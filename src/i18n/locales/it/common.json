@@ -6,7 +6,7 @@
   },
   "nav": {
     "listings": "Annunci in corso",
-    "small_missions": "Piccole missioni",
+    "small_missions": "Dare una mano",
     "pros": "Professionisti per animali",
     "guides": "Guide locali",
     "pricing": "Tariffe",
@@ -26,7 +26,7 @@
     },
     "links": {
       "all_guides": "Tutte le guide",
-      "articles": "Articoli",
+      "articles": "Il giornale",
       "house_sitting_guide": "Guida all'house-sitting",
       "faq": "FAQ",
       "pricing": "Tariffe",
@@ -35,7 +35,7 @@
       "about": "A proposito",
       "contact": "Contatti",
       "register": "Iscrizione",
-      "small_missions": "Piccole missioni",
+      "small_missions": "Dare una mano",
       "emergency_sitter": "Custode d'emergenza",
       "pet_pros": "Professionisti per animali"
     },
@@ -194,7 +194,7 @@
       "p5": "Guardiens è il pretesto che mancava. Da un lato, i piccoli aiuti tra vicini: un orto innaffiato in cambio di un pasto, una competenza contro un'altra, un aiuto reso in natura. Dall'altro, indipendentemente, l'home sitting: le Suo chiavi affidate a qualcuno che ha guardato negli occhi.",
       "p6": "Partirà con la mente leggera. Tornerà con una storia. Non ci aspettavamo che contasse così tanto.",
       "p7": "È per questo che abbiamo costruito Guardiens, affinché anche Lei possa vivere tutto questo.",
-      "signature": "Jérémie & Elisa"
+      "signature": "Jérémie e Elisa"
     },
     "cities": {
       "eyebrow": "Guide & città",

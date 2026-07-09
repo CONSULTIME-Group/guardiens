@@ -6,7 +6,7 @@
   },
   "nav": {
     "listings": "Annonces en cours",
-    "small_missions": "Entraide",
+    "small_missions": "Coups de main",
     "pros": "Pros animaliers",
     "guides": "Guides locaux",
     "pricing": "Tarifs",
@@ -26,7 +26,7 @@
     },
     "links": {
       "all_guides": "Tous les guides",
-      "articles": "Articles",
+      "articles": "Le journal",
       "house_sitting_guide": "Guide du house-sitting",
       "faq": "FAQ",
       "pricing": "Tarifs",
@@ -35,7 +35,7 @@
       "about": "À propos",
       "contact": "Contact",
       "register": "Inscription",
-      "small_missions": "Petites missions",
+      "small_missions": "Coups de main",
       "emergency_sitter": "Gardien d'urgence",
       "pet_pros": "Pros animaliers"
     },
@@ -194,7 +194,7 @@
       "p5": "Guardiens, c'est le prétexte qui manquait. D'un côté, les petites missions d'entraide entre gens du coin : un potager arrosé contre un repas, une compétence contre une autre, un coup de main qui se rend en nature. De l'autre, indépendamment, le home sitting : vos clés confiées à quelqu'un que vous avez regardé dans les yeux.",
       "p6": "Vous partirez l'esprit léger. Vous rentrerez avec une histoire. Nous ne nous attendions pas à ce que cela compte autant.",
       "p7": "C'est pour cela que nous avons construit Guardiens, pour que vous viviez cela aussi.",
-      "signature": "Jérémie & Elisa"
+      "signature": "Jérémie et Elisa"
     },
     "cities": {
       "eyebrow": "Guides & villes",

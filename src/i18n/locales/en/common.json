@@ -6,7 +6,7 @@
   },
   "nav": {
     "listings": "Current listings",
-    "small_missions": "Mutual aid",
+    "small_missions": "Helping hands",
     "pros": "Pet professionals",
     "guides": "Local guides",
     "pricing": "Pricing",
@@ -26,7 +26,7 @@
     },
     "links": {
       "all_guides": "All guides",
-      "articles": "Articles",
+      "articles": "The Journal",
       "house_sitting_guide": "House-sitting guide",
       "faq": "FAQ",
       "pricing": "Pricing",
@@ -35,7 +35,7 @@
       "about": "About",
       "contact": "Contact",
       "register": "Registration",
-      "small_missions": "Small favours",
+      "small_missions": "Helping hands",
       "emergency_sitter": "Emergency caretaker / pet & home sitter",
       "pet_pros": "Pet professionals"
     },
@@ -194,7 +194,7 @@
       "p5": "Guardiens is the pretext that was missing. On one side, small favours of mutual aid between local people: a vegetable garden watered in exchange for a meal, one skill for another, a small favour returned in kind. On the other, independently, house-sitting: your keys entrusted to someone you've looked in the eye.",
       "p6": "You will leave with peace of mind. You will return with a story. We didn't expect it to matter so much.",
       "p7": "That's why we built Guardiens, so you could live this too.",
-      "signature": "Jérémie & Elisa"
+      "signature": "Jérémie and Elisa"
     },
     "cities": {
       "eyebrow": "Guides & cities",
