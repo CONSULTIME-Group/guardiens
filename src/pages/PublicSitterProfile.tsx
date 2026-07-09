@@ -2521,34 +2521,43 @@ export default function PublicSitterProfile() {
       {/* ── Lightbox ── */}
       {lightboxIdx !== null && (
         <div
+          role="dialog"
+          aria-modal="true"
+          aria-label={`Photo ${lightboxIdx + 1} sur ${visibleGallery.length}`}
           className="fixed inset-0 z-[60] bg-black/90 flex items-center justify-center"
           onClick={() => setLightboxIdx(null)}
         >
           <button
-            className="absolute top-4 right-4 text-white/80 hover:text-white"
+            type="button"
+            aria-label="Fermer la galerie"
+            className="absolute top-4 right-4 text-white/80 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white rounded-full p-1"
             onClick={() => setLightboxIdx(null)}
           >
-            <X className="w-6 h-6" />
+            <X className="w-6 h-6" aria-hidden="true" />
           </button>
           {lightboxIdx > 0 && (
             <button
-              className="absolute left-4 text-white/80 hover:text-white"
+              type="button"
+              aria-label="Photo précédente"
+              className="absolute left-4 text-white/80 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white rounded-full p-1"
               onClick={(e) => { e.stopPropagation(); setLightboxIdx(lightboxIdx - 1); }}
             >
-              <ChevronLeft className="w-8 h-8" />
+              <ChevronLeft className="w-8 h-8" aria-hidden="true" />
             </button>
           )}
           {lightboxIdx < visibleGallery.length - 1 && (
             <button
-              className="absolute right-4 text-white/80 hover:text-white"
+              type="button"
+              aria-label="Photo suivante"
+              className="absolute right-4 text-white/80 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white rounded-full p-1"
               onClick={(e) => { e.stopPropagation(); setLightboxIdx(lightboxIdx + 1); }}
             >
-              <ChevronRight className="w-8 h-8" />
+              <ChevronRight className="w-8 h-8" aria-hidden="true" />
             </button>
           )}
           <img
             src={visibleGallery[lightboxIdx]?.photo_url}
-            alt=""
+            alt={visibleGallery[lightboxIdx]?.caption || `Photo ${lightboxIdx + 1} du profil de ${profile?.first_name || "ce gardien"}`}
             className="max-h-[85vh] max-w-[90vw] object-contain rounded-lg"
             onClick={(e) => e.stopPropagation()}
           />
