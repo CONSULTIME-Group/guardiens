@@ -11,6 +11,9 @@ import VerifiedBadge from "@/components/profile/VerifiedBadge";
 import { sanitizeUserTitle } from "@/lib/sanitizeTitle";
 import ApproximateLocationMap from "@/components/shared/ApproximateLocationMap";
 import SitHero from "@/components/sits/views/tabs/SitHero";
+import AffinitySection from "@/components/matching/AffinitySection";
+import AffinityTeaser from "@/components/matching/AffinityTeaser";
+import { useViewerSitterForAffinity } from "@/hooks/useViewerSitterForAffinity";
 
 interface SitLike {
   slug?: string | null;
