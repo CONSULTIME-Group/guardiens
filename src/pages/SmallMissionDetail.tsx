@@ -246,7 +246,7 @@ const SmallMissionDetail = () => {
     const [authorRes, relatedRes, respsRes, givenFbRes, recFbRes] = await Promise.all([
       supabase.rpc("get_mission_author_public", { _mission_id: m.id }),
       supabase.from("small_missions")
-        .select("id, title, description, category, city, postal_code, created_at, duration_estimate, photos, mission_type, latitude, longitude")
+        .select("id, slug, title, description, category, city, postal_code, created_at, duration_estimate, photos, mission_type, latitude, longitude")
         .eq("status", "open")
         .neq("id", m.id)
         .or(`category.eq.${m.category},city.eq.${m.city}`)
@@ -254,14 +254,14 @@ const SmallMissionDetail = () => {
         .limit(30),
       supabase.from("small_mission_responses")
         .select("*, responder:profiles!small_mission_responses_responder_id_fkey(first_name, avatar_url)")
-        .eq("mission_id", id).order("created_at", { ascending: false }),
+        .eq("mission_id", m.id).order("created_at", { ascending: false }),
       user
-        ? supabase.from("mission_feedbacks" as any).select("receiver_id").eq("mission_id", id).eq("giver_id", user.id)
+        ? supabase.from("mission_feedbacks" as any).select("receiver_id").eq("mission_id", m.id).eq("giver_id", user.id)
         : Promise.resolve({ data: [] as any[] }),
       user
         ? supabase.from("mission_feedbacks" as any)
             .select("*, giver:profiles!mission_feedbacks_giver_id_fkey(first_name, avatar_url)")
-            .eq("mission_id", id).eq("receiver_id", user.id)
+            .eq("mission_id", m.id).eq("receiver_id", user.id)
         : Promise.resolve({ data: [] as any[] }),
     ]);
 
