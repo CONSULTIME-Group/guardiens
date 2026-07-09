@@ -6,7 +6,7 @@
   },
   "nav": {
     "listings": "Anuncios en curso",
-    "small_missions": "Echar una mano",
+    "small_missions": "Ayuda mutua",
     "pros": "Prós de mascotas",
     "guides": "Guías locales",
     "pricing": "Tarifas",
@@ -35,7 +35,7 @@
       "about": "Acerca de",
       "contact": "Contacto",
       "register": "Registro",
-      "small_missions": "Echar una mano",
+      "small_missions": "Ayuda mutua",
       "emergency_sitter": "Cuidador de emergencia",
       "pet_pros": "Prós de mascotas"
     },

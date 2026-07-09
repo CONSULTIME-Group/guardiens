@@ -79,19 +79,19 @@ const SmallMissionsPublic = () => {
   return (
     <>
       <PageMeta
-        title="Coups de main, entraide locale, Guardiens"
+        title="Entraide, Guardiens"
         description="Échangez des coups de main entre gens du coin : jardin, animaux, bricolage, courses. Gratuit pour tous, sans engagement."
         path="/petites-missions"
       />
       <div className="min-h-screen bg-background">
         <PublicHeader />
-        <PageBreadcrumb items={[{ label: "Coups de main" }]} />
+        <PageBreadcrumb items={[{ label: "Entraide" }]} />
 
         <section className="max-w-3xl mx-auto px-4 sm:px-6 py-8">
           <div className="flex items-start justify-between gap-4 mb-4">
             <div>
               <h1 className="font-heading text-2xl sm:text-3xl font-bold text-foreground">
-                Coups de main
+                Entraide
               </h1>
               <p className="text-foreground/70 mt-2">
                 Un coup de main près de chez vous : jardin, animaux, bricolage, courses. Vous pouvez aussi{" "}

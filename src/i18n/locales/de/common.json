@@ -6,7 +6,7 @@
   },
   "nav": {
     "listings": "Aktuelle Anzeigen",
-    "small_missions": "Nachbarschaftshilfe",
+    "small_missions": "Gegenseitige Hilfe",
     "pros": "Tierprofis",
     "guides": "Lokale Ratgeber",
     "pricing": "Tarife",
@@ -35,7 +35,7 @@
       "about": "Über uns",
       "contact": "Kontakt",
       "register": "Registrierung",
-      "small_missions": "Nachbarschaftshilfe",
+      "small_missions": "Gegenseitige Hilfe",
       "emergency_sitter": "Notfall-Betreuer",
       "pet_pros": "Tierprofis"
     },
