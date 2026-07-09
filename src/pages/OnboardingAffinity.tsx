@@ -178,7 +178,7 @@ const OnboardingAffinity = () => {
       });
       await refreshProfile();
       await status.refresh();
-      toast.success("Merci, votre profil est prêt.");
+      toast.success("C'est noté, vous pourrez compléter votre profil ensuite.");
       navigate("/dashboard", { replace: true });
     } catch (e) {
       console.error("OnboardingAffinity: save failed", e);
