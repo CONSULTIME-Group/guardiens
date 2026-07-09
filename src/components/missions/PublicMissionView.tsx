@@ -436,7 +436,7 @@ const PublicMissionView = ({
               {relatedMissions.slice(0, 3).map((rm: any) => (
                 <RelatedMissionCard
                   key={rm.id}
-                  to={`/petites-missions/${rm.id}`}
+                  to={`/petites-missions/${rm.slug || rm.id}`}
                   photo={Array.isArray(rm.photos) ? rm.photos[0] : null}
                   category={rm.category}
                   title={sanitizeUserTitle(rm.title) || rm.title}
