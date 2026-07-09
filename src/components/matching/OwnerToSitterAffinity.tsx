@@ -72,6 +72,7 @@ const OwnerToSitterAffinity = ({
       <AffinityBadge
         result={full}
         size={size}
+        variant={variant}
         trackingContext={context}
         trackingId={targetId}
       />
