@@ -118,7 +118,7 @@ const EntraideSection = ({ userId }: EntraideSectionProps) => {
               return (
                 <Link
                   key={m.id}
-                  to={`/petites-missions/${m.id}`}
+                  to={`/petites-missions/${m.slug || m.id}`}
                   className="flex items-center gap-3 p-3 rounded-xl bg-card border border-primary/20 hover:bg-accent/50 transition-colors"
                 >
                   <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${
