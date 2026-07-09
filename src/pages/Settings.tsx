@@ -318,33 +318,29 @@ const Settings = () => {
     setDeleting(true);
     setDeleteStatus(null);
     try {
-      const { error } = await supabase
-        .from("account_deletion_requests")
-        .upsert({ user_id: user.id, status: "pending" }, { onConflict: "user_id" });
-      if (error) throw error;
-      const { error: profileError } = await supabase
-        .from("profiles")
-        .update({ bio: "[Compte en cours de suppression]" })
-        .eq("id", user.id);
-      if (profileError) throw profileError;
-      const successMsg = "Demande enregistrée. Vous avez 7 jours pour l'annuler depuis cette page.";
+      const { data, error } = await supabase.functions.invoke("self-delete-account", { body: {} });
+      if (error || (data as any)?.error) {
+        throw new Error((data as any)?.error || error?.message || "Suppression impossible");
+      }
+      const successMsg = "Compte supprimé. Vous allez être déconnecté.";
       setDeleteStatus({ type: "success", message: successMsg });
       toast.success(successMsg);
       setDeleteConfirm("");
-      setTimeout(() => {
-        setDeleteOpen(false);
-        setDeleteStatus(null);
-      }, 2500);
+      setTimeout(async () => {
+        await supabase.auth.signOut();
+        window.location.href = "/";
+      }, 1500);
     } catch (e: any) {
       const errorMsg = e?.message
-        ? `Échec de la demande : ${e.message}`
-        : "Échec de la demande de suppression. Veuillez réessayer dans un instant.";
+        ? `Échec de la suppression : ${e.message}`
+        : "Échec de la suppression. Veuillez réessayer dans un instant.";
       setDeleteStatus({ type: "error", message: errorMsg });
       toast.error(errorMsg);
     } finally {
       setDeleting(false);
     }
   };
+
 
   if (loading) {
     return <div className="p-6 md:p-10 text-center text-muted-foreground py-20">Chargement...</div>;
@@ -508,7 +504,7 @@ const Settings = () => {
           <DialogHeader>
             <DialogTitle className="text-destructive">Supprimer mon compte</DialogTitle>
             <DialogDescription className="text-sm leading-relaxed">
-              En confirmant, vous demandez la suppression de votre compte. Vos données personnelles seront effacées sous <strong>7 jours</strong>. Vos avis publics resteront visibles de manière anonyme. Cette action peut être annulée pendant 7 jours.
+              En confirmant, vous supprimez <strong>immédiatement et définitivement</strong> votre compte, votre profil et toutes vos données personnelles associées. Vos avis publics resteront visibles de manière anonyme. Cette action est <strong>irréversible</strong>.
             </DialogDescription>
           </DialogHeader>
           {activeCommitmentsCount !== null && activeCommitmentsCount > 0 && (
@@ -1117,30 +1113,6 @@ const HelpSection = () => (
 );
 
 const DangerSection = ({ user, activeCommitmentsCount, onRequestDelete }: any) => {
-  const [pendingRequest, setPendingRequest] = useState<any>(null);
-  const [cancelling, setCancelling] = useState(false);
-
-  useEffect(() => {
-    if (!user) return;
-    supabase.from("account_deletion_requests").select("*").eq("user_id", user.id).eq("status", "pending").maybeSingle()
-      .then(({ data }) => setPendingRequest(data));
-  }, [user]);
-
-  const handleCancel = async () => {
-    if (!pendingRequest) return;
-    setCancelling(true);
-    const { error } = await supabase.from("account_deletion_requests")
-      .update({ status: "cancelled", cancelled_at: new Date().toISOString() })
-      .eq("id", pendingRequest.id);
-    if (error) toast.error("Erreur lors de l'annulation.");
-    else {
-      toast.success("Demande de suppression annulée.");
-      setPendingRequest(null);
-      await supabase.from("profiles").update({ bio: "" }).eq("id", user.id);
-    }
-    setCancelling(false);
-  };
-
   return (
     <section className="rounded-xl border border-destructive/30 bg-destructive/5 -m-1 p-5">
       <div className="flex items-center gap-2 mb-3">
@@ -1148,47 +1120,29 @@ const DangerSection = ({ user, activeCommitmentsCount, onRequestDelete }: any) =
         <h2 className="font-heading text-lg font-semibold text-destructive">Zone dangereuse</h2>
       </div>
       <p className="text-sm text-foreground/80 mb-4">
-        La suppression de votre compte est irréversible passé un délai de 7 jours.
+        La suppression de votre compte est <strong>immédiate et irréversible</strong>. Vos données personnelles sont effacées sur-le-champ.
       </p>
 
-      {pendingRequest ? (
-        <div className="space-y-3">
-          <div className="rounded-lg border border-destructive/30 bg-background p-4">
-            <p className="text-sm font-medium text-destructive">
-              Suppression programmée le {new Date(pendingRequest.scheduled_deletion_at).toLocaleDateString("fr-FR")}
-            </p>
-            <p className="text-xs text-muted-foreground mt-1">
-              Vous pouvez annuler cette demande avant cette date.
-            </p>
-          </div>
-          <Button variant="outline" size="sm" onClick={handleCancel} disabled={cancelling}>
-            {cancelling ? "Annulation..." : "Annuler la suppression"}
-          </Button>
+      {activeCommitmentsCount !== null && activeCommitmentsCount > 0 && (
+        <div className="rounded-lg border border-warning/30 bg-warning/10 p-3 text-sm mb-3">
+          <p className="font-medium text-warning">
+            {activeCommitmentsCount} engagement{activeCommitmentsCount > 1 ? "s" : ""} actif{activeCommitmentsCount > 1 ? "s" : ""}
+          </p>
+          <p className="text-xs text-foreground/80 mt-1">
+            Vous devez d'abord finaliser ou annuler vos gardes confirmées et candidatures en attente.
+          </p>
         </div>
-      ) : (
-        <>
-          {activeCommitmentsCount !== null && activeCommitmentsCount > 0 && (
-            <div className="rounded-lg border border-warning/30 bg-warning/10 p-3 text-sm mb-3">
-              <p className="font-medium text-warning">
-                {activeCommitmentsCount} engagement{activeCommitmentsCount > 1 ? "s" : ""} actif{activeCommitmentsCount > 1 ? "s" : ""}
-              </p>
-              <p className="text-xs text-foreground/80 mt-1">
-                Vous devez d'abord finaliser ou annuler vos gardes confirmées et candidatures en attente.
-              </p>
-            </div>
-          )}
-          <Button
-            variant="outline"
-            size="sm"
-            className="text-destructive border-destructive/30 hover:bg-destructive/10 gap-2"
-            onClick={onRequestDelete}
-            disabled={(activeCommitmentsCount ?? 0) > 0}
-          >
-            <Trash2 className="h-4 w-4" />
-            Demander la suppression de mon compte
-          </Button>
-        </>
       )}
+      <Button
+        variant="outline"
+        size="sm"
+        className="text-destructive border-destructive/30 hover:bg-destructive/10 gap-2"
+        onClick={onRequestDelete}
+        disabled={(activeCommitmentsCount ?? 0) > 0}
+      >
+        <Trash2 className="h-4 w-4" />
+        Supprimer mon compte
+      </Button>
     </section>
   );
 };
