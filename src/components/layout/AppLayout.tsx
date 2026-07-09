@@ -15,6 +15,7 @@ import { AlmaProvider } from "@/contexts/AlmaContext";
 import LanguageSwitcher from "./LanguageSwitcher";
 import { useAuth } from "@/contexts/AuthContext";
 import OnboardingModal from "@/components/onboarding/OnboardingModal";
+import OnboardingGate from "@/components/onboarding/OnboardingGate";
 // DuplicateAccountGuard est monté globalement dans App.tsx pour s'exécuter
 // même quand l'utilisateur retombe sur une page publique (Landing, FAQ…)
 // après le retour OAuth Google. Ne pas le re-monter ici.
