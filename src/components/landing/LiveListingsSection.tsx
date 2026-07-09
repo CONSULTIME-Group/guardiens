@@ -136,7 +136,7 @@ const LiveListingsSection: React.FC = () => {
             const photo = s.cover_photo_url || s.first_photo || fallbackImageFor(s.city);
             const dates =
               s.start_date && s.end_date
-                ? `${formatDateShort(s.start_date)} → ${formatDateShort(s.end_date)}`
+                ? `${formatDateShort(s.start_date, dateLocale)} → ${formatDateShort(s.end_date, dateLocale)}`
                 : null;
             return (
               <Link
