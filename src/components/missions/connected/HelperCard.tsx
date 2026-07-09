@@ -27,6 +27,28 @@ const HelperCard = ({ helper: h, onPropose, onViewProfile, matchesMyNeed = false
     seen.add(k);
     return true;
   });
+
+  // Compétences concrètes prioritaires (expertise animale) puis courantes.
+  const specialAnimalRaw: string[] = (h.special_animal_skills as string[]) || [];
+  const compsRaw: string[] = (h.competences as string[]) || [];
+  const concreteSeen = new Set<string>();
+  const specialConcrete = specialAnimalRaw.filter((s) => {
+    const k = (s || "").trim().toLowerCase();
+    if (!k || concreteSeen.has(k)) return false;
+    concreteSeen.add(k);
+    return true;
+  });
+  const commonConcrete = compsRaw.filter((s) => {
+    const k = (s || "").trim().toLowerCase();
+    if (!k || concreteSeen.has(k)) return false;
+    concreteSeen.add(k);
+    return true;
+  });
+  const CONCRETE_MAX = 4;
+  const concreteVisible = [...specialConcrete, ...commonConcrete].slice(0, CONCRETE_MAX);
+  const concreteTotal = specialConcrete.length + commonConcrete.length;
+  const concreteExtra = concreteTotal - concreteVisible.length;
+  const hasConcrete = concreteVisible.length > 0;
   const bioTeaser = h.bio?.trim() || null;
   const memberName = h.first_name || tp("helper_card.default_member");
   const contactName = h.first_name || tp("helper_card.this_member");
@@ -90,19 +112,43 @@ const HelperCard = ({ helper: h, onPropose, onViewProfile, matchesMyNeed = false
           </div>
         </div>
 
-        <div className="flex flex-wrap gap-1.5">
-          {displayedSkills.map((key: string) => {
-            if (!SKILL_PILL_META[key]) return null;
-            return (
-              <span key={key} className="rounded-full border border-primary/20 bg-primary/10 text-primary px-2.5 py-0.5 text-xs">
-                {tp(`mission_categories.${key === "competences" ? "skills" : key}`)}
-              </span>
-            );
-          })}
-          {extraCount > 0 && (
-            <span className="text-xs text-muted-foreground px-2 py-0.5">+{extraCount}</span>
-          )}
-        </div>
+        {hasConcrete ? (
+          <div className="flex flex-wrap gap-1.5">
+            {concreteVisible.map((label) => {
+              const isSpecial = specialConcrete.includes(label);
+              return (
+                <span
+                  key={label}
+                  title={isSpecial ? `Expertise : ${label}` : label}
+                  className={
+                    isSpecial
+                      ? "rounded-full border border-accent/40 bg-accent/20 text-accent-foreground px-2.5 py-0.5 text-xs font-medium max-w-full truncate"
+                      : "rounded-full border border-primary/20 bg-primary/10 text-primary px-2.5 py-0.5 text-xs max-w-full truncate"
+                  }
+                >
+                  {label}
+                </span>
+              );
+            })}
+            {concreteExtra > 0 && (
+              <span className="text-xs text-muted-foreground px-2 py-0.5">+{concreteExtra}</span>
+            )}
+          </div>
+        ) : (
+          <div className="flex flex-wrap gap-1.5">
+            {displayedSkills.map((key: string) => {
+              if (!SKILL_PILL_META[key]) return null;
+              return (
+                <span key={key} className="rounded-full border border-primary/20 bg-primary/10 text-primary px-2.5 py-0.5 text-xs">
+                  {tp(`mission_categories.${key === "competences" ? "skills" : key}`)}
+                </span>
+              );
+            })}
+            {extraCount > 0 && (
+              <span className="text-xs text-muted-foreground px-2 py-0.5">+{extraCount}</span>
+            )}
+          </div>
+        )}
 
         {specialSkills.length > 0 && (
           <div>

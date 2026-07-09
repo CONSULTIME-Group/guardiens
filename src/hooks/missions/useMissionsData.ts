@@ -52,14 +52,33 @@ export function useAvailableHelpers(currentUserId: string | undefined, enabled: 
 
       const helperIds = data.map((h: any) => h.id);
 
-      const { data: sitterProfiles } = await supabase
-        .from("sitter_profiles")
-        .select("user_id, competences")
-        .in("user_id", helperIds);
+      const [{ data: sitterProfiles }, { data: ownerProfiles }] = await Promise.all([
+        supabase
+          .from("sitter_profiles")
+          .select("user_id, competences, special_animal_skills")
+          .in("user_id", helperIds),
+        supabase
+          .from("owner_profiles")
+          .select("user_id, competences")
+          .in("user_id", helperIds),
+      ]);
 
       const competenceMap = new Map<string, string[]>();
+      const specialSkillsMap = new Map<string, string[]>();
       (sitterProfiles || []).forEach((sp: any) => {
-        if (sp.competences?.length) competenceMap.set(sp.user_id, sp.competences);
+        const merged: string[] = [];
+        if (sp.competences?.length) merged.push(...sp.competences);
+        competenceMap.set(sp.user_id, merged);
+        if (sp.special_animal_skills?.length) specialSkillsMap.set(sp.user_id, sp.special_animal_skills);
+      });
+      (ownerProfiles || []).forEach((op: any) => {
+        if (!op.competences?.length) return;
+        const existing = competenceMap.get(op.user_id) || [];
+        const seen = new Set(existing);
+        op.competences.forEach((c: string) => {
+          if (!seen.has(c)) { existing.push(c); seen.add(c); }
+        });
+        competenceMap.set(op.user_id, existing);
       });
 
       const { data: reviews } = await supabase
@@ -92,6 +111,7 @@ export function useAvailableHelpers(currentUserId: string | undefined, enabled: 
           return {
             ...h,
             competences: competenceMap.get(h.id) || [],
+            special_animal_skills: specialSkillsMap.get(h.id) || [],
             review_avg: rev ? rev.total / rev.count : 0,
             review_count: rev?.count || 0,
             sits_count: sitsMap.get(h.id) || 0,
