@@ -34,6 +34,7 @@ const CATEGORIES: { value: MissionCategory | "all"; label: string }[] = [
 
 interface MissionRow {
   id: string;
+  slug?: string | null;
   title: string;
   category: string;
   city: string | null;
