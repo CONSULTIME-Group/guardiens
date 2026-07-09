@@ -116,12 +116,25 @@ const OnboardingAffinity = () => {
     [status.needsOwner, chosenRole],
   );
 
-  const canSubmit = useMemo(() => {
-    if (askRole && !chosenRole) return false;
-    if (showSitterBlock && (animalTypes.length === 0 || !workDuringSit || !sitterType)) return false;
-    if (showOwnerBlock && (!presenceExpected || preferredSitterTypes.length === 0)) return false;
-    return showSitterBlock || showOwnerBlock;
+  const missingFields = useMemo(() => {
+    const missing: string[] = [];
+    if (askRole && !chosenRole) missing.push("choisir ce que vous venez faire");
+    if (showSitterBlock) {
+      if (animalTypes.length === 0) missing.push("les animaux que vous acceptez");
+      if (!workDuringSit) missing.push("votre situation pendant la garde");
+      if (!sitterType) missing.push("votre profil de gardien");
+    }
+    if (showOwnerBlock) {
+      if (!presenceExpected) missing.push("la présence attendue du gardien");
+      if (preferredSitterTypes.length === 0) missing.push("le profil de gardien idéal");
+    }
+    return missing;
   }, [askRole, chosenRole, showSitterBlock, showOwnerBlock, animalTypes, workDuringSit, sitterType, presenceExpected, preferredSitterTypes]);
+
+  const canSubmit = useMemo(
+    () => (showSitterBlock || showOwnerBlock) && missingFields.length === 0,
+    [showSitterBlock, showOwnerBlock, missingFields],
+  );
 
   const handleRolePick = (r: Role) => {
     setChosenRole(r);
