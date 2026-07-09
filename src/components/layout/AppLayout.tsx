@@ -15,6 +15,7 @@ import { AlmaProvider } from "@/contexts/AlmaContext";
 import LanguageSwitcher from "./LanguageSwitcher";
 import { useAuth } from "@/contexts/AuthContext";
 import OnboardingModal from "@/components/onboarding/OnboardingModal";
+import OnboardingGate from "@/components/onboarding/OnboardingGate";
 // DuplicateAccountGuard est monté globalement dans App.tsx pour s'exécuter
 // même quand l'utilisateur retombe sur une page publique (Landing, FAQ…)
 // après le retour OAuth Google. Ne pas le re-monter ici.
@@ -41,6 +42,7 @@ export const AppLayout = ({ children }: { children?: ReactNode }) => {
 
   return (
     <AlmaProvider>
+    <OnboardingGate />
     <div className="flex min-h-screen bg-background">
       <Sidebar />
       <main id="main-content" className="flex-1 min-w-0 pb-20 md:pb-0 overflow-x-clip" role="main">

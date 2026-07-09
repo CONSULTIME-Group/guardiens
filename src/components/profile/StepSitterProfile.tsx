@@ -5,8 +5,9 @@ import { Switch } from "@/components/ui/switch";
 import ChipSelect from "./ChipSelect";
 import HintBubble from "./HintBubble";
 import type { SitterProfileData } from "@/hooks/useSitterProfile";
+import { SITTER_TYPE_OPTIONS } from "@/lib/profileMatchingOptions";
 
-const SITTER_TYPES = ["Solo", "Couple", "Famille", "Retraité"];
+const SITTER_TYPES = SITTER_TYPE_OPTIONS;
 const AVAILABILITY_OPTIONS = ["100% en congés", "En télétravail", "Flexible"];
 const LIFESTYLE_OPTIONS = [
   "Sportif / grandes balades", "Joueur", "Tranquille / casanier", "Lève-tôt", "Couche-tard"

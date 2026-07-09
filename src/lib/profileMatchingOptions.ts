@@ -1,5 +1,33 @@
 /**
  * Options partagées pour le matching propriétaire ↔ gardien.
+ * Utilisées dans les étapes d'édition de profil (gardien + propriétaire),
+ * l'étape d'onboarding obligatoire d'affinité, et l'affichage sur les
+ * profils publics. Source unique.
+ */
+
+/** Présence attendue par le propriétaire pendant la garde (single). */
+export const PRESENCE_EXPECTED_OPTIONS = [
+  "100% sur place",
+  "Télétravail OK",
+  "Absences courtes OK",
+];
+
+/** Types d'animaux acceptés par le gardien (multi). */
+export const SITTER_ANIMAL_TYPES_OPTIONS = [
+  "Tous",
+  "Chiens",
+  "Chats",
+  "Chevaux",
+  "Oiseaux",
+  "Animaux de ferme",
+  "NAC",
+];
+
+/** Type de gardien (single). */
+export const SITTER_TYPE_OPTIONS = ["Solo", "Couple", "Famille", "Retraité"];
+
+/**
+ * Options partagées pour le matching propriétaire ↔ gardien.
  * Utilisées dans les étapes d'édition de profil (gardien + propriétaire)
  * et dans l'affichage sur les profils publics.
  *

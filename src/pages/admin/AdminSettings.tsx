@@ -2,14 +2,20 @@ import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { Settings, Globe, Database, ExternalLink, CheckCircle2, AlertCircle } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
+import { Settings, Globe, Database, ExternalLink, CheckCircle2, AlertCircle, Flag } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { invalidateFeatureFlag } from "@/hooks/useFeatureFlag";
+import { toast } from "sonner";
 
 const FOUNDER_DATE = "2026-09-30";
+const MANDATORY_ONBOARDING_FLAG = "mandatory_affinity_onboarding";
 
 const AdminSettings = () => {
- const [stats, setStats] = useState({ totalUsers: 0, totalSits: 0, totalReviews: 0 });
- const [loading, setLoading] = useState(true);
+  const [stats, setStats] = useState({ totalUsers: 0, totalSits: 0, totalReviews: 0 });
+  const [loading, setLoading] = useState(true);
+  const [mandatoryOnboarding, setMandatoryOnboarding] = useState<boolean | null>(null);
+  const [togglingFlag, setTogglingFlag] = useState(false);
 
  useEffect(() => {
  const fetchStats = async () => {
@@ -34,8 +40,36 @@ const AdminSettings = () => {
  setLoading(false);
  }
  };
- void fetchStats();
- }, []);
+    void fetchStats();
+  }, []);
+
+  useEffect(() => {
+    supabase
+      .from("feature_flags")
+      .select("enabled")
+      .eq("key", MANDATORY_ONBOARDING_FLAG)
+      .maybeSingle()
+      .then(({ data }) => setMandatoryOnboarding(!!data?.enabled));
+  }, []);
+
+  const toggleMandatoryOnboarding = async (next: boolean) => {
+    setTogglingFlag(true);
+    const previous = mandatoryOnboarding;
+    setMandatoryOnboarding(next);
+    const { error } = await supabase
+      .from("feature_flags")
+      .update({ enabled: next, updated_at: new Date().toISOString() })
+      .eq("key", MANDATORY_ONBOARDING_FLAG);
+    setTogglingFlag(false);
+    if (error) {
+      setMandatoryOnboarding(previous);
+      toast.error("Impossible de mettre à jour le réglage.");
+      return;
+    }
+    invalidateFeatureFlag(MANDATORY_ONBOARDING_FLAG);
+    toast.success(next ? "Étape d'onboarding activée." : "Étape d'onboarding désactivée.");
+  };
+
 
  return (
  <div className="space-y-6">
@@ -173,9 +207,37 @@ const AdminSettings = () => {
  </div>
  <Badge variant="outline" className="text-xs border-warning text-warning">Temporaire</Badge>
  </div>
- </div>
- </CardContent>
- </Card>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Feature flags */}
+      <Card>
+        <CardHeader className="pb-3">
+          <CardTitle className="text-base flex items-center gap-2">
+            <Flag className="h-4 w-4" />
+            Réglages instantanés
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="flex items-start justify-between gap-4">
+            <div className="min-w-0">
+              <p className="text-sm font-medium">Étape d'onboarding obligatoire (affinité)</p>
+              <p className="text-xs text-muted-foreground mt-1">
+                Après l'inscription, force les nouveaux membres à renseigner les animaux acceptés, la présence attendue et le type de gardien avant d'accéder au tableau de bord. Bascule sans redéploiement.
+              </p>
+            </div>
+            <Switch
+              checked={mandatoryOnboarding === true}
+              disabled={mandatoryOnboarding === null || togglingFlag}
+              onCheckedChange={toggleMandatoryOnboarding}
+              aria-label="Activer l'étape d'onboarding obligatoire"
+            />
+          </div>
+        </CardContent>
+      </Card>
+
+
 
  {/* External services */}
  <Card>

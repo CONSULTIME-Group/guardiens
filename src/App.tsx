@@ -85,6 +85,7 @@ const AdminArticles = lazy(() => import("./pages/AdminArticles"));
 const ProsListing = lazy(() => import("./pages/ProsListing"));
 const ProDetail = lazy(() => import("./pages/ProDetail"));
 const ProOnboarding = lazy(() => import("./pages/ProOnboarding"));
+const OnboardingAffinity = lazy(() => import("./pages/OnboardingAffinity"));
 const MyProProfile = lazy(() => import("./pages/MyProProfile"));
 const ProCategoryListing = lazy(() => import("./pages/ProCategoryListing"));
 const AdminProDirectory = lazy(() => import("./pages/admin/AdminProDirectory"));
@@ -343,6 +344,7 @@ const AppRoutes = () => (
       <Route path="/gardiens/:id" element={<PublicSitterProfile />} />
       <Route path="/pros" element={<ContentRoute><ProsListing /></ContentRoute>} />
       <Route path="/pros/inscription" element={<AppLayout><ProOnboarding /></AppLayout>} />
+      <Route path="/onboarding/affinity" element={<ProtectedRoute><OnboardingAffinity /></ProtectedRoute>} />
       <Route path="/pros/mon-espace" element={<AppLayout><MyProProfile /></AppLayout>} />
 
       <Route path="/pros/categorie/:catSlug" element={<AppLayout><ProCategoryListing /></AppLayout>} />

@@ -14,8 +14,9 @@ import ChipSelect from "./ChipSelect";
 import HintBubble from "./HintBubble";
 import type { SitterProfileData, PastAnimal } from "@/hooks/useSitterProfile";
 import { safeUUID } from "@/lib/uuid";
+import { SITTER_ANIMAL_TYPES_OPTIONS } from "@/lib/profileMatchingOptions";
 
-const ANIMAL_TYPES = ["Tous", "Chiens", "Chats", "Chevaux", "Oiseaux", "Animaux de ferme", "NAC"];
+const ANIMAL_TYPES = SITTER_ANIMAL_TYPES_OPTIONS;
 const EXPERIENCE_OPTIONS = ["Débutant", "1-3 ans", "3-5 ans", "5+ ans"];
 const SPECIES_OPTIONS = ["Chien", "Chat", "Cheval", "Oiseau", "Animal de ferme", "NAC"];
 const DOG_SIZES = ["Petit (< 10kg)", "Moyen (10-25kg)", "Grand (> 25kg)", "Toutes tailles"];
