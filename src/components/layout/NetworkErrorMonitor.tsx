@@ -139,7 +139,7 @@ const NetworkErrorMonitor = () => {
           !shouldIgnoreUrl(url) &&
           !isAssetRequest(url, input) &&
           !IGNORED_STATUSES.has(status) &&
-          (status >= 400 || status === 0) &&
+          status >= 400 &&
           status < 600
         ) {
           // Dédoublonnage : même endpoint+statut dans les 5s = silence
