@@ -561,8 +561,8 @@ const Landing = () => {
             decoding="async"
           />
         </picture>
-        <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/65 to-black/50" />
-        <div className="absolute inset-0 bg-foreground/10" aria-hidden />
+        <div className="absolute inset-0 bg-gradient-to-r from-black/90 via-black/75 to-black/55" />
+        <div className="absolute inset-0 bg-foreground/20" aria-hidden />
 
         <div className="relative z-10 w-full max-w-7xl mx-auto px-6 md:px-12 lg:px-16 py-12 md:py-24">
           <div className="max-w-2xl lg:max-w-3xl">
@@ -579,10 +579,10 @@ const Landing = () => {
             </h1>
 
 
-            <p className="font-body text-lg md:text-xl text-white/85 max-w-xl mb-4 leading-relaxed animate-hero-fade-up animation-delay-700">
+            <p className="font-body text-lg md:text-xl text-white max-w-xl mb-4 leading-relaxed animate-hero-fade-up animation-delay-700">
               {t("landing.hero.lede")}
             </p>
-            <p className="font-body text-base md:text-lg text-white/85 max-w-xl mb-10 leading-relaxed italic animate-hero-fade-up animation-delay-700">
+            <p className="font-body text-base md:text-lg text-white/95 max-w-xl mb-10 leading-relaxed italic animate-hero-fade-up animation-delay-700">
               {t("landing.hero.lede_italic")}
             </p>
 

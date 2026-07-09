@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { supabase } from "@/integrations/supabase/client";
 import { format } from "date-fns";
-import { fr } from "date-fns/locale";
+import { fr, enUS, es, it, de } from "date-fns/locale";
 import fallbackMarrakech from "@/assets/fallback-marrakech.webp";
 
 
@@ -23,8 +23,10 @@ interface LiveSit {
   user_id: string;
 }
 
-const fmt = (d: string | null) =>
-  d ? format(new Date(d), "d MMM", { locale: fr }) : "";
+const LOCALE_MAP: Record<string, Locale> = { fr, en: enUS, es, it, de };
+type Locale = typeof fr;
+const fmt = (d: string | null, locale: Locale) =>
+  d ? format(new Date(d), "d MMM", { locale }) : "";
 
 const fallbackImageFor = (city: string | null, country: string | null): string | null => {
   const c = (city || "").toUpperCase();
@@ -49,7 +51,8 @@ const isHighlighted = (s: LiveSit) => s.is_urgent && isForeign(s.country);
  * 3 autres en pile à droite.
  */
 const LiveListingsStrip: React.FC = () => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const dateLocale: Locale = LOCALE_MAP[(i18n.language || "fr").slice(0, 2)] ?? fr;
   const [sits, setSits] = useState<LiveSit[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -202,7 +205,7 @@ const LiveListingsStrip: React.FC = () => {
   };
 
   const fmtDates = (s: LiveSit) =>
-    s.start_date && s.end_date ? `${fmt(s.start_date)} – ${fmt(s.end_date)}` : null;
+    s.start_date && s.end_date ? `${fmt(s.start_date, dateLocale)} – ${fmt(s.end_date, dateLocale)}` : null;
 
   const featured = sits.find(isHighlighted);
   const rest = featured ? sits.filter((s) => s.id !== featured.id).slice(0, 1) : sits;

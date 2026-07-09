@@ -5,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
 import { format } from "date-fns";
-import { fr } from "date-fns/locale";
+import { fr, enUS, es, it, de } from "date-fns/locale";
 import fallbackMarrakech from "@/assets/fallback-marrakech.webp";
 
 
@@ -30,14 +30,17 @@ interface LiveSit {
   property_type: string | null;
 }
 
-const formatDateShort = (d: string | null) =>
-  d ? format(new Date(d), "d MMM", { locale: fr }) : "";
+type Locale = typeof fr;
+const LOCALE_MAP: Record<string, Locale> = { fr, en: enUS, es, it, de };
+const formatDateShort = (d: string | null, locale: Locale) =>
+  d ? format(new Date(d), "d MMM", { locale }) : "";
 
 const initials = (name: string | null) =>
   name ? name.trim().charAt(0).toUpperCase() : "G";
 
 const LiveListingsSection: React.FC = () => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const dateLocale: Locale = LOCALE_MAP[(i18n.language || "fr").slice(0, 2)] ?? fr;
   const [sits, setSits] = useState<LiveSit[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -133,7 +136,7 @@ const LiveListingsSection: React.FC = () => {
             const photo = s.cover_photo_url || s.first_photo || fallbackImageFor(s.city);
             const dates =
               s.start_date && s.end_date
-                ? `${formatDateShort(s.start_date)} → ${formatDateShort(s.end_date)}`
+                ? `${formatDateShort(s.start_date, dateLocale)} → ${formatDateShort(s.end_date, dateLocale)}`
                 : null;
             return (
               <Link
