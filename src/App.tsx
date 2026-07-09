@@ -331,7 +331,6 @@ const AppRoutes = () => (
       <Route path="/petites-missions/nouveau" element={<Navigate to="/petites-missions/creer" replace />} />
       <Route path="/petites-missions/lyon" element={<MissionsCityPage />} />
       <Route path="/petites-missions/:id" element={<SmallMissionDetail />} />
-      <Route path="/petites-missions/:id/editer" element={<SmallMissionDetail />} />
       <Route path="/questions" element={<Navigate to="/petites-missions?tab=questions" replace />} />
       <Route path="/questions/nouvelle" element={<ProtectedRoute><AppLayout><QuestionCreate /></AppLayout></ProtectedRoute>} />
       <Route path="/questions/:id" element={<AppLayout><QuestionDetail /></AppLayout>} />
