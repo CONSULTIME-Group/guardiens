@@ -34,6 +34,7 @@ const CATEGORIES: { value: MissionCategory | "all"; label: string }[] = [
 
 interface MissionRow {
   id: string;
+  slug?: string | null;
   title: string;
   category: string;
   city: string | null;
@@ -55,7 +56,7 @@ const SmallMissionsPublic = () => {
       setLoading(true);
       const { data } = await supabase
         .from("small_missions")
-        .select("id, title, category, city, created_at, mission_type, photos")
+        .select("id, slug, title, category, city, created_at, mission_type, photos")
         .eq("status", "open")
         .order("created_at", { ascending: false })
         .limit(50);
@@ -188,7 +189,7 @@ const SmallMissionsPublic = () => {
                 return (
                   <li key={m.id}>
                     <Link
-                      to={`/petites-missions/${m.id}`}
+                      to={`/petites-missions/${m.slug || m.id}`}
                       className="flex gap-4 p-4 rounded-xl bg-card border border-border hover:bg-accent/50 transition-colors"
                     >
                       {hasPhoto && (

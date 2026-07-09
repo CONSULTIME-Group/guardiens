@@ -26,6 +26,7 @@ const CATEGORY_LABEL: Record<string, string> = {
 
 interface MissionRow {
   id: string;
+  slug?: string | null;
   title: string;
   category: string;
   city: string | null;
@@ -43,7 +44,7 @@ const MissionsCityPage = () => {
     const load = async () => {
       const { data } = await supabase
         .from("small_missions")
-        .select("id, title, category, city, latitude, longitude, created_at, photos")
+        .select("id, slug, title, category, city, latitude, longitude, created_at, photos")
         .eq("status", "open")
         .order("created_at", { ascending: false })
         .limit(100);
@@ -159,7 +160,7 @@ const MissionsCityPage = () => {
                   return (
                     <li key={m.id}>
                       <Link
-                        to={`/petites-missions/${m.id}`}
+                        to={`/petites-missions/${m.slug || m.id}`}
                         className="flex gap-4 p-4 rounded-xl border border-border bg-card hover:bg-accent/50 transition-colors"
                       >
                         {hasPhoto && (

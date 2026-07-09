@@ -49,6 +49,7 @@ const PAGE_SIZE = 20;
 
 interface MissionRow {
   id: string;
+  slug?: string | null;
   title: string;
   description: string | null;
   category: string;
@@ -269,7 +270,7 @@ const EntraideHub = () => {
       const { data } = await supabase
         .from("small_missions")
         .select(
-          "id, title, description, category, city, postal_code, created_at, date_needed, end_date, duration_estimate, status, mission_type, user_id, photos, profiles:user_id(first_name, avatar_url)",
+          "id, slug, title, description, category, city, postal_code, created_at, date_needed, end_date, duration_estimate, status, mission_type, user_id, photos, profiles:user_id(first_name, avatar_url)",
         )
         .in("status", ["open", "in_progress", "completed"] as any)
         .order("created_at", { ascending: false })
@@ -794,7 +795,7 @@ const EntraideHub = () => {
                         return (
                           <li key={m.id}>
                             <Link
-                              to={`/petites-missions/${m.id}`}
+                              to={`/petites-missions/${m.slug || m.id}`}
                               aria-label={cardAria}
                               className="flex gap-4 p-4 rounded-xl bg-card border border-border hover:border-primary/40 hover:shadow-sm transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
                             >

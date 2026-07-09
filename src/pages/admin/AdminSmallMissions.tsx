@@ -334,7 +334,7 @@ const AdminSmallMissions = () => {
                   <TableCell className="text-sm text-muted-foreground tabular-nums">{ratio}</TableCell>
                   <TableCell className="text-right">
                     <div className="flex justify-end gap-1">
-                      <Button variant="ghost" size="icon" aria-label="Voir la mission" title="Voir" onClick={() => navigate(`/petites-missions/${m.id}`)}>
+                      <Button variant="ghost" size="icon" aria-label="Voir la mission" title="Voir" onClick={() => navigate(`/petites-missions/${(m as any).slug || m.id}`)}>
                         <Eye className="h-4 w-4" />
                       </Button>
                       <Button variant="ghost" size="icon" aria-label="Contacter le posteur" title="Contacter" onClick={() => handleContact(m)}>

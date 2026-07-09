@@ -93,7 +93,7 @@ const PublicMissionView = ({
   // « alpinistes coucher de soleil » sur les partages.
   const ogImage = mission.photos?.[0] || undefined;
   const cityLabel = titlecaseCity(mission.city) || "France";
-  const redirect = `/petites-missions/${mission.id}`;
+  const redirect = `/petites-missions/${(mission as any).slug || mission.id}`;
   // Rétro-sanitize : les annonces créées avant la sanitize à la source
   // conservent des titres en minuscules ou avec fautes ("chez soit").
   const displayTitle = sanitizeUserTitle(mission.title) || mission.title;
@@ -436,7 +436,7 @@ const PublicMissionView = ({
               {relatedMissions.slice(0, 3).map((rm: any) => (
                 <RelatedMissionCard
                   key={rm.id}
-                  to={`/petites-missions/${rm.id}`}
+                  to={`/petites-missions/${rm.slug || rm.id}`}
                   photo={Array.isArray(rm.photos) ? rm.photos[0] : null}
                   category={rm.category}
                   title={sanitizeUserTitle(rm.title) || rm.title}

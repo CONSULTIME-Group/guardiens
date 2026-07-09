@@ -227,8 +227,17 @@ const SmallMissionDetail = () => {
     if (!id) return;
     if (id.startsWith("demo-")) { navigate("/petites-missions", { replace: true }); return; }
 
-    const { data: m } = await supabase.from("small_missions").select("*").eq("id", id).single();
+    // Le paramètre d'URL peut être soit un UUID (legacy), soit un slug lisible.
+    const isUuidParam = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
+    const query = supabase.from("small_missions").select("*");
+    const { data: m } = await (isUuidParam ? query.eq("id", id) : query.eq("slug", id)).maybeSingle();
     if (!m) { setLoading(false); return; }
+
+    // Rétrocompat : si on est arrivé par UUID et qu'un slug existe, on redirige vers l'URL lisible.
+    if (isUuidParam && (m as any).slug) {
+      navigate(`/petites-missions/${(m as any).slug}${window.location.search}`, { replace: true });
+      return;
+    }
     setMission(m);
 
     // Parallélisation : tous ces appels sont indépendants une fois la mission chargée.
@@ -237,7 +246,7 @@ const SmallMissionDetail = () => {
     const [authorRes, relatedRes, respsRes, givenFbRes, recFbRes] = await Promise.all([
       supabase.rpc("get_mission_author_public", { _mission_id: m.id }),
       supabase.from("small_missions")
-        .select("id, title, description, category, city, postal_code, created_at, duration_estimate, photos, mission_type, latitude, longitude")
+        .select("id, slug, title, description, category, city, postal_code, created_at, duration_estimate, photos, mission_type, latitude, longitude")
         .eq("status", "open")
         .neq("id", m.id)
         .or(`category.eq.${m.category},city.eq.${m.city}`)
@@ -245,14 +254,14 @@ const SmallMissionDetail = () => {
         .limit(30),
       supabase.from("small_mission_responses")
         .select("*, responder:profiles!small_mission_responses_responder_id_fkey(first_name, avatar_url)")
-        .eq("mission_id", id).order("created_at", { ascending: false }),
+        .eq("mission_id", m.id).order("created_at", { ascending: false }),
       user
-        ? supabase.from("mission_feedbacks" as any).select("receiver_id").eq("mission_id", id).eq("giver_id", user.id)
+        ? supabase.from("mission_feedbacks" as any).select("receiver_id").eq("mission_id", m.id).eq("giver_id", user.id)
         : Promise.resolve({ data: [] as any[] }),
       user
         ? supabase.from("mission_feedbacks" as any)
             .select("*, giver:profiles!mission_feedbacks_giver_id_fkey(first_name, avatar_url)")
-            .eq("mission_id", id).eq("receiver_id", user.id)
+            .eq("mission_id", m.id).eq("receiver_id", user.id)
         : Promise.resolve({ data: [] as any[] }),
     ]);
 
@@ -295,27 +304,28 @@ const SmallMissionDetail = () => {
   useEffect(() => { load(); }, [load]);
 
   // Compteur de vues : 1 fois par mission par session (sessionStorage)
+  const missionUuid: string | undefined = mission?.id;
   useEffect(() => {
-    if (!id || id.startsWith("demo-")) return;
+    if (!missionUuid) return;
     try {
-      const key = `mission_viewed_${id}`;
+      const key = `mission_viewed_${missionUuid}`;
       if (sessionStorage.getItem(key)) return;
       sessionStorage.setItem(key, "1");
       // .then() est indispensable : le builder supabase-js v2 est lazy,
       // sans souscription la requête HTTP n'est jamais envoyée.
-      void supabase.rpc("increment_small_mission_view" as any, { _mission_id: id }).then(() => {}, () => {});
+      void supabase.rpc("increment_small_mission_view" as any, { _mission_id: missionUuid }).then(() => {}, () => {});
     } catch { /* silencieux */ }
-  }, [id]);
+  }, [missionUuid]);
 
   // Realtime : l'auteur voit immédiatement les nouvelles propositions et changements de statut
   useEffect(() => {
-    if (!id) return;
+    if (!missionUuid) return;
     const channel = supabase
-      .channel(`mission-detail-${id}`)
-      .on("postgres_changes", { event: "*", schema: "public", table: "small_mission_responses", filter: `mission_id=eq.${id}` }, () => { load(); })
+      .channel(`mission-detail-${missionUuid}`)
+      .on("postgres_changes", { event: "*", schema: "public", table: "small_mission_responses", filter: `mission_id=eq.${missionUuid}` }, () => { load(); })
       .subscribe();
     return () => { supabase.removeChannel(channel); };
-  }, [id, load]);
+  }, [missionUuid, load]);
 
   const MIN_MESSAGE_LEN = 10;
   const MAX_MESSAGE_LEN = 500;
@@ -1657,7 +1667,7 @@ const SmallMissionDetail = () => {
                 {relatedMissions.slice(0, 3).map((rm) => (
                   <RelatedMissionCard
                     key={rm.id}
-                    to={`/petites-missions/${rm.id}`}
+                    to={`/petites-missions/${rm.slug || rm.id}`}
                     photo={Array.isArray(rm.photos) ? rm.photos[0] : null}
                     category={rm.category}
                     title={sanitizeUserTitle(rm.title) || rm.title}
