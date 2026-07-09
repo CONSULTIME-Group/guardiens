@@ -277,9 +277,9 @@ const OnboardingAffinity = () => {
                 </h2>
 
                 <div className="space-y-2">
-                  <Label>Votre présence attendue du gardien</Label>
+                  <Label htmlFor="presence-expected">Votre présence attendue du gardien</Label>
                   <Select value={presenceExpected} onValueChange={setPresenceExpected}>
-                    <SelectTrigger className="rounded-lg h-12"><SelectValue placeholder="Choisir" /></SelectTrigger>
+                    <SelectTrigger id="presence-expected" className="rounded-lg h-12"><SelectValue placeholder="Choisir" /></SelectTrigger>
                     <SelectContent>
                       {PRESENCE_EXPECTED_OPTIONS.map((p) => (
                         <SelectItem key={p} value={p}>{p}</SelectItem>
@@ -289,34 +289,52 @@ const OnboardingAffinity = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <Label>Le gardien idéal pour vous</Label>
-                  <ChipSelect options={IDEAL_SITTER_PROFILE_OPTIONS} selected={preferredSitterTypes} onChange={setPreferredSitterTypes} />
+                  <Label id="lbl-preferred-sitter">Le gardien idéal pour vous</Label>
+                  <ChipSelect
+                    options={IDEAL_SITTER_PROFILE_OPTIONS}
+                    selected={preferredSitterTypes}
+                    onChange={setPreferredSitterTypes}
+                    ariaLabelledBy="lbl-preferred-sitter"
+                  />
                 </div>
               </section>
             )}
 
-            <div className="flex flex-col sm:flex-row gap-3 pt-2">
-              <Button
-                onClick={handleSubmit}
-                disabled={!canSubmit || saving}
-                className="flex-1"
-              >
-                {saving ? "Enregistrement..." : "Accéder à mon espace"}
-              </Button>
-              <Button
-                variant="ghost"
-                onClick={async () => {
-                  void trackEvent("onboarding_abandoned", {
-                    source: "/onboarding/affinity",
-                    metadata: { role: chosenRole, via: "logout" },
-                  });
-                  await logout();
-                  navigate("/login", { replace: true });
-                }}
-                className="sm:w-auto"
-              >
-                Se déconnecter
-              </Button>
+            <div className="space-y-2 pt-2">
+              <div className="flex flex-col sm:flex-row gap-3">
+                <Button
+                  onClick={handleSubmit}
+                  disabled={!canSubmit || saving}
+                  className="flex-1"
+                  aria-describedby={!canSubmit ? "onboarding-missing" : undefined}
+                >
+                  {saving ? "Enregistrement..." : "Accéder à mon espace"}
+                </Button>
+                <Button
+                  variant="ghost"
+                  onClick={async () => {
+                    void trackEvent("onboarding_abandoned", {
+                      source: "/onboarding/affinity",
+                      metadata: { role: chosenRole, via: "logout" },
+                    });
+                    await logout();
+                    navigate("/login", { replace: true });
+                  }}
+                  className="sm:w-auto"
+                >
+                  Se déconnecter
+                </Button>
+              </div>
+              {!canSubmit && missingFields.length > 0 && (
+                <p
+                  id="onboarding-missing"
+                  role="status"
+                  aria-live="polite"
+                  className="text-xs text-muted-foreground"
+                >
+                  Pour continuer, indiquez encore&nbsp;: {missingFields.join(", ")}.
+                </p>
+              )}
             </div>
           </CardContent>
         </Card>
