@@ -1,3 +1,4 @@
+import { useId } from "react";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
@@ -24,112 +25,125 @@ interface Props {
   onChange: (partial: Partial<OwnerProfileData>) => void;
 }
 
-const OwnerStepRules = ({ data, onChange }: Props) => (
-  <div className="space-y-6">
-    <h2 className="font-heading text-2xl font-bold">Attentes & règles</h2>
+const OwnerStepRules = ({ data, onChange }: Props) => {
+  const uid = useId();
+  const meetingId = `${uid}-meeting`;
+  const newsId = `${uid}-news`;
+  const sitterTypesId = `${uid}-sitter-types`;
+  const ambianceId = `${uid}-ambiance`;
+  const presenceId = `${uid}-presence`;
+  const experienceRequiredId = `${uid}-experience-required`;
+  const expectationsId = `${uid}-expectations`;
+  const visitsId = `${uid}-visits`;
+  const overnightId = `${uid}-overnight`;
+  const spacesId = `${uid}-spaces`;
+  const smokerId = `${uid}-smoker`;
+  const rulesNotesId = `${uid}-rules-notes`;
 
-    <MatchingExplainer role="owner" variant="inline" />
+  return (
+    <div className="space-y-6">
+      <h2 className="font-heading text-2xl font-bold">Attentes & règles</h2>
 
+      <MatchingExplainer role="owner" variant="inline" />
 
-
-    {/* Rencontre avant la garde */}
-    <div className="space-y-1">
-      <Label className="text-sm font-medium">Rencontre avant la garde</Label>
-      <p className="text-xs text-muted-foreground mb-3">
-        Dans le house-sitting, une rencontre physique avant la garde est fortement recommandée. Elle permet aux animaux de s'habituer au gardien et d'établir la confiance.
-      </p>
-      <ChipSelect options={MEETING_OPTIONS} selected={data.meeting_preference} onChange={v => onChange({ meeting_preference: v })} />
-    </div>
-
-    {/* Nouvelles pendant la garde */}
-    <div className="space-y-1">
-      <Label className="text-sm font-medium">Nouvelles pendant la garde</Label>
-      <p className="text-xs text-muted-foreground mb-3">
-        À quelle fréquence souhaitez-vous recevoir des nouvelles (photos, messages) de votre gardien ?
-      </p>
-      <ChipSelect options={NEWS_OPTIONS} selected={data.news_frequency ? [data.news_frequency] : []} onChange={v => onChange({ news_frequency: v[v.length - 1] || "" })} />
-    </div>
-
-    <h3 className="font-heading text-lg font-semibold">Attentes envers le gardien</h3>
-
-    <div className="space-y-2">
-      <Label>Profil de gardien privilégié</Label>
-      <p className="text-xs text-muted-foreground">Optionnel. Aide à proposer des gardiens qui collent à votre quotidien.</p>
-      <ChipSelect options={SITTER_TYPES} selected={data.preferred_sitter_types} onChange={v => onChange({ preferred_sitter_types: v })} />
-    </div>
-
-    <div className="space-y-2">
-      <Label>Ambiance du foyer</Label>
-      <p className="text-xs text-muted-foreground">Optionnel. Quelques tags pour que le gardien se projette.</p>
-      <ChipSelect options={HOME_AMBIANCE_OPTIONS} selected={data.home_ambiance} onChange={v => onChange({ home_ambiance: v })} />
-    </div>
-
-
-    <div className="space-y-2">
-      <Label>Présence attendue</Label>
-      <Select value={data.presence_expected} onValueChange={v => onChange({ presence_expected: v })}>
-        <SelectTrigger className="rounded-lg h-12"><SelectValue placeholder="Choisir" /></SelectTrigger>
-        <SelectContent>{PRESENCE.map(p => <SelectItem key={p} value={p}>{p}</SelectItem>)}</SelectContent>
-      </Select>
-    </div>
-
-    <div className="flex items-center justify-between py-2">
-      <Label className="flex-1 pr-4">Le gardien doit-il avoir de l'expérience avec ce type d'animal ?</Label>
-      <Switch checked={data.experience_required} onCheckedChange={v => onChange({ experience_required: v })} />
-    </div>
-
-    <div className="space-y-2">
-      <div className="flex items-center justify-between">
-        <Label>Attentes spécifiques</Label>
-        <AiSuggestButton field="specific_expectations" currentValue={data.specific_expectations} onSuggestion={text => onChange({ specific_expectations: text })} />
+      {/* Rencontre avant la garde */}
+      <div className="space-y-1">
+        <Label id={meetingId} className="text-sm font-medium">Rencontre avant la garde</Label>
+        <p className="text-xs text-muted-foreground mb-3">
+          Dans le house-sitting, une rencontre physique avant la garde est fortement recommandée. Elle permet aux animaux de s'habituer au gardien et d'établir la confiance.
+        </p>
+        <ChipSelect ariaLabelledBy={meetingId} options={MEETING_OPTIONS} selected={data.meeting_preference} onChange={v => onChange({ meeting_preference: v })} />
       </div>
-      <Textarea value={data.specific_expectations} onChange={e => onChange({ specific_expectations: e.target.value })}
-        placeholder="Arrosage, courrier, entretien jardin, ménage... tout ce qui est en plus de la garde"
-        className="rounded-lg min-h-[80px]" maxLength={2000} />
-    </div>
 
-    <h3 className="font-heading text-lg font-semibold mt-4">Règles de la maison</h3>
-
-    <div className="space-y-2">
-      <Label>Visites autorisées</Label>
-      <Select value={data.visits_allowed} onValueChange={v => onChange({ visits_allowed: v })}>
-        <SelectTrigger className="rounded-lg h-12"><SelectValue placeholder="Choisir" /></SelectTrigger>
-        <SelectContent>{VISITS.map(v => <SelectItem key={v} value={v}>{v}</SelectItem>)}</SelectContent>
-      </Select>
-    </div>
-
-    <div className="space-y-2">
-      <Label>Invité à dormir autorisé</Label>
-      <Select value={data.overnight_guest} onValueChange={v => onChange({ overnight_guest: v })}>
-        <SelectTrigger className="rounded-lg h-12"><SelectValue placeholder="Choisir" /></SelectTrigger>
-        <SelectContent>{OVERNIGHT.map(o => <SelectItem key={o} value={o}>{o}</SelectItem>)}</SelectContent>
-      </Select>
-    </div>
-
-    <div className="space-y-2">
-      <Label>Utilisation des espaces</Label>
-      <ChipSelect options={SPACES} selected={data.space_usage} onChange={v => onChange({ space_usage: v })} />
-    </div>
-
-    <div className="space-y-2">
-      <Label>Fumeur accepté</Label>
-      <Select value={data.smoker_accepted} onValueChange={v => onChange({ smoker_accepted: v })}>
-        <SelectTrigger className="rounded-lg h-12"><SelectValue placeholder="Choisir" /></SelectTrigger>
-        <SelectContent>{SMOKER.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent>
-      </Select>
-    </div>
-
-    <div className="space-y-2">
-      <div className="flex items-center justify-between">
-        <Label>Précisions règles de vie</Label>
-        <AiSuggestButton field="rules_notes" currentValue={data.rules_notes} onSuggestion={text => onChange({ rules_notes: text })} />
+      {/* Nouvelles pendant la garde */}
+      <div className="space-y-1">
+        <Label id={newsId} className="text-sm font-medium">Nouvelles pendant la garde</Label>
+        <p className="text-xs text-muted-foreground mb-3">
+          À quelle fréquence souhaitez-vous recevoir des nouvelles (photos, messages) de votre gardien ?
+        </p>
+        <ChipSelect ariaLabelledBy={newsId} options={NEWS_OPTIONS} selected={data.news_frequency ? [data.news_frequency] : []} onChange={v => onChange({ news_frequency: v[v.length - 1] || "" })} />
       </div>
-      <Textarea value={data.rules_notes} onChange={e => onChange({ rules_notes: e.target.value })}
-        placeholder="Nuancez ici, ex : un BBQ entre amis OK, pas de soirée de groupe"
-        className="rounded-lg min-h-[80px]" maxLength={2000} />
-      <HintBubble>Soyez clair dès le départ, ça évite 90% des malentendus. Les gardiens préfèrent savoir à quoi s'attendre.</HintBubble>
+
+      <h3 className="font-heading text-lg font-semibold">Attentes envers le gardien</h3>
+
+      <div className="space-y-2">
+        <Label id={sitterTypesId}>Profil de gardien privilégié</Label>
+        <p className="text-xs text-muted-foreground">Optionnel. Aide à proposer des gardiens qui collent à votre quotidien.</p>
+        <ChipSelect ariaLabelledBy={sitterTypesId} options={SITTER_TYPES} selected={data.preferred_sitter_types} onChange={v => onChange({ preferred_sitter_types: v })} />
+      </div>
+
+      <div className="space-y-2">
+        <Label id={ambianceId}>Ambiance du foyer</Label>
+        <p className="text-xs text-muted-foreground">Optionnel. Quelques tags pour que le gardien se projette.</p>
+        <ChipSelect ariaLabelledBy={ambianceId} options={HOME_AMBIANCE_OPTIONS} selected={data.home_ambiance} onChange={v => onChange({ home_ambiance: v })} />
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor={presenceId}>Présence attendue</Label>
+        <Select value={data.presence_expected} onValueChange={v => onChange({ presence_expected: v })}>
+          <SelectTrigger id={presenceId} className="rounded-lg h-12"><SelectValue placeholder="Choisir" /></SelectTrigger>
+          <SelectContent>{PRESENCE.map(p => <SelectItem key={p} value={p}>{p}</SelectItem>)}</SelectContent>
+        </Select>
+      </div>
+
+      <div className="flex items-center justify-between py-2">
+        <Label htmlFor={experienceRequiredId} className="flex-1 pr-4">Le gardien doit-il avoir de l'expérience avec ce type d'animal ?</Label>
+        <Switch id={experienceRequiredId} checked={data.experience_required} onCheckedChange={v => onChange({ experience_required: v })} />
+      </div>
+
+      <div className="space-y-2">
+        <div className="flex items-center justify-between">
+          <Label htmlFor={expectationsId}>Attentes spécifiques</Label>
+          <AiSuggestButton field="specific_expectations" currentValue={data.specific_expectations} onSuggestion={text => onChange({ specific_expectations: text })} />
+        </div>
+        <Textarea id={expectationsId} value={data.specific_expectations} onChange={e => onChange({ specific_expectations: e.target.value })}
+          placeholder="Arrosage, courrier, entretien jardin, ménage... tout ce qui est en plus de la garde"
+          className="rounded-lg min-h-[80px]" maxLength={2000} />
+      </div>
+
+      <h3 className="font-heading text-lg font-semibold mt-4">Règles de la maison</h3>
+
+      <div className="space-y-2">
+        <Label htmlFor={visitsId}>Visites autorisées</Label>
+        <Select value={data.visits_allowed} onValueChange={v => onChange({ visits_allowed: v })}>
+          <SelectTrigger id={visitsId} className="rounded-lg h-12"><SelectValue placeholder="Choisir" /></SelectTrigger>
+          <SelectContent>{VISITS.map(v => <SelectItem key={v} value={v}>{v}</SelectItem>)}</SelectContent>
+        </Select>
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor={overnightId}>Invité à dormir autorisé</Label>
+        <Select value={data.overnight_guest} onValueChange={v => onChange({ overnight_guest: v })}>
+          <SelectTrigger id={overnightId} className="rounded-lg h-12"><SelectValue placeholder="Choisir" /></SelectTrigger>
+          <SelectContent>{OVERNIGHT.map(o => <SelectItem key={o} value={o}>{o}</SelectItem>)}</SelectContent>
+        </Select>
+      </div>
+
+      <div className="space-y-2">
+        <Label id={spacesId}>Utilisation des espaces</Label>
+        <ChipSelect ariaLabelledBy={spacesId} options={SPACES} selected={data.space_usage} onChange={v => onChange({ space_usage: v })} />
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor={smokerId}>Fumeur accepté</Label>
+        <Select value={data.smoker_accepted} onValueChange={v => onChange({ smoker_accepted: v })}>
+          <SelectTrigger id={smokerId} className="rounded-lg h-12"><SelectValue placeholder="Choisir" /></SelectTrigger>
+          <SelectContent>{SMOKER.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent>
+        </Select>
+      </div>
+
+      <div className="space-y-2">
+        <div className="flex items-center justify-between">
+          <Label htmlFor={rulesNotesId}>Précisions règles de vie</Label>
+          <AiSuggestButton field="rules_notes" currentValue={data.rules_notes} onSuggestion={text => onChange({ rules_notes: text })} />
+        </div>
+        <Textarea id={rulesNotesId} value={data.rules_notes} onChange={e => onChange({ rules_notes: e.target.value })}
+          placeholder="Nuancez ici, ex : un BBQ entre amis OK, pas de soirée de groupe"
+          className="rounded-lg min-h-[80px]" maxLength={2000} />
+        <HintBubble>Soyez clair dès le départ, ça évite 90% des malentendus. Les gardiens préfèrent savoir à quoi s'attendre.</HintBubble>
+      </div>
     </div>
-  </div>
-);
+  );
+};
 
 export default OwnerStepRules;
