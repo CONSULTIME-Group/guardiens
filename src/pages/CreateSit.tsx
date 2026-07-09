@@ -829,12 +829,12 @@ const CreateSit = () => {
 
         {!isRepublish && <FirstAnnonceTip />}
 
-        {profileCompletion < 60 && (
+        {profileCompletion < PUBLISH_PROFILE_THRESHOLD && (
           <div className="bg-destructive/10 border border-destructive/20 rounded-lg p-4 mb-6 flex items-start gap-3">
             <AlertCircle className="h-5 w-5 text-destructive mt-0.5 shrink-0" />
             <div>
               <p className="font-medium text-destructive">Profil incomplet ({profileCompletion} %)</p>
-              <p className="text-sm text-muted-foreground mt-1">Complétez votre profil à au moins 60 % pour publier une annonce.</p>
+              <p className="text-sm text-muted-foreground mt-1">Complétez votre profil à au moins {PUBLISH_PROFILE_THRESHOLD} % pour publier une annonce.</p>
               <Link to="/owner-profile" className="text-sm text-primary underline mt-2 inline-block">Compléter mon profil →</Link>
             </div>
           </div>
@@ -942,8 +942,10 @@ const CreateSit = () => {
                 <Label htmlFor="start-date" className="text-xs text-muted-foreground mb-1 block">Début</Label>
                 {/* Native date input, tappable to open sheet on mobile */}
                 <button
+                  id="start-date"
                   type="button"
                   onClick={() => setStartSheetOpen(true)}
+                  aria-label={startDate ? `Date de début : ${new Date(startDate + "T12:00:00").toLocaleDateString("fr-FR", { day: "2-digit", month: "long", year: "numeric" })}` : "Date de début, non renseignée"}
                   className={cn(
                     "w-full h-12 text-base rounded-md border px-3 text-left flex items-center justify-between transition-colors",
                     !startDate ? "text-muted-foreground border-input" : "text-foreground border-input",
@@ -952,14 +954,16 @@ const CreateSit = () => {
                   onBlur={() => touch("startDate")}
                 >
                   <span>{startDate ? new Date(startDate + "T12:00:00").toLocaleDateString("fr-FR", { day: "2-digit", month: "short", year: "numeric" }) : "JJ/MM/AAAA"}</span>
-                  <Calendar className="h-4 w-4 text-muted-foreground" />
+                  <Calendar className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
                 </button>
               </div>
               <div>
                 <Label htmlFor="end-date" className="text-xs text-muted-foreground mb-1 block">Fin</Label>
                 <button
+                  id="end-date"
                   type="button"
                   onClick={() => setEndSheetOpen(true)}
+                  aria-label={endDate ? `Date de fin : ${new Date(endDate + "T12:00:00").toLocaleDateString("fr-FR", { day: "2-digit", month: "long", year: "numeric" })}` : "Date de fin, non renseignée"}
                   className={cn(
                     "w-full h-12 text-base rounded-md border px-3 text-left flex items-center justify-between transition-colors",
                     !endDate ? "text-muted-foreground border-input" : "text-foreground border-input",
@@ -968,7 +972,7 @@ const CreateSit = () => {
                   onBlur={() => touch("endDate")}
                 >
                   <span>{endDate ? new Date(endDate + "T12:00:00").toLocaleDateString("fr-FR", { day: "2-digit", month: "short", year: "numeric" }) : "JJ/MM/AAAA"}</span>
-                  <Calendar className="h-4 w-4 text-muted-foreground" />
+                  <Calendar className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
                 </button>
               </div>
             </div>

@@ -1,3 +1,4 @@
+import { useId } from "react";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
@@ -12,11 +13,9 @@ import type { OwnerProfileData } from "@/hooks/useOwnerProfile";
 
 const TYPES = ["Appartement", "Maison", "Ferme", "Chalet", "Autre"];
 const TYPE_MAP: Record<string, string> = { Appartement: "apartment", Maison: "house", Ferme: "farm", Chalet: "chalet", Autre: "other" };
-const TYPE_REVERSE: Record<string, string> = Object.fromEntries(Object.entries(TYPE_MAP).map(([k, v]) => [v, k]));
 
 const ENVS = ["Centre-ville", "Périurbain", "Campagne", "Montagne", "Bord de mer", "Forêt"];
 const ENV_MAP: Record<string, string> = { "Centre-ville": "city_center", Périurbain: "suburban", Campagne: "countryside", Montagne: "mountain", "Bord de mer": "seaside", Forêt: "forest" };
-const ENV_REVERSE: Record<string, string> = Object.fromEntries(Object.entries(ENV_MAP).map(([k, v]) => [v, k]));
 
 const COUNTS = ["1", "2", "3", "4", "5", "Plus de 5"];
 const EQUIPMENTS = ["Jardin", "Piscine", "WiFi", "Parking", "Terrasse", "Cheminée", "Buanderie", "Lave-vaisselle", "Congélateur", "TV", "Équipement sport", "BBQ"];
@@ -29,6 +28,16 @@ interface Props {
 }
 
 const OwnerStepHousing = ({ data, onChange }: Props) => {
+  const uid = useId();
+  const propertyTypeId = `${uid}-property-type`;
+  const environmentId = `${uid}-environment`;
+  const environmentsGroupId = `${uid}-environments-label`;
+  const roomsId = `${uid}-rooms`;
+  const bedroomsId = `${uid}-bedrooms`;
+  const carRequiredId = `${uid}-car-required`;
+  const accessibleId = `${uid}-accessible`;
+  const equipmentsGroupId = `${uid}-equipments-label`;
+  const descriptionId = `${uid}-description`;
 
   return (
     <div className="space-y-6">
@@ -36,18 +45,18 @@ const OwnerStepHousing = ({ data, onChange }: Props) => {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="space-y-2">
-          <Label>Type de logement</Label>
+          <Label htmlFor={propertyTypeId}>Type de logement</Label>
           <Select value={data.property_type} onValueChange={v => onChange({ property_type: v })}>
-            <SelectTrigger className="rounded-lg h-12"><SelectValue placeholder="Choisir" /></SelectTrigger>
+            <SelectTrigger id={propertyTypeId} className="rounded-lg h-12"><SelectValue placeholder="Choisir" /></SelectTrigger>
             <SelectContent>
               {TYPES.map(t => <SelectItem key={t} value={TYPE_MAP[t]}>{t}</SelectItem>)}
             </SelectContent>
           </Select>
         </div>
         <div className="space-y-2">
-          <Label>Environnement</Label>
+          <Label htmlFor={environmentId}>Environnement</Label>
           <Select value={data.environment} onValueChange={v => onChange({ environment: v })}>
-            <SelectTrigger className="rounded-lg h-12"><SelectValue placeholder="Choisir" /></SelectTrigger>
+            <SelectTrigger id={environmentId} className="rounded-lg h-12"><SelectValue placeholder="Choisir" /></SelectTrigger>
             <SelectContent>
               {ENVS.map(e => <SelectItem key={e} value={ENV_MAP[e]}>{e}</SelectItem>)}
             </SelectContent>
@@ -56,40 +65,42 @@ const OwnerStepHousing = ({ data, onChange }: Props) => {
       </div>
 
       <div className="space-y-1">
-        <Label className="text-sm font-medium text-foreground">L'environnement de votre logement</Label>
+        <Label id={environmentsGroupId} className="text-sm font-medium text-foreground">L'environnement de votre logement</Label>
         <p className="text-xs text-muted-foreground mb-3">Sélectionnez jusqu'à 3 environnements qui décrivent votre cadre de vie.</p>
-        <EnvironmentPills selected={data.environments} onChange={v => onChange({ environments: v })} />
+        <div role="group" aria-labelledby={environmentsGroupId}>
+          <EnvironmentPills selected={data.environments} onChange={v => onChange({ environments: v })} />
+        </div>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="space-y-2">
-          <Label>Nombre de pièces</Label>
+          <Label htmlFor={roomsId}>Nombre de pièces</Label>
           <Select value={String(data.rooms_count)} onValueChange={v => onChange({ rooms_count: v === "Plus de 5" ? 6 : Number(v) })}>
-            <SelectTrigger className="rounded-lg h-12"><SelectValue placeholder="Choisir" /></SelectTrigger>
+            <SelectTrigger id={roomsId} className="rounded-lg h-12"><SelectValue placeholder="Choisir" /></SelectTrigger>
             <SelectContent>{COUNTS.map(c => <SelectItem key={c} value={c === "Plus de 5" ? "6" : c}>{c}</SelectItem>)}</SelectContent>
           </Select>
         </div>
         <div className="space-y-2">
-          <Label>Nombre de chambres</Label>
+          <Label htmlFor={bedroomsId}>Nombre de chambres</Label>
           <Select value={String(data.bedrooms_count)} onValueChange={v => onChange({ bedrooms_count: v === "Plus de 5" ? 6 : Number(v) })}>
-            <SelectTrigger className="rounded-lg h-12"><SelectValue placeholder="Choisir" /></SelectTrigger>
+            <SelectTrigger id={bedroomsId} className="rounded-lg h-12"><SelectValue placeholder="Choisir" /></SelectTrigger>
             <SelectContent>{COUNTS.map(c => <SelectItem key={c} value={c === "Plus de 5" ? "6" : c}>{c}</SelectItem>)}</SelectContent>
           </Select>
         </div>
       </div>
 
       <div className="flex items-center justify-between py-2">
-        <Label>Accès voiture nécessaire</Label>
-        <Switch checked={data.car_required} onCheckedChange={v => onChange({ car_required: v })} />
+        <Label htmlFor={carRequiredId}>Accès voiture nécessaire</Label>
+        <Switch id={carRequiredId} checked={data.car_required} onCheckedChange={v => onChange({ car_required: v })} />
       </div>
       <div className="flex items-center justify-between py-2">
-        <Label>Accessible PMR</Label>
-        <Switch checked={data.accessible} onCheckedChange={v => onChange({ accessible: v })} />
+        <Label htmlFor={accessibleId}>Accessible PMR</Label>
+        <Switch id={accessibleId} checked={data.accessible} onCheckedChange={v => onChange({ accessible: v })} />
       </div>
 
       <div className="space-y-2">
-        <Label>Équipements</Label>
-        <ChipSelect options={EQUIPMENTS} selected={data.equipments} onChange={v => onChange({ equipments: v })} />
+        <Label id={equipmentsGroupId}>Équipements</Label>
+        <ChipSelect ariaLabelledBy={equipmentsGroupId} options={EQUIPMENTS} selected={data.equipments} onChange={v => onChange({ equipments: v })} />
       </div>
 
       {/* Photos, gérées dans la Galerie (source unique) */}
@@ -112,10 +123,10 @@ const OwnerStepHousing = ({ data, onChange }: Props) => {
 
       <div className="space-y-2">
         <div className="flex items-center justify-between">
-          <Label>Description du logement</Label>
+          <Label htmlFor={descriptionId}>Description du logement</Label>
           <AiSuggestButton field="description" currentValue={data.description} context={{ property_type: data.property_type, environment: data.environment, city: data.city }} onSuggestion={text => onChange({ description: text })} />
         </div>
-        <Textarea value={data.description} onChange={e => onChange({ description: e.target.value })}
+        <Textarea id={descriptionId} value={data.description} onChange={e => onChange({ description: e.target.value })}
           placeholder="Ce qui fait le charme de votre logement : son ambiance, ses particularités, ce qu'on y ressent…"
           className="rounded-lg min-h-[120px]" maxLength={3000} />
         <HintBubble>Décrivez votre intérieur : la luminosité, l'ambiance, le confort. Les infos sur le quartier et la région sont générées automatiquement.</HintBubble>

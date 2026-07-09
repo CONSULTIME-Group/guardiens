@@ -191,7 +191,8 @@ const SearchOwner = () => {
   const handleContact = async (sitterId: string) => {
     if (!user) {
       toast.error("Connectez-vous pour contacter un gardien");
-      navigate("/login");
+      const redirect = `/gardiens/${sitterId}`;
+      navigate(`/login?redirect=${encodeURIComponent(redirect)}`);
       return;
     }
     if (sitterId === user.id) {
@@ -910,9 +911,38 @@ const SearchOwner = () => {
           <div aria-hidden className="pointer-events-none absolute inset-y-0 right-0 w-10 bg-gradient-to-l from-background to-transparent sm:hidden" />
         </div>
 
-        {/* Zone mode selector retiré du toolbar : redondant avec le Select rayon (desktop),
-            la pill Rayon (mobile) et le bouton "Élargir à France entière" de l'empty state.
-            Le changement de mode zone reste accessible via l'empty state et l'OutOfZoneBanner. */}
+        {/* Sélecteur de zone : rayon / département / France entière.
+            Toujours visible pour permettre d'élargir sans passer par l'empty state. */}
+        <div
+          role="group"
+          aria-label="Périmètre de recherche"
+          className="flex items-center gap-1.5 flex-wrap pt-1"
+        >
+          {zoneChips.map((z) => {
+            const active = zoneMode === z.key;
+            return (
+              <button
+                key={z.key}
+                type="button"
+                onClick={() => setZoneMode(z.key)}
+                disabled={z.disabled}
+                aria-pressed={active}
+                className={`min-h-9 rounded-full border px-3 py-1 text-xs transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-40 disabled:cursor-not-allowed ${
+                  active
+                    ? "bg-primary text-primary-foreground border-primary"
+                    : "bg-card text-muted-foreground border-border hover:border-primary"
+                }`}
+              >
+                {z.label}
+                {z.count > 0 && (
+                  <span className={`ml-1 text-[10px] ${active ? "text-primary-foreground/80" : "text-muted-foreground/70"}`}>
+                    ({z.count})
+                  </span>
+                )}
+              </button>
+            );
+          })}
+        </div>
 
 
         {/* Sort bar + view toggle (sticky avec les pills pour cohérence visuelle) */}
@@ -1238,20 +1268,9 @@ const SearchOwner = () => {
                     aria-label={`Voir le profil de ${firstName}`}
                     className="group relative bg-card rounded-xl overflow-hidden border border-border hover:shadow-md hover:-translate-y-0.5 hover:border-primary/40 transition-all flex flex-col h-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                   >
-                    {/* Quick actions, favori + contacter */}
-                    <div className="absolute top-2 right-2 z-10 flex items-center gap-1.5">
+                    {/* Favori (secondaire), en overlay */}
+                    <div className="absolute top-2 right-2 z-10">
                       <FavoriteButton targetType="sitter" targetId={s.user_id} />
-                      <button
-                        type="button"
-                        onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleContact(s.user_id); }}
-                        disabled={contactingId === s.user_id}
-                        aria-label={`Contacter ${firstName}`}
-                        className="p-1.5 rounded-full bg-background/80 text-muted-foreground hover:bg-primary hover:text-primary-foreground transition-all hover:scale-110 disabled:opacity-60"
-                      >
-                        {contactingId === s.user_id
-                          ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
-                          : <MessageCircle className="h-4 w-4" aria-hidden="true" />}
-                      </button>
                     </div>
 
                     {/* Photo, carré, cadrage haut pour ne pas couper les visages */}
@@ -1316,7 +1335,7 @@ const SearchOwner = () => {
                         )}
                       </div>
 
-                      {/* Affinité (badge compact, masqué si non calculable) */}
+                      {/* Affinité (badge sémantique, masqué si non calculable) */}
                       <div className="mt-1">
                         <OwnerToSitterAffinity
                           sitterProfile={s}
@@ -1324,6 +1343,7 @@ const SearchOwner = () => {
                           targetId={s.user_id}
                           size="sm"
                           showCta={false}
+                          variant="semantic"
                         />
                       </div>
 
@@ -1341,6 +1361,20 @@ const SearchOwner = () => {
                       <p className="text-xs text-muted-foreground mt-1.5 line-clamp-2 min-h-[2rem]">
                         {bio || <span className="opacity-0">.</span>}
                       </p>
+
+                      {/* CTA Contacter, labellisé, cible tactile min 44px */}
+                      <button
+                        type="button"
+                        onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleContact(s.user_id); }}
+                        disabled={contactingId === s.user_id}
+                        aria-label={`Contacter ${firstName}`}
+                        className="mt-2 inline-flex items-center justify-center gap-1.5 min-h-11 w-full rounded-full bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors disabled:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                      >
+                        {contactingId === s.user_id
+                          ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+                          : <MessageCircle className="h-4 w-4" aria-hidden="true" />}
+                        Contacter
+                      </button>
                     </div>
                   </Link>
                 );

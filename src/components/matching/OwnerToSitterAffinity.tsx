@@ -26,6 +26,8 @@ interface Props {
   scope?: "single" | "list";
   /** Texte adjacent au badge. */
   caption?: string;
+  /** "numeric" (%) ou "semantic" ("Très compatible", etc.). */
+  variant?: "numeric" | "semantic";
   className?: string;
 }
 
@@ -37,6 +39,7 @@ const OwnerToSitterAffinity = ({
   showCta = true,
   scope = "single",
   caption,
+  variant = "numeric",
   className,
 }: Props) => {
   const { owner, loading } = useViewerOwnerForAffinity();
@@ -69,6 +72,7 @@ const OwnerToSitterAffinity = ({
       <AffinityBadge
         result={full}
         size={size}
+        variant={variant}
         trackingContext={context}
         trackingId={targetId}
       />
