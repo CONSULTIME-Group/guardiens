@@ -56,6 +56,7 @@ const statusOrder: Record<string, number> = {
 
 const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, propertyId, sitStatus }: ApplicationsListProps) => {
   const { user } = useAuth();
+  const { owner: viewerOwner } = useViewerOwnerForAffinity();
   const [applications, setApplications] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [confirmApp, setConfirmApp] = useState<any>(null);
@@ -63,6 +64,7 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, prope
   const [declineMessage, setDeclineMessage] = useState("");
   const [declineCustom, setDeclineCustom] = useState(false);
   const [declinedOpen, setDeclinedOpen] = useState(false);
+  const [sortMode, setSortMode] = useState<"affinity" | "rating" | "recent">("affinity");
   const navigate = useNavigate();
   const [showAccord, setShowAccord] = useState(false);
   const [accordData, setAccordData] = useState<any>(null);
