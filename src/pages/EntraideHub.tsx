@@ -49,6 +49,7 @@ const PAGE_SIZE = 20;
 
 interface MissionRow {
   id: string;
+  slug?: string | null;
   title: string;
   description: string | null;
   category: string;
