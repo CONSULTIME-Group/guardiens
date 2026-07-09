@@ -81,36 +81,88 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, prope
       .eq("sit_id", sitId)
       .order("created_at", { ascending: false });
 
-    if (data) {
-      const enriched = await Promise.all(
-        data.map(async (app: any) => {
-          const [spRes, revRes, badgeRes, emRes] = await Promise.all([
-            supabase.from("sitter_profiles").select("experience_years, animal_types").eq("user_id", app.sitter_id).maybeSingle(),
-            supabase.from("reviews").select("overall_rating").eq("reviewee_id", app.sitter_id).eq("published", true),
-            supabase.from("badge_attributions").select("badge_id").eq("user_id", app.sitter_id),
-            supabase.from("emergency_sitter_profiles").select("id").eq("user_id", app.sitter_id).eq("is_active", true).maybeSingle(),
-          ]);
-          const reviews = revRes.data || [];
-          const avgRating = reviews.length > 0 ? (reviews.reduce((s: number, r: any) => s + r.overall_rating, 0) / reviews.length).toFixed(1) : null;
-          const badgeMap = new Map<string, number>();
-          (badgeRes.data || []).forEach((b: any) => badgeMap.set(b.badge_id, (badgeMap.get(b.badge_id) || 0) + 1));
-          const badgeCounts = Array.from(badgeMap.entries()).map(([badge_key, count]) => ({ badge_key, count })).sort((a, b) => b.count - a.count);
-          return {
-            ...app,
-            sitterProfile: spRes.data,
-            avgRating,
-            reviewCount: reviews.length,
-            badgeCounts,
-            isEmergencySitter: !!emRes.data,
-          };
-        })
-      );
-      // Sort by status order
-      enriched.sort((a, b) => (statusOrder[a.status] ?? 99) - (statusOrder[b.status] ?? 99));
-      setApplications(enriched);
+    if (!data) {
+      setLoading(false);
+      return;
     }
+
+    const sitterIds = [...new Set(data.map((a: any) => a.sitter_id).filter(Boolean))] as string[];
+
+    if (sitterIds.length === 0) {
+      setApplications([]);
+      setLoading(false);
+      return;
+    }
+
+    const [spRes, revRes, badgeRes, emRes] = await Promise.all([
+      supabase.from("sitter_profiles")
+        .select("user_id, experience_years, animal_types, life_pace, languages, interests, work_during_sit, sensitivities, special_animal_skills, sitter_type")
+        .in("user_id", sitterIds),
+      supabase.from("reviews").select("reviewee_id, overall_rating").in("reviewee_id", sitterIds).eq("published", true),
+      supabase.from("badge_attributions").select("user_id, badge_id").in("user_id", sitterIds),
+      supabase.from("emergency_sitter_profiles").select("user_id").in("user_id", sitterIds).eq("is_active", true),
+    ]);
+
+    const spMap = new Map<string, any>();
+    (spRes.data || []).forEach((r: any) => spMap.set(r.user_id, r));
+
+    const revMap = new Map<string, number[]>();
+    (revRes.data || []).forEach((r: any) => {
+      const arr = revMap.get(r.reviewee_id) || [];
+      arr.push(r.overall_rating);
+      revMap.set(r.reviewee_id, arr);
+    });
+
+    const badgeGrouped = new Map<string, Map<string, number>>();
+    (badgeRes.data || []).forEach((b: any) => {
+      const inner = badgeGrouped.get(b.user_id) || new Map<string, number>();
+      inner.set(b.badge_id, (inner.get(b.badge_id) || 0) + 1);
+      badgeGrouped.set(b.user_id, inner);
+    });
+
+    const emSet = new Set<string>((emRes.data || []).map((r: any) => r.user_id));
+
+    const enriched = data.map((app: any) => {
+      const sp = spMap.get(app.sitter_id) || null;
+      const ratings = revMap.get(app.sitter_id) || [];
+      const avgRating = ratings.length > 0
+        ? (ratings.reduce((s, n) => s + n, 0) / ratings.length).toFixed(1)
+        : null;
+      const inner = badgeGrouped.get(app.sitter_id);
+      const badgeCounts = inner
+        ? Array.from(inner.entries())
+            .map(([badge_key, count]) => ({ badge_key, count }))
+            .sort((a, b) => b.count - a.count)
+        : [];
+      const affinityInput: AffinitySitterInput | null = sp
+        ? {
+            animal_types: sp.animal_types,
+            life_pace: sp.life_pace,
+            languages: sp.languages,
+            interests: sp.interests,
+            work_during_sit: sp.work_during_sit,
+            sensitivities: sp.sensitivities,
+            special_animal_skills: sp.special_animal_skills,
+            sitter_type: sp.sitter_type,
+            experience_years: sp.experience_years,
+          }
+        : null;
+      return {
+        ...app,
+        sitterProfile: sp,
+        sitterAffinityInput: affinityInput,
+        avgRating,
+        reviewCount: ratings.length,
+        badgeCounts,
+        isEmergencySitter: emSet.has(app.sitter_id),
+      };
+    });
+
+    enriched.sort((a, b) => (statusOrder[a.status] ?? 99) - (statusOrder[b.status] ?? 99));
+    setApplications(enriched);
     setLoading(false);
   };
+
 
   useEffect(() => { load(); }, [sitId]);
 
