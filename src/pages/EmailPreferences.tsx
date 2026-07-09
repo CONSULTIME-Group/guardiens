@@ -36,7 +36,7 @@ const EmailPreferences = () => {
     (async () => {
       const { data } = await supabase
         .from("email_preferences")
-        .select("product_emails, digest_emails, alert_emails, new_mission_digest")
+        .select("product_emails, digest_emails, alert_emails, new_mission_digest, nearby_daily_digest, nearby_daily_radius_km")
         .eq("user_id", user.id)
         .maybeSingle();
       if (data) setPrefs({
@@ -44,6 +44,8 @@ const EmailPreferences = () => {
         digest_emails: data.digest_emails ?? true,
         alert_emails: data.alert_emails ?? true,
         new_mission_digest: (data as any).new_mission_digest ?? true,
+        nearby_daily_digest: (data as any).nearby_daily_digest ?? true,
+        nearby_daily_radius_km: ((data as any).nearby_daily_radius_km ?? 15) as 5 | 15 | 30,
       });
       setLoading(false);
     })();
@@ -58,6 +60,8 @@ const EmailPreferences = () => {
       p_digest: prefs.digest_emails,
       p_alert: prefs.alert_emails,
       p_new_mission_digest: prefs.new_mission_digest,
+      p_nearby_daily_digest: prefs.nearby_daily_digest,
+      p_nearby_daily_radius_km: prefs.nearby_daily_radius_km,
     } as any);
     setSaving(false);
     if (error) toast.error("Impossible d'enregistrer vos préférences");
