@@ -161,6 +161,48 @@ const EmailPreferences = () => {
               </CardHeader>
             </Card>
 
+            <Card>
+              <CardHeader className="gap-3">
+                <div className="flex flex-row items-start justify-between gap-4">
+                  <div>
+                    <CardTitle className="text-base">Récap quotidien près de chez vous</CardTitle>
+                    <CardDescription>
+                      Un email par jour maximum, envoyé à 13h, qui récapitule les nouvelles
+                      annonces (gardes et coups de main) publiées dans les dernières 24h
+                      autour de chez vous. Pas d'email si rien de nouveau.
+                    </CardDescription>
+                  </div>
+                  <Switch
+                    checked={prefs.nearby_daily_digest}
+                    onCheckedChange={(v) => setPrefs((p) => ({ ...p, nearby_daily_digest: v }))}
+                  />
+                </div>
+                {prefs.nearby_daily_digest && (
+                  <div className="pt-2">
+                    <p className="text-sm text-muted-foreground mb-2">Rayon autour de chez vous</p>
+                    <div className="flex gap-2">
+                      {[5, 15, 30].map((km) => (
+                        <button
+                          key={km}
+                          type="button"
+                          onClick={() => setPrefs((p) => ({ ...p, nearby_daily_radius_km: km as 5 | 15 | 30 }))}
+                          className={`px-4 py-2 rounded-md text-sm border transition ${
+                            prefs.nearby_daily_radius_km === km
+                              ? "bg-primary text-primary-foreground border-primary"
+                              : "bg-background text-foreground border-input hover:bg-muted"
+                          }`}
+                        >
+                          {km} km
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </CardHeader>
+            </Card>
+
+
+
 
             <div className="flex justify-end">
               <Button onClick={save} disabled={saving} className="h-11 md:h-auto">
