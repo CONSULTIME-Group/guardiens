@@ -39,7 +39,8 @@ const initials = (name: string | null) =>
   name ? name.trim().charAt(0).toUpperCase() : "G";
 
 const LiveListingsSection: React.FC = () => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const dateLocale: Locale = LOCALE_MAP[(i18n.language || "fr").slice(0, 2)] ?? fr;
   const [sits, setSits] = useState<LiveSit[]>([]);
   const [loading, setLoading] = useState(true);
 
