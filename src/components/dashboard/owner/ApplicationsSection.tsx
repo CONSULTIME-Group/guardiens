@@ -167,7 +167,7 @@ const ApplicationsSection = memo(({ recentApps, sitterProfiles, sitterBadges, si
           </AccordionTrigger>
           <AccordionContent className="px-4 pb-4">
             <div className="space-y-3">
-              {read.map(a => <AppCard key={a.id} app={a} sitterProfiles={sitterProfiles} />)}
+              {read.map(a => <AppCard key={a.id} app={a} sitterProfiles={sitterProfiles} sitterAffinityProfiles={sitterAffinityProfiles} />)}
             </div>
           </AccordionContent>
         </AccordionItem>
@@ -189,7 +189,7 @@ const ApplicationsSection = memo(({ recentApps, sitterProfiles, sitterBadges, si
         <p className="text-sm text-muted-foreground font-sans italic py-4 text-center">Aucune candidature reçue en attente</p>
       ) : unread.length > 0 ? (
         <div className="space-y-3">
-          {unread.map(a => <AppCard key={a.id} app={a} sitterProfiles={sitterProfiles} />)}
+          {unread.map(a => <AppCard key={a.id} app={a} sitterProfiles={sitterProfiles} sitterAffinityProfiles={sitterAffinityProfiles} />)}
         </div>
       ) : null}
       {loading ? (
@@ -224,7 +224,7 @@ const ApplicationsSection = memo(({ recentApps, sitterProfiles, sitterBadges, si
             </AccordionTrigger>
             <AccordionContent className="px-4 pb-4">
               <div className="space-y-3">
-                {read.map(a => <AppCard key={a.id} app={a} sitterProfiles={sitterProfiles} />)}
+                {read.map(a => <AppCard key={a.id} app={a} sitterProfiles={sitterProfiles} sitterAffinityProfiles={sitterAffinityProfiles} />)}
               </div>
             </AccordionContent>
           </AccordionItem>
