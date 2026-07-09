@@ -129,7 +129,7 @@ const AppCard = memo(({ app, sitterProfiles, sitterAffinityProfiles }: { app: Ap
 });
 AppCard.displayName = "AppCard";
 
-const ApplicationsSection = memo(({ recentApps, sitterProfiles, sitterBadges, loading = false }: ApplicationsSectionProps) => {
+const ApplicationsSection = memo(({ recentApps, sitterProfiles, sitterBadges, sitterAffinityProfiles, loading = false }: ApplicationsSectionProps) => {
   // "Non lues" = candidatures réellement en attente de première réponse.
   // 'discussing' a déjà été ouvert/répondu → va dans "déjà consultées".
   const unread = recentApps.filter(a => a.status === "pending");
