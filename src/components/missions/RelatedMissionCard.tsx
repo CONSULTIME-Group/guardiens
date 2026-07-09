@@ -74,43 +74,50 @@ const RelatedMissionCard = ({ to, photo, category, title, city, timeAgo, exchang
   const gradient = CATEGORY_GRADIENT[cat] || CATEGORY_GRADIENT.animals;
   const showImage = !!photo && !imgError;
 
-  return (
-    <Link to={to} className="group block">
-      <div className="relative rounded-2xl overflow-hidden aspect-[4/3] bg-card border border-border shadow-sm transition-all duration-300 group-hover:shadow-xl group-hover:-translate-y-0.5">
-        {showImage ? (
-          <>
-            <img
-              src={photo!}
-              alt={title}
-              loading="lazy"
-              decoding="async"
-              onError={() => setImgError(true)}
-              className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-            />
-            <span className="absolute top-3 left-3 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest bg-background/95 backdrop-blur text-primary">
+  // Sans photo : on abandonne le grand pavé 4:3 vide au profit d'une carte
+  // compacte, éditoriale, qui met en avant le titre et la contrepartie
+  // (l'info utile) plutôt qu'un placeholder décoratif.
+  if (!showImage) {
+    return (
+      <Link to={to} className="group block h-full">
+        <div className={`relative h-full rounded-2xl border border-border bg-gradient-to-br ${gradient} p-5 shadow-sm transition-all duration-300 group-hover:shadow-lg group-hover:-translate-y-0.5 flex flex-col`}>
+          <div className="flex items-center justify-between mb-3">
+            <span className="px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest bg-background/85 backdrop-blur text-primary">
               {label}
             </span>
-          </>
-        ) : (
-          // Sans photo : gradient teinté + glyphe en filigrane + chip catégorie,
-          // MAIS pas de titre dans le cover (le titre est rendu sous la carte
-          // comme pour les variantes avec photo, pour garantir des hauteurs de
-          // grille strictement identiques).
-          <div className={`w-full h-full bg-gradient-to-br ${gradient} relative flex flex-col justify-between p-5`}>
-            <span className="self-start px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest bg-background/85 backdrop-blur text-primary">
-              {label}
-            </span>
-            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-              <CategoryGlyph category={cat} className="w-28 h-28 text-primary/25" />
-            </div>
-            <span className="self-end text-[10px] font-medium uppercase tracking-wider text-primary/70">
-              Sans photo
-            </span>
+            <CategoryGlyph category={cat} className="w-8 h-8 text-primary/40" />
           </div>
-        )}
-      </div>
+          <h3 className="font-heading text-lg font-bold mb-1 group-hover:text-primary transition-colors line-clamp-2">
+            {title}
+          </h3>
+          <p className="text-sm text-muted-foreground font-medium">
+            {city || "France"}{timeAgo ? ` · ${timeAgo}` : ""}
+          </p>
+          {exchangeOffer && (
+            <p className="mt-3 pt-3 border-t border-border/50 text-xs text-muted-foreground italic line-clamp-2">
+              « {exchangeOffer} »
+            </p>
+          )}
+        </div>
+      </Link>
+    );
+  }
 
-      {/* Structure texte identique dans les deux cas → grille homogène. */}
+  return (
+    <Link to={to} className="group block h-full">
+      <div className="relative rounded-2xl overflow-hidden aspect-[4/3] bg-card border border-border shadow-sm transition-all duration-300 group-hover:shadow-xl group-hover:-translate-y-0.5">
+        <img
+          src={photo!}
+          alt={title}
+          loading="lazy"
+          decoding="async"
+          onError={() => setImgError(true)}
+          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+        />
+        <span className="absolute top-3 left-3 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest bg-background/95 backdrop-blur text-primary">
+          {label}
+        </span>
+      </div>
       <div className="mt-4">
         <h3 className="font-heading text-xl font-bold mb-1 group-hover:text-primary transition-colors line-clamp-2">
           {title}
@@ -118,11 +125,6 @@ const RelatedMissionCard = ({ to, photo, category, title, city, timeAgo, exchang
         <p className="text-sm text-muted-foreground font-medium">
           {city || "France"}{timeAgo ? ` · ${timeAgo}` : ""}
         </p>
-        {!showImage && exchangeOffer && (
-          <p className="mt-1.5 text-xs text-muted-foreground italic line-clamp-1">
-            « {exchangeOffer} »
-          </p>
-        )}
       </div>
     </Link>
   );
