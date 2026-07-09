@@ -116,12 +116,25 @@ const OnboardingAffinity = () => {
     [status.needsOwner, chosenRole],
   );
 
-  const canSubmit = useMemo(() => {
-    if (askRole && !chosenRole) return false;
-    if (showSitterBlock && (animalTypes.length === 0 || !workDuringSit || !sitterType)) return false;
-    if (showOwnerBlock && (!presenceExpected || preferredSitterTypes.length === 0)) return false;
-    return showSitterBlock || showOwnerBlock;
+  const missingFields = useMemo(() => {
+    const missing: string[] = [];
+    if (askRole && !chosenRole) missing.push("choisir ce que vous venez faire");
+    if (showSitterBlock) {
+      if (animalTypes.length === 0) missing.push("les animaux que vous acceptez");
+      if (!workDuringSit) missing.push("votre situation pendant la garde");
+      if (!sitterType) missing.push("votre profil de gardien");
+    }
+    if (showOwnerBlock) {
+      if (!presenceExpected) missing.push("la présence attendue du gardien");
+      if (preferredSitterTypes.length === 0) missing.push("le profil de gardien idéal");
+    }
+    return missing;
   }, [askRole, chosenRole, showSitterBlock, showOwnerBlock, animalTypes, workDuringSit, sitterType, presenceExpected, preferredSitterTypes]);
+
+  const canSubmit = useMemo(
+    () => (showSitterBlock || showOwnerBlock) && missingFields.length === 0,
+    [showSitterBlock, showOwnerBlock, missingFields],
+  );
 
   const handleRolePick = (r: Role) => {
     setChosenRole(r);
@@ -165,7 +178,7 @@ const OnboardingAffinity = () => {
       });
       await refreshProfile();
       await status.refresh();
-      toast.success("Merci, votre profil est prêt.");
+      toast.success("C'est noté, vous pourrez compléter votre profil ensuite.");
       navigate("/dashboard", { replace: true });
     } catch (e) {
       console.error("OnboardingAffinity: save failed", e);
@@ -222,14 +235,19 @@ const OnboardingAffinity = () => {
                 </h2>
 
                 <div className="space-y-2">
-                  <Label>Quels animaux acceptez-vous ?</Label>
-                  <ChipSelect options={SITTER_ANIMAL_TYPES_OPTIONS} selected={animalTypes} onChange={setAnimalTypes} />
+                  <Label id="lbl-animal-types">Quels animaux acceptez-vous ?</Label>
+                  <ChipSelect
+                    options={SITTER_ANIMAL_TYPES_OPTIONS}
+                    selected={animalTypes}
+                    onChange={setAnimalTypes}
+                    ariaLabelledBy="lbl-animal-types"
+                  />
                 </div>
 
                 <div className="space-y-2">
-                  <Label>Votre situation pendant la garde</Label>
+                  <Label htmlFor="work-during-sit">Votre situation pendant la garde</Label>
                   <Select value={workDuringSit} onValueChange={setWorkDuringSit}>
-                    <SelectTrigger className="rounded-lg h-12"><SelectValue placeholder="Choisir" /></SelectTrigger>
+                    <SelectTrigger id="work-during-sit" className="rounded-lg h-12"><SelectValue placeholder="Choisir" /></SelectTrigger>
                     <SelectContent>
                       {WORK_DURING_SIT_OPTIONS.map((o) => (
                         <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>
@@ -239,9 +257,9 @@ const OnboardingAffinity = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <Label>Votre profil de gardien</Label>
+                  <Label htmlFor="sitter-type">Votre profil de gardien</Label>
                   <Select value={sitterType} onValueChange={setSitterType}>
-                    <SelectTrigger className="rounded-lg h-12"><SelectValue placeholder="Choisir" /></SelectTrigger>
+                    <SelectTrigger id="sitter-type" className="rounded-lg h-12"><SelectValue placeholder="Choisir" /></SelectTrigger>
                     <SelectContent>
                       {SITTER_TYPE_OPTIONS.map((t) => (
                         <SelectItem key={t} value={t}>{t}</SelectItem>
@@ -259,9 +277,9 @@ const OnboardingAffinity = () => {
                 </h2>
 
                 <div className="space-y-2">
-                  <Label>Votre présence attendue du gardien</Label>
+                  <Label htmlFor="presence-expected">Votre présence attendue du gardien</Label>
                   <Select value={presenceExpected} onValueChange={setPresenceExpected}>
-                    <SelectTrigger className="rounded-lg h-12"><SelectValue placeholder="Choisir" /></SelectTrigger>
+                    <SelectTrigger id="presence-expected" className="rounded-lg h-12"><SelectValue placeholder="Choisir" /></SelectTrigger>
                     <SelectContent>
                       {PRESENCE_EXPECTED_OPTIONS.map((p) => (
                         <SelectItem key={p} value={p}>{p}</SelectItem>
@@ -271,34 +289,52 @@ const OnboardingAffinity = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <Label>Le gardien idéal pour vous</Label>
-                  <ChipSelect options={IDEAL_SITTER_PROFILE_OPTIONS} selected={preferredSitterTypes} onChange={setPreferredSitterTypes} />
+                  <Label id="lbl-preferred-sitter">Le gardien idéal pour vous</Label>
+                  <ChipSelect
+                    options={IDEAL_SITTER_PROFILE_OPTIONS}
+                    selected={preferredSitterTypes}
+                    onChange={setPreferredSitterTypes}
+                    ariaLabelledBy="lbl-preferred-sitter"
+                  />
                 </div>
               </section>
             )}
 
-            <div className="flex flex-col sm:flex-row gap-3 pt-2">
-              <Button
-                onClick={handleSubmit}
-                disabled={!canSubmit || saving}
-                className="flex-1"
-              >
-                {saving ? "Enregistrement..." : "Accéder à mon espace"}
-              </Button>
-              <Button
-                variant="ghost"
-                onClick={async () => {
-                  void trackEvent("onboarding_abandoned", {
-                    source: "/onboarding/affinity",
-                    metadata: { role: chosenRole, via: "logout" },
-                  });
-                  await logout();
-                  navigate("/login", { replace: true });
-                }}
-                className="sm:w-auto"
-              >
-                Se déconnecter
-              </Button>
+            <div className="space-y-2 pt-2">
+              <div className="flex flex-col sm:flex-row gap-3">
+                <Button
+                  onClick={handleSubmit}
+                  disabled={!canSubmit || saving}
+                  className="flex-1"
+                  aria-describedby={!canSubmit ? "onboarding-missing" : undefined}
+                >
+                  {saving ? "Enregistrement..." : "Accéder à mon espace"}
+                </Button>
+                <Button
+                  variant="ghost"
+                  onClick={async () => {
+                    void trackEvent("onboarding_abandoned", {
+                      source: "/onboarding/affinity",
+                      metadata: { role: chosenRole, via: "logout" },
+                    });
+                    await logout();
+                    navigate("/login", { replace: true });
+                  }}
+                  className="sm:w-auto"
+                >
+                  Se déconnecter
+                </Button>
+              </div>
+              {!canSubmit && missingFields.length > 0 && (
+                <p
+                  id="onboarding-missing"
+                  role="status"
+                  aria-live="polite"
+                  className="text-xs text-muted-foreground"
+                >
+                  Pour continuer, indiquez encore&nbsp;: {missingFields.join(", ")}.
+                </p>
+              )}
             </div>
           </CardContent>
         </Card>

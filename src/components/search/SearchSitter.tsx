@@ -203,7 +203,13 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
   environments.length +
   (verifiedOnly ? 1 : 0) +
   (withPhotosOnly ? 1 : 0) +
-  (minExperience !== "all" ? 1 : 0);
+  (minExperience !== "all" ? 1 : 0) +
+  animalTypes.length +
+  (startDate ? 1 : 0) +
+  (endDate ? 1 : 0) +
+  (duration !== "all" ? 1 : 0) +
+  (radius[0] !== 15 ? 1 : 0) +
+  (zoneMode !== "radius" ? 1 : 0);
  const hasActiveFilters = activeFiltersCount > 0;
 
  // ─── City autocomplete via geo.api.gouv.fr ───
@@ -1074,6 +1080,12 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
  setWithPhotosOnly(false);
  setMinExperience("all");
  setEnvironments([]);
+ setAnimalTypes([]);
+ setStartDate("");
+ setEndDate("");
+ setDuration("all");
+ setRadius([15]);
+ setZoneMode("radius");
  };
 
  const animalsLabel = animalTypes.length > 0 ? animalTypes.join(" · ") : "Animaux";

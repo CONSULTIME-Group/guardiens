@@ -259,7 +259,7 @@ const ApplicationModal = ({
         <div className="grid md:grid-cols-[1fr_220px] gap-4">
           {/* Left: message */}
           <div className="space-y-3">
-            <label className="text-sm font-medium">Votre message</label>
+            <label htmlFor="application-message" className="text-sm font-medium">Votre message</label>
             {!almaDismissed && (
               <AlmaBubble
                 audience="sitter"
@@ -307,6 +307,7 @@ const ApplicationModal = ({
               <p className="text-[10px] font-medium text-primary/80 uppercase tracking-wider">Brouillon Alma, à personnaliser</p>
             )}
             <Textarea
+              id="application-message"
               value={message}
               onChange={(e) => setMessage(e.target.value)}
               rows={10}

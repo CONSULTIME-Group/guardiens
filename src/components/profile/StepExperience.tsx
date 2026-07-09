@@ -74,8 +74,12 @@ const StepExperience = ({ data, pastAnimals, onChange, onAddAnimal, onRemoveAnim
   return (
     <div className="space-y-6">
       <div className="space-y-2">
-        <Label>Types d'animaux gérés</Label>
-        <ChipSelect options={ANIMAL_TYPES} selected={data.animal_types} onChange={v => {
+        <Label id="lbl-animal-types">Types d'animaux gérés</Label>
+        <ChipSelect
+          options={ANIMAL_TYPES}
+          selected={data.animal_types}
+          ariaLabelledBy="lbl-animal-types"
+          onChange={v => {
           const prev = data.animal_types;
           const added = v.find(x => !prev.includes(x));
           if (added === "Tous") {
@@ -92,8 +96,13 @@ const StepExperience = ({ data, pastAnimals, onChange, onAddAnimal, onRemoveAnim
       {hasDogs && (
         <>
           <div className="space-y-2">
-            <Label>Taille de chien acceptée</Label>
-            <ChipSelect options={DOG_SIZES} selected={(data as any).dog_sizes_accepted || []} onChange={v => onChange({ dog_sizes_accepted: v } as any)} />
+            <Label id="lbl-dog-sizes">Taille de chien acceptée</Label>
+            <ChipSelect
+              options={DOG_SIZES}
+              selected={(data as any).dog_sizes_accepted || []}
+              onChange={v => onChange({ dog_sizes_accepted: v } as any)}
+              ariaLabelledBy="lbl-dog-sizes"
+            />
           </div>
           <div className="space-y-1">
             <Label>Races exigeantes acceptées</Label>
@@ -101,8 +110,8 @@ const StepExperience = ({ data, pastAnimals, onChange, onAddAnimal, onRemoveAnim
               Certaines races demandent plus d'expérience (Malinois, Husky, Border Collie...)
             </p>
             <div className="flex items-center justify-between py-2">
-              <Label className="flex-1 pr-4 text-sm">J'accepte les races exigeantes</Label>
-              <Switch checked={(data as any).demanding_breeds_ok || false} onCheckedChange={v => onChange({ demanding_breeds_ok: v } as any)} />
+              <Label htmlFor="demanding-breeds-switch" className="flex-1 pr-4 text-sm">J'accepte les races exigeantes</Label>
+              <Switch id="demanding-breeds-switch" checked={(data as any).demanding_breeds_ok || false} onCheckedChange={v => onChange({ demanding_breeds_ok: v } as any)} />
             </div>
           </div>
         </>
@@ -111,26 +120,36 @@ const StepExperience = ({ data, pastAnimals, onChange, onAddAnimal, onRemoveAnim
       {/* Cat-specific */}
       {hasCats && (
         <div className="flex items-center justify-between py-2">
-          <Label className="flex-1 pr-4 text-sm">J'accepte les chats d'intérieur uniquement</Label>
-          <Switch checked={(data as any).indoor_cats_only || false} onCheckedChange={v => onChange({ indoor_cats_only: v } as any)} />
+          <Label htmlFor="indoor-cats-switch" className="flex-1 pr-4 text-sm">J'accepte les chats d'intérieur uniquement</Label>
+          <Switch id="indoor-cats-switch" checked={(data as any).indoor_cats_only || false} onCheckedChange={v => onChange({ indoor_cats_only: v } as any)} />
         </div>
       )}
 
       {/* Experience with animals */}
       <div className="space-y-2">
-        <Label>Avez-vous des animaux chez vous ?</Label>
-        <ChipSelect options={OWN_ANIMALS} selected={(data as any).own_animals || []} onChange={v => onChange({ own_animals: v } as any)} />
+        <Label id="lbl-own-animals">Avez-vous des animaux chez vous ?</Label>
+        <ChipSelect
+          options={OWN_ANIMALS}
+          selected={(data as any).own_animals || []}
+          onChange={v => onChange({ own_animals: v } as any)}
+          ariaLabelledBy="lbl-own-animals"
+        />
       </div>
 
       <div className="space-y-2">
-        <Label>Gardes avec animaux réalisées</Label>
-        <ChipSelect options={GUARD_EXPERIENCE} selected={(data as any).guard_experience ? [(data as any).guard_experience] : []} onChange={v => onChange({ guard_experience: v[v.length - 1] || "" } as any)} />
+        <Label id="lbl-guard-exp">Gardes avec animaux réalisées</Label>
+        <ChipSelect
+          options={GUARD_EXPERIENCE}
+          selected={(data as any).guard_experience ? [(data as any).guard_experience] : []}
+          onChange={v => onChange({ guard_experience: v[v.length - 1] || "" } as any)}
+          ariaLabelledBy="lbl-guard-exp"
+        />
       </div>
 
       <div className="space-y-2">
-        <Label>Années d'expérience</Label>
+        <Label htmlFor="experience-years-trigger">Années d'expérience</Label>
         <Select value={data.experience_years} onValueChange={v => onChange({ experience_years: v })}>
-          <SelectTrigger className="rounded-lg h-12"><SelectValue placeholder="Choisir" /></SelectTrigger>
+          <SelectTrigger id="experience-years-trigger" className="rounded-lg h-12"><SelectValue placeholder="Choisir" /></SelectTrigger>
           <SelectContent>
             {EXPERIENCE_OPTIONS.map(o => <SelectItem key={o} value={o}>{o}</SelectItem>)}
           </SelectContent>
@@ -138,8 +157,9 @@ const StepExperience = ({ data, pastAnimals, onChange, onAddAnimal, onRemoveAnim
       </div>
 
       <div className="space-y-2">
-        <Label>Références / gardes passées</Label>
+        <Label htmlFor="references-text">Références / gardes passées</Label>
         <Textarea
+          id="references-text"
           value={data.references_text}
           onChange={e => onChange({ references_text: e.target.value })}
           placeholder="Décrivez vos expériences précédentes : nombre de gardes, types d'animaux, durées..."

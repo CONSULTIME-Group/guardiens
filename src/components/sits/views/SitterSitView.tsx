@@ -310,7 +310,7 @@ const SitterSitView = ({
               <div className="w-full md:w-auto md:shrink-0">
                 {!sit.accepting_applications ? (
                   <Button className="w-full md:w-auto md:min-w-[16rem] h-11 md:h-12 px-6 text-base font-semibold" disabled>
-                    Candidatures en cours d'analyse
+                    Candidatures fermées
                   </Button>
                 ) : accessLevel === 1 ? (
                   <AccessGateBanner

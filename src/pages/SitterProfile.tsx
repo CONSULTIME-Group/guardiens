@@ -496,7 +496,8 @@ const SitterProfile = () => {
               });
             }}
           />
-          <div className={`py-3 px-4 md:py-4 md:px-6 flex items-center justify-between gap-3 ${(!dirty && !saving && !saved) ? "hidden md:flex" : ""}`} style={{ paddingBottom: "max(0.75rem, env(safe-area-inset-bottom))" }}>
+          <div className={`py-3 px-4 md:py-4 md:px-6 flex flex-col gap-2 ${(!dirty && !saving && !saved) ? "hidden md:flex" : ""}`} style={{ paddingBottom: "max(0.75rem, env(safe-area-inset-bottom))" }}>
+          <div className="flex items-center justify-between gap-3">
           <p className="text-xs text-muted-foreground" aria-live="polite">
             {saved && !dirty ? (
               <span className="inline-flex items-center gap-1 text-primary">
@@ -514,6 +515,7 @@ const SitterProfile = () => {
                   disabled={!canSave}
                   className="rounded-full px-6 gap-2"
                   size="lg"
+                  aria-describedby={motivationBlocks ? "save-blocked-hint" : undefined}
                 >
                   {saving ? (
                     <><Loader2 className="h-4 w-4 animate-spin" /> {tp("saving")}</>
@@ -533,6 +535,17 @@ const SitterProfile = () => {
               </TooltipContent>
             )}
           </Tooltip>
+          </div>
+          {motivationBlocks && !saving && (
+            <p
+              id="save-blocked-hint"
+              role="status"
+              aria-live="polite"
+              className="text-xs text-warning-foreground bg-warning/15 border border-warning/30 rounded-md px-3 py-2"
+            >
+              {tp("tooltip_motivation", { count: motivationLength })}
+            </p>
+          )}
           </div>
         </div>
       </TooltipProvider>
