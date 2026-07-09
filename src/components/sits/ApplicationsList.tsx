@@ -583,7 +583,7 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, prope
               <Link to={`/gardiens/${app.sitter_id}`} className="text-base font-semibold text-foreground hover:underline">
                 {sitter?.first_name || "Gardien"}
               </Link>
-              {sitter?.identity_verified && <VerifiedBadge size="sm" showTooltip />}
+              {sitter?.identity_verified && <VerifiedBadge size="sm" />}
               {app.isEmergencySitter && <EmergencyBadge size="sm" showTooltip />}
             </div>
             <div className="flex items-center gap-3 text-sm text-muted-foreground flex-wrap mt-0.5">
