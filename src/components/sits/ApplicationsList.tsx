@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { logger } from "@/lib/logger";
 import { trackEvent } from "@/lib/analytics";
 
@@ -10,16 +10,20 @@ import { Button } from "@/components/ui/button";
 import { toast } from "@/hooks/use-toast";
 import { sendTransactionalEmail } from "@/lib/sendTransactionalEmail";
 import {
-  Star, MapPin, CheckCircle2, XCircle, MessageSquare, Users,
-  Archive, Eye, EyeOff, Calendar, PawPrint, Shield, AlertTriangle,
+  Star, MapPin, CheckCircle2,
   ChevronDown,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import VerifiedBadge from "@/components/profile/VerifiedBadge";
 import EmergencyBadge from "@/components/profile/EmergencyBadge";
+import TrustHaloAvatar from "@/components/sitters/TrustHaloAvatar";
+import OwnerToSitterAffinity from "@/components/matching/OwnerToSitterAffinity";
+import { computeAffinityResultFull, type AffinitySitterInput, type AffinityOwnerInput } from "@/lib/affinityScore";
+import { useViewerOwnerForAffinity } from "@/hooks/useViewerOwnerForAffinity";
 
-import { TooltipProvider } from "@/components/ui/tooltip";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import {
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+} from "@/components/ui/select";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription,
 } from "@/components/ui/dialog";
