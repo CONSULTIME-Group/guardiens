@@ -15,9 +15,9 @@ describe("AffinityBadge", () => {
     expect(el.className).toMatch(/text-success/);
   });
 
-  it("utilise le tone warning entre 40 et 60", () => {
+  it("utilise le tone neutre entre 40 et 60 (pas de signal warning)", () => {
     render(<AffinityBadge result={{ score: 45, matched: [], total: 4 }} />);
     const el = screen.getByText(/45% d'affinité/);
-    expect(el.className).toMatch(/text-warning/);
+    expect(el.className).toMatch(/text-muted-foreground/);
   });
 });
