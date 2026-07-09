@@ -191,7 +191,8 @@ const SearchOwner = () => {
   const handleContact = async (sitterId: string) => {
     if (!user) {
       toast.error("Connectez-vous pour contacter un gardien");
-      navigate("/login");
+      const redirect = `/gardiens/${sitterId}`;
+      navigate(`/login?redirect=${encodeURIComponent(redirect)}`);
       return;
     }
     if (sitterId === user.id) {
