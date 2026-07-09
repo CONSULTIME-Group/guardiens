@@ -510,8 +510,46 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, prope
     ? differenceInDays(parseISO(endDate), parseISO(startDate))
     : null;
 
-  const activeApps = applications.filter(a => !["rejected", "cancelled"].includes(a.status));
+  const rawActive = applications.filter(a => !["rejected", "cancelled"].includes(a.status));
   const declinedApps = applications.filter(a => ["rejected", "cancelled"].includes(a.status));
+
+  // Précalcul du score d'affinité par candidat, pour le tri.
+  const affinityByApp = useMemo(() => {
+    const map = new Map<string, number>();
+    if (!viewerOwner) return map;
+    rawActive.forEach((app: any) => {
+      if (!app.sitterAffinityInput) return;
+      const res = computeAffinityResultFull(viewerOwner as AffinityOwnerInput, app.sitterAffinityInput);
+      if (res?.displayed) map.set(app.id, res.score);
+    });
+    return map;
+  }, [rawActive, viewerOwner]);
+
+  const activeApps = useMemo(() => {
+    const arr = [...rawActive];
+    const isPending = (s: string) => s === "pending" || s === "viewed";
+    arr.sort((a, b) => {
+      // Statut "en attente" en tête, quel que soit le tri secondaire.
+      const pa = isPending(a.status) ? 0 : 1;
+      const pb = isPending(b.status) ? 0 : 1;
+      if (pa !== pb) return pa - pb;
+      if (sortMode === "affinity") {
+        const sa = affinityByApp.get(a.id) ?? -1;
+        const sb = affinityByApp.get(b.id) ?? -1;
+        if (sa !== sb) return sb - sa;
+      } else if (sortMode === "rating") {
+        const ra = a.avgRating ? parseFloat(a.avgRating) : -1;
+        const rb = b.avgRating ? parseFloat(b.avgRating) : -1;
+        if (ra !== rb) return rb - ra;
+      }
+      // recent (défaut secondaire) : plus récentes d'abord
+      const da = new Date(a.created_at ?? 0).getTime();
+      const db = new Date(b.created_at ?? 0).getTime();
+      return db - da;
+    });
+    return arr;
+  }, [rawActive, sortMode, affinityByApp]);
+
 
   if (loading) return <p className="text-sm text-muted-foreground">Chargement des candidatures...</p>;
 
