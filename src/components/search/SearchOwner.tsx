@@ -1306,7 +1306,7 @@ const SearchOwner = () => {
                         )}
                       </div>
 
-                      {/* Affinité (badge compact, masqué si non calculable) */}
+                      {/* Affinité (badge sémantique, masqué si non calculable) */}
                       <div className="mt-1">
                         <OwnerToSitterAffinity
                           sitterProfile={s}
@@ -1314,6 +1314,7 @@ const SearchOwner = () => {
                           targetId={s.user_id}
                           size="sm"
                           showCta={false}
+                          variant="semantic"
                         />
                       </div>
 
@@ -1331,8 +1332,27 @@ const SearchOwner = () => {
                       <p className="text-xs text-muted-foreground mt-1.5 line-clamp-2 min-h-[2rem]">
                         {bio || <span className="opacity-0">.</span>}
                       </p>
+
+                      {/* CTA Contacter, labellisé, cible tactile min 44px */}
+                      <button
+                        type="button"
+                        onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleContact(s.user_id); }}
+                        disabled={contactingId === s.user_id}
+                        aria-label={`Contacter ${firstName}`}
+                        className="mt-2 inline-flex items-center justify-center gap-1.5 min-h-11 w-full rounded-full bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors disabled:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                      >
+                        {contactingId === s.user_id
+                          ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+                          : <MessageCircle className="h-4 w-4" aria-hidden="true" />}
+                        Contacter
+                      </button>
                     </div>
                   </Link>
+                );
+              });
+              })()}
+            </div>
+            </>
                 );
               });
               })()}
