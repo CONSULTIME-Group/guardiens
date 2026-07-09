@@ -55,6 +55,7 @@ const INITIAL: OwnerDashboardData = {
   missionMetrics: { total: 0, completed: 0 },
   sitterBadges: {},
   sitterProfiles: {},
+  sitterAffinityProfiles: {},
   trustedSitterCount: 0,
   propertyType: null,
   propertyEnvironment: null,
