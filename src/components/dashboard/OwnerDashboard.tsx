@@ -703,6 +703,7 @@ const OwnerDashboard = () => {
               recentApps={recentApps}
               sitterProfiles={sitterProfiles}
               sitterBadges={sitterBadges}
+              sitterAffinityProfiles={sitterAffinityProfiles}
               loading={loading}
             />
           )}
