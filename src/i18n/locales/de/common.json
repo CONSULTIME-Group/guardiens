@@ -1334,7 +1334,10 @@
       "skill": "Mindestens 1 Fähigkeit",
       "lifestyle": "Mindestens 1 Lebensstil",
       "radius": "Geografischer Radius definiert",
-      "sitter_gallery_one": "Mindestens 1 Galeriefoto"
+      "sitter_gallery_one": "Mindestens 1 Galeriefoto",
+      "affinity": "Affinitäten ausgefüllt (Interessen, Sprachen, Rhythmus, Ambiente, Wunsch-Sitter)",
+      "affinity_identity": "Ihre Affinitäten (Interessen, Sprachen, Lebensrhythmus)",
+      "affinity_rules": "Ihre Affinitäten mit Sittern (Ambiente des Zuhauses, Wunsch-Sitter)"
     },
     "hints": {
       "tab_identity": "Tab Identität.",
