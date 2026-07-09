@@ -40,8 +40,36 @@ const AdminSettings = () => {
  setLoading(false);
  }
  };
- void fetchStats();
- }, []);
+    void fetchStats();
+  }, []);
+
+  useEffect(() => {
+    supabase
+      .from("feature_flags")
+      .select("enabled")
+      .eq("key", MANDATORY_ONBOARDING_FLAG)
+      .maybeSingle()
+      .then(({ data }) => setMandatoryOnboarding(!!data?.enabled));
+  }, []);
+
+  const toggleMandatoryOnboarding = async (next: boolean) => {
+    setTogglingFlag(true);
+    const previous = mandatoryOnboarding;
+    setMandatoryOnboarding(next);
+    const { error } = await supabase
+      .from("feature_flags")
+      .update({ enabled: next, updated_at: new Date().toISOString() })
+      .eq("key", MANDATORY_ONBOARDING_FLAG);
+    setTogglingFlag(false);
+    if (error) {
+      setMandatoryOnboarding(previous);
+      toast.error("Impossible de mettre à jour le réglage.");
+      return;
+    }
+    invalidateFeatureFlag(MANDATORY_ONBOARDING_FLAG);
+    toast.success(next ? "Étape d'onboarding activée." : "Étape d'onboarding désactivée.");
+  };
+
 
  return (
  <div className="space-y-6">
