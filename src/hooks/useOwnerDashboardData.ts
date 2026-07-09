@@ -5,6 +5,7 @@ import type {
   Pet, SitRow, SitterInfo, AppRow, SmallMission,
   HighlightRow, OnboardingChecks,
 } from "@/components/dashboard/owner/types";
+import type { AffinitySitterInput } from "@/lib/affinityScore";
 
 export interface PendingReview {
   sitId: string;
