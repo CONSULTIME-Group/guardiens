@@ -235,14 +235,19 @@ const OnboardingAffinity = () => {
                 </h2>
 
                 <div className="space-y-2">
-                  <Label>Quels animaux acceptez-vous ?</Label>
-                  <ChipSelect options={SITTER_ANIMAL_TYPES_OPTIONS} selected={animalTypes} onChange={setAnimalTypes} />
+                  <Label id="lbl-animal-types">Quels animaux acceptez-vous ?</Label>
+                  <ChipSelect
+                    options={SITTER_ANIMAL_TYPES_OPTIONS}
+                    selected={animalTypes}
+                    onChange={setAnimalTypes}
+                    ariaLabelledBy="lbl-animal-types"
+                  />
                 </div>
 
                 <div className="space-y-2">
-                  <Label>Votre situation pendant la garde</Label>
+                  <Label htmlFor="work-during-sit">Votre situation pendant la garde</Label>
                   <Select value={workDuringSit} onValueChange={setWorkDuringSit}>
-                    <SelectTrigger className="rounded-lg h-12"><SelectValue placeholder="Choisir" /></SelectTrigger>
+                    <SelectTrigger id="work-during-sit" className="rounded-lg h-12"><SelectValue placeholder="Choisir" /></SelectTrigger>
                     <SelectContent>
                       {WORK_DURING_SIT_OPTIONS.map((o) => (
                         <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>
@@ -252,9 +257,9 @@ const OnboardingAffinity = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <Label>Votre profil de gardien</Label>
+                  <Label htmlFor="sitter-type">Votre profil de gardien</Label>
                   <Select value={sitterType} onValueChange={setSitterType}>
-                    <SelectTrigger className="rounded-lg h-12"><SelectValue placeholder="Choisir" /></SelectTrigger>
+                    <SelectTrigger id="sitter-type" className="rounded-lg h-12"><SelectValue placeholder="Choisir" /></SelectTrigger>
                     <SelectContent>
                       {SITTER_TYPE_OPTIONS.map((t) => (
                         <SelectItem key={t} value={t}>{t}</SelectItem>
