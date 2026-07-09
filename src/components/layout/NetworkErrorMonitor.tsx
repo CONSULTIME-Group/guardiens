@@ -29,7 +29,11 @@ const CRITICAL_ROUTE_PATTERNS: RegExp[] = [
  */
 const IGNORED_URL_PATTERNS: RegExp[] = [
   /google-analytics\.com/,
+  /analytics\.google\.com/,
   /googletagmanager\.com/,
+  /doubleclick\.net/,
+  /facebook\.com\/tr/,
+  /connect\.facebook\.net/,
   /sentry\.io/,
   /\/auth\/v1\/token/,           // login attempts → 400 attendus
   /\/auth\/v1\/recover/,
