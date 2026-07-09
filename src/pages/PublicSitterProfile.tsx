@@ -33,6 +33,7 @@ import PublicExperiences from "@/components/profile/PublicExperiences";
 import TrustScore from "@/components/profile/TrustScore";
 import FavoriteButton from "@/components/shared/FavoriteButton";
 import OwnerToSitterAffinity from "@/components/matching/OwnerToSitterAffinity";
+import AffinityTeaser from "@/components/matching/AffinityTeaser";
 import AlmaFitGardien from "@/components/ai/alma/AlmaFitGardien";
 import { AlmaReciprocityWhisper } from "@/components/ai/alma/wiring/AlmaReciprocityWhisper";
 import { AlmaOwnerActiveSitterWhisper } from "@/components/ai/alma/wiring/AlmaOwnerActiveSitterWhisper";
@@ -1129,6 +1130,16 @@ export default function PublicSitterProfile() {
                     size="md"
                     scope="single"
                     caption="Votre affinité avec ce gardien"
+                  />
+                </div>
+              )}
+
+              {/* Teaser affinité pour visiteurs non connectés */}
+              {activeTab === 'gardien' && !auth.user?.id && sitterProfile && (
+                <div className="self-stretch mt-2">
+                  <AffinityTeaser
+                    role="owner"
+                    targetLabel={profile?.first_name || "ce gardien"}
                   />
                 </div>
               )}

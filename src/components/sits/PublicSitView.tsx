@@ -11,6 +11,9 @@ import VerifiedBadge from "@/components/profile/VerifiedBadge";
 import { sanitizeUserTitle } from "@/lib/sanitizeTitle";
 import ApproximateLocationMap from "@/components/shared/ApproximateLocationMap";
 import SitHero from "@/components/sits/views/tabs/SitHero";
+import AffinitySection from "@/components/matching/AffinitySection";
+import AffinityTeaser from "@/components/matching/AffinityTeaser";
+import { useViewerSitterForAffinity } from "@/hooks/useViewerSitterForAffinity";
 
 interface SitLike {
   slug?: string | null;
@@ -143,6 +146,7 @@ const PublicSitView = ({
   onApply,
 }: Props) => {
   const [openPet, setOpenPet] = useState<PetLike | null>(null);
+  const { sitter: viewerSitter } = useViewerSitterForAffinity();
   const photos: string[] = (property?.photos || []).filter(Boolean);
   const petPhotos = pets
     .filter((p) => !!p.photo_url)
@@ -611,7 +615,31 @@ const PublicSitView = ({
                   Postuler à cette garde
                 </Button>
               )}
+
+              {/* Affinité gardien vers propriétaire (viewer connecté non owner) */}
+              {isAuthenticated && viewerSitter && ownerProfile && (
+                <AffinitySection
+                  sitterProfile={viewerSitter}
+                  ownerProfile={ownerProfile as any}
+                  pets={pets as any}
+                  context="public_sit_detail"
+                  targetId={sit.id}
+                  showCtaForSitter={false}
+                />
+              )}
+
+              {/* Teaser affinité pour visiteurs non connectés */}
+              {!isAuthenticated && (
+                <div className="mt-5">
+                  <AffinityTeaser
+                    role="sitter"
+                    targetLabel="cette annonce"
+                    redirectTo={redirect}
+                  />
+                </div>
+              )}
             </div>
+
 
             {/* Localisation approximative */}
             <div className="bg-card rounded-[2rem] overflow-hidden shadow-sm border border-border">
