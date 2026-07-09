@@ -28,6 +28,7 @@ export interface OwnerDashboardData {
   missionMetrics: { total: number; completed: number };
   sitterBadges: Record<string, { badge_key: string; count: number }[]>;
   sitterProfiles: Record<string, SitterInfo>;
+  sitterAffinityProfiles: Record<string, AffinitySitterInput>;
   trustedSitterCount: number;
   propertyType: string | null;
   propertyEnvironment: string | null;
