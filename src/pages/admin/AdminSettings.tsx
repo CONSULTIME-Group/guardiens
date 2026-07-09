@@ -3,6 +3,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Settings, Globe, Database, ExternalLink, CheckCircle2, AlertCircle, Flag } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { invalidateFeatureFlag } from "@/hooks/useFeatureFlag";
@@ -11,11 +14,32 @@ import { toast } from "sonner";
 const FOUNDER_DATE = "2026-09-30";
 const MANDATORY_ONBOARDING_FLAG = "mandatory_affinity_onboarding";
 
+/** Convertit un ISO UTC en valeur affichable par `<input type="datetime-local">` (heure locale). */
+function toLocalInputValue(iso: string): string {
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return "";
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
+
+/** Convertit une valeur `datetime-local` en ISO UTC pour la base. */
+function fromLocalInputValue(local: string): string | null {
+  if (!local) return null;
+  const d = new Date(local);
+  return Number.isNaN(d.getTime()) ? null : d.toISOString();
+}
+
 const AdminSettings = () => {
   const [stats, setStats] = useState({ totalUsers: 0, totalSits: 0, totalReviews: 0 });
   const [loading, setLoading] = useState(true);
   const [mandatoryOnboarding, setMandatoryOnboarding] = useState<boolean | null>(null);
   const [togglingFlag, setTogglingFlag] = useState(false);
+  // Date de bascule : seuls les comptes créés à partir de cette date sont
+  // soumis au garde-fou obligatoire. Format local `datetime-local` pour l'UI,
+  // converti en ISO à l'écriture. `null` = pas de scoping (aucune redirection).
+  const [appliesSince, setAppliesSince] = useState<string | null>(null);
+  const [appliesSinceDraft, setAppliesSinceDraft] = useState<string>("");
+  const [savingAppliesSince, setSavingAppliesSince] = useState(false);
 
  useEffect(() => {
  const fetchStats = async () => {
@@ -46,10 +70,16 @@ const AdminSettings = () => {
   useEffect(() => {
     supabase
       .from("feature_flags")
-      .select("enabled")
+      .select("enabled, applies_since")
       .eq("key", MANDATORY_ONBOARDING_FLAG)
       .maybeSingle()
-      .then(({ data }) => setMandatoryOnboarding(!!data?.enabled));
+      .then(({ data }) => {
+        const row = data as { enabled?: boolean | null; applies_since?: string | null } | null;
+        setMandatoryOnboarding(!!row?.enabled);
+        const iso = row?.applies_since ?? null;
+        setAppliesSince(iso);
+        setAppliesSinceDraft(iso ? toLocalInputValue(iso) : "");
+      });
   }, []);
 
   const toggleMandatoryOnboarding = async (next: boolean) => {
@@ -68,6 +98,22 @@ const AdminSettings = () => {
     }
     invalidateFeatureFlag(MANDATORY_ONBOARDING_FLAG);
     toast.success(next ? "Étape d'onboarding activée." : "Étape d'onboarding désactivée.");
+  };
+
+  const saveAppliesSince = async (nextIso: string | null) => {
+    setSavingAppliesSince(true);
+    const { error } = await supabase
+      .from("feature_flags")
+      .update({ applies_since: nextIso, updated_at: new Date().toISOString() })
+      .eq("key", MANDATORY_ONBOARDING_FLAG);
+    setSavingAppliesSince(false);
+    if (error) {
+      toast.error("Impossible d'enregistrer la date de bascule.");
+      return;
+    }
+    setAppliesSince(nextIso);
+    invalidateFeatureFlag(MANDATORY_ONBOARDING_FLAG);
+    toast.success("Date de bascule enregistrée.");
   };
 
 
@@ -233,6 +279,49 @@ const AdminSettings = () => {
               onCheckedChange={toggleMandatoryOnboarding}
               aria-label="Activer l'étape d'onboarding obligatoire"
             />
+          </div>
+          <Separator />
+          <div className="space-y-2">
+            <Label htmlFor="applies-since" className="text-sm font-medium">
+              Date de bascule (applies_since)
+            </Label>
+            <p className="text-xs text-muted-foreground">
+              Seuls les comptes créés à partir de cette date sont soumis au garde-fou. Laisser vide pour désactiver le scoping (aucune redirection, même si le réglage est actif). Reculer la date dans le passé pour élargir aux anciens.
+            </p>
+            <div className="flex flex-wrap items-center gap-2">
+              <Input
+                id="applies-since"
+                type="datetime-local"
+                value={appliesSinceDraft}
+                onChange={(e) => setAppliesSinceDraft(e.target.value)}
+                className="max-w-xs"
+                disabled={savingAppliesSince}
+              />
+              <Button
+                size="sm"
+                variant="outline"
+                disabled={savingAppliesSince}
+                onClick={() => saveAppliesSince(fromLocalInputValue(appliesSinceDraft))}
+              >
+                Enregistrer
+              </Button>
+              {appliesSince && (
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  disabled={savingAppliesSince}
+                  onClick={() => {
+                    setAppliesSinceDraft("");
+                    void saveAppliesSince(null);
+                  }}
+                >
+                  Effacer
+                </Button>
+              )}
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Valeur actuelle : {appliesSince ? new Date(appliesSince).toLocaleString("fr-FR") : "aucune (scoping désactivé)"}
+            </p>
           </div>
         </CardContent>
       </Card>

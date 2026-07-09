@@ -5,6 +5,10 @@
  * du profil. L'étape est requise si au moins un jeu de champs du rôle
  * concerné est incomplet. Rôle "both" = les deux jeux doivent être remplis.
  *
+ * Renvoie aussi la date d'inscription (`profileCreatedAt`) pour permettre au
+ * garde-fou global de restreindre la redirection aux nouveaux inscrits
+ * (comptes créés après la date de bascule `applies_since` du flag).
+ *
  * Utilisé par le garde-fou global (`OnboardingGate`) et par la page
  * `/onboarding/affinity` pour savoir quels blocs afficher.
  */
@@ -19,12 +23,14 @@ export interface AffinityOnboardingStatus {
   needsOwner: boolean;
   /** Doit-on afficher l'étape ? true si au moins un des deux jeux est incomplet. */
   needsOnboarding: boolean;
+  /** Date d'inscription du compte (ISO), pour scoper le garde aux nouveaux. */
+  profileCreatedAt: string | null;
   /** Rechargement à la volée (après enregistrement). */
   refresh: () => Promise<void>;
 }
 
 async function loadStatus(userId: string, role: string | null) {
-  const [sitterRes, ownerRes] = await Promise.all([
+  const [sitterRes, ownerRes, profileRes] = await Promise.all([
     supabase
       .from("sitter_profiles")
       .select("animal_types, work_during_sit, sitter_type")
@@ -35,10 +41,16 @@ async function loadStatus(userId: string, role: string | null) {
       .select("presence_expected, preferred_sitter_types")
       .eq("user_id", userId)
       .maybeSingle(),
+    supabase
+      .from("profiles")
+      .select("created_at")
+      .eq("id", userId)
+      .maybeSingle(),
   ]);
 
   const sitter = sitterRes.data as { animal_types?: string[] | null; work_during_sit?: string | null; sitter_type?: string | null } | null;
   const owner = ownerRes.data as { presence_expected?: string | null; preferred_sitter_types?: string[] | null } | null;
+  const profile = profileRes.data as { created_at?: string | null } | null;
 
   const sitterComplete =
     !!sitter &&
@@ -57,17 +69,23 @@ async function loadStatus(userId: string, role: string | null) {
   return {
     needsSitter: isSitter && !sitterComplete,
     needsOwner: isOwner && !ownerComplete,
+    profileCreatedAt: profile?.created_at ?? null,
   };
 }
 
 export function useAffinityOnboardingStatus(): AffinityOnboardingStatus {
   const { user } = useAuth();
   const role = (user?.role ?? null) as "owner" | "sitter" | "both" | null;
-  const [state, setState] = useState({ loading: !!user, needsSitter: false, needsOwner: false });
+  const [state, setState] = useState({
+    loading: !!user,
+    needsSitter: false,
+    needsOwner: false,
+    profileCreatedAt: null as string | null,
+  });
 
   const refresh = async () => {
     if (!user) {
-      setState({ loading: false, needsSitter: false, needsOwner: false });
+      setState({ loading: false, needsSitter: false, needsOwner: false, profileCreatedAt: null });
       return;
     }
     const s = await loadStatus(user.id, role);
@@ -77,13 +95,13 @@ export function useAffinityOnboardingStatus(): AffinityOnboardingStatus {
   useEffect(() => {
     let cancelled = false;
     if (!user) {
-      setState({ loading: false, needsSitter: false, needsOwner: false });
+      setState({ loading: false, needsSitter: false, needsOwner: false, profileCreatedAt: null });
       return;
     }
     setState((prev) => ({ ...prev, loading: true }));
     loadStatus(user.id, role)
       .then((s) => { if (!cancelled) setState({ loading: false, ...s }); })
-      .catch(() => { if (!cancelled) setState({ loading: false, needsSitter: false, needsOwner: false }); });
+      .catch(() => { if (!cancelled) setState({ loading: false, needsSitter: false, needsOwner: false, profileCreatedAt: null }); });
     return () => { cancelled = true; };
   }, [user, role]);
 
