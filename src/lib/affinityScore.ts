@@ -13,14 +13,15 @@
  * Critères évalués (pondération différenciée) :
  *  1. Animaux (poids 2) : intersection pets.species ↔ sitter.animal_types
  *  2. Présence ↔ travail pendant la garde (poids 2)
- *  3. Rythme de vie (poids 1) : exact = 1, adjacent = 0.5
- *  4. Langues (poids 1) : au moins 1 commune
- *  5. Intérêts (poids 1) : ≥2 communs = 1, ≥1 = 0.5
- *  6. Profil idéal (poids 1) : sitter matche un des owner.preferred_sitter_types
- *  7. Ambiance foyer (poids 1) : ↔ intérêts/rythme du sitter
+ *  3. Profil idéal (poids 1) : sitter matche un des owner.preferred_sitter_types
+ *  4. Rythme de vie (poids 0.5) : exact = 1, adjacent = 0.5
+ *  5. Langues (poids 0.5) : au moins 1 commune
+ *  6. Intérêts (poids 0.5) : ≥2 communs = 1, ≥1 = 0.5
+ *  7. Ambiance foyer (poids 0.5) : ↔ intérêts/rythme du sitter
  *
- * Rationnel : animaux et présence sont des critères "durs" (incompatibilité = échec
- * de garde). Langues/intérêts/ambiance sont des "nice-to-have" qui affinent.
+ * Rationnel : animaux, présence et profil idéal sont des critères "durs".
+ * Rythme, langues, intérêts et ambiance sont des "soft" (peu renseignés en base),
+ * pondérés à 0.5 pour ne pas écraser le score des profils qui matchent l'essentiel.
  */
 
 export interface AffinityOwnerInput {
@@ -67,11 +68,11 @@ const MIN_DISPLAY_SCORE = 40;
 const W = {
   animals: 2,
   presence: 2,
-  pace: 1,
-  languages: 1,
-  interests: 1,
   ideal: 1,
-  ambiance: 1,
+  pace: 0.5,
+  languages: 0.5,
+  interests: 0.5,
+  ambiance: 0.5,
 } as const;
 
 /**
@@ -206,7 +207,7 @@ export function computeAffinityResultFull(
     return { score: 0, matched: [], total: 0, displayed: false, hiddenReason: "disqualified" };
   }
 
-  // Dénominateur FIXE : poids max théorique de TOUS les critères (9).
+  // Dénominateur FIXE : poids max théorique de TOUS les critères (7).
   // Les critères non renseignés des deux côtés = 0 point, donc un profil incomplet
   // tombe naturellement à un score plus bas. Évite le biais "80% partout" lié
   // à un dénominateur dynamique sur 3-4 critères seulement.

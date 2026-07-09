@@ -14,7 +14,7 @@ interface Props {
 
 const OwnerAffinityBanner = ({
   context = "search_owner_listing",
-  editHref = "/owner-profile",
+  editHref = "/owner-profile?section=rules",
   className,
 }: Props) => {
   const { owner, loading } = useViewerOwnerForAffinity();

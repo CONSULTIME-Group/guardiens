@@ -14,17 +14,12 @@ import { useImpressionOnce } from "@/hooks/useImpressionOnce";
 
 interface SitterProfileLike {
   animal_types?: string[] | null;
-  life_pace?: string | null;
-  languages?: string[] | null;
-  interests?: string[] | null;
+  work_during_sit?: string | null;
+  sitter_type?: string | null;
 }
 
 interface OwnerProfileLike {
-  life_pace?: string | null;
-  languages?: string[] | null;
-  interests?: string[] | null;
   presence_expected?: string | null;
-  home_ambiance?: string[] | null;
   preferred_sitter_types?: string[] | null;
 }
 
@@ -49,18 +44,13 @@ type Props =
 
 
 const SITTER_LABELS: Record<string, string> = {
-  animal_types: "vos animaux",
-  life_pace: "votre rythme de vie",
-  languages: "vos langues",
-  interests: "vos centres d'intérêt",
+  animal_types: "les animaux que vous acceptez",
+  work_during_sit: "votre situation pendant la garde",
+  sitter_type: "votre profil de gardien",
 };
 
 const OWNER_LABELS: Record<string, string> = {
-  life_pace: "votre rythme de vie",
-  languages: "vos langues",
-  interests: "vos centres d'intérêt",
   presence_expected: "votre présence attendue",
-  home_ambiance: "l'ambiance du foyer",
   preferred_sitter_types: "votre gardien idéal",
 };
 
@@ -74,16 +64,11 @@ const AffinityMissingCTA = (props: Props) => {
     if (side === "sitter") {
       const p = profile as SitterProfileLike;
       if (!p.animal_types?.length) out.push("animal_types");
-      if (!p.life_pace) out.push("life_pace");
-      if (!p.languages?.length) out.push("languages");
-      if (!p.interests?.length) out.push("interests");
+      if (!p.work_during_sit) out.push("work_during_sit");
+      if (!p.sitter_type) out.push("sitter_type");
     } else {
       const p = profile as OwnerProfileLike;
-      if (!p.life_pace) out.push("life_pace");
-      if (!p.languages?.length) out.push("languages");
-      if (!p.interests?.length) out.push("interests");
       if (!p.presence_expected) out.push("presence_expected");
-      if (!p.home_ambiance?.length) out.push("home_ambiance");
       if (!p.preferred_sitter_types?.length) out.push("preferred_sitter_types");
     }
     return out;
@@ -102,7 +87,8 @@ const AffinityMissingCTA = (props: Props) => {
   if (missing.length === 0) return null;
 
   const labels = side === "sitter" ? SITTER_LABELS : OWNER_LABELS;
-  const href = editHref ?? (side === "sitter" ? "/profile" : "/owner-profile");
+  const href =
+    editHref ?? (side === "sitter" ? "/profile" : "/owner-profile?section=rules");
   // On limite à 3 items pour ne pas surcharger le message.
   const shown = missing.slice(0, 3).map((m) => labels[m]).filter(Boolean);
   const list =
