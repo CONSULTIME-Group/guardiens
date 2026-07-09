@@ -770,6 +770,21 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, prope
         <p className="text-sm text-muted-foreground italic">Aucune candidature pour le moment.</p>
       ) : (
         <>
+          {activeApps.length > 1 && (
+            <div className="flex items-center justify-end gap-2 mb-3">
+              <label htmlFor="app-sort" className="text-xs text-muted-foreground">Trier par</label>
+              <Select value={sortMode} onValueChange={(v) => setSortMode(v as any)}>
+                <SelectTrigger id="app-sort" className="h-8 w-[180px] text-sm">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="affinity">Affinité</SelectItem>
+                  <SelectItem value="rating">Note</SelectItem>
+                  <SelectItem value="recent">Plus récentes</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          )}
           {activeApps.map(renderCard)}
 
           {declinedApps.length > 0 && (
