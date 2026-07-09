@@ -942,8 +942,10 @@ const CreateSit = () => {
                 <Label htmlFor="start-date" className="text-xs text-muted-foreground mb-1 block">Début</Label>
                 {/* Native date input, tappable to open sheet on mobile */}
                 <button
+                  id="start-date"
                   type="button"
                   onClick={() => setStartSheetOpen(true)}
+                  aria-label={startDate ? `Date de début : ${new Date(startDate + "T12:00:00").toLocaleDateString("fr-FR", { day: "2-digit", month: "long", year: "numeric" })}` : "Date de début, non renseignée"}
                   className={cn(
                     "w-full h-12 text-base rounded-md border px-3 text-left flex items-center justify-between transition-colors",
                     !startDate ? "text-muted-foreground border-input" : "text-foreground border-input",
@@ -952,7 +954,7 @@ const CreateSit = () => {
                   onBlur={() => touch("startDate")}
                 >
                   <span>{startDate ? new Date(startDate + "T12:00:00").toLocaleDateString("fr-FR", { day: "2-digit", month: "short", year: "numeric" }) : "JJ/MM/AAAA"}</span>
-                  <Calendar className="h-4 w-4 text-muted-foreground" />
+                  <Calendar className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
                 </button>
               </div>
               <div>
