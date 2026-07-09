@@ -615,7 +615,31 @@ const PublicSitView = ({
                   Postuler à cette garde
                 </Button>
               )}
+
+              {/* Affinité gardien vers propriétaire (viewer connecté non owner) */}
+              {isAuthenticated && viewerSitter && ownerProfile && (
+                <AffinitySection
+                  sitterProfile={viewerSitter}
+                  ownerProfile={ownerProfile as any}
+                  pets={pets as any}
+                  context="public_sit_detail"
+                  targetId={sit.id}
+                  showCtaForSitter={false}
+                />
+              )}
+
+              {/* Teaser affinité pour visiteurs non connectés */}
+              {!isAuthenticated && (
+                <div className="mt-5">
+                  <AffinityTeaser
+                    role="sitter"
+                    targetLabel="cette annonce"
+                    redirectTo={redirect}
+                  />
+                </div>
+              )}
             </div>
+
 
             {/* Localisation approximative */}
             <div className="bg-card rounded-[2rem] overflow-hidden shadow-sm border border-border">
