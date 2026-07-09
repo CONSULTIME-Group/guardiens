@@ -14,6 +14,7 @@ import ProsMap from "@/components/pros/ProsMap";
 import ProVerifiedBadge from "@/components/pros/ProVerifiedBadge";
 import { useAuth } from "@/contexts/AuthContext";
 import PublicHeader from "@/components/layout/PublicHeader";
+import PublicFooter from "@/components/layout/PublicFooter";
 
 type ProRow = {
   id: string;
@@ -309,6 +310,7 @@ export default function ProsListing() {
           </div>
         </section>
       </main>
+      <PublicFooter />
     </div>
   );
 }
