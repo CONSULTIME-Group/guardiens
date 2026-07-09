@@ -795,7 +795,7 @@ const EntraideHub = () => {
                         return (
                           <li key={m.id}>
                             <Link
-                              to={`/petites-missions/${m.id}`}
+                              to={`/petites-missions/${m.slug || m.id}`}
                               aria-label={cardAria}
                               className="flex gap-4 p-4 rounded-xl bg-card border border-border hover:border-primary/40 hover:shadow-sm transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
                             >
