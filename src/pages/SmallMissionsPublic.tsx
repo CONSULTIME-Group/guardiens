@@ -189,7 +189,7 @@ const SmallMissionsPublic = () => {
                 return (
                   <li key={m.id}>
                     <Link
-                      to={`/petites-missions/${m.id}`}
+                      to={`/petites-missions/${m.slug || m.id}`}
                       className="flex gap-4 p-4 rounded-xl bg-card border border-border hover:bg-accent/50 transition-colors"
                     >
                       {hasPhoto && (
