@@ -1239,20 +1239,9 @@ const SearchOwner = () => {
                     aria-label={`Voir le profil de ${firstName}`}
                     className="group relative bg-card rounded-xl overflow-hidden border border-border hover:shadow-md hover:-translate-y-0.5 hover:border-primary/40 transition-all flex flex-col h-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                   >
-                    {/* Quick actions, favori + contacter */}
-                    <div className="absolute top-2 right-2 z-10 flex items-center gap-1.5">
+                    {/* Favori (secondaire), en overlay */}
+                    <div className="absolute top-2 right-2 z-10">
                       <FavoriteButton targetType="sitter" targetId={s.user_id} />
-                      <button
-                        type="button"
-                        onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleContact(s.user_id); }}
-                        disabled={contactingId === s.user_id}
-                        aria-label={`Contacter ${firstName}`}
-                        className="p-1.5 rounded-full bg-background/80 text-muted-foreground hover:bg-primary hover:text-primary-foreground transition-all hover:scale-110 disabled:opacity-60"
-                      >
-                        {contactingId === s.user_id
-                          ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
-                          : <MessageCircle className="h-4 w-4" aria-hidden="true" />}
-                      </button>
                     </div>
 
                     {/* Photo, carré, cadrage haut pour ne pas couper les visages */}
