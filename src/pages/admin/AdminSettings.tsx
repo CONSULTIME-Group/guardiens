@@ -280,6 +280,49 @@ const AdminSettings = () => {
               aria-label="Activer l'étape d'onboarding obligatoire"
             />
           </div>
+          <Separator />
+          <div className="space-y-2">
+            <Label htmlFor="applies-since" className="text-sm font-medium">
+              Date de bascule (applies_since)
+            </Label>
+            <p className="text-xs text-muted-foreground">
+              Seuls les comptes créés à partir de cette date sont soumis au garde-fou. Laisser vide pour désactiver le scoping (aucune redirection, même si le réglage est actif). Reculer la date dans le passé pour élargir aux anciens.
+            </p>
+            <div className="flex flex-wrap items-center gap-2">
+              <Input
+                id="applies-since"
+                type="datetime-local"
+                value={appliesSinceDraft}
+                onChange={(e) => setAppliesSinceDraft(e.target.value)}
+                className="max-w-xs"
+                disabled={savingAppliesSince}
+              />
+              <Button
+                size="sm"
+                variant="outline"
+                disabled={savingAppliesSince}
+                onClick={() => saveAppliesSince(fromLocalInputValue(appliesSinceDraft))}
+              >
+                Enregistrer
+              </Button>
+              {appliesSince && (
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  disabled={savingAppliesSince}
+                  onClick={() => {
+                    setAppliesSinceDraft("");
+                    void saveAppliesSince(null);
+                  }}
+                >
+                  Effacer
+                </Button>
+              )}
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Valeur actuelle : {appliesSince ? new Date(appliesSince).toLocaleString("fr-FR") : "aucune (scoping désactivé)"}
+            </p>
+          </div>
         </CardContent>
       </Card>
 
