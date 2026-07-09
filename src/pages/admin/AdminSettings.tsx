@@ -19,6 +19,12 @@ const AdminSettings = () => {
   const [loading, setLoading] = useState(true);
   const [mandatoryOnboarding, setMandatoryOnboarding] = useState<boolean | null>(null);
   const [togglingFlag, setTogglingFlag] = useState(false);
+  // Date de bascule : seuls les comptes créés à partir de cette date sont
+  // soumis au garde-fou obligatoire. Format local `datetime-local` pour l'UI,
+  // converti en ISO à l'écriture. `null` = pas de scoping (aucune redirection).
+  const [appliesSince, setAppliesSince] = useState<string | null>(null);
+  const [appliesSinceDraft, setAppliesSinceDraft] = useState<string>("");
+  const [savingAppliesSince, setSavingAppliesSince] = useState(false);
 
  useEffect(() => {
  const fetchStats = async () => {
@@ -49,10 +55,16 @@ const AdminSettings = () => {
   useEffect(() => {
     supabase
       .from("feature_flags")
-      .select("enabled")
+      .select("enabled, applies_since")
       .eq("key", MANDATORY_ONBOARDING_FLAG)
       .maybeSingle()
-      .then(({ data }) => setMandatoryOnboarding(!!data?.enabled));
+      .then(({ data }) => {
+        const row = data as { enabled?: boolean | null; applies_since?: string | null } | null;
+        setMandatoryOnboarding(!!row?.enabled);
+        const iso = row?.applies_since ?? null;
+        setAppliesSince(iso);
+        setAppliesSinceDraft(iso ? toLocalInputValue(iso) : "");
+      });
   }, []);
 
   const toggleMandatoryOnboarding = async (next: boolean) => {
@@ -71,6 +83,22 @@ const AdminSettings = () => {
     }
     invalidateFeatureFlag(MANDATORY_ONBOARDING_FLAG);
     toast.success(next ? "Étape d'onboarding activée." : "Étape d'onboarding désactivée.");
+  };
+
+  const saveAppliesSince = async (nextIso: string | null) => {
+    setSavingAppliesSince(true);
+    const { error } = await supabase
+      .from("feature_flags")
+      .update({ applies_since: nextIso, updated_at: new Date().toISOString() })
+      .eq("key", MANDATORY_ONBOARDING_FLAG);
+    setSavingAppliesSince(false);
+    if (error) {
+      toast.error("Impossible d'enregistrer la date de bascule.");
+      return;
+    }
+    setAppliesSince(nextIso);
+    invalidateFeatureFlag(MANDATORY_ONBOARDING_FLAG);
+    toast.success("Date de bascule enregistrée.");
   };
 
 
