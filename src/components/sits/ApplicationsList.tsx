@@ -666,12 +666,14 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, prope
             >
               Accepter
             </button>
-            <button
+            <Button
+              variant="ghost"
+              size="sm"
               onClick={() => setDeclineApp(app)}
-              className="text-xs text-muted-foreground hover:text-destructive transition-colors underline-offset-2 hover:underline ml-auto"
+              className="text-muted-foreground hover:text-destructive ml-auto"
             >
               Décliner
-            </button>
+            </Button>
           </div>
         )}
 
@@ -690,12 +692,14 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, prope
             >
               Accepter
             </button>
-            <button
+            <Button
+              variant="ghost"
+              size="sm"
               onClick={() => setDeclineApp(app)}
-              className="text-xs text-muted-foreground hover:text-destructive transition-colors underline-offset-2 hover:underline ml-auto"
+              className="text-muted-foreground hover:text-destructive ml-auto"
             >
               Décliner
-            </button>
+            </Button>
           </div>
         )}
 
