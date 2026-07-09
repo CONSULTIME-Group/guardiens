@@ -19,6 +19,8 @@ project_id = "erhccyqevdyevpyctsjj"
     verify_jwt = true
   [functions.purge-deleted-accounts]
     verify_jwt = true
+  [functions.self-delete-account]
+    verify_jwt = true
   [functions.og-profile]
     verify_jwt = false
   [functions.profile-jsonld]
