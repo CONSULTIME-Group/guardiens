@@ -5,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
 import { format } from "date-fns";
-import { fr } from "date-fns/locale";
+import { fr, enUS, es, it, de } from "date-fns/locale";
 import fallbackMarrakech from "@/assets/fallback-marrakech.webp";
 
 
@@ -30,8 +30,10 @@ interface LiveSit {
   property_type: string | null;
 }
 
-const formatDateShort = (d: string | null) =>
-  d ? format(new Date(d), "d MMM", { locale: fr }) : "";
+type Locale = typeof fr;
+const LOCALE_MAP: Record<string, Locale> = { fr, en: enUS, es, it, de };
+const formatDateShort = (d: string | null, locale: Locale) =>
+  d ? format(new Date(d), "d MMM", { locale }) : "";
 
 const initials = (name: string | null) =>
   name ? name.trim().charAt(0).toUpperCase() : "G";
