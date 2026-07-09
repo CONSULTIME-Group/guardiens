@@ -6,7 +6,7 @@
   },
   "nav": {
     "listings": "Annunci in corso",
-    "small_missions": "Dare una mano",
+    "small_missions": "Aiuto reciproco",
     "pros": "Professionisti per animali",
     "guides": "Guide locali",
     "pricing": "Tariffe",
@@ -35,7 +35,7 @@
       "about": "A proposito",
       "contact": "Contatti",
       "register": "Iscrizione",
-      "small_missions": "Dare una mano",
+      "small_missions": "Aiuto reciproco",
       "emergency_sitter": "Custode d'emergenza",
       "pet_pros": "Professionisti per animali"
     },

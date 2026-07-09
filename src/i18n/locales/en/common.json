@@ -6,7 +6,7 @@
   },
   "nav": {
     "listings": "Current listings",
-    "small_missions": "Helping hands",
+    "small_missions": "Community help",
     "pros": "Pet professionals",
     "guides": "Local guides",
     "pricing": "Pricing",
@@ -35,7 +35,7 @@
       "about": "About",
       "contact": "Contact",
       "register": "Registration",
-      "small_missions": "Helping hands",
+      "small_missions": "Community help",
       "emergency_sitter": "Emergency caretaker / pet & home sitter",
       "pet_pros": "Pet professionals"
     },

@@ -6,7 +6,7 @@
   },
   "nav": {
     "listings": "Annonces en cours",
-    "small_missions": "Coups de main",
+    "small_missions": "Entraide",
     "pros": "Pros animaliers",
     "guides": "Guides locaux",
     "pricing": "Tarifs",
@@ -35,7 +35,7 @@
       "about": "À propos",
       "contact": "Contact",
       "register": "Inscription",
-      "small_missions": "Coups de main",
+      "small_missions": "Entraide",
       "emergency_sitter": "Gardien d'urgence",
       "pet_pros": "Pros animaliers"
     },
