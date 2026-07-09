@@ -304,27 +304,28 @@ const SmallMissionDetail = () => {
   useEffect(() => { load(); }, [load]);
 
   // Compteur de vues : 1 fois par mission par session (sessionStorage)
+  const missionUuid: string | undefined = mission?.id;
   useEffect(() => {
-    if (!id || id.startsWith("demo-")) return;
+    if (!missionUuid) return;
     try {
-      const key = `mission_viewed_${id}`;
+      const key = `mission_viewed_${missionUuid}`;
       if (sessionStorage.getItem(key)) return;
       sessionStorage.setItem(key, "1");
       // .then() est indispensable : le builder supabase-js v2 est lazy,
       // sans souscription la requête HTTP n'est jamais envoyée.
-      void supabase.rpc("increment_small_mission_view" as any, { _mission_id: id }).then(() => {}, () => {});
+      void supabase.rpc("increment_small_mission_view" as any, { _mission_id: missionUuid }).then(() => {}, () => {});
     } catch { /* silencieux */ }
-  }, [id]);
+  }, [missionUuid]);
 
   // Realtime : l'auteur voit immédiatement les nouvelles propositions et changements de statut
   useEffect(() => {
-    if (!id) return;
+    if (!missionUuid) return;
     const channel = supabase
-      .channel(`mission-detail-${id}`)
-      .on("postgres_changes", { event: "*", schema: "public", table: "small_mission_responses", filter: `mission_id=eq.${id}` }, () => { load(); })
+      .channel(`mission-detail-${missionUuid}`)
+      .on("postgres_changes", { event: "*", schema: "public", table: "small_mission_responses", filter: `mission_id=eq.${missionUuid}` }, () => { load(); })
       .subscribe();
     return () => { supabase.removeChannel(channel); };
-  }, [id, load]);
+  }, [missionUuid, load]);
 
   const MIN_MESSAGE_LEN = 10;
   const MAX_MESSAGE_LEN = 500;
