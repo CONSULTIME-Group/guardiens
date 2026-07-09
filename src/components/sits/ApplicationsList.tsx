@@ -560,25 +560,33 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, prope
 
     return (
       <div key={app.id} className="bg-card border border-border rounded-2xl p-5 mb-4">
-        {/* LINE 1, Identity */}
-        <div className="flex items-center gap-3">
-          <Link to={`/gardiens/${app.sitter_id}`} className="shrink-0">
-            {sitter?.avatar_url ? (
-              <img src={sitter.avatar_url} alt={sitter.first_name} className="w-12 h-12 rounded-full object-cover border border-border" />
-            ) : (
-              <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center text-primary font-medium text-lg">
-                {sitter?.first_name?.charAt(0) || "?"}
-              </div>
-            )}
+        {/* Identité + signaux de confiance */}
+        <div className="flex items-start gap-3">
+          <Link to={`/gardiens/${app.sitter_id}`} className="shrink-0" aria-label={`Voir le profil de ${sitter?.first_name || "ce gardien"}`}>
+            <TrustHaloAvatar
+              size="h-12 w-12"
+              verified={sitter?.identity_verified}
+              avgRating={app.avgRating ? parseFloat(app.avgRating) : null}
+              sitsCount={completedSits}
+            >
+              {sitter?.avatar_url ? (
+                <img src={sitter.avatar_url} alt={`Photo de ${sitter.first_name || "gardien"}`} className="w-full h-full object-cover" />
+              ) : (
+                <div className="w-full h-full rounded-full bg-primary/10 flex items-center justify-center text-primary font-medium text-lg">
+                  {sitter?.first_name?.charAt(0) || "?"}
+                </div>
+              )}
+            </TrustHaloAvatar>
           </Link>
           <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-wrap">
               <Link to={`/gardiens/${app.sitter_id}`} className="text-base font-semibold text-foreground hover:underline">
                 {sitter?.first_name || "Gardien"}
               </Link>
-              
+              {sitter?.identity_verified && <VerifiedBadge size="sm" showTooltip />}
+              {app.isEmergencySitter && <EmergencyBadge size="sm" showTooltip />}
             </div>
-            <div className="flex items-center gap-3 text-sm text-muted-foreground flex-wrap">
+            <div className="flex items-center gap-3 text-sm text-muted-foreground flex-wrap mt-0.5">
               {sitter?.city && (
                 <span className="inline-flex items-center gap-1">
                   <MapPin className="h-3 w-3" />
@@ -586,24 +594,47 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, prope
                 </span>
               )}
               <span>{completedSits} garde{completedSits !== 1 ? "s" : ""} sur Guardiens</span>
+              {app.avgRating ? (
+                <span className="inline-flex items-center gap-1 text-primary">
+                  <Star className="h-3 w-3 fill-current" />
+                  {app.avgRating}
+                  <span className="text-muted-foreground">({app.reviewCount} avis)</span>
+                </span>
+              ) : (
+                <span className="italic">Aucun avis</span>
+              )}
+              {app.badgeCounts && app.badgeCounts.length > 0 && (
+                <span>
+                  {app.badgeCounts.reduce((n: number, b: any) => n + b.count, 0)} écusson{app.badgeCounts.reduce((n: number, b: any) => n + b.count, 0) > 1 ? "s" : ""}
+                </span>
+              )}
             </div>
+            {app.sitterAffinityInput && (
+              <div className="mt-2">
+                <OwnerToSitterAffinity
+                  sitterProfile={app.sitterAffinityInput}
+                  context="owner_applications_list"
+                  targetId={app.sitter_id}
+                  size="sm"
+                  showCta={false}
+                  scope="list"
+                />
+              </div>
+            )}
           </div>
           <span className={`px-3 py-1 rounded-full text-xs font-medium shrink-0 ${status.className}`}>
             {status.label}
           </span>
         </div>
 
-        {/* LINE 2, Badges */}
-        {/* Badges, migration en cours */}
-
-        {/* LINE 3, Message */}
+        {/* Message du candidat */}
         {app.message && (
           <div className="bg-muted/50 rounded-xl p-3 text-sm text-foreground/80 my-3 italic">
             {app.message}
           </div>
         )}
 
-        {/* LINE 4, CTAs */}
+        {/* CTAs */}
         {(app.status === "pending" || app.status === "viewed") && (
           <div className="flex items-center gap-2 mt-4 flex-wrap">
             <Link
