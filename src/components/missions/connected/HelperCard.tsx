@@ -27,6 +27,28 @@ const HelperCard = ({ helper: h, onPropose, onViewProfile, matchesMyNeed = false
     seen.add(k);
     return true;
   });
+
+  // Compétences concrètes prioritaires (expertise animale) puis courantes.
+  const specialAnimalRaw: string[] = (h.special_animal_skills as string[]) || [];
+  const compsRaw: string[] = (h.competences as string[]) || [];
+  const concreteSeen = new Set<string>();
+  const specialConcrete = specialAnimalRaw.filter((s) => {
+    const k = (s || "").trim().toLowerCase();
+    if (!k || concreteSeen.has(k)) return false;
+    concreteSeen.add(k);
+    return true;
+  });
+  const commonConcrete = compsRaw.filter((s) => {
+    const k = (s || "").trim().toLowerCase();
+    if (!k || concreteSeen.has(k)) return false;
+    concreteSeen.add(k);
+    return true;
+  });
+  const CONCRETE_MAX = 4;
+  const concreteVisible = [...specialConcrete, ...commonConcrete].slice(0, CONCRETE_MAX);
+  const concreteTotal = specialConcrete.length + commonConcrete.length;
+  const concreteExtra = concreteTotal - concreteVisible.length;
+  const hasConcrete = concreteVisible.length > 0;
   const bioTeaser = h.bio?.trim() || null;
   const memberName = h.first_name || tp("helper_card.default_member");
   const contactName = h.first_name || tp("helper_card.this_member");
