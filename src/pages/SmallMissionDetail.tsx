@@ -301,7 +301,9 @@ const SmallMissionDetail = () => {
       const key = `mission_viewed_${id}`;
       if (sessionStorage.getItem(key)) return;
       sessionStorage.setItem(key, "1");
-      supabase.rpc("increment_small_mission_view" as any, { _mission_id: id });
+      // .then() est indispensable : le builder supabase-js v2 est lazy,
+      // sans souscription la requête HTTP n'est jamais envoyée.
+      void supabase.rpc("increment_small_mission_view" as any, { _mission_id: id }).then(() => {}, () => {});
     } catch { /* silencieux */ }
   }, [id]);
 
