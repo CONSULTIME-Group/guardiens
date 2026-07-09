@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { logger } from "@/lib/logger";
 import { trackEvent } from "@/lib/analytics";
 
@@ -10,16 +10,20 @@ import { Button } from "@/components/ui/button";
 import { toast } from "@/hooks/use-toast";
 import { sendTransactionalEmail } from "@/lib/sendTransactionalEmail";
 import {
-  Star, MapPin, CheckCircle2, XCircle, MessageSquare, Users,
-  Archive, Eye, EyeOff, Calendar, PawPrint, Shield, AlertTriangle,
+  Star, MapPin, CheckCircle2,
   ChevronDown,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import VerifiedBadge from "@/components/profile/VerifiedBadge";
 import EmergencyBadge from "@/components/profile/EmergencyBadge";
+import TrustHaloAvatar from "@/components/sitters/TrustHaloAvatar";
+import OwnerToSitterAffinity from "@/components/matching/OwnerToSitterAffinity";
+import { computeAffinityResultFull, type AffinitySitterInput, type AffinityOwnerInput } from "@/lib/affinityScore";
+import { useViewerOwnerForAffinity } from "@/hooks/useViewerOwnerForAffinity";
 
-import { TooltipProvider } from "@/components/ui/tooltip";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import {
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+} from "@/components/ui/select";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription,
 } from "@/components/ui/dialog";
@@ -52,6 +56,7 @@ const statusOrder: Record<string, number> = {
 
 const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, propertyId, sitStatus }: ApplicationsListProps) => {
   const { user } = useAuth();
+  const { owner: viewerOwner } = useViewerOwnerForAffinity();
   const [applications, setApplications] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [confirmApp, setConfirmApp] = useState<any>(null);
@@ -59,6 +64,7 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, prope
   const [declineMessage, setDeclineMessage] = useState("");
   const [declineCustom, setDeclineCustom] = useState(false);
   const [declinedOpen, setDeclinedOpen] = useState(false);
+  const [sortMode, setSortMode] = useState<"affinity" | "rating" | "recent">("affinity");
   const navigate = useNavigate();
   const [showAccord, setShowAccord] = useState(false);
   const [accordData, setAccordData] = useState<any>(null);
@@ -75,36 +81,88 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, prope
       .eq("sit_id", sitId)
       .order("created_at", { ascending: false });
 
-    if (data) {
-      const enriched = await Promise.all(
-        data.map(async (app: any) => {
-          const [spRes, revRes, badgeRes, emRes] = await Promise.all([
-            supabase.from("sitter_profiles").select("experience_years, animal_types").eq("user_id", app.sitter_id).maybeSingle(),
-            supabase.from("reviews").select("overall_rating").eq("reviewee_id", app.sitter_id).eq("published", true),
-            supabase.from("badge_attributions").select("badge_id").eq("user_id", app.sitter_id),
-            supabase.from("emergency_sitter_profiles").select("id").eq("user_id", app.sitter_id).eq("is_active", true).maybeSingle(),
-          ]);
-          const reviews = revRes.data || [];
-          const avgRating = reviews.length > 0 ? (reviews.reduce((s: number, r: any) => s + r.overall_rating, 0) / reviews.length).toFixed(1) : null;
-          const badgeMap = new Map<string, number>();
-          (badgeRes.data || []).forEach((b: any) => badgeMap.set(b.badge_id, (badgeMap.get(b.badge_id) || 0) + 1));
-          const badgeCounts = Array.from(badgeMap.entries()).map(([badge_key, count]) => ({ badge_key, count })).sort((a, b) => b.count - a.count);
-          return {
-            ...app,
-            sitterProfile: spRes.data,
-            avgRating,
-            reviewCount: reviews.length,
-            badgeCounts,
-            isEmergencySitter: !!emRes.data,
-          };
-        })
-      );
-      // Sort by status order
-      enriched.sort((a, b) => (statusOrder[a.status] ?? 99) - (statusOrder[b.status] ?? 99));
-      setApplications(enriched);
+    if (!data) {
+      setLoading(false);
+      return;
     }
+
+    const sitterIds = [...new Set(data.map((a: any) => a.sitter_id).filter(Boolean))] as string[];
+
+    if (sitterIds.length === 0) {
+      setApplications([]);
+      setLoading(false);
+      return;
+    }
+
+    const [spRes, revRes, badgeRes, emRes] = await Promise.all([
+      supabase.from("sitter_profiles")
+        .select("user_id, experience_years, animal_types, life_pace, languages, interests, work_during_sit, sensitivities, special_animal_skills, sitter_type")
+        .in("user_id", sitterIds),
+      supabase.from("reviews").select("reviewee_id, overall_rating").in("reviewee_id", sitterIds).eq("published", true),
+      supabase.from("badge_attributions").select("user_id, badge_id").in("user_id", sitterIds),
+      supabase.from("emergency_sitter_profiles").select("user_id").in("user_id", sitterIds).eq("is_active", true),
+    ]);
+
+    const spMap = new Map<string, any>();
+    (spRes.data || []).forEach((r: any) => spMap.set(r.user_id, r));
+
+    const revMap = new Map<string, number[]>();
+    (revRes.data || []).forEach((r: any) => {
+      const arr = revMap.get(r.reviewee_id) || [];
+      arr.push(r.overall_rating);
+      revMap.set(r.reviewee_id, arr);
+    });
+
+    const badgeGrouped = new Map<string, Map<string, number>>();
+    (badgeRes.data || []).forEach((b: any) => {
+      const inner = badgeGrouped.get(b.user_id) || new Map<string, number>();
+      inner.set(b.badge_id, (inner.get(b.badge_id) || 0) + 1);
+      badgeGrouped.set(b.user_id, inner);
+    });
+
+    const emSet = new Set<string>((emRes.data || []).map((r: any) => r.user_id));
+
+    const enriched = data.map((app: any) => {
+      const sp = spMap.get(app.sitter_id) || null;
+      const ratings = revMap.get(app.sitter_id) || [];
+      const avgRating = ratings.length > 0
+        ? (ratings.reduce((s, n) => s + n, 0) / ratings.length).toFixed(1)
+        : null;
+      const inner = badgeGrouped.get(app.sitter_id);
+      const badgeCounts = inner
+        ? Array.from(inner.entries())
+            .map(([badge_key, count]) => ({ badge_key, count }))
+            .sort((a, b) => b.count - a.count)
+        : [];
+      const affinityInput: AffinitySitterInput | null = sp
+        ? {
+            animal_types: sp.animal_types,
+            life_pace: sp.life_pace,
+            languages: sp.languages,
+            interests: sp.interests,
+            work_during_sit: sp.work_during_sit,
+            sensitivities: sp.sensitivities,
+            special_animal_skills: sp.special_animal_skills,
+            sitter_type: sp.sitter_type,
+            experience_years: sp.experience_years,
+          }
+        : null;
+      return {
+        ...app,
+        sitterProfile: sp,
+        sitterAffinityInput: affinityInput,
+        avgRating,
+        reviewCount: ratings.length,
+        badgeCounts,
+        isEmergencySitter: emSet.has(app.sitter_id),
+      };
+    });
+
+    enriched.sort((a, b) => (statusOrder[a.status] ?? 99) - (statusOrder[b.status] ?? 99));
+    setApplications(enriched);
     setLoading(false);
   };
+
 
   useEffect(() => { load(); }, [sitId]);
 
@@ -452,8 +510,46 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, prope
     ? differenceInDays(parseISO(endDate), parseISO(startDate))
     : null;
 
-  const activeApps = applications.filter(a => !["rejected", "cancelled"].includes(a.status));
+  const rawActive = applications.filter(a => !["rejected", "cancelled"].includes(a.status));
   const declinedApps = applications.filter(a => ["rejected", "cancelled"].includes(a.status));
+
+  // Précalcul du score d'affinité par candidat, pour le tri.
+  const affinityByApp = useMemo(() => {
+    const map = new Map<string, number>();
+    if (!viewerOwner) return map;
+    rawActive.forEach((app: any) => {
+      if (!app.sitterAffinityInput) return;
+      const res = computeAffinityResultFull(viewerOwner as AffinityOwnerInput, app.sitterAffinityInput);
+      if (res?.displayed) map.set(app.id, res.score);
+    });
+    return map;
+  }, [rawActive, viewerOwner]);
+
+  const activeApps = useMemo(() => {
+    const arr = [...rawActive];
+    const isPending = (s: string) => s === "pending" || s === "viewed";
+    arr.sort((a, b) => {
+      // Statut "en attente" en tête, quel que soit le tri secondaire.
+      const pa = isPending(a.status) ? 0 : 1;
+      const pb = isPending(b.status) ? 0 : 1;
+      if (pa !== pb) return pa - pb;
+      if (sortMode === "affinity") {
+        const sa = affinityByApp.get(a.id) ?? -1;
+        const sb = affinityByApp.get(b.id) ?? -1;
+        if (sa !== sb) return sb - sa;
+      } else if (sortMode === "rating") {
+        const ra = a.avgRating ? parseFloat(a.avgRating) : -1;
+        const rb = b.avgRating ? parseFloat(b.avgRating) : -1;
+        if (ra !== rb) return rb - ra;
+      }
+      // recent (défaut secondaire) : plus récentes d'abord
+      const da = new Date(a.created_at ?? 0).getTime();
+      const db = new Date(b.created_at ?? 0).getTime();
+      return db - da;
+    });
+    return arr;
+  }, [rawActive, sortMode, affinityByApp]);
+
 
   if (loading) return <p className="text-sm text-muted-foreground">Chargement des candidatures...</p>;
 
@@ -464,25 +560,33 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, prope
 
     return (
       <div key={app.id} className="bg-card border border-border rounded-2xl p-5 mb-4">
-        {/* LINE 1, Identity */}
-        <div className="flex items-center gap-3">
-          <Link to={`/gardiens/${app.sitter_id}`} className="shrink-0">
-            {sitter?.avatar_url ? (
-              <img src={sitter.avatar_url} alt={sitter.first_name} className="w-12 h-12 rounded-full object-cover border border-border" />
-            ) : (
-              <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center text-primary font-medium text-lg">
-                {sitter?.first_name?.charAt(0) || "?"}
-              </div>
-            )}
+        {/* Identité + signaux de confiance */}
+        <div className="flex items-start gap-3">
+          <Link to={`/gardiens/${app.sitter_id}`} className="shrink-0" aria-label={`Voir le profil de ${sitter?.first_name || "ce gardien"}`}>
+            <TrustHaloAvatar
+              size="h-12 w-12"
+              verified={sitter?.identity_verified}
+              avgRating={app.avgRating ? parseFloat(app.avgRating) : null}
+              sitsCount={completedSits}
+            >
+              {sitter?.avatar_url ? (
+                <img src={sitter.avatar_url} alt={`Photo de ${sitter.first_name || "gardien"}`} className="w-full h-full object-cover" />
+              ) : (
+                <div className="w-full h-full rounded-full bg-primary/10 flex items-center justify-center text-primary font-medium text-lg">
+                  {sitter?.first_name?.charAt(0) || "?"}
+                </div>
+              )}
+            </TrustHaloAvatar>
           </Link>
           <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-wrap">
               <Link to={`/gardiens/${app.sitter_id}`} className="text-base font-semibold text-foreground hover:underline">
                 {sitter?.first_name || "Gardien"}
               </Link>
-              
+              {sitter?.identity_verified && <VerifiedBadge size="sm" />}
+              {app.isEmergencySitter && <EmergencyBadge size="sm" showTooltip />}
             </div>
-            <div className="flex items-center gap-3 text-sm text-muted-foreground flex-wrap">
+            <div className="flex items-center gap-3 text-sm text-muted-foreground flex-wrap mt-0.5">
               {sitter?.city && (
                 <span className="inline-flex items-center gap-1">
                   <MapPin className="h-3 w-3" />
@@ -490,24 +594,47 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, prope
                 </span>
               )}
               <span>{completedSits} garde{completedSits !== 1 ? "s" : ""} sur Guardiens</span>
+              {app.avgRating ? (
+                <span className="inline-flex items-center gap-1 text-primary">
+                  <Star className="h-3 w-3 fill-current" />
+                  {app.avgRating}
+                  <span className="text-muted-foreground">({app.reviewCount} avis)</span>
+                </span>
+              ) : (
+                <span className="italic">Aucun avis</span>
+              )}
+              {app.badgeCounts && app.badgeCounts.length > 0 && (
+                <span>
+                  {app.badgeCounts.reduce((n: number, b: any) => n + b.count, 0)} écusson{app.badgeCounts.reduce((n: number, b: any) => n + b.count, 0) > 1 ? "s" : ""}
+                </span>
+              )}
             </div>
+            {app.sitterAffinityInput && (
+              <div className="mt-2">
+                <OwnerToSitterAffinity
+                  sitterProfile={app.sitterAffinityInput}
+                  context="owner_applications_list"
+                  targetId={app.sitter_id}
+                  size="sm"
+                  showCta={false}
+                  scope="list"
+                />
+              </div>
+            )}
           </div>
           <span className={`px-3 py-1 rounded-full text-xs font-medium shrink-0 ${status.className}`}>
             {status.label}
           </span>
         </div>
 
-        {/* LINE 2, Badges */}
-        {/* Badges, migration en cours */}
-
-        {/* LINE 3, Message */}
+        {/* Message du candidat */}
         {app.message && (
           <div className="bg-muted/50 rounded-xl p-3 text-sm text-foreground/80 my-3 italic">
             {app.message}
           </div>
         )}
 
-        {/* LINE 4, CTAs */}
+        {/* CTAs */}
         {(app.status === "pending" || app.status === "viewed") && (
           <div className="flex items-center gap-2 mt-4 flex-wrap">
             <Link
@@ -539,12 +666,14 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, prope
             >
               Accepter
             </button>
-            <button
+            <Button
+              variant="ghost"
+              size="sm"
               onClick={() => setDeclineApp(app)}
-              className="text-xs text-muted-foreground hover:text-destructive transition-colors underline-offset-2 hover:underline ml-auto"
+              className="text-muted-foreground hover:text-destructive ml-auto"
             >
               Décliner
-            </button>
+            </Button>
           </div>
         )}
 
@@ -563,12 +692,14 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, prope
             >
               Accepter
             </button>
-            <button
+            <Button
+              variant="ghost"
+              size="sm"
               onClick={() => setDeclineApp(app)}
-              className="text-xs text-muted-foreground hover:text-destructive transition-colors underline-offset-2 hover:underline ml-auto"
+              className="text-muted-foreground hover:text-destructive ml-auto"
             >
               Décliner
-            </button>
+            </Button>
           </div>
         )}
 
@@ -639,6 +770,21 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, prope
         <p className="text-sm text-muted-foreground italic">Aucune candidature pour le moment.</p>
       ) : (
         <>
+          {activeApps.length > 1 && (
+            <div className="flex items-center justify-end gap-2 mb-3">
+              <label htmlFor="app-sort" className="text-xs text-muted-foreground">Trier par</label>
+              <Select value={sortMode} onValueChange={(v) => setSortMode(v as any)}>
+                <SelectTrigger id="app-sort" className="h-8 w-[180px] text-sm">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="affinity">Affinité</SelectItem>
+                  <SelectItem value="rating">Note</SelectItem>
+                  <SelectItem value="recent">Plus récentes</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          )}
           {activeApps.map(renderCard)}
 
           {declinedApps.length > 0 && (

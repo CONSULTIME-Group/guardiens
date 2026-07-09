@@ -5,6 +5,7 @@ import type {
   Pet, SitRow, SitterInfo, AppRow, SmallMission,
   HighlightRow, OnboardingChecks,
 } from "@/components/dashboard/owner/types";
+import type { AffinitySitterInput } from "@/lib/affinityScore";
 
 export interface PendingReview {
   sitId: string;
@@ -27,6 +28,7 @@ export interface OwnerDashboardData {
   missionMetrics: { total: number; completed: number };
   sitterBadges: Record<string, { badge_key: string; count: number }[]>;
   sitterProfiles: Record<string, SitterInfo>;
+  sitterAffinityProfiles: Record<string, AffinitySitterInput>;
   trustedSitterCount: number;
   propertyType: string | null;
   propertyEnvironment: string | null;
@@ -53,6 +55,7 @@ const INITIAL: OwnerDashboardData = {
   missionMetrics: { total: 0, completed: 0 },
   sitterBadges: {},
   sitterProfiles: {},
+  sitterAffinityProfiles: {},
   trustedSitterCount: 0,
   propertyType: null,
   propertyEnvironment: null,
@@ -162,6 +165,7 @@ export function useOwnerDashboardData(userId: string | undefined) {
         let recentApps: AppRow[] = [];
         const sitterProfiles: Record<string, SitterInfo> = {};
         const sitterBadges: Record<string, { badge_key: string; count: number }[]> = {};
+        const sitterAffinityProfiles: Record<string, AffinitySitterInput> = {};
 
         if (sitIds.length > 0) {
           recentApps = (appsRes.data || []) as AppRow[];
@@ -172,9 +176,12 @@ export function useOwnerDashboardData(userId: string | undefined) {
 
           const sitterIds = [...new Set(recentApps.map(a => a.sitter?.id).filter(Boolean))] as string[];
           if (sitterIds.length > 0) {
-            const [{ data: badgeData }, { data: sitterReviews }] = await Promise.all([
+            const [{ data: badgeData }, { data: sitterReviews }, { data: affinityRows }] = await Promise.all([
               supabase.from("badge_attributions").select("user_id, badge_id").in("user_id", sitterIds),
               supabase.from("reviews").select("reviewee_id, overall_rating").in("reviewee_id", sitterIds).eq("published", true),
+              supabase.from("sitter_profiles")
+                .select("user_id, animal_types, life_pace, languages, interests, work_during_sit, sensitivities, special_animal_skills, sitter_type, experience_years")
+                .in("user_id", sitterIds),
             ]);
 
             if (cancelled) return;
@@ -199,6 +206,13 @@ export function useOwnerDashboardData(userId: string | undefined) {
                   ...sitterProfiles[id],
                   avgNote: Math.round((ratings.reduce((a, b) => a + b, 0) / ratings.length) * 10) / 10,
                 };
+              }
+            });
+
+            (affinityRows || []).forEach((row: any) => {
+              if (row?.user_id) {
+                const { user_id, ...rest } = row;
+                sitterAffinityProfiles[user_id] = rest as AffinitySitterInput;
               }
             });
           }
@@ -270,6 +284,7 @@ export function useOwnerDashboardData(userId: string | undefined) {
           },
           sitterBadges,
           sitterProfiles,
+          sitterAffinityProfiles,
           trustedSitterCount,
           propertyType,
           propertyEnvironment,

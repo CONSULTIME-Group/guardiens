@@ -91,7 +91,7 @@ const OwnerDashboard = () => {
   const { data, loading } = useOwnerDashboardData(user?.id);
   const {
     sits, pets, recentApps, reviews, highlights, smallMissions, myMissions,
-    verificationStatus, sitterBadges, sitterProfiles, trustedSitterCount,
+    verificationStatus, sitterBadges, sitterProfiles, sitterAffinityProfiles, trustedSitterCount,
     propertyType, propertyEnvironment, propertyCoverPhoto, onboardingChecks,
     pendingReviews,
   } = data;
@@ -703,6 +703,7 @@ const OwnerDashboard = () => {
               recentApps={recentApps}
               sitterProfiles={sitterProfiles}
               sitterBadges={sitterBadges}
+              sitterAffinityProfiles={sitterAffinityProfiles}
               loading={loading}
             />
           )}

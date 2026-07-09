@@ -7,12 +7,15 @@ import { Skeleton } from "@/components/ui/skeleton";
 import DashSection from "./DashSection";
 import { capitalize } from "./helpers";
 import type { AppRow, SitterInfo } from "./types";
+import type { AffinitySitterInput } from "@/lib/affinityScore";
 import TrustHaloAvatar from "@/components/sitters/TrustHaloAvatar";
+import OwnerToSitterAffinity from "@/components/matching/OwnerToSitterAffinity";
 
 interface ApplicationsSectionProps {
   recentApps: AppRow[];
   sitterProfiles: Record<string, SitterInfo>;
   sitterBadges: Record<string, { badge_key: string; count: number }[]>;
+  sitterAffinityProfiles?: Record<string, AffinitySitterInput>;
   loading?: boolean;
 }
 
@@ -32,7 +35,7 @@ const AppCardSkeleton = () => (
 );
 
 
-const AppCard = memo(({ app, sitterProfiles }: { app: AppRow; sitterProfiles: Record<string, SitterInfo> }) => {
+const AppCard = memo(({ app, sitterProfiles, sitterAffinityProfiles }: { app: AppRow; sitterProfiles: Record<string, SitterInfo>; sitterAffinityProfiles?: Record<string, AffinitySitterInput> }) => {
   const navigate = useNavigate();
   const sitter = (app.sitter?.id && sitterProfiles[app.sitter.id]) || app.sitter;
   const sitTitle = app.sit?.title || "";
@@ -91,6 +94,16 @@ const AppCard = memo(({ app, sitterProfiles }: { app: AppRow; sitterProfiles: Re
           ) : (
             <span className="text-xs font-sans text-muted-foreground italic">Nouveau</span>
           )}
+          {sitter?.id && sitterAffinityProfiles?.[sitter.id] ? (
+            <OwnerToSitterAffinity
+              sitterProfile={sitterAffinityProfiles[sitter.id]}
+              context="owner_dashboard_applications"
+              targetId={sitter.id}
+              size="sm"
+              showCta={false}
+              scope="list"
+            />
+          ) : null}
         </div>
         <div className="flex gap-2 mt-3 flex-wrap">
           {sitter?.id ? (
@@ -116,7 +129,7 @@ const AppCard = memo(({ app, sitterProfiles }: { app: AppRow; sitterProfiles: Re
 });
 AppCard.displayName = "AppCard";
 
-const ApplicationsSection = memo(({ recentApps, sitterProfiles, sitterBadges, loading = false }: ApplicationsSectionProps) => {
+const ApplicationsSection = memo(({ recentApps, sitterProfiles, sitterBadges, sitterAffinityProfiles, loading = false }: ApplicationsSectionProps) => {
   // "Non lues" = candidatures réellement en attente de première réponse.
   // 'discussing' a déjà été ouvert/répondu → va dans "déjà consultées".
   const unread = recentApps.filter(a => a.status === "pending");
@@ -154,7 +167,7 @@ const ApplicationsSection = memo(({ recentApps, sitterProfiles, sitterBadges, lo
           </AccordionTrigger>
           <AccordionContent className="px-4 pb-4">
             <div className="space-y-3">
-              {read.map(a => <AppCard key={a.id} app={a} sitterProfiles={sitterProfiles} />)}
+              {read.map(a => <AppCard key={a.id} app={a} sitterProfiles={sitterProfiles} sitterAffinityProfiles={sitterAffinityProfiles} />)}
             </div>
           </AccordionContent>
         </AccordionItem>
@@ -176,7 +189,7 @@ const ApplicationsSection = memo(({ recentApps, sitterProfiles, sitterBadges, lo
         <p className="text-sm text-muted-foreground font-sans italic py-4 text-center">Aucune candidature reçue en attente</p>
       ) : unread.length > 0 ? (
         <div className="space-y-3">
-          {unread.map(a => <AppCard key={a.id} app={a} sitterProfiles={sitterProfiles} />)}
+          {unread.map(a => <AppCard key={a.id} app={a} sitterProfiles={sitterProfiles} sitterAffinityProfiles={sitterAffinityProfiles} />)}
         </div>
       ) : null}
       {loading ? (
@@ -211,7 +224,7 @@ const ApplicationsSection = memo(({ recentApps, sitterProfiles, sitterBadges, lo
             </AccordionTrigger>
             <AccordionContent className="px-4 pb-4">
               <div className="space-y-3">
-                {read.map(a => <AppCard key={a.id} app={a} sitterProfiles={sitterProfiles} />)}
+                {read.map(a => <AppCard key={a.id} app={a} sitterProfiles={sitterProfiles} sitterAffinityProfiles={sitterAffinityProfiles} />)}
               </div>
             </AccordionContent>
           </AccordionItem>
