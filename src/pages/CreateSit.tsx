@@ -960,8 +960,10 @@ const CreateSit = () => {
               <div>
                 <Label htmlFor="end-date" className="text-xs text-muted-foreground mb-1 block">Fin</Label>
                 <button
+                  id="end-date"
                   type="button"
                   onClick={() => setEndSheetOpen(true)}
+                  aria-label={endDate ? `Date de fin : ${new Date(endDate + "T12:00:00").toLocaleDateString("fr-FR", { day: "2-digit", month: "long", year: "numeric" })}` : "Date de fin, non renseignée"}
                   className={cn(
                     "w-full h-12 text-base rounded-md border px-3 text-left flex items-center justify-between transition-colors",
                     !endDate ? "text-muted-foreground border-input" : "text-foreground border-input",
@@ -970,7 +972,7 @@ const CreateSit = () => {
                   onBlur={() => touch("endDate")}
                 >
                   <span>{endDate ? new Date(endDate + "T12:00:00").toLocaleDateString("fr-FR", { day: "2-digit", month: "short", year: "numeric" }) : "JJ/MM/AAAA"}</span>
-                  <Calendar className="h-4 w-4 text-muted-foreground" />
+                  <Calendar className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
                 </button>
               </div>
             </div>
