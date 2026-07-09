@@ -42,6 +42,7 @@ export const AppLayout = ({ children }: { children?: ReactNode }) => {
 
   return (
     <AlmaProvider>
+    <OnboardingGate />
     <div className="flex min-h-screen bg-background">
       <Sidebar />
       <main id="main-content" className="flex-1 min-w-0 pb-20 md:pb-0 overflow-x-clip" role="main">
