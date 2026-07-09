@@ -1350,7 +1350,9 @@
       "lifestyle": "Au moins 1 mode de vie",
       "radius": "Rayon géographique défini",
       "sitter_gallery_one": "Au moins 1 photo de galerie",
-      "affinity": "Affinités renseignées (intérêts, langues, rythme de vie…)"
+      "affinity": "Affinités renseignées (intérêts, langues, rythme, ambiance, gardien idéal)",
+      "affinity_identity": "Vos affinités (intérêts, langues, rythme de vie)",
+      "affinity_rules": "Vos affinités avec les gardiens (ambiance du foyer, gardien idéal)"
     },
     "hints": {
       "tab_identity": "Onglet Identité.",
