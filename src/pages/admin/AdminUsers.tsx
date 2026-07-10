@@ -19,6 +19,16 @@ import { MessageHistoryDialog, type HistoryItem } from "./_components/users/Mess
 import { LastMessageDialog, type LastMessageState } from "./_components/users/LastMessageDialog";
 import { ErrorDetailDialog, type ErrorDetailState } from "./_components/users/ErrorDetailDialog";
 import ChangeRoleDialog from "./_components/users/ChangeRoleDialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 const roleLabels: Record<string, string> = {
   owner: "Propriétaire",
@@ -80,6 +90,14 @@ const AdminUsers = () => {
   const [roleModal, setRoleModal] = useState<{ open: boolean; userId: string | null; userName: string; currentRole: "owner" | "sitter" | "both" | null }>({
     open: false, userId: null, userName: "", currentRole: null,
   });
+  const [verifyModal, setVerifyModal] = useState<{ open: boolean; userId: string; userName: string; email: string }>({
+    open: false, userId: "", userName: "", email: "",
+  });
+  const [verifying, setVerifying] = useState(false);
+  const [superModal, setSuperModal] = useState<{ open: boolean; userId: string; userName: string; email: string; newValue: boolean }>({
+    open: false, userId: "", userName: "", email: "", newValue: false,
+  });
+  const [togglingSuper, setTogglingSuper] = useState(false);
   const navigate = useNavigate();
 
   const openHistory = async () => {
@@ -268,14 +286,72 @@ const AdminUsers = () => {
     else { toast.success("Compte réactivé"); fetchUsers(); }
   };
 
-  const handleForceVerify = async (userId: string) => {
+  const confirmForceVerify = async () => {
+    const userId = verifyModal.userId;
+    if (!userId) return;
+    setVerifying(true);
+    const { data: userData } = await supabase.auth.getUser();
+    const adminId = userData.user?.id;
     const { error } = await supabase
       .from("profiles")
       .update({ identity_verified: true, identity_verification_status: "verified" })
       .eq("id", userId);
-    if (error) toast.error("Erreur");
-    else { toast.success("Identité validée"); fetchUsers(); }
+    if (error) {
+      toast.error("Erreur");
+      setVerifying(false);
+      return;
+    }
+    // Journal métier : trace la vérification manuelle admin
+    await supabase.from("identity_verification_logs").insert({
+      user_id: userId,
+      result: "verified",
+      rejection_reason: "Vérification forcée par admin",
+    });
+    // Journal d'audit admin
+    if (adminId) {
+      await supabase.from("admin_action_logs").insert({
+        admin_id: adminId,
+        action: "force_verify_identity",
+        target_type: "profile",
+        target_id: userId,
+      });
+    }
+    toast.success("Identité validée");
+    setVerifying(false);
+    setVerifyModal({ open: false, userId: "", userName: "", email: "" });
+    fetchUsers();
   };
+
+  const confirmToggleSuper = async () => {
+    const userId = superModal.userId;
+    if (!userId) return;
+    setTogglingSuper(true);
+    const newValue = superModal.newValue;
+    const { data: userData } = await supabase.auth.getUser();
+    const adminId = userData.user?.id;
+    const { error } = await supabase
+      .from("profile_moderation")
+      .upsert({ profile_id: userId, is_manual_super: newValue }, { onConflict: "profile_id" });
+    if (error) {
+      toast.error("Erreur lors de la mise à jour");
+      setTogglingSuper(false);
+      return;
+    }
+    if (adminId) {
+      await supabase.from("admin_action_logs").insert({
+        admin_id: adminId,
+        action: "toggle_super_gardien",
+        target_type: "profile",
+        target_id: userId,
+        metadata: { new_value: newValue },
+      });
+    }
+    toast(newValue ? "Super Gardien activé" : "Override retiré");
+    setTogglingSuper(false);
+    setSuperModal({ open: false, userId: "", userName: "", email: "", newValue: false });
+    fetchUsers();
+  };
+
 
   const handleResendConfirmation = async (email: string | undefined | null) => {
     if (!email) {
@@ -580,8 +656,13 @@ const AdminUsers = () => {
                           variant="ghost"
                           size="icon"
                           title="Forcer vérification ID"
-                          onClick={() => handleForceVerify(user.id)}
-                          disabled={user.identity_verified}
+                          onClick={() => setVerifyModal({
+                            open: true,
+                            userId: user.id,
+                            userName: `${user.first_name || ""} ${user.last_name || ""}`.trim() || "Utilisateur",
+                            email: user.email || "",
+                          })}
+                          disabled={user.identity_verified || (verifying && verifyModal.userId === user.id)}
                         >
                           <ShieldCheck className="h-4 w-4" />
                         </Button>
@@ -589,21 +670,14 @@ const AdminUsers = () => {
                           variant="ghost"
                           size="icon"
                           title={user.is_manual_super ? "Retirer Super Gardien" : "Promouvoir Super Gardien"}
-                          onClick={async () => {
-                            const newVal = !user.is_manual_super;
-                            const { error } = await supabase
-                              .from("profile_moderation")
-                              .upsert({
-                                profile_id: user.id,
-                                is_manual_super: newVal,
-                              }, { onConflict: "profile_id" });
-                            if (!error) {
-                              toast(newVal ? "Super Gardien activé" : "Override retiré");
-                              fetchUsers();
-                            } else {
-                              toast.error("Erreur lors de la mise à jour");
-                            }
-                          }}
+                          disabled={togglingSuper && superModal.userId === user.id}
+                          onClick={() => setSuperModal({
+                            open: true,
+                            userId: user.id,
+                            userName: `${user.first_name || ""} ${user.last_name || ""}`.trim() || "Utilisateur",
+                            email: user.email || "",
+                            newValue: !user.is_manual_super,
+                          })}
                         >
                           <Crown className={`h-4 w-4 ${user.is_manual_super ? 'text-warning' : ''}`} />
                         </Button>
@@ -757,6 +831,72 @@ const AdminUsers = () => {
         currentRole={roleModal.currentRole}
         onSuccess={fetchUsers}
       />
+
+      <AlertDialog
+        open={verifyModal.open}
+        onOpenChange={(v) => { if (!v && !verifying) setVerifyModal({ open: false, userId: "", userName: "", email: "" }); }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Forcer la vérification d'identité ?</AlertDialogTitle>
+            <AlertDialogDescription asChild>
+              <div className="space-y-2 text-sm">
+                <p>
+                  Utilisateur : <strong>{verifyModal.userName}</strong>
+                  {verifyModal.email ? <> ({verifyModal.email})</> : null}
+                </p>
+                <p className="text-muted-foreground">
+                  Cette action contourne le process de vérification manuelle et marque
+                  l'identité comme vérifiée. Elle sera tracée dans le journal d'audit.
+                </p>
+              </div>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={verifying}>Annuler</AlertDialogCancel>
+            <AlertDialogAction
+              disabled={verifying}
+              onClick={(e) => { e.preventDefault(); confirmForceVerify(); }}
+            >
+              {verifying ? "Validation," : "Confirmer"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog
+        open={superModal.open}
+        onOpenChange={(v) => { if (!v && !togglingSuper) setSuperModal({ open: false, userId: "", userName: "", email: "", newValue: false }); }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              {superModal.newValue ? "Promouvoir Super Gardien ?" : "Retirer le statut Super Gardien ?"}
+            </AlertDialogTitle>
+            <AlertDialogDescription asChild>
+              <div className="space-y-2 text-sm">
+                <p>
+                  Utilisateur : <strong>{superModal.userName}</strong>
+                  {superModal.email ? <> ({superModal.email})</> : null}
+                </p>
+                <p className="text-muted-foreground">
+                  Le statut Super Gardien force manuellement la réputation, indépendamment
+                  des critères automatiques. Cette action sera tracée dans le journal d'audit.
+                </p>
+              </div>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={togglingSuper}>Annuler</AlertDialogCancel>
+            <AlertDialogAction
+              disabled={togglingSuper}
+              onClick={(e) => { e.preventDefault(); confirmToggleSuper(); }}
+            >
+              {togglingSuper ? "Mise à jour," : "Confirmer"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
