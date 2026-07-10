@@ -327,7 +327,8 @@ const AdminSkills = () => {
                             size="sm"
                             variant="ghost"
                             className="h-8 px-2 text-destructive"
-                            onClick={() => handleRejectCompetence(pc.label)}
+                            onClick={() => setRejectModal({ open: true, label: pc.label, count: pc.count })}
+                            disabled={rejecting && rejectModal.label === pc.label}
                             title="Refuser et retirer des profils"
                           >
                             <X className="h-4 w-4" />
