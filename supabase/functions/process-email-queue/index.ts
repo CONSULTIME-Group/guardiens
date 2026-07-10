@@ -387,4 +387,3 @@ Deno.serve(async (req) => {
   return finish({ processed: totalProcessed })
 })
 
-})
