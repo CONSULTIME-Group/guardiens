@@ -256,7 +256,7 @@ const AdminDiagnostics = () => {
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex flex-wrap items-center gap-3">
-            <Button onClick={runCoordinateBackfill} disabled={geoLoading || !isAdmin} size="sm">
+            <Button onClick={() => setGeoConfirmOpen(true)} disabled={geoLoading || !isAdmin} size="sm">
               <RefreshCw className={`h-4 w-4 mr-1.5 ${geoLoading ? "animate-spin" : ""}`} />
               Rattraper les coordonnées
             </Button>
@@ -438,6 +438,29 @@ const AdminDiagnostics = () => {
           </div>
         </CardContent>
       </Card>
+
+      <AlertDialog open={geoConfirmOpen} onOpenChange={(v) => { if (!v && !geoLoading) setGeoConfirmOpen(false); }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Rattraper les coordonnées ?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Cette opération va recalculer et réécrire en base les coordonnées
+              (latitude/longitude) de nombreux profils à partir de leur code postal.
+              C'est une action de masse qui modifie durablement les données de géolocalisation
+              des membres. Elle sera tracée dans le journal d'audit.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={geoLoading}>Annuler</AlertDialogCancel>
+            <AlertDialogAction
+              disabled={geoLoading}
+              onClick={(e) => { e.preventDefault(); runCoordinateBackfill(); }}
+            >
+              {geoLoading ? "Traitement," : "Confirmer"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
