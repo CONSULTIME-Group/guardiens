@@ -384,8 +384,7 @@ Deno.serve(async (req) => {
     }
   }
 
-  return new Response(
-    JSON.stringify({ processed: totalProcessed }),
-    { headers: { 'Content-Type': 'application/json' } }
-  )
+  return finish({ processed: totalProcessed })
+})
+
 })
