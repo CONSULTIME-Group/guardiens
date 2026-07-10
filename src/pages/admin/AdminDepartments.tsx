@@ -245,6 +245,36 @@ const AdminDepartments = () => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <AlertDialog open={!!pendingUnpublish} onOpenChange={(o) => !o && setPendingUnpublish(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Dépublier cette page département ?</AlertDialogTitle>
+            <AlertDialogDescription>
+              La page de {pendingUnpublish?.department}, potentiellement indexée par Google, sera retirée du site public.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Annuler</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={async () => {
+                const p = pendingUnpublish;
+                if (!p) return;
+                setPendingUnpublish(null);
+                await toggleMutation.mutateAsync({ id: p.id, published: false });
+                await logAdminAction({
+                  action: "content_unpublish",
+                  target_type: "department",
+                  target_id: p.id,
+                  metadata: { title: p.department },
+                });
+              }}
+            >
+              Dépublier
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
