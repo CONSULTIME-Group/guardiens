@@ -24,6 +24,16 @@ import {
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { SequenceRecipientsDialog } from "@/components/admin/SequenceRecipientsDialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 type Range = "24h" | "7d" | "30d";
 const RANGE_HOURS: Record<Range, number> = { "24h": 24, "7d": 24 * 7, "30d": 24 * 30 };
@@ -165,6 +175,11 @@ const AdminNurturing = () => {
   const [range, setRange] = useState<Range>("7d");
   const [loading, setLoading] = useState(true);
   const [triggering, setTriggering] = useState(false);
+  const [previewing, setPreviewing] = useState(false);
+  const [preview, setPreview] = useState<null | {
+    sent: number; enrolled: number; exited: number; skipped: number;
+    bySequence?: Record<string, { enrolled: number; sent: number; exited: number; skipped: number }>;
+  }>(null);
   const [logs, setLogs] = useState<LogRow[]>([]);
   const [journeys, setJourneys] = useState<JourneyRow[]>([]);
   const [queue, setQueue] = useState<QueueRow[]>([]);
@@ -304,7 +319,32 @@ const AdminNurturing = () => {
     setLoading(false);
   };
 
-  const triggerEvaluate = async () => {
+  const runPreview = async () => {
+    setPreviewing(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("evaluate-journeys", {
+        body: { manual: true, dryRun: true },
+      });
+      if (error) throw error;
+      const stats = (data as { stats?: {
+        sent?: number; skipped?: number; exited?: number; enrolled?: number;
+        bySequence?: Record<string, { enrolled: number; sent: number; exited: number; skipped: number }>;
+      } } | null)?.stats;
+      setPreview({
+        sent: stats?.sent ?? 0,
+        enrolled: stats?.enrolled ?? 0,
+        exited: stats?.exited ?? 0,
+        skipped: stats?.skipped ?? 0,
+        bySequence: stats?.bySequence,
+      });
+    } catch (e) {
+      toast.error("Échec de l'aperçu", { description: e instanceof Error ? e.message : String(e) });
+    } finally {
+      setPreviewing(false);
+    }
+  };
+
+  const confirmEvaluate = async () => {
     setTriggering(true);
     try {
       const { data, error } = await supabase.functions.invoke("evaluate-journeys", { body: { manual: true } });
@@ -317,6 +357,7 @@ const AdminNurturing = () => {
       } else {
         toast.success("Évaluation terminée");
       }
+      setPreview(null);
       await fetchData();
     } catch (e) {
       toast.error("Échec du déclenchement", { description: e instanceof Error ? e.message : String(e) });
@@ -674,8 +715,8 @@ const AdminNurturing = () => {
           <Button size="sm" variant="ghost" onClick={fetchData} disabled={loading}>
             Rafraîchir
           </Button>
-          <Button size="sm" variant="default" onClick={triggerEvaluate} disabled={triggering}>
-            {triggering ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : <PlayCircle className="h-4 w-4 mr-1" />}
+          <Button size="sm" variant="default" onClick={runPreview} disabled={previewing || triggering}>
+            {previewing ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : <PlayCircle className="h-4 w-4 mr-1" />}
             Lancer une évaluation
           </Button>
           <Popover>
@@ -1475,6 +1516,55 @@ const AdminNurturing = () => {
           sinceIso={sinceIso}
         />
       )}
+
+      <AlertDialog open={preview !== null} onOpenChange={(v) => { if (!v && !triggering) setPreview(null); }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirmer l'envoi réel</AlertDialogTitle>
+            <AlertDialogDescription asChild>
+              <div className="space-y-3 text-sm">
+                <p>
+                  <strong>{preview?.sent ?? 0} email{(preview?.sent ?? 0) > 1 ? "s" : ""}</strong> {" "}
+                  ser{(preview?.sent ?? 0) > 1 ? "ont" : "a"} envoyé{(preview?.sent ?? 0) > 1 ? "s" : ""} {" "}
+                  maintenant à de vrais utilisateurs.
+                </p>
+                <p className="text-muted-foreground">
+                  Enrôlés : {preview?.enrolled ?? 0} · Sortis : {preview?.exited ?? 0} · Sautés : {preview?.skipped ?? 0}
+                </p>
+                {preview?.bySequence && Object.keys(preview.bySequence).length > 0 && (
+                  <div className="border border-border rounded-md p-3 space-y-1">
+                    <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Détail par séquence</p>
+                    {Object.entries(preview.bySequence).map(([key, s]) => (
+                      <div key={key} className="flex justify-between text-xs">
+                        <span>{labelSequence(key)}</span>
+                        <span className="text-muted-foreground">
+                          envoyés {s.sent} · enrôlés {s.enrolled} · sortis {s.exited} · sautés {s.skipped}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+                <p className="text-destructive font-medium">
+                  Ce sont de vrais envois, immédiats et non annulables.
+                </p>
+              </div>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={triggering}>Annuler</AlertDialogCancel>
+            <AlertDialogAction
+              disabled={triggering}
+              onClick={(e) => { e.preventDefault(); confirmEvaluate(); }}
+            >
+              {triggering ? (
+                <><Loader2 className="h-4 w-4 mr-1 animate-spin" />Envoi en cours,</>
+              ) : (
+                <>Envoyer {preview?.sent ?? 0} email{(preview?.sent ?? 0) > 1 ? "s" : ""}</>
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
