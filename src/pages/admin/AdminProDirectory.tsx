@@ -265,13 +265,14 @@ export default function AdminProDirectory() {
                               rows={2}
                             />
                             <div className="flex flex-wrap gap-2">
-                              <Button size="sm" onClick={() => decide(row, "approved")}>
+                              <Button size="sm" onClick={() => decide(row, "approved")} disabled={busyId === row.id}>
                                 Approuver
                               </Button>
                               <Button
                                 size="sm"
                                 variant="destructive"
-                                onClick={() => decide(row, "rejected")}
+                                disabled={busyId === row.id}
+                                onClick={() => setRejectModal({ open: true, row, label: "Refuser" })}
                               >
                                 Refuser
                               </Button>
@@ -292,7 +293,7 @@ export default function AdminProDirectory() {
                               </Link>
                             </Button>
                             {tab === "rejected" && (
-                              <Button size="sm" onClick={() => decide(row, "approved")}>
+                              <Button size="sm" onClick={() => decide(row, "approved")} disabled={busyId === row.id}>
                                 Approuver finalement
                               </Button>
                             )}
@@ -300,7 +301,8 @@ export default function AdminProDirectory() {
                               <Button
                                 size="sm"
                                 variant="destructive"
-                                onClick={() => decide(row, "rejected")}
+                                disabled={busyId === row.id}
+                                onClick={() => setRejectModal({ open: true, row, label: "Retirer" })}
                               >
                                 Retirer
                               </Button>
