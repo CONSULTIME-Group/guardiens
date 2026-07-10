@@ -35,10 +35,11 @@ const AdminSitsManagement = () => {
   const [filterStatus, setFilterStatus] = useState("operational");
   const [search, setSearch] = useState("");
   const [filterCountry, setFilterCountry] = useState<string>("all");
-  const [sitters, setSitters] = useState<Record<string, { name: string; avatar: string | null }>>({});
+  const [sitters, setSitters] = useState<Record<string, { name: string; avatar: string | null; id?: string }>>({});
   const [reviews, setReviews] = useState<Record<string, { owner: boolean; sitter: boolean }>>({});
   const [statsBySit, setStatsBySit] = useState<Record<string, { views: number; messages: number }>>({});
   const [cancelModal, setCancelModal] = useState<{ open: boolean; id: string; type: string; reason: string }>({ open: false, id: "", type: "", reason: "" });
+  const [cancelling, setCancelling] = useState(false);
   const [noteModal, setNoteModal] = useState<{ open: boolean; id: string; note: string }>({ open: false, id: "", note: "" });
   const [forceCompleteModal, setForceCompleteModal] = useState<{ open: boolean; sit: any | null }>({ open: false, sit: null });
   const [forcingComplete, setForcingComplete] = useState(false);
@@ -78,7 +79,7 @@ const AdminSitsManagement = () => {
   useEffect(() => {
     if (!sits.length) return;
     const fetchSitterData = async () => {
-      const map: Record<string, { name: string; avatar: string | null }> = {};
+      const map: Record<string, { name: string; avatar: string | null; id?: string }> = {};
       const sitIds = sits.map(s => s.id);
 
       if (sitIds.length) {
@@ -89,6 +90,7 @@ const AdminSitsManagement = () => {
           map[a.sit_id] = {
             name: `${a.first_name || ""} ${a.last_name || ""}`.trim(),
             avatar: a.avatar_url,
+            id: a.sitter_id,
           };
         });
       }
@@ -178,13 +180,21 @@ const AdminSitsManagement = () => {
   const handleCancel = async () => {
     const sit = sits.find(s => s.id === cancelModal.id);
     if (!sit) return;
+    setCancelling(true);
+
     await supabase.from("sits").update({ status: "cancelled" as any, cancellation_reason: cancelModal.reason } as any).eq("id", cancelModal.id);
 
     if (sit.user_id) {
       await supabase.from("notifications").insert({ user_id: sit.user_id, type: "sit_cancelled", title: "Garde annulée par l'admin", body: `La garde "${sit.title}" a été annulée. Motif : ${cancelModal.reason}`, link: `/sits/${sit.id}` });
     }
 
+    const confirmedSitterId = sitters[sit.id]?.id;
+    if (confirmedSitterId) {
+      await supabase.from("notifications").insert({ user_id: confirmedSitterId, type: "sit_cancelled", title: "Garde annulée par l'admin", body: `La garde "${sit.title}" a été annulée. Motif : ${cancelModal.reason}`, link: `/sits/${sit.id}` });
+    }
+
     toast.success("Garde annulée");
+    setCancelling(false);
     setCancelModal({ open: false, id: "", type: "", reason: "" });
     fetchSits();
   };
@@ -400,7 +410,7 @@ const AdminSitsManagement = () => {
                     {sit.end_date ? format(new Date(sit.end_date), "d MMM yy", { locale: fr }) : ","}
                   </TableCell>
                   <TableCell className="text-sm text-muted-foreground whitespace-nowrap">
-                    {sit.created_at ? formatDistanceToNow(new Date(sit.created_at), { addSuffix: true, locale: fr }) : ","}
+                    {sit.updated_at ? formatDistanceToNow(new Date(sit.updated_at), { addSuffix: true, locale: fr }) : ","}
                   </TableCell>
                   <TableCell className="text-right text-sm font-medium tabular-nums">{statsBySit[sit.id]?.views ?? ","}</TableCell>
                   <TableCell className="text-right text-sm font-medium tabular-nums">{statsBySit[sit.id]?.messages ?? ","}</TableCell>
@@ -437,11 +447,15 @@ const AdminSitsManagement = () => {
       <Dialog open={cancelModal.open} onOpenChange={(o) => !o && setCancelModal({ open: false, id: "", type: "", reason: "" })}>
         <DialogContent>
           <DialogHeader><DialogTitle>Annuler cette garde ?</DialogTitle></DialogHeader>
-          <DialogDescription>Les deux parties seront notifiées.</DialogDescription>
+          <DialogDescription>
+            {sitters[cancelModal.id]?.id ? "Les deux parties seront notifiées." : "Le propriétaire sera notifié."}
+          </DialogDescription>
           <Textarea value={cancelModal.reason} onChange={(e) => setCancelModal(s => ({ ...s, reason: e.target.value }))} placeholder="Motif d'annulation…" rows={3} />
           <DialogFooter>
-            <Button variant="outline" onClick={() => setCancelModal({ open: false, id: "", type: "", reason: "" })}>Annuler</Button>
-            <Button variant="destructive" onClick={handleCancel} disabled={!cancelModal.reason.trim()}>Confirmer l'annulation</Button>
+            <Button variant="outline" onClick={() => setCancelModal({ open: false, id: "", type: "", reason: "" })} disabled={cancelling}>Annuler</Button>
+            <Button variant="destructive" onClick={handleCancel} disabled={!cancelModal.reason.trim() || cancelling}>
+              {cancelling ? "Annulation…" : "Confirmer l'annulation"}
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
