@@ -225,14 +225,21 @@ const AdminCityPages = () => {
                 <Button
                   variant="ghost"
                   size="sm"
-                  onClick={() => handleTogglePublish(page.id, page.published)}
+                  disabled={toggling === page.id}
+                  onClick={() => {
+                    if (page.published) {
+                      setPendingUnpublish({ id: page.id, city: page.city });
+                    } else {
+                      handleTogglePublish(page.id, page.published);
+                    }
+                  }}
                 >
                   {page.published ? "Dépublier" : "Publier"}
                 </Button>
                 <Button
                   variant="ghost"
                   size="icon"
-                  onClick={() => handleRegenerate(page)}
+                  onClick={() => setPendingRegenerate(page)}
                   disabled={!!regeneratingId}
                   title="Régénérer le contenu IA"
                 >
