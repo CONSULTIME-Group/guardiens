@@ -145,8 +145,20 @@ const AdminPros = () => {
         })
         .eq("id", row.id);
       if (error) throw error;
+      // Journal d'audit admin
+      const adminId = user.user?.id ?? null;
+      if (adminId && decision === "approved") {
+        await supabase.from("admin_action_logs").insert({
+          admin_id: adminId,
+          action: "pro_validate",
+          target_type: "pro",
+          target_id: row.id,
+          metadata: { user_id: row.user_id, doc_type: row.doc_type },
+        });
+      }
       toast.success(decision === "approved" ? "Pro validé" : "Demande refusée");
       setRejectModal({ open: false, row: null, reason: "" });
+      setValidateModal({ open: false, row: null });
       fetchRows();
     } catch (e: any) {
       toast.error(e?.message ?? "Action impossible");
