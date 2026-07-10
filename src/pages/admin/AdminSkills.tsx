@@ -517,6 +517,31 @@ const AdminSkills = () => {
           )}
         </TabsContent>
       </Tabs>
+
+      <AlertDialog
+        open={rejectModal.open}
+        onOpenChange={(v) => { if (!v && !rejecting) setRejectModal({ open: false, label: "", count: 0 }); }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Refuser la compétence « {rejectModal.label} » ?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Cette compétence sera <strong>retirée de TOUS les profils</strong> qui la portent
+              actuellement ({rejectModal.count} soumission{rejectModal.count > 1 ? "s" : ""}).
+              Cette action est irréversible et sera tracée dans le journal d'audit.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={rejecting}>Annuler</AlertDialogCancel>
+            <AlertDialogAction
+              disabled={rejecting}
+              onClick={(e) => { e.preventDefault(); confirmRejectCompetence(); }}
+            >
+              {rejecting ? "Suppression," : "Confirmer le refus"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
