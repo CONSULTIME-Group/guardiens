@@ -410,7 +410,7 @@ const AdminSitsManagement = () => {
                     {sit.end_date ? format(new Date(sit.end_date), "d MMM yy", { locale: fr }) : ","}
                   </TableCell>
                   <TableCell className="text-sm text-muted-foreground whitespace-nowrap">
-                    {sit.created_at ? formatDistanceToNow(new Date(sit.created_at), { addSuffix: true, locale: fr }) : ","}
+                    {sit.updated_at ? formatDistanceToNow(new Date(sit.updated_at), { addSuffix: true, locale: fr }) : ","}
                   </TableCell>
                   <TableCell className="text-right text-sm font-medium tabular-nums">{statsBySit[sit.id]?.views ?? ","}</TableCell>
                   <TableCell className="text-right text-sm font-medium tabular-nums">{statsBySit[sit.id]?.messages ?? ","}</TableCell>
