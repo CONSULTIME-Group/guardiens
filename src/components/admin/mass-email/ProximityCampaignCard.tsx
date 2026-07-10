@@ -5,7 +5,7 @@
  * explicite "Envoyer" pour déclencher l'edge function send-mass-email-proximity.
  * Aucun envoi n'a jamais lieu sans clic sur "Envoyer" après aperçu.
  */
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -41,18 +41,38 @@ interface PreviewRecipient {
 interface PreviewData {
   count: number;
   author_first_name: string;
-  mission: { id: string; title: string };
+  mission: {
+    id: string;
+    title: string;
+    mission_type?: "besoin" | "offre";
+    excerpt?: string;
+  };
+  subject?: string;
   recipients: PreviewRecipient[];
   truncated: boolean;
 }
 
-// Pré-remplissage : offre de Béryl.
+// Pré-remplissage par défaut : offre de Béryl.
 const DEFAULT_MISSION_ID = "eeaf2091-e5db-49b8-9402-2513abf316db";
 const DEFAULT_RADIUS = 50;
 
-const ProximityCampaignCard = () => {
-  const [missionId, setMissionId] = useState(DEFAULT_MISSION_ID);
-  const [radiusKm, setRadiusKm] = useState<number>(DEFAULT_RADIUS);
+interface ProximityCampaignCardProps {
+  initialMissionId?: string;
+  initialRadiusKm?: number;
+  /** Lance l'aperçu automatiquement au montage (utilisé pour les ouvertures pré-remplies). */
+  autoPreview?: boolean;
+  /** Masque l'en-tête de la carte (utile quand on l'affiche déjà dans un Dialog). */
+  hideHeader?: boolean;
+}
+
+const ProximityCampaignCard = ({
+  initialMissionId,
+  initialRadiusKm,
+  autoPreview = false,
+  hideHeader = false,
+}: ProximityCampaignCardProps = {}) => {
+  const [missionId, setMissionId] = useState(initialMissionId ?? DEFAULT_MISSION_ID);
+  const [radiusKm, setRadiusKm] = useState<number>(initialRadiusKm ?? DEFAULT_RADIUS);
   const [loading, setLoading] = useState(false);
   const [sending, setSending] = useState(false);
   const [preview, setPreview] = useState<PreviewData | null>(null);
@@ -110,21 +130,38 @@ const ProximityCampaignCard = () => {
     }
   };
 
+  // Auto-preview (ouverture depuis un contexte pré-rempli, ex : bouton par ligne
+  // dans /admin/small-missions).
+  const autoPreviewRef = useRef(false);
+  useEffect(() => {
+    if (!autoPreview || autoPreviewRef.current) return;
+    if (!missionId.trim()) return;
+    autoPreviewRef.current = true;
+    void handlePreview();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [autoPreview]);
+
+  const missionType = preview?.mission?.mission_type ?? "besoin";
   const subject = preview
-    ? `Près de chez vous, ${preview.author_first_name || "un membre"} propose un coup de main, gratuitement`
+    ? (preview.subject
+        ?? (missionType === "offre"
+          ? `Près de chez vous, ${preview.author_first_name || "un membre"} propose son aide, gratuitement`
+          : `Près de chez vous, ${preview.author_first_name || "un membre"} cherche un coup de main`))
     : "";
 
   return (
     <Card className="border-primary/30">
-      <CardHeader>
-        <CardTitle className="text-base">
-          Annonce d'entraide à proximité
-        </CardTitle>
-        <p className="text-xs text-muted-foreground">
-          Cible les inscrits situés dans un rayon donné autour de l'auteur d'une petite mission.
-          Exclut l'auteur, les emails supprimés et les opt-out. Aucun envoi tant que vous ne cliquez pas sur Envoyer.
-        </p>
-      </CardHeader>
+      {!hideHeader && (
+        <CardHeader>
+          <CardTitle className="text-base">
+            Annonce d'entraide à proximité
+          </CardTitle>
+          <p className="text-xs text-muted-foreground">
+            Cible les inscrits situés dans un rayon donné autour de l'auteur d'une petite mission.
+            Exclut l'auteur, les emails supprimés et les opt-out. Aucun envoi tant que vous ne cliquez pas sur Envoyer.
+          </p>
+        </CardHeader>
+      )}
       <CardContent className="space-y-4">
         <div className="grid grid-cols-1 sm:grid-cols-[1fr,140px,auto] gap-3 items-end">
           <div className="space-y-1.5">
@@ -168,6 +205,9 @@ const ProximityCampaignCard = () => {
               <span>
                 Mission : <strong>{preview.mission.title}</strong>
               </span>
+              <span className="text-xs uppercase tracking-wide text-muted-foreground">
+                {missionType === "offre" ? "Offre d'aide" : "Demande d'aide"}
+              </span>
               <span className="text-muted-foreground">
                 Auteur : {preview.author_first_name || "(inconnu)"}
               </span>
@@ -176,10 +216,17 @@ const ProximityCampaignCard = () => {
               </span>
             </div>
 
+            {preview.mission.excerpt && (
+              <div className="rounded border border-border bg-muted/20 p-3 text-xs italic text-muted-foreground">
+                {preview.mission.excerpt}
+              </div>
+            )}
+
             <div className="rounded border border-border bg-muted/30 p-3 text-xs">
               <div className="font-semibold mb-1">Objet</div>
               <div>{subject}</div>
             </div>
+
 
             {preview.count === 0 ? (
               <p className="text-sm text-muted-foreground">

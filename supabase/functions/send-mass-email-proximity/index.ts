@@ -50,14 +50,34 @@ function buildHtml(params: {
   recipientFirstName: string;
   authorFirstName: string;
   missionTitle: string;
+  missionExcerpt: string;
   missionUrl: string;
   subject: string;
+  missionType: "besoin" | "offre";
 }): string {
-  const { recipientFirstName, authorFirstName, missionTitle, missionUrl, subject } = params;
+  const {
+    recipientFirstName,
+    authorFirstName,
+    missionTitle,
+    missionExcerpt,
+    missionUrl,
+    subject,
+    missionType,
+  } = params;
   const greeting = recipientFirstName ? `Bonjour ${escapeHtml(recipientFirstName)},` : "Bonjour,";
   const author = escapeHtml(authorFirstName || "un membre du coin");
   const title = escapeHtml(missionTitle);
   const url = escapeHtml(missionUrl);
+  const excerptHtml = missionExcerpt
+    ? `<p style="margin:0 0 14px;font-size:14px;line-height:1.7;color:#555;font-style:italic;border-left:3px solid #2C6E49;padding:4px 0 4px 12px">${escapeHtml(missionExcerpt)}</p>`
+    : "";
+  const introLine = missionType === "offre"
+    ? `En ce moment, tout près de vous, ${author} propose son aide : <strong>${title}</strong>.`
+    : `En ce moment, tout près de vous, ${author} cherche un coup de main : <strong>${title}</strong>.`;
+  const ctaLabel = missionType === "offre" ? "Voir sa proposition" : "Voir sa demande";
+  const closingLine = missionType === "offre"
+    ? "C'est aussi ça, Guardiens : des gens du coin qui donnent de leur temps, sans rien attendre en retour."
+    : "C'est aussi ça, Guardiens : des gens du coin qui se rendent service, sans rien attendre en retour.";
   return `<!DOCTYPE html><html><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/></head>
 <body style="margin:0;padding:0;background-color:#FAF9F6;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif">
 <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#FAF9F6;padding:32px 16px">
@@ -71,13 +91,14 @@ function buildHtml(params: {
 <h1 style="margin:0 0 20px;font-size:22px;line-height:1.35;color:#1a1a1a;font-weight:700">${escapeHtml(subject)}</h1>
 <p style="margin:0 0 14px;font-size:15px;line-height:1.7;color:#3a3a3a">${greeting}</p>
 <p style="margin:0 0 14px;font-size:15px;line-height:1.7;color:#3a3a3a">Sur Guardiens, il n'y a pas que la garde de maison. Il y a aussi l'entraide, gratuite, entre gens du coin.</p>
-<p style="margin:0 0 14px;font-size:15px;line-height:1.7;color:#3a3a3a">En ce moment, tout près de vous, ${author} propose son aide : ${title}.</p>
+<p style="margin:0 0 14px;font-size:15px;line-height:1.7;color:#3a3a3a">${introLine}</p>
+${excerptHtml}
 </td></tr>
 <tr><td align="center" style="padding:16px 0 8px">
-<a href="${url}" style="display:inline-block;padding:14px 32px;background-color:#2C6E49;color:#ffffff;text-decoration:none;border-radius:10px;font-weight:600;font-size:16px;box-shadow:0 4px 12px rgba(44,110,73,0.25)">Voir sa proposition</a>
+<a href="${url}" style="display:inline-block;padding:14px 32px;background-color:#2C6E49;color:#ffffff;text-decoration:none;border-radius:10px;font-weight:600;font-size:16px;box-shadow:0 4px 12px rgba(44,110,73,0.25)">${escapeHtml(ctaLabel)}</a>
 </td></tr>
 <tr><td style="padding:16px 40px 8px">
-<p style="margin:0 0 14px;font-size:15px;line-height:1.7;color:#3a3a3a">C'est aussi ça, Guardiens : des gens du coin qui donnent de leur temps, sans rien attendre en retour.</p>
+<p style="margin:0 0 14px;font-size:15px;line-height:1.7;color:#3a3a3a">${closingLine}</p>
 <p style="margin:0 0 4px;font-size:15px;line-height:1.7;color:#3a3a3a">À bientôt,</p>
 <p style="margin:0 0 14px;font-size:15px;line-height:1.7;color:#3a3a3a">L'équipe Guardiens</p>
 </td></tr>
@@ -96,6 +117,20 @@ function buildHtml(params: {
 </body></html>`;
 }
 
+function buildSubject(authorFirstName: string, missionType: "besoin" | "offre"): string {
+  const who = authorFirstName || "un membre";
+  return missionType === "offre"
+    ? `Près de chez vous, ${who} propose son aide, gratuitement`
+    : `Près de chez vous, ${who} cherche un coup de main`;
+}
+
+function buildExcerpt(desc: string | null | undefined, maxLen = 220): string {
+  const clean = (desc ?? "").toString().replace(/\s+/g, " ").trim();
+  if (!clean) return "";
+  if (clean.length <= maxLen) return clean;
+  return clean.slice(0, maxLen - 3).trimEnd() + "...";
+}
+
 interface Recipient {
   user_id: string;
   first_name: string;
@@ -109,7 +144,15 @@ async function computeRecipients(
   missionId: string,
   radiusKm: number,
 ): Promise<{
-  mission: { id: string; title: string; user_id: string; latitude: number | null; longitude: number | null };
+  mission: {
+    id: string;
+    title: string;
+    description: string | null;
+    mission_type: "besoin" | "offre";
+    user_id: string;
+    latitude: number | null;
+    longitude: number | null;
+  };
   authorFirstName: string;
   centerLat: number;
   centerLon: number;
@@ -117,7 +160,7 @@ async function computeRecipients(
 }> {
   const { data: mission, error: mErr } = await serviceClient
     .from("small_missions")
-    .select("id, title, user_id, latitude, longitude")
+    .select("id, title, description, mission_type, user_id, latitude, longitude")
     .eq("id", missionId)
     .maybeSingle();
   if (mErr || !mission) throw new Error(`Mission introuvable (${missionId})`);
@@ -290,6 +333,13 @@ Deno.serve(async (req) => {
       radiusKm,
     );
 
+    const missionType: "besoin" | "offre" =
+      ((mission as any).mission_type === "offre" ? "offre" : "besoin");
+    const subject = buildSubject(authorFirstName, missionType);
+    const excerpt = buildExcerpt((mission as any).description);
+    const missionUrl = `https://guardiens.fr/petites-missions/${mission.id}`;
+    const ctaLabel = missionType === "offre" ? "Voir sa proposition" : "Voir sa demande";
+
     if (mode === "preview") {
       // Limite l'aperçu pour rester léger côté UI.
       const PREVIEW_LIMIT = 500;
@@ -297,7 +347,13 @@ Deno.serve(async (req) => {
         JSON.stringify({
           count: recipients.length,
           author_first_name: authorFirstName,
-          mission: { id: mission.id, title: mission.title },
+          mission: {
+            id: mission.id,
+            title: mission.title,
+            mission_type: missionType,
+            excerpt,
+          },
+          subject,
           recipients: recipients.slice(0, PREVIEW_LIMIT).map((r) => ({
             first_name: r.first_name,
             city: r.city,
@@ -319,18 +375,15 @@ Deno.serve(async (req) => {
       });
     }
 
-    const subject = `Près de chez vous, ${authorFirstName || "un membre"} propose un coup de main, gratuitement`;
-    const missionUrl = `https://guardiens.fr/petites-missions/${mission.id}`;
-
     // Log de campagne
     const { data: campaign, error: campErr } = await serviceClient
       .from("mass_emails")
       .insert({
         segment: "proximity",
-        filters: { mission_id: missionId, radius_km: radiusKm } as any,
+        filters: { mission_id: missionId, radius_km: radiusKm, mission_type: missionType } as any,
         subject,
-        body: `Annonce d'entraide (${mission.title}) à ${radiusKm} km, auteur ${authorFirstName}`,
-        cta_label: "Voir sa proposition",
+        body: `Annonce d'entraide ${missionType === "offre" ? "(offre)" : "(besoin)"} (${mission.title}) à ${radiusKm} km, auteur ${authorFirstName}`,
+        cta_label: ctaLabel,
         cta_url: missionUrl,
         recipients_count: 0,
         status: "sending",
@@ -364,8 +417,10 @@ Deno.serve(async (req) => {
           recipientFirstName: r.first_name,
           authorFirstName,
           missionTitle: mission.title,
+          missionExcerpt: excerpt,
           missionUrl,
           subject,
+          missionType,
         }),
         tracking: { opens: true, clicks: true },
         tags: [

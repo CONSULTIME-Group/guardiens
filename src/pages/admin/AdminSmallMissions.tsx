@@ -10,8 +10,9 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogD
 import { toast } from "sonner";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
-import { Search, Archive, Trash2, Eye, RotateCcw, Mail, AlertTriangle, ArrowUpDown, Download } from "lucide-react";
+import { Search, Archive, Trash2, Eye, RotateCcw, Mail, AlertTriangle, ArrowUpDown, Download, Send } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import ProximityCampaignCard from "@/components/admin/mass-email/ProximityCampaignCard";
 
 const statusLabels: Record<string, { label: string; variant: "default" | "secondary" | "outline" | "destructive" }> = {
   open: { label: "Ouverte", variant: "default" },
@@ -50,6 +51,7 @@ const AdminSmallMissions = () => {
   const [responseCounts, setResponseCounts] = useState<Record<string, number>>({});
   const [archiveId, setArchiveId] = useState<string | null>(null);
   const [restoreId, setRestoreId] = useState<string | null>(null);
+  const [proximityMission, setProximityMission] = useState<{ id: string; title: string } | null>(null);
   const [kpis, setKpis] = useState({ total: 0, open: 0, totalViews: 0, totalResponses: 0, suspect: 0 });
 
   // Global KPIs (independent of pagination/filters)
@@ -340,6 +342,15 @@ const AdminSmallMissions = () => {
                       <Button variant="ghost" size="icon" aria-label="Contacter le posteur" title="Contacter" onClick={() => handleContact(m)}>
                         <Mail className="h-4 w-4" />
                       </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        aria-label="Envoyer aux inscrits à proximité"
+                        title="Envoyer aux inscrits à proximité (15 km)"
+                        onClick={() => setProximityMission({ id: m.id, title: m.title })}
+                      >
+                        <Send className="h-4 w-4 text-primary" />
+                      </Button>
                       {m.status !== "cancelled" ? (
                         <Button variant="ghost" size="icon" aria-label="Masquer la mission" title="Masquer" onClick={() => setArchiveId(m.id)}>
                           <Archive className="h-4 w-4" />
@@ -400,6 +411,26 @@ const AdminSmallMissions = () => {
             <Button variant="outline" onClick={() => setRestoreId(null)}>Annuler</Button>
             <Button onClick={handleRestore}>Restaurer</Button>
           </DialogFooter>
+        </DialogContent>
+      </Dialog>
+      <Dialog open={!!proximityMission} onOpenChange={(open) => { if (!open) setProximityMission(null); }}>
+        <DialogContent className="max-w-3xl">
+          <DialogHeader>
+            <DialogTitle>Envoyer aux inscrits à proximité</DialogTitle>
+            <DialogDescription>
+              Mission : <strong>{proximityMission?.title}</strong>. Rayon pré-rempli à 15 km.
+              Vérifiez l'aperçu, puis confirmez explicitement pour envoyer. Aucun envoi automatique.
+            </DialogDescription>
+          </DialogHeader>
+          {proximityMission && (
+            <ProximityCampaignCard
+              key={proximityMission.id}
+              initialMissionId={proximityMission.id}
+              initialRadiusKm={15}
+              autoPreview
+              hideHeader
+            />
+          )}
         </DialogContent>
       </Dialog>
     </div>
