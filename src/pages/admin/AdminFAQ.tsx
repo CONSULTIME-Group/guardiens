@@ -231,7 +231,6 @@ const AdminFAQ = () => {
           ))}
         </div>
       )}
-      )}
 
       <AlertDialog open={!!pendingUnpublish} onOpenChange={(o) => !o && setPendingUnpublish(null)}>
         <AlertDialogContent>
