@@ -351,21 +351,16 @@ Deno.serve(async (req) => {
             .eq('id', 1)
 
           // Stop processing — remaining messages stay in queue (VT expires, retried next cycle)
-          return new Response(
-            JSON.stringify({ processed: totalProcessed, stopped: 'rate_limited' }),
-            { headers: { 'Content-Type': 'application/json' } }
-          )
+          return finish({ processed: totalProcessed, stopped: 'rate_limited' })
         }
 
         // 403 means emails are disabled for this project — retrying won't help.
         // Move straight to DLQ and stop processing the rest of the batch.
         if (isForbidden(error)) {
           await moveToDlq(supabase, queue, msg, 'Emails disabled for this project')
-          return new Response(
-            JSON.stringify({ processed: totalProcessed, stopped: 'emails_disabled' }),
-            { headers: { 'Content-Type': 'application/json' } }
-          )
+          return finish({ processed: totalProcessed, stopped: 'emails_disabled' })
         }
+
 
         // Log non-429 failures to track real retry attempts.
         await supabase.from('email_send_log').insert({
