@@ -333,6 +333,13 @@ Deno.serve(async (req) => {
       radiusKm,
     );
 
+    const missionType: "besoin" | "offre" =
+      ((mission as any).mission_type === "offre" ? "offre" : "besoin");
+    const subject = buildSubject(authorFirstName, missionType);
+    const excerpt = buildExcerpt((mission as any).description);
+    const missionUrl = `https://guardiens.fr/petites-missions/${mission.id}`;
+    const ctaLabel = missionType === "offre" ? "Voir sa proposition" : "Voir sa demande";
+
     if (mode === "preview") {
       // Limite l'aperçu pour rester léger côté UI.
       const PREVIEW_LIMIT = 500;
@@ -340,7 +347,13 @@ Deno.serve(async (req) => {
         JSON.stringify({
           count: recipients.length,
           author_first_name: authorFirstName,
-          mission: { id: mission.id, title: mission.title },
+          mission: {
+            id: mission.id,
+            title: mission.title,
+            mission_type: missionType,
+            excerpt,
+          },
+          subject,
           recipients: recipients.slice(0, PREVIEW_LIMIT).map((r) => ({
             first_name: r.first_name,
             city: r.city,
@@ -362,18 +375,15 @@ Deno.serve(async (req) => {
       });
     }
 
-    const subject = `Près de chez vous, ${authorFirstName || "un membre"} propose un coup de main, gratuitement`;
-    const missionUrl = `https://guardiens.fr/petites-missions/${mission.id}`;
-
     // Log de campagne
     const { data: campaign, error: campErr } = await serviceClient
       .from("mass_emails")
       .insert({
         segment: "proximity",
-        filters: { mission_id: missionId, radius_km: radiusKm } as any,
+        filters: { mission_id: missionId, radius_km: radiusKm, mission_type: missionType } as any,
         subject,
-        body: `Annonce d'entraide (${mission.title}) à ${radiusKm} km, auteur ${authorFirstName}`,
-        cta_label: "Voir sa proposition",
+        body: `Annonce d'entraide ${missionType === "offre" ? "(offre)" : "(besoin)"} (${mission.title}) à ${radiusKm} km, auteur ${authorFirstName}`,
+        cta_label: ctaLabel,
         cta_url: missionUrl,
         recipients_count: 0,
         status: "sending",
@@ -407,8 +417,10 @@ Deno.serve(async (req) => {
           recipientFirstName: r.first_name,
           authorFirstName,
           missionTitle: mission.title,
+          missionExcerpt: excerpt,
           missionUrl,
           subject,
+          missionType,
         }),
         tracking: { opens: true, clicks: true },
         tags: [
