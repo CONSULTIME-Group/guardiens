@@ -201,7 +201,14 @@ const AdminDepartments = () => {
               </div>
               <Switch
                 checked={p.published}
-                onCheckedChange={(checked) => toggleMutation.mutate({ id: p.id, published: checked })}
+                disabled={toggleMutation.isPending}
+                onCheckedChange={(checked) => {
+                  if (!checked) {
+                    setPendingUnpublish(p);
+                  } else {
+                    toggleMutation.mutate({ id: p.id, published: true });
+                  }
+                }}
               />
               <a href={`/departement/${p.slug}`} target="_blank" rel="noopener" className="text-muted-foreground hover:text-foreground">
                 <ExternalLink className="h-4 w-4" />
