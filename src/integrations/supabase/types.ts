@@ -2628,8 +2628,11 @@ export type Database = {
           created_at: string
           cta_label: string | null
           cta_url: string | null
+          dedupe_key: string | null
           filters: Json | null
+          heartbeat_at: string | null
           id: string
+          locked_at: string | null
           recipients_count: number
           segment: string
           sent_by: string | null
@@ -2641,8 +2644,11 @@ export type Database = {
           created_at?: string
           cta_label?: string | null
           cta_url?: string | null
+          dedupe_key?: string | null
           filters?: Json | null
+          heartbeat_at?: string | null
           id?: string
+          locked_at?: string | null
           recipients_count?: number
           segment: string
           sent_by?: string | null
@@ -2654,8 +2660,11 @@ export type Database = {
           created_at?: string
           cta_label?: string | null
           cta_url?: string | null
+          dedupe_key?: string | null
           filters?: Json | null
+          heartbeat_at?: string | null
           id?: string
+          locked_at?: string | null
           recipients_count?: number
           segment?: string
           sent_by?: string | null
