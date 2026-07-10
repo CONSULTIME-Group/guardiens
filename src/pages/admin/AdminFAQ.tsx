@@ -231,6 +231,37 @@ const AdminFAQ = () => {
           ))}
         </div>
       )}
+      )}
+
+      <AlertDialog open={!!pendingUnpublish} onOpenChange={(o) => !o && setPendingUnpublish(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Dépublier cette question ?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Cette question, potentiellement indexée par Google, sera retirée du site public.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Annuler</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={async () => {
+                const e = pendingUnpublish;
+                if (!e) return;
+                setPendingUnpublish(null);
+                await toggleMutation.mutateAsync({ id: e.id, published: false });
+                await logAdminAction({
+                  action: "content_unpublish",
+                  target_type: "faq",
+                  target_id: e.id,
+                  metadata: { title: e.question },
+                });
+              }}
+            >
+              Dépublier
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
