@@ -309,7 +309,32 @@ const AdminNurturing = () => {
     setLoading(false);
   };
 
-  const triggerEvaluate = async () => {
+  const runPreview = async () => {
+    setPreviewing(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("evaluate-journeys", {
+        body: { manual: true, dryRun: true },
+      });
+      if (error) throw error;
+      const stats = (data as { stats?: {
+        sent?: number; skipped?: number; exited?: number; enrolled?: number;
+        bySequence?: Record<string, { enrolled: number; sent: number; exited: number; skipped: number }>;
+      } } | null)?.stats;
+      setPreview({
+        sent: stats?.sent ?? 0,
+        enrolled: stats?.enrolled ?? 0,
+        exited: stats?.exited ?? 0,
+        skipped: stats?.skipped ?? 0,
+        bySequence: stats?.bySequence,
+      });
+    } catch (e) {
+      toast.error("Échec de l'aperçu", { description: e instanceof Error ? e.message : String(e) });
+    } finally {
+      setPreviewing(false);
+    }
+  };
+
+  const confirmEvaluate = async () => {
     setTriggering(true);
     try {
       const { data, error } = await supabase.functions.invoke("evaluate-journeys", { body: { manual: true } });
@@ -322,6 +347,7 @@ const AdminNurturing = () => {
       } else {
         toast.success("Évaluation terminée");
       }
+      setPreview(null);
       await fetchData();
     } catch (e) {
       toast.error("Échec du déclenchement", { description: e instanceof Error ? e.message : String(e) });
