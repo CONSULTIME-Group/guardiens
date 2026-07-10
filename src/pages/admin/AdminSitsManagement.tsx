@@ -628,6 +628,46 @@ const AdminSitsManagement = () => {
           )}
         </SheetContent>
       </Sheet>
+
+      <AlertDialog
+        open={forceCompleteModal.open}
+        onOpenChange={(v) => { if (!v && !forcingComplete) setForceCompleteModal({ open: false, sit: null }); }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              Forcer la fin de la garde « {forceCompleteModal.sit?.title ?? "sans titre"} » ?
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              {(() => {
+                const s = forceCompleteModal.sit;
+                const ownerName = sitters[s?.user_id]?.name ?? null;
+                const sitterName = s?.confirmed_sitter_id ? sitters[s.confirmed_sitter_id]?.name ?? null : null;
+                const parts: string[] = [];
+                if (ownerName) parts.push(`Propriétaire : ${ownerName}`);
+                if (sitterName) parts.push(`Gardien : ${sitterName}`);
+                return (
+                  <>
+                    {parts.length > 0 && <span className="block mb-2 text-foreground">{parts.join(" · ")}</span>}
+                    Cette action clôt la garde de force en la passant au statut « terminée »,
+                    même si les dates ou l'accord des deux parties ne sont pas complets.
+                    Elle sera tracée dans le journal d'audit.
+                  </>
+                );
+              })()}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={forcingComplete}>Annuler</AlertDialogCancel>
+            <AlertDialogAction
+              disabled={forcingComplete}
+              onClick={(e) => { e.preventDefault(); if (forceCompleteModal.sit) forceComplete(forceCompleteModal.sit); }}
+            >
+              {forcingComplete ? "Clôture," : "Confirmer la clôture"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
