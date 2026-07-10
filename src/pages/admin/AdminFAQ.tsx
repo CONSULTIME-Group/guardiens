@@ -37,6 +37,19 @@ const AdminFAQ = () => {
   const [showForm, setShowForm] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
   const [form, setForm] = useState({ question: "", answer: "", category: "general", sort_order: 0 });
+  const [pendingUnpublish, setPendingUnpublish] = useState<FaqEntry | null>(null);
+
+  const logAdminAction = async (payload: {
+    action: string;
+    target_type: string;
+    target_id: string | null;
+    metadata?: Record<string, unknown>;
+  }) => {
+    const { data: userData } = await supabase.auth.getUser();
+    const admin_id = userData?.user?.id;
+    if (!admin_id) return;
+    await (supabase.from("admin_action_logs" as any) as any).insert({ admin_id, ...payload });
+  };
 
   const { data: entries = [], isLoading } = useQuery({
     queryKey: ["admin-faq"],
