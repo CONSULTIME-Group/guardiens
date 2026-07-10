@@ -51,6 +51,7 @@ const AdminSmallMissions = () => {
   const [responseCounts, setResponseCounts] = useState<Record<string, number>>({});
   const [archiveId, setArchiveId] = useState<string | null>(null);
   const [restoreId, setRestoreId] = useState<string | null>(null);
+  const [proximityMission, setProximityMission] = useState<{ id: string; title: string } | null>(null);
   const [kpis, setKpis] = useState({ total: 0, open: 0, totalViews: 0, totalResponses: 0, suspect: 0 });
 
   // Global KPIs (independent of pagination/filters)
