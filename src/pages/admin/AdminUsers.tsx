@@ -831,6 +831,72 @@ const AdminUsers = () => {
         currentRole={roleModal.currentRole}
         onSuccess={fetchUsers}
       />
+
+      <AlertDialog
+        open={verifyModal.open}
+        onOpenChange={(v) => { if (!v && !verifying) setVerifyModal({ open: false, userId: "", userName: "", email: "" }); }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Forcer la vérification d'identité ?</AlertDialogTitle>
+            <AlertDialogDescription asChild>
+              <div className="space-y-2 text-sm">
+                <p>
+                  Utilisateur : <strong>{verifyModal.userName}</strong>
+                  {verifyModal.email ? <> ({verifyModal.email})</> : null}
+                </p>
+                <p className="text-muted-foreground">
+                  Cette action contourne le process de vérification manuelle et marque
+                  l'identité comme vérifiée. Elle sera tracée dans le journal d'audit.
+                </p>
+              </div>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={verifying}>Annuler</AlertDialogCancel>
+            <AlertDialogAction
+              disabled={verifying}
+              onClick={(e) => { e.preventDefault(); confirmForceVerify(); }}
+            >
+              {verifying ? "Validation," : "Confirmer"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog
+        open={superModal.open}
+        onOpenChange={(v) => { if (!v && !togglingSuper) setSuperModal({ open: false, userId: "", userName: "", email: "", newValue: false }); }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              {superModal.newValue ? "Promouvoir Super Gardien ?" : "Retirer le statut Super Gardien ?"}
+            </AlertDialogTitle>
+            <AlertDialogDescription asChild>
+              <div className="space-y-2 text-sm">
+                <p>
+                  Utilisateur : <strong>{superModal.userName}</strong>
+                  {superModal.email ? <> ({superModal.email})</> : null}
+                </p>
+                <p className="text-muted-foreground">
+                  Le statut Super Gardien force manuellement la réputation, indépendamment
+                  des critères automatiques. Cette action sera tracée dans le journal d'audit.
+                </p>
+              </div>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={togglingSuper}>Annuler</AlertDialogCancel>
+            <AlertDialogAction
+              disabled={togglingSuper}
+              onClick={(e) => { e.preventDefault(); confirmToggleSuper(); }}
+            >
+              {togglingSuper ? "Mise à jour," : "Confirmer"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
