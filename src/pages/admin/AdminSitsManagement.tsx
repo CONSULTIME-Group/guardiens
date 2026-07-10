@@ -447,11 +447,15 @@ const AdminSitsManagement = () => {
       <Dialog open={cancelModal.open} onOpenChange={(o) => !o && setCancelModal({ open: false, id: "", type: "", reason: "" })}>
         <DialogContent>
           <DialogHeader><DialogTitle>Annuler cette garde ?</DialogTitle></DialogHeader>
-          <DialogDescription>Les deux parties seront notifiées.</DialogDescription>
+          <DialogDescription>
+            {sitters[cancelModal.id]?.id ? "Les deux parties seront notifiées." : "Le propriétaire sera notifié."}
+          </DialogDescription>
           <Textarea value={cancelModal.reason} onChange={(e) => setCancelModal(s => ({ ...s, reason: e.target.value }))} placeholder="Motif d'annulation…" rows={3} />
           <DialogFooter>
-            <Button variant="outline" onClick={() => setCancelModal({ open: false, id: "", type: "", reason: "" })}>Annuler</Button>
-            <Button variant="destructive" onClick={handleCancel} disabled={!cancelModal.reason.trim()}>Confirmer l'annulation</Button>
+            <Button variant="outline" onClick={() => setCancelModal({ open: false, id: "", type: "", reason: "" })} disabled={cancelling}>Annuler</Button>
+            <Button variant="destructive" onClick={handleCancel} disabled={!cancelModal.reason.trim() || cancelling}>
+              {cancelling ? "Annulation…" : "Confirmer l'annulation"}
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
