@@ -29,6 +29,17 @@ interface MassEmailFilters {
 }
 
 
+const UNSUB_TOKEN_PLACEHOLDER = "__UNSUB_TOKEN__";
+
+// Generate a cryptographically random 32-byte hex token (aligned with send-transactional-email)
+function generateToken(): string {
+  const bytes = new Uint8Array(32);
+  crypto.getRandomValues(bytes);
+  return Array.from(bytes)
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("");
+}
+
 function buildHtml(subject: string, body: string, ctaLabel?: string, ctaUrl?: string): string {
   // Brand : --primary 153 42% 30% ≈ #2C6E49 (vert forêt) ; --background ≈ #FAF9F6
   const ctaBlock = ctaLabel && ctaUrl
@@ -38,6 +49,8 @@ function buildHtml(subject: string, body: string, ctaLabel?: string, ctaUrl?: st
 <tr><td align="center" style="padding:0 0 8px"><p style="margin:0;font-size:12px;color:#888">3 minutes, c'est tout.</p></td></tr>`
     : "";
 
+  // Le lien de désinscription contient un placeholder remplacé par le token
+  // propre à chaque destinataire avant l'envoi (RGPD + RFC 8058).
   return `<!DOCTYPE html><html><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/></head>
 <body style="margin:0;padding:0;background-color:#FAF9F6;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif">
 <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#FAF9F6;padding:32px 16px">
@@ -59,12 +72,115 @@ ${ctaBlock}
 <p style="margin:14px 0 0;font-size:11px;color:#aaa">
 <a href="https://guardiens.fr" style="color:#aaa;text-decoration:none">guardiens.fr</a>
 &nbsp;·&nbsp;
-<a href="https://guardiens.fr/unsubscribe" style="color:#aaa;text-decoration:underline">Se désinscrire</a>
+<a href="https://guardiens.fr/unsubscribe?token=${UNSUB_TOKEN_PLACEHOLDER}" style="color:#aaa;text-decoration:underline">Se désinscrire</a>
 </p>
 </td></tr>
 </table>
 </td></tr></table>
 </body></html>`;
+}
+
+/**
+ * Filtres RGPD/délivrabilité obligatoires, non désactivables :
+ *   - exclusion des emails dans `suppressed_emails` (fail-closed)
+ *   - exclusion des users avec `email_preferences.product_emails = false`
+ * Throw si une requête échoue → l'appelant doit ABORTER l'envoi (500).
+ */
+async function applyMandatoryComplianceFilters(
+  serviceClient: ReturnType<typeof createClient>,
+  profiles: { id: string; email: string }[],
+): Promise<{ id: string; email: string }[]> {
+  if (profiles.length === 0) return profiles;
+
+  const lowerEmails = Array.from(new Set(profiles.map((p) => p.email.toLowerCase())));
+  const userIds = Array.from(new Set(profiles.map((p) => p.id)));
+  const CHUNK = 500;
+
+  // 1. Suppression list — fail-closed
+  const suppressedSet = new Set<string>();
+  for (let i = 0; i < lowerEmails.length; i += CHUNK) {
+    const chunk = lowerEmails.slice(i, i + CHUNK);
+    const { data, error } = await serviceClient
+      .from("suppressed_emails")
+      .select("email")
+      .in("email", chunk);
+    if (error) throw new Error(`Suppression check failed: ${error.message}`);
+    for (const row of (data || []) as any[]) {
+      if (row.email) suppressedSet.add(String(row.email).toLowerCase());
+    }
+  }
+
+  // 2. Opt-out produit (obligatoire pour les campagnes de masse — catégorie 'product')
+  const optedOutIds = new Set<string>();
+  for (let i = 0; i < userIds.length; i += CHUNK) {
+    const chunk = userIds.slice(i, i + CHUNK);
+    const { data, error } = await serviceClient
+      .from("email_preferences")
+      .select("user_id")
+      .eq("product_emails", false)
+      .in("user_id", chunk);
+    if (error) throw new Error(`Product opt-out check failed: ${error.message}`);
+    for (const row of (data || []) as any[]) {
+      if (row.user_id) optedOutIds.add(row.user_id);
+    }
+  }
+
+  return profiles.filter(
+    (p) => !suppressedSet.has(p.email.toLowerCase()) && !optedOutIds.has(p.id),
+  );
+}
+
+/**
+ * Récupère ou crée les tokens de désinscription (une ligne par email).
+ * Retourne une map lowerEmail → token. Throw si une requête échoue.
+ */
+async function ensureUnsubscribeTokens(
+  serviceClient: ReturnType<typeof createClient>,
+  emails: string[],
+): Promise<Map<string, string>> {
+  const map = new Map<string, string>();
+  const lowerEmails = Array.from(new Set(emails.map((e) => e.toLowerCase())));
+  if (lowerEmails.length === 0) return map;
+
+  const CHUNK = 500;
+
+  for (let i = 0; i < lowerEmails.length; i += CHUNK) {
+    const chunk = lowerEmails.slice(i, i + CHUNK);
+    const { data, error } = await serviceClient
+      .from("email_unsubscribe_tokens")
+      .select("email, token")
+      .in("email", chunk);
+    if (error) throw new Error(`Token lookup failed: ${error.message}`);
+    for (const row of (data || []) as any[]) {
+      if (row.email && row.token) map.set(String(row.email).toLowerCase(), row.token);
+    }
+  }
+
+  const missing = lowerEmails.filter((e) => !map.has(e));
+  if (missing.length > 0) {
+    const rows = missing.map((email) => ({ email, token: generateToken() }));
+    for (let i = 0; i < rows.length; i += CHUNK) {
+      const chunk = rows.slice(i, i + CHUNK);
+      const { error } = await serviceClient
+        .from("email_unsubscribe_tokens")
+        .upsert(chunk, { onConflict: "email", ignoreDuplicates: true });
+      if (error) throw new Error(`Token upsert failed: ${error.message}`);
+    }
+    // Re-read pour récupérer le token effectif (gère les races concurrentes)
+    for (let i = 0; i < missing.length; i += CHUNK) {
+      const chunk = missing.slice(i, i + CHUNK);
+      const { data, error } = await serviceClient
+        .from("email_unsubscribe_tokens")
+        .select("email, token")
+        .in("email", chunk);
+      if (error) throw new Error(`Token re-read failed: ${error.message}`);
+      for (const row of (data || []) as any[]) {
+        if (row.email && row.token) map.set(String(row.email).toLowerCase(), row.token);
+      }
+    }
+  }
+
+  return map;
 }
 
 /**
@@ -302,10 +418,20 @@ Deno.serve(async (req) => {
     const segment: string = payload.segment || "tous";
     const filters: MassEmailFilters = payload.filters || {};
 
-    // Mode COUNT — estimation rapide, pas d'envoi
+    // Mode COUNT — estimation réelle : applique aussi les filtres obligatoires
+    // (suppression list + opt-out produit) pour ne pas surestimer.
     if (mode === "count") {
       const profiles = await fetchTargetedProfiles(serviceClient, segment, filters);
-      const uniqueEmails = new Set(profiles.map((p) => p.email));
+      let compliant: { id: string; email: string }[];
+      try {
+        compliant = await applyMandatoryComplianceFilters(serviceClient, profiles);
+      } catch (e) {
+        console.error("Compliance filter failed in count mode:", e);
+        return new Response(JSON.stringify({ error: "Failed to verify compliance filters" }), {
+          status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      const uniqueEmails = new Set(compliant.map((p) => p.email));
       return new Response(JSON.stringify({ count: uniqueEmails.size }), {
         status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
@@ -320,7 +446,20 @@ Deno.serve(async (req) => {
       });
     }
 
-    const profiles = await fetchTargetedProfiles(serviceClient, segment, filters);
+    const rawProfiles = await fetchTargetedProfiles(serviceClient, segment, filters);
+
+    // Filtres RGPD/délivrabilité obligatoires (non désactivables) —
+    // fail-closed : si la vérif échoue, on n'envoie RIEN.
+    let profiles: { id: string; email: string }[];
+    try {
+      profiles = await applyMandatoryComplianceFilters(serviceClient, rawProfiles);
+    } catch (e) {
+      console.error("Compliance filter failed — aborting send:", e);
+      return new Response(JSON.stringify({ error: "Failed to verify compliance filters" }), {
+        status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     const recipients = [...new Set(profiles.map((p) => p.email))];
 
     if (recipients.length === 0) {
@@ -329,7 +468,18 @@ Deno.serve(async (req) => {
       });
     }
 
-    const html = buildHtml(subject, body, cta_label, cta_url);
+    // Tokens de désinscription par destinataire (RGPD + List-Unsubscribe)
+    let tokenMap: Map<string, string>;
+    try {
+      tokenMap = await ensureUnsubscribeTokens(serviceClient, recipients);
+    } catch (e) {
+      console.error("Unsubscribe token provisioning failed — aborting send:", e);
+      return new Response(JSON.stringify({ error: "Failed to prepare unsubscribe tokens" }), {
+        status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    const htmlTemplate = buildHtml(subject, body, cta_label, cta_url);
     let sent = 0;
     let errors = 0;
     const BATCH_SIZE = 100;
@@ -355,15 +505,28 @@ Deno.serve(async (req) => {
     }
     const campaignId = campaign.id as string;
 
-    // Active le tracking ouvertures + clics côté Resend
-    const emailObjects = recipients.map((email) => ({
-      from: "Guardiens <bonjour@guardiens.fr>",
-      to: [email],
-      subject,
-      html,
-      tracking: { opens: true, clicks: true },
-      tags: [{ name: "campaign_id", value: campaignId }],
-    }));
+    // Un objet email par destinataire : lien de désinscription + headers
+    // List-Unsubscribe (RFC 8058, one-click) personnalisés au token.
+    const unsubApiBase = `${SUPABASE_URL}/functions/v1/handle-email-unsubscribe`;
+    const emailObjects = recipients.map((email) => {
+      const token = tokenMap.get(email.toLowerCase()) ?? "";
+      const oneClick = `${unsubApiBase}?token=${token}`;
+      const uiUrl = `https://guardiens.fr/unsubscribe?token=${token}`;
+      const personalizedHtml = htmlTemplate.replaceAll(UNSUB_TOKEN_PLACEHOLDER, token);
+      return {
+        from: "Guardiens <bonjour@guardiens.fr>",
+        to: [email],
+        subject,
+        html: personalizedHtml,
+        tracking: { opens: true, clicks: true },
+        tags: [{ name: "campaign_id", value: campaignId }],
+        headers: {
+          "List-Unsubscribe": `<${oneClick}>, <${uiUrl}>`,
+          "List-Unsubscribe-Post": "List-Unsubscribe=One-Click",
+        },
+      };
+    });
+
 
     // Rows de tracking à insérer (resend_id renseigné après chaque batch OK)
     const sendRows: Array<{
