@@ -159,8 +159,9 @@ const ProximityCampaignCard = ({
           <p className="text-xs text-muted-foreground">
             Cible les inscrits situés dans un rayon donné autour de l'auteur d'une petite mission.
             Exclut l'auteur, les emails supprimés et les opt-out. Aucun envoi tant que vous ne cliquez pas sur Envoyer.
-        </p>
-      </CardHeader>
+          </p>
+        </CardHeader>
+      )}
       <CardContent className="space-y-4">
         <div className="grid grid-cols-1 sm:grid-cols-[1fr,140px,auto] gap-3 items-end">
           <div className="space-y-1.5">
