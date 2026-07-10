@@ -358,6 +358,36 @@ const AdminPros = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <AlertDialog
+        open={validateModal.open}
+        onOpenChange={(v) => { if (!v && busyId !== validateModal.row?.id) setValidateModal({ open: false, row: null }); }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              Valider le pro {(() => {
+                const p = validateModal.row?.profiles;
+                const name = `${p?.first_name ?? ""} ${p?.last_name ?? ""}`.trim();
+                return name || validateModal.row?.declared_business_name || "sélectionné";
+              })()} ?
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              Cette action accorde le statut Pro validé et rend visible le badge côté public.
+              Elle sera tracée dans le journal d'audit.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={!!busyId}>Annuler</AlertDialogCancel>
+            <AlertDialogAction
+              disabled={!!busyId}
+              onClick={(e) => { e.preventDefault(); if (validateModal.row) decide(validateModal.row, "approved"); }}
+            >
+              {busyId ? "Validation," : "Confirmer la validation"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
