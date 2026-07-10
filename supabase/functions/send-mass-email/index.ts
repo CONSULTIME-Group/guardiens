@@ -504,10 +504,107 @@ Deno.serve(async (req) => {
       });
     }
 
+    // === Anti double-envoi (fingerprint) =====================================
+    // Empêche double-clic / rejeu sur timeout : si une campagne équivalente
+    // (même auteur + segment + filtres + contenu) a été créée dans les 5
+    // dernières minutes, on la RÉUTILISE au lieu d'en créer une nouvelle.
+    const dedupeKey = await computeDedupeKey({
+      sent_by: userId,
+      segment,
+      filters,
+      subject,
+      body,
+      cta_label,
+      cta_url,
+    });
+    const dedupeCutoff = new Date(Date.now() - DEDUPE_WINDOW_MINUTES * 60_000).toISOString();
+
+    let campaignId: string;
+    let resumed = false;
+    {
+      const { data: existing, error: exErr } = await serviceClient
+        .from("mass_emails")
+        .select("id, status")
+        .eq("dedupe_key", dedupeKey)
+        .gte("created_at", dedupeCutoff)
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      if (exErr) throw new Error(`Dedupe lookup failed: ${exErr.message}`);
+
+      if (existing?.id) {
+        campaignId = existing.id as string;
+        resumed = true;
+        // Reprend le verrou / heartbeat pour indiquer qu'un envoi est en cours
+        await serviceClient
+          .from("mass_emails")
+          .update({ status: "sending", locked_at: new Date().toISOString(), heartbeat_at: new Date().toISOString() })
+          .eq("id", campaignId);
+      } else {
+        const nowIso = new Date().toISOString();
+        const { data: campaign, error: campErr } = await serviceClient
+          .from("mass_emails")
+          .insert({
+            segment,
+            filters: filters as any,
+            subject,
+            body,
+            cta_label: cta_label || null,
+            cta_url: cta_url || null,
+            recipients_count: 0, // sera mis à jour après envoi
+            status: "sending",
+            sent_by: userId,
+            dedupe_key: dedupeKey,
+            locked_at: nowIso,
+            heartbeat_at: nowIso,
+          })
+          .select("id")
+          .single();
+        if (campErr || !campaign) {
+          throw new Error(`Failed to create campaign row: ${campErr?.message}`);
+        }
+        campaignId = campaign.id as string;
+      }
+    }
+
+    // === Reprise : exclure les destinataires déjà envoyés pour cette campagne
+    let remainingRecipients = recipients;
+    if (resumed) {
+      const alreadySent = new Set<string>();
+      const LOOK_CHUNK = 500;
+      for (let i = 0; i < recipients.length; i += LOOK_CHUNK) {
+        const chunk = recipients.slice(i, i + LOOK_CHUNK);
+        const { data, error } = await serviceClient
+          .from("mass_email_sends")
+          .select("recipient_email")
+          .eq("mass_email_id", campaignId)
+          .eq("status", "sent")
+          .in("recipient_email", chunk);
+        if (error) throw new Error(`Resume lookup failed: ${error.message}`);
+        for (const row of (data || []) as any[]) {
+          if (row.recipient_email) alreadySent.add(row.recipient_email);
+        }
+      }
+      remainingRecipients = recipients.filter((e) => !alreadySent.has(e));
+      if (remainingRecipients.length === 0) {
+        await serviceClient
+          .from("mass_emails")
+          .update({
+            status: "sent",
+            heartbeat_at: new Date().toISOString(),
+          })
+          .eq("id", campaignId);
+        return new Response(
+          JSON.stringify({ sent: 0, errors: 0, resumed: true, campaign_id: campaignId, note: "already delivered" }),
+          { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+        );
+      }
+    }
+
     // Tokens de désinscription par destinataire (RGPD + List-Unsubscribe)
     let tokenMap: Map<string, string>;
     try {
-      tokenMap = await ensureUnsubscribeTokens(serviceClient, recipients);
+      tokenMap = await ensureUnsubscribeTokens(serviceClient, remainingRecipients);
     } catch (e) {
       console.error("Unsubscribe token provisioning failed — aborting send:", e);
       return new Response(JSON.stringify({ error: "Failed to prepare unsubscribe tokens" }), {
@@ -520,31 +617,10 @@ Deno.serve(async (req) => {
     let errors = 0;
     const BATCH_SIZE = 100;
 
-    // Crée d'abord la campagne pour avoir son id (pour le tracking)
-    const { data: campaign, error: campErr } = await serviceClient
-      .from("mass_emails")
-      .insert({
-        segment,
-        filters: filters as any,
-        subject,
-        body,
-        cta_label: cta_label || null,
-        cta_url: cta_url || null,
-        recipients_count: 0, // sera mis à jour après envoi
-        status: "sending",
-        sent_by: userId,
-      })
-      .select("id")
-      .single();
-    if (campErr || !campaign) {
-      throw new Error(`Failed to create campaign row: ${campErr?.message}`);
-    }
-    const campaignId = campaign.id as string;
-
     // Un objet email par destinataire : lien de désinscription + headers
     // List-Unsubscribe (RFC 8058, one-click) personnalisés au token.
     const unsubApiBase = `${SUPABASE_URL}/functions/v1/handle-email-unsubscribe`;
-    const emailObjects = recipients.map((email) => {
+    const emailObjects = remainingRecipients.map((email) => {
       const token = tokenMap.get(email.toLowerCase()) ?? "";
       const oneClick = `${unsubApiBase}?token=${token}`;
       const uiUrl = `https://guardiens.fr/unsubscribe?token=${token}`;
@@ -563,19 +639,17 @@ Deno.serve(async (req) => {
       };
     });
 
-
-    // Rows de tracking à insérer (resend_id renseigné après chaque batch OK)
-    const sendRows: Array<{
-      mass_email_id: string;
-      recipient_email: string;
-      resend_id: string | null;
-      status: string;
-      error_message: string | null;
-    }> = [];
-
     for (let i = 0; i < emailObjects.length; i += BATCH_SIZE) {
       const batch = emailObjects.slice(i, i + BATCH_SIZE);
-      const batchEmails = recipients.slice(i, i + BATCH_SIZE);
+      const batchEmails = remainingRecipients.slice(i, i + BATCH_SIZE);
+      const batchRows: Array<{
+        mass_email_id: string;
+        recipient_email: string;
+        resend_id: string | null;
+        status: string;
+        error_message: string | null;
+      }> = [];
+
       try {
         const res = await fetch("https://api.resend.com/emails/batch", {
           method: "POST",
@@ -597,7 +671,7 @@ Deno.serve(async (req) => {
             // pas grave, on stocke sans id
           }
           batchEmails.forEach((email, idx) => {
-            sendRows.push({
+            batchRows.push({
               mass_email_id: campaignId,
               recipient_email: email,
               resend_id: ids[idx] || null,
@@ -609,7 +683,7 @@ Deno.serve(async (req) => {
           console.error(`Batch failed (${i}): ${res.status} ${resBody}`);
           errors += batch.length;
           batchEmails.forEach((email) => {
-            sendRows.push({
+            batchRows.push({
               mass_email_id: campaignId,
               recipient_email: email,
               resend_id: null,
@@ -622,7 +696,7 @@ Deno.serve(async (req) => {
         console.error(`Batch error (${i}):`, e);
         errors += batch.length;
         batchEmails.forEach((email) => {
-          sendRows.push({
+          batchRows.push({
             mass_email_id: campaignId,
             recipient_email: email,
             resend_id: null,
@@ -631,31 +705,49 @@ Deno.serve(async (req) => {
           });
         });
       }
+
+      // Upsert idempotent : (mass_email_id, recipient_email) est UNIQUE.
+      // ignoreDuplicates → si une ligne existe déjà pour ce destinataire
+      // (rejeu, race avec un autre run), on ne l'écrase pas.
+      if (batchRows.length > 0) {
+        const { error: insErr } = await serviceClient
+          .from("mass_email_sends")
+          .upsert(batchRows, {
+            onConflict: "mass_email_id,recipient_email",
+            ignoreDuplicates: true,
+          });
+        if (insErr) console.error(`mass_email_sends upsert error (chunk ${i}):`, insErr);
+      }
+
+      // Heartbeat à chaque lot (le watchdog considère silence > 5 min)
+      await serviceClient
+        .from("mass_emails")
+        .update({ heartbeat_at: new Date().toISOString() })
+        .eq("id", campaignId);
+
       if (i + BATCH_SIZE < emailObjects.length) {
         await new Promise((r) => setTimeout(r, 1000));
       }
     }
 
-    // Insert tracking rows en chunks (Postgres limit)
-    const INSERT_CHUNK = 500;
-    for (let i = 0; i < sendRows.length; i += INSERT_CHUNK) {
-      const chunk = sendRows.slice(i, i + INSERT_CHUNK);
-      const { error: insErr } = await serviceClient
-        .from("mass_email_sends")
-        .insert(chunk);
-      if (insErr) console.error(`mass_email_sends insert error (chunk ${i}):`, insErr);
-    }
+    // Recompte le nombre total d'envois « sent » (couvre la reprise + l'existant)
+    const { count: sentTotal } = await serviceClient
+      .from("mass_email_sends")
+      .select("id", { count: "exact", head: true })
+      .eq("mass_email_id", campaignId)
+      .eq("status", "sent");
 
     // Met à jour la campagne avec le compte final
     await serviceClient
       .from("mass_emails")
       .update({
-        recipients_count: sent,
+        recipients_count: sentTotal ?? sent,
         status: errors > 0 && sent === 0 ? "error" : "sent",
+        heartbeat_at: new Date().toISOString(),
       })
       .eq("id", campaignId);
 
-    return new Response(JSON.stringify({ sent, errors }), {
+    return new Response(JSON.stringify({ sent, errors, resumed, campaign_id: campaignId }), {
       status: 200,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
