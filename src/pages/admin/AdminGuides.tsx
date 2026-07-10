@@ -274,7 +274,14 @@ const AdminGuides = () => {
               </div>
               <Switch
                 checked={guide.published}
-                onCheckedChange={(checked) => toggleMutation.mutate({ id: guide.id, published: checked })}
+                disabled={toggleMutation.isPending}
+                onCheckedChange={(checked) => {
+                  if (!checked) {
+                    setPendingUnpublish(guide);
+                  } else {
+                    toggleMutation.mutate({ id: guide.id, published: true });
+                  }
+                }}
               />
               <a
                 href={`/guide/${guide.slug}`}
