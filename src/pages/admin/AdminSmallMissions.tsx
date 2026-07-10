@@ -89,9 +89,7 @@ const AdminSmallMissions = () => {
       query = query.order(sortBy, { ascending });
     }
 
-    const from = page * PAGE_SIZE;
-    const to = from + PAGE_SIZE - 1;
-    query = query.range(from, to);
+    query = query.limit(5000);
 
     const { data, count, error } = await query;
     if (error) toast.error("Erreur de chargement");
