@@ -8,6 +8,16 @@ import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ConfirmDialog } from "@/components/admin/ConfirmDialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 interface SkillRow {
   id: string;
@@ -57,6 +67,10 @@ const AdminSkills = () => {
   const [newCompLabel, setNewCompLabel] = useState("");
   const [newCompCategorie, setNewCompCategorie] = useState("jardin");
   const [pendingCompetences, setPendingCompetences] = useState<{ label: string; count: number; sources: string[] }[]>([]);
+  const [rejectModal, setRejectModal] = useState<{ open: boolean; label: string; count: number }>({
+    open: false, label: "", count: 0,
+  });
+  const [rejecting, setRejecting] = useState(false);
 
   const fetchSkills = useCallback(async () => {
     setLoading(true);
@@ -171,12 +185,35 @@ const AdminSkills = () => {
     fetchPendingCompetences();
   };
 
-  const handleRejectCompetence = async (label: string) => {
+  const confirmRejectCompetence = async () => {
+    const label = rejectModal.label;
+    if (!label) return;
+    setRejecting(true);
     const { data, error } = await supabase.rpc("admin_reject_competence_label", { p_label: label });
-    if (error) { toast({ description: "Erreur lors du refus." }); return; }
-    toast({ description: `"${label}" refusée et retirée de ${data ?? 0} profil(s).` });
+    if (error) {
+      toast({ description: "Erreur lors du refus." });
+      setRejecting(false);
+      return;
+    }
+    const affected = (data as number | null) ?? 0;
+    // Audit trail
+    const { data: userData } = await supabase.auth.getUser();
+    const adminId = userData.user?.id;
+    if (adminId) {
+      await supabase.from("admin_action_logs").insert({
+        admin_id: adminId,
+        action: "reject_competence_label",
+        target_type: "competence",
+        target_id: null,
+        metadata: { label, affected_profiles: affected, submissions: rejectModal.count },
+      });
+    }
+    toast({ description: `"${label}" refusée et retirée de ${affected} profil(s).` });
+    setRejecting(false);
+    setRejectModal({ open: false, label: "", count: 0 });
     fetchPendingCompetences();
   };
+
 
   const handleAddCompetence = async () => {
     if (!newCompLabel.trim()) return;
@@ -290,7 +327,8 @@ const AdminSkills = () => {
                             size="sm"
                             variant="ghost"
                             className="h-8 px-2 text-destructive"
-                            onClick={() => handleRejectCompetence(pc.label)}
+                            onClick={() => setRejectModal({ open: true, label: pc.label, count: pc.count })}
+                            disabled={rejecting && rejectModal.label === pc.label}
                             title="Refuser et retirer des profils"
                           >
                             <X className="h-4 w-4" />
@@ -479,6 +517,31 @@ const AdminSkills = () => {
           )}
         </TabsContent>
       </Tabs>
+
+      <AlertDialog
+        open={rejectModal.open}
+        onOpenChange={(v) => { if (!v && !rejecting) setRejectModal({ open: false, label: "", count: 0 }); }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Refuser la compétence « {rejectModal.label} » ?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Cette compétence sera <strong>retirée de TOUS les profils</strong> qui la portent
+              actuellement ({rejectModal.count} soumission{rejectModal.count > 1 ? "s" : ""}).
+              Cette action est irréversible et sera tracée dans le journal d'audit.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={rejecting}>Annuler</AlertDialogCancel>
+            <AlertDialogAction
+              disabled={rejecting}
+              onClick={(e) => { e.preventDefault(); confirmRejectCompetence(); }}
+            >
+              {rejecting ? "Suppression," : "Confirmer le refus"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
