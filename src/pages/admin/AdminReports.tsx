@@ -5,11 +5,21 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
-import { Eye, CheckCircle, StickyNote, AlertTriangle, Clock, ExternalLink, UserX, EyeOff, Trash2, ShieldAlert } from "lucide-react";
+import { Eye, CheckCircle, StickyNote, AlertTriangle, ExternalLink, UserX, EyeOff, Trash2, ShieldAlert } from "lucide-react";
 
 const reasonLabels: Record<string, string> = {
   inappropriate: "Contenu inapproprié",
@@ -27,13 +37,29 @@ const targetTypeLabels: Record<string, string> = {
   small_mission: "Petite mission",
 };
 
+type ActionKey = "warn" | "hide" | "suspend" | "delete" | "none";
+const DESTRUCTIVE_ACTIONS: ActionKey[] = ["suspend", "delete"];
+
+function targetHref(targetType: string, targetId: string): string | null {
+  switch (targetType) {
+    case "profile": return `/gardiens/${targetId}`;
+    case "listing": return `/annonces/${targetId}`;
+    case "small_mission": return `/petites-missions/${targetId}`;
+    case "review": return `/mes-avis?highlight=${targetId}`;
+    case "message": return `/messagerie?message=${targetId}`;
+    default: return null;
+  }
+}
+
 const AdminReports = () => {
   const [reports, setReports] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
   const [filterStatus, setFilterStatus] = useState("pending");
   const [reporters, setReporters] = useState<Record<string, { name: string; avatar: string | null }>>({});
   const [noteModal, setNoteModal] = useState<{ open: boolean; reportId: string; note: string }>({ open: false, reportId: "", note: "" });
-  const [actionModal, setActionModal] = useState<{ open: boolean; reportId: string; action: string }>({ open: false, reportId: "", action: "" });
+  const [actionModal, setActionModal] = useState<{ open: boolean; reportId: string; action: ActionKey | "" }>({ open: false, reportId: "", action: "" });
+  const [confirmDestructive, setConfirmDestructive] = useState<{ open: boolean; action: ActionKey | null }>({ open: false, action: null });
 
   const fetchReports = useCallback(async () => {
     setLoading(true);
@@ -63,30 +89,43 @@ const AdminReports = () => {
     toast.success("Prise en charge"); fetchReports();
   };
 
-  const takeAction = async () => {
-    const report = reports.find(r => r.id === actionModal.reportId);
-    if (!report) return;
+  const currentReport = reports.find(r => r.id === actionModal.reportId);
+  const currentTargetLabel = currentReport
+    ? `${targetTypeLabels[currentReport.target_type] || currentReport.target_type} — ${currentReport.target_id}`
+    : "";
 
-    // Update the report status
-    await supabase.from("reports").update({ status: "resolved", resolved_at: new Date().toISOString() }).eq("id", actionModal.reportId);
-
-    // Send email to reporter
-    const { data: emailData } = await supabase.rpc("get_user_emails_admin", { p_user_ids: [report.reporter_id] });
-    const reporterEmail = emailData?.[0]?.email;
-    if (reporterEmail) {
-      await supabase.functions.invoke("send-transactional-email", {
+  const executeAction = async () => {
+    if (!actionModal.reportId || !actionModal.action) return;
+    setSubmitting(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("admin-moderate-report", {
         body: {
-          templateName: "report-resolved",
-          recipientEmail: reporterEmail,
-          idempotencyKey: `report-resolved-${actionModal.reportId}`,
-          templateData: { reason: report.reason, status: "resolved", adminNotes: report.admin_notes || undefined },
+          report_id: actionModal.reportId,
+          action: actionModal.action,
+          admin_note: currentReport?.admin_notes || undefined,
         },
       });
+      if (error) throw error;
+      if ((data as any)?.error) throw new Error((data as any).error);
+      toast.success(`Action « ${actionModal.action} » appliquée`);
+      setActionModal({ open: false, reportId: "", action: "" });
+      setConfirmDestructive({ open: false, action: null });
+      fetchReports();
+    } catch (e: any) {
+      console.error("admin-moderate-report failed", e);
+      toast.error(`Échec : ${e?.message || "erreur serveur"}`);
+    } finally {
+      setSubmitting(false);
     }
+  };
 
-    toast.success(`Action "${actionModal.action}" appliquée`);
-    setActionModal({ open: false, reportId: "", action: "" });
-    fetchReports();
+  const onConfirmClick = () => {
+    if (!actionModal.action) return;
+    if (DESTRUCTIVE_ACTIONS.includes(actionModal.action)) {
+      setConfirmDestructive({ open: true, action: actionModal.action });
+    } else {
+      executeAction();
+    }
   };
 
   const saveNote = async () => {
@@ -96,7 +135,6 @@ const AdminReports = () => {
   };
 
   const newCount = reports.filter((r) => r.status === "new").length;
-  const inProgressCount = reports.filter((r) => r.status === "in_progress").length;
 
   const statusBadge = (status: string) => {
     if (status === "new") return <Badge variant="destructive">Nouveau</Badge>;
@@ -133,6 +171,7 @@ const AdminReports = () => {
         <div className="space-y-4">
           {reports.map((report) => {
             const reporter = reporters[report.reporter_id];
+            const href = targetHref(report.target_type, report.target_id);
             return (
               <Card key={report.id}>
                 <CardContent className="p-5 space-y-3">
@@ -142,13 +181,28 @@ const AdminReports = () => {
                         <AlertTriangle className="h-5 w-5 text-destructive" />
                       </div>
                       <div>
-                        <div className="flex items-center gap-2 mb-0.5">
+                        <div className="flex items-center gap-2 mb-0.5 flex-wrap">
                           <Badge variant="outline" className="text-xs">{targetTypeLabels[report.target_type] || report.target_type}</Badge>
                           <span className="text-sm font-medium">{reasonLabels[report.reason] || report.reason}</span>
+                          {href && (
+                            <a
+                              href={href}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center gap-1 text-xs text-primary hover:underline"
+                            >
+                              Voir la cible <ExternalLink className="h-3 w-3" />
+                            </a>
+                          )}
                         </div>
                         <p className="text-xs text-muted-foreground">
                           Signalé par <span className="font-medium">{reporter?.name || "Inconnu"}</span> · {format(new Date(report.created_at), "d MMM yyyy à HH:mm", { locale: fr })}
                         </p>
+                        {report.action_taken && (
+                          <p className="text-xs text-muted-foreground mt-0.5">
+                            Action prise : <span className="font-medium">{report.action_taken}</span>
+                          </p>
+                        )}
                       </div>
                     </div>
                     {statusBadge(report.status)}
@@ -187,16 +241,16 @@ const AdminReports = () => {
       )}
 
       {/* Action modal */}
-      <Dialog open={actionModal.open} onOpenChange={(o) => !o && setActionModal({ open: false, reportId: "", action: "" })}>
+      <Dialog open={actionModal.open} onOpenChange={(o) => !o && !submitting && setActionModal({ open: false, reportId: "", action: "" })}>
         <DialogContent>
           <DialogHeader><DialogTitle>Prendre une action</DialogTitle></DialogHeader>
           <div className="space-y-2">
             {[
-              { key: "warn", label: "Avertir l'utilisateur", icon: AlertTriangle },
-              { key: "hide", label: "Masquer le contenu", icon: EyeOff },
-              { key: "suspend", label: "Suspendre le compte", icon: UserX },
-              { key: "delete", label: "Supprimer le contenu", icon: Trash2 },
-              { key: "none", label: "Aucune action (non fondé)", icon: CheckCircle },
+              { key: "warn" as const, label: "Avertir l'utilisateur", icon: AlertTriangle },
+              { key: "hide" as const, label: "Masquer le contenu", icon: EyeOff },
+              { key: "suspend" as const, label: "Suspendre le compte", icon: UserX },
+              { key: "delete" as const, label: "Supprimer le contenu", icon: Trash2 },
+              { key: "none" as const, label: "Aucune action (non fondé)", icon: CheckCircle },
             ].map(({ key, label, icon: Icon }) => (
               <Button
                 key={key}
@@ -209,11 +263,41 @@ const AdminReports = () => {
             ))}
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setActionModal({ open: false, reportId: "", action: "" })}>Annuler</Button>
-            <Button onClick={takeAction} disabled={!actionModal.action}>Confirmer</Button>
+            <Button variant="outline" disabled={submitting} onClick={() => setActionModal({ open: false, reportId: "", action: "" })}>Annuler</Button>
+            <Button onClick={onConfirmClick} disabled={!actionModal.action || submitting}>
+              {submitting ? "En cours…" : "Confirmer"}
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Destructive confirmation */}
+      <AlertDialog
+        open={confirmDestructive.open}
+        onOpenChange={(o) => !o && !submitting && setConfirmDestructive({ open: false, action: null })}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              {confirmDestructive.action === "suspend" ? "Suspendre ce compte ?" : "Supprimer ce contenu ?"}
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              Action irréversible sur : <strong>{currentTargetLabel}</strong>.<br />
+              Confirmez-vous&nbsp;?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={submitting}>Annuler</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={(e) => { e.preventDefault(); executeAction(); }}
+              disabled={submitting}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {submitting ? "En cours…" : "Confirmer"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       {/* Note modal */}
       <Dialog open={noteModal.open} onOpenChange={(o) => !o && setNoteModal({ open: false, reportId: "", note: "" })}>

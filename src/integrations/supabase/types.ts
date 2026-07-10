@@ -41,6 +41,50 @@ export type Database = {
         }
         Relationships: []
       }
+      admin_action_logs: {
+        Row: {
+          action: string
+          admin_id: string
+          created_at: string
+          id: string
+          metadata: Json | null
+          note: string | null
+          report_id: string | null
+          target_id: string | null
+          target_type: string
+        }
+        Insert: {
+          action: string
+          admin_id: string
+          created_at?: string
+          id?: string
+          metadata?: Json | null
+          note?: string | null
+          report_id?: string | null
+          target_id?: string | null
+          target_type: string
+        }
+        Update: {
+          action?: string
+          admin_id?: string
+          created_at?: string
+          id?: string
+          metadata?: Json | null
+          note?: string | null
+          report_id?: string | null
+          target_id?: string | null
+          target_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "admin_action_logs_report_id_fkey"
+            columns: ["report_id"]
+            isOneToOne: false
+            referencedRelation: "reports"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       admin_message_logs: {
         Row: {
           admin_id: string
@@ -2650,6 +2694,8 @@ export type Database = {
           id: string
           is_system: boolean
           metadata: Json | null
+          moderation_hidden_at: string | null
+          moderation_hidden_by: string | null
           photo_url: string | null
           read_at: string | null
           sender_id: string
@@ -2661,6 +2707,8 @@ export type Database = {
           id?: string
           is_system?: boolean
           metadata?: Json | null
+          moderation_hidden_at?: string | null
+          moderation_hidden_by?: string | null
           photo_url?: string | null
           read_at?: string | null
           sender_id: string
@@ -2672,6 +2720,8 @@ export type Database = {
           id?: string
           is_system?: boolean
           metadata?: Json | null
+          moderation_hidden_at?: string | null
+          moderation_hidden_by?: string | null
           photo_url?: string | null
           read_at?: string | null
           sender_id?: string
@@ -3843,6 +3893,9 @@ export type Database = {
           referred_by: string | null
           role: Database["public"]["Enums"]["user_role"]
           skill_categories: string[] | null
+          suspended_at: string | null
+          suspended_by: string | null
+          suspension_reason: string | null
           updated_at: string
         }
         Insert: {
@@ -3898,6 +3951,9 @@ export type Database = {
           referred_by?: string | null
           role?: Database["public"]["Enums"]["user_role"]
           skill_categories?: string[] | null
+          suspended_at?: string | null
+          suspended_by?: string | null
+          suspension_reason?: string | null
           updated_at?: string
         }
         Update: {
@@ -3953,6 +4009,9 @@ export type Database = {
           referred_by?: string | null
           role?: Database["public"]["Enums"]["user_role"]
           skill_categories?: string[] | null
+          suspended_at?: string | null
+          suspended_by?: string | null
+          suspension_reason?: string | null
           updated_at?: string
         }
         Relationships: [
@@ -4169,6 +4228,7 @@ export type Database = {
       }
       reports: {
         Row: {
+          action_taken: string | null
           admin_notes: string | null
           created_at: string
           details: string | null
@@ -4177,11 +4237,13 @@ export type Database = {
           report_type: string
           reporter_id: string
           resolved_at: string | null
+          resolved_by: string | null
           status: string
           target_id: string
           target_type: string
         }
         Insert: {
+          action_taken?: string | null
           admin_notes?: string | null
           created_at?: string
           details?: string | null
@@ -4190,11 +4252,13 @@ export type Database = {
           report_type?: string
           reporter_id: string
           resolved_at?: string | null
+          resolved_by?: string | null
           status?: string
           target_id: string
           target_type?: string
         }
         Update: {
+          action_taken?: string | null
           admin_notes?: string | null
           created_at?: string
           details?: string | null
@@ -4203,6 +4267,7 @@ export type Database = {
           report_type?: string
           reporter_id?: string
           resolved_at?: string | null
+          resolved_by?: string | null
           status?: string
           target_id?: string
           target_type?: string
@@ -4299,6 +4364,8 @@ export type Database = {
           instructions_clarity_rating: number | null
           listing_accuracy_rating: number | null
           mission_id: string | null
+          moderation_hidden_at: string | null
+          moderation_hidden_by: string | null
           moderation_status: string
           overall_rating: number
           published: boolean | null
@@ -4326,6 +4393,8 @@ export type Database = {
           instructions_clarity_rating?: number | null
           listing_accuracy_rating?: number | null
           mission_id?: string | null
+          moderation_hidden_at?: string | null
+          moderation_hidden_by?: string | null
           moderation_status?: string
           overall_rating: number
           published?: boolean | null
@@ -4353,6 +4422,8 @@ export type Database = {
           instructions_clarity_rating?: number | null
           listing_accuracy_rating?: number | null
           mission_id?: string | null
+          moderation_hidden_at?: string | null
+          moderation_hidden_by?: string | null
           moderation_status?: string
           overall_rating?: number
           published?: boolean | null
@@ -4714,6 +4785,8 @@ export type Database = {
           logement_override: string | null
           max_applications: number | null
           min_gardien_sits: number
+          moderation_hidden_at: string | null
+          moderation_hidden_by: string | null
           open_to: string[] | null
           owner_message: string | null
           property_id: string
@@ -4752,6 +4825,8 @@ export type Database = {
           logement_override?: string | null
           max_applications?: number | null
           min_gardien_sits?: number
+          moderation_hidden_at?: string | null
+          moderation_hidden_by?: string | null
           open_to?: string[] | null
           owner_message?: string | null
           property_id: string
@@ -4790,6 +4865,8 @@ export type Database = {
           logement_override?: string | null
           max_applications?: number | null
           min_gardien_sits?: number
+          moderation_hidden_at?: string | null
+          moderation_hidden_by?: string | null
           open_to?: string[] | null
           owner_message?: string | null
           property_id?: string
@@ -5367,6 +5444,8 @@ export type Database = {
           latitude: number | null
           longitude: number | null
           mission_type: Database["public"]["Enums"]["mission_type_enum"]
+          moderation_hidden_at: string | null
+          moderation_hidden_by: string | null
           pet_size: string | null
           pet_species: string | null
           photos: string[]
@@ -5393,6 +5472,8 @@ export type Database = {
           latitude?: number | null
           longitude?: number | null
           mission_type?: Database["public"]["Enums"]["mission_type_enum"]
+          moderation_hidden_at?: string | null
+          moderation_hidden_by?: string | null
           pet_size?: string | null
           pet_species?: string | null
           photos?: string[]
@@ -5419,6 +5500,8 @@ export type Database = {
           latitude?: number | null
           longitude?: number | null
           mission_type?: Database["public"]["Enums"]["mission_type_enum"]
+          moderation_hidden_at?: string | null
+          moderation_hidden_by?: string | null
           pet_size?: string | null
           pet_species?: string | null
           photos?: string[]
