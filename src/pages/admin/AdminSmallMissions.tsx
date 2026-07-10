@@ -314,7 +314,7 @@ const AdminSmallMissions = () => {
               <TableRow><TableCell colSpan={10} className="text-center py-8 text-muted-foreground">Chargement…</TableCell></TableRow>
             ) : filtered.length === 0 ? (
               <TableRow><TableCell colSpan={10} className="text-center py-8 text-muted-foreground">Aucune mission</TableCell></TableRow>
-            ) : filtered.map((m) => {
+            ) : paginated.map((m) => {
               const status = statusLabels[m.status] || { label: m.status, variant: "outline" as const };
               const isSuspect = moneyPattern.test(m.description || "") || moneyPattern.test(m.exchange_offer || "");
               const views = m.view_count ?? 0;
