@@ -130,19 +130,35 @@ const ProximityCampaignCard = ({
     }
   };
 
+  // Auto-preview (ouverture depuis un contexte pré-rempli, ex : bouton par ligne
+  // dans /admin/small-missions).
+  const autoPreviewRef = useRef(false);
+  useEffect(() => {
+    if (!autoPreview || autoPreviewRef.current) return;
+    if (!missionId.trim()) return;
+    autoPreviewRef.current = true;
+    void handlePreview();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [autoPreview]);
+
+  const missionType = preview?.mission?.mission_type ?? "besoin";
   const subject = preview
-    ? `Près de chez vous, ${preview.author_first_name || "un membre"} propose un coup de main, gratuitement`
+    ? (preview.subject
+        ?? (missionType === "offre"
+          ? `Près de chez vous, ${preview.author_first_name || "un membre"} propose son aide, gratuitement`
+          : `Près de chez vous, ${preview.author_first_name || "un membre"} cherche un coup de main`))
     : "";
 
   return (
     <Card className="border-primary/30">
-      <CardHeader>
-        <CardTitle className="text-base">
-          Annonce d'entraide à proximité
-        </CardTitle>
-        <p className="text-xs text-muted-foreground">
-          Cible les inscrits situés dans un rayon donné autour de l'auteur d'une petite mission.
-          Exclut l'auteur, les emails supprimés et les opt-out. Aucun envoi tant que vous ne cliquez pas sur Envoyer.
+      {!hideHeader && (
+        <CardHeader>
+          <CardTitle className="text-base">
+            Annonce d'entraide à proximité
+          </CardTitle>
+          <p className="text-xs text-muted-foreground">
+            Cible les inscrits situés dans un rayon donné autour de l'auteur d'une petite mission.
+            Exclut l'auteur, les emails supprimés et les opt-out. Aucun envoi tant que vous ne cliquez pas sur Envoyer.
         </p>
       </CardHeader>
       <CardContent className="space-y-4">
