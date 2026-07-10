@@ -28,7 +28,7 @@ const AdminSubscriptions = () => {
   const [search, setSearch] = useState("");
   const [filterPlan, setFilterPlan] = useState("all");
   const [filterExpiring, setFilterExpiring] = useState(false);
-  const [metrics, setMetrics] = useState({ active: 0, founders: 0, expiredMonth: 0, revenue: 0 });
+  const [metrics, setMetrics] = useState({ active: 0, founders: 0, expiredMonth: 0 });
   const [actionModal, setActionModal] = useState<{ open: boolean; sub: any; action: string; duration: string; motif: string }>({
     open: false, sub: null, action: "", duration: "1", motif: ""
   });
@@ -80,7 +80,6 @@ const AdminSubscriptions = () => {
       active: allData.filter(s => s.status === "active").length,
       founders: allData.filter(s => s.plan === "founder_free" && s.status === "active").length,
       expiredMonth: allData.filter(s => s.status === "expired" && s.expires_at && new Date(s.expires_at) >= monthAgo).length,
-      revenue: allData.filter(s => s.plan === "annual_sitter" && s.status === "active").length * 9,
     });
     setLoading(false);
   }, [filterPlan, filterExpiring]);
@@ -239,8 +238,8 @@ const AdminSubscriptions = () => {
           <CardContent className="p-4 flex items-center gap-3">
             <div className="p-2 rounded-lg bg-success-soft"><CreditCard className="h-5 w-5 text-success" /></div>
             <div>
-              <p className="text-2xl font-bold">{metrics.revenue}€</p>
-              <p className="text-xs text-muted-foreground">Revenus estimés</p>
+              <p className="text-2xl font-bold">Gratuit</p>
+              <p className="text-xs text-muted-foreground">Revenus (offre gratuite pour l'instant)</p>
             </div>
           </CardContent>
         </Card>
@@ -267,7 +266,7 @@ const AdminSubscriptions = () => {
           <SelectContent>
             <SelectItem value="all">Tous les plans</SelectItem>
             <SelectItem value="founder_free">Fondateur</SelectItem>
-            <SelectItem value="annual_sitter">Gardien mensuel (9 €)</SelectItem>
+            <SelectItem value="annual_sitter">Gardien</SelectItem>
             <SelectItem value="free_launch">Lancement gratuit</SelectItem>
             <SelectItem value="owner_free">Proprio gratuit</SelectItem>
           </SelectContent>
