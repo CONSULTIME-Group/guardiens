@@ -79,7 +79,7 @@ const AdminSitsManagement = () => {
   useEffect(() => {
     if (!sits.length) return;
     const fetchSitterData = async () => {
-      const map: Record<string, { name: string; avatar: string | null }> = {};
+      const map: Record<string, { name: string; avatar: string | null; id?: string }> = {};
       const sitIds = sits.map(s => s.id);
 
       if (sitIds.length) {
@@ -90,6 +90,7 @@ const AdminSitsManagement = () => {
           map[a.sit_id] = {
             name: `${a.first_name || ""} ${a.last_name || ""}`.trim(),
             avatar: a.avatar_url,
+            id: a.sitter_id,
           };
         });
       }
