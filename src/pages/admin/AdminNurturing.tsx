@@ -165,6 +165,11 @@ const AdminNurturing = () => {
   const [range, setRange] = useState<Range>("7d");
   const [loading, setLoading] = useState(true);
   const [triggering, setTriggering] = useState(false);
+  const [previewing, setPreviewing] = useState(false);
+  const [preview, setPreview] = useState<null | {
+    sent: number; enrolled: number; exited: number; skipped: number;
+    bySequence?: Record<string, { enrolled: number; sent: number; exited: number; skipped: number }>;
+  }>(null);
   const [logs, setLogs] = useState<LogRow[]>([]);
   const [journeys, setJourneys] = useState<JourneyRow[]>([]);
   const [queue, setQueue] = useState<QueueRow[]>([]);
