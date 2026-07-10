@@ -16,7 +16,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 
 const planLabels: Record<string, { label: string; color: string }> = {
   founder_free: { label: "Fondateur", color: "bg-warning-soft text-warning-foreground dark:bg-amber-900/30 dark:text-amber-400" },
-  annual_sitter: { label: "Premium", color: "bg-primary/10 text-primary" },
+  annual_sitter: { label: "Gardien", color: "bg-primary/10 text-primary" },
   free_launch: { label: "Lancement gratuit", color: "bg-success-soft text-success" },
   owner_free: { label: "Proprio gratuit", color: "bg-muted text-muted-foreground" },
 };
@@ -61,7 +61,14 @@ const AdminSubscriptions = () => {
       (profiles || []).forEach(p => { profileMap[p.id] = p; });
     }
 
-    let subs = allData.map(s => ({ ...s, profile: profileMap[s.user_id] || null }));
+    // Fetch real emails via admin RPC
+    const emailMap: Record<string, string> = {};
+    if (userIds.length > 0) {
+      const { data: emails } = await supabase.rpc("get_user_emails_admin", { p_user_ids: userIds });
+      (emails || []).forEach((e: any) => { if (e?.user_id && e?.email) emailMap[e.user_id] = e.email; });
+    }
+
+    let subs = allData.map(s => ({ ...s, profile: profileMap[s.user_id] || null, email: emailMap[s.user_id] || null }));
     if (filterExpiring) {
       const in30days = new Date(Date.now() + 30 * 86400000);
       subs = subs.filter(s => s.status === "active" && s.expires_at && new Date(s.expires_at) <= in30days);
@@ -73,7 +80,7 @@ const AdminSubscriptions = () => {
       active: allData.filter(s => s.status === "active").length,
       founders: allData.filter(s => s.plan === "founder_free" && s.status === "active").length,
       expiredMonth: allData.filter(s => s.status === "expired" && s.expires_at && new Date(s.expires_at) >= monthAgo).length,
-      revenue: allData.filter(s => s.plan === "annual_sitter" && s.status === "active").length * 49,
+      revenue: allData.filter(s => s.plan === "annual_sitter" && s.status === "active").length * 9,
     });
     setLoading(false);
   }, [filterPlan, filterExpiring]);
@@ -135,7 +142,7 @@ const AdminSubscriptions = () => {
   const filtered = subscriptions.filter(s => {
     if (!search) return true;
     const q = search.toLowerCase();
-    return s.profile?.first_name?.toLowerCase().includes(q) || s.profile?.last_name?.toLowerCase().includes(q);
+    return s.profile?.first_name?.toLowerCase().includes(q) || s.profile?.last_name?.toLowerCase().includes(q) || s.email?.toLowerCase().includes(q);
   });
 
   // Count expiring in 30 days
@@ -260,7 +267,7 @@ const AdminSubscriptions = () => {
           <SelectContent>
             <SelectItem value="all">Tous les plans</SelectItem>
             <SelectItem value="founder_free">Fondateur</SelectItem>
-            <SelectItem value="annual_sitter">Gardien mensuel (6,99 €)</SelectItem>
+            <SelectItem value="annual_sitter">Gardien mensuel (9 €)</SelectItem>
             <SelectItem value="free_launch">Lancement gratuit</SelectItem>
             <SelectItem value="owner_free">Proprio gratuit</SelectItem>
           </SelectContent>
@@ -301,7 +308,7 @@ const AdminSubscriptions = () => {
                       <span className="font-medium text-sm">{sub.profile?.first_name} {sub.profile?.last_name}</span>
                     </div>
                   </TableCell>
-                  <TableCell className="text-xs text-muted-foreground">{sub.profile?.first_name} {sub.profile?.last_name}</TableCell>
+                  <TableCell className="text-xs text-muted-foreground">{sub.email || "-"}</TableCell>
                   <TableCell className="text-xs capitalize">{sub.profile?.role}</TableCell>
                   <TableCell>
                     <span className={`inline-flex px-2 py-0.5 rounded-full text-xs font-medium ${plan.color}`}>{plan.label}</span>
