@@ -17,6 +17,16 @@ import { fr } from "date-fns/locale";
 import { AlertTriangle, Search, Eye, XCircle, Star, StickyNote, RotateCcw, User, Calendar, MapPin, ChevronRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { getCountryName } from "@/lib/countries";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 const AdminSitsManagement = () => {
   const navigate = useNavigate();
@@ -30,6 +40,8 @@ const AdminSitsManagement = () => {
   const [statsBySit, setStatsBySit] = useState<Record<string, { views: number; messages: number }>>({});
   const [cancelModal, setCancelModal] = useState<{ open: boolean; id: string; type: string; reason: string }>({ open: false, id: "", type: "", reason: "" });
   const [noteModal, setNoteModal] = useState<{ open: boolean; id: string; note: string }>({ open: false, id: "", note: "" });
+  const [forceCompleteModal, setForceCompleteModal] = useState<{ open: boolean; sit: any | null }>({ open: false, sit: null });
+  const [forcingComplete, setForcingComplete] = useState(false);
 
   // Sheet state
   const [selectedSit, setSelectedSit] = useState<any | null>(null);
