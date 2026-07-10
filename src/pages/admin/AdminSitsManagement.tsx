@@ -180,13 +180,21 @@ const AdminSitsManagement = () => {
   const handleCancel = async () => {
     const sit = sits.find(s => s.id === cancelModal.id);
     if (!sit) return;
+    setCancelling(true);
+
     await supabase.from("sits").update({ status: "cancelled" as any, cancellation_reason: cancelModal.reason } as any).eq("id", cancelModal.id);
 
     if (sit.user_id) {
       await supabase.from("notifications").insert({ user_id: sit.user_id, type: "sit_cancelled", title: "Garde annulée par l'admin", body: `La garde "${sit.title}" a été annulée. Motif : ${cancelModal.reason}`, link: `/sits/${sit.id}` });
     }
 
+    const confirmedSitterId = sitters[sit.id]?.id;
+    if (confirmedSitterId) {
+      await supabase.from("notifications").insert({ user_id: confirmedSitterId, type: "sit_cancelled", title: "Garde annulée par l'admin", body: `La garde "${sit.title}" a été annulée. Motif : ${cancelModal.reason}`, link: `/sits/${sit.id}` });
+    }
+
     toast.success("Garde annulée");
+    setCancelling(false);
     setCancelModal({ open: false, id: "", type: "", reason: "" });
     fetchSits();
   };
