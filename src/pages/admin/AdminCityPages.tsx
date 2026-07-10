@@ -27,6 +27,21 @@ const AdminCityPages = () => {
   const [batchProgress, setBatchProgress] = useState<{ done: number; total: number; ok: number; skipped: number; failed: number } | null>(null);
   const [regeneratingId, setRegeneratingId] = useState<string | null>(null);
   const [pendingDelete, setPendingDelete] = useState<{ id: string; city: string } | null>(null);
+  const [pendingUnpublish, setPendingUnpublish] = useState<{ id: string; city: string } | null>(null);
+  const [pendingRegenerate, setPendingRegenerate] = useState<any | null>(null);
+  const [toggling, setToggling] = useState<string | null>(null);
+
+  const logAdminAction = async (payload: {
+    action: string;
+    target_type: string;
+    target_id: string | null;
+    metadata?: Record<string, unknown>;
+  }) => {
+    const { data: userData } = await supabase.auth.getUser();
+    const admin_id = userData?.user?.id;
+    if (!admin_id) return;
+    await (supabase.from("admin_action_logs" as any) as any).insert({ admin_id, ...payload });
+  };
 
   const { data: pages, refetch } = useQuery({
     queryKey: ["admin-city-pages"],
