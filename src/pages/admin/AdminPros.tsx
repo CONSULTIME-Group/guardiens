@@ -13,6 +13,16 @@ import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { Briefcase, CheckCircle2, XCircle, ExternalLink, AlertTriangle, Sparkles } from "lucide-react";
 import { Link } from "react-router-dom";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 type ProVerification = {
   id: string;
@@ -62,6 +72,7 @@ const AdminPros = () => {
   const [busyId, setBusyId] = useState<string | null>(null);
   const [previewModal, setPreviewModal] = useState<{ open: boolean; row: ProVerification | null }>({ open: false, row: null });
   const [rejectModal, setRejectModal] = useState<{ open: boolean; row: ProVerification | null; reason: string }>({ open: false, row: null, reason: "" });
+  const [validateModal, setValidateModal] = useState<{ open: boolean; row: ProVerification | null }>({ open: false, row: null });
 
   const fetchRows = useCallback(async () => {
     setLoading(true);
