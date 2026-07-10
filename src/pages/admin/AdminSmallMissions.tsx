@@ -342,6 +342,15 @@ const AdminSmallMissions = () => {
                       <Button variant="ghost" size="icon" aria-label="Contacter le posteur" title="Contacter" onClick={() => handleContact(m)}>
                         <Mail className="h-4 w-4" />
                       </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        aria-label="Envoyer aux inscrits à proximité"
+                        title="Envoyer aux inscrits à proximité (15 km)"
+                        onClick={() => setProximityMission({ id: m.id, title: m.title })}
+                      >
+                        <Send className="h-4 w-4 text-primary" />
+                      </Button>
                       {m.status !== "cancelled" ? (
                         <Button variant="ghost" size="icon" aria-label="Masquer la mission" title="Masquer" onClick={() => setArchiveId(m.id)}>
                           <Archive className="h-4 w-4" />
