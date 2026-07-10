@@ -35,6 +35,19 @@ const AdminGuides = () => {
   const [department, setDepartment] = useState("");
   const [generating, setGenerating] = useState(false);
   const [pendingDelete, setPendingDelete] = useState<CityGuide | null>(null);
+  const [pendingUnpublish, setPendingUnpublish] = useState<CityGuide | null>(null);
+
+  const logAdminAction = async (payload: {
+    action: string;
+    target_type: string;
+    target_id: string | null;
+    metadata?: Record<string, unknown>;
+  }) => {
+    const { data: userData } = await supabase.auth.getUser();
+    const admin_id = userData?.user?.id;
+    if (!admin_id) return;
+    await (supabase.from("admin_action_logs" as any) as any).insert({ admin_id, ...payload });
+  };
 
   const { data: guides = [], isLoading } = useQuery({
     queryKey: ["admin-guides"],
