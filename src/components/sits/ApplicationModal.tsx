@@ -180,7 +180,7 @@ const ApplicationModal = ({
         const { data: ownerSits } = await supabase
           .from("sits")
           .select("id")
-          .eq("owner_id", ownerId);
+          .eq("user_id", ownerId);
         const ownerSitIds = (ownerSits || []).map((s: any) => s.id);
         if (ownerSitIds.length > 0) {
           const { count: totalApps } = await supabase
