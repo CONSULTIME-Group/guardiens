@@ -5,7 +5,7 @@
  * explicite "Envoyer" pour déclencher l'edge function send-mass-email-proximity.
  * Aucun envoi n'a jamais lieu sans clic sur "Envoyer" après aperçu.
  */
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -41,18 +41,38 @@ interface PreviewRecipient {
 interface PreviewData {
   count: number;
   author_first_name: string;
-  mission: { id: string; title: string };
+  mission: {
+    id: string;
+    title: string;
+    mission_type?: "besoin" | "offre";
+    excerpt?: string;
+  };
+  subject?: string;
   recipients: PreviewRecipient[];
   truncated: boolean;
 }
 
-// Pré-remplissage : offre de Béryl.
+// Pré-remplissage par défaut : offre de Béryl.
 const DEFAULT_MISSION_ID = "eeaf2091-e5db-49b8-9402-2513abf316db";
 const DEFAULT_RADIUS = 50;
 
-const ProximityCampaignCard = () => {
-  const [missionId, setMissionId] = useState(DEFAULT_MISSION_ID);
-  const [radiusKm, setRadiusKm] = useState<number>(DEFAULT_RADIUS);
+interface ProximityCampaignCardProps {
+  initialMissionId?: string;
+  initialRadiusKm?: number;
+  /** Lance l'aperçu automatiquement au montage (utilisé pour les ouvertures pré-remplies). */
+  autoPreview?: boolean;
+  /** Masque l'en-tête de la carte (utile quand on l'affiche déjà dans un Dialog). */
+  hideHeader?: boolean;
+}
+
+const ProximityCampaignCard = ({
+  initialMissionId,
+  initialRadiusKm,
+  autoPreview = false,
+  hideHeader = false,
+}: ProximityCampaignCardProps = {}) => {
+  const [missionId, setMissionId] = useState(initialMissionId ?? DEFAULT_MISSION_ID);
+  const [radiusKm, setRadiusKm] = useState<number>(initialRadiusKm ?? DEFAULT_RADIUS);
   const [loading, setLoading] = useState(false);
   const [sending, setSending] = useState(false);
   const [preview, setPreview] = useState<PreviewData | null>(null);
