@@ -612,6 +612,69 @@ Deno.serve(async (req) => {
       });
     }
 
+    // === FLAG : bascule enqueue-only ========================================
+    // Défaut = false = ancien chemin synchrone Resend inchangé (Phase 1).
+    // Toggle : UPDATE public.email_send_state SET mass_email_use_queue = true WHERE id = 1;
+    let useQueue = false;
+    {
+      const { data: state } = await serviceClient
+        .from("email_send_state")
+        .select("mass_email_use_queue")
+        .eq("id", 1)
+        .maybeSingle();
+      useQueue = !!(state as { mass_email_use_queue?: boolean } | null)?.mass_email_use_queue;
+    }
+
+    if (useQueue) {
+      // Chemin queue : insère lignes `queued`, pousse 1 message pgmq / destinataire,
+      // renvoie immédiatement. Le worker `process-mass-email-queue` fera l'envoi.
+      const queuedRows = remainingRecipients.map((email) => ({
+        mass_email_id: campaignId,
+        recipient_email: email,
+        resend_id: null as string | null,
+        status: "queued",
+        error_message: null as string | null,
+      }));
+      const INS_CHUNK = 500;
+      for (let i = 0; i < queuedRows.length; i += INS_CHUNK) {
+        const chunk = queuedRows.slice(i, i + INS_CHUNK);
+        const { error } = await serviceClient
+          .from("mass_email_sends")
+          .upsert(chunk, {
+            onConflict: "mass_email_id,recipient_email",
+            ignoreDuplicates: true,
+          });
+        if (error) console.error(`queued upsert error (chunk ${i}):`, error);
+      }
+
+      let enqueued = 0;
+      for (const email of remainingRecipients) {
+        const { error } = await serviceClient.rpc("enqueue_email", {
+          queue_name: "mass_emails",
+          payload: { campaign_id: campaignId, recipient_email: email } as any,
+        });
+        if (error) {
+          console.error("enqueue_email failed:", error, { email });
+        } else {
+          enqueued++;
+        }
+      }
+
+      await serviceClient
+        .from("mass_emails")
+        .update({
+          status: "sending",
+          enqueued_count: enqueued,
+          heartbeat_at: new Date().toISOString(),
+        })
+        .eq("id", campaignId);
+
+      return new Response(
+        JSON.stringify({ queued: enqueued, campaign_id: campaignId, mode: "queue", resumed }),
+        { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
+    }
+
     const htmlTemplate = buildHtml(subject, body, cta_label, cta_url);
     let sent = 0;
     let errors = 0;

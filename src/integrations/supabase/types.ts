@@ -1734,6 +1734,7 @@ export type Database = {
           batch_size: number
           id: number
           last_run_at: string | null
+          mass_email_use_queue: boolean
           retry_after_until: string | null
           send_delay_ms: number
           transactional_email_ttl_minutes: number
@@ -1744,6 +1745,7 @@ export type Database = {
           batch_size?: number
           id?: number
           last_run_at?: string | null
+          mass_email_use_queue?: boolean
           retry_after_until?: string | null
           send_delay_ms?: number
           transactional_email_ttl_minutes?: number
@@ -1754,6 +1756,7 @@ export type Database = {
           batch_size?: number
           id?: number
           last_run_at?: string | null
+          mass_email_use_queue?: boolean
           retry_after_until?: string | null
           send_delay_ms?: number
           transactional_email_ttl_minutes?: number
@@ -2546,6 +2549,7 @@ export type Database = {
       }
       mass_email_sends: {
         Row: {
+          attempts: number
           bounced_at: string | null
           click_count: number
           complained_at: string | null
@@ -2555,8 +2559,10 @@ export type Database = {
           first_clicked_at: string | null
           first_opened_at: string | null
           id: string
+          last_attempt_at: string | null
           last_clicked_at: string | null
           last_clicked_url: string | null
+          last_error: string | null
           last_opened_at: string | null
           mass_email_id: string
           open_count: number
@@ -2567,6 +2573,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          attempts?: number
           bounced_at?: string | null
           click_count?: number
           complained_at?: string | null
@@ -2576,8 +2583,10 @@ export type Database = {
           first_clicked_at?: string | null
           first_opened_at?: string | null
           id?: string
+          last_attempt_at?: string | null
           last_clicked_at?: string | null
           last_clicked_url?: string | null
+          last_error?: string | null
           last_opened_at?: string | null
           mass_email_id: string
           open_count?: number
@@ -2588,6 +2597,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          attempts?: number
           bounced_at?: string | null
           click_count?: number
           complained_at?: string | null
@@ -2597,8 +2607,10 @@ export type Database = {
           first_clicked_at?: string | null
           first_opened_at?: string | null
           id?: string
+          last_attempt_at?: string | null
           last_clicked_at?: string | null
           last_clicked_url?: string | null
+          last_error?: string | null
           last_opened_at?: string | null
           mass_email_id?: string
           open_count?: number
@@ -2632,6 +2644,8 @@ export type Database = {
           cta_label: string | null
           cta_url: string | null
           dedupe_key: string | null
+          enqueued_count: number
+          failed_count: number
           filters: Json | null
           heartbeat_at: string | null
           id: string
@@ -2639,6 +2653,8 @@ export type Database = {
           recipients_count: number
           segment: string
           sent_by: string | null
+          sent_count: number
+          skipped_count: number
           status: string
           subject: string
         }
@@ -2648,6 +2664,8 @@ export type Database = {
           cta_label?: string | null
           cta_url?: string | null
           dedupe_key?: string | null
+          enqueued_count?: number
+          failed_count?: number
           filters?: Json | null
           heartbeat_at?: string | null
           id?: string
@@ -2655,6 +2673,8 @@ export type Database = {
           recipients_count?: number
           segment: string
           sent_by?: string | null
+          sent_count?: number
+          skipped_count?: number
           status?: string
           subject: string
         }
@@ -2664,6 +2684,8 @@ export type Database = {
           cta_label?: string | null
           cta_url?: string | null
           dedupe_key?: string | null
+          enqueued_count?: number
+          failed_count?: number
           filters?: Json | null
           heartbeat_at?: string | null
           id?: string
@@ -2671,6 +2693,8 @@ export type Database = {
           recipients_count?: number
           segment?: string
           sent_by?: string | null
+          sent_count?: number
+          skipped_count?: number
           status?: string
           subject?: string
         }
@@ -6750,6 +6774,7 @@ export type Database = {
         Args: { _application_id: string }
         Returns: string
       }
+      purge_email_queue: { Args: { queue_name: string }; Returns: number }
       read_email_batch: {
         Args: { batch_size: number; queue_name: string; vt: number }
         Returns: {
