@@ -142,7 +142,7 @@ const AdminSubscriptions = () => {
   const filtered = subscriptions.filter(s => {
     if (!search) return true;
     const q = search.toLowerCase();
-    return s.profile?.first_name?.toLowerCase().includes(q) || s.profile?.last_name?.toLowerCase().includes(q);
+    return s.profile?.first_name?.toLowerCase().includes(q) || s.profile?.last_name?.toLowerCase().includes(q) || s.email?.toLowerCase().includes(q);
   });
 
   // Count expiring in 30 days
