@@ -73,6 +73,9 @@ project_id = "erhccyqevdyevpyctsjj"
     verify_jwt = true
   [functions.mass-email-watchdog]
     verify_jwt = true
+  [functions.email-pipeline-watchdog]
+    verify_jwt = true
+
 
 
 
