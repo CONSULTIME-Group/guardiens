@@ -415,7 +415,7 @@ const AdminSitsManagement = () => {
                         <Eye className="h-4 w-4" />
                       </Button>
                       {isOverdue && (
-                        <Button variant="ghost" size="icon" title="Forcer fin" onClick={() => forceComplete(sit)}>
+                        <Button variant="ghost" size="icon" title="Forcer fin" onClick={() => setForceCompleteModal({ open: true, sit })} disabled={forcingComplete && forceCompleteModal.sit?.id === sit.id}>
                           <RotateCcw className="h-4 w-4 text-primary" />
                         </Button>
                       )}
