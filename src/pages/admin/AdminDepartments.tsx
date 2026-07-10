@@ -36,6 +36,19 @@ const AdminDepartments = () => {
   const [batchRunning, setBatchRunning] = useState(false);
   const [batchProgress, setBatchProgress] = useState<{ done: number; total: number; ok: number; failed: number } | null>(null);
   const [pendingDelete, setPendingDelete] = useState<DepartmentPage | null>(null);
+  const [pendingUnpublish, setPendingUnpublish] = useState<DepartmentPage | null>(null);
+
+  const logAdminAction = async (payload: {
+    action: string;
+    target_type: string;
+    target_id: string | null;
+    metadata?: Record<string, unknown>;
+  }) => {
+    const { data: userData } = await supabase.auth.getUser();
+    const admin_id = userData?.user?.id;
+    if (!admin_id) return;
+    await (supabase.from("admin_action_logs" as any) as any).insert({ admin_id, ...payload });
+  };
 
   const { data: pages = [], isLoading } = useQuery({
     queryKey: ["admin-departments"],
