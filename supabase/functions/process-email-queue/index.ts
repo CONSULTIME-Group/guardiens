@@ -115,18 +115,49 @@ Deno.serve(async (req) => {
   // deno-lint-ignore no-explicit-any
   const supabase: any = createClient(supabaseUrl, supabaseServiceKey)
 
+  // Helper: always update last_run_at heartbeat before returning.
+  const finish = async (body: Record<string, unknown>, status = 200) => {
+    try {
+      await supabase
+        .from('email_send_state')
+        .update({ last_run_at: new Date().toISOString() })
+        .eq('id', 1)
+    } catch (e) {
+      console.error('Failed to update last_run_at heartbeat', e)
+    }
+    return new Response(JSON.stringify(body), {
+      status,
+      headers: { 'Content-Type': 'application/json' },
+    })
+  }
+
   // 1. Check rate-limit cooldown and read queue config
   const { data: state } = await supabase
     .from('email_send_state')
     .select('retry_after_until, batch_size, send_delay_ms, auth_email_ttl_minutes, transactional_email_ttl_minutes')
     .single()
 
-  if (state?.retry_after_until && new Date(state.retry_after_until) > new Date()) {
-    return new Response(
-      JSON.stringify({ skipped: true, reason: 'rate_limited' }),
-      { headers: { 'Content-Type': 'application/json' } }
-    )
+  // Guard-rail : si retry_after_until est absurdement loin dans le futur (>30 min),
+  // c'est un état bloqué. On le réinitialise avant de continuer.
+  if (state?.retry_after_until) {
+    const retryDate = new Date(state.retry_after_until)
+    const maxFuture = Date.now() + 30 * 60 * 1000
+    if (retryDate.getTime() > maxFuture) {
+      console.warn('Unblocking implausible retry_after_until', {
+        retry_after_until: state.retry_after_until,
+      })
+      await supabase
+        .from('email_send_state')
+        .update({ retry_after_until: null, updated_at: new Date().toISOString() })
+        .eq('id', 1)
+      state.retry_after_until = null
+    }
   }
+
+  if (state?.retry_after_until && new Date(state.retry_after_until) > new Date()) {
+    return finish({ skipped: true, reason: 'rate_limited' })
+  }
+
 
   const batchSize = state?.batch_size ?? DEFAULT_BATCH_SIZE
   const sendDelayMs = state?.send_delay_ms ?? DEFAULT_SEND_DELAY_MS
