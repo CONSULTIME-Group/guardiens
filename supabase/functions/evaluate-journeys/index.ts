@@ -109,7 +109,15 @@ async function runEvaluation(
   supabase: ReturnType<typeof createClient>,
   dryRun: boolean,
 ) {
-  const stats = { enrolled: 0, sent: 0, exited: 0, completed: 0, skipped: 0, errors: 0, capped: false }
+  const stats = {
+    enrolled: 0, sent: 0, exited: 0, completed: 0, skipped: 0, errors: 0, capped: false,
+    bySequence: {} as Record<string, { enrolled: number; sent: number; exited: number; skipped: number }>,
+  }
+  const bumpSeq = (key: string, field: 'enrolled' | 'sent' | 'exited' | 'skipped', n = 1) => {
+    const r = stats.bySequence[key] ?? { enrolled: 0, sent: 0, exited: 0, skipped: 0 }
+    r[field] += n
+    stats.bySequence[key] = r
+  }
   // Hard cap per run + global deadline so we never spin near the edge timeout.
   const MAX_SENDS_PER_RUN = 40
   const SEND_DELAY_MS = 250
@@ -140,6 +148,7 @@ async function runEvaluation(
     try {
       const enrolled = await enrollForSequence(supabase, seq, dryRun)
       stats.enrolled += enrolled
+      if (enrolled) bumpSeq(seq.key, 'enrolled', enrolled)
     } catch (e) {
       console.error('[enrollment] failed', seq.key, e)
       stats.errors++
