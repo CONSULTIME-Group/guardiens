@@ -65,7 +65,7 @@ const AdminSubscriptions = () => {
     const emailMap: Record<string, string> = {};
     if (userIds.length > 0) {
       const { data: emails } = await supabase.rpc("get_user_emails_admin", { p_user_ids: userIds });
-      (emails || []).forEach((e: any) => { if (e?.user_id && e?.email) emailMap[e.user_id] = e.email; });
+      (emails || []).forEach((e: any) => { if (e?.id && e?.email) emailMap[e.id] = e.email; });
     }
 
     let subs = allData.map(s => ({ ...s, profile: profileMap[s.user_id] || null, email: emailMap[s.user_id] || null }));
