@@ -191,7 +191,14 @@ const AdminFAQ = () => {
               </div>
               <Switch
                 checked={entry.published}
-                onCheckedChange={(checked) => toggleMutation.mutate({ id: entry.id, published: checked })}
+                disabled={toggleMutation.isPending}
+                onCheckedChange={(checked) => {
+                  if (!checked) {
+                    setPendingUnpublish(entry);
+                  } else {
+                    toggleMutation.mutate({ id: entry.id, published: true });
+                  }
+                }}
               />
               <Button size="icon" variant="ghost" onClick={() => startEdit(entry)}>
                 <Pencil className="h-4 w-4" />
