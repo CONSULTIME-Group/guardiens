@@ -318,6 +318,36 @@ export default function AdminProDirectory() {
           )}
         </TabsContent>
       </Tabs>
+
+      <AlertDialog
+        open={rejectModal.open}
+        onOpenChange={(v) => {
+          if (!v && busyId !== rejectModal.row?.id) setRejectModal({ open: false, row: null, label: "Refuser" });
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              {rejectModal.label} la fiche « {rejectModal.row?.raison_sociale} » ?
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              {rejectModal.label === "Retirer"
+                ? "Cette fiche approuvée sera retirée de l'annuaire public et repassera en statut refusée. Le pro sera notifié par email."
+                : "Cette demande sera marquée refusée et le pro sera notifié par email avec le motif saisi."}
+              {" "}L'action sera tracée dans le journal d'audit.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={!!busyId}>Annuler</AlertDialogCancel>
+            <AlertDialogAction
+              disabled={!!busyId}
+              onClick={(e) => { e.preventDefault(); if (rejectModal.row) decide(rejectModal.row, "rejected"); }}
+            >
+              {busyId ? "Traitement," : `Confirmer, ${rejectModal.label}`}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
