@@ -16,7 +16,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 
 const planLabels: Record<string, { label: string; color: string }> = {
   founder_free: { label: "Fondateur", color: "bg-warning-soft text-warning-foreground dark:bg-amber-900/30 dark:text-amber-400" },
-  annual_sitter: { label: "Premium", color: "bg-primary/10 text-primary" },
+  annual_sitter: { label: "Gardien", color: "bg-primary/10 text-primary" },
   free_launch: { label: "Lancement gratuit", color: "bg-success-soft text-success" },
   owner_free: { label: "Proprio gratuit", color: "bg-muted text-muted-foreground" },
 };
