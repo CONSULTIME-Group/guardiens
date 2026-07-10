@@ -151,7 +151,7 @@ const AdminBreeds = () => {
                         <div className="flex items-center gap-1 shrink-0">
                           <button
                             type="button"
-                            onClick={() => handleRegenerate(r.species, r.breed)}
+                            onClick={() => setPendingRegenerate(r)}
                             disabled={!!regenerating}
                             className="text-muted-foreground hover:text-primary disabled:opacity-50 p-1"
                             title="Régénérer la fiche IA"
