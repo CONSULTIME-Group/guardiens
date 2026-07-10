@@ -12,6 +12,7 @@ const SITE_URL = 'https://guardiens.fr'
 interface Item {
   kind: 'sit' | 'mission'
   id: string
+  slug?: string | null
   title?: string
   city?: string
   distanceKm?: number
@@ -19,6 +20,8 @@ interface Item {
   endDate?: string
   ownerFirstName?: string
   category?: string
+  missionType?: 'besoin' | 'offre'
+  excerpt?: string
 }
 
 interface Props {
@@ -26,6 +29,23 @@ interface Props {
   radiusKm?: number
   city?: string
   items?: Item[]
+}
+
+function itemUrl(it: Item): string {
+  const seg = (it.slug && it.slug.trim().length > 0) ? it.slug : it.id
+  if (it.kind === 'sit') return `${SITE_URL}/annonces/${seg}`
+  return `${SITE_URL}/petites-missions/${seg}`
+}
+
+function missionBadge(mt?: 'besoin' | 'offre'): string {
+  return mt === 'offre' ? "Offre d'aide" : "Demande d'aide"
+}
+
+function cardHeadline(it: Item): string | undefined {
+  if (it.kind !== 'mission' || !it.ownerFirstName) return it.title
+  return it.missionType === 'offre'
+    ? `${it.ownerFirstName} propose son aide`
+    : `${it.ownerFirstName} cherche un coup de main`
 }
 
 const NearbyDailyDigestEmail = ({ firstName, radiusKm = 15, city, items = [] }: Props) => {
@@ -52,30 +72,43 @@ const NearbyDailyDigestEmail = ({ firstName, radiusKm = 15, city, items = [] }: 
             {city ? <> de <strong>{city}</strong></> : null}.
           </Text>
 
-          {items.map((it) => (
-            <Section key={`${it.kind}-${it.id}`} style={card}>
-              <Text style={cardTag}>
-                {it.kind === 'sit' ? 'Garde' : 'Coup de main'}
-                {typeof it.distanceKm === 'number' ? ` · ${it.distanceKm} km` : ''}
-              </Text>
-              {it.title ? <Text style={cardTitle}>{it.title}</Text> : null}
-              {it.city ? <Text style={cardLine}>{it.city}</Text> : null}
-              {it.startDate && it.endDate ? (
-                <Text style={cardLine}>Du {it.startDate} au {it.endDate}</Text>
-              ) : null}
-              {it.ownerFirstName ? (
-                <Text style={cardLine}>Proposée par {it.ownerFirstName}</Text>
-              ) : null}
-              <Link
-                style={cardLink}
-                href={`${SITE_URL}/${it.kind === 'sit' ? 'sits' : 'petites-missions'}/${it.id}`}
-              >
-                Voir l'annonce
-              </Link>
-            </Section>
-          ))}
+          {items.map((it) => {
+            const isMission = it.kind === 'mission'
+            const badge = isMission
+              ? missionBadge(it.missionType)
+              : 'Garde'
+            const headline = cardHeadline(it)
+            const authorLine = isMission && it.ownerFirstName
+              ? (it.missionType === 'offre'
+                  ? `Proposée par ${it.ownerFirstName}`
+                  : `Demandé par ${it.ownerFirstName}`)
+              : (it.ownerFirstName ? `Proposée par ${it.ownerFirstName}` : undefined)
+            return (
+              <Section key={`${it.kind}-${it.id}`} style={card}>
+                <Text style={cardTag}>
+                  {badge}
+                  {typeof it.distanceKm === 'number' ? ` · ${it.distanceKm} km` : ''}
+                </Text>
+                {headline ? <Text style={cardTitle}>{headline}</Text> : null}
+                {isMission && it.title && it.title !== headline ? (
+                  <Text style={cardLine}>{it.title}</Text>
+                ) : null}
+                {isMission && it.excerpt ? (
+                  <Text style={cardExcerpt}>{it.excerpt}</Text>
+                ) : null}
+                {it.city ? <Text style={cardLine}>{it.city}</Text> : null}
+                {it.startDate && it.endDate ? (
+                  <Text style={cardLine}>Du {it.startDate} au {it.endDate}</Text>
+                ) : null}
+                {authorLine ? <Text style={cardLine}>{authorLine}</Text> : null}
+                <Link style={cardLink} href={itemUrl(it)}>
+                  Voir l'annonce
+                </Link>
+              </Section>
+            )
+          })}
 
-          <Button style={button} href={`${SITE_URL}/sits`}>
+          <Button style={button} href={`${SITE_URL}/petites-missions`}>
             Voir toutes les annonces
           </Button>
 
@@ -128,10 +161,12 @@ export const template = {
       {
         kind: 'mission',
         id: '00000000-0000-0000-0000-000000000002',
-        title: 'Sortir mon chat en balade',
-        city: 'Meylan',
-        distanceKm: 6,
-        ownerFirstName: 'Marc',
+        title: 'Passages quotidiens pour nourrir le chat',
+        excerpt: "Je m'absente quelques jours et cherche quelqu'un pour passer nourrir mon chat.",
+        city: 'Lyon',
+        distanceKm: 0,
+        missionType: 'besoin',
+        ownerFirstName: 'Claire',
       },
     ] as Item[],
   },
@@ -151,6 +186,7 @@ const card = {
 const cardTag = { fontSize: '11px', textTransform: 'uppercase' as const, letterSpacing: '0.5px', color: 'hsl(153, 42%, 30%)', margin: '0 0 4px', fontWeight: '600' as const }
 const cardTitle = { fontSize: '15px', fontWeight: '600' as const, color: 'hsl(153, 42%, 25%)', margin: '0 0 6px' }
 const cardLine = { fontSize: '13px', color: 'hsl(37, 7%, 35%)', margin: '3px 0' }
+const cardExcerpt = { fontSize: '13px', color: 'hsl(37, 7%, 30%)', lineHeight: '1.5', margin: '4px 0 8px', fontStyle: 'italic' as const }
 const cardLink = { fontSize: '13px', color: 'hsl(153, 42%, 30%)', textDecoration: 'underline', display: 'inline-block', marginTop: '6px' }
 const button = { backgroundColor: 'hsl(153, 42%, 30%)', color: '#ffffff', padding: '12px 28px', borderRadius: '8px', fontSize: '15px', fontWeight: '600' as const, textDecoration: 'none', display: 'inline-block', margin: '8px 0 4px' }
 const hr = { borderColor: 'hsl(37, 22%, 89%)', margin: '20px 0' }
