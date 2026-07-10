@@ -31,19 +31,16 @@ Deno.serve(async (req) => {
 
   try {
     const now = Date.now();
-    const j1 = new Date(now - 24 * 3600 * 1000).toISOString();
     const j2 = new Date(now - 48 * 3600 * 1000).toISOString();
     const j7 = new Date(now - 7 * 24 * 3600 * 1000).toISOString();
 
-    // Fenêtre raisonnable : on prend les conversations dont le dernier message
-    // a entre 24h (J+1) et 7 jours, pas encore relancées, et limitées aux 2 contextes utiles.
+    // Toutes conversations sans réponse depuis 48h à 7j, pas encore relancées.
     const { data: convs, error } = await supabase
       .from("conversations")
       .select("id, context_type, owner_id, sitter_id, last_message_at, reminder_sent_at, sit_id, small_mission_id")
-      .in("context_type", ["sit_application", "sitter_inquiry"])
       .is("reminder_sent_at", null)
       .gte("last_message_at", j7)
-      .lte("last_message_at", j1)
+      .lte("last_message_at", j2)
       .returns<ConversationRow[]>();
 
     if (error) throw error;
@@ -52,14 +49,6 @@ Deno.serve(async (req) => {
 
     for (const conv of convs ?? []) {
       stats.processed++;
-
-      // Vérif délai par contexte
-      const lastMsgAt = conv.last_message_at ? new Date(conv.last_message_at).getTime() : 0;
-      const ageMs = now - lastMsgAt;
-      const ageHours = ageMs / 3600_000;
-
-      if (conv.context_type === "sit_application" && ageHours < 24) { stats.skipped++; continue; }
-      if (conv.context_type === "sitter_inquiry"  && ageHours < 48) { stats.skipped++; continue; }
 
       // Récupère le dernier message pour identifier l'expéditeur (relance le destinataire)
       const { data: lastMsg } = await supabase
@@ -72,15 +61,10 @@ Deno.serve(async (req) => {
 
       if (!lastMsg) { stats.skipped++; continue; }
 
-      // Le destinataire de la relance = celui qui n'a pas envoyé le dernier message
+      // Destinataire = celui qui n'a pas envoyé le dernier message
       const recipientId = lastMsg.sender_id === conv.owner_id ? conv.sitter_id : conv.owner_id;
       const senderId = lastMsg.sender_id;
-
-      // Pour sit_application : on ne relance QUE si le destinataire est le proprio
-      // Pour sitter_inquiry : on ne relance QUE si le destinataire est le gardien
       const isOwnerRecipient = recipientId === conv.owner_id;
-      if (conv.context_type === "sit_application" && !isOwnerRecipient) { stats.skipped++; continue; }
-      if (conv.context_type === "sitter_inquiry"  &&  isOwnerRecipient) { stats.skipped++; continue; }
 
       // Récupère profils
       const { data: recipient } = await supabase
@@ -118,13 +102,12 @@ Deno.serve(async (req) => {
         sitCity = (sit as any)?.properties?.city ?? null;
       }
 
-      const subject = conv.context_type === "sit_application"
-        ? `${sender?.first_name ?? "Un membre"} attend votre retour sur sa candidature`
-        : `${sender?.first_name ?? "Un membre"} attend toujours votre réponse`;
-
-      const intro = conv.context_type === "sit_application"
-        ? `Vous avez reçu une candidature il y a 24h pour votre annonce${sitTitle ? ` « ${sitTitle} »` : ""}${sitCity ? ` à ${sitCity}` : ""}, et vous n'y avez pas encore répondu.`
-        : `Vous avez reçu une demande de garde il y a 48h${sitCity ? ` à ${sitCity}` : ""}, et vous n'y avez pas encore répondu.`;
+      const senderName = sender?.first_name ?? "Un membre";
+      const intro = conv.context_type === "sit_application" && isOwnerRecipient
+        ? `Vous avez reçu une candidature de ${senderName} il y a plus de 48h pour votre annonce${sitTitle ? ` « ${sitTitle} »` : ""}${sitCity ? ` à ${sitCity}` : ""}, et vous n'y avez pas encore répondu.`
+        : conv.context_type === "sitter_inquiry" && !isOwnerRecipient
+          ? `${senderName} vous a envoyé une demande de garde il y a plus de 48h${sitCity ? ` à ${sitCity}` : ""}, sans réponse de votre part pour le moment.`
+          : `${senderName} attend toujours votre réponse depuis plus de 48h${sitTitle ? ` au sujet de « ${sitTitle} »` : ""}${sitCity && !sitTitle ? ` à ${sitCity}` : ""}.`;
 
       // Envoi via edge function transactionnel
       const { error: emailErr } = await supabase.functions.invoke("send-transactional-email", {

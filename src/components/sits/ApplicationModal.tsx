@@ -159,10 +159,11 @@ const ApplicationModal = ({
 
     // Notifier le propriétaire (in-app + email), best-effort, ne bloque pas le flux
     try {
-      const [{ data: ownerProfile }, { data: sitInfo }, { data: meProfile }] = await Promise.all([
+      const [{ data: ownerProfile }, { data: sitInfo }, { data: meProfile }, { data: mySitter }] = await Promise.all([
         supabase.from("profiles").select("email, first_name").eq("id", ownerId).maybeSingle(),
         supabase.from("sits").select("title").eq("id", sitId).maybeSingle(),
-        supabase.from("profiles").select("first_name, avatar_url").eq("id", user.id).maybeSingle(),
+        supabase.from("profiles").select("first_name, avatar_url, city").eq("id", user.id).maybeSingle(),
+        supabase.from("sitter_profiles").select("experience_years").eq("user_id", user.id).maybeSingle(),
       ]);
 
       const sitterFirstName = (meProfile?.first_name as string) || "Un gardien";
@@ -173,14 +174,44 @@ const ApplicationModal = ({
         await supabase.rpc("notify_owner_of_new_application", { _application_id: created.id });
       }
 
+      // Détection première candidature reçue par ce propriétaire (toutes annonces confondues)
+      let isFirstEver = false;
+      try {
+        const { data: ownerSits } = await supabase
+          .from("sits")
+          .select("id")
+          .eq("user_id", ownerId);
+        const ownerSitIds = (ownerSits || []).map((s: any) => s.id);
+        if (ownerSitIds.length > 0) {
+          const { count: totalApps } = await supabase
+            .from("applications")
+            .select("id", { count: "exact", head: true })
+            .in("sit_id", ownerSitIds);
+          isFirstEver = (totalApps ?? 0) <= 1; // celle qu'on vient d'insérer
+        }
+      } catch {}
+
       // Email transactionnel (idempotent par candidature)
       if (ownerProfile?.email) {
+        const templateName = isFirstEver ? "first-application-received" : "new-application";
+        const idempotencyKey = isFirstEver
+          ? `first-application-${created?.id ?? `${sitId}-${user.id}`}`
+          : `new-application-${created?.id ?? `${sitId}-${user.id}`}`;
+        const preview = message.trim().slice(0, 180);
         await supabase.functions.invoke("send-transactional-email", {
           body: {
-            templateName: "new-application",
+            templateName,
             recipientEmail: ownerProfile.email,
-            idempotencyKey: `new-application-${created?.id ?? `${sitId}-${user.id}`}`,
-            templateData: { sitterFirstName, sitTitle },
+            idempotencyKey,
+            templateData: isFirstEver
+              ? {
+                  sitterFirstName,
+                  sitTitle,
+                  messagePreview: preview,
+                  sitterCity: (meProfile as any)?.city ?? null,
+                  sitterExperience: (mySitter as any)?.experience_years ?? null,
+                }
+              : { sitterFirstName, sitTitle },
           },
         });
       }
