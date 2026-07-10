@@ -175,6 +175,36 @@ const AdminBreeds = () => {
           );
         })
       )}
+
+      <AlertDialog open={!!pendingRegenerate} onOpenChange={(o) => !o && setPendingRegenerate(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Régénérer cette fiche de race ?</AlertDialogTitle>
+            <AlertDialogDescription>
+              La fiche existante de {pendingRegenerate?.breed} sera écrasée par une nouvelle génération IA. Action non annulable.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Annuler</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={async () => {
+                const r = pendingRegenerate;
+                if (!r) return;
+                setPendingRegenerate(null);
+                await handleRegenerate(r.species, r.breed);
+                await logAdminAction({
+                  action: "content_ai_regenerate",
+                  target_type: "breed",
+                  target_id: null,
+                  metadata: { title: r.breed, species: r.species },
+                });
+              }}
+            >
+              Régénérer
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
