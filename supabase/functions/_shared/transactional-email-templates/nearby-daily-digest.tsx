@@ -186,6 +186,7 @@ const card = {
 const cardTag = { fontSize: '11px', textTransform: 'uppercase' as const, letterSpacing: '0.5px', color: 'hsl(153, 42%, 30%)', margin: '0 0 4px', fontWeight: '600' as const }
 const cardTitle = { fontSize: '15px', fontWeight: '600' as const, color: 'hsl(153, 42%, 25%)', margin: '0 0 6px' }
 const cardLine = { fontSize: '13px', color: 'hsl(37, 7%, 35%)', margin: '3px 0' }
+const cardExcerpt = { fontSize: '13px', color: 'hsl(37, 7%, 30%)', lineHeight: '1.5', margin: '4px 0 8px', fontStyle: 'italic' as const }
 const cardLink = { fontSize: '13px', color: 'hsl(153, 42%, 30%)', textDecoration: 'underline', display: 'inline-block', marginTop: '6px' }
 const button = { backgroundColor: 'hsl(153, 42%, 30%)', color: '#ffffff', padding: '12px 28px', borderRadius: '8px', fontSize: '15px', fontWeight: '600' as const, textDecoration: 'none', display: 'inline-block', margin: '8px 0 4px' }
 const hr = { borderColor: 'hsl(37, 22%, 89%)', margin: '20px 0' }
