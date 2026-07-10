@@ -98,7 +98,7 @@ const AdminSmallMissions = () => {
       setTotalCount(count || 0);
     }
     setLoading(false);
-  }, [filterStatus, filterCategory, filterPeriod, sortBy, sortDir, page]);
+  }, [filterStatus, filterCategory, filterPeriod, sortBy, sortDir]);
 
   useEffect(() => { fetchMissions(); }, [fetchMissions]);
   useEffect(() => { setPage(0); }, [filterStatus, filterCategory, filterPeriod, search]);
