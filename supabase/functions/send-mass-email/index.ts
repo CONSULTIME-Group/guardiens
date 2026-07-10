@@ -29,6 +29,17 @@ interface MassEmailFilters {
 }
 
 
+const UNSUB_TOKEN_PLACEHOLDER = "__UNSUB_TOKEN__";
+
+// Generate a cryptographically random 32-byte hex token (aligned with send-transactional-email)
+function generateToken(): string {
+  const bytes = new Uint8Array(32);
+  crypto.getRandomValues(bytes);
+  return Array.from(bytes)
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("");
+}
+
 function buildHtml(subject: string, body: string, ctaLabel?: string, ctaUrl?: string): string {
   // Brand : --primary 153 42% 30% ≈ #2C6E49 (vert forêt) ; --background ≈ #FAF9F6
   const ctaBlock = ctaLabel && ctaUrl
@@ -38,6 +49,8 @@ function buildHtml(subject: string, body: string, ctaLabel?: string, ctaUrl?: st
 <tr><td align="center" style="padding:0 0 8px"><p style="margin:0;font-size:12px;color:#888">3 minutes, c'est tout.</p></td></tr>`
     : "";
 
+  // Le lien de désinscription contient un placeholder remplacé par le token
+  // propre à chaque destinataire avant l'envoi (RGPD + RFC 8058).
   return `<!DOCTYPE html><html><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/></head>
 <body style="margin:0;padding:0;background-color:#FAF9F6;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif">
 <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#FAF9F6;padding:32px 16px">
@@ -59,12 +72,115 @@ ${ctaBlock}
 <p style="margin:14px 0 0;font-size:11px;color:#aaa">
 <a href="https://guardiens.fr" style="color:#aaa;text-decoration:none">guardiens.fr</a>
 &nbsp;·&nbsp;
-<a href="https://guardiens.fr/unsubscribe" style="color:#aaa;text-decoration:underline">Se désinscrire</a>
+<a href="https://guardiens.fr/unsubscribe?token=${UNSUB_TOKEN_PLACEHOLDER}" style="color:#aaa;text-decoration:underline">Se désinscrire</a>
 </p>
 </td></tr>
 </table>
 </td></tr></table>
 </body></html>`;
+}
+
+/**
+ * Filtres RGPD/délivrabilité obligatoires, non désactivables :
+ *   - exclusion des emails dans `suppressed_emails` (fail-closed)
+ *   - exclusion des users avec `email_preferences.product_emails = false`
+ * Throw si une requête échoue → l'appelant doit ABORTER l'envoi (500).
+ */
+async function applyMandatoryComplianceFilters(
+  serviceClient: ReturnType<typeof createClient>,
+  profiles: { id: string; email: string }[],
+): Promise<{ id: string; email: string }[]> {
+  if (profiles.length === 0) return profiles;
+
+  const lowerEmails = Array.from(new Set(profiles.map((p) => p.email.toLowerCase())));
+  const userIds = Array.from(new Set(profiles.map((p) => p.id)));
+  const CHUNK = 500;
+
+  // 1. Suppression list — fail-closed
+  const suppressedSet = new Set<string>();
+  for (let i = 0; i < lowerEmails.length; i += CHUNK) {
+    const chunk = lowerEmails.slice(i, i + CHUNK);
+    const { data, error } = await serviceClient
+      .from("suppressed_emails")
+      .select("email")
+      .in("email", chunk);
+    if (error) throw new Error(`Suppression check failed: ${error.message}`);
+    for (const row of (data || []) as any[]) {
+      if (row.email) suppressedSet.add(String(row.email).toLowerCase());
+    }
+  }
+
+  // 2. Opt-out produit (obligatoire pour les campagnes de masse — catégorie 'product')
+  const optedOutIds = new Set<string>();
+  for (let i = 0; i < userIds.length; i += CHUNK) {
+    const chunk = userIds.slice(i, i + CHUNK);
+    const { data, error } = await serviceClient
+      .from("email_preferences")
+      .select("user_id")
+      .eq("product_emails", false)
+      .in("user_id", chunk);
+    if (error) throw new Error(`Product opt-out check failed: ${error.message}`);
+    for (const row of (data || []) as any[]) {
+      if (row.user_id) optedOutIds.add(row.user_id);
+    }
+  }
+
+  return profiles.filter(
+    (p) => !suppressedSet.has(p.email.toLowerCase()) && !optedOutIds.has(p.id),
+  );
+}
+
+/**
+ * Récupère ou crée les tokens de désinscription (une ligne par email).
+ * Retourne une map lowerEmail → token. Throw si une requête échoue.
+ */
+async function ensureUnsubscribeTokens(
+  serviceClient: ReturnType<typeof createClient>,
+  emails: string[],
+): Promise<Map<string, string>> {
+  const map = new Map<string, string>();
+  const lowerEmails = Array.from(new Set(emails.map((e) => e.toLowerCase())));
+  if (lowerEmails.length === 0) return map;
+
+  const CHUNK = 500;
+
+  for (let i = 0; i < lowerEmails.length; i += CHUNK) {
+    const chunk = lowerEmails.slice(i, i + CHUNK);
+    const { data, error } = await serviceClient
+      .from("email_unsubscribe_tokens")
+      .select("email, token")
+      .in("email", chunk);
+    if (error) throw new Error(`Token lookup failed: ${error.message}`);
+    for (const row of (data || []) as any[]) {
+      if (row.email && row.token) map.set(String(row.email).toLowerCase(), row.token);
+    }
+  }
+
+  const missing = lowerEmails.filter((e) => !map.has(e));
+  if (missing.length > 0) {
+    const rows = missing.map((email) => ({ email, token: generateToken() }));
+    for (let i = 0; i < rows.length; i += CHUNK) {
+      const chunk = rows.slice(i, i + CHUNK);
+      const { error } = await serviceClient
+        .from("email_unsubscribe_tokens")
+        .upsert(chunk, { onConflict: "email", ignoreDuplicates: true });
+      if (error) throw new Error(`Token upsert failed: ${error.message}`);
+    }
+    // Re-read pour récupérer le token effectif (gère les races concurrentes)
+    for (let i = 0; i < missing.length; i += CHUNK) {
+      const chunk = missing.slice(i, i + CHUNK);
+      const { data, error } = await serviceClient
+        .from("email_unsubscribe_tokens")
+        .select("email, token")
+        .in("email", chunk);
+      if (error) throw new Error(`Token re-read failed: ${error.message}`);
+      for (const row of (data || []) as any[]) {
+        if (row.email && row.token) map.set(String(row.email).toLowerCase(), row.token);
+      }
+    }
+  }
+
+  return map;
 }
 
 /**
