@@ -24,6 +24,16 @@ import {
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { SequenceRecipientsDialog } from "@/components/admin/SequenceRecipientsDialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 type Range = "24h" | "7d" | "30d";
 const RANGE_HOURS: Record<Range, number> = { "24h": 24, "7d": 24 * 7, "30d": 24 * 30 };
@@ -1506,6 +1516,55 @@ const AdminNurturing = () => {
           sinceIso={sinceIso}
         />
       )}
+
+      <AlertDialog open={preview !== null} onOpenChange={(v) => { if (!v && !triggering) setPreview(null); }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirmer l'envoi réel</AlertDialogTitle>
+            <AlertDialogDescription asChild>
+              <div className="space-y-3 text-sm">
+                <p>
+                  <strong>{preview?.sent ?? 0} email{(preview?.sent ?? 0) > 1 ? "s" : ""}</strong> {" "}
+                  ser{(preview?.sent ?? 0) > 1 ? "ont" : "a"} envoyé{(preview?.sent ?? 0) > 1 ? "s" : ""} {" "}
+                  maintenant à de vrais utilisateurs.
+                </p>
+                <p className="text-muted-foreground">
+                  Enrôlés : {preview?.enrolled ?? 0} · Sortis : {preview?.exited ?? 0} · Sautés : {preview?.skipped ?? 0}
+                </p>
+                {preview?.bySequence && Object.keys(preview.bySequence).length > 0 && (
+                  <div className="border border-border rounded-md p-3 space-y-1">
+                    <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Détail par séquence</p>
+                    {Object.entries(preview.bySequence).map(([key, s]) => (
+                      <div key={key} className="flex justify-between text-xs">
+                        <span>{labelSequence(key)}</span>
+                        <span className="text-muted-foreground">
+                          envoyés {s.sent} · enrôlés {s.enrolled} · sortis {s.exited} · sautés {s.skipped}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+                <p className="text-destructive font-medium">
+                  Ce sont de vrais envois, immédiats et non annulables.
+                </p>
+              </div>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={triggering}>Annuler</AlertDialogCancel>
+            <AlertDialogAction
+              disabled={triggering}
+              onClick={(e) => { e.preventDefault(); confirmEvaluate(); }}
+            >
+              {triggering ? (
+                <><Loader2 className="h-4 w-4 mr-1 animate-spin" />Envoi en cours,</>
+              ) : (
+                <>Envoyer {preview?.sent ?? 0} email{(preview?.sent ?? 0) > 1 ? "s" : ""}</>
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
