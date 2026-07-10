@@ -1733,6 +1733,7 @@ export type Database = {
           auth_email_ttl_minutes: number
           batch_size: number
           id: number
+          last_run_at: string | null
           retry_after_until: string | null
           send_delay_ms: number
           transactional_email_ttl_minutes: number
@@ -1742,6 +1743,7 @@ export type Database = {
           auth_email_ttl_minutes?: number
           batch_size?: number
           id?: number
+          last_run_at?: string | null
           retry_after_until?: string | null
           send_delay_ms?: number
           transactional_email_ttl_minutes?: number
@@ -1751,6 +1753,7 @@ export type Database = {
           auth_email_ttl_minutes?: number
           batch_size?: number
           id?: number
+          last_run_at?: string | null
           retry_after_until?: string | null
           send_delay_ms?: number
           transactional_email_ttl_minutes?: number
@@ -6077,6 +6080,19 @@ export type Database = {
         }
         Relationships: []
       }
+      v_email_pipeline_health: {
+        Row: {
+          attempts_1h: number | null
+          dlq_last_hour: number | null
+          failure_rate_1h: number | null
+          last_run_age_seconds: number | null
+          last_run_at: string | null
+          oldest_pending_age_seconds: number | null
+          retry_after_until: string | null
+          stuck_rate_limit: boolean | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       _normalize_species_pg: { Args: { v: string }; Returns: string }
@@ -6511,6 +6527,19 @@ export type Database = {
       get_dormant_recovery_context: {
         Args: { _user_id: string }
         Returns: Json
+      }
+      get_email_pipeline_health: {
+        Args: never
+        Returns: {
+          attempts_1h: number
+          dlq_last_hour: number
+          failure_rate_1h: number
+          last_run_age_seconds: number
+          last_run_at: string
+          oldest_pending_age_seconds: number
+          retry_after_until: string
+          stuck_rate_limit: boolean
+        }[]
       }
       get_email_preferences_by_email: {
         Args: { p_email: string }
