@@ -144,7 +144,15 @@ async function computeRecipients(
   missionId: string,
   radiusKm: number,
 ): Promise<{
-  mission: { id: string; title: string; user_id: string; latitude: number | null; longitude: number | null };
+  mission: {
+    id: string;
+    title: string;
+    description: string | null;
+    mission_type: "besoin" | "offre";
+    user_id: string;
+    latitude: number | null;
+    longitude: number | null;
+  };
   authorFirstName: string;
   centerLat: number;
   centerLon: number;
@@ -152,7 +160,7 @@ async function computeRecipients(
 }> {
   const { data: mission, error: mErr } = await serviceClient
     .from("small_missions")
-    .select("id, title, user_id, latitude, longitude")
+    .select("id, title, description, mission_type, user_id, latitude, longitude")
     .eq("id", missionId)
     .maybeSingle();
   if (mErr || !mission) throw new Error(`Mission introuvable (${missionId})`);
