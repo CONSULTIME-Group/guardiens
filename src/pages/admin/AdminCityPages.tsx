@@ -293,6 +293,68 @@ const AdminCityPages = () => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <AlertDialog open={!!pendingUnpublish} onOpenChange={(o) => !o && setPendingUnpublish(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Dépublier cette page ?</AlertDialogTitle>
+            <AlertDialogDescription>
+              La page de {pendingUnpublish?.city}, potentiellement indexée par Google, sera retirée du site public.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Annuler</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={async () => {
+                const p = pendingUnpublish;
+                if (!p) return;
+                setPendingUnpublish(null);
+                setToggling(p.id);
+                await handleTogglePublish(p.id, true);
+                await logAdminAction({
+                  action: "content_unpublish",
+                  target_type: "city_page",
+                  target_id: p.id,
+                  metadata: { title: p.city },
+                });
+                setToggling(null);
+              }}
+            >
+              Dépublier
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog open={!!pendingRegenerate} onOpenChange={(o) => !o && setPendingRegenerate(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Régénérer le contenu IA ?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Le contenu existant de {pendingRegenerate?.city} sera écrasé par une nouvelle génération IA. Action non annulable.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Annuler</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={async () => {
+                const p = pendingRegenerate;
+                if (!p) return;
+                setPendingRegenerate(null);
+                await handleRegenerate(p);
+                await logAdminAction({
+                  action: "content_ai_regenerate",
+                  target_type: "city_page",
+                  target_id: p.id,
+                  metadata: { title: p.city },
+                });
+              }}
+            >
+              Régénérer
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
