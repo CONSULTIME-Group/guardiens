@@ -286,14 +286,72 @@ const AdminUsers = () => {
     else { toast.success("Compte réactivé"); fetchUsers(); }
   };
 
-  const handleForceVerify = async (userId: string) => {
+  const confirmForceVerify = async () => {
+    const userId = verifyModal.userId;
+    if (!userId) return;
+    setVerifying(true);
+    const { data: userData } = await supabase.auth.getUser();
+    const adminId = userData.user?.id;
     const { error } = await supabase
       .from("profiles")
       .update({ identity_verified: true, identity_verification_status: "verified" })
       .eq("id", userId);
-    if (error) toast.error("Erreur");
-    else { toast.success("Identité validée"); fetchUsers(); }
+    if (error) {
+      toast.error("Erreur");
+      setVerifying(false);
+      return;
+    }
+    // Journal métier : trace la vérification manuelle admin
+    await supabase.from("identity_verification_logs").insert({
+      user_id: userId,
+      result: "verified",
+      rejection_reason: "Vérification forcée par admin",
+    });
+    // Journal d'audit admin
+    if (adminId) {
+      await supabase.from("admin_action_logs").insert({
+        admin_id: adminId,
+        action: "force_verify_identity",
+        target_type: "profile",
+        target_id: userId,
+      });
+    }
+    toast.success("Identité validée");
+    setVerifying(false);
+    setVerifyModal({ open: false, userId: "", userName: "", email: "" });
+    fetchUsers();
   };
+
+  const confirmToggleSuper = async () => {
+    const userId = superModal.userId;
+    if (!userId) return;
+    setTogglingSuper(true);
+    const newValue = superModal.newValue;
+    const { data: userData } = await supabase.auth.getUser();
+    const adminId = userData.user?.id;
+    const { error } = await supabase
+      .from("profile_moderation")
+      .upsert({ profile_id: userId, is_manual_super: newValue }, { onConflict: "profile_id" });
+    if (error) {
+      toast.error("Erreur lors de la mise à jour");
+      setTogglingSuper(false);
+      return;
+    }
+    if (adminId) {
+      await supabase.from("admin_action_logs").insert({
+        admin_id: adminId,
+        action: "toggle_super_gardien",
+        target_type: "profile",
+        target_id: userId,
+        metadata: { new_value: newValue },
+      });
+    }
+    toast(newValue ? "Super Gardien activé" : "Override retiré");
+    setTogglingSuper(false);
+    setSuperModal({ open: false, userId: "", userName: "", email: "", newValue: false });
+    fetchUsers();
+  };
+
 
   const handleResendConfirmation = async (email: string | undefined | null) => {
     if (!email) {
