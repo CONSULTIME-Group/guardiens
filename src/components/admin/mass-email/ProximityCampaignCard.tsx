@@ -205,6 +205,9 @@ const ProximityCampaignCard = ({
               <span>
                 Mission : <strong>{preview.mission.title}</strong>
               </span>
+              <span className="text-xs uppercase tracking-wide text-muted-foreground">
+                {missionType === "offre" ? "Offre d'aide" : "Demande d'aide"}
+              </span>
               <span className="text-muted-foreground">
                 Auteur : {preview.author_first_name || "(inconnu)"}
               </span>
@@ -213,10 +216,17 @@ const ProximityCampaignCard = ({
               </span>
             </div>
 
+            {preview.mission.excerpt && (
+              <div className="rounded border border-border bg-muted/20 p-3 text-xs italic text-muted-foreground">
+                {preview.mission.excerpt}
+              </div>
+            )}
+
             <div className="rounded border border-border bg-muted/30 p-3 text-xs">
               <div className="font-semibold mb-1">Objet</div>
               <div>{subject}</div>
             </div>
+
 
             {preview.count === 0 ? (
               <p className="text-sm text-muted-foreground">
