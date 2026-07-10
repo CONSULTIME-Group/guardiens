@@ -151,6 +151,7 @@ Deno.serve(async (req) => {
           items.push({
             kind: 'sit',
             id: s.id,
+            slug: s.slug ?? null,
             title: s.title,
             city: s.city,
             distanceKm: Math.round(d),
@@ -164,13 +165,18 @@ Deno.serve(async (req) => {
           if (m.user_id === p.id) continue
           const d = haversineKm(origin, { lat: Number(m.latitude), lng: Number(m.longitude) })
           if (d > radiusKm) continue
+          const desc = (m.description ?? '').toString().replace(/\s+/g, ' ').trim()
+          const excerpt = desc.length > 160 ? desc.slice(0, 157).trimEnd() + '...' : desc
           items.push({
             kind: 'mission',
             id: m.id,
+            slug: m.slug ?? null,
             title: m.title,
             city: m.city,
             distanceKm: Math.round(d),
             category: m.category,
+            missionType: m.mission_type ?? 'besoin',
+            excerpt,
             ownerFirstName: ownerMap.get(m.user_id),
             _sort: d,
           })
