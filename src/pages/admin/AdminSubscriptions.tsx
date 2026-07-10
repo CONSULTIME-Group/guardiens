@@ -308,7 +308,7 @@ const AdminSubscriptions = () => {
                       <span className="font-medium text-sm">{sub.profile?.first_name} {sub.profile?.last_name}</span>
                     </div>
                   </TableCell>
-                  <TableCell className="text-xs text-muted-foreground">{sub.profile?.first_name} {sub.profile?.last_name}</TableCell>
+                  <TableCell className="text-xs text-muted-foreground">{sub.email || "-"}</TableCell>
                   <TableCell className="text-xs capitalize">{sub.profile?.role}</TableCell>
                   <TableCell>
                     <span className={`inline-flex px-2 py-0.5 rounded-full text-xs font-medium ${plan.color}`}>{plan.label}</span>
