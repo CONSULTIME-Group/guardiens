@@ -30,12 +30,48 @@ interface MassEmailFilters {
 
 
 const UNSUB_TOKEN_PLACEHOLDER = "__UNSUB_TOKEN__";
+const DEDUPE_WINDOW_MINUTES = 5;
 
 // Generate a cryptographically random 32-byte hex token (aligned with send-transactional-email)
 function generateToken(): string {
   const bytes = new Uint8Array(32);
   crypto.getRandomValues(bytes);
   return Array.from(bytes)
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("");
+}
+
+// Empreinte stable pour anti double-envoi. Sérialisation JSON canonique
+// (clés triées) puis SHA-256 hex.
+function canonicalStringify(value: unknown): string {
+  if (value === null || typeof value !== "object") return JSON.stringify(value);
+  if (Array.isArray(value)) return `[${value.map(canonicalStringify).join(",")}]`;
+  const obj = value as Record<string, unknown>;
+  const keys = Object.keys(obj).sort();
+  return `{${keys.map((k) => `${JSON.stringify(k)}:${canonicalStringify(obj[k])}`).join(",")}}`;
+}
+
+async function computeDedupeKey(input: {
+  sent_by: string;
+  segment: string;
+  filters: unknown;
+  subject: string;
+  body: string;
+  cta_label?: string | null;
+  cta_url?: string | null;
+}): Promise<string> {
+  const canonical = canonicalStringify({
+    sent_by: input.sent_by,
+    segment: input.segment,
+    filters: input.filters ?? {},
+    subject: input.subject,
+    body: input.body,
+    cta_label: input.cta_label ?? null,
+    cta_url: input.cta_url ?? null,
+  });
+  const bytes = new TextEncoder().encode(canonical);
+  const digest = await crypto.subtle.digest("SHA-256", bytes);
+  return Array.from(new Uint8Array(digest))
     .map((b) => b.toString(16).padStart(2, "0"))
     .join("");
 }
