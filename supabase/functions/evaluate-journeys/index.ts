@@ -223,6 +223,7 @@ async function runEvaluation(
           status: 'exited', exit_reason: 'no_email', completed_at: new Date().toISOString(),
         }).eq('id', j.id)
         stats.skipped++
+        bumpSeq(j.sequence_key, 'skipped')
         continue
       }
 
@@ -330,8 +331,12 @@ async function runEvaluation(
 
       if (actuallySent) {
         stats.sent++
+        bumpSeq(j.sequence_key, 'sent')
         await new Promise((r) => setTimeout(r, SEND_DELAY_MS))
-      } else stats.skipped++
+      } else {
+        stats.skipped++
+        bumpSeq(j.sequence_key, 'skipped')
+      }
 
     } catch (err) {
       console.error('Journey eval error', j.id, err)
