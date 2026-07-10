@@ -61,7 +61,14 @@ const AdminSubscriptions = () => {
       (profiles || []).forEach(p => { profileMap[p.id] = p; });
     }
 
-    let subs = allData.map(s => ({ ...s, profile: profileMap[s.user_id] || null }));
+    // Fetch real emails via admin RPC
+    const emailMap: Record<string, string> = {};
+    if (userIds.length > 0) {
+      const { data: emails } = await supabase.rpc("get_user_emails_admin", { p_user_ids: userIds });
+      (emails || []).forEach((e: any) => { if (e?.user_id && e?.email) emailMap[e.user_id] = e.email; });
+    }
+
+    let subs = allData.map(s => ({ ...s, profile: profileMap[s.user_id] || null, email: emailMap[s.user_id] || null }));
     if (filterExpiring) {
       const in30days = new Date(Date.now() + 30 * 86400000);
       subs = subs.filter(s => s.status === "active" && s.expires_at && new Date(s.expires_at) <= in30days);
