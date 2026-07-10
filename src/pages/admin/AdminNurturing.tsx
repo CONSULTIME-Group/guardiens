@@ -705,8 +705,8 @@ const AdminNurturing = () => {
           <Button size="sm" variant="ghost" onClick={fetchData} disabled={loading}>
             Rafraîchir
           </Button>
-          <Button size="sm" variant="default" onClick={triggerEvaluate} disabled={triggering}>
-            {triggering ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : <PlayCircle className="h-4 w-4 mr-1" />}
+          <Button size="sm" variant="default" onClick={runPreview} disabled={previewing || triggering}>
+            {previewing ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : <PlayCircle className="h-4 w-4 mr-1" />}
             Lancer une évaluation
           </Button>
           <Popover>
