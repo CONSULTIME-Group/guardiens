@@ -273,8 +273,13 @@ const AdminSmallMissions = () => {
       </div>
 
       <p className="text-sm text-muted-foreground">
-        {totalCount} mission{totalCount > 1 ? "s" : ""} · Page {page + 1}/{totalPages}
+        {filtered.length} mission{filtered.length > 1 ? "s" : ""} · Page {page + 1}/{totalPages}
       </p>
+      {missions.length >= 5000 && (
+        <p className="text-xs text-muted-foreground">
+          Vue plafonnée à 5000 missions. Recherche et export portent sur ces missions uniquement.
+        </p>
+      )}
 
       <div className="rounded-lg border bg-card overflow-x-auto">
         <Table>
