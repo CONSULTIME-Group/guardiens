@@ -413,6 +413,26 @@ const AdminSmallMissions = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+      <Dialog open={!!proximityMission} onOpenChange={(open) => { if (!open) setProximityMission(null); }}>
+        <DialogContent className="max-w-3xl">
+          <DialogHeader>
+            <DialogTitle>Envoyer aux inscrits à proximité</DialogTitle>
+            <DialogDescription>
+              Mission : <strong>{proximityMission?.title}</strong>. Rayon pré-rempli à 15 km.
+              Vérifiez l'aperçu, puis confirmez explicitement pour envoyer. Aucun envoi automatique.
+            </DialogDescription>
+          </DialogHeader>
+          {proximityMission && (
+            <ProximityCampaignCard
+              key={proximityMission.id}
+              initialMissionId={proximityMission.id}
+              initialRadiusKm={15}
+              autoPreview
+              hideHeader
+            />
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
