@@ -69,6 +69,10 @@ project_id = "erhccyqevdyevpyctsjj"
     verify_jwt = true
   [functions.transcribe-audio]
     verify_jwt = true
+  [functions.send-mass-email]
+    verify_jwt = true
+  [functions.mass-email-watchdog]
+    verify_jwt = true
 
 
 
