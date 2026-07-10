@@ -218,13 +218,13 @@ const AdminListings = () => {
     }
   };
 
-  // Totaux d'en-tête
-  const totalViews = Object.values(stats).reduce((a, s) => a + s.views, 0);
-  const totalUniques = Object.values(stats).reduce((a, s) => a + s.uniqueViews, 0);
-  const totalMsg = Object.values(stats).reduce((a, s) => a + s.messages, 0);
-  const totalApps = Object.values(stats).reduce((a, s) => a + s.applications, 0);
-  const lastViewGlobal = Object.values(stats)
-    .map((s) => s.lastViewAt)
+  // Totaux d'en-tête — cohérents avec les annonces affichées (filtered)
+  const totalViews = filtered.reduce((a, l) => a + (stats[l.id]?.views || 0), 0);
+  const totalUniques = filtered.reduce((a, l) => a + (stats[l.id]?.uniqueViews || 0), 0);
+  const totalMsg = filtered.reduce((a, l) => a + (stats[l.id]?.messages || 0), 0);
+  const totalApps = filtered.reduce((a, l) => a + (stats[l.id]?.applications || 0), 0);
+  const lastViewGlobal = filtered
+    .map((l) => stats[l.id]?.lastViewAt)
     .filter(Boolean)
     .sort()
     .pop() as string | undefined;
@@ -275,17 +275,27 @@ const AdminListings = () => {
         )}
       </div>
 
-      <div className="flex flex-wrap gap-2 text-xs">
-        <Badge variant="secondary">{filtered.length} annonce{filtered.length > 1 ? "s" : ""}</Badge>
-        <Badge variant="outline">{totalViews} vues</Badge>
-        <Badge variant="outline">{totalUniques} uniques</Badge>
-        <Badge variant="outline">{totalMsg} msg</Badge>
-        <Badge variant="outline">{totalApps} candidatures</Badge>
-        {lastViewGlobal && (
-          <Badge variant="outline">
-            Dernière vue {formatDistanceToNow(new Date(lastViewGlobal), { addSuffix: true, locale: fr })}
-          </Badge>
-        )}
+      <div className="space-y-2">
+        <div className="flex items-center gap-2 text-xs text-muted-foreground">
+          <span className="font-medium">Totaux sur les annonces affichées :</span>
+          {listings.length >= 2000 && (
+            <span className="text-[10px] text-muted-foreground bg-muted px-1.5 py-0.5 rounded">
+              Vue limitée aux 2000 annonces les plus récentes, les totaux sont partiels
+            </span>
+          )}
+        </div>
+        <div className="flex flex-wrap gap-2 text-xs">
+          <Badge variant="secondary">{filtered.length} annonce{filtered.length > 1 ? "s" : ""}</Badge>
+          <Badge variant="outline">{totalViews} vues</Badge>
+          <Badge variant="outline">{totalUniques} uniques</Badge>
+          <Badge variant="outline">{totalMsg} msg</Badge>
+          <Badge variant="outline">{totalApps} candidatures</Badge>
+          {lastViewGlobal && (
+            <Badge variant="outline">
+              Dernière vue {formatDistanceToNow(new Date(lastViewGlobal), { addSuffix: true, locale: fr })}
+            </Badge>
+          )}
+        </div>
       </div>
 
       <div className="rounded-lg border bg-card overflow-x-auto">
