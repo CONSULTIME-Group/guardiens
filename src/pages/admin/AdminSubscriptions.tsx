@@ -267,7 +267,7 @@ const AdminSubscriptions = () => {
           <SelectContent>
             <SelectItem value="all">Tous les plans</SelectItem>
             <SelectItem value="founder_free">Fondateur</SelectItem>
-            <SelectItem value="annual_sitter">Gardien mensuel (6,99 €)</SelectItem>
+            <SelectItem value="annual_sitter">Gardien mensuel (9 €)</SelectItem>
             <SelectItem value="free_launch">Lancement gratuit</SelectItem>
             <SelectItem value="owner_free">Proprio gratuit</SelectItem>
           </SelectContent>
