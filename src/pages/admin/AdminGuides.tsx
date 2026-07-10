@@ -318,6 +318,36 @@ const AdminGuides = () => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <AlertDialog open={!!pendingUnpublish} onOpenChange={(o) => !o && setPendingUnpublish(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Dépublier ce guide ?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Le guide de {pendingUnpublish?.city}, potentiellement indexé par Google, sera retiré du site public.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Annuler</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={async () => {
+                const g = pendingUnpublish;
+                if (!g) return;
+                setPendingUnpublish(null);
+                await toggleMutation.mutateAsync({ id: g.id, published: false });
+                await logAdminAction({
+                  action: "content_unpublish",
+                  target_type: "guide",
+                  target_id: g.id,
+                  metadata: { title: g.city },
+                });
+              }}
+            >
+              Dépublier
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
