@@ -13,6 +13,16 @@ import { getCategoryByValue } from "@/lib/proCategories";
 import { sendTransactionalEmail } from "@/lib/sendTransactionalEmail";
 import { trackEvent } from "@/lib/analytics";
 import { ShieldCheck } from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 type ProRow = {
   id: string;
@@ -42,6 +52,10 @@ export default function AdminProDirectory() {
   const [rows, setRows] = useState<ProRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [reasonById, setReasonById] = useState<Record<string, string>>({});
+  const [rejectModal, setRejectModal] = useState<{ open: boolean; row: ProRow | null; label: "Refuser" | "Retirer" }>({
+    open: false, row: null, label: "Refuser",
+  });
+  const [busyId, setBusyId] = useState<string | null>(null);
 
   const load = async (t: Tab) => {
     setLoading(true);
