@@ -246,7 +246,7 @@ const AdminPros = () => {
                 <>
                   <Button
                     size="sm"
-                    onClick={() => decide(row, "approved")}
+                    onClick={() => setValidateModal({ open: true, row })}
                     disabled={busyId === row.id}
                     className="gap-1"
                   >
