@@ -37,6 +37,19 @@ const AdminFAQ = () => {
   const [showForm, setShowForm] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
   const [form, setForm] = useState({ question: "", answer: "", category: "general", sort_order: 0 });
+  const [pendingUnpublish, setPendingUnpublish] = useState<FaqEntry | null>(null);
+
+  const logAdminAction = async (payload: {
+    action: string;
+    target_type: string;
+    target_id: string | null;
+    metadata?: Record<string, unknown>;
+  }) => {
+    const { data: userData } = await supabase.auth.getUser();
+    const admin_id = userData?.user?.id;
+    if (!admin_id) return;
+    await (supabase.from("admin_action_logs" as any) as any).insert({ admin_id, ...payload });
+  };
 
   const { data: entries = [], isLoading } = useQuery({
     queryKey: ["admin-faq"],
@@ -178,7 +191,14 @@ const AdminFAQ = () => {
               </div>
               <Switch
                 checked={entry.published}
-                onCheckedChange={(checked) => toggleMutation.mutate({ id: entry.id, published: checked })}
+                disabled={toggleMutation.isPending}
+                onCheckedChange={(checked) => {
+                  if (!checked) {
+                    setPendingUnpublish(entry);
+                  } else {
+                    toggleMutation.mutate({ id: entry.id, published: true });
+                  }
+                }}
               />
               <Button size="icon" variant="ghost" onClick={() => startEdit(entry)}>
                 <Pencil className="h-4 w-4" />
@@ -211,6 +231,36 @@ const AdminFAQ = () => {
           ))}
         </div>
       )}
+
+      <AlertDialog open={!!pendingUnpublish} onOpenChange={(o) => !o && setPendingUnpublish(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Dépublier cette question ?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Cette question, potentiellement indexée par Google, sera retirée du site public.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Annuler</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={async () => {
+                const e = pendingUnpublish;
+                if (!e) return;
+                setPendingUnpublish(null);
+                await toggleMutation.mutateAsync({ id: e.id, published: false });
+                await logAdminAction({
+                  action: "content_unpublish",
+                  target_type: "faq",
+                  target_id: e.id,
+                  metadata: { title: e.question },
+                });
+              }}
+            >
+              Dépublier
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };

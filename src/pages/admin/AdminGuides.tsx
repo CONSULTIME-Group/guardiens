@@ -35,6 +35,19 @@ const AdminGuides = () => {
   const [department, setDepartment] = useState("");
   const [generating, setGenerating] = useState(false);
   const [pendingDelete, setPendingDelete] = useState<CityGuide | null>(null);
+  const [pendingUnpublish, setPendingUnpublish] = useState<CityGuide | null>(null);
+
+  const logAdminAction = async (payload: {
+    action: string;
+    target_type: string;
+    target_id: string | null;
+    metadata?: Record<string, unknown>;
+  }) => {
+    const { data: userData } = await supabase.auth.getUser();
+    const admin_id = userData?.user?.id;
+    if (!admin_id) return;
+    await (supabase.from("admin_action_logs" as any) as any).insert({ admin_id, ...payload });
+  };
 
   const { data: guides = [], isLoading } = useQuery({
     queryKey: ["admin-guides"],
@@ -261,7 +274,14 @@ const AdminGuides = () => {
               </div>
               <Switch
                 checked={guide.published}
-                onCheckedChange={(checked) => toggleMutation.mutate({ id: guide.id, published: checked })}
+                disabled={toggleMutation.isPending}
+                onCheckedChange={(checked) => {
+                  if (!checked) {
+                    setPendingUnpublish(guide);
+                  } else {
+                    toggleMutation.mutate({ id: guide.id, published: true });
+                  }
+                }}
               />
               <a
                 href={`/guide/${guide.slug}`}
@@ -294,6 +314,36 @@ const AdminGuides = () => {
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
               Supprimer
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog open={!!pendingUnpublish} onOpenChange={(o) => !o && setPendingUnpublish(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Dépublier ce guide ?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Le guide de {pendingUnpublish?.city}, potentiellement indexé par Google, sera retiré du site public.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Annuler</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={async () => {
+                const g = pendingUnpublish;
+                if (!g) return;
+                setPendingUnpublish(null);
+                await toggleMutation.mutateAsync({ id: g.id, published: false });
+                await logAdminAction({
+                  action: "content_unpublish",
+                  target_type: "guide",
+                  target_id: g.id,
+                  metadata: { title: g.city },
+                });
+              }}
+            >
+              Dépublier
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

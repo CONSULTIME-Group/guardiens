@@ -36,6 +36,19 @@ const AdminDepartments = () => {
   const [batchRunning, setBatchRunning] = useState(false);
   const [batchProgress, setBatchProgress] = useState<{ done: number; total: number; ok: number; failed: number } | null>(null);
   const [pendingDelete, setPendingDelete] = useState<DepartmentPage | null>(null);
+  const [pendingUnpublish, setPendingUnpublish] = useState<DepartmentPage | null>(null);
+
+  const logAdminAction = async (payload: {
+    action: string;
+    target_type: string;
+    target_id: string | null;
+    metadata?: Record<string, unknown>;
+  }) => {
+    const { data: userData } = await supabase.auth.getUser();
+    const admin_id = userData?.user?.id;
+    if (!admin_id) return;
+    await (supabase.from("admin_action_logs" as any) as any).insert({ admin_id, ...payload });
+  };
 
   const { data: pages = [], isLoading } = useQuery({
     queryKey: ["admin-departments"],
@@ -188,7 +201,14 @@ const AdminDepartments = () => {
               </div>
               <Switch
                 checked={p.published}
-                onCheckedChange={(checked) => toggleMutation.mutate({ id: p.id, published: checked })}
+                disabled={toggleMutation.isPending}
+                onCheckedChange={(checked) => {
+                  if (!checked) {
+                    setPendingUnpublish(p);
+                  } else {
+                    toggleMutation.mutate({ id: p.id, published: true });
+                  }
+                }}
               />
               <a href={`/departement/${p.slug}`} target="_blank" rel="noopener" className="text-muted-foreground hover:text-foreground">
                 <ExternalLink className="h-4 w-4" />
@@ -221,6 +241,36 @@ const AdminDepartments = () => {
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
               Supprimer
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog open={!!pendingUnpublish} onOpenChange={(o) => !o && setPendingUnpublish(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Dépublier cette page département ?</AlertDialogTitle>
+            <AlertDialogDescription>
+              La page de {pendingUnpublish?.department}, potentiellement indexée par Google, sera retirée du site public.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Annuler</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={async () => {
+                const p = pendingUnpublish;
+                if (!p) return;
+                setPendingUnpublish(null);
+                await toggleMutation.mutateAsync({ id: p.id, published: false });
+                await logAdminAction({
+                  action: "content_unpublish",
+                  target_type: "department",
+                  target_id: p.id,
+                  metadata: { title: p.department },
+                });
+              }}
+            >
+              Dépublier
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

@@ -3,6 +3,16 @@ import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
 import { Loader2, Zap, ExternalLink, RefreshCw } from "lucide-react";
 import { TOP_DOG_BREEDS, TOP_CAT_BREEDS } from "@/data/topBreeds";
@@ -16,6 +26,19 @@ const AdminBreeds = () => {
   const [running, setRunning] = useState<null | "dog" | "cat">(null);
   const [progress, setProgress] = useState<{ done: number; total: number; ok: number; failed: number } | null>(null);
   const [regenerating, setRegenerating] = useState<string | null>(null);
+  const [pendingRegenerate, setPendingRegenerate] = useState<BreedRow | null>(null);
+
+  const logAdminAction = async (payload: {
+    action: string;
+    target_type: string;
+    target_id: string | null;
+    metadata?: Record<string, unknown>;
+  }) => {
+    const { data: userData } = await supabase.auth.getUser();
+    const admin_id = userData?.user?.id;
+    if (!admin_id) return;
+    await (supabase.from("admin_action_logs" as any) as any).insert({ admin_id, ...payload });
+  };
 
   const handleRegenerate = async (species: string, breed: string) => {
     const key = `${species}-${breed}`;
@@ -128,7 +151,7 @@ const AdminBreeds = () => {
                         <div className="flex items-center gap-1 shrink-0">
                           <button
                             type="button"
-                            onClick={() => handleRegenerate(r.species, r.breed)}
+                            onClick={() => setPendingRegenerate(r)}
                             disabled={!!regenerating}
                             className="text-muted-foreground hover:text-primary disabled:opacity-50 p-1"
                             title="Régénérer la fiche IA"
@@ -152,6 +175,36 @@ const AdminBreeds = () => {
           );
         })
       )}
+
+      <AlertDialog open={!!pendingRegenerate} onOpenChange={(o) => !o && setPendingRegenerate(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Régénérer cette fiche de race ?</AlertDialogTitle>
+            <AlertDialogDescription>
+              La fiche existante de {pendingRegenerate?.breed} sera écrasée par une nouvelle génération IA. Action non annulable.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Annuler</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={async () => {
+                const r = pendingRegenerate;
+                if (!r) return;
+                setPendingRegenerate(null);
+                await handleRegenerate(r.species, r.breed);
+                await logAdminAction({
+                  action: "content_ai_regenerate",
+                  target_type: "breed",
+                  target_id: null,
+                  metadata: { title: r.breed, species: r.species },
+                });
+              }}
+            >
+              Régénérer
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };

@@ -27,6 +27,21 @@ const AdminCityPages = () => {
   const [batchProgress, setBatchProgress] = useState<{ done: number; total: number; ok: number; skipped: number; failed: number } | null>(null);
   const [regeneratingId, setRegeneratingId] = useState<string | null>(null);
   const [pendingDelete, setPendingDelete] = useState<{ id: string; city: string } | null>(null);
+  const [pendingUnpublish, setPendingUnpublish] = useState<{ id: string; city: string } | null>(null);
+  const [pendingRegenerate, setPendingRegenerate] = useState<any | null>(null);
+  const [toggling, setToggling] = useState<string | null>(null);
+
+  const logAdminAction = async (payload: {
+    action: string;
+    target_type: string;
+    target_id: string | null;
+    metadata?: Record<string, unknown>;
+  }) => {
+    const { data: userData } = await supabase.auth.getUser();
+    const admin_id = userData?.user?.id;
+    if (!admin_id) return;
+    await (supabase.from("admin_action_logs" as any) as any).insert({ admin_id, ...payload });
+  };
 
   const { data: pages, refetch } = useQuery({
     queryKey: ["admin-city-pages"],
@@ -210,14 +225,21 @@ const AdminCityPages = () => {
                 <Button
                   variant="ghost"
                   size="sm"
-                  onClick={() => handleTogglePublish(page.id, page.published)}
+                  disabled={toggling === page.id}
+                  onClick={() => {
+                    if (page.published) {
+                      setPendingUnpublish({ id: page.id, city: page.city });
+                    } else {
+                      handleTogglePublish(page.id, page.published);
+                    }
+                  }}
                 >
                   {page.published ? "Dépublier" : "Publier"}
                 </Button>
                 <Button
                   variant="ghost"
                   size="icon"
-                  onClick={() => handleRegenerate(page)}
+                  onClick={() => setPendingRegenerate(page)}
                   disabled={!!regeneratingId}
                   title="Régénérer le contenu IA"
                 >
@@ -267,6 +289,68 @@ const AdminCityPages = () => {
             <AlertDialogCancel>Annuler</AlertDialogCancel>
             <AlertDialogAction onClick={confirmDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
               Supprimer
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog open={!!pendingUnpublish} onOpenChange={(o) => !o && setPendingUnpublish(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Dépublier cette page ?</AlertDialogTitle>
+            <AlertDialogDescription>
+              La page de {pendingUnpublish?.city}, potentiellement indexée par Google, sera retirée du site public.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Annuler</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={async () => {
+                const p = pendingUnpublish;
+                if (!p) return;
+                setPendingUnpublish(null);
+                setToggling(p.id);
+                await handleTogglePublish(p.id, true);
+                await logAdminAction({
+                  action: "content_unpublish",
+                  target_type: "city_page",
+                  target_id: p.id,
+                  metadata: { title: p.city },
+                });
+                setToggling(null);
+              }}
+            >
+              Dépublier
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog open={!!pendingRegenerate} onOpenChange={(o) => !o && setPendingRegenerate(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Régénérer le contenu IA ?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Le contenu existant de {pendingRegenerate?.city} sera écrasé par une nouvelle génération IA. Action non annulable.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Annuler</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={async () => {
+                const p = pendingRegenerate;
+                if (!p) return;
+                setPendingRegenerate(null);
+                await handleRegenerate(p);
+                await logAdminAction({
+                  action: "content_ai_regenerate",
+                  target_type: "city_page",
+                  target_id: p.id,
+                  metadata: { title: p.city },
+                });
+              }}
+            >
+              Régénérer
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
