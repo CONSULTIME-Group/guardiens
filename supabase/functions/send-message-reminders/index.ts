@@ -102,13 +102,12 @@ Deno.serve(async (req) => {
         sitCity = (sit as any)?.properties?.city ?? null;
       }
 
-      const subject = conv.context_type === "sit_application"
-        ? `${sender?.first_name ?? "Un membre"} attend votre retour sur sa candidature`
-        : `${sender?.first_name ?? "Un membre"} attend toujours votre réponse`;
-
-      const intro = conv.context_type === "sit_application"
-        ? `Vous avez reçu une candidature il y a 24h pour votre annonce${sitTitle ? ` « ${sitTitle} »` : ""}${sitCity ? ` à ${sitCity}` : ""}, et vous n'y avez pas encore répondu.`
-        : `Vous avez reçu une demande de garde il y a 48h${sitCity ? ` à ${sitCity}` : ""}, et vous n'y avez pas encore répondu.`;
+      const senderName = sender?.first_name ?? "Un membre";
+      const intro = conv.context_type === "sit_application" && isOwnerRecipient
+        ? `Vous avez reçu une candidature de ${senderName} il y a plus de 48h pour votre annonce${sitTitle ? ` « ${sitTitle} »` : ""}${sitCity ? ` à ${sitCity}` : ""}, et vous n'y avez pas encore répondu.`
+        : conv.context_type === "sitter_inquiry" && !isOwnerRecipient
+          ? `${senderName} vous a envoyé une demande de garde il y a plus de 48h${sitCity ? ` à ${sitCity}` : ""}, sans réponse de votre part pour le moment.`
+          : `${senderName} attend toujours votre réponse depuis plus de 48h${sitTitle ? ` au sujet de « ${sitTitle} »` : ""}${sitCity && !sitTitle ? ` à ${sitCity}` : ""}.`;
 
       // Envoi via edge function transactionnel
       const { error: emailErr } = await supabase.functions.invoke("send-transactional-email", {
