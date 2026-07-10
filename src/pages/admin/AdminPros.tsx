@@ -13,6 +13,16 @@ import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { Briefcase, CheckCircle2, XCircle, ExternalLink, AlertTriangle, Sparkles } from "lucide-react";
 import { Link } from "react-router-dom";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 type ProVerification = {
   id: string;
@@ -62,6 +72,7 @@ const AdminPros = () => {
   const [busyId, setBusyId] = useState<string | null>(null);
   const [previewModal, setPreviewModal] = useState<{ open: boolean; row: ProVerification | null }>({ open: false, row: null });
   const [rejectModal, setRejectModal] = useState<{ open: boolean; row: ProVerification | null; reason: string }>({ open: false, row: null, reason: "" });
+  const [validateModal, setValidateModal] = useState<{ open: boolean; row: ProVerification | null }>({ open: false, row: null });
 
   const fetchRows = useCallback(async () => {
     setLoading(true);
@@ -134,8 +145,20 @@ const AdminPros = () => {
         })
         .eq("id", row.id);
       if (error) throw error;
+      // Journal d'audit admin
+      const adminId = user.user?.id ?? null;
+      if (adminId && decision === "approved") {
+        await supabase.from("admin_action_logs").insert({
+          admin_id: adminId,
+          action: "pro_validate",
+          target_type: "pro",
+          target_id: row.id,
+          metadata: { user_id: row.user_id, doc_type: row.doc_type },
+        });
+      }
       toast.success(decision === "approved" ? "Pro validé" : "Demande refusée");
       setRejectModal({ open: false, row: null, reason: "" });
+      setValidateModal({ open: false, row: null });
       fetchRows();
     } catch (e: any) {
       toast.error(e?.message ?? "Action impossible");
@@ -223,7 +246,7 @@ const AdminPros = () => {
                 <>
                   <Button
                     size="sm"
-                    onClick={() => decide(row, "approved")}
+                    onClick={() => setValidateModal({ open: true, row })}
                     disabled={busyId === row.id}
                     className="gap-1"
                   >
@@ -335,6 +358,36 @@ const AdminPros = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <AlertDialog
+        open={validateModal.open}
+        onOpenChange={(v) => { if (!v && busyId !== validateModal.row?.id) setValidateModal({ open: false, row: null }); }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              Valider le pro {(() => {
+                const p = validateModal.row?.profiles;
+                const name = `${p?.first_name ?? ""} ${p?.last_name ?? ""}`.trim();
+                return name || validateModal.row?.declared_business_name || "sélectionné";
+              })()} ?
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              Cette action accorde le statut Pro validé et rend visible le badge côté public.
+              Elle sera tracée dans le journal d'audit.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={!!busyId}>Annuler</AlertDialogCancel>
+            <AlertDialogAction
+              disabled={!!busyId}
+              onClick={(e) => { e.preventDefault(); if (validateModal.row) decide(validateModal.row, "approved"); }}
+            >
+              {busyId ? "Validation," : "Confirmer la validation"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };

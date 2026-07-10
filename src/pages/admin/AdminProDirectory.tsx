@@ -13,6 +13,16 @@ import { getCategoryByValue } from "@/lib/proCategories";
 import { sendTransactionalEmail } from "@/lib/sendTransactionalEmail";
 import { trackEvent } from "@/lib/analytics";
 import { ShieldCheck } from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 type ProRow = {
   id: string;
@@ -42,6 +52,10 @@ export default function AdminProDirectory() {
   const [rows, setRows] = useState<ProRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [reasonById, setReasonById] = useState<Record<string, string>>({});
+  const [rejectModal, setRejectModal] = useState<{ open: boolean; row: ProRow | null; label: "Refuser" | "Retirer" }>({
+    open: false, row: null, label: "Refuser",
+  });
+  const [busyId, setBusyId] = useState<string | null>(null);
 
   const load = async (t: Tab) => {
     setLoading(true);
@@ -59,9 +73,13 @@ export default function AdminProDirectory() {
   }, [tab]);
 
   const decide = async (row: ProRow, decision: "approved" | "rejected") => {
-    const patch: any = { status: decision };
+    setBusyId(row.id);
+    const { data: userData } = await supabase.auth.getUser();
+    const adminId = userData.user?.id ?? null;
+    const patch: any = { status: decision, decided_by: adminId };
     if (decision === "approved") {
       patch.approved_at = new Date().toISOString();
+      patch.approved_by = adminId;
       patch.rejection_reason = null;
     } else {
       patch.rejection_reason = reasonById[row.id] ?? "Non conforme aux exigences de l'annuaire.";
@@ -69,7 +87,25 @@ export default function AdminProDirectory() {
     const { error } = await supabase.from("pro_profiles").update(patch).eq("id", row.id);
     if (error) {
       toast.error(error.message);
+      setBusyId(null);
       return;
+    }
+
+    // Journal d'audit admin
+    if (adminId) {
+      await supabase.from("admin_action_logs").insert({
+        admin_id: adminId,
+        action: `prodirectory_${decision}`,
+        target_type: "pro_directory",
+        target_id: row.id,
+        metadata: {
+          decision,
+          raison_sociale: row.raison_sociale,
+          slug: row.slug,
+          previous_status: row.status,
+          reason: decision === "rejected" ? patch.rejection_reason : null,
+        },
+      });
     }
 
     // Notification email au pro (non bloquant)
@@ -85,6 +121,8 @@ export default function AdminProDirectory() {
     }).catch(() => {});
 
     toast.success(decision === "approved" ? "Fiche approuvée, email envoyé" : "Fiche refusée, email envoyé");
+    setBusyId(null);
+    setRejectModal({ open: false, row: null, label: "Refuser" });
     load(tab);
   };
 
@@ -227,13 +265,14 @@ export default function AdminProDirectory() {
                               rows={2}
                             />
                             <div className="flex flex-wrap gap-2">
-                              <Button size="sm" onClick={() => decide(row, "approved")}>
+                              <Button size="sm" onClick={() => decide(row, "approved")} disabled={busyId === row.id}>
                                 Approuver
                               </Button>
                               <Button
                                 size="sm"
                                 variant="destructive"
-                                onClick={() => decide(row, "rejected")}
+                                disabled={busyId === row.id}
+                                onClick={() => setRejectModal({ open: true, row, label: "Refuser" })}
                               >
                                 Refuser
                               </Button>
@@ -254,7 +293,7 @@ export default function AdminProDirectory() {
                               </Link>
                             </Button>
                             {tab === "rejected" && (
-                              <Button size="sm" onClick={() => decide(row, "approved")}>
+                              <Button size="sm" onClick={() => decide(row, "approved")} disabled={busyId === row.id}>
                                 Approuver finalement
                               </Button>
                             )}
@@ -262,7 +301,8 @@ export default function AdminProDirectory() {
                               <Button
                                 size="sm"
                                 variant="destructive"
-                                onClick={() => decide(row, "rejected")}
+                                disabled={busyId === row.id}
+                                onClick={() => setRejectModal({ open: true, row, label: "Retirer" })}
                               >
                                 Retirer
                               </Button>
@@ -278,6 +318,36 @@ export default function AdminProDirectory() {
           )}
         </TabsContent>
       </Tabs>
+
+      <AlertDialog
+        open={rejectModal.open}
+        onOpenChange={(v) => {
+          if (!v && busyId !== rejectModal.row?.id) setRejectModal({ open: false, row: null, label: "Refuser" });
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              {rejectModal.label} la fiche « {rejectModal.row?.raison_sociale} » ?
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              {rejectModal.label === "Retirer"
+                ? "Cette fiche approuvée sera retirée de l'annuaire public et repassera en statut refusée. Le pro sera notifié par email."
+                : "Cette demande sera marquée refusée et le pro sera notifié par email avec le motif saisi."}
+              {" "}L'action sera tracée dans le journal d'audit.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={!!busyId}>Annuler</AlertDialogCancel>
+            <AlertDialogAction
+              disabled={!!busyId}
+              onClick={(e) => { e.preventDefault(); if (rejectModal.row) decide(rejectModal.row, "rejected"); }}
+            >
+              {busyId ? "Traitement," : `Confirmer, ${rejectModal.label}`}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

@@ -1,0 +1,1 @@
+ALTER TABLE public.pro_profiles ADD COLUMN IF NOT EXISTS decided_by uuid REFERENCES auth.users(id) ON DELETE SET NULL;

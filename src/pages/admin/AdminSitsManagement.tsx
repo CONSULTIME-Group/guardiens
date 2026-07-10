@@ -17,6 +17,16 @@ import { fr } from "date-fns/locale";
 import { AlertTriangle, Search, Eye, XCircle, Star, StickyNote, RotateCcw, User, Calendar, MapPin, ChevronRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { getCountryName } from "@/lib/countries";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 const AdminSitsManagement = () => {
   const navigate = useNavigate();
@@ -30,6 +40,8 @@ const AdminSitsManagement = () => {
   const [statsBySit, setStatsBySit] = useState<Record<string, { views: number; messages: number }>>({});
   const [cancelModal, setCancelModal] = useState<{ open: boolean; id: string; type: string; reason: string }>({ open: false, id: "", type: "", reason: "" });
   const [noteModal, setNoteModal] = useState<{ open: boolean; id: string; note: string }>({ open: false, id: "", note: "" });
+  const [forceCompleteModal, setForceCompleteModal] = useState<{ open: boolean; sit: any | null }>({ open: false, sit: null });
+  const [forcingComplete, setForcingComplete] = useState(false);
 
   // Sheet state
   const [selectedSit, setSelectedSit] = useState<any | null>(null);
@@ -132,8 +144,35 @@ const AdminSitsManagement = () => {
   };
 
   const forceComplete = async (sit: any) => {
-    await supabase.from("sits").update({ status: "completed" as any }).eq("id", sit.id);
-    toast.success("Garde marquée terminée"); fetchSits();
+    setForcingComplete(true);
+    const { error } = await supabase.from("sits").update({ status: "completed" as any }).eq("id", sit.id);
+    if (error) {
+      toast.error(error.message || "Erreur");
+      setForcingComplete(false);
+      return;
+    }
+    // Journal d'audit admin
+    const { data: userData } = await supabase.auth.getUser();
+    const adminId = userData.user?.id;
+    if (adminId) {
+      await supabase.from("admin_action_logs").insert({
+        admin_id: adminId,
+        action: "force_complete_garde",
+        target_type: "garde",
+        target_id: sit.id,
+        metadata: {
+          title: sit.title ?? null,
+          owner_id: sit.user_id ?? null,
+          previous_status: sit.status ?? null,
+          start_date: sit.start_date ?? null,
+          end_date: sit.end_date ?? null,
+        },
+      });
+    }
+    toast.success("Garde marquée terminée");
+    setForcingComplete(false);
+    setForceCompleteModal({ open: false, sit: null });
+    fetchSits();
   };
 
   const handleCancel = async () => {
@@ -376,7 +415,7 @@ const AdminSitsManagement = () => {
                         <Eye className="h-4 w-4" />
                       </Button>
                       {isOverdue && (
-                        <Button variant="ghost" size="icon" title="Forcer fin" onClick={() => forceComplete(sit)}>
+                        <Button variant="ghost" size="icon" title="Forcer fin" onClick={() => setForceCompleteModal({ open: true, sit })} disabled={forcingComplete && forceCompleteModal.sit?.id === sit.id}>
                           <RotateCcw className="h-4 w-4 text-primary" />
                         </Button>
                       )}
@@ -589,6 +628,46 @@ const AdminSitsManagement = () => {
           )}
         </SheetContent>
       </Sheet>
+
+      <AlertDialog
+        open={forceCompleteModal.open}
+        onOpenChange={(v) => { if (!v && !forcingComplete) setForceCompleteModal({ open: false, sit: null }); }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              Forcer la fin de la garde « {forceCompleteModal.sit?.title ?? "sans titre"} » ?
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              {(() => {
+                const s = forceCompleteModal.sit;
+                const ownerName = sitters[s?.user_id]?.name ?? null;
+                const sitterName = s?.confirmed_sitter_id ? sitters[s.confirmed_sitter_id]?.name ?? null : null;
+                const parts: string[] = [];
+                if (ownerName) parts.push(`Propriétaire : ${ownerName}`);
+                if (sitterName) parts.push(`Gardien : ${sitterName}`);
+                return (
+                  <>
+                    {parts.length > 0 && <span className="block mb-2 text-foreground">{parts.join(" · ")}</span>}
+                    Cette action clôt la garde de force en la passant au statut « terminée »,
+                    même si les dates ou l'accord des deux parties ne sont pas complets.
+                    Elle sera tracée dans le journal d'audit.
+                  </>
+                );
+              })()}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={forcingComplete}>Annuler</AlertDialogCancel>
+            <AlertDialogAction
+              disabled={forcingComplete}
+              onClick={(e) => { e.preventDefault(); if (forceCompleteModal.sit) forceComplete(forceCompleteModal.sit); }}
+            >
+              {forcingComplete ? "Clôture," : "Confirmer la clôture"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };

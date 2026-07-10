@@ -3531,6 +3531,7 @@ export type Database = {
           city: string | null
           cover_url: string | null
           created_at: string
+          decided_by: string | null
           description: string | null
           diplomes: string[]
           email_contact: string | null
@@ -3574,6 +3575,7 @@ export type Database = {
           city?: string | null
           cover_url?: string | null
           created_at?: string
+          decided_by?: string | null
           description?: string | null
           diplomes?: string[]
           email_contact?: string | null
@@ -3617,6 +3619,7 @@ export type Database = {
           city?: string | null
           cover_url?: string | null
           created_at?: string
+          decided_by?: string | null
           description?: string | null
           diplomes?: string[]
           email_contact?: string | null
