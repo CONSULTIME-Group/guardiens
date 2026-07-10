@@ -8,6 +8,16 @@ import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ConfirmDialog } from "@/components/admin/ConfirmDialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 interface SkillRow {
   id: string;
@@ -57,6 +67,10 @@ const AdminSkills = () => {
   const [newCompLabel, setNewCompLabel] = useState("");
   const [newCompCategorie, setNewCompCategorie] = useState("jardin");
   const [pendingCompetences, setPendingCompetences] = useState<{ label: string; count: number; sources: string[] }[]>([]);
+  const [rejectModal, setRejectModal] = useState<{ open: boolean; label: string; count: number }>({
+    open: false, label: "", count: 0,
+  });
+  const [rejecting, setRejecting] = useState(false);
 
   const fetchSkills = useCallback(async () => {
     setLoading(true);
