@@ -74,43 +74,82 @@ const NearbyDailyDigestEmail = ({ firstName, radiusKm = 15, city, items = [] }: 
 
           {items.map((it) => {
             const isMission = it.kind === 'mission'
-            const badge = isMission
-              ? missionBadge(it.missionType)
-              : 'Garde'
+            const type: 'besoin' | 'offre' | 'sit' = isMission
+              ? (it.missionType === 'offre' ? 'offre' : 'besoin')
+              : 'sit'
+            const badge = isMission ? missionBadge(it.missionType) : 'Garde'
             const headline = cardHeadline(it)
             const authorLine = isMission && it.ownerFirstName
               ? (it.missionType === 'offre'
                   ? `Proposée par ${it.ownerFirstName}`
-                  : `Demandé par ${it.ownerFirstName}`)
+                  : `Demandée par ${it.ownerFirstName}`)
               : (it.ownerFirstName ? `Proposée par ${it.ownerFirstName}` : undefined)
+
+            const accent = type === 'besoin' ? '#B45309' // ambre profond
+              : type === 'offre' ? '#2C6E49' // vert Guardiens
+              : '#6B7280' // neutre gris
+            const badgeBg = type === 'besoin' ? '#FEF3C7'
+              : type === 'offre' ? '#E6F0EA'
+              : '#F1F1EF'
+            const badgeFg = type === 'besoin' ? '#92400E'
+              : type === 'offre' ? '#1F5638'
+              : '#374151'
+            const metaBits: string[] = []
+            if (it.city) metaBits.push(it.city)
+            if (typeof it.distanceKm === 'number') metaBits.push(`${it.distanceKm} km`)
+            const metaLine = metaBits.join('  ·  ')
+
             return (
-              <Section key={`${it.kind}-${it.id}`} style={card}>
-                <Text style={cardTag}>
-                  {badge}
-                  {typeof it.distanceKm === 'number' ? ` · ${it.distanceKm} km` : ''}
-                </Text>
+              <Section
+                key={`${it.kind}-${it.id}`}
+                style={{ ...card, borderLeft: `4px solid ${accent}` }}
+              >
+                <table width="100%" cellPadding={0} cellSpacing={0} role="presentation" style={cardTable}>
+                  <tr>
+                    <td style={cardBadgeCell}>
+                      <span style={{ ...badgePill, backgroundColor: badgeBg, color: badgeFg }}>
+                        {badge}
+                      </span>
+                    </td>
+                  </tr>
+                </table>
                 {headline ? <Text style={cardTitle}>{headline}</Text> : null}
                 {isMission && it.title && it.title !== headline ? (
-                  <Text style={cardLine}>{it.title}</Text>
+                  <Text style={cardSubtitle}>{it.title}</Text>
                 ) : null}
                 {isMission && it.excerpt ? (
                   <Text style={cardExcerpt}>{it.excerpt}</Text>
                 ) : null}
-                {it.city ? <Text style={cardLine}>{it.city}</Text> : null}
+                {metaLine ? <Text style={cardMeta}>{metaLine}</Text> : null}
                 {it.startDate && it.endDate ? (
-                  <Text style={cardLine}>Du {it.startDate} au {it.endDate}</Text>
+                  <Text style={cardMeta}>Du {it.startDate} au {it.endDate}</Text>
                 ) : null}
-                {authorLine ? <Text style={cardLine}>{authorLine}</Text> : null}
-                <Link style={cardLink} href={itemUrl(it)}>
-                  Voir l'annonce
-                </Link>
+                {authorLine ? <Text style={cardMeta}>{authorLine}</Text> : null}
+                <table role="presentation" cellPadding={0} cellSpacing={0} style={{ margin: '14px 0 2px' }}>
+                  <tr>
+                    <td>
+                      <Link
+                        href={itemUrl(it)}
+                        style={{ ...cardCta, backgroundColor: accent }}
+                      >
+                        Voir l'annonce
+                      </Link>
+                    </td>
+                  </tr>
+                </table>
               </Section>
             )
           })}
 
-          <Button style={button} href={`${SITE_URL}/petites-missions`}>
-            Voir toutes les annonces
-          </Button>
+          <table role="presentation" cellPadding={0} cellSpacing={0} width="100%" style={{ margin: '24px 0 4px' }}>
+            <tr>
+              <td align="center">
+                <Button style={button} href={`${SITE_URL}/petites-missions`}>
+                  Voir toutes les annonces
+                </Button>
+              </td>
+            </tr>
+          </table>
 
           <Hr style={hr} />
 
@@ -168,27 +207,99 @@ export const template = {
         missionType: 'besoin',
         ownerFirstName: 'Claire',
       },
+      {
+        kind: 'mission',
+        id: '00000000-0000-0000-0000-000000000003',
+        title: 'Coup de main pour promener mon chien le matin',
+        excerpt: 'Je propose de promener votre chien 30 minutes chaque matin cette semaine, gratuitement.',
+        city: 'Villeurbanne',
+        distanceKm: 4,
+        missionType: 'offre',
+        ownerFirstName: 'Marc',
+      },
     ] as Item[],
   },
 } satisfies TemplateEntry
 
-const main = { backgroundColor: '#ffffff', fontFamily: "'Outfit', Arial, sans-serif" }
-const container = { padding: '24px 28px', maxWidth: '560px', margin: '0 auto' }
-const h1 = { fontSize: '24px', fontWeight: 'bold' as const, color: 'hsl(153, 42%, 30%)', margin: '0 0 20px' }
-const text = { fontSize: '14px', color: 'hsl(37, 7%, 43%)', lineHeight: '1.6', margin: '0 0 16px' }
-const card = {
-  backgroundColor: 'hsl(37, 22%, 96%)',
-  border: '1px solid hsl(37, 22%, 89%)',
-  borderRadius: '10px',
-  padding: '14px 16px',
-  margin: '10px 0',
+const main = {
+  backgroundColor: '#FAF9F6',
+  fontFamily: "'Outfit', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
+  margin: 0,
+  padding: '24px 12px',
 }
-const cardTag = { fontSize: '11px', textTransform: 'uppercase' as const, letterSpacing: '0.5px', color: 'hsl(153, 42%, 30%)', margin: '0 0 4px', fontWeight: '600' as const }
-const cardTitle = { fontSize: '15px', fontWeight: '600' as const, color: 'hsl(153, 42%, 25%)', margin: '0 0 6px' }
-const cardLine = { fontSize: '13px', color: 'hsl(37, 7%, 35%)', margin: '3px 0' }
-const cardExcerpt = { fontSize: '13px', color: 'hsl(37, 7%, 30%)', lineHeight: '1.5', margin: '4px 0 8px', fontStyle: 'italic' as const }
-const cardLink = { fontSize: '13px', color: 'hsl(153, 42%, 30%)', textDecoration: 'underline', display: 'inline-block', marginTop: '6px' }
-const button = { backgroundColor: 'hsl(153, 42%, 30%)', color: '#ffffff', padding: '12px 28px', borderRadius: '8px', fontSize: '15px', fontWeight: '600' as const, textDecoration: 'none', display: 'inline-block', margin: '8px 0 4px' }
-const hr = { borderColor: 'hsl(37, 22%, 89%)', margin: '20px 0' }
-const note = { fontSize: '12px', color: 'hsl(37, 7%, 55%)', lineHeight: '1.6', margin: '0 0 12px' }
-const link = { color: 'hsl(153, 42%, 30%)', textDecoration: 'underline' }
+const container = {
+  padding: '32px 28px',
+  maxWidth: '600px',
+  margin: '0 auto',
+  backgroundColor: '#ffffff',
+  borderRadius: '16px',
+  boxShadow: '0 2px 12px rgba(0,0,0,0.04)',
+}
+const h1 = {
+  fontSize: '24px',
+  fontWeight: 'bold' as const,
+  color: '#1a1a1a',
+  margin: '4px 0 20px',
+  lineHeight: '1.3',
+}
+const text = { fontSize: '15px', color: '#3a3a3a', lineHeight: '1.7', margin: '0 0 14px' }
+const card = {
+  backgroundColor: '#ffffff',
+  border: '1px solid #E7E5E0',
+  borderRadius: '12px',
+  padding: '16px 18px 18px',
+  margin: '14px 0',
+  boxShadow: '0 1px 3px rgba(17,24,39,0.04)',
+}
+const cardTable = { margin: '0 0 6px' }
+const cardBadgeCell = { padding: 0 }
+const badgePill = {
+  display: 'inline-block',
+  padding: '3px 10px',
+  borderRadius: '999px',
+  fontSize: '11px',
+  fontWeight: '700' as const,
+  letterSpacing: '0.3px',
+  textTransform: 'uppercase' as const,
+  lineHeight: '1.4',
+}
+const cardTitle = {
+  fontSize: '17px',
+  fontWeight: '700' as const,
+  color: '#1a1a1a',
+  margin: '6px 0 4px',
+  lineHeight: '1.35',
+}
+const cardSubtitle = { fontSize: '14px', color: '#3a3a3a', margin: '0 0 6px', fontWeight: '500' as const }
+const cardExcerpt = {
+  fontSize: '14px',
+  color: '#4b5563',
+  lineHeight: '1.6',
+  margin: '4px 0 10px',
+  fontStyle: 'italic' as const,
+}
+const cardMeta = { fontSize: '13px', color: '#6b7280', margin: '2px 0', lineHeight: '1.5' }
+const cardCta = {
+  display: 'inline-block',
+  padding: '10px 20px',
+  color: '#ffffff',
+  textDecoration: 'none',
+  borderRadius: '8px',
+  fontSize: '14px',
+  fontWeight: '600' as const,
+  lineHeight: '1.2',
+}
+const button = {
+  backgroundColor: '#2C6E49',
+  color: '#ffffff',
+  padding: '14px 32px',
+  borderRadius: '10px',
+  fontSize: '15px',
+  fontWeight: '600' as const,
+  textDecoration: 'none',
+  display: 'inline-block',
+  boxShadow: '0 4px 12px rgba(44,110,73,0.25)',
+}
+const hr = { borderColor: '#E7E5E0', margin: '24px 0 16px' }
+const note = { fontSize: '12px', color: '#6b7280', lineHeight: '1.6', margin: '0 0 12px' }
+const link = { color: '#2C6E49', textDecoration: 'underline' }
