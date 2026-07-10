@@ -73,9 +73,13 @@ export default function AdminProDirectory() {
   }, [tab]);
 
   const decide = async (row: ProRow, decision: "approved" | "rejected") => {
-    const patch: any = { status: decision };
+    setBusyId(row.id);
+    const { data: userData } = await supabase.auth.getUser();
+    const adminId = userData.user?.id ?? null;
+    const patch: any = { status: decision, decided_by: adminId };
     if (decision === "approved") {
       patch.approved_at = new Date().toISOString();
+      patch.approved_by = adminId;
       patch.rejection_reason = null;
     } else {
       patch.rejection_reason = reasonById[row.id] ?? "Non conforme aux exigences de l'annuaire.";
@@ -83,7 +87,25 @@ export default function AdminProDirectory() {
     const { error } = await supabase.from("pro_profiles").update(patch).eq("id", row.id);
     if (error) {
       toast.error(error.message);
+      setBusyId(null);
       return;
+    }
+
+    // Journal d'audit admin
+    if (adminId) {
+      await supabase.from("admin_action_logs").insert({
+        admin_id: adminId,
+        action: `prodirectory_${decision}`,
+        target_type: "pro_directory",
+        target_id: row.id,
+        metadata: {
+          decision,
+          raison_sociale: row.raison_sociale,
+          slug: row.slug,
+          previous_status: row.status,
+          reason: decision === "rejected" ? patch.rejection_reason : null,
+        },
+      });
     }
 
     // Notification email au pro (non bloquant)
@@ -99,6 +121,8 @@ export default function AdminProDirectory() {
     }).catch(() => {});
 
     toast.success(decision === "approved" ? "Fiche approuvée, email envoyé" : "Fiche refusée, email envoyé");
+    setBusyId(null);
+    setRejectModal({ open: false, row: null, label: "Refuser" });
     load(tab);
   };
 
