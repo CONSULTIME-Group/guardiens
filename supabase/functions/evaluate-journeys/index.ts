@@ -203,10 +203,11 @@ async function runEvaluation(
           })
         }
         stats.exited++
+        bumpSeq(j.sequence_key, 'exited')
         continue
       }
 
-      if (dryRun) { stats.sent++; continue }
+      if (dryRun) { stats.sent++; bumpSeq(j.sequence_key, 'sent'); continue }
 
       const { data: profile } = await supabase
         .from('profiles')
