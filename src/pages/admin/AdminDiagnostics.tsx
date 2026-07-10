@@ -24,6 +24,16 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { RefreshCw, AlertTriangle, CheckCircle2, Search } from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 interface AppRow {
   id: string;
@@ -74,6 +84,7 @@ const AdminDiagnostics = () => {
   const [geoLoading, setGeoLoading] = useState(false);
   const [geoError, setGeoError] = useState<string | null>(null);
   const [geoResult, setGeoResult] = useState<BackfillResult | null>(null);
+  const [geoConfirmOpen, setGeoConfirmOpen] = useState(false);
 
   const fetchData = async () => {
     setLoading(true);
@@ -123,13 +134,34 @@ const AdminDiagnostics = () => {
       if (invokeError) throw invokeError;
       if (data?.error) throw new Error(data.error);
 
-      setGeoResult(data as BackfillResult);
+      const result = data as BackfillResult;
+      setGeoResult(result);
+
+      // Audit trail
+      const { data: userData } = await supabase.auth.getUser();
+      const adminId = userData.user?.id;
+      if (adminId) {
+        await supabase.from("admin_action_logs").insert({
+          admin_id: adminId,
+          action: "coordinate_backfill",
+          target_type: "profiles_bulk",
+          target_id: null,
+          metadata: {
+            affected: result?.updated ?? null,
+            processed: result?.processed ?? null,
+            skipped: result?.skipped ?? null,
+            errors: result?.errors ?? null,
+          },
+        });
+      }
     } catch (e: any) {
       setGeoError(e?.message || "Erreur inconnue");
     } finally {
       setGeoLoading(false);
+      setGeoConfirmOpen(false);
     }
   };
+
 
   const filtered = useMemo(() => {
     if (!filter.trim()) return rows;
