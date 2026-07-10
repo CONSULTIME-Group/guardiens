@@ -19,6 +19,16 @@ import { MessageHistoryDialog, type HistoryItem } from "./_components/users/Mess
 import { LastMessageDialog, type LastMessageState } from "./_components/users/LastMessageDialog";
 import { ErrorDetailDialog, type ErrorDetailState } from "./_components/users/ErrorDetailDialog";
 import ChangeRoleDialog from "./_components/users/ChangeRoleDialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 const roleLabels: Record<string, string> = {
   owner: "Propriétaire",
@@ -80,6 +90,14 @@ const AdminUsers = () => {
   const [roleModal, setRoleModal] = useState<{ open: boolean; userId: string | null; userName: string; currentRole: "owner" | "sitter" | "both" | null }>({
     open: false, userId: null, userName: "", currentRole: null,
   });
+  const [verifyModal, setVerifyModal] = useState<{ open: boolean; userId: string; userName: string; email: string }>({
+    open: false, userId: "", userName: "", email: "",
+  });
+  const [verifying, setVerifying] = useState(false);
+  const [superModal, setSuperModal] = useState<{ open: boolean; userId: string; userName: string; email: string; newValue: boolean }>({
+    open: false, userId: "", userName: "", email: "", newValue: false,
+  });
+  const [togglingSuper, setTogglingSuper] = useState(false);
   const navigate = useNavigate();
 
   const openHistory = async () => {
