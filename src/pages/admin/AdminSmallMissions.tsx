@@ -89,9 +89,7 @@ const AdminSmallMissions = () => {
       query = query.order(sortBy, { ascending });
     }
 
-    const from = page * PAGE_SIZE;
-    const to = from + PAGE_SIZE - 1;
-    query = query.range(from, to);
+    query = query.limit(5000);
 
     const { data, count, error } = await query;
     if (error) toast.error("Erreur de chargement");
@@ -100,7 +98,7 @@ const AdminSmallMissions = () => {
       setTotalCount(count || 0);
     }
     setLoading(false);
-  }, [filterStatus, filterCategory, filterPeriod, sortBy, sortDir, page]);
+  }, [filterStatus, filterCategory, filterPeriod, sortBy, sortDir]);
 
   useEffect(() => { fetchMissions(); }, [fetchMissions]);
   useEffect(() => { setPage(0); }, [filterStatus, filterCategory, filterPeriod, search]);
@@ -134,6 +132,8 @@ const AdminSmallMissions = () => {
     }
     return list;
   }, [missions, search, sortBy, sortDir, responseCounts]);
+
+  const paginated = useMemo(() => filtered.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE), [filtered, page]);
 
   const suspectMissions = filtered.filter(m => moneyPattern.test(m.description || "") || moneyPattern.test(m.exchange_offer || ""));
 
@@ -191,7 +191,7 @@ const AdminSmallMissions = () => {
     URL.revokeObjectURL(url);
   };
 
-  const totalPages = Math.max(1, Math.ceil(totalCount / PAGE_SIZE));
+  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
   const ratioGlobal = kpis.totalViews > 0 ? ((kpis.totalResponses / kpis.totalViews) * 100).toFixed(1) : "0";
 
   return (
@@ -273,8 +273,13 @@ const AdminSmallMissions = () => {
       </div>
 
       <p className="text-sm text-muted-foreground">
-        {totalCount} mission{totalCount > 1 ? "s" : ""} · Page {page + 1}/{totalPages}
+        {filtered.length} mission{filtered.length > 1 ? "s" : ""} · Page {page + 1}/{totalPages}
       </p>
+      {missions.length >= 5000 && (
+        <p className="text-xs text-muted-foreground">
+          Vue plafonnée à 5000 missions. Recherche et export portent sur ces missions uniquement.
+        </p>
+      )}
 
       <div className="rounded-lg border bg-card overflow-x-auto">
         <Table>
@@ -309,7 +314,7 @@ const AdminSmallMissions = () => {
               <TableRow><TableCell colSpan={10} className="text-center py-8 text-muted-foreground">Chargement…</TableCell></TableRow>
             ) : filtered.length === 0 ? (
               <TableRow><TableCell colSpan={10} className="text-center py-8 text-muted-foreground">Aucune mission</TableCell></TableRow>
-            ) : filtered.map((m) => {
+            ) : paginated.map((m) => {
               const status = statusLabels[m.status] || { label: m.status, variant: "outline" as const };
               const isSuspect = moneyPattern.test(m.description || "") || moneyPattern.test(m.exchange_offer || "");
               const views = m.view_count ?? 0;
