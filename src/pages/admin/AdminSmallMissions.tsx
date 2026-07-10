@@ -191,7 +191,7 @@ const AdminSmallMissions = () => {
     URL.revokeObjectURL(url);
   };
 
-  const totalPages = Math.max(1, Math.ceil(totalCount / PAGE_SIZE));
+  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
   const ratioGlobal = kpis.totalViews > 0 ? ((kpis.totalResponses / kpis.totalViews) * 100).toFixed(1) : "0";
 
   return (
