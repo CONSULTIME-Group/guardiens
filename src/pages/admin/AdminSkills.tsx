@@ -185,12 +185,35 @@ const AdminSkills = () => {
     fetchPendingCompetences();
   };
 
-  const handleRejectCompetence = async (label: string) => {
+  const confirmRejectCompetence = async () => {
+    const label = rejectModal.label;
+    if (!label) return;
+    setRejecting(true);
     const { data, error } = await supabase.rpc("admin_reject_competence_label", { p_label: label });
-    if (error) { toast({ description: "Erreur lors du refus." }); return; }
-    toast({ description: `"${label}" refusée et retirée de ${data ?? 0} profil(s).` });
+    if (error) {
+      toast({ description: "Erreur lors du refus." });
+      setRejecting(false);
+      return;
+    }
+    const affected = (data as number | null) ?? 0;
+    // Audit trail
+    const { data: userData } = await supabase.auth.getUser();
+    const adminId = userData.user?.id;
+    if (adminId) {
+      await supabase.from("admin_action_logs").insert({
+        admin_id: adminId,
+        action: "reject_competence_label",
+        target_type: "competence",
+        target_id: null,
+        metadata: { label, affected_profiles: affected, submissions: rejectModal.count },
+      });
+    }
+    toast({ description: `"${label}" refusée et retirée de ${affected} profil(s).` });
+    setRejecting(false);
+    setRejectModal({ open: false, label: "", count: 0 });
     fetchPendingCompetences();
   };
+
 
   const handleAddCompetence = async () => {
     if (!newCompLabel.trim()) return;
