@@ -80,7 +80,7 @@ const AdminSubscriptions = () => {
       active: allData.filter(s => s.status === "active").length,
       founders: allData.filter(s => s.plan === "founder_free" && s.status === "active").length,
       expiredMonth: allData.filter(s => s.status === "expired" && s.expires_at && new Date(s.expires_at) >= monthAgo).length,
-      revenue: allData.filter(s => s.plan === "annual_sitter" && s.status === "active").length * 49,
+      revenue: allData.filter(s => s.plan === "annual_sitter" && s.status === "active").length * 9,
     });
     setLoading(false);
   }, [filterPlan, filterExpiring]);
