@@ -133,6 +133,8 @@ const AdminSmallMissions = () => {
     return list;
   }, [missions, search, sortBy, sortDir, responseCounts]);
 
+  const paginated = useMemo(() => filtered.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE), [filtered, page]);
+
   const suspectMissions = filtered.filter(m => moneyPattern.test(m.description || "") || moneyPattern.test(m.exchange_offer || ""));
 
   const toggleSort = (key: SortKey) => {
