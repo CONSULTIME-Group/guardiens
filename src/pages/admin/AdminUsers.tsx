@@ -656,8 +656,13 @@ const AdminUsers = () => {
                           variant="ghost"
                           size="icon"
                           title="Forcer vérification ID"
-                          onClick={() => handleForceVerify(user.id)}
-                          disabled={user.identity_verified}
+                          onClick={() => setVerifyModal({
+                            open: true,
+                            userId: user.id,
+                            userName: `${user.first_name || ""} ${user.last_name || ""}`.trim() || "Utilisateur",
+                            email: user.email || "",
+                          })}
+                          disabled={user.identity_verified || (verifying && verifyModal.userId === user.id)}
                         >
                           <ShieldCheck className="h-4 w-4" />
                         </Button>
@@ -665,21 +670,14 @@ const AdminUsers = () => {
                           variant="ghost"
                           size="icon"
                           title={user.is_manual_super ? "Retirer Super Gardien" : "Promouvoir Super Gardien"}
-                          onClick={async () => {
-                            const newVal = !user.is_manual_super;
-                            const { error } = await supabase
-                              .from("profile_moderation")
-                              .upsert({
-                                profile_id: user.id,
-                                is_manual_super: newVal,
-                              }, { onConflict: "profile_id" });
-                            if (!error) {
-                              toast(newVal ? "Super Gardien activé" : "Override retiré");
-                              fetchUsers();
-                            } else {
-                              toast.error("Erreur lors de la mise à jour");
-                            }
-                          }}
+                          disabled={togglingSuper && superModal.userId === user.id}
+                          onClick={() => setSuperModal({
+                            open: true,
+                            userId: user.id,
+                            userName: `${user.first_name || ""} ${user.last_name || ""}`.trim() || "Utilisateur",
+                            email: user.email || "",
+                            newValue: !user.is_manual_super,
+                          })}
                         >
                           <Crown className={`h-4 w-4 ${user.is_manual_super ? 'text-warning' : ''}`} />
                         </Button>
