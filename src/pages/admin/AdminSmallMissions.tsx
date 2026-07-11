@@ -33,6 +33,16 @@ const statusLabels: Record<string, { label: string; variant: "default" | "second
   cancelled: { label: "Annulée", variant: "destructive" },
 };
 
+// Distingue une mission masquée par l'admin d'une mission annulée par l'auteur.
+function resolveStatusBadge(m: { status: string; hidden_by?: string | null }) {
+  if (m.status === "cancelled") {
+    return m.hidden_by
+      ? { label: "Masquée (admin)", variant: "secondary" as const }
+      : { label: "Annulée (auteur)", variant: "outline" as const };
+  }
+  return statusLabels[m.status] || { label: m.status, variant: "outline" as const };
+}
+
 const categoryLabels: Record<string, string> = {
   animals: "Animaux",
   garden: "Jardin",
