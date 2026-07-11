@@ -1876,6 +1876,21 @@ export default function PublicSitterProfile() {
                   <span className="line-clamp-2">Contacter {firstName}</span>
                 </button>
               )}
+              {isAuthenticated && isSitter && id && (
+                <button
+                  type="button"
+                  onClick={() =>
+                    setActivateProprioIntent({
+                      recipientId: id,
+                      recipientFirstName: firstName,
+                      conversationContext: "sitter_inquiry",
+                    })
+                  }
+                  className="flex items-center justify-center bg-primary text-primary-foreground rounded-lg px-3 sm:px-4 py-3 text-[13px] sm:text-sm font-medium w-full leading-tight text-center break-words"
+                >
+                  <span className="line-clamp-2">Contacter {firstName}</span>
+                </button>
+              )}
             </div>
           )}
         </div>
