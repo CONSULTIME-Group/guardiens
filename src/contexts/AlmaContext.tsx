@@ -114,7 +114,13 @@ const SURFACE_WEIGHT: Record<AlmaProactiveSurface, number> = {
 
 interface AlmaContextValue {
   queueWhisper: (whisper: AlmaWhisper) => void;
-  dismissCurrent: (reason: AlmaDismissReason) => void;
+  /**
+   * Ferme le whisper courant.
+   * - `reason` : cause du dismiss (timeout, closed_manually, action_clicked, ...).
+   * - `actionId` : requis quand `reason === "action_clicked"`. Persiste dans
+   *   `alma_whisper_history.action_taken` pour le dashboard admin.
+   */
+  dismissCurrent: (reason: AlmaDismissReason, actionId?: string) => void;
   canEmit: (type: AlmaWhisperType) => boolean;
   currentWhisper: AlmaWhisper | null;
   frequency: AlmaFrequency;
@@ -141,6 +147,7 @@ const NOOP_VALUE: AlmaContextValue = {
   claimProactiveSurface: () => false,
   releaseProactiveSurface: () => {},
 };
+
 
 const AlmaCtx = createContext<AlmaContextValue>(NOOP_VALUE);
 
