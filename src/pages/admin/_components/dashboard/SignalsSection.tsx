@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useFeatureFlag } from "@/hooks/useFeatureFlag";
 import { NoApplicationsCard } from "@/components/admin/signals/NoApplicationsCard";
+import { PendingApplicationCard } from "@/components/admin/signals/PendingApplicationCard";
 import { cn } from "@/lib/utils";
 
 interface Signal {
@@ -95,6 +96,8 @@ export const SignalsSection = () => {
               <li key={s.id}>
                 {s.signal_type === "no_applications" ? (
                   <NoApplicationsCard signal={s as unknown as import("@/components/admin/signals/NoApplicationsCard").AdminSignal} />
+                ) : s.signal_type === "pending_application" ? (
+                  <PendingApplicationCard signal={s as unknown as import("@/components/admin/signals/PendingApplicationCard").PendingApplicationSignal} />
                 ) : (
                   <Link
                     to={entityLink(s)}

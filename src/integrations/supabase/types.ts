@@ -6579,6 +6579,20 @@ export type Database = {
         Args: { message_id: number; queue_name: string }
         Returns: boolean
       }
+      detect_pending_applications: {
+        Args: never
+        Returns: {
+          application_id: string
+          hours_since_created: number
+          owner_email: string
+          owner_first_name: string
+          owner_id: string
+          sit_id: string
+          sit_title: string
+          sitter_first_name: string
+          sitter_id: string
+        }[]
+      }
       detect_stale_sits: {
         Args: never
         Returns: {
