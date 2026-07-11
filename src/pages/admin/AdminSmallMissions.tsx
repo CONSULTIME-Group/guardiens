@@ -365,7 +365,7 @@ const AdminSmallMissions = () => {
             <SelectItem value="open">Ouvertes</SelectItem>
             <SelectItem value="in_progress">En cours</SelectItem>
             <SelectItem value="completed">Terminées</SelectItem>
-            <SelectItem value="cancelled">Archivées</SelectItem>
+            <SelectItem value="cancelled">Masquées / annulées</SelectItem>
           </SelectContent>
         </Select>
         <Select value={filterCategory} onValueChange={setFilterCategory}>
