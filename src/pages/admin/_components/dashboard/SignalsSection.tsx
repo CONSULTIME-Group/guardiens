@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useFeatureFlag } from "@/hooks/useFeatureFlag";
 import { NoApplicationsCard } from "@/components/admin/signals/NoApplicationsCard";
+import { PendingApplicationCard } from "@/components/admin/signals/PendingApplicationCard";
 import { cn } from "@/lib/utils";
 
 interface Signal {
