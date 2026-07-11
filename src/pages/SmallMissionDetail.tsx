@@ -350,7 +350,7 @@ const SmallMissionDetail = () => {
       const { data: fresh } = await supabase
         .from("small_missions")
         .select("status, user_id, title")
-        .eq("id", id)
+        .eq("id", mission.id)
         .single();
       if (!fresh) throw new Error("Mission introuvable.");
       if (fresh.status !== "open") {
@@ -414,7 +414,7 @@ const SmallMissionDetail = () => {
     try {
       // Server-side guard: re-check mission status
       const { data: freshMission } = await supabase
-        .from("small_missions").select("status").eq("id", id!).single();
+        .from("small_missions").select("status").eq("id", mission.id).single();
       if (!freshMission) throw new Error("Mission introuvable");
       if (freshMission.status === "cancelled" || freshMission.status === "completed") {
         toast({ variant: "destructive", title: "Mission clôturée", description: "Cette mission n'accepte plus de réponses." });
@@ -426,7 +426,7 @@ const SmallMissionDetail = () => {
       if (updErr) throw updErr;
 
       if (freshMission.status === "open") {
-        await supabase.from("small_missions").update({ status: "in_progress" as any }).eq("id", id!);
+        await supabase.from("small_missions").update({ status: "in_progress" as any }).eq("id", mission.id);
         setMission((prev: any) => ({ ...prev, status: "in_progress" }));
       }
 
@@ -557,7 +557,7 @@ const SmallMissionDetail = () => {
           },
         }).catch(() => {});
       }
-      await supabase.from("small_missions").update({ status: "cancelled" as any }).eq("id", id!);
+      await supabase.from("small_missions").update({ status: "cancelled" as any }).eq("id", mission.id);
       setMission((prev: any) => ({ ...prev, status: "cancelled" }));
       setResponses(prev => prev.map(r => r.status === "pending" ? { ...r, status: "declined" } : r));
       setCloseModalOpen(false);
@@ -574,7 +574,7 @@ const SmallMissionDetail = () => {
     if (completing) return;
     setCompleting(true);
     try {
-      const { error } = await supabase.from("small_missions").update({ status: "completed" as any }).eq("id", id!);
+      const { error } = await supabase.from("small_missions").update({ status: "completed" as any }).eq("id", mission.id);
       if (error) throw error;
       setMission((prev: any) => ({ ...prev, status: "completed" }));
       // Batch notifications to accepted responders (compute inline to avoid forward-ref)

@@ -57,15 +57,21 @@ Deno.serve(async (req) => {
     const anomalies: Anomaly[] = [];
 
     const lastRunAge = Number(health.last_run_age_seconds ?? 0);
-    if (health.last_run_age_seconds == null || lastRunAge > MAX_LAST_RUN_AGE_S) {
+    const oldestPending = Number(health.oldest_pending_age_seconds ?? 0);
+    const attempts1h = Number(health.attempts_1h ?? 0);
+    // Le worker process-email-queue est planifié à la demande : le cron se dé-planifie
+    // quand les deux files sont vides. Donc last_run_age_seconds > seuil est NORMAL
+    // s'il n'y a rien à traiter. On n'alerte que si un backlog attend OU si des
+    // tentatives récentes ont eu lieu (worker actif mais silencieux depuis).
+    const hasWorkToDo = health.oldest_pending_age_seconds != null || attempts1h > 0;
+    if (hasWorkToDo && (health.last_run_age_seconds == null || lastRunAge > MAX_LAST_RUN_AGE_S)) {
       anomalies.push({
         code: "email_pipeline_worker_stalled",
         title: "Worker process-email-queue silencieux",
-        detail: `Dernier heartbeat il y a ${health.last_run_age_seconds == null ? "jamais" : Math.round(lastRunAge) + "s"} (seuil ${MAX_LAST_RUN_AGE_S}s).`,
+        detail: `Dernier heartbeat il y a ${health.last_run_age_seconds == null ? "jamais" : Math.round(lastRunAge) + "s"} (seuil ${MAX_LAST_RUN_AGE_S}s), avec ${health.oldest_pending_age_seconds != null ? "backlog en attente" : attempts1h + " tentatives sur 1h"}.`,
       });
     }
 
-    const oldestPending = Number(health.oldest_pending_age_seconds ?? 0);
     if (health.oldest_pending_age_seconds != null && oldestPending > MAX_OLDEST_PENDING_S) {
       anomalies.push({
         code: "email_pipeline_queue_backlog",
@@ -74,13 +80,12 @@ Deno.serve(async (req) => {
       });
     }
 
-    const attempts = Number(health.attempts_1h ?? 0);
     const failureRate = Number(health.failure_rate_1h ?? 0);
-    if (attempts >= MIN_ATTEMPTS_FOR_RATE && failureRate > MAX_FAILURE_RATE) {
+    if (attempts1h >= MIN_ATTEMPTS_FOR_RATE && failureRate > MAX_FAILURE_RATE) {
       anomalies.push({
         code: "email_pipeline_failure_rate",
         title: "Taux d'échec d'envoi élevé",
-        detail: `Sur la dernière heure : ${attempts} tentatives, taux d'échec ${(failureRate * 100).toFixed(1)}% (seuil ${(MAX_FAILURE_RATE * 100).toFixed(0)}%). DLQ 1h : ${health.dlq_last_hour}.`,
+        detail: `Sur la dernière heure : ${attempts1h} tentatives, taux d'échec ${(failureRate * 100).toFixed(1)}% (seuil ${(MAX_FAILURE_RATE * 100).toFixed(0)}%). DLQ 1h : ${health.dlq_last_hour}.`,
       });
     }
 
