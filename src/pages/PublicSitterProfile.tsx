@@ -2619,6 +2619,13 @@ export default function PublicSitterProfile() {
           }
         />
       )}
+
+      <ActivateRoleDialog
+        open={activateProprioIntent !== null}
+        onClose={() => setActivateProprioIntent(null)}
+        targetRole="proprio"
+        contactContext={activateProprioIntent ?? undefined}
+      />
       </div>
     </div>
   );
