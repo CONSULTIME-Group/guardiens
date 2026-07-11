@@ -8,6 +8,7 @@ const corsHeaders = {
 };
 
 const LOVABLE_API_URL = "https://ai.gateway.lovable.dev/v1/chat/completions";
+const USER_AGENT = "GuardiensBot/1.0 (https://guardiens.fr)";
 
 function extractJson(raw: string): any | null {
   if (!raw) return null;
@@ -19,7 +20,7 @@ function extractJson(raw: string): any | null {
   const end = s.lastIndexOf(close);
   if (end === -1 || end < start) return null;
   s = s.slice(start, end + 1);
-  try { return JSON.parse(s); } catch {}
+  try { return JSON.parse(s); } catch { /* fallthrough */ }
   const repaired = s
     .replace(/,\s*([}\]])/g, "$1")
     .replace(/[\x00-\x1F\x7F]/g, " ");
@@ -30,18 +31,77 @@ async function fetchWikipediaImage(city: string): Promise<{ url: string; alt: st
   try {
     const res = await fetch(
       `https://fr.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(city)}`,
-      { headers: { "User-Agent": "GuardiensBot/1.0 (https://guardiens.fr)", Accept: "application/json" } },
+      { headers: { "User-Agent": USER_AGENT, Accept: "application/json" } },
     );
-    console.log("wiki", city, res.status);
     if (!res.ok) return null;
     const data = await res.json();
     const url: string | undefined = data.originalimage?.source || data.thumbnail?.source;
-    console.log("wiki url", city, url ? "yes" : "no");
     if (!url) return null;
     return { url, alt: `Vue de ${city}, ville de France` };
   } catch (e) {
     console.error("wiki err", city, String(e));
     return null;
+  }
+}
+
+/**
+ * Récupère des lieux réels depuis OpenStreetMap Overpass API.
+ * Dégradation gracieuse : en cas d'erreur, timeout ou zéro résultat, on renvoie
+ * des listes vides — on n'invente JAMAIS de lieu.
+ */
+async function fetchOsmPlaces(
+  city: string,
+): Promise<{ vets: string[]; parks: string[] }> {
+  const empty = { vets: [], parks: [] };
+  const safeCity = city.replace(/"/g, '\\"');
+  const query = `[out:json][timeout:25];
+area["name"="${safeCity}"]["boundary"="administrative"]["admin_level"~"7|8"]->.a;
+(
+  node["amenity"="veterinary"](area.a);
+  way["amenity"="veterinary"](area.a);
+  node["leisure"="dog_park"](area.a);
+  node["leisure"="park"]["name"](area.a);
+  way["leisure"="park"]["name"](area.a);
+);
+out tags center 40;`;
+
+  try {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 20000);
+    const res = await fetch("https://overpass-api.de/api/interpreter", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+        "User-Agent": USER_AGENT,
+      },
+      body: "data=" + encodeURIComponent(query),
+      signal: controller.signal,
+    });
+    clearTimeout(timer);
+    if (!res.ok) {
+      console.warn("overpass non-200", city, res.status);
+      return empty;
+    }
+    const data = await res.json();
+    const elements: any[] = Array.isArray(data?.elements) ? data.elements : [];
+    const vets = new Set<string>();
+    const parks = new Set<string>();
+    for (const el of elements) {
+      const tags = el?.tags || {};
+      const name: string | undefined = tags.name;
+      if (!name || typeof name !== "string") continue;
+      const clean = name.trim();
+      if (!clean) continue;
+      if (tags.amenity === "veterinary") {
+        if (vets.size < 5) vets.add(clean);
+      } else if (tags.leisure === "dog_park" || tags.leisure === "park") {
+        if (parks.size < 5) parks.add(clean);
+      }
+    }
+    return { vets: [...vets], parks: [...parks] };
+  } catch (e) {
+    console.warn("overpass err", city, String(e));
+    return empty;
   }
 }
 
@@ -90,11 +150,36 @@ Deno.serve(async (req) => {
       throw new Error("LOVABLE_API_KEY is not configured");
     }
 
+    // ── DONNÉES RÉELLES : Guardiens (couverture) + OSM (lieux) + sits actifs.
+    const [{ count: sitterCountRaw }, { count: activeSitsCountRaw }, osm] = await Promise.all([
+      supabase
+        .from("profiles")
+        .select("id", { count: "exact", head: true })
+        .in("role", ["sitter", "both"])
+        .ilike("city", `%${city}%`),
+      supabase
+        .from("sits")
+        .select("id", { count: "exact", head: true })
+        .eq("status", "published")
+        .ilike("city", `%${city}%`),
+      fetchOsmPlaces(city),
+    ]);
+
+    const realSitterCount = sitterCountRaw ?? 0;
+    const realActiveSitsCount = activeSitsCountRaw ?? 0;
+
+    const vetsLine = osm.vets.length > 0 ? osm.vets.join(", ") : "non disponibles";
+    const parksLine = osm.parks.length > 0 ? osm.parks.join(", ") : "non disponibles";
+
+    const realDataBlock = `DONNÉES LOCALES RÉELLES (vérifiées, à utiliser telles quelles, ne pas en inventer d'autres) :
+- Gardiens Guardiens actifs à ${city} : ${realSitterCount}.
+- Vétérinaires réels : ${vetsLine}.
+- Parcs et espaces verts réels : ${parksLine}.`;
+
     const brandContext = `CONTEXTE MARQUE Guardiens (plateforme de house-sitting de proximité, sans transaction financière directe) :
 - Fondée par Jérémie et Elisa après 5 ans de house-sitting en France (37 maisons gardées, 234 animaux accompagnés).
 - Rencontre physique obligatoire propriétaire/gardien avant chaque garde.
-- Propriétaires sans frais. Gardiens : 6,99 €/mois résiliable, 10 € ponctuel, ou 65 €/an. Aucune commission.
-- Gratuit pour tous jusqu'au 30 septembre 2026.
+- Propriétaires : gratuit. Gardiens : gratuit aujourd'hui, sans engagement. Aucune commission par garde. Service gratuit jusqu'à nouvel ordre.
 - L'animal reste chez lui, la maison reste vivante (courrier, plantes, lumières). Vérification d'identité + avis croisés.
 
 RÈGLES STRICTES :
@@ -105,10 +190,16 @@ RÈGLES STRICTES :
 - Pas d'emoji, pas de superlatif commercial, pas de concurrents (Animaute, Holidog, etc.).
 - Ton YMYL factuel. Évitez « unique », « révolutionnaire », « le meilleur ».
 - Préférez « gratuit » à « 0 € ». Pas de « à vie » ni « pour toujours ».
-- N'inventez aucun lieu. Si vous doutez, restez générique.`;
+- Ne mentionnez AUCUN prix d'abonnement (ni 6,99 €, ni 10 €, ni 65 €, ni 9 €) ni date de fin de gratuité.
+- N'inventez aucun lieu. Si vous doutez, restez générique.
+
+RÈGLE DURE — DONNÉES CHIFFRÉES :
+N'inventez AUCUN chiffre : ni population, ni nombre de foyers, ni prix, ni statistique. N'employez que les données du bloc DONNÉES LOCALES RÉELLES fourni ci-dessous. Si une information n'y figure pas, ne la mentionnez pas plutôt que de l'inventer.`;
 
     // Appel 1 : métadonnées JSON courtes (fiable)
     const metaPrompt = `${brandContext}
+
+${realDataBlock}
 
 Vous générez les MÉTADONNÉES SEO d'une landing page Guardiens pour ${city} (département ${department}).
 
@@ -118,11 +209,13 @@ Répondez UNIQUEMENT en JSON strict :
   "meta_title": "50-60 caractères avec ${city} et Guardiens",
   "meta_description": "140-160 caractères, incite à l'inscription gratuite",
   "excerpt": "1-2 phrases résumé, max 200 caractères",
-  "intro_text": "5 à 7 phrases : ${city} comme cadre de vie pour les animaux, profils utilisateurs (familles, retraités actifs, télétravailleurs, voyageurs), ancrage local concret."
+  "intro_text": "5 à 7 phrases : ${city} comme cadre de vie pour les animaux, profils utilisateurs (familles, retraités actifs, télétravailleurs, voyageurs), ancrage local concret. AUCUN chiffre inventé."
 }`;
 
-    // Appel 2 : corps markdown brut (pas d'échappement JSON, beaucoup plus stable)
+    // Appel 2 : corps markdown brut
     const contentPrompt = `${brandContext}
+
+${realDataBlock}
 
 Vous rédigez le CORPS markdown (1000 à 1300 mots) d'une landing page Guardiens pour ${city} (${department}).
 
@@ -132,9 +225,9 @@ Structure EXACTE :
 
 ## Pourquoi ${city} a besoin d'une plateforme de garde de proximité
 ### Une ville où les animaux font partie de la famille
-(paragraphe + chiffre estimé de foyers avec chien/chat)
+(paragraphe qualitatif, sans chiffre inventé)
 ### Les limites des pensions classiques
-(paragraphe + fourchette 25-50 € la nuit)
+(paragraphe qualitatif, sans fourchette de prix inventée)
 ### Le house-sitting, une alternative qui a fait ses preuves
 (paragraphe)
 
@@ -149,22 +242,22 @@ Structure EXACTE :
 (paragraphe avec lien [gardien d'urgence](/gardien-urgence))
 
 ## Les quartiers et environs de ${city}
-(intro + 3 à 5 zones réelles de ${city} en **gras**, type d'habitat, espaces verts. Si doute, restez sur 3 zones génériques.)
+(intro + citez uniquement les parcs, espaces verts et lieux figurant dans DONNÉES LOCALES RÉELLES (en **gras**). Si la liste est "non disponibles", restez générique sur 3 zones sans nommer de lieu précis.)
 
 ## Propriétaires à ${city}, ce que Guardiens vous offre
-(5 à 6 bénéfices en **gras** suivis de 1-2 phrases : animal chez lui, maison vivante, rencontre préalable obligatoire, aucune commission avec lien [tarifs détaillés](/tarifs), accord de garde clair, gardiens vérifiés)
+(5 à 6 bénéfices en **gras** suivis de 1-2 phrases : animal chez lui, maison vivante, rencontre préalable obligatoire, aucune commission, accord de garde clair, gardiens vérifiés)
 
 ## Qui sont les gardiens à ${city}
 (intro + 4 profils en **gras** : retraités actifs, jeunes actifs en télétravail, familles, étudiants vérifiés. Mentionnez les [petites missions](/petites-missions) pour les gardes courtes.)
 
-## Tarifs Guardiens : transparents et sans surprise
-(3 paragraphes en **gras** : Propriétaires sans frais ; Gardiens 6,99 €/mois ou 10 € ponctuel ou 65 €/an ; Aucune commission par garde. Lien [page tarifs complète](/tarifs). Gratuité totale jusqu'au 30 septembre 2026.)
+## Combien ça coûte à ${city}
+(un paragraphe factuel : Guardiens est gratuit pour les propriétaires et pour les gardiens aujourd'hui, sans engagement, aucune commission par garde. Lien [tarifs](/tarifs). AUCUN montant, AUCUNE date.)
 
 ## Notre histoire et notre engagement à ${city}
-(2-3 paragraphes : fondation Jérémie & Elisa, 37 maisons et 234 animaux en 5 ans, lancement officiel 30 septembre 2026, ${city} dans le déploiement France entière)
+(2-3 paragraphes : fondation Jérémie & Elisa, 37 maisons et 234 animaux en 5 ans, déploiement en France, ${city} intégrée au maillage. AUCUNE date de lancement inventée.)
 
 ## Questions fréquentes des propriétaires à ${city}
-(5 à 6 questions au format **Question ?** + réponse 2-3 phrases : rencontre préalable, urgence, frais cachés, animaux à besoins spécifiques, durée min/max, vérification d'identité)`;
+(5 à 6 questions au format **Question ?** + réponse 2-3 phrases : rencontre préalable, urgence, animaux à besoins spécifiques, durée min/max, vérification d'identité, sécurité du logement. Aucune question sur les prix d'abonnement ou une date de fin de gratuité.)`;
 
     const callAI = async (p: string, jsonMode: boolean) => {
       const res = await fetch(LOVABLE_API_URL, {
@@ -238,6 +331,12 @@ Structure EXACTE :
     const finalCover = coverIn || wiki?.url || existing?.cover_image_url || null;
     const finalAlt = altIn || wiki?.alt || existing?.hero_image_alt || (finalCover ? `Vue de ${city}` : null);
 
+    // Une page n'est indexable que si la ville a >= 1 gardien Guardiens ET
+    // que le contenu est valide (>200 car.). Sinon on la garde publiée mais
+    // noindex (accessible mais hors index Google).
+    const contentIsValid = hasValidContent || (typeof existing?.content === "string" && existing.content.trim().length > 200);
+    const noindex = realSitterCount === 0 || !contentIsValid;
+
     const record: Record<string, unknown> = {
       city: city.trim(),
       department: department.trim(),
@@ -250,6 +349,9 @@ Structure EXACTE :
       content: generated.content || existing?.content || null,
       cover_image_url: finalCover,
       hero_image_alt: finalAlt,
+      sitter_count: realSitterCount,
+      active_sits_count: realActiveSitsCount,
+      noindex,
       published: true,
       updated_at: new Date().toISOString(),
     };
@@ -267,7 +369,7 @@ Structure EXACTE :
     } else {
       const { data: inserted, error } = await supabase
         .from("seo_city_pages")
-        .insert({ ...record, sitter_count: 0, active_sits_count: 0 })
+        .insert(record)
         .select()
         .single();
       if (error) throw error;
