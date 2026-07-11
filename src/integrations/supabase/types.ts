@@ -6538,6 +6538,10 @@ export type Database = {
         }
         Returns: boolean
       }
+      count_eligible_sitters: {
+        Args: { p_lat: number; p_lng: number; p_radius_km?: number }
+        Returns: number
+      }
       create_alert_from_search: {
         Args: { p_city: string; p_postal_code: string; p_radius_km: number }
         Returns: string
@@ -6574,6 +6578,18 @@ export type Database = {
       delete_email: {
         Args: { message_id: number; queue_name: string }
         Returns: boolean
+      }
+      detect_stale_sits: {
+        Args: never
+        Returns: {
+          days_since_published: number
+          latitude: number
+          longitude: number
+          owner_id: string
+          sit_city: string
+          sit_id: string
+          sit_title: string
+        }[]
       }
       email_queue_dispatch: { Args: never; Returns: undefined }
       enqueue_email: {
