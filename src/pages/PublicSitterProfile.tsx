@@ -43,6 +43,7 @@ import { buildTrustTimeline } from "@/lib/trustTimeline";
 import { hydrateReviewers } from "@/lib/hydrateReviewers";
 import { getSitterHeroImage, getSitterHeroAnchor, getSitterHeroSources } from "@/lib/heroBank";
 import { useHeroWeights } from "@/hooks/useHeroWeights";
+import ActivateRoleDialog, { type ContactIntentContext } from "@/components/premium/ActivateRoleDialog";
 
 const capitalize = (name: string) =>
   name ? name.charAt(0).toUpperCase() + name.slice(1).toLowerCase() : "";
@@ -132,6 +133,7 @@ export default function PublicSitterProfile() {
   const [missionsPublished, setMissionsPublished] = useState<any[]>([]);
   const [missionsHelped, setMissionsHelped] = useState<any[]>([]);
   const [thanksReceived, setThanksReceived] = useState<number>(0);
+  const [activateProprioIntent, setActivateProprioIntent] = useState<ContactIntentContext | null>(null);
   const [externalExperiences, setExternalExperiences] = useState<any[]>([]);
   const [ownerGalleryPhotos, setOwnerGalleryPhotos] = useState<any[]>([]);
 
@@ -1466,6 +1468,20 @@ export default function PublicSitterProfile() {
                   >
                     Contacter {firstName}
                   </button>
+                ) : isSitter && id ? (
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setActivateProprioIntent({
+                        recipientId: id,
+                        recipientFirstName: firstName,
+                        conversationContext: "sitter_inquiry",
+                      })
+                    }
+                    className="inline-flex items-center justify-center bg-primary text-primary-foreground rounded-lg px-6 py-3 text-sm font-medium hover:bg-primary/90 transition-colors flex-1 sm:flex-initial cursor-pointer"
+                  >
+                    Contacter {firstName}
+                  </button>
                 ) : null}
                 <p className="text-[11px] sm:text-xs text-muted-foreground font-body sm:ml-2 self-center text-center sm:text-left leading-snug break-words">
                   {isOwn ? "Vous voyez cette page comme un visiteur." : "Contact direct, sans intermédiaire."}
@@ -1855,6 +1871,21 @@ export default function PublicSitterProfile() {
                       toast.error("Impossible d'ouvrir la conversation.");
                     }
                   }}
+                  className="flex items-center justify-center bg-primary text-primary-foreground rounded-lg px-3 sm:px-4 py-3 text-[13px] sm:text-sm font-medium w-full leading-tight text-center break-words"
+                >
+                  <span className="line-clamp-2">Contacter {firstName}</span>
+                </button>
+              )}
+              {isAuthenticated && isSitter && id && (
+                <button
+                  type="button"
+                  onClick={() =>
+                    setActivateProprioIntent({
+                      recipientId: id,
+                      recipientFirstName: firstName,
+                      conversationContext: "sitter_inquiry",
+                    })
+                  }
                   className="flex items-center justify-center bg-primary text-primary-foreground rounded-lg px-3 sm:px-4 py-3 text-[13px] sm:text-sm font-medium w-full leading-tight text-center break-words"
                 >
                   <span className="line-clamp-2">Contacter {firstName}</span>
@@ -2588,6 +2619,13 @@ export default function PublicSitterProfile() {
           }
         />
       )}
+
+      <ActivateRoleDialog
+        open={activateProprioIntent !== null}
+        onClose={() => setActivateProprioIntent(null)}
+        targetRole="proprio"
+        contactContext={activateProprioIntent ?? undefined}
+      />
       </div>
     </div>
   );
