@@ -127,6 +127,67 @@ export type Database = {
         }
         Relationships: []
       }
+      admin_signals: {
+        Row: {
+          action_taken: string | null
+          admin_id: string | null
+          detected_at: string
+          entity_id: string
+          entity_type: string
+          id: string
+          metadata: Json
+          resolved_at: string | null
+          severity: string
+          signal_type: string
+        }
+        Insert: {
+          action_taken?: string | null
+          admin_id?: string | null
+          detected_at?: string
+          entity_id: string
+          entity_type: string
+          id?: string
+          metadata?: Json
+          resolved_at?: string | null
+          severity: string
+          signal_type: string
+        }
+        Update: {
+          action_taken?: string | null
+          admin_id?: string | null
+          detected_at?: string
+          entity_id?: string
+          entity_type?: string
+          id?: string
+          metadata?: Json
+          resolved_at?: string | null
+          severity?: string
+          signal_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "admin_signals_admin_id_fkey"
+            columns: ["admin_id"]
+            isOneToOne: false
+            referencedRelation: "profile_reputation"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "admin_signals_admin_id_fkey"
+            columns: ["admin_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "admin_signals_admin_id_fkey"
+            columns: ["admin_id"]
+            isOneToOne: false
+            referencedRelation: "public_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       admin_subscription_logs: {
         Row: {
           action: string
@@ -6185,6 +6246,7 @@ export type Database = {
           views: number
         }[]
       }
+      admin_dashboard_snapshot: { Args: never; Returns: Json }
       admin_dashboard_summary: { Args: never; Returns: Json }
       admin_get_accepted_sitters: {
         Args: { p_sit_ids: string[] }
