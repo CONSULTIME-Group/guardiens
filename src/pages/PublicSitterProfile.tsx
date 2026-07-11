@@ -356,8 +356,11 @@ export default function PublicSitterProfile() {
       try {
       // Colonnes explicites : évite un select("*") qui exposerait/rapatrierait
       // des colonnes non utilisées côté client (privacy + payload).
+      // Note : la vue `public_profiles` n'expose PAS cancellation_count ni les
+      // champs pro_* — ils viennent de `profiles` (BASE_PROFILE_COLS) et sont
+      // mergés plus bas. Les inclure ici ferait échouer toute la requête.
       const PUBLIC_PROFILE_COLS =
-        "id, first_name, avatar_url, bio, city, postal_code, created_at, identity_verified, is_founder, completed_sits_count, cancellation_count, pro_status, pro_specialty, pro_tagline, pro_pricing_note, pro_business_name";
+        "id, first_name, avatar_url, bio, city, postal_code, created_at, identity_verified, is_founder, completed_sits_count";
       // `last_name` retiré du select — jamais rendu publiquement.
       const BASE_PROFILE_COLS =
         "id, first_name, avatar_url, bio, city, postal_code, created_at, identity_verified, is_founder, profile_completion, completed_sits_count, cancellation_count, hero_image_index, pro_status, pro_specialty, pro_tagline, pro_pricing_note, pro_business_name";
