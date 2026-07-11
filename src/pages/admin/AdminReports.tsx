@@ -168,7 +168,7 @@ const AdminReports = () => {
     return <Badge variant="default">Traité</Badge>;
   };
 
-  if (loading) return <div className="text-muted-foreground py-8 text-center">Chargement…</div>;
+  if (loading && reports.length === 0) return <div className="text-muted-foreground py-8 text-center">Chargement…</div>;
 
   return (
     <div className="space-y-6">
