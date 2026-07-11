@@ -79,6 +79,8 @@ project_id = "erhccyqevdyevpyctsjj"
     verify_jwt = true
   [functions.cancel-mass-email]
     verify_jwt = true
+  [functions.flush-deferred-emails]
+    verify_jwt = true
 
 
 
