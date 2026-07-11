@@ -57,12 +57,16 @@ const PAGE_SIZE = 50;
 const AdminUsers = () => {
   const [users, setUsers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [total, setTotal] = useState(0);
   const [search, setSearch] = useState("");
+  const [searchDebounced, setSearchDebounced] = useState("");
   const [filterRole, setFilterRole] = useState("all");
   const [filterVerification, setFilterVerification] = useState("all");
   const [filterDept, setFilterDept] = useState("all");
   const [filterCountry, setFilterCountry] = useState("all");
   const [page, setPage] = useState(0);
+  const [countryStats, setCountryStats] = useState<{ intl: number; codes: string[] }>({ intl: 0, codes: [] });
+
   // Modal states
   const [noteModal, setNoteModal] = useState<{ open: boolean; userId: string; currentNote: string }>({
     open: false, userId: "", currentNote: ""
