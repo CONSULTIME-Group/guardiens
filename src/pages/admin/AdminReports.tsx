@@ -19,7 +19,10 @@ import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
-import { Eye, CheckCircle, StickyNote, AlertTriangle, ExternalLink, UserX, EyeOff, Trash2, ShieldAlert } from "lucide-react";
+import { Eye, CheckCircle, StickyNote, AlertTriangle, ExternalLink, UserX, EyeOff, Trash2, ShieldAlert, ChevronLeft, ChevronRight } from "lucide-react";
+
+const PAGE_SIZE = 50;
+
 
 const reasonLabels: Record<string, string> = {
   inappropriate: "Contenu inapproprié",
@@ -56,6 +59,8 @@ const AdminReports = () => {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [filterStatus, setFilterStatus] = useState("pending");
+  const [page, setPage] = useState(0);
+  const [total, setTotal] = useState(0);
   const [reporters, setReporters] = useState<Record<string, { name: string; avatar: string | null }>>({});
   const [noteModal, setNoteModal] = useState<{ open: boolean; reportId: string; note: string }>({ open: false, reportId: "", note: "" });
   const [actionModal, setActionModal] = useState<{ open: boolean; reportId: string; action: ActionKey | "" }>({ open: false, reportId: "", action: "" });
@@ -63,16 +68,27 @@ const AdminReports = () => {
 
   const fetchReports = useCallback(async () => {
     setLoading(true);
-    let query = supabase.from("reports").select("*").order("status", { ascending: true }).order("created_at", { ascending: true });
+    const from = page * PAGE_SIZE;
+    const to = from + PAGE_SIZE - 1;
+    let query = supabase
+      .from("reports")
+      .select("*", { count: "exact" })
+      .order("status", { ascending: true })
+      .order("created_at", { ascending: true });
     if (filterStatus === "pending") query = query.in("status", ["new", "in_progress"]);
     else if (filterStatus !== "all") query = query.eq("status", filterStatus);
-    const { data, error } = await query;
+    const { data, error, count } = await query.range(from, to);
     if (error) toast.error("Erreur de chargement");
-    else setReports(data || []);
+    else {
+      setReports(data || []);
+      setTotal(count ?? 0);
+    }
     setLoading(false);
-  }, [filterStatus]);
+  }, [filterStatus, page]);
 
+  useEffect(() => { setPage(0); }, [filterStatus]);
   useEffect(() => { fetchReports(); }, [fetchReports]);
+
 
   useEffect(() => {
     if (!reports.length) return;
@@ -134,7 +150,17 @@ const AdminReports = () => {
     setNoteModal({ open: false, reportId: "", note: "" });
   };
 
-  const newCount = reports.filter((r) => r.status === "new").length;
+  const [newCount, setNewCount] = useState(0);
+  useEffect(() => {
+    supabase
+      .from("reports")
+      .select("id", { count: "exact", head: true })
+      .eq("status", "new")
+      .then(({ count }) => setNewCount(count ?? 0));
+  }, [reports]);
+
+  const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+
 
   const statusBadge = (status: string) => {
     if (status === "new") return <Badge variant="destructive">Nouveau</Badge>;
@@ -142,7 +168,7 @@ const AdminReports = () => {
     return <Badge variant="default">Traité</Badge>;
   };
 
-  if (loading) return <div className="text-muted-foreground py-8 text-center">Chargement…</div>;
+  if (loading && reports.length === 0) return <div className="text-muted-foreground py-8 text-center">Chargement…</div>;
 
   return (
     <div className="space-y-6">
@@ -239,6 +265,24 @@ const AdminReports = () => {
           })}
         </div>
       )}
+
+      {totalPages > 1 && (
+        <div className="flex items-center justify-between">
+          <p className="text-sm text-muted-foreground">
+            {total} signalement{total > 1 ? "s" : ""} · page {page + 1}/{totalPages}
+          </p>
+          <div className="flex items-center gap-2">
+            <Button variant="outline" size="sm" disabled={page === 0 || loading} onClick={() => setPage(p => p - 1)}>
+              <ChevronLeft className="h-4 w-4 mr-1" /> Précédent
+            </Button>
+            <Button variant="outline" size="sm" disabled={page >= totalPages - 1 || loading} onClick={() => setPage(p => p + 1)}>
+              Suivant <ChevronRight className="h-4 w-4 ml-1" />
+            </Button>
+          </div>
+        </div>
+      )}
+
+
 
       {/* Action modal */}
       <Dialog open={actionModal.open} onOpenChange={(o) => !o && !submitting && setActionModal({ open: false, reportId: "", action: "" })}>

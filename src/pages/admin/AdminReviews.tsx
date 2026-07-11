@@ -13,11 +13,15 @@ import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
-import { Eye, EyeOff, Trash2, Star, AlertTriangle, CheckCircle2, XCircle } from "lucide-react";
+import { Eye, EyeOff, Trash2, Star, AlertTriangle, CheckCircle2, XCircle, ChevronLeft, ChevronRight } from "lucide-react";
+
+const PAGE_SIZE = 50;
 
 const AdminReviews = () => {
   const [reviews, setReviews] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [total, setTotal] = useState(0);
+  const [page, setPage] = useState(0);
   const [filterStatus, setFilterStatus] = useState("all");
   const [sortBy, setSortBy] = useState<"date" | "rating">("date");
   const [detailReview, setDetailReview] = useState<any | null>(null);
@@ -27,6 +31,7 @@ const AdminReviews = () => {
   const [busyId, setBusyId] = useState<string | null>(null);
   const [badgeCounts, setBadgeCounts] = useState<Record<string, number>>({});
 
+
   // Cancellation moderation state
   const [cancellationReviews, setCancellationReviews] = useState<any[]>([]);
   const [cancellationLoading, setCancellationLoading] = useState(true);
@@ -35,13 +40,15 @@ const AdminReviews = () => {
 
   const fetchReviews = useCallback(async () => {
     setLoading(true);
+    const from = page * PAGE_SIZE;
+    const to = from + PAGE_SIZE - 1;
     let query = supabase
       .from("reviews")
       .select(`
         *,
         reviewer:profiles!reviews_reviewer_id_fkey(first_name, last_name, avatar_url),
         reviewee:profiles!reviews_reviewee_id_fkey(first_name, last_name, avatar_url)
-      `)
+      `, { count: "exact" })
       .or("review_type.is.null,review_type.neq.annulation");
 
     if (filterStatus === "published") query = query.eq("published", true);
@@ -51,10 +58,11 @@ const AdminReviews = () => {
     if (sortBy === "rating") query = query.order("overall_rating", { ascending: true });
     else query = query.order("created_at", { ascending: false });
 
-    const { data, error } = await query;
+    const { data, error, count } = await query.range(from, to);
     if (error) toast.error("Erreur de chargement");
     else {
       setReviews(data || []);
+      setTotal(count ?? 0);
       const sitIds = [...new Set((data || []).map(r => r.sit_id))];
       if (sitIds.length) {
         const { data: badges } = await supabase.from("badge_attributions").select("sit_id").in("sit_id", sitIds);
@@ -64,7 +72,10 @@ const AdminReviews = () => {
       }
     }
     setLoading(false);
-  }, [filterStatus, sortBy]);
+  }, [filterStatus, sortBy, page]);
+
+  useEffect(() => { setPage(0); }, [filterStatus, sortBy]);
+
 
   const fetchCancellationReviews = useCallback(async () => {
     setCancellationLoading(true);
@@ -339,7 +350,24 @@ const AdminReviews = () => {
               </TableBody>
             </Table>
           </div>
+
+          {total > PAGE_SIZE && (
+            <div className="flex items-center justify-between">
+              <p className="text-sm text-muted-foreground">
+                {total} avis · page {page + 1}/{Math.max(1, Math.ceil(total / PAGE_SIZE))}
+              </p>
+              <div className="flex items-center gap-2">
+                <Button variant="outline" size="sm" disabled={page === 0 || loading} onClick={() => setPage(p => p - 1)}>
+                  <ChevronLeft className="h-4 w-4 mr-1" /> Précédent
+                </Button>
+                <Button variant="outline" size="sm" disabled={page >= Math.ceil(total / PAGE_SIZE) - 1 || loading} onClick={() => setPage(p => p + 1)}>
+                  Suivant <ChevronRight className="h-4 w-4 ml-1" />
+                </Button>
+              </div>
+            </div>
+          )}
         </TabsContent>
+
 
         {/* ── Cancellation moderation tab ── */}
         <TabsContent value="cancellations" className="space-y-6 mt-4">

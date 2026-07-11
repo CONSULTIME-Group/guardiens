@@ -49,7 +49,7 @@ const statusLabels: Record<string, { label: string; variant: "default" | "second
   deletion_pending: { label: "Suppression en cours", variant: "secondary" },
 };
 
-import { DEPT_NAMES, getDeptCode, getDeptLabel } from "@/lib/departments";
+import { DEPT_NAMES, getDeptLabel } from "@/lib/departments";
 import { getCountryName } from "@/lib/countries";
 
 const PAGE_SIZE = 50;
@@ -57,12 +57,16 @@ const PAGE_SIZE = 50;
 const AdminUsers = () => {
   const [users, setUsers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [total, setTotal] = useState(0);
   const [search, setSearch] = useState("");
+  const [searchDebounced, setSearchDebounced] = useState("");
   const [filterRole, setFilterRole] = useState("all");
   const [filterVerification, setFilterVerification] = useState("all");
   const [filterDept, setFilterDept] = useState("all");
   const [filterCountry, setFilterCountry] = useState("all");
   const [page, setPage] = useState(0);
+  const [countryStats, setCountryStats] = useState<{ intl: number; codes: string[] }>({ intl: 0, codes: [] });
+
   // Modal states
   const [noteModal, setNoteModal] = useState<{ open: boolean; userId: string; currentNote: string }>({
     open: false, userId: "", currentNote: ""
@@ -163,103 +167,110 @@ const AdminUsers = () => {
 
   const fetchUsers = useCallback(async () => {
     setLoading(true);
+    const from = page * PAGE_SIZE;
+    const to = from + PAGE_SIZE - 1;
     let query = supabase
       .from("profiles")
-      .select("id, first_name, last_name, role, city, postal_code, country, avatar_url, bio, profile_completion, created_at, updated_at, cancellation_count, identity_verified, identity_verification_status, account_status, is_founder, skill_categories, available_for_help, custom_skills, completed_sits_count, cancellations_as_proprio")
-      .order("created_at", { ascending: false })
-      // Évite le cap silencieux Supabase à 1000. Au-delà de 2000 utilisateurs,
-      // basculer en pagination server-side avec .range() (le filtrage client devra
-      // alors aussi devenir server-side).
-      .limit(2000);
+      .select(
+        "id, first_name, last_name, role, city, postal_code, country, avatar_url, bio, profile_completion, created_at, updated_at, cancellation_count, identity_verified, identity_verification_status, account_status, is_founder, skill_categories, available_for_help, custom_skills, completed_sits_count, cancellations_as_proprio, email",
+        { count: "exact" },
+      )
+      .order("created_at", { ascending: false });
 
     if (filterRole !== "all") query = query.eq("role", filterRole as any);
-    if (filterVerification !== "all") {
-      query = query.eq("identity_verification_status", filterVerification);
+    if (filterVerification !== "all") query = query.eq("identity_verification_status", filterVerification);
+
+    if (filterCountry === "FR") {
+      query = query.or("country.eq.FR,country.is.null");
+    } else if (filterCountry === "INTL") {
+      query = query.not("country", "is", null).neq("country", "FR");
+    } else if (filterCountry !== "all") {
+      query = query.eq("country", filterCountry);
     }
 
-    const { data, error } = await query;
-    if (error) toast.error("Erreur de chargement");
-    else {
-      // Fetch emails for admin via RPC
-      const userIds = (data || []).map((u: any) => u.id);
-      let emailMap = new Map<string, string>();
-      let modMap = new Map<string, { admin_notes: string | null; is_manual_super: boolean }>();
-      if (userIds.length > 0) {
-        // Chunk les requêtes .in() pour éviter de dépasser la longueur d'URL
-        // que PostgREST/Cloudflare accepte (400 Bad Request au-delà ~150 UUIDs).
-        const CHUNK = 150;
-        const chunks: string[][] = [];
-        for (let i = 0; i < userIds.length; i += CHUNK) chunks.push(userIds.slice(i, i + CHUNK));
-        const [emailRes, ...modResAll] = await Promise.all([
-          supabase.rpc("get_user_emails_admin", { p_user_ids: userIds }),
-          ...chunks.map((ids) =>
-            supabase.from("profile_moderation").select("profile_id, admin_notes, is_manual_super").in("profile_id", ids)
-          ),
-        ]);
-        emailMap = new Map((emailRes.data || []).map((e: any) => [e.id, e.email]));
-        const modRows = modResAll.flatMap((r: any) => r.data || []);
-        modMap = new Map(modRows.map((m: any) => [m.profile_id, { admin_notes: m.admin_notes, is_manual_super: m.is_manual_super }]));
-      }
-      const enriched = (data || []).map((u: any) => {
-        const mod = modMap.get(u.id);
-        return {
-          ...u,
-          email: emailMap.get(u.id) || "",
-          admin_notes: mod?.admin_notes || null,
-          is_manual_super: mod?.is_manual_super || false,
-        };
-      });
-      setUsers(enriched);
+    if (filterDept !== "all") {
+      if (filterDept === "2A") query = query.gte("postal_code", "20000").lte("postal_code", "20199");
+      else if (filterDept === "2B") query = query.gte("postal_code", "20200").lte("postal_code", "20999");
+      else query = query.like("postal_code", `${filterDept}%`);
     }
+
+    if (searchDebounced) {
+      const s = searchDebounced.replace(/[%,()]/g, "");
+      if (s) {
+        query = query.or(`first_name.ilike.%${s}%,last_name.ilike.%${s}%,email.ilike.%${s}%`);
+      }
+    }
+
+    const { data, error, count } = await query.range(from, to);
+    if (error) {
+      toast.error("Erreur de chargement");
+      setLoading(false);
+      return;
+    }
+    // Fetch auth emails (source of vérité) + notes/super via chunked queries
+    const userIds = (data || []).map((u: any) => u.id);
+    let emailMap = new Map<string, string>();
+    let modMap = new Map<string, { admin_notes: string | null; is_manual_super: boolean }>();
+    if (userIds.length > 0) {
+      const CHUNK = 150;
+      const chunks: string[][] = [];
+      for (let i = 0; i < userIds.length; i += CHUNK) chunks.push(userIds.slice(i, i + CHUNK));
+      const [emailRes, ...modResAll] = await Promise.all([
+        supabase.rpc("get_user_emails_admin", { p_user_ids: userIds }),
+        ...chunks.map((ids) =>
+          supabase.from("profile_moderation").select("profile_id, admin_notes, is_manual_super").in("profile_id", ids),
+        ),
+      ]);
+      emailMap = new Map((emailRes.data || []).map((e: any) => [e.id, e.email]));
+      const modRows = modResAll.flatMap((r: any) => r.data || []);
+      modMap = new Map(modRows.map((m: any) => [m.profile_id, { admin_notes: m.admin_notes, is_manual_super: m.is_manual_super }]));
+    }
+    const enriched = (data || []).map((u: any) => {
+      const mod = modMap.get(u.id);
+      return {
+        ...u,
+        email: emailMap.get(u.id) || u.email || "",
+        admin_notes: mod?.admin_notes || null,
+        is_manual_super: mod?.is_manual_super || false,
+      };
+    });
+    setUsers(enriched);
+    setTotal(count ?? 0);
     setLoading(false);
-  }, [filterRole, filterVerification]);
+  }, [filterRole, filterVerification, filterDept, filterCountry, searchDebounced, page]);
+
+  // Debounce search 300ms
+  useEffect(() => {
+    const t = setTimeout(() => setSearchDebounced(search.trim().toLowerCase()), 300);
+    return () => clearTimeout(t);
+  }, [search]);
+
+  // Reset page when filters/search change
+  useEffect(() => { setPage(0); }, [searchDebounced, filterRole, filterVerification, filterDept, filterCountry]);
 
   useEffect(() => { fetchUsers(); }, [fetchUsers]);
 
-  const filtered = users.filter((u) => {
-    if (search) {
-      const s = search.toLowerCase();
-      if (
-        !(u.first_name || "").toLowerCase().includes(s) &&
-        !(u.last_name || "").toLowerCase().includes(s) &&
-        !(u.email || "").toLowerCase().includes(s)
-      ) return false;
-    }
-    if (filterDept !== "all") {
-      const code = getDeptCode(u.postal_code);
-      if (code !== filterDept) return false;
-    }
-    if (filterCountry !== "all") {
-      const c = (u.country || "FR").toUpperCase();
-      if (filterCountry === "FR" && c !== "FR") return false;
-      if (filterCountry === "INTL" && c === "FR") return false;
-      if (filterCountry !== "FR" && filterCountry !== "INTL" && c !== filterCountry) return false;
-    }
-    return true;
-  });
+  // Charge une fois : liste des pays présents (hors FR) + total international pour le badge KPI
+  useEffect(() => {
+    (async () => {
+      const { data, count } = await supabase
+        .from("profiles")
+        .select("country", { count: "exact" })
+        .not("country", "is", null)
+        .neq("country", "FR")
+        .limit(5000);
+      const codes = Array.from(
+        new Set((data || []).map((r: any) => String(r.country || "").toUpperCase()).filter(Boolean)),
+      ).sort((a, b) => getCountryName(a).localeCompare(getCountryName(b), "fr"));
+      setCountryStats({ intl: count ?? 0, codes });
+    })();
+  }, []);
 
-  // Reset page when filters change
-  useEffect(() => { setPage(0); }, [search, filterRole, filterVerification, filterDept, filterCountry]);
+  const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+  const availableDepts = Object.keys(DEPT_NAMES).sort((a, b) => a.localeCompare(b, "fr"));
+  const availableCountries = countryStats.codes;
+  const intlCount = countryStats.intl;
 
-  const totalPages = Math.ceil(filtered.length / PAGE_SIZE);
-  const paginated = filtered.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE);
-
-  // Compute available departments from loaded users for the dropdown
-  const availableDepts = Array.from(
-    new Set(users.map((u) => getDeptCode(u.postal_code)).filter(Boolean) as string[])
-  ).sort((a, b) => a.localeCompare(b, "fr"));
-
-  // Compute available countries from loaded users (excluding FR/empty)
-  const availableCountries = Array.from(
-    new Set(
-      users
-        .map((u) => (u.country || "").toUpperCase())
-        .filter((c) => c && c !== "FR")
-    )
-  ).sort((a, b) => getCountryName(a).localeCompare(getCountryName(b), "fr"));
-
-  // KPI international
-  const intlCount = users.filter((u) => (u.country || "FR").toUpperCase() !== "FR").length;
 
   const handleSuspend = async () => {
     const { error } = await supabase
@@ -530,14 +541,15 @@ const AdminUsers = () => {
                   Chargement…
                 </TableCell>
               </TableRow>
-            ) : filtered.length === 0 ? (
+            ) : users.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={11} className="text-center py-8 text-muted-foreground">
                   Aucun utilisateur trouvé
                 </TableCell>
               </TableRow>
             ) : (
-              paginated.map((user) => {
+              users.map((user) => {
+
                 const verif = verificationLabels[user.identity_verification_status || "not_submitted"] || verificationLabels.not_submitted;
                 const status = statusLabels[user.account_status || "active"] || statusLabels.active;
 
@@ -746,7 +758,7 @@ const AdminUsers = () => {
       {totalPages > 1 && (
         <div className="flex items-center justify-between">
           <p className="text-sm text-muted-foreground">
-            {filtered.length} utilisateur{filtered.length > 1 ? "s" : ""} · page {page + 1}/{totalPages}
+            {total} utilisateur{total > 1 ? "s" : ""} · page {page + 1}/{totalPages}
           </p>
           <div className="flex items-center gap-2">
             <Button variant="outline" size="sm" disabled={page === 0} onClick={() => setPage(p => p - 1)}>
