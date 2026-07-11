@@ -814,17 +814,19 @@ Deno.serve(async (req) => {
       .eq("mass_email_id", campaignId)
       .eq("status", "sent");
 
-    // Met à jour la campagne avec le compte final
+    // Met à jour la campagne avec le compte final — sans écraser un statut
+    // 'cancelled' posé par cancel-mass-email pendant la boucle.
     await serviceClient
       .from("mass_emails")
       .update({
         recipients_count: sentTotal ?? sent,
-        status: errors > 0 && sent === 0 ? "error" : "sent",
+        status: cancelled ? "cancelled" : (errors > 0 && sent === 0 ? "error" : "sent"),
         heartbeat_at: new Date().toISOString(),
       })
-      .eq("id", campaignId);
+      .eq("id", campaignId)
+      .neq("status", "cancelled");
 
-    return new Response(JSON.stringify({ sent, errors, resumed, campaign_id: campaignId }), {
+    return new Response(JSON.stringify({ sent, errors, resumed, cancelled, campaign_id: campaignId }), {
       status: 200,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
