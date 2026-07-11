@@ -101,6 +101,7 @@ const adminNavGroups: NavGroup[] = [
       { to: "/admin/emails", icon: Mail, label: "Emails transactionnels" },
       { to: "/admin/nurturing", icon: Sprout, label: "Nurturing" },
       { to: "/admin/settings", icon: Settings, label: "Paramètres" },
+      { to: "/admin/audit", icon: ScrollText, label: "Journal d'audit" },
       { to: "/admin/diagnostics", icon: Stethoscope, label: "Diagnostic" },
     ],
   },
