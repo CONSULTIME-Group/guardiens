@@ -59,18 +59,12 @@ Deno.serve(async (req) => {
     const lastRunAge = Number(health.last_run_age_seconds ?? 0);
     const oldestPending = Number(health.oldest_pending_age_seconds ?? 0);
     const attempts1h = Number(health.attempts_1h ?? 0);
-    // Le worker process-email-queue est planifié à la demande : le cron se dé-planifie
-    // quand les deux files sont vides. Donc last_run_age_seconds > seuil est NORMAL
-    // s'il n'y a rien à traiter. On n'alerte que si un backlog attend OU si des
-    // tentatives récentes ont eu lieu (worker actif mais silencieux depuis).
-    const hasWorkToDo = health.oldest_pending_age_seconds != null || attempts1h > 0;
-    if (hasWorkToDo && (health.last_run_age_seconds == null || lastRunAge > MAX_LAST_RUN_AGE_S)) {
-      anomalies.push({
-        code: "email_pipeline_worker_stalled",
-        title: "Worker process-email-queue silencieux",
-        detail: `Dernier heartbeat il y a ${health.last_run_age_seconds == null ? "jamais" : Math.round(lastRunAge) + "s"} (seuil ${MAX_LAST_RUN_AGE_S}s), avec ${health.oldest_pending_age_seconds != null ? "backlog en attente" : attempts1h + " tentatives sur 1h"}.`,
-      });
-    }
+    const dlqLastHour = Number(health.dlq_last_hour ?? 0);
+    // Note : last_run_age_seconds n'est PLUS un déclencheur d'alerte. Le worker
+    // process-email-queue est event-driven et se dé-planifie quand les files pgmq
+    // sont vides. Un âge élevé pendant les périodes calmes est normal. Le vrai
+    // signal de panne = backlog réel dans les files, échecs, rate-limit bloqué
+    // ou DLQ. On garde lastRunAge dans le corps de l'alerte à titre informatif.
 
     if (health.oldest_pending_age_seconds != null && oldestPending > MAX_OLDEST_PENDING_S) {
       anomalies.push({
@@ -96,6 +90,15 @@ Deno.serve(async (req) => {
         detail: `retry_after_until = ${health.retry_after_until} (plus de 30 min dans le futur).`,
       });
     }
+
+    if (dlqLastHour > 0) {
+      anomalies.push({
+        code: "email_pipeline_dlq",
+        title: "Envois basculés en DLQ (dernière heure)",
+        detail: `${dlqLastHour} message(s) en DLQ sur la dernière heure.`,
+      });
+    }
+
 
     if (anomalies.length === 0) {
       return new Response(JSON.stringify({ ok: true, anomalies: 0 }), {
