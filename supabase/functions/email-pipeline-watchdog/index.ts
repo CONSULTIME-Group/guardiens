@@ -57,11 +57,18 @@ Deno.serve(async (req) => {
     const anomalies: Anomaly[] = [];
 
     const lastRunAge = Number(health.last_run_age_seconds ?? 0);
-    if (health.last_run_age_seconds == null || lastRunAge > MAX_LAST_RUN_AGE_S) {
+    const oldestPending = Number(health.oldest_pending_age_seconds ?? 0);
+    const attempts1h = Number(health.attempts_1h ?? 0);
+    // Le worker process-email-queue est planifié à la demande : le cron se dé-planifie
+    // quand les deux files sont vides. Donc last_run_age_seconds > seuil est NORMAL
+    // s'il n'y a rien à traiter. On n'alerte que si un backlog attend OU si des
+    // tentatives récentes ont eu lieu (worker actif mais silencieux depuis).
+    const hasWorkToDo = health.oldest_pending_age_seconds != null || attempts1h > 0;
+    if (hasWorkToDo && (health.last_run_age_seconds == null || lastRunAge > MAX_LAST_RUN_AGE_S)) {
       anomalies.push({
         code: "email_pipeline_worker_stalled",
         title: "Worker process-email-queue silencieux",
-        detail: `Dernier heartbeat il y a ${health.last_run_age_seconds == null ? "jamais" : Math.round(lastRunAge) + "s"} (seuil ${MAX_LAST_RUN_AGE_S}s).`,
+        detail: `Dernier heartbeat il y a ${health.last_run_age_seconds == null ? "jamais" : Math.round(lastRunAge) + "s"} (seuil ${MAX_LAST_RUN_AGE_S}s), avec ${health.oldest_pending_age_seconds != null ? "backlog en attente" : attempts1h + " tentatives sur 1h"}.`,
       });
     }
 
