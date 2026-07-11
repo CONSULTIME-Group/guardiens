@@ -83,7 +83,7 @@ function buildRecos(s: Summary): Reco[] {
       title: "Anomalie pipeline email",
       analysis: s.email_pipeline.reasons.length > 0 ? s.email_pipeline.reasons.join(", ") + "." : "Le pipeline d'envoi présente une anomalie.",
       action: "Vérifier le worker et les logs edge.",
-      to: "/admin/errors",
+      to: "/admin/emails",
     });
   }
 
