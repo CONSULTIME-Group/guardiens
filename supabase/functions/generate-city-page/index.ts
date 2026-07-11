@@ -186,11 +186,14 @@ Deno.serve(async (req) => {
 
     const vetsLine = osm.vets.length > 0 ? osm.vets.join(", ") : "non disponibles";
     const parksLine = osm.parks.length > 0 ? osm.parks.join(", ") : "non disponibles";
+    const trailsLine = osm.trails.length > 0 ? osm.trails.join(", ") : "non disponibles";
 
     const realDataBlock = `DONNÉES LOCALES RÉELLES (vérifiées, à utiliser telles quelles, ne pas en inventer d'autres) :
 - Gardiens Guardiens actifs à ${city} : ${realSitterCount}.
 - Vétérinaires réels : ${vetsLine}.
-- Parcs et espaces verts réels : ${parksLine}.`;
+- Parcs et espaces verts réels : ${parksLine}.
+- Sentiers et lieux de promenade réels : ${trailsLine}.`;
+
 
     const brandContext = `CONTEXTE MARQUE Guardiens (plateforme de house-sitting de proximité, sans transaction financière directe) :
 - Fondée par Jérémie et Elisa après 5 ans de house-sitting en France (37 maisons gardées, 234 animaux accompagnés).
