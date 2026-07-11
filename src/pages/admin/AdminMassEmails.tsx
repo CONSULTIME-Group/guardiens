@@ -33,7 +33,30 @@ interface MassEmail {
   subject: string;
   recipients_count: number;
   status: string;
+  enqueued_count?: number | null;
+  sent_count?: number | null;
+  failed_count?: number | null;
+  skipped_count?: number | null;
 }
+
+type StatusMeta = {
+  label: string;
+  variant: "default" | "secondary" | "destructive" | "outline";
+  className?: string;
+};
+
+const STATUS_META: Record<string, StatusMeta> = {
+  pending: { label: "En attente", variant: "outline" },
+  enqueuing: { label: "Mise en file", variant: "secondary" },
+  sending: { label: "En cours", variant: "secondary", className: "bg-info-soft text-info-foreground border-transparent" },
+  paused: { label: "En pause", variant: "outline", className: "bg-warning-soft text-warning-foreground border-transparent" },
+  done: { label: "Terminé", variant: "default" },
+  sent: { label: "Envoyé", variant: "default" },
+  error: { label: "Erreur", variant: "destructive" },
+  cancelled: { label: "Annulée", variant: "outline", className: "bg-muted text-muted-foreground border-transparent line-through" },
+};
+
+const CANCELLABLE_STATUSES = new Set(["sending", "paused", "enqueuing"]);
 
 // Campagnes prédéfinies
 const OSER_SUBJECT = "Et si vous osiez demander, vous aussi ?";
@@ -170,7 +193,7 @@ const AdminMassEmails = () => {
     setHistoryLoading(true);
     const { data } = await supabase
       .from("mass_emails")
-      .select("id, created_at, segment, subject, recipients_count, status")
+      .select("id, created_at, segment, subject, recipients_count, status, enqueued_count, sent_count, failed_count, skipped_count")
       .order("created_at", { ascending: false })
       .limit(20);
     setHistory((data as MassEmail[]) || []);
@@ -178,6 +201,29 @@ const AdminMassEmails = () => {
   }, []);
 
   useEffect(() => { loadHistory(); }, [loadHistory]);
+
+  // Cancel campaign
+  const [cancelTarget, setCancelTarget] = useState<MassEmail | null>(null);
+  const [cancelling, setCancelling] = useState(false);
+
+  const handleCancelCampaign = async () => {
+    if (!cancelTarget) return;
+    setCancelling(true);
+    try {
+      const { error } = await supabase.functions.invoke("cancel-mass-email", {
+        body: { campaign_id: cancelTarget.id },
+      });
+      if (error) throw error;
+      toast.success("Campagne annulée");
+      setCancelTarget(null);
+      await loadHistory();
+    } catch (e) {
+      toast.error(`Annulation impossible : ${(e as Error).message ?? "erreur inconnue"}`);
+    } finally {
+      setCancelling(false);
+    }
+  };
+
 
   // Debounced recipient count
   useEffect(() => {
@@ -445,25 +491,64 @@ const AdminMassEmails = () => {
                       <TableHead>Segment</TableHead>
                       <TableHead>Objet</TableHead>
                       <TableHead className="text-right">Dest.</TableHead>
+                      <TableHead>Progression</TableHead>
                       <TableHead>Statut</TableHead>
+                      <TableHead className="text-right">Action</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {history.map((row) => (
-                      <TableRow key={row.id}>
-                        <TableCell className="text-xs whitespace-nowrap">
-                          {format(new Date(row.created_at), "dd MMM yyyy", { locale: fr })}
-                        </TableCell>
-                        <TableCell className="text-xs">{SEGMENT_LABELS[row.segment] || row.segment}</TableCell>
-                        <TableCell className="text-xs max-w-[120px] truncate">{row.subject}</TableCell>
-                        <TableCell className="text-xs text-right">{row.recipients_count}</TableCell>
-                        <TableCell>
-                          <Badge variant={row.status === "sent" ? "default" : "destructive"} className="text-[10px]">
-                            {row.status === "sent" ? "Envoyé" : "Erreur"}
-                          </Badge>
-                        </TableCell>
-                      </TableRow>
-                    ))}
+                    {history.map((row) => {
+                      const meta = STATUS_META[row.status] ?? { label: row.status, variant: "outline" as const };
+                      const sent = row.sent_count ?? 0;
+                      const enq = row.enqueued_count ?? 0;
+                      const failed = row.failed_count ?? 0;
+                      const skipped = row.skipped_count ?? 0;
+                      const hasCounters = enq > 0 || sent > 0 || failed > 0 || skipped > 0;
+                      const canCancel = CANCELLABLE_STATUSES.has(row.status);
+                      return (
+                        <TableRow key={row.id}>
+                          <TableCell className="text-xs whitespace-nowrap">
+                            {format(new Date(row.created_at), "dd MMM yyyy", { locale: fr })}
+                          </TableCell>
+                          <TableCell className="text-xs">{SEGMENT_LABELS[row.segment] || row.segment}</TableCell>
+                          <TableCell className="text-xs max-w-[120px] truncate">{row.subject}</TableCell>
+                          <TableCell className="text-xs text-right">{row.recipients_count}</TableCell>
+                          <TableCell className="text-xs">
+                            {hasCounters ? (
+                              <span className="tabular-nums">
+                                {sent}
+                                {enq > 0 ? ` / ${enq}` : ""}
+                                {(failed > 0 || skipped > 0) && (
+                                  <span className="text-muted-foreground">
+                                    {failed > 0 ? ` · ${failed} échec${failed > 1 ? "s" : ""}` : ""}
+                                    {skipped > 0 ? ` · ${skipped} ignoré${skipped > 1 ? "s" : ""}` : ""}
+                                  </span>
+                                )}
+                              </span>
+                            ) : (
+                              <span className="text-muted-foreground">–</span>
+                            )}
+                          </TableCell>
+                          <TableCell>
+                            <Badge variant={meta.variant} className={`text-[10px] ${meta.className ?? ""}`}>
+                              {meta.label}
+                            </Badge>
+                          </TableCell>
+                          <TableCell className="text-right">
+                            {canCancel ? (
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                className="h-7 text-xs"
+                                onClick={() => setCancelTarget(row)}
+                              >
+                                Annuler
+                              </Button>
+                            ) : null}
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })}
                   </TableBody>
                 </Table>
               )}
@@ -621,6 +706,41 @@ const AdminMassEmails = () => {
                 <>
                   <Send className="h-4 w-4 mr-2" /> Envoyer maintenant
                 </>
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Confirmation d'annulation de campagne */}
+      <AlertDialog open={!!cancelTarget} onOpenChange={(open) => { if (!open && !cancelling) setCancelTarget(null); }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Annuler cette campagne ?</AlertDialogTitle>
+            <AlertDialogDescription asChild>
+              <div className="space-y-2 text-sm">
+                <div><span className="text-muted-foreground">Objet :</span> {cancelTarget?.subject}</div>
+                <div>
+                  <span className="text-muted-foreground">Statut actuel :</span>{" "}
+                  {cancelTarget ? (STATUS_META[cancelTarget.status]?.label ?? cancelTarget.status) : ""}
+                </div>
+                <p className="text-muted-foreground">
+                  Les emails déjà envoyés ne peuvent pas être rappelés. Les destinataires restants ne recevront rien.
+                </p>
+              </div>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={cancelling}>Retour</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={(e) => { e.preventDefault(); handleCancelCampaign(); }}
+              disabled={cancelling}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {cancelling ? (
+                <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Annulation…</>
+              ) : (
+                "Annuler la campagne"
               )}
             </AlertDialogAction>
           </AlertDialogFooter>
