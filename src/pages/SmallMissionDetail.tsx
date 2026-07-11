@@ -350,7 +350,7 @@ const SmallMissionDetail = () => {
       const { data: fresh } = await supabase
         .from("small_missions")
         .select("status, user_id, title")
-        .eq("id", id)
+        .eq("id", mission.id)
         .single();
       if (!fresh) throw new Error("Mission introuvable.");
       if (fresh.status !== "open") {
