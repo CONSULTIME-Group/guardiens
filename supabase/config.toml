@@ -83,6 +83,8 @@ project_id = "erhccyqevdyevpyctsjj"
     verify_jwt = true
   [functions.generate-city-page]
     verify_jwt = true
+  [functions.admin-contact-mission-poster]
+    verify_jwt = true
 
 
 
