@@ -7,6 +7,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
@@ -20,13 +21,16 @@ const AdminReviews = () => {
   const [filterStatus, setFilterStatus] = useState("all");
   const [sortBy, setSortBy] = useState<"date" | "rating">("date");
   const [detailReview, setDetailReview] = useState<any | null>(null);
-  const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
+  const [deleteConfirm, setDeleteConfirm] = useState<any | null>(null);
+  const [hideConfirm, setHideConfirm] = useState<any | null>(null);
+  const [validateConfirm, setValidateConfirm] = useState<{ review: any; field: "moderation_status" | "response_status" } | null>(null);
+  const [busyId, setBusyId] = useState<string | null>(null);
   const [badgeCounts, setBadgeCounts] = useState<Record<string, number>>({});
 
   // Cancellation moderation state
   const [cancellationReviews, setCancellationReviews] = useState<any[]>([]);
   const [cancellationLoading, setCancellationLoading] = useState(true);
-  const [rejectReasonModal, setRejectReasonModal] = useState<{ id: string; type: "review" | "response" } | null>(null);
+  const [rejectReasonModal, setRejectReasonModal] = useState<{ id: string; type: "review" | "response"; review: any } | null>(null);
   const [rejectReason, setRejectReason] = useState("");
 
   const fetchReviews = useCallback(async () => {
@@ -80,42 +84,113 @@ const AdminReviews = () => {
 
   useEffect(() => { fetchReviews(); fetchCancellationReviews(); }, [fetchReviews, fetchCancellationReviews]);
 
-  const togglePublished = async (id: string, current: boolean) => {
-    const { error } = await supabase.from("reviews").update({ published: !current }).eq("id", id);
-    if (error) toast.error("Erreur");
-    else { toast.success(current ? "Avis masqué" : "Avis publié"); fetchReviews(); }
+  const logAdminAction = async (
+    action: string,
+    targetId: string,
+    metadata: Record<string, any>,
+  ) => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+    await supabase.from("admin_action_logs").insert({
+      admin_id: user.id,
+      action,
+      target_type: "review",
+      target_id: targetId,
+      metadata,
+    });
   };
 
-  const deleteReview = async (id: string) => {
-    const { error } = await supabase.from("reviews").update({ published: false, comment: "[Supprimé par l'admin]" }).eq("id", id);
-    if (error) toast.error("Erreur");
-    else { toast.success("Avis supprimé"); fetchReviews(); }
+  const performTogglePublished = async (review: any) => {
+    const willHide = review.published;
+    setBusyId(review.id);
+    const { error } = await supabase.from("reviews").update({ published: !review.published }).eq("id", review.id);
+    if (error) {
+      toast.error("Erreur");
+      setBusyId(null);
+      return;
+    }
+    await logAdminAction(willHide ? "review_hide" : "review_show", review.id, {
+      rating: review.overall_rating,
+      reviewer_id: review.reviewer_id,
+      reviewee_id: review.reviewee_id,
+      review_type: review.review_type ?? null,
+    });
+    toast.success(willHide ? "Avis masqué" : "Avis publié");
+    setBusyId(null);
+    setHideConfirm(null);
+    fetchReviews();
+  };
+
+  const togglePublished = (review: any) => {
+    if (review.published) {
+      setHideConfirm(review);
+    } else {
+      performTogglePublished(review);
+    }
+  };
+
+  const deleteReview = async (review: any) => {
+    setBusyId(review.id);
+    const { error } = await supabase
+      .from("reviews")
+      .update({ published: false, comment: "[Supprimé par l'admin]" })
+      .eq("id", review.id);
+    if (error) {
+      toast.error("Erreur");
+      setBusyId(null);
+      return;
+    }
+    await logAdminAction("review_delete", review.id, {
+      rating: review.overall_rating,
+      reviewer_id: review.reviewer_id,
+      reviewee_id: review.reviewee_id,
+      review_type: review.review_type ?? null,
+      original_comment: review.comment ?? null,
+    });
+    toast.success("Avis supprimé");
+    setBusyId(null);
     setDeleteConfirm(null);
+    fetchReviews();
   };
 
-  const handleModerationAction = async (reviewId: string, action: "valide" | "refuse", field: "moderation_status" | "response_status") => {
+  const handleModerationAction = async (
+    review: any,
+    action: "valide" | "refuse",
+    field: "moderation_status" | "response_status",
+  ) => {
+    const reviewId = review.id;
     if (action === "refuse" && !rejectReason.trim()) {
       toast.error("Veuillez indiquer une raison de refus.");
       return;
     }
 
     const update: any = { [field]: action === "valide" ? "valide" : "refuse" };
-    if (field === "response_status" && action === "valide") {
-      update.response_status = "validee";
-    }
-    if (field === "response_status" && action === "refuse") {
-      update.response_status = "refusee";
-    }
+    if (field === "response_status" && action === "valide") update.response_status = "validee";
+    if (field === "response_status" && action === "refuse") update.response_status = "refusee";
 
+    setBusyId(reviewId);
     const { error } = await supabase.from("reviews").update(update).eq("id", reviewId);
     if (error) {
       toast.error("Erreur lors de la mise à jour.");
+      setBusyId(null);
       return;
     }
 
-    // Send email on validation (non-blocking)
-    const review = cancellationReviews.find(r => r.id === reviewId);
-    if (review && action === "valide") {
+    const auditAction =
+      field === "moderation_status"
+        ? action === "valide" ? "review_cancellation_approve" : "review_cancellation_reject"
+        : action === "valide" ? "review_cancellation_response_approve" : "review_cancellation_response_reject";
+
+    await logAdminAction(auditAction, reviewId, {
+      review_type: "annulation",
+      field,
+      reviewer_id: review.reviewer_id,
+      reviewee_id: review.reviewee_id,
+      cancelled_by_role: review.cancelled_by_role ?? null,
+      reject_reason: action === "refuse" ? rejectReason.trim() : null,
+    });
+
+    if (action === "valide") {
       if (field === "moderation_status") {
         await sendTransactionalEmail({
           templateName: "cancellation-review-published",
@@ -140,8 +215,10 @@ const AdminReviews = () => {
     }
 
     toast.success(action === "valide" ? "Validé avec succès" : "Refusé");
+    setBusyId(null);
     setRejectReasonModal(null);
     setRejectReason("");
+    setValidateConfirm(null);
     fetchCancellationReviews();
   };
 
@@ -249,10 +326,10 @@ const AdminReviews = () => {
                         <Button variant="ghost" size="icon" title="Voir" onClick={() => setDetailReview(review)}>
                           <Eye className="h-4 w-4" />
                         </Button>
-                        <Button variant="ghost" size="icon" title={review.published ? "Masquer" : "Publier"} onClick={() => togglePublished(review.id, review.published)}>
+                        <Button variant="ghost" size="icon" disabled={busyId === review.id} title={review.published ? "Masquer" : "Publier"} onClick={() => togglePublished(review)}>
                           <EyeOff className="h-4 w-4" />
                         </Button>
-                        <Button variant="ghost" size="icon" title="Supprimer" onClick={() => setDeleteConfirm(review.id)}>
+                        <Button variant="ghost" size="icon" disabled={busyId === review.id} title="Supprimer" onClick={() => setDeleteConfirm(review)}>
                           <Trash2 className="h-4 w-4 text-destructive" />
                         </Button>
                       </div>
@@ -312,7 +389,8 @@ const AdminReviews = () => {
                       <div className="flex gap-2">
                         <Button
                           size="sm"
-                          onClick={() => handleModerationAction(review.id, "valide", "moderation_status")}
+                          disabled={busyId === review.id}
+                          onClick={() => setValidateConfirm({ review, field: "moderation_status" })}
                           className="gap-1.5"
                         >
                           <CheckCircle2 className="h-3.5 w-3.5" /> Valider
@@ -320,7 +398,8 @@ const AdminReviews = () => {
                         <Button
                           size="sm"
                           variant="outline"
-                          onClick={() => setRejectReasonModal({ id: review.id, type: "review" })}
+                          disabled={busyId === review.id}
+                          onClick={() => setRejectReasonModal({ id: review.id, type: "review", review })}
                           className="gap-1.5 text-destructive border-destructive/30 hover:bg-destructive/10"
                         >
                           <XCircle className="h-3.5 w-3.5" /> Refuser
@@ -364,7 +443,8 @@ const AdminReviews = () => {
                       <div className="flex gap-2">
                         <Button
                           size="sm"
-                          onClick={() => handleModerationAction(review.id, "valide", "response_status")}
+                          disabled={busyId === review.id}
+                          onClick={() => setValidateConfirm({ review, field: "response_status" })}
                           className="gap-1.5"
                         >
                           <CheckCircle2 className="h-3.5 w-3.5" /> Valider la réponse
@@ -372,7 +452,8 @@ const AdminReviews = () => {
                         <Button
                           size="sm"
                           variant="outline"
-                          onClick={() => setRejectReasonModal({ id: review.id, type: "response" })}
+                          disabled={busyId === review.id}
+                          onClick={() => setRejectReasonModal({ id: review.id, type: "response", review })}
                           className="gap-1.5 text-destructive border-destructive/30 hover:bg-destructive/10"
                         >
                           <XCircle className="h-3.5 w-3.5" /> Refuser
@@ -456,10 +537,10 @@ const AdminReviews = () => {
               <div><strong>Commentaire :</strong></div>
               <p className="bg-muted p-3 rounded-lg">{detailReview.comment || "Aucun commentaire"}</p>
               <div className="flex gap-2 pt-2 border-t border-border">
-                <Button size="sm" variant={detailReview.published ? "outline" : "default"} onClick={() => { togglePublished(detailReview.id, detailReview.published); setDetailReview(null); }}>
+                <Button size="sm" variant={detailReview.published ? "outline" : "default"} onClick={() => { togglePublished(detailReview); setDetailReview(null); }}>
                   {detailReview.published ? "Masquer" : "Publier"}
                 </Button>
-                <Button size="sm" variant="destructive" onClick={() => { setDeleteConfirm(detailReview.id); setDetailReview(null); }}>
+                <Button size="sm" variant="destructive" onClick={() => { setDeleteConfirm(detailReview); setDetailReview(null); }}>
                   Supprimer
                 </Button>
               </div>
@@ -468,17 +549,91 @@ const AdminReviews = () => {
         </DialogContent>
       </Dialog>
 
+      {/* Hide confirmation */}
+      <AlertDialog open={!!hideConfirm} onOpenChange={(o) => !o && setHideConfirm(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Masquer cet avis ?</AlertDialogTitle>
+            <AlertDialogDescription>
+              {hideConfirm && (
+                <>
+                  Avis de <strong>{hideConfirm.reviewer?.first_name} {hideConfirm.reviewer?.last_name}</strong>
+                  {" sur "}
+                  <strong>{hideConfirm.reviewee?.first_name} {hideConfirm.reviewee?.last_name}</strong>
+                  {" ("}{hideConfirm.overall_rating}/5{"). "}
+                  Il ne sera plus visible publiquement. Vous pourrez le ré-afficher.
+                </>
+              )}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={!!busyId}>Annuler</AlertDialogCancel>
+            <AlertDialogAction
+              disabled={!!busyId}
+              onClick={(e) => { e.preventDefault(); if (hideConfirm) performTogglePublished(hideConfirm); }}
+            >
+              {busyId ? "Masquage…" : "Masquer"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
       {/* Delete confirmation */}
-      <Dialog open={!!deleteConfirm} onOpenChange={(o) => !o && setDeleteConfirm(null)}>
-        <DialogContent>
-          <DialogHeader><DialogTitle>Supprimer cet avis ?</DialogTitle></DialogHeader>
-          <p className="text-sm text-muted-foreground">Cette action est irréversible. Le commentaire sera remplacé par "[Supprimé par l'admin]".</p>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setDeleteConfirm(null)}>Annuler</Button>
-            <Button variant="destructive" onClick={() => deleteConfirm && deleteReview(deleteConfirm)}>Confirmer la suppression</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <AlertDialog open={!!deleteConfirm} onOpenChange={(o) => !o && setDeleteConfirm(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Supprimer cet avis ?</AlertDialogTitle>
+            <AlertDialogDescription>
+              {deleteConfirm && (
+                <>
+                  Avis de <strong>{deleteConfirm.reviewer?.first_name} {deleteConfirm.reviewer?.last_name}</strong>
+                  {" sur "}
+                  <strong>{deleteConfirm.reviewee?.first_name} {deleteConfirm.reviewee?.last_name}</strong>.
+                  {" "}Cette action est irréversible. Le commentaire sera remplacé par « [Supprimé par l'admin] ».
+                </>
+              )}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={!!busyId}>Annuler</AlertDialogCancel>
+            <AlertDialogAction
+              disabled={!!busyId}
+              onClick={(e) => { e.preventDefault(); if (deleteConfirm) deleteReview(deleteConfirm); }}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {busyId ? "Suppression…" : "Confirmer la suppression"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Validate cancellation moderation confirmation */}
+      <AlertDialog open={!!validateConfirm} onOpenChange={(o) => !o && setValidateConfirm(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              {validateConfirm?.field === "moderation_status" ? "Valider cet avis d'annulation ?" : "Valider cette réponse ?"}
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              {validateConfirm && (
+                <>
+                  Auteur : <strong>{validateConfirm.review.reviewer?.first_name} {validateConfirm.review.reviewer?.last_name}</strong>.
+                  {" "}Publication immédiate et notification par email.
+                </>
+              )}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={!!busyId}>Annuler</AlertDialogCancel>
+            <AlertDialogAction
+              disabled={!!busyId}
+              onClick={(e) => { e.preventDefault(); if (validateConfirm) handleModerationAction(validateConfirm.review, "valide", validateConfirm.field); }}
+            >
+              {busyId ? "Validation…" : "Valider"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       {/* Reject reason modal */}
       <Dialog open={!!rejectReasonModal} onOpenChange={(o) => { if (!o) { setRejectReasonModal(null); setRejectReason(""); } }}>
@@ -505,18 +660,18 @@ const AdminReviews = () => {
             </Button>
             <Button
               variant="destructive"
-              disabled={!rejectReason.trim()}
+              disabled={!rejectReason.trim() || !!busyId}
               onClick={() => {
                 if (rejectReasonModal) {
                   handleModerationAction(
-                    rejectReasonModal.id,
+                    rejectReasonModal.review,
                     "refuse",
-                    rejectReasonModal.type === "review" ? "moderation_status" : "response_status"
+                    rejectReasonModal.type === "review" ? "moderation_status" : "response_status",
                   );
                 }
               }}
             >
-              Confirmer le refus
+              {busyId ? "Envoi…" : "Confirmer le refus"}
             </Button>
           </DialogFooter>
         </DialogContent>
