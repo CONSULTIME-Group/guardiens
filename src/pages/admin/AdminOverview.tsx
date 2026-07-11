@@ -46,9 +46,10 @@ const AdminOverview = () => {
         }
       />
 
+      <SignalsSection />
       <TodoSection actionCards={actionCards} lateCards={lateCards} />
-      <RecentActivity activity={activity} />
       <KpiCards stats={stats} />
+      <RecentActivity activity={activity} />
       <AcquisitionPilotCard />
       <AffinityPilotCard />
       <DashboardCharts weeklySignups={weeklySignups} deptData={deptData} />
@@ -57,4 +58,4 @@ const AdminOverview = () => {
   );
 };
 
-export default AdminDashboard;
+export default AdminOverview;
