@@ -62,60 +62,59 @@ area["name"="${safeCity}"]["boundary"="administrative"]["admin_level"~"7|8"]->.a
   node["leisure"="dog_park"](area.a);
   node["leisure"="park"]["name"](area.a);
   way["leisure"="park"]["name"](area.a);
-  relation["route"="hiking"]["name"](area.a);
-  way["leisure"="nature_reserve"]["name"](area.a);
-  node["leisure"="nature_reserve"]["name"](area.a);
 );
-out tags 150;`;
+out tags 80;`;
 
-  try {
-    const controller = new AbortController();
-    const timer = setTimeout(() => controller.abort(), 30000);
-    const res = await fetch("https://overpass-api.de/api/interpreter", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/x-www-form-urlencoded",
-        "User-Agent": USER_AGENT,
-      },
-      body: "data=" + encodeURIComponent(query),
-      signal: controller.signal,
-    });
-    clearTimeout(timer);
-    if (!res.ok) {
-      console.warn("overpass non-200", city, res.status);
-      return empty;
-    }
-    const data = await res.json();
-    const elements: any[] = Array.isArray(data?.elements) ? data.elements : [];
-    const vets = new Set<string>();
-    const parks = new Set<string>();
-    const trails = new Set<string>();
-    for (const el of elements) {
-      const tags = el?.tags || {};
-      const name: string | undefined = tags.name;
-      if (!name || typeof name !== "string") continue;
-      const clean = name.trim();
-      if (!clean) continue;
-      if (tags.amenity === "veterinary") {
-        if (vets.size < 5) vets.add(clean);
-      } else if (tags.leisure === "dog_park" || tags.leisure === "park") {
-        if (parks.size < 5) parks.add(clean);
-      } else if (
-        tags.route === "hiking" ||
-        tags.leisure === "nature_reserve"
-      ) {
-        trails.add(clean);
+  const endpoints = [
+    "https://overpass-api.de/api/interpreter",
+    "https://overpass.kumi.systems/api/interpreter",
+  ];
+
+  let lastError: unknown = null;
+  for (const endpoint of endpoints) {
+    try {
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), 25000);
+      const res = await fetch(endpoint, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+          "User-Agent": USER_AGENT,
+        },
+        body: "data=" + encodeURIComponent(query),
+        signal: controller.signal,
+      });
+      clearTimeout(timer);
+      if (!res.ok) {
+        console.warn("overpass non-200", city, endpoint, res.status);
+        lastError = new Error(`HTTP ${res.status} from ${endpoint}`);
+        continue;
       }
+      const data = await res.json();
+      const elements: any[] = Array.isArray(data?.elements) ? data.elements : [];
+      const vets = new Set<string>();
+      const parks = new Set<string>();
+      for (const el of elements) {
+        const tags = el?.tags || {};
+        const name: string | undefined = tags.name;
+        if (!name || typeof name !== "string") continue;
+        const clean = name.trim();
+        if (!clean) continue;
+        if (tags.amenity === "veterinary") {
+          if (vets.size < 5) vets.add(clean);
+        } else if (tags.leisure === "dog_park" || tags.leisure === "park") {
+          if (parks.size < 5) parks.add(clean);
+        }
+      }
+      return { vets: [...vets], parks: [...parks], trails: [] };
+    } catch (e) {
+      console.warn("overpass err", city, endpoint, String(e));
+      lastError = e;
     }
-    const parksArr = [...parks];
-    const trailsArr = [...trails]
-      .filter((t) => !parksArr.includes(t))
-      .slice(0, 5);
-    return { vets: [...vets], parks: parksArr, trails: trailsArr };
-  } catch (e) {
-    console.warn("overpass err", city, String(e));
-    return empty;
   }
+
+  console.warn("overpass all endpoints failed", city, lastError);
+  return empty;
 }
 
 
