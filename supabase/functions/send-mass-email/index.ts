@@ -702,7 +702,21 @@ Deno.serve(async (req) => {
       };
     });
 
+    let cancelled = false;
     for (let i = 0; i < emailObjects.length; i += BATCH_SIZE) {
+      // Relit le statut avant chaque batch : si un admin a cliqué « Annuler »
+      // via cancel-mass-email (UPDATE status='cancelled'), on stoppe la boucle
+      // pour ne pas continuer à envoyer les batches restants.
+      const { data: statusRow } = await serviceClient
+        .from("mass_emails")
+        .select("status")
+        .eq("id", campaignId)
+        .maybeSingle();
+      if (statusRow?.status === "cancelled") {
+        console.log(`send-mass-email: campaign ${campaignId} cancelled, stopping at batch ${i}`);
+        cancelled = true;
+        break;
+      }
       const batch = emailObjects.slice(i, i + BATCH_SIZE);
       const batchEmails = remainingRecipients.slice(i, i + BATCH_SIZE);
       const batchRows: Array<{
