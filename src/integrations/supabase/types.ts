@@ -490,6 +490,24 @@ export type Database = {
         }
         Relationships: []
       }
+      anon_insert_throttle: {
+        Row: {
+          bucket_minute: string
+          count: number
+          table_name: string
+        }
+        Insert: {
+          bucket_minute: string
+          count?: number
+          table_name: string
+        }
+        Update: {
+          bucket_minute?: string
+          count?: number
+          table_name?: string
+        }
+        Relationships: []
+      }
       applications: {
         Row: {
           created_at: string
