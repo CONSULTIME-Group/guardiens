@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useFeatureFlag } from "@/hooks/useFeatureFlag";
+import { NoApplicationsCard } from "@/components/admin/signals/NoApplicationsCard";
 import { cn } from "@/lib/utils";
 
 interface Signal {
@@ -90,12 +91,11 @@ export const SignalsSection = () => {
           </div>
         ) : (
           <ul className="space-y-2">
-            {signals.map((s) => {
-              const title =
-                (s.metadata?.title as string | undefined) ??
-                s.signal_type.replace(/_/g, " ");
-              return (
-                <li key={s.id}>
+            {signals.map((s) => (
+              <li key={s.id}>
+                {s.signal_type === "no_applications" ? (
+                  <NoApplicationsCard signal={s as unknown as import("@/components/admin/signals/NoApplicationsCard").AdminSignal} />
+                ) : (
                   <Link
                     to={entityLink(s)}
                     className="flex items-start gap-3 rounded-lg border p-3 hover:bg-accent/50 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
@@ -107,15 +107,17 @@ export const SignalsSection = () => {
                       {s.severity === "critical" ? "Critique" : "À traiter"}
                     </Badge>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-foreground truncate">{title}</p>
+                      <p className="text-sm font-medium text-foreground truncate">
+                        {(s.metadata?.title as string | undefined) ?? s.signal_type.replace(/_/g, " ")}
+                      </p>
                       <p className="text-xs text-muted-foreground">
                         {s.entity_type} · {new Date(s.detected_at).toLocaleString("fr-FR")}
                       </p>
                     </div>
                   </Link>
-                </li>
-              );
-            })}
+                )}
+              </li>
+            ))}
           </ul>
         )}
       </CardContent>
