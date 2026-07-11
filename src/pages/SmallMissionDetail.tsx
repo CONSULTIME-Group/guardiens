@@ -414,7 +414,7 @@ const SmallMissionDetail = () => {
     try {
       // Server-side guard: re-check mission status
       const { data: freshMission } = await supabase
-        .from("small_missions").select("status").eq("id", id!).single();
+        .from("small_missions").select("status").eq("id", mission.id).single();
       if (!freshMission) throw new Error("Mission introuvable");
       if (freshMission.status === "cancelled" || freshMission.status === "completed") {
         toast({ variant: "destructive", title: "Mission clôturée", description: "Cette mission n'accepte plus de réponses." });
