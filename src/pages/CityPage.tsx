@@ -678,8 +678,25 @@ const CityPage = () => {
  </section>
  )}
 
- {/* Final CTA */}
- <section className="max-w-5xl mx-auto px-4 py-16 text-center">
+        {/* FAQ (uniquement sur pages indexables) */}
+        {!dbNoindex && (
+          <section className="max-w-5xl mx-auto px-4 py-6 md:py-12 border-t border-border">
+            <h2 className="font-serif text-2xl font-bold text-foreground mb-6">
+              Questions fréquentes sur le house-sitting à {dbPage.city}
+            </h2>
+            <Accordion type="single" collapsible className="w-full">
+              {dbFaqItems.map((faq, i) => (
+                <AccordionItem key={i} value={`db-faq-${i}`}>
+                  <AccordionTrigger className="text-left">{faq.q}</AccordionTrigger>
+                  <AccordionContent>{faq.a}</AccordionContent>
+                </AccordionItem>
+              ))}
+            </Accordion>
+          </section>
+        )}
+
+  {/* Final CTA */}
+  <section className="max-w-5xl mx-auto px-4 py-16 text-center">
  <h2 className="font-serif text-2xl md:text-3xl font-bold text-foreground mb-4">
  Rejoignez la communauté Guardiens à {dbPage.city}
  </h2>
