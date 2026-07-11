@@ -491,25 +491,64 @@ const AdminMassEmails = () => {
                       <TableHead>Segment</TableHead>
                       <TableHead>Objet</TableHead>
                       <TableHead className="text-right">Dest.</TableHead>
+                      <TableHead>Progression</TableHead>
                       <TableHead>Statut</TableHead>
+                      <TableHead className="text-right">Action</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {history.map((row) => (
-                      <TableRow key={row.id}>
-                        <TableCell className="text-xs whitespace-nowrap">
-                          {format(new Date(row.created_at), "dd MMM yyyy", { locale: fr })}
-                        </TableCell>
-                        <TableCell className="text-xs">{SEGMENT_LABELS[row.segment] || row.segment}</TableCell>
-                        <TableCell className="text-xs max-w-[120px] truncate">{row.subject}</TableCell>
-                        <TableCell className="text-xs text-right">{row.recipients_count}</TableCell>
-                        <TableCell>
-                          <Badge variant={row.status === "sent" ? "default" : "destructive"} className="text-[10px]">
-                            {row.status === "sent" ? "Envoyé" : "Erreur"}
-                          </Badge>
-                        </TableCell>
-                      </TableRow>
-                    ))}
+                    {history.map((row) => {
+                      const meta = STATUS_META[row.status] ?? { label: row.status, variant: "outline" as const };
+                      const sent = row.sent_count ?? 0;
+                      const enq = row.enqueued_count ?? 0;
+                      const failed = row.failed_count ?? 0;
+                      const skipped = row.skipped_count ?? 0;
+                      const hasCounters = enq > 0 || sent > 0 || failed > 0 || skipped > 0;
+                      const canCancel = CANCELLABLE_STATUSES.has(row.status);
+                      return (
+                        <TableRow key={row.id}>
+                          <TableCell className="text-xs whitespace-nowrap">
+                            {format(new Date(row.created_at), "dd MMM yyyy", { locale: fr })}
+                          </TableCell>
+                          <TableCell className="text-xs">{SEGMENT_LABELS[row.segment] || row.segment}</TableCell>
+                          <TableCell className="text-xs max-w-[120px] truncate">{row.subject}</TableCell>
+                          <TableCell className="text-xs text-right">{row.recipients_count}</TableCell>
+                          <TableCell className="text-xs">
+                            {hasCounters ? (
+                              <span className="tabular-nums">
+                                {sent}
+                                {enq > 0 ? ` / ${enq}` : ""}
+                                {(failed > 0 || skipped > 0) && (
+                                  <span className="text-muted-foreground">
+                                    {failed > 0 ? ` · ${failed} échec${failed > 1 ? "s" : ""}` : ""}
+                                    {skipped > 0 ? ` · ${skipped} ignoré${skipped > 1 ? "s" : ""}` : ""}
+                                  </span>
+                                )}
+                              </span>
+                            ) : (
+                              <span className="text-muted-foreground">–</span>
+                            )}
+                          </TableCell>
+                          <TableCell>
+                            <Badge variant={meta.variant} className={`text-[10px] ${meta.className ?? ""}`}>
+                              {meta.label}
+                            </Badge>
+                          </TableCell>
+                          <TableCell className="text-right">
+                            {canCancel ? (
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                className="h-7 text-xs"
+                                onClick={() => setCancelTarget(row)}
+                              >
+                                Annuler
+                              </Button>
+                            ) : null}
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })}
                   </TableBody>
                 </Table>
               )}
