@@ -33,7 +33,30 @@ interface MassEmail {
   subject: string;
   recipients_count: number;
   status: string;
+  enqueued_count?: number | null;
+  sent_count?: number | null;
+  failed_count?: number | null;
+  skipped_count?: number | null;
 }
+
+type StatusMeta = {
+  label: string;
+  variant: "default" | "secondary" | "destructive" | "outline";
+  className?: string;
+};
+
+const STATUS_META: Record<string, StatusMeta> = {
+  pending: { label: "En attente", variant: "outline" },
+  enqueuing: { label: "Mise en file", variant: "secondary" },
+  sending: { label: "En cours", variant: "secondary", className: "bg-info-soft text-info-foreground border-transparent" },
+  paused: { label: "En pause", variant: "outline", className: "bg-warning-soft text-warning-foreground border-transparent" },
+  done: { label: "Terminé", variant: "default" },
+  sent: { label: "Envoyé", variant: "default" },
+  error: { label: "Erreur", variant: "destructive" },
+  cancelled: { label: "Annulée", variant: "outline", className: "bg-muted text-muted-foreground border-transparent line-through" },
+};
+
+const CANCELLABLE_STATUSES = new Set(["sending", "paused", "enqueuing"]);
 
 // Campagnes prédéfinies
 const OSER_SUBJECT = "Et si vous osiez demander, vous aussi ?";
