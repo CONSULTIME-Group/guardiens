@@ -350,7 +350,24 @@ const AdminReviews = () => {
               </TableBody>
             </Table>
           </div>
+
+          {total > PAGE_SIZE && (
+            <div className="flex items-center justify-between">
+              <p className="text-sm text-muted-foreground">
+                {total} avis · page {page + 1}/{Math.max(1, Math.ceil(total / PAGE_SIZE))}
+              </p>
+              <div className="flex items-center gap-2">
+                <Button variant="outline" size="sm" disabled={page === 0 || loading} onClick={() => setPage(p => p - 1)}>
+                  <ChevronLeft className="h-4 w-4 mr-1" /> Précédent
+                </Button>
+                <Button variant="outline" size="sm" disabled={page >= Math.ceil(total / PAGE_SIZE) - 1 || loading} onClick={() => setPage(p => p + 1)}>
+                  Suivant <ChevronRight className="h-4 w-4 ml-1" />
+                </Button>
+              </div>
+            </div>
+          )}
         </TabsContent>
+
 
         {/* ── Cancellation moderation tab ── */}
         <TabsContent value="cancellations" className="space-y-6 mt-4">
