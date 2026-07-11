@@ -266,6 +266,24 @@ const AdminReports = () => {
         </div>
       )}
 
+      {totalPages > 1 && (
+        <div className="flex items-center justify-between">
+          <p className="text-sm text-muted-foreground">
+            {total} signalement{total > 1 ? "s" : ""} · page {page + 1}/{totalPages}
+          </p>
+          <div className="flex items-center gap-2">
+            <Button variant="outline" size="sm" disabled={page === 0 || loading} onClick={() => setPage(p => p - 1)}>
+              <ChevronLeft className="h-4 w-4 mr-1" /> Précédent
+            </Button>
+            <Button variant="outline" size="sm" disabled={page >= totalPages - 1 || loading} onClick={() => setPage(p => p + 1)}>
+              Suivant <ChevronRight className="h-4 w-4 ml-1" />
+            </Button>
+          </div>
+        </div>
+      )}
+
+
+
       {/* Action modal */}
       <Dialog open={actionModal.open} onOpenChange={(o) => !o && !submitting && setActionModal({ open: false, reportId: "", action: "" })}>
         <DialogContent>
