@@ -4,9 +4,21 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
@@ -29,10 +41,26 @@ const categoryLabels: Record<string, string> = {
 };
 
 const PAGE_SIZE = 25;
+const RESPONSE_CHUNK = 200;
+// view_count = vues uniques (hors auteur, 1 par session) : libellé unifié partout.
+const VIEWS_LABEL = "Vues uniques";
+const VIEWS_HINT = "Vues uniques (hors auteur, 1 par session)";
 // Detect money mentions — symbol/word boundary based, lower false positives
 const moneyPattern = /(\d+\s*€|€\s*\d+|\beuros?\b|\brémunér|\brémuner|\bremuner|\bsalaire\b|\btarif\b|\bpayer\b|\bpaiement\b|\bcash\b|\bespèces?\b)/i;
 
 type SortKey = "created_at" | "view_count" | "response_count";
+
+async function logAdminAction(action: string, targetId: string, metadata?: Record<string, unknown>) {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return;
+  await supabase.from("admin_action_logs").insert({
+    admin_id: user.id,
+    action,
+    target_type: "small_mission",
+    target_id: targetId,
+    metadata: (metadata ?? null) as any,
+  });
+}
 
 const AdminSmallMissions = () => {
   const navigate = useNavigate();
@@ -52,7 +80,10 @@ const AdminSmallMissions = () => {
   const [archiveId, setArchiveId] = useState<string | null>(null);
   const [restoreId, setRestoreId] = useState<string | null>(null);
   const [proximityMission, setProximityMission] = useState<{ id: string; title: string } | null>(null);
-  const [kpis, setKpis] = useState({ total: 0, open: 0, totalViews: 0, totalResponses: 0, suspect: 0 });
+  const [contactMission, setContactMission] = useState<any | null>(null);
+  const [contactReason, setContactReason] = useState("");
+  const [contactSending, setContactSending] = useState(false);
+  const [kpis, setKpis] = useState({ total: 0, open: 0, totalViews: 0, totalResponses: 0 });
 
   // Global KPIs (independent of pagination/filters)
   useEffect(() => {
@@ -103,15 +134,31 @@ const AdminSmallMissions = () => {
   useEffect(() => { fetchMissions(); }, [fetchMissions]);
   useEffect(() => { setPage(0); }, [filterStatus, filterCategory, filterPeriod, search]);
 
-  // Fetch response counts for current page
+  // Fetch response counts pour l'ensemble des missions chargées (jusqu'à 5000).
+  // .in() est chunké par lots de 200 ids pour rester sous les limites de PostgREST.
   useEffect(() => {
-    if (!missions.length) return;
-    const ids = missions.map(m => m.id);
-    supabase.from("small_mission_responses").select("id, mission_id").in("mission_id", ids).then(({ data }) => {
+    if (!missions.length) {
+      setResponseCounts({});
+      return;
+    }
+    let cancelled = false;
+    (async () => {
+      const ids = missions.map(m => m.id);
       const counts: Record<string, number> = {};
-      data?.forEach((r: any) => { counts[r.mission_id] = (counts[r.mission_id] || 0) + 1; });
-      setResponseCounts(counts);
-    });
+      for (let i = 0; i < ids.length; i += RESPONSE_CHUNK) {
+        const chunk = ids.slice(i, i + RESPONSE_CHUNK);
+        const { data, error } = await supabase
+          .from("small_mission_responses")
+          .select("mission_id")
+          .in("mission_id", chunk);
+        if (error) continue;
+        (data ?? []).forEach((r: any) => {
+          counts[r.mission_id] = (counts[r.mission_id] || 0) + 1;
+        });
+      }
+      if (!cancelled) setResponseCounts(counts);
+    })();
+    return () => { cancelled = true; };
   }, [missions]);
 
   const filtered = useMemo(() => {
@@ -135,7 +182,10 @@ const AdminSmallMissions = () => {
 
   const paginated = useMemo(() => filtered.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE), [filtered, page]);
 
-  const suspectMissions = filtered.filter(m => moneyPattern.test(m.description || "") || moneyPattern.test(m.exchange_offer || ""));
+  const suspectMissions = useMemo(
+    () => filtered.filter(m => moneyPattern.test(m.description || "") || moneyPattern.test(m.exchange_offer || "")),
+    [filtered],
+  );
 
   const toggleSort = (key: SortKey) => {
     if (sortBy === key) setSortDir(d => d === "asc" ? "desc" : "asc");
@@ -144,37 +194,83 @@ const AdminSmallMissions = () => {
 
   const handleArchive = async () => {
     if (!archiveId) return;
-    await supabase.from("small_missions").update({ status: "cancelled" as any }).eq("id", archiveId);
-    toast.success("Mission masquée"); setArchiveId(null); fetchMissions();
+    const id = archiveId;
+    const { error } = await supabase.from("small_missions").update({ status: "cancelled" as any }).eq("id", id);
+    if (error) {
+      toast.error(`Masquage impossible : ${error.message}`);
+      return;
+    }
+    await logAdminAction("small_mission_hide", id);
+    toast.success("Mission masquée");
+    setArchiveId(null);
+    fetchMissions();
   };
 
   const handleRestore = async () => {
     if (!restoreId) return;
-    await supabase.from("small_missions").update({ status: "open" as any }).eq("id", restoreId);
-    toast.success("Mission restaurée"); setRestoreId(null); fetchMissions();
+    const id = restoreId;
+    const { error } = await supabase.from("small_missions").update({ status: "open" as any }).eq("id", id);
+    if (error) {
+      toast.error(`Restauration impossible : ${error.message}`);
+      return;
+    }
+    await logAdminAction("small_mission_restore", id);
+    toast.success("Mission restaurée");
+    setRestoreId(null);
+    fetchMissions();
   };
 
   const handleDelete = async () => {
     if (!deleteId) return;
     setDeleting(true);
-    await supabase.from("small_mission_responses").delete().eq("mission_id", deleteId);
-    await supabase.from("small_missions").delete().eq("id", deleteId);
-    toast.success("Mission supprimée définitivement");
-    setDeleting(false); setDeleteId(null); fetchMissions();
+    const id = deleteId;
+    const { data, error } = await supabase.functions.invoke("admin-delete-small-mission", {
+      body: { missionId: id },
+    });
+    setDeleting(false);
+    if (error || !data?.success) {
+      const msg = (data as any)?.error || error?.message || "Suppression impossible";
+      toast.error(msg);
+      return;
+    }
+    toast.success(`Mission supprimée (${data.responses_deleted ?? 0} réponse${(data.responses_deleted ?? 0) > 1 ? "s" : ""} nettoyée${(data.responses_deleted ?? 0) > 1 ? "s" : ""})`);
+    setDeleteId(null);
+    fetchMissions();
   };
 
-  const handleContact = async (mission: any) => {
-    await supabase.from("notifications").insert({
-      user_id: mission.user_id, type: "admin_contact",
+  const openContact = (mission: any) => {
+    setContactMission(mission);
+    setContactReason("");
+  };
+
+  const handleContactConfirm = async () => {
+    if (!contactMission) return;
+    setContactSending(true);
+    const mission = contactMission;
+    const reason = contactReason.trim();
+    const body = reason
+      ? `Un administrateur souhaite vous contacter au sujet de votre mission "${mission.title}".\n\nMotif : ${reason}`
+      : `Un administrateur souhaite vous contacter au sujet de votre mission "${mission.title}".`;
+    const { error } = await supabase.from("notifications").insert({
+      user_id: mission.user_id,
+      type: "admin_contact",
       title: "Message de l'équipe Guardiens",
-      body: `Un administrateur souhaite vous contacter au sujet de votre mission "${mission.title}".`,
+      body,
     });
+    setContactSending(false);
+    if (error) {
+      toast.error(`Envoi impossible : ${error.message}`);
+      return;
+    }
+    await logAdminAction("small_mission_contact", mission.id, reason ? { reason } : undefined);
     toast.success("Notification envoyée au posteur");
+    setContactMission(null);
+    setContactReason("");
   };
 
   const exportCsv = () => {
     const rows = [
-      ["Titre", "Posteur", "Catégorie", "Ville", "Date", "Statut", "Réponses", "Vues"],
+      ["Titre", "Posteur", "Catégorie", "Ville", "Date", "Statut", "Réponses", VIEWS_LABEL],
       ...filtered.map(m => [
         m.title, `${m.poster?.first_name || ""} ${m.poster?.last_name || ""}`.trim(),
         categoryLabels[m.category] || m.category, m.city || "",
@@ -214,7 +310,7 @@ const AdminSmallMissions = () => {
           <p className="text-2xl font-bold tabular-nums">{kpis.open}</p>
         </CardContent></Card>
         <Card><CardContent className="p-4">
-          <p className="text-xs text-muted-foreground">Vues cumulées</p>
+          <p className="text-xs text-muted-foreground">{VIEWS_LABEL}</p>
           <p className="text-2xl font-bold tabular-nums">{kpis.totalViews}</p>
         </CardContent></Card>
         <Card><CardContent className="p-4">
@@ -228,7 +324,7 @@ const AdminSmallMissions = () => {
       </div>
 
       {suspectMissions.length > 0 && (
-        <Card className="border-warning-border bg-warning-soft dark:bg-orange-900/10 dark:border-orange-800">
+        <Card className="border-warning-border bg-warning-soft">
           <CardContent className="p-3 flex items-center gap-3">
             <AlertTriangle className="h-5 w-5 text-warning shrink-0" />
             <p className="text-sm flex-1">{suspectMissions.length} mission{suspectMissions.length > 1 ? "s" : ""} avec mention d'argent détectée{suspectMissions.length > 1 ? "s" : ""}, à vérifier</p>
@@ -300,9 +396,9 @@ const AdminSmallMissions = () => {
                   Réponses <ArrowUpDown className="h-3 w-3" />
                 </button>
               </TableHead>
-              <TableHead title="Nombre de vues uniques (hors auteur, 1/session)">
+              <TableHead title={VIEWS_HINT}>
                 <button onClick={() => toggleSort("view_count")} className="inline-flex items-center gap-1 hover:text-foreground">
-                  Vues <ArrowUpDown className="h-3 w-3" />
+                  {VIEWS_LABEL} <ArrowUpDown className="h-3 w-3" />
                 </button>
               </TableHead>
               <TableHead title="Réponses ÷ vues">Ratio</TableHead>
@@ -321,7 +417,7 @@ const AdminSmallMissions = () => {
               const resp = responseCounts[m.id] || 0;
               const ratio = views > 0 ? `${((resp / views) * 100).toFixed(0)}%` : "–";
               return (
-                <TableRow key={m.id} className={isSuspect ? "bg-warning-soft/50 dark:bg-orange-900/5" : ""}>
+                <TableRow key={m.id} className={isSuspect ? "bg-warning-soft/50" : ""}>
                   <TableCell className="font-medium max-w-[180px] truncate">
                     {isSuspect && <AlertTriangle className="h-3 w-3 text-warning inline mr-1" />}
                     {m.title}
@@ -344,7 +440,7 @@ const AdminSmallMissions = () => {
                       <Button variant="ghost" size="icon" aria-label="Voir la mission" title="Voir" onClick={() => navigate(`/petites-missions/${(m as any).slug || m.id}`)}>
                         <Eye className="h-4 w-4" />
                       </Button>
-                      <Button variant="ghost" size="icon" aria-label="Contacter le posteur" title="Contacter" onClick={() => handleContact(m)}>
+                      <Button variant="ghost" size="icon" aria-label="Contacter le posteur" title="Contacter" onClick={() => openContact(m)}>
                         <Mail className="h-4 w-4" />
                       </Button>
                       <Button
@@ -386,12 +482,12 @@ const AdminSmallMissions = () => {
         </div>
       </div>
 
-      <Dialog open={!!deleteId} onOpenChange={() => setDeleteId(null)}>
+      <Dialog open={!!deleteId} onOpenChange={() => !deleting && setDeleteId(null)}>
         <DialogContent>
           <DialogHeader><DialogTitle>Supprimer cette mission ?</DialogTitle></DialogHeader>
           <DialogDescription>Cette action est irréversible. La mission et toutes ses réponses seront supprimées.</DialogDescription>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setDeleteId(null)}>Annuler</Button>
+            <Button variant="outline" onClick={() => setDeleteId(null)} disabled={deleting}>Annuler</Button>
             <Button variant="destructive" onClick={handleDelete} disabled={deleting}>{deleting ? "Suppression…" : "Supprimer"}</Button>
           </DialogFooter>
         </DialogContent>
@@ -418,6 +514,36 @@ const AdminSmallMissions = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <AlertDialog open={!!contactMission} onOpenChange={(open) => { if (!open && !contactSending) { setContactMission(null); setContactReason(""); } }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Contacter le posteur</AlertDialogTitle>
+            <AlertDialogDescription>
+              Envoyer une notification au posteur de la mission « {contactMission?.title} ». Un motif optionnel sera intégré au corps du message.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <div className="space-y-2">
+            <Label htmlFor="contact-reason">Motif (optionnel)</Label>
+            <Textarea
+              id="contact-reason"
+              value={contactReason}
+              onChange={(e) => setContactReason(e.target.value.slice(0, 500))}
+              placeholder="Ex : votre mission mentionne une rémunération, non autorisée dans l'entraide."
+              rows={4}
+              disabled={contactSending}
+            />
+            <p className="text-xs text-muted-foreground">{contactReason.length}/500</p>
+          </div>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={contactSending}>Annuler</AlertDialogCancel>
+            <AlertDialogAction onClick={handleContactConfirm} disabled={contactSending}>
+              {contactSending ? "Envoi…" : "Envoyer la notification"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
       <Dialog open={!!proximityMission} onOpenChange={(open) => { if (!open) setProximityMission(null); }}>
         <DialogContent className="max-w-3xl">
           <DialogHeader>
