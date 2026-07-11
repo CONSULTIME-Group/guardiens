@@ -407,7 +407,16 @@ export default function PublicSitterProfile() {
       const publicData = (profileRes?.data as any) ?? null;
       const baseData = (baseProfileRes?.data as any) ?? null;
       const fetchedPublicProfile = publicData
-        ? { ...publicData, hero_image_index: baseData?.hero_image_index ?? null }
+        ? {
+            ...publicData,
+            hero_image_index: baseData?.hero_image_index ?? null,
+            cancellation_count: baseData?.cancellation_count ?? 0,
+            pro_status: baseData?.pro_status ?? null,
+            pro_specialty: baseData?.pro_specialty ?? null,
+            pro_tagline: baseData?.pro_tagline ?? null,
+            pro_pricing_note: baseData?.pro_pricing_note ?? null,
+            pro_business_name: baseData?.pro_business_name ?? null,
+          }
         : baseData;
       const fetchedSitterProfile = sitterRes?.data ?? null;
       const fetchedOwnerProfile = (ownerRes?.data as OwnerProfileData | null) ?? null;
