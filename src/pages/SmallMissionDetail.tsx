@@ -557,7 +557,7 @@ const SmallMissionDetail = () => {
           },
         }).catch(() => {});
       }
-      await supabase.from("small_missions").update({ status: "cancelled" as any }).eq("id", id!);
+      await supabase.from("small_missions").update({ status: "cancelled" as any }).eq("id", mission.id);
       setMission((prev: any) => ({ ...prev, status: "cancelled" }));
       setResponses(prev => prev.map(r => r.status === "pending" ? { ...r, status: "declined" } : r));
       setCloseModalOpen(false);
