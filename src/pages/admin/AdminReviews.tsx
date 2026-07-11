@@ -84,9 +84,6 @@ const AdminReviews = () => {
 
   useEffect(() => { fetchReviews(); fetchCancellationReviews(); }, [fetchReviews, fetchCancellationReviews]);
 
-  const togglePublished = async (id: string, current: boolean) => {
-    const { error } = await supabase.from("reviews").update({ published: !current }).eq("id", id);
-    if (error) toast.error("Erreur");
   const logAdminAction = async (
     action: string,
     targetId: string,
