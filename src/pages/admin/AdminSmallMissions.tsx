@@ -273,21 +273,17 @@ const AdminSmallMissions = () => {
     setContactSending(true);
     const mission = contactMission;
     const reason = contactReason.trim();
-    const body = reason
-      ? `Un administrateur souhaite vous contacter au sujet de votre mission "${mission.title}".\n\nMotif : ${reason}`
-      : `Un administrateur souhaite vous contacter au sujet de votre mission "${mission.title}".`;
-    const { error } = await supabase.from("notifications").insert({
-      user_id: mission.user_id,
-      type: "admin_contact",
-      title: "Message de l'équipe Guardiens",
-      body,
-    });
+    const { data, error } = await supabase.functions.invoke(
+      "admin-contact-mission-poster",
+      { body: { missionId: mission.id, reason: reason || undefined } },
+    );
     setContactSending(false);
-    if (error) {
-      toast.error(`Envoi impossible : ${error.message}`);
+    const success = !error && (data as { success?: boolean })?.success;
+    if (!success) {
+      const msg = (data as { error?: string })?.error || error?.message || "Envoi impossible";
+      toast.error(`Envoi impossible : ${msg}`);
       return;
     }
-    await logAdminAction("small_mission_contact", mission.id, reason ? { reason } : undefined);
     toast.success("Notification envoyée au posteur");
     setContactMission(null);
     setContactReason("");
