@@ -260,8 +260,9 @@ Structure EXACTE :
 ### Étape 4, Partez l'esprit libre
 (paragraphe avec lien [gardien d'urgence](/gardien-urgence))
 
-## Les quartiers et environs de ${city}
-(intro + citez uniquement les parcs, espaces verts et lieux figurant dans DONNÉES LOCALES RÉELLES (en **gras**). Si la liste est "non disponibles", restez générique sur 3 zones sans nommer de lieu précis.)
+## Où promener votre chien à ${city}
+(intro + citez UNIQUEMENT les parcs, espaces verts et sentiers figurant dans DONNÉES LOCALES RÉELLES, en **gras**, en expliquant en quoi ils sont adaptés aux gardes d'animaux. Si toutes ces listes sont 'non disponibles', restez générique sur les types de lieux de promenade sans nommer de lieu précis.)
+
 
 ## Propriétaires à ${city}, ce que Guardiens vous offre
 (5 à 6 bénéfices en **gras** suivis de 1-2 phrases : animal chez lui, maison vivante, rencontre préalable obligatoire, aucune commission, accord de garde clair, gardiens vérifiés)
