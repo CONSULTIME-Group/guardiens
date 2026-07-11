@@ -356,8 +356,11 @@ export default function PublicSitterProfile() {
       try {
       // Colonnes explicites : évite un select("*") qui exposerait/rapatrierait
       // des colonnes non utilisées côté client (privacy + payload).
+      // Note : la vue `public_profiles` n'expose PAS cancellation_count ni les
+      // champs pro_* — ils viennent de `profiles` (BASE_PROFILE_COLS) et sont
+      // mergés plus bas. Les inclure ici ferait échouer toute la requête.
       const PUBLIC_PROFILE_COLS =
-        "id, first_name, avatar_url, bio, city, postal_code, created_at, identity_verified, is_founder, completed_sits_count, cancellation_count, pro_status, pro_specialty, pro_tagline, pro_pricing_note, pro_business_name";
+        "id, first_name, avatar_url, bio, city, postal_code, created_at, identity_verified, is_founder, completed_sits_count";
       // `last_name` retiré du select — jamais rendu publiquement.
       const BASE_PROFILE_COLS =
         "id, first_name, avatar_url, bio, city, postal_code, created_at, identity_verified, is_founder, profile_completion, completed_sits_count, cancellation_count, hero_image_index, pro_status, pro_specialty, pro_tagline, pro_pricing_note, pro_business_name";
@@ -404,7 +407,16 @@ export default function PublicSitterProfile() {
       const publicData = (profileRes?.data as any) ?? null;
       const baseData = (baseProfileRes?.data as any) ?? null;
       const fetchedPublicProfile = publicData
-        ? { ...publicData, hero_image_index: baseData?.hero_image_index ?? null }
+        ? {
+            ...publicData,
+            hero_image_index: baseData?.hero_image_index ?? null,
+            cancellation_count: baseData?.cancellation_count ?? 0,
+            pro_status: baseData?.pro_status ?? null,
+            pro_specialty: baseData?.pro_specialty ?? null,
+            pro_tagline: baseData?.pro_tagline ?? null,
+            pro_pricing_note: baseData?.pro_pricing_note ?? null,
+            pro_business_name: baseData?.pro_business_name ?? null,
+          }
         : baseData;
       const fetchedSitterProfile = sitterRes?.data ?? null;
       const fetchedOwnerProfile = (ownerRes?.data as OwnerProfileData | null) ?? null;
