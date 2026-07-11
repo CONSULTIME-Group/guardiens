@@ -127,8 +127,27 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const authFail = await requireAdminOrServiceRole(req, corsHeaders);
-    if (authFail) return authFail;
+    // Court-circuit : JWT service_role signé (cron/pg_net). La passerelle
+    // vérifie déjà la signature (verify_jwt = true), on lit juste le claim.
+    let isServiceRoleJwt = false;
+    try {
+      const authHeader = req.headers.get("Authorization") ?? "";
+      if (authHeader.startsWith("Bearer ")) {
+        const token = authHeader.slice("Bearer ".length).trim();
+        const parts = token.split(".");
+        if (parts.length === 3) {
+          const b64 = parts[1].replace(/-/g, "+").replace(/_/g, "/");
+          const pad = b64.length % 4 === 0 ? "" : "=".repeat(4 - (b64.length % 4));
+          const payload = JSON.parse(atob(b64 + pad));
+          if (payload?.role === "service_role") isServiceRoleJwt = true;
+        }
+      }
+    } catch { /* décodage impossible : on ne court-circuite pas */ }
+
+    if (!isServiceRoleJwt) {
+      const authFail = await requireAdminOrServiceRole(req, corsHeaders);
+      if (authFail) return authFail;
+    }
     const { city, department, force, cover_image_url: coverIn, hero_image_alt: altIn } = await req.json();
     if (!city || !department) {
       return new Response(JSON.stringify({ error: "city and department required" }), {
