@@ -6,7 +6,26 @@ import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Settings, Globe, Database, ExternalLink, CheckCircle2, AlertCircle, Flag } from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import {
+  Settings,
+  Globe,
+  Database,
+  ExternalLink,
+  CheckCircle2,
+  AlertCircle,
+  Flag,
+  Info,
+} from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { invalidateFeatureFlag } from "@/hooks/useFeatureFlag";
 import { toast } from "sonner";
@@ -14,7 +33,6 @@ import { toast } from "sonner";
 const FOUNDER_DATE = "2026-09-30";
 const MANDATORY_ONBOARDING_FLAG = "mandatory_affinity_onboarding";
 
-/** Convertit un ISO UTC en valeur affichable par `<input type="datetime-local">` (heure locale). */
 function toLocalInputValue(iso: string): string {
   const d = new Date(iso);
   if (Number.isNaN(d.getTime())) return "";
@@ -22,7 +40,6 @@ function toLocalInputValue(iso: string): string {
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
 }
 
-/** Convertit une valeur `datetime-local` en ISO UTC pour la base. */
 function fromLocalInputValue(local: string): string | null {
   if (!local) return null;
   const d = new Date(local);
@@ -34,36 +51,38 @@ const AdminSettings = () => {
   const [loading, setLoading] = useState(true);
   const [mandatoryOnboarding, setMandatoryOnboarding] = useState<boolean | null>(null);
   const [togglingFlag, setTogglingFlag] = useState(false);
-  // Date de bascule : seuls les comptes créés à partir de cette date sont
-  // soumis au garde-fou obligatoire. Format local `datetime-local` pour l'UI,
-  // converti en ISO à l'écriture. `null` = pas de scoping (aucune redirection).
   const [appliesSince, setAppliesSince] = useState<string | null>(null);
   const [appliesSinceDraft, setAppliesSinceDraft] = useState<string>("");
   const [savingAppliesSince, setSavingAppliesSince] = useState(false);
+  const [confirmDialog, setConfirmDialog] = useState<{
+    nextIso: string | null;
+    impactCount: number | null;
+    loading: boolean;
+  } | null>(null);
 
- useEffect(() => {
- const fetchStats = async () => {
- try {
- const [
- { count: totalUsers },
- { count: totalSits },
- { count: totalReviews },
- ] = await Promise.all([
- supabase.from("profiles").select("id", { count: "exact", head: true }),
- supabase.from("sits").select("id", { count: "exact", head: true }),
- supabase.from("reviews").select("id", { count: "exact", head: true }),
- ]);
- setStats({
- totalUsers: totalUsers || 0,
- totalSits: totalSits || 0,
- totalReviews: totalReviews || 0,
- });
- } catch (err) {
- console.warn("AdminSettings: stats unavailable", err);
- } finally {
- setLoading(false);
- }
- };
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const [
+          { count: totalUsers },
+          { count: totalSits },
+          { count: totalReviews },
+        ] = await Promise.all([
+          supabase.from("profiles").select("id", { count: "exact", head: true }),
+          supabase.from("sits").select("id", { count: "exact", head: true }),
+          supabase.from("reviews").select("id", { count: "exact", head: true }),
+        ]);
+        setStats({
+          totalUsers: totalUsers || 0,
+          totalSits: totalSits || 0,
+          totalReviews: totalReviews || 0,
+        });
+      } catch (err) {
+        console.warn("AdminSettings: stats unavailable", err);
+      } finally {
+        setLoading(false);
+      }
+    };
     void fetchStats();
   }, []);
 
@@ -100,271 +119,393 @@ const AdminSettings = () => {
     toast.success(next ? "Étape d'onboarding activée." : "Étape d'onboarding désactivée.");
   };
 
-  const saveAppliesSince = async (nextIso: string | null) => {
+  const openAppliesSinceConfirm = async () => {
+    const nextIso = fromLocalInputValue(appliesSinceDraft);
+    setConfirmDialog({ nextIso, impactCount: null, loading: true });
+    let impactCount = 0;
+    if (nextIso) {
+      const { count } = await supabase
+        .from("profiles")
+        .select("id", { count: "exact", head: true })
+        .gte("created_at", nextIso);
+      impactCount = count || 0;
+    } else {
+      // no scoping = all profiles concerned when flag is enabled
+      const { count } = await supabase
+        .from("profiles")
+        .select("id", { count: "exact", head: true });
+      impactCount = count || 0;
+    }
+    setConfirmDialog({ nextIso, impactCount, loading: false });
+  };
+
+  const openClearConfirm = async () => {
+    setConfirmDialog({ nextIso: null, impactCount: null, loading: true });
+    const { count } = await supabase
+      .from("profiles")
+      .select("id", { count: "exact", head: true });
+    setConfirmDialog({ nextIso: null, impactCount: count || 0, loading: false });
+  };
+
+  const confirmSaveAppliesSince = async () => {
+    if (!confirmDialog) return;
+    const nextIso = confirmDialog.nextIso;
     setSavingAppliesSince(true);
     const { error } = await supabase
       .from("feature_flags")
       .update({ applies_since: nextIso, updated_at: new Date().toISOString() })
       .eq("key", MANDATORY_ONBOARDING_FLAG);
     setSavingAppliesSince(false);
+    setConfirmDialog(null);
     if (error) {
       toast.error("Impossible d'enregistrer la date de bascule.");
       return;
     }
     setAppliesSince(nextIso);
+    setAppliesSinceDraft(nextIso ? toLocalInputValue(nextIso) : "");
     invalidateFeatureFlag(MANDATORY_ONBOARDING_FLAG);
     toast.success("Date de bascule enregistrée.");
   };
 
+  return (
+    <div className="space-y-6">
+      <div>
+        <h1 className="font-heading text-2xl sm:text-3xl font-bold tracking-tight">
+          Paramètres du site
+        </h1>
+        <p className="text-sm text-muted-foreground mt-1">
+          Configuration générale de la plateforme guardiens.
+        </p>
+      </div>
 
- return (
- <div className="space-y-6">
- <div>
- <h1 className="font-heading text-2xl sm:text-3xl font-bold tracking-tight">Paramètres du site</h1>
- <p className="text-sm text-muted-foreground mt-1">
- Configuration générale de la plateforme guardiens.
- </p>
- </div>
+      {/* ============ RÉGLAGES ============ */}
+      <section className="space-y-3">
+        <div>
+          <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+            Réglages
+          </h2>
+          <p className="text-xs text-muted-foreground">
+            Valeurs réellement pilotables. Toute modification s'applique immédiatement.
+          </p>
+        </div>
 
- {/* Platform info */}
- <Card>
- <CardHeader className="pb-3">
- <CardTitle className="text-base flex items-center gap-2">
- <Globe className="h-4 w-4" />
- Informations de la plateforme
- </CardTitle>
- </CardHeader>
- <CardContent className="space-y-3">
- <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
- <div>
- <label className="text-xs font-medium text-muted-foreground">Nom du site</label>
- <p className="text-sm font-medium">guardiens</p>
- </div>
- <div>
- <label className="text-xs font-medium text-muted-foreground">Domaine</label>
- <p className="text-sm font-medium">guardiens.fr</p>
- </div>
- <div>
- <label className="text-xs font-medium text-muted-foreground">Domaine d'envoi email</label>
- <p className="text-sm font-medium">guardiens.fr</p>
- </div>
- <div>
- <label className="text-xs font-medium text-muted-foreground">Éditeur</label>
- <p className="text-sm font-medium">Jérémie Martinot (EI)</p>
- </div>
- </div>
- </CardContent>
- </Card>
-
- {/* Stats snapshot */}
- <Card>
- <CardHeader className="pb-3">
- <CardTitle className="text-base flex items-center gap-2">
- <Database className="h-4 w-4" />
- État de la base de données
- </CardTitle>
- </CardHeader>
- <CardContent>
- {loading ? (
- <p className="text-sm text-muted-foreground">Chargement...</p>
- ) : (
- <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
- <div className="text-center p-3 rounded-lg bg-muted/50">
- <div className="text-xl font-bold">{stats.totalUsers}</div>
- <div className="text-xs text-muted-foreground">Utilisateurs</div>
- </div>
- <div className="text-center p-3 rounded-lg bg-muted/50">
- <div className="text-xl font-bold">{stats.totalSits}</div>
- <div className="text-xs text-muted-foreground">Gardes créées</div>
- </div>
- <div className="text-center p-3 rounded-lg bg-muted/50">
- <div className="text-xl font-bold">{stats.totalReviews}</div>
- <div className="text-xs text-muted-foreground">Avis</div>
- </div>
- </div>
- )}
- </CardContent>
- </Card>
-
- {/* Business rules */}
- <Card>
- <CardHeader className="pb-3">
- <CardTitle className="text-base flex items-center gap-2">
- <Settings className="h-4 w-4" />
- Règles métier actives
- </CardTitle>
- </CardHeader>
- <CardContent className="space-y-4">
- <div className="space-y-3">
- <div className="flex items-center justify-between">
- <div>
- <p className="text-sm font-medium">Statut Fondateur</p>
- <p className="text-xs text-muted-foreground">
- Les membres inscrits avant le {new Date(FOUNDER_DATE).toLocaleDateString("fr-FR")} obtiennent le statut Fondateur (gratuit).
- </p>
- </div>
- <Badge variant="default" className="text-xs">Actif</Badge>
- </div>
- <Separator />
- <div className="flex items-center justify-between">
- <div>
- <p className="text-sm font-medium">Espace propriétaire gratuit</p>
- <p className="text-xs text-muted-foreground">
- L'espace propriétaire est gratuit, sans limite de durée.
- </p>
- </div>
- <Badge variant="default" className="text-xs">Actif</Badge>
- </div>
- <Separator />
- <div className="flex items-center justify-between">
- <div>
- <p className="text-sm font-medium">Entraide entre membres</p>
- <p className="text-xs text-muted-foreground">
- Les petites missions d'entraide sont gratuites pour tous, sans limite.
- </p>
- </div>
- <Badge variant="default" className="text-xs">Gratuit</Badge>
- </div>
- <Separator />
- <div className="flex items-center justify-between">
- <div>
-  <p className="text-sm font-medium">Abonnement gardien</p>
- <p className="text-xs text-muted-foreground">6,99 €/mois pour activer l'espace gardien (hors fondateurs).</p>
- </div>
- <Badge variant="secondary" className="text-xs">6,99 €/mois</Badge>
- </div>
- <Separator />
- <div className="flex items-center justify-between">
- <div>
- <p className="text-sm font-medium">Publication croisée des avis</p>
- <p className="text-xs text-muted-foreground">
- Les avis ne sont publiés que lorsque les deux parties ont déposé le leur.
- </p>
- </div>
- <Badge variant="default" className="text-xs">Actif</Badge>
- </div>
- <Separator />
- <div className="flex items-center justify-between">
- <div>
- <p className="text-sm font-medium">Auto-confirmation email</p>
- <p className="text-xs text-muted-foreground">
- Activé temporairement (DNS en attente pour guardiens.fr).
- </p>
- </div>
- <Badge variant="outline" className="text-xs border-warning text-warning">Temporaire</Badge>
- </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Feature flags */}
-      <Card>
-        <CardHeader className="pb-3">
-          <CardTitle className="text-base flex items-center gap-2">
-            <Flag className="h-4 w-4" />
-            Réglages instantanés
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="flex items-start justify-between gap-4">
-            <div className="min-w-0">
-              <p className="text-sm font-medium">Étape d'onboarding obligatoire (affinité)</p>
-              <p className="text-xs text-muted-foreground mt-1">
-                Après l'inscription, force les nouveaux membres à renseigner les animaux acceptés, la présence attendue et le type de gardien avant d'accéder au tableau de bord. Bascule sans redéploiement.
-              </p>
-            </div>
-            <Switch
-              checked={mandatoryOnboarding === true}
-              disabled={mandatoryOnboarding === null || togglingFlag}
-              onCheckedChange={toggleMandatoryOnboarding}
-              aria-label="Activer l'étape d'onboarding obligatoire"
-            />
-          </div>
-          <Separator />
-          <div className="space-y-2">
-            <Label htmlFor="applies-since" className="text-sm font-medium">
-              Date de bascule (applies_since)
-            </Label>
-            <p className="text-xs text-muted-foreground">
-              Seuls les comptes créés à partir de cette date sont soumis au garde-fou. Laisser vide pour désactiver le scoping (aucune redirection, même si le réglage est actif). Reculer la date dans le passé pour élargir aux anciens.
-            </p>
-            <div className="flex flex-wrap items-center gap-2">
-              <Input
-                id="applies-since"
-                type="datetime-local"
-                value={appliesSinceDraft}
-                onChange={(e) => setAppliesSinceDraft(e.target.value)}
-                className="max-w-xs"
-                disabled={savingAppliesSince}
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base flex items-center gap-2">
+              <Flag className="h-4 w-4" />
+              Étape d'onboarding obligatoire (affinité)
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="flex items-start justify-between gap-4">
+              <div className="min-w-0">
+                <p className="text-sm font-medium">Activation</p>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Après l'inscription, force les nouveaux membres à renseigner les animaux acceptés,
+                  la présence attendue et le type de gardien avant d'accéder au tableau de bord.
+                  Bascule sans redéploiement.
+                </p>
+              </div>
+              <Switch
+                checked={mandatoryOnboarding === true}
+                disabled={mandatoryOnboarding === null || togglingFlag}
+                onCheckedChange={toggleMandatoryOnboarding}
+                aria-label="Activer l'étape d'onboarding obligatoire"
               />
-              <Button
-                size="sm"
-                variant="outline"
-                disabled={savingAppliesSince}
-                onClick={() => saveAppliesSince(fromLocalInputValue(appliesSinceDraft))}
-              >
-                Enregistrer
-              </Button>
-              {appliesSince && (
+            </div>
+            <Separator />
+            <div className="space-y-2">
+              <Label htmlFor="applies-since" className="text-sm font-medium">
+                Date de bascule (applies_since)
+              </Label>
+              <p className="text-xs text-muted-foreground">
+                Seuls les comptes créés à partir de cette date sont soumis au garde-fou. Laisser
+                vide pour désactiver le scoping. Reculer la date élargit aux anciens comptes.
+              </p>
+              <div className="flex flex-wrap items-center gap-2">
+                <Input
+                  id="applies-since"
+                  type="datetime-local"
+                  value={appliesSinceDraft}
+                  onChange={(e) => setAppliesSinceDraft(e.target.value)}
+                  className="max-w-xs"
+                  disabled={savingAppliesSince}
+                />
                 <Button
                   size="sm"
-                  variant="ghost"
+                  variant="outline"
                   disabled={savingAppliesSince}
-                  onClick={() => {
-                    setAppliesSinceDraft("");
-                    void saveAppliesSince(null);
-                  }}
+                  onClick={openAppliesSinceConfirm}
                 >
-                  Effacer
+                  Enregistrer
                 </Button>
-              )}
+                {appliesSince && (
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    disabled={savingAppliesSince}
+                    onClick={openClearConfirm}
+                  >
+                    Effacer
+                  </Button>
+                )}
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Valeur actuelle :{" "}
+                {appliesSince
+                  ? new Date(appliesSince).toLocaleString("fr-FR")
+                  : "aucune (scoping désactivé)"}
+              </p>
             </div>
+          </CardContent>
+        </Card>
+      </section>
+
+      {/* ============ INFORMATIONS ============ */}
+      <section className="space-y-3">
+        <div className="flex items-start gap-2 rounded-md border border-border bg-muted/40 p-3">
+          <Info className="h-4 w-4 text-muted-foreground shrink-0 mt-0.5" />
+          <div>
+            <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+              Informations
+            </h2>
             <p className="text-xs text-muted-foreground">
-              Valeur actuelle : {appliesSince ? new Date(appliesSince).toLocaleString("fr-FR") : "aucune (scoping désactivé)"}
+              Section indicative. Ces valeurs sont documentées ici pour référence mais ne sont pas
+              modifiables depuis cet écran.
             </p>
           </div>
-        </CardContent>
-      </Card>
+        </div>
 
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base flex items-center gap-2">
+              <Globe className="h-4 w-4" />
+              Plateforme
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="text-xs font-medium text-muted-foreground">Nom du site</label>
+                <p className="text-sm font-medium">guardiens</p>
+              </div>
+              <div>
+                <label className="text-xs font-medium text-muted-foreground">Domaine</label>
+                <p className="text-sm font-medium">guardiens.fr</p>
+              </div>
+              <div>
+                <label className="text-xs font-medium text-muted-foreground">
+                  Domaine d'envoi email
+                </label>
+                <p className="text-sm font-medium">guardiens.fr</p>
+              </div>
+              <div>
+                <label className="text-xs font-medium text-muted-foreground">Éditeur</label>
+                <p className="text-sm font-medium">Jérémie Martinot (EI)</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
 
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base flex items-center gap-2">
+              <Database className="h-4 w-4" />
+              État de la base
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {loading ? (
+              <p className="text-sm text-muted-foreground">Chargement…</p>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="text-center p-3 rounded-lg bg-muted/50">
+                  <div className="text-xl font-bold">{stats.totalUsers}</div>
+                  <div className="text-xs text-muted-foreground">Utilisateurs</div>
+                </div>
+                <div className="text-center p-3 rounded-lg bg-muted/50">
+                  <div className="text-xl font-bold">{stats.totalSits}</div>
+                  <div className="text-xs text-muted-foreground">Gardes créées</div>
+                </div>
+                <div className="text-center p-3 rounded-lg bg-muted/50">
+                  <div className="text-xl font-bold">{stats.totalReviews}</div>
+                  <div className="text-xs text-muted-foreground">Avis</div>
+                </div>
+              </div>
+            )}
+          </CardContent>
+        </Card>
 
- {/* External services */}
- <Card>
- <CardHeader className="pb-3">
- <CardTitle className="text-base flex items-center gap-2">
- <ExternalLink className="h-4 w-4" />
- Services externes
- </CardTitle>
- </CardHeader>
- <CardContent>
- <div className="space-y-3">
- {[
- { name: "Google Analytics", id: "G-9JP4VR1RRP", status: "connecté" },
- { name: "Nominatim (Géocodage)", id: "OpenStreetMap", status: "connecté" },
- { name: "Domaine email", id: "guardiens.fr", status: "DNS en attente" },
- ].map((service) => (
- <div key={service.name} className="flex items-center justify-between py-1">
- <div>
- <p className="text-sm font-medium">{service.name}</p>
- <p className="text-xs text-muted-foreground font-mono">{service.id}</p>
- </div>
- <Badge
- variant={service.status === "connecté" ? "default" : "outline"}
- className={`text-xs ${service.status !== "connecté" ? "border-warning text-warning" : ""}`}
- >
- {service.status === "connecté" ? (
- <><CheckCircle2 className="h-3 w-3 mr-1" />{service.status}</>
- ) : (
- <><AlertCircle className="h-3 w-3 mr-1" />{service.status}</>
- )}
- </Badge>
- </div>
- ))}
- </div>
- </CardContent>
- </Card>
- </div>
- );
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base flex items-center gap-2">
+              <Settings className="h-4 w-4" />
+              Règles métier documentées
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium">Statut Fondateur</p>
+                <p className="text-xs text-muted-foreground">
+                  Les membres inscrits avant le{" "}
+                  {new Date(FOUNDER_DATE).toLocaleDateString("fr-FR")} obtiennent le statut
+                  Fondateur (gratuit).
+                </p>
+              </div>
+              <Badge variant="default" className="text-xs">Actif</Badge>
+            </div>
+            <Separator />
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium">Espace propriétaire gratuit</p>
+                <p className="text-xs text-muted-foreground">
+                  L'espace propriétaire est gratuit, sans limite de durée.
+                </p>
+              </div>
+              <Badge variant="default" className="text-xs">Actif</Badge>
+            </div>
+            <Separator />
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium">Entraide entre membres</p>
+                <p className="text-xs text-muted-foreground">
+                  Les petites missions d'entraide sont gratuites pour tous, sans limite.
+                </p>
+              </div>
+              <Badge variant="default" className="text-xs">Gratuit</Badge>
+            </div>
+            <Separator />
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium">Abonnement gardien</p>
+                <p className="text-xs text-muted-foreground">
+                  6,99 €/mois pour activer l'espace gardien (hors fondateurs).
+                </p>
+              </div>
+              <Badge variant="secondary" className="text-xs">6,99 €/mois</Badge>
+            </div>
+            <Separator />
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium">Publication croisée des avis</p>
+                <p className="text-xs text-muted-foreground">
+                  Les avis ne sont publiés que lorsque les deux parties ont déposé le leur.
+                </p>
+              </div>
+              <Badge variant="default" className="text-xs">Actif</Badge>
+            </div>
+            <Separator />
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium">Auto-confirmation email</p>
+                <p className="text-xs text-muted-foreground">
+                  Activé temporairement (DNS en attente pour guardiens.fr).
+                </p>
+              </div>
+              <Badge variant="outline" className="text-xs border-warning text-warning">
+                Temporaire
+              </Badge>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base flex items-center gap-2">
+              <ExternalLink className="h-4 w-4" />
+              Services externes
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-3">
+              {[
+                { name: "Google Analytics", id: "G-9JP4VR1RRP", status: "connecté" },
+                { name: "Nominatim (Géocodage)", id: "OpenStreetMap", status: "connecté" },
+                { name: "Domaine email", id: "guardiens.fr", status: "DNS en attente" },
+              ].map((service) => (
+                <div key={service.name} className="flex items-center justify-between py-1">
+                  <div>
+                    <p className="text-sm font-medium">{service.name}</p>
+                    <p className="text-xs text-muted-foreground font-mono">{service.id}</p>
+                  </div>
+                  <Badge
+                    variant={service.status === "connecté" ? "default" : "outline"}
+                    className={`text-xs ${service.status !== "connecté" ? "border-warning text-warning" : ""}`}
+                  >
+                    {service.status === "connecté" ? (
+                      <>
+                        <CheckCircle2 className="h-3 w-3 mr-1" />
+                        {service.status}
+                      </>
+                    ) : (
+                      <>
+                        <AlertCircle className="h-3 w-3 mr-1" />
+                        {service.status}
+                      </>
+                    )}
+                  </Badge>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      </section>
+
+      {/* Impact confirmation for applies_since */}
+      <AlertDialog
+        open={!!confirmDialog}
+        onOpenChange={(o) => !o && !savingAppliesSince && setConfirmDialog(null)}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              {confirmDialog?.nextIso
+                ? "Appliquer cette date de bascule ?"
+                : "Désactiver le scoping ?"}
+            </AlertDialogTitle>
+            <AlertDialogDescription asChild>
+              <div className="space-y-2">
+                {confirmDialog?.nextIso ? (
+                  <p>
+                    Nouvelle date : <strong>{new Date(confirmDialog.nextIso).toLocaleString("fr-FR")}</strong>.
+                    Tous les comptes créés à partir de cette date seront soumis au garde-fou (si le
+                    réglage est actif).
+                  </p>
+                ) : (
+                  <p>
+                    Sans date, <strong>tous les comptes</strong> seront soumis au garde-fou dès que
+                    le réglage est actif.
+                  </p>
+                )}
+                {confirmDialog?.loading ? (
+                  <p className="text-muted-foreground">Calcul de l'impact…</p>
+                ) : (
+                  <p className="rounded-md border border-warning-border bg-warning-soft px-3 py-2 text-warning">
+                    Impact : <strong>{confirmDialog?.impactCount ?? 0}</strong> compte
+                    {(confirmDialog?.impactCount ?? 0) > 1 ? "s existants seraient" : " existant serait"}{" "}
+                    concerné{(confirmDialog?.impactCount ?? 0) > 1 ? "s" : ""} par le gate.
+                  </p>
+                )}
+              </div>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={savingAppliesSince}>Annuler</AlertDialogCancel>
+            <AlertDialogAction
+              disabled={savingAppliesSince || confirmDialog?.loading}
+              onClick={(e) => {
+                e.preventDefault();
+                void confirmSaveAppliesSince();
+              }}
+            >
+              {savingAppliesSince ? "Enregistrement…" : "Confirmer"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </div>
+  );
 };
 
 export default AdminSettings;
