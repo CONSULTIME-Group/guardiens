@@ -102,22 +102,38 @@ const CityPage = () => {
  enabled: !!slug,
  });
 
- const { data: relatedArticles = [] } = useQuery({
- queryKey: ["city-articles", cityData?.name || dbPage?.city],
- queryFn: async () => {
- const cityName = cityData?.name || dbPage?.city;
- const { data } = await supabase
-.from("articles")
-.select("slug, title, excerpt")
-.eq("published", true)
-.or(
- `city.ilike.%${cityName}%,tags.cs.{${cityName!.toLowerCase()}}`
- )
-.limit(3);
- return (data || []) as any[];
- },
- enabled: !!(cityData?.name || dbPage?.city),
- });
+  const { data: relatedArticles = [] } = useQuery({
+    queryKey: ["city-articles", cityData?.name || dbPage?.city],
+    queryFn: async () => {
+      const cityName = cityData?.name || dbPage?.city;
+      const { data } = await supabase
+        .from("articles")
+        .select("slug, title, excerpt")
+        .eq("published", true)
+        .or(
+          `city.ilike.%${cityName}%,tags.cs.{${cityName!.toLowerCase()}}`
+        )
+        .limit(3);
+      return (data || []) as any[];
+    },
+    enabled: !!(cityData?.name || dbPage?.city),
+  });
+
+  // Comptage live des gardiens pour la branche DB (sitter_count en base = 0).
+  const { data: dbSitterCount = 0 } = useQuery<number>({
+    queryKey: ["city-db-sitter-count", dbPage?.city],
+    enabled: !cityData && !!dbPage?.city,
+    staleTime: 5 * 60 * 1000,
+    queryFn: async () => {
+      const { count, error } = await supabase
+        .from("profiles")
+        .select("id", { count: "exact", head: true })
+        .in("role", ["sitter", "both"])
+        .ilike("city", `%${dbPage!.city}%`);
+      if (error) return 0;
+      return count ?? 0;
+    },
+  });
 
  // ── STATIC CITY DATA PATH ──
  if (cityData) {
