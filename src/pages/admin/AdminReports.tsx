@@ -59,6 +59,8 @@ const AdminReports = () => {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [filterStatus, setFilterStatus] = useState("pending");
+  const [page, setPage] = useState(0);
+  const [total, setTotal] = useState(0);
   const [reporters, setReporters] = useState<Record<string, { name: string; avatar: string | null }>>({});
   const [noteModal, setNoteModal] = useState<{ open: boolean; reportId: string; note: string }>({ open: false, reportId: "", note: "" });
   const [actionModal, setActionModal] = useState<{ open: boolean; reportId: string; action: ActionKey | "" }>({ open: false, reportId: "", action: "" });
@@ -66,16 +68,27 @@ const AdminReports = () => {
 
   const fetchReports = useCallback(async () => {
     setLoading(true);
-    let query = supabase.from("reports").select("*").order("status", { ascending: true }).order("created_at", { ascending: true });
+    const from = page * PAGE_SIZE;
+    const to = from + PAGE_SIZE - 1;
+    let query = supabase
+      .from("reports")
+      .select("*", { count: "exact" })
+      .order("status", { ascending: true })
+      .order("created_at", { ascending: true });
     if (filterStatus === "pending") query = query.in("status", ["new", "in_progress"]);
     else if (filterStatus !== "all") query = query.eq("status", filterStatus);
-    const { data, error } = await query;
+    const { data, error, count } = await query.range(from, to);
     if (error) toast.error("Erreur de chargement");
-    else setReports(data || []);
+    else {
+      setReports(data || []);
+      setTotal(count ?? 0);
+    }
     setLoading(false);
-  }, [filterStatus]);
+  }, [filterStatus, page]);
 
+  useEffect(() => { setPage(0); }, [filterStatus]);
   useEffect(() => { fetchReports(); }, [fetchReports]);
+
 
   useEffect(() => {
     if (!reports.length) return;
