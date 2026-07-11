@@ -541,14 +541,15 @@ const AdminUsers = () => {
                   Chargement…
                 </TableCell>
               </TableRow>
-            ) : filtered.length === 0 ? (
+            ) : users.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={11} className="text-center py-8 text-muted-foreground">
                   Aucun utilisateur trouvé
                 </TableCell>
               </TableRow>
             ) : (
-              paginated.map((user) => {
+              users.map((user) => {
+
                 const verif = verificationLabels[user.identity_verification_status || "not_submitted"] || verificationLabels.not_submitted;
                 const status = statusLabels[user.account_status || "active"] || statusLabels.active;
 
