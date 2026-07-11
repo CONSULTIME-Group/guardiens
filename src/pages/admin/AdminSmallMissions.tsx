@@ -477,11 +477,11 @@ const AdminSmallMissions = () => {
                         <Button variant="ghost" size="icon" aria-label="Masquer la mission" title="Masquer" onClick={() => setArchiveId(m.id)}>
                           <Archive className="h-4 w-4" />
                         </Button>
-                      ) : (
+                      ) : m.hidden_by ? (
                         <Button variant="ghost" size="icon" aria-label="Restaurer la mission" title="Restaurer" onClick={() => setRestoreId(m.id)}>
                           <RotateCcw className="h-4 w-4" />
                         </Button>
-                      )}
+                      ) : null}
                       <Button variant="ghost" size="icon" aria-label="Supprimer la mission" title="Supprimer" onClick={() => setDeleteId(m.id)}>
                         <Trash2 className="h-4 w-4 text-destructive" />
                       </Button>
