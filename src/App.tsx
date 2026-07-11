@@ -91,6 +91,7 @@ const ProCategoryListing = lazy(() => import("./pages/ProCategoryListing"));
 const AdminProDirectory = lazy(() => import("./pages/admin/AdminProDirectory"));
 const ArticleEditor = lazy(() => import("./pages/ArticleEditor"));
 const AdminDashboard = lazy(() => import("./pages/admin/AdminDashboard"));
+const AdminOverview = lazy(() => import("./pages/admin/AdminOverview"));
 const AdminUsers = lazy(() => import("./pages/admin/AdminUsers"));
 const AdminListings = lazy(() => import("./pages/admin/AdminListings"));
 const AdminSitsManagement = lazy(() => import("./pages/admin/AdminSitsManagement"));
