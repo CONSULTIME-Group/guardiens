@@ -10,7 +10,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
-import { supabase } from "@/integrations/supabase/client";
+import { useAdminBadges } from "@/hooks/useAdminBadges";
 
 interface NavItem {
   to: string;
@@ -20,7 +20,7 @@ interface NavItem {
   badgeKey?: string;
 }
 
-const BADGE_TITLES: Record<string, string> = {
+export const BADGE_TITLES: Record<string, string> = {
   verifications: "vérifications d'identité en attente",
   pros: "dossiers Gardien Pro à modérer",
   experiences: "expériences externes à vérifier",
@@ -33,7 +33,7 @@ const BADGE_TITLES: Record<string, string> = {
   errors: "erreurs non résolues",
   guideRequests: "demandes de guides en attente",
   analysisRequests: "demandes d'analyse à traiter",
-  reportsSit: "signalements visant des annonces / gardes",
+  reportsSit: "signalements visant des annonces",
   reportsMission: "signalements visant des petites missions",
 };
 
@@ -69,7 +69,7 @@ const adminNavGroups: NavGroup[] = [
     label: "ACTIVITÉ",
     items: [
       { to: "/admin/listings", icon: Megaphone, label: "Annonces", badgeKey: "reportsSit" },
-      { to: "/admin/sits-management", icon: CalendarCheck, label: "Gardes", badgeKey: "reportsSit" },
+      { to: "/admin/sits-management", icon: CalendarCheck, label: "Gardes" },
       { to: "/admin/small-missions", icon: Handshake, label: "Petites missions", badgeKey: "reportsMission" },
     ],
   },
@@ -113,7 +113,7 @@ const STORAGE_KEY = "admin.sidebar.collapsed";
 export const AdminSidebar = () => {
   const { logout } = useAuth();
   const navigate = useNavigate();
-  const [badges, setBadges] = useState<Record<string, number>>({});
+  const badges = useAdminBadges() as unknown as Record<string, number>;
   const [collapsed, setCollapsed] = useState<boolean>(() => {
     if (typeof window === "undefined") return false;
     return localStorage.getItem(STORAGE_KEY) === "1";
@@ -124,69 +124,6 @@ export const AdminSidebar = () => {
       localStorage.setItem(STORAGE_KEY, collapsed ? "1" : "0");
     }
   }, [collapsed]);
-
-  useEffect(() => {
-    const fetchBadges = async () => {
-      const results = await Promise.all([
-        supabase.from("profiles").select("id", { count: "exact", head: true }).or("identity_verification_status.eq.pending,and(identity_verification_status.eq.not_submitted,identity_document_url.not.is.null),and(identity_verification_status.eq.not_submitted,identity_selfie_url.not.is.null)"),
-        supabase.from("external_experiences").select("id", { count: "exact", head: true }).eq("verification_status", "pending"),
-        supabase.from("reports").select("id", { count: "exact", head: true }).eq("status", "new"),
-        supabase.from("contact_messages").select("id", { count: "exact", head: true }).eq("status", "new"),
-        supabase.from("skills_library").select("id", { count: "exact", head: true }).eq("status", "pending"),
-        supabase.from("review_disputes").select("id", { count: "exact", head: true }).eq("status", "pending"),
-        supabase.from("error_logs").select("id", { count: "exact", head: true }).is("resolved_at", null).neq("severity", "ignored_third_party"),
-        supabase.from("guide_requests" as any).select("id", { count: "exact", head: true }).eq("status", "pending"),
-        supabase.from("reviews").select("id", { count: "exact", head: true }).eq("moderation_status", "pending"),
-        supabase.from("admin_message_logs").select("id", { count: "exact", head: true }).eq("status", "failed"),
-        supabase.from("reports").select("id", { count: "exact", head: true }).eq("status", "new").eq("target_type", "sit"),
-        supabase.from("reports").select("id", { count: "exact", head: true }).eq("status", "new").eq("target_type", "small_mission"),
-        supabase.from("pro_verifications").select("id", { count: "exact", head: true }).in("status", ["needs_review", "pending"]),
-        (supabase.from("analysis_requests" as any) as any).select("id", { count: "exact", head: true }).eq("status", "new"),
-      ]);
-
-      // Compétences saisies dans les profils mais pas encore validées
-      let pendingProfileSkills = 0;
-      try {
-        const [{ data: validatedComps }, { data: sitterComps }, { data: ownerComps }] = await Promise.all([
-          supabase.from("competences_validees").select("label"),
-          supabase.from("sitter_profiles").select("competences").not("competences", "is", null),
-          supabase.from("owner_profiles").select("competences").not("competences", "is", null),
-        ]);
-        const validatedSet = new Set((validatedComps || []).map((c: any) => c.label));
-        const seen = new Set<string>();
-        [...(sitterComps || []), ...(ownerComps || [])].forEach((row: any) => {
-          (row.competences || []).forEach((c: string) => {
-            if (c && !validatedSet.has(c)) seen.add(c);
-          });
-        });
-        pendingProfileSkills = seen.size;
-      } catch {
-        pendingProfileSkills = 0;
-      }
-
-      setBadges({
-        verifications: results[0].count || 0,
-        experiences: results[1].count || 0,
-        reports: results[2].count || 0,
-        contactMessages: results[3].count || 0,
-        skills: (results[4].count || 0) + pendingProfileSkills,
-        reviewDisputes: results[5].count || 0,
-        errors: results[6].count || 0,
-        guideRequests: results[7].count || 0,
-        reviewsModeration: results[8].count || 0,
-        adminMessageFailed: results[9].count || 0,
-        reportsSit: results[10].count || 0,
-        reportsMission: results[11].count || 0,
-        pros: results[12].count || 0,
-        analysisRequests: results[13].count || 0,
-      });
-    };
-    fetchBadges();
-
-    const handler = () => fetchBadges();
-    window.addEventListener("admin-badges-refresh", handler);
-    return () => window.removeEventListener("admin-badges-refresh", handler);
-  }, []);
 
   return (
     <aside
