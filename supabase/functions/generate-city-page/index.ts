@@ -65,13 +65,12 @@ area["name"="${safeCity}"]["boundary"="administrative"]["admin_level"~"7|8"]->.a
   relation["route"="hiking"]["name"](area.a);
   way["leisure"="nature_reserve"]["name"](area.a);
   node["leisure"="nature_reserve"]["name"](area.a);
-  way["highway"="path"]["name"](area.a);
 );
-out tags center 80;`;
+out tags 150;`;
 
   try {
     const controller = new AbortController();
-    const timer = setTimeout(() => controller.abort(), 20000);
+    const timer = setTimeout(() => controller.abort(), 30000);
     const res = await fetch("https://overpass-api.de/api/interpreter", {
       method: "POST",
       headers: {
@@ -103,8 +102,7 @@ out tags center 80;`;
         if (parks.size < 5) parks.add(clean);
       } else if (
         tags.route === "hiking" ||
-        tags.leisure === "nature_reserve" ||
-        tags.highway === "path"
+        tags.leisure === "nature_reserve"
       ) {
         trails.add(clean);
       }
