@@ -5558,6 +5558,8 @@ export type Database = {
           duration_estimate: string
           end_date: string | null
           exchange_offer: string
+          hidden_at: string | null
+          hidden_by: string | null
           id: string
           latitude: number | null
           longitude: number | null
@@ -5586,6 +5588,8 @@ export type Database = {
           duration_estimate?: string
           end_date?: string | null
           exchange_offer?: string
+          hidden_at?: string | null
+          hidden_by?: string | null
           id?: string
           latitude?: number | null
           longitude?: number | null
@@ -5614,6 +5618,8 @@ export type Database = {
           duration_estimate?: string
           end_date?: string | null
           exchange_offer?: string
+          hidden_at?: string | null
+          hidden_by?: string | null
           id?: string
           latitude?: number | null
           longitude?: number | null

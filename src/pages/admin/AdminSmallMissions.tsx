@@ -33,6 +33,16 @@ const statusLabels: Record<string, { label: string; variant: "default" | "second
   cancelled: { label: "Annulée", variant: "destructive" },
 };
 
+// Distingue une mission masquée par l'admin d'une mission annulée par l'auteur.
+function resolveStatusBadge(m: { status: string; hidden_by?: string | null }) {
+  if (m.status === "cancelled") {
+    return m.hidden_by
+      ? { label: "Masquée (admin)", variant: "secondary" as const }
+      : { label: "Annulée (auteur)", variant: "outline" as const };
+  }
+  return statusLabels[m.status] || { label: m.status, variant: "outline" as const };
+}
+
 const categoryLabels: Record<string, string> = {
   animals: "Animaux",
   garden: "Jardin",
@@ -195,7 +205,15 @@ const AdminSmallMissions = () => {
   const handleArchive = async () => {
     if (!archiveId) return;
     const id = archiveId;
-    const { error } = await supabase.from("small_missions").update({ status: "cancelled" as any }).eq("id", id);
+    const { data: { user } } = await supabase.auth.getUser();
+    const { error } = await supabase
+      .from("small_missions")
+      .update({
+        status: "cancelled" as any,
+        hidden_by: user?.id ?? null,
+        hidden_at: new Date().toISOString(),
+      } as any)
+      .eq("id", id);
     if (error) {
       toast.error(`Masquage impossible : ${error.message}`);
       return;
@@ -209,7 +227,14 @@ const AdminSmallMissions = () => {
   const handleRestore = async () => {
     if (!restoreId) return;
     const id = restoreId;
-    const { error } = await supabase.from("small_missions").update({ status: "open" as any }).eq("id", id);
+    const { error } = await supabase
+      .from("small_missions")
+      .update({
+        status: "open" as any,
+        hidden_by: null,
+        hidden_at: null,
+      } as any)
+      .eq("id", id);
     if (error) {
       toast.error(`Restauration impossible : ${error.message}`);
       return;
@@ -248,21 +273,17 @@ const AdminSmallMissions = () => {
     setContactSending(true);
     const mission = contactMission;
     const reason = contactReason.trim();
-    const body = reason
-      ? `Un administrateur souhaite vous contacter au sujet de votre mission "${mission.title}".\n\nMotif : ${reason}`
-      : `Un administrateur souhaite vous contacter au sujet de votre mission "${mission.title}".`;
-    const { error } = await supabase.from("notifications").insert({
-      user_id: mission.user_id,
-      type: "admin_contact",
-      title: "Message de l'équipe Guardiens",
-      body,
-    });
+    const { data, error } = await supabase.functions.invoke(
+      "admin-contact-mission-poster",
+      { body: { missionId: mission.id, reason: reason || undefined } },
+    );
     setContactSending(false);
-    if (error) {
-      toast.error(`Envoi impossible : ${error.message}`);
+    const success = !error && (data as { success?: boolean })?.success;
+    if (!success) {
+      const msg = (data as { error?: string })?.error || error?.message || "Envoi impossible";
+      toast.error(`Envoi impossible : ${msg}`);
       return;
     }
-    await logAdminAction("small_mission_contact", mission.id, reason ? { reason } : undefined);
     toast.success("Notification envoyée au posteur");
     setContactMission(null);
     setContactReason("");
@@ -275,7 +296,7 @@ const AdminSmallMissions = () => {
         m.title, `${m.poster?.first_name || ""} ${m.poster?.last_name || ""}`.trim(),
         categoryLabels[m.category] || m.category, m.city || "",
         format(new Date(m.created_at), "yyyy-MM-dd"),
-        statusLabels[m.status]?.label || m.status,
+        resolveStatusBadge(m).label,
         String(responseCounts[m.id] || 0), String(m.view_count ?? 0),
       ]),
     ];
@@ -344,7 +365,7 @@ const AdminSmallMissions = () => {
             <SelectItem value="open">Ouvertes</SelectItem>
             <SelectItem value="in_progress">En cours</SelectItem>
             <SelectItem value="completed">Terminées</SelectItem>
-            <SelectItem value="cancelled">Archivées</SelectItem>
+            <SelectItem value="cancelled">Masquées / annulées</SelectItem>
           </SelectContent>
         </Select>
         <Select value={filterCategory} onValueChange={setFilterCategory}>
@@ -411,7 +432,7 @@ const AdminSmallMissions = () => {
             ) : filtered.length === 0 ? (
               <TableRow><TableCell colSpan={10} className="text-center py-8 text-muted-foreground">Aucune mission</TableCell></TableRow>
             ) : paginated.map((m) => {
-              const status = statusLabels[m.status] || { label: m.status, variant: "outline" as const };
+              const status = resolveStatusBadge(m);
               const isSuspect = moneyPattern.test(m.description || "") || moneyPattern.test(m.exchange_offer || "");
               const views = m.view_count ?? 0;
               const resp = responseCounts[m.id] || 0;
@@ -456,11 +477,11 @@ const AdminSmallMissions = () => {
                         <Button variant="ghost" size="icon" aria-label="Masquer la mission" title="Masquer" onClick={() => setArchiveId(m.id)}>
                           <Archive className="h-4 w-4" />
                         </Button>
-                      ) : (
+                      ) : m.hidden_by ? (
                         <Button variant="ghost" size="icon" aria-label="Restaurer la mission" title="Restaurer" onClick={() => setRestoreId(m.id)}>
                           <RotateCcw className="h-4 w-4" />
                         </Button>
-                      )}
+                      ) : null}
                       <Button variant="ghost" size="icon" aria-label="Supprimer la mission" title="Supprimer" onClick={() => setDeleteId(m.id)}>
                         <Trash2 className="h-4 w-4 text-destructive" />
                       </Button>
