@@ -549,17 +549,91 @@ const AdminReviews = () => {
         </DialogContent>
       </Dialog>
 
+      {/* Hide confirmation */}
+      <AlertDialog open={!!hideConfirm} onOpenChange={(o) => !o && setHideConfirm(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Masquer cet avis ?</AlertDialogTitle>
+            <AlertDialogDescription>
+              {hideConfirm && (
+                <>
+                  Avis de <strong>{hideConfirm.reviewer?.first_name} {hideConfirm.reviewer?.last_name}</strong>
+                  {" sur "}
+                  <strong>{hideConfirm.reviewee?.first_name} {hideConfirm.reviewee?.last_name}</strong>
+                  {" ("}{hideConfirm.overall_rating}/5{"). "}
+                  Il ne sera plus visible publiquement. Vous pourrez le ré-afficher.
+                </>
+              )}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={!!busyId}>Annuler</AlertDialogCancel>
+            <AlertDialogAction
+              disabled={!!busyId}
+              onClick={(e) => { e.preventDefault(); if (hideConfirm) performTogglePublished(hideConfirm); }}
+            >
+              {busyId ? "Masquage…" : "Masquer"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
       {/* Delete confirmation */}
-      <Dialog open={!!deleteConfirm} onOpenChange={(o) => !o && setDeleteConfirm(null)}>
-        <DialogContent>
-          <DialogHeader><DialogTitle>Supprimer cet avis ?</DialogTitle></DialogHeader>
-          <p className="text-sm text-muted-foreground">Cette action est irréversible. Le commentaire sera remplacé par "[Supprimé par l'admin]".</p>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setDeleteConfirm(null)}>Annuler</Button>
-            <Button variant="destructive" onClick={() => deleteConfirm && deleteReview(deleteConfirm)}>Confirmer la suppression</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <AlertDialog open={!!deleteConfirm} onOpenChange={(o) => !o && setDeleteConfirm(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Supprimer cet avis ?</AlertDialogTitle>
+            <AlertDialogDescription>
+              {deleteConfirm && (
+                <>
+                  Avis de <strong>{deleteConfirm.reviewer?.first_name} {deleteConfirm.reviewer?.last_name}</strong>
+                  {" sur "}
+                  <strong>{deleteConfirm.reviewee?.first_name} {deleteConfirm.reviewee?.last_name}</strong>.
+                  {" "}Cette action est irréversible. Le commentaire sera remplacé par « [Supprimé par l'admin] ».
+                </>
+              )}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={!!busyId}>Annuler</AlertDialogCancel>
+            <AlertDialogAction
+              disabled={!!busyId}
+              onClick={(e) => { e.preventDefault(); if (deleteConfirm) deleteReview(deleteConfirm); }}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {busyId ? "Suppression…" : "Confirmer la suppression"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Validate cancellation moderation confirmation */}
+      <AlertDialog open={!!validateConfirm} onOpenChange={(o) => !o && setValidateConfirm(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              {validateConfirm?.field === "moderation_status" ? "Valider cet avis d'annulation ?" : "Valider cette réponse ?"}
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              {validateConfirm && (
+                <>
+                  Auteur : <strong>{validateConfirm.review.reviewer?.first_name} {validateConfirm.review.reviewer?.last_name}</strong>.
+                  {" "}Publication immédiate et notification par email.
+                </>
+              )}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={!!busyId}>Annuler</AlertDialogCancel>
+            <AlertDialogAction
+              disabled={!!busyId}
+              onClick={(e) => { e.preventDefault(); if (validateConfirm) handleModerationAction(validateConfirm.review, "valide", validateConfirm.field); }}
+            >
+              {busyId ? "Validation…" : "Valider"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       {/* Reject reason modal */}
       <Dialog open={!!rejectReasonModal} onOpenChange={(o) => { if (!o) { setRejectReasonModal(null); setRejectReason(""); } }}>
@@ -586,18 +660,18 @@ const AdminReviews = () => {
             </Button>
             <Button
               variant="destructive"
-              disabled={!rejectReason.trim()}
+              disabled={!rejectReason.trim() || !!busyId}
               onClick={() => {
                 if (rejectReasonModal) {
                   handleModerationAction(
-                    rejectReasonModal.id,
+                    rejectReasonModal.review,
                     "refuse",
-                    rejectReasonModal.type === "review" ? "moderation_status" : "response_status"
+                    rejectReasonModal.type === "review" ? "moderation_status" : "response_status",
                   );
                 }
               }}
             >
-              Confirmer le refus
+              {busyId ? "Envoi…" : "Confirmer le refus"}
             </Button>
           </DialogFooter>
         </DialogContent>
