@@ -296,7 +296,7 @@ const AdminSmallMissions = () => {
         m.title, `${m.poster?.first_name || ""} ${m.poster?.last_name || ""}`.trim(),
         categoryLabels[m.category] || m.category, m.city || "",
         format(new Date(m.created_at), "yyyy-MM-dd"),
-        statusLabels[m.status]?.label || m.status,
+        resolveStatusBadge(m).label,
         String(responseCounts[m.id] || 0), String(m.view_count ?? 0),
       ]),
     ];
