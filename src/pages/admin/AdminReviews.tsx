@@ -13,11 +13,15 @@ import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
-import { Eye, EyeOff, Trash2, Star, AlertTriangle, CheckCircle2, XCircle } from "lucide-react";
+import { Eye, EyeOff, Trash2, Star, AlertTriangle, CheckCircle2, XCircle, ChevronLeft, ChevronRight } from "lucide-react";
+
+const PAGE_SIZE = 50;
 
 const AdminReviews = () => {
   const [reviews, setReviews] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [total, setTotal] = useState(0);
+  const [page, setPage] = useState(0);
   const [filterStatus, setFilterStatus] = useState("all");
   const [sortBy, setSortBy] = useState<"date" | "rating">("date");
   const [detailReview, setDetailReview] = useState<any | null>(null);
@@ -26,6 +30,7 @@ const AdminReviews = () => {
   const [validateConfirm, setValidateConfirm] = useState<{ review: any; field: "moderation_status" | "response_status" } | null>(null);
   const [busyId, setBusyId] = useState<string | null>(null);
   const [badgeCounts, setBadgeCounts] = useState<Record<string, number>>({});
+
 
   // Cancellation moderation state
   const [cancellationReviews, setCancellationReviews] = useState<any[]>([]);
