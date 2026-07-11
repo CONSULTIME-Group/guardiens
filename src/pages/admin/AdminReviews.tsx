@@ -21,13 +21,16 @@ const AdminReviews = () => {
   const [filterStatus, setFilterStatus] = useState("all");
   const [sortBy, setSortBy] = useState<"date" | "rating">("date");
   const [detailReview, setDetailReview] = useState<any | null>(null);
-  const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
+  const [deleteConfirm, setDeleteConfirm] = useState<any | null>(null);
+  const [hideConfirm, setHideConfirm] = useState<any | null>(null);
+  const [validateConfirm, setValidateConfirm] = useState<{ review: any; field: "moderation_status" | "response_status" } | null>(null);
+  const [busyId, setBusyId] = useState<string | null>(null);
   const [badgeCounts, setBadgeCounts] = useState<Record<string, number>>({});
 
   // Cancellation moderation state
   const [cancellationReviews, setCancellationReviews] = useState<any[]>([]);
   const [cancellationLoading, setCancellationLoading] = useState(true);
-  const [rejectReasonModal, setRejectReasonModal] = useState<{ id: string; type: "review" | "response" } | null>(null);
+  const [rejectReasonModal, setRejectReasonModal] = useState<{ id: string; type: "review" | "response"; review: any } | null>(null);
   const [rejectReason, setRejectReason] = useState("");
 
   const fetchReviews = useCallback(async () => {
