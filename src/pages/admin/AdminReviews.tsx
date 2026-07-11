@@ -40,13 +40,15 @@ const AdminReviews = () => {
 
   const fetchReviews = useCallback(async () => {
     setLoading(true);
+    const from = page * PAGE_SIZE;
+    const to = from + PAGE_SIZE - 1;
     let query = supabase
       .from("reviews")
       .select(`
         *,
         reviewer:profiles!reviews_reviewer_id_fkey(first_name, last_name, avatar_url),
         reviewee:profiles!reviews_reviewee_id_fkey(first_name, last_name, avatar_url)
-      `)
+      `, { count: "exact" })
       .or("review_type.is.null,review_type.neq.annulation");
 
     if (filterStatus === "published") query = query.eq("published", true);
@@ -56,10 +58,11 @@ const AdminReviews = () => {
     if (sortBy === "rating") query = query.order("overall_rating", { ascending: true });
     else query = query.order("created_at", { ascending: false });
 
-    const { data, error } = await query;
+    const { data, error, count } = await query.range(from, to);
     if (error) toast.error("Erreur de chargement");
     else {
       setReviews(data || []);
+      setTotal(count ?? 0);
       const sitIds = [...new Set((data || []).map(r => r.sit_id))];
       if (sitIds.length) {
         const { data: badges } = await supabase.from("badge_attributions").select("sit_id").in("sit_id", sitIds);
@@ -69,7 +72,10 @@ const AdminReviews = () => {
       }
     }
     setLoading(false);
-  }, [filterStatus, sortBy]);
+  }, [filterStatus, sortBy, page]);
+
+  useEffect(() => { setPage(0); }, [filterStatus, sortBy]);
+
 
   const fetchCancellationReviews = useCallback(async () => {
     setCancellationLoading(true);
