@@ -10,8 +10,9 @@ import { DashboardCharts } from "./_components/dashboard/DashboardCharts";
 import { OnboardingReminderCard } from "./_components/dashboard/OnboardingReminderCard";
 import { AcquisitionPilotCard } from "./_components/dashboard/AcquisitionPilotCard";
 import AffinityPilotCard from "./_components/dashboard/AffinityPilotCard";
+import { SignalsSection } from "./_components/dashboard/SignalsSection";
 
-const AdminDashboard = () => {
+const AdminOverview = () => {
   const { loading, stats, actionCards, lateCards, activity, weeklySignups, deptData } = useDashboardData();
 
   if (loading) {
