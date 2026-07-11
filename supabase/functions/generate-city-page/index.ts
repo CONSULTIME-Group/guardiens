@@ -51,8 +51,8 @@ async function fetchWikipediaImage(city: string): Promise<{ url: string; alt: st
  */
 async function fetchOsmPlaces(
   city: string,
-): Promise<{ vets: string[]; parks: string[] }> {
-  const empty = { vets: [], parks: [] };
+): Promise<{ vets: string[]; parks: string[]; trails: string[] }> {
+  const empty = { vets: [], parks: [], trails: [] };
   const safeCity = city.replace(/"/g, '\\"');
   const query = `[out:json][timeout:25];
 area["name"="${safeCity}"]["boundary"="administrative"]["admin_level"~"7|8"]->.a;
@@ -62,8 +62,12 @@ area["name"="${safeCity}"]["boundary"="administrative"]["admin_level"~"7|8"]->.a
   node["leisure"="dog_park"](area.a);
   node["leisure"="park"]["name"](area.a);
   way["leisure"="park"]["name"](area.a);
+  relation["route"="hiking"]["name"](area.a);
+  way["leisure"="nature_reserve"]["name"](area.a);
+  node["leisure"="nature_reserve"]["name"](area.a);
+  way["highway"="path"]["name"](area.a);
 );
-out tags center 40;`;
+out tags center 80;`;
 
   try {
     const controller = new AbortController();
@@ -86,6 +90,7 @@ out tags center 40;`;
     const elements: any[] = Array.isArray(data?.elements) ? data.elements : [];
     const vets = new Set<string>();
     const parks = new Set<string>();
+    const trails = new Set<string>();
     for (const el of elements) {
       const tags = el?.tags || {};
       const name: string | undefined = tags.name;
@@ -96,14 +101,25 @@ out tags center 40;`;
         if (vets.size < 5) vets.add(clean);
       } else if (tags.leisure === "dog_park" || tags.leisure === "park") {
         if (parks.size < 5) parks.add(clean);
+      } else if (
+        tags.route === "hiking" ||
+        tags.leisure === "nature_reserve" ||
+        tags.highway === "path"
+      ) {
+        trails.add(clean);
       }
     }
-    return { vets: [...vets], parks: [...parks] };
+    const parksArr = [...parks];
+    const trailsArr = [...trails]
+      .filter((t) => !parksArr.includes(t))
+      .slice(0, 5);
+    return { vets: [...vets], parks: parksArr, trails: trailsArr };
   } catch (e) {
     console.warn("overpass err", city, String(e));
     return empty;
   }
 }
+
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
