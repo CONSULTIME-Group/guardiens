@@ -121,29 +121,30 @@ export function AlmaEmptySearchBubble({
       <AlmaBubble
         audience="sitter"
         variant="inline"
-        title="Aucune annonce dans votre zone avec ces critères. Voulez-vous que je propose 3 pistes ?"
+        title="Aucune annonce ne correspond à votre recherche pour le moment."
         actions={
           <>
-            <Button size="sm" variant="outline" onClick={() => click("expand_region")}>
+            <Button size="sm" variant="default" onClick={() => click("expand_region")}>
               Élargir à la région
             </Button>
             <Button size="sm" variant="outline" onClick={() => click("activate_alert")}>
-              Activer une alerte
+              Créer une alerte
             </Button>
             {restrictive && (
-              <Button size="sm" variant="outline" onClick={() => click("relax_filter")}>
-                Relâcher {FILTER_LABEL[restrictive]}
+              <Button size="sm" variant="ghost" onClick={() => click("relax_filter")}>
+                Retirer {FILTER_LABEL[restrictive]}
               </Button>
             )}
           </>
         }
       >
-        Je cible d'abord la région et je vous préviens dès qu'une annonce colle à
-        votre profil. Si vous préférez voir plus tout de suite, je peux aussi
-        assouplir un critère.
+        Je vous propose d'élargir votre zone pour voir davantage d'annonces, ou
+        de créer une alerte pour être prévenu(e) dès qu'une annonce colle à
+        votre profil. Vous pouvez aussi retirer un filtre restrictif.
       </AlmaBubble>
     </div>
   );
 }
+
 
 export default AlmaEmptySearchBubble;

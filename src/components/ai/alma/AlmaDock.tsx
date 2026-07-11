@@ -205,11 +205,12 @@ export function AlmaDock() {
   }, [currentWhisper?.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const doDismiss = useCallback(
-    (reason: AlmaDismissReason) => {
-      dismissCurrent(reason);
+    (reason: AlmaDismissReason, actionId?: string) => {
+      dismissCurrent(reason, actionId);
     },
     [dismissCurrent],
   );
+
 
   // Auto-dismiss timer (20s défaut, ou whisper.autoDismissMs).
   useEffect(() => {
@@ -273,8 +274,9 @@ export function AlmaDock() {
       metadata: { whisper_type: whisper.type, action_id: actionId },
     });
     onClick();
-    doDismiss("action_clicked");
+    doDismiss("action_clicked", actionId);
   };
+
 
   const changeFrequency = useCallback(
     async (next: AlmaFrequency) => {
