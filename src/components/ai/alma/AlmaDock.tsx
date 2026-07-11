@@ -274,8 +274,9 @@ export function AlmaDock() {
       metadata: { whisper_type: whisper.type, action_id: actionId },
     });
     onClick();
-    doDismiss("action_clicked");
+    doDismiss("action_clicked", actionId);
   };
+
 
   const changeFrequency = useCallback(
     async (next: AlmaFrequency) => {
