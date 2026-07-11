@@ -2,7 +2,9 @@ import { useEffect } from "react";
 import ReactMarkdown from "react-markdown";
 import { useParams, Link, Navigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
+import { Helmet } from "react-helmet-async";
 import { supabase } from "@/integrations/supabase/client";
+
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -100,22 +102,38 @@ const CityPage = () => {
  enabled: !!slug,
  });
 
- const { data: relatedArticles = [] } = useQuery({
- queryKey: ["city-articles", cityData?.name || dbPage?.city],
- queryFn: async () => {
- const cityName = cityData?.name || dbPage?.city;
- const { data } = await supabase
-.from("articles")
-.select("slug, title, excerpt")
-.eq("published", true)
-.or(
- `city.ilike.%${cityName}%,tags.cs.{${cityName!.toLowerCase()}}`
- )
-.limit(3);
- return (data || []) as any[];
- },
- enabled: !!(cityData?.name || dbPage?.city),
- });
+  const { data: relatedArticles = [] } = useQuery({
+    queryKey: ["city-articles", cityData?.name || dbPage?.city],
+    queryFn: async () => {
+      const cityName = cityData?.name || dbPage?.city;
+      const { data } = await supabase
+        .from("articles")
+        .select("slug, title, excerpt")
+        .eq("published", true)
+        .or(
+          `city.ilike.%${cityName}%,tags.cs.{${cityName!.toLowerCase()}}`
+        )
+        .limit(3);
+      return (data || []) as any[];
+    },
+    enabled: !!(cityData?.name || dbPage?.city),
+  });
+
+  // Comptage live des gardiens pour la branche DB (sitter_count en base = 0).
+  const { data: dbSitterCount = 0 } = useQuery<number>({
+    queryKey: ["city-db-sitter-count", dbPage?.city],
+    enabled: !cityData && !!dbPage?.city,
+    staleTime: 5 * 60 * 1000,
+    queryFn: async () => {
+      const { count, error } = await supabase
+        .from("profiles")
+        .select("id", { count: "exact", head: true })
+        .in("role", ["sitter", "both"])
+        .ilike("city", `%${dbPage!.city}%`);
+      if (error) return 0;
+      return count ?? 0;
+    },
+  });
 
  // ── STATIC CITY DATA PATH ──
  if (cityData) {
@@ -455,57 +473,139 @@ const CityPage = () => {
  return <Navigate to="/" replace />;
  }
 
- // Render DB-based page (simplified legacy)
- return (
- <>
- <CityPageMeta
- city={{
- slug: dbPage.slug,
- name: dbPage.city,
- department: dbPage.department,
- departmentCode: "",
- region: "Auvergne-Rhône-Alpes",
- coordinates: { lat: 0, lng: 0 },
- zoneProfile: "urbain",
- keywordPrimary: "",
- keywordSecondary: [],
- h1: dbPage.h1_title,
- metaDescription: dbPage.meta_description,
- localSpots: [],
- riskProfile: [],
- expertiseTips: [],
- heroImageAlt: "",
- }}
- />
+  // Render DB-based page (simplified legacy)
+  const dbNoindex = dbPage.noindex === true;
+  const dbFaqItems = [
+    {
+      q: `Comment trouver un gardien de maison à ${dbPage.city} ?`,
+      a: `Sur Guardiens, vous publiez une annonce et les gardiens disponibles à ${dbPage.city} et ses environs postulent directement. Chaque gardien est vérifié manuellement avant d'apparaître sur la plateforme.`,
+    },
+    {
+      q: `Est-ce vraiment gratuit pour les propriétaires à ${dbPage.city} ?`,
+      a: "Oui. Guardiens est gratuit pour tous les propriétaires. L'espace gardien est également gratuit aujourd'hui, sans engagement.",
+    },
+    {
+      q: `Que se passe-t-il en cas d'urgence pendant la garde à ${dbPage.city} ?`,
+      a: `Guardiens dispose d'un réseau de Gardiens d'Urgence dans chaque zone. En cas d'imprévu, animal malade ou problème technique, le gardien en poste peut déclencher une alerte.`,
+    },
+    {
+      q: `Combien coûte une pension pour animaux à ${dbPage.city} ?`,
+      a: `Les pensions autour de ${dbPage.city} facturent en moyenne 25 à 45 euros par nuit et par animal. Sur Guardiens, c'est sans frais pour le propriétaire : le gardien s'installe chez vous et s'occupe de vos animaux dans leur environnement habituel.`,
+    },
+    {
+      q: `Comment devenir gardien à ${dbPage.city} ?`,
+      a: `Inscrivez-vous, complétez votre profil et faites vérifier votre identité. Vous pourrez ensuite postuler aux gardes disponibles en ${dbPage.department}. L'accès gardien est gratuit aujourd'hui, sans engagement.`,
+    },
+  ];
 
- <div className="min-h-screen bg-background">
- <PageBreadcrumb items={[
- { label: "Nos villes" },
- { label: dbPage.city },
- ]} />
+  const dbSchemaGraph = !dbNoindex
+    ? [
+        {
+          "@type": "Service",
+          name: `House-sitting à ${dbPage.city}`,
+          description: dbPage.meta_description,
+          serviceType: ["House Sitting", "Pet Sitting"],
+          provider: {
+            "@type": "Organization",
+            name: "Guardiens",
+            url: "https://guardiens.fr",
+          },
+          areaServed: {
+            "@type": "City",
+            name: dbPage.city,
+            containedInPlace: { "@type": "Country", name: "France" },
+          },
+          offers: {
+            "@type": "Offer",
+            price: "0",
+            priceCurrency: "EUR",
+            eligibleCustomerType: "Owner",
+            description: "Gratuit pour les propriétaires.",
+          },
+        },
+        {
+          "@type": "BreadcrumbList",
+          itemListElement: [
+            { "@type": "ListItem", position: 1, name: "Accueil", item: "https://guardiens.fr" },
+            { "@type": "ListItem", position: 2, name: "Nos villes", item: "https://guardiens.fr/nos-villes" },
+            {
+              "@type": "ListItem",
+              position: 3,
+              name: `House-sitting à ${dbPage.city}`,
+              item: `https://guardiens.fr/house-sitting/${dbPage.slug}`,
+            },
+          ],
+        },
+        {
+          "@type": "FAQPage",
+          mainEntity: dbFaqItems.map((f) => ({
+            "@type": "Question",
+            name: f.q,
+            acceptedAnswer: { "@type": "Answer", text: f.a },
+          })),
+        },
+      ]
+    : null;
 
- {/* Hero */}
- <section className="max-w-5xl mx-auto px-4 py-12">
- <h1 className="font-serif text-3xl md:text-5xl font-bold text-foreground mb-6">
- {dbPage.h1_title}
- </h1>
- <p className="text-lg text-muted-foreground max-w-3xl leading-relaxed mb-8">
- {dbPage.intro_text}
- </p>
- <div className="flex flex-wrap gap-4 mb-8">
- {dbPage.sitter_count > 0 && (
- <Badge variant="secondary" className="text-base px-4 py-2 gap-2">
- <Users className="h-4 w-4" />
- {dbPage.sitter_count} gardien
- {dbPage.sitter_count > 1 ? "s" : ""} vérifié
- {dbPage.sitter_count > 1 ? "s" : ""}
- </Badge>
- )}
- <Badge variant="outline" className="text-base px-4 py-2 gap-2">
- <Heart className="h-4 w-4" />
- Inscription gratuite
- </Badge>
- </div>
+  return (
+    <>
+      <CityPageMeta
+        noindex={dbNoindex}
+        city={{
+          slug: dbPage.slug,
+          name: dbPage.city,
+          department: dbPage.department,
+          departmentCode: "",
+          region: "Auvergne-Rhône-Alpes",
+          coordinates: { lat: 0, lng: 0 },
+          zoneProfile: "urbain",
+          keywordPrimary: "",
+          keywordSecondary: [],
+          h1: dbPage.h1_title,
+          metaDescription: dbPage.meta_description,
+          localSpots: [],
+          riskProfile: [],
+          expertiseTips: [],
+          heroImageAlt: "",
+        }}
+      />
+
+      {dbSchemaGraph && (
+        <Helmet>
+          <script type="application/ld+json">
+            {JSON.stringify({ "@context": "https://schema.org", "@graph": dbSchemaGraph })}
+          </script>
+        </Helmet>
+      )}
+
+      <div className="min-h-screen bg-background">
+        <PageBreadcrumb items={[
+          { label: "Nos villes" },
+          { label: dbPage.city },
+        ]} />
+
+        {/* Hero */}
+        <section className="max-w-5xl mx-auto px-4 py-12">
+          <h1 className="font-serif text-3xl md:text-5xl font-bold text-foreground mb-6">
+            {dbPage.h1_title}
+          </h1>
+          <p className="text-lg text-muted-foreground max-w-3xl leading-relaxed mb-8">
+            {dbPage.intro_text}
+          </p>
+          <div className="flex flex-wrap gap-4 mb-8">
+            {dbSitterCount > 0 && (
+              <Badge variant="secondary" className="text-base px-4 py-2 gap-2">
+                <Users className="h-4 w-4" />
+                {dbSitterCount} gardien
+                {dbSitterCount > 1 ? "s" : ""} vérifié
+                {dbSitterCount > 1 ? "s" : ""}
+              </Badge>
+            )}
+            <Badge variant="outline" className="text-base px-4 py-2 gap-2">
+              <Heart className="h-4 w-4" />
+              Inscription gratuite
+            </Badge>
+          </div>
  <div className="flex flex-col sm:flex-row gap-3">
  <Link to="/inscription">
  <Button size="lg" className="gap-2">
@@ -578,8 +678,25 @@ const CityPage = () => {
  </section>
  )}
 
- {/* Final CTA */}
- <section className="max-w-5xl mx-auto px-4 py-16 text-center">
+        {/* FAQ (uniquement sur pages indexables) */}
+        {!dbNoindex && (
+          <section className="max-w-5xl mx-auto px-4 py-6 md:py-12 border-t border-border">
+            <h2 className="font-serif text-2xl font-bold text-foreground mb-6">
+              Questions fréquentes sur le house-sitting à {dbPage.city}
+            </h2>
+            <Accordion type="single" collapsible className="w-full">
+              {dbFaqItems.map((faq, i) => (
+                <AccordionItem key={i} value={`db-faq-${i}`}>
+                  <AccordionTrigger className="text-left">{faq.q}</AccordionTrigger>
+                  <AccordionContent>{faq.a}</AccordionContent>
+                </AccordionItem>
+              ))}
+            </Accordion>
+          </section>
+        )}
+
+  {/* Final CTA */}
+  <section className="max-w-5xl mx-auto px-4 py-16 text-center">
  <h2 className="font-serif text-2xl md:text-3xl font-bold text-foreground mb-4">
  Rejoignez la communauté Guardiens à {dbPage.city}
  </h2>

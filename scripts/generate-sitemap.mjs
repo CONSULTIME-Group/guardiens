@@ -221,8 +221,8 @@ async function main() {
     ),
     fetchOrCache(
       "seo_city_pages", cache,
-      () => maxUpdatedAt("seo_city_pages", "updated_at", q => q.eq("published", true)),
-      async () => (await supabase.from("seo_city_pages").select("slug, updated_at").eq("published", true)).data,
+      () => maxUpdatedAt("seo_city_pages", "updated_at", q => q.eq("published", true).or("noindex.is.null,noindex.eq.false")),
+      async () => (await supabase.from("seo_city_pages").select("slug, updated_at").eq("published", true).or("noindex.is.null,noindex.eq.false")).data,
       rows => rows.map(cp => ({
         loc: `/house-sitting/${cp.slug}`,
         lastmod: (cp.updated_at || today).split("T")[0],
