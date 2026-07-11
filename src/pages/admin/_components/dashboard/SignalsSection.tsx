@@ -96,6 +96,8 @@ export const SignalsSection = () => {
               <li key={s.id}>
                 {s.signal_type === "no_applications" ? (
                   <NoApplicationsCard signal={s as unknown as import("@/components/admin/signals/NoApplicationsCard").AdminSignal} />
+                ) : s.signal_type === "pending_application" ? (
+                  <PendingApplicationCard signal={s as unknown as import("@/components/admin/signals/PendingApplicationCard").PendingApplicationSignal} />
                 ) : (
                   <Link
                     to={entityLink(s)}
