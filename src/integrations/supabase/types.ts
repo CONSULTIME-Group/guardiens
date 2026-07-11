@@ -6185,6 +6185,7 @@ export type Database = {
           views: number
         }[]
       }
+      admin_dashboard_summary: { Args: never; Returns: Json }
       admin_get_accepted_sitters: {
         Args: { p_sit_ids: string[] }
         Returns: {
