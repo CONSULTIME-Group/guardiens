@@ -426,7 +426,7 @@ const SmallMissionDetail = () => {
       if (updErr) throw updErr;
 
       if (freshMission.status === "open") {
-        await supabase.from("small_missions").update({ status: "in_progress" as any }).eq("id", id!);
+        await supabase.from("small_missions").update({ status: "in_progress" as any }).eq("id", mission.id);
         setMission((prev: any) => ({ ...prev, status: "in_progress" }));
       }
 
