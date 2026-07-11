@@ -1468,6 +1468,20 @@ export default function PublicSitterProfile() {
                   >
                     Contacter {firstName}
                   </button>
+                ) : isSitter && id ? (
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setActivateProprioIntent({
+                        recipientId: id,
+                        recipientFirstName: firstName,
+                        conversationContext: "sitter_inquiry",
+                      })
+                    }
+                    className="inline-flex items-center justify-center bg-primary text-primary-foreground rounded-lg px-6 py-3 text-sm font-medium hover:bg-primary/90 transition-colors flex-1 sm:flex-initial cursor-pointer"
+                  >
+                    Contacter {firstName}
+                  </button>
                 ) : null}
                 <p className="text-[11px] sm:text-xs text-muted-foreground font-body sm:ml-2 self-center text-center sm:text-left leading-snug break-words">
                   {isOwn ? "Vous voyez cette page comme un visiteur." : "Contact direct, sans intermédiaire."}
