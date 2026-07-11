@@ -473,57 +473,139 @@ const CityPage = () => {
  return <Navigate to="/" replace />;
  }
 
- // Render DB-based page (simplified legacy)
- return (
- <>
- <CityPageMeta
- city={{
- slug: dbPage.slug,
- name: dbPage.city,
- department: dbPage.department,
- departmentCode: "",
- region: "Auvergne-Rhône-Alpes",
- coordinates: { lat: 0, lng: 0 },
- zoneProfile: "urbain",
- keywordPrimary: "",
- keywordSecondary: [],
- h1: dbPage.h1_title,
- metaDescription: dbPage.meta_description,
- localSpots: [],
- riskProfile: [],
- expertiseTips: [],
- heroImageAlt: "",
- }}
- />
+  // Render DB-based page (simplified legacy)
+  const dbNoindex = dbPage.noindex === true;
+  const dbFaqItems = [
+    {
+      q: `Comment trouver un gardien de maison à ${dbPage.city} ?`,
+      a: `Sur Guardiens, vous publiez une annonce et les gardiens disponibles à ${dbPage.city} et ses environs postulent directement. Chaque gardien est vérifié manuellement avant d'apparaître sur la plateforme.`,
+    },
+    {
+      q: `Est-ce vraiment gratuit pour les propriétaires à ${dbPage.city} ?`,
+      a: "Oui. Guardiens est gratuit pour tous les propriétaires. L'espace gardien est également gratuit aujourd'hui, sans engagement.",
+    },
+    {
+      q: `Que se passe-t-il en cas d'urgence pendant la garde à ${dbPage.city} ?`,
+      a: `Guardiens dispose d'un réseau de Gardiens d'Urgence dans chaque zone. En cas d'imprévu, animal malade ou problème technique, le gardien en poste peut déclencher une alerte.`,
+    },
+    {
+      q: `Combien coûte une pension pour animaux à ${dbPage.city} ?`,
+      a: `Les pensions autour de ${dbPage.city} facturent en moyenne 25 à 45 euros par nuit et par animal. Sur Guardiens, c'est sans frais pour le propriétaire : le gardien s'installe chez vous et s'occupe de vos animaux dans leur environnement habituel.`,
+    },
+    {
+      q: `Comment devenir gardien à ${dbPage.city} ?`,
+      a: `Inscrivez-vous, complétez votre profil et faites vérifier votre identité. Vous pourrez ensuite postuler aux gardes disponibles en ${dbPage.department}. L'accès gardien est gratuit aujourd'hui, sans engagement.`,
+    },
+  ];
 
- <div className="min-h-screen bg-background">
- <PageBreadcrumb items={[
- { label: "Nos villes" },
- { label: dbPage.city },
- ]} />
+  const dbSchemaGraph = !dbNoindex
+    ? [
+        {
+          "@type": "Service",
+          name: `House-sitting à ${dbPage.city}`,
+          description: dbPage.meta_description,
+          serviceType: ["House Sitting", "Pet Sitting"],
+          provider: {
+            "@type": "Organization",
+            name: "Guardiens",
+            url: "https://guardiens.fr",
+          },
+          areaServed: {
+            "@type": "City",
+            name: dbPage.city,
+            containedInPlace: { "@type": "Country", name: "France" },
+          },
+          offers: {
+            "@type": "Offer",
+            price: "0",
+            priceCurrency: "EUR",
+            eligibleCustomerType: "Owner",
+            description: "Gratuit pour les propriétaires.",
+          },
+        },
+        {
+          "@type": "BreadcrumbList",
+          itemListElement: [
+            { "@type": "ListItem", position: 1, name: "Accueil", item: "https://guardiens.fr" },
+            { "@type": "ListItem", position: 2, name: "Nos villes", item: "https://guardiens.fr/nos-villes" },
+            {
+              "@type": "ListItem",
+              position: 3,
+              name: `House-sitting à ${dbPage.city}`,
+              item: `https://guardiens.fr/house-sitting/${dbPage.slug}`,
+            },
+          ],
+        },
+        {
+          "@type": "FAQPage",
+          mainEntity: dbFaqItems.map((f) => ({
+            "@type": "Question",
+            name: f.q,
+            acceptedAnswer: { "@type": "Answer", text: f.a },
+          })),
+        },
+      ]
+    : null;
 
- {/* Hero */}
- <section className="max-w-5xl mx-auto px-4 py-12">
- <h1 className="font-serif text-3xl md:text-5xl font-bold text-foreground mb-6">
- {dbPage.h1_title}
- </h1>
- <p className="text-lg text-muted-foreground max-w-3xl leading-relaxed mb-8">
- {dbPage.intro_text}
- </p>
- <div className="flex flex-wrap gap-4 mb-8">
- {dbPage.sitter_count > 0 && (
- <Badge variant="secondary" className="text-base px-4 py-2 gap-2">
- <Users className="h-4 w-4" />
- {dbPage.sitter_count} gardien
- {dbPage.sitter_count > 1 ? "s" : ""} vérifié
- {dbPage.sitter_count > 1 ? "s" : ""}
- </Badge>
- )}
- <Badge variant="outline" className="text-base px-4 py-2 gap-2">
- <Heart className="h-4 w-4" />
- Inscription gratuite
- </Badge>
- </div>
+  return (
+    <>
+      <CityPageMeta
+        noindex={dbNoindex}
+        city={{
+          slug: dbPage.slug,
+          name: dbPage.city,
+          department: dbPage.department,
+          departmentCode: "",
+          region: "Auvergne-Rhône-Alpes",
+          coordinates: { lat: 0, lng: 0 },
+          zoneProfile: "urbain",
+          keywordPrimary: "",
+          keywordSecondary: [],
+          h1: dbPage.h1_title,
+          metaDescription: dbPage.meta_description,
+          localSpots: [],
+          riskProfile: [],
+          expertiseTips: [],
+          heroImageAlt: "",
+        }}
+      />
+
+      {dbSchemaGraph && (
+        <Helmet>
+          <script type="application/ld+json">
+            {JSON.stringify({ "@context": "https://schema.org", "@graph": dbSchemaGraph })}
+          </script>
+        </Helmet>
+      )}
+
+      <div className="min-h-screen bg-background">
+        <PageBreadcrumb items={[
+          { label: "Nos villes" },
+          { label: dbPage.city },
+        ]} />
+
+        {/* Hero */}
+        <section className="max-w-5xl mx-auto px-4 py-12">
+          <h1 className="font-serif text-3xl md:text-5xl font-bold text-foreground mb-6">
+            {dbPage.h1_title}
+          </h1>
+          <p className="text-lg text-muted-foreground max-w-3xl leading-relaxed mb-8">
+            {dbPage.intro_text}
+          </p>
+          <div className="flex flex-wrap gap-4 mb-8">
+            {dbSitterCount > 0 && (
+              <Badge variant="secondary" className="text-base px-4 py-2 gap-2">
+                <Users className="h-4 w-4" />
+                {dbSitterCount} gardien
+                {dbSitterCount > 1 ? "s" : ""} vérifié
+                {dbSitterCount > 1 ? "s" : ""}
+              </Badge>
+            )}
+            <Badge variant="outline" className="text-base px-4 py-2 gap-2">
+              <Heart className="h-4 w-4" />
+              Inscription gratuite
+            </Badge>
+          </div>
  <div className="flex flex-col sm:flex-row gap-3">
  <Link to="/inscription">
  <Button size="lg" className="gap-2">
