@@ -64,6 +64,8 @@ const AdminLongTailArticles = () => {
 
   const run = async () => {
     if (running) return;
+    toast.error("Module verrouillé, voir bannière ci-dessus");
+    return;
     const todo = ALL_PAIRS.filter((p) => selected.has(slugFor(p)));
     if (todo.length === 0) { toast.info("Aucun article sélectionné."); return; }
     setRunning(true);
