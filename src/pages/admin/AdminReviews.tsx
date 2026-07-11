@@ -87,39 +87,113 @@ const AdminReviews = () => {
   const togglePublished = async (id: string, current: boolean) => {
     const { error } = await supabase.from("reviews").update({ published: !current }).eq("id", id);
     if (error) toast.error("Erreur");
-    else { toast.success(current ? "Avis masqué" : "Avis publié"); fetchReviews(); }
+  const logAdminAction = async (
+    action: string,
+    targetId: string,
+    metadata: Record<string, any>,
+  ) => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+    await supabase.from("admin_action_logs").insert({
+      admin_id: user.id,
+      action,
+      target_type: "review",
+      target_id: targetId,
+      metadata,
+    });
   };
 
-  const deleteReview = async (id: string) => {
-    const { error } = await supabase.from("reviews").update({ published: false, comment: "[Supprimé par l'admin]" }).eq("id", id);
-    if (error) toast.error("Erreur");
-    else { toast.success("Avis supprimé"); fetchReviews(); }
+  const performTogglePublished = async (review: any) => {
+    const willHide = review.published;
+    setBusyId(review.id);
+    const { error } = await supabase.from("reviews").update({ published: !review.published }).eq("id", review.id);
+    if (error) {
+      toast.error("Erreur");
+      setBusyId(null);
+      return;
+    }
+    await logAdminAction(willHide ? "review_hide" : "review_show", review.id, {
+      rating: review.overall_rating,
+      reviewer_id: review.reviewer_id,
+      reviewee_id: review.reviewee_id,
+      review_type: review.review_type ?? null,
+    });
+    toast.success(willHide ? "Avis masqué" : "Avis publié");
+    setBusyId(null);
+    setHideConfirm(null);
+    fetchReviews();
+  };
+
+  const togglePublished = (review: any) => {
+    if (review.published) {
+      setHideConfirm(review);
+    } else {
+      performTogglePublished(review);
+    }
+  };
+
+  const deleteReview = async (review: any) => {
+    setBusyId(review.id);
+    const { error } = await supabase
+      .from("reviews")
+      .update({ published: false, comment: "[Supprimé par l'admin]" })
+      .eq("id", review.id);
+    if (error) {
+      toast.error("Erreur");
+      setBusyId(null);
+      return;
+    }
+    await logAdminAction("review_delete", review.id, {
+      rating: review.overall_rating,
+      reviewer_id: review.reviewer_id,
+      reviewee_id: review.reviewee_id,
+      review_type: review.review_type ?? null,
+      original_comment: review.comment ?? null,
+    });
+    toast.success("Avis supprimé");
+    setBusyId(null);
     setDeleteConfirm(null);
+    fetchReviews();
   };
 
-  const handleModerationAction = async (reviewId: string, action: "valide" | "refuse", field: "moderation_status" | "response_status") => {
+  const handleModerationAction = async (
+    review: any,
+    action: "valide" | "refuse",
+    field: "moderation_status" | "response_status",
+  ) => {
+    const reviewId = review.id;
     if (action === "refuse" && !rejectReason.trim()) {
       toast.error("Veuillez indiquer une raison de refus.");
       return;
     }
 
     const update: any = { [field]: action === "valide" ? "valide" : "refuse" };
-    if (field === "response_status" && action === "valide") {
-      update.response_status = "validee";
-    }
-    if (field === "response_status" && action === "refuse") {
-      update.response_status = "refusee";
-    }
+    if (field === "response_status" && action === "valide") update.response_status = "validee";
+    if (field === "response_status" && action === "refuse") update.response_status = "refusee";
 
+    setBusyId(reviewId);
     const { error } = await supabase.from("reviews").update(update).eq("id", reviewId);
     if (error) {
       toast.error("Erreur lors de la mise à jour.");
+      setBusyId(null);
       return;
     }
 
-    // Send email on validation (non-blocking)
-    const review = cancellationReviews.find(r => r.id === reviewId);
-    if (review && action === "valide") {
+    const auditAction =
+      field === "moderation_status"
+        ? action === "valide" ? "review_cancellation_approve" : "review_cancellation_reject"
+        : action === "valide" ? "review_cancellation_response_approve" : "review_cancellation_response_reject";
+
+    await logAdminAction(auditAction, reviewId, {
+      review_type: "annulation",
+      field,
+      reviewer_id: review.reviewer_id,
+      reviewee_id: review.reviewee_id,
+      cancelled_by_role: review.cancelled_by_role ?? null,
+      reject_reason: action === "refuse" ? rejectReason.trim() : null,
+    });
+
+    if (action === "valide") {
       if (field === "moderation_status") {
         await sendTransactionalEmail({
           templateName: "cancellation-review-published",
@@ -144,8 +218,10 @@ const AdminReviews = () => {
     }
 
     toast.success(action === "valide" ? "Validé avec succès" : "Refusé");
+    setBusyId(null);
     setRejectReasonModal(null);
     setRejectReason("");
+    setValidateConfirm(null);
     fetchCancellationReviews();
   };
 
