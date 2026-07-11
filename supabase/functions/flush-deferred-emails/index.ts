@@ -17,15 +17,31 @@ const MAX_BATCH = 50;
 const MAX_ATTEMPTS = 6;
 const TTL_HOURS = 36; // hard expire after 36h to avoid stale notifications
 
+function getJwtRole(authHeader: string | null): string | null {
+  if (!authHeader?.startsWith("Bearer ")) return null;
+
+  try {
+    const token = authHeader.slice("Bearer ".length);
+    const parts = token.split(".");
+    if (parts.length !== 3) return null;
+
+    const base64 = parts[1].replace(/-/g, "+").replace(/_/g, "/");
+    const padded = base64.padEnd(Math.ceil(base64.length / 4) * 4, "=");
+    const payload = JSON.parse(atob(padded)) as { role?: unknown };
+    return typeof payload.role === "string" ? payload.role : null;
+  } catch {
+    return null;
+  }
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
 
   const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
   const SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 
-  // Restrict to service-role callers (pg_cron only).
-  const token = req.headers.get("Authorization")?.replace("Bearer ", "");
-  if (token !== SERVICE_KEY) {
+  // The gateway validates the JWT (verify_jwt = true); only service_role may proceed.
+  if (getJwtRole(req.headers.get("Authorization")) !== "service_role") {
     return new Response(JSON.stringify({ error: "Unauthorized" }), {
       status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
