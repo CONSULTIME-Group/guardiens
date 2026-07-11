@@ -80,13 +80,12 @@ Deno.serve(async (req) => {
       });
     }
 
-    const attempts = Number(health.attempts_1h ?? 0);
     const failureRate = Number(health.failure_rate_1h ?? 0);
-    if (attempts >= MIN_ATTEMPTS_FOR_RATE && failureRate > MAX_FAILURE_RATE) {
+    if (attempts1h >= MIN_ATTEMPTS_FOR_RATE && failureRate > MAX_FAILURE_RATE) {
       anomalies.push({
         code: "email_pipeline_failure_rate",
         title: "Taux d'échec d'envoi élevé",
-        detail: `Sur la dernière heure : ${attempts} tentatives, taux d'échec ${(failureRate * 100).toFixed(1)}% (seuil ${(MAX_FAILURE_RATE * 100).toFixed(0)}%). DLQ 1h : ${health.dlq_last_hour}.`,
+        detail: `Sur la dernière heure : ${attempts1h} tentatives, taux d'échec ${(failureRate * 100).toFixed(1)}% (seuil ${(MAX_FAILURE_RATE * 100).toFixed(0)}%). DLQ 1h : ${health.dlq_last_hour}.`,
       });
     }
 
