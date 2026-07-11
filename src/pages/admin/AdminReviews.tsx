@@ -537,10 +537,10 @@ const AdminReviews = () => {
               <div><strong>Commentaire :</strong></div>
               <p className="bg-muted p-3 rounded-lg">{detailReview.comment || "Aucun commentaire"}</p>
               <div className="flex gap-2 pt-2 border-t border-border">
-                <Button size="sm" variant={detailReview.published ? "outline" : "default"} onClick={() => { togglePublished(detailReview.id, detailReview.published); setDetailReview(null); }}>
+                <Button size="sm" variant={detailReview.published ? "outline" : "default"} onClick={() => { togglePublished(detailReview); setDetailReview(null); }}>
                   {detailReview.published ? "Masquer" : "Publier"}
                 </Button>
-                <Button size="sm" variant="destructive" onClick={() => { setDeleteConfirm(detailReview.id); setDetailReview(null); }}>
+                <Button size="sm" variant="destructive" onClick={() => { setDeleteConfirm(detailReview); setDetailReview(null); }}>
                   Supprimer
                 </Button>
               </div>
