@@ -64,6 +64,8 @@ const AdminLongTailArticles = () => {
 
   const run = async () => {
     if (running) return;
+    toast.error("Module verrouillé, voir bannière ci-dessus");
+    return;
     const todo = ALL_PAIRS.filter((p) => selected.has(slugFor(p)));
     if (todo.length === 0) { toast.info("Aucun article sélectionné."); return; }
     setRunning(true);
@@ -104,11 +106,19 @@ const AdminLongTailArticles = () => {
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
+          <div className="rounded-lg border border-destructive bg-destructive/10 p-4 space-y-2">
+            <h2 className="text-sm font-semibold text-destructive">
+              Module verrouillé — décision produit du 11/07/2026
+            </h2>
+            <p className="text-sm text-destructive/90">
+              Le pattern ville × race contredit la stratégie SEO validée (fiches races = scope national, pages villes = AURA uniquement). La génération de 150 combinaisons avec 7 villes hors AURA (Paris, Marseille, Toulouse, Bordeaux, Nantes, Lille, Strasbourg) créerait des pages à faible E-E-A-T et risque de pénalité Helpful Content Update. Le module reste visible pour audit mais n'exécute plus rien tant que la logique n'est pas re-arbitrée.
+            </p>
+          </div>
           <p className="text-sm text-muted-foreground">
             Les articles sont créés en brouillon (non publiés). Vérifiez et publiez ensuite depuis Articles.
           </p>
           <div className="flex flex-wrap items-center gap-3">
-            <Button onClick={run} disabled={running || loading || selected.size === 0}>
+            <Button onClick={run} disabled={true} className="disabled:opacity-50 disabled:cursor-not-allowed">
               {running ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Zap className="w-4 h-4 mr-2" />}
               Générer {selected.size} brouillon(s)
             </Button>
