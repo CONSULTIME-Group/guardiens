@@ -443,7 +443,8 @@ const AdminReviews = () => {
                       <div className="flex gap-2">
                         <Button
                           size="sm"
-                          onClick={() => handleModerationAction(review.id, "valide", "response_status")}
+                          disabled={busyId === review.id}
+                          onClick={() => setValidateConfirm({ review, field: "response_status" })}
                           className="gap-1.5"
                         >
                           <CheckCircle2 className="h-3.5 w-3.5" /> Valider la réponse
@@ -451,7 +452,8 @@ const AdminReviews = () => {
                         <Button
                           size="sm"
                           variant="outline"
-                          onClick={() => setRejectReasonModal({ id: review.id, type: "response" })}
+                          disabled={busyId === review.id}
+                          onClick={() => setRejectReasonModal({ id: review.id, type: "response", review })}
                           className="gap-1.5 text-destructive border-destructive/30 hover:bg-destructive/10"
                         >
                           <XCircle className="h-3.5 w-3.5" /> Refuser
