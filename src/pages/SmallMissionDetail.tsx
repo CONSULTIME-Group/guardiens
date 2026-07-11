@@ -574,7 +574,7 @@ const SmallMissionDetail = () => {
     if (completing) return;
     setCompleting(true);
     try {
-      const { error } = await supabase.from("small_missions").update({ status: "completed" as any }).eq("id", id!);
+      const { error } = await supabase.from("small_missions").update({ status: "completed" as any }).eq("id", mission.id);
       if (error) throw error;
       setMission((prev: any) => ({ ...prev, status: "completed" }));
       // Batch notifications to accepted responders (compute inline to avoid forward-ref)
