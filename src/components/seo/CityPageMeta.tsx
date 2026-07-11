@@ -4,6 +4,7 @@ import type { CityData } from "@/data/cities";
 
 interface Props {
   city: CityData;
+  noindex?: boolean;
 }
 
 const META_TITLE_OVERRIDES: Record<string, string> = {
@@ -12,7 +13,7 @@ const META_TITLE_OVERRIDES: Record<string, string> = {
   chambery: "Home sitting Chambéry, Gardien de confiance en Savoie | Guardiens",
 };
 
-const CityPageMeta = ({ city }: Props) => {
+const CityPageMeta = ({ city, noindex = false }: Props) => {
   const title =
     META_TITLE_OVERRIDES[city.slug] ||
     `House-sitting à ${city.name} – Gardiens vérifiés | Guardiens`;
@@ -22,6 +23,7 @@ const CityPageMeta = ({ city }: Props) => {
       title={title}
       description={city.metaDescription}
       path={`/house-sitting/${city.slug}`}
+      noindex={noindex}
       image={buildOgImageUrl({
         title: city.name,
         subtitle: "Garde d'animaux entre particuliers",
