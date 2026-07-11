@@ -58,7 +58,7 @@ async function logAdminAction(action: string, targetId: string, metadata?: Recor
     action,
     target_type: "small_mission",
     target_id: targetId,
-    metadata: metadata ?? null,
+    metadata: (metadata ?? null) as any,
   });
 }
 
