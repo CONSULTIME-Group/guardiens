@@ -43,6 +43,7 @@ import { buildTrustTimeline } from "@/lib/trustTimeline";
 import { hydrateReviewers } from "@/lib/hydrateReviewers";
 import { getSitterHeroImage, getSitterHeroAnchor, getSitterHeroSources } from "@/lib/heroBank";
 import { useHeroWeights } from "@/hooks/useHeroWeights";
+import ActivateRoleDialog, { type ContactIntentContext } from "@/components/premium/ActivateRoleDialog";
 
 const capitalize = (name: string) =>
   name ? name.charAt(0).toUpperCase() + name.slice(1).toLowerCase() : "";
