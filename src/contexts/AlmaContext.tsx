@@ -382,7 +382,7 @@ export function AlmaProvider({ children }: { children: ReactNode }) {
   }, [current, queue, user?.id, isProactiveMuted, verboseMode, claimProactiveSurface, activeProactiveSurface]);
 
   const dismissCurrent = useCallback(
-    (reason: AlmaDismissReason) => {
+    (reason: AlmaDismissReason, actionId?: string) => {
       if (!current) return;
       const w = current;
       setCurrent(null);
@@ -394,13 +394,20 @@ export function AlmaProvider({ children }: { children: ReactNode }) {
       }
 
       trackEvent("alma_whisper_dismissed", {
-        metadata: { whisper_type: w.type, reason },
+        metadata: { whisper_type: w.type, reason, action_id: actionId ?? null },
       });
 
       if (user?.id) {
+        const patch: Record<string, unknown> = { dismissed_reason: reason };
+        // Ne renseigne action_taken QUE pour un clic volontaire, jamais pour
+        // un auto-dismiss ou une fermeture manuelle : le dashboard admin
+        // compte les actions via cette colonne.
+        if (reason === "action_clicked" && actionId) {
+          patch.action_taken = actionId;
+        }
         void supabase
           .from("alma_whisper_history" as any)
-          .update({ dismissed_reason: reason } as any)
+          .update(patch as any)
           .eq("user_id", user.id)
           .eq("whisper_type", w.type)
           .is("dismissed_reason", null)
@@ -414,6 +421,7 @@ export function AlmaProvider({ children }: { children: ReactNode }) {
     },
     [current, user?.id],
   );
+
 
   const requestNextTip = useCallback<AlmaContextValue["requestNextTip"]>(
     async ({ surface, context, role, state: userState, preferNudge = true, emptyMessage, onDemand = false }) => {
