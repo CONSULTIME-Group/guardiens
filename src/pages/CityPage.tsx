@@ -586,6 +586,16 @@ const CityPage = () => {
 
         {/* Hero */}
         <section className="max-w-5xl mx-auto px-4 py-12">
+          {dbPage.cover_image_url && (
+            <img
+              src={dbPage.cover_image_url}
+              alt={dbPage.hero_image_alt || `Vue de ${dbPage.city}`}
+              loading="eager"
+              decoding="async"
+              onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = "none"; }}
+              className="w-full h-56 md:h-80 object-cover rounded-2xl mb-8 shadow-sm"
+            />
+          )}
           <h1 className="font-serif text-3xl md:text-5xl font-bold text-foreground mb-6">
             {dbPage.h1_title}
           </h1>
