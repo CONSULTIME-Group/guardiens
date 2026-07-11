@@ -326,10 +326,10 @@ const AdminReviews = () => {
                         <Button variant="ghost" size="icon" title="Voir" onClick={() => setDetailReview(review)}>
                           <Eye className="h-4 w-4" />
                         </Button>
-                        <Button variant="ghost" size="icon" title={review.published ? "Masquer" : "Publier"} onClick={() => togglePublished(review.id, review.published)}>
+                        <Button variant="ghost" size="icon" disabled={busyId === review.id} title={review.published ? "Masquer" : "Publier"} onClick={() => togglePublished(review)}>
                           <EyeOff className="h-4 w-4" />
                         </Button>
-                        <Button variant="ghost" size="icon" title="Supprimer" onClick={() => setDeleteConfirm(review.id)}>
+                        <Button variant="ghost" size="icon" disabled={busyId === review.id} title="Supprimer" onClick={() => setDeleteConfirm(review)}>
                           <Trash2 className="h-4 w-4 text-destructive" />
                         </Button>
                       </div>
