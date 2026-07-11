@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Outlet, Navigate, NavLink, useNavigate } from "react-router-dom";
-import { AdminSidebar, adminNavGroups_export } from "./AdminSidebar";
+import { AdminSidebar, adminNavGroups_export, BADGE_TITLES } from "./AdminSidebar";
+import { useAdminBadges } from "@/hooks/useAdminBadges";
 import { useAdmin } from "@/hooks/useAdmin";
 import { useAuth } from "@/contexts/AuthContext";
 import { Menu, X, ArrowLeft, LogOut } from "lucide-react";
@@ -11,6 +12,7 @@ export const AdminLayout = () => {
   const { isAdmin, loading: adminLoading } = useAdmin();
   const navigate = useNavigate();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const badges = useAdminBadges() as unknown as Record<string, number>;
 
   if (authLoading || adminLoading) {
     return (
@@ -52,25 +54,48 @@ export const AdminLayout = () => {
                   {group.label}
                 </p>
                 <div className="space-y-0.5">
-                  {group.items.map((item) => (
-                    <NavLink
-                      key={item.to}
-                      to={item.to}
-                      end={item.end}
-                      onClick={() => setMobileMenuOpen(false)}
-                      className={({ isActive }) =>
-                        cn(
-                          "flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors",
-                          isActive
-                            ? "bg-primary/10 text-primary"
-                            : "text-muted-foreground hover:bg-accent hover:text-foreground"
-                        )
-                      }
-                    >
-                      <item.icon className="h-4 w-4" />
-                      {item.label}
-                    </NavLink>
-                  ))}
+                  {group.items.map((item) => {
+                    const badgeCount = item.badgeKey ? badges[item.badgeKey] || 0 : 0;
+                    const badgeLabel = item.badgeKey
+                      ? `${badgeCount} ${BADGE_TITLES[item.badgeKey] ?? "à traiter"}`
+                      : undefined;
+                    return (
+                      <NavLink
+                        key={item.to}
+                        to={item.to}
+                        end={item.end}
+                        onClick={() => setMobileMenuOpen(false)}
+                        className={({ isActive }) =>
+                          cn(
+                            "flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors",
+                            isActive
+                              ? "bg-primary/10 text-primary"
+                              : "text-muted-foreground hover:bg-accent hover:text-foreground"
+                          )
+                        }
+                        aria-label={badgeLabel ? `${item.label}, ${badgeLabel}` : undefined}
+                      >
+                        <span className="relative shrink-0">
+                          <item.icon className="h-4 w-4" />
+                          {badgeCount > 0 && (
+                            <span
+                              className="absolute -top-1 -right-1.5 h-2 w-2 rounded-full bg-destructive ring-2 ring-background"
+                              aria-hidden="true"
+                            />
+                          )}
+                        </span>
+                        <span className="flex-1">{item.label}</span>
+                        {badgeCount > 0 && (
+                          <span
+                            className="ml-auto bg-destructive text-destructive-foreground text-[10px] font-bold rounded-full min-w-[18px] h-[18px] flex items-center justify-center px-1"
+                            aria-label={badgeLabel}
+                          >
+                            {badgeCount}
+                          </span>
+                        )}
+                      </NavLink>
+                    );
+                  })}
                 </div>
               </div>
             ))}
