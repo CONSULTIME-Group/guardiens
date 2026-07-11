@@ -253,14 +253,10 @@ export default function AdminEmailHealth() {
   }, [fetchSuppressed, suppressedPage, suppressedSearch]);
 
   // Pipeline tones
-  const lastRunTone = useMemo<"success" | "warning" | "destructive" | "muted">(() => {
-    if (!health) return "muted";
-    const age = health.last_run_age_seconds;
-    if (age == null) return "muted";
-    if (age > 600) return "destructive";
-    if (age > 300) return "warning";
-    return "success";
-  }, [health]);
+  // Le worker est event-driven : un âge élevé quand les files sont vides est normal.
+  // Cette carte reste informative ; seule oldestPendingTone reflète un vrai backlog.
+  const lastRunTone: "muted" = "muted";
+
 
   const failureRateTone = useMemo<"success" | "warning" | "destructive" | "muted">(() => {
     if (!health || health.failure_rate_1h == null) return "muted";
