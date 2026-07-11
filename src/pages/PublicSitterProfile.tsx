@@ -133,6 +133,7 @@ export default function PublicSitterProfile() {
   const [missionsPublished, setMissionsPublished] = useState<any[]>([]);
   const [missionsHelped, setMissionsHelped] = useState<any[]>([]);
   const [thanksReceived, setThanksReceived] = useState<number>(0);
+  const [activateProprioIntent, setActivateProprioIntent] = useState<ContactIntentContext | null>(null);
   const [externalExperiences, setExternalExperiences] = useState<any[]>([]);
   const [ownerGalleryPhotos, setOwnerGalleryPhotos] = useState<any[]>([]);
 
