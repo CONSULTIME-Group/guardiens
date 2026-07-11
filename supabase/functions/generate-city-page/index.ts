@@ -51,8 +51,8 @@ async function fetchWikipediaImage(city: string): Promise<{ url: string; alt: st
  */
 async function fetchOsmPlaces(
   city: string,
-): Promise<{ vets: string[]; parks: string[] }> {
-  const empty = { vets: [], parks: [] };
+): Promise<{ vets: string[]; parks: string[]; trails: string[] }> {
+  const empty = { vets: [], parks: [], trails: [] };
   const safeCity = city.replace(/"/g, '\\"');
   const query = `[out:json][timeout:25];
 area["name"="${safeCity}"]["boundary"="administrative"]["admin_level"~"7|8"]->.a;
@@ -62,8 +62,12 @@ area["name"="${safeCity}"]["boundary"="administrative"]["admin_level"~"7|8"]->.a
   node["leisure"="dog_park"](area.a);
   node["leisure"="park"]["name"](area.a);
   way["leisure"="park"]["name"](area.a);
+  relation["route"="hiking"]["name"](area.a);
+  way["leisure"="nature_reserve"]["name"](area.a);
+  node["leisure"="nature_reserve"]["name"](area.a);
+  way["highway"="path"]["name"](area.a);
 );
-out tags center 40;`;
+out tags center 80;`;
 
   try {
     const controller = new AbortController();
@@ -86,6 +90,7 @@ out tags center 40;`;
     const elements: any[] = Array.isArray(data?.elements) ? data.elements : [];
     const vets = new Set<string>();
     const parks = new Set<string>();
+    const trails = new Set<string>();
     for (const el of elements) {
       const tags = el?.tags || {};
       const name: string | undefined = tags.name;
@@ -96,14 +101,25 @@ out tags center 40;`;
         if (vets.size < 5) vets.add(clean);
       } else if (tags.leisure === "dog_park" || tags.leisure === "park") {
         if (parks.size < 5) parks.add(clean);
+      } else if (
+        tags.route === "hiking" ||
+        tags.leisure === "nature_reserve" ||
+        tags.highway === "path"
+      ) {
+        trails.add(clean);
       }
     }
-    return { vets: [...vets], parks: [...parks] };
+    const parksArr = [...parks];
+    const trailsArr = [...trails]
+      .filter((t) => !parksArr.includes(t))
+      .slice(0, 5);
+    return { vets: [...vets], parks: parksArr, trails: trailsArr };
   } catch (e) {
     console.warn("overpass err", city, String(e));
     return empty;
   }
 }
+
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -170,11 +186,14 @@ Deno.serve(async (req) => {
 
     const vetsLine = osm.vets.length > 0 ? osm.vets.join(", ") : "non disponibles";
     const parksLine = osm.parks.length > 0 ? osm.parks.join(", ") : "non disponibles";
+    const trailsLine = osm.trails.length > 0 ? osm.trails.join(", ") : "non disponibles";
 
     const realDataBlock = `DONNÉES LOCALES RÉELLES (vérifiées, à utiliser telles quelles, ne pas en inventer d'autres) :
 - Gardiens Guardiens actifs à ${city} : ${realSitterCount}.
 - Vétérinaires réels : ${vetsLine}.
-- Parcs et espaces verts réels : ${parksLine}.`;
+- Parcs et espaces verts réels : ${parksLine}.
+- Sentiers et lieux de promenade réels : ${trailsLine}.`;
+
 
     const brandContext = `CONTEXTE MARQUE Guardiens (plateforme de house-sitting de proximité, sans transaction financière directe) :
 - Fondée par Jérémie et Elisa après 5 ans de house-sitting en France (37 maisons gardées, 234 animaux accompagnés).
@@ -241,8 +260,9 @@ Structure EXACTE :
 ### Étape 4, Partez l'esprit libre
 (paragraphe avec lien [gardien d'urgence](/gardien-urgence))
 
-## Les quartiers et environs de ${city}
-(intro + citez uniquement les parcs, espaces verts et lieux figurant dans DONNÉES LOCALES RÉELLES (en **gras**). Si la liste est "non disponibles", restez générique sur 3 zones sans nommer de lieu précis.)
+## Où promener votre chien à ${city}
+(intro + citez UNIQUEMENT les parcs, espaces verts et sentiers figurant dans DONNÉES LOCALES RÉELLES, en **gras**, en expliquant en quoi ils sont adaptés aux gardes d'animaux. Si toutes ces listes sont 'non disponibles', restez générique sur les types de lieux de promenade sans nommer de lieu précis.)
+
 
 ## Propriétaires à ${city}, ce que Guardiens vous offre
 (5 à 6 bénéfices en **gras** suivis de 1-2 phrases : animal chez lui, maison vivante, rencontre préalable obligatoire, aucune commission, accord de garde clair, gardiens vérifiés)
