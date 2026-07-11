@@ -205,7 +205,15 @@ const AdminSmallMissions = () => {
   const handleArchive = async () => {
     if (!archiveId) return;
     const id = archiveId;
-    const { error } = await supabase.from("small_missions").update({ status: "cancelled" as any }).eq("id", id);
+    const { data: { user } } = await supabase.auth.getUser();
+    const { error } = await supabase
+      .from("small_missions")
+      .update({
+        status: "cancelled" as any,
+        hidden_by: user?.id ?? null,
+        hidden_at: new Date().toISOString(),
+      } as any)
+      .eq("id", id);
     if (error) {
       toast.error(`Masquage impossible : ${error.message}`);
       return;
@@ -219,7 +227,14 @@ const AdminSmallMissions = () => {
   const handleRestore = async () => {
     if (!restoreId) return;
     const id = restoreId;
-    const { error } = await supabase.from("small_missions").update({ status: "open" as any }).eq("id", id);
+    const { error } = await supabase
+      .from("small_missions")
+      .update({
+        status: "open" as any,
+        hidden_by: null,
+        hidden_at: null,
+      } as any)
+      .eq("id", id);
     if (error) {
       toast.error(`Restauration impossible : ${error.message}`);
       return;
