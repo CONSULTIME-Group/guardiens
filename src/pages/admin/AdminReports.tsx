@@ -19,7 +19,10 @@ import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
-import { Eye, CheckCircle, StickyNote, AlertTriangle, ExternalLink, UserX, EyeOff, Trash2, ShieldAlert } from "lucide-react";
+import { Eye, CheckCircle, StickyNote, AlertTriangle, ExternalLink, UserX, EyeOff, Trash2, ShieldAlert, ChevronLeft, ChevronRight } from "lucide-react";
+
+const PAGE_SIZE = 50;
+
 
 const reasonLabels: Record<string, string> = {
   inappropriate: "Contenu inapproprié",
