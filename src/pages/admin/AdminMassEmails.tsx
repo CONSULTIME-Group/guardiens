@@ -711,6 +711,41 @@ const AdminMassEmails = () => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Confirmation d'annulation de campagne */}
+      <AlertDialog open={!!cancelTarget} onOpenChange={(open) => { if (!open && !cancelling) setCancelTarget(null); }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Annuler cette campagne ?</AlertDialogTitle>
+            <AlertDialogDescription asChild>
+              <div className="space-y-2 text-sm">
+                <div><span className="text-muted-foreground">Objet :</span> {cancelTarget?.subject}</div>
+                <div>
+                  <span className="text-muted-foreground">Statut actuel :</span>{" "}
+                  {cancelTarget ? (STATUS_META[cancelTarget.status]?.label ?? cancelTarget.status) : ""}
+                </div>
+                <p className="text-muted-foreground">
+                  Les emails déjà envoyés ne peuvent pas être rappelés. Les destinataires restants ne recevront rien.
+                </p>
+              </div>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={cancelling}>Retour</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={(e) => { e.preventDefault(); handleCancelCampaign(); }}
+              disabled={cancelling}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {cancelling ? (
+                <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Annulation…</>
+              ) : (
+                "Annuler la campagne"
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
