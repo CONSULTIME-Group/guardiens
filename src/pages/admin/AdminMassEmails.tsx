@@ -202,6 +202,29 @@ const AdminMassEmails = () => {
 
   useEffect(() => { loadHistory(); }, [loadHistory]);
 
+  // Cancel campaign
+  const [cancelTarget, setCancelTarget] = useState<MassEmail | null>(null);
+  const [cancelling, setCancelling] = useState(false);
+
+  const handleCancelCampaign = async () => {
+    if (!cancelTarget) return;
+    setCancelling(true);
+    try {
+      const { error } = await supabase.functions.invoke("cancel-mass-email", {
+        body: { campaign_id: cancelTarget.id },
+      });
+      if (error) throw error;
+      toast.success("Campagne annulée");
+      setCancelTarget(null);
+      await loadHistory();
+    } catch (e) {
+      toast.error(`Annulation impossible : ${(e as Error).message ?? "erreur inconnue"}`);
+    } finally {
+      setCancelling(false);
+    }
+  };
+
+
   // Debounced recipient count
   useEffect(() => {
     const timer = setTimeout(async () => {
