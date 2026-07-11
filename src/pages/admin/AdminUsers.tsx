@@ -49,7 +49,7 @@ const statusLabels: Record<string, { label: string; variant: "default" | "second
   deletion_pending: { label: "Suppression en cours", variant: "secondary" },
 };
 
-import { DEPT_NAMES, getDeptCode, getDeptLabel } from "@/lib/departments";
+import { DEPT_NAMES, getDeptLabel } from "@/lib/departments";
 import { getCountryName } from "@/lib/countries";
 
 const PAGE_SIZE = 50;
