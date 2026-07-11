@@ -150,7 +150,17 @@ const AdminReports = () => {
     setNoteModal({ open: false, reportId: "", note: "" });
   };
 
-  const newCount = reports.filter((r) => r.status === "new").length;
+  const [newCount, setNewCount] = useState(0);
+  useEffect(() => {
+    supabase
+      .from("reports")
+      .select("id", { count: "exact", head: true })
+      .eq("status", "new")
+      .then(({ count }) => setNewCount(count ?? 0));
+  }, [reports]);
+
+  const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+
 
   const statusBadge = (status: string) => {
     if (status === "new") return <Badge variant="destructive">Nouveau</Badge>;
