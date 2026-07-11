@@ -72,7 +72,6 @@ Deno.serve(async (req) => {
       });
     }
 
-    const oldestPending = Number(health.oldest_pending_age_seconds ?? 0);
     if (health.oldest_pending_age_seconds != null && oldestPending > MAX_OLDEST_PENDING_S) {
       anomalies.push({
         code: "email_pipeline_queue_backlog",
