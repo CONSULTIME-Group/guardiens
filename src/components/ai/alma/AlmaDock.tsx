@@ -601,7 +601,7 @@ export function AlmaDock() {
                   />
                 )}
                 <span className="text-sm font-semibold text-foreground">
-                  {stage ? `Alma, stade ${STAGE_SHORT_LABEL[stage]}` : "Alma, votre assistante"}
+                  {stage && STAGE_SHORT_LABEL[stage] ? `Alma, stade ${STAGE_SHORT_LABEL[stage]}` : "Alma, votre assistante"}
                 </span>
               </div>
               {evolution?.nextMilestone && (
