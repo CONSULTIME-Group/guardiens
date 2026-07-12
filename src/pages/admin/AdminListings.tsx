@@ -64,7 +64,7 @@ const AdminListings = () => {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   // Annonces = vie de la publication. Par défaut : tout ce qui est visible publiquement ou bloqué côté annonce (hors brouillons et hors gardes opérationnelles déjà confirmées)
-  const [filterStatus, setFilterStatus] = useState<"published" | "draft" | "cancelled" | "all" | "no_draft">("published");
+  const [filterStatus, setFilterStatus] = useState<"published" | "draft" | "cancelled" | "all" | "no_draft" | "to_staff">("published");
   const [filterCity, setFilterCity] = useState("");
   const [stats, setStats] = useState<Record<string, Stats>>({});
   const [cities, setCities] = useState<string[]>([]);
