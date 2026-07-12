@@ -3,6 +3,7 @@
 // `enrollment_rule` (signup window, inactivity, behavioural conditions) and
 // dispatches due steps via send-transactional-email.
 import { createClient } from 'npm:@supabase/supabase-js@2'
+import { startCronRun } from '../_shared/cron-run-log.ts'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -84,19 +85,39 @@ Deno.serve(async (req) => {
   } catch { /* cron */ }
 
   // Kick off the heavy work in the background so we always respond quickly and
-  // never hit the 150s IDLE_TIMEOUT. The cron caller doesn't consume the stats.
-  const work = runEvaluation(supabase, dryRun).catch((e) => {
-    console.error('[evaluate-journeys] background run failed', e)
-  })
+  // never hit the 150s IDLE_TIMEOUT. Trace each run into cron_run_log so
+  // /admin/nurturing has a real freshness signal even when 0 emails are due.
+  const runWork = async () => {
+    const run = dryRun ? null : await startCronRun('evaluate-journeys')
+    try {
+      const stats = await runEvaluation(supabase, dryRun)
+      if (run) {
+        await run.finish(stats.errors > 0 ? 'partial' : 'success', {
+          enrolled: stats.enrolled,
+          sent: stats.sent,
+          exited: stats.exited,
+          completed: stats.completed,
+          skipped: stats.skipped,
+          errors: stats.errors,
+          capped: stats.capped,
+        })
+      }
+      return stats
+    } catch (e) {
+      console.error('[evaluate-journeys] background run failed', e)
+      if (run) await run.fail(e)
+      throw e
+    }
+  }
 
   if (dryRun) {
-    // Callers of dryRun (admin UI) want the actual stats synchronously.
-    const stats = await work
+    const stats = await runWork().catch(() => null)
     return new Response(JSON.stringify({ ok: true, dryRun, stats }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     })
   }
 
+  const work = runWork().catch(() => {})
   // @ts-ignore EdgeRuntime is provided by Supabase Edge runtime
   try { EdgeRuntime.waitUntil(work) } catch { /* ignore in non-edge env */ }
 
