@@ -40,6 +40,8 @@ const TabGarde = ({
   setActiveTab,
 }: TabGardeProps) => {
   const routine = parseRoutine(rawRoutine);
+  const displayOwnerName = ownerName ? ownerName.charAt(0).toUpperCase() + ownerName.slice(1) : ownerName;
+
 
   return (
     <>
