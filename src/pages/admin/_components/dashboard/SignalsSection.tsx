@@ -101,6 +101,12 @@ export const SignalsSection = () => {
                   <NoApplicationsCard signal={s as unknown as import("@/components/admin/signals/NoApplicationsCard").AdminSignal} />
                 ) : s.signal_type === "pending_application" ? (
                   <PendingApplicationCard signal={s as unknown as import("@/components/admin/signals/PendingApplicationCard").PendingApplicationSignal} />
+                ) : s.signal_type === "dormant_sitter" ? (
+                  <DormantSitterCard signal={s as unknown as import("@/components/admin/signals/DormantSitterCard").DormantSitterSignal} />
+                ) : s.signal_type === "stale_verification" ? (
+                  <StaleVerificationCard signal={s as unknown as import("@/components/admin/signals/StaleVerificationCard").StaleVerificationSignal} />
+                ) : s.signal_type === "affinity_onboarding_stale" ? (
+                  <AffinityStaleCard signal={s as unknown as import("@/components/admin/signals/AffinityStaleCard").AffinityStaleSignal} />
                 ) : (
                   <Link
                     to={entityLink(s)}
