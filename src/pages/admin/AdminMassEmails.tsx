@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -18,13 +18,12 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Send, Eye, Loader2 } from "lucide-react";
+import { Send, Eye, Loader2, Sparkles, Bold, Link as LinkIcon, MailCheck } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { MassEmailFiltersPanel } from "@/components/admin/mass-email/MassEmailFilters";
 import type { MassEmailFilters, Segment } from "@/components/admin/mass-email/filters.types";
 import { SEGMENT_LABELS } from "@/components/admin/mass-email/filters.types";
-import ProximityCampaignCard from "@/components/admin/mass-email/ProximityCampaignCard";
 
 interface MassEmail {
   id: string;
