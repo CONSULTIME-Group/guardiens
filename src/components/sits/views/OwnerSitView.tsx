@@ -115,6 +115,35 @@ const OwnerSitView = ({
   const [internalAppCount, setInternalAppCount] = useState(appCount);
   // Marqueur "vient juste de publier" → déclenche scroll + highlight du bloc d'invitation
   const [justPublished, setJustPublished] = useState(false);
+  // Segmentation candidatures (À traiter / Vues / En discussion / Refusées)
+  const [appChipFilter, setAppChipFilter] = useState<"pending" | "viewed" | "discussing" | "declined" | null>(null);
+  const [appStatusCounts, setAppStatusCounts] = useState<{ pending: number; viewed: number; discussing: number; declined: number }>({
+    pending: pendingAppCount,
+    viewed: 0,
+    discussing: 0,
+    declined: 0,
+  });
+
+  // Recompte par statut à l'arrivée + quand appCount change (proxy refetch).
+  useEffect(() => {
+    let cancelled = false;
+    void (async () => {
+      const { data } = await supabase
+        .from("applications")
+        .select("status")
+        .eq("sit_id", sit.id);
+      if (cancelled || !data) return;
+      const counts = { pending: 0, viewed: 0, discussing: 0, declined: 0 };
+      for (const a of data as any[]) {
+        if (a.status === "pending") counts.pending++;
+        else if (a.status === "viewed") counts.viewed++;
+        else if (a.status === "discussing") counts.discussing++;
+        else if (a.status === "rejected" || a.status === "owner_withdrew" || a.status === "cancelled") counts.declined++;
+      }
+      setAppStatusCounts(counts);
+    })();
+    return () => { cancelled = true; };
+  }, [sit.id, appCount, pendingAppCount]);
 
   // sync if parent re-fetches
   useEffect(() => setInternalAppCount(appCount), [appCount]);
