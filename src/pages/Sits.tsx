@@ -1112,10 +1112,11 @@ const Sits = () => {
 
 /* ── Card ── */
 const SitCard = ({
-  sit, isOwner, onArchive, onDelete, onRepublish, onOpenGuide,
+  sit, isOwner, onArchive, onDelete, onRepublish, onOpenGuide, onWithdraw,
 }: {
   sit: any; isOwner: boolean;
   onArchive: () => void; onDelete: () => void; onRepublish: () => void; onOpenGuide: (id: string) => void;
+  onWithdraw?: (appId: string) => void;
 }) => {
   const effectiveStatus = sit.effectiveStatus || sit.status;
   const duration = getDuration(sit.start_date, sit.end_date);
