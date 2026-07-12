@@ -278,28 +278,74 @@ const AdminUsers = () => {
 
 
   const handleSuspend = async () => {
+    const userId = suspendModal.userId;
+    const reason = suspendModal.reason.trim();
+    const { data: userData } = await supabase.auth.getUser();
+    const adminId = userData.user?.id ?? null;
+
     const { error } = await supabase
       .from("profiles")
       .update({ account_status: "suspended" })
-      .eq("id", suspendModal.userId);
-    if (!error && suspendModal.reason) {
+      .eq("id", userId);
+    if (error) {
+      toast.error("Erreur");
+      setSuspendModal({ open: false, userId: "", reason: "" });
+      return;
+    }
+    if (reason) {
+      // Motif de suspension : colonne dédiée, n'écrase PAS admin_notes (note interne).
       await supabase.from("profile_moderation").upsert({
-        profile_id: suspendModal.userId,
-        admin_notes: suspendModal.reason,
+        profile_id: userId,
+        suspension_reason: reason,
       }, { onConflict: "profile_id" });
     }
-    if (error) toast.error("Erreur");
-    else { toast.success("Compte suspendu"); fetchUsers(); }
+    if (adminId) {
+      await supabase.from("admin_action_logs").insert({
+        admin_id: adminId,
+        action: "suspend_account",
+        target_type: "profile",
+        target_id: userId,
+        metadata: reason ? { reason } : null,
+      });
+    }
+    toast.success("Compte suspendu");
+    fetchUsers();
     setSuspendModal({ open: false, userId: "", reason: "" });
   };
 
-  const handleReactivate = async (userId: string) => {
+  const confirmReactivate = async () => {
+    const userId = reactivateModal.userId;
+    if (!userId) return;
+    setReactivating(true);
+    const { data: userData } = await supabase.auth.getUser();
+    const adminId = userData.user?.id ?? null;
+
     const { error } = await supabase
       .from("profiles")
       .update({ account_status: "active" })
       .eq("id", userId);
-    if (error) toast.error("Erreur");
-    else { toast.success("Compte réactivé"); fetchUsers(); }
+    if (error) {
+      toast.error("Erreur");
+      setReactivating(false);
+      return;
+    }
+    // Retire le motif de suspension (mais préserve admin_notes / is_manual_super).
+    await supabase.from("profile_moderation").upsert({
+      profile_id: userId,
+      suspension_reason: null,
+    }, { onConflict: "profile_id" });
+    if (adminId) {
+      await supabase.from("admin_action_logs").insert({
+        admin_id: adminId,
+        action: "reactivate_account",
+        target_type: "profile",
+        target_id: userId,
+      });
+    }
+    toast.success("Compte réactivé");
+    setReactivating(false);
+    setReactivateModal({ open: false, userId: "", userName: "", email: "" });
+    fetchUsers();
   };
 
   const confirmForceVerify = async () => {
