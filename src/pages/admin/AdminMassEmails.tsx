@@ -463,6 +463,95 @@ const AdminMassEmails = () => {
             </CardContent>
           </Card>
 
+          {/* Assistant IA */}
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-base flex items-center gap-2">
+                <Sparkles className="h-4 w-4 text-primary" /> Rédiger avec l'IA
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <div className="space-y-1.5">
+                  <Label htmlFor="ai-objective">Objectif</Label>
+                  <Textarea
+                    id="ai-objective"
+                    rows={2}
+                    placeholder="Ex : inviter à publier une première petite mission"
+                    value={aiObjective}
+                    onChange={(e) => setAiObjective(e.target.value.slice(0, 400))}
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <Label htmlFor="ai-audience">Audience</Label>
+                  <Input
+                    id="ai-audience"
+                    placeholder="Ex : membres inscrits n'ayant jamais publié"
+                    value={aiAudience}
+                    onChange={(e) => setAiAudience(e.target.value.slice(0, 200))}
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <Label htmlFor="ai-tone">Ton</Label>
+                  <Input
+                    id="ai-tone"
+                    placeholder="Ex : chaleureux, direct"
+                    value={aiTone}
+                    onChange={(e) => setAiTone(e.target.value.slice(0, 100))}
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <Label htmlFor="ai-key-points">Points clés</Label>
+                  <Textarea
+                    id="ai-key-points"
+                    rows={2}
+                    placeholder="Ex : gratuit, 3 minutes, exemples concrets"
+                    value={aiKeyPoints}
+                    onChange={(e) => setAiKeyPoints(e.target.value.slice(0, 400))}
+                  />
+                </div>
+              </div>
+
+              <div className="flex flex-wrap gap-2 pt-1">
+                <Button size="sm" onClick={handleAiGenerate} disabled={aiLoading || !aiObjective.trim()}>
+                  {aiLoading ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Sparkles className="h-4 w-4 mr-2" />}
+                  Générer le brouillon
+                </Button>
+                <Button size="sm" variant="outline" onClick={() => handleAiRefine("shorten")} disabled={aiLoading || !body.trim()}>
+                  Raccourcir
+                </Button>
+                <Button size="sm" variant="outline" onClick={() => handleAiRefine("warmer")} disabled={aiLoading || !body.trim()}>
+                  Réchauffer le ton
+                </Button>
+                <Button size="sm" variant="outline" onClick={() => handleAiRefine("proofread")} disabled={aiLoading || !body.trim()}>
+                  Corriger
+                </Button>
+                <Button size="sm" variant="outline" onClick={handleAiSubjects} disabled={aiLoading || !body.trim()}>
+                  3 idées d'objet
+                </Button>
+              </div>
+
+              {subjectSuggestions.length > 0 && (
+                <div className="pt-2 space-y-1.5">
+                  <p className="text-xs text-muted-foreground">Cliquez pour appliquer :</p>
+                  <div className="flex flex-wrap gap-2">
+                    {subjectSuggestions.map((s, i) => (
+                      <Button
+                        key={i}
+                        size="sm"
+                        variant="secondary"
+                        className="h-auto py-1.5 px-3 text-xs whitespace-normal text-left"
+                        onClick={() => { setSubject(s.slice(0, 100)); setSubjectSuggestions([]); }}
+                      >
+                        {s}
+                      </Button>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
           {/* Message */}
           <Card>
             <CardHeader><CardTitle className="text-base">Message</CardTitle></CardHeader>
@@ -481,8 +570,17 @@ const AdminMassEmails = () => {
 
               <div className="space-y-1.5">
                 <Label htmlFor="body">Corps du message</Label>
+                <div className="flex flex-wrap gap-2">
+                  <Button type="button" size="sm" variant="outline" onClick={handleBold}>
+                    <Bold className="h-3.5 w-3.5 mr-1.5" /> Gras
+                  </Button>
+                  <Button type="button" size="sm" variant="outline" onClick={handleLink}>
+                    <LinkIcon className="h-3.5 w-3.5 mr-1.5" /> Lien
+                  </Button>
+                </div>
                 <Textarea
                   id="body"
+                  ref={bodyRef}
                   placeholder="Rédigez votre message ici…"
                   value={body}
                   onChange={(e) => setBody(e.target.value.slice(0, 2000))}
@@ -490,8 +588,13 @@ const AdminMassEmails = () => {
                   rows={8}
                   className="font-mono text-sm"
                 />
+                <p className="text-xs text-muted-foreground">
+                  Mise en forme : gras et liens via les boutons ci-dessus. Les retours à la ligne sont conservés.
+                </p>
                 <p className="text-xs text-muted-foreground text-right">{body.length}/2000</p>
               </div>
+
+
 
               <div className="flex items-center justify-between pt-2 border-t border-border">
                 <Label htmlFor="cta-toggle" className="text-sm">Ajouter un bouton CTA</Label>
