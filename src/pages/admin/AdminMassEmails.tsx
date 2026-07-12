@@ -367,6 +367,22 @@ const AdminMassEmails = () => {
     }
   };
 
+  const handleDuplicate = useCallback((row: MassEmail) => {
+    setSegment((row.segment as Segment) || "tous");
+    setFilters({});
+    setSubject((row.subject || "").slice(0, 100));
+    setBody((row.body || "").slice(0, 2000));
+    const hasCta = !!(row.cta_label && row.cta_url);
+    setCtaEnabled(hasCta);
+    setCtaLabel(row.cta_label || "");
+    setCtaUrl(row.cta_url || "");
+    setActivePreset("");
+    toast.success("Campagne dupliquée, prête à éditer");
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }, []);
+
+
+
 
   // Debounced recipient count
   useEffect(() => {
