@@ -84,6 +84,15 @@ const AdminListings = () => {
   // Message rapide au propriétaire
   const [messageModal, setMessageModal] = useState<{ open: boolean; listing: any | null; content: string }>({ open: false, listing: null, content: "" });
   const [sendingMessage, setSendingMessage] = useState(false);
+  const messageAi = useMessageAiAssistant({
+    getBody: () => messageModal.content,
+    setBody: (next) => setMessageModal((m) => ({ ...m, content: next.slice(0, 2000) })),
+  });
+  const messageAiButtons: Array<{ action: MessageAiAction; label: string }> = [
+    { action: "warmer", label: "Reformuler" },
+    { action: "proofread", label: "Corriger" },
+    { action: "shorten", label: "Raccourcir" },
+  ];
 
   // Envoi de l'annonce aux gardiens du coin
   const [proximityListing, setProximityListing] = useState<any | null>(null);
