@@ -749,8 +749,11 @@ const AdminUsers = () => {
                           </AvatarFallback>
                         </Avatar>
                         <div>
-                          <div className="font-medium text-sm">
-                            {user.first_name} {user.last_name}
+                          <div className="font-medium text-sm flex items-center gap-1.5">
+                            <span>{user.first_name} {user.last_name}</span>
+                            {user.is_founder && (
+                              <Badge variant="secondary" className="text-[10px] px-1.5 py-0">Fondateur</Badge>
+                            )}
                           </div>
                           <div className="text-xs text-muted-foreground">{user.email}</div>
                         </div>
