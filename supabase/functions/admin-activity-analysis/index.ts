@@ -128,8 +128,26 @@ async function callAI(signals: unknown): Promise<{ analysis: string; actions: Ac
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
 
-  const guard = await requireAdminOrServiceRole(req, corsHeaders);
-  if (guard) return guard;
+  // Court-circuit service_role : cron/pg_net peuvent appeler avec un JWT service_role signé.
+  let isServiceRole = false;
+  const authHeaderRaw = req.headers.get('Authorization') ?? '';
+  if (authHeaderRaw.startsWith('Bearer ')) {
+    const token = authHeaderRaw.replace('Bearer ', '');
+    try {
+      const parts = token.split('.');
+      if (parts.length === 3) {
+        const pad = parts[1].length % 4 === 0 ? '' : '='.repeat(4 - (parts[1].length % 4));
+        const b64 = parts[1].replace(/-/g, '+').replace(/_/g, '/') + pad;
+        const payload = JSON.parse(atob(b64));
+        if (payload?.role === 'service_role') isServiceRole = true;
+      }
+    } catch { /* ignore decode errors */ }
+  }
+
+  if (!isServiceRole) {
+    const guard = await requireAdminOrServiceRole(req, corsHeaders);
+    if (guard) return guard;
+  }
 
   try {
     let mode: 'latest' | 'refresh' = 'latest';
