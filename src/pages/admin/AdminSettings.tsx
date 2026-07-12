@@ -150,7 +150,7 @@ const AdminSettings = () => {
     const adminId = userRes?.user?.id ?? null;
     const now = new Date().toISOString();
 
-    const updates: Array<Promise<unknown>> = [];
+    const updates: Array<PromiseLike<{ error?: unknown }>> = [];
     if (nextCriteria !== affinityMinCriteria) {
       updates.push(
         supabase.from("feature_flags")
