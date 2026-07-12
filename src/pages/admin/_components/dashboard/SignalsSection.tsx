@@ -8,6 +8,9 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useFeatureFlag } from "@/hooks/useFeatureFlag";
 import { NoApplicationsCard } from "@/components/admin/signals/NoApplicationsCard";
 import { PendingApplicationCard } from "@/components/admin/signals/PendingApplicationCard";
+import { DormantSitterCard } from "@/components/admin/signals/DormantSitterCard";
+import { StaleVerificationCard } from "@/components/admin/signals/StaleVerificationCard";
+import { AffinityStaleCard } from "@/components/admin/signals/AffinityStaleCard";
 import { cn } from "@/lib/utils";
 
 interface Signal {
