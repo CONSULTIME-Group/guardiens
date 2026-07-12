@@ -111,33 +111,54 @@ const OnboardingAffinity = () => {
     });
   }, [flagLoading, flagEnabled, status.loading, status.needsSitter, status.needsOwner, status.needsOnboarding, status.profileCreatedAt, user]);
 
-  // Abandon : émis si l'utilisateur quitte la page (unload OU unmount) sans compléter.
+  // Abandon : émis AU PLUS UNE FOIS par session/monté du composant, si
+  // l'utilisateur n'a pas complété. `reason` distingue le mode de sortie
+  // (close_button | navigate_away | page_unload), `step` renseigne l'étape
+  // courante au moment de la sortie.
+  const emitAbandoned = (reason: "close_button" | "navigate_away" | "page_unload") => {
+    if (completedRef.current || abandonedEmittedRef.current) return;
+    abandonedEmittedRef.current = true;
+    const duration = startedAtRef.current
+      ? Math.round((Date.now() - startedAtRef.current) / 1000)
+      : 0;
+    void trackEvent("onboarding_abandoned", {
+      source: "/onboarding/affinity",
+      metadata: {
+        reason,
+        step: currentStepRef.current,
+        role: chosenRole,
+        needs_sitter: status.needsSitter,
+        needs_owner: status.needsOwner,
+      },
+    });
+    void trackEvent("affinity_onboarding_abandoned", {
+      source: "/onboarding/affinity",
+      metadata: {
+        reason,
+        step: currentStepRef.current,
+        role: chosenRole,
+        last_step_index: lastStepRef.current.index,
+        last_step_name: lastStepRef.current.name,
+        duration_seconds: duration,
+      },
+    });
+  };
+  // Ref stable pour être appelée depuis le cleanup / handlers sans redéclencher
+  // les effets à chaque changement d'état.
+  const emitAbandonedRef = useRef(emitAbandoned);
+  emitAbandonedRef.current = emitAbandoned;
+
   useEffect(() => {
-    const emitAbandoned = () => {
-      if (completedRef.current) return;
-      const duration = startedAtRef.current
-        ? Math.round((Date.now() - startedAtRef.current) / 1000)
-        : 0;
-      void trackEvent("onboarding_abandoned", {
-        source: "/onboarding/affinity",
-        metadata: { role: chosenRole, needs_sitter: status.needsSitter, needs_owner: status.needsOwner },
-      });
-      void trackEvent("affinity_onboarding_abandoned", {
-        source: "/onboarding/affinity",
-        metadata: {
-          role: chosenRole,
-          last_step_index: lastStepRef.current.index,
-          last_step_name: lastStepRef.current.name,
-          duration_seconds: duration,
-        },
-      });
-    };
-    window.addEventListener("beforeunload", emitAbandoned);
+    const onUnload = () => emitAbandonedRef.current("page_unload");
+    window.addEventListener("beforeunload", onUnload);
+    window.addEventListener("pagehide", onUnload);
     return () => {
-      window.removeEventListener("beforeunload", emitAbandoned);
-      emitAbandoned();
+      window.removeEventListener("beforeunload", onUnload);
+      window.removeEventListener("pagehide", onUnload);
+      // Démontage React sans complétion : navigation interne vers une autre route.
+      emitAbandonedRef.current("navigate_away");
     };
-  }, [chosenRole, status.needsSitter, status.needsOwner]);
+  }, []);
 
   const showSitterBlock = useMemo(
     () => status.needsSitter && (chosenRole === "sitter" || chosenRole === "both"),
