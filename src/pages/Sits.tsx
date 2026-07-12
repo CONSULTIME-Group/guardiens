@@ -1102,6 +1102,65 @@ const Sits = () => {
         </AlertDialogContent>
       </AlertDialog>
 
+      {/* Retrait de candidature (gardien) */}
+      <AlertDialog open={!!withdrawApp} onOpenChange={(o) => { if (!o && !withdrawing) setWithdrawApp(null); }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Retirer votre candidature ?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Vous êtes sûr de retirer votre candidature pour cette garde ? Le propriétaire recevra une notification et pourra continuer à traiter les autres candidats.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={withdrawing}>Annuler</AlertDialogCancel>
+            <AlertDialogAction
+              disabled={withdrawing}
+              onClick={async (e) => {
+                e.preventDefault();
+                if (!withdrawApp || !user) return;
+                setWithdrawing(true);
+                try {
+                  // Enum applications.status ne contient pas 'withdrawn' : on utilise
+                  // 'cancelled' (candidature annulée par le gardien). Aucune migration
+                  // BDD nécessaire, comportement UX identique.
+                  const { error } = await supabase
+                    .from("applications")
+                    .update({ status: "cancelled" as any })
+                    .eq("id", withdrawApp.appId)
+                    .eq("sitter_id", user.id);
+                  if (error) throw error;
+
+                  if (withdrawApp.conversationId) {
+                    await supabase.from("messages").insert({
+                      conversation_id: withdrawApp.conversationId,
+                      sender_id: user.id,
+                      content: "Le gardien a retiré sa candidature.",
+                      is_system: true,
+                    });
+                  }
+                  toast({ title: "Candidature retirée" });
+                  setWithdrawApp(null);
+                  loadSits();
+                } catch (err: any) {
+                  console.error("[Sits] withdraw failed", err);
+                  toast({
+                    variant: "destructive",
+                    title: "Retrait impossible",
+                    description: "Réessayez dans un instant.",
+                  });
+                } finally {
+                  setWithdrawing(false);
+                }
+              }}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {withdrawing ? "Retrait…" : "Retirer"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+
       {/* Sticky CTA mobile owner, visible dès qu'il y a au moins une annonce */}
       {isOwnerView && sits.length > 0 && (
         <MobileStickyCTA label="Publier une annonce" to="/sits/create" />
