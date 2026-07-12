@@ -12,6 +12,7 @@
  * email_preferences.product_emails.
  */
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
+import { startCronRun, type CronRun } from "../_shared/cron-run-log.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -185,6 +186,7 @@ Deno.serve(async (req) => {
     return new Response("ok", { headers: corsHeaders });
   }
 
+  let run: CronRun | null = null;
   try {
     const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
     const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
@@ -216,6 +218,9 @@ Deno.serve(async (req) => {
     }
 
     const mode = payload.mode === "manual" ? "manual" : "cron";
+    if (mode === "cron") {
+      run = await startCronRun("nudge-owner-pending-application");
+    }
 
     // ── Mode MANUAL : relance ciblée depuis l'admin ─────────────────────
     if (mode === "manual") {
