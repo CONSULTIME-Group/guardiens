@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useSearchParams } from "react-router-dom";
+import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -37,6 +38,20 @@ import {
   type RawEvent,
   type RawWhisperHistory,
 } from "@/lib/admin/alma-analytics";
+
+const ROW_LIMIT = 20000;
+
+/** Bandeau discret affiché quand une agrégation atteint le plafond de lignes. */
+function TruncationBanner() {
+  return (
+    <div className="flex items-start gap-2 rounded-md border border-warning/40 bg-warning/10 px-3 py-2 text-xs text-warning-foreground">
+      <AlertTriangle className="h-3.5 w-3.5 mt-0.5 shrink-0" aria-hidden="true" />
+      <span>
+        Données tronquées au-delà de {ROW_LIMIT.toLocaleString("fr-FR")} lignes, les chiffres peuvent sous-compter.
+      </span>
+    </div>
+  );
+}
 
 type Range = "7d" | "30d" | "90d";
 
@@ -142,12 +157,13 @@ function BubblesTab({ since, range }: { since: string; range: Range }) {
         .like("event_type", "alma_%")
         .gte("created_at", since)
         .order("created_at", { ascending: false })
-        .limit(20000);
+        .limit(ROW_LIMIT);
       if (error) throw error;
       return (data ?? []) as RawEvent[];
     },
   });
 
+  const truncated = events.length >= ROW_LIMIT;
   const kpis = useMemo(() => computeBubbleKpis(events), [events]);
   const moments = useMemo(() => aggregateMoments(events), [events]);
 
@@ -178,6 +194,7 @@ function BubblesTab({ since, range }: { since: string; range: Range }) {
 
   return (
     <div className="space-y-6">
+      {truncated && <TruncationBanner />}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <KpiCard label="Users uniques (7j)" value={kpis.uniqueUsers7d} />
         <KpiCard label="Users uniques (30j)" value={kpis.uniqueUsers30d} />
@@ -253,11 +270,13 @@ function WhispersTab({ since, range }: { since: string; range: Range }) {
         .select("whisper_type, emitted_at, action_taken, dismissed_reason, user_id")
         .gte("emitted_at", since)
         .order("emitted_at", { ascending: false })
-        .limit(20000);
+        .limit(ROW_LIMIT);
       if (error) throw error;
       return (data ?? []) as RawWhisperHistory[];
     },
   });
+
+  const historyTruncated = history.length >= ROW_LIMIT;
 
   const { data: freq = [] } = useQuery({
     queryKey: ["admin-alma-frequency"],
@@ -338,6 +357,7 @@ function WhispersTab({ since, range }: { since: string; range: Range }) {
 
   return (
     <div className="space-y-6">
+      {historyTruncated && <TruncationBanner />}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <KpiCard label="Whispers émis" value={totals.emitted} />
         <KpiCard label="Taux d'action" value={fmtPct(totals.actionRate)} />
@@ -539,13 +559,13 @@ function CulturalFactsTab({ since }: { since: string }) {
         .select("*")
         .order("fact_type", { ascending: true })
         .order("created_at", { ascending: false })
-        .limit(500);
+        .limit(2000);
       if (error) throw error;
       return (data ?? []) as unknown as CulturalFactRow[];
     },
   });
 
-  const { data: stats = [] } = useQuery({
+  const { data: statsResult = { rows: [], truncated: false } } = useQuery({
     queryKey: ["admin-alma-cultural-stats", since],
     queryFn: async () => {
       const [seenRes, clickRes] = await Promise.all([
@@ -554,31 +574,40 @@ function CulturalFactsTab({ since }: { since: string }) {
           .select("metadata, created_at")
           .eq("event_type", "alma_cultural_fact_seen")
           .gte("created_at", since)
-          .limit(20000),
+          .limit(ROW_LIMIT),
         supabase
           .from("analytics_events")
           .select("metadata, created_at")
           .eq("event_type", "alma_cultural_fact_action_clicked")
           .gte("created_at", since)
-          .limit(20000),
+          .limit(ROW_LIMIT),
       ]);
+      const seenRows = seenRes.data ?? [];
+      const clickRows = clickRes.data ?? [];
       const seen = new Map<string, number>();
       const clicks = new Map<string, number>();
-      for (const r of seenRes.data ?? []) {
+      for (const r of seenRows) {
         const id = (r as any).metadata?.fact_id;
         if (id) seen.set(id, (seen.get(id) ?? 0) + 1);
       }
-      for (const r of clickRes.data ?? []) {
+      for (const r of clickRows) {
         const id = (r as any).metadata?.fact_id;
         if (id) clicks.set(id, (clicks.get(id) ?? 0) + 1);
       }
-      return Array.from(seen.entries()).map(([id, views]) => ({
+      const rows = Array.from(seen.entries()).map(([id, views]) => ({
         id,
         views,
         clicks: clicks.get(id) ?? 0,
       }));
+      return {
+        rows,
+        truncated: seenRows.length >= ROW_LIMIT || clickRows.length >= ROW_LIMIT,
+      };
     },
   });
+
+  const stats = statsResult.rows;
+  const statsTruncated = statsResult.truncated;
 
   const statsById = useMemo(() => {
     const m = new Map<string, { views: number; clicks: number }>();
@@ -610,15 +639,36 @@ function CulturalFactsTab({ since }: { since: string }) {
       .from("alma_cultural_facts" as any)
       .update({ active: next } as any)
       .eq("id", fact.id);
-    if (error) return;
+    if (error) {
+      toast.error("Impossible de modifier le fait, réessayez.");
+      return;
+    }
+    toast.success(next ? "Fait réactivé" : "Fait désactivé");
     void trackEvent("admin_alma_cultural_fact_toggled", {
       metadata: { fact_id: fact.id, active: next },
     });
+    // Trace d'audit (même mécanisme que AdminUsers: insertion admin_action_logs).
+    try {
+      const { data: userData } = await supabase.auth.getUser();
+      const adminId = userData.user?.id ?? null;
+      if (adminId) {
+        await supabase.from("admin_action_logs").insert({
+          admin_id: adminId,
+          action: "alma_cultural_fact_toggled",
+          target_type: "alma_cultural_fact",
+          target_id: fact.id,
+          metadata: { active: next },
+        });
+      }
+    } catch {
+      /* silent : l'audit ne doit pas casser le toggle */
+    }
     void qc.invalidateQueries({ queryKey: ["admin-alma-cultural-facts"] });
   };
 
   return (
     <div className="space-y-4">
+      {statsTruncated && <TruncationBanner />}
       <div className="flex flex-wrap items-center gap-3">
         <Select value={typeFilter} onValueChange={setTypeFilter}>
           <SelectTrigger className="w-56">
@@ -634,6 +684,7 @@ function CulturalFactsTab({ since }: { since: string }) {
         </Select>
         <input
           type="text"
+          aria-label="Filtrer par surface"
           placeholder="Filtrer par surface (ex : dashboard)"
           value={surfaceFilter}
           onChange={(e) => setSurfaceFilter(e.target.value)}
