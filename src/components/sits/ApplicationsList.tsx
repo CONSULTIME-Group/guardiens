@@ -532,7 +532,12 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, prope
   }, [rawActive, viewerOwner]);
 
   const activeApps = useMemo(() => {
-    const arr = [...rawActive];
+    let arr = [...rawActive];
+    // Filtre segmenté (chips OwnerSitView)
+    if (statusFilter === "pending") arr = arr.filter(a => a.status === "pending");
+    else if (statusFilter === "viewed") arr = arr.filter(a => a.status === "viewed");
+    else if (statusFilter === "discussing") arr = arr.filter(a => a.status === "discussing");
+    else if (statusFilter === "declined") arr = [];
     const isPending = (s: string) => s === "pending" || s === "viewed";
     arr.sort((a, b) => {
       // Statut "en attente" en tête, quel que soit le tri secondaire.
@@ -554,7 +559,10 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, prope
       return db - da;
     });
     return arr;
-  }, [rawActive, sortMode, affinityByApp]);
+  }, [rawActive, sortMode, affinityByApp, statusFilter]);
+
+  // Quand le filtre est sur "declined", on force l'ouverture visuelle.
+  const forceDeclinedOnly = statusFilter === "declined";
 
 
   if (loading) return <p className="text-sm text-muted-foreground">Chargement des candidatures...</p>;
