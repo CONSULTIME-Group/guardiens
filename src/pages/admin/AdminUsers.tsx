@@ -696,6 +696,7 @@ const AdminUsers = () => {
                           variant="ghost"
                           size="icon"
                           title="Envoyer un message"
+                          aria-label="Envoyer un message à l'utilisateur"
                           onClick={() => setMessageModal({
                             open: true,
                             userId: user.id,
@@ -710,6 +711,7 @@ const AdminUsers = () => {
                           variant="ghost"
                           size="icon"
                           title="Voir le contenu du dernier message envoyé"
+                          aria-label="Voir le dernier message envoyé"
                           onClick={() => openLastMessage(
                             user.id,
                             `${user.first_name || ""} ${user.last_name || ""}`.trim() || user.email || "cet utilisateur",
@@ -721,7 +723,12 @@ const AdminUsers = () => {
                           variant="ghost"
                           size="icon"
                           title="Voir le profil"
-                          onClick={() => window.open(`/gardiens/${user.id}`, "_blank")}
+                          aria-label="Voir le profil public"
+                          onClick={() => {
+                            // Profil unifié /gardiens/:id : ?tab=proprio pour un propriétaire pur.
+                            const suffix = user.role === "owner" ? "?tab=proprio" : "";
+                            window.open(`/gardiens/${user.id}${suffix}`, "_blank");
+                          }}
                         >
                           <Eye className="h-4 w-4" />
                         </Button>
@@ -729,6 +736,7 @@ const AdminUsers = () => {
                           variant="ghost"
                           size="icon"
                           title="Forcer vérification ID"
+                          aria-label="Forcer la vérification d'identité"
                           onClick={() => setVerifyModal({
                             open: true,
                             userId: user.id,
@@ -743,6 +751,7 @@ const AdminUsers = () => {
                           variant="ghost"
                           size="icon"
                           title={user.is_manual_super ? "Retirer Super Gardien" : "Promouvoir Super Gardien"}
+                          aria-label={user.is_manual_super ? "Retirer le statut Super Gardien" : "Promouvoir Super Gardien"}
                           disabled={togglingSuper && superModal.userId === user.id}
                           onClick={() => setSuperModal({
                             open: true,
@@ -758,6 +767,7 @@ const AdminUsers = () => {
                           variant="ghost"
                           size="icon"
                           title="Note interne"
+                          aria-label="Éditer la note interne"
                           onClick={() => setNoteModal({
                             open: true,
                             userId: user.id,
@@ -770,6 +780,7 @@ const AdminUsers = () => {
                           variant="ghost"
                           size="icon"
                           title="Renvoyer l'e-mail de confirmation"
+                          aria-label="Renvoyer l'e-mail de confirmation"
                           onClick={() => handleResendConfirmation(user.email)}
                         >
                           <MailCheck className="h-4 w-4" />
@@ -778,8 +789,14 @@ const AdminUsers = () => {
                           <Button
                             variant="ghost"
                             size="icon"
-                            title="Réactiver"
-                            onClick={() => handleReactivate(user.id)}
+                            title="Réactiver le compte"
+                            aria-label="Réactiver le compte"
+                            onClick={() => setReactivateModal({
+                              open: true,
+                              userId: user.id,
+                              userName: `${user.first_name || ""} ${user.last_name || ""}`.trim() || "Utilisateur",
+                              email: user.email || "",
+                            })}
                           >
                             <RotateCcw className="h-4 w-4 text-primary" />
                           </Button>
@@ -787,7 +804,8 @@ const AdminUsers = () => {
                           <Button
                             variant="ghost"
                             size="icon"
-                            title="Suspendre"
+                            title="Suspendre le compte"
+                            aria-label="Suspendre le compte"
                             onClick={() => setSuspendModal({ open: true, userId: user.id, reason: "" })}
                           >
                             <Ban className="h-4 w-4 text-destructive" />
@@ -797,6 +815,7 @@ const AdminUsers = () => {
                           variant="ghost"
                           size="icon"
                           title="Supprimer définitivement"
+                          aria-label="Supprimer définitivement le compte"
                           onClick={() => setDeleteConfirm({
                             open: true,
                             userId: user.id,
