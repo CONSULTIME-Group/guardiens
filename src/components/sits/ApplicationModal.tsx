@@ -134,6 +134,17 @@ const ApplicationModal = ({
         metadata: { sit_id: sitId },
       });
     } catch {}
+    try {
+      await trackEvent("application_submitted", {
+        source: "modal",
+        metadata: {
+          source: "modal",
+          used_alma_draft: almaUsed,
+          message_length: message.trim().length,
+          sit_id: sitId,
+        },
+      });
+    } catch {}
     const digestAttr = readDigestAttribution(sitId);
 
     try {
