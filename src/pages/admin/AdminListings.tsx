@@ -13,7 +13,8 @@ import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
 import { format, formatDistanceToNow } from "date-fns";
 import { fr } from "date-fns/locale";
-import { Eye, EyeOff, Trash2, Search, Sparkles, Share2, Link2, Mail, BarChart3, MessageSquare, Download, ChevronLeft, ChevronRight, Send } from "lucide-react";
+import { Eye, EyeOff, Trash2, Search, Sparkles, Share2, Link2, Mail, BarChart3, MessageSquare, Download, ChevronLeft, ChevronRight, Send, Loader2 } from "lucide-react";
+import { useMessageAiAssistant, type MessageAiAction } from "@/hooks/useMessageAiAssistant";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -83,6 +84,15 @@ const AdminListings = () => {
   // Message rapide au propriétaire
   const [messageModal, setMessageModal] = useState<{ open: boolean; listing: any | null; content: string }>({ open: false, listing: null, content: "" });
   const [sendingMessage, setSendingMessage] = useState(false);
+  const messageAi = useMessageAiAssistant({
+    getBody: () => messageModal.content,
+    setBody: (next) => setMessageModal((m) => ({ ...m, content: next.slice(0, 2000) })),
+  });
+  const messageAiButtons: Array<{ action: MessageAiAction; label: string }> = [
+    { action: "warmer", label: "Reformuler" },
+    { action: "proofread", label: "Corriger" },
+    { action: "shorten", label: "Raccourcir" },
+  ];
 
   // Envoi de l'annonce aux gardiens du coin
   const [proximityListing, setProximityListing] = useState<any | null>(null);
@@ -838,8 +848,29 @@ const AdminListings = () => {
               onChange={(e) => setMessageModal((m) => ({ ...m, content: e.target.value }))}
               rows={6}
               maxLength={2000}
-              disabled={sendingMessage}
+              disabled={sendingMessage || messageAi.isLoading}
             />
+            <div className="flex flex-wrap items-center gap-2 pt-1">
+              <span className="text-xs text-muted-foreground inline-flex items-center gap-1">
+                <Sparkles className="h-3 w-3 text-primary" /> Assistant IA :
+              </span>
+              {messageAiButtons.map((b) => (
+                <Button
+                  key={b.action}
+                  type="button"
+                  size="sm"
+                  variant="outline"
+                  className="h-7 text-xs"
+                  disabled={sendingMessage || messageAi.isLoading}
+                  onClick={() => messageAi.run(b.action)}
+                >
+                  {messageAi.loading === b.action ? (
+                    <Loader2 className="h-3 w-3 mr-1.5 animate-spin" />
+                  ) : null}
+                  {b.label}
+                </Button>
+              ))}
+            </div>
             <div className="text-xs text-muted-foreground text-right">
               {messageModal.content.length}/2000
             </div>
