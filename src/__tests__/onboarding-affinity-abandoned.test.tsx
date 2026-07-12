@@ -27,8 +27,10 @@ vi.mock("@/contexts/AuthContext", () => ({
   }),
 }));
 
+const mocks = vi.hoisted(() => ({ flagEnabled: true }));
+
 vi.mock("@/hooks/useFeatureFlag", () => ({
-  useFeatureFlag: () => ({ enabled: true, loading: false }),
+  useFeatureFlag: () => ({ enabled: mocks.flagEnabled, loading: false }),
 }));
 
 vi.mock("@/hooks/useAffinityOnboardingStatus", () => ({
@@ -60,6 +62,7 @@ import OnboardingAffinity from "@/pages/OnboardingAffinity";
 describe("OnboardingAffinity — tracking d'abandon", () => {
   beforeEach(() => {
     trackEventMock.mockClear();
+    mocks.flagEnabled = true;
   });
 
   it("émet un unique onboarding_abandoned avec reason au démontage sans complétion", () => {
@@ -80,5 +83,22 @@ describe("OnboardingAffinity — tracking d'abandon", () => {
     expect(payload.source).toBe("/onboarding/affinity");
     expect(payload.metadata.reason).toBe("navigate_away");
     expect(payload.metadata.step).toBeTruthy();
+  });
+
+  it("n'émet pas onboarding_abandoned si l'onboarding n'a jamais été affiché (flag OFF)", () => {
+    mocks.flagEnabled = false;
+
+    const { unmount } = render(
+      <HelmetProvider>
+        <OnboardingAffinity />
+      </HelmetProvider>,
+    );
+
+    unmount();
+
+    const abandonedCalls = trackEventMock.mock.calls.filter(
+      ([name]) => name === "onboarding_abandoned" || name === "affinity_onboarding_abandoned",
+    );
+    expect(abandonedCalls).toHaveLength(0);
   });
 });
