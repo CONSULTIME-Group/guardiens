@@ -756,6 +756,7 @@ const CreateSit = () => {
           });
         } catch {}
       }
+      publishedRef.current = true;
       toast({ title: "Annonce publiée", description: "Les gardiens peuvent maintenant postuler." });
       navigate(`/sits/${sitId}`);
     } catch (err: any) {
