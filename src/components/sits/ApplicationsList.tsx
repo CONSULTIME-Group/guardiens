@@ -60,7 +60,7 @@ const statusOrder: Record<string, number> = {
   pending: 0, viewed: 0, discussing: 1, accepted: 2, rejected: 3, cancelled: 4,
 };
 
-const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, propertyId, sitStatus }: ApplicationsListProps) => {
+const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, propertyId, sitStatus, statusFilter = null }: ApplicationsListProps) => {
   const { user } = useAuth();
   const { owner: viewerOwner } = useViewerOwnerForAffinity();
   const [applications, setApplications] = useState<any[]>([]);
