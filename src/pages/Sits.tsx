@@ -54,8 +54,8 @@ const statusConfig: Record<string, { label: string; className: string }> = {
   archived: { label: "Archivée", className: "bg-muted text-muted-foreground border border-dashed border-border" },
 };
 
-const appStatusConfig: Record<string, { label: string; className: string }> = {
-  pending: { label: "Envoyée", className: "bg-muted text-muted-foreground" },
+const appStatusConfig: Record<string, { label: string; className: string; pulse?: boolean }> = {
+  pending: { label: "Envoyée", className: "bg-primary/10 text-primary", pulse: true },
   viewed: { label: "Consultée", className: "bg-secondary/10 text-secondary" },
   discussing: { label: "En discussion", className: "bg-accent text-foreground" },
   accepted: { label: "Acceptée", className: "bg-success-soft text-success border border-success-border" },
@@ -170,6 +170,11 @@ const Sits = () => {
   const [openGuideId, setOpenGuideId] = useState<string | null>(null);
   const [openGuide, setOpenGuide] = useState<any | null>(null);
   const [guideLoading, setGuideLoading] = useState(false);
+  // Tri owner : "urgent" (pending count desc) par défaut, ou "recent" (updated_at desc)
+  const [ownerSortMode, setOwnerSortMode] = useState<"urgent" | "recent">("urgent");
+  // Modale de retrait de candidature côté gardien
+  const [withdrawApp, setWithdrawApp] = useState<{ appId: string; sitTitle: string; conversationId: string | null } | null>(null);
+  const [withdrawing, setWithdrawing] = useState(false);
 
   // Load full guide when openGuideId is set
   useEffect(() => {
@@ -366,6 +371,8 @@ const Sits = () => {
             effectiveStatus: getEffectiveStatus(a.sit),
             application_status: a.status,
             application_id: a.id,
+            application_created_at: a.created_at,
+            application_viewed_at: a.viewed_at,
             owner: a.sit?.owner || null,
             hasReviewed: reviewedSitIds.includes(a.sit?.id),
             pets: petsByProperty[a.sit?.property_id] || [],
@@ -576,17 +583,41 @@ const Sits = () => {
       });
     }
     const q = searchQuery.trim().toLowerCase();
-    if (!q) return base;
-    return base.filter((s) => {
-      const fields = [
-        s.title, s.city, s.ownerCity,
-        s.owner?.first_name, s.owner?.city,
-        s.acceptedSitter?.first_name, s.acceptedSitter?.city,
-        ...(s.pets || []).map((p: any) => p.name),
-      ].filter(Boolean).join(" ").toLowerCase();
-      return fields.includes(q);
-    });
-  }, [activeSits, sits, isOwnerView, activeTab, activeOwnerTab, searchQuery]);
+    let searched = q
+      ? base.filter((s) => {
+          const fields = [
+            s.title, s.city, s.ownerCity,
+            s.owner?.first_name, s.owner?.city,
+            s.acceptedSitter?.first_name, s.acceptedSitter?.city,
+            ...(s.pets || []).map((p: any) => p.name),
+          ].filter(Boolean).join(" ").toLowerCase();
+          return fields.includes(q);
+        })
+      : base;
+
+    // Tri owner (onglet actif & en garde) : "urgent" par défaut (pending desc)
+    if (isOwnerView && (activeOwnerTab === "active")) {
+      const bySort = [...searched];
+      if (ownerSortMode === "urgent") {
+        bySort.sort((a, b) => {
+          const pa = a.pendingApplicationCount || 0;
+          const pb = b.pendingApplicationCount || 0;
+          if (pa !== pb) return pb - pa;
+          const ua = new Date(a.updated_at || a.created_at || 0).getTime();
+          const ub = new Date(b.updated_at || b.created_at || 0).getTime();
+          return ub - ua;
+        });
+      } else {
+        bySort.sort((a, b) => {
+          const ua = new Date(a.updated_at || a.created_at || 0).getTime();
+          const ub = new Date(b.updated_at || b.created_at || 0).getTime();
+          return ub - ua;
+        });
+      }
+      return bySort;
+    }
+    return searched;
+  }, [activeSits, sits, isOwnerView, activeTab, activeOwnerTab, searchQuery, ownerSortMode]);
 
   // Suggestions de recherche : titres, villes, gardiens/propriétaires, animaux (uniques)
   const searchSuggestions = useMemo(() => {
@@ -772,6 +803,34 @@ const Sits = () => {
         </div>
       )}
 
+      {/* Tri owner (onglet En ligne) */}
+      {isOwnerView && activeOwnerTab === "active" && sits.length > 1 && (
+        <div className="flex items-center justify-end gap-2 mb-3">
+          <span className="text-xs text-muted-foreground">Trier</span>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button
+                type="button"
+                className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-3 py-1 text-xs text-foreground hover:border-primary/40 transition-colors"
+              >
+                {ownerSortMode === "urgent" ? "Plus urgentes" : "Plus récentes"}
+                <ChevronRight className="h-3 w-3 rotate-90 text-muted-foreground" />
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-44">
+              <DropdownMenuItem onClick={() => setOwnerSortMode("urgent")}>
+                Plus urgentes
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setOwnerSortMode("recent")}>
+                Plus récentes
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+      )}
+
+
+
       {/* Content */}
       {loading ? (
         <div className="space-y-4">
@@ -888,6 +947,13 @@ const Sits = () => {
                     : handleRepublish(sit.id)
                 }
                 onOpenGuide={(id) => setOpenGuideId(id)}
+                onWithdraw={(appId) =>
+                  setWithdrawApp({
+                    appId,
+                    sitTitle: sit.title || "cette annonce",
+                    conversationId: sit.conversationId || null,
+                  })
+                }
               />
             );
           })}
@@ -1036,6 +1102,65 @@ const Sits = () => {
         </AlertDialogContent>
       </AlertDialog>
 
+      {/* Retrait de candidature (gardien) */}
+      <AlertDialog open={!!withdrawApp} onOpenChange={(o) => { if (!o && !withdrawing) setWithdrawApp(null); }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Retirer votre candidature ?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Vous êtes sûr de retirer votre candidature pour cette garde ? Le propriétaire recevra une notification et pourra continuer à traiter les autres candidats.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={withdrawing}>Annuler</AlertDialogCancel>
+            <AlertDialogAction
+              disabled={withdrawing}
+              onClick={async (e) => {
+                e.preventDefault();
+                if (!withdrawApp || !user) return;
+                setWithdrawing(true);
+                try {
+                  // Enum applications.status ne contient pas 'withdrawn' : on utilise
+                  // 'cancelled' (candidature annulée par le gardien). Aucune migration
+                  // BDD nécessaire, comportement UX identique.
+                  const { error } = await supabase
+                    .from("applications")
+                    .update({ status: "cancelled" as any })
+                    .eq("id", withdrawApp.appId)
+                    .eq("sitter_id", user.id);
+                  if (error) throw error;
+
+                  if (withdrawApp.conversationId) {
+                    await supabase.from("messages").insert({
+                      conversation_id: withdrawApp.conversationId,
+                      sender_id: user.id,
+                      content: "Le gardien a retiré sa candidature.",
+                      is_system: true,
+                    });
+                  }
+                  toast({ title: "Candidature retirée" });
+                  setWithdrawApp(null);
+                  loadSits();
+                } catch (err: any) {
+                  console.error("[Sits] withdraw failed", err);
+                  toast({
+                    variant: "destructive",
+                    title: "Retrait impossible",
+                    description: "Réessayez dans un instant.",
+                  });
+                } finally {
+                  setWithdrawing(false);
+                }
+              }}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {withdrawing ? "Retrait…" : "Retirer"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+
       {/* Sticky CTA mobile owner, visible dès qu'il y a au moins une annonce */}
       {isOwnerView && sits.length > 0 && (
         <MobileStickyCTA label="Publier une annonce" to="/sits/create" />
@@ -1046,10 +1171,11 @@ const Sits = () => {
 
 /* ── Card ── */
 const SitCard = ({
-  sit, isOwner, onArchive, onDelete, onRepublish, onOpenGuide,
+  sit, isOwner, onArchive, onDelete, onRepublish, onOpenGuide, onWithdraw,
 }: {
   sit: any; isOwner: boolean;
   onArchive: () => void; onDelete: () => void; onRepublish: () => void; onOpenGuide: (id: string) => void;
+  onWithdraw?: (appId: string) => void;
 }) => {
   const effectiveStatus = sit.effectiveStatus || sit.status;
   const duration = getDuration(sit.start_date, sit.end_date);
@@ -1171,7 +1297,22 @@ const SitCard = ({
             </div>
 
             <div className="flex items-center gap-2 shrink-0">
-              <span className={cn("px-2.5 py-1 rounded-full text-xs font-medium", displayStatus.className)}>
+              {isOwner && sit.pendingApplicationCount > 0 && (
+                <span
+                  className="min-w-[20px] h-5 rounded-full bg-destructive text-destructive-foreground text-[11px] font-bold inline-flex items-center justify-center px-1.5"
+                  aria-label={`${sit.pendingApplicationCount} candidature${sit.pendingApplicationCount > 1 ? "s" : ""} en attente`}
+                  title={`${sit.pendingApplicationCount} candidature${sit.pendingApplicationCount > 1 ? "s" : ""} en attente`}
+                >
+                  {sit.pendingApplicationCount}
+                </span>
+              )}
+              <span className={cn("px-2.5 py-1 rounded-full text-xs font-medium inline-flex items-center gap-1.5", displayStatus.className)}>
+                {(displayStatus as any).pulse && (
+                  <span className="relative flex h-1.5 w-1.5" aria-hidden="true">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-success/70 opacity-75" />
+                    <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-success" />
+                  </span>
+                )}
                 {displayStatus.label}
               </span>
               {isOwner && (
@@ -1185,6 +1326,36 @@ const SitCard = ({
               )}
             </div>
           </div>
+
+          {/* Sitter meta : envoi + consultation par le propriétaire */}
+          {!isOwner && sit.application_status === "pending" && sit.application_created_at && (() => {
+            const sent = `Envoyée ${
+              (() => {
+                try {
+                  const d = new Date(sit.application_created_at);
+                  const days = Math.max(0, Math.floor((Date.now() - d.getTime()) / 86400000));
+                  return days === 0 ? "aujourd'hui" : days === 1 ? "il y a 1 jour" : `il y a ${days} jours`;
+                } catch { return ""; }
+              })()
+            }`;
+            const viewedLabel = sit.application_viewed_at
+              ? (() => {
+                  const d = new Date(sit.application_viewed_at);
+                  const days = Math.max(0, Math.floor((Date.now() - d.getTime()) / 86400000));
+                  return days === 0
+                    ? "Vue par le propriétaire aujourd'hui"
+                    : days === 1
+                      ? "Vue par le propriétaire il y a 1 jour"
+                      : `Vue par le propriétaire il y a ${days} jours`;
+                })()
+              : "En attente de consultation";
+            return (
+              <div className="mt-2 flex flex-col gap-0.5">
+                <span className="text-xs text-muted-foreground">{sent}</span>
+                <span className="text-xs text-muted-foreground">{viewedLabel}</span>
+              </div>
+            );
+          })()}
 
           {/* Other party */}
           {otherParty && (
@@ -1232,7 +1403,7 @@ const SitCard = ({
 
           {/* Quick actions */}
           <div className="flex items-center gap-2 mt-3 flex-wrap">
-            <QuickActions sit={sit} isOwner={isOwner} effectiveStatus={effectiveStatus} onRepublish={onRepublish} onOpenGuide={onOpenGuide} />
+            <QuickActions sit={sit} isOwner={isOwner} effectiveStatus={effectiveStatus} onRepublish={onRepublish} onOpenGuide={onOpenGuide} onWithdraw={onWithdraw} />
           </div>
 
         </div>
@@ -1243,9 +1414,10 @@ const SitCard = ({
 
 /* ── Quick actions ── */
 const QuickActions = ({
-  sit, isOwner, effectiveStatus, onRepublish, onOpenGuide,
+  sit, isOwner, effectiveStatus, onRepublish, onOpenGuide, onWithdraw,
 }: {
   sit: any; isOwner: boolean; effectiveStatus: string; onRepublish: () => void; onOpenGuide: (id: string) => void;
+  onWithdraw?: (appId: string) => void;
 }) => {
   const btnClass = "text-xs font-medium flex items-center gap-1 px-2.5 py-1.5 rounded-lg transition-colors";
 
@@ -1381,9 +1553,28 @@ const QuickActions = ({
 
   if (!isOwner && ["pending", "viewed", "discussing"].includes(sit.application_status)) {
     return (
-      <Link to={`/sits/${sit.id}`} className={cn(btnClass, "bg-accent text-muted-foreground hover:text-foreground")}>
-        <ChevronRight className="h-3.5 w-3.5" /> Voir l'annonce
-      </Link>
+      <>
+        <Link to={`/sits/${sit.id}`} className={cn(btnClass, "bg-accent text-muted-foreground hover:text-foreground")}>
+          <ChevronRight className="h-3.5 w-3.5" /> Voir l'annonce
+        </Link>
+        {sit.conversationId && (
+          <Link
+            to={`/messages?c=${sit.conversationId}`}
+            className={cn(btnClass, "border border-primary/40 text-primary hover:bg-primary/10")}
+          >
+            <MessageCircle className="h-3.5 w-3.5" /> Ouvrir la conversation
+          </Link>
+        )}
+        {sit.application_status === "pending" && sit.application_id && onWithdraw && (
+          <button
+            type="button"
+            onClick={() => onWithdraw(sit.application_id)}
+            className={cn(btnClass, "text-muted-foreground hover:text-destructive ml-auto")}
+          >
+            Retirer ma candidature
+          </button>
+        )}
+      </>
     );
   }
 

@@ -215,6 +215,36 @@ const CreateSit = () => {
 
   const [currentStep, setCurrentStep] = useState(0);
   const [sitLocation, setSitLocation] = useState<"home" | "away" | null>(null);
+  const stepStartedAtRef = useRef<number>(Date.now());
+  const publishedRef = useRef(false);
+  const lastStepRef = useRef<number>(0);
+
+  // Analytics : step_started + step_completed sur transition de step
+  useEffect(() => {
+    stepStartedAtRef.current = Date.now();
+    void trackEvent("sits_create_step_started", { metadata: { step: currentStep } });
+    const prev = lastStepRef.current;
+    lastStepRef.current = currentStep;
+    return () => {
+      // Envoie step_completed pour l'étape qui vient d'être quittée
+      const duration = Date.now() - stepStartedAtRef.current;
+      void trackEvent("sits_create_step_completed", { metadata: { step: prev, duration_ms: duration } });
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentStep]);
+
+  // Analytics : abandon si unmount sans publication
+  useEffect(() => {
+    return () => {
+      if (!publishedRef.current) {
+        void trackEvent("sits_create_abandoned", {
+          metadata: { step: lastStepRef.current, has_draft: !!draftIdParam },
+        });
+      }
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
 
   const [title, setTitle] = useState("");
   const [startDate, setStartDate] = useState("");
@@ -644,8 +674,14 @@ const CreateSit = () => {
     });
     const animals = animalParts.length > 0 ? animalParts.join(" et ") : "animaux";
     const cityPart = ownerCity ? ` à ${ownerCity}` : "";
-    const dayWord = nDays > 1 ? "jours" : "jour";
-    return `Garde de ${animals}${cityPart}, ${nDays} ${dayWord}`;
+    // Dates au format FR long, ex : "du 14 août au 18 août 2026"
+    const monthsFR = ["janvier","février","mars","avril","mai","juin","juillet","août","septembre","octobre","novembre","décembre"];
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+    const sameYear = start.getFullYear() === end.getFullYear();
+    const startLabel = `${start.getDate()} ${monthsFR[start.getMonth()]}${sameYear ? "" : ` ${start.getFullYear()}`}`;
+    const endLabel = `${end.getDate()} ${monthsFR[end.getMonth()]} ${end.getFullYear()}`;
+    return `Garde${cityPart ? " de maison" : ""} ${animals !== "animaux" ? `pour ${animals}` : ""}${cityPart}, du ${startLabel} au ${endLabel}`.replace(/\s+/g, " ").trim();
   };
 
   const showUrgent = flexibleDates || (startDate && new Date(startDate).getTime() - Date.now() < 7 * 86400000);
@@ -720,6 +756,7 @@ const CreateSit = () => {
           });
         } catch {}
       }
+      publishedRef.current = true;
       toast({ title: "Annonce publiée", description: "Les gardiens peuvent maintenant postuler." });
       navigate(`/sits/${sitId}`);
     } catch (err: any) {

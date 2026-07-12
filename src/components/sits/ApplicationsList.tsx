@@ -27,7 +27,7 @@ import {
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription,
 } from "@/components/ui/dialog";
-import { format, differenceInDays, parseISO } from "date-fns";
+import { format, differenceInDays, parseISO, formatDistanceToNow } from "date-fns";
 import { fr } from "date-fns/locale";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 
@@ -39,6 +39,12 @@ interface ApplicationsListProps {
   endDate: string;
   propertyId: string;
   sitStatus?: string;
+  /**
+   * Filtre segmenté injecté par OwnerSitView (chips "À traiter", "Vues", etc.).
+   * Quand défini, la liste active n'affiche que ces statuts.
+   * "declined" force l'ouverture de la section refusées seule.
+   */
+  statusFilter?: "pending" | "viewed" | "discussing" | "declined" | null;
 }
 
 const statusStyles: Record<string, { label: string; className: string }> = {
@@ -54,7 +60,7 @@ const statusOrder: Record<string, number> = {
   pending: 0, viewed: 0, discussing: 1, accepted: 2, rejected: 3, cancelled: 4,
 };
 
-const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, propertyId, sitStatus }: ApplicationsListProps) => {
+const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, propertyId, sitStatus, statusFilter = null }: ApplicationsListProps) => {
   const { user } = useAuth();
   const { owner: viewerOwner } = useViewerOwnerForAffinity();
   const [applications, setApplications] = useState<any[]>([]);
@@ -63,7 +69,7 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, prope
   const [declineApp, setDeclineApp] = useState<any>(null);
   const [declineMessage, setDeclineMessage] = useState("");
   const [declineCustom, setDeclineCustom] = useState(false);
-  const [declinedOpen, setDeclinedOpen] = useState(false);
+  const [declinedOpen, setDeclinedOpen] = useState(true);
   const [sortMode, setSortMode] = useState<"affinity" | "rating" | "recent">("affinity");
   const navigate = useNavigate();
   const [showAccord, setShowAccord] = useState(false);
@@ -526,7 +532,12 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, prope
   }, [rawActive, viewerOwner]);
 
   const activeApps = useMemo(() => {
-    const arr = [...rawActive];
+    let arr = [...rawActive];
+    // Filtre segmenté (chips OwnerSitView)
+    if (statusFilter === "pending") arr = arr.filter(a => a.status === "pending");
+    else if (statusFilter === "viewed") arr = arr.filter(a => a.status === "viewed");
+    else if (statusFilter === "discussing") arr = arr.filter(a => a.status === "discussing");
+    else if (statusFilter === "declined") arr = [];
     const isPending = (s: string) => s === "pending" || s === "viewed";
     arr.sort((a, b) => {
       // Statut "en attente" en tête, quel que soit le tri secondaire.
@@ -548,7 +559,10 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, prope
       return db - da;
     });
     return arr;
-  }, [rawActive, sortMode, affinityByApp]);
+  }, [rawActive, sortMode, affinityByApp, statusFilter]);
+
+  // Quand le filtre est sur "declined", on force l'ouverture visuelle.
+  const forceDeclinedOnly = statusFilter === "declined";
 
 
   if (loading) return <p className="text-sm text-muted-foreground">Chargement des candidatures...</p>;
@@ -557,6 +571,19 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, prope
     const sitter = app.sitter;
     const status = statusStyles[app.status] || statusStyles.pending;
     const completedSits = sitter?.completed_sits_count || 0;
+    const isPendingLike = app.status === "pending" || app.status === "viewed";
+    const receivedLabel = app.created_at
+      ? `Reçue ${formatDistanceToNow(new Date(app.created_at), { addSuffix: true, locale: fr })}`
+      : null;
+    const affinityScore = affinityByApp.get(app.id);
+    const affinityClass =
+      typeof affinityScore === "number"
+        ? affinityScore >= 70
+          ? "bg-success/10 text-success"
+          : affinityScore >= 50
+            ? "bg-warning/10 text-warning-foreground"
+            : "bg-muted text-muted-foreground"
+        : null;
 
     return (
       <div key={app.id} className="bg-card border border-border rounded-2xl p-5 mb-4">
@@ -585,6 +612,9 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, prope
               </Link>
               {sitter?.identity_verified && <VerifiedBadge size="sm" />}
               {app.isEmergencySitter && <EmergencyBadge size="sm" showTooltip />}
+              {receivedLabel && (
+                <span className="text-xs text-muted-foreground font-normal">· {receivedLabel}</span>
+              )}
             </div>
             <div className="flex items-center gap-3 text-sm text-muted-foreground flex-wrap mt-0.5">
               {sitter?.city && (
@@ -610,7 +640,7 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, prope
               )}
             </div>
             {app.sitterAffinityInput && (
-              <div className="mt-2">
+              <div className={`mt-2 inline-flex rounded-full px-2 py-0.5 ${affinityClass ?? ""}`}>
                 <OwnerToSitterAffinity
                   sitterProfile={app.sitterAffinityInput}
                   context="owner_applications_list"
@@ -622,7 +652,13 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, prope
               </div>
             )}
           </div>
-          <span className={`px-3 py-1 rounded-full text-xs font-medium shrink-0 ${status.className}`}>
+          <span className={`px-3 py-1 rounded-full text-xs font-medium shrink-0 inline-flex items-center gap-1.5 ${status.className}`}>
+            {isPendingLike && (
+              <span className="relative flex h-1.5 w-1.5" aria-hidden="true">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-60" />
+                <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-primary" />
+              </span>
+            )}
             {status.label}
           </span>
         </div>

@@ -11,7 +11,7 @@
  * - Réouverture des candidatures (compteur ±)
  * - Bloc "Gérer cette garde" (OwnerSitManagement) + modal d'annulation
  */
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import { Calendar, MapPin, Send, Star, Home, Users, ChevronDown } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -115,6 +115,35 @@ const OwnerSitView = ({
   const [internalAppCount, setInternalAppCount] = useState(appCount);
   // Marqueur "vient juste de publier" → déclenche scroll + highlight du bloc d'invitation
   const [justPublished, setJustPublished] = useState(false);
+  // Segmentation candidatures (À traiter / Vues / En discussion / Refusées)
+  const [appChipFilter, setAppChipFilter] = useState<"pending" | "viewed" | "discussing" | "declined" | null>(null);
+  const [appStatusCounts, setAppStatusCounts] = useState<{ pending: number; viewed: number; discussing: number; declined: number }>({
+    pending: pendingAppCount,
+    viewed: 0,
+    discussing: 0,
+    declined: 0,
+  });
+
+  // Recompte par statut à l'arrivée + quand appCount change (proxy refetch).
+  useEffect(() => {
+    let cancelled = false;
+    void (async () => {
+      const { data } = await supabase
+        .from("applications")
+        .select("status")
+        .eq("sit_id", sit.id);
+      if (cancelled || !data) return;
+      const counts = { pending: 0, viewed: 0, discussing: 0, declined: 0 };
+      for (const a of data as any[]) {
+        if (a.status === "pending") counts.pending++;
+        else if (a.status === "viewed") counts.viewed++;
+        else if (a.status === "discussing") counts.discussing++;
+        else if (a.status === "rejected" || a.status === "owner_withdrew" || a.status === "cancelled") counts.declined++;
+      }
+      setAppStatusCounts(counts);
+    })();
+    return () => { cancelled = true; };
+  }, [sit.id, appCount, pendingAppCount]);
 
   // sync if parent re-fetches
   useEffect(() => setInternalAppCount(appCount), [appCount]);
@@ -532,65 +561,131 @@ const OwnerSitView = ({
         </div>
       )}
 
-      {/* Aperçu de l'annonce, vue identique à celle des gardiens, EN PREMIER pour
-          que le propriétaire visualise immédiatement à quoi ressemble son annonce. */}
-      <SitImmersiveContent
-        sit={sit}
-        owner={owner}
-        property={property}
-        pets={pets}
-        ownerProfile={ownerProfile}
-      />
+      {/* Bloc candidatures reçues. Ordre dynamique :
+          - S'il y a au moins une candidature, on remonte cette section AVANT
+            l'aperçu et l'invitation (priorité au traitement).
+          - Sinon on garde l'ordre historique (aperçu + invitation en tête). */}
+      {(() => {
+        const applicationsBlock = (
+          <section key="apps" className="mt-8 mb-8 rounded-2xl border border-border bg-card p-5 md:p-6">
+            <h2 className="text-lg font-semibold mb-3 flex items-center gap-2">
+              <Users className="h-5 w-5 text-primary" />
+              Candidatures reçues ({internalAppCount})
+              {pendingAppCount > 0 && (
+                <span className="w-2 h-2 rounded-full bg-primary inline-block" />
+              )}
+            </h2>
 
-      {/* Inviter des gardiens, action proactive avant les candidatures */}
-      {sit.status === "published" && (
-        <InviteSittersBlock
-          sitId={sit.id}
-          ownerId={currentUserId}
-          sitTitle={sit.title}
-          sitCity={owner?.city ?? null}
-          ownerPostalCode={owner?.postal_code ?? null}
-          ownerCountry={(owner as any)?.country ?? null}
-          startDate={sit.start_date}
-          endDate={sit.end_date}
-          highlight={justPublished}
-        />
-      )}
+            {/* Chips segmentation (scrollables sur mobile) */}
+            {internalAppCount > 0 && (
+              <div
+                className="flex gap-2 overflow-x-auto pb-2 mb-4 scrollbar-hide -mx-1 px-1"
+                role="tablist"
+                aria-label="Filtrer les candidatures par statut"
+              >
+                {(
+                  [
+                    { key: "pending" as const, label: "À traiter", count: appStatusCounts.pending, dot: appStatusCounts.pending > 0 },
+                    { key: "viewed" as const, label: "Vues", count: appStatusCounts.viewed },
+                    { key: "discussing" as const, label: "En discussion", count: appStatusCounts.discussing },
+                    { key: "declined" as const, label: "Refusées", count: appStatusCounts.declined },
+                  ]
+                ).map((chip) => {
+                  const active = appChipFilter === chip.key;
+                  return (
+                    <button
+                      key={chip.key}
+                      type="button"
+                      role="tab"
+                      aria-selected={active}
+                      onClick={() => setAppChipFilter(active ? null : chip.key)}
+                      className={
+                        "shrink-0 inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium transition-colors " +
+                        (active
+                          ? "bg-primary text-primary-foreground border-primary"
+                          : "bg-background text-muted-foreground border-border hover:text-foreground hover:border-primary/40")
+                      }
+                    >
+                      {chip.label}
+                      <span
+                        className={
+                          "inline-flex items-center justify-center min-w-[18px] h-[18px] rounded-full text-[10px] px-1 font-semibold " +
+                          (active
+                            ? "bg-primary-foreground/20 text-primary-foreground"
+                            : "bg-muted text-muted-foreground")
+                        }
+                      >
+                        {chip.count}
+                      </span>
+                      {chip.dot && (
+                        <span className="w-1.5 h-1.5 rounded-full bg-destructive inline-block" aria-hidden="true" />
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+            )}
 
-      {/* Candidatures reçues, APRÈS l'aperçu et l'invitation */}
-      <section className="mt-8 mb-8 rounded-2xl border border-border bg-card p-5 md:p-6">
-        <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
-          <Users className="h-5 w-5 text-primary" />
-          Candidatures reçues ({internalAppCount})
-          {pendingAppCount > 0 && (
-            <span className="w-2 h-2 rounded-full bg-primary inline-block" />
-          )}
-        </h2>
-        {!sit.accepting_applications && (
-          <div className="mb-4">
-            <ReopenApplicationsCard
-              sit={sit}
-              setSit={setSit}
-              internalAppCount={internalAppCount}
+            {!sit.accepting_applications && (
+              <div className="mb-4">
+                <ReopenApplicationsCard
+                  sit={sit}
+                  setSit={setSit}
+                  internalAppCount={internalAppCount}
+                />
+              </div>
+            )}
+            {sit.accepting_applications && sit.max_applications && (
+              <p className="text-xs text-muted-foreground mb-3">
+                {internalAppCount}/{sit.max_applications} candidature
+                {sit.max_applications > 1 ? "s" : ""} reçue{internalAppCount > 1 ? "s" : ""}
+              </p>
+            )}
+            <ApplicationsList
+              sitId={sit.id}
+              sitTitle={sit.title}
+              petNames={pets.map((p: any) => p.name)}
+              startDate={formatDate(sit.start_date)}
+              endDate={formatDate(sit.end_date)}
+              propertyId={sit.property_id}
+              sitStatus={sit.status}
+              statusFilter={appChipFilter}
             />
-          </div>
-        )}
-        {sit.accepting_applications && sit.max_applications && (
-          <p className="text-xs text-muted-foreground mb-3">
-            {internalAppCount}/{sit.max_applications} candidature
-            {sit.max_applications > 1 ? "s" : ""} reçue{internalAppCount > 1 ? "s" : ""}
-          </p>
-        )}
-        <ApplicationsList
-          sitId={sit.id}
-          sitTitle={sit.title}
-          petNames={pets.map((p: any) => p.name)}
-          startDate={formatDate(sit.start_date)}
-          endDate={formatDate(sit.end_date)}
-          propertyId={sit.property_id}
-          sitStatus={sit.status}
-        />
-      </section>
+          </section>
+        );
+
+        const immersiveBlock = (
+          <SitImmersiveContent
+            key="immersive"
+            sit={sit}
+            owner={owner}
+            property={property}
+            pets={pets}
+            ownerProfile={ownerProfile}
+          />
+        );
+
+        const inviteBlock = sit.status === "published" ? (
+          <InviteSittersBlock
+            key="invite"
+            sitId={sit.id}
+            ownerId={currentUserId}
+            sitTitle={sit.title}
+            sitCity={owner?.city ?? null}
+            ownerPostalCode={owner?.postal_code ?? null}
+            ownerCountry={(owner as any)?.country ?? null}
+            startDate={sit.start_date}
+            endDate={sit.end_date}
+            highlight={justPublished}
+          />
+        ) : null;
+
+        return internalAppCount > 0
+          ? <>{applicationsBlock}{immersiveBlock}{inviteBlock}</>
+          : <>{immersiveBlock}{inviteBlock}{applicationsBlock}</>;
+      })()}
+
+
 
       {/* Photos & couverture, déplacé en bas dans un Collapsible (gestion ponctuelle) */}
       <Collapsible className="mt-2 mb-8 rounded-2xl border border-border bg-card">
