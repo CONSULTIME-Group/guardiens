@@ -11,6 +11,7 @@ import { useSeoData } from "@/hooks/useSeoData";
 const AdminAnalytics = lazy(() => import("./AdminAnalytics"));
 const AdminSEO = lazy(() => import("./AdminSEO"));
 const AdminSignupFunnelTab = lazy(() => import("@/components/admin/AdminSignupFunnelTab"));
+const SignupFormSubStepsFunnel = lazy(() => import("@/components/admin/SignupFormSubStepsFunnel"));
 
 function pctChange(current: number, previous: number): number | undefined {
   if (previous === 0 && current === 0) return 0;
