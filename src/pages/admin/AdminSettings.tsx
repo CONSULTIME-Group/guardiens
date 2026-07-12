@@ -60,6 +60,11 @@ const AdminSettings = () => {
   const [signalsAppliesSince, setSignalsAppliesSince] = useState<string | null>(null);
   const [signalsAppliesSinceDraft, setSignalsAppliesSinceDraft] = useState<string>("");
   const [savingSignalsAppliesSince, setSavingSignalsAppliesSince] = useState(false);
+  const [affinityMinCriteria, setAffinityMinCriteria] = useState<number | null>(null);
+  const [affinityMinScore, setAffinityMinScore] = useState<number | null>(null);
+  const [affinityMinCriteriaDraft, setAffinityMinCriteriaDraft] = useState<string>("");
+  const [affinityMinScoreDraft, setAffinityMinScoreDraft] = useState<string>("");
+  const [savingAffinity, setSavingAffinity] = useState(false);
   const [confirmDialog, setConfirmDialog] = useState<{
     nextIso: string | null;
     impactCount: number | null;
