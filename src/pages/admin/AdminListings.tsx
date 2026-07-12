@@ -272,8 +272,85 @@ const AdminListings = () => {
   const filtered = listings.filter((l) => {
     if (search && !l.title?.toLowerCase().includes(search.toLowerCase()) && !l.owner?.first_name?.toLowerCase().includes(search.toLowerCase())) return false;
     if (filterCity && filterCity !== "all_cities" && l.owner?.city !== filterCity) return false;
+    if (filterStatus === "to_staff") {
+      const today = new Date(); today.setHours(0, 0, 0, 0);
+      const apps = stats[l.id]?.applications || 0;
+      const notPast = !l.end_date || new Date(l.end_date) >= today;
+      if (apps !== 0 || !notPast) return false;
+    }
     return true;
   });
+
+  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+  const currentPage = Math.min(page, totalPages - 1);
+  const paginated = filtered.slice(currentPage * PAGE_SIZE, (currentPage + 1) * PAGE_SIZE);
+
+  const handleExportCsv = () => {
+    const header = ["Titre", "Proprio", "Ville", "Pays", "Début", "Fin", "Statut", "Vues", "Uniques", "Messages", "Candidatures", "Dernière vue"];
+    const esc = (v: any) => {
+      const s = v == null ? "" : String(v);
+      return `"${s.replace(/"/g, '""')}"`;
+    };
+    const rows = filtered.map((l) => {
+      const st = stats[l.id];
+      const owner = `${l.owner?.first_name || ""} ${l.owner?.last_name || ""}`.trim();
+      return [
+        l.title || "Sans titre",
+        owner,
+        l.owner?.city || "",
+        l.country ? getCountryName(l.country) : "",
+        l.start_date ? format(new Date(l.start_date), "yyyy-MM-dd") : "",
+        l.end_date ? format(new Date(l.end_date), "yyyy-MM-dd") : "",
+        resolveStatusBadge(l).label,
+        st?.views ?? 0,
+        st?.uniqueViews ?? 0,
+        st?.messages ?? 0,
+        st?.applications ?? 0,
+        st?.lastViewAt ? format(new Date(st.lastViewAt), "yyyy-MM-dd HH:mm") : "",
+      ].map(esc).join(",");
+    });
+    const csv = "\uFEFF" + [header.map(esc).join(","), ...rows].join("\n");
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `annonces-${format(new Date(), "yyyy-MM-dd")}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
+  const handleSendMessage = async () => {
+    const content = messageModal.content.trim();
+    const target = messageModal.listing;
+    if (!content || !target?.user_id) {
+      toast.error("Le message ne peut pas être vide");
+      return;
+    }
+    setSendingMessage(true);
+    const { data, error } = await supabase.rpc("admin_send_message_to_user", {
+      p_target_user_id: target.user_id,
+      p_content: content,
+    });
+    setSendingMessage(false);
+    if (error) {
+      try {
+        await supabase.rpc("admin_log_message_failure", {
+          p_target_user_id: target.user_id,
+          p_content: content,
+          p_error_message: error.message || "Erreur inconnue",
+        });
+      } catch { /* noop */ }
+      toast.error(error.message || "Erreur lors de l'envoi");
+      return;
+    }
+    toast.success("Message envoyé");
+    const convId = data as string;
+    setMessageModal({ open: false, listing: null, content: "" });
+    if (convId) navigate(`/messages?conversation=${convId}`);
+  };
+
 
   const buildShareData = (listing: any) => {
     const url = `https://guardiens.fr/annonces/${listing.id}`;
