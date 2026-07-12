@@ -98,7 +98,7 @@ export const MassEmailFiltersPanel = ({ segment, setSegment, filters, setFilters
           </div>
         </CardHeader>
         <CardContent className="pt-0">
-          <Accordion type="multiple" defaultValue={["geo"]} className="space-y-1">
+          <Accordion type="multiple" className="space-y-1">
             {/* ── GÉO ── */}
             <AccordionItem value="geo" className="border-b-0">
               <AccordionTrigger className="hover:no-underline py-2">
