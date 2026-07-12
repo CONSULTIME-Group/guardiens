@@ -289,6 +289,12 @@ const AdminMassEmails = () => {
     applyBodyTransform((s) => `<a href="${url}">${s || url}</a>`);
   };
 
+  const handleInsertFirstName = () => {
+    applyBodyTransform((s) => `{prénom}${s}`, "{prénom}");
+  };
+
+
+
   const handleSendTest = async () => {
     if (!subject.trim() || body.trim().length < 20) return;
     setTestLoading(true);
