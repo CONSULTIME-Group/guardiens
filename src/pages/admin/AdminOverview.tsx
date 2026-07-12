@@ -48,6 +48,7 @@ const AdminOverview = () => {
         }
       />
 
+      <ActivityAnalysisCard />
       <SignalsSection />
       <CronHealthCard />
       <TodoSection actionCards={actionCards} lateCards={lateCards} />
