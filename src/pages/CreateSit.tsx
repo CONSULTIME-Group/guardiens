@@ -644,8 +644,14 @@ const CreateSit = () => {
     });
     const animals = animalParts.length > 0 ? animalParts.join(" et ") : "animaux";
     const cityPart = ownerCity ? ` à ${ownerCity}` : "";
-    const dayWord = nDays > 1 ? "jours" : "jour";
-    return `Garde de ${animals}${cityPart}, ${nDays} ${dayWord}`;
+    // Dates au format FR long, ex : "du 14 août au 18 août 2026"
+    const monthsFR = ["janvier","février","mars","avril","mai","juin","juillet","août","septembre","octobre","novembre","décembre"];
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+    const sameYear = start.getFullYear() === end.getFullYear();
+    const startLabel = `${start.getDate()} ${monthsFR[start.getMonth()]}${sameYear ? "" : ` ${start.getFullYear()}`}`;
+    const endLabel = `${end.getDate()} ${monthsFR[end.getMonth()]} ${end.getFullYear()}`;
+    return `Garde${cityPart ? " de maison" : ""} ${animals !== "animaux" ? `pour ${animals}` : ""}${cityPart}, du ${startLabel} au ${endLabel}`.replace(/\s+/g, " ").trim();
   };
 
   const showUrgent = flexibleDates || (startDate && new Date(startDate).getTime() - Date.now() < 7 * 86400000);
