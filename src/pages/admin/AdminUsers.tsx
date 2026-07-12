@@ -293,6 +293,9 @@ const AdminUsers = () => {
         newLast7d: newRes.count ?? 0,
       });
     })();
+  }, []);
+
+
 
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
   const availableDepts = Object.keys(DEPT_NAMES).sort((a, b) => a.localeCompare(b, "fr"));
