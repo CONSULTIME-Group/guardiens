@@ -160,8 +160,6 @@ async function computeRecipients(
     title: string;
     description: string | null;
     user_id: string;
-    latitude: number | null;
-    longitude: number | null;
     city: string | null;
     start_date: string | null;
     end_date: string | null;
@@ -175,7 +173,7 @@ async function computeRecipients(
 }> {
   const { data: sit, error: sErr } = await serviceClient
     .from("sits")
-    .select("id, title, description, user_id, latitude, longitude, city, start_date, end_date, status, country")
+    .select("id, title, description, user_id, city, start_date, end_date, status, country")
     .eq("id", sitId)
     .maybeSingle();
   if (sErr || !sit) throw new Error(`Annonce introuvable (${sitId})`);
@@ -187,12 +185,10 @@ async function computeRecipients(
     .maybeSingle();
   if (aErr || !author) throw new Error("Propriétaire introuvable pour cette annonce");
 
-  const centerLat =
-    ((sit as any).latitude as number | null) ?? ((author as any).latitude as number | null);
-  const centerLon =
-    ((sit as any).longitude as number | null) ?? ((author as any).longitude as number | null);
+  const centerLat = (author as any).latitude as number | null;
+  const centerLon = (author as any).longitude as number | null;
   if (centerLat == null || centerLon == null) {
-    throw new Error("Aucune coordonnée disponible (ni sur l'annonce, ni sur le propriétaire)");
+    throw new Error("Aucune coordonnée disponible pour le propriétaire de cette annonce");
   }
 
   const latDelta = radiusKm / 111;
