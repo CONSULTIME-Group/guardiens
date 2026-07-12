@@ -156,7 +156,17 @@ export function ActivityAnalysisCard() {
                       <Button
                         size="sm"
                         variant="outline"
-                        onClick={() => navigate(action.link)}
+                        onClick={() => {
+                          if (action.link.startsWith("/admin/envois-groupes")) {
+                            const params = new URLSearchParams({
+                              ai_objective: action.title,
+                              ai_points: action.why,
+                            });
+                            navigate(`/admin/envois-groupes?${params.toString()}`);
+                          } else {
+                            navigate(action.link);
+                          }
+                        }}
                         className="shrink-0"
                       >
                         Traiter

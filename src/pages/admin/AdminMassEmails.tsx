@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from "react";
+import { useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -18,7 +19,7 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Send, Eye, Loader2, Sparkles, Bold, Link as LinkIcon, MailCheck } from "lucide-react";
+import { Send, Eye, Loader2, Sparkles, Bold, Link as LinkIcon, MailCheck, Copy, AlertTriangle, Check, User } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { MassEmailFiltersPanel } from "@/components/admin/mass-email/MassEmailFilters";
@@ -30,6 +31,9 @@ interface MassEmail {
   created_at: string;
   segment: string;
   subject: string;
+  body?: string | null;
+  cta_label?: string | null;
+  cta_url?: string | null;
   recipients_count: number;
   status: string;
   enqueued_count?: number | null;
@@ -37,6 +41,9 @@ interface MassEmail {
   failed_count?: number | null;
   skipped_count?: number | null;
 }
+
+const SPAM_TRIGGERS = ["gratuit", "urgent", "gagnez", "cliquez ici", "promo", "offre limitée", "100%", "argent facile", "félicitations"];
+
 
 type StatusMeta = {
   label: string;
@@ -181,6 +188,28 @@ const AdminMassEmails = () => {
 
   // Ref textarea corps (mise en forme)
   const bodyRef = useRef<HTMLTextAreaElement | null>(null);
+  // Ref panneau IA (scroll)
+  const aiPanelRef = useRef<HTMLDivElement | null>(null);
+
+  // Pré-brief depuis l'analyse IA
+  const [searchParams, setSearchParams] = useSearchParams();
+  useEffect(() => {
+    const objective = searchParams.get("ai_objective");
+    const points = searchParams.get("ai_points");
+    if (!objective && !points) return;
+    if (objective) setAiObjective(objective.slice(0, 400));
+    if (points) setAiKeyPoints(points.slice(0, 400));
+    toast.success("Brief pré-rempli depuis l'analyse IA");
+    const next = new URLSearchParams(searchParams);
+    next.delete("ai_objective");
+    next.delete("ai_points");
+    setSearchParams(next, { replace: true });
+    requestAnimationFrame(() => {
+      aiPanelRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
 
   const callAi = useCallback(async (payload: Record<string, unknown>) => {
     setAiLoading(true);
@@ -260,6 +289,12 @@ const AdminMassEmails = () => {
     applyBodyTransform((s) => `<a href="${url}">${s || url}</a>`);
   };
 
+  const handleInsertFirstName = () => {
+    applyBodyTransform((s) => `{prénom}${s}`, "{prénom}");
+  };
+
+
+
   const handleSendTest = async () => {
     if (!subject.trim() || body.trim().length < 20) return;
     setTestLoading(true);
@@ -307,7 +342,7 @@ const AdminMassEmails = () => {
     setHistoryLoading(true);
     const { data } = await supabase
       .from("mass_emails")
-      .select("id, created_at, segment, subject, recipients_count, status, enqueued_count, sent_count, failed_count, skipped_count")
+      .select("id, created_at, segment, subject, body, cta_label, cta_url, recipients_count, status, enqueued_count, sent_count, failed_count, skipped_count")
       .order("created_at", { ascending: false })
       .limit(20);
     setHistory((data as MassEmail[]) || []);
@@ -337,6 +372,22 @@ const AdminMassEmails = () => {
       setCancelling(false);
     }
   };
+
+  const handleDuplicate = useCallback((row: MassEmail) => {
+    setSegment((row.segment as Segment) || "tous");
+    setFilters({});
+    setSubject((row.subject || "").slice(0, 100));
+    setBody((row.body || "").slice(0, 2000));
+    const hasCta = !!(row.cta_label && row.cta_url);
+    setCtaEnabled(hasCta);
+    setCtaLabel(row.cta_label || "");
+    setCtaUrl(row.cta_url || "");
+    setActivePreset("");
+    toast.success("Campagne dupliquée, prête à éditer");
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }, []);
+
+
 
 
   // Debounced recipient count
@@ -414,7 +465,14 @@ const AdminMassEmails = () => {
     }
   };
 
-  const previewHtml = buildPreviewHtml(subject, body, ctaEnabled ? ctaLabel : undefined, ctaEnabled ? withUtm(ctaUrl) : undefined);
+  const previewBody = body.replace(/\{prénom\}/gi, "Camille");
+  const previewSubject = subject.replace(/\{prénom\}/gi, "Camille");
+  const previewHtml = buildPreviewHtml(previewSubject, previewBody, ctaEnabled ? ctaLabel : undefined, ctaEnabled ? withUtm(ctaUrl) : undefined);
+
+  // Contrôle qualité non bloquant
+  const lowerBody = body.toLowerCase();
+  const spamFound = SPAM_TRIGGERS.filter((w) => lowerBody.includes(w.toLowerCase()));
+  const hasInsecureLinks = /http:\/\//i.test(body);
 
   return (
     <div className="p-6 space-y-6">
@@ -464,6 +522,7 @@ const AdminMassEmails = () => {
           </Card>
 
           {/* Assistant IA */}
+          <div ref={aiPanelRef} />
           <Card>
             <CardHeader className="pb-3">
               <CardTitle className="text-base flex items-center gap-2">
@@ -577,6 +636,9 @@ const AdminMassEmails = () => {
                   <Button type="button" size="sm" variant="outline" onClick={handleLink}>
                     <LinkIcon className="h-3.5 w-3.5 mr-1.5" /> Lien
                   </Button>
+                  <Button type="button" size="sm" variant="outline" onClick={handleInsertFirstName}>
+                    <User className="h-3.5 w-3.5 mr-1.5" /> Insérer {"{prénom}"}
+                  </Button>
                 </div>
                 <Textarea
                   id="body"
@@ -590,6 +652,9 @@ const AdminMassEmails = () => {
                 />
                 <p className="text-xs text-muted-foreground">
                   Mise en forme : gras et liens via les boutons ci-dessus. Les retours à la ligne sont conservés.
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  Astuce : insérez {"{prénom}"} pour personnaliser (remplacé par le prénom de chaque destinataire, ou « Bonjour » si le prénom est absent).
                 </p>
                 <p className="text-xs text-muted-foreground text-right">{body.length}/2000</p>
               </div>
@@ -762,16 +827,27 @@ const AdminMassEmails = () => {
                             </Badge>
                           </TableCell>
                           <TableCell className="text-right">
-                            {canCancel ? (
+                            <div className="flex justify-end gap-1">
                               <Button
                                 size="sm"
-                                variant="outline"
+                                variant="ghost"
                                 className="h-7 text-xs"
-                                onClick={() => setCancelTarget(row)}
+                                onClick={() => handleDuplicate(row)}
+                                title="Dupliquer cette campagne"
                               >
-                                Annuler
+                                <Copy className="h-3 w-3 mr-1" /> Dupliquer
                               </Button>
-                            ) : null}
+                              {canCancel ? (
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  className="h-7 text-xs"
+                                  onClick={() => setCancelTarget(row)}
+                                >
+                                  Annuler
+                                </Button>
+                              ) : null}
+                            </div>
                           </TableCell>
                         </TableRow>
                       );
@@ -850,7 +926,44 @@ const AdminMassEmails = () => {
                 </div>
               )}
 
-              <div className="rounded-lg border border-amber-500/40 bg-warning-soft/40 dark:bg-amber-950/10 p-4 text-xs text-warning-foreground dark:text-amber-200">
+              <div className="rounded-lg border border-border p-4 space-y-2">
+                <h3 className="text-sm font-semibold">Contrôle qualité</h3>
+                <p className="text-xs text-muted-foreground">Indicatif. N'empêche jamais l'envoi.</p>
+                <ul className="space-y-1.5 text-xs">
+                  <li className="flex items-start gap-2">
+                    {spamFound.length > 0 ? (
+                      <>
+                        <AlertTriangle className="h-3.5 w-3.5 mt-0.5 text-warning-foreground shrink-0" />
+                        <span>Mots déclencheurs spam détectés : <span className="font-medium">{spamFound.join(", ")}</span></span>
+                      </>
+                    ) : (
+                      <>
+                        <Check className="h-3.5 w-3.5 mt-0.5 text-success shrink-0" />
+                        <span>Aucun mot déclencheur spam repéré.</span>
+                      </>
+                    )}
+                  </li>
+                  <li className="flex items-start gap-2">
+                    {hasInsecureLinks ? (
+                      <>
+                        <AlertTriangle className="h-3.5 w-3.5 mt-0.5 text-destructive shrink-0" />
+                        <span>Lien non sécurisé (http://) présent dans le corps.</span>
+                      </>
+                    ) : (
+                      <>
+                        <Check className="h-3.5 w-3.5 mt-0.5 text-success shrink-0" />
+                        <span>Aucun lien non sécurisé.</span>
+                      </>
+                    )}
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <Check className="h-3.5 w-3.5 mt-0.5 text-success shrink-0" />
+                    <span>Lien de désinscription présent (auto).</span>
+                  </li>
+                </ul>
+              </div>
+
+              <div className="rounded-lg border border-warning/40 bg-warning-soft/40 p-4 text-xs text-warning-foreground">
                 <strong>Action irréversible.</strong> Une fois confirmé, l'email part immédiatement
                 vers <strong>{recipientCount ?? 0}</strong> destinataires. Aucun rappel possible.
               </div>
