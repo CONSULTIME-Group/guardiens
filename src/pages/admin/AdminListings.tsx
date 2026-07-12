@@ -601,6 +601,17 @@ const AdminListings = () => {
                       >
                         <MessageSquare className="h-4 w-4" />
                       </Button>
+                      {listing.status === "published" && (
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          title="Envoyer aux gardiens du coin"
+                          aria-label="Envoyer aux gardiens du coin"
+                          onClick={() => setProximityListing(listing)}
+                        >
+                          <Send className="h-4 w-4" />
+                        </Button>
+                      )}
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                           <Button variant="ghost" size="icon" title="Partager" aria-label="Partager">
