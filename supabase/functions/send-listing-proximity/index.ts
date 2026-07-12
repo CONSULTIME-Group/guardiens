@@ -174,10 +174,11 @@ async function computeRecipients(
 }> {
   const { data: sit, error: sErr } = await serviceClient
     .from("sits")
-    .select("id, title, description, user_id, city, start_date, end_date, status, country")
+    .select("id, title, owner_message, specific_expectations, user_id, city, start_date, end_date, status, country")
     .eq("id", sitId)
     .maybeSingle();
-  if (sErr || !sit) throw new Error(`Annonce introuvable (${sitId})`);
+  if (sErr) throw new Error(`Erreur chargement annonce: ${sErr.message}`);
+  if (!sit) throw new Error(`Annonce introuvable (${sitId})`);
 
   const { data: author, error: aErr } = await serviceClient
     .from("profiles")
