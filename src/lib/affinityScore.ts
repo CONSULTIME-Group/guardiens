@@ -61,8 +61,30 @@ export interface AffinityResult {
 
 const PACE_ORDER = ["calme", "equilibre", "actif"];
 
-/** Seuil sous lequel on n'affiche pas le badge (signal trop faible). */
-const MIN_DISPLAY_SCORE = 40;
+/**
+ * Seuils pilotables via feature_flags (affinity_min_common_criteria +
+ * affinity_min_score_percent). Bootstrap au démarrage via
+ * useAffinityThresholdsBootstrap ; par défaut : 2 critères / 40 %.
+ * Historique : 3 critères / 40 % masquait 68 % des scores (68 % des masquages
+ * étaient dus au seuil critères, cf. audit 12/07/2026).
+ */
+const thresholds = {
+  minCommonCriteria: 2,
+  minScorePercent: 40,
+};
+
+export function setAffinityThresholds(next: { minCommonCriteria?: number; minScorePercent?: number }) {
+  if (typeof next.minCommonCriteria === "number" && Number.isFinite(next.minCommonCriteria)) {
+    thresholds.minCommonCriteria = Math.max(1, Math.min(5, Math.round(next.minCommonCriteria)));
+  }
+  if (typeof next.minScorePercent === "number" && Number.isFinite(next.minScorePercent)) {
+    thresholds.minScorePercent = Math.max(0, Math.min(100, Math.round(next.minScorePercent)));
+  }
+}
+
+export function getAffinityThresholds() {
+  return { ...thresholds };
+}
 
 /** Pondération par critère (poids supérieur = critère "dur"). */
 const W = {
@@ -304,10 +326,10 @@ export function computeAffinityResultFull(
   const score = Math.max(0, Math.min(100, Math.round(raw)));
   const total = evaluated;
 
-  if (evaluated < 3) {
+  if (evaluated < thresholds.minCommonCriteria) {
     return { score, matched, total, displayed: false, hiddenReason: "too_few_criteria" };
   }
-  if (score < MIN_DISPLAY_SCORE) {
+  if (score < thresholds.minScorePercent) {
     return { score, matched, total, displayed: false, hiddenReason: "below_threshold" };
   }
   return { score, matched, total, displayed: true };
