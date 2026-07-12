@@ -166,9 +166,18 @@ const OnboardingAffinity = () => {
   const handleRolePick = (r: Role) => {
     setChosenRole(r);
     setAskRole(false);
+    lastStepRef.current = { index: 1, name: "role_selected" };
     void trackEvent("onboarding_role_selected", {
       source: "/onboarding/affinity",
       metadata: { role: r },
+    });
+    void trackEvent("affinity_onboarding_role_selected", {
+      source: "/onboarding/affinity",
+      metadata: { role: r },
+    });
+    void trackEvent("affinity_onboarding_step_completed", {
+      source: "/onboarding/affinity",
+      metadata: { step_index: 0, step_name: "choose_role" },
     });
   };
 
