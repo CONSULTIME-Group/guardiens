@@ -675,6 +675,16 @@ const AdminMassEmails = () => {
               </div>
             </div>
             <Button
+              type="button"
+              variant="outline"
+              className="w-full"
+              disabled={testLoading || !subject.trim() || body.trim().length < 20}
+              onClick={handleSendTest}
+            >
+              {testLoading ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <MailCheck className="h-4 w-4 mr-2" />}
+              M'envoyer un test
+            </Button>
+            <Button
               className="w-full h-14 text-base font-semibold shadow-md hover:shadow-lg transition-shadow"
               size="lg"
               disabled={!isValid || sending}
