@@ -72,6 +72,17 @@ const AdminListings = () => {
   const [hideModal, setHideModal] = useState<string | null>(null);
   const [restoreModal, setRestoreModal] = useState<string | null>(null);
 
+  // KPIs (indépendants des filtres, calculés au montage)
+  const [kpis, setKpis] = useState<{ total: number; published: number; draft: number; cancelled: number; archived: number; newLast7d: number } | null>(null);
+
+  // Pagination client-side
+  const PAGE_SIZE = 25;
+  const [page, setPage] = useState(0);
+
+  // Message rapide au propriétaire
+  const [messageModal, setMessageModal] = useState<{ open: boolean; listing: any | null; content: string }>({ open: false, listing: null, content: "" });
+  const [sendingMessage, setSendingMessage] = useState(false);
+
   // Traffic sheet
   const [trafficOpen, setTrafficOpen] = useState(false);
   const [trafficListing, setTrafficListing] = useState<any | null>(null);
