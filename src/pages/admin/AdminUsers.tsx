@@ -989,6 +989,38 @@ const AdminUsers = () => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <AlertDialog
+        open={reactivateModal.open}
+        onOpenChange={(v) => { if (!v && !reactivating) setReactivateModal({ open: false, userId: "", userName: "", email: "" }); }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Réactiver le compte ?</AlertDialogTitle>
+            <AlertDialogDescription asChild>
+              <div className="space-y-2 text-sm">
+                <p>
+                  Utilisateur : <strong>{reactivateModal.userName}</strong>
+                  {reactivateModal.email ? <> ({reactivateModal.email})</> : null}
+                </p>
+                <p className="text-muted-foreground">
+                  Le compte redevient actif et le motif de suspension est effacé. La note
+                  interne est conservée. Cette action sera tracée dans le journal d'audit.
+                </p>
+              </div>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={reactivating}>Annuler</AlertDialogCancel>
+            <AlertDialogAction
+              disabled={reactivating}
+              onClick={(e) => { e.preventDefault(); confirmReactivate(); }}
+            >
+              {reactivating ? "Réactivation…" : "Confirmer"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
