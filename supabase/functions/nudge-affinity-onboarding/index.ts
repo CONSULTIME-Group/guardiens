@@ -11,6 +11,7 @@
  * (les triggers BDD ne pouvant pas écouter analytics_events).
  */
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
+import { startCronRun } from "../_shared/cron-run-log.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -76,6 +77,7 @@ Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
   }
+  const run = await startCronRun("nudge-affinity-onboarding");
   try {
     const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
     const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
@@ -88,6 +90,7 @@ Deno.serve(async (req) => {
       .eq("key", "admin_signals_active")
       .maybeSingle();
     if (!flag?.enabled) {
+      await run.finish("success", { skipped: "flag_off" });
       return new Response(
         JSON.stringify({ skipped: "admin_signals_active is off" }),
         { headers: { ...corsHeaders, "Content-Type": "application/json" } },
@@ -233,6 +236,15 @@ Deno.serve(async (req) => {
       else emailsSkipped += 1;
     }
 
+    await run.finish(errors.length > 0 ? "partial" : "success", {
+      detected: users.length,
+      auto_resolved: autoResolved,
+      signals_inserted: signalsInserted,
+      signals_skipped: signalsSkipped,
+      emails_sent: emailsSent,
+      emails_skipped: emailsSkipped,
+      errors_count: errors.length,
+    });
     return new Response(
       JSON.stringify({
         detected: users.length,
@@ -248,6 +260,7 @@ Deno.serve(async (req) => {
     );
   } catch (err) {
     console.error("[nudge-affinity-onboarding]", err);
+    await run.fail(err);
     return new Response(
       JSON.stringify({ error: String((err as Error)?.message ?? err) }),
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } },
