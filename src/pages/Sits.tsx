@@ -170,6 +170,11 @@ const Sits = () => {
   const [openGuideId, setOpenGuideId] = useState<string | null>(null);
   const [openGuide, setOpenGuide] = useState<any | null>(null);
   const [guideLoading, setGuideLoading] = useState(false);
+  // Tri owner : "urgent" (pending count desc) par défaut, ou "recent" (updated_at desc)
+  const [ownerSortMode, setOwnerSortMode] = useState<"urgent" | "recent">("urgent");
+  // Modale de retrait de candidature côté gardien
+  const [withdrawApp, setWithdrawApp] = useState<{ appId: string; sitTitle: string; conversationId: string | null } | null>(null);
+  const [withdrawing, setWithdrawing] = useState(false);
 
   // Load full guide when openGuideId is set
   useEffect(() => {
