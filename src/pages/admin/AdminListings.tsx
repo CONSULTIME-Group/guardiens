@@ -402,20 +402,47 @@ const AdminListings = () => {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="font-heading text-2xl sm:text-3xl font-bold tracking-tight">Annonces</h1>
-        <p className="text-sm text-muted-foreground mt-1">
-          Vie de la publication : visibilité, trafic, candidatures. Annonces publiées, brouillons et masquées.
-        </p>
-        <p className="text-sm text-muted-foreground mt-1">
-          Pour le suivi opérationnel post-acceptation (confirmed, completed, cancelled), consultez l'onglet{' '}
-          <button
-            onClick={() => navigate('/admin/sits-management')}
-            className="font-medium text-foreground underline hover:text-primary transition-colors"
-          >
-            Gardes
-          </button>.
-        </p>
+      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
+        <div>
+          <h1 className="font-heading text-2xl sm:text-3xl font-bold tracking-tight">Annonces</h1>
+          <p className="text-sm text-muted-foreground mt-1">
+            Vie de la publication : visibilité, trafic, candidatures. Annonces publiées, brouillons et masquées.
+          </p>
+          <p className="text-sm text-muted-foreground mt-1">
+            Pour le suivi opérationnel post-acceptation (confirmed, completed, cancelled), consultez l'onglet{' '}
+            <button
+              onClick={() => navigate('/admin/sits-management')}
+              className="font-medium text-foreground underline hover:text-primary transition-colors"
+            >
+              Gardes
+            </button>.
+          </p>
+        </div>
+        <Button variant="outline" size="sm" onClick={handleExportCsv} disabled={filtered.length === 0}>
+          <Download className="h-4 w-4 mr-2" />
+          Exporter CSV
+        </Button>
+      </div>
+
+      {/* KPI banner */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+        {[
+          { label: "Total annonces", value: kpis?.total },
+          { label: "En ligne", value: kpis?.published },
+          { label: "Brouillons", value: kpis?.draft },
+          { label: "Masquées / annulées", value: kpis?.cancelled },
+          { label: "Archivées", value: kpis?.archived },
+          { label: "Nouvelles 7 jours", value: kpis?.newLast7d },
+        ].map((k) => (
+          <Card key={k.label}>
+            <CardContent className="p-4">
+              <p className="text-xs text-muted-foreground">{k.label}</p>
+              <p className="text-2xl font-bold text-foreground mt-1">
+                {k.value === undefined ? "–" : k.value.toLocaleString("fr-FR")}
+              </p>
+            </CardContent>
+          </Card>
+        ))}
       </div>
 
       <DraftStatsPanel />
@@ -426,9 +453,10 @@ const AdminListings = () => {
           <Input placeholder="Rechercher titre ou proprio…" value={search} onChange={(e) => setSearch(e.target.value)} className="pl-9" />
         </div>
         <Select value={filterStatus} onValueChange={(v) => setFilterStatus(v as any)}>
-          <SelectTrigger className="w-[200px]"><SelectValue /></SelectTrigger>
+          <SelectTrigger className="w-[220px]"><SelectValue /></SelectTrigger>
           <SelectContent>
             <SelectItem value="published">En ligne (par défaut)</SelectItem>
+            <SelectItem value="to_staff">À staffer (0 candidature)</SelectItem>
             <SelectItem value="draft">Brouillons</SelectItem>
             <SelectItem value="cancelled">Masquées / annulées</SelectItem>
             <SelectItem value="no_draft">Tout sauf brouillons</SelectItem>
@@ -445,6 +473,7 @@ const AdminListings = () => {
           </Select>
         )}
       </div>
+
 
       <div className="space-y-2">
         <div className="flex items-center gap-2 text-xs text-muted-foreground">
