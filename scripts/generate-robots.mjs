@@ -85,12 +85,81 @@ function buildRobotsTxt({ siteUrl, privatePaths, noindexFromStatic }) {
     );
   }
 
+  // Politique AI/GEO 2026 (fenêtre AI Overviews FR, deadline sept. 2026) :
+  // - Google-Extended + GPTBot + ClaudeBot + CCBot + ByteSpider + Meta-ExternalAgent
+  //   + Applebot-Extended + cohere-ai + FacebookBot => Disallow (protection IP marque).
+  // - Bots search + retrieval (OAI-SearchBot, ChatGPT-User, PerplexityBot…) => Allow
+  //   pour rester citable dans les réponses génératives.
+  // - Réévaluer post-notoriété (~T2 2027).
+  const searchBots = [
+    "Googlebot",
+    "Googlebot-Image",
+    "Googlebot-Video",
+    "Bingbot",
+    "DuckDuckBot",
+    "Yandex",
+  ];
+  const trainingBotsDisallowed = [
+    "GPTBot",
+    "CCBot",
+    "ByteSpider",
+    "ClaudeBot",
+    "Meta-ExternalAgent",
+    "Applebot-Extended",
+    "cohere-ai",
+    "FacebookBot",
+  ];
+  const retrievalBotsAllowed = [
+    "OAI-SearchBot",
+    "ChatGPT-User",
+    "Claude-User",
+    "Claude-SearchBot",
+    "PerplexityBot",
+    "Perplexity-User",
+    "MistralAI-User",
+    "Amazonbot",
+    "Applebot",
+  ];
+  const seoTools = ["DataForSeoBot", "AhrefsBot", "SemrushBot"];
+
+  const block = (uas, directive) =>
+    uas.flatMap((ua) => [`User-agent: ${ua}`, directive, ""]);
+
   const lines = [
     "# AUTO-GÉNÉRÉ par scripts/generate-robots.mjs — NE PAS ÉDITER À LA MAIN.",
     "# Source de vérité : src/data/siteRoutes.ts (privateDisallowPaths + index:false).",
+    "# Politique AI/GEO 2026 (Freeland) : training bots Disallow, retrieval bots Allow.",
     "",
+    "# ------------------------------------------------------------",
+    "# Search engines classiques",
+    "# ------------------------------------------------------------",
+    ...block(searchBots, "Allow: /"),
+    "# ------------------------------------------------------------",
+    "# Bots training — Disallow (protection IP marque Guardiens)",
+    "# ------------------------------------------------------------",
+    ...block(trainingBotsDisallowed, "Disallow: /"),
+    "# ------------------------------------------------------------",
+    "# Bots search + retrieval — Allow (visibilité IA générative)",
+    "# ------------------------------------------------------------",
+    ...block(retrievalBotsAllowed, "Allow: /"),
+    "# ------------------------------------------------------------",
+    "# Outils SEO / analytics — Allow",
+    "# ------------------------------------------------------------",
+    ...block(seoTools, "Allow: /"),
+    "# ------------------------------------------------------------",
+    "# Google-Extended = Disallow (protection IP marque Guardiens)",
+    "# Réévaluer post-notoriété (~T2 2027).",
+    "# ------------------------------------------------------------",
+    "User-agent: Google-Extended",
+    "Disallow: /",
+    "",
+    "# ------------------------------------------------------------",
+    "# Règles génériques : zones privées + paramètres tracking",
+    "# ------------------------------------------------------------",
     "User-agent: *",
     "Allow: /",
+    "Disallow: /*?*utm_",
+    "Disallow: /*?*sessionid=",
     "",
     "# Pages privées (espace authentifié)",
     ...privatePaths.map((p) => `Disallow: ${p}`),
