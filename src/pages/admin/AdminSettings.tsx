@@ -32,6 +32,7 @@ import { toast } from "sonner";
 
 const FOUNDER_DATE = "2026-09-30";
 const MANDATORY_ONBOARDING_FLAG = "mandatory_affinity_onboarding";
+const ADMIN_SIGNALS_FLAG = "admin_signals_active";
 
 function toLocalInputValue(iso: string): string {
   const d = new Date(iso);
@@ -54,6 +55,11 @@ const AdminSettings = () => {
   const [appliesSince, setAppliesSince] = useState<string | null>(null);
   const [appliesSinceDraft, setAppliesSinceDraft] = useState<string>("");
   const [savingAppliesSince, setSavingAppliesSince] = useState(false);
+  const [signalsEnabled, setSignalsEnabled] = useState<boolean | null>(null);
+  const [togglingSignals, setTogglingSignals] = useState(false);
+  const [signalsAppliesSince, setSignalsAppliesSince] = useState<string | null>(null);
+  const [signalsAppliesSinceDraft, setSignalsAppliesSinceDraft] = useState<string>("");
+  const [savingSignalsAppliesSince, setSavingSignalsAppliesSince] = useState(false);
   const [confirmDialog, setConfirmDialog] = useState<{
     nextIso: string | null;
     impactCount: number | null;
@@ -99,7 +105,72 @@ const AdminSettings = () => {
         setAppliesSince(iso);
         setAppliesSinceDraft(iso ? toLocalInputValue(iso) : "");
       });
+    supabase
+      .from("feature_flags")
+      .select("enabled, applies_since")
+      .eq("key", ADMIN_SIGNALS_FLAG)
+      .maybeSingle()
+      .then(({ data }) => {
+        const row = data as { enabled?: boolean | null; applies_since?: string | null } | null;
+        setSignalsEnabled(!!row?.enabled);
+        const iso = row?.applies_since ?? null;
+        setSignalsAppliesSince(iso);
+        setSignalsAppliesSinceDraft(iso ? toLocalInputValue(iso) : "");
+      });
   }, []);
+
+  const toggleSignalsFlag = async (next: boolean) => {
+    setTogglingSignals(true);
+    const previous = signalsEnabled;
+    setSignalsEnabled(next);
+    const { error } = await supabase
+      .from("feature_flags")
+      .update({ enabled: next, updated_at: new Date().toISOString() })
+      .eq("key", ADMIN_SIGNALS_FLAG);
+    setTogglingSignals(false);
+    if (error) {
+      setSignalsEnabled(previous);
+      toast.error("Impossible de mettre à jour le réglage.");
+      return;
+    }
+    invalidateFeatureFlag(ADMIN_SIGNALS_FLAG);
+    toast.success(next ? "Signaux admin activés." : "Signaux admin désactivés (kill-switch).");
+  };
+
+  const saveSignalsAppliesSince = async () => {
+    const nextIso = fromLocalInputValue(signalsAppliesSinceDraft);
+    setSavingSignalsAppliesSince(true);
+    const { error } = await supabase
+      .from("feature_flags")
+      .update({ applies_since: nextIso, updated_at: new Date().toISOString() })
+      .eq("key", ADMIN_SIGNALS_FLAG);
+    setSavingSignalsAppliesSince(false);
+    if (error) {
+      toast.error("Impossible d'enregistrer la date de bascule.");
+      return;
+    }
+    setSignalsAppliesSince(nextIso);
+    setSignalsAppliesSinceDraft(nextIso ? toLocalInputValue(nextIso) : "");
+    invalidateFeatureFlag(ADMIN_SIGNALS_FLAG);
+    toast.success("Date de bascule enregistrée.");
+  };
+
+  const clearSignalsAppliesSince = async () => {
+    setSavingSignalsAppliesSince(true);
+    const { error } = await supabase
+      .from("feature_flags")
+      .update({ applies_since: null, updated_at: new Date().toISOString() })
+      .eq("key", ADMIN_SIGNALS_FLAG);
+    setSavingSignalsAppliesSince(false);
+    if (error) {
+      toast.error("Impossible d'effacer la date.");
+      return;
+    }
+    setSignalsAppliesSince(null);
+    setSignalsAppliesSinceDraft("");
+    invalidateFeatureFlag(ADMIN_SIGNALS_FLAG);
+    toast.success("Date de bascule effacée.");
+  };
 
   const toggleMandatoryOnboarding = async (next: boolean) => {
     setTogglingFlag(true);
@@ -255,6 +326,83 @@ const AdminSettings = () => {
                 {appliesSince
                   ? new Date(appliesSince).toLocaleString("fr-FR")
                   : "aucune (scoping désactivé)"}
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base flex items-center gap-2">
+              <Flag className="h-4 w-4" />
+              Système d'alertes admin
+            </CardTitle>
+            <p className="text-xs text-muted-foreground mt-2">
+              Active la persistance des signaux administrateur (cartes SignalsSection sur
+              {" "}/admin, crons nurturing <code>nudge-*</code>, RPC{" "}
+              <code>admin_dashboard_snapshot</code>). Désactiver coupe l'affichage des signaux
+              ET l'exécution des crons pour un retour au calme immédiat. Bascule sans
+              redéploiement.
+            </p>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="flex items-start justify-between gap-4">
+              <div className="min-w-0">
+                <p className="text-sm font-medium">Activation</p>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Kill-switch immédiat. Désactivé : les 10 crons <code>nudge-*</code> retournent
+                  {" "}<code>skipped: flag_off</code> et les cartes de signaux disparaissent
+                  de la Vue d'ensemble.
+                </p>
+              </div>
+              <Switch
+                checked={signalsEnabled === true}
+                disabled={signalsEnabled === null || togglingSignals}
+                onCheckedChange={toggleSignalsFlag}
+                aria-label="Activer les signaux admin"
+              />
+            </div>
+            <Separator />
+            <div className="space-y-2">
+              <Label htmlFor="signals-applies-since" className="text-sm font-medium">
+                Date de bascule (applies_since)
+              </Label>
+              <p className="text-xs text-muted-foreground">
+                Champ documentaire pour tracer l'activation. Laisser vide si non pertinent.
+              </p>
+              <div className="flex flex-wrap items-center gap-2">
+                <Input
+                  id="signals-applies-since"
+                  type="datetime-local"
+                  value={signalsAppliesSinceDraft}
+                  onChange={(e) => setSignalsAppliesSinceDraft(e.target.value)}
+                  className="max-w-xs"
+                  disabled={savingSignalsAppliesSince}
+                />
+                <Button
+                  size="sm"
+                  variant="outline"
+                  disabled={savingSignalsAppliesSince}
+                  onClick={saveSignalsAppliesSince}
+                >
+                  Enregistrer
+                </Button>
+                {signalsAppliesSince && (
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    disabled={savingSignalsAppliesSince}
+                    onClick={clearSignalsAppliesSince}
+                  >
+                    Effacer
+                  </Button>
+                )}
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Valeur actuelle :{" "}
+                {signalsAppliesSince
+                  ? new Date(signalsAppliesSince).toLocaleString("fr-FR")
+                  : "aucune"}
               </p>
             </div>
           </CardContent>
