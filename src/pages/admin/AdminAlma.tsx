@@ -357,6 +357,7 @@ function WhispersTab({ since, range }: { since: string; range: Range }) {
 
   return (
     <div className="space-y-6">
+      {historyTruncated && <TruncationBanner />}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <KpiCard label="Whispers émis" value={totals.emitted} />
         <KpiCard label="Taux d'action" value={fmtPct(totals.actionRate)} />
