@@ -23,6 +23,12 @@ export type EventType =
   | "onboarding_shown"            // Étape /onboarding/affinity affichée (role, needs_sitter, needs_owner)
   | "onboarding_role_selected"    // Rôle choisi dans l'étape d'affinité (role)
   | "onboarding_abandoned"        // Étape /onboarding/affinity quittée sans finir (role, via?)
+  // Funnel affinité (nouveaux noms canoniques, coexistent avec onboarding_* legacy)
+  | "affinity_onboarding_started"      // Mount de /onboarding/affinity (role, profile_created_at)
+  | "affinity_onboarding_role_selected"// Sélection du rôle (role)
+  | "affinity_onboarding_step_completed" // Chaque étape franchie (step_index, step_name)
+  | "affinity_onboarding_completed"    // Submit final (total_steps, duration_seconds)
+  | "affinity_onboarding_abandoned"    // Unmount sans complétion (last_step_index, last_step_name, duration_seconds)
   | "first_action"                // Première vraie action (metadata.kind)
   | "cta_click"
   | "cta_proprio_clicked"
