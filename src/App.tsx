@@ -30,6 +30,7 @@ import AuthConfirm from "./pages/AuthConfirm";
 import { AppLayout } from "@/components/layout/AppLayout";
 import PublicHeader from "@/components/layout/PublicHeader";
 import PublicFooter from "@/components/layout/PublicFooter";
+import { useAffinityThresholdsBootstrap } from "@/hooks/useAffinityThresholdsBootstrap";
 
 // ──── Lazy-loaded routes ────
 const FallbackSpinner = () => (
