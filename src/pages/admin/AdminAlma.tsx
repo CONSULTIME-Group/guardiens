@@ -639,15 +639,36 @@ function CulturalFactsTab({ since }: { since: string }) {
       .from("alma_cultural_facts" as any)
       .update({ active: next } as any)
       .eq("id", fact.id);
-    if (error) return;
+    if (error) {
+      toast.error("Impossible de modifier le fait, réessayez.");
+      return;
+    }
+    toast.success(next ? "Fait réactivé" : "Fait désactivé");
     void trackEvent("admin_alma_cultural_fact_toggled", {
       metadata: { fact_id: fact.id, active: next },
     });
+    // Trace d'audit (même mécanisme que AdminUsers: insertion admin_action_logs).
+    try {
+      const { data: userData } = await supabase.auth.getUser();
+      const adminId = userData.user?.id ?? null;
+      if (adminId) {
+        await supabase.from("admin_action_logs").insert({
+          admin_id: adminId,
+          action: "alma_cultural_fact_toggled",
+          target_type: "alma_cultural_fact",
+          target_id: fact.id,
+          metadata: { active: next },
+        });
+      }
+    } catch {
+      /* silent : l'audit ne doit pas casser le toggle */
+    }
     void qc.invalidateQueries({ queryKey: ["admin-alma-cultural-facts"] });
   };
 
   return (
     <div className="space-y-4">
+      {statsTruncated && <TruncationBanner />}
       <div className="flex flex-wrap items-center gap-3">
         <Select value={typeFilter} onValueChange={setTypeFilter}>
           <SelectTrigger className="w-56">
@@ -663,6 +684,7 @@ function CulturalFactsTab({ since }: { since: string }) {
         </Select>
         <input
           type="text"
+          aria-label="Filtrer par surface"
           placeholder="Filtrer par surface (ex : dashboard)"
           value={surfaceFilter}
           onChange={(e) => setSurfaceFilter(e.target.value)}
