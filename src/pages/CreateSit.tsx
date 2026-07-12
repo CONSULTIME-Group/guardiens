@@ -1636,7 +1636,7 @@ const CreateSit = () => {
 };
 
 const SummaryCard = ({ icon: Icon, title, editLink, children }: {
-  icon: React.ElementType; title: string; editLink: string; children: React.ReactNode;
+  icon: React.ElementType; title: string; editLink?: string; children: React.ReactNode;
 }) => (
   <div className="bg-card rounded-lg border border-border p-5">
     <div className="flex items-center justify-between mb-3">
@@ -1644,9 +1644,10 @@ const SummaryCard = ({ icon: Icon, title, editLink, children }: {
         <Icon className="h-4 w-4 text-primary" />
         <h3 className="font-heading text-sm font-semibold">{title}</h3>
       </div>
-      <Link to={editLink} className="text-xs text-primary hover:underline">Modifier dans mon profil</Link>
+      {editLink ? <Link to={editLink} className="text-xs text-primary hover:underline">Modifier dans mon profil</Link> : null}
     </div>
     {children}
+
   </div>
 );
 
