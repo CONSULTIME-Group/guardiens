@@ -188,6 +188,28 @@ const AdminMassEmails = () => {
 
   // Ref textarea corps (mise en forme)
   const bodyRef = useRef<HTMLTextAreaElement | null>(null);
+  // Ref panneau IA (scroll)
+  const aiPanelRef = useRef<HTMLDivElement | null>(null);
+
+  // Pré-brief depuis l'analyse IA
+  const [searchParams, setSearchParams] = useSearchParams();
+  useEffect(() => {
+    const objective = searchParams.get("ai_objective");
+    const points = searchParams.get("ai_points");
+    if (!objective && !points) return;
+    if (objective) setAiObjective(objective.slice(0, 400));
+    if (points) setAiKeyPoints(points.slice(0, 400));
+    toast.success("Brief pré-rempli depuis l'analyse IA");
+    const next = new URLSearchParams(searchParams);
+    next.delete("ai_objective");
+    next.delete("ai_points");
+    setSearchParams(next, { replace: true });
+    requestAnimationFrame(() => {
+      aiPanelRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
 
   const callAi = useCallback(async (payload: Record<string, unknown>) => {
     setAiLoading(true);
