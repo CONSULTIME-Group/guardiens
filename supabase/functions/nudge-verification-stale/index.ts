@@ -9,6 +9,7 @@
  * 7 et 14 jours, critical au-delà.
  */
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
+import { startCronRun } from "../_shared/cron-run-log.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -27,6 +28,7 @@ Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
   }
+  const run = await startCronRun("nudge-verification-stale");
   try {
     const service = createClient(
       Deno.env.get("SUPABASE_URL")!,
@@ -77,6 +79,12 @@ Deno.serve(async (req) => {
       }
     }
 
+    await run.finish(errors.length > 0 ? "partial" : "success", {
+      detected: rows.length,
+      inserted,
+      skipped,
+      errors_count: errors.length,
+    });
     return new Response(
       JSON.stringify({
         detected: rows.length,
@@ -89,6 +97,7 @@ Deno.serve(async (req) => {
     );
   } catch (err) {
     console.error("[nudge-verification-stale]", err);
+    await run.fail(err);
     return new Response(
       JSON.stringify({ error: String((err as Error)?.message ?? err) }),
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } },

@@ -9,6 +9,7 @@
  * Respecte le feature flag admin_signals_active : si false, sortie early.
  */
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
+import { startCronRun } from "../_shared/cron-run-log.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -33,6 +34,7 @@ Deno.serve(async (req) => {
     return new Response("ok", { headers: corsHeaders });
   }
 
+  const run = await startCronRun("nudge-owner-no-applications");
   try {
     const supabase = createClient(
       Deno.env.get("SUPABASE_URL")!,
@@ -47,6 +49,7 @@ Deno.serve(async (req) => {
       .maybeSingle();
 
     if (!flag?.enabled) {
+      await run.finish("success", { skipped: "flag_off" });
       return new Response(
         JSON.stringify({ skipped: "admin_signals_active is off" }),
         { headers: { ...corsHeaders, "Content-Type": "application/json" } },
@@ -114,6 +117,8 @@ Deno.serve(async (req) => {
       }
     }
 
+    const metrics = { detected: sits.length, inserted, skipped, errors_count: errors.length };
+    await run.finish(errors.length > 0 ? "partial" : "success", metrics);
     return new Response(
       JSON.stringify({
         detected: sits.length,
@@ -126,6 +131,7 @@ Deno.serve(async (req) => {
     );
   } catch (err) {
     console.error("[nudge-owner-no-applications]", err);
+    await run.fail(err);
     return new Response(
       JSON.stringify({ error: String((err as Error)?.message ?? err) }),
       {
