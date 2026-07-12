@@ -569,9 +569,13 @@ export function AlmaDock() {
           aria-hidden
         >
           <span className="text-xs font-semibold text-foreground/80">Alma</span>
-          <span className="text-[10px] font-medium text-muted-foreground">
-            {stage ? STAGE_SHORT_LABEL[stage] : "votre assistante"}
-          </span>
+          {stage && STAGE_SHORT_LABEL[stage] ? (
+            <span className="text-[10px] font-medium text-muted-foreground">
+              {STAGE_SHORT_LABEL[stage]}
+            </span>
+          ) : !stage ? (
+            <span className="text-[10px] font-medium text-muted-foreground">votre assistante</span>
+          ) : null}
         </button>
 
         <div className="h-6 w-px bg-border/70" aria-hidden />
