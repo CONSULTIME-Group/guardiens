@@ -39,6 +39,12 @@ interface ApplicationsListProps {
   endDate: string;
   propertyId: string;
   sitStatus?: string;
+  /**
+   * Filtre segmenté injecté par OwnerSitView (chips "À traiter", "Vues", etc.).
+   * Quand défini, la liste active n'affiche que ces statuts.
+   * "declined" force l'ouverture de la section refusées seule.
+   */
+  statusFilter?: "pending" | "viewed" | "discussing" | "declined" | null;
 }
 
 const statusStyles: Record<string, { label: string; className: string }> = {
