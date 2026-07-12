@@ -93,7 +93,7 @@ function buildProposition(
         ctaTo: "/sits",
       };
     }
-    if (signals.publishedSitsCount === 0) {
+    if (signals.publishedSitsCount === 0 && signals.allSitsCount === 0) {
       return {
         message: "Publions votre première annonce pour trouver une personne de confiance.",
         ctaLabel: "Créer une annonce",
