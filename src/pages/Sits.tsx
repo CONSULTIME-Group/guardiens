@@ -947,6 +947,13 @@ const Sits = () => {
                     : handleRepublish(sit.id)
                 }
                 onOpenGuide={(id) => setOpenGuideId(id)}
+                onWithdraw={(appId) =>
+                  setWithdrawApp({
+                    appId,
+                    sitTitle: sit.title || "cette annonce",
+                    conversationId: sit.conversationId || null,
+                  })
+                }
               />
             );
           })}
