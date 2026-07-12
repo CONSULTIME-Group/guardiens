@@ -344,7 +344,7 @@ Deno.serve(async (req) => {
     );
 
     const subject = buildSubject(authorFirstName, sit.city || "");
-    const excerpt = buildExcerpt(sit.description);
+    const excerpt = buildExcerpt(sit.owner_message ?? sit.specific_expectations);
     const dateRange = buildDateRange(sit.start_date, sit.end_date);
     const listingUrl = `https://guardiens.fr/annonces/${sit.id}`;
     const ctaLabel = "Voir l'annonce";
