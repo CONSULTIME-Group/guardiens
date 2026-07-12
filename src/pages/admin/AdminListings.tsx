@@ -848,8 +848,29 @@ const AdminListings = () => {
               onChange={(e) => setMessageModal((m) => ({ ...m, content: e.target.value }))}
               rows={6}
               maxLength={2000}
-              disabled={sendingMessage}
+              disabled={sendingMessage || messageAi.isLoading}
             />
+            <div className="flex flex-wrap items-center gap-2 pt-1">
+              <span className="text-xs text-muted-foreground inline-flex items-center gap-1">
+                <Sparkles className="h-3 w-3 text-primary" /> Assistant IA :
+              </span>
+              {messageAiButtons.map((b) => (
+                <Button
+                  key={b.action}
+                  type="button"
+                  size="sm"
+                  variant="outline"
+                  className="h-7 text-xs"
+                  disabled={sendingMessage || messageAi.isLoading}
+                  onClick={() => messageAi.run(b.action)}
+                >
+                  {messageAi.loading === b.action ? (
+                    <Loader2 className="h-3 w-3 mr-1.5 animate-spin" />
+                  ) : null}
+                  {b.label}
+                </Button>
+              ))}
+            </div>
             <div className="text-xs text-muted-foreground text-right">
               {messageModal.content.length}/2000
             </div>
