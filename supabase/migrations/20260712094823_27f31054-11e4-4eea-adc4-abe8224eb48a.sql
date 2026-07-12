@@ -1,0 +1,2 @@
+ALTER TABLE public.feature_flags ADD COLUMN IF NOT EXISTS value_int integer;
+COMMENT ON COLUMN public.feature_flags.value_int IS 'Valeur numérique optionnelle (seuils, quotas). Utilisée par affinity_min_common_criteria et affinity_min_score_percent.';
