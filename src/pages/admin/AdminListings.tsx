@@ -25,12 +25,23 @@ import DraftStatsPanel from "@/components/admin/DraftStatsPanel";
 import ListingDrilldownDialog from "@/components/admin/ListingDrilldownDialog";
 import { getCountryName } from "@/lib/countries";
 
-const statusLabels: Record<string, { label: string; variant: "default" | "secondary" | "outline" | "destructive" }> = {
+type BadgeVariant = "default" | "secondary" | "outline" | "destructive";
+const statusLabels: Record<string, { label: string; variant: BadgeVariant }> = {
   draft: { label: "Brouillon", variant: "outline" },
   published: { label: "En ligne", variant: "default" },
   confirmed: { label: "Confirmée", variant: "secondary" },
   completed: { label: "Terminée", variant: "secondary" },
-  cancelled: { label: "Masquée / annulée", variant: "destructive" },
+  cancelled: { label: "Annulée (auteur)", variant: "outline" },
+  archived: { label: "Archivée", variant: "secondary" },
+};
+
+const resolveStatusBadge = (listing: any): { label: string; variant: BadgeVariant } => {
+  if (listing.status === "cancelled") {
+    return listing.hidden_by
+      ? { label: "Masquée (admin)", variant: "destructive" }
+      : { label: "Annulée (auteur)", variant: "outline" };
+  }
+  return statusLabels[listing.status] || statusLabels.draft;
 };
 
 type Stats = {
