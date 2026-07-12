@@ -8,9 +8,12 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type",
 };
 
-const SYSTEM_PROMPT = `Vous rédigez des emails pour Guardiens, plateforme d'entraide et de house-sitting entre particuliers. Ton : chaleureux, humain, vouvoiement systématique, vocabulaire "gens du coin"/"personne de confiance" (jamais "voisin"). Interdits : tiret cadratin (—), emojis, superlatifs commerciaux, chiffres/statistiques inventés, mentions de prix ou de dates non fournis. Le CORPS doit être du texte simple avec de vrais retours à la ligne pour séparer les paragraphes, et UNIQUEMENT ces balises HTML inline autorisées : <strong> pour l'emphase, <a href="https://..."> pour les liens. PAS de <p>, <div>, <br>, PAS de markdown.`;
+const SYSTEM_PROMPT_EMAIL = `Vous rédigez des emails pour Guardiens, plateforme d'entraide et de house-sitting entre particuliers. Ton : chaleureux, humain, vouvoiement systématique, vocabulaire "gens du coin"/"personne de confiance" (jamais "voisin"). Interdits : tiret cadratin (—), emojis, superlatifs commerciaux, chiffres/statistiques inventés, mentions de prix ou de dates non fournis. Le CORPS doit être du texte simple avec de vrais retours à la ligne pour séparer les paragraphes, et UNIQUEMENT ces balises HTML inline autorisées : <strong> pour l'emphase, <a href="https://..."> pour les liens. PAS de <p>, <div>, <br>, PAS de markdown.`;
+
+const SYSTEM_PROMPT_MESSAGE = `Vous rédigez un message 1:1 envoyé par un admin Guardiens à un utilisateur via la messagerie interne. Ton : chaleureux, humain, vouvoiement systématique, vocabulaire "gens du coin"/"personne de confiance" (jamais "voisin"). Interdits : tiret cadratin (—), emojis, superlatifs commerciaux, chiffres/statistiques inventés, mentions de prix ou de dates non fournis. Le message doit être en TEXTE BRUT uniquement, avec de vrais retours à la ligne pour séparer les paragraphes. AUCUNE balise HTML, AUCUN markdown, AUCUN objet/sujet.`;
 
 type Action = "generate" | "shorten" | "warmer" | "proofread" | "subjects";
+type Format = "email" | "message";
 
 interface Brief {
   objective?: string;
@@ -21,6 +24,7 @@ interface Brief {
 
 interface Body {
   action: Action;
+  format?: Format;
   brief?: Brief;
   subject?: string;
   body?: string;
@@ -30,7 +34,16 @@ function sanitize(text: string): string {
   return (text ?? "").replace(/—/g, ",");
 }
 
-function buildUserPrompt(payload: Body): string {
+function stripHtml(text: string): string {
+  return (text ?? "")
+    .replace(/<br\s*\/?>/gi, "\n")
+    .replace(/<\/(p|div|li)>/gi, "\n")
+    .replace(/<[^>]+>/g, "")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
+}
+
+function buildUserPromptEmail(payload: Body): string {
   const { action, brief, subject, body } = payload;
   const b = brief ?? {};
   const briefBlock = `Brief:
@@ -66,6 +79,43 @@ Corrigez orthographe, grammaire et ponctuation du sujet et du corps. Retirez tou
 ${currentBlock}
 
 Proposez 3 objets alternatifs percutants (chacun <=90 caractères), variés dans l'angle. Répondez STRICTEMENT en JSON: {"subjects": [string, string, string]}.`;
+  }
+}
+
+function buildUserPromptMessage(payload: Body): string {
+  const { action, brief, body } = payload;
+  const b = brief ?? {};
+  const briefBlock = `Brief:
+- Objectif: ${b.objective || "(non précisé)"}
+- Destinataire: ${b.audience || "(non précisé)"}
+- Ton souhaité: ${b.tone || "(par défaut Guardiens)"}
+- Points clés: ${b.key_points || "(aucun)"}`;
+
+  const currentBlock = `Message actuel:
+${body || "(vide)"}`;
+
+  switch (action) {
+    case "generate":
+      return `${briefBlock}
+
+Rédigez le message en texte brut. Répondez STRICTEMENT en JSON: {"body": string}. Aucun autre champ.`;
+    case "shorten":
+      return `${currentBlock}
+
+Raccourcissez le message sans perdre le sens. Répondez STRICTEMENT en JSON: {"body": string}.`;
+    case "warmer":
+      return `${currentBlock}
+
+Réécrivez le message avec un ton plus chaleureux, plus incarné, sans en changer le sens. Répondez STRICTEMENT en JSON: {"body": string}.`;
+    case "proofread":
+      return `${currentBlock}
+
+Corrigez orthographe, grammaire et ponctuation. Retirez tout tiret cadratin (—). Ne changez pas le sens. Répondez STRICTEMENT en JSON: {"body": string}.`;
+    case "subjects":
+      // Non applicable en format message; renvoyer un JSON vide, géré côté handler.
+      return `${currentBlock}
+
+Le format "message" n'a pas d'objet. Répondez STRICTEMENT en JSON: {"body": ""}.`;
   }
 }
 
@@ -111,7 +161,18 @@ Deno.serve(async (req) => {
       );
     }
 
-    const userPrompt = buildUserPrompt(payload);
+    const format: Format = payload.format === "message" ? "message" : "email";
+
+    // subjects reste réservé au format email
+    if (format === "message" && payload.action === "subjects") {
+      return new Response(
+        JSON.stringify({ error: "action 'subjects' non disponible en format 'message'" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
+    }
+
+    const systemPrompt = format === "message" ? SYSTEM_PROMPT_MESSAGE : SYSTEM_PROMPT_EMAIL;
+    const userPrompt = format === "message" ? buildUserPromptMessage(payload) : buildUserPromptEmail(payload);
 
     const aiRes = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -123,7 +184,7 @@ Deno.serve(async (req) => {
         model: "google/gemini-2.5-pro",
         response_format: { type: "json_object" },
         messages: [
-          { role: "system", content: SYSTEM_PROMPT },
+          { role: "system", content: systemPrompt },
           { role: "user", content: userPrompt },
         ],
       }),
@@ -155,7 +216,10 @@ Deno.serve(async (req) => {
     const parsed = extractJson(content);
 
     let result: Record<string, unknown> = {};
-    if (payload.action === "subjects") {
+    if (format === "message") {
+      const outBody = sanitize(stripHtml(String(parsed?.body ?? "")));
+      result = { body: outBody };
+    } else if (payload.action === "subjects") {
       const subs = Array.isArray(parsed?.subjects) ? parsed.subjects : [];
       result = {
         subjects: subs
