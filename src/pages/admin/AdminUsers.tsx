@@ -214,7 +214,7 @@ const AdminUsers = () => {
     // Fetch auth emails (source of vérité) + notes/super via chunked queries
     const userIds = (data || []).map((u: any) => u.id);
     let emailMap = new Map<string, string>();
-    let modMap = new Map<string, { admin_notes: string | null; is_manual_super: boolean }>();
+    let modMap = new Map<string, { admin_notes: string | null; is_manual_super: boolean; suspension_reason: string | null }>();
     if (userIds.length > 0) {
       const CHUNK = 150;
       const chunks: string[][] = [];
@@ -222,12 +222,12 @@ const AdminUsers = () => {
       const [emailRes, ...modResAll] = await Promise.all([
         supabase.rpc("get_user_emails_admin", { p_user_ids: userIds }),
         ...chunks.map((ids) =>
-          supabase.from("profile_moderation").select("profile_id, admin_notes, is_manual_super").in("profile_id", ids),
+          supabase.from("profile_moderation").select("profile_id, admin_notes, is_manual_super, suspension_reason").in("profile_id", ids),
         ),
       ]);
       emailMap = new Map((emailRes.data || []).map((e: any) => [e.id, e.email]));
       const modRows = modResAll.flatMap((r: any) => r.data || []);
-      modMap = new Map(modRows.map((m: any) => [m.profile_id, { admin_notes: m.admin_notes, is_manual_super: m.is_manual_super }]));
+      modMap = new Map(modRows.map((m: any) => [m.profile_id, { admin_notes: m.admin_notes, is_manual_super: m.is_manual_super, suspension_reason: m.suspension_reason ?? null }]));
     }
     const enriched = (data || []).map((u: any) => {
       const mod = modMap.get(u.id);
@@ -236,6 +236,7 @@ const AdminUsers = () => {
         email: emailMap.get(u.id) || u.email || "",
         admin_notes: mod?.admin_notes || null,
         is_manual_super: mod?.is_manual_super || false,
+        suspension_reason: mod?.suspension_reason || null,
       };
     });
     setUsers(enriched);
