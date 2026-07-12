@@ -25,6 +25,7 @@ import {
 import { useNavigate } from "react-router-dom";
 import DraftStatsPanel from "@/components/admin/DraftStatsPanel";
 import ListingDrilldownDialog from "@/components/admin/ListingDrilldownDialog";
+import ListingProximityCard from "@/components/admin/ListingProximityCard";
 import { getCountryName } from "@/lib/countries";
 
 type BadgeVariant = "default" | "secondary" | "outline" | "destructive";
