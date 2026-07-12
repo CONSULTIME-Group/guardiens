@@ -487,7 +487,7 @@ Deno.serve(async (req) => {
 
     // Filtres RGPD/délivrabilité obligatoires (non désactivables) —
     // fail-closed : si la vérif échoue, on n'envoie RIEN.
-    let profiles: { id: string; email: string }[];
+    let profiles: { id: string; email: string; first_name: string | null }[];
     try {
       profiles = await applyMandatoryComplianceFilters(serviceClient, rawProfiles);
     } catch (e) {
