@@ -88,9 +88,9 @@ export const CITIES: CityData[] = [
  "gardien maison Lyon",
  "house-sitting Lyon",
  ],
- h1: "Garde de chien et de chat à Lyon : la plateforme de confiance des propriétaires",
+ h1: "Garde chien et chat à Lyon : gardiens de confiance à domicile",
  metaDescription:
- "Faites garder votre chien ou votre chat à Lyon par un home sitter de proximité vérifié. Inscription gratuit pour les propriétaires. Sans commission.",
+ "Faites garder votre chien ou votre chat à Lyon par un gardien de confiance à domicile. Sans mise en pension, sans commission, rencontre avant chaque garde. Guardiens couvre tous les arrondissements lyonnais.",
  localSpots: [
  {
  name: "Parc de la Tête d'Or",
