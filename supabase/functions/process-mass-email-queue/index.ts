@@ -248,7 +248,7 @@ Deno.serve(async (req) => {
           body: JSON.stringify({
             from: "Guardiens <bonjour@guardiens.fr>",
             to: [rawEmail],
-            subject: campaign.subject,
+            subject: personalizedSubject,
             html,
             tracking: { opens: true, clicks: true },
             tags: [{ name: "campaign_id", value: campaignId }],
