@@ -192,13 +192,17 @@ export default function ArticleDetail() {
        meta_description: tr.meta_description ?? art.meta_description,
        hero_image_alt: tr.hero_image_alt ?? art.hero_image_alt,
      };
+     if (!cancelled) setHasTranslationForLang(true);
    } else {
      console.info(`[i18n] no ${currentLang} translation for ${art.slug}`);
+     // Pas de traduction : la variante ?lang=xx sera noindexée (thin content).
+     if (!cancelled) setHasTranslationForLang(false);
    }
+ } else {
+   if (!cancelled) setHasTranslationForLang(true);
  }
  setArticle(art);
  setLoading(false);
- window.prerenderReady = true;
 
  if (!art) return;
 
