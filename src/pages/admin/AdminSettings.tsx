@@ -122,7 +122,89 @@ const AdminSettings = () => {
         setSignalsAppliesSince(iso);
         setSignalsAppliesSinceDraft(iso ? toLocalInputValue(iso) : "");
       });
+    supabase
+      .from("feature_flags")
+      .select("key, value_int")
+      .in("key", ["affinity_min_common_criteria", "affinity_min_score_percent"])
+      .then(({ data }) => {
+        for (const row of (data ?? []) as { key: string; value_int: number | null }[]) {
+          if (row.key === "affinity_min_common_criteria") {
+            const v = row.value_int ?? 2;
+            setAffinityMinCriteria(v);
+            setAffinityMinCriteriaDraft(String(v));
+          }
+          if (row.key === "affinity_min_score_percent") {
+            const v = row.value_int ?? 40;
+            setAffinityMinScore(v);
+            setAffinityMinScoreDraft(String(v));
+          }
+        }
+      });
   }, []);
+
+  const saveAffinityThresholds = async () => {
+    const nextCriteria = Math.max(1, Math.min(5, parseInt(affinityMinCriteriaDraft, 10) || 2));
+    const nextScore = Math.max(20, Math.min(60, parseInt(affinityMinScoreDraft, 10) || 40));
+    setSavingAffinity(true);
+    const { data: userRes } = await supabase.auth.getUser();
+    const adminId = userRes?.user?.id ?? null;
+    const now = new Date().toISOString();
+
+    const updates: Array<Promise<unknown>> = [];
+    if (nextCriteria !== affinityMinCriteria) {
+      updates.push(
+        supabase.from("feature_flags")
+          .update({ value_int: nextCriteria, updated_at: now, updated_by: adminId })
+          .eq("key", "affinity_min_common_criteria")
+      );
+      if (adminId) {
+        updates.push(
+          supabase.from("admin_action_logs").insert({
+            admin_id: adminId,
+            action: "feature_flag_update",
+            target_type: "feature_flag",
+            note: "affinity_min_common_criteria",
+            metadata: { key: "affinity_min_common_criteria", old_value: affinityMinCriteria, new_value: nextCriteria },
+          })
+        );
+      }
+    }
+    if (nextScore !== affinityMinScore) {
+      updates.push(
+        supabase.from("feature_flags")
+          .update({ value_int: nextScore, updated_at: now, updated_by: adminId })
+          .eq("key", "affinity_min_score_percent")
+      );
+      if (adminId) {
+        updates.push(
+          supabase.from("admin_action_logs").insert({
+            admin_id: adminId,
+            action: "feature_flag_update",
+            target_type: "feature_flag",
+            note: "affinity_min_score_percent",
+            metadata: { key: "affinity_min_score_percent", old_value: affinityMinScore, new_value: nextScore },
+          })
+        );
+      }
+    }
+    if (updates.length === 0) {
+      setSavingAffinity(false);
+      toast.info("Aucun changement à enregistrer.");
+      return;
+    }
+    const results = await Promise.all(updates);
+    setSavingAffinity(false);
+    const anyErr = results.some((r) => (r as { error?: unknown })?.error);
+    if (anyErr) {
+      toast.error("Impossible d'enregistrer les seuils affinité.");
+      return;
+    }
+    setAffinityMinCriteria(nextCriteria);
+    setAffinityMinScore(nextScore);
+    setAffinityMinCriteriaDraft(String(nextCriteria));
+    setAffinityMinScoreDraft(String(nextScore));
+    toast.success("Seuils d'affinité enregistrés. Rechargez la page pour voir l'effet.");
+  };
 
   const toggleSignalsFlag = async (next: boolean) => {
     setTogglingSignals(true);
