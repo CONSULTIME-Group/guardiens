@@ -221,8 +221,15 @@ Deno.serve(async (req) => {
         token = (tok as { token?: string } | null)?.token ?? "";
       }
 
-      const html = buildHtml(campaign.subject, campaign.body, campaign.cta_label, campaign.cta_url)
-        .replaceAll(UNSUB_TOKEN_PLACEHOLDER, token);
+      // Personnalisation {prénom} / {prenom}, fallback « Bonjour » si prénom vide/null.
+      const firstName = ((profile as { first_name?: string | null } | null)?.first_name ?? "").trim();
+      const personalize = (t: string) => t.replace(/\{pr[ée]nom\}/gi, firstName || "Bonjour");
+      const personalizedSubject = personalize(campaign.subject);
+
+      const html = personalize(
+        buildHtml(campaign.subject, campaign.body, campaign.cta_label, campaign.cta_url)
+          .replaceAll(UNSUB_TOKEN_PLACEHOLDER, token),
+      );
 
       const unsubApiBase = `${SUPABASE_URL}/functions/v1/handle-email-unsubscribe`;
       const oneClick = `${unsubApiBase}?token=${token}`;
