@@ -465,7 +465,14 @@ const AdminMassEmails = () => {
     }
   };
 
-  const previewHtml = buildPreviewHtml(subject, body, ctaEnabled ? ctaLabel : undefined, ctaEnabled ? withUtm(ctaUrl) : undefined);
+  const previewBody = body.replace(/\{prénom\}/gi, "Camille");
+  const previewSubject = subject.replace(/\{prénom\}/gi, "Camille");
+  const previewHtml = buildPreviewHtml(previewSubject, previewBody, ctaEnabled ? ctaLabel : undefined, ctaEnabled ? withUtm(ctaUrl) : undefined);
+
+  // Contrôle qualité non bloquant
+  const lowerBody = body.toLowerCase();
+  const spamFound = SPAM_TRIGGERS.filter((w) => lowerBody.includes(w.toLowerCase()));
+  const hasInsecureLinks = /http:\/\//i.test(body);
 
   return (
     <div className="p-6 space-y-6">
