@@ -366,6 +366,8 @@ const Sits = () => {
             effectiveStatus: getEffectiveStatus(a.sit),
             application_status: a.status,
             application_id: a.id,
+            application_created_at: a.created_at,
+            application_viewed_at: a.viewed_at,
             owner: a.sit?.owner || null,
             hasReviewed: reviewedSitIds.includes(a.sit?.id),
             pets: petsByProperty[a.sit?.property_id] || [],
