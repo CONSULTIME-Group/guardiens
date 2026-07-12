@@ -739,7 +739,7 @@ const Messages = () => {
               <HouseGuideBlock propertyId={activeConv.sit.property_id} />
             )}
 
-            <div className="p-4 space-y-1">
+            <div className="p-4 space-y-1" data-alma-safe-area>
               {messages.length === 0 && !hasMoreMessages && (
                 <div className="flex flex-col items-center justify-center py-16 px-6 text-center gap-3">
                   <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center" aria-hidden="true">

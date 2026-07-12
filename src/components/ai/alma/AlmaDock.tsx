@@ -49,10 +49,12 @@ const STAGE_DOT_CLASS: Record<AlmaStage, string> = {
   fidele: "bg-amber-500",
 };
 
+// « Complice » retiré côté UI (connotation ambiguë). Le stade reste dans
+// la logique interne mais n'a plus de libellé visible sous « Alma ».
 const STAGE_SHORT_LABEL: Record<AlmaStage, string> = {
   nouvelle: "Nouvelle",
   eveillee: "Éveillée",
-  complice: "Complice",
+  complice: "",
   fidele: "Fidèle",
 };
 
@@ -319,6 +321,22 @@ export function AlmaDock() {
     ? ({ nouvelle: 36, eveillee: 40, complice: 42, fidele: 44 } as const)[stage]
     : 36;
 
+  // Expose l'état déplié via un attribut body, pour permettre aux surfaces
+  // (ex. /messages) d'ajouter un padding-bottom réservant l'espace du panneau
+  // Alma sans repositionner le dock.
+  useEffect(() => {
+    if (typeof document === "undefined") return;
+    const active = expanded && (!!whisper || !!proposition);
+    if (active) {
+      document.body.dataset.almaDockExpanded = "true";
+    } else {
+      delete document.body.dataset.almaDockExpanded;
+    }
+    return () => {
+      delete document.body.dataset.almaDockExpanded;
+    };
+  }, [expanded, whisper, proposition]);
+
   // Action utilisateur : demande explicite d'un conseil. Contourne le quota
   // de session proactif et le verrou de surface (initiée par l'utilisateur),
   // et affiche un repli bienveillant si tout a déjà été vu.
@@ -545,7 +563,7 @@ export function AlmaDock() {
           {stage && (
             <span
               aria-hidden
-              title={`Alma · ${STAGE_SHORT_LABEL[stage]}`}
+              title={STAGE_SHORT_LABEL[stage] ? `Alma · ${STAGE_SHORT_LABEL[stage]}` : "Alma"}
               className={cn(
                 "absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full ring-2 ring-card",
                 STAGE_DOT_CLASS[stage],
@@ -567,9 +585,13 @@ export function AlmaDock() {
           aria-hidden
         >
           <span className="text-xs font-semibold text-foreground/80">Alma</span>
-          <span className="text-[10px] font-medium text-muted-foreground">
-            {stage ? STAGE_SHORT_LABEL[stage] : "votre assistante"}
-          </span>
+          {stage && STAGE_SHORT_LABEL[stage] ? (
+            <span className="text-[10px] font-medium text-muted-foreground">
+              {STAGE_SHORT_LABEL[stage]}
+            </span>
+          ) : !stage ? (
+            <span className="text-[10px] font-medium text-muted-foreground">votre assistante</span>
+          ) : null}
         </button>
 
         <div className="h-6 w-px bg-border/70" aria-hidden />
@@ -595,7 +617,7 @@ export function AlmaDock() {
                   />
                 )}
                 <span className="text-sm font-semibold text-foreground">
-                  {stage ? `Alma, stade ${STAGE_SHORT_LABEL[stage]}` : "Alma, votre assistante"}
+                  {stage && STAGE_SHORT_LABEL[stage] ? `Alma, stade ${STAGE_SHORT_LABEL[stage]}` : "Alma, votre assistante"}
                 </span>
               </div>
               {evolution?.nextMilestone && (

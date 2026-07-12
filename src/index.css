@@ -742,3 +742,12 @@
     display: none;
   }
 }
+
+@layer utilities {
+  /* Quand le dock Alma est déplié, réserver l'espace du panneau flottant
+     sous le dernier message d'une conversation, pour ne masquer aucun
+     contenu utile. Portée : conteneurs opt-in via [data-alma-safe-area]. */
+  body[data-alma-dock-expanded="true"] [data-alma-safe-area] {
+    padding-bottom: 18rem;
+  }
+}
