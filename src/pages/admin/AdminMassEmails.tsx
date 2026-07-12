@@ -168,6 +168,121 @@ const AdminMassEmails = () => {
   const [sending, setSending] = useState(false);
   const [activePreset, setActivePreset] = useState<string>("oser");
 
+  // Assistant IA
+  const [aiObjective, setAiObjective] = useState("");
+  const [aiAudience, setAiAudience] = useState("");
+  const [aiTone, setAiTone] = useState("chaleureux");
+  const [aiKeyPoints, setAiKeyPoints] = useState("");
+  const [aiLoading, setAiLoading] = useState(false);
+  const [subjectSuggestions, setSubjectSuggestions] = useState<string[]>([]);
+
+  // Test send
+  const [testLoading, setTestLoading] = useState(false);
+
+  // Ref textarea corps (mise en forme)
+  const bodyRef = useRef<HTMLTextAreaElement | null>(null);
+
+  const callAi = useCallback(async (payload: Record<string, unknown>) => {
+    setAiLoading(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("admin-draft-mass-email", { body: payload });
+      if (error) throw new Error((error as { message?: string }).message || "Erreur assistant IA");
+      if (data?.error) throw new Error(data.error);
+      return data;
+    } catch (e) {
+      toast.error((e as Error).message || "Erreur assistant IA");
+      return null;
+    } finally {
+      setAiLoading(false);
+    }
+  }, []);
+
+  const handleAiGenerate = async () => {
+    if (!aiObjective.trim()) { toast.error("Précisez l'objectif de l'email."); return; }
+    const data = await callAi({
+      action: "generate",
+      brief: {
+        objective: aiObjective.trim(),
+        audience: aiAudience.trim(),
+        tone: aiTone.trim(),
+        key_points: aiKeyPoints.trim(),
+      },
+    });
+    if (data?.subject) setSubject(String(data.subject).slice(0, 100));
+    if (data?.body) setBody(String(data.body).slice(0, 2000));
+    if (data?.subject || data?.body) toast.success("Brouillon généré.");
+  };
+
+  const handleAiRefine = async (action: "shorten" | "warmer" | "proofread") => {
+    if (!body.trim()) return;
+    const data = await callAi({ action, subject, body });
+    if (data?.subject) setSubject(String(data.subject).slice(0, 100));
+    if (data?.body) setBody(String(data.body).slice(0, 2000));
+    if (data?.subject || data?.body) toast.success("Brouillon mis à jour.");
+  };
+
+  const handleAiSubjects = async () => {
+    const data = await callAi({ action: "subjects", subject, body });
+    const list = Array.isArray(data?.subjects) ? data.subjects.slice(0, 3) : [];
+    if (list.length === 0) { toast.error("Aucune proposition reçue."); return; }
+    setSubjectSuggestions(list.map(String));
+  };
+
+  const applyBodyTransform = (transform: (sel: string) => string, fallback?: string) => {
+    const el = bodyRef.current;
+    const current = body;
+    let start = current.length;
+    let end = current.length;
+    if (el) { start = el.selectionStart ?? current.length; end = el.selectionEnd ?? current.length; }
+    const selected = current.slice(start, end);
+    const replacement = selected ? transform(selected) : (fallback ?? transform(""));
+    const next = (current.slice(0, start) + replacement + current.slice(end)).slice(0, 2000);
+    setBody(next);
+    requestAnimationFrame(() => {
+      if (!el) return;
+      el.focus();
+      const caret = Math.min(2000, start + replacement.length);
+      el.setSelectionRange(caret, caret);
+    });
+  };
+
+  const handleBold = () => {
+    applyBodyTransform((s) => `<strong>${s}</strong>`, "<strong></strong>");
+  };
+
+  const handleLink = () => {
+    const url = window.prompt("URL du lien (https:// obligatoire)");
+    if (!url) return;
+    if (!url.startsWith("https://")) {
+      toast.error("L'URL doit commencer par https://");
+      return;
+    }
+    applyBodyTransform((s) => `<a href="${url}">${s || url}</a>`);
+  };
+
+  const handleSendTest = async () => {
+    if (!subject.trim() || body.trim().length < 20) return;
+    setTestLoading(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("admin-send-test-email", {
+        body: {
+          subject: subject.trim(),
+          body: body.trim(),
+          cta_label: ctaEnabled ? ctaLabel.trim() : undefined,
+          cta_url: ctaEnabled ? withUtm(ctaUrl.trim()) : undefined,
+        },
+      });
+      if (error) throw new Error((error as { message?: string }).message || "Erreur d'envoi test");
+      if (data?.error) throw new Error(data.error);
+      toast.success(`Email de test envoyé à ${data?.to ?? "vous"}`);
+    } catch (e) {
+      toast.error((e as Error).message || "Erreur d'envoi test");
+    } finally {
+      setTestLoading(false);
+    }
+  };
+
+
   const applyPreset = useCallback((key: string) => {
     const p = CAMPAIGN_PRESETS.find((x) => x.key === key);
     if (!p) return;
