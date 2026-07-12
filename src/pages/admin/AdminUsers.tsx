@@ -176,7 +176,7 @@ const AdminUsers = () => {
     let query = supabase
       .from("profiles")
       .select(
-        "id, first_name, last_name, role, city, postal_code, country, avatar_url, bio, profile_completion, created_at, updated_at, cancellation_count, identity_verified, identity_verification_status, account_status, is_founder, skill_categories, available_for_help, custom_skills, completed_sits_count, cancellations_as_proprio, email",
+        "id, first_name, last_name, role, city, postal_code, country, avatar_url, bio, profile_completion, created_at, updated_at, last_seen_at, cancellation_count, identity_verified, identity_verification_status, account_status, is_founder, skill_categories, available_for_help, custom_skills, completed_sits_count, cancellations_as_proprio, email",
         { count: "exact" },
       )
       .order("created_at", { ascending: false });
