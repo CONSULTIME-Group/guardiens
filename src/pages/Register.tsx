@@ -123,23 +123,30 @@ const Register = () => {
   { value: "pro", label: t("register_page.roles.pro_label"), description: t("register_page.roles.pro_desc") },
  ], [t]);
 
- useEffect(() => {
- const ref = searchParams.get("ref");
- if (ref) {
- sessionStorage.setItem("guardiens_ref", ref);
- }
- trackEvent("signup_started", {
- source: "/inscription",
- metadata: { has_ref: !!ref, preset_role: presetRole || null },
- });
- if (presetRole) {
- trackEvent("signup_role_selected", {
- source: "/inscription",
- metadata: { role: presetRole, preset: true },
- });
- }
- // eslint-disable-next-line react-hooks/exhaustive-deps
- }, []);
+  const emailBlurredRef = useRef(false);
+  const passwordBlurredRef = useRef(false);
+
+  useEffect(() => {
+  const ref = searchParams.get("ref");
+  if (ref) {
+  sessionStorage.setItem("guardiens_ref", ref);
+  }
+  trackEvent("signup_page_loaded", {
+  source: "/inscription",
+  metadata: { has_ref: !!ref, preset_role: presetRole || null },
+  });
+  trackEvent("signup_started", {
+  source: "/inscription",
+  metadata: { has_ref: !!ref, preset_role: presetRole || null },
+  });
+  if (presetRole) {
+  trackEvent("signup_role_selected", {
+  source: "/inscription",
+  metadata: { role: presetRole, preset: true },
+  });
+  }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
  useEffect(() => {
  if (resendCooldown <= 0) return;
