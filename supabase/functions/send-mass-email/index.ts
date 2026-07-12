@@ -122,10 +122,10 @@ ${ctaBlock}
  *   - exclusion des users avec `email_preferences.product_emails = false`
  * Throw si une requête échoue → l'appelant doit ABORTER l'envoi (500).
  */
-async function applyMandatoryComplianceFilters(
+async function applyMandatoryComplianceFilters<T extends { id: string; email: string }>(
   serviceClient: ReturnType<typeof createClient>,
-  profiles: { id: string; email: string }[],
-): Promise<{ id: string; email: string }[]> {
+  profiles: T[],
+): Promise<T[]> {
   if (profiles.length === 0) return profiles;
 
   const lowerEmails = Array.from(new Set(profiles.map((p) => p.email.toLowerCase())));
