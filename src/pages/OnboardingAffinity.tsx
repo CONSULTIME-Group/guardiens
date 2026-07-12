@@ -116,6 +116,7 @@ const OnboardingAffinity = () => {
   // (close_button | navigate_away | page_unload), `step` renseigne l'étape
   // courante au moment de la sortie.
   const emitAbandoned = (reason: "close_button" | "navigate_away" | "page_unload") => {
+    if (!shownTrackedRef.current) return;
     if (completedRef.current || abandonedEmittedRef.current) return;
     abandonedEmittedRef.current = true;
     const duration = startedAtRef.current
