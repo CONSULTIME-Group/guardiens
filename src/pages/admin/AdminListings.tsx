@@ -108,6 +108,8 @@ const AdminListings = () => {
       .limit(2000);
     if (filterStatus === "no_draft") {
       q = q.neq("status", "draft" as any);
+    } else if (filterStatus === "to_staff") {
+      q = q.eq("status", "published" as any);
     } else if (filterStatus !== "all") {
       q = q.eq("status", filterStatus as any);
     }
@@ -122,6 +124,33 @@ const AdminListings = () => {
   }, [filterStatus]);
 
   useEffect(() => { fetchListings(); }, [fetchListings]);
+
+  // KPI counts (indépendants des filtres, calculés au montage)
+  useEffect(() => {
+    (async () => {
+      const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
+      const [totalRes, pubRes, draftRes, cancRes, archRes, newRes] = await Promise.all([
+        supabase.from("sits").select("id", { count: "exact", head: true }),
+        supabase.from("sits").select("id", { count: "exact", head: true }).eq("status", "published" as any),
+        supabase.from("sits").select("id", { count: "exact", head: true }).eq("status", "draft" as any),
+        supabase.from("sits").select("id", { count: "exact", head: true }).eq("status", "cancelled" as any),
+        supabase.from("sits").select("id", { count: "exact", head: true }).eq("status", "archived" as any),
+        supabase.from("sits").select("id", { count: "exact", head: true }).gte("created_at", sevenDaysAgo),
+      ]);
+      setKpis({
+        total: totalRes.count ?? 0,
+        published: pubRes.count ?? 0,
+        draft: draftRes.count ?? 0,
+        cancelled: cancRes.count ?? 0,
+        archived: archRes.count ?? 0,
+        newLast7d: newRes.count ?? 0,
+      });
+    })();
+  }, []);
+
+  // Reset pagination quand le contexte de filtrage change
+  useEffect(() => { setPage(0); }, [filterStatus, search, filterCity]);
+
 
   // Batch stats : vues, vues uniques, msg, conversations, candidatures, dernière vue
   useEffect(() => {
