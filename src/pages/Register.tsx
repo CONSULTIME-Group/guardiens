@@ -174,10 +174,16 @@ const Register = () => {
  return () => { cancelled = true; };
  }, []);
 
- const handleSubmit = async (e: React.FormEvent) => {
- e.preventDefault();
- if (!selectedRole) return;
- setFormError(null);
+  const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
+  try {
+    trackEvent("signup_submit_clicked", {
+      source: "/inscription",
+      metadata: { role: selectedRole, has_email: !!email, has_password: !!password },
+    });
+  } catch {}
+  if (!selectedRole) return;
+  setFormError(null);
 
  if (password.length < 8) {
  setFormError(t("register_page.error_min_length"));
