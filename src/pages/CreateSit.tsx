@@ -215,6 +215,36 @@ const CreateSit = () => {
 
   const [currentStep, setCurrentStep] = useState(0);
   const [sitLocation, setSitLocation] = useState<"home" | "away" | null>(null);
+  const stepStartedAtRef = useRef<number>(Date.now());
+  const publishedRef = useRef(false);
+  const lastStepRef = useRef<number>(0);
+
+  // Analytics : step_started + step_completed sur transition de step
+  useEffect(() => {
+    stepStartedAtRef.current = Date.now();
+    void trackEvent("sits_create_step_started", { metadata: { step: currentStep } });
+    const prev = lastStepRef.current;
+    lastStepRef.current = currentStep;
+    return () => {
+      // Envoie step_completed pour l'étape qui vient d'être quittée
+      const duration = Date.now() - stepStartedAtRef.current;
+      void trackEvent("sits_create_step_completed", { metadata: { step: prev, duration_ms: duration } });
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentStep]);
+
+  // Analytics : abandon si unmount sans publication
+  useEffect(() => {
+    return () => {
+      if (!publishedRef.current) {
+        void trackEvent("sits_create_abandoned", {
+          metadata: { step: lastStepRef.current, has_draft: !!draftIdParam },
+        });
+      }
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
 
   const [title, setTitle] = useState("");
   const [startDate, setStartDate] = useState("");
