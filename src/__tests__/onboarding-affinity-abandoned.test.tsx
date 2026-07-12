@@ -62,6 +62,7 @@ import OnboardingAffinity from "@/pages/OnboardingAffinity";
 describe("OnboardingAffinity — tracking d'abandon", () => {
   beforeEach(() => {
     trackEventMock.mockClear();
+    mocks.flagEnabled = true;
   });
 
   it("émet un unique onboarding_abandoned avec reason au démontage sans complétion", () => {
