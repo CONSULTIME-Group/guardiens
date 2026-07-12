@@ -24,6 +24,11 @@ createRoot(container).render(
   </HelmetProvider>
 );
 
+// Fallback prerenderReady : PageMeta est la source de vérité et flippe le flag
+// à la fin de son useEffect (après upsert du canonical par langue). Ce fallback
+// couvre uniquement les routes sans PageMeta (ex : /annonces/* qui a son propre
+// chemin OG server-side). Délai généreux pour laisser React + fetch + PageMeta
+// s'exécuter avant que Prerender ne capture.
 const markPrerenderReady = () => {
   if (window.location.pathname.startsWith("/annonces/")) {
     return;
@@ -31,10 +36,8 @@ const markPrerenderReady = () => {
   window.prerenderReady = true;
 };
 
-if (typeof window !== "undefined" && typeof window.requestIdleCallback === "function") {
-  window.requestIdleCallback(markPrerenderReady);
-} else {
-  window.setTimeout(markPrerenderReady, 500);
+if (typeof window !== "undefined") {
+  window.setTimeout(markPrerenderReady, 3000);
 }
 
 reportWebVitals();
