@@ -547,7 +547,7 @@ export function AlmaDock() {
           {stage && (
             <span
               aria-hidden
-              title={`Alma · ${STAGE_SHORT_LABEL[stage]}`}
+              title={STAGE_SHORT_LABEL[stage] ? `Alma · ${STAGE_SHORT_LABEL[stage]}` : "Alma"}
               className={cn(
                 "absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full ring-2 ring-card",
                 STAGE_DOT_CLASS[stage],
