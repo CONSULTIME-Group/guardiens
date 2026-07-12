@@ -146,22 +146,62 @@ const AdminListings = () => {
   };
 
   const handleHide = async (id: string) => {
-    await supabase.from("sits").update({ status: "cancelled" as any }).eq("id", id);
+    const { data: userRes } = await supabase.auth.getUser();
+    const adminId = userRes?.user?.id;
+    const { error } = await supabase
+      .from("sits")
+      .update({ status: "cancelled" as any, hidden_by: adminId ?? null, hidden_at: new Date().toISOString() } as any)
+      .eq("id", id);
+    if (error) {
+      toast.error("Erreur : " + error.message);
+      return;
+    }
     const listing = listings.find(l => l.id === id);
-    if (listing?.owner) {
-      await supabase.from("notifications").insert({
-        user_id: listing.user_id, type: "listing_hidden",
-        title: "Annonce masquée par l'admin",
-        body: `Votre annonce "${listing.title || "Sans titre"}" a été masquée de la recherche par un administrateur.`,
-        link: `/sits/${id}`,
-      });
+    try {
+      if (listing?.user_id) {
+        await supabase.from("notifications").insert({
+          user_id: listing.user_id, type: "listing_hidden",
+          title: "Annonce masquée par l'admin",
+          body: `Votre annonce "${listing.title || "Sans titre"}" a été masquée de la recherche par un administrateur.`,
+          link: `/sits/${id}`,
+        });
+      }
+    } catch (e) {
+      console.error("notify owner hide:", e);
+    }
+    try {
+      if (adminId) {
+        await supabase.from("admin_action_logs").insert({
+          admin_id: adminId, action: "hide_listing", target_type: "sit", target_id: id,
+        } as any);
+      }
+    } catch (e) {
+      console.error("admin_action_logs hide:", e);
     }
     toast.success("Annonce masquée"); setHideModal(null); fetchListings();
   };
 
   const handleRestore = async (id: string) => {
-    await supabase.from("sits").update({ status: "published" as any }).eq("id", id);
-    toast.success("Annonce remise en ligne"); fetchListings();
+    const { data: userRes } = await supabase.auth.getUser();
+    const adminId = userRes?.user?.id;
+    const { error } = await supabase
+      .from("sits")
+      .update({ status: "published" as any, hidden_by: null, hidden_at: null } as any)
+      .eq("id", id);
+    if (error) {
+      toast.error("Erreur : " + error.message);
+      return;
+    }
+    try {
+      if (adminId) {
+        await supabase.from("admin_action_logs").insert({
+          admin_id: adminId, action: "restore_listing", target_type: "sit", target_id: id,
+        } as any);
+      }
+    } catch (e) {
+      console.error("admin_action_logs restore:", e);
+    }
+    toast.success("Annonce remise en ligne"); setRestoreModal(null); fetchListings();
   };
 
   const handleDelete = async (id: string) => {
