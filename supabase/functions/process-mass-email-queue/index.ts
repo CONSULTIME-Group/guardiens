@@ -199,7 +199,7 @@ Deno.serve(async (req) => {
 
       // Opt-out produit : email → profile.id → email_preferences
       const { data: profile } = await service
-        .from("profiles").select("id").eq("email", rawEmail).maybeSingle();
+        .from("profiles").select("id, first_name").eq("email", rawEmail).maybeSingle();
       if (profile?.id) {
         const { data: prefs } = await service
           .from("email_preferences").select("product_emails").eq("user_id", profile.id).maybeSingle();
