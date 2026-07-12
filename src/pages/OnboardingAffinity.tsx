@@ -58,8 +58,13 @@ const OnboardingAffinity = () => {
 
   const shownTrackedRef = useRef(false);
   const completedRef = useRef(false);
+  const abandonedEmittedRef = useRef(false);
   const startedAtRef = useRef<number | null>(null);
   const lastStepRef = useRef<{ index: number; name: string }>({ index: 0, name: "role_or_form" });
+
+  // Étape courante (dérivée de l'état visible) pour renseigner metadata.step
+  // sur l'événement d'abandon. Recalculée à la volée à chaque émission.
+  const currentStepRef = useRef<string>("role_or_form");
 
   // Rôle inconnu ou "both" imposé par l'utilisateur : la question précède les champs.
   useEffect(() => {
