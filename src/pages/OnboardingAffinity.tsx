@@ -208,9 +208,21 @@ const OnboardingAffinity = () => {
           );
       }
       completedRef.current = true;
+      const duration = startedAtRef.current
+        ? Math.round((Date.now() - startedAtRef.current) / 1000)
+        : 0;
+      const totalSteps = (showSitterBlock ? 3 : 0) + (showOwnerBlock ? 2 : 0);
       void trackEvent("onboarding_completed", {
         source: "/onboarding/affinity",
         metadata: { role: chosenRole },
+      });
+      void trackEvent("affinity_onboarding_step_completed", {
+        source: "/onboarding/affinity",
+        metadata: { step_index: 99, step_name: "form_submitted" },
+      });
+      void trackEvent("affinity_onboarding_completed", {
+        source: "/onboarding/affinity",
+        metadata: { role: chosenRole, total_steps: totalSteps, duration_seconds: duration },
       });
       await refreshProfile();
       await status.refresh();
