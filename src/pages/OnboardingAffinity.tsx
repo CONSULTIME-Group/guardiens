@@ -58,8 +58,13 @@ const OnboardingAffinity = () => {
 
   const shownTrackedRef = useRef(false);
   const completedRef = useRef(false);
+  const abandonedEmittedRef = useRef(false);
   const startedAtRef = useRef<number | null>(null);
   const lastStepRef = useRef<{ index: number; name: string }>({ index: 0, name: "role_or_form" });
+
+  // Étape courante (dérivée de l'état visible) pour renseigner metadata.step
+  // sur l'événement d'abandon. Recalculée à la volée à chaque émission.
+  const currentStepRef = useRef<string>("role_or_form");
 
   // Rôle inconnu ou "both" imposé par l'utilisateur : la question précède les champs.
   useEffect(() => {
@@ -106,33 +111,54 @@ const OnboardingAffinity = () => {
     });
   }, [flagLoading, flagEnabled, status.loading, status.needsSitter, status.needsOwner, status.needsOnboarding, status.profileCreatedAt, user]);
 
-  // Abandon : émis si l'utilisateur quitte la page (unload OU unmount) sans compléter.
+  // Abandon : émis AU PLUS UNE FOIS par session/monté du composant, si
+  // l'utilisateur n'a pas complété. `reason` distingue le mode de sortie
+  // (close_button | navigate_away | page_unload), `step` renseigne l'étape
+  // courante au moment de la sortie.
+  const emitAbandoned = (reason: "close_button" | "navigate_away" | "page_unload") => {
+    if (completedRef.current || abandonedEmittedRef.current) return;
+    abandonedEmittedRef.current = true;
+    const duration = startedAtRef.current
+      ? Math.round((Date.now() - startedAtRef.current) / 1000)
+      : 0;
+    void trackEvent("onboarding_abandoned", {
+      source: "/onboarding/affinity",
+      metadata: {
+        reason,
+        step: currentStepRef.current,
+        role: chosenRole,
+        needs_sitter: status.needsSitter,
+        needs_owner: status.needsOwner,
+      },
+    });
+    void trackEvent("affinity_onboarding_abandoned", {
+      source: "/onboarding/affinity",
+      metadata: {
+        reason,
+        step: currentStepRef.current,
+        role: chosenRole,
+        last_step_index: lastStepRef.current.index,
+        last_step_name: lastStepRef.current.name,
+        duration_seconds: duration,
+      },
+    });
+  };
+  // Ref stable pour être appelée depuis le cleanup / handlers sans redéclencher
+  // les effets à chaque changement d'état.
+  const emitAbandonedRef = useRef(emitAbandoned);
+  emitAbandonedRef.current = emitAbandoned;
+
   useEffect(() => {
-    const emitAbandoned = () => {
-      if (completedRef.current) return;
-      const duration = startedAtRef.current
-        ? Math.round((Date.now() - startedAtRef.current) / 1000)
-        : 0;
-      void trackEvent("onboarding_abandoned", {
-        source: "/onboarding/affinity",
-        metadata: { role: chosenRole, needs_sitter: status.needsSitter, needs_owner: status.needsOwner },
-      });
-      void trackEvent("affinity_onboarding_abandoned", {
-        source: "/onboarding/affinity",
-        metadata: {
-          role: chosenRole,
-          last_step_index: lastStepRef.current.index,
-          last_step_name: lastStepRef.current.name,
-          duration_seconds: duration,
-        },
-      });
-    };
-    window.addEventListener("beforeunload", emitAbandoned);
+    const onUnload = () => emitAbandonedRef.current("page_unload");
+    window.addEventListener("beforeunload", onUnload);
+    window.addEventListener("pagehide", onUnload);
     return () => {
-      window.removeEventListener("beforeunload", emitAbandoned);
-      emitAbandoned();
+      window.removeEventListener("beforeunload", onUnload);
+      window.removeEventListener("pagehide", onUnload);
+      // Démontage React sans complétion : navigation interne vers une autre route.
+      emitAbandonedRef.current("navigate_away");
     };
-  }, [chosenRole, status.needsSitter, status.needsOwner]);
+  }, []);
 
   const showSitterBlock = useMemo(
     () => status.needsSitter && (chosenRole === "sitter" || chosenRole === "both"),
@@ -162,6 +188,16 @@ const OnboardingAffinity = () => {
     () => (showSitterBlock || showOwnerBlock) && missingFields.length === 0,
     [showSitterBlock, showOwnerBlock, missingFields],
   );
+
+  // Tient à jour l'étape courante pour metadata.step des événements d'abandon.
+  useEffect(() => {
+    let step = "role_or_form";
+    if (askRole && !chosenRole) step = "role_pick";
+    else if (showSitterBlock && (animalTypes.length === 0 || !workDuringSit || !sitterType)) step = "sitter_form";
+    else if (showOwnerBlock && (!presenceExpected || preferredSitterTypes.length === 0)) step = "owner_form";
+    else if (showSitterBlock || showOwnerBlock) step = "form_ready";
+    currentStepRef.current = step;
+  }, [askRole, chosenRole, showSitterBlock, showOwnerBlock, animalTypes, workDuringSit, sitterType, presenceExpected, preferredSitterTypes]);
 
   const handleRolePick = (r: Role) => {
     setChosenRole(r);
@@ -361,10 +397,7 @@ const OnboardingAffinity = () => {
                 <Button
                   variant="ghost"
                   onClick={async () => {
-                    void trackEvent("onboarding_abandoned", {
-                      source: "/onboarding/affinity",
-                      metadata: { role: chosenRole, via: "logout" },
-                    });
+                    emitAbandonedRef.current("close_button");
                     await logout();
                     navigate("/login", { replace: true });
                   }}
