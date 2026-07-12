@@ -636,6 +636,36 @@ const AdminListings = () => {
         </Table>
       </div>
 
+      {/* Pagination */}
+      {filtered.length > 0 && (
+        <div className="flex items-center justify-between gap-3 text-sm text-muted-foreground">
+          <span>
+            {filtered.length.toLocaleString("fr-FR")} annonce{filtered.length > 1 ? "s" : ""} · page {currentPage + 1}/{totalPages}
+          </span>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setPage((p) => Math.max(0, p - 1))}
+              disabled={currentPage === 0}
+              aria-label="Page précédente"
+            >
+              <ChevronLeft className="h-4 w-4 mr-1" /> Précédent
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
+              disabled={currentPage >= totalPages - 1}
+              aria-label="Page suivante"
+            >
+              Suivant <ChevronRight className="h-4 w-4 ml-1" />
+            </Button>
+          </div>
+        </div>
+      )}
+
+
       {/* Traffic sheet */}
       <Sheet open={trafficOpen} onOpenChange={setTrafficOpen}>
         <SheetContent className="w-full sm:max-w-lg overflow-y-auto">
