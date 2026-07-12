@@ -69,7 +69,8 @@ Contraintes strictes:
 - Interdiction du tiret cadratin (—). Utilisez virgule, deux-points, parenthèses ou tiret demi-cadratin.
 - Réponse en JSON STRICT: { "analysis": string, "actions": [{ "title": string, "why": string, "priority": "haute"|"moyenne"|"basse", "link": string }] }.
 - analysis : 3 à 5 phrases synthétiques sur l'état de la plateforme.
-- actions : max 6, priorisées, concrètes, chacune avec un lien admin pertinent parmi /admin/verifications, /admin/listings, /admin/reports, /admin/reviews, /admin/users, /admin/emails.`;
+- actions : max 6, priorisées, concrètes, chacune avec un lien admin pertinent parmi /admin/verifications, /admin/listings, /admin/reports, /admin/reviews, /admin/users, /admin/emails, /admin/envois-groupes.
+- RÈGLE LIEN: pour toute action qui recommande de LANCER UNE CAMPAGNE EMAIL, une RELANCE de masse, ou une communication par email de masse, le champ "link" DOIT valoir "/admin/envois-groupes" (et non "/admin/emails"). Les autres actions gardent leurs liens habituels.`;
 
 async function callAI(signals: unknown): Promise<{ analysis: string; actions: ActionItem[] }> {
   if (!LOVABLE_API_KEY) throw new Error('LOVABLE_API_KEY manquant');
