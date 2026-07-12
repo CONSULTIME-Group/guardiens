@@ -9,7 +9,8 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { toast } from "sonner";
 import { format, formatDistanceToNow } from "date-fns";
 import { fr } from "date-fns/locale";
-import { Eye, Ban, ShieldCheck, StickyNote, RotateCcw, Trash2, Crown, ChevronLeft, ChevronRight, MessageSquare, FileText, MailCheck, UserCog } from "lucide-react";
+import { Eye, Ban, ShieldCheck, StickyNote, RotateCcw, Trash2, Crown, ChevronLeft, ChevronRight, MessageSquare, FileText, MailCheck, UserCog, Download } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
 import { useNavigate } from "react-router-dom";
 import { SuspendUserDialog } from "./_components/users/SuspendUserDialog";
 import { NoteUserDialog } from "./_components/users/NoteUserDialog";
@@ -66,6 +67,8 @@ const AdminUsers = () => {
   const [filterCountry, setFilterCountry] = useState("all");
   const [page, setPage] = useState(0);
   const [countryStats, setCountryStats] = useState<{ intl: number; codes: string[] }>({ intl: 0, codes: [] });
+  const [kpis, setKpis] = useState<{ total: number; active: number; suspended: number; verified: number; newLast7d: number } | null>(null);
+  const [exporting, setExporting] = useState(false);
 
   // Modal states
   const [noteModal, setNoteModal] = useState<{ open: boolean; userId: string; currentNote: string }>({
@@ -271,10 +274,117 @@ const AdminUsers = () => {
     })();
   }, []);
 
+  // KPI counts (indépendants des filtres, calculés au montage)
+  useEffect(() => {
+    (async () => {
+      const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
+      const [totalRes, activeRes, suspRes, verifRes, newRes] = await Promise.all([
+        supabase.from("profiles").select("id", { count: "exact", head: true }),
+        supabase.from("profiles").select("id", { count: "exact", head: true }).or("account_status.eq.active,account_status.is.null"),
+        supabase.from("profiles").select("id", { count: "exact", head: true }).eq("account_status", "suspended"),
+        supabase.from("profiles").select("id", { count: "exact", head: true }).eq("identity_verification_status", "verified"),
+        supabase.from("profiles").select("id", { count: "exact", head: true }).gte("created_at", sevenDaysAgo),
+      ]);
+      setKpis({
+        total: totalRes.count ?? 0,
+        active: activeRes.count ?? 0,
+        suspended: suspRes.count ?? 0,
+        verified: verifRes.count ?? 0,
+        newLast7d: newRes.count ?? 0,
+      });
+    })();
+  }, []);
+
+
+
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
   const availableDepts = Object.keys(DEPT_NAMES).sort((a, b) => a.localeCompare(b, "fr"));
   const availableCountries = countryStats.codes;
   const intlCount = countryStats.intl;
+
+  const EXPORT_MAX = 5000;
+  const handleExportCsv = async () => {
+    setExporting(true);
+    try {
+      let query = supabase
+        .from("profiles")
+        .select(
+          "id, first_name, last_name, role, city, postal_code, country, created_at, last_seen_at, identity_verification_status, account_status, is_founder",
+        )
+        .order("created_at", { ascending: false })
+        .limit(EXPORT_MAX);
+
+      if (filterRole !== "all") query = query.eq("role", filterRole as any);
+      if (filterVerification !== "all") query = query.eq("identity_verification_status", filterVerification);
+      if (filterCountry === "FR") query = query.or("country.eq.FR,country.is.null");
+      else if (filterCountry === "INTL") query = query.not("country", "is", null).neq("country", "FR");
+      else if (filterCountry !== "all") query = query.eq("country", filterCountry);
+      if (filterDept !== "all") {
+        if (filterDept === "2A") query = query.gte("postal_code", "20000").lte("postal_code", "20199");
+        else if (filterDept === "2B") query = query.gte("postal_code", "20200").lte("postal_code", "20999");
+        else query = query.like("postal_code", `${filterDept}%`);
+      }
+      if (searchDebounced) {
+        const s = searchDebounced.replace(/[%,()]/g, "");
+        if (s) query = query.or(`first_name.ilike.%${s}%,last_name.ilike.%${s}%,email.ilike.%${s}%`);
+      }
+
+      const { data, error } = await query;
+      if (error || !data) {
+        toast.error("Erreur lors de l'export");
+        return;
+      }
+      const ids = data.map((u: any) => u.id);
+      const emailMap = new Map<string, string>();
+      const CHUNK = 150;
+      for (let i = 0; i < ids.length; i += CHUNK) {
+        const chunk = ids.slice(i, i + CHUNK);
+        const { data: emails } = await supabase.rpc("get_user_emails_admin", { p_user_ids: chunk });
+        (emails || []).forEach((e: any) => emailMap.set(e.id, e.email));
+      }
+
+      const esc = (v: any) => {
+        const s = v === null || v === undefined ? "" : String(v);
+        return `"${s.replace(/"/g, '""')}"`;
+      };
+      const headers = ["Nom", "Email", "Rôle", "Ville", "Code postal", "Département", "Pays", "Inscription", "Dernière activité", "Vérification", "Statut", "Fondateur"];
+      const rows = data.map((u: any) => {
+        const name = `${u.first_name || ""} ${u.last_name || ""}`.trim();
+        const country = (u.country || "FR").toUpperCase();
+        return [
+          name,
+          emailMap.get(u.id) || "",
+          roleLabels[u.role] || u.role || "",
+          u.city || "",
+          u.postal_code || "",
+          getDeptLabel(u.postal_code) || "",
+          country === "FR" ? "France" : getCountryName(country),
+          u.created_at ? format(new Date(u.created_at), "yyyy-MM-dd") : "",
+          u.last_seen_at ? format(new Date(u.last_seen_at), "yyyy-MM-dd HH:mm") : "",
+          verificationLabels[u.identity_verification_status || "not_submitted"]?.label || "",
+          statusLabels[u.account_status || "active"]?.label || "",
+          u.is_founder ? "oui" : "non",
+        ].map(esc).join(",");
+      });
+      const csv = "\uFEFF" + [headers.map(esc).join(","), ...rows].join("\n");
+      const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `utilisateurs-${format(new Date(), "yyyy-MM-dd")}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      if (data.length >= EXPORT_MAX) {
+        toast.warning(`Export plafonné à ${EXPORT_MAX} lignes. Affinez les filtres pour tout exporter.`);
+      } else {
+        toast.success(`${data.length} ligne${data.length > 1 ? "s" : ""} exportée${data.length > 1 ? "s" : ""}`);
+      }
+    } finally {
+      setExporting(false);
+    }
+  };
 
 
   const handleSuspend = async () => {
@@ -500,16 +610,39 @@ const AdminUsers = () => {
     <div className="space-y-6">
       <div className="flex items-center justify-between gap-3">
         <h1 className="font-heading text-2xl sm:text-3xl font-bold tracking-tight">Utilisateurs</h1>
-        <div className="flex items-center gap-3">
-          <Badge variant="secondary" className="text-xs">
-            {intlCount} membre{intlCount > 1 ? "s" : ""} hors France
-          </Badge>
+        <div className="flex items-center gap-2">
+          <Button variant="outline" size="sm" onClick={handleExportCsv} disabled={exporting}>
+            <Download className="h-4 w-4 mr-2" />
+            {exporting ? "Export…" : "Exporter CSV"}
+          </Button>
           <Button variant="outline" size="sm" onClick={openHistory}>
             <MessageSquare className="h-4 w-4 mr-2" />
             Historique de mes envois
           </Button>
         </div>
       </div>
+
+      {/* KPI banner */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+        {[
+          { label: "Total inscrits", value: kpis?.total },
+          { label: "Actifs", value: kpis?.active },
+          { label: "Suspendus", value: kpis?.suspended },
+          { label: "Vérifiés", value: kpis?.verified },
+          { label: "Hors France", value: intlCount },
+          { label: "Nouveaux 7 jours", value: kpis?.newLast7d },
+        ].map((k) => (
+          <Card key={k.label}>
+            <CardContent className="p-4">
+              <p className="text-xs text-muted-foreground">{k.label}</p>
+              <p className="text-2xl font-bold text-foreground mt-1">
+                {k.value === undefined ? "–" : k.value.toLocaleString("fr-FR")}
+              </p>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+
 
       <div className="flex flex-col sm:flex-row gap-3">
         <Input
@@ -616,8 +749,11 @@ const AdminUsers = () => {
                           </AvatarFallback>
                         </Avatar>
                         <div>
-                          <div className="font-medium text-sm">
-                            {user.first_name} {user.last_name}
+                          <div className="font-medium text-sm flex items-center gap-1.5">
+                            <span>{user.first_name} {user.last_name}</span>
+                            {user.is_founder && (
+                              <Badge variant="secondary" className="text-[10px] px-1.5 py-0">Fondateur</Badge>
+                            )}
                           </div>
                           <div className="text-xs text-muted-foreground">{user.email}</div>
                         </div>
@@ -766,15 +902,22 @@ const AdminUsers = () => {
                         <Button
                           variant="ghost"
                           size="icon"
-                          title="Note interne"
-                          aria-label="Éditer la note interne"
+                          className="relative"
+                          title={user.admin_notes ? "Note interne (présente)" : "Note interne"}
+                          aria-label={user.admin_notes ? "Éditer la note interne (présente)" : "Éditer la note interne"}
                           onClick={() => setNoteModal({
                             open: true,
                             userId: user.id,
                             currentNote: user.admin_notes || "",
                           })}
                         >
-                          <StickyNote className="h-4 w-4" />
+                          <StickyNote className={`h-4 w-4 ${user.admin_notes ? "text-primary" : ""}`} />
+                          {user.admin_notes && (
+                            <span
+                              aria-hidden="true"
+                              className="absolute top-1 right-1 h-1.5 w-1.5 rounded-full bg-primary"
+                            />
+                          )}
                         </Button>
                         <Button
                           variant="ghost"
