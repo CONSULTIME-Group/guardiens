@@ -189,6 +189,16 @@ const OnboardingAffinity = () => {
     [showSitterBlock, showOwnerBlock, missingFields],
   );
 
+  // Tient à jour l'étape courante pour metadata.step des événements d'abandon.
+  useEffect(() => {
+    let step = "role_or_form";
+    if (askRole && !chosenRole) step = "role_pick";
+    else if (showSitterBlock && (animalTypes.length === 0 || !workDuringSit || !sitterType)) step = "sitter_form";
+    else if (showOwnerBlock && (!presenceExpected || preferredSitterTypes.length === 0)) step = "owner_form";
+    else if (showSitterBlock || showOwnerBlock) step = "form_ready";
+    currentStepRef.current = step;
+  }, [askRole, chosenRole, showSitterBlock, showOwnerBlock, animalTypes, workDuringSit, sitterType, presenceExpected, preferredSitterTypes]);
+
   const handleRolePick = (r: Role) => {
     setChosenRole(r);
     setAskRole(false);
