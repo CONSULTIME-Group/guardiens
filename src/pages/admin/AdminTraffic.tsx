@@ -11,6 +11,7 @@ import { useSeoData } from "@/hooks/useSeoData";
 const AdminAnalytics = lazy(() => import("./AdminAnalytics"));
 const AdminSEO = lazy(() => import("./AdminSEO"));
 const AdminSignupFunnelTab = lazy(() => import("@/components/admin/AdminSignupFunnelTab"));
+const SignupFormSubStepsFunnel = lazy(() => import("@/components/admin/SignupFormSubStepsFunnel"));
 
 function pctChange(current: number, previous: number): number | undefined {
   if (previous === 0 && current === 0) return 0;
@@ -136,9 +137,12 @@ const AdminTraffic = () => {
           </Suspense>
         </TabsContent>
 
-        <TabsContent value="signup-funnel" className="mt-6">
+        <TabsContent value="signup-funnel" className="mt-6 space-y-6">
           <Suspense fallback={<div className="p-8 text-center text-muted-foreground"><Loader2 className="h-5 w-5 animate-spin inline" /></div>}>
             <AdminSignupFunnelTab />
+          </Suspense>
+          <Suspense fallback={<div className="p-8 text-center text-muted-foreground"><Loader2 className="h-5 w-5 animate-spin inline" /></div>}>
+            <SignupFormSubStepsFunnel />
           </Suspense>
         </TabsContent>
       </Tabs>

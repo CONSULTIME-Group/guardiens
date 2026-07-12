@@ -90,6 +90,11 @@ export type EventType =
   | "signup_terms_checked"             // CGU cochées (metadata.step: 1 | 2)
   | "dashboard_error"                  // Erreur boundary dashboard (metadata.error_type, component?)
   | "admin_ga4_diag_test"              // Test diagnostic GA4 admin (metadata.result: 'ok' | 'ko', message?)
+  // Chantier funnel signup granulaire : sous-étapes du formulaire /inscription
+  | "signup_page_loaded"               // Mount de la page /inscription
+  | "signup_email_entered"             // 1er blur du champ email si non vide
+  | "signup_password_entered"          // 1er blur du champ password si non vide
+  | "signup_submit_clicked"            // Clic sur submit AVANT toute validation
   // Chantier 2.3 Casse A : NBA nouveau gardien --------------------------------
   | "sitter_first_nba_seen"            // 1×/session (sits_count, avg_affinity_score)
   | "sitter_first_nba_card_clicked"    // Clic sur une des 3 cards (sit_id, affinity_score, position)

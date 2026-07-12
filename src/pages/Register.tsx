@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { Helmet } from "react-helmet-async";
 import { useNavigate, Link, useSearchParams } from "react-router-dom";
 import { useTranslation, Trans } from "react-i18next";
@@ -123,23 +123,30 @@ const Register = () => {
   { value: "pro", label: t("register_page.roles.pro_label"), description: t("register_page.roles.pro_desc") },
  ], [t]);
 
- useEffect(() => {
- const ref = searchParams.get("ref");
- if (ref) {
- sessionStorage.setItem("guardiens_ref", ref);
- }
- trackEvent("signup_started", {
- source: "/inscription",
- metadata: { has_ref: !!ref, preset_role: presetRole || null },
- });
- if (presetRole) {
- trackEvent("signup_role_selected", {
- source: "/inscription",
- metadata: { role: presetRole, preset: true },
- });
- }
- // eslint-disable-next-line react-hooks/exhaustive-deps
- }, []);
+  const emailBlurredRef = useRef(false);
+  const passwordBlurredRef = useRef(false);
+
+  useEffect(() => {
+  const ref = searchParams.get("ref");
+  if (ref) {
+  sessionStorage.setItem("guardiens_ref", ref);
+  }
+  trackEvent("signup_page_loaded", {
+  source: "/inscription",
+  metadata: { has_ref: !!ref, preset_role: presetRole || null },
+  });
+  trackEvent("signup_started", {
+  source: "/inscription",
+  metadata: { has_ref: !!ref, preset_role: presetRole || null },
+  });
+  if (presetRole) {
+  trackEvent("signup_role_selected", {
+  source: "/inscription",
+  metadata: { role: presetRole, preset: true },
+  });
+  }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
  useEffect(() => {
  if (resendCooldown <= 0) return;
@@ -167,10 +174,16 @@ const Register = () => {
  return () => { cancelled = true; };
  }, []);
 
- const handleSubmit = async (e: React.FormEvent) => {
- e.preventDefault();
- if (!selectedRole) return;
- setFormError(null);
+  const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
+  try {
+    trackEvent("signup_submit_clicked", {
+      source: "/inscription",
+      metadata: { role: selectedRole, has_email: !!email, has_password: !!password },
+    });
+  } catch {}
+  if (!selectedRole) return;
+  setFormError(null);
 
  if (password.length < 8) {
  setFormError(t("register_page.error_min_length"));
@@ -755,7 +768,13 @@ const Register = () => {
     placeholder={t("register_page.email_placeholder")}
     value={email}
     onChange={(e) => { setEmail(e.target.value); setFormError(null); }}
-    onFocus={() => { try { trackEvent("signup_form_field_focused" as any, { source: "/inscription", metadata: { field: "email" } }); } catch {} }}
+     onFocus={() => { try { trackEvent("signup_form_field_focused" as any, { source: "/inscription", metadata: { field: "email" } }); } catch {} }}
+     onBlur={(e) => {
+       if (emailBlurredRef.current) return;
+       if (!e.target.value.trim()) return;
+       emailBlurredRef.current = true;
+       try { trackEvent("signup_email_entered", { source: "/inscription" }); } catch {}
+     }}
     required
     autoComplete="email"
     className="rounded-lg h-12"
@@ -788,7 +807,13 @@ const Register = () => {
      placeholder={t("register_page.password_placeholder")}
      value={password}
      onChange={(e) => { setPassword(e.target.value); setFormError(null); }}
-     onFocus={() => { try { trackEvent("signup_form_field_focused" as any, { source: "/inscription", metadata: { field: "password" } }); } catch {} }}
+      onFocus={() => { try { trackEvent("signup_form_field_focused" as any, { source: "/inscription", metadata: { field: "password" } }); } catch {} }}
+      onBlur={(e) => {
+        if (passwordBlurredRef.current) return;
+        if (!e.target.value) return;
+        passwordBlurredRef.current = true;
+        try { trackEvent("signup_password_entered", { source: "/inscription" }); } catch {}
+      }}
      required
      minLength={8}
      autoComplete="new-password"
