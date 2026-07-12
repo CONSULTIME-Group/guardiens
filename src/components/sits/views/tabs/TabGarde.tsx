@@ -49,7 +49,7 @@ const TabGarde = ({
       {hasOwnerMessage && (
         <section className="rounded-2xl border-2 border-primary/20 bg-primary/5 p-5 md:p-6">
           <p className="text-[11px] uppercase tracking-wider text-primary/80 font-semibold mb-2">
-            Un mot de {ownerName}
+            Un mot de {displayOwnerName}
           </p>
           <p className="text-sm text-foreground/90 leading-relaxed italic whitespace-pre-line">
             « {ownerMessage} »
@@ -108,7 +108,7 @@ const TabGarde = ({
 
       {!hasOwnerMessage && !hasRoutine && (
         <p className="text-sm text-muted-foreground italic text-center py-4">
-          {ownerName} n'a pas encore détaillé le déroulé de la garde.
+          {displayOwnerName} n'a pas encore détaillé le déroulé de la garde.
         </p>
       )}
 
@@ -226,7 +226,7 @@ const TabGarde = ({
             <div className="flex items-start gap-4">
               <div className="flex-1 min-w-0">
                 <div className="flex items-center justify-between gap-2 mb-1">
-                  <p className="text-sm font-semibold">Attentes de {ownerName}</p>
+                  <p className="text-sm font-semibold">Attentes de {displayOwnerName}</p>
                   <ArrowRight
                     aria-hidden="true"
                     className="h-4 w-4 text-muted-foreground group-hover:text-primary group-hover:translate-x-0.5 transition shrink-0"
