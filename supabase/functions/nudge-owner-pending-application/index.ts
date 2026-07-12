@@ -360,6 +360,16 @@ Deno.serve(async (req) => {
       else emailsSkipped += 1;
     }
 
+    if (run) {
+      await run.finish(errors.length > 0 ? "partial" : "success", {
+        detected: pending.length,
+        signals_inserted: signalsInserted,
+        signals_skipped: signalsSkipped,
+        emails_sent: emailsSent,
+        emails_skipped: emailsSkipped,
+        errors_count: errors.length,
+      });
+    }
     return new Response(
       JSON.stringify({
         mode,
@@ -375,6 +385,7 @@ Deno.serve(async (req) => {
     );
   } catch (err) {
     console.error("[nudge-owner-pending-application]", err);
+    if (run) await run.fail(err);
     return new Response(
       JSON.stringify({ error: String((err as Error)?.message ?? err) }),
       {
