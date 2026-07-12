@@ -1494,9 +1494,28 @@ const QuickActions = ({
 
   if (!isOwner && ["pending", "viewed", "discussing"].includes(sit.application_status)) {
     return (
-      <Link to={`/sits/${sit.id}`} className={cn(btnClass, "bg-accent text-muted-foreground hover:text-foreground")}>
-        <ChevronRight className="h-3.5 w-3.5" /> Voir l'annonce
-      </Link>
+      <>
+        <Link to={`/sits/${sit.id}`} className={cn(btnClass, "bg-accent text-muted-foreground hover:text-foreground")}>
+          <ChevronRight className="h-3.5 w-3.5" /> Voir l'annonce
+        </Link>
+        {sit.conversationId && (
+          <Link
+            to={`/messages?c=${sit.conversationId}`}
+            className={cn(btnClass, "border border-primary/40 text-primary hover:bg-primary/10")}
+          >
+            <MessageCircle className="h-3.5 w-3.5" /> Ouvrir la conversation
+          </Link>
+        )}
+        {sit.application_status === "pending" && sit.application_id && onWithdraw && (
+          <button
+            type="button"
+            onClick={() => onWithdraw(sit.application_id)}
+            className={cn(btnClass, "text-muted-foreground hover:text-destructive ml-auto")}
+          >
+            Retirer ma candidature
+          </button>
+        )}
+      </>
     );
   }
 
