@@ -159,8 +159,10 @@ Le home sitting existe depuis des décennies dans les pays anglo-saxons. Le prin
  },
  {
  id: "fonctionnement",
- title: "Comment fonctionne Guardiens à Lyon",
- content: `### Etape 1, Publiez votre annonce
+ title: "Comment trouver un gardien fiable à Lyon ?",
+ content: `Pour trouver un gardien fiable à Lyon, publiez votre annonce sur Guardiens, recevez des candidatures de gardiens vérifiés de votre quartier, consultez leurs avis, puis organisez une rencontre avant de confirmer. Chaque profil est vérifié (identité, avis publics de la communauté) et la rencontre physique est systématique.
+
+### Etape 1, Publiez votre annonce
 
 Décrivez votre maison, vos animaux, les dates de votre absence et vos attentes. La publication est entièrement sans frais pour les propriétaires. Précisez votre arrondissement ou votre commune pour que les gardiens de proximité vous trouvent. [Voir les tarifs](/tarifs).
 
