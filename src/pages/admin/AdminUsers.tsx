@@ -679,7 +679,16 @@ const AdminUsers = () => {
                       <Badge variant={verif.variant}>{verif.label}</Badge>
                     </TableCell>
                     <TableCell>
-                      <Badge variant={status.variant}>{status.label}</Badge>
+                      <Badge
+                        variant={status.variant}
+                        title={
+                          user.account_status === "suspended" && user.suspension_reason
+                            ? `Motif : ${user.suspension_reason}`
+                            : undefined
+                        }
+                      >
+                        {status.label}
+                      </Badge>
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-1">
