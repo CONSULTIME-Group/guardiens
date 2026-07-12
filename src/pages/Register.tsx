@@ -768,7 +768,13 @@ const Register = () => {
     placeholder={t("register_page.email_placeholder")}
     value={email}
     onChange={(e) => { setEmail(e.target.value); setFormError(null); }}
-    onFocus={() => { try { trackEvent("signup_form_field_focused" as any, { source: "/inscription", metadata: { field: "email" } }); } catch {} }}
+     onFocus={() => { try { trackEvent("signup_form_field_focused" as any, { source: "/inscription", metadata: { field: "email" } }); } catch {} }}
+     onBlur={(e) => {
+       if (emailBlurredRef.current) return;
+       if (!e.target.value.trim()) return;
+       emailBlurredRef.current = true;
+       try { trackEvent("signup_email_entered", { source: "/inscription" }); } catch {}
+     }}
     required
     autoComplete="email"
     className="rounded-lg h-12"
