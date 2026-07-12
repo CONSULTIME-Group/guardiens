@@ -139,6 +139,9 @@ export default function ArticleDetail() {
  const [relatedArticles, setRelatedArticles] = useState<RelatedArticle[]>([]);
  const [cityGuideSlug, setCityGuideSlug] = useState<string | null>(null);
  const [cityPageSlug, setCityPageSlug] = useState<string | null>(null);
+ // true si lang=fr OU si une traduction existe pour la langue courante.
+ // Sert à noindex les variantes ?lang=xx pointant vers du contenu FR (thin content SEO).
+ const [hasTranslationForLang, setHasTranslationForLang] = useState<boolean>(true);
 
   useEffect(() => {
   if (!slug) return;
