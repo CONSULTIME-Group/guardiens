@@ -68,6 +68,7 @@ const AdminListings = () => {
   const [cities, setCities] = useState<string[]>([]);
   const [deleteModal, setDeleteModal] = useState<string | null>(null);
   const [hideModal, setHideModal] = useState<string | null>(null);
+  const [restoreModal, setRestoreModal] = useState<string | null>(null);
 
   // Traffic sheet
   const [trafficOpen, setTrafficOpen] = useState(false);
