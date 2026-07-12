@@ -58,6 +58,8 @@ const OnboardingAffinity = () => {
 
   const shownTrackedRef = useRef(false);
   const completedRef = useRef(false);
+  const startedAtRef = useRef<number | null>(null);
+  const lastStepRef = useRef<{ index: number; name: string }>({ index: 0, name: "role_or_form" });
 
   // Rôle inconnu ou "both" imposé par l'utilisateur : la question précède les champs.
   useEffect(() => {
@@ -84,6 +86,7 @@ const OnboardingAffinity = () => {
     if (shownTrackedRef.current) return;
     if (flagLoading || status.loading || !user || !flagEnabled || !status.needsOnboarding) return;
     shownTrackedRef.current = true;
+    startedAtRef.current = Date.now();
     void trackEvent("onboarding_shown", {
       source: "/onboarding/affinity",
       metadata: {
@@ -92,19 +95,43 @@ const OnboardingAffinity = () => {
         needs_owner: status.needsOwner,
       },
     });
-  }, [flagLoading, flagEnabled, status.loading, status.needsSitter, status.needsOwner, status.needsOnboarding, user]);
+    void trackEvent("affinity_onboarding_started", {
+      source: "/onboarding/affinity",
+      metadata: {
+        role: user.role ?? null,
+        profile_created_at: status.profileCreatedAt,
+        needs_sitter: status.needsSitter,
+        needs_owner: status.needsOwner,
+      },
+    });
+  }, [flagLoading, flagEnabled, status.loading, status.needsSitter, status.needsOwner, status.needsOnboarding, status.profileCreatedAt, user]);
 
-  // Abandon : émis si l'utilisateur quitte la page sans compléter.
+  // Abandon : émis si l'utilisateur quitte la page (unload OU unmount) sans compléter.
   useEffect(() => {
-    const onUnload = () => {
+    const emitAbandoned = () => {
       if (completedRef.current) return;
+      const duration = startedAtRef.current
+        ? Math.round((Date.now() - startedAtRef.current) / 1000)
+        : 0;
       void trackEvent("onboarding_abandoned", {
         source: "/onboarding/affinity",
         metadata: { role: chosenRole, needs_sitter: status.needsSitter, needs_owner: status.needsOwner },
       });
+      void trackEvent("affinity_onboarding_abandoned", {
+        source: "/onboarding/affinity",
+        metadata: {
+          role: chosenRole,
+          last_step_index: lastStepRef.current.index,
+          last_step_name: lastStepRef.current.name,
+          duration_seconds: duration,
+        },
+      });
     };
-    window.addEventListener("beforeunload", onUnload);
-    return () => window.removeEventListener("beforeunload", onUnload);
+    window.addEventListener("beforeunload", emitAbandoned);
+    return () => {
+      window.removeEventListener("beforeunload", emitAbandoned);
+      emitAbandoned();
+    };
   }, [chosenRole, status.needsSitter, status.needsOwner]);
 
   const showSitterBlock = useMemo(
@@ -139,9 +166,18 @@ const OnboardingAffinity = () => {
   const handleRolePick = (r: Role) => {
     setChosenRole(r);
     setAskRole(false);
+    lastStepRef.current = { index: 1, name: "role_selected" };
     void trackEvent("onboarding_role_selected", {
       source: "/onboarding/affinity",
       metadata: { role: r },
+    });
+    void trackEvent("affinity_onboarding_role_selected", {
+      source: "/onboarding/affinity",
+      metadata: { role: r },
+    });
+    void trackEvent("affinity_onboarding_step_completed", {
+      source: "/onboarding/affinity",
+      metadata: { step_index: 0, step_name: "choose_role" },
     });
   };
 
@@ -172,9 +208,21 @@ const OnboardingAffinity = () => {
           );
       }
       completedRef.current = true;
+      const duration = startedAtRef.current
+        ? Math.round((Date.now() - startedAtRef.current) / 1000)
+        : 0;
+      const totalSteps = (showSitterBlock ? 3 : 0) + (showOwnerBlock ? 2 : 0);
       void trackEvent("onboarding_completed", {
         source: "/onboarding/affinity",
         metadata: { role: chosenRole },
+      });
+      void trackEvent("affinity_onboarding_step_completed", {
+        source: "/onboarding/affinity",
+        metadata: { step_index: 99, step_name: "form_submitted" },
+      });
+      void trackEvent("affinity_onboarding_completed", {
+        source: "/onboarding/affinity",
+        metadata: { role: chosenRole, total_steps: totalSteps, duration_seconds: duration },
       });
       await refreshProfile();
       await status.refresh();

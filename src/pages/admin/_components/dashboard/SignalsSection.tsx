@@ -8,6 +8,9 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useFeatureFlag } from "@/hooks/useFeatureFlag";
 import { NoApplicationsCard } from "@/components/admin/signals/NoApplicationsCard";
 import { PendingApplicationCard } from "@/components/admin/signals/PendingApplicationCard";
+import { DormantSitterCard } from "@/components/admin/signals/DormantSitterCard";
+import { StaleVerificationCard } from "@/components/admin/signals/StaleVerificationCard";
+import { AffinityStaleCard } from "@/components/admin/signals/AffinityStaleCard";
 import { cn } from "@/lib/utils";
 
 interface Signal {
@@ -98,6 +101,12 @@ export const SignalsSection = () => {
                   <NoApplicationsCard signal={s as unknown as import("@/components/admin/signals/NoApplicationsCard").AdminSignal} />
                 ) : s.signal_type === "pending_application" ? (
                   <PendingApplicationCard signal={s as unknown as import("@/components/admin/signals/PendingApplicationCard").PendingApplicationSignal} />
+                ) : s.signal_type === "dormant_sitter" ? (
+                  <DormantSitterCard signal={s as unknown as import("@/components/admin/signals/DormantSitterCard").DormantSitterSignal} />
+                ) : s.signal_type === "stale_verification" ? (
+                  <StaleVerificationCard signal={s as unknown as import("@/components/admin/signals/StaleVerificationCard").StaleVerificationSignal} />
+                ) : s.signal_type === "affinity_onboarding_stale" ? (
+                  <AffinityStaleCard signal={s as unknown as import("@/components/admin/signals/AffinityStaleCard").AffinityStaleSignal} />
                 ) : (
                   <Link
                     to={entityLink(s)}

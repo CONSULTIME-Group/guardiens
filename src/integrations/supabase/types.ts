@@ -6585,6 +6585,25 @@ export type Database = {
         Args: { message_id: number; queue_name: string }
         Returns: boolean
       }
+      detect_affinity_stale: {
+        Args: never
+        Returns: {
+          email: string
+          first_name: string
+          hours_since_started: number
+          profile_id: string
+        }[]
+      }
+      detect_dormant_sitters: {
+        Args: never
+        Returns: {
+          days_since_signup: number
+          profile_completion: number
+          sitter_email: string
+          sitter_first_name: string
+          sitter_id: string
+        }[]
+      }
       detect_pending_applications: {
         Args: never
         Returns: {
@@ -6609,6 +6628,15 @@ export type Database = {
           sit_city: string
           sit_id: string
           sit_title: string
+        }[]
+      }
+      detect_stale_verifications: {
+        Args: never
+        Returns: {
+          days_since_request: number
+          email: string
+          first_name: string
+          profile_id: string
         }[]
       }
       email_queue_dispatch: { Args: never; Returns: undefined }
