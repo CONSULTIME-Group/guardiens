@@ -807,7 +807,13 @@ const Register = () => {
      placeholder={t("register_page.password_placeholder")}
      value={password}
      onChange={(e) => { setPassword(e.target.value); setFormError(null); }}
-     onFocus={() => { try { trackEvent("signup_form_field_focused" as any, { source: "/inscription", metadata: { field: "password" } }); } catch {} }}
+      onFocus={() => { try { trackEvent("signup_form_field_focused" as any, { source: "/inscription", metadata: { field: "password" } }); } catch {} }}
+      onBlur={(e) => {
+        if (passwordBlurredRef.current) return;
+        if (!e.target.value) return;
+        passwordBlurredRef.current = true;
+        try { trackEvent("signup_password_entered", { source: "/inscription" }); } catch {}
+      }}
      required
      minLength={8}
      autoComplete="new-password"
