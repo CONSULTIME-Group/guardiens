@@ -274,19 +274,33 @@ const AdminNurturing = () => {
       setEngagement([]);
     }
 
-    // Dernier run du cron evaluate-journeys (toutes périodes confondues)
-    const lastRunRes = await supabase
-      .from("journey_step_log")
-      .select("created_at, sent")
-      .order("created_at", { ascending: false })
+    // Dernier run du cron evaluate-journeys : on lit cron_run_log (populé par
+    // le helper _shared/cron-run-log.ts). Fallback sur journey_step_log si le
+    // helper n'a encore jamais tourné (première exécution après déploiement).
+    const cronRun = await supabase
+      .from("cron_run_log")
+      .select("started_at, finished_at, status")
+      .eq("edge_name", "evaluate-journeys")
+      .order("started_at", { ascending: false })
       .limit(1)
       .maybeSingle();
-    if (!lastRunRes.error && lastRunRes.data) {
-      setLastRunAt(lastRunRes.data.created_at);
-      setLastRunSent(lastRunRes.data.sent);
+    if (!cronRun.error && cronRun.data) {
+      setLastRunAt(cronRun.data.finished_at ?? cronRun.data.started_at);
+      setLastRunSent(cronRun.data.status === "success" || cronRun.data.status === "partial");
     } else {
-      setLastRunAt(null);
-      setLastRunSent(false);
+      const lastRunRes = await supabase
+        .from("journey_step_log")
+        .select("created_at, sent")
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      if (!lastRunRes.error && lastRunRes.data) {
+        setLastRunAt(lastRunRes.data.created_at);
+        setLastRunSent(lastRunRes.data.sent);
+      } else {
+        setLastRunAt(null);
+        setLastRunSent(false);
+      }
     }
 
     // Métadonnées des séquences (pour affichage humain)
