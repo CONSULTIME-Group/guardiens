@@ -199,7 +199,7 @@ Deno.serve(async (req) => {
 
       // Opt-out produit : email → profile.id → email_preferences
       const { data: profile } = await service
-        .from("profiles").select("id").eq("email", rawEmail).maybeSingle();
+        .from("profiles").select("id, first_name").eq("email", rawEmail).maybeSingle();
       if (profile?.id) {
         const { data: prefs } = await service
           .from("email_preferences").select("product_emails").eq("user_id", profile.id).maybeSingle();
@@ -221,8 +221,15 @@ Deno.serve(async (req) => {
         token = (tok as { token?: string } | null)?.token ?? "";
       }
 
-      const html = buildHtml(campaign.subject, campaign.body, campaign.cta_label, campaign.cta_url)
-        .replaceAll(UNSUB_TOKEN_PLACEHOLDER, token);
+      // Personnalisation {prénom} / {prenom}, fallback « Bonjour » si prénom vide/null.
+      const firstName = ((profile as { first_name?: string | null } | null)?.first_name ?? "").trim();
+      const personalize = (t: string) => t.replace(/\{pr[ée]nom\}/gi, firstName || "Bonjour");
+      const personalizedSubject = personalize(campaign.subject);
+
+      const html = personalize(
+        buildHtml(campaign.subject, campaign.body, campaign.cta_label, campaign.cta_url)
+          .replaceAll(UNSUB_TOKEN_PLACEHOLDER, token),
+      );
 
       const unsubApiBase = `${SUPABASE_URL}/functions/v1/handle-email-unsubscribe`;
       const oneClick = `${unsubApiBase}?token=${token}`;
@@ -241,7 +248,7 @@ Deno.serve(async (req) => {
           body: JSON.stringify({
             from: "Guardiens <bonjour@guardiens.fr>",
             to: [rawEmail],
-            subject: campaign.subject,
+            subject: personalizedSubject,
             html,
             tracking: { opens: true, clicks: true },
             tags: [{ name: "campaign_id", value: campaignId }],
