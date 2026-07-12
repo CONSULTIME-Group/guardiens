@@ -83,6 +83,10 @@ const PageMeta = ({
   }));
 
   useEffect(() => {
+    // Bloque Prerender.io le temps que le canonical (par langue) soit injecté.
+    // Sera flippé à true en fin d'effect (voir plus bas).
+    (window as any).prerenderReady = false;
+
     const upsertMetaTag = ({ attr, key, content }: { attr: "name" | "property"; key: string; content: string }) => {
       document.head.querySelectorAll(`meta[${attr}="${key}"]`).forEach((node) => node.remove());
 
