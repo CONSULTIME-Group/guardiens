@@ -4001,6 +4001,7 @@ export type Database = {
           available_for_help: boolean | null
           avatar_url: string | null
           bio: string | null
+          boosted_until: string | null
           cancellation_count: number
           cancellations_as_proprio: number
           city: string | null
@@ -4046,6 +4047,7 @@ export type Database = {
           skill_categories: string[] | null
           suspended_at: string | null
           suspended_by: string | null
+          suspended_until: string | null
           suspension_reason: string | null
           updated_at: string
         }
@@ -4059,6 +4061,7 @@ export type Database = {
           available_for_help?: boolean | null
           avatar_url?: string | null
           bio?: string | null
+          boosted_until?: string | null
           cancellation_count?: number
           cancellations_as_proprio?: number
           city?: string | null
@@ -4104,6 +4107,7 @@ export type Database = {
           skill_categories?: string[] | null
           suspended_at?: string | null
           suspended_by?: string | null
+          suspended_until?: string | null
           suspension_reason?: string | null
           updated_at?: string
         }
@@ -4117,6 +4121,7 @@ export type Database = {
           available_for_help?: boolean | null
           avatar_url?: string | null
           bio?: string | null
+          boosted_until?: string | null
           cancellation_count?: number
           cancellations_as_proprio?: number
           city?: string | null
@@ -4162,6 +4167,7 @@ export type Database = {
           skill_categories?: string[] | null
           suspended_at?: string | null
           suspended_by?: string | null
+          suspended_until?: string | null
           suspension_reason?: string | null
           updated_at?: string
         }
@@ -6644,6 +6650,16 @@ export type Database = {
           sitter_id: string
         }[]
       }
+      detect_dormant_top_sitters: {
+        Args: never
+        Returns: {
+          avg_rating: number
+          days_since_last_application: number
+          first_name: string
+          reviews_count: number
+          sitter_id: string
+        }[]
+      }
       detect_pending_applications: {
         Args: never
         Returns: {
@@ -6656,6 +6672,25 @@ export type Database = {
           sit_title: string
           sitter_first_name: string
           sitter_id: string
+        }[]
+      }
+      detect_repeated_cancellations: {
+        Args: never
+        Returns: {
+          cancellations_count: number
+          first_name: string
+          period_days: number
+          profile_id: string
+          role: string
+        }[]
+      }
+      detect_repeated_republished_sits: {
+        Args: never
+        Returns: {
+          first_name: string
+          owner_id: string
+          republish_count: number
+          sit_title_pattern: string
         }[]
       }
       detect_stale_sits: {
@@ -6677,6 +6712,27 @@ export type Database = {
           email: string
           first_name: string
           profile_id: string
+        }[]
+      }
+      detect_suspicious_accounts: {
+        Args: never
+        Returns: {
+          created_at: string
+          detail: string
+          email: string
+          first_name: string
+          profile_id: string
+          signal: string
+        }[]
+      }
+      detect_untapped_cities: {
+        Args: never
+        Returns: {
+          active_sits_count: number
+          city: string
+          gsc_clicks: number
+          gsc_impressions: number
+          local_sitters_count: number
         }[]
       }
       email_queue_dispatch: { Args: never; Returns: undefined }
