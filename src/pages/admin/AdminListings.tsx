@@ -433,15 +433,15 @@ const AdminListings = () => {
                   <TableCell><Badge variant={s.variant}>{s.label}</Badge></TableCell>
                   <TableCell className="text-right">
                     <div className="flex justify-end gap-1">
-                      <Button variant="ghost" size="icon" title="Sources de trafic" onClick={() => openTraffic(listing)}>
+                      <Button variant="ghost" size="icon" title="Sources de trafic" aria-label="Sources de trafic" onClick={() => openTraffic(listing)}>
                         <BarChart3 className="h-4 w-4" />
                       </Button>
-                      <Button variant="ghost" size="icon" title="Voir l'annonce" onClick={() => navigate(`/sits/${listing.id}`)}>
+                      <Button variant="ghost" size="icon" title="Voir l'annonce" aria-label="Voir l'annonce" onClick={() => navigate(`/sits/${listing.id}`)}>
                         <Eye className="h-4 w-4" />
                       </Button>
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="icon" title="Partager">
+                          <Button variant="ghost" size="icon" title="Partager" aria-label="Partager">
                             <Share2 className="h-4 w-4" />
                           </Button>
                         </DropdownMenuTrigger>
@@ -457,16 +457,16 @@ const AdminListings = () => {
                           <DropdownMenuItem onSelect={() => handleShareTo(listing, "email")}><Mail className="h-4 w-4 mr-2" /> E-mail</DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
-                      {listing.status !== "cancelled" ? (
-                        <Button variant="ghost" size="icon" title="Masquer" onClick={() => setHideModal(listing.id)}>
-                          <EyeOff className="h-4 w-4" />
-                        </Button>
-                      ) : (
-                        <Button variant="ghost" size="icon" title="Remettre en ligne" onClick={() => handleRestore(listing.id)}>
+                      {isAdminHidden ? (
+                        <Button variant="ghost" size="icon" title="Remettre en ligne" aria-label="Remettre en ligne" onClick={() => setRestoreModal(listing.id)}>
                           <Sparkles className="h-4 w-4 text-primary" />
                         </Button>
+                      ) : isAuthorCancelled ? null : (
+                        <Button variant="ghost" size="icon" title="Masquer" aria-label="Masquer l'annonce" onClick={() => setHideModal(listing.id)}>
+                          <EyeOff className="h-4 w-4" />
+                        </Button>
                       )}
-                      <Button variant="ghost" size="icon" title="Supprimer" onClick={() => setDeleteModal(listing.id)}>
+                      <Button variant="ghost" size="icon" title="Supprimer" aria-label="Supprimer l'annonce" onClick={() => setDeleteModal(listing.id)}>
                         <Trash2 className="h-4 w-4 text-destructive" />
                       </Button>
                     </div>
