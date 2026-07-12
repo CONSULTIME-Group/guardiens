@@ -1462,6 +1462,36 @@ export type Database = {
           },
         ]
       }
+      cron_run_log: {
+        Row: {
+          edge_name: string
+          error_message: string | null
+          finished_at: string | null
+          id: string
+          metrics: Json
+          started_at: string
+          status: string | null
+        }
+        Insert: {
+          edge_name: string
+          error_message?: string | null
+          finished_at?: string | null
+          id?: string
+          metrics?: Json
+          started_at?: string
+          status?: string | null
+        }
+        Update: {
+          edge_name?: string
+          error_message?: string | null
+          finished_at?: string | null
+          id?: string
+          metrics?: Json
+          started_at?: string
+          status?: string | null
+        }
+        Relationships: []
+      }
       email_campaign_events: {
         Row: {
           created_at: string
@@ -6261,6 +6291,7 @@ export type Database = {
           views: number
         }[]
       }
+      admin_cron_health: { Args: never; Returns: Json }
       admin_dashboard_snapshot: { Args: never; Returns: Json }
       admin_dashboard_summary: { Args: never; Returns: Json }
       admin_get_accepted_sitters: {
