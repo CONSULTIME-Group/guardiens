@@ -210,10 +210,90 @@ const DepartmentPage = () => {
  ))}
  </div>
  </section>
- )}
+  )}
 
- {/* Why Guardiens */}
- <section className="max-w-5xl mx-auto px-4 py-6 md:py-12 border-t border-border">
+  {/* Combien coûte */}
+  <section className="max-w-5xl mx-auto px-4 py-6 md:py-12 border-t border-border">
+    <h2 className="font-serif text-2xl font-bold text-foreground mb-4">
+      Combien coûte une garde d'animaux dans le {page.department} ?
+    </h2>
+    <p className="text-base text-foreground/90 leading-relaxed mb-3">
+      Guardiens reste gratuit tant que nous ne sommes pas satisfaits du service que nous vous offrons. Aucune commission côté propriétaire, aucun frais de mise en relation, une rencontre systématique avant chaque garde.
+    </p>
+    <p className="text-base text-foreground/80 leading-relaxed">
+      Une pension pour animaux dans le {page.department} se facture généralement entre 25 et 50 € par nuit et par animal, soit 350 à 700 € pour deux semaines avec un chien. Confier son animal à un gardien à domicile, c'est éviter le stress de la mise en pension, garder votre logement occupé pendant votre absence, et bénéficier d'une relation directe entre particuliers, sans intermédiaire commercial. Les gardiens du réseau Guardiens dans le {page.department} sont vérifiés (identité, avis publics de la communauté) et rencontrés en amont.
+    </p>
+  </section>
+
+  {/* Comment trouver un gardien fiable */}
+  <section className="max-w-5xl mx-auto px-4 py-6 md:py-12 border-t border-border">
+    <h2 className="font-serif text-2xl font-bold text-foreground mb-4">
+      Comment trouver un gardien fiable dans le {page.department} ?
+    </h2>
+    <p className="text-base text-foreground/90 leading-relaxed mb-4">
+      Pour trouver un gardien fiable dans le {page.department}, publiez votre annonce sur Guardiens, recevez des candidatures de gardiens vérifiés de votre secteur, consultez leurs profils et avis, puis organisez une rencontre avant de confirmer la garde. Le processus tient en trois étapes.
+    </p>
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <Card>
+        <CardContent className="p-5">
+          <h3 className="font-semibold text-foreground mb-2">1. Publiez votre annonce</h3>
+          <p className="text-sm text-muted-foreground">Décrivez votre maison, vos animaux, les dates, vos attentes. La publication est sans frais côté propriétaire. Précisez votre ville ou commune pour être trouvé par les gardiens de proximité.</p>
+        </CardContent>
+      </Card>
+      <Card>
+        <CardContent className="p-5">
+          <h3 className="font-semibold text-foreground mb-2">2. Rencontrez les candidats</h3>
+          <p className="text-sm text-muted-foreground">Consultez les profils vérifiés, les avis de la communauté, l'expérience animale. Rencontrez-vous autour d'un café ou lors d'une visite du logement. C'est cette rencontre physique qui fait la différence.</p>
+        </CardContent>
+      </Card>
+      <Card>
+        <CardContent className="p-5">
+          <h3 className="font-semibold text-foreground mb-2">3. Confirmez la garde</h3>
+          <p className="text-sm text-muted-foreground">Échangez les informations pratiques via la messagerie intégrée : clés, routine de l'animal, contacts du vétérinaire. Un guide de maison optionnel permet de tout centraliser.</p>
+        </CardContent>
+      </Card>
+    </div>
+  </section>
+
+  {/* Vétérinaires */}
+  <section className="max-w-5xl mx-auto px-4 py-6 md:py-12 border-t border-border">
+    <h2 className="font-serif text-2xl font-bold text-foreground mb-4">
+      Vétérinaires et cliniques d'urgence dans le {page.department}
+    </h2>
+    <p className="text-base text-foreground/90 leading-relaxed mb-3">
+      Chaque garde Guardiens s'accompagne d'un guide de maison où le propriétaire renseigne le vétérinaire habituel, la clinique d'urgence la plus proche et la conduite à tenir en cas d'incident. Dans le {page.department}, les cliniques vétérinaires de garde couvrent la plupart des villes moyennes, avec des permanences 24h/24 dans les chefs-lieux.
+    </p>
+    <p className="text-base text-foreground/80 leading-relaxed">
+      Consultez <Link to="/observatoire-garde-animaux" className="underline text-primary">l'observatoire Guardiens de la garde d'animaux</Link> pour les chiffres nationaux (densité de vétérinaires, cliniques d'urgence, tarifs moyens). En cas d'imprévu majeur pendant une garde, le réseau <Link to="/gardien-urgence" className="underline text-primary">gardien d'urgence</Link> peut relayer votre gardien titulaire.
+    </p>
+  </section>
+
+  {/* Fiches races */}
+  <section className="max-w-5xl mx-auto px-4 py-6 md:py-12 border-t border-border">
+    <h2 className="font-serif text-2xl font-bold text-foreground mb-4">
+      Fiches races populaires
+    </h2>
+    <p className="text-base text-foreground/80 leading-relaxed mb-4">
+      Selon la race de votre animal, les besoins de garde diffèrent : rythme des sorties, sensibilité au stress, comportement en présence d'inconnus. Nos fiches race, nationales, aident les gardiens à préparer chaque mission.
+    </p>
+    <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+      {[
+        { slug: "border-collie-guide-race-complet", label: "Border Collie" },
+        { slug: "bouledogue-francais-guide-race-complet", label: "Bouledogue français" },
+        { slug: "malinois-guide-race-complet", label: "Malinois" },
+        { slug: "labrador-retriever-guide-race", label: "Labrador Retriever" },
+        { slug: "golden-retriever-guide-race-complet", label: "Golden Retriever" },
+        { slug: "maine-coon-guide-race", label: "Maine Coon" },
+      ].map((race) => (
+        <Link key={race.slug} to={`/actualites/${race.slug}`} className="rounded-lg border border-border px-4 py-3 text-sm text-foreground hover:bg-accent transition-colors">
+          {race.label}
+        </Link>
+      ))}
+    </div>
+  </section>
+
+  {/* Why Guardiens */}
+  <section className="max-w-5xl mx-auto px-4 py-6 md:py-12 border-t border-border">
  <h2 className="font-serif text-2xl font-bold text-foreground mb-8">
  Pourquoi Guardiens dans le {page.department} ?
  </h2>
