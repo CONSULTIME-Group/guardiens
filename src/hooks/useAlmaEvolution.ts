@@ -38,6 +38,7 @@ export interface AlmaEvolution {
     profileCompletion: number;
     identityVerified: boolean;
     publishedSitsCount: number;
+    allSitsCount: number;
     applicationsCount: number;
     missionsCount: number;
     completedSitsCount: number;
