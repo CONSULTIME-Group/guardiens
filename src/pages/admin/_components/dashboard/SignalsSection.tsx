@@ -11,6 +11,11 @@ import { PendingApplicationCard } from "@/components/admin/signals/PendingApplic
 import { DormantSitterCard } from "@/components/admin/signals/DormantSitterCard";
 import { StaleVerificationCard } from "@/components/admin/signals/StaleVerificationCard";
 import { AffinityStaleCard } from "@/components/admin/signals/AffinityStaleCard";
+import { UntappedCityCard } from "@/components/admin/signals/UntappedCityCard";
+import { DormantTopSitterCard } from "@/components/admin/signals/DormantTopSitterCard";
+import { SuspiciousAccountCard } from "@/components/admin/signals/SuspiciousAccountCard";
+import { RepeatedCancellationsCard } from "@/components/admin/signals/RepeatedCancellationsCard";
+import { RepeatedRepublishCard } from "@/components/admin/signals/RepeatedRepublishCard";
 import { cn } from "@/lib/utils";
 
 interface Signal {
@@ -107,6 +112,16 @@ export const SignalsSection = () => {
                   <StaleVerificationCard signal={s as unknown as import("@/components/admin/signals/StaleVerificationCard").StaleVerificationSignal} />
                 ) : s.signal_type === "affinity_onboarding_stale" ? (
                   <AffinityStaleCard signal={s as unknown as import("@/components/admin/signals/AffinityStaleCard").AffinityStaleSignal} />
+                ) : s.signal_type === "untapped_city" ? (
+                  <UntappedCityCard signal={s as unknown as import("@/components/admin/signals/UntappedCityCard").UntappedCitySignal} />
+                ) : s.signal_type === "dormant_top_sitter" ? (
+                  <DormantTopSitterCard signal={s as unknown as import("@/components/admin/signals/DormantTopSitterCard").DormantTopSitterSignal} />
+                ) : s.signal_type === "suspicious_account" ? (
+                  <SuspiciousAccountCard signal={s as unknown as import("@/components/admin/signals/SuspiciousAccountCard").SuspiciousAccountSignal} />
+                ) : s.signal_type === "repeated_cancellations" ? (
+                  <RepeatedCancellationsCard signal={s as unknown as import("@/components/admin/signals/RepeatedCancellationsCard").RepeatedCancellationsSignal} />
+                ) : s.signal_type === "repeated_republish" ? (
+                  <RepeatedRepublishCard signal={s as unknown as import("@/components/admin/signals/RepeatedRepublishCard").RepeatedRepublishSignal} />
                 ) : (
                   <Link
                     to={entityLink(s)}
