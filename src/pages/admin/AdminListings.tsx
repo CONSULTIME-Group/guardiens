@@ -84,6 +84,9 @@ const AdminListings = () => {
   const [messageModal, setMessageModal] = useState<{ open: boolean; listing: any | null; content: string }>({ open: false, listing: null, content: "" });
   const [sendingMessage, setSendingMessage] = useState(false);
 
+  // Envoi de l'annonce aux gardiens du coin
+  const [proximityListing, setProximityListing] = useState<any | null>(null);
+
   // Traffic sheet
   const [trafficOpen, setTrafficOpen] = useState(false);
   const [trafficListing, setTrafficListing] = useState<any | null>(null);
