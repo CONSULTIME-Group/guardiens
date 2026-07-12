@@ -1344,7 +1344,7 @@ const SitCard = ({
 
           {/* Quick actions */}
           <div className="flex items-center gap-2 mt-3 flex-wrap">
-            <QuickActions sit={sit} isOwner={isOwner} effectiveStatus={effectiveStatus} onRepublish={onRepublish} onOpenGuide={onOpenGuide} />
+            <QuickActions sit={sit} isOwner={isOwner} effectiveStatus={effectiveStatus} onRepublish={onRepublish} onOpenGuide={onOpenGuide} onWithdraw={onWithdraw} />
           </div>
 
         </div>
