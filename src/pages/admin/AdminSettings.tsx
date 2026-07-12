@@ -494,6 +494,75 @@ const AdminSettings = () => {
             </div>
           </CardContent>
         </Card>
+
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base flex items-center gap-2">
+              <Flag className="h-4 w-4" />
+              Seuils de matching affinité
+            </CardTitle>
+            <p className="text-xs text-muted-foreground mt-2">
+              Baisser ces seuils élargit le discovery mais peut réduire la qualité perçue des
+              matchs. Modifier avec précaution. Chaque changement est tracé dans{" "}
+              <code>admin_action_logs</code>. Prise en compte au prochain rechargement de page.
+            </p>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="affinity-min-criteria" className="text-sm font-medium">
+                  Critères communs minimum
+                </Label>
+                <Input
+                  id="affinity-min-criteria"
+                  type="number"
+                  min={1}
+                  max={5}
+                  value={affinityMinCriteriaDraft}
+                  onChange={(e) => setAffinityMinCriteriaDraft(e.target.value)}
+                  disabled={savingAffinity || affinityMinCriteria === null}
+                  className="max-w-[120px]"
+                />
+                <p className="text-xs text-muted-foreground">
+                  Défaut : 2. Nombre minimum de critères communs évalués avant d'afficher un
+                  badge. Historique : 3 = 68 % des scores masqués.
+                </p>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="affinity-min-score" className="text-sm font-medium">
+                  Score minimum (%)
+                </Label>
+                <Input
+                  id="affinity-min-score"
+                  type="number"
+                  min={20}
+                  max={60}
+                  value={affinityMinScoreDraft}
+                  onChange={(e) => setAffinityMinScoreDraft(e.target.value)}
+                  disabled={savingAffinity || affinityMinScore === null}
+                  className="max-w-[120px]"
+                />
+                <p className="text-xs text-muted-foreground">
+                  Défaut : 40. Score en-dessous duquel le badge est masqué (signal jugé trop
+                  faible pour être affiché).
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center gap-3">
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={saveAffinityThresholds}
+                disabled={savingAffinity || affinityMinCriteria === null || affinityMinScore === null}
+              >
+                Enregistrer
+              </Button>
+              <p className="text-xs text-muted-foreground">
+                Valeurs actuelles : {affinityMinCriteria ?? "…"} critère(s) / {affinityMinScore ?? "…"} %.
+              </p>
+            </div>
+          </CardContent>
+        </Card>
       </section>
 
       {/* ============ INFORMATIONS ============ */}
