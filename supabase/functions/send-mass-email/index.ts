@@ -130,7 +130,8 @@ async function applyMandatoryComplianceFilters(
 
   const lowerEmails = Array.from(new Set(profiles.map((p) => p.email.toLowerCase())));
   const userIds = Array.from(new Set(profiles.map((p) => p.id)));
-  const CHUNK = 500;
+  // Chunk agressif : les user_id (UUID 36c) explosent la longueur d'URL PostgREST (>16 Ko => "error sending request").
+  const CHUNK = 150;
 
   // 1. Suppression list — fail-closed
   const suppressedSet = new Set<string>();
