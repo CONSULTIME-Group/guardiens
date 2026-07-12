@@ -32,6 +32,7 @@ import { toast } from "sonner";
 
 const FOUNDER_DATE = "2026-09-30";
 const MANDATORY_ONBOARDING_FLAG = "mandatory_affinity_onboarding";
+const ADMIN_SIGNALS_FLAG = "admin_signals_active";
 
 function toLocalInputValue(iso: string): string {
   const d = new Date(iso);
@@ -54,6 +55,11 @@ const AdminSettings = () => {
   const [appliesSince, setAppliesSince] = useState<string | null>(null);
   const [appliesSinceDraft, setAppliesSinceDraft] = useState<string>("");
   const [savingAppliesSince, setSavingAppliesSince] = useState(false);
+  const [signalsEnabled, setSignalsEnabled] = useState<boolean | null>(null);
+  const [togglingSignals, setTogglingSignals] = useState(false);
+  const [signalsAppliesSince, setSignalsAppliesSince] = useState<string | null>(null);
+  const [signalsAppliesSinceDraft, setSignalsAppliesSinceDraft] = useState<string>("");
+  const [savingSignalsAppliesSince, setSavingSignalsAppliesSince] = useState(false);
   const [confirmDialog, setConfirmDialog] = useState<{
     nextIso: string | null;
     impactCount: number | null;
@@ -99,7 +105,72 @@ const AdminSettings = () => {
         setAppliesSince(iso);
         setAppliesSinceDraft(iso ? toLocalInputValue(iso) : "");
       });
+    supabase
+      .from("feature_flags")
+      .select("enabled, applies_since")
+      .eq("key", ADMIN_SIGNALS_FLAG)
+      .maybeSingle()
+      .then(({ data }) => {
+        const row = data as { enabled?: boolean | null; applies_since?: string | null } | null;
+        setSignalsEnabled(!!row?.enabled);
+        const iso = row?.applies_since ?? null;
+        setSignalsAppliesSince(iso);
+        setSignalsAppliesSinceDraft(iso ? toLocalInputValue(iso) : "");
+      });
   }, []);
+
+  const toggleSignalsFlag = async (next: boolean) => {
+    setTogglingSignals(true);
+    const previous = signalsEnabled;
+    setSignalsEnabled(next);
+    const { error } = await supabase
+      .from("feature_flags")
+      .update({ enabled: next, updated_at: new Date().toISOString() })
+      .eq("key", ADMIN_SIGNALS_FLAG);
+    setTogglingSignals(false);
+    if (error) {
+      setSignalsEnabled(previous);
+      toast.error("Impossible de mettre à jour le réglage.");
+      return;
+    }
+    invalidateFeatureFlag(ADMIN_SIGNALS_FLAG);
+    toast.success(next ? "Signaux admin activés." : "Signaux admin désactivés (kill-switch).");
+  };
+
+  const saveSignalsAppliesSince = async () => {
+    const nextIso = fromLocalInputValue(signalsAppliesSinceDraft);
+    setSavingSignalsAppliesSince(true);
+    const { error } = await supabase
+      .from("feature_flags")
+      .update({ applies_since: nextIso, updated_at: new Date().toISOString() })
+      .eq("key", ADMIN_SIGNALS_FLAG);
+    setSavingSignalsAppliesSince(false);
+    if (error) {
+      toast.error("Impossible d'enregistrer la date de bascule.");
+      return;
+    }
+    setSignalsAppliesSince(nextIso);
+    setSignalsAppliesSinceDraft(nextIso ? toLocalInputValue(nextIso) : "");
+    invalidateFeatureFlag(ADMIN_SIGNALS_FLAG);
+    toast.success("Date de bascule enregistrée.");
+  };
+
+  const clearSignalsAppliesSince = async () => {
+    setSavingSignalsAppliesSince(true);
+    const { error } = await supabase
+      .from("feature_flags")
+      .update({ applies_since: null, updated_at: new Date().toISOString() })
+      .eq("key", ADMIN_SIGNALS_FLAG);
+    setSavingSignalsAppliesSince(false);
+    if (error) {
+      toast.error("Impossible d'effacer la date.");
+      return;
+    }
+    setSignalsAppliesSince(null);
+    setSignalsAppliesSinceDraft("");
+    invalidateFeatureFlag(ADMIN_SIGNALS_FLAG);
+    toast.success("Date de bascule effacée.");
+  };
 
   const toggleMandatoryOnboarding = async (next: boolean) => {
     setTogglingFlag(true);
