@@ -330,6 +330,83 @@ const AdminSettings = () => {
             </div>
           </CardContent>
         </Card>
+
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base flex items-center gap-2">
+              <Flag className="h-4 w-4" />
+              Système d'alertes admin
+            </CardTitle>
+            <p className="text-xs text-muted-foreground mt-2">
+              Active la persistance des signaux administrateur (cartes SignalsSection sur
+              {" "}/admin, crons nurturing <code>nudge-*</code>, RPC{" "}
+              <code>admin_dashboard_snapshot</code>). Désactiver coupe l'affichage des signaux
+              ET l'exécution des crons pour un retour au calme immédiat. Bascule sans
+              redéploiement.
+            </p>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="flex items-start justify-between gap-4">
+              <div className="min-w-0">
+                <p className="text-sm font-medium">Activation</p>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Kill-switch immédiat. Désactivé : les 10 crons <code>nudge-*</code> retournent
+                  {" "}<code>skipped: flag_off</code> et les cartes de signaux disparaissent
+                  de la Vue d'ensemble.
+                </p>
+              </div>
+              <Switch
+                checked={signalsEnabled === true}
+                disabled={signalsEnabled === null || togglingSignals}
+                onCheckedChange={toggleSignalsFlag}
+                aria-label="Activer les signaux admin"
+              />
+            </div>
+            <Separator />
+            <div className="space-y-2">
+              <Label htmlFor="signals-applies-since" className="text-sm font-medium">
+                Date de bascule (applies_since)
+              </Label>
+              <p className="text-xs text-muted-foreground">
+                Champ documentaire pour tracer l'activation. Laisser vide si non pertinent.
+              </p>
+              <div className="flex flex-wrap items-center gap-2">
+                <Input
+                  id="signals-applies-since"
+                  type="datetime-local"
+                  value={signalsAppliesSinceDraft}
+                  onChange={(e) => setSignalsAppliesSinceDraft(e.target.value)}
+                  className="max-w-xs"
+                  disabled={savingSignalsAppliesSince}
+                />
+                <Button
+                  size="sm"
+                  variant="outline"
+                  disabled={savingSignalsAppliesSince}
+                  onClick={saveSignalsAppliesSince}
+                >
+                  Enregistrer
+                </Button>
+                {signalsAppliesSince && (
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    disabled={savingSignalsAppliesSince}
+                    onClick={clearSignalsAppliesSince}
+                  >
+                    Effacer
+                  </Button>
+                )}
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Valeur actuelle :{" "}
+                {signalsAppliesSince
+                  ? new Date(signalsAppliesSince).toLocaleString("fr-FR")
+                  : "aucune"}
+              </p>
+            </div>
+          </CardContent>
+        </Card>
       </section>
 
       {/* ============ INFORMATIONS ============ */}
