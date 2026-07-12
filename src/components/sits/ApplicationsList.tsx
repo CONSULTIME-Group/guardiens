@@ -640,7 +640,7 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, prope
               )}
             </div>
             {app.sitterAffinityInput && (
-              <div className="mt-2">
+              <div className={`mt-2 inline-flex rounded-full px-2 py-0.5 ${affinityClass ?? ""}`}>
                 <OwnerToSitterAffinity
                   sitterProfile={app.sitterAffinityInput}
                   context="owner_applications_list"
@@ -652,7 +652,13 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, prope
               </div>
             )}
           </div>
-          <span className={`px-3 py-1 rounded-full text-xs font-medium shrink-0 ${status.className}`}>
+          <span className={`px-3 py-1 rounded-full text-xs font-medium shrink-0 inline-flex items-center gap-1.5 ${status.className}`}>
+            {isPendingLike && (
+              <span className="relative flex h-1.5 w-1.5" aria-hidden="true">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-60" />
+                <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-primary" />
+              </span>
+            )}
             {status.label}
           </span>
         </div>
