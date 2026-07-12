@@ -631,6 +631,7 @@ const AdminUsers = () => {
                           size="icon"
                           className="h-6 w-6"
                           title="Changer le rôle"
+                          aria-label="Changer le rôle de l'utilisateur"
                           onClick={() => setRoleModal({
                             open: true,
                             userId: user.id,
