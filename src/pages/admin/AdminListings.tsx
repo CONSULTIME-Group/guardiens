@@ -13,7 +13,7 @@ import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
 import { format, formatDistanceToNow } from "date-fns";
 import { fr } from "date-fns/locale";
-import { Eye, EyeOff, Trash2, Search, Sparkles, Share2, Link2, Mail, BarChart3, MessageSquare, Download, ChevronLeft, ChevronRight } from "lucide-react";
+import { Eye, EyeOff, Trash2, Search, Sparkles, Share2, Link2, Mail, BarChart3, MessageSquare, Download, ChevronLeft, ChevronRight, Send } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -25,6 +25,7 @@ import {
 import { useNavigate } from "react-router-dom";
 import DraftStatsPanel from "@/components/admin/DraftStatsPanel";
 import ListingDrilldownDialog from "@/components/admin/ListingDrilldownDialog";
+import ListingProximityCard from "@/components/admin/ListingProximityCard";
 import { getCountryName } from "@/lib/countries";
 
 type BadgeVariant = "default" | "secondary" | "outline" | "destructive";
@@ -82,6 +83,9 @@ const AdminListings = () => {
   // Message rapide au propriétaire
   const [messageModal, setMessageModal] = useState<{ open: boolean; listing: any | null; content: string }>({ open: false, listing: null, content: "" });
   const [sendingMessage, setSendingMessage] = useState(false);
+
+  // Envoi de l'annonce aux gardiens du coin
+  const [proximityListing, setProximityListing] = useState<any | null>(null);
 
   // Traffic sheet
   const [trafficOpen, setTrafficOpen] = useState(false);
@@ -597,6 +601,17 @@ const AdminListings = () => {
                       >
                         <MessageSquare className="h-4 w-4" />
                       </Button>
+                      {listing.status === "published" && (
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          title="Envoyer aux gardiens du coin"
+                          aria-label="Envoyer aux gardiens du coin"
+                          onClick={() => setProximityListing(listing)}
+                        >
+                          <Send className="h-4 w-4" />
+                        </Button>
+                      )}
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                           <Button variant="ghost" size="icon" title="Partager" aria-label="Partager">
@@ -841,6 +856,29 @@ const AdminListings = () => {
               {sendingMessage ? "Envoi…" : "Envoyer"}
             </Button>
           </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Envoi de l'annonce aux gardiens du coin */}
+      <Dialog open={!!proximityListing} onOpenChange={(o) => !o && setProximityListing(null)}>
+        <DialogContent className="max-w-3xl">
+          <DialogHeader>
+            <DialogTitle>
+              Envoyer aux gardiens du coin
+              {proximityListing?.title ? ` , ${proximityListing.title}` : ""}
+            </DialogTitle>
+            <DialogDescription>
+              Un email personnalisé par gardien, jamais de copie groupée. Aperçu obligatoire avant tout envoi.
+            </DialogDescription>
+          </DialogHeader>
+          {proximityListing && (
+            <ListingProximityCard
+              sitId={proximityListing.id}
+              initialRadiusKm={30}
+              autoPreview
+              hideHeader
+            />
+          )}
         </DialogContent>
       </Dialog>
     </div>
