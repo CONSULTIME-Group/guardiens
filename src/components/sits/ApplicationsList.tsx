@@ -612,6 +612,9 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, prope
               </Link>
               {sitter?.identity_verified && <VerifiedBadge size="sm" />}
               {app.isEmergencySitter && <EmergencyBadge size="sm" showTooltip />}
+              {receivedLabel && (
+                <span className="text-xs text-muted-foreground font-normal">· {receivedLabel}</span>
+              )}
             </div>
             <div className="flex items-center gap-3 text-sm text-muted-foreground flex-wrap mt-0.5">
               {sitter?.city && (
