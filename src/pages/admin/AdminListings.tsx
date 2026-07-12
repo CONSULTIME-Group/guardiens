@@ -373,8 +373,10 @@ const AdminListings = () => {
             ) : filtered.length === 0 ? (
               <TableRow><TableCell colSpan={11} className="text-center py-8 text-muted-foreground">Aucune annonce</TableCell></TableRow>
             ) : filtered.map((listing) => {
-              const s = statusLabels[listing.status] || statusLabels.draft;
+              const s = resolveStatusBadge(listing);
               const st = stats[listing.id];
+              const isAdminHidden = listing.status === "cancelled" && !!listing.hidden_by;
+              const isAuthorCancelled = listing.status === "cancelled" && !listing.hidden_by;
               return (
                 <TableRow key={listing.id}>
                   <TableCell className="font-medium max-w-[200px] truncate">{listing.title || "Sans titre"}</TableCell>
