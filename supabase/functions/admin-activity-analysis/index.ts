@@ -69,7 +69,8 @@ Contraintes strictes:
 - Interdiction du tiret cadratin (—). Utilisez virgule, deux-points, parenthèses ou tiret demi-cadratin.
 - Réponse en JSON STRICT: { "analysis": string, "actions": [{ "title": string, "why": string, "priority": "haute"|"moyenne"|"basse", "link": string }] }.
 - analysis : 3 à 5 phrases synthétiques sur l'état de la plateforme.
-- actions : max 6, priorisées, concrètes, chacune avec un lien admin pertinent parmi /admin/verifications, /admin/listings, /admin/reports, /admin/reviews, /admin/users, /admin/emails.`;
+- actions : max 6, priorisées, concrètes, chacune avec un lien admin pertinent parmi /admin/verifications, /admin/listings, /admin/reports, /admin/reviews, /admin/users, /admin/emails, /admin/envois-groupes.
+- RÈGLE LIEN: pour toute action qui recommande de LANCER UNE CAMPAGNE EMAIL, une RELANCE de masse, ou une communication par email de masse, le champ "link" DOIT valoir "/admin/envois-groupes" (et non "/admin/emails"). Les autres actions gardent leurs liens habituels.`;
 
 async function callAI(signals: unknown): Promise<{ analysis: string; actions: ActionItem[] }> {
   if (!LOVABLE_API_KEY) throw new Error('LOVABLE_API_KEY manquant');
@@ -127,8 +128,26 @@ async function callAI(signals: unknown): Promise<{ analysis: string; actions: Ac
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
 
-  const guard = await requireAdminOrServiceRole(req, corsHeaders);
-  if (guard) return guard;
+  // Court-circuit service_role : cron/pg_net peuvent appeler avec un JWT service_role signé.
+  let isServiceRole = false;
+  const authHeaderRaw = req.headers.get('Authorization') ?? '';
+  if (authHeaderRaw.startsWith('Bearer ')) {
+    const token = authHeaderRaw.replace('Bearer ', '');
+    try {
+      const parts = token.split('.');
+      if (parts.length === 3) {
+        const pad = parts[1].length % 4 === 0 ? '' : '='.repeat(4 - (parts[1].length % 4));
+        const b64 = parts[1].replace(/-/g, '+').replace(/_/g, '/') + pad;
+        const payload = JSON.parse(atob(b64));
+        if (payload?.role === 'service_role') isServiceRole = true;
+      }
+    } catch { /* ignore decode errors */ }
+  }
+
+  if (!isServiceRole) {
+    const guard = await requireAdminOrServiceRole(req, corsHeaders);
+    if (guard) return guard;
+  }
 
   try {
     let mode: 'latest' | 'refresh' = 'latest';
