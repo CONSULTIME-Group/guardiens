@@ -102,6 +102,10 @@ const AdminUsers = () => {
     open: false, userId: "", userName: "", email: "", newValue: false,
   });
   const [togglingSuper, setTogglingSuper] = useState(false);
+  const [reactivateModal, setReactivateModal] = useState<{ open: boolean; userId: string; userName: string; email: string }>({
+    open: false, userId: "", userName: "", email: "",
+  });
+  const [reactivating, setReactivating] = useState(false);
   const navigate = useNavigate();
 
   const openHistory = async () => {
@@ -172,7 +176,7 @@ const AdminUsers = () => {
     let query = supabase
       .from("profiles")
       .select(
-        "id, first_name, last_name, role, city, postal_code, country, avatar_url, bio, profile_completion, created_at, updated_at, cancellation_count, identity_verified, identity_verification_status, account_status, is_founder, skill_categories, available_for_help, custom_skills, completed_sits_count, cancellations_as_proprio, email",
+        "id, first_name, last_name, role, city, postal_code, country, avatar_url, bio, profile_completion, created_at, updated_at, last_seen_at, cancellation_count, identity_verified, identity_verification_status, account_status, is_founder, skill_categories, available_for_help, custom_skills, completed_sits_count, cancellations_as_proprio, email",
         { count: "exact" },
       )
       .order("created_at", { ascending: false });
@@ -210,7 +214,7 @@ const AdminUsers = () => {
     // Fetch auth emails (source of vérité) + notes/super via chunked queries
     const userIds = (data || []).map((u: any) => u.id);
     let emailMap = new Map<string, string>();
-    let modMap = new Map<string, { admin_notes: string | null; is_manual_super: boolean }>();
+    let modMap = new Map<string, { admin_notes: string | null; is_manual_super: boolean; suspension_reason: string | null }>();
     if (userIds.length > 0) {
       const CHUNK = 150;
       const chunks: string[][] = [];
@@ -218,12 +222,12 @@ const AdminUsers = () => {
       const [emailRes, ...modResAll] = await Promise.all([
         supabase.rpc("get_user_emails_admin", { p_user_ids: userIds }),
         ...chunks.map((ids) =>
-          supabase.from("profile_moderation").select("profile_id, admin_notes, is_manual_super").in("profile_id", ids),
+          supabase.from("profile_moderation").select("profile_id, admin_notes, is_manual_super, suspension_reason").in("profile_id", ids),
         ),
       ]);
       emailMap = new Map((emailRes.data || []).map((e: any) => [e.id, e.email]));
       const modRows = modResAll.flatMap((r: any) => r.data || []);
-      modMap = new Map(modRows.map((m: any) => [m.profile_id, { admin_notes: m.admin_notes, is_manual_super: m.is_manual_super }]));
+      modMap = new Map(modRows.map((m: any) => [m.profile_id, { admin_notes: m.admin_notes, is_manual_super: m.is_manual_super, suspension_reason: m.suspension_reason ?? null }]));
     }
     const enriched = (data || []).map((u: any) => {
       const mod = modMap.get(u.id);
@@ -232,6 +236,7 @@ const AdminUsers = () => {
         email: emailMap.get(u.id) || u.email || "",
         admin_notes: mod?.admin_notes || null,
         is_manual_super: mod?.is_manual_super || false,
+        suspension_reason: mod?.suspension_reason || null,
       };
     });
     setUsers(enriched);
@@ -273,28 +278,74 @@ const AdminUsers = () => {
 
 
   const handleSuspend = async () => {
+    const userId = suspendModal.userId;
+    const reason = suspendModal.reason.trim();
+    const { data: userData } = await supabase.auth.getUser();
+    const adminId = userData.user?.id ?? null;
+
     const { error } = await supabase
       .from("profiles")
       .update({ account_status: "suspended" })
-      .eq("id", suspendModal.userId);
-    if (!error && suspendModal.reason) {
+      .eq("id", userId);
+    if (error) {
+      toast.error("Erreur");
+      setSuspendModal({ open: false, userId: "", reason: "" });
+      return;
+    }
+    if (reason) {
+      // Motif de suspension : colonne dédiée, n'écrase PAS admin_notes (note interne).
       await supabase.from("profile_moderation").upsert({
-        profile_id: suspendModal.userId,
-        admin_notes: suspendModal.reason,
+        profile_id: userId,
+        suspension_reason: reason,
       }, { onConflict: "profile_id" });
     }
-    if (error) toast.error("Erreur");
-    else { toast.success("Compte suspendu"); fetchUsers(); }
+    if (adminId) {
+      await supabase.from("admin_action_logs").insert({
+        admin_id: adminId,
+        action: "suspend_account",
+        target_type: "profile",
+        target_id: userId,
+        metadata: reason ? { reason } : null,
+      });
+    }
+    toast.success("Compte suspendu");
+    fetchUsers();
     setSuspendModal({ open: false, userId: "", reason: "" });
   };
 
-  const handleReactivate = async (userId: string) => {
+  const confirmReactivate = async () => {
+    const userId = reactivateModal.userId;
+    if (!userId) return;
+    setReactivating(true);
+    const { data: userData } = await supabase.auth.getUser();
+    const adminId = userData.user?.id ?? null;
+
     const { error } = await supabase
       .from("profiles")
       .update({ account_status: "active" })
       .eq("id", userId);
-    if (error) toast.error("Erreur");
-    else { toast.success("Compte réactivé"); fetchUsers(); }
+    if (error) {
+      toast.error("Erreur");
+      setReactivating(false);
+      return;
+    }
+    // Retire le motif de suspension (mais préserve admin_notes / is_manual_super).
+    await supabase.from("profile_moderation").upsert({
+      profile_id: userId,
+      suspension_reason: null,
+    }, { onConflict: "profile_id" });
+    if (adminId) {
+      await supabase.from("admin_action_logs").insert({
+        admin_id: adminId,
+        action: "reactivate_account",
+        target_type: "profile",
+        target_id: userId,
+      });
+    }
+    toast.success("Compte réactivé");
+    setReactivating(false);
+    setReactivateModal({ open: false, userId: "", userName: "", email: "" });
+    fetchUsers();
   };
 
   const confirmForceVerify = async () => {
@@ -580,6 +631,7 @@ const AdminUsers = () => {
                           size="icon"
                           className="h-6 w-6"
                           title="Changer le rôle"
+                          aria-label="Changer le rôle de l'utilisateur"
                           onClick={() => setRoleModal({
                             open: true,
                             userId: user.id,
@@ -608,9 +660,9 @@ const AdminUsers = () => {
                       {format(new Date(user.created_at), "d MMM yyyy", { locale: fr })}
                     </TableCell>
                     <TableCell className="text-sm text-muted-foreground">
-                      {user.updated_at
-                        ? formatDistanceToNow(new Date(user.updated_at), { addSuffix: true, locale: fr })
-                        : ","}
+                      {user.last_seen_at
+                        ? formatDistanceToNow(new Date(user.last_seen_at), { addSuffix: true, locale: fr })
+                        : "Jamais connecté"}
                     </TableCell>
                     <TableCell>
                       <div className="flex items-center gap-1.5">
@@ -627,7 +679,16 @@ const AdminUsers = () => {
                       <Badge variant={verif.variant}>{verif.label}</Badge>
                     </TableCell>
                     <TableCell>
-                      <Badge variant={status.variant}>{status.label}</Badge>
+                      <Badge
+                        variant={status.variant}
+                        title={
+                          user.account_status === "suspended" && user.suspension_reason
+                            ? `Motif : ${user.suspension_reason}`
+                            : undefined
+                        }
+                      >
+                        {status.label}
+                      </Badge>
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-1">
@@ -635,6 +696,7 @@ const AdminUsers = () => {
                           variant="ghost"
                           size="icon"
                           title="Envoyer un message"
+                          aria-label="Envoyer un message à l'utilisateur"
                           onClick={() => setMessageModal({
                             open: true,
                             userId: user.id,
@@ -649,6 +711,7 @@ const AdminUsers = () => {
                           variant="ghost"
                           size="icon"
                           title="Voir le contenu du dernier message envoyé"
+                          aria-label="Voir le dernier message envoyé"
                           onClick={() => openLastMessage(
                             user.id,
                             `${user.first_name || ""} ${user.last_name || ""}`.trim() || user.email || "cet utilisateur",
@@ -660,7 +723,12 @@ const AdminUsers = () => {
                           variant="ghost"
                           size="icon"
                           title="Voir le profil"
-                          onClick={() => window.open(`/gardiens/${user.id}`, "_blank")}
+                          aria-label="Voir le profil public"
+                          onClick={() => {
+                            // Profil unifié /gardiens/:id : ?tab=proprio pour un propriétaire pur.
+                            const suffix = user.role === "owner" ? "?tab=proprio" : "";
+                            window.open(`/gardiens/${user.id}${suffix}`, "_blank");
+                          }}
                         >
                           <Eye className="h-4 w-4" />
                         </Button>
@@ -668,6 +736,7 @@ const AdminUsers = () => {
                           variant="ghost"
                           size="icon"
                           title="Forcer vérification ID"
+                          aria-label="Forcer la vérification d'identité"
                           onClick={() => setVerifyModal({
                             open: true,
                             userId: user.id,
@@ -682,6 +751,7 @@ const AdminUsers = () => {
                           variant="ghost"
                           size="icon"
                           title={user.is_manual_super ? "Retirer Super Gardien" : "Promouvoir Super Gardien"}
+                          aria-label={user.is_manual_super ? "Retirer le statut Super Gardien" : "Promouvoir Super Gardien"}
                           disabled={togglingSuper && superModal.userId === user.id}
                           onClick={() => setSuperModal({
                             open: true,
@@ -697,6 +767,7 @@ const AdminUsers = () => {
                           variant="ghost"
                           size="icon"
                           title="Note interne"
+                          aria-label="Éditer la note interne"
                           onClick={() => setNoteModal({
                             open: true,
                             userId: user.id,
@@ -709,6 +780,7 @@ const AdminUsers = () => {
                           variant="ghost"
                           size="icon"
                           title="Renvoyer l'e-mail de confirmation"
+                          aria-label="Renvoyer l'e-mail de confirmation"
                           onClick={() => handleResendConfirmation(user.email)}
                         >
                           <MailCheck className="h-4 w-4" />
@@ -717,8 +789,14 @@ const AdminUsers = () => {
                           <Button
                             variant="ghost"
                             size="icon"
-                            title="Réactiver"
-                            onClick={() => handleReactivate(user.id)}
+                            title="Réactiver le compte"
+                            aria-label="Réactiver le compte"
+                            onClick={() => setReactivateModal({
+                              open: true,
+                              userId: user.id,
+                              userName: `${user.first_name || ""} ${user.last_name || ""}`.trim() || "Utilisateur",
+                              email: user.email || "",
+                            })}
                           >
                             <RotateCcw className="h-4 w-4 text-primary" />
                           </Button>
@@ -726,7 +804,8 @@ const AdminUsers = () => {
                           <Button
                             variant="ghost"
                             size="icon"
-                            title="Suspendre"
+                            title="Suspendre le compte"
+                            aria-label="Suspendre le compte"
                             onClick={() => setSuspendModal({ open: true, userId: user.id, reason: "" })}
                           >
                             <Ban className="h-4 w-4 text-destructive" />
@@ -736,6 +815,7 @@ const AdminUsers = () => {
                           variant="ghost"
                           size="icon"
                           title="Supprimer définitivement"
+                          aria-label="Supprimer définitivement le compte"
                           onClick={() => setDeleteConfirm({
                             open: true,
                             userId: user.id,
@@ -905,6 +985,38 @@ const AdminUsers = () => {
               onClick={(e) => { e.preventDefault(); confirmToggleSuper(); }}
             >
               {togglingSuper ? "Mise à jour," : "Confirmer"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog
+        open={reactivateModal.open}
+        onOpenChange={(v) => { if (!v && !reactivating) setReactivateModal({ open: false, userId: "", userName: "", email: "" }); }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Réactiver le compte ?</AlertDialogTitle>
+            <AlertDialogDescription asChild>
+              <div className="space-y-2 text-sm">
+                <p>
+                  Utilisateur : <strong>{reactivateModal.userName}</strong>
+                  {reactivateModal.email ? <> ({reactivateModal.email})</> : null}
+                </p>
+                <p className="text-muted-foreground">
+                  Le compte redevient actif et le motif de suspension est effacé. La note
+                  interne est conservée. Cette action sera tracée dans le journal d'audit.
+                </p>
+              </div>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={reactivating}>Annuler</AlertDialogCancel>
+            <AlertDialogAction
+              disabled={reactivating}
+              onClick={(e) => { e.preventDefault(); confirmReactivate(); }}
+            >
+              {reactivating ? "Réactivation…" : "Confirmer"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
