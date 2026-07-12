@@ -121,10 +121,12 @@ Tout est sur la plateforme : messagerie, avis croisés, guide de la maison, et m
  heroAlt: "Garde de chien et de chat à Lyon - Vue panoramique depuis Fourvière au coucher du soleil - Guardiens",
  subtitle: "Faites garder votre chien, votre chat ou votre maison à Lyon par un home sitter de proximité vérifié. Sans commission, sans frais de pension.",
  articleSections: [
- {
+  {
  id: "introduction",
- title: "Lyon, ville d'animaux : pourquoi la garde de proximité change tout",
- content: `Lyon est l'une des villes les plus accueillantes de France pour les animaux de compagnie. Près d'un quart des foyers lyonnais vivent avec un chien ou un chat. Du parc de la Tête d'Or aux quais de Saône, la ville offre un cadre de vie où les animaux ont toute leur place.
+ title: "Comment faire garder son chien ou son chat à Lyon ?",
+ content: `Trouver un gardien à Lyon pour son chien ou son chat, à domicile et sans mise en pension, se fait via une plateforme d'entraide entre particuliers. Guardiens réunit des gardiens de confiance dans tous les arrondissements lyonnais, de la Presqu'île à la Croix-Rousse, de Confluence au 3ème et au 6ème. Recommandations par la communauté, rencontre avant chaque garde.
+
+Lyon est l'une des villes les plus accueillantes de France pour les animaux de compagnie. Près d'un quart des foyers lyonnais vivent avec un chien ou un chat. Du parc de la Tête d'Or aux quais de Saône, la ville offre un cadre de vie où les animaux ont toute leur place.
 
 Mais quand vient le moment de partir, vacances, déplacement professionnel, week-end en famille, la question se pose : **à qui confier votre animal et votre maison à Lyon ?**
 
@@ -132,10 +134,12 @@ Guardiens est une plateforme de garde d'animaux et de home sitting fondée par J
 
 Ce que Guardiens propose concrètement : vous publiez votre annonce, des gardiens de votre quartier postulent, vous les rencontrez autour d'un café ou lors d'une visite de votre logement, puis vous confirmez la garde. Votre animal reste chez lui, dans ses repères. Votre maison reste vivante. [Inscrivez-vous pour publier votre annonce](/inscription?role=owner).`,
  },
- {
+  {
  id: "pourquoi-proximite",
- title: "Pourquoi Lyon a besoin d'une plateforme de proximité",
- content: `### Une ville où les animaux font partie de la famille
+ title: "Combien coûte une garde d'animaux à Lyon ?",
+ content: `Une pension pour animaux autour de Lyon coûte 25 à 50 € par nuit et par animal, soit 350 à 700 € pour deux semaines avec un chien. Une garde à domicile via Guardiens n'entraîne aucun frais de pension côté propriétaire, votre animal reste chez lui, votre maison reste occupée.
+
+### Une ville où les animaux font partie de la famille
 
 Lyon compte plus de 150 000 chiens et chats dans son agglomération. Les Lyonnais sont attachés à leurs compagnons : promenades quotidiennes à la Tête d'Or, terrasses dog-friendly dans le Vieux-Lyon, cliniques vétérinaires de quartier ouvertes le samedi. L'animal n'est pas un accessoire, c'est un membre du foyer.
 
@@ -155,8 +159,10 @@ Le home sitting existe depuis des décennies dans les pays anglo-saxons. Le prin
  },
  {
  id: "fonctionnement",
- title: "Comment fonctionne Guardiens à Lyon",
- content: `### Etape 1, Publiez votre annonce
+ title: "Comment trouver un gardien fiable à Lyon ?",
+ content: `Pour trouver un gardien fiable à Lyon, publiez votre annonce sur Guardiens, recevez des candidatures de gardiens vérifiés de votre quartier, consultez leurs avis, puis organisez une rencontre avant de confirmer. Chaque profil est vérifié (identité, avis publics de la communauté) et la rencontre physique est systématique.
+
+### Etape 1, Publiez votre annonce
 
 Décrivez votre maison, vos animaux, les dates de votre absence et vos attentes. La publication est entièrement sans frais pour les propriétaires. Précisez votre arrondissement ou votre commune pour que les gardiens de proximité vous trouvent. [Voir les tarifs](/tarifs).
 
@@ -174,8 +180,10 @@ Pendant la garde, votre gardien envoie des photos et des nouvelles de vos animau
  },
  {
  id: "quartiers",
- title: "Les quartiers de Lyon couverts par nos gardiens",
- content: `Lyon se compose de neuf arrondissements et d'une ceinture de communes limitrophes, chacun avec ses particularités pour la garde d'animaux. Nos gardiens à Lyon connaissent les spécificités de chaque quartier.
+ title: "Quels quartiers de Lyon sont les mieux couverts ?",
+ content: `Les 9 arrondissements lyonnais et les communes limitrophes (Villeurbanne, Caluire-et-Cuire, Bron, Oullins, Ecully) sont couverts par le réseau Guardiens, avec une densité plus forte sur le Vieux-Lyon (5ème), la Presqu'île (1er et 2ème), les Brotteaux et la Tête d'Or (6ème), Montchat (3ème) et la Croix-Rousse (4ème).
+
+Lyon se compose de neuf arrondissements et d'une ceinture de communes limitrophes, chacun avec ses particularités pour la garde d'animaux. Nos gardiens à Lyon connaissent les spécificités de chaque quartier.
 
 **Lyon 1er, Terreaux, Croix-Rousse pentes.** Quartier dense, rues pavées et montées. Les chiens de petite taille s'y adaptent bien. Les gardiens du 1er connaissent les passages piétons vers les quais de Saône pour des promenades au calme. Peu de jardins privatifs, les sorties régulières sont essentielles.
 

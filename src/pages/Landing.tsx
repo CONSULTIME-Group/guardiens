@@ -298,11 +298,11 @@ const Landing = () => {
  return (
  <div className="min-h-screen bg-background text-foreground">
   <PageMeta
-        title="Garde d'animaux à domicile et house-sitting près de chez vous | Guardiens"
-        description="Confiez votre maison et vos animaux à un gardien vérifié près de chez vous. Rencontre avant chaque garde, sans commission, partout en France."
-  path="/"
-  image={HOME_OG_IMAGE}
-  />
+        title="Guardiens, house sitting et garde d'animaux à domicile en France"
+        description="Le house sitting, c'est confier vos animaux et votre maison à un gardien vérifié près de chez vous, sans commission, avec rencontre avant chaque garde. Guardiens, partout en France."
+ path="/"
+ image={HOME_OG_IMAGE}
+ />
       {/* JSON-LD consolidé : un seul @graph (Organization, WebSite, WebPage,
           BreadcrumbList, Service, FAQPage). Plus lisible pour Google qu'une
           collection de scripts indépendants, et permet de relier WebPage →
