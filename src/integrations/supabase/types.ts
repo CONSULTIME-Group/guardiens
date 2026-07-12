@@ -85,6 +85,33 @@ export type Database = {
           },
         ]
       }
+      admin_activity_analysis: {
+        Row: {
+          actions: Json | null
+          generated_at: string
+          generated_by: string | null
+          id: string
+          snapshot: Json | null
+          summary: string | null
+        }
+        Insert: {
+          actions?: Json | null
+          generated_at?: string
+          generated_by?: string | null
+          id?: string
+          snapshot?: Json | null
+          summary?: string | null
+        }
+        Update: {
+          actions?: Json | null
+          generated_at?: string
+          generated_by?: string | null
+          id?: string
+          snapshot?: Json | null
+          summary?: string | null
+        }
+        Relationships: []
+      }
       admin_message_logs: {
         Row: {
           admin_id: string
