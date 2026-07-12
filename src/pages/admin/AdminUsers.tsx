@@ -902,15 +902,22 @@ const AdminUsers = () => {
                         <Button
                           variant="ghost"
                           size="icon"
-                          title="Note interne"
-                          aria-label="Éditer la note interne"
+                          className="relative"
+                          title={user.admin_notes ? "Note interne (présente)" : "Note interne"}
+                          aria-label={user.admin_notes ? "Éditer la note interne (présente)" : "Éditer la note interne"}
                           onClick={() => setNoteModal({
                             open: true,
                             userId: user.id,
                             currentNote: user.admin_notes || "",
                           })}
                         >
-                          <StickyNote className="h-4 w-4" />
+                          <StickyNote className={`h-4 w-4 ${user.admin_notes ? "text-primary" : ""}`} />
+                          {user.admin_notes && (
+                            <span
+                              aria-hidden="true"
+                              className="absolute top-1 right-1 h-1.5 w-1.5 rounded-full bg-primary"
+                            />
+                          )}
                         </Button>
                         <Button
                           variant="ghost"
