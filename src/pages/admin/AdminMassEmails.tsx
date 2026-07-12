@@ -820,16 +820,27 @@ const AdminMassEmails = () => {
                             </Badge>
                           </TableCell>
                           <TableCell className="text-right">
-                            {canCancel ? (
+                            <div className="flex justify-end gap-1">
                               <Button
                                 size="sm"
-                                variant="outline"
+                                variant="ghost"
                                 className="h-7 text-xs"
-                                onClick={() => setCancelTarget(row)}
+                                onClick={() => handleDuplicate(row)}
+                                title="Dupliquer cette campagne"
                               >
-                                Annuler
+                                <Copy className="h-3 w-3 mr-1" /> Dupliquer
                               </Button>
-                            ) : null}
+                              {canCancel ? (
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  className="h-7 text-xs"
+                                  onClick={() => setCancelTarget(row)}
+                                >
+                                  Annuler
+                                </Button>
+                              ) : null}
+                            </div>
                           </TableCell>
                         </TableRow>
                       );
