@@ -305,7 +305,7 @@ const AdminMassEmails = () => {
     <div className="p-6 space-y-6">
       <h1 className="text-2xl font-bold text-foreground">Envois groupés</h1>
 
-      <ProximityCampaignCard />
+
 
 
       <div className="flex flex-wrap gap-2">
