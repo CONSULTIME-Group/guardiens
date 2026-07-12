@@ -49,10 +49,12 @@ const STAGE_DOT_CLASS: Record<AlmaStage, string> = {
   fidele: "bg-amber-500",
 };
 
+// « Complice » retiré côté UI (connotation ambiguë). Le stade reste dans
+// la logique interne mais n'a plus de libellé visible sous « Alma ».
 const STAGE_SHORT_LABEL: Record<AlmaStage, string> = {
   nouvelle: "Nouvelle",
   eveillee: "Éveillée",
-  complice: "Complice",
+  complice: "",
   fidele: "Fidèle",
 };
 
