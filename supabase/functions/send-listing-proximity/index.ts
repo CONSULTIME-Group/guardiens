@@ -158,7 +158,8 @@ async function computeRecipients(
   sit: {
     id: string;
     title: string;
-    description: string | null;
+    owner_message: string | null;
+    specific_expectations: string | null;
     user_id: string;
     city: string | null;
     start_date: string | null;
