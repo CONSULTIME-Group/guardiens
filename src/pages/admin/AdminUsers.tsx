@@ -67,6 +67,8 @@ const AdminUsers = () => {
   const [filterCountry, setFilterCountry] = useState("all");
   const [page, setPage] = useState(0);
   const [countryStats, setCountryStats] = useState<{ intl: number; codes: string[] }>({ intl: 0, codes: [] });
+  const [kpis, setKpis] = useState<{ total: number; active: number; suspended: number; verified: number; newLast7d: number } | null>(null);
+  const [exporting, setExporting] = useState(false);
 
   // Modal states
   const [noteModal, setNoteModal] = useState<{ open: boolean; userId: string; currentNote: string }>({
