@@ -799,7 +799,52 @@ const AdminListings = () => {
         sitTitle={drillSit?.title ?? null}
         initialTab={drillTab}
       />
+
+      {/* Message rapide au propriétaire */}
+      <Dialog
+        open={messageModal.open}
+        onOpenChange={(o) => !o && !sendingMessage && setMessageModal({ open: false, listing: null, content: "" })}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>
+              Message au propriétaire
+              {messageModal.listing?.owner?.first_name ? ` , ${messageModal.listing.owner.first_name}` : ""}
+            </DialogTitle>
+          </DialogHeader>
+          <DialogDescription>
+            Le message sera envoyé en votre nom dans la messagerie du propriétaire de l'annonce
+            {messageModal.listing?.title ? ` « ${messageModal.listing.title} »` : ""}.
+          </DialogDescription>
+          <div className="space-y-2">
+            <Textarea
+              placeholder="Votre message…"
+              value={messageModal.content}
+              onChange={(e) => setMessageModal((m) => ({ ...m, content: e.target.value }))}
+              rows={6}
+              maxLength={2000}
+              disabled={sendingMessage}
+            />
+            <div className="text-xs text-muted-foreground text-right">
+              {messageModal.content.length}/2000
+            </div>
+          </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setMessageModal({ open: false, listing: null, content: "" })}
+              disabled={sendingMessage}
+            >
+              Annuler
+            </Button>
+            <Button onClick={handleSendMessage} disabled={sendingMessage || !messageModal.content.trim()}>
+              {sendingMessage ? "Envoi…" : "Envoyer"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
+
   );
 };
 
