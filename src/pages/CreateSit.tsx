@@ -38,6 +38,8 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import PetsEditor from "@/components/pets/PetsEditor";
+
 
 interface PropertySummary {
   id: string;
@@ -591,7 +593,7 @@ const CreateSit = () => {
   // du profil sur l'annonce tant qu'elle est < 80 %.
   const PUBLISH_PROFILE_THRESHOLD = 40;
   const NUDGE_PROFILE_THRESHOLD = 80;
-  const canPublish = profileCompletion >= PUBLISH_PROFILE_THRESHOLD && property && title && startDate && endDate && !dateError && descriptionValid && hasPhoto;
+  const canPublish = profileCompletion >= PUBLISH_PROFILE_THRESHOLD && property && title && startDate && endDate && !dateError && descriptionValid && hasPhoto && pets.length > 0;
 
   type PublishBlocker = { id: string; label: string; anchor?: string; action?: string };
   const publishBlockers: PublishBlocker[] = [
@@ -603,7 +605,9 @@ const CreateSit = () => {
     dateError ? { id: "date-error", label: dateError, anchor: "dates-field" } : null,
     !descriptionValid ? { id: "desc", label: `Description d'au moins ${MIN_DESCRIPTION} caractères (actuellement ${specificExpectations.length})`, anchor: "description-field" } : null,
     !hasPhoto ? { id: "photo", label: "Au moins 1 photo de votre logement ou galerie", action: "/owner-profile" } : null,
+    pets.length === 0 ? { id: "pets", label: "Au moins un animal à faire garder", anchor: "pets-field" } : null,
   ].filter(Boolean) as PublishBlocker[];
+
 
 
   const onPublishClick = () => {
@@ -1379,27 +1383,28 @@ const CreateSit = () => {
                 ) : <p className="text-sm text-muted-foreground italic">Aucun logement renseigné</p>}
               </SummaryCard>
 
-              <SummaryCard icon={PawPrint} title="Les animaux" editLink="/profile">
-                {pets.length > 0 ? (
-                  <div className="space-y-3">
-                    {pets.map((pet, i) => (
-                      <div key={i} className="flex items-center gap-3">
-                        {pet.photo_url && <img src={pet.photo_url} alt={pet.name} className="w-10 h-10 rounded-full object-cover" />}
-                        <div>
-                          <p className="text-sm font-medium">{speciesLabels[pet.species]?.split(" ")[0]} {pet.name}{pet.breed ? `, ${pet.breed}` : ""}</p>
-                          <p className="text-xs text-muted-foreground">
-                            {[
-                              pet.walk_duration && pet.walk_duration !== "none" ? walkLabels[pet.walk_duration] + " de balade" : null,
-                              pet.alone_duration ? aloneLabels[pet.alone_duration] : null,
-                              hasMedication(pet.medication) ? "Médication" : null,
-                            ].filter(Boolean).join(" · ")}
-                          </p>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                ) : <p className="text-sm text-muted-foreground italic">Aucun animal renseigné</p>}
+              <SummaryCard icon={PawPrint} title="Les animaux à faire garder">
+                <div id="pets-field">
+                  {property ? (
+                    <PetsEditor
+                      propertyId={property.id}
+                      onChange={(list) => {
+                        setPets(list.map((a) => ({
+                          name: a.name, species: a.species, breed: a.breed,
+                          photo_url: a.photo_url, walk_duration: (a as any).walk_duration ?? null,
+                          alone_duration: (a as any).alone_duration ?? null,
+                          medication: (a as any).medication ?? null,
+                          activity_level: (a as any).activity_level ?? null,
+                        })));
+                        hasUserEditedRef.current = true;
+                      }}
+                    />
+                  ) : (
+                    <p className="text-sm text-muted-foreground italic">Renseignez d'abord votre logement pour ajouter des animaux.</p>
+                  )}
+                </div>
               </SummaryCard>
+
 
               <SummaryCard icon={ShieldCheck} title="Règles de la maison" editLink="/profile">
                 {ownerProfile ? (
