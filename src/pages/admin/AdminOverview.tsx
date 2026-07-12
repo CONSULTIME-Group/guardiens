@@ -11,6 +11,7 @@ import { OnboardingReminderCard } from "./_components/dashboard/OnboardingRemind
 import { AcquisitionPilotCard } from "./_components/dashboard/AcquisitionPilotCard";
 import AffinityPilotCard from "./_components/dashboard/AffinityPilotCard";
 import { SignalsSection } from "./_components/dashboard/SignalsSection";
+import { CronHealthCard } from "./_components/dashboard/CronHealthCard";
 
 const AdminOverview = () => {
   const { loading, stats, actionCards, lateCards, activity, weeklySignups, deptData } = useDashboardData();
@@ -47,6 +48,7 @@ const AdminOverview = () => {
       />
 
       <SignalsSection />
+      <CronHealthCard />
       <TodoSection actionCards={actionCards} lateCards={lateCards} />
       <KpiCards stats={stats} />
       <RecentActivity activity={activity} />
