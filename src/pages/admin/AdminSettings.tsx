@@ -555,6 +555,19 @@ const AdminSettings = () => {
                 Temporaire
               </Badge>
             </div>
+            <Separator />
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium">Google-Extended (entraînement Gemini)</p>
+                <p className="text-xs text-muted-foreground">
+                  Décision politique : protection IP marque en construction. Documenté dans{" "}
+                  <code>robots.txt</code>. Réévaluer post-notoriété (~T2 2027).
+                </p>
+              </div>
+              <Badge variant="outline" className="text-xs border-warning text-warning">
+                Disallow
+              </Badge>
+            </div>
           </CardContent>
         </Card>
 
