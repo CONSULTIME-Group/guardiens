@@ -99,6 +99,8 @@ export default function AdminAlma() {
         </Select>
       </div>
 
+      <AffinityOnboardingFunnelCard since={since} />
+
       <Tabs value={tab} onValueChange={handleTabChange}>
         <TabsList>
           <TabsTrigger value="bubbles">
