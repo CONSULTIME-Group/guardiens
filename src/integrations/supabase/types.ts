@@ -4900,6 +4900,8 @@ export type Database = {
           end_date: string | null
           environments: string[]
           flexible_dates: boolean | null
+          hidden_at: string | null
+          hidden_by: string | null
           id: string
           is_urgent: boolean
           last_unpublished_reason: string | null
@@ -4940,6 +4942,8 @@ export type Database = {
           end_date?: string | null
           environments?: string[]
           flexible_dates?: boolean | null
+          hidden_at?: string | null
+          hidden_by?: string | null
           id?: string
           is_urgent?: boolean
           last_unpublished_reason?: string | null
@@ -4980,6 +4984,8 @@ export type Database = {
           end_date?: string | null
           environments?: string[]
           flexible_dates?: boolean | null
+          hidden_at?: string | null
+          hidden_by?: string | null
           id?: string
           is_urgent?: boolean
           last_unpublished_reason?: string | null
