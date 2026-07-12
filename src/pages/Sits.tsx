@@ -1238,6 +1238,15 @@ const SitCard = ({
             </div>
 
             <div className="flex items-center gap-2 shrink-0">
+              {isOwner && sit.pendingApplicationCount > 0 && (
+                <span
+                  className="min-w-[20px] h-5 rounded-full bg-destructive text-destructive-foreground text-[11px] font-bold inline-flex items-center justify-center px-1.5"
+                  aria-label={`${sit.pendingApplicationCount} candidature${sit.pendingApplicationCount > 1 ? "s" : ""} en attente`}
+                  title={`${sit.pendingApplicationCount} candidature${sit.pendingApplicationCount > 1 ? "s" : ""} en attente`}
+                >
+                  {sit.pendingApplicationCount}
+                </span>
+              )}
               <span className={cn("px-2.5 py-1 rounded-full text-xs font-medium", displayStatus.className)}>
                 {displayStatus.label}
               </span>
@@ -1252,6 +1261,36 @@ const SitCard = ({
               )}
             </div>
           </div>
+
+          {/* Sitter meta : envoi + consultation par le propriétaire */}
+          {!isOwner && sit.application_status === "pending" && sit.application_created_at && (() => {
+            const sent = `Envoyée ${
+              (() => {
+                try {
+                  const d = new Date(sit.application_created_at);
+                  const days = Math.max(0, Math.floor((Date.now() - d.getTime()) / 86400000));
+                  return days === 0 ? "aujourd'hui" : days === 1 ? "il y a 1 jour" : `il y a ${days} jours`;
+                } catch { return ""; }
+              })()
+            }`;
+            const viewedLabel = sit.application_viewed_at
+              ? (() => {
+                  const d = new Date(sit.application_viewed_at);
+                  const days = Math.max(0, Math.floor((Date.now() - d.getTime()) / 86400000));
+                  return days === 0
+                    ? "Vue par le propriétaire aujourd'hui"
+                    : days === 1
+                      ? "Vue par le propriétaire il y a 1 jour"
+                      : `Vue par le propriétaire il y a ${days} jours`;
+                })()
+              : "En attente de consultation";
+            return (
+              <div className="mt-2 flex flex-col gap-0.5">
+                <span className="text-xs text-muted-foreground">{sent}</span>
+                <span className="text-xs text-muted-foreground">{viewedLabel}</span>
+              </div>
+            );
+          })()}
 
           {/* Other party */}
           {otherParty && (
