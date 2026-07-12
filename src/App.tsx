@@ -286,7 +286,9 @@ const RedirectProprietaire = () => {
   return <Navigate to={`/gardiens/${id}?tab=proprio`} replace />;
 };
 
-const AppRoutes = () => (
+const AppRoutes = () => {
+  useAffinityThresholdsBootstrap();
+  return (
   <Suspense fallback={<FallbackSpinner />}>
     <Routes>
       <Route path="/" element={<Landing />} />
