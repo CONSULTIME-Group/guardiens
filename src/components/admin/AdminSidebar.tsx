@@ -35,6 +35,7 @@ export const BADGE_TITLES: Record<string, string> = {
   analysisRequests: "demandes d'analyse à traiter",
   reportsSit: "signalements visant des annonces",
   reportsMission: "signalements visant des petites missions",
+  sitsToStaff: "annonces à staffer (aucune candidature)",
 };
 
 interface NavGroup {
@@ -67,7 +68,7 @@ const adminNavGroups: NavGroup[] = [
   {
     label: "ACTIVITÉ",
     items: [
-      { to: "/admin/listings", icon: Megaphone, label: "Annonces", badgeKey: "reportsSit" },
+      { to: "/admin/listings", icon: Megaphone, label: "Annonces", badgeKey: "sitsToStaff" },
       { to: "/admin/sits-management", icon: CalendarCheck, label: "Gardes" },
       { to: "/admin/small-missions", icon: Handshake, label: "Petites missions", badgeKey: "reportsMission" },
     ],

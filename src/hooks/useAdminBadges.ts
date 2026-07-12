@@ -16,6 +16,7 @@ export interface AdminBadges {
   reportsMission: number;
   pros: number;
   analysisRequests: number;
+  sitsToStaff: number;
 }
 
 const EMPTY: AdminBadges = {
@@ -33,6 +34,7 @@ const EMPTY: AdminBadges = {
   reportsMission: 0,
   pros: 0,
   analysisRequests: 0,
+  sitsToStaff: 0,
 };
 
 export function useAdminBadges(): AdminBadges {
@@ -75,6 +77,31 @@ export function useAdminBadges(): AdminBadges {
       pendingProfileSkills = 0;
     }
 
+    // « À staffer » : sits publiés, à venir (end_date null ou >= aujourd'hui),
+    // sans aucune candidature. Même définition que le filtre AdminListings.
+    let sitsToStaff = 0;
+    try {
+      const todayISO = new Date().toISOString().slice(0, 10);
+      const { data: openSits } = await supabase
+        .from("sits")
+        .select("id, end_date")
+        .eq("status", "published");
+      const upcoming = (openSits || []).filter(
+        (s: { id: string; end_date: string | null }) => !s.end_date || s.end_date >= todayISO,
+      );
+      const ids = upcoming.map((s) => s.id);
+      if (ids.length > 0) {
+        const { data: appsRows } = await supabase
+          .from("applications")
+          .select("sit_id")
+          .in("sit_id", ids);
+        const withApps = new Set((appsRows || []).map((r: { sit_id: string }) => r.sit_id));
+        sitsToStaff = ids.filter((id) => !withApps.has(id)).length;
+      }
+    } catch {
+      sitsToStaff = 0;
+    }
+
     setBadges({
       verifications: results[0].count || 0,
       experiences: results[1].count || 0,
@@ -90,6 +117,7 @@ export function useAdminBadges(): AdminBadges {
       reportsMission: results[11].count || 0,
       pros: results[12].count || 0,
       analysisRequests: results[13].count || 0,
+      sitsToStaff,
     });
   }, []);
 
