@@ -302,6 +302,90 @@ const AdminUsers = () => {
   const availableCountries = countryStats.codes;
   const intlCount = countryStats.intl;
 
+  const EXPORT_MAX = 5000;
+  const handleExportCsv = async () => {
+    setExporting(true);
+    try {
+      let query = supabase
+        .from("profiles")
+        .select(
+          "id, first_name, last_name, role, city, postal_code, country, created_at, last_seen_at, identity_verification_status, account_status, is_founder",
+        )
+        .order("created_at", { ascending: false })
+        .limit(EXPORT_MAX);
+
+      if (filterRole !== "all") query = query.eq("role", filterRole as any);
+      if (filterVerification !== "all") query = query.eq("identity_verification_status", filterVerification);
+      if (filterCountry === "FR") query = query.or("country.eq.FR,country.is.null");
+      else if (filterCountry === "INTL") query = query.not("country", "is", null).neq("country", "FR");
+      else if (filterCountry !== "all") query = query.eq("country", filterCountry);
+      if (filterDept !== "all") {
+        if (filterDept === "2A") query = query.gte("postal_code", "20000").lte("postal_code", "20199");
+        else if (filterDept === "2B") query = query.gte("postal_code", "20200").lte("postal_code", "20999");
+        else query = query.like("postal_code", `${filterDept}%`);
+      }
+      if (searchDebounced) {
+        const s = searchDebounced.replace(/[%,()]/g, "");
+        if (s) query = query.or(`first_name.ilike.%${s}%,last_name.ilike.%${s}%,email.ilike.%${s}%`);
+      }
+
+      const { data, error } = await query;
+      if (error || !data) {
+        toast.error("Erreur lors de l'export");
+        return;
+      }
+      const ids = data.map((u: any) => u.id);
+      const emailMap = new Map<string, string>();
+      const CHUNK = 150;
+      for (let i = 0; i < ids.length; i += CHUNK) {
+        const chunk = ids.slice(i, i + CHUNK);
+        const { data: emails } = await supabase.rpc("get_user_emails_admin", { p_user_ids: chunk });
+        (emails || []).forEach((e: any) => emailMap.set(e.id, e.email));
+      }
+
+      const esc = (v: any) => {
+        const s = v === null || v === undefined ? "" : String(v);
+        return `"${s.replace(/"/g, '""')}"`;
+      };
+      const headers = ["Nom", "Email", "Rôle", "Ville", "Code postal", "Département", "Pays", "Inscription", "Dernière activité", "Vérification", "Statut", "Fondateur"];
+      const rows = data.map((u: any) => {
+        const name = `${u.first_name || ""} ${u.last_name || ""}`.trim();
+        const country = (u.country || "FR").toUpperCase();
+        return [
+          name,
+          emailMap.get(u.id) || "",
+          roleLabels[u.role] || u.role || "",
+          u.city || "",
+          u.postal_code || "",
+          getDeptLabel(u.postal_code) || "",
+          country === "FR" ? "France" : getCountryName(country),
+          u.created_at ? format(new Date(u.created_at), "yyyy-MM-dd") : "",
+          u.last_seen_at ? format(new Date(u.last_seen_at), "yyyy-MM-dd HH:mm") : "",
+          verificationLabels[u.identity_verification_status || "not_submitted"]?.label || "",
+          statusLabels[u.account_status || "active"]?.label || "",
+          u.is_founder ? "oui" : "non",
+        ].map(esc).join(",");
+      });
+      const csv = "\uFEFF" + [headers.map(esc).join(","), ...rows].join("\n");
+      const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `utilisateurs-${format(new Date(), "yyyy-MM-dd")}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      if (data.length >= EXPORT_MAX) {
+        toast.warning(`Export plafonné à ${EXPORT_MAX} lignes. Affinez les filtres pour tout exporter.`);
+      } else {
+        toast.success(`${data.length} ligne${data.length > 1 ? "s" : ""} exportée${data.length > 1 ? "s" : ""}`);
+      }
+    } finally {
+      setExporting(false);
+    }
+  };
+
 
   const handleSuspend = async () => {
     const userId = suspendModal.userId;
