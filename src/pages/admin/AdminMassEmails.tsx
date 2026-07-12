@@ -629,6 +629,9 @@ const AdminMassEmails = () => {
                   <Button type="button" size="sm" variant="outline" onClick={handleLink}>
                     <LinkIcon className="h-3.5 w-3.5 mr-1.5" /> Lien
                   </Button>
+                  <Button type="button" size="sm" variant="outline" onClick={handleInsertFirstName}>
+                    <User className="h-3.5 w-3.5 mr-1.5" /> Insérer {"{prénom}"}
+                  </Button>
                 </div>
                 <Textarea
                   id="body"
@@ -642,6 +645,9 @@ const AdminMassEmails = () => {
                 />
                 <p className="text-xs text-muted-foreground">
                   Mise en forme : gras et liens via les boutons ci-dessus. Les retours à la ligne sont conservés.
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  Astuce : insérez {"{prénom}"} pour personnaliser (remplacé par le prénom de chaque destinataire, ou « Bonjour » si le prénom est absent).
                 </p>
                 <p className="text-xs text-muted-foreground text-right">{body.length}/2000</p>
               </div>
