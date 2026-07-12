@@ -926,7 +926,44 @@ const AdminMassEmails = () => {
                 </div>
               )}
 
-              <div className="rounded-lg border border-amber-500/40 bg-warning-soft/40 dark:bg-amber-950/10 p-4 text-xs text-warning-foreground dark:text-amber-200">
+              <div className="rounded-lg border border-border p-4 space-y-2">
+                <h3 className="text-sm font-semibold">Contrôle qualité</h3>
+                <p className="text-xs text-muted-foreground">Indicatif. N'empêche jamais l'envoi.</p>
+                <ul className="space-y-1.5 text-xs">
+                  <li className="flex items-start gap-2">
+                    {spamFound.length > 0 ? (
+                      <>
+                        <AlertTriangle className="h-3.5 w-3.5 mt-0.5 text-warning-foreground shrink-0" />
+                        <span>Mots déclencheurs spam détectés : <span className="font-medium">{spamFound.join(", ")}</span></span>
+                      </>
+                    ) : (
+                      <>
+                        <Check className="h-3.5 w-3.5 mt-0.5 text-success shrink-0" />
+                        <span>Aucun mot déclencheur spam repéré.</span>
+                      </>
+                    )}
+                  </li>
+                  <li className="flex items-start gap-2">
+                    {hasInsecureLinks ? (
+                      <>
+                        <AlertTriangle className="h-3.5 w-3.5 mt-0.5 text-destructive shrink-0" />
+                        <span>Lien non sécurisé (http://) présent dans le corps.</span>
+                      </>
+                    ) : (
+                      <>
+                        <Check className="h-3.5 w-3.5 mt-0.5 text-success shrink-0" />
+                        <span>Aucun lien non sécurisé.</span>
+                      </>
+                    )}
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <Check className="h-3.5 w-3.5 mt-0.5 text-success shrink-0" />
+                    <span>Lien de désinscription présent (auto).</span>
+                  </li>
+                </ul>
+              </div>
+
+              <div className="rounded-lg border border-warning/40 bg-warning-soft/40 p-4 text-xs text-warning-foreground">
                 <strong>Action irréversible.</strong> Une fois confirmé, l'email part immédiatement
                 vers <strong>{recipientCount ?? 0}</strong> destinataires. Aucun rappel possible.
               </div>
