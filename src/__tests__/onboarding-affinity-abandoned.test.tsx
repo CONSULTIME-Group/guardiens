@@ -84,4 +84,21 @@ describe("OnboardingAffinity — tracking d'abandon", () => {
     expect(payload.metadata.reason).toBe("navigate_away");
     expect(payload.metadata.step).toBeTruthy();
   });
+
+  it("n'émet pas onboarding_abandoned si l'onboarding n'a jamais été affiché (flag OFF)", () => {
+    mocks.flagEnabled = false;
+
+    const { unmount } = render(
+      <HelmetProvider>
+        <OnboardingAffinity />
+      </HelmetProvider>,
+    );
+
+    unmount();
+
+    const abandonedCalls = trackEventMock.mock.calls.filter(
+      ([name]) => name === "onboarding_abandoned" || name === "affinity_onboarding_abandoned",
+    );
+    expect(abandonedCalls).toHaveLength(0);
+  });
 });
