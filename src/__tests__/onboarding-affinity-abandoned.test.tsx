@@ -27,8 +27,10 @@ vi.mock("@/contexts/AuthContext", () => ({
   }),
 }));
 
+const mocks = vi.hoisted(() => ({ flagEnabled: true }));
+
 vi.mock("@/hooks/useFeatureFlag", () => ({
-  useFeatureFlag: () => ({ enabled: true, loading: false }),
+  useFeatureFlag: () => ({ enabled: mocks.flagEnabled, loading: false }),
 }));
 
 vi.mock("@/hooks/useAffinityOnboardingStatus", () => ({
