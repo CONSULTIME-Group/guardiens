@@ -559,13 +559,13 @@ function CulturalFactsTab({ since }: { since: string }) {
         .select("*")
         .order("fact_type", { ascending: true })
         .order("created_at", { ascending: false })
-        .limit(500);
+        .limit(2000);
       if (error) throw error;
       return (data ?? []) as unknown as CulturalFactRow[];
     },
   });
 
-  const { data: stats = [] } = useQuery({
+  const { data: statsResult = { rows: [], truncated: false } } = useQuery({
     queryKey: ["admin-alma-cultural-stats", since],
     queryFn: async () => {
       const [seenRes, clickRes] = await Promise.all([
@@ -574,31 +574,40 @@ function CulturalFactsTab({ since }: { since: string }) {
           .select("metadata, created_at")
           .eq("event_type", "alma_cultural_fact_seen")
           .gte("created_at", since)
-          .limit(20000),
+          .limit(ROW_LIMIT),
         supabase
           .from("analytics_events")
           .select("metadata, created_at")
           .eq("event_type", "alma_cultural_fact_action_clicked")
           .gte("created_at", since)
-          .limit(20000),
+          .limit(ROW_LIMIT),
       ]);
+      const seenRows = seenRes.data ?? [];
+      const clickRows = clickRes.data ?? [];
       const seen = new Map<string, number>();
       const clicks = new Map<string, number>();
-      for (const r of seenRes.data ?? []) {
+      for (const r of seenRows) {
         const id = (r as any).metadata?.fact_id;
         if (id) seen.set(id, (seen.get(id) ?? 0) + 1);
       }
-      for (const r of clickRes.data ?? []) {
+      for (const r of clickRows) {
         const id = (r as any).metadata?.fact_id;
         if (id) clicks.set(id, (clicks.get(id) ?? 0) + 1);
       }
-      return Array.from(seen.entries()).map(([id, views]) => ({
+      const rows = Array.from(seen.entries()).map(([id, views]) => ({
         id,
         views,
         clicks: clicks.get(id) ?? 0,
       }));
+      return {
+        rows,
+        truncated: seenRows.length >= ROW_LIMIT || clickRows.length >= ROW_LIMIT,
+      };
     },
   });
+
+  const stats = statsResult.rows;
+  const statsTruncated = statsResult.truncated;
 
   const statsById = useMemo(() => {
     const m = new Map<string, { views: number; clicks: number }>();
