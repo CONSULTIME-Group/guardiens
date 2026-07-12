@@ -158,7 +158,8 @@ async function computeRecipients(
   sit: {
     id: string;
     title: string;
-    description: string | null;
+    owner_message: string | null;
+    specific_expectations: string | null;
     user_id: string;
     city: string | null;
     start_date: string | null;
@@ -173,10 +174,11 @@ async function computeRecipients(
 }> {
   const { data: sit, error: sErr } = await serviceClient
     .from("sits")
-    .select("id, title, description, user_id, city, start_date, end_date, status, country")
+    .select("id, title, owner_message, specific_expectations, user_id, city, start_date, end_date, status, country")
     .eq("id", sitId)
     .maybeSingle();
-  if (sErr || !sit) throw new Error(`Annonce introuvable (${sitId})`);
+  if (sErr) throw new Error(`Erreur chargement annonce: ${sErr.message}`);
+  if (!sit) throw new Error(`Annonce introuvable (${sitId})`);
 
   const { data: author, error: aErr } = await serviceClient
     .from("profiles")
@@ -342,7 +344,7 @@ Deno.serve(async (req) => {
     );
 
     const subject = buildSubject(authorFirstName, sit.city || "");
-    const excerpt = buildExcerpt(sit.description);
+    const excerpt = buildExcerpt(sit.owner_message ?? sit.specific_expectations);
     const dateRange = buildDateRange(sit.start_date, sit.end_date);
     const listingUrl = `https://guardiens.fr/annonces/${sit.id}`;
     const ctaLabel = "Voir l'annonce";
