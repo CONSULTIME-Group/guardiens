@@ -252,7 +252,12 @@ export type EventType =
   | "alma_next_tip_empty"                       // Pool épuisé pour cette surface (surface)
   | "alma_usage_nudge_seen"                     // Usage nudge affiché (fact_id, surface, cta_action)
   | "alma_topbar_button_clicked"                // Bouton persistant Alma cliqué en topbar (surface)
-  | "alma_first_meeting_cta_clicked";           // CTA principal du premier contact Alma cliqué (role, cta_action)
+  | "alma_first_meeting_cta_clicked"            // CTA principal du premier contact Alma cliqué (role, cta_action)
+  // Funnel création d'annonce ---------------------------------------------------
+  | "sits_create_step_started"                  // Étape du wizard CreateSit entamée (step)
+  | "sits_create_step_completed"                // Étape terminée (step, duration_ms)
+  | "sits_create_abandoned"                     // Wizard quitté sans publication (step, has_draft)
+  | "application_submitted";                    // Candidature envoyée (source, used_alma_draft, message_length)
 
 
 
