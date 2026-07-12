@@ -659,9 +659,9 @@ const AdminUsers = () => {
                       {format(new Date(user.created_at), "d MMM yyyy", { locale: fr })}
                     </TableCell>
                     <TableCell className="text-sm text-muted-foreground">
-                      {user.updated_at
-                        ? formatDistanceToNow(new Date(user.updated_at), { addSuffix: true, locale: fr })
-                        : ","}
+                      {user.last_seen_at
+                        ? formatDistanceToNow(new Date(user.last_seen_at), { addSuffix: true, locale: fr })
+                        : "Jamais connecté"}
                     </TableCell>
                     <TableCell>
                       <div className="flex items-center gap-1.5">
