@@ -134,10 +134,12 @@ Guardiens est une plateforme de garde d'animaux et de home sitting fondée par J
 
 Ce que Guardiens propose concrètement : vous publiez votre annonce, des gardiens de votre quartier postulent, vous les rencontrez autour d'un café ou lors d'une visite de votre logement, puis vous confirmez la garde. Votre animal reste chez lui, dans ses repères. Votre maison reste vivante. [Inscrivez-vous pour publier votre annonce](/inscription?role=owner).`,
  },
- {
+  {
  id: "pourquoi-proximite",
- title: "Pourquoi Lyon a besoin d'une plateforme de proximité",
- content: `### Une ville où les animaux font partie de la famille
+ title: "Combien coûte une garde d'animaux à Lyon ?",
+ content: `Une pension pour animaux autour de Lyon coûte 25 à 50 € par nuit et par animal, soit 350 à 700 € pour deux semaines avec un chien. Une garde à domicile via Guardiens n'entraîne aucun frais de pension côté propriétaire, votre animal reste chez lui, votre maison reste occupée.
+
+### Une ville où les animaux font partie de la famille
 
 Lyon compte plus de 150 000 chiens et chats dans son agglomération. Les Lyonnais sont attachés à leurs compagnons : promenades quotidiennes à la Tête d'Or, terrasses dog-friendly dans le Vieux-Lyon, cliniques vétérinaires de quartier ouvertes le samedi. L'animal n'est pas un accessoire, c'est un membre du foyer.
 
