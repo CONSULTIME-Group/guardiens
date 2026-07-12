@@ -397,10 +397,7 @@ const OnboardingAffinity = () => {
                 <Button
                   variant="ghost"
                   onClick={async () => {
-                    void trackEvent("onboarding_abandoned", {
-                      source: "/onboarding/affinity",
-                      metadata: { role: chosenRole, via: "logout" },
-                    });
+                    emitAbandonedRef.current("close_button");
                     await logout();
                     navigate("/login", { replace: true });
                   }}
