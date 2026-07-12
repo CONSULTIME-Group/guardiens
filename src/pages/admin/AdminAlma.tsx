@@ -270,11 +270,13 @@ function WhispersTab({ since, range }: { since: string; range: Range }) {
         .select("whisper_type, emitted_at, action_taken, dismissed_reason, user_id")
         .gte("emitted_at", since)
         .order("emitted_at", { ascending: false })
-        .limit(20000);
+        .limit(ROW_LIMIT);
       if (error) throw error;
       return (data ?? []) as RawWhisperHistory[];
     },
   });
+
+  const historyTruncated = history.length >= ROW_LIMIT;
 
   const { data: freq = [] } = useQuery({
     queryKey: ["admin-alma-frequency"],
