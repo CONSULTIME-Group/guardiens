@@ -16,6 +16,7 @@ export interface AdminBadges {
   reportsMission: number;
   pros: number;
   analysisRequests: number;
+  sitsToStaff: number;
 }
 
 const EMPTY: AdminBadges = {
@@ -33,6 +34,7 @@ const EMPTY: AdminBadges = {
   reportsMission: 0,
   pros: 0,
   analysisRequests: 0,
+  sitsToStaff: 0,
 };
 
 export function useAdminBadges(): AdminBadges {
