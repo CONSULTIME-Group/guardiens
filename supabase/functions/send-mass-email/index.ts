@@ -228,10 +228,10 @@ async function fetchTargetedProfiles(
   serviceClient: ReturnType<typeof createClient>,
   segment: string,
   filters: MassEmailFilters,
-): Promise<{ id: string; email: string }[]> {
+): Promise<{ id: string; email: string; first_name: string | null }[]> {
   let query = serviceClient
     .from("profiles")
-    .select("id, email, postal_code, city, identity_verified, profile_completion, completed_sits_count, is_founder, created_at, role");
+    .select("id, email, first_name, postal_code, city, identity_verified, profile_completion, completed_sits_count, is_founder, created_at, role");
 
   // Segment
   if (segment === "gardiens") query = query.in("role", ["sitter", "both"]);
