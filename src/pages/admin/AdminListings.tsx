@@ -575,6 +575,18 @@ const AdminListings = () => {
         </DialogContent>
       </Dialog>
 
+      {/* Restore confirmation */}
+      <Dialog open={!!restoreModal} onOpenChange={(o) => !o && setRestoreModal(null)}>
+        <DialogContent>
+          <DialogHeader><DialogTitle>Remettre cette annonce en ligne ?</DialogTitle></DialogHeader>
+          <DialogDescription>L'annonce redeviendra visible dans la recherche.</DialogDescription>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setRestoreModal(null)}>Annuler</Button>
+            <Button onClick={() => restoreModal && handleRestore(restoreModal)}>Remettre en ligne</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       {/* Delete confirmation */}
       <Dialog open={!!deleteModal} onOpenChange={(o) => !o && setDeleteModal(null)}>
         <DialogContent>
