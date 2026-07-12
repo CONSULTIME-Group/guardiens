@@ -336,7 +336,7 @@ const AdminMassEmails = () => {
     setHistoryLoading(true);
     const { data } = await supabase
       .from("mass_emails")
-      .select("id, created_at, segment, subject, recipients_count, status, enqueued_count, sent_count, failed_count, skipped_count")
+      .select("id, created_at, segment, subject, body, cta_label, cta_url, recipients_count, status, enqueued_count, sent_count, failed_count, skipped_count")
       .order("created_at", { ascending: false })
       .limit(20);
     setHistory((data as MassEmail[]) || []);
