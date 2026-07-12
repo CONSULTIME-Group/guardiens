@@ -194,6 +194,7 @@ function BubblesTab({ since, range }: { since: string; range: Range }) {
 
   return (
     <div className="space-y-6">
+      {truncated && <TruncationBanner />}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <KpiCard label="Users uniques (7j)" value={kpis.uniqueUsers7d} />
         <KpiCard label="Users uniques (30j)" value={kpis.uniqueUsers30d} />
