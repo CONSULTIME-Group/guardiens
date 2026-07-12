@@ -35,10 +35,15 @@ async function collectSignals() {
   ] = await Promise.all([
     admin.from('profiles').select('*', { count: 'exact', head: true }),
     admin.from('profiles').select('*', { count: 'exact', head: true }).gte('created_at', sevenDaysAgo),
-    admin.from('profiles').select('*', { count: 'exact', head: true }).not('suspended_until', 'is', null).gt('suspended_until', new Date().toISOString()),
+    admin.from('profiles').select('*', { count: 'exact', head: true }).eq('account_status', 'suspended'),
     admin.from('sits').select('*', { count: 'exact', head: true }).eq('status', 'published'),
-    admin.from('pro_verifications').select('*', { count: 'exact', head: true }).eq('status', 'pending'),
-    admin.from('reports').select('*', { count: 'exact', head: true }).eq('status', 'open'),
+    admin
+      .from('profiles')
+      .select('*', { count: 'exact', head: true })
+      .or(
+        'identity_verification_status.eq.pending,and(identity_verification_status.eq.not_submitted,identity_document_url.not.is.null),and(identity_verification_status.eq.not_submitted,identity_selfie_url.not.is.null)',
+      ),
+    admin.from('reports').select('*', { count: 'exact', head: true }).eq('status', 'new'),
     admin.from('reviews').select('*', { count: 'exact', head: true }).eq('moderation_status', 'pending'),
   ]);
 
