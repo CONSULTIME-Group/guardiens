@@ -6,6 +6,12 @@
     <meta name="msvalidate.01" content="A9009F9BCAB68B9AB7920896CDC39742" />
     <meta charset="UTF-8" />
     <script>
+      // Prerender.io : bloque la capture tant que PageMeta n'a pas fini d'injecter
+      // le canonical et les meta SEO côté DOM. PageMeta bascule à true à la fin
+      // de son useEffect. Un fallback dans main.tsx couvre les pages sans PageMeta.
+      window.prerenderReady = false;
+    </script>
+    <script>
       // Empêche l'indexation du domaine de preview Lovable. Domaine canonique = guardiens.fr.
       (function () {
         try {
