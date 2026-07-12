@@ -803,6 +803,34 @@ const Sits = () => {
         </div>
       )}
 
+      {/* Tri owner (onglet En ligne) */}
+      {isOwnerView && activeOwnerTab === "active" && sits.length > 1 && (
+        <div className="flex items-center justify-end gap-2 mb-3">
+          <span className="text-xs text-muted-foreground">Trier</span>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button
+                type="button"
+                className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-3 py-1 text-xs text-foreground hover:border-primary/40 transition-colors"
+              >
+                {ownerSortMode === "urgent" ? "Plus urgentes" : "Plus récentes"}
+                <ChevronRight className="h-3 w-3 rotate-90 text-muted-foreground" />
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-44">
+              <DropdownMenuItem onClick={() => setOwnerSortMode("urgent")}>
+                Plus urgentes
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setOwnerSortMode("recent")}>
+                Plus récentes
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+      )}
+
+
+
       {/* Content */}
       {loading ? (
         <div className="space-y-4">
