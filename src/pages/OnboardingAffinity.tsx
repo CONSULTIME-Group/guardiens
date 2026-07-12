@@ -86,6 +86,7 @@ const OnboardingAffinity = () => {
     if (shownTrackedRef.current) return;
     if (flagLoading || status.loading || !user || !flagEnabled || !status.needsOnboarding) return;
     shownTrackedRef.current = true;
+    startedAtRef.current = Date.now();
     void trackEvent("onboarding_shown", {
       source: "/onboarding/affinity",
       metadata: {
@@ -94,19 +95,43 @@ const OnboardingAffinity = () => {
         needs_owner: status.needsOwner,
       },
     });
-  }, [flagLoading, flagEnabled, status.loading, status.needsSitter, status.needsOwner, status.needsOnboarding, user]);
+    void trackEvent("affinity_onboarding_started", {
+      source: "/onboarding/affinity",
+      metadata: {
+        role: user.role ?? null,
+        profile_created_at: status.profileCreatedAt,
+        needs_sitter: status.needsSitter,
+        needs_owner: status.needsOwner,
+      },
+    });
+  }, [flagLoading, flagEnabled, status.loading, status.needsSitter, status.needsOwner, status.needsOnboarding, status.profileCreatedAt, user]);
 
-  // Abandon : émis si l'utilisateur quitte la page sans compléter.
+  // Abandon : émis si l'utilisateur quitte la page (unload OU unmount) sans compléter.
   useEffect(() => {
-    const onUnload = () => {
+    const emitAbandoned = () => {
       if (completedRef.current) return;
+      const duration = startedAtRef.current
+        ? Math.round((Date.now() - startedAtRef.current) / 1000)
+        : 0;
       void trackEvent("onboarding_abandoned", {
         source: "/onboarding/affinity",
         metadata: { role: chosenRole, needs_sitter: status.needsSitter, needs_owner: status.needsOwner },
       });
+      void trackEvent("affinity_onboarding_abandoned", {
+        source: "/onboarding/affinity",
+        metadata: {
+          role: chosenRole,
+          last_step_index: lastStepRef.current.index,
+          last_step_name: lastStepRef.current.name,
+          duration_seconds: duration,
+        },
+      });
     };
-    window.addEventListener("beforeunload", onUnload);
-    return () => window.removeEventListener("beforeunload", onUnload);
+    window.addEventListener("beforeunload", emitAbandoned);
+    return () => {
+      window.removeEventListener("beforeunload", emitAbandoned);
+      emitAbandoned();
+    };
   }, [chosenRole, status.needsSitter, status.needsOwner]);
 
   const showSitterBlock = useMemo(
