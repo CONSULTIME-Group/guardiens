@@ -858,6 +858,29 @@ const AdminListings = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Envoi de l'annonce aux gardiens du coin */}
+      <Dialog open={!!proximityListing} onOpenChange={(o) => !o && setProximityListing(null)}>
+        <DialogContent className="max-w-3xl">
+          <DialogHeader>
+            <DialogTitle>
+              Envoyer aux gardiens du coin
+              {proximityListing?.title ? ` , ${proximityListing.title}` : ""}
+            </DialogTitle>
+            <DialogDescription>
+              Un email personnalisé par gardien, jamais de copie groupée. Aperçu obligatoire avant tout envoi.
+            </DialogDescription>
+          </DialogHeader>
+          {proximityListing && (
+            <ListingProximityCard
+              sitId={proximityListing.id}
+              initialRadiusKm={30}
+              autoPreview
+              hideHeader
+            />
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
 
   );
