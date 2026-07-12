@@ -30,6 +30,7 @@ import AuthConfirm from "./pages/AuthConfirm";
 import { AppLayout } from "@/components/layout/AppLayout";
 import PublicHeader from "@/components/layout/PublicHeader";
 import PublicFooter from "@/components/layout/PublicFooter";
+import { useAffinityThresholdsBootstrap } from "@/hooks/useAffinityThresholdsBootstrap";
 
 // ──── Lazy-loaded routes ────
 const FallbackSpinner = () => (
@@ -286,7 +287,9 @@ const RedirectProprietaire = () => {
   return <Navigate to={`/gardiens/${id}?tab=proprio`} replace />;
 };
 
-const AppRoutes = () => (
+const AppRoutes = () => {
+  useAffinityThresholdsBootstrap();
+  return (
   <Suspense fallback={<FallbackSpinner />}>
     <Routes>
       <Route path="/" element={<Landing />} />
@@ -449,7 +452,8 @@ const AppRoutes = () => (
 
     </Routes>
   </Suspense>
-);
+  );
+};
 
 const App = () => (
   <ErrorBoundary>

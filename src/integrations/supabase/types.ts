@@ -2195,6 +2195,7 @@ export type Database = {
           key: string
           updated_at: string
           updated_by: string | null
+          value_int: number | null
         }
         Insert: {
           applies_since?: string | null
@@ -2203,6 +2204,7 @@ export type Database = {
           key: string
           updated_at?: string
           updated_by?: string | null
+          value_int?: number | null
         }
         Update: {
           applies_since?: string | null
@@ -2211,6 +2213,7 @@ export type Database = {
           key?: string
           updated_at?: string
           updated_by?: string | null
+          value_int?: number | null
         }
         Relationships: []
       }
