@@ -3,6 +3,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Card, CardContent } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
@@ -11,7 +13,7 @@ import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
 import { format, formatDistanceToNow } from "date-fns";
 import { fr } from "date-fns/locale";
-import { Eye, EyeOff, Trash2, Search, Sparkles, Share2, Link2, Mail, BarChart3 } from "lucide-react";
+import { Eye, EyeOff, Trash2, Search, Sparkles, Share2, Link2, Mail, BarChart3, MessageSquare, Download, ChevronLeft, ChevronRight } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -62,13 +64,24 @@ const AdminListings = () => {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   // Annonces = vie de la publication. Par défaut : tout ce qui est visible publiquement ou bloqué côté annonce (hors brouillons et hors gardes opérationnelles déjà confirmées)
-  const [filterStatus, setFilterStatus] = useState<"published" | "draft" | "cancelled" | "all" | "no_draft">("published");
+  const [filterStatus, setFilterStatus] = useState<"published" | "draft" | "cancelled" | "all" | "no_draft" | "to_staff">("published");
   const [filterCity, setFilterCity] = useState("");
   const [stats, setStats] = useState<Record<string, Stats>>({});
   const [cities, setCities] = useState<string[]>([]);
   const [deleteModal, setDeleteModal] = useState<string | null>(null);
   const [hideModal, setHideModal] = useState<string | null>(null);
   const [restoreModal, setRestoreModal] = useState<string | null>(null);
+
+  // KPIs (indépendants des filtres, calculés au montage)
+  const [kpis, setKpis] = useState<{ total: number; published: number; draft: number; cancelled: number; archived: number; newLast7d: number } | null>(null);
+
+  // Pagination client-side
+  const PAGE_SIZE = 25;
+  const [page, setPage] = useState(0);
+
+  // Message rapide au propriétaire
+  const [messageModal, setMessageModal] = useState<{ open: boolean; listing: any | null; content: string }>({ open: false, listing: null, content: "" });
+  const [sendingMessage, setSendingMessage] = useState(false);
 
   // Traffic sheet
   const [trafficOpen, setTrafficOpen] = useState(false);
@@ -95,6 +108,8 @@ const AdminListings = () => {
       .limit(2000);
     if (filterStatus === "no_draft") {
       q = q.neq("status", "draft" as any);
+    } else if (filterStatus === "to_staff") {
+      q = q.eq("status", "published" as any);
     } else if (filterStatus !== "all") {
       q = q.eq("status", filterStatus as any);
     }
@@ -109,6 +124,33 @@ const AdminListings = () => {
   }, [filterStatus]);
 
   useEffect(() => { fetchListings(); }, [fetchListings]);
+
+  // KPI counts (indépendants des filtres, calculés au montage)
+  useEffect(() => {
+    (async () => {
+      const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
+      const [totalRes, pubRes, draftRes, cancRes, archRes, newRes] = await Promise.all([
+        supabase.from("sits").select("id", { count: "exact", head: true }),
+        supabase.from("sits").select("id", { count: "exact", head: true }).eq("status", "published" as any),
+        supabase.from("sits").select("id", { count: "exact", head: true }).eq("status", "draft" as any),
+        supabase.from("sits").select("id", { count: "exact", head: true }).eq("status", "cancelled" as any),
+        supabase.from("sits").select("id", { count: "exact", head: true }).eq("status", "archived" as any),
+        supabase.from("sits").select("id", { count: "exact", head: true }).gte("created_at", sevenDaysAgo),
+      ]);
+      setKpis({
+        total: totalRes.count ?? 0,
+        published: pubRes.count ?? 0,
+        draft: draftRes.count ?? 0,
+        cancelled: cancRes.count ?? 0,
+        archived: archRes.count ?? 0,
+        newLast7d: newRes.count ?? 0,
+      });
+    })();
+  }, []);
+
+  // Reset pagination quand le contexte de filtrage change
+  useEffect(() => { setPage(0); }, [filterStatus, search, filterCity]);
+
 
   // Batch stats : vues, vues uniques, msg, conversations, candidatures, dernière vue
   useEffect(() => {
@@ -230,8 +272,85 @@ const AdminListings = () => {
   const filtered = listings.filter((l) => {
     if (search && !l.title?.toLowerCase().includes(search.toLowerCase()) && !l.owner?.first_name?.toLowerCase().includes(search.toLowerCase())) return false;
     if (filterCity && filterCity !== "all_cities" && l.owner?.city !== filterCity) return false;
+    if (filterStatus === "to_staff") {
+      const today = new Date(); today.setHours(0, 0, 0, 0);
+      const apps = stats[l.id]?.applications || 0;
+      const notPast = !l.end_date || new Date(l.end_date) >= today;
+      if (apps !== 0 || !notPast) return false;
+    }
     return true;
   });
+
+  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+  const currentPage = Math.min(page, totalPages - 1);
+  const paginated = filtered.slice(currentPage * PAGE_SIZE, (currentPage + 1) * PAGE_SIZE);
+
+  const handleExportCsv = () => {
+    const header = ["Titre", "Proprio", "Ville", "Pays", "Début", "Fin", "Statut", "Vues", "Uniques", "Messages", "Candidatures", "Dernière vue"];
+    const esc = (v: any) => {
+      const s = v == null ? "" : String(v);
+      return `"${s.replace(/"/g, '""')}"`;
+    };
+    const rows = filtered.map((l) => {
+      const st = stats[l.id];
+      const owner = `${l.owner?.first_name || ""} ${l.owner?.last_name || ""}`.trim();
+      return [
+        l.title || "Sans titre",
+        owner,
+        l.owner?.city || "",
+        l.country ? getCountryName(l.country) : "",
+        l.start_date ? format(new Date(l.start_date), "yyyy-MM-dd") : "",
+        l.end_date ? format(new Date(l.end_date), "yyyy-MM-dd") : "",
+        resolveStatusBadge(l).label,
+        st?.views ?? 0,
+        st?.uniqueViews ?? 0,
+        st?.messages ?? 0,
+        st?.applications ?? 0,
+        st?.lastViewAt ? format(new Date(st.lastViewAt), "yyyy-MM-dd HH:mm") : "",
+      ].map(esc).join(",");
+    });
+    const csv = "\uFEFF" + [header.map(esc).join(","), ...rows].join("\n");
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `annonces-${format(new Date(), "yyyy-MM-dd")}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
+  const handleSendMessage = async () => {
+    const content = messageModal.content.trim();
+    const target = messageModal.listing;
+    if (!content || !target?.user_id) {
+      toast.error("Le message ne peut pas être vide");
+      return;
+    }
+    setSendingMessage(true);
+    const { data, error } = await supabase.rpc("admin_send_message_to_user", {
+      p_target_user_id: target.user_id,
+      p_content: content,
+    });
+    setSendingMessage(false);
+    if (error) {
+      try {
+        await supabase.rpc("admin_log_message_failure", {
+          p_target_user_id: target.user_id,
+          p_content: content,
+          p_error_message: error.message || "Erreur inconnue",
+        });
+      } catch { /* noop */ }
+      toast.error(error.message || "Erreur lors de l'envoi");
+      return;
+    }
+    toast.success("Message envoyé");
+    const convId = data as string;
+    setMessageModal({ open: false, listing: null, content: "" });
+    if (convId) navigate(`/messages?conversation=${convId}`);
+  };
+
 
   const buildShareData = (listing: any) => {
     const url = `https://guardiens.fr/annonces/${listing.id}`;
@@ -283,20 +402,47 @@ const AdminListings = () => {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="font-heading text-2xl sm:text-3xl font-bold tracking-tight">Annonces</h1>
-        <p className="text-sm text-muted-foreground mt-1">
-          Vie de la publication : visibilité, trafic, candidatures. Annonces publiées, brouillons et masquées.
-        </p>
-        <p className="text-sm text-muted-foreground mt-1">
-          Pour le suivi opérationnel post-acceptation (confirmed, completed, cancelled), consultez l'onglet{' '}
-          <button
-            onClick={() => navigate('/admin/sits-management')}
-            className="font-medium text-foreground underline hover:text-primary transition-colors"
-          >
-            Gardes
-          </button>.
-        </p>
+      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
+        <div>
+          <h1 className="font-heading text-2xl sm:text-3xl font-bold tracking-tight">Annonces</h1>
+          <p className="text-sm text-muted-foreground mt-1">
+            Vie de la publication : visibilité, trafic, candidatures. Annonces publiées, brouillons et masquées.
+          </p>
+          <p className="text-sm text-muted-foreground mt-1">
+            Pour le suivi opérationnel post-acceptation (confirmed, completed, cancelled), consultez l'onglet{' '}
+            <button
+              onClick={() => navigate('/admin/sits-management')}
+              className="font-medium text-foreground underline hover:text-primary transition-colors"
+            >
+              Gardes
+            </button>.
+          </p>
+        </div>
+        <Button variant="outline" size="sm" onClick={handleExportCsv} disabled={filtered.length === 0}>
+          <Download className="h-4 w-4 mr-2" />
+          Exporter CSV
+        </Button>
+      </div>
+
+      {/* KPI banner */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+        {[
+          { label: "Total annonces", value: kpis?.total },
+          { label: "En ligne", value: kpis?.published },
+          { label: "Brouillons", value: kpis?.draft },
+          { label: "Masquées / annulées", value: kpis?.cancelled },
+          { label: "Archivées", value: kpis?.archived },
+          { label: "Nouvelles 7 jours", value: kpis?.newLast7d },
+        ].map((k) => (
+          <Card key={k.label}>
+            <CardContent className="p-4">
+              <p className="text-xs text-muted-foreground">{k.label}</p>
+              <p className="text-2xl font-bold text-foreground mt-1">
+                {k.value === undefined ? "–" : k.value.toLocaleString("fr-FR")}
+              </p>
+            </CardContent>
+          </Card>
+        ))}
       </div>
 
       <DraftStatsPanel />
@@ -307,9 +453,10 @@ const AdminListings = () => {
           <Input placeholder="Rechercher titre ou proprio…" value={search} onChange={(e) => setSearch(e.target.value)} className="pl-9" />
         </div>
         <Select value={filterStatus} onValueChange={(v) => setFilterStatus(v as any)}>
-          <SelectTrigger className="w-[200px]"><SelectValue /></SelectTrigger>
+          <SelectTrigger className="w-[220px]"><SelectValue /></SelectTrigger>
           <SelectContent>
             <SelectItem value="published">En ligne (par défaut)</SelectItem>
+            <SelectItem value="to_staff">À staffer (0 candidature)</SelectItem>
             <SelectItem value="draft">Brouillons</SelectItem>
             <SelectItem value="cancelled">Masquées / annulées</SelectItem>
             <SelectItem value="no_draft">Tout sauf brouillons</SelectItem>
@@ -326,6 +473,7 @@ const AdminListings = () => {
           </Select>
         )}
       </div>
+
 
       <div className="space-y-2">
         <div className="flex items-center gap-2 text-xs text-muted-foreground">
@@ -372,7 +520,7 @@ const AdminListings = () => {
               <TableRow><TableCell colSpan={11} className="text-center py-8 text-muted-foreground">Chargement…</TableCell></TableRow>
             ) : filtered.length === 0 ? (
               <TableRow><TableCell colSpan={11} className="text-center py-8 text-muted-foreground">Aucune annonce</TableCell></TableRow>
-            ) : filtered.map((listing) => {
+            ) : paginated.map((listing) => {
               const s = resolveStatusBadge(listing);
               const st = stats[listing.id];
               const isAdminHidden = listing.status === "cancelled" && !!listing.hidden_by;
@@ -439,6 +587,16 @@ const AdminListings = () => {
                       <Button variant="ghost" size="icon" title="Voir l'annonce" aria-label="Voir l'annonce" onClick={() => navigate(`/sits/${listing.id}`)}>
                         <Eye className="h-4 w-4" />
                       </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        title="Message au propriétaire"
+                        aria-label="Message au propriétaire"
+                        onClick={() => setMessageModal({ open: true, listing, content: "" })}
+                        disabled={!listing.user_id}
+                      >
+                        <MessageSquare className="h-4 w-4" />
+                      </Button>
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                           <Button variant="ghost" size="icon" title="Partager" aria-label="Partager">
@@ -477,6 +635,36 @@ const AdminListings = () => {
           </TableBody>
         </Table>
       </div>
+
+      {/* Pagination */}
+      {filtered.length > 0 && (
+        <div className="flex items-center justify-between gap-3 text-sm text-muted-foreground">
+          <span>
+            {filtered.length.toLocaleString("fr-FR")} annonce{filtered.length > 1 ? "s" : ""} · page {currentPage + 1}/{totalPages}
+          </span>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setPage((p) => Math.max(0, p - 1))}
+              disabled={currentPage === 0}
+              aria-label="Page précédente"
+            >
+              <ChevronLeft className="h-4 w-4 mr-1" /> Précédent
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
+              disabled={currentPage >= totalPages - 1}
+              aria-label="Page suivante"
+            >
+              Suivant <ChevronRight className="h-4 w-4 ml-1" />
+            </Button>
+          </div>
+        </div>
+      )}
+
 
       {/* Traffic sheet */}
       <Sheet open={trafficOpen} onOpenChange={setTrafficOpen}>
@@ -611,7 +799,52 @@ const AdminListings = () => {
         sitTitle={drillSit?.title ?? null}
         initialTab={drillTab}
       />
+
+      {/* Message rapide au propriétaire */}
+      <Dialog
+        open={messageModal.open}
+        onOpenChange={(o) => !o && !sendingMessage && setMessageModal({ open: false, listing: null, content: "" })}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>
+              Message au propriétaire
+              {messageModal.listing?.owner?.first_name ? ` , ${messageModal.listing.owner.first_name}` : ""}
+            </DialogTitle>
+          </DialogHeader>
+          <DialogDescription>
+            Le message sera envoyé en votre nom dans la messagerie du propriétaire de l'annonce
+            {messageModal.listing?.title ? ` « ${messageModal.listing.title} »` : ""}.
+          </DialogDescription>
+          <div className="space-y-2">
+            <Textarea
+              placeholder="Votre message…"
+              value={messageModal.content}
+              onChange={(e) => setMessageModal((m) => ({ ...m, content: e.target.value }))}
+              rows={6}
+              maxLength={2000}
+              disabled={sendingMessage}
+            />
+            <div className="text-xs text-muted-foreground text-right">
+              {messageModal.content.length}/2000
+            </div>
+          </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setMessageModal({ open: false, listing: null, content: "" })}
+              disabled={sendingMessage}
+            >
+              Annuler
+            </Button>
+            <Button onClick={handleSendMessage} disabled={sendingMessage || !messageModal.content.trim()}>
+              {sendingMessage ? "Envoi…" : "Envoyer"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
+
   );
 };
 
