@@ -180,8 +180,10 @@ Pendant la garde, votre gardien envoie des photos et des nouvelles de vos animau
  },
  {
  id: "quartiers",
- title: "Les quartiers de Lyon couverts par nos gardiens",
- content: `Lyon se compose de neuf arrondissements et d'une ceinture de communes limitrophes, chacun avec ses particularités pour la garde d'animaux. Nos gardiens à Lyon connaissent les spécificités de chaque quartier.
+ title: "Quels quartiers de Lyon sont les mieux couverts ?",
+ content: `Les 9 arrondissements lyonnais et les communes limitrophes (Villeurbanne, Caluire-et-Cuire, Bron, Oullins, Ecully) sont couverts par le réseau Guardiens, avec une densité plus forte sur le Vieux-Lyon (5ème), la Presqu'île (1er et 2ème), les Brotteaux et la Tête d'Or (6ème), Montchat (3ème) et la Croix-Rousse (4ème).
+
+Lyon se compose de neuf arrondissements et d'une ceinture de communes limitrophes, chacun avec ses particularités pour la garde d'animaux. Nos gardiens à Lyon connaissent les spécificités de chaque quartier.
 
 **Lyon 1er, Terreaux, Croix-Rousse pentes.** Quartier dense, rues pavées et montées. Les chiens de petite taille s'y adaptent bien. Les gardiens du 1er connaissent les passages piétons vers les quais de Saône pour des promenades au calme. Peu de jardins privatifs, les sorties régulières sont essentielles.
 
