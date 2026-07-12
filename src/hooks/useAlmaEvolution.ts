@@ -197,6 +197,7 @@ export function useAlmaEvolution() {
           profileCompletion,
           identityVerified,
           publishedSitsCount,
+          allSitsCount: sits.length,
           applicationsCount,
           missionsCount,
           completedSitsCount,
