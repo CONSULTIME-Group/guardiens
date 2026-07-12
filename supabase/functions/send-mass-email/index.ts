@@ -681,6 +681,17 @@ Deno.serve(async (req) => {
     let errors = 0;
     const BATCH_SIZE = 100;
 
+    // Personnalisation {prénom} / {prenom} par destinataire.
+    // Fallback « Bonjour » quand le prénom est vide/null : évite un « Bonjour  , »
+    // vide côté destinataire et préserve une amorce polie côté objet et corps.
+    const firstNameByEmail = new Map<string, string>();
+    for (const p of profiles) {
+      firstNameByEmail.set(p.email.toLowerCase(), (p.first_name ?? "").trim());
+    }
+    const FIRST_NAME_RE = /\{pr[ée]nom\}/gi;
+    const personalize = (text: string, firstName: string): string =>
+      text.replace(FIRST_NAME_RE, firstName || "Bonjour");
+
     // Un objet email par destinataire : lien de désinscription + headers
     // List-Unsubscribe (RFC 8058, one-click) personnalisés au token.
     const unsubApiBase = `${SUPABASE_URL}/functions/v1/handle-email-unsubscribe`;
@@ -688,11 +699,16 @@ Deno.serve(async (req) => {
       const token = tokenMap.get(email.toLowerCase()) ?? "";
       const oneClick = `${unsubApiBase}?token=${token}`;
       const uiUrl = `https://guardiens.fr/unsubscribe?token=${token}`;
-      const personalizedHtml = htmlTemplate.replaceAll(UNSUB_TOKEN_PLACEHOLDER, token);
+      const firstName = firstNameByEmail.get(email.toLowerCase()) ?? "";
+      const personalizedSubject = personalize(subject, firstName);
+      const personalizedHtml = personalize(
+        htmlTemplate.replaceAll(UNSUB_TOKEN_PLACEHOLDER, token),
+        firstName,
+      );
       return {
         from: "Guardiens <bonjour@guardiens.fr>",
         to: [email],
-        subject,
+        subject: personalizedSubject,
         html: personalizedHtml,
         tracking: { opens: true, clicks: true },
         tags: [{ name: "campaign_id", value: campaignId }],
