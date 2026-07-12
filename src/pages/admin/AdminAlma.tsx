@@ -25,6 +25,7 @@ import { Download, AlertTriangle, Sparkles, MessageCircle, BookOpen } from "luci
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
+import { AffinityOnboardingFunnelCard } from "@/components/admin/AffinityOnboardingFunnelCard";
 import { trackEvent } from "@/lib/analytics";
 import { WHISPER_PRIORITY } from "@/lib/alma/whisper-types";
 import {
