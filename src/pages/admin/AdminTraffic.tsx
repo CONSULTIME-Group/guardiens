@@ -137,9 +137,12 @@ const AdminTraffic = () => {
           </Suspense>
         </TabsContent>
 
-        <TabsContent value="signup-funnel" className="mt-6">
+        <TabsContent value="signup-funnel" className="mt-6 space-y-6">
           <Suspense fallback={<div className="p-8 text-center text-muted-foreground"><Loader2 className="h-5 w-5 animate-spin inline" /></div>}>
             <AdminSignupFunnelTab />
+          </Suspense>
+          <Suspense fallback={<div className="p-8 text-center text-muted-foreground"><Loader2 className="h-5 w-5 animate-spin inline" /></div>}>
+            <SignupFormSubStepsFunnel />
           </Suspense>
         </TabsContent>
       </Tabs>
