@@ -520,7 +520,7 @@ const AdminListings = () => {
               <TableRow><TableCell colSpan={11} className="text-center py-8 text-muted-foreground">Chargement…</TableCell></TableRow>
             ) : filtered.length === 0 ? (
               <TableRow><TableCell colSpan={11} className="text-center py-8 text-muted-foreground">Aucune annonce</TableCell></TableRow>
-            ) : filtered.map((listing) => {
+            ) : paginated.map((listing) => {
               const s = resolveStatusBadge(listing);
               const st = stats[listing.id];
               const isAdminHidden = listing.status === "cancelled" && !!listing.hidden_by;
