@@ -1355,9 +1355,10 @@ const SitCard = ({
 
 /* ── Quick actions ── */
 const QuickActions = ({
-  sit, isOwner, effectiveStatus, onRepublish, onOpenGuide,
+  sit, isOwner, effectiveStatus, onRepublish, onOpenGuide, onWithdraw,
 }: {
   sit: any; isOwner: boolean; effectiveStatus: string; onRepublish: () => void; onOpenGuide: (id: string) => void;
+  onWithdraw?: (appId: string) => void;
 }) => {
   const btnClass = "text-xs font-medium flex items-center gap-1 px-2.5 py-1.5 rounded-lg transition-colors";
 
