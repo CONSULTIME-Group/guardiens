@@ -274,6 +274,26 @@ const AdminUsers = () => {
     })();
   }, []);
 
+  // KPI counts (indépendants des filtres, calculés au montage)
+  useEffect(() => {
+    (async () => {
+      const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
+      const [totalRes, activeRes, suspRes, verifRes, newRes] = await Promise.all([
+        supabase.from("profiles").select("id", { count: "exact", head: true }),
+        supabase.from("profiles").select("id", { count: "exact", head: true }).or("account_status.eq.active,account_status.is.null"),
+        supabase.from("profiles").select("id", { count: "exact", head: true }).eq("account_status", "suspended"),
+        supabase.from("profiles").select("id", { count: "exact", head: true }).eq("identity_verification_status", "verified"),
+        supabase.from("profiles").select("id", { count: "exact", head: true }).gte("created_at", sevenDaysAgo),
+      ]);
+      setKpis({
+        total: totalRes.count ?? 0,
+        active: activeRes.count ?? 0,
+        suspended: suspRes.count ?? 0,
+        verified: verifRes.count ?? 0,
+        newLast7d: newRes.count ?? 0,
+      });
+    })();
+
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
   const availableDepts = Object.keys(DEPT_NAMES).sort((a, b) => a.localeCompare(b, "fr"));
   const availableCountries = countryStats.codes;
