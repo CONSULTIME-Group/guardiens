@@ -308,6 +308,11 @@ const AppRoutes = () => (
       <Route path="/articles/:slug" element={<NavigateBlogSlug />} />
       <Route path="/blog" element={<Navigate to="/actualites" replace />} />
       <Route path="/blog/:slug" element={<NavigateBlogSlug />} />
+
+      {/* Legacy footer/marketing redirects — évite les 404 issus d'anciens liens indexés */}
+      <Route path="/observatoire" element={<Navigate to="/observatoire-garde-animaux" replace />} />
+      <Route path="/pros-animaliers" element={<Navigate to="/pros" replace />} />
+      <Route path="/mon-profil" element={<Navigate to="/profile" replace />} />
       <Route path="/a-propos" element={<About />} />
       <Route path="/observatoire-garde-animaux" element={<PublicShellRoute><Observatoire /></PublicShellRoute>} />
       <Route path="/contact" element={<Contact />} />
