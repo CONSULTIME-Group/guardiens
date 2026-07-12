@@ -571,6 +571,19 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, prope
     const sitter = app.sitter;
     const status = statusStyles[app.status] || statusStyles.pending;
     const completedSits = sitter?.completed_sits_count || 0;
+    const isPendingLike = app.status === "pending" || app.status === "viewed";
+    const receivedLabel = app.created_at
+      ? `Reçue ${formatDistanceToNow(new Date(app.created_at), { addSuffix: true, locale: fr })}`
+      : null;
+    const affinityScore = affinityByApp.get(app.id);
+    const affinityClass =
+      typeof affinityScore === "number"
+        ? affinityScore >= 70
+          ? "bg-success/10 text-success"
+          : affinityScore >= 50
+            ? "bg-warning/10 text-warning-foreground"
+            : "bg-muted text-muted-foreground"
+        : null;
 
     return (
       <div key={app.id} className="bg-card border border-border rounded-2xl p-5 mb-4">
