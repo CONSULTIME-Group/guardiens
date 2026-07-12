@@ -102,6 +102,10 @@ const AdminUsers = () => {
     open: false, userId: "", userName: "", email: "", newValue: false,
   });
   const [togglingSuper, setTogglingSuper] = useState(false);
+  const [reactivateModal, setReactivateModal] = useState<{ open: boolean; userId: string; userName: string; email: string }>({
+    open: false, userId: "", userName: "", email: "",
+  });
+  const [reactivating, setReactivating] = useState(false);
   const navigate = useNavigate();
 
   const openHistory = async () => {
