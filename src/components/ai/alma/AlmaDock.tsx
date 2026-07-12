@@ -206,6 +206,22 @@ export function AlmaDock() {
     }
   }, [currentWhisper?.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  // Expose l'état déplié via un attribut body, pour permettre aux surfaces
+  // (ex. /messages) d'ajouter un padding-bottom réservant l'espace du panneau
+  // Alma sans repositionner le dock.
+  useEffect(() => {
+    if (typeof document === "undefined") return;
+    const active = expanded && (!!whisper || !!proposition);
+    if (active) {
+      document.body.dataset.almaDockExpanded = "true";
+    } else {
+      delete document.body.dataset.almaDockExpanded;
+    }
+    return () => {
+      delete document.body.dataset.almaDockExpanded;
+    };
+  }, [expanded, whisper, proposition]);
+
   const doDismiss = useCallback(
     (reason: AlmaDismissReason, actionId?: string) => {
       dismissCurrent(reason, actionId);
