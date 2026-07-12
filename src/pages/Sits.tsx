@@ -583,17 +583,41 @@ const Sits = () => {
       });
     }
     const q = searchQuery.trim().toLowerCase();
-    if (!q) return base;
-    return base.filter((s) => {
-      const fields = [
-        s.title, s.city, s.ownerCity,
-        s.owner?.first_name, s.owner?.city,
-        s.acceptedSitter?.first_name, s.acceptedSitter?.city,
-        ...(s.pets || []).map((p: any) => p.name),
-      ].filter(Boolean).join(" ").toLowerCase();
-      return fields.includes(q);
-    });
-  }, [activeSits, sits, isOwnerView, activeTab, activeOwnerTab, searchQuery]);
+    let searched = q
+      ? base.filter((s) => {
+          const fields = [
+            s.title, s.city, s.ownerCity,
+            s.owner?.first_name, s.owner?.city,
+            s.acceptedSitter?.first_name, s.acceptedSitter?.city,
+            ...(s.pets || []).map((p: any) => p.name),
+          ].filter(Boolean).join(" ").toLowerCase();
+          return fields.includes(q);
+        })
+      : base;
+
+    // Tri owner (onglet actif & en garde) : "urgent" par défaut (pending desc)
+    if (isOwnerView && (activeOwnerTab === "active")) {
+      const bySort = [...searched];
+      if (ownerSortMode === "urgent") {
+        bySort.sort((a, b) => {
+          const pa = a.pendingApplicationCount || 0;
+          const pb = b.pendingApplicationCount || 0;
+          if (pa !== pb) return pb - pa;
+          const ua = new Date(a.updated_at || a.created_at || 0).getTime();
+          const ub = new Date(b.updated_at || b.created_at || 0).getTime();
+          return ub - ua;
+        });
+      } else {
+        bySort.sort((a, b) => {
+          const ua = new Date(a.updated_at || a.created_at || 0).getTime();
+          const ub = new Date(b.updated_at || b.created_at || 0).getTime();
+          return ub - ua;
+        });
+      }
+      return bySort;
+    }
+    return searched;
+  }, [activeSits, sits, isOwnerView, activeTab, activeOwnerTab, searchQuery, ownerSortMode]);
 
   // Suggestions de recherche : titres, villes, gardiens/propriétaires, animaux (uniques)
   const searchSuggestions = useMemo(() => {
