@@ -54,8 +54,8 @@ const statusConfig: Record<string, { label: string; className: string }> = {
   archived: { label: "Archivée", className: "bg-muted text-muted-foreground border border-dashed border-border" },
 };
 
-const appStatusConfig: Record<string, { label: string; className: string }> = {
-  pending: { label: "Envoyée", className: "bg-muted text-muted-foreground" },
+const appStatusConfig: Record<string, { label: string; className: string; pulse?: boolean }> = {
+  pending: { label: "Envoyée", className: "bg-primary/10 text-primary", pulse: true },
   viewed: { label: "Consultée", className: "bg-secondary/10 text-secondary" },
   discussing: { label: "En discussion", className: "bg-accent text-foreground" },
   accepted: { label: "Acceptée", className: "bg-success-soft text-success border border-success-border" },
