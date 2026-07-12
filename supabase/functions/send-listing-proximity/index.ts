@@ -151,7 +151,7 @@ interface Recipient {
 }
 
 async function computeRecipients(
-  serviceClient: ReturnType<typeof createClient>,
+  serviceClient: SupabaseClient<any, "public", any>,
   sitId: string,
   radiusKm: number,
 ): Promise<{
