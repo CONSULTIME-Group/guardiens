@@ -610,16 +610,39 @@ const AdminUsers = () => {
     <div className="space-y-6">
       <div className="flex items-center justify-between gap-3">
         <h1 className="font-heading text-2xl sm:text-3xl font-bold tracking-tight">Utilisateurs</h1>
-        <div className="flex items-center gap-3">
-          <Badge variant="secondary" className="text-xs">
-            {intlCount} membre{intlCount > 1 ? "s" : ""} hors France
-          </Badge>
+        <div className="flex items-center gap-2">
+          <Button variant="outline" size="sm" onClick={handleExportCsv} disabled={exporting}>
+            <Download className="h-4 w-4 mr-2" />
+            {exporting ? "Export…" : "Exporter CSV"}
+          </Button>
           <Button variant="outline" size="sm" onClick={openHistory}>
             <MessageSquare className="h-4 w-4 mr-2" />
             Historique de mes envois
           </Button>
         </div>
       </div>
+
+      {/* KPI banner */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+        {[
+          { label: "Total inscrits", value: kpis?.total },
+          { label: "Actifs", value: kpis?.active },
+          { label: "Suspendus", value: kpis?.suspended },
+          { label: "Vérifiés", value: kpis?.verified },
+          { label: "Hors France", value: intlCount },
+          { label: "Nouveaux 7 jours", value: kpis?.newLast7d },
+        ].map((k) => (
+          <Card key={k.label}>
+            <CardContent className="p-4">
+              <p className="text-xs text-muted-foreground">{k.label}</p>
+              <p className="text-2xl font-bold text-foreground mt-1">
+                {k.value === undefined ? "–" : k.value.toLocaleString("fr-FR")}
+              </p>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+
 
       <div className="flex flex-col sm:flex-row gap-3">
         <Input
