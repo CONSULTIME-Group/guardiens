@@ -157,12 +157,13 @@ function BubblesTab({ since, range }: { since: string; range: Range }) {
         .like("event_type", "alma_%")
         .gte("created_at", since)
         .order("created_at", { ascending: false })
-        .limit(20000);
+        .limit(ROW_LIMIT);
       if (error) throw error;
       return (data ?? []) as RawEvent[];
     },
   });
 
+  const truncated = events.length >= ROW_LIMIT;
   const kpis = useMemo(() => computeBubbleKpis(events), [events]);
   const moments = useMemo(() => aggregateMoments(events), [events]);
 
