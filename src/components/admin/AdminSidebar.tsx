@@ -35,6 +35,7 @@ export const BADGE_TITLES: Record<string, string> = {
   analysisRequests: "demandes d'analyse à traiter",
   reportsSit: "signalements visant des annonces",
   reportsMission: "signalements visant des petites missions",
+  sitsToStaff: "annonces à staffer (aucune candidature)",
 };
 
 interface NavGroup {
