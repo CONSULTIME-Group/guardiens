@@ -25,12 +25,23 @@ import DraftStatsPanel from "@/components/admin/DraftStatsPanel";
 import ListingDrilldownDialog from "@/components/admin/ListingDrilldownDialog";
 import { getCountryName } from "@/lib/countries";
 
-const statusLabels: Record<string, { label: string; variant: "default" | "secondary" | "outline" | "destructive" }> = {
+type BadgeVariant = "default" | "secondary" | "outline" | "destructive";
+const statusLabels: Record<string, { label: string; variant: BadgeVariant }> = {
   draft: { label: "Brouillon", variant: "outline" },
   published: { label: "En ligne", variant: "default" },
   confirmed: { label: "Confirmée", variant: "secondary" },
   completed: { label: "Terminée", variant: "secondary" },
-  cancelled: { label: "Masquée / annulée", variant: "destructive" },
+  cancelled: { label: "Annulée (auteur)", variant: "outline" },
+  archived: { label: "Archivée", variant: "secondary" },
+};
+
+const resolveStatusBadge = (listing: any): { label: string; variant: BadgeVariant } => {
+  if (listing.status === "cancelled") {
+    return listing.hidden_by
+      ? { label: "Masquée (admin)", variant: "destructive" }
+      : { label: "Annulée (auteur)", variant: "outline" };
+  }
+  return statusLabels[listing.status] || statusLabels.draft;
 };
 
 type Stats = {
@@ -57,6 +68,7 @@ const AdminListings = () => {
   const [cities, setCities] = useState<string[]>([]);
   const [deleteModal, setDeleteModal] = useState<string | null>(null);
   const [hideModal, setHideModal] = useState<string | null>(null);
+  const [restoreModal, setRestoreModal] = useState<string | null>(null);
 
   // Traffic sheet
   const [trafficOpen, setTrafficOpen] = useState(false);
@@ -134,22 +146,62 @@ const AdminListings = () => {
   };
 
   const handleHide = async (id: string) => {
-    await supabase.from("sits").update({ status: "cancelled" as any }).eq("id", id);
+    const { data: userRes } = await supabase.auth.getUser();
+    const adminId = userRes?.user?.id;
+    const { error } = await supabase
+      .from("sits")
+      .update({ status: "cancelled" as any, hidden_by: adminId ?? null, hidden_at: new Date().toISOString() } as any)
+      .eq("id", id);
+    if (error) {
+      toast.error("Erreur : " + error.message);
+      return;
+    }
     const listing = listings.find(l => l.id === id);
-    if (listing?.owner) {
-      await supabase.from("notifications").insert({
-        user_id: listing.user_id, type: "listing_hidden",
-        title: "Annonce masquée par l'admin",
-        body: `Votre annonce "${listing.title || "Sans titre"}" a été masquée de la recherche par un administrateur.`,
-        link: `/sits/${id}`,
-      });
+    try {
+      if (listing?.user_id) {
+        await supabase.from("notifications").insert({
+          user_id: listing.user_id, type: "listing_hidden",
+          title: "Annonce masquée par l'admin",
+          body: `Votre annonce "${listing.title || "Sans titre"}" a été masquée de la recherche par un administrateur.`,
+          link: `/sits/${id}`,
+        });
+      }
+    } catch (e) {
+      console.error("notify owner hide:", e);
+    }
+    try {
+      if (adminId) {
+        await supabase.from("admin_action_logs").insert({
+          admin_id: adminId, action: "hide_listing", target_type: "sit", target_id: id,
+        } as any);
+      }
+    } catch (e) {
+      console.error("admin_action_logs hide:", e);
     }
     toast.success("Annonce masquée"); setHideModal(null); fetchListings();
   };
 
   const handleRestore = async (id: string) => {
-    await supabase.from("sits").update({ status: "published" as any }).eq("id", id);
-    toast.success("Annonce remise en ligne"); fetchListings();
+    const { data: userRes } = await supabase.auth.getUser();
+    const adminId = userRes?.user?.id;
+    const { error } = await supabase
+      .from("sits")
+      .update({ status: "published" as any, hidden_by: null, hidden_at: null } as any)
+      .eq("id", id);
+    if (error) {
+      toast.error("Erreur : " + error.message);
+      return;
+    }
+    try {
+      if (adminId) {
+        await supabase.from("admin_action_logs").insert({
+          admin_id: adminId, action: "restore_listing", target_type: "sit", target_id: id,
+        } as any);
+      }
+    } catch (e) {
+      console.error("admin_action_logs restore:", e);
+    }
+    toast.success("Annonce remise en ligne"); setRestoreModal(null); fetchListings();
   };
 
   const handleDelete = async (id: string) => {
@@ -321,8 +373,10 @@ const AdminListings = () => {
             ) : filtered.length === 0 ? (
               <TableRow><TableCell colSpan={11} className="text-center py-8 text-muted-foreground">Aucune annonce</TableCell></TableRow>
             ) : filtered.map((listing) => {
-              const s = statusLabels[listing.status] || statusLabels.draft;
+              const s = resolveStatusBadge(listing);
               const st = stats[listing.id];
+              const isAdminHidden = listing.status === "cancelled" && !!listing.hidden_by;
+              const isAuthorCancelled = listing.status === "cancelled" && !listing.hidden_by;
               return (
                 <TableRow key={listing.id}>
                   <TableCell className="font-medium max-w-[200px] truncate">{listing.title || "Sans titre"}</TableCell>
@@ -379,15 +433,15 @@ const AdminListings = () => {
                   <TableCell><Badge variant={s.variant}>{s.label}</Badge></TableCell>
                   <TableCell className="text-right">
                     <div className="flex justify-end gap-1">
-                      <Button variant="ghost" size="icon" title="Sources de trafic" onClick={() => openTraffic(listing)}>
+                      <Button variant="ghost" size="icon" title="Sources de trafic" aria-label="Sources de trafic" onClick={() => openTraffic(listing)}>
                         <BarChart3 className="h-4 w-4" />
                       </Button>
-                      <Button variant="ghost" size="icon" title="Voir l'annonce" onClick={() => navigate(`/sits/${listing.id}`)}>
+                      <Button variant="ghost" size="icon" title="Voir l'annonce" aria-label="Voir l'annonce" onClick={() => navigate(`/sits/${listing.id}`)}>
                         <Eye className="h-4 w-4" />
                       </Button>
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="icon" title="Partager">
+                          <Button variant="ghost" size="icon" title="Partager" aria-label="Partager">
                             <Share2 className="h-4 w-4" />
                           </Button>
                         </DropdownMenuTrigger>
@@ -403,16 +457,16 @@ const AdminListings = () => {
                           <DropdownMenuItem onSelect={() => handleShareTo(listing, "email")}><Mail className="h-4 w-4 mr-2" /> E-mail</DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
-                      {listing.status !== "cancelled" ? (
-                        <Button variant="ghost" size="icon" title="Masquer" onClick={() => setHideModal(listing.id)}>
-                          <EyeOff className="h-4 w-4" />
-                        </Button>
-                      ) : (
-                        <Button variant="ghost" size="icon" title="Remettre en ligne" onClick={() => handleRestore(listing.id)}>
+                      {isAdminHidden ? (
+                        <Button variant="ghost" size="icon" title="Remettre en ligne" aria-label="Remettre en ligne" onClick={() => setRestoreModal(listing.id)}>
                           <Sparkles className="h-4 w-4 text-primary" />
                         </Button>
+                      ) : isAuthorCancelled ? null : (
+                        <Button variant="ghost" size="icon" title="Masquer" aria-label="Masquer l'annonce" onClick={() => setHideModal(listing.id)}>
+                          <EyeOff className="h-4 w-4" />
+                        </Button>
                       )}
-                      <Button variant="ghost" size="icon" title="Supprimer" onClick={() => setDeleteModal(listing.id)}>
+                      <Button variant="ghost" size="icon" title="Supprimer" aria-label="Supprimer l'annonce" onClick={() => setDeleteModal(listing.id)}>
                         <Trash2 className="h-4 w-4 text-destructive" />
                       </Button>
                     </div>
@@ -517,6 +571,18 @@ const AdminListings = () => {
           <DialogFooter>
             <Button variant="outline" onClick={() => setHideModal(null)}>Annuler</Button>
             <Button variant="destructive" onClick={() => hideModal && handleHide(hideModal)}>Masquer</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Restore confirmation */}
+      <Dialog open={!!restoreModal} onOpenChange={(o) => !o && setRestoreModal(null)}>
+        <DialogContent>
+          <DialogHeader><DialogTitle>Remettre cette annonce en ligne ?</DialogTitle></DialogHeader>
+          <DialogDescription>L'annonce redeviendra visible dans la recherche.</DialogDescription>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setRestoreModal(null)}>Annuler</Button>
+            <Button onClick={() => restoreModal && handleRestore(restoreModal)}>Remettre en ligne</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
