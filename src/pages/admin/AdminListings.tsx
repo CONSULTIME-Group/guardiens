@@ -587,6 +587,16 @@ const AdminListings = () => {
                       <Button variant="ghost" size="icon" title="Voir l'annonce" aria-label="Voir l'annonce" onClick={() => navigate(`/sits/${listing.id}`)}>
                         <Eye className="h-4 w-4" />
                       </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        title="Message au propriétaire"
+                        aria-label="Message au propriétaire"
+                        onClick={() => setMessageModal({ open: true, listing, content: "" })}
+                        disabled={!listing.user_id}
+                      >
+                        <MessageSquare className="h-4 w-4" />
+                      </Button>
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                           <Button variant="ghost" size="icon" title="Partager" aria-label="Partager">
