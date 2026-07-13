@@ -174,7 +174,7 @@ const PublicSitDetail = () => {
           try {
             const { data: opRow } = await supabase
               .from("owner_profiles")
-              .select("presence_expected, visits_allowed, overnight_guest, space_usage, smoker_accepted, rules_notes, meeting_preference, handover_preference, welcome_notes, news_frequency, news_format, communication_notes, competences, competences_disponible, specific_expectations, experience_required, environments")
+              .select("presence_expected, visits_allowed, overnight_guest, space_usage, smoker_accepted, rules_notes, meeting_preference, handover_preference, welcome_notes, news_frequency, news_format, communication_notes, competences, competences_disponible, specific_expectations, experience_required, environments, preferred_sitter_types, home_ambiance, languages, interests, life_pace")
               .eq("user_id", sitData.user_id)
               .maybeSingle();
             setOwnerProfile(opRow || null);
