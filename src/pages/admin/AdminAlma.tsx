@@ -535,6 +535,12 @@ const FACT_TYPES = [
   { value: "founder_anecdote", label: "Anecdote fondatrice" },
 ] as const;
 
+const EMPTY_CULTURAL_STATS: { rows: Array<{ id: string; views: number; clicks: number }>; truncated: boolean } = {
+  rows: [],
+  truncated: false,
+};
+
+
 interface CulturalFactRow {
   id: string;
   fact_type: string;
