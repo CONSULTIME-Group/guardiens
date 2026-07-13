@@ -16,6 +16,7 @@ import { DormantTopSitterCard } from "@/components/admin/signals/DormantTopSitte
 import { SuspiciousAccountCard } from "@/components/admin/signals/SuspiciousAccountCard";
 import { RepeatedCancellationsCard } from "@/components/admin/signals/RepeatedCancellationsCard";
 import { RepeatedRepublishCard } from "@/components/admin/signals/RepeatedRepublishCard";
+import { OwnerMissingCoordinatesCard } from "@/components/admin/signals/OwnerMissingCoordinatesCard";
 import { cn } from "@/lib/utils";
 
 interface Signal {
