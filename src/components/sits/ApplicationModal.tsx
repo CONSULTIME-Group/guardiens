@@ -64,13 +64,14 @@ const ApplicationModal = ({
   useEffect(() => {
     if (!user || !open) return;
     const load = async () => {
-      const [profileRes, sitterRes, reviewRes, badgeRes, galleryRes, sitRes] = await Promise.all([
+      const [profileRes, sitterRes, reviewRes, badgeRes, galleryRes, sitRes, ownerAffRes] = await Promise.all([
         supabase.from("profiles").select("first_name, avatar_url, city, identity_verified").eq("id", user.id).single(),
-        supabase.from("sitter_profiles").select("experience_years, animal_types, own_animals, travels_with_children, travels_with_own_animals").eq("user_id", user.id).maybeSingle(),
+        supabase.from("sitter_profiles").select("experience_years, animal_types, own_animals, travels_with_children, travels_with_own_animals, life_pace, languages, interests, work_during_sit, sensitivities, special_animal_skills, sitter_type").eq("user_id", user.id).maybeSingle(),
         supabase.from("reviews").select("overall_rating").eq("reviewee_id", user.id).eq("published", true),
         supabase.from("badge_attributions").select("badge_id").eq("user_id", user.id),
         supabase.from("sitter_gallery").select("photo_url").eq("user_id", user.id).limit(4),
-        supabase.from("sits").select("accepts_sitter_pets, accepts_sitter_children, owner_message, specific_expectations").eq("id", sitId).maybeSingle(),
+        supabase.from("sits").select("accepts_sitter_pets, accepts_sitter_children, owner_message, specific_expectations, property_id").eq("id", sitId).maybeSingle(),
+        supabase.from("owner_profiles").select("preferred_sitter_types, home_ambiance, languages, interests, life_pace, presence_expected").eq("user_id", ownerId).maybeSingle(),
       ]);
 
       const reviews = reviewRes.data || [];
