@@ -6279,6 +6279,7 @@ export type Database = {
       }
     }
     Functions: {
+      _debug_geocode_secret_len: { Args: never; Returns: number }
       _normalize_species_pg: { Args: { v: string }; Returns: string }
       accept_application: { Args: { p_application_id: string }; Returns: Json }
       accept_garde_accord: {
