@@ -1191,6 +1191,7 @@ const SitCard = ({
   onArchive: () => void; onDelete: () => void; onRepublish: () => void; onOpenGuide: (id: string) => void;
   onWithdraw?: (appId: string) => void;
 }) => {
+  const { sitter: viewerSitter } = useViewerSitterForAffinity();
   const effectiveStatus = sit.effectiveStatus || sit.status;
   const duration = getDuration(sit.start_date, sit.end_date);
   // Couverture : photo de couv choisie sur la fiche en priorité, puis 1re photo de la galerie owner, puis ancien fallback property.
