@@ -4,7 +4,7 @@
  * - Pas d'emoji ni d'icône
  * - Pas de point d'exclamation « ! »
  * - Apostrophe typographique « ’ » (pas « ' »)
- * - Suffixe « — Guardiens » obligatoire
+ * - Pas de tiret cadratin ni demi-cadratin (ponctuation projet)
  */
 import { assert } from 'jsr:@std/assert@1'
 import { TEMPLATES } from './registry.ts'
