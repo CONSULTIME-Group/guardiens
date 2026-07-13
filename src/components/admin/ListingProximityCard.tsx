@@ -120,6 +120,7 @@ const ListingProximityCard = ({
     if (!preview) return;
     setConfirmOpen(false);
     setSending(true);
+    setWarningMessage(null);
     try {
       const { data, error } = await supabase.functions.invoke(
         "send-listing-proximity",
@@ -127,17 +128,20 @@ const ListingProximityCard = ({
           body: { mode: "send", sit_id: sitId, radius_km: radiusKm },
         },
       );
-      if (error) throw error;
-      if ((data as any)?.error) throw new Error((data as any).error);
+      if (error || (data as { error?: string })?.error) {
+        const msg = await extractError(error, data);
+        setWarningMessage(msg);
+        return;
+      }
       toast.success(
-        `Envoi terminé, ${(data as any).sent} email(s) expédié(s)${
-          (data as any).errors ? `, ${(data as any).errors} erreur(s)` : ""
+        `Envoi terminé, ${(data as { sent: number }).sent} email(s) expédié(s)${
+          (data as { errors?: number }).errors ? `, ${(data as { errors: number }).errors} erreur(s)` : ""
         }.`,
       );
       setPreview(null);
       setConfirmInput("");
-    } catch (err: any) {
-      toast.error(err.message || "Erreur lors de l'envoi");
+    } catch (err: unknown) {
+      setWarningMessage((err as Error)?.message || "Erreur lors de l'envoi");
     } finally {
       setSending(false);
     }
