@@ -55,6 +55,10 @@ const TrustScore = ({
   score += seniorPts;
   factors.push({ label: `Membre depuis ${monthsActive} mois`, points: 10, earned: seniorPts > 0 });
 
+  // Sous 70/100, on ne surexpose pas un « Fiable · 55% » qui inquiète.
+  // Le tooltip d'affinité reste, mais le badge trust est masqué.
+  if (score < 70) return null;
+
   // Determine level
   let level: string;
   let color: string;
@@ -63,18 +67,10 @@ const TrustScore = ({
     level = "Très fiable";
     color = "text-success";
     bgColor = "bg-success-soft border-success-border";
-  } else if (score >= 50) {
+  } else {
     level = "Fiable";
     color = "text-primary";
     bgColor = "bg-primary/5 border-primary/20";
-  } else if (score >= 25) {
-    level = "En progression";
-    color = "text-warning-foreground";
-    bgColor = "bg-warning-soft border-warning-border";
-  } else {
-    level = "Nouveau";
-    color = "text-muted-foreground";
-    bgColor = "bg-muted border-border";
   }
 
   const earnedCount = factors.filter(f => f.earned).length;
