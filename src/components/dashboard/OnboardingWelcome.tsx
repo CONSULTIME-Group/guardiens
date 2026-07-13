@@ -137,7 +137,7 @@ const OnboardingWelcome = ({ role, checks, onDismiss }: OnboardingWelcomeProps) 
       title: "Publiez votre première annonce",
       description: "Décrivez votre besoin de garde et recevez des candidatures en quelques heures.",
       link: "/sits/create",
-      cta: "Créer une annonce",
+      cta: "Publier une annonce",
       done: !!checks.hasSit,
     },
   ];
