@@ -50,7 +50,7 @@ const SitterEncourageCandidatureEmail = ({ firstName }: Props) => (
         <Hr style={hr} />
 
         <LegalFooter
-          purpose="de l'accompagnement de votre activation"
+          purpose="l'accompagnement de votre activation"
           basis="6.1.f"
           extra="Vous recevez ce message car votre compte gardien n'a pas encore donné lieu à une candidature. Vous pouvez ajuster vos préférences d'email depuis votre espace personnel."
         />

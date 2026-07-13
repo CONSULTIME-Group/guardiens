@@ -91,7 +91,7 @@ const ListingUnpublishedFeedbackEmail = ({
         </Text>
 
         <LegalFooter
-          purpose="d'un échange relatif à votre annonce et à l'amélioration du service"
+          purpose="un échange relatif à votre annonce et à l'amélioration du service"
           basis="6.1.f"
         />
       </Container>
