@@ -71,6 +71,7 @@ import { template as mutualAidWeeklyDigest } from './mutual-aid-weekly-digest.ts
 import { template as nearbyDailyDigest } from './nearby-daily-digest.tsx'
 import { template as firstApplicationReceived } from './first-application-received.tsx'
 import { template as nudgeMissingPhoto } from './nudge-missing-photo.tsx'
+import { template as ownerActivationNudge } from './owner-activation-nudge.tsx'
 
 
 export const TEMPLATES: Record<string, TemplateEntry> = {
@@ -136,6 +137,7 @@ export const TEMPLATES: Record<string, TemplateEntry> = {
   'nearby-daily-digest': nearbyDailyDigest,
   'first-application-received': firstApplicationReceived,
   'nudge-missing-photo': nudgeMissingPhoto,
+  'owner-activation-nudge': ownerActivationNudge,
 }
 
 

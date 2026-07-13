@@ -17,6 +17,7 @@ import { SuspiciousAccountCard } from "@/components/admin/signals/SuspiciousAcco
 import { RepeatedCancellationsCard } from "@/components/admin/signals/RepeatedCancellationsCard";
 import { RepeatedRepublishCard } from "@/components/admin/signals/RepeatedRepublishCard";
 import { OwnerMissingCoordinatesCard } from "@/components/admin/signals/OwnerMissingCoordinatesCard";
+import { OwnerActivationCampaignCard } from "@/components/admin/signals/OwnerActivationCampaignCard";
 import { cn } from "@/lib/utils";
 
 interface Signal {
@@ -84,7 +85,9 @@ export const SignalsSection = () => {
           À traiter
         </CardTitle>
       </CardHeader>
-      <CardContent>
+      <CardContent className="space-y-3">
+        <OwnerActivationCampaignCard />
+
         {isLoading ? (
           <div className="space-y-2">
             <Skeleton className="h-14 rounded-lg" />
