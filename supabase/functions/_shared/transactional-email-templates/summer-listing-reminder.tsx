@@ -41,7 +41,7 @@ const Email = ({ firstName }: Props) => {
             Vos plantes et vos animaux vous remercieront. En attendant, bonnes préparations de voyage.
           </Text>
           <Hr style={hr} />
-          <LegalFooter purpose="de rappel saisonnier aux propriétaires inscrits" basis="6.1.f" />
+          <LegalFooter purpose="l'envoi de rappels saisonniers aux propriétaires inscrits" basis="6.1.f" />
         </Container>
       </Body>
     </Html>

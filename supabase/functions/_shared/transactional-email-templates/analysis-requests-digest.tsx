@@ -57,7 +57,7 @@ const AnalysisRequestsDigestEmail = ({
         <Text style={text}>
           <Link href={adminUrl} style={link}>Ouvrir le kanban admin</Link>
         </Text>
-        <LegalFooter purpose="de la notification administrative" basis="6.1.f" />
+        <LegalFooter purpose="la notification administrative" basis="6.1.f" />
       </Container>
     </Body>
   </Html>

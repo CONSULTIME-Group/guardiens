@@ -40,7 +40,7 @@ const ProProfileRejectedEmail = ({ raisonSociale, reason }: Props) => (
           Corriger ma fiche
         </Button>
         <LegalFooter
-          purpose="de la gestion de votre fiche dans l’annuaire des pros animaliers"
+          purpose="la gestion de votre fiche dans l’annuaire des pros animaliers"
           basis="6.1.b"
         />
       </Container>

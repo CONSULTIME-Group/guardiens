@@ -165,7 +165,7 @@ const NearbyDailyDigestEmail = ({ firstName, radiusKm = 15, city, items = [] }: 
           </Text>
 
           <LegalFooter
-            purpose="de votre alerte de proximité"
+            purpose="votre alerte de proximité"
             basis="6.1.f"
           />
         </Container>

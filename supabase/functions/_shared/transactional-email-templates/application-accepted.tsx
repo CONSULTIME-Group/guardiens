@@ -31,7 +31,7 @@ const ApplicationAcceptedEmail = ({ sitTitle, ownerFirstName }: Props) => (
           Ouvrir la messagerie
         </Button>
         <LegalFooter
-          purpose="du traitement de votre candidature"
+          purpose="le traitement de votre candidature"
           basis="6.1.b"
         />
       </Container>

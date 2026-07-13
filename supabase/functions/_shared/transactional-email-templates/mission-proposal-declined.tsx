@@ -31,7 +31,7 @@ const Email = ({ missionTitle }: Props) => (
         <Button style={button} href={`${SITE_URL}/petites-missions`}>
           Voir d'autres coups de main
         </Button>
-        <LegalFooter purpose="du bon fonctionnement du service d'entraide" basis="6.1.f" />
+        <LegalFooter purpose="le bon fonctionnement du service d'entraide" basis="6.1.f" />
       </Container>
     </Body>
   </Html>

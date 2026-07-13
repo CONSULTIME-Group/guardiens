@@ -54,7 +54,7 @@ const AvailabilityNudgeEmail = ({
           <Button style={button} href={ctaHref}>Voir l'annonce</Button>
 
           <LegalFooter
-            purpose="du bon fonctionnement de votre compte"
+            purpose="le bon fonctionnement de votre compte"
             basis="6.1.f"
             extra="Vous recevez ce message une seule fois pour cette annonce, parce que vous êtes inscrit comme gardien dans le même département. Vous pouvez ajuster vos préférences d'alerte depuis votre espace personnel."
           />

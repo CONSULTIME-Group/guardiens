@@ -38,7 +38,7 @@ const ProProfileApprovedEmail = ({ raisonSociale, slug }: Props) => (
           <a href={`${SITE_URL}/pros/mon-espace`} style={link}>Accéder à mon espace pro</a>
         </Text>
         <LegalFooter
-          purpose="de la gestion de votre fiche dans l’annuaire des pros animaliers"
+          purpose="la gestion de votre fiche dans l’annuaire des pros animaliers"
           basis="6.1.b"
         />
       </Container>

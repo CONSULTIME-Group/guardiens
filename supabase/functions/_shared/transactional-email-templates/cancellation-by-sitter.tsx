@@ -39,7 +39,7 @@ const CancellationBySitterEmail = ({ cancellerFirstName, sitTitle, startDate, re
           Trouver un autre gardien
         </Button>
         <LegalFooter
-          purpose="du suivi de votre garde"
+          purpose="le suivi de votre garde"
           basis="6.1.b"
         />
       </Container>

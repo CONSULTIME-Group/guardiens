@@ -121,7 +121,7 @@ const MissionDailyDigestEmail = ({ helperFirstName, items = [] }: Props) => (
         <AlmaSignoff />
 
         <LegalFooter
-          purpose="du bon fonctionnement de votre digest entraide quotidien"
+          purpose="le bon fonctionnement de votre digest entraide quotidien"
           basis="6.1.f"
         />
 

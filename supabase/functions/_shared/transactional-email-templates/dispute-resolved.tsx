@@ -74,7 +74,7 @@ const DisputeResolvedEmail = ({ firstName, decision, category, adminNote }: Disp
             Merci de contribuer à la qualité et à la fiabilité des avis sur {SITE_NAME}.
           </Text>
         <LegalFooter
-          purpose="de la modération de la communauté"
+          purpose="la modération de la communauté"
           basis="6.1.f"
         />
         </Container>

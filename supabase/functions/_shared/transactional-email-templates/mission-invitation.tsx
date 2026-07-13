@@ -65,7 +65,7 @@ const MissionInvitationEmail = ({
         <Hr style={hr} />
 
         <LegalFooter
-          purpose="de la mise en relation pour l'entraide entre membres"
+          purpose="la mise en relation pour l'entraide entre membres"
           basis="6.1.b"
           extra="Vous recevez ce message car un membre du coin vous a personnellement invité(e) à donner un coup de main."
         />

@@ -50,7 +50,7 @@ const SubscriptionExpires7dEmail = ({ firstName = '', renewalDate }: Subscriptio
           Renouveler maintenant
         </Button>
         <LegalFooter
-          purpose="de la gestion de votre abonnement"
+          purpose="la gestion de votre abonnement"
           basis="6.1.b"
         />
       </Container>

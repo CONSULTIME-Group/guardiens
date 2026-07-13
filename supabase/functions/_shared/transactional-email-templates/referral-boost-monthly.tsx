@@ -41,7 +41,7 @@ const Email = ({ firstName }: Props) => {
             quand on a des animaux. Voici mon lien. »
           </Text>
           <Hr style={hr} />
-          <LegalFooter purpose="de fidélisation de nos membres actifs" basis="6.1.f" />
+          <LegalFooter purpose="la fidélisation de nos membres actifs" basis="6.1.f" />
         </Container>
       </Body>
     </Html>

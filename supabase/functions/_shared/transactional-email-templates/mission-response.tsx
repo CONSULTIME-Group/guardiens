@@ -31,7 +31,7 @@ const MissionResponseEmail = ({ responderFirstName, missionTitle }: Props) => (
           Voir la réponse
         </Button>
         <LegalFooter
-          purpose="du bon fonctionnement du service d'entraide"
+          purpose="le bon fonctionnement du service d'entraide"
           basis="6.1.f"
         />
       </Container>

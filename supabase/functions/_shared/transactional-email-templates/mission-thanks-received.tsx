@@ -35,7 +35,7 @@ const Email = ({ actorName, missionTitle, missionId }: Props) => (
             Voir la mission
           </Button>
         )}
-        <LegalFooter purpose="du bon fonctionnement du service d'entraide" basis="6.1.f" />
+        <LegalFooter purpose="le bon fonctionnement du service d'entraide" basis="6.1.f" />
       </Container>
     </Body>
   </Html>

@@ -147,7 +147,7 @@ const OnboardingJ1Email = ({
           <Hr style={hr} />
 
           <LegalFooter
-            purpose="du bon fonctionnement de votre compte"
+            purpose="le bon fonctionnement de votre compte"
             basis="6.1.f"
           />
         </Container>

@@ -61,7 +61,7 @@ const DiscoverMutualAidIntroEmail = ({ firstName }: Props) => (
         <Hr style={hr} />
 
         <LegalFooter
-          purpose="de la présentation des fonctionnalités d'entraide"
+          purpose="la présentation des fonctionnalités d'entraide"
           basis="6.1.f"
           extra="Vous recevez ce message dans le cadre de la découverte de votre compte. Vous pouvez ajuster vos préférences d'email depuis votre espace personnel."
         />

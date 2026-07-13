@@ -60,7 +60,7 @@ const ReviewReceivedEmail = ({ firstName, reviewerName, sitTitle, sitId }: Props
             </Section>
 
           <LegalFooter
-            purpose="du bon fonctionnement du service d'avis"
+            purpose="le bon fonctionnement du service d'avis"
             basis="6.1.f"
             extra={`Les avis publiés sur ${SITE_NAME} sont modérés conformément à l'article L. 111-7-2 du Code de la consommation et au décret n° 2017-1436. Chaque avis émane d'un membre ayant effectivement participé à la garde concernée.`}
           />

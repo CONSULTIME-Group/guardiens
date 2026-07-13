@@ -67,7 +67,7 @@ const ReviewReminderEmail = ({ firstName, sitTitle, revieweeName, sitId, isOwner
           <Hr style={hr} />
 
         <LegalFooter
-          purpose="du bon fonctionnement du service d'avis"
+          purpose="le bon fonctionnement du service d'avis"
           basis="6.1.f"
           extra={
     "Les avis publiés sur Guardiens sont modérés conformément à l'article L. 111-7-2 du Code de la consommation."
