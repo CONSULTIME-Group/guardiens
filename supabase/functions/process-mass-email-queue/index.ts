@@ -223,7 +223,14 @@ Deno.serve(async (req) => {
 
       // Personnalisation {prénom} / {prenom}, fallback « Bonjour » si prénom vide/null.
       const firstName = ((profile as { first_name?: string | null } | null)?.first_name ?? "").trim();
-      const personalize = (t: string) => t.replace(/\{pr[ée]nom\}/gi, firstName || "Bonjour");
+      const personalize = (t: string) => {
+        const name = (firstName || "").trim();
+        const replaced = t.replace(/\{pr[ée]nom\}/gi, name);
+        if (name) return replaced;
+        return replaced
+          .replace(/Bonjour\s+([,.!?;:])/gi, "Bonjour$1")
+          .replace(/[ \t]{2,}/g, " ");
+      };
       const personalizedSubject = personalize(campaign.subject);
 
       const html = personalize(
