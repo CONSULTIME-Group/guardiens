@@ -582,7 +582,7 @@ function CulturalFactsTab({ since }: { since: string }) {
   });
 
 
-  const { data: statsResult = { rows: [], truncated: false } } = useQuery({
+  const { data: statsResult = EMPTY_CULTURAL_STATS } = useQuery({
     queryKey: ["admin-alma-cultural-stats", since],
     queryFn: async () => {
       const [seenRes, clickRes] = await Promise.all([
