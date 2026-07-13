@@ -704,7 +704,7 @@ const Messages = () => {
                   renderGroup(sitId, g.title, g.convs, g.unreadCount, <Home className="h-3.5 w-3.5 text-muted-foreground shrink-0" />)
                 )}
                 {noSitGroup.length > 0 &&
-                  renderGroup("no-sit", "Échanges & Missions", noSitGroup, noSitGroup.reduce((s, c) => s + c.unread_count, 0), <HeartHandshake className="h-3.5 w-3.5 text-muted-foreground shrink-0" />)
+                  renderGroup("no-sit", "Entraide", noSitGroup, noSitGroup.reduce((s, c) => s + c.unread_count, 0), <HeartHandshake className="h-3.5 w-3.5 text-muted-foreground shrink-0" />)
                 }
               </>
             )}
