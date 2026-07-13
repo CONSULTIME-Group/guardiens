@@ -430,7 +430,8 @@ const ListingProximityCard = ({
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </Card>
+    </>
+
   );
 };
 
