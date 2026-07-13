@@ -387,6 +387,7 @@ const Sits = () => {
             owner: a.sit?.owner || null,
             hasReviewed: reviewedSitIds.includes(a.sit?.id),
             pets: petsByProperty[a.sit?.property_id] || [],
+            ownerAffinity: ownerAffinityById[a.sit?.user_id] || null,
             houseGuide: guideMap[a.sit?.id] || null,
             conversationId: convMap[a.sit?.id] || null,
             lastMessage: lastMsgMap[a.sit?.id] || null,
