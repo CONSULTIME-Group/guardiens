@@ -615,7 +615,10 @@ function CulturalFactsTab({ since }: { since: string }) {
         truncated: seenRows.length >= ROW_LIMIT || clickRows.length >= ROW_LIMIT,
       };
     },
+    staleTime: 60_000,
+    refetchOnWindowFocus: false,
   });
+
 
   const stats = statsResult.rows;
   const statsTruncated = statsResult.truncated;
