@@ -1017,8 +1017,8 @@ const CreateSit = () => {
               onBlur={() => touch("title")}
               className={cn("h-12 text-base", fieldState("title", !title))}
             />
-            {touched.title && !title && (
-              <p className="text-xs text-destructive mt-1">Le titre est requis pour publier.</p>
+            {touched.title && !title.trim() && (
+              <p className="text-sm text-destructive flex items-center gap-1.5 mt-1"><AlertCircle className="h-3.5 w-3.5" /> Ajoutez un titre.</p>
             )}
           </div>
 
