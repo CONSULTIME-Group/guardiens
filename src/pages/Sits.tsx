@@ -1338,21 +1338,9 @@ const SitCard = ({
                 } catch { return ""; }
               })()
             }`;
-            const viewedLabel = sit.application_viewed_at
-              ? (() => {
-                  const d = new Date(sit.application_viewed_at);
-                  const days = Math.max(0, Math.floor((Date.now() - d.getTime()) / 86400000));
-                  return days === 0
-                    ? "Vue par le propriétaire aujourd'hui"
-                    : days === 1
-                      ? "Vue par le propriétaire il y a 1 jour"
-                      : `Vue par le propriétaire il y a ${days} jours`;
-                })()
-              : "En attente de consultation";
             return (
               <div className="mt-2 flex flex-col gap-0.5">
                 <span className="text-xs text-muted-foreground">{sent}</span>
-                <span className="text-xs text-muted-foreground">{viewedLabel}</span>
               </div>
             );
           })()}
