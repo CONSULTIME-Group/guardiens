@@ -892,8 +892,8 @@ const AdminListings = () => {
 
       {/* Envoi de l'annonce aux gardiens du coin */}
       <Dialog open={!!proximityListing} onOpenChange={(o) => !o && setProximityListing(null)}>
-        <DialogContent className="max-w-3xl">
-          <DialogHeader>
+        <DialogContent className="max-w-3xl p-0 gap-0 max-h-[95vh] sm:max-h-[85vh] flex flex-col overflow-hidden">
+          <DialogHeader className="px-6 pt-6 pb-4 border-b border-border shrink-0">
             <DialogTitle>
               Envoyer aux gardiens du coin
               {proximityListing?.title ? ` , ${proximityListing.title}` : ""}
@@ -908,10 +908,12 @@ const AdminListings = () => {
               initialRadiusKm={30}
               autoPreview
               hideHeader
+              onClose={() => setProximityListing(null)}
             />
           )}
         </DialogContent>
       </Dialog>
+
     </div>
 
   );
