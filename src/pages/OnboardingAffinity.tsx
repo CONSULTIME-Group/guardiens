@@ -59,6 +59,11 @@ const OnboardingAffinity = () => {
   // Owner fields
   const [presenceExpected, setPresenceExpected] = useState<string>("");
   const [preferredSitterTypes, setPreferredSitterTypes] = useState<string[]>([]);
+  const [homeAmbiance, setHomeAmbiance] = useState<string[]>([]);
+  // Champs partagés (persistés sur sitter_profiles ET owner_profiles selon les rôles actifs).
+  const [lifePace, setLifePace] = useState<string>("");
+  const [interests, setInterests] = useState<string[]>([]);
+  const [languages, setLanguages] = useState<string[]>(["Français"]);
 
   const shownTrackedRef = useRef(false);
   const completedRef = useRef(false);
