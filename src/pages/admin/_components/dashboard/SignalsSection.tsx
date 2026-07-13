@@ -123,6 +123,8 @@ export const SignalsSection = () => {
                   <RepeatedCancellationsCard signal={s as unknown as import("@/components/admin/signals/RepeatedCancellationsCard").RepeatedCancellationsSignal} />
                 ) : s.signal_type === "repeated_republish" ? (
                   <RepeatedRepublishCard signal={s as unknown as import("@/components/admin/signals/RepeatedRepublishCard").RepeatedRepublishSignal} />
+                ) : s.signal_type === "owner_missing_coordinates" ? (
+                  <OwnerMissingCoordinatesCard signal={s as unknown as import("@/components/admin/signals/OwnerMissingCoordinatesCard").OwnerMissingCoordinatesSignal} />
                 ) : (
                   <Link
                     to={entityLink(s)}
