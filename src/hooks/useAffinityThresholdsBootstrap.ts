@@ -4,7 +4,7 @@
  *
  * À monter au niveau racine (App.tsx). Silencieux en cas d'erreur réseau :
  * on garde les valeurs par défaut (2 critères / 40 %) codées en dur, ce qui
- * évite tout freeze visuel du discovery.
+ * évite tout freeze visuel du discovery. Défauts : 2 critères / 35 %.
  */
 import { useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
