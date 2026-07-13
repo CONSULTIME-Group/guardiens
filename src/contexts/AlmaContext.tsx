@@ -304,6 +304,7 @@ export function AlmaProvider({ children }: { children: ReactNode }) {
   const canEmit = useCallback(
     (type: AlmaWhisperType) => {
       if (verboseMode) return true;
+      if (hasSessionEmitted()) return false;
       if (isProactiveMuted()) return false;
       const active = activeSurfaceRef.current;
       // Une surface plus prioritaire (first_meeting, welcome_back) bloque les whispers.
@@ -316,6 +317,7 @@ export function AlmaProvider({ children }: { children: ReactNode }) {
   const queueWhisper = useCallback(
     (whisper: AlmaWhisper) => {
       if (!verboseMode && isProactiveMuted()) return;
+      if (!verboseMode && hasSessionEmitted()) return;
       setQueue((q) => {
         if (q.some((w) => w.type === whisper.type)) return q;
         return [...q, whisper];
