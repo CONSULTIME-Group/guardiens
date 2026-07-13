@@ -85,7 +85,9 @@ export const SignalsSection = () => {
           À traiter
         </CardTitle>
       </CardHeader>
-      <CardContent>
+      <CardContent className="space-y-3">
+        <OwnerActivationCampaignCard />
+
         {isLoading ? (
           <div className="space-y-2">
             <Skeleton className="h-14 rounded-lg" />
