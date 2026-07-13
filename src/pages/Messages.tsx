@@ -877,13 +877,30 @@ const Messages = () => {
       ) : !isMobile ? (
         /* Empty state desktop, gouache emptyMailbox conforme à la charte */
         <div className="flex-1 flex flex-col items-center justify-center h-full bg-background">
-          <EmptyState
-            illustration="emptyMailbox"
-            title="Vos échanges"
-            description="Sélectionnez une conversation ou lancez une recherche pour démarrer un échange."
-            actionLabel={pill === "mission" ? "Rechercher une mission" : "Rechercher une annonce"}
-            actionTo={pill === "archived" ? undefined : (pill === "mission" ? "/petites-missions" : "/search")}
-          />
+          {(() => {
+            const isOwnerActive = effectiveRole === "owner";
+            const emptyActionLabel = pill === "mission"
+              ? "Voir l'entraide"
+              : isOwnerActive
+                ? "Trouver un gardien"
+                : "Rechercher une annonce";
+            const emptyActionTo = pill === "archived"
+              ? undefined
+              : pill === "mission"
+                ? "/petites-missions"
+                : isOwnerActive
+                  ? "/recherche-gardiens"
+                  : "/search";
+            return (
+              <EmptyState
+                illustration="emptyMailbox"
+                title="Vos échanges"
+                description="Sélectionnez une conversation ou lancez une recherche pour démarrer un échange."
+                actionLabel={emptyActionLabel}
+                actionTo={emptyActionTo}
+              />
+            );
+          })()}
         </div>
       ) : null}
     </div>
