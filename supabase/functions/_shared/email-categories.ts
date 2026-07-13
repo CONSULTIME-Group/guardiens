@@ -48,6 +48,7 @@ const PRODUCT: ReadonlyArray<string> = [
   'availability-nudge',
   'review-reminder',
   'nudge-missing-photo',
+  'owner-activation-nudge',
 ]
 
 
