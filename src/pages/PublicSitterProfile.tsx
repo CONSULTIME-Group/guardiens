@@ -112,6 +112,8 @@ export default function PublicSitterProfile() {
     },
   });
   const [ownerProfile, setOwnerProfile] = useState<OwnerProfileData | null>(null);
+  const [targetOwnerAffinity, setTargetOwnerAffinity] = useState<any | null>(null);
+  const [targetPets, setTargetPets] = useState<{ species: string | null; special_needs: string | null }[]>([]);
   const [missionCount, setMissionCount] = useState<number>(0);
   const [badges, setBadges] = useState<{ badge_key: string; count: number }[]>([]);
   const [reviews, setReviews] = useState<any[]>([]);
