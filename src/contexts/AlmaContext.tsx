@@ -330,6 +330,7 @@ export function AlmaProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (current || queue.length === 0) return;
     if (!verboseMode && isProactiveMuted()) return;
+    if (!verboseMode && hasSessionEmitted()) return;
     // Verrou : si une surface plus prioritaire est active, on ne parle pas.
     if (!verboseMode) {
       const active = activeSurfaceRef.current;
