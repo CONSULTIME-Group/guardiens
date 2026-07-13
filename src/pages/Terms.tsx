@@ -44,10 +44,16 @@ const Terms = () => {
             <li><strong className="text-foreground">Adresse</strong> : 22 rue Juiverie, 69005 Lyon, France</li>
             <li><strong className="text-foreground">Email</strong> : <a href="mailto:contact@guardiens.fr" className="text-primary hover:underline">contact@guardiens.fr</a></li>
             <li><strong className="text-foreground">Directeur de la publication</strong> : Jérémie Martinot</li>
-            <li><strong className="text-foreground">TVA non applicable</strong>, art. 293 B du CGI</li>
+            <li><strong className="text-foreground">TVA non applicable</strong>, article 293 B du Code général des impôts</li>
           </ul>
           <p>
-            <strong className="text-foreground">Hébergeur technique</strong> : Lovable AB, Stockholm, Suède. Les coordonnées complètes sont disponibles sur la page <a href="/mentions-legales" className="text-primary hover:underline">Mentions légales</a>.
+            <strong className="text-foreground">Hébergement des données</strong> : Supabase Inc., région eu-central-1 (Francfort, Allemagne).
+          </p>
+          <p>
+            <strong className="text-foreground">Infrastructure CDN et sécurité</strong> : Cloudflare Ireland Limited (Dublin, Irlande).
+          </p>
+          <p>
+            <strong className="text-foreground">Interface applicative</strong> : Lovable Labs, société d'origine suédoise, représentée dans l'Union européenne par Lovable Labs AB (Stockholm).
           </p>
           <p><strong className="text-foreground">Langue contractuelle</strong> : français.</p>
 
@@ -131,11 +137,15 @@ const Terms = () => {
 
           {/* 8 */}
           <h2 className="font-heading text-xl font-bold text-foreground pt-4">8. Vérification d'identité</h2>
-          <p>Guardiens propose un système optionnel de vérification d'identité reposant sur l'analyse d'un document officiel par un prestataire spécialisé agissant en qualité de sous-traitant au sens de l'article 28 du RGPD.</p>
-          <p>Cette vérification atteste qu'un utilisateur a soumis un document jugé conforme. Elle ne constitue pas une garantie absolue de fiabilité, d'honnêteté ou de compétence de l'utilisateur.</p>
-          <p>La base légale du traitement est le consentement (art. 6.1.a RGPD). Les modalités de conservation et de suppression des données sont détaillées dans la <a href="/confidentialite" className="text-primary hover:underline">Politique de confidentialité</a>.</p>
-          <p>L'utilisateur peut retirer son consentement et demander la suppression de ses pièces à tout moment depuis son espace personnel ou par email à <a href="mailto:dpo@guardiens.fr" className="text-primary hover:underline">dpo@guardiens.fr</a>.</p>
-          <p>En cas de doute sérieux sur l'identité d'un utilisateur, de non-conformité des documents fournis ou de suspicion de fraude, Guardiens se réserve le droit de suspendre ou de supprimer le compte concerné, sans préjudice des autres dispositions des présentes CGU.</p>
+          <p>
+            La Plateforme prévoit un dispositif de vérification d'identité optionnel, qui sera mis en œuvre par un prestataire spécialisé lorsque le service atteindra la maturité technique et le volume d'usage justifiant son ouverture.
+          </p>
+          <p>
+            À la date des présentes, ce dispositif n'est pas actif. La confiance entre utilisateurs repose sur la rencontre physique préalable à toute garde, les avis croisés publiés après chaque garde ou petite mission, l'historique visible sur chaque profil, et les mécanismes de signalement et de modération décrits aux articles 10 et 14.
+          </p>
+          <p>
+            Les utilisateurs seront informés par email, avec un préavis de trente (30) jours, de l'activation du dispositif de vérification d'identité. Les modalités précises (prestataire retenu, base légale, conservation, exercice des droits) seront alors publiées dans la <a href="/confidentialite" className="text-primary hover:underline">Politique de confidentialité</a> et rendues opposables par un avenant aux présentes CGU.
+          </p>
 
           {/* 9 */}
           <h2 className="font-heading text-xl font-bold text-foreground pt-4">9. Avis en ligne (art. L.&nbsp;111-7-2 C. conso)</h2>
@@ -266,8 +276,12 @@ const Terms = () => {
 
           {/* 16 */}
           <h2 className="font-heading text-xl font-bold text-foreground pt-4">16. Données personnelles et cookies</h2>
-          <p>Le traitement des données personnelles est décrit dans la <a href="/confidentialite" className="text-primary hover:underline">Politique de confidentialité</a>, accessible à guardiens.fr/confidentialite.</p>
-          <p>La Plateforme utilise des cookies strictement nécessaires à son fonctionnement ainsi que des cookies de mesure d'audience soumis au consentement préalable de l'utilisateur, conformément à l'article 82 de la loi Informatique et Libertés. Le refus est aussi simple que l'acceptation et n'empêche pas l'accès au service.</p>
+          <p>
+            Le traitement des données personnelles est décrit dans la <a href="/confidentialite" className="text-primary hover:underline">Politique de confidentialité</a>, accessible à guardiens.fr/confidentialite.
+          </p>
+          <p>
+            La Plateforme utilise des cookies strictement nécessaires à son fonctionnement, exemptés de consentement, ainsi que des cookies de mesure d'audience soumis au consentement préalable de l'utilisateur, conformément à l'article 82 de la loi Informatique et Libertés. Le refus est aussi simple que l'acceptation et n'empêche pas l'accès au service. Le détail des traceurs figure sur la page guardiens.fr/cookies.
+          </p>
 
           {/* 17 */}
           <h2 className="font-heading text-xl font-bold text-foreground pt-4">17. Force majeure</h2>
