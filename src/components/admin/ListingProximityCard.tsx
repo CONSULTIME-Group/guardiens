@@ -73,6 +73,20 @@ const ListingProximityCard = ({
   const [preview, setPreview] = useState<PreviewData | null>(null);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [confirmInput, setConfirmInput] = useState("");
+  const [warningMessage, setWarningMessage] = useState<string | null>(null);
+
+  const extractError = async (error: unknown, data: unknown): Promise<string> => {
+    const ctx = (error as { context?: Response } | null)?.context;
+    if (ctx && typeof ctx.json === "function") {
+      try {
+        const body = await ctx.json();
+        if (body?.error) return String(body.error);
+      } catch { /* ignore */ }
+    }
+    if ((data as { error?: string })?.error) return String((data as { error: string }).error);
+    if ((error as Error)?.message) return String((error as Error).message);
+    return "Erreur inconnue.";
+  };
 
   const handlePreview = async () => {
     if (!sitId) {
@@ -81,6 +95,7 @@ const ListingProximityCard = ({
     }
     setLoading(true);
     setPreview(null);
+    setWarningMessage(null);
     try {
       const { data, error } = await supabase.functions.invoke(
         "send-listing-proximity",
@@ -88,11 +103,14 @@ const ListingProximityCard = ({
           body: { mode: "preview", sit_id: sitId, radius_km: radiusKm },
         },
       );
-      if (error) throw error;
-      if ((data as any)?.error) throw new Error((data as any).error);
+      if (error || (data as { error?: string })?.error) {
+        const msg = await extractError(error, data);
+        setWarningMessage(msg);
+        return;
+      }
       setPreview(data as PreviewData);
-    } catch (err: any) {
-      toast.error(err.message || "Erreur lors de l'aperçu");
+    } catch (err: unknown) {
+      setWarningMessage((err as Error)?.message || "Erreur lors de l'aperçu");
     } finally {
       setLoading(false);
     }
