@@ -832,7 +832,7 @@ const ALMA_OPTIONS: { value: AlmaFrequency; label: string; description: string }
   },
   {
     value: "balanced",
-    label: "Modéré (recommandé)",
+    label: "Modérée (recommandée)",
     description: "Un conseil au maximum toutes les 3 minutes, conseils utiles et petites touches d'ambiance.",
   },
   {
