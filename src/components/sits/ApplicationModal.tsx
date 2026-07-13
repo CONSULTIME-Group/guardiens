@@ -17,6 +17,8 @@ import AlmaBubble from "@/components/ai/alma/AlmaBubble";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AlertTriangle } from "lucide-react";
 import { detectRestrictionInText } from "@/lib/detectRestriction";
+import AffinityBadge from "@/components/matching/AffinityBadge";
+import { computeAffinityResultFull, type AffinityOwnerInput, type AffinitySitterInput, type AffinityResult } from "@/lib/affinityScore";
 
 
 interface ApplicationModalProps {
