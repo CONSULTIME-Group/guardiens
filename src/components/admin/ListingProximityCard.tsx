@@ -202,6 +202,26 @@ const ListingProximityCard = ({
           </Button>
         </div>
 
+        {radiusKm > 500 && (
+          <Alert variant="default" className="border-warning/40 bg-warning/5">
+            <AlertTriangle className="h-4 w-4" />
+            <AlertDescription className="text-xs">
+              Rayon large : l'envoi peut concerner beaucoup de gardiens.
+              Vérifiez bien votre segment avant l'envoi.
+            </AlertDescription>
+          </Alert>
+        )}
+
+        {warningMessage && (
+          <Alert variant="default" className="border-warning/40 bg-warning/5">
+            <AlertTriangle className="h-4 w-4" />
+            <AlertDescription className="text-sm">
+              {warningMessage}
+            </AlertDescription>
+          </Alert>
+        )}
+
+
         {preview && (
           <div className="space-y-3 pt-2 border-t border-border">
             <div className="flex flex-wrap items-baseline gap-x-6 gap-y-1 text-sm">
