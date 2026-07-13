@@ -56,6 +56,14 @@ const INPUT_FOCUS_QUIET_MS = 3000;
 const VERBOSE_SESSION_KEY = "alma_verbose_mode";
 const SEEN_IDS_SESSION_KEY = "alma_seen_fact_ids";
 const MAX_SEEN_IDS = 40;
+/** Un seul whisper proactif par session (toutes pages, toutes fréquences). */
+const SESSION_EMITTED_KEY = "alma_session_whisper_emitted";
+function hasSessionEmitted(): boolean {
+  try { return sessionStorage.getItem(SESSION_EMITTED_KEY) === "1"; } catch { return false; }
+}
+function markSessionEmitted() {
+  try { sessionStorage.setItem(SESSION_EMITTED_KEY, "1"); } catch { /* silent */ }
+}
 
 function loadSeenIds(): string[] {
   try {
