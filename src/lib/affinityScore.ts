@@ -32,6 +32,9 @@ export interface AffinityOwnerInput {
   life_pace?: string | null;
   presence_expected?: string | null;
   pets?: { species?: string | null; special_needs?: string | null }[] | null;
+  /** Contexte annonce (optionnel) : politique accompagnants du sit. */
+  accepts_sitter_pets?: "yes" | "no" | "discuss" | null;
+  accepts_sitter_children?: "yes" | "no" | "discuss" | null;
 }
 
 export interface AffinitySitterInput {
@@ -44,6 +47,10 @@ export interface AffinitySitterInput {
   special_animal_skills?: string[] | null;
   sitter_type?: string | null;
   experience_years?: string | null;
+  /** Le gardien voyage habituellement avec ses propres animaux. */
+  travels_with_own_animals?: boolean | null;
+  /** Le gardien voyage habituellement avec ses enfants. */
+  travels_with_children?: boolean | null;
 }
 
 export interface AffinityResult {
@@ -56,7 +63,15 @@ export interface AffinityResult {
   /** Faut-il afficher le badge ? Optionnel pour rétro-compat. */
   displayed?: boolean;
   /** Si displayed === false, raison du masquage. */
-  hiddenReason?: "below_threshold" | "too_few_criteria" | "disqualified";
+  hiddenReason?:
+    | "below_threshold"
+    | "too_few_criteria"
+    | "disqualified"
+    | "no_animal_species_match"
+    | "sitter_pets_not_accepted"
+    | "sitter_children_not_accepted";
+  /** Notes contextuelles (ex: "accompagnants à discuter"). */
+  notes?: string[];
 }
 
 const PACE_ORDER = ["calme", "equilibre", "actif"];
@@ -64,13 +79,11 @@ const PACE_ORDER = ["calme", "equilibre", "actif"];
 /**
  * Seuils pilotables via feature_flags (affinity_min_common_criteria +
  * affinity_min_score_percent). Bootstrap au démarrage via
- * useAffinityThresholdsBootstrap ; par défaut : 2 critères / 40 %.
- * Historique : 3 critères / 40 % masquait 68 % des scores (68 % des masquages
- * étaient dus au seuil critères, cf. audit 12/07/2026).
+ * useAffinityThresholdsBootstrap ; par défaut : 2 critères / 35 %.
  */
 const thresholds = {
   minCommonCriteria: 2,
-  minScorePercent: 40,
+  minScorePercent: 35,
 };
 
 export function setAffinityThresholds(next: { minCommonCriteria?: number; minScorePercent?: number }) {
@@ -86,16 +99,21 @@ export function getAffinityThresholds() {
   return { ...thresholds };
 }
 
-/** Pondération par critère (poids supérieur = critère "dur"). */
+/**
+ * Pondération par critère. Barème uniformisé (juillet 2026) : MAX_WEIGHT = 9.
+ * Animaux et présence pèsent 2 (critères durs), les 5 autres pèsent 1.
+ */
 const W = {
   animals: 2,
   presence: 2,
   ideal: 1,
-  pace: 0.5,
-  languages: 0.5,
-  interests: 0.5,
-  ambiance: 0.5,
+  pace: 1,
+  languages: 1,
+  interests: 1,
+  ambiance: 1,
 } as const;
+
+const MAX_WEIGHT = 9;
 
 /**
  * Normalise une espèce vers un code canonique en anglais.
