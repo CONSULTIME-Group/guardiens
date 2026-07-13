@@ -97,7 +97,7 @@ function buildProposition(
     if (signals.publishedSitsCount === 0 && signals.allSitsCount === 0) {
       return {
         message: "Publions votre première annonce pour trouver une personne de confiance.",
-        ctaLabel: "Créer une annonce",
+        ctaLabel: "Publier une annonce",
         ctaTo: "/sits/create",
       };
     }
@@ -111,7 +111,7 @@ function buildProposition(
     }
   }
   return {
-    message: "Vous êtes bien lancé. Envie d'un conseil du jour ?",
+    message: "Vous êtes bien lancé. Envie d'un conseil du jour\u00A0?",
     ctaLabel: "Explorer les conseils",
     ctaTo: "/conseils",
   };
