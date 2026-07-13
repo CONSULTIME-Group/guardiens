@@ -571,7 +571,10 @@ function CulturalFactsTab({ since }: { since: string }) {
       if (error) throw error;
       return (data ?? []) as unknown as CulturalFactRow[];
     },
+    staleTime: 60_000,
+    refetchOnWindowFocus: false,
   });
+
 
   const { data: statsResult = { rows: [], truncated: false } } = useQuery({
     queryKey: ["admin-alma-cultural-stats", since],
