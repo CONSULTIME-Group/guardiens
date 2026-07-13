@@ -33,7 +33,7 @@ const Email = ({ authorFirstName, missionTitle, conversationId }: Props) => (
         <Button style={button} href={conversationId ? `${SITE_URL}/messages?c=${conversationId}` : `${SITE_URL}/messages`}>
           Ouvrir la messagerie
         </Button>
-        <LegalFooter purpose="le bon fonctionnement du service d'entraide" basis="6.1.f" />
+        <LegalFooter purpose="la bonne marche du service d'entraide" basis="6.1.f" />
       </Container>
     </Body>
   </Html>

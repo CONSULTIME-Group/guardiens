@@ -30,7 +30,7 @@ const ApplicationDeclinedEmail = ({ sitTitle }: Props) => (
           Voir les gardes disponibles
         </Button>
         <LegalFooter
-          purpose="le traitement de votre candidature"
+          purpose="la gestion de votre candidature"
           basis="6.1.b"
         />
       </Container>

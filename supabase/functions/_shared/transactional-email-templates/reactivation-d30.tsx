@@ -57,7 +57,7 @@ const ReactivationD30Email = ({ firstName, daysSinceLastSeen }: Props) => {
           <Hr style={hr} />
 
           <LegalFooter
-            purpose="le maintien de votre compte actif"
+            purpose="la réactivation de votre compte"
             basis="6.1.f"
             extra="Vous recevez ce message car votre compte n'a pas eu d'activité récente. Vous pouvez ajuster vos préférences d'email depuis votre espace personnel."
           />

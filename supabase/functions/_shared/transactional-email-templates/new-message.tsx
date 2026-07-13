@@ -85,7 +85,7 @@ const NewMessageEmail = ({
           </Section>
 
         <LegalFooter
-          purpose="le bon fonctionnement du service de messagerie"
+          purpose="la bonne marche du service de messagerie"
           basis="6.1.f"
         />
         </Container>

@@ -56,7 +56,7 @@ const SitDraftReminderEmail = ({
           préférez.
         </Text>
         <AlmaSignoff />
-        <LegalFooter purpose="le rappel de brouillon d'annonce" basis="6.1.f" />
+        <LegalFooter purpose="l'accompagnement de votre brouillon d'annonce" basis="6.1.f" />
 
       </Container>
     </Body>

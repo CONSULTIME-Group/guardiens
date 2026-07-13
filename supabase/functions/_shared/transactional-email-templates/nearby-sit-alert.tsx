@@ -78,7 +78,7 @@ const NearbySitAlertEmail = ({
           </Button>
 
         <LegalFooter
-          purpose="le bon fonctionnement de votre alerte"
+          purpose="la bonne marche de votre alerte"
           basis="6.1.f"
         />
         </Container>
