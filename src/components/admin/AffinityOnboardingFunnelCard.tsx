@@ -57,6 +57,8 @@ export function AffinityOnboardingFunnelCard({ since }: { since: string }) {
         .gte("created_at", cohortSince);
       return count ?? 0;
     },
+    staleTime: 60_000,
+    refetchOnWindowFocus: false,
   });
 
   const { data: events = [] } = useQuery({
@@ -78,6 +80,7 @@ export function AffinityOnboardingFunnelCard({ since }: { since: string }) {
         metadata: Record<string, unknown> | null;
         created_at: string;
       }>;
+
     },
   });
 
