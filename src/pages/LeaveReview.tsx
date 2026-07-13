@@ -291,7 +291,7 @@ const LeaveReview = () => {
       await supabase.from("messages").insert({
         conversation_id: conv.id,
         sender_id: user.id,
-        content: `⭐ Un avis a été laissé. ${wouldRecommend ? "Recommandation positive !" : ""}`,
+        content: `Un avis a été laissé. ${wouldRecommend ? "Recommandation positive." : ""}`.trim(),
         is_system: true,
       } as any);
     }

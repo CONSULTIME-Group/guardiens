@@ -788,6 +788,42 @@ const CreateSit = () => {
     return invalid ? "border-destructive focus-visible:ring-destructive" : "border-green-500 focus-visible:ring-green-500";
   };
 
+  // Validation "au clic" pour le bouton Suivant : on marque tous les champs
+  // requis de l'étape en cours comme touched pour afficher les erreurs,
+  // on scrolle vers le premier champ en erreur et on bloque l'avancement.
+  // Le bouton reste visuellement actif (feedback au clic, pas de disabled).
+  const validateCurrentStep = (): boolean => {
+    if (currentStep === 0) {
+      const errors: Array<{ field: string; anchor: string }> = [];
+      if (!title.trim()) errors.push({ field: "title", anchor: "title-field" });
+      if (!startDate) errors.push({ field: "startDate", anchor: "dates-field" });
+      if (!endDate) errors.push({ field: "endDate", anchor: "dates-field" });
+      if (dateError) errors.push({ field: "endDate", anchor: "dates-field" });
+      if (!descriptionValid) errors.push({ field: "description", anchor: "description-field" });
+      if (errors.length > 0) {
+        setTouched(prev => {
+          const next = { ...prev };
+          errors.forEach(e => { next[e.field] = true; });
+          return next;
+        });
+        const first = errors[0];
+        if (typeof document !== "undefined") {
+          document.getElementById(first.anchor)?.scrollIntoView({ behavior: "smooth", block: "center" });
+        }
+        return false;
+      }
+    }
+    // Les étapes 1 et 2 n'ont pas de champs obligatoires côté UI (tous optionnels)
+    // dans la version actuelle. Rien à valider ici.
+    return true;
+  };
+
+  const handleNext = () => {
+    if (!validateCurrentStep()) return;
+    setCurrentStep(s => s + 1);
+  };
+
+
   if (loading) {
     return <div className="p-6 md:p-10 max-w-3xl mx-auto text-muted-foreground">Chargement...</div>;
   }
@@ -981,8 +1017,8 @@ const CreateSit = () => {
               onBlur={() => touch("title")}
               className={cn("h-12 text-base", fieldState("title", !title))}
             />
-            {touched.title && !title && (
-              <p className="text-xs text-destructive mt-1">Le titre est requis pour publier.</p>
+            {touched.title && !title.trim() && (
+              <p className="text-sm text-destructive flex items-center gap-1.5 mt-1"><AlertCircle className="h-3.5 w-3.5" /> Ajoutez un titre.</p>
             )}
           </div>
 
@@ -1031,6 +1067,10 @@ const CreateSit = () => {
             {dateError ? (
               <p className="text-sm text-destructive flex items-center gap-1.5 mt-2">
                 <AlertCircle className="h-3.5 w-3.5" /> {dateError}
+              </p>
+            ) : (touched.startDate || touched.endDate) && (!startDate || !endDate) ? (
+              <p className="text-sm text-destructive flex items-center gap-1.5 mt-2">
+                <AlertCircle className="h-3.5 w-3.5" /> Choisissez les dates de la garde.
               </p>
             ) : nDays > 0 ? (
               <p className="text-xs text-muted-foreground mt-2">
@@ -1116,20 +1156,22 @@ const CreateSit = () => {
             />
             <p className={cn(
               "text-xs mt-1 flex justify-between",
-              touched.description && specificExpectations.length > 0 && specificExpectations.length < MIN_DESCRIPTION
+              touched.description && !descriptionValid
                 ? "text-destructive"
                 : specificExpectations.length >= MIN_DESCRIPTION
                   ? "text-green-600"
                   : "text-muted-foreground"
             )}>
               <span>
-                {touched.description && !descriptionValid && specificExpectations.length > 0
-                  ? `Encore ${MIN_DESCRIPTION - specificExpectations.length} caractères`
+                {touched.description && !descriptionValid
+                  ? specificExpectations.length === 0
+                    ? `Décrivez la garde (${MIN_DESCRIPTION} caractères minimum).`
+                    : `Encore ${MIN_DESCRIPTION - specificExpectations.length} caractères`
                   : specificExpectations.length >= MIN_DESCRIPTION
                     ? "Longueur suffisante"
-                    : `Min. ${MIN_DESCRIPTION} caractères`}
+                    : `Décrivez la garde (${MIN_DESCRIPTION} caractères minimum)`}
               </span>
-              <span>{specificExpectations.length}/{MIN_DESCRIPTION}</span>
+              <span>{specificExpectations.length} / {MIN_DESCRIPTION} min.</span>
             </p>
           </div>
 
@@ -1608,7 +1650,7 @@ const CreateSit = () => {
               <Button
                 type="button"
                 className="flex-1 h-12 text-base font-semibold gap-1.5"
-                onClick={() => setCurrentStep(s => s + 1)}
+                onClick={handleNext}
                 disabled={currentStep === 0 && sitLocation !== "home"}
               >
                 Suivant

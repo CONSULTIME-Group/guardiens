@@ -26,21 +26,38 @@ const systemMessageText = (
   readerRole: "proprio" | "gardien",
   fallback: string,
 ): string => {
-  if (!metadata?.action) return fallback;
-  const name = metadata.actor_name || "";
-  const dates = metadata.dates || "";
+  // Fallback : détection par motif du contenu brut (messages legacy sans metadata).
+  // On synthétise une action pour retomber sur le mapping ci-dessous.
+  let action = metadata?.action;
+  let name = metadata?.actor_name || "";
+  const dates = metadata?.dates || "";
+  if (!action && fallback) {
+    const raw = fallback.trim();
+    if (/vous invite.*reconsid[ée]rer/i.test(raw)) action = "reinvited";
+    else if (/^la garde est confirm[ée]e/i.test(raw) || /^vous avez [ée]t[ée] choisi/i.test(raw)) action = "candidature_acceptee";
+    else if (/le guide de la maison est disponible/i.test(raw)) action = "guide_available";
+    else if (/le propri[ée]taire a choisi un autre gardien/i.test(raw)) action = "other_sitter_chosen";
+    else if (/votre candidature a [ée]t[ée] d[ée]clin[ée]e/i.test(raw)) action = "candidature_declinee_owner";
+    else if (/^la garde.*a [ée]t[ée] annul[ée]e par/i.test(raw)) action = "garde_annulee_generique";
+    else if (/un avis a [ée]t[ée] laiss[ée]/i.test(raw)) action = "review_left";
+  }
+  if (!action) return fallback;
   const map: Record<string, Record<string, string>> = {
     candidature_declinee: {
-      proprio: metadata.actor === "proprio" ? "Vous avez décliné cette candidature." : "Le gardien a retiré sa candidature.",
-      gardien: metadata.actor === "proprio" ? "Votre candidature a été déclinée." : "Vous avez retiré votre candidature.",
+      proprio: metadata?.actor === "proprio" ? "Vous avez décliné cette candidature." : "Le gardien a retiré sa candidature.",
+      gardien: metadata?.actor === "proprio" ? "Votre candidature a été déclinée." : "Vous avez retiré votre candidature.",
+    },
+    candidature_declinee_owner: {
+      proprio: "Vous avez décliné cette candidature.",
+      gardien: "Votre candidature a été déclinée pour cette garde.",
     },
     candidature_acceptee: {
-      proprio: `Vous avez accepté ${name || "le gardien"}. Garde confirmée ✓`,
-      gardien: "Votre candidature a été acceptée. Garde confirmée ✓",
+      proprio: `Vous avez confirmé ${name || "ce gardien"} pour cette garde.`,
+      gardien: "Votre candidature a été acceptée. La garde est confirmée.",
     },
     garde_confirmee: {
-      proprio: `Garde confirmée avec ${name}${dates ? " · " + dates : ""}`,
-      gardien: `Garde confirmée avec ${name}${dates ? " · " + dates : ""}`,
+      proprio: `Garde confirmée avec ${name}${dates ? ", " + dates : ""}.`,
+      gardien: `Garde confirmée avec ${name}${dates ? ", " + dates : ""}.`,
     },
     garde_annulee_proprio: {
       proprio: "Vous avez annulé cette garde.",
@@ -50,20 +67,40 @@ const systemMessageText = (
       proprio: "Le gardien a annulé la garde.",
       gardien: "Vous avez annulé cette garde.",
     },
+    garde_annulee_generique: {
+      proprio: "La garde a été annulée.",
+      gardien: "La garde a été annulée.",
+    },
     candidature_expiree: {
       proprio: "Candidature expirée, sans réponse dans les 48h.",
       gardien: "Candidature expirée, sans réponse dans les 48h.",
     },
     garde_en_cours: {
       proprio: `La garde a commencé. ${name || "Le gardien"} est sur place.`,
-      gardien: "La garde a commencé. Bon séjour !",
+      gardien: "La garde a commencé. Bon séjour.",
     },
     garde_terminee: {
-      proprio: "Garde terminée. Pensez à laisser un avis !",
-      gardien: "Garde terminée. Pensez à laisser un avis !",
+      proprio: "Garde terminée. Pensez à laisser un avis.",
+      gardien: "Garde terminée. Pensez à laisser un avis.",
+    },
+    reinvited: {
+      proprio: `Vous avez invité ${name || "ce gardien"} à reconsidérer sa candidature.`,
+      gardien: "Le propriétaire vous invite à reconsidérer votre candidature.",
+    },
+    guide_available: {
+      proprio: "Vous avez rendu le guide de la maison disponible pour le gardien.",
+      gardien: "Le guide de la maison est disponible. Vous y trouverez l'adresse, les codes d'accès, les contacts utiles et toutes les consignes.",
+    },
+    other_sitter_chosen: {
+      proprio: "Vous avez choisi un autre gardien pour cette garde.",
+      gardien: "Le propriétaire a choisi un autre gardien pour cette garde. Merci pour votre candidature.",
+    },
+    review_left: {
+      proprio: "Un avis a été déposé pour cette garde.",
+      gardien: "Un avis a été déposé pour cette garde.",
     },
   };
-  return map[metadata.action]?.[readerRole] || fallback;
+  return map[action]?.[readerRole] || fallback;
 };
 
 const MessageBubble = ({ msg, isMe, readerRole = "gardien", isLastInGroup = true }: MessageBubbleProps) => {

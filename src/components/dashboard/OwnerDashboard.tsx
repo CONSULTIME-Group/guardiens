@@ -124,17 +124,25 @@ const OwnerDashboard = () => {
 
   /* ── Draft en cours de rédaction : on affiche une carte de reprise
        au-dessus de la NBA quand un brouillon existe (Chantier 4 Casse A). ── */
-  const latestDraft = useMemo(
-    () =>
-      sits
-        .filter(s => s.status === "draft")
-        .sort((a, b) => {
-          const da = new Date((a as any).updated_at || a.created_at || 0).getTime();
-          const db = new Date((b as any).updated_at || b.created_at || 0).getTime();
-          return db - da;
-        })[0] ?? null,
-    [sits],
-  );
+  // Un brouillon est « actif » s'il est encore visible dans l'onglet Brouillons
+  // de la page Mes annonces : status=draft ET (pas de date de fin OU date de fin
+  // non passée). Sinon il bascule dans « Passées » et ne doit plus être surfacé
+  // sur le dashboard, sous peine de divergence entre les deux vues.
+  const latestDraft = useMemo(() => {
+    const todayIso = new Date().toISOString().slice(0, 10);
+    return sits
+      .filter((s: any) => {
+        if (s.status !== "draft") return false;
+        if (s.cancellation_reason === "archived") return false;
+        if (s.end_date && s.end_date < todayIso) return false;
+        return true;
+      })
+      .sort((a, b) => {
+        const da = new Date((a as any).updated_at || a.created_at || 0).getTime();
+        const db = new Date((b as any).updated_at || b.created_at || 0).getTime();
+        return db - da;
+      })[0] ?? null;
+  }, [sits]);
   const hasDraft = !!latestDraft;
 
   /* ── Flags NBA & signal local calculés tôt (utilisés par subtitle + NBA) ── */
