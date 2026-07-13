@@ -51,7 +51,7 @@ export interface AlmaEvolution {
 const STAGE_LABEL: Record<AlmaStage, string> = {
   nouvelle: "Nouvelle rencontre",
   eveillee: "Éveillée",
-  complice: "Complice",
+  complice: "Proche",
   fidele: "Fidèle",
 };
 
