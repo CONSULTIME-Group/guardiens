@@ -844,11 +844,11 @@ const CreateSit = () => {
 
       <div className="px-4 pt-5 pb-2 max-w-3xl mx-auto">
         <Link to="/sits" className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground mb-4">
-          <ArrowLeft className="h-4 w-4" /> Retour à mes gardes
+          <ArrowLeft className="h-4 w-4" /> Retour à mes annonces
         </Link>
 
         <h1 className="font-heading text-2xl md:text-3xl font-bold mb-1">
-          {isRepublish ? "Republier une garde" : "Publier une garde"}
+          {isRepublish ? "Republier une annonce" : "Publier une annonce"}
         </h1>
         <p className="text-sm text-muted-foreground mb-4">
           {isRepublish

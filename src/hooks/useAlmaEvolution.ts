@@ -177,7 +177,7 @@ export function useAlmaEvolution() {
           nextMilestone =
             "Réaliser une garde avec un gardien ou publier une nouvelle annonce pour devenir Fidèle.";
           nextActionHref = "/sits/create";
-          nextActionLabel = "Créer une annonce";
+          nextActionLabel = "Publier une annonce";
         }
       } else {
         nextMilestone =

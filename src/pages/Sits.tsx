@@ -1298,7 +1298,12 @@ const SitCard = ({
                     Dates flexibles
                   </span>
                 )}
-                {isUrgent && effectiveStatus !== "expired" && (
+                {isUrgent
+                  && effectiveStatus !== "expired"
+                  && effectiveStatus !== "archived"
+                  && effectiveStatus !== "completed"
+                  && effectiveStatus !== "cancelled"
+                  && !(sit.end_date && parseISO(sit.end_date).getTime() < Date.now()) && (
                   <span className="text-xs px-1.5 py-0.5 rounded bg-amber-50 text-amber-700 border border-amber-200 font-medium">
                     Urgent
                   </span>

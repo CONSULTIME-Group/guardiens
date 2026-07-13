@@ -40,7 +40,7 @@ export function buildSearchIndecisionWhisper(params: { onRefine: () => void }): 
     ...base("sitter_search_indecision"),
     audience: "sitter",
     surface: "search",
-    message: "20 annonces vues, aucune retenue. Je peux affiner selon vos critères les plus forts ?",
+    message: "20 annonces vues, aucune retenue. Je peux affiner selon vos critères les plus forts ?",
     primaryAction: { label: "Affiner", onClick: params.onRefine, actionId: "refine" },
   };
 }
@@ -53,7 +53,7 @@ export function buildSearchRepeatedNoActionWhisper(params: {
     audience: "sitter",
     surface: "search",
     message:
-      "Vous explorez depuis un moment. Voulez-vous que je vous propose 3 annonces qui matchent le mieux votre profil ?",
+      "Vous explorez depuis un moment. Voulez-vous que je vous propose 3 annonces qui matchent le mieux votre profil ?",
     primaryAction: { label: "Voir mes 3 meilleures", onClick: params.onSeeTop, actionId: "top3" },
   };
 }
@@ -145,7 +145,7 @@ export function buildTrafficNoActionWhisper(params: {
     ...base("owner_traffic_no_action"),
     audience: "owner",
     surface: "owner_dashboard",
-    message: `Votre annonce a été vue ${params.views} fois mais personne n'a candidaté. Je peux vous suggérer 2 ajustements ?`,
+    message: `Votre annonce a été vue ${params.views} fois mais personne n'a candidaté. Je peux vous suggérer 2 ajustements ?`,
     primaryAction: {
       label: "Voir les suggestions",
       onClick: params.onSuggestions,
@@ -164,7 +164,7 @@ export function buildConversationStagnantWhisper(params: {
     ...base("owner_conversation_stagnant"),
     audience: "owner",
     surface: "messages",
-    message: `Vous discutez avec ${params.firstName} depuis quelques jours. Voulez-vous fixer une rencontre ?`,
+    message: `Vous discutez avec ${params.firstName} depuis quelques jours. Voulez-vous fixer une rencontre ?`,
     primaryAction: {
       label: "Proposer une rencontre",
       onClick: params.onProposeMeeting,

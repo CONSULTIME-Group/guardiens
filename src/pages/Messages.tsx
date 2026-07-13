@@ -498,7 +498,7 @@ const Messages = () => {
   const pills: { value: ConvPill; label: string }[] = [
     { value: "all", label: "Tout" },
     { value: "garde", label: "Gardes" },
-    { value: "mission", label: "Missions" },
+    { value: "mission", label: "Entraide" },
     { value: "archived", label: "Archivées" },
   ];
 
@@ -704,7 +704,7 @@ const Messages = () => {
                   renderGroup(sitId, g.title, g.convs, g.unreadCount, <Home className="h-3.5 w-3.5 text-muted-foreground shrink-0" />)
                 )}
                 {noSitGroup.length > 0 &&
-                  renderGroup("no-sit", "Échanges & Missions", noSitGroup, noSitGroup.reduce((s, c) => s + c.unread_count, 0), <HeartHandshake className="h-3.5 w-3.5 text-muted-foreground shrink-0" />)
+                  renderGroup("no-sit", "Entraide", noSitGroup, noSitGroup.reduce((s, c) => s + c.unread_count, 0), <HeartHandshake className="h-3.5 w-3.5 text-muted-foreground shrink-0" />)
                 }
               </>
             )}
@@ -837,6 +837,8 @@ const Messages = () => {
                   audience="owner"
                   otherFirstName={activeConv.other_user?.first_name ?? null}
                   messages={messages}
+                  applicationStatus={activeConv.application_status ?? null}
+                  sitStartDate={activeConv.sit?.start_date ?? null}
                   onProposeMeeting={(tpl) => {
                     setNewMessage(tpl);
                     setTimeout(() => {
@@ -875,13 +877,30 @@ const Messages = () => {
       ) : !isMobile ? (
         /* Empty state desktop, gouache emptyMailbox conforme à la charte */
         <div className="flex-1 flex flex-col items-center justify-center h-full bg-background">
-          <EmptyState
-            illustration="emptyMailbox"
-            title="Vos échanges"
-            description="Sélectionnez une conversation ou lancez une recherche pour démarrer un échange."
-            actionLabel={pill === "mission" ? "Rechercher une mission" : "Rechercher une annonce"}
-            actionTo={pill === "archived" ? undefined : (pill === "mission" ? "/petites-missions" : "/search")}
-          />
+          {(() => {
+            const isOwnerActive = effectiveRole === "owner";
+            const emptyActionLabel = pill === "mission"
+              ? "Voir l'entraide"
+              : isOwnerActive
+                ? "Trouver un gardien"
+                : "Rechercher une annonce";
+            const emptyActionTo = pill === "archived"
+              ? undefined
+              : pill === "mission"
+                ? "/petites-missions"
+                : isOwnerActive
+                  ? "/recherche-gardiens"
+                  : "/search";
+            return (
+              <EmptyState
+                illustration="emptyMailbox"
+                title="Vos échanges"
+                description="Sélectionnez une conversation ou lancez une recherche pour démarrer un échange."
+                actionLabel={emptyActionLabel}
+                actionTo={emptyActionTo}
+              />
+            );
+          })()}
         </div>
       ) : null}
     </div>

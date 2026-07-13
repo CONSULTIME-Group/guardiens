@@ -56,6 +56,14 @@ const INPUT_FOCUS_QUIET_MS = 3000;
 const VERBOSE_SESSION_KEY = "alma_verbose_mode";
 const SEEN_IDS_SESSION_KEY = "alma_seen_fact_ids";
 const MAX_SEEN_IDS = 40;
+/** Un seul whisper proactif par session (toutes pages, toutes fréquences). */
+const SESSION_EMITTED_KEY = "alma_session_whisper_emitted";
+function hasSessionEmitted(): boolean {
+  try { return sessionStorage.getItem(SESSION_EMITTED_KEY) === "1"; } catch { return false; }
+}
+function markSessionEmitted() {
+  try { sessionStorage.setItem(SESSION_EMITTED_KEY, "1"); } catch { /* silent */ }
+}
 
 function loadSeenIds(): string[] {
   try {
@@ -296,6 +304,7 @@ export function AlmaProvider({ children }: { children: ReactNode }) {
   const canEmit = useCallback(
     (type: AlmaWhisperType) => {
       if (verboseMode) return true;
+      if (hasSessionEmitted()) return false;
       if (isProactiveMuted()) return false;
       const active = activeSurfaceRef.current;
       // Une surface plus prioritaire (first_meeting, welcome_back) bloque les whispers.
@@ -308,6 +317,7 @@ export function AlmaProvider({ children }: { children: ReactNode }) {
   const queueWhisper = useCallback(
     (whisper: AlmaWhisper) => {
       if (!verboseMode && isProactiveMuted()) return;
+      if (!verboseMode && hasSessionEmitted()) return;
       setQueue((q) => {
         if (q.some((w) => w.type === whisper.type)) return q;
         return [...q, whisper];
@@ -320,6 +330,7 @@ export function AlmaProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (current || queue.length === 0) return;
     if (!verboseMode && isProactiveMuted()) return;
+    if (!verboseMode && hasSessionEmitted()) return;
     // Verrou : si une surface plus prioritaire est active, on ne parle pas.
     if (!verboseMode) {
       const active = activeSurfaceRef.current;
@@ -349,6 +360,7 @@ export function AlmaProvider({ children }: { children: ReactNode }) {
     setCurrent(next);
     setQueue((q) => q.filter((w) => w.id !== next!.id));
     if (!verboseMode) setState((s) => onEmit(s, next!.type));
+    if (!verboseMode) markSessionEmitted();
 
     const factId = (next.metadata as any)?.fact_id;
     if (factId) pushSeenId(String(factId));

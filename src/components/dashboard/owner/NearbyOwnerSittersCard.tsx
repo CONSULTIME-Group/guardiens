@@ -99,8 +99,15 @@ const NearbyOwnerSittersCard = ({ hideHeader = false }: Props) => {
 
           <ul className="divide-y divide-border/60">
             {sitters.map((s) => {
-              const distance =
-                typeof s.distance_km === "number" ? Math.round(s.distance_km) : null;
+              // Distance : masquée si inconnue ou nulle (donnée manquante côté profil).
+              // Affichée en "< 1 km" pour les distances subkilomètriques réelles.
+              const rawKm = typeof s.distance_km === "number" ? s.distance_km : null;
+              const distanceLabel =
+                rawKm === null || rawKm <= 0
+                  ? null
+                  : rawKm < 1
+                    ? "< 1 km"
+                    : `${Math.round(rawKm)} km`;
               // Jusqu'à 4 savoir-faire secondaires, critère de choix clé.
               const skills = s.custom_skills.slice(0, 4);
               return (
@@ -165,16 +172,16 @@ const NearbyOwnerSittersCard = ({ hideHeader = false }: Props) => {
                       </div>
                     )}
                   </div>
-                  {distance !== null && (
+                  {distanceLabel !== null && (
                     <span
                       className={`shrink-0 inline-flex items-center rounded-full text-[11px] font-bold tabular-nums px-2.5 py-0.5 ${
                         s.is_beyond
                           ? "bg-muted text-muted-foreground ring-1 ring-border"
                           : "bg-primary/10 text-primary"
                       }`}
-                      aria-label={`À environ ${distance} kilomètres de chez vous`}
+                      aria-label={`À environ ${distanceLabel} de chez vous`}
                     >
-                      {s.is_beyond ? "Plus loin · " : ""}{distance}&nbsp;km
+                      {s.is_beyond ? "Plus loin · " : ""}{distanceLabel}
                     </span>
                   )}
                 </Link>

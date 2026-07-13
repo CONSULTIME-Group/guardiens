@@ -27,6 +27,10 @@ interface Props {
   otherFirstName: string | null;
   messages: Message[];
   onProposeMeeting: (template: string) => void;
+  /** Statut candidature côté conversation. Bloque si autre que "accepted". */
+  applicationStatus?: string | null;
+  /** Date début de garde (ISO). Bloque si passée. */
+  sitStartDate?: string | null;
 }
 
 const STAGNANT_THRESHOLD_MS = 24 * 60 * 60 * 1000;
@@ -38,6 +42,8 @@ export function AlmaStagnantConversationWhisper({
   otherFirstName,
   messages,
   onProposeMeeting,
+  applicationStatus,
+  sitStartDate,
 }: Props) {
   const { queueWhisper, canEmit } = useAlma();
   const firedFor = useRef<string | null>(null);
@@ -47,6 +53,12 @@ export function AlmaStagnantConversationWhisper({
     if (firedFor.current === conversationId) return;
     if (!canEmit("owner_conversation_stagnant")) return;
     if (messages.length < MIN_MESSAGES) return;
+    // Ne se déclenche que sur une candidature acceptée ET une garde à venir.
+    if (applicationStatus && applicationStatus !== "accepted") return;
+    if (sitStartDate) {
+      const start = new Date(sitStartDate).getTime();
+      if (!Number.isNaN(start) && start < Date.now()) return;
+    }
 
     const last = messages[messages.length - 1];
     if (!last) return;
@@ -58,7 +70,7 @@ export function AlmaStagnantConversationWhisper({
 
     firedFor.current = conversationId;
     const prenom = otherFirstName || "cette personne";
-    const template = `Bonjour ${prenom}, je vous propose que l'on se rencontre pour discuter de vive voix. Êtes-vous disponible cette semaine ?`;
+    const template = `Bonjour ${prenom}, je vous propose que l'on se rencontre pour discuter de vive voix. Êtes-vous disponible cette semaine\u00A0?`;
 
     queueWhisper(
       buildConversationStagnantWhisper({
@@ -66,7 +78,7 @@ export function AlmaStagnantConversationWhisper({
         onProposeMeeting: () => onProposeMeeting(template),
       }),
     );
-  }, [conversationId, audience, otherFirstName, messages, canEmit, queueWhisper, onProposeMeeting]);
+  }, [conversationId, audience, otherFirstName, messages, canEmit, queueWhisper, onProposeMeeting, applicationStatus, sitStartDate]);
 
   return null;
 }

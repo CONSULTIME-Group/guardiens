@@ -97,7 +97,7 @@ function buildProposition(
     if (signals.publishedSitsCount === 0 && signals.allSitsCount === 0) {
       return {
         message: "Publions votre première annonce pour trouver une personne de confiance.",
-        ctaLabel: "Créer une annonce",
+        ctaLabel: "Publier une annonce",
         ctaTo: "/sits/create",
       };
     }
@@ -111,7 +111,7 @@ function buildProposition(
     }
   }
   return {
-    message: "Vous êtes bien lancé. Envie d'un conseil du jour ?",
+    message: "Vous êtes bien lancé. Envie d'un conseil du jour\u00A0?",
     ctaLabel: "Explorer les conseils",
     ctaTo: "/conseils",
   };
@@ -169,7 +169,7 @@ function surfaceFromPath(
 const FREQUENCY_CHOICES: { value: AlmaFrequency; label: string }[] = [
   { value: "silent", label: "Silencieuse" },
   { value: "low", label: "Peu bavarde" },
-  { value: "balanced", label: "Modéré (recommandé)" },
+  { value: "balanced", label: "Modérée (recommandée)" },
   { value: "talkative", label: "Bavarde" },
 ];
 
@@ -324,7 +324,9 @@ function AlmaDockInner() {
 
 
   const mood = whisper?.primaryAction ? "attentive" : "idle";
-  const proposition = !whisper && !isSilent ? buildProposition(evolution, activeRole) : null;
+  const rawProposition = !whisper && !isSilent ? buildProposition(evolution, activeRole) : null;
+  // Ne jamais proposer une action qui pointe vers la page courante.
+  const proposition = rawProposition && rawProposition.ctaTo.split(/[?#]/)[0] === location.pathname ? null : rawProposition;
   const stage = evolution?.stage ?? null;
   const avatarSize = stage
     ? ({ nouvelle: 36, eveillee: 40, complice: 42, fidele: 44 } as const)[stage]
