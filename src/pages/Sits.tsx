@@ -1404,6 +1404,22 @@ const SitCard = ({
             </Link>
           )}
 
+          {/* Affinité (côté gardien, annonces publiées) */}
+          {!isOwner && sit.status === "published" && viewerSitter && sit.ownerAffinity && (
+            <AffinitySection
+              sitterProfile={viewerSitter}
+              ownerProfile={{
+                ...sit.ownerAffinity,
+                accepts_sitter_pets: sit.accepts_sitter_pets ?? null,
+                accepts_sitter_children: sit.accepts_sitter_children ?? null,
+              }}
+              pets={sit.pets || []}
+              context="sits_list_sitter"
+              targetId={sit.id}
+              showCtaForSitter={false}
+            />
+          )}
+
           {/* Quick actions */}
           <div className="flex items-center gap-2 mt-3 flex-wrap">
             <QuickActions sit={sit} isOwner={isOwner} effectiveStatus={effectiveStatus} onRepublish={onRepublish} onOpenGuide={onOpenGuide} onWithdraw={onWithdraw} />
