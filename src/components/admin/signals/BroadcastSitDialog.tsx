@@ -122,10 +122,17 @@ export const BroadcastSitDialog = ({ open, onOpenChange, signal, onSent }: Props
 
   const showLargeRadiusWarning = radiusKm > 500;
 
+  const recipientCount = preview?.count ?? 0;
+  const sendLabel = sending
+    ? "Envoi en cours..."
+    : recipientCount === 0
+      ? "Aucun destinataire"
+      : `Envoyer les ${recipientCount} email${recipientCount > 1 ? "s" : ""}`;
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
+      <DialogContent className="max-w-2xl p-0 gap-0 max-h-[95vh] sm:max-h-[85vh] flex flex-col overflow-hidden">
+        <DialogHeader className="px-6 pt-6 pb-4 border-b border-border shrink-0">
           <DialogTitle>Diffuser l'annonce aux gardiens du coin</DialogTitle>
           <DialogDescription>
             Envoi individuel avec le template riche (photo, animaux, dates, affinité).
@@ -133,7 +140,7 @@ export const BroadcastSitDialog = ({ open, onOpenChange, signal, onSent }: Props
           </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-4">
+        <div className="flex-1 overflow-y-auto px-6 py-4 space-y-4 min-h-0">
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1.5">
               <Label htmlFor="radius">Rayon (km)</Label>
@@ -171,46 +178,70 @@ export const BroadcastSitDialog = ({ open, onOpenChange, signal, onSent }: Props
             </Alert>
           )}
 
-          <div className="rounded-lg border p-3 bg-muted/30">
-            {preview ? (
-              <div className="text-sm">
-                <p className="font-medium text-foreground">
-                  {preview.count} destinataire{preview.count > 1 ? "s" : ""} éligible
+          {preview ? (
+            <div className="rounded-lg border border-border overflow-hidden">
+              <div className="px-3 py-2 bg-muted/40 border-b border-border">
+                <p className="text-sm font-medium text-foreground">
+                  {preview.count} destinataire{preview.count > 1 ? "s" : ""} ciblé
                   {preview.count > 1 ? "s" : ""}
                 </p>
-                {preview.recipients.length > 0 && (
-                  <ul className="mt-2 space-y-0.5 text-xs text-muted-foreground max-h-40 overflow-y-auto">
-                    {preview.recipients.slice(0, 10).map((r) => (
-                      <li key={r.email}>
-                        {r.first_name || "(sans prénom)"} · {r.city || "?"} · {r.distance_km} km
-                      </li>
-                    ))}
-                    {preview.count > 10 && (
-                      <li className="italic">… et {preview.count - 10} autres</li>
-                    )}
-                  </ul>
+                {preview.subject && (
+                  <p className="text-xs text-muted-foreground mt-0.5 truncate">
+                    Objet : {preview.subject}
+                  </p>
                 )}
               </div>
-            ) : (
-              <p className="text-sm text-muted-foreground">
-                Cliquez sur « Prévisualiser » pour obtenir la liste réelle.
-              </p>
-            )}
-          </div>
+              {preview.recipients.length > 0 ? (
+                <div className="max-h-[40vh] overflow-y-auto">
+                  <ul className="divide-y divide-border text-xs">
+                    {preview.recipients.map((r) => (
+                      <li key={r.email} className="px-3 py-1.5 flex items-center justify-between gap-3">
+                        <span className="text-foreground truncate">
+                          {r.first_name || "(sans prénom)"}
+                          <span className="text-muted-foreground"> · {r.city || "?"}</span>
+                        </span>
+                        <span className="text-muted-foreground shrink-0 tabular-nums">
+                          {r.distance_km} km
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ) : (
+                <p className="px-3 py-4 text-sm text-muted-foreground">
+                  Aucun gardien éligible dans ce rayon.
+                </p>
+              )}
+              {preview.truncated && (
+                <p className="px-3 py-2 text-xs italic text-muted-foreground border-t border-border">
+                  Liste tronquée à l'affichage. L'envoi couvrira les {preview.count} destinataires.
+                </p>
+              )}
+            </div>
+          ) : (
+            <div className="rounded-lg border border-dashed border-border p-4 text-sm text-muted-foreground bg-muted/20">
+              Cliquez sur « Prévisualiser » pour obtenir la liste réelle.
+            </div>
+          )}
         </div>
 
-        <DialogFooter className="gap-2">
+        <DialogFooter className="px-6 py-4 border-t border-border bg-background gap-2 shrink-0 sm:justify-between">
           <Button variant="outline" onClick={doPreview} disabled={previewing || sending}>
             {previewing ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Search className="h-4 w-4 mr-2" />}
             Prévisualiser
           </Button>
-          <Button
-            onClick={doSend}
-            disabled={sending || !preview || preview.count === 0}
-          >
-            {sending ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Send className="h-4 w-4 mr-2" />}
-            Envoyer aux {preview?.count ?? 0} gardiens
-          </Button>
+          <div className="flex gap-2">
+            <Button variant="ghost" onClick={() => onOpenChange(false)} disabled={sending}>
+              Fermer
+            </Button>
+            <Button
+              onClick={doSend}
+              disabled={sending || !preview || recipientCount === 0}
+            >
+              {sending ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Send className="h-4 w-4 mr-2" />}
+              {sendLabel}
+            </Button>
+          </div>
         </DialogFooter>
       </DialogContent>
     </Dialog>
