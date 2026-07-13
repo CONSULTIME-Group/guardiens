@@ -293,11 +293,22 @@ const Sits = () => {
         let petsByProperty: Record<string, any[]> = {};
         if (propertyIds.length > 0) {
           const { data: pets } = await supabase
-            .from("pets").select("name, species, property_id").in("property_id", propertyIds);
+            .from("pets").select("name, species, special_needs, property_id").in("property_id", propertyIds);
           pets?.forEach((p: any) => {
             if (!petsByProperty[p.property_id]) petsByProperty[p.property_id] = [];
             petsByProperty[p.property_id].push(p);
           });
+        }
+
+        // Owner affinity profiles (préférences propriétaires) pour permettre le calcul d'affinité sur les cards.
+        const ownerIds = [...new Set(data?.map((a: any) => a.sit?.user_id).filter(Boolean) || [])] as string[];
+        let ownerAffinityById: Record<string, any> = {};
+        if (ownerIds.length > 0) {
+          const { data: ownerProfiles } = await supabase
+            .from("owner_profiles")
+            .select("user_id, preferred_sitter_types, home_ambiance, languages, interests, life_pace, presence_expected")
+            .in("user_id", ownerIds);
+          (ownerProfiles || []).forEach((o: any) => { ownerAffinityById[o.user_id] = o; });
         }
 
         // For all applications: conversation + last message + unread.
