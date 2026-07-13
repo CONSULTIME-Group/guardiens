@@ -6290,6 +6290,15 @@ export type Database = {
         }
         Returns: undefined
       }
+      admin_alma_matching_diagnosis: {
+        Args: {
+          p_context?: Json
+          p_role: string
+          p_surface: string
+          p_user_id?: string
+        }
+        Returns: Json
+      }
       admin_analytics_daily_events: {
         Args: { _role?: string; _since: string; _until: string }
         Returns: {
