@@ -170,7 +170,7 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, prope
 
     enriched.sort((a, b) => (statusOrder[a.status] ?? 99) - (statusOrder[b.status] ?? 99));
     setApplications(enriched);
-    (setSitContext as any)({
+    setSitContext({
       accepts_sitter_pets: (sitCtxRes.data as any)?.accepts_sitter_pets ?? null,
       accepts_sitter_children: (sitCtxRes.data as any)?.accepts_sitter_children ?? null,
     });
