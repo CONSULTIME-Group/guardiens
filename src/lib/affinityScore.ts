@@ -351,19 +351,28 @@ export function computeAffinityResultFull(
     }
   }
 
+  // Note "à discuter" (accompagnants) : n'impacte pas le score.
+  if (owner.accepts_sitter_pets === "discuss" && sitter.travels_with_own_animals === true) {
+    notes.push("Vos animaux accompagnants sont à discuter avec le propriétaire");
+  }
+  if (owner.accepts_sitter_children === "discuss" && sitter.travels_with_children === true) {
+    notes.push("Vos enfants accompagnants sont à discuter avec le propriétaire");
+  }
+
   // Score = points obtenus / poids max théorique (pas le poids des seuls critères évalués).
   const raw = (points / MAX_WEIGHT) * 100;
   const score = Math.max(0, Math.min(100, Math.round(raw)));
   const total = evaluated;
 
   if (evaluated < thresholds.minCommonCriteria) {
-    return { score, matched, total, displayed: false, hiddenReason: "too_few_criteria" };
+    return { score, matched, total, notes, displayed: false, hiddenReason: "too_few_criteria" };
   }
   if (score < thresholds.minScorePercent) {
-    return { score, matched, total, displayed: false, hiddenReason: "below_threshold" };
+    return { score, matched, total, notes, displayed: false, hiddenReason: "below_threshold" };
   }
-  return { score, matched, total, displayed: true };
+  return { score, matched, total, notes, displayed: true };
 }
+
 
 
 /**
