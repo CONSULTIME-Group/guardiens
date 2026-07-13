@@ -39,6 +39,8 @@ import { useToast } from "@/hooks/use-toast";
 import { Helmet } from "react-helmet-async";
 import MobileStickyCTA from "@/components/dashboard/owner/MobileStickyCTA";
 import { RepublishAlmaDialog } from "@/components/ai/alma/RepublishAlmaDialog";
+import AffinitySection from "@/components/matching/AffinitySection";
+import { useViewerSitterForAffinity } from "@/hooks/useViewerSitterForAffinity";
 
 /* ── Status configs (tokens sémantiques uniquement, compat dark mode) ── */
 const statusConfig: Record<string, { label: string; className: string }> = {
