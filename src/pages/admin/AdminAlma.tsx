@@ -153,7 +153,7 @@ function BubblesTab({ since, range }: { since: string; range: Range }) {
     queryFn: async (): Promise<RawEvent[]> => {
       const { data, error } = await supabase
         .from("analytics_events")
-        .select("event_type, created_at, user_id, metadata")
+        .select("event_type, created_at, user_id")
         .like("event_type", "alma_%")
         .gte("created_at", since)
         .order("created_at", { ascending: false })
@@ -161,7 +161,10 @@ function BubblesTab({ since, range }: { since: string; range: Range }) {
       if (error) throw error;
       return (data ?? []) as RawEvent[];
     },
+    staleTime: 60_000,
+    refetchOnWindowFocus: false,
   });
+
 
   const truncated = events.length >= ROW_LIMIT;
   const kpis = useMemo(() => computeBubbleKpis(events), [events]);
