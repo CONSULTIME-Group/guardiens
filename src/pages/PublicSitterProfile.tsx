@@ -452,6 +452,22 @@ export default function PublicSitterProfile() {
       if (fetchedEmergencyProfile) setEmergencyActive(fetchedEmergencyProfile.is_active);
       setHasActiveSubscription(!!(subRes.data && (subRes.data as any[]).length > 0));
       setOwnerProfile(fetchedOwnerProfile);
+      setTargetOwnerAffinity(fetchedOwnerProfile);
+      // Charge les animaux du propriétaire cible (via ses properties) pour permettre le calcul d'affinité côté gardien visitant l'onglet propriétaire.
+      if (fetchedOwnerProfile && id) {
+        try {
+          const { data: propsData } = await supabase
+            .from("properties")
+            .select("pets:pets(species, special_needs)")
+            .eq("user_id", id);
+          const flat = (propsData || []).flatMap((p: any) => p.pets || []);
+          setTargetPets(flat);
+        } catch {
+          setTargetPets([]);
+        }
+      } else {
+        setTargetPets([]);
+      }
       setMissionCount(fetchedMissionCount);
       setExternalExperiences(extExpRes?.data || []);
 
