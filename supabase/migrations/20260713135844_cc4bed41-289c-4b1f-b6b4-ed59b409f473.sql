@@ -1,0 +1,1 @@
+DROP POLICY IF EXISTS "Public sitter profiles read" ON public.sitter_profiles; REVOKE SELECT ON public.sitter_profiles FROM anon;
