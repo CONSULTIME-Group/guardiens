@@ -243,15 +243,16 @@ describe("computeAffinityScore", () => {
     expect(a!.score).toBeGreaterThan(b!.score);
   });
 
-  it("signale displayed:false avec raison too_few_criteria sous 3 critères communs", () => {
+  it("signale displayed:false avec raison too_few_criteria sous 2 critères communs", () => {
     const r = computeAffinityResultFull(
-      { life_pace: "calme", languages: ["Français"] },
-      { life_pace: "calme", languages: ["Français"] },
+      { life_pace: "calme" },
+      { life_pace: "calme" },
     );
     expect(r).not.toBeNull();
     expect(r!.displayed).toBe(false);
     expect(r!.hiddenReason).toBe("too_few_criteria");
   });
+
 
 
 
