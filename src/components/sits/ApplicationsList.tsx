@@ -531,13 +531,18 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, prope
   const affinityByApp = useMemo(() => {
     const map = new Map<string, number>();
     if (!viewerOwner) return map;
+    const ownerWithSit: AffinityOwnerInput = {
+      ...(viewerOwner as AffinityOwnerInput),
+      accepts_sitter_pets: sitContext.accepts_sitter_pets ?? undefined,
+      accepts_sitter_children: sitContext.accepts_sitter_children ?? undefined,
+    };
     rawActive.forEach((app: any) => {
       if (!app.sitterAffinityInput) return;
-      const res = computeAffinityResultFull(viewerOwner as AffinityOwnerInput, app.sitterAffinityInput);
+      const res = computeAffinityResultFull(ownerWithSit, app.sitterAffinityInput);
       if (res?.displayed) map.set(app.id, res.score);
     });
     return map;
-  }, [rawActive, viewerOwner]);
+  }, [rawActive, viewerOwner, sitContext.accepts_sitter_pets, sitContext.accepts_sitter_children]);
 
   const activeApps = useMemo(() => {
     let arr = [...rawActive];
