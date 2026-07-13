@@ -251,7 +251,93 @@ describe("computeAffinityScore", () => {
     expect(r).not.toBeNull();
     expect(r!.displayed).toBe(false);
     expect(r!.hiddenReason).toBe("too_few_criteria");
+
+  it("garde-fou espèces : owner chat + sitter chien = no_animal_species_match", () => {
+    const r = computeAffinityResultFull(
+      { pets: [{ species: "cat" }], life_pace: "calme", languages: ["Français"] },
+      { animal_types: ["dog"], life_pace: "calme", languages: ["Français"] },
+    );
+    expect(r).not.toBeNull();
+    expect(r!.displayed).toBe(false);
+    expect(r!.hiddenReason).toBe("no_animal_species_match");
+    expect(computeAffinityScore(
+      { pets: [{ species: "cat" }], life_pace: "calme", languages: ["Français"] },
+      { animal_types: ["dog"], life_pace: "calme", languages: ["Français"] },
+    )).toBeNull();
+  });
+
+  it("garde-fou accompagnants : accepts_sitter_pets='no' + travels_with_own_animals=true = disqualification", () => {
+    const r = computeAffinityResultFull(
+      {
+        pets: [{ species: "cat" }],
+        accepts_sitter_pets: "no",
+        life_pace: "calme",
+        languages: ["Français"],
+      },
+      {
+        animal_types: ["cat"],
+        travels_with_own_animals: true,
+        life_pace: "calme",
+        languages: ["Français"],
+      },
+    );
+    expect(r).not.toBeNull();
+    expect(r!.hiddenReason).toBe("sitter_pets_not_accepted");
+  });
+
+  it("garde-fou accompagnants enfants : accepts='no' + travels=true", () => {
+    const r = computeAffinityResultFull(
+      { accepts_sitter_children: "no", life_pace: "calme", languages: ["Français"] },
+      { travels_with_children: true, life_pace: "calme", languages: ["Français"] },
+    );
+    expect(r).not.toBeNull();
+    expect(r!.hiddenReason).toBe("sitter_children_not_accepted");
+  });
+
+  it("accepts_sitter_pets='discuss' + travels=true : pas de disqualification mais note", () => {
+    const r = computeAffinityResultFull(
+      {
+        pets: [{ species: "cat" }],
+        accepts_sitter_pets: "discuss",
+        presence_expected: "Télétravail OK",
+        life_pace: "calme",
+      },
+      {
+        animal_types: ["cat"],
+        travels_with_own_animals: true,
+        work_during_sit: "full_remote",
+        life_pace: "calme",
+      },
+    );
+    expect(r).not.toBeNull();
+    expect(r!.hiddenReason).toBeUndefined();
+    expect(r!.notes?.some((n) => /discuter/i.test(n))).toBe(true);
+  });
+
+  it("score 100 % : tous les 7 critères matchent avec MAX_WEIGHT=9", () => {
+    const r = computeAffinityScore(
+      {
+        pets: [{ species: "cat" }, { species: "cat" }],
+        presence_expected: "Télétravail OK",
+        preferred_sitter_types: ["Retraité·e"],
+        home_ambiance: ["Cocon casanier"],
+        life_pace: "calme",
+        languages: ["Français"],
+        interests: ["Lecture", "Jardinage"],
+      },
+      {
+        animal_types: ["cat", "dog"],
+        work_during_sit: "full_remote",
+        sitter_type: "Retraité·e voyageur·euse",
+        life_pace: "calme",
+        languages: ["Français"],
+        interests: ["Lecture", "Jardinage"],
+      },
+    );
+    expect(r).not.toBeNull();
+    expect(r!.score).toBe(100);
   });
 });
+
 
 
