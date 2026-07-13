@@ -244,7 +244,15 @@ const OnboardingAffinity = () => {
         await supabase
           .from("sitter_profiles")
           .upsert(
-            { user_id: user.id, animal_types: animalTypes, work_during_sit: workDuringSit, sitter_type: sitterType },
+            {
+              user_id: user.id,
+              animal_types: animalTypes,
+              work_during_sit: workDuringSit,
+              sitter_type: sitterType,
+              life_pace: lifePace || null,
+              interests,
+              languages,
+            },
             { onConflict: "user_id" },
           );
       }
@@ -253,7 +261,15 @@ const OnboardingAffinity = () => {
         await supabase
           .from("owner_profiles")
           .upsert(
-            { user_id: user.id, presence_expected: presenceExpected, preferred_sitter_types: preferredSitterTypes } as any,
+            {
+              user_id: user.id,
+              presence_expected: presenceExpected,
+              preferred_sitter_types: preferredSitterTypes,
+              home_ambiance: homeAmbiance,
+              life_pace: lifePace || null,
+              interests,
+              languages,
+            } as any,
             { onConflict: "user_id" },
           );
       }
