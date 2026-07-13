@@ -174,10 +174,11 @@ const FREQUENCY_CHOICES: { value: AlmaFrequency; label: string }[] = [
 ];
 
 export function AlmaDock() {
+  const { isAuthenticated, activeRole } = useAuth();
+  if (!isAuthenticated) return null;
   const { currentWhisper, dismissCurrent, requestNextTip } = useAlma();
   const { frequency, setFrequency } = useAlmaFrequency();
   const { hidden, setHidden } = useAlmaHidden();
-  const { activeRole } = useAuth();
   const { data: evolution } = useAlmaEvolution();
   const isModalOpen = useIsRadixModalOpen();
   const location = useLocation();
