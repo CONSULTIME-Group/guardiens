@@ -499,7 +499,7 @@ export function AlmaProvider({ children }: { children: ReactNode }) {
         surface,
         priority: "P3",
         allowNextTip: false,
-        message: emptyMessage ?? "Rien de neuf pour l'instant, revenez tout à l'heure.",
+        message: emptyMessage ?? "Rien de neuf pour l'instant, revenez un peu plus tard.",
         autoDismissMs: 6_000,
       });
       trackEvent("alma_next_tip_empty", { metadata: { surface } });
