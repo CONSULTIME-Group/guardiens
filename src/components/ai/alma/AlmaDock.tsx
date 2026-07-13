@@ -169,7 +169,7 @@ function surfaceFromPath(
 const FREQUENCY_CHOICES: { value: AlmaFrequency; label: string }[] = [
   { value: "silent", label: "Silencieuse" },
   { value: "low", label: "Peu bavarde" },
-  { value: "balanced", label: "Modéré (recommandé)" },
+  { value: "balanced", label: "Modérée (recommandée)" },
   { value: "talkative", label: "Bavarde" },
 ];
 
