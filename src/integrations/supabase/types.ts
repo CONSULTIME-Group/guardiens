@@ -7120,6 +7120,7 @@ export type Database = {
         Args: { _path: string; _source: string }
         Returns: undefined
       }
+      unaccent: { Args: { "": string }; Returns: string }
       unpublish_sit:
         | { Args: { p_sit_id: string }; Returns: number }
         | { Args: { p_reason?: string; p_sit_id: string }; Returns: number }
