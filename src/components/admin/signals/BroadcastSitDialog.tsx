@@ -110,7 +110,10 @@ export const BroadcastSitDialog = ({ open, onOpenChange, signal, onSent }: Props
     try {
       const data = await invokeProximity("send");
       const sent = (data as { sent?: number })?.sent ?? 0;
-      toast.success(`Broadcast envoyé à ${sent} gardien${sent > 1 ? "s" : ""}.`);
+      const errors = (data as { errors?: number })?.errors ?? 0;
+      toast.success(
+        `${sent} email${sent > 1 ? "s" : ""} envoyé${sent > 1 ? "s" : ""}${errors ? `, ${errors} erreur${errors > 1 ? "s" : ""}` : ""}.`,
+      );
       onOpenChange(false);
       onSent();
     } catch (e) {
