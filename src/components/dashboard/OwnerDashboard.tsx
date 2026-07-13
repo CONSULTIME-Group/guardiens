@@ -757,13 +757,15 @@ const OwnerDashboard = () => {
                 value: completedSits.length,
                 label: completedSits.length > 1 ? "Gardes" : "Garde",
               },
-              {
-                value: avgRating > 0 ? `${avgRating} ★` : null,
-                fallback: ",",
-                label: "Note",
-                highlight: avgRating > 0,
-                to: user?.id ? `/gardiens/${user.id}?tab=proprio#avis` : undefined,
-              },
+              // Tuile note masquée tant qu'aucun avis publié (pas de note trompeuse).
+              ...(avgRating > 0 && reviews.length > 0
+                ? [{
+                    value: `${avgRating} ★ (${reviews.length} avis)`,
+                    label: "Note",
+                    highlight: true,
+                    to: user?.id ? `/gardiens/${user.id}?tab=proprio#avis` : undefined,
+                  }]
+                : []),
               ...(activeSits.length > 0
                 ? [{
                     value: activeSits.length,
