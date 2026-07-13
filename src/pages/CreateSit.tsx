@@ -17,6 +17,7 @@ import { cn } from "@/lib/utils";
 import { hasMedication } from "@/lib/medication";
 import { trackFirstAction, trackEvent } from "@/lib/analytics";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { COUNTRIES } from "@/lib/countries";
 import ImproveListingButton from "@/components/ai/ImproveListingButton";
 import { moderateContent } from "@/lib/moderation";
@@ -262,6 +263,8 @@ const CreateSit = () => {
   const [coverPhotoUrl, setCoverPhotoUrl] = useState<string | null>(null);
   const [sitCity, setSitCity] = useState<string>("");
   const [sitCountry, setSitCountry] = useState<string>("FR");
+  const [acceptsSitterPets, setAcceptsSitterPets] = useState<"yes" | "no" | "discuss">("discuss");
+  const [acceptsSitterChildren, setAcceptsSitterChildren] = useState<"yes" | "no" | "discuss">("discuss");
 
   // Touched state for blur validation
   const [touched, setTouched] = useState<Record<string, boolean>>({});
@@ -360,7 +363,7 @@ const CreateSit = () => {
 
       let sourceSitRes: { data: any } | null = null;
       if (fromSitId) {
-        sourceSitRes = await supabase.from("sits").select("title, specific_expectations, open_to, environments, min_gardien_sits, flexible_dates, max_applications, owner_message, daily_routine, city, country").eq("id", fromSitId).single();
+        sourceSitRes = await supabase.from("sits").select("title, specific_expectations, open_to, environments, min_gardien_sits, flexible_dates, max_applications, owner_message, daily_routine, city, country, accepts_sitter_pets, accepts_sitter_children").eq("id", fromSitId).single();
       }
 
       setProfileCompletion(profileRes.data?.profile_completion || 0);
@@ -382,6 +385,8 @@ const CreateSit = () => {
         setDailyRoutine(s.daily_routine || "");
         setSitCity((s as any).city || "");
         setSitCountry((s as any).country || "FR");
+        setAcceptsSitterPets(((s as any).accepts_sitter_pets as any) || "discuss");
+        setAcceptsSitterChildren(((s as any).accepts_sitter_children as any) || "discuss");
         setIsRepublish(true);
         try {
           trackEvent("alma_republish_bubble_seen", {
@@ -478,6 +483,8 @@ const CreateSit = () => {
           setCoverPhotoUrl(d.cover_photo_url || null);
           setSitCity((d as any).city || "");
           setSitCountry((d as any).country || "FR");
+          setAcceptsSitterPets(((d as any).accepts_sitter_pets as any) || "discuss");
+          setAcceptsSitterChildren(((d as any).accepts_sitter_children as any) || "discuss");
           if (datesWerePast) {
             toast({
               title: "Dates à redéfinir",
@@ -542,7 +549,7 @@ const CreateSit = () => {
     }, 1500);
     return () => clearTimeout(t);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [title, startDate, endDate, flexibleDates, flexibleNotes, specificExpectations, openTo, isUrgent, sitEnvironments, minGardienSits, maxApplications, ownerMessage, dailyRoutine, coverPhotoUrl, sitCity, sitCountry]);
+  }, [title, startDate, endDate, flexibleDates, flexibleNotes, specificExpectations, openTo, isUrgent, sitEnvironments, minGardienSits, maxApplications, ownerMessage, dailyRoutine, coverPhotoUrl, sitCity, sitCountry, acceptsSitterPets, acceptsSitterChildren]);
 
   const saveDraft = async ({ silent = false }: { silent?: boolean } = {}) => {
     if (!user || !property) return null;
@@ -583,6 +590,8 @@ const CreateSit = () => {
         cover_photo_url: coverPhotoUrl ?? pets.find(p => !!p.photo_url)?.photo_url ?? (ownerPhotos[0] || null),
         city: sitCity.trim() || null,
         country: sitCountry.trim() || "FR",
+        accepts_sitter_pets: acceptsSitterPets,
+        accepts_sitter_children: acceptsSitterChildren,
       };
       if (draftId) {
         const { error } = await supabase.from("sits").update(payload).eq("id", draftId).eq("status", "draft");
@@ -728,6 +737,8 @@ const CreateSit = () => {
         cover_photo_url: coverPhotoUrl ?? pets.find(p => !!p.photo_url)?.photo_url ?? (ownerPhotos[0] || null),
         city: sitCity.trim() || null,
         country: sitCountry.trim() || "FR",
+        accepts_sitter_pets: acceptsSitterPets,
+        accepts_sitter_children: acceptsSitterChildren,
       };
 
       let sitId = draftId;
@@ -1314,6 +1325,43 @@ const CreateSit = () => {
               ))}
             </div>
           </div>
+
+          {/* Accompagnants du gardien */}
+          <div className="space-y-4 rounded-xl border border-border bg-card p-4">
+            <div>
+              <Label className="text-sm font-medium text-foreground mb-1 block">Accompagnants du gardien</Label>
+              <p className="text-xs text-muted-foreground">Ces informations aident les gardiens à mieux préparer leur candidature.</p>
+            </div>
+
+            <div className="space-y-2">
+              <Label className="text-sm font-medium text-foreground">Acceptez-vous que le gardien vienne avec ses animaux ?</Label>
+              <ToggleGroup
+                type="single"
+                value={acceptsSitterPets}
+                onValueChange={(v) => { if (v === "yes" || v === "no" || v === "discuss") setAcceptsSitterPets(v); }}
+                className="justify-start flex-wrap gap-2"
+              >
+                <ToggleGroupItem value="yes" className="rounded-full border data-[state=on]:bg-primary data-[state=on]:text-primary-foreground px-3 h-9">Oui, autorisés</ToggleGroupItem>
+                <ToggleGroupItem value="no" className="rounded-full border data-[state=on]:bg-primary data-[state=on]:text-primary-foreground px-3 h-9">Non</ToggleGroupItem>
+                <ToggleGroupItem value="discuss" className="rounded-full border data-[state=on]:bg-primary data-[state=on]:text-primary-foreground px-3 h-9">À discuter selon les cas</ToggleGroupItem>
+              </ToggleGroup>
+            </div>
+
+            <div className="space-y-2">
+              <Label className="text-sm font-medium text-foreground">Acceptez-vous que le gardien vienne avec ses enfants ?</Label>
+              <ToggleGroup
+                type="single"
+                value={acceptsSitterChildren}
+                onValueChange={(v) => { if (v === "yes" || v === "no" || v === "discuss") setAcceptsSitterChildren(v); }}
+                className="justify-start flex-wrap gap-2"
+              >
+                <ToggleGroupItem value="yes" className="rounded-full border data-[state=on]:bg-primary data-[state=on]:text-primary-foreground px-3 h-9">Oui, autorisés</ToggleGroupItem>
+                <ToggleGroupItem value="no" className="rounded-full border data-[state=on]:bg-primary data-[state=on]:text-primary-foreground px-3 h-9">Non</ToggleGroupItem>
+                <ToggleGroupItem value="discuss" className="rounded-full border data-[state=on]:bg-primary data-[state=on]:text-primary-foreground px-3 h-9">À discuter selon les cas</ToggleGroupItem>
+              </ToggleGroup>
+            </div>
+          </div>
+
 
           {/* Max candidatures */}
           <div>

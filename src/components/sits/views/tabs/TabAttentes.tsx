@@ -1,6 +1,6 @@
 /**
  * Onglet "Attentes" : attentes spécifiques de l'hôte + cadre de vie
- * + préférences gardien (open_to, expérience minimum).
+ * + préférences gardien (open_to, expérience minimum, accompagnants).
  * Aucune icône Lucide décorative, texte pur.
  */
 import { getEnvMeta } from "./sitMeta";
@@ -11,7 +11,15 @@ interface TabAttentesProps {
   environments: string[];
   openTo?: string[] | null;
   minGardienSits?: number | null;
+  acceptsSitterPets?: "yes" | "no" | "discuss" | null;
+  acceptsSitterChildren?: "yes" | "no" | "discuss" | null;
 }
+
+const ACCOMP_STYLE: Record<"yes" | "no" | "discuss", { label: string; className: string }> = {
+  yes: { label: "Autorisés", className: "bg-success/10 text-success border-success/30" },
+  no: { label: "Non autorisés", className: "bg-warning/10 text-warning border-warning/30" },
+  discuss: { label: "À discuter", className: "bg-muted text-foreground border-border" },
+};
 
 const TabAttentes = ({
   ownerName,
@@ -19,13 +27,18 @@ const TabAttentes = ({
   environments,
   openTo,
   minGardienSits,
+  acceptsSitterPets,
+  acceptsSitterChildren,
 }: TabAttentesProps) => {
   const cleanOpenTo = (openTo || []).filter(Boolean);
-  const hasNoPreference =
-    cleanOpenTo.length === 0 ||
-    (cleanOpenTo.length === 1 && cleanOpenTo[0] === "Sans préférence");
+  const hasOpenTo =
+    cleanOpenTo.length > 0 &&
+    !(cleanOpenTo.length === 1 && cleanOpenTo[0] === "Sans préférence");
   const hasMinExperience = typeof minGardienSits === "number" && minGardienSits > 0;
-  const hasPreferences = !hasNoPreference || hasMinExperience;
+  const hasAccompChip =
+    (acceptsSitterPets && acceptsSitterPets !== "discuss") ||
+    (acceptsSitterChildren && acceptsSitterChildren !== "discuss");
+  const hasPreferences = hasOpenTo || hasMinExperience || hasAccompChip;
 
   return (
     <>
@@ -46,10 +59,35 @@ const TabAttentes = ({
       )}
 
       {hasPreferences && (
-        <section className="rounded-2xl border border-border bg-card p-5 md:p-6">
-          <h2 className="text-lg font-semibold mb-3">Profil de gardien recherché</h2>
-          {!hasNoPreference && (
-            <div className="mb-3">
+        <section className="rounded-2xl border border-border bg-card p-5 md:p-6 space-y-4">
+          <h2 className="text-lg font-semibold">Profil de gardien recherché</h2>
+
+          {(acceptsSitterPets || acceptsSitterChildren) && (
+            <div className="space-y-2">
+              <p className="text-[11px] uppercase tracking-wider text-muted-foreground">
+                Accompagnants du gardien
+              </p>
+              <div className="flex flex-wrap gap-2">
+                {acceptsSitterPets && (
+                  <span
+                    className={`inline-flex items-center text-sm rounded-full border px-3 py-1.5 font-medium ${ACCOMP_STYLE[acceptsSitterPets].className}`}
+                  >
+                    Animaux du gardien : {ACCOMP_STYLE[acceptsSitterPets].label}
+                  </span>
+                )}
+                {acceptsSitterChildren && (
+                  <span
+                    className={`inline-flex items-center text-sm rounded-full border px-3 py-1.5 font-medium ${ACCOMP_STYLE[acceptsSitterChildren].className}`}
+                  >
+                    Enfants du gardien : {ACCOMP_STYLE[acceptsSitterChildren].label}
+                  </span>
+                )}
+              </div>
+            </div>
+          )}
+
+          {hasOpenTo && (
+            <div>
               <p className="text-[11px] uppercase tracking-wider text-muted-foreground mb-2">
                 Ouvert à
               </p>
@@ -65,6 +103,7 @@ const TabAttentes = ({
               </div>
             </div>
           )}
+
           {hasMinExperience && (
             <p className="text-sm text-foreground/90">
               Expérience souhaitée :{" "}

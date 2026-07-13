@@ -89,6 +89,9 @@ export interface SitterProfileData {
   available_for_help: boolean;
   // Competences
   competences: string[];
+  // Accompagnants pendant les gardes
+  travels_with_children: boolean;
+  travels_with_own_animals: boolean;
 }
 
 export interface PastAnimal {
@@ -112,6 +115,8 @@ const defaultData: SitterProfileData = {
   special_animal_skills: [], work_during_sit: "", sensitivities: [],
   skill_categories: [], available_for_help: false,
   competences: [],
+  travels_with_children: false,
+  travels_with_own_animals: false,
 };
 
 export function useSitterProfile() {
@@ -199,6 +204,8 @@ export function useSitterProfile() {
       skill_categories: (p as any)?.skill_categories || [],
       available_for_help: (p as any)?.available_for_help || false,
       competences: (s as any)?.competences || [],
+      travels_with_children: (s as any)?.travels_with_children || false,
+      travels_with_own_animals: (s as any)?.travels_with_own_animals || false,
       // Step 3 — Animaux (nouveaux champs persistés)
       ...( {
         dog_sizes_accepted: (s as any)?.dog_sizes_accepted || [],
@@ -355,6 +362,8 @@ export function useSitterProfile() {
         "min_stay_duration", "preferred_frequency", "min_notice", "preferred_periods", "preferred_environments",
         // Step 3 — Animaux (étaient dans le formulaire mais perdus à la sauvegarde)
         "dog_sizes_accepted", "demanding_breeds_ok", "indoor_cats_only", "own_animals", "guard_experience",
+        // Accompagnants
+        "travels_with_children", "travels_with_own_animals",
       ] as const;
 
       const sitterUpdate: any = {};

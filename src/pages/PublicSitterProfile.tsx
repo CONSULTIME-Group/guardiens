@@ -239,6 +239,23 @@ export default function PublicSitterProfile() {
           </div>
         </div>
       )}
+      {(props.sitterProfile?.travels_with_own_animals || props.sitterProfile?.travels_with_children) && (
+        <div>
+          <h3 className="text-sm font-semibold text-foreground font-body mb-2.5">Accompagnants</h3>
+          <ul className="text-sm text-foreground/80 font-body space-y-1">
+            {props.sitterProfile?.travels_with_own_animals && (() => {
+              const own: string[] = (props.sitterProfile?.own_animals || []).filter((s: string) => s && s.toLowerCase() !== "non");
+              const detail = own.length > 0 ? own.map(s => s.replace(/^Oui[\s,\-—]*/i, "").trim()).filter(Boolean).join(", ") : "";
+              return (
+                <li>Voyage avec ses animaux{detail ? ` : ${detail}` : ""}</li>
+              );
+            })()}
+            {props.sitterProfile?.travels_with_children && (
+              <li>Voyage parfois avec ses enfants</li>
+            )}
+          </ul>
+        </div>
+      )}
       <div>
         <h3 className="text-sm font-semibold text-foreground font-body mb-2.5">Zone d'intervention</h3>
         <p className="text-sm text-foreground/70 font-body">
