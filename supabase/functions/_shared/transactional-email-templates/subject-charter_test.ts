@@ -57,8 +57,9 @@ Deno.test('subjects respectent la charte', () => {
         // détecter apostrophe droite entre lettres ou en début de mot
         if (subject.includes("'")) violations.push(`${name}: apostrophe droite -> "${subject}"`)
       }
-      if (!subject.includes('\u2014 Guardiens')) {
-        violations.push(`${name}: suffixe « » manquant -> "${subject}"`)
+      // Interdiction du tiret cadratin dans les subjects (règle de ponctuation projet)
+      if (subject.includes('\u2014') || subject.includes('\u2013')) {
+        violations.push(`${name}: tiret cadratin/demi-cadratin interdit -> "${subject}"`)
       }
     }
   }
