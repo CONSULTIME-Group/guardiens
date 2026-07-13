@@ -57,7 +57,7 @@ export function AlmaBubble({
   className,
   stage,
 }: AlmaBubbleProps) {
-  const loadingLabel = audience === "sitter" ? "Alma prépare…" : "Alma prépare…";
+  const loadingLabel = "Alma prépare…";
   const mood = loading ? "thinking" : success ? "happy" : "idle";
 
 
