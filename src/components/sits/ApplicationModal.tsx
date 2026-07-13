@@ -377,6 +377,21 @@ const ApplicationModal = ({
           <DialogDescription>Le propriétaire verra votre profil ci-dessous en plus de votre message.</DialogDescription>
         </DialogHeader>
 
+        {affinity?.displayed && (
+          <div className="flex items-center gap-2 flex-wrap mt-1">
+            <AffinityBadge
+              result={affinity}
+              size="md"
+              trackingContext="application_modal"
+              trackingId={sitId}
+            />
+            <span className="text-xs text-muted-foreground">
+              Votre affinité avec ce propriétaire
+            </span>
+          </div>
+        )}
+
+
         {companionWarning && (
           <Alert className="mt-1 border-warning/40 bg-warning/10 text-foreground">
             <AlertTriangle className="h-4 w-4 text-warning" />
