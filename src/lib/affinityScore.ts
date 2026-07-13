@@ -100,8 +100,16 @@ export function getAffinityThresholds() {
 }
 
 /**
- * Pondération par critère. Barème uniformisé (juillet 2026) : MAX_WEIGHT = 9.
- * Animaux et présence pèsent 2 (critères durs), les 5 autres pèsent 1.
+ * Pondération par critère. Animaux et présence pèsent 2 (critères durs),
+ * les 5 autres pèsent 1. MAX_WEIGHT = 9 correspond à un profil qui a
+ * renseigné les 7 critères de la formule.
+ *
+ * Normalisation (juillet 2026) : le score est calculé sur le poids
+ * effectivement évalué (somme des poids des critères comparables des deux
+ * côtés), pas sur MAX_WEIGHT. Un critère absent d'un côté sort simplement
+ * du dénominateur — il n'est ni bonus ni pénalité. Cela garantit qu'un
+ * même couple owner/gardien obtient le même score quel que soit le nombre
+ * de champs récupérés par la vue appelante (cohérence /annonces ↔ détail).
  */
 const W = {
   animals: 2,
@@ -266,6 +274,7 @@ export function computeAffinityResultFull(
 
   let points = 0;
   let evaluated = 0; // nombre de critères réellement comparables (X / 7)
+  let evaluatedWeight = 0; // somme des poids des critères comparables (dénominateur dynamique)
   const matched: string[] = [];
   const notes: string[] = [];
 
@@ -273,6 +282,7 @@ export function computeAffinityResultFull(
   const species = ownerSpeciesRaw;
   if (species.length > 0 && (sitter.animal_types?.length ?? 0) > 0) {
     evaluated++;
+    evaluatedWeight += W.animals;
     const inter = speciesIntersects(species, sitter.animal_types ?? []);
     if (inter > 0) {
       const ratio = Math.min(1, inter / species.length);
@@ -287,6 +297,7 @@ export function computeAffinityResultFull(
   const presScore = presenceCompatibility(owner.presence_expected, sitter.work_during_sit);
   if (presScore !== null) {
     evaluated++;
+    evaluatedWeight += W.presence;
     points += presScore * W.presence;
     if (presScore >= 1) matched.push("Présence compatible");
     else if (presScore >= 0.5) matched.push("Présence plutôt compatible");
@@ -295,6 +306,7 @@ export function computeAffinityResultFull(
   // 3. Rythme (poids 1)
   if (owner.life_pace && sitter.life_pace) {
     evaluated++;
+    evaluatedWeight += W.pace;
     if (owner.life_pace === sitter.life_pace) {
       points += W.pace;
       matched.push("Même rythme de vie");
@@ -311,6 +323,7 @@ export function computeAffinityResultFull(
   // 4. Langues (poids 1)
   if ((owner.languages?.length ?? 0) > 0 && (sitter.languages?.length ?? 0) > 0) {
     evaluated++;
+    evaluatedWeight += W.languages;
     if (hasIntersection(owner.languages, sitter.languages)) {
       points += W.languages;
       matched.push("Langue commune");
@@ -320,6 +333,7 @@ export function computeAffinityResultFull(
   // 5. Intérêts (poids 1)
   if ((owner.interests?.length ?? 0) > 0 && (sitter.interests?.length ?? 0) > 0) {
     evaluated++;
+    evaluatedWeight += W.interests;
     const c = intersectionCount(owner.interests, sitter.interests);
     if (c >= 2) {
       points += W.interests;
@@ -333,6 +347,7 @@ export function computeAffinityResultFull(
   // 6. Profil idéal (poids 1)
   if ((owner.preferred_sitter_types?.length ?? 0) > 0 && sitter.sitter_type) {
     evaluated++;
+    evaluatedWeight += W.ideal;
     const m = idealProfileMatch(owner, sitter);
     if (m > 0) {
       points += m * W.ideal;
@@ -343,6 +358,7 @@ export function computeAffinityResultFull(
   // 7. Ambiance foyer (poids 1)
   if ((owner.home_ambiance?.length ?? 0) > 0 && (sitter.life_pace || (sitter.interests?.length ?? 0) > 0)) {
     evaluated++;
+    evaluatedWeight += W.ambiance;
     const a = ambianceMatch(owner, sitter);
     if (a > 0) {
       points += a * W.ambiance;
@@ -359,8 +375,9 @@ export function computeAffinityResultFull(
     notes.push("Vos enfants accompagnants sont à discuter avec le propriétaire");
   }
 
-  // Score = points obtenus / poids max théorique (pas le poids des seuls critères évalués).
-  const raw = (points / MAX_WEIGHT) * 100;
+  // Dénominateur dynamique : on normalise sur les poids réellement évalués.
+  // Un critère absent d'un côté ne pénalise plus le score, il en sort.
+  const raw = evaluatedWeight > 0 ? (points / evaluatedWeight) * 100 : 0;
   const score = Math.max(0, Math.min(100, Math.round(raw)));
   const total = evaluated;
 

@@ -620,7 +620,11 @@ const PublicSitView = ({
               {isAuthenticated && viewerSitter && ownerProfile && (
                 <AffinitySection
                   sitterProfile={viewerSitter}
-                  ownerProfile={ownerProfile as any}
+                  ownerProfile={{
+                    ...(ownerProfile as any),
+                    accepts_sitter_pets: (sit as any).accepts_sitter_pets ?? null,
+                    accepts_sitter_children: (sit as any).accepts_sitter_children ?? null,
+                  }}
                   pets={pets as any}
                   context="public_sit_detail"
                   targetId={sit.id}
