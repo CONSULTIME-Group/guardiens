@@ -247,19 +247,30 @@ export function computeAffinityResultFull(
     return { score: 0, matched: [], total: 0, displayed: false, hiddenReason: "disqualified" };
   }
 
-  // Dénominateur FIXE : poids max théorique de TOUS les critères (7).
-  // Les critères non renseignés des deux côtés = 0 point, donc un profil incomplet
-  // tombe naturellement à un score plus bas. Évite le biais "80% partout" lié
-  // à un dénominateur dynamique sur 3-4 critères seulement.
-  const MAX_WEIGHT = W.animals + W.presence + W.pace + W.languages + W.interests + W.ideal + W.ambiance;
-  const TOTAL_CRITERIA = 7;
+  // Garde-fou accompagnants (annonce ↔ gardien).
+  if (owner.accepts_sitter_pets === "no" && sitter.travels_with_own_animals === true) {
+    return { score: 0, matched: [], total: 0, displayed: false, hiddenReason: "sitter_pets_not_accepted" };
+  }
+  if (owner.accepts_sitter_children === "no" && sitter.travels_with_children === true) {
+    return { score: 0, matched: [], total: 0, displayed: false, hiddenReason: "sitter_children_not_accepted" };
+  }
+
+  // Garde-fou espèces : si l'owner a des animaux ET le gardien déclare une expérience
+  // mais qu'aucune espèce ne matche, on masque plutôt que d'afficher un faux positif.
+  const ownerSpeciesRaw = (owner.pets ?? []).map((p) => p?.species).filter(Boolean) as string[];
+  if (ownerSpeciesRaw.length > 0 && (sitter.animal_types?.length ?? 0) > 0) {
+    if (speciesIntersects(ownerSpeciesRaw, sitter.animal_types ?? []) === 0) {
+      return { score: 0, matched: [], total: 0, displayed: false, hiddenReason: "no_animal_species_match" };
+    }
+  }
 
   let points = 0;
   let evaluated = 0; // nombre de critères réellement comparables (X / 7)
   const matched: string[] = [];
+  const notes: string[] = [];
 
   // 1. Animaux (poids 2)
-  const species = (owner.pets ?? []).map((p) => p?.species).filter(Boolean) as string[];
+  const species = ownerSpeciesRaw;
   if (species.length > 0 && (sitter.animal_types?.length ?? 0) > 0) {
     evaluated++;
     const inter = speciesIntersects(species, sitter.animal_types ?? []);
@@ -270,6 +281,7 @@ export function computeAffinityResultFull(
       else matched.push("Expérience avec une partie de vos animaux");
     }
   }
+
 
   // 2. Présence (poids 2)
   const presScore = presenceCompatibility(owner.presence_expected, sitter.work_during_sit);
