@@ -100,8 +100,16 @@ export function getAffinityThresholds() {
 }
 
 /**
- * Pondération par critère. Barème uniformisé (juillet 2026) : MAX_WEIGHT = 9.
- * Animaux et présence pèsent 2 (critères durs), les 5 autres pèsent 1.
+ * Pondération par critère. Animaux et présence pèsent 2 (critères durs),
+ * les 5 autres pèsent 1. MAX_WEIGHT = 9 correspond à un profil qui a
+ * renseigné les 7 critères de la formule.
+ *
+ * Normalisation (juillet 2026) : le score est calculé sur le poids
+ * effectivement évalué (somme des poids des critères comparables des deux
+ * côtés), pas sur MAX_WEIGHT. Un critère absent d'un côté sort simplement
+ * du dénominateur — il n'est ni bonus ni pénalité. Cela garantit qu'un
+ * même couple owner/gardien obtient le même score quel que soit le nombre
+ * de champs récupérés par la vue appelante (cohérence /annonces ↔ détail).
  */
 const W = {
   animals: 2,
