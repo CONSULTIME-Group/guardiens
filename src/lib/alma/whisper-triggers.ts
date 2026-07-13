@@ -245,7 +245,7 @@ export function buildCulturalFactWhisper(params: {
     allowNextTip: true,
     primaryAction:
       url && params.onSource
-        ? {
+        ? {
             label: "En savoir plus",
             onClick: () => params.onSource!(url),
             actionId: "cultural_fact_source",
@@ -284,7 +284,7 @@ export function buildUsageNudgeWhisper(params: {
 }): AlmaWhisper {
   const ctaLabel = params.payload.cta_label?.trim() || null;
   const ctaAction = params.payload.cta_action?.trim() || null;
-  const hasCta = ctaLabel && ctaAction && ctaAction !== "none";
+  const hasCta = ctaLabel && ctaAction && ctaAction !== "none";
   return {
     ...base("usage_nudge"),
     audience: params.audience,
@@ -293,7 +293,7 @@ export function buildUsageNudgeWhisper(params: {
     autoDismissMs: 22_000,
     allowNextTip: true,
     primaryAction: hasCta
-      ? {
+      ? {
           label: ctaLabel!,
           onClick: () => params.onCta?.(ctaAction!),
           actionId: `usage_nudge_${ctaAction}`,
