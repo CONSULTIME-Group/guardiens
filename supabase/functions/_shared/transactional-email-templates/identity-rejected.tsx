@@ -35,7 +35,7 @@ const IdentityRejectedEmail = ({ reason }: Props) => (
           Soumettre un nouveau document
         </Button>
         <LegalFooter
-          purpose="le traitement de votre demande de vérification d'identité"
+          purpose="la gestion de votre demande de vérification d'identité"
           basis="6.1.b"
         />
       </Container>

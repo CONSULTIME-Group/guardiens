@@ -66,7 +66,7 @@ const RelancePieceIdentiteEmail = ({ firstName }: RelancePieceIdentiteProps) => 
           </Text>
 
         <LegalFooter
-          purpose="le bon fonctionnement de votre compte"
+          purpose="la bonne marche de votre compte"
           basis="6.1.f"
         />
         </Container>

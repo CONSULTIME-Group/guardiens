@@ -133,7 +133,7 @@ const SitterDailyDigestEmail = ({ sitterFirstName, items = [] }: Props) => (
         <AlmaSignoff />
 
         <LegalFooter
-          purpose="le bon fonctionnement de votre digest quotidien"
+          purpose="la bonne marche de votre digest quotidien"
           basis="6.1.f"
         />
 

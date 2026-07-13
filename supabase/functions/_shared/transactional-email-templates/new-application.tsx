@@ -34,7 +34,7 @@ const NewApplicationEmail = ({ sitterFirstName, sitTitle }: Props) => (
           Voir la candidature
         </Button>
         <LegalFooter
-          purpose="le fonctionnement de votre annonce"
+          purpose="la gestion de votre annonce"
           basis="6.1.b"
         />
       </Container>

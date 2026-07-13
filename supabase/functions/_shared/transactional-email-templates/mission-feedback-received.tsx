@@ -43,7 +43,7 @@ const Email = ({ actorName, missionTitle, missionId, metadata }: Props) => {
           <Button style={button} href={`${SITE_URL}/profil`}>
             Voir mon profil
           </Button>
-          <LegalFooter purpose="le bon fonctionnement du service d'entraide" basis="6.1.f" />
+          <LegalFooter purpose="la bonne marche du service d'entraide" basis="6.1.f" />
         </Container>
       </Body>
     </Html>
