@@ -88,6 +88,36 @@ const ListingProximityCard = ({
     return "Erreur inconnue.";
   };
 
+  /**
+   * Adapte le message d'erreur "coordonnées manquantes" selon l'état réel
+   * du profil propriétaire (city/postal_code renseignés ou pas).
+   */
+  const buildCoordsErrorMessage = async (rawMsg: string): Promise<string> => {
+    if (!/coordonn/i.test(rawMsg)) return rawMsg;
+    try {
+      const { data: sit } = await supabase
+        .from("sits")
+        .select("user_id")
+        .eq("id", sitId)
+        .maybeSingle();
+      if (!sit?.user_id) return rawMsg;
+      const { data: owner } = await supabase
+        .from("profiles")
+        .select("first_name, city, postal_code")
+        .eq("id", sit.user_id)
+        .maybeSingle();
+      const firstName = owner?.first_name || "le propriétaire";
+      const hasCity = !!(owner?.city && String(owner.city).trim().length > 0);
+      const hasPostal = !!(owner?.postal_code && String(owner.postal_code).trim().length > 0);
+      if (hasCity && hasPostal) {
+        return `Cette annonce ne peut pas être diffusée par proximité. Les coordonnées géographiques de ${firstName} ne sont pas encore calculées. Cela devrait se résoudre automatiquement sous 1 minute, réessayez ensuite. Si le problème persiste, un géocodage manuel peut être déclenché depuis /admin/users.`;
+      }
+      return `Cette annonce ne peut pas être diffusée par proximité. ${firstName} n'a pas complété sa localisation. Demandez-lui de saisir sa ville et son code postal dans son profil.`;
+    } catch {
+      return rawMsg;
+    }
+  };
+
   const handlePreview = async () => {
     if (!sitId) {
       toast.error("sit_id manquant");
@@ -105,7 +135,7 @@ const ListingProximityCard = ({
       );
       if (error || (data as { error?: string })?.error) {
         const msg = await extractError(error, data);
-        setWarningMessage(msg);
+        setWarningMessage(await buildCoordsErrorMessage(msg));
         return;
       }
       setPreview(data as PreviewData);
@@ -130,7 +160,7 @@ const ListingProximityCard = ({
       );
       if (error || (data as { error?: string })?.error) {
         const msg = await extractError(error, data);
-        setWarningMessage(msg);
+        setWarningMessage(await buildCoordsErrorMessage(msg));
         return;
       }
       toast.success(
