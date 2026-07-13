@@ -788,6 +788,42 @@ const CreateSit = () => {
     return invalid ? "border-destructive focus-visible:ring-destructive" : "border-green-500 focus-visible:ring-green-500";
   };
 
+  // Validation "au clic" pour le bouton Suivant : on marque tous les champs
+  // requis de l'étape en cours comme touched pour afficher les erreurs,
+  // on scrolle vers le premier champ en erreur et on bloque l'avancement.
+  // Le bouton reste visuellement actif (feedback au clic, pas de disabled).
+  const validateCurrentStep = (): boolean => {
+    if (currentStep === 0) {
+      const errors: Array<{ field: string; anchor: string }> = [];
+      if (!title.trim()) errors.push({ field: "title", anchor: "title-field" });
+      if (!startDate) errors.push({ field: "startDate", anchor: "dates-field" });
+      if (!endDate) errors.push({ field: "endDate", anchor: "dates-field" });
+      if (dateError) errors.push({ field: "endDate", anchor: "dates-field" });
+      if (!descriptionValid) errors.push({ field: "description", anchor: "description-field" });
+      if (errors.length > 0) {
+        setTouched(prev => {
+          const next = { ...prev };
+          errors.forEach(e => { next[e.field] = true; });
+          return next;
+        });
+        const first = errors[0];
+        if (typeof document !== "undefined") {
+          document.getElementById(first.anchor)?.scrollIntoView({ behavior: "smooth", block: "center" });
+        }
+        return false;
+      }
+    }
+    // Les étapes 1 et 2 n'ont pas de champs obligatoires côté UI (tous optionnels)
+    // dans la version actuelle. Rien à valider ici.
+    return true;
+  };
+
+  const handleNext = () => {
+    if (!validateCurrentStep()) return;
+    setCurrentStep(s => s + 1);
+  };
+
+
   if (loading) {
     return <div className="p-6 md:p-10 max-w-3xl mx-auto text-muted-foreground">Chargement...</div>;
   }
