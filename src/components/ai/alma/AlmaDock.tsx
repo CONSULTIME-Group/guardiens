@@ -324,7 +324,9 @@ function AlmaDockInner() {
 
 
   const mood = whisper?.primaryAction ? "attentive" : "idle";
-  const proposition = !whisper && !isSilent ? buildProposition(evolution, activeRole) : null;
+  const rawProposition = !whisper && !isSilent ? buildProposition(evolution, activeRole) : null;
+  // Ne jamais proposer une action qui pointe vers la page courante.
+  const proposition = rawProposition && rawProposition.ctaTo.split(/[?#]/)[0] === location.pathname ? null : rawProposition;
   const stage = evolution?.stage ?? null;
   const avatarSize = stage
     ? ({ nouvelle: 36, eveillee: 40, complice: 42, fidele: 44 } as const)[stage]
