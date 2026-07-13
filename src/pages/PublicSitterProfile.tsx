@@ -104,6 +104,7 @@ export default function PublicSitterProfile() {
   // Pass 5 — compagnon culturel : fait race si l'un des animaux du gardien matche.
   useAlmaCulturalFact({
     surface: "sitter_profile",
+    enabled: !!auth.user?.id,
     context: {
       role: auth.activeRole,
       animal_species: (sitterProfile as any)?.animal_types?.[0] ?? undefined,
