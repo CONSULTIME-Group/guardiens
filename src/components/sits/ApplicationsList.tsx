@@ -63,6 +63,7 @@ const statusOrder: Record<string, number> = {
 const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, propertyId, sitStatus, statusFilter = null }: ApplicationsListProps) => {
   const { user } = useAuth();
   const { owner: viewerOwner } = useViewerOwnerForAffinity();
+  const [sitContext, setSitContext] = useState<{ accepts_sitter_pets: any; accepts_sitter_children: any }>({ accepts_sitter_pets: null, accepts_sitter_children: null });
   const [applications, setApplications] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [confirmApp, setConfirmApp] = useState<any>(null);
