@@ -153,7 +153,7 @@ function BubblesTab({ since, range }: { since: string; range: Range }) {
     queryFn: async (): Promise<RawEvent[]> => {
       const { data, error } = await supabase
         .from("analytics_events")
-        .select("event_type, created_at, user_id, metadata")
+        .select("event_type, created_at, user_id")
         .like("event_type", "alma_%")
         .gte("created_at", since)
         .order("created_at", { ascending: false })
@@ -161,7 +161,10 @@ function BubblesTab({ since, range }: { since: string; range: Range }) {
       if (error) throw error;
       return (data ?? []) as RawEvent[];
     },
+    staleTime: 60_000,
+    refetchOnWindowFocus: false,
   });
+
 
   const truncated = events.length >= ROW_LIMIT;
   const kpis = useMemo(() => computeBubbleKpis(events), [events]);
@@ -274,6 +277,8 @@ function WhispersTab({ since, range }: { since: string; range: Range }) {
       if (error) throw error;
       return (data ?? []) as RawWhisperHistory[];
     },
+    staleTime: 60_000,
+    refetchOnWindowFocus: false,
   });
 
   const historyTruncated = history.length >= ROW_LIMIT;
@@ -285,7 +290,10 @@ function WhispersTab({ since, range }: { since: string; range: Range }) {
       if (error) throw error;
       return (data ?? []) as Array<{ alma_frequency: string | null }>;
     },
+    staleTime: 5 * 60_000,
+    refetchOnWindowFocus: false,
   });
+
 
   const stats = useMemo(
     () => aggregateWhispers(history, WHISPER_PRIORITY as Record<string, "P0" | "P1" | "P2">),
@@ -527,6 +535,12 @@ const FACT_TYPES = [
   { value: "founder_anecdote", label: "Anecdote fondatrice" },
 ] as const;
 
+const EMPTY_CULTURAL_STATS: { rows: Array<{ id: string; views: number; clicks: number }>; truncated: boolean } = {
+  rows: [],
+  truncated: false,
+};
+
+
 interface CulturalFactRow {
   id: string;
   fact_type: string;
@@ -563,9 +577,12 @@ function CulturalFactsTab({ since }: { since: string }) {
       if (error) throw error;
       return (data ?? []) as unknown as CulturalFactRow[];
     },
+    staleTime: 60_000,
+    refetchOnWindowFocus: false,
   });
 
-  const { data: statsResult = { rows: [], truncated: false } } = useQuery({
+
+  const { data: statsResult = EMPTY_CULTURAL_STATS } = useQuery({
     queryKey: ["admin-alma-cultural-stats", since],
     queryFn: async () => {
       const [seenRes, clickRes] = await Promise.all([
@@ -604,7 +621,10 @@ function CulturalFactsTab({ since }: { since: string }) {
         truncated: seenRows.length >= ROW_LIMIT || clickRows.length >= ROW_LIMIT,
       };
     },
+    staleTime: 60_000,
+    refetchOnWindowFocus: false,
   });
+
 
   const stats = statsResult.rows;
   const statsTruncated = statsResult.truncated;
