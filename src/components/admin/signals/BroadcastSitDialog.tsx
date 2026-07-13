@@ -143,10 +143,10 @@ export const BroadcastSitDialog = ({ open, onOpenChange, signal, onSent }: Props
           </DialogDescription>
         </DialogHeader>
 
-        <div className="flex-1 overflow-y-auto px-6 py-4 space-y-4 min-h-0">
-          <div className="grid grid-cols-2 gap-3">
-            <div className="space-y-1.5">
-              <Label htmlFor="radius">Rayon (km)</Label>
+        <div className="flex-1 overflow-y-auto px-6 py-3 space-y-3 min-h-0">
+          <div className="flex items-end gap-3">
+            <div className="space-y-1.5 w-28 shrink-0">
+              <Label htmlFor="radius" className="text-xs">Rayon (km)</Label>
               <Input
                 id="radius"
                 type="number"
@@ -156,26 +156,25 @@ export const BroadcastSitDialog = ({ open, onOpenChange, signal, onSent }: Props
                 onChange={(e) => setRadiusKm(Math.max(1, Math.min(2000, Number(e.target.value) || 30)))}
               />
             </div>
-            <div className="space-y-1.5">
-              <Label>Annonce</Label>
-              <p className="text-sm text-muted-foreground truncate pt-2">
-                « {m.sit_title ?? sitId} »
-              </p>
-            </div>
+            <p
+              className="text-sm text-muted-foreground truncate flex-1 pb-2"
+              title={m.sit_title ?? sitId}
+            >
+              « {m.sit_title ?? sitId} »
+            </p>
           </div>
 
           {showLargeRadiusWarning && (
-            <Alert variant="default" className="border-warning/40 bg-warning/5">
+            <Alert variant="default" className="border-warning/40 bg-warning/5 py-2">
               <AlertTriangle className="h-4 w-4" />
               <AlertDescription className="text-xs">
-                Rayon large : l'envoi peut concerner beaucoup de gardiens.
-                Vérifiez bien votre segment avant l'envoi.
+                Rayon large : l'envoi peut concerner beaucoup de gardiens. Vérifiez votre segment.
               </AlertDescription>
             </Alert>
           )}
 
           {errorMessage && (
-            <Alert variant="default" className="border-warning/40 bg-warning/5">
+            <Alert variant="default" className="border-warning/40 bg-warning/5 py-2">
               <AlertTriangle className="h-4 w-4" />
               <AlertDescription className="text-sm">{errorMessage}</AlertDescription>
             </Alert>
@@ -189,13 +188,16 @@ export const BroadcastSitDialog = ({ open, onOpenChange, signal, onSent }: Props
                   {preview.count > 1 ? "s" : ""}
                 </p>
                 {preview.subject && (
-                  <p className="text-xs text-muted-foreground mt-0.5 truncate">
+                  <p
+                    className="text-xs text-muted-foreground mt-0.5 truncate"
+                    title={preview.subject}
+                  >
                     Objet : {preview.subject}
                   </p>
                 )}
               </div>
               {preview.recipients.length > 0 ? (
-                <div className="max-h-[40vh] overflow-y-auto">
+                <div className="max-h-[240px] overflow-y-auto">
                   <ul className="divide-y divide-border text-xs">
                     {preview.recipients.map((r) => (
                       <li key={r.email} className="px-3 py-1.5 flex items-center justify-between gap-3">
@@ -216,17 +218,18 @@ export const BroadcastSitDialog = ({ open, onOpenChange, signal, onSent }: Props
                 </p>
               )}
               {preview.truncated && (
-                <p className="px-3 py-2 text-xs italic text-muted-foreground border-t border-border">
+                <p className="px-3 py-1.5 text-xs italic text-muted-foreground border-t border-border">
                   Liste tronquée à l'affichage. L'envoi couvrira les {preview.count} destinataires.
                 </p>
               )}
             </div>
           ) : (
-            <div className="rounded-lg border border-dashed border-border p-4 text-sm text-muted-foreground bg-muted/20">
+            <div className="rounded-lg border border-dashed border-border p-3 text-sm text-muted-foreground bg-muted/20">
               Cliquez sur « Prévisualiser » pour obtenir la liste réelle.
             </div>
           )}
         </div>
+
 
         <DialogFooter className="px-6 py-4 border-t border-border bg-background gap-2 shrink-0 sm:justify-between">
           <Button variant="outline" onClick={doPreview} disabled={previewing || sending}>
