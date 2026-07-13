@@ -54,9 +54,10 @@ describe("computeAffinityScore", () => {
     expect(r).toBeNull();
   });
 
-  it("baisse le score quand peu de critères sont comparables (dénominateur fixe sur 9)", () => {
-    // 3 critères matchés à fond = pace(1) + langue(1) + intérêts(1) = 3 / 9 ≈ 33%
-    // Sous le seuil d'affichage (40%) → computeAffinityScore renvoie null.
+  it("dénominateur dynamique : 3 critères tous matchés = 100 %", () => {
+    // pace(1) + langue(1) + intérêts(1) = 3 / 3 = 100%
+    // Les critères absents (animaux, présence, idéal, ambiance) sortent du
+    // dénominateur au lieu d'être comptabilisés à 0.
     const full = computeAffinityResultFull(
       {
         life_pace: "actif",
@@ -71,12 +72,11 @@ describe("computeAffinityScore", () => {
     );
     expect(full).not.toBeNull();
     expect(full!.total).toBe(3);
-    expect(full!.score).toBeLessThan(40);
-    expect(full!.displayed).toBe(false);
-    expect(full!.hiddenReason).toBe("below_threshold");
+    expect(full!.score).toBe(100);
+    expect(full!.displayed).toBe(true);
   });
 
-  it("rythme adjacent + langue + intérêt commun reste sous le seuil (dénominateur fixe)", () => {
+  it("rythme adjacent + langue + intérêt commun (dénominateur dynamique)", () => {
     const r = computeAffinityResultFull(
       {
         life_pace: "calme",
@@ -90,8 +90,35 @@ describe("computeAffinityScore", () => {
       },
     );
     expect(r).not.toBeNull();
-    // pace 0.5 + langue 1 + intérêts 0.5 = 2 / 9 ≈ 22%
-    expect(r!.score).toBeLessThan(40);
+    // pace 0.5 + langue 1 + intérêts 0.5 = 2 / 3 ≈ 67%
+    expect(r!.score).toBeGreaterThanOrEqual(60);
+    expect(r!.score).toBeLessThanOrEqual(70);
+  });
+
+  it("cohérence : profil owner partiel (3 critères) et sitter complet, tout matché = 100 %", () => {
+    // Reproduit le bug /annonces vs /annonces/:slug : quand la vue détail
+    // ne récupère que 3 critères owner et la vue liste en récupère 7, le
+    // score doit rester identique (100 %) si tous les critères mesurables
+    // matchent. La normalisation dynamique le garantit.
+    const r = computeAffinityResultFull(
+      {
+        pets: [{ species: "cat" }],
+        presence_expected: "Télétravail OK",
+        preferred_sitter_types: ["Retraité·e"],
+      },
+      {
+        animal_types: ["cat"],
+        work_during_sit: "full_remote",
+        sitter_type: "Retraité·e voyageur·euse",
+        life_pace: "calme",
+        languages: ["Français"],
+        interests: ["Lecture"],
+      },
+    );
+    expect(r).not.toBeNull();
+    expect(r!.total).toBe(3);
+    expect(r!.score).toBe(100);
+    expect(r!.displayed).toBe(true);
   });
 
 
