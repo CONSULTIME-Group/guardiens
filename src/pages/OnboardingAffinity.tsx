@@ -33,6 +33,10 @@ import {
   WORK_DURING_SIT_OPTIONS,
   PRESENCE_EXPECTED_OPTIONS,
   IDEAL_SITTER_PROFILE_OPTIONS,
+  LIFE_PACE_OPTIONS,
+  INTEREST_OPTIONS,
+  LANGUAGE_OPTIONS,
+  HOME_AMBIANCE_OPTIONS,
 } from "@/lib/profileMatchingOptions";
 
 type Role = "owner" | "sitter" | "both";
