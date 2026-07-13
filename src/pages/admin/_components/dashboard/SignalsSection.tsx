@@ -17,6 +17,7 @@ import { SuspiciousAccountCard } from "@/components/admin/signals/SuspiciousAcco
 import { RepeatedCancellationsCard } from "@/components/admin/signals/RepeatedCancellationsCard";
 import { RepeatedRepublishCard } from "@/components/admin/signals/RepeatedRepublishCard";
 import { OwnerMissingCoordinatesCard } from "@/components/admin/signals/OwnerMissingCoordinatesCard";
+import { OwnerActivationCampaignCard } from "@/components/admin/signals/OwnerActivationCampaignCard";
 import { cn } from "@/lib/utils";
 
 interface Signal {
