@@ -62,9 +62,11 @@ const NudgeMissingPhotoEmail = ({ firstName }: NudgeMissingPhotoProps) => {
           </Text>
 
           <LegalFooter
-            purpose="du bon fonctionnement de votre compte"
+            purpose="l'accompagnement de votre activation en tant que gardien"
             basis="6.1.f"
+            extra="Vous recevez ce message parce que votre profil gardien n'a pas encore de photo. Vous pouvez ajuster vos préférences d'email depuis votre espace personnel."
           />
+
         </Container>
       </Body>
     </Html>
