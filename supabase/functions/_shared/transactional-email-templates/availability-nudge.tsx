@@ -80,7 +80,7 @@ const legal = { color: '#777', fontSize: '12px', lineHeight: '18px', marginBotto
 
 export const template: TemplateEntry = {
   component: AvailabilityNudgeEmail,
-  subject: (d: Record<string, any>) => `Une garde près de chez vous cherche un gardien${d?.city ? ` — ${d.city}` : ''} — Guardiens`,
+  subject: (d: Record<string, any>) => `Une garde près de chez vous cherche un gardien${d?.city ? `, ${d.city}` : ''}`,
   displayName: 'Garde sans candidature (alerte département)',
   previewData: {
     sitterFirstName: 'Camille',

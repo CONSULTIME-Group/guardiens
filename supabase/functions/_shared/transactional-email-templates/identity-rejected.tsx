@@ -45,9 +45,9 @@ const IdentityRejectedEmail = ({ reason }: Props) => (
 
 export const template = {
   component: IdentityRejectedEmail,
-  subject: 'Votre vérification d’identité nécessite une action — Guardiens',
+  subject: 'Votre vérification d’identité nécessite une action',
   displayName: 'Identité refusée',
-  previewData: { reason: 'Document illisible — veuillez fournir une photo plus nette.' },
+  previewData: { reason: 'Document illisible, veuillez fournir une photo plus nette.' },
 } satisfies TemplateEntry
 
 const main = { backgroundColor: '#ffffff', fontFamily: "'Outfit', Arial, sans-serif" }

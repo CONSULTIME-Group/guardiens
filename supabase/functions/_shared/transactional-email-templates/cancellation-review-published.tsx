@@ -46,7 +46,7 @@ const CancellationReviewPublishedEmail = ({ targetFirstName, profileUrl }: Props
 
 export const template = {
   component: CancellationReviewPublishedEmail,
-  subject: 'Un avis d’annulation a été publié sur votre profil — Guardiens',
+  subject: 'Un avis d’annulation a été publié sur votre profil',
   displayName: 'Avis d\'annulation publié',
   previewData: { targetFirstName: 'Marie', profileUrl: 'https://guardiens.fr/gardiens/123' },
 } satisfies TemplateEntry

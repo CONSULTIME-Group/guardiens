@@ -103,7 +103,7 @@ const hr = { borderColor: 'hsl(37, 22%, 89%)', margin: '20px 0' }
 export const template: TemplateEntry = {
   component: SitInvitationEmail,
   subject: (data: Record<string, any>) =>
-    `${data.ownerFirstName || 'Un propriétaire'} vous invite à candidater à sa garde — Guardiens`,
+    `${data.ownerFirstName || 'Un propriétaire'} vous invite à candidater à sa garde`,
   displayName: 'Invitation à candidater (gardien)',
   previewData: {
     sitterFirstName: 'Camille',

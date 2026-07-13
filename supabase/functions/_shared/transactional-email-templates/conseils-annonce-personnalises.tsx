@@ -66,7 +66,7 @@ const ConseilsAnnoncePersoEmail = ({
 
           <Text style={text}>
             Sur Guardiens, l'expérience est centrale : un gardien va vivre chez vous
-            plusieurs jours. Avant de candidater, il a besoin de se projeter — voir
+            plusieurs jours. Avant de candidater, il a besoin de se projeter, voir
             les pièces, sentir l'ambiance, comprendre les environs. Une annonce avec
             peu d'informations visuelles, surtout dans une zone moins dense en gardiens,
             a naturellement plus de mal à convaincre.
@@ -186,7 +186,7 @@ const ConseilsAnnoncePersoEmail = ({
 
 export const template = {
   component: ConseilsAnnoncePersoEmail,
-  subject: 'Quelques conseils pour rendre votre annonce irrésistible — Guardiens',
+  subject: 'Quelques conseils pour rendre votre annonce irrésistible',
   displayName: 'Conseils annonce personnalisés',
   previewData: {
     firstName: 'Patricia',

@@ -90,7 +90,7 @@ const hr = { borderColor: 'hsl(37, 22%, 89%)', margin: '20px 0' }
 
 export const template: TemplateEntry = {
   component: ReactivationD30Email,
-  subject: 'Toujours partant pour rendre service — Guardiens',
+  subject: 'Toujours partant pour rendre service',
   displayName: 'Réactivation à 30 jours d\'inactivité',
   previewData: { firstName: 'Camille', daysSinceLastSeen: 32 },
 }

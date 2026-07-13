@@ -28,7 +28,7 @@ const SitterEncourageCandidatureEmail = ({ firstName }: Props) => (
 
         <Text style={text}>
           Vous êtes inscrit comme gardien depuis quelques jours, mais vous n'avez pas encore
-          envoyé de candidature. C'est souvent l'étape la plus intimidante — pourtant la plupart
+          envoyé de candidature. C'est souvent l'étape la plus intimidante, pourtant la plupart
           des propriétaires répondent dans les 48&nbsp;heures.
         </Text>
 
@@ -82,7 +82,7 @@ const hr = { borderColor: 'hsl(37, 22%, 89%)', margin: '20px 0' }
 
 export const template: TemplateEntry = {
   component: SitterEncourageCandidatureEmail,
-  subject: 'Prêt pour votre première mission — Guardiens',
-  displayName: 'Gardien sans candidature — encouragement',
+  subject: 'Prêt pour votre première mission',
+  displayName: 'Gardien sans candidature, encouragement',
   previewData: { firstName: 'Camille' },
 }

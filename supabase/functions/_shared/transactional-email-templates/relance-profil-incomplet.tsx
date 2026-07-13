@@ -20,7 +20,7 @@ const RelanceProfilIncompletEmail = ({ firstName }: RelanceProfilIncompletProps)
   return (
     <Html lang="fr" dir="ltr">
       <BrandedHead />
-      <Preview>Votre profil Guardiens est encore invisible — débloquez-le en 3 minutes</Preview>
+      <Preview>Votre profil Guardiens est encore invisible, débloquez-le en 3 minutes</Preview>
       <Body style={main}>
         <Container style={container}>
         <BrandHeader />
@@ -54,7 +54,7 @@ const RelanceProfilIncompletEmail = ({ firstName }: RelanceProfilIncompletProps)
             </Section>
 
           <Text style={subtext}>
-            Temps estimé : 3 minutes — et votre profil rejoint les centaines de membres
+            Temps estimé : 3 minutes, et votre profil rejoint les centaines de membres
             visibles près de chez vous.
           </Text>
 
@@ -76,7 +76,7 @@ const RelanceProfilIncompletEmail = ({ firstName }: RelanceProfilIncompletProps)
 
 export const template = {
   component: RelanceProfilIncompletEmail,
-  subject: 'Votre profil est encore invisible — débloquez-le en 3 minutes — Guardiens',
+  subject: 'Votre profil est encore invisible, débloquez-le en 3 minutes',
   displayName: 'Relance profil incomplet (J+2)',
   previewData: { firstName: 'Marie' },
 } satisfies TemplateEntry

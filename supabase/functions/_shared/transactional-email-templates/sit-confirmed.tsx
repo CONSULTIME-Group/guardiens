@@ -29,7 +29,7 @@ const SitConfirmedEmail = ({
 }: Props) => (
   <Html lang="fr" dir="ltr">
     <BrandedHead />
-    <Preview>Garde confirmée — votre gardien est sélectionné</Preview>
+    <Preview>Garde confirmée, votre gardien est sélectionné</Preview>
     <Body style={main}>
       <Container style={container}>
         <BrandHeader />
@@ -48,11 +48,11 @@ const SitConfirmedEmail = ({
           )}
           {(startDate || endDate) && (
             <Text style={cardLine}>
-              <strong>Dates :</strong> {startDate || '—'} → {endDate || '—'}
+              <strong>Dates :</strong> {startDate || '…'} → {endDate || '…'}
             </Text>
           )}
           <Text style={cardLine}>
-            <strong>Gardien :</strong> {sitterFirstName || '—'}
+            <strong>Gardien :</strong> {sitterFirstName || '…'}
           </Text>
           </Section>
 
@@ -82,8 +82,8 @@ export const template = {
   component: SitConfirmedEmail,
   subject: (data: Record<string, any>) =>
     data?.sitterFirstName
-      ? `Garde confirmée avec ${data.sitterFirstName} — Guardiens`
-      : 'Garde confirmée — Guardiens',
+      ? `Garde confirmée avec ${data.sitterFirstName}`
+      : 'Garde confirmée',
   displayName: 'Garde confirmée (propriétaire)',
   previewData: {
     sitTitle: 'Garde Mistigri & Pacha',

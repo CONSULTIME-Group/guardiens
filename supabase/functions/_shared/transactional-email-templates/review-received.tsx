@@ -25,7 +25,7 @@ const ReviewReceivedEmail = ({ firstName, reviewerName, sitTitle, sitId }: Props
   return (
     <Html lang="fr" dir="ltr">
       <BrandedHead />
-      <Preview>{reviewer} a laissé un avis — à votre tour !</Preview>
+      <Preview>{reviewer} a laissé un avis, à votre tour !</Preview>
       <Body style={main}>
         <Container style={container}>
         <BrandHeader />
@@ -39,7 +39,7 @@ const ReviewReceivedEmail = ({ firstName, reviewerName, sitTitle, sitId }: Props
 
           <Text style={text}>
             {reviewer} a pris le temps de laisser un avis suite à la garde{sitTitle ? ` « ${sitTitle} »` : ''}.
-            Partagez à votre tour votre expérience — cela ne prend que 2 minutes.
+            Partagez à votre tour votre expérience, cela ne prend que 2 minutes.
           </Text>
 
           <Section style={infoBox}>
@@ -74,8 +74,8 @@ export const template = {
   component: ReviewReceivedEmail,
   subject: (data: Record<string, any>) =>
     data.reviewerName
-      ? `${data.reviewerName} a laissé un avis — à votre tour — Guardiens`
-      : 'Un avis a été laissé — à votre tour — Guardiens',
+      ? `${data.reviewerName} a laissé un avis, à votre tour`
+      : 'Un avis a été laissé, à votre tour',
   displayName: 'Invitation avis (autre partie)',
   previewData: {
     firstName: 'Marie',

@@ -58,7 +58,7 @@ Deno.test('subjects respectent la charte', () => {
         if (subject.includes("'")) violations.push(`${name}: apostrophe droite -> "${subject}"`)
       }
       if (!subject.includes('\u2014 Guardiens')) {
-        violations.push(`${name}: suffixe « — Guardiens » manquant -> "${subject}"`)
+        violations.push(`${name}: suffixe « » manquant -> "${subject}"`)
       }
     }
   }

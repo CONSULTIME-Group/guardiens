@@ -56,7 +56,7 @@ const NewMessageEmail = ({
         <BrandHeader />
           <Heading style={h1}>{title} {emoji}</Heading>
           <Text style={text}>
-            <strong>{sender}</strong> — {lead.replace(`${sender} `, '')}
+            <strong>{sender}</strong>, {lead.replace(`${sender} `, '')}
           </Text>
 
           {hasDetails ? (

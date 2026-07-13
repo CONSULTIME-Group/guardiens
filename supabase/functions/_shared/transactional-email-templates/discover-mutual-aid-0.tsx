@@ -97,6 +97,6 @@ const hr = { borderColor: 'hsl(37, 22%, 89%)', margin: '24px 0 16px' }
 export const template: TemplateEntry = {
   component: DiscoverMutualAidIntroEmail,
   subject: "L'entraide sur Guardiens, en deux minutes",
-  displayName: 'Découverte entraide — présentation',
+  displayName: 'Découverte entraide, présentation',
   previewData: { firstName: 'Camille' },
 }

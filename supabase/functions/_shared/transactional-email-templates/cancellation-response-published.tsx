@@ -44,7 +44,7 @@ const CancellationResponsePublishedEmail = ({ responderFirstName, profileUrl }: 
 export const template = {
   component: CancellationResponsePublishedEmail,
   subject: (data: Record<string, any>) =>
-    `${data.responderFirstName || 'Un membre'} a répondu à votre avis — Guardiens`,
+    `${data.responderFirstName || 'Un membre'} a répondu à votre avis`,
   displayName: 'Réponse à avis d\'annulation publiée',
   previewData: { responderFirstName: 'Lucas', profileUrl: 'https://guardiens.fr/gardiens/456' },
 } satisfies TemplateEntry

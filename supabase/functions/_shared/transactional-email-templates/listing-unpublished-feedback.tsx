@@ -22,7 +22,7 @@ const ListingUnpublishedFeedbackEmail = ({
 }: ListingUnpublishedFeedbackProps) => (
   <Html lang="fr" dir="ltr">
     <BrandedHead />
-    <Preview>Votre annonce {sitTitle || ''} n'est plus en ligne — un retour à nous partager ?</Preview>
+    <Preview>Votre annonce {sitTitle || ''} n'est plus en ligne, un retour à nous partager ?</Preview>
     <Body style={main}>
       <Container style={container}>
         <BrandHeader />
@@ -38,7 +38,7 @@ const ListingUnpublishedFeedbackEmail = ({
           Je viens de remarquer que votre annonce{' '}
           {sitTitle ? <strong>« {sitTitle} »</strong> : 'récente'} a été dépubliée
           alors qu'elle avait déjà reçu des candidatures. J'espère que ce n'est pas
-          une erreur de manipulation de votre part — si c'est le cas, vous pouvez
+          une erreur de manipulation de votre part, si c'est le cas, vous pouvez
           la remettre en ligne en un clic depuis votre espace propriétaire.
         </Text>
 
@@ -76,7 +76,7 @@ const ListingUnpublishedFeedbackEmail = ({
         </Text>
 
         <Text style={text}>
-          Il vous suffit de répondre directement à cet email — c'est moi qui le
+          Il vous suffit de répondre directement à cet email, c'est moi qui le
           recevrai.
         </Text>
 
@@ -103,9 +103,9 @@ export const template = {
   component: ListingUnpublishedFeedbackEmail,
   subject: (data: Record<string, any>) =>
     data.sitTitle
-      ? `Votre annonce « ${data.sitTitle} » — un retour à partager ?`
-      : `Votre annonce dépubliée — un retour à partager ?`,
-  displayName: 'Annonce dépubliée — demande de feedback',
+      ? `Votre annonce « ${data.sitTitle} », un retour à partager ?`
+      : `Votre annonce dépubliée, un retour à partager ?`,
+  displayName: 'Annonce dépubliée, demande de feedback',
   to: 'contact@guardiens.fr',
   previewData: {
     firstName: 'Lucy',

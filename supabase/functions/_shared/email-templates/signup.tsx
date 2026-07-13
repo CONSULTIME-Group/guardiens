@@ -50,7 +50,7 @@ export const SignupEmail = ({
   <Html lang="fr" dir="ltr">
     <BrandedHead />
     <Preview>
-      Bienvenue sur {siteName} — il ne reste qu'à confirmer votre adresse
+      Bienvenue sur {siteName}, il ne reste qu'à confirmer votre adresse
     </Preview>
     <Body style={main}>
       <Container style={container}>
@@ -59,7 +59,7 @@ export const SignupEmail = ({
           <span style={{ color: '#3d7a5f' }}>g</span>uardiens
         </Heading>
 
-        {/* Bannière gouache panoramique — discrète, évocatrice */}
+        {/* Bannière gouache panoramique, discrète, évocatrice */}
         <Section style={bannerSection}>
           <Img
             src={BANNER_URL}
@@ -117,20 +117,20 @@ export const SignupEmail = ({
 
         <Hr style={hr} />
 
-        {/* Onboarding — ce qui vous attend */}
+        {/* Onboarding, ce qui vous attend */}
         <Heading as="h2" style={h2}>
           Une fois connecté, voici ce qui vous attend
         </Heading>
 
         <Text style={stepText}>
           <strong style={stepNum}>1.</strong> Quelques minutes pour
-          présenter votre profil — un prénom, une ville, une photo, et
+          présenter votre profil, un prénom, une ville, une photo, et
           quelques mots sur votre rapport aux animaux. C'est ce qui
           permettra aux autres de vous reconnaître.
         </Text>
         <Text style={stepText}>
           <strong style={stepNum}>2.</strong> Vous découvrirez les
-          membres et les annonces près de chez vous — et partout en
+          membres et les annonces près de chez vous, et partout en
           France si vous élargissez votre recherche.
         </Text>
         <Text style={stepText}>
@@ -148,7 +148,7 @@ export const SignupEmail = ({
           <span style={signatureRole}>Fondateur de {siteName}</span>
         </Text>
 
-        {/* Anti-phishing — important */}
+        {/* Anti-phishing, important */}
         <Section style={securityBox}>
           <Text style={securityText}>
             <strong>Vous n'avez pas créé de compte ?</strong> Ignorez

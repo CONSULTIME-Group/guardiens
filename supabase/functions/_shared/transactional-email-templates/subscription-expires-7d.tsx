@@ -61,7 +61,7 @@ const SubscriptionExpires7dEmail = ({ firstName = '', renewalDate }: Subscriptio
 
 export const template = {
   component: SubscriptionExpires7dEmail,
-  subject: 'Plus que 7 jours sur votre abonnement — Guardiens',
+  subject: 'Plus que 7 jours sur votre abonnement',
   displayName: 'Abonnement expire dans 7 jours',
   previewData: { firstName: 'Marie', renewalDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString() },
 } satisfies TemplateEntry
