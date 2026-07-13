@@ -74,7 +74,7 @@ export function useSitterTopAffinitySits(): Result {
       const todayIso = new Date().toISOString().slice(0, 10);
       const sitsRes: any = await supabase
         .from("sits")
-        .select("id, title, city, start_date, end_date, cover_photo_url, user_id, property_id")
+        .select("id, title, city, start_date, end_date, cover_photo_url, user_id, property_id, accepts_sitter_pets, accepts_sitter_children")
         .eq("status", "published")
         .eq("accepting_applications", true)
         .gte("end_date", todayIso)
