@@ -152,6 +152,8 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, prope
             special_animal_skills: sp.special_animal_skills,
             sitter_type: sp.sitter_type,
             experience_years: sp.experience_years,
+            travels_with_children: sp.travels_with_children,
+            travels_with_own_animals: sp.travels_with_own_animals,
           }
         : null;
       return {
@@ -167,6 +169,10 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, prope
 
     enriched.sort((a, b) => (statusOrder[a.status] ?? 99) - (statusOrder[b.status] ?? 99));
     setApplications(enriched);
+    (setSitContext as any)({
+      accepts_sitter_pets: (sitCtxRes.data as any)?.accepts_sitter_pets ?? null,
+      accepts_sitter_children: (sitCtxRes.data as any)?.accepts_sitter_children ?? null,
+    });
     setLoading(false);
   };
 
