@@ -38,7 +38,7 @@ const SubscriptionExpiredEmail = () => (
 
 export const template = {
   component: SubscriptionExpiredEmail,
-  subject: 'Votre abonnement a expiré — Guardiens',
+  subject: 'Votre abonnement a expiré',
   displayName: 'Abonnement expiré',
   previewData: {},
 } satisfies TemplateEntry

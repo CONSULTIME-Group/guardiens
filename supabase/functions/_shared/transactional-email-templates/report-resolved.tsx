@@ -32,7 +32,7 @@ const reasonLabels: Record<string, string> = {
 const ReportResolvedEmail = ({ reason, status, adminNotes }: ReportResolvedProps) => (
   <Html lang="fr" dir="ltr">
     <BrandedHead />
-    <Preview>Votre signalement a été {statusLabels[status || 'resolved'] || 'traité'} — {SITE_NAME}</Preview>
+    <Preview>Votre signalement a été {statusLabels[status || 'resolved'] || 'traité'}, {SITE_NAME}</Preview>
     <Body style={main}>
       <Container style={container}>
         <BrandHeader />
@@ -68,7 +68,7 @@ const ReportResolvedEmail = ({ reason, status, adminNotes }: ReportResolvedProps
 
 export const template = {
   component: ReportResolvedEmail,
-  subject: 'Votre signalement a été traité — Guardiens',
+  subject: 'Votre signalement a été traité',
   displayName: 'Signalement traité',
   previewData: { reason: 'inappropriate', status: 'resolved', adminNotes: 'Le contenu a été retiré.' },
 } satisfies TemplateEntry

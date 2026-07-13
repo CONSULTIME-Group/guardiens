@@ -47,7 +47,7 @@ const ConseilsPublicationEmail = ({
   return (
     <Html lang="fr" dir="ltr">
       <BrandedHead />
-      <Preview>Votre annonce est en ligne — quelques conseils pour maximiser les candidatures</Preview>
+      <Preview>Votre annonce est en ligne, quelques conseils pour maximiser les candidatures</Preview>
       <Body style={main}>
         <Container style={container}>
         <BrandHeader />
@@ -77,14 +77,14 @@ const ConseilsPublicationEmail = ({
             6 et 12 photos : pièce de vie, chambre du gardien, cuisine, jardin,
             une ou deux vues des environs, et bien sûr les animaux dans leur cadre.
             Vous pouvez aussi définir la <strong>photo de couverture</strong> de
-            l'annonce — c'est la première image que verront les gardiens en parcourant
+            l'annonce, c'est la première image que verront les gardiens en parcourant
             les résultats. Choisissez celle qui donne le plus envie de cliquer.
           </Text>
 
           <Text style={listTitle}>2. Une journée type détaillée</Text>
           <Text style={text}>
             Horaires des repas, sorties, soins éventuels, temps de jeu, moments
-            calmes — décrire le déroulé matin / midi / soir aide les gardiens à
+            calmes, décrire le déroulé matin / midi / soir aide les gardiens à
             évaluer la charge de travail et à se projeter concrètement.
           </Text>
 
@@ -98,7 +98,7 @@ const ConseilsPublicationEmail = ({
           <Text style={listTitle}>4. Le guide de la maison</Text>
           <Text style={text}>
             Wifi, vétérinaire, instructions des appareils, jours de poubelles,
-            consignes pour les plantes — le guide n'est partagé qu'au gardien retenu,
+            consignes pour les plantes, le guide n'est partagé qu'au gardien retenu,
             mais le mentionner dans l'annonce témoigne de votre niveau de préparation.
           </Text>
 
@@ -123,7 +123,7 @@ const ConseilsPublicationEmail = ({
               {!hasCoverPhoto && nbPhotos > 0 && (
                 <Text style={highlightItem}>
                   • <strong>Photo de couverture :</strong> non définie. La première image
-                  de la galerie est utilisée par défaut — pensez à choisir celle qui
+                  de la galerie est utilisée par défaut, pensez à choisir celle qui
                   représente le mieux votre annonce.
                 </Text>
               )}
@@ -187,11 +187,11 @@ const ConseilsPublicationEmail = ({
 
 export const template = {
   component: ConseilsPublicationEmail,
-  subject: 'Votre annonce est en ligne — conseils pour la rendre irrésistible — Guardiens',
+  subject: 'Votre annonce est en ligne, conseils pour la rendre irrésistible',
   displayName: 'Conseils publication annonce (J+30min)',
   previewData: {
     firstName: 'Patricia',
-    sitTitle: 'Garde de 2 chats à Lyon — 10 jours en août',
+    sitTitle: 'Garde de 2 chats à Lyon, 10 jours en août',
     sitId: '293fab2e-b32d-45a0-9c04-36a4f43c484f',
     city: 'Lyon',
     nbPhotos: 3,

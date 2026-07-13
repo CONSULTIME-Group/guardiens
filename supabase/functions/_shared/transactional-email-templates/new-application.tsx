@@ -45,7 +45,7 @@ const NewApplicationEmail = ({ sitterFirstName, sitTitle }: Props) => (
 export const template = {
   component: NewApplicationEmail,
   subject: (data: Record<string, any>) =>
-    `${data.sitterFirstName || 'Un gardien'} a postulé pour votre garde — Guardiens`,
+    `${data.sitterFirstName || 'Un gardien'} a postulé pour votre garde`,
   displayName: 'Nouvelle candidature reçue',
   previewData: { sitterFirstName: 'Marie', sitTitle: 'Garde chat Paris 11e' },
 } satisfies TemplateEntry

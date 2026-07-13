@@ -50,7 +50,7 @@ const CancellationBySitterEmail = ({ cancellerFirstName, sitTitle, startDate, re
 export const template = {
   component: CancellationBySitterEmail,
   subject: (data: Record<string, any>) =>
-    `${data.cancellerFirstName || 'Le gardien'} a annulé la garde — Guardiens`,
+    `${data.cancellerFirstName || 'Le gardien'} a annulé la garde`,
   displayName: 'Annulation par le gardien',
   previewData: { cancellerFirstName: 'Lucas', sitTitle: 'Garde chiens Lyon', startDate: '20 août', reason: 'Un imprévu personnel m\'empêche de me rendre disponible pour cette garde.' },
 } satisfies TemplateEntry

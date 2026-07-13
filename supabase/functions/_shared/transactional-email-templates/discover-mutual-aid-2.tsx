@@ -95,7 +95,7 @@ const hr = { borderColor: 'hsl(37, 22%, 89%)', margin: '24px 0 16px' }
 
 export const template: TemplateEntry = {
   component: DiscoverMutualAidOfferEmail,
-  subject: 'Proposez un coup de main, vivez une histoire — Guardiens',
-  displayName: 'Découverte entraide — proposer',
+  subject: 'Proposez un coup de main, vivez une histoire',
+  displayName: 'Découverte entraide, proposer',
   previewData: { firstName: 'Camille' },
 }

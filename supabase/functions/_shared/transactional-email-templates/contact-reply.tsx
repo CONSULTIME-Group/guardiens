@@ -44,13 +44,13 @@ const ContactReplyEmail = ({ firstName, originalMessage, replyBody }: ContactRep
 export const template = {
   component: ContactReplyEmail,
   subject: (data: Record<string, any>) =>
-    data.subject || `Re : Votre message — ${SITE_NAME}`,
+    data.subject || `Re : Votre message`,
   displayName: 'Réponse message contact',
   previewData: {
     firstName: 'Marie',
     originalMessage: 'Bonjour, je souhaite en savoir plus sur votre service.',
     replyBody: 'Merci pour votre intérêt ! Nous serions ravis de vous aider.',
-    subject: 'Re : Demande d’information — Guardiens',
+    subject: 'Re : Demande d’information',
   },
 } satisfies TemplateEntry
 

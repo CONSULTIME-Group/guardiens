@@ -43,8 +43,8 @@ export const LegalFooter = ({ purpose, basis = '6.1.b', extra }: LegalFooterProp
   <Section>
     <Hr style={hr} />
     <Text style={legal}>
-      Email envoyé par <strong>{SITE_NAME}</strong> — SIRET 894 864 040 00015,
-      dans le cadre de {purpose} (art. {basis} RGPD —{' '}
+      Email envoyé par <strong>{SITE_NAME}</strong>, SIRET 894 864 040 00015,
+      dans le cadre de {purpose} (art. {basis} RGPD,{' '}
       {BASIS_LABEL[basis]}).
     </Text>
     {extra ? <Text style={legal}>{extra}</Text> : null}

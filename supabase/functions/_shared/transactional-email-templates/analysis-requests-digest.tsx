@@ -66,7 +66,7 @@ const AnalysisRequestsDigestEmail = ({
 export const template = {
   component: AnalysisRequestsDigestEmail,
   subject: (data: Record<string, any>) =>
-    `${data.total || 0} demande(s) d'analyse — Guardiens`,
+    `${data.total || 0} demande(s) d'analyse`,
   displayName: "Digest demandes d'analyse (admin)",
   previewData: {
     total: 3,

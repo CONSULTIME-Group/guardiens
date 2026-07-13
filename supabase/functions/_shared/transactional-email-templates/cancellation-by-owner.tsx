@@ -50,7 +50,7 @@ const CancellationByOwnerEmail = ({ cancellerFirstName, sitTitle, startDate, rea
 export const template = {
   component: CancellationByOwnerEmail,
   subject: (data: Record<string, any>) =>
-    `Votre garde${data.startDate ? ` du ${data.startDate}` : ''} a été annulée — Guardiens`,
+    `Votre garde${data.startDate ? ` du ${data.startDate}` : ''} a été annulée`,
   displayName: 'Annulation par le propriétaire',
   previewData: { cancellerFirstName: 'Marie', sitTitle: 'Garde chat Paris', startDate: '15 juillet', reason: 'Changement de plans, nous ne partons plus en vacances finalement.' },
 } satisfies TemplateEntry

@@ -40,7 +40,7 @@ const ApplicationDeclinedEmail = ({ sitTitle }: Props) => (
 
 export const template = {
   component: ApplicationDeclinedEmail,
-  subject: 'Votre candidature n’a pas été retenue — Guardiens',
+  subject: 'Votre candidature n’a pas été retenue',
   displayName: 'Candidature déclinée',
   previewData: { sitTitle: 'Garde chat Paris 11e' },
 } satisfies TemplateEntry

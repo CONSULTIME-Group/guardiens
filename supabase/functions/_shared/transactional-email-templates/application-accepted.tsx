@@ -15,7 +15,7 @@ interface Props { sitTitle?: string; ownerFirstName?: string }
 const ApplicationAcceptedEmail = ({ sitTitle, ownerFirstName }: Props) => (
   <Html lang="fr" dir="ltr">
     <BrandedHead />
-    <Preview>Bonne nouvelle — votre candidature est acceptée !</Preview>
+    <Preview>Bonne nouvelle, votre candidature est acceptée !</Preview>
     <Body style={main}>
       <Container style={container}>
         <BrandHeader />
@@ -41,7 +41,7 @@ const ApplicationAcceptedEmail = ({ sitTitle, ownerFirstName }: Props) => (
 
 export const template = {
   component: ApplicationAcceptedEmail,
-  subject: 'Votre candidature est acceptée — Guardiens',
+  subject: 'Votre candidature est acceptée',
   displayName: 'Candidature acceptée',
   previewData: { sitTitle: 'Garde chat Paris 11e', ownerFirstName: 'Julie' },
 } satisfies TemplateEntry

@@ -98,7 +98,7 @@ const hr = { borderColor: 'hsl(37, 22%, 89%)', margin: '20px 0' }
 export const template: TemplateEntry = {
   component: MissionInvitationEmail,
   subject: (data: Record<string, any>) =>
-    `${data.ownerFirstName || 'Un membre du coin'} vous propose un coup de main — Guardiens`,
+    `${data.ownerFirstName || 'Un membre du coin'} vous propose un coup de main`,
   displayName: "Invitation à une petite mission (aidant)",
   previewData: {
     helperFirstName: 'Camille',

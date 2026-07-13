@@ -38,7 +38,7 @@ const IdentityVerifiedEmail = () => (
 
 export const template = {
   component: IdentityVerifiedEmail,
-  subject: 'Votre identité a été vérifiée — Guardiens',
+  subject: 'Votre identité a été vérifiée',
   displayName: 'Identité vérifiée',
   previewData: {},
 } satisfies TemplateEntry

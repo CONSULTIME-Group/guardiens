@@ -63,12 +63,12 @@ export const BrandedHead = () => (
     <style>{MSO_RESET}</style>
     {/*
       Outlook conditional : force le fond blanc pour les versions desktop
-      (Outlook 2007–2019) qui ignorent `background` sur <body>. Cf.
+      (Outlook 2007-2019) qui ignorent `background` sur <body>. Cf.
       https://www.caniemail.com/features/css-background/
     */}
     {/*
       eslint-disable-next-line react/no-danger
-      Le HTML conditionnel mso-* est volontairement injecté tel quel —
+      Le HTML conditionnel mso-* est volontairement injecté tel quel,
       c'est la SEULE façon de cibler Outlook desktop.
     */}
     <div

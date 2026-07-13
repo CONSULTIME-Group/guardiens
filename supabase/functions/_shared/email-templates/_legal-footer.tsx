@@ -27,9 +27,9 @@ export const LegalFooter = () => (
   <Section>
     <Hr style={hr} />
     <Text style={legal}>
-      Email envoyé par <strong>{SITE_NAME}</strong> — SIRET 894 864 040 00015,
+      Email envoyé par <strong>{SITE_NAME}</strong>, SIRET 894 864 040 00015,
       dans le cadre de la création ou de la sécurisation de votre compte
-      (art. 6.1.b RGPD — exécution de mesures précontractuelles ou
+      (art. 6.1.b RGPD, exécution de mesures précontractuelles ou
       contractuelles).
     </Text>
     <Text style={legal}>
