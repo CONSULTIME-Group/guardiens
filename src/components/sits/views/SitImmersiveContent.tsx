@@ -300,6 +300,8 @@ const SitImmersiveContent = ({
                 environments={environments}
                 openTo={sit?.open_to ?? null}
                 minGardienSits={sit?.min_gardien_sits ?? null}
+                acceptsSitterPets={(sit as any)?.accepts_sitter_pets ?? null}
+                acceptsSitterChildren={(sit as any)?.accepts_sitter_children ?? null}
               />
             </TabsContent>
           </Tabs>

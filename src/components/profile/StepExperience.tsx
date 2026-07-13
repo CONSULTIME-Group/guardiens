@@ -136,6 +136,33 @@ const StepExperience = ({ data, pastAnimals, onChange, onAddAnimal, onRemoveAnim
         />
       </div>
 
+      <div className="space-y-2 rounded-xl border border-border bg-card p-4">
+        <Label>Accompagnants pendant les gardes</Label>
+        <p className="text-xs text-muted-foreground">
+          Aide les propriétaires à voir si leur annonce vous convient.
+        </p>
+        <div className="flex items-center justify-between py-1">
+          <Label htmlFor="travels-with-animals-switch" className="flex-1 pr-4 text-sm font-normal">
+            Je voyage avec mes animaux pour mes gardes
+          </Label>
+          <Switch
+            id="travels-with-animals-switch"
+            checked={!!(data as any).travels_with_own_animals}
+            onCheckedChange={v => onChange({ travels_with_own_animals: v } as any)}
+          />
+        </div>
+        <div className="flex items-center justify-between py-1">
+          <Label htmlFor="travels-with-children-switch" className="flex-1 pr-4 text-sm font-normal">
+            Je voyage parfois avec mes enfants pour mes gardes
+          </Label>
+          <Switch
+            id="travels-with-children-switch"
+            checked={!!(data as any).travels_with_children}
+            onCheckedChange={v => onChange({ travels_with_children: v } as any)}
+          />
+        </div>
+      </div>
+
       <div className="space-y-2">
         <Label id="lbl-guard-exp">Gardes avec animaux réalisées</Label>
         <ChipSelect

@@ -14,6 +14,9 @@ import { readDigestAttribution, clearDigestAttribution } from "@/lib/digestAttri
 
 import { TooltipProvider } from "@/components/ui/tooltip";
 import AlmaBubble from "@/components/ai/alma/AlmaBubble";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { AlertTriangle } from "lucide-react";
+import { detectRestrictionInText } from "@/lib/detectRestriction";
 
 
 interface ApplicationModalProps {
@@ -45,18 +48,26 @@ const ApplicationModal = ({
   const [almaDismissed, setAlmaDismissed] = useState(false);
   const [almaUsed, setAlmaUsed] = useState(false);
   const almaSeenRef = useRef(false);
+  const [companionWarning, setCompanionWarning] = useState<{
+    text: string;
+    petsMismatch: boolean;
+    childrenMismatch: boolean;
+    ownAnimalsLabel: string;
+  } | null>(null);
+  const prefillAppliedRef = useRef(false);
 
 
   // Load current user's sitter profile info for preview
   useEffect(() => {
     if (!user || !open) return;
     const load = async () => {
-      const [profileRes, sitterRes, reviewRes, badgeRes, galleryRes] = await Promise.all([
+      const [profileRes, sitterRes, reviewRes, badgeRes, galleryRes, sitRes] = await Promise.all([
         supabase.from("profiles").select("first_name, avatar_url, city, identity_verified").eq("id", user.id).single(),
-        supabase.from("sitter_profiles").select("experience_years, animal_types").eq("user_id", user.id).maybeSingle(),
+        supabase.from("sitter_profiles").select("experience_years, animal_types, own_animals, travels_with_children, travels_with_own_animals").eq("user_id", user.id).maybeSingle(),
         supabase.from("reviews").select("overall_rating").eq("reviewee_id", user.id).eq("published", true),
         supabase.from("badge_attributions").select("badge_id").eq("user_id", user.id),
         supabase.from("sitter_gallery").select("photo_url").eq("user_id", user.id).limit(4),
+        supabase.from("sits").select("accepts_sitter_pets, accepts_sitter_children, owner_message, specific_expectations").eq("id", sitId).maybeSingle(),
       ]);
 
       const reviews = reviewRes.data || [];
@@ -78,9 +89,64 @@ const ApplicationModal = ({
         badgeCounts,
         gallery: galleryRes.data || [],
       });
+
+      // Détection mismatch accompagnants
+      const sp: any = sitterRes.data || {};
+      const sit: any = sitRes.data || {};
+      const own: string[] = Array.isArray(sp.own_animals) ? sp.own_animals : [];
+      const ownAnimalsDetail = own
+        .filter((s: string) => s && s.toLowerCase() !== "non")
+        .map((s: string) => s.replace(/^Oui[\s,\-—]*/i, "").trim())
+        .filter(Boolean)
+        .join(", ");
+      const acceptsPets = (sit.accepts_sitter_pets as string) || "discuss";
+      const acceptsKids = (sit.accepts_sitter_children as string) || "discuss";
+      const restrictiveText = `${sit.owner_message || ""}\n${sit.specific_expectations || ""}`;
+      const petsRestricted =
+        acceptsPets === "no" ||
+        (acceptsPets === "discuss" && detectRestrictionInText(restrictiveText, "pets"));
+      const kidsRestricted =
+        acceptsKids === "no" ||
+        (acceptsPets === "discuss" && detectRestrictionInText(restrictiveText, "children")) ||
+        (acceptsKids === "discuss" && detectRestrictionInText(restrictiveText, "children"));
+      const petsMismatch = !!sp.travels_with_own_animals && petsRestricted;
+      const childrenMismatch = !!sp.travels_with_children && kidsRestricted;
+
+      if (petsMismatch || childrenMismatch) {
+        const parts: string[] = [];
+        if (petsMismatch) {
+          parts.push(
+            `Cette annonce n'accepte pas les gardiens qui viennent avec leurs animaux. Votre profil indique que vous voyagez avec ${ownAnimalsDetail || "vos animaux"}.`,
+          );
+        }
+        if (childrenMismatch) {
+          parts.push(
+            "Cette annonce n'accepte pas les gardiens qui viennent avec leurs enfants. Votre profil indique que vous voyagez parfois avec vos enfants.",
+          );
+        }
+        parts.push("Vous pouvez tout de même postuler pour en discuter avec le propriétaire.");
+        setCompanionWarning({
+          text: parts.join(" "),
+          petsMismatch,
+          childrenMismatch,
+          ownAnimalsLabel: ownAnimalsDetail,
+        });
+
+        if (!prefillAppliedRef.current) {
+          prefillAppliedRef.current = true;
+          const companionsList: string[] = [];
+          if (petsMismatch) companionsList.push(`mes animaux${ownAnimalsDetail ? ` (${ownAnimalsDetail})` : ""}`);
+          if (childrenMismatch) companionsList.push("mes enfants");
+          const companions = companionsList.join(" et ");
+          const paragraph = `\n\nJe précise que je voyage habituellement avec ${companions}. Je suis prête à en discuter avec vous et à trouver une solution qui convienne à chacun.`;
+          setMessage((prev) => (prev.includes("Je précise que je voyage") ? prev : `${prev.trimEnd()}${paragraph}`));
+        }
+      } else {
+        setCompanionWarning(null);
+      }
     };
     load();
-  }, [user, open]);
+  }, [user, open, sitId]);
 
   // Alma Pass 1 : impression de la bulle lettre candidature (1×/ouverture)
   useEffect(() => {
@@ -88,7 +154,11 @@ const ApplicationModal = ({
       almaSeenRef.current = true;
       void trackEvent("alma_application_bubble_seen", { metadata: { sit_id: sitId } });
     }
-    if (!open) almaSeenRef.current = false;
+    if (!open) {
+      almaSeenRef.current = false;
+      prefillAppliedRef.current = false;
+      setCompanionWarning(null);
+    }
   }, [open, sitId]);
 
 
@@ -274,6 +344,16 @@ const ApplicationModal = ({
           <DialogTitle className="font-heading">Postuler à cette garde</DialogTitle>
           <DialogDescription>Le propriétaire verra votre profil ci-dessous en plus de votre message.</DialogDescription>
         </DialogHeader>
+
+        {companionWarning && (
+          <Alert className="mt-1 border-warning/40 bg-warning/10 text-foreground">
+            <AlertTriangle className="h-4 w-4 text-warning" />
+            <AlertDescription className="text-sm">
+              {companionWarning.text}
+            </AlertDescription>
+          </Alert>
+        )}
+
 
         {identityRecommended && (
           <div

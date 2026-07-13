@@ -4953,6 +4953,8 @@ export type Database = {
       sits: {
         Row: {
           accepting_applications: boolean
+          accepts_sitter_children: string | null
+          accepts_sitter_pets: string | null
           animaux_override: string | null
           availability_nudge_sent_at: string | null
           cancellation_reason: string | null
@@ -4995,6 +4997,8 @@ export type Database = {
         }
         Insert: {
           accepting_applications?: boolean
+          accepts_sitter_children?: string | null
+          accepts_sitter_pets?: string | null
           animaux_override?: string | null
           availability_nudge_sent_at?: string | null
           cancellation_reason?: string | null
@@ -5037,6 +5041,8 @@ export type Database = {
         }
         Update: {
           accepting_applications?: boolean
+          accepts_sitter_children?: string | null
+          accepts_sitter_pets?: string | null
           animaux_override?: string | null
           availability_nudge_sent_at?: string | null
           cancellation_reason?: string | null
@@ -5290,6 +5296,8 @@ export type Database = {
           smoker: boolean | null
           special_animal_skills: string[]
           strict_rules_ok: boolean | null
+          travels_with_children: boolean | null
+          travels_with_own_animals: boolean | null
           updated_at: string
           user_id: string
           work_during_sit: string | null
@@ -5339,6 +5347,8 @@ export type Database = {
           smoker?: boolean | null
           special_animal_skills?: string[]
           strict_rules_ok?: boolean | null
+          travels_with_children?: boolean | null
+          travels_with_own_animals?: boolean | null
           updated_at?: string
           user_id: string
           work_during_sit?: string | null
@@ -5388,6 +5398,8 @@ export type Database = {
           smoker?: boolean | null
           special_animal_skills?: string[]
           strict_rules_ok?: boolean | null
+          travels_with_children?: boolean | null
+          travels_with_own_animals?: boolean | null
           updated_at?: string
           user_id?: string
           work_during_sit?: string | null
