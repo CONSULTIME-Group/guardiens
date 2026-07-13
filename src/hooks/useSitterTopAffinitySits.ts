@@ -131,6 +131,8 @@ export function useSitterTopAffinitySits(): Result {
             life_pace: ownerPrefs.life_pace,
             presence_expected: ownerPrefs.presence_expected,
             pets,
+            accepts_sitter_pets: sit.accepts_sitter_pets ?? null,
+            accepts_sitter_children: sit.accepts_sitter_children ?? null,
           },
           sitter as any,
         );
