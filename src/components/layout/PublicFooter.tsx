@@ -78,9 +78,11 @@ const PublicFooter = React.forwardRef<HTMLElement>((_props, ref) => {
             <span aria-hidden="true" className="text-white/40">·</span>
             <Link to="/cgu" className="hover:text-white transition-colors">{t("footer.legal.cgu")}</Link>
             <span aria-hidden="true" className="text-white/40">·</span>
+            <Link to="/confidentialite" className="hover:text-white transition-colors">{t("footer.legal.privacy")}</Link>
+            <span aria-hidden="true" className="text-white/40">·</span>
             <Link to="/cgs" className="hover:text-white transition-colors">{t("footer.legal.cgs")}</Link>
             <span aria-hidden="true" className="text-white/40">·</span>
-            <Link to="/confidentialite" className="hover:text-white transition-colors">{t("footer.legal.privacy")}</Link>
+            <Link to="/cookies" className="hover:text-white transition-colors">{t("footer.legal.cookies")}</Link>
             <span aria-hidden="true" className="text-white/40">·</span>
             <Link to="/mentions-legales" className="hover:text-white transition-colors">{t("footer.legal.legal_notice")}</Link>
             <span aria-hidden="true" className="text-white/40">·</span>

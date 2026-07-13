@@ -81,6 +81,7 @@ const BreedPage = lazy(() => import("./pages/BreedPage"));
 const Contact = lazy(() => import("./pages/Contact"));
 const Terms = lazy(() => import("./pages/Terms"));
 const Cgs = lazy(() => import("./pages/Cgs"));
+const CookiesPage = lazy(() => import("./pages/Cookies"));
 const Privacy = lazy(() => import("./pages/Privacy"));
 const AdminArticles = lazy(() => import("./pages/AdminArticles"));
 const ProsListing = lazy(() => import("./pages/ProsListing"));
@@ -321,6 +322,7 @@ const AppRoutes = () => {
       <Route path="/contact" element={<Contact />} />
       <Route path="/cgu" element={<Terms />} />
       <Route path="/cgs" element={<Cgs />} />
+      <Route path="/cookies" element={<CookiesPage />} />
       <Route path="/confidentialite" element={<Privacy />} />
       <Route path="/mentions-legales" element={<MentionsLegales />} />
       <Route path="/faq" element={<FAQ />} />
