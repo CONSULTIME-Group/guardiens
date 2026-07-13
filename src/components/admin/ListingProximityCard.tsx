@@ -80,6 +80,8 @@ const ListingProximityCard = ({
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [confirmInput, setConfirmInput] = useState("");
   const [warningMessage, setWarningMessage] = useState<string | null>(null);
+  const [descOpen, setDescOpen] = useState(false);
+
 
   const extractError = async (error: unknown, data: unknown): Promise<string> => {
     const ctx = (error as { context?: Response } | null)?.context;
