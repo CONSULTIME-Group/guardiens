@@ -191,8 +191,12 @@ const OnboardingAffinity = () => {
       if (!presenceExpected) missing.push("la présence attendue du gardien");
       if (preferredSitterTypes.length === 0) missing.push("le profil de gardien idéal");
     }
+    if (showSitterBlock || showOwnerBlock) {
+      if (!lifePace) missing.push("votre rythme de vie");
+      if (languages.length === 0) missing.push("au moins une langue parlée");
+    }
     return missing;
-  }, [askRole, chosenRole, showSitterBlock, showOwnerBlock, animalTypes, workDuringSit, sitterType, presenceExpected, preferredSitterTypes]);
+  }, [askRole, chosenRole, showSitterBlock, showOwnerBlock, animalTypes, workDuringSit, sitterType, presenceExpected, preferredSitterTypes, lifePace, languages]);
 
   const canSubmit = useMemo(
     () => (showSitterBlock || showOwnerBlock) && missingFields.length === 0,
