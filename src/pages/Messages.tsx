@@ -40,7 +40,7 @@ interface Conversation {
   sit?: { title: string; status: string; property_id: string; start_date?: string | null; end_date?: string | null; city?: string | null } | null;
   small_mission?: { id: string; title?: string | null; city?: string | null; date_needed?: string | null } | null;
   other_user?: { id: string; first_name: string; avatar_url: string | null; identity_verified: boolean; city?: string | null; is_founder?: boolean; last_seen_at?: string | null; show_last_seen?: boolean } | null;
-  last_message?: { content: string; created_at: string; sender_id: string } | null;
+  last_message?: { content: string; created_at: string; sender_id: string; is_system?: boolean } | null;
   unread_count: number;
   application_status?: string | null;
   other_user_rating?: number;
@@ -147,7 +147,7 @@ const Messages = () => {
 
     const [profilesRes, allLastMsgsRes, allUnreadRes, ratingsRes, emergencyRes, sitsRes, applicationsRes, missionsRes, prefsRes] = await Promise.all([
       supabase.from("profiles").select("id, first_name, avatar_url, identity_verified, city, is_founder, last_seen_at").in("id", otherIds),
-      supabase.from("messages").select("conversation_id, content, created_at, sender_id").in("conversation_id", convIds).order("created_at", { ascending: false }),
+      supabase.from("messages").select("conversation_id, content, created_at, sender_id, is_system").in("conversation_id", convIds).order("created_at", { ascending: false }),
       supabase.from("messages").select("conversation_id, id").in("conversation_id", convIds).neq("sender_id", user.id).is("read_at", null),
       supabase.from("reviews").select("reviewee_id, overall_rating").in("reviewee_id", otherIds).eq("published", true),
       supabase.from("emergency_sitter_profiles").select("user_id, is_active").in("user_id", otherIds).eq("is_active", true),
@@ -559,10 +559,17 @@ const Messages = () => {
               <p className="text-sm text-muted-foreground truncate">{roleLabel}</p>
             )}
             <div className="flex items-center justify-between gap-2 mt-0.5">
-              <p className={`text-sm truncate ${hasUnread ? "text-foreground font-medium" : "text-muted-foreground"}`}>
-                {conv.last_message?.sender_id === user?.id ? "Vous : " : ""}
-                {conv.last_message?.content || "Photo"}
-              </p>
+              {conv.last_message?.is_system ? (
+                <p className={`text-sm truncate italic flex items-center gap-1 ${hasUnread ? "text-foreground/80" : "text-muted-foreground"}`}>
+                  <Info className="h-3 w-3 shrink-0" aria-hidden="true" />
+                  <span className="truncate">{conv.last_message?.content || ""}</span>
+                </p>
+              ) : (
+                <p className={`text-sm truncate ${hasUnread ? "text-foreground font-medium" : "text-muted-foreground"}`}>
+                  {conv.last_message?.sender_id === user?.id ? "Vous : " : ""}
+                  {conv.last_message?.content || "Photo"}
+                </p>
+              )}
               {hasUnread && (
                 <span className="bg-destructive text-destructive-foreground text-[10px] rounded-full min-w-[18px] h-[18px] flex items-center justify-center px-1 shrink-0 font-bold">
                   {conv.unread_count}
