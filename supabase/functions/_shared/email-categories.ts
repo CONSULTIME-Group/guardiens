@@ -47,7 +47,9 @@ const PRODUCT: ReadonlyArray<string> = [
   'relance-profil-incomplet',
   'availability-nudge',
   'review-reminder',
+  'nudge-missing-photo',
 ]
+
 
 const DIGEST: ReadonlyArray<string> = [
   // Reserved for future digest emails (e.g., weekly recap)
