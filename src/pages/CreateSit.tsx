@@ -1156,20 +1156,22 @@ const CreateSit = () => {
             />
             <p className={cn(
               "text-xs mt-1 flex justify-between",
-              touched.description && specificExpectations.length > 0 && specificExpectations.length < MIN_DESCRIPTION
+              touched.description && !descriptionValid
                 ? "text-destructive"
                 : specificExpectations.length >= MIN_DESCRIPTION
                   ? "text-green-600"
                   : "text-muted-foreground"
             )}>
               <span>
-                {touched.description && !descriptionValid && specificExpectations.length > 0
-                  ? `Encore ${MIN_DESCRIPTION - specificExpectations.length} caractères`
+                {touched.description && !descriptionValid
+                  ? specificExpectations.length === 0
+                    ? `Décrivez la garde (${MIN_DESCRIPTION} caractères minimum).`
+                    : `Encore ${MIN_DESCRIPTION - specificExpectations.length} caractères`
                   : specificExpectations.length >= MIN_DESCRIPTION
                     ? "Longueur suffisante"
-                    : `Min. ${MIN_DESCRIPTION} caractères`}
+                    : `Décrivez la garde (${MIN_DESCRIPTION} caractères minimum)`}
               </span>
-              <span>{specificExpectations.length}/{MIN_DESCRIPTION}</span>
+              <span>{specificExpectations.length} / {MIN_DESCRIPTION} min.</span>
             </p>
           </div>
 
