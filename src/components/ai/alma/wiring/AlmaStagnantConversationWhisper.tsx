@@ -70,7 +70,7 @@ export function AlmaStagnantConversationWhisper({
 
     firedFor.current = conversationId;
     const prenom = otherFirstName || "cette personne";
-    const template = `Bonjour ${prenom}, je vous propose que l'on se rencontre pour discuter de vive voix. Êtes-vous disponible cette semaine ?`;
+    const template = `Bonjour ${prenom}, je vous propose que l'on se rencontre pour discuter de vive voix. Êtes-vous disponible cette semaine\u00A0?`;
 
     queueWhisper(
       buildConversationStagnantWhisper({
@@ -78,7 +78,7 @@ export function AlmaStagnantConversationWhisper({
         onProposeMeeting: () => onProposeMeeting(template),
       }),
     );
-  }, [conversationId, audience, otherFirstName, messages, canEmit, queueWhisper, onProposeMeeting]);
+  }, [conversationId, audience, otherFirstName, messages, canEmit, queueWhisper, onProposeMeeting, applicationStatus, sitStartDate]);
 
   return null;
 }
