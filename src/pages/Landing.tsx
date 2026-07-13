@@ -502,7 +502,7 @@ const Landing = () => {
                     name: "Qui sont les gardiens sur Guardiens ?",
                     acceptedAnswer: {
                       "@type": "Answer",
-                      text: "Des gens du coin, vérifiés par notre équipe. Chaque profil passe une vérification d'identité (pièce d'identité + selfie) traitée sous 24h. Vous voyez aussi leurs avis publiés par les propriétaires précédents.",
+                      text: "Des gens du coin, dont chaque profil est examiné par notre équipe. La confiance se construit sur la rencontre physique préalable à toute garde, les avis croisés publiés après chaque expérience, et l'historique visible sur chaque profil.",
                     },
                   },
                   {

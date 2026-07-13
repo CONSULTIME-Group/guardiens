@@ -13,6 +13,25 @@ import "./i18n";
 installStorageFallback();
 installOAuthDebugHelper();
 
+// RGPD : en production, forcer un loglevel restrictif pour éviter que des
+// données personnelles ne fuient dans la console navigateur via des libs
+// tierces qui lisent `localStorage['loglevel']` (loglevel, debug, etc.).
+// Ne touche pas aux environnements dev / preview.
+if (import.meta.env.PROD && typeof window !== "undefined") {
+  try {
+    const current = window.localStorage.getItem("loglevel");
+    if (!current || !/^(ERROR|WARN|SILENT)$/i.test(current)) {
+      window.localStorage.setItem("loglevel", "ERROR");
+    }
+    // Neutralise également le canal `debug` (npm `debug`) qui log en clair.
+    if (window.localStorage.getItem("debug")) {
+      window.localStorage.removeItem("debug");
+    }
+  } catch {
+    // storage indisponible (mode privé, iframe cross-origin) — no-op
+  }
+}
+
 const container = document.getElementById("root");
 if (!container) {
   throw new Error("Élément #root introuvable dans le DOM");
