@@ -498,7 +498,7 @@ const Messages = () => {
   const pills: { value: ConvPill; label: string }[] = [
     { value: "all", label: "Tout" },
     { value: "garde", label: "Gardes" },
-    { value: "mission", label: "Missions" },
+    { value: "mission", label: "Entraide" },
     { value: "archived", label: "Archivées" },
   ];
 
