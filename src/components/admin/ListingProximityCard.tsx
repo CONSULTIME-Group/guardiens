@@ -182,9 +182,9 @@ const ListingProximityCard = ({
               id="listing-prox-radius"
               type="number"
               min={1}
-              max={500}
+              max={2000}
               value={radiusKm}
-              onChange={(e) => setRadiusKm(Math.max(1, Math.min(500, Number(e.target.value) || 30)))}
+              onChange={(e) => setRadiusKm(Math.max(1, Math.min(2000, Number(e.target.value) || 30)))}
             />
           </div>
           <Button onClick={handlePreview} disabled={loading}>
