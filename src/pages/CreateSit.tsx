@@ -1068,6 +1068,10 @@ const CreateSit = () => {
               <p className="text-sm text-destructive flex items-center gap-1.5 mt-2">
                 <AlertCircle className="h-3.5 w-3.5" /> {dateError}
               </p>
+            ) : (touched.startDate || touched.endDate) && (!startDate || !endDate) ? (
+              <p className="text-sm text-destructive flex items-center gap-1.5 mt-2">
+                <AlertCircle className="h-3.5 w-3.5" /> Choisissez les dates de la garde.
+              </p>
             ) : nDays > 0 ? (
               <p className="text-xs text-muted-foreground mt-2">
                 Durée : <span className="font-medium text-foreground">{nDays} {nDays > 1 ? "jours" : "jour"}</span>
