@@ -62,6 +62,7 @@ interface ListingProximityCardProps {
   initialRadiusKm?: number;
   autoPreview?: boolean;
   hideHeader?: boolean;
+  onClose?: () => void;
 }
 
 const ListingProximityCard = ({
@@ -69,8 +70,10 @@ const ListingProximityCard = ({
   initialRadiusKm = 30,
   autoPreview = false,
   hideHeader = false,
+  onClose,
 }: ListingProximityCardProps) => {
   const [radiusKm, setRadiusKm] = useState<number>(initialRadiusKm);
+
   const [loading, setLoading] = useState(false);
   const [sending, setSending] = useState(false);
   const [preview, setPreview] = useState<PreviewData | null>(null);
