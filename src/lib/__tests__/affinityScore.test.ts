@@ -62,7 +62,7 @@ describe("computeAffinityScore", () => {
       {
         life_pace: "actif",
         languages: ["Français"],
-        interests: ["Randonnée"],
+        interests: ["Randonnée", "Vélo"],
       },
       {
         life_pace: "actif",
