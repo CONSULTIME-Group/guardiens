@@ -99,8 +99,15 @@ const NearbyOwnerSittersCard = ({ hideHeader = false }: Props) => {
 
           <ul className="divide-y divide-border/60">
             {sitters.map((s) => {
-              const distance =
-                typeof s.distance_km === "number" ? Math.round(s.distance_km) : null;
+              // Distance : masquée si inconnue ou nulle (donnée manquante côté profil).
+              // Affichée en "< 1 km" pour les distances subkilomètriques réelles.
+              const rawKm = typeof s.distance_km === "number" ? s.distance_km : null;
+              const distanceLabel =
+                rawKm === null || rawKm <= 0
+                  ? null
+                  : rawKm < 1
+                    ? "< 1 km"
+                    : `${Math.round(rawKm)} km`;
               // Jusqu'à 4 savoir-faire secondaires, critère de choix clé.
               const skills = s.custom_skills.slice(0, 4);
               return (
