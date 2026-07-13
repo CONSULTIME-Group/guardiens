@@ -277,6 +277,8 @@ function WhispersTab({ since, range }: { since: string; range: Range }) {
       if (error) throw error;
       return (data ?? []) as RawWhisperHistory[];
     },
+    staleTime: 60_000,
+    refetchOnWindowFocus: false,
   });
 
   const historyTruncated = history.length >= ROW_LIMIT;
@@ -288,7 +290,10 @@ function WhispersTab({ since, range }: { since: string; range: Range }) {
       if (error) throw error;
       return (data ?? []) as Array<{ alma_frequency: string | null }>;
     },
+    staleTime: 5 * 60_000,
+    refetchOnWindowFocus: false,
   });
+
 
   const stats = useMemo(
     () => aggregateWhispers(history, WHISPER_PRIORITY as Record<string, "P0" | "P1" | "P2">),
