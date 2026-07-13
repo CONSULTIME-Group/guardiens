@@ -50,7 +50,22 @@ Deno.serve(async (req) => {
     const token = authHeader.replace("Bearer ", "");
     const service = createClient(SUPABASE_URL, SERVICE_KEY);
 
-    if (token !== SERVICE_KEY) {
+    // Court-circuit service_role : cron/pg_net peuvent appeler avec un JWT
+    // service_role signé (clé vault distincte de SERVICE_KEY).
+    let isServiceRole = token === SERVICE_KEY;
+    if (!isServiceRole && token) {
+      try {
+        const parts = token.split(".");
+        if (parts.length === 3) {
+          const pad = parts[1].length % 4 === 0 ? "" : "=".repeat(4 - (parts[1].length % 4));
+          const b64 = parts[1].replace(/-/g, "+").replace(/_/g, "/") + pad;
+          const payload = JSON.parse(atob(b64));
+          if (payload?.role === "service_role") isServiceRole = true;
+        }
+      } catch { /* ignore decode errors */ }
+    }
+
+    if (!isServiceRole) {
       const userClient = createClient(SUPABASE_URL, ANON_KEY, {
         global: { headers: { Authorization: authHeader } },
       });
@@ -71,6 +86,7 @@ Deno.serve(async (req) => {
         });
       }
     }
+
 
     const body = await req.json().catch(() => ({} as Record<string, unknown>));
     const mode = (body?.mode as string) === "count" ? "count" : "send";
