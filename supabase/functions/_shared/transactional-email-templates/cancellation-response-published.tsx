@@ -30,7 +30,7 @@ const CancellationResponsePublishedEmail = ({ responderFirstName, profileUrl }: 
           Voir la réponse
         </Button>
         <LegalFooter
-          purpose="de la gestion des avis"
+          purpose="la gestion des avis"
           basis="6.1.f"
           extra={
     "Les avis publiés sur Guardiens sont modérés conformément à l'article L. 111-7-2 du Code de la consommation."

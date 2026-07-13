@@ -58,7 +58,7 @@ const ReportResolvedEmail = ({ reason, status, adminNotes }: ReportResolvedProps
           Merci de contribuer à la sécurité de notre communauté. Si vous avez des questions, n'hésitez pas à nous contacter.
         </Text>
         <LegalFooter
-          purpose="de la modération de la communauté"
+          purpose="la modération de la communauté"
           basis="6.1.f"
         />
       </Container>

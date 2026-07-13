@@ -65,7 +65,7 @@ const UnreadMessagesReminderEmail = ({
           </Text>
 
           <LegalFooter
-            purpose="du bon fonctionnement du service de messagerie"
+            purpose="le bon fonctionnement du service de messagerie"
             basis="6.1.f"
           />
         </Container>

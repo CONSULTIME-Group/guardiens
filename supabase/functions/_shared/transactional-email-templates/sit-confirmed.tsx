@@ -70,7 +70,7 @@ const SitConfirmedEmail = ({
         </Button>
 
         <LegalFooter
-          purpose="de la confirmation de votre garde"
+          purpose="la confirmation de votre garde"
           basis="6.1.b"
         />
       </Container>

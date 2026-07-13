@@ -75,7 +75,7 @@ const FirstApplicationEmail = ({
           </Text>
 
           <LegalFooter
-            purpose="du fonctionnement de votre annonce"
+            purpose="le fonctionnement de votre annonce"
             basis="6.1.b"
           />
         </Container>

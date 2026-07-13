@@ -44,7 +44,7 @@ const Email = ({ firstName }: Props) => {
             Vous pouvez proposer votre aide, ou publier votre propre besoin en quelques secondes.
           </Text>
           <Hr style={hr} />
-          <LegalFooter purpose="de rappel saisonnier aux gardiens inscrits" basis="6.1.f" />
+          <LegalFooter purpose="l'envoi de rappels saisonniers aux gardiens inscrits" basis="6.1.f" />
         </Container>
       </Body>
     </Html>

@@ -70,7 +70,7 @@ const SitInvitationEmail = ({
         <Hr style={hr} />
 
         <LegalFooter
-          purpose="de la mise en relation entre propriétaires et gardiens"
+          purpose="la mise en relation entre propriétaires et gardiens"
           basis="6.1.b"
           extra="Vous recevez ce message car un propriétaire vous a personnellement invité(e) à candidater à sa garde."
         />

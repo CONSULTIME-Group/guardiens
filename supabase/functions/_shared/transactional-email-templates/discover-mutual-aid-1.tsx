@@ -60,7 +60,7 @@ const DiscoverMutualAidEmail = ({ firstName }: Props) => (
         <Hr style={hr} />
 
         <LegalFooter
-          purpose="de la découverte des fonctionnalités d'entraide"
+          purpose="la découverte des fonctionnalités d'entraide"
           basis="6.1.f"
           extra="Vous recevez ce message car vous n'avez pas encore utilisé l'entraide. Vous pouvez ajuster vos préférences d'email depuis votre espace personnel."
         />

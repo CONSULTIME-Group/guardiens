@@ -82,7 +82,7 @@ const Email = ({ firstName, city, nearby_sitters_count, radius_km, top_3_sitter_
 
           <AlmaSignoff />
           <Hr style={hr} />
-          <LegalFooter purpose="d'accompagnement à la prise en main de votre compte" basis="6.1.f" />
+          <LegalFooter purpose="l'accompagnement à la prise en main de votre compte" basis="6.1.f" />
         </Container>
       </Body>
     </Html>
