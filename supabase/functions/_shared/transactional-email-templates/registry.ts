@@ -70,6 +70,7 @@ import { template as missionNudgeNoResponse } from './mission-nudge-no-response.
 import { template as mutualAidWeeklyDigest } from './mutual-aid-weekly-digest.tsx'
 import { template as nearbyDailyDigest } from './nearby-daily-digest.tsx'
 import { template as firstApplicationReceived } from './first-application-received.tsx'
+import { template as nudgeMissingPhoto } from './nudge-missing-photo.tsx'
 
 
 export const TEMPLATES: Record<string, TemplateEntry> = {
