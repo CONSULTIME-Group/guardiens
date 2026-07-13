@@ -247,6 +247,8 @@ export type EventType =
   | "alma_cultural_fact_dismissed"              // Fait culturel fermé (fact_id, reason)
   | "admin_alma_cultural_facts_tab_seen"        // Onglet admin cultural facts affiché
   | "admin_alma_cultural_fact_toggled"          // Désactivation/réactivation d'un fait (fact_id, active)
+  | "admin_alma_matching_diagnosis_run"         // Simulation diagnostic matching depuis admin (surface, role)
+
   // Alma évolution étape 1 — usage_nudge + next tip ------------------------
   | "alma_next_tip_delivered"                   // Conseil "un autre" tiré (fact_id, kind, surface)
   | "alma_next_tip_empty"                       // Pool épuisé pour cette surface (surface)
