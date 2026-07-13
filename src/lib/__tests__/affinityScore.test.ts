@@ -251,6 +251,9 @@ describe("computeAffinityScore", () => {
     expect(r).not.toBeNull();
     expect(r!.displayed).toBe(false);
     expect(r!.hiddenReason).toBe("too_few_criteria");
+  });
+
+
 
   it("garde-fou espèces : owner chat + sitter chien = no_animal_species_match", () => {
     const r = computeAffinityResultFull(
