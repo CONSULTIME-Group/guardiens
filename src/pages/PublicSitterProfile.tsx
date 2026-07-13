@@ -35,6 +35,7 @@ import FavoriteButton from "@/components/shared/FavoriteButton";
 import OwnerToSitterAffinity from "@/components/matching/OwnerToSitterAffinity";
 import AffinitySection from "@/components/matching/AffinitySection";
 import AffinityTeaser from "@/components/matching/AffinityTeaser";
+import { useViewerSitterForAffinity } from "@/hooks/useViewerSitterForAffinity";
 import AlmaFitGardien from "@/components/ai/alma/AlmaFitGardien";
 import { AlmaReciprocityWhisper } from "@/components/ai/alma/wiring/AlmaReciprocityWhisper";
 import { AlmaOwnerActiveSitterWhisper } from "@/components/ai/alma/wiring/AlmaOwnerActiveSitterWhisper";
