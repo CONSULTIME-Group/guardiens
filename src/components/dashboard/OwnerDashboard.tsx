@@ -785,7 +785,7 @@ const OwnerDashboard = () => {
           {showEmergencyHelp && <NearbyEmergencySitters />}
           <NearbyOwnerSittersCard />
 
-          {/* Parrainage, levier d'acquisition gratuit */}
+          {/* Parrainage, levier d'entraide gratuit (aucune contrepartie monétaire). */}
           <Link
             to="/mon-abonnement#parrainage"
             className="block rounded-2xl border border-border bg-gradient-to-br from-accent/10 to-background p-4 hover:border-primary/40 transition-colors group"
@@ -797,8 +797,7 @@ const OwnerDashboard = () => {
               Invitez un proche
             </p>
             <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
-              Son inscription reste gratuite jusqu'au {SITTER_PRICE_START}.
-              Vous gagnez {REFERRAL_REWARD_LABEL.toLowerCase()} dès qu'il publie sa première annonce ou candidature.
+              Son inscription reste sans engagement et vous développez l'entraide autour de chez vous.
             </p>
             <span className="inline-flex items-center gap-1 text-xs font-semibold text-primary mt-2 group-hover:translate-x-0.5 transition-transform">
               Partager mon lien →
