@@ -68,7 +68,7 @@ export function useOwnerTopAffinitySitters(): Result {
       const ids = pool.map((p) => p.id);
       const { data: sitterRows } = await supabase
         .from("sitter_profiles")
-        .select("user_id, animal_types, life_pace, languages, interests, work_during_sit, sensitivities, special_animal_skills, sitter_type, experience_years")
+        .select("user_id, animal_types, life_pace, languages, interests, work_during_sit, sensitivities, special_animal_skills, sitter_type, experience_years, travels_with_children, travels_with_own_animals")
         .in("user_id", ids);
 
       const sitterByUser = new Map<string, any>((sitterRows ?? []).map((s: any) => [s.user_id, s]));

@@ -63,6 +63,7 @@ const statusOrder: Record<string, number> = {
 const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, propertyId, sitStatus, statusFilter = null }: ApplicationsListProps) => {
   const { user } = useAuth();
   const { owner: viewerOwner } = useViewerOwnerForAffinity();
+  const [sitContext, setSitContext] = useState<{ accepts_sitter_pets: any; accepts_sitter_children: any }>({ accepts_sitter_pets: null, accepts_sitter_children: null });
   const [applications, setApplications] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [confirmApp, setConfirmApp] = useState<any>(null);
@@ -100,13 +101,14 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, prope
       return;
     }
 
-    const [spRes, revRes, badgeRes, emRes] = await Promise.all([
+    const [spRes, revRes, badgeRes, emRes, sitCtxRes] = await Promise.all([
       supabase.from("sitter_profiles")
-        .select("user_id, experience_years, animal_types, life_pace, languages, interests, work_during_sit, sensitivities, special_animal_skills, sitter_type")
+        .select("user_id, experience_years, animal_types, life_pace, languages, interests, work_during_sit, sensitivities, special_animal_skills, sitter_type, travels_with_children, travels_with_own_animals")
         .in("user_id", sitterIds),
       supabase.from("reviews").select("reviewee_id, overall_rating").in("reviewee_id", sitterIds).eq("published", true),
       supabase.from("badge_attributions").select("user_id, badge_id").in("user_id", sitterIds),
       supabase.from("emergency_sitter_profiles").select("user_id").in("user_id", sitterIds).eq("is_active", true),
+      supabase.from("sits").select("accepts_sitter_pets, accepts_sitter_children").eq("id", sitId).maybeSingle(),
     ]);
 
     const spMap = new Map<string, any>();
@@ -151,6 +153,8 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, prope
             special_animal_skills: sp.special_animal_skills,
             sitter_type: sp.sitter_type,
             experience_years: sp.experience_years,
+            travels_with_children: sp.travels_with_children,
+            travels_with_own_animals: sp.travels_with_own_animals,
           }
         : null;
       return {
@@ -166,6 +170,10 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, prope
 
     enriched.sort((a, b) => (statusOrder[a.status] ?? 99) - (statusOrder[b.status] ?? 99));
     setApplications(enriched);
+    setSitContext({
+      accepts_sitter_pets: (sitCtxRes.data as any)?.accepts_sitter_pets ?? null,
+      accepts_sitter_children: (sitCtxRes.data as any)?.accepts_sitter_children ?? null,
+    });
     setLoading(false);
   };
 
@@ -523,13 +531,18 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, prope
   const affinityByApp = useMemo(() => {
     const map = new Map<string, number>();
     if (!viewerOwner) return map;
+    const ownerWithSit: AffinityOwnerInput = {
+      ...(viewerOwner as AffinityOwnerInput),
+      accepts_sitter_pets: sitContext.accepts_sitter_pets ?? undefined,
+      accepts_sitter_children: sitContext.accepts_sitter_children ?? undefined,
+    };
     rawActive.forEach((app: any) => {
       if (!app.sitterAffinityInput) return;
-      const res = computeAffinityResultFull(viewerOwner as AffinityOwnerInput, app.sitterAffinityInput);
+      const res = computeAffinityResultFull(ownerWithSit, app.sitterAffinityInput);
       if (res?.displayed) map.set(app.id, res.score);
     });
     return map;
-  }, [rawActive, viewerOwner]);
+  }, [rawActive, viewerOwner, sitContext.accepts_sitter_pets, sitContext.accepts_sitter_children]);
 
   const activeApps = useMemo(() => {
     let arr = [...rawActive];

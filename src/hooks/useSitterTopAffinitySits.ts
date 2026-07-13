@@ -50,7 +50,7 @@ export function useSitterTopAffinitySits(): Result {
       const { data: sitter } = await supabase
         .from("sitter_profiles")
         .select(
-          "animal_types, life_pace, languages, interests, work_during_sit, sensitivities, special_animal_skills, sitter_type, experience_years",
+          "animal_types, life_pace, languages, interests, work_during_sit, sensitivities, special_animal_skills, sitter_type, experience_years, travels_with_children, travels_with_own_animals",
         )
         .eq("user_id", userId!)
         .maybeSingle();
@@ -74,7 +74,7 @@ export function useSitterTopAffinitySits(): Result {
       const todayIso = new Date().toISOString().slice(0, 10);
       const sitsRes: any = await supabase
         .from("sits")
-        .select("id, title, city, start_date, end_date, cover_photo_url, user_id, property_id")
+        .select("id, title, city, start_date, end_date, cover_photo_url, user_id, property_id, accepts_sitter_pets, accepts_sitter_children")
         .eq("status", "published")
         .eq("accepting_applications", true)
         .gte("end_date", todayIso)
@@ -131,6 +131,8 @@ export function useSitterTopAffinitySits(): Result {
             life_pace: ownerPrefs.life_pace,
             presence_expected: ownerPrefs.presence_expected,
             pets,
+            accepts_sitter_pets: sit.accepts_sitter_pets ?? null,
+            accepts_sitter_children: sit.accepts_sitter_children ?? null,
           },
           sitter as any,
         );

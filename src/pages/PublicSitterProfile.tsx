@@ -33,7 +33,9 @@ import PublicExperiences from "@/components/profile/PublicExperiences";
 import TrustScore from "@/components/profile/TrustScore";
 import FavoriteButton from "@/components/shared/FavoriteButton";
 import OwnerToSitterAffinity from "@/components/matching/OwnerToSitterAffinity";
+import AffinitySection from "@/components/matching/AffinitySection";
 import AffinityTeaser from "@/components/matching/AffinityTeaser";
+import { useViewerSitterForAffinity } from "@/hooks/useViewerSitterForAffinity";
 import AlmaFitGardien from "@/components/ai/alma/AlmaFitGardien";
 import { AlmaReciprocityWhisper } from "@/components/ai/alma/wiring/AlmaReciprocityWhisper";
 import { AlmaOwnerActiveSitterWhisper } from "@/components/ai/alma/wiring/AlmaOwnerActiveSitterWhisper";
@@ -89,6 +91,7 @@ interface OwnerProfileData {
 export default function PublicSitterProfile() {
   const { id } = useParams<{ id: string }>();
   const auth = useAuth();
+  const { sitter: viewerSitter } = useViewerSitterForAffinity();
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
   const tabParam = searchParams.get('tab');
@@ -111,6 +114,8 @@ export default function PublicSitterProfile() {
     },
   });
   const [ownerProfile, setOwnerProfile] = useState<OwnerProfileData | null>(null);
+  const [targetOwnerAffinity, setTargetOwnerAffinity] = useState<any | null>(null);
+  const [targetPets, setTargetPets] = useState<{ species: string | null; special_needs: string | null }[]>([]);
   const [missionCount, setMissionCount] = useState<number>(0);
   const [badges, setBadges] = useState<{ badge_key: string; count: number }[]>([]);
   const [reviews, setReviews] = useState<any[]>([]);
@@ -407,7 +412,7 @@ export default function PublicSitterProfile() {
           supabase.from("subscriptions").select("status").eq("user_id", id).eq("status", "active").limit(1),
           supabase
             .from("owner_profiles")
-            .select("id, user_id, welcome_notes, environments, competences, competences_disponible")
+            .select("id, user_id, welcome_notes, environments, competences, competences_disponible, preferred_sitter_types, home_ambiance, languages, interests, life_pace, presence_expected")
             .eq("user_id", id)
             .maybeSingle(),
           supabase
@@ -449,6 +454,22 @@ export default function PublicSitterProfile() {
       if (fetchedEmergencyProfile) setEmergencyActive(fetchedEmergencyProfile.is_active);
       setHasActiveSubscription(!!(subRes.data && (subRes.data as any[]).length > 0));
       setOwnerProfile(fetchedOwnerProfile);
+      setTargetOwnerAffinity(fetchedOwnerProfile);
+      // Charge les animaux du propriétaire cible (via ses properties) pour permettre le calcul d'affinité côté gardien visitant l'onglet propriétaire.
+      if (fetchedOwnerProfile && id) {
+        try {
+          const { data: propsData } = await supabase
+            .from("properties")
+            .select("pets:pets(species, special_needs)")
+            .eq("user_id", id);
+          const flat = (propsData || []).flatMap((p: any) => p.pets || []);
+          setTargetPets(flat);
+        } catch {
+          setTargetPets([]);
+        }
+      } else {
+        setTargetPets([]);
+      }
       setMissionCount(fetchedMissionCount);
       setExternalExperiences(extExpRes?.data || []);
 
@@ -1152,8 +1173,8 @@ export default function PublicSitterProfile() {
                 />
               </div>
 
-              {/* Affinité côté propriétaire visitant un gardien */}
-              {activeTab === 'gardien' && auth.user?.id && id && auth.user.id !== id && sitterProfile && (
+              {/* Affinité côté propriétaire visitant un gardien (guard strict : viewer actif en owner) */}
+              {activeTab === 'gardien' && auth.user?.id && id && auth.user.id !== id && sitterProfile && auth.activeRole === 'owner' && (
                 <div className="self-start mt-2">
                   <OwnerToSitterAffinity
                     sitterProfile={sitterProfile}
@@ -1162,6 +1183,20 @@ export default function PublicSitterProfile() {
                     size="md"
                     scope="single"
                     caption="Votre affinité avec ce gardien"
+                  />
+                </div>
+              )}
+
+              {/* Affinité miroir (gardien visitant l'onglet propriétaire d'un profil dual) */}
+              {activeTab === 'proprio' && auth.user?.id && id && auth.user.id !== id && auth.activeRole === 'sitter' && targetOwnerAffinity && viewerSitter && (
+                <div className="self-start mt-2">
+                  <AffinitySection
+                    sitterProfile={viewerSitter}
+                    ownerProfile={targetOwnerAffinity}
+                    pets={targetPets}
+                    context="public_owner_facet"
+                    targetId={id}
+                    showCtaForSitter={false}
                   />
                 </div>
               )}

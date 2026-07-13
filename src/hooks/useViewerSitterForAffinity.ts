@@ -19,7 +19,7 @@ async function fetchSitter(userId: string): Promise<Loaded> {
   const { data } = await supabase
     .from("sitter_profiles")
     .select(
-      "animal_types, life_pace, languages, interests, work_during_sit, sensitivities, special_animal_skills, sitter_type, experience_years",
+      "animal_types, life_pace, languages, interests, work_during_sit, sensitivities, special_animal_skills, sitter_type, experience_years, travels_with_children, travels_with_own_animals",
     )
     .eq("user_id", userId)
     .maybeSingle();

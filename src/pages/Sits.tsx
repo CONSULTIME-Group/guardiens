@@ -39,6 +39,8 @@ import { useToast } from "@/hooks/use-toast";
 import { Helmet } from "react-helmet-async";
 import MobileStickyCTA from "@/components/dashboard/owner/MobileStickyCTA";
 import { RepublishAlmaDialog } from "@/components/ai/alma/RepublishAlmaDialog";
+import AffinitySection from "@/components/matching/AffinitySection";
+import { useViewerSitterForAffinity } from "@/hooks/useViewerSitterForAffinity";
 
 /* ── Status configs (tokens sémantiques uniquement, compat dark mode) ── */
 const statusConfig: Record<string, { label: string; className: string }> = {
@@ -293,11 +295,22 @@ const Sits = () => {
         let petsByProperty: Record<string, any[]> = {};
         if (propertyIds.length > 0) {
           const { data: pets } = await supabase
-            .from("pets").select("name, species, property_id").in("property_id", propertyIds);
+            .from("pets").select("name, species, special_needs, property_id").in("property_id", propertyIds);
           pets?.forEach((p: any) => {
             if (!petsByProperty[p.property_id]) petsByProperty[p.property_id] = [];
             petsByProperty[p.property_id].push(p);
           });
+        }
+
+        // Owner affinity profiles (préférences propriétaires) pour permettre le calcul d'affinité sur les cards.
+        const ownerIds = [...new Set(data?.map((a: any) => a.sit?.user_id).filter(Boolean) || [])] as string[];
+        let ownerAffinityById: Record<string, any> = {};
+        if (ownerIds.length > 0) {
+          const { data: ownerProfiles } = await supabase
+            .from("owner_profiles")
+            .select("user_id, preferred_sitter_types, home_ambiance, languages, interests, life_pace, presence_expected")
+            .in("user_id", ownerIds);
+          (ownerProfiles || []).forEach((o: any) => { ownerAffinityById[o.user_id] = o; });
         }
 
         // For all applications: conversation + last message + unread.
@@ -376,6 +389,7 @@ const Sits = () => {
             owner: a.sit?.owner || null,
             hasReviewed: reviewedSitIds.includes(a.sit?.id),
             pets: petsByProperty[a.sit?.property_id] || [],
+            ownerAffinity: ownerAffinityById[a.sit?.user_id] || null,
             houseGuide: guideMap[a.sit?.id] || null,
             conversationId: convMap[a.sit?.id] || null,
             lastMessage: lastMsgMap[a.sit?.id] || null,
@@ -1177,6 +1191,7 @@ const SitCard = ({
   onArchive: () => void; onDelete: () => void; onRepublish: () => void; onOpenGuide: (id: string) => void;
   onWithdraw?: (appId: string) => void;
 }) => {
+  const { sitter: viewerSitter } = useViewerSitterForAffinity();
   const effectiveStatus = sit.effectiveStatus || sit.status;
   const duration = getDuration(sit.start_date, sit.end_date);
   // Couverture : photo de couv choisie sur la fiche en priorité, puis 1re photo de la galerie owner, puis ancien fallback property.
@@ -1387,6 +1402,22 @@ const SitCard = ({
                 </span>
               )}
             </Link>
+          )}
+
+          {/* Affinité (côté gardien, annonces publiées) */}
+          {!isOwner && sit.status === "published" && viewerSitter && sit.ownerAffinity && (
+            <AffinitySection
+              sitterProfile={viewerSitter}
+              ownerProfile={{
+                ...sit.ownerAffinity,
+                accepts_sitter_pets: sit.accepts_sitter_pets ?? null,
+                accepts_sitter_children: sit.accepts_sitter_children ?? null,
+              }}
+              pets={sit.pets || []}
+              context="sits_list_sitter"
+              targetId={sit.id}
+              showCtaForSitter={false}
+            />
           )}
 
           {/* Quick actions */}

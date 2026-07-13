@@ -111,10 +111,38 @@ const Favorites = () => {
       if (!sitIds.length) return [];
       const { data, error } = await supabase
         .from("sits")
-        .select("id, title, start_date, end_date, status")
+        .select("id, title, start_date, end_date, status, user_id, property_id, accepts_sitter_pets, accepts_sitter_children")
         .in("id", sitIds);
       if (error) throw error;
-      return data ?? [];
+      const rows = data ?? [];
+      const ownerIds = [...new Set(rows.map((s: any) => s.user_id).filter(Boolean))] as string[];
+      const propertyIds = [...new Set(rows.map((s: any) => s.property_id).filter(Boolean))] as string[];
+      const [{ data: owners }, { data: pets }] = await Promise.all([
+        ownerIds.length > 0
+          ? supabase
+              .from("owner_profiles")
+              .select("user_id, preferred_sitter_types, home_ambiance, languages, interests, life_pace, presence_expected")
+              .in("user_id", ownerIds)
+          : Promise.resolve({ data: [] as any[] }),
+        propertyIds.length > 0
+          ? supabase
+              .from("pets")
+              .select("property_id, species, special_needs")
+              .in("property_id", propertyIds)
+          : Promise.resolve({ data: [] as any[] }),
+      ]);
+      const ownerBy = new Map((owners || []).map((o: any) => [o.user_id, o]));
+      const petsByProp = new Map<string, any[]>();
+      (pets || []).forEach((p: any) => {
+        const arr = petsByProp.get(p.property_id) || [];
+        arr.push({ species: p.species, special_needs: p.special_needs });
+        petsByProp.set(p.property_id, arr);
+      });
+      return rows.map((s: any) => ({
+        ...s,
+        ownerAffinity: ownerBy.get(s.user_id) || null,
+        pets: petsByProp.get(s.property_id) || [],
+      }));
     },
     enabled: sitIds.length > 0,
   });
