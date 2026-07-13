@@ -16,6 +16,7 @@ import { DormantTopSitterCard } from "@/components/admin/signals/DormantTopSitte
 import { SuspiciousAccountCard } from "@/components/admin/signals/SuspiciousAccountCard";
 import { RepeatedCancellationsCard } from "@/components/admin/signals/RepeatedCancellationsCard";
 import { RepeatedRepublishCard } from "@/components/admin/signals/RepeatedRepublishCard";
+import { OwnerMissingCoordinatesCard } from "@/components/admin/signals/OwnerMissingCoordinatesCard";
 import { cn } from "@/lib/utils";
 
 interface Signal {
@@ -122,6 +123,8 @@ export const SignalsSection = () => {
                   <RepeatedCancellationsCard signal={s as unknown as import("@/components/admin/signals/RepeatedCancellationsCard").RepeatedCancellationsSignal} />
                 ) : s.signal_type === "repeated_republish" ? (
                   <RepeatedRepublishCard signal={s as unknown as import("@/components/admin/signals/RepeatedRepublishCard").RepeatedRepublishSignal} />
+                ) : s.signal_type === "owner_missing_coordinates" ? (
+                  <OwnerMissingCoordinatesCard signal={s as unknown as import("@/components/admin/signals/OwnerMissingCoordinatesCard").OwnerMissingCoordinatesSignal} />
                 ) : (
                   <Link
                     to={entityLink(s)}

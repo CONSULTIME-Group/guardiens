@@ -30,7 +30,8 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Loader2, Search, Send } from "lucide-react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Loader2, Search, Send, AlertTriangle } from "lucide-react";
 
 interface PreviewRecipient {
   first_name: string;
@@ -72,6 +73,20 @@ const ListingProximityCard = ({
   const [preview, setPreview] = useState<PreviewData | null>(null);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [confirmInput, setConfirmInput] = useState("");
+  const [warningMessage, setWarningMessage] = useState<string | null>(null);
+
+  const extractError = async (error: unknown, data: unknown): Promise<string> => {
+    const ctx = (error as { context?: Response } | null)?.context;
+    if (ctx && typeof ctx.json === "function") {
+      try {
+        const body = await ctx.json();
+        if (body?.error) return String(body.error);
+      } catch { /* ignore */ }
+    }
+    if ((data as { error?: string })?.error) return String((data as { error: string }).error);
+    if ((error as Error)?.message) return String((error as Error).message);
+    return "Erreur inconnue.";
+  };
 
   const handlePreview = async () => {
     if (!sitId) {
@@ -80,6 +95,7 @@ const ListingProximityCard = ({
     }
     setLoading(true);
     setPreview(null);
+    setWarningMessage(null);
     try {
       const { data, error } = await supabase.functions.invoke(
         "send-listing-proximity",
@@ -87,11 +103,14 @@ const ListingProximityCard = ({
           body: { mode: "preview", sit_id: sitId, radius_km: radiusKm },
         },
       );
-      if (error) throw error;
-      if ((data as any)?.error) throw new Error((data as any).error);
+      if (error || (data as { error?: string })?.error) {
+        const msg = await extractError(error, data);
+        setWarningMessage(msg);
+        return;
+      }
       setPreview(data as PreviewData);
-    } catch (err: any) {
-      toast.error(err.message || "Erreur lors de l'aperçu");
+    } catch (err: unknown) {
+      setWarningMessage((err as Error)?.message || "Erreur lors de l'aperçu");
     } finally {
       setLoading(false);
     }
@@ -101,6 +120,7 @@ const ListingProximityCard = ({
     if (!preview) return;
     setConfirmOpen(false);
     setSending(true);
+    setWarningMessage(null);
     try {
       const { data, error } = await supabase.functions.invoke(
         "send-listing-proximity",
@@ -108,17 +128,20 @@ const ListingProximityCard = ({
           body: { mode: "send", sit_id: sitId, radius_km: radiusKm },
         },
       );
-      if (error) throw error;
-      if ((data as any)?.error) throw new Error((data as any).error);
+      if (error || (data as { error?: string })?.error) {
+        const msg = await extractError(error, data);
+        setWarningMessage(msg);
+        return;
+      }
       toast.success(
-        `Envoi terminé, ${(data as any).sent} email(s) expédié(s)${
-          (data as any).errors ? `, ${(data as any).errors} erreur(s)` : ""
+        `Envoi terminé, ${(data as { sent: number }).sent} email(s) expédié(s)${
+          (data as { errors?: number }).errors ? `, ${(data as { errors: number }).errors} erreur(s)` : ""
         }.`,
       );
       setPreview(null);
       setConfirmInput("");
-    } catch (err: any) {
-      toast.error(err.message || "Erreur lors de l'envoi");
+    } catch (err: unknown) {
+      setWarningMessage((err as Error)?.message || "Erreur lors de l'envoi");
     } finally {
       setSending(false);
     }
@@ -159,9 +182,9 @@ const ListingProximityCard = ({
               id="listing-prox-radius"
               type="number"
               min={1}
-              max={500}
+              max={2000}
               value={radiusKm}
-              onChange={(e) => setRadiusKm(Math.max(1, Math.min(500, Number(e.target.value) || 30)))}
+              onChange={(e) => setRadiusKm(Math.max(1, Math.min(2000, Number(e.target.value) || 30)))}
             />
           </div>
           <Button onClick={handlePreview} disabled={loading}>
@@ -178,6 +201,26 @@ const ListingProximityCard = ({
             )}
           </Button>
         </div>
+
+        {radiusKm > 500 && (
+          <Alert variant="default" className="border-warning/40 bg-warning/5">
+            <AlertTriangle className="h-4 w-4" />
+            <AlertDescription className="text-xs">
+              Rayon large : l'envoi peut concerner beaucoup de gardiens.
+              Vérifiez bien votre segment avant l'envoi.
+            </AlertDescription>
+          </Alert>
+        )}
+
+        {warningMessage && (
+          <Alert variant="default" className="border-warning/40 bg-warning/5">
+            <AlertTriangle className="h-4 w-4" />
+            <AlertDescription className="text-sm">
+              {warningMessage}
+            </AlertDescription>
+          </Alert>
+        )}
+
 
         {preview && (
           <div className="space-y-3 pt-2 border-t border-border">

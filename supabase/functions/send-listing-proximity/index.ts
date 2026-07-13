@@ -1,13 +1,13 @@
 /**
- * send-listing-proximity — envoi ciblé d'une annonce de garde (sits) aux
- * gardiens de proximité.
+ * send-listing-proximity — unique source de vérité pour la diffusion d'une
+ * annonce de garde (sits) aux gardiens de proximité.
  *
  * Modes :
  *  - "preview" : renvoie la liste des destinataires (prénom, ville, distance, email)
  *  - "send"    : envoie un email personnalisé par destinataire (jamais de CC groupé)
  *
  * Ciblage : profils role in ('sitter','both'), latitude/longitude non nulls,
- * dans un rayon (km) autour de l'annonce (fallback : coordonnées du propriétaire).
+ * dans un rayon (km) autour du propriétaire.
  * Exclusions : propriétaire, comptes non actifs, suppressed_emails, opt-out
  * product_emails, emails vides/doublons.
  *
@@ -40,6 +40,17 @@ function escapeHtml(s: string): string {
     .replace(/"/g, "&quot;");
 }
 
+function toTitleCase(s: string | null | undefined): string {
+  const clean = (s ?? "").toString().trim();
+  if (!clean) return "";
+  return clean
+    .split(/(\s|-)/)
+    .map((part) =>
+      /\s|-/.test(part) ? part : part.charAt(0).toUpperCase() + part.slice(1).toLowerCase(),
+    )
+    .join("");
+}
+
 function formatDateFr(iso: string | null | undefined): string {
   if (!iso) return "";
   const d = new Date(iso);
@@ -69,6 +80,44 @@ function buildSubject(authorFirstName: string, city: string): string {
   return `${who} cherche un gardien près de chez vous`;
 }
 
+const SPECIES_LABELS: Record<string, { singular: string; plural: string }> = {
+  dog: { singular: "chien", plural: "chiens" },
+  cat: { singular: "chat", plural: "chats" },
+  rabbit: { singular: "lapin", plural: "lapins" },
+  bird: { singular: "oiseau", plural: "oiseaux" },
+  rodent: { singular: "rongeur", plural: "rongeurs" },
+  fish: { singular: "poisson", plural: "poissons" },
+  reptile: { singular: "reptile", plural: "reptiles" },
+  horse: { singular: "cheval", plural: "chevaux" },
+  other: { singular: "animal", plural: "animaux" },
+};
+
+function joinWithEt(parts: string[]): string {
+  if (parts.length === 0) return "";
+  if (parts.length === 1) return parts[0];
+  return `${parts.slice(0, -1).join(", ")} et ${parts[parts.length - 1]}`;
+}
+
+function buildPetsSentence(pets: Array<{ species: string; name: string }>): string {
+  if (!pets.length) return "";
+  const groups = new Map<string, string[]>();
+  for (const p of pets) {
+    const key = p.species || "other";
+    if (!groups.has(key)) groups.set(key, []);
+    if (p.name && p.name.trim()) groups.get(key)!.push(toTitleCase(p.name));
+  }
+  const parts: string[] = [];
+  for (const [species, names] of groups) {
+    const list = pets.filter((x) => (x.species || "other") === species);
+    const count = list.length;
+    const label = SPECIES_LABELS[species] || SPECIES_LABELS.other;
+    const noun = count > 1 ? label.plural : label.singular;
+    const namesPart = names.length ? ` (${joinWithEt(names)})` : "";
+    parts.push(`${count} ${noun}${namesPart}`);
+  }
+  return joinWithEt(parts);
+}
+
 function buildHtml(params: {
   recipientFirstName: string;
   authorFirstName: string;
@@ -78,6 +127,9 @@ function buildHtml(params: {
   dateRange: string;
   listingUrl: string;
   subject: string;
+  coverPhotoUrl: string | null;
+  petsSentence: string;
+  affinityLine: string;
 }): string {
   const {
     recipientFirstName,
@@ -88,6 +140,9 @@ function buildHtml(params: {
     dateRange,
     listingUrl,
     subject,
+    coverPhotoUrl,
+    petsSentence,
+    affinityLine,
   } = params;
   const greeting = recipientFirstName ? `Bonjour ${escapeHtml(recipientFirstName)},` : "Bonjour,";
   const author = escapeHtml(authorFirstName || "un propriétaire du coin");
@@ -100,6 +155,15 @@ function buildHtml(params: {
   const dateHtml = dateRange
     ? `<p style="margin:0 0 14px;font-size:14px;line-height:1.7;color:#3a3a3a"><strong>Dates : </strong>${escapeHtml(dateRange)}</p>`
     : "";
+  const petsHtml = petsSentence
+    ? `<p style="margin:0 0 10px;font-size:14px;line-height:1.7;color:#3a3a3a"><strong>Animaux : </strong>${escapeHtml(petsSentence)}</p>`
+    : "";
+  const affinityHtml = affinityLine
+    ? `<p style="margin:0 0 14px;font-size:13px;line-height:1.6;color:#2C6E49;font-weight:600">${escapeHtml(affinityLine)}</p>`
+    : "";
+  const coverHtml = coverPhotoUrl
+    ? `<tr><td style="padding:0"><img src="${escapeHtml(coverPhotoUrl)}" alt="Photo de l'annonce" width="600" style="width:100%;max-width:600px;height:auto;display:block"/></td></tr>`
+    : "";
   const introLine = city
     ? `Près de chez vous, à ${city}, ${author} cherche un gardien pour ses animaux : <strong>${title}</strong>.`
     : `Près de chez vous, ${author} cherche un gardien pour ses animaux : <strong>${title}</strong>.`;
@@ -109,6 +173,7 @@ function buildHtml(params: {
 <tr><td align="center">
 <table width="600" cellpadding="0" cellspacing="0" style="max-width:600px;background-color:#ffffff;border-radius:16px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,0.04)">
 <tr><td style="padding:0;background:linear-gradient(135deg,#2C6E49 0%,#3a8a5d 100%);height:6px;line-height:6px;font-size:0">&nbsp;</td></tr>
+${coverHtml}
 <tr><td style="padding:32px 40px 8px;text-align:center;background-color:#ffffff">
 <img src="https://guardiens.fr/logo-guardiens.png" alt="Guardiens" width="120" style="display:block;margin:0 auto;height:auto"/>
 </td></tr>
@@ -117,6 +182,8 @@ function buildHtml(params: {
 <p style="margin:0 0 14px;font-size:15px;line-height:1.7;color:#3a3a3a">${greeting}</p>
 <p style="margin:0 0 14px;font-size:15px;line-height:1.7;color:#3a3a3a">${introLine}</p>
 ${dateHtml}
+${petsHtml}
+${affinityHtml}
 ${excerptHtml}
 </td></tr>
 <tr><td align="center" style="padding:16px 0 8px">
@@ -125,7 +192,7 @@ ${excerptHtml}
 <tr><td style="padding:16px 40px 8px">
 <p style="margin:0 0 14px;font-size:15px;line-height:1.7;color:#3a3a3a">Si les dates et le contexte vous conviennent, vous pouvez postuler directement depuis l'annonce.</p>
 <p style="margin:0 0 4px;font-size:15px;line-height:1.7;color:#3a3a3a">À bientôt,</p>
-<p style="margin:0 0 14px;font-size:15px;line-height:1.7;color:#3a3a3a">L'équipe Guardiens</p>
+<p style="margin:0 0 14px;font-size:15px;line-height:1.7;color:#3a3a3a">Jérémie et Elisa</p>
 </td></tr>
 <tr><td style="padding:24px 40px 32px"></td></tr>
 <tr><td style="padding:20px 40px;border-top:1px solid #eee;background-color:#FAF9F6;text-align:center">
@@ -148,33 +215,18 @@ interface Recipient {
   city: string;
   email: string;
   distance_km: number;
+  animal_types: string[] | null;
+  affinity_score: number | null;
 }
 
 async function computeRecipients(
   serviceClient: SupabaseClient<any, "public", any>,
   sitId: string,
   radiusKm: number,
-): Promise<{
-  sit: {
-    id: string;
-    title: string;
-    owner_message: string | null;
-    specific_expectations: string | null;
-    user_id: string;
-    city: string | null;
-    start_date: string | null;
-    end_date: string | null;
-    status: string | null;
-    country: string | null;
-  };
-  authorFirstName: string;
-  centerLat: number;
-  centerLon: number;
-  recipients: Recipient[];
-}> {
+) {
   const { data: sit, error: sErr } = await serviceClient
     .from("sits")
-    .select("id, title, owner_message, specific_expectations, user_id, city, start_date, end_date, status, country")
+    .select("id, title, owner_message, specific_expectations, user_id, city, start_date, end_date, status, country, property_id, cover_photo_url")
     .eq("id", sitId)
     .maybeSingle();
   if (sErr) throw new Error(`Erreur chargement annonce: ${sErr.message}`);
@@ -182,16 +234,59 @@ async function computeRecipients(
 
   const { data: author, error: aErr } = await serviceClient
     .from("profiles")
-    .select("id, first_name, latitude, longitude")
+    .select("id, first_name, city, latitude, longitude")
     .eq("id", (sit as any).user_id)
     .maybeSingle();
   if (aErr || !author) throw new Error("Propriétaire introuvable pour cette annonce");
 
+  const authorFirstName = toTitleCase((author as any).first_name);
   const centerLat = (author as any).latitude as number | null;
   const centerLon = (author as any).longitude as number | null;
   if (centerLat == null || centerLon == null) {
-    throw new Error("Aucune coordonnée disponible pour le propriétaire de cette annonce");
+    const who = authorFirstName || "Le propriétaire";
+    throw new Error(
+      `Cette annonce ne peut pas être diffusée par proximité. ${who} n'a pas de coordonnées géographiques dans son profil. Demandez-lui de compléter sa localisation (ville + code postal) dans son profil.`,
+    );
   }
+
+  // Property + pets (owner's animals) for the rich template
+  const propertyId = (sit as any).property_id as string | null;
+  let propertyCover: string | null = null;
+  let propertyFirstPhoto: string | null = null;
+  const ownerPetSpecies = new Set<string>();
+  const petsList: Array<{ species: string; name: string }> = [];
+  if (propertyId) {
+    const { data: prop } = await serviceClient
+      .from("properties")
+      .select("cover_photo_url, photos")
+      .eq("id", propertyId)
+      .maybeSingle();
+    if (prop) {
+      propertyCover = ((prop as any).cover_photo_url || "").trim() || null;
+      const photos = (prop as any).photos as string[] | null;
+      if (Array.isArray(photos) && photos.length > 0) {
+        const first = photos.find((p) => typeof p === "string" && p.trim());
+        if (first) propertyFirstPhoto = first;
+      }
+    }
+    const { data: pets } = await serviceClient
+      .from("pets")
+      .select("species, name")
+      .eq("property_id", propertyId);
+    for (const p of (pets || []) as any[]) {
+      const species = String(p.species || "other");
+      ownerPetSpecies.add(species);
+      petsList.push({ species, name: String(p.name || "") });
+    }
+  }
+
+  const coverPhotoUrl =
+    ((sit as any).cover_photo_url || "").trim() ||
+    propertyCover ||
+    propertyFirstPhoto ||
+    null;
+
+  const petsSentence = buildPetsSentence(petsList);
 
   const latDelta = radiusKm / 111;
   const lonDelta = radiusKm / (111 * Math.cos((centerLat * Math.PI) / 180) || 1);
@@ -225,6 +320,8 @@ async function computeRecipients(
           city: p.city || "",
           email: String(p.email).trim(),
           distance_km: Math.round(d * 10) / 10,
+          animal_types: null,
+          affinity_score: null,
         });
       }
     }
@@ -233,6 +330,32 @@ async function computeRecipients(
   }
 
   const ids = all.map((r) => r.user_id);
+
+  // Sitter profiles: animal_types + affinity_score for enrichment
+  if (ids.length > 0) {
+    const CHUNK = 500;
+    const spMap = new Map<string, { animal_types: string[] | null; affinity_score: number | null }>();
+    for (let i = 0; i < ids.length; i += CHUNK) {
+      const { data: sps } = await serviceClient
+        .from("sitter_profiles")
+        .select("user_id, animal_types, affinity_score")
+        .in("user_id", ids.slice(i, i + CHUNK));
+      for (const s of (sps || []) as any[]) {
+        spMap.set(s.user_id, {
+          animal_types: Array.isArray(s.animal_types) ? s.animal_types : null,
+          affinity_score: typeof s.affinity_score === "number" ? s.affinity_score : null,
+        });
+      }
+    }
+    for (const r of all) {
+      const sp = spMap.get(r.user_id);
+      if (sp) {
+        r.animal_types = sp.animal_types;
+        r.affinity_score = sp.affinity_score;
+      }
+    }
+  }
+
   const optedOut = new Set<string>();
   if (ids.length > 0) {
     const CHUNK = 500;
@@ -274,13 +397,42 @@ async function computeRecipients(
     filtered.push(r);
   }
 
+  // Resolve owner city: sit.city fallback profiles.city
+  const listingCity = ((sit as any).city && String((sit as any).city).trim())
+    || ((author as any).city && String((author as any).city).trim())
+    || "";
+
   return {
     sit: sit as any,
-    authorFirstName: (author as any).first_name || "",
+    authorFirstName,
     centerLat,
     centerLon,
     recipients: filtered,
+    coverPhotoUrl,
+    petsSentence,
+    ownerPetSpecies,
+    listingCity,
   };
+}
+
+function computeAffinityLine(
+  recipient: Recipient,
+  authorFirstName: string,
+  ownerPetSpecies: Set<string>,
+): string {
+  if (typeof recipient.affinity_score === "number" && recipient.affinity_score > 0) {
+    return `Affinité avec ${authorFirstName || "le propriétaire"} : ${Math.round(recipient.affinity_score)} %`;
+  }
+  if (ownerPetSpecies.size > 0 && recipient.animal_types && recipient.animal_types.length > 0) {
+    const sitterSet = new Set(recipient.animal_types.map((x) => String(x)));
+    const inter = [...ownerPetSpecies].filter((s) => sitterSet.has(s)).length;
+    const total = ownerPetSpecies.size;
+    if (total > 0 && inter > 0) {
+      const pct = Math.round((inter / total) * 100);
+      return `Affinité animaux : ${pct} %`;
+    }
+  }
+  return "";
 }
 
 Deno.serve(async (req) => {
@@ -329,7 +481,8 @@ Deno.serve(async (req) => {
     const payload = await req.json();
     const mode: "preview" | "send" = payload.mode || "preview";
     const sitId: string = payload.sit_id;
-    const radiusKm: number = Math.max(1, Math.min(500, Number(payload.radius_km) || 30));
+    const radiusKm: number = Math.max(1, Math.min(2000, Number(payload.radius_km) || 30));
+    const signalId: string | null = payload.signal_id ?? null;
     if (!sitId) {
       return new Response(JSON.stringify({ error: "sit_id requis" }), {
         status: 400,
@@ -337,13 +490,17 @@ Deno.serve(async (req) => {
       });
     }
 
-    const { sit, authorFirstName, recipients } = await computeRecipients(
-      serviceClient,
-      sitId,
-      radiusKm,
-    );
+    const {
+      sit,
+      authorFirstName,
+      recipients,
+      coverPhotoUrl,
+      petsSentence,
+      ownerPetSpecies,
+      listingCity,
+    } = await computeRecipients(serviceClient, sitId, radiusKm);
 
-    const subject = buildSubject(authorFirstName, sit.city || "");
+    const subject = buildSubject(authorFirstName, listingCity);
     const excerpt = buildExcerpt(sit.owner_message ?? sit.specific_expectations);
     const dateRange = buildDateRange(sit.start_date, sit.end_date);
     const listingUrl = `https://guardiens.fr/annonces/${sit.id}`;
@@ -358,13 +515,15 @@ Deno.serve(async (req) => {
           sit: {
             id: sit.id,
             title: sit.title,
-            city: sit.city,
+            city: listingCity,
             excerpt,
             date_range: dateRange,
+            cover_photo_url: coverPhotoUrl,
+            pets_sentence: petsSentence,
           },
           subject,
           recipients: recipients.slice(0, PREVIEW_LIMIT).map((r) => ({
-            first_name: r.first_name,
+            first_name: toTitleCase(r.first_name),
             city: r.city,
             distance_km: r.distance_km,
             email: r.email,
@@ -422,14 +581,17 @@ Deno.serve(async (req) => {
         to: [r.email],
         subject,
         html: buildHtml({
-          recipientFirstName: r.first_name,
+          recipientFirstName: toTitleCase(r.first_name),
           authorFirstName,
           listingTitle: sit.title || "",
-          listingCity: sit.city || "",
+          listingCity,
           listingExcerpt: excerpt,
           dateRange,
           listingUrl,
           subject,
+          coverPhotoUrl,
+          petsSentence,
+          affinityLine: computeAffinityLine(r, authorFirstName, ownerPetSpecies),
         }),
         tracking: { opens: true, clicks: true },
         tags: [
@@ -511,6 +673,17 @@ Deno.serve(async (req) => {
       })
       .eq("id", campaignId);
 
+    if (signalId) {
+      await serviceClient
+        .from("admin_signals")
+        .update({
+          resolved_at: new Date().toISOString(),
+          action_taken: "broadcast_sent",
+          admin_id: user.id,
+        })
+        .eq("id", signalId);
+    }
+
     return new Response(JSON.stringify({ sent, errors, campaign_id: campaignId }), {
       status: 200,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -518,10 +691,9 @@ Deno.serve(async (req) => {
   } catch (err) {
     const message = String((err as Error).message || err);
     console.error("send-listing-proximity error:", err);
-    // Cas fonctionnel connu : propriétaire sans coordonnées géographiques.
-    // On renvoie 422 (unprocessable) avec un flag `fallback` pour que le
-    // client affiche un message clair au lieu d'un écran vide sur 500.
-    const isMissingCoords = message.includes("Aucune coordonnée");
+    const isMissingCoords =
+      message.includes("Aucune coordonnée") ||
+      message.includes("coordonnées géographiques");
     return new Response(
       JSON.stringify({
         error: message,
