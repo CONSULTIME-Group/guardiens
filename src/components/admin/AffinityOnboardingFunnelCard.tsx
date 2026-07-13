@@ -82,7 +82,10 @@ export function AffinityOnboardingFunnelCard({ since }: { since: string }) {
       }>;
 
     },
+    staleTime: 60_000,
+    refetchOnWindowFocus: false,
   });
+
 
   const truncated = events.length >= ROW_LIMIT;
 
