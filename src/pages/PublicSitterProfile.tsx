@@ -91,6 +91,7 @@ interface OwnerProfileData {
 export default function PublicSitterProfile() {
   const { id } = useParams<{ id: string }>();
   const auth = useAuth();
+  const { sitter: viewerSitter } = useViewerSitterForAffinity();
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
   const tabParam = searchParams.get('tab');
