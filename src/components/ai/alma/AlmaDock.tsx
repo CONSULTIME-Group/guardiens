@@ -174,11 +174,18 @@ const FREQUENCY_CHOICES: { value: AlmaFrequency; label: string }[] = [
 ];
 
 export function AlmaDock() {
-  const { isAuthenticated, activeRole } = useAuth();
+  // Défense en profondeur : ne rien monter pour un visiteur anonyme, même
+  // si le composant est appelé hors AppLayout par régression.
+  const { isAuthenticated } = useAuth();
   if (!isAuthenticated) return null;
+  return <AlmaDockInner />;
+}
+
+function AlmaDockInner() {
   const { currentWhisper, dismissCurrent, requestNextTip } = useAlma();
   const { frequency, setFrequency } = useAlmaFrequency();
   const { hidden, setHidden } = useAlmaHidden();
+  const { activeRole } = useAuth();
   const { data: evolution } = useAlmaEvolution();
   const isModalOpen = useIsRadixModalOpen();
   const location = useLocation();
