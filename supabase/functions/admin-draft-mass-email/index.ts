@@ -120,18 +120,40 @@ Le format "message" n'a pas d'objet. Répondez STRICTEMENT en JSON: {"body": ""}
 }
 
 function extractJson(text: string): any {
+  const cleaned = (text ?? "")
+    .replace(/^\uFEFF/, "")
+    .replace(/```(?:json)?\s*/gi, "")
+    .replace(/```/g, "")
+    .trim();
   try {
-    return JSON.parse(text);
+    return JSON.parse(cleaned);
   } catch {
-    const match = text.match(/\{[\s\S]*\}/);
-    if (match) {
-      try {
-        return JSON.parse(match[0]);
-      } catch {
-        // fallthrough
+    const start = cleaned.indexOf("{");
+    if (start !== -1) {
+      let depth = 0;
+      let inStr = false;
+      let esc = false;
+      for (let i = start; i < cleaned.length; i++) {
+        const c = cleaned[i];
+        if (inStr) {
+          if (esc) esc = false;
+          else if (c === "\\") esc = true;
+          else if (c === '"') inStr = false;
+        } else {
+          if (c === '"') inStr = true;
+          else if (c === "{") depth++;
+          else if (c === "}") {
+            depth--;
+            if (depth === 0) {
+              const candidate = cleaned.slice(start, i + 1);
+              try { return JSON.parse(candidate); } catch { break; }
+            }
+          }
+        }
       }
     }
-    throw new Error("Réponse IA non parseable");
+    // Fallback : renvoie le texte brut comme body pour préserver l'UX
+    return { body: cleaned, subject: "" };
   }
 }
 
