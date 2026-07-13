@@ -32,6 +32,9 @@ export interface AffinityOwnerInput {
   life_pace?: string | null;
   presence_expected?: string | null;
   pets?: { species?: string | null; special_needs?: string | null }[] | null;
+  /** Contexte annonce (optionnel) : politique accompagnants du sit. */
+  accepts_sitter_pets?: "yes" | "no" | "discuss" | null;
+  accepts_sitter_children?: "yes" | "no" | "discuss" | null;
 }
 
 export interface AffinitySitterInput {
@@ -44,6 +47,10 @@ export interface AffinitySitterInput {
   special_animal_skills?: string[] | null;
   sitter_type?: string | null;
   experience_years?: string | null;
+  /** Le gardien voyage habituellement avec ses propres animaux. */
+  travels_with_own_animals?: boolean | null;
+  /** Le gardien voyage habituellement avec ses enfants. */
+  travels_with_children?: boolean | null;
 }
 
 export interface AffinityResult {
@@ -56,7 +63,15 @@ export interface AffinityResult {
   /** Faut-il afficher le badge ? Optionnel pour rétro-compat. */
   displayed?: boolean;
   /** Si displayed === false, raison du masquage. */
-  hiddenReason?: "below_threshold" | "too_few_criteria" | "disqualified";
+  hiddenReason?:
+    | "below_threshold"
+    | "too_few_criteria"
+    | "disqualified"
+    | "no_animal_species_match"
+    | "sitter_pets_not_accepted"
+    | "sitter_children_not_accepted";
+  /** Notes contextuelles (ex: "accompagnants à discuter"). */
+  notes?: string[];
 }
 
 const PACE_ORDER = ["calme", "equilibre", "actif"];
@@ -64,13 +79,11 @@ const PACE_ORDER = ["calme", "equilibre", "actif"];
 /**
  * Seuils pilotables via feature_flags (affinity_min_common_criteria +
  * affinity_min_score_percent). Bootstrap au démarrage via
- * useAffinityThresholdsBootstrap ; par défaut : 2 critères / 40 %.
- * Historique : 3 critères / 40 % masquait 68 % des scores (68 % des masquages
- * étaient dus au seuil critères, cf. audit 12/07/2026).
+ * useAffinityThresholdsBootstrap ; par défaut : 2 critères / 35 %.
  */
 const thresholds = {
   minCommonCriteria: 2,
-  minScorePercent: 40,
+  minScorePercent: 35,
 };
 
 export function setAffinityThresholds(next: { minCommonCriteria?: number; minScorePercent?: number }) {
@@ -86,16 +99,21 @@ export function getAffinityThresholds() {
   return { ...thresholds };
 }
 
-/** Pondération par critère (poids supérieur = critère "dur"). */
+/**
+ * Pondération par critère. Barème uniformisé (juillet 2026) : MAX_WEIGHT = 9.
+ * Animaux et présence pèsent 2 (critères durs), les 5 autres pèsent 1.
+ */
 const W = {
   animals: 2,
   presence: 2,
   ideal: 1,
-  pace: 0.5,
-  languages: 0.5,
-  interests: 0.5,
-  ambiance: 0.5,
+  pace: 1,
+  languages: 1,
+  interests: 1,
+  ambiance: 1,
 } as const;
+
+const MAX_WEIGHT = 9;
 
 /**
  * Normalise une espèce vers un code canonique en anglais.
@@ -229,19 +247,30 @@ export function computeAffinityResultFull(
     return { score: 0, matched: [], total: 0, displayed: false, hiddenReason: "disqualified" };
   }
 
-  // Dénominateur FIXE : poids max théorique de TOUS les critères (7).
-  // Les critères non renseignés des deux côtés = 0 point, donc un profil incomplet
-  // tombe naturellement à un score plus bas. Évite le biais "80% partout" lié
-  // à un dénominateur dynamique sur 3-4 critères seulement.
-  const MAX_WEIGHT = W.animals + W.presence + W.pace + W.languages + W.interests + W.ideal + W.ambiance;
-  const TOTAL_CRITERIA = 7;
+  // Garde-fou accompagnants (annonce ↔ gardien).
+  if (owner.accepts_sitter_pets === "no" && sitter.travels_with_own_animals === true) {
+    return { score: 0, matched: [], total: 0, displayed: false, hiddenReason: "sitter_pets_not_accepted" };
+  }
+  if (owner.accepts_sitter_children === "no" && sitter.travels_with_children === true) {
+    return { score: 0, matched: [], total: 0, displayed: false, hiddenReason: "sitter_children_not_accepted" };
+  }
+
+  // Garde-fou espèces : si l'owner a des animaux ET le gardien déclare une expérience
+  // mais qu'aucune espèce ne matche, on masque plutôt que d'afficher un faux positif.
+  const ownerSpeciesRaw = (owner.pets ?? []).map((p) => p?.species).filter(Boolean) as string[];
+  if (ownerSpeciesRaw.length > 0 && (sitter.animal_types?.length ?? 0) > 0) {
+    if (speciesIntersects(ownerSpeciesRaw, sitter.animal_types ?? []) === 0) {
+      return { score: 0, matched: [], total: 0, displayed: false, hiddenReason: "no_animal_species_match" };
+    }
+  }
 
   let points = 0;
   let evaluated = 0; // nombre de critères réellement comparables (X / 7)
   const matched: string[] = [];
+  const notes: string[] = [];
 
   // 1. Animaux (poids 2)
-  const species = (owner.pets ?? []).map((p) => p?.species).filter(Boolean) as string[];
+  const species = ownerSpeciesRaw;
   if (species.length > 0 && (sitter.animal_types?.length ?? 0) > 0) {
     evaluated++;
     const inter = speciesIntersects(species, sitter.animal_types ?? []);
@@ -252,6 +281,7 @@ export function computeAffinityResultFull(
       else matched.push("Expérience avec une partie de vos animaux");
     }
   }
+
 
   // 2. Présence (poids 2)
   const presScore = presenceCompatibility(owner.presence_expected, sitter.work_during_sit);
@@ -321,19 +351,28 @@ export function computeAffinityResultFull(
     }
   }
 
+  // Note "à discuter" (accompagnants) : n'impacte pas le score.
+  if (owner.accepts_sitter_pets === "discuss" && sitter.travels_with_own_animals === true) {
+    notes.push("Vos animaux accompagnants sont à discuter avec le propriétaire");
+  }
+  if (owner.accepts_sitter_children === "discuss" && sitter.travels_with_children === true) {
+    notes.push("Vos enfants accompagnants sont à discuter avec le propriétaire");
+  }
+
   // Score = points obtenus / poids max théorique (pas le poids des seuls critères évalués).
   const raw = (points / MAX_WEIGHT) * 100;
   const score = Math.max(0, Math.min(100, Math.round(raw)));
   const total = evaluated;
 
   if (evaluated < thresholds.minCommonCriteria) {
-    return { score, matched, total, displayed: false, hiddenReason: "too_few_criteria" };
+    return { score, matched, total, notes, displayed: false, hiddenReason: "too_few_criteria" };
   }
   if (score < thresholds.minScorePercent) {
-    return { score, matched, total, displayed: false, hiddenReason: "below_threshold" };
+    return { score, matched, total, notes, displayed: false, hiddenReason: "below_threshold" };
   }
-  return { score, matched, total, displayed: true };
+  return { score, matched, total, notes, displayed: true };
 }
+
 
 
 /**

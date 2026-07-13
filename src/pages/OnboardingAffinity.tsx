@@ -33,6 +33,10 @@ import {
   WORK_DURING_SIT_OPTIONS,
   PRESENCE_EXPECTED_OPTIONS,
   IDEAL_SITTER_PROFILE_OPTIONS,
+  LIFE_PACE_OPTIONS,
+  INTEREST_OPTIONS,
+  LANGUAGE_OPTIONS,
+  HOME_AMBIANCE_OPTIONS,
 } from "@/lib/profileMatchingOptions";
 
 type Role = "owner" | "sitter" | "both";
@@ -55,6 +59,11 @@ const OnboardingAffinity = () => {
   // Owner fields
   const [presenceExpected, setPresenceExpected] = useState<string>("");
   const [preferredSitterTypes, setPreferredSitterTypes] = useState<string[]>([]);
+  const [homeAmbiance, setHomeAmbiance] = useState<string[]>([]);
+  // Champs partagés (persistés sur sitter_profiles ET owner_profiles selon les rôles actifs).
+  const [lifePace, setLifePace] = useState<string>("");
+  const [interests, setInterests] = useState<string[]>([]);
+  const [languages, setLanguages] = useState<string[]>(["Français"]);
 
   const shownTrackedRef = useRef(false);
   const completedRef = useRef(false);
@@ -182,8 +191,12 @@ const OnboardingAffinity = () => {
       if (!presenceExpected) missing.push("la présence attendue du gardien");
       if (preferredSitterTypes.length === 0) missing.push("le profil de gardien idéal");
     }
+    if (showSitterBlock || showOwnerBlock) {
+      if (!lifePace) missing.push("votre rythme de vie");
+      if (languages.length === 0) missing.push("au moins une langue parlée");
+    }
     return missing;
-  }, [askRole, chosenRole, showSitterBlock, showOwnerBlock, animalTypes, workDuringSit, sitterType, presenceExpected, preferredSitterTypes]);
+  }, [askRole, chosenRole, showSitterBlock, showOwnerBlock, animalTypes, workDuringSit, sitterType, presenceExpected, preferredSitterTypes, lifePace, languages]);
 
   const canSubmit = useMemo(
     () => (showSitterBlock || showOwnerBlock) && missingFields.length === 0,
@@ -231,7 +244,15 @@ const OnboardingAffinity = () => {
         await supabase
           .from("sitter_profiles")
           .upsert(
-            { user_id: user.id, animal_types: animalTypes, work_during_sit: workDuringSit, sitter_type: sitterType },
+            {
+              user_id: user.id,
+              animal_types: animalTypes,
+              work_during_sit: workDuringSit,
+              sitter_type: sitterType,
+              life_pace: lifePace || null,
+              interests,
+              languages,
+            },
             { onConflict: "user_id" },
           );
       }
@@ -240,7 +261,15 @@ const OnboardingAffinity = () => {
         await supabase
           .from("owner_profiles")
           .upsert(
-            { user_id: user.id, presence_expected: presenceExpected, preferred_sitter_types: preferredSitterTypes } as any,
+            {
+              user_id: user.id,
+              presence_expected: presenceExpected,
+              preferred_sitter_types: preferredSitterTypes,
+              home_ambiance: homeAmbiance,
+              life_pace: lifePace || null,
+              interests,
+              languages,
+            } as any,
             { onConflict: "user_id" },
           );
       }
@@ -380,6 +409,70 @@ const OnboardingAffinity = () => {
                     selected={preferredSitterTypes}
                     onChange={setPreferredSitterTypes}
                     ariaLabelledBy="lbl-preferred-sitter"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label id="lbl-ambiance">Comment décririez-vous l'ambiance chez vous ?</Label>
+                  <ChipSelect
+                    options={HOME_AMBIANCE_OPTIONS}
+                    selected={homeAmbiance}
+                    onChange={setHomeAmbiance}
+                    ariaLabelledBy="lbl-ambiance"
+                  />
+                </div>
+              </section>
+            )}
+
+            {(showSitterBlock || showOwnerBlock) && (
+              <section className="space-y-5" aria-labelledby="shared-heading">
+                <h2 id="shared-heading" className="font-heading text-lg font-semibold">
+                  Pour affiner votre affinité
+                </h2>
+
+                <div className="space-y-2">
+                  <Label id="lbl-life-pace">Quel est votre rythme de vie ?</Label>
+                  <div role="radiogroup" aria-labelledby="lbl-life-pace" className="flex flex-wrap gap-2">
+                    {LIFE_PACE_OPTIONS.map((o) => {
+                      const active = lifePace === o.value;
+                      return (
+                        <button
+                          type="button"
+                          key={o.value}
+                          role="radio"
+                          aria-checked={active}
+                          onClick={() => setLifePace(o.value)}
+                          className={`px-4 py-2 rounded-full border text-sm transition-colors ${
+                            active
+                              ? "bg-primary text-primary-foreground border-primary"
+                              : "bg-background text-foreground border-border hover:bg-accent"
+                          }`}
+                          title={o.description}
+                        >
+                          {o.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label id="lbl-interests">Vos centres d'intérêt (3 minimum recommandés)</Label>
+                  <ChipSelect
+                    options={INTEREST_OPTIONS}
+                    selected={interests}
+                    onChange={setInterests}
+                    ariaLabelledBy="lbl-interests"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label id="lbl-languages">Les langues que vous parlez</Label>
+                  <ChipSelect
+                    options={LANGUAGE_OPTIONS}
+                    selected={languages}
+                    onChange={setLanguages}
+                    ariaLabelledBy="lbl-languages"
                   />
                 </div>
               </section>
