@@ -1,47 +1,73 @@
 ---
 name: Affinity Score Matching
-description: Score d'affinité réciproque propriétaire ↔ gardien, dénominateur fixe sur 9 (X/7 critères), badge dans PublicProfile, SearchListingCard, Favorites
+description: Score d'affinité réciproque propriétaire ↔ gardien. Barème MAX=9, poids uniformes, garde-fous animaux + accompagnants, seuil 35 %. Source de vérité.
 type: feature
 ---
 
 ## Pure function
 
-`src/lib/affinityScore.ts` → `computeAffinityScore(owner, sitter) → AffinityResult | null`
+`src/lib/affinityScore.ts` → `computeAffinityResultFull(owner, sitter) → AffinityResult | null`
 
-7 critères, pondérés :
-1. Animaux (poids 2) : intersection `pets.species` × `sitter.animal_types`
-2. Présence ↔ work_during_sit (poids 2)
-3. Rythme de vie (poids 1) : exact = 1, adjacent = 0.5
-4. Langues (poids 1) : ≥1 commune
-5. Intérêts (poids 1) : ≥2 = 1, ≥1 = 0.5
-6. Profil idéal (poids 1) : sitter matche `owner.preferred_sitter_types`
-7. Ambiance foyer (poids 1) : ↔ life_pace / interests sitter
+7 critères, pondération unifiée :
 
-## Normalisation (depuis juin 2026)
+| Critère | Poids |
+|---|---|
+| Animaux (intersection `pets.species` × `sitter.animal_types`) | 2 |
+| Présence ↔ `work_during_sit` | 2 |
+| Rythme de vie (`life_pace`) | 1 |
+| Langues (≥ 1 commune) | 1 |
+| Intérêts (≥ 2 = 1, ≥ 1 = 0.5) | 1 |
+| Profil idéal (sitter matche `preferred_sitter_types`) | 1 |
+| Ambiance foyer (`home_ambiance` ↔ life_pace / interests sitter) | 1 |
 
-**Dénominateur FIXE = MAX_WEIGHT = 9** (poids cumulé des 7 critères).
-Les critères non comparables (info manquante d'un côté) valent 0 point et tirent le score vers le bas. Fini les "80% partout" mécaniques liés à un dénominateur dynamique sur 3-4 critères.
+## Normalisation
 
-Conséquence : un profil incomplet affiche un score modeste, ce qui incite à compléter. Un score élevé devient un vrai signal.
+**Dénominateur FIXE = MAX_WEIGHT = 9**. Les critères non renseignés valent 0 point et tirent le score vers le bas. Un profil complet peut atteindre 100 %, un profil creux plafonne mécaniquement.
 
-**Seuils d'affichage** :
-- < 3 critères comparables → `null` (badge masqué, `hiddenReason: "too_few_criteria"`)
-- score < 40 % → `null` (`hiddenReason: "below_threshold"`)
-- `sitter.sensitivities` incompatible avec une espèce de l'owner → `null` (`disqualified`)
+## Garde-fous (score = null, badge masqué)
+
+| `hiddenReason` | Déclencheur |
+|---|---|
+| `disqualified` | `sitter.sensitivities` incompatible avec une espèce de l'owner (allergies, refus d'espèce) |
+| `no_animal_species_match` | Owner a des animaux ET sitter déclare une expérience, mais aucune espèce ne matche |
+| `sitter_pets_not_accepted` | `sit.accepts_sitter_pets = 'no'` ET `sitter.travels_with_own_animals = true` |
+| `sitter_children_not_accepted` | `sit.accepts_sitter_children = 'no'` ET `sitter.travels_with_children = true` |
+| `too_few_criteria` | Moins de `minCommonCriteria` critères comparables (défaut 2) |
+| `below_threshold` | Score < `minScorePercent` (défaut 35, réglable via `feature_flags`) |
+
+`accepts_sitter_pets = 'discuss'` avec un gardien qui voyage avec ses animaux n'impacte pas le score mais alimente `result.notes` avec une mention « à discuter ».
+
+## Seuils (feature_flags)
+
+- `affinity_min_common_criteria` : défaut 2
+- `affinity_min_score_percent` : défaut 35 (juillet 2026, abaissé depuis 40)
+
+Bootstrap au démarrage via `useAffinityThresholdsBootstrap` monté dans `App.tsx`.
 
 ## UI
 
 - `src/components/matching/AffinityBadge.tsx` : chip `XX% · N/7` + popover.
-  Tones : ≥80 success, ≥60 primary, ≥40 warning.
-  Popover affiche les critères matchés + ligne explicative quand `total < 7` ("Le score augmente quand les profils se complètent").
+  Tones : ≥ 80 success, ≥ 60 primary, ≥ 40 warning.
   Aucune icône Lucide ni emoji.
 
 ## Intégrations
 
 - **PublicProfile** : calcul réciproque selon le rôle du viewer.
-- **SearchListingCard** (tab sits) : `viewerSitterProfile` + `ownerMatch` enrichi dans `fetchSits`.
-- **Favorites > Gardiens** : `viewerOwnerContext` comparé à chaque sitter favori.
+- **SearchListingCard** (onglet sits) : `viewerSitterProfile` + `ownerMatch` enrichi.
+- **Favorites > Gardiens** : `viewerOwnerContext` vs sitter favori.
+- **ApplicationsList** (owner) : score sur chaque candidature.
+- **Sits list, ApplicationModal, Favorites > Sits** : chip d'affinité (Chantier UI juillet 2026).
+
+## Onboarding (OnboardingAffinity)
+
+Capture désormais les 12 champs de la formule :
+
+- Sitter : `animal_types`, `work_during_sit`, `sitter_type`
+- Owner : `presence_expected`, `preferred_sitter_types`, `home_ambiance`
+- Partagés : `life_pace`, `interests`, `languages` (persistés sur `sitter_profiles` et/ou `owner_profiles` selon les rôles actifs)
+
+Objectif : après complétion, tous les critères de la formule ont une valeur non nulle, un profil complet peut atteindre 100 %.
 
 ## Tests
 
-`src/lib/__tests__/affinityScore.test.ts` : 12 cas (null si <3 critères, score complet 100%, disqualification allergie, dénominateur fixe pénalise les profils incomplets, rythme adjacent sous seuil, pondération animaux>nice-to-have…).
+`src/lib/__tests__/affinityScore.test.ts` couvre : dénominateur fixe = 9, disqualification sensibilité, disqualification espèces, disqualification accompagnants, seuils, pondération critères durs > nice-to-have.
