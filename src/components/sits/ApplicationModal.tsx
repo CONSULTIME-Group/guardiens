@@ -341,6 +341,16 @@ const ApplicationModal = ({
           <DialogDescription>Le propriétaire verra votre profil ci-dessous en plus de votre message.</DialogDescription>
         </DialogHeader>
 
+        {companionWarning && (
+          <Alert className="mt-1 border-warning/40 bg-warning/10 text-foreground">
+            <AlertTriangle className="h-4 w-4 text-warning" />
+            <AlertDescription className="text-sm">
+              {companionWarning.text}
+            </AlertDescription>
+          </Alert>
+        )}
+
+
         {identityRecommended && (
           <div
             className="rounded-lg p-3 flex items-start gap-2.5 mt-1"
