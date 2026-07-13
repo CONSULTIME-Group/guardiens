@@ -1171,8 +1171,8 @@ export default function PublicSitterProfile() {
                 />
               </div>
 
-              {/* Affinité côté propriétaire visitant un gardien */}
-              {activeTab === 'gardien' && auth.user?.id && id && auth.user.id !== id && sitterProfile && (
+              {/* Affinité côté propriétaire visitant un gardien (guard strict : viewer actif en owner) */}
+              {activeTab === 'gardien' && auth.user?.id && id && auth.user.id !== id && sitterProfile && auth.activeRole === 'owner' && (
                 <div className="self-start mt-2">
                   <OwnerToSitterAffinity
                     sitterProfile={sitterProfile}
@@ -1181,6 +1181,20 @@ export default function PublicSitterProfile() {
                     size="md"
                     scope="single"
                     caption="Votre affinité avec ce gardien"
+                  />
+                </div>
+              )}
+
+              {/* Affinité miroir (gardien visitant l'onglet propriétaire d'un profil dual) */}
+              {activeTab === 'proprio' && auth.user?.id && id && auth.user.id !== id && auth.activeRole === 'sitter' && targetOwnerAffinity && (
+                <div className="self-start mt-2">
+                  <AffinitySection
+                    sitterProfile={null /* injecté via viewer hook interne */}
+                    ownerProfile={targetOwnerAffinity}
+                    pets={targetPets}
+                    context="public_owner_facet"
+                    targetId={id}
+                    showCtaForSitter={false}
                   />
                 </div>
               )}
