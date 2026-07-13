@@ -516,10 +516,22 @@ Deno.serve(async (req) => {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (err) {
+    const message = String((err as Error).message || err);
     console.error("send-listing-proximity error:", err);
-    return new Response(JSON.stringify({ error: String((err as Error).message || err) }), {
-      status: 500,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+    // Cas fonctionnel connu : propriétaire sans coordonnées géographiques.
+    // On renvoie 422 (unprocessable) avec un flag `fallback` pour que le
+    // client affiche un message clair au lieu d'un écran vide sur 500.
+    const isMissingCoords = message.includes("Aucune coordonnée");
+    return new Response(
+      JSON.stringify({
+        error: message,
+        code: isMissingCoords ? "owner_coords_missing" : "internal_error",
+        fallback: isMissingCoords,
+      }),
+      {
+        status: isMissingCoords ? 422 : 500,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      },
+    );
   }
 });
