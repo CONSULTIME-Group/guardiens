@@ -57,6 +57,7 @@ const ApplicationModal = ({
     ownAnimalsLabel: string;
   } | null>(null);
   const prefillAppliedRef = useRef(false);
+  const [affinity, setAffinity] = useState<AffinityResult | null>(null);
 
 
   // Load current user's sitter profile info for preview
