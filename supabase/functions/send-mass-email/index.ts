@@ -689,8 +689,15 @@ Deno.serve(async (req) => {
       firstNameByEmail.set(p.email.toLowerCase(), (p.first_name ?? "").trim());
     }
     const FIRST_NAME_RE = /\{pr[ée]nom\}/gi;
-    const personalize = (text: string, firstName: string): string =>
-      text.replace(FIRST_NAME_RE, firstName || "Bonjour");
+    const personalize = (text: string, firstName: string): string => {
+      const name = (firstName || "").trim();
+      const replaced = text.replace(FIRST_NAME_RE, name);
+      if (name) return replaced;
+      // First name absent : évite "Bonjour Bonjour," / "Bonjour ,"
+      return replaced
+        .replace(/Bonjour\s+([,.!?;:])/gi, "Bonjour$1")
+        .replace(/[ \t]{2,}/g, " ");
+    };
 
     // Un objet email par destinataire : lien de désinscription + headers
     // List-Unsubscribe (RFC 8058, one-click) personnalisés au token.
