@@ -100,13 +100,14 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, prope
       return;
     }
 
-    const [spRes, revRes, badgeRes, emRes] = await Promise.all([
+    const [spRes, revRes, badgeRes, emRes, sitCtxRes] = await Promise.all([
       supabase.from("sitter_profiles")
-        .select("user_id, experience_years, animal_types, life_pace, languages, interests, work_during_sit, sensitivities, special_animal_skills, sitter_type")
+        .select("user_id, experience_years, animal_types, life_pace, languages, interests, work_during_sit, sensitivities, special_animal_skills, sitter_type, travels_with_children, travels_with_own_animals")
         .in("user_id", sitterIds),
       supabase.from("reviews").select("reviewee_id, overall_rating").in("reviewee_id", sitterIds).eq("published", true),
       supabase.from("badge_attributions").select("user_id, badge_id").in("user_id", sitterIds),
       supabase.from("emergency_sitter_profiles").select("user_id").in("user_id", sitterIds).eq("is_active", true),
+      supabase.from("sits").select("accepts_sitter_pets, accepts_sitter_children").eq("id", sitId).maybeSingle(),
     ]);
 
     const spMap = new Map<string, any>();
