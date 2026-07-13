@@ -411,6 +411,70 @@ const OnboardingAffinity = () => {
                     ariaLabelledBy="lbl-preferred-sitter"
                   />
                 </div>
+
+                <div className="space-y-2">
+                  <Label id="lbl-ambiance">Comment décririez-vous l'ambiance chez vous ?</Label>
+                  <ChipSelect
+                    options={HOME_AMBIANCE_OPTIONS}
+                    selected={homeAmbiance}
+                    onChange={setHomeAmbiance}
+                    ariaLabelledBy="lbl-ambiance"
+                  />
+                </div>
+              </section>
+            )}
+
+            {(showSitterBlock || showOwnerBlock) && (
+              <section className="space-y-5" aria-labelledby="shared-heading">
+                <h2 id="shared-heading" className="font-heading text-lg font-semibold">
+                  Pour affiner votre affinité
+                </h2>
+
+                <div className="space-y-2">
+                  <Label id="lbl-life-pace">Quel est votre rythme de vie ?</Label>
+                  <div role="radiogroup" aria-labelledby="lbl-life-pace" className="flex flex-wrap gap-2">
+                    {LIFE_PACE_OPTIONS.map((o) => {
+                      const active = lifePace === o.value;
+                      return (
+                        <button
+                          type="button"
+                          key={o.value}
+                          role="radio"
+                          aria-checked={active}
+                          onClick={() => setLifePace(o.value)}
+                          className={`px-4 py-2 rounded-full border text-sm transition-colors ${
+                            active
+                              ? "bg-primary text-primary-foreground border-primary"
+                              : "bg-background text-foreground border-border hover:bg-accent"
+                          }`}
+                          title={o.description}
+                        >
+                          {o.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label id="lbl-interests">Vos centres d'intérêt (3 minimum recommandés)</Label>
+                  <ChipSelect
+                    options={INTEREST_OPTIONS}
+                    selected={interests}
+                    onChange={setInterests}
+                    ariaLabelledBy="lbl-interests"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label id="lbl-languages">Les langues que vous parlez</Label>
+                  <ChipSelect
+                    options={LANGUAGE_OPTIONS}
+                    selected={languages}
+                    onChange={setLanguages}
+                    ariaLabelledBy="lbl-languages"
+                  />
+                </div>
               </section>
             )}
 
