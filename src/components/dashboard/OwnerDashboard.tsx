@@ -67,7 +67,7 @@ import { useAlmaUsageNudge } from "@/hooks/useAlmaUsageNudge";
 import { useAlmaFirstMeeting } from "@/hooks/useAlmaFirstMeeting";
 import { AlmaFirstMeeting } from "@/components/ai/alma/AlmaFirstMeeting";
 import { trackEvent } from "@/lib/analytics";
-import { SITTER_PRICE_START, REFERRAL_REWARD_LABEL } from "@/lib/pricing";
+
 
 /* ═══════════════════════════════════════════════════════
    Main component
