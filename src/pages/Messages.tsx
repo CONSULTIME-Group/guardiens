@@ -837,6 +837,8 @@ const Messages = () => {
                   audience="owner"
                   otherFirstName={activeConv.other_user?.first_name ?? null}
                   messages={messages}
+                  applicationStatus={activeConv.application_status ?? null}
+                  sitStartDate={activeConv.sit?.start_date ?? null}
                   onProposeMeeting={(tpl) => {
                     setNewMessage(tpl);
                     setTimeout(() => {
