@@ -359,6 +359,7 @@ export function AlmaProvider({ children }: { children: ReactNode }) {
     setCurrent(next);
     setQueue((q) => q.filter((w) => w.id !== next!.id));
     if (!verboseMode) setState((s) => onEmit(s, next!.type));
+    if (!verboseMode) markSessionEmitted();
 
     const factId = (next.metadata as any)?.fact_id;
     if (factId) pushSeenId(String(factId));
