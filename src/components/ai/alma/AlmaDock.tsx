@@ -49,14 +49,15 @@ const STAGE_DOT_CLASS: Record<AlmaStage, string> = {
   fidele: "bg-amber-500",
 };
 
-// « Complice » retiré côté UI (connotation ambiguë). Le stade reste dans
-// la logique interne mais n'a plus de libellé visible sous « Alma ».
+// Libellé court affiché sous l'avatar Alma. La clé technique « complice »
+// est conservée pour la rétrocompat BDD, seul le rendu FR change en « Proche ».
 const STAGE_SHORT_LABEL: Record<AlmaStage, string> = {
   nouvelle: "Nouvelle",
   eveillee: "Éveillée",
-  complice: "",
+  complice: "Proche",
   fidele: "Fidèle",
 };
+
 
 interface Proposition {
   message: string;

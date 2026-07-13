@@ -18,9 +18,11 @@ import { useAlma } from "@/contexts/AlmaContext";
 import { trackEvent } from "@/lib/analytics";
 import {
   buildCulturalFactWhisper,
+  buildUsageNudgeWhisper,
   type CulturalFactPayload,
 } from "@/lib/alma/whisper-triggers";
 import { CULTURAL_FACT_LIMITS, type AlmaAudience } from "@/lib/alma/whisper-types";
+
 
 const SESSION_QUEUED_KEY = "alma_cultural_fact_queued";
 const SESSION_COUNT_KEY = "alma_cultural_fact_count";
@@ -83,21 +85,38 @@ export function useAlmaCulturalFact({
         if (!fact?.id || !fact?.content) return;
 
         const audience: AlmaAudience = activeRole === "owner" ? "owner" : "sitter";
-        const whisper = buildCulturalFactWhisper({
-          fact,
-          audience,
-          surface,
-          onSource: (url) => {
-            try {
-              void trackEvent("alma_cultural_fact_action_clicked", {
-                metadata: { fact_id: fact.id, source_url: url },
+        // Cohérence whisper_type : si la RPC renvoie un fait de type
+        // « usage_nudge », on l'insère explicitement comme whisper usage_nudge
+        // (au lieu de cultural_fact) pour ne pas polluer les stats admin.
+        const whisper =
+          fact.type === "usage_nudge"
+            ? buildUsageNudgeWhisper({
+                payload: {
+                  id: fact.id,
+                  type: "usage_nudge",
+                  content: fact.content,
+                  cta_label: null,
+                  cta_action: null,
+                },
+                audience,
+                surface,
+              })
+            : buildCulturalFactWhisper({
+                fact,
+                audience,
+                surface,
+                onSource: (url) => {
+                  try {
+                    void trackEvent("alma_cultural_fact_action_clicked", {
+                      metadata: { fact_id: fact.id, source_url: url },
+                    });
+                  } catch { /* silent */ }
+                  try {
+                    window.open(url, "_blank", "noopener,noreferrer");
+                  } catch { /* silent */ }
+                },
               });
-            } catch { /* silent */ }
-            try {
-              window.open(url, "_blank", "noopener,noreferrer");
-            } catch { /* silent */ }
-          },
-        });
+
 
         queueWhisper(whisper);
 

@@ -51,7 +51,7 @@ export interface AlmaEvolution {
 const STAGE_LABEL: Record<AlmaStage, string> = {
   nouvelle: "Nouvelle rencontre",
   eveillee: "Éveillée",
-  complice: "Complice",
+  complice: "Proche",
   fidele: "Fidèle",
 };
 
@@ -158,11 +158,12 @@ export function useAlmaEvolution() {
         nextActionLabel = "Compléter mon profil";
       } else if (stage === "eveillee") {
         if (activeRole === "owner") {
-          nextMilestone = "Publier votre première annonce ou une petite mission pour devenir Complice.";
+          nextMilestone = "Publier votre première annonce ou une petite mission pour devenir Proche.";
           nextActionHref = "/sits/create";
           nextActionLabel = "Publier une annonce";
         } else {
-          nextMilestone = "Postuler à votre première garde pour devenir Complice.";
+          nextMilestone = "Postuler à votre première garde pour devenir Proche.";
+
           nextActionHref = "/annonces";
           nextActionLabel = "Trouver une garde";
         }

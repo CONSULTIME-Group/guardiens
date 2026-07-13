@@ -1,11 +1,12 @@
 /**
  * <AlmaBubble /> — composant réutilisable pour incarner Alma, la narratrice IA.
  *
- * Règle éditoriale : vouvoiement pour audience "owner", tutoiement pour audience "sitter".
- * Le prop `audience` est obligatoire pour que les intégrations passent explicitement
- * le bon registre. Aucun mot proscrit, aucun tiret cadratin, jamais "IA" ni "Assistant"
- * dans la signature visible.
+ * Règle éditoriale : vouvoiement absolu, quelle que soit l'audience (owner ou sitter).
+ * Le prop `audience` reste obligatoire pour permettre des adaptations non textuelles
+ * (styles, halo, tracking). Aucun mot proscrit, aucun tiret cadratin, jamais "IA"
+ * ni "Assistant" dans la signature visible.
  */
+
 import { ReactNode } from "react";
 import { X } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -56,7 +57,7 @@ export function AlmaBubble({
   className,
   stage,
 }: AlmaBubbleProps) {
-  const loadingLabel = audience === "sitter" ? "Alma prépare…" : "Alma prépare…";
+  const loadingLabel = "Alma prépare…";
   const mood = loading ? "thinking" : success ? "happy" : "idle";
 
 

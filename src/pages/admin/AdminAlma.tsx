@@ -786,6 +786,196 @@ function CulturalFactsTab({ since }: { since: string }) {
           </Table>
         </CardContent>
       </Card>
+
+      <MatchingDiagnosisCard />
     </div>
   );
 }
+
+/* ══════════════════════════ Diagnostic matching ══════════════════════════ */
+
+const DIAG_SURFACES = [
+  "owner_dashboard",
+  "sitter_dashboard",
+  "breed_page",
+  "city_page",
+  "house_guide",
+  "listings",
+  "search_page",
+  "missions",
+  "mutual_aid",
+] as const;
+
+interface DiagRow {
+  fact_type: string;
+  count_eligible: number;
+  count_muted: number;
+  count_seasonal_blocked: number;
+  count_surface_blocked: number;
+  count_context_blocked: number;
+}
+
+interface DiagResult {
+  eligible_fact_types: DiagRow[];
+  picked_type_probability: Record<string, number>;
+  total_seeds_by_type: Record<string, number>;
+  inputs: Record<string, unknown>;
+}
+
+function MatchingDiagnosisCard() {
+  const [surface, setSurface] = useState<string>("owner_dashboard");
+  const [role, setRole] = useState<string>("owner");
+  const [contextJson, setContextJson] = useState<string>("{}");
+  const [userId, setUserId] = useState<string>("");
+  const [result, setResult] = useState<DiagResult | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+
+  const onRun = async () => {
+    setError(null);
+    setLoading(true);
+    let parsedContext: unknown;
+    try {
+      parsedContext = contextJson.trim() ? JSON.parse(contextJson) : {};
+    } catch (e) {
+      setError("Contexte JSON invalide.");
+      setLoading(false);
+      return;
+    }
+    const { data, error: rpcError } = await supabase.rpc(
+      "admin_alma_matching_diagnosis" as any,
+      {
+        p_surface: surface,
+        p_role: role,
+        p_context: parsedContext as any,
+        p_user_id: userId.trim() || null,
+      },
+    );
+    setLoading(false);
+    if (rpcError) {
+      setError(rpcError.message);
+      return;
+    }
+    setResult(data as unknown as DiagResult);
+    void trackEvent("admin_alma_matching_diagnosis_run", {
+      metadata: { surface, role },
+    });
+  };
+
+  return (
+    <Card>
+      <CardContent className="p-6 space-y-4">
+        <div>
+          <h3 className="text-sm font-semibold">Diagnostic matching</h3>
+          <p className="text-xs text-muted-foreground">
+            Simule le tirage d'un fait culturel Alma pour une surface, un rôle et un contexte donnés. Détaille pourquoi tel fact_type est bloqué.
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
+          <div className="space-y-1">
+            <label className="text-xs text-muted-foreground" htmlFor="diag-surface">Surface</label>
+            <Select value={surface} onValueChange={setSurface}>
+              <SelectTrigger id="diag-surface"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                {DIAG_SURFACES.map((s) => (
+                  <SelectItem key={s} value={s}>{s}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="space-y-1">
+            <label className="text-xs text-muted-foreground" htmlFor="diag-role">Rôle</label>
+            <Select value={role} onValueChange={setRole}>
+              <SelectTrigger id="diag-role"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="owner">owner</SelectItem>
+                <SelectItem value="sitter">sitter</SelectItem>
+                <SelectItem value="both">both</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="space-y-1 md:col-span-2">
+            <label className="text-xs text-muted-foreground" htmlFor="diag-user">
+              User ID (optionnel, pour appliquer les mutes de la personne)
+            </label>
+            <input
+              id="diag-user"
+              type="text"
+              value={userId}
+              onChange={(e) => setUserId(e.target.value)}
+              placeholder="uuid"
+              className="h-9 w-full px-3 rounded-md border border-input bg-background text-sm font-mono"
+            />
+          </div>
+        </div>
+
+        <div className="space-y-1">
+          <label className="text-xs text-muted-foreground" htmlFor="diag-context">
+            Contexte JSON (ex : {"{"}"animal_species":"dog","city":"Lyon"{"}"})
+          </label>
+          <textarea
+            id="diag-context"
+            value={contextJson}
+            onChange={(e) => setContextJson(e.target.value)}
+            rows={3}
+            className="w-full px-3 py-2 rounded-md border border-input bg-background text-sm font-mono"
+          />
+        </div>
+
+        <div className="flex items-center gap-3">
+          <Button size="sm" onClick={onRun} disabled={loading}>
+            {loading ? "Simulation…" : "Simuler"}
+          </Button>
+          {error && <span className="text-xs text-destructive">{error}</span>}
+        </div>
+
+        {result && (
+          <div className="space-y-3">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Fact type</TableHead>
+                  <TableHead className="text-right">Seeds actifs</TableHead>
+                  <TableHead className="text-right">Éligibles</TableHead>
+                  <TableHead className="text-right">Muted</TableHead>
+                  <TableHead className="text-right">Saison</TableHead>
+                  <TableHead className="text-right">Surface</TableHead>
+                  <TableHead className="text-right">Contexte</TableHead>
+                  <TableHead className="text-right">Proba tirage</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {result.eligible_fact_types.map((r) => {
+                  const total = result.total_seeds_by_type[r.fact_type] ?? 0;
+                  const prob = result.picked_type_probability[r.fact_type] ?? 0;
+                  const noEligible = r.count_eligible === 0;
+                  return (
+                    <TableRow key={r.fact_type} className={noEligible ? "opacity-70" : undefined}>
+                      <TableCell className="font-mono text-xs">{r.fact_type}</TableCell>
+                      <TableCell className="text-right tabular-nums">{total}</TableCell>
+                      <TableCell className="text-right tabular-nums">
+                        <span className={noEligible ? "text-destructive font-semibold" : "text-foreground"}>
+                          {r.count_eligible}
+                        </span>
+                      </TableCell>
+                      <TableCell className="text-right tabular-nums text-muted-foreground">{r.count_muted}</TableCell>
+                      <TableCell className="text-right tabular-nums text-muted-foreground">{r.count_seasonal_blocked}</TableCell>
+                      <TableCell className="text-right tabular-nums text-muted-foreground">{r.count_surface_blocked}</TableCell>
+                      <TableCell className="text-right tabular-nums text-muted-foreground">{r.count_context_blocked}</TableCell>
+                      <TableCell className="text-right tabular-nums">{prob.toFixed(2)} %</TableCell>
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+            </Table>
+            <p className="text-xs text-muted-foreground">
+              Éligibles = seeds actifs restants après filtres. Une ligne à zéro signale un fact_type dormant sur ce contexte.
+            </p>
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
+
