@@ -148,6 +148,34 @@ const ApplicationModal = ({
       } else {
         setCompanionWarning(null);
       }
+
+      // Score d'affinité (badge tête de modale)
+      try {
+        const ownerAff = (ownerAffRes.data as any) || null;
+        const propertyId = (sitRes.data as any)?.property_id || null;
+        let pets: any[] = [];
+        if (propertyId) {
+          const { data: petsData } = await supabase
+            .from("pets")
+            .select("species, special_needs")
+            .eq("property_id", propertyId);
+          pets = petsData || [];
+        }
+        if (ownerAff && sitterRes.data) {
+          const ownerInput: AffinityOwnerInput = {
+            ...ownerAff,
+            pets,
+            accepts_sitter_pets: (sitRes.data as any)?.accepts_sitter_pets ?? null,
+            accepts_sitter_children: (sitRes.data as any)?.accepts_sitter_children ?? null,
+          };
+          const sitterInput: AffinitySitterInput = sitterRes.data as any;
+          setAffinity(computeAffinityResultFull(ownerInput, sitterInput));
+        } else {
+          setAffinity(null);
+        }
+      } catch {
+        setAffinity(null);
+      }
     };
     load();
   }, [user, open, sitId]);
