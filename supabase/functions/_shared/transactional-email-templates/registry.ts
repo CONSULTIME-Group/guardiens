@@ -135,6 +135,7 @@ export const TEMPLATES: Record<string, TemplateEntry> = {
   'mutual-aid-weekly-digest': mutualAidWeeklyDigest,
   'nearby-daily-digest': nearbyDailyDigest,
   'first-application-received': firstApplicationReceived,
+  'nudge-missing-photo': nudgeMissingPhoto,
 }
 
 
