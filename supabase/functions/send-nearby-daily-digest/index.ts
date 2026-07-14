@@ -94,6 +94,47 @@ Deno.serve(async (req) => {
       for (const o of owners ?? []) ownerMap.set(o.id, o.first_name ?? undefined)
     }
 
+    // 2b) Cover fallback + animaux via properties/pets pour les sits.
+    const propertyIds = Array.from(new Set(
+      allSits.map((s: any) => s.property_id).filter(Boolean)
+    ))
+    const propertyCoverMap = new Map<string, string | null>()
+    const propertyAnimalsMap = new Map<string, string>()
+    if (propertyIds.length > 0) {
+      const { data: props } = await supabase
+        .from('properties')
+        .select('id, cover_photo_url, photos, pets(species)')
+        .in('id', propertyIds)
+      const SPECIES: Record<string, { s: string; p: string }> = {
+        dog: { s: 'chien', p: 'chiens' },
+        cat: { s: 'chat', p: 'chats' },
+        rabbit: { s: 'lapin', p: 'lapins' },
+        bird: { s: 'oiseau', p: 'oiseaux' },
+        rodent: { s: 'rongeur', p: 'rongeurs' },
+        fish: { s: 'poisson', p: 'poissons' },
+        reptile: { s: 'reptile', p: 'reptiles' },
+        horse: { s: 'cheval', p: 'chevaux' },
+        other: { s: 'animal', p: 'animaux' },
+      }
+      for (const p of props ?? []) {
+        const anyP = p as any
+        const cover = (anyP.cover_photo_url as string | null)
+          || (Array.isArray(anyP.photos) && anyP.photos.length > 0 ? anyP.photos[0] : null)
+        propertyCoverMap.set(anyP.id, cover ?? null)
+        const counts: Record<string, number> = {}
+        for (const pet of (anyP.pets ?? [])) {
+          const key = String(pet.species || 'other')
+          counts[key] = (counts[key] || 0) + 1
+        }
+        const parts = Object.entries(counts).map(([k, n]) => {
+          const lab = SPECIES[k] || SPECIES.other
+          return `${n} ${n > 1 ? lab.p : lab.s}`
+        })
+        if (parts.length > 0) propertyAnimalsMap.set(anyP.id, parts.join(', '))
+      }
+    }
+
+
     // 3) Récupère les destinataires opt-in avec coordonnées.
     let recipientsQ = supabase
       .from('email_preferences')
