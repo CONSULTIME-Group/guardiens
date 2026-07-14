@@ -12,8 +12,11 @@ Deno.serve(async (req) => {
 
   const supabase = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
   const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY")!;
+  const run = await startCronRun("send-rappel-j7");
 
-  const now = new Date();
+  try {
+    const now = new Date();
+
   const in7 = new Date(now);
   in7.setDate(in7.getDate() + 7);
   const targetDate = in7.toISOString().split("T")[0];
