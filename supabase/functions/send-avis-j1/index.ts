@@ -13,8 +13,11 @@ Deno.serve(async (req) => {
   const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
   const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
   const supabase = createClient(supabaseUrl, supabaseKey);
+  const run = await startCronRun("send-avis-j1");
 
-  const now = new Date();
+  try {
+    const now = new Date();
+
   const h24ago = new Date(now.getTime() - 24 * 60 * 60 * 1000).toISOString().split("T")[0];
   const h48ago = new Date(now.getTime() - 48 * 60 * 60 * 1000).toISOString().split("T")[0];
 
