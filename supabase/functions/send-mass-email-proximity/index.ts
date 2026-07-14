@@ -201,7 +201,7 @@ async function computeRecipients(
 }> {
   const { data: mission, error: mErr } = await serviceClient
     .from("small_missions")
-    .select("id, title, description, mission_type, user_id, latitude, longitude")
+    .select("id, title, description, mission_type, user_id, latitude, longitude, city, category, date_needed, photos")
     .eq("id", missionId)
     .maybeSingle();
   if (mErr || !mission) throw new Error(`Mission introuvable (${missionId})`);
@@ -462,6 +462,10 @@ Deno.serve(async (req) => {
           missionUrl,
           subject,
           missionType,
+          missionCity: (mission as any).city || "",
+          missionCategory: (mission as any).category || null,
+          missionDateNeeded: (mission as any).date_needed || null,
+          missionPhotoUrl: Array.isArray((mission as any).photos) && (mission as any).photos.length > 0 && typeof (mission as any).photos[0] === "string" ? (mission as any).photos[0] : null,
         }),
         tracking: { opens: true, clicks: true },
         tags: [
