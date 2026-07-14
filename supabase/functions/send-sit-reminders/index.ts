@@ -178,8 +178,14 @@ Deno.serve(async (req) => {
     }
   }
 
-  return new Response(JSON.stringify({ processed: count }), {
-    headers: { ...corsHeaders, "Content-Type": "application/json" },
-  });
+    await run.finish("success", { processed: count });
+    return new Response(JSON.stringify({ processed: count }), {
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  } catch (e) {
+    await run.fail(e);
+    throw e;
+  }
 });
+
 
