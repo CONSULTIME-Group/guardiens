@@ -35,7 +35,7 @@ const CancellationByOwnerEmail = ({ cancellerFirstName, sitTitle, startDate, rea
         <Text style={text}>
           Un avis d'annulation sera soumis à modération puis publié sur son profil. Vous pourrez y répondre dans les 7 jours.
         </Text>
-        <Button style={button} href={`${SITE_URL}/search`}>
+        <Button style={button} href={`${SITE_URL}/recherche`}>
           Trouver une autre garde
         </Button>
         <LegalFooter
