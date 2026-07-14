@@ -12,15 +12,19 @@
  * `useImpressionOnce`) quand il devient visible à l'écran.
  */
 import { useCallback, useRef, type MouseEvent } from "react";
+import { Link } from "react-router-dom";
+import { Sparkles } from "lucide-react";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import type { AffinityResult } from "@/lib/affinityScore";
 import { cn } from "@/lib/utils";
 import { trackEvent } from "@/lib/analytics";
 import { useImpressionOnce } from "@/hooks/useImpressionOnce";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface AffinityBadgeProps {
   result: AffinityResult | null;
