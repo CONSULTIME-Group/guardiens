@@ -87,5 +87,11 @@ Deno.serve(async (req) => {
     await supabase.from("sits").update({ reminder_j7_sent: true }).eq("id", sit.id);
   }
 
-  return new Response(JSON.stringify({ sent: count }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    await run.finish("success", { sent: count });
+    return new Response(JSON.stringify({ sent: count }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
+  } catch (e) {
+    await run.fail(e);
+    throw e;
+  }
 });
+
