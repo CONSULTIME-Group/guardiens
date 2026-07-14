@@ -5,7 +5,7 @@
 
 import * as React from 'npm:react@18.3.1'
 import {
-  Body, Container, Head, Heading, Html, Preview, Text, Button, Section, Hr, Link,
+  Body, Container, Head, Heading, Html, Preview, Text, Button, Section, Hr, Link, Img,
 } from 'npm:@react-email/components@0.0.22'
 import { BrandedHead } from './_branded-head.tsx'
 import { BrandHeader } from './_brand-header.tsx'
@@ -27,6 +27,7 @@ interface MissionItem {
   exchangeOffer?: string
   distanceKm?: number | null
   missionType?: 'besoin' | 'offre' | null
+  photoUrl?: string | null
 }
 
 interface Props {
