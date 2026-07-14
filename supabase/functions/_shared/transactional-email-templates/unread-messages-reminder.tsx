@@ -17,6 +17,9 @@ interface Props {
   oldestUnreadDays?: number
   topSenderFirstName?: string
   conversationUrl?: string
+  /** Si présent, active le variant "1 conversation" avec le contexte
+   *  ("votre annonce X", "l'entraide Y", etc.). */
+  contextLabel?: string
 }
 
 const UnreadMessagesReminderEmail = ({
@@ -26,6 +29,7 @@ const UnreadMessagesReminderEmail = ({
   oldestUnreadDays = 2,
   topSenderFirstName,
   conversationUrl,
+  contextLabel,
 }: Props) => {
   const link = conversationUrl || `${SITE_URL}/messages`
   const greeting = firstName ? `Bonjour ${firstName},` : 'Bonjour,'
@@ -35,6 +39,12 @@ const UnreadMessagesReminderEmail = ({
     ? `Notamment ${topSenderFirstName} attend votre retour.`
     : ''
 
+  // Variant "1 conversation contextualisée" : phrase courte demandée.
+  const singleConversationVariant = Boolean(topSenderFirstName && contextLabel && conversationsCount <= 1)
+  const singleBody = singleConversationVariant
+    ? `${topSenderFirstName} vous a écrit au sujet de ${contextLabel}. Son message attend votre réponse.`
+    : null
+
   return (
     <Html lang="fr" dir="ltr">
       <BrandedHead />
@@ -42,26 +52,31 @@ const UnreadMessagesReminderEmail = ({
       <Body style={main}>
         <Container style={container}>
           <BrandHeader />
-          <Heading style={h1}>Des messages vous attendent</Heading>
+          <Heading style={h1}>Un message attend votre réponse</Heading>
 
           <Text style={text}>{greeting}</Text>
-          <Text style={text}>
-            Vous avez <strong>{unreadCount} message{plural} non lu{plural}</strong>
-            {conversationsCount > 1 ? ` dans ${conversationsCount} conversation${convPlural}` : ''}
-            {oldestUnreadDays >= 2 ? ` depuis ${oldestUnreadDays} jour${oldestUnreadDays > 1 ? 's' : ''}` : ''}.
-            {senderMention ? ` ${senderMention}` : ''}
-          </Text>
+
+          {singleBody ? (
+            <Text style={text}>{singleBody}</Text>
+          ) : (
+            <Text style={text}>
+              Vous avez <strong>{unreadCount} message{plural} non lu{plural}</strong>
+              {conversationsCount > 1 ? ` dans ${conversationsCount} conversation${convPlural}` : ''}
+              {oldestUnreadDays >= 2 ? ` depuis ${oldestUnreadDays} jour${oldestUnreadDays > 1 ? 's' : ''}` : ''}.
+              {senderMention ? ` ${senderMention}` : ''}
+            </Text>
+          )}
 
           <Text style={text}>
-            Une réponse rapide augmente fortement vos chances de finaliser un échange. Prenez quelques secondes pour lire et répondre.
+            Une réponse rapide augmente fortement vos chances de finaliser un échange.
           </Text>
 
           <Section style={{ textAlign: 'center', margin: '24px 0' }}>
-            <Button style={button} href={link}>Voir mes messages</Button>
+            <Button style={button} href={link}>Lire et répondre</Button>
           </Section>
 
           <Text style={hint}>
-            Vous recevez ce rappel car des messages sont restés non lus depuis plus de 48 heures. Vous pouvez désactiver les notifications par email dans vos préférences.
+            Vous recevez ce rappel car ce message est resté non lu depuis plus de 24 heures. Vous pouvez ajuster vos préférences de notifications dans votre compte.
           </Text>
 
           <LegalFooter
@@ -73,6 +88,7 @@ const UnreadMessagesReminderEmail = ({
     </Html>
   )
 }
+
 
 export const template = {
   component: UnreadMessagesReminderEmail,

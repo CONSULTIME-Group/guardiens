@@ -91,6 +91,13 @@ project_id = "erhccyqevdyevpyctsjj"
     verify_jwt = true
   [functions.admin-send-test-email]
     verify_jwt = true
+  [functions.remind-unread-messages]
+    verify_jwt = false
+
+
+
+
+
 
 
 
