@@ -243,20 +243,10 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, prope
           is_system: true,
         });
 
-        const { data: guideData } = await supabase
-          .from("house_guides")
-          .select("id")
-          .eq("property_id", propertyId)
-          .maybeSingle();
+        // Le message système « guide de la maison disponible » est envoyé
+        // par le cron auto-transition-sits au passage effectif en in_progress
+        // (jour du début de garde), jamais à l'acceptation.
 
-        if (guideData) {
-          await supabase.from("messages").insert({
-            conversation_id: acceptedConv.id,
-            sender_id: user.id,
-            content: "Le guide de la maison est disponible. Vous y trouverez l'adresse exacte, les codes d'accès, les contacts utiles et toutes les consignes.",
-            is_system: true,
-          });
-        }
 
         await supabase.from("conversations").update({ updated_at: new Date().toISOString() }).eq("id", acceptedConv.id);
       }

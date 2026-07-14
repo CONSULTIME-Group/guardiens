@@ -3,7 +3,7 @@ import { useParams, Link, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { logger } from "@/lib/logger";
-import { buildBadgeAttributionRows } from "@/lib/buildBadgeAttributionRows";
+
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/hooks/use-toast";
@@ -198,6 +198,11 @@ const LeaveReview = () => {
       would_recommend: wouldRecommend,
       review_type: dbReviewType,
       published: false,
+      // Les écussons sont attribués côté base par le trigger
+      // `trg_attribute_badges_on_review_publish` uniquement quand l'avis
+      // devient publié (réciprocité ou fallback 14 jours). Aucun insert direct
+      // dans badge_attributions ici.
+      selected_badges: selectedBadges,
     };
 
     criteria.forEach((criterion) => {
@@ -222,19 +227,6 @@ const LeaveReview = () => {
     );
 
 
-    // Attribution des écussons sélectionnés
-    if (selectedBadges.length > 0) {
-      const badgeRows = buildBadgeAttributionRows({
-        selectedBadges,
-        revieweeId: reviewee.id,
-        reviewerId: user.id,
-        sitId,
-      });
-      const { error: badgeError } = await supabase.from("badge_attributions").insert(badgeRows);
-      if (badgeError) {
-        logger.warn("Badge attribution failed", { err: String(badgeError) });
-      }
-    }
 
     // Send email to the other party inviting them to leave their review
     try {

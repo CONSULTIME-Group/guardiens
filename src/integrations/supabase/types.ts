@@ -4562,6 +4562,7 @@ export type Database = {
           review_type: string | null
           reviewee_id: string
           reviewer_id: string
+          selected_badges: string[]
           sit_id: string | null
           welcome_rating: number | null
           would_recommend: boolean | null
@@ -4591,6 +4592,7 @@ export type Database = {
           review_type?: string | null
           reviewee_id: string
           reviewer_id: string
+          selected_badges?: string[]
           sit_id?: string | null
           welcome_rating?: number | null
           would_recommend?: boolean | null
@@ -4620,6 +4622,7 @@ export type Database = {
           review_type?: string | null
           reviewee_id?: string
           reviewer_id?: string
+          selected_badges?: string[]
           sit_id?: string | null
           welcome_rating?: number | null
           would_recommend?: boolean | null

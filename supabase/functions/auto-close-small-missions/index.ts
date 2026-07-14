@@ -1,14 +1,18 @@
 // auto-close-small-missions
 // -----------------------------------------------------------------------------
-// Ferme automatiquement les missions dormantes :
-//  - status='open' AND date_needed IS NOT NULL AND date_needed + 3j < now()
-//  - OR    status='open' AND created_at + 45j < now() AND aucune small_mission_responses pending
+// Ferme automatiquement les missions dormantes selon la nature du poste :
+//   - besoin : status='open' AND
+//              (end_date IS NOT NULL AND end_date < today) OR
+//              (end_date IS NULL AND date_needed IS NOT NULL AND date_needed + 3j < today) OR
+//              (créée depuis > 45j sans réponse pending)
+//   - offre  : JAMAIS péremption automatique par date. La clôture d'une offre
+//              se fait manuellement (statut completed/cancelled côté auteur).
 // -> status='cancelled', closed_at=now(), close_reason='expired'
-// Envoie l'événement `mission_auto_closed` via notify-mission-event (fanout notif + email).
 //
-// Idempotence : filtre `status='open'` déjà exclusif.
+// Idempotence : filtre status='open' exclusif.
 // Body accepté : { dry_run?: boolean, mission_id?: string }
 import { createClient } from 'npm:@supabase/supabase-js@2.45.0'
+import { startCronRun } from '../_shared/cron-run-log.ts'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -25,18 +29,20 @@ Deno.serve(async (req) => {
   try { if (req.body) body = await req.json() } catch { /* noop */ }
 
   const admin = createClient(SUPABASE_URL, SERVICE_KEY, { auth: { persistSession: false } })
+  const run = await startCronRun('auto-close-small-missions')
   const now = new Date()
   const nowIso = now.toISOString()
+  const today = nowIso.slice(0, 10)
   const dateNeededCutoff = new Date(now.getTime() - 3 * 86400_000).toISOString().slice(0, 10)
   const createdAtCutoff = new Date(now.getTime() - 45 * 86400_000).toISOString()
 
   try {
-    // Sélection : status='open' AND (date_needed < cutoff OR created_at < 45j)
+    // Sélection large, on filtre besoin vs offre en mémoire.
     const { data: candidates, error } = await admin
       .from('small_missions')
-      .select('id, user_id, title, date_needed, created_at')
+      .select('id, user_id, title, mission_type, date_needed, end_date, created_at')
       .eq('status', 'open')
-      .or(`date_needed.lt.${dateNeededCutoff},created_at.lt.${createdAtCutoff}`)
+      .or(`end_date.lt.${today},date_needed.lt.${dateNeededCutoff},created_at.lt.${createdAtCutoff}`)
       .order('created_at', { ascending: true })
       .limit(500)
 
@@ -45,34 +51,34 @@ Deno.serve(async (req) => {
     let filtered = candidates ?? []
     if (body.mission_id) filtered = filtered.filter((m) => m.id === body.mission_id)
 
-    const toClose: Array<{ id: string; user_id: string; title: string; ageDays: number }> = []
+    const toClose: Array<{ id: string; user_id: string; title: string; ageDays: number; reason: string }> = []
 
     for (const m of filtered) {
-      // Si mission datée expirée : on ferme sans vérifier réponses pending
-      const dateNeededExpired = m.date_needed && m.date_needed < dateNeededCutoff
-      if (dateNeededExpired) {
-        toClose.push({
-          id: m.id, user_id: m.user_id, title: m.title || 'Votre mission',
-          ageDays: Math.floor((now.getTime() - new Date(m.created_at).getTime()) / 86400_000),
-        })
-        continue
-      }
+      // Les OFFRES ne périment jamais par date : clôture uniquement manuelle.
+      if (m.mission_type === 'offre') continue
 
-      // Sinon (créée >45j) : vérifier absence de réponses pending
-      const { count } = await admin
-        .from('small_mission_responses')
-        .select('id', { count: 'exact', head: true })
-        .eq('mission_id', m.id)
-        .eq('status', 'pending')
-      if ((count ?? 0) === 0) {
-        toClose.push({
-          id: m.id, user_id: m.user_id, title: m.title || 'Votre mission',
-          ageDays: Math.floor((now.getTime() - new Date(m.created_at).getTime()) / 86400_000),
-        })
+      const ageDays = Math.floor((now.getTime() - new Date(m.created_at).getTime()) / 86400_000)
+      const push = (reason: string) => toClose.push({
+        id: m.id, user_id: m.user_id, title: m.title || 'Votre mission', ageDays, reason,
+      })
+
+      // BESOIN daté : end_date d'abord, sinon date_needed (+ 3 jours de grâce)
+      if (m.end_date && m.end_date < today) { push('end_date_past'); continue }
+      if (!m.end_date && m.date_needed && m.date_needed < dateNeededCutoff) { push('date_needed_past'); continue }
+
+      // Dormance : créée > 45 jours et aucune réponse pending
+      if (m.created_at < createdAtCutoff) {
+        const { count } = await admin
+          .from('small_mission_responses')
+          .select('id', { count: 'exact', head: true })
+          .eq('mission_id', m.id)
+          .eq('status', 'pending')
+        if ((count ?? 0) === 0) push('dormant_45d')
       }
     }
 
     if (body.dry_run) {
+      await run.finish('success', { dry_run: true, candidates: toClose.length })
       return json({ ok: true, dry_run: true, candidates: toClose.length, missions: toClose })
     }
 
@@ -87,13 +93,12 @@ Deno.serve(async (req) => {
       if (updErr) { errors.push({ mission_id: m.id, reason: updErr.message }); continue }
       closedCount++
 
-      // Notif in-app + email direct (bypass notify-mission-event : besoin de firstName + ageDays)
       try {
         await admin.from('notifications').insert({
           user_id: m.user_id,
           type: 'mission_auto_closed',
           title: 'Votre mission a été clôturée automatiquement',
-          body: `"${m.title}" a été clôturée après ${m.ageDays} jours sans activité. Vous pouvez la republier.`,
+          body: `« ${m.title} » a été clôturée après ${m.ageDays} jours sans activité. Vous pouvez la republier.`,
           link: `/petites-missions/${m.id}`,
           actor_name: 'Système',
         })
@@ -135,7 +140,7 @@ Deno.serve(async (req) => {
               missionId: m.id,
               ageDays: m.ageDays,
             },
-            metadata: { mission_id: m.id, close_reason: 'expired', age_days: m.ageDays },
+            metadata: { mission_id: m.id, close_reason: 'expired', age_days: m.ageDays, reason: m.reason },
           },
         })
       } catch (e) {
@@ -143,9 +148,11 @@ Deno.serve(async (req) => {
       }
     }
 
+    await run.finish('success', { closed: closedCount, examined: filtered.length, errors: errors.length })
     return json({ ok: true, closed: closedCount, errors, examined: filtered.length })
   } catch (err) {
     console.error('[auto-close-small-missions] fatal', err)
+    await run.fail(err)
     return json({ error: String(err) }, 500)
   }
 })
