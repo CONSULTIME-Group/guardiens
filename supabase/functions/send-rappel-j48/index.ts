@@ -49,7 +49,7 @@ Deno.serve(async (req) => {
           html: `<p>Bonjour ${ownerProfile.first_name || ""},</p>
 <p>Plus que 48h avant l'arrivée de ${sitterProfile?.first_name || "votre gardien"}.</p>
 <p>Assurez-vous que le guide de la maison est complet et accessible.</p>
-<p><a href="https://guardiens.fr/sits/${sit.id}">Voir ma garde →</a></p>
+<p><a href="https://guardiens.fr/sits/${sit.id}">Voir ma garde</a></p>
 <p>L'équipe Guardiens</p>`,
         }),
       });
@@ -68,7 +68,7 @@ Deno.serve(async (req) => {
           html: `<p>Bonjour ${sitterProfile.first_name || ""},</p>
 <p>Plus que 48h avant votre garde chez ${ownerProfile?.first_name || "votre propriétaire"}.</p>
 <p>Vérifiez les dernières consignes dans le guide de la maison.</p>
-<p><a href="https://guardiens.fr/sits/${sit.id}">Voir la garde →</a></p>
+<p><a href="https://guardiens.fr/sits/${sit.id}">Voir la garde</a></p>
 <p>L'équipe Guardiens</p>`,
         }),
       });
