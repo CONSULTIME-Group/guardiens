@@ -22,7 +22,14 @@ export default function ProsShowcase() {
   const fmt = (n: number) =>
     new Intl.NumberFormat(i18n.language || "fr-FR").format(n).replace(/\u0020/g, "\u202F");
 
-  const cards = [
+  // Mapping card LP → clé db pro_profiles.category (singulier).
+  const CARD_TO_DB_CATEGORY: Record<string, string> = {
+    veterinaires: "veterinaire",
+    toiletteurs: "toiletteur",
+    transporteurs: "transporteur",
+  };
+  const byCat = data.pros_by_category ?? {};
+  const allCards = [
     {
       id: "veterinaires",
       Icon: Stethoscope,
@@ -45,6 +52,9 @@ export default function ProsShowcase() {
       to: "/pros/categorie/transporteurs",
     },
   ];
+  // Ne garder que les catégories qui ont au moins 1 fiche publiée.
+  const cards = allCards.filter((c) => (byCat[CARD_TO_DB_CATEGORY[c.id]] ?? 0) > 0);
+  if (cards.length === 0) return null;
 
   return (
     <section
