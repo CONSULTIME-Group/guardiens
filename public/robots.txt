@@ -1,6 +1,7 @@
 # AUTO-GÉNÉRÉ par scripts/generate-robots.mjs — NE PAS ÉDITER À LA MAIN.
 # Source de vérité : src/data/siteRoutes.ts (privateDisallowPaths + index:false).
-# Politique AI/GEO 2026 (Freeland) : training bots Disallow, retrieval bots Allow.
+# Politique AI/GEO juillet 2026 : visibilité LLM ouverte (GPTBot, ClaudeBot,
+# PerplexityBot, Google-Extended, Applebot-Extended, Bingbot… tous Allow).
 
 # ------------------------------------------------------------
 # Search engines classiques
@@ -24,39 +25,18 @@ User-agent: Yandex
 Allow: /
 
 # ------------------------------------------------------------
-# Bots training — Disallow (protection IP marque Guardiens)
+# Bots IA (training + retrieval) — Allow (visibilité générative)
 # ------------------------------------------------------------
 User-agent: GPTBot
-Disallow: /
+Allow: /
 
-User-agent: CCBot
-Disallow: /
-
-User-agent: ByteSpider
-Disallow: /
-
-User-agent: ClaudeBot
-Disallow: /
-
-User-agent: Meta-ExternalAgent
-Disallow: /
-
-User-agent: Applebot-Extended
-Disallow: /
-
-User-agent: cohere-ai
-Disallow: /
-
-User-agent: FacebookBot
-Disallow: /
-
-# ------------------------------------------------------------
-# Bots search + retrieval — Allow (visibilité IA générative)
-# ------------------------------------------------------------
 User-agent: OAI-SearchBot
 Allow: /
 
 User-agent: ChatGPT-User
+Allow: /
+
+User-agent: ClaudeBot
 Allow: /
 
 User-agent: Claude-User
@@ -74,11 +54,35 @@ Allow: /
 User-agent: MistralAI-User
 Allow: /
 
-User-agent: Amazonbot
+User-agent: Google-Extended
 Allow: /
 
 User-agent: Applebot
 Allow: /
+
+User-agent: Applebot-Extended
+Allow: /
+
+User-agent: Amazonbot
+Allow: /
+
+User-agent: Meta-ExternalAgent
+Allow: /
+
+User-agent: FacebookBot
+Allow: /
+
+# ------------------------------------------------------------
+# Scrapers sans valeur SEO/GEO — Disallow
+# ------------------------------------------------------------
+User-agent: CCBot
+Disallow: /
+
+User-agent: ByteSpider
+Disallow: /
+
+User-agent: cohere-ai
+Disallow: /
 
 # ------------------------------------------------------------
 # Outils SEO / analytics — Allow
@@ -91,13 +95,6 @@ Allow: /
 
 User-agent: SemrushBot
 Allow: /
-
-# ------------------------------------------------------------
-# Google-Extended = Disallow (protection IP marque Guardiens)
-# Réévaluer post-notoriété (~T2 2027).
-# ------------------------------------------------------------
-User-agent: Google-Extended
-Disallow: /
 
 # ------------------------------------------------------------
 # Règles génériques : zones privées + paramètres tracking

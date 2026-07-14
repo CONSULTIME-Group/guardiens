@@ -85,12 +85,10 @@ function buildRobotsTxt({ siteUrl, privatePaths, noindexFromStatic }) {
     );
   }
 
-  // Politique AI/GEO 2026 (fenêtre AI Overviews FR, deadline sept. 2026) :
-  // - Google-Extended + GPTBot + ClaudeBot + CCBot + ByteSpider + Meta-ExternalAgent
-  //   + Applebot-Extended + cohere-ai + FacebookBot => Disallow (protection IP marque).
-  // - Bots search + retrieval (OAI-SearchBot, ChatGPT-User, PerplexityBot…) => Allow
-  //   pour rester citable dans les réponses génératives.
-  // - Réévaluer post-notoriété (~T2 2027).
+  // Politique AI/GEO juillet 2026 : Guardiens vise la visibilité dans les
+  // moteurs génératifs (ChatGPT, Perplexity, Claude, AI Overviews). Tous les
+  // bots search + retrieval + training principaux sont désormais autorisés.
+  // Seuls quelques scrapers sans valeur SEO/GEO restent bloqués.
   const searchBots = [
     "Googlebot",
     "Googlebot-Image",
@@ -99,26 +97,27 @@ function buildRobotsTxt({ siteUrl, privatePaths, noindexFromStatic }) {
     "DuckDuckBot",
     "Yandex",
   ];
-  const trainingBotsDisallowed = [
+  const aiBotsAllowed = [
     "GPTBot",
-    "CCBot",
-    "ByteSpider",
-    "ClaudeBot",
-    "Meta-ExternalAgent",
-    "Applebot-Extended",
-    "cohere-ai",
-    "FacebookBot",
-  ];
-  const retrievalBotsAllowed = [
     "OAI-SearchBot",
     "ChatGPT-User",
+    "ClaudeBot",
     "Claude-User",
     "Claude-SearchBot",
     "PerplexityBot",
     "Perplexity-User",
     "MistralAI-User",
-    "Amazonbot",
+    "Google-Extended",
     "Applebot",
+    "Applebot-Extended",
+    "Amazonbot",
+    "Meta-ExternalAgent",
+    "FacebookBot",
+  ];
+  const scrapersBlocked = [
+    "CCBot",
+    "ByteSpider",
+    "cohere-ai",
   ];
   const seoTools = ["DataForSeoBot", "AhrefsBot", "SemrushBot"];
 
@@ -128,31 +127,25 @@ function buildRobotsTxt({ siteUrl, privatePaths, noindexFromStatic }) {
   const lines = [
     "# AUTO-GÉNÉRÉ par scripts/generate-robots.mjs — NE PAS ÉDITER À LA MAIN.",
     "# Source de vérité : src/data/siteRoutes.ts (privateDisallowPaths + index:false).",
-    "# Politique AI/GEO 2026 (Freeland) : training bots Disallow, retrieval bots Allow.",
+    "# Politique AI/GEO juillet 2026 : visibilité LLM ouverte (GPTBot, ClaudeBot,",
+    "# PerplexityBot, Google-Extended, Applebot-Extended, Bingbot… tous Allow).",
     "",
     "# ------------------------------------------------------------",
     "# Search engines classiques",
     "# ------------------------------------------------------------",
     ...block(searchBots, "Allow: /"),
     "# ------------------------------------------------------------",
-    "# Bots training — Disallow (protection IP marque Guardiens)",
+    "# Bots IA (training + retrieval) — Allow (visibilité générative)",
     "# ------------------------------------------------------------",
-    ...block(trainingBotsDisallowed, "Disallow: /"),
+    ...block(aiBotsAllowed, "Allow: /"),
     "# ------------------------------------------------------------",
-    "# Bots search + retrieval — Allow (visibilité IA générative)",
+    "# Scrapers sans valeur SEO/GEO — Disallow",
     "# ------------------------------------------------------------",
-    ...block(retrievalBotsAllowed, "Allow: /"),
+    ...block(scrapersBlocked, "Disallow: /"),
     "# ------------------------------------------------------------",
     "# Outils SEO / analytics — Allow",
     "# ------------------------------------------------------------",
     ...block(seoTools, "Allow: /"),
-    "# ------------------------------------------------------------",
-    "# Google-Extended = Disallow (protection IP marque Guardiens)",
-    "# Réévaluer post-notoriété (~T2 2027).",
-    "# ------------------------------------------------------------",
-    "User-agent: Google-Extended",
-    "Disallow: /",
-    "",
     "# ------------------------------------------------------------",
     "# Règles génériques : zones privées + paramètres tracking",
     "# ------------------------------------------------------------",

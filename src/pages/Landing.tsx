@@ -370,9 +370,9 @@ const Landing = () => {
                   "@type": "ImageObject",
                   url: HOME_OG_IMAGE,
                 },
+                dateModified: new Date().toISOString().slice(0, 10),
                 mainEntity: [
                   { "@id": "https://guardiens.fr/#service" },
-                  { "@id": "https://guardiens.fr/#faq" },
                   { "@id": "https://guardiens.fr/#howto" },
                 ],
               },
@@ -456,59 +456,23 @@ const Landing = () => {
                 // Rich Result Google avec un prix qui contredirait /tarifs.
               },
               {
-                "@type": "FAQPage",
-                "@id": "https://guardiens.fr/#faq",
-                mainEntity: [
-                  {
-                    "@type": "Question",
-                    name: "Qu'est-ce que le house sitting ?",
-                    acceptedAnswer: {
-                      "@type": "Answer",
-                      text: "Le house sitting est un échange de services : un gardien habite sans frais dans votre maison pendant votre absence et prend soin de vos animaux. L'échange n'implique aucune transaction financière entre les deux parties.",
-                    },
-                  },
-                  {
-                    "@type": "Question",
-                    name: "Faut-il payer pour s'inscrire en tant que propriétaire ?",
-                    acceptedAnswer: {
-                      "@type": "Answer",
-                      text: "L'inscription, la publication d'annonces et les échanges avec les gardiens sont sans abonnement requis pour les propriétaires. Aucune carte bancaire demandée. Les gardiens bénéficient également d'un accès gratuit aujourd'hui, sans engagement. L'entraide entre gens du coin reste sans abonnement pour tous.",
-                    },
-                  },
-                  {
-                    "@type": "Question",
-                    name: "Comment trouver un pet sitter près de chez moi ?",
-                    acceptedAnswer: {
-                      "@type": "Answer",
-                      text: "Inscrivez-vous sur Guardiens, publiez votre annonce de garde avec les dates et vos animaux, et recevez des candidatures de gardiens qui habitent près de chez vous. Vous choisissez après une rencontre.",
-                    },
-                  },
-                  {
-                    "@type": "Question",
-                    name: "Qui sont les gardiens sur Guardiens ?",
-                    acceptedAnswer: {
-                      "@type": "Answer",
-                      text: "Des gens du coin, dont chaque profil est examiné par notre équipe. La confiance se construit sur la rencontre physique préalable à toute garde, les avis croisés publiés après chaque expérience, et l'historique visible sur chaque profil.",
-                    },
-                  },
-                  {
-                    "@type": "Question",
-                    name: "Comment se déroule une garde sur Guardiens ?",
-                    acceptedAnswer: {
-                      "@type": "Answer",
-                      text: "Vous publiez votre annonce, les gardiens du coin postulent, vous choisissez après une rencontre, puis votre gardien s'installe. Un accord de garde optionnel encadre les engagements de chacun pendant la garde.",
-                    },
-                  },
-                  {
-                    "@type": "Question",
-                    name: "Guardiens est-il disponible partout en France ?",
-                    acceptedAnswer: {
-                      "@type": "Answer",
-                      text: "Oui. Le réseau Guardiens s'étend dans toutes les régions de France, du Pays basque à la Bretagne, en passant par les Alpes et le Nord. Vous trouverez un gardien près de chez vous quel que soit votre département.",
-                    },
-                  },
-                ],
+                "@type": "Person",
+                "@id": "https://guardiens.fr/#founder-jeremie",
+                name: "Jérémie Martinot",
+                jobTitle: "Cofondateur",
+                worksFor: { "@id": "https://guardiens.fr/#organization" },
+                url: "https://guardiens.fr/a-propos",
+                sameAs: ["https://www.linkedin.com/in/jeremiemartinot"],
               },
+              {
+                "@type": "Person",
+                "@id": "https://guardiens.fr/#founder-elisa",
+                name: "Elisa",
+                jobTitle: "Cofondatrice",
+                worksFor: { "@id": "https://guardiens.fr/#organization" },
+                url: "https://guardiens.fr/a-propos",
+              },
+
             ],
           }),
         }}
@@ -631,6 +595,92 @@ const Landing = () => {
 
       {/* ═══════════════ APERÇU LIVE ANNONCES (sous Hero) ═══════════════ */}
       <LiveListingsStrip />
+
+      {/* ═══════════════ SECTION DÉFINITION (statement-first, GEO) ═══════════════ */}
+      <section id="definition" className="py-10 md:py-16 bg-background border-b border-border/40 scroll-mt-24">
+        <div className="max-w-3xl mx-auto px-6">
+          <h2 className="font-heading text-2xl md:text-4xl font-semibold text-foreground mb-5 scroll-mt-24">
+            Qu'est-ce que Guardiens&nbsp;?
+          </h2>
+          <p className="font-body text-base md:text-lg text-foreground/80 leading-relaxed mb-6">
+            Guardiens est une plateforme française de house-sitting et d'entraide entre particuliers. Le principe&nbsp;: un gardien vérifié, qui vit près de chez vous, s'installe dans votre maison pendant votre absence et s'occupe de vos animaux dans leur environnement. L'échange repose sur la confiance et la rencontre, sans frais pour le propriétaire. Guardiens couvre toute la France.
+          </p>
+          {(kpiMaisons > 0 || kpiAnimaux > 0 || kpiInscrits > 0) && (
+            <div className="flex flex-wrap items-baseline gap-x-6 gap-y-2 text-sm font-body text-foreground/70">
+              {kpiMaisons > 0 && (
+                <span><strong className="text-foreground tabular-nums">{kpiMaisons}</strong> maisons gardées</span>
+              )}
+              {kpiAnimaux > 0 && (
+                <span><strong className="text-foreground tabular-nums">{kpiAnimaux}</strong> animaux accompagnés</span>
+              )}
+              {kpiInscrits > 0 && (
+                <span><strong className="text-foreground tabular-nums">{kpiInscrits}</strong> inscrits</span>
+              )}
+              <span className="text-xs text-foreground/50">
+                Chiffres mis à jour le {new Date().toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" })}.
+              </span>
+            </div>
+          )}
+        </div>
+      </section>
+
+      {/* ═══════════════ SECTION COMPARATIF (extractible, GEO) ═══════════════ */}
+      <section id="comparatif" className="py-10 md:py-16 bg-accent/30 border-b border-border/40 scroll-mt-24">
+        <div className="max-w-4xl mx-auto px-6">
+          <h2 className="font-heading text-2xl md:text-4xl font-semibold text-foreground mb-3 scroll-mt-24">
+            House-sitting, pension, pet-sitter&nbsp;: que choisir&nbsp;?
+          </h2>
+          <p className="font-body text-sm md:text-base text-foreground/70 leading-relaxed mb-6 max-w-2xl">
+            Quatre solutions pour faire garder vos animaux pendant votre absence. Comparaison factuelle, sans jugement.
+          </p>
+          <div className="overflow-x-auto rounded-2xl border border-border bg-card">
+            <table className="w-full text-sm font-body min-w-[640px]">
+              <caption className="sr-only">Comparatif entre house-sitting Guardiens, pension, pet-sitter à domicile et garde par un proche.</caption>
+              <thead className="bg-muted/60 text-foreground">
+                <tr>
+                  <th scope="col" className="text-left px-4 py-3 font-semibold">Solution</th>
+                  <th scope="col" className="text-left px-4 py-3 font-semibold">L'animal reste chez lui</th>
+                  <th scope="col" className="text-left px-4 py-3 font-semibold">La maison est habitée</th>
+                  <th scope="col" className="text-left px-4 py-3 font-semibold">Coût pour le propriétaire</th>
+                  <th scope="col" className="text-left px-4 py-3 font-semibold">Lien humain</th>
+                </tr>
+              </thead>
+              <tbody className="text-foreground/80">
+                <tr className="border-t border-border">
+                  <th scope="row" className="text-left px-4 py-3 font-semibold text-foreground">House-sitting Guardiens</th>
+                  <td className="px-4 py-3">Oui</td>
+                  <td className="px-4 py-3">Oui, en permanence</td>
+                  <td className="px-4 py-3">Aucun frais entre membres</td>
+                  <td className="px-4 py-3">Rencontre préalable et avis croisés</td>
+                </tr>
+                <tr className="border-t border-border">
+                  <th scope="row" className="text-left px-4 py-3 font-semibold text-foreground">Pension</th>
+                  <td className="px-4 py-3">Non, l'animal est déplacé</td>
+                  <td className="px-4 py-3">Sans objet</td>
+                  <td className="px-4 py-3">Payant, tarif journalier</td>
+                  <td className="px-4 py-3">Équipe professionnelle sur site</td>
+                </tr>
+                <tr className="border-t border-border">
+                  <th scope="row" className="text-left px-4 py-3 font-semibold text-foreground">Pet-sitter à domicile</th>
+                  <td className="px-4 py-3">Oui</td>
+                  <td className="px-4 py-3">Non, visites ponctuelles</td>
+                  <td className="px-4 py-3">Payant, à la visite</td>
+                  <td className="px-4 py-3">Relation professionnelle</td>
+                </tr>
+                <tr className="border-t border-border">
+                  <th scope="row" className="text-left px-4 py-3 font-semibold text-foreground">Garde par un proche</th>
+                  <td className="px-4 py-3">Variable</td>
+                  <td className="px-4 py-3">Variable</td>
+                  <td className="px-4 py-3">Sans frais en général</td>
+                  <td className="px-4 py-3">Relation familiale ou amicale</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+
 
       {/* ═══════════════ SOMMAIRE DE PAGE, maillage interne ═══════════════ */}
       <nav
@@ -1474,18 +1524,18 @@ const Landing = () => {
             <h2 id="faq-heading" className="font-heading text-3xl md:text-4xl font-semibold text-foreground text-center mb-10 scroll-mt-24">
               {t("landing.faq.title")}
             </h2>
-            <dl className="space-y-6">
-              {[1, 2, 3, 4, 5, 6].map((n) => (
-                <div key={n} className="bg-card border border-border rounded-2xl p-6">
-                  <dt className="font-heading font-semibold text-foreground mb-2">
+            <div className="space-y-6">
+              {[1, 2, 3, 4, 5, 6, 7, 8].map((n) => (
+                <article key={n} className="bg-card border border-border rounded-2xl p-6">
+                  <h3 className="font-heading text-lg font-semibold text-foreground mb-2">
                     {t(`landing.faq.q${n}`)}
-                  </dt>
-                  <dd className="text-sm text-foreground/70 leading-relaxed">
+                  </h3>
+                  <p className="text-sm text-foreground/70 leading-relaxed">
                     {t(`landing.faq.a${n}`)}
-                  </dd>
-                </div>
+                  </p>
+                </article>
               ))}
-            </dl>
+            </div>
           </RevealSection>
         </div>
       </section>
