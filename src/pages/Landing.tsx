@@ -1524,18 +1524,18 @@ const Landing = () => {
             <h2 id="faq-heading" className="font-heading text-3xl md:text-4xl font-semibold text-foreground text-center mb-10 scroll-mt-24">
               {t("landing.faq.title")}
             </h2>
-            <dl className="space-y-6">
+            <div className="space-y-6">
               {[1, 2, 3, 4, 5, 6, 7, 8].map((n) => (
-                <div key={n} className="bg-card border border-border rounded-2xl p-6">
-                  <dt className="font-heading font-semibold text-foreground mb-2">
+                <article key={n} className="bg-card border border-border rounded-2xl p-6">
+                  <h3 className="font-heading text-lg font-semibold text-foreground mb-2">
                     {t(`landing.faq.q${n}`)}
-                  </dt>
-                  <dd className="text-sm text-foreground/70 leading-relaxed">
+                  </h3>
+                  <p className="text-sm text-foreground/70 leading-relaxed">
                     {t(`landing.faq.a${n}`)}
-                  </dd>
-                </div>
+                  </p>
+                </article>
               ))}
-            </dl>
+            </div>
           </RevealSection>
         </div>
       </section>
