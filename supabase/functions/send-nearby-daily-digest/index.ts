@@ -59,14 +59,14 @@ Deno.serve(async (req) => {
     const [{ data: sits }, { data: missions }] = await Promise.all([
       supabase
         .from('sits')
-        .select('id, slug, title, city, start_date, end_date, latitude, longitude, user_id, status, created_at')
+        .select('id, slug, title, city, start_date, end_date, latitude, longitude, user_id, status, created_at, cover_photo_url, property_id')
         .gte('created_at', since)
         .eq('status', 'open')
         .not('latitude', 'is', null)
         .not('longitude', 'is', null),
       supabase
         .from('small_missions')
-        .select('id, slug, title, description, mission_type, city, category, date_needed, latitude, longitude, user_id, status, created_at')
+        .select('id, slug, title, description, mission_type, city, category, date_needed, latitude, longitude, user_id, status, created_at, photos')
         .gte('created_at', since)
         .eq('status', 'open')
         .not('latitude', 'is', null)
@@ -93,6 +93,47 @@ Deno.serve(async (req) => {
         .in('id', ownerIds)
       for (const o of owners ?? []) ownerMap.set(o.id, o.first_name ?? undefined)
     }
+
+    // 2b) Cover fallback + animaux via properties/pets pour les sits.
+    const propertyIds = Array.from(new Set(
+      allSits.map((s: any) => s.property_id).filter(Boolean)
+    ))
+    const propertyCoverMap = new Map<string, string | null>()
+    const propertyAnimalsMap = new Map<string, string>()
+    if (propertyIds.length > 0) {
+      const { data: props } = await supabase
+        .from('properties')
+        .select('id, cover_photo_url, photos, pets(species)')
+        .in('id', propertyIds)
+      const SPECIES: Record<string, { s: string; p: string }> = {
+        dog: { s: 'chien', p: 'chiens' },
+        cat: { s: 'chat', p: 'chats' },
+        rabbit: { s: 'lapin', p: 'lapins' },
+        bird: { s: 'oiseau', p: 'oiseaux' },
+        rodent: { s: 'rongeur', p: 'rongeurs' },
+        fish: { s: 'poisson', p: 'poissons' },
+        reptile: { s: 'reptile', p: 'reptiles' },
+        horse: { s: 'cheval', p: 'chevaux' },
+        other: { s: 'animal', p: 'animaux' },
+      }
+      for (const p of props ?? []) {
+        const anyP = p as any
+        const cover = (anyP.cover_photo_url as string | null)
+          || (Array.isArray(anyP.photos) && anyP.photos.length > 0 ? anyP.photos[0] : null)
+        propertyCoverMap.set(anyP.id, cover ?? null)
+        const counts: Record<string, number> = {}
+        for (const pet of (anyP.pets ?? [])) {
+          const key = String(pet.species || 'other')
+          counts[key] = (counts[key] || 0) + 1
+        }
+        const parts = Object.entries(counts).map(([k, n]) => {
+          const lab = SPECIES[k] || SPECIES.other
+          return `${n} ${n > 1 ? lab.p : lab.s}`
+        })
+        if (parts.length > 0) propertyAnimalsMap.set(anyP.id, parts.join(', '))
+      }
+    }
+
 
     // 3) Récupère les destinataires opt-in avec coordonnées.
     let recipientsQ = supabase
@@ -148,6 +189,9 @@ Deno.serve(async (req) => {
           if (s.user_id === p.id) continue
           const d = haversineKm(origin, { lat: Number(s.latitude), lng: Number(s.longitude) })
           if (d > radiusKm) continue
+          const sitCover = (s.cover_photo_url as string | null)
+            || (s.property_id ? propertyCoverMap.get(s.property_id) ?? null : null)
+          const sitAnimals = s.property_id ? propertyAnimalsMap.get(s.property_id) : undefined
           items.push({
             kind: 'sit',
             id: s.id,
@@ -158,6 +202,8 @@ Deno.serve(async (req) => {
             startDate: formatFrDate(s.start_date),
             endDate: formatFrDate(s.end_date),
             ownerFirstName: ownerMap.get(s.user_id),
+            coverPhotoUrl: sitCover,
+            animalsSummary: sitAnimals,
             _sort: d,
           })
         }
@@ -167,6 +213,8 @@ Deno.serve(async (req) => {
           if (d > radiusKm) continue
           const desc = (m.description ?? '').toString().replace(/\s+/g, ' ').trim()
           const excerpt = desc.length > 160 ? desc.slice(0, 157).trimEnd() + '...' : desc
+          const missionPhoto = Array.isArray(m.photos) && m.photos.length > 0 && typeof m.photos[0] === 'string'
+            ? m.photos[0] : null
           items.push({
             kind: 'mission',
             id: m.id,
@@ -178,6 +226,7 @@ Deno.serve(async (req) => {
             missionType: m.mission_type ?? 'besoin',
             excerpt,
             ownerFirstName: ownerMap.get(m.user_id),
+            coverPhotoUrl: missionPhoto,
             _sort: d,
           })
         }

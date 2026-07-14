@@ -74,6 +74,8 @@ import { template as nudgeMissingPhoto } from './nudge-missing-photo.tsx'
 import { template as ownerActivationNudge } from './owner-activation-nudge.tsx'
 import { template as sitReminderJ7 } from './sit-reminder-j7.tsx'
 import { template as sitReminderJ48 } from './sit-reminder-j48.tsx'
+import { template as alertDigest } from './alert-digest.tsx'
+
 
 
 export const TEMPLATES: Record<string, TemplateEntry> = {
@@ -142,6 +144,8 @@ export const TEMPLATES: Record<string, TemplateEntry> = {
   'owner-activation-nudge': ownerActivationNudge,
   'sit-reminder-j7': sitReminderJ7,
   'sit-reminder-j48': sitReminderJ48,
+  'alert-digest': alertDigest,
 }
+
 
 
