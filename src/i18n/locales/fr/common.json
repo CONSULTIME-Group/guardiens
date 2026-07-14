@@ -222,7 +222,11 @@
       "q5": "Comment se déroule une garde sur Guardiens ?",
       "a5": "Vous publiez votre annonce, les gardiens du coin postulent, vous choisissez après une rencontre, puis votre gardien s'installe. Un accord de garde optionnel encadre les engagements de chacun pendant la garde.",
       "q6": "Guardiens est-il disponible partout en France ?",
-      "a6": "Oui. Le réseau Guardiens s'étend dans toutes les régions de France, du Pays basque à la Bretagne, en passant par les Alpes et le Nord. Vous trouverez un gardien près de chez vous quel que soit votre département."
+      "a6": "Oui. Le réseau Guardiens s'étend dans toutes les régions de France, du Pays basque à la Bretagne, en passant par les Alpes et le Nord. Vous trouverez un gardien près de chez vous quel que soit votre département.",
+      "q7": "Combien coûte le house-sitting avec Guardiens ?",
+      "a7": "L'accès à Guardiens est aujourd'hui complet et sans abonnement, pour les propriétaires comme pour les gardiens. Vous serez prévenu à l'avance si cela évolue. L'entraide entre membres se fait sans aucun échange d'argent : c'est un échange de services et de temps, pas une prestation payante.",
+      "q8": "Le house-sitting est-il sécurisé ?",
+      "a8": "Chaque profil est examiné par notre équipe et l'identité est vérifiée. Une rencontre préalable entre le propriétaire et le gardien est systématique avant toute garde. Après chaque expérience, les avis croisés publiés sur le profil construisent une réputation vérifiable, visible par tous les membres."
     },
     "inventory": {
       "title": "Ce qu'on a construit pour vous",
