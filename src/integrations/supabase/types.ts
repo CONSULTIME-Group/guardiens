@@ -6584,6 +6584,10 @@ export type Database = {
         Args: { p_new_label?: string; p_new_status: string; p_skill_id: string }
         Returns: number
       }
+      admin_upsert_vault_secret: {
+        Args: { p_name: string; p_value: string }
+        Returns: string
+      }
       apply_referral_reward: {
         Args: { p_referred_id: string }
         Returns: undefined
