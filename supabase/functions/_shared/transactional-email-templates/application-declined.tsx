@@ -26,7 +26,7 @@ const ApplicationDeclinedEmail = ({ sitTitle }: Props) => (
         <Text style={text}>
           Ne vous découragez pas ! De nouvelles gardes sont publiées chaque jour. Continuez à postuler, le bon match arrivera bientôt
         </Text>
-        <Button style={button} href={`${SITE_URL}/sits`}>
+        <Button style={button} href={`${SITE_URL}/recherche`}>
           Voir les gardes disponibles
         </Button>
         <LegalFooter
