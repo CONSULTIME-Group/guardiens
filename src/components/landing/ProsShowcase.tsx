@@ -79,12 +79,14 @@ export default function ProsShowcase() {
           ))}
         </div>
 
-        <p className="mt-8 text-sm text-foreground/60 tabular-nums">
-          {t("landing.pros.counter", {
-            total: fmt(data.pros_total),
-            verified: fmt(data.pros_verified ?? 0),
-          })}
-        </p>
+        {(data.pros_verified ?? 0) > 0 && (
+          <p className="mt-8 text-sm text-foreground/60 tabular-nums">
+            {t("landing.pros.counter", {
+              total: fmt(data.pros_total),
+              verified: fmt(data.pros_verified ?? 0),
+            })}
+          </p>
+        )}
         <div className="mt-6">
           <Link
             to="/pros"
