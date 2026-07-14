@@ -1,4 +1,6 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.4";
+import { startCronRun } from "../_shared/cron-run-log.ts";
+
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -14,8 +16,11 @@ Deno.serve(async (req) => {
   const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
   const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
   const supabase = createClient(supabaseUrl, serviceKey);
+  const run = await startCronRun("send-sit-reminders");
 
-  const now = new Date();
+  try {
+    const now = new Date();
+
   const formatDate = (d: Date) => d.toISOString().split("T")[0];
 
   // ── Pre-garde reminders (J-7 and J-2) ──
@@ -168,29 +173,19 @@ Deno.serve(async (req) => {
       });
       count++;
 
-      // Send transactional email for review reminders
-      const templateName = isJ1 ? "review-reminder" : "review-reminder";
-      try {
-        await supabase.functions.invoke("send-transactional-email", {
-          body: {
-            template_name: templateName,
-            recipient_user_id: party.userId,
-            data: {
-              sit_title: sit.title,
-              sit_id: sit.id,
-              is_relance: isJ5,
-            },
-            idempotency_key: `${reminderType}-${sit.id}-${party.userId}`,
-            purpose: "transactional",
-          },
-        });
-      } catch {
-        // Email sending is best-effort, don't block on failure
-      }
+      // Note: emails de relance avis sont envoyés par send-avis-j1 / send-avis-j5
+      // pour éviter le doublon. Ici on ne fait que la notification in-app.
     }
   }
 
-  return new Response(JSON.stringify({ processed: count }), {
-    headers: { ...corsHeaders, "Content-Type": "application/json" },
-  });
+    await run.finish("success", { processed: count });
+    return new Response(JSON.stringify({ processed: count }), {
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  } catch (e) {
+    await run.fail(e);
+    throw e;
+  }
 });
+
+

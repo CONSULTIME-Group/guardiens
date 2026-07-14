@@ -1,4 +1,6 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.4";
+import { startCronRun } from "../_shared/cron-run-log.ts";
+
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -23,11 +25,14 @@ Deno.serve(async (req) => {
   }
 
   const supabase = createClient(supabaseUrl, serviceKey);
+  const run = await startCronRun("auto-transition-sits");
 
-  const today = new Date().toISOString().split("T")[0];
-  let transitioned = 0;
+  try {
+    const today = new Date().toISOString().split("T")[0];
+    let transitioned = 0;
 
-  // 1. Confirmed sits where start_date <= today → in_progress
+    // 1. Confirmed sits where start_date <= today → in_progress
+
   const { data: toStart } = await supabase
     .from("sits")
     .select("id, title, user_id, start_date")
@@ -103,7 +108,13 @@ Deno.serve(async (req) => {
     transitioned++;
   }
 
-  return new Response(JSON.stringify({ transitioned }), {
-    headers: { ...corsHeaders, "Content-Type": "application/json" },
-  });
+    await run.finish("success", { transitioned });
+    return new Response(JSON.stringify({ transitioned }), {
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  } catch (e) {
+    await run.fail(e);
+    throw e;
+  }
 });
+

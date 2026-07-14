@@ -1,4 +1,6 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.4";
+import { startCronRun } from "../_shared/cron-run-log.ts";
+
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -11,8 +13,11 @@ Deno.serve(async (req) => {
   const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
   const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
   const supabase = createClient(supabaseUrl, supabaseKey);
+  const run = await startCronRun("send-avis-j5");
 
-  const now = new Date();
+  try {
+    const now = new Date();
+
   const d5ago = new Date(now.getTime() - 5 * 24 * 60 * 60 * 1000).toISOString().split("T")[0];
   const d6ago = new Date(now.getTime() - 6 * 24 * 60 * 60 * 1000).toISOString().split("T")[0];
 
@@ -88,7 +93,13 @@ Deno.serve(async (req) => {
     await supabase.from("sits").update({ review_j5_sent: true }).eq("id", sit.id);
   }
 
-  return new Response(JSON.stringify({ sent: count }), {
-    headers: { ...corsHeaders, "Content-Type": "application/json" },
-  });
+    await run.finish("success", { sent: count });
+    return new Response(JSON.stringify({ sent: count }), {
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  } catch (e) {
+    await run.fail(e);
+    throw e;
+  }
 });
+
