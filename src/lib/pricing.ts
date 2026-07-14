@@ -26,11 +26,11 @@ export function getSitterMonthlyLabel(): string {
     : "Gratuit";
 }
 
-export function getSitterYearlyLabel(): string {
+function getSitterYearlyLabel(): string {
   return PRICING_IS_ACTIVE ? `${SITTER_PRICE_YEARLY}${NBSP}€/an` : "Gratuit";
 }
 
-export function getSitterOneshotLabel(): string {
+function getSitterOneshotLabel(): string {
   return PRICING_IS_ACTIVE ? `${CFG_SITTER_PRICE_ONESHOT}${NBSP}€` : "Gratuit";
 }
 
