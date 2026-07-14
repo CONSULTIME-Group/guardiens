@@ -567,7 +567,7 @@ const OwnerSitView = ({
           - Sinon on garde l'ordre historique (aperçu + invitation en tête). */}
       {(() => {
         const applicationsBlock = (
-          <section key="apps" className="mt-8 mb-8 rounded-2xl border border-border bg-card p-5 md:p-6">
+          <section id="candidatures" key="apps" className="mt-8 mb-8 rounded-2xl border border-border bg-card p-5 md:p-6 scroll-mt-24">
             <h2 className="text-lg font-semibold mb-3 flex items-center gap-2">
               <Users className="h-5 w-5 text-primary" />
               Candidatures reçues ({internalAppCount})
