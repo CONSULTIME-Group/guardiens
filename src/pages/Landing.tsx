@@ -1525,7 +1525,7 @@ const Landing = () => {
               {t("landing.faq.title")}
             </h2>
             <dl className="space-y-6">
-              {[1, 2, 3, 4, 5, 6].map((n) => (
+              {[1, 2, 3, 4, 5, 6, 7, 8].map((n) => (
                 <div key={n} className="bg-card border border-border rounded-2xl p-6">
                   <dt className="font-heading font-semibold text-foreground mb-2">
                     {t(`landing.faq.q${n}`)}
