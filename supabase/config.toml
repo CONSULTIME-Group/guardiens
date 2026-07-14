@@ -93,8 +93,7 @@ project_id = "erhccyqevdyevpyctsjj"
     verify_jwt = true
   [functions.remind-unread-messages]
     verify_jwt = false
-  [functions.oneshot-sync-vault]
-    verify_jwt = false
+
 
 
 
