@@ -35,7 +35,7 @@ Deno.serve(async (req) => {
 
   const { data: toStart } = await supabase
     .from("sits")
-    .select("id, title, user_id, start_date")
+    .select("id, title, user_id, start_date, property_id")
     .eq("status", "confirmed")
     .lte("start_date", today);
 
@@ -46,12 +46,23 @@ Deno.serve(async (req) => {
     await supabase.from("notifications").insert({
       user_id: sit.user_id,
       type: "sit_started",
-      title: "Garde en cours !",
+      title: "Garde en cours",
       body: `Votre garde « ${sit.title} » a commencé aujourd'hui.`,
       link: `/sits/${sit.id}`,
     });
 
-    // Notify accepted sitter
+    // Guide de la maison : disponible désormais (accès RLS ouvert à start_date).
+    let guideAvailable = false;
+    if (sit.property_id) {
+      const { data: guide } = await supabase
+        .from("house_guides")
+        .select("id")
+        .eq("property_id", sit.property_id)
+        .maybeSingle();
+      guideAvailable = !!guide;
+    }
+
+    // Notify accepted sitter(s) + message système "guide disponible" dans la conversation
     const { data: apps } = await supabase
       .from("applications")
       .select("sitter_id")
@@ -62,13 +73,45 @@ Deno.serve(async (req) => {
       await supabase.from("notifications").insert({
         user_id: app.sitter_id,
         type: "sit_started",
-        title: "Garde en cours !",
+        title: "Garde en cours",
         body: `La garde « ${sit.title} » commence aujourd'hui. Bonne garde !`,
         link: `/sits/${sit.id}`,
       });
+
+      if (guideAvailable) {
+        const { data: conv } = await supabase
+          .from("conversations")
+          .select("id")
+          .eq("sit_id", sit.id)
+          .eq("sitter_id", app.sitter_id)
+          .maybeSingle();
+        if (conv) {
+          // Dédup : ne pas réinsérer si un message identique existe déjà.
+          const { data: existing } = await supabase
+            .from("messages")
+            .select("id")
+            .eq("conversation_id", conv.id)
+            .eq("is_system", true)
+            .ilike("content", "%le guide de la maison est disponible%")
+            .maybeSingle();
+          if (!existing) {
+            await supabase.from("messages").insert({
+              conversation_id: conv.id,
+              sender_id: sit.user_id,
+              content: "Le guide de la maison est disponible. Vous y trouverez l'adresse exacte, les codes d'accès, les contacts utiles et toutes les consignes.",
+              is_system: true,
+            });
+            await supabase
+              .from("conversations")
+              .update({ updated_at: new Date().toISOString() })
+              .eq("id", conv.id);
+          }
+        }
+      }
     }
     transitioned++;
   }
+
 
   // 2. In-progress sits where end_date < today → completed
   const { data: toEnd } = await supabase
