@@ -71,7 +71,7 @@ export default function ProsShowcase() {
           {t("landing.pros.subtitle")}
         </p>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 mt-10">
+        <div className={`grid grid-cols-1 gap-4 md:gap-6 mt-10 max-w-4xl mx-auto ${cards.length === 1 ? "md:grid-cols-1" : cards.length === 2 ? "md:grid-cols-2" : "md:grid-cols-3"}`}>
           {cards.map(({ id, Icon, title, cta, to }) => (
             <div key={id} data-testid={`pros-card-${id}`} className="rounded-2xl border border-border bg-card p-6 flex flex-col items-center text-center gap-3">
               <Icon className="w-6 h-6 text-primary" aria-hidden="true" />
