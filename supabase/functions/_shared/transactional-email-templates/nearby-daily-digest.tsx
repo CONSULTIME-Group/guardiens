@@ -115,6 +115,15 @@ const NearbyDailyDigestEmail = ({ firstName, radiusKm = 15, city, items = [] }: 
                     </td>
                   </tr>
                 </table>
+                {it.coverPhotoUrl ? (
+                  <Img
+                    src={it.coverPhotoUrl}
+                    alt=""
+                    width="520"
+                    height="200"
+                    style={coverImg}
+                  />
+                ) : null}
                 {headline ? <Text style={cardTitle}>{headline}</Text> : null}
                 {isMission && it.title && it.title !== headline ? (
                   <Text style={cardSubtitle}>{it.title}</Text>
@@ -125,6 +134,9 @@ const NearbyDailyDigestEmail = ({ firstName, radiusKm = 15, city, items = [] }: 
                 {metaLine ? <Text style={cardMeta}>{metaLine}</Text> : null}
                 {it.startDate && it.endDate ? (
                   <Text style={cardMeta}>Du {it.startDate} au {it.endDate}</Text>
+                ) : null}
+                {!isMission && it.animalsSummary ? (
+                  <Text style={cardMeta}>{it.animalsSummary}</Text>
                 ) : null}
                 {authorLine ? <Text style={cardMeta}>{authorLine}</Text> : null}
                 <table role="presentation" cellPadding={0} cellSpacing={0} style={{ margin: '14px 0 2px' }}>
@@ -281,6 +293,15 @@ const cardExcerpt = {
   fontStyle: 'italic' as const,
 }
 const cardMeta = { fontSize: '13px', color: '#6b7280', margin: '2px 0', lineHeight: '1.5' }
+const coverImg = {
+  width: '100%',
+  maxWidth: '520px',
+  height: 'auto',
+  borderRadius: '10px',
+  margin: '8px 0 12px',
+  objectFit: 'cover' as const,
+  display: 'block',
+}
 const cardCta = {
   display: 'inline-block',
   padding: '10px 20px',
