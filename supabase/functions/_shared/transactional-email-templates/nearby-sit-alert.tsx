@@ -1,14 +1,13 @@
 import * as React from 'npm:react@18.3.1'
 import {
-  Body, Container, Head, Heading, Html, Preview, Text, Button, Hr, Section,
+  Body, Container, Head, Heading, Html, Preview, Text, Button, Section, Img,
 } from 'npm:@react-email/components@0.0.22'
 import { BrandedHead } from './_branded-head.tsx'
 import { BrandHeader } from './_brand-header.tsx'
 import { LegalFooter } from './_legal-footer.tsx'
 import type { TemplateEntry } from './registry.ts'
 
-const SITE_NAME = "Guardiens"
-const SITE_URL = "https://guardiens.fr"
+const SITE_URL = 'https://guardiens.fr'
 
 interface Props {
   sitterFirstName?: string
@@ -20,6 +19,7 @@ interface Props {
   endDate?: string
   sitId?: string
   animalsSummary?: string
+  coverPhotoUrl?: string | null
 }
 
 const NearbySitAlertEmail = ({
@@ -32,6 +32,7 @@ const NearbySitAlertEmail = ({
   endDate,
   sitId,
   animalsSummary,
+  coverPhotoUrl,
 }: Props) => {
   const ctaHref = sitId ? `${SITE_URL}/sits/${sitId}` : `${SITE_URL}/sits`
   return (
@@ -42,7 +43,7 @@ const NearbySitAlertEmail = ({
       </Preview>
       <Body style={main}>
         <Container style={container}>
-        <BrandHeader />
+          <BrandHeader />
           <Heading style={h1}>Une annonce près de chez vous</Heading>
 
           <Text style={text}>
@@ -56,6 +57,15 @@ const NearbySitAlertEmail = ({
           </Text>
 
           <Section style={card}>
+            {coverPhotoUrl ? (
+              <Img
+                src={coverPhotoUrl}
+                alt=""
+                width="504"
+                height="220"
+                style={coverImg}
+              />
+            ) : null}
             {sitTitle ? <Text style={cardTitle}>{sitTitle}</Text> : null}
             {ownerFirstName ? (
               <Text style={cardLine}>Proposée par {ownerFirstName}</Text>
@@ -73,17 +83,19 @@ const NearbySitAlertEmail = ({
             peut vraiment faire la différence pour cette famille.
           </Text>
 
-          <Button style={button} href={ctaHref}>
-            Voir l'annonce
-          </Button>
+          <Section style={{ textAlign: 'center', margin: '20px 0' }}>
+            <Button style={button} href={ctaHref}>
+              Voir l'annonce
+            </Button>
+          </Section>
 
-        <LegalFooter
-          purpose="la bonne marche de votre alerte"
-          basis="6.1.f"
-        />
+          <LegalFooter
+            purpose="la bonne marche de votre alerte"
+            basis="6.1.f"
+          />
         </Container>
-        </Body>
-        </Html>
+      </Body>
+    </Html>
   )
 }
 
@@ -104,6 +116,7 @@ export const template = {
     endDate: '5 juillet 2026',
     sitId: '293fab2e-b32d-45a0-9c04-36a4f43c484f',
     animalsSummary: '4 chats, 2 perroquets, 1 chien',
+    coverPhotoUrl: null,
   },
 } satisfies TemplateEntry
 
@@ -118,9 +131,15 @@ const card = {
   padding: '16px 18px',
   margin: '12px 0 20px',
 }
+const coverImg = {
+  width: '100%',
+  maxWidth: '504px',
+  height: 'auto',
+  borderRadius: '8px',
+  marginBottom: '12px',
+  objectFit: 'cover' as const,
+  display: 'block',
+}
 const cardTitle = { fontSize: '16px', fontWeight: '600' as const, color: 'hsl(153, 42%, 25%)', margin: '0 0 8px' }
 const cardLine = { fontSize: '13px', color: 'hsl(37, 7%, 35%)', margin: '4px 0' }
-const hr = { borderColor: 'hsl(37, 22%, 89%)', margin: '20px 0' }
 const button = { backgroundColor: 'hsl(153, 42%, 30%)', color: '#ffffff', padding: '12px 28px', borderRadius: '8px', fontSize: '15px', fontWeight: '600' as const, textDecoration: 'none', display: 'inline-block' }
-const legal = { fontSize: '10px', color: 'hsl(37, 7%, 60%)', lineHeight: '1.5', margin: '0 0 12px' }
-const footer = { fontSize: '12px', color: 'hsl(37, 7%, 60%)', margin: '10px 0 0' }
