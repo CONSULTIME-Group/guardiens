@@ -12,7 +12,7 @@ import { trackEvent } from "@/lib/analytics";
  */
 export default function InternationalStrip() {
   const { t } = useTranslation();
-  const { count, recent } = useInternationalSitsCount();
+  const { count } = useInternationalSitsCount();
   const ref = useRef<HTMLDivElement>(null);
   useImpressionOnce(ref, "international_strip", () => {
     void trackEvent("international_strip_seen");
