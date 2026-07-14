@@ -456,59 +456,23 @@ const Landing = () => {
                 // Rich Result Google avec un prix qui contredirait /tarifs.
               },
               {
-                "@type": "FAQPage",
-                "@id": "https://guardiens.fr/#faq",
-                mainEntity: [
-                  {
-                    "@type": "Question",
-                    name: "Qu'est-ce que le house sitting ?",
-                    acceptedAnswer: {
-                      "@type": "Answer",
-                      text: "Le house sitting est un échange de services : un gardien habite sans frais dans votre maison pendant votre absence et prend soin de vos animaux. L'échange n'implique aucune transaction financière entre les deux parties.",
-                    },
-                  },
-                  {
-                    "@type": "Question",
-                    name: "Faut-il payer pour s'inscrire en tant que propriétaire ?",
-                    acceptedAnswer: {
-                      "@type": "Answer",
-                      text: "L'inscription, la publication d'annonces et les échanges avec les gardiens sont sans abonnement requis pour les propriétaires. Aucune carte bancaire demandée. Les gardiens bénéficient également d'un accès gratuit aujourd'hui, sans engagement. L'entraide entre gens du coin reste sans abonnement pour tous.",
-                    },
-                  },
-                  {
-                    "@type": "Question",
-                    name: "Comment trouver un pet sitter près de chez moi ?",
-                    acceptedAnswer: {
-                      "@type": "Answer",
-                      text: "Inscrivez-vous sur Guardiens, publiez votre annonce de garde avec les dates et vos animaux, et recevez des candidatures de gardiens qui habitent près de chez vous. Vous choisissez après une rencontre.",
-                    },
-                  },
-                  {
-                    "@type": "Question",
-                    name: "Qui sont les gardiens sur Guardiens ?",
-                    acceptedAnswer: {
-                      "@type": "Answer",
-                      text: "Des gens du coin, dont chaque profil est examiné par notre équipe. La confiance se construit sur la rencontre physique préalable à toute garde, les avis croisés publiés après chaque expérience, et l'historique visible sur chaque profil.",
-                    },
-                  },
-                  {
-                    "@type": "Question",
-                    name: "Comment se déroule une garde sur Guardiens ?",
-                    acceptedAnswer: {
-                      "@type": "Answer",
-                      text: "Vous publiez votre annonce, les gardiens du coin postulent, vous choisissez après une rencontre, puis votre gardien s'installe. Un accord de garde optionnel encadre les engagements de chacun pendant la garde.",
-                    },
-                  },
-                  {
-                    "@type": "Question",
-                    name: "Guardiens est-il disponible partout en France ?",
-                    acceptedAnswer: {
-                      "@type": "Answer",
-                      text: "Oui. Le réseau Guardiens s'étend dans toutes les régions de France, du Pays basque à la Bretagne, en passant par les Alpes et le Nord. Vous trouverez un gardien près de chez vous quel que soit votre département.",
-                    },
-                  },
-                ],
+                "@type": "Person",
+                "@id": "https://guardiens.fr/#founder-jeremie",
+                name: "Jérémie Martinot",
+                jobTitle: "Cofondateur",
+                worksFor: { "@id": "https://guardiens.fr/#organization" },
+                url: "https://guardiens.fr/a-propos",
+                sameAs: ["https://www.linkedin.com/in/jeremiemartinot"],
               },
+              {
+                "@type": "Person",
+                "@id": "https://guardiens.fr/#founder-elisa",
+                name: "Elisa",
+                jobTitle: "Cofondatrice",
+                worksFor: { "@id": "https://guardiens.fr/#organization" },
+                url: "https://guardiens.fr/a-propos",
+              },
+
             ],
           }),
         }}
