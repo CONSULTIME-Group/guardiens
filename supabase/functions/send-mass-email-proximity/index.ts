@@ -46,6 +46,20 @@ function escapeHtml(s: string): string {
     .replace(/"/g, "&quot;");
 }
 
+const CATEGORY_LABEL: Record<string, string> = {
+  walk: "Promenade", visit: "Visite à domicile", feeding: "Repas / gamelle",
+  transport: "Transport", vet: "Visite vétérinaire", house: "Coup de main maison",
+  animals: "Animaux", garden: "Jardin", errand: "Courses", tech: "Technique",
+  company: "Compagnie", other: "Coup de main",
+};
+
+function fmtDateFr(iso: string | null | undefined): string {
+  if (!iso) return "";
+  const d = new Date(iso);
+  if (isNaN(d.getTime())) return "";
+  return d.toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" });
+}
+
 function buildHtml(params: {
   recipientFirstName: string;
   authorFirstName: string;
@@ -54,6 +68,10 @@ function buildHtml(params: {
   missionUrl: string;
   subject: string;
   missionType: "besoin" | "offre";
+  missionCity: string;
+  missionCategory: string | null;
+  missionDateNeeded: string | null;
+  missionPhotoUrl: string | null;
 }): string {
   const {
     recipientFirstName,
@@ -63,21 +81,47 @@ function buildHtml(params: {
     missionUrl,
     subject,
     missionType,
+    missionCity,
+    missionCategory,
+    missionDateNeeded,
+    missionPhotoUrl,
   } = params;
   const greeting = recipientFirstName ? `Bonjour ${escapeHtml(recipientFirstName)},` : "Bonjour,";
   const author = escapeHtml(authorFirstName || "un membre du coin");
   const title = escapeHtml(missionTitle);
   const url = escapeHtml(missionUrl);
   const excerptHtml = missionExcerpt
-    ? `<p style="margin:0 0 14px;font-size:14px;line-height:1.7;color:#555;font-style:italic;border-left:3px solid #2C6E49;padding:4px 0 4px 12px">${escapeHtml(missionExcerpt)}</p>`
+    ? `<p style="margin:0 0 12px;font-size:14px;line-height:1.6;color:#555;font-style:italic">${escapeHtml(missionExcerpt)}</p>`
     : "";
   const introLine = missionType === "offre"
-    ? `En ce moment, tout près de vous, ${author} propose son aide : <strong>${title}</strong>.`
-    : `En ce moment, tout près de vous, ${author} cherche un coup de main : <strong>${title}</strong>.`;
+    ? `En ce moment, tout près de vous, ${author} propose son aide.`
+    : `En ce moment, tout près de vous, ${author} cherche un coup de main.`;
   const ctaLabel = missionType === "offre" ? "Voir sa proposition" : "Voir sa demande";
   const closingLine = missionType === "offre"
     ? "C'est aussi ça, Guardiens : des gens du coin qui donnent de leur temps, sans rien attendre en retour."
     : "C'est aussi ça, Guardiens : des gens du coin qui se rendent service, sans rien attendre en retour.";
+
+  const catLabel = missionCategory ? (CATEGORY_LABEL[missionCategory] ?? missionCategory) : "";
+  const dateLabel = fmtDateFr(missionDateNeeded);
+  const metaBits: string[] = [];
+  if (missionCity) metaBits.push(escapeHtml(missionCity));
+  if (catLabel) metaBits.push(escapeHtml(catLabel));
+  if (dateLabel) metaBits.push(`pour le ${escapeHtml(dateLabel)}`);
+  const metaLine = metaBits.length > 0
+    ? `<p style="margin:0 0 8px;font-size:13px;color:#5b5b5b">${metaBits.join(' &middot; ')}</p>`
+    : "";
+  const photoHtml = missionPhotoUrl
+    ? `<img src="${escapeHtml(missionPhotoUrl)}" alt="" width="520" style="display:block;width:100%;max-width:520px;height:auto;border:0;border-radius:10px;margin:0 0 12px"/>`
+    : "";
+  const cardHtml = `
+<div style="background:#FAF9F6;border:1px solid #E7E5E0;border-radius:12px;padding:16px;margin:8px 0 18px">
+  ${photoHtml}
+  <p style="margin:0 0 6px;font-size:16px;line-height:1.35;color:#1a1a1a;font-weight:700">${title}</p>
+  ${metaLine}
+  ${excerptHtml}
+  <a href="${url}" style="display:inline-block;margin-top:4px;padding:10px 20px;background:#2C6E49;color:#ffffff;text-decoration:none;border-radius:8px;font-weight:600;font-size:14px">${escapeHtml(ctaLabel)}</a>
+</div>`;
+
   return `<!DOCTYPE html><html><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/></head>
 <body style="margin:0;padding:0;background-color:#FAF9F6;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif">
 <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#FAF9F6;padding:32px 16px">
@@ -91,13 +135,10 @@ function buildHtml(params: {
 <h1 style="margin:0 0 20px;font-size:22px;line-height:1.35;color:#1a1a1a;font-weight:700">${escapeHtml(subject)}</h1>
 <p style="margin:0 0 14px;font-size:15px;line-height:1.7;color:#3a3a3a">${greeting}</p>
 <p style="margin:0 0 14px;font-size:15px;line-height:1.7;color:#3a3a3a">Sur Guardiens, il n'y a pas que la garde de maison. Il y a aussi l'entraide, gratuite, entre gens du coin.</p>
-<p style="margin:0 0 14px;font-size:15px;line-height:1.7;color:#3a3a3a">${introLine}</p>
-${excerptHtml}
+<p style="margin:0 0 8px;font-size:15px;line-height:1.7;color:#3a3a3a">${introLine}</p>
+${cardHtml}
 </td></tr>
-<tr><td align="center" style="padding:16px 0 8px">
-<a href="${url}" style="display:inline-block;padding:14px 32px;background-color:#2C6E49;color:#ffffff;text-decoration:none;border-radius:10px;font-weight:600;font-size:16px;box-shadow:0 4px 12px rgba(44,110,73,0.25)">${escapeHtml(ctaLabel)}</a>
-</td></tr>
-<tr><td style="padding:16px 40px 8px">
+<tr><td style="padding:0 40px 8px">
 <p style="margin:0 0 14px;font-size:15px;line-height:1.7;color:#3a3a3a">${closingLine}</p>
 <p style="margin:0 0 4px;font-size:15px;line-height:1.7;color:#3a3a3a">À bientôt,</p>
 <p style="margin:0 0 14px;font-size:15px;line-height:1.7;color:#3a3a3a">L'équipe Guardiens</p>
