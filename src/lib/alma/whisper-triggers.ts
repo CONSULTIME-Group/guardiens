@@ -19,44 +19,6 @@ function base(type: AlmaWhisperType) {
   };
 }
 
-/* ---------------- SearchSitter (sitter) ---------------- */
-
-export function buildFreshSitWhisper(params: {
-  city: string;
-  hoursAgo: number;
-  onView: () => void;
-}): AlmaWhisper {
-  return {
-    ...base("sitter_fresh_sit_detected"),
-    audience: "sitter",
-    surface: "search",
-    message: `Cette annonce à ${params.city} vient d'être publiée il y a ${params.hoursAgo}h, aucun candidat pour le moment.`,
-    primaryAction: { label: "Voir l'annonce", onClick: params.onView, actionId: "view_sit" },
-  };
-}
-
-export function buildSearchIndecisionWhisper(params: { onRefine: () => void }): AlmaWhisper {
-  return {
-    ...base("sitter_search_indecision"),
-    audience: "sitter",
-    surface: "search",
-    message: "20 annonces vues, aucune retenue. Je peux affiner selon vos critères les plus forts ?",
-    primaryAction: { label: "Affiner", onClick: params.onRefine, actionId: "refine" },
-  };
-}
-
-export function buildSearchRepeatedNoActionWhisper(params: {
-  onSeeTop: () => void;
-}): AlmaWhisper {
-  return {
-    ...base("sitter_search_repeated_no_action"),
-    audience: "sitter",
-    surface: "search",
-    message:
-      "Vous explorez depuis un moment. Voulez-vous que je vous propose 3 annonces qui matchent le mieux votre profil ?",
-    primaryAction: { label: "Voir mes 3 meilleures", onClick: params.onSeeTop, actionId: "top3" },
-  };
-}
 
 /* ---------------- SitDetail (sitter) ---------------- */
 
@@ -175,22 +137,6 @@ export function buildConversationStagnantWhisper(params: {
 
 /* ---------------- Cross ---------------- */
 
-export function buildInternationalDiscoveryWhisper(params: {
-  city: string;
-  onExplore: () => void;
-}): AlmaWhisper {
-  return {
-    ...base("sitter_international_discovery"),
-    audience: "sitter",
-    surface: "listings",
-    message: `Une annonce à ${params.city} vient d'apparaître. Ce n'est pas votre zone, mais votre compagnon pourrait apprécier le dépaysement.`,
-    primaryAction: {
-      label: "Voir les annonces internationales",
-      onClick: params.onExplore,
-      actionId: "explore_international",
-    },
-  };
-}
 
 export function buildLongAbsenceReturnWhisper(params: {
   firstName: string;

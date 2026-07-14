@@ -1,12 +1,138 @@
-User-agent: *
+# AUTO-GÉNÉRÉ par scripts/generate-robots.mjs — NE PAS ÉDITER À LA MAIN.
+# Source de vérité : src/data/siteRoutes.ts (privateDisallowPaths + index:false).
+# Politique AI/GEO 2026 (Freeland) : training bots Disallow, retrieval bots Allow.
+
+# ------------------------------------------------------------
+# Search engines classiques
+# ------------------------------------------------------------
+User-agent: Googlebot
 Allow: /
 
-Disallow: /admin/
+User-agent: Googlebot-Image
+Allow: /
+
+User-agent: Googlebot-Video
+Allow: /
+
+User-agent: Bingbot
+Allow: /
+
+User-agent: DuckDuckBot
+Allow: /
+
+User-agent: Yandex
+Allow: /
+
+# ------------------------------------------------------------
+# Bots training — Disallow (protection IP marque Guardiens)
+# ------------------------------------------------------------
+User-agent: GPTBot
+Disallow: /
+
+User-agent: CCBot
+Disallow: /
+
+User-agent: ByteSpider
+Disallow: /
+
+User-agent: ClaudeBot
+Disallow: /
+
+User-agent: Meta-ExternalAgent
+Disallow: /
+
+User-agent: Applebot-Extended
+Disallow: /
+
+User-agent: cohere-ai
+Disallow: /
+
+User-agent: FacebookBot
+Disallow: /
+
+# ------------------------------------------------------------
+# Bots search + retrieval — Allow (visibilité IA générative)
+# ------------------------------------------------------------
+User-agent: OAI-SearchBot
+Allow: /
+
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: Claude-User
+Allow: /
+
+User-agent: Claude-SearchBot
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: Perplexity-User
+Allow: /
+
+User-agent: MistralAI-User
+Allow: /
+
+User-agent: Amazonbot
+Allow: /
+
+User-agent: Applebot
+Allow: /
+
+# ------------------------------------------------------------
+# Outils SEO / analytics — Allow
+# ------------------------------------------------------------
+User-agent: DataForSeoBot
+Allow: /
+
+User-agent: AhrefsBot
+Allow: /
+
+User-agent: SemrushBot
+Allow: /
+
+# ------------------------------------------------------------
+# Google-Extended = Disallow (protection IP marque Guardiens)
+# Réévaluer post-notoriété (~T2 2027).
+# ------------------------------------------------------------
+User-agent: Google-Extended
+Disallow: /
+
+# ------------------------------------------------------------
+# Règles génériques : zones privées + paramètres tracking
+# ------------------------------------------------------------
+User-agent: *
+Allow: /
+Disallow: /*?*utm_
+Disallow: /*?*sessionid=
+
+# Pages privées (espace authentifié)
+Disallow: /admin
 Disallow: /dashboard
 Disallow: /messages
-Disallow: /parametres
-Disallow: /profil/
-Disallow: /inscription
-Disallow: /connexion
+Disallow: /mon-abonnement
+Disallow: /notifications
+Disallow: /sits
+Disallow: /recherche-gardiens
+Disallow: /review/
+Disallow: /house-guide/
+Disallow: /profile
+Disallow: /owner-profile
+Disallow: /favoris
+Disallow: /mes-avis
+Disallow: /settings
+Disallow: /forgot-password
+Disallow: /reset-password
+Disallow: /unsubscribe
+Disallow: /test-accord
+Disallow: /auth/
+
+# Routes publiques marquées index:false dans staticRoutes
+# (outils internes / pages d'auth — cohérent avec <meta robots> + sitemap)
+Disallow: /recherche
+
+# Profils publics : /gardiens/:id reste indexable.
+# Le sitemap filtre déjà les profils non-publics (politique : seuls sitter/both publics).
 
 Sitemap: https://guardiens.fr/sitemap.xml

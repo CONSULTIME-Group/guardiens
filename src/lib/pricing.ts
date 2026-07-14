@@ -26,11 +26,11 @@ export function getSitterMonthlyLabel(): string {
     : "Gratuit";
 }
 
-export function getSitterYearlyLabel(): string {
+function getSitterYearlyLabel(): string {
   return PRICING_IS_ACTIVE ? `${SITTER_PRICE_YEARLY}${NBSP}€/an` : "Gratuit";
 }
 
-export function getSitterOneshotLabel(): string {
+function getSitterOneshotLabel(): string {
   return PRICING_IS_ACTIVE ? `${CFG_SITTER_PRICE_ONESHOT}${NBSP}€` : "Gratuit";
 }
 
@@ -75,17 +75,8 @@ export const SITTER_PRICE_START_ISO = "";
  * @deprecated Plus de programme Fondateur à échéance.
  */
 export const FOUNDER_DEADLINE = "à une date ultérieure";
-/**
- * @deprecated
- */
-export const FOUNDER_DEADLINE_ISO = "";
 
-// ── Parrainage ───────────────────────────────────────────────────────────────
-export const REFERRAL_FREE_MONTHS = 1;
-export const REFERRAL_REWARD_LABEL =
-  REFERRAL_FREE_MONTHS === 1
-    ? `1${NBSP}mois offert`
-    : `${REFERRAL_FREE_MONTHS}${NBSP}mois offerts`;
+
 
 // ── Versions composées prêtes à l'emploi ─────────────────────────────────────
 // NB: littéraux string (pas d'appel de fonction) pour que le script
