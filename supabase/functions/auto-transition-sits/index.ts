@@ -108,7 +108,13 @@ Deno.serve(async (req) => {
     transitioned++;
   }
 
-  return new Response(JSON.stringify({ transitioned }), {
-    headers: { ...corsHeaders, "Content-Type": "application/json" },
-  });
+    await run.finish("success", { transitioned });
+    return new Response(JSON.stringify({ transitioned }), {
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  } catch (e) {
+    await run.fail(e);
+    throw e;
+  }
 });
+
