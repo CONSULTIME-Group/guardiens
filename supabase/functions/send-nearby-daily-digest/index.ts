@@ -189,6 +189,9 @@ Deno.serve(async (req) => {
           if (s.user_id === p.id) continue
           const d = haversineKm(origin, { lat: Number(s.latitude), lng: Number(s.longitude) })
           if (d > radiusKm) continue
+          const sitCover = (s.cover_photo_url as string | null)
+            || (s.property_id ? propertyCoverMap.get(s.property_id) ?? null : null)
+          const sitAnimals = s.property_id ? propertyAnimalsMap.get(s.property_id) : undefined
           items.push({
             kind: 'sit',
             id: s.id,
@@ -199,6 +202,8 @@ Deno.serve(async (req) => {
             startDate: formatFrDate(s.start_date),
             endDate: formatFrDate(s.end_date),
             ownerFirstName: ownerMap.get(s.user_id),
+            coverPhotoUrl: sitCover,
+            animalsSummary: sitAnimals,
             _sort: d,
           })
         }
@@ -208,6 +213,8 @@ Deno.serve(async (req) => {
           if (d > radiusKm) continue
           const desc = (m.description ?? '').toString().replace(/\s+/g, ' ').trim()
           const excerpt = desc.length > 160 ? desc.slice(0, 157).trimEnd() + '...' : desc
+          const missionPhoto = Array.isArray(m.photos) && m.photos.length > 0 && typeof m.photos[0] === 'string'
+            ? m.photos[0] : null
           items.push({
             kind: 'mission',
             id: m.id,
@@ -219,6 +226,7 @@ Deno.serve(async (req) => {
             missionType: m.mission_type ?? 'besoin',
             excerpt,
             ownerFirstName: ownerMap.get(m.user_id),
+            coverPhotoUrl: missionPhoto,
             _sort: d,
           })
         }
