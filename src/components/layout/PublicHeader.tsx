@@ -34,8 +34,8 @@ export default function PublicHeader({ authedVariant = false }: { authedVariant?
   return (
     <header className="sticky top-0 z-50 bg-background/80 backdrop-blur-md border-b border-border/50">
       <div className="flex items-center justify-between px-[5%] md:px-[8%] py-4">
-        <Link to="/" className="font-heading text-xl md:text-2xl font-bold">
-          <span className="text-primary">g</span>uardiens
+        <Link to="/" aria-label="Guardiens, accueil" className="font-heading text-xl md:text-2xl font-bold">
+          <span aria-hidden="true"><span className="text-primary">g</span>uardiens</span>
         </Link>
 
         {/* Desktop nav */}
