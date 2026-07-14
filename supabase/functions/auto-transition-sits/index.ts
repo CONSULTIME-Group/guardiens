@@ -25,11 +25,14 @@ Deno.serve(async (req) => {
   }
 
   const supabase = createClient(supabaseUrl, serviceKey);
+  const run = await startCronRun("auto-transition-sits");
 
-  const today = new Date().toISOString().split("T")[0];
-  let transitioned = 0;
+  try {
+    const today = new Date().toISOString().split("T")[0];
+    let transitioned = 0;
 
-  // 1. Confirmed sits where start_date <= today → in_progress
+    // 1. Confirmed sits where start_date <= today → in_progress
+
   const { data: toStart } = await supabase
     .from("sits")
     .select("id, title, user_id, start_date")
