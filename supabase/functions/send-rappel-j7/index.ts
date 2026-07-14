@@ -71,8 +71,9 @@ Deno.serve(async (req) => {
           html: `<p>Bonjour ${sitterProfile.first_name || ""},</p>
 <p>Votre garde chez ${ownerProfile?.first_name || "votre propriétaire"} commence le ${dateStr}.</p>
 <p>Pensez à confirmer les derniers détails avec votre propriétaire.</p>
-<p><a href="https://guardiens.fr/sits/${sit.id}">Voir la garde →</a></p>
+<p><a href="https://guardiens.fr/sits/${sit.id}">Voir la garde</a></p>
 <p>L'équipe Guardiens</p>`,
+
         }),
       });
       count++;
