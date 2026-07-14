@@ -92,7 +92,7 @@ Deno.serve(async (req) => {
     const missionsCutoff = new Date(now - 7 * 86400_000).toISOString()
     const { data: freshMissions } = await admin
       .from('small_missions')
-      .select('id, title, city, mission_type, latitude, longitude, postal_code, created_at')
+      .select('id, title, city, mission_type, latitude, longitude, postal_code, created_at, photos')
       .eq('status', 'open')
       .gte('created_at', missionsCutoff)
       .order('created_at', { ascending: false })
@@ -187,6 +187,7 @@ Deno.serve(async (req) => {
         city: m.city,
         missionType: m.mission_type,
         distanceKm: typeof m.__distance === 'number' ? m.__distance : null,
+        photoUrl: Array.isArray(m.photos) && m.photos.length > 0 && typeof m.photos[0] === 'string' ? m.photos[0] : null,
       }))
 
       // Skip si aucun contenu à montrer (0 mission + 0 question + 0 top members)
