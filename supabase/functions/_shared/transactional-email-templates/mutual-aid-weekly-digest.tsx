@@ -1,6 +1,6 @@
 /// <reference types="npm:@types/react@18.3.1" />
 import * as React from 'npm:react@18.3.1'
-import { Body, Container, Head, Heading, Html, Preview, Text, Button, Section, Hr, Link } from 'npm:@react-email/components@0.0.22'
+import { Body, Container, Head, Heading, Html, Preview, Text, Button, Section, Hr, Link, Img } from 'npm:@react-email/components@0.0.22'
 import { BrandedHead } from './_branded-head.tsx'
 import { BrandHeader } from './_brand-header.tsx'
 import { AlmaSignature, AlmaIntro } from './_alma-signature.tsx'
@@ -17,6 +17,7 @@ interface MissionItem {
   city?: string
   missionType?: 'besoin' | 'offre' | null
   distanceKm?: number | null
+  photoUrl?: string | null
 }
 interface QuestionItem {
   id: string
@@ -57,16 +58,27 @@ const Email = ({ firstName, city, missions = [], questions = [], topMembers = []
             <Section style={section}>
               <Heading as="h2" style={h2}>Nouvelles missions près de chez vous</Heading>
               {missions.map((m) => (
-                <Text key={m.id} style={itemLine}>
-                  <Link href={`${SITE_URL}/petites-missions/${m.id}?${utm('mission')}`} style={link}>
-                    {m.title || 'Mission sans titre'}
-                  </Link>
-                  <span style={meta}>
-                    {m.missionType === 'offre' ? ' · Offre' : ' · Besoin'}
-                    {m.city ? ` · ${m.city}` : ''}
-                    {typeof m.distanceKm === 'number' ? ` · ${Math.round(m.distanceKm)} km` : ''}
-                  </span>
-                </Text>
+                <div key={m.id} style={missionRow}>
+                  {m.photoUrl ? (
+                    <Img
+                      src={m.photoUrl}
+                      alt=""
+                      width="80"
+                      height="80"
+                      style={missionThumb}
+                    />
+                  ) : null}
+                  <Text style={itemLine}>
+                    <Link href={`${SITE_URL}/petites-missions/${m.id}?${utm('mission')}`} style={link}>
+                      {m.title || 'Mission sans titre'}
+                    </Link>
+                    <span style={meta}>
+                      {m.missionType === 'offre' ? ' · Offre' : ' · Besoin'}
+                      {m.city ? ` · ${m.city}` : ''}
+                      {typeof m.distanceKm === 'number' ? ` · ${Math.round(m.distanceKm)} km` : ''}
+                    </span>
+                  </Text>
+                </div>
               ))}
             </Section>
           )}
@@ -149,6 +161,8 @@ const h1 = { color: '#1a1a1a', fontSize: '22px', fontWeight: 700, margin: '20px 
 const h2 = { color: '#1a1a1a', fontSize: '16px', fontWeight: 700, margin: '0 0 8px 0' }
 const section = { margin: '18px 0', padding: '14px 16px', backgroundColor: '#fafafa', borderRadius: '10px' }
 const itemLine = { color: '#333', fontSize: '14px', lineHeight: '22px', margin: '4px 0' }
+const missionRow = { display: 'flex' as const, alignItems: 'flex-start' as const, gap: '10px', margin: '6px 0' }
+const missionThumb = { borderRadius: '8px', objectFit: 'cover' as const, flexShrink: 0 }
 const meta = { color: '#666', fontSize: '13px' }
 const link = { color: '#2b6cb0', textDecoration: 'underline', fontWeight: 600 }
 const pCenter = { textAlign: 'center' as const, color: '#666', fontSize: '13px', margin: '6px 0 0 0' }
