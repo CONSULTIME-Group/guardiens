@@ -168,25 +168,8 @@ Deno.serve(async (req) => {
       });
       count++;
 
-      // Send transactional email for review reminders
-      const templateName = isJ1 ? "review-reminder" : "review-reminder";
-      try {
-        await supabase.functions.invoke("send-transactional-email", {
-          body: {
-            template_name: templateName,
-            recipient_user_id: party.userId,
-            data: {
-              sit_title: sit.title,
-              sit_id: sit.id,
-              is_relance: isJ5,
-            },
-            idempotency_key: `${reminderType}-${sit.id}-${party.userId}`,
-            purpose: "transactional",
-          },
-        });
-      } catch {
-        // Email sending is best-effort, don't block on failure
-      }
+      // Note: emails de relance avis sont envoyés par send-avis-j1 / send-avis-j5
+      // pour éviter le doublon. Ici on ne fait que la notification in-app.
     }
   }
 
@@ -194,3 +177,4 @@ Deno.serve(async (req) => {
     headers: { ...corsHeaders, "Content-Type": "application/json" },
   });
 });
+
