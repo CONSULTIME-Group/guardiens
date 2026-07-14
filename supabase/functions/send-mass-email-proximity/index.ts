@@ -1,5 +1,5 @@
 /**
- * send-mass-email-proximity — envoi ciblé d'une annonce d'entraide de proximité.
+ * send-mass-email-proximity : envoi ciblé d'une annonce d'entraide de proximité.
  *
  * Deux modes :
  *  - "preview" : renvoie la liste des destinataires (prénom, ville, distance km, email)

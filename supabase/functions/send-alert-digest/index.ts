@@ -1,4 +1,4 @@
-// send-alert-digest — pousse le digest de veille (rayon / département /
+// send-alert-digest : pousse le digest de veille (rayon / département /
 // France) via `send-transactional-email` (template `alert-digest`).
 //
 // Historique : ce endpoint appelait Resend en direct, hors cap de fréquence,

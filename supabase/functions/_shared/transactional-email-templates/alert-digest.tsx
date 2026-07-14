@@ -1,5 +1,5 @@
 /// <reference types="npm:@types/react@18.3.1" />
-// alert-digest — digest ciblé (rayon / département / France) envoyé aux
+// alert-digest : digest ciblé (rayon / département / France) envoyé aux
 // utilisateurs ayant configuré une veille. Remplace l'envoi Resend direct
 // historique afin de bénéficier du cap de fréquence, des suppressions, du
 // respect des opt-out et du log email_send_log.
