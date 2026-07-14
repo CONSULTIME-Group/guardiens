@@ -1,188 +1,191 @@
-# Audit AURA / Auvergne-Rhône-Alpes — rapport read-only
+# Audit code mort — rapport consolidé (read-only)
 
-Aucun fichier n'a été modifié. Résultats bruts + hiérarchisation.
+Aucun fichier modifié. Chiffrages appuyés par `rg`, `wc -l`, `du`. Trois catégories : **A** mort certain (0 référence), **B** probablement mort (référence indirecte non branchée / doublon / flag inactif), **C** douteux (à ne pas toucher sans vérification manuelle).
 
----
+## Récapitulatif chiffré
 
-## 1. Code source — hits pertinents (hors i18n, hors faux positifs `aurait`/`restaurant`/`alma-aura`/`dog_friendly_restaurant`/`Sauvegardes`/`Restauration`)
+| Périmètre | Cat. A (LOC / poids) | B | C douteux |
+|---|---|---|---|
+| Pages src/pages | 559 LOC (2 fichiers + 1 ré-export) | – | – |
+| Composants src/components | 4 749 LOC (51 fichiers) | – | – |
+| Hooks src/hooks | 252 LOC (4 fichiers) | – | – |
+| Libs src/lib (fichiers entiers) | 249 LOC (2 fichiers) | – | – |
+| Libs src/lib (exports isolés) | ~60 exports orphelins | – | – |
+| Contextes | – | AuthContext.mock.tsx (usage test) | – |
+| Edge functions supabase/functions | 2 892 LOC (22 fonctions) | – | stripe-webhook (206 LOC, webhook Stripe externe) |
+| RPC Postgres public.* | 22 fonctions candidates | – | À revalider individuellement (wrappers `.rpc(var)`) |
+| Assets src/assets + public | ~15,2 Mo (33 fichiers) | – | icon-512-maskable (manifest.json) |
+| Dépendances npm | 2 paquets | – | – |
+| Feature flags | 0 | 2 flags actifs | – |
+| Exports partagés (constants/data/config) | 17 exports | – | siteRoutes.ts (parsé par regex dans scripts/) |
 
-**A. Données de référence légitimes (à conserver — infra régionale FR)**
-- `src/lib/regions.ts:20` — `ARA: "Auvergne-Rhône-Alpes"` dans mapping des 18 régions FR.
-- `src/data/cities.ts` L14, L33, L79, L127, L174, L219 — 6 villes hub Guardiens (Annecy, Lyon, Grenoble, Caluire, Chambéry, +1) avec `region: "Auvergne-Rhône-Alpes"`. Légitime : ce sont réellement des villes AURA.
-
-**B. Traces user-facing (à purger)**
-- `src/pages/CityPage.tsx:559` — `region: "Auvergne-Rhône-Alpes"` **hardcodé** pour toute page ville servie par la BDD (au lieu de dériver du `department`).
-- `src/components/layout/PublicFooter.tsx:47` — lien vers `/actualites/house-sitting-aura-guide-complet` (footer visible partout).
-- `scripts/generate-sitemap.mjs:57` — `"aura"` dans `cityLandingPages` → régénère `/house-sitting/aura` dans le sitemap à chaque build.
-
-**C. Garde-fous & tests (à conserver — protection anti-régression)**
-- `scripts/validate-jsonld.mjs` L5, L22, L23 — bannit AURA/Auvergne-Rhône-Alpes dans JSON-LD.
-- `scripts/sync-index-html.mjs` L30, L33, L34 — bannit dans index.html.
-- `scripts/preview-article-diff.mjs:75` — bannit dans previews articles.
-- `src/pages/AdminArticles.tsx` L57–99 — regex + commentaires bloquant les articles avec AURA.
-- `src/pages/EditSit.tsx:180` — regex bloquant AURA dans les annonces.
-- `src/__tests__/sync-index-html-guard.test.ts` L8, L28, L46 — test de non-régression.
-- `src/__tests__/jsonld-validation.test.ts:6` — test de non-régression.
-- `src/lib/__tests__/normalize.test.ts:49` — test unitaire de `looseIncludes`.
-- Commentaires "No AURA" dans `SearchOwner.tsx` (L549, L553, L598), `SearchSeoFooter.tsx:10`, `ZonePickerPopover.tsx:57` — rassurants, à conserver.
-
-**D. Backoffice / docs internes**
-- `src/pages/admin/AdminLongTailArticles.tsx:114` — texte explicatif interne.
-- `AUDIT_GUARDIENS.md:130` — audit historique.
-
-**E. Faux positifs (à ignorer — verbe `aura`, mot `restaurant`, animation `alma-aura`, `hsl(27...)`)**
-- `src/pages/Pricing.tsx:28`, `src/lib/conversation.ts` L110/L122, `src/pages/MesAvis.tsx` L108/L215, `src/components/sits/views/SitOverridesEditor.tsx:71`, `src/data/missionTemplates.ts:136`, `src/components/ai/alma/AlmaAvatarAnimated.tsx:588`, `tailwind.config.ts` L192/L222/L223 → aucune action.
+**Total LOC frontend + edge en catégorie A : ~8 700 LOC. Assets : ~15 Mo.**
 
 ---
 
-## 2. Fichiers i18n
+## A. MORT CERTAIN — supprimable sans risque après double check build
 
-Grep strict `\baura\b` + `auvergne` + `rhône-alpes` sur `src/i18n/locales/{fr,en,es,de,it}/**` :
-**0 hit pertinent.** Seuls des `dog_friendly_restaurant` (bruit).
+### A.1 Pages / ré-exports (559 LOC)
 
-**i18n = propre.**
-
----
-
-## 3. Base de données
-
-### 3.1 Articles avec AURA/Auvergne (slug ou contenu, match strict)
-
-| id (préfixe) | slug | category |
+| Fichier | LOC | Preuve |
 |---|---|---|
-| 5597f4d2 | `house-sitting-ete-aura-guide` | saisonnier |
-| 03f0bf66 | `gardiennage-maison-vacances-aura` | guide_local |
-| 3c6d8b50 | `reseau-entraide-quartier-lyon-aura` | vie_locale |
-| ddc0342e | `temoignage-premiere-garde-auvergne` | temoignage |
-| 27dbc88c | `house-sitting-aura-guide-complet` | thematique |
-| 4bf0d4b1 | `house-sitting-auvergne-rhone-alpes` | guide_local |
-| 809eceed | `house-sitting-week-end-court-sejour-aura` | saisonnier |
-| ea8e64fd | `faire-garder-animal-pendant-hospitalisation` | conseil_proprio (contenu seul) |
-| 26443d76 | `pet-sitting-clermont-ferrand-guide` | guide_ville (title mentionne "volcans d'Auvergne", légitime éditorial) |
+| `src/pages/admin/AdminOverviewLegacy.tsx` | 313 | `rg "AdminOverviewLegacy" .` → 0 hors définition |
+| `src/pages/SmallMissionsPublic.tsx` | 244 | Route `/petites-missions` pointe vers `EntraideHub`, ce fichier n'est référencé nulle part sauf docs `audit/*.md` |
+| `src/pages/Index.tsx` | 2 | Ré-export `Landing`; App.tsx importe `Landing` directement |
 
-**→ 8 articles à arbitrer, dont 5 avec AURA en clair dans le slug (URL indexée).**
+### A.2 Composants (4 749 LOC, 51 fichiers)
 
-### 3.2 Répartition catégories scopées
+Vérifiés un par un : aucun n'a d'import réel `from "…/NomFichier"`. Les seuls hits résiduels sont soit des commentaires "remplacé par…", soit des homonymes locaux (`StatCard` redéfini dans 5 pages admin, `NavLink` de react-router-dom).
 
-| category | published |
+Regroupés par dossier pour lisibilité :
+
+- **NavLink.tsx, city/CityPOISection, CitySidebar, CityTableOfContents**
+- **dashboard/** : EmergencyActivation, MissionsNearbySection, MobileDashboardTabs, ProSpaceBanner, VerificationBanner
+- **dashboard/owner/** : ExchangesColumn, MyMissionsColumn, StatCard
+- **dashboard/sitter/** : AsideArticlesCard, QuickActionsCard, SitterBottomColumns, SitterHero, SitterNextGuard
+- **landing/LiveListingsSection**
+- **layout/CookieConsent** (App.tsx ligne 20 : commentaire "CookieConsent retiré")
+- **marketing/FreeTickerChip**
+- **missions/** : EntraideSection, ProposeExchangeDialog
+- **missions/connected/** : ExamplesSection, HelperCard, MissionsArticlesStrip, MissionsFilterBar, MissionsHero, OfferDialog
+- **owner-profile/** : OwnerExperiences, OwnerStepCalendar
+- **profile/** : OwnerHighlights, PublicGallery, PublicOwnerGallery, PublicSkills, StepProgress
+- **reviews/CancellationReviewsSection**
+- **seo/SitSchemaOrg**
+- **shared/** : PhotoLightbox, ResourceSection
+- **sits/public/** : PublicSitFAQ, PublicSitGallery, PublicSitPitch, PublicSitTrustStrip
+- **skeletons/ListSkeleton**
+- **subscription/** : AdvantagesList, EntraideLibreBanner, MySubscriptionFAQ, PricingCards, PricingCardsCheckout, SecurityTrustSection, SubscriptionFAQ
+
+Note : `CookieConsent` est un retrait volontaire documenté dans App.tsx, à supprimer proprement.
+
+### A.3 Hooks (252 LOC)
+
+| Fichier | LOC |
 |---|---|
-| guide_local | 23 |
-| guide_ville | 5 |
-| saisonnier | 4 |
-| vie_locale | 14 |
-| ville | 5 |
+| `src/hooks/usePreloadImages.ts` | 35 |
+| `src/hooks/useScrollDepthTracker.ts` | 50 |
+| `src/hooks/missions/useGeocodedCoords.ts` | 44 |
+| `src/hooks/missions/useMissionsData.ts` | 123 |
 
-### 3.3 seo_city_pages
-- Total : **163** pages
-- Traces strictes AURA (`\bAURA\b` ou `Auvergne-Rh[oô]ne-Alpes`) dans intro/content/meta : **0**
-- **Propre.**
+### A.4 Libs — fichiers entiers morts (249 LOC)
 
-### 3.4 seo_department_pages
-- Total : 101 pages, **12 avec `region = "Auvergne-Rhône-Alpes"`** (ain, allier, ardeche, cantal, drome, haute-loire, haute-savoie, isere, loire, puy-de-dome, rhone, savoie).
-- **Légitime** : ce sont les 12 vrais départements AURA. La valeur `region` est nationale (14 régions présentes, réparties normalement).
-
-### 3.5 sits
-- `sits` n'a **pas** de colonne `region`. Rien à purger côté annonces.
-
-### 3.6 feature_flags
-- `key ILIKE '%aura%|%scope%|%region%'` → **0 ligne**. Aucun flag régional.
-
----
-
-## 4. Schema.org / JSON-LD hardcodés
-
-**Références "Auvergne-Rhône-Alpes" en clair :** aucune dans le JSON-LD rendu. Une seule occurrence hardcodée : `src/pages/CityPage.tsx:559` (voir §1B).
-
-**Hubs SEO Lyon/Annecy/Grenoble hardcodés dans `areaServed`** (choix stratégique explicite, à confirmer) :
-- `src/pages/Landing.tsx:330` et `:454` — `areaServed: [Country France, Lyon, Annecy, Grenoble]`.
-- `src/components/seo/CitySchemaOrg.tsx:162, :231, :239` — `addressRegion: city.department` (dérivé, pas hardcodé AURA).
-- `src/pages/DepartmentPage.tsx:378` — `areaServed: { AdministrativeArea, containedInPlace: page.region || "France" }` → propage `region` BDD.
-- `src/pages/CityPage.tsx:513` — `areaServed: { City: dbPage.city, containedInPlace: Country France }` (propre).
-- `src/pages/EmergencySitter.tsx:70`, `Observatoire.tsx:112`, `ArticleDetail.tsx:424` — `Country France` (propre).
-- Divers (`PublicSitDetail`, `SitSchemaOrg`, `SmallMissionDetail`, `ProfileSchemaOrg`, `RecentSitsItemListJsonLd`, `PublicMissionView`, `GuideDetail`) — `City` ou `Place` par nom, sans mention AURA.
-
-**Question stratégique** : les 3 villes hub `Lyon/Annecy/Grenoble` en dur dans `Landing.tsx` (2 blocs `areaServed`) sont-elles à retirer maintenant que le scope est France entière, ou conservées comme signal SEO ? → à trancher.
-
----
-
-## 5. Meta descriptions / titles hardcodés
-
-- Aucun composant client ne pose `<title>` ou `<meta description>` en dur avec AURA/Auvergne.
-- BDD `seo_city_pages` : 0 meta contenant AURA (strict).
-- BDD `seo_department_pages` : les 12 pages AURA ont naturellement `meta_title` / `meta_description` mentionnant leur département (Ain, Isère, Rhône…), pas "AURA" ni "Auvergne-Rhône-Alpes" en tant que promesse produit.
-- BDD `articles` : les 8 articles §3.1 portent la mention dans title / meta / slug.
-
----
-
-## 6. Routes & sitemap
-
-### 6.1 Sitemap.xml généré
-- **3 URLs `/aura`** en clair :
-  - `https://guardiens.fr/house-sitting/aura`
-  - `https://guardiens.fr/actualites/house-sitting-ete-aura-guide`
-  - `https://guardiens.fr/actualites/house-sitting-week-end-court-sejour-aura`
-- Chaque URL a 6 hreflang → 21 lignes au total.
-- Aucune URL `/regions/auvergne-rhone-alpes`.
-
-### 6.2 Footer
-- `PublicFooter.tsx:47` → 1 lien vers l'article `house-sitting-aura-guide-complet`.
-
-### 6.3 Composants dédiés
-- Aucun `RegionSelector`, `AuraCoverage`, `AuraCarousel` ou similaire dans `src/`.
-
----
-
-## Synthèse chiffrée
-
-| Zone | Items à purger | Items légitimes (conserver) |
+| Fichier | LOC | Note |
 |---|---|---|
-| Code source user-facing | **3** (CityPage L559, Footer L47, generate-sitemap L57) | 0 |
-| i18n | 0 | — |
-| Articles BDD | **8** (7 slugs AURA/Auvergne + 1 contenu) | 0 |
-| seo_city_pages | 0 | 163 |
-| seo_department_pages | 0 | 12 (vrais dépts AURA) |
-| Sitemap URLs | **3** (+ 18 hreflang) | — |
-| Schema.org hardcodé | **1** (CityPage) + **2 blocs à arbitrer** (Landing Lyon/Annecy/Grenoble) | reste OK |
-| Garde-fous / tests | 0 | 10+ (à conserver) |
-| Backoffice / audits internes | 0 (peut rester) | 2 |
-| Feature flags | 0 | — |
+| `src/lib/fatalErrorOverlay.ts` | 181 | À vérifier : pas d'`import "./fatalErrorOverlay"` (side-effect) trouvé, `installGlobalErrorHandlers` de `lib/logger.ts` est déjà appelé dans `main.tsx`. |
+| `src/lib/sitCoverPhoto.ts` | 68 | `resolveSitCoverPhoto`, `resolvePropertyCover` : 0 ref |
+
+### A.5 Libs — exports orphelins dans fichiers vivants (à retirer symbole par symbole)
+
+Extraits significatifs :
+- `lib/constants.ts` : `LAUNCH_START`, `PRICE_MONTHLY`, `PRICE_ONESHOT`, `PRORATA_DISCOUNT`, `PROFILE_COMPLETION_THRESHOLD` (doublons morts de `config/pricing.ts`)
+- `lib/pricing.ts` : `getSitterYearlyLabel`, `getSitterOneshotLabel`, `FOUNDER_DEADLINE_ISO`, `REFERRAL_FREE_MONTHS`, `REFERRAL_REWARD_LABEL`
+- `lib/alma/whisper-triggers.ts` : `buildFreshSitWhisper`, `buildSearchIndecisionWhisper`, `buildSearchRepeatedNoActionWhisper`, `buildInternationalDiscoveryWhisper`
+- `lib/admin/alma-analytics.ts` : `ALMA_MOMENTS`, `AlmaMomentKey`, `MomentStats`, `BubbleKpis`, `WhisperStats`
+- `lib/alma/whisper-scheduler.ts` : `SESSION_MUTE_THRESHOLD_BY_FREQUENCY`, `SESSION_MUTE_THRESHOLD`, `CanEmitResult`
+- `lib/trustTimeline.ts` : `TimelineEventKind`, `ActivityMonth`, `timelineToSchemaEvents`, `monthsSince`
+- `lib/skills/categories.ts` et `lib/skills/tokenize.ts` : tous exports 0 ref → probables fichiers entiers morts (à re-confirmer)
+- Types morts isolés : `AllowedAlertRadius`, `AuthErrorInfo`, `PrefillDecision`, `ConsentValue`, `DigestAttribution`, `PasswordStrength`, `OgKind`, `MaybeId`, `FaqItem`, `AvatarValidation`, `TrustTier`, `HeroSelection`, `HeroBankIssue`, `HeroBankValidationReport`, `ModerationVerdict`, `ThirdPartyReason`, `SendTransactionalEmailParams`, `NextActionInput`, `ActivationStep`
+
+Liste complète disponible dans le rapport source si besoin.
+
+### A.6 Data / config (17 exports)
+
+| Fichier | Exports morts |
+|---|---|
+| `src/data/missionsPublicContent.ts` | **fichier entier** : `MISSIONS_ILLUSTRATIONS`, `MISSIONS_EXAMPLES`, `MISSIONS_FAQ`, `MISSIONS_TESTIMONIALS` (62 LOC) |
+| `src/data/demoListings.ts` | `DEMO_THRESHOLD`, types `DemoPet`, `DemoSit` |
+| `src/data/authors.ts` | `AUTHORS`, `COSIGNED_AUTHOR_VARIANTS` (usage interne uniquement) |
+| `src/data/topCitiesFrance.ts` | type `TopCity` |
+| `src/data/cityContent.ts` | types `CityArticleSection`, `CityContentData` |
+| `src/data/missionsCityContent.ts` | types `MissionsCityFAQ`, `MissionsCityContent` |
+| `src/data/cities.ts` | type `ZoneProfile` |
+| `src/config/pricing.ts` | `SITTER_PRICE_MONTHLY_LEGACY_DISCOUNT_RATIO` |
+
+### A.7 Edge functions (22 fonctions, 2 892 LOC)
+
+Aucune référence dans `src/`, aucune référence croisée entre fonctions, aucun cron pg_cron actif, aucune mention `config.toml`.
+
+| Fonction | LOC | Fonction | LOC |
+|---|---|---|---|
+| add-custom-skill | 197 | send-avis-j1 | 97 |
+| auto-transition-sits | 109 | send-avis-j5 | 94 |
+| broadcast-sit-to-sitters | 79 | send-conseils-publication-annonce | 254 |
+| check-subscription | 154 | send-error-digest | 187 |
+| gsc-submit-sitemap | 90 | send-helpers-digest | 265 |
+| nudge-dormant-top-sitters | 63 | send-rappel-j48 | 82 |
+| nudge-repeated-cancellations | 61 | send-rappel-j7 | 84 |
+| nudge-repeated-republished-sits | 59 | send-sit-reminders | 196 |
+| nudge-suspicious-accounts | 64 | send-subscription-expiry-reminders | 144 |
+| nudge-untapped-cities | 90 | smoke-test | 171 |
+| remind-unread-messages | 222 | send-availability-nudge | 130 |
+
+Attention `broadcast-sit-to-sitters` : wrapper deprecated qui délègue à `send-listing-proximity`, à supprimer avec les éventuels appelants historiques restants.
+
+### A.8 Assets orphelins (~15,2 Mo)
+
+**src/assets/ (~9,7 Mo)** :
+- Illustrations Alma abandonnées : `alma-avatar.png` (1,4 Mo), `alma-full.png` (828 Ko)
+- Essais d'illustration auth : `auth-sage-overflow.png` (646 Ko), `auth-wisteria-overflow.png` (709 Ko)
+- 12 fichiers `hero-style-*.jpg` (~2,4 Mo) — planches d'exploration
+- 8 fichiers `sample-*.jpg` (~3 Mo)
+- Logos non utilisés : `logo-guardiens-light-white.webp`, `logo-guardiens-light.webp`, `logo-guardiens.webp` (le logo réel est `public/logo-guardiens.png`)
+- 5 covers d'articles orphelines : `article-garde-chien-lyon-vacances.jpg`, `article-villes-chien-autour-lyon.jpg`, `cover-juridique-house-sitting.jpg`, `cover-pilier-comment-fonctionne-guardiens.jpg`, `cover-satellite-imprevus-garde.jpg`
+- 6 fichiers `*.jpg.asset.json` orphelins (metadata sans binaire présent)
+
+**public/ (~5,5 Mo)** :
+- `public/_tmp_uploads/cover-satellite-imprevus-garde.webp` (dossier `_tmp_uploads` suspect)
+- `public/badges/fondateur.png` (1,4 Mo) + `fondateur_clean.png` (1,3 Mo)
+- `public/images/malinois-lyon.jpg` (2,8 Mo)
+
+### A.9 Dépendances npm
+
+| Paquet | Preuve |
+|---|---|
+| `@lottiefiles/react-lottie-player` | 0 import ; commentaire "ne rend jamais AlmaAvatarLottie" dans AlmaDock.tsx |
+| `browser-image-compression` | 0 import de `imageCompression` |
 
 ---
 
-## Stratégie de purge — 3 vagues
+## B. PROBABLEMENT MORT
 
-### V1 — Copy user-facing (impact SEO/UX max) — **5 items — PRIORITÉ 1**
+- `src/contexts/AuthContext.mock.tsx` : utilisé uniquement par tests unitaires, à conserver si vitest tourne dessus.
+- `src/lib/heroBankMobile.ts` : ne contient qu'un export (`HERO_BANK_MOBILE`) à 0 référence externe → probable fichier mort entier, à confirmer.
+- `send-founder-reminder-30` / `send-founder-reminder-7` : crons désinscrits le 05/07, ne restent en vie que via bouton admin manuel dans `AdminSubscriptions.tsx`. Si vous ne prévoyez pas de les rejouer, elles peuvent basculer en A.
 
-1. `src/pages/CityPage.tsx:559` — retirer `region: "Auvergne-Rhône-Alpes"` hardcodé (déduire via `regions.ts` depuis `department` ou passer `null`).
-2. `src/components/layout/PublicFooter.tsx:47` — remplacer le lien vers l'article `house-sitting-aura-guide-complet` par un article national (candidat : `c-est-quoi-le-house-sitting` déjà travaillé statement-first).
-3. `scripts/generate-sitemap.mjs:57` — retirer `"aura"` de `cityLandingPages`.
-4. Régénérer `public/sitemap.xml` (supprime les 3 URLs `/aura` + 18 hreflang).
-5. Poser des `redirects` (`redirects` table déjà présente en BDD) 301 sur les 3 URLs `/aura` → cibles nationales.
+## C. DOUTEUX — ne pas toucher sans vérification manuelle
 
-### V2 — Données structurées & contenu BDD — **8 items — PRIORITÉ 2**
-
-Arbitrer les 8 articles §3.1 en trois options :
-- **Renommer slug** (301 + réécriture éditoriale nationale) : `house-sitting-ete-aura-guide` → `house-sitting-ete-france-guide`, idem pour `week-end-court-sejour`, `aura-guide-complet`, `gardiennage-maison-vacances-aura`, `reseau-entraide-quartier-lyon-aura` → conserver Lyon (ville hub légitime), retirer `-aura`.
-- **Dépublier** : `temoignage-premiere-garde-auvergne` (temoignage nominatif — peut rester si vrai témoignage AURA, retirer `-auvergne` du slug).
-- **Conserver + purger contenu** : `pet-sitting-clermont-ferrand-guide` (ville d'Auvergne réelle → mention légitime), `faire-garder-animal-pendant-hospitalisation` (retirer la seule mention AURA du corps).
-
-Bonus V2 (à trancher — pas dans le scope strict AURA mais adjacent) :
-- `src/pages/Landing.tsx:330` et `:454` — décider si les hubs `Lyon/Annecy/Grenoble` restent dans `areaServed` ou si on ne garde que `Country France`.
-
-### V3 — Backoffice / scripts / commentaires — **0 action bloquante**
-
-- Baseline régionale interne (`regions.ts`, `cities.ts` avec `region: "Auvergne-Rhône-Alpes"` pour 6 villes réelles AURA, `AdminLongTailArticles.tsx:114`, `AUDIT_GUARDIENS.md`) : **conserver**, c'est de la donnée référentielle FR.
-- Garde-fous `validate-jsonld.mjs`, `sync-index-html.mjs`, `preview-article-diff.mjs`, tests, regex `AdminArticles`/`EditSit` : **conserver impérativement**, c'est la protection anti-régression.
-- 12 `seo_department_pages` AURA : **conserver**, ce sont les vrais départements administratifs.
+1. **`stripe-webhook` (206 LOC)** : 0 hit interne mais endpoint appelé par Stripe en externe (URL configurée hors repo). Vérifier dashboard Stripe avant toute suppression.
+2. **`public/icons/icon-512-maskable.png`** : probablement référencé par `public/manifest.json` (non grepé dans "code"). PWA sensible.
+3. **22 RPC Postgres candidats** (`accept_application`, `admin_alma_matching_diagnosis`, `admin_get_application_counts`, `admin_get_listings_application_counts`, `check_invitation_quota`, `generate_sit_slug`, `get_dormant_recovery_context`, `get_email_pipeline_health`, `get_garde_environments`, `get_own_email`, `get_owner_response_median_minutes`, `get_owner_sits_view_trend`, `get_sit_context_for_alma`, `get_sit_view_count_week`, `get_sitter_context_for_alma`, `get_sitter_stay_stats`, `haversine_km`, `record_sit_view`, `slugify_city`, `_debug_geocode_secret_len`, `_debug_vault_names`, `_normalize_species_pg`) : recherche par nom exact ; risque de faux négatif si appel via wrapper `.rpc(fnName, …)` avec variable. À vérifier individuellement.
+4. **`src/data/siteRoutes.ts`** : exports `staticRoutes`, `dynamicRoutes`, `privateDisallowPaths`, types `SiteRoute`/`DynamicRouteConfig` invisibles au grep TS mais parsés par regex dans `scripts/generate-robots.mjs` et `scripts/validate-og-tags.mjs`. **Ne pas classer A.**
+5. **Fonctions security-definer** (`has_role`, `is_admin`, `enforce_*`, `validate_*`, `trg_*`) : vivantes via policies RLS et triggers — jamais à toucher.
 
 ---
 
-## Ordre de bataille recommandé
+## Détails techniques
 
-1. **V1 immédiatement** (impact indexation + footer visible partout).
-2. **V2 dans la foulée** avec plan de redirection 301 pour les 5 slugs renommés.
-3. **V3 : rien à faire**.
+### Faux positifs corrigés pendant l'audit
+Les edge functions ci-dessous ressortaient en 0 hit par recherche naïve `functions.invoke("nom")` mais sont **vivantes** via template literals dynamiques :
+- `fetch-bing-data` (useBingData.ts)
+- `fetch-seo-data` (useSeoData.ts)
+- `send-founder-reminder-30/7` (AdminSubscriptions.tsx)
+- `backfill-profile-coordinates` (AdminDiagnostics.tsx)
+- `delete-empty-duplicate-account` (DuplicateAccountGuard.tsx)
+- `geocode-guide-places` (NetworkErrorMonitor.tsx)
 
-Total effort net : **~13 modifications** (5 code/sitemap + 8 articles). Aucun risque sur les tests / garde-fous / infra régionale.
+### Limites connues
+- Imports 100 % dynamiques via variable (`import(\`@/pages/\${x}\`)`) non détectables par `rg` — aucun pattern de ce type repéré dans le repo.
+- Ré-exports par barrel (`index.ts` avec `export *`) : aucun n'a été trouvé masquant un usage.
+- Suppression réelle non effectuée : à valider par `tsgo` + build + vitest après retrait, avec attention particulière aux side-effects d'imports (`main.tsx` en tête).
 
-Dites-moi lequel des trois axes vous voulez que je prépare en build mode (V1 seul, V1+V2, ou V1+V2 avec plan de redirects détaillé).
+### Ordre de suppression recommandé (si vous validez)
+1. Composants + pages + hooks A (batch simple, 0 risque bundle).
+2. Assets A (gain immédiat repo + éventuels imports morts détectés).
+3. Exports orphelins A.5/A.6 (symbole par symbole).
+4. Libs entières A.4 après re-lecture de `fatalErrorOverlay.ts`.
+5. Edge functions A.7 (suppression via `supabase functions delete`).
+6. Dépendances npm A.9 (`bun remove`).
+7. Vérifications C avant tout retrait.
+
+Aucune modification n'a été apportée. Validez la liste (ou marquez les éléments à conserver) et je passerai à la suppression en une ou plusieurs passes selon votre préférence.
