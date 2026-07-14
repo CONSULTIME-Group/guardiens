@@ -1167,10 +1167,8 @@ const Landing = () => {
                           <span className="font-body text-xs text-foreground/55">
                             {quote.detail}
                           </span>
-                          <span className="font-body text-[11px] text-foreground/40 mt-0.5 uppercase tracking-widest">
-                            {quote.period} · {t("landing.testimonials.program_label")}
-                          </span>
                         </span>
+
                       </figcaption>
                     </blockquote>
                   </figure>

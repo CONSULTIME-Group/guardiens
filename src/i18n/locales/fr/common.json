@@ -52,10 +52,10 @@
   },
   "landing": {
     "hero": {
-      "eyebrow": "Entraide · Garde d'animaux · Home sitting",
+      "eyebrow": "Entraide · Garde d'animaux · House-sitting",
       "title_main": "La garde d'animaux, le coup de main,",
       "title_accent": "la rencontre.",
-      "lede": "Guardiens met en relation propriétaires d'animaux et gardiens de confiance, partout en France. House sitting à domicile, entraide entre gens du coin, aucune commission côté propriétaire, un gardien recommandé par la communauté près de chez vous.",
+      "lede": "Guardiens met en relation propriétaires d'animaux et gardiens de confiance, partout en France. House-sitting à domicile, entraide entre gens du coin, aucune commission côté propriétaire, un gardien recommandé par la communauté près de chez vous.",
       "lede_italic": "Et derrière chaque échange, une rencontre que vous n'auriez pas cherchée.",
       "cta_owner": "Publier mon annonce",
       "cta_sitter": "Je veux garder",
@@ -85,7 +85,7 @@
     "usages": {
       "eyebrow": "Ce qu'on fait ensemble",
       "title": "Garde d'animaux à domicile et entraide locale.",
-      "lede": "Le home sitting d'un côté, l'entraide entre gens du coin de l'autre. À vous de choisir, l'un, l'autre, ou les deux.",
+      "lede": "Le house-sitting d'un côté, l'entraide entre gens du coin de l'autre. À vous de choisir, l'un, l'autre, ou les deux.",
       "owner": {
         "tag": "Propriétaires",
         "title": "Partir l'esprit léger.",
@@ -107,10 +107,10 @@
         "cta": "Découvrir l'entraide →"
       },
       "urgency": {
-        "eyebrow": "Imprévu de dernière minute",
-        "title": "Un départ précipité ?",
-        "text": "Hospitalisation, déplacement de dernière minute, urgence familiale : un gardien du coin peut prendre le relais en quelques heures.",
-        "cta": "Trouver un gardien en urgence →"
+        "eyebrow": "Réseau en construction",
+        "title": "Devenir gardien d'urgence",
+        "text": "Le réseau de gardiens d'urgence Guardiens se construit avec les premiers profils vérifiés. Vous pouvez vous inscrire comme gardien mobilisable, ou déposer une demande pour votre région.",
+        "cta": "Rejoindre le réseau d'urgence"
       }
     },
     "meeting": {
@@ -178,7 +178,7 @@
     },
     "testimonials": {
       "title": "Ils ont osé. Voici ce qu'il leur reste.",
-      "source": "Témoignages recueillis auprès de nos premiers membres (janvier à mai 2026). Prénoms et villes réels, récits anonymisés à leur demande.",
+      "source": "Témoignages recueillis auprès de nos premiers membres.",
       "prev_aria": "Témoignage précédent",
       "next_aria": "Témoignage suivant",
       "page_aria": "Aller à la page de témoignages {{n}}",
@@ -251,10 +251,6 @@
       "card2": {
         "title": "Vous partez à l'étranger, trouvez un gardien local.",
         "cta": "Voir les annonces internationales"
-      },
-      "card3": {
-        "title": "Une communauté qui grandit avec Marrakech, Lisbonne, Bali.",
-        "cta": "Voir la carte"
       }
     },
     "affinity": {
@@ -1371,7 +1367,7 @@
   "live_listings": {
     "aria": "Annonces de garde disponibles maintenant",
     "eyebrow": "En direct",
-    "title": "Annonces de garde dispo",
+    "title": "Annonces de garde disponibles",
     "see_all": "Voir tout",
     "urgent": "Urgent",
     "super_opportunity": "Super opportunité",
