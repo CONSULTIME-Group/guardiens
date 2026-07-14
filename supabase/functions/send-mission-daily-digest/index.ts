@@ -35,6 +35,7 @@ interface MissionRow {
   status: string
   user_id: string
   mission_type: string | null
+  photos: string[] | null
 }
 
 function formatFrDate(iso?: string | null): string | undefined {
@@ -172,7 +173,7 @@ Deno.serve(async (req) => {
           if (!m) {
             const { data } = await supabase
               .from('small_missions')
-              .select('id, title, city, category, date_needed, duration_estimate, exchange_offer, status, user_id, mission_type')
+              .select('id, title, city, category, date_needed, duration_estimate, exchange_offer, status, user_id, mission_type, photos')
               .eq('id', qr.mission_id)
               .maybeSingle()
             if (data) { m = data as MissionRow; missionCache.set(qr.mission_id, m) }
@@ -199,6 +200,7 @@ Deno.serve(async (req) => {
             exchangeOffer: m.exchange_offer,
             distanceKm: qr.distance_km,
             missionType: m.mission_type,
+            photoUrl: Array.isArray(m.photos) && m.photos.length > 0 && typeof m.photos[0] === 'string' ? m.photos[0] : null,
           })
         }
 
