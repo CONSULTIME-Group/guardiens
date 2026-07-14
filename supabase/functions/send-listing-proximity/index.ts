@@ -1,17 +1,26 @@
 /**
- * send-listing-proximity — unique source de vérité pour la diffusion d'une
- * annonce de garde (sits) aux gardiens de proximité.
+ * send-listing-proximity — diffusion admin d'une annonce (sits) aux gardiens
+ * de proximité, depuis SignalsSection / BroadcastSitDialog.
  *
  * Modes :
  *  - "preview" : renvoie la liste des destinataires (prénom, ville, distance, email)
- *  - "send"    : envoie un email personnalisé par destinataire (jamais de CC groupé)
+ *  - "send"    : envoie un email personnalisé par destinataire via
+ *                `send-transactional-email` (template `nearby-sit-alert`).
+ *
+ * Refactor 14/07/2026 : abandon de l'appel direct Resend au profit du pipeline
+ * transactionnel unique (cap de fréquence, opt-out product_emails,
+ * suppressed_emails, log email_send_log, idempotence). L'ancien buildHtml
+ * inline a été supprimé — le template React `nearby-sit-alert` sert désormais
+ * de source unique (photo de couverture, titre, ville, dates, animaux, CTA).
  *
  * Ciblage : profils role in ('sitter','both'), latitude/longitude non nulls,
  * dans un rayon (km) autour du propriétaire.
- * Exclusions : propriétaire, comptes non actifs, suppressed_emails, opt-out
- * product_emails, emails vides/doublons.
+ * Exclusions préalables : propriétaire, comptes non actifs, suppressed_emails,
+ * opt-out product_emails, emails vides/doublons. (Redondant avec les checks
+ * côté send-transactional-email, mais permet un compte de destinataires exact
+ * en preview et évite des invocations inutiles.)
  *
- * Sécurité : admin uniquement (user_roles.role = 'admin'). Aucun envoi automatique.
+ * Sécurité : admin uniquement (user_roles.role = 'admin').
  */
 import { createClient, SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
 
@@ -30,14 +39,6 @@ function haversineKm(lat1: number, lon1: number, lat2: number, lon2: number): nu
     Math.sin(dLat / 2) ** 2 +
     Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon / 2) ** 2;
   return 2 * R * Math.asin(Math.min(1, Math.sqrt(a)));
-}
-
-function escapeHtml(s: string): string {
-  return s
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;");
 }
 
 function toTitleCase(s: string | null | undefined): string {
@@ -118,105 +119,12 @@ function buildPetsSentence(pets: Array<{ species: string; name: string }>): stri
   return joinWithEt(parts);
 }
 
-function buildHtml(params: {
-  recipientFirstName: string;
-  authorFirstName: string;
-  listingTitle: string;
-  listingCity: string;
-  listingExcerpt: string;
-  dateRange: string;
-  listingUrl: string;
-  subject: string;
-  coverPhotoUrl: string | null;
-  petsSentence: string;
-  affinityLine: string;
-}): string {
-  const {
-    recipientFirstName,
-    authorFirstName,
-    listingTitle,
-    listingCity,
-    listingExcerpt,
-    dateRange,
-    listingUrl,
-    subject,
-    coverPhotoUrl,
-    petsSentence,
-    affinityLine,
-  } = params;
-  const greeting = recipientFirstName ? `Bonjour ${escapeHtml(recipientFirstName)},` : "Bonjour,";
-  const author = escapeHtml(authorFirstName || "un propriétaire du coin");
-  const title = escapeHtml(listingTitle || "une garde d'animaux");
-  const city = escapeHtml(listingCity || "");
-  const url = escapeHtml(listingUrl);
-  const excerptHtml = listingExcerpt
-    ? `<p style="margin:0 0 14px;font-size:14px;line-height:1.7;color:#555;font-style:italic;border-left:3px solid #2C6E49;padding:4px 0 4px 12px">${escapeHtml(listingExcerpt)}</p>`
-    : "";
-  const dateHtml = dateRange
-    ? `<p style="margin:0 0 14px;font-size:14px;line-height:1.7;color:#3a3a3a"><strong>Dates : </strong>${escapeHtml(dateRange)}</p>`
-    : "";
-  const petsHtml = petsSentence
-    ? `<p style="margin:0 0 10px;font-size:14px;line-height:1.7;color:#3a3a3a"><strong>Animaux : </strong>${escapeHtml(petsSentence)}</p>`
-    : "";
-  const affinityHtml = affinityLine
-    ? `<p style="margin:0 0 14px;font-size:13px;line-height:1.6;color:#2C6E49;font-weight:600">${escapeHtml(affinityLine)}</p>`
-    : "";
-  const coverHtml = coverPhotoUrl
-    ? `<tr><td style="padding:0"><img src="${escapeHtml(coverPhotoUrl)}" alt="Photo de l'annonce" width="600" style="width:100%;max-width:600px;height:auto;display:block"/></td></tr>`
-    : "";
-  const introLine = city
-    ? `Près de chez vous, à ${city}, ${author} cherche un gardien pour ses animaux : <strong>${title}</strong>.`
-    : `Près de chez vous, ${author} cherche un gardien pour ses animaux : <strong>${title}</strong>.`;
-  return `<!DOCTYPE html><html><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/></head>
-<body style="margin:0;padding:0;background-color:#FAF9F6;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif">
-<table width="100%" cellpadding="0" cellspacing="0" style="background-color:#FAF9F6;padding:32px 16px">
-<tr><td align="center">
-<table width="600" cellpadding="0" cellspacing="0" style="max-width:600px;background-color:#ffffff;border-radius:16px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,0.04)">
-<tr><td style="padding:0;background:linear-gradient(135deg,#2C6E49 0%,#3a8a5d 100%);height:6px;line-height:6px;font-size:0">&nbsp;</td></tr>
-${coverHtml}
-<tr><td style="padding:32px 40px 8px;text-align:center;background-color:#ffffff">
-<img src="https://guardiens.fr/logo-guardiens.png" alt="Guardiens" width="120" style="display:block;margin:0 auto;height:auto"/>
-</td></tr>
-<tr><td style="padding:24px 40px 8px">
-<h1 style="margin:0 0 20px;font-size:22px;line-height:1.35;color:#1a1a1a;font-weight:700">${escapeHtml(subject)}</h1>
-<p style="margin:0 0 14px;font-size:15px;line-height:1.7;color:#3a3a3a">${greeting}</p>
-<p style="margin:0 0 14px;font-size:15px;line-height:1.7;color:#3a3a3a">${introLine}</p>
-${dateHtml}
-${petsHtml}
-${affinityHtml}
-${excerptHtml}
-</td></tr>
-<tr><td align="center" style="padding:16px 0 8px">
-<a href="${url}" style="display:inline-block;padding:14px 32px;background-color:#2C6E49;color:#ffffff;text-decoration:none;border-radius:10px;font-weight:600;font-size:16px;box-shadow:0 4px 12px rgba(44,110,73,0.25)">Voir l'annonce</a>
-</td></tr>
-<tr><td style="padding:16px 40px 8px">
-<p style="margin:0 0 14px;font-size:15px;line-height:1.7;color:#3a3a3a">Si les dates et le contexte vous conviennent, vous pouvez postuler directement depuis l'annonce.</p>
-<p style="margin:0 0 4px;font-size:15px;line-height:1.7;color:#3a3a3a">À bientôt,</p>
-<p style="margin:0 0 14px;font-size:15px;line-height:1.7;color:#3a3a3a">Jérémie et Elisa</p>
-</td></tr>
-<tr><td style="padding:24px 40px 32px"></td></tr>
-<tr><td style="padding:20px 40px;border-top:1px solid #eee;background-color:#FAF9F6;text-align:center">
-<p style="margin:0 0 6px;font-size:13px;color:#555;font-weight:600">Guardiens</p>
-<p style="margin:0;font-size:12px;color:#888;line-height:1.6">L'entraide locale entre propriétaires et gardiens d'animaux.</p>
-<p style="margin:14px 0 0;font-size:11px;color:#aaa">
-<a href="https://guardiens.fr" style="color:#aaa;text-decoration:none">guardiens.fr</a>
-&nbsp;·&nbsp;
-<a href="https://guardiens.fr/unsubscribe" style="color:#aaa;text-decoration:underline">Se désinscrire</a>
-</p>
-</td></tr>
-</table>
-</td></tr></table>
-</body></html>`;
-}
-
 interface Recipient {
   user_id: string;
   first_name: string;
   city: string;
   email: string;
   distance_km: number;
-  animal_types: string[] | null;
-  affinity_score: number | null;
 }
 
 async function computeRecipients(
@@ -249,11 +157,10 @@ async function computeRecipients(
     );
   }
 
-  // Property + pets (owner's animals) for the rich template
+  // Property + pets pour enrichissement carte (photo fallback + phrase animaux)
   const propertyId = (sit as any).property_id as string | null;
   let propertyCover: string | null = null;
   let propertyFirstPhoto: string | null = null;
-  const ownerPetSpecies = new Set<string>();
   const petsList: Array<{ species: string; name: string }> = [];
   if (propertyId) {
     const { data: prop } = await serviceClient
@@ -275,7 +182,6 @@ async function computeRecipients(
       .eq("property_id", propertyId);
     for (const p of (pets || []) as any[]) {
       const species = String(p.species || "other");
-      ownerPetSpecies.add(species);
       petsList.push({ species, name: String(p.name || "") });
     }
   }
@@ -320,8 +226,6 @@ async function computeRecipients(
           city: p.city || "",
           email: String(p.email).trim(),
           distance_km: Math.round(d * 10) / 10,
-          animal_types: null,
-          affinity_score: null,
         });
       }
     }
@@ -330,31 +234,6 @@ async function computeRecipients(
   }
 
   const ids = all.map((r) => r.user_id);
-
-  // Sitter profiles: animal_types + affinity_score for enrichment
-  if (ids.length > 0) {
-    const CHUNK = 500;
-    const spMap = new Map<string, { animal_types: string[] | null; affinity_score: number | null }>();
-    for (let i = 0; i < ids.length; i += CHUNK) {
-      const { data: sps } = await serviceClient
-        .from("sitter_profiles")
-        .select("user_id, animal_types, affinity_score")
-        .in("user_id", ids.slice(i, i + CHUNK));
-      for (const s of (sps || []) as any[]) {
-        spMap.set(s.user_id, {
-          animal_types: Array.isArray(s.animal_types) ? s.animal_types : null,
-          affinity_score: typeof s.affinity_score === "number" ? s.affinity_score : null,
-        });
-      }
-    }
-    for (const r of all) {
-      const sp = spMap.get(r.user_id);
-      if (sp) {
-        r.animal_types = sp.animal_types;
-        r.affinity_score = sp.affinity_score;
-      }
-    }
-  }
 
   const optedOut = new Set<string>();
   if (ids.length > 0) {
@@ -397,7 +276,6 @@ async function computeRecipients(
     filtered.push(r);
   }
 
-  // Resolve owner city: sit.city fallback profiles.city
   const listingCity = ((sit as any).city && String((sit as any).city).trim())
     || ((author as any).city && String((author as any).city).trim())
     || "";
@@ -410,29 +288,8 @@ async function computeRecipients(
     recipients: filtered,
     coverPhotoUrl,
     petsSentence,
-    ownerPetSpecies,
     listingCity,
   };
-}
-
-function computeAffinityLine(
-  recipient: Recipient,
-  authorFirstName: string,
-  ownerPetSpecies: Set<string>,
-): string {
-  if (typeof recipient.affinity_score === "number" && recipient.affinity_score > 0) {
-    return `Affinité avec ${authorFirstName || "le propriétaire"} : ${Math.round(recipient.affinity_score)} %`;
-  }
-  if (ownerPetSpecies.size > 0 && recipient.animal_types && recipient.animal_types.length > 0) {
-    const sitterSet = new Set(recipient.animal_types.map((x) => String(x)));
-    const inter = [...ownerPetSpecies].filter((s) => sitterSet.has(s)).length;
-    const total = ownerPetSpecies.size;
-    if (total > 0 && inter > 0) {
-      const pct = Math.round((inter / total) * 100);
-      return `Affinité animaux : ${pct} %`;
-    }
-  }
-  return "";
 }
 
 Deno.serve(async (req) => {
@@ -441,7 +298,6 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
     const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
     const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const SUPABASE_ANON_KEY = Deno.env.get("SUPABASE_ANON_KEY")!;
@@ -496,15 +352,14 @@ Deno.serve(async (req) => {
       recipients,
       coverPhotoUrl,
       petsSentence,
-      ownerPetSpecies,
       listingCity,
     } = await computeRecipients(serviceClient, sitId, radiusKm);
 
     const subject = buildSubject(authorFirstName, listingCity);
     const excerpt = buildExcerpt(sit.owner_message ?? sit.specific_expectations);
     const dateRange = buildDateRange(sit.start_date, sit.end_date);
-    const listingUrl = `https://guardiens.fr/annonces/${sit.id}`;
-    const ctaLabel = "Voir l'annonce";
+    const startDateFr = formatDateFr(sit.start_date);
+    const endDateFr = formatDateFr(sit.end_date);
 
     if (mode === "preview") {
       const PREVIEW_LIMIT = 500;
@@ -534,8 +389,8 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Mode SEND
-    if (!RESEND_API_KEY) throw new Error("RESEND_API_KEY not configured");
+    // Mode SEND — passe intégralement par send-transactional-email (cap,
+    // opt-out, suppression, logs, idempotence).
     if (recipients.length === 0) {
       return new Response(JSON.stringify({ error: "Aucun destinataire" }), {
         status: 400,
@@ -543,15 +398,18 @@ Deno.serve(async (req) => {
       });
     }
 
+    // Row campagne pour la traçabilité admin (SignalsSection). Le détail par
+    // destinataire vit désormais dans email_send_log; on garde une trace
+    // agrégée ici.
     const { data: campaign, error: campErr } = await serviceClient
       .from("mass_emails")
       .insert({
         segment: "listing_proximity",
         filters: { sit_id: sitId, radius_km: radiusKm } as any,
         subject,
-        body: `Annonce de garde (${sit.title}) à ${radiusKm} km, propriétaire ${authorFirstName}`,
-        cta_label: ctaLabel,
-        cta_url: listingUrl,
+        body: `Annonce de garde (${sit.title}) diffusée à ${radiusKm} km, propriétaire ${authorFirstName}`,
+        cta_label: "Voir l'annonce",
+        cta_url: `https://guardiens.fr/sits/${sit.id}`,
         recipients_count: 0,
         status: "sending",
         sent_by: user.id,
@@ -565,104 +423,44 @@ Deno.serve(async (req) => {
 
     let sent = 0;
     let errors = 0;
-    const sendRows: Array<{
-      mass_email_id: string;
-      recipient_email: string;
-      resend_id: string | null;
-      status: string;
-      error_message: string | null;
-    }> = [];
 
-    const BATCH_SIZE = 100;
-    for (let i = 0; i < recipients.length; i += BATCH_SIZE) {
-      const batch = recipients.slice(i, i + BATCH_SIZE);
-      const emailObjects = batch.map((r) => ({
-        from: "Guardiens <bonjour@guardiens.fr>",
-        to: [r.email],
-        subject,
-        html: buildHtml({
-          recipientFirstName: toTitleCase(r.first_name),
-          authorFirstName,
-          listingTitle: sit.title || "",
-          listingCity,
-          listingExcerpt: excerpt,
-          dateRange,
-          listingUrl,
-          subject,
-          coverPhotoUrl,
-          petsSentence,
-          affinityLine: computeAffinityLine(r, authorFirstName, ownerPetSpecies),
-        }),
-        tracking: { opens: true, clicks: true },
-        tags: [
-          { name: "campaign_id", value: campaignId },
-          { name: "campaign_type", value: "listing_proximity" },
-        ],
-      }));
-      try {
-        const res = await fetch("https://api.resend.com/emails/batch", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${RESEND_API_KEY}`,
-          },
-          body: JSON.stringify(emailObjects),
-        });
-        const resBody = await res.text();
-        if (res.ok) {
-          sent += batch.length;
-          let ids: string[] = [];
-          try {
-            const parsed = JSON.parse(resBody);
-            ids = (parsed?.data || []).map((d: any) => d?.id || null);
-          } catch { /* ignore */ }
-          batch.forEach((r, idx) => {
-            sendRows.push({
-              mass_email_id: campaignId,
-              recipient_email: r.email,
-              resend_id: ids[idx] || null,
-              status: "sent",
-              error_message: null,
-            });
+    // Idempotence stable par (campagne, destinataire) : un rejeu de la même
+    // campagne ne double pas les envois, mais un nouveau broadcast admin
+    // (nouvelle mass_emails.id) permet un renvoi légitime.
+    const CONCURRENCY = 8;
+    for (let i = 0; i < recipients.length; i += CONCURRENCY) {
+      const slice = recipients.slice(i, i + CONCURRENCY);
+      const results = await Promise.all(slice.map(async (r) => {
+        const idem = `listing-proximity-${campaignId}-${r.user_id}`;
+        try {
+          const { error } = await serviceClient.functions.invoke("send-transactional-email", {
+            body: {
+              templateName: "nearby-sit-alert",
+              recipientEmail: r.email,
+              idempotencyKey: idem,
+              templateData: {
+                sitterFirstName: toTitleCase(r.first_name) || undefined,
+                ownerFirstName: authorFirstName || undefined,
+                sitTitle: sit.title || undefined,
+                city: listingCity || undefined,
+                distanceKm: r.distance_km,
+                startDate: startDateFr || undefined,
+                endDate: endDateFr || undefined,
+                sitId: sit.id,
+                animalsSummary: petsSentence || undefined,
+                coverPhotoUrl: coverPhotoUrl || null,
+              },
+            },
           });
-        } else {
-          console.error(`Listing proximity batch failed (${i}): ${res.status} ${resBody}`);
-          errors += batch.length;
-          batch.forEach((r) => {
-            sendRows.push({
-              mass_email_id: campaignId,
-              recipient_email: r.email,
-              resend_id: null,
-              status: "failed",
-              error_message: `${res.status}: ${resBody.slice(0, 200)}`,
-            });
-          });
+          if (error) return { ok: false, err: String(error) };
+          return { ok: true };
+        } catch (e) {
+          return { ok: false, err: String(e) };
         }
-      } catch (e) {
-        console.error(`Listing proximity batch error (${i}):`, e);
-        errors += batch.length;
-        batch.forEach((r) => {
-          sendRows.push({
-            mass_email_id: campaignId,
-            recipient_email: r.email,
-            resend_id: null,
-            status: "failed",
-            error_message: String(e).slice(0, 200),
-          });
-        });
+      }));
+      for (const r of results) {
+        if (r.ok) sent++; else { errors++; console.error("listing-proximity send failed:", r.err); }
       }
-      if (i + BATCH_SIZE < recipients.length) {
-        await new Promise((r) => setTimeout(r, 1000));
-      }
-    }
-
-    const INSERT_CHUNK = 500;
-    for (let i = 0; i < sendRows.length; i += INSERT_CHUNK) {
-      const chunk = sendRows.slice(i, i + INSERT_CHUNK);
-      const { error: insErr } = await serviceClient
-        .from("mass_email_sends")
-        .insert(chunk);
-      if (insErr) console.error(`mass_email_sends insert error (chunk ${i}):`, insErr);
     }
 
     await serviceClient
