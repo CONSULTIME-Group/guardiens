@@ -1,7 +1,6 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.4";
 import { startCronRun } from "../_shared/cron-run-log.ts";
 
-
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
@@ -10,84 +9,91 @@ const corsHeaders = {
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
-  const supabase = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
-  const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY")!;
+  const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
+  const SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+  const supabase = createClient(SUPABASE_URL, SERVICE_KEY);
   const run = await startCronRun("send-rappel-j48");
 
   try {
-    const now = new Date();
+    const in2 = new Date();
+    in2.setDate(in2.getDate() + 2);
+    const targetDate = in2.toISOString().split("T")[0];
 
-  const in2 = new Date(now);
-  in2.setDate(in2.getDate() + 2);
-  const targetDate = in2.toISOString().split("T")[0];
+    const { data: sits } = await supabase
+      .from("sits")
+      .select("id, title, start_date, user_id")
+      .eq("status", "confirmed")
+      .eq("reminder_j48_sent", false)
+      .eq("start_date", targetDate);
 
-  const { data: sits } = await supabase
-    .from("sits")
-    .select("id, title, start_date, user_id")
-    .eq("status", "confirmed")
-    .eq("reminder_j48_sent", false)
-    .eq("start_date", targetDate);
+    let sent = 0;
 
-  let count = 0;
+    for (const sit of sits || []) {
+      const { data: apps } = await supabase
+        .from("applications")
+        .select("sitter_id")
+        .eq("sit_id", sit.id)
+        .eq("status", "accepted");
+      const sitterId = apps?.[0]?.sitter_id ?? null;
 
-  for (const sit of sits || []) {
-    const { data: apps } = await supabase
-      .from("applications")
-      .select("sitter_id")
-      .eq("sit_id", sit.id)
-      .eq("status", "accepted");
+      const { data: ownerProfile } = await supabase
+        .from("profiles").select("first_name, email").eq("id", sit.user_id).maybeSingle();
+      const sitterProfile = sitterId
+        ? (await supabase.from("profiles").select("first_name, email").eq("id", sitterId).maybeSingle()).data
+        : null;
 
-    const sitterId = apps?.[0]?.sitter_id;
+      const invokeSend = async (payload: Record<string, unknown>) => {
+        const res = await fetch(`${SUPABASE_URL}/functions/v1/send-transactional-email`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${SERVICE_KEY}`,
+          },
+          body: JSON.stringify(payload),
+        });
+        if (res.ok) sent++;
+        else console.error("[rappel-j48] send failed", res.status, await res.text().catch(() => ""));
+      };
 
-    const { data: ownerProfile } = await supabase.from("profiles").select("first_name, email").eq("id", sit.user_id).single();
-    const sitterProfile = sitterId ? (await supabase.from("profiles").select("first_name, email").eq("id", sitterId).single()).data : null;
+      if (ownerProfile?.email) {
+        await invokeSend({
+          templateName: "sit-reminder-j48",
+          recipientEmail: ownerProfile.email,
+          idempotencyKey: `sit-reminder-j48-owner-${sit.id}`,
+          templateData: {
+            firstName: ownerProfile.first_name || "",
+            role: "owner",
+            counterpartFirstName: sitterProfile?.first_name || "",
+            sitTitle: sit.title,
+            sitId: sit.id,
+          },
+        });
+      }
 
-    // Email proprio
-    if (ownerProfile?.email) {
-      await fetch("https://api.resend.com/emails", {
-        method: "POST",
-        headers: { "Content-Type": "application/json", Authorization: `Bearer ${RESEND_API_KEY}` },
-        body: JSON.stringify({
-          from: "Guardiens <noreply@guardiens.fr>",
-          to: [ownerProfile.email],
-          subject: "Votre garde commence dans 48h",
-          html: `<p>Bonjour ${ownerProfile.first_name || ""},</p>
-<p>Plus que 48h avant l'arrivée de ${sitterProfile?.first_name || "votre gardien"}.</p>
-<p>Assurez-vous que le guide de la maison est complet et accessible.</p>
-<p><a href="https://guardiens.fr/sits/${sit.id}">Voir ma garde</a></p>
-<p>L'équipe Guardiens</p>`,
-        }),
-      });
-      count++;
+      if (sitterProfile?.email) {
+        await invokeSend({
+          templateName: "sit-reminder-j48",
+          recipientEmail: sitterProfile.email,
+          idempotencyKey: `sit-reminder-j48-sitter-${sit.id}`,
+          templateData: {
+            firstName: sitterProfile.first_name || "",
+            role: "sitter",
+            counterpartFirstName: ownerProfile?.first_name || "",
+            sitTitle: sit.title,
+            sitId: sit.id,
+          },
+        });
+      }
+
+      await supabase.from("sits").update({ reminder_j48_sent: true }).eq("id", sit.id);
     }
 
-    // Email gardien
-    if (sitterProfile?.email) {
-      await fetch("https://api.resend.com/emails", {
-        method: "POST",
-        headers: { "Content-Type": "application/json", Authorization: `Bearer ${RESEND_API_KEY}` },
-        body: JSON.stringify({
-          from: "Guardiens <noreply@guardiens.fr>",
-          to: [sitterProfile.email],
-          subject: "Votre garde commence dans 48h",
-          html: `<p>Bonjour ${sitterProfile.first_name || ""},</p>
-<p>Plus que 48h avant votre garde chez ${ownerProfile?.first_name || "votre propriétaire"}.</p>
-<p>Vérifiez les dernières consignes dans le guide de la maison.</p>
-<p><a href="https://guardiens.fr/sits/${sit.id}">Voir la garde</a></p>
-<p>L'équipe Guardiens</p>`,
-        }),
-      });
-      count++;
-    }
-
-    await supabase.from("sits").update({ reminder_j48_sent: true }).eq("id", sit.id);
-  }
-
-    await run.finish("success", { sent: count });
-    return new Response(JSON.stringify({ sent: count }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    await run.finish("success", { sent });
+    return new Response(JSON.stringify({ sent }), {
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
   } catch (e) {
     await run.fail(e);
     throw e;
   }
 });
-

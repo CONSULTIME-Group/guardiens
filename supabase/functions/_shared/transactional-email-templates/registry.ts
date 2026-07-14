@@ -72,6 +72,8 @@ import { template as nearbyDailyDigest } from './nearby-daily-digest.tsx'
 import { template as firstApplicationReceived } from './first-application-received.tsx'
 import { template as nudgeMissingPhoto } from './nudge-missing-photo.tsx'
 import { template as ownerActivationNudge } from './owner-activation-nudge.tsx'
+import { template as sitReminderJ7 } from './sit-reminder-j7.tsx'
+import { template as sitReminderJ48 } from './sit-reminder-j48.tsx'
 
 
 export const TEMPLATES: Record<string, TemplateEntry> = {
@@ -138,6 +140,8 @@ export const TEMPLATES: Record<string, TemplateEntry> = {
   'first-application-received': firstApplicationReceived,
   'nudge-missing-photo': nudgeMissingPhoto,
   'owner-activation-nudge': ownerActivationNudge,
+  'sit-reminder-j7': sitReminderJ7,
+  'sit-reminder-j48': sitReminderJ48,
 }
 
 
