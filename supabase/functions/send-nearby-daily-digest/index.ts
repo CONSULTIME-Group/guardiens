@@ -59,14 +59,14 @@ Deno.serve(async (req) => {
     const [{ data: sits }, { data: missions }] = await Promise.all([
       supabase
         .from('sits')
-        .select('id, slug, title, city, start_date, end_date, latitude, longitude, user_id, status, created_at')
+        .select('id, slug, title, city, start_date, end_date, latitude, longitude, user_id, status, created_at, cover_photo_url, property_id')
         .gte('created_at', since)
         .eq('status', 'open')
         .not('latitude', 'is', null)
         .not('longitude', 'is', null),
       supabase
         .from('small_missions')
-        .select('id, slug, title, description, mission_type, city, category, date_needed, latitude, longitude, user_id, status, created_at')
+        .select('id, slug, title, description, mission_type, city, category, date_needed, latitude, longitude, user_id, status, created_at, photos')
         .gte('created_at', since)
         .eq('status', 'open')
         .not('latitude', 'is', null)
