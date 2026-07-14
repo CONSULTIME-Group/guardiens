@@ -129,66 +129,32 @@ const getInitials = (name: string) =>
 
 
 
-/* ── IntersectionObserver hook for scroll animations ──
- * Sécurité : le contenu est visible par défaut. On ne masque brièvement que
- * les sections placées SOUS le viewport au montage, pour animer leur entrée.
- * Fallback timer + prefers-reduced-motion + absence d'IO → affichage immédiat.
+/* ── Reveal purement CSS ──
+ * Règle absolue : le contenu est TOUJOURS visible. L'animation d'entrée
+ * (`animate-fade-in`) est un bonus décoratif joué une fois au mount, sans
+ * aucun IntersectionObserver ni état React qui puisse laisser une section
+ * bloquée à opacity-0. `prefers-reduced-motion` désactive l'animation.
  */
-function useScrollReveal() {
-  const ref = useRef<HTMLDivElement>(null);
-  const [isVisible, setIsVisible] = useState(true);
-
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-    const prefersReduced =
-      typeof window !== "undefined" &&
-      window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
-    if (prefersReduced || typeof IntersectionObserver === "undefined") return;
-
-    // N'animer que ce qui est sous le viewport au montage.
-    const rect = el.getBoundingClientRect();
-    const belowFold = rect.top > (window.innerHeight || 0) + 40;
-    if (!belowFold) return;
-
-    setIsVisible(false);
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setIsVisible(true);
-          observer.disconnect();
-        }
-      },
-      { threshold: 0, rootMargin: "0px 0px 20% 0px" },
-    );
-    observer.observe(el);
-    // Filet de sécurité : force visible après 1.2s si l'observer ne s'est
-    // jamais déclenché (scroll ultra-rapide, layout shift, WebView bugué).
-    const safety = window.setTimeout(() => setIsVisible(true), 1200);
-    return () => {
-      observer.disconnect();
-      window.clearTimeout(safety);
-    };
-  }, []);
-
-  return { ref, isVisible };
-}
-
-const RevealSection = React.forwardRef<HTMLDivElement, { children: React.ReactNode; className?: string; delay?: number }>(
- ({ children, className = "", delay = 0 }, _forwardedRef) => {
- const { ref, isVisible } = useScrollReveal();
- return (
- <div
- ref={ref}
- className={`transition-all duration-700 ease-out ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-5"} ${className}`}
- style={{ transitionDelay: `${delay}s` }}
- >
- {children}
- </div>
- );
- }
-);
+const RevealSection = React.forwardRef<
+  HTMLDivElement,
+  { children: React.ReactNode; className?: string; delay?: number }
+>(({ children, className = "", delay = 0 }, forwardedRef) => {
+  const prefersReduced =
+    typeof window !== "undefined" &&
+    window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+  const animClass = prefersReduced ? "" : "motion-safe:animate-fade-in";
+  return (
+    <div
+      ref={forwardedRef}
+      className={`${animClass} ${className}`}
+      style={delay && !prefersReduced ? { animationDelay: `${delay}s`, animationFillMode: "both" } : undefined}
+    >
+      {children}
+    </div>
+  );
+});
 RevealSection.displayName = "RevealSection";
+
 
 
 
