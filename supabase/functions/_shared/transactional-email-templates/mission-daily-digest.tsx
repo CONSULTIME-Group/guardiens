@@ -193,6 +193,15 @@ const card = {
   margin: '14px 0',
 }
 const cardTitle = { fontSize: '16px', fontWeight: '600' as const, color: 'hsl(153, 42%, 25%)', margin: '0 0 8px' }
+const photoStyle = {
+  width: '100%',
+  maxWidth: '504px',
+  height: 'auto',
+  borderRadius: '8px',
+  marginBottom: '10px',
+  objectFit: 'cover' as const,
+  display: 'block',
+}
 const cardLine = { fontSize: '13px', color: 'hsl(37, 7%, 35%)', margin: '4px 0' }
 const cardLineSmall = { fontSize: '12px', color: 'hsl(37, 7%, 45%)', margin: '6px 0' }
 const cardBadge = {
