@@ -72,6 +72,15 @@ const MissionDailyDigestEmail = ({ helperFirstName, items = [] }: Props) => (
 
         {items.map((item, idx) => (
           <Section key={item.missionId} style={{ ...card, marginTop: idx === 0 ? '20px' : '14px' }}>
+            {item.photoUrl ? (
+              <Img
+                src={item.photoUrl}
+                alt=""
+                width="504"
+                height="180"
+                style={photoStyle}
+              />
+            ) : null}
             {item.title ? <Text style={cardTitle}>{item.title}</Text> : null}
 
             <Text style={cardLine}>
