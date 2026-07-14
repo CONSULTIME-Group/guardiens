@@ -18,11 +18,12 @@ interface Props {
 
 const Email = ({ firstName, missionTitle = 'Votre mission', missionId }: Props) => {
   const editUrl = missionId
-    ? `${SITE_URL}/petites-missions/${missionId}/editer?utm_source=email&utm_campaign=mission_nudge_no_response`
+    ? `${SITE_URL}/petites-missions/${missionId}?edit=1&utm_source=email&utm_campaign=mission_nudge_no_response`
     : `${SITE_URL}/petites-missions`
   const detailUrl = missionId
     ? `${SITE_URL}/petites-missions/${missionId}?utm_source=email&utm_campaign=mission_nudge_no_response`
     : `${SITE_URL}/petites-missions`
+
   return (
     <Html lang="fr" dir="ltr">
       <BrandedHead />
