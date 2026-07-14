@@ -78,12 +78,12 @@ const RealMembersStrip = () => {
             <li key={m.id}>
               <Link
                 to={`/gardiens/${m.id}`}
-                title={`${m.first_name}${m.city ? " · " + m.city : ""}`}
+                title={m.city ? `${m.first_name} · ${m.city}` : m.first_name}
                 className="block h-11 w-11 rounded-full overflow-hidden border-2 border-background ring-1 ring-border bg-muted hover:ring-primary/60 transition-all hover:z-10 hover:scale-110"
               >
                 <img
                   src={m.avatar_url ?? ""}
-                  alt={`${m.first_name}, membre Guardiens à ${m.city ?? "France"}`}
+                  alt={m.city ? `${m.first_name}, membre Guardiens à ${m.city}` : `${m.first_name}, membre Guardiens`}
                   className="h-full w-full object-cover"
                   loading="lazy"
                   width={44}

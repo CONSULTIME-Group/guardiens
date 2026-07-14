@@ -21,15 +21,17 @@ function renderStrip() {
 }
 
 describe("InternationalStrip", () => {
-  it("affiche la section avec message 'bientôt' quand count = 0", () => {
+  it("affiche les deux cartes actives, avec message 'bientôt' quand count = 0", () => {
     mockCount.mockReturnValue({ count: 0, recent: [], isLoading: false });
     renderStrip();
     expect(screen.getByTestId("intl-card-owner_fr")).toBeInTheDocument();
     expect(screen.getByTestId("intl-card-sitter_intl")).toBeInTheDocument();
-    expect(screen.getByTestId("intl-card-community")).toBeInTheDocument();
+    // La carte "community" (Marrakech/Lisbonne/Bali + Voir la carte) est
+    // retirée tant qu'aucune annonce n'est publiée à l'étranger.
+    expect(screen.queryByTestId("intl-card-community")).toBeNull();
   });
 
-  it("affiche les 3 dernières annonces internationales dans la card community quand recent.length ≥ 1", () => {
+  it("n'affiche pas la carte 'community' même quand des annonces récentes existent (retirée pour éviter la promesse fabriquée)", () => {
     mockCount.mockReturnValue({
       count: 3,
       recent: [
@@ -40,8 +42,6 @@ describe("InternationalStrip", () => {
       isLoading: false,
     });
     renderStrip();
-    expect(screen.getByText(/Marrakech/)).toBeInTheDocument();
-    expect(screen.getByText(/Lisbonne/)).toBeInTheDocument();
-    expect(screen.getByText(/Bali/)).toBeInTheDocument();
+    expect(screen.queryByTestId("intl-card-community")).toBeNull();
   });
 });

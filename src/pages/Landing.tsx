@@ -129,28 +129,49 @@ const getInitials = (name: string) =>
 
 
 
-/* ── IntersectionObserver hook for scroll animations ── */
+/* ── IntersectionObserver hook for scroll animations ──
+ * Sécurité : le contenu est visible par défaut. On ne masque brièvement que
+ * les sections placées SOUS le viewport au montage, pour animer leur entrée.
+ * Fallback timer + prefers-reduced-motion + absence d'IO → affichage immédiat.
+ */
 function useScrollReveal() {
- const ref = useRef<HTMLDivElement>(null);
- const [isVisible, setIsVisible] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+  const [isVisible, setIsVisible] = useState(true);
 
- useEffect(() => {
- const prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
- if (prefersReduced) {
- setIsVisible(true);
- return;
- }
- const el = ref.current;
- if (!el) return;
- const observer = new IntersectionObserver(
- ([entry]) => { if (entry.isIntersecting) setIsVisible(true); },
- { threshold: 0.1 }
- );
- observer.observe(el);
- return () => observer.disconnect();
- }, []);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const prefersReduced =
+      typeof window !== "undefined" &&
+      window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+    if (prefersReduced || typeof IntersectionObserver === "undefined") return;
 
- return { ref, isVisible };
+    // N'animer que ce qui est sous le viewport au montage.
+    const rect = el.getBoundingClientRect();
+    const belowFold = rect.top > (window.innerHeight || 0) + 40;
+    if (!belowFold) return;
+
+    setIsVisible(false);
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true);
+          observer.disconnect();
+        }
+      },
+      { threshold: 0, rootMargin: "0px 0px 20% 0px" },
+    );
+    observer.observe(el);
+    // Filet de sécurité : force visible après 1.2s si l'observer ne s'est
+    // jamais déclenché (scroll ultra-rapide, layout shift, WebView bugué).
+    const safety = window.setTimeout(() => setIsVisible(true), 1200);
+    return () => {
+      observer.disconnect();
+      window.clearTimeout(safety);
+    };
+  }, []);
+
+  return { ref, isVisible };
 }
 
 const RevealSection = React.forwardRef<HTMLDivElement, { children: React.ReactNode; className?: string; delay?: number }>(
@@ -297,9 +318,9 @@ const Landing = () => {
 
  return (
  <div className="min-h-screen bg-background text-foreground">
-  <PageMeta
-        title="Guardiens, house sitting et garde d'animaux à domicile en France"
-        description="Le house sitting, c'est confier vos animaux et votre maison à un gardien vérifié près de chez vous, sans commission, avec rencontre avant chaque garde. Guardiens, partout en France."
+   <PageMeta
+        title="Garde d'animaux à domicile et house-sitting entre particuliers | Guardiens"
+        description="Trouvez un gardien du coin pour votre maison et vos animaux. House-sitting et entraide entre particuliers, vérifiés et notés. Partout en France."
  path="/"
  image={HOME_OG_IMAGE}
  />
@@ -317,7 +338,7 @@ const Landing = () => {
                 "@type": "Organization",
                 "@id": "https://guardiens.fr/#organization",
                 name: "Guardiens",
-                alternateName: ["Guardiens.fr", "Home sitting Guardiens"],
+                alternateName: ["Guardiens.fr", "House-sitting Guardiens"],
                 url: "https://guardiens.fr",
                 logo: {
                   "@type": "ImageObject",
@@ -326,7 +347,7 @@ const Landing = () => {
                   height: 512,
                 },
                 description:
-                  "Plateforme de home sitting, garde d'animaux à domicile et petites missions d'entraide entre gens du coin. Sans abonnement pour les propriétaires.",
+                  "Plateforme de house-sitting, garde d'animaux à domicile et petites missions d'entraide entre gens du coin. Sans abonnement pour les propriétaires.",
                 areaServed: [
                   { "@type": "Country", name: "France" },
                   { "@type": "City", name: "Lyon" },
@@ -375,7 +396,7 @@ const Landing = () => {
                 url: "https://guardiens.fr/",
                 name: "Garde d'animaux à domicile et house-sitting près de chez vous | Guardiens",
                 description:
-                  "Home sitting et petites missions d'entraide entre gens du coin. Confiez votre maison, demandez un coup de main au quartier. Partout en France.",
+                  "House-sitting et petites missions d'entraide entre gens du coin. Confiez votre maison, demandez un coup de main au quartier. Partout en France.",
                 inLanguage: "fr-FR",
                 isPartOf: { "@id": "https://guardiens.fr/#website" },
                 about: { "@id": "https://guardiens.fr/#organization" },
@@ -447,9 +468,9 @@ const Landing = () => {
               {
                 "@type": "Service",
                 "@id": "https://guardiens.fr/#service",
-                name: "Home sitting, garde d'animaux et entraide locale entre gens du coin",
+                name: "House-sitting, garde d'animaux et entraide locale entre gens du coin",
                 description:
-                  "Deux services indépendants : home sitting et garde d'animaux à domicile d'un côté ; petites missions d'entraide entre gens du coin de l'autre. Avis croisés, vérification d'identité, sans commission.",
+                  "Deux services indépendants : house-sitting et garde d'animaux à domicile d'un côté ; petites missions d'entraide entre gens du coin de l'autre. Avis croisés, vérification d'identité, sans commission.",
                 provider: { "@id": "https://guardiens.fr/#organization" },
                 areaServed: [
                   { "@type": "Country", name: "France" },
@@ -458,8 +479,7 @@ const Landing = () => {
                   { "@type": "City", name: "Grenoble" },
                 ],
                 serviceType: [
-                  "Home sitting",
-                  "House sitting",
+                  "House-sitting",
                   "Pet sitting",
                   "Garde d'animaux à domicile",
                   "Garde de chien",
@@ -1147,10 +1167,8 @@ const Landing = () => {
                           <span className="font-body text-xs text-foreground/55">
                             {quote.detail}
                           </span>
-                          <span className="font-body text-[11px] text-foreground/40 mt-0.5 uppercase tracking-widest">
-                            {quote.period} · {t("landing.testimonials.program_label")}
-                          </span>
                         </span>
+
                       </figcaption>
                     </blockquote>
                   </figure>
@@ -1230,7 +1248,7 @@ const Landing = () => {
           <div className="w-full mt-16 rounded-2xl overflow-hidden">
             <img
               src={notreHistoirePanorama}
-              alt="Photographie panoramique d'une maison de campagne aux volets bleus, illustrant l'esprit du home sitting Guardiens : on confie ses clés, on est invité dans une vie."
+              alt="Photographie panoramique d'une maison de campagne aux volets bleus, illustrant l'esprit du house-sitting Guardiens : on confie ses clés, on est invité dans une vie."
               className="w-full h-64 md:h-96 object-cover object-center"
               loading="lazy"
               width={1920}

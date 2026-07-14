@@ -62,6 +62,26 @@ const About = () => {
           <p>
             Pas une marketplace anonyme. Un <strong className="text-foreground">réseau local de confiance</strong>, basé à Lyon et ouvert à toute la France.
           </p>
+
+          <h2 id="affinite" className="font-heading text-xl md:text-2xl font-bold text-foreground pt-4 scroll-mt-24">Le score d'affinité</h2>
+          <p>
+            À chaque candidature, un score d'affinité est calculé automatiquement entre le propriétaire et le gardien. Il repose sur <strong className="text-foreground">sept critères pondérés</strong> selon leur poids dans une garde réussie.
+          </p>
+          <ul className="list-disc pl-6 space-y-2">
+            <li><strong className="text-foreground">Animaux (22 %)</strong> : les espèces déclarées par le propriétaire recoupent l'expérience du gardien.</li>
+            <li><strong className="text-foreground">Présence pendant la garde (22 %)</strong> : le rythme du gardien correspond à ce que la maison attend (télétravail, sorties, présence continue).</li>
+            <li><strong className="text-foreground">Rythme de vie (11 %)</strong> : calme, actif, sportif, tranquille.</li>
+            <li><strong className="text-foreground">Langues (11 %)</strong> : au moins une langue en commun.</li>
+            <li><strong className="text-foreground">Intérêts (11 %)</strong> : jardin, cuisine, lecture, nature, animaux.</li>
+            <li><strong className="text-foreground">Profil idéal (11 %)</strong> : le gardien correspond au type de personne recherché par le foyer.</li>
+            <li><strong className="text-foreground">Ambiance du foyer (11 %)</strong> : le rythme et les centres d'intérêt du gardien collent à l'ambiance déclarée.</li>
+          </ul>
+          <p>
+            Des garde-fous coupent le score si les sensibilités du gardien sont incompatibles avec une espèce, si aucune espèce ne matche, ou si le gardien voyage avec des enfants ou des animaux non acceptés. Le score n'est affiché qu'au-delà d'un seuil minimum (35 % par défaut) et de deux critères comparables.
+          </p>
+          <p className="text-sm text-foreground/60 italic">
+            La règle est publique : elle n'est ni un classement caché, ni un tri commercial. Vous voyez le détail, vous décidez.
+          </p>
         </div>
       </main>
       <PublicFooter />

@@ -22,7 +22,14 @@ export default function ProsShowcase() {
   const fmt = (n: number) =>
     new Intl.NumberFormat(i18n.language || "fr-FR").format(n).replace(/\u0020/g, "\u202F");
 
-  const cards = [
+  // Mapping card LP → clé db pro_profiles.category (singulier).
+  const CARD_TO_DB_CATEGORY: Record<string, string> = {
+    veterinaires: "veterinaire",
+    toiletteurs: "toiletteur",
+    transporteurs: "transporteur",
+  };
+  const byCat = data.pros_by_category ?? {};
+  const allCards = [
     {
       id: "veterinaires",
       Icon: Stethoscope,
@@ -45,6 +52,9 @@ export default function ProsShowcase() {
       to: "/pros/categorie/transporteurs",
     },
   ];
+  // Ne garder que les catégories qui ont au moins 1 fiche publiée.
+  const cards = allCards.filter((c) => (byCat[CARD_TO_DB_CATEGORY[c.id]] ?? 0) > 0);
+  if (cards.length === 0) return null;
 
   return (
     <section
@@ -61,7 +71,7 @@ export default function ProsShowcase() {
           {t("landing.pros.subtitle")}
         </p>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 mt-10">
+        <div className={`grid grid-cols-1 gap-4 md:gap-6 mt-10 max-w-4xl mx-auto ${cards.length === 1 ? "md:grid-cols-1" : cards.length === 2 ? "md:grid-cols-2" : "md:grid-cols-3"}`}>
           {cards.map(({ id, Icon, title, cta, to }) => (
             <div key={id} data-testid={`pros-card-${id}`} className="rounded-2xl border border-border bg-card p-6 flex flex-col items-center text-center gap-3">
               <Icon className="w-6 h-6 text-primary" aria-hidden="true" />
