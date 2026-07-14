@@ -16,8 +16,11 @@ Deno.serve(async (req) => {
   const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
   const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
   const supabase = createClient(supabaseUrl, serviceKey);
+  const run = await startCronRun("send-sit-reminders");
 
-  const now = new Date();
+  try {
+    const now = new Date();
+
   const formatDate = (d: Date) => d.toISOString().split("T")[0];
 
   // ── Pre-garde reminders (J-7 and J-2) ──
