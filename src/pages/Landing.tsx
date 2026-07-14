@@ -370,9 +370,9 @@ const Landing = () => {
                   "@type": "ImageObject",
                   url: HOME_OG_IMAGE,
                 },
+                dateModified: new Date().toISOString().slice(0, 10),
                 mainEntity: [
                   { "@id": "https://guardiens.fr/#service" },
-                  { "@id": "https://guardiens.fr/#faq" },
                   { "@id": "https://guardiens.fr/#howto" },
                 ],
               },
