@@ -214,7 +214,7 @@ Structure attendue :
           nom: p.name ?? null,
           espece: p.species ?? null,
           race: p.breed ?? null,
-          age_annees: p.age_years ?? null,
+          age_annees: p.age ?? null,
         })),
       },
       proprietaire: {
