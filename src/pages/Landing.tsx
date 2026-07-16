@@ -596,89 +596,8 @@ const Landing = () => {
       {/* ═══════════════ APERÇU LIVE ANNONCES (sous Hero) ═══════════════ */}
       <LiveListingsStrip />
 
-      {/* ═══════════════ SECTION DÉFINITION (statement-first, GEO) ═══════════════ */}
-      <section id="definition" className="py-10 md:py-16 bg-background border-b border-border/40 scroll-mt-24">
-        <div className="max-w-3xl mx-auto px-6">
-          <h2 className="font-heading text-2xl md:text-4xl font-semibold text-foreground mb-5 scroll-mt-24">
-            Qu'est-ce que Guardiens&nbsp;?
-          </h2>
-          <p className="font-body text-base md:text-lg text-foreground/80 leading-relaxed mb-6">
-            Guardiens est une plateforme française de house-sitting et d'entraide entre particuliers. Le principe&nbsp;: un gardien vérifié, qui vit près de chez vous, s'installe dans votre maison pendant votre absence et s'occupe de vos animaux dans leur environnement. L'échange repose sur la confiance et la rencontre, sans frais pour le propriétaire. Guardiens couvre toute la France.
-          </p>
-          {(kpiMaisons > 0 || kpiAnimaux > 0 || kpiInscrits > 0) && (
-            <div className="flex flex-wrap items-baseline gap-x-6 gap-y-2 text-sm font-body text-foreground/70">
-              {kpiMaisons > 0 && (
-                <span><strong className="text-foreground tabular-nums">{kpiMaisons}</strong> maisons gardées</span>
-              )}
-              {kpiAnimaux > 0 && (
-                <span><strong className="text-foreground tabular-nums">{kpiAnimaux}</strong> animaux accompagnés</span>
-              )}
-              {kpiInscrits > 0 && (
-                <span><strong className="text-foreground tabular-nums">{kpiInscrits}</strong> inscrits</span>
-              )}
-              <span className="text-xs text-foreground/50">
-                Chiffres mis à jour le {new Date().toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" })}.
-              </span>
-            </div>
-          )}
-        </div>
-      </section>
 
-      {/* ═══════════════ SECTION COMPARATIF (extractible, GEO) ═══════════════ */}
-      <section id="comparatif" className="py-10 md:py-16 bg-accent/30 border-b border-border/40 scroll-mt-24">
-        <div className="max-w-4xl mx-auto px-6">
-          <h2 className="font-heading text-2xl md:text-4xl font-semibold text-foreground mb-3 scroll-mt-24">
-            House-sitting, pension, pet-sitter&nbsp;: que choisir&nbsp;?
-          </h2>
-          <p className="font-body text-sm md:text-base text-foreground/70 leading-relaxed mb-6 max-w-2xl">
-            Quatre solutions pour faire garder vos animaux pendant votre absence. Comparaison factuelle, sans jugement.
-          </p>
-          <div className="overflow-x-auto rounded-2xl border border-border bg-card">
-            <table className="w-full text-sm font-body min-w-[640px]">
-              <caption className="sr-only">Comparatif entre house-sitting Guardiens, pension, pet-sitter à domicile et garde par un proche.</caption>
-              <thead className="bg-muted/60 text-foreground">
-                <tr>
-                  <th scope="col" className="text-left px-4 py-3 font-semibold">Solution</th>
-                  <th scope="col" className="text-left px-4 py-3 font-semibold">L'animal reste chez lui</th>
-                  <th scope="col" className="text-left px-4 py-3 font-semibold">La maison est habitée</th>
-                  <th scope="col" className="text-left px-4 py-3 font-semibold">Coût pour le propriétaire</th>
-                  <th scope="col" className="text-left px-4 py-3 font-semibold">Lien humain</th>
-                </tr>
-              </thead>
-              <tbody className="text-foreground/80">
-                <tr className="border-t border-border">
-                  <th scope="row" className="text-left px-4 py-3 font-semibold text-foreground">House-sitting Guardiens</th>
-                  <td className="px-4 py-3">Oui</td>
-                  <td className="px-4 py-3">Oui, en permanence</td>
-                  <td className="px-4 py-3">Aucun frais entre membres</td>
-                  <td className="px-4 py-3">Rencontre préalable et avis croisés</td>
-                </tr>
-                <tr className="border-t border-border">
-                  <th scope="row" className="text-left px-4 py-3 font-semibold text-foreground">Pension</th>
-                  <td className="px-4 py-3">Non, l'animal est déplacé</td>
-                  <td className="px-4 py-3">Sans objet</td>
-                  <td className="px-4 py-3">Payant, tarif journalier</td>
-                  <td className="px-4 py-3">Équipe professionnelle sur site</td>
-                </tr>
-                <tr className="border-t border-border">
-                  <th scope="row" className="text-left px-4 py-3 font-semibold text-foreground">Pet-sitter à domicile</th>
-                  <td className="px-4 py-3">Oui</td>
-                  <td className="px-4 py-3">Non, visites ponctuelles</td>
-                  <td className="px-4 py-3">Payant, à la visite</td>
-                  <td className="px-4 py-3">Relation professionnelle</td>
-                </tr>
-                <tr className="border-t border-border">
-                  <th scope="row" className="text-left px-4 py-3 font-semibold text-foreground">Garde par un proche</th>
-                  <td className="px-4 py-3">Variable</td>
-                  <td className="px-4 py-3">Variable</td>
-                  <td className="px-4 py-3">Sans frais en général</td>
-                  <td className="px-4 py-3">Relation familiale ou amicale</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </section>
+
 
 
 
@@ -697,6 +616,7 @@ const Landing = () => {
                 { href: "#entraide", label: t("landing.toc.aid"), mobile: false },
                 { href: "#chiffres", label: t("landing.toc.numbers"), mobile: true },
                 { href: "#confiance", label: t("landing.toc.trust"), mobile: true },
+                { href: "#comparatif", label: t("landing.toc.compare", { defaultValue: "Comparatif" }), mobile: false },
                 { href: "#matching", label: t("landing.toc.matching"), mobile: true },
                 { href: "#temoignages", label: t("landing.toc.testimonials"), mobile: true },
                 { href: "#notre-histoire", label: t("landing.toc.story"), mobile: false },
@@ -723,6 +643,14 @@ const Landing = () => {
       {/* ═══════════════ SECTION 2, CE QU'ON FAIT ENSEMBLE ═══════════════ */}
       <section id="usages" className="py-10 md:py-20 bg-background scroll-mt-24">
         <div className="max-w-5xl mx-auto px-6">
+          <div id="definition" className="max-w-3xl mb-10 md:mb-14 scroll-mt-24">
+            <h2 className="font-heading text-xl md:text-2xl font-semibold text-foreground mb-3">
+              Qu'est-ce que Guardiens&nbsp;?
+            </h2>
+            <p className="font-body text-base md:text-lg text-foreground/80 leading-relaxed">
+              Guardiens est une plateforme française de house-sitting et d'entraide entre particuliers. Le principe&nbsp;: un gardien vérifié, qui vit près de chez vous, s'installe dans votre maison pendant votre absence et s'occupe de vos animaux dans leur environnement. L'échange repose sur la confiance et la rencontre, sans frais pour le propriétaire. Guardiens couvre toute la France.
+            </p>
+          </div>
           <RevealSection>
             <span className="text-xs tracking-widest uppercase text-primary/60 font-body mb-4 block text-center">
               {t("landing.usages.eyebrow")}
@@ -1116,6 +1044,62 @@ const Landing = () => {
                 </p>
               </article>
             </RevealOnScroll>
+          </div>
+        </div>
+      </section>
+
+      {/* ═══════════════ SECTION COMPARATIF (extractible, GEO) ═══════════════ */}
+      <section id="comparatif" className="py-10 md:py-16 bg-accent/30 border-b border-border/40 scroll-mt-24">
+        <div className="max-w-4xl mx-auto px-6">
+          <h2 className="font-heading text-2xl md:text-4xl font-semibold text-foreground mb-3 scroll-mt-24">
+            House-sitting, pension, pet-sitter&nbsp;: que choisir&nbsp;?
+          </h2>
+          <p className="font-body text-sm md:text-base text-foreground/70 leading-relaxed mb-6 max-w-2xl">
+            Quatre solutions pour faire garder vos animaux pendant votre absence. Comparaison factuelle, sans jugement.
+          </p>
+          <div className="overflow-x-auto rounded-2xl border border-border bg-card">
+            <table className="w-full text-sm font-body min-w-[640px]">
+              <caption className="sr-only">Comparatif entre house-sitting Guardiens, pension, pet-sitter à domicile et garde par un proche.</caption>
+              <thead className="bg-muted/60 text-foreground">
+                <tr>
+                  <th scope="col" className="text-left px-4 py-3 font-semibold">Solution</th>
+                  <th scope="col" className="text-left px-4 py-3 font-semibold">L'animal reste chez lui</th>
+                  <th scope="col" className="text-left px-4 py-3 font-semibold">La maison est habitée</th>
+                  <th scope="col" className="text-left px-4 py-3 font-semibold">Coût pour le propriétaire</th>
+                  <th scope="col" className="text-left px-4 py-3 font-semibold">Lien humain</th>
+                </tr>
+              </thead>
+              <tbody className="text-foreground/80">
+                <tr className="border-t border-border">
+                  <th scope="row" className="text-left px-4 py-3 font-semibold text-foreground">House-sitting Guardiens</th>
+                  <td className="px-4 py-3">Oui</td>
+                  <td className="px-4 py-3">Oui, en permanence</td>
+                  <td className="px-4 py-3">Aucun frais entre membres</td>
+                  <td className="px-4 py-3">Rencontre préalable et avis croisés</td>
+                </tr>
+                <tr className="border-t border-border">
+                  <th scope="row" className="text-left px-4 py-3 font-semibold text-foreground">Pension</th>
+                  <td className="px-4 py-3">Non, l'animal est déplacé</td>
+                  <td className="px-4 py-3">Sans objet</td>
+                  <td className="px-4 py-3">Payant, tarif journalier</td>
+                  <td className="px-4 py-3">Équipe professionnelle sur site</td>
+                </tr>
+                <tr className="border-t border-border">
+                  <th scope="row" className="text-left px-4 py-3 font-semibold text-foreground">Pet-sitter à domicile</th>
+                  <td className="px-4 py-3">Oui</td>
+                  <td className="px-4 py-3">Non, visites ponctuelles</td>
+                  <td className="px-4 py-3">Payant, à la visite</td>
+                  <td className="px-4 py-3">Relation professionnelle</td>
+                </tr>
+                <tr className="border-t border-border">
+                  <th scope="row" className="text-left px-4 py-3 font-semibold text-foreground">Garde par un proche</th>
+                  <td className="px-4 py-3">Variable</td>
+                  <td className="px-4 py-3">Variable</td>
+                  <td className="px-4 py-3">Sans frais en général</td>
+                  <td className="px-4 py-3">Relation familiale ou amicale</td>
+                </tr>
+              </tbody>
+            </table>
           </div>
         </div>
       </section>
