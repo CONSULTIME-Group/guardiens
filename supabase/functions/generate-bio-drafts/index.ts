@@ -99,6 +99,17 @@ Mission :
       text: String(d.text || "").replaceAll("—", ","),
     }));
 
+    // Garde-fou refus IA : si l'un des 3 brouillons ressemble à un refus,
+    // retourner 502 propre plutôt que de laisser l'utilisateur choisir un
+    // texte du style « Je suis désolé, je ne peux pas rédiger… ».
+    const anyRefusal = parsed.drafts.some((d: any) => isLlmRefusal(d.text, 200));
+    if (anyRefusal) {
+      console.warn("generate-bio-drafts: LLM refusal detected in at least one draft");
+      return new Response(JSON.stringify({ error: "Nous n'avons pas pu générer vos brouillons, réessayez ou rédigez librement." }), {
+        status: 502, headers: { ...CORS_HEADERS, "Content-Type": "application/json" },
+      });
+    }
+
     return new Response(JSON.stringify(parsed), {
       headers: { ...CORS_HEADERS, "Content-Type": "application/json" },
     });
