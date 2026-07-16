@@ -1,4 +1,4 @@
-import { memo } from "react";
+import { memo, useEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
@@ -10,6 +10,7 @@ import type { AppRow, SitterInfo } from "./types";
 import type { AffinitySitterInput } from "@/lib/affinityScore";
 import TrustHaloAvatar from "@/components/sitters/TrustHaloAvatar";
 import OwnerToSitterAffinity from "@/components/matching/OwnerToSitterAffinity";
+import { supabase } from "@/integrations/supabase/client";
 
 interface ApplicationsSectionProps {
   recentApps: AppRow[];
@@ -134,6 +135,24 @@ const ApplicationsSection = memo(({ recentApps, sitterProfiles, sitterBadges, si
   // 'discussing' a déjà été ouvert/répondu → va dans "déjà consultées".
   const unread = recentApps.filter(a => a.status === "pending");
   const read = recentApps.filter(a => a.status !== "pending");
+
+  // Dès que le propriétaire voit sa liste de candidatures pending dans son
+  // dashboard, on marque ces candidatures comme "vues" (idempotent, non
+  // bloquant). Sans cela, un propriétaire qui consulte tout depuis son
+  // dashboard sans jamais ouvrir /sits/:id laisse le gardien avec un
+  // "toujours pas vu" trompeur. Le trigger enforce_application_status_transitions
+  // autorise la transition pending → viewed depuis un UPDATE owner direct.
+  const markedRef = useRef<Set<string>>(new Set());
+  useEffect(() => {
+    if (loading) return;
+    const sitIds = Array.from(new Set(unread.map(a => a.sit_id).filter(Boolean))) as string[];
+    const toMark = sitIds.filter(id => !markedRef.current.has(id));
+    if (toMark.length === 0) return;
+    toMark.forEach(id => markedRef.current.add(id));
+    for (const sitId of toMark) {
+      void supabase.rpc("mark_sit_applications_viewed" as any, { p_sit_id: sitId });
+    }
+  }, [loading, unread]);
 
   // « Voir toutes » : retiré entièrement de l'UI pendant le chargement,
   // affiché ensuite uniquement s'il y a des candidatures à consulter.
