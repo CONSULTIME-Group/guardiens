@@ -207,12 +207,6 @@ const ApplicationModal = ({
   }, [open, sitId]);
 
 
-  const handleSend = async () => {
-    if (!user || !message.trim()) return;
-
-    // Garde-fou anti-refus IA : ne jamais envoyer un message qui ressemble à
-    // une réponse d'échec du générateur (ex : "Je suis désolée, mais je ne
-    // peux pas rédiger..."). Voir bug P0 du 15/07/2026.
   const doSend = async (viaUneditedDraft = false) => {
     if (!user || !message.trim()) return;
 
