@@ -6,10 +6,19 @@
 // Vouvoiement, guardrails Guardiens, tiret cadratin proscrit.
 
 import { callLovableAI, extractToolArgs, STYLE_GUARDRAILS, CORS_HEADERS } from "../_shared/ai-gateway.ts";
+import { isLlmRefusal, logRefusalFallback } from "../_shared/refusal-guard.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 
 const RATE_LIMIT_PER_DAY = 2;
 const PROSCRIBED = /(voisin(e|s|age)?|auvergne-rhône-alpes|\bAURA\b)/i;
+
+const FALLBACK_DRAFTS = {
+  wifi_info: "Bienvenue à la maison. Le réseau WiFi est {nom du réseau} et le mot de passe est {mot de passe}. La box internet se trouve {emplacement de la box}. En cas de coupure, un simple redémarrage de la box (couper l'alimentation 30 secondes, puis rallumer) résout la plupart des soucis. La télévision se rallume avec {télécommande / nom de l'appli}. N'hésitez pas à me demander si un point n'est pas clair.",
+  neighborhood: "Voici quelques repères pratiques du coin. La boulangerie la plus proche se trouve {rue et distance}, ouverte {horaires}. Pour les courses du quotidien, {nom du commerce} est à {distance à pied ou en voiture}. Un joli coin de balade avec les animaux : {parc ou sentier}. Si vous cherchez un endroit calme pour souffler, {café ou lieu conseillé} est très apprécié. La pharmacie de garde est indiquée sur la vitrine de {pharmacie du coin}.",
+  veterinary: "En cas de besoin vétérinaire, notre praticien habituel est {nom du vétérinaire}, joignable au {téléphone}, cabinet situé {adresse}. Il connaît nos animaux et leur dossier. Pour les urgences en dehors des heures d'ouverture, la clinique de garde la plus proche est {nom et téléphone}. Pensez à emporter le carnet de santé, rangé {emplacement}. Nos animaux prennent {traitement en cours} si applicable, comme précisé dans leur fiche.",
+  emergency: "En cas de souci sérieux, contactez d'abord {nom du contact de secours} au {téléphone} : cette personne a la clé et peut se déplacer rapidement. Nous restons également joignables à {notre numéro} pendant notre absence. Les numéros d'urgence utiles : 15 (Samu), 18 (Pompiers), 112 (numéro européen). Le disjoncteur principal se trouve {emplacement}, la vanne d'eau {emplacement}. Merci pour votre vigilance.",
+};
+
 
 function json(body: unknown, status = 200) {
   return new Response(JSON.stringify(body), {
