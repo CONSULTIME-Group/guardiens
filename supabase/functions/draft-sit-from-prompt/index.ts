@@ -205,6 +205,23 @@ Si le prompt mentionne un prix ou une transaction financière, ignorez-le : Guar
       warnings.push("Quelques éléments à vérifier manuellement : le brouillon contient des termes à reformuler.");
     }
 
+    // Garde-fou refus IA : bloque un brouillon qui serait un refus du LLM
+    // (« Je suis désolé, je ne peux pas rédiger… ») plutôt que de l'écrire
+    // en base comme annonce draft.
+    if (
+      isLlmRefusal(draft.specific_expectations, 60)
+      || isLlmRefusal(draft.daily_routine, 60)
+      || isLlmRefusal(draft.owner_message, 60)
+      || isLlmRefusal(draft.title, 20)
+    ) {
+      console.warn("draft-sit-from-prompt: LLM refusal detected, aborting draft insert", {
+        userId,
+        preview: scanBlob.slice(0, 200),
+      });
+      return json({ error: "Nous n'avons pas pu générer votre brouillon, précisez votre absence en une phrase plus complète." }, 502);
+    }
+
+
     // Assure une property par défaut
     const { data: existingProp } = await supabase
       .from("properties")
