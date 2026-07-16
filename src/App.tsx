@@ -113,6 +113,8 @@ const TestHeroDistribution = lazy(() => import("./pages/TestHeroDistribution"));
 const AdminHeroWeights = lazy(() => import("./pages/AdminHeroWeights"));
 const TestErrorBoundary = lazy(() => import("./pages/TestErrorBoundary"));
 const TestEmptyStates = lazy(() => import("./pages/TestEmptyStates"));
+const MesCandidatures = lazy(() => import("./pages/MesCandidatures"));
+
 
 const PreviewOngoingSitHero = lazy(() => import("./pages/dev/PreviewOngoingSitHero"));
 const PreviewMissionCards = lazy(() => import("./pages/dev/PreviewMissionCards"));
@@ -424,6 +426,8 @@ const AppRoutes = () => {
 
         <Route path="/messages" element={<Messages />} />
         <Route path="/sits" element={<Sits />} />
+        <Route path="/mes-candidatures" element={<MesCandidatures />} />
+
         <Route path="/sits/create" element={<CreateSit />} />
         <Route path="/sits/:id" element={<SitDetail />} />
         <Route path="/sits/:id/edit" element={<EditSit />} />

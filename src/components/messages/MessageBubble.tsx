@@ -34,12 +34,14 @@ const systemMessageText = (
   if (!action && fallback) {
     const raw = fallback.trim();
     if (/vous invite.*reconsid[ée]rer/i.test(raw)) action = "reinvited";
+    else if (/a rouvert votre candidature/i.test(raw)) action = "reopened";
     else if (/^la garde est confirm[ée]e/i.test(raw) || /^vous avez [ée]t[ée] choisi/i.test(raw)) action = "candidature_acceptee";
     else if (/le guide de la maison est disponible/i.test(raw)) action = "guide_available";
     else if (/le propri[ée]taire a choisi un autre gardien/i.test(raw)) action = "other_sitter_chosen";
     else if (/votre candidature a [ée]t[ée] d[ée]clin[ée]e/i.test(raw)) action = "candidature_declinee_owner";
     else if (/^la garde.*a [ée]t[ée] annul[ée]e par/i.test(raw)) action = "garde_annulee_generique";
     else if (/un avis a [ée]t[ée] laiss[ée]/i.test(raw)) action = "review_left";
+
   }
   if (!action) return fallback;
   const map: Record<string, Record<string, string>> = {
@@ -87,6 +89,11 @@ const systemMessageText = (
       proprio: `Vous avez invité ${name || "ce gardien"} à reconsidérer sa candidature.`,
       gardien: "Le propriétaire vous invite à reconsidérer votre candidature.",
     },
+    reopened: {
+      proprio: `Vous avez rouvert la candidature de ${name || "ce gardien"}.`,
+      gardien: `${name || "Le propriétaire"} a rouvert votre candidature. Vous pouvez reprendre la discussion.`,
+    },
+
     guide_available: {
       proprio: "Vous avez rendu le guide de la maison disponible pour le gardien.",
       gardien: "Le guide de la maison est disponible. Vous y trouverez l'adresse, les codes d'accès, les contacts utiles et toutes les consignes.",

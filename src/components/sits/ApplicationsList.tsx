@@ -490,25 +490,27 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, prope
 
   const handleReinvite = async (app: any) => {
     try {
-      const { error } = await supabase.rpc('reinvite_candidat', {
+      // Depuis 2026-07-16 : bascule vers la RPC atomique reopen_application
+      // (l'ancienne RPC reinvite_candidat était bloquee par le trigger
+      // enforce_application_status_transitions durci).
+      const { error } = await supabase.rpc('reopen_application' as any, {
         p_application_id: app.id,
-        p_sit_id: sitId,
-        p_sitter_id: app.sitter_id,
       } as any);
       if (error) throw error;
       toast({
-        title: "Invitation envoyée",
-        description: `${app.sitter?.first_name ?? "Le gardien"} a été invité à reconsidérer sa candidature.`,
+        title: "Candidature rouverte",
+        description: `${app.sitter?.first_name ?? "Le gardien"} peut reprendre la discussion et repostuler.`,
       });
       load();
     } catch (err: any) {
       toast({
-        title: "Erreur",
+        title: "Impossible de rouvrir la candidature",
         description: err?.message ?? "Une erreur est survenue.",
         variant: "destructive",
       });
     }
   };
+
 
   const duration = startDate && endDate
     ? differenceInDays(parseISO(endDate), parseISO(startDate))
@@ -791,9 +793,10 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, prope
                 size="sm"
                 onClick={(e) => { e.stopPropagation(); handleReinvite(app); }}
               >
-                Inviter à nouveau
+                Rouvrir cette candidature
               </Button>
             )}
+
           </div>
         )}
       </div>

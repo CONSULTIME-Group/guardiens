@@ -7117,6 +7117,7 @@ export type Database = {
         }
         Returns: undefined
       }
+      reopen_application: { Args: { p_application_id: string }; Returns: Json }
       repondre_avis_annulation: {
         Args: {
           p_respondent_id: string
