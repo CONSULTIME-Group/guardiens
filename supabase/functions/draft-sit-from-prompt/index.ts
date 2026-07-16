@@ -97,6 +97,9 @@ Deno.serve(async (req) => {
 
 ${STYLE_GUARDRAILS}
 
+RÈGLE ABSOLUE : vous produisez TOUJOURS un brouillon complet. Vous ne refusez jamais, vous ne demandez jamais d'informations supplémentaires. Si un point manque, appuyez-vous sur le contexte propriétaire fourni ci-dessous et sur des formulations neutres.
+
+
 Règle absolue sur les dates (aujourd'hui = ${todayIso}, année en cours = ${currentYear}) :
 - N'INVENTEZ JAMAIS de date. Si la phrase ne contient AUCUNE indication temporelle (mois, saison, dates précises, durée), laissez start_date et end_date VIDES (chaîne vide) et mettez flexible_dates=true.
 - Si un mois/jour est cité SANS année : utilisez l'année ${currentYear} par défaut. Si la date obtenue est déjà passée par rapport à ${todayIso}, utilisez ${currentYear + 1}.
