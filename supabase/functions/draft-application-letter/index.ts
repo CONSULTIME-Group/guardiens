@@ -156,7 +156,7 @@ Deno.serve(async (req) => {
     ]);
 
     const owner = ownerRes.data || {};
-    const pets = (petsRes.data || []) as Array<{ name?: string; species?: string; breed?: string; age_years?: number }>;
+    const pets = (petsRes.data || []) as Array<{ name?: string; species?: string; breed?: string; age?: number }>;
     const me = meRes.data || {};
     const sitter = sitterRes.data || {};
 
