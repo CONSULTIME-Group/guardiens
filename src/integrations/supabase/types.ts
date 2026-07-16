@@ -7026,6 +7026,7 @@ export type Database = {
         Returns: string
       }
       is_account_empty: { Args: { _user_id: string }; Returns: boolean }
+      is_llm_refusal_text: { Args: { _txt: string }; Returns: boolean }
       is_profile_ready_for_action: {
         Args: { p_user_id?: string }
         Returns: boolean
