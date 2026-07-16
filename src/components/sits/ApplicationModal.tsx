@@ -59,6 +59,9 @@ const ApplicationModal = ({
   const [almaLoading, setAlmaLoading] = useState(false);
   const [almaDismissed, setAlmaDismissed] = useState(false);
   const [almaUsed, setAlmaUsed] = useState(false);
+  const [almaDraftText, setAlmaDraftText] = useState<string | null>(null);
+  const [unpersonalizedConfirmOpen, setUnpersonalizedConfirmOpen] = useState(false);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
   const almaSeenRef = useRef(false);
   const [companionWarning, setCompanionWarning] = useState<{
     text: string;
