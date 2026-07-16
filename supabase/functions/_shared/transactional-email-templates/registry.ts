@@ -146,6 +146,7 @@ export const TEMPLATES: Record<string, TemplateEntry> = {
   'sit-reminder-j7': sitReminderJ7,
   'sit-reminder-j48': sitReminderJ48,
   'alert-digest': alertDigest,
+  'application-message-restored': applicationMessageRestored,
 }
 
 
