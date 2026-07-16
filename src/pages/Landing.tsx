@@ -643,6 +643,14 @@ const Landing = () => {
       {/* ═══════════════ SECTION 2, CE QU'ON FAIT ENSEMBLE ═══════════════ */}
       <section id="usages" className="py-10 md:py-20 bg-background scroll-mt-24">
         <div className="max-w-5xl mx-auto px-6">
+          <div id="definition" className="max-w-3xl mb-10 md:mb-14 scroll-mt-24">
+            <h2 className="font-heading text-xl md:text-2xl font-semibold text-foreground mb-3">
+              Qu'est-ce que Guardiens&nbsp;?
+            </h2>
+            <p className="font-body text-base md:text-lg text-foreground/80 leading-relaxed">
+              Guardiens est une plateforme française de house-sitting et d'entraide entre particuliers. Le principe&nbsp;: un gardien vérifié, qui vit près de chez vous, s'installe dans votre maison pendant votre absence et s'occupe de vos animaux dans leur environnement. L'échange repose sur la confiance et la rencontre, sans frais pour le propriétaire. Guardiens couvre toute la France.
+            </p>
+          </div>
           <RevealSection>
             <span className="text-xs tracking-widest uppercase text-primary/60 font-body mb-4 block text-center">
               {t("landing.usages.eyebrow")}
