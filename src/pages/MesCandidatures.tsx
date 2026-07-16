@@ -260,6 +260,16 @@ const MesCandidatures = () => {
                         </div>
 
                         <div className="flex items-center gap-2 shrink-0">
+                          {app.status === "accepted" && sit.status === "in_progress" && (
+                            <HelpDuringSitDialog
+                              sitId={sit.id}
+                              sitTitle={sit.title}
+                              recipientUserId={sit.user_id}
+                              size="sm"
+                              variant="outline"
+                              className="rounded-xl"
+                            />
+                          )}
                           <Button
                             variant="outline"
                             size="sm"
@@ -270,6 +280,7 @@ const MesCandidatures = () => {
                             Message
                           </Button>
                         </div>
+
                       </div>
                     </div>
                   </div>
