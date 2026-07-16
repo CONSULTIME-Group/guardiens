@@ -1,6 +1,16 @@
 import { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
@@ -49,6 +59,9 @@ const ApplicationModal = ({
   const [almaLoading, setAlmaLoading] = useState(false);
   const [almaDismissed, setAlmaDismissed] = useState(false);
   const [almaUsed, setAlmaUsed] = useState(false);
+  const [almaDraftText, setAlmaDraftText] = useState<string | null>(null);
+  const [unpersonalizedConfirmOpen, setUnpersonalizedConfirmOpen] = useState(false);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
   const almaSeenRef = useRef(false);
   const [companionWarning, setCompanionWarning] = useState<{
     text: string;
@@ -194,7 +207,7 @@ const ApplicationModal = ({
   }, [open, sitId]);
 
 
-  const handleSend = async () => {
+  const doSend = async (viaUneditedDraft = false) => {
     if (!user || !message.trim()) return;
 
     // Garde-fou anti-refus IA : ne jamais envoyer un message qui ressemble à
@@ -208,6 +221,12 @@ const ApplicationModal = ({
         variant: "destructive",
       });
       return;
+    }
+
+    if (viaUneditedDraft) {
+      try {
+        await trackEvent("application_sent_unedited_draft", { metadata: { sit_id: sitId } });
+      } catch {}
     }
 
     setSending(true);
@@ -327,6 +346,16 @@ const ApplicationModal = ({
     onSuccess();
   };
 
+  const handleSend = () => {
+    if (!user || !message.trim() || sending) return;
+    const trimmed = message.trim();
+    if (almaDraftText && trimmed === almaDraftText.trim()) {
+      setUnpersonalizedConfirmOpen(true);
+      return;
+    }
+    void doSend(false);
+  };
+
   const p = sitterInfo?.profile;
 
   return (
@@ -409,10 +438,11 @@ const ApplicationModal = ({
                           const draft = (data as any)?.draft as string;
                           if (!draft) throw new Error("Aucun brouillon reçu");
                           setMessage(draft);
+                          setAlmaDraftText(draft);
                           setAlmaUsed(true);
                           setAlmaDismissed(true);
                           await trackEvent("alma_application_letter_generated", { metadata: { sit_id: sitId } });
-                          toast({ title: "Brouillon Alma prêt", description: "Tu peux relire et personnaliser avant d'envoyer." });
+                          toast({ title: "Brouillon Alma prêt", description: "Vous pouvez relire et personnaliser avant d'envoyer." });
                         } catch (e: any) {
                           toast({ title: "Alma indisponible", description: e?.message || "Réessaie dans un instant.", variant: "destructive" });
                         } finally {
@@ -436,6 +466,7 @@ const ApplicationModal = ({
               <p className="text-[10px] font-medium text-primary/80 uppercase tracking-wider">Brouillon Alma, à personnaliser</p>
             )}
             <Textarea
+              ref={textareaRef}
               id="application-message"
               value={message}
               onChange={(e) => setMessage(e.target.value)}
@@ -528,6 +559,35 @@ const ApplicationModal = ({
           </Button>
         </div>
       </DialogContent>
+
+      <AlertDialog open={unpersonalizedConfirmOpen} onOpenChange={setUnpersonalizedConfirmOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Un mot personnel fait la différence</AlertDialogTitle>
+            <AlertDialogDescription>
+              Ce message est le brouillon d'Alma tel quel. Les propriétaires choisissent d'abord une personne : une phrase personnelle augmente vos chances d'être choisi(e).
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel
+              onClick={() => {
+                setUnpersonalizedConfirmOpen(false);
+                setTimeout(() => textareaRef.current?.focus(), 50);
+              }}
+            >
+              Personnaliser mon message
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                setUnpersonalizedConfirmOpen(false);
+                void doSend(true);
+              }}
+            >
+              Envoyer quand même
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </Dialog>
   );
 };
