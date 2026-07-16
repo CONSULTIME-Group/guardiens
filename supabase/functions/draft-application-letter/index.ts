@@ -149,14 +149,14 @@ Deno.serve(async (req) => {
     const [ownerRes, petsRes, meRes, sitterRes] = await Promise.all([
       adminClient.from("profiles").select("first_name").eq("id", sit.user_id).maybeSingle(),
       sit.property_id
-        ? adminClient.from("pets").select("name, species, breed, age_years").eq("property_id", sit.property_id)
+        ? adminClient.from("pets").select("name, species, breed, age").eq("property_id", sit.property_id)
         : Promise.resolve({ data: [], error: null } as any),
       adminClient.from("profiles").select("first_name, bio, city").eq("id", userId).maybeSingle(),
       adminClient.from("sitter_profiles").select("motivation, experience_years, animal_types").eq("user_id", userId).maybeSingle(),
     ]);
 
     const owner = ownerRes.data || {};
-    const pets = (petsRes.data || []) as Array<{ name?: string; species?: string; breed?: string; age_years?: number }>;
+    const pets = (petsRes.data || []) as Array<{ name?: string; species?: string; breed?: string; age?: number }>;
     const me = meRes.data || {};
     const sitter = sitterRes.data || {};
 
@@ -214,7 +214,7 @@ Structure attendue :
           nom: p.name ?? null,
           espece: p.species ?? null,
           race: p.breed ?? null,
-          age_annees: p.age_years ?? null,
+          age_annees: p.age ?? null,
         })),
       },
       proprietaire: {

@@ -6,6 +6,7 @@
 // Rate limit 5/heure/user via analytics_events.
 
 import { callLovableAI, extractToolArgs, STYLE_GUARDRAILS, CORS_HEADERS } from "../_shared/ai-gateway.ts";
+import { isLlmRefusal } from "../_shared/refusal-guard.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 
 const RATE_LIMIT_PER_HOUR = 5;
@@ -62,6 +63,8 @@ Deno.serve(async (req) => {
     const system = `Vous êtes rédacteur pour Guardiens.fr. Un propriétaire souhaite republier une annonce existante en l'adaptant. Vous recevez l'annonce d'origine ET les modifications qu'il demande. Réécrivez UNIQUEMENT les champs texte pour refléter ses ajustements, en gardant la voix, la ville et les contraintes cohérentes avec l'original quand elles ne sont pas explicitement modifiées.
 
 ${STYLE_GUARDRAILS}
+
+RÈGLE ABSOLUE : vous produisez TOUJOURS une version adaptée exploitable. Vous ne refusez jamais, vous ne demandez jamais d'informations supplémentaires. Si un point est ambigu, appuyez-vous sur l'original.
 
 Contraintes :
 - Ne supprimez pas d'information essentielle de l'original (animaux, ville, contexte) sauf si l'ajustement le demande explicitement.
@@ -129,6 +132,16 @@ ${prompt.trim()}`;
             .filter((v: string) => (ALLOWED_ENVIRONMENTS as readonly string[]).includes(v)).slice(0, 3)
         : (source.environments ?? []),
     };
+
+    // Garde-fou refus IA sur les champs texte destinés à finir dans l'annonce.
+    const anyRefusal = isLlmRefusal(result.specific_expectations, 60)
+      || isLlmRefusal(result.daily_routine, 60)
+      || isLlmRefusal(result.owner_message, 60)
+      || isLlmRefusal(result.title, 20);
+    if (anyRefusal) {
+      console.warn("adapt-sit-with-alma: LLM refusal detected");
+      return json({ error: "Nous n'avons pas pu adapter votre annonce, précisez votre demande et réessayez." }, 502);
+    }
 
     return json(result, 200);
   } catch (e) {

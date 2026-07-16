@@ -6,10 +6,19 @@
 // Vouvoiement, guardrails Guardiens, tiret cadratin proscrit.
 
 import { callLovableAI, extractToolArgs, STYLE_GUARDRAILS, CORS_HEADERS } from "../_shared/ai-gateway.ts";
+import { isLlmRefusal, logRefusalFallback } from "../_shared/refusal-guard.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 
 const RATE_LIMIT_PER_DAY = 2;
 const PROSCRIBED = /(voisin(e|s|age)?|auvergne-rhône-alpes|\bAURA\b)/i;
+
+const FALLBACK_DRAFTS = {
+  wifi_info: "Bienvenue à la maison. Le réseau WiFi est {nom du réseau} et le mot de passe est {mot de passe}. La box internet se trouve {emplacement de la box}. En cas de coupure, un simple redémarrage de la box (couper l'alimentation 30 secondes, puis rallumer) résout la plupart des soucis. La télévision se rallume avec {télécommande / nom de l'appli}. N'hésitez pas à me demander si un point n'est pas clair.",
+  neighborhood: "Voici quelques repères pratiques du coin. La boulangerie la plus proche se trouve {rue et distance}, ouverte {horaires}. Pour les courses du quotidien, {nom du commerce} est à {distance à pied ou en voiture}. Un joli coin de balade avec les animaux : {parc ou sentier}. Si vous cherchez un endroit calme pour souffler, {café ou lieu conseillé} est très apprécié. La pharmacie de garde est indiquée sur la vitrine de {pharmacie du coin}.",
+  veterinary: "En cas de besoin vétérinaire, notre praticien habituel est {nom du vétérinaire}, joignable au {téléphone}, cabinet situé {adresse}. Il connaît nos animaux et leur dossier. Pour les urgences en dehors des heures d'ouverture, la clinique de garde la plus proche est {nom et téléphone}. Pensez à emporter le carnet de santé, rangé {emplacement}. Nos animaux prennent {traitement en cours} si applicable, comme précisé dans leur fiche.",
+  emergency: "En cas de souci sérieux, contactez d'abord {nom du contact de secours} au {téléphone} : cette personne a la clé et peut se déplacer rapidement. Nous restons également joignables à {notre numéro} pendant notre absence. Les numéros d'urgence utiles : 15 (Samu), 18 (Pompiers), 112 (numéro européen). Le disjoncteur principal se trouve {emplacement}, la vanne d'eau {emplacement}. Merci pour votre vigilance.",
+};
+
 
 function json(body: unknown, status = 200) {
   return new Response(JSON.stringify(body), {
@@ -54,19 +63,24 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Contexte : profil, owner_profile, propriété, animaux, guide existant
+    // Contexte : profil, owner_profile, propriété, animaux, guide existant.
+    // Colonnes RÉELLES : owner_profiles n'a ni property_type, ni environment
+    // (singulier), ni city, ni postal_code. Ces infos vivent sur properties
+    // et profiles.
     const [profileRes, ownerRes, propRes, guideRes] = await Promise.all([
       supabase.from("profiles").select("first_name, city, postal_code").eq("id", userId).maybeSingle(),
-      supabase.from("owner_profiles").select("property_type, environment, environments, city, postal_code").eq("user_id", userId).maybeSingle(),
-      supabase.from("properties").select("id, pets(species, first_name)").eq("user_id", userId).limit(1).maybeSingle(),
+      supabase.from("owner_profiles").select("environments, welcome_notes, rules_notes, presence_expected").eq("user_id", userId).maybeSingle(),
+      supabase.from("properties").select("id, type, environment, pets(species, name)").eq("user_id", userId).limit(1).maybeSingle(),
       supabase.from("house_guides").select("wifi_instructions, detailed_instructions, vet_address, emergency_contact_name").eq("user_id", userId).maybeSingle(),
     ]);
 
-    const city = ownerRes.data?.city || profileRes.data?.city || null;
-    const postalCode = ownerRes.data?.postal_code || profileRes.data?.postal_code || null;
-    const propertyType = ownerRes.data?.property_type || null;
-    const environments = ownerRes.data?.environments || (ownerRes.data?.environment ? [ownerRes.data.environment] : []);
-    const pets = (propRes.data?.pets ?? []).map((p: any) => ({ species: p.species, first_name: p.first_name }));
+    const city = profileRes.data?.city || null;
+    const postalCode = profileRes.data?.postal_code || null;
+    const propertyType = (propRes.data as any)?.type || null;
+    const environments = (ownerRes.data as any)?.environments
+      || ((propRes.data as any)?.environment ? [(propRes.data as any).environment] : []);
+    const pets = ((propRes.data as any)?.pets ?? []).map((p: any) => ({ species: p.species, name: p.name }));
+
 
     const system = `Vous êtes Alma, narratrice IA de Guardiens.fr. Vous rédigez, pour un propriétaire (vouvoiement), 4 trames courtes destinées à son "guide maison" (document confidentiel remis à son gardien pendant la garde).
 
@@ -113,13 +127,18 @@ Règles spécifiques :
       temperature: 0.4,
     });
 
-    if (!r.ok) return json({ error: r.error, code: r.code }, r.status);
-    const parsed = extractToolArgs(r.data);
-    if (!parsed) return json({ error: "Réponse IA invalide" }, 502);
+    // Sur 402/429 on remonte l'erreur (crédits/quota), sinon on peut basculer
+    // sur les fallbacks statiques plutôt que d'échouer durement.
+    if (!r.ok && (r.status === 402 || r.status === 429)) {
+      return json({ error: r.error, code: r.code }, r.status);
+    }
+    const parsed = r.ok ? extractToolArgs(r.data) : null;
+
+
 
     const warnings: string[] = [];
     const clean = (s: string) => {
-      let out = String(s || "").replaceAll("—", ",");
+      let out = String(s || "").replaceAll("—", ",").replaceAll("–", "-");
       if (PROSCRIBED.test(out)) {
         warnings.push("Un terme sensible a été détecté et neutralisé.");
         out = out.replace(new RegExp(PROSCRIBED, "gi"), "personne de confiance");
@@ -127,12 +146,37 @@ Règles spécifiques :
       return out.trim();
     };
 
-    const drafts = {
-      wifi_info: clean(parsed.wifi_info),
-      neighborhood: clean(parsed.neighborhood),
-      veterinary: clean(parsed.veterinary),
-      emergency: clean(parsed.emergency),
+    const applyGuard = (raw: unknown, fallback: string, key: string) => {
+      const cleaned = clean(String(raw ?? ""));
+      if (isLlmRefusal(cleaned, 60)) {
+        console.warn(`generate-house-guide: refusal on ${key}, using fallback`);
+        warnings.push(`Trame « ${key} » remplacée par un modèle générique.`);
+        return fallback;
+      }
+      return cleaned;
     };
+
+    let usedFallback = false;
+    if (!r.ok || !parsed) {
+      usedFallback = true;
+      warnings.push("Assistant IA momentanément indisponible, trames génériques proposées.");
+    }
+
+    const drafts = parsed ? {
+      wifi_info: applyGuard(parsed.wifi_info, FALLBACK_DRAFTS.wifi_info, "wifi_info"),
+      neighborhood: applyGuard(parsed.neighborhood, FALLBACK_DRAFTS.neighborhood, "neighborhood"),
+      veterinary: applyGuard(parsed.veterinary, FALLBACK_DRAFTS.veterinary, "veterinary"),
+      emergency: applyGuard(parsed.emergency, FALLBACK_DRAFTS.emergency, "emergency"),
+    } : { ...FALLBACK_DRAFTS };
+
+    if (usedFallback || warnings.some((w) => w.startsWith("Trame «"))) {
+      await logRefusalFallback(supabase, {
+        user_id: userId,
+        surface: "alma_house_guide",
+        reason: usedFallback ? "gateway_error" : "llm_refusal",
+      });
+    }
+
 
     // hint : le guide existant (info : on aurait pu skipper les champs déjà remplis, on laisse le client décider)
     const already = {

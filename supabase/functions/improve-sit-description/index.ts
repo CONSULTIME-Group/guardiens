@@ -3,6 +3,7 @@
 // Sortie : { title, description, suggestions[] }
 
 import { callLovableAI, extractToolArgs, STYLE_GUARDRAILS, CORS_HEADERS } from "../_shared/ai-gateway.ts";
+import { isLlmRefusal } from "../_shared/refusal-guard.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 
 Deno.serve(async (req) => {
@@ -42,6 +43,8 @@ Deno.serve(async (req) => {
     const system = `Vous êtes éditeur d'annonces de garde de maison et d'animaux pour une plateforme française de confiance.
 
 ${STYLE_GUARDRAILS}
+
+RÈGLE ABSOLUE : vous produisez TOUJOURS une version améliorée exploitable. Vous ne refusez jamais, vous ne demandez jamais d'informations complémentaires. Si un élément manque, vous vous appuyez sur ce qui est fourni.
 
 Mission :
 - Corriger l'orthographe et la grammaire.
@@ -98,6 +101,16 @@ Mission :
     // Filet de sécurité : strip tiret cadratin résiduel.
     parsed.title = String(parsed.title || "").replaceAll("—", ",");
     parsed.description = String(parsed.description || "").replaceAll("—", ",");
+
+    // Garde-fou refus IA : si l'un des deux champs ressemble à un refus,
+    // renvoyer 502 propre plutôt que de laisser l'utilisateur coller ça
+    // dans son formulaire d'annonce.
+    if (isLlmRefusal(parsed.description, 100) || isLlmRefusal(parsed.title, 20)) {
+      console.warn("improve-sit-description: LLM refusal detected", { preview: String(parsed.description).slice(0, 120) });
+      return new Response(JSON.stringify({ error: "Nous n'avons pas pu améliorer votre texte, réessayez ou modifiez-le manuellement." }), {
+        status: 502, headers: { ...CORS_HEADERS, "Content-Type": "application/json" },
+      });
+    }
 
     return new Response(JSON.stringify(parsed), {
       headers: { ...CORS_HEADERS, "Content-Type": "application/json" },

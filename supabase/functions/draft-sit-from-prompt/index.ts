@@ -11,6 +11,7 @@
 //  6. Insert sits status='draft' et renvoie l'id.
 
 import { callLovableAI, extractToolArgs, STYLE_GUARDRAILS, CORS_HEADERS } from "../_shared/ai-gateway.ts";
+import { isLlmRefusal } from "../_shared/refusal-guard.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 
 const RATE_LIMIT_PER_HOUR = 3;
@@ -95,6 +96,9 @@ Deno.serve(async (req) => {
     const system = `Vous êtes rédacteur pour Guardiens.fr, plateforme française de garde d'animaux à domicile entre particuliers de confiance. Un propriétaire vous décrit son besoin en une phrase. Générez un brouillon d'annonce complet, prêt à être relu et publié.
 
 ${STYLE_GUARDRAILS}
+
+RÈGLE ABSOLUE : vous produisez TOUJOURS un brouillon complet. Vous ne refusez jamais, vous ne demandez jamais d'informations supplémentaires. Si un point manque, appuyez-vous sur le contexte propriétaire fourni ci-dessous et sur des formulations neutres.
+
 
 Règle absolue sur les dates (aujourd'hui = ${todayIso}, année en cours = ${currentYear}) :
 - N'INVENTEZ JAMAIS de date. Si la phrase ne contient AUCUNE indication temporelle (mois, saison, dates précises, durée), laissez start_date et end_date VIDES (chaîne vide) et mettez flexible_dates=true.
@@ -200,6 +204,23 @@ Si le prompt mentionne un prix ou une transaction financière, ignorez-le : Guar
     if (PROSCRIBED.test(scanBlob)) {
       warnings.push("Quelques éléments à vérifier manuellement : le brouillon contient des termes à reformuler.");
     }
+
+    // Garde-fou refus IA : bloque un brouillon qui serait un refus du LLM
+    // (« Je suis désolé, je ne peux pas rédiger… ») plutôt que de l'écrire
+    // en base comme annonce draft.
+    if (
+      isLlmRefusal(draft.specific_expectations, 60)
+      || isLlmRefusal(draft.daily_routine, 60)
+      || isLlmRefusal(draft.owner_message, 60)
+      || isLlmRefusal(draft.title, 20)
+    ) {
+      console.warn("draft-sit-from-prompt: LLM refusal detected, aborting draft insert", {
+        userId,
+        preview: scanBlob.slice(0, 200),
+      });
+      return json({ error: "Nous n'avons pas pu générer votre brouillon, précisez votre absence en une phrase plus complète." }, 502);
+    }
+
 
     // Assure une property par défaut
     const { data: existingProp } = await supabase
