@@ -1,4 +1,4 @@
-import { memo } from "react";
+import { memo, useEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
@@ -10,6 +10,7 @@ import type { AppRow, SitterInfo } from "./types";
 import type { AffinitySitterInput } from "@/lib/affinityScore";
 import TrustHaloAvatar from "@/components/sitters/TrustHaloAvatar";
 import OwnerToSitterAffinity from "@/components/matching/OwnerToSitterAffinity";
+import { supabase } from "@/integrations/supabase/client";
 
 interface ApplicationsSectionProps {
   recentApps: AppRow[];
