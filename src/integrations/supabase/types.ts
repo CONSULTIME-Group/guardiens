@@ -6418,6 +6418,7 @@ export type Database = {
           message: string
           sitter_id: string
           status: string
+          viewed_at: string
         }[]
       }
       admin_get_listing_conversations: {
