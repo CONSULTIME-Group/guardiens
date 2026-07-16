@@ -346,6 +346,16 @@ const ApplicationModal = ({
     onSuccess();
   };
 
+  const handleSend = () => {
+    if (!user || !message.trim() || sending) return;
+    const trimmed = message.trim();
+    if (almaDraftText && trimmed === almaDraftText.trim()) {
+      setUnpersonalizedConfirmOpen(true);
+      return;
+    }
+    void doSend(false);
+  };
+
   const p = sitterInfo?.profile;
 
   return (
