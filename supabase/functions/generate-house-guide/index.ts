@@ -127,6 +127,15 @@ Règles spécifiques :
       temperature: 0.4,
     });
 
+    // Sur 402/429 on remonte l'erreur (crédits/quota), sinon on peut basculer
+    // sur les fallbacks statiques plutôt que d'échouer durement.
+    if (!r.ok && (r.status === 402 || r.status === 429)) {
+      return json({ error: r.error, code: r.code }, r.status);
+    }
+    const parsed = r.ok ? extractToolArgs(r.data) : null;
+
+
+
     const warnings: string[] = [];
     const clean = (s: string) => {
       let out = String(s || "").replaceAll("—", ",").replaceAll("–", "-");
