@@ -5,8 +5,10 @@ import { fr } from "date-fns/locale";
 import { MessageSquare, ArrowRight, Sparkles, Calendar, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { getOptimizedImageUrl } from "@/lib/imageOptim";
+import HelpDuringSitDialog from "@/components/sits/HelpDuringSitDialog";
 import { capitalize } from "./helpers";
 import type { SitRow, SitterInfo } from "./types";
+
 
 interface OngoingSitHeroProps {
   sit: SitRow;
@@ -169,7 +171,19 @@ const OngoingSitHero = memo(({ sit, sitterProfiles, coverPhoto }: OngoingSitHero
                 <Button asChild variant="outline" size="sm" className="flex-1 sm:flex-initial rounded-xl">
                   <Link to={`/sits/${sit.id}`}>Voir l'annonce</Link>
                 </Button>
+                {sitter?.id && (
+                  <HelpDuringSitDialog
+                    sitId={sit.id}
+                    sitTitle={sit.title}
+                    recipientUserId={sitter.id}
+                    senderFirstName={undefined}
+                    size="sm"
+                    variant="outline"
+                    className="flex-1 sm:flex-initial rounded-xl"
+                  />
+                )}
               </div>
+
 
               {sitter?.id ? (
                 <Link

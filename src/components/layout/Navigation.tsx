@@ -259,7 +259,7 @@ export const Sidebar = () => {
             <>
               <GroupLabel label="Mon activité" />
               <SidebarItem to="/dashboard" icon={Home} label="Dashboard" />
-              <SidebarItem to="/sits" icon={Calendar} label={effectiveRole === "owner" ? "Mes annonces" : "Mes candidatures"} badge={sitsBadge} />
+              <SidebarItem to={effectiveRole === "owner" ? "/sits" : "/mes-candidatures"} icon={Calendar} label={effectiveRole === "owner" ? "Mes annonces" : "Mes candidatures"} badge={sitsBadge} />
               <SidebarItem to="/messages" icon={MessageCircle} label="Messages" badge={unreadCount} />
               <SidebarItem to={effectiveRole === "owner" ? "/owner-profile" : "/profile"} icon={User} label="Mon profil" />
               <SidebarItem to="/mes-avis" icon={Star} label="Mes avis" />
@@ -627,7 +627,7 @@ export const BottomNav = () => {
                 {[
                   { to: "/profile", icon: UserCircle2, label: "Mon profil", badge: 0 },
                   { to: "/search", icon: Search, label: effectiveRole === "owner" ? "Recherche gardiens" : "Recherche", badge: 0 },
-                  { to: "/sits", icon: Calendar, label: effectiveRole === "owner" ? "Mes annonces" : "Mes candidatures", badge: sitsBadge },
+                  { to: effectiveRole === "owner" ? "/sits" : "/mes-candidatures", icon: Calendar, label: effectiveRole === "owner" ? "Mes annonces" : "Mes candidatures", badge: sitsBadge },
                   { to: "/messages", icon: MessageCircle, label: "Messages", badge: unreadCount },
                   { to: "/favoris", icon: Heart, label: "Mes favoris", badge: 0 },
                   { to: "/petites-missions", icon: Handshake, label: "Entraide", badge: missionBadgeCount },
