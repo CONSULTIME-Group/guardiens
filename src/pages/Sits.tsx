@@ -1349,22 +1349,34 @@ const SitCard = ({
           </div>
 
           {/* Sitter meta : envoi + consultation par le propriétaire */}
-          {!isOwner && sit.application_status === "pending" && sit.application_created_at && (() => {
-            const sent = `Envoyée ${
-              (() => {
-                try {
-                  const d = new Date(sit.application_created_at);
-                  const days = Math.max(0, Math.floor((Date.now() - d.getTime()) / 86400000));
-                  return days === 0 ? "aujourd'hui" : days === 1 ? "il y a 1 jour" : `il y a ${days} jours`;
-                } catch { return ""; }
-              })()
-            }`;
+          {!isOwner && (sit.application_status === "pending" || sit.application_status === "viewed") && sit.application_created_at && (() => {
+            const relative = (iso?: string | null) => {
+              if (!iso) return "";
+              try {
+                const d = new Date(iso);
+                const days = Math.max(0, Math.floor((Date.now() - d.getTime()) / 86400000));
+                if (days === 0) {
+                  const hours = Math.max(0, Math.floor((Date.now() - d.getTime()) / 3600000));
+                  return hours <= 1 ? "il y a moins d'une heure" : `il y a ${hours} heures`;
+                }
+                return days === 1 ? "il y a 1 jour" : `il y a ${days} jours`;
+              } catch { return ""; }
+            };
+            const sent = `Envoyée ${relative(sit.application_created_at)}`;
+            const viewedAt = sit.application_viewed_at as string | null | undefined;
+            const isViewed = sit.application_status === "viewed" || !!viewedAt;
             return (
               <div className="mt-2 flex flex-col gap-0.5">
                 <span className="text-xs text-muted-foreground">{sent}</span>
+                {isViewed && (
+                  <span className="text-xs text-primary">
+                    Vue par le propriétaire{viewedAt ? ` ${relative(viewedAt)}` : ""}
+                  </span>
+                )}
               </div>
             );
           })()}
+
 
           {/* Other party */}
           {otherParty && (
