@@ -17,35 +17,33 @@ const MAX_BATCH = 50;
 const MAX_ATTEMPTS = 6;
 const TTL_HOURS = 36; // hard expire after 36h to avoid stale notifications
 
-function getJwtRole(authHeader: string | null): string | null {
-  if (!authHeader?.startsWith("Bearer ")) return null;
-
-  try {
-    const token = authHeader.slice("Bearer ".length);
-    const parts = token.split(".");
-    if (parts.length !== 3) return null;
-
-    const base64 = parts[1].replace(/-/g, "+").replace(/_/g, "/");
-    const padded = base64.padEnd(Math.ceil(base64.length / 4) * 4, "=");
-    const payload = JSON.parse(atob(padded)) as { role?: unknown };
-    return typeof payload.role === "string" ? payload.role : null;
-  } catch {
-    return null;
-  }
-}
-
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
 
   const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
   const SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 
-  // The gateway validates the JWT (verify_jwt = true); only service_role may proceed.
-  if (getJwtRole(req.headers.get("Authorization")) !== "service_role") {
+  // Auth : accepte la clé service_role brute (comparaison directe avec l'env,
+  // pattern éprouvé de send-transactional-email et evaluate-journeys). Le
+  // décodage de claim JWT `role=service_role` échoue pour les clés du vault
+  // qui ne portent pas ce claim, ce qui bloquait le drainage automatique.
+  const authHeader = req.headers.get("Authorization") ?? "";
+  const token = authHeader.startsWith("Bearer ") ? authHeader.slice(7) : "";
+  let authorized = !!token && token === SERVICE_KEY;
+  if (!authorized && token && token.split(".").length === 3) {
+    try {
+      const b64 = token.split(".")[1].replace(/-/g, "+").replace(/_/g, "/");
+      const pad = b64.length % 4 === 0 ? "" : "=".repeat(4 - (b64.length % 4));
+      const payload = JSON.parse(atob(b64 + pad)) as { role?: unknown };
+      if (payload?.role === "service_role") authorized = true;
+    } catch { /* ignore */ }
+  }
+  if (!authorized) {
     return new Response(JSON.stringify({ error: "Unauthorized" }), {
       status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   }
+
 
   const supabase = createClient(SUPABASE_URL, SERVICE_KEY);
 
