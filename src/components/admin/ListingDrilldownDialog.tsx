@@ -168,12 +168,18 @@ export const ListingDrilldownDialog = ({ open, onOpenChange, sitId, sitTitle, in
                           <Link to={`/gardiens/${a.sitter_id}`} className="font-medium hover:underline">
                             {name}
                           </Link>
-                          <div className="flex items-center gap-2">
+                          <div className="flex items-center gap-2 flex-wrap">
                             <Badge variant={st.tone}>{st.label}</Badge>
                             <span className="text-xs text-muted-foreground">
-                              {formatDistanceToNow(new Date(a.created_at), { addSuffix: true, locale: fr })}
+                              {a.viewed_at
+                                ? `Vue le ${format(new Date(a.viewed_at), "dd/MM/yyyy à HH:mm", { locale: fr })}`
+                                : "Non vue"}
+                            </span>
+                            <span className="text-xs text-muted-foreground">
+                              · {formatDistanceToNow(new Date(a.created_at), { addSuffix: true, locale: fr })}
                             </span>
                           </div>
+
                         </div>
                         {a.message && (
                           <p className="text-sm text-muted-foreground mt-2 whitespace-pre-wrap">
