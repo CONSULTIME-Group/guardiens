@@ -259,7 +259,8 @@ export type EventType =
   | "sits_create_step_started"                  // Étape du wizard CreateSit entamée (step)
   | "sits_create_step_completed"                // Étape terminée (step, duration_ms)
   | "sits_create_abandoned"                     // Wizard quitté sans publication (step, has_draft)
-  | "application_submitted";                    // Candidature envoyée (source, used_alma_draft, message_length)
+  | "application_submitted"                     // Candidature envoyée (source, used_alma_draft, message_length)
+  | "application_sent_unedited_draft";          // Candidature envoyée avec brouillon Alma non modifié (sit_id)
 
 
 
