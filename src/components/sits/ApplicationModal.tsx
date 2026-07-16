@@ -213,6 +213,12 @@ const ApplicationModal = ({
     // Garde-fou anti-refus IA : ne jamais envoyer un message qui ressemble à
     // une réponse d'échec du générateur (ex : "Je suis désolée, mais je ne
     // peux pas rédiger..."). Voir bug P0 du 15/07/2026.
+  const doSend = async (viaUneditedDraft = false) => {
+    if (!user || !message.trim()) return;
+
+    // Garde-fou anti-refus IA : ne jamais envoyer un message qui ressemble à
+    // une réponse d'échec du générateur (ex : "Je suis désolée, mais je ne
+    // peux pas rédiger..."). Voir bug P0 du 15/07/2026.
     const { isLlmRefusal } = await import("@/lib/detectLlmRefusal");
     if (isLlmRefusal(message)) {
       toast({
@@ -221,6 +227,12 @@ const ApplicationModal = ({
         variant: "destructive",
       });
       return;
+    }
+
+    if (viaUneditedDraft) {
+      try {
+        await trackEvent("application_sent_unedited_draft", { metadata: { sit_id: sitId } });
+      } catch {}
     }
 
     setSending(true);
