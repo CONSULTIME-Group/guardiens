@@ -64,10 +64,13 @@ const initials = (name: string | null | undefined) =>
 
 const STATUS_LABEL: Record<string, { label: string; tone: "default" | "secondary" | "outline" | "destructive" }> = {
   pending: { label: "En attente", tone: "outline" },
+  viewed: { label: "Vue", tone: "secondary" },
+  discussing: { label: "En discussion", tone: "secondary" },
   accepted: { label: "Acceptée", tone: "default" },
   rejected: { label: "Refusée", tone: "destructive" },
   cancelled: { label: "Annulée", tone: "secondary" },
 };
+
 
 export const ListingDrilldownDialog = ({ open, onOpenChange, sitId, sitTitle, initialTab = "applications" }: Props) => {
   const [tab, setTab] = useState<Tab>(initialTab);
