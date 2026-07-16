@@ -29,8 +29,10 @@ interface Application {
   avatar_url: string | null;
   message: string | null;
   status: string;
+  viewed_at: string | null;
   created_at: string;
 }
+
 
 interface Conversation {
   conversation_id: string;
@@ -62,10 +64,13 @@ const initials = (name: string | null | undefined) =>
 
 const STATUS_LABEL: Record<string, { label: string; tone: "default" | "secondary" | "outline" | "destructive" }> = {
   pending: { label: "En attente", tone: "outline" },
+  viewed: { label: "Vue", tone: "secondary" },
+  discussing: { label: "En discussion", tone: "secondary" },
   accepted: { label: "Acceptée", tone: "default" },
   rejected: { label: "Refusée", tone: "destructive" },
   cancelled: { label: "Annulée", tone: "secondary" },
 };
+
 
 export const ListingDrilldownDialog = ({ open, onOpenChange, sitId, sitTitle, initialTab = "applications" }: Props) => {
   const [tab, setTab] = useState<Tab>(initialTab);
@@ -163,12 +168,18 @@ export const ListingDrilldownDialog = ({ open, onOpenChange, sitId, sitTitle, in
                           <Link to={`/gardiens/${a.sitter_id}`} className="font-medium hover:underline">
                             {name}
                           </Link>
-                          <div className="flex items-center gap-2">
+                          <div className="flex items-center gap-2 flex-wrap">
                             <Badge variant={st.tone}>{st.label}</Badge>
                             <span className="text-xs text-muted-foreground">
-                              {formatDistanceToNow(new Date(a.created_at), { addSuffix: true, locale: fr })}
+                              {a.viewed_at
+                                ? `Vue le ${format(new Date(a.viewed_at), "dd/MM/yyyy à HH:mm", { locale: fr })}`
+                                : "Non vue"}
+                            </span>
+                            <span className="text-xs text-muted-foreground">
+                              · {formatDistanceToNow(new Date(a.created_at), { addSuffix: true, locale: fr })}
                             </span>
                           </div>
+
                         </div>
                         {a.message && (
                           <p className="text-sm text-muted-foreground mt-2 whitespace-pre-wrap">

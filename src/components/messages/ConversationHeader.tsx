@@ -71,6 +71,16 @@ const ConversationHeader = ({
   const sitterName = capitalize(conv.other_user?.first_name) || "le gardien";
   const appBadge = conv.application_status ? appStatusBadge[conv.application_status] : null;
 
+  // Propriétaire ouvre une conversation liée à une candidature : marque
+  // silencieusement toutes ses candidatures pending sur ce sit comme "viewed".
+  // Idempotent, non bloquant. La RPC vérifie l'ownership côté serveur.
+  // N'affecte pas les relances (cron traite pending + viewed comme sans réponse).
+  useEffect(() => {
+    if (!isOwner || !conv.sit_id) return;
+    void supabase.rpc("mark_sit_applications_viewed" as any, { p_sit_id: conv.sit_id });
+  }, [isOwner, conv.sit_id]);
+
+
   // Mission exchange roles
   const isInitiator = responseData?.responder_id === userId;
   const isRecipient = missionData?.user_id === userId;

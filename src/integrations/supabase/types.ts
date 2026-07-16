@@ -604,6 +604,7 @@ export type Database = {
           sit_id: string
           sitter_id: string
           status: Database["public"]["Enums"]["application_status"]
+          viewed_at: string | null
         }
         Insert: {
           created_at?: string
@@ -612,6 +613,7 @@ export type Database = {
           sit_id: string
           sitter_id: string
           status?: Database["public"]["Enums"]["application_status"]
+          viewed_at?: string | null
         }
         Update: {
           created_at?: string
@@ -620,6 +622,7 @@ export type Database = {
           sit_id?: string
           sitter_id?: string
           status?: Database["public"]["Enums"]["application_status"]
+          viewed_at?: string | null
         }
         Relationships: [
           {
@@ -6415,6 +6418,7 @@ export type Database = {
           message: string
           sitter_id: string
           status: string
+          viewed_at: string
         }[]
       }
       admin_get_listing_conversations: {
@@ -7058,6 +7062,10 @@ export type Database = {
           _user_email?: string
         }
         Returns: string
+      }
+      mark_sit_applications_viewed: {
+        Args: { p_sit_id: string }
+        Returns: number
       }
       mark_user_seen: { Args: never; Returns: undefined }
       move_to_dlq: {

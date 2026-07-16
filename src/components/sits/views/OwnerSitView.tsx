@@ -148,6 +148,17 @@ const OwnerSitView = ({
   // sync if parent re-fetches
   useEffect(() => setInternalAppCount(appCount), [appCount]);
 
+  // Marque silencieusement les candidatures "pending" de ce sit en "viewed"
+  // dès que le propriétaire ouvre son OwnerSitView (la section #candidatures
+  // est toujours rendue sur cette route). Idempotent, non bloquant.
+  // Le cron nudge-owner-pending-application traite viewed comme toujours
+  // sans réponse : marquer "viewed" ne coupe donc PAS les relances.
+  useEffect(() => {
+    if (!sit?.id) return;
+    void supabase.rpc("mark_sit_applications_viewed" as any, { p_sit_id: sit.id });
+  }, [sit?.id]);
+
+
   // Sauvegarde debounced des overrides logement/animaux.
   // - Stocke la dernière valeur en attente dans `pendingOverrides` (ref)
   //   pour pouvoir flusher de manière synchrone en cas de unmount/navigation.
