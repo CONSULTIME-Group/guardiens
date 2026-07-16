@@ -559,6 +559,35 @@ const ApplicationModal = ({
           </Button>
         </div>
       </DialogContent>
+
+      <AlertDialog open={unpersonalizedConfirmOpen} onOpenChange={setUnpersonalizedConfirmOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Un mot personnel fait la différence</AlertDialogTitle>
+            <AlertDialogDescription>
+              Ce message est le brouillon d'Alma tel quel. Les propriétaires choisissent d'abord une personne : une phrase personnelle augmente vos chances d'être choisi(e).
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel
+              onClick={() => {
+                setUnpersonalizedConfirmOpen(false);
+                setTimeout(() => textareaRef.current?.focus(), 50);
+              }}
+            >
+              Personnaliser mon message
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                setUnpersonalizedConfirmOpen(false);
+                void doSend(true);
+              }}
+            >
+              Envoyer quand même
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </Dialog>
   );
 };
