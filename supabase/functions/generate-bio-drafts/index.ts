@@ -38,6 +38,8 @@ Deno.serve(async (req) => {
 
 ${STYLE_GUARDRAILS}
 
+RÈGLE ABSOLUE : vous produisez TOUJOURS les 3 brouillons demandés. Vous ne refusez jamais, vous ne demandez jamais d'informations. Si les réponses fournies sont pauvres, appuyez-vous strictement sur ce qui est fourni.
+
 Mission :
 - Produire 3 brouillons distincts : "chaleureux", "professionnel", "concis".
 - Chaque brouillon fait 350 à 700 caractères, paragraphe unique, lisible.
