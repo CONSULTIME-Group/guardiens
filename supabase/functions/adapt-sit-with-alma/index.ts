@@ -133,6 +133,16 @@ ${prompt.trim()}`;
         : (source.environments ?? []),
     };
 
+    // Garde-fou refus IA sur les champs texte destinés à finir dans l'annonce.
+    const anyRefusal = isLlmRefusal(result.specific_expectations, 60)
+      || isLlmRefusal(result.daily_routine, 60)
+      || isLlmRefusal(result.owner_message, 60)
+      || isLlmRefusal(result.title, 20);
+    if (anyRefusal) {
+      console.warn("adapt-sit-with-alma: LLM refusal detected");
+      return json({ error: "Nous n'avons pas pu adapter votre annonce, précisez votre demande et réessayez." }, 502);
+    }
+
     return json(result, 200);
   } catch (e) {
     console.error("adapt-sit-with-alma error:", e);
