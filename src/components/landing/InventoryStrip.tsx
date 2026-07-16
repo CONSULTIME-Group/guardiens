@@ -41,6 +41,9 @@ export default function InventoryStrip() {
           {t("landing.inventory.title")}
         </h2>
         <p className="mt-3 italic text-muted-foreground">{t("landing.inventory.subtitle")}</p>
+        <p className="mt-2 text-xs text-foreground/50">
+          Chiffres mis à jour le {new Date().toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" })}.
+        </p>
 
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 md:gap-6 mt-10">
           {isLoading
