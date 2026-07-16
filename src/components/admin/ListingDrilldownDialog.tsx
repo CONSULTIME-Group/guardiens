@@ -29,8 +29,10 @@ interface Application {
   avatar_url: string | null;
   message: string | null;
   status: string;
+  viewed_at: string | null;
   created_at: string;
 }
+
 
 interface Conversation {
   conversation_id: string;
