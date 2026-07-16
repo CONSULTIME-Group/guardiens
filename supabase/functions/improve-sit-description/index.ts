@@ -102,6 +102,16 @@ Mission :
     parsed.title = String(parsed.title || "").replaceAll("—", ",");
     parsed.description = String(parsed.description || "").replaceAll("—", ",");
 
+    // Garde-fou refus IA : si l'un des deux champs ressemble à un refus,
+    // renvoyer 502 propre plutôt que de laisser l'utilisateur coller ça
+    // dans son formulaire d'annonce.
+    if (isLlmRefusal(parsed.description, 100) || isLlmRefusal(parsed.title, 20)) {
+      console.warn("improve-sit-description: LLM refusal detected", { preview: String(parsed.description).slice(0, 120) });
+      return new Response(JSON.stringify({ error: "Nous n'avons pas pu améliorer votre texte, réessayez ou modifiez-le manuellement." }), {
+        status: 502, headers: { ...CORS_HEADERS, "Content-Type": "application/json" },
+      });
+    }
+
     return new Response(JSON.stringify(parsed), {
       headers: { ...CORS_HEADERS, "Content-Type": "application/json" },
     });
