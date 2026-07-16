@@ -75,6 +75,7 @@ import { template as ownerActivationNudge } from './owner-activation-nudge.tsx'
 import { template as sitReminderJ7 } from './sit-reminder-j7.tsx'
 import { template as sitReminderJ48 } from './sit-reminder-j48.tsx'
 import { template as alertDigest } from './alert-digest.tsx'
+import { template as applicationMessageRestored } from './application-message-restored.tsx'
 
 
 
