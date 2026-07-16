@@ -32,6 +32,8 @@ import { useToast } from "@/hooks/use-toast";
 import { getOptimizedImageUrl } from "@/lib/imageOptim";
 import { formatSitPeriod } from "@/lib/dateRange";
 import { logger } from "@/lib/logger";
+import HelpDuringSitDialog from "@/components/sits/HelpDuringSitDialog";
+
 
 interface SitterApp {
   id: string;
