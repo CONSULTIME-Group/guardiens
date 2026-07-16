@@ -438,10 +438,11 @@ const ApplicationModal = ({
                           const draft = (data as any)?.draft as string;
                           if (!draft) throw new Error("Aucun brouillon reçu");
                           setMessage(draft);
+                          setAlmaDraftText(draft);
                           setAlmaUsed(true);
                           setAlmaDismissed(true);
                           await trackEvent("alma_application_letter_generated", { metadata: { sit_id: sitId } });
-                          toast({ title: "Brouillon Alma prêt", description: "Tu peux relire et personnaliser avant d'envoyer." });
+                          toast({ title: "Brouillon Alma prêt", description: "Vous pouvez relire et personnaliser avant d'envoyer." });
                         } catch (e: any) {
                           toast({ title: "Alma indisponible", description: e?.message || "Réessaie dans un instant.", variant: "destructive" });
                         } finally {
