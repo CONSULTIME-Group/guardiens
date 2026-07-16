@@ -64,6 +64,8 @@ Deno.serve(async (req) => {
 
 ${STYLE_GUARDRAILS}
 
+RÈGLE ABSOLUE : vous produisez TOUJOURS une version adaptée exploitable. Vous ne refusez jamais, vous ne demandez jamais d'informations supplémentaires. Si un point est ambigu, appuyez-vous sur l'original.
+
 Contraintes :
 - Ne supprimez pas d'information essentielle de l'original (animaux, ville, contexte) sauf si l'ajustement le demande explicitement.
 - Ne recopiez pas mot pour mot : reformulez pour intégrer les changements de façon naturelle.
