@@ -63,19 +63,24 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Contexte : profil, owner_profile, propriété, animaux, guide existant
+    // Contexte : profil, owner_profile, propriété, animaux, guide existant.
+    // Colonnes RÉELLES : owner_profiles n'a ni property_type, ni environment
+    // (singulier), ni city, ni postal_code. Ces infos vivent sur properties
+    // et profiles.
     const [profileRes, ownerRes, propRes, guideRes] = await Promise.all([
       supabase.from("profiles").select("first_name, city, postal_code").eq("id", userId).maybeSingle(),
-      supabase.from("owner_profiles").select("property_type, environment, environments, city, postal_code").eq("user_id", userId).maybeSingle(),
-      supabase.from("properties").select("id, pets(species, first_name)").eq("user_id", userId).limit(1).maybeSingle(),
+      supabase.from("owner_profiles").select("environments, welcome_notes, rules_notes, presence_expected").eq("user_id", userId).maybeSingle(),
+      supabase.from("properties").select("id, type, environment, pets(species, name)").eq("user_id", userId).limit(1).maybeSingle(),
       supabase.from("house_guides").select("wifi_instructions, detailed_instructions, vet_address, emergency_contact_name").eq("user_id", userId).maybeSingle(),
     ]);
 
-    const city = ownerRes.data?.city || profileRes.data?.city || null;
-    const postalCode = ownerRes.data?.postal_code || profileRes.data?.postal_code || null;
-    const propertyType = ownerRes.data?.property_type || null;
-    const environments = ownerRes.data?.environments || (ownerRes.data?.environment ? [ownerRes.data.environment] : []);
-    const pets = (propRes.data?.pets ?? []).map((p: any) => ({ species: p.species, first_name: p.first_name }));
+    const city = profileRes.data?.city || null;
+    const postalCode = profileRes.data?.postal_code || null;
+    const propertyType = (propRes.data as any)?.type || null;
+    const environments = (ownerRes.data as any)?.environments
+      || ((propRes.data as any)?.environment ? [(propRes.data as any).environment] : []);
+    const pets = ((propRes.data as any)?.pets ?? []).map((p: any) => ({ species: p.species, name: p.name }));
+
 
     const system = `Vous êtes Alma, narratrice IA de Guardiens.fr. Vous rédigez, pour un propriétaire (vouvoiement), 4 trames courtes destinées à son "guide maison" (document confidentiel remis à son gardien pendant la garde).
 
