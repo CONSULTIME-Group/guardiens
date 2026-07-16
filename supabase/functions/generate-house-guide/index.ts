@@ -127,13 +127,9 @@ Règles spécifiques :
       temperature: 0.4,
     });
 
-    if (!r.ok) return json({ error: r.error, code: r.code }, r.status);
-    const parsed = extractToolArgs(r.data);
-    if (!parsed) return json({ error: "Réponse IA invalide" }, 502);
-
     const warnings: string[] = [];
     const clean = (s: string) => {
-      let out = String(s || "").replaceAll("—", ",");
+      let out = String(s || "").replaceAll("—", ",").replaceAll("–", "-");
       if (PROSCRIBED.test(out)) {
         warnings.push("Un terme sensible a été détecté et neutralisé.");
         out = out.replace(new RegExp(PROSCRIBED, "gi"), "personne de confiance");
@@ -141,12 +137,37 @@ Règles spécifiques :
       return out.trim();
     };
 
-    const drafts = {
-      wifi_info: clean(parsed.wifi_info),
-      neighborhood: clean(parsed.neighborhood),
-      veterinary: clean(parsed.veterinary),
-      emergency: clean(parsed.emergency),
+    const applyGuard = (raw: unknown, fallback: string, key: string) => {
+      const cleaned = clean(String(raw ?? ""));
+      if (isLlmRefusal(cleaned, 60)) {
+        console.warn(`generate-house-guide: refusal on ${key}, using fallback`);
+        warnings.push(`Trame « ${key} » remplacée par un modèle générique.`);
+        return fallback;
+      }
+      return cleaned;
     };
+
+    let usedFallback = false;
+    if (!r.ok || !parsed) {
+      usedFallback = true;
+      warnings.push("Assistant IA momentanément indisponible, trames génériques proposées.");
+    }
+
+    const drafts = parsed ? {
+      wifi_info: applyGuard(parsed.wifi_info, FALLBACK_DRAFTS.wifi_info, "wifi_info"),
+      neighborhood: applyGuard(parsed.neighborhood, FALLBACK_DRAFTS.neighborhood, "neighborhood"),
+      veterinary: applyGuard(parsed.veterinary, FALLBACK_DRAFTS.veterinary, "veterinary"),
+      emergency: applyGuard(parsed.emergency, FALLBACK_DRAFTS.emergency, "emergency"),
+    } : { ...FALLBACK_DRAFTS };
+
+    if (usedFallback || warnings.some((w) => w.startsWith("Trame «"))) {
+      await logRefusalFallback(supabase, {
+        user_id: userId,
+        surface: "alma_house_guide",
+        reason: usedFallback ? "gateway_error" : "llm_refusal",
+      });
+    }
+
 
     // hint : le guide existant (info : on aurait pu skipper les champs déjà remplis, on laisse le client décider)
     const already = {
