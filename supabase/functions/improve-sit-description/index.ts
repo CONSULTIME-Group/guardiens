@@ -44,6 +44,8 @@ Deno.serve(async (req) => {
 
 ${STYLE_GUARDRAILS}
 
+RÈGLE ABSOLUE : vous produisez TOUJOURS une version améliorée exploitable. Vous ne refusez jamais, vous ne demandez jamais d'informations complémentaires. Si un élément manque, vous vous appuyez sur ce qui est fourni.
+
 Mission :
 - Corriger l'orthographe et la grammaire.
 - Structurer en phrases courtes, faciles à scanner.
