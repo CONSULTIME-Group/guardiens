@@ -649,7 +649,7 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
    // Hydrate owner data from public_profiles (safe public view) in a single batched call
    const ownerIds = Array.from(new Set(items.map((s: any) => s.user_id).filter(Boolean)));
    if (ownerIds.length > 0) {
-   const [{ data: owners }, { data: galleryRows }] = await Promise.all([
+   const [ownersRes, galleryRes] = await Promise.all([
      supabase
 .from("public_profiles")
 .select("id, first_name, avatar_url, city, postal_code, identity_verified, is_founder")
@@ -660,6 +660,13 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
 .in("user_id", ownerIds)
 .order("position", { ascending: true }),
    ]);
+   if (ownersRes.error || galleryRes.error) {
+     console.error("[SearchSitter] Erreur hydratation propriétaires:", ownersRes.error || galleryRes.error);
+     setSearchError("Impossible de charger les informations des propriétaires.");
+     return;
+   }
+   const owners = ownersRes.data;
+   const galleryRows = galleryRes.data;
    const ownerMap = new Map((owners || []).map((o: any) => [o.id, o]));
    const galleryFirstMap = new Map<string, string>();
    (galleryRows || []).forEach((g: any) => {
