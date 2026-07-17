@@ -75,7 +75,26 @@ export interface AffinityResult {
   notes?: string[];
 }
 
-const PACE_ORDER = ["calme", "equilibre", "actif"];
+import {
+  PACE_ORDER,
+  PRESENCE_100,
+  PRESENCE_REMOTE_OK,
+  PRESENCE_SHORT_ABSENCES,
+  WORK_FULL_REMOTE,
+  WORK_PARTIAL_REMOTE,
+  WORK_ON_SITE,
+  WORK_FLEXIBLE,
+  AMBIANCE_COCON,
+  AMBIANCE_CALME_POSE,
+  AMBIANCE_SPORTIF,
+  AMBIANCE_CAMPAGNE,
+  AMBIANCE_FAMILLE,
+  OUTDOOR_SPORT_INTERESTS,
+  RURAL_INTERESTS,
+  SPECIES_NORMALIZE,
+  NAC_UMBRELLA as NAC_UMBRELLA_LIST,
+  SENSITIVITY_BY_SPECIES,
+} from "./affinityVocab";
 
 /**
  * Seuils pilotables via feature_flags (affinity_min_common_criteria +
