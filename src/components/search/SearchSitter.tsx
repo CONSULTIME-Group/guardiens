@@ -1081,32 +1081,13 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
   return {...m, competences: competenceMap.get(m.id) || [], avgRating: rev ? (rev.total / rev.count).toFixed(1) : null, reviewCount: rev?.count || 0, sitsCount: sitsMap.get(m.id) || 0 };
  });
  }
-  if (sort === "closest") items.sort((a: any, b: any) => (a.distance ?? 9999) - (b.distance ?? 9999));
- else if (sort === "rating") items.sort((a: any, b: any) => parseFloat(b.avgRating || "0") - parseFloat(a.avgRating || "0"));
- // Tri prio : savoir-faire particuliers (competences) AVEC photo > competences sans photo > autres avec photo > autres sans photo.
- // Ce tri prime sur les autres pour mettre en avant la valeur ajoutée (reiki, éducation canine, ostéo…).
-  const skillRank = (m: any) => {
-    const hasSpecificSkills =
-      tokenizeSkillPhrases(m.custom_skills || []).length > 0 ||
-      tokenizeSkillPhrases(m.competences || []).length > 0 ||
-      !!m.specialty_label;
-   const hasAvatar = !!m.avatar_url;
-    if (hasSpecificSkills && hasAvatar) return 0;
-    if (hasSpecificSkills) return 1;
-   if (hasAvatar) return 2;
-   return 3;
- };
- items.sort((a: any, b: any) => skillRank(a) - skillRank(b));
- // Démos "savoir-faire complémentaires" toujours visibles (reiki, naturopathie, ostéo…)
- //, seulement quand le filtre catégorie est "all" ou "skills".
- const showDemoMembers = missionCategoryFilter === "all" || missionCategoryFilter === "skills";
- if (showDemoMembers) {
-   items = interleaveDemos(items, DEMO_MEMBERS as any[], 3);
- }
- setAvailableMembers(items);
- setResults([]);
+  // Note: tri (closest/rating), skillRank et démos sont désormais appliqués côté
+  // client dans le useMemo `availableMembers` (aucun refetch au changement).
+  setRawAvailableMembers(items);
+  setRawResults([]);
  };
 
+ // Tri commun aux sits et missions, appliqué dans le useMemo `results` ci-dessous.
  const sortResults = (items: any[], sortBy: SortOption) => {
  const sorted = [...items];
  if (sortBy === "closest") sorted.sort((a, b) => (a.distance ?? 9999) - (b.distance ?? 9999));
@@ -1119,10 +1100,96 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
  return sorted;
  };
 
+ // Le changement de tri ne relance plus aucune requête : le useMemo `results`
+ // re-trie instantanément le jeu `rawResults` déjà en mémoire.
  const handleSortChange = (newSort: SortOption) => {
  setSort(newSort);
- setResults(prev => sortResults(prev, newSort));
  };
+
+ // ────────────────────────────────────────────────────────────────────────────
+ // Dérivé mémoïsé : applique tous les filtres CLIENTS + le tri + les démos sur
+ // les jeux bruts (rawResults / rawAvailableMembers) sans refetch ni géocodage.
+ // ────────────────────────────────────────────────────────────────────────────
+ const results = useMemo(() => {
+   if (tab === "sits") {
+     let final = rawResults.slice();
+     if (housingType !== "all") final = final.filter((s: any) => s.property?.type === housingType);
+     if (withPhotosOnly) final = final.filter((s: any) => s.property?.photos?.length > 0);
+     if (duration !== "all") {
+       final = final.filter((s: any) => {
+         if (!s.start_date || !s.end_date) return true;
+         const days = Math.ceil((new Date(s.end_date).getTime() - new Date(s.start_date).getTime()) / (1000 * 60 * 60 * 24));
+         switch (duration) { case "short": return days < 7; case "medium": return days >= 7 && days <= 21; case "long": return days > 21; default: return true; }
+       });
+     }
+     if (emergencyOnly) final = final.filter((s: any) => s.is_urgent === true);
+     if (verifiedOnly) final = final.filter((s: any) => s.owner?.identity_verified);
+     if (animalTypes.length > 0) {
+       const wantedSpecies = animalTypes.map(a => animalChipToSpecies[a]).filter(Boolean);
+       final = final.filter((s: any) => (s.pets || []).some((p: any) => wantedSpecies.includes(p.species)));
+     }
+     if (minExperience !== "all") {
+       const minCount = parseInt(minExperience);
+       final = final.filter((s: any) => (s.reviewCount || 0) >= minCount);
+     }
+     if (isPublic) {
+       final = final.filter((item: any) => !item.isPast && !item.isAssigned && !item.isCompleted);
+     }
+     if (environments.length > 0) {
+       final = final.filter((item: any) => {
+         const envs: string[] = item.environments || [];
+         return envs.some((e: string) => environments.includes(e));
+       });
+     }
+     final = sortResults(final, sort);
+     const realCount = final.length;
+     const demoCadence = realCount === 0 ? 3 : realCount <= 3 ? 99 : 6;
+     const demoLimit = isPublic ? 0 : (realCount === 0 ? DEMO_SITS.length : realCount <= 3 ? 2 : DEMO_SITS.length);
+     return interleaveDemos(final, DEMO_SITS.slice(0, demoLimit), demoCadence);
+   }
+   // tab === "missions", sous-onglet "published"
+   if (missionSubTab === "members") return [];
+   let final = rawResults.slice();
+   if (missionTypeFilter !== "all") {
+     final = final.filter((m: any) => (m.mission_type ?? "besoin") === missionTypeFilter);
+   }
+   if (missionCategoryFilter !== "all") {
+     final = final.filter((m: any) => m.category === missionCategoryFilter);
+   }
+   if (verifiedOnly) final = final.filter((m: any) => m.owner?.identity_verified);
+   if (sort === "closest") final.sort((a: any, b: any) => (a.distance ?? 9999) - (b.distance ?? 9999));
+   else if (sort === "recent") final.sort((a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+   return interleaveDemos(final, DEMO_MISSIONS, 3);
+ }, [tab, missionSubTab, rawResults, housingType, withPhotosOnly, duration, emergencyOnly, verifiedOnly, animalTypes, minExperience, isPublic, environments, sort, missionTypeFilter, missionCategoryFilter]);
+
+ const availableMembers = useMemo(() => {
+   if (!(tab === "missions" && missionSubTab === "members")) return [];
+   let items = rawAvailableMembers.slice();
+   const catToSkill: Record<string, string> = { garden: "jardin", animals: "animaux", skills: "competences", house: "coups_de_main" };
+   if (missionCategoryFilter !== "all") {
+     const skillKey = catToSkill[missionCategoryFilter];
+     items = items.filter((m: any) => m.skill_categories?.includes(skillKey));
+   }
+   if (sort === "closest") items.sort((a: any, b: any) => (a.distance ?? 9999) - (b.distance ?? 9999));
+   else if (sort === "rating") items.sort((a: any, b: any) => parseFloat(b.avgRating || "0") - parseFloat(a.avgRating || "0"));
+   const skillRank = (m: any) => {
+     const hasSpecificSkills =
+       tokenizeSkillPhrases(m.custom_skills || []).length > 0 ||
+       tokenizeSkillPhrases(m.competences || []).length > 0 ||
+       !!m.specialty_label;
+     const hasAvatar = !!m.avatar_url;
+     if (hasSpecificSkills && hasAvatar) return 0;
+     if (hasSpecificSkills) return 1;
+     if (hasAvatar) return 2;
+     return 3;
+   };
+   items.sort((a: any, b: any) => skillRank(a) - skillRank(b));
+   const showDemoMembers = missionCategoryFilter === "all" || missionCategoryFilter === "skills";
+   if (showDemoMembers) {
+     items = interleaveDemos(items, DEMO_MEMBERS as any[], 3);
+   }
+   return items;
+ }, [tab, missionSubTab, rawAvailableMembers, missionCategoryFilter, sort]);
 
  const formatDate = (d: string | null) => d ? format(new Date(d), "d MMM", { locale: fr }) : "";
 
