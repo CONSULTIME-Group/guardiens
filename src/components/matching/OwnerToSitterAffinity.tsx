@@ -28,6 +28,12 @@ interface Props {
   caption?: string;
   /** "numeric" (%) ou "semantic" ("Très compatible", etc.). */
   variant?: "numeric" | "semantic";
+  /**
+   * Libellé de repli affiché quand le score est calculable côté data mais masqué
+   * (viewer sans owner profile, seuil non atteint, disqualification, etc.).
+   * Utile sur les cartes de liste pour ne jamais laisser un trou visuel.
+   */
+  fallbackLabel?: string;
   className?: string;
 }
 
@@ -40,6 +46,7 @@ const OwnerToSitterAffinity = ({
   scope = "single",
   caption,
   variant = "numeric",
+  fallbackLabel,
   className,
 }: Props) => {
   const { owner, loading } = useViewerOwnerForAffinity();
@@ -62,6 +69,16 @@ const OwnerToSitterAffinity = ({
             scope={scope}
           />
         </div>
+      );
+    }
+    if (fallbackLabel) {
+      return (
+        <span
+          className={`inline-flex items-center rounded-full border border-border bg-muted/60 px-2 py-0.5 text-[11px] font-medium text-muted-foreground ${className ?? ""}`}
+          title="Complétez votre profil pour révéler le score d'affinité."
+        >
+          {fallbackLabel}
+        </span>
       );
     }
     return null;
