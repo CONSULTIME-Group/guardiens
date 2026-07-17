@@ -158,7 +158,10 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
  const [rawResults, setRawResults] = useState<any[]>([]);
  const [resultCoords, setResultCoords] = useState<Map<string, { lat: number; lng: number }>>(new Map());
  const [loading, setLoading] = useState(false);
- const [searchError, setSearchError] = useState<string | null>(null);
+  const [searchError, setSearchError] = useState<string | null>(null);
+ // Vrai quand la requête serveur a atteint le plafond (jeu potentiellement tronqué → tri distance/affinité partiel).
+ const [resultsTruncated, setResultsTruncated] = useState(false);
+ const SITS_SERVER_CAP = 500;
  const [userCity, setUserCity] = useState("");
  const [userCoords, setUserCoords] = useState<{ lat: number; lng: number } | null>(null);
  const [sitterEligible, setSitterEligible] = useState(false);
