@@ -387,6 +387,43 @@ describe("computeAffinityScore", () => {
     expect(r).not.toBeNull();
     expect(r!.score).toBe(100);
   });
+
+  it("expansion NAC : gardien 'NAC' matche owner avec rongeur (pas de no_animal_species_match)", () => {
+    const r = computeAffinityResultFull(
+      {
+        pets: [{ species: "rodent" }],
+        presence_expected: "Télétravail OK",
+        life_pace: "calme",
+      },
+      {
+        animal_types: ["NAC"],
+        work_during_sit: "full_remote",
+        life_pace: "calme",
+      },
+    );
+    expect(r).not.toBeNull();
+    expect(r!.hiddenReason).not.toBe("no_animal_species_match");
+    expect(r!.displayed).toBe(true);
+    expect(r!.matched.some((m) => /animaux|expérience/i.test(m))).toBe(true);
+  });
+
+  it("no_hard_criterion : uniquement soft (langues + intérêts + ambiance) → masqué", () => {
+    const r = computeAffinityResultFull(
+      {
+        home_ambiance: ["Cocon casanier"],
+        languages: ["Français"],
+        interests: ["Lecture", "Jardinage"],
+      },
+      {
+        life_pace: "calme",
+        languages: ["Français"],
+        interests: ["Lecture", "Jardinage"],
+      },
+    );
+    expect(r).not.toBeNull();
+    expect(r!.displayed).toBe(false);
+    expect(r!.hiddenReason).toBe("no_hard_criterion");
+  });
 });
 
 
