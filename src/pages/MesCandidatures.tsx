@@ -49,9 +49,11 @@ interface SitterApp {
     status: string;
     user_id: string;
     property_id: string | null;
-    properties: { photos: string[] | null; city?: string | null } | null;
+    city: string | null;
+    properties: { photos: string[] | null } | null;
     owner: { id: string; first_name: string | null; avatar_url: string | null; city: string | null } | null;
   } | null;
+
 }
 
 const appStatusBadge: Record<string, { label: (viewedAt: string | null) => string; className: string }> = {
@@ -87,7 +89,7 @@ const MesCandidatures = () => {
       const { data, error } = await supabase
         .from("applications")
         .select(
-          "id, status, created_at, viewed_at, sit:sits(id, title, slug, start_date, end_date, status, user_id, property_id, properties(photos, city), owner:profiles!sits_user_id_fkey(id, first_name, avatar_url, city))",
+          "id, status, created_at, viewed_at, sit:sits(id, title, slug, start_date, end_date, status, user_id, property_id, city, properties(photos), owner:profiles!sits_user_id_fkey(id, first_name, avatar_url, city))",
         )
         .eq("sitter_id", user.id)
         .order("created_at", { ascending: false });
@@ -186,7 +188,7 @@ const MesCandidatures = () => {
             {rendered.map((app) => {
               const sit = app.sit!;
               const cover = sit.properties?.photos?.[0];
-              const city = sit.properties?.city || sit.owner?.city;
+              const city = sit.city || sit.owner?.city;
               const period = formatSitPeriod(sit.start_date, sit.end_date, null);
               const badge = appStatusBadge[app.status] || appStatusBadge.pending;
               return (
