@@ -66,6 +66,7 @@ export interface AffinityResult {
   hiddenReason?:
     | "below_threshold"
     | "too_few_criteria"
+    | "no_hard_criterion"
     | "disqualified"
     | "no_animal_species_match"
     | "sitter_pets_not_accepted"
