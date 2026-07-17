@@ -95,6 +95,8 @@ const SitterDashboard = () => {
   } = useSitterTopAffinitySits();
 
   if (loading) return <SitterDashboardSkeleton />;
+  if (error) return <DashboardLoadError onRetry={reload} detail={error} />;
+
 
   // (Sous-titre dynamique supprimé : redondant avec le titre de la
   // PriorityActionCard du cockpit. Cf. audit dashboard 2026.)
