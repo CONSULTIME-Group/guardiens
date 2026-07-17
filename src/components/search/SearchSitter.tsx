@@ -208,9 +208,10 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
   animalTypes.length +
   (startDate ? 1 : 0) +
   (endDate ? 1 : 0) +
-  (duration !== "all" ? 1 : 0) +
-  (radius[0] !== 15 ? 1 : 0) +
-  (zoneMode !== "radius" ? 1 : 0);
+   (duration !== "all" ? 1 : 0) +
+   (emergencyOnly ? 1 : 0) +
+   (radius[0] !== 15 ? 1 : 0) +
+   (zoneMode !== "radius" ? 1 : 0);
  const hasActiveFilters = activeFiltersCount > 0;
 
  // ─── City autocomplete via geo.api.gouv.fr ───
