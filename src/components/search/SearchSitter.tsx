@@ -1380,10 +1380,31 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
      setEndDate={setEndDate}
    />
  
- {/* Animals picker retiré, remplacé par la pill catégorie « Animaux » ci-dessus */}
+ {/* Animals picker : réexposé sur l'onglet Annonces pour permettre l'AJOUT
+     du filtre animal (les chips actives en dessous n'offrent que le retrait). */}
+ {tab === "sits" && (
+   <AnimalsPickerPopover
+     pillClass={pillClass}
+     animalsLabel={animalsLabel}
+     animalTypes={animalTypes}
+     toggleAnimalFilter={toggleAnimalFilter}
+   />
+ )}
 
+ {/* Toggle Urgence : n'expose que sur l'onglet Annonces (colonne sits.is_urgent). */}
+ {tab === "sits" && (
+   <button
+     type="button"
+     onClick={() => setEmergencyOnly(v => !v)}
+     aria-pressed={emergencyOnly}
+     className={`${pillClass} ${emergencyOnly ? "!bg-primary/10 !border-primary !text-primary" : ""}`}
+     title="Afficher uniquement les gardes signalées comme urgentes"
+   >
+     <span>Urgent</span>
+   </button>
+ )}
 
-   {/* Pill "Vérifié" retirée : accessible dans le sheet Filtres. La chip d'actif ci-dessous suffit. */}
+    {/* Pill "Vérifié" retirée : accessible dans le sheet Filtres. La chip d'actif ci-dessous suffit. */}
 
    {/* Advanced filters pill, type de logement / environnement, désactivé hors connexion */}
    <div
