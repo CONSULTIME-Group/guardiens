@@ -1604,6 +1604,13 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
       ) : null;
     })()}
 
+  {/* Bandeau troncature : le serveur a renvoyé le maximum (500), le tri distance/affinité peut être partiel. */}
+  {resultsTruncated && tab === "sits" && !loading && (
+    <div className="mx-6 mt-4 bg-muted/60 border border-border rounded-lg p-3 text-sm text-muted-foreground">
+      Beaucoup de résultats dans cette zone. Affinez votre recherche (ville, rayon) pour un classement par distance plus fiable.
+    </div>
+  )}
+
   {/* hasNoLocalRealMissions banner retiré : OutOfZoneBanner couvre déjà l'élargissement de zone. */}
 
  {/* ─── No city warning ─── (masqué si OutOfZoneBanner déjà visible pour éviter l'empilement) */}
