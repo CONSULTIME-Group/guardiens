@@ -309,8 +309,8 @@ export function computeAffinityResultFull(
       points += W.pace;
       matched.push("Même rythme de vie");
     } else {
-      const oi = PACE_ORDER.indexOf(owner.life_pace);
-      const si = PACE_ORDER.indexOf(sitter.life_pace);
+      const oi = (PACE_ORDER as readonly string[]).indexOf(owner.life_pace);
+      const si = (PACE_ORDER as readonly string[]).indexOf(sitter.life_pace);
       if (oi >= 0 && si >= 0 && Math.abs(oi - si) === 1) {
         points += 0.5 * W.pace;
         matched.push("Rythme de vie proche");
