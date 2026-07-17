@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { logger } from "@/lib/logger";
 import type {
@@ -75,6 +75,11 @@ export function useOwnerDashboardData(userId: string | undefined) {
 
   const [refreshTick, setRefreshTick] = useState(0);
 
+  // Ref des sit ids appartenant au propriétaire courant. Utilisée pour gater
+  // les événements realtime « applications » (table sans lien direct user_id) :
+  // on ne rafraîchit que si l'application concerne une annonce à nous.
+  const ownedSitIdsRef = useRef<Set<string>>(new Set());
+
   useEffect(() => {
     if (!userId) return;
     let cancelled = false;
@@ -100,6 +105,7 @@ export function useOwnerDashboardData(userId: string | undefined) {
         if (cancelled) return;
 
         const sitsData = (sitsRes.data || []) as SitRow[];
+        ownedSitIdsRef.current = new Set(sitsData.map((s) => s.id));
         const p = profileRes.data;
         const verStatus = p?.identity_verification_status || "not_submitted";
         const propsData = (propsRes.data || []) as Array<{
@@ -316,7 +322,28 @@ export function useOwnerDashboardData(userId: string | undefined) {
   useEffect(() => {
     if (!userId) return;
 
-    const triggerRefresh = () => setRefreshTick(t => t + 1);
+    // Debounce : évite un refetch par événement quand plusieurs candidatures
+    // remuent en rafale (batch admin, cron, etc.).
+    let timer: ReturnType<typeof setTimeout> | null = null;
+    const triggerRefresh = () => {
+      if (timer) clearTimeout(timer);
+      timer = setTimeout(() => setRefreshTick((t) => t + 1), 250);
+    };
+
+    // Gating : la table applications n'a pas de colonne user_id du propriétaire
+    // (propriété indirecte via sits.user_id). On filtre côté handler à partir
+    // des sit ids déjà connus pour ce propriétaire : un événement portant sur
+    // une annonce qui n'est pas la nôtre est ignoré. Évite qu'une candidature
+    // sur la plateforme entière ne relance notre chargement complet.
+    const handleApplicationEvent = (payload: any) => {
+      const owned = ownedSitIdsRef.current;
+      if (owned.size === 0) return;
+      const newSitId = payload?.new?.sit_id as string | undefined;
+      const oldSitId = payload?.old?.sit_id as string | undefined;
+      if ((newSitId && owned.has(newSitId)) || (oldSitId && owned.has(oldSitId))) {
+        triggerRefresh();
+      }
+    };
 
     const onVisibility = () => {
       if (document.visibilityState === "visible") triggerRefresh();
@@ -325,12 +352,13 @@ export function useOwnerDashboardData(userId: string | undefined) {
 
     const channel = supabase
       .channel(`owner-dashboard-${userId}`)
-      .on("postgres_changes", { event: "*", schema: "public", table: "applications" }, triggerRefresh)
+      .on("postgres_changes", { event: "*", schema: "public", table: "applications" }, handleApplicationEvent)
       .on("postgres_changes", { event: "*", schema: "public", table: "sits", filter: `user_id=eq.${userId}` }, triggerRefresh)
       .on("postgres_changes", { event: "*", schema: "public", table: "reviews", filter: `reviewee_id=eq.${userId}` }, triggerRefresh)
       .subscribe();
 
     return () => {
+      if (timer) clearTimeout(timer);
       document.removeEventListener("visibilitychange", onVisibility);
       supabase.removeChannel(channel);
     };

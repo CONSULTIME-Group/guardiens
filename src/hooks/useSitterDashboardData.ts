@@ -509,12 +509,30 @@ export function useSitterDashboardData(userId: string | undefined) {
     });
   }, [userId, setPartial]);
 
-  // Realtime sync for unread messages count
-  // Re-fetches the RPC whenever a message is inserted or its read_at is updated.
-  // The RPC itself enforces: not sender, not archived, only my conversations.
+  // Realtime sync for unread messages count.
+  // La table `messages` n'a pas de colonne destinataire (routage indirect via
+  // conversations.owner_id / sitter_id). Sans filtre, chaque message envoyé
+  // par n'importe qui sur la plateforme relançait la RPC ici. On gate donc
+  // côté handler avec la liste des conversations de l'utilisateur, chargée
+  // au montage puis complétée à la volée pour les nouvelles conversations.
   useEffect(() => {
     if (!userId) return;
+    let cancelled = false;
     let timer: ReturnType<typeof setTimeout> | null = null;
+
+    const memberConvIds = new Set<string>();
+    const nonMemberConvIds = new Set<string>(); // cache négatif (borné)
+
+    // Précharge les conversations dont je fais partie.
+    (async () => {
+      const { data } = await supabase
+        .from("conversations")
+        .select("id")
+        .or(`owner_id.eq.${userId},sitter_id.eq.${userId}`);
+      if (cancelled) return;
+      (data || []).forEach((c: any) => memberConvIds.add(c.id));
+    })();
+
     const refresh = () => {
       if (timer) clearTimeout(timer);
       timer = setTimeout(async () => {
@@ -534,12 +552,53 @@ export function useSitterDashboardData(userId: string | undefined) {
         });
       }, 250);
     };
+
+    const handleMessageEvent = async (payload: any) => {
+      const row = payload?.new ?? payload?.old;
+      const convId = row?.conversation_id as string | undefined;
+      const senderId = row?.sender_id as string | undefined;
+      if (!convId) return;
+      // Message envoyé par nous-même : jamais un « non lu » pour nous.
+      if (senderId && senderId === userId) return;
+
+      if (memberConvIds.has(convId)) {
+        refresh();
+        return;
+      }
+      if (nonMemberConvIds.has(convId)) return;
+
+      // Conversation inconnue : vérifie l'appartenance une seule fois.
+      const { data: conv } = await supabase
+        .from("conversations")
+        .select("id")
+        .eq("id", convId)
+        .or(`owner_id.eq.${userId},sitter_id.eq.${userId}`)
+        .maybeSingle();
+      if (conv?.id) {
+        memberConvIds.add(convId);
+        refresh();
+      } else {
+        // Cache négatif borné pour éviter une croissance infinie.
+        if (nonMemberConvIds.size > 500) nonMemberConvIds.clear();
+        nonMemberConvIds.add(convId);
+      }
+    };
+
     const channel = supabase
       .channel(`sitter-unread-${userId}`)
-      .on("postgres_changes", { event: "INSERT", schema: "public", table: "messages" }, refresh)
-      .on("postgres_changes", { event: "UPDATE", schema: "public", table: "messages" }, refresh)
+      .on("postgres_changes", { event: "INSERT", schema: "public", table: "messages" }, handleMessageEvent)
+      .on("postgres_changes", { event: "UPDATE", schema: "public", table: "messages" }, handleMessageEvent)
+      // Nouvelle conversation où l'utilisateur est partie prenante : on l'ajoute
+      // au set pour ne pas rater son premier message.
+      .on("postgres_changes", { event: "INSERT", schema: "public", table: "conversations" }, (payload: any) => {
+        const c = payload?.new;
+        if (c && (c.owner_id === userId || c.sitter_id === userId)) {
+          memberConvIds.add(c.id);
+        }
+      })
       .subscribe();
     return () => {
+      cancelled = true;
       if (timer) clearTimeout(timer);
       supabase.removeChannel(channel);
     };
