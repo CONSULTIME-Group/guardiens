@@ -51,7 +51,7 @@ const animalChipToType: Record<string, string> = {
   "Animaux de ferme": "farm_animal", NAC: "nac",
 };
 
-const RADIUS_SHORTCUTS = [5, 10, 15, 30, 50];
+const RADIUS_SHORTCUTS = [5, 15, 30, 50];
 
 type SortOption = "affinity" | "closest" | "rating" | "experience";
 type ViewMode = "list" | "map";
@@ -1377,8 +1377,8 @@ const SearchOwner = () => {
           )}
         </div>
       ) : (
-        <div className="flex h-[calc(100dvh-220px)]">
-          <div className="hidden md:block md:w-1/2 overflow-y-auto border-r border-border p-4 space-y-3">
+        <div className="flex flex-col md:flex-row h-[calc(100dvh-180px)] md:h-[calc(100dvh-220px)]">
+          <div className="order-2 md:order-1 w-full md:w-1/2 flex-1 min-h-0 overflow-y-auto border-r border-border p-4 space-y-3">
             {results.map((s: any) => {
               const profile = s.profile;
               const firstName = profile?.first_name || "Gardien";
@@ -1408,7 +1408,7 @@ const SearchOwner = () => {
               );
             })}
           </div>
-          <div className="w-full md:w-1/2 relative bg-muted/30">
+          <div className="order-1 md:order-2 w-full md:w-1/2 h-[45vh] md:h-auto relative bg-muted/30">
             <Suspense fallback={<div className="absolute inset-0 flex items-center justify-center text-sm text-muted-foreground">Chargement de la carte…</div>}>
               <SearchOwnerMapView
                 sitters={results

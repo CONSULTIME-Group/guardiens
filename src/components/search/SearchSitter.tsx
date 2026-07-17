@@ -1421,22 +1421,16 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
   </div>
 
 
-   {/* Zone pill (radius / dept / region / france), désactivé hors connexion */}
-   <div
-     className={!user ? "opacity-60 pointer-events-none" : ""}
-     aria-disabled={!user}
-     title={!user ? "Connectez-vous pour filtrer par distance" : undefined}
-   >
-     <ZonePickerPopover
-       pillClass={pillClass}
-       zoneMode={zoneMode}
-       setZoneMode={setZoneMode}
-       radius={radius}
-       setRadius={setRadius}
-       userPostalCode={userPostalCode}
-       densityCounts={densityCounts}
-     />
-   </div>
+   {/* Zone pill (radius / dept / region / france) : accessible aussi aux visiteurs anonymes pour régler le rayon. */}
+      <ZonePickerPopover
+        pillClass={pillClass}
+        zoneMode={zoneMode}
+        setZoneMode={setZoneMode}
+        radius={radius}
+        setRadius={setRadius}
+        userPostalCode={userPostalCode}
+        densityCounts={densityCounts}
+      />
 
    {/* Dates pill */}
    <DatesPickerPopover
@@ -1573,25 +1567,25 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
 
  {/* Densité supprimée, déjà visible dans le sélecteur de Zone et le bandeau hors-zone */}
 
-   {/* ─── Out-of-zone banner ─── PRIORITÉ 1 : quand il s'affiche, il masque
-        SitterDiscoveryBanner et AffinityMissingCTA (une seule bannière au-dessus des résultats). */}
-   {(() => {
-     const showOutOfZone = tab === "sits" && !loading && zoneMode !== "france" && densityCounts.france > densityCounts.radius && availableSitsCount > 0;
-     return showOutOfZone ? (
-       <OutOfZoneBanner
-         zoneMode={zoneMode}
-         setZoneMode={setZoneMode}
-         densityCounts={densityCounts}
-         radius={radius}
-         city={city}
-         alertCreated={alertCreated}
-         isCreatingAlert={isCreatingAlert}
-         handleCreateAlert={handleCreateAlert}
-         navigate={navigate}
-         trackEvent={trackEvent}
-       />
-     ) : null;
-   })()}
+    {/* ─── Out-of-zone banner ─── PRIORITÉ 1 : quand il s'affiche, il masque
+         SitterDiscoveryBanner et AffinityMissingCTA (une seule bannière au-dessus des résultats). */}
+    {(() => {
+      const showOutOfZone = tab === "sits" && !loading && zoneMode !== "france" && densityCounts.france > densityCounts.radius;
+      return showOutOfZone ? (
+        <OutOfZoneBanner
+          zoneMode={zoneMode}
+          setZoneMode={setZoneMode}
+          densityCounts={densityCounts}
+          radius={radius}
+          city={city}
+          alertCreated={alertCreated}
+          isCreatingAlert={isCreatingAlert}
+          handleCreateAlert={handleCreateAlert}
+          navigate={navigate}
+          trackEvent={trackEvent}
+        />
+      ) : null;
+    })()}
 
   {/* hasNoLocalRealMissions banner retiré : OutOfZoneBanner couvre déjà l'élargissement de zone. */}
 
@@ -2134,7 +2128,7 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
     {(() => {
       // Priorité UNIQUE : OutOfZoneBanner > SitterDiscoveryBanner > AffinityMissingCTA.
       // Une seule bannière au-dessus des résultats pour éviter l'empilement.
-      const outOfZoneVisible = tab === "sits" && !loading && zoneMode !== "france" && densityCounts.france > densityCounts.radius && availableSitsCount > 0;
+      const outOfZoneVisible = tab === "sits" && !loading && zoneMode !== "france" && densityCounts.france > densityCounts.radius;
       const showDiscovery = !isPublic && tab === "sits" && !outOfZoneVisible;
       const showAffinity = tab === "sits" && !!user && !!sitterProfile && !outOfZoneVisible && !showDiscovery;
       return (
