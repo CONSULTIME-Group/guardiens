@@ -699,13 +699,15 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
    });
  if (housingType !== "all") items = items.filter((s: any) => s.property?.type === housingType);
  if (withPhotosOnly) items = items.filter((s: any) => s.property?.photos?.length > 0);
- if (duration !== "all") {
- items = items.filter((s: any) => {
- if (!s.start_date || !s.end_date) return true;
- const days = Math.ceil((new Date(s.end_date).getTime() - new Date(s.start_date).getTime()) / (1000 * 60 * 60 * 24));
- switch (duration) { case "short": return days <= 7; case "medium": return days >= 7 && days <= 14; case "long": return days >= 15; default: return true; }
- });
- }
+  if (duration !== "all") {
+  items = items.filter((s: any) => {
+  if (!s.start_date || !s.end_date) return true;
+  const days = Math.ceil((new Date(s.end_date).getTime() - new Date(s.start_date).getTime()) / (1000 * 60 * 60 * 24));
+  // Bornes exclusives : court < 7, moyen [7,21], long > 21.
+  switch (duration) { case "short": return days < 7; case "medium": return days >= 7 && days <= 21; case "long": return days > 21; default: return true; }
+  });
+  }
+  if (emergencyOnly) items = items.filter((s: any) => s.is_urgent === true);
  if (verifiedOnly) items = items.filter((s: any) => s.owner?.identity_verified);
  const { items: locFiltered, cityCoords } = await filterByLocation(
  items,
