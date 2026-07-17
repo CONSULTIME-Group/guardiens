@@ -88,7 +88,7 @@ const OwnerDashboard = () => {
   
 
   /* ── Data fetching (extracted hook) ── */
-  const { data, loading } = useOwnerDashboardData(user?.id);
+  const { data, loading, error, reload } = useOwnerDashboardData(user?.id);
   const {
     sits, pets, recentApps, reviews, highlights, smallMissions, myMissions,
     verificationStatus, sitterBadges, sitterProfiles, sitterAffinityProfiles, trustedSitterCount,
