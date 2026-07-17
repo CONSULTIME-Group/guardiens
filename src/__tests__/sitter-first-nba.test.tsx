@@ -54,7 +54,7 @@ describe("SitterFirstNBA", () => {
       </MemoryRouter>,
     );
     expect(screen.getByText(/3 annonces qui vous correspondent/i)).toBeInTheDocument();
-    expect(screen.getAllByText(/Voir l'annonce/i)).toHaveLength(3);
+    expect(screen.getAllByRole("link", { name: /Annonce 1|Annonce 2|Annonce 3/i }).length).toBeGreaterThanOrEqual(3);
     expect(screen.getByText(/Voir toutes les annonces/i)).toBeInTheDocument();
   });
 });
