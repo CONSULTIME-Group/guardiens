@@ -154,6 +154,7 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
  const [results, setResults] = useState<any[]>([]);
  const [resultCoords, setResultCoords] = useState<Map<string, { lat: number; lng: number }>>(new Map());
  const [loading, setLoading] = useState(false);
+ const [searchError, setSearchError] = useState<string | null>(null);
  const [userCity, setUserCity] = useState("");
  const [userCoords, setUserCoords] = useState<{ lat: number; lng: number } | null>(null);
  const [sitterEligible, setSitterEligible] = useState(false);
