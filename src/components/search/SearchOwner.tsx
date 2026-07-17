@@ -91,6 +91,7 @@ const SearchOwner = () => {
   const [results, setResults] = useState<any[]>([]);
   const [searchCenter, setSearchCenter] = useState<{ lat: number; lng: number } | null>(null);
   const [loading, setLoading] = useState(false);
+  const [searchError, setSearchError] = useState<string | null>(null);
   const [contactingId, setContactingId] = useState<string | null>(null);
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [initialLoaded, setInitialLoaded] = useState(false);
