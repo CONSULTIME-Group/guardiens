@@ -104,7 +104,7 @@ import {
 /**
  * Seuils pilotables via feature_flags (affinity_min_common_criteria +
  * affinity_min_score_percent). Bootstrap au démarrage via
- * useAffinityThresholdsBootstrap ; par défaut : 2 critères / 35 %.
+ * useAffinityThresholdsBootstrap ; par défaut : 3 critères / 35 %.
  */
 const thresholds = {
   minCommonCriteria: 3,
@@ -126,15 +126,12 @@ export function getAffinityThresholds() {
 
 /**
  * Pondération par critère. Animaux et présence pèsent 2 (critères durs),
- * les 5 autres pèsent 1. MAX_WEIGHT = 9 correspond à un profil qui a
- * renseigné les 7 critères de la formule.
- *
- * Normalisation (juillet 2026) : le score est calculé sur le poids
- * effectivement évalué (somme des poids des critères comparables des deux
- * côtés), pas sur MAX_WEIGHT. Un critère absent d'un côté sort simplement
- * du dénominateur — il n'est ni bonus ni pénalité. Cela garantit qu'un
- * même couple owner/gardien obtient le même score quel que soit le nombre
- * de champs récupérés par la vue appelante (cohérence /annonces ↔ détail).
+ * les 5 autres pèsent 1. La somme des 7 poids vaut 9, mais le score est
+ * calculé sur le poids effectivement évalué (dénominateur dynamique), pas
+ * sur ce total. Un critère absent d'un côté sort simplement du dénominateur :
+ * il n'est ni bonus ni pénalité. Cela garantit qu'un même couple owner/gardien
+ * obtient le même score quel que soit le nombre de champs récupérés par la
+ * vue appelante (cohérence /annonces ↔ détail).
  */
 const W = {
   animals: 2,
@@ -145,8 +142,6 @@ const W = {
   interests: 1,
   ambiance: 1,
 } as const;
-
-const MAX_WEIGHT = 9;
 
 function normalizeSpecies(value?: string | null): string | null {
   if (!value) return null;
