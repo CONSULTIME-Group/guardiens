@@ -2128,7 +2128,7 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
     {(() => {
       // Priorité UNIQUE : OutOfZoneBanner > SitterDiscoveryBanner > AffinityMissingCTA.
       // Une seule bannière au-dessus des résultats pour éviter l'empilement.
-      const outOfZoneVisible = tab === "sits" && !loading && zoneMode !== "france" && densityCounts.france > densityCounts.radius && availableSitsCount > 0;
+      const outOfZoneVisible = tab === "sits" && !loading && zoneMode !== "france" && densityCounts.france > densityCounts.radius;
       const showDiscovery = !isPublic && tab === "sits" && !outOfZoneVisible;
       const showAffinity = tab === "sits" && !!user && !!sitterProfile && !outOfZoneVisible && !showDiscovery;
       return (
