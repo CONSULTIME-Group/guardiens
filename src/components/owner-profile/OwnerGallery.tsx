@@ -448,6 +448,7 @@ const OwnerGallery = () => {
                   photo={photo}
                   onDelete={handleDelete}
                   onEditCaption={handleEditCaption}
+                  onSetAsMain={handleSetAsMain}
                 />
               ))}
             </div>
