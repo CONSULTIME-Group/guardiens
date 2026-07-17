@@ -722,42 +722,103 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
  (s: any) => s.status === "published" && s.accepting_applications !== false && (!s.end_date || s.end_date >= todayIso),
  );
 
- items = locFiltered;
- const enriched = await Promise.all(
- items.map(async (sit: any) => {
- const [{ data: pets }, { data: reviews }, { data: ownerBadges }, { data: ownerProf }] = await Promise.all([
- supabase.from("pets").select("species, name, special_needs").eq("property_id", sit.property_id),
- supabase.from("reviews").select("overall_rating").eq("reviewee_id", sit.user_id).eq("published", true),
- supabase.from("badge_attributions").select("badge_id").eq("user_id", sit.user_id),
- supabase.from("owner_profiles").select("environments, preferred_sitter_types, home_ambiance, languages, interests, life_pace, presence_expected").eq("user_id", sit.user_id).maybeSingle(),
- ]);
- const avgRating = reviews && reviews.length > 0
- ? (reviews.reduce((s: number, r: any) => s + r.overall_rating, 0) / reviews.length).toFixed(1) : null;
- const badgeCounts = new Map<string, number>();
- (ownerBadges || []).forEach((b: any) => badgeCounts.set(b.badge_id, (badgeCounts.get(b.badge_id) || 0) + 1));
- const topBadges = Array.from(badgeCounts.entries()).map(([badge_id, count]) => ({ badge_key: badge_id, count })).sort((a, b) => b.count - a.count).slice(0, 2);
- const petSpecies = (pets || []).map((p: any) => p.species);
- if (animalTypes.length > 0) {
- const wantedSpecies = animalTypes.map(a => animalChipToSpecies[a]).filter(Boolean);
- if (!petSpecies.some((s: string) => wantedSpecies.includes(s))) return null;
- }
- // Min experience filter
- if (minExperience !== "all") {
- const completedCount = (ownerBadges || []).length;
- const minCount = parseInt(minExperience);
- const revCount = reviews?.length || 0;
- if (revCount < minCount) return null;
- }
- const dist = searchCoords && sit.owner?.city ? computeDistance(sit.owner.city, cityCoords, searchCoords) : null;
- const isNew = differenceInHours(new Date(), new Date(sit.created_at)) < 48;
- const days = sit.start_date && sit.end_date ? differenceInDays(new Date(sit.end_date), new Date(sit.start_date)) : 0;
- // Resolve environments: sit-level first, then owner profile fallback
- const sitEnvs: string[] = (sit as any).environments || [];
- const ownerEnvs: string[] = (ownerProf as any)?.environments || [];
- const resolvedEnvs = sitEnvs.length > 0 ? sitEnvs : ownerEnvs;
- return {...sit, pets: pets || [], avgRating, reviewCount: reviews?.length || 0, topBadges, distance: dist, isNew, durationDays: days, environments: resolvedEnvs, ownerEnvironments: ownerEnvs, ownerMatch: ownerProf || null };
- })
- );
+  items = locFiltered;
+
+  // Batched hydration to avoid N+1 : 4 requêtes uniques au lieu de 4 par annonce.
+  const allPropertyIds = Array.from(new Set(items.map((s: any) => s.property_id).filter(Boolean)));
+  const allUserIds = Array.from(new Set(items.map((s: any) => s.user_id).filter(Boolean)));
+
+  const petsPromise = allPropertyIds.length > 0
+    ? supabase.from("pets").select("species, name, special_needs, property_id").in("property_id", allPropertyIds)
+    : Promise.resolve({ data: [] as any[], error: null });
+  const reviewsPromise = allUserIds.length > 0
+    ? supabase.from("reviews").select("overall_rating, reviewee_id").in("reviewee_id", allUserIds).eq("published", true)
+    : Promise.resolve({ data: [] as any[], error: null });
+  const badgesPromise = allUserIds.length > 0
+    ? supabase.from("badge_attributions").select("badge_id, user_id").in("user_id", allUserIds)
+    : Promise.resolve({ data: [] as any[], error: null });
+  const ownerProfPromise = allUserIds.length > 0
+    ? supabase.from("owner_profiles").select("user_id, environments, preferred_sitter_types, home_ambiance, languages, interests, life_pace, presence_expected").in("user_id", allUserIds)
+    : Promise.resolve({ data: [] as any[], error: null });
+
+  const [petsRes, reviewsRes, badgesRes, ownerProfRes] = await Promise.all([
+    petsPromise, reviewsPromise, badgesPromise, ownerProfPromise,
+  ]);
+  if (petsRes.error) {
+    console.error("[SearchSitter] Erreur chargement pets:", petsRes.error);
+    setSearchError("Impossible de charger les animaux.");
+    return;
+  }
+  if (reviewsRes.error) {
+    console.error("[SearchSitter] Erreur chargement reviews:", reviewsRes.error);
+    setSearchError("Impossible de charger les avis.");
+    return;
+  }
+  if (badgesRes.error) {
+    console.error("[SearchSitter] Erreur chargement badges:", badgesRes.error);
+    setSearchError("Impossible de charger les badges.");
+    return;
+  }
+  if (ownerProfRes.error) {
+    console.error("[SearchSitter] Erreur chargement owner_profiles:", ownerProfRes.error);
+    setSearchError("Impossible de charger les profils propriétaires.");
+    return;
+  }
+
+  const petsByProperty = new Map<string, any[]>();
+  (petsRes.data || []).forEach((p: any) => {
+    if (!p?.property_id) return;
+    const arr = petsByProperty.get(p.property_id) || [];
+    arr.push(p);
+    petsByProperty.set(p.property_id, arr);
+  });
+  const reviewAggByUser = new Map<string, { sum: number; count: number }>();
+  (reviewsRes.data || []).forEach((r: any) => {
+    if (!r?.reviewee_id) return;
+    const cur = reviewAggByUser.get(r.reviewee_id) || { sum: 0, count: 0 };
+    cur.sum += r.overall_rating || 0;
+    cur.count += 1;
+    reviewAggByUser.set(r.reviewee_id, cur);
+  });
+  const badgesByUser = new Map<string, any[]>();
+  (badgesRes.data || []).forEach((b: any) => {
+    if (!b?.user_id) return;
+    const arr = badgesByUser.get(b.user_id) || [];
+    arr.push(b);
+    badgesByUser.set(b.user_id, arr);
+  });
+  const ownerProfByUser = new Map<string, any>();
+  (ownerProfRes.data || []).forEach((o: any) => {
+    if (o?.user_id) ownerProfByUser.set(o.user_id, o);
+  });
+
+  const enriched = items.map((sit: any) => {
+    const pets = petsByProperty.get(sit.property_id) || [];
+    const agg = reviewAggByUser.get(sit.user_id);
+    const avgRating = agg && agg.count > 0 ? (agg.sum / agg.count).toFixed(1) : null;
+    const ownerBadges = badgesByUser.get(sit.user_id) || [];
+    const ownerProf = ownerProfByUser.get(sit.user_id) || null;
+    const badgeCounts = new Map<string, number>();
+    ownerBadges.forEach((b: any) => badgeCounts.set(b.badge_id, (badgeCounts.get(b.badge_id) || 0) + 1));
+    const topBadges = Array.from(badgeCounts.entries()).map(([badge_id, count]) => ({ badge_key: badge_id, count })).sort((a, b) => b.count - a.count).slice(0, 2);
+    const petSpecies = pets.map((p: any) => p.species);
+    if (animalTypes.length > 0) {
+      const wantedSpecies = animalTypes.map(a => animalChipToSpecies[a]).filter(Boolean);
+      if (!petSpecies.some((s: string) => wantedSpecies.includes(s))) return null;
+    }
+    if (minExperience !== "all") {
+      const minCount = parseInt(minExperience);
+      const revCount = agg?.count || 0;
+      if (revCount < minCount) return null;
+    }
+    const dist = searchCoords && sit.owner?.city ? computeDistance(sit.owner.city, cityCoords, searchCoords) : null;
+    const isNew = differenceInHours(new Date(), new Date(sit.created_at)) < 48;
+    const days = sit.start_date && sit.end_date ? differenceInDays(new Date(sit.end_date), new Date(sit.start_date)) : 0;
+    const sitEnvs: string[] = (sit as any).environments || [];
+    const ownerEnvs: string[] = (ownerProf as any)?.environments || [];
+    const resolvedEnvs = sitEnvs.length > 0 ? sitEnvs : ownerEnvs;
+    return { ...sit, pets, avgRating, reviewCount: agg?.count || 0, topBadges, distance: dist, isNew, durationDays: days, environments: resolvedEnvs, ownerEnvironments: ownerEnvs, ownerMatch: ownerProf };
+  });
 
  let final = enriched.filter(Boolean);
  // Public /annonces : on masque les annonces passées/attribuées/terminées
