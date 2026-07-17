@@ -37,6 +37,9 @@ import { useActiveSittersCount } from "@/hooks/useActiveSittersCount";
 import { useActiveOwnersCount } from "@/hooks/useActiveOwnersCount";
 import OwnerToSitterAffinity from "@/components/matching/OwnerToSitterAffinity";
 import OwnerAffinityBanner from "@/components/matching/OwnerAffinityBanner";
+import SitterResultCard from "@/components/search/SitterResultCard";
+import { useViewerOwnerForAffinity } from "@/hooks/useViewerOwnerForAffinity";
+import { computeAffinityResultFull, type AffinityOwnerInput, type AffinitySitterInput } from "@/lib/affinityScore";
 
 import { TooltipProvider } from "@/components/ui/tooltip";
 
@@ -50,7 +53,7 @@ const animalChipToType: Record<string, string> = {
 
 const RADIUS_SHORTCUTS = [5, 10, 15, 30, 50];
 
-type SortOption = "closest" | "rating" | "experience";
+type SortOption = "affinity" | "closest" | "rating" | "experience";
 type ViewMode = "list" | "map";
 type ZoneMode = "radius" | "dept" | "region" | "france";
 
@@ -59,7 +62,8 @@ const SearchOwnerMapView = lazy(() => import("@/components/search/SearchOwnerMap
 const SearchOwner = () => {
   const { user, switchRole } = useAuth();
   const navigate = useNavigate();
-  
+  const { owner: viewerOwner } = useViewerOwnerForAffinity();
+
   const { toast: toastUi } = useToast();
   const [searchParams] = useSearchParams();
 
@@ -80,7 +84,8 @@ const SearchOwner = () => {
   const [proOnly, setProOnly] = useState(false);
   const [minSits, setMinSits] = useState<string>("all");
   const [minRating, setMinRating] = useState<string>("all");
-  const [sort, setSort] = useState<SortOption>("closest");
+  const [sort, setSort] = useState<SortOption>("affinity");
+  const [sortUserOverride, setSortUserOverride] = useState(false);
   const [viewMode, setViewMode] = useState<ViewMode>("list");
 
   const [results, setResults] = useState<any[]>([]);
@@ -406,14 +411,15 @@ const SearchOwner = () => {
     // Enrich ALL items with coords (needed for density counts across zones)
     const allItems = items.map(withCoords);
 
-    // Fetch badges, emergency profiles, and reviews for ALL candidates
+    // Fetch badges, emergency profiles, reviews et galerie pour TOUS les candidats
     const allUserIds = allItems.map((s: any) => s.user_id);
-    const [allBadgesRes, emergencyRes] = allUserIds.length > 0
+    const [allBadgesRes, emergencyRes, galleryRes] = allUserIds.length > 0
       ? await Promise.all([
           supabase.from("badge_attributions").select("user_id, badge_id").in("user_id", allUserIds),
           supabase.from("emergency_sitter_profiles").select("user_id, is_active").in("user_id", allUserIds).eq("is_active", true),
+          supabase.from("sitter_gallery").select("user_id, photo_url, created_at").in("user_id", allUserIds).order("created_at", { ascending: false }),
         ])
-      : [{ data: [] as any[] }, { data: [] as any[] }] as const;
+      : [{ data: [] as any[] }, { data: [] as any[] }, { data: [] as any[] }] as const;
 
     const emergencySet = new Set((emergencyRes.data || []).map((e: any) => e.user_id));
 
@@ -439,6 +445,14 @@ const SearchOwner = () => {
       m.set(b.badge_id, (m.get(b.badge_id) || 0) + 1);
     });
 
+    // Galerie : max 4 photos par gardien, avatar prépendu si présent.
+    const photoMap = new Map<string, string[]>();
+    (galleryRes.data || []).forEach((g: any) => {
+      const arr = photoMap.get(g.user_id) || [];
+      if (arr.length < 4 && g.photo_url) arr.push(g.photo_url);
+      photoMap.set(g.user_id, arr);
+    });
+
     // Enrich all items
     const enrichedAll = allItems.map((s: any) => {
       const agg = reviewsAgg.get(s.user_id);
@@ -447,7 +461,14 @@ const SearchOwner = () => {
       const topBadges = userBadges
         ? Array.from(userBadges.entries()).map(([badge_key, count]) => ({ badge_key, count })).sort((a, b) => b.count - a.count).slice(0, 3)
         : [];
-      return { ...s, avgRating, reviewCount: agg?.count || 0, topBadges, isEmergency: emergencySet.has(s.user_id) };
+      const gallery = photoMap.get(s.user_id) || [];
+      const avatar = s.profile?.avatar_url;
+      const photos = avatar ? [avatar, ...gallery.filter((p) => p !== avatar)] : gallery;
+      // Score d'affinité pré-calculé pour permettre le tri "Meilleure affinité".
+      const affinity = viewerOwner
+        ? computeAffinityResultFull(viewerOwner as AffinityOwnerInput, s as AffinitySitterInput)
+        : null;
+      return { ...s, avgRating, reviewCount: agg?.count || 0, topBadges, isEmergency: emergencySet.has(s.user_id), _photos: photos, _affinity: affinity };
     });
 
     // Apply ALL advanced filters (non-zone) to get the pool used for density counts
@@ -508,13 +529,35 @@ const SearchOwner = () => {
     // france: no zone filter applied
 
     // Sort
+    // Bascule automatique : si l'utilisateur n'a jamais choisi de tri
+    // manuellement et n'a pas de profil owner (donc pas de scoring possible),
+    // on retombe sur « Plus proches » comme défaut fonctionnel.
+    let effectiveSort: SortOption = sort;
+    if (!sortUserOverride && sort === "affinity" && !viewerOwner) {
+      effectiveSort = "closest";
+    }
+
+    const affinityRank = (s: any) => {
+      const a = s._affinity;
+      if (!a || a.displayed === false) return -1;
+      return a.score ?? 0;
+    };
+
     let final = results;
-    if (sort === "closest") {
+    if (effectiveSort === "affinity") {
+      final.sort((a, b) => {
+        if (a.isEmergency !== b.isEmergency) return a.isEmergency ? -1 : 1;
+        const ra = affinityRank(a);
+        const rb = affinityRank(b);
+        if (rb !== ra) return rb - ra;
+        return (a._dist ?? Infinity) - (b._dist ?? Infinity);
+      });
+    } else if (effectiveSort === "closest") {
       final.sort((a, b) => {
         if (a.isEmergency !== b.isEmergency) return a.isEmergency ? -1 : 1;
         return (a._dist ?? Infinity) - (b._dist ?? Infinity);
       });
-    } else if (sort === "rating") {
+    } else if (effectiveSort === "rating") {
       final.sort((a, b) => {
         if (a.isEmergency !== b.isEmergency) return a.isEmergency ? -1 : 1;
         return (b.avgRating || 0) - (a.avgRating || 0);
@@ -529,7 +572,7 @@ const SearchOwner = () => {
     setResults(final);
     setSearchCenter(searchCoords);
     setLoading(false);
-  }, [city, cityPostalCode, userPostalCode, radius, zoneMode, animalTypes, vehicled, availableOnly, verifiedOnly, emergencyOnly, proOnly, minSits, minRating, sort]);
+  }, [city, cityPostalCode, userPostalCode, radius, zoneMode, animalTypes, vehicled, availableOnly, verifiedOnly, emergencyOnly, proOnly, minSits, minRating, sort, sortUserOverride, viewerOwner]);
 
   // Auto-search on filter change (debounced)
   useEffect(() => {
@@ -952,22 +995,39 @@ const SearchOwner = () => {
             {hasActiveFilters && (
               <button onClick={resetFilters} className="text-xs text-primary hover:underline whitespace-nowrap shrink-0">Réinit.</button>
             )}
-            {/* Mobile : Select compact — Desktop : pills visibles */}
-            <Select value={sort} onValueChange={(v) => setSort(v as SortOption)}>
-              <SelectTrigger className="sm:hidden h-8 w-auto gap-1.5 rounded-full border-border bg-card px-3 text-xs shrink-0">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent align="start">
-                <SelectItem value="closest">Plus proches</SelectItem>
-                <SelectItem value="rating">Mieux notés</SelectItem>
-                <SelectItem value="experience">Plus expérimentés</SelectItem>
-              </SelectContent>
-            </Select>
-            <div className="hidden sm:flex gap-1.5 shrink-0">
-              {[{ label: "Plus proches", value: "closest" as SortOption }, { label: "Mieux notés", value: "rating" as SortOption }, { label: "Plus expérimentés", value: "experience" as SortOption }].map(opt => (
-                <button key={opt.value} onClick={() => setSort(opt.value)} className={sort === opt.value ? sortPillActive : sortPillBase}>{opt.label}</button>
-              ))}
-            </div>
+            {/* Options de tri : « Meilleure affinité » n'apparaît que si le viewer
+                a un profil owner (sinon le score est masqué et le tri n'a pas de sens). */}
+            {(() => {
+              const sortOptions: Array<{ value: SortOption; label: string }> = [
+                ...(viewerOwner ? [{ value: "affinity" as SortOption, label: "Meilleure affinité" }] : []),
+                { value: "closest", label: "Plus proches" },
+                { value: "rating", label: "Mieux notés" },
+                { value: "experience", label: "Plus expérimentés" },
+              ];
+              const handleSort = (v: SortOption) => {
+                setSort(v);
+                setSortUserOverride(true);
+              };
+              return (
+                <>
+                  <Select value={sort} onValueChange={(v) => handleSort(v as SortOption)}>
+                    <SelectTrigger className="sm:hidden h-8 w-auto gap-1.5 rounded-full border-border bg-card px-3 text-xs shrink-0">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent align="start">
+                      {sortOptions.map((o) => (
+                        <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <div className="hidden sm:flex gap-1.5 shrink-0">
+                    {sortOptions.map((opt) => (
+                      <button key={opt.value} onClick={() => handleSort(opt.value)} className={sort === opt.value ? sortPillActive : sortPillBase}>{opt.label}</button>
+                    ))}
+                  </div>
+                </>
+              );
+            })()}
 
           </div>
           <div className="flex items-center gap-1.5 shrink-0">
@@ -1243,142 +1303,29 @@ const SearchOwner = () => {
                 </div>
               )}
             {results.length > 0 && <OwnerAffinityBanner className="mb-4" />}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 auto-rows-fr">
+            {/* Grille dense 4 col desktop / 3 laptop / 2 tablette / 1 mobile.
+                Padding-right sur >= xl pour éviter que la dernière colonne passe
+                sous le AlmaDock fixé (right-6 md:). */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 auto-rows-fr xl:pr-16">
               {(() => {
                 const nameCounts: Record<string, number> = {};
                 results.forEach((s: any) => {
                   const fn = (s.profile?.first_name || "Gardien").toLowerCase();
                   nameCounts[fn] = (nameCounts[fn] || 0) + 1;
                 });
-                return results.map((s: any) => {
-                const profile = s.profile;
-                const sitterAnimalTypes: string[] = s.animal_types || [];
-                const firstName = profile?.first_name || "Gardien";
-                const isDuplicate = nameCounts[firstName.toLowerCase()] > 1;
-                const bio = profile?.bio ? (profile.bio.length > 80 ? profile.bio.slice(0, 80) + "…" : profile.bio) : null;
-                // « Dans votre ville » supprimé : quand le gardien est dans la ville recherchée,
-                // on affiche uniquement la ville (l'info est implicite). Sinon la distance seule.
-                const sameCity = s._dist === 0 || (city && profile?.city && profile.city.toLowerCase() === city.toLowerCase());
-                const distLabel = !sameCity && s._dist != null && s._dist !== Infinity ? `à ${s._dist} km` : null;
-
-                return (
-                  <Link
+                return results.map((s: any) => (
+                  <SitterResultCard
                     key={s.id}
-                    to={`/gardiens/${s.user_id}`}
-                    aria-label={`Voir le profil de ${firstName}`}
-                    className="group relative bg-card rounded-xl overflow-hidden border border-border hover:shadow-md hover:-translate-y-0.5 hover:border-primary/40 transition-all flex flex-col h-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                  >
-                    {/* Favori (secondaire), en overlay */}
-                    <div className="absolute top-2 right-2 z-10">
-                      <FavoriteButton targetType="sitter" targetId={s.user_id} />
-                    </div>
-
-                    {/* Photo, carré, cadrage haut pour ne pas couper les visages */}
-                    <div className="relative">
-                      {profile?.avatar_url ? (
-                        <div className="aspect-square w-full overflow-hidden bg-muted">
-                          <img
-                            src={profile.avatar_url}
-                            alt={firstName}
-                            loading="lazy"
-                            className="w-full h-full object-cover object-[center_top] group-hover:scale-[1.02] transition-transform duration-300"
-                          />
-                        </div>
-                      ) : (
-                        <div className="aspect-square w-full overflow-hidden bg-primary/10 flex items-center justify-center">
-                          <span className="text-3xl text-primary font-heading font-bold">{firstName.charAt(0)}</span>
-                        </div>
-                      )}
-                      {s.isEmergency && (
-                        <span className="absolute top-2 left-2 flex items-center gap-1 bg-card/90 rounded-full px-2 py-0.5 text-[11px] font-medium">
-                          <Zap className="h-3 w-3 text-amber-500" /> Urgence
-                        </span>
-                      )}
-                    </div>
-
-                    {/* Body */}
-                    <div className="p-3 flex flex-col flex-1">
-                      <p className="text-sm font-semibold truncate">
-                        {firstName}
-                        {isDuplicate && profile?.city && (
-                          <span className="text-xs font-normal text-muted-foreground ml-1">· {profile.city}</span>
-                        )}
-                        {profile?.identity_verified && (
-                          <span className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-full font-medium ml-1.5 inline-block align-middle">Vérifié</span>
-                        )}
-                        {profile?.pro_status === "verified" && (
-                          <span className="text-xs bg-accent text-accent-foreground px-2 py-0.5 rounded-full font-medium ml-1.5 inline-block align-middle">Pro</span>
-                        )}
-                      </p>
-                      {(profile?.city || distLabel) && (
-                        <p className="text-xs text-muted-foreground truncate">
-                          {profile?.city}
-                          {profile?.city && distLabel && " · "}
-                          {distLabel}
-                        </p>
-                      )}
-                      <div className="flex items-center gap-1.5 mt-0.5 flex-wrap">
-                        <PresenceBadge lastSeenAt={profile?.last_seen_at} />
-                        <ReplyTimeBadge minutes={s.reply_median_minutes} />
-                      </div>
-
-                      {/* Rating + experience */}
-                      <div className="flex items-center gap-2 mt-1 min-h-[1rem]">
-                        {s.avgRating !== null && (
-                          <span className="flex items-center gap-0.5 text-xs text-muted-foreground">
-                            <Star className="h-3 w-3 text-yellow-500 fill-yellow-500" />
-                            {s.avgRating.toFixed(1)}
-                          </span>
-                        )}
-                        {(profile?.completed_sits_count || 0) > 0 && (
-                          <span className="text-xs text-muted-foreground">{profile.completed_sits_count} garde{profile.completed_sits_count > 1 ? "s" : ""}</span>
-                        )}
-                      </div>
-
-                      {/* Affinité (badge sémantique, masqué si non calculable) */}
-                      <div className="mt-1">
-                        <OwnerToSitterAffinity
-                          sitterProfile={s}
-                          context="search_owner_listing"
-                          targetId={s.user_id}
-                          size="sm"
-                          showCta={false}
-                          variant="semantic"
-                        />
-                      </div>
-
-                      {/* Animal pills, zone réservée pour aligner */}
-                      <div className="flex flex-wrap gap-1 mt-1.5 min-h-[1.5rem]">
-                        {sitterAnimalTypes.slice(0, 3).map((a: string) => (
-                          <span key={a} className="text-[11px] bg-muted text-foreground/80 rounded-full px-2 py-0.5">{a}</span>
-                        ))}
-                        {sitterAnimalTypes.length > 3 && (
-                          <span className="text-[11px] text-muted-foreground self-center">+{sitterAnimalTypes.length - 3}</span>
-                        )}
-                      </div>
-
-                      {/* Bio, zone réservée 2 lignes pour aligner les cartes */}
-                      <p className="text-xs text-muted-foreground mt-1.5 line-clamp-2 min-h-[2rem]">
-                        {bio || <span className="opacity-0">.</span>}
-                      </p>
-
-                      {/* CTA Contacter, labellisé, cible tactile min 44px */}
-                      <button
-                        type="button"
-                        onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleContact(s.user_id); }}
-                        disabled={contactingId === s.user_id}
-                        aria-label={`Contacter ${firstName}`}
-                        className="mt-2 inline-flex items-center justify-center gap-1.5 min-h-11 w-full rounded-full bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors disabled:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                      >
-                        {contactingId === s.user_id
-                          ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
-                          : <MessageCircle className="h-4 w-4" aria-hidden="true" />}
-                        Contacter
-                      </button>
-                    </div>
-                  </Link>
-                );
-              });
+                    sitter={s}
+                    photos={s._photos || []}
+                    affinity={s._affinity || null}
+                    hasOwnerProfile={!!viewerOwner}
+                    onContact={handleContact}
+                    contactingId={contactingId}
+                    duplicateName={nameCounts[(s.profile?.first_name || "Gardien").toLowerCase()] > 1}
+                    city={city}
+                  />
+                ));
               })()}
             </div>
             </>

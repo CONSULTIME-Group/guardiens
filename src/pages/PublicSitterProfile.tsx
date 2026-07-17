@@ -671,7 +671,8 @@ export default function PublicSitterProfile() {
   // Lightbox keyboard navigation (Escape to close, arrows to navigate)
   useEffect(() => {
     if (lightboxIdx === null) return;
-    const max = gallery.slice(0, 9).length;
+    const gallerySlice = gallery.slice(0, 9);
+    const max = gallerySlice.length > 0 ? gallerySlice.length : (profile?.avatar_url ? 1 : 0);
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') setLightboxIdx(null);
       else if (e.key === 'ArrowLeft' && lightboxIdx > 0) setLightboxIdx(lightboxIdx - 1);
@@ -799,6 +800,11 @@ export default function PublicSitterProfile() {
   const gardeReviews = reviews.filter((r: any) => r.sit_id !== null);
   const missionReviews = reviews.filter((r: any) => r.sit_id === null);
   const visibleGallery = gallery.slice(0, 9);
+  // Contenu réel de la lightbox : la galerie si elle existe, sinon on retombe
+  // sur l'avatar seul pour que l'utilisateur puisse toujours l'agrandir.
+  const lightboxItems = visibleGallery.length > 0
+    ? visibleGallery
+    : (profile?.avatar_url ? [{ photo_url: profile.avatar_url, caption: null }] : []);
 
   const showCTA = !(isAuthenticated && isSitter); // visible aussi pour soi-même (état désactivé)
 
@@ -1048,11 +1054,19 @@ export default function PublicSitterProfile() {
           <div className="flex flex-col sm:flex-row sm:items-end gap-3 sm:gap-6 min-w-0">
             {/* Photo grande */}
             <div className="shrink-0 relative">
-              <img
-                src={profile.avatar_url || "/placeholder.svg"}
-                alt={firstName}
-                className="w-20 h-20 sm:w-28 sm:h-28 md:w-40 md:h-40 rounded-full object-cover object-center border-4 border-white shadow-md ring-2 ring-primary ring-offset-2"
-              />
+              <button
+                type="button"
+                onClick={() => lightboxItems.length > 0 && setLightboxIdx(0)}
+                disabled={lightboxItems.length === 0}
+                aria-label={`Agrandir la photo de ${firstName}`}
+                className="block rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary disabled:cursor-default"
+              >
+                <img
+                  src={profile.avatar_url || "/placeholder.svg"}
+                  alt={firstName}
+                  className="w-20 h-20 sm:w-28 sm:h-28 md:w-40 md:h-40 rounded-full object-cover object-center border-4 border-white shadow-md ring-2 ring-primary ring-offset-2"
+                />
+              </button>
               {reputation && reputation.statut_gardien !== 'novice' && (
                 <div className="absolute -bottom-2 -right-2">
                   <StatutGardienBadge statut={reputation.statut_gardien} />
@@ -2619,7 +2633,7 @@ export default function PublicSitterProfile() {
         <div
           role="dialog"
           aria-modal="true"
-          aria-label={`Photo ${lightboxIdx + 1} sur ${visibleGallery.length}`}
+          aria-label={`Photo ${lightboxIdx + 1} sur ${lightboxItems.length}`}
           className="fixed inset-0 z-[60] bg-black/90 flex items-center justify-center"
           onClick={() => setLightboxIdx(null)}
         >
@@ -2641,7 +2655,7 @@ export default function PublicSitterProfile() {
               <ChevronLeft className="w-8 h-8" aria-hidden="true" />
             </button>
           )}
-          {lightboxIdx < visibleGallery.length - 1 && (
+          {lightboxIdx < lightboxItems.length - 1 && (
             <button
               type="button"
               aria-label="Photo suivante"
@@ -2652,8 +2666,8 @@ export default function PublicSitterProfile() {
             </button>
           )}
           <img
-            src={visibleGallery[lightboxIdx]?.photo_url}
-            alt={visibleGallery[lightboxIdx]?.caption || `Photo ${lightboxIdx + 1} du profil de ${profile?.first_name || "ce gardien"}`}
+            src={lightboxItems[lightboxIdx]?.photo_url}
+            alt={lightboxItems[lightboxIdx]?.caption || `Photo ${lightboxIdx + 1} du profil de ${profile?.first_name || "ce gardien"}`}
             className="max-h-[85vh] max-w-[90vw] object-contain rounded-lg"
             onClick={(e) => e.stopPropagation()}
           />
