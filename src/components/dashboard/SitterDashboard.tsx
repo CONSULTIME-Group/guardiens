@@ -7,6 +7,8 @@ import { useSearchParams, Link, useNavigate } from "react-router-dom";
 import { useSubscriptionAccess } from "@/hooks/useSubscriptionAccess";
 import { useAccessLevel } from "@/hooks/useAccessLevel";
 import { useSitterDashboardData } from "@/hooks/useSitterDashboardData";
+import DashboardLoadError from "./DashboardLoadError";
+
 import { getOptimizedImageUrl } from "@/lib/imageOptim";
 
 import RoleActivationBanner from "./RoleActivationBanner";
@@ -57,7 +59,7 @@ const SitterDashboard = () => {
 
 
   const {
-    loading, profileCompletion, identityVerified, identityStatus,
+    loading, error, profileCompletion, identityVerified, identityStatus,
     completedSits, avgRating, reviewsCount, badgeCount, totalApps,
     pendingAppsCount, unreadCount, isAvailable, competencesCount, interestsCount,
     postalCode, avatarUrl, bio, hasAnimalExperience,
@@ -65,8 +67,9 @@ const SitterDashboard = () => {
     nearbyListings, nearbyListingsRadius, nearbyError, articles, nearbyMissions, nearbyMissionsError,
     myMissions, myMissionsError,
     toggleAvailability,
-    reputation, groupedBadges,
+    reputation, groupedBadges, reload,
   } = useSitterDashboardData(user?.id);
+
 
   // NBA nouveau gardien : score d'affinité + fallback empty state.
   // Le hook est appelé inconditionnellement (règle des hooks). Il ne fetche
@@ -92,6 +95,8 @@ const SitterDashboard = () => {
   } = useSitterTopAffinitySits();
 
   if (loading) return <SitterDashboardSkeleton />;
+  if (error) return <DashboardLoadError onRetry={reload} detail={error} />;
+
 
   // (Sous-titre dynamique supprimé : redondant avec le titre de la
   // PriorityActionCard du cockpit. Cf. audit dashboard 2026.)

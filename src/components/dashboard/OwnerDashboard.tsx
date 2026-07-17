@@ -60,6 +60,8 @@ import {
 } from "./owner/helpers";
 import type { Pet } from "./owner/types";
 import { useOwnerDashboardData } from "@/hooks/useOwnerDashboardData";
+import DashboardLoadError from "./DashboardLoadError";
+
 import { useNearbyOwnerSitters } from "@/hooks/useNearbyOwnerSitters";
 import { useIsNewOwner, isEarlyOwner, hasNoActiveSit, computeOwnerNbaVariant } from "@/hooks/useIsNewUser";
 import { useAlmaCulturalFact } from "@/hooks/useAlmaCulturalFact";
@@ -88,7 +90,7 @@ const OwnerDashboard = () => {
   
 
   /* ── Data fetching (extracted hook) ── */
-  const { data, loading } = useOwnerDashboardData(user?.id);
+  const { data, loading, error, reload } = useOwnerDashboardData(user?.id);
   const {
     sits, pets, recentApps, reviews, highlights, smallMissions, myMissions,
     verificationStatus, sitterBadges, sitterProfiles, sitterAffinityProfiles, trustedSitterCount,
@@ -385,6 +387,8 @@ const OwnerDashboard = () => {
 
 
   if (loading) return <DashboardSkeleton />;
+  if (error) return <DashboardLoadError onRetry={reload} detail={error} />;
+
 
   if (showOnboarding && user?.onboardingMinimalCompleted) {
     return (

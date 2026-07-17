@@ -19,6 +19,7 @@ export interface ReputationData {
 
 export interface SitterDashboardData {
   loading: boolean;
+  error: string | null;
   profileCompletion: number;
   identityVerified: boolean;
   identityStatus: string;
@@ -60,8 +61,11 @@ export interface SitterDashboardData {
   myMissionsError: string | null;
 }
 
+
 const INITIAL_STATE: SitterDashboardData = {
   loading: true,
+  error: null,
+
   profileCompletion: 0,
   identityVerified: false,
   identityStatus: "not_submitted",
@@ -105,6 +109,8 @@ const INITIAL_STATE: SitterDashboardData = {
 
 export function useSitterDashboardData(userId: string | undefined) {
   const [data, setData] = useState<SitterDashboardData>(INITIAL_STATE);
+  const [reloadTick, setReloadTick] = useState(0);
+  const reload = useCallback(() => setReloadTick((t) => t + 1), []);
 
   const setPartial = useCallback(
     (partial: Partial<SitterDashboardData>) =>
@@ -119,6 +125,7 @@ export function useSitterDashboardData(userId: string | undefined) {
     // while the new fetch is in flight.
     let cancelled = false;
     setData(INITIAL_STATE);
+
 
     const load = async () => {
       const [
@@ -152,6 +159,31 @@ export function useSitterDashboardData(userId: string | undefined) {
         (supabase as any).from("profile_reputation")
           .select("*").eq("user_id", userId).maybeSingle(),
       ]);
+
+      // Socle : profiles obligatoire (compte authentifié = ligne existante),
+      // sitter_profiles peut légitimement être absent (PGRST116 = 0 rows) tant
+      // que l'utilisateur n'a pas activé son rôle gardien : on l'ignore.
+      // applications est également critique (base de la plupart des compteurs).
+      const isNoRow = (err: any) => err?.code === "PGRST116";
+      const profileErr = profileRes.error && !isNoRow(profileRes.error) ? profileRes.error : null;
+      const sitterErr = sitterRes.error && !isNoRow(sitterRes.error) ? sitterRes.error : null;
+      const appsErr = appsRes.error ?? null;
+      if (profileErr || sitterErr || appsErr) {
+        console.error("[useSitterDashboardData] socle error", {
+          profile: profileErr, sitter_profile: sitterErr, applications: appsErr,
+        });
+        if (!cancelled) {
+          setData((prev) => ({
+            ...prev,
+            loading: false,
+            error: (profileErr || sitterErr || appsErr)?.message
+              || "Erreur de chargement du tableau de bord.",
+          }));
+        }
+        return;
+      }
+
+
 
       const profile = profileRes.data;
       const sitter = sitterRes.data;
@@ -420,7 +452,9 @@ export function useSitterDashboardData(userId: string | undefined) {
       if (cancelled) return;
       setData({
         loading: false,
+        error: null,
         profileCompletion: profile?.profile_completion || 0,
+
         identityVerified: profile?.identity_verified || false,
         identityStatus: profile?.identity_verification_status || "not_submitted",
         completedSits: completed,
@@ -466,7 +500,7 @@ export function useSitterDashboardData(userId: string | undefined) {
 
     load();
     return () => { cancelled = true; };
-  }, [userId]);
+  }, [userId, reloadTick]);
 
   // Realtime sync for availability
   useEffect(() => {
@@ -611,5 +645,5 @@ export function useSitterDashboardData(userId: string | undefined) {
     await supabase.from("sitter_profiles").update({ is_available: newVal }).eq("user_id", userId);
   }, [userId, data.isAvailable, setPartial]);
 
-  return { ...data, setPartial, toggleAvailability, refetchUnread };
+  return { ...data, setPartial, toggleAvailability, refetchUnread, reload };
 }
