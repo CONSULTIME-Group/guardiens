@@ -748,7 +748,8 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
      setSearchError("Impossible de charger les annonces.");
      return;
    }
-   let items = data || [];
+    let items = data || [];
+    setResultsTruncated(items.length >= SITS_SERVER_CAP);
 
    // Hydrate owner data from public_profiles (safe public view) in a single batched call
    const ownerIds = Array.from(new Set(items.map((s: any) => s.user_id).filter(Boolean)));
