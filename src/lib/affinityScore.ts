@@ -143,33 +143,13 @@ const W = {
 
 const MAX_WEIGHT = 9;
 
-/**
- * Normalise une espèce vers un code canonique en anglais.
- * pets.species utilise des codes EN (dog, cat, …) ; sitter_profiles.animal_types
- * utilise des libellés FR pluriels ("Chiens", "Chats", "NAC"…). On ramène
- * tout au code EN pour pouvoir intersecter.
- */
-const SPECIES_NORMALIZE: Record<string, string> = {
-  dog: "dog", chien: "dog", chiens: "dog",
-  cat: "cat", chat: "cat", chats: "cat",
-  bird: "bird", oiseau: "bird", oiseaux: "bird",
-  rodent: "rodent", rongeur: "rodent", rongeurs: "rodent",
-  reptile: "reptile", reptiles: "reptile",
-  nac: "nac",
-  horse: "horse", cheval: "horse", chevaux: "horse",
-  farm_animal: "farm_animal",
-  "animal de ferme": "farm_animal",
-  "animaux de ferme": "farm_animal",
-  tous: "all", all: "all",
-};
-
 function normalizeSpecies(value?: string | null): string | null {
   if (!value) return null;
   const k = value.trim().toLowerCase();
   return SPECIES_NORMALIZE[k] ?? k;
 }
 
-const NAC_UMBRELLA = new Set(["rodent", "reptile", "bird", "nac"]);
+const NAC_UMBRELLA = new Set<string>(NAC_UMBRELLA_LIST);
 
 function speciesIntersects(ownerSpecies: string[], sitterTypes: string[]): number {
   const owners = ownerSpecies.map(normalizeSpecies).filter(Boolean) as string[];
@@ -182,17 +162,6 @@ function speciesIntersects(ownerSpecies: string[], sitterTypes: string[]): numbe
     0,
   );
 }
-
-const SENSITIVITY_BY_SPECIES: Record<string, string[]> = {
-  cat: ["Allergie aux chats"],
-  dog: ["Allergie aux chiens", "Pas de très grands chiens", "Pas de chiens catégorisés"],
-  reptile: ["Pas de reptiles", "Pas de NAC"],
-  rodent: ["Pas de NAC"],
-  bird: ["Pas de NAC"],
-  nac: ["Pas de NAC"],
-  horse: ["Pas de chevaux ou animaux de ferme"],
-  farm_animal: ["Pas de chevaux ou animaux de ferme"],
-};
 
 function hasIntersection<T>(a?: T[] | null, b?: T[] | null): boolean {
   if (!a || !b || a.length === 0 || b.length === 0) return false;
@@ -221,15 +190,15 @@ function isDisqualified(owner: AffinityOwnerInput, sitter: AffinitySitterInput):
 
 function presenceCompatibility(presence?: string | null, work?: string | null): number | null {
   if (!presence || !work) return null;
-  if (presence === "100% sur place") return 1;
-  if (presence === "Télétravail OK") {
-    if (work === "full_remote" || work === "partial_remote" || work === "on_site") return 1;
-    if (work === "flexible") return 0.5;
+  if (presence === PRESENCE_100) return 1;
+  if (presence === PRESENCE_REMOTE_OK) {
+    if (work === WORK_FULL_REMOTE || work === WORK_PARTIAL_REMOTE || work === WORK_ON_SITE) return 1;
+    if (work === WORK_FLEXIBLE) return 0.5;
     return 0;
   }
-  if (presence === "Absences courtes OK") {
-    if (work === "full_remote" || work === "on_site") return 1;
-    if (work === "partial_remote" || work === "flexible") return 0.5;
+  if (presence === PRESENCE_SHORT_ABSENCES) {
+    if (work === WORK_FULL_REMOTE || work === WORK_ON_SITE) return 1;
+    if (work === WORK_PARTIAL_REMOTE || work === WORK_FLEXIBLE) return 0.5;
     return 0;
   }
   return null;
@@ -239,17 +208,17 @@ function ambianceMatch(owner: AffinityOwnerInput, sitter: AffinitySitterInput): 
   const tags = owner.home_ambiance ?? [];
   if (tags.length === 0) return 0;
   let score = 0;
-  if (tags.includes("Cocon casanier") && sitter.life_pace === "calme") score = Math.max(score, 1);
-  if (tags.includes("Calme et posé") && (sitter.life_pace === "calme" || sitter.life_pace === "equilibre"))
+  if (tags.includes(AMBIANCE_COCON) && sitter.life_pace === "calme") score = Math.max(score, 1);
+  if (tags.includes(AMBIANCE_CALME_POSE) && (sitter.life_pace === "calme" || sitter.life_pace === "equilibre"))
     score = Math.max(score, 1);
-  if (tags.includes("Sportif outdoor")) {
+  if (tags.includes(AMBIANCE_SPORTIF)) {
     if (sitter.life_pace === "actif") score = Math.max(score, 1);
-    if (hasIntersection(sitter.interests, ["Randonnée", "Course à pied", "Vélo", "Ski", "Sports nautiques"]))
+    if (hasIntersection(sitter.interests, [...OUTDOOR_SPORT_INTERESTS]))
       score = Math.max(score, 1);
   }
-  if (tags.includes("Campagne") && hasIntersection(sitter.interests, ["Randonnée", "Jardinage"]))
+  if (tags.includes(AMBIANCE_CAMPAGNE) && hasIntersection(sitter.interests, [...RURAL_INTERESTS]))
     score = Math.max(score, 0.5);
-  if (tags.includes("Famille animée") && sitter.sitter_type && /famille|couple/i.test(sitter.sitter_type))
+  if (tags.includes(AMBIANCE_FAMILLE) && sitter.sitter_type && /famille|couple/i.test(sitter.sitter_type))
     score = Math.max(score, 1);
   return score;
 }
