@@ -899,19 +899,29 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
 
  const searchAvailableMembers = async (searchCoords: { lat: number; lng: number } | null) => {
  // 1) Profils opt-in « available_for_help »
- const { data: optInData } = await supabase
+ const { data: optInData, error: optInError } = await supabase
 .from("public_profiles")
 .select("id, first_name, avatar_url, city, postal_code, bio, skill_categories, custom_skills, available_for_help, is_founder")
 .eq("available_for_help", true)
 .not("skill_categories", "eq", "{}");
+ if (optInError) {
+   console.error("[SearchSitter] Erreur chargement membres opt-in:", optInError);
+   setSearchError("Impossible de charger les membres disponibles.");
+   return;
+ }
 
  // 2) Auteurs ayant publié une « offre » de coup de main encore ouverte
  //    -> considérés disponibles de fait, même sans opt-in available_for_help
- const { data: offreMissions } = await supabase
+ const { data: offreMissions, error: offreError } = await supabase
    .from("small_missions")
     .select("id, user_id, title, category, city, postal_code, created_at")
    .eq("mission_type", "offre")
    .eq("status", "open");
+ if (offreError) {
+   console.error("[SearchSitter] Erreur chargement offres:", offreError);
+   setSearchError("Impossible de charger les offres de coup de main.");
+   return;
+ }
  const offreAuthorIds = Array.from(new Set((offreMissions || []).map((m: any) => m.user_id))).filter(Boolean);
  const offreCatsByUser = new Map<string, Set<string>>();
   const offresByUser = new Map<string, any[]>();
