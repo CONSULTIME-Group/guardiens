@@ -37,6 +37,9 @@ import { useActiveSittersCount } from "@/hooks/useActiveSittersCount";
 import { useActiveOwnersCount } from "@/hooks/useActiveOwnersCount";
 import OwnerToSitterAffinity from "@/components/matching/OwnerToSitterAffinity";
 import OwnerAffinityBanner from "@/components/matching/OwnerAffinityBanner";
+import SitterResultCard from "@/components/search/SitterResultCard";
+import { useViewerOwnerForAffinity } from "@/hooks/useViewerOwnerForAffinity";
+import { computeAffinityResultFull, type AffinityOwnerInput, type AffinitySitterInput } from "@/lib/affinityScore";
 
 import { TooltipProvider } from "@/components/ui/tooltip";
 
@@ -50,7 +53,7 @@ const animalChipToType: Record<string, string> = {
 
 const RADIUS_SHORTCUTS = [5, 10, 15, 30, 50];
 
-type SortOption = "closest" | "rating" | "experience";
+type SortOption = "affinity" | "closest" | "rating" | "experience";
 type ViewMode = "list" | "map";
 type ZoneMode = "radius" | "dept" | "region" | "france";
 
