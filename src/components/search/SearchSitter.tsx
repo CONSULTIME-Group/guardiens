@@ -1141,10 +1141,11 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
  setAnimalTypes([]);
  setStartDate("");
  setEndDate("");
- setDuration("all");
- setRadius([15]);
- setZoneMode("radius");
- };
+  setDuration("all");
+  setEmergencyOnly(false);
+  setRadius([15]);
+  setZoneMode("radius");
+  };
 
  const animalsLabel = animalTypes.length > 0 ? animalTypes.join(" · ") : "Animaux";
  const datesLabel = startDate && endDate
