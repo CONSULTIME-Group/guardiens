@@ -38,7 +38,7 @@ export default function AnimalsPickerPopover({
               Voir plus ▾
             </button>
           )}
-          {showMore && ["Chevaux", "Animaux de ferme", "NAC"].map(animal => (
+          {showMore && ["Chevaux", "Oiseaux", "Animaux de ferme", "NAC"].map(animal => (
             <label key={animal} className="flex items-center gap-2 text-sm text-foreground cursor-pointer">
               <Checkbox checked={animalTypes.includes(animal)} onCheckedChange={() => toggleAnimalFilter(animal)} />
               {animal}

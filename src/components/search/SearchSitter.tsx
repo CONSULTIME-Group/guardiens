@@ -53,9 +53,9 @@ import AnimalsPickerPopover from "@/components/search/header/AnimalsPickerPopove
 import { useEmptyStateBreakdown } from "@/hooks/search/useEmptyStateBreakdown";
 import { useSearchAlert } from "@/hooks/search/useSearchAlert";
 import { useSearchUserProfile } from "@/hooks/search/useSearchUserProfile";
-const animalChips = ["Chiens", "Chats", "Chevaux", "Animaux de ferme", "NAC"];
+const animalChips = ["Chiens", "Chats", "Chevaux", "Oiseaux", "Animaux de ferme", "NAC"];
 const animalChipToSpecies: Record<string, string> = {
- Chiens: "dog", Chats: "cat", Chevaux: "horse",
+ Chiens: "dog", Chats: "cat", Chevaux: "horse", Oiseaux: "bird",
  "Animaux de ferme": "farm_animal", NAC: "nac",
 };
 
@@ -208,9 +208,10 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
   animalTypes.length +
   (startDate ? 1 : 0) +
   (endDate ? 1 : 0) +
-  (duration !== "all" ? 1 : 0) +
-  (radius[0] !== 15 ? 1 : 0) +
-  (zoneMode !== "radius" ? 1 : 0);
+   (duration !== "all" ? 1 : 0) +
+   (emergencyOnly ? 1 : 0) +
+   (radius[0] !== 15 ? 1 : 0) +
+   (zoneMode !== "radius" ? 1 : 0);
  const hasActiveFilters = activeFiltersCount > 0;
 
  // ─── City autocomplete via geo.api.gouv.fr ───
@@ -436,13 +437,14 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
   setOrDel("rayon", radius[0] !== 15 ? String(radius[0]) : null);
   setOrDel("debut", startDate || null);
   setOrDel("fin", endDate || null);
-  setOrDel("animaux", animalTypes.length ? animalTypes.join(",") : null);
-  setOrDel("tri", sort !== "closest" ? sort : null);
-  const a = next.toString();
-  const b = searchParams.toString();
-  if (a !== b) setSearchParams(next, { replace: true });
-  // eslint-disable-next-line react-hooks/exhaustive-deps
- }, [city, radius, startDate, endDate, animalTypes, sort]);
+   setOrDel("animaux", animalTypes.length ? animalTypes.join(",") : null);
+   setOrDel("emergency", emergencyOnly ? "true" : null);
+   setOrDel("tri", sort !== "closest" ? sort : null);
+   const a = next.toString();
+   const b = searchParams.toString();
+   if (a !== b) setSearchParams(next, { replace: true });
+   // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [city, radius, startDate, endDate, animalTypes, emergencyOnly, sort]);
 
  // ─── Mode test démos : snapshot à chaque changement de filtre clé ───
  const lastDemoFiltersRef = useRef<{ city: string; startDate: string; endDate: string; sort: string; tab: string } | null>(null);
@@ -699,13 +701,15 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
    });
  if (housingType !== "all") items = items.filter((s: any) => s.property?.type === housingType);
  if (withPhotosOnly) items = items.filter((s: any) => s.property?.photos?.length > 0);
- if (duration !== "all") {
- items = items.filter((s: any) => {
- if (!s.start_date || !s.end_date) return true;
- const days = Math.ceil((new Date(s.end_date).getTime() - new Date(s.start_date).getTime()) / (1000 * 60 * 60 * 24));
- switch (duration) { case "short": return days <= 7; case "medium": return days >= 7 && days <= 14; case "long": return days >= 15; default: return true; }
- });
- }
+  if (duration !== "all") {
+  items = items.filter((s: any) => {
+  if (!s.start_date || !s.end_date) return true;
+  const days = Math.ceil((new Date(s.end_date).getTime() - new Date(s.start_date).getTime()) / (1000 * 60 * 60 * 24));
+  // Bornes exclusives : court < 7, moyen [7,21], long > 21.
+  switch (duration) { case "short": return days < 7; case "medium": return days >= 7 && days <= 21; case "long": return days > 21; default: return true; }
+  });
+  }
+  if (emergencyOnly) items = items.filter((s: any) => s.is_urgent === true);
  if (verifiedOnly) items = items.filter((s: any) => s.owner?.identity_verified);
  const { items: locFiltered, cityCoords } = await filterByLocation(
  items,
@@ -1137,10 +1141,11 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
  setAnimalTypes([]);
  setStartDate("");
  setEndDate("");
- setDuration("all");
- setRadius([15]);
- setZoneMode("radius");
- };
+  setDuration("all");
+  setEmergencyOnly(false);
+  setRadius([15]);
+  setZoneMode("radius");
+  };
 
  const animalsLabel = animalTypes.length > 0 ? animalTypes.join(" · ") : "Animaux";
  const datesLabel = startDate && endDate
@@ -1380,10 +1385,31 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
      setEndDate={setEndDate}
    />
  
- {/* Animals picker retiré, remplacé par la pill catégorie « Animaux » ci-dessus */}
+ {/* Animals picker : réexposé sur l'onglet Annonces pour permettre l'AJOUT
+     du filtre animal (les chips actives en dessous n'offrent que le retrait). */}
+ {tab === "sits" && (
+   <AnimalsPickerPopover
+     pillClass={pillClass}
+     animalsLabel={animalsLabel}
+     animalTypes={animalTypes}
+     toggleAnimalFilter={toggleAnimalFilter}
+   />
+ )}
 
+ {/* Toggle Urgence : n'expose que sur l'onglet Annonces (colonne sits.is_urgent). */}
+ {tab === "sits" && (
+   <button
+     type="button"
+     onClick={() => setEmergencyOnly(v => !v)}
+     aria-pressed={emergencyOnly}
+     className={`${pillClass} ${emergencyOnly ? "!bg-primary/10 !border-primary !text-primary" : ""}`}
+     title="Afficher uniquement les gardes signalées comme urgentes"
+   >
+     <span>Urgent</span>
+   </button>
+ )}
 
-   {/* Pill "Vérifié" retirée : accessible dans le sheet Filtres. La chip d'actif ci-dessous suffit. */}
+    {/* Pill "Vérifié" retirée : accessible dans le sheet Filtres. La chip d'actif ci-dessous suffit. */}
 
    {/* Advanced filters pill, type de logement / environnement, désactivé hors connexion */}
    <div
@@ -1408,9 +1434,11 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
         setVerifiedOnly={setVerifiedOnly}
         withPhotosOnly={withPhotosOnly}
         setWithPhotosOnly={setWithPhotosOnly}
-        minExperience={minExperience}
-        setMinExperience={setMinExperience}
-        currentResultsCount={results.length}
+         minExperience={minExperience}
+         setMinExperience={setMinExperience}
+         duration={duration as any}
+         setDuration={setDuration as any}
+         currentResultsCount={results.length}
         loading={loading}
         onApply={() => {
           doSearch();

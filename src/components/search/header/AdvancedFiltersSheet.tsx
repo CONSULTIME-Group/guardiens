@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 
 export type HousingFilter = "all" | "house" | "apartment" | "farm";
 export type ExperienceFilter = "all" | "1" | "3";
+export type DurationFilter = "all" | "short" | "medium" | "long";
 
 interface EnvOption {
   key: string;
@@ -30,6 +31,8 @@ interface AdvancedFiltersSheetProps {
   setWithPhotosOnly: (v: boolean) => void;
   minExperience: ExperienceFilter;
   setMinExperience: (v: ExperienceFilter) => void;
+  duration?: DurationFilter;
+  setDuration?: (v: DurationFilter) => void;
   onApply: () => void;
   currentResultsCount?: number;
   loading?: boolean;
@@ -54,6 +57,8 @@ export const AdvancedFiltersSheet = ({
   setWithPhotosOnly,
   minExperience,
   setMinExperience,
+  duration,
+  setDuration,
   onApply,
   currentResultsCount,
   loading,
@@ -176,6 +181,33 @@ export const AdvancedFiltersSheet = ({
               ))}
             </div>
           </div>
+
+          {/* Durée du séjour (bornes exclusives : court < 7j, moyen 7 à 21j, long > 21j) */}
+          {setDuration && (
+            <div>
+              <label className="text-sm font-medium text-foreground mb-2 block">Durée du séjour</label>
+              <div className="flex flex-wrap gap-2">
+                {([
+                  { key: "all" as DurationFilter, label: "Toutes" },
+                  { key: "short" as DurationFilter, label: "Court (moins de 7 jours)" },
+                  { key: "medium" as DurationFilter, label: "Moyen (7 à 21 jours)" },
+                  { key: "long" as DurationFilter, label: "Long (plus de 21 jours)" },
+                ]).map(({ key, label }) => (
+                  <button
+                    key={key}
+                    onClick={() => setDuration(key)}
+                    className={`rounded-full px-3 py-1.5 text-xs transition-colors ${
+                      duration === key
+                        ? "bg-primary text-primary-foreground"
+                        : "border border-border text-muted-foreground hover:border-primary"
+                    }`}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
 
           {/* Apply button */}
           <Button className="w-full bg-primary text-primary-foreground py-3 rounded-xl font-medium" onClick={onApply} disabled={loading}>
