@@ -374,11 +374,19 @@ const SearchOwner = () => {
   // Search logic
   const handleSearch = useCallback(async () => {
     setLoading(true);
+    setSearchError(null);
 
-    const { data: sitters } = await supabase
+    const { data: sitters, error: sittersError } = await supabase
       .from("sitter_profiles")
       .select("*, reply_median_minutes, profile:profiles!sitter_profiles_user_id_fkey(first_name, last_name, avatar_url, city, postal_code, profile_completion, identity_verified, completed_sits_count, bio, pro_status, pro_specialty, last_seen_at)")
       .limit(500);
+
+    if (sittersError) {
+      console.error("[SearchOwner] Erreur chargement gardiens:", sittersError);
+      setSearchError("Impossible de charger les gardiens.");
+      setLoading(false);
+      return;
+    }
 
     let items = (sitters || []).filter((s: any) => s.profile?.profile_completion >= 60);
 
