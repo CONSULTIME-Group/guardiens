@@ -1095,7 +1095,29 @@ const SearchOwner = () => {
       {/* Results */}
       {viewMode === "list" ? (
         <div className="p-6">
-          {loading ? (
+          {searchError ? (
+            <div
+              role="alert"
+              className="max-w-2xl mx-auto my-8 rounded-2xl border border-destructive/40 bg-destructive/5 p-6 text-center space-y-3"
+            >
+              <AlertCircle className="h-10 w-10 mx-auto text-destructive" aria-hidden="true" />
+              <h2 className="font-heading text-lg font-semibold text-foreground">
+                Une erreur est survenue lors de la recherche
+              </h2>
+              <p className="text-sm text-muted-foreground">
+                {searchError} Vérifiez votre connexion, puis réessayez.
+              </p>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => { void handleSearch(); }}
+                className="gap-2"
+              >
+                <RefreshCw className="h-4 w-4" aria-hidden="true" />
+                Réessayer
+              </Button>
+            </div>
+          ) : loading ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4" aria-busy="true" aria-label="Chargement des gardiens">
               {Array.from({ length: 6 }).map((_, i) => (
                 <div key={i} className="bg-card rounded-xl overflow-hidden border border-border">
