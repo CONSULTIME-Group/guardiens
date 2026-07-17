@@ -57,6 +57,8 @@ export const AdvancedFiltersSheet = ({
   setWithPhotosOnly,
   minExperience,
   setMinExperience,
+  duration,
+  setDuration,
   onApply,
   currentResultsCount,
   loading,
