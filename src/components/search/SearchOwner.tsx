@@ -1105,6 +1105,11 @@ const SearchOwner = () => {
       {/* Results */}
       {viewMode === "list" ? (
         <div className="p-6">
+          {resultsTruncated && !loading && !searchError && (
+            <div className="max-w-4xl mx-auto mb-4 bg-muted/60 border border-border rounded-lg p-3 text-sm text-muted-foreground">
+              Beaucoup de résultats dans cette zone. Affinez votre recherche (ville, rayon) pour un classement par distance plus fiable.
+            </div>
+          )}
           {searchError ? (
             <div
               role="alert"
