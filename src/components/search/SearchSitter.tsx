@@ -389,6 +389,7 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
  // Auto-search when filters change (debounced)
  const doSearch = useCallback(async () => {
  setLoading(true);
+ setSearchError(null);
  let searchCoords = userCoords;
  if (city && city !== userCity) {
  const coords = await geocodeCity(city);
