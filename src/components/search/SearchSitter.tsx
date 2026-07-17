@@ -53,6 +53,7 @@ import AnimalsPickerPopover from "@/components/search/header/AnimalsPickerPopove
 import { useEmptyStateBreakdown } from "@/hooks/search/useEmptyStateBreakdown";
 import { useSearchAlert } from "@/hooks/search/useSearchAlert";
 import { useSearchUserProfile } from "@/hooks/search/useSearchUserProfile";
+import { PRICING_IS_ACTIVE } from "@/config/pricing";
 const animalChips = ["Chiens", "Chats", "Chevaux", "Oiseaux", "Animaux de ferme", "NAC"];
 const animalChipToSpecies: Record<string, string> = {
  Chiens: "dog", Chats: "cat", Chevaux: "horse", Oiseaux: "bird",
@@ -1251,7 +1252,8 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
  // ─── Render ───
   // Visiteurs non connectés : annonces visibles (consultation libre pour conversion).
   // Sitters connectés sans abo : overlay premium maintenu.
-  const isSitterLocked = !!user && !hasAccess && tab === "sits";
+  // Overlay neutralisé tant que PRICING_IS_ACTIVE = false (promesse "sans limite").
+  const isSitterLocked = PRICING_IS_ACTIVE && !!user && !hasAccess && tab === "sits";
 
  return (
  <div className="animate-fade-in relative">
