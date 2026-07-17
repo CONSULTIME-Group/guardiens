@@ -799,6 +799,11 @@ export default function PublicSitterProfile() {
   const gardeReviews = reviews.filter((r: any) => r.sit_id !== null);
   const missionReviews = reviews.filter((r: any) => r.sit_id === null);
   const visibleGallery = gallery.slice(0, 9);
+  // Contenu réel de la lightbox : la galerie si elle existe, sinon on retombe
+  // sur l'avatar seul pour que l'utilisateur puisse toujours l'agrandir.
+  const lightboxItems = visibleGallery.length > 0
+    ? visibleGallery
+    : (profile?.avatar_url ? [{ photo_url: profile.avatar_url, caption: null }] : []);
 
   const showCTA = !(isAuthenticated && isSitter); // visible aussi pour soi-même (état désactivé)
 
