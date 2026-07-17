@@ -872,13 +872,8 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
     const ownerMap = new Map<string, any>((owners || []).map((o: any) => [o.id, o]));
     items = items.map((m: any) => ({ ...m, owner: ownerMap.get(m.user_id) || null }));
   }
-  if (missionTypeFilter !== "all") {
-    items = items.filter((m: any) => (m.mission_type ?? "besoin") === missionTypeFilter);
-  }
-  if (missionCategoryFilter !== "all") {
-    items = items.filter((m: any) => m.category === missionCategoryFilter);
-  }
-  if (verifiedOnly) items = items.filter((s: any) => s.owner?.identity_verified);
+  // Note: missionTypeFilter / missionCategoryFilter / verifiedOnly / sort / demos
+  // sont appliqués côté client dans le useMemo `results` (aucun refetch).
 
   const getMissionCity = (m: any) => m.city || m.owner?.city;
   const getMissionPostalCode = (m: any) => m.postal_code || m.owner?.postal_code;
@@ -919,13 +914,9 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
     const dist = searchCoords && coords ? haversineDistance(searchCoords.lat, searchCoords.lng, coords.lat, coords.lng) : null;
     return { ...m, distance: dist, isNew: differenceInHours(new Date(), new Date(m.created_at)) < 48 } as any;
   });
-  let final: any[] = [...items];
-  if (sort === "closest") final.sort((a: any, b: any) => (a.distance ?? 9999) - (b.distance ?? 9999));
-  else if (sort === "recent") final.sort((a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
-  // Démos toujours visibles, intercalées
-  final = interleaveDemos(final, DEMO_MISSIONS, 3);
- setResults(final);
- setVisibleCount(12);
+  setRawResults(items);
+  setRawAvailableMembers([]);
+  setVisibleCount(12);
   };
 
  const searchAvailableMembers = async (searchCoords: { lat: number; lng: number } | null) => {
