@@ -2632,7 +2632,7 @@ export default function PublicSitterProfile() {
         <div
           role="dialog"
           aria-modal="true"
-          aria-label={`Photo ${lightboxIdx + 1} sur ${visibleGallery.length}`}
+          aria-label={`Photo ${lightboxIdx + 1} sur ${lightboxItems.length}`}
           className="fixed inset-0 z-[60] bg-black/90 flex items-center justify-center"
           onClick={() => setLightboxIdx(null)}
         >
@@ -2654,7 +2654,7 @@ export default function PublicSitterProfile() {
               <ChevronLeft className="w-8 h-8" aria-hidden="true" />
             </button>
           )}
-          {lightboxIdx < visibleGallery.length - 1 && (
+          {lightboxIdx < lightboxItems.length - 1 && (
             <button
               type="button"
               aria-label="Photo suivante"
@@ -2665,8 +2665,8 @@ export default function PublicSitterProfile() {
             </button>
           )}
           <img
-            src={visibleGallery[lightboxIdx]?.photo_url}
-            alt={visibleGallery[lightboxIdx]?.caption || `Photo ${lightboxIdx + 1} du profil de ${profile?.first_name || "ce gardien"}`}
+            src={lightboxItems[lightboxIdx]?.photo_url}
+            alt={lightboxItems[lightboxIdx]?.caption || `Photo ${lightboxIdx + 1} du profil de ${profile?.first_name || "ce gardien"}`}
             className="max-h-[85vh] max-w-[90vw] object-contain rounded-lg"
             onClick={(e) => e.stopPropagation()}
           />
