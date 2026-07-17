@@ -608,6 +608,7 @@ const SearchOwner = () => {
 
   const { data: activeSittersCount } = useActiveSittersCount();
   const { data: activeOwnersCount } = useActiveOwnersCount();
+  const { owner: viewerOwner } = useViewerOwnerForAffinity();
 
   return (
     <div className="animate-fade-in">
