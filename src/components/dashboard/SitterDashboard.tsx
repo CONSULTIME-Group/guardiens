@@ -7,6 +7,8 @@ import { useSearchParams, Link, useNavigate } from "react-router-dom";
 import { useSubscriptionAccess } from "@/hooks/useSubscriptionAccess";
 import { useAccessLevel } from "@/hooks/useAccessLevel";
 import { useSitterDashboardData } from "@/hooks/useSitterDashboardData";
+import DashboardLoadError from "./DashboardLoadError";
+
 import { getOptimizedImageUrl } from "@/lib/imageOptim";
 
 import RoleActivationBanner from "./RoleActivationBanner";
