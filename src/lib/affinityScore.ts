@@ -4,24 +4,29 @@
  * Principes (dégradation gracieuse) :
  * - Chaque critère absent côté propriétaire OU gardien est NEUTRE (ni bonus, ni pénalité).
  * - Le score est calculé uniquement sur les critères communs renseignés des deux côtés.
- * - Seuil minimum : 3 critères communs. En dessous → renvoie `null` (pas de badge).
- * - Seuil de confiance : score < 40 % → renvoie `null` (un score faible n'a pas de
- *   valeur informative, mieux vaut masquer que décourager).
+ * - Dénominateur dynamique : on normalise sur la somme des poids des critères
+ *   réellement évalués, pas sur un maximum fixe. Un critère absent d'un côté
+ *   sort du dénominateur, il n'est ni bonus ni pénalité.
+ * - Seuil minimum : 3 critères communs. En dessous → masqué (hiddenReason
+ *   `too_few_criteria`).
+ * - Seuil de confiance : score < 35 % → masqué (hiddenReason `below_threshold`).
+ * - Critère dur obligatoire : le badge ne s'affiche jamais si aucun critère dur
+ *   (Animaux ou Présence) n'a été évalué (hiddenReason `no_hard_criterion`).
  * - Disqualification : si le gardien a une sensibilité incompatible avec une espèce
- *   présente chez le propriétaire (allergie, refus d'espèce…), le score est `null`.
+ *   présente chez le propriétaire (allergie, refus d'espèce…), le score est masqué.
  *
  * Critères évalués (pondération différenciée) :
  *  1. Animaux (poids 2) : intersection pets.species ↔ sitter.animal_types
  *  2. Présence ↔ travail pendant la garde (poids 2)
  *  3. Profil idéal (poids 1) : sitter matche un des owner.preferred_sitter_types
- *  4. Rythme de vie (poids 0.5) : exact = 1, adjacent = 0.5
- *  5. Langues (poids 0.5) : au moins 1 commune
- *  6. Intérêts (poids 0.5) : ≥2 communs = 1, ≥1 = 0.5
- *  7. Ambiance foyer (poids 0.5) : ↔ intérêts/rythme du sitter
+ *  4. Rythme de vie (poids 1) : exact = 1, adjacent = 0.5
+ *  5. Langues (poids 1) : au moins 1 commune
+ *  6. Intérêts (poids 1) : ≥2 communs = 1, ≥1 = 0.5
+ *  7. Ambiance foyer (poids 1) : ↔ intérêts/rythme du sitter
  *
  * Rationnel : animaux, présence et profil idéal sont des critères "durs".
  * Rythme, langues, intérêts et ambiance sont des "soft" (peu renseignés en base),
- * pondérés à 0.5 pour ne pas écraser le score des profils qui matchent l'essentiel.
+ * pondérés à 1 pour enrichir le score sans écraser les critères essentiels.
  */
 
 export interface AffinityOwnerInput {
