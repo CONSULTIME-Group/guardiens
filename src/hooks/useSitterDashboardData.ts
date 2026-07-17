@@ -500,7 +500,7 @@ export function useSitterDashboardData(userId: string | undefined) {
 
     load();
     return () => { cancelled = true; };
-  }, [userId]);
+  }, [userId, reloadTick]);
 
   // Realtime sync for availability
   useEffect(() => {
