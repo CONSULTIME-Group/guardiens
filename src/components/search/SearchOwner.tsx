@@ -16,7 +16,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import {
   MapPin, Star, SlidersHorizontal, MessageCircle, Zap,
   LayoutGrid, Map as MapIcon, ShieldCheck, Crosshair, CircleDot, Car, Calendar,
-  Bell, BellRing, Loader2, Share2
+  Bell, BellRing, Loader2, Share2, AlertCircle, RefreshCw
 } from "lucide-react";
 import FavoriteButton from "@/components/shared/FavoriteButton";
 import { ILLUSTRATIONS } from "@/components/shared/EmptyState";
