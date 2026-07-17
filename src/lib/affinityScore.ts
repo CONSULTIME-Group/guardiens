@@ -282,6 +282,7 @@ export function computeAffinityResultFull(
   let points = 0;
   let evaluated = 0; // nombre de critères réellement comparables (X / 7)
   let evaluatedWeight = 0; // somme des poids des critères comparables (dénominateur dynamique)
+  let evaluatedHard = 0; // nombre de critères durs évalués (Animaux, Présence)
   const matched: string[] = [];
   const notes: string[] = [];
 
@@ -289,6 +290,7 @@ export function computeAffinityResultFull(
   const species = ownerSpeciesRaw;
   if (species.length > 0 && (sitter.animal_types?.length ?? 0) > 0) {
     evaluated++;
+    evaluatedHard++;
     evaluatedWeight += W.animals;
     const inter = speciesIntersects(species, sitter.animal_types ?? []);
     if (inter > 0) {
@@ -304,6 +306,7 @@ export function computeAffinityResultFull(
   const presScore = presenceCompatibility(owner.presence_expected, sitter.work_during_sit);
   if (presScore !== null) {
     evaluated++;
+    evaluatedHard++;
     evaluatedWeight += W.presence;
     points += presScore * W.presence;
     if (presScore >= 1) matched.push("Présence compatible");
