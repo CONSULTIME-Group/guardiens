@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 
 export type HousingFilter = "all" | "house" | "apartment" | "farm";
 export type ExperienceFilter = "all" | "1" | "3";
+export type DurationFilter = "all" | "short" | "medium" | "long";
 
 interface EnvOption {
   key: string;
