@@ -54,10 +54,10 @@ describe("computeAffinityScore", () => {
     expect(r).toBeNull();
   });
 
-  it("dénominateur dynamique : 3 critères tous matchés = 100 %", () => {
-    // pace(1) + langue(1) + intérêts(1) = 3 / 3 = 100%
-    // Les critères absents (animaux, présence, idéal, ambiance) sortent du
-    // dénominateur au lieu d'être comptabilisés à 0.
+  it("dénominateur dynamique : 3 critères SOFT tous matchés → masqué (no_hard_criterion)", () => {
+    // pace + langue + intérêts = 3 critères comparables mais AUCUN critère dur.
+    // Depuis juillet 2026 : un badge d'affinité ne peut plus reposer uniquement
+    // sur des soft (langues, intérêts, rythme, ambiance).
     const full = computeAffinityResultFull(
       {
         life_pace: "actif",
@@ -73,10 +73,30 @@ describe("computeAffinityScore", () => {
     expect(full).not.toBeNull();
     expect(full!.total).toBe(3);
     expect(full!.score).toBe(100);
+    expect(full!.displayed).toBe(false);
+    expect(full!.hiddenReason).toBe("no_hard_criterion");
+  });
+
+  it("3 critères DONT un critère dur (présence) tous matchés = 100 %, affiché", () => {
+    const full = computeAffinityResultFull(
+      {
+        presence_expected: "100% sur place",
+        languages: ["Français"],
+        interests: ["Randonnée", "Vélo"],
+      },
+      {
+        work_during_sit: "on_site",
+        languages: ["Français"],
+        interests: ["Randonnée", "Vélo"],
+      },
+    );
+    expect(full).not.toBeNull();
+    expect(full!.total).toBe(3);
+    expect(full!.score).toBe(100);
     expect(full!.displayed).toBe(true);
   });
 
-  it("rythme adjacent + langue + intérêt commun (dénominateur dynamique)", () => {
+  it("rythme adjacent + langue + intérêt commun (que du soft) → masqué", () => {
     const r = computeAffinityResultFull(
       {
         life_pace: "calme",
@@ -90,9 +110,8 @@ describe("computeAffinityScore", () => {
       },
     );
     expect(r).not.toBeNull();
-    // pace 0.5 + langue 1 + intérêts 0.5 = 2 / 3 ≈ 67%
-    expect(r!.score).toBeGreaterThanOrEqual(60);
-    expect(r!.score).toBeLessThanOrEqual(70);
+    expect(r!.displayed).toBe(false);
+    expect(r!.hiddenReason).toBe("no_hard_criterion");
   });
 
   it("cohérence : profil owner partiel (3 critères) et sitter complet, tout matché = 100 %", () => {
@@ -367,6 +386,43 @@ describe("computeAffinityScore", () => {
     );
     expect(r).not.toBeNull();
     expect(r!.score).toBe(100);
+  });
+
+  it("expansion NAC : gardien 'NAC' matche owner avec rongeur (pas de no_animal_species_match)", () => {
+    const r = computeAffinityResultFull(
+      {
+        pets: [{ species: "rodent" }],
+        presence_expected: "Télétravail OK",
+        life_pace: "calme",
+      },
+      {
+        animal_types: ["NAC"],
+        work_during_sit: "full_remote",
+        life_pace: "calme",
+      },
+    );
+    expect(r).not.toBeNull();
+    expect(r!.hiddenReason).not.toBe("no_animal_species_match");
+    expect(r!.displayed).toBe(true);
+    expect(r!.matched.some((m) => /animaux|expérience/i.test(m))).toBe(true);
+  });
+
+  it("no_hard_criterion : uniquement soft (langues + intérêts + ambiance) → masqué", () => {
+    const r = computeAffinityResultFull(
+      {
+        home_ambiance: ["Cocon casanier"],
+        languages: ["Français"],
+        interests: ["Lecture", "Jardinage"],
+      },
+      {
+        life_pace: "calme",
+        languages: ["Français"],
+        interests: ["Lecture", "Jardinage"],
+      },
+    );
+    expect(r).not.toBeNull();
+    expect(r!.displayed).toBe(false);
+    expect(r!.hiddenReason).toBe("no_hard_criterion");
   });
 });
 

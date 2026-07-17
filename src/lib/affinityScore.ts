@@ -66,6 +66,7 @@ export interface AffinityResult {
   hiddenReason?:
     | "below_threshold"
     | "too_few_criteria"
+    | "no_hard_criterion"
     | "disqualified"
     | "no_animal_species_match"
     | "sitter_pets_not_accepted"
@@ -82,7 +83,7 @@ const PACE_ORDER = ["calme", "equilibre", "actif"];
  * useAffinityThresholdsBootstrap ; par défaut : 2 critères / 35 %.
  */
 const thresholds = {
-  minCommonCriteria: 2,
+  minCommonCriteria: 3,
   minScorePercent: 35,
 };
 
@@ -149,12 +150,18 @@ function normalizeSpecies(value?: string | null): string | null {
   return SPECIES_NORMALIZE[k] ?? k;
 }
 
+const NAC_UMBRELLA = new Set(["rodent", "reptile", "bird", "nac"]);
+
 function speciesIntersects(ownerSpecies: string[], sitterTypes: string[]): number {
   const owners = ownerSpecies.map(normalizeSpecies).filter(Boolean) as string[];
   const sitters = sitterTypes.map(normalizeSpecies).filter(Boolean) as string[];
   if (sitters.includes("all")) return owners.length;
   const set = new Set(sitters);
-  return owners.reduce((acc, s) => acc + (set.has(s) ? 1 : 0), 0);
+  const nacExpands = set.has("nac");
+  return owners.reduce(
+    (acc, s) => acc + (set.has(s) || (nacExpands && NAC_UMBRELLA.has(s)) ? 1 : 0),
+    0,
+  );
 }
 
 const SENSITIVITY_BY_SPECIES: Record<string, string[]> = {
@@ -275,6 +282,7 @@ export function computeAffinityResultFull(
   let points = 0;
   let evaluated = 0; // nombre de critères réellement comparables (X / 7)
   let evaluatedWeight = 0; // somme des poids des critères comparables (dénominateur dynamique)
+  let evaluatedHard = 0; // nombre de critères durs évalués (Animaux, Présence)
   const matched: string[] = [];
   const notes: string[] = [];
 
@@ -282,6 +290,7 @@ export function computeAffinityResultFull(
   const species = ownerSpeciesRaw;
   if (species.length > 0 && (sitter.animal_types?.length ?? 0) > 0) {
     evaluated++;
+    evaluatedHard++;
     evaluatedWeight += W.animals;
     const inter = speciesIntersects(species, sitter.animal_types ?? []);
     if (inter > 0) {
@@ -297,6 +306,7 @@ export function computeAffinityResultFull(
   const presScore = presenceCompatibility(owner.presence_expected, sitter.work_during_sit);
   if (presScore !== null) {
     evaluated++;
+    evaluatedHard++;
     evaluatedWeight += W.presence;
     points += presScore * W.presence;
     if (presScore >= 1) matched.push("Présence compatible");
@@ -383,6 +393,9 @@ export function computeAffinityResultFull(
 
   if (evaluated < thresholds.minCommonCriteria) {
     return { score, matched, total, notes, displayed: false, hiddenReason: "too_few_criteria" };
+  }
+  if (evaluatedHard === 0) {
+    return { score, matched, total, notes, displayed: false, hiddenReason: "no_hard_criterion" };
   }
   if (score < thresholds.minScorePercent) {
     return { score, matched, total, notes, displayed: false, hiddenReason: "below_threshold" };
