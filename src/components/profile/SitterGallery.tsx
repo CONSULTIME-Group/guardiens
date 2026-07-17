@@ -148,6 +148,17 @@ const SitterGallery = () => {
     toast.success("Photo supprimée.");
   };
 
+  const handleSetAsMain = async (photo: GalleryPhoto) => {
+    if (!user) return;
+    const { error } = await supabase.from("profiles").update({ avatar_url: photo.photo_url }).eq("id", user.id);
+    if (error) {
+      toast.error("Impossible de définir cette photo comme principale.");
+      return;
+    }
+    toast.success("Photo principale mise à jour.");
+    window.dispatchEvent(new Event("profile:avatar-changed"));
+  };
+
   if (loading) return <div className="text-muted-foreground text-sm py-8 text-center">Chargement...</div>;
 
   return (
