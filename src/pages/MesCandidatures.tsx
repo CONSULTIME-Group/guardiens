@@ -49,9 +49,11 @@ interface SitterApp {
     status: string;
     user_id: string;
     property_id: string | null;
-    properties: { photos: string[] | null; city?: string | null } | null;
+    city: string | null;
+    properties: { photos: string[] | null } | null;
     owner: { id: string; first_name: string | null; avatar_url: string | null; city: string | null } | null;
   } | null;
+
 }
 
 const appStatusBadge: Record<string, { label: (viewedAt: string | null) => string; className: string }> = {
