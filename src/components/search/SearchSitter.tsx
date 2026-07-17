@@ -53,6 +53,7 @@ import AnimalsPickerPopover from "@/components/search/header/AnimalsPickerPopove
 import { useEmptyStateBreakdown } from "@/hooks/search/useEmptyStateBreakdown";
 import { useSearchAlert } from "@/hooks/search/useSearchAlert";
 import { useSearchUserProfile } from "@/hooks/search/useSearchUserProfile";
+import { PRICING_IS_ACTIVE } from "@/config/pricing";
 const animalChips = ["Chiens", "Chats", "Chevaux", "Oiseaux", "Animaux de ferme", "NAC"];
 const animalChipToSpecies: Record<string, string> = {
  Chiens: "dog", Chats: "cat", Chevaux: "horse", Oiseaux: "bird",
