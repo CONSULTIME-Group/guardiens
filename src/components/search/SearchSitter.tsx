@@ -410,7 +410,10 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
  }
  }
  setLoading(false);
- }, [tab, missionSubTab, city, radius, zoneMode, startDate, endDate, animalTypes, housingType, duration, verifiedOnly, emergencyOnly, sort, userCoords, userCity, userPostalCode, missionTypeFilter, missionCategoryFilter, withPhotosOnly, minExperience, environments]);
+ // Déps FETCH RÉSEAU uniquement : sous-onglets, ville/lieu, rayon, zone, dates.
+ // Les filtres purement clients (housing, verified, animaux, durée, urgence, tri…)
+ // sont appliqués par le useMemo `results`/`availableMembers` sans refetch.
+ }, [tab, missionSubTab, city, radius, zoneMode, startDate, endDate, userCoords, userCity, userPostalCode]);
 
  useEffect(() => {
  if (!initialLoadDone.current) return;
