@@ -182,6 +182,33 @@ export const AdvancedFiltersSheet = ({
             </div>
           </div>
 
+          {/* Durée du séjour (bornes exclusives : court < 7j, moyen 7 à 21j, long > 21j) */}
+          {setDuration && (
+            <div>
+              <label className="text-sm font-medium text-foreground mb-2 block">Durée du séjour</label>
+              <div className="flex flex-wrap gap-2">
+                {([
+                  { key: "all" as DurationFilter, label: "Toutes" },
+                  { key: "short" as DurationFilter, label: "Court (moins de 7 jours)" },
+                  { key: "medium" as DurationFilter, label: "Moyen (7 à 21 jours)" },
+                  { key: "long" as DurationFilter, label: "Long (plus de 21 jours)" },
+                ]).map(({ key, label }) => (
+                  <button
+                    key={key}
+                    onClick={() => setDuration(key)}
+                    className={`rounded-full px-3 py-1.5 text-xs transition-colors ${
+                      duration === key
+                        ? "bg-primary text-primary-foreground"
+                        : "border border-border text-muted-foreground hover:border-primary"
+                    }`}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
           {/* Apply button */}
           <Button className="w-full bg-primary text-primary-foreground py-3 rounded-xl font-medium" onClick={onApply} disabled={loading}>
             {countLabel}
