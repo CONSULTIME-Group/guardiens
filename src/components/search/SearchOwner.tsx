@@ -995,22 +995,39 @@ const SearchOwner = () => {
             {hasActiveFilters && (
               <button onClick={resetFilters} className="text-xs text-primary hover:underline whitespace-nowrap shrink-0">Réinit.</button>
             )}
-            {/* Mobile : Select compact — Desktop : pills visibles */}
-            <Select value={sort} onValueChange={(v) => setSort(v as SortOption)}>
-              <SelectTrigger className="sm:hidden h-8 w-auto gap-1.5 rounded-full border-border bg-card px-3 text-xs shrink-0">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent align="start">
-                <SelectItem value="closest">Plus proches</SelectItem>
-                <SelectItem value="rating">Mieux notés</SelectItem>
-                <SelectItem value="experience">Plus expérimentés</SelectItem>
-              </SelectContent>
-            </Select>
-            <div className="hidden sm:flex gap-1.5 shrink-0">
-              {[{ label: "Plus proches", value: "closest" as SortOption }, { label: "Mieux notés", value: "rating" as SortOption }, { label: "Plus expérimentés", value: "experience" as SortOption }].map(opt => (
-                <button key={opt.value} onClick={() => setSort(opt.value)} className={sort === opt.value ? sortPillActive : sortPillBase}>{opt.label}</button>
-              ))}
-            </div>
+            {/* Options de tri : « Meilleure affinité » n'apparaît que si le viewer
+                a un profil owner (sinon le score est masqué et le tri n'a pas de sens). */}
+            {(() => {
+              const sortOptions: Array<{ value: SortOption; label: string }> = [
+                ...(viewerOwner ? [{ value: "affinity" as SortOption, label: "Meilleure affinité" }] : []),
+                { value: "closest", label: "Plus proches" },
+                { value: "rating", label: "Mieux notés" },
+                { value: "experience", label: "Plus expérimentés" },
+              ];
+              const handleSort = (v: SortOption) => {
+                setSort(v);
+                setSortUserOverride(true);
+              };
+              return (
+                <>
+                  <Select value={sort} onValueChange={(v) => handleSort(v as SortOption)}>
+                    <SelectTrigger className="sm:hidden h-8 w-auto gap-1.5 rounded-full border-border bg-card px-3 text-xs shrink-0">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent align="start">
+                      {sortOptions.map((o) => (
+                        <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <div className="hidden sm:flex gap-1.5 shrink-0">
+                    {sortOptions.map((opt) => (
+                      <button key={opt.value} onClick={() => handleSort(opt.value)} className={sort === opt.value ? sortPillActive : sortPillBase}>{opt.label}</button>
+                    ))}
+                  </div>
+                </>
+              );
+            })()}
 
           </div>
           <div className="flex items-center gap-1.5 shrink-0">
