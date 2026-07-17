@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Trash2, ArrowLeft, Info, GripVertical, UploadCloud, Pencil, Check, X } from "lucide-react";
+import { Trash2, ArrowLeft, Info, GripVertical, UploadCloud, Pencil, Check, X, Star } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import PhotoTipsAlert from "./PhotoTipsAlert";
 import PhotoQualityChecker from "./PhotoQualityChecker";
@@ -62,9 +62,10 @@ interface SortablePhotoProps {
   photo: GalleryPhoto;
   onDelete: (id: string) => void;
   onEditCaption: (id: string, caption: string) => void;
+  onSetAsMain: (photo: GalleryPhoto) => void;
 }
 
-const SortablePhoto = ({ photo, onDelete, onEditCaption }: SortablePhotoProps) => {
+const SortablePhoto = ({ photo, onDelete, onEditCaption, onSetAsMain }: SortablePhotoProps) => {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: photo.id,
   });
@@ -96,15 +97,27 @@ const SortablePhoto = ({ photo, onDelete, onEditCaption }: SortablePhotoProps) =
         <GripVertical className="h-3.5 w-3.5" />
       </button>
 
-      {/* Delete */}
-      <button
-        type="button"
-        onClick={() => onDelete(photo.id)}
-        className="absolute top-2 right-2 p-1.5 rounded-md bg-black/60 text-white opacity-0 group-hover:opacity-100 transition-opacity hover:bg-destructive"
-        aria-label="Supprimer la photo"
-      >
-        <Trash2 className="h-3.5 w-3.5" />
-      </button>
+      {/* Actions (top-right) */}
+      <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+        <button
+          type="button"
+          onClick={() => onSetAsMain(photo)}
+          className="p-1.5 rounded-md bg-black/60 text-white hover:bg-primary"
+          aria-label="Définir comme photo principale"
+          title="Définir comme photo principale"
+        >
+          <Star className="h-3.5 w-3.5" />
+        </button>
+        <button
+          type="button"
+          onClick={() => onDelete(photo.id)}
+          className="p-1.5 rounded-md bg-black/60 text-white hover:bg-destructive"
+          aria-label="Supprimer la photo"
+          title="Supprimer"
+        >
+          <Trash2 className="h-3.5 w-3.5" />
+        </button>
+      </div>
 
       {/* Caption overlay */}
       <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 to-transparent p-2">
@@ -286,6 +299,17 @@ const OwnerGallery = () => {
     }
   };
 
+  const handleSetAsMain = async (photo: GalleryPhoto) => {
+    if (!user) return;
+    const { error } = await supabase.from("profiles").update({ avatar_url: photo.photo_url }).eq("id", user.id);
+    if (error) {
+      toast({ variant: "destructive", title: "Erreur", description: "Impossible de définir cette photo comme principale." });
+      return;
+    }
+    toast({ title: "Photo principale mise à jour" });
+    window.dispatchEvent(new Event("profile:avatar-changed"));
+  };
+
   const handleDragEnd = async (event: DragEndEvent) => {
     const { active, over } = event;
     if (!over || active.id === over.id) return;
@@ -424,6 +448,7 @@ const OwnerGallery = () => {
                   photo={photo}
                   onDelete={handleDelete}
                   onEditCaption={handleEditCaption}
+                  onSetAsMain={handleSetAsMain}
                 />
               ))}
             </div>

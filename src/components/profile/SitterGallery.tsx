@@ -7,7 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
-import { Plus, Trash2, Camera, X, CheckCircle2 } from "lucide-react";
+import { Plus, Trash2, Camera, X, CheckCircle2, Star } from "lucide-react";
 import { toast } from "sonner";
 import { logger } from "@/lib/logger";
 
@@ -148,6 +148,17 @@ const SitterGallery = () => {
     toast.success("Photo supprimée.");
   };
 
+  const handleSetAsMain = async (photo: GalleryPhoto) => {
+    if (!user) return;
+    const { error } = await supabase.from("profiles").update({ avatar_url: photo.photo_url }).eq("id", user.id);
+    if (error) {
+      toast.error("Impossible de définir cette photo comme principale.");
+      return;
+    }
+    toast.success("Photo principale mise à jour.");
+    window.dispatchEvent(new Event("profile:avatar-changed"));
+  };
+
   if (loading) return <div className="text-muted-foreground text-sm py-8 text-center">Chargement...</div>;
 
   return (
@@ -246,10 +257,25 @@ const SitterGallery = () => {
                   <p className="text-white/70 text-xs mt-0.5">{[photo.city, photo.photo_date].filter(Boolean).join(" · ")}</p>
                 )}
               </div>
-              {/* Delete button */}
-              <button onClick={(e) => { e.stopPropagation(); handleDelete(photo); }} className="absolute top-2 right-2 p-1.5 rounded-full bg-destructive/80 text-destructive-foreground opacity-0 group-hover:opacity-100 transition-opacity">
-                <Trash2 className="h-3.5 w-3.5" />
-              </button>
+              {/* Actions */}
+              <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                <button
+                  onClick={(e) => { e.stopPropagation(); handleSetAsMain(photo); }}
+                  className="p-1.5 rounded-full bg-background/90 text-foreground hover:bg-background"
+                  title="Définir comme photo principale"
+                  aria-label="Définir comme photo principale"
+                >
+                  <Star className="h-3.5 w-3.5" />
+                </button>
+                <button
+                  onClick={(e) => { e.stopPropagation(); handleDelete(photo); }}
+                  className="p-1.5 rounded-full bg-destructive/80 text-destructive-foreground"
+                  title="Supprimer"
+                  aria-label="Supprimer la photo"
+                >
+                  <Trash2 className="h-3.5 w-3.5" />
+                </button>
+              </div>
             </div>
           ))}
         </div>
