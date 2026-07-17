@@ -74,7 +74,6 @@ const SearchOwner = () => {
   const [citySuggestions, setCitySuggestions] = useState<any[]>([]);
   const [radius, setRadius] = useState([15]);
   const [zoneMode, setZoneMode] = useState<ZoneMode>("radius");
-  const [densityCounts, setDensityCounts] = useState<{ radius: number; dept: number; region: number; france: number }>({ radius: 0, dept: 0, region: 0, france: 0 });
   // Note: filtre Dates retiré tant que la disponibilité datée n'est pas modélisée côté gardien.
   const [animalTypes, setAnimalTypes] = useState<string[]>([]);
   const [vehicled, setVehicled] = useState(false);
@@ -88,7 +87,10 @@ const SearchOwner = () => {
   const [sortUserOverride, setSortUserOverride] = useState(false);
   const [viewMode, setViewMode] = useState<ViewMode>("list");
 
-  const [results, setResults] = useState<any[]>([]);
+  // rawResults = jeu brut rapatrié et enrichi par le fetch réseau (sitters + coords + reviews + badges + gallery + affinité).
+  // Les filtres purement clients (avec véhicule, vérifié, note min, animaux, etc.) sont appliqués en mémoire via useMemo,
+  // sans relancer aucune requête Supabase ni géocodage.
+  const [rawResults, setRawResults] = useState<any[]>([]);
   const [searchCenter, setSearchCenter] = useState<{ lat: number; lng: number } | null>(null);
   const [loading, setLoading] = useState(false);
   const [searchError, setSearchError] = useState<string | null>(null);
