@@ -671,7 +671,8 @@ export default function PublicSitterProfile() {
   // Lightbox keyboard navigation (Escape to close, arrows to navigate)
   useEffect(() => {
     if (lightboxIdx === null) return;
-    const max = gallery.slice(0, 9).length;
+    const gallerySlice = gallery.slice(0, 9);
+    const max = gallerySlice.length > 0 ? gallerySlice.length : (profile?.avatar_url ? 1 : 0);
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') setLightboxIdx(null);
       else if (e.key === 'ArrowLeft' && lightboxIdx > 0) setLightboxIdx(lightboxIdx - 1);
