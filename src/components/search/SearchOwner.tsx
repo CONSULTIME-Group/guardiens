@@ -16,7 +16,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import {
   MapPin, Star, SlidersHorizontal, MessageCircle, Zap,
   LayoutGrid, Map as MapIcon, ShieldCheck, Crosshair, CircleDot, Car, Calendar,
-  Bell, BellRing, Loader2, Share2
+  Bell, BellRing, Loader2, Share2, AlertCircle, RefreshCw
 } from "lucide-react";
 import FavoriteButton from "@/components/shared/FavoriteButton";
 import { ILLUSTRATIONS } from "@/components/shared/EmptyState";
@@ -91,6 +91,7 @@ const SearchOwner = () => {
   const [results, setResults] = useState<any[]>([]);
   const [searchCenter, setSearchCenter] = useState<{ lat: number; lng: number } | null>(null);
   const [loading, setLoading] = useState(false);
+  const [searchError, setSearchError] = useState<string | null>(null);
   const [contactingId, setContactingId] = useState<string | null>(null);
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [initialLoaded, setInitialLoaded] = useState(false);
@@ -373,11 +374,19 @@ const SearchOwner = () => {
   // Search logic
   const handleSearch = useCallback(async () => {
     setLoading(true);
+    setSearchError(null);
 
-    const { data: sitters } = await supabase
+    const { data: sitters, error: sittersError } = await supabase
       .from("sitter_profiles")
       .select("*, reply_median_minutes, profile:profiles!sitter_profiles_user_id_fkey(first_name, last_name, avatar_url, city, postal_code, profile_completion, identity_verified, completed_sits_count, bio, pro_status, pro_specialty, last_seen_at)")
       .limit(500);
+
+    if (sittersError) {
+      console.error("[SearchOwner] Erreur chargement gardiens:", sittersError);
+      setSearchError("Impossible de charger les gardiens.");
+      setLoading(false);
+      return;
+    }
 
     let items = (sitters || []).filter((s: any) => s.profile?.profile_completion >= 60);
 
@@ -419,17 +428,31 @@ const SearchOwner = () => {
           supabase.from("emergency_sitter_profiles").select("user_id, is_active").in("user_id", allUserIds).eq("is_active", true),
           supabase.from("sitter_gallery").select("user_id, photo_url, created_at").in("user_id", allUserIds).order("created_at", { ascending: false }),
         ])
-      : [{ data: [] as any[] }, { data: [] as any[] }, { data: [] as any[] }] as const;
+      : [{ data: [] as any[], error: null }, { data: [] as any[], error: null }, { data: [] as any[], error: null }] as const;
+
+    const enrichError = (allBadgesRes as any).error || (emergencyRes as any).error || (galleryRes as any).error;
+    if (enrichError) {
+      console.error("[SearchOwner] Erreur enrichissement gardiens:", enrichError);
+      setSearchError("Impossible de charger les informations complètes des gardiens.");
+      setLoading(false);
+      return;
+    }
 
     const emergencySet = new Set((emergencyRes.data || []).map((e: any) => e.user_id));
 
     const reviewsAgg = new Map<string, { sum: number; count: number }>();
     if (allUserIds.length > 0) {
-      const { data: reviewRows } = await supabase
+      const { data: reviewRows, error: reviewsError } = await supabase
         .from("reviews")
         .select("reviewee_id, overall_rating")
         .in("reviewee_id", allUserIds)
         .eq("published", true);
+      if (reviewsError) {
+        console.error("[SearchOwner] Erreur chargement avis:", reviewsError);
+        setSearchError("Impossible de charger les avis des gardiens.");
+        setLoading(false);
+        return;
+      }
       (reviewRows || []).forEach((r: any) => {
         const cur = reviewsAgg.get(r.reviewee_id) || { sum: 0, count: 0 };
         cur.sum += r.overall_rating || 0;
@@ -1072,7 +1095,29 @@ const SearchOwner = () => {
       {/* Results */}
       {viewMode === "list" ? (
         <div className="p-6">
-          {loading ? (
+          {searchError ? (
+            <div
+              role="alert"
+              className="max-w-2xl mx-auto my-8 rounded-2xl border border-destructive/40 bg-destructive/5 p-6 text-center space-y-3"
+            >
+              <AlertCircle className="h-10 w-10 mx-auto text-destructive" aria-hidden="true" />
+              <h2 className="font-heading text-lg font-semibold text-foreground">
+                Une erreur est survenue lors de la recherche
+              </h2>
+              <p className="text-sm text-muted-foreground">
+                {searchError} Vérifiez votre connexion, puis réessayez.
+              </p>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => { void handleSearch(); }}
+                className="gap-2"
+              >
+                <RefreshCw className="h-4 w-4" aria-hidden="true" />
+                Réessayer
+              </Button>
+            </div>
+          ) : loading ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4" aria-busy="true" aria-label="Chargement des gardiens">
               {Array.from({ length: 6 }).map((_, i) => (
                 <div key={i} className="bg-card rounded-xl overflow-hidden border border-border">

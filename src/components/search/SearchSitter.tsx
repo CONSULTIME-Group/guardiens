@@ -34,7 +34,7 @@ import { SitterDiscoveryBanner } from "@/components/search/SitterDiscoveryBanner
 import { OutOfZoneBanner } from "@/components/search/listing/OutOfZoneBanner";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Search, MapPin, Calendar, Star, Lock, Zap, Sparkles, Globe2, X } from "lucide-react";
+import { Search, MapPin, Calendar, Star, Lock, Zap, Sparkles, Globe2, X, AlertCircle, RefreshCw } from "lucide-react";
 import { format, differenceInDays, differenceInHours } from "date-fns";
 import { fr } from "date-fns/locale";
 import { geocodeCity, haversineDistance } from "@/lib/geocode";
@@ -154,6 +154,7 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
  const [results, setResults] = useState<any[]>([]);
  const [resultCoords, setResultCoords] = useState<Map<string, { lat: number; lng: number }>>(new Map());
  const [loading, setLoading] = useState(false);
+ const [searchError, setSearchError] = useState<string | null>(null);
  const [userCity, setUserCity] = useState("");
  const [userCoords, setUserCoords] = useState<{ lat: number; lng: number } | null>(null);
  const [sitterEligible, setSitterEligible] = useState(false);
@@ -388,6 +389,7 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
  // Auto-search when filters change (debounced)
  const doSearch = useCallback(async () => {
  setLoading(true);
+ setSearchError(null);
  let searchCoords = userCoords;
  if (city && city !== userCity) {
  const coords = await geocodeCity(city);
@@ -636,13 +638,18 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
 .order("created_at", { ascending: false });
    if (startDate) query = query.gte("end_date", startDate);
    if (endDate) query = query.lte("start_date", endDate);
-   const { data } = await query;
+   const { data, error: sitsError } = await query;
+   if (sitsError) {
+     console.error("[SearchSitter] Erreur chargement annonces:", sitsError);
+     setSearchError("Impossible de charger les annonces.");
+     return;
+   }
    let items = data || [];
 
    // Hydrate owner data from public_profiles (safe public view) in a single batched call
    const ownerIds = Array.from(new Set(items.map((s: any) => s.user_id).filter(Boolean)));
    if (ownerIds.length > 0) {
-   const [{ data: owners }, { data: galleryRows }] = await Promise.all([
+   const [ownersRes, galleryRes] = await Promise.all([
      supabase
 .from("public_profiles")
 .select("id, first_name, avatar_url, city, postal_code, identity_verified, is_founder")
@@ -653,6 +660,13 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
 .in("user_id", ownerIds)
 .order("position", { ascending: true }),
    ]);
+   if (ownersRes.error || galleryRes.error) {
+     console.error("[SearchSitter] Erreur hydratation propriétaires:", ownersRes.error || galleryRes.error);
+     setSearchError("Impossible de charger les informations des propriétaires.");
+     return;
+   }
+   const owners = ownersRes.data;
+   const galleryRows = galleryRes.data;
    const ownerMap = new Map((owners || []).map((o: any) => [o.id, o]));
    const galleryFirstMap = new Map<string, string>();
    (galleryRows || []).forEach((g: any) => {
@@ -801,7 +815,12 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
 .select("*")
 .eq("status", "open")
 .order("created_at", { ascending: false });
-  const { data } = await query;
+   const { data, error: missionsError } = await query;
+   if (missionsError) {
+     console.error("[SearchSitter] Erreur chargement missions:", missionsError);
+     setSearchError("Impossible de charger les coups de main.");
+     return;
+   }
   let items = data || [];
   // Les « offres » sont des disponibilités de membres : elles doivent vivre dans
   // l'onglet Membres disponibles, pas dans le flux des demandes publiées.
@@ -810,10 +829,15 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
   // utilisée par le FK embed PostgREST).
   const ownerIds = Array.from(new Set(items.map((m: any) => m.user_id).filter(Boolean)));
   if (ownerIds.length > 0) {
-    const { data: owners } = await supabase
+    const { data: owners, error: ownersError } = await supabase
       .from("public_profiles")
       .select("id, first_name, avatar_url, city, postal_code, identity_verified, is_founder")
       .in("id", ownerIds);
+    if (ownersError) {
+      console.error("[SearchSitter] Erreur hydratation propriétaires (missions):", ownersError);
+      setSearchError("Impossible de charger les informations des propriétaires.");
+      return;
+    }
     const ownerMap = new Map<string, any>((owners || []).map((o: any) => [o.id, o]));
     items = items.map((m: any) => ({ ...m, owner: ownerMap.get(m.user_id) || null }));
   }
@@ -875,19 +899,29 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
 
  const searchAvailableMembers = async (searchCoords: { lat: number; lng: number } | null) => {
  // 1) Profils opt-in « available_for_help »
- const { data: optInData } = await supabase
+ const { data: optInData, error: optInError } = await supabase
 .from("public_profiles")
 .select("id, first_name, avatar_url, city, postal_code, bio, skill_categories, custom_skills, available_for_help, is_founder")
 .eq("available_for_help", true)
 .not("skill_categories", "eq", "{}");
+ if (optInError) {
+   console.error("[SearchSitter] Erreur chargement membres opt-in:", optInError);
+   setSearchError("Impossible de charger les membres disponibles.");
+   return;
+ }
 
  // 2) Auteurs ayant publié une « offre » de coup de main encore ouverte
  //    -> considérés disponibles de fait, même sans opt-in available_for_help
- const { data: offreMissions } = await supabase
+ const { data: offreMissions, error: offreError } = await supabase
    .from("small_missions")
     .select("id, user_id, title, category, city, postal_code, created_at")
    .eq("mission_type", "offre")
    .eq("status", "open");
+ if (offreError) {
+   console.error("[SearchSitter] Erreur chargement offres:", offreError);
+   setSearchError("Impossible de charger les offres de coup de main.");
+   return;
+ }
  const offreAuthorIds = Array.from(new Set((offreMissions || []).map((m: any) => m.user_id))).filter(Boolean);
  const offreCatsByUser = new Map<string, Set<string>>();
   const offresByUser = new Map<string, any[]>();
@@ -903,10 +937,15 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
  });
  let offreProfiles: any[] = [];
  if (offreAuthorIds.length > 0) {
-   const { data } = await supabase
-     .from("public_profiles")
-      .select("id, first_name, avatar_url, city, postal_code, bio, skill_categories, custom_skills, available_for_help, is_founder")
-     .in("id", offreAuthorIds);
+    const { data, error: offreProfilesError } = await supabase
+      .from("public_profiles")
+       .select("id, first_name, avatar_url, city, postal_code, bio, skill_categories, custom_skills, available_for_help, is_founder")
+      .in("id", offreAuthorIds);
+    if (offreProfilesError) {
+      console.error("[SearchSitter] Erreur hydratation auteurs d'offres:", offreProfilesError);
+      setSearchError("Impossible de charger les auteurs d'offres.");
+      return;
+    }
    const catToSkillKey: Record<string, string> = { garden: "jardin", animals: "animaux", skills: "competences", house: "coups_de_main" };
    offreProfiles = (data || []).map((p: any) => {
      const cats = offreCatsByUser.get(p.id);
@@ -983,21 +1022,36 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
   });
  const memberIds = items.map((m: any) => m.id);
  if (memberIds.length > 0) {
-  const { data: sitterProfiles } = await supabase
-    .from("sitter_profiles")
-    .select("user_id, competences")
-    .in("user_id", memberIds);
-  const competenceMap = new Map<string, string[]>();
-  (sitterProfiles || []).forEach((sp: any) => {
-    if (sp.competences?.length) competenceMap.set(sp.user_id, sp.competences);
+   const { data: sitterProfiles, error: sitterProfilesError } = await supabase
+     .from("sitter_profiles")
+     .select("user_id, competences")
+     .in("user_id", memberIds);
+   if (sitterProfilesError) {
+     console.error("[SearchSitter] Erreur chargement profils gardiens (membres):", sitterProfilesError);
+     setSearchError("Impossible de charger les compétences des membres.");
+     return;
+   }
+   const competenceMap = new Map<string, string[]>();
+   (sitterProfiles || []).forEach((sp: any) => {
+     if (sp.competences?.length) competenceMap.set(sp.user_id, sp.competences);
+   });
+  const { data: reviews, error: reviewsError } = await supabase.from("reviews").select("reviewee_id, overall_rating").in("reviewee_id", memberIds).eq("published", true);
+  if (reviewsError) {
+    console.error("[SearchSitter] Erreur chargement avis (membres):", reviewsError);
+    setSearchError("Impossible de charger les avis des membres.");
+    return;
+  }
+  const reviewMap = new Map<string, { count: number; total: number }>();
+  (reviews || []).forEach((r: any) => {
+  const cur = reviewMap.get(r.reviewee_id) || { count: 0, total: 0 };
+  reviewMap.set(r.reviewee_id, { count: cur.count + 1, total: cur.total + r.overall_rating });
   });
- const { data: reviews } = await supabase.from("reviews").select("reviewee_id, overall_rating").in("reviewee_id", memberIds).eq("published", true);
- const reviewMap = new Map<string, { count: number; total: number }>();
- (reviews || []).forEach((r: any) => {
- const cur = reviewMap.get(r.reviewee_id) || { count: 0, total: 0 };
- reviewMap.set(r.reviewee_id, { count: cur.count + 1, total: cur.total + r.overall_rating });
- });
- const { data: apps } = await supabase.from("applications").select("sitter_id").in("sitter_id", memberIds).eq("status", "accepted");
+  const { data: apps, error: appsError } = await supabase.from("applications").select("sitter_id").in("sitter_id", memberIds).eq("status", "accepted");
+  if (appsError) {
+    console.error("[SearchSitter] Erreur chargement candidatures (membres):", appsError);
+    setSearchError("Impossible de charger l'historique des membres.");
+    return;
+  }
  const sitsMap = new Map<string, number>();
  (apps || []).forEach((a: any) => { sitsMap.set(a.sitter_id, (sitsMap.get(a.sitter_id) || 0) + 1); });
  items = items.map((m: any) => {
@@ -1742,7 +1796,29 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
  {/* ─── Content ─── */}
  {viewMode === "list" ? (
  <div className="p-6">
- {loading ? (
+ {searchError ? (
+   <div
+     role="alert"
+     className="max-w-2xl mx-auto my-8 rounded-2xl border border-destructive/40 bg-destructive/5 p-6 text-center space-y-3"
+   >
+     <AlertCircle className="h-10 w-10 mx-auto text-destructive" aria-hidden="true" />
+     <h2 className="font-heading text-lg font-semibold text-foreground">
+       Une erreur est survenue lors de la recherche
+     </h2>
+     <p className="text-sm text-muted-foreground">
+       {searchError} Vérifiez votre connexion, puis réessayez.
+     </p>
+     <Button
+       type="button"
+       variant="outline"
+       onClick={() => { void doSearch(); }}
+       className="gap-2"
+     >
+       <RefreshCw className="h-4 w-4" aria-hidden="true" />
+       Réessayer
+     </Button>
+   </div>
+ ) : loading ? (
   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-6 sm:gap-y-10">
     {Array.from({ length: 6 }).map((_, i) => (
       <div key={i} className="space-y-3">
