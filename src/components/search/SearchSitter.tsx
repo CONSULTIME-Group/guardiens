@@ -34,7 +34,7 @@ import { SitterDiscoveryBanner } from "@/components/search/SitterDiscoveryBanner
 import { OutOfZoneBanner } from "@/components/search/listing/OutOfZoneBanner";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Search, MapPin, Calendar, Star, Lock, Zap, Sparkles, Globe2, X } from "lucide-react";
+import { Search, MapPin, Calendar, Star, Lock, Zap, Sparkles, Globe2, X, AlertCircle, RefreshCw } from "lucide-react";
 import { format, differenceInDays, differenceInHours } from "date-fns";
 import { fr } from "date-fns/locale";
 import { geocodeCity, haversineDistance } from "@/lib/geocode";
