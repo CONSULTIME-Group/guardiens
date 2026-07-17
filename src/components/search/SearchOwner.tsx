@@ -691,7 +691,7 @@ const SearchOwner = () => {
             )}
             {!!activeOwnersCount && (
               <span className="inline-flex items-center">
-                <span className="font-semibold text-foreground mr-1">{(activeOwnersCount + 37).toLocaleString("fr-FR")}</span>
+                <span className="font-semibold text-foreground mr-1">{activeOwnersCount.toLocaleString("fr-FR")}</span>
                 propriétaires inscrits
               </span>
             )}
