@@ -75,6 +75,11 @@ export function useOwnerDashboardData(userId: string | undefined) {
 
   const [refreshTick, setRefreshTick] = useState(0);
 
+  // Ref des sit ids appartenant au propriétaire courant. Utilisée pour gater
+  // les événements realtime « applications » (table sans lien direct user_id) :
+  // on ne rafraîchit que si l'application concerne une annonce à nous.
+  const ownedSitIdsRef = useRef<Set<string>>(new Set());
+
   useEffect(() => {
     if (!userId) return;
     let cancelled = false;
