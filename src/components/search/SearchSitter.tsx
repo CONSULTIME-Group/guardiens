@@ -1022,21 +1022,36 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
   });
  const memberIds = items.map((m: any) => m.id);
  if (memberIds.length > 0) {
-  const { data: sitterProfiles } = await supabase
-    .from("sitter_profiles")
-    .select("user_id, competences")
-    .in("user_id", memberIds);
-  const competenceMap = new Map<string, string[]>();
-  (sitterProfiles || []).forEach((sp: any) => {
-    if (sp.competences?.length) competenceMap.set(sp.user_id, sp.competences);
+   const { data: sitterProfiles, error: sitterProfilesError } = await supabase
+     .from("sitter_profiles")
+     .select("user_id, competences")
+     .in("user_id", memberIds);
+   if (sitterProfilesError) {
+     console.error("[SearchSitter] Erreur chargement profils gardiens (membres):", sitterProfilesError);
+     setSearchError("Impossible de charger les compétences des membres.");
+     return;
+   }
+   const competenceMap = new Map<string, string[]>();
+   (sitterProfiles || []).forEach((sp: any) => {
+     if (sp.competences?.length) competenceMap.set(sp.user_id, sp.competences);
+   });
+  const { data: reviews, error: reviewsError } = await supabase.from("reviews").select("reviewee_id, overall_rating").in("reviewee_id", memberIds).eq("published", true);
+  if (reviewsError) {
+    console.error("[SearchSitter] Erreur chargement avis (membres):", reviewsError);
+    setSearchError("Impossible de charger les avis des membres.");
+    return;
+  }
+  const reviewMap = new Map<string, { count: number; total: number }>();
+  (reviews || []).forEach((r: any) => {
+  const cur = reviewMap.get(r.reviewee_id) || { count: 0, total: 0 };
+  reviewMap.set(r.reviewee_id, { count: cur.count + 1, total: cur.total + r.overall_rating });
   });
- const { data: reviews } = await supabase.from("reviews").select("reviewee_id, overall_rating").in("reviewee_id", memberIds).eq("published", true);
- const reviewMap = new Map<string, { count: number; total: number }>();
- (reviews || []).forEach((r: any) => {
- const cur = reviewMap.get(r.reviewee_id) || { count: 0, total: 0 };
- reviewMap.set(r.reviewee_id, { count: cur.count + 1, total: cur.total + r.overall_rating });
- });
- const { data: apps } = await supabase.from("applications").select("sitter_id").in("sitter_id", memberIds).eq("status", "accepted");
+  const { data: apps, error: appsError } = await supabase.from("applications").select("sitter_id").in("sitter_id", memberIds).eq("status", "accepted");
+  if (appsError) {
+    console.error("[SearchSitter] Erreur chargement candidatures (membres):", appsError);
+    setSearchError("Impossible de charger l'historique des membres.");
+    return;
+  }
  const sitsMap = new Map<string, number>();
  (apps || []).forEach((a: any) => { sitsMap.set(a.sitter_id, (sitsMap.get(a.sitter_id) || 0) + 1); });
  items = items.map((m: any) => {
