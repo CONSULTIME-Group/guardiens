@@ -152,7 +152,10 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
  const [viewMode, setViewMode] = useState<ViewMode>("list");
  const [cityPostalCode, setCityPostalCode] = useState<string | null>(null);
 
- const [results, setResults] = useState<any[]>([]);
+ // rawResults = jeu brut rapatrié par le fetch réseau (sits enrichis, missions enrichies).
+ // Les filtres purement clients (avec véhicule, vérifié, photos, animaux, durée, urgence, tri…)
+ // sont appliqués en mémoire via useMemo plus bas, sans refetch ni géocodage.
+ const [rawResults, setRawResults] = useState<any[]>([]);
  const [resultCoords, setResultCoords] = useState<Map<string, { lat: number; lng: number }>>(new Map());
  const [loading, setLoading] = useState(false);
  const [searchError, setSearchError] = useState<string | null>(null);
