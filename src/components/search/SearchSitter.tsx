@@ -437,13 +437,14 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
   setOrDel("rayon", radius[0] !== 15 ? String(radius[0]) : null);
   setOrDel("debut", startDate || null);
   setOrDel("fin", endDate || null);
-  setOrDel("animaux", animalTypes.length ? animalTypes.join(",") : null);
-  setOrDel("tri", sort !== "closest" ? sort : null);
-  const a = next.toString();
-  const b = searchParams.toString();
-  if (a !== b) setSearchParams(next, { replace: true });
-  // eslint-disable-next-line react-hooks/exhaustive-deps
- }, [city, radius, startDate, endDate, animalTypes, sort]);
+   setOrDel("animaux", animalTypes.length ? animalTypes.join(",") : null);
+   setOrDel("emergency", emergencyOnly ? "true" : null);
+   setOrDel("tri", sort !== "closest" ? sort : null);
+   const a = next.toString();
+   const b = searchParams.toString();
+   if (a !== b) setSearchParams(next, { replace: true });
+   // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [city, radius, startDate, endDate, animalTypes, emergencyOnly, sort]);
 
  // ─── Mode test démos : snapshot à chaque changement de filtre clé ───
  const lastDemoFiltersRef = useRef<{ city: string; startDate: string; endDate: string; sort: string; tab: string } | null>(null);
