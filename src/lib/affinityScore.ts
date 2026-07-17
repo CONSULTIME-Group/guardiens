@@ -150,12 +150,18 @@ function normalizeSpecies(value?: string | null): string | null {
   return SPECIES_NORMALIZE[k] ?? k;
 }
 
+const NAC_UMBRELLA = new Set(["rodent", "reptile", "bird", "nac"]);
+
 function speciesIntersects(ownerSpecies: string[], sitterTypes: string[]): number {
   const owners = ownerSpecies.map(normalizeSpecies).filter(Boolean) as string[];
   const sitters = sitterTypes.map(normalizeSpecies).filter(Boolean) as string[];
   if (sitters.includes("all")) return owners.length;
   const set = new Set(sitters);
-  return owners.reduce((acc, s) => acc + (set.has(s) ? 1 : 0), 0);
+  const nacExpands = set.has("nac");
+  return owners.reduce(
+    (acc, s) => acc + (set.has(s) || (nacExpands && NAC_UMBRELLA.has(s)) ? 1 : 0),
+    0,
+  );
 }
 
 const SENSITIVITY_BY_SPECIES: Record<string, string[]> = {
