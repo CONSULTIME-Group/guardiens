@@ -528,13 +528,35 @@ const SearchOwner = () => {
     // france: no zone filter applied
 
     // Sort
+    // Bascule automatique : si l'utilisateur n'a jamais choisi de tri
+    // manuellement et n'a pas de profil owner (donc pas de scoring possible),
+    // on retombe sur « Plus proches » comme défaut fonctionnel.
+    let effectiveSort: SortOption = sort;
+    if (!sortUserOverride && sort === "affinity" && !viewerOwner) {
+      effectiveSort = "closest";
+    }
+
+    const affinityRank = (s: any) => {
+      const a = s._affinity;
+      if (!a || a.displayed === false) return -1;
+      return a.score ?? 0;
+    };
+
     let final = results;
-    if (sort === "closest") {
+    if (effectiveSort === "affinity") {
+      final.sort((a, b) => {
+        if (a.isEmergency !== b.isEmergency) return a.isEmergency ? -1 : 1;
+        const ra = affinityRank(a);
+        const rb = affinityRank(b);
+        if (rb !== ra) return rb - ra;
+        return (a._dist ?? Infinity) - (b._dist ?? Infinity);
+      });
+    } else if (effectiveSort === "closest") {
       final.sort((a, b) => {
         if (a.isEmergency !== b.isEmergency) return a.isEmergency ? -1 : 1;
         return (a._dist ?? Infinity) - (b._dist ?? Infinity);
       });
-    } else if (sort === "rating") {
+    } else if (effectiveSort === "rating") {
       final.sort((a, b) => {
         if (a.isEmergency !== b.isEmergency) return a.isEmergency ? -1 : 1;
         return (b.avgRating || 0) - (a.avgRating || 0);
@@ -549,7 +571,7 @@ const SearchOwner = () => {
     setResults(final);
     setSearchCenter(searchCoords);
     setLoading(false);
-  }, [city, cityPostalCode, userPostalCode, radius, zoneMode, animalTypes, vehicled, availableOnly, verifiedOnly, emergencyOnly, proOnly, minSits, minRating, sort]);
+  }, [city, cityPostalCode, userPostalCode, radius, zoneMode, animalTypes, vehicled, availableOnly, verifiedOnly, emergencyOnly, proOnly, minSits, minRating, sort, sortUserOverride, viewerOwner]);
 
   // Auto-search on filter change (debounced)
   useEffect(() => {
