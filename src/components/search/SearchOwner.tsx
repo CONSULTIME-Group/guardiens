@@ -51,7 +51,7 @@ const animalChipToType: Record<string, string> = {
   "Animaux de ferme": "farm_animal", NAC: "nac",
 };
 
-const RADIUS_SHORTCUTS = [5, 10, 15, 30, 50];
+const RADIUS_SHORTCUTS = [5, 15, 30, 50];
 
 type SortOption = "affinity" | "closest" | "rating" | "experience";
 type ViewMode = "list" | "map";
