@@ -19,6 +19,7 @@ export interface ReputationData {
 
 export interface SitterDashboardData {
   loading: boolean;
+  error: string | null;
   profileCompletion: number;
   identityVerified: boolean;
   identityStatus: string;
@@ -59,6 +60,7 @@ export interface SitterDashboardData {
   myMissions: any[];
   myMissionsError: string | null;
 }
+
 
 const INITIAL_STATE: SitterDashboardData = {
   loading: true,
