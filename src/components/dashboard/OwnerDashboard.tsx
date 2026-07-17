@@ -385,6 +385,8 @@ const OwnerDashboard = () => {
 
 
   if (loading) return <DashboardSkeleton />;
+  if (error) return <DashboardLoadError onRetry={reload} detail={error} />;
+
 
   if (showOnboarding && user?.onboardingMinimalCompleted) {
     return (
