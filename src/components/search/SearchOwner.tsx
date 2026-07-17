@@ -410,14 +410,15 @@ const SearchOwner = () => {
     // Enrich ALL items with coords (needed for density counts across zones)
     const allItems = items.map(withCoords);
 
-    // Fetch badges, emergency profiles, and reviews for ALL candidates
+    // Fetch badges, emergency profiles, reviews et galerie pour TOUS les candidats
     const allUserIds = allItems.map((s: any) => s.user_id);
-    const [allBadgesRes, emergencyRes] = allUserIds.length > 0
+    const [allBadgesRes, emergencyRes, galleryRes] = allUserIds.length > 0
       ? await Promise.all([
           supabase.from("badge_attributions").select("user_id, badge_id").in("user_id", allUserIds),
           supabase.from("emergency_sitter_profiles").select("user_id, is_active").in("user_id", allUserIds).eq("is_active", true),
+          supabase.from("sitter_gallery").select("user_id, photo_url, created_at").in("user_id", allUserIds).order("created_at", { ascending: false }),
         ])
-      : [{ data: [] as any[] }, { data: [] as any[] }] as const;
+      : [{ data: [] as any[] }, { data: [] as any[] }, { data: [] as any[] }] as const;
 
     const emergencySet = new Set((emergencyRes.data || []).map((e: any) => e.user_id));
 
@@ -443,6 +444,14 @@ const SearchOwner = () => {
       m.set(b.badge_id, (m.get(b.badge_id) || 0) + 1);
     });
 
+    // Galerie : max 4 photos par gardien, avatar prépendu si présent.
+    const photoMap = new Map<string, string[]>();
+    (galleryRes.data || []).forEach((g: any) => {
+      const arr = photoMap.get(g.user_id) || [];
+      if (arr.length < 4 && g.photo_url) arr.push(g.photo_url);
+      photoMap.set(g.user_id, arr);
+    });
+
     // Enrich all items
     const enrichedAll = allItems.map((s: any) => {
       const agg = reviewsAgg.get(s.user_id);
@@ -451,7 +460,14 @@ const SearchOwner = () => {
       const topBadges = userBadges
         ? Array.from(userBadges.entries()).map(([badge_key, count]) => ({ badge_key, count })).sort((a, b) => b.count - a.count).slice(0, 3)
         : [];
-      return { ...s, avgRating, reviewCount: agg?.count || 0, topBadges, isEmergency: emergencySet.has(s.user_id) };
+      const gallery = photoMap.get(s.user_id) || [];
+      const avatar = s.profile?.avatar_url;
+      const photos = avatar ? [avatar, ...gallery.filter((p) => p !== avatar)] : gallery;
+      // Score d'affinité pré-calculé pour permettre le tri "Meilleure affinité".
+      const affinity = viewerOwner
+        ? computeAffinityResultFull(viewerOwner as AffinityOwnerInput, s as AffinitySitterInput)
+        : null;
+      return { ...s, avgRating, reviewCount: agg?.count || 0, topBadges, isEmergency: emergencySet.has(s.user_id), _photos: photos, _affinity: affinity };
     });
 
     // Apply ALL advanced filters (non-zone) to get the pool used for density counts
