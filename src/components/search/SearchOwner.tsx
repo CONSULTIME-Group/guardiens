@@ -428,17 +428,31 @@ const SearchOwner = () => {
           supabase.from("emergency_sitter_profiles").select("user_id, is_active").in("user_id", allUserIds).eq("is_active", true),
           supabase.from("sitter_gallery").select("user_id, photo_url, created_at").in("user_id", allUserIds).order("created_at", { ascending: false }),
         ])
-      : [{ data: [] as any[] }, { data: [] as any[] }, { data: [] as any[] }] as const;
+      : [{ data: [] as any[], error: null }, { data: [] as any[], error: null }, { data: [] as any[], error: null }] as const;
+
+    const enrichError = (allBadgesRes as any).error || (emergencyRes as any).error || (galleryRes as any).error;
+    if (enrichError) {
+      console.error("[SearchOwner] Erreur enrichissement gardiens:", enrichError);
+      setSearchError("Impossible de charger les informations complètes des gardiens.");
+      setLoading(false);
+      return;
+    }
 
     const emergencySet = new Set((emergencyRes.data || []).map((e: any) => e.user_id));
 
     const reviewsAgg = new Map<string, { sum: number; count: number }>();
     if (allUserIds.length > 0) {
-      const { data: reviewRows } = await supabase
+      const { data: reviewRows, error: reviewsError } = await supabase
         .from("reviews")
         .select("reviewee_id, overall_rating")
         .in("reviewee_id", allUserIds)
         .eq("published", true);
+      if (reviewsError) {
+        console.error("[SearchOwner] Erreur chargement avis:", reviewsError);
+        setSearchError("Impossible de charger les avis des gardiens.");
+        setLoading(false);
+        return;
+      }
       (reviewRows || []).forEach((r: any) => {
         const cur = reviewsAgg.get(r.reviewee_id) || { sum: 0, count: 0 };
         cur.sum += r.overall_rating || 0;
