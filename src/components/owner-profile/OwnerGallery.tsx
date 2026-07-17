@@ -65,7 +65,7 @@ interface SortablePhotoProps {
   onSetAsMain: (photo: GalleryPhoto) => void;
 }
 
-const SortablePhoto = ({ photo, onDelete, onEditCaption }: SortablePhotoProps) => {
+const SortablePhoto = ({ photo, onDelete, onEditCaption, onSetAsMain }: SortablePhotoProps) => {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: photo.id,
   });
