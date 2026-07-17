@@ -1434,9 +1434,11 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
         setVerifiedOnly={setVerifiedOnly}
         withPhotosOnly={withPhotosOnly}
         setWithPhotosOnly={setWithPhotosOnly}
-        minExperience={minExperience}
-        setMinExperience={setMinExperience}
-        currentResultsCount={results.length}
+         minExperience={minExperience}
+         setMinExperience={setMinExperience}
+         duration={duration as any}
+         setDuration={setDuration as any}
+         currentResultsCount={results.length}
         loading={loading}
         onApply={() => {
           doSearch();
