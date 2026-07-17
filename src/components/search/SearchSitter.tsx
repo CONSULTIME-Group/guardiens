@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef, lazy, Suspense } from "react";
+import { useState, useEffect, useCallback, useMemo, useRef, lazy, Suspense } from "react";
 
 import ReportButton from "@/components/reports/ReportButton";
 import InviteToMySitButton from "@/components/sits/owner/InviteToMySitButton";
@@ -94,7 +94,7 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
  const [missionSubTab, setMissionSubTab] = useState<MissionSubTab>("published");
  const [missionTypeFilter, setMissionTypeFilter] = useState<"all" | "besoin" | "offre">("all");
  const [missionCategoryFilter, setMissionCategoryFilter] = useState<"all" | "garden" | "animals" | "skills" | "house">("all");
- const [availableMembers, setAvailableMembers] = useState<any[]>([]);
+ const [rawAvailableMembers, setRawAvailableMembers] = useState<any[]>([]);
  const [city, setCity] = useState(() => searchParams.get("ville") || "");
  const [radius, setRadius] = useState(() => {
   const r = parseInt(searchParams.get("rayon") || "", 10);
@@ -152,7 +152,10 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
  const [viewMode, setViewMode] = useState<ViewMode>("list");
  const [cityPostalCode, setCityPostalCode] = useState<string | null>(null);
 
- const [results, setResults] = useState<any[]>([]);
+ // rawResults = jeu brut rapatrié par le fetch réseau (sits enrichis, missions enrichies).
+ // Les filtres purement clients (avec véhicule, vérifié, photos, animaux, durée, urgence, tri…)
+ // sont appliqués en mémoire via useMemo plus bas, sans refetch ni géocodage.
+ const [rawResults, setRawResults] = useState<any[]>([]);
  const [resultCoords, setResultCoords] = useState<Map<string, { lat: number; lng: number }>>(new Map());
  const [loading, setLoading] = useState(false);
  const [searchError, setSearchError] = useState<string | null>(null);
@@ -407,14 +410,108 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
  }
  }
  setLoading(false);
- }, [tab, missionSubTab, city, radius, zoneMode, startDate, endDate, animalTypes, housingType, duration, verifiedOnly, emergencyOnly, sort, userCoords, userCity, userPostalCode, missionTypeFilter, missionCategoryFilter, withPhotosOnly, minExperience, environments]);
+ // Déps FETCH RÉSEAU uniquement : sous-onglets, ville/lieu, rayon, zone, dates.
+ // Les filtres purement clients (housing, verified, animaux, durée, urgence, tri…)
+ // sont appliqués par le useMemo `results`/`availableMembers` sans refetch.
+ }, [tab, missionSubTab, city, radius, zoneMode, startDate, endDate, userCoords, userCity, userPostalCode]);
 
  useEffect(() => {
  if (!initialLoadDone.current) return;
  if (searchTimeoutRef.current) clearTimeout(searchTimeoutRef.current);
  searchTimeoutRef.current = setTimeout(() => doSearch(), 400);
  return () => { if (searchTimeoutRef.current) clearTimeout(searchTimeoutRef.current); };
- }, [doSearch]);
+  }, [doSearch]);
+
+ // Tri commun aux sits et missions, appliqué dans le useMemo `results` ci-dessous.
+ const sortResults = (items: any[], sortBy: SortOption) => {
+ const sorted = [...items];
+ if (sortBy === "closest") sorted.sort((a, b) => (a.distance ?? 9999) - (b.distance ?? 9999));
+ else if (sortBy === "recent") sorted.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+ else if (sortBy === "rating") sorted.sort((a, b) => parseFloat(b.avgRating || "0") - parseFloat(a.avgRating || "0"));
+  sorted.sort((a, b) => Number(!!a.isAssigned || !!a.isCompleted || !!a.isPast) - Number(!!b.isAssigned || !!b.isCompleted || !!b.isPast));
+  sorted.sort((a, b) => Number(!!a.isCompleted || !!a.isPast) - Number(!!b.isCompleted || !!b.isPast));
+ return sorted;
+ };
+
+ // Le changement de tri ne relance plus aucune requête : le useMemo `results` re-trie instantanément le jeu déjà en mémoire.
+ const handleSortChange = (newSort: SortOption) => { setSort(newSort); };
+
+ // Dérivé mémoïsé : applique tous les filtres CLIENTS + le tri + les démos sur
+ // les jeux bruts (rawResults / rawAvailableMembers) sans refetch ni géocodage.
+ const results = useMemo(() => {
+   if (tab === "sits") {
+     let final = rawResults.slice();
+     if (housingType !== "all") final = final.filter((s: any) => s.property?.type === housingType);
+     if (withPhotosOnly) final = final.filter((s: any) => s.property?.photos?.length > 0);
+     if (duration !== "all") {
+       final = final.filter((s: any) => {
+         if (!s.start_date || !s.end_date) return true;
+         const days = Math.ceil((new Date(s.end_date).getTime() - new Date(s.start_date).getTime()) / (1000 * 60 * 60 * 24));
+         switch (duration) { case "short": return days < 7; case "medium": return days >= 7 && days <= 21; case "long": return days > 21; default: return true; }
+       });
+     }
+     if (emergencyOnly) final = final.filter((s: any) => s.is_urgent === true);
+     if (verifiedOnly) final = final.filter((s: any) => s.owner?.identity_verified);
+     if (animalTypes.length > 0) {
+       const wantedSpecies = animalTypes.map(a => animalChipToSpecies[a]).filter(Boolean);
+       final = final.filter((s: any) => (s.pets || []).some((p: any) => wantedSpecies.includes(p.species)));
+     }
+     if (minExperience !== "all") {
+       const minCount = parseInt(minExperience);
+       final = final.filter((s: any) => (s.reviewCount || 0) >= minCount);
+     }
+     if (isPublic) {
+       final = final.filter((item: any) => !item.isPast && !item.isAssigned && !item.isCompleted);
+     }
+     if (environments.length > 0) {
+       final = final.filter((item: any) => {
+         const envs: string[] = item.environments || [];
+         return envs.some((e: string) => environments.includes(e));
+       });
+     }
+     final = sortResults(final, sort);
+     const realCount = final.length;
+     const demoCadence = realCount === 0 ? 3 : realCount <= 3 ? 99 : 6;
+     const demoLimit = isPublic ? 0 : (realCount === 0 ? DEMO_SITS.length : realCount <= 3 ? 2 : DEMO_SITS.length);
+     return interleaveDemos(final, DEMO_SITS.slice(0, demoLimit), demoCadence);
+   }
+   if (missionSubTab === "members") return [];
+   let final = rawResults.slice();
+   if (missionTypeFilter !== "all") final = final.filter((m: any) => (m.mission_type ?? "besoin") === missionTypeFilter);
+   if (missionCategoryFilter !== "all") final = final.filter((m: any) => m.category === missionCategoryFilter);
+   if (verifiedOnly) final = final.filter((m: any) => m.owner?.identity_verified);
+   if (sort === "closest") final.sort((a: any, b: any) => (a.distance ?? 9999) - (b.distance ?? 9999));
+   else if (sort === "recent") final.sort((a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+   return interleaveDemos(final, DEMO_MISSIONS, 3);
+ }, [tab, missionSubTab, rawResults, housingType, withPhotosOnly, duration, emergencyOnly, verifiedOnly, animalTypes, minExperience, isPublic, environments, sort, missionTypeFilter, missionCategoryFilter]);
+
+ const availableMembers = useMemo(() => {
+   if (!(tab === "missions" && missionSubTab === "members")) return [];
+   let items = rawAvailableMembers.slice();
+   const catToSkill: Record<string, string> = { garden: "jardin", animals: "animaux", skills: "competences", house: "coups_de_main" };
+   if (missionCategoryFilter !== "all") {
+     const skillKey = catToSkill[missionCategoryFilter];
+     items = items.filter((m: any) => m.skill_categories?.includes(skillKey));
+   }
+   if (sort === "closest") items.sort((a: any, b: any) => (a.distance ?? 9999) - (b.distance ?? 9999));
+   else if (sort === "rating") items.sort((a: any, b: any) => parseFloat(b.avgRating || "0") - parseFloat(a.avgRating || "0"));
+   const skillRank = (m: any) => {
+     const hasSpecificSkills =
+       tokenizeSkillPhrases(m.custom_skills || []).length > 0 ||
+       tokenizeSkillPhrases(m.competences || []).length > 0 ||
+       !!m.specialty_label;
+     const hasAvatar = !!m.avatar_url;
+     if (hasSpecificSkills && hasAvatar) return 0;
+     if (hasSpecificSkills) return 1;
+     if (hasAvatar) return 2;
+     return 3;
+   };
+   items.sort((a: any, b: any) => skillRank(a) - skillRank(b));
+   const showDemoMembers = missionCategoryFilter === "all" || missionCategoryFilter === "skills";
+   if (showDemoMembers) items = interleaveDemos(items, DEMO_MEMBERS as any[], 3);
+   return items;
+ }, [tab, missionSubTab, rawAvailableMembers, missionCategoryFilter, sort]);
+
 
   useEffect(() => {
   if (initialLoadDone.current) return;
@@ -700,28 +797,20 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
        isPast: isExpired || isCancelled || isArchived || isUnpublished,
      };
    });
- if (housingType !== "all") items = items.filter((s: any) => s.property?.type === housingType);
- if (withPhotosOnly) items = items.filter((s: any) => s.property?.photos?.length > 0);
-  if (duration !== "all") {
-  items = items.filter((s: any) => {
-  if (!s.start_date || !s.end_date) return true;
-  const days = Math.ceil((new Date(s.end_date).getTime() - new Date(s.start_date).getTime()) / (1000 * 60 * 60 * 24));
-  // Bornes exclusives : court < 7, moyen [7,21], long > 21.
-  switch (duration) { case "short": return days < 7; case "medium": return days >= 7 && days <= 21; case "long": return days > 21; default: return true; }
-  });
-  }
-  if (emergencyOnly) items = items.filter((s: any) => s.is_urgent === true);
- if (verifiedOnly) items = items.filter((s: any) => s.owner?.identity_verified);
- const { items: locFiltered, cityCoords } = await filterByLocation(
- items,
- (s: any) => s.owner?.city,
- searchCoords,
- (s: any) => s.owner?.postal_code,
- (s: any) => !!s.country && s.country !== "FR",
- // Density : uniquement les annonces actionnables (publiées, ouvertes aux
- // candidatures, non expirées) pour rester aligné avec l'eyebrow SEO.
- (s: any) => s.status === "published" && s.accepting_applications !== false && (!s.end_date || s.end_date >= todayIso),
- );
+  // NB: les filtres purement clients (housing, photos, durée, urgence, verified,
+  // animaux, expérience, environnements) sont appliqués plus bas dans le useMemo
+  // `results`, sans refetch. On ne garde ici QUE ce qui affecte la zone/density
+  // ou nécessite les données rapatriées côté propriétaire.
+  const { items: locFiltered, cityCoords } = await filterByLocation(
+  items,
+  (s: any) => s.owner?.city,
+  searchCoords,
+  (s: any) => s.owner?.postal_code,
+  (s: any) => !!s.country && s.country !== "FR",
+  // Density : uniquement les annonces actionnables (publiées, ouvertes aux
+  // candidatures, non expirées) pour rester aligné avec l'eyebrow SEO.
+  (s: any) => s.status === "published" && s.accepting_applications !== false && (!s.end_date || s.end_date >= todayIso),
+  );
 
   items = locFiltered;
 
@@ -793,6 +882,16 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
     if (o?.user_id) ownerProfByUser.set(o.user_id, o);
   });
 
+  // Géocodage international (nécessite le jeu final avant tout filtre client)
+  const intlItems = items.filter((it: any) => !it.latitude && it.country && it.country !== "FR" && (it.city || it.owner?.city));
+  const intlKeys = [...new Set(intlItems.map((it: any) => `${it.city || it.owner?.city}, ${it.country}`))];
+  const intlCoords = new Map<string, { lat: number; lng: number }>();
+  await Promise.all(intlKeys.map(async (k) => {
+    const c = await geocodeCity(k);
+    if (c) intlCoords.set(k, { lat: c.lat, lng: c.lng });
+  }));
+
+  const coordsMap = new Map<string, { lat: number; lng: number }>();
   const enriched = items.map((sit: any) => {
     const pets = petsByProperty.get(sit.property_id) || [];
     const agg = reviewAggByUser.get(sit.user_id);
@@ -802,76 +901,33 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
     const badgeCounts = new Map<string, number>();
     ownerBadges.forEach((b: any) => badgeCounts.set(b.badge_id, (badgeCounts.get(b.badge_id) || 0) + 1));
     const topBadges = Array.from(badgeCounts.entries()).map(([badge_id, count]) => ({ badge_key: badge_id, count })).sort((a, b) => b.count - a.count).slice(0, 2);
-    const petSpecies = pets.map((p: any) => p.species);
-    if (animalTypes.length > 0) {
-      const wantedSpecies = animalTypes.map(a => animalChipToSpecies[a]).filter(Boolean);
-      if (!petSpecies.some((s: string) => wantedSpecies.includes(s))) return null;
-    }
-    if (minExperience !== "all") {
-      const minCount = parseInt(minExperience);
-      const revCount = agg?.count || 0;
-      if (revCount < minCount) return null;
-    }
     const dist = searchCoords && sit.owner?.city ? computeDistance(sit.owner.city, cityCoords, searchCoords) : null;
     const isNew = differenceInHours(new Date(), new Date(sit.created_at)) < 48;
     const days = sit.start_date && sit.end_date ? differenceInDays(new Date(sit.end_date), new Date(sit.start_date)) : 0;
     const sitEnvs: string[] = (sit as any).environments || [];
     const ownerEnvs: string[] = (ownerProf as any)?.environments || [];
     const resolvedEnvs = sitEnvs.length > 0 ? sitEnvs : ownerEnvs;
+
+    // Coords pour la carte (map view) : on renseigne pour TOUS les items rapatriés,
+    // les filtres clients pourront réduire la liste sans invalider ces coordonnées.
+    if (sit.latitude && sit.longitude) {
+      coordsMap.set(sit.id, { lat: sit.latitude, lng: sit.longitude });
+    } else if (sit.country && sit.country !== "FR") {
+      const key = `${sit.city || sit.owner?.city}, ${sit.country}`;
+      const c = intlCoords.get(key);
+      if (c) coordsMap.set(sit.id, c);
+    } else if (sit.owner?.city) {
+      const c = cityCoords.get(sit.owner.city);
+      if (c) coordsMap.set(sit.id, c);
+    }
+
     return { ...sit, pets, avgRating, reviewCount: agg?.count || 0, topBadges, distance: dist, isNew, durationDays: days, environments: resolvedEnvs, ownerEnvironments: ownerEnvs, ownerMatch: ownerProf };
   });
 
- let final = enriched.filter(Boolean);
- // Public /annonces : on masque les annonces passées/attribuées/terminées
- // pour ne montrer QUE les annonces réellement ouvertes à candidature.
- if (isPublic) {
-  final = final.filter((item: any) => !item.isPast && !item.isAssigned && !item.isCompleted);
- }
- // Environment filter (using resolved environments with fallback)
- if (environments.length > 0) {
- final = final.filter((item: any) => {
- const envs: string[] = item.environments || [];
- return envs.some((e: string) => environments.includes(e));
- });
- }
- // `min_gardien_sits` est une préférence propriétaire, pas un critère bloquant :
- // l'annonce doit rester visible dans la recherche, comme indiqué dans le formulaire.
- final = sortResults(final, sort);
- // Démos : visibles uniquement en interne, jamais sur la page publique
- // /annonces (pollue le flux quand de vraies annonces existent).
- //  • public                      → 0 démo
- //  • internal, 0 vraie annonce   → cadence 1/3 (page sinon vide)
- //  • internal, 1-3 vraies        → 1 démo en fin, max 2 démos
- //  • internal, 4+ vraies         → 1 démo tous les 6 résultats
- const realCount = final.length;
- const demoCadence = realCount === 0 ? 3 : realCount <= 3 ? 99 : 6;
- const demoLimit = isPublic ? 0 : (realCount === 0 ? DEMO_SITS.length : realCount <= 3 ? 2 : DEMO_SITS.length);
- final = interleaveDemos(final, DEMO_SITS.slice(0, demoLimit), demoCadence);
-  const coordsMap = new Map<string, { lat: number; lng: number }>();
-  // Géocodage des annonces internationales (city + country, hors FR)
-  const intlItems = final.filter((it: any) => it && !it.latitude && it.country && it.country !== "FR" && (it.city || it.owner?.city));
-  const intlKeys = [...new Set(intlItems.map((it: any) => `${it.city || it.owner?.city}, ${it.country}`))];
-  const intlCoords = new Map<string, { lat: number; lng: number }>();
-  await Promise.all(intlKeys.map(async (k) => {
-    const c = await geocodeCity(k);
-    if (c) intlCoords.set(k, { lat: c.lat, lng: c.lng });
-  }));
-  final.forEach((item: any) => {
-    if (!item) return;
-    if (item.latitude && item.longitude) {
-      coordsMap.set(item.id, { lat: item.latitude, lng: item.longitude });
-    } else if (item.country && item.country !== "FR") {
-      const key = `${item.city || item.owner?.city}, ${item.country}`;
-      const c = intlCoords.get(key);
-      if (c) coordsMap.set(item.id, c);
-    } else if (item.owner?.city) {
-      const c = cityCoords.get(item.owner.city);
-      if (c) coordsMap.set(item.id, c);
-    }
-  });
   setResultCoords(coordsMap);
- setResults(final);
- setVisibleCount(12);
+  setRawResults(enriched);
+  setRawAvailableMembers([]);
+  setVisibleCount(12);
  };
 
 
@@ -907,13 +963,8 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
     const ownerMap = new Map<string, any>((owners || []).map((o: any) => [o.id, o]));
     items = items.map((m: any) => ({ ...m, owner: ownerMap.get(m.user_id) || null }));
   }
-  if (missionTypeFilter !== "all") {
-    items = items.filter((m: any) => (m.mission_type ?? "besoin") === missionTypeFilter);
-  }
-  if (missionCategoryFilter !== "all") {
-    items = items.filter((m: any) => m.category === missionCategoryFilter);
-  }
-  if (verifiedOnly) items = items.filter((s: any) => s.owner?.identity_verified);
+  // Note: missionTypeFilter / missionCategoryFilter / verifiedOnly / sort / demos
+  // sont appliqués côté client dans le useMemo `results` (aucun refetch).
 
   const getMissionCity = (m: any) => m.city || m.owner?.city;
   const getMissionPostalCode = (m: any) => m.postal_code || m.owner?.postal_code;
@@ -954,13 +1005,9 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
     const dist = searchCoords && coords ? haversineDistance(searchCoords.lat, searchCoords.lng, coords.lat, coords.lng) : null;
     return { ...m, distance: dist, isNew: differenceInHours(new Date(), new Date(m.created_at)) < 48 } as any;
   });
-  let final: any[] = [...items];
-  if (sort === "closest") final.sort((a: any, b: any) => (a.distance ?? 9999) - (b.distance ?? 9999));
-  else if (sort === "recent") final.sort((a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
-  // Démos toujours visibles, intercalées
-  final = interleaveDemos(final, DEMO_MISSIONS, 3);
- setResults(final);
- setVisibleCount(12);
+  setRawResults(items);
+  setRawAvailableMembers([]);
+  setVisibleCount(12);
   };
 
  const searchAvailableMembers = async (searchCoords: { lat: number; lng: number } | null) => {
@@ -1125,50 +1172,14 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
   return {...m, competences: competenceMap.get(m.id) || [], avgRating: rev ? (rev.total / rev.count).toFixed(1) : null, reviewCount: rev?.count || 0, sitsCount: sitsMap.get(m.id) || 0 };
  });
  }
-  if (sort === "closest") items.sort((a: any, b: any) => (a.distance ?? 9999) - (b.distance ?? 9999));
- else if (sort === "rating") items.sort((a: any, b: any) => parseFloat(b.avgRating || "0") - parseFloat(a.avgRating || "0"));
- // Tri prio : savoir-faire particuliers (competences) AVEC photo > competences sans photo > autres avec photo > autres sans photo.
- // Ce tri prime sur les autres pour mettre en avant la valeur ajoutée (reiki, éducation canine, ostéo…).
-  const skillRank = (m: any) => {
-    const hasSpecificSkills =
-      tokenizeSkillPhrases(m.custom_skills || []).length > 0 ||
-      tokenizeSkillPhrases(m.competences || []).length > 0 ||
-      !!m.specialty_label;
-   const hasAvatar = !!m.avatar_url;
-    if (hasSpecificSkills && hasAvatar) return 0;
-    if (hasSpecificSkills) return 1;
-   if (hasAvatar) return 2;
-   return 3;
- };
- items.sort((a: any, b: any) => skillRank(a) - skillRank(b));
- // Démos "savoir-faire complémentaires" toujours visibles (reiki, naturopathie, ostéo…)
- //, seulement quand le filtre catégorie est "all" ou "skills".
- const showDemoMembers = missionCategoryFilter === "all" || missionCategoryFilter === "skills";
- if (showDemoMembers) {
-   items = interleaveDemos(items, DEMO_MEMBERS as any[], 3);
- }
- setAvailableMembers(items);
- setResults([]);
- };
-
- const sortResults = (items: any[], sortBy: SortOption) => {
- const sorted = [...items];
- if (sortBy === "closest") sorted.sort((a, b) => (a.distance ?? 9999) - (b.distance ?? 9999));
- else if (sortBy === "recent") sorted.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
- else if (sortBy === "rating") sorted.sort((a, b) => parseFloat(b.avgRating || "0") - parseFloat(a.avgRating || "0"));
-  // Tri secondaire : on pousse en bas les annonces inactives (attribuées),
-  // puis tout en bas les annonces passées (expirées, complétées, annulées).
-  sorted.sort((a, b) => Number(!!a.isAssigned || !!a.isCompleted || !!a.isPast) - Number(!!b.isAssigned || !!b.isCompleted || !!b.isPast));
-  sorted.sort((a, b) => Number(!!a.isCompleted || !!a.isPast) - Number(!!b.isCompleted || !!b.isPast));
- return sorted;
- };
-
- const handleSortChange = (newSort: SortOption) => {
- setSort(newSort);
- setResults(prev => sortResults(prev, newSort));
+  // Note: tri (closest/rating), skillRank et démos sont désormais appliqués côté
+  // client dans le useMemo `availableMembers` (aucun refetch au changement).
+  setRawAvailableMembers(items);
+  setRawResults([]);
  };
 
  const formatDate = (d: string | null) => d ? format(new Date(d), "d MMM", { locale: fr }) : "";
+
 
  const handleActivateAvailable = async () => {
  if (!user) return;

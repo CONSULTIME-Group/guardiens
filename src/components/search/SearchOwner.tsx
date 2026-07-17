@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef, lazy, Suspense } from "react";
+import { useState, useEffect, useCallback, useMemo, useRef, lazy, Suspense } from "react";
 import { logger } from "@/lib/logger";
 import { useNavigate, Link, useSearchParams } from "react-router-dom";
 import ReportButton from "@/components/reports/ReportButton";
@@ -74,7 +74,6 @@ const SearchOwner = () => {
   const [citySuggestions, setCitySuggestions] = useState<any[]>([]);
   const [radius, setRadius] = useState([15]);
   const [zoneMode, setZoneMode] = useState<ZoneMode>("radius");
-  const [densityCounts, setDensityCounts] = useState<{ radius: number; dept: number; region: number; france: number }>({ radius: 0, dept: 0, region: 0, france: 0 });
   // Note: filtre Dates retiré tant que la disponibilité datée n'est pas modélisée côté gardien.
   const [animalTypes, setAnimalTypes] = useState<string[]>([]);
   const [vehicled, setVehicled] = useState(false);
@@ -88,7 +87,10 @@ const SearchOwner = () => {
   const [sortUserOverride, setSortUserOverride] = useState(false);
   const [viewMode, setViewMode] = useState<ViewMode>("list");
 
-  const [results, setResults] = useState<any[]>([]);
+  // rawResults = jeu brut rapatrié et enrichi par le fetch réseau (sitters + coords + reviews + badges + gallery + affinité).
+  // Les filtres purement clients (avec véhicule, vérifié, note min, animaux, etc.) sont appliqués en mémoire via useMemo,
+  // sans relancer aucune requête Supabase ni géocodage.
+  const [rawResults, setRawResults] = useState<any[]>([]);
   const [searchCenter, setSearchCenter] = useState<{ lat: number; lng: number } | null>(null);
   const [loading, setLoading] = useState(false);
   const [searchError, setSearchError] = useState<string | null>(null);
@@ -494,8 +496,29 @@ const SearchOwner = () => {
       return { ...s, avgRating, reviewCount: agg?.count || 0, topBadges, isEmergency: emergencySet.has(s.user_id), _photos: photos, _affinity: affinity };
     });
 
-    // Apply ALL advanced filters (non-zone) to get the pool used for density counts
-    let filtered = enrichedAll;
+    setRawResults(enrichedAll);
+    setSearchCenter(searchCoords);
+    setLoading(false);
+  }, [city, cityPostalCode, userPostalCode, viewerOwner]);
+
+  // Auto-search on network dep change (debounced) : ville / code postal uniquement.
+  // Les filtres purement clients (véhicule, vérifié, note min, animaux, radius, zone, tri…)
+  // sont appliqués en mémoire via le useMemo ci-dessous, sans refetch ni géocodage.
+  useEffect(() => {
+    if (!initialLoaded) return;
+    clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(() => { handleSearch(); }, 400);
+    return () => clearTimeout(debounceRef.current);
+  }, [initialLoaded, handleSearch]);
+
+  // Dérivé mémoïsé : applique tous les filtres clients + le tri + la zone + les compteurs
+  // de densité sur `rawResults`. Recalculé sans coût réseau.
+  const { results, densityCounts } = useMemo(() => {
+    const refPostal = cityPostalCode ?? userPostalCode;
+    const refDept = getDeptCode(refPostal);
+    const refRegion = getRegionCode(refDept);
+
+    let filtered = rawResults;
     if (vehicled) filtered = filtered.filter((s: any) => s.has_vehicle);
     if (availableOnly) filtered = filtered.filter((s: any) => s.is_available);
     if (verifiedOnly) filtered = filtered.filter((s: any) => s.profile?.identity_verified);
@@ -517,44 +540,34 @@ const SearchOwner = () => {
       filtered = filtered.filter((s: any) => s.avgRating !== null && s.avgRating >= min);
     }
 
-    // Compute density counts on the FILTERED pool (before zone filter)
-    const radiusCount = searchCoords ? filtered.filter((s: any) => s._dist != null && s._dist <= radius[0]).length : 0;
-    const deptCount = refDept ? filtered.filter((s: any) => {
-      const cp = s.profile?.postal_code; return cp ? getDeptCode(cp) === refDept : false;
-    }).length : 0;
-    const regionCount = refRegion ? filtered.filter((s: any) => {
-      const cp = s.profile?.postal_code; return cp ? getRegionCode(getDeptCode(cp)) === refRegion : false;
-    }).length : 0;
-    setDensityCounts({
-      radius: radiusCount,
-      dept: deptCount,
-      region: regionCount,
+    const density = {
+      radius: searchCenter ? filtered.filter((s: any) => s._dist != null && s._dist <= radius[0]).length : 0,
+      dept: refDept ? filtered.filter((s: any) => {
+        const cp = s.profile?.postal_code; return cp ? getDeptCode(cp) === refDept : false;
+      }).length : 0,
+      region: refRegion ? filtered.filter((s: any) => {
+        const cp = s.profile?.postal_code; return cp ? getRegionCode(getDeptCode(cp)) === refRegion : false;
+      }).length : 0,
       france: filtered.length,
-    });
+    };
 
-    // Apply zone filter to the filtered pool
-    let results = filtered;
+    let zoned = filtered;
     if (zoneMode === "radius") {
-      if (searchCoords) {
-        results = results.filter((s: any) => s._dist != null && s._dist <= radius[0]);
+      if (searchCenter) {
+        zoned = zoned.filter((s: any) => s._dist != null && s._dist <= radius[0]);
       } else if (city) {
-        results = results.filter((s: any) => s.profile?.city?.toLowerCase().includes(city.toLowerCase()));
+        zoned = zoned.filter((s: any) => s.profile?.city?.toLowerCase().includes(city.toLowerCase()));
       }
     } else if (zoneMode === "dept" && refDept) {
-      results = results.filter((s: any) => {
+      zoned = zoned.filter((s: any) => {
         const cp = s.profile?.postal_code; return cp ? getDeptCode(cp) === refDept : false;
       });
     } else if (zoneMode === "region" && refRegion) {
-      results = results.filter((s: any) => {
+      zoned = zoned.filter((s: any) => {
         const cp = s.profile?.postal_code; return cp ? getRegionCode(getDeptCode(cp)) === refRegion : false;
       });
     }
-    // france: no zone filter applied
 
-    // Sort
-    // Bascule automatique : si l'utilisateur n'a jamais choisi de tri
-    // manuellement et n'a pas de profil owner (donc pas de scoring possible),
-    // on retombe sur « Plus proches » comme défaut fonctionnel.
     let effectiveSort: SortOption = sort;
     if (!sortUserOverride && sort === "affinity" && !viewerOwner) {
       effectiveSort = "closest";
@@ -566,9 +579,9 @@ const SearchOwner = () => {
       return a.score ?? 0;
     };
 
-    let final = results;
+    const sorted = [...zoned];
     if (effectiveSort === "affinity") {
-      final.sort((a, b) => {
+      sorted.sort((a, b) => {
         if (a.isEmergency !== b.isEmergency) return a.isEmergency ? -1 : 1;
         const ra = affinityRank(a);
         const rb = affinityRank(b);
@@ -576,34 +589,25 @@ const SearchOwner = () => {
         return (a._dist ?? Infinity) - (b._dist ?? Infinity);
       });
     } else if (effectiveSort === "closest") {
-      final.sort((a, b) => {
+      sorted.sort((a, b) => {
         if (a.isEmergency !== b.isEmergency) return a.isEmergency ? -1 : 1;
         return (a._dist ?? Infinity) - (b._dist ?? Infinity);
       });
     } else if (effectiveSort === "rating") {
-      final.sort((a, b) => {
+      sorted.sort((a, b) => {
         if (a.isEmergency !== b.isEmergency) return a.isEmergency ? -1 : 1;
         return (b.avgRating || 0) - (a.avgRating || 0);
       });
     } else {
-      final.sort((a, b) => {
+      sorted.sort((a, b) => {
         if (a.isEmergency !== b.isEmergency) return a.isEmergency ? -1 : 1;
         return (b.profile?.completed_sits_count || 0) - (a.profile?.completed_sits_count || 0);
       });
     }
 
-    setResults(final);
-    setSearchCenter(searchCoords);
-    setLoading(false);
-  }, [city, cityPostalCode, userPostalCode, radius, zoneMode, animalTypes, vehicled, availableOnly, verifiedOnly, emergencyOnly, proOnly, minSits, minRating, sort, sortUserOverride, viewerOwner]);
+    return { results: sorted, densityCounts: density };
+  }, [rawResults, searchCenter, city, cityPostalCode, userPostalCode, radius, zoneMode, animalTypes, vehicled, availableOnly, verifiedOnly, emergencyOnly, proOnly, minSits, minRating, sort, sortUserOverride, viewerOwner]);
 
-  // Auto-search on filter change (debounced)
-  useEffect(() => {
-    if (!initialLoaded) return;
-    clearTimeout(debounceRef.current);
-    debounceRef.current = setTimeout(() => { handleSearch(); }, 400);
-    return () => clearTimeout(debounceRef.current);
-  }, [initialLoaded, city, cityPostalCode, radius, zoneMode, animalTypes, vehicled, availableOnly, verifiedOnly, emergencyOnly, proOnly, minSits, minRating, sort, handleSearch]);
 
   const hasActiveFilters = vehicled || availableOnly || verifiedOnly || emergencyOnly || proOnly || minSits !== "all" || minRating !== "all";
   const hasAnyRating = results.some((s: any) => s.avgRating !== null);
