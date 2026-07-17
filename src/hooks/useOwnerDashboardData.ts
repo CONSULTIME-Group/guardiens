@@ -74,6 +74,7 @@ export function useOwnerDashboardData(userId: string | undefined) {
   const [error, setError] = useState<string | null>(null);
 
   const [refreshTick, setRefreshTick] = useState(0);
+  const reload = () => setRefreshTick((t) => t + 1);
 
   // Ref des sit ids appartenant au propriétaire courant. Utilisée pour gater
   // les événements realtime « applications » (table sans lien direct user_id) :
@@ -87,6 +88,8 @@ export function useOwnerDashboardData(userId: string | undefined) {
     // Anti-flicker reset uniquement au premier load (pas sur refetch silencieux)
     if (refreshTick === 0) {
       setData(INITIAL);
+      setLoading(true);
+    } else {
       setLoading(true);
     }
     setError(null);
@@ -103,6 +106,25 @@ export function useOwnerDashboardData(userId: string | undefined) {
         ]);
 
         if (cancelled) return;
+
+        // Vérification des erreurs socle : sans sits / profile / reviews on ne
+        // peut pas distinguer un dashboard vide (compte neuf) d'une panne
+        // réseau ou d'un refus RLS. On expose l'erreur à l'appelant pour
+        // afficher un encart dédié plutôt qu'un empty state trompeur.
+        if (sitsRes.error || profileRes.error || reviewsRes.error) {
+          const critical = sitsRes.error || profileRes.error || reviewsRes.error;
+          console.error("[useOwnerDashboardData] socle error", {
+            sits: sitsRes.error,
+            profile: profileRes.error,
+            reviews: reviewsRes.error,
+          });
+          if (!cancelled) {
+            setError(critical?.message || "Erreur de chargement du tableau de bord.");
+            setLoading(false);
+          }
+          return;
+        }
+
 
         const sitsData = (sitsRes.data || []) as SitRow[];
         ownedSitIdsRef.current = new Set(sitsData.map((s) => s.id));
