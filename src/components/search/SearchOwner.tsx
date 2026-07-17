@@ -94,6 +94,9 @@ const SearchOwner = () => {
   const [searchCenter, setSearchCenter] = useState<{ lat: number; lng: number } | null>(null);
   const [loading, setLoading] = useState(false);
   const [searchError, setSearchError] = useState<string | null>(null);
+  // Vrai quand la requête serveur a atteint le plafond (jeu potentiellement tronqué → tri distance/affinité partiel).
+  const [resultsTruncated, setResultsTruncated] = useState(false);
+  const SITTERS_SERVER_CAP = 500;
   const [contactingId, setContactingId] = useState<string | null>(null);
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [initialLoaded, setInitialLoaded] = useState(false);
@@ -378,10 +381,11 @@ const SearchOwner = () => {
     setLoading(true);
     setSearchError(null);
 
+    setResultsTruncated(false);
     const { data: sitters, error: sittersError } = await supabase
       .from("sitter_profiles")
       .select("*, reply_median_minutes, profile:profiles!sitter_profiles_user_id_fkey(first_name, last_name, avatar_url, city, postal_code, profile_completion, identity_verified, completed_sits_count, bio, pro_status, pro_specialty, last_seen_at)")
-      .limit(500);
+      .limit(SITTERS_SERVER_CAP);
 
     if (sittersError) {
       console.error("[SearchOwner] Erreur chargement gardiens:", sittersError);
@@ -390,7 +394,9 @@ const SearchOwner = () => {
       return;
     }
 
-    let items = (sitters || []).filter((s: any) => s.profile?.profile_completion >= 60);
+    const rawSitters = sitters || [];
+    setResultsTruncated(rawSitters.length >= SITTERS_SERVER_CAP);
+    let items = rawSitters.filter((s: any) => s.profile?.profile_completion >= 60);
 
     // Geocode all sitter cities once
     const uniqueCities = [...new Set(items.map((s: any) => s.profile?.city).filter(Boolean))] as string[];
@@ -1099,6 +1105,11 @@ const SearchOwner = () => {
       {/* Results */}
       {viewMode === "list" ? (
         <div className="p-6">
+          {resultsTruncated && !loading && !searchError && (
+            <div className="max-w-4xl mx-auto mb-4 bg-muted/60 border border-border rounded-lg p-3 text-sm text-muted-foreground">
+              Beaucoup de résultats dans cette zone. Affinez votre recherche (ville, rayon) pour un classement par distance plus fiable.
+            </div>
+          )}
           {searchError ? (
             <div
               role="alert"

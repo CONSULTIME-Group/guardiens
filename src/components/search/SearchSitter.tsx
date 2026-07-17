@@ -158,7 +158,10 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
  const [rawResults, setRawResults] = useState<any[]>([]);
  const [resultCoords, setResultCoords] = useState<Map<string, { lat: number; lng: number }>>(new Map());
  const [loading, setLoading] = useState(false);
- const [searchError, setSearchError] = useState<string | null>(null);
+  const [searchError, setSearchError] = useState<string | null>(null);
+ // Vrai quand la requête serveur a atteint le plafond (jeu potentiellement tronqué → tri distance/affinité partiel).
+ const [resultsTruncated, setResultsTruncated] = useState(false);
+ const SITS_SERVER_CAP = 500;
  const [userCity, setUserCity] = useState("");
  const [userCoords, setUserCoords] = useState<{ lat: number; lng: number } | null>(null);
  const [sitterEligible, setSitterEligible] = useState(false);
@@ -394,7 +397,8 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
  // Auto-search when filters change (debounced)
  const doSearch = useCallback(async () => {
  setLoading(true);
- setSearchError(null);
+  setSearchError(null);
+  setResultsTruncated(false);
  let searchCoords = userCoords;
  if (city && city !== userCity) {
  const coords = await geocodeCity(city);
@@ -735,7 +739,8 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
 .or(isPublic
   ? "status.in.(published,confirmed,in_progress,completed,cancelled)"
   : "status.in.(published,confirmed,in_progress,completed,cancelled,archived),and(status.eq.draft,unpublished_at.not.is.null)")
-.order("created_at", { ascending: false });
+.order("created_at", { ascending: false })
+.limit(SITS_SERVER_CAP);
    if (startDate) query = query.gte("end_date", startDate);
    if (endDate) query = query.lte("start_date", endDate);
    const { data, error: sitsError } = await query;
@@ -744,7 +749,8 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
      setSearchError("Impossible de charger les annonces.");
      return;
    }
-   let items = data || [];
+    let items = data || [];
+    setResultsTruncated(items.length >= SITS_SERVER_CAP);
 
    // Hydrate owner data from public_profiles (safe public view) in a single batched call
    const ownerIds = Array.from(new Set(items.map((s: any) => s.user_id).filter(Boolean)));
@@ -1597,6 +1603,13 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
         />
       ) : null;
     })()}
+
+  {/* Bandeau troncature : le serveur a renvoyé le maximum (500), le tri distance/affinité peut être partiel. */}
+  {resultsTruncated && tab === "sits" && !loading && (
+    <div className="mx-6 mt-4 bg-muted/60 border border-border rounded-lg p-3 text-sm text-muted-foreground">
+      Beaucoup de résultats dans cette zone. Affinez votre recherche (ville, rayon) pour un classement par distance plus fiable.
+    </div>
+  )}
 
   {/* hasNoLocalRealMissions banner retiré : OutOfZoneBanner couvre déjà l'élargissement de zone. */}
 
