@@ -62,6 +62,7 @@ interface SortablePhotoProps {
   photo: GalleryPhoto;
   onDelete: (id: string) => void;
   onEditCaption: (id: string, caption: string) => void;
+  onSetAsMain: (photo: GalleryPhoto) => void;
 }
 
 const SortablePhoto = ({ photo, onDelete, onEditCaption }: SortablePhotoProps) => {
