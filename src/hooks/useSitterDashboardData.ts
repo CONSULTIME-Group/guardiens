@@ -160,6 +160,31 @@ export function useSitterDashboardData(userId: string | undefined) {
           .select("*").eq("user_id", userId).maybeSingle(),
       ]);
 
+      // Socle : profiles obligatoire (compte authentifié = ligne existante),
+      // sitter_profiles peut légitimement être absent (PGRST116 = 0 rows) tant
+      // que l'utilisateur n'a pas activé son rôle gardien : on l'ignore.
+      // applications est également critique (base de la plupart des compteurs).
+      const isNoRow = (err: any) => err?.code === "PGRST116";
+      const profileErr = profileRes.error && !isNoRow(profileRes.error) ? profileRes.error : null;
+      const sitterErr = sitterRes.error && !isNoRow(sitterRes.error) ? sitterRes.error : null;
+      const appsErr = appsRes.error ?? null;
+      if (profileErr || sitterErr || appsErr) {
+        console.error("[useSitterDashboardData] socle error", {
+          profile: profileErr, sitter_profile: sitterErr, applications: appsErr,
+        });
+        if (!cancelled) {
+          setData((prev) => ({
+            ...prev,
+            loading: false,
+            error: (profileErr || sitterErr || appsErr)?.message
+              || "Erreur de chargement du tableau de bord.",
+          }));
+        }
+        return;
+      }
+
+
+
       const profile = profileRes.data;
       const sitter = sitterRes.data;
       const apps = appsRes.data || [];
