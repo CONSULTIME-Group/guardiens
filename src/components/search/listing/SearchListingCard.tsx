@@ -315,18 +315,21 @@ const SearchListingCard = ({
           </div>
         )}
 
-        {isAssigned && (
-          <p className="mt-2 text-[11px] text-muted-foreground italic">Cette garde a déjà trouvé son gardien.</p>
-        )}
-        {isCompleted && (
-          <p className="mt-2 text-[11px] text-muted-foreground italic">Garde déjà réalisée, aperçu de l'activité.</p>
-        )}
-        {isPast && !isCompleted && (
-          <p className="mt-2 text-[11px] text-muted-foreground italic">Annonce passée, consultable à titre d'historique.</p>
-        )}
-        {isDemo && (
-          <p className="mt-2 text-[11px] text-warning-foreground/80 italic">Exemple, cliquez pour découvrir</p>
-        )}
+        {/* Bloc de pied de carte : épingle en bas pour aligner les cartes d'une rangée */}
+        <div className="mt-auto">
+          {isAssigned && (
+            <p className="mt-2 text-[11px] text-muted-foreground italic">Cette garde a déjà trouvé son gardien.</p>
+          )}
+          {isCompleted && (
+            <p className="mt-2 text-[11px] text-muted-foreground italic">Garde déjà réalisée, aperçu de l'activité.</p>
+          )}
+          {isPast && !isCompleted && (
+            <p className="mt-2 text-[11px] text-muted-foreground italic">Annonce passée, consultable à titre d'historique.</p>
+          )}
+          {isDemo && (
+            <p className="mt-2 text-[11px] text-warning-foreground/80 italic">Exemple, cliquez pour découvrir</p>
+          )}
+        </div>
       </div>
     </article>
   );

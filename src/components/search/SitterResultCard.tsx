@@ -269,24 +269,26 @@ const SitterResultCard = ({
           {bio || <span className="opacity-0">.</span>}
         </p>
 
-        {/* CTA */}
-        <button
-          type="button"
-          onClick={(e) => {
-            stop(e);
-            onContact(sitter.user_id);
-          }}
-          disabled={contactingId === sitter.user_id}
-          aria-label={`Contacter ${firstName}`}
-          className="mt-2 inline-flex items-center justify-center gap-1.5 min-h-11 w-full rounded-full bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors disabled:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-        >
-          {contactingId === sitter.user_id ? (
-            <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
-          ) : (
-            <MessageCircle className="h-4 w-4" aria-hidden />
-          )}
-          Contacter
-        </button>
+        {/* CTA : épingle en bas de carte pour aligner les boutons sur une rangée */}
+        <div className="mt-auto pt-2">
+          <button
+            type="button"
+            onClick={(e) => {
+              stop(e);
+              onContact(sitter.user_id);
+            }}
+            disabled={contactingId === sitter.user_id}
+            aria-label={`Contacter ${firstName}`}
+            className="inline-flex items-center justify-center gap-1.5 min-h-11 w-full rounded-full bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors disabled:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          >
+            {contactingId === sitter.user_id ? (
+              <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
+            ) : (
+              <MessageCircle className="h-4 w-4" aria-hidden />
+            )}
+            Contacter
+          </button>
+        </div>
       </div>
     </Link>
   );
