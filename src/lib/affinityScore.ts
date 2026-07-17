@@ -394,6 +394,9 @@ export function computeAffinityResultFull(
   if (evaluated < thresholds.minCommonCriteria) {
     return { score, matched, total, notes, displayed: false, hiddenReason: "too_few_criteria" };
   }
+  if (evaluatedHard === 0) {
+    return { score, matched, total, notes, displayed: false, hiddenReason: "no_hard_criterion" };
+  }
   if (score < thresholds.minScorePercent) {
     return { score, matched, total, notes, displayed: false, hiddenReason: "below_threshold" };
   }
