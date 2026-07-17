@@ -64,8 +64,23 @@ const MissionsTabsCard = memo(({ myMissions, nearbyMissions }: MissionsTabsCardP
         </Link>
       </div>
 
-      <ExchangePactBanner variant="owner" className="mb-4" />
-      <ExchangeHowItWorks variant="owner" className="mb-4" />
+      {myMissions.length === 0 && nearbyMissions.length === 0 ? (
+        <>
+          <ExchangePactBanner variant="owner" className="mb-4" />
+          <ExchangeHowItWorks variant="owner" className="mb-4" />
+        </>
+      ) : (
+        <details className="group mb-4 rounded-xl border border-border bg-muted/30 overflow-hidden">
+          <summary className="cursor-pointer list-none px-3 py-2 flex items-center justify-between hover:bg-muted/50 transition-colors">
+            <span className="text-xs font-semibold text-foreground">Comment fonctionne l'entraide</span>
+            <span className="text-xs text-muted-foreground group-open:rotate-180 transition-transform" aria-hidden="true">▾</span>
+          </summary>
+          <div className="px-3 pb-3 pt-2">
+            <ExchangePactBanner variant="owner" className="mb-3" />
+            <ExchangeHowItWorks variant="owner" />
+          </div>
+        </details>
+      )}
 
       {/* Onglets internes */}
       <div className="flex gap-1 p-1 bg-muted/50 rounded-xl mb-4" role="tablist">

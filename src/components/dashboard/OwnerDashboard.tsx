@@ -254,8 +254,7 @@ const OwnerDashboard = () => {
       return "Vous avez commencé une annonce. Reprenez où vous en étiez.";
     }
     if (noActiveSit && sits.length > 0 && !earlyOwner) {
-      const firstName = user?.firstName ? capitalize(user.firstName) : null;
-      const hello = firstName ? `Ravi de vous revoir, ${firstName}.` : "Ravi de vous revoir.";
+      const hello = "Ravi de vous revoir.";
       if (nearbyCount > 0 && nearbyRadius) {
         return `${hello} ${nearbyCount} gardien${nearbyCount > 1 ? "s" : ""} vérifié${nearbyCount > 1 ? "s" : ""} à ${nearbyRadius} km attendent votre prochaine annonce.`;
       }
@@ -267,8 +266,7 @@ const OwnerDashboard = () => {
     }
     // New/early owner sans brouillon : subtitle personnalisé via signal local.
     if (earlyOwner) {
-      const firstName = user?.firstName ? capitalize(user.firstName) : null;
-      const hello = firstName ? `Bienvenue, ${firstName}.` : "Bienvenue chez Guardiens.";
+      const hello = "Bienvenue chez Guardiens.";
       if (nearbyCount > 0 && nearbyRadius) {
         return `${hello} ${nearbyCount} gardien${nearbyCount > 1 ? "s" : ""} vérifié${nearbyCount > 1 ? "s" : ""} dans un rayon de ${nearbyRadius} km attendent une annonce.`;
       }
@@ -441,8 +439,8 @@ const OwnerDashboard = () => {
 
 
   return (
-    <div className="space-y-6 md:space-y-8 pb-[calc(10rem+env(safe-area-inset-bottom))] md:pb-8">
-{/* pb mobile = BottomNav (h-16=64px) + Sticky CTA (~72px) + safe-area iPhone notch. */}
+    <div className="space-y-6 md:space-y-8 pb-[calc(10rem+env(safe-area-inset-bottom))] md:pb-32">
+{/* pb mobile = BottomNav (h-16=64px) + Sticky CTA (~72px) + safe-area iPhone notch. Desktop pb-32 = dégage la bulle Alma flottante (bottom-right). */}
 
       {/* Alma trigger owner_traffic_no_action : annonce avec vues réelles mais 0 candidature. */}
       <AlmaOwnerTrafficNoActionWhisper sits={sits} />
