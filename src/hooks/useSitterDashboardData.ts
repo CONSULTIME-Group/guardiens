@@ -452,7 +452,9 @@ export function useSitterDashboardData(userId: string | undefined) {
       if (cancelled) return;
       setData({
         loading: false,
+        error: null,
         profileCompletion: profile?.profile_completion || 0,
+
         identityVerified: profile?.identity_verified || false,
         identityStatus: profile?.identity_verification_status || "not_submitted",
         completedSits: completed,
