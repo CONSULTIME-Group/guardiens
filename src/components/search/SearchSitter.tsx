@@ -706,28 +706,20 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
        isPast: isExpired || isCancelled || isArchived || isUnpublished,
      };
    });
- if (housingType !== "all") items = items.filter((s: any) => s.property?.type === housingType);
- if (withPhotosOnly) items = items.filter((s: any) => s.property?.photos?.length > 0);
-  if (duration !== "all") {
-  items = items.filter((s: any) => {
-  if (!s.start_date || !s.end_date) return true;
-  const days = Math.ceil((new Date(s.end_date).getTime() - new Date(s.start_date).getTime()) / (1000 * 60 * 60 * 24));
-  // Bornes exclusives : court < 7, moyen [7,21], long > 21.
-  switch (duration) { case "short": return days < 7; case "medium": return days >= 7 && days <= 21; case "long": return days > 21; default: return true; }
-  });
-  }
-  if (emergencyOnly) items = items.filter((s: any) => s.is_urgent === true);
- if (verifiedOnly) items = items.filter((s: any) => s.owner?.identity_verified);
- const { items: locFiltered, cityCoords } = await filterByLocation(
- items,
- (s: any) => s.owner?.city,
- searchCoords,
- (s: any) => s.owner?.postal_code,
- (s: any) => !!s.country && s.country !== "FR",
- // Density : uniquement les annonces actionnables (publiées, ouvertes aux
- // candidatures, non expirées) pour rester aligné avec l'eyebrow SEO.
- (s: any) => s.status === "published" && s.accepting_applications !== false && (!s.end_date || s.end_date >= todayIso),
- );
+  // NB: les filtres purement clients (housing, photos, durée, urgence, verified,
+  // animaux, expérience, environnements) sont appliqués plus bas dans le useMemo
+  // `results`, sans refetch. On ne garde ici QUE ce qui affecte la zone/density
+  // ou nécessite les données rapatriées côté propriétaire.
+  const { items: locFiltered, cityCoords } = await filterByLocation(
+  items,
+  (s: any) => s.owner?.city,
+  searchCoords,
+  (s: any) => s.owner?.postal_code,
+  (s: any) => !!s.country && s.country !== "FR",
+  // Density : uniquement les annonces actionnables (publiées, ouvertes aux
+  // candidatures, non expirées) pour rester aligné avec l'eyebrow SEO.
+  (s: any) => s.status === "published" && s.accepting_applications !== false && (!s.end_date || s.end_date >= todayIso),
+  );
 
   items = locFiltered;
 
@@ -799,6 +791,16 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
     if (o?.user_id) ownerProfByUser.set(o.user_id, o);
   });
 
+  // Géocodage international (nécessite le jeu final avant tout filtre client)
+  const intlItems = items.filter((it: any) => !it.latitude && it.country && it.country !== "FR" && (it.city || it.owner?.city));
+  const intlKeys = [...new Set(intlItems.map((it: any) => `${it.city || it.owner?.city}, ${it.country}`))];
+  const intlCoords = new Map<string, { lat: number; lng: number }>();
+  await Promise.all(intlKeys.map(async (k) => {
+    const c = await geocodeCity(k);
+    if (c) intlCoords.set(k, { lat: c.lat, lng: c.lng });
+  }));
+
+  const coordsMap = new Map<string, { lat: number; lng: number }>();
   const enriched = items.map((sit: any) => {
     const pets = petsByProperty.get(sit.property_id) || [];
     const agg = reviewAggByUser.get(sit.user_id);
@@ -808,76 +810,33 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
     const badgeCounts = new Map<string, number>();
     ownerBadges.forEach((b: any) => badgeCounts.set(b.badge_id, (badgeCounts.get(b.badge_id) || 0) + 1));
     const topBadges = Array.from(badgeCounts.entries()).map(([badge_id, count]) => ({ badge_key: badge_id, count })).sort((a, b) => b.count - a.count).slice(0, 2);
-    const petSpecies = pets.map((p: any) => p.species);
-    if (animalTypes.length > 0) {
-      const wantedSpecies = animalTypes.map(a => animalChipToSpecies[a]).filter(Boolean);
-      if (!petSpecies.some((s: string) => wantedSpecies.includes(s))) return null;
-    }
-    if (minExperience !== "all") {
-      const minCount = parseInt(minExperience);
-      const revCount = agg?.count || 0;
-      if (revCount < minCount) return null;
-    }
     const dist = searchCoords && sit.owner?.city ? computeDistance(sit.owner.city, cityCoords, searchCoords) : null;
     const isNew = differenceInHours(new Date(), new Date(sit.created_at)) < 48;
     const days = sit.start_date && sit.end_date ? differenceInDays(new Date(sit.end_date), new Date(sit.start_date)) : 0;
     const sitEnvs: string[] = (sit as any).environments || [];
     const ownerEnvs: string[] = (ownerProf as any)?.environments || [];
     const resolvedEnvs = sitEnvs.length > 0 ? sitEnvs : ownerEnvs;
+
+    // Coords pour la carte (map view) : on renseigne pour TOUS les items rapatriés,
+    // les filtres clients pourront réduire la liste sans invalider ces coordonnées.
+    if (sit.latitude && sit.longitude) {
+      coordsMap.set(sit.id, { lat: sit.latitude, lng: sit.longitude });
+    } else if (sit.country && sit.country !== "FR") {
+      const key = `${sit.city || sit.owner?.city}, ${sit.country}`;
+      const c = intlCoords.get(key);
+      if (c) coordsMap.set(sit.id, c);
+    } else if (sit.owner?.city) {
+      const c = cityCoords.get(sit.owner.city);
+      if (c) coordsMap.set(sit.id, c);
+    }
+
     return { ...sit, pets, avgRating, reviewCount: agg?.count || 0, topBadges, distance: dist, isNew, durationDays: days, environments: resolvedEnvs, ownerEnvironments: ownerEnvs, ownerMatch: ownerProf };
   });
 
- let final = enriched.filter(Boolean);
- // Public /annonces : on masque les annonces passées/attribuées/terminées
- // pour ne montrer QUE les annonces réellement ouvertes à candidature.
- if (isPublic) {
-  final = final.filter((item: any) => !item.isPast && !item.isAssigned && !item.isCompleted);
- }
- // Environment filter (using resolved environments with fallback)
- if (environments.length > 0) {
- final = final.filter((item: any) => {
- const envs: string[] = item.environments || [];
- return envs.some((e: string) => environments.includes(e));
- });
- }
- // `min_gardien_sits` est une préférence propriétaire, pas un critère bloquant :
- // l'annonce doit rester visible dans la recherche, comme indiqué dans le formulaire.
- final = sortResults(final, sort);
- // Démos : visibles uniquement en interne, jamais sur la page publique
- // /annonces (pollue le flux quand de vraies annonces existent).
- //  • public                      → 0 démo
- //  • internal, 0 vraie annonce   → cadence 1/3 (page sinon vide)
- //  • internal, 1-3 vraies        → 1 démo en fin, max 2 démos
- //  • internal, 4+ vraies         → 1 démo tous les 6 résultats
- const realCount = final.length;
- const demoCadence = realCount === 0 ? 3 : realCount <= 3 ? 99 : 6;
- const demoLimit = isPublic ? 0 : (realCount === 0 ? DEMO_SITS.length : realCount <= 3 ? 2 : DEMO_SITS.length);
- final = interleaveDemos(final, DEMO_SITS.slice(0, demoLimit), demoCadence);
-  const coordsMap = new Map<string, { lat: number; lng: number }>();
-  // Géocodage des annonces internationales (city + country, hors FR)
-  const intlItems = final.filter((it: any) => it && !it.latitude && it.country && it.country !== "FR" && (it.city || it.owner?.city));
-  const intlKeys = [...new Set(intlItems.map((it: any) => `${it.city || it.owner?.city}, ${it.country}`))];
-  const intlCoords = new Map<string, { lat: number; lng: number }>();
-  await Promise.all(intlKeys.map(async (k) => {
-    const c = await geocodeCity(k);
-    if (c) intlCoords.set(k, { lat: c.lat, lng: c.lng });
-  }));
-  final.forEach((item: any) => {
-    if (!item) return;
-    if (item.latitude && item.longitude) {
-      coordsMap.set(item.id, { lat: item.latitude, lng: item.longitude });
-    } else if (item.country && item.country !== "FR") {
-      const key = `${item.city || item.owner?.city}, ${item.country}`;
-      const c = intlCoords.get(key);
-      if (c) coordsMap.set(item.id, c);
-    } else if (item.owner?.city) {
-      const c = cityCoords.get(item.owner.city);
-      if (c) coordsMap.set(item.id, c);
-    }
-  });
   setResultCoords(coordsMap);
- setResults(final);
- setVisibleCount(12);
+  setRawResults(enriched);
+  setRawAvailableMembers([]);
+  setVisibleCount(12);
  };
 
 
