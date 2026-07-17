@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef, lazy, Suspense } from "react";
+import { useState, useEffect, useCallback, useMemo, useRef, lazy, Suspense } from "react";
 
 import ReportButton from "@/components/reports/ReportButton";
 import InviteToMySitButton from "@/components/sits/owner/InviteToMySitButton";
