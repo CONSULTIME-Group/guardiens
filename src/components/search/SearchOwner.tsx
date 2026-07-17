@@ -83,7 +83,8 @@ const SearchOwner = () => {
   const [proOnly, setProOnly] = useState(false);
   const [minSits, setMinSits] = useState<string>("all");
   const [minRating, setMinRating] = useState<string>("all");
-  const [sort, setSort] = useState<SortOption>("closest");
+  const [sort, setSort] = useState<SortOption>("affinity");
+  const [sortUserOverride, setSortUserOverride] = useState(false);
   const [viewMode, setViewMode] = useState<ViewMode>("list");
 
   const [results, setResults] = useState<any[]>([]);
