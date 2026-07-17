@@ -299,6 +299,17 @@ const OwnerGallery = () => {
     }
   };
 
+  const handleSetAsMain = async (photo: GalleryPhoto) => {
+    if (!user) return;
+    const { error } = await supabase.from("profiles").update({ avatar_url: photo.photo_url }).eq("id", user.id);
+    if (error) {
+      toast({ variant: "destructive", title: "Erreur", description: "Impossible de définir cette photo comme principale." });
+      return;
+    }
+    toast({ title: "Photo principale mise à jour" });
+    window.dispatchEvent(new Event("profile:avatar-changed"));
+  };
+
   const handleDragEnd = async (event: DragEndEvent) => {
     const { active, over } = event;
     if (!over || active.id === over.id) return;
