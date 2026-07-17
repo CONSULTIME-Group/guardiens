@@ -937,10 +937,15 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
  });
  let offreProfiles: any[] = [];
  if (offreAuthorIds.length > 0) {
-   const { data } = await supabase
-     .from("public_profiles")
-      .select("id, first_name, avatar_url, city, postal_code, bio, skill_categories, custom_skills, available_for_help, is_founder")
-     .in("id", offreAuthorIds);
+    const { data, error: offreProfilesError } = await supabase
+      .from("public_profiles")
+       .select("id, first_name, avatar_url, city, postal_code, bio, skill_categories, custom_skills, available_for_help, is_founder")
+      .in("id", offreAuthorIds);
+    if (offreProfilesError) {
+      console.error("[SearchSitter] Erreur hydratation auteurs d'offres:", offreProfilesError);
+      setSearchError("Impossible de charger les auteurs d'offres.");
+      return;
+    }
    const catToSkillKey: Record<string, string> = { garden: "jardin", animals: "animaux", skills: "competences", house: "coups_de_main" };
    offreProfiles = (data || []).map((p: any) => {
      const cats = offreCatsByUser.get(p.id);
