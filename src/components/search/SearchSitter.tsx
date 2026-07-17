@@ -53,9 +53,9 @@ import AnimalsPickerPopover from "@/components/search/header/AnimalsPickerPopove
 import { useEmptyStateBreakdown } from "@/hooks/search/useEmptyStateBreakdown";
 import { useSearchAlert } from "@/hooks/search/useSearchAlert";
 import { useSearchUserProfile } from "@/hooks/search/useSearchUserProfile";
-const animalChips = ["Chiens", "Chats", "Chevaux", "Animaux de ferme", "NAC"];
+const animalChips = ["Chiens", "Chats", "Chevaux", "Oiseaux", "Animaux de ferme", "NAC"];
 const animalChipToSpecies: Record<string, string> = {
- Chiens: "dog", Chats: "cat", Chevaux: "horse",
+ Chiens: "dog", Chats: "cat", Chevaux: "horse", Oiseaux: "bird",
  "Animaux de ferme": "farm_animal", NAC: "nac",
 };
 
