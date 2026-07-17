@@ -59,7 +59,7 @@ const SitterDashboard = () => {
 
 
   const {
-    loading, profileCompletion, identityVerified, identityStatus,
+    loading, error, profileCompletion, identityVerified, identityStatus,
     completedSits, avgRating, reviewsCount, badgeCount, totalApps,
     pendingAppsCount, unreadCount, isAvailable, competencesCount, interestsCount,
     postalCode, avatarUrl, bio, hasAnimalExperience,
@@ -67,8 +67,9 @@ const SitterDashboard = () => {
     nearbyListings, nearbyListingsRadius, nearbyError, articles, nearbyMissions, nearbyMissionsError,
     myMissions, myMissionsError,
     toggleAvailability,
-    reputation, groupedBadges,
+    reputation, groupedBadges, reload,
   } = useSitterDashboardData(user?.id);
+
 
   // NBA nouveau gardien : score d'affinité + fallback empty state.
   // Le hook est appelé inconditionnellement (règle des hooks). Il ne fetche
