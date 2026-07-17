@@ -829,10 +829,15 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
   // utilisée par le FK embed PostgREST).
   const ownerIds = Array.from(new Set(items.map((m: any) => m.user_id).filter(Boolean)));
   if (ownerIds.length > 0) {
-    const { data: owners } = await supabase
+    const { data: owners, error: ownersError } = await supabase
       .from("public_profiles")
       .select("id, first_name, avatar_url, city, postal_code, identity_verified, is_founder")
       .in("id", ownerIds);
+    if (ownersError) {
+      console.error("[SearchSitter] Erreur hydratation propriétaires (missions):", ownersError);
+      setSearchError("Impossible de charger les informations des propriétaires.");
+      return;
+    }
     const ownerMap = new Map<string, any>((owners || []).map((o: any) => [o.id, o]));
     items = items.map((m: any) => ({ ...m, owner: ownerMap.get(m.user_id) || null }));
   }
