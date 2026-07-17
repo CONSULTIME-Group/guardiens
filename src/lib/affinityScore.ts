@@ -83,7 +83,7 @@ const PACE_ORDER = ["calme", "equilibre", "actif"];
  * useAffinityThresholdsBootstrap ; par défaut : 2 critères / 35 %.
  */
 const thresholds = {
-  minCommonCriteria: 2,
+  minCommonCriteria: 3,
   minScorePercent: 35,
 };
 
