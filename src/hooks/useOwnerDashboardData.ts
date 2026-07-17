@@ -105,6 +105,7 @@ export function useOwnerDashboardData(userId: string | undefined) {
         if (cancelled) return;
 
         const sitsData = (sitsRes.data || []) as SitRow[];
+        ownedSitIdsRef.current = new Set(sitsData.map((s) => s.id));
         const p = profileRes.data;
         const verStatus = p?.identity_verification_status || "not_submitted";
         const propsData = (propsRes.data || []) as Array<{
