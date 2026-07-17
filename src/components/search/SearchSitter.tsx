@@ -1421,22 +1421,16 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
   </div>
 
 
-   {/* Zone pill (radius / dept / region / france), désactivé hors connexion */}
-   <div
-     className={!user ? "opacity-60 pointer-events-none" : ""}
-     aria-disabled={!user}
-     title={!user ? "Connectez-vous pour filtrer par distance" : undefined}
-   >
-     <ZonePickerPopover
-       pillClass={pillClass}
-       zoneMode={zoneMode}
-       setZoneMode={setZoneMode}
-       radius={radius}
-       setRadius={setRadius}
-       userPostalCode={userPostalCode}
-       densityCounts={densityCounts}
-     />
-   </div>
+   {/* Zone pill (radius / dept / region / france) : accessible aussi aux visiteurs anonymes pour régler le rayon. */}
+      <ZonePickerPopover
+        pillClass={pillClass}
+        zoneMode={zoneMode}
+        setZoneMode={setZoneMode}
+        radius={radius}
+        setRadius={setRadius}
+        userPostalCode={userPostalCode}
+        densityCounts={densityCounts}
+      />
 
    {/* Dates pill */}
    <DatesPickerPopover
