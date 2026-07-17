@@ -1251,7 +1251,8 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
  // ─── Render ───
   // Visiteurs non connectés : annonces visibles (consultation libre pour conversion).
   // Sitters connectés sans abo : overlay premium maintenu.
-  const isSitterLocked = !!user && !hasAccess && tab === "sits";
+  // Overlay neutralisé tant que PRICING_IS_ACTIVE = false (promesse "sans limite").
+  const isSitterLocked = PRICING_IS_ACTIVE && !!user && !hasAccess && tab === "sits";
 
  return (
  <div className="animate-fade-in relative">
