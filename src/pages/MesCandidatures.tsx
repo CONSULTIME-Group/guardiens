@@ -188,7 +188,7 @@ const MesCandidatures = () => {
             {rendered.map((app) => {
               const sit = app.sit!;
               const cover = sit.properties?.photos?.[0];
-              const city = sit.properties?.city || sit.owner?.city;
+              const city = sit.city || sit.owner?.city;
               const period = formatSitPeriod(sit.start_date, sit.end_date, null);
               const badge = appStatusBadge[app.status] || appStatusBadge.pending;
               return (
