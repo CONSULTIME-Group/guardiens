@@ -257,10 +257,25 @@ const SitterGallery = () => {
                   <p className="text-white/70 text-xs mt-0.5">{[photo.city, photo.photo_date].filter(Boolean).join(" · ")}</p>
                 )}
               </div>
-              {/* Delete button */}
-              <button onClick={(e) => { e.stopPropagation(); handleDelete(photo); }} className="absolute top-2 right-2 p-1.5 rounded-full bg-destructive/80 text-destructive-foreground opacity-0 group-hover:opacity-100 transition-opacity">
-                <Trash2 className="h-3.5 w-3.5" />
-              </button>
+              {/* Actions */}
+              <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                <button
+                  onClick={(e) => { e.stopPropagation(); handleSetAsMain(photo); }}
+                  className="p-1.5 rounded-full bg-background/90 text-foreground hover:bg-background"
+                  title="Définir comme photo principale"
+                  aria-label="Définir comme photo principale"
+                >
+                  <Star className="h-3.5 w-3.5" />
+                </button>
+                <button
+                  onClick={(e) => { e.stopPropagation(); handleDelete(photo); }}
+                  className="p-1.5 rounded-full bg-destructive/80 text-destructive-foreground"
+                  title="Supprimer"
+                  aria-label="Supprimer la photo"
+                >
+                  <Trash2 className="h-3.5 w-3.5" />
+                </button>
+              </div>
             </div>
           ))}
         </div>
