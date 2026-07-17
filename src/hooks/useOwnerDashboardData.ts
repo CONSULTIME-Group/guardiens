@@ -386,5 +386,6 @@ export function useOwnerDashboardData(userId: string | undefined) {
     };
   }, [userId]);
 
-  return { data, loading, error };
+  return { data, loading, error, reload };
 }
+
