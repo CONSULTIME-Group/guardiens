@@ -94,7 +94,7 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
  const [missionSubTab, setMissionSubTab] = useState<MissionSubTab>("published");
  const [missionTypeFilter, setMissionTypeFilter] = useState<"all" | "besoin" | "offre">("all");
  const [missionCategoryFilter, setMissionCategoryFilter] = useState<"all" | "garden" | "animals" | "skills" | "house">("all");
- const [availableMembers, setAvailableMembers] = useState<any[]>([]);
+ const [rawAvailableMembers, setRawAvailableMembers] = useState<any[]>([]);
  const [city, setCity] = useState(() => searchParams.get("ville") || "");
  const [radius, setRadius] = useState(() => {
   const r = parseInt(searchParams.get("rayon") || "", 10);
