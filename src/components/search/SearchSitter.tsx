@@ -638,7 +638,12 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
 .order("created_at", { ascending: false });
    if (startDate) query = query.gte("end_date", startDate);
    if (endDate) query = query.lte("start_date", endDate);
-   const { data } = await query;
+   const { data, error: sitsError } = await query;
+   if (sitsError) {
+     console.error("[SearchSitter] Erreur chargement annonces:", sitsError);
+     setSearchError("Impossible de charger les annonces.");
+     return;
+   }
    let items = data || [];
 
    // Hydrate owner data from public_profiles (safe public view) in a single batched call
