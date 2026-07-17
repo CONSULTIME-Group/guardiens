@@ -97,15 +97,27 @@ const SortablePhoto = ({ photo, onDelete, onEditCaption, onSetAsMain }: Sortable
         <GripVertical className="h-3.5 w-3.5" />
       </button>
 
-      {/* Delete */}
-      <button
-        type="button"
-        onClick={() => onDelete(photo.id)}
-        className="absolute top-2 right-2 p-1.5 rounded-md bg-black/60 text-white opacity-0 group-hover:opacity-100 transition-opacity hover:bg-destructive"
-        aria-label="Supprimer la photo"
-      >
-        <Trash2 className="h-3.5 w-3.5" />
-      </button>
+      {/* Actions (top-right) */}
+      <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+        <button
+          type="button"
+          onClick={() => onSetAsMain(photo)}
+          className="p-1.5 rounded-md bg-black/60 text-white hover:bg-primary"
+          aria-label="Définir comme photo principale"
+          title="Définir comme photo principale"
+        >
+          <Star className="h-3.5 w-3.5" />
+        </button>
+        <button
+          type="button"
+          onClick={() => onDelete(photo.id)}
+          className="p-1.5 rounded-md bg-black/60 text-white hover:bg-destructive"
+          aria-label="Supprimer la photo"
+          title="Supprimer"
+        >
+          <Trash2 className="h-3.5 w-3.5" />
+        </button>
+      </div>
 
       {/* Caption overlay */}
       <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 to-transparent p-2">
