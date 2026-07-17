@@ -439,8 +439,8 @@ const OwnerDashboard = () => {
 
 
   return (
-    <div className="space-y-6 md:space-y-8 pb-[calc(10rem+env(safe-area-inset-bottom))] md:pb-8">
-{/* pb mobile = BottomNav (h-16=64px) + Sticky CTA (~72px) + safe-area iPhone notch. */}
+    <div className="space-y-6 md:space-y-8 pb-[calc(10rem+env(safe-area-inset-bottom))] md:pb-32">
+{/* pb mobile = BottomNav (h-16=64px) + Sticky CTA (~72px) + safe-area iPhone notch. Desktop pb-32 = dégage la bulle Alma flottante (bottom-right). */}
 
       {/* Alma trigger owner_traffic_no_action : annonce avec vues réelles mais 0 candidature. */}
       <AlmaOwnerTrafficNoActionWhisper sits={sits} />
