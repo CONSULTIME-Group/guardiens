@@ -64,6 +64,8 @@ export interface SitterDashboardData {
 
 const INITIAL_STATE: SitterDashboardData = {
   loading: true,
+  error: null,
+
   profileCompletion: 0,
   identityVerified: false,
   identityStatus: "not_submitted",
