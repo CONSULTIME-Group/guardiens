@@ -1303,142 +1303,29 @@ const SearchOwner = () => {
                 </div>
               )}
             {results.length > 0 && <OwnerAffinityBanner className="mb-4" />}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 auto-rows-fr">
+            {/* Grille dense 4 col desktop / 3 laptop / 2 tablette / 1 mobile.
+                Padding-right sur >= xl pour éviter que la dernière colonne passe
+                sous le AlmaDock fixé (right-6 md:). */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 auto-rows-fr xl:pr-16">
               {(() => {
                 const nameCounts: Record<string, number> = {};
                 results.forEach((s: any) => {
                   const fn = (s.profile?.first_name || "Gardien").toLowerCase();
                   nameCounts[fn] = (nameCounts[fn] || 0) + 1;
                 });
-                return results.map((s: any) => {
-                const profile = s.profile;
-                const sitterAnimalTypes: string[] = s.animal_types || [];
-                const firstName = profile?.first_name || "Gardien";
-                const isDuplicate = nameCounts[firstName.toLowerCase()] > 1;
-                const bio = profile?.bio ? (profile.bio.length > 80 ? profile.bio.slice(0, 80) + "…" : profile.bio) : null;
-                // « Dans votre ville » supprimé : quand le gardien est dans la ville recherchée,
-                // on affiche uniquement la ville (l'info est implicite). Sinon la distance seule.
-                const sameCity = s._dist === 0 || (city && profile?.city && profile.city.toLowerCase() === city.toLowerCase());
-                const distLabel = !sameCity && s._dist != null && s._dist !== Infinity ? `à ${s._dist} km` : null;
-
-                return (
-                  <Link
+                return results.map((s: any) => (
+                  <SitterResultCard
                     key={s.id}
-                    to={`/gardiens/${s.user_id}`}
-                    aria-label={`Voir le profil de ${firstName}`}
-                    className="group relative bg-card rounded-xl overflow-hidden border border-border hover:shadow-md hover:-translate-y-0.5 hover:border-primary/40 transition-all flex flex-col h-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                  >
-                    {/* Favori (secondaire), en overlay */}
-                    <div className="absolute top-2 right-2 z-10">
-                      <FavoriteButton targetType="sitter" targetId={s.user_id} />
-                    </div>
-
-                    {/* Photo, carré, cadrage haut pour ne pas couper les visages */}
-                    <div className="relative">
-                      {profile?.avatar_url ? (
-                        <div className="aspect-square w-full overflow-hidden bg-muted">
-                          <img
-                            src={profile.avatar_url}
-                            alt={firstName}
-                            loading="lazy"
-                            className="w-full h-full object-cover object-[center_top] group-hover:scale-[1.02] transition-transform duration-300"
-                          />
-                        </div>
-                      ) : (
-                        <div className="aspect-square w-full overflow-hidden bg-primary/10 flex items-center justify-center">
-                          <span className="text-3xl text-primary font-heading font-bold">{firstName.charAt(0)}</span>
-                        </div>
-                      )}
-                      {s.isEmergency && (
-                        <span className="absolute top-2 left-2 flex items-center gap-1 bg-card/90 rounded-full px-2 py-0.5 text-[11px] font-medium">
-                          <Zap className="h-3 w-3 text-amber-500" /> Urgence
-                        </span>
-                      )}
-                    </div>
-
-                    {/* Body */}
-                    <div className="p-3 flex flex-col flex-1">
-                      <p className="text-sm font-semibold truncate">
-                        {firstName}
-                        {isDuplicate && profile?.city && (
-                          <span className="text-xs font-normal text-muted-foreground ml-1">· {profile.city}</span>
-                        )}
-                        {profile?.identity_verified && (
-                          <span className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-full font-medium ml-1.5 inline-block align-middle">Vérifié</span>
-                        )}
-                        {profile?.pro_status === "verified" && (
-                          <span className="text-xs bg-accent text-accent-foreground px-2 py-0.5 rounded-full font-medium ml-1.5 inline-block align-middle">Pro</span>
-                        )}
-                      </p>
-                      {(profile?.city || distLabel) && (
-                        <p className="text-xs text-muted-foreground truncate">
-                          {profile?.city}
-                          {profile?.city && distLabel && " · "}
-                          {distLabel}
-                        </p>
-                      )}
-                      <div className="flex items-center gap-1.5 mt-0.5 flex-wrap">
-                        <PresenceBadge lastSeenAt={profile?.last_seen_at} />
-                        <ReplyTimeBadge minutes={s.reply_median_minutes} />
-                      </div>
-
-                      {/* Rating + experience */}
-                      <div className="flex items-center gap-2 mt-1 min-h-[1rem]">
-                        {s.avgRating !== null && (
-                          <span className="flex items-center gap-0.5 text-xs text-muted-foreground">
-                            <Star className="h-3 w-3 text-yellow-500 fill-yellow-500" />
-                            {s.avgRating.toFixed(1)}
-                          </span>
-                        )}
-                        {(profile?.completed_sits_count || 0) > 0 && (
-                          <span className="text-xs text-muted-foreground">{profile.completed_sits_count} garde{profile.completed_sits_count > 1 ? "s" : ""}</span>
-                        )}
-                      </div>
-
-                      {/* Affinité (badge sémantique, masqué si non calculable) */}
-                      <div className="mt-1">
-                        <OwnerToSitterAffinity
-                          sitterProfile={s}
-                          context="search_owner_listing"
-                          targetId={s.user_id}
-                          size="sm"
-                          showCta={false}
-                          variant="semantic"
-                        />
-                      </div>
-
-                      {/* Animal pills, zone réservée pour aligner */}
-                      <div className="flex flex-wrap gap-1 mt-1.5 min-h-[1.5rem]">
-                        {sitterAnimalTypes.slice(0, 3).map((a: string) => (
-                          <span key={a} className="text-[11px] bg-muted text-foreground/80 rounded-full px-2 py-0.5">{a}</span>
-                        ))}
-                        {sitterAnimalTypes.length > 3 && (
-                          <span className="text-[11px] text-muted-foreground self-center">+{sitterAnimalTypes.length - 3}</span>
-                        )}
-                      </div>
-
-                      {/* Bio, zone réservée 2 lignes pour aligner les cartes */}
-                      <p className="text-xs text-muted-foreground mt-1.5 line-clamp-2 min-h-[2rem]">
-                        {bio || <span className="opacity-0">.</span>}
-                      </p>
-
-                      {/* CTA Contacter, labellisé, cible tactile min 44px */}
-                      <button
-                        type="button"
-                        onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleContact(s.user_id); }}
-                        disabled={contactingId === s.user_id}
-                        aria-label={`Contacter ${firstName}`}
-                        className="mt-2 inline-flex items-center justify-center gap-1.5 min-h-11 w-full rounded-full bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors disabled:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                      >
-                        {contactingId === s.user_id
-                          ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
-                          : <MessageCircle className="h-4 w-4" aria-hidden="true" />}
-                        Contacter
-                      </button>
-                    </div>
-                  </Link>
-                );
-              });
+                    sitter={s}
+                    photos={s._photos || []}
+                    affinity={s._affinity || null}
+                    hasOwnerProfile={!!viewerOwner}
+                    onContact={handleContact}
+                    contactingId={contactingId}
+                    duplicateName={nameCounts[(s.profile?.first_name || "Gardien").toLowerCase()] > 1}
+                    city={city}
+                  />
+                ));
               })()}
             </div>
             </>
