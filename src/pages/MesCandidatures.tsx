@@ -89,7 +89,7 @@ const MesCandidatures = () => {
       const { data, error } = await supabase
         .from("applications")
         .select(
-          "id, status, created_at, viewed_at, sit:sits(id, title, slug, start_date, end_date, status, user_id, property_id, properties(photos, city), owner:profiles!sits_user_id_fkey(id, first_name, avatar_url, city))",
+          "id, status, created_at, viewed_at, sit:sits(id, title, slug, start_date, end_date, status, user_id, property_id, city, properties(photos), owner:profiles!sits_user_id_fkey(id, first_name, avatar_url, city))",
         )
         .eq("sitter_id", user.id)
         .order("created_at", { ascending: false });
