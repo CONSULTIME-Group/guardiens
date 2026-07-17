@@ -53,7 +53,7 @@ const StatsStrip = memo(({ items }: StatsStripProps) => {
           <div className="px-4 py-3 text-center md:text-left">
             {item.value !== null && !showEmptyHint ? (
               <p
-                className={`text-xl md:text-2xl font-heading font-bold leading-none transition-transform duration-200 ease-out ${valueColor} ${clickable ? "group-hover:-translate-y-0.5" : ""}`}
+                className={`text-xl md:text-2xl font-heading font-bold leading-none whitespace-nowrap transition-transform duration-200 ease-out ${valueColor} ${clickable ? "group-hover:-translate-y-0.5" : ""}`}
               >
                 {item.value}
               </p>
