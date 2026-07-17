@@ -738,7 +738,8 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
 .or(isPublic
   ? "status.in.(published,confirmed,in_progress,completed,cancelled)"
   : "status.in.(published,confirmed,in_progress,completed,cancelled,archived),and(status.eq.draft,unpublished_at.not.is.null)")
-.order("created_at", { ascending: false });
+.order("created_at", { ascending: false })
+.limit(SITS_SERVER_CAP);
    if (startDate) query = query.gte("end_date", startDate);
    if (endDate) query = query.lte("start_date", endDate);
    const { data, error: sitsError } = await query;
