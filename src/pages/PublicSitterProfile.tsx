@@ -1053,11 +1053,19 @@ export default function PublicSitterProfile() {
           <div className="flex flex-col sm:flex-row sm:items-end gap-3 sm:gap-6 min-w-0">
             {/* Photo grande */}
             <div className="shrink-0 relative">
-              <img
-                src={profile.avatar_url || "/placeholder.svg"}
-                alt={firstName}
-                className="w-20 h-20 sm:w-28 sm:h-28 md:w-40 md:h-40 rounded-full object-cover object-center border-4 border-white shadow-md ring-2 ring-primary ring-offset-2"
-              />
+              <button
+                type="button"
+                onClick={() => lightboxItems.length > 0 && setLightboxIdx(0)}
+                disabled={lightboxItems.length === 0}
+                aria-label={`Agrandir la photo de ${firstName}`}
+                className="block rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary disabled:cursor-default"
+              >
+                <img
+                  src={profile.avatar_url || "/placeholder.svg"}
+                  alt={firstName}
+                  className="w-20 h-20 sm:w-28 sm:h-28 md:w-40 md:h-40 rounded-full object-cover object-center border-4 border-white shadow-md ring-2 ring-primary ring-offset-2"
+                />
+              </button>
               {reputation && reputation.statut_gardien !== 'novice' && (
                 <div className="absolute -bottom-2 -right-2">
                   <StatutGardienBadge statut={reputation.statut_gardien} />
