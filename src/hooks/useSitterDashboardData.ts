@@ -109,6 +109,8 @@ const INITIAL_STATE: SitterDashboardData = {
 
 export function useSitterDashboardData(userId: string | undefined) {
   const [data, setData] = useState<SitterDashboardData>(INITIAL_STATE);
+  const [reloadTick, setReloadTick] = useState(0);
+  const reload = useCallback(() => setReloadTick((t) => t + 1), []);
 
   const setPartial = useCallback(
     (partial: Partial<SitterDashboardData>) =>
@@ -123,6 +125,7 @@ export function useSitterDashboardData(userId: string | undefined) {
     // while the new fetch is in flight.
     let cancelled = false;
     setData(INITIAL_STATE);
+
 
     const load = async () => {
       const [
