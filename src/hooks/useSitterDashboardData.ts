@@ -645,5 +645,5 @@ export function useSitterDashboardData(userId: string | undefined) {
     await supabase.from("sitter_profiles").update({ is_available: newVal }).eq("user_id", userId);
   }, [userId, data.isAvailable, setPartial]);
 
-  return { ...data, setPartial, toggleAvailability, refetchUnread };
+  return { ...data, setPartial, toggleAvailability, refetchUnread, reload };
 }
