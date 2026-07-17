@@ -31,6 +31,8 @@ interface AdvancedFiltersSheetProps {
   setWithPhotosOnly: (v: boolean) => void;
   minExperience: ExperienceFilter;
   setMinExperience: (v: ExperienceFilter) => void;
+  duration?: DurationFilter;
+  setDuration?: (v: DurationFilter) => void;
   onApply: () => void;
   currentResultsCount?: number;
   loading?: boolean;
