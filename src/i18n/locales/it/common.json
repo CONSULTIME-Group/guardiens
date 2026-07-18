@@ -374,6 +374,69 @@
           "human": "Relazione familiare o amicale"
         }
       }
+    },
+    "guides_cities": {
+      "all_listings": "Vedi tutti gli annunci",
+      "guides": {
+        "g1": {
+          "label": "Assentarsi con un animale: la guida alle 8 situazioni nel 2026"
+        },
+        "g2": {
+          "label": "Vacanze lunghe: far accudire il proprio animale per 2 settimane o più"
+        },
+        "g3": {
+          "label": "Alternative alla pensione per cani: 5 soluzioni per partire sereni"
+        },
+        "g4": {
+          "label": "Pet sitting in Savoia: la guida completa"
+        },
+        "g5": {
+          "label": "Pet sitting in Alta Savoia: la guida completa"
+        },
+        "g6": {
+          "label": "Pet sitting per cani e gatti a Croix-Rousse: specificità del quartiere"
+        },
+        "g7": {
+          "label": "Francesi all'estero: far custodire la propria casa in Francia durante l'assenza"
+        },
+        "g8": {
+          "label": "Espatriati: far custodire la propria casa all'estero (Bali, Lisbona, Marrakech...) da un francese"
+        }
+      },
+      "cities": {
+        "c1": {
+          "label": "House-sitting a Lione",
+          "desc": "Sitter verificati in ogni arrondissement, dal Vieux Lyon a Croix-Rousse, passando per Part-Dieu e Confluence."
+        },
+        "c2": {
+          "label": "House-sitting ad Annecy",
+          "desc": "Lago, montagna, seconde case in Alta Savoia. Sitter locali che conoscono il gelo, gli accessi e i veterinari."
+        },
+        "c3": {
+          "label": "House-sitting a Grenoble",
+          "desc": "Ai piedi del Vercors, della Chartreuse e del Belledonne. Sitter che conoscono la conca e i sentieri della Bastiglia."
+        },
+        "c4": {
+          "label": "House-sitting a Villeurbanne",
+          "desc": "Alle porte di Lione, Gratte-Ciel, Charpennes, Cusset. Sitter che si spostano facilmente tra le due città."
+        },
+        "c5": {
+          "label": "House-sitting a Chambéry",
+          "desc": "Capitale della Savoia, tra il lago del Bourget e il massiccio dei Bauges. Sitter a proprio agio con la montagna e l'inverno."
+        },
+        "c6": {
+          "label": "House-sitting a Valence",
+          "desc": "Porta del sud, tra Rodano e Vercors. Sitter vicini alle rotte vacanziere e alle seconde case della Drôme."
+        },
+        "c7": {
+          "label": "House-sitting a Écully",
+          "desc": "Ovest residenziale di Lione, case con giardino e animali. Sitter abituati a proprietà tranquille e familiari."
+        },
+        "c8": {
+          "label": "In tutta la Francia",
+          "desc": "Dai Paesi Baschi alla Bretagna, passando per le Alpi, la Provenza e il Nord. La rete si estende in tutte le regioni."
+        }
+      }
     }
   },
   "faq": {

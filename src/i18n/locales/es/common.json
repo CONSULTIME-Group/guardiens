@@ -374,6 +374,69 @@
           "human": "Relación familiar o de amistad"
         }
       }
+    },
+    "guides_cities": {
+      "all_listings": "Ver todos los anuncios",
+      "guides": {
+        "g1": {
+          "label": "Ausentarse con un animal: la guía de 8 situaciones en 2026"
+        },
+        "g2": {
+          "label": "Vacaciones largas: cuidar de su animal durante 2 semanas o más"
+        },
+        "g3": {
+          "label": "Alternativas a la residencia canina: 5 soluciones para viajar con tranquilidad"
+        },
+        "g4": {
+          "label": "Cuidado de animales en Saboya: la guía completa"
+        },
+        "g5": {
+          "label": "Cuidado de animales en Alta Saboya: la guía completa"
+        },
+        "g6": {
+          "label": "Cuidado de perros y gatos en Croix-Rousse: particularidades del barrio"
+        },
+        "g7": {
+          "label": "Franceses en el extranjero: cuidar su casa en Francia durante su ausencia"
+        },
+        "g8": {
+          "label": "Expatriados: cuidar su casa en el extranjero (Bali, Lisboa, Marrakech...) con un francés"
+        }
+      },
+      "cities": {
+        "c1": {
+          "label": "House-sitting en Lyon",
+          "desc": "Cuidadores verificados en cada distrito, del Vieux Lyon a la Croix-Rousse, pasando por Part-Dieu y Confluence."
+        },
+        "c2": {
+          "label": "House-sitting en Annecy",
+          "desc": "Lago, montaña, segundas residencias en Alta Saboya. Cuidadores locales que conocen el hielo, los accesos y los veterinarios."
+        },
+        "c3": {
+          "label": "House-sitting en Grenoble",
+          "desc": "A los pies del Vercors, la Chartreuse y Belledonne. Cuidadores que conocen el valle y los senderos de la Bastilla."
+        },
+        "c4": {
+          "label": "House-sitting en Villeurbanne",
+          "desc": "A las puertas de Lyon, Gratte-Ciel, Charpennes, Cusset. Cuidadores que se desplazan fácilmente entre ambas ciudades."
+        },
+        "c5": {
+          "label": "House-sitting en Chambéry",
+          "desc": "Capital de Saboya, entre el lago del Bourget y el macizo de los Bauges. Cuidadores cómodos con la montaña y el invierno."
+        },
+        "c6": {
+          "label": "House-sitting en Valence",
+          "desc": "Puerta del sur, entre Ródano y Vercors. Cuidadores cercanos a las rutas vacacionales y segundas residencias del Drôme."
+        },
+        "c7": {
+          "label": "House-sitting en Écully",
+          "desc": "Oeste residencial de Lyon, casas con jardín y animales. Cuidadores acostumbrados a propiedades tranquilas y familiares."
+        },
+        "c8": {
+          "label": "En toda Francia",
+          "desc": "Del País Vasco a Bretaña, pasando por los Alpes, la Provenza y el Norte. La red se extiende por todas las regiones."
+        }
+      }
     }
   },
   "faq": {

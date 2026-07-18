@@ -1265,95 +1265,26 @@ const Landing = () => {
                   {t("landing.cities.guides_title")}
                 </h3>
                 <ul className="space-y-3">
-                  <li>
-                    <Link
-                      to="/actualites/s-absenter-avec-animal-guide-solutions-2026"
-                      className="group flex items-start gap-2 text-foreground hover:text-primary transition-colors"
-                    >
-                      <ArrowRight className="h-4 w-4 mt-1 shrink-0 text-primary/60 group-hover:translate-x-0.5 transition-transform" />
-                      <span className="text-sm leading-relaxed">
-                        S'absenter avec un animal : le guide des 8 situations en 2026
-                      </span>
-                    </Link>
-                  </li>
-                  <li>
-                    <Link
-                      to="/actualites/vacances-longues-garde-animal-2-semaines"
-                      className="group flex items-start gap-2 text-foreground hover:text-primary transition-colors"
-                    >
-                      <ArrowRight className="h-4 w-4 mt-1 shrink-0 text-primary/60 group-hover:translate-x-0.5 transition-transform" />
-                      <span className="text-sm leading-relaxed">
-                        Vacances longues : faire garder son animal pendant 2 semaines ou plus
-                      </span>
-                    </Link>
-                  </li>
-                  <li>
-                    <Link
-                      to="/actualites/pension-chien-alternatives-guide"
-                      className="group flex items-start gap-2 text-foreground hover:text-primary transition-colors"
-                    >
-                      <ArrowRight className="h-4 w-4 mt-1 shrink-0 text-primary/60 group-hover:translate-x-0.5 transition-transform" />
-                      <span className="text-sm leading-relaxed">
-                        Alternatives à la pension pour chien : 5 solutions pour partir sereinement
-                      </span>
-                    </Link>
-                  </li>
-                  <li>
-                    <Link
-                      to="/actualites/garde-animaux-savoie-guide"
-                      className="group flex items-start gap-2 text-foreground hover:text-primary transition-colors"
-                    >
-                      <ArrowRight className="h-4 w-4 mt-1 shrink-0 text-primary/60 group-hover:translate-x-0.5 transition-transform" />
-                      <span className="text-sm leading-relaxed">
-                        Garde d'animaux en Savoie : le guide complet
-                      </span>
-                    </Link>
-                  </li>
-                  <li>
-                    <Link
-                      to="/actualites/garde-animaux-haute-savoie-guide"
-                      className="group flex items-start gap-2 text-foreground hover:text-primary transition-colors"
-                    >
-                      <ArrowRight className="h-4 w-4 mt-1 shrink-0 text-primary/60 group-hover:translate-x-0.5 transition-transform" />
-                      <span className="text-sm leading-relaxed">
-                        Garde d'animaux en Haute-Savoie : le guide complet
-                      </span>
-                    </Link>
-                  </li>
-                  <li>
-                    <Link
-                      to="/actualites/garde-animaux-croix-rousse-lyon"
-                      className="group flex items-start gap-2 text-foreground hover:text-primary transition-colors"
-                    >
-                      <ArrowRight className="h-4 w-4 mt-1 shrink-0 text-primary/60 group-hover:translate-x-0.5 transition-transform" />
-                      <span className="text-sm leading-relaxed">
-                        Garde de chien et chat à la Croix-Rousse : spécificités du quartier
-                      </span>
-                    </Link>
-                  </li>
-                  <li>
-                    <Link
-                      to="/actualites/francais-etranger-garde-maison-france"
-                      className="group flex items-start gap-2 text-foreground hover:text-primary transition-colors"
-                    >
-                      <ArrowRight className="h-4 w-4 mt-1 shrink-0 text-primary/60 group-hover:translate-x-0.5 transition-transform" />
-                      <span className="text-sm leading-relaxed">
-                        Français de l'étranger : faire garder sa maison en France pendant son absence
-                      </span>
-                    </Link>
-                  </li>
-                  <li>
-                    <Link
-                      to="/actualites/expat-proprietaire-faire-garder-maison-etranger"
-                      className="group flex items-start gap-2 text-foreground hover:text-primary transition-colors"
-                    >
-                      <ArrowRight className="h-4 w-4 mt-1 shrink-0 text-primary/60 group-hover:translate-x-0.5 transition-transform" />
-                      <span className="text-sm leading-relaxed">
-                        Expatriés : faire garder sa maison à l'étranger (Bali, Lisbonne, Marrakech...) par un Français
-                      </span>
-                    </Link>
-                  </li>
-
+                  {([
+                    { to: "/actualites/s-absenter-avec-animal-guide-solutions-2026", labelKey: "landing.guides_cities.guides.g1.label" },
+                    { to: "/actualites/vacances-longues-garde-animal-2-semaines", labelKey: "landing.guides_cities.guides.g2.label" },
+                    { to: "/actualites/pension-chien-alternatives-guide", labelKey: "landing.guides_cities.guides.g3.label" },
+                    { to: "/actualites/garde-animaux-savoie-guide", labelKey: "landing.guides_cities.guides.g4.label" },
+                    { to: "/actualites/garde-animaux-haute-savoie-guide", labelKey: "landing.guides_cities.guides.g5.label" },
+                    { to: "/actualites/garde-animaux-croix-rousse-lyon", labelKey: "landing.guides_cities.guides.g6.label" },
+                    { to: "/actualites/francais-etranger-garde-maison-france", labelKey: "landing.guides_cities.guides.g7.label" },
+                    { to: "/actualites/expat-proprietaire-faire-garder-maison-etranger", labelKey: "landing.guides_cities.guides.g8.label" },
+                  ] as const).map((e) => (
+                    <li key={e.to}>
+                      <Link
+                        to={e.to}
+                        className="group flex items-start gap-2 text-foreground hover:text-primary transition-colors"
+                      >
+                        <ArrowRight className="h-4 w-4 mt-1 shrink-0 text-primary/60 group-hover:translate-x-0.5 transition-transform" />
+                        <span className="text-sm leading-relaxed">{t(e.labelKey)}</span>
+                      </Link>
+                    </li>
+                  ))}
                 </ul>
                 <div className="mt-6 pt-6 border-t border-border flex flex-col sm:flex-row gap-3">
                   <Button asChild variant="outline" size="sm" className="rounded-full">
@@ -1374,98 +1305,32 @@ const Landing = () => {
                   {t("landing.cities.cities_title")}
                 </h3>
                 <ul className="space-y-3">
-                  <li>
-                    <Link
-                      to="/house-sitting/lyon"
-                      className="group flex items-start gap-2 text-foreground hover:text-primary transition-colors"
-                    >
-                      <ArrowRight className="h-4 w-4 mt-1 shrink-0 text-primary/60 group-hover:translate-x-0.5 transition-transform" />
-                      <span className="text-sm leading-relaxed">
-                        <strong>House-sitting à Lyon</strong>. Des gardiens vérifiés dans chaque arrondissement, du Vieux Lyon à la Croix-Rousse, en passant par la Part-Dieu et Confluence.
-                      </span>
-                    </Link>
-                  </li>
-                  <li>
-                    <Link
-                      to="/house-sitting/annecy"
-                      className="group flex items-start gap-2 text-foreground hover:text-primary transition-colors"
-                    >
-                      <ArrowRight className="h-4 w-4 mt-1 shrink-0 text-primary/60 group-hover:translate-x-0.5 transition-transform" />
-                      <span className="text-sm leading-relaxed">
-                        <strong>House-sitting à Annecy</strong>. Lac, montagne, résidences secondaires en Haute-Savoie. Des gardiens locaux qui connaissent le gel, les accès et les vétos.
-                      </span>
-                    </Link>
-                  </li>
-                  <li>
-                    <Link
-                      to="/house-sitting/grenoble"
-                      className="group flex items-start gap-2 text-foreground hover:text-primary transition-colors"
-                    >
-                      <ArrowRight className="h-4 w-4 mt-1 shrink-0 text-primary/60 group-hover:translate-x-0.5 transition-transform" />
-                      <span className="text-sm leading-relaxed">
-                        <strong>House-sitting à Grenoble</strong>. Au pied du Vercors, de la Chartreuse et de Belledonne. Des gardiens qui connaissent la cuvette et les sentiers de la Bastille.
-                      </span>
-                    </Link>
-                  </li>
-                  <li>
-                    <Link
-                      to="/house-sitting/villeurbanne"
-                      className="group flex items-start gap-2 text-foreground hover:text-primary transition-colors"
-                    >
-                      <ArrowRight className="h-4 w-4 mt-1 shrink-0 text-primary/60 group-hover:translate-x-0.5 transition-transform" />
-                      <span className="text-sm leading-relaxed">
-                        <strong>House-sitting à Villeurbanne</strong>. Aux portes de Lyon, Gratte-Ciel, Charpennes, Cusset. Des gardiens qui circulent facilement entre les deux villes.
-                      </span>
-                    </Link>
-                  </li>
-                  <li>
-                    <Link
-                      to="/house-sitting/chambery"
-                      className="group flex items-start gap-2 text-foreground hover:text-primary transition-colors"
-                    >
-                      <ArrowRight className="h-4 w-4 mt-1 shrink-0 text-primary/60 group-hover:translate-x-0.5 transition-transform" />
-                      <span className="text-sm leading-relaxed">
-                        <strong>House-sitting à Chambéry</strong>. Capitale de la Savoie, entre lac du Bourget et massif des Bauges. Des gardiens à l'aise avec la montagne et l'hiver.
-                      </span>
-                    </Link>
-                  </li>
-                  <li>
-                    <Link
-                      to="/house-sitting/valence"
-                      className="group flex items-start gap-2 text-foreground hover:text-primary transition-colors"
-                    >
-                      <ArrowRight className="h-4 w-4 mt-1 shrink-0 text-primary/60 group-hover:translate-x-0.5 transition-transform" />
-                      <span className="text-sm leading-relaxed">
-                        <strong>House-sitting à Valence</strong>. Porte du sud, entre Rhône et Vercors. Des gardiens proches des trajets vacances et des résidences secondaires drômoises.
-                      </span>
-                    </Link>
-                  </li>
-                  <li>
-                    <Link
-                      to="/house-sitting/ecully"
-                      className="group flex items-start gap-2 text-foreground hover:text-primary transition-colors"
-                    >
-                      <ArrowRight className="h-4 w-4 mt-1 shrink-0 text-primary/60 group-hover:translate-x-0.5 transition-transform" />
-                      <span className="text-sm leading-relaxed">
-                        <strong>House-sitting à Écully</strong>. Ouest lyonnais résidentiel, maisons avec jardin et animaux. Des gardiens habitués aux propriétés calmes et familiales.
-                      </span>
-                    </Link>
-                  </li>
-                  <li>
-                    <Link
-                      to="/inscription"
-                      className="group flex items-start gap-2 text-foreground hover:text-primary transition-colors"
-                    >
-                      <ArrowRight className="h-4 w-4 mt-1 shrink-0 text-primary/60 group-hover:translate-x-0.5 transition-transform" />
-                      <span className="text-sm leading-relaxed">
-                        <strong>Partout en France</strong>. Du Pays basque à la Bretagne, en passant par les Alpes, la Provence et le Nord. Le réseau s'étend dans toutes les régions.
-                      </span>
-                    </Link>
-                  </li>
+                  {([
+                    { to: "/house-sitting/lyon", labelKey: "landing.guides_cities.cities.c1.label", descKey: "landing.guides_cities.cities.c1.desc" },
+                    { to: "/house-sitting/annecy", labelKey: "landing.guides_cities.cities.c2.label", descKey: "landing.guides_cities.cities.c2.desc" },
+                    { to: "/house-sitting/grenoble", labelKey: "landing.guides_cities.cities.c3.label", descKey: "landing.guides_cities.cities.c3.desc" },
+                    { to: "/house-sitting/villeurbanne", labelKey: "landing.guides_cities.cities.c4.label", descKey: "landing.guides_cities.cities.c4.desc" },
+                    { to: "/house-sitting/chambery", labelKey: "landing.guides_cities.cities.c5.label", descKey: "landing.guides_cities.cities.c5.desc" },
+                    { to: "/house-sitting/valence", labelKey: "landing.guides_cities.cities.c6.label", descKey: "landing.guides_cities.cities.c6.desc" },
+                    { to: "/house-sitting/ecully", labelKey: "landing.guides_cities.cities.c7.label", descKey: "landing.guides_cities.cities.c7.desc" },
+                    { to: "/inscription", labelKey: "landing.guides_cities.cities.c8.label", descKey: "landing.guides_cities.cities.c8.desc" },
+                  ] as const).map((e) => (
+                    <li key={e.to}>
+                      <Link
+                        to={e.to}
+                        className="group flex items-start gap-2 text-foreground hover:text-primary transition-colors"
+                      >
+                        <ArrowRight className="h-4 w-4 mt-1 shrink-0 text-primary/60 group-hover:translate-x-0.5 transition-transform" />
+                        <span className="text-sm leading-relaxed">
+                          <strong>{t(e.labelKey)}</strong>. {t(e.descKey)}
+                        </span>
+                      </Link>
+                    </li>
+                  ))}
                 </ul>
                 <div className="mt-6 pt-6 border-t border-border flex flex-col sm:flex-row gap-3 items-start">
                   <Button asChild variant="outline" size="sm" className="rounded-full">
-                    <Link to="/annonces">Voir toutes les annonces</Link>
+                    <Link to="/annonces">{t("landing.guides_cities.all_listings")}</Link>
                   </Button>
                   <p className="text-xs text-foreground/60 leading-relaxed flex-1">
                     {t("landing.cities.cities_footer")}
