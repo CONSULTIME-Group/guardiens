@@ -60,8 +60,8 @@ export default function MatchedHelpersInviteBlock({
     let cancelled = false;
     (async () => {
       const { data } = await supabase
-        .from("profiles")
-        .select("id, first_name, avatar_url, city, latitude, longitude, skill_categories, available_for_help")
+        .from("public_profiles")
+        .select("id, first_name, avatar_url, city, latitude_approx, longitude_approx, skill_categories, available_for_help")
         .eq("available_for_help", true)
         .contains("skill_categories", [skillKey])
         .neq("id", ownerId)
@@ -71,8 +71,8 @@ export default function MatchedHelpersInviteBlock({
 
       const enriched: Helper[] = data.map((h: any) => {
         let distance: number | null = null;
-        if (ownerLat != null && ownerLng != null && h.latitude != null && h.longitude != null) {
-          distance = haversineDistance(ownerLat, ownerLng, h.latitude, h.longitude);
+        if (ownerLat != null && ownerLng != null && h.latitude_approx != null && h.longitude_approx != null) {
+          distance = haversineDistance(ownerLat, ownerLng, h.latitude_approx, h.longitude_approx);
         }
         return { ...h, distance };
       });

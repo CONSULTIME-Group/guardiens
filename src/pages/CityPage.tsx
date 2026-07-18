@@ -126,7 +126,7 @@ const CityPage = () => {
     staleTime: 5 * 60 * 1000,
     queryFn: async () => {
       const { count, error } = await supabase
-        .from("profiles")
+        .from("public_profiles")
         .select("id", { count: "exact", head: true })
         .in("role", ["sitter", "both"])
         .ilike("city", `%${dbPage!.city}%`);

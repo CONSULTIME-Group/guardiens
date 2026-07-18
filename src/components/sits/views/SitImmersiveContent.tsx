@@ -152,7 +152,7 @@ const SitImmersiveContent = ({
     staleTime: 5 * 60 * 1000,
     queryFn: async () => {
       const { count: cityCount } = await supabase
-        .from("profiles")
+        .from("public_profiles")
         .select("id, sitter_profiles!inner(user_id)", { count: "exact", head: true })
         .ilike("city", cityName);
       const safeCityCount = cityCount ?? 0;
@@ -162,7 +162,7 @@ const SitImmersiveContent = ({
       }
 
       const { count: deptCount } = await supabase
-        .from("profiles")
+        .from("public_profiles")
         .select("id, postal_code, sitter_profiles!inner(user_id)", { count: "exact", head: true })
         .like("postal_code", `${deptCode}%`);
 

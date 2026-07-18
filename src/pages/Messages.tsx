@@ -179,7 +179,7 @@ const Messages = () => {
     const missingOwnerIds = ownerIdsForSits.filter((id: string) => !profilesMap.has(id));
     if (missingOwnerIds.length > 0) {
       const { data: ownerProfiles } = await supabase
-        .from("profiles").select("id, city").in("id", missingOwnerIds);
+        .from("public_profiles").select("id, city").in("id", missingOwnerIds);
       (ownerProfiles || []).forEach((p: any) => {
         if (!profilesMap.has(p.id)) profilesMap.set(p.id, p);
       });
