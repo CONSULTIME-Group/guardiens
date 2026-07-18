@@ -435,7 +435,7 @@ export function useSitterDashboardData(userId: string | undefined) {
       if (futureGuards.length > 0) {
         const g = futureGuards[0];
         const [ownerRes, petsRes] = await Promise.all([
-          supabase.from("profiles").select("first_name").eq("id", g.sit.user_id).single(),
+          supabase.from("public_profiles").select("first_name").eq("id", g.sit.user_id).single(),
           supabase.from("pets").select("species").eq("property_id", g.sit.property_id),
         ]);
         if (ownerRes.error || petsRes.error) {
