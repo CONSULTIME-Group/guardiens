@@ -19,7 +19,7 @@ export function useActiveSittersCount() {
     gcTime: 30 * 60 * 1000,
     queryFn: async () => {
       const { count, error } = await supabase
-        .from("profiles")
+        .from("public_profiles")
         .select("id", { count: "exact", head: true })
         .in("role", ["sitter", "both"]);
       if (error) throw error;
