@@ -88,8 +88,11 @@ const SitterDashboard = () => {
   });
   const {
     topSits,
+    fallbackSits,
     hasMinimumPool,
     hasPostalCode,
+    profileIncomplete,
+    scopeUsed,
     totalPublished,
     isLoading: nbaLoading,
   } = useSitterTopAffinitySits();
