@@ -458,7 +458,7 @@ const OwnerDashboard = () => {
       <header className="px-5 md:px-8 pt-2 animate-fade-in">
         <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
           <div className="min-w-0">
-            <p className="hidden md:block font-heading italic text-sm text-accent mb-1.5">
+            <p className="hidden md:block font-heading italic text-sm text-muted-foreground mb-1.5">
               Espace propriétaire
             </p>
             <div className="flex items-center gap-3 flex-wrap">
@@ -792,7 +792,7 @@ const OwnerDashboard = () => {
             to="/mon-abonnement#parrainage"
             className="block rounded-2xl border border-border bg-gradient-to-br from-accent/10 to-background p-4 hover:border-primary/40 transition-colors group"
           >
-            <p className="text-[10px] uppercase tracking-[2px] text-accent font-sans font-semibold mb-1">
+            <p className="text-[10px] uppercase tracking-[2px] text-muted-foreground font-sans font-semibold mb-1">
               Parrainage
             </p>
             <p className="text-sm font-heading font-semibold text-foreground leading-snug">

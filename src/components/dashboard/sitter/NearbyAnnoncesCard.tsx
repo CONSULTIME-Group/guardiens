@@ -53,7 +53,7 @@ const NearbyAnnoncesCard = ({ nearbyListings, nearbyError = null, nearbyListings
   <section aria-labelledby={hideHeader ? undefined : "nearby-annonces-heading"} className="space-y-5">
     {!hideHeader && (
       <div className="flex flex-col">
-        <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-accent mb-1.5">
+        <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-muted-foreground mb-1.5">
           Annonces
         </p>
         <div className="flex items-end justify-between gap-3">
