@@ -469,62 +469,61 @@ const SitterDashboard = () => {
           → Activation → Opportunités → Profil (accordéon). */}
       <div className="min-w-0">
         {isNewSitter ? (
-          <div className="lg:grid lg:grid-cols-12 lg:gap-6 lg:px-2">
-            <div className="lg:col-span-8 lg:min-w-0">
+          <div className="lg:grid lg:grid-cols-12 lg:gap-x-6 lg:auto-rows-min">
             {/* ═══ New-user path : NBA affinité dominante, pas de cockpit/KPI vides ═══ */}
-            {nbaLoading ? (
-              <SitterFirstNBASkeleton />
-            ) : hasMinimumPool && hasPostalCode ? (
-              <SitterFirstNBA sits={topSits} />
-            ) : fallbackSits.length > 0 && hasPostalCode && !profileIncomplete ? (
-              <SitterFirstNBA
-                sits={fallbackSits}
-                mode="fallback"
-                scopeLabel={
-                  scopeUsed === "dept"
-                    ? "dans votre département"
-                    : scopeUsed === "region"
-                      ? "dans votre région"
-                      : "sur Guardiens"
-                }
-              />
-            ) : (
-              <NoNearbySitsEmptyState
-                totalPublishedSits={totalPublished}
-                postalCode={postalCode}
-                variant={profileIncomplete ? "profile_incomplete" : "no_nearby"}
-              />
-            )}
+            <div className="lg:col-span-8 lg:col-start-1 lg:min-w-0">
+              {nbaLoading ? (
+                <SitterFirstNBASkeleton />
+              ) : hasMinimumPool && hasPostalCode ? (
+                <SitterFirstNBA sits={topSits} />
+              ) : fallbackSits.length > 0 && hasPostalCode && !profileIncomplete ? (
+                <SitterFirstNBA
+                  sits={fallbackSits}
+                  mode="fallback"
+                  scopeLabel={
+                    scopeUsed === "dept"
+                      ? "dans votre département"
+                      : scopeUsed === "region"
+                        ? "dans votre région"
+                        : "sur Guardiens"
+                  }
+                />
+              ) : (
+                <NoNearbySitsEmptyState
+                  totalPublishedSits={totalPublished}
+                  postalCode={postalCode}
+                  variant={profileIncomplete ? "profile_incomplete" : "no_nearby"}
+                />
+              )}
+            </div>
+
+            {/* Pouls de la communauté : chiffres réels et vivants. */}
+            <div className="px-4 sm:px-5 md:px-8 mt-4 lg:mt-0 lg:col-span-4 lg:col-start-9 lg:row-start-1 lg:px-0 lg:sticky lg:top-24 lg:self-start">
+              <CommunityPulseBanner userId={user?.id} />
+            </div>
 
             {/* Bannière accès (garde le contexte tarif/onboarding) */}
-            <div className="px-4 sm:px-5 md:px-8 mt-4">
+            <div className="px-4 sm:px-5 md:px-8 mt-4 lg:col-span-8 lg:col-start-1 lg:px-0">
               {!(level === 4 || level === "3B")
                 ? <AccessGateBanner level={level} profileCompletion={accessProfileCompletion} context="guard" />
                 : <FreePeriodBanner />}
             </div>
 
-            <div className="mt-6">
+            <div className="mt-6 lg:col-span-8 lg:col-start-1">
               {ChecklistBlock}
             </div>
-            <div className="px-4 sm:px-5 md:px-8 mt-4">
+            <div className="px-4 sm:px-5 md:px-8 mt-4 lg:col-span-8 lg:col-start-1 lg:px-0">
               <NearbyHelpersCarousel hideHeader />
             </div>
-            <div className="px-4 sm:px-5 md:px-8 mt-6">
+            <div className="px-4 sm:px-5 md:px-8 mt-6 lg:col-span-8 lg:col-start-1 lg:px-0">
               {ConseilsDiscoveryCard}
             </div>
+            <div className="px-4 sm:px-5 md:px-8 mt-4 lg:col-span-4 lg:col-start-9 lg:px-0">
+              <EmailDigestCard />
             </div>
-
-            <aside className="lg:col-span-4 lg:sticky lg:top-20 lg:self-start lg:max-h-[calc(100vh-6rem)] lg:overflow-y-auto lg:pr-1 space-y-4 mt-4 lg:mt-0" aria-label="Rail latéral gardien">
-              <div className="px-4 sm:px-5 md:px-8 lg:px-0">
-                <CommunityPulseBanner userId={user?.id} />
-              </div>
-              <div className="px-4 sm:px-5 md:px-8 lg:px-0">
-                <EmailDigestCard />
-              </div>
-              <div className="px-4 sm:px-5 md:px-8 lg:px-0 mb-6">
-                {buildSecondaryAccordion()}
-              </div>
-            </aside>
+            <div className="px-4 sm:px-5 md:px-8 mb-6 lg:col-span-4 lg:col-start-9 lg:px-0">
+              {buildSecondaryAccordion()}
+            </div>
           </div>
         ) : (
           <>
