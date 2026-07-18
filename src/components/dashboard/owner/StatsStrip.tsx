@@ -116,7 +116,7 @@ const StatsStrip = memo(({ items }: StatsStripProps) => {
               key={idx}
               to={item.to}
               className="group block transition-colors duration-200 hover:bg-muted/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset"
-              aria-label={`${item.label}${item.value !== null ? ` : ${item.value}` : ""}`}
+              aria-label={`${item.label}${isEmpty ? ` : ${zeroState.phrase}` : item.value !== null ? ` : ${item.value}` : ""}`}
             >
               {inner(true)}
             </Link>
