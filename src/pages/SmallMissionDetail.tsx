@@ -395,9 +395,19 @@ const SmallMissionDetail = () => {
       } else {
         // Optimistic UI : afficher la nouvelle réponse tout de suite en tête de liste
         if (inserted) {
+          // Hydratation RLS-safe du responder pour la ligne insérée.
+          const { data: meProf } = await supabase
+            .from("public_profiles")
+            .select("id, first_name, avatar_url")
+            .eq("id", user.id)
+            .maybeSingle();
+          const insertedRow: any = {
+            ...(inserted as any),
+            responder: meProf ? { first_name: (meProf as any).first_name, avatar_url: (meProf as any).avatar_url } : null,
+          };
           setResponses((prev) => {
-            if (prev.some((r) => r.id === (inserted as any).id)) return prev;
-            return [inserted as any, ...prev];
+            if (prev.some((r) => r.id === insertedRow.id)) return prev;
+            return [insertedRow, ...prev];
           });
         }
         setHasResponded(true);
