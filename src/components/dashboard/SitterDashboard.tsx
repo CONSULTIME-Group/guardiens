@@ -469,7 +469,8 @@ const SitterDashboard = () => {
           → Activation → Opportunités → Profil (accordéon). */}
       <div className="min-w-0">
         {isNewSitter ? (
-          <>
+          <div className="lg:grid lg:grid-cols-12 lg:gap-6 lg:px-2">
+            <div className="lg:col-span-8 lg:min-w-0">
             {/* ═══ New-user path : NBA affinité dominante, pas de cockpit/KPI vides ═══ */}
             {nbaLoading ? (
               <SitterFirstNBASkeleton />
@@ -495,11 +496,6 @@ const SitterDashboard = () => {
               />
             )}
 
-            {/* Pouls de la communauté : chiffres réels et vivants. */}
-            <div className="px-4 sm:px-5 md:px-8 mt-4">
-              <CommunityPulseBanner userId={user?.id} />
-            </div>
-
             {/* Bannière accès (garde le contexte tarif/onboarding) */}
             <div className="px-4 sm:px-5 md:px-8 mt-4">
               {!(level === 4 || level === "3B")
@@ -516,14 +512,20 @@ const SitterDashboard = () => {
             <div className="px-4 sm:px-5 md:px-8 mt-6">
               {ConseilsDiscoveryCard}
             </div>
-            <div className="px-4 sm:px-5 md:px-8 mt-4">
-              <EmailDigestCard />
-            </div>
-            <div className="px-4 sm:px-5 md:px-8 mb-6">
-              {buildSecondaryAccordion()}
             </div>
 
-          </>
+            <aside className="lg:col-span-4 lg:sticky lg:top-20 lg:self-start lg:max-h-[calc(100vh-6rem)] lg:overflow-y-auto lg:pr-1 space-y-4 mt-4 lg:mt-0" aria-label="Rail latéral gardien">
+              <div className="px-4 sm:px-5 md:px-8 lg:px-0">
+                <CommunityPulseBanner userId={user?.id} />
+              </div>
+              <div className="px-4 sm:px-5 md:px-8 lg:px-0">
+                <EmailDigestCard />
+              </div>
+              <div className="px-4 sm:px-5 md:px-8 lg:px-0 mb-6">
+                {buildSecondaryAccordion()}
+              </div>
+            </aside>
+          </div>
         ) : (
           <>
             {/* COCKPIT */}
