@@ -20,9 +20,10 @@ interface MonAnnonceCardProps {
   propertyEnvironment: string | null;
   pendingAppCount: number;
   coverPhoto?: string | null;
+  suppressPublishPrompt?: boolean;
 }
 
-const MonAnnonceCard = memo(({ sits, pets, propertyType, propertyEnvironment, pendingAppCount, coverPhoto }: MonAnnonceCardProps) => {
+const MonAnnonceCard = memo(({ sits, pets, propertyType, propertyEnvironment, pendingAppCount, coverPhoto, suppressPublishPrompt }: MonAnnonceCardProps) => {
   const navigate = useNavigate();
   const now = new Date();
 
