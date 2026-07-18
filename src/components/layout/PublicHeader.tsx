@@ -20,13 +20,13 @@ export default function PublicHeader({ authedVariant = false }: { authedVariant?
   const navigate = useNavigate();
   const location = useLocation();
   const { t } = useTranslation();
-  const { isAuthenticated, loading } = useAuth();
+  const { hasSession, authChecked } = useAuth();
   const [open, setOpen] = useState(false);
 
   // Utilisateur connecté : l'en-tête public est masqué par défaut, la coquille
   // authentifiée (AppLayout) fournit déjà la navigation. En mode authedVariant,
   // on affiche quand même la barre (cas Landing hors AppLayout).
-  if (isAuthenticated && !authedVariant) return null;
+  if (hasSession && !authedVariant) return null;
 
   const isActive = (path: string) => location.pathname === path || location.pathname.startsWith(path + "/");
 
@@ -57,9 +57,9 @@ export default function PublicHeader({ authedVariant = false }: { authedVariant?
               )}
             </Button>
           ))}
-          {loading ? (
+          {!authChecked ? (
             <div className="h-8 w-40 rounded-md bg-muted/40 animate-pulse" aria-hidden="true" />
-          ) : isAuthenticated ? (
+          ) : hasSession ? (
             <Button size="sm" onClick={() => navigate("/dashboard")}>
               Mon espace
             </Button>
