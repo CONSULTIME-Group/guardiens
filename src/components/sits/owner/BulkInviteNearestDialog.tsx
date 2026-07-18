@@ -103,7 +103,7 @@ const BulkInviteNearestDialog = ({
     (async () => {
       const excluded = new Set(alreadyInvitedIds);
       const { data } = await supabase
-        .from("profiles")
+        .from("public_profiles")
         .select(
           "id, first_name, avatar_url, city, sitter_profiles!inner(is_available)",
         )

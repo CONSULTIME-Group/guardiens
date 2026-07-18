@@ -86,7 +86,7 @@ const PostPublishRecapDialog = ({
 
       // 2) Total gardiens actifs en France
       const totalRes = await supabase
-        .from("profiles")
+        .from("public_profiles")
         .select("id", { count: "exact", head: true })
         .eq("role", "sitter")
         .neq("id", ownerId);
@@ -95,7 +95,7 @@ const PostPublishRecapDialog = ({
       let deptRes: { count: number | null } = { count: 0 };
       if (deptCode) {
         const r = await supabase
-          .from("profiles")
+          .from("public_profiles")
           .select("id", { count: "exact", head: true })
           .eq("role", "sitter")
           .neq("id", ownerId)

@@ -27,7 +27,7 @@ const CitySittersGrid = ({ city, citySlug }: Props) => {
     queryKey: ["city-sitters-grid", city],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("profiles")
+        .from("public_profiles")
         .select("id, first_name, avatar_url, city, role")
         .in("role", ["sitter", "both"])
         .ilike("city", `%${city}%`)

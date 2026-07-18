@@ -109,7 +109,7 @@ const InviteSittersBlock = ({
     }
     (async () => {
       const { data } = await supabase
-        .from("profiles")
+        .from("public_profiles")
         .select("id, first_name, avatar_url, city, bio")
         .in("id", favoriteIds)
         .eq("role", "sitter");
@@ -169,7 +169,7 @@ const InviteSittersBlock = ({
         : "id, first_name, avatar_url, city, bio, postal_code, identity_verified, completed_sits_count";
 
       let req = supabase
-        .from("profiles")
+        .from("public_profiles")
         .select(selectCols)
         .eq("role", "sitter")
         .neq("id", ownerId);

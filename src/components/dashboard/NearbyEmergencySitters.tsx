@@ -44,7 +44,7 @@ const NearbyEmergencySitters = ({ hideHeader = false }: { hideHeader?: boolean }
       }
 
       const [profilesRes, reviewsRes, sitterRes] = await Promise.all([
-        supabase.from("profiles").select("id, first_name, avatar_url, city, custom_skills").in("id", userIds),
+        supabase.from("public_profiles").select("id, first_name, avatar_url, city, custom_skills").in("id", userIds),
         supabase.from("reviews").select("reviewee_id, overall_rating").in("reviewee_id", userIds).eq("published", true),
         supabase.from("sitter_profiles").select("user_id, competences").in("user_id", userIds),
       ]);
