@@ -328,6 +328,52 @@
         "title": "Travelling this autumn?",
         "description": "All Saints break, weekend escapes, work trips: a trusted sitter near you watches over your home and pets while you are away."
       }
+    },
+    "what_is": {
+      "title": "What is Guardiens?",
+      "body": "Guardiens is a French house-sitting and mutual aid platform between individuals. The idea: a verified sitter who lives near you moves into your home while you are away and looks after your pets in their own environment. The exchange is built on trust and a real meeting, at no cost for the owner. Guardiens covers all of France."
+    },
+    "compare": {
+      "title": "House-sitting, boarding, pet-sitter: which to choose?",
+      "intro": "Four options to have your pets cared for while you are away. A factual, judgement-free comparison.",
+      "caption": "Comparison between Guardiens house-sitting, boarding, in-home pet-sitting and care by a relative.",
+      "columns": {
+        "solution": "Solution",
+        "pet_home": "Pet stays at home",
+        "house_lived": "Home is occupied",
+        "cost": "Cost for the owner",
+        "human": "Human connection"
+      },
+      "rows": {
+        "guardiens": {
+          "label": "Guardiens house-sitting",
+          "pet_home": "Yes",
+          "house_lived": "Yes, at all times",
+          "cost": "No fees between members",
+          "human": "Prior meeting and mutual reviews"
+        },
+        "pension": {
+          "label": "Boarding kennel",
+          "pet_home": "No, the pet is moved",
+          "house_lived": "Not applicable",
+          "cost": "Paid, daily rate",
+          "human": "Professional team on site"
+        },
+        "petsitter": {
+          "label": "In-home pet-sitter",
+          "pet_home": "Yes",
+          "house_lived": "No, occasional visits",
+          "cost": "Paid, per visit",
+          "human": "Professional relationship"
+        },
+        "relative": {
+          "label": "Care by a relative",
+          "pet_home": "Varies",
+          "house_lived": "Varies",
+          "cost": "Usually no fees",
+          "human": "Family or friendly relationship"
+        }
+      }
     }
   },
   "faq": {
