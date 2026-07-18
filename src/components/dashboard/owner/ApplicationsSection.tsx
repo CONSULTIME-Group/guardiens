@@ -290,7 +290,7 @@ const ApplicationsSection = memo(({ recentApps, sitterProfiles, sitterBadges, si
             </AccordionTrigger>
             <AccordionContent className="px-4 pb-4">
               <div className="space-y-3">
-                {read.map(a => <AppCard key={a.id} app={a} sitterProfiles={sitterProfiles} sitterAffinityProfiles={sitterAffinityProfiles} />)}
+                {read.map((a, i) => <AppCard key={a.id} app={a} sitterProfiles={sitterProfiles} sitterAffinityProfiles={sitterAffinityProfiles} featured={unread.length === 0 && i === 0} />)}
               </div>
             </AccordionContent>
           </AccordionItem>
