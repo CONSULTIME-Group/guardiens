@@ -68,7 +68,7 @@ const StatsStrip = memo(({ items }: StatsStripProps) => {
             : "text-foreground";
 
         const inner = (clickable: boolean) => (
-          <div className="px-4 py-3 text-center md:text-left">
+          <div className="min-w-0 overflow-hidden px-4 py-3 text-center md:text-left">
             {!isEmpty ? (
               <p
                 className={`text-xl md:text-2xl font-heading font-bold leading-none whitespace-nowrap transition-transform duration-200 ease-out ${valueColor} ${clickable ? "group-hover:-translate-y-0.5" : ""}`}
@@ -78,7 +78,7 @@ const StatsStrip = memo(({ items }: StatsStripProps) => {
             ) : (
               <>
                 <p
-                  className={`text-xl md:text-2xl font-heading font-bold leading-none whitespace-nowrap text-accent ${clickable ? "group-hover:-translate-y-0.5 transition-transform duration-200 ease-out" : ""}`}
+                  className={`text-lg md:text-xl font-heading font-bold leading-tight break-words text-accent ${clickable ? "group-hover:-translate-y-0.5 transition-transform duration-200 ease-out" : ""}`}
                 >
                   {zeroState.phrase}
                 </p>
@@ -115,14 +115,14 @@ const StatsStrip = memo(({ items }: StatsStripProps) => {
             <Link
               key={idx}
               to={item.to}
-              className="group block transition-colors duration-200 hover:bg-muted/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset"
+              className="group block min-w-0 overflow-hidden transition-colors duration-200 hover:bg-muted/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset"
               aria-label={`${item.label}${isEmpty ? ` : ${zeroState.phrase}` : item.value !== null ? ` : ${item.value}` : ""}`}
             >
               {inner(true)}
             </Link>
           );
         }
-        return <div key={idx}>{inner(false)}</div>;
+        return <div key={idx} className="min-w-0 overflow-hidden">{inner(false)}</div>;
       })}
       </section>
     </TooltipProvider>
