@@ -288,14 +288,31 @@ const SmallMissionDetail = () => {
     }
     setRelatedMissions(ranked.slice(0, 3));
 
-    setResponses(respsRes.data || []);
+    // Hydratation RLS-safe des responders et givers via la vue publique.
+    const respRows = ((respsRes.data as any[]) ?? []).slice();
+    const recFbRows = ((recFbRes.data as any[]) ?? []).slice();
+    const hydrateIds = Array.from(new Set([
+      ...respRows.map((r: any) => r.responder_id).filter(Boolean),
+      ...recFbRows.map((f: any) => f.giver_id).filter(Boolean),
+    ])) as string[];
+    if (hydrateIds.length > 0) {
+      const { data: hProfs } = await supabase
+        .from("public_profiles")
+        .select("id, first_name, avatar_url")
+        .in("id", hydrateIds);
+      const hMap = new Map<string, any>();
+      (hProfs ?? []).forEach((p: any) => hMap.set(p.id, { first_name: p.first_name, avatar_url: p.avatar_url }));
+      respRows.forEach((r: any) => { r.responder = r.responder_id ? hMap.get(r.responder_id) ?? null : null; });
+      recFbRows.forEach((f: any) => { f.giver = f.giver_id ? hMap.get(f.giver_id) ?? null : null; });
+    }
+    setResponses(respRows);
 
     if (user) {
-      setHasResponded(!!(respsRes.data?.some((r: any) => r.responder_id === user.id)));
+      setHasResponded(!!(respRows.some((r: any) => r.responder_id === user.id)));
       const sentMap: Record<string, boolean> = {};
       (givenFbRes.data as any[])?.forEach((f: any) => { sentMap[f.receiver_id] = true; });
       setFeedbackSent(sentMap);
-      setReceivedFeedbacks((recFbRes.data as any[]) || []);
+      setReceivedFeedbacks(recFbRows);
     }
 
     setLoading(false);
