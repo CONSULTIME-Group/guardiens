@@ -34,7 +34,7 @@ export function useHelpersProximityCount(currentUserId: string | undefined) {
     queryFn: async () => {
       // 1. Total national (exact, via head: true)
       const { count: nationalCount } = await supabase
-        .from("profiles")
+        .from("public_profiles")
         .select("id", { count: "exact", head: true })
         .eq("available_for_help", true)
         .not("skill_categories", "eq", "{}");
@@ -54,12 +54,12 @@ export function useHelpersProximityCount(currentUserId: string | undefined) {
 
         if (hasGeo) {
           const { data: pool } = await supabase
-            .from("profiles")
-            .select("id, latitude, longitude")
+            .from("public_profiles")
+            .select("id, latitude_approx, longitude_approx")
             .eq("available_for_help", true)
             .not("skill_categories", "eq", "{}")
-            .not("latitude", "is", null)
-            .not("longitude", "is", null)
+            .not("latitude_approx", "is", null)
+            .not("longitude_approx", "is", null)
             .neq("id", currentUserId)
             .limit(500);
 
@@ -67,7 +67,7 @@ export function useHelpersProximityCount(currentUserId: string | undefined) {
             localCount = pool.filter((p: any) => {
               const d = haversineDistance(
                 { lat: me!.latitude as number, lng: me!.longitude as number },
-                { lat: p.latitude, lng: p.longitude },
+                { lat: p.latitude_approx, lng: p.longitude_approx },
               );
               return d <= LOCAL_RADIUS_KM;
             }).length;
