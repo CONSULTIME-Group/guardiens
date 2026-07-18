@@ -89,7 +89,7 @@ const RealMembersStrip = () => {
       )}
       <p className="font-body text-sm text-foreground/70 text-center max-w-xl">
         <span className="font-semibold text-foreground">
-          Plus de {roundedTotal} membres
+          Plus de {memberCount} membres
         </span>{" "}
         ont déjà rejoint le réseau, partout en France, de Valence à Quimper, de
         Paris à Sète.
