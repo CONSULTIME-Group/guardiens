@@ -470,6 +470,13 @@ const SitterDashboard = () => {
       <div className="min-w-0">
         {isNewSitter ? (
           <div className="lg:grid lg:grid-cols-12 lg:gap-x-6 lg:auto-rows-min lg:grid-flow-dense">
+            {/* ═══ New-user path : completion-first quand le profil est incomplet ═══ */}
+            {!allChecklistDone && (
+              <div className="lg:col-span-8 lg:col-start-1">
+                {ChecklistBlock}
+              </div>
+            )}
+
             {/* ═══ New-user path : NBA affinité dominante, pas de cockpit/KPI vides ═══ */}
             <div className="lg:col-span-8 lg:col-start-1 lg:min-w-0">
               {nbaLoading ? (
