@@ -70,9 +70,29 @@ export function useEmptyStateBreakdown({
         setCrossTabCount(otherTabRes.count ?? 0);
         setLaunchModeCount((sitsAllRes.count ?? 0) + (missionsAllRes.count ?? 0));
 
+        // Hydratation RLS-safe des propriétaires côté "sits" : la requête ne
+        // retourne que des user_id, on charge les postal_code via la vue publique.
+        const breakdownRows = ((breakdownRes.data || []) as any[]).slice();
+        if (tab === "sits") {
+          const ownerIds = Array.from(new Set(
+            breakdownRows.map((r: any) => r.user_id).filter(Boolean),
+          )) as string[];
+          if (ownerIds.length > 0) {
+            const { data: ownerProfs } = await supabase
+              .from("public_profiles")
+              .select("id, postal_code")
+              .in("id", ownerIds);
+            const ownerMap = new Map<string, any>();
+            (ownerProfs ?? []).forEach((p: any) => ownerMap.set(p.id, { postal_code: p.postal_code }));
+            breakdownRows.forEach((r: any) => {
+              r.owner = r.user_id ? ownerMap.get(r.user_id) ?? null : null;
+            });
+          }
+        }
+
         const deptAgg = new Map<string, number>();
         const regionAgg = new Map<string, number>();
-        for (const row of (breakdownRes.data || []) as any[]) {
+        for (const row of breakdownRows) {
           const cp = row?.postal_code || row?.owner?.postal_code || null;
           const dept = getDeptCode(cp);
           if (!dept) continue;
