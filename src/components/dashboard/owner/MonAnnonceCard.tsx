@@ -20,9 +20,10 @@ interface MonAnnonceCardProps {
   propertyEnvironment: string | null;
   pendingAppCount: number;
   coverPhoto?: string | null;
+  suppressPublishPrompt?: boolean;
 }
 
-const MonAnnonceCard = memo(({ sits, pets, propertyType, propertyEnvironment, pendingAppCount, coverPhoto }: MonAnnonceCardProps) => {
+const MonAnnonceCard = memo(({ sits, pets, propertyType, propertyEnvironment, pendingAppCount, coverPhoto, suppressPublishPrompt }: MonAnnonceCardProps) => {
   const navigate = useNavigate();
   const now = new Date();
 
@@ -103,6 +104,7 @@ const MonAnnonceCard = memo(({ sits, pets, propertyType, propertyEnvironment, pe
 
   // No sit ever but profile data exists → ready to publish
   if (!currentSit) {
+    if (suppressPublishPrompt) return null;
     return (
       <div className="bg-card border-2 border-dashed border-primary/30 rounded-2xl p-5 space-y-4">
         <div className="flex items-center justify-between">

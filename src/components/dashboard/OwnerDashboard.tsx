@@ -646,6 +646,7 @@ const OwnerDashboard = () => {
             propertyEnvironment={propertyEnvironment}
             pendingAppCount={pendingAppCount}
             coverPhoto={propertyCoverPhoto}
+            suppressPublishPrompt={showAlmaProactive || hasPrimaryAction}
           />
 
           {showAlmaProactive && <OwnerFirstNBAGardiens />}
