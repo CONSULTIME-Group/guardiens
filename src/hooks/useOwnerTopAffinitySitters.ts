@@ -52,10 +52,9 @@ export function useOwnerTopAffinitySitters(): Result {
 
       // 2. Pool sitters vérifiés
       const { data: pool } = await supabase
-        .from("profiles")
-        .select("id, first_name, avatar_url, city, latitude, longitude, identity_verified, profile_completion, role, account_status")
+        .from("public_profiles")
+        .select("id, first_name, avatar_url, city, latitude_approx, longitude_approx, identity_verified, profile_completion, role")
         .in("role", ["sitter", "both"])
-        .eq("account_status", "active")
         .eq("identity_verified", true)
         .gte("profile_completion", 60)
         .neq("id", userId!)
