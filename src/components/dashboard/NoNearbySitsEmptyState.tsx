@@ -223,21 +223,23 @@ const NoNearbySitsEmptyState = ({
           </div>
         </div>
 
-        <div className="mt-4">
-          {alertActive ? (
-            <div className="rounded-xl border border-border bg-muted/40 px-4 py-3 text-sm text-foreground">
-              Alerte déjà configurée. Vous êtes prévenu par email dès qu'une annonce
-              est publiée dans votre rayon.{" "}
-              <Link to="/settings#alerts" className="text-primary underline-offset-4 hover:underline">
-                Modifier le rayon
-              </Link>
-            </div>
-          ) : (
-            <Button variant="outline" onClick={subscribe} disabled={saving || alertActive === null}>
-              M'alerter dès qu'une annonce est publiée près de chez moi
-            </Button>
-          )}
-        </div>
+        {variant !== "profile_incomplete" && (
+          <div className="mt-4">
+            {alertActive ? (
+              <div className="rounded-xl border border-border bg-muted/40 px-4 py-3 text-sm text-foreground">
+                Alerte déjà configurée. Vous êtes prévenu par email dès qu'une annonce
+                est publiée dans votre rayon.{" "}
+                <Link to="/settings#alerts" className="text-primary underline-offset-4 hover:underline">
+                  Modifier le rayon
+                </Link>
+              </div>
+            ) : (
+              <Button variant="outline" onClick={subscribe} disabled={saving || alertActive === null}>
+                M'alerter dès qu'une annonce est publiée près de chez moi
+              </Button>
+            )}
+          </div>
+        )}
       </div>
 
       <div className="mt-6">
