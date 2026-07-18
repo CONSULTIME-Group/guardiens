@@ -516,9 +516,6 @@ const SitterDashboard = () => {
                 : <FreePeriodBanner />}
             </div>
 
-            <div className="mt-6 lg:col-span-8 lg:col-start-1">
-              {ChecklistBlock}
-            </div>
             <div className="px-4 sm:px-5 md:px-8 mt-4 lg:col-span-8 lg:col-start-1 lg:px-0">
               <NearbyHelpersCarousel hideHeader />
             </div>
