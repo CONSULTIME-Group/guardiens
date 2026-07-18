@@ -374,6 +374,69 @@
           "human": "Family or friendly relationship"
         }
       }
+    },
+    "guides_cities": {
+      "all_listings": "See all listings",
+      "guides": {
+        "g1": {
+          "label": "Leaving with a pet: the guide to 8 situations in 2026"
+        },
+        "g2": {
+          "label": "Long holidays: having your pet looked after for 2 weeks or more"
+        },
+        "g3": {
+          "label": "Alternatives to dog boarding: 5 solutions to leave with peace of mind"
+        },
+        "g4": {
+          "label": "Pet sitting in Savoie: the complete guide"
+        },
+        "g5": {
+          "label": "Pet sitting in Haute-Savoie: the complete guide"
+        },
+        "g6": {
+          "label": "Dog and cat sitting in Croix-Rousse: neighbourhood specifics"
+        },
+        "g7": {
+          "label": "French expats: having your home in France looked after during your absence"
+        },
+        "g8": {
+          "label": "Expats: having your home abroad (Bali, Lisbon, Marrakech...) looked after by a French sitter"
+        }
+      },
+      "cities": {
+        "c1": {
+          "label": "House-sitting in Lyon",
+          "desc": "Verified sitters in every district, from Vieux Lyon to Croix-Rousse, including Part-Dieu and Confluence."
+        },
+        "c2": {
+          "label": "House-sitting in Annecy",
+          "desc": "Lake, mountains, second homes in Haute-Savoie. Local sitters familiar with the frost, access roads and vets."
+        },
+        "c3": {
+          "label": "House-sitting in Grenoble",
+          "desc": "At the foot of Vercors, Chartreuse and Belledonne. Sitters familiar with the valley and Bastille trails."
+        },
+        "c4": {
+          "label": "House-sitting in Villeurbanne",
+          "desc": "At the gates of Lyon, Gratte-Ciel, Charpennes, Cusset. Sitters who move easily between the two cities."
+        },
+        "c5": {
+          "label": "House-sitting in Chambéry",
+          "desc": "Capital of Savoie, between Lake Bourget and the Bauges massif. Sitters at ease with mountains and winter."
+        },
+        "c6": {
+          "label": "House-sitting in Valence",
+          "desc": "Gateway to the south, between Rhône and Vercors. Sitters close to holiday routes and second homes in the Drôme."
+        },
+        "c7": {
+          "label": "House-sitting in Écully",
+          "desc": "Residential western Lyon, houses with gardens and pets. Sitters used to quiet, family properties."
+        },
+        "c8": {
+          "label": "Everywhere in France",
+          "desc": "From the Basque Country to Brittany, via the Alps, Provence and the North. The network extends across all regions."
+        }
+      }
     }
   },
   "faq": {

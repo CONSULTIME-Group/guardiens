@@ -374,6 +374,69 @@
           "human": "Familiäre oder freundschaftliche Beziehung"
         }
       }
+    },
+    "guides_cities": {
+      "all_listings": "Alle Anzeigen ansehen",
+      "guides": {
+        "g1": {
+          "label": "Mit einem Tier verreisen: der Leitfaden zu 8 Situationen im Jahr 2026"
+        },
+        "g2": {
+          "label": "Lange Ferien: das Haustier für 2 Wochen oder länger betreuen lassen"
+        },
+        "g3": {
+          "label": "Alternativen zur Hundepension: 5 Lösungen für eine entspannte Abreise"
+        },
+        "g4": {
+          "label": "Tierbetreuung im Savoyen: der komplette Leitfaden"
+        },
+        "g5": {
+          "label": "Tierbetreuung im Hochsavoyen: der komplette Leitfaden"
+        },
+        "g6": {
+          "label": "Hunde- und Katzenbetreuung in Croix-Rousse: Besonderheiten des Viertels"
+        },
+        "g7": {
+          "label": "Auslandsfranzosen: das Zuhause in Frankreich während der Abwesenheit betreuen lassen"
+        },
+        "g8": {
+          "label": "Expats: das Zuhause im Ausland (Bali, Lissabon, Marrakesch...) von einem Franzosen betreuen lassen"
+        }
+      },
+      "cities": {
+        "c1": {
+          "label": "House-Sitting in Lyon",
+          "desc": "Verifizierte Betreuer in jedem Arrondissement, vom Vieux Lyon bis zur Croix-Rousse, über Part-Dieu und Confluence."
+        },
+        "c2": {
+          "label": "House-Sitting in Annecy",
+          "desc": "See, Berge, Zweitwohnsitze in Hochsavoyen. Lokale Betreuer, die Frost, Zufahrten und Tierärzte kennen."
+        },
+        "c3": {
+          "label": "House-Sitting in Grenoble",
+          "desc": "Am Fuße des Vercors, der Chartreuse und des Belledonne. Betreuer, die den Talkessel und die Wege der Bastille kennen."
+        },
+        "c4": {
+          "label": "House-Sitting in Villeurbanne",
+          "desc": "Vor den Toren Lyons, Gratte-Ciel, Charpennes, Cusset. Betreuer, die sich mühelos zwischen beiden Städten bewegen."
+        },
+        "c5": {
+          "label": "House-Sitting in Chambéry",
+          "desc": "Hauptstadt von Savoyen, zwischen Bourget-See und Bauges-Massiv. Betreuer, die mit Bergen und Winter vertraut sind."
+        },
+        "c6": {
+          "label": "House-Sitting in Valence",
+          "desc": "Tor zum Süden, zwischen Rhône und Vercors. Betreuer nahe an Ferienrouten und Zweitwohnsitzen in der Drôme."
+        },
+        "c7": {
+          "label": "House-Sitting in Écully",
+          "desc": "Wohnliches westliches Lyon, Häuser mit Garten und Tieren. Betreuer, die ruhige Familienanwesen gewohnt sind."
+        },
+        "c8": {
+          "label": "Überall in Frankreich",
+          "desc": "Vom Baskenland bis in die Bretagne, über die Alpen, die Provence und den Norden. Das Netzwerk erstreckt sich über alle Regionen."
+        }
+      }
     }
   },
   "faq": {

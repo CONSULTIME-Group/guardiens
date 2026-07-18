@@ -375,6 +375,69 @@
           "human": "Relation familiale ou amicale"
         }
       }
+    },
+    "guides_cities": {
+      "all_listings": "Voir toutes les annonces",
+      "guides": {
+        "g1": {
+          "label": "S'absenter avec un animal : le guide des 8 situations en 2026"
+        },
+        "g2": {
+          "label": "Vacances longues : faire garder son animal pendant 2 semaines ou plus"
+        },
+        "g3": {
+          "label": "Alternatives à la pension pour chien : 5 solutions pour partir sereinement"
+        },
+        "g4": {
+          "label": "Garde d'animaux en Savoie : le guide complet"
+        },
+        "g5": {
+          "label": "Garde d'animaux en Haute-Savoie : le guide complet"
+        },
+        "g6": {
+          "label": "Garde de chien et chat à la Croix-Rousse : spécificités du quartier"
+        },
+        "g7": {
+          "label": "Français de l'étranger : faire garder sa maison en France pendant son absence"
+        },
+        "g8": {
+          "label": "Expatriés : faire garder sa maison à l'étranger (Bali, Lisbonne, Marrakech...) par un Français"
+        }
+      },
+      "cities": {
+        "c1": {
+          "label": "House-sitting à Lyon",
+          "desc": "Des gardiens vérifiés dans chaque arrondissement, du Vieux Lyon à la Croix-Rousse, en passant par la Part-Dieu et Confluence."
+        },
+        "c2": {
+          "label": "House-sitting à Annecy",
+          "desc": "Lac, montagne, résidences secondaires en Haute-Savoie. Des gardiens locaux qui connaissent le gel, les accès et les vétos."
+        },
+        "c3": {
+          "label": "House-sitting à Grenoble",
+          "desc": "Au pied du Vercors, de la Chartreuse et de Belledonne. Des gardiens qui connaissent la cuvette et les sentiers de la Bastille."
+        },
+        "c4": {
+          "label": "House-sitting à Villeurbanne",
+          "desc": "Aux portes de Lyon, Gratte-Ciel, Charpennes, Cusset. Des gardiens qui circulent facilement entre les deux villes."
+        },
+        "c5": {
+          "label": "House-sitting à Chambéry",
+          "desc": "Capitale de la Savoie, entre lac du Bourget et massif des Bauges. Des gardiens à l'aise avec la montagne et l'hiver."
+        },
+        "c6": {
+          "label": "House-sitting à Valence",
+          "desc": "Porte du sud, entre Rhône et Vercors. Des gardiens proches des trajets vacances et des résidences secondaires drômoises."
+        },
+        "c7": {
+          "label": "House-sitting à Écully",
+          "desc": "Ouest lyonnais résidentiel, maisons avec jardin et animaux. Des gardiens habitués aux propriétés calmes et familiales."
+        },
+        "c8": {
+          "label": "Partout en France",
+          "desc": "Du Pays basque à la Bretagne, en passant par les Alpes, la Provence et le Nord. Le réseau s'étend dans toutes les régions."
+        }
+      }
     }
   },
   "faq": {
