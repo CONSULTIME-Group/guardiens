@@ -92,7 +92,7 @@ const MissionsTabsCard = memo(({ myMissions, nearbyMissions }: MissionsTabsCardP
   return (
     <div className="bg-card border border-border rounded-2xl p-5 transition-shadow duration-300 hover:shadow-sm">
       <div className="flex items-center justify-between gap-2 mb-3">
-        <h3 className="text-sm font-semibold text-foreground">Coups de main</h3>
+        <h3 className="text-sm font-semibold text-foreground">Petites missions</h3>
         <Link to="/petites-missions" className="text-xs text-primary font-sans hover:underline shrink-0">
           Voir tout
         </Link>

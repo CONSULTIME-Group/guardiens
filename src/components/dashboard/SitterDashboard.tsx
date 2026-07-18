@@ -430,7 +430,7 @@ const SitterDashboard = () => {
           <span className="inline-flex items-center rounded-full bg-warning/10 text-warning text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5">Entraide</span>
         </div>
         <h2 id="discovery-missions-heading" className="font-heading text-lg sm:text-xl font-bold text-foreground leading-tight mb-3">
-          Échanges dans votre coin
+          L'entraide dans votre coin
         </h2>
         <div className="space-y-4 min-w-0">
           <NearbyHelpersCarousel hideHeader />
