@@ -27,6 +27,8 @@ interface AuthContextType {
   activeRole: ActiveRole;
   isAuthenticated: boolean;
   loading: boolean;
+  hasSession: boolean;
+  authChecked: boolean;
   switchRole: (role: ActiveRole) => void;
   setActiveRole: (role: ActiveRole) => void;
   login: (email: string, password: string) => Promise<void>;
@@ -64,6 +66,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return (saved === 'owner' || saved === 'sitter') ? saved : 'sitter';
   });
   const [loading, setLoading] = useState(true);
+  const [hasSession, setHasSession] = useState(false);
+  const [authChecked, setAuthChecked] = useState(false);
   const roleInitialized = useRef(false);
 
   const switchRole = useCallback((role: ActiveRole) => {
