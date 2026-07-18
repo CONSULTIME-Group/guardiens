@@ -118,10 +118,10 @@ export function useNearbyOwnerSitters(currentUserId: string | undefined) {
 
       const enriched: NearbyOwnerSitter[] = pool.map((p: any) => {
         const distance_km =
-          hasGeo && p.latitude && p.longitude
+          hasGeo && p.latitude_approx != null && p.longitude_approx != null
             ? haversineDistance(
                 { lat: meLat!, lng: meLng! },
-                { lat: p.latitude, lng: p.longitude },
+                { lat: p.latitude_approx, lng: p.longitude_approx },
               )
             : null;
         const ratings = ratingMap.get(p.id) || [];
