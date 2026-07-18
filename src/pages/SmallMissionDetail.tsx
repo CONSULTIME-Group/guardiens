@@ -253,14 +253,14 @@ const SmallMissionDetail = () => {
         .order("created_at", { ascending: false })
         .limit(30),
       supabase.from("small_mission_responses")
-        .select("*, responder:profiles!small_mission_responses_responder_id_fkey(first_name, avatar_url)")
+        .select("*")
         .eq("mission_id", m.id).order("created_at", { ascending: false }),
       user
         ? supabase.from("mission_feedbacks" as any).select("receiver_id").eq("mission_id", m.id).eq("giver_id", user.id)
         : Promise.resolve({ data: [] as any[] }),
       user
         ? supabase.from("mission_feedbacks" as any)
-            .select("*, giver:profiles!mission_feedbacks_giver_id_fkey(first_name, avatar_url)")
+            .select("*")
             .eq("mission_id", m.id).eq("receiver_id", user.id)
         : Promise.resolve({ data: [] as any[] }),
     ]);
