@@ -39,7 +39,7 @@ const AppCardSkeleton = () => (
 );
 
 
-const AppCard = memo(({ app, sitterProfiles, sitterAffinityProfiles }: { app: AppRow; sitterProfiles: Record<string, SitterInfo>; sitterAffinityProfiles?: Record<string, AffinitySitterInput> }) => {
+const AppCard = memo(({ app, sitterProfiles, sitterAffinityProfiles, featured = false }: { app: AppRow; sitterProfiles: Record<string, SitterInfo>; sitterAffinityProfiles?: Record<string, AffinitySitterInput>; featured?: boolean }) => {
   const navigate = useNavigate();
   const sitter = (app.sitter?.id && sitterProfiles[app.sitter.id]) || app.sitter;
   const sitTitle = app.sit?.title || "";
