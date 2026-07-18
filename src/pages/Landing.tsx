@@ -21,7 +21,7 @@ import ProsShowcase from "@/components/landing/ProsShowcase";
 import { useInventaireCounts } from "@/hooks/useInventaireCounts";
 import { usePublicStats } from "@/hooks/usePublicStats";
 import LiveListingsStrip from "@/components/landing/LiveListingsStrip";
-import RealMembersStrip from "@/components/landing/RealMembersStrip";
+import TestimonialsSection from "@/components/landing/TestimonialsSection";
 import HomeJsonLd from "@/components/landing/HomeJsonLd";
 import PublicHeader from "@/components/layout/PublicHeader";
 
