@@ -79,9 +79,9 @@ export default function PublicHeader({ authedVariant = false }: { authedVariant?
         {/* Mobile: auth + burger */}
         <div className="flex sm:hidden items-center gap-1">
           <LanguageSwitcher compact />
-          {loading ? (
+          {!authChecked ? (
             <div className="h-9 w-24 rounded-md bg-muted/40 animate-pulse" aria-hidden="true" />
-          ) : isAuthenticated ? (
+          ) : hasSession ? (
             <Button
               size="sm"
               onClick={() => navigate("/dashboard")}
@@ -145,9 +145,9 @@ export default function PublicHeader({ authedVariant = false }: { authedVariant?
             </Link>
           ))}
           <div className="pt-2 border-t border-border">
-            {loading ? (
+            {!authChecked ? (
               <div className="h-9 w-full rounded-md bg-muted/40 animate-pulse" aria-hidden="true" />
-            ) : isAuthenticated ? (
+            ) : hasSession ? (
               <Button className="w-full" size="sm" onClick={() => { setOpen(false); navigate("/dashboard"); }}>
                 Mon espace
               </Button>
