@@ -298,6 +298,8 @@ const SitterDashboard = () => {
     </section>
   );
 
+  const isBeginnerSitter = completedSits === 0 && reviewsCount === 0 && badgeCount === 0;
+
   const buildSecondaryAccordion = () => (
     <section aria-label="Mon espace gardien, détails" className="rounded-2xl border border-border bg-card overflow-hidden">
       <Accordion type="single" collapsible defaultValue={completedSits > 0 ? "reputation" : undefined}>
@@ -310,13 +312,17 @@ const SitterDashboard = () => {
                 Ma réputation
               </p>
               <p className="text-sm font-medium text-foreground">
-                {completedSits} garde{completedSits > 1 ? "s" : ""}
-                {" · "}
-                {completedSits > 0 && reviewsCount > 0
-                  ? `note ${avgRating.toFixed(1).replace(".", ",")}/5`
-                  : "pas encore noté"}
-                {" · "}
-                {badgeCount} badge{badgeCount > 1 ? "s" : ""}
+                {isBeginnerSitter
+                  ? "Votre réputation se construira dès votre première garde."
+                  : <>
+                      {completedSits} garde{completedSits > 1 ? "s" : ""}
+                      {" · "}
+                      {completedSits > 0 && reviewsCount > 0
+                        ? `note ${avgRating.toFixed(1).replace(".", ",")}/5`
+                        : "pas encore noté"}
+                      {" · "}
+                      {badgeCount} badge{badgeCount > 1 ? "s" : ""}
+                    </>}
               </p>
             </div>
           </AccordionTrigger>
@@ -341,7 +347,9 @@ const SitterDashboard = () => {
                 Badges
               </p>
               <p className="text-sm font-medium text-foreground">
-                {badgeCount} badge{badgeCount > 1 ? "s" : ""} obtenu{badgeCount > 1 ? "s" : ""}
+                {isBeginnerSitter
+                  ? "Vos premiers écussons vous attendent, ils se débloquent avec votre activité."
+                  : `${badgeCount} badge${badgeCount > 1 ? "s" : ""} obtenu${badgeCount > 1 ? "s" : ""}`}
               </p>
             </div>
           </AccordionTrigger>
@@ -357,7 +365,11 @@ const SitterDashboard = () => {
                 Gardien d'urgence
               </p>
               <p className="text-sm font-medium text-foreground">
-                {hasEmergencyProfile ? "Profil actif" : "Non configuré"}
+                {hasEmergencyProfile
+                  ? "Profil actif"
+                  : isBeginnerSitter
+                    ? "Activez le mode gardien d'urgence pour recevoir les demandes de dernière minute"
+                    : "Non configuré"}
               </p>
             </div>
           </AccordionTrigger>
