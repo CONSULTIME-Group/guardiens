@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { supabase } from "@/integrations/supabase/client";
 import { AlmaAvatar } from "@/components/ai/alma/AlmaAvatar";
 import { Badge } from "@/components/ui/badge";
@@ -21,14 +22,14 @@ interface Tip {
   context_filter: Record<string, unknown> | null;
 }
 
-const TYPE_LABEL: Record<string, string> = {
-  pet_care_tip: "Soins",
-  dog_behavior_tip: "Chien",
-  cat_behavior_tip: "Chat",
-  home_care_tip: "Maison",
-  seasonal_advice: "Saison",
-  breed_did_you_know: "Races",
-  mutual_aid_tip: "Entraide",
+const TYPE_KEYS: Record<string, string> = {
+  pet_care_tip: "landing.alma_tips.types.pet_care_tip",
+  dog_behavior_tip: "landing.alma_tips.types.dog_behavior_tip",
+  cat_behavior_tip: "landing.alma_tips.types.cat_behavior_tip",
+  home_care_tip: "landing.alma_tips.types.home_care_tip",
+  seasonal_advice: "landing.alma_tips.types.seasonal_advice",
+  breed_did_you_know: "landing.alma_tips.types.breed_did_you_know",
+  mutual_aid_tip: "landing.alma_tips.types.mutual_aid_tip",
 };
 
 function pickVaried(tips: Tip[], count: number): Tip[] {
@@ -53,6 +54,7 @@ function pickVaried(tips: Tip[], count: number): Tip[] {
 }
 
 export default function AlmaTipsTeaser() {
+  const { t } = useTranslation();
   const [tips, setTips] = useState<Tip[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -64,7 +66,7 @@ export default function AlmaTipsTeaser() {
         .select("id, fact_type, content, source_url, context_filter")
         .limit(60);
       if (cancelled) return;
-      const rows = ((data as unknown as Tip[]) || []).filter((t) => !!t.content);
+      const rows = ((data as unknown as Tip[]) || []).filter((tip) => !!tip.content);
       const varied = pickVaried(rows, 6);
       setTips(varied);
       setLoading(false);
@@ -77,17 +79,26 @@ export default function AlmaTipsTeaser() {
   if (loading) return null;
   if (tips.length === 0) return null;
 
+  const labelFor = (factType: string | null): string => {
+    const fallback = t("landing.alma_tips.fallback_label");
+    if (!factType) return fallback;
+    const key = TYPE_KEYS[factType];
+    if (!key) return factType || fallback;
+    const translated = t(key);
+    return translated === key ? factType : translated;
+  };
+
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "ItemList",
-    name: "Les conseils d'Alma",
+    name: t("landing.alma_tips.title"),
     numberOfItems: tips.length,
     itemListElement: tips.map((tip, i) => ({
       "@type": "ListItem",
       position: i + 1,
       item: {
         "@type": "CreativeWork",
-        name: TYPE_LABEL[tip.fact_type || ""] || tip.fact_type || "Conseil",
+        name: labelFor(tip.fact_type),
         text: tip.content,
       },
     })),
@@ -99,7 +110,7 @@ export default function AlmaTipsTeaser() {
         <div className="max-w-6xl mx-auto px-5 sm:px-6">
           <div className="mb-8 md:mb-10">
             <p className="text-[10px] md:text-xs uppercase tracking-[0.2em] text-primary font-semibold font-body mb-3">
-              Conseils
+              {t("landing.alma_tips.eyebrow")}
             </p>
             <div className="flex flex-col md:flex-row md:items-start gap-4 md:gap-6">
               <div className="shrink-0">
@@ -107,10 +118,10 @@ export default function AlmaTipsTeaser() {
               </div>
               <div className="min-w-0">
                 <h2 id="alma-tips-heading" className="font-heading text-3xl md:text-4xl font-semibold text-foreground leading-tight mb-3">
-                  Les conseils d'Alma
+                  {t("landing.alma_tips.title")}
                 </h2>
                 <p className="text-base md:text-lg text-muted-foreground leading-relaxed max-w-2xl">
-                  Je rassemble ici des repères pratiques sur les animaux, la maison et les saisons. Rien de théorique : juste des conseils utiles pour votre quotidien.
+                  {t("landing.alma_tips.intro")}
                 </p>
               </div>
             </div>
@@ -123,7 +134,7 @@ export default function AlmaTipsTeaser() {
                 className="bg-card border border-border rounded-2xl p-5 md:p-6 flex flex-col gap-3"
               >
                 <Badge variant="secondary" className="w-fit text-[11px]">
-                  {TYPE_LABEL[tip.fact_type || ""] || tip.fact_type || "Conseil"}
+                  {labelFor(tip.fact_type)}
                 </Badge>
                 <p className="text-sm md:text-base text-foreground leading-relaxed">
                   {tip.content}
@@ -137,7 +148,7 @@ export default function AlmaTipsTeaser() {
               to="/conseils"
               className="inline-flex items-center gap-2 rounded-full px-6 py-3 border border-primary text-primary hover:bg-primary hover:text-primary-foreground transition-colors font-body text-sm font-medium"
             >
-              Voir tous les conseils d'Alma <span aria-hidden>→</span>
+              {t("landing.alma_tips.cta")} <span aria-hidden>→</span>
             </Link>
           </div>
         </div>
