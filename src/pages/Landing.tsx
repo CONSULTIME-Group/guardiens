@@ -15,11 +15,6 @@ import { supabase } from "@/integrations/supabase/client";
 import PageMeta from "@/components/PageMeta";
 
 import InventoryStrip from "@/components/landing/InventoryStrip";
-
-// Date de dernière modification réelle du contenu de la home.
-// À mettre à jour lors d'une vraie évolution éditoriale (hors données dynamiques).
-const HOME_CONTENT_LAST_MODIFIED = "2026-07-01";
-
 import InternationalStrip from "@/components/landing/InternationalStrip";
 import AffinityScoreShowcase from "@/components/landing/AffinityScoreShowcase";
 import ProsShowcase from "@/components/landing/ProsShowcase";
@@ -27,6 +22,7 @@ import { useInventaireCounts } from "@/hooks/useInventaireCounts";
 import { usePublicStats } from "@/hooks/usePublicStats";
 import LiveListingsStrip from "@/components/landing/LiveListingsStrip";
 import RealMembersStrip from "@/components/landing/RealMembersStrip";
+import HomeJsonLd from "@/components/landing/HomeJsonLd";
 import PublicHeader from "@/components/layout/PublicHeader";
 
 import RecentSitsItemListJsonLd from "@/components/seo/RecentSitsItemListJsonLd";
