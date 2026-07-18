@@ -27,6 +27,8 @@ interface AuthContextType {
   activeRole: ActiveRole;
   isAuthenticated: boolean;
   loading: boolean;
+  hasSession: boolean;
+  authChecked: boolean;
   switchRole: (role: ActiveRole) => void;
   setActiveRole: (role: ActiveRole) => void;
   login: (email: string, password: string) => Promise<void>;
@@ -64,6 +66,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return (saved === 'owner' || saved === 'sitter') ? saved : 'sitter';
   });
   const [loading, setLoading] = useState(true);
+  const [hasSession, setHasSession] = useState(false);
+  const [authChecked, setAuthChecked] = useState(false);
   const roleInitialized = useRef(false);
 
   const switchRole = useCallback((role: ActiveRole) => {
@@ -149,6 +153,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
+        setHasSession(!!session?.user);
+        setAuthChecked(true);
         if (session?.user) {
           // Si un flux OAuth est en cours, on trace la pose de session.
           if (getOAuthTraceId()) {
@@ -175,6 +181,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     );
 
     supabase.auth.getSession().then(async ({ data: { session } }) => {
+      setHasSession(!!session?.user);
+      setAuthChecked(true);
       if (session?.user) {
         await fetchProfile(session.user);
       }
@@ -261,6 +269,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       localStorage.removeItem('guardiens_active_role');
     } catch {}
     setUser(null);
+    setHasSession(false);
     roleInitialized.current = false;
     await supabase.auth.signOut();
   }, []);
@@ -279,6 +288,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         activeRole,
         isAuthenticated: !!user,
         loading,
+        hasSession,
+        authChecked,
         switchRole,
         setActiveRole,
         login,
