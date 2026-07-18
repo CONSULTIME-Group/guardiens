@@ -7,6 +7,7 @@
  * gardien, /annonces et /recherche.
  */
 import { Link } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
 import { format, parseISO } from "date-fns";
 import { fr } from "date-fns/locale";
 import { PawPrint } from "lucide-react";
