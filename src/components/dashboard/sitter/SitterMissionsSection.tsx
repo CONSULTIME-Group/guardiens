@@ -2,7 +2,7 @@ import { memo, useCallback, useMemo, useRef, useState, type KeyboardEvent } from
 import { Link, useNavigate } from "react-router-dom";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
-import { AlertCircle, RefreshCw, Plus, ArrowRight } from "lucide-react";
+import { AlertCircle, RefreshCw, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface SitterMissionsSectionProps {

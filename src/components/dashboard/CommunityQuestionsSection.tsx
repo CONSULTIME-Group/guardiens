@@ -33,7 +33,7 @@ const CommunityQuestionsSection = () => {
             >
               <div className="flex items-center gap-2 mb-1">
                 <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-primary/10 text-primary">
-                  {CATEGORY_LABEL[q.category]}
+                  {CATEGORY_LABEL[q.category] ?? q.category}
                 </span>
                 <span className="text-xs text-foreground/50">
                   {q.answers_count} réponse{q.answers_count > 1 ? "s" : ""}
