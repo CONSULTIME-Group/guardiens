@@ -541,9 +541,6 @@ const OwnerDashboard = () => {
         </div>
       )}
 
-      {/* OwnerFirstNBAGardiens : descendu sous la grille de pilotage
-          (voir plus bas) pour rester une preuve tangible du vivier local
-          sans concurrencer la NBA principale. */}
 
       {isNewOwner ? (
         <div className="px-5 md:px-8">
@@ -650,6 +647,8 @@ const OwnerDashboard = () => {
             pendingAppCount={pendingAppCount}
             coverPhoto={propertyCoverPhoto}
           />
+
+          {showAlmaProactive && <OwnerFirstNBAGardiens />}
 
 
           {/* Mes animaux, remonté juste après l'annonce (logique : maison → animaux) */}
@@ -808,14 +807,6 @@ const OwnerDashboard = () => {
         </aside>
       </div>
 
-      {/* ═══ Preuve tangible du vivier local (early owner) ═══
-          Descendu sous la grille de pilotage pour ne pas concurrencer la NBA.
-          Reste visible tant qu'aucune annonce n'est publiée (drafts inclus). */}
-      {showAlmaProactive && (
-        <div className="px-5 md:px-8">
-          <OwnerFirstNBAGardiens />
-        </div>
-      )}
 
 
       {/* ═══ Preuve sociale, Highlights remontés et déployés par défaut ═══ */}
