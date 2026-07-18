@@ -230,7 +230,8 @@
       "breeds_label": "razze documentate",
       "places_label": "luoghi dog-friendly geolocalizzati",
       "pros_label": "professionisti per animali",
-      "cta": "Vedere l'osservatorio completo"
+      "cta": "Vedere l'osservatorio completo",
+      "updated_on": "Dati aggiornati il {{date}}."
     },
     "final": {
       "title": "La Sua prossima storia inizia qui.",
@@ -297,6 +298,35 @@
         "seasonal_advice": "Stagione",
         "breed_did_you_know": "Razze",
         "mutual_aid_tip": "Aiuto reciproco"
+      }
+    },
+    "real_members": {
+      "members_preview_aria": "Anteprima dei membri recenti",
+      "member_alt_with_city": "{{name}}, membro Guardiens a {{city}}",
+      "member_alt_default": "{{name}}, membro Guardiens",
+      "members_count": "Più di {{count}} membri",
+      "members_suffix": " hanno già raggiunto la rete, in tutta la Francia, da Valence a Quimper, da Paris a Sète."
+    },
+    "seasonal": {
+      "december": {
+        "title": "Parte per le feste?",
+        "description": "Pubblichi il suo annuncio subito. Una persona di fiducia vicino a lei si prenderà cura della sua casa e dei suoi animali durante le feste di fine anno."
+      },
+      "winter": {
+        "title": "Parte quest'inverno?",
+        "description": "Vacanze sulla neve, weekend lunghi, trasferte di lavoro: affidi la sua casa e i suoi animali a una persona di fiducia vicino a lei."
+      },
+      "spring": {
+        "title": "Sta preparando le vacanze?",
+        "description": "Si organizzi in anticipo: pubblichi il suo annuncio subito per trovare la persona giusta prima del picco estivo. L'incontro avviene sempre prima della partenza."
+      },
+      "summer": {
+        "title": "Parte quest'estate?",
+        "description": "Pubblichi il suo annuncio subito. Una persona di fiducia vicino a lei si occuperà della sua casa e dei suoi animali durante la sua assenza."
+      },
+      "autumn": {
+        "title": "Parte quest'autunno?",
+        "description": "Ognissanti, gite, trasferte: una persona di fiducia vicino a lei veglia sulla sua casa e sui suoi animali mentre è assente."
       }
     }
   },

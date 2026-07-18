@@ -230,7 +230,8 @@
       "breeds_label": "breeds documented",
       "places_label": "geolocated dog-friendly places",
       "pros_label": "pet professionals",
-      "cta": "See the full observatory"
+      "cta": "See the full observatory",
+      "updated_on": "Figures updated on {{date}}."
     },
     "final": {
       "title": "Your next story begins here.",
@@ -297,6 +298,35 @@
         "seasonal_advice": "Season",
         "breed_did_you_know": "Breeds",
         "mutual_aid_tip": "Mutual aid"
+      }
+    },
+    "real_members": {
+      "members_preview_aria": "Recent members preview",
+      "member_alt_with_city": "{{name}}, Guardiens member in {{city}}",
+      "member_alt_default": "{{name}}, Guardiens member",
+      "members_count": "More than {{count}} members",
+      "members_suffix": " have already joined the network, all across France, from Valence to Quimper, from Paris to Sète."
+    },
+    "seasonal": {
+      "december": {
+        "title": "Heading away for the holidays?",
+        "description": "Post your listing now. A trusted sitter near you will take care of your home and pets during the end-of-year holidays."
+      },
+      "winter": {
+        "title": "Travelling this winter?",
+        "description": "Ski holidays, long weekends, work trips: entrust your home and pets to a trusted sitter near you."
+      },
+      "spring": {
+        "title": "Planning your holidays?",
+        "description": "Plan ahead: post your listing now to find the right sitter before the summer rush. The meet-up always happens before you leave."
+      },
+      "summer": {
+        "title": "Travelling this summer?",
+        "description": "Post your listing now. A trusted sitter near you will look after your home and pets while you are away."
+      },
+      "autumn": {
+        "title": "Travelling this autumn?",
+        "description": "All Saints break, weekend escapes, work trips: a trusted sitter near you watches over your home and pets while you are away."
       }
     }
   },

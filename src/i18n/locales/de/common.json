@@ -230,7 +230,8 @@
       "breeds_label": "dokumentierte Rassen",
       "places_label": "geolokalisierte hundefreundliche Orte",
       "pros_label": "Tierprofis",
-      "cta": "Vollständiges Observatorium ansehen"
+      "cta": "Vollständiges Observatorium ansehen",
+      "updated_on": "Zahlen aktualisiert am {{date}}."
     },
     "final": {
       "title": "Ihre nächste Geschichte beginnt hier.",
@@ -297,6 +298,35 @@
         "seasonal_advice": "Saison",
         "breed_did_you_know": "Rassen",
         "mutual_aid_tip": "Nachbarschaftshilfe"
+      }
+    },
+    "real_members": {
+      "members_preview_aria": "Vorschau der neuesten Mitglieder",
+      "member_alt_with_city": "{{name}}, Guardiens-Mitglied in {{city}}",
+      "member_alt_default": "{{name}}, Guardiens-Mitglied",
+      "members_count": "Mehr als {{count}} Mitglieder",
+      "members_suffix": " sind dem Netzwerk bereits beigetreten, überall in Frankreich, von Valence bis Quimper, von Paris bis Sète."
+    },
+    "seasonal": {
+      "december": {
+        "title": "Verreisen Sie über die Feiertage?",
+        "description": "Veröffentlichen Sie Ihre Anzeige jetzt. Eine vertrauenswürdige Person in Ihrer Nähe kümmert sich während der Feiertage um Ihr Zuhause und Ihre Tiere."
+      },
+      "winter": {
+        "title": "Verreisen Sie diesen Winter?",
+        "description": "Skiurlaub, verlängerte Wochenenden, Geschäftsreisen: Vertrauen Sie Ihr Zuhause und Ihre Tiere einer vertrauenswürdigen Person in Ihrer Nähe an."
+      },
+      "spring": {
+        "title": "Planen Sie Ihre Ferien?",
+        "description": "Planen Sie im Voraus: Veröffentlichen Sie Ihre Anzeige jetzt, um die richtige Person vor dem Sommeransturm zu finden. Das Treffen findet immer vor der Abreise statt."
+      },
+      "summer": {
+        "title": "Verreisen Sie diesen Sommer?",
+        "description": "Veröffentlichen Sie Ihre Anzeige jetzt. Eine vertrauenswürdige Person in Ihrer Nähe kümmert sich während Ihrer Abwesenheit um Ihr Zuhause und Ihre Tiere."
+      },
+      "autumn": {
+        "title": "Verreisen Sie diesen Herbst?",
+        "description": "Allerheiligen, Ausflüge, Geschäftsreisen: eine vertrauenswürdige Person in Ihrer Nähe wacht über Ihr Zuhause und Ihre Tiere, während Sie weg sind."
       }
     }
   },

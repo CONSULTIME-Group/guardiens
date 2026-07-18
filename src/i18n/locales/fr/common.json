@@ -235,7 +235,8 @@
       "breeds_label": "races documentées",
       "places_label": "lieux dog-friendly géolocalisés",
       "pros_label": "pros animaliers",
-      "cta": "Voir l'observatoire complet"
+      "cta": "Voir l'observatoire complet",
+      "updated_on": "Chiffres mis à jour le {{date}}."
     },
     "final": {
       "title": "Votre prochaine histoire commence ici.",
@@ -298,6 +299,35 @@
         "seasonal_advice": "Saison",
         "breed_did_you_know": "Races",
         "mutual_aid_tip": "Entraide"
+      }
+    },
+    "real_members": {
+      "members_preview_aria": "Aperçu des membres récents",
+      "member_alt_with_city": "{{name}}, membre Guardiens à {{city}}",
+      "member_alt_default": "{{name}}, membre Guardiens",
+      "members_count": "Plus de {{count}} membres",
+      "members_suffix": " ont déjà rejoint le réseau, partout en France, de Valence à Quimper, de Paris à Sète."
+    },
+    "seasonal": {
+      "december": {
+        "title": "Vous partez pour les fêtes ?",
+        "description": "Publiez votre annonce dès maintenant. Un gardien près de chez vous s'occupera de votre maison et de vos animaux pendant les fêtes de fin d'année."
+      },
+      "winter": {
+        "title": "Vous partez cet hiver ?",
+        "description": "Vacances au ski, week-ends prolongés, déplacements pro : confiez votre maison et vos animaux à un gardien près de chez vous."
+      },
+      "spring": {
+        "title": "Vous préparez vos vacances ?",
+        "description": "Anticipez : publiez votre annonce maintenant pour trouver le bon gardien avant le pic de l'été. La rencontre se fait toujours avant le départ."
+      },
+      "summer": {
+        "title": "Vous partez cet été ?",
+        "description": "Publiez votre annonce dès maintenant. Un gardien près de chez vous s'occupera de votre maison et de vos animaux pendant votre absence."
+      },
+      "autumn": {
+        "title": "Vous partez cet automne ?",
+        "description": "Toussaint, escapades, déplacements : un gardien près de chez vous veille sur votre maison et vos animaux pendant que vous êtes absent."
       }
     }
   },

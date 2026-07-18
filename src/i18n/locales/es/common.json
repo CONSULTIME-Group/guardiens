@@ -230,7 +230,8 @@
       "breeds_label": "razas documentadas",
       "places_label": "lugares dog-friendly geolocalizados",
       "pros_label": "profesionales para animales",
-      "cta": "Ver el observatorio completo"
+      "cta": "Ver el observatorio completo",
+      "updated_on": "Cifras actualizadas el {{date}}."
     },
     "final": {
       "title": "Su próxima historia comienza aquí.",
@@ -297,6 +298,35 @@
         "seasonal_advice": "Temporada",
         "breed_did_you_know": "Razas",
         "mutual_aid_tip": "Ayuda mutua"
+      }
+    },
+    "real_members": {
+      "members_preview_aria": "Vista de miembros recientes",
+      "member_alt_with_city": "{{name}}, miembro de Guardiens en {{city}}",
+      "member_alt_default": "{{name}}, miembro de Guardiens",
+      "members_count": "Más de {{count}} miembros",
+      "members_suffix": " ya se han unido a la red, en toda Francia, de Valence a Quimper, de Paris a Sète."
+    },
+    "seasonal": {
+      "december": {
+        "title": "¿Se va para las fiestas?",
+        "description": "Publique su anuncio ahora. Una persona de confianza cerca de usted cuidará de su casa y de sus animales durante las fiestas de fin de año."
+      },
+      "winter": {
+        "title": "¿Viaja este invierno?",
+        "description": "Vacaciones de esquí, fines de semana largos, viajes de trabajo: confíe su casa y sus animales a una persona de confianza cerca de usted."
+      },
+      "spring": {
+        "title": "¿Prepara sus vacaciones?",
+        "description": "Anticípese: publique su anuncio ahora para encontrar a la persona adecuada antes del pico del verano. El encuentro siempre se realiza antes de su partida."
+      },
+      "summer": {
+        "title": "¿Viaja este verano?",
+        "description": "Publique su anuncio ahora. Una persona de confianza cerca de usted cuidará de su casa y de sus animales durante su ausencia."
+      },
+      "autumn": {
+        "title": "¿Viaja este otoño?",
+        "description": "Todos los Santos, escapadas, viajes: una persona de confianza cerca de usted vela por su casa y sus animales durante su ausencia."
       }
     }
   },
