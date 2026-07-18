@@ -323,7 +323,7 @@ export function useOwnerDashboardData(userId: string | undefined) {
           pets: petsData,
           recentApps,
           reviews: reviewsRes.data || [],
-          highlights: (highlightsRes.data || []) as HighlightRow[],
+          highlights: rawHighlights as HighlightRow[],
           smallMissions: (missionsRes.data || []) as SmallMission[],
           myMissions: (myMissionsDataRes.data || []) as SmallMission[],
           verificationStatus: verStatus,
