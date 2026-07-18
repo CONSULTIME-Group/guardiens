@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import AlmaTipsTeaser from "@/components/landing/AlmaTipsTeaser";
-import notreHistoirePanorama from "@/assets/story-photo.webp";
+
 import franceLocalNational from "@/assets/illustrations/france-local-national.webp";
 import { useNavigate, Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
