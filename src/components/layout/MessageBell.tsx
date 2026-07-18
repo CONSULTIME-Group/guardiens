@@ -52,19 +52,34 @@ const MessageBell = () => {
         : `owner_id.eq.${userId},sitter_id.eq.${userId}`;
 
     // Conversations de l'utilisateur (les 5 plus récentes au sens dernier message)
-    const { data: convs } = await supabase
+    const { data: convsRaw } = await supabase
       .from("conversations")
       .select(`
         id, owner_id, sitter_id, sit_id,
         sit:sits(title),
-        owner:profiles!conversations_owner_id_fkey(first_name, avatar_url),
-        sitter:profiles!conversations_sitter_id_fkey(first_name, avatar_url),
         messages:messages(content, created_at, sender_id, read_at, is_system)
       `)
       .or(filter)
       .order("updated_at", { ascending: false })
       .limit(8);
 
+    // Hydrate les profils des interlocuteurs via la vue publique (RLS-safe).
+    const convs = (convsRaw ?? []) as any[];
+    const otherIds = Array.from(new Set(
+      convs.flatMap((c: any) => [c.owner_id, c.sitter_id]).filter(Boolean)
+    )) as string[];
+    const profMap = new Map<string, { first_name: string | null; avatar_url: string | null }>();
+    if (otherIds.length > 0) {
+      const { data: profs } = await supabase
+        .from("public_profiles")
+        .select("id, first_name, avatar_url")
+        .in("id", otherIds);
+      (profs ?? []).forEach((p: any) => profMap.set(p.id, { first_name: p.first_name, avatar_url: p.avatar_url }));
+    }
+    convs.forEach((c: any) => {
+      c.owner = c.owner_id ? profMap.get(c.owner_id) ?? null : null;
+      c.sitter = c.sitter_id ? profMap.get(c.sitter_id) ?? null : null;
+    });
 
     if (!convs || convs.length === 0) {
       setThreads([]);
