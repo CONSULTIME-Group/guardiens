@@ -6233,6 +6233,7 @@ export type Database = {
           longitude_approx: number | null
           postal_code: string | null
           profile_completion: number | null
+          role: Database["public"]["Enums"]["user_role"] | null
           skill_categories: string[] | null
         }
         Insert: {
@@ -6251,6 +6252,7 @@ export type Database = {
           longitude_approx?: never
           postal_code?: string | null
           profile_completion?: number | null
+          role?: Database["public"]["Enums"]["user_role"] | null
           skill_categories?: string[] | null
         }
         Update: {
@@ -6269,6 +6271,7 @@ export type Database = {
           longitude_approx?: never
           postal_code?: string | null
           profile_completion?: number | null
+          role?: Database["public"]["Enums"]["user_role"] | null
           skill_categories?: string[] | null
         }
         Relationships: []
