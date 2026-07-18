@@ -41,9 +41,13 @@ const NoNearbySitsEmptyState = ({
   useEffect(() => {
     void trackEvent("sitter_no_nearby_empty_state_seen", {
       source: "dashboard",
-      metadata: { total_published: totalPublishedSits, radius_km: radiusKm },
+      metadata: {
+        total_published: totalPublishedSits,
+        radius_km: radiusKm,
+        variant,
+      },
     });
-  }, [totalPublishedSits, radiusKm]);
+  }, [totalPublishedSits, radiusKm, variant]);
 
   useEffect(() => {
     if (!user?.id) return;
