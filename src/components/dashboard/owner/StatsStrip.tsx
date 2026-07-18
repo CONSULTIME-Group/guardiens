@@ -70,7 +70,7 @@ const StatsStrip = memo(({ items }: StatsStripProps) => {
             : "text-foreground";
 
         const inner = (clickable: boolean) => (
-          <div className="px-4 py-3 text-center md:text-left">
+          <div className="min-w-0 overflow-hidden px-4 py-3 text-center md:text-left">
             {!isEmpty ? (
               <p
                 className={`text-xl md:text-2xl font-heading font-bold leading-none whitespace-nowrap transition-transform duration-200 ease-out ${valueColor} ${clickable ? "group-hover:-translate-y-0.5" : ""}`}
@@ -80,7 +80,7 @@ const StatsStrip = memo(({ items }: StatsStripProps) => {
             ) : (
               <>
                 <p
-                  className={`text-xl md:text-2xl font-heading font-bold leading-none whitespace-nowrap text-accent ${clickable ? "group-hover:-translate-y-0.5 transition-transform duration-200 ease-out" : ""}`}
+                  className={`text-lg md:text-xl font-heading font-bold leading-tight break-words text-accent ${clickable ? "group-hover:-translate-y-0.5 transition-transform duration-200 ease-out" : ""}`}
                 >
                   {zeroState.phrase}
                 </p>
