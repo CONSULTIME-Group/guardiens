@@ -35,6 +35,8 @@ import PublicFooter from "@/components/layout/PublicFooter";
 import { staticRoutes, DEFAULT_OG_IMAGE } from "@/data/siteRoutes";
 // Pricing pivot : plus d'Offer JSON-LD tant que PRICING_IS_ACTIVE = false.
 import RevealOnScroll from "@/components/ui/RevealOnScroll";
+import { RevealSection } from "@/components/ui/RevealSection";
+
 
 const HOME_ROUTE = staticRoutes.find((route) => route.path === "/");
 const HOME_OG_IMAGE = HOME_ROUTE?.ogImage ?? DEFAULT_OG_IMAGE;
@@ -118,31 +120,6 @@ const getInitials = (name: string) =>
 
 
 
-/* ── Reveal purement CSS ──
- * Règle absolue : le contenu est TOUJOURS visible. L'animation d'entrée
- * (`animate-fade-in`) est un bonus décoratif joué une fois au mount, sans
- * aucun IntersectionObserver ni état React qui puisse laisser une section
- * bloquée à opacity-0. `prefers-reduced-motion` désactive l'animation.
- */
-const RevealSection = React.forwardRef<
-  HTMLDivElement,
-  { children: React.ReactNode; className?: string; delay?: number }
->(({ children, className = "", delay = 0 }, forwardedRef) => {
-  const prefersReduced =
-    typeof window !== "undefined" &&
-    window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
-  const animClass = prefersReduced ? "" : "motion-safe:animate-fade-in";
-  return (
-    <div
-      ref={forwardedRef}
-      className={`${animClass} ${className}`}
-      style={delay && !prefersReduced ? { animationDelay: `${delay}s`, animationFillMode: "both" } : undefined}
-    >
-      {children}
-    </div>
-  );
-});
-RevealSection.displayName = "RevealSection";
 
 
 
