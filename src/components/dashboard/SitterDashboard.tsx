@@ -463,10 +463,23 @@ const SitterDashboard = () => {
               <SitterFirstNBASkeleton />
             ) : hasMinimumPool && hasPostalCode ? (
               <SitterFirstNBA sits={topSits} />
+            ) : fallbackSits.length > 0 && hasPostalCode && !profileIncomplete ? (
+              <SitterFirstNBA
+                sits={fallbackSits}
+                mode="fallback"
+                scopeLabel={
+                  scopeUsed === "dept"
+                    ? "dans votre département"
+                    : scopeUsed === "region"
+                      ? "dans votre région"
+                      : "sur Guardiens"
+                }
+              />
             ) : (
               <NoNearbySitsEmptyState
                 totalPublishedSits={totalPublished}
                 postalCode={postalCode}
+                variant={profileIncomplete ? "profile_incomplete" : "no_nearby"}
               />
             )}
 
