@@ -22,6 +22,9 @@ import { useInventaireCounts } from "@/hooks/useInventaireCounts";
 import { usePublicStats } from "@/hooks/usePublicStats";
 import LiveListingsStrip from "@/components/landing/LiveListingsStrip";
 import TestimonialsSection from "@/components/landing/TestimonialsSection";
+import { UsagesSection } from "@/components/landing/UsagesSection";
+import { RencontreSection } from "@/components/landing/RencontreSection";
+import { EntraideSection } from "@/components/landing/EntraideSection";
 import HomeJsonLd from "@/components/landing/HomeJsonLd";
 import PublicHeader from "@/components/layout/PublicHeader";
 
@@ -327,94 +330,7 @@ const Landing = () => {
 
 
       {/* ═══════════════ SECTION 2, CE QU'ON FAIT ENSEMBLE ═══════════════ */}
-      <section id="usages" className="py-10 md:py-20 bg-background scroll-mt-24">
-        <div className="max-w-5xl mx-auto px-6">
-          <div id="definition" className="max-w-3xl mb-10 md:mb-14 scroll-mt-24">
-            <h2 className="font-heading text-xl md:text-2xl font-semibold text-foreground mb-3">
-              {t("landing.what_is.title")}
-            </h2>
-            <p className="font-body text-base md:text-lg text-foreground/80 leading-relaxed">
-              {t("landing.what_is.body")}
-            </p>
-          </div>
-          <RevealSection>
-            <span className="text-xs tracking-widest uppercase text-primary/60 font-body mb-4 block text-center">
-              {t("landing.usages.eyebrow")}
-            </span>
-            <h2 id="garde-et-entraide" className="text-2xl md:text-5xl font-heading font-semibold leading-snug text-foreground text-center mb-3 scroll-mt-24">
-              {t("landing.usages.title")}
-            </h2>
-            <p className="text-center text-foreground/60 font-body max-w-2xl mx-auto mb-8 md:mb-16 italic">
-              {t("landing.usages.lede")}
-            </p>
-          </RevealSection>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <RevealSection delay={0.1}>
-              <div className="bg-card rounded-2xl p-5 md:p-8 shadow-sm text-left h-full">
-                <p className="text-xs tracking-widest uppercase text-primary/70 font-body mb-3">{t("landing.usages.owner.tag")}</p>
-                <h3 className="text-xl font-heading font-semibold text-foreground mb-3">{t("landing.usages.owner.title")}</h3>
-                <p className="text-base font-body leading-relaxed text-foreground/70 mb-4">
-                  {t("landing.usages.owner.text")}
-                </p>
-                <span className="inline-block px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-body font-medium mb-4">
-                  {t("landing.usages.owner.badge")}
-                </span>
-                <Link to="/inscription?role=owner" className="block text-sm font-body text-primary font-medium hover:underline">
-                  {t("landing.usages.owner.cta")}
-                </Link>
-              </div>
-            </RevealSection>
-
-            <RevealSection delay={0.2}>
-              <div className="bg-card rounded-2xl p-5 md:p-8 shadow-sm text-left h-full">
-                <p className="text-xs tracking-widest uppercase text-primary/70 font-body mb-3">{t("landing.usages.sitter.tag")}</p>
-                <h3 className="text-xl font-heading font-semibold text-foreground mb-3">{t("landing.usages.sitter.title")}</h3>
-                <p className="text-base font-body leading-relaxed text-foreground/70 mb-4">
-                  {t("landing.usages.sitter.text")}
-                </p>
-                <Link to="/inscription?role=sitter" className="text-sm font-body text-muted-foreground font-medium hover:text-primary hover:underline">
-                  {t("landing.usages.sitter.cta")}
-                </Link>
-              </div>
-            </RevealSection>
-
-            <RevealSection delay={0.3}>
-              <div className="bg-card rounded-2xl p-5 md:p-8 shadow-sm text-left h-full border-2 border-primary/20 relative overflow-hidden">
-                <div className="absolute top-0 right-0 bg-primary text-primary-foreground text-[10px] font-body font-bold uppercase tracking-wider px-3 py-1 rounded-bl-lg">
-                  {t("landing.usages.mutual.badge")}
-                </div>
-                <p className="text-xs tracking-widest uppercase text-primary/70 font-body mb-3">{t("landing.usages.mutual.tag")}</p>
-                <h3 className="text-xl font-heading font-semibold text-foreground mb-3">{t("landing.usages.mutual.title")}</h3>
-                <p className="text-base font-body leading-relaxed text-foreground/70 mb-4">
-                  {t("landing.usages.mutual.text")}
-                </p>
-                <a href="#entraide" className="text-sm font-body text-primary font-medium hover:underline">
-                  {t("landing.usages.mutual.cta")}
-                </a>
-              </div>
-            </RevealSection>
-          </div>
-
-          <RevealSection delay={0.4}>
-            <div className="mt-10 bg-accent/40 border border-accent rounded-2xl p-6 md:p-7 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-              <div>
-                <p className="text-xs tracking-widest uppercase text-foreground/60 font-body mb-1">{t("landing.usages.urgency.eyebrow")}</p>
-                <h3 className="text-lg font-heading font-semibold text-foreground">{t("landing.usages.urgency.title")}</h3>
-                <p className="text-sm font-body text-foreground/70 mt-1">
-                  {t("landing.usages.urgency.text")}
-                </p>
-              </div>
-              <Link
-                to="/gardien-urgence"
-                className="shrink-0 inline-flex items-center justify-center px-5 py-2.5 rounded-full bg-foreground text-background font-body font-medium text-sm hover:bg-foreground/90 transition-colors"
-              >
-                {t("landing.usages.urgency.cta")}
-              </Link>
-            </div>
-          </RevealSection>
-        </div>
-      </section>
+      <UsagesSection />
 
       {/* ═══════════════ SECTION 2.5, INTERNATIONAL (InternationalStrip) ═══════════════ */}
       <RevealSection>
@@ -422,30 +338,7 @@ const Landing = () => {
       </RevealSection>
 
       {/* ═══════════════ SECTION 2bis, CE QUI ARRIVE EN PLUS ═══════════════ */}
-      <section id="rencontre" className="py-10 md:py-20 bg-accent/40 border-y border-accent scroll-mt-24">
-        <div className="max-w-3xl mx-auto px-6">
-          <RevealSection>
-            <span className="text-xs tracking-widest uppercase text-primary/70 font-body mb-6 block text-center">
-              {t("landing.meeting.eyebrow")}
-            </span>
-            <h2 id="le-vrai-pretexte" className="font-heading text-2xl md:text-5xl lg:text-6xl font-semibold leading-[1.15] text-foreground text-center mb-10 scroll-mt-24">
-              {t("landing.meeting.title_a")}<br className="hidden md:inline" /> {t("landing.meeting.title_b")}
-            </h2>
-
-            <div className="border-l-4 border-primary pl-6 md:pl-8 max-w-2xl mx-auto">
-              <p className="text-lg md:text-xl font-body leading-relaxed text-foreground/80 mb-5">
-                {t("landing.meeting.p1")}
-              </p>
-              <p className="text-lg md:text-xl font-body leading-relaxed text-foreground/80 mb-5">
-                {t("landing.meeting.p2")}
-              </p>
-              <p className="font-heading text-xl md:text-2xl italic text-foreground leading-snug">
-                {t("landing.meeting.p3")}
-              </p>
-            </div>
-          </RevealSection>
-        </div>
-      </section>
+      <RencontreSection />
 
       {/* ═══════════════ SECTION 3, COMMENT ÇA MARCHE ═══════════════ */}
       <section id="comment-ca-marche" className="py-10 md:py-20 bg-muted/30 scroll-mt-24">
@@ -559,97 +452,7 @@ const Landing = () => {
       </section>
 
       {/* ═══════════════ SECTION 4, OSEZ L'ENTRAIDE ═══════════════ */}
-      <section id="entraide" className="py-10 md:py-20 bg-accent scroll-mt-24">
-        <div className="max-w-5xl mx-auto px-6">
-          <RevealSection>
-            <span className="text-xs tracking-widest uppercase text-primary/60 font-body mb-4 block text-center">
-              {t("landing.aid.eyebrow")}
-            </span>
-            <h2 id="osez-l-entraide" className="text-2xl md:text-5xl font-heading font-semibold leading-snug text-foreground text-center mb-6 scroll-mt-24">
-              {t("landing.aid.title")}
-            </h2>
-            <p className="text-center text-foreground/70 font-body max-w-2xl mx-auto mb-4 text-lg leading-relaxed">
-              {t("landing.aid.p1")}
-            </p>
-            <p className="text-center text-foreground/70 font-body max-w-2xl mx-auto mb-8 md:mb-16 text-lg leading-relaxed">
-              {t("landing.aid.p2")}
-            </p>
-          </RevealSection>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-            <RevealSection delay={0.1}>
-              <div className="bg-card rounded-2xl p-5 md:p-8 shadow-sm h-full">
-                <h3 className="text-xl font-heading font-semibold text-foreground mb-3">
-                  {t("landing.aid.need_title")}
-                </h3>
-                <p className="text-base font-body leading-relaxed text-foreground/70 mb-4">
-                  {t("landing.aid.need_text")}
-                </p>
-                <p className="text-sm font-body font-medium text-primary">
-                  {t("landing.aid.need_footer")}
-                </p>
-              </div>
-            </RevealSection>
-
-            <RevealSection delay={0.2}>
-              <div className="bg-card rounded-2xl p-5 md:p-8 shadow-sm h-full">
-                <h3 className="text-xl font-heading font-semibold text-foreground mb-3">
-                  {t("landing.aid.offer_title")}
-                </h3>
-                <p className="text-base font-body leading-relaxed text-foreground/70 mb-4">
-                  {t("landing.aid.offer_text")}
-                </p>
-                <p className="text-sm font-body font-medium text-primary">
-                  {t("landing.aid.offer_footer")}
-                </p>
-              </div>
-            </RevealSection>
-          </div>
-
-          <RevealSection delay={0.25} className="mt-16">
-            <p className="text-center text-xs tracking-widest uppercase text-primary/60 font-body mb-6">
-              {t("landing.aid.seen_this_week")}
-            </p>
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 max-w-5xl mx-auto">
-              {[
-                "water_plants",
-                "small_diy",
-                "garden_pruning",
-                "bread_class",
-                "reiki",
-                "parcel",
-                "carpool",
-                "seedlings",
-                "coffee_listen",
-                "groceries",
-                "moving_help",
-                "sewing",
-              ].map((key) => (
-                <div
-                  key={key}
-                  className="flex items-center justify-center text-center bg-card rounded-xl px-3 py-4 border border-border/60 hover:border-primary/40 hover:shadow-sm transition-all min-h-[64px]"
-                >
-                  <span className="text-xs font-body text-foreground/80 leading-tight">{t(`landing.aid.examples.${key}`)}</span>
-                </div>
-              ))}
-            </div>
-          </RevealSection>
-
-          <RevealSection delay={0.3} className="text-center mt-12">
-            <div className="border-l-4 border-primary pl-6 max-w-xl mx-auto text-left mb-10">
-              <p className="text-xl md:text-2xl font-heading font-semibold italic text-foreground leading-snug">
-                {t("landing.aid.quote")}
-              </p>
-            </div>
-            <Link
-              to="/petites-missions"
-              className="inline-flex items-center gap-2 bg-primary text-primary-foreground px-8 py-4 rounded-full font-body font-medium text-sm hover:bg-primary/90 transition-colors"
-            >
-              {t("landing.aid.cta")} <ArrowRight className="h-4 w-4" />
-            </Link>
-          </RevealSection>
-        </div>
-      </section>
+      <EntraideSection />
 
       {/* ═══════════════ SECTION 5.5, CHIFFRES DU RÉSEAU (InventoryStrip) ═══════════════ */}
       <RevealSection>
