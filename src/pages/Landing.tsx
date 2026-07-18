@@ -214,7 +214,7 @@ const Landing = () => {
  (_, index) => testimonials.slice(index * 3, index * 3 + 3)
  );
  const [selectedIndex, setSelectedIndex] = useState(0);
- const [isTestimonialsHovered, setIsTestimonialsHovered] = useState(false);
+ const [isTestimonialsPaused, setIsTestimonialsPaused] = useState(false);
 
  const goToTestimonialPage = (index: number) => {
  const totalPages = testimonialPages.length;
@@ -223,14 +223,14 @@ const Landing = () => {
  };
 
  useEffect(() => {
- if (testimonialPages.length <= 1 || isTestimonialsHovered) return;
+ if (testimonialPages.length <= 1 || isTestimonialsPaused) return;
 
  const intervalId = window.setInterval(() => {
  setSelectedIndex((prev) => (prev + 1) % testimonialPages.length);
  }, 5000);
 
  return () => window.clearInterval(intervalId);
- }, [isTestimonialsHovered, testimonialPages.length]);
+ }, [isTestimonialsPaused, testimonialPages.length]);
 
  /* ── Idle preload of the France illustration (low priority, post-LCP) ── */
  useEffect(() => {
@@ -1115,8 +1115,10 @@ const Landing = () => {
 
           <div
             className="relative"
-            onMouseEnter={() => setIsTestimonialsHovered(true)}
-            onMouseLeave={() => setIsTestimonialsHovered(false)}
+            onMouseEnter={() => setIsTestimonialsPaused(true)}
+            onMouseLeave={() => setIsTestimonialsPaused(false)}
+            onFocus={() => setIsTestimonialsPaused(true)}
+            onBlur={() => setIsTestimonialsPaused(false)}
           >
             <button
               onClick={() => goToTestimonialPage(selectedIndex - 1)}
@@ -1135,7 +1137,7 @@ const Landing = () => {
               <ArrowRight className="h-4 w-4" />
             </button>
 
-            <div className="overflow-hidden px-3">
+            <div className="overflow-hidden px-3" aria-live="polite">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 {(testimonialPages[selectedIndex] ?? []).map((quote) => (
                   <figure key={quote.name} className="min-w-0">

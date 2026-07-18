@@ -47,8 +47,8 @@ const isHighlighted = (s: LiveSit) => s.is_urgent && isForeign(s.country);
 
 /**
  * Aperçu live des annonces sous le Hero.
- * Carte "{t("live_listings.super_opportunity")}" (urgent + étranger) en grand format à gauche,
- * 3 autres en pile à droite.
+ * Une carte "opportunité" (urgente + étrangère) en grand format à gauche,
+ * et une carte secondaire à droite (ou une grille uniforme s'il n'y a pas d'opportunité phare).
  */
 const LiveListingsStrip: React.FC = () => {
   const { t, i18n } = useTranslation();
@@ -312,6 +312,8 @@ const LiveListingsStrip: React.FC = () => {
                           src={photo}
                           alt={s.title}
                           loading="lazy"
+                          width={320}
+                          height={240}
                           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                         />
                       ) : (
@@ -359,7 +361,14 @@ const LiveListingsStrip: React.FC = () => {
                 >
                   <div className="aspect-[4/3] bg-muted relative overflow-hidden">
                     {photo ? (
-                      <img src={photo} alt={s.title} loading="lazy" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                      <img
+                        src={photo}
+                        alt={s.title}
+                        loading="lazy"
+                        width={400}
+                        height={300}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                      />
                     ) : (
                       <div className="w-full h-full bg-gradient-to-br from-accent/60 to-muted" />
                     )}
