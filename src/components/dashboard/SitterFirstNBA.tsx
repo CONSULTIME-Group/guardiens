@@ -12,7 +12,7 @@ import { format, parseISO } from "date-fns";
 import { fr } from "date-fns/locale";
 import { PawPrint } from "lucide-react";
 import { getOptimizedImageUrl } from "@/lib/imageOptim";
-import AffinityBadge from "@/components/matching/AffinityBadge";
+import AffinityRing from "@/components/affinity/AffinityRing";
 import { useEffect, useRef } from "react";
 import { trackEvent } from "@/lib/analytics";
 import type { AffinitySitCard } from "@/hooks/useSitterTopAffinitySits";
@@ -153,7 +153,7 @@ const SitterFirstNBA = ({ sits, mode = "affinity", scopeLabel }: Props) => {
                   <p className="text-[11px] uppercase tracking-[0.16em] font-medium text-primary/70 truncate">
                     {sit.city || "France"}
                   </p>
-                  <h3 className="mt-1.5 font-sans text-[15px] sm:text-[16px] font-medium leading-snug text-foreground line-clamp-2">
+                  <h3 className="mt-1.5 font-heading text-[16px] sm:text-[17px] font-semibold leading-snug text-foreground line-clamp-2">
                     {sit.title || "Annonce"}
                   </h3>
                   <div className="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1 text-[12px] text-muted-foreground">
@@ -171,22 +171,35 @@ const SitterFirstNBA = ({ sits, mode = "affinity", scopeLabel }: Props) => {
                       </>
                     )}
                   </div>
-                  <div className="mt-3 flex flex-wrap items-center gap-1.5">
-                    {sit.affinity ? (
-                      <AffinityBadge
-                        result={sit.affinity}
-                        size="sm"
-                        variant="numeric"
-                        trackingContext="sitter_first_nba"
-                        trackingId={sit.id}
-                      />
-                    ) : null}
-                    {sit.owner_first_name && (
-                      <span className="text-[11px] text-muted-foreground">
-                        Chez {sit.owner_first_name}
-                      </span>
-                    )}
-                  </div>
+                  {sit.affinity && typeof sit.affinity.score === "number" ? (
+                    <div className="mt-3 flex items-center gap-3">
+                      <AffinityRing score={sit.affinity.score} size={72} />
+                      <div className="flex-1 min-w-0">
+                        {sit.affinity.matched && sit.affinity.matched.length > 0 ? (
+                          <p className="text-[12px] leading-snug text-muted-foreground line-clamp-2">
+                            Points communs : {sit.affinity.matched.slice(0, 3).join(", ")}.
+                          </p>
+                        ) : (
+                          <p className="text-[12px] leading-snug text-muted-foreground">
+                            Correspondance basée sur vos critères (animaux, présence).
+                          </p>
+                        )}
+                        {sit.owner_first_name && (
+                          <p className="mt-1 text-[11px] text-muted-foreground/80">
+                            Chez {sit.owner_first_name}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  ) : (
+                    sit.owner_first_name && (
+                      <div className="mt-3">
+                        <span className="text-[11px] text-muted-foreground">
+                          Chez {sit.owner_first_name}
+                        </span>
+                      </div>
+                    )
+                  )}
                 </div>
               </article>
             </Link>
