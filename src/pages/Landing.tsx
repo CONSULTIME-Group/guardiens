@@ -1265,95 +1265,26 @@ const Landing = () => {
                   {t("landing.cities.guides_title")}
                 </h3>
                 <ul className="space-y-3">
-                  <li>
-                    <Link
-                      to="/actualites/s-absenter-avec-animal-guide-solutions-2026"
-                      className="group flex items-start gap-2 text-foreground hover:text-primary transition-colors"
-                    >
-                      <ArrowRight className="h-4 w-4 mt-1 shrink-0 text-primary/60 group-hover:translate-x-0.5 transition-transform" />
-                      <span className="text-sm leading-relaxed">
-                        S'absenter avec un animal : le guide des 8 situations en 2026
-                      </span>
-                    </Link>
-                  </li>
-                  <li>
-                    <Link
-                      to="/actualites/vacances-longues-garde-animal-2-semaines"
-                      className="group flex items-start gap-2 text-foreground hover:text-primary transition-colors"
-                    >
-                      <ArrowRight className="h-4 w-4 mt-1 shrink-0 text-primary/60 group-hover:translate-x-0.5 transition-transform" />
-                      <span className="text-sm leading-relaxed">
-                        Vacances longues : faire garder son animal pendant 2 semaines ou plus
-                      </span>
-                    </Link>
-                  </li>
-                  <li>
-                    <Link
-                      to="/actualites/pension-chien-alternatives-guide"
-                      className="group flex items-start gap-2 text-foreground hover:text-primary transition-colors"
-                    >
-                      <ArrowRight className="h-4 w-4 mt-1 shrink-0 text-primary/60 group-hover:translate-x-0.5 transition-transform" />
-                      <span className="text-sm leading-relaxed">
-                        Alternatives à la pension pour chien : 5 solutions pour partir sereinement
-                      </span>
-                    </Link>
-                  </li>
-                  <li>
-                    <Link
-                      to="/actualites/garde-animaux-savoie-guide"
-                      className="group flex items-start gap-2 text-foreground hover:text-primary transition-colors"
-                    >
-                      <ArrowRight className="h-4 w-4 mt-1 shrink-0 text-primary/60 group-hover:translate-x-0.5 transition-transform" />
-                      <span className="text-sm leading-relaxed">
-                        Garde d'animaux en Savoie : le guide complet
-                      </span>
-                    </Link>
-                  </li>
-                  <li>
-                    <Link
-                      to="/actualites/garde-animaux-haute-savoie-guide"
-                      className="group flex items-start gap-2 text-foreground hover:text-primary transition-colors"
-                    >
-                      <ArrowRight className="h-4 w-4 mt-1 shrink-0 text-primary/60 group-hover:translate-x-0.5 transition-transform" />
-                      <span className="text-sm leading-relaxed">
-                        Garde d'animaux en Haute-Savoie : le guide complet
-                      </span>
-                    </Link>
-                  </li>
-                  <li>
-                    <Link
-                      to="/actualites/garde-animaux-croix-rousse-lyon"
-                      className="group flex items-start gap-2 text-foreground hover:text-primary transition-colors"
-                    >
-                      <ArrowRight className="h-4 w-4 mt-1 shrink-0 text-primary/60 group-hover:translate-x-0.5 transition-transform" />
-                      <span className="text-sm leading-relaxed">
-                        Garde de chien et chat à la Croix-Rousse : spécificités du quartier
-                      </span>
-                    </Link>
-                  </li>
-                  <li>
-                    <Link
-                      to="/actualites/francais-etranger-garde-maison-france"
-                      className="group flex items-start gap-2 text-foreground hover:text-primary transition-colors"
-                    >
-                      <ArrowRight className="h-4 w-4 mt-1 shrink-0 text-primary/60 group-hover:translate-x-0.5 transition-transform" />
-                      <span className="text-sm leading-relaxed">
-                        Français de l'étranger : faire garder sa maison en France pendant son absence
-                      </span>
-                    </Link>
-                  </li>
-                  <li>
-                    <Link
-                      to="/actualites/expat-proprietaire-faire-garder-maison-etranger"
-                      className="group flex items-start gap-2 text-foreground hover:text-primary transition-colors"
-                    >
-                      <ArrowRight className="h-4 w-4 mt-1 shrink-0 text-primary/60 group-hover:translate-x-0.5 transition-transform" />
-                      <span className="text-sm leading-relaxed">
-                        Expatriés : faire garder sa maison à l'étranger (Bali, Lisbonne, Marrakech...) par un Français
-                      </span>
-                    </Link>
-                  </li>
-
+                  {([
+                    { to: "/actualites/s-absenter-avec-animal-guide-solutions-2026", labelKey: "landing.guides_cities.guides.g1.label" },
+                    { to: "/actualites/vacances-longues-garde-animal-2-semaines", labelKey: "landing.guides_cities.guides.g2.label" },
+                    { to: "/actualites/pension-chien-alternatives-guide", labelKey: "landing.guides_cities.guides.g3.label" },
+                    { to: "/actualites/garde-animaux-savoie-guide", labelKey: "landing.guides_cities.guides.g4.label" },
+                    { to: "/actualites/garde-animaux-haute-savoie-guide", labelKey: "landing.guides_cities.guides.g5.label" },
+                    { to: "/actualites/garde-animaux-croix-rousse-lyon", labelKey: "landing.guides_cities.guides.g6.label" },
+                    { to: "/actualites/francais-etranger-garde-maison-france", labelKey: "landing.guides_cities.guides.g7.label" },
+                    { to: "/actualites/expat-proprietaire-faire-garder-maison-etranger", labelKey: "landing.guides_cities.guides.g8.label" },
+                  ] as const).map((e) => (
+                    <li key={e.to}>
+                      <Link
+                        to={e.to}
+                        className="group flex items-start gap-2 text-foreground hover:text-primary transition-colors"
+                      >
+                        <ArrowRight className="h-4 w-4 mt-1 shrink-0 text-primary/60 group-hover:translate-x-0.5 transition-transform" />
+                        <span className="text-sm leading-relaxed">{t(e.labelKey)}</span>
+                      </Link>
+                    </li>
+                  ))}
                 </ul>
                 <div className="mt-6 pt-6 border-t border-border flex flex-col sm:flex-row gap-3">
                   <Button asChild variant="outline" size="sm" className="rounded-full">
