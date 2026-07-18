@@ -283,6 +283,22 @@
       },
       "counter": "{{total}} pros animaliers référencés, {{verified}} vérifiés SIRET",
       "cta_all": "Voir tous les pros"
+    },
+    "alma_tips": {
+      "eyebrow": "Conseils",
+      "title": "Les conseils d'Alma",
+      "intro": "Je rassemble ici des repères pratiques sur les animaux, la maison et les saisons. Rien de théorique : juste des conseils utiles pour votre quotidien.",
+      "cta": "Voir tous les conseils d'Alma",
+      "fallback_label": "Conseil",
+      "types": {
+        "pet_care_tip": "Soins",
+        "dog_behavior_tip": "Chien",
+        "cat_behavior_tip": "Chat",
+        "home_care_tip": "Maison",
+        "seasonal_advice": "Saison",
+        "breed_did_you_know": "Races",
+        "mutual_aid_tip": "Entraide"
+      }
     }
   },
   "faq": {
