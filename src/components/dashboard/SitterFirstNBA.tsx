@@ -170,13 +170,15 @@ const SitterFirstNBA = ({ sits, mode = "affinity", scopeLabel }: Props) => {
                     )}
                   </div>
                   <div className="mt-3 flex flex-wrap items-center gap-1.5">
-                    <AffinityBadge
-                      result={sit.affinity}
-                      size="sm"
-                      variant="numeric"
-                      trackingContext="sitter_first_nba"
-                      trackingId={sit.id}
-                    />
+                    {sit.affinity ? (
+                      <AffinityBadge
+                        result={sit.affinity}
+                        size="sm"
+                        variant="numeric"
+                        trackingContext="sitter_first_nba"
+                        trackingId={sit.id}
+                      />
+                    ) : null}
                     {sit.owner_first_name && (
                       <span className="text-[11px] text-muted-foreground">
                         Chez {sit.owner_first_name}
