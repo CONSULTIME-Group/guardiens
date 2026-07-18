@@ -101,7 +101,7 @@ export function useOwnerDashboardData(userId: string | undefined) {
           supabase.from("properties").select("id, type, environment, photos").eq("user_id", userId),
           supabase.from("reviews").select("overall_rating").eq("reviewee_id", userId).eq("published", true),
           supabase.from("profiles").select("first_name, avatar_url, bio, identity_verification_status, onboarding_completed, onboarding_dismissed_at, onboarding_minimal_completed").eq("id", userId).single(),
-          supabase.from("owner_highlights").select("*, sitter:profiles!owner_highlights_sitter_id_fkey(first_name, avatar_url)").eq("owner_id", userId).eq("hidden", false).order("created_at", { ascending: false }).limit(5),
+          supabase.from("owner_highlights").select("*").eq("owner_id", userId).eq("hidden", false).order("created_at", { ascending: false }).limit(5),
           supabase.from("small_missions").select("id, title, category, city, created_at").eq("status", "open").order("created_at", { ascending: false }).limit(2),
         ]);
 
