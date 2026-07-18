@@ -105,9 +105,7 @@ const SitDetail = () => {
         supabase.from("owner_profiles").select("*").eq("user_id", sitData.user_id).limit(1),
         supabase
           .from("reviews")
-          .select(
-            "*, reviewer:profiles!reviews_reviewer_id_fkey(first_name, avatar_url)",
-          )
+          .select("*")
           .eq("reviewee_id", sitData.user_id)
           .eq("published", true),
         // Galerie propriétaire = source de vérité unique pour les photos.
