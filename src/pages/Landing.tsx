@@ -67,13 +67,6 @@ function getSeasonalBannerKeys(): { titleKey: string; descriptionKey: string } {
 
 
 
-// Initiales pour avatar (ex: "Sarah & Karim" → "S&K", "Nadia" → "N")
-const getInitials = (name: string) =>
-  name
-    .split(/\s*&\s*|\s+/)
-    .map((part) => part.charAt(0).toUpperCase())
-    .join("")
-    .slice(0, 3);
 
 
 
