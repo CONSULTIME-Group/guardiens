@@ -24,6 +24,8 @@ import HomeJsonLd from "@/components/landing/HomeJsonLd";
 import { HowItWorksSection } from "@/components/landing/HowItWorksSection";
 import { ConfianceSection } from "@/components/landing/ConfianceSection";
 import { ComparatifSection } from "@/components/landing/ComparatifSection";
+import { NotreHistoireSection } from "@/components/landing/NotreHistoireSection";
+import { GuidesVillesSection } from "@/components/landing/GuidesVillesSection";
 
 import PublicHeader from "@/components/layout/PublicHeader";
 
