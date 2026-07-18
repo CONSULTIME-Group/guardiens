@@ -54,7 +54,7 @@ export function useSendSitInvitation(sitId: string, ownerId: string) {
         const [{ data: sitRow }, { data: ownerRow }, { data: sitterRow }] = await Promise.all([
           supabase.from("sits").select("title, start_date, end_date").eq("id", sitId).single(),
           supabase.from("profiles").select("first_name, city").eq("id", ownerId).single(),
-          supabase.from("profiles").select("first_name").eq("id", sitterId).single(),
+          supabase.from("public_profiles").select("first_name").eq("id", sitterId).single(),
         ]);
         const { formatSitPeriod } = await import("@/lib/dateRange");
         const { sendTransactionalEmail } = await import("@/lib/sendTransactionalEmail");
