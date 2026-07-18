@@ -295,7 +295,7 @@ const Landing = () => {
                 <li key={item.href} className={item.mobile ? "shrink-0" : "shrink-0 hidden md:list-item"}>
                 <a
                   href={item.href}
-                  className="inline-flex items-center px-3 py-1.5 rounded-full text-[11px] tracking-[0.14em] uppercase font-body text-foreground/55 hover:text-primary hover:bg-primary/5 transition-colors whitespace-nowrap"
+                  className="inline-flex items-center px-3 py-1.5 rounded-full text-[11px] tracking-[0.14em] uppercase font-body text-foreground/75 hover:text-primary hover:bg-primary/5 transition-colors whitespace-nowrap"
                 >
                   {item.label}
                 </a>
