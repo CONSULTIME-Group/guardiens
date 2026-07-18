@@ -185,6 +185,31 @@ const NoNearbySitsEmptyState = ({
             </Link>
           </Button>
         </div>
+
+        {!isProfileIncomplete && user?.id && (
+          <div className="mt-4">
+            {alertActive ? (
+              <p className="text-xs text-muted-foreground">
+                Alerte déjà configurée.{" "}
+                <Link to="/settings#alerts" className="text-accent underline underline-offset-2">
+                  Gérer mes alertes
+                </Link>
+              </p>
+            ) : (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={subscribe}
+                disabled={saving || alertActive === null}
+                className="gap-2"
+              >
+                <BellRing className="h-4 w-4" aria-hidden="true" />
+                M'alerter dès qu'une annonce est publiée près de chez moi
+              </Button>
+            )}
+          </div>
+        )}
+
       </div>
     </section>
   );
