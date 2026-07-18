@@ -1,18 +1,14 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { haversineDistance } from "@/utils/geo";
 import { qk } from "@/lib/queryKeys";
 
 /**
  * Helpers du coin (gens disponibles « pour un coup de main »).
  *
- * Pourquoi un hook dédié plutôt que de réutiliser `useAvailableHelpers` :
- * - on a besoin de la distance par rapport à l'utilisateur courant pour trier
- *   et appliquer un rayon (fallback 30 → 50 → 100 km).
- * - on limite le payload (8 profils max) — c'est un carrousel, pas une liste.
- *
- * Aucune réponse vide : si le rayon de 30 km est sec, on élargit silencieusement.
- * Le composant affiche le rayon réellement utilisé pour rester transparent.
+ * SÉCURITÉ : ce hook ne reçoit JAMAIS les coordonnées GPS d'autres utilisateurs.
+ * Le filtrage géographique et le tri par distance sont réalisés côté serveur
+ * par la fonction Postgres `get_nearby_helpers` (SECURITY DEFINER), qui
+ * renvoie uniquement une distance déjà calculée.
  */
 
 export type NearbyHelper = {
@@ -37,34 +33,17 @@ export type NearbyHelpersResult = {
 
 export const RADIUS_STEPS = [30, 50, 100];
 const MAX_RESULTS = 8;
+const MAX_RADIUS_KM = 100;
 
-/**
- * Rayon « ultra-proche ». À l'intérieur de cette zone, on autorise un
- * bonus de tri pour les profils renseignant un savoir-faire (custom_skills) —
- * et UNIQUEMENT à l'intérieur. Au-delà, la distance reprend la main absolue.
- */
+/** Zone « ultra-proche » — bonus custom_skills réservé à ce périmètre. */
 export const NEAR_RADIUS_KM = 5;
 
-/**
- * Tri canonique des helpers pour le carrousel « près de chez vous ».
- *
- * Règles, dans cet ordre :
- *  1. Distance croissante = priorité ABSOLUE (un profil à 50 km ne passe
- *     JAMAIS devant un profil à 5 km, même avec savoir-faire).
- *  2. Bonus custom_skills UNIQUEMENT si les deux profils comparés sont
- *     dans la zone ≤ NEAR_RADIUS_KM (et à distance ~égale, le bonus
- *     est appliqué avant le tie-break distance).
- *  3. Tie-break : identité vérifiée d'abord.
- *
- * Exporté pour pouvoir être testé sans monter le hook complet.
- */
 export function prioritizeHelpers(list: NearbyHelper[]): NearbyHelper[] {
   return [...list].sort((a, b) => {
     const da = a.distance_km ?? Infinity;
     const db = b.distance_km ?? Infinity;
     const aNear = da <= NEAR_RADIUS_KM;
     const bNear = db <= NEAR_RADIUS_KM;
-    // Bonus skills strictement réservé à la zone ultra-proche.
     if (aNear && bNear) {
       const aHasSkills = a.custom_skills.length > 0 ? 1 : 0;
       const bHasSkills = b.custom_skills.length > 0 ? 1 : 0;
@@ -77,18 +56,31 @@ export function prioritizeHelpers(list: NearbyHelper[]): NearbyHelper[] {
   });
 }
 
-/**
- * Renvoie le prochain palier de rayon strictement plus grand, ou null s'il
- * n'y en a plus. Utilisé par l'UI pour proposer « Élargir le rayon » sans
- * réinitialiser le filtre compétence.
- */
 export function nextRadiusStep(current: number): number | null {
   return RADIUS_STEPS.find((r) => r > current) ?? null;
 }
 
 export type NearbyHelpersOptions = {
-  /** Force un rayon spécifique (sinon fallback automatique 30→50→100). */
   forcedRadius?: number | null;
+};
+
+const normalizeCustom = (raw: any): string[] => {
+  if (!raw) return [];
+  if (Array.isArray(raw)) {
+    return raw
+      .map((item) => {
+        if (typeof item === "string") return item.trim();
+        if (item && typeof item === "object") {
+          const status = typeof item.status === "string" ? item.status : "approved";
+          const label = typeof item.label === "string" ? item.label : "";
+          return status === "approved" ? label.trim() : "";
+        }
+        return "";
+      })
+      .filter((s) => s.length > 0);
+  }
+  if (typeof raw === "string" && raw.trim().length > 0) return [raw];
+  return [];
 };
 
 export function useNearbyHelpers(
@@ -101,122 +93,66 @@ export function useNearbyHelpers(
     enabled: !!currentUserId,
     staleTime: 5 * 60 * 1000,
     queryFn: async () => {
-      // 1. Coords de l'utilisateur courant — fallback sur public_profiles
-      //    (latitude_approx/longitude_approx) si profiles.latitude est null,
-      //    sinon aucune distance ne s'affiche pour les utilisateurs qui n'ont
-      //    pas encore d'adresse précise mais ont un code postal géocodé.
-      const { data: meRaw } = await supabase
-        .from("profiles")
-        .select("latitude, longitude")
-        .eq("id", currentUserId!)
-        .maybeSingle();
+      const { data, error } = await supabase.rpc("get_nearby_helpers", {
+        p_max_results: MAX_RESULTS,
+        p_max_radius_km: MAX_RADIUS_KM,
+      });
+      if (error) throw error;
 
-      let meLat: number | null = (meRaw?.latitude as number | null) ?? null;
-      let meLng: number | null = (meRaw?.longitude as number | null) ?? null;
-      if (meLat === null || meLng === null) {
-        const { data: meApprox } = await supabase
-          .from("public_profiles")
-          .select("latitude_approx, longitude_approx")
-          .eq("id", currentUserId!)
-          .maybeSingle();
-        if (meApprox?.latitude_approx && meApprox?.longitude_approx) {
-          meLat = meApprox.latitude_approx as number;
-          meLng = meApprox.longitude_approx as number;
-        }
-      }
-      const me = meLat !== null && meLng !== null ? { latitude: meLat, longitude: meLng } : null;
-      const hasGeo = !!me;
+      const rows = (data as any[]) ?? [];
+      const hasGeo = rows.length > 0 ? !!rows[0].has_geo : false;
 
-      // 2. Pool de helpers (limité — filtre distance fait côté client,
-      //    on garde large pour avoir matière même en zone rurale)
-      const { data: pool } = await supabase
-        .from("profiles")
-        .select("id, first_name, avatar_url, city, skill_categories, custom_skills, bio, identity_verified, completed_sits_count, latitude, longitude")
-        .eq("available_for_help", true)
-        .neq("id", currentUserId!)
-        .limit(500);
+      const enriched: NearbyHelper[] = rows.map((p: any) => ({
+        id: p.id,
+        first_name: p.first_name,
+        avatar_url: p.avatar_url,
+        city: p.city,
+        skill_categories: p.skill_categories || [],
+        custom_skills: normalizeCustom(p.custom_skills),
+        bio: typeof p.bio === "string" && p.bio.trim().length > 0 ? p.bio : null,
+        identity_verified: !!p.identity_verified,
+        completed_sits_count: p.completed_sits_count || 0,
+        distance_km: p.distance_km ?? null,
+      }));
 
-      if (!pool || pool.length === 0) {
-        return { helpers: [], radiusUsed: RADIUS_STEPS[0], hasGeo, includesExtendedSkillProfiles: false };
-      }
+      const sorted = prioritizeHelpers(enriched);
 
-      const normalizeCustom = (raw: any): string[] => {
-        if (!raw) return [];
-        if (Array.isArray(raw)) {
-          return raw
-            .map((item) => {
-              if (typeof item === "string") return item.trim();
-              if (item && typeof item === "object") {
-                const status = typeof item.status === "string" ? item.status : "approved";
-                const label = typeof item.label === "string" ? item.label : "";
-                return status === "approved" ? label.trim() : "";
-              }
-              return "";
-            })
-            .filter((s) => s.length > 0);
-        }
-        if (typeof raw === "string" && raw.trim().length > 0) return [raw];
-        return [];
-      };
-
-      // 3. Tri par distance si géoloc connue, sinon ordre arbitraire
-      const enriched: NearbyHelper[] = pool.map((p: any) => {
-        const distance_km =
-          hasGeo && p.latitude && p.longitude
-            ? haversineDistance(
-                { lat: me!.latitude as number, lng: me!.longitude as number },
-                { lat: p.latitude, lng: p.longitude },
-              )
-            : null;
-        return {
-          id: p.id,
-          first_name: p.first_name,
-          avatar_url: p.avatar_url,
-          city: p.city,
-          skill_categories: p.skill_categories || [],
-          custom_skills: normalizeCustom(p.custom_skills),
-          bio: typeof p.bio === "string" && p.bio.trim().length > 0 ? p.bio : null,
-          identity_verified: !!p.identity_verified,
-          completed_sits_count: p.completed_sits_count || 0,
-          distance_km,
-        };
-      }).filter((h) => h.skill_categories.length > 0 || h.custom_skills.length > 0);
-
-      const prioritize = (list: NearbyHelper[]) => prioritizeHelpers(list);
-
-      // Pas de géoloc → on retourne 8 profils par identité vérifiée + skills
       if (!hasGeo) {
-        return { helpers: prioritize(enriched).slice(0, MAX_RESULTS), radiusUsed: 0, hasGeo: false, includesExtendedSkillProfiles: false };
+        return {
+          helpers: sorted.slice(0, MAX_RESULTS),
+          radiusUsed: 0,
+          hasGeo: false,
+          includesExtendedSkillProfiles: false,
+        };
       }
-
-      const withDistance = enriched.filter((h) => h.distance_km !== null);
 
       if (forcedRadius && forcedRadius > 0) {
-        const inRange = withDistance.filter((h) => h.distance_km! <= forcedRadius);
+        const inRange = sorted.filter(
+          (h) => h.distance_km !== null && h.distance_km <= forcedRadius,
+        );
         return {
-          helpers: prioritize(inRange).slice(0, MAX_RESULTS),
+          helpers: inRange.slice(0, MAX_RESULTS),
           radiusUsed: forcedRadius,
           hasGeo: true,
           includesExtendedSkillProfiles: false,
         };
       }
 
-      // Fallback progressif du rayon
+      // Plus petit palier contenant au moins 3 helpers, sinon 100.
+      let radiusUsed = RADIUS_STEPS[RADIUS_STEPS.length - 1];
       for (const radius of RADIUS_STEPS) {
-        const inRange = withDistance.filter((h) => h.distance_km! <= radius);
-        if (inRange.length >= 3) {
-          return {
-            helpers: prioritize(inRange).slice(0, MAX_RESULTS),
-            radiusUsed: radius,
-            hasGeo: true,
-            includesExtendedSkillProfiles: false,
-          };
+        const count = sorted.filter(
+          (h) => h.distance_km !== null && h.distance_km <= radius,
+        ).length;
+        if (count >= 3) {
+          radiusUsed = radius;
+          break;
         }
       }
 
       return {
-        helpers: prioritize(withDistance).slice(0, MAX_RESULTS),
-        radiusUsed: RADIUS_STEPS[RADIUS_STEPS.length - 1],
+        helpers: sorted.slice(0, MAX_RESULTS),
+        radiusUsed,
         hasGeo: true,
         includesExtendedSkillProfiles: false,
       };
