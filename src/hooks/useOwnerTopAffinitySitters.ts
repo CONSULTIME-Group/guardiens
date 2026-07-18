@@ -76,10 +76,10 @@ export function useOwnerTopAffinitySitters(): Result {
       const withDistance = pool
         .map((p: any) => {
           let distance_km: number | null = null;
-          if (hasGeo && p.latitude != null && p.longitude != null) {
+          if (hasGeo && p.latitude_approx != null && p.longitude_approx != null) {
             distance_km = haversineDistance(
               { lat: meLat!, lng: meLng! },
-              { lat: p.latitude, lng: p.longitude },
+              { lat: p.latitude_approx, lng: p.longitude_approx },
             );
           }
           return { ...p, distance_km };
