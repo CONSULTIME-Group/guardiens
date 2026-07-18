@@ -69,8 +69,11 @@ const SitterCockpit = ({
               <span className="font-heading font-bold text-base text-foreground/70">{initial}</span>
             )}
           </Link>
-          <div className="min-w-0 flex items-center gap-2 flex-wrap">
-            <h1 className="text-xl sm:text-2xl font-heading font-bold text-foreground leading-tight truncate">
+          <div className="min-w-0">
+            <p className="hidden md:block font-heading italic text-sm text-accent mb-1">
+              Espace gardien
+            </p>
+            <h1 className="text-3xl md:text-4xl font-heading font-bold tracking-tight leading-tight text-foreground">
               Bonjour{firstName ? `, ${capitalize(firstName)}` : ""}
             </h1>
           </div>
