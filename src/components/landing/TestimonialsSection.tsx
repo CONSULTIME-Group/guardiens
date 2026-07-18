@@ -83,7 +83,7 @@ const TestimonialsSection = () => {
                 <figure key={quote.name} className="min-w-0">
                   <blockquote className="rounded-2xl p-10 h-full bg-card border border-border shadow-sm flex flex-col">
                     <span aria-hidden className="block font-heading text-7xl leading-none mb-3 select-none text-primary/40">
-                      &quot;
+                      "
                     </span>
                     <p className="font-body text-base md:text-lg text-foreground/70 leading-relaxed italic mb-6 flex-1">
                       {quote.text}
