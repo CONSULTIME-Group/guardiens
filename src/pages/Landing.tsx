@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import AlmaTipsTeaser from "@/components/landing/AlmaTipsTeaser";
 import notreHistoirePanorama from "@/assets/story-photo.webp";
 import franceLocalNational from "@/assets/illustrations/france-local-national.webp";
@@ -13,10 +13,13 @@ import { trackEvent } from "@/lib/analytics";
 import { supabase } from "@/integrations/supabase/client";
 
 import PageMeta from "@/components/PageMeta";
-// DemoListingShowcase retiré (cards « Bientôt disponible » anti-vente).
-// import DemoListingShowcase from "@/components/landing/DemoListingShowcase";
 
 import InventoryStrip from "@/components/landing/InventoryStrip";
+
+// Date de dernière modification réelle du contenu de la home.
+// À mettre à jour lors d'une vraie évolution éditoriale (hors données dynamiques).
+const HOME_CONTENT_LAST_MODIFIED = "2026-07-01";
+
 import InternationalStrip from "@/components/landing/InternationalStrip";
 import AffinityScoreShowcase from "@/components/landing/AffinityScoreShowcase";
 import ProsShowcase from "@/components/landing/ProsShowcase";
@@ -370,10 +373,11 @@ const Landing = () => {
                   "@type": "ImageObject",
                   url: HOME_OG_IMAGE,
                 },
-                dateModified: new Date().toISOString().slice(0, 10),
+                dateModified: HOME_CONTENT_LAST_MODIFIED,
                 mainEntity: [
                   { "@id": "https://guardiens.fr/#service" },
                   { "@id": "https://guardiens.fr/#howto" },
+                  { "@id": "https://guardiens.fr/#faq" },
                 ],
               },
               {
@@ -454,6 +458,18 @@ const Landing = () => {
                 ],
                 // Pas d'`offers` tant que PRICING_IS_ACTIVE = false : évite un
                 // Rich Result Google avec un prix qui contredirait /tarifs.
+              },
+              {
+                "@type": "FAQPage",
+                "@id": "https://guardiens.fr/#faq",
+                mainEntity: [1, 2, 3, 4, 5, 6, 7, 8].map((n) => ({
+                  "@type": "Question",
+                  name: t(`landing.faq.q${n}`),
+                  acceptedAnswer: {
+                    "@type": "Answer",
+                    text: t(`landing.faq.a${n}`),
+                  },
+                })),
               },
               {
                 "@type": "Person",
@@ -965,16 +981,10 @@ const Landing = () => {
         </div>
       </section>
 
-      {/* Section 5 (annonces live) retirée : doublon de LiveListingsStrip sous le hero. */}
-
       {/* ═══════════════ SECTION 5.5, CHIFFRES DU RÉSEAU (InventoryStrip) ═══════════════ */}
       <RevealSection>
         <InventoryStrip />
       </RevealSection>
-
-      {/* Vitrine démo désactivée : doublonnait LiveListingsSection avec des cards
-          « Bientôt disponible » qui envoyaient un signal anti-vente juste après
-          les vraies annonces live. */}
 
       {/* ═══════════════ SECTION 6, CONFIANCE & PÉRIMÈTRE ═══════════════ */}
       <section id="confiance" className="bg-background py-10 md:py-20 scroll-mt-24" aria-labelledby="trust-heading">
