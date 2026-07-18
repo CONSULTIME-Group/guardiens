@@ -20,7 +20,7 @@ export default function PublicHeader({ authedVariant = false }: { authedVariant?
   const navigate = useNavigate();
   const location = useLocation();
   const { t } = useTranslation();
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, loading } = useAuth();
   const [open, setOpen] = useState(false);
 
   // Utilisateur connecté : l'en-tête public est masqué par défaut, la coquille
@@ -57,7 +57,9 @@ export default function PublicHeader({ authedVariant = false }: { authedVariant?
               )}
             </Button>
           ))}
-          {isAuthenticated ? (
+          {loading ? (
+            <div className="h-8 w-40 rounded-md bg-muted/40 animate-pulse" aria-hidden="true" />
+          ) : isAuthenticated ? (
             <Button size="sm" onClick={() => navigate("/dashboard")}>
               Mon espace
             </Button>
@@ -77,7 +79,9 @@ export default function PublicHeader({ authedVariant = false }: { authedVariant?
         {/* Mobile: auth + burger */}
         <div className="flex sm:hidden items-center gap-1">
           <LanguageSwitcher compact />
-          {isAuthenticated ? (
+          {loading ? (
+            <div className="h-9 w-24 rounded-md bg-muted/40 animate-pulse" aria-hidden="true" />
+          ) : isAuthenticated ? (
             <Button
               size="sm"
               onClick={() => navigate("/dashboard")}
@@ -141,7 +145,9 @@ export default function PublicHeader({ authedVariant = false }: { authedVariant?
             </Link>
           ))}
           <div className="pt-2 border-t border-border">
-            {isAuthenticated ? (
+            {loading ? (
+              <div className="h-9 w-full rounded-md bg-muted/40 animate-pulse" aria-hidden="true" />
+            ) : isAuthenticated ? (
               <Button className="w-full" size="sm" onClick={() => { setOpen(false); navigate("/dashboard"); }}>
                 Mon espace
               </Button>
