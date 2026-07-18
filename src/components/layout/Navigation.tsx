@@ -24,7 +24,7 @@ import ActivateRoleDialog from "@/components/premium/ActivateRoleDialog";
 
 // ── Sidebar group label ──
 const GroupLabel = ({ label }: { label: string }) => (
-  <p className="px-4 pt-5 pb-1.5 text-[10px] font-semibold tracking-widest uppercase text-muted-foreground/60 select-none">
+  <p className="px-4 pt-5 pb-1.5 text-[10px] font-semibold tracking-widest uppercase text-muted-foreground select-none">
     {label}
   </p>
 );

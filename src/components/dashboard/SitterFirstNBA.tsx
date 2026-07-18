@@ -150,7 +150,7 @@ const SitterFirstNBA = ({ sits, mode = "affinity", scopeLabel }: Props) => {
 
                 {/* Corps sous l'image */}
                 <div className="mt-3 px-0.5 flex flex-col flex-1">
-                  <p className="text-[11px] uppercase tracking-[0.16em] font-medium text-primary/70 truncate">
+                  <p className="text-[11px] uppercase tracking-[0.16em] font-medium text-primary truncate">
                     {sit.city || "France"}
                   </p>
                   <h3 className="mt-1.5 font-heading text-[16px] sm:text-[17px] font-semibold leading-snug text-foreground line-clamp-2">
