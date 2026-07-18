@@ -384,7 +384,7 @@ const SearchOwner = () => {
     setResultsTruncated(false);
     const { data: sitters, error: sittersError } = await supabase
       .from("sitter_profiles")
-      .select("*, reply_median_minutes, profile:profiles!sitter_profiles_user_id_fkey(first_name, last_name, avatar_url, city, postal_code, profile_completion, identity_verified, completed_sits_count, bio, pro_status, pro_specialty, last_seen_at)")
+      .select("*, reply_median_minutes")
       .limit(SITTERS_SERVER_CAP);
 
     if (sittersError) {
@@ -394,8 +394,26 @@ const SearchOwner = () => {
       return;
     }
 
-    const rawSitters = sitters || [];
+    const rawSitters = (sitters || []) as any[];
     setResultsTruncated(rawSitters.length >= SITTERS_SERVER_CAP);
+
+    // Hydratation RLS-safe des profils via la vue publique.
+    // Colonnes absentes de la vue : last_name, pro_status, pro_specialty, last_seen_at.
+    const sitterUserIds = Array.from(new Set(
+      rawSitters.map((s: any) => s.user_id).filter(Boolean),
+    )) as string[];
+    if (sitterUserIds.length > 0) {
+      const { data: sitterProfs } = await supabase
+        .from("public_profiles")
+        .select("id, first_name, avatar_url, city, postal_code, profile_completion, identity_verified, completed_sits_count, bio")
+        .in("id", sitterUserIds);
+      const sitterProfMap = new Map<string, any>();
+      (sitterProfs ?? []).forEach((p: any) => sitterProfMap.set(p.id, p));
+      rawSitters.forEach((s: any) => {
+        s.profile = s.user_id ? sitterProfMap.get(s.user_id) ?? null : null;
+      });
+    }
+
     let items = rawSitters.filter((s: any) => s.profile?.profile_completion >= 60);
 
     // Geocode all sitter cities once

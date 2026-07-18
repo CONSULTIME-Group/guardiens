@@ -270,12 +270,30 @@ const EntraideHub = () => {
       const { data } = await supabase
         .from("small_missions")
         .select(
-          "id, slug, title, description, category, city, postal_code, created_at, date_needed, end_date, duration_estimate, status, mission_type, user_id, photos, profiles:user_id(first_name, avatar_url)",
+          "id, slug, title, description, category, city, postal_code, created_at, date_needed, end_date, duration_estimate, status, mission_type, user_id, photos",
         )
         .in("status", ["open", "in_progress", "completed"] as any)
         .order("created_at", { ascending: false })
         .limit(120);
-      const rows = (data || []) as unknown as MissionRow[];
+      const baseRows = (data || []) as any[];
+
+      // Hydratation RLS-safe des auteurs via la vue publique (alias "profiles").
+      const authorIds = Array.from(new Set(
+        baseRows.map((r: any) => r.user_id).filter(Boolean),
+      )) as string[];
+      if (authorIds.length > 0) {
+        const { data: authorProfs } = await supabase
+          .from("public_profiles")
+          .select("id, first_name, avatar_url")
+          .in("id", authorIds);
+        const authorMap = new Map<string, any>();
+        (authorProfs ?? []).forEach((p: any) => authorMap.set(p.id, { first_name: p.first_name, avatar_url: p.avatar_url }));
+        baseRows.forEach((r: any) => {
+          r.profiles = r.user_id ? authorMap.get(r.user_id) ?? null : null;
+        });
+      }
+
+      const rows = baseRows as unknown as MissionRow[];
       setMissions(rows);
       setMLoading(false);
       // Auto-switch vers "all" si moins de 20 missions ET user n'a pas forcé un statut

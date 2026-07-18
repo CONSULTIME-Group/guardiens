@@ -63,16 +63,36 @@ export function useEmptyStateBreakdown({
           supabase.from("sits").select("id", { count: "exact", head: true }).eq("status", "published"),
           supabase.from("small_missions").select("id", { count: "exact", head: true }).eq("status", "open"),
           tab === "sits"
-            ? supabase.from("sits").select("owner:profiles!sits_user_id_fkey(postal_code)").in("status", ["published", "confirmed", "in_progress"]).limit(500)
+            ? supabase.from("sits").select("user_id").in("status", ["published", "confirmed", "in_progress"]).limit(500)
             : supabase.from("small_missions").select("postal_code").eq("status", "open").limit(500),
         ]);
         if (cancelled) return;
         setCrossTabCount(otherTabRes.count ?? 0);
         setLaunchModeCount((sitsAllRes.count ?? 0) + (missionsAllRes.count ?? 0));
 
+        // Hydratation RLS-safe des propriétaires côté "sits" : la requête ne
+        // retourne que des user_id, on charge les postal_code via la vue publique.
+        const breakdownRows = ((breakdownRes.data || []) as any[]).slice();
+        if (tab === "sits") {
+          const ownerIds = Array.from(new Set(
+            breakdownRows.map((r: any) => r.user_id).filter(Boolean),
+          )) as string[];
+          if (ownerIds.length > 0) {
+            const { data: ownerProfs } = await supabase
+              .from("public_profiles")
+              .select("id, postal_code")
+              .in("id", ownerIds);
+            const ownerMap = new Map<string, any>();
+            (ownerProfs ?? []).forEach((p: any) => ownerMap.set(p.id, { postal_code: p.postal_code }));
+            breakdownRows.forEach((r: any) => {
+              r.owner = r.user_id ? ownerMap.get(r.user_id) ?? null : null;
+            });
+          }
+        }
+
         const deptAgg = new Map<string, number>();
         const regionAgg = new Map<string, number>();
-        for (const row of (breakdownRes.data || []) as any[]) {
+        for (const row of breakdownRows) {
           const cp = row?.postal_code || row?.owner?.postal_code || null;
           const dept = getDeptCode(cp);
           if (!dept) continue;

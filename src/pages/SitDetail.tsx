@@ -105,9 +105,7 @@ const SitDetail = () => {
         supabase.from("owner_profiles").select("*").eq("user_id", sitData.user_id).limit(1),
         supabase
           .from("reviews")
-          .select(
-            "*, reviewer:profiles!reviews_reviewer_id_fkey(first_name, avatar_url)",
-          )
+          .select("*")
           .eq("reviewee_id", sitData.user_id)
           .eq("published", true),
         // Galerie propriétaire = source de vérité unique pour les photos.
@@ -152,7 +150,23 @@ const SitDetail = () => {
       setOwner(effectiveOwner);
       setProperty(enrichedProperty);
       setOwnerProfile(ownerProfileData);
-      setReviews(reviewsRes.data || []);
+      // Hydratation RLS-safe des reviewers via la vue publique.
+      const reviewRows = (reviewsRes.data ?? []) as any[];
+      const reviewerIds = Array.from(new Set(
+        reviewRows.map((r: any) => r.reviewer_id).filter(Boolean),
+      )) as string[];
+      if (reviewerIds.length > 0) {
+        const { data: revProfs } = await supabase
+          .from("public_profiles")
+          .select("id, first_name, avatar_url")
+          .in("id", reviewerIds);
+        const revMap = new Map<string, any>();
+        (revProfs ?? []).forEach((p: any) => revMap.set(p.id, { first_name: p.first_name, avatar_url: p.avatar_url }));
+        reviewRows.forEach((r: any) => {
+          r.reviewer = r.reviewer_id ? revMap.get(r.reviewer_id) ?? null : null;
+        });
+      }
+      setReviews(reviewRows);
       setOwnerGallery((galleryRes.data || []).map((g: any) => ({ id: g.id, photo_url: g.photo_url })));
 
       if (effectiveOwner?.city) {
