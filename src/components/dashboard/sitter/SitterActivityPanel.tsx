@@ -25,25 +25,16 @@ const SitterActivityPanel = ({
 }: SitterActivityPanelProps) => {
   const nextGuardLabel = nextGuard
     ? `${format(new Date(nextGuard.start_date), "d MMM", { locale: fr })} → ${format(new Date(nextGuard.end_date), "d MMM", { locale: fr })}`
-    : "À venir";
+    : null;
 
   const nearbyCount = nearbyListings.filter((s) => !s.is_beyond).length;
-
-  const hasNoActivity = completedSits === 0 && pendingAppsCount === 0 && unreadCount === 0 && nearbyCount === 0;
-
-  if (hasNoActivity) {
-    return (
-      <div className="rounded-2xl border border-border bg-card px-4 py-3 text-sm text-muted-foreground">
-        Profil visible par les propriétaires. Vous serez prévenu dès qu'une garde correspond à votre profil.
-      </div>
-    );
-  }
 
   const tiles = [
     {
       to: "#sitter-availability-toggle",
       label: "Disponibilité",
       value: isAvailable ? "Active" : "Inactive",
+      sub: null,
       Icon: () => (
         <span className="relative flex h-2.5 w-2.5" aria-hidden="true">
           {isAvailable && (
@@ -57,37 +48,42 @@ const SitterActivityPanel = ({
     {
       to: "/profile",
       label: "Profil",
-      value: `${profileCompletion}%`,
+      value: profileCompletion === 0 ? "À compléter" : `${profileCompletion}%`,
+      sub: profileCompletion === 0 ? "Un profil complet rassure les propriétaires" : null,
       Icon: UserCircle2,
-      emphasis: profileCompletion < 60 ? "text-warning" : "text-foreground",
+      emphasis: profileCompletion === 0 ? "text-accent font-heading" : profileCompletion < 60 ? "text-warning" : "text-foreground",
     },
     {
       to: nextGuard ? `/sits/${nextGuard.id}` : "/search",
       label: "Prochaine garde",
-      value: nextGuardLabel,
+      value: nextGuardLabel ?? "À décrocher",
+      sub: nextGuardLabel ? null : "Postulez à une annonce proche",
       Icon: Calendar,
-      emphasis: "text-foreground",
+      emphasis: nextGuardLabel ? "text-foreground" : "text-accent font-heading",
     },
     {
       to: "/messages",
       label: "Messages",
-      value: String(unreadCount),
+      value: unreadCount === 0 ? "À lire" : String(unreadCount),
+      sub: unreadCount === 0 ? "Vos conversations apparaissent ici" : null,
       Icon: MessageSquare,
-      emphasis: unreadCount > 0 ? "text-primary" : "text-muted-foreground",
+      emphasis: unreadCount > 0 ? "text-primary" : "text-accent font-heading",
     },
     {
       to: "/my-applications",
       label: "Candidatures",
-      value: String(pendingAppsCount),
+      value: pendingAppsCount === 0 ? "À envoyer" : String(pendingAppsCount),
+      sub: pendingAppsCount === 0 ? "Postulez à une mission proche" : null,
       Icon: FileText,
-      emphasis: pendingAppsCount > 0 ? "text-primary" : "text-muted-foreground",
+      emphasis: pendingAppsCount > 0 ? "text-primary" : "text-accent font-heading",
     },
     {
       to: "#discovery-annonces-heading",
       label: "Annonces autour",
-      value: String(nearbyCount),
+      value: nearbyCount === 0 ? "À explorer" : String(nearbyCount),
+      sub: nearbyCount === 0 ? "Élargissez votre rayon de recherche" : null,
       Icon: MapPin,
-      emphasis: nearbyCount > 0 ? "text-foreground" : "text-muted-foreground",
+      emphasis: nearbyCount > 0 ? "text-foreground" : "text-accent font-heading",
     },
   ];
 
@@ -102,6 +98,7 @@ const SitterActivityPanel = ({
         const Wrapper: any = isAnchor ? "a" : Link;
         const props: any = isAnchor ? { href: t.to } : { to: t.to };
         const Icon = t.Icon;
+        const isInvitation = Boolean(t.sub);
         return (
           <Wrapper
             key={i}
@@ -115,9 +112,14 @@ const SitterActivityPanel = ({
               <p className="text-[11px] uppercase tracking-wide text-muted-foreground font-medium leading-none">
                 {t.label}
               </p>
-              <p className={`mt-1 text-sm font-semibold tabular-nums truncate ${t.emphasis}`}>
+              <p className={`mt-1 text-sm font-semibold truncate ${isInvitation ? "" : "tabular-nums"} ${t.emphasis}`}>
                 {t.value}
               </p>
+              {isInvitation && (
+                <p className="mt-0.5 text-[10px] leading-tight text-accent truncate">
+                  {t.sub}
+                </p>
+              )}
             </div>
           </Wrapper>
         );
