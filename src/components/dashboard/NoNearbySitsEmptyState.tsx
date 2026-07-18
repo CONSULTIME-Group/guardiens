@@ -32,6 +32,12 @@ const NoNearbySitsEmptyState = ({
   postalCode,
   variant = "no_nearby",
 }: Props) => {
+  const { user } = useAuth();
+  const [alertActive, setAlertActive] = useState<boolean | null>(null);
+  const [saving, setSaving] = useState(false);
+  const isProfileIncomplete = variant === "profile_incomplete";
+  const currentRadius = radiusKm;
+
   useEffect(() => {
     void trackEvent("sitter_no_nearby_empty_state_seen", {
       source: "dashboard",
@@ -43,7 +49,72 @@ const NoNearbySitsEmptyState = ({
     });
   }, [totalPublishedSits, radiusKm, variant]);
 
-  const isProfileIncomplete = variant === "profile_incomplete";
+  useEffect(() => {
+    if (isProfileIncomplete || !user?.id) return;
+    let cancelled = false;
+    (async () => {
+      const { data } = await supabase
+        .from("alert_preferences")
+        .select("id, alert_types")
+        .eq("user_id", user.id)
+        .eq("active", true)
+        .eq("zone_type", "rayon")
+        .contains("alert_types", ["gardes"])
+        .limit(1);
+      if (!cancelled) {
+        const active = Array.isArray(data) && data.length > 0;
+        setAlertActive(active);
+        if (active) {
+          void trackEvent("sitter_alert_confirmation_seen", {
+            source: "dashboard_empty_state",
+          });
+        }
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [user?.id, isProfileIncomplete]);
+
+  const subscribe = async () => {
+    if (!user?.id || saving) return;
+    setSaving(true);
+    try {
+      const label = postalCode
+        ? `Autour de ${postalCode} (${currentRadius} km)`
+        : `Autour de moi (${currentRadius} km)`;
+      const { error } = await supabase.rpc("create_alert_preference", {
+        p_label: label,
+        p_zone_type: "rayon",
+        p_city: null,
+        p_postal_code: postalCode ?? null,
+        p_radius_km: currentRadius,
+        p_departement: null,
+        p_region_code: null,
+        p_alert_types: ["gardes", "new_sit"],
+        p_heure_envoi: "08:00",
+        p_frequence: "quotidien",
+      });
+      if (error) throw error;
+      const { error: prefErr } = await supabase
+        .from("email_preferences")
+        .upsert(
+          { user_id: user.id, new_sit_digest: true },
+          { onConflict: "user_id" },
+        );
+      if (prefErr) throw prefErr;
+      setAlertActive(true);
+      void trackEvent("sitter_alert_subscribed", {
+        source: "dashboard_empty_state",
+        metadata: { radius_km: currentRadius, postal_code: postalCode ?? null },
+      });
+      toast.success("Alerte activée, vous serez prévenu par email.");
+    } catch (e) {
+      toast.error("Impossible d'activer l'alerte pour le moment.");
+    } finally {
+      setSaving(false);
+    }
+  };
 
   const eyebrow = isProfileIncomplete ? "Profil à compléter" : "Aucune annonce proche";
   const title = isProfileIncomplete
@@ -62,6 +133,7 @@ const NoNearbySitsEmptyState = ({
       aria-labelledby="no-nearby-empty-state-heading"
       className="px-4 sm:px-5 md:px-8 mb-6 md:mb-8"
     >
+
       <div className="rounded-2xl border border-border bg-card p-6 sm:p-8 text-center">
         <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-accent/10">
           <Icon className="h-7 w-7 text-accent" aria-hidden="true" />
