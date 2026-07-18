@@ -73,7 +73,7 @@ const SitterFirstNBA = ({ sits, mode = "affinity", scopeLabel }: Props) => {
   }, [sits, mode]);
 
   const eyebrow =
-    mode === "fallback" ? "Annonces ouvertes près de chez vous" : "Recommandé pour vous";
+    mode === "fallback" ? "Annonces ouvertes près de chez vous" : "UNE MAISON VOUS ATTEND";
   const heading =
     mode === "fallback"
       ? sits.length === 1
