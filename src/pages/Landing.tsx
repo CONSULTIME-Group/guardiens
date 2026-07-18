@@ -2,10 +2,8 @@ import { useEffect } from "react";
 import AlmaTipsTeaser from "@/components/landing/AlmaTipsTeaser";
 
 import franceLocalNational from "@/assets/illustrations/france-local-national.webp";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { Button } from "@/components/ui/button";
-import { ArrowRight } from "lucide-react";
 import { trackEvent } from "@/lib/analytics";
 import { supabase } from "@/integrations/supabase/client";
 
