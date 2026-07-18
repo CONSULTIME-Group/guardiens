@@ -382,7 +382,7 @@ const SmallMissionDetail = () => {
       const { data: inserted, error } = await supabase
         .from("small_mission_responses")
         .insert({ mission_id: id, responder_id: user.id, message: msg })
-        .select("*, responder:profiles!small_mission_responses_responder_id_fkey(first_name, avatar_url)")
+        .select("*")
         .single();
 
       if (error) {
