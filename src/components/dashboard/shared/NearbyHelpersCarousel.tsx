@@ -359,7 +359,7 @@ const HelperMiniCard = ({
         {/* Savoir-faire (custom), affiché EN PREMIER car c'est le différenciant. */}
         {visibleSF.length > 0 ? (
           <div className="space-y-1.5">
-            <p className="text-[9px] uppercase tracking-[0.2em] text-accent font-bold">
+            <p className="text-[9px] uppercase tracking-[0.2em] text-muted-foreground font-bold">
               Savoir-faire
             </p>
             <div className="flex flex-wrap gap-1.5">
@@ -377,7 +377,7 @@ const HelperMiniCard = ({
             </div>
           </div>
         ) : visibleCats.length === 0 ? (
-          <p className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground/70">
+          <p className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
             Aucun savoir-faire renseigné
           </p>
         ) : null}
@@ -504,7 +504,7 @@ const NearbyHelpersCarousel = memo(({ hideHeader = false }: { hideHeader?: boole
     <section aria-labelledby="nearby-helpers-heading" className="space-y-3">
       {!hideHeader && (
         <div className="min-w-0">
-          <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-accent mb-1.5">
+          <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-muted-foreground mb-1.5">
             Personnes disponibles
           </p>
           <h3

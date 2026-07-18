@@ -12,7 +12,7 @@ export function GuidesVillesSection() {
     <section id="guides-villes" className="py-10 md:py-20 bg-background scroll-mt-24">
       <div className="max-w-6xl mx-auto px-6">
         <RevealSection className="text-center mb-14">
-          <span className="text-xs tracking-widest uppercase text-primary/60 font-body mb-4 block">
+          <span className="text-xs tracking-widest uppercase text-primary font-body mb-4 block">
             {t("landing.cities.eyebrow")}
           </span>
           <h2 id="house-sitting-pres-de-chez-vous" className="font-heading text-4xl md:text-5xl font-semibold text-foreground leading-snug mb-4 scroll-mt-24">
@@ -27,7 +27,7 @@ export function GuidesVillesSection() {
           {/* Colonne Guides */}
           <RevealSection delay={0.1}>
             <div className="rounded-2xl bg-card border border-border p-8 h-full">
-              <p className="text-xs tracking-widest uppercase text-primary/70 font-body mb-2">{t("landing.cities.guides_tag")}</p>
+              <p className="text-xs tracking-widest uppercase text-primary font-body mb-2">{t("landing.cities.guides_tag")}</p>
               <h3 className="font-heading text-2xl font-semibold text-foreground mb-6">
                 {t("landing.cities.guides_title")}
               </h3>
@@ -58,7 +58,7 @@ export function GuidesVillesSection() {
           {/* Colonne Villes */}
           <RevealSection delay={0.2}>
             <div className="rounded-2xl bg-card border border-border p-8 h-full">
-              <p className="text-xs tracking-widest uppercase text-primary/70 font-body mb-2">{t("landing.cities.cities_tag")}</p>
+              <p className="text-xs tracking-widest uppercase text-primary font-body mb-2">{t("landing.cities.cities_tag")}</p>
               <h3 className="font-heading text-2xl font-semibold text-foreground mb-6">
                 {t("landing.cities.cities_title")}
               </h3>

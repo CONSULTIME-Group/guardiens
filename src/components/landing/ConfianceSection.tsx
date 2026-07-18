@@ -43,7 +43,7 @@ export function ConfianceSection() {
           {/* 4 piliers */}
           <RevealOnScroll from="right" delay={120} className="order-1 lg:order-2 grid grid-cols-1 sm:grid-cols-2 gap-4">
             <article className="bg-card border border-border rounded-2xl p-6 transition-all duration-300 hover:shadow-md hover:-translate-y-0.5 hover:border-primary/30 motion-reduce:transition-none motion-reduce:transform-none">
-              <p className="text-xs tracking-widest uppercase text-primary/70 font-body">01</p>
+              <p className="text-xs tracking-widest uppercase text-primary font-body">01</p>
               <h3 className="mt-3 font-heading font-semibold text-lg text-foreground">{t("landing.trust.p1_title")}</h3>
               <p className="mt-2 text-muted-foreground text-sm leading-relaxed">
                 {t("landing.trust.p1_text")}
@@ -51,7 +51,7 @@ export function ConfianceSection() {
             </article>
 
             <article className="bg-card border border-border rounded-2xl p-6 transition-all duration-300 hover:shadow-md hover:-translate-y-0.5 hover:border-primary/30 motion-reduce:transition-none motion-reduce:transform-none">
-              <p className="text-xs tracking-widest uppercase text-primary/70 font-body">02</p>
+              <p className="text-xs tracking-widest uppercase text-primary font-body">02</p>
               <h3 className="mt-3 font-heading font-semibold text-lg text-foreground">{t("landing.trust.p2_title")}</h3>
               <p className="mt-2 text-muted-foreground text-sm leading-relaxed">
                 {t("landing.trust.p2_text")}
@@ -59,7 +59,7 @@ export function ConfianceSection() {
             </article>
 
             <article className="bg-card border border-border rounded-2xl p-6 transition-all duration-300 hover:shadow-md hover:-translate-y-0.5 hover:border-primary/30 motion-reduce:transition-none motion-reduce:transform-none">
-              <p className="text-xs tracking-widest uppercase text-primary/70 font-body">03</p>
+              <p className="text-xs tracking-widest uppercase text-primary font-body">03</p>
               <h3 className="mt-3 font-heading font-semibold text-lg text-foreground">{t("landing.trust.p3_title")}</h3>
               <p className="mt-2 text-muted-foreground text-sm leading-relaxed">
                 {t("landing.trust.p3_text")}
@@ -67,7 +67,7 @@ export function ConfianceSection() {
             </article>
 
             <article className="bg-card border border-border rounded-2xl p-6 transition-all duration-300 hover:shadow-md hover:-translate-y-0.5 hover:border-primary/30 motion-reduce:transition-none motion-reduce:transform-none">
-              <p className="text-xs tracking-widest uppercase text-primary/70 font-body">04</p>
+              <p className="text-xs tracking-widest uppercase text-primary font-body">04</p>
               <h3 className="mt-3 font-heading font-semibold text-lg text-foreground">{t("landing.trust.p4_title")}</h3>
               <p className="mt-2 text-muted-foreground text-sm leading-relaxed">
                 {t("landing.trust.p4_text")}

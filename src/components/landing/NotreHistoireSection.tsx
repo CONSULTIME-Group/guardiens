@@ -9,7 +9,7 @@ export function NotreHistoireSection() {
     <section id="notre-histoire" className="bg-muted/30 scroll-mt-24">
       <div className="max-w-6xl mx-auto px-6 py-10 md:py-20">
         <RevealSection>
-          <span className="text-xs tracking-widest uppercase text-primary/60 font-body mb-4 block">
+          <span className="text-xs tracking-widest uppercase text-primary font-body mb-4 block">
             {t("landing.story.eyebrow")}
           </span>
           <h2 id="commence-avec-un-visa" className="text-2xl md:text-5xl font-heading font-semibold leading-snug text-foreground mb-12 scroll-mt-24">

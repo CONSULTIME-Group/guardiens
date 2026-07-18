@@ -17,7 +17,7 @@ export function UsagesSection() {
           </p>
         </div>
         <RevealSection>
-          <span className="text-xs tracking-widest uppercase text-primary/60 font-body mb-4 block text-center">
+          <span className="text-xs tracking-widest uppercase text-primary font-body mb-4 block text-center">
             {t("landing.usages.eyebrow")}
           </span>
           <h2 id="garde-et-entraide" className="text-2xl md:text-5xl font-heading font-semibold leading-snug text-foreground text-center mb-3 scroll-mt-24">
@@ -31,7 +31,7 @@ export function UsagesSection() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           <RevealSection delay={0.1}>
             <div className="bg-card rounded-2xl p-5 md:p-8 shadow-sm text-left h-full">
-              <p className="text-xs tracking-widest uppercase text-primary/70 font-body mb-3">{t("landing.usages.owner.tag")}</p>
+              <p className="text-xs tracking-widest uppercase text-primary font-body mb-3">{t("landing.usages.owner.tag")}</p>
               <h3 className="text-xl font-heading font-semibold text-foreground mb-3">{t("landing.usages.owner.title")}</h3>
               <p className="text-base font-body leading-relaxed text-foreground/70 mb-4">
                 {t("landing.usages.owner.text")}
@@ -47,7 +47,7 @@ export function UsagesSection() {
 
           <RevealSection delay={0.2}>
             <div className="bg-card rounded-2xl p-5 md:p-8 shadow-sm text-left h-full">
-              <p className="text-xs tracking-widest uppercase text-primary/70 font-body mb-3">{t("landing.usages.sitter.tag")}</p>
+              <p className="text-xs tracking-widest uppercase text-primary font-body mb-3">{t("landing.usages.sitter.tag")}</p>
               <h3 className="text-xl font-heading font-semibold text-foreground mb-3">{t("landing.usages.sitter.title")}</h3>
               <p className="text-base font-body leading-relaxed text-foreground/70 mb-4">
                 {t("landing.usages.sitter.text")}
@@ -63,7 +63,7 @@ export function UsagesSection() {
               <div className="absolute top-0 right-0 bg-primary text-primary-foreground text-[10px] font-body font-bold uppercase tracking-wider px-3 py-1 rounded-bl-lg">
                 {t("landing.usages.mutual.badge")}
               </div>
-              <p className="text-xs tracking-widest uppercase text-primary/70 font-body mb-3">{t("landing.usages.mutual.tag")}</p>
+              <p className="text-xs tracking-widest uppercase text-primary font-body mb-3">{t("landing.usages.mutual.tag")}</p>
               <h3 className="text-xl font-heading font-semibold text-foreground mb-3">{t("landing.usages.mutual.title")}</h3>
               <p className="text-base font-body leading-relaxed text-foreground/70 mb-4">
                 {t("landing.usages.mutual.text")}
@@ -78,7 +78,7 @@ export function UsagesSection() {
         <RevealSection delay={0.4}>
           <div className="mt-10 bg-accent/40 border border-accent rounded-2xl p-6 md:p-7 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             <div>
-              <p className="text-xs tracking-widest uppercase text-foreground/60 font-body mb-1">{t("landing.usages.urgency.eyebrow")}</p>
+              <p className="text-xs tracking-widest uppercase text-foreground/75 font-body mb-1">{t("landing.usages.urgency.eyebrow")}</p>
               <h3 className="text-lg font-heading font-semibold text-foreground">{t("landing.usages.urgency.title")}</h3>
               <p className="text-sm font-body text-foreground/70 mt-1">
                 {t("landing.usages.urgency.text")}

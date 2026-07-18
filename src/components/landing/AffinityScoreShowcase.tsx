@@ -63,7 +63,7 @@ export default function AffinityScoreShowcase() {
 
           <div className="rounded-2xl border border-border bg-card p-6 md:p-8 shadow-sm">
             <div className="flex items-center justify-between mb-4">
-              <span className="font-body text-xs uppercase tracking-widest text-foreground/55">
+              <span className="font-body text-xs uppercase tracking-widest text-foreground/75">
                 {t("landing.affinity.demo_label")}
               </span>
               <span className="inline-flex items-center gap-2 rounded-full bg-primary/10 text-primary px-3 py-1 font-body text-sm font-semibold tabular-nums">

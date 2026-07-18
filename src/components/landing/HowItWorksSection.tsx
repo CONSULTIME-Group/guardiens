@@ -16,7 +16,7 @@ export function HowItWorksSection() {
     <section id="comment-ca-marche" className="py-10 md:py-20 bg-muted/30 scroll-mt-24">
       <div className="max-w-5xl mx-auto px-6">
         <RevealSection>
-          <span className="text-xs tracking-widest uppercase text-primary/60 font-body mb-4 block text-center">
+          <span className="text-xs tracking-widest uppercase text-primary font-body mb-4 block text-center">
             {t("landing.how.eyebrow")}
           </span>
           <h2 id="how-it-works" className="text-2xl md:text-5xl font-heading font-semibold leading-snug text-foreground text-center mb-4 scroll-mt-24">
