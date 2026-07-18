@@ -7,6 +7,7 @@
  * gardien, /annonces et /recherche.
  */
 import { Link } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
 import { format, parseISO } from "date-fns";
 import { fr } from "date-fns/locale";
 import { PawPrint } from "lucide-react";
@@ -50,6 +51,7 @@ const SPECIES_LABEL: Record<string, string> = {
 };
 
 const SitterFirstNBA = ({ sits, mode = "affinity", scopeLabel }: Props) => {
+  const { isAuthenticated } = useAuth();
   const seenRef = useRef(false);
   useEffect(() => {
     if (seenRef.current || sits.length === 0) return;
@@ -111,7 +113,7 @@ const SitterFirstNBA = ({ sits, mode = "affinity", scopeLabel }: Props) => {
           return (
             <Link
               key={sit.id}
-              to={`/annonces/${sit.id}`}
+              to={isAuthenticated ? `/sits/${sit.id}` : `/annonces/${sit.id}`}
               className="group block focus:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-2xl"
               onClick={() =>
                 void trackEvent("sitter_first_nba_card_clicked", {

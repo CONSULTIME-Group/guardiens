@@ -1,4 +1,5 @@
 import { Link, useLocation } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
 
 import EnvironmentPills from "@/components/shared/EnvironmentPills";
 import FavoriteButton from "@/components/shared/FavoriteButton";
@@ -69,15 +70,16 @@ const SearchListingCard = ({
 
   const location = useLocation();
   const isPublicContext = location.pathname.startsWith("/annonces") || location.pathname.startsWith("/petites-missions") || location.pathname.startsWith("/search");
+  const { isAuthenticated } = useAuth();
   const linkTo = isMission
     ? `/petites-missions/${item.id}`
     : isDemo
     ? `/annonces/demo/${item.slug || item.id}`
-    : isPublicContext
-    ? `/annonces/${item.id}`
-    : `/sits/${item.id}`;
+    : isAuthenticated
+    ? `/sits/${item.id}`
+    : `/annonces/${item.id}`;
 
-  const isClickable = (isDemo || hasAccess || isPublicContext) && !isInactive;
+  const isClickable = (isDemo || hasAccess || isPublicContext || isAuthenticated) && !isInactive;
 
   const dateLabel = !isMission && item.start_date
     ? `${formatDate(item.start_date)} → ${formatDate(item.end_date)}`

@@ -38,7 +38,7 @@ const PublicSitDetail = () => {
  const { id: rawParam } = useParams<{ id: string }>();
  const param = rawParam?.replace(/[\s\u00A0\u200B-\u200D\uFEFF]+/g, "") || undefined;
  const navigate = useNavigate();
- const { user, isAuthenticated } = useAuth();
+ const { user, isAuthenticated, activeRole } = useAuth();
  const { hasAccess } = useSubscriptionAccess();
  const [sit, setSit] = useState<any>(null);
  const [owner, setOwner] = useState<any>(null);
@@ -210,8 +210,12 @@ const PublicSitDetail = () => {
               resolvedViewer = "admin";
             } else {
               const role = (user as any).role;
-              if (role === "owner") resolvedViewer = "proprio";
-              else if (role === "both") resolvedViewer = "proprio"; // par défaut : aperçu public, toggle dispo
+              // Un compte "both" ou "owner" qui navigue en mode gardien
+              // (toggle Propriétaire/Gardien positionné sur "sitter") doit
+              // atterrir sur la vue complète, pas sur l'aperçu public.
+              if (activeRole === "sitter") resolvedViewer = "gardien";
+              else if (role === "owner") resolvedViewer = "proprio";
+              else if (role === "both") resolvedViewer = "proprio";
               else resolvedViewer = "gardien";
             }
           }
