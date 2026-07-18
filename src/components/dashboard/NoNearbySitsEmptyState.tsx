@@ -16,12 +16,21 @@ interface Props {
   totalPublishedSits: number;
   radiusKm?: number;
   postalCode?: string | null;
+  /**
+   * "no_nearby"       : profil suffisant, mais aucune annonce ouverte
+   *                     dans le département/région (message distance).
+   * "profile_incomplete" : le pool retourne 0 parce que le profil du
+   *                     gardien manque de critères d'affinité — on invite
+   *                     à compléter le profil, pas à changer de zone.
+   */
+  variant?: "no_nearby" | "profile_incomplete";
 }
 
 const NoNearbySitsEmptyState = ({
   totalPublishedSits,
   radiusKm = 30,
   postalCode,
+  variant = "no_nearby",
 }: Props) => {
   const { user } = useAuth();
   const { toast } = useToast();
