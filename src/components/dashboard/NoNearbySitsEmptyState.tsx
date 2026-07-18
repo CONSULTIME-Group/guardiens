@@ -2,11 +2,15 @@
  * Empty state premium 3 parties pour le dashboard gardien.
  * Statut + enseignement + un seul CTA dominant.
  */
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { Search, UserCircle } from "lucide-react";
+import { Search, UserCircle, BellRing } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { trackEvent } from "@/lib/analytics";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
+import { toast } from "sonner";
+
 
 interface Props {
   totalPublishedSits: number;
