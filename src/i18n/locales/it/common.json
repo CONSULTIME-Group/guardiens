@@ -282,6 +282,22 @@
       },
       "counter": "{{total}} professionisti per animali elencati, {{verified}} verificati SIRET",
       "cta_all": "Vedere tutti i professionisti"
+    },
+    "alma_tips": {
+      "eyebrow": "Consigli",
+      "title": "I consigli di Alma",
+      "intro": "Raccolgo qui riferimenti pratici su animali, casa e stagioni. Niente di teorico: solo consigli utili per la vostra quotidianità.",
+      "cta": "Vedi tutti i consigli di Alma",
+      "fallback_label": "Consiglio",
+      "types": {
+        "pet_care_tip": "Cure",
+        "dog_behavior_tip": "Cane",
+        "cat_behavior_tip": "Gatto",
+        "home_care_tip": "Casa",
+        "seasonal_advice": "Stagione",
+        "breed_did_you_know": "Razze",
+        "mutual_aid_tip": "Aiuto reciproco"
+      }
     }
   },
   "faq": {

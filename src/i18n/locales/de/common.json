@@ -282,6 +282,22 @@
       },
       "counter": "{{total}} gelistete Tierprofis, {{verified}} SIRET-verifiziert",
       "cta_all": "Alle Profis ansehen"
+    },
+    "alma_tips": {
+      "eyebrow": "Tipps",
+      "title": "Almas Tipps",
+      "intro": "Ich sammle hier praktische Hinweise zu Tieren, Haus und Jahreszeiten. Nichts Theoretisches: einfach nützliche Tipps für Ihren Alltag.",
+      "cta": "Alle Tipps von Alma ansehen",
+      "fallback_label": "Tipp",
+      "types": {
+        "pet_care_tip": "Pflege",
+        "dog_behavior_tip": "Hund",
+        "cat_behavior_tip": "Katze",
+        "home_care_tip": "Zuhause",
+        "seasonal_advice": "Saison",
+        "breed_did_you_know": "Rassen",
+        "mutual_aid_tip": "Nachbarschaftshilfe"
+      }
     }
   },
   "faq": {

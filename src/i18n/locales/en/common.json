@@ -282,6 +282,22 @@
       },
       "counter": "{{total}} pet professionals listed, {{verified}} SIRET-verified",
       "cta_all": "See all professionals"
+    },
+    "alma_tips": {
+      "eyebrow": "Tips",
+      "title": "Alma's tips",
+      "intro": "I gather here practical guidance on pets, the home and the seasons. Nothing theoretical: just useful tips for your daily life.",
+      "cta": "See all of Alma's tips",
+      "fallback_label": "Tip",
+      "types": {
+        "pet_care_tip": "Care",
+        "dog_behavior_tip": "Dog",
+        "cat_behavior_tip": "Cat",
+        "home_care_tip": "Home",
+        "seasonal_advice": "Season",
+        "breed_did_you_know": "Breeds",
+        "mutual_aid_tip": "Mutual aid"
+      }
     }
   },
   "faq": {
