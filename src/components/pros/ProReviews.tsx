@@ -81,14 +81,14 @@ export default function ProReviews({
     const ids = Array.from(new Set(list.map((r) => r.user_id)));
     if (ids.length > 0) {
       const { data: profs } = await (supabase
-        .from("profiles") as any)
-        .select("user_id, first_name, last_name, avatar_url")
-        .in("user_id", ids);
-      const map = new Map((profs ?? []).map((p: any) => [p.user_id, p]));
+        .from("public_profiles") as any)
+        .select("id, first_name, avatar_url")
+        .in("id", ids);
+      const map = new Map((profs ?? []).map((p: any) => [p.id, p]));
       list.forEach((r) => {
         const p = map.get(r.user_id) as any;
         if (p) {
-          r.author_name = [p.first_name, p.last_name].filter(Boolean).join(" ") || null;
+          r.author_name = p.first_name ?? null;
           r.author_avatar = p.avatar_url ?? null;
         }
       });

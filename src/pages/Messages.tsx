@@ -146,7 +146,7 @@ const Messages = () => {
     const missionIds = filteredConvs.map((conv: any) => conv.small_mission_id).filter(Boolean);
 
     const [profilesRes, allLastMsgsRes, allUnreadRes, ratingsRes, emergencyRes, sitsRes, applicationsRes, missionsRes, prefsRes] = await Promise.all([
-      supabase.from("profiles").select("id, first_name, avatar_url, identity_verified, city, is_founder, last_seen_at").in("id", otherIds),
+      supabase.from("public_profiles").select("id, first_name, avatar_url, identity_verified, city, is_founder").in("id", otherIds),
       supabase.from("messages").select("conversation_id, content, created_at, sender_id, is_system").in("conversation_id", convIds).order("created_at", { ascending: false }),
       supabase.from("messages").select("conversation_id, id").in("conversation_id", convIds).neq("sender_id", user.id).is("read_at", null),
       supabase.from("reviews").select("reviewee_id, overall_rating").in("reviewee_id", otherIds).eq("published", true),

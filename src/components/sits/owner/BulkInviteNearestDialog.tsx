@@ -102,14 +102,28 @@ const BulkInviteNearestDialog = ({
     setLoading(true);
     (async () => {
       const excluded = new Set(alreadyInvitedIds);
+
+      const { data: availRows } = await supabase
+        .from("sitter_profiles")
+        .select("user_id")
+        .eq("is_available", true);
+      const availableIds = ((availRows as any[]) || [])
+        .map((r) => r.user_id)
+        .filter((id) => id && id !== ownerId && !excluded.has(id));
+
+      if (availableIds.length === 0) {
+        if (!cancel) {
+          setCandidates([]);
+          setLoading(false);
+        }
+        return;
+      }
+
       const { data } = await supabase
         .from("public_profiles")
-        .select(
-          "id, first_name, avatar_url, city, sitter_profiles!inner(is_available)",
-        )
-        .eq("role", "sitter")
+        .select("id, first_name, avatar_url, city")
+        .in("id", availableIds)
         .neq("id", ownerId)
-        .eq("sitter_profiles.is_available", true)
         .not("city", "is", null)
         .limit(300);
 
