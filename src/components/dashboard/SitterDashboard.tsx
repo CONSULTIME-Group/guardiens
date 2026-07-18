@@ -469,7 +469,7 @@ const SitterDashboard = () => {
           → Activation → Opportunités → Profil (accordéon). */}
       <div className="min-w-0">
         {isNewSitter ? (
-          <div className="mx-auto w-full max-w-2xl space-y-8">
+          <div className="mx-auto w-full max-w-4xl space-y-8">
             {/* ═══ New-user path : completion-first quand le profil est incomplet ═══ */}
             {!allChecklistDone && ChecklistBlock}
 
@@ -526,7 +526,7 @@ const SitterDashboard = () => {
             </div>
           </div>
         ) : (
-          <div className="mx-auto w-full max-w-2xl space-y-8">
+          <div className="mx-auto w-full max-w-4xl space-y-8">
             {/* COCKPIT */}
             <div className="min-w-0">
               <SitterCockpit
