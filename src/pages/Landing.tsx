@@ -460,6 +460,18 @@ const Landing = () => {
                 // Rich Result Google avec un prix qui contredirait /tarifs.
               },
               {
+                "@type": "FAQPage",
+                "@id": "https://guardiens.fr/#faq",
+                mainEntity: [1, 2, 3, 4, 5, 6, 7, 8].map((n) => ({
+                  "@type": "Question",
+                  name: t(`landing.faq.q${n}`),
+                  acceptedAnswer: {
+                    "@type": "Answer",
+                    text: t(`landing.faq.a${n}`),
+                  },
+                })),
+              },
+              {
                 "@type": "Person",
                 "@id": "https://guardiens.fr/#founder-jeremie",
                 name: "Jérémie Martinot",
