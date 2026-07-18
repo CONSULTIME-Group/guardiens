@@ -24,7 +24,7 @@ export function useCityStats(
       try {
         // Count verified sitters in same city or nearby
         const { count: sitterCount } = await supabase
-          .from("profiles")
+          .from("public_profiles")
           .select("id", { count: "exact", head: true })
           .in("role", ["sitter", "both"])
           .ilike("city", `%${cityName}%`);

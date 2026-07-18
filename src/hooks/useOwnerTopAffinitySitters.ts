@@ -52,10 +52,9 @@ export function useOwnerTopAffinitySitters(): Result {
 
       // 2. Pool sitters vérifiés
       const { data: pool } = await supabase
-        .from("profiles")
-        .select("id, first_name, avatar_url, city, latitude, longitude, identity_verified, profile_completion, role, account_status")
+        .from("public_profiles")
+        .select("id, first_name, avatar_url, city, latitude_approx, longitude_approx, identity_verified, profile_completion, role")
         .in("role", ["sitter", "both"])
-        .eq("account_status", "active")
         .eq("identity_verified", true)
         .gte("profile_completion", 60)
         .neq("id", userId!)
@@ -77,10 +76,10 @@ export function useOwnerTopAffinitySitters(): Result {
       const withDistance = pool
         .map((p: any) => {
           let distance_km: number | null = null;
-          if (hasGeo && p.latitude != null && p.longitude != null) {
+          if (hasGeo && p.latitude_approx != null && p.longitude_approx != null) {
             distance_km = haversineDistance(
               { lat: meLat!, lng: meLng! },
-              { lat: p.latitude, lng: p.longitude },
+              { lat: p.latitude_approx, lng: p.longitude_approx },
             );
           }
           return { ...p, distance_km };

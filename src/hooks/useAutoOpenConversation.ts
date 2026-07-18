@@ -99,7 +99,7 @@ export function useAutoOpenConversation<C extends ConvLike>({
         if (cancelled || !newConv) return;
 
         const { data: profileData } = await supabase
-          .from("profiles")
+          .from("public_profiles")
           .select("id, first_name, avatar_url, identity_verified, city, is_founder")
           .eq("id", gardienId)
           .single();
@@ -150,7 +150,7 @@ export function useAutoOpenConversation<C extends ConvLike>({
         const otherId =
           fetchedConv.owner_id === user.id ? fetchedConv.sitter_id : fetchedConv.owner_id;
         const { data: profileData } = await supabase
-          .from("profiles")
+          .from("public_profiles")
           .select("id, first_name, avatar_url, identity_verified, city, is_founder")
           .eq("id", otherId)
           .single();

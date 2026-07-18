@@ -80,10 +80,9 @@ export function useNearbyOwnerSitters(currentUserId: string | undefined) {
 
       // 2. Pool de gardiens actifs (large, on filtre côté client)
       const { data: pool } = await supabase
-        .from("profiles")
-        .select("id, first_name, avatar_url, city, identity_verified, completed_sits_count, skill_categories, custom_skills, latitude, longitude, account_status, role, profile_completion")
+        .from("public_profiles")
+        .select("id, first_name, avatar_url, city, identity_verified, completed_sits_count, skill_categories, custom_skills, latitude_approx, longitude_approx, role, profile_completion")
         .in("role", ["sitter", "both"])
-        .eq("account_status", "active")
         .neq("id", currentUserId!)
         .gte("profile_completion", 40)
         .limit(500);
@@ -119,10 +118,10 @@ export function useNearbyOwnerSitters(currentUserId: string | undefined) {
 
       const enriched: NearbyOwnerSitter[] = pool.map((p: any) => {
         const distance_km =
-          hasGeo && p.latitude && p.longitude
+          hasGeo && p.latitude_approx != null && p.longitude_approx != null
             ? haversineDistance(
                 { lat: meLat!, lng: meLng! },
-                { lat: p.latitude, lng: p.longitude },
+                { lat: p.latitude_approx, lng: p.longitude_approx },
               )
             : null;
         const ratings = ratingMap.get(p.id) || [];

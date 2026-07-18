@@ -64,7 +64,7 @@ export const useQuestionDetail = (questionId: string | undefined) => {
     const authorIds = Array.from(new Set(rows.map((r) => r.author_id)));
     if (authorIds.length > 0) {
       const { data: profiles } = await supabase
-        .from("profiles")
+        .from("public_profiles")
         .select("id, first_name, avatar_url")
         .in("id", authorIds);
       const byId = new Map((profiles || []).map((p: any) => [p.id, p]));
