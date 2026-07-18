@@ -328,6 +328,52 @@
         "title": "Parte quest'autunno?",
         "description": "Ognissanti, gite, trasferte: una persona di fiducia vicino a lei veglia sulla sua casa e sui suoi animali mentre è assente."
       }
+    },
+    "what_is": {
+      "title": "Che cos'è Guardiens?",
+      "body": "Guardiens è una piattaforma francese di house-sitting e mutuo aiuto tra privati. Il principio: una persona di fiducia verificata, che vive vicino a lei, si installa a casa sua durante la sua assenza e si occupa dei suoi animali nel loro ambiente. Lo scambio si basa sulla fiducia e sull'incontro, senza costi per il proprietario. Guardiens copre tutta la Francia."
+    },
+    "compare": {
+      "title": "House-sitting, pensione, pet-sitter: cosa scegliere?",
+      "intro": "Quattro soluzioni per far accudire i suoi animali durante la sua assenza. Confronto oggettivo, senza giudizio.",
+      "caption": "Confronto tra house-sitting Guardiens, pensione, pet-sitter a domicilio e affido a un familiare.",
+      "columns": {
+        "solution": "Soluzione",
+        "pet_home": "L'animale resta a casa",
+        "house_lived": "La casa è abitata",
+        "cost": "Costo per il proprietario",
+        "human": "Legame umano"
+      },
+      "rows": {
+        "guardiens": {
+          "label": "House-sitting Guardiens",
+          "pet_home": "Sì",
+          "house_lived": "Sì, in permanenza",
+          "cost": "Nessun costo tra membri",
+          "human": "Incontro preliminare e recensioni reciproche"
+        },
+        "pension": {
+          "label": "Pensione",
+          "pet_home": "No, l'animale viene spostato",
+          "house_lived": "Non applicabile",
+          "cost": "A pagamento, tariffa giornaliera",
+          "human": "Équipe professionale in sede"
+        },
+        "petsitter": {
+          "label": "Pet-sitter a domicilio",
+          "pet_home": "Sì",
+          "house_lived": "No, visite puntuali",
+          "cost": "A pagamento, a visita",
+          "human": "Relazione professionale"
+        },
+        "relative": {
+          "label": "Affido a un familiare",
+          "pet_home": "Variabile",
+          "house_lived": "Variabile",
+          "cost": "Generalmente senza costi",
+          "human": "Relazione familiare o amicale"
+        }
+      }
     }
   },
   "faq": {

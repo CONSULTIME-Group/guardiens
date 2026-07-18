@@ -329,6 +329,52 @@
         "title": "Vous partez cet automne ?",
         "description": "Toussaint, escapades, déplacements : un gardien près de chez vous veille sur votre maison et vos animaux pendant que vous êtes absent."
       }
+    },
+    "what_is": {
+      "title": "Qu'est-ce que Guardiens ?",
+      "body": "Guardiens est une plateforme française de house-sitting et d'entraide entre particuliers. Le principe : un gardien vérifié, qui vit près de chez vous, s'installe dans votre maison pendant votre absence et s'occupe de vos animaux dans leur environnement. L'échange repose sur la confiance et la rencontre, sans frais pour le propriétaire. Guardiens couvre toute la France."
+    },
+    "compare": {
+      "title": "House-sitting, pension, pet-sitter : que choisir ?",
+      "intro": "Quatre solutions pour faire garder vos animaux pendant votre absence. Comparaison factuelle, sans jugement.",
+      "caption": "Comparatif entre house-sitting Guardiens, pension, pet-sitter à domicile et garde par un proche.",
+      "columns": {
+        "solution": "Solution",
+        "pet_home": "L'animal reste chez lui",
+        "house_lived": "La maison est habitée",
+        "cost": "Coût pour le propriétaire",
+        "human": "Lien humain"
+      },
+      "rows": {
+        "guardiens": {
+          "label": "House-sitting Guardiens",
+          "pet_home": "Oui",
+          "house_lived": "Oui, en permanence",
+          "cost": "Aucun frais entre membres",
+          "human": "Rencontre préalable et avis croisés"
+        },
+        "pension": {
+          "label": "Pension",
+          "pet_home": "Non, l'animal est déplacé",
+          "house_lived": "Sans objet",
+          "cost": "Payant, tarif journalier",
+          "human": "Équipe professionnelle sur site"
+        },
+        "petsitter": {
+          "label": "Pet-sitter à domicile",
+          "pet_home": "Oui",
+          "house_lived": "Non, visites ponctuelles",
+          "cost": "Payant, à la visite",
+          "human": "Relation professionnelle"
+        },
+        "relative": {
+          "label": "Garde par un proche",
+          "pet_home": "Variable",
+          "house_lived": "Variable",
+          "cost": "Sans frais en général",
+          "human": "Relation familiale ou amicale"
+        }
+      }
     }
   },
   "faq": {

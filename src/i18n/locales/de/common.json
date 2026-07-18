@@ -328,6 +328,52 @@
         "title": "Verreisen Sie diesen Herbst?",
         "description": "Allerheiligen, Ausflüge, Geschäftsreisen: eine vertrauenswürdige Person in Ihrer Nähe wacht über Ihr Zuhause und Ihre Tiere, während Sie weg sind."
       }
+    },
+    "what_is": {
+      "title": "Was ist Guardiens?",
+      "body": "Guardiens ist eine französische Plattform für House-Sitting und Nachbarschaftshilfe zwischen Privatpersonen. Das Prinzip: eine geprüfte Vertrauensperson, die in Ihrer Nähe wohnt, zieht während Ihrer Abwesenheit bei Ihnen ein und kümmert sich um Ihre Tiere in ihrer gewohnten Umgebung. Der Austausch beruht auf Vertrauen und einer echten Begegnung, ohne Kosten für den Besitzer. Guardiens deckt ganz Frankreich ab."
+    },
+    "compare": {
+      "title": "House-Sitting, Tierpension, Pet-Sitter: was wählen?",
+      "intro": "Vier Lösungen, um Ihre Tiere während Ihrer Abwesenheit betreuen zu lassen. Ein sachlicher, wertfreier Vergleich.",
+      "caption": "Vergleich zwischen Guardiens House-Sitting, Tierpension, Pet-Sitter zu Hause und Betreuung durch Angehörige.",
+      "columns": {
+        "solution": "Lösung",
+        "pet_home": "Tier bleibt zu Hause",
+        "house_lived": "Haus ist bewohnt",
+        "cost": "Kosten für den Besitzer",
+        "human": "Menschliche Bindung"
+      },
+      "rows": {
+        "guardiens": {
+          "label": "Guardiens House-Sitting",
+          "pet_home": "Ja",
+          "house_lived": "Ja, durchgehend",
+          "cost": "Keine Kosten zwischen Mitgliedern",
+          "human": "Vorheriges Treffen und gegenseitige Bewertungen"
+        },
+        "pension": {
+          "label": "Tierpension",
+          "pet_home": "Nein, das Tier wird verlegt",
+          "house_lived": "Nicht zutreffend",
+          "cost": "Kostenpflichtig, Tagestarif",
+          "human": "Professionelles Team vor Ort"
+        },
+        "petsitter": {
+          "label": "Pet-Sitter zu Hause",
+          "pet_home": "Ja",
+          "house_lived": "Nein, punktuelle Besuche",
+          "cost": "Kostenpflichtig, pro Besuch",
+          "human": "Professionelles Verhältnis"
+        },
+        "relative": {
+          "label": "Betreuung durch Angehörige",
+          "pet_home": "Variabel",
+          "house_lived": "Variabel",
+          "cost": "In der Regel kostenlos",
+          "human": "Familiäre oder freundschaftliche Beziehung"
+        }
+      }
     }
   },
   "faq": {

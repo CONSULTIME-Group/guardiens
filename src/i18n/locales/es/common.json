@@ -328,6 +328,52 @@
         "title": "¿Viaja este otoño?",
         "description": "Todos los Santos, escapadas, viajes: una persona de confianza cerca de usted vela por su casa y sus animales durante su ausencia."
       }
+    },
+    "what_is": {
+      "title": "¿Qué es Guardiens?",
+      "body": "Guardiens es una plataforma francesa de house-sitting y ayuda mutua entre particulares. El principio: una persona de confianza verificada, que vive cerca de usted, se instala en su casa durante su ausencia y cuida de sus animales en su entorno. El intercambio se basa en la confianza y el encuentro, sin costes para el propietario. Guardiens cubre toda Francia."
+    },
+    "compare": {
+      "title": "House-sitting, residencia, pet-sitter: ¿qué elegir?",
+      "intro": "Cuatro soluciones para cuidar a sus animales durante su ausencia. Comparación factual, sin juicios.",
+      "caption": "Comparativa entre house-sitting Guardiens, residencia, pet-sitter a domicilio y cuidado por un allegado.",
+      "columns": {
+        "solution": "Solución",
+        "pet_home": "El animal se queda en casa",
+        "house_lived": "La casa está habitada",
+        "cost": "Coste para el propietario",
+        "human": "Vínculo humano"
+      },
+      "rows": {
+        "guardiens": {
+          "label": "House-sitting Guardiens",
+          "pet_home": "Sí",
+          "house_lived": "Sí, de forma permanente",
+          "cost": "Sin costes entre miembros",
+          "human": "Encuentro previo y valoraciones mutuas"
+        },
+        "pension": {
+          "label": "Residencia",
+          "pet_home": "No, el animal es trasladado",
+          "house_lived": "No procede",
+          "cost": "De pago, tarifa diaria",
+          "human": "Equipo profesional in situ"
+        },
+        "petsitter": {
+          "label": "Pet-sitter a domicilio",
+          "pet_home": "Sí",
+          "house_lived": "No, visitas puntuales",
+          "cost": "De pago, por visita",
+          "human": "Relación profesional"
+        },
+        "relative": {
+          "label": "Cuidado por un allegado",
+          "pet_home": "Variable",
+          "house_lived": "Variable",
+          "cost": "Generalmente sin coste",
+          "human": "Relación familiar o de amistad"
+        }
+      }
     }
   },
   "faq": {
