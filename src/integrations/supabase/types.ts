@@ -6894,6 +6894,22 @@ export type Database = {
           user_id: string
         }[]
       }
+      get_nearby_helpers: {
+        Args: { p_max_radius_km?: number; p_max_results?: number }
+        Returns: {
+          avatar_url: string
+          bio: string
+          city: string
+          completed_sits_count: number
+          custom_skills: Json
+          distance_km: number
+          first_name: string
+          has_geo: boolean
+          id: string
+          identity_verified: boolean
+          skill_categories: string[]
+        }[]
+      }
       get_or_create_conversation: {
         Args: {
           p_context_type: Database["public"]["Enums"]["conversation_context"]
