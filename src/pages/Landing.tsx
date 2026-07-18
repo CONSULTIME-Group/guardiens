@@ -47,36 +47,21 @@ const HOME_OG_IMAGE = HOME_ROUTE?.ogImage ?? DEFAULT_OG_IMAGE;
  * - Juillet-Août : été
  * - Septembre-Novembre : automne / Toussaint
  */
-function getSeasonalBanner(): { title: string; description: string } {
- const month = new Date().getMonth(); // 0 = janvier
- if (month === 11) {
- return {
- title: "Vous partez pour les fêtes ?",
- description: "Publiez votre annonce dès maintenant. Un gardien près de chez vous s'occupera de votre maison et de vos animaux pendant les fêtes de fin d'année.",
- };
- }
- if (month <= 2) {
- return {
- title: "Vous partez cet hiver ?",
- description: "Vacances au ski, week-ends prolongés, déplacements pro : confiez votre maison et vos animaux à un gardien près de chez vous.",
- };
- }
- if (month <= 5) {
- return {
- title: "Vous préparez vos vacances ?",
- description: "Anticipez : publiez votre annonce maintenant pour trouver le bon gardien avant le pic de l'été. La rencontre se fait toujours avant le départ.",
- };
- }
- if (month <= 7) {
- return {
- title: "Vous partez cet été ?",
- description: "Publiez votre annonce dès maintenant. Un gardien près de chez vous s'occupera de votre maison et de vos animaux pendant votre absence.",
- };
- }
- return {
- title: "Vous partez cet automne ?",
- description: "Toussaint, escapades, déplacements : un gardien près de chez vous veille sur votre maison et vos animaux pendant que vous êtes absent.",
- };
+function getSeasonalBannerKeys(): { titleKey: string; descriptionKey: string } {
+  const month = new Date().getMonth(); // 0 = janvier
+  if (month === 11) {
+    return { titleKey: "landing.seasonal.december.title", descriptionKey: "landing.seasonal.december.description" };
+  }
+  if (month <= 2) {
+    return { titleKey: "landing.seasonal.winter.title", descriptionKey: "landing.seasonal.winter.description" };
+  }
+  if (month <= 5) {
+    return { titleKey: "landing.seasonal.spring.title", descriptionKey: "landing.seasonal.spring.description" };
+  }
+  if (month <= 7) {
+    return { titleKey: "landing.seasonal.summer.title", descriptionKey: "landing.seasonal.summer.description" };
+  }
+  return { titleKey: "landing.seasonal.autumn.title", descriptionKey: "landing.seasonal.autumn.description" };
 }
 
 
