@@ -164,7 +164,7 @@ export function useOwnerDashboardData(userId: string | undefined) {
         const appsPromise = sitIds.length > 0
           ? supabase
               .from("applications")
-              .select("*, sitter:profiles!applications_sitter_id_fkey(id, first_name, avatar_url, identity_verified, completed_sits_count), sit:sits(title, start_date, end_date)")
+              .select("*, sit:sits(title, start_date, end_date)")
               .in("sit_id", sitIds)
               .order("created_at", { ascending: false })
               .limit(20)
