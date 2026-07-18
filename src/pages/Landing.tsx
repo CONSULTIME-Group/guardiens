@@ -120,29 +120,6 @@ const Landing = () => {
   const kpiInscrits = publicStats?.total_inscrits ?? 0;
   const kpiMissions = publicStats?.missions_entraide ?? 0;
 
- /* ── Local testimonial slider (no external runtime dependency) ── */
- const testimonialPages = Array.from(
- { length: Math.ceil(testimonials.length / 3) },
- (_, index) => testimonials.slice(index * 3, index * 3 + 3)
- );
- const [selectedIndex, setSelectedIndex] = useState(0);
- const [isTestimonialsPaused, setIsTestimonialsPaused] = useState(false);
-
- const goToTestimonialPage = (index: number) => {
- const totalPages = testimonialPages.length;
- if (totalPages <= 1) return;
- setSelectedIndex((index + totalPages) % totalPages);
- };
-
- useEffect(() => {
- if (testimonialPages.length <= 1 || isTestimonialsPaused) return;
-
- const intervalId = window.setInterval(() => {
- setSelectedIndex((prev) => (prev + 1) % testimonialPages.length);
- }, 5000);
-
- return () => window.clearInterval(intervalId);
- }, [isTestimonialsPaused, testimonialPages.length]);
 
  /* ── Idle preload of the France illustration (low priority, post-LCP) ── */
  useEffect(() => {
