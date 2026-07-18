@@ -226,7 +226,7 @@ DemoListingCard.displayName = "DemoListingCard";
 const DemoListingShowcase = React.forwardRef<HTMLElement>((_props, ref) => (
   <section ref={ref} className="py-24 md:py-32 bg-muted/30">
     <div className="max-w-6xl mx-auto px-4">
-      <p className="text-xs tracking-widest uppercase text-primary/60 font-body text-center mb-4">
+      <p className="text-xs tracking-widest uppercase text-primary font-body text-center mb-4">
         Ce qui vous attend
       </p>
 
