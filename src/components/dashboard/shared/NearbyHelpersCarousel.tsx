@@ -557,7 +557,8 @@ const NearbyHelpersCarousel = memo(({ hideHeader = false }: { hideHeader?: boole
           aria-label="Personnes prêtes à rendre service près de chez vous"
           tabIndex={0}
           onKeyDown={onScrollerKeyDown}
-          className="flex gap-3 overflow-x-auto pb-3 px-1 snap-x snap-mandatory scrollbar-hide scroll-smooth rounded-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+          style={{ overscrollBehaviorX: "contain", overscrollBehaviorY: "auto", touchAction: "pan-x pan-y" }}
+          className="flex items-start gap-3 overflow-x-auto pb-3 px-1 snap-x snap-proximity scrollbar-hide scroll-smooth rounded-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
         >
           {helpers.map((helper) => (
             <HelperMiniCard

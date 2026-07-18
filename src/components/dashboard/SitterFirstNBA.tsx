@@ -105,7 +105,7 @@ const SitterFirstNBA = ({ sits, mode = "affinity", scopeLabel }: Props) => {
         <p className="text-sm text-muted-foreground mt-1">{sub}</p>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-5">
+      <div className={`grid grid-cols-1 gap-4 md:gap-5 ${sits.length === 1 ? "sm:max-w-md sm:mx-auto" : sits.length === 2 ? "sm:grid-cols-2 lg:max-w-3xl lg:mx-auto" : "sm:grid-cols-2 lg:grid-cols-3"}`}>
         {sits.map((sit, i) => {
           const speciesLabels = (sit.pet_species || [])
             .slice(0, 3)
