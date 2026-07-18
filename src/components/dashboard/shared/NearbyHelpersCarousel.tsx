@@ -212,10 +212,8 @@ const SKILL_CHIPS: { key: string; label: string; intent: string }[] = [
 
 const HelperMiniCard = ({
   helper,
-  ctaHref,
 }: {
   helper: NearbyHelper;
-  ctaHref: string;
 }) => {
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -234,6 +232,8 @@ const HelperMiniCard = ({
         { otherUserId: helper.id, context: "helper_inquiry" },
         navigate,
       );
+    } catch {
+      toast.error("Impossible d'ouvrir la conversation pour le moment.");
     } finally {
       setContacting(false);
     }
@@ -564,7 +564,6 @@ const NearbyHelpersCarousel = memo(({ hideHeader = false }: { hideHeader?: boole
             <HelperMiniCard
               key={helper.id}
               helper={helper}
-              ctaHref={ctaHref}
             />
           ))}
         </div>
