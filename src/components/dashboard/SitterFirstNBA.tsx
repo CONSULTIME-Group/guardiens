@@ -13,6 +13,7 @@ import { fr } from "date-fns/locale";
 import { PawPrint } from "lucide-react";
 import { getOptimizedImageUrl } from "@/lib/imageOptim";
 import AffinityBadge from "@/components/matching/AffinityBadge";
+import AffinityRing from "@/components/affinity/AffinityRing";
 import { useEffect, useRef } from "react";
 import { trackEvent } from "@/lib/analytics";
 import type { AffinitySitCard } from "@/hooks/useSitterTopAffinitySits";
