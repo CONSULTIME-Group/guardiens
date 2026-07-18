@@ -23,6 +23,8 @@ import { UsagesSection } from "@/components/landing/UsagesSection";
 import { RencontreSection } from "@/components/landing/RencontreSection";
 import { EntraideSection } from "@/components/landing/EntraideSection";
 import HomeJsonLd from "@/components/landing/HomeJsonLd";
+import { HowItWorksSection } from "@/components/landing/HowItWorksSection";
+
 import PublicHeader from "@/components/layout/PublicHeader";
 
 import RecentSitsItemListJsonLd from "@/components/seo/RecentSitsItemListJsonLd";
