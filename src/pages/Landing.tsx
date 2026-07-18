@@ -166,6 +166,7 @@ const Landing = () => {
   const navigate = useNavigate();
   const { t } = useTranslation();
   const { data: inventaire } = useInventaireCounts();
+  const { data: publicStats } = usePublicStats();
   const hasPros = (inventaire?.pros_total ?? 0) > 0;
 
   const seasonal = getSeasonalBanner();
@@ -195,39 +196,17 @@ const Landing = () => {
     return () => { cancelled = true; };
   }, [navigate]);
 
- // KPIs : valeurs réelles depuis public_stats + socle historique équipe.
- // - Maisons : 37 maisons gardées en 5 ans par Jérémie & Elisa (cité dans le récit d'origine).
- // - Animaux : 234 animaux accompagnés sur la même période (cité dans le récit d'origine,
- // src/data/cityContent.ts). On part donc de 234 et on ajoute les nouveaux comptés en base.
- const FOUNDERS_HOUSES_OFFSET = 37;
- const FOUNDERS_ANIMALS_OFFSET = 234;
+  // KPIs : valeurs réelles depuis public_stats + socle historique équipe.
+  // - Maisons : 37 maisons gardées en 5 ans par Jérémie & Elisa (cité dans le récit d'origine).
+  // - Animaux : 234 animaux accompagnés sur la même période (cité dans le récit d'origine,
+  // src/data/cityContent.ts). On part donc de 234 et on ajoute les nouveaux comptés en base.
+  const FOUNDERS_HOUSES_OFFSET = 37;
+  const FOUNDERS_ANIMALS_OFFSET = 234;
 
- const [kpiMaisons, setKpiMaisons] = useState<number>(FOUNDERS_HOUSES_OFFSET);
- const [kpiAnimaux, setKpiAnimaux] = useState<number>(FOUNDERS_ANIMALS_OFFSET);
- const [kpiInscrits, setKpiInscrits] = useState<number>(0);
- const [kpiMissions, setKpiMissions] = useState<number>(0);
-
- useEffect(() => {
- const loadKPIs = async () => {
-      const { data: rows } = await supabase.rpc('get_public_stats');
-      const data = Array.isArray(rows) ? rows[0] : rows;
-      if (data) {
-        if (typeof data.maisons_gardees === 'number') {
-          setKpiMaisons(data.maisons_gardees + FOUNDERS_HOUSES_OFFSET);
-        }
-        if (typeof data.total_inscrits === 'number') {
-          setKpiInscrits(data.total_inscrits);
- }
- if (typeof data.missions_entraide === 'number') {
- setKpiMissions(data.missions_entraide);
- }
- if (typeof data.animaux_accompagnes === 'number') {
- setKpiAnimaux(data.animaux_accompagnes + FOUNDERS_ANIMALS_OFFSET);
- }
- }
- };
- loadKPIs();
- }, []);
+  const kpiMaisons = (publicStats?.maisons_gardees ?? 0) + FOUNDERS_HOUSES_OFFSET;
+  const kpiAnimaux = (publicStats?.animaux_accompagnes ?? 0) + FOUNDERS_ANIMALS_OFFSET;
+  const kpiInscrits = publicStats?.total_inscrits ?? 0;
+  const kpiMissions = publicStats?.missions_entraide ?? 0;
 
  /* ── Local testimonial slider (no external runtime dependency) ── */
  const testimonialPages = Array.from(
