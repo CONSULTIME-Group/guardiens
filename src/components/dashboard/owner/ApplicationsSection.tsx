@@ -10,6 +10,9 @@ import type { AppRow, SitterInfo } from "./types";
 import type { AffinitySitterInput } from "@/lib/affinityScore";
 import TrustHaloAvatar from "@/components/sitters/TrustHaloAvatar";
 import OwnerToSitterAffinity from "@/components/matching/OwnerToSitterAffinity";
+import AffinityRing from "@/components/affinity/AffinityRing";
+import { useViewerOwnerForAffinity } from "@/hooks/useViewerOwnerForAffinity";
+import { useAffinityWithShadow } from "@/hooks/useAffinityWithShadow";
 import { supabase } from "@/integrations/supabase/client";
 
 interface ApplicationsSectionProps {
