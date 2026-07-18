@@ -45,7 +45,7 @@ const CommunityPulseBanner = memo(({ userId, className }: Props) => {
     metrics.push({
       key: "local",
       value: proximity.localCount,
-      label: `gens du coin à moins de ${proximity.radiusKm} km`,
+      label: `à moins de ${proximity.radiusKm} km autour de vous`,
       Icon: MapPin,
       tone: "success",
     });

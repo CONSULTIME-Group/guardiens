@@ -88,18 +88,18 @@ const EmptyHelpersState = ({ hideHeader, userId }: { hideHeader: boolean; userId
         "
       >
         <p className="text-[10px] uppercase tracking-[2px] text-primary font-sans font-semibold mb-2 text-center sm:text-left">
-          Votre coin est encore calme
+          C'est encore calme près de chez vous
         </p>
         <h4 className="font-heading text-lg sm:text-xl font-bold text-foreground leading-snug text-center sm:text-left">
           {variant === "hidden"
             ? "Personne disponible près de chez vous pour l'instant."
-            : "Soyez la première personne de confiance de votre coin."}
+            : "Soyez la première personne de confiance près de chez vous."}
         </h4>
 
         {variant === "primary" && (
           <>
             <p className="text-sm text-foreground/70 leading-relaxed mt-2 max-w-prose">
-              Personne n'est encore disponible pour un coup de main près de chez vous. Invitez un proche du coin pour agrandir le réseau d'échanges et de confiance.
+              Personne n'est encore disponible pour un coup de main près de chez vous. Invitez un proche près de chez vous pour agrandir le réseau d'échanges et de confiance.
             </p>
             <div className="mt-4 flex flex-wrap gap-2">
               <Button asChild size="sm" variant="outline" className="rounded-xl">
@@ -520,7 +520,7 @@ const NearbyHelpersCarousel = memo(({ hideHeader = false }: { hideHeader?: boole
           aider, différent de la section « Missions ouvertes » qui liste des
           besoins et offres publiés. */}
       <p className="text-xs sm:text-sm text-foreground/75 leading-relaxed max-w-prose">
-        Les gens du coin prêts à donner un coup de main ponctuel. Cliquez sur «&nbsp;Lui écrire&nbsp;» pour proposer un échange, c'est gratuit.
+        Les personnes prêtes à donner un coup de main près de chez vous. Cliquez sur «&nbsp;Lui écrire&nbsp;» pour proposer un échange, c'est gratuit.
         {hasGeo && radiusUsed > 0 && (
           <>
             {" "}
@@ -600,7 +600,7 @@ const NearbyHelpersCarousel = memo(({ hideHeader = false }: { hideHeader?: boole
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 pt-2 border-t border-border/40">
         <p className="text-[11px] text-muted-foreground leading-snug">
           Vous préférez décrire votre besoin&nbsp;? Publiez une demande&nbsp;:
-          les membres du coin sont alertés.
+          les membres autour de vous sont alertés.
         </p>
         <div className="flex items-center gap-3 shrink-0">
           <Link
