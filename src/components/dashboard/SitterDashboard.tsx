@@ -469,16 +469,12 @@ const SitterDashboard = () => {
           → Activation → Opportunités → Profil (accordéon). */}
       <div className="min-w-0">
         {isNewSitter ? (
-          <div className="lg:grid lg:grid-cols-12 lg:gap-x-6 lg:auto-rows-min lg:grid-flow-dense">
+          <div className="mx-auto w-full max-w-2xl space-y-8">
             {/* ═══ New-user path : completion-first quand le profil est incomplet ═══ */}
-            {!allChecklistDone && (
-              <div className="lg:col-span-8 lg:col-start-1">
-                {ChecklistBlock}
-              </div>
-            )}
+            {!allChecklistDone && ChecklistBlock}
 
             {/* ═══ New-user path : NBA affinité dominante, pas de cockpit/KPI vides ═══ */}
-            <div className="lg:col-span-8 lg:col-start-1 lg:min-w-0">
+            <div className="min-w-0">
               {nbaLoading ? (
                 <SitterFirstNBASkeleton />
               ) : hasMinimumPool && hasPostalCode ? (
@@ -504,28 +500,28 @@ const SitterDashboard = () => {
               )}
             </div>
 
-            {/* Pouls de la communauté : chiffres réels et vivants. */}
-            <div className="px-4 sm:px-5 md:px-8 mt-4 lg:mt-0 lg:col-span-4 lg:col-start-9 lg:row-start-1 lg:px-0 lg:sticky lg:top-24 lg:self-start">
-              <CommunityPulseBanner userId={user?.id} />
-            </div>
-
             {/* Bannière accès (garde le contexte tarif/onboarding) */}
-            <div className="px-4 sm:px-5 md:px-8 mt-4 lg:col-span-8 lg:col-start-1 lg:px-0">
+            <div className="px-4 sm:px-5 md:px-8">
               {!(level === 4 || level === "3B")
                 ? <AccessGateBanner level={level} profileCompletion={accessProfileCompletion} context="guard" />
                 : <FreePeriodBanner />}
             </div>
 
-            <div className="px-4 sm:px-5 md:px-8 mt-4 lg:col-span-8 lg:col-start-1 lg:px-0">
+            {/* Pouls de la communauté : chiffres réels et vivants. */}
+            <div className="px-4 sm:px-5 md:px-8">
+              <CommunityPulseBanner userId={user?.id} />
+            </div>
+
+            <div className="px-4 sm:px-5 md:px-8">
               <NearbyHelpersCarousel hideHeader />
             </div>
-            <div className="px-4 sm:px-5 md:px-8 mt-6 lg:col-span-8 lg:col-start-1 lg:px-0">
+            <div className="px-4 sm:px-5 md:px-8">
               {ConseilsDiscoveryCard}
             </div>
-            <div className="px-4 sm:px-5 md:px-8 mt-4 lg:col-span-4 lg:col-start-9 lg:px-0">
+            <div className="px-4 sm:px-5 md:px-8">
               <EmailDigestCard />
             </div>
-            <div className="px-4 sm:px-5 md:px-8 mb-6 lg:col-span-4 lg:col-start-9 lg:px-0">
+            <div className="px-4 sm:px-5 md:px-8 mb-6">
               {buildSecondaryAccordion()}
             </div>
           </div>
