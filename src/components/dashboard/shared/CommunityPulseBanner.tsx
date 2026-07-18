@@ -109,7 +109,7 @@ const CommunityPulseBanner = memo(({ userId, className }: Props) => {
           Le pouls de la communauté
         </h2>
       </div>
-      <ul className="grid grid-cols-2 md:grid-cols-4 gap-2.5 sm:gap-3">
+      <ul className="grid grid-cols-2 gap-3">
         {metrics.slice(0, 4).map(({ key, value, label, Icon, tone }) => (
           <li
             key={key}
