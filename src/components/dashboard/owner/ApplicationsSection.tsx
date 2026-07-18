@@ -98,7 +98,7 @@ const AppCard = memo(({ app, sitterProfiles, sitterAffinityProfiles, featured = 
           ) : (
             <span className="text-xs font-sans text-muted-foreground italic">Nouveau</span>
           )}
-          {sitter?.id && sitterAffinityProfiles?.[sitter.id] ? (
+          {!featured && sitter?.id && sitterAffinityProfiles?.[sitter.id] ? (
             <OwnerToSitterAffinity
               sitterProfile={sitterAffinityProfiles[sitter.id]}
               context="owner_dashboard_applications"
@@ -109,6 +109,12 @@ const AppCard = memo(({ app, sitterProfiles, sitterAffinityProfiles, featured = 
             />
           ) : null}
         </div>
+        {featured && sitter?.id && sitterAffinityProfiles?.[sitter.id] ? (
+          <FeaturedAffinityBlock
+            sitterProfile={sitterAffinityProfiles[sitter.id]}
+            sitterId={sitter.id}
+          />
+        ) : null}
         <div className="flex gap-2 mt-3 flex-wrap">
           {sitter?.id ? (
             <button
