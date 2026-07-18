@@ -1,5 +1,5 @@
 /**
- * CommunityPulseBanner — bandeau « Le pouls de la communauté ».
+ * CommunityPulseBanner — panneau vert chaleureux « Le quartier, en ce moment ».
  *
  * Vitrine de chiffres RÉELS et vivants (jamais des KPI personnels à zéro).
  * Sources : useCommunityPulse (RPC get_public_stats + offsets fondateurs) et
@@ -25,15 +25,7 @@ interface Metric {
   value: number;
   label: string;
   Icon: typeof Users;
-  tone: "primary" | "warning" | "success" | "info";
 }
-
-const TONE_CLASSES: Record<Metric["tone"], string> = {
-  primary: "bg-primary/10 text-primary",
-  warning: "bg-warning/10 text-warning",
-  success: "bg-success/10 text-success",
-  info: "bg-info/10 text-info",
-};
 
 const CommunityPulseBanner = memo(({ userId, className }: Props) => {
   const { data: pulse } = useCommunityPulse();
@@ -47,7 +39,6 @@ const CommunityPulseBanner = memo(({ userId, className }: Props) => {
       value: proximity.localCount,
       label: `à moins de ${proximity.radiusKm} km autour de vous`,
       Icon: MapPin,
-      tone: "success",
     });
   }
   if (pulse && pulse.maisonsGardees > 0) {
@@ -56,7 +47,6 @@ const CommunityPulseBanner = memo(({ userId, className }: Props) => {
       value: pulse.maisonsGardees,
       label: "maisons gardées",
       Icon: Home,
-      tone: "primary",
     });
   }
   if (pulse && pulse.animauxAccompagnes > 0) {
@@ -65,7 +55,6 @@ const CommunityPulseBanner = memo(({ userId, className }: Props) => {
       value: pulse.animauxAccompagnes,
       label: "animaux accompagnés",
       Icon: PawPrint,
-      tone: "warning",
     });
   }
   if (proximity && proximity.nationalCount > 0) {
@@ -74,7 +63,6 @@ const CommunityPulseBanner = memo(({ userId, className }: Props) => {
       value: proximity.nationalCount,
       label: "personnes prêtes à aider en France",
       Icon: HandHeart,
-      tone: "info",
     });
   }
   if (pulse && pulse.totalInscrits > 0) {
@@ -83,7 +71,6 @@ const CommunityPulseBanner = memo(({ userId, className }: Props) => {
       value: pulse.totalInscrits,
       label: "membres de la communauté",
       Icon: Users,
-      tone: "primary",
     });
   }
 
@@ -93,52 +80,43 @@ const CommunityPulseBanner = memo(({ userId, className }: Props) => {
     <section
       aria-labelledby="community-pulse-heading"
       className={cn(
-        "rounded-2xl border border-border/60 bg-card p-4 sm:p-5",
+        "rounded-2xl bg-gradient-to-br from-[#235741] to-[#2C6D50] p-6 md:p-7 shadow-lg",
         className,
       )}
     >
-      <div className="flex items-center gap-2 mb-3">
-        <span className="relative flex h-2 w-2 shrink-0" aria-hidden="true">
-          <span className="absolute inline-flex h-full w-full rounded-full bg-success opacity-60 animate-ping" />
-          <span className="relative inline-flex h-2 w-2 rounded-full bg-success" />
-        </span>
+      <div className="mb-5">
+        <p className="text-[11px] sm:text-xs font-semibold uppercase tracking-[0.18em] text-[#cfe6da]">
+          Le quartier, en ce moment
+        </p>
         <h2
           id="community-pulse-heading"
-          className="font-heading text-sm sm:text-base font-semibold text-foreground leading-tight"
+          className="mt-1.5 font-heading text-xl sm:text-2xl font-semibold text-white leading-tight"
         >
-          Le pouls de la communauté
+          Il vit. Vous en êtes déjà.
         </h2>
       </div>
-      <ul className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-2 gap-3">
-        {metrics.slice(0, 4).map(({ key, value, label, Icon, tone }) => (
-          <li
-            key={key}
-            className="flex items-start gap-2.5 rounded-xl bg-background/60 border border-border/40 p-3 min-w-0"
-          >
-            <span
-              className={cn(
-                "flex h-8 w-8 shrink-0 items-center justify-center rounded-lg",
-                TONE_CLASSES[tone],
-              )}
+      <ul className="grid grid-cols-2 gap-x-6 gap-y-4">
+        {metrics.slice(0, 4).map(({ key, value, label, Icon }) => (
+          <li key={key} className="flex items-start gap-2.5 min-w-0">
+            <Icon
+              className="mt-1 h-3.5 w-3.5 shrink-0 text-[#cfe6da] opacity-80"
               aria-hidden="true"
-            >
-              <Icon className="h-4 w-4" />
-            </span>
+            />
             <div className="min-w-0">
-              <div className="font-heading text-lg sm:text-xl font-bold text-foreground tabular-nums leading-none">
+              <div className="font-heading text-2xl sm:text-3xl font-semibold text-white tabular-nums leading-none">
                 {value.toLocaleString("fr-FR")}
               </div>
-              <div className="mt-1 text-[11px] sm:text-xs text-foreground/70 leading-snug">
+              <div className="mt-1 text-xs sm:text-sm text-[#d5e6dd] leading-snug">
                 {label}
               </div>
             </div>
           </li>
         ))}
       </ul>
-      <div className="mt-3 flex justify-end">
+      <div className="mt-5 flex justify-end">
         <Link
           to="/actualites/inventaire-guardiens-france"
-          className="inline-flex items-center gap-1 text-xs sm:text-sm text-muted-foreground hover:text-primary transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-sm"
+          className="inline-flex items-center gap-1 text-xs sm:text-sm text-[#cfe6da] hover:text-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60 focus-visible:ring-offset-2 focus-visible:ring-offset-[#235741] rounded-sm"
         >
           Voir l'inventaire complet
           <ArrowRight className="h-3 w-3" aria-hidden="true" />
