@@ -118,7 +118,7 @@ const SitterFirstNBA = ({ sits, mode = "affinity", scopeLabel }: Props) => {
                   source: "dashboard",
                   metadata: {
                     sit_id: sit.id,
-                    affinity_score: sit.affinity.score,
+                    affinity_score: sit.affinity?.score ?? null,
                     position: i + 1,
                   },
                 })
