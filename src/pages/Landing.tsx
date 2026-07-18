@@ -84,7 +84,7 @@ const Landing = () => {
   const { data: publicStats } = usePublicStats();
   const hasPros = (inventaire?.pros_total ?? 0) > 0;
 
-  const seasonal = getSeasonalBannerKeys();
+  
 
   // OAuth mobile fallback : si Google nous renvoie sur "/" alors qu'un flux
   // OAuth est actif (in-app browser, PWA, broker mobile), on récupère la
