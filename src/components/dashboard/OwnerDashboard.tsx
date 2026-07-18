@@ -651,6 +651,8 @@ const OwnerDashboard = () => {
             coverPhoto={propertyCoverPhoto}
           />
 
+          {showAlmaProactive && <OwnerFirstNBAGardiens />}
+
 
           {/* Mes animaux, remonté juste après l'annonce (logique : maison → animaux) */}
           <DashSection
