@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import AlmaTipsTeaser from "@/components/landing/AlmaTipsTeaser";
 import notreHistoirePanorama from "@/assets/story-photo.webp";
 import franceLocalNational from "@/assets/illustrations/france-local-national.webp";
@@ -13,10 +13,13 @@ import { trackEvent } from "@/lib/analytics";
 import { supabase } from "@/integrations/supabase/client";
 
 import PageMeta from "@/components/PageMeta";
-// DemoListingShowcase retiré (cards « Bientôt disponible » anti-vente).
-// import DemoListingShowcase from "@/components/landing/DemoListingShowcase";
 
 import InventoryStrip from "@/components/landing/InventoryStrip";
+
+// Date de dernière modification réelle du contenu de la home.
+// À mettre à jour lors d'une vraie évolution éditoriale (hors données dynamiques).
+const HOME_CONTENT_LAST_MODIFIED = "2026-07-01";
+
 import InternationalStrip from "@/components/landing/InternationalStrip";
 import AffinityScoreShowcase from "@/components/landing/AffinityScoreShowcase";
 import ProsShowcase from "@/components/landing/ProsShowcase";
