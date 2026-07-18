@@ -526,25 +526,27 @@ const SitterDashboard = () => {
             </div>
           </div>
         ) : (
-          <>
+          <div className="lg:grid lg:grid-cols-12 lg:gap-x-6 lg:auto-rows-min">
             {/* COCKPIT */}
-            <SitterCockpit
-              userId={user?.id}
-              firstName={user?.firstName}
-              avatarUrl={avatarUrl}
-              isFounder={user?.isFounder}
-              isAvailable={isAvailable}
-              onToggleAvailability={toggleAvailability}
-              nextGuard={nextGuard}
-              profileCompletion={profileCompletion}
-              postalCode={postalCode}
-              nearbyListings={nearbyListings}
-              competencesCount={competencesCount}
-              interestsCount={interestsCount}
-            />
+            <div className="lg:col-span-8 lg:col-start-1 lg:min-w-0">
+              <SitterCockpit
+                userId={user?.id}
+                firstName={user?.firstName}
+                avatarUrl={avatarUrl}
+                isFounder={user?.isFounder}
+                isAvailable={isAvailable}
+                onToggleAvailability={toggleAvailability}
+                nextGuard={nextGuard}
+                profileCompletion={profileCompletion}
+                postalCode={postalCode}
+                nearbyListings={nearbyListings}
+                competencesCount={competencesCount}
+                interestsCount={interestsCount}
+              />
+            </div>
 
             {(nextGuardError || nearbyError) && (
-              <div className="px-4 sm:px-5 md:px-8 mt-2 space-y-2">
+              <div className="px-4 sm:px-5 md:px-8 mt-2 space-y-2 lg:col-span-8 lg:col-start-1 lg:px-0">
                 {nextGuardError && (
                   <DashboardSectionState
                     variant="error"
@@ -564,7 +566,8 @@ const SitterDashboard = () => {
               </div>
             )}
 
-            <div className="px-4 sm:px-5 md:px-8 mt-4">
+            {/* KPI perso : au rail en desktop */}
+            <div className="px-4 sm:px-5 md:px-8 mt-4 lg:mt-0 lg:col-span-4 lg:col-start-9 lg:row-start-1 lg:px-0 lg:sticky lg:top-24 lg:self-start">
               <SitterActivityPanel
                 isAvailable={isAvailable}
                 profileCompletion={profileCompletion}
@@ -577,35 +580,35 @@ const SitterDashboard = () => {
             </div>
 
             {/* Pouls de la communauté : chiffres réels et vivants. */}
-            <div className="px-4 sm:px-5 md:px-8 mt-4">
+            <div className="px-4 sm:px-5 md:px-8 mt-4 lg:col-span-4 lg:col-start-9 lg:px-0">
               <CommunityPulseBanner userId={user?.id} />
             </div>
 
             {!nextGuard && (
-              <div className="px-4 sm:px-5 md:px-8 mt-4">
+              <div className="px-4 sm:px-5 md:px-8 mt-4 lg:col-span-8 lg:col-start-1 lg:px-0">
                 {!(level === 4 || level === "3B")
                   ? <AccessGateBanner level={level} profileCompletion={accessProfileCompletion} context="guard" />
                   : <FreePeriodBanner />}
               </div>
             )}
 
-            <div className="mt-6">
+            <div className="mt-6 lg:col-span-8 lg:col-start-1">
               {ChecklistBlock}
             </div>
-            <div className="px-4 sm:px-5 md:px-8 mb-6">
+            <div className="px-4 sm:px-5 md:px-8 mb-6 lg:col-span-8 lg:col-start-1 lg:px-0">
               {DiscoverySections}
             </div>
-            <div className="px-4 sm:px-5 md:px-8 mb-6">
+            <div className="px-4 sm:px-5 md:px-8 mb-6 lg:col-span-8 lg:col-start-1 lg:px-0">
               {ConseilsDiscoveryCard}
             </div>
-            <div className="px-4 sm:px-5 md:px-8 mt-4">
+            <div className="px-4 sm:px-5 md:px-8 mt-4 lg:col-span-4 lg:col-start-9 lg:px-0">
               <EmailDigestCard />
             </div>
-            <div className="px-4 sm:px-5 md:px-8 mb-6">
+            <div className="px-4 sm:px-5 md:px-8 mb-6 lg:col-span-4 lg:col-start-9 lg:px-0">
               {buildSecondaryAccordion()}
             </div>
 
-          </>
+          </div>
         )}
       </div>
 
