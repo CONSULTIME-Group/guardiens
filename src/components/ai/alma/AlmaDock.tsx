@@ -468,7 +468,7 @@ function AlmaDockInner() {
         <div
           role="status"
           className={cn(
-            "pointer-events-auto mb-2 w-[min(20rem,calc(100vw-1.5rem))]",
+            "pointer-events-auto mb-2 w-full md:w-80",
             "rounded-2xl border border-border bg-card text-card-foreground shadow-lg",
             "p-3 pr-9 relative",
             "animate-in slide-in-from-bottom-2 fade-in duration-300",
