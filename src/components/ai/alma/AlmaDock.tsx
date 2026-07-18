@@ -379,12 +379,12 @@ function AlmaDockInner() {
   return (
     <div
       className={cn(
-        "fixed z-40 pointer-events-none",
-        "right-3 md:right-6",
+        "fixed z-40 pointer-events-none flex flex-col items-end",
+        "left-3 right-3 md:left-auto md:right-6",
+        // Mobile : au-dessus de la BottomNav (h-16 + safe-area) avec marge.
+        // Desktop : simple marge basse (pas de BottomNav).
+        "bottom-[calc(env(safe-area-inset-bottom,0px)+5.5rem)] md:bottom-6",
       )}
-      style={{
-        bottom: "calc(env(safe-area-inset-bottom, 0px) + 5rem)",
-      }}
     >
       {/* Panneau déplié */}
       {expanded && whisper && (
@@ -397,7 +397,7 @@ function AlmaDockInner() {
           onFocusCapture={pauseTimer}
           onBlurCapture={resumeTimer}
           className={cn(
-            "pointer-events-auto mb-2 w-[min(20rem,calc(100vw-1.5rem))]",
+            "pointer-events-auto mb-2 w-full md:w-80",
             "rounded-2xl border border-primary/20 bg-card text-card-foreground shadow-xl",
             "p-3 pr-9 relative",
             "animate-in slide-in-from-bottom-2 fade-in duration-300",
@@ -468,7 +468,7 @@ function AlmaDockInner() {
         <div
           role="status"
           className={cn(
-            "pointer-events-auto mb-2 w-[min(20rem,calc(100vw-1.5rem))]",
+            "pointer-events-auto mb-2 w-full md:w-80",
             "rounded-2xl border border-border bg-card text-card-foreground shadow-lg",
             "p-3 pr-9 relative",
             "animate-in slide-in-from-bottom-2 fade-in duration-300",

@@ -45,7 +45,7 @@ export const AppLayout = ({ children }: { children?: ReactNode }) => {
     <OnboardingGate />
     <div className="flex min-h-screen bg-background">
       <Sidebar />
-      <main id="main-content" className="flex-1 min-w-0 pb-20 md:pb-0 overflow-x-clip" role="main">
+      <main id="main-content" className="flex-1 min-w-0 pb-20 md:pb-24 overflow-x-clip" role="main">
         {/* Mobile top bar unifiée : back (si applicable) + logo + cloche */}
         <div className="md:hidden sticky top-0 z-40 flex items-center justify-between gap-2 px-3 py-2 bg-background/95 backdrop-blur border-b border-border">
           <div className="flex items-center gap-1 min-w-0">
