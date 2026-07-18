@@ -68,7 +68,7 @@ const RealMembersStrip = () => {
   return (
     <div className="mb-16 flex flex-col items-center gap-5">
       {members.length > 0 && (
-        <ul className="flex -space-x-3" aria-label="Aperçu des membres récents">
+        <ul className="flex -space-x-3" aria-label={t("landing.real_members.members_preview_aria")}>
           {members.map((m) => (
             <li key={m.id}>
               <Link
@@ -78,7 +78,11 @@ const RealMembersStrip = () => {
               >
                 <img
                   src={m.avatar_url ?? ""}
-                  alt={m.city ? `${m.first_name}, membre Guardiens à ${m.city}` : `${m.first_name}, membre Guardiens`}
+                  alt={
+                    m.city
+                      ? t("landing.real_members.member_alt_with_city", { name: m.first_name, city: m.city })
+                      : t("landing.real_members.member_alt_default", { name: m.first_name })
+                  }
                   className="h-full w-full object-cover"
                   loading="lazy"
                   width={44}
@@ -91,10 +95,9 @@ const RealMembersStrip = () => {
       )}
       <p className="font-body text-sm text-foreground/70 text-center max-w-xl">
         <span className="font-semibold text-foreground">
-          Plus de {memberCount} membres
-        </span>{" "}
-        ont déjà rejoint le réseau, partout en France, de Valence à Quimper, de
-        Paris à Sète.
+          {t("landing.real_members.members_count", { count: memberCount })}
+        </span>
+        {t("landing.real_members.members_suffix")}
       </p>
     </div>
   );
