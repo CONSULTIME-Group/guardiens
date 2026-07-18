@@ -10,6 +10,9 @@ import type { AppRow, SitterInfo } from "./types";
 import type { AffinitySitterInput } from "@/lib/affinityScore";
 import TrustHaloAvatar from "@/components/sitters/TrustHaloAvatar";
 import OwnerToSitterAffinity from "@/components/matching/OwnerToSitterAffinity";
+import AffinityRing from "@/components/affinity/AffinityRing";
+import { useViewerOwnerForAffinity } from "@/hooks/useViewerOwnerForAffinity";
+import { useAffinityWithShadow } from "@/hooks/useAffinityWithShadow";
 import { supabase } from "@/integrations/supabase/client";
 
 interface ApplicationsSectionProps {
@@ -35,8 +38,46 @@ const AppCardSkeleton = () => (
   </div>
 );
 
+/**
+ * Bloc d'affinité premium réservé à la candidature mise en avant.
+ * Calcule le score via les hooks partagés et rend l'AffinityRing +
+ * la raison courte de l'adéquation si des critères matchent.
+ */
+const FeaturedAffinityBlock = ({
+  sitterProfile,
+  sitterId,
+}: {
+  sitterProfile: AffinitySitterInput;
+  sitterId: string;
+}) => {
+  const { owner, loading } = useViewerOwnerForAffinity();
+  const { full, displayed } = useAffinityWithShadow(owner, sitterProfile, {
+    context: "owner_dashboard_applications_featured",
+    targetId: sitterId,
+    enabled: !loading && !!owner && !!sitterProfile,
+  });
+  if (loading || !full || !displayed || typeof full.score !== "number") return null;
+  const matched = Array.isArray(full.matched) ? full.matched.slice(0, 3) : [];
+  return (
+    <div className="mt-3 flex items-center gap-3 rounded-xl border border-border/60 bg-muted/30 p-2.5">
+      <AffinityRing score={full.score} size={64} />
+      <div className="flex-1 min-w-0">
+        {matched.length > 0 ? (
+          <p className="text-[12px] leading-snug text-muted-foreground">
+            Points communs : {matched.join(", ")}.
+          </p>
+        ) : (
+          <p className="text-[12px] leading-snug text-muted-foreground">
+            Adéquation sur vos critères (animaux, présence).
+          </p>
+        )}
+      </div>
+    </div>
+  );
+};
 
-const AppCard = memo(({ app, sitterProfiles, sitterAffinityProfiles }: { app: AppRow; sitterProfiles: Record<string, SitterInfo>; sitterAffinityProfiles?: Record<string, AffinitySitterInput> }) => {
+
+const AppCard = memo(({ app, sitterProfiles, sitterAffinityProfiles, featured = false }: { app: AppRow; sitterProfiles: Record<string, SitterInfo>; sitterAffinityProfiles?: Record<string, AffinitySitterInput>; featured?: boolean }) => {
   const navigate = useNavigate();
   const sitter = (app.sitter?.id && sitterProfiles[app.sitter.id]) || app.sitter;
   const sitTitle = app.sit?.title || "";
@@ -95,7 +136,7 @@ const AppCard = memo(({ app, sitterProfiles, sitterAffinityProfiles }: { app: Ap
           ) : (
             <span className="text-xs font-sans text-muted-foreground italic">Nouveau</span>
           )}
-          {sitter?.id && sitterAffinityProfiles?.[sitter.id] ? (
+          {!featured && sitter?.id && sitterAffinityProfiles?.[sitter.id] ? (
             <OwnerToSitterAffinity
               sitterProfile={sitterAffinityProfiles[sitter.id]}
               context="owner_dashboard_applications"
@@ -106,6 +147,12 @@ const AppCard = memo(({ app, sitterProfiles, sitterAffinityProfiles }: { app: Ap
             />
           ) : null}
         </div>
+        {featured && sitter?.id && sitterAffinityProfiles?.[sitter.id] ? (
+          <FeaturedAffinityBlock
+            sitterProfile={sitterAffinityProfiles[sitter.id]}
+            sitterId={sitter.id}
+          />
+        ) : null}
         <div className="flex gap-2 mt-3 flex-wrap">
           {sitter?.id ? (
             <button
@@ -186,7 +233,7 @@ const ApplicationsSection = memo(({ recentApps, sitterProfiles, sitterBadges, si
           </AccordionTrigger>
           <AccordionContent className="px-4 pb-4">
             <div className="space-y-3">
-              {read.map(a => <AppCard key={a.id} app={a} sitterProfiles={sitterProfiles} sitterAffinityProfiles={sitterAffinityProfiles} />)}
+              {read.map((a, i) => <AppCard key={a.id} app={a} sitterProfiles={sitterProfiles} sitterAffinityProfiles={sitterAffinityProfiles} featured={i === 0} />)}
             </div>
           </AccordionContent>
         </AccordionItem>
@@ -208,7 +255,7 @@ const ApplicationsSection = memo(({ recentApps, sitterProfiles, sitterBadges, si
         <p className="text-sm text-muted-foreground font-sans italic py-4 text-center">Aucune candidature reçue en attente</p>
       ) : unread.length > 0 ? (
         <div className="space-y-3">
-          {unread.map(a => <AppCard key={a.id} app={a} sitterProfiles={sitterProfiles} sitterAffinityProfiles={sitterAffinityProfiles} />)}
+          {unread.map((a, i) => <AppCard key={a.id} app={a} sitterProfiles={sitterProfiles} sitterAffinityProfiles={sitterAffinityProfiles} featured={i === 0} />)}
         </div>
       ) : null}
       {loading ? (
@@ -243,7 +290,7 @@ const ApplicationsSection = memo(({ recentApps, sitterProfiles, sitterBadges, si
             </AccordionTrigger>
             <AccordionContent className="px-4 pb-4">
               <div className="space-y-3">
-                {read.map(a => <AppCard key={a.id} app={a} sitterProfiles={sitterProfiles} sitterAffinityProfiles={sitterAffinityProfiles} />)}
+                {read.map((a, i) => <AppCard key={a.id} app={a} sitterProfiles={sitterProfiles} sitterAffinityProfiles={sitterAffinityProfiles} featured={unread.length === 0 && i === 0} />)}
               </div>
             </AccordionContent>
           </AccordionItem>
