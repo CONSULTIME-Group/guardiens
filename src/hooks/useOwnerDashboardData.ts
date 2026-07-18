@@ -195,8 +195,29 @@ export function useOwnerDashboardData(userId: string | undefined) {
         const sitterBadges: Record<string, { badge_key: string; count: number }[]> = {};
         const sitterAffinityProfiles: Record<string, AffinitySitterInput> = {};
 
+        // Hydratation RLS-safe des fiches gardiens (applications + highlights)
+        // via la vue publique public_profiles.
+        const rawApps = (appsRes.data || []) as any[];
+        const rawHighlights = (highlightsRes.data || []) as any[];
+        const hydrateIds = Array.from(new Set(
+          [...rawApps.map((a) => a.sitter_id), ...rawHighlights.map((h) => h.sitter_id)].filter(Boolean),
+        )) as string[];
+        const sitterProfMap = new Map<string, any>();
+        if (hydrateIds.length > 0) {
+          const { data: sitterProfs } = await supabase
+            .from("public_profiles")
+            .select("id, first_name, avatar_url, identity_verified, completed_sits_count")
+            .in("id", hydrateIds);
+          (sitterProfs ?? []).forEach((p: any) => sitterProfMap.set(p.id, p));
+        }
+        rawApps.forEach((a: any) => { a.sitter = a.sitter_id ? sitterProfMap.get(a.sitter_id) ?? null : null; });
+        rawHighlights.forEach((h: any) => {
+          const p = h.sitter_id ? sitterProfMap.get(h.sitter_id) : null;
+          h.sitter = p ? { first_name: p.first_name, avatar_url: p.avatar_url } : null;
+        });
+
         if (sitIds.length > 0) {
-          recentApps = (appsRes.data || []) as AppRow[];
+          recentApps = rawApps as AppRow[];
 
           recentApps.forEach((a) => {
             if (a.sitter?.id) sitterProfiles[a.sitter.id] = a.sitter;
