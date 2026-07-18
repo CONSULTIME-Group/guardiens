@@ -51,6 +51,7 @@ const SPECIES_LABEL: Record<string, string> = {
 };
 
 const SitterFirstNBA = ({ sits, mode = "affinity", scopeLabel }: Props) => {
+  const { isAuthenticated } = useAuth();
   const seenRef = useRef(false);
   useEffect(() => {
     if (seenRef.current || sits.length === 0) return;
