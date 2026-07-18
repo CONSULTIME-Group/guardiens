@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import { usePublicStats } from "@/hooks/usePublicStats";
 
 interface Member {
   id: string;
@@ -23,21 +24,12 @@ const STRIP_SIZE = 14;
 
 const RealMembersStrip = () => {
   const [members, setMembers] = useState<Member[]>([]);
-  const [total, setTotal] = useState<number>(FALLBACK_COUNT);
+  const { data: publicStats } = usePublicStats();
 
   useEffect(() => {
     let cancelled = false;
     (async () => {
       try {
-        const { count } = await supabase
-          .from("public_profiles")
-          .select("id", { count: "exact", head: true })
-          .not("first_name", "is", null)
-          .not("city", "is", null);
-        if (!cancelled && typeof count === "number" && count > 0) {
-          setTotal(count);
-        }
-
         const { data } = await supabase
           .from("public_profiles")
           .select("id, first_name, city, avatar_url")
@@ -59,7 +51,7 @@ const RealMembersStrip = () => {
           setMembers(shuffled.slice(0, STRIP_SIZE) as Member[]);
         }
       } catch {
-        /* fallback silencieux : compteur par défaut, pas d'avatars */
+        /* fallback silencieux : pas d'avatars */
       }
     })();
     return () => {
@@ -67,8 +59,9 @@ const RealMembersStrip = () => {
     };
   }, []);
 
-  // Round to nearest 10 for a stable, communicating number
-  const roundedTotal = Math.max(FALLBACK_COUNT, Math.floor(total / 10) * 10);
+  // Même source que le hero : total_inscrits via usePublicStats.
+  const totalInscrits = publicStats?.total_inscrits ?? 0;
+  const memberCount = totalInscrits > 0 ? totalInscrits : FALLBACK_COUNT;
 
   return (
     <div className="mb-16 flex flex-col items-center gap-5">
@@ -96,7 +89,7 @@ const RealMembersStrip = () => {
       )}
       <p className="font-body text-sm text-foreground/70 text-center max-w-xl">
         <span className="font-semibold text-foreground">
-          Plus de {roundedTotal} membres
+          Plus de {memberCount} membres
         </span>{" "}
         ont déjà rejoint le réseau, partout en France, de Valence à Quimper, de
         Paris à Sète.
