@@ -106,17 +106,17 @@ const SitterCockpit = ({
             aria-checked={isAvailable}
             aria-label={isAvailable ? "Vous êtes disponible, désactiver" : "Vous êtes indisponible, activer"}
             onClick={onToggleAvailability}
-            className={`group inline-flex items-center gap-2 rounded-lg border px-2.5 py-1.5 text-xs font-medium transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 ${
+            className={`group inline-flex items-center gap-2 rounded-lg border px-3.5 py-2 text-sm font-medium transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 ${
               isAvailable
-                ? "border-success/40 bg-success/10 text-success"
-                : "border-border bg-card text-muted-foreground hover:bg-muted/40"
+                ? "bg-primary text-primary-foreground border-primary hover:bg-primary/90"
+                : "bg-muted text-foreground border-border hover:bg-muted/80"
             }`}
           >
             <span className={`relative flex h-2 w-2 ${isAvailable ? "" : "opacity-40"}`} aria-hidden="true">
               {isAvailable && (
-                <span className="absolute inline-flex h-full w-full rounded-full bg-success opacity-60 animate-ping" />
+                <span className="absolute inline-flex h-full w-full rounded-full bg-primary-foreground opacity-60 animate-ping" />
               )}
-              <span className={`relative inline-flex h-2 w-2 rounded-full ${isAvailable ? "bg-success" : "bg-muted-foreground"}`} />
+              <span className={`relative inline-flex h-2 w-2 rounded-full ${isAvailable ? "bg-primary-foreground" : "bg-muted-foreground"}`} />
             </span>
             {isAvailable ? "Disponible" : "Indisponible"}
           </button>
