@@ -753,7 +753,7 @@ const Landing = () => {
               {t("landing.how.title")}
             </h2>
             <p className="text-center text-foreground/60 font-body max-w-2xl mx-auto mb-8 md:mb-16">
-              {seasonal.description}
+              {t(seasonal.descriptionKey)}
             </p>
           </RevealSection>
 
