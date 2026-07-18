@@ -24,6 +24,7 @@ const FALLBACK_COUNT = 460;
 const STRIP_SIZE = 14;
 
 const RealMembersStrip = () => {
+  const { t } = useTranslation();
   const [members, setMembers] = useState<Member[]>([]);
   const { data: publicStats } = usePublicStats();
 
