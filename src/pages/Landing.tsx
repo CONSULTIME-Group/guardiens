@@ -36,7 +36,7 @@ import { staticRoutes, DEFAULT_OG_IMAGE } from "@/data/siteRoutes";
 // Pricing pivot : plus d'Offer JSON-LD tant que PRICING_IS_ACTIVE = false.
 import { RevealSection } from "@/components/ui/RevealSection";
 
-import { guideLinks, cityLinks } from "@/data/homeGuidesCities";
+
 
 
 const HOME_ROUTE = staticRoutes.find((route) => route.path === "/");
