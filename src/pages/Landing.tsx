@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useEffect } from "react";
 import AlmaTipsTeaser from "@/components/landing/AlmaTipsTeaser";
 import notreHistoirePanorama from "@/assets/story-photo.webp";
 import franceLocalNational from "@/assets/illustrations/france-local-national.webp";
