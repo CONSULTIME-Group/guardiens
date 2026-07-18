@@ -42,7 +42,25 @@ const StatsStrip = memo(({ items }: StatsStripProps) => {
       >
       {items.map((item, idx) => {
         const isZero = item.value === 0 || item.value === "0";
-        const showEmptyHint = isZero && !!item.emptyHint;
+        const isEmpty = item.value === null || item.value === undefined || isZero;
+
+        const zeroState = (() => {
+          const key = item.label.toLowerCase().replace(/\s+/g, "").replace(/s$/, "");
+          switch (key) {
+            case "garde":
+              return { phrase: "À venir", hint: "Votre première garde vous attend" };
+            case "note":
+              return { phrase: "À découvrir", hint: "Vos premiers avis construiront votre réputation" };
+            case "annonce":
+              return { phrase: "À publier", hint: "Votre première annonce attire les gardiens du coin" };
+            case "récurrent":
+            case "recurrent":
+              return { phrase: "À fidéliser", hint: "Vos gardiens réguliers apparaîtront ici" };
+            default:
+              return { phrase: "À venir", hint: "Continuez à explorer Guardiens" };
+          }
+        })();
+
         const valueColor = item.highlight
           ? "text-primary"
           : isZero
@@ -51,16 +69,23 @@ const StatsStrip = memo(({ items }: StatsStripProps) => {
 
         const inner = (clickable: boolean) => (
           <div className="px-4 py-3 text-center md:text-left">
-            {item.value !== null && !showEmptyHint ? (
+            {!isEmpty ? (
               <p
                 className={`text-xl md:text-2xl font-heading font-bold leading-none whitespace-nowrap transition-transform duration-200 ease-out ${valueColor} ${clickable ? "group-hover:-translate-y-0.5" : ""}`}
               >
                 {item.value}
               </p>
-            ) : showEmptyHint ? (
-              <p className="text-xl md:text-2xl font-heading font-bold leading-none text-muted-foreground/40" aria-label={item.emptyHint}>,</p>
             ) : (
-              <p className="text-sm text-muted-foreground leading-none mt-1">{item.fallback}</p>
+              <>
+                <p
+                  className={`text-xl md:text-2xl font-heading font-bold leading-none whitespace-nowrap text-accent ${clickable ? "group-hover:-translate-y-0.5 transition-transform duration-200 ease-out" : ""}`}
+                >
+                  {zeroState.phrase}
+                </p>
+                <p className="text-xs font-sans leading-tight text-accent mt-1">
+                  {zeroState.hint}
+                </p>
+              </>
             )}
             <p className={`text-[10px] md:text-[11px] uppercase tracking-wider text-muted-foreground font-sans mt-1.5 transition-colors duration-200 inline-flex items-center gap-1 justify-center md:justify-start ${clickable ? "group-hover:text-foreground/80" : ""}`}>
               <span>{item.label}</span>
@@ -91,7 +116,7 @@ const StatsStrip = memo(({ items }: StatsStripProps) => {
               key={idx}
               to={item.to}
               className="group block transition-colors duration-200 hover:bg-muted/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset"
-              aria-label={`${item.label}${item.value !== null ? ` : ${item.value}` : ""}`}
+              aria-label={`${item.label}${isEmpty ? ` : ${zeroState.phrase}` : item.value !== null ? ` : ${item.value}` : ""}`}
             >
               {inner(true)}
             </Link>
