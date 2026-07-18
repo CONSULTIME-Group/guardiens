@@ -16,12 +16,21 @@ interface Props {
   totalPublishedSits: number;
   radiusKm?: number;
   postalCode?: string | null;
+  /**
+   * "no_nearby"       : profil suffisant, mais aucune annonce ouverte
+   *                     dans le département/région (message distance).
+   * "profile_incomplete" : le pool retourne 0 parce que le profil du
+   *                     gardien manque de critères d'affinité — on invite
+   *                     à compléter le profil, pas à changer de zone.
+   */
+  variant?: "no_nearby" | "profile_incomplete";
 }
 
 const NoNearbySitsEmptyState = ({
   totalPublishedSits,
   radiusKm = 30,
   postalCode,
+  variant = "no_nearby",
 }: Props) => {
   const { user } = useAuth();
   const { toast } = useToast();
@@ -32,9 +41,13 @@ const NoNearbySitsEmptyState = ({
   useEffect(() => {
     void trackEvent("sitter_no_nearby_empty_state_seen", {
       source: "dashboard",
-      metadata: { total_published: totalPublishedSits, radius_km: radiusKm },
+      metadata: {
+        total_published: totalPublishedSits,
+        radius_km: radiusKm,
+        variant,
+      },
     });
-  }, [totalPublishedSits, radiusKm]);
+  }, [totalPublishedSits, radiusKm, variant]);
 
   useEffect(() => {
     if (!user?.id) return;
@@ -129,20 +142,62 @@ const NoNearbySitsEmptyState = ({
     >
       <div className="rounded-2xl border border-border bg-card p-5 sm:p-6">
         <p className="text-[10px] uppercase tracking-[2px] text-muted-foreground font-sans font-semibold mb-2">
-          Aucune annonce disponible
+          {variant === "profile_incomplete"
+            ? "Profil à compléter"
+            : "Aucune annonce disponible"}
         </p>
         <h2
           id="no-nearby-empty-state-heading"
           className="font-heading text-xl sm:text-2xl font-bold text-foreground leading-tight"
         >
-          Rien dans votre rayon aujourd'hui.
+          {variant === "profile_incomplete"
+            ? "Complétez votre profil pour voir vos correspondances."
+            : "Rien dans votre zone aujourd'hui."}
         </h2>
-        <p className="text-sm text-muted-foreground mt-2">
-          Guardiens grandit chaque semaine. Il y a actuellement{" "}
-          <strong className="text-foreground">{totalPublishedSits.toLocaleString("fr-FR")}</strong>{" "}
-          annonce{totalPublishedSits > 1 ? "s" : ""} publiée{totalPublishedSits > 1 ? "s" : ""} en France,
-          {" "}dont aucune dans un rayon de {currentRadius} km autour de vous.
-        </p>
+        {variant === "profile_incomplete" ? (
+          <p className="text-sm text-muted-foreground mt-2">
+            Nous avons besoin de quelques informations supplémentaires (animaux
+            que vous acceptez, langues, rythme de vie, présence) pour calculer
+            un score d'affinité fiable et vous proposer des annonces
+            pertinentes. Il y a actuellement{" "}
+            <strong className="text-foreground">
+              {totalPublishedSits.toLocaleString("fr-FR")}
+            </strong>{" "}
+            annonce{totalPublishedSits > 1 ? "s" : ""} ouverte
+            {totalPublishedSits > 1 ? "s" : ""} sur Guardiens.
+          </p>
+        ) : (
+          <p className="text-sm text-muted-foreground mt-2">
+            Guardiens grandit chaque semaine. Il y a actuellement{" "}
+            <strong className="text-foreground">
+              {totalPublishedSits.toLocaleString("fr-FR")}
+            </strong>{" "}
+            annonce{totalPublishedSits > 1 ? "s" : ""} publiée
+            {totalPublishedSits > 1 ? "s" : ""} sur Guardiens, dont aucune dans
+            votre département ni votre région pour l'instant.
+          </p>
+        )}
+
+        {variant === "profile_incomplete" && (
+          <div className="mt-4">
+            <Button asChild>
+              <Link
+                to="/profile"
+                onClick={() =>
+                  void trackEvent("dashboard_cta_clicked", {
+                    source: "dashboard_empty_state",
+                    metadata: {
+                      cta: "complete_profile_empty_state",
+                      user_role: "sitter",
+                    },
+                  })
+                }
+              >
+                Compléter mon profil
+              </Link>
+            </Button>
+          </div>
+        )}
 
         <div className="mt-5 rounded-2xl border border-border bg-card p-4 sm:p-5">
           <p className="text-sm font-semibold text-foreground">
@@ -168,21 +223,23 @@ const NoNearbySitsEmptyState = ({
           </div>
         </div>
 
-        <div className="mt-4">
-          {alertActive ? (
-            <div className="rounded-xl border border-border bg-muted/40 px-4 py-3 text-sm text-foreground">
-              Alerte déjà configurée. Vous êtes prévenu par email dès qu'une annonce
-              est publiée dans votre rayon.{" "}
-              <Link to="/settings#alerts" className="text-primary underline-offset-4 hover:underline">
-                Modifier le rayon
-              </Link>
-            </div>
-          ) : (
-            <Button variant="outline" onClick={subscribe} disabled={saving || alertActive === null}>
-              M'alerter dès qu'une annonce est publiée près de chez moi
-            </Button>
-          )}
-        </div>
+        {variant !== "profile_incomplete" && (
+          <div className="mt-4">
+            {alertActive ? (
+              <div className="rounded-xl border border-border bg-muted/40 px-4 py-3 text-sm text-foreground">
+                Alerte déjà configurée. Vous êtes prévenu par email dès qu'une annonce
+                est publiée dans votre rayon.{" "}
+                <Link to="/settings#alerts" className="text-primary underline-offset-4 hover:underline">
+                  Modifier le rayon
+                </Link>
+              </div>
+            ) : (
+              <Button variant="outline" onClick={subscribe} disabled={saving || alertActive === null}>
+                M'alerter dès qu'une annonce est publiée près de chez moi
+              </Button>
+            )}
+          </div>
+        )}
       </div>
 
       <div className="mt-6">

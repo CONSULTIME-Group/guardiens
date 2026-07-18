@@ -18,6 +18,14 @@ import type { AffinitySitCard } from "@/hooks/useSitterTopAffinitySits";
 
 interface Props {
   sits: AffinitySitCard[];
+  /**
+   * "affinity" : score d'affinité calculé, badges affichés.
+   * "fallback" : aucune annonce scorable, on présente les annonces
+   *   ouvertes de la zone triées par date (pas de badge d'affinité).
+   */
+  mode?: "affinity" | "fallback";
+  /** Contexte géographique retenu, pour la mention neutre en mode fallback. */
+  scopeLabel?: string | null;
 }
 
 function fmt(d: string | null): string {
@@ -41,19 +49,41 @@ const SPECIES_LABEL: Record<string, string> = {
   nac: "NAC",
 };
 
-const SitterFirstNBA = ({ sits }: Props) => {
+const SitterFirstNBA = ({ sits, mode = "affinity", scopeLabel }: Props) => {
   const seenRef = useRef(false);
   useEffect(() => {
     if (seenRef.current || sits.length === 0) return;
     seenRef.current = true;
-    const avg = Math.round(
-      sits.reduce((s, x) => s + x.affinity.score, 0) / sits.length,
-    );
+    const scores = sits
+      .map((x) => x.affinity?.score)
+      .filter((s): s is number => typeof s === "number");
+    const avg = scores.length
+      ? Math.round(scores.reduce((a, b) => a + b, 0) / scores.length)
+      : 0;
     void trackEvent("sitter_first_nba_seen", {
       source: "dashboard",
-      metadata: { sits_count: sits.length, avg_affinity_score: avg },
+      metadata: {
+        sits_count: sits.length,
+        avg_affinity_score: avg,
+        mode,
+      },
     });
-  }, [sits]);
+  }, [sits, mode]);
+
+  const eyebrow =
+    mode === "fallback" ? "Annonces ouvertes près de chez vous" : "Recommandé pour vous";
+  const heading =
+    mode === "fallback"
+      ? sits.length === 1
+        ? "1 annonce ouverte à proximité"
+        : `${sits.length} annonces ouvertes à proximité`
+      : sits.length === 1
+        ? "1 annonce qui vous correspond"
+        : `${sits.length} annonces qui vous correspondent`;
+  const sub =
+    mode === "fallback"
+      ? `En attendant d'affiner vos correspondances, voici les annonces ouvertes${scopeLabel ? ` ${scopeLabel}` : ""}. Complétez votre profil pour obtenir un score d'affinité.`
+      : "Score d'affinité calculé à partir de vos préférences. Complétez votre profil pour affiner vos correspondances.";
 
   return (
     <section
@@ -62,19 +92,15 @@ const SitterFirstNBA = ({ sits }: Props) => {
     >
       <div className="mb-4">
         <p className="text-[10px] uppercase tracking-[2px] text-muted-foreground font-sans font-semibold mb-1">
-          Recommandé pour vous
+          {eyebrow}
         </p>
         <h2
           id="sitter-first-nba-heading"
           className="font-heading text-xl sm:text-2xl font-bold text-foreground leading-tight"
         >
-          {sits.length === 1
-            ? "1 annonce qui vous correspond"
-            : `${sits.length} annonces qui vous correspondent`}
+          {heading}
         </h2>
-        <p className="text-sm text-muted-foreground mt-1">
-          Score d'affinité calculé à partir de vos préférences. Complétez votre profil pour affiner vos correspondances.
-        </p>
+        <p className="text-sm text-muted-foreground mt-1">{sub}</p>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-5">
@@ -144,13 +170,15 @@ const SitterFirstNBA = ({ sits }: Props) => {
                     )}
                   </div>
                   <div className="mt-3 flex flex-wrap items-center gap-1.5">
-                    <AffinityBadge
-                      result={sit.affinity}
-                      size="sm"
-                      variant="numeric"
-                      trackingContext="sitter_first_nba"
-                      trackingId={sit.id}
-                    />
+                    {sit.affinity ? (
+                      <AffinityBadge
+                        result={sit.affinity}
+                        size="sm"
+                        variant="numeric"
+                        trackingContext="sitter_first_nba"
+                        trackingId={sit.id}
+                      />
+                    ) : null}
                     {sit.owner_first_name && (
                       <span className="text-[11px] text-muted-foreground">
                         Chez {sit.owner_first_name}
