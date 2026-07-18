@@ -113,7 +113,7 @@ const SitterFirstNBA = ({ sits, mode = "affinity", scopeLabel }: Props) => {
           return (
             <Link
               key={sit.id}
-              to={`/annonces/${sit.id}`}
+              to={isAuthenticated ? `/sits/${sit.id}` : `/annonces/${sit.id}`}
               className="group block focus:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-2xl"
               onClick={() =>
                 void trackEvent("sitter_first_nba_card_clicked", {
