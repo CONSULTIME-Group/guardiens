@@ -541,9 +541,6 @@ const OwnerDashboard = () => {
         </div>
       )}
 
-      {/* OwnerFirstNBAGardiens : descendu sous la grille de pilotage
-          (voir plus bas) pour rester une preuve tangible du vivier local
-          sans concurrencer la NBA principale. */}
 
       {isNewOwner ? (
         <div className="px-5 md:px-8">
