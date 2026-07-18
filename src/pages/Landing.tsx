@@ -22,6 +22,9 @@ import { useInventaireCounts } from "@/hooks/useInventaireCounts";
 import { usePublicStats } from "@/hooks/usePublicStats";
 import LiveListingsStrip from "@/components/landing/LiveListingsStrip";
 import TestimonialsSection from "@/components/landing/TestimonialsSection";
+import { UsagesSection } from "@/components/landing/UsagesSection";
+import { RencontreSection } from "@/components/landing/RencontreSection";
+import { EntraideSection } from "@/components/landing/EntraideSection";
 import HomeJsonLd from "@/components/landing/HomeJsonLd";
 import PublicHeader from "@/components/layout/PublicHeader";
 
