@@ -84,7 +84,7 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, prope
   const load = async () => {
     const { data } = await supabase
       .from("applications")
-      .select("*, sitter:profiles!applications_sitter_id_fkey(id, first_name, last_name, city, avatar_url, bio, identity_verified, completed_sits_count, is_founder)")
+      .select("*")
       .eq("sit_id", sitId)
       .order("created_at", { ascending: false });
 
@@ -100,6 +100,19 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, prope
       setLoading(false);
       return;
     }
+
+    // Hydrate les fiches gardiens via la vue publique (RLS-safe).
+    // NOTE: `last_name` n'est pas exposé par public_profiles, on l'omet (non consommé en aval).
+    const { data: sitterProfs } = await supabase
+      .from("public_profiles")
+      .select("id, first_name, city, avatar_url, bio, identity_verified, completed_sits_count, is_founder")
+      .in("id", sitterIds);
+    const sitterProfMap = new Map<string, any>();
+    (sitterProfs ?? []).forEach((p: any) => sitterProfMap.set(p.id, p));
+    data.forEach((row: any) => {
+      row.sitter = row.sitter_id ? sitterProfMap.get(row.sitter_id) ?? null : null;
+    });
+
 
     const [spRes, revRes, badgeRes, emRes, sitCtxRes] = await Promise.all([
       supabase.from("sitter_profiles")

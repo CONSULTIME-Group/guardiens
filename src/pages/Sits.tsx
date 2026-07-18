@@ -279,10 +279,26 @@ const Sits = () => {
         // Sitter view (inchangee)
         const { data, error } = await supabase
           .from("applications")
-          .select("*, sit:sits(*, properties(type, environment, photos), owner:profiles!sits_user_id_fkey(first_name, avatar_url, city, id))")
+          .select("*, sit:sits(*, properties(type, environment, photos))")
           .eq("sitter_id", user.id)
           .order("created_at", { ascending: false });
         if (error) throw error;
+
+        // Hydratation RLS-safe des propriétaires via la vue publique.
+        const ownerIdsHydrate = Array.from(new Set(
+          (data ?? []).map((a: any) => a.sit?.user_id).filter(Boolean),
+        )) as string[];
+        if (ownerIdsHydrate.length > 0) {
+          const { data: ownerProfs } = await supabase
+            .from("public_profiles")
+            .select("id, first_name, avatar_url, city")
+            .in("id", ownerIdsHydrate);
+          const ownerHydrateMap = new Map<string, any>();
+          (ownerProfs ?? []).forEach((p: any) => ownerHydrateMap.set(p.id, p));
+          (data ?? []).forEach((a: any) => {
+            if (a.sit) a.sit.owner = a.sit.user_id ? ownerHydrateMap.get(a.sit.user_id) ?? null : null;
+          });
+        }
 
         const sitIds = data?.map((a: any) => a.sit?.id).filter(Boolean) || [];
         let reviewedSitIds: string[] = [];

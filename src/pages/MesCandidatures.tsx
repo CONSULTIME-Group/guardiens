@@ -89,14 +89,32 @@ const MesCandidatures = () => {
       const { data, error } = await supabase
         .from("applications")
         .select(
-          "id, status, created_at, viewed_at, sit:sits(id, title, slug, start_date, end_date, status, user_id, property_id, city, properties(photos), owner:profiles!sits_user_id_fkey(id, first_name, avatar_url, city))",
+          "id, status, created_at, viewed_at, sit:sits(id, title, slug, start_date, end_date, status, user_id, property_id, city, properties(photos))",
         )
         .eq("sitter_id", user.id)
         .order("created_at", { ascending: false });
       if (error) throw error;
-      const rows = (data as any) as SitterApp[];
-      setApps(rows || []);
-      prevStatusRef.current = Object.fromEntries((rows || []).map((r) => [r.id, r.status]));
+      const rows = ((data as any[]) || []);
+
+      // Hydratation RLS-safe des propriétaires via la vue publique.
+      const ownerIds = Array.from(new Set(
+        rows.map((r: any) => r.sit?.user_id).filter(Boolean),
+      )) as string[];
+      if (ownerIds.length > 0) {
+        const { data: ownerProfs } = await supabase
+          .from("public_profiles")
+          .select("id, first_name, avatar_url, city")
+          .in("id", ownerIds);
+        const ownerMap = new Map<string, any>();
+        (ownerProfs ?? []).forEach((p: any) => ownerMap.set(p.id, p));
+        rows.forEach((r: any) => {
+          if (r.sit) r.sit.owner = r.sit.user_id ? ownerMap.get(r.sit.user_id) ?? null : null;
+        });
+      }
+
+      const typedRows = rows as SitterApp[];
+      setApps(typedRows || []);
+      prevStatusRef.current = Object.fromEntries((typedRows || []).map((r) => [r.id, r.status]));
     } catch (e) {
       logger.error("MesCandidatures.load", { error: String(e) });
     } finally {

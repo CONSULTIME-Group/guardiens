@@ -101,7 +101,7 @@ export function useOwnerDashboardData(userId: string | undefined) {
           supabase.from("properties").select("id, type, environment, photos").eq("user_id", userId),
           supabase.from("reviews").select("overall_rating").eq("reviewee_id", userId).eq("published", true),
           supabase.from("profiles").select("first_name, avatar_url, bio, identity_verification_status, onboarding_completed, onboarding_dismissed_at, onboarding_minimal_completed").eq("id", userId).single(),
-          supabase.from("owner_highlights").select("*, sitter:profiles!owner_highlights_sitter_id_fkey(first_name, avatar_url)").eq("owner_id", userId).eq("hidden", false).order("created_at", { ascending: false }).limit(5),
+          supabase.from("owner_highlights").select("*").eq("owner_id", userId).eq("hidden", false).order("created_at", { ascending: false }).limit(5),
           supabase.from("small_missions").select("id, title, category, city, created_at").eq("status", "open").order("created_at", { ascending: false }).limit(2),
         ]);
 
@@ -164,7 +164,7 @@ export function useOwnerDashboardData(userId: string | undefined) {
         const appsPromise = sitIds.length > 0
           ? supabase
               .from("applications")
-              .select("*, sitter:profiles!applications_sitter_id_fkey(id, first_name, avatar_url, identity_verified, completed_sits_count), sit:sits(title, start_date, end_date)")
+              .select("*, sit:sits(title, start_date, end_date)")
               .in("sit_id", sitIds)
               .order("created_at", { ascending: false })
               .limit(20)
@@ -195,8 +195,29 @@ export function useOwnerDashboardData(userId: string | undefined) {
         const sitterBadges: Record<string, { badge_key: string; count: number }[]> = {};
         const sitterAffinityProfiles: Record<string, AffinitySitterInput> = {};
 
+        // Hydratation RLS-safe des fiches gardiens (applications + highlights)
+        // via la vue publique public_profiles.
+        const rawApps = (appsRes.data || []) as any[];
+        const rawHighlights = (highlightsRes.data || []) as any[];
+        const hydrateIds = Array.from(new Set(
+          [...rawApps.map((a) => a.sitter_id), ...rawHighlights.map((h) => h.sitter_id)].filter(Boolean),
+        )) as string[];
+        const sitterProfMap = new Map<string, any>();
+        if (hydrateIds.length > 0) {
+          const { data: sitterProfs } = await supabase
+            .from("public_profiles")
+            .select("id, first_name, avatar_url, identity_verified, completed_sits_count")
+            .in("id", hydrateIds);
+          (sitterProfs ?? []).forEach((p: any) => sitterProfMap.set(p.id, p));
+        }
+        rawApps.forEach((a: any) => { a.sitter = a.sitter_id ? sitterProfMap.get(a.sitter_id) ?? null : null; });
+        rawHighlights.forEach((h: any) => {
+          const p = h.sitter_id ? sitterProfMap.get(h.sitter_id) : null;
+          h.sitter = p ? { first_name: p.first_name, avatar_url: p.avatar_url } : null;
+        });
+
         if (sitIds.length > 0) {
-          recentApps = (appsRes.data || []) as AppRow[];
+          recentApps = rawApps as AppRow[];
 
           recentApps.forEach((a) => {
             if (a.sitter?.id) sitterProfiles[a.sitter.id] = a.sitter;
@@ -302,7 +323,7 @@ export function useOwnerDashboardData(userId: string | undefined) {
           pets: petsData,
           recentApps,
           reviews: reviewsRes.data || [],
-          highlights: (highlightsRes.data || []) as HighlightRow[],
+          highlights: rawHighlights as HighlightRow[],
           smallMissions: (missionsRes.data || []) as SmallMission[],
           myMissions: (myMissionsDataRes.data || []) as SmallMission[],
           verificationStatus: verStatus,

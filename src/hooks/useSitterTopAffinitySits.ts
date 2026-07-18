@@ -112,7 +112,7 @@ export function useSitterTopAffinitySits(): Result {
       const sitsRes: any = await supabase
         .from("sits")
         .select(
-          "id, title, city, start_date, end_date, cover_photo_url, user_id, property_id, accepts_sitter_pets, accepts_sitter_children, owner:profiles!sits_user_id_fkey(first_name, postal_code)",
+          "id, title, city, start_date, end_date, cover_photo_url, user_id, property_id, accepts_sitter_pets, accepts_sitter_children",
         )
         .eq("status", "published")
         .eq("accepting_applications", true)
@@ -121,6 +121,18 @@ export function useSitterTopAffinitySits(): Result {
         .order("created_at", { ascending: false })
         .limit(80);
       const sitsAll: any[] = sitsRes.data ?? [];
+
+      // Hydratation RLS-safe des propriétaires via la vue publique.
+      const sitOwnerIds = Array.from(new Set(sitsAll.map((s) => s.user_id).filter(Boolean))) as string[];
+      if (sitOwnerIds.length > 0) {
+        const { data: ownerProfs } = await supabase
+          .from("public_profiles")
+          .select("id, first_name, postal_code")
+          .in("id", sitOwnerIds);
+        const ownerMap = new Map<string, any>();
+        (ownerProfs ?? []).forEach((p: any) => ownerMap.set(p.id, { first_name: p.first_name, postal_code: p.postal_code }));
+        sitsAll.forEach((s: any) => { s.owner = s.user_id ? ownerMap.get(s.user_id) ?? null : null; });
+      }
 
       // 4. Réduction géographique progressive : département → région → pays.
       let scopeUsed: PoolScope = "none";
