@@ -153,6 +153,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
+        setHasSession(!!session?.user);
+        setAuthChecked(true);
         if (session?.user) {
           // Si un flux OAuth est en cours, on trace la pose de session.
           if (getOAuthTraceId()) {
@@ -179,6 +181,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     );
 
     supabase.auth.getSession().then(async ({ data: { session } }) => {
+      setHasSession(!!session?.user);
+      setAuthChecked(true);
       if (session?.user) {
         await fetchProfile(session.user);
       }
@@ -265,6 +269,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       localStorage.removeItem('guardiens_active_role');
     } catch {}
     setUser(null);
+    setHasSession(false);
     roleInitialized.current = false;
     await supabase.auth.signOut();
   }, []);
