@@ -44,19 +44,20 @@ const ReviewsDisplay = ({ userId, showAnimalCare = false }: ReviewsDisplayProps)
 
   return (
     <div>
-      {/* Summary */}
-      <div className="flex items-center gap-4 mb-4">
-        <div className="flex items-center gap-2">
-          <StarRating value={Math.round(avgRating)} readonly size="md" />
-          <span className="font-heading font-bold text-lg">{avgRating.toFixed(1)}</span>
+      {/* Summary : masqué tant qu'aucun avis n'est publié */}
+      {reviews.length > 0 && (
+        <div className="flex items-center gap-4 mb-4">
+          <div className="flex items-center gap-2">
+            <StarRating value={Math.round(avgRating)} readonly size="md" />
+            <span className="font-heading font-bold text-lg">{avgRating.toFixed(1)}</span>
+          </div>
+          <span className="text-sm text-muted-foreground">{reviews.length} avis</span>
         </div>
-        <span className="text-sm text-muted-foreground">{reviews.length} avis</span>
-      </div>
+      )}
 
       {/* Highlighted animal care score */}
       {avgAnimalCare !== null && !isNaN(avgAnimalCare) && (
         <div className="flex items-center gap-2 mb-4 p-2.5 rounded-lg bg-accent/50">
-          <span className="text-sm">🐾</span>
           <span className="text-sm font-medium">Soin des animaux</span>
           <StarRating value={Math.round(avgAnimalCare)} readonly size="sm" />
           <span className="text-sm font-bold">{avgAnimalCare.toFixed(1)}</span>
