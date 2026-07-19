@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Archive, Home, HeartHandshake, Lock, Loader2, MessageCircle, ChevronDown, Info } from "lucide-react";
+import { Archive, Home, HeartHandshake, Loader2, MessageCircle, ChevronDown } from "lucide-react";
 import EmptyState from "@/components/shared/EmptyState";
 import { format, isToday, isYesterday, isSameDay } from "date-fns";
 import { fr } from "date-fns/locale";
@@ -518,23 +518,22 @@ const Messages = () => {
     const roleLabel = contextTitle;
 
     return (
-      <div key={conv.id} className="group relative border-b border-border/50">
+      <div key={conv.id} className="group relative">
         <button
           type="button"
           onClick={() => {
-            // Memorize scroll position before opening the conversation
             if (convListRef.current) {
               savedScrollRef.current = convListRef.current.scrollTop;
             }
             setActiveConv(conv);
           }}
-          className={`w-full flex items-start gap-3 p-3.5 pl-6 pr-10 text-left hover:bg-accent/50 transition-colors ${activeConv?.id === conv.id ? "bg-accent/50" : ""}`}
+          className={`w-full flex items-start gap-3 px-4 py-3.5 pr-10 text-left transition-colors ${activeConv?.id === conv.id ? "bg-primary/10" : "hover:bg-primary/5"}`}
         >
           <div className="relative shrink-0">
             {conv.other_user?.avatar_url ? (
               <img src={conv.other_user.avatar_url} alt="" className="w-11 h-11 rounded-full object-cover" />
             ) : (
-              <div className="w-11 h-11 rounded-full bg-primary/10 flex items-center justify-center text-primary font-medium text-sm">
+              <div className="w-11 h-11 rounded-full bg-secondary/[0.12] flex items-center justify-center text-secondary-foreground font-heading text-base">
                 {conv.other_user?.first_name?.charAt(0)?.toUpperCase() || "?"}
               </div>
             )}
@@ -542,7 +541,7 @@ const Messages = () => {
           <div className="flex-1 min-w-0">
             <div className="flex items-center justify-between gap-2">
               <div className="flex items-center gap-2 min-w-0">
-                <span className={`text-base truncate capitalize ${hasUnread ? "font-bold text-foreground" : "font-medium"}`}>
+                <span className={`text-[15px] truncate capitalize ${hasUnread ? "font-semibold text-foreground" : "font-medium text-foreground"}`}>
                   {capitalize(conv.other_user?.first_name) || "Utilisateur"}
                 </span>
                 {appInfo && !isMission && (
@@ -556,13 +555,12 @@ const Messages = () => {
               </span>
             </div>
             {roleLabel && (
-              <p className="text-sm text-muted-foreground truncate">{roleLabel}</p>
+              <p className="font-heading italic text-[12px] text-muted-foreground truncate mt-0.5">{roleLabel}</p>
             )}
-            <div className="flex items-center justify-between gap-2 mt-0.5">
+            <div className="flex items-center justify-between gap-2 mt-1">
               {conv.last_message?.is_system ? (
-                <p className={`text-sm truncate italic flex items-center gap-1 ${hasUnread ? "text-foreground/80" : "text-muted-foreground"}`}>
-                  <Info className="h-3 w-3 shrink-0" aria-hidden="true" />
-                  <span className="truncate">{conv.last_message?.content || ""}</span>
+                <p className={`text-sm truncate italic ${hasUnread ? "text-foreground/80" : "text-muted-foreground"}`}>
+                  {conv.last_message?.content || ""}
                 </p>
               ) : (
                 <p className={`text-sm truncate ${hasUnread ? "text-foreground font-medium" : "text-muted-foreground"}`}>
@@ -571,7 +569,7 @@ const Messages = () => {
                 </p>
               )}
               {hasUnread && (
-                <span className="bg-destructive text-destructive-foreground text-[10px] rounded-full min-w-[18px] h-[18px] flex items-center justify-center px-1 shrink-0 font-bold">
+                <span className="bg-primary text-primary-foreground text-[10px] rounded-full min-w-[18px] h-[18px] flex items-center justify-center px-1 shrink-0 font-semibold tabular-nums">
                   {conv.unread_count}
                 </span>
               )}
@@ -591,23 +589,26 @@ const Messages = () => {
     );
   };
 
-  const renderGroup = (key: string, title: string, convs: Conversation[], unreadCount: number, icon: React.ReactNode) => (
-    <section key={key} aria-label={title}>
-      <h2 className="bg-muted/50 px-4 py-2 flex items-center gap-2 text-sm font-medium text-foreground m-0">
-        <span aria-hidden="true">{icon}</span>
-        <span className="truncate flex-1">{title}</span>
+  const renderGroup = (key: string, title: string, convs: Conversation[], unreadCount: number, _icon: React.ReactNode) => (
+    <section key={key} aria-label={title} className="pt-5">
+      <div className="px-4 pb-2 flex items-center gap-3">
+        <span className="h-px w-3.5 bg-secondary/60" aria-hidden="true" />
+        <h2 className="text-[11px] font-bold uppercase tracking-[0.16em] text-secondary-foreground/80 m-0 truncate flex-1">
+          {title}
+        </h2>
         {unreadCount > 0 && (
           <span
-            className="bg-destructive text-destructive-foreground rounded-full w-4 h-4 text-[10px] flex items-center justify-center font-bold shrink-0"
+            className="bg-primary text-primary-foreground rounded-full min-w-[18px] h-[18px] px-1 text-[10px] flex items-center justify-center font-semibold shrink-0 tabular-nums"
             aria-label={`${unreadCount} non lu${unreadCount > 1 ? "s" : ""}`}
           >
             {unreadCount}
           </span>
         )}
-      </h2>
+      </div>
       {convs.map(renderConvItem)}
     </section>
   );
+
 
   // Group conversations by sit
   const groups = new Map<string, { title: string; convs: Conversation[]; unreadCount: number }>();
@@ -633,29 +634,29 @@ const Messages = () => {
       {/* ═══ CONVERSATION LIST ═══ */}
       {showList && (
         <div className={`${isMobile && activeConv ? "hidden" : ""} ${isMobile ? "w-full" : "w-80 border-r border-border"} flex flex-col bg-card`}>
-          <div className="sticky top-12 md:top-0 z-10 bg-card border-b border-border px-3 pt-3 pb-2 space-y-2">
-            {/* Row 1, title alone (lisible mobile) + role à droite */}
-            <div className="flex items-center justify-between gap-2">
-              <h1 className="font-heading text-base font-bold truncate">Messages</h1>
-              <span className="text-xs text-muted-foreground truncate shrink-0">
-                {effectiveRole === "owner" ? "Propriétaire" : "Gardien"}
+          <div className="sticky top-12 md:top-0 z-10 bg-card border-b border-border px-4 pt-4 pb-3 space-y-3">
+            {/* Titre Playfair + rôle */}
+            <div className="flex items-end justify-between gap-2">
+              <h1 className="font-heading text-[20px] font-semibold leading-tight truncate">Vos échanges</h1>
+              <span className="text-[12px] text-muted-foreground truncate shrink-0 pb-0.5">
+                {effectiveRole === "owner" ? "Espace propriétaire" : "Espace gardien"}
               </span>
             </div>
 
-            {/* Row 2, search filter (uniquement si >=5 conversations) */}
+            {/* Recherche pilule (uniquement si >=5 conversations) */}
             {conversations.length >= 5 && (
               <Input
                 value={searchFilter}
                 onChange={e => setSearchFilter(e.target.value)}
                 placeholder="Filtrer par annonce ou prénom…"
                 aria-label="Filtrer les conversations par annonce ou prénom"
-                className="h-8 text-xs rounded-lg w-full"
+                className="h-9 text-xs rounded-full w-full bg-background"
               />
             )}
 
-            {/* Row 3, pills compactes */}
+            {/* Pills compactes */}
             <div className="flex items-center gap-2 overflow-x-auto no-scrollbar">
-              <div className="flex gap-1 shrink-0" role="tablist" aria-label="Filtrer les conversations">
+              <div className="flex gap-1.5 shrink-0" role="tablist" aria-label="Filtrer les conversations">
                 {pills.map(p => (
                   <button
                     key={p.value}
@@ -663,9 +664,9 @@ const Messages = () => {
                     role="tab"
                     aria-selected={pill === p.value}
                     onClick={() => setPill(p.value)}
-                    className={`rounded-full px-2.5 py-0.5 text-xs leading-5 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
+                    className={`rounded-full px-3 py-1 text-xs leading-5 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
                       pill === p.value
-                        ? "bg-foreground text-background"
+                        ? "bg-primary/10 text-primary font-medium"
                         : "border border-border text-muted-foreground hover:border-primary"
                     }`}
                   >
@@ -675,6 +676,7 @@ const Messages = () => {
               </div>
             </div>
           </div>
+
 
           <div
             ref={(el) => {
@@ -743,7 +745,10 @@ const Messages = () => {
             aria-label="Historique des messages"
           >
             {(activeConv.sit?.status === "confirmed" || activeConv.sit?.status === "in_progress") && activeConv.sit?.property_id && (
-              <HouseGuideBlock propertyId={activeConv.sit.property_id} />
+              <HouseGuideBlock
+                propertyId={activeConv.sit.property_id}
+                ownerFirstName={activeConv.owner_id === user?.id ? null : (activeConv.other_user?.first_name ?? null)}
+              />
             )}
 
             <div className="p-4 space-y-1" data-alma-safe-area>
@@ -808,15 +813,20 @@ const Messages = () => {
 
           {/* Input or Paywall, only gate sit conversations for non-subscribed sitters */}
           {effectiveRole === "sitter" && !hasAccess && !activeConv.small_mission_id ? (
-            <div className="border-t border-border bg-muted/50 p-4 mb-16 md:mb-0">
-              <div className="flex items-center gap-3">
-                <Lock className="h-5 w-5 text-muted-foreground shrink-0" aria-hidden="true" />
-                <div className="flex-1">
-                  <p className="text-sm text-muted-foreground">
-                    Abonnez-vous pour répondre à cette conversation.{" "}
-                    <Link to="/mon-abonnement" className="text-primary hover:underline">S'abonner →</Link>
-                  </p>
-                </div>
+            <div className="border-t border-border bg-background p-4 mb-16 md:mb-0">
+              <div className="bg-secondary/[0.12] border border-secondary/30 rounded-2xl p-4">
+                <p className="font-heading text-[16px] font-semibold text-foreground">
+                  Cette conversation vous attend.
+                </p>
+                <p className="text-[12.5px] text-muted-foreground mt-1 leading-relaxed">
+                  L'abonnement gardien ouvre les réponses aux annonces de garde.
+                </p>
+                <Link
+                  to="/mon-abonnement"
+                  className="inline-block mt-2 text-[12px] font-bold text-primary hover:underline"
+                >
+                  Découvrir l'abonnement
+                </Link>
               </div>
             </div>
           ) : (

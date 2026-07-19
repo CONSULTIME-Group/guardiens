@@ -76,10 +76,10 @@ const MessageComposer = ({ value, onChange, onSend, onPickPhoto, sending }: Mess
       <button
         type="button"
         onClick={() => fileInputRef.current?.click()}
-        className="min-h-[44px] min-w-[44px] flex items-center justify-center rounded-xl hover:bg-accent active:bg-accent/80 text-muted-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring shrink-0"
+        className="h-11 w-11 flex items-center justify-center rounded-full bg-background border border-border hover:bg-accent active:bg-accent/80 text-muted-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring shrink-0"
         aria-label="Joindre une photo"
       >
-        <ImageIcon className="h-[22px] w-[22px]" aria-hidden="true" />
+        <ImageIcon className="h-[20px] w-[20px]" aria-hidden="true" />
       </button>
 
       {/* Champ texte autosize */}
@@ -93,7 +93,7 @@ const MessageComposer = ({ value, onChange, onSend, onPickPhoto, sending }: Mess
         rows={1}
         className={[
           "flex-1 resize-none",
-          "rounded-2xl border border-input bg-background",
+          "rounded-2xl border border-border bg-background",
           "px-4 py-[10px] text-sm leading-[22px]",
           "min-h-[44px]",
           "placeholder:text-muted-foreground",
@@ -102,12 +102,12 @@ const MessageComposer = ({ value, onChange, onSend, onPickPhoto, sending }: Mess
         ].join(" ")}
       />
 
-      {/* Bouton envoi — 44 × 44 px, couleur primary */}
+      {/* Bouton envoi — 44 × 44 px, ombre pin (seule ombre colorée de l'écran) */}
       <Button
         size="icon"
         onClick={onSend}
         disabled={sending || !value.trim()}
-        className="rounded-full shrink-0 h-11 w-11 transition-all active:scale-95"
+        className="rounded-full shrink-0 h-11 w-11 transition-all active:scale-95 shadow-[0_6px_14px_hsl(var(--primary)/0.24)]"
         aria-label="Envoyer le message"
       >
         <Send className="h-[18px] w-[18px]" aria-hidden="true" />
@@ -117,3 +117,4 @@ const MessageComposer = ({ value, onChange, onSend, onPickPhoto, sending }: Mess
 };
 
 export default MessageComposer;
+

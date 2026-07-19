@@ -171,7 +171,7 @@ const MessageBell = () => {
         >
           <MessageSquare className="h-5 w-5" strokeWidth={1.8} />
           {unreadCount > 0 && (
-            <span className="absolute top-1 right-1 min-w-[18px] h-[18px] px-1 rounded-full bg-destructive text-destructive-foreground text-[10px] font-semibold flex items-center justify-center tabular-nums z-10">
+            <span className="absolute top-1 right-1 min-w-[18px] h-[18px] px-1 rounded-full bg-primary text-primary-foreground text-[10px] font-semibold flex items-center justify-center tabular-nums z-10">
               {unreadCount > 99 ? "99+" : unreadCount}
             </span>
           )}
@@ -246,7 +246,7 @@ const MessageBell = () => {
                     )}
                   </div>
                   {t.unread > 0 && (
-                    <span className="shrink-0 mt-1 min-w-[18px] h-[18px] px-1 rounded-full bg-destructive text-destructive-foreground text-[10px] font-semibold flex items-center justify-center tabular-nums">
+                    <span className="shrink-0 mt-1 min-w-[18px] h-[18px] px-1 rounded-full bg-primary text-primary-foreground text-[10px] font-semibold flex items-center justify-center tabular-nums">
                       {t.unread > 9 ? "9+" : t.unread}
                     </span>
                   )}
