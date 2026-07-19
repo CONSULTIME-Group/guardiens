@@ -698,6 +698,7 @@ const SitterDashboard = () => {
                 <AlmaRailWhisper
                   profileCompletion={profileCompletion ?? 0}
                   isAvailable={!!isAvailable}
+                  checklistVisible={!allChecklistDone}
                 />
               </div>
             </aside>
