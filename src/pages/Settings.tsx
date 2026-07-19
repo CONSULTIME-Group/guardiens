@@ -787,6 +787,59 @@ const NotificationsSection = ({ prefs, savingKey, allNotifsOn, onMasterToggle, o
   </section>
 );
 
+const EmergencySection = ({ user }: any) => {
+  const { data: rep } = useProfileReputation(user?.id);
+  const [state, setState] = useState<{ has: boolean; reviews: number } | null>(null);
+
+  useEffect(() => {
+    if (!user?.id) return;
+    let cancelled = false;
+    (async () => {
+      const [emRes, revRes]: any[] = await Promise.all([
+        (supabase as any)
+          .from("sitter_emergency_profiles")
+          .select("user_id")
+          .eq("user_id", user.id)
+          .maybeSingle(),
+        (supabase as any)
+          .from("sitter_reviews")
+          .select("id", { count: "exact", head: true })
+          .eq("sitter_id", user.id),
+      ]);
+      if (cancelled) return;
+      setState({
+        has: !!emRes?.data,
+        reviews: revRes?.count ?? 0,
+      });
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [user?.id]);
+
+  return (
+    <section>
+      <SectionHeader
+        icon={Shield}
+        title="Gardien d'urgence"
+        description="Recevez les demandes de garde de dernière minute quand votre profil est éligible."
+      />
+      {state === null ? (
+        <div className="h-16 rounded-xl border border-border bg-muted/30 animate-pulse" aria-hidden="true" />
+      ) : (
+        <SitterEmergencyCardCompact
+          hasEmergencyProfile={state.has}
+          completedSits={rep?.completed_sits ?? 0}
+          avgRating={rep?.note_moyenne ?? 0}
+          reviewsCount={state.reviews}
+        />
+      )}
+    </section>
+  );
+};
+
+
+
 const PrivacySection = ({ prefs, onSave }: any) => (
   <section>
     <SectionHeader icon={EyeOff} title="Confidentialité" description="Qui peut voir votre profil et vos informations." />
