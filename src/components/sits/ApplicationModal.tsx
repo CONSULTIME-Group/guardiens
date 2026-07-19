@@ -459,7 +459,7 @@ const ApplicationModal = ({
                   </>
                 }
               >
-                Je peux te suggérer un début de lettre à partir de ta bio et de cette annonce. Tu gardes le contrôle.
+                Je peux vous suggérer un début de lettre à partir de votre bio et de cette annonce. Vous gardez le contrôle.
               </AlmaBubble>
             )}
             {almaUsed && !almaDismissed && (
