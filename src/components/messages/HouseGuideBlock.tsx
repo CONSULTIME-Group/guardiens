@@ -1,12 +1,14 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Home, Key, Wifi, Phone, Info, ChevronDown, ChevronUp, MapPin } from "lucide-react";
+import { Key, Wifi, Phone, Info, MapPin } from "lucide-react";
 
 interface HouseGuideBlockProps {
   propertyId: string;
+  /** Prénom du propriétaire, si connu, pour personnaliser le titre du guide. */
+  ownerFirstName?: string | null;
 }
 
-const HouseGuideBlock = ({ propertyId }: HouseGuideBlockProps) => {
+const HouseGuideBlock = ({ propertyId, ownerFirstName }: HouseGuideBlockProps) => {
   const [guide, setGuide] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [expanded, setExpanded] = useState(false);
@@ -35,26 +37,37 @@ const HouseGuideBlock = ({ propertyId }: HouseGuideBlockProps) => {
 
   if (!hasContent) return null;
 
+  const firstName = ownerFirstName?.trim();
+  const title = firstName
+    ? `Le guide de la maison de ${firstName.charAt(0).toUpperCase() + firstName.slice(1).toLowerCase()}`
+    : "Le guide de la maison";
+
   return (
-    <div className="mx-4 my-3 bg-card border border-border rounded-xl overflow-hidden">
+    <div
+      className="mx-4 my-3 rounded-2xl overflow-hidden border"
+      style={{
+        backgroundColor: "hsl(var(--hero-paper))",
+        borderColor: "hsl(var(--border) / 0.6)",
+      }}
+    >
       <button
         type="button"
         onClick={() => setExpanded(!expanded)}
         aria-expanded={expanded}
         aria-controls="house-guide-content"
-        className="w-full flex items-center justify-between p-4 hover:bg-accent/30 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset"
+        className="w-full flex items-center justify-between gap-3 p-4 hover:bg-primary/[0.04] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset text-left"
       >
-        <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center" aria-hidden="true">
-            <Home className="h-4 w-4 text-primary" />
-          </div>
-          <div className="text-left">
-            <p className="text-sm font-semibold">Guide de la maison</p>
-            <p className="text-[11px] text-muted-foreground">Infos pratiques pour votre garde</p>
-          </div>
+        <div className="min-w-0">
+          <p className="font-heading text-[15px] font-semibold text-foreground truncate">{title}</p>
+          <p className="text-[12px] text-muted-foreground mt-0.5">
+            Adresse, codes d'accès, WiFi, vétérinaire et consignes.
+          </p>
         </div>
-        {expanded ? <ChevronUp className="h-4 w-4 text-muted-foreground" aria-hidden="true" /> : <ChevronDown className="h-4 w-4 text-muted-foreground" aria-hidden="true" />}
+        <span className="text-[12px] font-bold text-primary shrink-0" aria-hidden="true">
+          {expanded ? "Fermer" : "Ouvrir"}
+        </span>
       </button>
+
 
       {expanded && (
         <div id="house-guide-content" className="px-4 pb-4 space-y-4 border-t border-border pt-3">
