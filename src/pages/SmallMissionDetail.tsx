@@ -1235,7 +1235,6 @@ const SmallMissionDetail = () => {
                     </div>
                     {!isAuthor && (
                       <div className="flex items-center gap-2 shrink-0">
-                        <ReportButton targetId={mission.user_id} targetType="profile" />
                         <ReportButton targetId={mission.id} targetType="small_mission" />
                       </div>
                     )}
