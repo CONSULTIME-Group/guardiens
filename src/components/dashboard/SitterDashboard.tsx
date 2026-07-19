@@ -319,7 +319,13 @@ const SitterDashboard = () => {
                   subtitle="La façon la plus simple de rencontrer les gens du coin."
                 />
               </div>
+
+              {/* 5. LECTURES ET GUIDES (vague 16) */}
+              <div>
+                <ReadingsSection role="sitter" />
+              </div>
             </div>
+
 
             {/* ═══ RAIL collant (droite) — espacement 34px, mt-[52px] mobile ═══ */}
             <aside className="mt-[52px] lg:mt-0 space-y-[34px] lg:col-span-4 lg:sticky lg:top-20 lg:self-start lg:max-h-[calc(100vh-6rem)] lg:overflow-y-auto">
