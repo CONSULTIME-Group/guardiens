@@ -260,7 +260,10 @@ export type EventType =
   | "sits_create_step_completed"                // Étape terminée (step, duration_ms)
   | "sits_create_abandoned"                     // Wizard quitté sans publication (step, has_draft)
   | "application_submitted"                     // Candidature envoyée (source, used_alma_draft, message_length)
-  | "application_sent_unedited_draft";          // Candidature envoyée avec brouillon Alma non modifié (sit_id)
+  | "application_sent_unedited_draft"           // Candidature envoyée avec brouillon Alma non modifié (sit_id)
+  // Vague 14 — tracking des sections vedettes des dashboards ---------------
+  | "dashboard_star_seen"                        // Impression 1×/session d'une section vedette (surface, variant, ...)
+  | "dashboard_star_cta_clicked";                // Clic CTA principal d'une section vedette (surface, variant, ...)
 
 
 
