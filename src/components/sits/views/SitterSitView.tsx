@@ -384,11 +384,29 @@ const SitterSitView = ({
         ownerProfile={ownerProfile}
       />
 
-      {/* Avis sur l'hôte */}
-      <section className="mt-8">
-        <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
-          <Star className="h-5 w-5 text-primary" /> Avis ({reviews.length})
-        </h2>
+      {/* Avis sur l'hôte — trio d'en-tête signature (vague 21) */}
+      <section className="mt-10">
+        <header className="mb-[22px]">
+          <div className="flex items-center gap-[8px]">
+            <span
+              aria-hidden="true"
+              className="inline-block bg-secondary"
+              style={{ width: "20px", height: "2px" }}
+            />
+            <p
+              className="text-secondary uppercase"
+              style={{ fontSize: "11px", fontWeight: 700, letterSpacing: "0.16em" }}
+            >
+              Ce que les gardiens en disent
+            </p>
+          </div>
+          <h2
+            className="font-heading text-foreground mt-[8px]"
+            style={{ fontSize: "20px", fontWeight: 600, lineHeight: 1.25 }}
+          >
+            Une maison déjà racontée.
+          </h2>
+        </header>
         <ReviewsTab
           sitId={sit.id}
           sitOwnerId={sit.user_id}
@@ -398,7 +416,7 @@ const SitterSitView = ({
         />
       </section>
 
-      {/* Accord de garde, sitter view */}
+      {/* Accord de garde — registre carnet (vague 21) */}
       {ownerAccordSigned && ["confirmed", "in_progress", "completed"].includes(sit.status) && (
         <div className="mt-8">
           {accordOpen && accordData ? (
@@ -407,41 +425,50 @@ const SitterSitView = ({
               role="gardien"
               onClose={() => setAccordOpen(false)}
             />
-          ) : sitterAccordSigned ? (
-            <div className="bg-card rounded-xl border border-border p-5 flex items-center gap-3">
-              <CheckCircle2 className="h-5 w-5 text-primary shrink-0" />
-              <div>
-                <p className="text-sm font-medium">Accord de garde accepté</p>
-                <p className="text-xs text-muted-foreground">
-                  Signé le{" "}
-                  {sitterAccordSigned.accepted_at
-                    ? format(new Date(sitterAccordSigned.accepted_at), "d MMMM yyyy", {
-                        locale: fr,
-                      })
-                    : ","}
-                </p>
-              </div>
-            </div>
           ) : (
-            <div className="bg-card rounded-xl border border-border p-5 space-y-3">
-              <p className="font-heading font-semibold text-sm">Notre accord de garde</p>
-              <p className="text-sm text-muted-foreground">
-                Le propriétaire a validé cet accord. Lisez-le et confirmez votre acceptation pour
-                finaliser la garde.
+            <article
+              className="border"
+              style={{
+                background: "hsl(var(--hero-paper))",
+                borderColor: "hsl(var(--border))",
+                borderRadius: "16px",
+                padding: "20px",
+              }}
+            >
+              <h3
+                className="font-heading text-foreground"
+                style={{ fontSize: "16px", fontWeight: 600, lineHeight: 1.3 }}
+              >
+                Notre accord de garde
+              </h3>
+              <p
+                className="text-muted-foreground mt-[8px]"
+                style={{ fontSize: "13px", lineHeight: 1.5 }}
+              >
+                {sitterAccordSigned
+                  ? `Vous l'avez signé${
+                      sitterAccordSigned.accepted_at
+                        ? " le " +
+                          format(new Date(sitterAccordSigned.accepted_at), "d MMMM yyyy", { locale: fr })
+                        : ""
+                    }. Vous pouvez le relire à tout moment.`
+                  : "Le propriétaire a validé cet accord. Lisez-le et confirmez votre acceptation pour finaliser la garde."}
               </p>
-              <Button onClick={() => setAccordOpen(true)} className="gap-2">
-                Voir et signer l'accord
-              </Button>
-            </div>
+              <div className="mt-[14px]">
+                <Button
+                  variant="outline"
+                  onClick={() => setAccordOpen(true)}
+                  className="rounded-full bg-card border-border"
+                >
+                  {sitterAccordSigned ? "Voir l'accord" : "Voir et signer l'accord"}
+                </Button>
+              </div>
+            </article>
           )}
         </div>
       )}
 
-      {/* Bloc "Annuler ma participation", gardien confirmé uniquement.
-          Conditions :
-          - Le gardien a candidaté ET est l'attribué (status confirmed/in_progress)
-          - La garde n'est ni terminée, ni annulée, ni en brouillon
-          Le modal CancelSitModal détecte automatiquement le rôle via user.id ≠ sitOwnerId. */}
+      {/* Annulation adoucie (vague 21) — carte pointillée, seul rouge sur la page */}
       {(() => {
         const today = new Date();
         today.setHours(0, 0, 0, 0);
@@ -454,37 +481,37 @@ const SitterSitView = ({
         if (!canSitterCancel) return null;
         return (
           <section
-            className="mt-10 mb-6 rounded-xl border border-destructive/20 bg-destructive/5 p-5 md:p-6"
+            className="mt-10 mb-6 bg-card"
+            style={{
+              borderRadius: "16px",
+              border: "1px dashed hsl(var(--border))",
+              padding: "18px 20px",
+            }}
             aria-labelledby="sitter-cancel-title"
           >
-            <div className="flex items-start gap-3">
-              <XCircle
-                className="h-5 w-5 text-destructive shrink-0 mt-0.5"
-                aria-hidden="true"
-              />
-              <div className="flex-1 min-w-0">
-                <h2
-                  id="sitter-cancel-title"
-                  className="font-heading font-semibold text-base text-foreground"
-                >
-                  Annuler ma participation
-                </h2>
-                <p className="text-xs text-muted-foreground mt-1 mb-3">
-                  {sit.status === "in_progress"
-                    ? "La garde est en cours. Une annulation maintenant peut mettre le propriétaire en difficulté, contactez-le d'abord si possible."
-                    : "Le propriétaire sera notifié immédiatement. Pensez à le prévenir directement avant si possible."}
-                </p>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="text-destructive hover:text-destructive hover:bg-destructive/10 border-destructive/40 hover:border-destructive/60"
-                  onClick={() => setCancelOpen(true)}
-                >
-                  <XCircle className="h-3.5 w-3.5 mr-1.5" />
-                  Annuler ma participation
-                </Button>
-              </div>
-            </div>
+            <h2
+              id="sitter-cancel-title"
+              className="font-heading text-foreground"
+              style={{ fontSize: "15px", fontWeight: 600, lineHeight: 1.3 }}
+            >
+              Besoin d'annuler votre participation ?
+            </h2>
+            <p
+              className="text-muted-foreground mt-[6px]"
+              style={{ fontSize: "12.5px", lineHeight: 1.5 }}
+            >
+              {sit.status === "in_progress"
+                ? "La garde est en cours. Prévenez d'abord l'hôte si possible : une annulation le met en difficulté."
+                : "Prévenez d'abord l'hôte directement si possible, puis confirmez ici. Il sera notifié immédiatement."}
+            </p>
+            <button
+              type="button"
+              onClick={() => setCancelOpen(true)}
+              className="text-destructive hover:underline underline-offset-4 mt-[12px]"
+              style={{ fontSize: "12.5px", fontWeight: 700 }}
+            >
+              Annuler ma participation
+            </button>
           </section>
         );
       })()}
