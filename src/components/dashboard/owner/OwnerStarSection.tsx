@@ -470,6 +470,28 @@ const OwnerStarSection = ({
   showConcierge,
   primaryAction,
 }: OwnerStarSectionProps) => {
+  const variant: "ongoing" | "applications" | "draft" | "publish" = ongoingSit
+    ? "ongoing"
+    : pendingApps.length > 0
+      ? "applications"
+      : latestDraft
+        ? "draft"
+        : "publish";
+
+  const sectionRef = useRef<HTMLElement | null>(null);
+  useImpressionOnce(sectionRef, `owner_star:${variant}`, () => {
+    void trackEvent("dashboard_star_seen", {
+      source: "owner_dashboard",
+      metadata: { surface: "owner_dashboard", variant },
+    });
+  });
+
+  const onCtaClick = () =>
+    void trackEvent("dashboard_star_cta_clicked", {
+      source: "owner_dashboard",
+      metadata: { surface: "owner_dashboard", variant },
+    });
+
   let content: React.ReactNode;
 
   if (ongoingSit) {
@@ -482,7 +504,7 @@ const OwnerStarSection = ({
           eyebrow="En ce moment"
           title="Votre maison est entre de bonnes mains."
         />
-        <OngoingCard sit={ongoingSit} sitter={sitter} coverPhoto={propertyCoverPhoto} />
+        <OngoingCard sit={ongoingSit} sitter={sitter} coverPhoto={propertyCoverPhoto} onCtaClick={onCtaClick} />
       </>
     );
   } else if (pendingApps.length > 0) {
@@ -491,10 +513,11 @@ const OwnerStarSection = ({
         pendingApps={pendingApps}
         sitterProfiles={sitterProfiles}
         sitterAffinityProfiles={sitterAffinityProfiles}
+        onCtaClick={onCtaClick}
       />
     );
   } else if (latestDraft) {
-    content = <DraftStar draft={latestDraft} />;
+    content = <DraftStar draft={latestDraft} onCtaClick={onCtaClick} />;
   } else {
     content = (
       <PublishStar
@@ -502,12 +525,18 @@ const OwnerStarSection = ({
         nearbyRadius={nearbyRadius}
         showConcierge={showConcierge}
         primaryAction={primaryAction}
+        onCtaClick={onCtaClick}
       />
     );
   }
 
   return (
-    <section aria-label="Votre priorité du moment" className="px-4 sm:px-5 md:px-8">
+    <section
+      ref={sectionRef}
+      data-dashboard-star="owner"
+      aria-label="Votre priorité du moment"
+      className="px-4 sm:px-5 md:px-8"
+    >
       {content}
     </section>
   );
