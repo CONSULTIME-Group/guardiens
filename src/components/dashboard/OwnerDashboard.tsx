@@ -10,10 +10,12 @@ import { Link } from "react-router-dom";
 import { differenceInDays } from "date-fns";
 
 import RoleActivationBanner from "./RoleActivationBanner";
+import AccessGateBanner from "@/components/access/AccessGateBanner";
+import { FreePeriodBanner } from "@/components/marketing/FreePeriodBanner";
+import { useAccessLevel } from "@/hooks/useAccessLevel";
 
 /* ── Vague 11 : composants du flux principal ── */
 import ApplicationsSection from "./owner/ApplicationsSection";
-import StatsStrip from "./owner/StatsStrip";
 import OwnerCockpit from "./owner/OwnerCockpit";
 import OwnerStarSection from "./owner/OwnerStarSection";
 import OwnerAnnonceSection from "./owner/OwnerAnnonceSection";
@@ -21,6 +23,11 @@ import OwnerFamilySection from "./owner/OwnerFamilySection";
 import OwnerEntraideSection from "./owner/OwnerEntraideSection";
 import MobileStickyCTA from "./owner/MobileStickyCTA";
 import OwnerFirstNBAGardiens from "./OwnerFirstNBAGardiens";
+
+/* ── Vague 12 : rail ── */
+import CommunityPulseBanner from "./shared/CommunityPulseBanner";
+import HouseStoryRailCard from "./owner/HouseStoryRailCard";
+import AlmaRailWhisper from "./sitter/AlmaRailWhisper";
 
 import { useOwnerPriorityAction } from "@/hooks/useOwnerPriorityAction";
 import { useOwnerPrimaryAction } from "@/hooks/useOwnerPrimaryAction";
