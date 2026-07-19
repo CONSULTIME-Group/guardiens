@@ -1,4 +1,3 @@
-import entraideEmptyIllustration from "@/assets/illustrations/sitter-entraide-empty.jpg";
 import { useAlmaCulturalFact } from "@/hooks/useAlmaCulturalFact";
 
 import { useAlmaUsageNudge } from "@/hooks/useAlmaUsageNudge";
@@ -11,8 +10,6 @@ import { useAccessLevel } from "@/hooks/useAccessLevel";
 import { useSitterDashboardData } from "@/hooks/useSitterDashboardData";
 import DashboardLoadError from "./DashboardLoadError";
 
-import { getOptimizedImageUrl } from "@/lib/imageOptim";
-
 import RoleActivationBanner from "./RoleActivationBanner";
 import AccessGateBanner from "@/components/access/AccessGateBanner";
 import { FreePeriodBanner } from "@/components/marketing/FreePeriodBanner";
@@ -20,19 +17,13 @@ import { FreePeriodBanner } from "@/components/marketing/FreePeriodBanner";
 import SitterCockpit from "./sitter/SitterCockpit";
 import DashboardSectionState from "./sitter/DashboardSectionState";
 import SitterMobileStickyCTA from "./sitter/SitterMobileStickyCTA";
-import SitterStatusBar from "./sitter/SitterStatusBar";
-import SitterBadgesSection from "./sitter/SitterBadgesSection";
 import CommunityPulseBanner from "./shared/CommunityPulseBanner";
-import SitterEmergencyCardCompact from "./sitter/SitterEmergencyCardCompact";
-import SitterMissionsSection from "./sitter/SitterMissionsSection";
-import CommunityQuestionsSection from "./CommunityQuestionsSection";
 // NearbyAnnoncesCard retiré ici (vague 2) : la carte rencontre le remplace.
 import DashSection from "./owner/DashSection";
 import SitterDashboardSkeleton from "./sitter/SitterDashboardSkeleton";
-import SitterActivityPanel from "./sitter/SitterActivityPanel";
 import SitterFirstNBA from "./SitterFirstNBA";
 import SitterFirstNBASkeleton from "./SitterFirstNBASkeleton";
-import SitterMatchSection, { SectionHeader } from "./sitter/SitterMatchSection";
+import SitterMatchSection from "./sitter/SitterMatchSection";
 import SitterStoryTiles from "./sitter/SitterStoryTiles";
 import NoNearbySitsEmptyState from "./NoNearbySitsEmptyState";
 import NextGuardRailCard from "./sitter/NextGuardRailCard";
@@ -45,10 +36,10 @@ import SitterEntraideSection from "./sitter/SitterEntraideSection";
 import { useIsNewSitter } from "@/hooks/useIsNewUser";
 import { useSitterTopAffinitySits } from "@/hooks/useSitterTopAffinitySits";
 
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { CheckCircle, Circle, ChevronRight, Newspaper, AlertCircle } from "lucide-react";
+import { CheckCircle, Circle, ChevronRight, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
+
 
 
 
