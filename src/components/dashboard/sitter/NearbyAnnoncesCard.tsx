@@ -11,22 +11,40 @@ const resolveCover = (sit: any): string | null =>
   || (Array.isArray(sit?.properties?.photos) ? sit.properties.photos[0] : null)
   || null;
 
-/** Vignette paysage (4:3) à gauche d'un item d'annonce. Fallback icône maison. */
+/** Tache aquarelle douce (fallback sans photo) — dérivée des tokens HSL. */
+const aquarelleBg: React.CSSProperties = {
+  backgroundImage: [
+    "radial-gradient(ellipse at 28% 30%, hsl(var(--primary) / 0.28), transparent 62%)",
+    "radial-gradient(ellipse at 72% 62%, hsl(var(--secondary) / 0.32), transparent 66%)",
+    "radial-gradient(ellipse at 50% 82%, hsl(var(--founder) / 0.22), transparent 70%)",
+    "radial-gradient(circle at center, hsl(var(--hero-paper)) 0%, hsl(var(--hero-paper)) 100%)",
+  ].join(", "),
+};
+
+/** Vignette paysage (4:3) à gauche d'un item d'annonce. Fallback aquarelle. */
 const SitThumb = ({ sit }: { sit: any }) => {
   const src = resolveCover(sit);
-  return src ? (
-    <div className="relative w-20 aspect-[4/3] rounded-xl overflow-hidden shrink-0 ring-1 ring-border bg-muted">
-      <img
-        src={src}
-        alt=""
-        loading="lazy"
-        className="w-full h-full object-cover object-[center_30%]"
-        onError={(e) => { e.currentTarget.src = '/placeholder.svg'; }}
-      />
-    </div>
-  ) : (
-    <div className="w-20 aspect-[4/3] rounded-xl bg-muted flex items-center justify-center shrink-0 ring-1 ring-border">
-      <Home className="h-5 w-5 text-muted-foreground" aria-hidden="true" />
+  return (
+    <div className="notebook-card relative w-20 aspect-[4/3] shrink-0">
+      <div className="notebook-card-paper absolute inset-0" aria-hidden="true" />
+      {src ? (
+        <img
+          src={src}
+          alt=""
+          loading="lazy"
+          className="relative w-full h-full object-cover object-[center_30%]"
+          onError={(e) => { e.currentTarget.src = '/placeholder.svg'; }}
+        />
+      ) : (
+        <div
+          className="illustration-blend animate-painted-reveal relative w-full h-full flex items-center justify-center"
+          style={aquarelleBg}
+          aria-hidden="true"
+        >
+          <Home className="h-5 w-5 text-foreground/50" aria-hidden="true" />
+        </div>
+      )}
+      <div className="notebook-card-edge" aria-hidden="true" />
     </div>
   );
 };
