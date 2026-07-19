@@ -85,6 +85,8 @@ const SitterStoryTiles = ({
   unreadCount,
   badgeCount,
 }: Props) => {
+  const { user } = useAuth();
+  const badgesLink = user?.id ? `/gardiens/${user.id}#badges` : "/profile";
   const tiles: TileData[] = [
     {
       key: "apps",
