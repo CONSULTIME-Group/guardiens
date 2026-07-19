@@ -68,7 +68,7 @@ const SitterCockpit = ({
   return (
     <section
       aria-label="Espace gardien, accueil"
-      className="px-4 sm:px-5 md:px-8 pt-4 sm:pt-6 pb-2"
+      className="pt-4 sm:pt-6 pb-2"
     >
       {/* Couverture de carnet : papier hero-paper, lavis aquarelle discret,
           bord droit déchiré, ombre douce. Wrapper conservé de la vague 0. */}

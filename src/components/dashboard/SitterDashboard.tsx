@@ -33,6 +33,8 @@ import SitterOpeningCard from "./sitter/SitterOpeningCard";
 import SitterTeaserCard from "./sitter/SitterTeaserCard";
 import SitterNextStepRailCard from "./sitter/SitterNextStepRailCard";
 import SitterEntraideSection from "./sitter/SitterEntraideSection";
+import ReadingsSection from "./shared/ReadingsSection";
+
 import { useIsNewSitter } from "@/hooks/useIsNewUser";
 import { useSitterTopAffinitySits } from "@/hooks/useSitterTopAffinitySits";
 
@@ -131,7 +133,7 @@ const SitterDashboard = () => {
 
   // ── Bloc activation unifié ──
   const ChecklistBlock = (
-    <section aria-labelledby="onboarding-checklist-heading" className="px-4 sm:px-5 md:px-8 mb-6 md:mb-8">
+    <section aria-labelledby="onboarding-checklist-heading" className="mb-6 md:mb-8">
       {!postalCode && (
         <div className="mb-3 flex items-start gap-3 rounded-xl border border-warning/40 bg-warning/10 px-4 py-3" role="alert">
           <AlertCircle className="h-4 w-4 text-warning shrink-0 mt-0.5" aria-hidden="true" />
@@ -274,7 +276,7 @@ const SitterDashboard = () => {
           → Activation → Opportunités → Profil (accordéon). */}
       <div className="min-w-0">
         {isNewSitter ? (
-          <div className="mx-auto w-full max-w-4xl lg:max-w-6xl lg:grid lg:grid-cols-12 lg:gap-6 lg:items-start">
+          <div className="mx-auto w-full max-w-4xl lg:max-w-6xl px-4 sm:px-5 lg:px-8 lg:grid lg:grid-cols-12 lg:gap-6 lg:items-start">
             {/* ═══ FLUX principal (gauche) — rythme vertical 52px ═══ */}
             <div className="min-w-0 space-y-[52px] lg:col-span-8">
               {/* 1. ACCUEIL, salutation Bienvenue */}
@@ -293,7 +295,7 @@ const SitterDashboard = () => {
               {/* 2. LA STAR, complétion : SitterOpeningCard (remplace ChecklistBlock
                   et le bandeau code postal manquant dans cette branche uniquement). */}
               {!allChecklistDone && (
-                <div className="px-4 sm:px-5 md:px-8 lg:px-0">
+                <div className="">
                   <SitterOpeningCard
                     hasAvatar={!!avatarUrl}
                     hasBioMin={!!(bio && bio.length >= 50)}
@@ -311,7 +313,7 @@ const SitterDashboard = () => {
               />
 
               {/* 4. ENTRAIDE, invitation adaptée au premier pas */}
-              <div className="px-4 sm:px-5 md:px-8 lg:px-0">
+              <div className="">
                 <SitterEntraideSection
                   firstNearbyMission={firstNearbyMission}
                   eyebrow="Un premier pas dans la communauté"
@@ -319,20 +321,26 @@ const SitterDashboard = () => {
                   subtitle="La façon la plus simple de rencontrer les gens du coin."
                 />
               </div>
+
+              {/* 5. LECTURES ET GUIDES (vague 16) */}
+              <div>
+                <ReadingsSection role="sitter" />
+              </div>
             </div>
+
 
             {/* ═══ RAIL collant (droite) — espacement 34px, mt-[52px] mobile ═══ */}
             <aside className="mt-[52px] lg:mt-0 space-y-[34px] lg:col-span-4 lg:sticky lg:top-20 lg:self-start lg:max-h-[calc(100vh-6rem)] lg:overflow-y-auto">
-              <div className="px-4 sm:px-5 md:px-8 lg:px-0">
+              <div className="">
                 <CommunityPulseBanner userId={user?.id} />
               </div>
-              <div className="px-4 sm:px-5 md:px-8 lg:px-0">
+              <div className="">
                 {!(level === 4 || level === "3B")
                   ? <AccessGateBanner level={level} profileCompletion={accessProfileCompletion} context="guard" />
                   : <FreePeriodBanner />}
               </div>
               {!allChecklistDone && (
-                <div className="px-4 sm:px-5 md:px-8 lg:px-0">
+                <div className="">
                   <SitterNextStepRailCard
                     hasAvatar={!!avatarUrl}
                     hasBioMin={!!(bio && bio.length >= 50)}
@@ -340,7 +348,7 @@ const SitterDashboard = () => {
                   />
                 </div>
               )}
-              <div className="px-4 sm:px-5 md:px-8 lg:px-0 mb-6">
+              <div className="mb-6">
                 <AlmaRailWhisper
                   profileCompletion={profileCompletion ?? 0}
                   isAvailable={!!isAvailable}
@@ -352,7 +360,7 @@ const SitterDashboard = () => {
           </div>
 
         ) : (
-          <div className="mx-auto w-full max-w-4xl lg:max-w-6xl lg:grid lg:grid-cols-12 lg:gap-6 lg:items-start">
+          <div className="mx-auto w-full max-w-4xl lg:max-w-6xl px-4 sm:px-5 lg:px-8 lg:grid lg:grid-cols-12 lg:gap-6 lg:items-start">
             {/* ═══ FLUX principal (gauche) ═══ rythme vertical 52px (vague 3) */}
             <div className="min-w-0 space-y-[52px] lg:col-span-8">
               {/* COCKPIT */}
@@ -374,7 +382,7 @@ const SitterDashboard = () => {
               </div>
 
               {(nextGuardError || nearbyError) && (
-                <div className="px-4 sm:px-5 md:px-8 lg:px-0 space-y-2">
+                <div className="space-y-2">
                   {nextGuardError && (
                     <DashboardSectionState
                       variant="error"
@@ -395,7 +403,7 @@ const SitterDashboard = () => {
               )}
 
               {/* VAGUE 2 — carte rencontre, star unique de l'écran */}
-              <div className="px-4 sm:px-5 md:px-8 lg:px-0">
+              <div className="">
                 <SitterMatchSection
                   topSits={topSits}
                   fallbackSits={fallbackSits}
@@ -406,7 +414,7 @@ const SitterDashboard = () => {
               </div>
 
               {/* VAGUE 3 — tuiles histoire (remplace SitterActivityPanel côté confirmé) */}
-              <div className="px-4 sm:px-5 md:px-8 lg:px-0">
+              <div className="">
                 <SitterStoryTiles
                   pendingAppsCount={pendingAppsCount ?? 0}
                   unreadCount={unreadCount ?? 0}
@@ -417,7 +425,7 @@ const SitterDashboard = () => {
               {ChecklistBlock}
 
               {/* VAGUE 3 — invitation entraide calme */}
-              <div className="px-4 sm:px-5 md:px-8 lg:px-0">
+              <div className="">
                 <SitterEntraideSection
                   firstNearbyMission={firstNearbyMission}
                   eyebrow="L'entraide, tout près"
@@ -425,17 +433,23 @@ const SitterDashboard = () => {
                 />
 
               </div>
+
+              {/* VAGUE 16 — lectures et guides */}
+              <div>
+                <ReadingsSection role="sitter" />
+              </div>
             </div>
+
 
 
             {/* ═══ RAIL collant (droite) — vague 4 ═══
                 Ordre narratif : pouls → prochaine garde (ou access/free) →
                 réputation → Alma en murmure. Espacement 34px. */}
             <aside className="mt-[52px] lg:mt-0 space-y-[34px] lg:col-span-4 lg:sticky lg:top-20 lg:self-start lg:max-h-[calc(100vh-6rem)] lg:overflow-y-auto">
-              <div className="px-4 sm:px-5 md:px-8 lg:px-0">
+              <div className="">
                 <CommunityPulseBanner userId={user?.id} />
               </div>
-              <div className="px-4 sm:px-5 md:px-8 lg:px-0">
+              <div className="">
                 {nextGuard ? (
                   <NextGuardRailCard nextGuard={nextGuard} />
                 ) : !(level === 4 || level === "3B") ? (
@@ -444,7 +458,7 @@ const SitterDashboard = () => {
                   <FreePeriodBanner />
                 )}
               </div>
-              <div className="px-4 sm:px-5 md:px-8 lg:px-0">
+              <div className="">
                 <ReputationRailCard
                   userId={user?.id}
                   completedSits={completedSits ?? 0}
@@ -453,7 +467,7 @@ const SitterDashboard = () => {
                   badgeCount={badgeCount ?? 0}
                 />
               </div>
-              <div className="px-4 sm:px-5 md:px-8 lg:px-0 mb-6">
+              <div className="mb-6">
                 <AlmaRailWhisper
                   profileCompletion={profileCompletion ?? 0}
                   isAvailable={!!isAvailable}

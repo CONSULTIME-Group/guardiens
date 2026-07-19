@@ -21,6 +21,9 @@ import OwnerStarSection from "./owner/OwnerStarSection";
 import OwnerAnnonceSection from "./owner/OwnerAnnonceSection";
 import OwnerFamilySection from "./owner/OwnerFamilySection";
 import OwnerEntraideSection from "./owner/OwnerEntraideSection";
+import NearbySittersSection from "./owner/NearbySittersSection";
+import ReadingsSection from "./shared/ReadingsSection";
+
 import MobileStickyCTA from "./owner/MobileStickyCTA";
 import OwnerFirstNBAGardiens from "./OwnerFirstNBAGardiens";
 
@@ -267,7 +270,7 @@ const OwnerDashboard = () => {
 
       {/* ═══ Grille 12 colonnes : flux (8) + rail (4) ═══ */}
       <div className="min-w-0">
-        <div className="mx-auto w-full max-w-4xl lg:max-w-6xl lg:grid lg:grid-cols-12 lg:gap-6 lg:items-start">
+        <div className="mx-auto w-full max-w-4xl lg:max-w-6xl px-4 sm:px-5 lg:px-8 lg:grid lg:grid-cols-12 lg:gap-6 lg:items-start">
           {/* ═══ FLUX principal (gauche), rythme vertical 52px ═══ */}
           <div className="min-w-0 space-y-[52px] lg:col-span-8">
             {/* 1. Accueil */}
@@ -310,15 +313,22 @@ const OwnerDashboard = () => {
             {/* 4. VOTRE FAMILLE */}
             <OwnerFamilySection pets={pets} getNextSitForPet={getNextSitForPet} />
 
+            {/* 4bis. LES GENS DU COIN (vague 16) */}
+            <NearbySittersSection />
+
             {/* 5. ENTRAIDE */}
             <OwnerEntraideSection
               myMissions={myMissions}
               nearbyHelpersCount={nearbyHelpersCount}
             />
 
+            {/* 6. LECTURES ET GUIDES (vague 16) */}
+            <ReadingsSection role="owner" />
+
+
             {/* Historique candidatures : accordéon discret tout en bas */}
             {hasReadApps && (
-              <details className="px-4 sm:px-5 md:px-8 lg:px-0 rounded-2xl bg-card border border-border overflow-hidden">
+              <details className="rounded-2xl bg-card border border-border overflow-hidden">
                 <summary className="cursor-pointer list-none px-4 py-3 flex items-center justify-between hover:bg-muted/30 transition-colors">
                   <p className="text-sm font-semibold text-foreground">
                     Historique des candidatures
@@ -341,12 +351,12 @@ const OwnerDashboard = () => {
           {/* ═══ RAIL collant (droite) — vague 12 ═══ */}
           <aside className="mt-[52px] lg:mt-0 space-y-[34px] lg:col-span-4 lg:sticky lg:top-20 lg:self-start lg:max-h-[calc(100vh-6rem)] lg:overflow-y-auto">
             {/* 1. Pouls — seul bloc sombre */}
-            <div className="px-4 sm:px-5 md:px-8 lg:px-0">
+            <div className="">
               <CommunityPulseBanner userId={user?.id} />
             </div>
 
             {/* 2. Votre maison */}
-            <div className="px-4 sm:px-5 md:px-8 lg:px-0">
+            <div className="">
               <HouseStoryRailCard
                 userId={user?.id}
                 completedSits={completedSits.length}
@@ -360,7 +370,7 @@ const OwnerDashboard = () => {
             </div>
 
             {/* 3. Accès (Gate ou Free) */}
-            <div className="px-4 sm:px-5 md:px-8 lg:px-0">
+            <div className="">
               {!(level === 4 || level === "3B")
                 ? <AccessGateBanner level={level} profileCompletion={accessProfileCompletion} context="guard" />
                 : <FreePeriodBanner />}
@@ -368,13 +378,13 @@ const OwnerDashboard = () => {
 
             {/* 4. Gardiens d'urgence — condition existante */}
             {showEmergencyHelp && (
-              <div className="px-4 sm:px-5 md:px-8 lg:px-0">
+              <div className="">
                 <NearbyEmergencySitters />
               </div>
             )}
 
             {/* 5. Parrainage — gabarit rail aligné */}
-            <div className="px-4 sm:px-5 md:px-8 lg:px-0">
+            <div className="">
               <article
                 className="bg-card border border-border"
                 style={{
@@ -426,7 +436,7 @@ const OwnerDashboard = () => {
             </div>
 
             {/* 6. Alma — clôt le rail */}
-            <div className="px-4 sm:px-5 md:px-8 lg:px-0 mb-6">
+            <div className="mb-6">
               <AlmaRailWhisper
                 variant="owner"
                 ownerState={{
