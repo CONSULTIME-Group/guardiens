@@ -1,4 +1,6 @@
 import { useEffect, useState } from "react";
+import matchEmptyIllustration from "@/assets/illustrations/sitter-match-empty.jpg";
+
 import { Link } from "react-router-dom";
 import { getOptimizedImageUrl } from "@/lib/imageOptim";
 import type { AffinitySitCard, PoolScope } from "@/hooks/useSitterTopAffinitySits";
