@@ -227,7 +227,14 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, prope
         return;
       }
 
-      const result = (rpcData ?? {}) as { sit_id?: string; auto_rejected_count?: number };
+      const result = (rpcData ?? {}) as {
+        sit_id?: string;
+        auto_rejected_count?: number;
+        auto_rejected_sitter_ids?: string[];
+      };
+      const autoRejectedIds: string[] = Array.isArray(result.auto_rejected_sitter_ids)
+        ? result.auto_rejected_sitter_ids.filter((id): id is string => typeof id === "string")
+        : [];
       trackEvent("application_accepted", {
         metadata: { application_id: app.id, sit_id: result.sit_id ?? sitId },
       });
@@ -264,22 +271,25 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, prope
         await supabase.from("conversations").update({ updated_at: new Date().toISOString() }).eq("id", acceptedConv.id);
       }
 
-      // Notification + emails (dédup via idempotencyKey).
+      // Notification gardien : dédup PAR GARDE via le champ link qui inclut le sit_id.
+      // Les emails restent hors du bloc conditionnel — leur idempotencyKey suffit à
+      // dédupliquer côté serveur, même si la notification a déjà été insérée avant.
+      const notifLink = `/mes-gardes?sit=${sitId}`;
       const { data: existingNotif } = await supabase
         .from("notifications")
         .select("id")
         .eq("user_id", sitterId)
         .eq("type", "sit_confirmed")
-        .eq("link", `/mes-gardes`)
+        .eq("link", notifLink)
         .maybeSingle();
 
-      if (!existingNotif) {
-        const { data: proprio } = await supabase
-          .from("profiles")
-          .select("first_name")
-          .eq("id", user!.id)
-          .single();
+      const { data: proprio } = await supabase
+        .from("profiles")
+        .select("first_name")
+        .eq("id", user!.id)
+        .single();
 
+      if (!existingNotif) {
         const { data: guideCheck } = await supabase
           .from("house_guides")
           .select("id")
@@ -303,56 +313,52 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, prope
           body: guideCheck
             ? `Votre garde chez ${proprio?.first_name ?? "votre hôte"} est confirmée. Le guide de la maison sera disponible dans votre espace à partir du ${startFormatted}.`
             : `Votre garde chez ${proprio?.first_name ?? "votre hôte"} est confirmée. Rendez-vous dans "Mes gardes" pour les détails.`,
-          link: `/mes-gardes`,
+          link: notifLink,
         });
-
-        sendTransactionalEmail({
-          templateName: "application-accepted",
-          recipientUserId: sitterId,
-          idempotencyKey: `app-accepted-${app.id}`,
-          templateData: {
-            sitTitle,
-            ownerFirstName: proprio?.first_name ?? "",
-          },
-        }).catch(() => {});
-
-        let endFormatted = "";
-        if (endDate) {
-          try { endFormatted = format(parseISO(endDate), "dd MMMM yyyy", { locale: fr }); } catch { endFormatted = endDate; }
-        }
-        const startFormattedFull = startDate
-          ? (() => { try { return format(parseISO(startDate), "dd MMMM yyyy", { locale: fr }); } catch { return startDate; } })()
-          : "";
-        sendTransactionalEmail({
-          templateName: "sit-confirmed",
-          recipientUserId: user!.id,
-          idempotencyKey: `sit-confirmed-${sitId}`,
-          templateData: {
-            sitTitle,
-            sitterFirstName: app.sitter?.first_name ?? "",
-            startDate: startFormattedFull,
-            endDate: endFormatted,
-            petNames: petNames.join(", "),
-            sitId,
-          },
-        }).catch(() => {});
       }
 
-      // Message système + email pour les candidatures auto-déclinées.
-      const { data: autoRejected } = await supabase
-        .from("applications")
-        .select("sitter_id")
-        .eq("sit_id", sitId)
-        .eq("status", "rejected")
-        .neq("id", app.id);
+      // Emails toujours envoyés — idempotencyKey stable (app.id / sit.id) dédup côté serveur.
+      sendTransactionalEmail({
+        templateName: "application-accepted",
+        recipientUserId: sitterId,
+        idempotencyKey: `app-accepted-${app.id}`,
+        templateData: {
+          sitTitle,
+          ownerFirstName: proprio?.first_name ?? "",
+        },
+      }).catch(() => {});
 
-      if (autoRejected && user) {
-        for (const ra of autoRejected) {
+      let endFormatted = "";
+      if (endDate) {
+        try { endFormatted = format(parseISO(endDate), "dd MMMM yyyy", { locale: fr }); } catch { endFormatted = endDate; }
+      }
+      const startFormattedFull = startDate
+        ? (() => { try { return format(parseISO(startDate), "dd MMMM yyyy", { locale: fr }); } catch { return startDate; } })()
+        : "";
+      sendTransactionalEmail({
+        templateName: "sit-confirmed",
+        recipientUserId: user!.id,
+        idempotencyKey: `sit-confirmed-${sitId}`,
+        templateData: {
+          sitTitle,
+          sitterFirstName: app.sitter?.first_name ?? "",
+          startDate: startFormattedFull,
+          endDate: endFormatted,
+          petNames: petNames.join(", "),
+          sitId,
+        },
+      }).catch(() => {});
+
+      // Message système + email pour les candidatures RÉELLEMENT auto-refusées
+      // par cette acceptation (retournées par la RPC). N'inclut PAS les refus
+      // manuels antérieurs, qui ont déjà reçu leur propre message de déclin.
+      if (autoRejectedIds.length > 0 && user) {
+        for (const rejectedSitterId of autoRejectedIds) {
           const { data: rejConv } = await supabase
             .from("conversations")
             .select("id")
             .eq("sit_id", sitId)
-            .eq("sitter_id", ra.sitter_id)
+            .eq("sitter_id", rejectedSitterId)
             .maybeSingle();
           if (rejConv) {
             await supabase.from("messages").insert({
@@ -366,12 +372,13 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, prope
 
           sendTransactionalEmail({
             templateName: "application-declined",
-            recipientUserId: ra.sitter_id,
-            idempotencyKey: `app-declined-auto-${sitId}-${ra.sitter_id}`,
+            recipientUserId: rejectedSitterId,
+            idempotencyKey: `app-declined-auto-${sitId}-${rejectedSitterId}`,
             templateData: { sitTitle },
           }).catch(() => {});
         }
       }
+
 
       // 3) Construire accordData enrichi (sit + property + pets réels).
       const { data: sitFull } = await supabase

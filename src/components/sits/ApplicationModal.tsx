@@ -444,7 +444,7 @@ const ApplicationModal = ({
                           await trackEvent("alma_application_letter_generated", { metadata: { sit_id: sitId } });
                           toast({ title: "Brouillon Alma prêt", description: "Vous pouvez relire et personnaliser avant d'envoyer." });
                         } catch (e: any) {
-                          toast({ title: "Alma indisponible", description: e?.message || "Réessaie dans un instant.", variant: "destructive" });
+                          toast({ title: "Alma indisponible", description: e?.message || "Réessayez dans un instant.", variant: "destructive" });
                         } finally {
                           setAlmaLoading(false);
                         }
