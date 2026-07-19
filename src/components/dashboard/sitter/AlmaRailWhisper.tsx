@@ -61,7 +61,7 @@ const AlmaRailWhisper = ({
     }
   };
 
-  const onKeyDown = (e: React.KeyboardEvent<HTMLElement>) => {
+  const onKeyDown = (e: KeyboardEvent<HTMLElement>) => {
     if (e.key === "Enter" || e.key === " ") {
       e.preventDefault();
       openAlma();
