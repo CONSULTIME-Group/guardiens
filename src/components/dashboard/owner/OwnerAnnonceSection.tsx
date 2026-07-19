@@ -12,7 +12,8 @@ import { getOptimizedImageUrl } from "@/lib/imageOptim";
 import { SectionHeader } from "../sitter/SitterMatchSection";
 import type { SitRow } from "./types";
 
-const PLACEHOLDER_BG = "linear-gradient(160deg, #e8ddce, #d9c7ae 60%, #c4ad90)";
+// Vague 15 : passe par un token CSS pour s'assombrir en dark.
+const PLACEHOLDER_BG = "var(--photo-placeholder-sand)";
 
 const humanStatus = (status: string): string | null => {
   switch (status) {

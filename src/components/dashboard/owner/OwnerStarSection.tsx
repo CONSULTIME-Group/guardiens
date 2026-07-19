@@ -47,7 +47,8 @@ const formatDateRange = (start?: string | null, end?: string | null): string | n
   }
 };
 
-const PLACEHOLDER_BG = "linear-gradient(160deg, #cfe0d6, #a9c6b6 60%, #8bae9b)";
+// Vague 15 : passe par un token CSS pour s'assombrir en dark.
+const PLACEHOLDER_BG = "var(--photo-placeholder-green)";
 
 /* ------------------------------------------------------------------ */
 /*  En-tête de section (eyebrow terracotta + titre Playfair)          */

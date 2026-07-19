@@ -25,8 +25,8 @@ interface Props {
   isLoading: boolean;
 }
 
-const PLACEHOLDER_BG =
-  "linear-gradient(160deg, #cfe0d6, #a9c6b6 60%, #8bae9b)";
+// Vague 15 : passe par un token CSS pour s'assombrir en dark.
+const PLACEHOLDER_BG = "var(--photo-placeholder-green)";
 
 const DATE_FMT = new Intl.DateTimeFormat("fr-FR", {
   day: "numeric",

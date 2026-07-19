@@ -5,7 +5,8 @@
  * pour ne jamais dupliquer le calcul visuel : même dégradé, même piste,
  * même animation, même popover d'explication.
  *
- * Signature : gradient linéaire pin -> olive -> or, piste #EDE7DE.
+ * Signature : gradient linéaire pin -> olive -> or (inchangé dans les deux thèmes),
+ * piste adossée au token --affinity-ring-track (crème en light, muted en dark).
  * Animation strokeDashoffset au montage (360 ms), respectée si
  * prefers-reduced-motion. Popover d'explication au clic si `result` fourni.
  */
@@ -62,7 +63,7 @@ const AffinityRing = ({ score, result, size = 70 }: Props) => {
             cy={size / 2}
             r={r}
             fill="none"
-            stroke="#EDE7DE"
+            stroke="hsl(var(--affinity-ring-track))"
             strokeWidth={stroke}
           />
           <circle
