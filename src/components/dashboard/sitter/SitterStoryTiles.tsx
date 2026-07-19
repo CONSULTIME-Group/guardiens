@@ -115,7 +115,7 @@ const SitterStoryTiles = ({
       Icon: Award,
       value: badgeCount,
       label: badgeCount > 1 ? "écussons obtenus" : "écusson obtenu",
-      linkTo: "/profile#badges",
+      linkTo: badgesLink,
       linkText:
         badgeCount === 0
           ? "Débloquer votre premier écusson"
