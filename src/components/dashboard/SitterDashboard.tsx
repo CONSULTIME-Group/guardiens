@@ -489,12 +489,28 @@ const SitterDashboard = () => {
             padding: "34px 22px",
           }}
         >
+          <div
+            aria-hidden="true"
+            className="illustration-wrapper mx-auto"
+            style={{ width: 140, height: 140 }}
+          >
+            <img
+              src={entraideEmptyIllustration}
+              alt=""
+              width={140}
+              height={140}
+              loading="lazy"
+              decoding="async"
+              className="illustration-blend animate-painted-reveal w-full h-full object-cover"
+            />
+          </div>
           <h3
-            className="font-heading text-foreground"
+            className="font-heading text-foreground mt-[14px]"
             style={{ fontSize: "20px", fontWeight: 600 }}
           >
             Personne n'a besoin d'aide pour l'instant, tout va bien.
           </h3>
+
           <p
             className="font-sans text-muted-foreground mx-auto mt-[14px]"
             style={{ fontSize: "13px", maxWidth: "42ch", lineHeight: 1.5 }}
