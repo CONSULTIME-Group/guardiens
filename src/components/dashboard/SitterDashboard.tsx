@@ -109,8 +109,14 @@ const SitterDashboard = () => {
     isLoading: nbaLoading,
   } = useSitterTopAffinitySits();
 
+  // Signal helpers proches, partagé entre les deux dashboards.
+  // DOIT rester avant tout early return pour respecter la règle des hooks.
+  const { data: nearbyHelpersData } = useNearbyHelpers(user?.id);
+  const nearbyHelpersCount = nearbyHelpersData?.helpers?.length ?? 0;
+
   if (loading) return <SitterDashboardSkeleton />;
   if (error) return <DashboardLoadError onRetry={reload} detail={error} />;
+
 
 
   // (Sous-titre dynamique supprimé : redondant avec le titre de la
