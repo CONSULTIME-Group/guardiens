@@ -1,7 +1,5 @@
 import { useState, useEffect, useMemo, useCallback } from "react";
 
-import { supabase } from "@/integrations/supabase/client";
-import { logger } from "@/lib/logger";
 import { useAuth } from "@/contexts/AuthContext";
 
 import OnboardingWelcome from "./OnboardingWelcome";
