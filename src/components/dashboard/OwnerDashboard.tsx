@@ -267,7 +267,7 @@ const OwnerDashboard = () => {
 
       {/* ═══ Grille 12 colonnes : flux (8) + rail (4) ═══ */}
       <div className="min-w-0">
-        <div className="mx-auto w-full max-w-4xl lg:max-w-6xl lg:grid lg:grid-cols-12 lg:gap-6 lg:items-start">
+        <div className="mx-auto w-full max-w-4xl lg:max-w-6xl px-4 sm:px-5 lg:px-8 lg:grid lg:grid-cols-12 lg:gap-6 lg:items-start">
           {/* ═══ FLUX principal (gauche), rythme vertical 52px ═══ */}
           <div className="min-w-0 space-y-[52px] lg:col-span-8">
             {/* 1. Accueil */}

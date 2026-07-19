@@ -274,7 +274,7 @@ const SitterDashboard = () => {
           → Activation → Opportunités → Profil (accordéon). */}
       <div className="min-w-0">
         {isNewSitter ? (
-          <div className="mx-auto w-full max-w-4xl lg:max-w-6xl lg:grid lg:grid-cols-12 lg:gap-6 lg:items-start">
+          <div className="mx-auto w-full max-w-4xl lg:max-w-6xl px-4 sm:px-5 lg:px-8 lg:grid lg:grid-cols-12 lg:gap-6 lg:items-start">
             {/* ═══ FLUX principal (gauche) — rythme vertical 52px ═══ */}
             <div className="min-w-0 space-y-[52px] lg:col-span-8">
               {/* 1. ACCUEIL, salutation Bienvenue */}
@@ -352,7 +352,7 @@ const SitterDashboard = () => {
           </div>
 
         ) : (
-          <div className="mx-auto w-full max-w-4xl lg:max-w-6xl lg:grid lg:grid-cols-12 lg:gap-6 lg:items-start">
+          <div className="mx-auto w-full max-w-4xl lg:max-w-6xl px-4 sm:px-5 lg:px-8 lg:grid lg:grid-cols-12 lg:gap-6 lg:items-start">
             {/* ═══ FLUX principal (gauche) ═══ rythme vertical 52px (vague 3) */}
             <div className="min-w-0 space-y-[52px] lg:col-span-8">
               {/* COCKPIT */}
