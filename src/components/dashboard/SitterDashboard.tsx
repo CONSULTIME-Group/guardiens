@@ -561,48 +561,54 @@ const SitterDashboard = () => {
       <div className="min-w-0">
         {isNewSitter ? (
           <div className="mx-auto w-full max-w-4xl lg:max-w-6xl lg:grid lg:grid-cols-12 lg:gap-6 lg:items-start">
-            {/* ═══ FLUX principal (gauche) ═══ */}
-            <div className="min-w-0 space-y-8 lg:col-span-8">
-              {/* completion-first quand le profil est incomplet */}
-              {!allChecklistDone && ChecklistBlock}
-
-              {/* NBA affinité dominante */}
+            {/* ═══ FLUX principal (gauche) — rythme vertical 52px ═══ */}
+            <div className="min-w-0 space-y-[52px] lg:col-span-8">
+              {/* 1. ACCUEIL, salutation Bienvenue */}
               <div className="min-w-0">
-                {nbaLoading ? (
-                  <SitterFirstNBASkeleton />
-                ) : hasMinimumPool && hasPostalCode ? (
-                  <SitterFirstNBA sits={topSits} />
-                ) : fallbackSits.length > 0 && hasPostalCode && !profileIncomplete ? (
-                  <SitterFirstNBA
-                    sits={fallbackSits}
-                    mode="fallback"
-                    scopeLabel={
-                      scopeUsed === "dept"
-                        ? "dans votre département"
-                        : scopeUsed === "region"
-                          ? "dans votre région"
-                          : "sur Guardiens"
-                    }
-                  />
-                ) : (
-                  <NoNearbySitsEmptyState
-                    totalPublishedSits={totalPublished}
-                    postalCode={postalCode}
-                    variant={profileIncomplete ? "profile_incomplete" : "no_nearby"}
-                  />
-                )}
+                <SitterCockpit
+                  userId={user?.id}
+                  firstName={user?.firstName}
+                  avatarUrl={avatarUrl}
+                  isFounder={user?.isFounder}
+                  isAvailable={isAvailable}
+                  onToggleAvailability={toggleAvailability}
+                  greeting="Bienvenue"
+                />
               </div>
 
+              {/* 2. LA STAR, complétion : SitterOpeningCard (remplace ChecklistBlock
+                  et le bandeau code postal manquant dans cette branche uniquement). */}
+              {!allChecklistDone && (
+                <div className="px-4 sm:px-5 md:px-8 lg:px-0">
+                  <SitterOpeningCard
+                    hasAvatar={!!avatarUrl}
+                    hasBioMin={!!(bio && bio.length >= 50)}
+                    hasPostalCode={!!postalCode}
+                  />
+                </div>
+              )}
+
+              {/* 3. ÉMOTION EN APERÇU : SitterTeaserCard (jamais de ring ici) */}
+              <SitterTeaserCard
+                topSits={topSits}
+                fallbackSits={fallbackSits}
+                scopeUsed={scopeUsed}
+                isLoading={nbaLoading}
+              />
+
+              {/* 4. ENTRAIDE, invitation adaptée au premier pas */}
               <div className="px-4 sm:px-5 md:px-8 lg:px-0">
-                <NearbyHelpersCarousel hideHeader />
-              </div>
-              <div className="px-4 sm:px-5 md:px-8 lg:px-0">
-                {ConseilsDiscoveryCard}
+                <SitterEntraideSection
+                  firstNearbyMission={firstNearbyMission}
+                  eyebrow="Un premier pas dans la communauté"
+                  title="Commencez par un coup de main."
+                  subtitle="La façon la plus simple de rencontrer les gens du coin."
+                />
               </div>
             </div>
 
-            {/* ═══ RAIL collant (droite) ═══ */}
-            <aside className="mt-8 lg:mt-0 space-y-8 lg:col-span-4 lg:sticky lg:top-20 lg:self-start lg:max-h-[calc(100vh-6rem)] lg:overflow-y-auto">
+            {/* ═══ RAIL collant (droite) — espacement 34px, mt-[52px] mobile ═══ */}
+            <aside className="mt-[52px] lg:mt-0 space-y-[34px] lg:col-span-4 lg:sticky lg:top-20 lg:self-start lg:max-h-[calc(100vh-6rem)] lg:overflow-y-auto">
               <div className="px-4 sm:px-5 md:px-8 lg:px-0">
                 <CommunityPulseBanner userId={user?.id} />
               </div>
@@ -611,14 +617,26 @@ const SitterDashboard = () => {
                   ? <AccessGateBanner level={level} profileCompletion={accessProfileCompletion} context="guard" />
                   : <FreePeriodBanner />}
               </div>
-              <div className="px-4 sm:px-5 md:px-8 lg:px-0">
-                <EmailDigestCard />
-              </div>
+              {!allChecklistDone && (
+                <div className="px-4 sm:px-5 md:px-8 lg:px-0">
+                  <SitterNextStepRailCard
+                    hasAvatar={!!avatarUrl}
+                    hasBioMin={!!(bio && bio.length >= 50)}
+                    hasPostalCode={!!postalCode}
+                  />
+                </div>
+              )}
               <div className="px-4 sm:px-5 md:px-8 lg:px-0 mb-6">
-                {buildSecondaryAccordion()}
+                <AlmaRailWhisper
+                  profileCompletion={profileCompletion ?? 0}
+                  isAvailable={!!isAvailable}
+                  variant="newSitter"
+                  openingCardVisible={!allChecklistDone}
+                />
               </div>
             </aside>
           </div>
+
         ) : (
           <div className="mx-auto w-full max-w-4xl lg:max-w-6xl lg:grid lg:grid-cols-12 lg:gap-6 lg:items-start">
             {/* ═══ FLUX principal (gauche) ═══ rythme vertical 52px (vague 3) */}
