@@ -64,8 +64,25 @@ const SitterOpeningCard = ({
   const progressPct = Math.round((doneCount / steps.length) * 100);
   const firstUndone = steps.find((s) => !s.done)!;
 
+  const undoneKeys = steps.filter((s) => !s.done).map((s) => s.key).join(",");
+  const sectionRef = useRef<HTMLElement | null>(null);
+  useImpressionOnce(sectionRef, `sitter_opening:${undoneKeys}`, () => {
+    void trackEvent("dashboard_star_seen", {
+      source: "sitter_dashboard",
+      metadata: { surface: "sitter_dashboard", variant: "opening", undone: undoneKeys },
+    });
+  });
+
+  const trackStep = (stepKey: string) =>
+    void trackEvent("dashboard_star_cta_clicked", {
+      source: "sitter_dashboard",
+      metadata: { surface: "sitter_dashboard", variant: "opening", step: stepKey },
+    });
+
   return (
     <section
+      ref={sectionRef}
+      data-dashboard-star="sitter"
       aria-labelledby="sitter-opening-heading"
       className="px-4 sm:px-5 md:px-8 lg:px-0"
     >
