@@ -27,6 +27,9 @@ import IdentityVerificationSection from "@/components/settings/IdentityVerificat
 import ProVerificationSection from "@/components/settings/ProVerificationSection";
 import AlertsSection from "@/components/settings/AlertsSection";
 import OwnerPitchSection from "@/components/settings/OwnerPitchSection";
+import SitterEmergencyCardCompact from "@/components/dashboard/sitter/SitterEmergencyCardCompact";
+import EmailDigestCard from "@/components/dashboard/sitter/EmailDigestCard";
+import { useProfileReputation } from "@/hooks/useProfileReputation";
 import { useTheme } from "@/contexts/ThemeContext";
 import { getPasswordStrength, validateStrongPassword } from "@/lib/passwordStrength";
 import { Link } from "react-router-dom";
