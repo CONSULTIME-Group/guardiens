@@ -86,7 +86,7 @@ const CommunityPulseBanner = memo(({ userId, className }: Props) => {
     >
       <div className="mb-5">
         <p className="text-[11px] sm:text-xs font-semibold uppercase tracking-[0.18em] text-[#cfe6da]">
-          Le quartier, en ce moment
+          Le pouls de la communauté
         </p>
         <h2
           id="community-pulse-heading"
