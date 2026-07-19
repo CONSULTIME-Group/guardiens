@@ -151,6 +151,9 @@ const SitterCockpit = ({
         urgency={priority.urgency}
         onCtaClick={handlePriorityCta}
       />
+        </div>
+        <div className="notebook-card-edge" aria-hidden="true" />
+      </div>
     </section>
   );
 };
