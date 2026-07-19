@@ -137,4 +137,11 @@ Deno.serve(async (req) => {
   return new Response(JSON.stringify({ ok: true }), {
     status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
   })
+  } catch (e) {
+    // Filet de sécurité : notif déjà créée en base par la RPC, on ne bloque pas le client.
+    console.error('unexpected_error', { err: (e as Error)?.message, stack: (e as Error)?.stack })
+    return new Response(JSON.stringify({ ok: false, warning: 'unexpected_error' }), {
+      status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    })
+  }
 })
