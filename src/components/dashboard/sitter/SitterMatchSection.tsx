@@ -308,6 +308,7 @@ const StarCard = ({ sit, onCtaClick }: { sit: AffinitySitCard; onCtaClick?: () =
           <div className="mt-[22px]">
             <Link
               to={`/sits/${sit.id}`}
+              onClick={onCtaClick}
               className="inline-flex items-center justify-center rounded-full bg-primary text-primary-foreground font-bold transition-colors hover:bg-primary/90"
               style={{
                 padding: "10px 18px",
