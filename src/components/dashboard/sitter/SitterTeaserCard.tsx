@@ -118,7 +118,7 @@ const EmptyTeaser = () => (
   </div>
 );
 
-const TeaserCard = ({ sit }: { sit: AffinitySitCard }) => {
+const TeaserCard = ({ sit, onCtaClick }: { sit: AffinitySitCard; onCtaClick?: () => void }) => {
   const place = [
     sit.owner_first_name ? `Chez ${sit.owner_first_name}` : null,
     sit.city,
