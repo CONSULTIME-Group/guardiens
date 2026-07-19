@@ -29,6 +29,7 @@ import SitDraftFromPrompt from "@/components/dashboard/SitDraftFromPrompt";
 import type { OwnerPrimaryAction } from "@/hooks/useOwnerPrimaryAction";
 import { trackEvent } from "@/lib/analytics";
 import { useImpressionOnce } from "@/hooks/useImpressionOnce";
+import { selectOwnerStarVariant } from "@/lib/ownerStarVariant";
 
 const DATE_FMT = new Intl.DateTimeFormat("fr-FR", {
   day: "numeric",
@@ -480,13 +481,11 @@ const OwnerStarSection = ({
   showConcierge,
   primaryAction,
 }: OwnerStarSectionProps) => {
-  const variant: "ongoing" | "applications" | "draft" | "publish" = ongoingSit
-    ? "ongoing"
-    : pendingApps.length > 0
-      ? "applications"
-      : latestDraft
-        ? "draft"
-        : "publish";
+  const variant = selectOwnerStarVariant({
+    ongoingSit,
+    pendingAppsCount: pendingApps.length,
+    latestDraft,
+  });
 
   const sectionRef = useRef<HTMLElement | null>(null);
   useImpressionOnce(sectionRef, `owner_star:${variant}`, () => {
