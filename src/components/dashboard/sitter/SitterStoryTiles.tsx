@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { FileText, MessageSquare, Award, type LucideIcon } from "lucide-react";
 import { SectionHeader } from "./SitterMatchSection";
+import { useAuth } from "@/contexts/AuthContext";
 
 /**
  * Vague 3 sur 4, tuiles histoire.
