@@ -8,9 +8,7 @@
  */
 
 import { Link } from "react-router-dom";
-import { Calendar, MapPin, Sparkles, AlertCircle, Compass, Plus } from "lucide-react";
-import { format } from "date-fns";
-import { fr } from "date-fns/locale";
+import { Sparkles, Compass, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import InviteToMySitButton from "@/components/sits/owner/InviteToMySitButton";
@@ -30,12 +28,7 @@ interface Props {
   otherUserId?: string | null;
 }
 
-const fmt = (d?: string | null) => {
-  if (!d) return null;
-  try { return format(new Date(d), "d MMM", { locale: fr }); } catch { return null; }
-};
-
-const ContextHeaderCard = ({ contextType, isOwner, sit, otherFirstName, otherCity, otherUserId }: Props) => {
+const ContextHeaderCard = ({ contextType, isOwner, otherFirstName, otherUserId }: Props) => {
   const [ownerHasPublishedSit, setOwnerHasPublishedSit] = useState<number | null>(null);
   if (!contextType) return null;
 
