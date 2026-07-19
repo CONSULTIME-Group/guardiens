@@ -80,12 +80,12 @@ const SitterFirstNBA = ({ sits, mode = "affinity", scopeLabel }: Props) => {
         ? "1 annonce ouverte à proximité"
         : `${sits.length} annonces ouvertes à proximité`
       : sits.length === 1
-        ? "1 annonce qui vous correspond"
-        : `${sits.length} annonces qui vous correspondent`;
+        ? "1 rencontre faite pour vous"
+        : `${sits.length} rencontres faites pour vous`;
   const sub =
     mode === "fallback"
       ? `En attendant d'affiner vos correspondances, voici les annonces ouvertes${scopeLabel ? ` ${scopeLabel}` : ""}. Complétez votre profil pour obtenir un score d'affinité.`
-      : "Score d'affinité calculé à partir de vos préférences. Complétez votre profil pour affiner vos correspondances.";
+      : "Assez de points communs pour vous confier une maison en confiance. Complétez votre profil pour affiner.";
 
   return (
     <section
