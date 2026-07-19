@@ -124,9 +124,11 @@ Deno.serve(async (req) => {
   })
 
   if (sendErr) {
-    console.error('send_failed', { err: sendErr.message })
-    return new Response(JSON.stringify({ error: 'send_failed' }), {
-      status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    // Best-effort: la notification en base est déjà créée par la RPC.
+    // On journalise mais on renvoie 200 pour ne pas polluer les moniteurs réseau côté client.
+    console.error('send_failed', { err: sendErr.message, mission_id: payload.mission_id, helper_id: payload.helper_id })
+    return new Response(JSON.stringify({ ok: false, warning: 'send_failed' }), {
+      status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     })
   }
 
