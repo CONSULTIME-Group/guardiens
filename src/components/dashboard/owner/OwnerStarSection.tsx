@@ -207,12 +207,14 @@ const ApplicationCard = ({
   affinity,
   affinityInput,
   extraCount,
+  onCtaClick,
 }: {
   app: AppRow;
   sitter: SitterInfo | null;
   affinity: AffinityResult | null;
   affinityInput: AffinitySitterInput | null;
   extraCount: number;
+  onCtaClick?: () => void;
 }) => {
   const firstName = sitter?.first_name ? capitalize(sitter.first_name) : "Un gardien";
   const dates = formatDateRange(app.sit?.start_date, app.sit?.end_date);
