@@ -1727,10 +1727,10 @@ export default function PublicSitterProfile() {
                   </h2>
                 </header>
                 {userBadges && userBadges.length > 0 && (
-                  <>
+                  <div id="badges" className="scroll-mt-24 space-y-6">
                     <SpecialBadgeHighlight userBadges={userBadges} />
                     <BadgeRow badges={userBadges} />
-                  </>
+                  </div>
                 )}
                 {id && <MissionBadgesReceived profileId={id} />}
                 <TrustTimeline
