@@ -240,13 +240,11 @@ const StarCard = ({ sit, onCtaClick }: { sit: AffinitySitCard; onCtaClick?: () =
         )}
         {place && (
           <div
-            className="absolute left-[14px] bottom-[14px] rounded-full"
+            className="absolute left-[14px] bottom-[14px] rounded-full bg-background/90 text-foreground"
             style={{
-              backgroundColor: "rgba(255,255,255,0.92)",
               padding: "6px 12px",
               fontSize: "12px",
               fontWeight: 700,
-              color: "hsl(var(--foreground))",
             }}
           >
             {place}
@@ -327,7 +325,7 @@ const StarCard = ({ sit, onCtaClick }: { sit: AffinitySitCard; onCtaClick?: () =
               className="text-muted-foreground mt-[14px]"
               style={{ fontSize: "12px", lineHeight: 1.4 }}
             >
-              Basé sur {total} critères partagés entre vos deux profils.
+              Basé sur {total} critère{total > 1 ? "s" : ""} comparé{total > 1 ? "s" : ""} entre vos deux profils.
             </p>
           )}
         </div>

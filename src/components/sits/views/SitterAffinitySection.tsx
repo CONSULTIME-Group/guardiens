@@ -44,7 +44,7 @@ const SitterAffinitySection = ({
   if (!full || !displayed) return null;
 
   const reasons = full.matched ?? [];
-  const criteriaCount = reasons.length;
+  const criteriaCount = full.total ?? reasons.length;
   const first = (ownerFirstName ?? "").trim();
 
   return (
@@ -79,7 +79,7 @@ const SitterAffinitySection = ({
               className="text-muted-foreground mt-[6px]"
               style={{ fontSize: "13px", lineHeight: 1.5 }}
             >
-              {`Basé sur ${criteriaCount} critère${criteriaCount > 1 ? "s" : ""} partagé${
+              {`Basé sur ${criteriaCount} critère${criteriaCount > 1 ? "s" : ""} comparé${
                 criteriaCount > 1 ? "s" : ""
               } entre vos deux profils. Touchez le cercle pour le détail.`}
             </p>
