@@ -33,6 +33,8 @@ import SitterOpeningCard from "./sitter/SitterOpeningCard";
 import SitterTeaserCard from "./sitter/SitterTeaserCard";
 import SitterNextStepRailCard from "./sitter/SitterNextStepRailCard";
 import SitterEntraideSection from "./sitter/SitterEntraideSection";
+import ReadingsSection from "./shared/ReadingsSection";
+
 import { useIsNewSitter } from "@/hooks/useIsNewUser";
 import { useSitterTopAffinitySits } from "@/hooks/useSitterTopAffinitySits";
 
