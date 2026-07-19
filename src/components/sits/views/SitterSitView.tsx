@@ -34,7 +34,8 @@ import SitFooterReassurance from "./SitFooterReassurance";
 import SitterStatusBanner from "./SitterStatusBanner";
 import { useSitDerived } from "./useSitDerived";
 import ReviewsTab from "./tabs/ReviewsTab";
-import SitImmersiveContent from "./SitImmersiveContent";
+import SitImmersiveHero from "./SitImmersiveHero";
+import SitImmersiveBody from "./SitImmersiveBody";
 import SitterAffinitySection from "./SitterAffinitySection";
 import { AlmaPopularSitWhisper } from "@/components/ai/alma/wiring/AlmaPopularSitWhisper";
 import { AlmaReactiveOwnerWhisper } from "@/components/ai/alma/wiring/AlmaReactiveOwnerWhisper";
@@ -186,21 +187,7 @@ const SitterSitView = ({
         endDate={sit.end_date}
       />
 
-      {badges.length > 0 && (
-        <div className="flex flex-wrap gap-2 mb-4">
-          {badges.map((b) => (
-            <span
-              key={b}
-              className="px-3 py-1.5 rounded-full text-xs font-medium bg-primary/10 text-primary"
-            >
-              <CheckCircle2 className="inline h-3.5 w-3.5 mr-1 -mt-0.5" />
-              {b}
-            </span>
-          ))}
-        </div>
-      )}
-
-      {/* Header partagé */}
+      {/* Header partagé (compact : back link + actions uniquement) */}
       <SitDetailHeader
         sitId={sit.id}
         sitSlug={sit.slug}
@@ -223,31 +210,27 @@ const SitterSitView = ({
         compact
       />
 
-      {/* Rencontre en tête — grammaire du ring partagé (vague 21) */}
-      <SitterAffinitySection
-        sitterProfile={sitterProfile}
-        ownerProfile={ownerProfile}
+      {/* Hero photos + ville + titre : accueil/émotion en premier */}
+      <SitImmersiveHero
+        sit={sit}
+        owner={owner}
+        property={property}
         pets={pets}
-        ownerFirstName={owner?.first_name}
-        targetId={sit.id}
       />
 
-      {/* Whispers Alma — surfacés uniquement si données réelles */}
-      {activeRole === "sitter" && sit.status === "published" && !!currentUserId && (
-        <>
-          <AlmaPopularSitWhisper
-            sitId={sit.id}
-            applicationsCount={appCount}
-            ownerProfile={ownerProfile}
-            sitterProfile={sitterProfile}
-            pets={pets}
-            onApply={() => setApplyOpen(true)}
-          />
-          {owner?.id && <AlmaReactiveOwnerWhisper ownerId={owner.id} />}
-        </>
+      {badges.length > 0 && (
+        <div className="flex flex-wrap gap-2 mt-4 mb-4">
+          {badges.map((b) => (
+            <span
+              key={b}
+              className="px-3 py-1.5 rounded-full text-xs font-medium bg-primary/10 text-primary"
+            >
+              <CheckCircle2 className="inline h-3.5 w-3.5 mr-1 -mt-0.5" aria-hidden="true" />
+              {b}
+            </span>
+          ))}
+        </div>
       )}
-
-
 
       {/* Barre de candidature en pilule signature (vague 21).
           data-dashboard-star="sitter" : le sticky mobile ci-dessous utilise
@@ -307,11 +290,7 @@ const SitterSitView = ({
                   {appCount > 0 && (
                     <Fact
                       icon={Users}
-                      label={
-                        sit.max_applications
-                          ? `${appCount} / ${sit.max_applications} candidature${sit.max_applications > 1 ? "s" : ""}`
-                          : `${appCount} candidature${appCount > 1 ? "s" : ""}`
-                      }
+                      label={`${appCount} candidature${appCount > 1 ? "s" : ""} déjà reçue${appCount > 1 ? "s" : ""}`}
                     />
                   )}
                 </div>
@@ -360,6 +339,31 @@ const SitterSitView = ({
           </aside>
         );
       })()}
+
+      {/* Rencontre — grammaire du ring partagé (vague 21), après l'action */}
+      <SitterAffinitySection
+        sitterProfile={sitterProfile}
+        ownerProfile={ownerProfile}
+        pets={pets}
+        ownerFirstName={owner?.first_name}
+        targetId={sit.id}
+      />
+
+      {/* Whispers Alma — surfacés uniquement si données réelles */}
+      {activeRole === "sitter" && sit.status === "published" && !!currentUserId && (
+        <>
+          <AlmaPopularSitWhisper
+            sitId={sit.id}
+            applicationsCount={appCount}
+            ownerProfile={ownerProfile}
+            sitterProfile={sitterProfile}
+            pets={pets}
+            onApply={() => setApplyOpen(true)}
+          />
+          {owner?.id && <AlmaReactiveOwnerWhisper ownerId={owner.id} />}
+        </>
+      )}
+
       {/* Post-confirmation checklist */}
       {(sit.status === "confirmed" || sit.status === "in_progress") && (
         <div className="mb-8">
@@ -375,8 +379,8 @@ const SitterSitView = ({
         </div>
       )}
 
-      {/* Contenu immersif (hero, animaux+fiches race, journée type, mot de l'hôte, sidebar) */}
-      <SitImmersiveContent
+      {/* Contenu immersif (quick facts, animaux+fiches race, journée type, mot de l'hôte, sidebar) */}
+      <SitImmersiveBody
         sit={sit}
         owner={owner}
         property={property}
