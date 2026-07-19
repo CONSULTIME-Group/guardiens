@@ -94,6 +94,7 @@ const SitterDashboard = () => {
   const {
     topSits,
     fallbackSits,
+    discoverySit,
     hasMinimumPool,
     hasPostalCode,
     profileIncomplete,
@@ -398,6 +399,7 @@ const SitterDashboard = () => {
                 <SitterMatchSection
                   topSits={topSits}
                   fallbackSits={fallbackSits}
+                  discoverySit={discoverySit}
                   scopeUsed={scopeUsed}
                   isLoading={nbaLoading}
                 />
