@@ -1,16 +1,9 @@
-import { useEffect, useState } from "react";
 import matchEmptyIllustration from "@/assets/illustrations/sitter-match-empty.jpg";
 
 import { Link } from "react-router-dom";
 import { getOptimizedImageUrl } from "@/lib/imageOptim";
 import type { AffinitySitCard, PoolScope } from "@/hooks/useSitterTopAffinitySits";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import AffinityDetailsPopoverContent from "@/components/matching/AffinityDetailsPopoverContent";
-import type { AffinityResult } from "@/lib/affinityScore";
+import AffinityRing from "@/components/matching/AffinityRing";
 
 /**
  * Vague 2 sur 4, la carte rencontre.
@@ -63,140 +56,6 @@ const speciesLabel = (species: string[]): string | null => {
   if (!species || species.length === 0) return null;
   if (species.length === 1) return species[0];
   return `${species.length} animaux`;
-};
-
-/* -------------------------------------------------------------------------- */
-/*  Ring d'affinité, signature unique de l'écran                              */
-/* -------------------------------------------------------------------------- */
-
-const AffinityRing = ({
-  score,
-  result,
-}: {
-  score: number;
-  result?: AffinityResult | null;
-}) => {
-  const size = 70;
-  const stroke = 7;
-  const r = (size - stroke) / 2;
-  const c = 2 * Math.PI * r;
-  const clamped = Math.max(0, Math.min(100, Math.round(score)));
-  const finalOffset = c - (clamped / 100) * c;
-
-  const prefersReducedMotion =
-    typeof window !== "undefined" &&
-    window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
-  const [mounted, setMounted] = useState(prefersReducedMotion);
-  useEffect(() => {
-    if (prefersReducedMotion) return;
-    const raf = requestAnimationFrame(() => setMounted(true));
-    return () => cancelAnimationFrame(raf);
-  }, [prefersReducedMotion]);
-  const offset = mounted ? finalOffset : c;
-
-  const ariaLabel = `Affinité ${clamped} pour cent, calculée sur vos préférences communes. Voir le détail du score.`;
-
-  const ringSvg = (
-    <>
-      <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
-        <defs>
-          <linearGradient id="matchRingGrad" x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0%" stopColor="#2C6D50" />
-            <stop offset="55%" stopColor="#7C8A45" />
-            <stop offset="100%" stopColor="#C8A24B" />
-          </linearGradient>
-        </defs>
-        <g transform={`rotate(-90 ${size / 2} ${size / 2})`}>
-          <circle
-            cx={size / 2}
-            cy={size / 2}
-            r={r}
-            fill="none"
-            stroke="#EDE7DE"
-            strokeWidth={stroke}
-          />
-          <circle
-            cx={size / 2}
-            cy={size / 2}
-            r={r}
-            fill="none"
-            stroke="url(#matchRingGrad)"
-            strokeWidth={stroke}
-            strokeLinecap="round"
-            strokeDasharray={c}
-            strokeDashoffset={offset}
-            style={{
-              transition: prefersReducedMotion
-                ? "none"
-                : "stroke-dashoffset 360ms cubic-bezier(0,0,.2,1)",
-            }}
-          />
-        </g>
-      </svg>
-      <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-        <span
-          className="font-heading text-primary"
-          style={{ fontSize: "17px", lineHeight: 1, fontWeight: 600 }}
-        >
-          {clamped}%
-        </span>
-        <span
-          className="text-muted-foreground uppercase"
-          style={{ fontSize: "7.5px", letterSpacing: "0.12em", marginTop: "2px" }}
-        >
-          Affinité
-        </span>
-      </div>
-    </>
-  );
-
-  // Sans détail exploitable : rendu passif (garde la sémantique image).
-  if (!result) {
-    return (
-      <div
-        role="img"
-        aria-label={`Affinité ${clamped} pour cent, calculée sur vos préférences communes`}
-        className="relative shrink-0"
-        style={{ width: size, height: size }}
-      >
-        {ringSvg}
-      </div>
-    );
-  }
-
-  // Wrapper 44px min pour cible tactile, on stoppe la navigation du Link parent.
-  const blockLink = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-  };
-
-  return (
-    <Popover>
-      <span onClick={blockLink} className="inline-flex shrink-0">
-        <PopoverTrigger asChild>
-          <button
-            type="button"
-            aria-label={ariaLabel}
-            className="relative rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 cursor-pointer"
-            style={{ width: size, height: size, minWidth: 44, minHeight: 44 }}
-          >
-            {ringSvg}
-          </button>
-        </PopoverTrigger>
-      </span>
-      <PopoverContent
-        side="bottom"
-        align="start"
-        sideOffset={8}
-        avoidCollisions
-        collisionPadding={12}
-        className="w-[300px] p-3 z-50"
-        onOpenAutoFocus={(e) => e.preventDefault()}
-      >
-        <AffinityDetailsPopoverContent result={result} />
-      </PopoverContent>
-    </Popover>
-  );
 };
 
 /* -------------------------------------------------------------------------- */

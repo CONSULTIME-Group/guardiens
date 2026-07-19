@@ -29,6 +29,12 @@ export interface SitDraftFromPromptProps {
    */
   secondary?: boolean;
   /**
+   * Mode démoté (vague 10) : la carte vit sous une CTA primaire concurrente
+   * (OwnerStarSection). Le bouton Générer passe en variant "outline" pour
+   * ne plus concurrencer le CTA principal de la star.
+   */
+  demoted?: boolean;
+  /**
    * Action primaire proprio (activation). Quand `create_first_sit`, on affiche
    * une phrase courte d'Alma expliquant POURQUOI publier maintenant. Quand
    * `publish_draft`, la carte bascule en mode « finalisez et publiez » avec
@@ -37,7 +43,7 @@ export interface SitDraftFromPromptProps {
   primary?: OwnerPrimaryAction | null;
 }
 
-export default function SitDraftFromPrompt({ secondary = false, primary = null }: SitDraftFromPromptProps = {}) {
+export default function SitDraftFromPrompt({ secondary = false, demoted = false, primary = null }: SitDraftFromPromptProps = {}) {
   const [prompt, setPrompt] = useState("");
   const [loading, setLoading] = useState(false);
   const [almaMood, setAlmaMood] = useState<"idle" | "happy" | "thinking" | "attentive">("attentive");
@@ -327,6 +333,7 @@ export default function SitDraftFromPrompt({ secondary = false, primary = null }
           <Button
             onClick={handleGenerate}
             disabled={loading || transcribing || recording || prompt.trim().length < 10}
+            variant={demoted ? "outline" : "default"}
             className="rounded-xl"
           >
             {loading ? (
