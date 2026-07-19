@@ -4,11 +4,9 @@
  * Vouvoiement/tutoiement selon l'audience.
  */
 import { useEffect, useState } from "react";
-import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import { trackEvent } from "@/lib/analytics";
-import AlmaBubble from "./AlmaBubble";
 
 interface AlmaMessageOpenerProps {
   audience: "owner" | "sitter";
@@ -81,26 +79,44 @@ export function AlmaMessageOpener({
 
   return (
     <div className="px-4 pt-3">
-      <AlmaBubble
-        audience={audience}
-        variant="inline"
-        loading={loading}
-        onDismiss={() => setDismissed(true)}
-        actions={
-          <>
-            <Button size="sm" onClick={handleGenerate} disabled={loading}>
-              Oui, préparer un message
-            </Button>
-            <Button size="sm" variant="ghost" onClick={() => setDismissed(true)}>
-              Non merci
-            </Button>
-          </>
-        }
+      <div
+        className="bg-card border border-dashed border-border rounded-2xl p-4 flex gap-3 items-start"
       >
-        {message}
-      </AlmaBubble>
+        <div
+          className="w-[34px] h-[34px] rounded-full shrink-0"
+          style={{
+            background:
+              "radial-gradient(circle at 30% 30%, hsl(var(--hero-paper)) 0%, hsl(var(--primary) / 0.18) 100%)",
+          }}
+          aria-hidden="true"
+        />
+        <div className="flex-1 min-w-0">
+          <p className="text-[13px] font-bold text-primary">Alma</p>
+          <p className="font-heading italic text-[13.5px] text-foreground/90 leading-relaxed mt-0.5">
+            {message}
+          </p>
+          <div className="flex items-center gap-4 mt-2">
+            <button
+              type="button"
+              onClick={handleGenerate}
+              disabled={loading}
+              className="text-[12px] font-bold text-primary hover:underline disabled:opacity-60 disabled:cursor-not-allowed"
+            >
+              {loading ? "Préparation…" : "Utiliser cette réponse"}
+            </button>
+            <button
+              type="button"
+              onClick={() => setDismissed(true)}
+              className="text-[12px] text-muted-foreground hover:text-foreground transition-colors"
+            >
+              Non merci
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
 
 export default AlmaMessageOpener;
+
