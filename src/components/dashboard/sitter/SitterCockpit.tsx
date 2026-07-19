@@ -39,6 +39,9 @@ interface SitterCockpitProps {
   isFounder?: boolean;
   isAvailable: boolean;
   onToggleAvailability: () => void;
+  /** Salutation configurable, "Bonjour" par défaut. La branche nouveau gardien
+   * passe "Bienvenue" pour marquer l'arrivée. */
+  greeting?: string;
   // Props conservées pour compatibilité de l'appelant, non utilisées dans
   // cette vague : l'accueil ne porte plus d'action prioritaire.
   nextGuard?: any | null;
@@ -55,7 +58,9 @@ const SitterCockpit = ({
   avatarUrl,
   isAvailable,
   onToggleAvailability,
+  greeting = "Bonjour",
 }: SitterCockpitProps) => {
+
   const displayName = firstName ? capitalize(firstName) : "";
   const initial = displayName ? displayName.charAt(0) : "?";
   const ancrage = momentAncrage();
