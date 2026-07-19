@@ -95,9 +95,18 @@ const SectionHeader = ({
 /* ------------------------------------------------------------------ */
 /*  Bouton primaire unique de la section                              */
 /* ------------------------------------------------------------------ */
-const PrimaryCta = ({ to, children }: { to: string; children: React.ReactNode }) => (
+const PrimaryCta = ({
+  to,
+  children,
+  onClick,
+}: {
+  to: string;
+  children: React.ReactNode;
+  onClick?: () => void;
+}) => (
   <Link
     to={to}
+    onClick={onClick}
     className="inline-flex items-center justify-center rounded-full bg-primary text-primary-foreground font-bold transition-colors hover:bg-primary/90"
     style={{
       padding: "10px 18px",
