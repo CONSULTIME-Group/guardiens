@@ -31,6 +31,7 @@ import SitterDashboardSkeleton from "./sitter/SitterDashboardSkeleton";
 import SitterActivityPanel from "./sitter/SitterActivityPanel";
 import SitterFirstNBA from "./SitterFirstNBA";
 import SitterFirstNBASkeleton from "./SitterFirstNBASkeleton";
+import SitterMatchSection from "./sitter/SitterMatchSection";
 import NoNearbySitsEmptyState from "./NoNearbySitsEmptyState";
 import EmailDigestCard from "./sitter/EmailDigestCard";
 import { useIsNewSitter } from "@/hooks/useIsNewUser";
