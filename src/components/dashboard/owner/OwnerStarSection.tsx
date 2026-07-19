@@ -29,6 +29,7 @@ import SitDraftFromPrompt from "@/components/dashboard/SitDraftFromPrompt";
 import type { OwnerPrimaryAction } from "@/hooks/useOwnerPrimaryAction";
 import { trackEvent } from "@/lib/analytics";
 import { useImpressionOnce } from "@/hooks/useImpressionOnce";
+import { selectOwnerStarVariant } from "@/lib/ownerStarVariant";
 
 const DATE_FMT = new Intl.DateTimeFormat("fr-FR", {
   day: "numeric",

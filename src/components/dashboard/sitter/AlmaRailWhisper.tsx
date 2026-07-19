@@ -10,6 +10,7 @@ import type { KeyboardEvent } from "react";
 import AlmaAvatar from "@/components/ai/alma/AlmaAvatar";
 import { useAlmaHidden } from "@/hooks/useAlmaHidden";
 import { toast } from "sonner";
+import { pickAlmaRailPhrase } from "@/lib/almaRailPhrase";
 
 interface AlmaRailWhisperProps {
   profileCompletion?: number;
@@ -36,31 +37,15 @@ const AlmaRailWhisper = ({
 }: AlmaRailWhisperProps) => {
   const { hidden, setHidden } = useAlmaHidden();
 
-  let phrase: string;
-  if (hidden) {
-    phrase = "Je reste à portée de voix si vous changez d'avis.";
-  } else if (variant === "owner" && ownerState) {
-    if (ownerState.ongoingSit) {
-      phrase = ownerState.ongoingSitterFirstName
-        ? `Tout se passe bien chez vous. ${ownerState.ongoingSitterFirstName} veille sur la maison.`
-        : "Tout se passe bien chez vous, votre gardien veille sur la maison.";
-    } else if (ownerState.pendingApps) {
-      phrase = "Prenez le temps de lire chaque candidature, la bonne rencontre se sent vite.";
-    } else if (ownerState.noActiveSit) {
-      phrase = "Quand vous serez prêt à partir, je vous aide à raconter votre maison.";
-    } else {
-      phrase = "Votre annonce vit. Les bonnes personnes finissent toujours par se croiser.";
-    }
-  } else if (variant === "newSitter" && openingCardVisible) {
-    phrase =
-      "Bienvenue chez vous. Une photo, quelques mots, et je vous présente les maisons d'ici.";
-  } else if (!checklistVisible && profileCompletion < 100) {
-    phrase = "Quelques touches à votre profil, et les propriétaires vous remarquent davantage.";
-  } else if (!isAvailable) {
-    phrase = "Dites que vous êtes disponible, et les bonnes gardes viennent à vous.";
-  } else {
-    phrase = "Votre profil est prêt. Une belle rencontre peut arriver à tout moment.";
-  }
+  const phrase = pickAlmaRailPhrase({
+    variant,
+    hidden,
+    profileCompletion,
+    isAvailable,
+    checklistVisible,
+    openingCardVisible,
+    ownerState,
+  });
 
   const handleActivate = () => {
     if (hidden) {
