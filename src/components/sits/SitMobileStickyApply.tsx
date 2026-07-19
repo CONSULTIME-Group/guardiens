@@ -57,7 +57,7 @@ const SitMobileStickyApply = ({ sitId, state, onApply }: SitMobileStickyApplyPro
               onApply();
             }}
           >
-            Postuler à cette garde
+            Postuler pour cette garde
           </Button>
         )}
       </div>
