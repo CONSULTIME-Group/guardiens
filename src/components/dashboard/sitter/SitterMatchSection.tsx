@@ -1,4 +1,6 @@
 import { useEffect, useState } from "react";
+import matchEmptyIllustration from "@/assets/illustrations/sitter-match-empty.jpg";
+
 import { Link } from "react-router-dom";
 import { getOptimizedImageUrl } from "@/lib/imageOptim";
 import type { AffinitySitCard, PoolScope } from "@/hooks/useSitterTopAffinitySits";
@@ -274,12 +276,28 @@ const EmptyState = () => (
       padding: "34px 22px",
     }}
   >
+    <div
+      aria-hidden="true"
+      className="illustration-wrapper mx-auto"
+      style={{ width: 140, height: 140 }}
+    >
+      <img
+        src={matchEmptyIllustration}
+        alt=""
+        width={140}
+        height={140}
+        loading="lazy"
+        decoding="async"
+        className="illustration-blend animate-painted-reveal w-full h-full object-cover"
+      />
+    </div>
     <h3
-      className="font-heading text-foreground"
+      className="font-heading text-foreground mt-[14px]"
       style={{ fontSize: "20px", fontWeight: 600 }}
     >
       Votre prochaine rencontre se prépare.
     </h3>
+
     <p
       className="font-sans text-muted-foreground mx-auto mt-[14px]"
       style={{ fontSize: "13px", maxWidth: "42ch", lineHeight: 1.5 }}

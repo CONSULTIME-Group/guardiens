@@ -1,5 +1,7 @@
 import { Link } from "react-router-dom";
 import { Eye, Pencil } from "lucide-react";
+import cockpitMorning from "@/assets/illustrations/sitter-cockpit-morning.jpg";
+
 
 /**
  * Cockpit gardien, vague 1 sur 4, refonte accueil.
@@ -69,15 +71,34 @@ const SitterCockpit = ({
         <div className="notebook-card-paper absolute inset-0" aria-hidden="true" />
         <div
           aria-hidden="true"
-          className="pointer-events-none absolute inset-0 opacity-70"
+          className="pointer-events-none absolute inset-0 opacity-50"
           style={{
             backgroundImage: [
-              "radial-gradient(circle at 92% 8%, hsl(var(--primary) / 0.16), transparent 42%)",
-              "radial-gradient(circle at 6% 96%, hsl(var(--secondary) / 0.18), transparent 46%)",
-              "radial-gradient(circle at 78% 88%, hsl(var(--founder) / 0.12), transparent 40%)",
+              "radial-gradient(circle at 6% 96%, hsl(var(--secondary) / 0.14), transparent 46%)",
             ].join(", "),
           }}
         />
+        {/* Aquarelle signature Guardiens : scène "matin du gardien",
+            posée en douceur dans le coin droit derrière le contenu.
+            Décorative (aria-hidden, alt vide), taille contenue, masque
+            radial via .illustration-blend qui fond les bords dans le papier.
+            Le texte reste à gauche : jamais d'aquarelle sous le titre. */}
+        <div
+          aria-hidden="true"
+          className="illustration-wrapper pointer-events-none absolute top-[-14px] right-[-18px] hidden sm:block"
+          style={{ width: 180, height: 180 }}
+        >
+          <img
+            src={cockpitMorning}
+            alt=""
+            width={180}
+            height={180}
+            loading="eager"
+            decoding="async"
+            className="illustration-blend animate-painted-reveal w-full h-full object-cover"
+          />
+        </div>
+
 
         <div className="relative flex items-start justify-between gap-[22px] flex-wrap">
           {/* Bloc gauche : avatar + salutation adressée */}
