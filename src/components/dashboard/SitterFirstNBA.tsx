@@ -126,94 +126,99 @@ const SitterFirstNBA = ({ sits, mode = "affinity", scopeLabel }: Props) => {
                 })
               }
             >
-              <article className="flex h-full flex-col">
-                {/* Photo 4:3, traitement carnet aquarelle. */}
-                <div className="notebook-card relative aspect-[4/3] transition-transform duration-500 ease-out">
-                  <div className="notebook-card-paper absolute inset-0" aria-hidden="true" />
-                  {sit.cover_photo_url ? (
-                    <img
-                      src={getOptimizedImageUrl(sit.cover_photo_url, 640, 82)}
-                      alt=""
-                      loading="lazy"
-                      width={640}
-                      height={480}
-                      className="relative w-full h-full object-cover transition-transform duration-[900ms] ease-out group-hover:scale-[1.03]"
-                      onError={(e) => {
-                        (e.currentTarget as HTMLImageElement).src = "/placeholder.svg";
-                      }}
-                    />
-                  ) : (
-                    <div
-                      className="illustration-blend animate-painted-reveal relative w-full h-full flex items-center justify-center"
-                      style={{
-                        backgroundImage: [
-                          "radial-gradient(ellipse at 28% 30%, hsl(var(--primary) / 0.30), transparent 62%)",
-                          "radial-gradient(ellipse at 72% 62%, hsl(var(--secondary) / 0.34), transparent 66%)",
-                          "radial-gradient(ellipse at 50% 82%, hsl(var(--founder) / 0.24), transparent 70%)",
-                          "radial-gradient(circle at center, hsl(var(--hero-paper)) 0%, hsl(var(--hero-paper)) 100%)",
-                        ].join(", "),
-                      }}
-                      aria-hidden="true"
-                    >
-                      <PawPrint className="h-10 w-10 text-foreground/45" aria-hidden="true" />
-                    </div>
-                  )}
-                  <div className="notebook-card-edge" aria-hidden="true" />
-                </div>
-
-                {/* Corps sous l'image */}
-                <div className="mt-3 px-0.5 flex flex-col flex-1">
-                  <p className="text-[11px] uppercase tracking-[0.16em] font-medium text-primary truncate">
-                    {sit.city || "France"}
-                  </p>
-                  <h3 className="mt-1.5 font-heading text-[16px] sm:text-[17px] font-semibold leading-snug text-foreground line-clamp-2">
-                    {sit.title || "Annonce"}
-                  </h3>
-                  <div className="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1 text-[12px] text-muted-foreground">
-                    {speciesLabels.length > 0 && (
-                      <span className="truncate">{speciesLabels.join(", ")}</span>
-                    )}
-                    {sit.start_date && sit.end_date && (
-                      <>
-                        {speciesLabels.length > 0 && (
-                          <span aria-hidden className="opacity-40">·</span>
-                        )}
-                        <span>
-                          {fmt(sit.start_date)} → {fmt(sit.end_date)}
-                        </span>
-                      </>
+              {/* Page de carnet : panneau papier + bord droit déchiré.
+                  Le padding-right supplémentaire évite que le contenu ne soit
+                  rogné par le clip-path (~2% à droite). */}
+              <article className="notebook-card relative flex h-full flex-col p-3 pr-6 sm:pr-7 transition-transform duration-500 ease-out">
+                <div className="notebook-card-paper absolute inset-0" aria-hidden="true" />
+                <div className="relative flex h-full flex-col">
+                  {/* Photo 4:3 encadrée dans la page. */}
+                  <div className="relative aspect-[4/3] overflow-hidden rounded-xl">
+                    {sit.cover_photo_url ? (
+                      <img
+                        src={getOptimizedImageUrl(sit.cover_photo_url, 640, 82)}
+                        alt=""
+                        loading="lazy"
+                        width={640}
+                        height={480}
+                        className="w-full h-full object-cover transition-transform duration-[900ms] ease-out group-hover:scale-[1.03]"
+                        onError={(e) => {
+                          (e.currentTarget as HTMLImageElement).src = "/placeholder.svg";
+                        }}
+                      />
+                    ) : (
+                      <div
+                        className="illustration-blend animate-painted-reveal w-full h-full flex items-center justify-center"
+                        style={{
+                          backgroundImage: [
+                            "radial-gradient(ellipse at 28% 30%, hsl(var(--primary) / 0.30), transparent 62%)",
+                            "radial-gradient(ellipse at 72% 62%, hsl(var(--secondary) / 0.34), transparent 66%)",
+                            "radial-gradient(ellipse at 50% 82%, hsl(var(--founder) / 0.24), transparent 70%)",
+                            "radial-gradient(circle at center, hsl(var(--hero-paper)) 0%, hsl(var(--hero-paper)) 100%)",
+                          ].join(", "),
+                        }}
+                        aria-hidden="true"
+                      >
+                        <PawPrint className="h-10 w-10 text-foreground/45" aria-hidden="true" />
+                      </div>
                     )}
                   </div>
-                  {sit.affinity && typeof sit.affinity.score === "number" ? (
-                    <div className="mt-3 flex items-center gap-3">
-                      <AffinityRing score={sit.affinity.score} size={72} />
-                      <div className="flex-1 min-w-0">
-                        {sit.affinity.matched && sit.affinity.matched.length > 0 ? (
-                          <p className="text-[12px] leading-snug text-muted-foreground line-clamp-2">
-                            Points communs : {sit.affinity.matched.slice(0, 3).join(", ")}.
-                          </p>
-                        ) : (
-                          <p className="text-[12px] leading-snug text-muted-foreground">
-                            Correspondance basée sur vos critères (animaux, présence).
-                          </p>
-                        )}
-                        {sit.owner_first_name && (
-                          <p className="mt-1 text-[11px] text-muted-foreground/80">
-                            Chez {sit.owner_first_name}
-                          </p>
-                        )}
-                      </div>
+
+                  {/* Corps sous l'image */}
+                  <div className="mt-3 flex flex-col flex-1">
+                    <p className="text-[11px] uppercase tracking-[0.16em] font-medium text-primary truncate">
+                      {sit.city || "France"}
+                    </p>
+                    <h3 className="mt-1.5 font-heading text-[16px] sm:text-[17px] font-semibold leading-snug text-foreground line-clamp-2">
+                      {sit.title || "Annonce"}
+                    </h3>
+                    <div className="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1 text-[12px] text-muted-foreground">
+                      {speciesLabels.length > 0 && (
+                        <span className="truncate">{speciesLabels.join(", ")}</span>
+                      )}
+                      {sit.start_date && sit.end_date && (
+                        <>
+                          {speciesLabels.length > 0 && (
+                            <span aria-hidden className="opacity-40">·</span>
+                          )}
+                          <span>
+                            {fmt(sit.start_date)} → {fmt(sit.end_date)}
+                          </span>
+                        </>
+                      )}
                     </div>
-                  ) : (
-                    sit.owner_first_name && (
-                      <div className="mt-3">
-                        <span className="text-[11px] text-muted-foreground">
-                          Chez {sit.owner_first_name}
-                        </span>
+                    {sit.affinity && typeof sit.affinity.score === "number" ? (
+                      <div className="mt-3 flex items-center gap-3">
+                        <AffinityRing score={sit.affinity.score} size={72} />
+                        <div className="flex-1 min-w-0">
+                          {sit.affinity.matched && sit.affinity.matched.length > 0 ? (
+                            <p className="text-[12px] leading-snug text-muted-foreground line-clamp-2">
+                              Points communs : {sit.affinity.matched.slice(0, 3).join(", ")}.
+                            </p>
+                          ) : (
+                            <p className="text-[12px] leading-snug text-muted-foreground">
+                              Correspondance basée sur vos critères (animaux, présence).
+                            </p>
+                          )}
+                          {sit.owner_first_name && (
+                            <p className="mt-1 text-[11px] text-muted-foreground/80">
+                              Chez {sit.owner_first_name}
+                            </p>
+                          )}
+                        </div>
                       </div>
-                    )
-                  )}
+                    ) : (
+                      sit.owner_first_name && (
+                        <div className="mt-3">
+                          <span className="text-[11px] text-muted-foreground">
+                            Chez {sit.owner_first_name}
+                          </span>
+                        </div>
+                      )
+                    )}
+                  </div>
                 </div>
+                <div className="notebook-card-edge" aria-hidden="true" />
               </article>
             </Link>
           );
