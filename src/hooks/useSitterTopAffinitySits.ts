@@ -175,6 +175,7 @@ export function useSitterTopAffinitySits(): Result {
         return {
           topSits: [] as AffinitySitCard[],
           fallbackSits: [] as AffinitySitCard[],
+          discoverySit: null,
           totalPublished: totalPublished ?? 0,
           hasPostalCode,
           profileIncomplete,
