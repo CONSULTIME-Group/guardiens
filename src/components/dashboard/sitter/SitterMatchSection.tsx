@@ -1,9 +1,12 @@
 import matchEmptyIllustration from "@/assets/illustrations/sitter-match-empty.webp";
 
 import { Link } from "react-router-dom";
+import { useRef } from "react";
 import { getOptimizedImageUrl } from "@/lib/imageOptim";
 import type { AffinitySitCard, PoolScope } from "@/hooks/useSitterTopAffinitySits";
 import AffinityRing from "@/components/matching/AffinityRing";
+import { trackEvent } from "@/lib/analytics";
+import { useImpressionOnce } from "@/hooks/useImpressionOnce";
 
 /**
  * Vague 2 sur 4, la carte rencontre.
