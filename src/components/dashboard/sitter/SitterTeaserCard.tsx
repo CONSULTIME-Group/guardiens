@@ -4,7 +4,7 @@
  * branche uniquement. CTA secondaire, jamais primaire.
  */
 import { Link } from "react-router-dom";
-import matchEmptyIllustration from "@/assets/illustrations/sitter-match-empty.jpg";
+import matchEmptyIllustration from "@/assets/illustrations/sitter-match-empty.webp";
 import { getOptimizedImageUrl } from "@/lib/imageOptim";
 import type { AffinitySitCard, PoolScope } from "@/hooks/useSitterTopAffinitySits";
 import { SectionHeader } from "./SitterMatchSection";

@@ -11,7 +11,7 @@
  */
 import { Link } from "react-router-dom";
 import { Eye } from "lucide-react";
-import ownerHome from "@/assets/illustrations/owner-cockpit-home.jpg";
+import ownerHome from "@/assets/illustrations/owner-cockpit-home.webp";
 
 const capitalize = (name: string) =>
   name ? name.charAt(0).toUpperCase() + name.slice(1).toLowerCase() : "";

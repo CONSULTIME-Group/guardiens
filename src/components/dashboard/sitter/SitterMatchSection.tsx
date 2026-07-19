@@ -1,4 +1,4 @@
-import matchEmptyIllustration from "@/assets/illustrations/sitter-match-empty.jpg";
+import matchEmptyIllustration from "@/assets/illustrations/sitter-match-empty.webp";
 
 import { Link } from "react-router-dom";
 import { getOptimizedImageUrl } from "@/lib/imageOptim";
