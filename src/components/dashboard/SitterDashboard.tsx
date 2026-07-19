@@ -29,7 +29,10 @@ import SitterStoryTiles from "./sitter/SitterStoryTiles";
 import NoNearbySitsEmptyState from "./NoNearbySitsEmptyState";
 import NextGuardRailCard from "./sitter/NextGuardRailCard";
 import ReputationRailCard from "./sitter/ReputationRailCard";
+import VerifiedSitterRailCard from "./sitter/VerifiedSitterRailCard";
 import AlmaRailWhisper from "./sitter/AlmaRailWhisper";
+import { isPricingActive } from "@/lib/pricing";
+import { shouldShowVerifiedCard } from "@/lib/shouldShowVerifiedCard";
 import SitterOpeningCard from "./sitter/SitterOpeningCard";
 import SitterTeaserCard from "./sitter/SitterTeaserCard";
 import SitterNextStepRailCard from "./sitter/SitterNextStepRailCard";
@@ -471,6 +474,11 @@ const SitterDashboard = () => {
                   badgeCount={badgeCount ?? 0}
                 />
               </div>
+              {shouldShowVerifiedCard(isPricingActive(), !!hasSubscription) && (
+                <div>
+                  <VerifiedSitterRailCard />
+                </div>
+              )}
               <div className="mb-6">
                 <AlmaRailWhisper
                   profileCompletion={profileCompletion ?? 0}
