@@ -3,6 +3,7 @@
  * Carte à bordure pointillée, pastille Alma respirante, une seule phrase
  * choisie selon l'état réel du gardien. Jamais un bandeau système.
  */
+import type { KeyboardEvent } from "react";
 import AlmaAvatar from "@/components/ai/alma/AlmaAvatar";
 
 interface AlmaRailWhisperProps {
@@ -52,9 +53,29 @@ const AlmaRailWhisper = ({
     phrase = "Votre profil est prêt. Une belle rencontre peut arriver à tout moment.";
   }
 
+  const openAlma = () => {
+    try {
+      window.dispatchEvent(new CustomEvent("alma:open-dock"));
+    } catch {
+      /* silent */
+    }
+  };
+
+  const onKeyDown = (e: KeyboardEvent<HTMLElement>) => {
+    if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      openAlma();
+    }
+  };
+
   return (
     <aside
-      className="bg-card flex items-start"
+      role="button"
+      tabIndex={0}
+      aria-label="Parler à Alma"
+      onClick={openAlma}
+      onKeyDown={onKeyDown}
+      className="bg-card flex items-start cursor-pointer transition-shadow duration-200 hover:shadow-[0_2px_4px_rgba(29,27,22,.05),0_18px_40px_rgba(29,27,22,.09)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
       style={{
         border: "1px dashed hsl(var(--border))",
         borderRadius: "16px",
@@ -82,6 +103,13 @@ const AlmaRailWhisper = ({
           style={{ fontSize: "14.5px", fontStyle: "italic", lineHeight: 1.5 }}
         >
           «&nbsp;{phrase}&nbsp;»
+        </p>
+        <p
+          className="text-primary mt-[10px]"
+          style={{ fontSize: "12px", fontWeight: 700 }}
+          aria-hidden={true}
+        >
+          Parler à Alma
         </p>
       </div>
     </aside>

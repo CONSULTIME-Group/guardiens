@@ -215,6 +215,18 @@ function AlmaDockInner() {
     }
   }, [currentWhisper?.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  // Ouverture programmatique depuis n'importe quelle carte du produit
+  // (ex. AlmaRailWhisper). Événement fenêtre volontairement minimal pour
+  // éviter un refactor du dock ou l'ajout d'une nouvelle API de contexte.
+  useEffect(() => {
+    const onOpen = () => {
+      setExpanded(true);
+      setUserCollapsed(false);
+    };
+    window.addEventListener("alma:open-dock", onOpen);
+    return () => window.removeEventListener("alma:open-dock", onOpen);
+  }, []);
+
   const doDismiss = useCallback(
     (reason: AlmaDismissReason, actionId?: string) => {
       dismissCurrent(reason, actionId);
