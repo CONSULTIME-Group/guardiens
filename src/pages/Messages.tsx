@@ -813,15 +813,20 @@ const Messages = () => {
 
           {/* Input or Paywall, only gate sit conversations for non-subscribed sitters */}
           {effectiveRole === "sitter" && !hasAccess && !activeConv.small_mission_id ? (
-            <div className="border-t border-border bg-muted/50 p-4 mb-16 md:mb-0">
-              <div className="flex items-center gap-3">
-                <Lock className="h-5 w-5 text-muted-foreground shrink-0" aria-hidden="true" />
-                <div className="flex-1">
-                  <p className="text-sm text-muted-foreground">
-                    Abonnez-vous pour répondre à cette conversation.{" "}
-                    <Link to="/mon-abonnement" className="text-primary hover:underline">S'abonner →</Link>
-                  </p>
-                </div>
+            <div className="border-t border-border bg-background p-4 mb-16 md:mb-0">
+              <div className="bg-secondary/[0.12] border border-secondary/30 rounded-2xl p-4">
+                <p className="font-heading text-[16px] font-semibold text-foreground">
+                  Cette conversation vous attend.
+                </p>
+                <p className="text-[12.5px] text-muted-foreground mt-1 leading-relaxed">
+                  L'abonnement gardien ouvre les réponses aux annonces de garde.
+                </p>
+                <Link
+                  to="/mon-abonnement"
+                  className="inline-block mt-2 text-[12px] font-bold text-primary hover:underline"
+                >
+                  Découvrir l'abonnement
+                </Link>
               </div>
             </div>
           ) : (
