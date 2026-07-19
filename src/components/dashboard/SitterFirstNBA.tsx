@@ -127,8 +127,9 @@ const SitterFirstNBA = ({ sits, mode = "affinity", scopeLabel }: Props) => {
               }
             >
               <article className="flex h-full flex-col">
-                {/* Photo 4:3, gabarit unifié avec SearchListingCard */}
-                <div className="relative aspect-[4/3] overflow-hidden rounded-2xl bg-muted border border-black/[0.06] shadow-[0_1px_3px_rgba(11,31,26,0.05),0_4px_16px_-4px_rgba(11,31,26,0.06)] transition-all duration-500 ease-out group-hover:shadow-[0_4px_12px_rgba(11,31,26,0.08),0_16px_40px_-8px_rgba(11,31,26,0.10)]">
+                {/* Photo 4:3, traitement carnet aquarelle. */}
+                <div className="notebook-card relative aspect-[4/3] transition-transform duration-500 ease-out">
+                  <div className="notebook-card-paper absolute inset-0" aria-hidden="true" />
                   {sit.cover_photo_url ? (
                     <img
                       src={getOptimizedImageUrl(sit.cover_photo_url, 640, 82)}
@@ -136,16 +137,28 @@ const SitterFirstNBA = ({ sits, mode = "affinity", scopeLabel }: Props) => {
                       loading="lazy"
                       width={640}
                       height={480}
-                      className="w-full h-full object-cover transition-transform duration-[900ms] ease-out group-hover:scale-[1.03]"
+                      className="relative w-full h-full object-cover transition-transform duration-[900ms] ease-out group-hover:scale-[1.03]"
                       onError={(e) => {
                         (e.currentTarget as HTMLImageElement).src = "/placeholder.svg";
                       }}
                     />
                   ) : (
-                    <div className="absolute inset-0 flex items-center justify-center text-muted-foreground/40">
-                      <PawPrint className="h-10 w-10" aria-hidden="true" />
+                    <div
+                      className="illustration-blend animate-painted-reveal relative w-full h-full flex items-center justify-center"
+                      style={{
+                        backgroundImage: [
+                          "radial-gradient(ellipse at 28% 30%, hsl(var(--primary) / 0.30), transparent 62%)",
+                          "radial-gradient(ellipse at 72% 62%, hsl(var(--secondary) / 0.34), transparent 66%)",
+                          "radial-gradient(ellipse at 50% 82%, hsl(var(--founder) / 0.24), transparent 70%)",
+                          "radial-gradient(circle at center, hsl(var(--hero-paper)) 0%, hsl(var(--hero-paper)) 100%)",
+                        ].join(", "),
+                      }}
+                      aria-hidden="true"
+                    >
+                      <PawPrint className="h-10 w-10 text-foreground/45" aria-hidden="true" />
                     </div>
                   )}
+                  <div className="notebook-card-edge" aria-hidden="true" />
                 </div>
 
                 {/* Corps sous l'image */}
