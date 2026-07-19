@@ -81,6 +81,7 @@ export const SIT_STATUS_CONFIG: Record<string, SitStatusConfig> = {
   completed: { label: "Terminée", className: "bg-muted text-foreground" },
   cancelled: { label: "Annulée", className: "bg-destructive/10 text-destructive-text" },
   expired: { label: "Expirée", className: "bg-muted text-foreground" },
+  archived: { label: "Archivée", className: "bg-muted text-foreground" },
 };
 
 export function getSitStatusConfig(status: string | null | undefined): SitStatusConfig {
