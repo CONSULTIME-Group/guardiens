@@ -633,29 +633,29 @@ const Messages = () => {
       {/* ═══ CONVERSATION LIST ═══ */}
       {showList && (
         <div className={`${isMobile && activeConv ? "hidden" : ""} ${isMobile ? "w-full" : "w-80 border-r border-border"} flex flex-col bg-card`}>
-          <div className="sticky top-12 md:top-0 z-10 bg-card border-b border-border px-3 pt-3 pb-2 space-y-2">
-            {/* Row 1, title alone (lisible mobile) + role à droite */}
-            <div className="flex items-center justify-between gap-2">
-              <h1 className="font-heading text-base font-bold truncate">Messages</h1>
-              <span className="text-xs text-muted-foreground truncate shrink-0">
-                {effectiveRole === "owner" ? "Propriétaire" : "Gardien"}
+          <div className="sticky top-12 md:top-0 z-10 bg-card border-b border-border px-4 pt-4 pb-3 space-y-3">
+            {/* Titre Playfair + rôle */}
+            <div className="flex items-end justify-between gap-2">
+              <h1 className="font-heading text-[20px] font-semibold leading-tight truncate">Vos échanges</h1>
+              <span className="text-[12px] text-muted-foreground truncate shrink-0 pb-0.5">
+                {effectiveRole === "owner" ? "Espace propriétaire" : "Espace gardien"}
               </span>
             </div>
 
-            {/* Row 2, search filter (uniquement si >=5 conversations) */}
+            {/* Recherche pilule (uniquement si >=5 conversations) */}
             {conversations.length >= 5 && (
               <Input
                 value={searchFilter}
                 onChange={e => setSearchFilter(e.target.value)}
                 placeholder="Filtrer par annonce ou prénom…"
                 aria-label="Filtrer les conversations par annonce ou prénom"
-                className="h-8 text-xs rounded-lg w-full"
+                className="h-9 text-xs rounded-full w-full bg-background"
               />
             )}
 
-            {/* Row 3, pills compactes */}
+            {/* Pills compactes */}
             <div className="flex items-center gap-2 overflow-x-auto no-scrollbar">
-              <div className="flex gap-1 shrink-0" role="tablist" aria-label="Filtrer les conversations">
+              <div className="flex gap-1.5 shrink-0" role="tablist" aria-label="Filtrer les conversations">
                 {pills.map(p => (
                   <button
                     key={p.value}
@@ -663,9 +663,9 @@ const Messages = () => {
                     role="tab"
                     aria-selected={pill === p.value}
                     onClick={() => setPill(p.value)}
-                    className={`rounded-full px-2.5 py-0.5 text-xs leading-5 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
+                    className={`rounded-full px-3 py-1 text-xs leading-5 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
                       pill === p.value
-                        ? "bg-foreground text-background"
+                        ? "bg-primary/10 text-primary font-medium"
                         : "border border-border text-muted-foreground hover:border-primary"
                     }`}
                   >
@@ -675,6 +675,7 @@ const Messages = () => {
               </div>
             </div>
           </div>
+
 
           <div
             ref={(el) => {
