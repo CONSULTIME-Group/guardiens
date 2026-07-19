@@ -247,7 +247,7 @@ const NearbyAnnoncesCard = ({ nearbyListings, nearbyError = null, nearbyListings
               </div>
               {distance !== null && (
                 <span
-                  className={`shrink-0 inline-flex items-center rounded-full text-[11px] font-bold tabular-nums px-2.5 py-0.5 ${
+                  className={`shrink-0 inline-flex items-center rounded-full font-heading text-[13px] font-semibold tabular-nums px-2.5 py-0.5 ${
                     sit.is_beyond
                       ? "bg-muted text-muted-foreground ring-1 ring-border"
                       : "bg-primary/10 text-primary"
