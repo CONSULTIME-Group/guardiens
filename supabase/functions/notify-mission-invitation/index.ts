@@ -31,6 +31,8 @@ Deno.serve(async (req) => {
     return new Response(null, { headers: corsHeaders })
   }
 
+  try {
+
   const authHeader = req.headers.get('Authorization') ?? ''
   if (!authHeader.startsWith('Bearer ')) {
     return new Response(JSON.stringify({ error: 'unauthorized' }), {
@@ -124,13 +126,22 @@ Deno.serve(async (req) => {
   })
 
   if (sendErr) {
-    console.error('send_failed', { err: sendErr.message })
-    return new Response(JSON.stringify({ error: 'send_failed' }), {
-      status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    // Best-effort: la notification en base est déjà créée par la RPC.
+    // On journalise mais on renvoie 200 pour ne pas polluer les moniteurs réseau côté client.
+    console.error('send_failed', { err: sendErr.message, mission_id: payload.mission_id, helper_id: payload.helper_id })
+    return new Response(JSON.stringify({ ok: false, warning: 'send_failed' }), {
+      status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     })
   }
 
   return new Response(JSON.stringify({ ok: true }), {
     status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
   })
+  } catch (e) {
+    // Filet de sécurité : notif déjà créée en base par la RPC, on ne bloque pas le client.
+    console.error('unexpected_error', { err: (e as Error)?.message, stack: (e as Error)?.stack })
+    return new Response(JSON.stringify({ ok: false, warning: 'unexpected_error' }), {
+      status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    })
+  }
 })
