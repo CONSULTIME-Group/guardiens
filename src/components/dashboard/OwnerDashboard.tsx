@@ -10,10 +10,12 @@ import { Link } from "react-router-dom";
 import { differenceInDays } from "date-fns";
 
 import RoleActivationBanner from "./RoleActivationBanner";
+import AccessGateBanner from "@/components/access/AccessGateBanner";
+import { FreePeriodBanner } from "@/components/marketing/FreePeriodBanner";
+import { useAccessLevel } from "@/hooks/useAccessLevel";
 
 /* ── Vague 11 : composants du flux principal ── */
 import ApplicationsSection from "./owner/ApplicationsSection";
-import StatsStrip from "./owner/StatsStrip";
 import OwnerCockpit from "./owner/OwnerCockpit";
 import OwnerStarSection from "./owner/OwnerStarSection";
 import OwnerAnnonceSection from "./owner/OwnerAnnonceSection";
@@ -21,6 +23,11 @@ import OwnerFamilySection from "./owner/OwnerFamilySection";
 import OwnerEntraideSection from "./owner/OwnerEntraideSection";
 import MobileStickyCTA from "./owner/MobileStickyCTA";
 import OwnerFirstNBAGardiens from "./OwnerFirstNBAGardiens";
+
+/* ── Vague 12 : rail ── */
+import CommunityPulseBanner from "./shared/CommunityPulseBanner";
+import HouseStoryRailCard from "./owner/HouseStoryRailCard";
+import AlmaRailWhisper from "./sitter/AlmaRailWhisper";
 
 import { useOwnerPriorityAction } from "@/hooks/useOwnerPriorityAction";
 import { useOwnerPrimaryAction } from "@/hooks/useOwnerPrimaryAction";
@@ -52,8 +59,9 @@ const OwnerDashboard = () => {
     sits, pets, recentApps, reviews, myMissions,
     verificationStatus, sitterProfiles, sitterAffinityProfiles, trustedSitterCount,
     propertyCoverPhoto, onboardingChecks,
-    pendingReviews,
+    pendingReviews, highlights,
   } = data;
+  const { level, profileCompletion: accessProfileCompletion } = useAccessLevel();
 
   /* ── Signaux locaux : gardiens et « helpers » proches ── */
   const { data: nearbyOwnerSittersData } = useNearbyOwnerSitters(user?.id);
@@ -330,69 +338,109 @@ const OwnerDashboard = () => {
             )}
           </div>
 
-          {/* ═══ RAIL collant (droite) — repris tel quel en attendant la vague 12 ═══ */}
+          {/* ═══ RAIL collant (droite) — vague 12 ═══ */}
           <aside className="mt-[52px] lg:mt-0 space-y-[34px] lg:col-span-4 lg:sticky lg:top-20 lg:self-start lg:max-h-[calc(100vh-6rem)] lg:overflow-y-auto">
+            {/* 1. Pouls — seul bloc sombre */}
             <div className="px-4 sm:px-5 md:px-8 lg:px-0">
-              <StatsStrip
-                items={[
-                  {
-                    value: completedSits.length,
-                    label: completedSits.length > 1 ? "Gardes" : "Garde",
-                  },
-                  ...(avgRating > 0 && reviews.length > 0
-                    ? [{
-                        value: `${avgRating} ★ (${reviews.length} avis)`,
-                        label: "Note",
-                        highlight: true,
-                        to: user?.id ? `/gardiens/${user.id}?tab=proprio#avis` : undefined,
-                      }]
-                    : []),
-                  ...(activeSits.length > 0
-                    ? [{
-                        value: activeSits.length,
-                        label: activeSits.length > 1 ? "Annonces" : "Annonce",
-                        to: "/sits",
-                      }]
-                    : []),
-                  ...(trustedSitterCount > 0
-                    ? [{
-                        value: trustedSitterCount,
-                        label: "Récurrents",
-                        tooltip: "Nombre de gardiens ayant déjà réalisé au moins 2 gardes chez vous.",
-                      }]
-                    : []),
-                ]}
+              <CommunityPulseBanner userId={user?.id} />
+            </div>
+
+            {/* 2. Votre maison */}
+            <div className="px-4 sm:px-5 md:px-8 lg:px-0">
+              <HouseStoryRailCard
+                userId={user?.id}
+                completedSits={completedSits.length}
+                avgRating={avgRating}
+                reviewsCount={reviews.length}
+                trustedSitterCount={trustedSitterCount}
+                highlightsCount={(highlights ?? []).length}
+                pendingReviewsCount={pendingReviews.length}
+                firstPendingReviewSitId={pendingReviews[0]?.sitId ?? null}
               />
             </div>
 
+            {/* 3. Accès (Gate ou Free) */}
             <div className="px-4 sm:px-5 md:px-8 lg:px-0">
-              <NearbyOwnerSittersCard />
+              {!(level === 4 || level === "3B")
+                ? <AccessGateBanner level={level} profileCompletion={accessProfileCompletion} context="guard" />
+                : <FreePeriodBanner />}
             </div>
 
+            {/* 4. Gardiens d'urgence — condition existante */}
             {showEmergencyHelp && (
               <div className="px-4 sm:px-5 md:px-8 lg:px-0">
                 <NearbyEmergencySitters />
               </div>
             )}
 
-            <div className="px-4 sm:px-5 md:px-8 lg:px-0 mb-6">
-              <Link
-                to="/mon-abonnement#parrainage"
-                className="block rounded-2xl border border-border bg-gradient-to-br from-accent/10 to-background p-4 hover:border-primary/40 transition-colors group"
+            {/* 5. Parrainage — gabarit rail aligné */}
+            <div className="px-4 sm:px-5 md:px-8 lg:px-0">
+              <article
+                className="bg-card border border-border"
+                style={{
+                  borderRadius: "20px",
+                  padding: "22px",
+                  boxShadow: "0 1px 2px rgba(29,27,22,0.04), 0 8px 24px rgba(29,27,22,0.05)",
+                }}
               >
-                <p className="text-[10px] uppercase tracking-[2px] text-muted-foreground font-sans font-semibold mb-1">
-                  Parrainage
-                </p>
-                <p className="text-sm font-heading font-semibold text-foreground leading-snug">
-                  Invitez un proche
-                </p>
-                <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
+                <div className="flex items-center gap-2">
+                  <span
+                    aria-hidden="true"
+                    className="inline-block"
+                    style={{ width: "20px", height: "1px", background: "hsl(var(--secondary))" }}
+                  />
+                  <p
+                    style={{
+                      color: "hsl(var(--secondary))",
+                      fontSize: "11px",
+                      fontWeight: 700,
+                      letterSpacing: "0.16em",
+                      textTransform: "uppercase",
+                    }}
+                  >
+                    Parrainage
+                  </p>
+                </div>
+                <h3
+                  className="font-heading text-foreground mt-[8px]"
+                  style={{ fontSize: "17px", fontWeight: 600, lineHeight: 1.3 }}
+                >
+                  Invitez un proche.
+                </h3>
+                <p
+                  className="font-sans text-muted-foreground mt-[8px]"
+                  style={{ fontSize: "13.5px", lineHeight: 1.5 }}
+                >
                   Son inscription reste sans engagement et vous développez l'entraide autour de chez vous.
                 </p>
-                <span className="inline-flex items-center gap-1 text-xs font-semibold text-primary mt-2 group-hover:translate-x-0.5 transition-transform">
-                  Partager mon lien →
-                </span>
-              </Link>
+                <div className="mt-[14px]">
+                  <Link
+                    to="/mon-abonnement#parrainage"
+                    className="text-primary hover:underline underline-offset-4"
+                    style={{ fontSize: "13px", fontWeight: 700 }}
+                  >
+                    Partager votre lien
+                  </Link>
+                </div>
+              </article>
+            </div>
+
+            {/* 6. Alma — clôt le rail */}
+            <div className="px-4 sm:px-5 md:px-8 lg:px-0 mb-6">
+              <AlmaRailWhisper
+                variant="owner"
+                ownerState={{
+                  ongoingSit: !!ongoingSit,
+                  ongoingSitterFirstName: ongoingSit
+                    ? (() => {
+                        const accepted = (ongoingSit.applications || []).find((a: any) => a.status === "accepted");
+                        return accepted ? (sitterProfiles[accepted.sitter_id]?.first_name ?? null) : null;
+                      })()
+                    : null,
+                  pendingApps: pendingAppCount > 0,
+                  noActiveSit,
+                }}
+              />
             </div>
           </aside>
         </div>
