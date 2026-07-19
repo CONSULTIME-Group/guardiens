@@ -396,7 +396,7 @@ const DraftStar = ({ draft, onCtaClick }: { draft: SitRow; onCtaClick?: () => vo
           </p>
         )}
         <div className="mt-[22px]">
-          <PrimaryCta to={`/sits/create?draftId=${draft.id}`}>
+          <PrimaryCta to={`/sits/create?draftId=${draft.id}`} onClick={onCtaClick}>
             Reprendre mon annonce
           </PrimaryCta>
         </div>
