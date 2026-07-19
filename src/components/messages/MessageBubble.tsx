@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Check, CheckCheck, Info } from "lucide-react";
+import { Check, CheckCheck } from "lucide-react";
 import { format } from "date-fns";
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
