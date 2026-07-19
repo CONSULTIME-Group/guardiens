@@ -533,7 +533,7 @@ const Messages = () => {
             {conv.other_user?.avatar_url ? (
               <img src={conv.other_user.avatar_url} alt="" className="w-11 h-11 rounded-full object-cover" />
             ) : (
-              <div className="w-11 h-11 rounded-full bg-secondary/[0.12] flex items-center justify-center text-secondary-foreground font-heading text-base">
+              <div className="w-11 h-11 rounded-full bg-secondary/[0.12] flex items-center justify-center text-secondary font-heading text-base">
                 {conv.other_user?.first_name?.charAt(0)?.toUpperCase() || "?"}
               </div>
             )}
@@ -593,7 +593,7 @@ const Messages = () => {
     <section key={key} aria-label={title} className="pt-5">
       <div className="px-4 pb-2 flex items-center gap-3">
         <span className="h-px w-3.5 bg-secondary/60" aria-hidden="true" />
-        <h2 className="text-[11px] font-bold uppercase tracking-[0.16em] text-secondary-foreground/80 m-0 truncate flex-1">
+        <h2 className="text-[11px] font-bold uppercase tracking-[0.16em] text-secondary m-0 truncate flex-1">
           {title}
         </h2>
         {unreadCount > 0 && (

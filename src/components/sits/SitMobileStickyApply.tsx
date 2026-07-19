@@ -43,7 +43,7 @@ const SitMobileStickyApply = ({ sitId, state, onApply }: SitMobileStickyApplyPro
           </Button>
         ) : state === "closed" ? (
           <Button className="flex-1 h-11 text-sm font-semibold" disabled>
-            Candidatures en cours d'analyse
+            Candidatures fermées
           </Button>
         ) : (
           <Button

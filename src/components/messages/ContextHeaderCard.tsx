@@ -8,9 +8,7 @@
  */
 
 import { Link } from "react-router-dom";
-import { Calendar, MapPin, Sparkles, AlertCircle, Compass, Plus } from "lucide-react";
-import { format } from "date-fns";
-import { fr } from "date-fns/locale";
+import { Sparkles, Compass, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import InviteToMySitButton from "@/components/sits/owner/InviteToMySitButton";
@@ -30,12 +28,7 @@ interface Props {
   otherUserId?: string | null;
 }
 
-const fmt = (d?: string | null) => {
-  if (!d) return null;
-  try { return format(new Date(d), "d MMM", { locale: fr }); } catch { return null; }
-};
-
-const ContextHeaderCard = ({ contextType, isOwner, sit, otherFirstName, otherCity, otherUserId }: Props) => {
+const ContextHeaderCard = ({ contextType, isOwner, otherFirstName, otherUserId }: Props) => {
   const [ownerHasPublishedSit, setOwnerHasPublishedSit] = useState<number | null>(null);
   if (!contextType) return null;
 
@@ -47,53 +40,60 @@ const ContextHeaderCard = ({ contextType, isOwner, sit, otherFirstName, otherCit
 
   const safeName = (otherFirstName ?? "").trim();
 
-  if (contextType === "sitter_inquiry" || contextType === "helper_inquiry") {
-    const isHelper = contextType === "helper_inquiry";
+  if (contextType === "sitter_inquiry") {
     const sitterName = safeName || "ce gardien";
     const ownerName = safeName || "ce propriétaire";
+    return (
+      <div className="px-3 py-2 md:px-4 md:py-3 bg-background border-b border-dashed border-border">
+        <div className="flex justify-center">
+          <p className="font-heading italic text-[12.5px] text-muted-foreground text-center max-w-[80%] leading-relaxed">
+            {isOwner
+              ? (ownerHasPublishedSit === null
+                  ? `Échangez avec ${sitterName} avant d'aller plus loin.`
+                  : ownerHasPublishedSit > 0
+                    ? `Vous avez une annonce publiée : proposez-la à ${sitterName}.`
+                    : `Pour aller plus loin avec ${sitterName}, publiez votre annonce.`)
+              : `${ownerName === "ce propriétaire" ? "Ce propriétaire" : ownerName} vous a contacté en amont d'une éventuelle annonce.`}
+          </p>
+        </div>
+        {isOwner && (
+          <div className="mt-2 flex justify-center">
+            {otherUserId && ownerHasPublishedSit !== 0 && (
+              <InviteToMySitButton
+                sitter={{ id: otherUserId, first_name: safeName || null }}
+                label="Proposer mon annonce"
+                className="border-border text-foreground hover:bg-accent"
+                hideIfNoSits
+                onPublishedSitsResolved={(c) => setOwnerHasPublishedSit(c)}
+              />
+            )}
+            {(!otherUserId || ownerHasPublishedSit === 0) && (
+              <Button asChild size="sm" variant="outline" className="gap-1.5 h-8 border-border text-foreground hover:bg-accent">
+                <Link to="/sits/new">
+                  <Plus className="h-3.5 w-3.5" /> Créer mon annonce
+                </Link>
+              </Button>
+            )}
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  if (contextType === "helper_inquiry") {
     const memberName = safeName || "ce membre";
     return (
       <div className="px-3 py-2 md:px-4 md:py-3 bg-info-soft border-t border-info-border">
         <div className="flex items-start gap-2">
           <Compass className="h-4 w-4 text-info shrink-0 mt-0.5" />
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium text-info">
-              {isHelper ? "Demande d'entraide" : "Premier contact"}
-            </p>
+            <p className="text-sm font-medium text-info">Demande d'entraide</p>
             <p className="text-xs text-info/80 mt-0.5">
-              {isHelper
-                ? (isOwner
-                    ? `Vous avez sollicité ${memberName} pour un futur coup de main.`
-                    : `${memberName === "ce membre" ? "Un membre du coin" : memberName} vous sollicite pour un futur coup de main.`)
-                : (isOwner
-                    ? (ownerHasPublishedSit === null
-                        ? `Échangez avec ${sitterName} avant d'aller plus loin.`
-                        : ownerHasPublishedSit > 0
-                          ? `Vous avez une annonce publiée : proposez-la à ${sitterName}.`
-                          : `Pour aller plus loin avec ${sitterName}, publiez votre annonce.`)
-                    : `${ownerName === "ce propriétaire" ? "Ce propriétaire" : ownerName} vous a contacté en amont d'une éventuelle annonce.`)}
+              {isOwner
+                ? `Vous avez sollicité ${memberName} pour un futur coup de main.`
+                : `${memberName === "ce membre" ? "Un membre du coin" : memberName} vous sollicite pour un futur coup de main.`}
             </p>
-            {isOwner && !isHelper && (
-              <div className="mt-2">
-                {otherUserId && ownerHasPublishedSit !== 0 && (
-                  <InviteToMySitButton
-                    sitter={{ id: otherUserId, first_name: safeName || null }}
-                    label="Proposer mon annonce"
-                    className="border-info-border text-info hover:bg-info-soft"
-                    hideIfNoSits
-                    onPublishedSitsResolved={(c) => setOwnerHasPublishedSit(c)}
-                  />
-                )}
-                {(!otherUserId || ownerHasPublishedSit === 0) && (
-                  <Button asChild size="sm" variant="outline" className="gap-1.5 h-8 border-info-border text-info hover:bg-info-soft">
-                    <Link to="/sits/new">
-                      <Plus className="h-3.5 w-3.5" /> Créer mon annonce
-                    </Link>
-                  </Button>
-                )}
-              </div>
-            )}
-            {isOwner && isHelper && (
+            {isOwner && (
               <Button asChild size="sm" variant="outline" className="gap-1.5 h-8 mt-2 border-info-border text-info hover:bg-info-soft">
                 <Link to="/petites-missions/creer">
                   <Plus className="h-3.5 w-3.5" /> Créer une mission
