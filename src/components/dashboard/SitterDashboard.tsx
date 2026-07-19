@@ -672,7 +672,7 @@ const SitterDashboard = () => {
             {/* ═══ RAIL collant (droite) — vague 4 ═══
                 Ordre narratif : pouls → prochaine garde (ou access/free) →
                 réputation → Alma en murmure. Espacement 34px. */}
-            <aside className="mt-8 lg:mt-0 space-y-[34px] lg:col-span-4 lg:sticky lg:top-20 lg:self-start lg:max-h-[calc(100vh-6rem)] lg:overflow-y-auto">
+            <aside className="mt-[52px] lg:mt-0 space-y-[34px] lg:col-span-4 lg:sticky lg:top-20 lg:self-start lg:max-h-[calc(100vh-6rem)] lg:overflow-y-auto">
               <div className="px-4 sm:px-5 md:px-8 lg:px-0">
                 <CommunityPulseBanner userId={user?.id} />
               </div>
