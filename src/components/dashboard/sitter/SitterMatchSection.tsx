@@ -640,18 +640,35 @@ const SitterMatchSection = ({ topSits, fallbackSits, discoverySit, scopeUsed, is
         <>
           {primary && <StarCard sit={primary} />}
 
-          {rest.length > 0 && (
+          {(rest.length > 0 || discoverySit) && (
             <div style={{ marginTop: "52px" }}>
               <SectionHeader
                 eyebrow="Près de chez vous"
                 title="D'autres maisons cherchent leur gardien."
                 subtitle={scopeSubtitle(scopeUsed) || undefined}
               />
-              <div className="space-y-[14px]">
-                {rest.map((s) => (
-                  <CompactRow key={s.id} sit={s} showScore={rowsShowScore} />
-                ))}
-              </div>
+              {rest.length > 0 && (
+                <div className="space-y-[14px]">
+                  {rest.map((s) => (
+                    <CompactRow key={s.id} sit={s} showScore={rowsShowScore} />
+                  ))}
+                </div>
+              )}
+              {discoverySit && (
+                <div style={{ marginTop: rest.length > 0 ? "22px" : "0" }}>
+                  <p
+                    className="font-heading text-muted-foreground mb-[8px]"
+                    style={{
+                      fontSize: "13.5px",
+                      fontStyle: "italic",
+                      lineHeight: 1.4,
+                    }}
+                  >
+                    Et pour ce que vous n'avez pas encore vécu :
+                  </p>
+                  <DiscoveryRow sit={discoverySit} />
+                </div>
+              )}
               <div className="mt-[22px]">
                 <Link
                   to="/recherche"
