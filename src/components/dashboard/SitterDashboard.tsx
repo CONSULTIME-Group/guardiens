@@ -1,4 +1,6 @@
+import entraideEmptyIllustration from "@/assets/illustrations/sitter-entraide-empty.jpg";
 import { useAlmaCulturalFact } from "@/hooks/useAlmaCulturalFact";
+
 import { useAlmaUsageNudge } from "@/hooks/useAlmaUsageNudge";
 import { useAlmaFirstMeeting } from "@/hooks/useAlmaFirstMeeting";
 import { AlmaFirstMeeting } from "@/components/ai/alma/AlmaFirstMeeting";
