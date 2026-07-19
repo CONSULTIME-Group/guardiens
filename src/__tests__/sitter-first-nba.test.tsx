@@ -53,7 +53,7 @@ describe("SitterFirstNBA", () => {
         <SitterFirstNBA sits={sits} />
       </MemoryRouter>,
     );
-    expect(screen.getByText(/3 annonces qui vous correspondent/i)).toBeInTheDocument();
+    expect(screen.getByText(/3 rencontres faites pour vous/i)).toBeInTheDocument();
     expect(screen.getAllByRole("heading", { level: 3 })).toHaveLength(3);
     expect(screen.getByText(/Voir toutes les annonces/i)).toBeInTheDocument();
   });
@@ -66,7 +66,7 @@ describe("NoNearbySitsEmptyState", () => {
         <NoNearbySitsEmptyState totalPublishedSits={42} postalCode="69005" />
       </MemoryRouter>,
     );
-    expect(screen.getByText(/Rien dans votre zone aujourd'hui/i)).toBeInTheDocument();
+    expect(screen.getByText(/Votre profil est en veille active/i)).toBeInTheDocument();
     expect(screen.getByText(/42/)).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /M'alerter/i })).toBeInTheDocument();
   });

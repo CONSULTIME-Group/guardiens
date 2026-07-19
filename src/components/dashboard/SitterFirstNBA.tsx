@@ -80,12 +80,12 @@ const SitterFirstNBA = ({ sits, mode = "affinity", scopeLabel }: Props) => {
         ? "1 annonce ouverte à proximité"
         : `${sits.length} annonces ouvertes à proximité`
       : sits.length === 1
-        ? "1 annonce qui vous correspond"
-        : `${sits.length} annonces qui vous correspondent`;
+        ? "1 rencontre faite pour vous"
+        : `${sits.length} rencontres faites pour vous`;
   const sub =
     mode === "fallback"
       ? `En attendant d'affiner vos correspondances, voici les annonces ouvertes${scopeLabel ? ` ${scopeLabel}` : ""}. Complétez votre profil pour obtenir un score d'affinité.`
-      : "Score d'affinité calculé à partir de vos préférences. Complétez votre profil pour affiner vos correspondances.";
+      : "Assez de points communs pour vous confier une maison en confiance. Complétez votre profil pour affiner.";
 
   return (
     <section
@@ -193,11 +193,11 @@ const SitterFirstNBA = ({ sits, mode = "affinity", scopeLabel }: Props) => {
                         <div className="flex-1 min-w-0">
                           {sit.affinity.matched && sit.affinity.matched.length > 0 ? (
                             <p className="text-[12px] leading-snug text-muted-foreground line-clamp-2">
-                              Points communs : {sit.affinity.matched.slice(0, 3).join(", ")}.
+                              Vous êtes faits pour vous entendre : {sit.affinity.matched.slice(0, 3).join(", ")}.
                             </p>
                           ) : (
                             <p className="text-[12px] leading-snug text-muted-foreground">
-                              Correspondance basée sur vos critères (animaux, présence).
+                              Assez en commun pour se faire confiance (animaux, présence).
                             </p>
                           )}
                           {sit.owner_first_name && (
