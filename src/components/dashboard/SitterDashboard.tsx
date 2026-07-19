@@ -293,7 +293,7 @@ const SitterDashboard = () => {
               {/* 2. LA STAR, complétion : SitterOpeningCard (remplace ChecklistBlock
                   et le bandeau code postal manquant dans cette branche uniquement). */}
               {!allChecklistDone && (
-                <div className="px-4 sm:px-5 md:px-8 lg:px-0">
+                <div className="">
                   <SitterOpeningCard
                     hasAvatar={!!avatarUrl}
                     hasBioMin={!!(bio && bio.length >= 50)}
@@ -311,7 +311,7 @@ const SitterDashboard = () => {
               />
 
               {/* 4. ENTRAIDE, invitation adaptée au premier pas */}
-              <div className="px-4 sm:px-5 md:px-8 lg:px-0">
+              <div className="">
                 <SitterEntraideSection
                   firstNearbyMission={firstNearbyMission}
                   eyebrow="Un premier pas dans la communauté"
@@ -323,16 +323,16 @@ const SitterDashboard = () => {
 
             {/* ═══ RAIL collant (droite) — espacement 34px, mt-[52px] mobile ═══ */}
             <aside className="mt-[52px] lg:mt-0 space-y-[34px] lg:col-span-4 lg:sticky lg:top-20 lg:self-start lg:max-h-[calc(100vh-6rem)] lg:overflow-y-auto">
-              <div className="px-4 sm:px-5 md:px-8 lg:px-0">
+              <div className="">
                 <CommunityPulseBanner userId={user?.id} />
               </div>
-              <div className="px-4 sm:px-5 md:px-8 lg:px-0">
+              <div className="">
                 {!(level === 4 || level === "3B")
                   ? <AccessGateBanner level={level} profileCompletion={accessProfileCompletion} context="guard" />
                   : <FreePeriodBanner />}
               </div>
               {!allChecklistDone && (
-                <div className="px-4 sm:px-5 md:px-8 lg:px-0">
+                <div className="">
                   <SitterNextStepRailCard
                     hasAvatar={!!avatarUrl}
                     hasBioMin={!!(bio && bio.length >= 50)}
@@ -340,7 +340,7 @@ const SitterDashboard = () => {
                   />
                 </div>
               )}
-              <div className="px-4 sm:px-5 md:px-8 lg:px-0 mb-6">
+              <div className="mb-6">
                 <AlmaRailWhisper
                   profileCompletion={profileCompletion ?? 0}
                   isAvailable={!!isAvailable}
@@ -374,7 +374,7 @@ const SitterDashboard = () => {
               </div>
 
               {(nextGuardError || nearbyError) && (
-                <div className="px-4 sm:px-5 md:px-8 lg:px-0 space-y-2">
+                <div className="space-y-2">
                   {nextGuardError && (
                     <DashboardSectionState
                       variant="error"
@@ -395,7 +395,7 @@ const SitterDashboard = () => {
               )}
 
               {/* VAGUE 2 — carte rencontre, star unique de l'écran */}
-              <div className="px-4 sm:px-5 md:px-8 lg:px-0">
+              <div className="">
                 <SitterMatchSection
                   topSits={topSits}
                   fallbackSits={fallbackSits}
@@ -406,7 +406,7 @@ const SitterDashboard = () => {
               </div>
 
               {/* VAGUE 3 — tuiles histoire (remplace SitterActivityPanel côté confirmé) */}
-              <div className="px-4 sm:px-5 md:px-8 lg:px-0">
+              <div className="">
                 <SitterStoryTiles
                   pendingAppsCount={pendingAppsCount ?? 0}
                   unreadCount={unreadCount ?? 0}
@@ -417,7 +417,7 @@ const SitterDashboard = () => {
               {ChecklistBlock}
 
               {/* VAGUE 3 — invitation entraide calme */}
-              <div className="px-4 sm:px-5 md:px-8 lg:px-0">
+              <div className="">
                 <SitterEntraideSection
                   firstNearbyMission={firstNearbyMission}
                   eyebrow="L'entraide, tout près"
@@ -432,10 +432,10 @@ const SitterDashboard = () => {
                 Ordre narratif : pouls → prochaine garde (ou access/free) →
                 réputation → Alma en murmure. Espacement 34px. */}
             <aside className="mt-[52px] lg:mt-0 space-y-[34px] lg:col-span-4 lg:sticky lg:top-20 lg:self-start lg:max-h-[calc(100vh-6rem)] lg:overflow-y-auto">
-              <div className="px-4 sm:px-5 md:px-8 lg:px-0">
+              <div className="">
                 <CommunityPulseBanner userId={user?.id} />
               </div>
-              <div className="px-4 sm:px-5 md:px-8 lg:px-0">
+              <div className="">
                 {nextGuard ? (
                   <NextGuardRailCard nextGuard={nextGuard} />
                 ) : !(level === 4 || level === "3B") ? (
@@ -444,7 +444,7 @@ const SitterDashboard = () => {
                   <FreePeriodBanner />
                 )}
               </div>
-              <div className="px-4 sm:px-5 md:px-8 lg:px-0">
+              <div className="">
                 <ReputationRailCard
                   userId={user?.id}
                   completedSits={completedSits ?? 0}
@@ -453,7 +453,7 @@ const SitterDashboard = () => {
                   badgeCount={badgeCount ?? 0}
                 />
               </div>
-              <div className="px-4 sm:px-5 md:px-8 lg:px-0 mb-6">
+              <div className="mb-6">
                 <AlmaRailWhisper
                   profileCompletion={profileCompletion ?? 0}
                   isAvailable={!!isAvailable}
