@@ -242,6 +242,7 @@ const SitterOpeningCard = ({
                 ) : (
                   <Link
                     to={step.to}
+                    onClick={() => trackStep(step.key)}
                     aria-label={`${step.label}. ${step.hint}`}
                     className="block focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 rounded-[12px]"
                   >
