@@ -15,6 +15,7 @@ interface SitterMobileStickyCTAProps {
  */
 const SitterMobileStickyCTA = memo(({ pendingAppsCount = 0, unreadCount = 0 }: SitterMobileStickyCTAProps) => {
   const navigate = useNavigate();
+  const starVisible = useStarVisibilityGate("sitter");
 
   // Priorité contextuelle : messages non lus > candidatures.
   // Empty state (aucun message / aucune candidature) : on MASQUE le sticky,
