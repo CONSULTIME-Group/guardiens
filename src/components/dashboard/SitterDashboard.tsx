@@ -76,7 +76,11 @@ const SitterDashboard = () => {
   // NBA nouveau gardien : score d'affinité + fallback empty state.
   // Le hook est appelé inconditionnellement (règle des hooks). Il ne fetche
   // que si userId présent (cf. `enabled` du useQuery).
-  const isNewSitter = useIsNewSitter({ totalApps: totalApps ?? 0, completedSits: completedSits ?? 0 });
+  const rawIsNewSitter = useIsNewSitter({ totalApps: totalApps ?? 0, completedSits: completedSits ?? 0 });
+  // Override pour preview design : ?sitterView=confirmed force la branche confirmée,
+  // ?sitterView=new force la branche nouveau gardien. Sinon comportement normal.
+  const sitterViewParam = searchParams.get("sitterView");
+  const isNewSitter = sitterViewParam === "new" ? true : sitterViewParam === "confirmed" ? false : rawIsNewSitter;
   // Alma étape 1 — usage_nudge P2, ciblé sur l'état du gardien.
   useAlmaUsageNudge({
     surface: "sitter_dashboard",
