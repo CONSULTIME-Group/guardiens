@@ -11,7 +11,7 @@
  */
 import { useState, useEffect } from "react";
 import { Link, useSearchParams } from "react-router-dom";
-import { CheckCircle2, Star, PawPrint, Home, ClipboardList, XCircle, MapPin, CalendarDays, Users, ArrowLeft } from "lucide-react";
+import { CheckCircle2, PawPrint, MapPin, CalendarDays, Users, ArrowLeft } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { Button } from "@/components/ui/button";
@@ -35,7 +35,7 @@ import SitterStatusBanner from "./SitterStatusBanner";
 import { useSitDerived } from "./useSitDerived";
 import ReviewsTab from "./tabs/ReviewsTab";
 import SitImmersiveContent from "./SitImmersiveContent";
-import AffinitySection from "@/components/matching/AffinitySection";
+import SitterAffinitySection from "./SitterAffinitySection";
 import { AlmaPopularSitWhisper } from "@/components/ai/alma/wiring/AlmaPopularSitWhisper";
 import { AlmaReactiveOwnerWhisper } from "@/components/ai/alma/wiring/AlmaReactiveOwnerWhisper";
 import type { SitData } from "./types";
@@ -223,14 +223,13 @@ const SitterSitView = ({
         compact
       />
 
-      {/* Score d'affinité réciproque (vue gardien sur annonce propriétaire) */}
-      <AffinitySection
+      {/* Rencontre en tête — grammaire du ring partagé (vague 21) */}
+      <SitterAffinitySection
         sitterProfile={sitterProfile}
         ownerProfile={ownerProfile}
         pets={pets}
-        context="sit_detail"
+        ownerFirstName={owner?.first_name}
         targetId={sit.id}
-        showCtaForSitter={activeRole === "sitter"}
       />
 
       {/* Whispers Alma — surfacés uniquement si données réelles */}
@@ -250,8 +249,10 @@ const SitterSitView = ({
 
 
 
-      {/* Apply bar, affichée tout en haut, juste sous le header,
-          pour que le CTA "Postuler" soit visible immédiatement sans scroll. */}
+      {/* Barre de candidature en pilule signature (vague 21).
+          data-dashboard-star="sitter" : le sticky mobile ci-dessous utilise
+          useStarVisibilityGate("sitter") pour ne s'afficher que lorsque cette
+          barre est hors écran. */}
       {activeRole === "sitter" && sit.status === "published" && (() => {
         const days =
           sit.start_date && sit.end_date
@@ -270,37 +271,48 @@ const SitterSitView = ({
           !hasApplied &&
           sit.accepting_applications;
 
+        const Fact = ({ icon: Icon, label }: { icon: any; label: React.ReactNode }) => (
+          <span className="inline-flex items-center gap-1.5 text-muted-foreground" style={{ fontSize: "13px" }}>
+            <Icon className="h-3.5 w-3.5 text-primary/70" aria-hidden="true" />
+            <span className="text-foreground" style={{ fontWeight: 600 }}>{label}</span>
+          </span>
+        );
+
         return (
           <aside
             aria-label="Action de candidature"
-            className="mt-4 mb-6 rounded-2xl border border-border bg-card shadow-sm"
+            data-dashboard-star="sitter"
+            className="mt-4 mb-6 bg-card border border-border"
+            style={{
+              borderRadius: "20px",
+              boxShadow: "0 1px 2px rgba(29,27,22,0.04), 0 8px 24px rgba(29,27,22,0.05)",
+            }}
           >
             <div className="px-4 md:px-6 py-3 md:py-4 flex flex-col md:flex-row md:items-center md:justify-between gap-3 md:gap-6">
               {showRecap ? (
-                <div className="flex flex-col md:flex-row md:items-center gap-y-1.5 md:gap-x-5 text-xs md:text-sm text-muted-foreground min-w-0">
-                  {owner?.city && (
-                    <span className="inline-flex items-center gap-1.5">
-                      <MapPin className="h-3.5 w-3.5 text-primary/70" aria-hidden="true" />
-                      <span className="truncate max-w-[12rem]">{owner.city}</span>
-                    </span>
-                  )}
+                <div className="flex flex-wrap items-center gap-x-5 gap-y-1.5 min-w-0">
+                  {owner?.city && <Fact icon={MapPin} label={owner.city} />}
                   {days > 0 && (
-                    <span className="inline-flex items-center gap-1.5">
-                      <CalendarDays className="h-3.5 w-3.5 text-primary/70" aria-hidden="true" />
-                      {days} {days === 1 ? "jour" : "jours"}
-                    </span>
+                    <Fact
+                      icon={CalendarDays}
+                      label={`${days} ${days === 1 ? "jour" : "jours"}`}
+                    />
                   )}
                   {pets.length > 0 && (
-                    <span className="inline-flex items-center gap-1.5">
-                      <PawPrint className="h-3.5 w-3.5 text-primary/70" aria-hidden="true" />
-                      {pets.length} {pets.length === 1 ? "animal" : "animaux"}
-                    </span>
+                    <Fact
+                      icon={PawPrint}
+                      label={`${pets.length} ${pets.length === 1 ? "animal" : "animaux"}`}
+                    />
                   )}
-                  {sit.max_applications && (
-                    <span className="inline-flex items-center gap-1.5">
-                      <Users className="h-3.5 w-3.5 text-primary/70" aria-hidden="true" />
-                      {appCount} / {sit.max_applications} candidature{sit.max_applications > 1 ? "s" : ""}
-                    </span>
+                  {appCount > 0 && (
+                    <Fact
+                      icon={Users}
+                      label={
+                        sit.max_applications
+                          ? `${appCount} / ${sit.max_applications} candidature${sit.max_applications > 1 ? "s" : ""}`
+                          : `${appCount} candidature${appCount > 1 ? "s" : ""}`
+                      }
+                    />
                   )}
                 </div>
               ) : (
@@ -309,7 +321,7 @@ const SitterSitView = ({
 
               <div className="w-full md:w-auto md:shrink-0">
                 {!sit.accepting_applications ? (
-                  <Button className="w-full md:w-auto md:min-w-[16rem] h-11 md:h-12 px-6 text-base font-semibold" disabled>
+                  <Button className="w-full md:w-auto md:min-w-[16rem] h-11 md:h-12 px-6 rounded-full text-base font-semibold" disabled>
                     Candidatures fermées
                   </Button>
                 ) : accessLevel === 1 ? (
@@ -319,7 +331,7 @@ const SitterSitView = ({
                     context="guard"
                   />
                 ) : hasApplied ? (
-                  <Button className="w-full md:w-auto md:min-w-[16rem] h-11 md:h-12 px-6 text-base font-semibold" disabled>
+                  <Button className="w-full md:w-auto md:min-w-[16rem] h-11 md:h-12 px-6 rounded-full text-base font-semibold" disabled>
                     <CheckCircle2 className="h-5 w-5 mr-2" aria-hidden="true" /> Candidature envoyée
                   </Button>
                 ) : !canApplyGuards ? (
@@ -330,7 +342,8 @@ const SitterSitView = ({
                   />
                 ) : (
                   <Button
-                    className="w-full md:w-auto md:min-w-[16rem] h-11 md:h-12 px-8 text-base font-semibold shadow-sm"
+                    className="w-full md:w-auto md:min-w-[16rem] h-11 md:h-12 px-8 rounded-full text-base font-semibold"
+                    style={{ boxShadow: "0 6px 14px rgba(44,109,80,0.24)" }}
                     onClick={() => {
                       trackEvent("sit_apply_clicked", {
                         source: "sit_detail_top",
@@ -371,11 +384,29 @@ const SitterSitView = ({
         ownerProfile={ownerProfile}
       />
 
-      {/* Avis sur l'hôte */}
-      <section className="mt-8">
-        <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
-          <Star className="h-5 w-5 text-primary" /> Avis ({reviews.length})
-        </h2>
+      {/* Avis sur l'hôte — trio d'en-tête signature (vague 21) */}
+      <section className="mt-10">
+        <header className="mb-[22px]">
+          <div className="flex items-center gap-[8px]">
+            <span
+              aria-hidden="true"
+              className="inline-block bg-secondary"
+              style={{ width: "20px", height: "2px" }}
+            />
+            <p
+              className="text-secondary uppercase"
+              style={{ fontSize: "11px", fontWeight: 700, letterSpacing: "0.16em" }}
+            >
+              Ce que les gardiens en disent
+            </p>
+          </div>
+          <h2
+            className="font-heading text-foreground mt-[8px]"
+            style={{ fontSize: "20px", fontWeight: 600, lineHeight: 1.25 }}
+          >
+            Une maison déjà racontée.
+          </h2>
+        </header>
         <ReviewsTab
           sitId={sit.id}
           sitOwnerId={sit.user_id}
@@ -385,7 +416,7 @@ const SitterSitView = ({
         />
       </section>
 
-      {/* Accord de garde, sitter view */}
+      {/* Accord de garde — registre carnet (vague 21) */}
       {ownerAccordSigned && ["confirmed", "in_progress", "completed"].includes(sit.status) && (
         <div className="mt-8">
           {accordOpen && accordData ? (
@@ -394,41 +425,50 @@ const SitterSitView = ({
               role="gardien"
               onClose={() => setAccordOpen(false)}
             />
-          ) : sitterAccordSigned ? (
-            <div className="bg-card rounded-xl border border-border p-5 flex items-center gap-3">
-              <CheckCircle2 className="h-5 w-5 text-primary shrink-0" />
-              <div>
-                <p className="text-sm font-medium">Accord de garde accepté</p>
-                <p className="text-xs text-muted-foreground">
-                  Signé le{" "}
-                  {sitterAccordSigned.accepted_at
-                    ? format(new Date(sitterAccordSigned.accepted_at), "d MMMM yyyy", {
-                        locale: fr,
-                      })
-                    : ","}
-                </p>
-              </div>
-            </div>
           ) : (
-            <div className="bg-card rounded-xl border border-border p-5 space-y-3">
-              <p className="font-heading font-semibold text-sm">Notre accord de garde</p>
-              <p className="text-sm text-muted-foreground">
-                Le propriétaire a validé cet accord. Lisez-le et confirmez votre acceptation pour
-                finaliser la garde.
+            <article
+              className="border"
+              style={{
+                background: "hsl(var(--hero-paper))",
+                borderColor: "hsl(var(--border))",
+                borderRadius: "16px",
+                padding: "20px",
+              }}
+            >
+              <h3
+                className="font-heading text-foreground"
+                style={{ fontSize: "16px", fontWeight: 600, lineHeight: 1.3 }}
+              >
+                Notre accord de garde
+              </h3>
+              <p
+                className="text-muted-foreground mt-[8px]"
+                style={{ fontSize: "13px", lineHeight: 1.5 }}
+              >
+                {sitterAccordSigned
+                  ? `Vous l'avez signé${
+                      sitterAccordSigned.accepted_at
+                        ? " le " +
+                          format(new Date(sitterAccordSigned.accepted_at), "d MMMM yyyy", { locale: fr })
+                        : ""
+                    }. Vous pouvez le relire à tout moment.`
+                  : "Le propriétaire a validé cet accord. Lisez-le et confirmez votre acceptation pour finaliser la garde."}
               </p>
-              <Button onClick={() => setAccordOpen(true)} className="gap-2">
-                Voir et signer l'accord
-              </Button>
-            </div>
+              <div className="mt-[14px]">
+                <Button
+                  variant="outline"
+                  onClick={() => setAccordOpen(true)}
+                  className="rounded-full bg-card border-border"
+                >
+                  {sitterAccordSigned ? "Voir l'accord" : "Voir et signer l'accord"}
+                </Button>
+              </div>
+            </article>
           )}
         </div>
       )}
 
-      {/* Bloc "Annuler ma participation", gardien confirmé uniquement.
-          Conditions :
-          - Le gardien a candidaté ET est l'attribué (status confirmed/in_progress)
-          - La garde n'est ni terminée, ni annulée, ni en brouillon
-          Le modal CancelSitModal détecte automatiquement le rôle via user.id ≠ sitOwnerId. */}
+      {/* Annulation adoucie (vague 21) — carte pointillée, seul rouge sur la page */}
       {(() => {
         const today = new Date();
         today.setHours(0, 0, 0, 0);
@@ -441,37 +481,37 @@ const SitterSitView = ({
         if (!canSitterCancel) return null;
         return (
           <section
-            className="mt-10 mb-6 rounded-xl border border-destructive/20 bg-destructive/5 p-5 md:p-6"
+            className="mt-10 mb-6 bg-card"
+            style={{
+              borderRadius: "16px",
+              border: "1px dashed hsl(var(--border))",
+              padding: "18px 20px",
+            }}
             aria-labelledby="sitter-cancel-title"
           >
-            <div className="flex items-start gap-3">
-              <XCircle
-                className="h-5 w-5 text-destructive shrink-0 mt-0.5"
-                aria-hidden="true"
-              />
-              <div className="flex-1 min-w-0">
-                <h2
-                  id="sitter-cancel-title"
-                  className="font-heading font-semibold text-base text-foreground"
-                >
-                  Annuler ma participation
-                </h2>
-                <p className="text-xs text-muted-foreground mt-1 mb-3">
-                  {sit.status === "in_progress"
-                    ? "La garde est en cours. Une annulation maintenant peut mettre le propriétaire en difficulté, contactez-le d'abord si possible."
-                    : "Le propriétaire sera notifié immédiatement. Pensez à le prévenir directement avant si possible."}
-                </p>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="text-destructive hover:text-destructive hover:bg-destructive/10 border-destructive/40 hover:border-destructive/60"
-                  onClick={() => setCancelOpen(true)}
-                >
-                  <XCircle className="h-3.5 w-3.5 mr-1.5" />
-                  Annuler ma participation
-                </Button>
-              </div>
-            </div>
+            <h2
+              id="sitter-cancel-title"
+              className="font-heading text-foreground"
+              style={{ fontSize: "15px", fontWeight: 600, lineHeight: 1.3 }}
+            >
+              Besoin d'annuler votre participation ?
+            </h2>
+            <p
+              className="text-muted-foreground mt-[6px]"
+              style={{ fontSize: "12.5px", lineHeight: 1.5 }}
+            >
+              {sit.status === "in_progress"
+                ? "La garde est en cours. Prévenez d'abord l'hôte si possible : une annulation le met en difficulté."
+                : "Prévenez d'abord l'hôte directement si possible, puis confirmez ici. Il sera notifié immédiatement."}
+            </p>
+            <button
+              type="button"
+              onClick={() => setCancelOpen(true)}
+              className="text-destructive hover:underline underline-offset-4 mt-[12px]"
+              style={{ fontSize: "12.5px", fontWeight: 700 }}
+            >
+              Annuler ma participation
+            </button>
           </section>
         );
       })()}

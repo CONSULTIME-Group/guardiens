@@ -8,6 +8,7 @@ import { CheckCircle2 } from "lucide-react";
 import FavoriteButton from "@/components/shared/FavoriteButton";
 import { trackEvent, trackCtaClick } from "@/lib/analytics";
 import { useScrollDirection } from "@/hooks/useScrollDirection";
+import { useStarVisibilityGate } from "@/hooks/useStarVisibilityGate";
 
 interface SitMobileStickyApplyProps {
   sitId: string;
@@ -17,8 +18,10 @@ interface SitMobileStickyApplyProps {
 
 const SitMobileStickyApply = ({ sitId, state, onApply }: SitMobileStickyApplyProps) => {
   const scrollDir = useScrollDirection(12);
+  const applyBarVisible = useStarVisibilityGate("sitter");
 
   if (state === "blocked") return null;
+  if (applyBarVisible) return null;
 
   return (
     <div
@@ -54,7 +57,7 @@ const SitMobileStickyApply = ({ sitId, state, onApply }: SitMobileStickyApplyPro
               onApply();
             }}
           >
-            Postuler à cette garde
+            Postuler pour cette garde
           </Button>
         )}
       </div>
