@@ -378,7 +378,7 @@ const StarCard = ({ sit }: { sit: AffinitySitCard }) => {
         className="flex items-start"
         style={{ padding: "22px", gap: "22px" }}
       >
-        {sit.affinity && <AffinityRing score={sit.affinity.score} />}
+        {sit.affinity && <AffinityRing score={sit.affinity.score} result={sit.affinity} />}
 
         <div className="min-w-0 flex-1">
           <h3
