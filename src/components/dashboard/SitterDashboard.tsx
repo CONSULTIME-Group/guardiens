@@ -94,6 +94,7 @@ const SitterDashboard = () => {
   const {
     topSits,
     fallbackSits,
+    discoverySit,
     hasMinimumPool,
     hasPostalCode,
     profileIncomplete,
