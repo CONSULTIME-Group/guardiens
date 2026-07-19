@@ -248,6 +248,11 @@ const SitterDashboard = () => {
 
   // VAGUE 3 — L'entraide, invitation calme, une seule mission mise en avant.
   const firstNearbyMission = nearbyMissions[0];
+  const myActiveMission = myMissions.find((m: any) => m.status !== "completed" && m.status !== "cancelled") ?? null;
+
+  // Signal helpers proches, partagé entre les deux dashboards.
+  const { data: nearbyHelpersData } = useNearbyHelpers(user?.id);
+  const nearbyHelpersCount = nearbyHelpersData?.helpers?.length ?? 0;
 
 
 
