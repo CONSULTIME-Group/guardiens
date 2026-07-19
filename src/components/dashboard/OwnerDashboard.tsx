@@ -537,16 +537,7 @@ const OwnerDashboard = () => {
       )}
 
 
-      {/* ═══ Garde en cours (prioritaire, contextuel) ═══ */}
-      {ongoingSit && (
-        <div className="px-5 md:px-8">
-          <OngoingSitHero
-            sit={ongoingSit}
-            sitterProfiles={sitterProfiles}
-            coverPhoto={propertyCoverPhoto}
-          />
-        </div>
-      )}
+      {/* Garde en cours : rendue par OwnerStarSection (variant "ongoing"). */}
 
       {/* ═══ Toggle mobile : « Voir mes stats et bonus » ═══
           P1 2026 mobile reveal : on AFFICHE par défaut le cœur opérationnel
