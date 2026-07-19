@@ -776,6 +776,13 @@ const NotificationsSection = ({ prefs, savingKey, allNotifsOn, onMasterToggle, o
           </Link>
         </Button>
       </div>
+
+      <div className="pt-4 border-t border-border">
+        <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-3">
+          Vos rendez-vous email
+        </p>
+        <EmailDigestCard />
+      </div>
     </div>
   </section>
 );
