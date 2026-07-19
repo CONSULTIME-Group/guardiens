@@ -1,119 +1,71 @@
 import { useState, useEffect, useMemo, useCallback } from "react";
 
-import { BadgeRow } from "@/components/badges/BadgeRow";
 import { supabase } from "@/integrations/supabase/client";
 import { logger } from "@/lib/logger";
 import { useAuth } from "@/contexts/AuthContext";
-import { Link } from "react-router-dom";
-
 
 import OnboardingWelcome from "./OnboardingWelcome";
 import NearbyOwnerSittersCard from "./owner/NearbyOwnerSittersCard";
 import NearbyEmergencySitters from "./NearbyEmergencySitters";
-import NearbyHelpersCarousel from "./shared/NearbyHelpersCarousel";
 import DashboardSkeleton from "@/components/skeletons/DashboardSkeleton";
-import { ChevronDown, ChevronUp } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Link } from "react-router-dom";
 import { differenceInDays } from "date-fns";
 
-
-
 import RoleActivationBanner from "./RoleActivationBanner";
-import AccessGateBanner from "@/components/access/AccessGateBanner";
-import NextMissionDigestCard from "./NextMissionDigestCard";
-import { useAccessLevel } from "@/hooks/useAccessLevel";
-import { useUserBadges } from "@/hooks/useProfileReputation";
 
-/* ── Extracted sub-components ── */
-import MonAnnonceCard from "./owner/MonAnnonceCard";
-// OngoingSitHero: rendu désormais via OwnerStarSection.
+/* ── Vague 11 : composants du flux principal ── */
 import ApplicationsSection from "./owner/ApplicationsSection";
-import ContextualResources from "./owner/ContextualResources";
-import MissionsTabsCard from "./owner/MissionsTabsCard";
-import DashSection from "./owner/DashSection";
-import EmptyCard from "./owner/EmptyCard";
 import StatsStrip from "./owner/StatsStrip";
 import OwnerCockpit from "./owner/OwnerCockpit";
 import OwnerStarSection from "./owner/OwnerStarSection";
-
+import OwnerAnnonceSection from "./owner/OwnerAnnonceSection";
+import OwnerFamilySection from "./owner/OwnerFamilySection";
+import OwnerEntraideSection from "./owner/OwnerEntraideSection";
 import MobileStickyCTA from "./owner/MobileStickyCTA";
-import LiveSignalStrip from "./shared/LiveSignalStrip";
-import SectionEyebrow from "./shared/SectionEyebrow";
-import TodoCard, { type TodoItem } from "./owner/TodoCard";
-// PriorityActionCard / DraftResumeCard / SitDraftFromPrompt : remplacés par OwnerStarSection (vague 10).
 import OwnerFirstNBAGardiens from "./OwnerFirstNBAGardiens";
+
 import { useOwnerPriorityAction } from "@/hooks/useOwnerPriorityAction";
 import { useOwnerPrimaryAction } from "@/hooks/useOwnerPrimaryAction";
-import ActivationScoreCard from "./owner/ActivationScoreCard";
-import NextActionsList from "./owner/NextActionsList";
 import AlmaSilentSitBubble from "@/components/ai/alma/AlmaSilentSitBubble";
 import { AlmaOwnerTrafficNoActionWhisper } from "@/components/ai/alma/wiring/AlmaOwnerTrafficNoActionWhisper";
 import { AlmaOwnerViewTrendWhisper } from "@/components/ai/alma/wiring/AlmaOwnerViewTrendWhisper";
-import {
-  computeOwnerNextActions,
-  computeOwnerActivationScore,
-} from "@/lib/nextActions/owner";
 
-import {
-  SPECIES_LABEL,
-  capitalize, capitalizeWords,
-} from "./owner/helpers";
 import type { Pet } from "./owner/types";
 import { useOwnerDashboardData } from "@/hooks/useOwnerDashboardData";
 import DashboardLoadError from "./DashboardLoadError";
 
 import { useNearbyOwnerSitters } from "@/hooks/useNearbyOwnerSitters";
-import { useIsNewOwner, isEarlyOwner, hasNoActiveSit, computeOwnerNbaVariant } from "@/hooks/useIsNewUser";
+import { useNearbyHelpers } from "@/hooks/useNearbyHelpers";
+import { useIsNewOwner, isEarlyOwner, hasNoActiveSit } from "@/hooks/useIsNewUser";
 import { useAlmaCulturalFact } from "@/hooks/useAlmaCulturalFact";
 import { useAlmaUsageNudge } from "@/hooks/useAlmaUsageNudge";
 import { useAlmaFirstMeeting } from "@/hooks/useAlmaFirstMeeting";
 import { AlmaFirstMeeting } from "@/components/ai/alma/AlmaFirstMeeting";
 import { trackEvent } from "@/lib/analytics";
 
-
-/* ═══════════════════════════════════════════════════════
-   Main component
-   ═══════════════════════════════════════════════════════ */
-
 const OwnerDashboard = () => {
   const { user } = useAuth();
-  const { level, profileCompletion: accessProfileCompletion } = useAccessLevel();
-  const [showAllMobile, setShowAllMobile] = useState(false);
-  // Premier contact Alma : bloque les whispers proactifs tant qu'il n'est pas vu.
   const { shouldShow: showAlmaFirstMeeting, markSeen: markAlmaFirstMeetingSeen } = useAlmaFirstMeeting();
-  // Pass 5 — compagnon culturel : anecdote fondatrice ou stat sociale.
   useAlmaCulturalFact({ surface: "dashboard", context: { role: "owner" }, enabled: !showAlmaFirstMeeting });
 
-
-
-  
-
-  /* ── Data fetching (extracted hook) ── */
+  /* ── Data fetching ── */
   const { data, loading, error, reload } = useOwnerDashboardData(user?.id);
   const {
-    sits, pets, recentApps, reviews, highlights, smallMissions, myMissions,
-    verificationStatus, sitterBadges, sitterProfiles, sitterAffinityProfiles, trustedSitterCount,
-    propertyType, propertyEnvironment, propertyCoverPhoto, onboardingChecks,
+    sits, pets, recentApps, reviews, myMissions,
+    verificationStatus, sitterProfiles, sitterAffinityProfiles, trustedSitterCount,
+    propertyCoverPhoto, onboardingChecks,
     pendingReviews,
   } = data;
 
-  /* ── Signal local : nombre de gardiens proches (utilisé pour enrichir
-       LiveSignalStrip avec une preuve sociale ancrée près de chez vous). ── */
+  /* ── Signaux locaux : gardiens et « helpers » proches ── */
   const { data: nearbyOwnerSittersData } = useNearbyOwnerSitters(user?.id);
-  const localSignal = useMemo(() => {
-    if (!nearbyOwnerSittersData) return null;
-    const { sitters, radiusUsed } = nearbyOwnerSittersData;
-    if (sitters.length === 0 || !radiusUsed) return null;
-    return `${sitters.length} dans un rayon de ${radiusUsed} km`;
-  }, [nearbyOwnerSittersData]);
+  const { data: nearbyHelpersData } = useNearbyHelpers(user?.id);
+  const nearbyHelpersCount = nearbyHelpersData?.helpers?.length ?? 0;
 
   /* ── UI state ── */
   const [showOnboarding, setShowOnboarding] = useState(false);
 
-  /* ── Badges (react-query) ── */
-  const { data: userBadges } = useUserBadges(user?.id);
-
-  /* ── Derived values (stable `now` per render cycle, not stale memo) ── */
+  /* ── Derived values ── */
   const now = new Date();
   const activeSits = useMemo(() => sits.filter(s => ["published", "confirmed"].includes(s.status)), [sits]);
   const completedSits = useMemo(() => sits.filter(s => s.status === "completed"), [sits]);
@@ -123,12 +75,6 @@ const OwnerDashboard = () => {
   }, [reviews]);
   const pendingAppCount = useMemo(() => recentApps.filter(a => a.status === "pending").length, [recentApps]);
 
-  /* ── Draft en cours de rédaction : on affiche une carte de reprise
-       au-dessus de la NBA quand un brouillon existe (Chantier 4 Casse A). ── */
-  // Un brouillon est « actif » s'il est encore visible dans l'onglet Brouillons
-  // de la page Mes annonces : status=draft ET (pas de date de fin OU date de fin
-  // non passée). Sinon il bascule dans « Passées » et ne doit plus être surfacé
-  // sur le dashboard, sous peine de divergence entre les deux vues.
   const latestDraft = useMemo(() => {
     const todayIso = new Date().toISOString().slice(0, 10);
     return sits
@@ -144,38 +90,24 @@ const OwnerDashboard = () => {
         return db - da;
       })[0] ?? null;
   }, [sits]);
-  const hasDraft = !!latestDraft;
 
-  /* ── Flags NBA & signal local calculés tôt (utilisés par subtitle + NBA) ── */
   const isNewOwner = useIsNewOwner({ sitsCount: sits.length, petsCount: pets.length });
   const earlyOwner = useMemo(
     () => isEarlyOwner({ sits: sits as any, pets: pets as any }),
     [sits, pets],
   );
-  const noActiveSit = useMemo(
-    () => hasNoActiveSit(sits as any),
-    [sits],
-  );
-  // Activation goulot proprio : action unique tant qu'aucune annonce publiée.
+  const noActiveSit = useMemo(() => hasNoActiveSit(sits as any), [sits]);
   const { data: primaryActionData } = useOwnerPrimaryAction(user?.id);
   const primaryAction = primaryActionData ?? null;
   const hasPrimaryAction = !!primaryAction?.action;
 
-  // Alma étape 1 — usage_nudge P2, ciblé sur l'état de l'owner.
-  // Désactivé quand une action primaire est active : l'incitation « publier »
-  // est déjà rendue inline sur la carte, on n'ajoute pas de whisper concurrent.
   useAlmaUsageNudge({
     surface: "owner_dashboard",
     role: "owner",
     state: isNewOwner ? "new_owner" : noActiveSit ? "no_active_sit" : "any",
     enabled: !showAlmaFirstMeeting && !hasPrimaryAction,
   });
-  /**
-   * Alma proactive : le dashboard affiche SitDraftFromPrompt (si new owner),
-   * OwnerFirstNBAGardiens et un subtitle contextuel personnalisé, et masque
-   * le CTA hero desktop, pour tout owner qui n'a aucune annonce active,
-   * qu'il ait ou non des animaux enregistrés.
-   */
+
   const isOwnerRole = user?.role === "owner" || user?.role === "both";
   const showAlmaProactive = earlyOwner || (noActiveSit && isOwnerRole);
   const nearbyCount = nearbyOwnerSittersData?.totalCount ?? 0;
@@ -187,13 +119,6 @@ const OwnerDashboard = () => {
     [sits]
   );
 
-  /**
-   * Affichage urgence : strictement conditionnel pour éviter de générer
-   * de l'anxiété par défaut. On ne montre les gardiens d'urgence QUE si :
-   *  - une garde confirmée commence dans moins de 7 jours, OU
-   *  - une annonce publiée est ouverte SANS aucune candidature (le proprio
-   *    risque de se retrouver sans solution).
-   */
   const showEmergencyHelp = useMemo(() => {
     const sevenDaysMs = 7 * 24 * 60 * 60 * 1000;
     const imminent = sits.some(s =>
@@ -210,7 +135,7 @@ const OwnerDashboard = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sits]);
 
-  /* ── Onboarding visibility (driven by hook data + user state) ── */
+  /* ── Onboarding ── */
   useEffect(() => {
     if (loading || !user || !data.profile) return;
     const dismissed = localStorage.getItem("onboarding_owner_dismissed");
@@ -221,7 +146,7 @@ const OwnerDashboard = () => {
     }
   }, [loading, user, data.profile]);
 
-  /* ── Dynamic text ── */
+  /* ── Sous-titre contextuel pour le cockpit ── */
   const subtitle = useMemo(() => {
     if (ongoingSit) {
       const daysLeft = ongoingSit.end_date ? differenceInDays(new Date(ongoingSit.end_date), now) : null;
@@ -235,21 +160,10 @@ const OwnerDashboard = () => {
     if (pendingAppCount > 0) {
       return `${pendingAppCount} candidature${pendingAppCount > 1 ? "s" : ""} à examiner.`;
     }
-    // Annonce publiée stagnante : on rend le subtitle diagnostic plutôt que générique.
-    const stalledPublished = sits.find(s =>
-      s.status === "published" &&
-      (s.applications || []).length === 0 &&
-      s.created_at &&
-      differenceInDays(now, new Date(s.created_at)) >= 3
-    );
-    if (stalledPublished) {
-      return "Votre annonce n'a pas encore reçu de candidature, voici 3 leviers pour la relancer.";
+    if (sits.some(s => s.status === "published")) {
+      return "Votre annonce est en ligne, les candidatures arrivent.";
     }
-    const anyPublished = sits.some(s => s.status === "published");
-    if (anyPublished) return "Votre annonce est en ligne, les candidatures arrivent.";
-    // Owner sans annonce active (draft/archived/completed/cancelled uniquement) :
-    // subtitle contextuel qui reprend le fil ou relance la publication.
-    if (hasDraft) {
+    if (latestDraft) {
       return "Vous avez commencé une annonce. Reprenez où vous en étiez.";
     }
     if (noActiveSit && sits.length > 0 && !earlyOwner) {
@@ -257,13 +171,8 @@ const OwnerDashboard = () => {
       if (nearbyCount > 0 && nearbyRadius) {
         return `${hello} ${nearbyCount} gardien${nearbyCount > 1 ? "s" : ""} vérifié${nearbyCount > 1 ? "s" : ""} à ${nearbyRadius} km attendent votre prochaine annonce.`;
       }
-      return `${hello} Republiez une annonce quand vous êtes prêt, on vous accompagne.`;
+      return `${hello} Republiez une annonce quand vous êtes prêt.`;
     }
-    // Historique présent mais plus rien d'actif : on évite le message « première annonce » trompeur.
-    if (sits.length > 0 && !earlyOwner) {
-      return `${sits.length} annonce${sits.length > 1 ? "s" : ""} dans votre historique, aucune en cours.`;
-    }
-    // New/early owner sans brouillon : subtitle personnalisé via signal local.
     if (earlyOwner) {
       const hello = "Bienvenue chez Guardiens.";
       if (nearbyCount > 0 && nearbyRadius) {
@@ -272,15 +181,8 @@ const OwnerDashboard = () => {
       return `${hello} Publiez votre première annonce, on vous accompagne.`;
     }
     return "Publiez votre première annonce pour trouver un gardien.";
-
-
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [ongoingSit, sits, pendingAppCount, hasDraft, noActiveSit, earlyOwner, nearbyCount, nearbyRadius, user?.firstName]);
-
-  // Banner contextuel supprimé : verif & candidatures non lues affichées en chips inline dans le hero.
-
-  // CTA bas de page supprimé : redondant avec le hero (action principale toujours
-  // visible en haut) et avec MonAnnonceCard (qui guide déjà sur l'action contextuelle).
+  }, [ongoingSit, sits, pendingAppCount, latestDraft, noActiveSit, earlyOwner, nearbyCount, nearbyRadius]);
 
   const getNextSitForPet = useCallback((pet: Pet) => {
     const currentDate = new Date();
@@ -289,9 +191,6 @@ const OwnerDashboard = () => {
       .sort((a, b) => new Date(a.start_date!).getTime() - new Date(b.start_date!).getTime())[0];
   }, [sits]);
 
-  // Action prioritaire unique , miroir SitterCockpit côté propriétaire.
-  // Pioche LA chose la plus urgente parmi les données déjà chargées.
-  // Doit rester avant tout early return (rules of hooks).
   const priorityAction = useOwnerPriorityAction({
     sits,
     pendingAppCount,
@@ -306,47 +205,7 @@ const OwnerDashboard = () => {
     petsCount: pets.length,
   });
 
-  // Liste complète d'actions séquentielles + score d'activation 0/6,
-  // calculée à partir des mêmes données déjà chargées (zéro fetch supplémentaire).
-  const nextActionsInput = useMemo(
-    () => ({
-      sits,
-      pets,
-      pendingAppCount,
-      pendingReviews: pendingReviews.map((r: any) => ({
-        sitId: r.sitId,
-        sitterId: r.sitterId,
-        sitterName: r.sitterName,
-      })),
-      verificationStatus,
-      profileCompletion: user?.profileCompletion ?? 0,
-      hasPropertyType: !!propertyType,
-    }),
-    [sits, pets, pendingAppCount, pendingReviews, verificationStatus, user?.profileCompletion, propertyType]
-  );
-  const nextActions = useMemo(() => computeOwnerNextActions(nextActionsInput), [nextActionsInput]);
-  const activationScore = useMemo(() => computeOwnerActivationScore(nextActionsInput), [nextActionsInput]);
-
-  /* ── Enrichit la description de la NBA avec un signal local
-       (nombre de gardiens vérifiés à proximité). ── */
-  const newOwnerDescription = useMemo(() => {
-    if (!isNewOwner) return priorityAction.description;
-    if (nearbyCount >= 5 && nearbyRadius) {
-      return `${nearbyCount} gardiens vérifiés à ${nearbyRadius} km attendent une annonce comme la vôtre. Environ 2 minutes pour publier.`;
-    }
-    if (nearbyCount > 0 && nearbyRadius) {
-      return `Vous êtes parmi les premiers dans votre secteur. Publiez votre annonce, on active les notifications pour les gardiens qui s'inscriront près de chez vous.`;
-    }
-    return `Plus de 2 200 gardiens vérifiés en France. Publiez votre annonce, on prévient ceux qui correspondent le mieux. Environ 2 minutes.`;
-  }, [isNewOwner, nearbyCount, nearbyRadius, priorityAction.description]);
-
-  /* ── NBA variant retenue (précepte 2026 : 1 seule NBA dominante). ── */
-  const nbaVariant = useMemo(
-    () => computeOwnerNbaVariant({ isNewOwner, hasDraft, hasNoActiveSit: noActiveSit }),
-    [isNewOwner, hasDraft, noActiveSit],
-  );
-
-  // Trace 1 fois par session le premier affichage dashboard "nouveau proprio"
+  /* ── Analytics une fois par session ── */
   useEffect(() => {
     if (loading || !user?.id || !isNewOwner) return;
     const key = `dash_first_view_owner_${user.id}`;
@@ -365,27 +224,8 @@ const OwnerDashboard = () => {
     } catch {}
   }, [loading, user?.id, isNewOwner, nearbyCount, nearbyRadius]);
 
-  // Trace 1 fois par session la NBA dominante retenue (ventilation des variants).
-  useEffect(() => {
-    if (loading || !user?.id) return;
-    const key = `dash_owner_nba_choice_${user.id}`;
-    try {
-      if (sessionStorage.getItem(key)) return;
-      sessionStorage.setItem(key, "1");
-      void trackEvent("owner_dashboard_nba_choice", {
-        source: "/dashboard",
-        metadata: { variant: nbaVariant, early_owner: earlyOwner, no_active_sit: noActiveSit },
-      });
-    } catch {}
-  }, [loading, user?.id, nbaVariant, earlyOwner, noActiveSit]);
-
-
-  /* ── Render ── */
-
-
   if (loading) return <DashboardSkeleton />;
   if (error) return <DashboardLoadError onRetry={reload} detail={error} />;
-
 
   if (showOnboarding && user?.onboardingMinimalCompleted) {
     return (
@@ -400,449 +240,167 @@ const OwnerDashboard = () => {
     );
   }
 
-  // Si MonAnnonceCard affiche déjà l'encart candidatures, on évite le doublon
-  // de la section ApplicationsSection (qui réapparaît dès qu'il y a des candidatures
-  // déjà consultées à montrer dans l'accordéon).
   const hasReadApps = recentApps.some(a => a.status !== "pending");
-  const showApplicationsSection = loading || hasReadApps;
-
-  // Construit la liste unifiée "À faire" : actions urgentes regroupées en un seul bloc
-  // au lieu d'être éparpillées (chips hero + cards séparées).
-  const todoItems: TodoItem[] = [];
-  if (verificationStatus !== "verified" && verificationStatus !== "pending") {
-    todoItems.push({
-      key: "identity",
-      label: "Vérifier votre identité",
-      hint: "Indispensable pour rassurer les gardiens",
-      to: "/settings#verification",
-      tone: "warning",
-    });
-  }
-  // P2 — Décongestion : les candidatures sont déjà rendues dominantes dans
-  // PriorityActionCard ET listées dans MonAnnonceCard, on ne les répète plus
-  // ici (le précepte 2026 = 1 NBA card visible, pas 3 surfaces concurrentes).
-  // Cf. mem://ux/dashboard-2026-precepts.
-  if (pendingReviews.length > 0) {
-    todoItems.push({
-      key: "reviews",
-      label: `${pendingReviews.length} avis à laisser`,
-      hint: "Aidez la communauté à choisir en confiance",
-      to: pendingReviews[0]
-        ? `/review/${pendingReviews[0].sitId}?reviewee=${pendingReviews[0].sitterId}`
-        : "/dashboard",
-      tone: "info",
-    });
-  }
-
-
-
 
   return (
-    <div className="space-y-6 md:space-y-8 pb-[calc(10rem+env(safe-area-inset-bottom))] md:pb-32">
-{/* pb mobile = BottomNav (h-16=64px) + Sticky CTA (~72px) + safe-area iPhone notch. Desktop pb-32 = dégage la bulle Alma flottante (bottom-right). */}
-
-      {/* Alma trigger owner_traffic_no_action : annonce avec vues réelles mais 0 candidature. */}
+    <div className="space-y-0 overflow-hidden lg:overflow-visible pb-[calc(10rem+env(safe-area-inset-bottom))] md:pb-32">
+      {/* Alma whispers */}
       <AlmaOwnerTrafficNoActionWhisper sits={sits} />
       <AlmaOwnerViewTrendWhisper />
 
-
-
       {showAlmaFirstMeeting && (
-        <div className="px-5 md:px-8 pt-2">
+        <div className="px-4 sm:px-5 md:px-8 pt-2">
           <AlmaFirstMeeting role="owner" onDone={markAlmaFirstMeetingSeen} />
         </div>
       )}
 
-      {/* ═══ Cockpit propriétaire (vague 10) ═══ */}
-      <OwnerCockpit
-        userId={user?.id}
-        firstName={user?.firstName}
-        avatarUrl={user?.avatarUrl ?? null}
-        subtitle={subtitle}
-      />
-
-      {/* ═══ Star contextuelle (vague 10) : UNE seule vedette à la fois ═══
-          Remplace DraftResumeCard + SitDraftFromPrompt autonome + PriorityActionCard
-          + OngoingSitHero au-dessus du flux. */}
-      <OwnerStarSection
-        ongoingSit={ongoingSit ?? null}
-        pendingApps={recentApps.filter(a => a.status === "pending")}
-        sitterProfiles={sitterProfiles}
-        sitterAffinityProfiles={sitterAffinityProfiles}
-        latestDraft={latestDraft as any}
-        propertyCoverPhoto={propertyCoverPhoto}
-        nearbyCount={nearbyCount}
-        nearbyRadius={nearbyRadius}
-        showConcierge={!ongoingSit && !latestDraft && (showAlmaProactive || hasPrimaryAction)}
-        primaryAction={primaryAction}
-      />
-
-
-      {isNewOwner ? (
-        <div className="px-5 md:px-8">
-          <details className="group rounded-2xl bg-card border border-border overflow-hidden">
-            <summary className="cursor-pointer list-none px-4 py-3 flex items-center justify-between hover:bg-muted/30 transition-colors">
-              <div>
-                <p className="text-[10px] uppercase tracking-[2px] text-muted-foreground font-sans font-semibold">
-                  Plus tard
-                </p>
-                <p className="text-sm font-semibold text-foreground">
-                  Voir aussi mes tâches et mon score de complétion
-                </p>
-              </div>
-              <span className="text-xs text-muted-foreground group-open:rotate-180 transition-transform" aria-hidden="true">▾</span>
-            </summary>
-            <div className="px-4 pb-4 pt-2 grid grid-cols-1 lg:grid-cols-2 gap-4">
-              <NextActionsList actions={nextActions} excludeId={priorityAction.variant} />
-              <ActivationScoreCard score={activationScore} />
-              {todoItems.length > 0 && (
-                <div className="lg:col-span-2">
-                  <TodoCard items={todoItems} />
-                </div>
-              )}
-            </div>
-          </details>
-        </div>
-      ) : (
-        <>
-          {(nextActions.length > 1 || !activationScore.allDone) && (
-            <details className={`px-5 md:px-8 ${!showAllMobile ? "hidden md:block" : ""}`}>
-              <summary className="cursor-pointer list-none text-sm text-muted-foreground hover:text-foreground py-1.5 flex items-center gap-1.5 select-none">
-                Voir les étapes suivantes <span aria-hidden="true" className="ml-0.5">▾</span>
-              </summary>
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-3">
-                <NextActionsList actions={nextActions} excludeId={priorityAction.variant} />
-                <ActivationScoreCard score={activationScore} />
-              </div>
-            </details>
-          )}
-
-          <div className={`px-5 md:px-8 ${!showAllMobile ? "hidden md:block" : ""}`}>
-            <AccessGateBanner level={level} profileCompletion={accessProfileCompletion} context="guard" />
-          </div>
-
-          <div className={`px-5 md:px-8 ${!showAllMobile ? "hidden md:block" : ""}`}>
-            <NextMissionDigestCard />
-          </div>
-
-          {todoItems.length > 0 && (
-            <div className="px-5 md:px-8">
-              <TodoCard items={todoItems} />
-            </div>
-          )}
-        </>
-      )}
-
-
-      {/* Garde en cours : rendue par OwnerStarSection (variant "ongoing"). */}
-
-      {/* ═══ Toggle mobile : « Voir mes stats et bonus » ═══
-          P1 2026 mobile reveal : on AFFICHE par défaut le cœur opérationnel
-          (annonce, animaux, candidatures, coups de main). Le toggle ne masque
-          plus QUE l'aside contextuelle (stats, parrainage, gardiens d'urgence)
-          + la preuve sociale + badges + ressources. Cf. mem://ux/dashboard-2026-precepts.
-          Desktop : non rendu. */}
-      {!showAllMobile && (
-        <div className="px-5 md:hidden">
-          <button
-            type="button"
-            onClick={() => setShowAllMobile(true)}
-            className="w-full flex items-center justify-center gap-2 py-3 rounded-xl border border-border bg-card text-sm font-semibold text-foreground hover:bg-muted/40 transition-colors"
-            aria-expanded={false}
-            aria-controls="owner-dash-extra"
-          >
-            Voir mes stats et bonus
-            <ChevronDown className="h-4 w-4" aria-hidden="true" />
-          </button>
-        </div>
-      )}
-
-      {/* ═══ PILOTAGE (gauche) + CONTEXTE (droite) ═══
-          Mobile : la grille est TOUJOURS rendue (pilotage visible par défaut).
-          L'aside reste masquée derrière le toggle via classe propre. */}
-      <div id="owner-dash-extra" className="px-5 md:px-8 grid grid-cols-1 lg:grid-cols-3 gap-6">
-
-        {/* Colonne pilotage : annonce, animaux, avis, candidatures */}
-        <div className="lg:col-span-2 space-y-6">
-          <AlmaSilentSitBubble sits={sits as any} />
-
-          <MonAnnonceCard
-            sits={sits}
-            pets={pets}
-            propertyType={propertyType}
-            propertyEnvironment={propertyEnvironment}
-            pendingAppCount={pendingAppCount}
-            coverPhoto={propertyCoverPhoto}
-            suppressPublishPrompt={showAlmaProactive || hasPrimaryAction}
-          />
-
-          {showAlmaProactive && <OwnerFirstNBAGardiens />}
-
-
-          {/* Mes animaux, remonté juste après l'annonce (logique : maison → animaux) */}
-          <DashSection
-            eyebrow="Famille"
-            title="Mes animaux"
-            description="Vos compagnons tels qu'ils apparaissent aux gardiens."
-            action={
-              <Link to="/owner-profile" className="text-xs text-primary hover:underline font-medium">Gérer</Link>
-            }
-          >
-            {pets.length === 0 ? (
-              <EmptyCard text="Aucun animal enregistré" hint="Ajoutez vos compagnons pour attirer les bons gardiens" cta="Ajouter un animal" to="/owner-profile" />
-            ) : (
-              <>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
-                  {pets.map(pet => {
-                    const nextSit = getNextSitForPet(pet);
-                    return (
-                      <div key={pet.id} className="bg-card border border-border rounded-2xl p-4 flex items-center gap-3">
-                        <div className="w-11 h-11 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-lg shrink-0 overflow-hidden">
-                          {pet.photo_url ? (
-                            <img src={pet.photo_url} alt={pet.name} className="w-full h-full rounded-full object-cover" />
-                          ) : (
-                            pet.name ? pet.name[0].toUpperCase() : "?"
-                          )}
-                        </div>
-                        <div className="min-w-0">
-                          <p className="text-sm font-semibold text-foreground truncate">{capitalize(pet.name)}</p>
-                          <p className="text-xs text-muted-foreground font-sans">
-                            {SPECIES_LABEL[pet.species] || capitalize(pet.species)}
-                            {pet.breed ? ` · ${capitalizeWords(pet.breed)}` : ""}
-                            {pet.age ? ` · ${pet.age} an${pet.age > 1 ? "s" : ""}` : ""}
-                          </p>
-                          {nextSit && nextSit.status === "confirmed" ? (
-                            <span className="text-xs font-sans bg-primary/10 text-primary rounded-xl px-2 py-0.5 mt-1 inline-block">
-                              Garde confirmée
-                            </span>
-                          ) : nextSit ? (
-                            <span className="text-xs font-sans bg-accent text-accent-foreground rounded-xl px-2 py-0.5 mt-1 inline-block">
-                              Annonce en cours
-                            </span>
-                          ) : null}
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-                <Link to="/owner-profile" className="text-sm text-primary font-sans hover:underline">
-                  Ajouter un animal
-                </Link>
-              </>
-            )}
-          </DashSection>
-
-          {/* Avis en attente : remontés dans TodoCard pour éviter le doublon
-              de surface. Un seul point d'entrée « action en attente ». */}
-
-          {showApplicationsSection && (
-            <ApplicationsSection
-              recentApps={recentApps}
-              sitterProfiles={sitterProfiles}
-              sitterBadges={sitterBadges}
-              sitterAffinityProfiles={sitterAffinityProfiles}
-              loading={loading}
-            />
-          )}
-
-          {/* ═══ DÉCOUVERTE, Coup de main dans la colonne principale ═══
-              Les gardiens « près de chez vous » sont remontés dans l'aside à droite. */}
-          <div className="space-y-6 min-w-0">
-
-            {/* 2. Coup de main, ton apaisé : border discrète, plus de teinte de fond agressive */}
-            <section
-              aria-labelledby="owner-discovery-missions-heading"
-              className="relative rounded-2xl border border-border bg-card p-3 sm:p-5 min-w-0 overflow-hidden"
-            >
-              <span aria-hidden className="absolute left-0 top-4 bottom-4 w-0.5 rounded-r-full bg-warning/60" />
-              <div className="pl-2 sm:pl-3 min-w-0">
-                <SectionEyebrow
-                  eyebrow="Entraide"
-                  title="L'entraide près de chez vous"
-                  accent="warning"
-                  id="owner-discovery-missions-heading"
-                />
-                <div className="space-y-4 min-w-0">
-                  <div className="xl:hidden">
-                    <NearbyHelpersCarousel hideHeader />
-                  </div>
-                  <MissionsTabsCard myMissions={myMissions} nearbyMissions={smallMissions} />
-                </div>
-              </div>
-            </section>
-          </div>
-        </div>
-
-        {/* Colonne contexte : stats compactes + parrainage uniquement.
-            Mobile : masquée par défaut (hidden) → révélée par le toggle
-            « Voir mes stats et bonus » via showAllMobile. Aligne sur précepte
-            2026 « aside contextuelle, pas opérationnelle ».
-            Desktop : toujours visible en colonne lg:col-span-1. */}
-        <aside className={`space-y-6 ${!showAllMobile ? "hidden lg:block" : ""}`}>
-          {/* Preuve sociale rapide : stats en haut de colonne pour une lecture immédiate */}
-          <StatsStrip
-            items={[
-              {
-                value: completedSits.length,
-                label: completedSits.length > 1 ? "Gardes" : "Garde",
-              },
-              // Tuile note masquée tant qu'aucun avis publié (pas de note trompeuse).
-              ...(avgRating > 0 && reviews.length > 0
-                ? [{
-                    value: `${avgRating} ★ (${reviews.length} avis)`,
-                    label: "Note",
-                    highlight: true,
-                    to: user?.id ? `/gardiens/${user.id}?tab=proprio#avis` : undefined,
-                  }]
-                : []),
-              ...(activeSits.length > 0
-                ? [{
-                    value: activeSits.length,
-                    label: activeSits.length > 1 ? "Annonces" : "Annonce",
-                    to: "/sits",
-                  }]
-                : []),
-              ...(trustedSitterCount > 0
-                ? [{
-                    value: trustedSitterCount,
-                    label: "Récurrents",
-                    tooltip: "Nombre de gardiens ayant déjà réalisé au moins 2 gardes chez vous. Ce sont vos contacts privilégiés à recontacter en priorité.",
-                  }]
-                : []),
-            ]}
-          />
-          {showEmergencyHelp && <NearbyEmergencySitters />}
-          <NearbyOwnerSittersCard />
-
-          {/* Parrainage, levier d'entraide gratuit (aucune contrepartie monétaire). */}
-          <Link
-            to="/mon-abonnement#parrainage"
-            className="block rounded-2xl border border-border bg-gradient-to-br from-accent/10 to-background p-4 hover:border-primary/40 transition-colors group"
-          >
-            <p className="text-[10px] uppercase tracking-[2px] text-muted-foreground font-sans font-semibold mb-1">
-              Parrainage
-            </p>
-            <p className="text-sm font-heading font-semibold text-foreground leading-snug">
-              Invitez un proche
-            </p>
-            <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
-              Son inscription reste sans engagement et vous développez l'entraide autour de chez vous.
-            </p>
-            <span className="inline-flex items-center gap-1 text-xs font-semibold text-primary mt-2 group-hover:translate-x-0.5 transition-transform">
-              Partager mon lien →
-            </span>
-          </Link>
-        </aside>
+      {/* Bandeau d'activation de rôle : reste en haut de page */}
+      <div className="px-4 sm:px-5 md:px-8 mb-4">
+        <RoleActivationBanner userRole={user?.role || "owner"} />
       </div>
 
+      {/* ═══ Grille 12 colonnes : flux (8) + rail (4) ═══ */}
+      <div className="min-w-0">
+        <div className="mx-auto w-full max-w-4xl lg:max-w-6xl lg:grid lg:grid-cols-12 lg:gap-6 lg:items-start">
+          {/* ═══ FLUX principal (gauche), rythme vertical 52px ═══ */}
+          <div className="min-w-0 space-y-[52px] lg:col-span-8">
+            {/* 1. Accueil */}
+            <OwnerCockpit
+              userId={user?.id}
+              firstName={user?.firstName}
+              avatarUrl={user?.avatarUrl ?? null}
+              subtitle={subtitle}
+            />
 
+            {/* 2. Star contextuelle (une seule vedette à la fois) */}
+            <OwnerStarSection
+              ongoingSit={ongoingSit ?? null}
+              pendingApps={recentApps.filter(a => a.status === "pending")}
+              sitterProfiles={sitterProfiles}
+              sitterAffinityProfiles={sitterAffinityProfiles}
+              latestDraft={latestDraft as any}
+              propertyCoverPhoto={propertyCoverPhoto}
+              nearbyCount={nearbyCount}
+              nearbyRadius={nearbyRadius}
+              showConcierge={!ongoingSit && !latestDraft && (showAlmaProactive || hasPrimaryAction)}
+              primaryAction={primaryAction}
+            />
 
-      {/* ═══ Preuve sociale, Highlights remontés et déployés par défaut ═══ */}
-      {highlights.length > 0 && (
-        <section
-          className={`px-5 md:px-8 pt-2 border-t border-border/40 ${!showAllMobile ? "hidden md:block" : ""}`}
-          aria-label="Ce que les gardiens disent de votre maison"
-        >
+            {/* Alma bulle silencieuse : conservée dans le flux */}
+            <AlmaSilentSitBubble sits={sits as any} />
 
-          <div className="mb-3">
-            <p className="text-[10px] uppercase tracking-[2px] text-muted-foreground font-sans font-semibold">
-              Preuve sociale
-            </p>
-            <h2 className="font-heading text-base md:text-lg font-bold text-foreground leading-tight">
-              Ce que les gardiens disent de votre maison
-            </h2>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-            {highlights.slice(0, 3).map(h => (
-              <div key={h.id} className="flex items-start gap-3 p-3 rounded-2xl bg-card border border-border">
-                {h.sitter?.avatar_url ? (
-                  <img src={h.sitter.avatar_url} alt={`Photo de ${h.sitter.first_name || 'gardien'}`} loading="lazy" className="w-10 h-10 rounded-full object-cover shrink-0" />
-                ) : (
-                  <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center text-sm font-bold shrink-0">
-                    {h.sitter?.first_name?.charAt(0) || "?"}
-                  </div>
-                )}
-                <div className="flex-1 min-w-0">
-                  <p className="text-xs font-medium">{capitalize(h.sitter?.first_name)}</p>
-                  <p className="text-sm text-muted-foreground mt-0.5">{h.text}</p>
+            {/* NBA gardiens si nouveau proprio sans annonce active */}
+            {showAlmaProactive && !latestDraft && !ongoingSit && (
+              <OwnerFirstNBAGardiens />
+            )}
+
+            {/* 3. VOTRE ANNONCE (n'affiche rien si aucune annonce active) */}
+            <OwnerAnnonceSection
+              sits={sits}
+              coverPhoto={propertyCoverPhoto}
+              pendingAppCount={pendingAppCount}
+            />
+
+            {/* 4. VOTRE FAMILLE */}
+            <OwnerFamilySection pets={pets} getNextSitForPet={getNextSitForPet} />
+
+            {/* 5. ENTRAIDE */}
+            <OwnerEntraideSection
+              myMissions={myMissions}
+              nearbyHelpersCount={nearbyHelpersCount}
+            />
+
+            {/* Historique candidatures : accordéon discret tout en bas */}
+            {hasReadApps && (
+              <details className="px-4 sm:px-5 md:px-8 lg:px-0 rounded-2xl bg-card border border-border overflow-hidden">
+                <summary className="cursor-pointer list-none px-4 py-3 flex items-center justify-between hover:bg-muted/30 transition-colors">
+                  <p className="text-sm font-semibold text-foreground">
+                    Historique des candidatures
+                  </p>
+                  <span className="text-xs text-muted-foreground group-open:rotate-180 transition-transform" aria-hidden="true">▾</span>
+                </summary>
+                <div className="px-4 pb-4 pt-2">
+                  <ApplicationsSection
+                    recentApps={recentApps}
+                    sitterProfiles={sitterProfiles}
+                    sitterBadges={{}}
+                    sitterAffinityProfiles={sitterAffinityProfiles}
+                    loading={loading}
+                  />
                 </div>
-                {h.photo_url && <img src={h.photo_url} alt="Photo de garde" loading="lazy" className="w-16 h-12 rounded-xl object-cover shrink-0" />}
-              </div>
-            ))}
+              </details>
+            )}
           </div>
-        </section>
-      )}
 
-      {/* ═══ Footer dashboard, badges inline + ressources ═══ */}
-      <div className={`px-5 md:px-8 pt-2 border-t border-border/40 space-y-3 ${!showAllMobile ? "hidden md:block" : ""}`}>
+          {/* ═══ RAIL collant (droite) — repris tel quel en attendant la vague 12 ═══ */}
+          <aside className="mt-[52px] lg:mt-0 space-y-[34px] lg:col-span-4 lg:sticky lg:top-20 lg:self-start lg:max-h-[calc(100vh-6rem)] lg:overflow-y-auto">
+            <div className="px-4 sm:px-5 md:px-8 lg:px-0">
+              <StatsStrip
+                items={[
+                  {
+                    value: completedSits.length,
+                    label: completedSits.length > 1 ? "Gardes" : "Garde",
+                  },
+                  ...(avgRating > 0 && reviews.length > 0
+                    ? [{
+                        value: `${avgRating} ★ (${reviews.length} avis)`,
+                        label: "Note",
+                        highlight: true,
+                        to: user?.id ? `/gardiens/${user.id}?tab=proprio#avis` : undefined,
+                      }]
+                    : []),
+                  ...(activeSits.length > 0
+                    ? [{
+                        value: activeSits.length,
+                        label: activeSits.length > 1 ? "Annonces" : "Annonce",
+                        to: "/sits",
+                      }]
+                    : []),
+                  ...(trustedSitterCount > 0
+                    ? [{
+                        value: trustedSitterCount,
+                        label: "Récurrents",
+                        tooltip: "Nombre de gardiens ayant déjà réalisé au moins 2 gardes chez vous.",
+                      }]
+                    : []),
+                ]}
+              />
+            </div>
 
-        {user?.id && userBadges && userBadges.length > 0 && (
-          <div className="rounded-2xl bg-card border border-border px-4 py-3">
-            <div className="flex items-center justify-between gap-3 mb-3">
-              <div>
-                <p className="text-[10px] uppercase tracking-[2px] text-muted-foreground font-sans font-semibold">
-                  Reconnaissance
-                </p>
-                <p className="text-sm font-semibold text-foreground">
-                  {userBadges.length} badge{userBadges.length > 1 ? "s" : ""} débloqué{userBadges.length > 1 ? "s" : ""}
-                </p>
+            <div className="px-4 sm:px-5 md:px-8 lg:px-0">
+              <NearbyOwnerSittersCard />
+            </div>
+
+            {showEmergencyHelp && (
+              <div className="px-4 sm:px-5 md:px-8 lg:px-0">
+                <NearbyEmergencySitters />
               </div>
+            )}
+
+            <div className="px-4 sm:px-5 md:px-8 lg:px-0 mb-6">
               <Link
-                to={`/gardiens/${user.id}#confiance`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-xs text-primary font-semibold hover:underline shrink-0"
-                aria-label="Voir tous les badges sur mon profil public (nouvel onglet)"
+                to="/mon-abonnement#parrainage"
+                className="block rounded-2xl border border-border bg-gradient-to-br from-accent/10 to-background p-4 hover:border-primary/40 transition-colors group"
               >
-                Voir tout →
+                <p className="text-[10px] uppercase tracking-[2px] text-muted-foreground font-sans font-semibold mb-1">
+                  Parrainage
+                </p>
+                <p className="text-sm font-heading font-semibold text-foreground leading-snug">
+                  Invitez un proche
+                </p>
+                <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
+                  Son inscription reste sans engagement et vous développez l'entraide autour de chez vous.
+                </p>
+                <span className="inline-flex items-center gap-1 text-xs font-semibold text-primary mt-2 group-hover:translate-x-0.5 transition-transform">
+                  Partager mon lien →
+                </span>
               </Link>
             </div>
-            <BadgeRow badges={userBadges} size="compact" maxVisible={8} />
-          </div>
-        )}
-
-        <details className="group rounded-2xl bg-card border border-border overflow-hidden">
-          <summary className="cursor-pointer list-none px-4 py-3 flex items-center justify-between hover:bg-muted/30 transition-colors">
-            <div>
-              <p className="text-[10px] uppercase tracking-[2px] text-muted-foreground font-sans font-semibold">
-                Ressources
-              </p>
-              <p className="text-sm font-semibold text-foreground">
-                Conseils & guides pour propriétaires
-              </p>
-            </div>
-            <span className="text-xs text-muted-foreground group-open:rotate-180 transition-transform" aria-hidden="true">▾</span>
-          </summary>
-          <div className="px-4 pb-4 space-y-3">
-            <RoleActivationBanner userRole={user?.role || "owner"} />
-            {(level === 4 || level === "3B") && <LiveSignalStrip secondarySignal={localSignal} />}
-            <ContextualResources annoncesCount={sits.length} gardesCount={completedSits.length} loading={loading} />
-          </div>
-        </details>
+          </aside>
+        </div>
       </div>
 
-      {/* Toggle « Réduire » mobile : visible uniquement quand l'espace est déployé */}
-      {showAllMobile && (
-        <div className="px-5 md:hidden">
-          <button
-            type="button"
-            onClick={() => {
-              setShowAllMobile(false);
-              if (typeof window !== "undefined") window.scrollTo({ top: 0, behavior: "smooth" });
-            }}
-            className="w-full flex items-center justify-center gap-2 py-3 rounded-xl border border-border bg-card text-sm font-semibold text-muted-foreground hover:bg-muted/40 transition-colors"
-            aria-expanded={true}
-            aria-controls="owner-dash-extra"
-          >
-            Réduire l'espace
-            <ChevronUp className="h-4 w-4" aria-hidden="true" />
-          </button>
-        </div>
-      )}
-
       {/* ═══ CTA sticky mobile ═══ */}
-
-      {/* Empty state mobile : le hero CTA est hidden md:inline-flex → on relaie ici. */}
       {pendingAppCount > 0 ? (
         <MobileStickyCTA
           label="Voir les candidatures"
@@ -859,4 +417,3 @@ const OwnerDashboard = () => {
 };
 
 export default OwnerDashboard;
-
