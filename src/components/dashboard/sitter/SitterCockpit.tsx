@@ -79,14 +79,14 @@ const SitterCockpit = ({
           }}
         />
         {/* Aquarelle signature Guardiens : scène "matin du gardien",
-            posée en douceur dans le coin droit derrière le contenu.
+            posée en douceur dans le coin bas droit de la couverture.
             Décorative (aria-hidden, alt vide), taille contenue, masque
             radial via .illustration-blend qui fond les bords dans le papier.
-            Le texte reste à gauche : jamais d'aquarelle sous le titre. */}
+            Réduite à 150 px entre 768 px et 1100 px pour ne jamais croiser
+            les pilules de contrôle ni le texte. */}
         <div
           aria-hidden="true"
-          className="illustration-wrapper pointer-events-none absolute top-[-14px] right-[-18px] hidden sm:block"
-          style={{ width: 180, height: 180 }}
+          className="illustration-wrapper pointer-events-none absolute bottom-[-12px] right-[-16px] hidden sm:block w-[150px] h-[150px] min-[1100px]:w-[180px] min-[1100px]:h-[180px]"
         >
           <img
             src={cockpitMorning}
