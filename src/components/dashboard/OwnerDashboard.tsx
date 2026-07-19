@@ -71,6 +71,11 @@ const OwnerDashboard = () => {
   const { data: nearbyOwnerSittersData } = useNearbyOwnerSitters(user?.id);
   const { data: nearbyHelpersData } = useNearbyHelpers(user?.id);
   const nearbyHelpersCount = nearbyHelpersData?.helpers?.length ?? 0;
+  const { mission: firstNearbyMission } = useFirstNearbyMission(user?.id);
+  const myActiveMission = useMemo(
+    () => myMissions.find((m: any) => m.status !== "completed" && m.status !== "cancelled") ?? null,
+    [myMissions],
+  );
 
   /* ── UI state ── */
   const [showOnboarding, setShowOnboarding] = useState(false);
