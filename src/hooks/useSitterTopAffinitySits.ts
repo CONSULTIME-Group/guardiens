@@ -37,6 +37,13 @@ export type PoolScope = "dept" | "region" | "country" | "none";
 interface Result {
   topSits: AffinitySitCard[];
   fallbackSits: AffinitySitCard[];
+  /**
+   * Vague 9 : une annonce "altérité" hors topSits, choisie pour la
+   * découverte (espèce absente de l'expérience du gardien ou ville
+   * différente). Jamais scorée à l'affichage. `null` si le pool ne
+   * fournit pas de candidat honnête.
+   */
+  discoverySit: AffinitySitCard | null;
   hasMinimumPool: boolean;
   hasPostalCode: boolean;
   profileIncomplete: boolean;
