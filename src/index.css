@@ -105,6 +105,15 @@
     /* Papier sketchbook (hero profils gardiens) — légèrement plus chaud et soutenu que --background */
     --hero-paper: 38 58% 93%;
 
+    /* Vague 15 : tokens thème-conscients spécifiques dashboards.
+       Piste du ring d'affinité (signature or : le dégradé pin→olive→or ne change JAMAIS,
+       seule la piste s'adapte pour ne pas éclater en dark). */
+    --affinity-ring-track: 36 33% 90%;
+    /* Placeholders photos annonces sans couverture — pastel vert / sable en light,
+       assombris en dark pour ne pas créer un pavé pastel dans un écran sombre. */
+    --photo-placeholder-green: linear-gradient(160deg, #cfe0d6, #a9c6b6 60%, #8bae9b);
+    --photo-placeholder-sand: linear-gradient(160deg, #e8ddce, #d9c7ae 60%, #c4ad90);
+
     /* Warning (utilisé pour les bandeaux d'avertissement non bloquants : spam, conseils mobiles, etc.) */
     --warning: 38 92% 50%;
     --warning-foreground: 30 70% 20%;
@@ -213,6 +222,11 @@
 
     /* Papier sketchbook en dark mode — teinte chaude suffisamment soutenue pour le contraste */
     --hero-paper: 40 15% 18%;
+
+    /* Vague 15 : overrides dark pour tokens dashboards. */
+    --affinity-ring-track: 160 8% 22%;
+    --photo-placeholder-green: linear-gradient(160deg, hsl(153 22% 14%), hsl(153 18% 11%) 60%, hsl(153 15% 9%));
+    --photo-placeholder-sand: linear-gradient(160deg, hsl(30 18% 16%), hsl(30 15% 13%) 60%, hsl(30 12% 10%));
   }
 }
 
@@ -640,9 +654,11 @@
     transform: translateY(-1px);
   }
   /* Couleur papier visible sous le clip — prend toute la silhouette déchirée
-     pour éviter qu'un fond blanc ne « déborde » sur le côté droit. */
+     pour éviter qu'un fond blanc ne « déborde » sur le côté droit.
+     Utilise le token --hero-paper pour rester cohérent avec les hero de profils
+     et s'adapter automatiquement en dark mode (vague 15). */
   .notebook-card-paper {
-    background-color: #FBF6EC;
+    background-color: hsl(var(--hero-paper));
   }
   /* Petit liseré ambré le long de la déchirure pour matérialiser l'épaisseur du papier. */
   .notebook-card-edge {
