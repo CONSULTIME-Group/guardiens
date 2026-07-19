@@ -20,7 +20,8 @@ import OwnerCockpit from "./owner/OwnerCockpit";
 import OwnerStarSection from "./owner/OwnerStarSection";
 import OwnerAnnonceSection from "./owner/OwnerAnnonceSection";
 import OwnerFamilySection from "./owner/OwnerFamilySection";
-import OwnerEntraideSection from "./owner/OwnerEntraideSection";
+import SitterEntraideSection from "./sitter/SitterEntraideSection";
+import { useFirstNearbyMission } from "@/hooks/useFirstNearbyMission";
 import NearbySittersSection from "./owner/NearbySittersSection";
 import ReadingsSection from "./shared/ReadingsSection";
 
