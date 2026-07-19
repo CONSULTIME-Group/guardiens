@@ -745,7 +745,10 @@ const Messages = () => {
             aria-label="Historique des messages"
           >
             {(activeConv.sit?.status === "confirmed" || activeConv.sit?.status === "in_progress") && activeConv.sit?.property_id && (
-              <HouseGuideBlock propertyId={activeConv.sit.property_id} />
+              <HouseGuideBlock
+                propertyId={activeConv.sit.property_id}
+                ownerFirstName={activeConv.owner_id === user?.id ? null : (activeConv.other_user?.first_name ?? null)}
+              />
             )}
 
             <div className="p-4 space-y-1" data-alma-safe-area>
