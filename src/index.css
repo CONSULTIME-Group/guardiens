@@ -102,8 +102,8 @@
     --badge-success-foreground: 153 50% 25%;
     --sitter-hero: 153 50% 18%;
     --toggle-active: 153 55% 55%;
-    /* Papier sketchbook (hero profils gardiens) — équivalent #FBF6EC */
-    --hero-paper: 40 60% 95%;
+    /* Papier sketchbook (hero profils gardiens) — légèrement plus chaud et soutenu que --background */
+    --hero-paper: 38 58% 93%;
 
     /* Warning (utilisé pour les bandeaux d'avertissement non bloquants : spam, conseils mobiles, etc.) */
     --warning: 38 92% 50%;
@@ -210,6 +210,9 @@
     --founder-foreground: 45 90% 92%;
     --founder-soft: 38 30% 18%;
     --founder-border: 38 50% 32%;
+
+    /* Papier sketchbook en dark mode — teinte chaude suffisamment soutenue pour le contraste */
+    --hero-paper: 40 15% 18%;
   }
 }
 
