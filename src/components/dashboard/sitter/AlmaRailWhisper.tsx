@@ -8,11 +8,12 @@ import AlmaAvatar from "@/components/ai/alma/AlmaAvatar";
 interface AlmaRailWhisperProps {
   profileCompletion: number;
   isAvailable: boolean;
+  checklistVisible?: boolean;
 }
 
-const AlmaRailWhisper = ({ profileCompletion, isAvailable }: AlmaRailWhisperProps) => {
+const AlmaRailWhisper = ({ profileCompletion, isAvailable, checklistVisible = false }: AlmaRailWhisperProps) => {
   let phrase: string;
-  if (profileCompletion < 100) {
+  if (!checklistVisible && profileCompletion < 100) {
     phrase = "Quelques touches à votre profil, et les propriétaires vous remarquent davantage.";
   } else if (!isAvailable) {
     phrase = "Dites que vous êtes disponible, et les bonnes gardes viennent à vous.";
