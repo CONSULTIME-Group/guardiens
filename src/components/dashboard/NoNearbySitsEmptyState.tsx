@@ -134,9 +134,20 @@ const NoNearbySitsEmptyState = ({
       className="px-4 sm:px-5 md:px-8 mb-6 md:mb-8"
     >
 
-      <div className="rounded-2xl border border-border bg-card p-6 sm:p-8 text-center">
-        <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-accent/10">
-          <Icon className="h-7 w-7 text-accent" aria-hidden="true" />
+      <div className="notebook-card relative p-6 sm:p-8 text-center">
+        <div className="notebook-card-paper absolute inset-0" aria-hidden="true" />
+        <div className="relative">
+        <div
+          className="illustration-blend animate-painted-reveal mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full"
+          style={{
+            backgroundImage: [
+              "radial-gradient(ellipse at 30% 30%, hsl(var(--primary) / 0.32), transparent 62%)",
+              "radial-gradient(ellipse at 70% 62%, hsl(var(--secondary) / 0.36), transparent 66%)",
+              "radial-gradient(ellipse at 50% 82%, hsl(var(--founder) / 0.26), transparent 72%)",
+            ].join(", "),
+          }}
+        >
+          <Icon className="h-7 w-7 text-foreground/70" aria-hidden="true" />
         </div>
 
         <p className="font-heading italic text-sm text-accent mb-2">
