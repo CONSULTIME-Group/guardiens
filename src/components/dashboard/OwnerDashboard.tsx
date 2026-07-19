@@ -21,6 +21,9 @@ import OwnerStarSection from "./owner/OwnerStarSection";
 import OwnerAnnonceSection from "./owner/OwnerAnnonceSection";
 import OwnerFamilySection from "./owner/OwnerFamilySection";
 import OwnerEntraideSection from "./owner/OwnerEntraideSection";
+import NearbySittersSection from "./owner/NearbySittersSection";
+import ReadingsSection from "./shared/ReadingsSection";
+
 import MobileStickyCTA from "./owner/MobileStickyCTA";
 import OwnerFirstNBAGardiens from "./OwnerFirstNBAGardiens";
 
