@@ -6,26 +6,42 @@
 import AlmaAvatar from "@/components/ai/alma/AlmaAvatar";
 
 interface AlmaRailWhisperProps {
-  profileCompletion: number;
-  isAvailable: boolean;
+  profileCompletion?: number;
+  isAvailable?: boolean;
   checklistVisible?: boolean;
-  /** "newSitter" : phrase de bienvenue tant que les 3 touches de la
-   * SitterOpeningCard ne sont pas faites (openingCardVisible=true).
-   * "confirmed" (défaut) : logique existante. */
-  variant?: "confirmed" | "newSitter";
-  /** Vrai tant que SitterOpeningCard est encore montée (< 3 étapes faites). */
+  variant?: "confirmed" | "newSitter" | "owner";
   openingCardVisible?: boolean;
+  /** Contexte propriétaire (variant="owner") */
+  ownerState?: {
+    ongoingSit: boolean;
+    ongoingSitterFirstName?: string | null;
+    pendingApps: boolean;
+    noActiveSit: boolean;
+  };
 }
 
 const AlmaRailWhisper = ({
-  profileCompletion,
-  isAvailable,
+  profileCompletion = 100,
+  isAvailable = true,
   checklistVisible = false,
   variant = "confirmed",
   openingCardVisible = false,
+  ownerState,
 }: AlmaRailWhisperProps) => {
   let phrase: string;
-  if (variant === "newSitter" && openingCardVisible) {
+  if (variant === "owner" && ownerState) {
+    if (ownerState.ongoingSit) {
+      phrase = ownerState.ongoingSitterFirstName
+        ? `Tout se passe bien chez vous. ${ownerState.ongoingSitterFirstName} veille sur la maison.`
+        : "Tout se passe bien chez vous, votre gardien veille sur la maison.";
+    } else if (ownerState.pendingApps) {
+      phrase = "Prenez le temps de lire chaque candidature, la bonne rencontre se sent vite.";
+    } else if (ownerState.noActiveSit) {
+      phrase = "Quand vous serez prêt à partir, je vous aide à raconter votre maison.";
+    } else {
+      phrase = "Votre annonce vit. Les bonnes personnes finissent toujours par se croiser.";
+    }
+  } else if (variant === "newSitter" && openingCardVisible) {
     phrase =
       "Bienvenue chez vous. Une photo, quelques mots, et je vous présente les maisons d'ici.";
   } else if (!checklistVisible && profileCompletion < 100) {
