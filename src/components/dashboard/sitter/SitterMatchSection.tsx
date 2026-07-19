@@ -461,9 +461,31 @@ const DiscoveryRow = ({ sit }: { sit: AffinitySitCard }) => {
 /* -------------------------------------------------------------------------- */
 
 const SitterMatchSection = ({ topSits, fallbackSits, discoverySit, scopeUsed, isLoading }: Props) => {
+  const sectionRef = useRef<HTMLElement | null>(null);
+  const usableScored = topSits.filter((s) => s.affinity);
+  const hasScored = usableScored.length > 0;
+  const primary = hasScored ? usableScored[0] : (fallbackSits[0] ?? null);
+  const impressionKey = primary ? `sitter_star:${primary.id}` : null;
+  const scoreForTrack = primary?.affinity?.score ?? null;
+
+  useImpressionOnce(sectionRef, impressionKey, () => {
+    void trackEvent("dashboard_star_seen", {
+      source: "sitter_dashboard",
+      metadata: { surface: "sitter_dashboard", variant: "match", scope: scopeUsed, score: scoreForTrack },
+    });
+  });
+
+  const onCtaClick = () =>
+    void trackEvent("dashboard_star_cta_clicked", {
+      source: "sitter_dashboard",
+      metadata: { surface: "sitter_dashboard", variant: "match", scope: scopeUsed, score: scoreForTrack, sit_id: primary?.id ?? null },
+    });
+
   if (isLoading) {
     return (
       <section
+        ref={sectionRef}
+        data-dashboard-star="sitter"
         aria-label="Rencontre suggérée"
         className="px-4 sm:px-5 md:px-8 lg:px-0"
       >
@@ -477,10 +499,7 @@ const SitterMatchSection = ({ topSits, fallbackSits, discoverySit, scopeUsed, is
     );
   }
 
-  const usableScored = topSits.filter((s) => s.affinity);
   const usableFallback = fallbackSits;
-  const hasScored = usableScored.length > 0;
-  const primary = hasScored ? usableScored[0] : null;
   const rest = hasScored ? usableScored.slice(1, 3) : usableFallback.slice(0, 3);
   const rowsShowScore = hasScored;
 
@@ -488,6 +507,8 @@ const SitterMatchSection = ({ topSits, fallbackSits, discoverySit, scopeUsed, is
 
   return (
     <section
+      ref={sectionRef}
+      data-dashboard-star="sitter"
       aria-label="Rencontre suggérée"
       className="px-4 sm:px-5 md:px-8 lg:px-0"
     >
@@ -501,7 +522,7 @@ const SitterMatchSection = ({ topSits, fallbackSits, discoverySit, scopeUsed, is
         <EmptyState />
       ) : (
         <>
-          {primary && <StarCard sit={primary} />}
+          {primary && <StarCard sit={primary} onCtaClick={onCtaClick} />}
 
           {(rest.length > 0 || discoverySit) && (
             <div style={{ marginTop: "52px" }}>
