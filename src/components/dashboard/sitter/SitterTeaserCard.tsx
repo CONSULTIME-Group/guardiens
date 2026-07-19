@@ -203,6 +203,7 @@ const TeaserCard = ({ sit, onCtaClick }: { sit: AffinitySitCard; onCtaClick?: ()
         <div className="mt-[22px]">
           <Link
             to={`/sits/${sit.id}`}
+            onClick={onCtaClick}
             className="inline-flex items-center justify-center rounded-full border border-border bg-card text-foreground hover:bg-muted/40 transition-colors"
             style={{
               padding: "10px 18px",
