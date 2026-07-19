@@ -309,10 +309,12 @@ const ApplicationsStar = ({
   pendingApps,
   sitterProfiles,
   sitterAffinityProfiles,
+  onCtaClick,
 }: {
   pendingApps: AppRow[];
   sitterProfiles: Record<string, SitterInfo>;
   sitterAffinityProfiles?: Record<string, AffinitySitterInput>;
+  onCtaClick?: () => void;
 }) => {
   const { owner } = useViewerOwnerForAffinity();
 
