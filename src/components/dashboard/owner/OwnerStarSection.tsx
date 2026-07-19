@@ -369,7 +369,7 @@ const ApplicationsStar = ({
 /* ================================================================== */
 /*  C. Brouillon en cours                                             */
 /* ================================================================== */
-const DraftStar = ({ draft }: { draft: SitRow }) => {
+const DraftStar = ({ draft, onCtaClick }: { draft: SitRow; onCtaClick?: () => void }) => {
   const dates = formatDateRange(draft.start_date, draft.end_date);
   return (
     <>
