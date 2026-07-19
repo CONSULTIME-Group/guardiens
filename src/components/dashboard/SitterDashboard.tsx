@@ -429,14 +429,13 @@ const SitterDashboard = () => {
 
               {ChecklistBlock}
 
-              {/* VAGUE 3 — invitation entraide calme */}
+              {/* VAGUE 20 — entraide bidimensionnelle */}
               <div className="">
                 <SitterEntraideSection
                   firstNearbyMission={firstNearbyMission}
-                  eyebrow="L'entraide, tout près"
-                  title="Un coup de main à donner."
+                  myActiveMission={myActiveMission}
+                  nearbyHelpersCount={nearbyHelpersCount}
                 />
-
               </div>
 
               {/* VAGUE 16 — lectures et guides */}
