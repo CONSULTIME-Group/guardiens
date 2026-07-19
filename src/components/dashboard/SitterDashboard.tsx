@@ -469,142 +469,149 @@ const SitterDashboard = () => {
           → Activation → Opportunités → Profil (accordéon). */}
       <div className="min-w-0">
         {isNewSitter ? (
-          <div className="mx-auto w-full max-w-4xl space-y-8">
-            {/* ═══ New-user path : completion-first quand le profil est incomplet ═══ */}
-            {!allChecklistDone && ChecklistBlock}
+          <div className="mx-auto w-full max-w-4xl lg:max-w-6xl lg:grid lg:grid-cols-12 lg:gap-6 lg:items-start">
+            {/* ═══ FLUX principal (gauche) ═══ */}
+            <div className="min-w-0 space-y-8 lg:col-span-8">
+              {/* completion-first quand le profil est incomplet */}
+              {!allChecklistDone && ChecklistBlock}
 
-            {/* ═══ New-user path : NBA affinité dominante, pas de cockpit/KPI vides ═══ */}
-            <div className="min-w-0">
-              {nbaLoading ? (
-                <SitterFirstNBASkeleton />
-              ) : hasMinimumPool && hasPostalCode ? (
-                <SitterFirstNBA sits={topSits} />
-              ) : fallbackSits.length > 0 && hasPostalCode && !profileIncomplete ? (
-                <SitterFirstNBA
-                  sits={fallbackSits}
-                  mode="fallback"
-                  scopeLabel={
-                    scopeUsed === "dept"
-                      ? "dans votre département"
-                      : scopeUsed === "region"
-                        ? "dans votre région"
-                        : "sur Guardiens"
-                  }
-                />
-              ) : (
-                <NoNearbySitsEmptyState
-                  totalPublishedSits={totalPublished}
-                  postalCode={postalCode}
-                  variant={profileIncomplete ? "profile_incomplete" : "no_nearby"}
-                />
-              )}
-            </div>
-
-            {/* Bannière accès (garde le contexte tarif/onboarding) */}
-            <div className="px-4 sm:px-5 md:px-8">
-              {!(level === 4 || level === "3B")
-                ? <AccessGateBanner level={level} profileCompletion={accessProfileCompletion} context="guard" />
-                : <FreePeriodBanner />}
-            </div>
-
-            {/* Pouls de la communauté : chiffres réels et vivants. */}
-            <div className="px-4 sm:px-5 md:px-8">
-              <CommunityPulseBanner userId={user?.id} />
-            </div>
-
-            <div className="px-4 sm:px-5 md:px-8">
-              <NearbyHelpersCarousel hideHeader />
-            </div>
-            <div className="px-4 sm:px-5 md:px-8">
-              {ConseilsDiscoveryCard}
-            </div>
-            <div className="px-4 sm:px-5 md:px-8">
-              <EmailDigestCard />
-            </div>
-            <div className="px-4 sm:px-5 md:px-8 mb-6">
-              {buildSecondaryAccordion()}
-            </div>
-          </div>
-        ) : (
-          <div className="mx-auto w-full max-w-4xl space-y-8">
-            {/* COCKPIT */}
-            <div className="min-w-0">
-              <SitterCockpit
-                userId={user?.id}
-                firstName={user?.firstName}
-                avatarUrl={avatarUrl}
-                isFounder={user?.isFounder}
-                isAvailable={isAvailable}
-                onToggleAvailability={toggleAvailability}
-                nextGuard={nextGuard}
-                profileCompletion={profileCompletion}
-                postalCode={postalCode}
-                nearbyListings={nearbyListings}
-                competencesCount={competencesCount}
-                interestsCount={interestsCount}
-              />
-            </div>
-
-            {(nextGuardError || nearbyError) && (
-              <div className="px-4 sm:px-5 md:px-8 space-y-2">
-                {nextGuardError && (
-                  <DashboardSectionState
-                    variant="error"
-                    eyebrow="Prochaine garde"
-                    description={nextGuardError}
-                    onRetry={() => window.location.reload()}
+              {/* NBA affinité dominante */}
+              <div className="min-w-0">
+                {nbaLoading ? (
+                  <SitterFirstNBASkeleton />
+                ) : hasMinimumPool && hasPostalCode ? (
+                  <SitterFirstNBA sits={topSits} />
+                ) : fallbackSits.length > 0 && hasPostalCode && !profileIncomplete ? (
+                  <SitterFirstNBA
+                    sits={fallbackSits}
+                    mode="fallback"
+                    scopeLabel={
+                      scopeUsed === "dept"
+                        ? "dans votre département"
+                        : scopeUsed === "region"
+                          ? "dans votre région"
+                          : "sur Guardiens"
+                    }
                   />
-                )}
-                {nearbyError && (
-                  <DashboardSectionState
-                    variant="error"
-                    eyebrow="Annonces à proximité"
-                    description={nearbyError}
-                    onRetry={() => window.location.reload()}
+                ) : (
+                  <NoNearbySitsEmptyState
+                    totalPublishedSits={totalPublished}
+                    postalCode={postalCode}
+                    variant={profileIncomplete ? "profile_incomplete" : "no_nearby"}
                   />
                 )}
               </div>
-            )}
 
-            <div className="px-4 sm:px-5 md:px-8">
-              <SitterActivityPanel
-                isAvailable={isAvailable}
-                profileCompletion={profileCompletion}
-                nextGuard={nextGuard}
-                unreadCount={unreadCount}
-                pendingAppsCount={pendingAppsCount}
-                nearbyListings={nearbyListings}
-                completedSits={completedSits ?? 0}
-              />
+              <div className="px-4 sm:px-5 md:px-8 lg:px-0">
+                <NearbyHelpersCarousel hideHeader />
+              </div>
+              <div className="px-4 sm:px-5 md:px-8 lg:px-0">
+                {ConseilsDiscoveryCard}
+              </div>
             </div>
 
-            {/* Pouls de la communauté : chiffres réels et vivants. */}
-            <div className="px-4 sm:px-5 md:px-8">
-              <CommunityPulseBanner userId={user?.id} />
-            </div>
-
-            {!nextGuard && (
-              <div className="px-4 sm:px-5 md:px-8">
+            {/* ═══ RAIL collant (droite) ═══ */}
+            <aside className="mt-8 lg:mt-0 space-y-8 lg:col-span-4 lg:sticky lg:top-20 lg:self-start lg:max-h-[calc(100vh-6rem)] lg:overflow-y-auto">
+              <div className="px-4 sm:px-5 md:px-8 lg:px-0">
+                <CommunityPulseBanner userId={user?.id} />
+              </div>
+              <div className="px-4 sm:px-5 md:px-8 lg:px-0">
                 {!(level === 4 || level === "3B")
                   ? <AccessGateBanner level={level} profileCompletion={accessProfileCompletion} context="guard" />
                   : <FreePeriodBanner />}
               </div>
-            )}
+              <div className="px-4 sm:px-5 md:px-8 lg:px-0">
+                <EmailDigestCard />
+              </div>
+              <div className="px-4 sm:px-5 md:px-8 lg:px-0 mb-6">
+                {buildSecondaryAccordion()}
+              </div>
+            </aside>
+          </div>
+        ) : (
+          <div className="mx-auto w-full max-w-4xl lg:max-w-6xl lg:grid lg:grid-cols-12 lg:gap-6 lg:items-start">
+            {/* ═══ FLUX principal (gauche) ═══ */}
+            <div className="min-w-0 space-y-8 lg:col-span-8">
+              {/* COCKPIT */}
+              <div className="min-w-0">
+                <SitterCockpit
+                  userId={user?.id}
+                  firstName={user?.firstName}
+                  avatarUrl={avatarUrl}
+                  isFounder={user?.isFounder}
+                  isAvailable={isAvailable}
+                  onToggleAvailability={toggleAvailability}
+                  nextGuard={nextGuard}
+                  profileCompletion={profileCompletion}
+                  postalCode={postalCode}
+                  nearbyListings={nearbyListings}
+                  competencesCount={competencesCount}
+                  interestsCount={interestsCount}
+                />
+              </div>
 
-            {ChecklistBlock}
+              {(nextGuardError || nearbyError) && (
+                <div className="px-4 sm:px-5 md:px-8 lg:px-0 space-y-2">
+                  {nextGuardError && (
+                    <DashboardSectionState
+                      variant="error"
+                      eyebrow="Prochaine garde"
+                      description={nextGuardError}
+                      onRetry={() => window.location.reload()}
+                    />
+                  )}
+                  {nearbyError && (
+                    <DashboardSectionState
+                      variant="error"
+                      eyebrow="Annonces à proximité"
+                      description={nearbyError}
+                      onRetry={() => window.location.reload()}
+                    />
+                  )}
+                </div>
+              )}
 
-            <div className="px-4 sm:px-5 md:px-8">
-              {DiscoverySections}
+              <div className="px-4 sm:px-5 md:px-8 lg:px-0">
+                <SitterActivityPanel
+                  isAvailable={isAvailable}
+                  profileCompletion={profileCompletion}
+                  nextGuard={nextGuard}
+                  unreadCount={unreadCount}
+                  pendingAppsCount={pendingAppsCount}
+                  nearbyListings={nearbyListings}
+                  completedSits={completedSits ?? 0}
+                />
+              </div>
+
+              {ChecklistBlock}
+
+              <div className="px-4 sm:px-5 md:px-8 lg:px-0">
+                {DiscoverySections}
+              </div>
+              <div className="px-4 sm:px-5 md:px-8 lg:px-0">
+                {ConseilsDiscoveryCard}
+              </div>
             </div>
-            <div className="px-4 sm:px-5 md:px-8">
-              {ConseilsDiscoveryCard}
-            </div>
-            <div className="px-4 sm:px-5 md:px-8">
-              <EmailDigestCard />
-            </div>
-            <div className="px-4 sm:px-5 md:px-8 mb-6">
-              {buildSecondaryAccordion()}
-            </div>
+
+            {/* ═══ RAIL collant (droite) ═══ */}
+            <aside className="mt-8 lg:mt-0 space-y-8 lg:col-span-4 lg:sticky lg:top-20 lg:self-start lg:max-h-[calc(100vh-6rem)] lg:overflow-y-auto">
+              <div className="px-4 sm:px-5 md:px-8 lg:px-0">
+                <CommunityPulseBanner userId={user?.id} />
+              </div>
+              {!nextGuard && (
+                <div className="px-4 sm:px-5 md:px-8 lg:px-0">
+                  {!(level === 4 || level === "3B")
+                    ? <AccessGateBanner level={level} profileCompletion={accessProfileCompletion} context="guard" />
+                    : <FreePeriodBanner />}
+                </div>
+              )}
+              <div className="px-4 sm:px-5 md:px-8 lg:px-0">
+                <EmailDigestCard />
+              </div>
+              <div className="px-4 sm:px-5 md:px-8 lg:px-0 mb-6">
+                {buildSecondaryAccordion()}
+              </div>
+            </aside>
           </div>
         )}
       </div>
