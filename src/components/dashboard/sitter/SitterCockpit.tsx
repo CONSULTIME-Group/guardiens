@@ -53,8 +53,26 @@ const SitterCockpit = ({
   return (
     <section
       aria-label="Espace gardien, synthèse"
-      className="px-4 sm:px-5 md:px-8 pt-4 sm:pt-6 pb-2 space-y-4"
+      className="px-4 sm:px-5 md:px-8 pt-4 sm:pt-6 pb-2"
     >
+      {/* Panneau papier : couverture de carnet. Fond hero-paper, lavis
+          aquarelle dans deux coins (couches décoratives aria-hidden),
+          bord droit déchiré, ombre douce pour le détacher du fond crème. */}
+      <div className="notebook-card relative p-5 pr-8 sm:p-7 sm:pr-10">
+        <div className="notebook-card-paper absolute inset-0" aria-hidden="true" />
+        {/* Lavis aquarelle discret : deux washes très doux, pointer-events-none. */}
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0 opacity-70"
+          style={{
+            backgroundImage: [
+              "radial-gradient(circle at 92% 8%, hsl(var(--primary) / 0.16), transparent 42%)",
+              "radial-gradient(circle at 6% 96%, hsl(var(--secondary) / 0.18), transparent 46%)",
+              "radial-gradient(circle at 78% 88%, hsl(var(--founder) / 0.12), transparent 40%)",
+            ].join(", "),
+          }}
+        />
+        <div className="relative space-y-4">
       {/* Header minimal */}
       <div className="flex items-center justify-between gap-3 flex-wrap">
         <div className="flex items-center gap-3 min-w-0 flex-1">
