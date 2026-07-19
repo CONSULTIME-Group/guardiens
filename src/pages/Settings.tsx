@@ -797,7 +797,7 @@ const EmergencySection = ({ user }: any) => {
     (async () => {
       const [emRes, revRes]: any[] = await Promise.all([
         (supabase as any)
-          .from("sitter_emergency_profiles")
+          .from("emergency_sitter_profiles")
           .select("user_id")
           .eq("user_id", user.id)
           .maybeSingle(),
