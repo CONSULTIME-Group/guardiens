@@ -53,7 +53,7 @@ describe("SitterFirstNBA", () => {
         <SitterFirstNBA sits={sits} />
       </MemoryRouter>,
     );
-    expect(screen.getByText(/3 annonces qui vous correspondent/i)).toBeInTheDocument();
+    expect(screen.getByText(/3 rencontres faites pour vous/i)).toBeInTheDocument();
     expect(screen.getAllByRole("heading", { level: 3 })).toHaveLength(3);
     expect(screen.getByText(/Voir toutes les annonces/i)).toBeInTheDocument();
   });
