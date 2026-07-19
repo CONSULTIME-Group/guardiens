@@ -135,14 +135,15 @@ const SitterCockpit = ({
                 style={{ fontSize: "28px" }}
               >
                 <span className="sm:hidden">
-                  Bonjour{displayName ? `, ${displayName}` : ""}
+                  {greeting}{displayName ? `, ${displayName}` : ""}
                 </span>
                 <span
                   className="hidden sm:inline"
                   style={{ fontSize: "32px" }}
                 >
-                  Bonjour{displayName ? `, ${displayName}` : ""}
+                  {greeting}{displayName ? `, ${displayName}` : ""}
                 </span>
+
               </h1>
               <p
                 className="font-sans text-muted-foreground mt-[8px]"
