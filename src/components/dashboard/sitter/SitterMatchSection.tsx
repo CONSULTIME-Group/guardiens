@@ -125,7 +125,7 @@ const AffinityRing = ({ score }: { score: number }) => {
 /*  En-tête signature : trait + eyebrow + titre + sous-titre                  */
 /* -------------------------------------------------------------------------- */
 
-const SectionHeader = ({
+export const SectionHeader = ({
   eyebrow,
   title,
   subtitle,
