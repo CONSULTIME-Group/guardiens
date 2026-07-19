@@ -571,7 +571,7 @@ const Messages = () => {
                 </p>
               )}
               {hasUnread && (
-                <span className="bg-destructive text-destructive-foreground text-[10px] rounded-full min-w-[18px] h-[18px] flex items-center justify-center px-1 shrink-0 font-bold">
+                <span className="bg-primary text-primary-foreground text-[10px] rounded-full min-w-[18px] h-[18px] flex items-center justify-center px-1 shrink-0 font-bold">
                   {conv.unread_count}
                 </span>
               )}
@@ -598,7 +598,7 @@ const Messages = () => {
         <span className="truncate flex-1">{title}</span>
         {unreadCount > 0 && (
           <span
-            className="bg-destructive text-destructive-foreground rounded-full w-4 h-4 text-[10px] flex items-center justify-center font-bold shrink-0"
+            className="bg-primary text-primary-foreground rounded-full w-4 h-4 text-[10px] flex items-center justify-center font-bold shrink-0"
             aria-label={`${unreadCount} non lu${unreadCount > 1 ? "s" : ""}`}
           >
             {unreadCount}
