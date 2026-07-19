@@ -703,7 +703,12 @@ const SitterDashboard = () => {
 
               {/* VAGUE 3 — invitation entraide calme */}
               <div className="px-4 sm:px-5 md:px-8 lg:px-0">
-                {EntraideSection}
+                <SitterEntraideSection
+                  firstNearbyMission={firstNearbyMission}
+                  eyebrow="L'entraide, tout près"
+                  title="Un coup de main à donner."
+                />
+
               </div>
             </div>
 
