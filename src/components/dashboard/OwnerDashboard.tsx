@@ -310,11 +310,18 @@ const OwnerDashboard = () => {
             {/* 4. VOTRE FAMILLE */}
             <OwnerFamilySection pets={pets} getNextSitForPet={getNextSitForPet} />
 
+            {/* 4bis. LES GENS DU COIN (vague 16) */}
+            <NearbySittersSection />
+
             {/* 5. ENTRAIDE */}
             <OwnerEntraideSection
               myMissions={myMissions}
               nearbyHelpersCount={nearbyHelpersCount}
             />
+
+            {/* 6. LECTURES ET GUIDES (vague 16) */}
+            <ReadingsSection role="owner" />
+
 
             {/* Historique candidatures : accordéon discret tout en bas */}
             {hasReadApps && (
