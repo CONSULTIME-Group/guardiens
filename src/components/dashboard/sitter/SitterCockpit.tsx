@@ -1,5 +1,7 @@
 import { Link } from "react-router-dom";
 import { Eye, Pencil } from "lucide-react";
+import cockpitMorning from "@/assets/illustrations/sitter-cockpit-morning.jpg";
+
 
 /**
  * Cockpit gardien, vague 1 sur 4, refonte accueil.
