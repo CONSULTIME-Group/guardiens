@@ -593,8 +593,8 @@ const SitterDashboard = () => {
           </div>
         ) : (
           <div className="mx-auto w-full max-w-4xl lg:max-w-6xl lg:grid lg:grid-cols-12 lg:gap-6 lg:items-start">
-            {/* ═══ FLUX principal (gauche) ═══ */}
-            <div className="min-w-0 space-y-8 lg:col-span-8">
+            {/* ═══ FLUX principal (gauche) ═══ rythme vertical 52px (vague 3) */}
+            <div className="min-w-0 space-y-[52px] lg:col-span-8">
               {/* COCKPIT */}
               <div className="min-w-0">
                 <SitterCockpit
@@ -644,28 +644,23 @@ const SitterDashboard = () => {
                 />
               </div>
 
+              {/* VAGUE 3 — tuiles histoire (remplace SitterActivityPanel côté confirmé) */}
               <div className="px-4 sm:px-5 md:px-8 lg:px-0">
-                <SitterActivityPanel
-                  isAvailable={isAvailable}
-                  profileCompletion={profileCompletion}
-                  nextGuard={nextGuard}
-                  unreadCount={unreadCount}
-                  pendingAppsCount={pendingAppsCount}
-                  nearbyListings={nearbyListings}
-                  completedSits={completedSits ?? 0}
+                <SitterStoryTiles
+                  pendingAppsCount={pendingAppsCount ?? 0}
+                  unreadCount={unreadCount ?? 0}
+                  badgeCount={badgeCount ?? 0}
                 />
               </div>
 
-
               {ChecklistBlock}
 
+              {/* VAGUE 3 — invitation entraide calme */}
               <div className="px-4 sm:px-5 md:px-8 lg:px-0">
-                {DiscoverySections}
-              </div>
-              <div className="px-4 sm:px-5 md:px-8 lg:px-0">
-                {ConseilsDiscoveryCard}
+                {EntraideSection}
               </div>
             </div>
+
 
             {/* ═══ RAIL collant (droite) ═══ */}
             <aside className="mt-8 lg:mt-0 space-y-8 lg:col-span-4 lg:sticky lg:top-20 lg:self-start lg:max-h-[calc(100vh-6rem)] lg:overflow-y-auto">
