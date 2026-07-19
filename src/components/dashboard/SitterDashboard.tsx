@@ -669,23 +669,36 @@ const SitterDashboard = () => {
             </div>
 
 
-            {/* ═══ RAIL collant (droite) ═══ */}
-            <aside className="mt-8 lg:mt-0 space-y-8 lg:col-span-4 lg:sticky lg:top-20 lg:self-start lg:max-h-[calc(100vh-6rem)] lg:overflow-y-auto">
+            {/* ═══ RAIL collant (droite) — vague 4 ═══
+                Ordre narratif : pouls → prochaine garde (ou access/free) →
+                réputation → Alma en murmure. Espacement 34px. */}
+            <aside className="mt-8 lg:mt-0 space-y-[34px] lg:col-span-4 lg:sticky lg:top-20 lg:self-start lg:max-h-[calc(100vh-6rem)] lg:overflow-y-auto">
               <div className="px-4 sm:px-5 md:px-8 lg:px-0">
                 <CommunityPulseBanner userId={user?.id} />
               </div>
-              {!nextGuard && (
-                <div className="px-4 sm:px-5 md:px-8 lg:px-0">
-                  {!(level === 4 || level === "3B")
-                    ? <AccessGateBanner level={level} profileCompletion={accessProfileCompletion} context="guard" />
-                    : <FreePeriodBanner />}
-                </div>
-              )}
               <div className="px-4 sm:px-5 md:px-8 lg:px-0">
-                <EmailDigestCard />
+                {nextGuard ? (
+                  <NextGuardRailCard nextGuard={nextGuard} />
+                ) : !(level === 4 || level === "3B") ? (
+                  <AccessGateBanner level={level} profileCompletion={accessProfileCompletion} context="guard" />
+                ) : (
+                  <FreePeriodBanner />
+                )}
+              </div>
+              <div className="px-4 sm:px-5 md:px-8 lg:px-0">
+                <ReputationRailCard
+                  userId={user?.id}
+                  completedSits={completedSits ?? 0}
+                  avgRating={avgRating ?? 0}
+                  reviewsCount={reviewsCount ?? 0}
+                  badgeCount={badgeCount ?? 0}
+                />
               </div>
               <div className="px-4 sm:px-5 md:px-8 lg:px-0 mb-6">
-                {buildSecondaryAccordion()}
+                <AlmaRailWhisper
+                  profileCompletion={profileCompletion ?? 0}
+                  isAvailable={!!isAvailable}
+                />
               </div>
             </aside>
           </div>
