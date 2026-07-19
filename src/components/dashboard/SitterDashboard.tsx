@@ -318,13 +318,12 @@ const SitterDashboard = () => {
                 isLoading={nbaLoading}
               />
 
-              {/* 4. ENTRAIDE, invitation adaptée au premier pas */}
+              {/* 4. ENTRAIDE bidimensionnelle (vague 20) */}
               <div className="">
                 <SitterEntraideSection
                   firstNearbyMission={firstNearbyMission}
-                  eyebrow="Un premier pas dans la communauté"
-                  title="Commencez par un coup de main."
-                  subtitle="La façon la plus simple de rencontrer les gens du coin."
+                  myActiveMission={myActiveMission}
+                  nearbyHelpersCount={nearbyHelpersCount}
                 />
               </div>
 
