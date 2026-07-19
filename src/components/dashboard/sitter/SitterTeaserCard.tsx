@@ -4,11 +4,14 @@
  * branche uniquement. CTA secondaire, jamais primaire.
  */
 import { Link } from "react-router-dom";
+import { useRef } from "react";
 import matchEmptyIllustration from "@/assets/illustrations/sitter-match-empty.webp";
 import { getOptimizedImageUrl } from "@/lib/imageOptim";
 import type { AffinitySitCard, PoolScope } from "@/hooks/useSitterTopAffinitySits";
 import { SectionHeader } from "./SitterMatchSection";
 import AffinityBadge from "@/components/matching/AffinityBadge";
+import { trackEvent } from "@/lib/analytics";
+import { useImpressionOnce } from "@/hooks/useImpressionOnce";
 
 interface SitterTeaserCardProps {
   topSits: AffinitySitCard[];
