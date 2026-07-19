@@ -3,6 +3,7 @@
  * Carte à bordure pointillée, pastille Alma respirante, une seule phrase
  * choisie selon l'état réel du gardien. Jamais un bandeau système.
  */
+import type { KeyboardEvent } from "react";
 import AlmaAvatar from "@/components/ai/alma/AlmaAvatar";
 
 interface AlmaRailWhisperProps {
