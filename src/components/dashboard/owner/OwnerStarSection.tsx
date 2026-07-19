@@ -190,7 +190,7 @@ const OngoingCard = ({
             </p>
           )}
           <div className="mt-[22px]">
-            <PrimaryCta to={`/sits/${sit.id}`}>Suivre la garde</PrimaryCta>
+            <PrimaryCta to={`/sits/${sit.id}`} onClick={onCtaClick}>Suivre la garde</PrimaryCta>
           </div>
         </div>
       </div>
