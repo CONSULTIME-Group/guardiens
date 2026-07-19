@@ -258,6 +258,7 @@ const SitterOpeningCard = ({
         <div className="mt-[22px]">
           <Link
             to={firstUndone.to}
+            onClick={() => trackStep("continue")}
             className="inline-flex items-center justify-center rounded-full bg-primary text-primary-foreground font-bold transition-colors hover:bg-primary/90"
             style={{
               padding: "10px 22px",
