@@ -52,20 +52,20 @@ const CommunityPulseBanner = memo(({ userId, className }: Props) => {
       label: "personnes prêtes à aider en France",
     });
   }
-  // (b) Maisons
+  // (b) Maisons (inclut l'historique fondateurs 2021-2026)
   if (pulse && pulse.maisonsGardees > 0 && metrics.length < 3) {
     metrics.push({
       key: "maisons",
       value: pulse.maisonsGardees,
-      label: "maisons déjà gardées, partout en France",
+      label: "maisons gardées depuis le début de l'aventure",
     });
   }
-  // (c) Animaux
+  // (c) Animaux (inclut l'historique fondateurs 2021-2026)
   if (pulse && pulse.animauxAccompagnes > 0 && metrics.length < 3) {
     metrics.push({
       key: "animaux",
       value: pulse.animauxAccompagnes,
-      label: "animaux accompagnés depuis le lancement",
+      label: "animaux accompagnés depuis le début de l'aventure",
     });
   }
 
