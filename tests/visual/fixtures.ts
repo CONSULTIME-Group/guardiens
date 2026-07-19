@@ -279,15 +279,7 @@ export const SCENARIOS: Record<ScenarioId, Scenario> = {
         basePets[1],
       ],
       reviews: baseReviews,
-      applications: [
-        {
-          id: "app-photo",
-          sit_id: "66666666-6666-6666-6666-666666666666",
-          sitter_id: "00000000-0000-0000-0000-000000000003",
-          status: "pending",
-          created_at: "2026-04-15T10:00:00Z",
-        },
-      ],
+      applications: [],
     },
   },
   "cancelled-sitter": {
