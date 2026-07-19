@@ -6,6 +6,9 @@
  * Se démonte dès que les 3 étapes primaires sont faites.
  */
 import { Link } from "react-router-dom";
+import { useRef } from "react";
+import { trackEvent } from "@/lib/analytics";
+import { useImpressionOnce } from "@/hooks/useImpressionOnce";
 
 interface OpeningStep {
   key: string;
