@@ -219,58 +219,62 @@ const NearbyAnnoncesCard = ({ nearbyListings, nearbyError = null, nearbyListings
       })()
 
     ) : (
-      <div className="bg-card border border-border rounded-[2rem] p-4 sm:p-5">
-        {(nearbyListingsRadius || hasBeyond) && (
-          <p className="text-[11px] text-muted-foreground mb-2 px-1">
-            {hasBeyond
-              ? "Aucune annonce dans un rayon de 100 km, voici la/les plus proche(s) disponible(s)."
-              : `Annonces dans un rayon de ${nearbyListingsRadius} km.`}
-          </p>
-        )}
-        <div className="divide-y divide-border/60">
-        {nearbyListings.slice(0, 5).map((sit: any) => {
-          const isNew = differenceInHours(new Date(), new Date(sit.created_at)) < 48;
-          const distance =
-            typeof sit.distance_km === "number" ? Math.round(sit.distance_km) : null;
-          return (
-            <Link
-              key={sit.id}
-              to={`/sits/${sit.id}`}
-              className="group flex items-start gap-3 py-3 first:pt-1 last:pb-1 -mx-2 px-2 rounded-lg transition-all duration-200 ease-out hover:bg-muted/40 hover:translate-x-0.5"
-            >
-              <SitThumb sit={sit} />
-              <div className="flex-1 min-w-0">
-                <p className="text-sm text-foreground leading-snug font-medium transition-colors group-hover:text-primary">
-                  {sit.title}
-                  {isNew && (
-                    <span className="ml-2 text-[10px] uppercase tracking-wider font-bold bg-accent text-accent-foreground rounded px-1.5 py-0.5 align-middle">
-                      Nouveau
-                    </span>
-                  )}
-                </p>
-                <p className="text-xs text-muted-foreground mt-0.5">
-                  {sit.start_date && sit.end_date
-                    ? `${format(new Date(sit.start_date), "d MMM", { locale: fr })} → ${format(new Date(sit.end_date), "d MMM", { locale: fr })}`
-                    : "Dates flexibles"}
-                </p>
-              </div>
-              {distance !== null && (
-                <span
-                  className={`shrink-0 inline-flex items-center rounded-full font-heading text-[13px] font-semibold tabular-nums px-2.5 py-0.5 ${
-                    sit.is_beyond
-                      ? "bg-muted text-muted-foreground ring-1 ring-border"
-                      : "bg-primary/10 text-primary"
-                  }`}
-                  aria-label={`À environ ${distance} kilomètres de chez vous`}
-                  title={sit.is_beyond ? "Annonce hors rayon habituel" : "Distance approximative (~1 km de précision)"}
-                >
-                  {sit.is_beyond ? "Plus loin · " : ""}{distance}&nbsp;km
-                </span>
-              )}
-            </Link>
-          );
-        })}
+      <div className="notebook-card relative p-4 pr-7 sm:p-5 sm:pr-8 min-w-0">
+        <div className="notebook-card-paper absolute inset-0" aria-hidden="true" />
+        <div className="relative">
+          {(nearbyListingsRadius || hasBeyond) && (
+            <p className="text-[11px] text-muted-foreground mb-2 px-1">
+              {hasBeyond
+                ? "Aucune annonce dans un rayon de 100 km, voici la/les plus proche(s) disponible(s)."
+                : `Annonces dans un rayon de ${nearbyListingsRadius} km.`}
+            </p>
+          )}
+          <div className="divide-y divide-border/60">
+          {nearbyListings.slice(0, 5).map((sit: any) => {
+            const isNew = differenceInHours(new Date(), new Date(sit.created_at)) < 48;
+            const distance =
+              typeof sit.distance_km === "number" ? Math.round(sit.distance_km) : null;
+            return (
+              <Link
+                key={sit.id}
+                to={`/sits/${sit.id}`}
+                className="group flex items-start gap-3 py-3 first:pt-1 last:pb-1 px-1 rounded-lg transition-all duration-200 ease-out hover:bg-muted/40 hover:translate-x-0.5"
+              >
+                <SitThumb sit={sit} />
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm text-foreground leading-snug font-medium transition-colors group-hover:text-primary">
+                    {sit.title}
+                    {isNew && (
+                      <span className="ml-2 text-[10px] uppercase tracking-wider font-bold bg-accent text-accent-foreground rounded px-1.5 py-0.5 align-middle">
+                        Nouveau
+                      </span>
+                    )}
+                  </p>
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    {sit.start_date && sit.end_date
+                      ? `${format(new Date(sit.start_date), "d MMM", { locale: fr })} → ${format(new Date(sit.end_date), "d MMM", { locale: fr })}`
+                      : "Dates flexibles"}
+                  </p>
+                </div>
+                {distance !== null && (
+                  <span
+                    className={`shrink-0 inline-flex items-center rounded-full font-heading text-[13px] font-semibold tabular-nums px-2.5 py-0.5 ${
+                      sit.is_beyond
+                        ? "bg-muted text-muted-foreground ring-1 ring-border"
+                        : "bg-primary/10 text-primary"
+                    }`}
+                    aria-label={`À environ ${distance} kilomètres de chez vous`}
+                    title={sit.is_beyond ? "Annonce hors rayon habituel" : "Distance approximative (~1 km de précision)"}
+                  >
+                    {sit.is_beyond ? "Plus loin · " : ""}{distance}&nbsp;km
+                  </span>
+                )}
+              </Link>
+            );
+          })}
+          </div>
         </div>
+        <div className="notebook-card-edge" aria-hidden="true" />
       </div>
     )}
   </section>
