@@ -2,6 +2,13 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { getOptimizedImageUrl } from "@/lib/imageOptim";
 import type { AffinitySitCard, PoolScope } from "@/hooks/useSitterTopAffinitySits";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import AffinityDetailsPopoverContent from "@/components/matching/AffinityDetailsPopoverContent";
+import type { AffinityResult } from "@/lib/affinityScore";
 
 /**
  * Vague 2 sur 4, la carte rencontre.
