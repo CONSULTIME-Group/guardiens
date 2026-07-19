@@ -1,5 +1,5 @@
 /**
- * AlmaRailWhisper — clôture le rail confirmé (vague 4).
+ * AlmaRailWhisper — clôture le rail (confirmé et nouveau gardien).
  * Carte à bordure pointillée, pastille Alma respirante, une seule phrase
  * choisie selon l'état réel du gardien. Jamais un bandeau système.
  */
@@ -9,11 +9,26 @@ interface AlmaRailWhisperProps {
   profileCompletion: number;
   isAvailable: boolean;
   checklistVisible?: boolean;
+  /** "newSitter" : phrase de bienvenue tant que les 3 touches de la
+   * SitterOpeningCard ne sont pas faites (openingCardVisible=true).
+   * "confirmed" (défaut) : logique existante. */
+  variant?: "confirmed" | "newSitter";
+  /** Vrai tant que SitterOpeningCard est encore montée (< 3 étapes faites). */
+  openingCardVisible?: boolean;
 }
 
-const AlmaRailWhisper = ({ profileCompletion, isAvailable, checklistVisible = false }: AlmaRailWhisperProps) => {
+const AlmaRailWhisper = ({
+  profileCompletion,
+  isAvailable,
+  checklistVisible = false,
+  variant = "confirmed",
+  openingCardVisible = false,
+}: AlmaRailWhisperProps) => {
   let phrase: string;
-  if (!checklistVisible && profileCompletion < 100) {
+  if (variant === "newSitter" && openingCardVisible) {
+    phrase =
+      "Bienvenue chez vous. Une photo, quelques mots, et je vous présente les maisons d'ici.";
+  } else if (!checklistVisible && profileCompletion < 100) {
     phrase = "Quelques touches à votre profil, et les propriétaires vous remarquent davantage.";
   } else if (!isAvailable) {
     phrase = "Dites que vous êtes disponible, et les bonnes gardes viennent à vous.";

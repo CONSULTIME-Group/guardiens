@@ -1,4 +1,3 @@
-import entraideEmptyIllustration from "@/assets/illustrations/sitter-entraide-empty.jpg";
 import { useAlmaCulturalFact } from "@/hooks/useAlmaCulturalFact";
 
 import { useAlmaUsageNudge } from "@/hooks/useAlmaUsageNudge";
@@ -11,8 +10,6 @@ import { useAccessLevel } from "@/hooks/useAccessLevel";
 import { useSitterDashboardData } from "@/hooks/useSitterDashboardData";
 import DashboardLoadError from "./DashboardLoadError";
 
-import { getOptimizedImageUrl } from "@/lib/imageOptim";
-
 import RoleActivationBanner from "./RoleActivationBanner";
 import AccessGateBanner from "@/components/access/AccessGateBanner";
 import { FreePeriodBanner } from "@/components/marketing/FreePeriodBanner";
@@ -20,33 +17,30 @@ import { FreePeriodBanner } from "@/components/marketing/FreePeriodBanner";
 import SitterCockpit from "./sitter/SitterCockpit";
 import DashboardSectionState from "./sitter/DashboardSectionState";
 import SitterMobileStickyCTA from "./sitter/SitterMobileStickyCTA";
-import SitterStatusBar from "./sitter/SitterStatusBar";
-import SitterBadgesSection from "./sitter/SitterBadgesSection";
-import NearbyHelpersCarousel from "./shared/NearbyHelpersCarousel";
 import CommunityPulseBanner from "./shared/CommunityPulseBanner";
-import SitterEmergencyCardCompact from "./sitter/SitterEmergencyCardCompact";
-import SitterMissionsSection from "./sitter/SitterMissionsSection";
-import CommunityQuestionsSection from "./CommunityQuestionsSection";
 // NearbyAnnoncesCard retiré ici (vague 2) : la carte rencontre le remplace.
 import DashSection from "./owner/DashSection";
 import SitterDashboardSkeleton from "./sitter/SitterDashboardSkeleton";
-import SitterActivityPanel from "./sitter/SitterActivityPanel";
 import SitterFirstNBA from "./SitterFirstNBA";
 import SitterFirstNBASkeleton from "./SitterFirstNBASkeleton";
-import SitterMatchSection, { SectionHeader } from "./sitter/SitterMatchSection";
+import SitterMatchSection from "./sitter/SitterMatchSection";
 import SitterStoryTiles from "./sitter/SitterStoryTiles";
 import NoNearbySitsEmptyState from "./NoNearbySitsEmptyState";
-import EmailDigestCard from "./sitter/EmailDigestCard";
 import NextGuardRailCard from "./sitter/NextGuardRailCard";
 import ReputationRailCard from "./sitter/ReputationRailCard";
 import AlmaRailWhisper from "./sitter/AlmaRailWhisper";
+import SitterOpeningCard from "./sitter/SitterOpeningCard";
+import SitterTeaserCard from "./sitter/SitterTeaserCard";
+import SitterNextStepRailCard from "./sitter/SitterNextStepRailCard";
+import SitterEntraideSection from "./sitter/SitterEntraideSection";
 import { useIsNewSitter } from "@/hooks/useIsNewUser";
 import { useSitterTopAffinitySits } from "@/hooks/useSitterTopAffinitySits";
 
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { CheckCircle, Circle, ChevronRight, Newspaper, AlertCircle } from "lucide-react";
+import { CheckCircle, Circle, ChevronRight, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
+
+
 
 
 
@@ -232,170 +226,8 @@ const SitterDashboard = () => {
   );
 
 
-  // ── Accordéon unique : Conseils + Réputation + Badges ──
-  // 3 strates secondaires regroupées dans UN seul Accordion pour densifier
-  // le bas de dashboard et clarifier la hiérarchie (1 zone "à explorer"
-  // au lieu de 3 cartes empilées). Toutes fermées par défaut.
-  // Zone « À découvrir » visible (pas repliée) : conseils choisis, en cartes.
-  const ConseilsDiscoveryCard = (
-    <section aria-labelledby="discovery-conseils-heading" className="min-w-0">
-      <div className="flex items-center gap-2 mb-2">
-        <span className="inline-flex items-center rounded-full bg-info/10 text-info text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5">
-          À découvrir
-        </span>
-      </div>
-      <h2
-        id="discovery-conseils-heading"
-        className="font-heading text-lg sm:text-xl font-bold text-foreground leading-tight mb-3"
-      >
-        {articles.length > 0
-          ? "Lectures choisies pour vos premières gardes"
-          : "Explorez les ressources de la communauté"}
-      </h2>
-      {articles.length > 0 ? (
-        <div className="flex gap-3 overflow-x-auto pb-1 -mx-1 px-1 scrollbar-hide">
-          {articles.map((a: any) => (
-            <Link
-              key={a.id}
-              to={`/actualites/${a.slug}`}
-              className="group/card flex-shrink-0 w-[70vw] sm:w-64 rounded-xl border border-border bg-card overflow-hidden hover:shadow-md hover:-translate-y-0.5 transition-all duration-300 ease-out cursor-pointer"
-            >
-              {a.cover_image_url ? (
-                <div className="w-full h-28 overflow-hidden">
-                  <img
-                    src={getOptimizedImageUrl(a.cover_image_url, 300, 75)}
-                    alt={a.title || "Article"}
-                    className="w-full h-full object-cover transition-transform duration-500 ease-out group-hover/card:scale-105"
-                    width={300}
-                    height={112}
-                    loading="lazy"
-                  />
-                </div>
-              ) : (
-                <div className="w-full h-28 bg-accent flex items-center justify-center">
-                  <Newspaper className="h-8 w-8 text-muted-foreground/40" aria-hidden="true" />
-                </div>
-              )}
-              <div className="p-3">
-                <h3 className="text-sm font-semibold line-clamp-2 transition-colors group-hover/card:text-primary">
-                  {a.title}
-                </h3>
-                <p className="text-xs text-muted-foreground line-clamp-2 mt-1">{a.excerpt}</p>
-              </div>
-            </Link>
-          ))}
-        </div>
-      ) : null}
-      <div className="mt-3 flex flex-wrap gap-2">
-        <Link
-          to="/races"
-          className="inline-flex items-center rounded-lg border border-border bg-card px-3 py-1.5 text-xs font-semibold text-foreground hover:border-primary hover:text-primary transition-colors"
-        >
-          Fiches races
-        </Link>
-        <Link
-          to="/guides"
-          className="inline-flex items-center rounded-lg border border-border bg-card px-3 py-1.5 text-xs font-semibold text-foreground hover:border-primary hover:text-primary transition-colors"
-        >
-          Guides pratiques
-        </Link>
-        <Link
-          to="/actualites"
-          className="inline-flex items-center rounded-lg border border-border bg-card px-3 py-1.5 text-xs font-semibold text-foreground hover:border-primary hover:text-primary transition-colors"
-        >
-          Tous les conseils
-        </Link>
-      </div>
-    </section>
-  );
-
-  const isBeginnerSitter = completedSits === 0 && reviewsCount === 0 && badgeCount === 0;
-
-  const buildSecondaryAccordion = () => (
-    <section aria-label="Mon espace gardien, détails" className="rounded-2xl border border-border bg-card overflow-hidden">
-      <Accordion type="single" collapsible defaultValue={completedSits > 0 ? "reputation" : undefined}>
 
 
-        <AccordionItem value="reputation" className="border-b border-border last:border-0">
-          <AccordionTrigger className="px-4 py-2.5 hover:no-underline hover:bg-muted/30 [&[data-state=open]>svg]:rotate-180">
-            <div className="flex flex-col items-start text-left">
-              <p className="text-[10px] uppercase tracking-[2px] text-muted-foreground font-sans font-semibold">
-                Ma réputation
-              </p>
-              <p className="text-sm font-medium text-foreground">
-                {isBeginnerSitter
-                  ? "Votre réputation se construira dès votre première garde."
-                  : <>
-                      {completedSits} garde{completedSits > 1 ? "s" : ""}
-                      {" · "}
-                      {completedSits > 0 && reviewsCount > 0
-                        ? `note ${avgRating.toFixed(1).replace(".", ",")}/5`
-                        : "pas encore noté"}
-                      {" · "}
-                      {badgeCount} badge{badgeCount > 1 ? "s" : ""}
-                    </>}
-              </p>
-            </div>
-          </AccordionTrigger>
-          <AccordionContent className="px-4 pb-4 pt-1">
-            <SitterStatusBar
-              profileCompletion={profileCompletion}
-              completedSits={completedSits}
-              avgRating={avgRating}
-              reviewsCount={reviewsCount}
-              badgeCount={badgeCount}
-              totalApps={totalApps}
-              reputation={reputation}
-              compact={false}
-            />
-          </AccordionContent>
-        </AccordionItem>
-
-        <AccordionItem value="badges" className="border-b border-border last:border-0">
-          <AccordionTrigger className="px-4 py-2.5 hover:no-underline hover:bg-muted/30 [&[data-state=open]>svg]:rotate-180">
-            <div className="flex flex-col items-start text-left">
-              <p className="text-[10px] uppercase tracking-[2px] text-muted-foreground font-sans font-semibold">
-                Badges
-              </p>
-              <p className="text-sm font-medium text-foreground">
-                {isBeginnerSitter
-                  ? "Vos premiers écussons vous attendent, ils se débloquent avec votre activité."
-                  : `${badgeCount} badge${badgeCount > 1 ? "s" : ""} obtenu${badgeCount > 1 ? "s" : ""}`}
-              </p>
-            </div>
-          </AccordionTrigger>
-          <AccordionContent className="px-4 pb-4 pt-1">
-            <SitterBadgesSection groupedBadges={groupedBadges} />
-          </AccordionContent>
-        </AccordionItem>
-
-        <AccordionItem value="emergency" className="border-b border-border last:border-0">
-          <AccordionTrigger className="px-4 py-2.5 hover:no-underline hover:bg-muted/30 [&[data-state=open]>svg]:rotate-180">
-            <div className="flex flex-col items-start text-left">
-              <p className="text-[10px] uppercase tracking-[2px] text-muted-foreground font-sans font-semibold">
-                Gardien d'urgence
-              </p>
-              <p className="text-sm font-medium text-foreground">
-                {hasEmergencyProfile
-                  ? "Profil actif"
-                  : isBeginnerSitter
-                    ? "Activez le mode gardien d'urgence pour recevoir les demandes de dernière minute"
-                    : "Non configuré"}
-              </p>
-            </div>
-          </AccordionTrigger>
-          <AccordionContent className="px-4 pb-4 pt-1">
-            <SitterEmergencyCardCompact
-              hasEmergencyProfile={hasEmergencyProfile}
-              completedSits={completedSits ?? 0}
-              avgRating={avgRating ?? 0}
-              reviewsCount={reviewsCount ?? 0}
-            />
-          </AccordionContent>
-        </AccordionItem>
-      </Accordion>
-    </section>
-  );
 
 
   // ── Zone Découverte, sections indépendantes (plus d'onglets).
@@ -412,124 +244,8 @@ const SitterDashboard = () => {
 
   // VAGUE 3 — L'entraide, invitation calme, une seule mission mise en avant.
   const firstNearbyMission = nearbyMissions[0];
-  const missionDateFmt = new Intl.DateTimeFormat("fr-FR", {
-    day: "numeric",
-    month: "long",
-  });
-  const formatMissionDate = (d: string | null | undefined): string | null => {
-    if (!d) return null;
-    try { return missionDateFmt.format(new Date(d)); } catch { return null; }
-  };
 
-  const EntraideSection = (
-    <section aria-label="L'entraide, tout près">
-      <SectionHeader
-        eyebrow="L'entraide, tout près"
-        title="Un coup de main à donner."
-      />
-      {firstNearbyMission ? (
-        <>
-          <article
-            className="bg-card border border-border flex items-center flex-wrap"
-            style={{
-              borderRadius: "16px",
-              padding: "22px",
-              gap: "14px",
-              boxShadow: "0 1px 2px rgba(29,27,22,0.04), 0 8px 24px rgba(29,27,22,0.05)",
-            }}
-          >
-            <div className="min-w-0 flex-1">
-              <h3
-                className="font-heading text-foreground"
-                style={{ fontSize: "16px", fontWeight: 600, lineHeight: 1.3 }}
-              >
-                {firstNearbyMission.title ?? "Une aide à proposer"}
-              </h3>
-              {(() => {
-                const meta = [
-                  firstNearbyMission.city,
-                  formatMissionDate(firstNearbyMission.date_needed),
-                ].filter(Boolean).join(" · ");
-                return meta ? (
-                  <p className="text-muted-foreground mt-[8px]" style={{ fontSize: "13px", lineHeight: 1.4 }}>
-                    {meta}
-                  </p>
-                ) : null;
-              })()}
-            </div>
-            <Link
-              to={`/petites-missions/${firstNearbyMission.id}`}
-              className="inline-flex items-center justify-center rounded-full border border-border bg-card text-foreground hover:bg-muted/40 transition-colors"
-              style={{
-                minHeight: "44px",
-                padding: "10px 18px",
-                fontSize: "14px",
-                fontWeight: 700,
-              }}
-            >
-              Proposer mon aide
-            </Link>
-          </article>
-          <div className="mt-[14px]">
-            <Link
-              to="/petites-missions"
-              className="text-primary hover:underline underline-offset-4"
-              style={{ fontSize: "13px", fontWeight: 700 }}
-            >
-              Toutes les missions d'entraide
-            </Link>
-          </div>
-        </>
-      ) : (
-        <div
-          className="text-center bg-card"
-          style={{
-            border: "1px dashed hsl(var(--border))",
-            borderRadius: "16px",
-            padding: "34px 22px",
-          }}
-        >
-          <div
-            aria-hidden="true"
-            className="illustration-wrapper mx-auto"
-            style={{ width: 140, height: 140 }}
-          >
-            <img
-              src={entraideEmptyIllustration}
-              alt=""
-              width={140}
-              height={140}
-              loading="lazy"
-              decoding="async"
-              className="illustration-blend animate-painted-reveal w-full h-full object-cover"
-            />
-          </div>
-          <h3
-            className="font-heading text-foreground mt-[14px]"
-            style={{ fontSize: "20px", fontWeight: 600 }}
-          >
-            Personne n'a besoin d'aide pour l'instant, tout va bien.
-          </h3>
 
-          <p
-            className="font-sans text-muted-foreground mx-auto mt-[14px]"
-            style={{ fontSize: "13px", maxWidth: "42ch", lineHeight: 1.5 }}
-          >
-            Revenez plus tard, ou proposez vous-même un coup de main autour de vous.
-          </p>
-          <div className="mt-[22px]">
-            <Link
-              to="/petites-missions"
-              className="text-primary hover:underline underline-offset-4"
-              style={{ fontSize: "13px", fontWeight: 700 }}
-            >
-              Voir toutes les missions
-            </Link>
-          </div>
-        </div>
-      )}
-    </section>
-  );
 
   // Ancienne DiscoverySections retirée du flux confirmé (vague 3).
   // NearbyHelpersCarousel, SitterMissionsSection, CommunityQuestionsSection
@@ -558,48 +274,54 @@ const SitterDashboard = () => {
       <div className="min-w-0">
         {isNewSitter ? (
           <div className="mx-auto w-full max-w-4xl lg:max-w-6xl lg:grid lg:grid-cols-12 lg:gap-6 lg:items-start">
-            {/* ═══ FLUX principal (gauche) ═══ */}
-            <div className="min-w-0 space-y-8 lg:col-span-8">
-              {/* completion-first quand le profil est incomplet */}
-              {!allChecklistDone && ChecklistBlock}
-
-              {/* NBA affinité dominante */}
+            {/* ═══ FLUX principal (gauche) — rythme vertical 52px ═══ */}
+            <div className="min-w-0 space-y-[52px] lg:col-span-8">
+              {/* 1. ACCUEIL, salutation Bienvenue */}
               <div className="min-w-0">
-                {nbaLoading ? (
-                  <SitterFirstNBASkeleton />
-                ) : hasMinimumPool && hasPostalCode ? (
-                  <SitterFirstNBA sits={topSits} />
-                ) : fallbackSits.length > 0 && hasPostalCode && !profileIncomplete ? (
-                  <SitterFirstNBA
-                    sits={fallbackSits}
-                    mode="fallback"
-                    scopeLabel={
-                      scopeUsed === "dept"
-                        ? "dans votre département"
-                        : scopeUsed === "region"
-                          ? "dans votre région"
-                          : "sur Guardiens"
-                    }
-                  />
-                ) : (
-                  <NoNearbySitsEmptyState
-                    totalPublishedSits={totalPublished}
-                    postalCode={postalCode}
-                    variant={profileIncomplete ? "profile_incomplete" : "no_nearby"}
-                  />
-                )}
+                <SitterCockpit
+                  userId={user?.id}
+                  firstName={user?.firstName}
+                  avatarUrl={avatarUrl}
+                  isFounder={user?.isFounder}
+                  isAvailable={isAvailable}
+                  onToggleAvailability={toggleAvailability}
+                  greeting="Bienvenue"
+                />
               </div>
 
+              {/* 2. LA STAR, complétion : SitterOpeningCard (remplace ChecklistBlock
+                  et le bandeau code postal manquant dans cette branche uniquement). */}
+              {!allChecklistDone && (
+                <div className="px-4 sm:px-5 md:px-8 lg:px-0">
+                  <SitterOpeningCard
+                    hasAvatar={!!avatarUrl}
+                    hasBioMin={!!(bio && bio.length >= 50)}
+                    hasPostalCode={!!postalCode}
+                  />
+                </div>
+              )}
+
+              {/* 3. ÉMOTION EN APERÇU : SitterTeaserCard (jamais de ring ici) */}
+              <SitterTeaserCard
+                topSits={topSits}
+                fallbackSits={fallbackSits}
+                scopeUsed={scopeUsed}
+                isLoading={nbaLoading}
+              />
+
+              {/* 4. ENTRAIDE, invitation adaptée au premier pas */}
               <div className="px-4 sm:px-5 md:px-8 lg:px-0">
-                <NearbyHelpersCarousel hideHeader />
-              </div>
-              <div className="px-4 sm:px-5 md:px-8 lg:px-0">
-                {ConseilsDiscoveryCard}
+                <SitterEntraideSection
+                  firstNearbyMission={firstNearbyMission}
+                  eyebrow="Un premier pas dans la communauté"
+                  title="Commencez par un coup de main."
+                  subtitle="La façon la plus simple de rencontrer les gens du coin."
+                />
               </div>
             </div>
 
-            {/* ═══ RAIL collant (droite) ═══ */}
-            <aside className="mt-8 lg:mt-0 space-y-8 lg:col-span-4 lg:sticky lg:top-20 lg:self-start lg:max-h-[calc(100vh-6rem)] lg:overflow-y-auto">
+            {/* ═══ RAIL collant (droite) — espacement 34px, mt-[52px] mobile ═══ */}
+            <aside className="mt-[52px] lg:mt-0 space-y-[34px] lg:col-span-4 lg:sticky lg:top-20 lg:self-start lg:max-h-[calc(100vh-6rem)] lg:overflow-y-auto">
               <div className="px-4 sm:px-5 md:px-8 lg:px-0">
                 <CommunityPulseBanner userId={user?.id} />
               </div>
@@ -608,14 +330,26 @@ const SitterDashboard = () => {
                   ? <AccessGateBanner level={level} profileCompletion={accessProfileCompletion} context="guard" />
                   : <FreePeriodBanner />}
               </div>
-              <div className="px-4 sm:px-5 md:px-8 lg:px-0">
-                <EmailDigestCard />
-              </div>
+              {!allChecklistDone && (
+                <div className="px-4 sm:px-5 md:px-8 lg:px-0">
+                  <SitterNextStepRailCard
+                    hasAvatar={!!avatarUrl}
+                    hasBioMin={!!(bio && bio.length >= 50)}
+                    hasPostalCode={!!postalCode}
+                  />
+                </div>
+              )}
               <div className="px-4 sm:px-5 md:px-8 lg:px-0 mb-6">
-                {buildSecondaryAccordion()}
+                <AlmaRailWhisper
+                  profileCompletion={profileCompletion ?? 0}
+                  isAvailable={!!isAvailable}
+                  variant="newSitter"
+                  openingCardVisible={!allChecklistDone}
+                />
               </div>
             </aside>
           </div>
+
         ) : (
           <div className="mx-auto w-full max-w-4xl lg:max-w-6xl lg:grid lg:grid-cols-12 lg:gap-6 lg:items-start">
             {/* ═══ FLUX principal (gauche) ═══ rythme vertical 52px (vague 3) */}
@@ -682,7 +416,12 @@ const SitterDashboard = () => {
 
               {/* VAGUE 3 — invitation entraide calme */}
               <div className="px-4 sm:px-5 md:px-8 lg:px-0">
-                {EntraideSection}
+                <SitterEntraideSection
+                  firstNearbyMission={firstNearbyMission}
+                  eyebrow="L'entraide, tout près"
+                  title="Un coup de main à donner."
+                />
+
               </div>
             </div>
 
