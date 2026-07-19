@@ -378,6 +378,7 @@ const Settings = () => {
       />;
       case "spaces": return <ActiveRolesSection />;
       case "owner-pitch": return <OwnerPitchSection user={user} />;
+      case "emergency": return <EmergencySection user={user} />;
       case "notifications": return <NotificationsSection
         prefs={prefs} savingKey={savingKey} allNotifsOn={allNotifsOn}
         onMasterToggle={handleMasterToggle} onSave={savePrefs}
