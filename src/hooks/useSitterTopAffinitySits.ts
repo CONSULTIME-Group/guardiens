@@ -284,7 +284,7 @@ export function useSitterTopAffinitySits(): Result {
       );
       const hasSitterSpecies = sitterSpecies.size > 0;
       const isUniversal = sitterSpecies.has("all") || sitterSpecies.has("tous");
-      const discoverySit: AffinitySitCard | null =
+      let discoverySit: AffinitySitCard | null =
         fallback.find((card) => {
           if (topIds.has(card.id)) return false;
           const cityKey = (card.city ?? "").trim().toLowerCase();
@@ -297,6 +297,61 @@ export function useSitterTopAffinitySits(): Result {
               : false;
           return speciesIsNovel || cityIsNovel;
         }) ?? null;
+
+      // Vague 14, #7 : découverte élargie. Si le pool local ne fournit aucun
+      // candidat "altérité" (typiquement une seule annonce locale), on va
+      // chercher une seule annonce affichable ailleurs en France, hors du top.
+      if (!discoverySit && topIds.size < 3) {
+        const excludeIds = Array.from(topIds);
+        let elsewhereQuery = supabase
+          .from("sits")
+          .select("id, title, city, start_date, end_date, cover_photo_url, user_id, property_id")
+          .eq("status", "published")
+          .eq("accepting_applications", true)
+          .gte("end_date", todayIso)
+          .neq("user_id", userId!)
+          .order("created_at", { ascending: false })
+          .limit(1);
+        if (excludeIds.length > 0) {
+          elsewhereQuery = elsewhereQuery.not("id", "in", `(${excludeIds.join(",")})`);
+        }
+        const { data: elsewhereRows } = await elsewhereQuery;
+        const elsewhere = (elsewhereRows ?? [])[0];
+        if (elsewhere) {
+          // Hydrate owner first name best effort (non bloquant).
+          let ownerFirstName: string | null = null;
+          if (elsewhere.user_id) {
+            const { data: ownerRow } = await supabase
+              .from("public_profiles")
+              .select("first_name")
+              .eq("id", elsewhere.user_id)
+              .maybeSingle();
+            ownerFirstName = (ownerRow as any)?.first_name ?? null;
+          }
+          let petSpecies: string[] = [];
+          if (elsewhere.property_id) {
+            const { data: petRows } = await supabase
+              .from("pets")
+              .select("species")
+              .eq("property_id", elsewhere.property_id);
+            petSpecies = (petRows ?? [])
+              .map((p: any) => p.species)
+              .filter(Boolean);
+          }
+          discoverySit = {
+            id: elsewhere.id,
+            title: elsewhere.title,
+            city: elsewhere.city,
+            start_date: elsewhere.start_date,
+            end_date: elsewhere.end_date,
+            cover_photo_url: elsewhere.cover_photo_url,
+            owner_first_name: ownerFirstName,
+            pet_species: petSpecies,
+            affinity: null,
+          };
+        }
+      }
+
 
       return {
         topSits: topThree,
