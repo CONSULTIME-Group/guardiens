@@ -9,12 +9,12 @@ const DaySeparator = ({ date }: { date: string }) => {
   else label = format(d, "EEEE d MMMM", { locale: fr });
 
   return (
-    <div className="flex items-center gap-3 py-4" role="separator" aria-label={label}>
-      <div className="flex-1 h-px bg-border/40" />
-      <span className="text-[11px] text-muted-foreground/70 font-medium capitalize tracking-wide select-none">
+    <div className="flex items-center gap-3 py-5" role="separator" aria-label={label}>
+      <div className="flex-1 h-px bg-border/50" />
+      <span className="text-[10px] uppercase tracking-[0.16em] text-muted-foreground/80 font-semibold select-none">
         {label}
       </span>
-      <div className="flex-1 h-px bg-border/40" />
+      <div className="flex-1 h-px bg-border/50" />
     </div>
   );
 };
