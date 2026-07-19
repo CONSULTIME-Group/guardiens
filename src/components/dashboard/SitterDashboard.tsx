@@ -431,7 +431,13 @@ const SitterDashboard = () => {
                 />
 
               </div>
+
+              {/* VAGUE 16 — lectures et guides */}
+              <div>
+                <ReadingsSection role="sitter" />
+              </div>
             </div>
+
 
 
             {/* ═══ RAIL collant (droite) — vague 4 ═══
