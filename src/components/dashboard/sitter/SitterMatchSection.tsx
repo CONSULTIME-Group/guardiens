@@ -2,6 +2,13 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { getOptimizedImageUrl } from "@/lib/imageOptim";
 import type { AffinitySitCard, PoolScope } from "@/hooks/useSitterTopAffinitySits";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import AffinityDetailsPopoverContent from "@/components/matching/AffinityDetailsPopoverContent";
+import type { AffinityResult } from "@/lib/affinityScore";
 
 /**
  * Vague 2 sur 4, la carte rencontre.
@@ -59,7 +66,13 @@ const speciesLabel = (species: string[]): string | null => {
 /*  Ring d'affinité, signature unique de l'écran                              */
 /* -------------------------------------------------------------------------- */
 
-const AffinityRing = ({ score }: { score: number }) => {
+const AffinityRing = ({
+  score,
+  result,
+}: {
+  score: number;
+  result?: AffinityResult | null;
+}) => {
   const size = 70;
   const stroke = 7;
   const r = (size - stroke) / 2;
@@ -78,13 +91,10 @@ const AffinityRing = ({ score }: { score: number }) => {
   }, [prefersReducedMotion]);
   const offset = mounted ? finalOffset : c;
 
-  return (
-    <div
-      role="img"
-      aria-label={`Affinité ${clamped} pour cent, calculée sur vos préférences communes`}
-      className="relative shrink-0"
-      style={{ width: size, height: size }}
-    >
+  const ariaLabel = `Affinité ${clamped} pour cent, calculée sur vos préférences communes. Voir le détail du score.`;
+
+  const ringSvg = (
+    <>
       <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
         <defs>
           <linearGradient id="matchRingGrad" x1="0" y1="0" x2="1" y2="1">
@@ -134,7 +144,55 @@ const AffinityRing = ({ score }: { score: number }) => {
           Affinité
         </span>
       </div>
-    </div>
+    </>
+  );
+
+  // Sans détail exploitable : rendu passif (garde la sémantique image).
+  if (!result) {
+    return (
+      <div
+        role="img"
+        aria-label={`Affinité ${clamped} pour cent, calculée sur vos préférences communes`}
+        className="relative shrink-0"
+        style={{ width: size, height: size }}
+      >
+        {ringSvg}
+      </div>
+    );
+  }
+
+  // Wrapper 44px min pour cible tactile, on stoppe la navigation du Link parent.
+  const blockLink = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+  };
+
+  return (
+    <Popover>
+      <span onClick={blockLink} className="inline-flex shrink-0">
+        <PopoverTrigger asChild>
+          <button
+            type="button"
+            aria-label={ariaLabel}
+            className="relative rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 cursor-pointer"
+            style={{ width: size, height: size, minWidth: 44, minHeight: 44 }}
+          >
+            {ringSvg}
+          </button>
+        </PopoverTrigger>
+      </span>
+      <PopoverContent
+        side="bottom"
+        align="start"
+        sideOffset={8}
+        avoidCollisions
+        collisionPadding={12}
+        className="w-[300px] p-3 z-50"
+        onOpenAutoFocus={(e) => e.preventDefault()}
+      >
+        <AffinityDetailsPopoverContent result={result} />
+      </PopoverContent>
+    </Popover>
   );
 };
 
@@ -320,7 +378,7 @@ const StarCard = ({ sit }: { sit: AffinitySitCard }) => {
         className="flex items-start"
         style={{ padding: "22px", gap: "22px" }}
       >
-        {sit.affinity && <AffinityRing score={sit.affinity.score} />}
+        {sit.affinity && <AffinityRing score={sit.affinity.score} result={sit.affinity} />}
 
         <div className="min-w-0 flex-1">
           <h3

@@ -27,6 +27,9 @@ import IdentityVerificationSection from "@/components/settings/IdentityVerificat
 import ProVerificationSection from "@/components/settings/ProVerificationSection";
 import AlertsSection from "@/components/settings/AlertsSection";
 import OwnerPitchSection from "@/components/settings/OwnerPitchSection";
+import SitterEmergencyCardCompact from "@/components/dashboard/sitter/SitterEmergencyCardCompact";
+import EmailDigestCard from "@/components/dashboard/sitter/EmailDigestCard";
+import { useProfileReputation } from "@/hooks/useProfileReputation";
 import { useTheme } from "@/contexts/ThemeContext";
 import { getPasswordStrength, validateStrongPassword } from "@/lib/passwordStrength";
 import { Link } from "react-router-dom";
@@ -58,7 +61,7 @@ const defaultPrefs: NotifPrefs = {
 
 type SectionId =
   | "account" | "security" | "spaces" | "notifications" | "alerts"
-  | "privacy" | "owner-pitch" | "appearance" | "alma" | "billing" | "data" | "help" | "danger";
+  | "privacy" | "owner-pitch" | "emergency" | "appearance" | "alma" | "billing" | "data" | "help" | "danger";
 
 interface SectionDef {
   id: SectionId;
@@ -72,6 +75,7 @@ const SECTIONS: SectionDef[] = [
   { id: "security", label: "Sécurité & identité", icon: Shield, group: "Compte" },
   { id: "spaces", label: "Mes espaces", icon: Layers, group: "Mes espaces" },
   { id: "owner-pitch", label: "Contacts spontanés", icon: Shield, group: "Mes espaces" },
+  { id: "emergency", label: "Gardien d'urgence", icon: Shield, group: "Mes espaces" },
   { id: "notifications", label: "Notifications", icon: Bell, group: "Préférences" },
   { id: "alerts", label: "Alertes annonces", icon: Bell, group: "Préférences" },
   { id: "privacy", label: "Confidentialité", icon: EyeOff, group: "Préférences" },
@@ -374,6 +378,7 @@ const Settings = () => {
       />;
       case "spaces": return <ActiveRolesSection />;
       case "owner-pitch": return <OwnerPitchSection user={user} />;
+      case "emergency": return <EmergencySection user={user} />;
       case "notifications": return <NotificationsSection
         prefs={prefs} savingKey={savingKey} allNotifsOn={allNotifsOn}
         onMasterToggle={handleMasterToggle} onSave={savePrefs}
@@ -771,9 +776,69 @@ const NotificationsSection = ({ prefs, savingKey, allNotifsOn, onMasterToggle, o
           </Link>
         </Button>
       </div>
+
+      <div className="pt-4 border-t border-border">
+        <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-3">
+          Vos rendez-vous email
+        </p>
+        <EmailDigestCard />
+      </div>
     </div>
   </section>
 );
+
+const EmergencySection = ({ user }: any) => {
+  const { data: rep } = useProfileReputation(user?.id);
+  const [state, setState] = useState<{ has: boolean; reviews: number } | null>(null);
+
+  useEffect(() => {
+    if (!user?.id) return;
+    let cancelled = false;
+    (async () => {
+      const [emRes, revRes]: any[] = await Promise.all([
+        (supabase as any)
+          .from("emergency_sitter_profiles")
+          .select("user_id")
+          .eq("user_id", user.id)
+          .maybeSingle(),
+        (supabase as any)
+          .from("sitter_reviews")
+          .select("id", { count: "exact", head: true })
+          .eq("sitter_id", user.id),
+      ]);
+      if (cancelled) return;
+      setState({
+        has: !!emRes?.data,
+        reviews: revRes?.count ?? 0,
+      });
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [user?.id]);
+
+  return (
+    <section>
+      <SectionHeader
+        icon={Shield}
+        title="Gardien d'urgence"
+        description="Recevez les demandes de garde de dernière minute quand votre profil est éligible."
+      />
+      {state === null ? (
+        <div className="h-16 rounded-xl border border-border bg-muted/30 animate-pulse" aria-hidden="true" />
+      ) : (
+        <SitterEmergencyCardCompact
+          hasEmergencyProfile={state.has}
+          completedSits={rep?.completed_sits ?? 0}
+          avgRating={rep?.note_moyenne ?? 0}
+          reviewsCount={state.reviews}
+        />
+      )}
+    </section>
+  );
+};
+
+
 
 const PrivacySection = ({ prefs, onSave }: any) => (
   <section>
