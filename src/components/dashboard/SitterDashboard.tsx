@@ -25,12 +25,13 @@ import CommunityPulseBanner from "./shared/CommunityPulseBanner";
 import SitterEmergencyCardCompact from "./sitter/SitterEmergencyCardCompact";
 import SitterMissionsSection from "./sitter/SitterMissionsSection";
 import CommunityQuestionsSection from "./CommunityQuestionsSection";
-import NearbyAnnoncesCard from "./sitter/NearbyAnnoncesCard";
+// NearbyAnnoncesCard retiré ici (vague 2) : la carte rencontre le remplace.
 import DashSection from "./owner/DashSection";
 import SitterDashboardSkeleton from "./sitter/SitterDashboardSkeleton";
 import SitterActivityPanel from "./sitter/SitterActivityPanel";
 import SitterFirstNBA from "./SitterFirstNBA";
 import SitterFirstNBASkeleton from "./SitterFirstNBASkeleton";
+import SitterMatchSection from "./sitter/SitterMatchSection";
 import NoNearbySitsEmptyState from "./NoNearbySitsEmptyState";
 import EmailDigestCard from "./sitter/EmailDigestCard";
 import { useIsNewSitter } from "@/hooks/useIsNewUser";
@@ -394,35 +395,18 @@ const SitterDashboard = () => {
   // - Coup de main : si pas de missions (mienne ni du coin), on masque
   //   SitterMissionsSection, la carte helpers (qui a son propre empty-state
   //   premium avec CTA parrainage) reste seule visible et porte le message.
-  const annoncesEmpty = !nearbyError && nearbyListings.length === 0;
   const missionsEmpty =
     !myMissionsError && !nearbyMissionsError &&
     myMissions.length === 0 && nearbyMissions.length === 0;
-  const hasBeyondListings = nearbyListings.some((s: any) => s?.is_beyond);
-  const annoncesTitle = annoncesEmpty
-    ? "Aucune annonce à proximité"
-    : hasBeyondListings
-      ? "Annonces ailleurs en France"
-      : "Près de chez vous";
+
 
   const DiscoverySections = (
     <div className="space-y-6 min-w-0">
-      {/* 1. Annonces — pas de cadre wrapper (cartes internes en portent déjà) */}
-      <section aria-labelledby="discovery-annonces-heading" className="min-w-0">
-        <div className="flex items-center gap-2 mb-2">
-          <span className="inline-flex items-center rounded-full bg-primary/10 text-primary text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5">Garde</span>
-        </div>
-        <h2 id="discovery-annonces-heading" className="font-heading text-lg sm:text-xl font-bold text-foreground leading-tight mb-3">
-          {annoncesTitle}
-        </h2>
-        <NearbyAnnoncesCard
-          nearbyListings={nearbyListings}
-          nearbyListingsRadius={nearbyListingsRadius}
-          nearbyError={nearbyError}
-          isAvailable={isAvailable}
-          hideHeader
-        />
-      </section>
+      {/* Sous-section "Garde / Près de chez vous" retirée : la carte rencontre
+          (SitterMatchSection, vague 2) porte désormais seule la découverte
+          d'annonces dans la branche confirmée. NearbyAnnoncesCard reste
+          disponible pour la branche isNewSitter et d'autres écrans. */}
+
 
       {/* 2. Coup de main — idem, pas de wrapper */}
       <section aria-labelledby="discovery-missions-heading" className="min-w-0">
@@ -571,6 +555,16 @@ const SitterDashboard = () => {
                 </div>
               )}
 
+              {/* VAGUE 2 — carte rencontre, star unique de l'écran */}
+              <div className="px-4 sm:px-5 md:px-8 lg:px-0">
+                <SitterMatchSection
+                  topSits={topSits}
+                  fallbackSits={fallbackSits}
+                  scopeUsed={scopeUsed}
+                  isLoading={nbaLoading}
+                />
+              </div>
+
               <div className="px-4 sm:px-5 md:px-8 lg:px-0">
                 <SitterActivityPanel
                   isAvailable={isAvailable}
@@ -582,6 +576,7 @@ const SitterDashboard = () => {
                   completedSits={completedSits ?? 0}
                 />
               </div>
+
 
               {ChecklistBlock}
 
