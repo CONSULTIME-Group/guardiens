@@ -537,10 +537,67 @@ const CompactRow = ({
 };
 
 /* -------------------------------------------------------------------------- */
+/*  Rangée "découverte" (Vague 9) — altérité, jamais de score                 */
+/* -------------------------------------------------------------------------- */
+
+const DiscoveryRow = ({ sit }: { sit: AffinitySitCard }) => {
+  const dates = formatDateRange(sit.start_date, sit.end_date);
+  const species = speciesLabel(sit.pet_species);
+  const meta = [sit.city, species, dates].filter(Boolean).join(" · ");
+
+  return (
+    <Link
+      to={`/sits/${sit.id}`}
+      className="flex items-center bg-card border border-border hover:border-primary/40 transition-colors"
+      style={{
+        borderRadius: "16px",
+        padding: "14px 22px",
+        gap: "14px",
+      }}
+    >
+      <span
+        className="rounded-full shrink-0"
+        style={{
+          backgroundColor: "hsl(var(--primary) / 0.1)",
+          color: "hsl(var(--primary))",
+          padding: "4px 10px",
+          fontSize: "12px",
+          fontWeight: 600,
+        }}
+      >
+        À découvrir
+      </span>
+      <div className="min-w-0 flex-1">
+        <p
+          className="font-heading text-foreground truncate"
+          style={{ fontSize: "15.5px", fontWeight: 600, lineHeight: 1.3 }}
+        >
+          {sit.title ?? "Une garde à découvrir"}
+        </p>
+        {meta && (
+          <p
+            className="text-muted-foreground truncate mt-[4px]"
+            style={{ fontSize: "12.5px" }}
+          >
+            {meta}
+          </p>
+        )}
+      </div>
+      <span
+        className="text-primary shrink-0"
+        style={{ fontSize: "13px", fontWeight: 700 }}
+      >
+        Voir
+      </span>
+    </Link>
+  );
+};
+
+/* -------------------------------------------------------------------------- */
 /*  Section principale                                                        */
 /* -------------------------------------------------------------------------- */
 
-const SitterMatchSection = ({ topSits, fallbackSits, scopeUsed, isLoading }: Props) => {
+const SitterMatchSection = ({ topSits, fallbackSits, discoverySit, scopeUsed, isLoading }: Props) => {
   if (isLoading) {
     return (
       <section
