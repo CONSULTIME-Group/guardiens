@@ -277,26 +277,14 @@ export function useSitterTopAffinitySits(): Result {
           .map((c) => (c.city ?? "").trim().toLowerCase())
           .filter(Boolean),
       );
-      const sitterSpecies = new Set<string>(
-        Array.isArray(sitter?.animal_types)
-          ? (sitter!.animal_types as string[]).map((s) => (s ?? "").toLowerCase())
-          : [],
-      );
-      const hasSitterSpecies = sitterSpecies.size > 0;
-      const isUniversal = sitterSpecies.has("all") || sitterSpecies.has("tous");
-      let discoverySit: AffinitySitCard | null =
-        fallback.find((card) => {
-          if (topIds.has(card.id)) return false;
-          const cityKey = (card.city ?? "").trim().toLowerCase();
-          const cityIsNovel = cityKey ? !topCities.has(cityKey) : false;
-          const speciesIsNovel =
-            hasSitterSpecies && !isUniversal
-              ? card.pet_species.some(
-                  (sp) => sp && !sitterSpecies.has(sp.toLowerCase()),
-                )
-              : false;
-          return speciesIsNovel || cityIsNovel;
-        }) ?? null;
+      const sitterSpecies = Array.isArray(sitter?.animal_types)
+        ? (sitter!.animal_types as string[])
+        : [];
+      let discoverySit: AffinitySitCard | null = pickDiscoverySit(fallback, {
+        topIds,
+        topCities,
+        sitterSpecies,
+      });
 
       // Vague 14, #7 : découverte élargie. Si le pool local ne fournit aucun
       // candidat "altérité" (typiquement une seule annonce locale), on va
