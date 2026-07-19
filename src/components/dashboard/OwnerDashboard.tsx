@@ -59,8 +59,9 @@ const OwnerDashboard = () => {
     sits, pets, recentApps, reviews, myMissions,
     verificationStatus, sitterProfiles, sitterAffinityProfiles, trustedSitterCount,
     propertyCoverPhoto, onboardingChecks,
-    pendingReviews,
+    pendingReviews, highlights,
   } = data;
+  const { level, profileCompletion: accessProfileCompletion } = useAccessLevel();
 
   /* ── Signaux locaux : gardiens et « helpers » proches ── */
   const { data: nearbyOwnerSittersData } = useNearbyOwnerSitters(user?.id);
