@@ -4,7 +4,7 @@ import { BadgeRow } from "@/components/badges/BadgeRow";
 import { supabase } from "@/integrations/supabase/client";
 import { logger } from "@/lib/logger";
 import { useAuth } from "@/contexts/AuthContext";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 
 
 import OnboardingWelcome from "./OnboardingWelcome";
@@ -12,7 +12,7 @@ import NearbyOwnerSittersCard from "./owner/NearbyOwnerSittersCard";
 import NearbyEmergencySitters from "./NearbyEmergencySitters";
 import NearbyHelpersCarousel from "./shared/NearbyHelpersCarousel";
 import DashboardSkeleton from "@/components/skeletons/DashboardSkeleton";
-import { Plus, Eye, ChevronDown, ChevronUp } from "lucide-react";
+import { ChevronDown, ChevronUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { differenceInDays } from "date-fns";
 
@@ -26,7 +26,7 @@ import { useUserBadges } from "@/hooks/useProfileReputation";
 
 /* ── Extracted sub-components ── */
 import MonAnnonceCard from "./owner/MonAnnonceCard";
-import OngoingSitHero from "./owner/OngoingSitHero";
+// OngoingSitHero: rendu désormais via OwnerStarSection.
 import ApplicationsSection from "./owner/ApplicationsSection";
 import ContextualResources from "./owner/ContextualResources";
 import MissionsTabsCard from "./owner/MissionsTabsCard";
@@ -40,9 +40,7 @@ import MobileStickyCTA from "./owner/MobileStickyCTA";
 import LiveSignalStrip from "./shared/LiveSignalStrip";
 import SectionEyebrow from "./shared/SectionEyebrow";
 import TodoCard, { type TodoItem } from "./owner/TodoCard";
-import PriorityActionCard from "./shared/PriorityActionCard";
-import DraftResumeCard from "./DraftResumeCard";
-import SitDraftFromPrompt from "./SitDraftFromPrompt";
+// PriorityActionCard / DraftResumeCard / SitDraftFromPrompt : remplacés par OwnerStarSection (vague 10).
 import OwnerFirstNBAGardiens from "./OwnerFirstNBAGardiens";
 import { useOwnerPriorityAction } from "@/hooks/useOwnerPriorityAction";
 import { useOwnerPrimaryAction } from "@/hooks/useOwnerPrimaryAction";
@@ -79,7 +77,6 @@ import { trackEvent } from "@/lib/analytics";
 
 const OwnerDashboard = () => {
   const { user } = useAuth();
-  const navigate = useNavigate();
   const { level, profileCompletion: accessProfileCompletion } = useAccessLevel();
   const [showAllMobile, setShowAllMobile] = useState(false);
   // Premier contact Alma : bloque les whispers proactifs tant qu'il n'est pas vu.
