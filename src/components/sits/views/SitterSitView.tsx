@@ -11,7 +11,7 @@
  */
 import { useState, useEffect } from "react";
 import { Link, useSearchParams } from "react-router-dom";
-import { CheckCircle2, Star, PawPrint, Home, ClipboardList, XCircle, MapPin, CalendarDays, Users, ArrowLeft } from "lucide-react";
+import { CheckCircle2, PawPrint, MapPin, CalendarDays, Users, ArrowLeft } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { Button } from "@/components/ui/button";
