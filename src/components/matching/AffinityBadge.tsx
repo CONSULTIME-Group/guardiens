@@ -62,7 +62,6 @@ const AffinityBadge = ({
   variant = "numeric",
 }: AffinityBadgeProps) => {
   const wrapRef = useRef<HTMLButtonElement>(null);
-  const { activeRole } = useAuth();
 
   const dedupeKey =
     trackingContext && result
@@ -86,13 +85,11 @@ const AffinityBadge = ({
 
   if (!result) return null;
 
-  // Variante sémantique : rien en-dessous de 60% (silence = pas de bruit visuel).
   const label = variant === "semantic" ? semanticLabel(result.score) : null;
   if (variant === "semantic" && !label) return null;
 
   const sizing = size === "sm" ? "text-[11px] px-2 py-0.5" : "text-xs px-2.5 py-1";
 
-  // Empêche la navigation du Link parent SANS bloquer l'ouverture du Popover.
   const blockLink = (e: MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
@@ -105,12 +102,10 @@ const AffinityBadge = ({
       ? `${label} (${result.score}% d'affinité), voir le détail`
       : `Affinité ${result.score}% (${result.total} critères sur 7 comparés), voir le détail`;
 
-  // Fiabilité selon le nombre de critères comparés
   const reliability: "complete" | "partial" | "neutral" =
     result.total >= 6 ? "complete" : result.total <= 3 ? "partial" : "neutral";
 
   const chipClass = "text-[10px] font-medium px-2 py-0.5 rounded-full leading-none";
-  const profilePath = activeRole === "owner" ? "/owner-profile" : "/profile";
 
   return (
     <Popover>
