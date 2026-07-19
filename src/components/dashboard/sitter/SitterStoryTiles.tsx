@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { FileText, MessageSquare, Award, type LucideIcon } from "lucide-react";
 import { SectionHeader } from "./SitterMatchSection";
+import { useAuth } from "@/contexts/AuthContext";
 
 /**
  * Vague 3 sur 4, tuiles histoire.
@@ -84,17 +85,17 @@ const SitterStoryTiles = ({
   unreadCount,
   badgeCount,
 }: Props) => {
+  const { user } = useAuth();
+  const badgesLink = user?.id ? `/gardiens/${user.id}#badges` : "/profile";
   const tiles: TileData[] = [
     {
       key: "apps",
       Icon: FileText,
       value: pendingAppsCount,
       label:
-        pendingAppsCount === 0
-          ? "aucune candidature en attente pour l'instant"
-          : pendingAppsCount === 1
-          ? "candidature en attente de réponse"
-          : "candidatures en attente de réponse",
+        pendingAppsCount > 1
+          ? "candidatures en attente de réponse"
+          : "candidature en attente de réponse",
       linkTo: pendingAppsCount === 0 ? "/recherche" : "/mes-candidatures",
       linkText:
         pendingAppsCount === 0
@@ -105,12 +106,7 @@ const SitterStoryTiles = ({
       key: "messages",
       Icon: MessageSquare,
       value: unreadCount,
-      label:
-        unreadCount === 0
-          ? "aucun message à lire pour l'instant"
-          : unreadCount === 1
-          ? "message à lire"
-          : "messages à lire",
+      label: unreadCount > 1 ? "messages à lire" : "message à lire",
       linkTo: "/messages",
       linkText: "Ouvrir vos conversations",
     },
@@ -118,13 +114,8 @@ const SitterStoryTiles = ({
       key: "badges",
       Icon: Award,
       value: badgeCount,
-      label:
-        badgeCount === 0
-          ? "aucun écusson obtenu pour l'instant"
-          : badgeCount === 1
-          ? "écusson obtenu"
-          : "écussons obtenus",
-      linkTo: "/profile#badges",
+      label: badgeCount > 1 ? "écussons obtenus" : "écusson obtenu",
+      linkTo: badgesLink,
       linkText:
         badgeCount === 0
           ? "Débloquer votre premier écusson"

@@ -6,6 +6,9 @@
  * Se démonte dès que les 3 étapes primaires sont faites.
  */
 import { Link } from "react-router-dom";
+import { useRef } from "react";
+import { trackEvent } from "@/lib/analytics";
+import { useImpressionOnce } from "@/hooks/useImpressionOnce";
 
 interface OpeningStep {
   key: string;
@@ -61,8 +64,25 @@ const SitterOpeningCard = ({
   const progressPct = Math.round((doneCount / steps.length) * 100);
   const firstUndone = steps.find((s) => !s.done)!;
 
+  const undoneKeys = steps.filter((s) => !s.done).map((s) => s.key).join(",");
+  const sectionRef = useRef<HTMLElement | null>(null);
+  useImpressionOnce(sectionRef, `sitter_opening:${undoneKeys}`, () => {
+    void trackEvent("dashboard_star_seen", {
+      source: "sitter_dashboard",
+      metadata: { surface: "sitter_dashboard", variant: "opening", undone: undoneKeys },
+    });
+  });
+
+  const trackStep = (stepKey: string) =>
+    void trackEvent("dashboard_star_cta_clicked", {
+      source: "sitter_dashboard",
+      metadata: { surface: "sitter_dashboard", variant: "opening", step: stepKey },
+    });
+
   return (
     <section
+      ref={sectionRef}
+      data-dashboard-star="sitter"
       aria-labelledby="sitter-opening-heading"
       className="px-4 sm:px-5 md:px-8 lg:px-0"
     >
@@ -222,6 +242,7 @@ const SitterOpeningCard = ({
                 ) : (
                   <Link
                     to={step.to}
+                    onClick={() => trackStep(step.key)}
                     aria-label={`${step.label}. ${step.hint}`}
                     className="block focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 rounded-[12px]"
                   >
@@ -237,6 +258,7 @@ const SitterOpeningCard = ({
         <div className="mt-[22px]">
           <Link
             to={firstUndone.to}
+            onClick={() => trackStep("continue")}
             className="inline-flex items-center justify-center rounded-full bg-primary text-primary-foreground font-bold transition-colors hover:bg-primary/90"
             style={{
               padding: "10px 22px",

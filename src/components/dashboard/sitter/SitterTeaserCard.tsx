@@ -4,11 +4,14 @@
  * branche uniquement. CTA secondaire, jamais primaire.
  */
 import { Link } from "react-router-dom";
-import matchEmptyIllustration from "@/assets/illustrations/sitter-match-empty.jpg";
+import { useRef } from "react";
+import matchEmptyIllustration from "@/assets/illustrations/sitter-match-empty.webp";
 import { getOptimizedImageUrl } from "@/lib/imageOptim";
 import type { AffinitySitCard, PoolScope } from "@/hooks/useSitterTopAffinitySits";
 import { SectionHeader } from "./SitterMatchSection";
 import AffinityBadge from "@/components/matching/AffinityBadge";
+import { trackEvent } from "@/lib/analytics";
+import { useImpressionOnce } from "@/hooks/useImpressionOnce";
 
 interface SitterTeaserCardProps {
   topSits: AffinitySitCard[];
@@ -115,7 +118,7 @@ const EmptyTeaser = () => (
   </div>
 );
 
-const TeaserCard = ({ sit }: { sit: AffinitySitCard }) => {
+const TeaserCard = ({ sit, onCtaClick }: { sit: AffinitySitCard; onCtaClick?: () => void }) => {
   const place = [
     sit.owner_first_name ? `Chez ${sit.owner_first_name}` : null,
     sit.city,
@@ -200,6 +203,7 @@ const TeaserCard = ({ sit }: { sit: AffinitySitCard }) => {
         <div className="mt-[22px]">
           <Link
             to={`/sits/${sit.id}`}
+            onClick={onCtaClick}
             className="inline-flex items-center justify-center rounded-full border border-border bg-card text-foreground hover:bg-muted/40 transition-colors"
             style={{
               padding: "10px 18px",
@@ -243,16 +247,36 @@ const SitterTeaserCard = ({
   scopeUsed,
   isLoading,
 }: SitterTeaserCardProps) => {
+  const sectionRef = useRef<HTMLElement | null>(null);
   const featured = topSits[0] ?? fallbackSits[0] ?? null;
+  const impressionKey = featured ? `sitter_teaser:${featured.id}` : null;
+
+  useImpressionOnce(sectionRef, impressionKey, () => {
+    void trackEvent("dashboard_star_seen", {
+      source: "sitter_dashboard",
+      metadata: { surface: "sitter_dashboard", variant: "teaser", scope: scopeUsed, sit_id: featured?.id ?? null },
+    });
+  });
+
+  const onCtaClick = () =>
+    void trackEvent("dashboard_star_cta_clicked", {
+      source: "sitter_dashboard",
+      metadata: { surface: "sitter_dashboard", variant: "teaser", scope: scopeUsed, sit_id: featured?.id ?? null },
+    });
 
   return (
-    <section aria-labelledby="teaser-heading" className="px-4 sm:px-5 md:px-8 lg:px-0">
+    <section
+      ref={sectionRef}
+      data-dashboard-star="sitter"
+      aria-labelledby="teaser-heading"
+      className="px-4 sm:px-5 md:px-8 lg:px-0"
+    >
       <SectionHeader
         eyebrow="Ce qui vous attend"
         title="Une maison cherche déjà son gardien."
         subtitle={scopeSubtitle(scopeUsed)}
       />
-      {isLoading ? <Skeleton /> : featured ? <TeaserCard sit={featured} /> : <EmptyTeaser />}
+      {isLoading ? <Skeleton /> : featured ? <TeaserCard sit={featured} onCtaClick={onCtaClick} /> : <EmptyTeaser />}
     </section>
   );
 };

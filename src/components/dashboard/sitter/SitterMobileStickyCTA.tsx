@@ -2,6 +2,7 @@ import { memo } from "react";
 import { useNavigate } from "react-router-dom";
 import { Search, MessageSquare, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useStarVisibilityGate } from "@/hooks/useStarVisibilityGate";
 
 interface SitterMobileStickyCTAProps {
   pendingAppsCount?: number;
@@ -14,6 +15,7 @@ interface SitterMobileStickyCTAProps {
  */
 const SitterMobileStickyCTA = memo(({ pendingAppsCount = 0, unreadCount = 0 }: SitterMobileStickyCTAProps) => {
   const navigate = useNavigate();
+  const starVisible = useStarVisibilityGate("sitter");
 
   // Priorité contextuelle : messages non lus > candidatures.
   // Empty state (aucun message / aucune candidature) : on MASQUE le sticky,
@@ -42,8 +44,9 @@ const SitterMobileStickyCTA = memo(({ pendingAppsCount = 0, unreadCount = 0 }: S
     <div
       // Posé EXACTEMENT au-dessus de la BottomNav (h-16 = 64px) pour éviter
       // la superposition sticky CTA / nav mobile.
-      className="md:hidden fixed bottom-16 left-0 right-0 z-40 bg-background/95 backdrop-blur-sm border-t border-border px-4 py-3 shadow-[0_-4px_12px_-4px_hsl(var(--foreground)/0.08)]"
+      className={`md:hidden fixed bottom-16 left-0 right-0 z-40 bg-background/95 backdrop-blur-sm border-t border-border px-4 py-3 shadow-[0_-4px_12px_-4px_hsl(var(--foreground)/0.08)] motion-safe:transition-opacity motion-safe:duration-200 ${starVisible ? "opacity-0 pointer-events-none" : "opacity-100"}`}
       role="region"
+      aria-hidden={starVisible}
       aria-label="Action principale gardien"
     >
       <Button

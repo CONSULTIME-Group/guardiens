@@ -2,9 +2,14 @@
  * AlmaRailWhisper — clôture le rail (confirmé et nouveau gardien).
  * Carte à bordure pointillée, pastille Alma respirante, une seule phrase
  * choisie selon l'état réel du gardien. Jamais un bandeau système.
+ *
+ * Vague 14 : lit `useAlmaHidden`. Si Alma est masquée, la carte propose
+ * de la réafficher plutôt que d'ouvrir le dock.
  */
 import type { KeyboardEvent } from "react";
 import AlmaAvatar from "@/components/ai/alma/AlmaAvatar";
+import { useAlmaHidden } from "@/hooks/useAlmaHidden";
+import { toast } from "sonner";
 
 interface AlmaRailWhisperProps {
   profileCompletion?: number;
@@ -29,8 +34,12 @@ const AlmaRailWhisper = ({
   openingCardVisible = false,
   ownerState,
 }: AlmaRailWhisperProps) => {
+  const { hidden, setHidden } = useAlmaHidden();
+
   let phrase: string;
-  if (variant === "owner" && ownerState) {
+  if (hidden) {
+    phrase = "Je reste à portée de voix si vous changez d'avis.";
+  } else if (variant === "owner" && ownerState) {
     if (ownerState.ongoingSit) {
       phrase = ownerState.ongoingSitterFirstName
         ? `Tout se passe bien chez vous. ${ownerState.ongoingSitterFirstName} veille sur la maison.`
@@ -53,7 +62,18 @@ const AlmaRailWhisper = ({
     phrase = "Votre profil est prêt. Une belle rencontre peut arriver à tout moment.";
   }
 
-  const openAlma = () => {
+  const handleActivate = () => {
+    if (hidden) {
+      void (async () => {
+        try {
+          await setHidden(false);
+          toast.success("Alma est de retour à vos côtés.");
+        } catch {
+          /* silent */
+        }
+      })();
+      return;
+    }
     try {
       window.dispatchEvent(new CustomEvent("alma:open-dock"));
     } catch {
@@ -64,16 +84,19 @@ const AlmaRailWhisper = ({
   const onKeyDown = (e: KeyboardEvent<HTMLElement>) => {
     if (e.key === "Enter" || e.key === " ") {
       e.preventDefault();
-      openAlma();
+      handleActivate();
     }
   };
+
+  const linkLabel = hidden ? "Réafficher Alma" : "Parler à Alma";
+  const ariaLabel = hidden ? "Réafficher Alma" : "Parler à Alma";
 
   return (
     <aside
       role="button"
       tabIndex={0}
-      aria-label="Parler à Alma"
-      onClick={openAlma}
+      aria-label={ariaLabel}
+      onClick={handleActivate}
       onKeyDown={onKeyDown}
       className="bg-card flex items-start cursor-pointer transition-shadow duration-200 hover:shadow-[0_2px_4px_rgba(29,27,22,.05),0_18px_40px_rgba(29,27,22,.09)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
       style={{
@@ -109,7 +132,7 @@ const AlmaRailWhisper = ({
           style={{ fontSize: "12px", fontWeight: 700 }}
           aria-hidden={true}
         >
-          Parler à Alma
+          {linkLabel}
         </p>
       </div>
     </aside>

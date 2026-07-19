@@ -4,7 +4,7 @@
  * plutôt que dupliquée. Une seule mission mise en avant.
  */
 import { Link } from "react-router-dom";
-import entraideEmptyIllustration from "@/assets/illustrations/sitter-entraide-empty.jpg";
+import entraideEmptyIllustration from "@/assets/illustrations/sitter-entraide-empty.webp";
 import { SectionHeader } from "./SitterMatchSection";
 
 interface NearbyMission {

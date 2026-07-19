@@ -14,6 +14,7 @@
  */
 import { differenceInDays } from "date-fns";
 import { Link } from "react-router-dom";
+import { useRef } from "react";
 import { getOptimizedImageUrl } from "@/lib/imageOptim";
 import AffinityRing from "@/components/matching/AffinityRing";
 import { useViewerOwnerForAffinity } from "@/hooks/useViewerOwnerForAffinity";
@@ -26,6 +27,8 @@ import type { AppRow, SitterInfo, SitRow } from "./types";
 import { capitalize } from "./helpers";
 import SitDraftFromPrompt from "@/components/dashboard/SitDraftFromPrompt";
 import type { OwnerPrimaryAction } from "@/hooks/useOwnerPrimaryAction";
+import { trackEvent } from "@/lib/analytics";
+import { useImpressionOnce } from "@/hooks/useImpressionOnce";
 
 const DATE_FMT = new Intl.DateTimeFormat("fr-FR", {
   day: "numeric",
@@ -92,9 +95,18 @@ const SectionHeader = ({
 /* ------------------------------------------------------------------ */
 /*  Bouton primaire unique de la section                              */
 /* ------------------------------------------------------------------ */
-const PrimaryCta = ({ to, children }: { to: string; children: React.ReactNode }) => (
+const PrimaryCta = ({
+  to,
+  children,
+  onClick,
+}: {
+  to: string;
+  children: React.ReactNode;
+  onClick?: () => void;
+}) => (
   <Link
     to={to}
+    onClick={onClick}
     className="inline-flex items-center justify-center rounded-full bg-primary text-primary-foreground font-bold transition-colors hover:bg-primary/90"
     style={{
       padding: "10px 18px",
@@ -115,10 +127,12 @@ const OngoingCard = ({
   sit,
   sitter,
   coverPhoto,
+  onCtaClick,
 }: {
   sit: SitRow;
   sitter?: SitterInfo | null;
   coverPhoto?: string | null;
+  onCtaClick?: () => void;
 }) => {
   const dates = formatDateRange(sit.start_date, sit.end_date);
   const daysLeft = sit.end_date
@@ -176,7 +190,7 @@ const OngoingCard = ({
             </p>
           )}
           <div className="mt-[22px]">
-            <PrimaryCta to={`/sits/${sit.id}`}>Suivre la garde</PrimaryCta>
+            <PrimaryCta to={`/sits/${sit.id}`} onClick={onCtaClick}>Suivre la garde</PrimaryCta>
           </div>
         </div>
       </div>
@@ -193,12 +207,14 @@ const ApplicationCard = ({
   affinity,
   affinityInput,
   extraCount,
+  onCtaClick,
 }: {
   app: AppRow;
   sitter: SitterInfo | null;
   affinity: AffinityResult | null;
   affinityInput: AffinitySitterInput | null;
   extraCount: number;
+  onCtaClick?: () => void;
 }) => {
   const firstName = sitter?.first_name ? capitalize(sitter.first_name) : "Un gardien";
   const dates = formatDateRange(app.sit?.start_date, app.sit?.end_date);
@@ -272,7 +288,7 @@ const ApplicationCard = ({
           )}
 
           <div className="mt-[22px] flex flex-wrap items-center gap-[14px]">
-            <PrimaryCta to={app.sit_id ? `/sits/${app.sit_id}#candidatures` : "/sits"}>
+            <PrimaryCta to={app.sit_id ? `/sits/${app.sit_id}#candidatures` : "/sits"} onClick={onCtaClick}>
               Découvrir sa candidature
             </PrimaryCta>
             {extraCount > 0 && (
@@ -295,10 +311,12 @@ const ApplicationsStar = ({
   pendingApps,
   sitterProfiles,
   sitterAffinityProfiles,
+  onCtaClick,
 }: {
   pendingApps: AppRow[];
   sitterProfiles: Record<string, SitterInfo>;
   sitterAffinityProfiles?: Record<string, AffinitySitterInput>;
+  onCtaClick?: () => void;
 }) => {
   const { owner } = useViewerOwnerForAffinity();
 
@@ -342,6 +360,7 @@ const ApplicationsStar = ({
         affinity={featuredAffinity}
         affinityInput={featuredInput}
         extraCount={n - 1}
+        onCtaClick={onCtaClick}
       />
     </>
   );
@@ -350,7 +369,7 @@ const ApplicationsStar = ({
 /* ================================================================== */
 /*  C. Brouillon en cours                                             */
 /* ================================================================== */
-const DraftStar = ({ draft }: { draft: SitRow }) => {
+const DraftStar = ({ draft, onCtaClick }: { draft: SitRow; onCtaClick?: () => void }) => {
   const dates = formatDateRange(draft.start_date, draft.end_date);
   return (
     <>
@@ -377,7 +396,7 @@ const DraftStar = ({ draft }: { draft: SitRow }) => {
           </p>
         )}
         <div className="mt-[22px]">
-          <PrimaryCta to={`/sits/create?draftId=${draft.id}`}>
+          <PrimaryCta to={`/sits/create?draftId=${draft.id}`} onClick={onCtaClick}>
             Reprendre mon annonce
           </PrimaryCta>
         </div>
@@ -394,11 +413,13 @@ const PublishStar = ({
   nearbyRadius,
   showConcierge,
   primaryAction,
+  onCtaClick,
 }: {
   nearbyCount: number;
   nearbyRadius: number | null;
   showConcierge: boolean;
   primaryAction: OwnerPrimaryAction | null;
+  onCtaClick?: () => void;
 }) => {
   const localSignal =
     nearbyCount > 0 && nearbyRadius
@@ -419,7 +440,7 @@ const PublishStar = ({
           padding: "22px",
         }}
       >
-        <PrimaryCta to="/sits/create">Publier une annonce</PrimaryCta>
+        <PrimaryCta to="/sits/create" onClick={onCtaClick}>Publier une annonce</PrimaryCta>
         {showConcierge && (
           <div className="mt-[22px]">
             <SitDraftFromPrompt demoted primary={primaryAction} />
@@ -458,6 +479,28 @@ const OwnerStarSection = ({
   showConcierge,
   primaryAction,
 }: OwnerStarSectionProps) => {
+  const variant: "ongoing" | "applications" | "draft" | "publish" = ongoingSit
+    ? "ongoing"
+    : pendingApps.length > 0
+      ? "applications"
+      : latestDraft
+        ? "draft"
+        : "publish";
+
+  const sectionRef = useRef<HTMLElement | null>(null);
+  useImpressionOnce(sectionRef, `owner_star:${variant}`, () => {
+    void trackEvent("dashboard_star_seen", {
+      source: "owner_dashboard",
+      metadata: { surface: "owner_dashboard", variant },
+    });
+  });
+
+  const onCtaClick = () =>
+    void trackEvent("dashboard_star_cta_clicked", {
+      source: "owner_dashboard",
+      metadata: { surface: "owner_dashboard", variant },
+    });
+
   let content: React.ReactNode;
 
   if (ongoingSit) {
@@ -470,7 +513,7 @@ const OwnerStarSection = ({
           eyebrow="En ce moment"
           title="Votre maison est entre de bonnes mains."
         />
-        <OngoingCard sit={ongoingSit} sitter={sitter} coverPhoto={propertyCoverPhoto} />
+        <OngoingCard sit={ongoingSit} sitter={sitter} coverPhoto={propertyCoverPhoto} onCtaClick={onCtaClick} />
       </>
     );
   } else if (pendingApps.length > 0) {
@@ -479,10 +522,11 @@ const OwnerStarSection = ({
         pendingApps={pendingApps}
         sitterProfiles={sitterProfiles}
         sitterAffinityProfiles={sitterAffinityProfiles}
+        onCtaClick={onCtaClick}
       />
     );
   } else if (latestDraft) {
-    content = <DraftStar draft={latestDraft} />;
+    content = <DraftStar draft={latestDraft} onCtaClick={onCtaClick} />;
   } else {
     content = (
       <PublishStar
@@ -490,12 +534,18 @@ const OwnerStarSection = ({
         nearbyRadius={nearbyRadius}
         showConcierge={showConcierge}
         primaryAction={primaryAction}
+        onCtaClick={onCtaClick}
       />
     );
   }
 
   return (
-    <section aria-label="Votre priorité du moment" className="px-4 sm:px-5 md:px-8">
+    <section
+      ref={sectionRef}
+      data-dashboard-star="owner"
+      aria-label="Votre priorité du moment"
+      className="px-4 sm:px-5 md:px-8"
+    >
       {content}
     </section>
   );
