@@ -35,6 +35,9 @@ import SitterMatchSection, { SectionHeader } from "./sitter/SitterMatchSection";
 import SitterStoryTiles from "./sitter/SitterStoryTiles";
 import NoNearbySitsEmptyState from "./NoNearbySitsEmptyState";
 import EmailDigestCard from "./sitter/EmailDigestCard";
+import NextGuardRailCard from "./sitter/NextGuardRailCard";
+import ReputationRailCard from "./sitter/ReputationRailCard";
+import AlmaRailWhisper from "./sitter/AlmaRailWhisper";
 import { useIsNewSitter } from "@/hooks/useIsNewUser";
 import { useSitterTopAffinitySits } from "@/hooks/useSitterTopAffinitySits";
 
