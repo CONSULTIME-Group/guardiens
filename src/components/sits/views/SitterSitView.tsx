@@ -249,8 +249,10 @@ const SitterSitView = ({
 
 
 
-      {/* Apply bar, affichée tout en haut, juste sous le header,
-          pour que le CTA "Postuler" soit visible immédiatement sans scroll. */}
+      {/* Barre de candidature en pilule signature (vague 21).
+          data-dashboard-star="sitter" : le sticky mobile ci-dessous utilise
+          useStarVisibilityGate("sitter") pour ne s'afficher que lorsque cette
+          barre est hors écran. */}
       {activeRole === "sitter" && sit.status === "published" && (() => {
         const days =
           sit.start_date && sit.end_date
@@ -269,37 +271,48 @@ const SitterSitView = ({
           !hasApplied &&
           sit.accepting_applications;
 
+        const Fact = ({ icon: Icon, label }: { icon: any; label: React.ReactNode }) => (
+          <span className="inline-flex items-center gap-1.5 text-muted-foreground" style={{ fontSize: "13px" }}>
+            <Icon className="h-3.5 w-3.5 text-primary/70" aria-hidden="true" />
+            <span className="text-foreground" style={{ fontWeight: 600 }}>{label}</span>
+          </span>
+        );
+
         return (
           <aside
             aria-label="Action de candidature"
-            className="mt-4 mb-6 rounded-2xl border border-border bg-card shadow-sm"
+            data-dashboard-star="sitter"
+            className="mt-4 mb-6 bg-card border border-border"
+            style={{
+              borderRadius: "20px",
+              boxShadow: "0 1px 2px rgba(29,27,22,0.04), 0 8px 24px rgba(29,27,22,0.05)",
+            }}
           >
             <div className="px-4 md:px-6 py-3 md:py-4 flex flex-col md:flex-row md:items-center md:justify-between gap-3 md:gap-6">
               {showRecap ? (
-                <div className="flex flex-col md:flex-row md:items-center gap-y-1.5 md:gap-x-5 text-xs md:text-sm text-muted-foreground min-w-0">
-                  {owner?.city && (
-                    <span className="inline-flex items-center gap-1.5">
-                      <MapPin className="h-3.5 w-3.5 text-primary/70" aria-hidden="true" />
-                      <span className="truncate max-w-[12rem]">{owner.city}</span>
-                    </span>
-                  )}
+                <div className="flex flex-wrap items-center gap-x-5 gap-y-1.5 min-w-0">
+                  {owner?.city && <Fact icon={MapPin} label={owner.city} />}
                   {days > 0 && (
-                    <span className="inline-flex items-center gap-1.5">
-                      <CalendarDays className="h-3.5 w-3.5 text-primary/70" aria-hidden="true" />
-                      {days} {days === 1 ? "jour" : "jours"}
-                    </span>
+                    <Fact
+                      icon={CalendarDays}
+                      label={`${days} ${days === 1 ? "jour" : "jours"}`}
+                    />
                   )}
                   {pets.length > 0 && (
-                    <span className="inline-flex items-center gap-1.5">
-                      <PawPrint className="h-3.5 w-3.5 text-primary/70" aria-hidden="true" />
-                      {pets.length} {pets.length === 1 ? "animal" : "animaux"}
-                    </span>
+                    <Fact
+                      icon={PawPrint}
+                      label={`${pets.length} ${pets.length === 1 ? "animal" : "animaux"}`}
+                    />
                   )}
-                  {sit.max_applications && (
-                    <span className="inline-flex items-center gap-1.5">
-                      <Users className="h-3.5 w-3.5 text-primary/70" aria-hidden="true" />
-                      {appCount} / {sit.max_applications} candidature{sit.max_applications > 1 ? "s" : ""}
-                    </span>
+                  {appCount > 0 && (
+                    <Fact
+                      icon={Users}
+                      label={
+                        sit.max_applications
+                          ? `${appCount} / ${sit.max_applications} candidature${sit.max_applications > 1 ? "s" : ""}`
+                          : `${appCount} candidature${appCount > 1 ? "s" : ""}`
+                      }
+                    />
                   )}
                 </div>
               ) : (
@@ -308,7 +321,7 @@ const SitterSitView = ({
 
               <div className="w-full md:w-auto md:shrink-0">
                 {!sit.accepting_applications ? (
-                  <Button className="w-full md:w-auto md:min-w-[16rem] h-11 md:h-12 px-6 text-base font-semibold" disabled>
+                  <Button className="w-full md:w-auto md:min-w-[16rem] h-11 md:h-12 px-6 rounded-full text-base font-semibold" disabled>
                     Candidatures fermées
                   </Button>
                 ) : accessLevel === 1 ? (
@@ -318,7 +331,7 @@ const SitterSitView = ({
                     context="guard"
                   />
                 ) : hasApplied ? (
-                  <Button className="w-full md:w-auto md:min-w-[16rem] h-11 md:h-12 px-6 text-base font-semibold" disabled>
+                  <Button className="w-full md:w-auto md:min-w-[16rem] h-11 md:h-12 px-6 rounded-full text-base font-semibold" disabled>
                     <CheckCircle2 className="h-5 w-5 mr-2" aria-hidden="true" /> Candidature envoyée
                   </Button>
                 ) : !canApplyGuards ? (
@@ -329,7 +342,8 @@ const SitterSitView = ({
                   />
                 ) : (
                   <Button
-                    className="w-full md:w-auto md:min-w-[16rem] h-11 md:h-12 px-8 text-base font-semibold shadow-sm"
+                    className="w-full md:w-auto md:min-w-[16rem] h-11 md:h-12 px-8 rounded-full text-base font-semibold"
+                    style={{ boxShadow: "0 6px 14px rgba(44,109,80,0.24)" }}
                     onClick={() => {
                       trackEvent("sit_apply_clicked", {
                         source: "sit_detail_top",
