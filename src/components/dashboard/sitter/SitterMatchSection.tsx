@@ -325,7 +325,7 @@ const StarCard = ({ sit, onCtaClick }: { sit: AffinitySitCard; onCtaClick?: () =
               className="text-muted-foreground mt-[14px]"
               style={{ fontSize: "12px", lineHeight: 1.4 }}
             >
-              Basé sur {total} critères partagés entre vos deux profils.
+              Basé sur {total} critère{total > 1 ? "s" : ""} comparé{total > 1 ? "s" : ""} entre vos deux profils.
             </p>
           )}
         </div>
