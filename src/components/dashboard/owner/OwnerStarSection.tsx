@@ -288,7 +288,7 @@ const ApplicationCard = ({
           )}
 
           <div className="mt-[22px] flex flex-wrap items-center gap-[14px]">
-            <PrimaryCta to={app.sit_id ? `/sits/${app.sit_id}#candidatures` : "/sits"}>
+            <PrimaryCta to={app.sit_id ? `/sits/${app.sit_id}#candidatures` : "/sits"} onClick={onCtaClick}>
               Découvrir sa candidature
             </PrimaryCta>
             {extraCount > 0 && (
