@@ -20,7 +20,8 @@ import OwnerCockpit from "./owner/OwnerCockpit";
 import OwnerStarSection from "./owner/OwnerStarSection";
 import OwnerAnnonceSection from "./owner/OwnerAnnonceSection";
 import OwnerFamilySection from "./owner/OwnerFamilySection";
-import OwnerEntraideSection from "./owner/OwnerEntraideSection";
+import SitterEntraideSection from "./sitter/SitterEntraideSection";
+import { useFirstNearbyMission } from "@/hooks/useFirstNearbyMission";
 import NearbySittersSection from "./owner/NearbySittersSection";
 import ReadingsSection from "./shared/ReadingsSection";
 
@@ -70,6 +71,11 @@ const OwnerDashboard = () => {
   const { data: nearbyOwnerSittersData } = useNearbyOwnerSitters(user?.id);
   const { data: nearbyHelpersData } = useNearbyHelpers(user?.id);
   const nearbyHelpersCount = nearbyHelpersData?.helpers?.length ?? 0;
+  const { mission: firstNearbyMission } = useFirstNearbyMission(user?.id);
+  const myActiveMission = useMemo(
+    () => myMissions.find((m: any) => m.status !== "completed" && m.status !== "cancelled") ?? null,
+    [myMissions],
+  );
 
   /* ── UI state ── */
   const [showOnboarding, setShowOnboarding] = useState(false);
@@ -316,11 +322,14 @@ const OwnerDashboard = () => {
             {/* 4bis. LES GENS DU COIN (vague 16) */}
             <NearbySittersSection />
 
-            {/* 5. ENTRAIDE */}
-            <OwnerEntraideSection
-              myMissions={myMissions}
-              nearbyHelpersCount={nearbyHelpersCount}
-            />
+            {/* 5. ENTRAIDE bidimensionnelle (vague 20) — même composant que le dashboard gardien */}
+            <div className="px-4 sm:px-5 md:px-8">
+              <SitterEntraideSection
+                firstNearbyMission={firstNearbyMission}
+                myActiveMission={myActiveMission}
+                nearbyHelpersCount={nearbyHelpersCount}
+              />
+            </div>
 
             {/* 6. LECTURES ET GUIDES (vague 16) */}
             <ReadingsSection role="owner" />

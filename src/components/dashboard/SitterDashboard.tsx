@@ -8,6 +8,7 @@ import { useSearchParams, Link, useNavigate } from "react-router-dom";
 import { useSubscriptionAccess } from "@/hooks/useSubscriptionAccess";
 import { useAccessLevel } from "@/hooks/useAccessLevel";
 import { useSitterDashboardData } from "@/hooks/useSitterDashboardData";
+import { useNearbyHelpers } from "@/hooks/useNearbyHelpers";
 import DashboardLoadError from "./DashboardLoadError";
 
 import RoleActivationBanner from "./RoleActivationBanner";
@@ -247,6 +248,11 @@ const SitterDashboard = () => {
 
   // VAGUE 3 — L'entraide, invitation calme, une seule mission mise en avant.
   const firstNearbyMission = nearbyMissions[0];
+  const myActiveMission = myMissions.find((m: any) => m.status !== "completed" && m.status !== "cancelled") ?? null;
+
+  // Signal helpers proches, partagé entre les deux dashboards.
+  const { data: nearbyHelpersData } = useNearbyHelpers(user?.id);
+  const nearbyHelpersCount = nearbyHelpersData?.helpers?.length ?? 0;
 
 
 
@@ -312,13 +318,12 @@ const SitterDashboard = () => {
                 isLoading={nbaLoading}
               />
 
-              {/* 4. ENTRAIDE, invitation adaptée au premier pas */}
+              {/* 4. ENTRAIDE bidimensionnelle (vague 20) */}
               <div className="">
                 <SitterEntraideSection
                   firstNearbyMission={firstNearbyMission}
-                  eyebrow="Un premier pas dans la communauté"
-                  title="Commencez par un coup de main."
-                  subtitle="La façon la plus simple de rencontrer les gens du coin."
+                  myActiveMission={myActiveMission}
+                  nearbyHelpersCount={nearbyHelpersCount}
                 />
               </div>
 
@@ -424,14 +429,13 @@ const SitterDashboard = () => {
 
               {ChecklistBlock}
 
-              {/* VAGUE 3 — invitation entraide calme */}
+              {/* VAGUE 20 — entraide bidimensionnelle */}
               <div className="">
                 <SitterEntraideSection
                   firstNearbyMission={firstNearbyMission}
-                  eyebrow="L'entraide, tout près"
-                  title="Un coup de main à donner."
+                  myActiveMission={myActiveMission}
+                  nearbyHelpersCount={nearbyHelpersCount}
                 />
-
               </div>
 
               {/* VAGUE 16 — lectures et guides */}
