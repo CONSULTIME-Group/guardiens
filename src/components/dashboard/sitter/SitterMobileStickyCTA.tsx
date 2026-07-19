@@ -2,6 +2,7 @@ import { memo } from "react";
 import { useNavigate } from "react-router-dom";
 import { Search, MessageSquare, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useStarVisibilityGate } from "@/hooks/useStarVisibilityGate";
 
 interface SitterMobileStickyCTAProps {
   pendingAppsCount?: number;
