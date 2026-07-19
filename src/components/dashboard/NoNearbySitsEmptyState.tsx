@@ -168,7 +168,7 @@ const NoNearbySitsEmptyState = ({
         {totalPublishedSits > 0 && (
           <p className="text-xs text-muted-foreground mt-2">
             Il y a actuellement{" "}
-            <strong className="text-foreground">
+            <strong className="font-heading text-base text-foreground">
               {totalPublishedSits.toLocaleString("fr-FR")}
             </strong>{" "}
             garde{totalPublishedSits > 1 ? "s" : ""} publiée
