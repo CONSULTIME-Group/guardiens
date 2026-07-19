@@ -66,7 +66,7 @@ describe("NoNearbySitsEmptyState", () => {
         <NoNearbySitsEmptyState totalPublishedSits={42} postalCode="69005" />
       </MemoryRouter>,
     );
-    expect(screen.getByText(/Rien dans votre zone aujourd'hui/i)).toBeInTheDocument();
+    expect(screen.getByText(/Votre profil est en veille active/i)).toBeInTheDocument();
     expect(screen.getByText(/42/)).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /M'alerter/i })).toBeInTheDocument();
   });
