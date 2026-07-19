@@ -4,7 +4,7 @@ import { BadgeRow } from "@/components/badges/BadgeRow";
 import { supabase } from "@/integrations/supabase/client";
 import { logger } from "@/lib/logger";
 import { useAuth } from "@/contexts/AuthContext";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 
 
 import OnboardingWelcome from "./OnboardingWelcome";
@@ -12,7 +12,7 @@ import NearbyOwnerSittersCard from "./owner/NearbyOwnerSittersCard";
 import NearbyEmergencySitters from "./NearbyEmergencySitters";
 import NearbyHelpersCarousel from "./shared/NearbyHelpersCarousel";
 import DashboardSkeleton from "@/components/skeletons/DashboardSkeleton";
-import { Plus, Eye, ChevronDown, ChevronUp } from "lucide-react";
+import { ChevronDown, ChevronUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { differenceInDays } from "date-fns";
 
@@ -26,21 +26,21 @@ import { useUserBadges } from "@/hooks/useProfileReputation";
 
 /* ── Extracted sub-components ── */
 import MonAnnonceCard from "./owner/MonAnnonceCard";
-import OngoingSitHero from "./owner/OngoingSitHero";
+// OngoingSitHero: rendu désormais via OwnerStarSection.
 import ApplicationsSection from "./owner/ApplicationsSection";
 import ContextualResources from "./owner/ContextualResources";
 import MissionsTabsCard from "./owner/MissionsTabsCard";
 import DashSection from "./owner/DashSection";
 import EmptyCard from "./owner/EmptyCard";
 import StatsStrip from "./owner/StatsStrip";
+import OwnerCockpit from "./owner/OwnerCockpit";
+import OwnerStarSection from "./owner/OwnerStarSection";
 
 import MobileStickyCTA from "./owner/MobileStickyCTA";
 import LiveSignalStrip from "./shared/LiveSignalStrip";
 import SectionEyebrow from "./shared/SectionEyebrow";
 import TodoCard, { type TodoItem } from "./owner/TodoCard";
-import PriorityActionCard from "./shared/PriorityActionCard";
-import DraftResumeCard from "./DraftResumeCard";
-import SitDraftFromPrompt from "./SitDraftFromPrompt";
+// PriorityActionCard / DraftResumeCard / SitDraftFromPrompt : remplacés par OwnerStarSection (vague 10).
 import OwnerFirstNBAGardiens from "./OwnerFirstNBAGardiens";
 import { useOwnerPriorityAction } from "@/hooks/useOwnerPriorityAction";
 import { useOwnerPrimaryAction } from "@/hooks/useOwnerPrimaryAction";
@@ -77,7 +77,6 @@ import { trackEvent } from "@/lib/analytics";
 
 const OwnerDashboard = () => {
   const { user } = useAuth();
-  const navigate = useNavigate();
   const { level, profileCompletion: accessProfileCompletion } = useAccessLevel();
   const [showAllMobile, setShowAllMobile] = useState(false);
   // Premier contact Alma : bloque les whispers proactifs tant qu'il n'est pas vu.
@@ -454,92 +453,29 @@ const OwnerDashboard = () => {
         </div>
       )}
 
-      {/* ═══ Hero header (compact, eyebrow + titre + sous-titre contextuel) ═══ */}
-      <header className="px-5 md:px-8 pt-2 animate-fade-in">
-        <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
-          <div className="min-w-0">
-            <p className="hidden md:block font-heading italic text-sm text-muted-foreground mb-1.5">
-              Espace propriétaire
-            </p>
-            <div className="flex items-center gap-3 flex-wrap">
-              <h1 className="text-3xl md:text-4xl font-heading font-bold tracking-tight leading-tight text-foreground">
-                Bonjour{user?.firstName ? `, ${capitalize(user.firstName)}` : ""}{"\u202F"}!
-              </h1>
-            </div>
-            <p className="text-sm text-muted-foreground font-sans mt-1">{subtitle}</p>
-          </div>
-          {/* Desktop : CTA inline + bouton profil public visible. Mobile : sticky CTA en bas. */}
-          <div className="hidden md:flex items-center gap-2 shrink-0">
-            {user?.id && (
-              <Button
-                variant="outline"
-                size="lg"
-                asChild
-                className="rounded-xl"
-              >
-                <Link
-                  to={`/gardiens/${user.id}?tab=proprio`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label="Voir mon profil public (nouvel onglet)"
-                >
-                  <Eye className="h-4 w-4 mr-1.5" /> Mon profil public
-                </Link>
-              </Button>
-            )}
-            {/* CTA hero desktop masqué pour early/new-owner ou owner sans annonce active :
-                la NBA dominante (SitDraftFromPrompt ou DraftResumeCard) sert déjà de CTA principal. */}
-            {!showAlmaProactive && (
-              <Button
-                size="lg"
-                onClick={() => navigate("/sits/create")}
-                className="rounded-xl"
-              >
-                <Plus className="h-4 w-4 mr-1.5" /> Publier une annonce
-              </Button>
-            )}
-          </div>
-        </div>
-      </header>
+      {/* ═══ Cockpit propriétaire (vague 10) ═══ */}
+      <OwnerCockpit
+        userId={user?.id}
+        firstName={user?.firstName}
+        avatarUrl={user?.avatarUrl ?? null}
+        subtitle={subtitle}
+      />
 
-      {/* ═══ Draft en cours : carte de reprise prioritaire, en tête ═══
-          Masquée quand l'action primaire est « publish_draft » : SitDraftFromPrompt
-          rend déjà la carte d'activation dédiée en mode publication. */}
-      {hasDraft && latestDraft && primaryAction?.action !== "publish_draft" && (
-        <div className="px-5 md:px-8">
-          <DraftResumeCard draft={latestDraft as any} />
-        </div>
-      )}
-
-      {/* ═══ Owner Pass 3 — Concierge IA (owner sans annonce active) ═══
-          Reste accessible en permanence même si un brouillon existe :
-          l'owner peut vouloir décrire une autre absence sans écraser son
-          draft en cours. Affichage secondaire (moins accentué) dans ce cas. */}
-      {(showAlmaProactive || hasPrimaryAction) && (
-        <div className="px-5 md:px-8">
-          <SitDraftFromPrompt
-            secondary={hasDraft && primaryAction?.action !== "publish_draft"}
-            primary={primaryAction}
-          />
-        </div>
-      )}
-
-      {/* ═══ Action prioritaire unique , UN seul CTA dominant ═══
-          Précepte 2026 : 1 seule NBA above the fold. Pour un owner sans annonce
-          active, SitDraftFromPrompt / DraftResumeCard est la NBA dominante ;
-          on masque PriorityActionCard pour éviter les CTA "Publier" empilés. */}
-      {!hasDraft && !showAlmaProactive && !hasPrimaryAction && (
-        <div className="px-5 md:px-8">
-          <PriorityActionCard
-            eyebrow={priorityAction.eyebrow}
-            title={priorityAction.title}
-            description={newOwnerDescription}
-            ctaLabel={priorityAction.ctaLabel}
-            ctaTo={priorityAction.ctaTo}
-            urgency={priorityAction.urgency}
-          />
-        </div>
-      )}
+      {/* ═══ Star contextuelle (vague 10) : UNE seule vedette à la fois ═══
+          Remplace DraftResumeCard + SitDraftFromPrompt autonome + PriorityActionCard
+          + OngoingSitHero au-dessus du flux. */}
+      <OwnerStarSection
+        ongoingSit={ongoingSit ?? null}
+        pendingApps={recentApps.filter(a => a.status === "pending")}
+        sitterProfiles={sitterProfiles}
+        sitterAffinityProfiles={sitterAffinityProfiles}
+        latestDraft={latestDraft as any}
+        propertyCoverPhoto={propertyCoverPhoto}
+        nearbyCount={nearbyCount}
+        nearbyRadius={nearbyRadius}
+        showConcierge={!ongoingSit && !latestDraft && (showAlmaProactive || hasPrimaryAction)}
+        primaryAction={primaryAction}
+      />
 
 
       {isNewOwner ? (
@@ -598,16 +534,7 @@ const OwnerDashboard = () => {
       )}
 
 
-      {/* ═══ Garde en cours (prioritaire, contextuel) ═══ */}
-      {ongoingSit && (
-        <div className="px-5 md:px-8">
-          <OngoingSitHero
-            sit={ongoingSit}
-            sitterProfiles={sitterProfiles}
-            coverPhoto={propertyCoverPhoto}
-          />
-        </div>
-      )}
+      {/* Garde en cours : rendue par OwnerStarSection (variant "ongoing"). */}
 
       {/* ═══ Toggle mobile : « Voir mes stats et bonus » ═══
           P1 2026 mobile reveal : on AFFICHE par défaut le cœur opérationnel
