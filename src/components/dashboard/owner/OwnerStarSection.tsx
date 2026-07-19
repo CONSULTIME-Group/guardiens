@@ -127,10 +127,12 @@ const OngoingCard = ({
   sit,
   sitter,
   coverPhoto,
+  onCtaClick,
 }: {
   sit: SitRow;
   sitter?: SitterInfo | null;
   coverPhoto?: string | null;
+  onCtaClick?: () => void;
 }) => {
   const dates = formatDateRange(sit.start_date, sit.end_date);
   const daysLeft = sit.end_date
