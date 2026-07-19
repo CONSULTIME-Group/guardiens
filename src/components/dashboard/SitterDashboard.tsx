@@ -399,6 +399,7 @@ const SitterDashboard = () => {
                 <SitterMatchSection
                   topSits={topSits}
                   fallbackSits={fallbackSits}
+                  discoverySit={discoverySit}
                   scopeUsed={scopeUsed}
                   isLoading={nbaLoading}
                 />
