@@ -518,23 +518,22 @@ const Messages = () => {
     const roleLabel = contextTitle;
 
     return (
-      <div key={conv.id} className="group relative border-b border-border/50">
+      <div key={conv.id} className="group relative">
         <button
           type="button"
           onClick={() => {
-            // Memorize scroll position before opening the conversation
             if (convListRef.current) {
               savedScrollRef.current = convListRef.current.scrollTop;
             }
             setActiveConv(conv);
           }}
-          className={`w-full flex items-start gap-3 p-3.5 pl-6 pr-10 text-left hover:bg-accent/50 transition-colors ${activeConv?.id === conv.id ? "bg-accent/50" : ""}`}
+          className={`w-full flex items-start gap-3 px-4 py-3.5 pr-10 text-left transition-colors ${activeConv?.id === conv.id ? "bg-primary/10" : "hover:bg-primary/5"}`}
         >
           <div className="relative shrink-0">
             {conv.other_user?.avatar_url ? (
               <img src={conv.other_user.avatar_url} alt="" className="w-11 h-11 rounded-full object-cover" />
             ) : (
-              <div className="w-11 h-11 rounded-full bg-primary/10 flex items-center justify-center text-primary font-medium text-sm">
+              <div className="w-11 h-11 rounded-full bg-secondary/[0.12] flex items-center justify-center text-secondary-foreground font-heading text-base">
                 {conv.other_user?.first_name?.charAt(0)?.toUpperCase() || "?"}
               </div>
             )}
@@ -542,7 +541,7 @@ const Messages = () => {
           <div className="flex-1 min-w-0">
             <div className="flex items-center justify-between gap-2">
               <div className="flex items-center gap-2 min-w-0">
-                <span className={`text-base truncate capitalize ${hasUnread ? "font-bold text-foreground" : "font-medium"}`}>
+                <span className={`text-[15px] truncate capitalize ${hasUnread ? "font-semibold text-foreground" : "font-medium text-foreground"}`}>
                   {capitalize(conv.other_user?.first_name) || "Utilisateur"}
                 </span>
                 {appInfo && !isMission && (
@@ -556,13 +555,12 @@ const Messages = () => {
               </span>
             </div>
             {roleLabel && (
-              <p className="text-sm text-muted-foreground truncate">{roleLabel}</p>
+              <p className="font-heading italic text-[12px] text-muted-foreground truncate mt-0.5">{roleLabel}</p>
             )}
-            <div className="flex items-center justify-between gap-2 mt-0.5">
+            <div className="flex items-center justify-between gap-2 mt-1">
               {conv.last_message?.is_system ? (
-                <p className={`text-sm truncate italic flex items-center gap-1 ${hasUnread ? "text-foreground/80" : "text-muted-foreground"}`}>
-                  <Info className="h-3 w-3 shrink-0" aria-hidden="true" />
-                  <span className="truncate">{conv.last_message?.content || ""}</span>
+                <p className={`text-sm truncate italic ${hasUnread ? "text-foreground/80" : "text-muted-foreground"}`}>
+                  {conv.last_message?.content || ""}
                 </p>
               ) : (
                 <p className={`text-sm truncate ${hasUnread ? "text-foreground font-medium" : "text-muted-foreground"}`}>
@@ -571,7 +569,7 @@ const Messages = () => {
                 </p>
               )}
               {hasUnread && (
-                <span className="bg-primary text-primary-foreground text-[10px] rounded-full min-w-[18px] h-[18px] flex items-center justify-center px-1 shrink-0 font-bold">
+                <span className="bg-primary text-primary-foreground text-[10px] rounded-full min-w-[18px] h-[18px] flex items-center justify-center px-1 shrink-0 font-semibold tabular-nums">
                   {conv.unread_count}
                 </span>
               )}
@@ -591,23 +589,26 @@ const Messages = () => {
     );
   };
 
-  const renderGroup = (key: string, title: string, convs: Conversation[], unreadCount: number, icon: React.ReactNode) => (
-    <section key={key} aria-label={title}>
-      <h2 className="bg-muted/50 px-4 py-2 flex items-center gap-2 text-sm font-medium text-foreground m-0">
-        <span aria-hidden="true">{icon}</span>
-        <span className="truncate flex-1">{title}</span>
+  const renderGroup = (key: string, title: string, convs: Conversation[], unreadCount: number, _icon: React.ReactNode) => (
+    <section key={key} aria-label={title} className="pt-5">
+      <div className="px-4 pb-2 flex items-center gap-3">
+        <span className="h-px w-3.5 bg-secondary/60" aria-hidden="true" />
+        <h2 className="text-[11px] font-bold uppercase tracking-[0.16em] text-secondary-foreground/80 m-0 truncate flex-1">
+          {title}
+        </h2>
         {unreadCount > 0 && (
           <span
-            className="bg-primary text-primary-foreground rounded-full w-4 h-4 text-[10px] flex items-center justify-center font-bold shrink-0"
+            className="bg-primary text-primary-foreground rounded-full min-w-[18px] h-[18px] px-1 text-[10px] flex items-center justify-center font-semibold shrink-0 tabular-nums"
             aria-label={`${unreadCount} non lu${unreadCount > 1 ? "s" : ""}`}
           >
             {unreadCount}
           </span>
         )}
-      </h2>
+      </div>
       {convs.map(renderConvItem)}
     </section>
   );
+
 
   // Group conversations by sit
   const groups = new Map<string, { title: string; convs: Conversation[]; unreadCount: number }>();
