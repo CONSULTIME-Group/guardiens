@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { getOptimizedImageUrl } from "@/lib/imageOptim";
 import type { AffinitySitCard, PoolScope } from "@/hooks/useSitterTopAffinitySits";
@@ -64,7 +65,18 @@ const AffinityRing = ({ score }: { score: number }) => {
   const r = (size - stroke) / 2;
   const c = 2 * Math.PI * r;
   const clamped = Math.max(0, Math.min(100, Math.round(score)));
-  const offset = c - (clamped / 100) * c;
+  const finalOffset = c - (clamped / 100) * c;
+
+  const prefersReducedMotion =
+    typeof window !== "undefined" &&
+    window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+  const [mounted, setMounted] = useState(prefersReducedMotion);
+  useEffect(() => {
+    if (prefersReducedMotion) return;
+    const raf = requestAnimationFrame(() => setMounted(true));
+    return () => cancelAnimationFrame(raf);
+  }, [prefersReducedMotion]);
+  const offset = mounted ? finalOffset : c;
 
   return (
     <div
@@ -75,7 +87,7 @@ const AffinityRing = ({ score }: { score: number }) => {
     >
       <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
         <defs>
-          <linearGradient id="matchRingGrad" x1="0" y1="0" x2="1" y2="1" gradientTransform="rotate(135, 0.5, 0.5)">
+          <linearGradient id="matchRingGrad" x1="0" y1="0" x2="1" y2="1">
             <stop offset="0%" stopColor="#2C6D50" />
             <stop offset="55%" stopColor="#7C8A45" />
             <stop offset="100%" stopColor="#C8A24B" />
@@ -100,6 +112,11 @@ const AffinityRing = ({ score }: { score: number }) => {
             strokeLinecap="round"
             strokeDasharray={c}
             strokeDashoffset={offset}
+            style={{
+              transition: prefersReducedMotion
+                ? "none"
+                : "stroke-dashoffset 360ms cubic-bezier(0,0,.2,1)",
+            }}
           />
         </g>
       </svg>

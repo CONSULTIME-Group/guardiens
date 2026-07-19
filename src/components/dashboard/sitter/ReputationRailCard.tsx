@@ -25,7 +25,7 @@ const ReputationRailCard = ({
   reviewsCount,
   badgeCount,
 }: ReputationRailCardProps) => {
-  const isBlank = completedSits === 0 && reviewsCount === 0 && badgeCount === 0;
+  const showStats = completedSits > 0;
   const showRating = reviewsCount > 0;
   const ratingStr = avgRating.toFixed(1).replace(".", ",");
 
@@ -38,17 +38,28 @@ const ReputationRailCard = ({
         boxShadow: "0 1px 2px rgba(29,27,22,0.04), 0 8px 24px rgba(29,27,22,0.05)",
       }}
     >
-      <p
-        className="text-muted-foreground"
-        style={{
-          fontSize: "11px",
-          fontWeight: 700,
-          letterSpacing: "0.16em",
-          textTransform: "uppercase",
-        }}
-      >
-        Votre réputation
-      </p>
+      <div className="flex items-center gap-2">
+        <span
+          aria-hidden="true"
+          className="inline-block"
+          style={{
+            width: "20px",
+            height: "1px",
+            background: "hsl(var(--secondary))",
+          }}
+        />
+        <p
+          style={{
+            color: "hsl(var(--secondary))",
+            fontSize: "11px",
+            fontWeight: 700,
+            letterSpacing: "0.16em",
+            textTransform: "uppercase",
+          }}
+        >
+          Votre réputation
+        </p>
+      </div>
       <h3
         className="font-heading text-foreground mt-[8px]"
         style={{ fontSize: "20px", fontWeight: 600, lineHeight: 1.3 }}
@@ -56,7 +67,7 @@ const ReputationRailCard = ({
         Elle parle pour vous.
       </h3>
 
-      {isBlank ? (
+      {!showStats ? (
         <p
           className="font-sans text-muted-foreground mt-[14px]"
           style={{ fontSize: "13.5px", lineHeight: 1.5 }}
