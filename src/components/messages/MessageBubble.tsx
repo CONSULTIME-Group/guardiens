@@ -117,11 +117,10 @@ const MessageBubble = ({ msg, isMe, readerRole = "gardien", isLastInGroup = true
     const text = systemMessageText(msg.metadata, readerRole, msg.content);
     if (!text?.trim()) return null;
     return (
-      <div className="flex justify-center" role="status">
-        <div className="bg-muted/50 rounded-full px-4 py-1 flex items-center gap-1">
-          <Info className="h-3 w-3 text-muted-foreground shrink-0" aria-hidden="true" />
-          <span className="text-xs text-muted-foreground italic">{text}</span>
-        </div>
+      <div className="flex justify-center px-6 py-1" role="status">
+        <p className="font-heading italic text-[12.5px] text-muted-foreground text-center max-w-[80%] leading-relaxed">
+          {text}
+        </p>
       </div>
     );
   }
@@ -132,11 +131,10 @@ const MessageBubble = ({ msg, isMe, readerRole = "gardien", isLastInGroup = true
         <div
           className={[
             "max-w-[78%] px-4 py-2.5",
-            "rounded-2xl",
-            // Asymétrie 2026 : coin 4 px côté origine
+            "shadow-[0_1px_2px_hsl(var(--foreground)/0.04)]",
             isMe
-              ? "rounded-br-[4px] bg-primary text-primary-foreground"
-              : "rounded-bl-[4px] bg-muted text-foreground",
+              ? "rounded-[16px] rounded-br-[4px] bg-primary/[0.12] text-foreground"
+              : "rounded-[16px] rounded-bl-[4px] bg-card border border-border text-foreground",
           ].join(" ")}
         >
           {msg.photo_url && (
@@ -155,25 +153,26 @@ const MessageBubble = ({ msg, isMe, readerRole = "gardien", isLastInGroup = true
             </button>
           )}
           {msg.content && (
-            <p className={`text-sm whitespace-pre-line break-words leading-[1.5] ${isMe ? "text-primary-foreground" : "text-foreground"}`}>
+            <p className="text-[14px] whitespace-pre-line break-words leading-[1.5] text-foreground">
               {msg.content}
             </p>
           )}
           {/* Timestamp + statut lecture : uniquement sur la dernière bulle du groupe */}
           {isLastInGroup && (
             <div className={`flex items-center gap-1 mt-1 ${isMe ? "justify-end" : "justify-start"}`}>
-              <span className={`text-[10px] ${isMe ? "text-primary-foreground/70" : "text-muted-foreground"}`}>
+              <span className="text-[10.5px] text-muted-foreground">
                 {format(new Date(msg.created_at), "HH:mm")}
               </span>
               {isMe && (
                 msg.read_at
-                  ? <CheckCheck className="h-3 w-3 text-primary-foreground/70" />
-                  : <Check className="h-3 w-3 text-primary-foreground/50" />
+                  ? <CheckCheck className="h-3 w-3 text-primary/70" />
+                  : <Check className="h-3 w-3 text-muted-foreground/60" />
               )}
             </div>
           )}
         </div>
       </div>
+
 
       {msg.photo_url && (
         <Dialog open={lightboxOpen} onOpenChange={setLightboxOpen}>
