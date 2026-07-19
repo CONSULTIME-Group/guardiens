@@ -474,6 +474,11 @@ const SitterDashboard = () => {
                   badgeCount={badgeCount ?? 0}
                 />
               </div>
+              {shouldShowVerifiedCard(isPricingActive(), !!hasSubscription) && (
+                <div>
+                  <VerifiedSitterRailCard />
+                </div>
+              )}
               <div className="mb-6">
                 <AlmaRailWhisper
                   profileCompletion={profileCompletion ?? 0}
