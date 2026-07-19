@@ -24,6 +24,7 @@ import type { AffinityResult } from "@/lib/affinityScore";
 interface Props {
   topSits: AffinitySitCard[];
   fallbackSits: AffinitySitCard[];
+  discoverySit?: AffinitySitCard | null;
   scopeUsed: PoolScope;
   isLoading: boolean;
 }
