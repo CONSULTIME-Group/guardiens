@@ -1,16 +1,16 @@
 /**
- * CommunityPulseBanner — panneau vert chaleureux « Le quartier, en ce moment ».
+ * CommunityPulseBanner — panneau vert chaleureux « Le pouls de la communauté ».
+ *
+ * VAGUE 4 (rail confirmé) : liste verticale de TROIS chiffres MAX, sans icônes,
+ * priorité au local. Chaque libellé dit explicitement son périmètre.
  *
  * Vitrine de chiffres RÉELS et vivants (jamais des KPI personnels à zéro).
  * Sources : useCommunityPulse (RPC get_public_stats + offsets fondateurs) et
- * useHelpersProximityCount (dimension locale si géoloc dispo). Aucun chiffre
- * n'est affiché s'il vaut 0 : on ne veut pas de métrique démoralisante.
- *
- * Placement recommandé : haut du dashboard, sous l'action prioritaire.
+ * useHelpersProximityCount (dimension locale si géoloc dispo).
  */
 import { memo } from "react";
 import { Link } from "react-router-dom";
-import { MapPin, Users, Home, PawPrint, HandHeart, ArrowRight } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { useCommunityPulse } from "@/hooks/useCommunityPulse";
 import { useHelpersProximityCount } from "@/hooks/useHelpersProximityCount";
 import { cn } from "@/lib/utils";
@@ -24,8 +24,12 @@ interface Metric {
   key: string;
   value: number;
   label: string;
-  Icon: typeof Users;
 }
+
+// Grain très léger : SVG feTurbulence en data-uri, mix-blend soft-light,
+// opacité globale ~0.5. Se sent, ne se voit pas.
+const GRAIN_DATA_URI =
+  "url(\"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23n)' opacity='0.55'/></svg>\")";
 
 const CommunityPulseBanner = memo(({ userId, className }: Props) => {
   const { data: pulse } = useCommunityPulse();
@@ -33,44 +37,35 @@ const CommunityPulseBanner = memo(({ userId, className }: Props) => {
 
   const metrics: Metric[] = [];
 
+  // (a) Local prioritaire si dispo
   if (proximity?.hasGeo && proximity.localCount > 0) {
     metrics.push({
       key: "local",
       value: proximity.localCount,
-      label: `à moins de ${proximity.radiusKm} km autour de vous`,
-      Icon: MapPin,
+      label: `personnes prêtes à aider à moins de ${proximity.radiusKm} km de chez vous`,
+    });
+  } else if (proximity && proximity.nationalCount > 0) {
+    // Fallback national quand pas de local
+    metrics.push({
+      key: "national",
+      value: proximity.nationalCount,
+      label: "personnes prêtes à aider en France",
     });
   }
-  if (pulse && pulse.maisonsGardees > 0) {
+  // (b) Maisons
+  if (pulse && pulse.maisonsGardees > 0 && metrics.length < 3) {
     metrics.push({
       key: "maisons",
       value: pulse.maisonsGardees,
-      label: "maisons gardées",
-      Icon: Home,
+      label: "maisons déjà gardées, partout en France",
     });
   }
-  if (pulse && pulse.animauxAccompagnes > 0) {
+  // (c) Animaux
+  if (pulse && pulse.animauxAccompagnes > 0 && metrics.length < 3) {
     metrics.push({
       key: "animaux",
       value: pulse.animauxAccompagnes,
-      label: "animaux accompagnés",
-      Icon: PawPrint,
-    });
-  }
-  if (proximity && proximity.nationalCount > 0) {
-    metrics.push({
-      key: "helpers",
-      value: proximity.nationalCount,
-      label: "personnes prêtes à aider en France",
-      Icon: HandHeart,
-    });
-  }
-  if (pulse && pulse.totalInscrits > 0) {
-    metrics.push({
-      key: "inscrits",
-      value: pulse.totalInscrits,
-      label: "membres de la communauté",
-      Icon: Users,
+      label: "animaux accompagnés depuis le lancement",
     });
   }
 
@@ -79,48 +74,67 @@ const CommunityPulseBanner = memo(({ userId, className }: Props) => {
   return (
     <section
       aria-labelledby="community-pulse-heading"
-      className={cn(
-        "rounded-2xl bg-gradient-to-br from-[#235741] to-[#2C6D50] p-6 md:p-7 shadow-lg",
-        className,
-      )}
+      className={cn("relative isolate overflow-hidden", className)}
+      style={{
+        borderRadius: "20px",
+        padding: "22px",
+        background: "linear-gradient(135deg, #235741 0%, #2C6D50 100%)",
+        boxShadow:
+          "inset 0 1px 0 rgba(255,255,255,0.14), 0 1px 2px rgba(29,27,22,0.04), 0 12px 32px rgba(29,27,22,0.12)",
+      }}
     >
-      <div className="mb-5">
-        <p className="text-[11px] sm:text-xs font-semibold uppercase tracking-[0.18em] text-[#cfe6da]">
-          Le pouls de la communauté
-        </p>
-        <h2
-          id="community-pulse-heading"
-          className="mt-1.5 font-heading text-xl sm:text-2xl font-semibold text-white leading-tight"
-        >
-          Il vit. Vous en êtes déjà.
-        </h2>
-      </div>
-      <ul className="grid grid-cols-2 gap-x-6 gap-y-4">
-        {metrics.slice(0, 4).map(({ key, value, label, Icon }) => (
-          <li key={key} className="flex items-start gap-2.5 min-w-0">
-            <Icon
-              className="mt-1 h-3.5 w-3.5 shrink-0 text-[#cfe6da] opacity-80"
-              aria-hidden="true"
-            />
-            <div className="min-w-0">
-              <div className="font-heading text-2xl sm:text-3xl font-semibold text-white tabular-nums leading-none">
+      {/* Grain léger, décoratif */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0"
+        style={{
+          backgroundImage: GRAIN_DATA_URI,
+          mixBlendMode: "soft-light",
+          opacity: 0.5,
+        }}
+      />
+
+      <div className="relative">
+        <div className="mb-5">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[#cfe6da]">
+            Le pouls de la communauté
+          </p>
+          <h2
+            id="community-pulse-heading"
+            className="mt-1.5 font-heading text-xl sm:text-2xl font-semibold text-white leading-tight"
+          >
+            Il vit. Vous en êtes déjà.
+          </h2>
+        </div>
+
+        <ul className="flex flex-col" style={{ gap: "14px" }}>
+          {metrics.map(({ key, value, label }) => (
+            <li key={key} className="flex items-baseline gap-3 min-w-0">
+              <span
+                className="font-heading text-white tabular-nums shrink-0 text-right"
+                style={{ fontSize: "26px", fontWeight: 600, minWidth: "52px", lineHeight: 1 }}
+              >
                 {value.toLocaleString("fr-FR")}
-              </div>
-              <div className="mt-1 text-xs sm:text-sm text-[#d5e6dd] leading-snug">
+              </span>
+              <span
+                className="text-[#d5e6dd] leading-snug min-w-0"
+                style={{ fontSize: "12.5px" }}
+              >
                 {label}
-              </div>
-            </div>
-          </li>
-        ))}
-      </ul>
-      <div className="mt-5 flex justify-end">
-        <Link
-          to="/actualites/inventaire-guardiens-france"
-          className="inline-flex items-center gap-1 text-xs sm:text-sm text-[#cfe6da] hover:text-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60 focus-visible:ring-offset-2 focus-visible:ring-offset-[#235741] rounded-sm"
-        >
-          Voir l'inventaire complet
-          <ArrowRight className="h-3 w-3" aria-hidden="true" />
-        </Link>
+              </span>
+            </li>
+          ))}
+        </ul>
+
+        <div className="mt-5 flex justify-end">
+          <Link
+            to="/actualites/inventaire-guardiens-france"
+            className="inline-flex items-center gap-1 text-xs sm:text-sm text-[#cfe6da] hover:text-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60 focus-visible:ring-offset-2 focus-visible:ring-offset-[#235741] rounded-sm"
+          >
+            Voir l'inventaire complet
+            <ArrowRight className="h-3 w-3" aria-hidden="true" />
+          </Link>
+        </div>
       </div>
     </section>
   );
