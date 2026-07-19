@@ -223,14 +223,13 @@ const SitterSitView = ({
         compact
       />
 
-      {/* Score d'affinité réciproque (vue gardien sur annonce propriétaire) */}
-      <AffinitySection
+      {/* Rencontre en tête — grammaire du ring partagé (vague 21) */}
+      <SitterAffinitySection
         sitterProfile={sitterProfile}
         ownerProfile={ownerProfile}
         pets={pets}
-        context="sit_detail"
+        ownerFirstName={owner?.first_name}
         targetId={sit.id}
-        showCtaForSitter={activeRole === "sitter"}
       />
 
       {/* Whispers Alma — surfacés uniquement si données réelles */}
