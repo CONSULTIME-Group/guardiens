@@ -55,7 +55,7 @@ const OwnerCockpit = ({
   return (
     <section
       aria-label="Espace propriétaire, accueil"
-      className="px-4 sm:px-5 md:px-8 pt-4 sm:pt-6 pb-2"
+      className="pt-4 sm:pt-6 pb-2"
     >
       <div className="notebook-card relative p-[22px] sm:p-[34px] pr-[34px] sm:pr-[52px]">
         <div className="notebook-card-paper absolute inset-0" aria-hidden="true" />

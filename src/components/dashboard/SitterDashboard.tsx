@@ -131,7 +131,7 @@ const SitterDashboard = () => {
 
   // ── Bloc activation unifié ──
   const ChecklistBlock = (
-    <section aria-labelledby="onboarding-checklist-heading" className="px-4 sm:px-5 md:px-8 mb-6 md:mb-8">
+    <section aria-labelledby="onboarding-checklist-heading" className="mb-6 md:mb-8">
       {!postalCode && (
         <div className="mb-3 flex items-start gap-3 rounded-xl border border-warning/40 bg-warning/10 px-4 py-3" role="alert">
           <AlertCircle className="h-4 w-4 text-warning shrink-0 mt-0.5" aria-hidden="true" />
