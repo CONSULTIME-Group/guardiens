@@ -221,6 +221,7 @@ const NoNearbySitsEmptyState = ({
           </div>
         )}
 
+        </div>
       </div>
     </section>
   );
