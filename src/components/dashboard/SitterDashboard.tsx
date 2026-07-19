@@ -22,7 +22,6 @@ import DashboardSectionState from "./sitter/DashboardSectionState";
 import SitterMobileStickyCTA from "./sitter/SitterMobileStickyCTA";
 import SitterStatusBar from "./sitter/SitterStatusBar";
 import SitterBadgesSection from "./sitter/SitterBadgesSection";
-import NearbyHelpersCarousel from "./shared/NearbyHelpersCarousel";
 import CommunityPulseBanner from "./shared/CommunityPulseBanner";
 import SitterEmergencyCardCompact from "./sitter/SitterEmergencyCardCompact";
 import SitterMissionsSection from "./sitter/SitterMissionsSection";
@@ -36,10 +35,13 @@ import SitterFirstNBASkeleton from "./SitterFirstNBASkeleton";
 import SitterMatchSection, { SectionHeader } from "./sitter/SitterMatchSection";
 import SitterStoryTiles from "./sitter/SitterStoryTiles";
 import NoNearbySitsEmptyState from "./NoNearbySitsEmptyState";
-import EmailDigestCard from "./sitter/EmailDigestCard";
 import NextGuardRailCard from "./sitter/NextGuardRailCard";
 import ReputationRailCard from "./sitter/ReputationRailCard";
 import AlmaRailWhisper from "./sitter/AlmaRailWhisper";
+import SitterOpeningCard from "./sitter/SitterOpeningCard";
+import SitterTeaserCard from "./sitter/SitterTeaserCard";
+import SitterNextStepRailCard from "./sitter/SitterNextStepRailCard";
+import SitterEntraideSection from "./sitter/SitterEntraideSection";
 import { useIsNewSitter } from "@/hooks/useIsNewUser";
 import { useSitterTopAffinitySits } from "@/hooks/useSitterTopAffinitySits";
 
@@ -47,6 +49,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { CheckCircle, Circle, ChevronRight, Newspaper, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
+
 
 
 
