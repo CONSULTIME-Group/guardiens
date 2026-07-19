@@ -61,7 +61,7 @@ const defaultPrefs: NotifPrefs = {
 
 type SectionId =
   | "account" | "security" | "spaces" | "notifications" | "alerts"
-  | "privacy" | "owner-pitch" | "appearance" | "alma" | "billing" | "data" | "help" | "danger";
+  | "privacy" | "owner-pitch" | "emergency" | "appearance" | "alma" | "billing" | "data" | "help" | "danger";
 
 interface SectionDef {
   id: SectionId;
@@ -75,6 +75,7 @@ const SECTIONS: SectionDef[] = [
   { id: "security", label: "Sécurité & identité", icon: Shield, group: "Compte" },
   { id: "spaces", label: "Mes espaces", icon: Layers, group: "Mes espaces" },
   { id: "owner-pitch", label: "Contacts spontanés", icon: Shield, group: "Mes espaces" },
+  { id: "emergency", label: "Gardien d'urgence", icon: Shield, group: "Mes espaces" },
   { id: "notifications", label: "Notifications", icon: Bell, group: "Préférences" },
   { id: "alerts", label: "Alertes annonces", icon: Bell, group: "Préférences" },
   { id: "privacy", label: "Confidentialité", icon: EyeOff, group: "Préférences" },
