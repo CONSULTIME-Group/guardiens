@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { FileText, MessageSquare, Award } from "lucide-react";
+import { FileText, MessageSquare, Award, type LucideIcon } from "lucide-react";
 import { SectionHeader } from "./SitterMatchSection";
 
 /**
@@ -16,20 +16,23 @@ interface Props {
   badgeCount: number;
 }
 
-type Tile = {
+type TileData = {
   key: string;
-  Icon: React.ComponentType<{ size?: number; strokeWidth?: number }>;
+  Icon: LucideIcon;
   value: number;
   label: string;
   linkTo: string;
   linkText: string;
+  spanFull?: boolean;
 };
 
-const Tile = ({ tile }: { tile: Tile }) => {
+const Tile = ({ tile }: { tile: TileData }) => {
   const { Icon, value, label, linkTo, linkText } = tile;
   return (
     <article
-      className="bg-card border border-border flex flex-col items-start"
+      className={`bg-card border border-border flex flex-col items-start h-full ${
+        tile.spanFull ? "col-span-2 md:col-span-1" : ""
+      }`}
       style={{
         borderRadius: "16px",
         padding: "14px 22px",
@@ -81,7 +84,7 @@ const SitterStoryTiles = ({
   unreadCount,
   badgeCount,
 }: Props) => {
-  const tiles: Tile[] = [
+  const tiles: TileData[] = [
     {
       key: "apps",
       Icon: FileText,
@@ -109,10 +112,7 @@ const SitterStoryTiles = ({
           ? "message à lire"
           : "messages à lire",
       linkTo: "/messages",
-      linkText:
-        unreadCount === 0
-          ? "Ouvrir vos conversations"
-          : "Ouvrir vos conversations",
+      linkText: "Ouvrir vos conversations",
     },
     {
       key: "badges",
@@ -129,6 +129,7 @@ const SitterStoryTiles = ({
         badgeCount === 0
           ? "Débloquer votre premier écusson"
           : "En débloquer d'autres",
+      spanFull: true,
     },
   ];
 
@@ -139,27 +140,10 @@ const SitterStoryTiles = ({
         title="Là où votre histoire avance."
       />
 
-      {/* Mobile : 2 colonnes, la 3e passe en pleine largeur. Desktop : 3. */}
-      <div
-        className="grid gap-[14px]"
-        style={{ gridTemplateColumns: "repeat(2, minmax(0, 1fr))" }}
-      >
-        <Tile tile={tiles[0]} />
-        <Tile tile={tiles[1]} />
-        <div className="col-span-2 md:col-span-1 md:hidden">
-          <Tile tile={tiles[2]} />
-        </div>
-      </div>
-
-      {/* Desktop uniquement : réaffiche la grille en 3 colonnes propres */}
-      <div
-        className="hidden md:grid gap-[14px] mt-[14px]"
-        style={{ gridTemplateColumns: "repeat(3, minmax(0, 1fr))" }}
-      >
-        {/* pour éviter le doublon des 2 premières tuiles en desktop, on
-            n'affiche via la grille mobile QUE la 3e ; on refait la vraie
-            grille 3 colonnes ici. */}
-        <div className="hidden" aria-hidden="true" />
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-[14px]">
+        {tiles.map((t) => (
+          <Tile key={t.key} tile={t} />
+        ))}
       </div>
     </section>
   );
