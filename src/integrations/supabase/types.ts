@@ -6229,9 +6229,14 @@ export type Database = {
           id: string | null
           identity_verified: boolean | null
           is_founder: boolean | null
+          last_seen_at: string | null
           latitude_approx: number | null
           longitude_approx: number | null
           postal_code: string | null
+          pro_specialty: string | null
+          pro_status:
+            | Database["public"]["Enums"]["pro_profile_status_enum"]
+            | null
           profile_completion: number | null
           role: Database["public"]["Enums"]["user_role"] | null
           skill_categories: string[] | null
@@ -6248,9 +6253,14 @@ export type Database = {
           id?: string | null
           identity_verified?: boolean | null
           is_founder?: boolean | null
+          last_seen_at?: string | null
           latitude_approx?: never
           longitude_approx?: never
           postal_code?: string | null
+          pro_specialty?: string | null
+          pro_status?:
+            | Database["public"]["Enums"]["pro_profile_status_enum"]
+            | null
           profile_completion?: number | null
           role?: Database["public"]["Enums"]["user_role"] | null
           skill_categories?: string[] | null
@@ -6267,9 +6277,14 @@ export type Database = {
           id?: string | null
           identity_verified?: boolean | null
           is_founder?: boolean | null
+          last_seen_at?: string | null
           latitude_approx?: never
           longitude_approx?: never
           postal_code?: string | null
+          pro_specialty?: string | null
+          pro_status?:
+            | Database["public"]["Enums"]["pro_profile_status_enum"]
+            | null
           profile_completion?: number | null
           role?: Database["public"]["Enums"]["user_role"] | null
           skill_categories?: string[] | null
