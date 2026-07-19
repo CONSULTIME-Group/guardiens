@@ -35,7 +35,7 @@ import SitterStatusBanner from "./SitterStatusBanner";
 import { useSitDerived } from "./useSitDerived";
 import ReviewsTab from "./tabs/ReviewsTab";
 import SitImmersiveContent from "./SitImmersiveContent";
-import AffinitySection from "@/components/matching/AffinitySection";
+import SitterAffinitySection from "./SitterAffinitySection";
 import { AlmaPopularSitWhisper } from "@/components/ai/alma/wiring/AlmaPopularSitWhisper";
 import { AlmaReactiveOwnerWhisper } from "@/components/ai/alma/wiring/AlmaReactiveOwnerWhisper";
 import type { SitData } from "./types";
