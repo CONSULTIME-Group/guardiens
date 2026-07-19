@@ -401,38 +401,116 @@ const SitterDashboard = () => {
     myMissions.length === 0 && nearbyMissions.length === 0;
 
 
-  const DiscoverySections = (
-    <div className="space-y-6 min-w-0">
-      {/* Sous-section "Garde / Près de chez vous" retirée : la carte rencontre
-          (SitterMatchSection, vague 2) porte désormais seule la découverte
-          d'annonces dans la branche confirmée. NearbyAnnoncesCard reste
-          disponible pour la branche isNewSitter et d'autres écrans. */}
+  // VAGUE 3 — L'entraide, invitation calme, une seule mission mise en avant.
+  const firstNearbyMission = nearbyMissions[0];
+  const missionDateFmt = new Intl.DateTimeFormat("fr-FR", {
+    day: "numeric",
+    month: "long",
+  });
+  const formatMissionDate = (d: string | null | undefined): string | null => {
+    if (!d) return null;
+    try { return missionDateFmt.format(new Date(d)); } catch { return null; }
+  };
 
-
-      {/* 2. Coup de main — idem, pas de wrapper */}
-      <section aria-labelledby="discovery-missions-heading" className="min-w-0">
-        <div className="flex items-center gap-2 mb-2">
-          <span className="inline-flex items-center rounded-full bg-warning/10 text-warning text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5">Entraide</span>
+  const EntraideSection = (
+    <section aria-label="L'entraide, tout près">
+      <SectionHeader
+        eyebrow="L'entraide, tout près"
+        title="Un coup de main à donner."
+      />
+      {firstNearbyMission ? (
+        <>
+          <article
+            className="bg-card border border-border flex items-center flex-wrap"
+            style={{
+              borderRadius: "16px",
+              padding: "22px",
+              gap: "14px",
+              boxShadow: "0 1px 2px rgba(29,27,22,0.04), 0 8px 24px rgba(29,27,22,0.05)",
+            }}
+          >
+            <div className="min-w-0 flex-1">
+              <h3
+                className="font-heading text-foreground"
+                style={{ fontSize: "16px", fontWeight: 600, lineHeight: 1.3 }}
+              >
+                {firstNearbyMission.title ?? "Une aide à proposer"}
+              </h3>
+              {(() => {
+                const meta = [
+                  firstNearbyMission.city,
+                  formatMissionDate(firstNearbyMission.date_needed),
+                ].filter(Boolean).join(" · ");
+                return meta ? (
+                  <p className="text-muted-foreground mt-[8px]" style={{ fontSize: "13px", lineHeight: 1.4 }}>
+                    {meta}
+                  </p>
+                ) : null;
+              })()}
+            </div>
+            <Link
+              to={`/petites-missions/${firstNearbyMission.id}`}
+              className="inline-flex items-center justify-center rounded-full border border-border bg-card text-foreground hover:bg-muted/40 transition-colors"
+              style={{
+                minHeight: "44px",
+                padding: "10px 18px",
+                fontSize: "14px",
+                fontWeight: 700,
+              }}
+            >
+              Proposer mon aide
+            </Link>
+          </article>
+          <div className="mt-[14px]">
+            <Link
+              to="/petites-missions"
+              className="text-primary hover:underline underline-offset-4"
+              style={{ fontSize: "13px", fontWeight: 700 }}
+            >
+              Toutes les missions d'entraide
+            </Link>
+          </div>
+        </>
+      ) : (
+        <div
+          className="text-center bg-card"
+          style={{
+            border: "1px dashed hsl(var(--border))",
+            borderRadius: "16px",
+            padding: "34px 22px",
+          }}
+        >
+          <h3
+            className="font-heading text-foreground"
+            style={{ fontSize: "20px", fontWeight: 600 }}
+          >
+            Personne n'a besoin d'aide pour l'instant, tout va bien.
+          </h3>
+          <p
+            className="font-sans text-muted-foreground mx-auto mt-[14px]"
+            style={{ fontSize: "13px", maxWidth: "42ch", lineHeight: 1.5 }}
+          >
+            Revenez plus tard, ou proposez vous-même un coup de main autour de vous.
+          </p>
+          <div className="mt-[22px]">
+            <Link
+              to="/petites-missions"
+              className="text-primary hover:underline underline-offset-4"
+              style={{ fontSize: "13px", fontWeight: 700 }}
+            >
+              Voir toutes les missions
+            </Link>
+          </div>
         </div>
-        <h2 id="discovery-missions-heading" className="font-heading text-lg sm:text-xl font-bold text-foreground leading-tight mb-3">
-          L'entraide dans votre coin
-        </h2>
-        <div className="space-y-4 min-w-0">
-          <NearbyHelpersCarousel hideHeader />
-          {!missionsEmpty && (
-            <SitterMissionsSection
-              myMissions={myMissions}
-              nearbyMissions={nearbyMissions}
-              postalCode={postalCode}
-              myMissionsError={myMissionsError}
-              nearbyMissionsError={nearbyMissionsError}
-            />
-          )}
-          <CommunityQuestionsSection />
-        </div>
-      </section>
-    </div>
+      )}
+    </section>
   );
+
+  // Ancienne DiscoverySections retirée du flux confirmé (vague 3).
+  // NearbyHelpersCarousel, SitterMissionsSection, CommunityQuestionsSection
+  // et ConseilsDiscoveryCard ne sont plus montés côté confirmé, mais restent
+  // disponibles ailleurs (branche isNewSitter, autres écrans).
+
 
 
 
