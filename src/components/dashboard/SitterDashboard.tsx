@@ -395,16 +395,10 @@ const SitterDashboard = () => {
   // - Coup de main : si pas de missions (mienne ni du coin), on masque
   //   SitterMissionsSection, la carte helpers (qui a son propre empty-state
   //   premium avec CTA parrainage) reste seule visible et porte le message.
-  const annoncesEmpty = !nearbyError && nearbyListings.length === 0;
   const missionsEmpty =
     !myMissionsError && !nearbyMissionsError &&
     myMissions.length === 0 && nearbyMissions.length === 0;
-  const hasBeyondListings = nearbyListings.some((s: any) => s?.is_beyond);
-  const annoncesTitle = annoncesEmpty
-    ? "Aucune annonce à proximité"
-    : hasBeyondListings
-      ? "Annonces ailleurs en France"
-      : "Près de chez vous";
+
 
   const DiscoverySections = (
     <div className="space-y-6 min-w-0">
