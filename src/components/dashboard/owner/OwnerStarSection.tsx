@@ -413,11 +413,13 @@ const PublishStar = ({
   nearbyRadius,
   showConcierge,
   primaryAction,
+  onCtaClick,
 }: {
   nearbyCount: number;
   nearbyRadius: number | null;
   showConcierge: boolean;
   primaryAction: OwnerPrimaryAction | null;
+  onCtaClick?: () => void;
 }) => {
   const localSignal =
     nearbyCount > 0 && nearbyRadius
