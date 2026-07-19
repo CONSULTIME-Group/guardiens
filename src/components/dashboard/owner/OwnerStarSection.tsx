@@ -360,6 +360,7 @@ const ApplicationsStar = ({
         affinity={featuredAffinity}
         affinityInput={featuredInput}
         extraCount={n - 1}
+        onCtaClick={onCtaClick}
       />
     </>
   );
