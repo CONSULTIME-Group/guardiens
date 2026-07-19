@@ -25,7 +25,7 @@ import CommunityPulseBanner from "./shared/CommunityPulseBanner";
 import SitterEmergencyCardCompact from "./sitter/SitterEmergencyCardCompact";
 import SitterMissionsSection from "./sitter/SitterMissionsSection";
 import CommunityQuestionsSection from "./CommunityQuestionsSection";
-import NearbyAnnoncesCard from "./sitter/NearbyAnnoncesCard";
+// NearbyAnnoncesCard retiré ici (vague 2) : la carte rencontre le remplace.
 import DashSection from "./owner/DashSection";
 import SitterDashboardSkeleton from "./sitter/SitterDashboardSkeleton";
 import SitterActivityPanel from "./sitter/SitterActivityPanel";
