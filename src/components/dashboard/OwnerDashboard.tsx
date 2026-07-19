@@ -322,11 +322,14 @@ const OwnerDashboard = () => {
             {/* 4bis. LES GENS DU COIN (vague 16) */}
             <NearbySittersSection />
 
-            {/* 5. ENTRAIDE */}
-            <OwnerEntraideSection
-              myMissions={myMissions}
-              nearbyHelpersCount={nearbyHelpersCount}
-            />
+            {/* 5. ENTRAIDE bidimensionnelle (vague 20) — même composant que le dashboard gardien */}
+            <div className="px-4 sm:px-5 md:px-8">
+              <SitterEntraideSection
+                firstNearbyMission={firstNearbyMission}
+                myActiveMission={myActiveMission}
+                nearbyHelpersCount={nearbyHelpersCount}
+              />
+            </div>
 
             {/* 6. LECTURES ET GUIDES (vague 16) */}
             <ReadingsSection role="owner" />
