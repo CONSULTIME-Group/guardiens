@@ -157,58 +157,62 @@ const NearbyAnnoncesCard = ({ nearbyListings, nearbyError = null, nearbyListings
         // hasFallback === true : on met en avant les annonces hors rayon.
         return (
           <div className="space-y-3 min-w-0">
-            <div className="bg-card border border-border rounded-2xl p-4 sm:p-5 min-w-0">
-              <p className="text-[11px] uppercase tracking-[0.18em] text-muted-foreground font-semibold mb-3">
-                Aucune garde à moins de 100 km, voici les plus proches disponibles
-              </p>
-              <div className="divide-y divide-border/60">
-                {nearbyListings.slice(0, 5).map((sit: any) => {
-                  const distance =
-                    typeof sit.distance_km === "number" ? Math.round(sit.distance_km) : null;
-                  const isNew = differenceInHours(new Date(), new Date(sit.created_at)) < 48;
-                  return (
-                    <Link
-                      key={sit.id}
-                      to={`/sits/${sit.id}`}
-                      className="group flex items-start gap-3 py-3 first:pt-1 last:pb-1 -mx-2 px-2 rounded-lg transition-all duration-200 ease-out hover:bg-muted/40 hover:translate-x-0.5"
-                    >
-                      <SitThumb sit={sit} />
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm sm:text-base text-foreground leading-snug font-medium transition-colors group-hover:text-primary">
-                          {sit.title}
-                          {isNew && (
-                            <span className="ml-2 text-[10px] uppercase tracking-wider font-bold bg-accent text-accent-foreground rounded px-1.5 py-0.5 align-middle">
-                              Nouveau
-                            </span>
-                          )}
-                        </p>
-                        <p className="text-xs text-muted-foreground mt-0.5">
-                          {sit.start_date && sit.end_date
-                            ? `${format(new Date(sit.start_date), "d MMM", { locale: fr })} → ${format(new Date(sit.end_date), "d MMM", { locale: fr })}`
-                            : "Dates flexibles"}
-                        </p>
-                      </div>
-                      {distance !== null && (
-                        <span
-                          className="shrink-0 inline-flex items-center rounded-full font-heading text-[13px] font-semibold tabular-nums px-2.5 py-0.5 bg-muted text-muted-foreground ring-1 ring-border"
-                          aria-label={`À environ ${distance} kilomètres de chez vous`}
-                        >
-                          {distance}&nbsp;km
-                        </span>
-                      )}
-                    </Link>
-                  );
-                })}
+            <div className="notebook-card relative p-4 pr-7 sm:p-5 sm:pr-8 min-w-0">
+              <div className="notebook-card-paper absolute inset-0" aria-hidden="true" />
+              <div className="relative">
+                <p className="text-[11px] uppercase tracking-[0.18em] text-muted-foreground font-semibold mb-3">
+                  Aucune garde à moins de 100 km, voici les plus proches disponibles
+                </p>
+                <div className="divide-y divide-border/60">
+                  {nearbyListings.slice(0, 5).map((sit: any) => {
+                    const distance =
+                      typeof sit.distance_km === "number" ? Math.round(sit.distance_km) : null;
+                    const isNew = differenceInHours(new Date(), new Date(sit.created_at)) < 48;
+                    return (
+                      <Link
+                        key={sit.id}
+                        to={`/sits/${sit.id}`}
+                        className="group flex items-start gap-3 py-3 first:pt-1 last:pb-1 px-1 rounded-lg transition-all duration-200 ease-out hover:bg-muted/40 hover:translate-x-0.5"
+                      >
+                        <SitThumb sit={sit} />
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm sm:text-base text-foreground leading-snug font-medium transition-colors group-hover:text-primary">
+                            {sit.title}
+                            {isNew && (
+                              <span className="ml-2 text-[10px] uppercase tracking-wider font-bold bg-accent text-accent-foreground rounded px-1.5 py-0.5 align-middle">
+                                Nouveau
+                              </span>
+                            )}
+                          </p>
+                          <p className="text-xs text-muted-foreground mt-0.5">
+                            {sit.start_date && sit.end_date
+                              ? `${format(new Date(sit.start_date), "d MMM", { locale: fr })} → ${format(new Date(sit.end_date), "d MMM", { locale: fr })}`
+                              : "Dates flexibles"}
+                          </p>
+                        </div>
+                        {distance !== null && (
+                          <span
+                            className="shrink-0 inline-flex items-center rounded-full font-heading text-[13px] font-semibold tabular-nums px-2.5 py-0.5 bg-muted text-muted-foreground ring-1 ring-border"
+                            aria-label={`À environ ${distance} kilomètres de chez vous`}
+                          >
+                            {distance}&nbsp;km
+                          </span>
+                        )}
+                      </Link>
+                    );
+                  })}
+                </div>
+                <div className="flex items-center justify-end gap-2 pt-3 mt-2 border-t border-border/60">
+                  <Link
+                    to="/mon-abonnement#parrainage"
+                    className="inline-flex items-center gap-1.5 text-xs font-semibold text-muted-foreground hover:text-primary"
+                  >
+                    <Share2 className="h-3 w-3" aria-hidden="true" />
+                    Inviter un proche
+                  </Link>
+                </div>
               </div>
-              <div className="flex items-center justify-end gap-2 pt-3 mt-2 border-t border-border/60">
-                <Link
-                  to="/mon-abonnement#parrainage"
-                  className="inline-flex items-center gap-1.5 text-xs font-semibold text-muted-foreground hover:text-primary"
-                >
-                  <Share2 className="h-3 w-3" aria-hidden="true" />
-                  Inviter un proche
-                </Link>
-              </div>
+              <div className="notebook-card-edge" aria-hidden="true" />
             </div>
           </div>
         );
