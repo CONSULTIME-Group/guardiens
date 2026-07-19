@@ -247,16 +247,36 @@ const SitterTeaserCard = ({
   scopeUsed,
   isLoading,
 }: SitterTeaserCardProps) => {
+  const sectionRef = useRef<HTMLElement | null>(null);
   const featured = topSits[0] ?? fallbackSits[0] ?? null;
+  const impressionKey = featured ? `sitter_teaser:${featured.id}` : null;
+
+  useImpressionOnce(sectionRef, impressionKey, () => {
+    void trackEvent("dashboard_star_seen", {
+      source: "sitter_dashboard",
+      metadata: { surface: "sitter_dashboard", variant: "teaser", scope: scopeUsed, sit_id: featured?.id ?? null },
+    });
+  });
+
+  const onCtaClick = () =>
+    void trackEvent("dashboard_star_cta_clicked", {
+      source: "sitter_dashboard",
+      metadata: { surface: "sitter_dashboard", variant: "teaser", scope: scopeUsed, sit_id: featured?.id ?? null },
+    });
 
   return (
-    <section aria-labelledby="teaser-heading" className="px-4 sm:px-5 md:px-8 lg:px-0">
+    <section
+      ref={sectionRef}
+      data-dashboard-star="sitter"
+      aria-labelledby="teaser-heading"
+      className="px-4 sm:px-5 md:px-8 lg:px-0"
+    >
       <SectionHeader
         eyebrow="Ce qui vous attend"
         title="Une maison cherche déjà son gardien."
         subtitle={scopeSubtitle(scopeUsed)}
       />
-      {isLoading ? <Skeleton /> : featured ? <TeaserCard sit={featured} /> : <EmptyTeaser />}
+      {isLoading ? <Skeleton /> : featured ? <TeaserCard sit={featured} onCtaClick={onCtaClick} /> : <EmptyTeaser />}
     </section>
   );
 };
