@@ -187,7 +187,7 @@ const EmptyState = () => (
 /*  Carte star (topSits[0])                                                   */
 /* -------------------------------------------------------------------------- */
 
-const StarCard = ({ sit }: { sit: AffinitySitCard }) => {
+const StarCard = ({ sit, onCtaClick }: { sit: AffinitySitCard; onCtaClick?: () => void }) => {
   const place = [
     sit.owner_first_name ? `Chez ${sit.owner_first_name}` : null,
     sit.city,
