@@ -14,6 +14,7 @@
  */
 import { differenceInDays } from "date-fns";
 import { Link } from "react-router-dom";
+import { useRef } from "react";
 import { getOptimizedImageUrl } from "@/lib/imageOptim";
 import AffinityRing from "@/components/matching/AffinityRing";
 import { useViewerOwnerForAffinity } from "@/hooks/useViewerOwnerForAffinity";
@@ -26,6 +27,8 @@ import type { AppRow, SitterInfo, SitRow } from "./types";
 import { capitalize } from "./helpers";
 import SitDraftFromPrompt from "@/components/dashboard/SitDraftFromPrompt";
 import type { OwnerPrimaryAction } from "@/hooks/useOwnerPrimaryAction";
+import { trackEvent } from "@/lib/analytics";
+import { useImpressionOnce } from "@/hooks/useImpressionOnce";
 
 const DATE_FMT = new Intl.DateTimeFormat("fr-FR", {
   day: "numeric",
