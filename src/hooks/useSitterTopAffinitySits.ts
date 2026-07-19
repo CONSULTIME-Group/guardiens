@@ -19,6 +19,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { computeAffinityScore, type AffinityResult } from "@/lib/affinityScore";
 import { getDeptCode } from "@/lib/departments";
 import { getRegionCode, getDeptsInRegion } from "@/lib/regions";
+import { pickDiscoverySit } from "@/lib/pickDiscoverySit";
 
 export interface AffinitySitCard {
   id: string;
