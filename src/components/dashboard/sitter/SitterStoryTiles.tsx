@@ -90,11 +90,9 @@ const SitterStoryTiles = ({
       Icon: FileText,
       value: pendingAppsCount,
       label:
-        pendingAppsCount === 0
-          ? "aucune candidature en attente pour l'instant"
-          : pendingAppsCount === 1
-          ? "candidature en attente de réponse"
-          : "candidatures en attente de réponse",
+        pendingAppsCount > 1
+          ? "candidatures en attente de réponse"
+          : "candidature en attente de réponse",
       linkTo: pendingAppsCount === 0 ? "/recherche" : "/mes-candidatures",
       linkText:
         pendingAppsCount === 0
@@ -105,12 +103,7 @@ const SitterStoryTiles = ({
       key: "messages",
       Icon: MessageSquare,
       value: unreadCount,
-      label:
-        unreadCount === 0
-          ? "aucun message à lire pour l'instant"
-          : unreadCount === 1
-          ? "message à lire"
-          : "messages à lire",
+      label: unreadCount > 1 ? "messages à lire" : "message à lire",
       linkTo: "/messages",
       linkText: "Ouvrir vos conversations",
     },
@@ -118,12 +111,7 @@ const SitterStoryTiles = ({
       key: "badges",
       Icon: Award,
       value: badgeCount,
-      label:
-        badgeCount === 0
-          ? "aucun écusson obtenu pour l'instant"
-          : badgeCount === 1
-          ? "écusson obtenu"
-          : "écussons obtenus",
+      label: badgeCount > 1 ? "écussons obtenus" : "écusson obtenu",
       linkTo: "/profile#badges",
       linkText:
         badgeCount === 0
