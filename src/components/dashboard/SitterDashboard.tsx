@@ -561,6 +561,16 @@ const SitterDashboard = () => {
                 </div>
               )}
 
+              {/* VAGUE 2 — carte rencontre, star unique de l'écran */}
+              <div className="px-4 sm:px-5 md:px-8 lg:px-0">
+                <SitterMatchSection
+                  topSits={topSits}
+                  fallbackSits={fallbackSits}
+                  scopeUsed={scopeUsed}
+                  isLoading={nbaLoading}
+                />
+              </div>
+
               <div className="px-4 sm:px-5 md:px-8 lg:px-0">
                 <SitterActivityPanel
                   isAvailable={isAvailable}
@@ -572,6 +582,7 @@ const SitterDashboard = () => {
                   completedSits={completedSits ?? 0}
                 />
               </div>
+
 
               {ChecklistBlock}
 
