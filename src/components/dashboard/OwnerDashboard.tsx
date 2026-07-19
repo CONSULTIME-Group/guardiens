@@ -33,6 +33,8 @@ import MissionsTabsCard from "./owner/MissionsTabsCard";
 import DashSection from "./owner/DashSection";
 import EmptyCard from "./owner/EmptyCard";
 import StatsStrip from "./owner/StatsStrip";
+import OwnerCockpit from "./owner/OwnerCockpit";
+import OwnerStarSection from "./owner/OwnerStarSection";
 
 import MobileStickyCTA from "./owner/MobileStickyCTA";
 import LiveSignalStrip from "./shared/LiveSignalStrip";
