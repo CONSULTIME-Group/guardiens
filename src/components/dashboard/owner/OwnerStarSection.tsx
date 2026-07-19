@@ -440,7 +440,7 @@ const PublishStar = ({
           padding: "22px",
         }}
       >
-        <PrimaryCta to="/sits/create">Publier une annonce</PrimaryCta>
+        <PrimaryCta to="/sits/create" onClick={onCtaClick}>Publier une annonce</PrimaryCta>
         {showConcierge && (
           <div className="mt-[22px]">
             <SitDraftFromPrompt demoted primary={primaryAction} />
