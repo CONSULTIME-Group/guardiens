@@ -261,9 +261,46 @@ export function useSitterTopAffinitySits(): Result {
 
       scored.sort((a, b) => (b.affinity?.score ?? 0) - (a.affinity?.score ?? 0));
 
+      // Sélection "découverte" (Vague 9) : première annonce hors top 3
+      // qui apporte de l'altérité au gardien. Critères réels :
+      //   (a) au moins une espèce que le gardien n'a pas déclarée dans
+      //       son expérience `animal_types`, OU
+      //   (b) une ville différente de toutes celles du top.
+      // Pas de score affiché ensuite : c'est la proposition inverse du
+      // ring. Si aucun candidat ne remplit ces critères, on retourne
+      // null plutôt qu'un remplissage artificiel.
+      const topThree = scored.slice(0, 3);
+      const topIds = new Set(topThree.map((c) => c.id));
+      const topCities = new Set(
+        topThree
+          .map((c) => (c.city ?? "").trim().toLowerCase())
+          .filter(Boolean),
+      );
+      const sitterSpecies = new Set<string>(
+        Array.isArray(sitter?.animal_types)
+          ? (sitter!.animal_types as string[]).map((s) => (s ?? "").toLowerCase())
+          : [],
+      );
+      const hasSitterSpecies = sitterSpecies.size > 0;
+      const isUniversal = sitterSpecies.has("all") || sitterSpecies.has("tous");
+      const discoverySit: AffinitySitCard | null =
+        fallback.find((card) => {
+          if (topIds.has(card.id)) return false;
+          const cityKey = (card.city ?? "").trim().toLowerCase();
+          const cityIsNovel = cityKey ? !topCities.has(cityKey) : false;
+          const speciesIsNovel =
+            hasSitterSpecies && !isUniversal
+              ? card.pet_species.some(
+                  (sp) => sp && !sitterSpecies.has(sp.toLowerCase()),
+                )
+              : false;
+          return speciesIsNovel || cityIsNovel;
+        }) ?? null;
+
       return {
-        topSits: scored.slice(0, 3),
+        topSits: topThree,
         fallbackSits: fallback.slice(0, 3),
+        discoverySit,
         totalPublished: totalPublished ?? 0,
         hasPostalCode,
         profileIncomplete,
@@ -278,6 +315,7 @@ export function useSitterTopAffinitySits(): Result {
   return {
     topSits,
     fallbackSits,
+    discoverySit: data?.discoverySit ?? null,
     hasMinimumPool: topSits.length >= 1,
     hasPostalCode: data?.hasPostalCode ?? false,
     profileIncomplete: data?.profileIncomplete ?? false,
