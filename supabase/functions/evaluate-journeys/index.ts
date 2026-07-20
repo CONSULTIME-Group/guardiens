@@ -581,7 +581,10 @@ async function enrollForSequence(
       .eq('sequence_key', seq.key)
       .in('user_id', chunk)
     if (recurThreshold) q = q.gte('started_at', recurThreshold)
-    const { data, error } = await q
+    // Limite haute : après l'incident, certains users comptent >100 journeys exit
+    // sur la même sequence_key. Il faut absolument tous les récupérer, sinon la
+    // dédup rate et on ré-enrôle massivement (cf. bug PostgREST 1000-row default).
+    const { data, error } = await q.limit(50000)
     if (error) {
       console.error('[enrollment] existing-lookup failed', seq.key, error.message, 'chunk', i)
       return 0
