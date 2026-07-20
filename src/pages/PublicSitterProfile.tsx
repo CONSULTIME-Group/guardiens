@@ -48,6 +48,8 @@ import { getSitterHeroImage, getSitterHeroAnchor, getSitterHeroSources } from "@
 import { useHeroWeights } from "@/hooks/useHeroWeights";
 import ActivateRoleDialog, { type ContactIntentContext } from "@/components/premium/ActivateRoleDialog";
 import ProfileHero, { type HeroCtaVariant } from "@/components/profile/ProfileHero";
+import StoryTiles, { type StoryTileInput } from "@/components/profile/StoryTiles";
+import TrustStory from "@/components/profile/TrustStory";
 
 const capitalize = (name: string) =>
   name ? name.charAt(0).toUpperCase() + name.slice(1).toLowerCase() : "";
