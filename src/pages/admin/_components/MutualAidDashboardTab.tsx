@@ -85,6 +85,29 @@ const downloadCsv = (filename: string, rows: string[][]) => {
   URL.revokeObjectURL(url);
 };
 
+interface FunnelMetrics {
+  period_days: number;
+  generated_at: string;
+  missions: {
+    published: number;
+    with_response: number;
+    with_accepted: number;
+    completed: number;
+    with_feedback: number;
+    rate_response: number | null;
+    rate_accepted: number | null;
+    rate_completed: number | null;
+    rate_feedback: number | null;
+    rate_end_to_end: number | null;
+    median_seconds_to_first_response: number | null;
+  };
+  questions: {
+    posted: number;
+    with_answer: number;
+    rate_answered: number | null;
+  };
+}
+
 const MutualAidDashboardTab = () => {
   const [range, setRange] = useState<Range>("30d");
   const [loading, setLoading] = useState(true);
@@ -94,6 +117,7 @@ const MutualAidDashboardTab = () => {
     feedbacks: 0,
     thanks: 0,
   });
+  const [funnel, setFunnel] = useState<FunnelMetrics | null>(null);
   const [emailStats, setEmailStats] = useState<EmailStats[]>([]);
   const [dormant, setDormant] = useState<DormantMission[]>([]);
   const [autoClosed, setAutoClosed] = useState<AutoClosedMission[]>([]);
@@ -180,6 +204,21 @@ const MutualAidDashboardTab = () => {
 
     setDormant((dormantRes.data || []) as DormantMission[]);
     setAutoClosed((autoRes.data || []) as AutoClosedMission[]);
+
+    // Funnel — s'appuie sur la RPC dédiée. Silencieux si erreur pour ne pas
+    // casser le reste du dashboard.
+    try {
+      const periodDays = range === "7d" ? 7 : range === "30d" ? 30 : 90;
+      const { data: funnelData, error: funnelErr } = await supabase.rpc(
+        "get_mutual_aid_funnel_metrics" as any,
+        { p_period_days: periodDays },
+      );
+      if (!funnelErr && funnelData) setFunnel(funnelData as unknown as FunnelMetrics);
+      else if (funnelErr) console.warn("[MutualAidDashboard] funnel rpc failed", funnelErr.message);
+    } catch (e) {
+      console.warn("[MutualAidDashboard] funnel rpc threw", e);
+    }
+
     setLoading(false);
   }, [range]);
 
@@ -257,6 +296,43 @@ const MutualAidDashboardTab = () => {
           </div>
         </CardContent>
       </Card>
+
+      {funnel && (
+        <Card>
+          <CardContent className="pt-6 space-y-4">
+            <div>
+              <h3 className="font-heading text-base font-semibold">Tunnel de conversion, {RANGE_LABEL[range].toLowerCase()}</h3>
+              <p className="text-xs text-muted-foreground">
+                Parcours d'une mission publiée jusqu'au retour laissé. Les pourcentages sont calculés sur l'étape immédiatement précédente.
+              </p>
+            </div>
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+              <FunnelStep label="Publiées" value={funnel.missions.published} rate={null} />
+              <FunnelStep label="Avec une réponse" value={funnel.missions.with_response} rate={funnel.missions.rate_response} />
+              <FunnelStep label="Personne retenue" value={funnel.missions.with_accepted} rate={funnel.missions.rate_accepted} />
+              <FunnelStep label="Terminées" value={funnel.missions.completed} rate={funnel.missions.rate_completed} />
+              <FunnelStep label="Retour laissé" value={funnel.missions.with_feedback} rate={funnel.missions.rate_feedback} />
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3 pt-2 border-t border-border">
+              <MetricPill
+                label="Bout en bout"
+                value={funnel.missions.rate_end_to_end != null ? `${funnel.missions.rate_end_to_end}%` : "–"}
+                hint="Publication vers retour laissé"
+              />
+              <MetricPill
+                label="Temps médian vers 1re réponse"
+                value={formatMedianDuration(funnel.missions.median_seconds_to_first_response)}
+                hint="Sur les missions ayant reçu au moins une réponse"
+              />
+              <MetricPill
+                label="Questions avec réponse"
+                value={funnel.questions.rate_answered != null ? `${funnel.questions.rate_answered}%` : "–"}
+                hint={`${funnel.questions.with_answer} sur ${funnel.questions.posted} posée${funnel.questions.posted > 1 ? "s" : ""}`}
+              />
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       <Card>
         <CardContent className="pt-6 space-y-3">
@@ -390,5 +466,30 @@ const KpiCard = ({ label, value }: { label: string; value: number }) => (
     <p className="mt-1 text-2xl font-bold tabular-nums text-foreground">{value}</p>
   </div>
 );
+
+const FunnelStep = ({ label, value, rate }: { label: string; value: number; rate: number | null }) => (
+  <div className="rounded-xl border border-border bg-card px-3 py-3">
+    <p className="text-[10px] uppercase tracking-wide text-muted-foreground font-semibold">{label}</p>
+    <p className="mt-1 text-xl font-bold tabular-nums text-foreground">{value}</p>
+    <p className="text-[11px] text-muted-foreground tabular-nums">
+      {rate != null ? `${rate}% de l'étape précédente` : "point de départ"}
+    </p>
+  </div>
+);
+
+const MetricPill = ({ label, value, hint }: { label: string; value: string; hint?: string }) => (
+  <div className="rounded-xl bg-muted/40 px-3 py-3">
+    <p className="text-[10px] uppercase tracking-wide text-muted-foreground font-semibold">{label}</p>
+    <p className="mt-1 text-lg font-bold tabular-nums text-foreground">{value}</p>
+    {hint && <p className="text-[11px] text-muted-foreground">{hint}</p>}
+  </div>
+);
+
+const formatMedianDuration = (seconds: number | null): string => {
+  if (seconds == null) return "–";
+  if (seconds < 3600) return `${Math.round(seconds / 60)} min`;
+  if (seconds < 86400) return `${(seconds / 3600).toFixed(1)} h`;
+  return `${(seconds / 86400).toFixed(1)} j`;
+};
 
 export default MutualAidDashboardTab;

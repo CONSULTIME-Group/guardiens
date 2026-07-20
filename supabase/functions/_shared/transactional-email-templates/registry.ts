@@ -83,6 +83,7 @@ import { template as affinityCompletionOwner } from './affinity-completion-owner
 import { template as missionResponseReceived } from './mission-response-received.tsx'
 import { template as missionResponseWaiting } from './mission-response-waiting.tsx'
 import { template as questionAnswerReceived } from './question-answer-received.tsx'
+import { template as helperToGuard } from './helper-to-guard.tsx'
 
 
 
@@ -163,6 +164,7 @@ export const TEMPLATES: Record<string, TemplateEntry> = {
   'mission-response-received': missionResponseReceived,
   'mission-response-waiting': missionResponseWaiting,
   'question-answer-received': questionAnswerReceived,
+  'helper-to-guard': helperToGuard,
 }
 
 

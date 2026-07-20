@@ -13,6 +13,7 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
+import MissionBadgesReceived from "@/components/missions/MissionBadgesReceived";
 
 interface Props {
   response: any;
@@ -124,6 +125,7 @@ const MissionResponseCard = ({
                   <ShieldCheck className="h-3 w-3" /> Personne retenue
                 </span>
               )}
+              <MissionBadgesReceived profileId={r.responder_id} variant="compact" />
             </Link>
             <p className="text-xs text-muted-foreground">
               {format(new Date(r.created_at), "d MMM à HH:mm", { locale: fr })}
