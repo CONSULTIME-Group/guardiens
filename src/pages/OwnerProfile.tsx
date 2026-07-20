@@ -327,6 +327,9 @@ const OwnerProfilePage = () => {
             }}
             publicProfileUrl={user ? `/gardiens/${user.id}?tab=proprio` : "#"}
             role="owner"
+            missingScoreItems={scoredCriteria
+              .filter(c => !c.ok && c.points > 0)
+              .map(c => ({ key: c.label, label: c.label, points: c.points, hint: c.hint }))}
             scoreBreakdown={
               <ScoreBreakdown
                 role="owner"

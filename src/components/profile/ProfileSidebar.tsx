@@ -38,12 +38,17 @@ interface ProfileSidebarProps {
   scoreBreakdown?: ReactNode;
   /** Slot optionnel rendu uniquement sur desktop (lg+), sous le lien profil public. */
   trustSlot?: ReactNode;
+  /**
+   * Liste calme des items manquants (label + points), affichée sous la jauge.
+   * Registre charte : gris, pas de rouge, pas d'icône alerte.
+   */
+  missingScoreItems?: Array<{ key: string; label: string; points: number; hint?: string }>;
 }
 
 const ProfileSidebar = ({
   firstName, city, avatarUrl, completion, sections,
   activeSection, dirtySection, onSectionClick, publicProfileUrl, role, isFounder,
-  scoreBreakdown, trustSlot,
+  scoreBreakdown, trustSlot, missingScoreItems,
 }: ProfileSidebarProps) => {
   const [expandedMissing, setExpandedMissing] = useState<Record<string, boolean>>({});
   const [scoreOpen, setScoreOpen] = useState(false);
@@ -110,6 +115,24 @@ const ProfileSidebar = ({
               : `Complétez jusqu'à 60% pour rendre votre profil visible`}
           </p>
         </div>
+
+        {/* Détail calme des items manquants (mobile). Registre pédagogique. */}
+        {missingScoreItems && missingScoreItems.length > 0 && (
+          <div className="rounded-lg border border-border bg-card/60 px-3 py-2.5">
+            <p className="text-[11px] uppercase tracking-wide text-muted-foreground mb-1.5">
+              Pour aller plus loin
+            </p>
+            <ul className="space-y-1">
+              {missingScoreItems.map((it) => (
+                <li key={it.key} className="flex items-baseline justify-between gap-2 text-xs">
+                  <span className="text-foreground/80 leading-snug">{it.label}</span>
+                  <span className="tabular-nums text-muted-foreground shrink-0">+{it.points}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+
 
         {/* Score breakdown collapsible (mobile) */}
         {scoreBreakdown && (
@@ -181,8 +204,31 @@ const ProfileSidebar = ({
           )}
         </div>
 
+        {/* Détail calme des items manquants (desktop), sous la jauge. */}
+        {missingScoreItems && missingScoreItems.length > 0 && (
+          <div className="rounded-lg border border-border bg-card/60 px-3 py-2.5">
+            <p className="text-[11px] uppercase tracking-wide text-muted-foreground mb-1.5">
+              Pour aller plus loin
+            </p>
+            <ul className="space-y-1.5">
+              {missingScoreItems.map((it) => (
+                <li key={it.key} className="text-xs">
+                  <div className="flex items-baseline justify-between gap-2">
+                    <span className="text-foreground/85 leading-snug">{it.label}</span>
+                    <span className="tabular-nums text-muted-foreground shrink-0">+{it.points}</span>
+                  </div>
+                  {it.hint && (
+                    <p className="text-[11px] text-muted-foreground/80 mt-0.5">{it.hint}</p>
+                  )}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+
         {/* Score breakdown desktop */}
         {scoreBreakdown}
+
       </div>
 
       {/* ────────────────────────────────────────────────────

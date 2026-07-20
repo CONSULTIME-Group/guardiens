@@ -385,6 +385,9 @@ const SitterProfile = () => {
             }}
             publicProfileUrl={user ? `/gardiens/${user.id}` : "#"}
             role="sitter"
+            missingScoreItems={scoredCriteria
+              .filter(c => !c.ok && c.points > 0)
+              .map(c => ({ key: c.label, label: c.label, points: c.points, hint: c.hint }))}
             isFounder={isFounder}
             scoreBreakdown={
               <ScoreBreakdown
