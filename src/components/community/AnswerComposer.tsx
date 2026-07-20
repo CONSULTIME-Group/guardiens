@@ -25,6 +25,7 @@ const AnswerComposer = ({ questionId, parentAnswerId = null, isFirstAnswer, onPo
   const { user } = useAuth();
   const [body, setBody] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [eligibilityReason, setEligibilityReason] = useState<MissionEligibilityReason | null>(null);
 
   const submit = async () => {
     if (!user) {
@@ -45,6 +46,11 @@ const AnswerComposer = ({ questionId, parentAnswerId = null, isFirstAnswer, onPo
     });
     setSubmitting(false);
     if (error) {
+      const reason = detectEligibilityReason(error);
+      if (reason) {
+        setEligibilityReason(reason);
+        return;
+      }
       toast.error("Impossible de publier votre réponse.");
       return;
     }
