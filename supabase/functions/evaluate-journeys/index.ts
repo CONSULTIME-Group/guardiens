@@ -575,16 +575,13 @@ async function enrollForSequence(
   const allIds = candidates.map((c) => c.id)
   for (let i = 0; i < allIds.length; i += 100) {
     const chunk = allIds.slice(i, i + 100)
-    let q = supabase
-      .from('user_journeys')
-      .select('user_id, started_at')
-      .eq('sequence_key', seq.key)
-      .in('user_id', chunk)
-    if (recurThreshold) q = q.gte('started_at', recurThreshold)
-    // Limite haute : après l'incident, certains users comptent >100 journeys exit
-    // sur la même sequence_key. Il faut absolument tous les récupérer, sinon la
-    // dédup rate et on ré-enrôle massivement (cf. bug PostgREST 1000-row default).
-    const { data, error } = await q.limit(50000)
+    // RPC dédiée : renvoie DISTINCT user_id, immunisée contre la troncature
+    // PostgREST à 1000 lignes (>100k rows brutes sur discover-mutual-aid).
+    const { data, error } = await supabase.rpc('users_with_journey_for_sequence', {
+      _sequence_key: seq.key,
+      _user_ids: chunk,
+      _started_since: recurThreshold,
+    })
     if (error) {
       console.error('[enrollment] existing-lookup failed', seq.key, error.message, 'chunk', i)
       return 0
