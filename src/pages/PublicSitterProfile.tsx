@@ -1941,7 +1941,7 @@ export default function PublicSitterProfile() {
             <div className="md:hidden fixed bottom-16 left-0 right-0 z-40 bg-background border-t border-border px-3 sm:px-4 pt-2.5 sm:pt-3 pb-[calc(env(safe-area-inset-bottom)+0.625rem)] shadow-lg">
               {!isAuthenticated && (
                 <Link
-                  to={`/inscription?redirect=/gardiens/${id}`}
+                  to={`/inscription?redirect=${encodeURIComponent(`/gardiens/${id}`)}`}
                   className="flex items-center justify-center bg-primary text-primary-foreground rounded-lg px-3 sm:px-4 py-3 text-[13px] sm:text-sm font-medium w-full leading-tight text-center break-words"
                 >
                   <span className="line-clamp-2">S'inscrire pour contacter {firstName}</span>
