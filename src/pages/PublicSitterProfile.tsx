@@ -26,6 +26,7 @@ import {
   Shield, Star, PawPrint,
   Home, KeyRound, Handshake, Heart,
   Image as ImageIcon,
+  CalendarClock,
 } from "lucide-react";
 import { HeroPickerModal } from "@/components/profile/HeroPickerModal";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
