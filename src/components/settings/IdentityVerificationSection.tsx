@@ -25,7 +25,7 @@ const IdentityVerificationSection = ({ user }: { user: any }) => {
     Promise.all([
       supabase
         .from("profiles")
-        .select("identity_verified, identity_verification_status, identity_document_url")
+        .select("identity_verified, identity_verification_status, identity_document_url, identity_selfie_url")
         .eq("id", user.id)
         .single(),
       supabase
@@ -34,23 +34,38 @@ const IdentityVerificationSection = ({ user }: { user: any }) => {
         .eq("user_id", user.id)
         .order("created_at", { ascending: false })
         .limit(10),
-    ]).then(([profileRes, logsRes]) => {
+    ]).then(async ([profileRes, logsRes]) => {
       if (profileRes.data) {
-        const data = profileRes.data;
-        if (data.identity_verified) setStatus("verified");
-        else setStatus((data as any).identity_verification_status || "not_submitted");
-        setDocumentUrl((data as any).identity_document_url || null);
+        const data = profileRes.data as any;
+        const docUrl = data.identity_document_url || null;
+        const selfie = data.identity_selfie_url || null;
+        let currentStatus: string = data.identity_verified
+          ? "verified"
+          : data.identity_verification_status || "not_submitted";
+
+        // Self-heal : document présent mais statut « non soumis » (dossier orphelin).
+        // On propose une reprise silencieuse en un aller-retour pour que l'admin
+        // voie le dossier immédiatement.
+        if (!data.identity_verified && currentStatus === "not_submitted" && docUrl) {
+          const { error: healErr } = await supabase
+            .from("profiles")
+            .update({ identity_verification_status: "pending" } as any)
+            .eq("id", user.id);
+          if (!healErr) {
+            currentStatus = "pending";
+            toast.info("Votre document précédent a bien été enregistré, il est en cours de vérification.");
+          }
+        }
+
+        setStatus(currentStatus);
+        setDocumentUrl(docUrl);
+        setSelfieUrl(selfie);
       }
       setLogs((logsRes.data as any[]) || []);
       setLoaded(true);
     });
   }, [user]);
 
-  useEffect(() => {
-    if (!user) return;
-    supabase.from("profiles").select("identity_selfie_url").eq("id", user.id).single()
-      .then(({ data }) => { if (data) setSelfieUrl((data as any).identity_selfie_url || null); });
-  }, [user]);
 
   const todayAttempts = logs.filter((log: any) => {
     const logDate = new Date(log.created_at);
@@ -103,14 +118,21 @@ const IdentityVerificationSection = ({ user }: { user: any }) => {
         .upload(path, toUpload, { upsert: true, contentType: toUpload.type || undefined });
       if (uploadError) throw uploadError;
       setUploadProgress(80);
-      await supabase.from("profiles").update({
+      const { error: profileErr } = await supabase.from("profiles").update({
         identity_document_url: path,
         identity_verification_status: "pending",
       } as any).eq("id", user.id);
+      if (profileErr) {
+        // On remonte l'erreur explicitement plutôt que de la masquer : l'utilisateur
+        // pourra réessayer, et le document déjà uploadé sera raccroché au prochain
+        // chargement grâce au self-heal ci-dessus.
+        throw new Error(`Enregistrement du dossier impossible : ${profileErr.message}`);
+      }
       setUploadProgress(90);
       setStatus("pending");
       setDocumentUrl(path);
       toast.info("Document envoyé ! Vérification en cours...");
+
 
       try {
         const { data: verifyResult, error: verifyError } = await supabase.functions.invoke("verify-identity");
@@ -209,6 +231,9 @@ const IdentityVerificationSection = ({ user }: { user: any }) => {
           <div>
             <p className={`text-sm font-medium ${cfg.color}`}>{cfg.label}</p>
             <p className="text-xs text-muted-foreground mt-0.5">{cfg.desc}</p>
+            <p className="text-[11px] text-muted-foreground/80 mt-2 leading-relaxed">
+              Votre document est stocké dans un espace sécurisé et privé, et supprimé automatiquement de nos serveurs 30 jours après la vérification. Seule l'équipe Guardiens peut le consulter pendant l'examen.
+            </p>
           </div>
         </div>
 

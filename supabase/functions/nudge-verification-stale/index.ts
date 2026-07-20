@@ -79,12 +79,53 @@ Deno.serve(async (req) => {
       }
     }
 
+    // Détection additionnelle : documents orphelins en stockage sans dossier ouvert
+    const { data: orphansData, error: orphErr } = await service.rpc(
+      "detect_identity_orphan_documents",
+    );
+    if (orphErr) throw orphErr;
+    const orphans = (orphansData ?? []) as Array<{
+      profile_id: string;
+      first_name: string | null;
+      email: string | null;
+      oldest_upload: string | null;
+    }>;
+
+    let orphans_inserted = 0;
+    let orphans_skipped = 0;
+    for (const o of orphans) {
+      const { error: insErr } = await service.from("admin_signals").insert({
+        signal_type: "identity_orphan_documents",
+        severity: "warning",
+        entity_type: "profile",
+        entity_id: o.profile_id,
+        metadata: {
+          first_name: o.first_name,
+          email: o.email,
+          oldest_upload: o.oldest_upload,
+        },
+      });
+      if (insErr) {
+        if (insErr.code === "23505" || insErr.message?.includes("idx_admin_signals_idempotent")) {
+          orphans_skipped += 1;
+        } else {
+          errors.push({ profile_id: o.profile_id, error: insErr.message });
+        }
+      } else {
+        orphans_inserted += 1;
+      }
+    }
+
     await run.finish(errors.length > 0 ? "partial" : "success", {
       detected: rows.length,
       inserted,
       skipped,
+      orphans_detected: orphans.length,
+      orphans_inserted,
+      orphans_skipped,
       errors_count: errors.length,
     });
+
     return new Response(
       JSON.stringify({
         detected: rows.length,
