@@ -399,6 +399,7 @@ async function runEvaluation(
       if (actuallySent) {
         stats.sent++
         bumpSeq(j.sequence_key, 'sent')
+        recentlyServed.add(profile.email.toLowerCase())
         await new Promise((r) => setTimeout(r, SEND_DELAY_MS))
       } else {
         stats.skipped++
