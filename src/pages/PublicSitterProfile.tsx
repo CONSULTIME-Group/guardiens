@@ -2666,7 +2666,7 @@ export default function PublicSitterProfile() {
             )}
           </div>
 
-          {missionsPublished.length === 0 && missionsHelped.length === 0 && missionFeedbacks.length === 0 && (
+          {!entraideLoading && missionsPublished.length === 0 && missionsHelped.length === 0 && missionFeedbacks.length === 0 && (
             <div className="text-center py-12 space-y-2">
               <p className="text-base text-foreground/50 font-body">Pas encore de missions d'entraide.</p>
               <p className="text-sm text-foreground/40 font-body italic">Les échanges de services apparaîtront ici après la première mission.</p>
