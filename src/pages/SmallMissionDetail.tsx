@@ -215,6 +215,8 @@ const SmallMissionDetail = () => {
   const [completing, setCompleting] = useState(false);
   const [responseModalOpen, setResponseModalOpen] = useState(false);
   const [oneClickInterestBusy, setOneClickInterestBusy] = useState(false);
+  const [eligibilityReason, setEligibilityReason] = useState<MissionEligibilityReason | null>(null);
+  const [eligibilityContext, setEligibilityContext] = useState<"publish" | "respond">("respond");
 
   // Per-person feedback tracking: receiverId → submitted
   const [feedbackSent, setFeedbackSent] = useState<Record<string, boolean>>({});
