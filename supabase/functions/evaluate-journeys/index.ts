@@ -409,10 +409,101 @@ async function runEvaluation(
     } catch (err) {
       console.error('Journey eval error', j.id, err)
       stats.errors++
+      // Trace exploitable, plus de defaillance silencieuse. On tente
+      // d'insérer une ligne journey_step_log ; si l'insert lui-même casse,
+      // on absorbe pour ne pas relancer l'exception dans la boucle.
+      try {
+        const msg = err instanceof Error ? err.message : String(err)
+        await supabase.from('journey_step_log').insert({
+          journey_id: j.id,
+          step_order: (j.current_step ?? 0) + 1,
+          template_name: 'unknown',
+          sent: false,
+          reason: 'eval_error',
+          error_detail: {
+            message: msg.slice(0, 500),
+            sequence_key: j.sequence_key,
+            attempted_step: (j.current_step ?? 0) + 1,
+            at: new Date().toISOString(),
+          },
+        })
+      } catch (logErr) {
+        console.error('[eval-error] failed to log', logErr)
+      }
+    }
+  }
+
+  // Alerte proactive dans admin_signals si run anormal (erreurs > 10,
+  // enrôlements > 100, ou 3 runs consécutifs non-success). Dédup 24h.
+  if (!dryRun) {
+    try {
+      await maybeInsertRunAnomaly(supabase, stats)
+    } catch (sigErr) {
+      console.warn('[anomaly-signal] insert failed', sigErr)
     }
   }
 
   return stats
+}
+
+// Sentinel UUID pour signaux non attachés à une entité métier.
+const CRON_ENTITY_ID = '00000000-0000-0000-0000-000000000000'
+
+async function maybeInsertRunAnomaly(
+  supabase: ReturnType<typeof createClient>,
+  stats: { enrolled: number; sent: number; exited: number; skipped: number; errors: number; capped: boolean; bySequence: Record<string, unknown> },
+) {
+  // 3 runs consécutifs non success (partial ou failed)
+  const { data: recentRuns } = await supabase
+    .from('cron_run_log')
+    .select('status')
+    .eq('edge_name', 'evaluate-journeys')
+    .not('finished_at', 'is', null)
+    .order('started_at', { ascending: false })
+    .limit(3)
+  const threeInARow =
+    (recentRuns?.length ?? 0) === 3 &&
+    (recentRuns as Array<{ status: string }>).every((r) => r.status !== 'success')
+
+  const trigger =
+    stats.errors > 10
+      ? `errors=${stats.errors}`
+      : stats.enrolled > 100
+        ? `enrolled=${stats.enrolled}`
+        : threeInARow
+          ? '3_runs_non_success'
+          : null
+
+  if (!trigger) return
+
+  // Dedup : pas de nouveau signal non résolu du même type dans les 24h.
+  const since = new Date(Date.now() - 24 * 3600_000).toISOString()
+  const { data: existing } = await supabase
+    .from('admin_signals')
+    .select('id')
+    .eq('signal_type', 'nurturing_run_anomaly')
+    .is('resolved_at', null)
+    .gte('detected_at', since)
+    .limit(1)
+  if (existing && existing.length > 0) return
+
+  await supabase.from('admin_signals').insert({
+    signal_type: 'nurturing_run_anomaly',
+    severity: 'critical',
+    entity_type: 'cron_run',
+    entity_id: CRON_ENTITY_ID,
+    metadata: {
+      title: `Nurturing anormal, ${trigger}`,
+      trigger,
+      enrolled: stats.enrolled,
+      sent: stats.sent,
+      exited: stats.exited,
+      skipped: stats.skipped,
+      errors: stats.errors,
+      capped: stats.capped,
+      by_sequence: stats.bySequence,
+    },
+  })
 }
 
 
