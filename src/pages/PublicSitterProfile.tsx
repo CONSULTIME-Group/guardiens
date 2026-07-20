@@ -2562,7 +2562,11 @@ export default function PublicSitterProfile() {
             <p className="text-xs uppercase tracking-widest text-foreground/50 font-body">
               Missions publiées{missionsPublished.length > 0 && ` (${missionsPublished.length})`}
             </p>
-            {missionsPublished.length > 0 ? (
+            {entraideLoading ? (
+              <div className="space-y-2" aria-busy="true">
+                {[0, 1, 2].map((i) => (<Skeleton key={i} className="h-12 rounded-xl" />))}
+              </div>
+            ) : missionsPublished.length > 0 ? (
               <div className="space-y-2">
                 {(showAllMissionsPublished ? missionsPublished : missionsPublished.slice(0, VISIBLE_COUNT)).map((m) => {
                   const statusMap: Record<string, { label: string; style: string }> = {
