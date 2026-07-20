@@ -364,7 +364,12 @@ const OwnerProfilePage = () => {
               {activeSection === "identity" && <OwnerStepIdentity data={mergedData} onChange={handleChange} onUploadPhoto={handleUploadPhoto} />}
               {activeSection === "housing" && <OwnerStepHousing data={mergedData} onChange={handleChange} onUploadPhoto={uploadPhoto} />}
               {activeSection === "animals" && <OwnerStepAnimals pets={pets} onAddPet={addPet} onUpdatePet={updatePet} onRemovePet={removePet} />}
-              {activeSection === "rules" && <OwnerStepRules data={mergedData} onChange={handleChange} />}
+              {activeSection === "rules" && (
+                <>
+                  <OwnerAffinityBanner context="profile_owner_section" editHref="" className="mb-6" />
+                  <OwnerStepRules data={mergedData} onChange={handleChange} />
+                </>
+              )}
               {activeSection === "communication" && (
                 <div className="space-y-8">
                   <OwnerStepCommunication data={mergedData} onChange={handleChange} />

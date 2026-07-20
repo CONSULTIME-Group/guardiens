@@ -426,6 +426,7 @@ const SitterProfile = () => {
               )}
               {activeSection === "sitter" && (
                 <>
+                  <SitterAffinityBanner context="profile_sitter_section" editHref="" className="mb-6" />
                   <StepSitterProfile data={mergedData} onChange={handleChange} />
                   <div className="mt-8 pt-8 border-t border-border">
                     <StepPreferences data={mergedData} onChange={handleChange} />
