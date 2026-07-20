@@ -2534,7 +2534,15 @@ export default function PublicSitterProfile() {
       {activeTab === 'entraide' && (
         <div className="max-w-4xl mx-auto px-4 py-8 space-y-10">
 
-          {(missionsPublished.length > 0 || missionsHelped.length > 0 || missionFeedbacks.length > 0 || thanksReceived > 0) && (
+          {entraideLoading && (
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3" aria-busy="true">
+              {[0, 1, 2, 3].map((i) => (
+                <Skeleton key={i} className="h-20 rounded-xl" />
+              ))}
+            </div>
+          )}
+
+          {!entraideLoading && (missionsPublished.length > 0 || missionsHelped.length > 0 || missionFeedbacks.length > 0 || thanksReceived > 0) && (
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
               {[
                 { value: missionsPublished.length, label: 'Mission' + (missionsPublished.length > 1 ? 's publiées' : ' publiée') },
