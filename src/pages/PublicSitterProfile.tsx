@@ -1912,7 +1912,7 @@ export default function PublicSitterProfile() {
 
               {/* Onglet Confiance */}
               {((userBadges && userBadges.length > 0) || profile?.created_at) && (
-                <TabsContent value="confiance" forceMount className="mt-0 data-[state=inactive]:hidden px-4 pt-5 space-y-5" id="confiance">
+                <TabsContent value="confiance" forceMount className="mt-0 data-[state=inactive]:hidden px-4 pt-5 space-y-5" id="confiance-mobile">
                   {userBadges && userBadges.length > 0 && (
                     <>
                       <SpecialBadgeHighlight userBadges={userBadges} />
