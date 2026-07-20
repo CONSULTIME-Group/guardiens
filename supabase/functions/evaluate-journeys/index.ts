@@ -624,6 +624,55 @@ async function enrollForSequence(
     candidates = (data ?? []).map((c: { id: string; last_seen_at: string }) => ({
       id: c.id, anchor_at: c.last_seen_at,
     }))
+  } else if (rule.type === 'sitter_missing_affinity') {
+    // Gardiens inscrits depuis min_age_days jours dont animal_types OU
+    // work_during_sit est vide. Chunké par pages de 500 pour rester frugal.
+    const minAge = rule.min_age_days ?? 7
+    const minAgeAt = new Date(nowMs - minAge * 86400_000).toISOString()
+    let q = supabase
+      .from('profiles')
+      .select('id, role, created_at, sitter_profiles!inner(animal_types, work_during_sit)')
+      .lt('created_at', minAgeAt)
+      .not('email', 'is', null)
+      .eq('account_status', 'active')
+      .in('role', ['sitter', 'both'])
+    const { data, error } = await q.limit(500)
+    if (error) {
+      console.error('[enrollment] sitter_missing_affinity failed', error.message)
+      return 0
+    }
+    candidates = (data ?? [])
+      .filter((c: any) => {
+        const sp = Array.isArray(c.sitter_profiles) ? c.sitter_profiles[0] : c.sitter_profiles
+        if (!sp) return false
+        const noAnimals = !sp.animal_types || sp.animal_types.length === 0
+        const noWork = !sp.work_during_sit || sp.work_during_sit === ''
+        return noAnimals || noWork
+      })
+      .map((c: any) => ({ id: c.id, anchor_at: c.created_at }))
+  } else if (rule.type === 'owner_missing_affinity') {
+    // Propriétaires inscrits depuis min_age_days jours dont presence_expected est vide.
+    const minAge = rule.min_age_days ?? 7
+    const minAgeAt = new Date(nowMs - minAge * 86400_000).toISOString()
+    let q = supabase
+      .from('profiles')
+      .select('id, role, created_at, owner_profiles!inner(presence_expected)')
+      .lt('created_at', minAgeAt)
+      .not('email', 'is', null)
+      .eq('account_status', 'active')
+      .in('role', ['owner', 'both'])
+    const { data, error } = await q.limit(500)
+    if (error) {
+      console.error('[enrollment] owner_missing_affinity failed', error.message)
+      return 0
+    }
+    candidates = (data ?? [])
+      .filter((c: any) => {
+        const op = Array.isArray(c.owner_profiles) ? c.owner_profiles[0] : c.owner_profiles
+        if (!op) return false
+        return !op.presence_expected || op.presence_expected === ''
+      })
+      .map((c: any) => ({ id: c.id, anchor_at: c.created_at }))
   } else {
     console.warn('[enrollment] unknown rule type', rule)
     return 0
