@@ -648,30 +648,35 @@ export default function PublicSitterProfile() {
     if (!id) return;
 
     const loadEntraideData = async () => {
-      const { data: published } = await supabase
-        .from('small_missions')
-        .select('id, title, category, status, created_at, exchange_offer')
-        .eq('user_id', id)
-        .order('created_at', { ascending: false })
-        .limit(20);
+      setEntraideLoading(true);
+      try {
+        const [publishedRes, helpedResult, recognitionRes] = await Promise.all([
+          supabase
+            .from('small_missions')
+            .select('id, title, category, status, created_at, exchange_offer')
+            .eq('user_id', id)
+            .order('created_at', { ascending: false })
+            .limit(20),
+          supabase
+            .from('small_mission_responses')
+            .select('id, status, created_at, small_missions(id, title, category, status, created_at)')
+            .eq('responder_id', id)
+            .eq('status', 'accepted')
+            .order('created_at', { ascending: false })
+            .limit(20),
+          (supabase as any)
+            .from('helper_recognition_stats')
+            .select('useful_count')
+            .eq('user_id', id)
+            .maybeSingle(),
+        ]);
 
-      const helpedResult = await supabase
-        .from('small_mission_responses')
-        .select('id, status, created_at, small_missions(id, title, category, status, created_at)')
-        .eq('responder_id', id)
-        .eq('status', 'accepted')
-        .order('created_at', { ascending: false })
-        .limit(20);
-
-      const { data: recognition } = await (supabase as any)
-        .from('helper_recognition_stats')
-        .select('useful_count')
-        .eq('user_id', id)
-        .maybeSingle();
-
-      setMissionsPublished(published ?? []);
-      setMissionsHelped(!helpedResult.error ? (helpedResult.data ?? []) : []);
-      setThanksReceived(Number(recognition?.useful_count ?? 0));
+        setMissionsPublished(publishedRes.data ?? []);
+        setMissionsHelped(!helpedResult.error ? (helpedResult.data ?? []) : []);
+        setThanksReceived(Number((recognitionRes as any)?.data?.useful_count ?? 0));
+      } finally {
+        setEntraideLoading(false);
+      }
     };
 
     loadEntraideData();
