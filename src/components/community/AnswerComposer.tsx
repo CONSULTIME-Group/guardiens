@@ -6,6 +6,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { trackEvent } from "@/lib/analytics";
+import MissionEligibilityDialog, { type MissionEligibilityReason } from "@/components/missions/MissionEligibilityDialog";
+import { detectEligibilityReason } from "@/lib/eligibilityError";
 
 const schema = z.object({
   body: z.string().trim().min(10, "10 caractères minimum").max(4000, "4000 caractères maximum"),
