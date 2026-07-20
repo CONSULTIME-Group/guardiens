@@ -366,7 +366,7 @@ const OwnerProfilePage = () => {
               {activeSection === "animals" && <OwnerStepAnimals pets={pets} onAddPet={addPet} onUpdatePet={updatePet} onRemovePet={removePet} />}
               {activeSection === "rules" && (
                 <>
-                  <OwnerAffinityBanner context="profile_owner_section" editHref="" className="mb-6" />
+                  <OwnerAffinityBanner context="profile_owner_section" editHref="/owner-profile?section=rules" className="mb-6" />
                   <OwnerStepRules data={mergedData} onChange={handleChange} />
                 </>
               )}
