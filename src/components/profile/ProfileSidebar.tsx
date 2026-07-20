@@ -48,7 +48,7 @@ interface ProfileSidebarProps {
 const ProfileSidebar = ({
   firstName, city, avatarUrl, completion, sections,
   activeSection, dirtySection, onSectionClick, publicProfileUrl, role, isFounder,
-  scoreBreakdown, trustSlot,
+  scoreBreakdown, trustSlot, missingScoreItems,
 }: ProfileSidebarProps) => {
   const [expandedMissing, setExpandedMissing] = useState<Record<string, boolean>>({});
   const [scoreOpen, setScoreOpen] = useState(false);
