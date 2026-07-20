@@ -26,6 +26,7 @@ import {
   Shield, Star, PawPrint,
   Home, KeyRound, Handshake, Heart,
   Image as ImageIcon,
+  CalendarClock,
 } from "lucide-react";
 import { HeroPickerModal } from "@/components/profile/HeroPickerModal";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
@@ -47,6 +48,8 @@ import { getSitterHeroImage, getSitterHeroAnchor, getSitterHeroSources } from "@
 import { useHeroWeights } from "@/hooks/useHeroWeights";
 import ActivateRoleDialog, { type ContactIntentContext } from "@/components/premium/ActivateRoleDialog";
 import ProfileHero, { type HeroCtaVariant } from "@/components/profile/ProfileHero";
+import StoryTiles, { type StoryTileInput } from "@/components/profile/StoryTiles";
+import TrustStory from "@/components/profile/TrustStory";
 
 const capitalize = (name: string) =>
   name ? name.charAt(0).toUpperCase() + name.slice(1).toLowerCase() : "";
@@ -1132,175 +1135,69 @@ export default function PublicSitterProfile() {
       {activeTab === 'gardien' && (
         <div className="max-w-5xl mx-auto px-4 md:px-6 py-6 md:py-8 pb-[calc(10.5rem+env(safe-area-inset-bottom))] md:pb-8">
 
-          {/* ── A. BANDEAU DE QUALIFICATION RAPIDE (4 tuiles + CTA) ──── */}
-          <section
-            aria-label="Informations clés pour qualifier le gardien"
-            className="mb-8 md:mb-10"
-          >
+          {/* ── FLUX NARRATIF UNIFIÉ (vague 37) ────────────────────────────
+              Mobile et desktop partagent le même flux vertical. Les onglets
+              Radix sont supprimés au profit de sections continues séparées de
+              52 px. L'ancre `#confiance` sert désormais aux deux breakpoints. */}
+          <div className="space-y-[52px]">
+
+            {/* 1. StoryTiles narratives (3 tuiles max, jamais « Non renseigné ») */}
             {(() => {
-              // Helpers locaux pour des états "non renseigné" propres et homogènes
-              const Empty = ({ label }: { label: string }) => (
-                <p className="text-sm text-muted-foreground/70 italic font-body">{label}</p>
-              );
-
-              // Tuile Disponibilité : on distingue clairement
-              // - Disponible (toggle ON)
-              // - Sur demande (toggle OFF mais préférences renseignées)
-              // - Non renseignée (rien)
+              const tiles: StoryTileInput[] = [];
+              if (animalTypes.length > 0) {
+                tiles.push({
+                  key: 'animaux',
+                  Icon: PawPrint,
+                  title: animalTypes.map((a) => ANIMAL_LABELS[a] || a).join(', '),
+                  detail: 'Animaux acceptés en garde',
+                });
+              }
+              if (radius || city) {
+                const zoneTitle = radius && city
+                  ? `${city}, jusqu'à ${radius} km`
+                  : radius
+                    ? `Jusqu'à ${radius} km autour`
+                    : (city as string);
+                tiles.push({
+                  key: 'zone',
+                  Icon: MapPin,
+                  title: zoneTitle,
+                  detail: hasVehicle ? 'Se déplace avec véhicule' : null,
+                });
+              }
               const hasAvailabilityHint = Boolean(durationLabel || frequencyLabel || noticeLabel);
-
-              // Tuile Confiance : on a "quelque chose à dire" si avis OU gardes OU écussons OU identité vérifiée
-              const identityVerified = Boolean(profile?.identity_verified);
-              const hasTrustSignals =
-                reviewCount > 0 || completedSits > 0 || totalBadgeCount > 0 || identityVerified;
-
-              return (
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-2.5 md:gap-3">
-                  {/* Tuile 1, Animaux acceptés */}
-                  <div className="bg-card border border-border rounded-xl p-2.5 sm:p-3.5 md:p-4 flex flex-col gap-1 sm:gap-1.5 min-h-[88px] sm:min-h-[92px] min-w-0">
-                    <div className="text-[10px] sm:text-[11px] uppercase tracking-wider text-muted-foreground font-body">
-                      <span className="truncate">Animaux</span>
-                    </div>
-                    {animalTypes.length > 0 ? (
-                      <p className="text-xs sm:text-sm text-foreground font-body leading-snug line-clamp-2 break-words">
-                        {animalTypes.map(a => ANIMAL_LABELS[a] || a).join(', ')}
-                      </p>
-                    ) : (
-                      <Empty label="Non renseigné" />
-                    )}
-                  </div>
-
-                  {/* Tuile 2, Zone d'intervention */}
-                  <div className="bg-card border border-border rounded-xl p-2.5 sm:p-3.5 md:p-4 flex flex-col gap-1 sm:gap-1.5 min-h-[88px] sm:min-h-[92px] min-w-0">
-                    <div className="text-[10px] sm:text-[11px] uppercase tracking-wider text-muted-foreground font-body">
-                      <span className="truncate">Zone</span>
-                    </div>
-                    {radius || city ? (
-                      <p className="text-xs sm:text-sm text-foreground font-body leading-snug break-words">
-                        {radius && city ? (
-                          <><span className="break-words">{city}</span> <span className="text-muted-foreground">·</span> <span className="font-semibold whitespace-nowrap">jusqu'à {radius} km</span></>
-                        ) : radius ? (
-                          <span className="font-semibold whitespace-nowrap">Jusqu'à {radius} km autour</span>
-                        ) : (
-                          <>Secteur : <span className="font-semibold break-words">{city}</span></>
-                        )}
-                      </p>
-                    ) : (
-                      <Empty label="Non renseigné" />
-                    )}
-                    <span className={`text-[10px] sm:text-[11px] font-body ${hasVehicle ? 'text-primary' : 'text-muted-foreground/70'}`}>
-                      {hasVehicle ? 'Avec véhicule' : 'Sans véhicule'}
-                    </span>
-                  </div>
-
-                  {/* Tuile 3, Disponibilité */}
-                  <div className="bg-card border border-border rounded-xl p-2.5 sm:p-3.5 md:p-4 flex flex-col gap-1 sm:gap-1.5 min-h-[88px] sm:min-h-[92px] min-w-0">
-                    <div className="text-[10px] sm:text-[11px] uppercase tracking-wider text-muted-foreground font-body">
-                      <span className="truncate">Disponibilité</span>
-                    </div>
-                    {isAvailable ? (
-                      <p className="text-xs sm:text-sm text-foreground font-body leading-snug break-words">
-                        <span className="font-semibold text-primary">Disponible</span>
-                        {durationLabel && (
-                          <span className="text-muted-foreground"> · {durationLabel.replace(' minimum', ' min.')}</span>
-                        )}
-                      </p>
-                    ) : hasAvailabilityHint ? (
-                      <p className="text-xs sm:text-sm text-foreground/80 font-body leading-snug break-words">
-                        <span className="font-medium">Sur demande</span>
-                        {(durationLabel || frequencyLabel) && (
-                          <span className="text-muted-foreground"> · {durationLabel || frequencyLabel}</span>
-                        )}
-                      </p>
-                    ) : (
-                      <Empty label="Non renseigné" />
-                    )}
-                    {typeLine && (
-                      <span className="text-[10px] sm:text-[11px] text-muted-foreground font-body line-clamp-1">{typeLine}</span>
-                    )}
-                  </div>
-
-                  {/* Tuile 4, Confiance / preuves */}
-                  <div className="bg-card border border-border rounded-xl p-2.5 sm:p-3.5 md:p-4 flex flex-col gap-1 sm:gap-1.5 min-h-[88px] sm:min-h-[92px] min-w-0">
-                    <div className="text-[10px] sm:text-[11px] uppercase tracking-wider text-muted-foreground font-body">
-                      <span className="truncate">Confiance</span>
-                    </div>
-                    {hasTrustSignals ? (
-                      <>
-                        <div className="flex items-baseline flex-wrap gap-x-1.5 gap-y-0.5 text-xs sm:text-sm text-foreground font-body">
-                          {reviewCount > 0 ? (
-                            <>
-                              <span className="font-semibold whitespace-nowrap">{avgRating.toFixed(1)}<span className="text-primary">★</span></span>
-                              <span className="text-muted-foreground text-[11px] sm:text-xs">
-                                ({reviewCount} avis{reviewCount === 1 ? ', premier retour' : ''})
-                              </span>
-                            </>
-                          ) : identityVerified ? (
-                            <span className="text-foreground/80 text-[11px] sm:text-xs">Identité vérifiée</span>
-                          ) : (
-                            <span className="text-muted-foreground text-[11px] sm:text-xs italic">Aucun avis</span>
-                          )}
-                        </div>
-                        <div className="flex flex-wrap gap-x-1 sm:gap-x-1.5 gap-y-0.5 text-[10px] sm:text-[11px] text-muted-foreground font-body">
-                          {completedSits > 0 && <span className="whitespace-nowrap">{completedSits} garde{completedSits > 1 ? 's' : ''}</span>}
-                          {completedSits > 0 && totalBadgeCount > 0 && <span aria-hidden="true">·</span>}
-                          {totalBadgeCount > 0 && <span className="whitespace-nowrap">{totalBadgeCount} écusson{totalBadgeCount > 1 ? 's' : ''}</span>}
-                          {reviewCount > 0 && identityVerified && (completedSits > 0 || totalBadgeCount > 0) && <span aria-hidden="true">·</span>}
-                          {reviewCount > 0 && identityVerified && <span className="whitespace-nowrap">ID vérifiée</span>}
-                        </div>
-                      </>
-                    ) : (
-                      <Empty label="Nouveau profil" />
-                    )}
-                  </div>
-                </div>
-              );
+              if (isAvailable) {
+                tiles.push({
+                  key: 'dispo',
+                  Icon: CalendarClock,
+                  title: 'Disponible maintenant',
+                  detail: durationLabel || frequencyLabel || null,
+                });
+              } else if (hasAvailabilityHint) {
+                tiles.push({
+                  key: 'dispo',
+                  Icon: CalendarClock,
+                  title: 'Sur demande',
+                  detail: durationLabel || frequencyLabel || null,
+                });
+              }
+              return <StoryTiles tiles={tiles} />;
             })()}
 
-            {/* CTA primaire déplacé dans le hero (vague 37) — pas de doublon ici. */}
-          </section>
-
-          {/* ── B. CONTENU EN ONGLETS (desktop) / FLUX (mobile) ───────── */}
-
-          {/*, DESKTOP : Tabs Radix, */}
-          <div className="hidden md:block">
-            <Tabs defaultValue="apropos" className="w-full">
-              <TabsList className="w-full justify-start bg-transparent border-b border-border rounded-none h-auto p-0 gap-1">
-                <TabsTrigger
-                  value="apropos"
-                  className="data-[state=active]:bg-transparent data-[state=active]:border-primary data-[state=active]:text-primary data-[state=active]:shadow-none rounded-none border-b-2 border-transparent px-4 py-2.5 text-sm font-body"
-                >
+            {/* 2. Qui est {prénom} — bio + motivation + grille de faits */}
+            <section aria-label={`À propos de ${firstName}`} className="scroll-mt-20">
+              <div className="mb-5">
+                <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-secondary">
                   À propos
-                </TabsTrigger>
-                {reviewCount > 0 && (
-                  <TabsTrigger
-                    value="avis"
-                    className="data-[state=active]:bg-transparent data-[state=active]:border-primary data-[state=active]:text-primary data-[state=active]:shadow-none rounded-none border-b-2 border-transparent px-4 py-2.5 text-sm font-body"
-                  >
-                    Avis ({reviewCount})
-                  </TabsTrigger>
-                )}
-                <TabsTrigger
-                  value="pratique"
-                  className="data-[state=active]:bg-transparent data-[state=active]:border-primary data-[state=active]:text-primary data-[state=active]:shadow-none rounded-none border-b-2 border-transparent px-4 py-2.5 text-sm font-body"
-                >
-                  Pratique
-                </TabsTrigger>
-                {gallery.length > 0 && (
-                  <TabsTrigger
-                    value="galerie"
-                    className="data-[state=active]:bg-transparent data-[state=active]:border-primary data-[state=active]:text-primary data-[state=active]:shadow-none rounded-none border-b-2 border-transparent px-4 py-2.5 text-sm font-body"
-                  >
-                    Galerie ({gallery.length})
-                  </TabsTrigger>
-                )}
-                {/* Onglet « Confiance » retiré du desktop : la section est désormais toujours
-                    visible en dessous des Tabs, plus besoin de cliquer pour voir les vérifications. */}
-
-              </TabsList>
-
-              {/* Onglet À propos */}
-              <TabsContent value="apropos" className="pt-6 space-y-6">
+                </p>
+                <h2 className="font-heading text-[22px] sm:text-[26px] font-semibold text-foreground mt-1 leading-tight">
+                  Qui est {firstName}.
+                </h2>
+                <p className="text-sm text-muted-foreground mt-1">
+                  Ses mots, ses habitudes, sa manière de faire.
+                </p>
+              </div>
+              <div className="space-y-6">
                 {(motivation || bio) ? (
                   <div className="space-y-4 max-w-2xl">
                     {motivation && (
@@ -1316,75 +1213,9 @@ export default function PublicSitterProfile() {
                   </div>
                 ) : (
                   <p className="text-sm text-muted-foreground italic font-body">
-                    {firstName} n'a pas encore rédigé de présentation.
+                    {firstName} n'a pas encore rédigé sa présentation.
                   </p>
                 )}
-                <PublicExperiences experiences={externalExperiences} />
-              </TabsContent>
-
-              {/* Onglet Avis, aplati : liste unique triée + filtre à puces (plus de sous-onglets imbriqués). */}
-              {reviewCount > 0 && (
-                <TabsContent value="avis" className="pt-6">
-                  {(() => {
-                    const filtered = reviewFilter === 'gardes'
-                      ? gardeReviews
-                      : reviewFilter === 'missions'
-                        ? missionReviews
-                        : [...reviews].sort((a: any, b: any) =>
-                            new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
-                    const chips: Array<{ id: 'all' | 'gardes' | 'missions'; label: string; count: number }> = [
-                      { id: 'all', label: 'Tous', count: reviews.length },
-                      { id: 'gardes', label: 'Gardes', count: gardeReviews.length },
-                      { id: 'missions', label: 'Missions', count: missionReviews.length },
-                    ];
-                    return (
-                      <>
-                        <div className="flex flex-wrap gap-2 mb-4" role="tablist" aria-label="Filtrer les avis">
-                          {chips.map((c) => {
-                            const active = reviewFilter === c.id;
-                            return (
-                              <button
-                                key={c.id}
-                                type="button"
-                                role="tab"
-                                aria-selected={active}
-                                onClick={() => setReviewFilter(c.id)}
-                                className={[
-                                  'inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-body transition-colors',
-                                  active
-                                    ? 'bg-primary text-primary-foreground border-primary'
-                                    : 'bg-card text-foreground/70 border-border hover:border-primary/40 hover:text-foreground',
-                                ].join(' ')}
-                              >
-                                {c.label}
-                                {c.count > 0 && (
-                                  <span className={active ? 'opacity-90' : 'text-muted-foreground'}>({c.count})</span>
-                                )}
-                              </button>
-                            );
-                          })}
-                        </div>
-                        {filtered.length === 0 ? (
-                          <p className="text-sm text-muted-foreground italic py-4 font-body">
-                            Aucun avis dans cette catégorie.
-                          </p>
-                        ) : (
-                          <ReviewGrid
-                            reviews={filtered}
-                            showAll={showAllGardeReviews}
-                            setShowAll={setShowAllGardeReviews}
-                            badgesBySitId={badgesBySitId}
-                          />
-                        )}
-                      </>
-                    );
-                  })()}
-                </TabsContent>
-              )}
-
-
-              {/* Onglet Pratique */}
-              <TabsContent value="pratique" className="pt-6">
                 <PracticalGrid
                   animalTypes={animalTypes}
                   sitterProfile={sitterProfile}
@@ -1399,201 +1230,27 @@ export default function PublicSitterProfile() {
                   frequencyLabel={frequencyLabel}
                   noticeLabel={noticeLabel}
                 />
-              </TabsContent>
+                <PublicExperiences experiences={externalExperiences} />
+              </div>
+            </section>
 
-              {/* Onglet Galerie */}
-              {gallery.length > 0 && (
-                <TabsContent value="galerie" className="pt-6">
-                  <GallerySimple
-                    visibleGallery={visibleGallery}
-                    setLightboxIdx={setLightboxIdx}
-                  />
-                </TabsContent>
-              )}
-
-            </Tabs>
-
-            {/* Section Confiance toujours visible sur desktop (badges + timeline + missions).
-                Sortie de l'onglet pour rendre la réassurance accessible sans clic. */}
+            {/* 3. Confiance : timeline + badges. Ancre unique #confiance,
+                également ciblée par le fallback #confiance-mobile du hero. */}
             {((userBadges && userBadges.length > 0) || profile?.created_at) && (
-              <section
-                id="confiance"
-                aria-label="Confiance et vérifications"
-                className="mt-10 pt-8 border-t border-border space-y-6"
+              <TrustStory
+                variant="desktop"
+                title={`Ce qui rassure chez ${firstName}.`}
+                eyebrow="Confiance"
               >
-                <header>
-                  <p className="text-xs uppercase tracking-[2px] text-muted-foreground font-body mb-1.5">
-                    Confiance et vérifications
-                  </p>
-                  <h2 className="text-xl font-heading font-semibold text-foreground">
-                    Ce qui rassure chez {firstName}
-                  </h2>
-                </header>
-                {userBadges && userBadges.length > 0 && (
-                  <div id="badges" className="scroll-mt-24 space-y-6">
-                    <SpecialBadgeHighlight userBadges={userBadges} />
-                    <BadgeRow badges={userBadges} />
-                  </div>
-                )}
-                {id && <MissionBadgesReceived profileId={id} />}
-                <TrustTimeline
-                  memberSince={profile?.created_at}
-                  reviews={reviews}
-                  badges={(userBadges || []).map((b: any) => ({
-                    badge_id: b.badge_id,
-                    created_at: b.created_at,
-                    count: b.count ?? 1,
-                  }))}
-                  completedSits={completedSits}
-                  lastActivity={sitterProfile?.last_seen_at ?? null}
-                  firstName={firstName}
-                />
-              </section>
-            )}
-          </div>
-
-
-          {/* MOBILE : onglets sticky scrollables (forceMount pour SEO) */}
-          <div className="md:hidden">
-            <Tabs defaultValue="apropos" className="w-full">
-              <TabsList className="sticky top-[49px] z-10 w-full flex overflow-x-auto scrollbar-none justify-start rounded-none border-b border-border bg-background/95 backdrop-blur-sm h-auto p-0 gap-0 [&>*]:rounded-none [&>*]:border-b-2 [&>*]:border-transparent [&>*[data-state=active]]:border-primary [&>*[data-state=active]]:text-primary [&>*[data-state=active]]:bg-transparent [&>*[data-state=active]]:shadow-none">
-                <TabsTrigger value="apropos" className="shrink-0 px-4 py-3 text-sm font-body text-foreground/60 hover:text-foreground">
-                  À propos
-                </TabsTrigger>
-                {reviewCount > 0 && (
-                  <TabsTrigger value="avis" className="shrink-0 px-4 py-3 text-sm font-body text-foreground/60 hover:text-foreground">
-                    Avis&nbsp;({reviewCount})
-                  </TabsTrigger>
-                )}
-                {/* Confiance remonté en 2e position pratique après Avis pour rendre la réassurance visible sans clic. */}
-                {((userBadges && userBadges.length > 0) || profile?.created_at) && (
-                  <TabsTrigger value="confiance" className="shrink-0 px-4 py-3 text-sm font-body text-foreground/60 hover:text-foreground">
-                    Confiance
-                  </TabsTrigger>
-                )}
-                <TabsTrigger value="pratique" className="shrink-0 px-4 py-3 text-sm font-body text-foreground/60 hover:text-foreground">
-                  Pratique
-                </TabsTrigger>
-                {gallery.length > 0 && (
-                  <TabsTrigger value="galerie" className="shrink-0 px-4 py-3 text-sm font-body text-foreground/60 hover:text-foreground">
-                    Galerie
-                  </TabsTrigger>
-                )}
-              </TabsList>
-
-
-              {/* Onglet À propos */}
-              <TabsContent value="apropos" forceMount className="mt-0 data-[state=inactive]:hidden px-4 pt-5 space-y-5">
-                {(motivation || bio) ? (
-                  <div className="space-y-3">
-                    {motivation && (
-                      <p className="text-base text-foreground leading-relaxed font-body">{motivation}</p>
-                    )}
-                    {bio && (
-                      <p className="text-sm text-foreground/75 leading-relaxed font-body whitespace-pre-line">{bio}</p>
-                    )}
-                  </div>
-                ) : (
-                  <p className="text-sm text-muted-foreground italic font-body">
-                    Pas encore de présentation.
-                  </p>
-                )}
-                <PublicExperiences experiences={externalExperiences} />
-              </TabsContent>
-
-              {/* Onglet Avis, aplati : liste unique triée + filtre à puces (plus de sous-onglets imbriqués). */}
-              {reviewCount > 0 && (
-                <TabsContent value="avis" forceMount className="mt-0 data-[state=inactive]:hidden px-4 pt-5">
-                  {(() => {
-                    const filtered = reviewFilter === 'gardes'
-                      ? gardeReviews
-                      : reviewFilter === 'missions'
-                        ? missionReviews
-                        : [...reviews].sort((a: any, b: any) =>
-                            new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
-                    const chips: Array<{ id: 'all' | 'gardes' | 'missions'; label: string; count: number }> = [
-                      { id: 'all', label: 'Tous', count: reviews.length },
-                      { id: 'gardes', label: 'Gardes', count: gardeReviews.length },
-                      { id: 'missions', label: 'Missions', count: missionReviews.length },
-                    ];
-                    return (
-                      <>
-                        <div className="flex flex-wrap gap-2 mb-3" role="tablist" aria-label="Filtrer les avis">
-                          {chips.map((c) => {
-                            const active = reviewFilter === c.id;
-                            return (
-                              <button
-                                key={c.id}
-                                type="button"
-                                role="tab"
-                                aria-selected={active}
-                                onClick={() => setReviewFilter(c.id)}
-                                className={[
-                                  'inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-body transition-colors',
-                                  active
-                                    ? 'bg-primary text-primary-foreground border-primary'
-                                    : 'bg-card text-foreground/70 border-border hover:border-primary/40 hover:text-foreground',
-                                ].join(' ')}
-                              >
-                                {c.label}
-                                {c.count > 0 && (
-                                  <span className={active ? 'opacity-90' : 'text-muted-foreground'}>({c.count})</span>
-                                )}
-                              </button>
-                            );
-                          })}
-                        </div>
-                        {filtered.length === 0 ? (
-                          <p className="text-sm text-muted-foreground italic py-2 font-body">Aucun avis dans cette catégorie.</p>
-                        ) : (
-                          <ReviewGrid
-                            reviews={filtered}
-                            showAll={showAllGardeReviews}
-                            setShowAll={setShowAllGardeReviews}
-                            badgesBySitId={badgesBySitId}
-                          />
-                        )}
-                      </>
-                    );
-                  })()}
-                </TabsContent>
-              )}
-
-
-              {/* Onglet Pratique */}
-              <TabsContent value="pratique" forceMount className="mt-0 data-[state=inactive]:hidden px-4 pt-5">
-                <PracticalGrid
-                  animalTypes={animalTypes}
-                  sitterProfile={sitterProfile}
-                  hasVehicle={hasVehicle}
-                  radius={radius}
-                  city={city}
-                  competences={competences}
-                  lifestyle={lifestyle}
-                  preferredEnvironments={preferredEnvironments}
-                  typeLine={typeLine}
-                  durationLabel={durationLabel}
-                  frequencyLabel={frequencyLabel}
-                  noticeLabel={noticeLabel}
-                />
-              </TabsContent>
-
-              {/* Onglet Galerie */}
-              {gallery.length > 0 && (
-                <TabsContent value="galerie" forceMount className="mt-0 data-[state=inactive]:hidden px-4 pt-5">
-                  <GallerySimple visibleGallery={visibleGallery} setLightboxIdx={setLightboxIdx} />
-                </TabsContent>
-              )}
-
-              {/* Onglet Confiance */}
-              {((userBadges && userBadges.length > 0) || profile?.created_at) && (
-                <TabsContent value="confiance" forceMount className="mt-0 data-[state=inactive]:hidden px-4 pt-5 space-y-5" id="confiance-mobile">
+                <span id="confiance-mobile" aria-hidden="true" />
+                <div className="space-y-6">
                   {userBadges && userBadges.length > 0 && (
-                    <>
+                    <div id="badges" className="scroll-mt-24 space-y-6">
                       <SpecialBadgeHighlight userBadges={userBadges} />
                       <BadgeRow badges={userBadges} />
-                    </>
+                    </div>
                   )}
+                  {id && <MissionBadgesReceived profileId={id} />}
                   <TrustTimeline
                     memberSince={profile?.created_at}
                     reviews={reviews}
@@ -1606,10 +1263,106 @@ export default function PublicSitterProfile() {
                     lastActivity={sitterProfile?.last_seen_at ?? null}
                     firstName={firstName}
                   />
-                </TabsContent>
-              )}
-            </Tabs>
+                </div>
+              </TrustStory>
+            )}
+
+            {/* 4. Avis — liste réelle ou empty raconté */}
+            <section aria-label="Avis reçus" className="scroll-mt-20">
+              <div className="mb-5">
+                <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-secondary">
+                  Avis
+                </p>
+                <h2 className="font-heading text-[22px] sm:text-[26px] font-semibold text-foreground mt-1 leading-tight">
+                  {reviewCount > 0
+                    ? 'Ce que les propriétaires racontent.'
+                    : `${firstName} prépare sa première garde.`}
+                </h2>
+                {reviewCount > 0 ? (
+                  <p className="text-sm text-muted-foreground mt-1">
+                    {reviewCount} retour{reviewCount > 1 ? 's' : ''} · moyenne {avgRating.toFixed(1)}★
+                  </p>
+                ) : (
+                  <p className="text-sm text-muted-foreground mt-1">
+                    Les premiers retours des propriétaires apparaîtront ici, tels quels.
+                  </p>
+                )}
+              </div>
+              {reviewCount > 0 && (() => {
+                const filtered = reviewFilter === 'gardes'
+                  ? gardeReviews
+                  : reviewFilter === 'missions'
+                    ? missionReviews
+                    : [...reviews].sort((a: any, b: any) =>
+                        new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+                const chips: Array<{ id: 'all' | 'gardes' | 'missions'; label: string; count: number }> = [
+                  { id: 'all', label: 'Tous', count: reviews.length },
+                  { id: 'gardes', label: 'Gardes', count: gardeReviews.length },
+                  { id: 'missions', label: 'Missions', count: missionReviews.length },
+                ];
+                return (
+                  <>
+                    <div className="flex flex-wrap gap-2 mb-4" role="tablist" aria-label="Filtrer les avis">
+                      {chips.map((c) => {
+                        const active = reviewFilter === c.id;
+                        return (
+                          <button
+                            key={c.id}
+                            type="button"
+                            role="tab"
+                            aria-selected={active}
+                            onClick={() => setReviewFilter(c.id)}
+                            className={[
+                              'inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-body transition-colors',
+                              active
+                                ? 'bg-primary text-primary-foreground border-primary'
+                                : 'bg-card text-foreground/70 border-border hover:border-primary/40 hover:text-foreground',
+                            ].join(' ')}
+                          >
+                            {c.label}
+                            {c.count > 0 && (
+                              <span className={active ? 'opacity-90' : 'text-muted-foreground'}>({c.count})</span>
+                            )}
+                          </button>
+                        );
+                      })}
+                    </div>
+                    {filtered.length === 0 ? (
+                      <p className="text-sm text-muted-foreground italic font-body">
+                        Aucun avis dans cette catégorie.
+                      </p>
+                    ) : (
+                      <ReviewGrid
+                        reviews={filtered}
+                        showAll={showAllGardeReviews}
+                        setShowAll={setShowAllGardeReviews}
+                        badgesBySitId={badgesBySitId}
+                      />
+                    )}
+                  </>
+                );
+              })()}
+            </section>
+
+            {/* 5. Galerie — uniquement si contenu réel */}
+            {gallery.length > 0 && (
+              <section aria-label="Galerie" className="scroll-mt-20">
+                <div className="mb-5">
+                  <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-secondary">
+                    Galerie
+                  </p>
+                  <h2 className="font-heading text-[22px] sm:text-[26px] font-semibold text-foreground mt-1 leading-tight">
+                    Quelques instants de {firstName}.
+                  </h2>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    Cliquez pour agrandir.
+                  </p>
+                </div>
+                <GallerySimple visibleGallery={visibleGallery} setLightboxIdx={setLightboxIdx} />
+              </section>
+            )}
           </div>
+
 
           {/* CTA sticky bottom mobile */}
           {showCTA && (
