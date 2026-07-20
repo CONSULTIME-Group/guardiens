@@ -1535,7 +1535,7 @@ export default function PublicSitterProfile() {
                   </button>
                 ) : !isAuthenticated ? (
                   <Link
-                    to={`/inscription?redirect=/gardiens/${id}`}
+                    to={`/inscription?redirect=${encodeURIComponent(`/gardiens/${id}`)}`}
                     className="inline-flex items-center justify-center bg-primary text-primary-foreground rounded-lg px-6 py-3 text-sm font-medium hover:bg-primary/90 transition-colors flex-1 sm:flex-initial"
                   >
                     S'inscrire pour contacter {firstName}
