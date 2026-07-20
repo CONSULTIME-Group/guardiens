@@ -155,6 +155,8 @@ export const TEMPLATES: Record<string, TemplateEntry> = {
   'application-message-restored': applicationMessageRestored,
   'application-reopened': applicationReopened,
   'help-during-sit': helpDuringSit,
+  'affinity-completion-sitter': affinityCompletionSitter,
+  'affinity-completion-owner': affinityCompletionOwner,
 }
 
 
