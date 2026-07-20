@@ -978,349 +978,85 @@ export default function PublicSitterProfile() {
 
       {/* ── Contenu principal z-1 ── */}
       <div className="relative z-[1]">
-      {/* ── HERO FUSIONNÉ : illustration carnet de voyage (banque, hashée par sitter.id) ──
-          Mode "spirale visible / rognage minimal" :
-          - object-contain au lieu de object-cover → l'intégralité du carnet (spirales,
-            reliure, marges) est affichée sans coupe.
-          - Le conteneur respecte l'aspect-ratio natif (1536/544 ≈ 2.82) plutôt qu'une
-            min-height arbitraire qui forcerait à zoomer/recadrer.
-          - Fond #FBF6EC = couleur du papier des illustrations → liserés invisibles. */}
-      {(() => {
-        // L'ancrage horizontal n'est plus utile en mode contain (toute l'image est visible),
-        // mais on conserve le calcul pour pouvoir basculer rapidement entre les deux modes.
-        // `hero_image_index` (override manuel choisi par le gardien) prend le pas sur le hash.
+      {/* ── HERO RESSERRÉ (vague 37) ── */}
+      {profile && id && (() => {
         const overrideIndex = profile?.hero_image_index ?? null;
         const anchor = getSitterHeroAnchor(id, heroWeights, overrideIndex);
         const { desktop: heroDesktop, mobile: heroMobile } = getSitterHeroSources(
           id,
           heroWeights,
-          overrideIndex
+          overrideIndex,
         );
-        const isOwnProfile = !!auth.user?.id && auth.user.id === id;
+        const heroCta: HeroCtaVariant = isOwn
+          ? { kind: "own" }
+          : !isAuthenticated
+            ? {
+                kind: "unauthenticated",
+                signupHref: `/inscription?redirect=${encodeURIComponent(`/gardiens/${id}`)}`,
+              }
+            : isOwner
+              ? {
+                  kind: "owner",
+                  onContact: async () => {
+                    if (!auth?.user?.id || !id) return;
+                    const { startConversation } = await import("@/lib/conversation");
+                    const { conversationId, error } = await startConversation({
+                      otherUserId: id,
+                      context: "sitter_inquiry",
+                    });
+                    if (conversationId) {
+                      navigate(`/messages?c=${conversationId}`);
+                    } else if (error?.includes("propositions spontanées")) {
+                      const { toast } = await import("sonner");
+                      toast.error("Ce membre ne reçoit pas de propositions spontanées.");
+                    } else {
+                      const { toast } = await import("sonner");
+                      toast.error("Impossible d'ouvrir la conversation.");
+                    }
+                  },
+                }
+              : {
+                  kind: "sitter",
+                  onActivate: () =>
+                    setActivateProprioIntent({
+                      recipientId: id,
+                      recipientFirstName: firstName,
+                      conversationContext: "sitter_inquiry",
+                    }),
+                };
         return (
-          <div
-            className="relative overflow-hidden w-full flex items-end bg-[hsl(var(--hero-paper))] md:max-h-[520px] md:[aspect-ratio:1536/544]"
-          >
-            {/* Illustration de fond, sketchbook style, déterministe par profil.
-                object-contain : on montre le carnet entier (spirales, marges) sans rogner. */}
-            <div className="absolute inset-0 z-0 pointer-events-none">
-              <img
-                src={heroDesktop}
-                srcSet={`${heroMobile} 768w, ${heroDesktop} 1536w`}
-                sizes="(max-width: 767px) 100vw, 1536px"
-                alt=""
-                aria-hidden="true"
-                data-hero-anchor={anchor}
-                width={1536}
-                height={544}
-                loading="eager"
-                decoding="async"
-                fetchPriority="high"
-                style={{
-                  // GPU layer : préserve les perfs de scroll même sans transform.
-                  willChange: 'transform',
-                  transform: 'translateZ(0)',
-                  backfaceVisibility: 'hidden',
-                }}
-                className="w-full h-full object-contain object-center"
-              />
-            </div>
-
-            {/* Bouton "Changer l'image", visible uniquement pour le propriétaire du profil.
-                Position en haut à droite du hero, au-dessus des scrims, en z-20 pour
-                rester cliquable malgré les overlays. */}
-            {isOwnProfile && (
-              <button
-                type="button"
-                onClick={() => setHeroPickerOpen(true)}
-                className="absolute top-3 right-3 z-20 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-background/90 backdrop-blur border border-border text-xs font-medium shadow-sm hover:bg-background transition-colors"
-                title="Choisir une autre illustration de carnet"
-              >
-                <ImageIcon className="w-3.5 h-3.5" />
-                Changer l'image
-              </button>
-            )}
-
-        {/* Vignettage très subtil */}
-        <div className="absolute inset-0 z-[1] pointer-events-none" style={{ background: 'radial-gradient(ellipse at center, transparent 55%, rgba(90,69,48,0.08) 100%)' }} />
-
-        {/* Scrim de lisibilité, dégradé bas qui remonte derrière le bloc texte.
-            Plus présent (60% de la hauteur) pour garantir le contraste de la h1, ville,
-            badges et stats peu importe la zone de l'illustration. */}
-        <div
-          className="absolute inset-x-0 bottom-0 h-[75%] z-[1] pointer-events-none"
-          style={{
-            background:
-              'linear-gradient(to top, hsl(var(--background)) 0%, hsl(var(--background) / 0.85) 30%, hsl(var(--background) / 0.45) 65%, transparent 100%)',
-          }}
-        />
-
-        {/* Scrim haut très léger pour le lien "Retour aux gardiens" */}
-        <div
-          className="absolute inset-x-0 top-0 h-24 z-[1] pointer-events-none"
-          style={{
-            background:
-              'linear-gradient(to bottom, hsl(var(--background) / 0.55) 0%, transparent 100%)',
-          }}
-        />
-
-        {/* Contenu header par-dessus */}
-        <div className="relative z-10 w-full max-w-5xl mx-auto px-4 sm:px-6 pb-5 sm:pb-8 pt-4 sm:pt-6">
-          {/* Ligne retour */}
-          <div className="flex justify-end mb-4">
-            <Link
-              to="/recherche-gardiens"
-              className="inline-flex items-center gap-1 text-sm text-foreground font-medium px-3 py-1.5 rounded-full bg-background/90 backdrop-blur-md border border-border/60 shadow-md hover:bg-background hover:shadow-lg transition-all"
-            >
-              ← Retour aux gardiens
-            </Link>
-          </div>
-
-          {/* Flex photo + infos */}
-          <div className="flex flex-col sm:flex-row sm:items-end gap-3 sm:gap-6 min-w-0">
-            {/* Photo grande */}
-            <div className="shrink-0 relative">
-              <button
-                type="button"
-                onClick={() => lightboxItems.length > 0 && setLightboxIdx(0)}
-                disabled={lightboxItems.length === 0}
-                aria-label={`Agrandir la photo de ${firstName}`}
-                className="block rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary disabled:cursor-default"
-              >
-                <img
-                  src={profile.avatar_url || "/placeholder.svg"}
-                  alt={firstName}
-                  className="w-20 h-20 sm:w-28 sm:h-28 md:w-40 md:h-40 rounded-full object-cover object-center border-4 border-white shadow-md ring-2 ring-primary ring-offset-2"
-                />
-              </button>
-              {reputation && reputation.statut_gardien !== 'novice' && (
-                <div className="absolute -bottom-2 -right-2">
-                  <StatutGardienBadge statut={reputation.statut_gardien} />
-                </div>
-              )}
-            </div>
-
-            {/* Infos */}
-            <div className="flex flex-col gap-1.5 pb-1 min-w-0 flex-1">
-              {isAvailable && (
-                <span className="inline-flex w-fit items-center gap-1.5 text-xs bg-primary text-primary-foreground px-3 py-1 rounded-full font-semibold shadow-md border border-primary/40 backdrop-blur-sm">
-                  <span className="relative flex h-2 w-2">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary-foreground opacity-60" />
-                    <span className="relative inline-flex rounded-full h-2 w-2 bg-primary-foreground" />
-                  </span>
-                  Disponible
-                </span>
-              )}
-
-              {/* Pastille opaque englobant titre + ville → lisibilité garantie quelle
-                  que soit l'illustration de fond.
-                  - `max-w-full` + `min-w-0` empêchent tout débordement horizontal.
-                  - La rangée interne passe en `flex-wrap` : si le prénom est très
-                    long, le bouton favori descend à la ligne au lieu de chevaucher
-                    le texte.
-                  - `break-words` + `[overflow-wrap:anywhere]` cassent même les
-                    prénoms composés sans espace (ex. "Marie-Christophe-Alexandre"). */}
-              <div
-                tabIndex={0}
-                className="group/hero-card self-start max-w-full min-w-0 inline-flex flex-col gap-1 rounded-2xl bg-background/90 backdrop-blur-md border border-border/60 shadow-md px-3 py-2 sm:px-4 sm:py-2.5 outline-none transition-all duration-300 ease-out hover:bg-background hover:shadow-xl hover:-translate-y-0.5 focus-visible:bg-background focus-visible:shadow-xl focus-visible:ring-2 focus-visible:ring-primary/40 active:bg-background active:shadow-xl"
-              >
-                <div className="flex flex-wrap items-center gap-x-2 sm:gap-x-3 gap-y-1.5 min-w-0 max-w-full">
-                  <h1 className="text-2xl sm:text-3xl md:text-4xl font-heading font-bold text-foreground leading-tight capitalize break-words [overflow-wrap:anywhere] hyphens-auto min-w-0">
-                    {firstName}
-                  </h1>
-                  <ProBadge status={(profile as any)?.pro_status} size="sm" />
-                  {id && <FavoriteButton targetType="sitter" targetId={id} size="md" />}
-                  {avgRating > 0 && reviewCount > 0 && (
-                    <span className="inline-flex items-baseline gap-1 text-sm font-medium text-foreground/85">
-                      <span className="font-semibold">{avgRating.toFixed(1)}</span>
-                      <span className="text-primary">★</span>
-                      <span className="text-muted-foreground text-xs">({reviewCount})</span>
-                    </span>
-                  )}
-                </div>
-
-                {sitterProfile?.reply_median_minutes != null && (
-                  <ReplyTimeBadge minutes={sitterProfile.reply_median_minutes} className="self-start mt-1" />
-                )}
-
-                {city && (() => {
-                  // Sous-titre rôle-aware, cohérent quel que soit l'onglet actif.
-                  // Un dual-role affiche « Gardien et propriétaire à X » ;
-                  // sinon, on colle au rôle réel de la personne (pas juste au tab).
-                  const isDual = hasSitterProfile && hasOwnerProfile;
-                  const roleLabel = isDual
-                    ? 'Gardien et propriétaire'
-                    : (activeTab === 'proprio' || (!hasSitterProfile && hasOwnerProfile))
-                      ? 'Propriétaire'
-                      : 'Gardien';
-                  return (
-                    <p className="text-sm sm:text-base text-foreground/80 flex items-center gap-1 font-medium min-w-0 max-w-full break-words">
-                      <MapPin className="w-3.5 h-3.5 shrink-0" />
-                      <span className="min-w-0 break-words">{roleLabel} à {city}</span>
-                    </p>
-                  );
-                })()}
-                {(profile as any)?.pro_status === "verified" && (profile as any)?.pro_tagline && (
-                  <p className="text-xs sm:text-sm text-foreground/75 italic mt-1 max-w-full break-words">
-                    « {(profile as any).pro_tagline} »
-                  </p>
-                )}
-                {(profile as any)?.pro_status === "verified" && (profile as any)?.pro_pricing_note && (
-                  <p className="text-[11px] sm:text-xs text-muted-foreground mt-0.5">
-                    Tarif indicatif : {(profile as any).pro_pricing_note}
-                  </p>
-                )}
-              </div>
-
-              {(profile?.identity_verified || emergencyActive || hasActiveSubscription) && (
-                <div className="flex items-center gap-2 flex-wrap">
-                  {hasActiveSubscription && (
-                    <span className="inline-flex items-center gap-1 text-xs text-foreground/85 border border-border/60 rounded-full px-2 py-0.5 bg-background/85 backdrop-blur-sm">
-                      <BadgeCheck size={11} className="text-primary" /> Abonné
-                    </span>
-                  )}
-                  {profile?.identity_verified && (
-                    <button
-                      type="button"
-                      onClick={() => {
-                        const el =
-                          [document.getElementById('confiance'), document.getElementById('confiance-mobile')]
-                            .find((n) => n && (n as HTMLElement).offsetParent !== null) as HTMLElement | null;
-                        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                      }}
-                      aria-label="Voir les détails de confiance et vérifications"
-                      className="inline-flex items-center gap-1 text-xs text-foreground/85 border border-border/60 rounded-full px-2 py-0.5 bg-background/85 backdrop-blur-sm hover:bg-background hover:border-primary/40 transition-colors cursor-pointer"
-                    >
-                      <Shield size={11} className="text-primary" /> ID vérifiée
-                    </button>
-                  )}
-                  {emergencyActive && (
-                    <span className="inline-flex items-center gap-1 text-xs text-foreground/85 border border-border/60 rounded-full px-2 py-0.5 bg-background/85 backdrop-blur-sm">
-                      <Shield size={11} className="text-primary" /> Gardien d'urgence
-                    </span>
-                  )}
-                </div>
-              )}
-
-              {/* Trust Score, wrapper self-start pour éviter l'étirement en pleine largeur dans le flex-col */}
-              <div className="self-start">
-                <TrustScore
-                  identityVerified={profile?.identity_verified || false}
-                  avgRating={avgRating}
-                  reviewCount={reviewCount}
-                  completedSits={completedSits}
-                  externalExperiencesCount={externalExperiences.length}
-                  memberSince={profile?.created_at || new Date().toISOString()}
-                  isFounder={profile?.is_founder || false}
-                />
-              </div>
-
-              {/* Affinité côté propriétaire visitant un gardien (guard strict : viewer actif en owner) */}
-              {activeTab === 'gardien' && auth.user?.id && id && auth.user.id !== id && sitterProfile && auth.activeRole === 'owner' && (
-                <div className="self-start mt-2">
-                  <OwnerToSitterAffinity
-                    sitterProfile={sitterProfile}
-                    context="public_sitter_profile"
-                    targetId={id}
-                    size="md"
-                    scope="single"
-                    caption="Votre affinité avec ce gardien"
-                  />
-                </div>
-              )}
-
-              {/* Affinité miroir (gardien visitant l'onglet propriétaire d'un profil dual) */}
-              {activeTab === 'proprio' && auth.user?.id && id && auth.user.id !== id && auth.activeRole === 'sitter' && targetOwnerAffinity && viewerSitter && (
-                <div className="self-start mt-2">
-                  <AffinitySection
-                    sitterProfile={viewerSitter}
-                    ownerProfile={targetOwnerAffinity}
-                    pets={targetPets}
-                    context="public_owner_facet"
-                    targetId={id}
-                    showCtaForSitter={false}
-                  />
-                </div>
-              )}
-
-              {/* Teaser affinité pour visiteurs non connectés */}
-              {activeTab === 'gardien' && !auth.user?.id && sitterProfile && (
-                <div className="self-stretch mt-2">
-                  <AffinityTeaser
-                    role="owner"
-                    targetLabel={profile?.first_name || "ce gardien"}
-                  />
-                </div>
-              )}
-
-              {/* Alma Pass 2 — Chantier 2 : bulle fit gardien pour owner avec au moins une annonce publiée */}
-              {activeTab === 'gardien' && id && sitterProfile && (
-                <div className="self-stretch mt-3">
-                  <AlmaFitGardien
-                    sitter={{
-                      id,
-                      first_name: profile?.first_name ?? null,
-                      reviewCount: reviewCount,
-                    }}
-                    sitterProfile={sitterProfile}
-                  />
-                  <AlmaReciprocityWhisper
-                    sitterId={id}
-                    sitterFirstName={profile?.first_name ?? null}
-                  />
-                  <AlmaOwnerActiveSitterWhisper
-                    sitterId={id}
-                    sitterFirstName={profile?.first_name ?? null}
-                  />
-                </div>
-              )}
-
-              <div className="flex items-center gap-2 sm:gap-4 text-sm text-foreground/80 mt-1 flex-wrap font-medium drop-shadow-sm">
-                {statsItems.map((s, i) => (
-                  <span key={i} className="flex items-center gap-1">
-                    {i > 0 && <span className="text-border mr-1 sm:mr-3">·</span>}
-                    {s}
-                  </span>
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
-          </div>
+          <ProfileHero
+            id={id}
+            firstName={firstName}
+            city={city || null}
+            avatarUrl={profile.avatar_url || null}
+            heroDesktop={heroDesktop}
+            heroMobile={heroMobile}
+            heroAnchor={anchor}
+            isOwnProfile={isOwn}
+            onOpenHeroPicker={() => setHeroPickerOpen(true)}
+            onOpenAvatarLightbox={() =>
+              lightboxItems.length > 0 && setLightboxIdx(0)
+            }
+            hasAvatarLightbox={lightboxItems.length > 0}
+            proStatus={(profile as any)?.pro_status ?? null}
+            proTagline={(profile as any)?.pro_tagline ?? null}
+            proPricingNote={(profile as any)?.pro_pricing_note ?? null}
+            isAvailable={isAvailable}
+            avgRating={avgRating}
+            reviewCount={reviewCount}
+            replyMedianMinutes={sitterProfile?.reply_median_minutes ?? null}
+            statutGardien={reputation?.statut_gardien ?? null}
+            identityVerified={!!profile?.identity_verified}
+            hasActiveSubscription={hasActiveSubscription}
+            emergencyActive={emergencyActive}
+            hasSitterProfile={hasSitterProfile}
+            hasOwnerProfile={hasOwnerProfile}
+            roleTabActive={activeTab}
+            cta={heroCta}
+          />
         );
       })()}
-
-      {/* ── STATS STRIP MOBILE (tab-aware) ── */}
-      {profile && (
-        <div className="md:hidden overflow-x-auto scrollbar-none bg-background/95 backdrop-blur-sm border-b border-border">
-          <div className="flex divide-x divide-border/60 min-w-max">
-            {(() => {
-              const ownerAvgStrip = ownerReviews.length > 0 ? ownerReviews.reduce((s, r) => s + (Number(r.overall_rating) || 0), 0) / ownerReviews.length : 0;
-              const stripItems: Array<{ label: string; value: string }> = activeTab === 'proprio'
-                ? ([
-                    ownerAvgStrip > 0 ? { label: 'Note', value: `${ownerAvgStrip.toFixed(1)}★` } : null,
-                    ownerSitsTotal > 0 ? { label: 'Gardes publiées', value: String(ownerSitsTotal) } : null,
-                    profile?.created_at ? { label: 'Membre depuis', value: anciennete(profile.created_at) } : null,
-                    totalBadgeCount > 0 ? { label: 'Écussons', value: String(totalBadgeCount) } : null,
-                    pets.length > 0 ? { label: pets.length > 1 ? 'Animaux' : 'Animal', value: String(pets.length) } : null,
-                  ] as Array<{ label: string; value: string } | null>).filter((s): s is { label: string; value: string } => s !== null)
-                : ([
-                    reviewCount > 0 ? { label: 'Note', value: `${avgRating.toFixed(1)}★` } : null,
-                    { label: 'Gardes', value: String(completedSits) },
-                    profile?.created_at ? { label: 'Membre depuis', value: anciennete(profile.created_at) } : null,
-                    totalBadgeCount > 0 ? { label: 'Écussons', value: String(totalBadgeCount) } : null,
-                    externalExperiences.length > 0 ? { label: 'Expé. vérif.', value: String(externalExperiences.length) } : null,
-                  ] as Array<{ label: string; value: string } | null>).filter((s): s is { label: string; value: string } => s !== null);
-              return stripItems.map((s) => (
-                <div key={s.label} className="flex flex-col items-center justify-center px-4 py-2.5 shrink-0">
-                  <span className="text-sm font-bold text-foreground font-heading leading-tight tabular-nums">{s.value}</span>
-                  <span className="text-[10px] uppercase tracking-wide text-muted-foreground font-body mt-0.5 whitespace-nowrap">{s.label}</span>
-                </div>
-              ));
-            })()}
-          </div>
-        </div>
-      )}
 
       {/* ── BARRE D'ONGLETS, visible si ≥ 2 onglets ── */}
       {availableTabs > 1 && (
