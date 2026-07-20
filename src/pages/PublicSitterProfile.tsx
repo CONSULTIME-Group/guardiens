@@ -715,16 +715,27 @@ export default function PublicSitterProfile() {
   };
 
   if (loading) {
+    // Squelette qui préfigure la vraie structure : hero pleine largeur à hauteur
+    // réservée (responsive), rangée de tuiles, bouton. Objectif : éviter le CLS
+    // à l'arrivée des données. Aucun changement visuel par ailleurs.
     return (
-      <div className="min-h-screen bg-background">
-        <div className="max-w-5xl mx-auto px-6 py-10 space-y-6">
-          <div className="flex items-center gap-8">
-            <Skeleton className="w-24 h-24 rounded-full shrink-0" />
-            <div className="space-y-3 flex-1">
-              <Skeleton className="h-10 w-48" />
-              <Skeleton className="h-4 w-32" />
-            </div>
+      <div className="min-h-screen bg-background" aria-busy="true" aria-live="polite">
+        {/* Hero */}
+        <Skeleton className="w-full h-[280px] sm:h-[380px] md:h-[520px] rounded-none" />
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 py-6 space-y-6">
+          {/* Titre + sous-titre */}
+          <div className="space-y-3">
+            <Skeleton className="h-8 sm:h-10 w-2/3 max-w-sm" />
+            <Skeleton className="h-4 w-40" />
           </div>
+          {/* Rangée de tuiles */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+            {[0, 1, 2, 3].map((i) => (
+              <Skeleton key={i} className="h-20 rounded-xl" />
+            ))}
+          </div>
+          {/* Bouton */}
+          <Skeleton className="h-11 w-full sm:w-64 rounded-lg" />
         </div>
       </div>
     );
