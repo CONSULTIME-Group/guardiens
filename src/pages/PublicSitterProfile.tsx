@@ -46,6 +46,7 @@ import { hydrateReviewers } from "@/lib/hydrateReviewers";
 import { getSitterHeroImage, getSitterHeroAnchor, getSitterHeroSources } from "@/lib/heroBank";
 import { useHeroWeights } from "@/hooks/useHeroWeights";
 import ActivateRoleDialog, { type ContactIntentContext } from "@/components/premium/ActivateRoleDialog";
+import ProfileHero, { type HeroCtaVariant } from "@/components/profile/ProfileHero";
 
 const capitalize = (name: string) =>
   name ? name.charAt(0).toUpperCase() + name.slice(1).toLowerCase() : "";
