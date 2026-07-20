@@ -24,6 +24,7 @@ import {
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { SequenceRecipientsDialog } from "@/components/admin/SequenceRecipientsDialog";
+import AffinityCompletenessCard from "@/pages/admin/_components/dashboard/AffinityCompletenessCard";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -822,6 +823,8 @@ const AdminNurturing = () => {
               <StatCard label="Parcours actifs" value={journeyStats.active} hint={`${journeyStats.total} créés sur la période`} />
               <StatCard label="Sortis (objectif atteint)" value={journeyStats.exited} hint="Utilisateurs qui ont fait l'action attendue" />
             </div>
+
+            <AffinityCompletenessCard />
 
             <Card>
               <CardHeader>
