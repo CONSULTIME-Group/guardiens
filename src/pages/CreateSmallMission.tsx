@@ -27,6 +27,9 @@ import { templatesFor, MISSION_TEMPLATES, type MissionTemplate } from "@/data/mi
 import { AlertCircle, ChevronLeft, CalendarIcon } from "lucide-react";
 import { sanitizeUserTitle } from "@/lib/sanitizeTitle";
 import { stripEmojis } from "@/lib/stripEmojis";
+import MissionEligibilityDialog, { type MissionEligibilityReason } from "@/components/missions/MissionEligibilityDialog";
+import IdentityRecommendedHint from "@/components/missions/IdentityRecommendedHint";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 
 /** Longueurs minimales pour éviter les annonces vides ou illisibles. */
 const MIN_TITLE_LEN = 15;
