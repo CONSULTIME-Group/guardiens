@@ -6746,6 +6746,15 @@ export type Database = {
           sitter_id: string
         }[]
       }
+      detect_identity_orphan_documents: {
+        Args: never
+        Returns: {
+          email: string
+          first_name: string
+          oldest_upload: string
+          profile_id: string
+        }[]
+      }
       detect_pending_applications: {
         Args: never
         Returns: {
@@ -7079,6 +7088,15 @@ export type Database = {
       is_profile_ready_for_action: {
         Args: { p_user_id?: string }
         Returns: boolean
+      }
+      list_identity_documents_to_purge: {
+        Args: { _retention_days?: number }
+        Returns: {
+          decided_at: string
+          decision: string
+          object_name: string
+          user_id: string
+        }[]
       }
       list_sits_needing_availability_nudge: {
         Args: never

@@ -210,19 +210,42 @@ Rules:
       rejection_reason: verification.rejection_reason || (redFlags.length ? redFlags.join(" ; ") : null),
     });
 
+    // Récupère l'email pour les notifications transactionnelles
+    let userEmail: string | null = null;
+    try {
+      const { data: authUser } = await supabaseAdmin.auth.admin.getUserById(user.id);
+      userEmail = authUser?.user?.email ?? null;
+    } catch (e) {
+      console.warn("Could not fetch user email", e);
+    }
+
+    const sendEmail = async (templateName: string, idempotencyKey: string, templateData: Record<string, unknown> = {}) => {
+      if (!userEmail) return;
+      try {
+        await supabaseAdmin.functions.invoke("send-transactional-email", {
+          body: { templateName, recipientEmail: userEmail, idempotencyKey, templateData },
+        });
+      } catch (e) {
+        console.error("send-transactional-email failed", { templateName, error: e });
+      }
+    };
+
     if (finalStatus === "verified") {
       await supabaseAdmin
         .from("profiles")
         .update({ identity_verified: true, identity_verification_status: "verified" })
         .eq("id", user.id);
 
-      await supabaseAdmin.from("notifications").insert({
-        user_id: user.id,
-        type: "identity_verified",
-        title: "Identité vérifiée",
-        body: "Votre pièce d'identité a été validée avec succès. Vous avez maintenant accès à toutes les fonctionnalités.",
-        link: "/settings#verification",
-      });
+      await Promise.allSettled([
+        supabaseAdmin.from("notifications").insert({
+          user_id: user.id,
+          type: "identity_verified",
+          title: "Identité vérifiée",
+          body: "Votre pièce d'identité a été validée avec succès. Vous avez maintenant accès à toutes les fonctionnalités.",
+          link: "/settings#verification",
+        }),
+        sendEmail("identity-verified", `identity-verified-${user.id}`),
+      ]);
     } else if (finalStatus === "needs_review") {
       await supabaseAdmin
         .from("profiles")
@@ -243,14 +266,18 @@ Rules:
         .eq("id", user.id);
 
       const reason = verification.rejection_reason || (redFlags.length ? redFlags.join(" ; ") : "Document non conforme");
-      await supabaseAdmin.from("notifications").insert({
-        user_id: user.id,
-        type: "identity_rejected",
-        title: "Vérification refusée",
-        body: `Votre document n'a pas pu être validé : ${reason}. Vous pouvez soumettre un nouveau document.`,
-        link: "/settings#verification",
-      });
+      await Promise.allSettled([
+        supabaseAdmin.from("notifications").insert({
+          user_id: user.id,
+          type: "identity_rejected",
+          title: "Vérification refusée",
+          body: `Votre document n'a pas pu être validé : ${reason}. Vous pouvez soumettre un nouveau document.`,
+          link: "/settings#verification",
+        }),
+        sendEmail("identity-rejected", `identity-rejected-${user.id}-${Date.now()}`, { reason }),
+      ]);
     }
+
 
 
     return new Response(
