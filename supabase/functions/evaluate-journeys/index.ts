@@ -675,6 +675,52 @@ async function enrollForSequence(
         return !op.presence_expected || op.presence_expected === ''
       })
       .map((c: any) => ({ id: c.id, anchor_at: c.created_at }))
+  } else if (rule.type === 'helper_no_guard_activity') {
+    // Membres qui ont répondu à au moins une petite mission dans la fenêtre
+    // (window_days, défaut 180) et n'ont ni candidature de garde envoyée ni
+    // annonce publiée. Pont éditorial « du coup de main à la garde ».
+    const windowAt = new Date(nowMs - ((rule.window_days ?? 180) * 86400_000)).toISOString()
+    const { data: responses, error: respErr } = await supabase
+      .from('small_mission_responses')
+      .select('responder_id, created_at')
+      .in('status', ['accepted', 'completed'])
+      .gte('created_at', windowAt)
+      .limit(2000)
+    if (respErr) {
+      console.error('[enrollment] helper_no_guard_activity responses failed', respErr.message)
+      return 0
+    }
+    // Dernière réponse par user
+    const lastByUser = new Map<string, string>()
+    for (const r of (responses ?? []) as Array<{ responder_id: string; created_at: string }>) {
+      const prev = lastByUser.get(r.responder_id)
+      if (!prev || r.created_at > prev) lastByUser.set(r.responder_id, r.created_at)
+    }
+    const helperIds = Array.from(lastByUser.keys())
+    if (!helperIds.length) return 0
+
+    // Filtre profils actifs avec email
+    const { data: profs } = await supabase
+      .from('profiles')
+      .select('id')
+      .in('id', helperIds)
+      .not('email', 'is', null)
+      .eq('account_status', 'active')
+      .limit(2000)
+    const activeSet = new Set((profs ?? []).map((p: { id: string }) => p.id))
+
+    // Exclut ceux qui ont déjà une activité garde
+    const [{ data: withApp }, { data: withSit }] = await Promise.all([
+      supabase.from('applications').select('sitter_id').in('sitter_id', helperIds),
+      supabase.from('sits').select('user_id').in('user_id', helperIds),
+    ])
+    const guardSet = new Set<string>()
+    for (const r of (withApp ?? []) as Array<{ sitter_id: string }>) guardSet.add(r.sitter_id)
+    for (const r of (withSit ?? []) as Array<{ user_id: string }>) guardSet.add(r.user_id)
+
+    candidates = helperIds
+      .filter((id) => activeSet.has(id) && !guardSet.has(id))
+      .map((id) => ({ id, anchor_at: lastByUser.get(id)! }))
   } else {
     console.warn('[enrollment] unknown rule type', rule)
     return 0
@@ -819,7 +865,6 @@ async function checkExitCondition(
       return Date.now() - new Date(data.last_seen_at).getTime() < days * 86400_000
     }
     case 'has_mutual_aid_activity': {
-      // User has either posted a small mission OR responded to one
       const [posted, responded] = await Promise.all([
         supabase.from('small_missions')
           .select('id', { count: 'exact', head: true }).eq('user_id', userId),
@@ -827,6 +872,13 @@ async function checkExitCondition(
           .select('id', { count: 'exact', head: true }).eq('responder_id', userId),
       ])
       return ((posted.count ?? 0) + (responded.count ?? 0)) > 0
+    }
+    case 'has_guard_activity': {
+      const [{ count: appCount }, { count: sitCount }] = await Promise.all([
+        supabase.from('applications').select('id', { count: 'exact', head: true }).eq('sitter_id', userId),
+        supabase.from('sits').select('id', { count: 'exact', head: true }).eq('user_id', userId),
+      ])
+      return ((appCount ?? 0) + (sitCount ?? 0)) > 0
     }
     case 'sitter_affinity_ready': {
       const { data } = await supabase.from('sitter_profiles')
