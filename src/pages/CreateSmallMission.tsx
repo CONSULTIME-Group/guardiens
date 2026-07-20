@@ -259,10 +259,6 @@ const CreateSmallMission = () => {
     if (error) {
       const hint = (error as any)?.hint || "";
       const msg = String(error.message || "");
-      if (hint === "profile_incomplete" || msg.includes("profile_incomplete")) {
-        setEligibilityReason("profile_incomplete");
-        return;
-      }
       if (hint === "account_not_active" || msg.includes("account_not_active")) {
         setEligibilityReason("account_not_active");
         return;
