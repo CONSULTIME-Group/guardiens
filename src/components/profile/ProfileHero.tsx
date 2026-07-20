@@ -353,7 +353,10 @@ const ProfileHero = ({
             )}
 
             {/* CTA unique + réassurance */}
-            <div className="mt-3 flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 self-stretch">
+            <div
+              data-hero-cta
+              className="mt-3 flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 self-stretch"
+            >
               {renderCta()}
               <p className="text-[11px] sm:text-xs text-muted-foreground font-body sm:ml-2 self-center text-center sm:text-left leading-snug break-words">
                 {reassurance}
