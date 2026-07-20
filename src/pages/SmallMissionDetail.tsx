@@ -41,7 +41,7 @@ import ApproximateLocationMap from "@/components/shared/ApproximateLocationMap";
 import { isAuthorOf } from "@/lib/ownership";
 import { sanitizeUserTitle } from "@/lib/sanitizeTitle";
 import { haversineDistance } from "@/utils/geo";
-import MissionEligibilityDialog, { type MissionEligibilityReason } from "@/components/missions/MissionEligibilityDialog";
+
 import IdentityRecommendedHint from "@/components/missions/IdentityRecommendedHint";
 
 /** Rayon max (km) pour considérer une mission « près de chez vous ». */
