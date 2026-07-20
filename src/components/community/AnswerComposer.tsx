@@ -77,6 +77,14 @@ const AnswerComposer = ({ questionId, parentAnswerId = null, isFirstAnswer, onPo
           {submitting ? "Publication…" : "Publier ma réponse"}
         </Button>
       </div>
+      <MissionEligibilityDialog
+        open={eligibilityReason !== null}
+        onOpenChange={(v) => { if (!v) setEligibilityReason(null); }}
+        reason={eligibilityReason}
+        userId={user?.id ?? null}
+        role="sitter"
+        context="respond"
+      />
     </div>
   );
 };
