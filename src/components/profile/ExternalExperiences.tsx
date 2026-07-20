@@ -158,7 +158,9 @@ const ExternalExperiences = () => {
                     {platformOptions.map(p => <SelectItem key={p} value={p}>{p}</SelectItem>)}
                   </SelectContent>
                 </Select>
+                <p className="text-xs text-muted-foreground mt-1">Le nom de la plateforme reste entre nous. Votre expérience s'affichera publiquement comme vérifiée, sans mention de la marque.</p>
               </div>
+
               <div>
                 <Label>Screenshot de l'avis * (1-3 images, JPG/PNG, max 5 Mo chacune)</Label>
                 <Input type="file" accept="image/jpeg,image/png" multiple onChange={e => setScreenshots(Array.from(e.target.files || []).slice(0, 3))} />

@@ -1,4 +1,5 @@
 import { CheckCircle2, Briefcase } from "lucide-react";
+import { getPublicExperienceLabel } from "@/lib/externalExperienceLabel";
 
 interface Experience {
   id: string;
@@ -23,13 +24,13 @@ const PublicExperiences = ({ experiences }: PublicExperiencesProps) => {
   return (
     <div className="space-y-3">
       <h3 className="font-heading font-semibold text-sm flex items-center gap-1.5">
-        <Briefcase className="h-4 w-4" /> Expériences vérifiées sur d'autres plateformes
+        <Briefcase className="h-4 w-4" /> Expériences vérifiées ailleurs
       </h3>
       <div className="space-y-3">
         {verified.map(exp => (
           <div key={exp.id} className="p-4 rounded-xl bg-card border border-border space-y-2">
             <div className="flex items-center gap-2">
-              <span className="font-medium text-sm">{exp.platform_name}</span>
+              <span className="font-medium text-sm">{getPublicExperienceLabel(exp.platform_name)}</span>
               <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-primary/10 text-primary">
                 <CheckCircle2 className="h-3 w-3" /> Expérience vérifiée
               </span>
@@ -49,3 +50,4 @@ const PublicExperiences = ({ experiences }: PublicExperiencesProps) => {
 };
 
 export default PublicExperiences;
+
