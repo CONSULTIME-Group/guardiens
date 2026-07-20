@@ -88,11 +88,14 @@ function buildCopy(
 
   switch (event) {
     case 'mission_proposal':
+      // Note : le chemin principal est le trigger `notify_new_mission_response`
+      // (in-app + email `mission-response-received`). Cette branche reste comme
+      // filet de sécurité pour appels legacy.
       return {
-        title: 'Nouvelle réponse à votre mission',
-        body: `${actorName} vous propose son aide pour "${missionTitle}".`,
+        title: 'Nouvelle réponse à votre coup de main',
+        body: `${actorName} vous propose son aide pour « ${missionTitle} ».`,
         link: missionLink,
-        emailTemplate: 'mission-response',
+        emailTemplate: 'mission-response-received',
       }
     case 'mission_accepted':
       return {
@@ -294,6 +297,7 @@ Deno.serve(async (req) => {
     if (copy.emailTemplate) {
       await sendEmailSafely(admin, targetId, copy.emailTemplate, {
         actorName,
+        responderFirstName: actorName,
         missionTitle: mission.title,
         missionId: mission.id,
         link: copy.link,

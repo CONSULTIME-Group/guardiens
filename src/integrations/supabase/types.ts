@@ -7182,6 +7182,7 @@ export type Database = {
       }
       slugify: { Args: { input: string }; Returns: string }
       slugify_city: { Args: { input: string }; Returns: string }
+      strip_emojis: { Args: { t: string }; Returns: string }
       trigger_indexnow_push: {
         Args: { _path: string; _source: string }
         Returns: undefined

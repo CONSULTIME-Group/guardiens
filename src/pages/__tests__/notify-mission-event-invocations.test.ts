@@ -33,12 +33,11 @@ function extractInvocations(): Array<{ block: string }> {
 describe("SmallMissionDetail → notify-mission-event", () => {
   const blocks = extractInvocations();
 
-  it("expose exactement 7 invocations (1 par chemin fonctionnel)", () => {
-    expect(blocks.length).toBe(7);
+  it("expose exactement 6 invocations (mission_proposal est désormais géré côté serveur par le trigger notify_new_mission_response)", () => {
+    expect(blocks.length).toBe(6);
   });
 
   const expected: Array<{ event: string; targetShape: RegExp }> = [
-    { event: "mission_proposal", targetShape: /target_ids:\s*\[fresh\.user_id\]/ },
     { event: "mission_declined", targetShape: /target_ids:\s*pendingOthers\.map\(r\s*=>\s*r\.responder_id\)/ },
     { event: "mission_accepted", targetShape: /target_ids:\s*\[resp\.responder_id\]/ },
     { event: "mission_declined", targetShape: /target_ids:\s*\[resp\.responder_id\]/ },
