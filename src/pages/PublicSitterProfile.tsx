@@ -1183,7 +1183,9 @@ export default function PublicSitterProfile() {
                     <button
                       type="button"
                       onClick={() => {
-                        const el = document.getElementById('confiance');
+                        const el =
+                          [document.getElementById('confiance'), document.getElementById('confiance-mobile')]
+                            .find((n) => n && (n as HTMLElement).offsetParent !== null) as HTMLElement | null;
                         if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
                       }}
                       aria-label="Voir les détails de confiance et vérifications"
