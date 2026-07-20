@@ -1751,6 +1751,15 @@ const SmallMissionDetail = () => {
           setResponseModalOpen(false);
         }}
       />
+
+      <MissionEligibilityDialog
+        open={!!eligibilityReason}
+        onOpenChange={(v) => { if (!v) setEligibilityReason(null); }}
+        reason={eligibilityReason}
+        userId={user?.id ?? null}
+        role={((user as any)?.role === "owner" ? "owner" : "sitter")}
+        context={eligibilityContext}
+      />
     </div>
     </AppLayout>
   );
