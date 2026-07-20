@@ -7212,6 +7212,16 @@ export type Database = {
             }
             Returns: undefined
           }
+      users_with_journey_for_sequence: {
+        Args: {
+          _sequence_key: string
+          _started_since?: string
+          _user_ids: string[]
+        }
+        Returns: {
+          user_id: string
+        }[]
+      }
     }
     Enums: {
       activity_level: "calm" | "moderate" | "sportive"
