@@ -6315,6 +6315,8 @@ export type Database = {
       }
     }
     Functions: {
+      _calculate_owner_score: { Args: { p_user_id: string }; Returns: number }
+      _calculate_sitter_score: { Args: { p_user_id: string }; Returns: number }
       _normalize_species_pg: { Args: { v: string }; Returns: string }
       accept_application: { Args: { p_application_id: string }; Returns: Json }
       accept_garde_accord: {
