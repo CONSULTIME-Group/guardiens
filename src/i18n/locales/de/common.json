@@ -54,7 +54,7 @@
       "eyebrow": "Nachbarschaftshilfe · Tierbetreuung · Home Sitting",
       "title_main": "Tierbetreuung, eine kleine Hilfe,",
       "title_accent": "die Begegnung.",
-      "lede": "Lassen Sie Ihr Haus und Ihre Tiere während Ihrer Abwesenheit von einem Betreuer aus der Nachbarschaft hüten. Oder fragen Sie nach einer kleinen Hilfe in Ihrer Nähe und leisten Sie selbst welche, mit oder ohne Tiere.",
+      "lede": "Guardiens verbindet Tierbesitzer mit vertrauenswürdigen Betreuern, überall in Frankreich. House-Sitting zu Hause, gegenseitige Hilfe unter Menschen aus der Umgebung: Ihre Tiere bleiben zu Hause, Ihr Haus bleibt bewohnt, und Sie reisen unbeschwert ab.",
       "lede_italic": "Und hinter jedem Austausch steht eine Begegnung, nach der Sie sonst nicht gesucht hätten.",
       "cta_owner": "Meine Anzeige veröffentlichen",
       "cta_sitter": "Ich möchte betreuen",
@@ -89,7 +89,7 @@
         "tag": "Eigentümer",
         "title": "Unbeschwert verreisen.",
         "text": "Jemand aus der Nähe wacht über Ihr Haus und Ihre Tiere. Sie lernen sich vor der Abreise kennen. Sie entscheiden.",
-        "badge": "Ohne Abo",
+        "badge": "Unter Privatpersonen",
         "cta": "Ich suche einen Betreuer →"
       },
       "sitter": {
@@ -99,7 +99,7 @@
         "cta": "Ich möchte betreuen →"
       },
       "mutual": {
-        "badge": "Kostenlos",
+        "badge": "Unter Menschen aus der Umgebung",
         "tag": "Lokale Hilfe, unabhängig von der Betreuung",
         "title": "Eine kleine Hilfe, ein Austausch.",
         "text": "Den Gemüsegarten gießen, ein Regal aufbauen, eine Fähigkeit teilen, eine einsame Person besuchen. Keine Betreuung, kein Tier nötig – einfach Menschen aus der Nähe, die sich gegenseitig helfen.",
@@ -131,16 +131,16 @@
       "step3_text": "Sobald die Betreuungsvereinbarung unterzeichnet ist, zieht Ihr Betreuer ein. Sie erhalten Neuigkeiten und kehren oft mit einer neuen Freundschaft nach Hause zurück.",
       "cta_owner": "Anzeige veröffentlichen",
       "cta_secondary": "Oder mit einer kleinen Hilfe beginnen →",
-      "footnote": "Anmeldung in 2 Minuten · Ohne Kreditkarte"
+      "footnote": "Anmeldung in 2 Minuten"
     },
     "aid": {
-      "eyebrow": "Für alle · Ohne Abo · Ohne Geld",
+      "eyebrow": "Für alle · Unter Menschen aus der Umgebung",
       "title": "Trauen Sie sich zu fragen. Trauen Sie sich anzubieten.",
       "p1": "Früher gab es jemanden aus der Nachbarschaft, der zum Gießen kam, den Hund hütete oder einen Fensterladen reparierte. Jemand, dem man im Gegenzug ein Stück Kuchen oder Hilfe anbot.",
       "p2": "Diese Gewohnheit ist nicht verschwunden, man traut sich nur die erste Frage nicht mehr. Guardiens ist der Vorwand, sie wieder zu stellen und dabei Erfahrungen zu machen, die Ihnen keine organisierte Reise bieten kann.",
       "need_title": "«Ich brauche eine kleine Hilfe»",
       "need_text": "Ihr Gemüsegarten während des Urlaubs. Ihre Hühner dieses Wochenende. Den Hund nach einer OP ausführen. Danach zu fragen ist kein Geständnis einer Schwäche, sondern ein Vertrauensbeweis.",
-      "need_footer": "Ohne Geld, ohne Abo. Das ist unser Versprechen.",
+      "need_footer": "Ein Dienst als Gegenleistung für einen Dienst. Das ist unser Versprechen.",
       "offer_title": "«Ich kann ein wenig Zeit schenken»",
       "offer_text": "Sie wissen, wie man Rosen schneidet. Sie lieben Hunde. Sie haben am Samstagmorgen zwei Stunden Zeit. Bieten Sie es an und erleben Sie etwas, das Sie ohne diese Begegnung nie erfahren hätten.",
       "offer_footer": "So knüpft man das lokale soziale Netz neu.",
@@ -159,15 +159,15 @@
         "moving_help": "Umzugshilfe",
         "sewing": "Nähen lernen"
       },
-      "quote": "Das Dorfleben ist nicht verschwunden. Es hat nur darauf gewartet, dass jemand die erste Frage wagt.",
+      "quote": "« Das Dorfleben ist nicht verschwunden. Es hat nur darauf gewartet, dass jemand die erste Frage wagt. »",
       "cta": "Kleine Hilfen entdecken"
     },
     "trust": {
       "eyebrow": "Vertrauen & Umkreis",
       "title": "Vertrauensvoll wählen, einen oder tausend Kilometer entfernt.",
-      "lede": "Vier Eckpfeiler für Ihre Ruhe: kostenlos für Eigentümer, persönliches Treffen vor jeder Betreuung, verifizierte Profile und ein Umkreis, den Sie selbst festlegen.",
-      "p1_title": "Kostenlos für Eigentümer",
-      "p1_text": "Anzeige, Bewerbungen, Nachrichten: Alles ist kostenlos. Keine Kreditkarte erforderlich.",
+      "lede": "Vier Eckpfeiler für Ihre Ruhe: persönliches Treffen vor jeder Betreuung, verifizierte Profile, gegenseitige Bewertungen und ein Umkreis, den Sie selbst festlegen.",
+      "p1_title": "Zwischen Mitgliedern, ohne Transaktion",
+      "p1_text": "Zwischen Mitgliedern läuft alles ohne Transaktion: ein Dienst als Gegenleistung für einen Dienst.",
       "p2_title": "Treffen vor jeder Betreuung",
       "p2_text": "Ein Kaffee, eine Besichtigung der Unterkunft, eine Übergabe der Anweisungen. Vertrauen lässt sich nicht erraten: Es baut sich auf, wenn man sich gegenübersteht.",
       "p3_title": "Dokumentierte Profile, gegenseitige Bewertungen",
@@ -349,7 +349,7 @@
           "label": "Guardiens House-Sitting",
           "pet_home": "Ja",
           "house_lived": "Ja, durchgehend",
-          "cost": "Keine Kosten zwischen Mitgliedern",
+          "cost": "Zwischen Mitgliedern, ohne Transaktion",
           "human": "Vorheriges Treffen und gegenseitige Bewertungen"
         },
         "pension": {
