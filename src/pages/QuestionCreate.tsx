@@ -151,6 +151,14 @@ const QuestionCreate = () => {
           </div>
         </section>
       </div>
+      <MissionEligibilityDialog
+        open={eligibilityReason !== null}
+        onOpenChange={(v) => { if (!v) setEligibilityReason(null); }}
+        reason={eligibilityReason}
+        userId={user?.id ?? null}
+        role="owner"
+        context="publish"
+      />
     </>
   );
 };
