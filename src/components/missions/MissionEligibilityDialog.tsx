@@ -48,24 +48,35 @@ const MissionEligibilityDialog = ({ open, onOpenChange, reason, userId, role, co
           .maybeSingle();
 
         // Signaux d'affinité + galerie sont dans des tables/vues dédiées.
-        const [ownerRes, sitterRes, ownerGalRes, sitterGalRes, petRes] = await Promise.all([
+        const [ownerRes, sitterRes, ownerGalRes, sitterGalRes, propRes] = await Promise.all([
           supabase.from("owner_profiles").select("owner_competences, home_ambiance, preferred_sitter_types, interests, languages, life_pace, property_description").eq("user_id", userId).maybeSingle(),
           supabase.from("sitter_profiles").select("competences, lifestyle, geographic_radius, interests, languages, life_pace, animal_types").eq("user_id", userId).maybeSingle(),
           supabase.from("owner_gallery").select("id", { head: true, count: "exact" }).eq("user_id", userId),
           supabase.from("sitter_gallery").select("id", { head: true, count: "exact" }).eq("user_id", userId),
-          supabase.from("pets").select("id", { head: true, count: "exact" }).eq("user_id", userId),
+          supabase.from("properties").select("id").eq("user_id", userId),
         ]);
 
+        // has_pet : au moins un pet dans l'une des propriétés du membre.
+        let hasPet = false;
+        const propIds = (propRes.data ?? []).map((p: any) => p.id).filter(Boolean);
+        if (propIds.length > 0) {
+          const { count } = await supabase
+            .from("pets")
+            .select("id", { head: true, count: "exact" })
+            .in("property_id", propIds);
+          hasPet = (count ?? 0) > 0;
+        }
+
         if (!alive) return;
-        const merged = {
+        const merged: any = {
           role,
-          ...(base ?? {}),
-          ...(ownerRes.data ?? {}),
-          ...(sitterRes.data ?? {}),
+          ...((base ?? {}) as object),
+          ...((ownerRes.data ?? {}) as object),
+          ...((sitterRes.data ?? {}) as object),
           has_owner_gallery: (ownerGalRes.count ?? 0) > 0,
           has_sitter_gallery: (sitterGalRes.count ?? 0) > 0,
-          has_pet: (petRes.count ?? 0) > 0,
-        } as any;
+          has_pet: hasPet,
+        };
 
         const res = computeProfileCompletion(role, merged);
         setCompletion(res.score);
