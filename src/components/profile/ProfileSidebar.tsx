@@ -204,8 +204,31 @@ const ProfileSidebar = ({
           )}
         </div>
 
+        {/* Détail calme des items manquants (desktop), sous la jauge. */}
+        {missingScoreItems && missingScoreItems.length > 0 && (
+          <div className="rounded-lg border border-border bg-card/60 px-3 py-2.5">
+            <p className="text-[11px] uppercase tracking-wide text-muted-foreground mb-1.5">
+              Pour aller plus loin
+            </p>
+            <ul className="space-y-1.5">
+              {missingScoreItems.map((it) => (
+                <li key={it.key} className="text-xs">
+                  <div className="flex items-baseline justify-between gap-2">
+                    <span className="text-foreground/85 leading-snug">{it.label}</span>
+                    <span className="tabular-nums text-muted-foreground shrink-0">+{it.points}</span>
+                  </div>
+                  {it.hint && (
+                    <p className="text-[11px] text-muted-foreground/80 mt-0.5">{it.hint}</p>
+                  )}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+
         {/* Score breakdown desktop */}
         {scoreBreakdown}
+
       </div>
 
       {/* ────────────────────────────────────────────────────
