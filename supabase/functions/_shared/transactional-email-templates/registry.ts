@@ -162,6 +162,7 @@ export const TEMPLATES: Record<string, TemplateEntry> = {
   'affinity-completion-owner': affinityCompletionOwner,
   'mission-response-received': missionResponseReceived,
   'mission-response-waiting': missionResponseWaiting,
+  'question-answer-received': questionAnswerReceived,
 }
 
 
