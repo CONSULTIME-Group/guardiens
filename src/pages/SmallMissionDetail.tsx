@@ -395,8 +395,7 @@ const SmallMissionDetail = () => {
           toast({ variant: "destructive", title: "Déjà envoyé", description: "Vous avez déjà proposé votre aide pour cette mission." });
           setHasResponded(true);
         } else if (hint === "account_not_active" || msg.includes("account_not_active")) {
-          setEligibilityContext("respond");
-          setEligibilityReason("account_not_active");
+          toast({ variant: "destructive", title: "Compte non actif", description: "Contactez le support pour rétablir l'accès à l'entraide." });
         } else if (hint === "mission_response_cap_reached" || msg.includes("mission_response_cap_reached")) {
           toast({
             variant: "destructive",
