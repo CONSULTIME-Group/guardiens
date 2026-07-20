@@ -20,6 +20,7 @@ type ExitCondition =
   | { type: 'sitter_affinity_ready' }
   | { type: 'owner_affinity_ready' }
   | { type: 'has_mutual_aid_activity' }
+  | { type: 'has_guard_activity' }
   | Record<string, never>
 
 type EnrollmentRule =
@@ -30,6 +31,7 @@ type EnrollmentRule =
   | { type: 'active_referral'; min_age_days?: number; active_within_days?: number; window_days?: number }
   | { type: 'sitter_missing_affinity'; min_age_days?: number }
   | { type: 'owner_missing_affinity'; min_age_days?: number }
+  | { type: 'helper_no_guard_activity'; min_age_days?: number; window_days?: number }
 
 interface Step {
   id: string
