@@ -6328,6 +6328,10 @@ export type Database = {
         }
         Returns: undefined
       }
+      accept_mission_response: {
+        Args: { p_decline_others?: boolean; p_response_id: string }
+        Returns: Json
+      }
       admin_alma_matching_diagnosis: {
         Args: {
           p_context?: Json
