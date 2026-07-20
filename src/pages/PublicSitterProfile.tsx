@@ -2637,7 +2637,11 @@ export default function PublicSitterProfile() {
             <p className="text-xs uppercase tracking-widest text-foreground/50 font-body">
               Avis d'entraide reçus{missionFeedbacks.length > 0 && ` (${missionFeedbacks.length})`}
             </p>
-            {missionFeedbacks.length > 0 ? (
+            {entraideLoading ? (
+              <div className="space-y-3" aria-busy="true">
+                {[0, 1].map((i) => (<Skeleton key={i} className="h-20 rounded-xl" />))}
+              </div>
+            ) : missionFeedbacks.length > 0 ? (
               <div className="space-y-3">
                 {(showAllEntraideFeedbacks ? missionFeedbacks : missionFeedbacks.slice(0, VISIBLE_COUNT)).map((fb) => (
                   <div key={fb.id} className="bg-card border border-border rounded-xl p-4 space-y-2">
