@@ -41,7 +41,7 @@ import ApproximateLocationMap from "@/components/shared/ApproximateLocationMap";
 import { isAuthorOf } from "@/lib/ownership";
 import { sanitizeUserTitle } from "@/lib/sanitizeTitle";
 import { haversineDistance } from "@/utils/geo";
-import MissionEligibilityDialog, { type MissionEligibilityReason } from "@/components/missions/MissionEligibilityDialog";
+
 import IdentityRecommendedHint from "@/components/missions/IdentityRecommendedHint";
 
 /** Rayon max (km) pour considérer une mission « près de chez vous ». */
@@ -215,8 +215,6 @@ const SmallMissionDetail = () => {
   const [completing, setCompleting] = useState(false);
   const [responseModalOpen, setResponseModalOpen] = useState(false);
   const [oneClickInterestBusy, setOneClickInterestBusy] = useState(false);
-  const [eligibilityReason, setEligibilityReason] = useState<MissionEligibilityReason | null>(null);
-  const [eligibilityContext, setEligibilityContext] = useState<"publish" | "respond">("respond");
 
   // Per-person feedback tracking: receiverId → submitted
   const [feedbackSent, setFeedbackSent] = useState<Record<string, boolean>>({});
@@ -396,12 +394,8 @@ const SmallMissionDetail = () => {
         if (error.code === "23505") {
           toast({ variant: "destructive", title: "Déjà envoyé", description: "Vous avez déjà proposé votre aide pour cette mission." });
           setHasResponded(true);
-        } else if (hint === "profile_incomplete" || msg.includes("profile_incomplete")) {
-          setEligibilityContext("respond");
-          setEligibilityReason("profile_incomplete");
         } else if (hint === "account_not_active" || msg.includes("account_not_active")) {
-          setEligibilityContext("respond");
-          setEligibilityReason("account_not_active");
+          toast({ variant: "destructive", title: "Compte non actif", description: "Contactez le support pour rétablir l'accès à l'entraide." });
         } else if (hint === "mission_response_cap_reached" || msg.includes("mission_response_cap_reached")) {
           toast({
             variant: "destructive",
@@ -1752,14 +1746,6 @@ const SmallMissionDetail = () => {
         }}
       />
 
-      <MissionEligibilityDialog
-        open={!!eligibilityReason}
-        onOpenChange={(v) => { if (!v) setEligibilityReason(null); }}
-        reason={eligibilityReason}
-        userId={user?.id ?? null}
-        role={((user as any)?.role === "owner" ? "owner" : "sitter")}
-        context={eligibilityContext}
-      />
     </div>
     </AppLayout>
   );

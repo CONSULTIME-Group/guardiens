@@ -27,7 +27,7 @@ import { templatesFor, MISSION_TEMPLATES, type MissionTemplate } from "@/data/mi
 import { AlertCircle, ChevronLeft, CalendarIcon } from "lucide-react";
 import { sanitizeUserTitle } from "@/lib/sanitizeTitle";
 import { stripEmojis } from "@/lib/stripEmojis";
-import MissionEligibilityDialog, { type MissionEligibilityReason } from "@/components/missions/MissionEligibilityDialog";
+
 import IdentityRecommendedHint from "@/components/missions/IdentityRecommendedHint";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 
@@ -71,7 +71,7 @@ const CreateSmallMission = () => {
   // Chantier 1 EntraideHub Pass 1 : plus de gate 60 %, tout profil connecté peut publier.
   // L'ID vérification devient un soft-nudge (badge auteur uniquement) sur SitDetail.
   const canApplyMissions = true;
-  const [eligibilityReason, setEligibilityReason] = useState<MissionEligibilityReason | null>(null);
+  
   const [confirmUnchangedOpen, setConfirmUnchangedOpen] = useState(false);
 
   const CATEGORIES = useMemo(() => [
@@ -259,12 +259,8 @@ const CreateSmallMission = () => {
     if (error) {
       const hint = (error as any)?.hint || "";
       const msg = String(error.message || "");
-      if (hint === "profile_incomplete" || msg.includes("profile_incomplete")) {
-        setEligibilityReason("profile_incomplete");
-        return;
-      }
       if (hint === "account_not_active" || msg.includes("account_not_active")) {
-        setEligibilityReason("account_not_active");
+        toast({ title: "Compte non actif", description: "Contactez le support pour rétablir l'accès à l'entraide.", variant: "destructive" });
         return;
       }
       toast({ title: tp("toast_error_title"), description: error.message, variant: "destructive" });
@@ -716,14 +712,6 @@ const CreateSmallMission = () => {
         </div>
       )}
 
-      <MissionEligibilityDialog
-        open={!!eligibilityReason}
-        onOpenChange={(v) => { if (!v) setEligibilityReason(null); }}
-        reason={eligibilityReason}
-        userId={user?.id ?? null}
-        role={((user as any)?.role === "owner" ? "owner" : "sitter")}
-        context="publish"
-      />
 
       <Dialog open={confirmUnchangedOpen} onOpenChange={setConfirmUnchangedOpen}>
         <DialogContent className="max-w-md">
