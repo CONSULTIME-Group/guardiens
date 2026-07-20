@@ -396,9 +396,6 @@ const SmallMissionDetail = () => {
         if (error.code === "23505") {
           toast({ variant: "destructive", title: "Déjà envoyé", description: "Vous avez déjà proposé votre aide pour cette mission." });
           setHasResponded(true);
-        } else if (hint === "profile_incomplete" || msg.includes("profile_incomplete")) {
-          setEligibilityContext("respond");
-          setEligibilityReason("profile_incomplete");
         } else if (hint === "account_not_active" || msg.includes("account_not_active")) {
           setEligibilityContext("respond");
           setEligibilityReason("account_not_active");
