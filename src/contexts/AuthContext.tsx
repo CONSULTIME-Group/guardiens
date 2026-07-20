@@ -151,11 +151,43 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       });
     }
 
+    // (A) Détection synchrone d'un token Supabase persistant en localStorage.
+    // Si présent, on maintient authChecked=false (squelette) le temps que le
+    // refresh se résolve, pour éviter le flash "Connexion" avant "Mon espace".
+    let hasPersistedToken = false;
+    try {
+      if (typeof window !== "undefined") {
+        for (let i = 0; i < window.localStorage.length; i++) {
+          const key = window.localStorage.key(i);
+          if (key && /^sb-.*-auth-token$/.test(key)) {
+            const raw = window.localStorage.getItem(key);
+            if (raw && raw.length > 2) {
+              hasPersistedToken = true;
+              break;
+            }
+          }
+        }
+      }
+    } catch {
+      hasPersistedToken = false;
+    }
+
+    if (hasPersistedToken) {
+      // Optimistic : on présuppose la session le temps de la vérifier.
+      setHasSession(true);
+    }
+
+    let settled = false;
+    const markChecked = (session: boolean) => {
+      settled = true;
+      setHasSession(session);
+      setAuthChecked(true);
+    };
+
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
-        setHasSession(!!session?.user);
-        setAuthChecked(true);
         if (session?.user) {
+          markChecked(true);
           // Si un flux OAuth est en cours, on trace la pose de session.
           if (getOAuthTraceId()) {
             logOAuthStage("session_set", "auth-context", {
@@ -166,13 +198,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           setTimeout(async () => {
             await fetchProfile(session.user);
             setLoading(false);
-            // Profil chargé = équivalent /user OK + données métier prêtes.
             if (getOAuthTraceId()) {
               logOAuthStage("user_endpoint_ok", "auth-context");
               endOAuthFlow("success");
             }
           }, 0);
         } else {
+          // (B) INITIAL_SESSION à null + token persistant : on attend
+          // SIGNED_IN / TOKEN_REFRESHED ou la résolution de getSession().
+          if (event === "INITIAL_SESSION" && hasPersistedToken && !settled) {
+            return;
+          }
+          markChecked(false);
           setUser(null);
           roleInitialized.current = false;
           setLoading(false);
@@ -181,15 +218,30 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     );
 
     supabase.auth.getSession().then(async ({ data: { session } }) => {
-      setHasSession(!!session?.user);
-      setAuthChecked(true);
       if (session?.user) {
+        markChecked(true);
         await fetchProfile(session.user);
+      } else {
+        markChecked(false);
       }
+      setLoading(false);
+    }).catch(() => {
+      markChecked(false);
       setLoading(false);
     });
 
-    return () => subscription.unsubscribe();
+    // (C) Timeout de sécurité : ne jamais geler le header si le refresh échoue.
+    const safety = window.setTimeout(() => {
+      if (!settled) {
+        setAuthChecked(true);
+        setLoading(false);
+      }
+    }, 1500);
+
+    return () => {
+      subscription.unsubscribe();
+      window.clearTimeout(safety);
+    };
   }, [fetchProfile]);
 
   const login = useCallback(async (email: string, password: string) => {
