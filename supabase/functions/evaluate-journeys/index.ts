@@ -178,11 +178,33 @@ async function runEvaluation(
 
   const { data: activeJourneys } = await supabase
     .from('user_journeys')
-    .select('id, user_id, sequence_key, current_step, started_at, last_step_at')
+    .select('id, user_id, sequence_key, current_step, started_at, last_step_at, created_at')
     .eq('status', 'active')
     .limit(2000)
 
   const seqByKey = new Map(sequences.map((s) => [s.key, s]))
+
+  // Global frequency cap: at most 1 nurturing email per recipient per 48h,
+  // toutes séquences confondues. On construit un set des destinataires déjà
+  // servis récemment pour éviter une requête par journey.
+  const FREQ_WINDOW_MS = 48 * 3600_000
+  const freqSince = new Date(Date.now() - FREQ_WINDOW_MS).toISOString()
+  const recentlyServed = new Set<string>()
+  try {
+    const { data: recent, error: recentErr } = await supabase
+      .from('email_send_log')
+      .select('recipient_email')
+      .eq('status', 'sent')
+      .gte('created_at', freqSince)
+      .filter('metadata->>source', 'like', 'journey:%')
+      .limit(10000)
+    if (recentErr) throw recentErr
+    for (const r of (recent ?? []) as Array<{ recipient_email: string | null }>) {
+      if (r.recipient_email) recentlyServed.add(r.recipient_email.toLowerCase())
+    }
+  } catch (freqErr) {
+    console.warn('[frequency-cap] lookup failed, proceeding without global cap', freqErr)
+  }
 
   for (const j of activeJourneys ?? []) {
     if (stats.sent >= MAX_SENDS_PER_RUN) { stats.capped = true; break }
@@ -205,8 +227,20 @@ async function runEvaluation(
         continue
       }
 
-      // Time check (anchor on started_at, which already reflects anchor_field at enrollment)
-      const dueAt = new Date(j.started_at).getTime() + nextStep.delay_hours * 3600_000
+      // Délais RELATIFS entre étapes (évite les rafales à l'enrôlement tardif).
+      // Étape 1 : ancrée sur la date d'enrôlement (created_at de user_journeys).
+      // Étapes suivantes : last_step_at + max(48h, delay_N - delay_{N-1}).
+      const enrolledAtMs = new Date(j.created_at ?? j.started_at).getTime()
+      const prevStep = steps.find((s) => s.step_order === j.current_step)
+      let dueAt: number
+      if (!prevStep) {
+        dueAt = enrolledAtMs + Math.max(0, nextStep.delay_hours) * 3600_000
+      } else {
+        const rawGap = nextStep.delay_hours - prevStep.delay_hours
+        const gapHours = Math.max(48, rawGap)
+        const refMs = j.last_step_at ? new Date(j.last_step_at).getTime() : enrolledAtMs
+        dueAt = refMs + gapHours * 3600_000
+      }
       if (Date.now() < dueAt) continue
 
       // Exit condition check
@@ -243,6 +277,18 @@ async function runEvaluation(
         await supabase.from('user_journeys').update({
           status: 'exited', exit_reason: 'no_email', completed_at: new Date().toISOString(),
         }).eq('id', j.id)
+        stats.skipped++
+        bumpSeq(j.sequence_key, 'skipped')
+        continue
+      }
+
+      // Garde de fréquence globale : max 1 email de nurturing / 48h / destinataire.
+      // On ne fait PAS avancer current_step : l'étape repartira au prochain run éligible.
+      if (recentlyServed.has(profile.email.toLowerCase())) {
+        await supabase.from('journey_step_log').insert({
+          journey_id: j.id, step_order: nextStep.step_order,
+          template_name: nextStep.template_name, sent: false, reason: 'frequency_capped',
+        })
         stats.skipped++
         bumpSeq(j.sequence_key, 'skipped')
         continue
@@ -353,6 +399,7 @@ async function runEvaluation(
       if (actuallySent) {
         stats.sent++
         bumpSeq(j.sequence_key, 'sent')
+        recentlyServed.add(profile.email.toLowerCase())
         await new Promise((r) => setTimeout(r, SEND_DELAY_MS))
       } else {
         stats.skipped++
@@ -488,22 +535,59 @@ async function enrollForSequence(
 
   if (!candidates.length) return 0
 
-  // For recurring sequences (e.g. monthly referral boost), only dedup against
-  // journeys started within the last (window_days + active_within_days) days so
-  // users can be re-enrolled later. Default behaviour blocks any existing journey.
-  const recurring = rule.type === 'active_referral'
-  let existingQ = supabase
-    .from('user_journeys')
-    .select('user_id, started_at')
-    .eq('sequence_key', seq.key)
-    .in('user_id', candidates.map((c) => c.id))
-  if (recurring) {
-    const recurDays = ((rule as { active_within_days?: number }).active_within_days ?? 30) +
-      ((rule as { window_days?: number }).window_days ?? 30)
-    existingQ = existingQ.gte('started_at', new Date(nowMs - recurDays * 86400_000).toISOString())
+  // Onboarding double-enrollment guard : un profil 'both' ne doit pas être
+  // enrôlé dans onboarding-owner ET onboarding-sitter. Si l'autre séquence
+  // d'onboarding a déjà une journey (tout statut) pour ce user, on skip.
+  if (seq.key === 'onboarding-owner' || seq.key === 'onboarding-sitter') {
+    const otherKey = seq.key === 'onboarding-owner' ? 'onboarding-sitter' : 'onboarding-owner'
+    const alreadyOther = new Set<string>()
+    const idsForOnboarding = candidates.map((c) => c.id)
+    for (let i = 0; i < idsForOnboarding.length; i += 100) {
+      const chunk = idsForOnboarding.slice(i, i + 100)
+      const { data, error } = await supabase
+        .from('user_journeys')
+        .select('user_id')
+        .eq('sequence_key', otherKey)
+        .in('user_id', chunk)
+      if (error) {
+        console.error('[enrollment] onboarding cross-check failed', seq.key, error.message)
+        return 0
+      }
+      for (const r of (data ?? []) as Array<{ user_id: string }>) alreadyOther.add(r.user_id)
+    }
+    candidates = candidates.filter((c) => !alreadyOther.has(c.id))
+    if (!candidates.length) return 0
   }
-  const { data: existing } = await existingQ
-  const existingSet = new Set((existing ?? []).map((e: { user_id: string }) => e.user_id))
+
+  // Vérification des journeys existantes, chunkée par 100 pour éviter
+  // les URL trop longues qui faisaient silencieusement échouer la dédup.
+  // Tout échec est fatal : on n'insère rien, plutôt que risquer un ré-enrôlement massif.
+  const recurring = rule.type === 'active_referral'
+  const recurDays = recurring
+    ? ((rule as { active_within_days?: number }).active_within_days ?? 30) +
+      ((rule as { window_days?: number }).window_days ?? 30)
+    : 0
+  const recurThreshold = recurring
+    ? new Date(nowMs - recurDays * 86400_000).toISOString()
+    : null
+
+  const existingSet = new Set<string>()
+  const allIds = candidates.map((c) => c.id)
+  for (let i = 0; i < allIds.length; i += 100) {
+    const chunk = allIds.slice(i, i + 100)
+    // RPC dédiée : renvoie DISTINCT user_id, immunisée contre la troncature
+    // PostgREST à 1000 lignes (>100k rows brutes sur discover-mutual-aid).
+    const { data, error } = await supabase.rpc('users_with_journey_for_sequence', {
+      _sequence_key: seq.key,
+      _user_ids: chunk,
+      _started_since: recurThreshold,
+    })
+    if (error) {
+      console.error('[enrollment] existing-lookup failed', seq.key, error.message, 'chunk', i)
+      return 0
+    }
+    for (const r of (data ?? []) as Array<{ user_id: string }>) existingSet.add(r.user_id)
+  }
 
   const toInsert = candidates
     .filter((c) => !existingSet.has(c.id))
@@ -518,12 +602,27 @@ async function enrollForSequence(
   if (!toInsert.length) return 0
   if (dryRun) return toInsert.length
 
+  // Filet de sécurité : l'index unique partiel (user_id, sequence_key WHERE status='active')
+  // rejettera tout doublon résiduel. En cas de violation, on retombe sur un insert
+  // individuel row-par-row pour ne perdre que la ligne fautive.
   const { error } = await supabase.from('user_journeys').insert(toInsert)
-  if (error) {
-    console.error('[enrollment] insert failed', seq.key, error.message)
-    return 0
+  if (!error) return toInsert.length
+
+  if (error.code === '23505') {
+    console.warn('[enrollment] bulk hit unique index, falling back to per-row', seq.key)
+    let ok = 0
+    for (const row of toInsert) {
+      const { error: rowErr } = await supabase.from('user_journeys').insert(row)
+      if (!rowErr) ok++
+      else if (rowErr.code !== '23505') {
+        console.error('[enrollment] row insert failed', seq.key, rowErr.message)
+      }
+    }
+    return ok
   }
-  return toInsert.length
+
+  console.error('[enrollment] insert failed', seq.key, error.message)
+  return 0
 }
 
 // ---------------------------------------------------------------------------
