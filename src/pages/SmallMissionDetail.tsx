@@ -452,97 +452,59 @@ const SmallMissionDetail = () => {
     if (!resp) return;
     setProcessingResponseId(responseId);
     try {
-      // Server-side guard: re-check mission status
-      const { data: freshMission } = await supabase
-        .from("small_missions").select("status").eq("id", mission.id).single();
-      if (!freshMission) throw new Error("Mission introuvable");
-      if (freshMission.status === "cancelled" || freshMission.status === "completed") {
-        toast({ variant: "destructive", title: "Mission clôturée", description: "Cette mission n'accepte plus de réponses." });
-        return;
-      }
-
-      const { error: updErr } = await supabase
-        .from("small_mission_responses").update({ status: "accepted" as any }).eq("id", responseId);
-      if (updErr) throw updErr;
-
-      if (freshMission.status === "open") {
-        await supabase.from("small_missions").update({ status: "in_progress" as any }).eq("id", mission.id);
-        setMission((prev: any) => ({ ...prev, status: "in_progress" }));
-      }
-
-      setResponses(prev => prev.map(r => r.id === responseId ? { ...r, status: "accepted" } : r));
-
-      // Cascade decline si demandé
       const pendingOthers = responses.filter(r => r.id !== responseId && r.status === "pending");
       trackEvent("mission_accept_response_cascade_choice", {
         metadata: { mode, pending_count: pendingOthers.length },
       });
-      if (mode === "decline_others" && pendingOthers.length > 0) {
-        const otherIds = pendingOthers.map(r => r.id);
-        await supabase.from("small_mission_responses")
-          .update({ status: "declined" as any })
-          .in("id", otherIds);
-        supabase.functions.invoke("notify-mission-event", {
-          body: {
-            event_type: "mission_declined",
-            mission_id: id,
-            actor_id: user!.id,
-            target_ids: pendingOthers.map(r => r.responder_id),
-          },
-        }).catch(() => {});
-        setResponses(prev => prev.map(r =>
-          otherIds.includes(r.id) ? { ...r, status: "declined" } : r,
-        ));
-      }
 
-      // Reuse existing conversation if any (responder may have already proposed via dialog)
-      const { data: existingConv } = await supabase
-        .from("conversations")
-        .select("id")
-        .eq("small_mission_id", id!)
-        .or(`and(owner_id.eq.${mission.user_id},sitter_id.eq.${resp.responder_id}),and(owner_id.eq.${resp.responder_id},sitter_id.eq.${mission.user_id})`)
-        .maybeSingle();
+      // RPC atomique : accept + in_progress + cascade decline + conversation + message système.
+      const { data, error } = await supabase.rpc("accept_mission_response", {
+        p_response_id: responseId,
+        p_decline_others: mode === "decline_others",
+      });
+      if (error) throw error;
 
-      let convId = existingConv?.id;
-      if (!convId) {
-        const { data: newConv, error: convErr } = await supabase
-          .from("conversations")
-          .insert({
-            owner_id: mission.user_id,
-            sitter_id: resp.responder_id,
-            small_mission_id: id,
-          })
-          .select("id")
-          .single();
-        if (convErr) throw convErr;
-        convId = newConv.id;
-      }
+      const result = (data ?? {}) as any;
+      const convId: string | null = result.conversation_id ?? null;
+      const declinedIds: string[] = Array.isArray(result.declined_responder_ids)
+        ? result.declined_responder_ids
+        : [];
 
-      // Add a system message to materialize the acceptance in the chat
-      if (convId) {
-        await supabase.from("messages").insert({
-          conversation_id: convId,
-          sender_id: user!.id,
-          content: `Personne retenue pour « ${mission.title} ». Vous pouvez maintenant échanger pour organiser l'entraide.`,
-          is_system: true,
-        });
-      }
+      // UI optimiste alignée sur le résultat serveur.
+      setMission((prev: any) => (prev?.status === "open" ? { ...prev, status: "in_progress" } : prev));
+      setResponses((prev) => prev.map((r) => {
+        if (r.id === responseId) return { ...r, status: "accepted" };
+        if (mode === "decline_others" && r.status === "pending" && r.id !== responseId) {
+          return { ...r, status: "declined" };
+        }
+        return r;
+      }));
 
+      // Notifications (idempotence côté fonction edge par event_type + target).
       supabase.functions.invoke("notify-mission-event", {
         body: {
           event_type: "mission_accepted",
           mission_id: id,
           actor_id: user!.id,
           target_ids: [resp.responder_id],
-          metadata: { conversation_id: convId || null },
+          metadata: { conversation_id: convId },
         },
       }).catch(() => {});
+      if (declinedIds.length > 0) {
+        supabase.functions.invoke("notify-mission-event", {
+          body: {
+            event_type: "mission_declined",
+            mission_id: id,
+            actor_id: user!.id,
+            target_ids: declinedIds,
+          },
+        }).catch(() => {});
+      }
 
       toast({ title: "Vous avez retenu cette personne !" });
     } catch (err: any) {
       logger.error("[handleAcceptResponse]", { err: String(err) });
       toast({ variant: "destructive", title: "Erreur", description: err?.message || "Impossible de retenir cette personne." });
-      // Rollback optimistic UI
       setResponses(prev => prev.map(r => r.id === responseId ? { ...r, status: "pending" } : r));
     } finally {
       setProcessingResponseId(null);
