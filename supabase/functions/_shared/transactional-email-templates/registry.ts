@@ -80,6 +80,8 @@ import { template as applicationReopened } from './application-reopened.tsx'
 import { template as helpDuringSit } from './help-during-sit.tsx'
 import { template as affinityCompletionSitter } from './affinity-completion-sitter.tsx'
 import { template as affinityCompletionOwner } from './affinity-completion-owner.tsx'
+import { template as missionResponseReceived } from './mission-response-received.tsx'
+import { template as missionResponseWaiting } from './mission-response-waiting.tsx'
 
 
 
@@ -157,6 +159,8 @@ export const TEMPLATES: Record<string, TemplateEntry> = {
   'help-during-sit': helpDuringSit,
   'affinity-completion-sitter': affinityCompletionSitter,
   'affinity-completion-owner': affinityCompletionOwner,
+  'mission-response-received': missionResponseReceived,
+  'mission-response-waiting': missionResponseWaiting,
 }
 
 

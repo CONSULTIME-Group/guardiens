@@ -26,6 +26,7 @@ import { recordMissionCreatedAttribution } from "@/lib/campaignAttribution";
 import { templatesFor, MISSION_TEMPLATES, type MissionTemplate } from "@/data/missionTemplates";
 import { AlertCircle, ChevronLeft, CalendarIcon } from "lucide-react";
 import { sanitizeUserTitle } from "@/lib/sanitizeTitle";
+import { stripEmojis } from "@/lib/stripEmojis";
 
 /** Longueurs minimales pour éviter les annonces vides ou illisibles. */
 const MIN_TITLE_LEN = 15;
@@ -210,17 +211,20 @@ const CreateSmallMission = () => {
     let coords: { lat: number; lng: number } | null = null;
     try { coords = await geocodeCity(city.trim()); } catch { coords = null; }
 
-    // Titre nettoyé (capitalisation, espaces, fautes fréquentes) au save
-    // pour normaliser à la source.
-    const cleanTitle = sanitizeUserTitle(title) || title.trim();
+    // Titre nettoyé (capitalisation, espaces, fautes fréquentes) + retrait
+    // silencieux des emojis (charte). La garde serveur `validate_small_mission`
+    // reste autoritaire.
+    const cleanTitle = stripEmojis(sanitizeUserTitle(title) || title.trim());
+    const cleanDescription = stripEmojis(description);
+    const cleanExchange = stripEmojis(exchangeOffer);
 
     const { data: inserted, error } = await supabase.from("small_missions").insert({
       user_id: user.id,
       title: cleanTitle,
-      description: description.trim(),
+      description: cleanDescription,
       category: category as any,
       mission_type: missionType,
-      exchange_offer: exchangeOffer.trim(),
+      exchange_offer: cleanExchange,
       city: city.trim(),
       postal_code: postalCode.trim(),
       date_needed: dateNeeded || null,

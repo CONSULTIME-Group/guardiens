@@ -414,15 +414,9 @@ const SmallMissionDetail = () => {
         setMessage("");
         toast({ title: "Réponse publiée !", description: "La personne qui demande va être prévenue." });
 
-        // Fan-out serveur (notif in-app + email) via edge function
-        supabase.functions.invoke("notify-mission-event", {
-          body: {
-            event_type: "mission_proposal",
-            mission_id: id,
-            actor_id: user.id,
-            target_ids: [fresh.user_id],
-          },
-        }).catch(() => {});
+        // Note : le fan-out (notif in-app + email) est déclenché côté serveur
+        // par le trigger `notify_new_mission_response` sur l'insertion de la
+        // réponse. On ne dépend plus du client pour ce chemin critique.
       }
 
     } catch (err: any) {
@@ -939,11 +933,11 @@ const SmallMissionDetail = () => {
           <div>
             <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-1">Comment ça marche</p>
             <p className="font-heading text-lg font-bold text-foreground leading-snug">
-              Répondez comme en commentaire.
+              Adressez une proposition privée.
             </p>
             <p className="text-sm text-muted-foreground leading-relaxed mt-1">
-              Votre réponse est visible par tout le monde. {author?.first_name || "L'auteur"} pourra
-              <span className="font-semibold text-foreground"> retenir une personne pour aider</span>.
+              Votre réponse n'est visible que par {author?.first_name || "l'auteur"} de l'annonce. S'il vous
+              <span className="font-semibold text-foreground"> retient pour aider</span>, votre nom apparaîtra alors publiquement.
             </p>
           </div>
           <Button
@@ -1431,18 +1425,19 @@ const SmallMissionDetail = () => {
                 {isAuthor ? (
                   <>
                     <span className="font-semibold text-foreground">Vous êtes l'auteur.</span>{" "}
-                    Chaque membre peut réagir publiquement. Quand une réponse vous convient, cliquez sur
+                    Chaque proposition ci-dessous n'est visible que par vous et la personne qui l'a écrite.
+                    Quand une réponse vous convient, cliquez sur
                     <span className="font-semibold text-foreground"> « Retenir cette personne »</span> :
                     elle deviendra la <span className="font-semibold text-success">personne retenue pour vous aider</span>,
                     visible ici et sur son profil public.
                   </>
                 ) : (
                   <>
-                    <span className="font-semibold text-foreground">Répondez comme en commentaire.</span>{" "}
-                    Votre réponse est publique. Si {author?.first_name || "l'auteur"} vous
-                    <span className="font-semibold text-foreground"> retient pour l'aider</span>, vous serez
-                    identifié(e) comme <span className="font-semibold text-success">« personne retenue »</span> et
-                    cela apparaîtra sur votre profil public. Vous pouvez aussi dire
+                    <span className="font-semibold text-foreground">Adressez une proposition privée.</span>{" "}
+                    Seul {author?.first_name || "l'auteur"} peut la lire. Si vous êtes
+                    <span className="font-semibold text-foreground"> retenu(e) pour l'aider</span>, vous apparaîtrez alors
+                    comme <span className="font-semibold text-success">« personne retenue »</span> ici et sur votre profil public.
+                    Vous pouvez aussi dire
                     <span className="font-semibold text-foreground"> « Merci »</span> à une réponse utile.
                   </>
                 )}

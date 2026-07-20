@@ -1,11 +1,13 @@
 // send-mission-nudges
 // -----------------------------------------------------------------------------
-// Envoie 2 types de nudges au propriétaire d'une mission :
-//  - `feedback` : mission completed depuis 48h à 72h, sans feedback de l'auteur
-//  - `no_response` : mission open depuis 7j sans aucune small_mission_responses
-// Anti-spam : chaque nudge ne part qu'une seule fois par mission (dédup via email_send_log).
+// Envoie 3 types de nudges au propriétaire d'une mission :
+//  - `feedback`         : mission completed depuis 48h à 72h, sans feedback de l'auteur
+//  - `no_response`      : mission open depuis 7j sans aucune small_mission_responses
+//  - `response_waiting` : réponse `pending` depuis plus de 48h, poster jamais relancé pour
+//                         cette réponse (dédup par response_id dans metadata)
+// Anti-spam : chaque nudge ne part qu'une seule fois par cible (dédup via email_send_log).
 // Respecte suppression et opt-in `email_preferences.product_emails`.
-// Body : { dry_run?: boolean, mission_id?: string, kind?: 'feedback'|'no_response' }
+// Body : { dry_run?: boolean, mission_id?: string, kind?: 'feedback'|'no_response'|'response_waiting' }
 import { createClient } from 'npm:@supabase/supabase-js@2.45.0'
 
 const corsHeaders = {
@@ -28,7 +30,7 @@ interface Mission {
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders })
 
-  let body: { dry_run?: boolean; mission_id?: string; kind?: 'feedback' | 'no_response' } = {}
+  let body: { dry_run?: boolean; mission_id?: string; kind?: 'feedback' | 'no_response' | 'response_waiting' } = {}
   try { if (req.body) body = await req.json() } catch { /* noop */ }
 
   const admin = createClient(SUPABASE_URL, SERVICE_KEY, { auth: { persistSession: false } })
@@ -90,6 +92,52 @@ Deno.serve(async (req) => {
           continue
         }
         await sendNudge(admin, m, 'no_response', results, body.dry_run)
+      }
+    }
+
+    // === Nudge 3 : réponse en attente depuis >48h ===
+    if (!body.kind || body.kind === 'response_waiting') {
+      const cutoff = new Date(now - 48 * 3600 * 1000).toISOString()
+      let q = admin
+        .from('small_mission_responses')
+        .select('id, mission_id, responder_id, status, created_at, message, mission:small_missions(id, user_id, title, status)')
+        .eq('status', 'pending')
+        .lte('created_at', cutoff)
+        .limit(200)
+      if (body.mission_id) q = q.eq('mission_id', body.mission_id)
+      const { data: rows, error } = await q
+      if (error) throw error
+
+      for (const r of (rows as any[]) ?? []) {
+        const mission = r.mission
+        if (!mission || mission.status !== 'open') {
+          results.push({ mission_id: r.mission_id, nudge_type: 'response_waiting', status: 'skipped', reason: 'mission_not_open' })
+          continue
+        }
+        // La mission a-t-elle déjà une réponse acceptée ? Si oui, plus la peine.
+        const { count: acceptedCount } = await admin
+          .from('small_mission_responses')
+          .select('id', { count: 'exact', head: true })
+          .eq('mission_id', r.mission_id)
+          .eq('status', 'accepted')
+        if ((acceptedCount ?? 0) > 0) {
+          results.push({ mission_id: r.mission_id, nudge_type: 'response_waiting', status: 'skipped', reason: 'already_accepted' })
+          continue
+        }
+
+        // Prénom du répondant
+        const { data: responderProf } = await admin
+          .from('profiles')
+          .select('first_name')
+          .eq('id', r.responder_id)
+          .maybeSingle()
+        const responderFirstName = (responderProf?.first_name as string | undefined)?.trim() || 'Un membre'
+
+        await sendResponseWaitingNudge(admin, {
+          mission: { id: mission.id, user_id: mission.user_id, title: mission.title, status: mission.status, created_at: '', updated_at: '' },
+          responseId: r.id,
+          responderFirstName,
+        }, results, body.dry_run)
       }
     }
 
@@ -189,6 +237,94 @@ async function sendNudge(
     return
   }
   results.push({ mission_id: m.id, nudge_type: kind, status: 'sent' })
+}
+
+async function sendResponseWaitingNudge(
+  admin: ReturnType<typeof createClient>,
+  ctx: { mission: Mission; responseId: string; responderFirstName: string },
+  results: Array<{ mission_id: string; nudge_type: string; status: string; reason?: string }>,
+  dryRun?: boolean,
+) {
+  const { mission, responseId, responderFirstName } = ctx
+  const templateName = 'mission-response-waiting'
+  const idempotencyKey = `${templateName}-${responseId}`
+
+  const { data: profile } = await admin
+    .from('profiles')
+    .select('id, email, first_name, account_status')
+    .eq('id', mission.user_id)
+    .maybeSingle()
+  if (!profile || profile.account_status !== 'active') {
+    results.push({ mission_id: mission.id, nudge_type: 'response_waiting', status: 'skipped', reason: 'author_inactive' })
+    return
+  }
+  let email = (profile.email as string | undefined)?.trim() || null
+  if (!email) {
+    const { data: authData } = await admin.auth.admin.getUserById(mission.user_id)
+    email = authData?.user?.email ?? null
+  }
+  if (!email) {
+    results.push({ mission_id: mission.id, nudge_type: 'response_waiting', status: 'skipped', reason: 'email_missing' })
+    return
+  }
+
+  const { data: prefs } = await admin
+    .from('email_preferences')
+    .select('product_emails')
+    .eq('user_id', mission.user_id)
+    .maybeSingle()
+  if (prefs && prefs.product_emails === false) {
+    results.push({ mission_id: mission.id, nudge_type: 'response_waiting', status: 'skipped', reason: 'opt_out' })
+    return
+  }
+
+  const { data: sup } = await admin
+    .from('suppressed_emails')
+    .select('email')
+    .ilike('email', email)
+    .maybeSingle()
+  if (sup) {
+    results.push({ mission_id: mission.id, nudge_type: 'response_waiting', status: 'skipped', reason: 'suppressed' })
+    return
+  }
+
+  // Dédup strict par response_id
+  const { data: prev } = await admin
+    .from('email_send_log')
+    .select('id')
+    .eq('template_name', templateName)
+    .eq('recipient_email', email)
+    .in('status', ['sent', 'pending'])
+    .contains('metadata', { response_id: responseId })
+    .limit(1)
+  if (prev && prev.length > 0) {
+    results.push({ mission_id: mission.id, nudge_type: 'response_waiting', status: 'skipped', reason: 'already_sent' })
+    return
+  }
+
+  if (dryRun) {
+    results.push({ mission_id: mission.id, nudge_type: 'response_waiting', status: 'would_send' })
+    return
+  }
+
+  const { error: sendErr } = await admin.functions.invoke('send-transactional-email', {
+    body: {
+      templateName,
+      recipientEmail: email,
+      idempotencyKey,
+      templateData: {
+        responderFirstName,
+        missionTitle: mission.title,
+        missionId: mission.id,
+      },
+      metadata: { mission_id: mission.id, response_id: responseId, nudge_type: 'response_waiting' },
+    },
+  })
+  if (sendErr) {
+    results.push({ mission_id: mission.id, nudge_type: 'response_waiting', status: 'error', reason: String(sendErr) })
+    return
+  }
+  results.push({ mission_id: mission.id, nudge_type: 'response_waiting', status: 'sent' })
 }
 
 function json(payload: unknown, status = 200) {
