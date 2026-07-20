@@ -17,6 +17,9 @@ type ExitCondition =
   | { type: 'has_published_sit' }
   | { type: 'has_application_received' }
   | { type: 'reactivated'; days?: number }
+  | { type: 'sitter_affinity_ready' }
+  | { type: 'owner_affinity_ready' }
+  | { type: 'has_mutual_aid_activity' }
   | Record<string, never>
 
 type EnrollmentRule =
