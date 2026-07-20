@@ -36,7 +36,7 @@ const QuestionCreate = () => {
   const [body, setBody] = useState("");
   const [city, setCity] = useState("");
   const [submitting, setSubmitting] = useState(false);
-  const [eligibilityReason, setEligibilityReason] = useState<MissionEligibilityReason | null>(null);
+  
 
   const submit = async () => {
     if (!user) {
