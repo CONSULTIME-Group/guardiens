@@ -71,7 +71,7 @@ const CreateSmallMission = () => {
   // Chantier 1 EntraideHub Pass 1 : plus de gate 60 %, tout profil connecté peut publier.
   // L'ID vérification devient un soft-nudge (badge auteur uniquement) sur SitDetail.
   const canApplyMissions = true;
-  const [eligibilityReason, setEligibilityReason] = useState<MissionEligibilityReason | null>(null);
+  
   const [confirmUnchangedOpen, setConfirmUnchangedOpen] = useState(false);
 
   const CATEGORIES = useMemo(() => [
