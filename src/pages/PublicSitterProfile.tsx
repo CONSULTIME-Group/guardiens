@@ -50,6 +50,11 @@ import ActivateRoleDialog, { type ContactIntentContext } from "@/components/prem
 import ProfileHero, { type HeroCtaVariant } from "@/components/profile/ProfileHero";
 import StoryTiles, { type StoryTileInput } from "@/components/profile/StoryTiles";
 import TrustStory from "@/components/profile/TrustStory";
+import ProfileRail from "@/components/profile/ProfileRail";
+import AffinityTeaserCard from "@/components/profile/AffinityTeaserCard";
+import AlmaWhisperCard from "@/components/profile/AlmaWhisperCard";
+import CommunityPulseCard from "@/components/profile/CommunityPulseCard";
+import { useCommunityPulse } from "@/hooks/useCommunityPulse";
 
 const capitalize = (name: string) =>
   name ? name.charAt(0).toUpperCase() + name.slice(1).toLowerCase() : "";
@@ -383,6 +388,26 @@ export default function PublicSitterProfile() {
     }, 250);
     return () => clearTimeout(t);
   }, [loading, activeTab]);
+
+  // Sticky CTA mobile : visible uniquement quand le CTA du hero est HORS viewport.
+  const [heroCtaVisible, setHeroCtaVisible] = useState(true);
+  useEffect(() => {
+    if (loading) return;
+    const target = document.querySelector<HTMLElement>("[data-hero-cta]");
+    if (!target || typeof IntersectionObserver === "undefined") return;
+    const io = new IntersectionObserver(
+      (entries) => {
+        const e = entries[0];
+        if (e) setHeroCtaVisible(e.isIntersecting);
+      },
+      { rootMargin: "0px 0px -40% 0px", threshold: 0.01 },
+    );
+    io.observe(target);
+    return () => io.disconnect();
+  }, [loading, activeTab]);
+
+  const { data: communityPulse } = useCommunityPulse();
+
 
   const [loadError, setLoadError] = useState<null | 'error'>(null);
   const [loadNonce, setLoadNonce] = useState(0);
@@ -788,9 +813,7 @@ export default function PublicSitterProfile() {
   const rawRadius = sitterProfile?.geographic_radius;
   // Cohérence : la valeur DB est désormais maintenue par un trigger sur la table
   // reviews (recalc_completed_sits_count). Plus besoin de Math.max côté client.
-  const gardeReviewsCount = reviews.filter((r: any) => r.sit_id !== null).length;
   const completedSits = profile?.completed_sits_count ?? 0;
-  const cancellations = profile?.cancellation_count || 0;
   const radius = rawRadius && rawRadius > 0 ? rawRadius : null;
   const isOwn = auth?.user?.id === id;
   const isAuthenticated = auth?.isAuthenticated;
@@ -868,14 +891,6 @@ export default function PublicSitterProfile() {
   const isRichProfile = hasSubstantialBio && hasTrustSignal;
   const shouldNoindex = !isRichProfile;
 
-  const jsonLd = {
-    "@context": "https://schema.org",
-    "@type": "Person",
-    name: firstName,
-    address: { "@type": "PostalAddress", addressLocality: city, addressCountry: "FR" },
-    description: motivation || bio,
-    url: pageUrl,
-  };
 
   const typeLabel = SITTER_TYPE_LABELS[sitterType] || sitterType;
   const accompLabel = accompaniedBy ? `avec ${accompaniedBy}` : "";
@@ -951,14 +966,14 @@ export default function PublicSitterProfile() {
         />
       )}
       {/* Bandes latérales décoratives, desktop ≥ lg uniquement (sinon traversent le contenu en mobile) */}
-      <div className="hidden lg:block" style={{ position: 'fixed', left: 0, top: 0, bottom: 0, width: '56px', background: 'linear-gradient(to right, rgba(45,106,79,0.06), transparent)', pointerEvents: 'none', zIndex: 0 }} aria-hidden="true" />
-      <div className="hidden lg:block" style={{ position: 'fixed', right: 0, top: 0, bottom: 0, width: '56px', background: 'linear-gradient(to left, rgba(45,106,79,0.06), transparent)', pointerEvents: 'none', zIndex: 0 }} aria-hidden="true" />
+      <div className="hidden lg:block" style={{ position: 'fixed', left: 0, top: 0, bottom: 0, width: '56px', background: 'linear-gradient(to right, hsl(var(--primary) / 0.06), transparent)', pointerEvents: 'none', zIndex: 0 }} aria-hidden="true" />
+      <div className="hidden lg:block" style={{ position: 'fixed', right: 0, top: 0, bottom: 0, width: '56px', background: 'linear-gradient(to left, hsl(var(--primary) / 0.06), transparent)', pointerEvents: 'none', zIndex: 0 }} aria-hidden="true" />
       {/* Texte vertical gauche, desktop ≥ lg uniquement */}
-      <div className="hidden lg:block" style={{ position: 'fixed', left: '10px', top: '50%', transform: 'translateY(-50%) rotate(-90deg)', fontSize: '9px', letterSpacing: '4px', textTransform: 'uppercase' as const, color: 'rgba(45,106,79,0.28)', whiteSpace: 'nowrap', pointerEvents: 'none', zIndex: 0, fontFamily: 'sans-serif' }} aria-hidden="true">
+      <div className="hidden lg:block" style={{ position: 'fixed', left: '10px', top: '50%', transform: 'translateY(-50%) rotate(-90deg)', fontSize: '9px', letterSpacing: '4px', textTransform: 'uppercase' as const, color: 'hsl(var(--primary) / 0.28)', whiteSpace: 'nowrap', pointerEvents: 'none', zIndex: 0, fontFamily: 'sans-serif' }} aria-hidden="true">
         Guardiens · House-sitting de proximité
       </div>
       {/* Texte vertical droit, desktop ≥ lg uniquement */}
-      <div className="hidden lg:block" style={{ position: 'fixed', right: '10px', top: '50%', transform: 'translateY(-50%) rotate(90deg)', fontSize: '9px', letterSpacing: '4px', textTransform: 'uppercase' as const, color: 'rgba(45,106,79,0.28)', whiteSpace: 'nowrap', pointerEvents: 'none', zIndex: 0, fontFamily: 'sans-serif' }} aria-hidden="true">
+      <div className="hidden lg:block" style={{ position: 'fixed', right: '10px', top: '50%', transform: 'translateY(-50%) rotate(90deg)', fontSize: '9px', letterSpacing: '4px', textTransform: 'uppercase' as const, color: 'hsl(var(--primary) / 0.28)', whiteSpace: 'nowrap', pointerEvents: 'none', zIndex: 0, fontFamily: 'sans-serif' }} aria-hidden="true">
         Gardiens de confiance · Gens du coin
       </div>
       <PageMeta
@@ -1132,14 +1147,61 @@ export default function PublicSitterProfile() {
       {availableTabs <= 1 && <hr className="border-border max-w-5xl mx-auto" />}
 
       {/* ── ONGLET GARDIEN (refonte "outil de décision") ───────────────── */}
-      {activeTab === 'gardien' && (
-        <div className="max-w-5xl mx-auto px-4 md:px-6 py-6 md:py-8 pb-[calc(10.5rem+env(safe-area-inset-bottom))] md:pb-8">
+      {activeTab === 'gardien' && (() => {
+        // ── Rail droit (vague 37 Lot 4) : Affinité, Alma, Pouls ─────────
+        const redirectTo = `/gardiens/${id}?tab=gardien`;
+        const affinityNode = !isAuthenticated
+          ? <AffinityTeaserCard sitterFirstName={firstName} redirectTo={redirectTo} />
+          : (isOwner && !isOwn && sitterProfile)
+            ? (
+                <OwnerToSitterAffinity
+                  sitterProfile={sitterProfile}
+                  context="public_sitter_profile_rail"
+                  targetId={id}
+                  size="md"
+                  scope="single"
+                  variant="numeric"
+                />
+              )
+            : null;
+        // Alma : UNE phrase pertinente, dérivée de données réelles uniquement.
+        let almaPhrase: string | null = null;
+        if (avgRating >= 4.5 && reviewCount >= 3) {
+          almaPhrase = `${firstName} rassure : ${reviewCount} propriétaires lui donnent ${avgRating.toFixed(1)} sur 5.`;
+        } else if (isAvailable) {
+          almaPhrase = `${firstName} est disponible en ce moment, c'est le bon moment pour prendre contact.`;
+        } else if (completedSits >= 3) {
+          almaPhrase = `${firstName} a déjà mené ${completedSits} gardes à leur terme.`;
+        } else if (profile?.identity_verified) {
+          almaPhrase = `L'identité de ${firstName} a été vérifiée par notre équipe.`;
+        }
+        const almaNode = !isOwn ? <AlmaWhisperCard phrase={almaPhrase} /> : null;
+        // Pouls : chiffres RÉELS. Local via useCityStats trop coûteux ici ; on
+        // sert les chiffres globaux depuis useCommunityPulse (déjà en cache).
+        const pulseGlobal = communityPulse
+          ? [
+              { value: communityPulse.maisonsGardees, label: "maisons gardées avec Guardiens" },
+              { value: communityPulse.totalInscrits, label: "membres actifs" },
+            ]
+          : [];
+        const pulseNode = <CommunityPulseCard city={city || null} global={pulseGlobal} />;
+        const railChildren = (
+          <>
+            {affinityNode}
+            {almaNode}
+            {pulseNode}
+          </>
+        );
 
+        return (
+        <div className="max-w-5xl mx-auto px-4 md:px-6 py-6 md:py-8 pb-[calc(10.5rem+env(safe-area-inset-bottom))] md:pb-8">
+          <div className="lg:grid lg:grid-cols-[minmax(0,1fr)_340px] lg:gap-8">
           {/* ── FLUX NARRATIF UNIFIÉ (vague 37) ────────────────────────────
               Mobile et desktop partagent le même flux vertical. Les onglets
               Radix sont supprimés au profit de sections continues séparées de
               52 px. L'ancre `#confiance` sert désormais aux deux breakpoints. */}
-          <div className="space-y-[52px]">
+          <div className="space-y-[52px] min-w-0">
+
 
             {/* 1. StoryTiles narratives (3 tuiles max, jamais « Non renseigné ») */}
             {(() => {
@@ -1361,11 +1423,22 @@ export default function PublicSitterProfile() {
                 <GallerySimple visibleGallery={visibleGallery} setLightboxIdx={setLightboxIdx} />
               </section>
             )}
+            {/* Rail INLINE (mobile) : les mêmes cartes que le rail sticky
+                desktop, empilées en fin de flux. Masqué en desktop où le rail
+                sticky à droite prend le relais. */}
+            <div className="lg:hidden">
+              <ProfileRail inline>{railChildren}</ProfileRail>
+            </div>
+          </div>
+
+          {/* Rail STICKY (desktop ≥ lg) — 340 px, aligné haut, self-start. */}
+          <ProfileRail>{railChildren}</ProfileRail>
           </div>
 
 
-          {/* CTA sticky bottom mobile */}
-          {showCTA && (
+          {/* CTA sticky bottom mobile — gaté par IntersectionObserver :
+              n'apparaît que lorsque le CTA du hero est sorti du viewport. */}
+          {showCTA && !heroCtaVisible && (
             <div className="md:hidden fixed bottom-16 left-0 right-0 z-40 bg-background border-t border-border px-3 sm:px-4 pt-2.5 sm:pt-3 pb-[calc(env(safe-area-inset-bottom)+0.625rem)] shadow-lg">
               {!isAuthenticated && (
                 <Link
@@ -1417,7 +1490,9 @@ export default function PublicSitterProfile() {
             </div>
           )}
         </div>
-      )}
+        );
+      })()}
+
 
 
       {/* ── ONGLET PROPRIO ── */}
@@ -1653,7 +1728,7 @@ export default function PublicSitterProfile() {
                             )}
                             <span className="text-sm font-medium text-foreground font-body">{review.reviewer?.first_name || 'Gardien'}</span>
                             {stars > 0 && (
-                              <span className="text-xs text-amber-500 font-body tracking-wider" aria-label={`${stars} étoiles sur 5`}>
+                              <span className="text-xs text-primary font-body tracking-wider" aria-label={`${stars} étoiles sur 5`}>
                                 {'★'.repeat(stars)}{'☆'.repeat(5 - stars)}
                               </span>
                             )}
