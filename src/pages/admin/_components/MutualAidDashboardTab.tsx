@@ -467,4 +467,29 @@ const KpiCard = ({ label, value }: { label: string; value: number }) => (
   </div>
 );
 
+const FunnelStep = ({ label, value, rate }: { label: string; value: number; rate: number | null }) => (
+  <div className="rounded-xl border border-border bg-card px-3 py-3">
+    <p className="text-[10px] uppercase tracking-wide text-muted-foreground font-semibold">{label}</p>
+    <p className="mt-1 text-xl font-bold tabular-nums text-foreground">{value}</p>
+    <p className="text-[11px] text-muted-foreground tabular-nums">
+      {rate != null ? `${rate}% de l'étape précédente` : "point de départ"}
+    </p>
+  </div>
+);
+
+const MetricPill = ({ label, value, hint }: { label: string; value: string; hint?: string }) => (
+  <div className="rounded-xl bg-muted/40 px-3 py-3">
+    <p className="text-[10px] uppercase tracking-wide text-muted-foreground font-semibold">{label}</p>
+    <p className="mt-1 text-lg font-bold tabular-nums text-foreground">{value}</p>
+    {hint && <p className="text-[11px] text-muted-foreground">{hint}</p>}
+  </div>
+);
+
+const formatMedianDuration = (seconds: number | null): string => {
+  if (seconds == null) return "–";
+  if (seconds < 3600) return `${Math.round(seconds / 60)} min`;
+  if (seconds < 86400) return `${(seconds / 3600).toFixed(1)} h`;
+  return `${(seconds / 86400).toFixed(1)} j`;
+};
+
 export default MutualAidDashboardTab;
