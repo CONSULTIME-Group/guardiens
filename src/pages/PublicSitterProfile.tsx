@@ -365,7 +365,15 @@ export default function PublicSitterProfile() {
     if (!hash) return;
     // Léger délai pour laisser le DOM des Tabs/sections se monter.
     const t = setTimeout(() => {
-      const el = document.getElementById(hash);
+      // Pour l'ancre #confiance, la section existe en deux exemplaires
+      // (desktop et mobile). On cible celui qui est réellement visible.
+      const candidates =
+        hash === "confiance"
+          ? ["confiance", "confiance-mobile"]
+          : [hash];
+      const el = candidates
+        .map((h) => document.getElementById(h))
+        .find((n) => n && (n as HTMLElement).offsetParent !== null) as HTMLElement | undefined;
       if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
     }, 250);
     return () => clearTimeout(t);
