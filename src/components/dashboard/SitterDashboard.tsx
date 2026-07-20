@@ -31,6 +31,7 @@ import NextGuardRailCard from "./sitter/NextGuardRailCard";
 import ReputationRailCard from "./sitter/ReputationRailCard";
 import VerifiedSitterRailCard from "./sitter/VerifiedSitterRailCard";
 import AlmaRailWhisper from "./sitter/AlmaRailWhisper";
+import SitterAffinityBanner from "@/components/matching/SitterAffinityBanner";
 import { isPricingActive } from "@/lib/pricing";
 import { shouldShowVerifiedCard } from "@/lib/shouldShowVerifiedCard";
 import SitterOpeningCard from "./sitter/SitterOpeningCard";
@@ -460,6 +461,8 @@ const SitterDashboard = () => {
               <div className="">
                 <CommunityPulseBanner userId={user?.id} />
               </div>
+              <SitterAffinityBanner />
+
               <div className="">
                 {nextGuard ? (
                   <NextGuardRailCard nextGuard={nextGuard} />

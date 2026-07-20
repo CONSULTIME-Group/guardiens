@@ -78,6 +78,8 @@ import { template as alertDigest } from './alert-digest.tsx'
 import { template as applicationMessageRestored } from './application-message-restored.tsx'
 import { template as applicationReopened } from './application-reopened.tsx'
 import { template as helpDuringSit } from './help-during-sit.tsx'
+import { template as affinityCompletionSitter } from './affinity-completion-sitter.tsx'
+import { template as affinityCompletionOwner } from './affinity-completion-owner.tsx'
 
 
 
@@ -153,6 +155,8 @@ export const TEMPLATES: Record<string, TemplateEntry> = {
   'application-message-restored': applicationMessageRestored,
   'application-reopened': applicationReopened,
   'help-during-sit': helpDuringSit,
+  'affinity-completion-sitter': affinityCompletionSitter,
+  'affinity-completion-owner': affinityCompletionOwner,
 }
 
 

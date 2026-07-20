@@ -32,6 +32,7 @@ import OwnerFirstNBAGardiens from "./OwnerFirstNBAGardiens";
 import CommunityPulseBanner from "./shared/CommunityPulseBanner";
 import HouseStoryRailCard from "./owner/HouseStoryRailCard";
 import AlmaRailWhisper from "./sitter/AlmaRailWhisper";
+import OwnerAffinityBanner from "@/components/matching/OwnerAffinityBanner";
 
 import { useOwnerPriorityAction } from "@/hooks/useOwnerPriorityAction";
 import { useOwnerPrimaryAction } from "@/hooks/useOwnerPrimaryAction";
@@ -363,6 +364,12 @@ const OwnerDashboard = () => {
             <div className="">
               <CommunityPulseBanner userId={user?.id} />
             </div>
+
+            {/* 1bis. Activation affinité — profils anciens sans presence_expected */}
+            {!isNewOwner && (
+              <OwnerAffinityBanner context="dashboard_owner_rail" />
+            )}
+
 
             {/* 2. Votre maison */}
             <div className="">

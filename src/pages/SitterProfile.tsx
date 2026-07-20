@@ -25,6 +25,7 @@ import PageMeta from "@/components/PageMeta";
 import FillSavoirFaireBanner from "@/components/profile/FillSavoirFaireBanner";
 import ProfileProgressStrip from "@/components/profile/ProfileProgressStrip";
 import TrustProfile from "@/components/profile/TrustProfile";
+import SitterAffinityBanner from "@/components/matching/SitterAffinityBanner";
 
 const SECTIONS_BASE: Array<{ id: string; num: number; optional?: boolean }> = [
   { id: "identity", num: 1 },
@@ -426,6 +427,7 @@ const SitterProfile = () => {
               )}
               {activeSection === "sitter" && (
                 <>
+                  <SitterAffinityBanner context="profile_sitter_section" editHref="/profile?section=sitter" className="mb-6" />
                   <StepSitterProfile data={mergedData} onChange={handleChange} />
                   <div className="mt-8 pt-8 border-t border-border">
                     <StepPreferences data={mergedData} onChange={handleChange} />

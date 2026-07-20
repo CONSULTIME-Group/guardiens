@@ -6842,6 +6842,7 @@ export type Database = {
         Returns: string
       }
       get_activity_since_last_visit: { Args: never; Returns: Json }
+      get_affinity_completeness_stats: { Args: never; Returns: Json }
       get_alma_blacklisted_types: {
         Args: never
         Returns: {
