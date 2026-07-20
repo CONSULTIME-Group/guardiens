@@ -116,6 +116,24 @@ const ProfileSidebar = ({
           </p>
         </div>
 
+        {/* Détail calme des items manquants (mobile). Registre pédagogique. */}
+        {missingScoreItems && missingScoreItems.length > 0 && (
+          <div className="rounded-lg border border-border bg-card/60 px-3 py-2.5">
+            <p className="text-[11px] uppercase tracking-wide text-muted-foreground mb-1.5">
+              Pour aller plus loin
+            </p>
+            <ul className="space-y-1">
+              {missingScoreItems.map((it) => (
+                <li key={it.key} className="flex items-baseline justify-between gap-2 text-xs">
+                  <span className="text-foreground/80 leading-snug">{it.label}</span>
+                  <span className="tabular-nums text-muted-foreground shrink-0">+{it.points}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+
+
         {/* Score breakdown collapsible (mobile) */}
         {scoreBreakdown && (
           <div className="rounded-lg border border-border overflow-hidden">
