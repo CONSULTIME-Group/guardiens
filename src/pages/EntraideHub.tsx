@@ -22,6 +22,7 @@ import { DEPT_NAMES, getDeptCode } from "@/lib/departments";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import MissionCardCover from "@/components/missions/MissionCardCover";
+import MissionBadgesReceived from "@/components/missions/MissionBadgesReceived";
 import ProximityFilter from "@/components/missions/ProximityFilter";
 import EntraideGeolocBanner from "@/components/missions/EntraideGeolocBanner";
 import { sanitizeUserTitle } from "@/lib/sanitizeTitle";
@@ -897,6 +898,7 @@ const EntraideHub = () => {
                                     <AvatarFallback className="text-[9px]">{initial}</AvatarFallback>
                                   </Avatar>
                                   <span className="truncate max-w-[10rem]">{authorName}</span>
+                                  <MissionBadgesReceived profileId={m.user_id} variant="compact" />
                                   {m.city && (
                                     <>
                                       <span aria-hidden="true">·</span>

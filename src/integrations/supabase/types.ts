@@ -6919,6 +6919,10 @@ export type Database = {
           user_id: string
         }[]
       }
+      get_mutual_aid_funnel_metrics: {
+        Args: { p_period_days?: number }
+        Returns: Json
+      }
       get_nearby_helpers: {
         Args: { p_max_radius_km?: number; p_max_results?: number }
         Returns: {

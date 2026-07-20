@@ -5,12 +5,17 @@ import { supabase } from "@/integrations/supabase/client";
 import { trackEvent } from "@/lib/analytics";
 
 /**
- * Section "Badges reçus en entraide" affichée sur les profils publics.
+ * Section « Écussons reçus en entraide » affichée sur les profils publics.
  * Alimentée par la vue `profile_mission_badges` qui agrège
  * `mission_feedbacks.badge_key` par receveur.
  *
+ * Deux variantes :
+ *  - default : bloc complet, en tête de section « Confiance ».
+ *  - compact : pilule discrète (total d'écussons) posable dans une carte de
+ *              réponse ou dans un feed sans polluer la hiérarchie visuelle.
+ *
  * Libellés éditoriaux : `super_voisin` est présenté « Personne en or »
- * (mot proscrit "voisin" évité) tout en conservant la clé DB.
+ * (mot proscrit « voisin » évité) tout en conservant la clé DB.
  */
 
 interface MissionBadgeMeta {
@@ -57,12 +62,13 @@ interface Row {
 
 interface Props {
   profileId: string;
-  /** Petit label visible côté "mon propre profil". */
+  /** Petit label visible côté « mon propre profil ». */
   ownerNote?: string;
   className?: string;
+  variant?: "default" | "compact";
 }
 
-const MissionBadgesReceived = ({ profileId, ownerNote, className = "" }: Props) => {
+const MissionBadgesReceived = ({ profileId, ownerNote, className = "", variant = "default" }: Props) => {
   const { data, isLoading } = useQuery({
     queryKey: ["profile_mission_badges", profileId],
     queryFn: async () => {
@@ -83,15 +89,33 @@ const MissionBadgesReceived = ({ profileId, ownerNote, className = "" }: Props) 
   );
 
   useEffect(() => {
-    if (badges.length > 0) {
+    if (variant === "default" && badges.length > 0) {
       trackEvent("profile_mission_badges_seen", {
         metadata: { profile_id: profileId, badges_count: badges.length },
       });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [badges.length, profileId]);
+  }, [badges.length, profileId, variant]);
 
   if (isLoading || badges.length === 0) return null;
+
+  if (variant === "compact") {
+    const total = badges.reduce((n, b) => n + (b.earned_count ?? 0), 0);
+    const label = `${total} écusson${total > 1 ? "s" : ""} d'entraide`;
+    const topBadge = [...badges].sort((a, b) => (b.earned_count ?? 0) - (a.earned_count ?? 0))[0];
+    const meta = BADGE_META[topBadge.badge_key];
+    const Icon = meta.icon;
+    return (
+      <span
+        className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[11px] font-medium ${meta.bgColor} ${meta.borderColor} ${className}`}
+        title={`${label} · dernier reçu ${meta.label}`}
+        aria-label={label}
+      >
+        <Icon className={`h-3 w-3 ${meta.iconColor}`} aria-hidden="true" />
+        <span className="tabular-nums">{total}</span>
+      </span>
+    );
+  }
 
   return (
     <section
@@ -104,7 +128,7 @@ const MissionBadgesReceived = ({ profileId, ownerNote, className = "" }: Props) 
           id="mission-badges-received-heading"
           className="text-sm font-semibold text-foreground"
         >
-          Badges reçus en entraide
+          Écussons reçus en entraide
         </h3>
       </div>
       {ownerNote && (
