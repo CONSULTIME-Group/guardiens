@@ -178,11 +178,33 @@ async function runEvaluation(
 
   const { data: activeJourneys } = await supabase
     .from('user_journeys')
-    .select('id, user_id, sequence_key, current_step, started_at, last_step_at')
+    .select('id, user_id, sequence_key, current_step, started_at, last_step_at, created_at')
     .eq('status', 'active')
     .limit(2000)
 
   const seqByKey = new Map(sequences.map((s) => [s.key, s]))
+
+  // Global frequency cap: at most 1 nurturing email per recipient per 48h,
+  // toutes séquences confondues. On construit un set des destinataires déjà
+  // servis récemment pour éviter une requête par journey.
+  const FREQ_WINDOW_MS = 48 * 3600_000
+  const freqSince = new Date(Date.now() - FREQ_WINDOW_MS).toISOString()
+  const recentlyServed = new Set<string>()
+  try {
+    const { data: recent, error: recentErr } = await supabase
+      .from('email_send_log')
+      .select('recipient_email')
+      .eq('status', 'sent')
+      .gte('created_at', freqSince)
+      .filter('metadata->>source', 'like', 'journey:%')
+      .limit(10000)
+    if (recentErr) throw recentErr
+    for (const r of (recent ?? []) as Array<{ recipient_email: string | null }>) {
+      if (r.recipient_email) recentlyServed.add(r.recipient_email.toLowerCase())
+    }
+  } catch (freqErr) {
+    console.warn('[frequency-cap] lookup failed, proceeding without global cap', freqErr)
+  }
 
   for (const j of activeJourneys ?? []) {
     if (stats.sent >= MAX_SENDS_PER_RUN) { stats.capped = true; break }
@@ -205,8 +227,20 @@ async function runEvaluation(
         continue
       }
 
-      // Time check (anchor on started_at, which already reflects anchor_field at enrollment)
-      const dueAt = new Date(j.started_at).getTime() + nextStep.delay_hours * 3600_000
+      // Délais RELATIFS entre étapes (évite les rafales à l'enrôlement tardif).
+      // Étape 1 : ancrée sur la date d'enrôlement (created_at de user_journeys).
+      // Étapes suivantes : last_step_at + max(48h, delay_N - delay_{N-1}).
+      const enrolledAtMs = new Date(j.created_at ?? j.started_at).getTime()
+      const prevStep = steps.find((s) => s.step_order === j.current_step)
+      let dueAt: number
+      if (!prevStep) {
+        dueAt = enrolledAtMs + Math.max(0, nextStep.delay_hours) * 3600_000
+      } else {
+        const rawGap = nextStep.delay_hours - prevStep.delay_hours
+        const gapHours = Math.max(48, rawGap)
+        const refMs = j.last_step_at ? new Date(j.last_step_at).getTime() : enrolledAtMs
+        dueAt = refMs + gapHours * 3600_000
+      }
       if (Date.now() < dueAt) continue
 
       // Exit condition check
