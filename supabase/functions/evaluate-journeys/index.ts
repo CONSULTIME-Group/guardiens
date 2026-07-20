@@ -25,6 +25,8 @@ type EnrollmentRule =
   | { type: 'owner_no_sit'; min_age_days?: number; window_days?: number }
   | { type: 'sitter_no_application'; min_age_days?: number; window_days?: number }
   | { type: 'active_referral'; min_age_days?: number; active_within_days?: number; window_days?: number }
+  | { type: 'sitter_missing_affinity'; min_age_days?: number }
+  | { type: 'owner_missing_affinity'; min_age_days?: number }
 
 interface Step {
   id: string
