@@ -54,7 +54,7 @@
       "eyebrow": "Mutual aid · Pet sitting · Home sitting",
       "title_main": "Pet sitting, small favours,",
       "title_accent": "the meeting.",
-      "lede": "Have your home and pets looked after by a local caretaker / pet & home sitter during your absences. Or ask for, and return, a small favour near you, with or without pets.",
+      "lede": "Guardiens connects pet owners with trusted sitters, everywhere in France. In-home house-sitting, local mutual help: your pets stay home, your home stays lived in, and you leave with peace of mind.",
       "lede_italic": "And behind every exchange, a meeting you wouldn't have looked for.",
       "cta_owner": "Publish my listing",
       "cta_sitter": "I want to sit",
@@ -89,7 +89,7 @@
         "tag": "Owners",
         "title": "Leave with peace of mind.",
         "text": "Someone local watches over your home and your pets. You meet them before leaving. You choose.",
-        "badge": "No subscription",
+        "badge": "Between individuals",
         "cta": "I am looking for a caretaker / pet & home sitter →"
       },
       "sitter": {
@@ -99,7 +99,7 @@
         "cta": "I want to sit →"
       },
       "mutual": {
-        "badge": "Free",
+        "badge": "Between locals",
         "tag": "Local mutual aid, independent of sitting",
         "title": "A small favour, an exchange.",
         "text": "Watering a vegetable garden, putting up a shelf, sharing a skill, visiting an isolated person. No sitting, no pet required, just locals helping each other.",
@@ -131,16 +131,16 @@
       "step3_text": "Once the sitting agreement is signed, your sitter moves in. You receive news. You return home, often with a new relationship.",
       "cta_owner": "Publish my listing",
       "cta_secondary": "Or start with a small favour →",
-      "footnote": "Registration in 2 minutes · No credit card required"
+      "footnote": "Registration in 2 minutes"
     },
     "aid": {
-      "eyebrow": "For everyone · No subscription · No money",
+      "eyebrow": "For everyone · Between locals",
       "title": "Dare to ask. Dare to propose.",
       "p1": "Before, there was someone local who would come by to water the garden, who looked after the dog, who came to fix a shutter. Someone to whom we offered a piece of cake or a small favour in return.",
       "p2": "This habit hasn't disappeared, we simply no longer dare to ask the first question. Guardiens is the pretext to ask it again, and along the way, live experiences that no organised trip could offer you.",
       "need_title": "« I need a small favour »",
       "need_text": "Your vegetable garden during holidays. Your chickens this weekend. Walking your dog after an operation. Asking for it isn't admitting a weakness, it's trusting.",
-      "need_footer": "No money, no subscription. That's the bet.",
+      "need_footer": "A service in return for a service. That's the bet.",
       "offer_title": "« I can give a little of my time »",
       "offer_text": "You know how to prune roses. You love dogs. You have two hours on Saturday morning. Propose, and live what you would never have experienced without this meeting.",
       "offer_footer": "That is how a local fabric reweaves itself.",
@@ -159,15 +159,15 @@
         "moving_help": "Help with moving",
         "sewing": "Learning sewing"
       },
-      "quote": "Village life hasn't disappeared. It was simply waiting for someone to dare the first question.",
+      "quote": "« Village life hasn't disappeared. It was simply waiting for someone to dare the first question. »",
       "cta": "Discover small favours"
     },
     "trust": {
       "eyebrow": "Trust & perimeter",
       "title": "Choose with confidence, one mile away or a thousand.",
-      "lede": "Four benchmarks for leaving peacefully: free for owners, a meeting before every sit, verified profiles, and a perimeter you set yourself.",
-      "p1_title": "Free for owners",
-      "p1_text": "Listing, applications, messaging: everything is free. No credit card requested.",
+      "lede": "Four benchmarks for peace of mind: a meeting before every sit, verified profiles, cross reviews, and a perimeter you set yourself.",
+      "p1_title": "Between members, no transaction",
+      "p1_text": "Between members, everything happens without a transaction: a service in return for a service.",
       "p2_title": "Meeting before every sit",
       "p2_text": "A coffee, a visit of the accommodation, a tour of the instructions. Trust isn't guessed: it is built, face to face.",
       "p3_title": "Documented profiles, cross-reviews",
@@ -349,7 +349,7 @@
           "label": "Guardiens house-sitting",
           "pet_home": "Yes",
           "house_lived": "Yes, at all times",
-          "cost": "No fees between members",
+          "cost": "Between members, no transaction",
           "human": "Prior meeting and mutual reviews"
         },
         "pension": {

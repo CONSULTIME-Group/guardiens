@@ -54,7 +54,7 @@
       "eyebrow": "Ayuda mutua · Cuidado de mascotas · Home sitting",
       "title_main": "El cuidado de mascotas, el pequeño favor,",
       "title_accent": "el encuentro.",
-      "lede": "Haga cuidar su casa y sus mascotas por un cuidador de la zona durante sus ausencias. O pida, y devuelva, un pequeño favor cerca de usted, con o sin mascotas.",
+      "lede": "Guardiens conecta a propietarios de animales con cuidadores de confianza, en toda Francia. House-sitting a domicilio, ayuda mutua entre gente de la zona: sus animales se quedan en casa, su casa sigue habitada y usted parte tranquilo.",
       "lede_italic": "Y detrás de cada intercambio, un encuentro que no habría buscado.",
       "cta_owner": "Publicar mi anuncio",
       "cta_sitter": "Quiero ser cuidador",
@@ -89,7 +89,7 @@
         "tag": "Propietarios",
         "title": "Partir con tranquilidad.",
         "text": "Alguien de la zona cuida de su casa y de sus mascotas. Usted se conoce con la persona antes de partir. Usted elige.",
-        "badge": "Sin suscripción",
+        "badge": "Entre particulares",
         "cta": "Busco un cuidador →"
       },
       "sitter": {
@@ -99,7 +99,7 @@
         "cta": "Quiero ser cuidador →"
       },
       "mutual": {
-        "badge": "Gratis",
+        "badge": "Entre gente de la zona",
         "tag": "Ayuda local, independiente del cuidado",
         "title": "Un pequeño favor, un intercambio.",
         "text": "Regar un huerto, montar una estantería, compartir una habilidad, visitar a una persona aislada. Sin necesidad de cuidado ni de mascotas, solo vecinos que se ayudan mutuamente.",
@@ -131,16 +131,16 @@
       "step3_text": "Una vez firmado el acuerdo de cuidado, su cuidador se instala. Usted recibe noticias. Regresará a casa, a menudo con una nueva relación.",
       "cta_owner": "Publicar mi anuncio",
       "cta_secondary": "O comenzar con un pequeño favor →",
-      "footnote": "Registro en 2 minutos · Sin tarjeta bancaria"
+      "footnote": "Registro en 2 minutos"
     },
     "aid": {
-      "eyebrow": "Para todos · Sin suscripción · Sin dinero",
+      "eyebrow": "Para todos · Entre gente de la zona",
       "title": "Atrévase a pedir. Atrévase a proponer.",
       "p1": "Antes, siempre había alguien del barrio que pasaba a regar el jardín, que cuidaba al perro o que venía a arreglar una persiana. Alguien a quien se le ofrecía un trozo de pastel o una ayuda a cambio.",
       "p2": "Esta costumbre no ha desaparecido, simplemente ya no nos atrevemos a hacer la primera pregunta. Guardiens es el pretexto para volver a preguntarlo y, de paso, vivir experiencias que ningún viaje organizado le ofrecerá.",
       "need_title": "«Necesito un pequeño favor»",
       "need_text": "Su huerto durante las vacaciones. Sus gallinas este fin de semana. Pasear a su perro tras una operación. Pedirlo no es confesar una debilidad, es confiar.",
-      "need_footer": "Sin dinero, sin suscripción. Esa es la apuesta.",
+      "need_footer": "Un servicio a cambio de un servicio. Esa es la apuesta.",
       "offer_title": "«Puedo dedicar un poco de mi tiempo»",
       "offer_text": "Usted sabe podar rosales. Le encantan los perros. Tiene dos horas el sábado por la mañana. Proponga, y viva lo que nunca habría vivido sin ese encuentro.",
       "offer_footer": "Así es como se reconstruye el tejido local.",
@@ -159,15 +159,15 @@
         "moving_help": "Ayuda con una mudanza",
         "sewing": "Aprender costura"
       },
-      "quote": "La vida de pueblo no ha desaparecido. Simplemente esperaba a que alguien se atreviera a hacer la primera pregunta.",
+      "quote": "« La vida de pueblo no ha desaparecido. Simplemente esperaba a que alguien se atreviera a hacer la primera pregunta. »",
       "cta": "Descubrir los pequeños favores"
     },
     "trust": {
       "eyebrow": "Confianza y perímetro",
       "title": "Elegir con confianza, a un kilómetro como a mil.",
-      "lede": "Cuatro puntos de referencia para partir tranquilo: gratis para los propietarios, encuentro antes de cada cuidado, perfiles verificados y un perímetro que usted mismo fija.",
-      "p1_title": "Gratis para los propietarios",
-      "p1_text": "Anuncios, candidaturas, mensajería: todo es gratis. No se solicita tarjeta bancaria.",
+      "lede": "Cuatro puntos de referencia para partir tranquilo: encuentro antes de cada cuidado, perfiles verificados, opiniones cruzadas y un perímetro que usted mismo fija.",
+      "p1_title": "Entre miembros, sin transacción",
+      "p1_text": "Entre miembros, todo ocurre sin transacción: un servicio a cambio de un servicio.",
       "p2_title": "Encuentro antes de cada cuidado",
       "p2_text": "Un café, una visita a la vivienda, un repaso de las instrucciones. La confianza no se supone: se construye mirándose a los ojos.",
       "p3_title": "Perfiles documentados, reseñas cruzadas",
@@ -349,7 +349,7 @@
           "label": "House-sitting Guardiens",
           "pet_home": "Sí",
           "house_lived": "Sí, de forma permanente",
-          "cost": "Sin costes entre miembros",
+          "cost": "Entre miembros, sin transacción",
           "human": "Encuentro previo y valoraciones mutuas"
         },
         "pension": {

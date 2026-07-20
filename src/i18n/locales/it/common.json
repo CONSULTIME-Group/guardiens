@@ -54,7 +54,7 @@
       "eyebrow": "Reciproco aiuto · Cura degli animali · Home sitting",
       "title_main": "La cura degli animali, il piccolo aiuto,",
       "title_accent": "l'incontro.",
-      "lede": "Faccia custodire la Sua casa e i Suoi animali da un custode della zona durante le Sue assenze. Oppure chieda e offra piccoli aiuti vicino a Lei, con o senza animali.",
+      "lede": "Guardiens mette in contatto proprietari di animali e custodi di fiducia, in tutta la Francia. House-sitting a domicilio, aiuto reciproco tra persone della zona: i Suoi animali restano a casa, la Sua casa resta abitata, e Lei parte sereno.",
       "lede_italic": "E dietro ogni scambio, un incontro che non avreste altrimenti cercato.",
       "cta_owner": "Pubblicare il mio annuncio",
       "cta_sitter": "Voglio fare il custode",
@@ -89,7 +89,7 @@
         "tag": "Proprietari",
         "title": "Partire con la mente leggera.",
         "text": "Qualcuno della zona veglia sulla Sua casa e sui Suoi animali. Potrete incontrarvi prima della partenza. È Lei a scegliere.",
-        "badge": "Senza abbonamento",
+        "badge": "Tra privati",
         "cta": "Cerco un custode →"
       },
       "sitter": {
@@ -99,7 +99,7 @@
         "cta": "Voglio fare il custode →"
       },
       "mutual": {
-        "badge": "Gratuito",
+        "badge": "Tra persone della zona",
         "tag": "Aiuto locale, indipendente dalla custodia",
         "title": "Un piccolo aiuto, uno scambio.",
         "text": "Innaffiare l'orto, montare uno scaffale, condividere una competenza, fare visita a una persona isolata. Nessuna custodia, nessun animale necessario, solo persone della zona che si aiutano a vicenda.",
@@ -131,16 +131,16 @@
       "step3_text": "Firmato l'accordo di custodia, il Suo custode si stabilisce. Riceverà notizie. Tornerà a casa, spesso con una nuova amicizia.",
       "cta_owner": "Pubblicare il mio annuncio",
       "cta_secondary": "O iniziare con un piccolo aiuto →",
-      "footnote": "Iscrizione in 2 minuti · Senza carta di credito"
+      "footnote": "Iscrizione in 2 minuti"
     },
     "aid": {
-      "eyebrow": "Per tutti · Senza abbonamento · Senza denaro",
+      "eyebrow": "Per tutti · Tra persone della zona",
       "title": "Osi chiedere. Osi proporre.",
       "p1": "Un tempo c'era qualcuno della zona che passava a innaffiare il giardino, che badava al cane, che veniva a riparare una persiana. Qualcuno a cui si offriva una fetta di torta o un aiuto in cambio.",
       "p2": "Questa abitudine non è scomparsa, semplicemente non osiamo più fare la prima domanda. Guardiens è il pretesto per rifarla e, nel frattempo, vivere esperienze che nessun viaggio organizzato Le offrirà.",
       "need_title": "«Ho bisogno di un piccolo aiuto»",
       "need_text": "Il Suo orto durante le vacanze. Le Sue galline questo fine settimana. Portare a spasso il Suo cane dopo un'operazione. Chiederlo non è ammettere una debolezza, è dare fiducia.",
-      "need_footer": "Senza denaro, senza abbonamento. Questa è la sfida.",
+      "need_footer": "Un servizio in cambio di un servizio. Questa è la sfida.",
       "offer_title": "«Posso dedicare un po' del mio tempo»",
       "offer_text": "Sa potare i rosai. Adora i cani. Ha due ore sabato mattina. Proponga, e viva ciò che non avrebbe mai vissuto senza quell'incontro.",
       "offer_footer": "È così che si ricuce il tessuto locale.",
@@ -159,15 +159,15 @@
         "moving_help": "Aiuto per trasloco",
         "sewing": "Imparare il cucito"
       },
-      "quote": "La vita di villaggio non è scomparsa. Aspettava solo che qualcuno osasse fare la prima domanda.",
+      "quote": "« La vita di villaggio non è scomparsa. Aspettava solo che qualcuno osasse fare la prima domanda. »",
       "cta": "Scoprire i piccoli aiuti"
     },
     "trust": {
       "eyebrow": "Fiducia & raggio d'azione",
       "title": "Scegliere con fiducia, a un chilometro come a mille.",
-      "lede": "Quattro riferimenti per partire tranquilli: gratuito per i proprietari, incontro prima di ogni custodia, profili verificati e un raggio d'azione stabilito da Lei.",
-      "p1_title": "Gratuito per i proprietari",
-      "p1_text": "Annuncio, candidature, messaggistica: tutto è gratuito. Nessuna carta di credito richiesta.",
+      "lede": "Quattro riferimenti per partire tranquilli: incontro prima di ogni custodia, profili verificati, recensioni incrociate e un raggio d'azione stabilito da Lei.",
+      "p1_title": "Tra membri, senza transazione",
+      "p1_text": "Tra membri, tutto avviene senza transazione: un servizio in cambio di un servizio.",
       "p2_title": "Incontro prima di ogni custodia",
       "p2_text": "Un caffè, una visita dell'alloggio, un giro delle istruzioni. La fiducia non si indovina: si costruisce guardandosi negli occhi.",
       "p3_title": "Profili documentati, recensioni incrociate",
@@ -349,7 +349,7 @@
           "label": "House-sitting Guardiens",
           "pet_home": "Sì",
           "house_lived": "Sì, in permanenza",
-          "cost": "Nessun costo tra membri",
+          "cost": "Tra membri, senza transazione",
           "human": "Incontro preliminare e recensioni reciproche"
         },
         "pension": {
