@@ -364,6 +364,12 @@ const OwnerDashboard = () => {
               <CommunityPulseBanner userId={user?.id} />
             </div>
 
+            {/* 1bis. Activation affinité — profils anciens sans presence_expected */}
+            {!isNewOwner && (
+              <OwnerAffinityBanner context="dashboard_owner_rail" />
+            )}
+
+
             {/* 2. Votre maison */}
             <div className="">
               <HouseStoryRailCard
