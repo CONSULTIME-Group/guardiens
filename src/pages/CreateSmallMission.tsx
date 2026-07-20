@@ -190,6 +190,14 @@ const CreateSmallMission = () => {
     }
   };
 
+  /** True si titre + description sont mot pour mot ceux d'un template. */
+  const isUnchangedTemplate = useMemo(() => {
+    if (!appliedTemplateId) return false;
+    const tpl = MISSION_TEMPLATES.find((x) => x.id === appliedTemplateId);
+    if (!tpl) return false;
+    return title.trim() === tpl.title.trim() && description.trim() === tpl.description.trim();
+  }, [appliedTemplateId, title, description]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user) return;
@@ -199,8 +207,6 @@ const CreateSmallMission = () => {
       toast({ title: tp("toast_required_title"), description: tp("toast_required_desc"), variant: "destructive" });
       return;
     }
-    // Garde-fous côté client : évite d'insérer une annonce trop courte
-    // même si l'utilisateur skippe la validation Step 1 (retour arrière + submit).
     if (title.trim().length < MIN_TITLE_LEN || description.trim().length < MIN_DESC_LEN) {
       toast({
         title: "Annonce trop courte",
@@ -212,13 +218,20 @@ const CreateSmallMission = () => {
       setDescTouched(true);
       return;
     }
+    // Garde-fou "modèle non personnalisé" (pattern brouillon Alma).
+    if (isUnchangedTemplate) {
+      setConfirmUnchangedOpen(true);
+      return;
+    }
+    await performSubmit();
+  };
+
+  const performSubmit = async () => {
+    if (!user) return;
     setSubmitting(true);
     let coords: { lat: number; lng: number } | null = null;
     try { coords = await geocodeCity(city.trim()); } catch { coords = null; }
 
-    // Titre nettoyé (capitalisation, espaces, fautes fréquentes) + retrait
-    // silencieux des emojis (charte). La garde serveur `validate_small_mission`
-    // reste autoritaire.
     const cleanTitle = stripEmojis(sanitizeUserTitle(title) || title.trim());
     const cleanDescription = stripEmojis(description);
     const cleanExchange = stripEmojis(exchangeOffer);
@@ -244,6 +257,16 @@ const CreateSmallMission = () => {
 
     setSubmitting(false);
     if (error) {
+      const hint = (error as any)?.hint || "";
+      const msg = String(error.message || "");
+      if (hint === "profile_incomplete" || msg.includes("profile_incomplete")) {
+        setEligibilityReason("profile_incomplete");
+        return;
+      }
+      if (hint === "account_not_active" || msg.includes("account_not_active")) {
+        setEligibilityReason("account_not_active");
+        return;
+      }
       toast({ title: tp("toast_error_title"), description: error.message, variant: "destructive" });
       return;
     }
