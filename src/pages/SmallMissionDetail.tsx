@@ -1460,12 +1460,26 @@ const SmallMissionDetail = () => {
 
               {/* Composer inline type commentaire */}
               {!isAuthor && mission.status === "open" && canApplyMissions && !hasResponded && (
+                pendingResponses.length >= 5 ? (
+                  <div className="rounded-2xl border border-warning/40 bg-warning-soft/40 p-4 text-sm text-foreground/85">
+                    <p className="font-medium">Coup de main temporairement fermé aux nouvelles réponses.</p>
+                    <p className="mt-1 text-muted-foreground">
+                      5 personnes ont déjà proposé leur aide. Une place se libérera si l'auteur en décline une.
+                    </p>
+                  </div>
+                ) : (
                 <section
                   id="composer"
-                  className="scroll-mt-24"
+                  className="scroll-mt-24 space-y-3"
                   aria-labelledby="composer-heading"
                 >
                   <h3 id="composer-heading" className="sr-only">Publier une réponse à la mission</h3>
+                  {pendingResponses.length > 0 && (
+                    <p className="text-xs text-muted-foreground">
+                      {pendingResponses.length} personne{pendingResponses.length > 1 ? "s" : ""} {pendingResponses.length > 1 ? "ont" : "a"} déjà proposé son aide (5 maximum).
+                    </p>
+                  )}
+                  {identityRecommended && <IdentityRecommendedHint />}
                   <form
                     className="bg-card border border-border rounded-2xl p-3 md:p-4 flex items-start gap-3"
                     onSubmit={(e) => { e.preventDefault(); handleRespond(); }}
@@ -1518,9 +1532,9 @@ const SmallMissionDetail = () => {
                       )}
                       <div className="flex items-center justify-between gap-2 mt-2">
                         <span id="composer-help" className={`text-[11px] ${message.length > 450 ? "text-warning" : "text-muted-foreground"}`}>
-                          <span aria-hidden="true">{message.length}/{MAX_MESSAGE_LEN} · Visible par tout le monde</span>
+                          <span aria-hidden="true">{message.length}/{MAX_MESSAGE_LEN} · Visible uniquement par l'auteur</span>
                           <span className="sr-only">
-                            {message.length} caractères sur {MAX_MESSAGE_LEN}. Visible par tout le monde. Astuce : Ctrl + Entrée pour publier.
+                            {message.length} caractères sur {MAX_MESSAGE_LEN}. Visible uniquement par l'auteur de la mission. Astuce : Ctrl + Entrée pour publier.
                           </span>
                         </span>
                         <Button
@@ -1538,6 +1552,7 @@ const SmallMissionDetail = () => {
                     </div>
                   </form>
                 </section>
+                )
               )}
 
 
