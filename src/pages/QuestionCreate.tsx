@@ -63,9 +63,10 @@ const QuestionCreate = () => {
       .single();
     setSubmitting(false);
     if (error || !data) {
-      const reason = detectEligibilityReason(error);
-      if (reason) {
-        setEligibilityReason(reason);
+      const hint = (error as any)?.hint || "";
+      const msg = String(error?.message || "");
+      if (hint === "account_not_active" || msg.includes("account_not_active")) {
+        toast.error("Compte non actif. Contactez le support pour rétablir l'accès à l'entraide.");
         return;
       }
       toast.error("Impossible de publier votre question.");
