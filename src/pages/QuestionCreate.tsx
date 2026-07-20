@@ -13,6 +13,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { trackEvent } from "@/lib/analytics";
 import { COMMUNITY_CATEGORIES, type CommunityCategory } from "@/lib/communityCategories";
+import MissionEligibilityDialog, { type MissionEligibilityReason } from "@/components/missions/MissionEligibilityDialog";
+import { detectEligibilityReason } from "@/lib/eligibilityError";
 
 const schema = z.object({
   category: z.enum(["animaux", "jardin", "maison", "garde", "autre"]),
