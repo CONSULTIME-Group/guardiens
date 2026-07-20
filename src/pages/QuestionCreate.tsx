@@ -13,6 +13,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { trackEvent } from "@/lib/analytics";
 import { COMMUNITY_CATEGORIES, type CommunityCategory } from "@/lib/communityCategories";
+import MissionEligibilityDialog, { type MissionEligibilityReason } from "@/components/missions/MissionEligibilityDialog";
+import { detectEligibilityReason } from "@/lib/eligibilityError";
 
 const schema = z.object({
   category: z.enum(["animaux", "jardin", "maison", "garde", "autre"]),
@@ -36,6 +38,7 @@ const QuestionCreate = () => {
   const [body, setBody] = useState("");
   const [city, setCity] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [eligibilityReason, setEligibilityReason] = useState<MissionEligibilityReason | null>(null);
 
   const submit = async () => {
     if (!user) {
@@ -62,6 +65,11 @@ const QuestionCreate = () => {
       .single();
     setSubmitting(false);
     if (error || !data) {
+      const reason = detectEligibilityReason(error);
+      if (reason) {
+        setEligibilityReason(reason);
+        return;
+      }
       toast.error("Impossible de publier votre question.");
       return;
     }
@@ -143,6 +151,14 @@ const QuestionCreate = () => {
           </div>
         </section>
       </div>
+      <MissionEligibilityDialog
+        open={eligibilityReason !== null}
+        onOpenChange={(v) => { if (!v) setEligibilityReason(null); }}
+        reason={eligibilityReason}
+        userId={user?.id ?? null}
+        role="owner"
+        context="publish"
+      />
     </>
   );
 };

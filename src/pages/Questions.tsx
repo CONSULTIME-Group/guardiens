@@ -74,7 +74,9 @@ const Questions = () => {
             </ul>
           ) : (
             <div className="p-8 rounded-2xl border border-dashed border-border bg-accent/20 text-center">
-              <p className="font-heading text-lg text-foreground/85">Aucune question dans cette catégorie.</p>
+              <p className="font-heading text-lg text-foreground/85">
+                Aucune question pour l'instant. Les gens du coin attendent la première.
+              </p>
               <Link to="/questions/nouvelle" className="inline-block mt-4">
                 <Button>Poser la première question</Button>
               </Link>

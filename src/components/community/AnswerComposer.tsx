@@ -6,6 +6,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { trackEvent } from "@/lib/analytics";
+import MissionEligibilityDialog, { type MissionEligibilityReason } from "@/components/missions/MissionEligibilityDialog";
+import { detectEligibilityReason } from "@/lib/eligibilityError";
 
 const schema = z.object({
   body: z.string().trim().min(10, "10 caractères minimum").max(4000, "4000 caractères maximum"),
@@ -23,6 +25,7 @@ const AnswerComposer = ({ questionId, parentAnswerId = null, isFirstAnswer, onPo
   const { user } = useAuth();
   const [body, setBody] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [eligibilityReason, setEligibilityReason] = useState<MissionEligibilityReason | null>(null);
 
   const submit = async () => {
     if (!user) {
@@ -43,6 +46,11 @@ const AnswerComposer = ({ questionId, parentAnswerId = null, isFirstAnswer, onPo
     });
     setSubmitting(false);
     if (error) {
+      const reason = detectEligibilityReason(error);
+      if (reason) {
+        setEligibilityReason(reason);
+        return;
+      }
       toast.error("Impossible de publier votre réponse.");
       return;
     }
@@ -69,6 +77,14 @@ const AnswerComposer = ({ questionId, parentAnswerId = null, isFirstAnswer, onPo
           {submitting ? "Publication…" : "Publier ma réponse"}
         </Button>
       </div>
+      <MissionEligibilityDialog
+        open={eligibilityReason !== null}
+        onOpenChange={(v) => { if (!v) setEligibilityReason(null); }}
+        reason={eligibilityReason}
+        userId={user?.id ?? null}
+        role="sitter"
+        context="respond"
+      />
     </div>
   );
 };
