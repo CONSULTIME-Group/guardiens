@@ -38,6 +38,11 @@ interface ProfileSidebarProps {
   scoreBreakdown?: ReactNode;
   /** Slot optionnel rendu uniquement sur desktop (lg+), sous le lien profil public. */
   trustSlot?: ReactNode;
+  /**
+   * Liste calme des items manquants (label + points), affichée sous la jauge.
+   * Registre charte : gris, pas de rouge, pas d'icône alerte.
+   */
+  missingScoreItems?: Array<{ key: string; label: string; points: number; hint?: string }>;
 }
 
 const ProfileSidebar = ({
