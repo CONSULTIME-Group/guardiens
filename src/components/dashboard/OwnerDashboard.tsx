@@ -32,6 +32,7 @@ import OwnerFirstNBAGardiens from "./OwnerFirstNBAGardiens";
 import CommunityPulseBanner from "./shared/CommunityPulseBanner";
 import HouseStoryRailCard from "./owner/HouseStoryRailCard";
 import AlmaRailWhisper from "./sitter/AlmaRailWhisper";
+import OwnerAffinityBanner from "@/components/matching/OwnerAffinityBanner";
 
 import { useOwnerPriorityAction } from "@/hooks/useOwnerPriorityAction";
 import { useOwnerPrimaryAction } from "@/hooks/useOwnerPrimaryAction";
