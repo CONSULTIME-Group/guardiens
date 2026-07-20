@@ -712,14 +712,6 @@ const CreateSmallMission = () => {
         </div>
       )}
 
-      <MissionEligibilityDialog
-        open={!!eligibilityReason}
-        onOpenChange={(v) => { if (!v) setEligibilityReason(null); }}
-        reason={eligibilityReason}
-        userId={user?.id ?? null}
-        role={((user as any)?.role === "owner" ? "owner" : "sitter")}
-        context="publish"
-      />
 
       <Dialog open={confirmUnchangedOpen} onOpenChange={setConfirmUnchangedOpen}>
         <DialogContent className="max-w-md">
