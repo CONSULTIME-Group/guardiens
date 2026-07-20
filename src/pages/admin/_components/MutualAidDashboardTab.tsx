@@ -204,6 +204,21 @@ const MutualAidDashboardTab = () => {
 
     setDormant((dormantRes.data || []) as DormantMission[]);
     setAutoClosed((autoRes.data || []) as AutoClosedMission[]);
+
+    // Funnel — s'appuie sur la RPC dédiée. Silencieux si erreur pour ne pas
+    // casser le reste du dashboard.
+    try {
+      const periodDays = range === "7d" ? 7 : range === "30d" ? 30 : 90;
+      const { data: funnelData, error: funnelErr } = await supabase.rpc(
+        "get_mutual_aid_funnel_metrics" as any,
+        { p_period_days: periodDays },
+      );
+      if (!funnelErr && funnelData) setFunnel(funnelData as unknown as FunnelMetrics);
+      else if (funnelErr) console.warn("[MutualAidDashboard] funnel rpc failed", funnelErr.message);
+    } catch (e) {
+      console.warn("[MutualAidDashboard] funnel rpc threw", e);
+    }
+
     setLoading(false);
   }, [range]);
 
