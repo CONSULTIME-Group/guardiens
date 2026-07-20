@@ -1257,69 +1257,7 @@ export default function PublicSitterProfile() {
               );
             })()}
 
-            {/* CTA primaire, visible immédiatement */}
-            {showCTA && (
-              <div className="mt-4 md:mt-5 flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5">
-                {isOwn ? (
-                  <button
-                    type="button"
-                    disabled
-                    title="Ceci est votre profil public, utilisez « Modifier mon profil » pour le mettre à jour."
-                    aria-disabled="true"
-                    className="inline-flex items-center justify-center bg-muted text-muted-foreground rounded-lg px-6 py-3 text-sm font-medium flex-1 sm:flex-initial cursor-not-allowed opacity-70"
-                  >
-                    Aperçu de votre profil
-                  </button>
-                ) : !isAuthenticated ? (
-                  <Link
-                    to={`/inscription?redirect=${encodeURIComponent(`/gardiens/${id}`)}`}
-                    className="inline-flex items-center justify-center bg-primary text-primary-foreground rounded-lg px-6 py-3 text-sm font-medium hover:bg-primary/90 transition-colors flex-1 sm:flex-initial"
-                  >
-                    S'inscrire pour contacter {firstName}
-                  </Link>
-                ) : isOwner ? (
-                  <button
-                    onClick={async () => {
-                      if (!auth?.user?.id || !id) return;
-                      const { startConversation } = await import("@/lib/conversation");
-                      const { conversationId, error } = await startConversation({
-                        otherUserId: id,
-                        context: "sitter_inquiry",
-                      });
-                      if (conversationId) {
-                        navigate(`/messages?c=${conversationId}`);
-                      } else if (error?.includes("propositions spontanées")) {
-                        const { toast } = await import("sonner");
-                        toast.error("Ce membre ne reçoit pas de propositions spontanées.");
-                      } else {
-                        const { toast } = await import("sonner");
-                        toast.error("Impossible d'ouvrir la conversation.");
-                      }
-                    }}
-                    className="inline-flex items-center justify-center bg-primary text-primary-foreground rounded-lg px-6 py-3 text-sm font-medium hover:bg-primary/90 transition-colors flex-1 sm:flex-initial cursor-pointer"
-                  >
-                    Contacter {firstName}
-                  </button>
-                ) : isSitter && id ? (
-                  <button
-                    type="button"
-                    onClick={() =>
-                      setActivateProprioIntent({
-                        recipientId: id,
-                        recipientFirstName: firstName,
-                        conversationContext: "sitter_inquiry",
-                      })
-                    }
-                    className="inline-flex items-center justify-center bg-primary text-primary-foreground rounded-lg px-6 py-3 text-sm font-medium hover:bg-primary/90 transition-colors flex-1 sm:flex-initial cursor-pointer"
-                  >
-                    Contacter {firstName}
-                  </button>
-                ) : null}
-                <p className="text-[11px] sm:text-xs text-muted-foreground font-body sm:ml-2 self-center text-center sm:text-left leading-snug break-words">
-                  {isOwn ? "Vous voyez cette page comme un visiteur." : "Contact direct, sans intermédiaire."}
-                </p>
-              </div>
-            )}
+            {/* CTA primaire déplacé dans le hero (vague 37) — pas de doublon ici. */}
           </section>
 
           {/* ── B. CONTENU EN ONGLETS (desktop) / FLUX (mobile) ───────── */}
