@@ -534,22 +534,59 @@ async function enrollForSequence(
 
   if (!candidates.length) return 0
 
-  // For recurring sequences (e.g. monthly referral boost), only dedup against
-  // journeys started within the last (window_days + active_within_days) days so
-  // users can be re-enrolled later. Default behaviour blocks any existing journey.
-  const recurring = rule.type === 'active_referral'
-  let existingQ = supabase
-    .from('user_journeys')
-    .select('user_id, started_at')
-    .eq('sequence_key', seq.key)
-    .in('user_id', candidates.map((c) => c.id))
-  if (recurring) {
-    const recurDays = ((rule as { active_within_days?: number }).active_within_days ?? 30) +
-      ((rule as { window_days?: number }).window_days ?? 30)
-    existingQ = existingQ.gte('started_at', new Date(nowMs - recurDays * 86400_000).toISOString())
+  // Onboarding double-enrollment guard : un profil 'both' ne doit pas être
+  // enrôlé dans onboarding-owner ET onboarding-sitter. Si l'autre séquence
+  // d'onboarding a déjà une journey (tout statut) pour ce user, on skip.
+  if (seq.key === 'onboarding-owner' || seq.key === 'onboarding-sitter') {
+    const otherKey = seq.key === 'onboarding-owner' ? 'onboarding-sitter' : 'onboarding-owner'
+    const alreadyOther = new Set<string>()
+    const idsForOnboarding = candidates.map((c) => c.id)
+    for (let i = 0; i < idsForOnboarding.length; i += 100) {
+      const chunk = idsForOnboarding.slice(i, i + 100)
+      const { data, error } = await supabase
+        .from('user_journeys')
+        .select('user_id')
+        .eq('sequence_key', otherKey)
+        .in('user_id', chunk)
+      if (error) {
+        console.error('[enrollment] onboarding cross-check failed', seq.key, error.message)
+        return 0
+      }
+      for (const r of (data ?? []) as Array<{ user_id: string }>) alreadyOther.add(r.user_id)
+    }
+    candidates = candidates.filter((c) => !alreadyOther.has(c.id))
+    if (!candidates.length) return 0
   }
-  const { data: existing } = await existingQ
-  const existingSet = new Set((existing ?? []).map((e: { user_id: string }) => e.user_id))
+
+  // Vérification des journeys existantes, chunkée par 100 pour éviter
+  // les URL trop longues qui faisaient silencieusement échouer la dédup.
+  // Tout échec est fatal : on n'insère rien, plutôt que risquer un ré-enrôlement massif.
+  const recurring = rule.type === 'active_referral'
+  const recurDays = recurring
+    ? ((rule as { active_within_days?: number }).active_within_days ?? 30) +
+      ((rule as { window_days?: number }).window_days ?? 30)
+    : 0
+  const recurThreshold = recurring
+    ? new Date(nowMs - recurDays * 86400_000).toISOString()
+    : null
+
+  const existingSet = new Set<string>()
+  const allIds = candidates.map((c) => c.id)
+  for (let i = 0; i < allIds.length; i += 100) {
+    const chunk = allIds.slice(i, i + 100)
+    let q = supabase
+      .from('user_journeys')
+      .select('user_id, started_at')
+      .eq('sequence_key', seq.key)
+      .in('user_id', chunk)
+    if (recurThreshold) q = q.gte('started_at', recurThreshold)
+    const { data, error } = await q
+    if (error) {
+      console.error('[enrollment] existing-lookup failed', seq.key, error.message, 'chunk', i)
+      return 0
+    }
+    for (const r of (data ?? []) as Array<{ user_id: string }>) existingSet.add(r.user_id)
+  }
 
   const toInsert = candidates
     .filter((c) => !existingSet.has(c.id))
@@ -564,12 +601,27 @@ async function enrollForSequence(
   if (!toInsert.length) return 0
   if (dryRun) return toInsert.length
 
+  // Filet de sécurité : l'index unique partiel (user_id, sequence_key WHERE status='active')
+  // rejettera tout doublon résiduel. En cas de violation, on retombe sur un insert
+  // individuel row-par-row pour ne perdre que la ligne fautive.
   const { error } = await supabase.from('user_journeys').insert(toInsert)
-  if (error) {
-    console.error('[enrollment] insert failed', seq.key, error.message)
-    return 0
+  if (!error) return toInsert.length
+
+  if (error.code === '23505') {
+    console.warn('[enrollment] bulk hit unique index, falling back to per-row', seq.key)
+    let ok = 0
+    for (const row of toInsert) {
+      const { error: rowErr } = await supabase.from('user_journeys').insert(row)
+      if (!rowErr) ok++
+      else if (rowErr.code !== '23505') {
+        console.error('[enrollment] row insert failed', seq.key, rowErr.message)
+      }
+    }
+    return ok
   }
-  return toInsert.length
+
+  console.error('[enrollment] insert failed', seq.key, error.message)
+  return 0
 }
 
 // ---------------------------------------------------------------------------
