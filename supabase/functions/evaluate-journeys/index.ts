@@ -826,6 +826,20 @@ async function checkExitCondition(
       ])
       return ((posted.count ?? 0) + (responded.count ?? 0)) > 0
     }
+    case 'sitter_affinity_ready': {
+      const { data } = await supabase.from('sitter_profiles')
+        .select('animal_types, work_during_sit').eq('user_id', userId).maybeSingle()
+      if (!data) return false
+      const hasAnimals = Array.isArray(data.animal_types) && data.animal_types.length > 0
+      const hasWork = !!data.work_during_sit && data.work_during_sit !== ''
+      return hasAnimals && hasWork
+    }
+    case 'owner_affinity_ready': {
+      const { data } = await supabase.from('owner_profiles')
+        .select('presence_expected').eq('user_id', userId).maybeSingle()
+      if (!data) return false
+      return !!data.presence_expected && data.presence_expected !== ''
+    }
     default:
       return false
   }
