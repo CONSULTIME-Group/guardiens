@@ -260,7 +260,7 @@ const CreateSmallMission = () => {
       const hint = (error as any)?.hint || "";
       const msg = String(error.message || "");
       if (hint === "account_not_active" || msg.includes("account_not_active")) {
-        setEligibilityReason("account_not_active");
+        toast({ title: "Compte non actif", description: "Contactez le support pour rétablir l'accès à l'entraide.", variant: "destructive" });
         return;
       }
       toast({ title: tp("toast_error_title"), description: error.message, variant: "destructive" });
