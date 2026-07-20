@@ -854,13 +854,14 @@ export default function PublicSitterProfile() {
   const descBase = `${firstName} garde vos ${animalsForDesc} ${cityForDesc}.`;
   const pageDesc = (descBase + (trustForDesc ? ` ${trustForDesc}.` : '')).slice(0, 160);
   const pageUrl = buildAbsoluteUrl(`/gardiens/${id}`);
-  // Politique : profils riches indexables (≥1 avis publié OU ≥1 garde réalisée),
-  // identité vérifiée et bio substantielle. Sinon noindex (RGPD + thin content).
+  // Politique noindex (assouplie le 20/07/2026) : un profil est indexable dès lors
+  // qu'il présente une bio substantielle (>= 80 caractères) ET au moins un signal
+  // de confiance visuelle ou identitaire (identité vérifiée OU au moins une photo
+  // de galerie). Objectif : rouvrir le canal SEO profils sans exposer les fiches
+  // vides. Ancienne règle (trop stricte) : (avis>=1 OU garde>=1) ET identité ET bio.
   const hasSubstantialBio = ((bio || motivation || "") as string).length >= 80;
-  const isRichProfile =
-    (reviewCount >= 1 || completedSits >= 1) &&
-    !!profile?.identity_verified &&
-    hasSubstantialBio;
+  const hasTrustSignal = !!profile?.identity_verified || gallery.length >= 1;
+  const isRichProfile = hasSubstantialBio && hasTrustSignal;
   const shouldNoindex = !isRichProfile;
 
   const jsonLd = {
