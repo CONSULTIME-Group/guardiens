@@ -689,7 +689,8 @@ const CreateSmallMission = () => {
       {/* CTA sticky au-dessus de la BottomNav */}
       {(accessLoading || canApplyMissions) && (
         <div className="fixed bottom-16 inset-x-0 bg-card/95 backdrop-blur border-t border-border px-4 py-3 z-40 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
-          <div className="max-w-2xl mx-auto">
+          <div className="max-w-2xl mx-auto space-y-2">
+            {step === 2 && identityRecommended && <IdentityRecommendedHint compact />}
             {step === 1 ? (
               <Button
                 type="button"
@@ -714,6 +715,44 @@ const CreateSmallMission = () => {
           </div>
         </div>
       )}
+
+      <MissionEligibilityDialog
+        open={!!eligibilityReason}
+        onOpenChange={(v) => { if (!v) setEligibilityReason(null); }}
+        reason={eligibilityReason}
+        userId={user?.id ?? null}
+        role={((user as any)?.role === "owner" ? "owner" : "sitter")}
+        context="publish"
+      />
+
+      <Dialog open={confirmUnchangedOpen} onOpenChange={setConfirmUnchangedOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Un mot à vous fait la différence</DialogTitle>
+            <DialogDescription>
+              Les gens du coin répondent plus aux messages personnels. Prenez un instant pour ajouter un détail qui vous ressemble : lieu précis, contexte, ton.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="gap-2">
+            <Button
+              onClick={() => setConfirmUnchangedOpen(false)}
+              autoFocus
+            >
+              Personnaliser
+            </Button>
+            <Button
+              variant="outline"
+              onClick={async () => {
+                setConfirmUnchangedOpen(false);
+                try { trackEvent("mission_composer_published_unchanged_template", { metadata: { template_id: appliedTemplateId } }); } catch {}
+                await performSubmit();
+              }}
+            >
+              Publier quand même
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </>
   );
 };
