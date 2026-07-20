@@ -297,6 +297,43 @@ const MutualAidDashboardTab = () => {
         </CardContent>
       </Card>
 
+      {funnel && (
+        <Card>
+          <CardContent className="pt-6 space-y-4">
+            <div>
+              <h3 className="font-heading text-base font-semibold">Tunnel de conversion, {RANGE_LABEL[range].toLowerCase()}</h3>
+              <p className="text-xs text-muted-foreground">
+                Parcours d'une mission publiée jusqu'au retour laissé. Les pourcentages sont calculés sur l'étape immédiatement précédente.
+              </p>
+            </div>
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+              <FunnelStep label="Publiées" value={funnel.missions.published} rate={null} />
+              <FunnelStep label="Avec une réponse" value={funnel.missions.with_response} rate={funnel.missions.rate_response} />
+              <FunnelStep label="Personne retenue" value={funnel.missions.with_accepted} rate={funnel.missions.rate_accepted} />
+              <FunnelStep label="Terminées" value={funnel.missions.completed} rate={funnel.missions.rate_completed} />
+              <FunnelStep label="Retour laissé" value={funnel.missions.with_feedback} rate={funnel.missions.rate_feedback} />
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3 pt-2 border-t border-border">
+              <MetricPill
+                label="Bout en bout"
+                value={funnel.missions.rate_end_to_end != null ? `${funnel.missions.rate_end_to_end}%` : "–"}
+                hint="Publication vers retour laissé"
+              />
+              <MetricPill
+                label="Temps médian vers 1re réponse"
+                value={formatMedianDuration(funnel.missions.median_seconds_to_first_response)}
+                hint="Sur les missions ayant reçu au moins une réponse"
+              />
+              <MetricPill
+                label="Questions avec réponse"
+                value={funnel.questions.rate_answered != null ? `${funnel.questions.rate_answered}%` : "–"}
+                hint={`${funnel.questions.with_answer} sur ${funnel.questions.posted} posée${funnel.questions.posted > 1 ? "s" : ""}`}
+              />
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       <Card>
         <CardContent className="pt-6 space-y-3">
           <h3 className="font-heading text-base font-semibold">Engagement par email</h3>
