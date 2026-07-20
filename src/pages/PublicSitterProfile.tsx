@@ -2606,7 +2606,11 @@ export default function PublicSitterProfile() {
             <p className="text-xs uppercase tracking-widest text-foreground/50 font-body">
               Coups de main donnés{missionsHelped.length > 0 && ` (${missionsHelped.length})`}
             </p>
-            {missionsHelped.length > 0 ? (
+            {entraideLoading ? (
+              <div className="space-y-2" aria-busy="true">
+                {[0, 1, 2].map((i) => (<Skeleton key={i} className="h-12 rounded-xl" />))}
+              </div>
+            ) : missionsHelped.length > 0 ? (
               <div className="space-y-2">
                 {(showAllMissionsHelped ? missionsHelped : missionsHelped.slice(0, VISIBLE_COUNT)).map((r) => {
                   const m = r.small_missions;
