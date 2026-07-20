@@ -25,6 +25,7 @@ import PageMeta from "@/components/PageMeta";
 import FillSavoirFaireBanner from "@/components/profile/FillSavoirFaireBanner";
 import ProfileProgressStrip from "@/components/profile/ProfileProgressStrip";
 import TrustProfile from "@/components/profile/TrustProfile";
+import SitterAffinityBanner from "@/components/matching/SitterAffinityBanner";
 
 const SECTIONS_BASE: Array<{ id: string; num: number; optional?: boolean }> = [
   { id: "identity", num: 1 },
