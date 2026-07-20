@@ -390,9 +390,24 @@ const SmallMissionDetail = () => {
         .single();
 
       if (error) {
+        // Erreurs métier serveur (triggers) : on traduit en UX douce
+        const hint = (error as any)?.hint || "";
+        const msg = String(error.message || "");
         if (error.code === "23505") {
           toast({ variant: "destructive", title: "Déjà envoyé", description: "Vous avez déjà proposé votre aide pour cette mission." });
           setHasResponded(true);
+        } else if (hint === "profile_incomplete" || msg.includes("profile_incomplete")) {
+          setEligibilityContext("respond");
+          setEligibilityReason("profile_incomplete");
+        } else if (hint === "account_not_active" || msg.includes("account_not_active")) {
+          setEligibilityContext("respond");
+          setEligibilityReason("account_not_active");
+        } else if (hint === "mission_response_cap_reached" || msg.includes("mission_response_cap_reached")) {
+          toast({
+            variant: "destructive",
+            title: "Mission temporairement fermée",
+            description: "5 personnes ont déjà proposé leur aide. Une place se libérera si l'auteur en décline une.",
+          });
         } else {
           throw error;
         }
