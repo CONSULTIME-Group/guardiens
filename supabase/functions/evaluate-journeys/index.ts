@@ -282,6 +282,18 @@ async function runEvaluation(
         continue
       }
 
+      // Garde de fréquence globale : max 1 email de nurturing / 48h / destinataire.
+      // On ne fait PAS avancer current_step : l'étape repartira au prochain run éligible.
+      if (recentlyServed.has(profile.email.toLowerCase())) {
+        await supabase.from('journey_step_log').insert({
+          journey_id: j.id, step_order: nextStep.step_order,
+          template_name: nextStep.template_name, sent: false, reason: 'frequency_capped',
+        })
+        stats.skipped++
+        bumpSeq(j.sequence_key, 'skipped')
+        continue
+      }
+
       const idempotencyKey = `journey-${j.sequence_key}-${j.id}-step-${nextStep.step_order}`
 
       // Enrichissement contextuel : pour les séquences owner-no-sit-*, on
