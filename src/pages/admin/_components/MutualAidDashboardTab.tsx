@@ -85,6 +85,29 @@ const downloadCsv = (filename: string, rows: string[][]) => {
   URL.revokeObjectURL(url);
 };
 
+interface FunnelMetrics {
+  period_days: number;
+  generated_at: string;
+  missions: {
+    published: number;
+    with_response: number;
+    with_accepted: number;
+    completed: number;
+    with_feedback: number;
+    rate_response: number | null;
+    rate_accepted: number | null;
+    rate_completed: number | null;
+    rate_feedback: number | null;
+    rate_end_to_end: number | null;
+    median_seconds_to_first_response: number | null;
+  };
+  questions: {
+    posted: number;
+    with_answer: number;
+    rate_answered: number | null;
+  };
+}
+
 const MutualAidDashboardTab = () => {
   const [range, setRange] = useState<Range>("30d");
   const [loading, setLoading] = useState(true);
@@ -94,6 +117,7 @@ const MutualAidDashboardTab = () => {
     feedbacks: 0,
     thanks: 0,
   });
+  const [funnel, setFunnel] = useState<FunnelMetrics | null>(null);
   const [emailStats, setEmailStats] = useState<EmailStats[]>([]);
   const [dormant, setDormant] = useState<DormantMission[]>([]);
   const [autoClosed, setAutoClosed] = useState<AutoClosedMission[]>([]);
