@@ -199,7 +199,7 @@ const SmallMissionDetail = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const { user } = useAuth();
   const { hasAccess } = useSubscriptionAccess();
-  const { level: accessLevel, profileCompletion, canApplyMissions } = useAccessLevel();
+  const { level: accessLevel, profileCompletion, canApplyMissions, identityRecommended } = useAccessLevel();
   const { toast } = useToast();
 
   const [mission, setMission] = useState<any>(null);
