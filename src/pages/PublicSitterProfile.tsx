@@ -139,6 +139,7 @@ export default function PublicSitterProfile() {
   const [missionsPublished, setMissionsPublished] = useState<any[]>([]);
   const [missionsHelped, setMissionsHelped] = useState<any[]>([]);
   const [thanksReceived, setThanksReceived] = useState<number>(0);
+  const [entraideLoading, setEntraideLoading] = useState(true);
   const [activateProprioIntent, setActivateProprioIntent] = useState<ContactIntentContext | null>(null);
   const [externalExperiences, setExternalExperiences] = useState<any[]>([]);
   const [ownerGalleryPhotos, setOwnerGalleryPhotos] = useState<any[]>([]);
@@ -365,7 +366,15 @@ export default function PublicSitterProfile() {
     if (!hash) return;
     // Léger délai pour laisser le DOM des Tabs/sections se monter.
     const t = setTimeout(() => {
-      const el = document.getElementById(hash);
+      // Pour l'ancre #confiance, la section existe en deux exemplaires
+      // (desktop et mobile). On cible celui qui est réellement visible.
+      const candidates =
+        hash === "confiance"
+          ? ["confiance", "confiance-mobile"]
+          : [hash];
+      const el = candidates
+        .map((h) => document.getElementById(h))
+        .find((n) => n && (n as HTMLElement).offsetParent !== null) as HTMLElement | undefined;
       if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
     }, 250);
     return () => clearTimeout(t);
@@ -639,30 +648,35 @@ export default function PublicSitterProfile() {
     if (!id) return;
 
     const loadEntraideData = async () => {
-      const { data: published } = await supabase
-        .from('small_missions')
-        .select('id, title, category, status, created_at, exchange_offer')
-        .eq('user_id', id)
-        .order('created_at', { ascending: false })
-        .limit(20);
+      setEntraideLoading(true);
+      try {
+        const [publishedRes, helpedResult, recognitionRes] = await Promise.all([
+          supabase
+            .from('small_missions')
+            .select('id, title, category, status, created_at, exchange_offer')
+            .eq('user_id', id)
+            .order('created_at', { ascending: false })
+            .limit(20),
+          supabase
+            .from('small_mission_responses')
+            .select('id, status, created_at, small_missions(id, title, category, status, created_at)')
+            .eq('responder_id', id)
+            .eq('status', 'accepted')
+            .order('created_at', { ascending: false })
+            .limit(20),
+          (supabase as any)
+            .from('helper_recognition_stats')
+            .select('useful_count')
+            .eq('user_id', id)
+            .maybeSingle(),
+        ]);
 
-      const helpedResult = await supabase
-        .from('small_mission_responses')
-        .select('id, status, created_at, small_missions(id, title, category, status, created_at)')
-        .eq('responder_id', id)
-        .eq('status', 'accepted')
-        .order('created_at', { ascending: false })
-        .limit(20);
-
-      const { data: recognition } = await (supabase as any)
-        .from('helper_recognition_stats')
-        .select('useful_count')
-        .eq('user_id', id)
-        .maybeSingle();
-
-      setMissionsPublished(published ?? []);
-      setMissionsHelped(!helpedResult.error ? (helpedResult.data ?? []) : []);
-      setThanksReceived(Number(recognition?.useful_count ?? 0));
+        setMissionsPublished(publishedRes.data ?? []);
+        setMissionsHelped(!helpedResult.error ? (helpedResult.data ?? []) : []);
+        setThanksReceived(Number((recognitionRes as any)?.data?.useful_count ?? 0));
+      } finally {
+        setEntraideLoading(false);
+      }
     };
 
     loadEntraideData();
@@ -701,16 +715,27 @@ export default function PublicSitterProfile() {
   };
 
   if (loading) {
+    // Squelette qui préfigure la vraie structure : hero pleine largeur à hauteur
+    // réservée (responsive), rangée de tuiles, bouton. Objectif : éviter le CLS
+    // à l'arrivée des données. Aucun changement visuel par ailleurs.
     return (
-      <div className="min-h-screen bg-background">
-        <div className="max-w-5xl mx-auto px-6 py-10 space-y-6">
-          <div className="flex items-center gap-8">
-            <Skeleton className="w-24 h-24 rounded-full shrink-0" />
-            <div className="space-y-3 flex-1">
-              <Skeleton className="h-10 w-48" />
-              <Skeleton className="h-4 w-32" />
-            </div>
+      <div className="min-h-screen bg-background" aria-busy="true" aria-live="polite">
+        {/* Hero */}
+        <Skeleton className="w-full h-[280px] sm:h-[380px] md:h-[520px] rounded-none" />
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 py-6 space-y-6">
+          {/* Titre + sous-titre */}
+          <div className="space-y-3">
+            <Skeleton className="h-8 sm:h-10 w-2/3 max-w-sm" />
+            <Skeleton className="h-4 w-40" />
           </div>
+          {/* Rangée de tuiles */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+            {[0, 1, 2, 3].map((i) => (
+              <Skeleton key={i} className="h-20 rounded-xl" />
+            ))}
+          </div>
+          {/* Bouton */}
+          <Skeleton className="h-11 w-full sm:w-64 rounded-lg" />
         </div>
       </div>
     );
@@ -829,13 +854,14 @@ export default function PublicSitterProfile() {
   const descBase = `${firstName} garde vos ${animalsForDesc} ${cityForDesc}.`;
   const pageDesc = (descBase + (trustForDesc ? ` ${trustForDesc}.` : '')).slice(0, 160);
   const pageUrl = buildAbsoluteUrl(`/gardiens/${id}`);
-  // Politique : profils riches indexables (≥1 avis publié OU ≥1 garde réalisée),
-  // identité vérifiée et bio substantielle. Sinon noindex (RGPD + thin content).
+  // Politique noindex (assouplie le 20/07/2026) : un profil est indexable dès lors
+  // qu'il présente une bio substantielle (>= 80 caractères) ET au moins un signal
+  // de confiance visuelle ou identitaire (identité vérifiée OU au moins une photo
+  // de galerie). Objectif : rouvrir le canal SEO profils sans exposer les fiches
+  // vides. Ancienne règle (trop stricte) : (avis>=1 OU garde>=1) ET identité ET bio.
   const hasSubstantialBio = ((bio || motivation || "") as string).length >= 80;
-  const isRichProfile =
-    (reviewCount >= 1 || completedSits >= 1) &&
-    !!profile?.identity_verified &&
-    hasSubstantialBio;
+  const hasTrustSignal = !!profile?.identity_verified || gallery.length >= 1;
+  const isRichProfile = hasSubstantialBio && hasTrustSignal;
   const shouldNoindex = !isRichProfile;
 
   const jsonLd = {
@@ -1157,7 +1183,9 @@ export default function PublicSitterProfile() {
                     <button
                       type="button"
                       onClick={() => {
-                        const el = document.getElementById('confiance');
+                        const el =
+                          [document.getElementById('confiance'), document.getElementById('confiance-mobile')]
+                            .find((n) => n && (n as HTMLElement).offsetParent !== null) as HTMLElement | null;
                         if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
                       }}
                       aria-label="Voir les détails de confiance et vérifications"
@@ -1507,7 +1535,7 @@ export default function PublicSitterProfile() {
                   </button>
                 ) : !isAuthenticated ? (
                   <Link
-                    to={`/inscription?redirect=/gardiens/${id}`}
+                    to={`/inscription?redirect=${encodeURIComponent(`/gardiens/${id}`)}`}
                     className="inline-flex items-center justify-center bg-primary text-primary-foreground rounded-lg px-6 py-3 text-sm font-medium hover:bg-primary/90 transition-colors flex-1 sm:flex-initial"
                   >
                     S'inscrire pour contacter {firstName}
@@ -1884,7 +1912,7 @@ export default function PublicSitterProfile() {
 
               {/* Onglet Confiance */}
               {((userBadges && userBadges.length > 0) || profile?.created_at) && (
-                <TabsContent value="confiance" forceMount className="mt-0 data-[state=inactive]:hidden px-4 pt-5 space-y-5" id="confiance">
+                <TabsContent value="confiance" forceMount className="mt-0 data-[state=inactive]:hidden px-4 pt-5 space-y-5" id="confiance-mobile">
                   {userBadges && userBadges.length > 0 && (
                     <>
                       <SpecialBadgeHighlight userBadges={userBadges} />
@@ -1913,7 +1941,7 @@ export default function PublicSitterProfile() {
             <div className="md:hidden fixed bottom-16 left-0 right-0 z-40 bg-background border-t border-border px-3 sm:px-4 pt-2.5 sm:pt-3 pb-[calc(env(safe-area-inset-bottom)+0.625rem)] shadow-lg">
               {!isAuthenticated && (
                 <Link
-                  to={`/inscription?redirect=/gardiens/${id}`}
+                  to={`/inscription?redirect=${encodeURIComponent(`/gardiens/${id}`)}`}
                   className="flex items-center justify-center bg-primary text-primary-foreground rounded-lg px-3 sm:px-4 py-3 text-[13px] sm:text-sm font-medium w-full leading-tight text-center break-words"
                 >
                   <span className="line-clamp-2">S'inscrire pour contacter {firstName}</span>
@@ -2466,7 +2494,7 @@ export default function PublicSitterProfile() {
                 </button>
               ) : !isAuthenticated ? (
                 <Link
-                  to={`/inscription?redirect=/gardiens/${id}?tab=proprio`}
+                  to={`/inscription?redirect=${encodeURIComponent(`/gardiens/${id}?tab=proprio`)}`}
                   className="flex items-center justify-center bg-primary text-primary-foreground rounded-lg px-4 py-3 text-sm font-medium w-full"
                 >
                   S'inscrire pour contacter {firstName}
@@ -2506,7 +2534,15 @@ export default function PublicSitterProfile() {
       {activeTab === 'entraide' && (
         <div className="max-w-4xl mx-auto px-4 py-8 space-y-10">
 
-          {(missionsPublished.length > 0 || missionsHelped.length > 0 || missionFeedbacks.length > 0 || thanksReceived > 0) && (
+          {entraideLoading && (
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3" aria-busy="true">
+              {[0, 1, 2, 3].map((i) => (
+                <Skeleton key={i} className="h-20 rounded-xl" />
+              ))}
+            </div>
+          )}
+
+          {!entraideLoading && (missionsPublished.length > 0 || missionsHelped.length > 0 || missionFeedbacks.length > 0 || thanksReceived > 0) && (
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
               {[
                 { value: missionsPublished.length, label: 'Mission' + (missionsPublished.length > 1 ? 's publiées' : ' publiée') },
@@ -2526,7 +2562,11 @@ export default function PublicSitterProfile() {
             <p className="text-xs uppercase tracking-widest text-foreground/50 font-body">
               Missions publiées{missionsPublished.length > 0 && ` (${missionsPublished.length})`}
             </p>
-            {missionsPublished.length > 0 ? (
+            {entraideLoading ? (
+              <div className="space-y-2" aria-busy="true">
+                {[0, 1, 2].map((i) => (<Skeleton key={i} className="h-12 rounded-xl" />))}
+              </div>
+            ) : missionsPublished.length > 0 ? (
               <div className="space-y-2">
                 {(showAllMissionsPublished ? missionsPublished : missionsPublished.slice(0, VISIBLE_COUNT)).map((m) => {
                   const statusMap: Record<string, { label: string; style: string }> = {
@@ -2566,7 +2606,11 @@ export default function PublicSitterProfile() {
             <p className="text-xs uppercase tracking-widest text-foreground/50 font-body">
               Coups de main donnés{missionsHelped.length > 0 && ` (${missionsHelped.length})`}
             </p>
-            {missionsHelped.length > 0 ? (
+            {entraideLoading ? (
+              <div className="space-y-2" aria-busy="true">
+                {[0, 1, 2].map((i) => (<Skeleton key={i} className="h-12 rounded-xl" />))}
+              </div>
+            ) : missionsHelped.length > 0 ? (
               <div className="space-y-2">
                 {(showAllMissionsHelped ? missionsHelped : missionsHelped.slice(0, VISIBLE_COUNT)).map((r) => {
                   const m = r.small_missions;
@@ -2593,7 +2637,11 @@ export default function PublicSitterProfile() {
             <p className="text-xs uppercase tracking-widest text-foreground/50 font-body">
               Avis d'entraide reçus{missionFeedbacks.length > 0 && ` (${missionFeedbacks.length})`}
             </p>
-            {missionFeedbacks.length > 0 ? (
+            {entraideLoading ? (
+              <div className="space-y-3" aria-busy="true">
+                {[0, 1].map((i) => (<Skeleton key={i} className="h-20 rounded-xl" />))}
+              </div>
+            ) : missionFeedbacks.length > 0 ? (
               <div className="space-y-3">
                 {(showAllEntraideFeedbacks ? missionFeedbacks : missionFeedbacks.slice(0, VISIBLE_COUNT)).map((fb) => (
                   <div key={fb.id} className="bg-card border border-border rounded-xl p-4 space-y-2">
@@ -2618,7 +2666,7 @@ export default function PublicSitterProfile() {
             )}
           </div>
 
-          {missionsPublished.length === 0 && missionsHelped.length === 0 && missionFeedbacks.length === 0 && (
+          {!entraideLoading && missionsPublished.length === 0 && missionsHelped.length === 0 && missionFeedbacks.length === 0 && (
             <div className="text-center py-12 space-y-2">
               <p className="text-base text-foreground/50 font-body">Pas encore de missions d'entraide.</p>
               <p className="text-sm text-foreground/40 font-body italic">Les échanges de services apparaîtront ici après la première mission.</p>
