@@ -673,9 +673,47 @@ const Register = () => {
   </button>
   </div>
 
-
+  <div
+    className={cn(
+      "flex items-start gap-3 rounded-lg border p-3 transition-colors",
+      termsHighlighted && !acceptedTerms
+        ? "border-destructive bg-destructive/5 animate-in fade-in-0"
+        : "border-border bg-muted/30"
+    )}
+  >
+    <Checkbox
+      id="accept-terms"
+      checked={acceptedTerms}
+      onCheckedChange={(v) => {
+        const checked = v === true;
+        setAcceptedTerms(checked);
+        if (checked) {
+          setTermsHighlighted(false);
+          setFormError(null);
+          try { trackEvent("signup_terms_checked", { source: "/inscription", metadata: { step: 2 } }); } catch {}
+        }
+      }}
+      className="mt-0.5"
+    />
+    <label htmlFor="accept-terms" className="text-sm text-foreground/80 leading-snug cursor-pointer">
+      <Trans
+        i18nKey="register_page.accept_label"
+        components={{
+          1: <Link to="/cgu" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline" />,
+          2: <Link to="/cgs" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline" />,
+          3: <Link to="/confidentialite" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline" />,
+        }}
+      />
+    </label>
+  </div>
+  {termsHighlighted && !acceptedTerms && (
+    <p role="alert" className="text-xs text-destructive">
+      {t("register_page.terms_required_hint")}
+    </p>
+  )}
 
   <Button
+
   type="button"
   variant="outline"
   size="lg"
