@@ -104,9 +104,25 @@ const Register = () => {
  // Si on arrive avec ?as=pro, on force le rôle "pro" même si role=owner est dans l'URL (héritage des anciens liens).
  const presetRole: Role | null = asPro ? "pro" : presetRoleRaw;
  const presetEmail = (searchParams.get("email") || "").trim().toLowerCase();
+ const redirectTarget = sanitizeRedirect(searchParams.get("redirect"));
 
- const [step, setStep] = useState<1 | 2 | "confirmation">(presetRole ? 2 : 1);
- const [selectedRole, setSelectedRole] = useState<Role | null>(presetRole);
+ // Intention déduite du redirect : /gardiens/… => visiteur = propriétaire,
+ // /annonces/… => visiteur = gardien. Un ?role= ou ?as=pro explicite gagne
+ // toujours. On n'écrase jamais un choix utilisateur.
+ const detectedIntent: "owner" | "sitter" | null = (() => {
+  if (asPro || presetRoleRaw) return null;
+  if (!redirectTarget) return null;
+  if (redirectTarget.startsWith("/gardiens/")) return "owner";
+  if (redirectTarget.startsWith("/annonces/")) return "sitter";
+  return null;
+ })();
+
+ // Rôle initial : preset explicite > intention déduite > null.
+ const initialRole: Role | null = presetRole ?? detectedIntent;
+ const initialStep: 1 | 2 = initialRole ? 2 : 1;
+
+ const [step, setStep] = useState<1 | 2 | "confirmation">(initialStep);
+ const [selectedRole, setSelectedRole] = useState<Role | null>(initialRole);
  const [email, setEmail] = useState<string>(() => {
   if (presetEmail) return presetEmail;
   try { return sessionStorage.getItem("guardiens_signup_email") || ""; } catch { return ""; }
@@ -121,25 +137,13 @@ const Register = () => {
  const [existingAccountOpen, setExistingAccountOpen] = useState(false);
  const [acceptedTerms, setAcceptedTerms] = useState(false);
  const [termsHighlighted, setTermsHighlighted] = useState(false);
- 
+
  const [totalInscrits, setTotalInscrits] = useState<number | null>(null);
  const [isGoogleLoading, setIsGoogleLoading] = useState(false);
 
  const { register } = useAuth();
  const navigate = useNavigate();
  const { toast } = useToast();
- const redirectTarget = sanitizeRedirect(searchParams.get("redirect"));
-
- // Intention déduite du redirect : /gardiens/… => visiteur = propriétaire,
- // /annonces/… => visiteur = gardien. Un ?role= ou ?as=pro explicite gagne
- // toujours. On n'écrase jamais un choix utilisateur.
- const detectedIntent: "owner" | "sitter" | null = useMemo(() => {
-  if (asPro || presetRoleRaw) return null;
-  if (!redirectTarget) return null;
-  if (redirectTarget.startsWith("/gardiens/")) return "owner";
-  if (redirectTarget.startsWith("/annonces/")) return "sitter";
-  return null;
- }, [asPro, presetRoleRaw, redirectTarget]);
 
  // Si l'utilisateur sélectionne le rôle « pro », on l'envoie systématiquement vers le formulaire fiche pro.
  const postAuthTarget = selectedRole === "pro" ? "/pros/inscription" : (redirectTarget ?? "/dashboard");
