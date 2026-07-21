@@ -659,6 +659,11 @@ const Register = () => {
 
   {step === 2 && (
   <form onSubmit={handleSubmit} className="space-y-5 animate-in fade-in-0 slide-in-from-bottom-4 duration-300">
+  {detectedIntent && (
+   <div className="rounded-lg border border-terra-border/60 bg-terra-soft px-4 py-3 text-sm text-terra-foreground">
+    {t(`register_page.intent_banner.${detectedIntent}`)}
+   </div>
+  )}
   <div className="text-center mb-4">
   <span className="inline-block px-4 py-1.5 rounded-pill bg-primary/10 text-primary text-sm font-medium">
   {roles.find((r) => r.value === selectedRole)?.label}
@@ -668,59 +673,7 @@ const Register = () => {
   </button>
   </div>
 
-  {acceptedTerms ? (
-   <div className="flex items-center justify-between rounded-md bg-success-soft border border-success-border px-3 py-2 text-xs text-success-foreground">
-     <span>{t("register_page.terms_accepted_confirm")}</span>
-     <button
-       type="button"
-       onClick={() => setAcceptedTerms(false)}
-       className="text-xs font-medium text-primary hover:underline"
-     >
-       {t("register_page.terms_accepted_edit")}
-     </button>
-   </div>
-  ) : (
-   <>
-     <div
-       className={cn(
-         "flex items-start gap-3 rounded-lg border p-3 transition-colors",
-         termsHighlighted && !acceptedTerms
-           ? "border-destructive bg-destructive/5 animate-in fade-in-0"
-           : "border-border bg-muted/30"
-       )}
-     >
-       <Checkbox
-         id="accept-terms-step2"
-         checked={acceptedTerms}
-         onCheckedChange={(v) => {
-           const checked = v === true;
-           setAcceptedTerms(checked);
-           if (checked) {
-             setTermsHighlighted(false);
-             setFormError(null);
-             try { trackEvent("signup_terms_checked", { source: "/inscription", metadata: { step: 2 } }); } catch {}
-           }
-         }}
-         className="mt-0.5"
-       />
-       <label htmlFor="accept-terms-step2" className="text-sm text-foreground/80 leading-snug cursor-pointer">
-         <Trans
-           i18nKey="register_page.accept_label"
-           components={{
-             1: <Link to="/cgu" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline" />,
-             2: <Link to="/cgs" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline" />,
-             3: <Link to="/confidentialite" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline" />,
-           }}
-         />
-       </label>
-     </div>
-     {termsHighlighted && !acceptedTerms && (
-       <p className="mt-2 text-xs text-destructive">
-         {t("register_page.terms_required_hint")}
-       </p>
-     )}
-   </>
-  )}
+
 
   <Button
   type="button"
