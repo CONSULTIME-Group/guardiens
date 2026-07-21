@@ -258,12 +258,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }, [fetchProfile]);
 
-  const register = useCallback(async (email: string, password: string, role: Role) => {
+  const register = useCallback(async (email: string, password: string, role: Role, nextPath?: string) => {
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
-        emailRedirectTo: getSignupRedirectUrl(),
+        emailRedirectTo: getSignupRedirectUrl(nextPath),
         data: { role },
       },
     });
