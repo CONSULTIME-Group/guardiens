@@ -199,12 +199,11 @@ const SearchOwner = () => {
   // Reference postal code (selected city if available, else user CP)
   const getZoneRefPostalCode = (): string | null => cityPostalCode ?? userPostalCode;
 
-  // Contact handler, propriétaire qui sonde un gardien (context: sitter_inquiry)
+  // Contact handler, propriétaire qui sonde un gardien (context: sitter_inquiry).
+  // Anonyme (vague 40) : renvoi propre vers l'inscription avec redirect encodé, sans toast.
   const handleContact = async (sitterId: string) => {
     if (!user) {
-      toast.error("Connectez-vous pour contacter un gardien");
-      const redirect = `/gardiens/${sitterId}`;
-      navigate(`/login?redirect=${encodeURIComponent(redirect)}`);
+      navigate(`/inscription?redirect=${encodeURIComponent(`/gardiens/${sitterId}`)}`);
       return;
     }
     if (sitterId === user.id) {
@@ -225,6 +224,16 @@ const SearchOwner = () => {
     } finally {
       setContactingId(null);
     }
+  };
+
+  // Alerte : anonyme → redirection propre vers l'inscription (vague 40).
+  const handleCreateAlertGated = () => {
+    if (!user) {
+      const target = `/recherche-gardiens${city ? `?city=${encodeURIComponent(city)}` : ""}`;
+      navigate(`/inscription?redirect=${encodeURIComponent(target)}`);
+      return;
+    }
+    void handleCreateAlert();
   };
 
   // Create sitter alert
