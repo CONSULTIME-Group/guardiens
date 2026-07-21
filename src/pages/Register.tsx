@@ -637,46 +637,6 @@ const Register = () => {
    ))}
   </div>
 
-  <div
-    className={cn(
-      "mt-4 flex items-start gap-3 rounded-lg border p-3 transition-colors",
-      termsHighlighted && !acceptedTerms
-        ? "border-destructive bg-destructive/5 animate-in fade-in-0"
-        : "border-border bg-muted/30"
-    )}
-  >
-    <Checkbox
-      id="accept-terms"
-      checked={acceptedTerms}
-      onCheckedChange={(v) => {
-        const checked = v === true;
-        setAcceptedTerms(checked);
-        if (checked) {
-          setTermsHighlighted(false);
-          setFormError(null);
-          try { trackEvent("signup_terms_checked", { source: "/inscription", metadata: { step: 1 } }); } catch {}
-        }
-      }}
-      className="mt-0.5"
-    />
-    <label htmlFor="accept-terms" className="text-sm text-foreground/80 leading-snug cursor-pointer">
-      <Trans
-        i18nKey="register_page.accept_label"
-        components={{
-          1: <Link to="/cgu" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline" />,
-          2: <Link to="/cgs" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline" />,
-          3: <Link to="/confidentialite" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline" />,
-        }}
-      />
-    </label>
-  </div>
-
-  {termsHighlighted && !acceptedTerms && (
-    <p className="mt-2 text-xs text-destructive">
-      {t("register_page.terms_required_hint")}
-    </p>
-  )}
-
   <Button
     type="button"
     size="lg"
@@ -684,26 +644,12 @@ const Register = () => {
     disabled={!selectedRole}
     onClick={() => {
       if (!selectedRole) return;
-      if (!acceptedTerms) {
-        setTermsHighlighted(true);
-        setFormError(null);
-        try {
-          trackEvent("signup_step_1_terms_unchecked_click_continue" as any, {
-            source: "/inscription",
-            metadata: { role: selectedRole },
-          });
-          trackEvent("signup_form_blocked", {
-            source: "/inscription",
-            metadata: { reason: "terms_unchecked", role: selectedRole, step: 1 },
-          });
-        } catch {}
-        return;
-      }
       setStep(2);
     }}
   >
     {t("register_page.continue")}
   </Button>
+
 
    <p className="mt-4 text-center text-[11px] lg:text-xs text-muted-foreground/80">
      {t("register_page.role_change_hint")}
