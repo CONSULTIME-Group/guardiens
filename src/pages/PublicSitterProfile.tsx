@@ -1113,43 +1113,6 @@ export default function PublicSitterProfile() {
           heroWeights,
           overrideIndex,
         );
-        const heroCta: HeroCtaVariant = isOwn
-          ? { kind: "own" }
-          : !isAuthenticated
-            ? {
-                kind: "unauthenticated",
-                signupHref: `/inscription?redirect=${encodeURIComponent(`/gardiens/${id}`)}`,
-              }
-            : isOwner
-              ? {
-                  kind: "owner",
-                  onContact: async () => {
-                    if (!auth?.user?.id || !id) return;
-                    const { startConversation } = await import("@/lib/conversation");
-                    const { conversationId, error } = await startConversation({
-                      otherUserId: id,
-                      context: "sitter_inquiry",
-                    });
-                    if (conversationId) {
-                      navigate(`/messages?c=${conversationId}`);
-                    } else if (error?.includes("propositions spontanées")) {
-                      const { toast } = await import("sonner");
-                      toast.error("Ce membre ne reçoit pas de propositions spontanées.");
-                    } else {
-                      const { toast } = await import("sonner");
-                      toast.error("Impossible d'ouvrir la conversation.");
-                    }
-                  },
-                }
-              : {
-                  kind: "sitter",
-                  onActivate: () =>
-                    setActivateProprioIntent({
-                      recipientId: id,
-                      recipientFirstName: firstName,
-                      conversationContext: "sitter_inquiry",
-                    }),
-                };
         return (
           <ProfileHero
             id={id}
@@ -1180,8 +1143,10 @@ export default function PublicSitterProfile() {
             hasOwnerProfile={hasOwnerProfile}
             roleTabActive={activeTab}
             cta={heroCta}
+            ctaReassurance={heroCtaReassurance}
           />
         );
+
       })()}
 
       {/* ── BARRE D'ONGLETS, visible si ≥ 2 onglets ── */}
