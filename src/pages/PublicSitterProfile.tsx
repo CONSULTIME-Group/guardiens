@@ -14,7 +14,7 @@ import { BadgeSceau } from "@/components/badges/BadgeSceau";
 import StatutGardienBadge from "@/components/profile/StatutGardienBadge";
 import ReplyTimeBadge from "@/components/sitters/ReplyTimeBadge";
 import { useProfileReputation, useUserBadges } from "@/hooks/useProfileReputation";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+// Tabs Radix supprimés (vague 38) : les onglets facettes sont des boutons.
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 
