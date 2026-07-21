@@ -710,7 +710,8 @@ const SearchOwner = () => {
   const pillActive = "snap-start flex items-center gap-2 px-4 py-2 min-h-11 rounded-full border border-primary bg-primary/10 text-primary cursor-pointer transition-colors text-sm font-medium whitespace-nowrap shrink-0";
 
   const sortPillBase = "snap-start shrink-0 rounded-full px-3 py-1 min-h-9 inline-flex items-center text-xs border border-border text-muted-foreground cursor-pointer hover:border-primary transition-colors whitespace-nowrap";
-  const sortPillActive = "snap-start shrink-0 rounded-full px-3 py-1 min-h-9 inline-flex items-center text-xs bg-foreground text-background cursor-pointer whitespace-nowrap";
+  const sortPillActive = "snap-start shrink-0 rounded-full px-3 py-1 min-h-9 inline-flex items-center text-xs bg-primary/10 text-primary border border-primary/30 font-semibold cursor-pointer whitespace-nowrap";
+
 
   // Zone mode chips, l'option "région" est volontairement absente : la
   // promesse produit est « France entière », pas régionale (mémoire "No AURA").
