@@ -494,7 +494,7 @@ export default function PublicSitterProfile() {
       if (fetchedSitterProfile) setSitterProfile(fetchedSitterProfile);
       if (galleryRes.data) setGallery(galleryRes.data);
       if (fetchedEmergencyProfile) setEmergencyActive(fetchedEmergencyProfile.is_active);
-      setHasActiveSubscription(!!(subRes.data && (subRes.data as any[]).length > 0));
+      setHasActiveSubscription(Boolean((subRes as any)?.data));
       setOwnerProfile(fetchedOwnerProfile);
       setTargetOwnerAffinity(fetchedOwnerProfile);
       // Charge les animaux du propriétaire cible (via ses properties) pour permettre le calcul d'affinité côté gardien visitant l'onglet propriétaire.
