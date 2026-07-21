@@ -98,13 +98,13 @@ const SitterResultCard = ({
     >
       {/* Favori */}
       <div className="absolute top-2 right-2 z-10">
-        <FavoriteButton targetType="sitter" targetId={sitter.user_id} />
+        <FavoriteButton targetType="sitter" targetId={sitter.user_id} anonRedirect={signupRedirect} />
       </div>
 
       {/* Urgence */}
       {sitter.isEmergency && (
         <span className="absolute top-2 left-2 z-10 flex items-center gap-1 bg-card/90 rounded-full px-2 py-0.5 text-[11px] font-medium">
-          <Zap className="h-3 w-3 text-amber-500" /> Urgence
+          <Zap className="h-3 w-3 text-warning" /> Urgence
         </span>
       )}
 
