@@ -428,7 +428,9 @@ const SearchOwner = () => {
       });
     }
 
-    let items = rawSitters.filter((s: any) => s.profile?.profile_completion >= 60);
+    // Seuil de complétion abaissé à 40 (vague 40, 20/07/2026) : le profil public
+    // refondu gère les profils clairsemés, on ne masque plus de vrais gardiens.
+    let items = rawSitters.filter((s: any) => s.profile?.profile_completion >= 40);
 
     // Geocode all sitter cities once
     const uniqueCities = [...new Set(items.map((s: any) => s.profile?.city).filter(Boolean))] as string[];
