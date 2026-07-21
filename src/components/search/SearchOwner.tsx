@@ -1390,7 +1390,7 @@ const SearchOwner = () => {
                     Recevez une alerte e-mail dès qu'un nouveau gardien rejoint la zone autour de {city}.
                   </p>
                   <button
-                    onClick={handleCreateAlert}
+                    onClick={handleCreateAlertGated}
                     disabled={isCreatingAlert}
                     className="text-xs font-medium text-primary hover:underline disabled:opacity-60 whitespace-nowrap"
                   >
