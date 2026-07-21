@@ -1448,7 +1448,7 @@ const SearchOwner = () => {
                       <ReplyTimeBadge minutes={s.reply_median_minutes} />
                     </div>
                     <div className="flex gap-3 text-xs text-muted-foreground mt-0.5">
-                      {s.avgRating !== null && <span className="flex items-center gap-0.5"><Star className="h-3 w-3 text-yellow-500 fill-yellow-500" />{s.avgRating.toFixed(1)}</span>}
+                      {s.avgRating !== null && <span className="flex items-center gap-0.5"><Star className="h-3 w-3 text-primary fill-primary" />{s.avgRating.toFixed(1)}</span>}
                       {(profile?.completed_sits_count || 0) > 0 && <span>{profile.completed_sits_count} garde{profile.completed_sits_count > 1 ? "s" : ""}</span>}
                     </div>
                   </div>
