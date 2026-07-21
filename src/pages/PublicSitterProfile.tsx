@@ -2100,6 +2100,55 @@ export default function PublicSitterProfile() {
         </div>
       )}
 
+      {/* ── CTA sticky mobile UNIFIÉ (vague 38) ──
+          Mirroir strict du CTA hero courant (facette active), gaté par
+          IntersectionObserver : n'apparaît que si le hero est hors écran.
+          Un seul bloc, jamais deux CTA concurrents. */}
+      {!heroCtaVisible && (() => {
+        const baseCls =
+          "md:hidden fixed bottom-16 left-0 right-0 z-40 bg-background border-t border-border px-3 sm:px-4 pt-2.5 sm:pt-3 pb-[calc(env(safe-area-inset-bottom)+0.625rem)] shadow-lg";
+        const btnCls =
+          "flex items-center justify-center bg-primary text-primary-foreground rounded-lg px-3 sm:px-4 py-3 text-[13px] sm:text-sm font-medium w-full leading-tight text-center break-words";
+        const mutedCls =
+          "flex items-center justify-center bg-muted text-muted-foreground rounded-lg px-4 py-3 text-sm font-medium w-full opacity-70 cursor-not-allowed";
+        if (heroCta.kind === "own") return null;
+        if (heroCta.kind === "muted") {
+          return (
+            <div className={baseCls}>
+              <button type="button" disabled aria-disabled="true" className={mutedCls} title={heroCta.hint}>
+                {heroCta.label}
+              </button>
+            </div>
+          );
+        }
+        if (heroCta.kind === "unauthenticated") {
+          return (
+            <div className={baseCls}>
+              <Link to={heroCta.signupHref} className={btnCls}>
+                <span className="line-clamp-2">{heroCta.label ?? `S'inscrire pour contacter ${firstName}`}</span>
+              </Link>
+            </div>
+          );
+        }
+        if (heroCta.kind === "owner") {
+          return (
+            <div className={baseCls}>
+              <button type="button" onClick={heroCta.onContact} className={btnCls}>
+                <span className="line-clamp-2">{heroCta.label ?? `Contacter ${firstName}`}</span>
+              </button>
+            </div>
+          );
+        }
+        return (
+          <div className={baseCls}>
+            <button type="button" onClick={heroCta.onActivate} className={btnCls}>
+              <span className="line-clamp-2">{heroCta.label ?? `Contacter ${firstName}`}</span>
+            </button>
+          </div>
+        );
+      })()}
+
+
       {/* ── Lightbox ── */}
       {lightboxIdx !== null && (
         <div
