@@ -936,6 +936,111 @@ export default function PublicSitterProfile() {
   const hasEntraide = missionCount > 0;
   const availableTabs = [hasSitterProfile, hasOwnerProfile, hasEntraide].filter(Boolean).length;
 
+  // ── CTA du hero, contextuel à la facette active (vague 38, chantier 1) ──
+  // gardien / entraide → contact du gardien (sitter_inquiry, "Contacter")
+  // proprio            → pitch d'un gardien connecté ("Proposer une garde"),
+  //                       redirect encodé, dialog activation gardien si proprio,
+  //                       muted si sitter regardant un autre sitter sans proprio.
+  const contactSitterHandler = async () => {
+    if (!auth?.user?.id || !id) return;
+    const { startConversation } = await import("@/lib/conversation");
+    const { conversationId, error } = await startConversation({
+      otherUserId: id,
+      context: "sitter_inquiry",
+    });
+    if (conversationId) {
+      navigate(`/messages?c=${conversationId}`);
+    } else if (error?.includes("propositions spontanées")) {
+      const { toast } = await import("sonner");
+      toast.error("Ce membre ne reçoit pas de propositions spontanées.");
+    } else {
+      const { toast } = await import("sonner");
+      toast.error("Impossible d'ouvrir la conversation.");
+    }
+  };
+  const pitchOwnerHandler = async () => {
+    if (!auth?.user?.id || !id) return;
+    const { startConversation } = await import("@/lib/conversation");
+    const { conversationId, error } = await startConversation({
+      otherUserId: id,
+      context: "owner_pitch",
+    });
+    if (conversationId) {
+      navigate(`/messages?c=${conversationId}`);
+    } else if (error?.includes("propositions spontanées")) {
+      const { toast } = await import("sonner");
+      toast.error("Ce propriétaire ne reçoit pas de propositions spontanées.");
+    } else {
+      const { toast } = await import("sonner");
+      toast.error("Impossible d'ouvrir la conversation.");
+    }
+  };
+
+  const heroCtaFor = (tab: ProfileTab): { cta: HeroCtaVariant; reassurance?: string } => {
+    if (isOwn) {
+      return { cta: { kind: "own" } };
+    }
+    if (tab === "proprio") {
+      const label = `Proposer une garde à ${firstName}`;
+      if (!isAuthenticated) {
+        return {
+          cta: {
+            kind: "unauthenticated",
+            signupHref: `/inscription?redirect=${encodeURIComponent(`/gardiens/${id}?tab=proprio`)}`,
+            label: `S'inscrire pour proposer une garde à ${firstName}`,
+          },
+        };
+      }
+      if (isSitter) {
+        return { cta: { kind: "owner", onContact: pitchOwnerHandler, label } };
+      }
+      if (isOwner) {
+        // proprio connecté sans facette gardien → dialog activation gardien
+        return {
+          cta: {
+            kind: "sitter",
+            onActivate: () => setActivateGardienOpen(true),
+            label,
+          },
+          reassurance: "Activez votre rôle gardien pour lui proposer vos services.",
+        };
+      }
+      return {
+        cta: {
+          kind: "muted",
+          label: "Réservé aux gardiens",
+          hint: "Seuls les gardiens peuvent proposer une garde.",
+        },
+      };
+    }
+    // gardien / entraide → contact du gardien
+    if (!isAuthenticated) {
+      return {
+        cta: {
+          kind: "unauthenticated",
+          signupHref: `/inscription?redirect=${encodeURIComponent(`/gardiens/${id}?tab=${tab}`)}`,
+        },
+      };
+    }
+    if (isOwner) {
+      return { cta: { kind: "owner", onContact: contactSitterHandler } };
+    }
+    // isSitter (viewer sans profil proprio) → activation proprio
+    return {
+      cta: {
+        kind: "sitter",
+        onActivate: () =>
+          setActivateProprioIntent({
+            recipientId: id!,
+            recipientFirstName: firstName,
+            conversationContext: "sitter_inquiry",
+          }),
+      },
+    };
+  };
+  const { cta: heroCta, reassurance: heroCtaReassurance } = heroCtaFor(activeTab);
+
+
   return (
     <div className="min-h-screen bg-background">
       {/* JSON-LD */}
