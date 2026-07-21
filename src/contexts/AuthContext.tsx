@@ -32,7 +32,7 @@ interface AuthContextType {
   switchRole: (role: ActiveRole) => void;
   setActiveRole: (role: ActiveRole) => void;
   login: (email: string, password: string) => Promise<void>;
-  register: (email: string, password: string, role: Role) => Promise<any>;
+  register: (email: string, password: string, role: Role, nextPath?: string) => Promise<any>;
   logout: () => void;
   refreshProfile: () => Promise<void>;
 }
