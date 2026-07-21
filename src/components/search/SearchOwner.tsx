@@ -966,7 +966,7 @@ const SearchOwner = () => {
                     <Switch checked={verifiedOnly} onCheckedChange={setVerifiedOnly} />
                   </div>
                   <div className="flex items-center justify-between">
-                    <p className="text-sm flex items-center gap-1.5"><Zap className="h-3.5 w-3.5 text-amber-500" /> Gardiens d'urgence</p>
+                    <p className="text-sm flex items-center gap-1.5"><Zap className="h-3.5 w-3.5 text-warning" /> Gardiens d'urgence</p>
                     <Switch checked={emergencyOnly} onCheckedChange={setEmergencyOnly} />
                   </div>
                   <div className="flex items-center justify-between">
