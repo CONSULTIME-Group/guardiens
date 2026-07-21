@@ -367,7 +367,7 @@ const Register = () => {
  type: "signup",
  email,
  options: {
- emailRedirectTo: getSignupRedirectUrl(),
+ emailRedirectTo: getSignupRedirectUrl(postAuthTarget),
  },
  });
  if (error) {
