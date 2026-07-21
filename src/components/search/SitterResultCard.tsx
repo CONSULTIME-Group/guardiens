@@ -219,7 +219,7 @@ const SitterResultCard = ({
         <div className="flex items-center gap-2 mt-1 min-h-[1rem]">
           {sitter.avgRating !== null && (
             <span className="flex items-center gap-0.5 text-xs text-muted-foreground">
-              <Star className="h-3 w-3 text-yellow-500 fill-yellow-500" />
+              <Star className="h-3 w-3 text-primary fill-primary" />
               {sitter.avgRating.toFixed(1)}
             </span>
           )}
