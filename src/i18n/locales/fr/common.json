@@ -1052,6 +1052,10 @@
     "terms_required_hint": "Cochez la case pour continuer.",
     "terms_accepted_confirm": "Vous avez accepté les CGU, les CGS et la politique de confidentialité.",
     "terms_accepted_edit": "Modifier",
+    "intent_banner": {
+      "owner": "Encore un pas, et vous pourrez contacter ce gardien.",
+      "sitter": "Encore un pas, et vous pourrez proposer vos services."
+    },
     "footer_trust": "Pas de spam · Désinscription en 1 clic · Vos données restent en France",
     "have_account": "Déjà un compte ?",
     "sign_in": "Se connecter",

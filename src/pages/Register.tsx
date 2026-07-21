@@ -72,9 +72,27 @@ const PW_ADJ = ["Joyeux", "Calme", "Sauvage", "Doux", "Brave", "Curieux", "Vif",
 const PW_NOUN = ["Chat", "Chien", "Lapin", "Renard", "Loup", "Cheval", "Hibou", "Ours"];
 const PW_VERB = ["adore", "croque", "grimpe", "danse", "veille", "murmure", "explore"];
 const PW_SYM = ["!", "?", "#", "$", "*"];
+/**
+ * Génère un mot de passe suggéré cryptographiquement sûr, style mémorisable
+ * Adjectif+Nom+Symbole+Verbe+4 chiffres. Utilise crypto.getRandomValues pour
+ * l'entropie (jamais Math.random). Résultat garanti >= 12 caractères et
+ * conçu pour passer le contrôle de force (mix majuscules/minuscules/chiffres/symbole).
+ */
 const generateSuggestedPassword = (): string => {
-  const pick = <T,>(arr: T[]): T => arr[Math.floor(Math.random() * arr.length)];
-  const num = String(Math.floor(Math.random() * 90) + 10);
+  const rand = (max: number): number => {
+    // Rejet des valeurs qui biaiseraient le modulo (uniformité stricte).
+    const buf = new Uint32Array(1);
+    const limit = Math.floor(0xffffffff / max) * max;
+    let x = 0;
+    do {
+      crypto.getRandomValues(buf);
+      x = buf[0];
+    } while (x >= limit);
+    return x % max;
+  };
+  const pick = <T,>(arr: T[]): T => arr[rand(arr.length)];
+  // 4 chiffres [1000, 9999] : ~13 bits d'entropie supplémentaires.
+  const num = String(1000 + rand(9000));
   return `${pick(PW_ADJ)}${pick(PW_NOUN)}${pick(PW_SYM)}${pick(PW_VERB)}${num}`;
 };
 
@@ -86,9 +104,25 @@ const Register = () => {
  // Si on arrive avec ?as=pro, on force le rôle "pro" même si role=owner est dans l'URL (héritage des anciens liens).
  const presetRole: Role | null = asPro ? "pro" : presetRoleRaw;
  const presetEmail = (searchParams.get("email") || "").trim().toLowerCase();
+ const redirectTarget = sanitizeRedirect(searchParams.get("redirect"));
 
- const [step, setStep] = useState<1 | 2 | "confirmation">(presetRole ? 2 : 1);
- const [selectedRole, setSelectedRole] = useState<Role | null>(presetRole);
+ // Intention déduite du redirect : /gardiens/… => visiteur = propriétaire,
+ // /annonces/… => visiteur = gardien. Un ?role= ou ?as=pro explicite gagne
+ // toujours. On n'écrase jamais un choix utilisateur.
+ const detectedIntent: "owner" | "sitter" | null = (() => {
+  if (asPro || presetRoleRaw) return null;
+  if (!redirectTarget) return null;
+  if (redirectTarget.startsWith("/gardiens/")) return "owner";
+  if (redirectTarget.startsWith("/annonces/")) return "sitter";
+  return null;
+ })();
+
+ // Rôle initial : preset explicite > intention déduite > null.
+ const initialRole: Role | null = presetRole ?? detectedIntent;
+ const initialStep: 1 | 2 = initialRole ? 2 : 1;
+
+ const [step, setStep] = useState<1 | 2 | "confirmation">(initialStep);
+ const [selectedRole, setSelectedRole] = useState<Role | null>(initialRole);
  const [email, setEmail] = useState<string>(() => {
   if (presetEmail) return presetEmail;
   try { return sessionStorage.getItem("guardiens_signup_email") || ""; } catch { return ""; }
@@ -103,14 +137,14 @@ const Register = () => {
  const [existingAccountOpen, setExistingAccountOpen] = useState(false);
  const [acceptedTerms, setAcceptedTerms] = useState(false);
  const [termsHighlighted, setTermsHighlighted] = useState(false);
- 
+
  const [totalInscrits, setTotalInscrits] = useState<number | null>(null);
  const [isGoogleLoading, setIsGoogleLoading] = useState(false);
 
  const { register } = useAuth();
  const navigate = useNavigate();
  const { toast } = useToast();
- const redirectTarget = sanitizeRedirect(searchParams.get("redirect"));
+
  // Si l'utilisateur sélectionne le rôle « pro », on l'envoie systématiquement vers le formulaire fiche pro.
  const postAuthTarget = selectedRole === "pro" ? "/pros/inscription" : (redirectTarget ?? "/dashboard");
 
@@ -144,6 +178,14 @@ const Register = () => {
   source: "/inscription",
   metadata: { role: presetRole, preset: true },
   });
+  }
+  if (detectedIntent) {
+   try {
+    trackEvent("signup_intent_detected" as any, {
+     source: "/inscription",
+     metadata: { intent: detectedIntent, has_redirect: !!redirectTarget, redirect: redirectTarget },
+    });
+   } catch {}
   }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -228,7 +270,7 @@ const Register = () => {
 
  try {
  const result = await Promise.race([
- register(cleanEmail, password, selectedRole === "pro" ? "owner" : selectedRole),
+ register(cleanEmail, password, selectedRole === "pro" ? "owner" : selectedRole, postAuthTarget),
  timeoutPromise,
  ]) as any;
 
@@ -325,7 +367,7 @@ const Register = () => {
  type: "signup",
  email,
  options: {
- emailRedirectTo: getSignupRedirectUrl(),
+ emailRedirectTo: getSignupRedirectUrl(postAuthTarget),
  },
  });
  if (error) {
@@ -454,7 +496,7 @@ const Register = () => {
  />
  </div>
  </div>
- <p className="text-foreground font-medium text-sm lg:text-base mt-2 lg:mt-3">
+ <p className="font-heading text-foreground text-xl lg:text-2xl mt-2 lg:mt-3">
  {step === 1 ? t("register_page.welcome") : t("register_page.almost_done")}
  </p>
  <p className="text-xs lg:text-sm text-muted-foreground mt-0.5 lg:mt-1">
@@ -595,9 +637,45 @@ const Register = () => {
    ))}
   </div>
 
+  <Button
+    type="button"
+    size="lg"
+    className="w-full mt-4"
+    disabled={!selectedRole}
+    onClick={() => {
+      if (!selectedRole) return;
+      setStep(2);
+    }}
+  >
+    {t("register_page.continue")}
+  </Button>
+
+
+   <p className="mt-4 text-center text-[11px] lg:text-xs text-muted-foreground/80">
+     {t("register_page.role_change_hint")}
+   </p>
+  </>
+  )}
+
+  {step === 2 && (
+  <form onSubmit={handleSubmit} className="space-y-5 animate-in fade-in-0 slide-in-from-bottom-4 duration-300">
+  {detectedIntent && (
+   <div className="rounded-lg border border-terra-border/60 bg-terra-soft/60 px-4 py-3 text-sm text-foreground">
+    {t(`register_page.intent_banner.${detectedIntent}`)}
+   </div>
+  )}
+  <div className="text-center mb-4">
+  <span className="inline-block px-4 py-1.5 rounded-pill bg-primary/10 text-primary text-sm font-medium">
+  {roles.find((r) => r.value === selectedRole)?.label}
+  </span>
+  <button type="button" onClick={() => setStep(1)} className="block mx-auto mt-2 text-xs text-muted-foreground hover:text-foreground">
+  {t("register_page.change_role")}
+  </button>
+  </div>
+
   <div
     className={cn(
-      "mt-4 flex items-start gap-3 rounded-lg border p-3 transition-colors",
+      "flex items-start gap-3 rounded-lg border p-3 transition-colors",
       termsHighlighted && !acceptedTerms
         ? "border-destructive bg-destructive/5 animate-in fade-in-0"
         : "border-border bg-muted/30"
@@ -612,7 +690,7 @@ const Register = () => {
         if (checked) {
           setTermsHighlighted(false);
           setFormError(null);
-          try { trackEvent("signup_terms_checked", { source: "/inscription", metadata: { step: 1 } }); } catch {}
+          try { trackEvent("signup_terms_checked", { source: "/inscription", metadata: { step: 2 } }); } catch {}
         }
       }}
       className="mt-0.5"
@@ -628,113 +706,14 @@ const Register = () => {
       />
     </label>
   </div>
-
   {termsHighlighted && !acceptedTerms && (
-    <p className="mt-2 text-xs text-destructive">
+    <p role="alert" className="text-xs text-destructive">
       {t("register_page.terms_required_hint")}
     </p>
   )}
 
   <Button
-    type="button"
-    size="lg"
-    className="w-full mt-4"
-    disabled={!selectedRole}
-    onClick={() => {
-      if (!selectedRole) return;
-      if (!acceptedTerms) {
-        setTermsHighlighted(true);
-        setFormError(null);
-        try {
-          trackEvent("signup_step_1_terms_unchecked_click_continue" as any, {
-            source: "/inscription",
-            metadata: { role: selectedRole },
-          });
-          trackEvent("signup_form_blocked", {
-            source: "/inscription",
-            metadata: { reason: "terms_unchecked", role: selectedRole, step: 1 },
-          });
-        } catch {}
-        return;
-      }
-      setStep(2);
-    }}
-  >
-    {t("register_page.continue")}
-  </Button>
 
-   <p className="mt-4 text-center text-[11px] lg:text-xs text-muted-foreground/80">
-     {t("register_page.role_change_hint")}
-   </p>
-  </>
-  )}
-
-  {step === 2 && (
-  <form onSubmit={handleSubmit} className="space-y-5 animate-in fade-in-0 slide-in-from-bottom-4 duration-300">
-  <div className="text-center mb-4">
-  <span className="inline-block px-4 py-1.5 rounded-pill bg-primary/10 text-primary text-sm font-medium">
-  {roles.find((r) => r.value === selectedRole)?.label}
-  </span>
-  <button type="button" onClick={() => setStep(1)} className="block mx-auto mt-2 text-xs text-muted-foreground hover:text-foreground">
-  {t("register_page.change_role")}
-  </button>
-  </div>
-
-  {acceptedTerms ? (
-   <div className="flex items-center justify-between rounded-md bg-success-soft border border-success-border px-3 py-2 text-xs text-success-foreground">
-     <span>{t("register_page.terms_accepted_confirm")}</span>
-     <button
-       type="button"
-       onClick={() => setAcceptedTerms(false)}
-       className="text-xs font-medium text-primary hover:underline"
-     >
-       {t("register_page.terms_accepted_edit")}
-     </button>
-   </div>
-  ) : (
-   <>
-     <div
-       className={cn(
-         "flex items-start gap-3 rounded-lg border p-3 transition-colors",
-         termsHighlighted && !acceptedTerms
-           ? "border-destructive bg-destructive/5 animate-in fade-in-0"
-           : "border-border bg-muted/30"
-       )}
-     >
-       <Checkbox
-         id="accept-terms-step2"
-         checked={acceptedTerms}
-         onCheckedChange={(v) => {
-           const checked = v === true;
-           setAcceptedTerms(checked);
-           if (checked) {
-             setTermsHighlighted(false);
-             setFormError(null);
-             try { trackEvent("signup_terms_checked", { source: "/inscription", metadata: { step: 2 } }); } catch {}
-           }
-         }}
-         className="mt-0.5"
-       />
-       <label htmlFor="accept-terms-step2" className="text-sm text-foreground/80 leading-snug cursor-pointer">
-         <Trans
-           i18nKey="register_page.accept_label"
-           components={{
-             1: <Link to="/cgu" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline" />,
-             2: <Link to="/cgs" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline" />,
-             3: <Link to="/confidentialite" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline" />,
-           }}
-         />
-       </label>
-     </div>
-     {termsHighlighted && !acceptedTerms && (
-       <p className="mt-2 text-xs text-destructive">
-         {t("register_page.terms_required_hint")}
-       </p>
-     )}
-   </>
-  )}
-
-  <Button
   type="button"
   variant="outline"
   size="lg"

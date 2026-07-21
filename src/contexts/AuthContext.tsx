@@ -32,7 +32,7 @@ interface AuthContextType {
   switchRole: (role: ActiveRole) => void;
   setActiveRole: (role: ActiveRole) => void;
   login: (email: string, password: string) => Promise<void>;
-  register: (email: string, password: string, role: Role) => Promise<any>;
+  register: (email: string, password: string, role: Role, nextPath?: string) => Promise<any>;
   logout: () => void;
   refreshProfile: () => Promise<void>;
 }
@@ -258,12 +258,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }, [fetchProfile]);
 
-  const register = useCallback(async (email: string, password: string, role: Role) => {
+  const register = useCallback(async (email: string, password: string, role: Role, nextPath?: string) => {
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
-        emailRedirectTo: getSignupRedirectUrl(),
+        emailRedirectTo: getSignupRedirectUrl(nextPath),
         data: { role },
       },
     });
