@@ -375,7 +375,7 @@ const SearchOwner = () => {
   const handleShareInvite = async () => {
     trackEvent("search_empty_action", { source: "owner", metadata: { action: "share_invite", zone_mode: zoneMode } });
     const url = `${window.location.origin}/inscription?role=sitter`;
-    const shareText = `Je cherche un gardien d'animaux près de ${city || "chez moi"} sur Guardiens. Tu peux t'inscrire ici :`;
+    const shareText = `Je cherche un gardien d'animaux près de ${city || "chez moi"} sur Guardiens. Vous pouvez vous inscrire ici :`;
     if (navigator.share) {
       try {
         await navigator.share({ title: "Guardiens, devenez gardien", text: shareText, url });
