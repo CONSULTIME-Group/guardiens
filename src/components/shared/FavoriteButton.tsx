@@ -1,4 +1,5 @@
 import { Heart } from "lucide-react";
+import { Link } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useIsFavorite, useToggleFavorite } from "@/hooks/useFavorites";
 import { toast } from "sonner";
@@ -8,17 +9,31 @@ interface FavoriteButtonProps {
   targetId: string;
   size?: "sm" | "md";
   className?: string;
+  /** Chemin de redirection après inscription pour visiteur anonyme (vague 40). */
+  anonRedirect?: string;
 }
 
-const FavoriteButton = ({ targetType, targetId, size = "sm", className = "" }: FavoriteButtonProps) => {
+const FavoriteButton = ({ targetType, targetId, size = "sm", className = "", anonRedirect }: FavoriteButtonProps) => {
   const { user } = useAuth();
   const isFavorite = useIsFavorite(targetType, targetId);
   const { mutate, isPending } = useToggleFavorite();
 
-  if (!user) return null;
-
   const iconSize = size === "sm" ? "h-4 w-4" : "h-5 w-5";
   const btnSize = size === "sm" ? "p-1.5" : "p-2";
+
+  if (!user) {
+    if (!anonRedirect) return null;
+    return (
+      <Link
+        to={`/inscription?redirect=${encodeURIComponent(anonRedirect)}`}
+        onClick={(e) => e.stopPropagation()}
+        className={`${btnSize} rounded-full transition-all hover:scale-110 text-muted-foreground bg-background/80 hover:bg-muted ${className}`}
+        aria-label="Créer un compte pour ajouter aux favoris"
+      >
+        <Heart className={iconSize} />
+      </Link>
+    );
+  }
 
   return (
     <button
