@@ -1109,7 +1109,7 @@ const SearchOwner = () => {
             {city && (
               <button
                 type="button"
-                onClick={alertCreated ? undefined : handleCreateAlert}
+                onClick={alertCreated ? undefined : handleCreateAlertGated}
                 disabled={!city || isCreatingAlert}
                 aria-label={alertCreated ? "Alerte créée" : "Créer une alerte pour cette recherche"}
                 title={alertCreated ? "Alerte créée" : "Créer une alerte"}
