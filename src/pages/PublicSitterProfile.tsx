@@ -136,13 +136,14 @@ export default function PublicSitterProfile() {
   const [lightboxIdx, setLightboxIdx] = useState<number | null>(null);
   const [heroPickerOpen, setHeroPickerOpen] = useState(false);
   const [badgesBySitId, setBadgesBySitId] = useState<Record<string, string[]>>({});
+  const [sitOwnerBySitId, setSitOwnerBySitId] = useState<Record<string, string>>({});
   const [activeTab, setActiveTab] = useState<ProfileTab>('gardien');
   const [pets, setPets] = useState<any[]>([]);
   const [ownerSits, setOwnerSits] = useState<any[]>([]);
   const [ownerSitsTotal, setOwnerSitsTotal] = useState<number>(0);
   const [ownerSitsLoadingMore, setOwnerSitsLoadingMore] = useState(false);
   const OWNER_SITS_PAGE_SIZE = 50;
-  const [ownerReviews, setOwnerReviews] = useState<any[]>([]);
+  const [archivedSits, setArchivedSits] = useState<any[]>([]);
   const [missionFeedbacks, setMissionFeedbacks] = useState<any[]>([]);
   const [ownerDataLoading, setOwnerDataLoading] = useState(true);
   const [missionsPublished, setMissionsPublished] = useState<any[]>([]);
@@ -536,17 +537,28 @@ export default function PublicSitterProfile() {
           .map((r: any) => r.sit_id)
           .filter((sid: string | null): sid is string => sid !== null);
         if (sitIdsFromReviews.length > 0) {
-          const { data: badgeAttrData } = await supabase
-            .from("badge_attributions")
-            .select("badge_id, sit_id")
-            .in("sit_id", sitIdsFromReviews)
-            .eq("user_id", id);
+          const [{ data: badgeAttrData }, { data: sitOwnersData }] = await Promise.all([
+            supabase
+              .from("badge_attributions")
+              .select("badge_id, sit_id")
+              .in("sit_id", sitIdsFromReviews)
+              .eq("user_id", id),
+            supabase
+              .from("sits")
+              .select("id, user_id")
+              .in("id", sitIdsFromReviews),
+          ]);
           const grouped: Record<string, string[]> = {};
           (badgeAttrData || []).forEach((b: any) => {
             if (!grouped[b.sit_id]) grouped[b.sit_id] = [];
             grouped[b.sit_id].push(b.badge_id);
           });
           setBadgesBySitId(grouped);
+          const ownerMap: Record<string, string> = {};
+          (sitOwnersData || []).forEach((s: any) => {
+            if (s?.id && s?.user_id) ownerMap[s.id] = s.user_id;
+          });
+          setSitOwnerBySitId(ownerMap);
         }
       }
 
@@ -639,18 +651,21 @@ export default function PublicSitterProfile() {
         setOwnerSits(sitsData ?? []);
         setOwnerSitsTotal(sitsCount ?? (sitsData?.length ?? 0));
 
-        // Query 3, Avis reçus en tant que propriétaire
-        const { data: revData, error: revErr } = await supabase
-          .from('reviews')
-          .select('id, overall_rating, comment, created_at, review_type, reviewer_id, sit_id')
-          .eq('reviewee_id', id)
-          .eq('published', true)
-          .eq('moderation_status', 'valide')
-          .neq('review_type', 'annulation')
-          .order('created_at', { ascending: false });
-        if (revErr) console.error('[ownerReviews]', revErr);
-        const enrichedOwnerReviews = await hydrateReviewers((revData ?? []) as any[]);
-        setOwnerReviews(enrichedOwnerReviews);
+        // Query 3, Gardes passées (annonces archivées, hors annulées et modération).
+        //   Les avis reçus en tant que propriétaire sont désormais dérivés du set principal
+        //   `reviews` via `sitOwnerBySitId` (cf. useMemo `ownerReviewsDerived`) — plus de
+        //   requête dédiée ici, pour garantir la cohérence des compteurs par rôle.
+        const { data: archData, error: archErr } = await supabase
+          .from('sits')
+          .select('id, slug, title, city, cover_photo_url, start_date, end_date, status')
+          .eq('user_id', id)
+          .eq('status', 'archived')
+          .is('moderation_hidden_at', null)
+          .order('start_date', { ascending: false })
+          .limit(50);
+        if (archErr) console.error('[archivedSits]', archErr);
+        setArchivedSits(archData ?? []);
+
 
         // Query 4, Feedbacks missions
         const { data: fbData, error: fbErr } = await supabase
@@ -853,8 +868,33 @@ export default function PublicSitterProfile() {
 
   const totalBadgeCount = badges.reduce((s: any, b: any) => s + b.count, 0);
 
-  const gardeReviews = reviews.filter((r: any) => r.sit_id !== null);
+  // Ségrégation par rôle : un avis avec sit_id compte comme "garde" (côté gardien)
+  //   uniquement si le reviewer était le propriétaire de l'annonce (sit.user_id).
+  //   Inversement, un avis avec sit_id compte comme "propriétaire" si le reviewer
+  //   n'était PAS le propriétaire (donc le gardien laissant un avis au proprio).
+  //   Les avis sans sit_id (missions d'entraide) restent côté gardien.
+  const gardeReviews = reviews.filter((r: any) => {
+    if (r.sit_id === null) return false;
+    const ownerId = sitOwnerBySitId[r.sit_id];
+    return ownerId !== undefined && ownerId !== r.reviewee_id;
+  });
   const missionReviews = reviews.filter((r: any) => r.sit_id === null);
+  const ownerReviews = reviews.filter((r: any) => {
+    if (r.sit_id === null) return false;
+    const ownerId = sitOwnerBySitId[r.sit_id];
+    return ownerId !== undefined && ownerId === r.reviewee_id;
+  });
+  const sitterRoleReviews = [...gardeReviews, ...missionReviews];
+  const sitterRoleCount = sitterRoleReviews.length;
+  const sitterRoleAvg = sitterRoleCount > 0
+    ? Math.round((sitterRoleReviews.reduce((s: number, r: any) => s + (Number(r.overall_rating) || 0), 0) / sitterRoleCount) * 10) / 10
+    : 0;
+  const ownerAvg = ownerReviews.length > 0
+    ? Math.round((ownerReviews.reduce((s: number, r: any) => s + (Number(r.overall_rating) || 0), 0) / ownerReviews.length) * 10) / 10
+    : 0;
+  // Compteurs contextuels au hero selon la facette active (JSON-LD/SEO restent sur le total).
+  const heroAvg = activeTab === 'proprio' ? ownerAvg : sitterRoleAvg;
+  const heroCount = activeTab === 'proprio' ? ownerReviews.length : sitterRoleCount;
   const visibleGallery = gallery.slice(0, 9);
   // Contenu réel de la lightbox : la galerie si elle existe, sinon on retombe
   // sur l'avatar seul pour que l'utilisateur puisse toujours l'agrandir.
@@ -1134,8 +1174,8 @@ export default function PublicSitterProfile() {
             proTagline={(profile as any)?.pro_tagline ?? null}
             proPricingNote={(profile as any)?.pro_pricing_note ?? null}
             isAvailable={isAvailable}
-            avgRating={avgRating}
-            reviewCount={reviewCount}
+            avgRating={heroAvg}
+            reviewCount={heroCount}
             replyMedianMinutes={sitterProfile?.reply_median_minutes ?? null}
             statutGardien={reputation?.statut_gardien ?? null}
             identityVerified={!!profile?.identity_verified}
@@ -1410,13 +1450,13 @@ export default function PublicSitterProfile() {
                   Avis
                 </p>
                 <h2 className="font-heading text-[22px] sm:text-[26px] font-semibold text-foreground mt-1 leading-tight">
-                  {reviewCount > 0
+                  {sitterRoleCount > 0
                     ? 'Ce que les propriétaires racontent.'
                     : `${firstName} prépare sa première garde.`}
                 </h2>
-                {reviewCount > 0 ? (
+                {sitterRoleCount > 0 ? (
                   <p className="text-sm text-muted-foreground mt-1">
-                    {reviewCount} retour{reviewCount > 1 ? 's' : ''} · moyenne {avgRating.toFixed(1)}★
+                    {sitterRoleCount} retour{sitterRoleCount > 1 ? 's' : ''} · moyenne {sitterRoleAvg.toFixed(1)}★
                   </p>
                 ) : (
                   <p className="text-sm text-muted-foreground mt-1">
@@ -1424,15 +1464,15 @@ export default function PublicSitterProfile() {
                   </p>
                 )}
               </div>
-              {reviewCount > 0 && (() => {
+              {sitterRoleCount > 0 && (() => {
                 const filtered = reviewFilter === 'gardes'
                   ? gardeReviews
                   : reviewFilter === 'missions'
                     ? missionReviews
-                    : [...reviews].sort((a: any, b: any) =>
+                    : [...sitterRoleReviews].sort((a: any, b: any) =>
                         new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
                 const chips: Array<{ id: 'all' | 'gardes' | 'missions'; label: string; count: number }> = [
-                  { id: 'all', label: 'Tous', count: reviews.length },
+                  { id: 'all', label: 'Tous', count: sitterRoleCount },
                   { id: 'gardes', label: 'Gardes', count: gardeReviews.length },
                   { id: 'missions', label: 'Missions', count: missionReviews.length },
                 ];
@@ -1535,10 +1575,8 @@ export default function PublicSitterProfile() {
               )
             : null;
         // Alma proprio : une phrase dérivée de vraies données seulement.
+        //   (ownerAvg est déjà calculé au niveau composant à partir des avis dérivés.)
         let proprioAlmaPhrase: string | null = null;
-        const ownerAvg = ownerReviews.length > 0
-          ? ownerReviews.reduce((s: number, r: any) => s + (Number(r.overall_rating) || 0), 0) / ownerReviews.length
-          : 0;
         if (ownerAvg >= 4.5 && ownerReviews.length >= 3) {
           proprioAlmaPhrase = `${firstName} rassure : ${ownerReviews.length} gardiens lui donnent ${ownerAvg.toFixed(1)} sur 5.`;
         } else if (pets.length > 0 && ownerSitsTotal > 0) {
@@ -1782,12 +1820,58 @@ export default function PublicSitterProfile() {
                       )}
                     </div>
                   </div>
-                ) : (
+                ) : archivedSits.length === 0 ? (
                   <p className="text-sm text-muted-foreground italic font-body">
                     {firstName} prépare sa première annonce.
                   </p>
-                )}
+                ) : null}
               </section>
+
+              {/* Ses gardes passées (annonces archivées, non annulées) */}
+              {archivedSits.length > 0 && (
+                <section aria-label={`Gardes passées de ${firstName}`} className="scroll-mt-20">
+                  <div className="mb-5">
+                    <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-secondary">
+                      Historique
+                    </p>
+                    <h2 className="font-heading text-[22px] sm:text-[26px] font-semibold text-foreground mt-1 leading-tight">
+                      Ses gardes passées.
+                    </h2>
+                  </div>
+                  <div className="space-y-2">
+                    {archivedSits.map((sit: any) => {
+                      const fmt = (d: string) => new Date(d).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
+                      const slug = sit.slug && String(sit.slug).trim().length > 0 ? sit.slug : sit.id;
+                      const href = `/annonces/${slug}`;
+                      return (
+                        <Link
+                          key={sit.id}
+                          to={href}
+                          className="flex items-center gap-3 bg-card border border-border rounded-xl px-3 py-2.5 opacity-70 hover:opacity-100 hover:border-primary/40 hover:bg-muted/30 transition-all"
+                        >
+                          {sit.cover_photo_url ? (
+                            <img src={sit.cover_photo_url} alt="" loading="lazy" className="w-14 h-14 rounded-lg object-cover shrink-0" />
+                          ) : (
+                            <div className="w-14 h-14 rounded-lg bg-muted shrink-0 flex items-center justify-center text-foreground/30">
+                              <Home className="h-5 w-5" aria-hidden="true" />
+                            </div>
+                          )}
+                          <div className="min-w-0 flex-1">
+                            <p className="text-sm font-medium text-foreground font-body truncate">{sit.title || 'Garde'}</p>
+                            <p className="text-xs text-foreground/50 font-body mt-0.5 truncate">
+                              {sit.city ? `${sit.city} · ` : ''}
+                              {sit.start_date && fmt(sit.start_date)}{sit.end_date && ` → ${fmt(sit.end_date)}`}
+                            </p>
+                          </div>
+                          <span className="text-xs font-medium px-2.5 py-1 rounded-full shrink-0 font-body whitespace-nowrap bg-muted text-foreground/60">
+                            Archivée
+                          </span>
+                        </Link>
+                      );
+                    })}
+                  </div>
+                </section>
+              )}
 
               {/* Confiance (miroir) */}
               {((userBadges && userBadges.length > 0) || profile?.created_at) && (
