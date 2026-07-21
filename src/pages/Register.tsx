@@ -179,6 +179,14 @@ const Register = () => {
   metadata: { role: presetRole, preset: true },
   });
   }
+  if (detectedIntent) {
+   try {
+    trackEvent("signup_intent_detected" as any, {
+     source: "/inscription",
+     metadata: { intent: detectedIntent, has_redirect: !!redirectTarget, redirect: redirectTarget },
+    });
+   } catch {}
+  }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
