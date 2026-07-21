@@ -270,7 +270,7 @@ const Register = () => {
 
  try {
  const result = await Promise.race([
- register(cleanEmail, password, selectedRole === "pro" ? "owner" : selectedRole),
+ register(cleanEmail, password, selectedRole === "pro" ? "owner" : selectedRole, postAuthTarget),
  timeoutPromise,
  ]) as any;
 
