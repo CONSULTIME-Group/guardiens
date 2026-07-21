@@ -17,10 +17,11 @@ import FavoriteButton from "@/components/shared/FavoriteButton";
 import ReplyTimeBadge from "@/components/sitters/ReplyTimeBadge";
 
 export type HeroCtaVariant =
-  | { kind: "own" }
-  | { kind: "unauthenticated"; signupHref: string }
-  | { kind: "owner"; onContact: () => void }
-  | { kind: "sitter"; onActivate: () => void };
+  | { kind: "own"; label?: string }
+  | { kind: "unauthenticated"; signupHref: string; label?: string }
+  | { kind: "owner"; onContact: () => void; label?: string }
+  | { kind: "sitter"; onActivate: () => void; label?: string }
+  | { kind: "muted"; label: string; hint?: string };
 
 interface ProfileHeroProps {
   id: string;
@@ -54,7 +55,9 @@ interface ProfileHeroProps {
   roleTabActive: "gardien" | "proprio" | "entraide";
 
   cta: HeroCtaVariant;
+  ctaReassurance?: string;
 }
+
 
 const ProfileHero = ({
   id,
@@ -83,7 +86,9 @@ const ProfileHero = ({
   hasOwnerProfile,
   roleTabActive,
   cta,
+  ctaReassurance,
 }: ProfileHeroProps) => {
+
   // Chips : cap à 3, priorité ID > Abonné > Urgence.
   const chips: Array<{ key: string; node: JSX.Element }> = [];
   if (identityVerified) {
@@ -154,7 +159,20 @@ const ProfileHero = ({
           title="Ceci est votre profil public. Utilisez « Modifier mon profil » pour le mettre à jour."
           className={`${baseCls} bg-muted text-muted-foreground cursor-not-allowed opacity-70`}
         >
-          Aperçu de votre profil
+          {cta.label ?? "Aperçu de votre profil"}
+        </button>
+      );
+    }
+    if (cta.kind === "muted") {
+      return (
+        <button
+          type="button"
+          disabled
+          aria-disabled="true"
+          title={cta.hint}
+          className={`${baseCls} bg-muted text-muted-foreground cursor-not-allowed opacity-70`}
+        >
+          {cta.label}
         </button>
       );
     }
@@ -164,7 +182,7 @@ const ProfileHero = ({
           to={cta.signupHref}
           className={`${baseCls} bg-primary text-primary-foreground hover:bg-primary/90`}
         >
-          S'inscrire pour contacter {firstName}
+          {cta.label ?? `S'inscrire pour contacter ${firstName}`}
         </Link>
       );
     }
@@ -175,7 +193,7 @@ const ProfileHero = ({
           onClick={cta.onContact}
           className={`${baseCls} bg-primary text-primary-foreground hover:bg-primary/90 cursor-pointer`}
         >
-          Contacter {firstName}
+          {cta.label ?? `Contacter ${firstName}`}
         </button>
       );
     }
@@ -185,17 +203,21 @@ const ProfileHero = ({
         onClick={cta.onActivate}
         className={`${baseCls} bg-primary text-primary-foreground hover:bg-primary/90 cursor-pointer`}
       >
-        Contacter {firstName}
+        {cta.label ?? `Contacter ${firstName}`}
       </button>
     );
   };
 
-  const reassurance =
+  const defaultReassurance =
     cta.kind === "own"
       ? "Vous voyez cette page comme un visiteur."
-      : cta.kind === "unauthenticated"
-        ? "L'inscription est gratuite, sans engagement."
-        : "Contact direct, sans intermédiaire.";
+      : cta.kind === "muted"
+        ? (cta.hint ?? "")
+        : cta.kind === "unauthenticated"
+          ? "L'inscription est gratuite, sans engagement."
+          : "Contact direct, sans intermédiaire.";
+  const reassurance = ctaReassurance ?? defaultReassurance;
+
 
   return (
     <div className="relative overflow-hidden w-full flex items-end bg-[hsl(var(--hero-paper))] md:max-h-[520px] md:[aspect-ratio:1536/544]">

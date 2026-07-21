@@ -14,14 +14,14 @@ import { BadgeSceau } from "@/components/badges/BadgeSceau";
 import StatutGardienBadge from "@/components/profile/StatutGardienBadge";
 import ReplyTimeBadge from "@/components/sitters/ReplyTimeBadge";
 import { useProfileReputation, useUserBadges } from "@/hooks/useProfileReputation";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+// Tabs Radix supprimés (vague 38) : les onglets facettes sont des boutons.
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 
 import { Skeleton } from "@/components/ui/skeleton";
 import { buildAbsoluteUrl } from "@/lib/seo";
 import {
-  Car, MapPin, X, BadgeCheck,
+  MapPin, X,
   ChevronLeft, ChevronRight,
   Shield, Star, PawPrint,
   Home, KeyRound, Handshake, Heart,
@@ -150,6 +150,8 @@ export default function PublicSitterProfile() {
   const [thanksReceived, setThanksReceived] = useState<number>(0);
   const [entraideLoading, setEntraideLoading] = useState(true);
   const [activateProprioIntent, setActivateProprioIntent] = useState<ContactIntentContext | null>(null);
+  const [activateGardienOpen, setActivateGardienOpen] = useState(false);
+
   const [externalExperiences, setExternalExperiences] = useState<any[]>([]);
   const [ownerGalleryPhotos, setOwnerGalleryPhotos] = useState<any[]>([]);
 
@@ -858,7 +860,7 @@ export default function PublicSitterProfile() {
     ? visibleGallery
     : (profile?.avatar_url ? [{ photo_url: profile.avatar_url, caption: null }] : []);
 
-  const showCTA = !(isAuthenticated && isSitter); // visible aussi pour soi-même (état désactivé)
+  // showCTA supprimé (vague 38) : le sticky mobile suit heroCta.kind.
 
    // SEO
   const animalLabels = animalTypes.map(a => ANIMAL_LABELS[a] || a).join(", ");
@@ -934,6 +936,111 @@ export default function PublicSitterProfile() {
   const hasEntraide = missionCount > 0;
   const availableTabs = [hasSitterProfile, hasOwnerProfile, hasEntraide].filter(Boolean).length;
 
+  // ── CTA du hero, contextuel à la facette active (vague 38, chantier 1) ──
+  // gardien / entraide → contact du gardien (sitter_inquiry, "Contacter")
+  // proprio            → pitch d'un gardien connecté ("Proposer une garde"),
+  //                       redirect encodé, dialog activation gardien si proprio,
+  //                       muted si sitter regardant un autre sitter sans proprio.
+  const contactSitterHandler = async () => {
+    if (!auth?.user?.id || !id) return;
+    const { startConversation } = await import("@/lib/conversation");
+    const { conversationId, error } = await startConversation({
+      otherUserId: id,
+      context: "sitter_inquiry",
+    });
+    if (conversationId) {
+      navigate(`/messages?c=${conversationId}`);
+    } else if (error?.includes("propositions spontanées")) {
+      const { toast } = await import("sonner");
+      toast.error("Ce membre ne reçoit pas de propositions spontanées.");
+    } else {
+      const { toast } = await import("sonner");
+      toast.error("Impossible d'ouvrir la conversation.");
+    }
+  };
+  const pitchOwnerHandler = async () => {
+    if (!auth?.user?.id || !id) return;
+    const { startConversation } = await import("@/lib/conversation");
+    const { conversationId, error } = await startConversation({
+      otherUserId: id,
+      context: "owner_pitch",
+    });
+    if (conversationId) {
+      navigate(`/messages?c=${conversationId}`);
+    } else if (error?.includes("propositions spontanées")) {
+      const { toast } = await import("sonner");
+      toast.error("Ce propriétaire ne reçoit pas de propositions spontanées.");
+    } else {
+      const { toast } = await import("sonner");
+      toast.error("Impossible d'ouvrir la conversation.");
+    }
+  };
+
+  const heroCtaFor = (tab: ProfileTab): { cta: HeroCtaVariant; reassurance?: string } => {
+    if (isOwn) {
+      return { cta: { kind: "own" } };
+    }
+    if (tab === "proprio") {
+      const label = `Proposer une garde à ${firstName}`;
+      if (!isAuthenticated) {
+        return {
+          cta: {
+            kind: "unauthenticated",
+            signupHref: `/inscription?redirect=${encodeURIComponent(`/gardiens/${id}?tab=proprio`)}`,
+            label: `S'inscrire pour proposer une garde à ${firstName}`,
+          },
+        };
+      }
+      if (isSitter) {
+        return { cta: { kind: "owner", onContact: pitchOwnerHandler, label } };
+      }
+      if (isOwner) {
+        // proprio connecté sans facette gardien → dialog activation gardien
+        return {
+          cta: {
+            kind: "sitter",
+            onActivate: () => setActivateGardienOpen(true),
+            label,
+          },
+          reassurance: "Activez votre rôle gardien pour lui proposer vos services.",
+        };
+      }
+      return {
+        cta: {
+          kind: "muted",
+          label: "Réservé aux gardiens",
+          hint: "Seuls les gardiens peuvent proposer une garde.",
+        },
+      };
+    }
+    // gardien / entraide → contact du gardien
+    if (!isAuthenticated) {
+      return {
+        cta: {
+          kind: "unauthenticated",
+          signupHref: `/inscription?redirect=${encodeURIComponent(`/gardiens/${id}?tab=${tab}`)}`,
+        },
+      };
+    }
+    if (isOwner) {
+      return { cta: { kind: "owner", onContact: contactSitterHandler } };
+    }
+    // isSitter (viewer sans profil proprio) → activation proprio
+    return {
+      cta: {
+        kind: "sitter",
+        onActivate: () =>
+          setActivateProprioIntent({
+            recipientId: id!,
+            recipientFirstName: firstName,
+            conversationContext: "sitter_inquiry",
+          }),
+      },
+    };
+  };
+  const { cta: heroCta, reassurance: heroCtaReassurance } = heroCtaFor(activeTab);
+
+
   return (
     <div className="min-h-screen bg-background">
       {/* JSON-LD */}
@@ -1006,43 +1113,6 @@ export default function PublicSitterProfile() {
           heroWeights,
           overrideIndex,
         );
-        const heroCta: HeroCtaVariant = isOwn
-          ? { kind: "own" }
-          : !isAuthenticated
-            ? {
-                kind: "unauthenticated",
-                signupHref: `/inscription?redirect=${encodeURIComponent(`/gardiens/${id}`)}`,
-              }
-            : isOwner
-              ? {
-                  kind: "owner",
-                  onContact: async () => {
-                    if (!auth?.user?.id || !id) return;
-                    const { startConversation } = await import("@/lib/conversation");
-                    const { conversationId, error } = await startConversation({
-                      otherUserId: id,
-                      context: "sitter_inquiry",
-                    });
-                    if (conversationId) {
-                      navigate(`/messages?c=${conversationId}`);
-                    } else if (error?.includes("propositions spontanées")) {
-                      const { toast } = await import("sonner");
-                      toast.error("Ce membre ne reçoit pas de propositions spontanées.");
-                    } else {
-                      const { toast } = await import("sonner");
-                      toast.error("Impossible d'ouvrir la conversation.");
-                    }
-                  },
-                }
-              : {
-                  kind: "sitter",
-                  onActivate: () =>
-                    setActivateProprioIntent({
-                      recipientId: id,
-                      recipientFirstName: firstName,
-                      conversationContext: "sitter_inquiry",
-                    }),
-                };
         return (
           <ProfileHero
             id={id}
@@ -1073,8 +1143,10 @@ export default function PublicSitterProfile() {
             hasOwnerProfile={hasOwnerProfile}
             roleTabActive={activeTab}
             cta={heroCta}
+            ctaReassurance={heroCtaReassurance}
           />
         );
+
       })()}
 
       {/* ── BARRE D'ONGLETS, visible si ≥ 2 onglets ── */}
@@ -1434,270 +1506,336 @@ export default function PublicSitterProfile() {
           {/* Rail STICKY (desktop ≥ lg) — 340 px, aligné haut, self-start. */}
           <ProfileRail>{railChildren}</ProfileRail>
           </div>
+          {/* CTA sticky mobile : unifié en dehors des onglets (vague 38). */}
 
-
-          {/* CTA sticky bottom mobile — gaté par IntersectionObserver :
-              n'apparaît que lorsque le CTA du hero est sorti du viewport. */}
-          {showCTA && !heroCtaVisible && (
-            <div className="md:hidden fixed bottom-16 left-0 right-0 z-40 bg-background border-t border-border px-3 sm:px-4 pt-2.5 sm:pt-3 pb-[calc(env(safe-area-inset-bottom)+0.625rem)] shadow-lg">
-              {!isAuthenticated && (
-                <Link
-                  to={`/inscription?redirect=${encodeURIComponent(`/gardiens/${id}`)}`}
-                  className="flex items-center justify-center bg-primary text-primary-foreground rounded-lg px-3 sm:px-4 py-3 text-[13px] sm:text-sm font-medium w-full leading-tight text-center break-words"
-                >
-                  <span className="line-clamp-2">S'inscrire pour contacter {firstName}</span>
-                </Link>
-              )}
-              {isAuthenticated && isOwner && (
-                <button
-                  onClick={async () => {
-                    if (!auth?.user?.id || !id) return;
-                    const { startConversation } = await import("@/lib/conversation");
-                    const { conversationId, error } = await startConversation({
-                      otherUserId: id,
-                      context: "sitter_inquiry",
-                    });
-                    if (conversationId) {
-                      navigate(`/messages?c=${conversationId}`);
-                    } else if (error?.includes("propositions spontanées")) {
-                      const { toast } = await import("sonner");
-                      toast.error("Ce membre ne reçoit pas de propositions spontanées.");
-                    } else {
-                      const { toast } = await import("sonner");
-                      toast.error("Impossible d'ouvrir la conversation.");
-                    }
-                  }}
-                  className="flex items-center justify-center bg-primary text-primary-foreground rounded-lg px-3 sm:px-4 py-3 text-[13px] sm:text-sm font-medium w-full leading-tight text-center break-words"
-                >
-                  <span className="line-clamp-2">Contacter {firstName}</span>
-                </button>
-              )}
-              {isAuthenticated && isSitter && id && (
-                <button
-                  type="button"
-                  onClick={() =>
-                    setActivateProprioIntent({
-                      recipientId: id,
-                      recipientFirstName: firstName,
-                      conversationContext: "sitter_inquiry",
-                    })
-                  }
-                  className="flex items-center justify-center bg-primary text-primary-foreground rounded-lg px-3 sm:px-4 py-3 text-[13px] sm:text-sm font-medium w-full leading-tight text-center break-words"
-                >
-                  <span className="line-clamp-2">Contacter {firstName}</span>
-                </button>
-              )}
-            </div>
-          )}
         </div>
         );
       })()}
 
 
 
-      {/* ── ONGLET PROPRIO ── */}
-      {activeTab === 'proprio' && (
-        <div className="max-w-4xl mx-auto pb-[calc(10.5rem+env(safe-area-inset-bottom))] md:pb-8">
+      {/* ── ONGLET PROPRIO — flux narratif miroir vague 37 (vague 38) ── */}
+      {activeTab === 'proprio' && (() => {
+        // Rail droit contextuel : affinité miroir (sitter → owner) + Alma + Pouls.
+        const redirectTo = `/gardiens/${id}?tab=proprio`;
+        const proprioAffinityNode = !isAuthenticated
+          ? <AffinityTeaserCard sitterFirstName={firstName} redirectTo={redirectTo} />
+          : (isSitter && !isOwn && viewerSitter && targetOwnerAffinity)
+            ? (
+                <AffinitySection
+                  sitterProfile={viewerSitter}
+                  ownerProfile={targetOwnerAffinity as any}
+                  pets={targetPets as any}
+                  context="public_owner_profile_rail"
+                  targetId={id}
+                  showCtaForSitter={false}
+                />
+              )
+            : null;
+        // Alma proprio : une phrase dérivée de vraies données seulement.
+        let proprioAlmaPhrase: string | null = null;
+        const ownerAvg = ownerReviews.length > 0
+          ? ownerReviews.reduce((s: number, r: any) => s + (Number(r.overall_rating) || 0), 0) / ownerReviews.length
+          : 0;
+        if (ownerAvg >= 4.5 && ownerReviews.length >= 3) {
+          proprioAlmaPhrase = `${firstName} rassure : ${ownerReviews.length} gardiens lui donnent ${ownerAvg.toFixed(1)} sur 5.`;
+        } else if (pets.length > 0 && ownerSitsTotal > 0) {
+          proprioAlmaPhrase = `${firstName} a déjà accueilli des gardiens pour ${pets.length > 1 ? 'ses animaux' : 'son animal'}.`;
+        } else if (profile?.identity_verified) {
+          proprioAlmaPhrase = `L'identité de ${firstName} a été vérifiée par notre équipe.`;
+        }
+        const proprioAlmaNode = !isOwn ? <AlmaWhisperCard phrase={proprioAlmaPhrase} /> : null;
+        const pulseGlobal = communityPulse
+          ? [
+              { value: communityPulse.maisonsGardees, label: "maisons gardées avec Guardiens" },
+              { value: communityPulse.totalInscrits, label: "membres actifs" },
+            ]
+          : [];
+        const proprioRailChildren = (
+          <>
+            {proprioAffinityNode}
+            {proprioAlmaNode}
+            <CommunityPulseCard city={city || null} global={pulseGlobal} />
+          </>
+        );
 
-          {/* ── Bandeau qualification propriétaire, miroir du bandeau gardien ──
-              Le hero premium est déjà rendu en tête, ne pas dupliquer. */}
-          {(() => {
-            const ownerAvg = ownerReviews.length > 0
-              ? ownerReviews.reduce((s, r) => s + (Number(r.overall_rating) || 0), 0) / ownerReviews.length
-              : 0;
-            const speciesSet = Array.from(new Set(pets.map((p: any) => p.species).filter(Boolean)));
-            const speciesLabel = speciesSet
-              .map((s: any) => ANIMAL_LABELS[s as string] || s)
-              .join(', ');
-            const envLabel = (ownerProfile?.environments ?? [])
-              .map((e) => ENV_LABELS[e] || e)
-              .join(', ');
-            const Empty = ({ label }: { label: string }) => (
-              <p className="text-sm text-muted-foreground/70 italic font-body">{label}</p>
-            );
-            return (
-              <section
-                aria-label="Informations clés du propriétaire"
-                className="px-4 md:px-6 pt-5 md:pt-6"
-              >
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-2.5 md:gap-3">
-                  {/* Tuile 1 : Animaux */}
-                  <div className="bg-card border border-border rounded-xl p-2.5 sm:p-3.5 md:p-4 flex flex-col gap-1 sm:gap-1.5 min-h-[88px] sm:min-h-[92px] min-w-0">
-                    <div className="text-[10px] sm:text-[11px] uppercase tracking-wider text-muted-foreground font-body">
-                      <span className="truncate">Animaux</span>
-                    </div>
-                    {pets.length > 0 ? (
-                      <p className="text-xs sm:text-sm text-foreground font-body leading-snug line-clamp-2 break-words">
-                        <span className="font-semibold">{pets.length}</span>
-                        {speciesLabel ? <span className="text-muted-foreground"> · {speciesLabel}</span> : null}
-                      </p>
-                    ) : (
-                      <Empty label="Non renseigné" />
-                    )}
-                  </div>
+        // Tuiles narratives, jamais « Non renseigné »
+        const tiles: StoryTileInput[] = [];
+        if (pets.length > 0) {
+          const speciesSet = Array.from(new Set(pets.map((p: any) => p.species).filter(Boolean)));
+          const speciesLabel = speciesSet
+            .map((s: any) => ANIMAL_LABELS[s as string] || s)
+            .join(', ');
+          tiles.push({
+            key: 'animaux',
+            Icon: PawPrint,
+            title: `${pets.length} animal${pets.length > 1 ? 'x' : ''} au foyer`,
+            detail: speciesLabel || null,
+          });
+        }
+        const envLabel = (ownerProfile?.environments ?? [])
+          .map((e) => ENV_LABELS[e] || e)
+          .join(', ');
+        if (envLabel || city) {
+          tiles.push({
+            key: 'env',
+            Icon: Home,
+            title: envLabel && city ? `${envLabel} à ${city}` : (envLabel || (city as string)),
+            detail: null,
+          });
+        }
+        if (profile?.created_at) {
+          tiles.push({
+            key: 'anciennete',
+            Icon: CalendarClock,
+            title: `Membre depuis ${anciennete(profile.created_at)}`,
+            detail: ownerSitsTotal > 0
+              ? `${ownerSitsTotal} garde${ownerSitsTotal > 1 ? 's' : ''} publiée${ownerSitsTotal > 1 ? 's' : ''}`
+              : null,
+          });
+        }
 
-                  {/* Tuile 2 : Environnement */}
-                  <div className="bg-card border border-border rounded-xl p-2.5 sm:p-3.5 md:p-4 flex flex-col gap-1 sm:gap-1.5 min-h-[88px] sm:min-h-[92px] min-w-0">
-                    <div className="text-[10px] sm:text-[11px] uppercase tracking-wider text-muted-foreground font-body">
-                      <span className="truncate">Environnement</span>
-                    </div>
-                    {envLabel ? (
-                      <p className="text-xs sm:text-sm text-foreground font-body leading-snug line-clamp-2 break-words">
-                        {envLabel}
-                      </p>
-                    ) : city ? (
-                      <p className="text-xs sm:text-sm text-foreground/80 font-body leading-snug break-words">{city}</p>
-                    ) : (
-                      <Empty label="Non renseigné" />
-                    )}
-                  </div>
+        return (
+        <div className="max-w-5xl mx-auto px-4 md:px-6 py-6 md:py-8 pb-[calc(10.5rem+env(safe-area-inset-bottom))] md:pb-8">
+          <div className="lg:grid lg:grid-cols-[minmax(0,1fr)_340px] lg:gap-8">
+            <div className="space-y-[52px] min-w-0">
 
-                  {/* Tuile 3 : Ancienneté + gardes publiées */}
-                  <div className="bg-card border border-border rounded-xl p-2.5 sm:p-3.5 md:p-4 flex flex-col gap-1 sm:gap-1.5 min-h-[88px] sm:min-h-[92px] min-w-0">
-                    <div className="text-[10px] sm:text-[11px] uppercase tracking-wider text-muted-foreground font-body">
-                      <span className="truncate">Ancienneté</span>
-                    </div>
-                    {profile?.created_at ? (
-                      <p className="text-xs sm:text-sm text-foreground font-body leading-snug break-words">
-                        <span className="font-semibold">{anciennete(profile.created_at)}</span>
-                      </p>
-                    ) : (
-                      <Empty label="Non renseigné" />
-                    )}
-                    <span className="text-[10px] sm:text-[11px] text-muted-foreground font-body">
-                      {ownerSitsTotal > 0
-                        ? `${ownerSitsTotal} garde${ownerSitsTotal > 1 ? 's' : ''} publiée${ownerSitsTotal > 1 ? 's' : ''}`
-                        : 'Aucune garde publiée'}
-                    </span>
-                  </div>
+              <StoryTiles tiles={tiles} />
 
-                  {/* Tuile 4 : Confiance (avis + écussons) */}
-                  <div className="bg-card border border-border rounded-xl p-2.5 sm:p-3.5 md:p-4 flex flex-col gap-1 sm:gap-1.5 min-h-[88px] sm:min-h-[92px] min-w-0">
-                    <div className="text-[10px] sm:text-[11px] uppercase tracking-wider text-muted-foreground font-body">
-                      <span className="truncate">Confiance</span>
-                    </div>
-                    {(ownerReviews.length > 0 || totalBadgeCount > 0 || profile?.identity_verified) ? (
-                      <>
-                        <div className="flex items-baseline flex-wrap gap-x-1.5 gap-y-0.5 text-xs sm:text-sm text-foreground font-body">
-                          {ownerReviews.length > 0 ? (
-                            <>
-                              <span className="font-semibold whitespace-nowrap">{ownerAvg.toFixed(1)}<span className="text-primary">★</span></span>
-                              <span className="text-muted-foreground text-[11px] sm:text-xs">({ownerReviews.length} avis)</span>
-                            </>
-                          ) : profile?.identity_verified ? (
-                            <span className="text-foreground/80 text-[11px] sm:text-xs">Identité vérifiée</span>
-                          ) : (
-                            <span className="text-muted-foreground text-[11px] sm:text-xs italic">Aucun avis</span>
-                          )}
-                        </div>
-                        <div className="flex flex-wrap gap-x-1 sm:gap-x-1.5 gap-y-0.5 text-[10px] sm:text-[11px] text-muted-foreground font-body">
-                          {totalBadgeCount > 0 && (
-                            <span className="whitespace-nowrap">{totalBadgeCount} écusson{totalBadgeCount > 1 ? 's' : ''}</span>
-                          )}
-                          {totalBadgeCount > 0 && profile?.identity_verified && ownerReviews.length > 0 && <span aria-hidden="true">·</span>}
-                          {profile?.identity_verified && ownerReviews.length > 0 && (
-                            <span className="whitespace-nowrap">ID vérifiée</span>
-                          )}
-                        </div>
-                      </>
-                    ) : (
-                      <Empty label="Nouveau profil" />
-                    )}
-                  </div>
+              {/* Son mot d'accueil */}
+              <section aria-label={`Mot d'accueil de ${firstName}`} className="scroll-mt-20">
+                <div className="mb-5">
+                  <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-secondary">
+                    Bienvenue
+                  </p>
+                  <h2 className="font-heading text-[22px] sm:text-[26px] font-semibold text-foreground mt-1 leading-tight">
+                    Son mot d'accueil.
+                  </h2>
                 </div>
-
-                {/* Empty state éditorial owner sans annonce */}
-                {ownerSitsTotal === 0 && !ownerDataLoading && (
-                  <div className="mt-4 rounded-xl border border-dashed border-border bg-muted/30 p-4 text-sm text-foreground/80 font-body leading-relaxed">
-                    <span className="font-medium text-foreground">{firstName} prépare sa première garde.</span>{' '}
-                    En attendant, découvrez ses animaux et son environnement ci-dessous.
+                {ownerProfile?.welcome_notes || bio ? (
+                  <div className="space-y-4 max-w-2xl">
+                    {ownerProfile?.welcome_notes && (
+                      <p className="text-base text-foreground leading-relaxed font-body whitespace-pre-line">
+                        {ownerProfile.welcome_notes}
+                      </p>
+                    )}
+                    {bio && bio !== ownerProfile?.welcome_notes && (
+                      <p className="text-sm text-foreground/75 leading-relaxed font-body whitespace-pre-line">
+                        {bio}
+                      </p>
+                    )}
+                  </div>
+                ) : (
+                  <p className="text-sm text-muted-foreground italic font-body">
+                    {firstName} n'a pas encore rédigé son mot d'accueil.
+                  </p>
+                )}
+                {(ownerProfile?.competences?.length ?? 0) > 0 && (
+                  <div className="mt-6 space-y-2">
+                    <p className="text-xs uppercase tracking-widest text-foreground/50 font-body">Savoir-faire</p>
+                    <div className="flex flex-wrap gap-1.5">
+                      {ownerProfile?.competences?.map((c: string) => (
+                        <span key={c} className="border border-border bg-card rounded-full text-xs px-2.5 py-1 text-foreground/80 font-body">{c}</span>
+                      ))}
+                    </div>
                   </div>
                 )}
               </section>
-            );
-          })()}
 
+              {/* Ses animaux */}
+              <section aria-label={`Animaux de ${firstName}`} className="scroll-mt-20">
+                <div className="mb-5">
+                  <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-secondary">
+                    Foyer
+                  </p>
+                  <h2 className="font-heading text-[22px] sm:text-[26px] font-semibold text-foreground mt-1 leading-tight">
+                    Ses animaux.
+                  </h2>
+                </div>
+                {ownerDataLoading ? (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3" aria-busy="true">
+                    {[0, 1].map((i) => (
+                      <div key={i} className="flex items-center gap-3 bg-card border border-border rounded-xl p-4">
+                        <Skeleton className="w-12 h-12 rounded-full shrink-0" />
+                        <div className="space-y-2 flex-1">
+                          <Skeleton className="h-3 w-24" />
+                          <Skeleton className="h-3 w-16" />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : pets.length > 0 ? (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    {pets.map((pet) => {
+                      const ageNum = parseInt(String(pet.age ?? ''));
+                      const ageLabel = !isNaN(ageNum) ? `${ageNum} an${ageNum > 1 ? 's' : ''}` : null;
+                      return (
+                        <div key={pet.id} className="flex items-center gap-3 bg-card border border-border rounded-xl p-4">
+                          {pet.photo_url ? (
+                            <img src={pet.photo_url} alt={pet.name} className="w-12 h-12 rounded-full object-cover shrink-0" />
+                          ) : (
+                            <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center shrink-0">
+                              <PawPrint className="w-5 h-5 text-foreground/30" aria-hidden="true" />
+                            </div>
+                          )}
+                          <div className="min-w-0">
+                            <p className="font-heading font-semibold text-foreground text-sm truncate">{pet.name}</p>
+                            <p className="text-xs text-foreground/60 font-body truncate">
+                              {[pet.species, pet.breed, ageLabel].filter(Boolean).join(' · ')}
+                            </p>
+                            {pet.character && (
+                              <p className="text-xs text-foreground/50 font-body mt-0.5 truncate italic">{pet.character}</p>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  <p className="text-sm text-muted-foreground italic font-body">
+                    Les compagnons de {firstName} apparaîtront ici.
+                  </p>
+                )}
+              </section>
 
-          {/* Sous-onglets sticky scrollables (forceMount SEO) */}
-          <Tabs defaultValue="apropos" className="w-full">
-            <TabsList className="sticky top-[49px] z-10 w-full flex overflow-x-auto scrollbar-none justify-start rounded-none border-b border-border bg-background/95 backdrop-blur-sm h-auto p-0 gap-0 [&>*]:rounded-none [&>*]:border-b-2 [&>*]:border-transparent [&>*[data-state=active]]:border-primary [&>*[data-state=active]]:text-primary [&>*[data-state=active]]:bg-transparent [&>*[data-state=active]]:shadow-none">
-              <TabsTrigger value="apropos" className="shrink-0 px-4 py-3 text-sm font-body text-foreground/60 hover:text-foreground">
-                À propos
-              </TabsTrigger>
-              <TabsTrigger value="avis" className="shrink-0 px-4 py-3 text-sm font-body text-foreground/60 hover:text-foreground">
-                Avis{ownerReviews.length > 0 ? ` (${ownerReviews.length})` : ''}
-              </TabsTrigger>
-              <TabsTrigger value="animaux" className="shrink-0 px-4 py-3 text-sm font-body text-foreground/60 hover:text-foreground">
-                Animaux{pets.length > 0 ? ` (${pets.length})` : ''}
-              </TabsTrigger>
-              <TabsTrigger value="annonces" className="shrink-0 px-4 py-3 text-sm font-body text-foreground/60 hover:text-foreground">
-                Gardes{ownerSitsTotal > 0 ? ` (${ownerSitsTotal})` : ''}
-              </TabsTrigger>
-              {ownerGalleryPhotos.length > 0 && (
-                <TabsTrigger value="galerie" className="shrink-0 px-4 py-3 text-sm font-body text-foreground/60 hover:text-foreground">
-                  Galerie ({ownerGalleryPhotos.length})
-                </TabsTrigger>
+              {/* Ses annonces */}
+              <section aria-label={`Annonces de ${firstName}`} className="scroll-mt-20">
+                <div className="mb-5">
+                  <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-secondary">
+                    Annonces
+                  </p>
+                  <h2 className="font-heading text-[22px] sm:text-[26px] font-semibold text-foreground mt-1 leading-tight">
+                    Ses annonces.
+                  </h2>
+                </div>
+                {ownerDataLoading ? (
+                  <div className="space-y-2" aria-busy="true">
+                    {[0, 1, 2].map((i) => (
+                      <div key={i} className="flex items-center justify-between gap-4 bg-card border border-border rounded-xl px-4 py-3">
+                        <div className="min-w-0 flex-1 space-y-2">
+                          <Skeleton className="h-4 w-2/3" />
+                          <Skeleton className="h-3 w-1/2" />
+                        </div>
+                        <Skeleton className="h-6 w-20 rounded-full" />
+                      </div>
+                    ))}
+                  </div>
+                ) : ownerSits.length > 0 ? (
+                  <div className="space-y-2">
+                    {(showAllOwnerSits ? ownerSits : ownerSits.slice(0, VISIBLE_COUNT)).map((sit) => {
+                      const statusMap: Record<string, { label: string; style: string }> = {
+                        published: { label: 'Publiée', style: 'bg-primary/10 text-primary' },
+                        active: { label: 'Active', style: 'bg-primary/10 text-primary' },
+                        confirmed: { label: 'Confirmée', style: 'bg-primary/10 text-primary' },
+                        completed: { label: 'Terminée', style: 'bg-muted text-foreground/60' },
+                        finished: { label: 'Terminée', style: 'bg-muted text-foreground/60' },
+                        cancelled: { label: 'Annulée', style: 'bg-destructive/10 text-destructive' },
+                        draft: { label: 'Brouillon', style: 'bg-muted text-foreground/40' },
+                        archived: { label: 'Archivée', style: 'bg-muted text-foreground/40' },
+                        pending: { label: 'En attente', style: 'bg-muted text-foreground/60' },
+                      };
+                      const s = statusMap[sit.status] ?? { label: sit.status, style: 'bg-muted text-foreground/40' };
+                      const fmt = (d: string) => new Date(d).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
+                      const isPast = ['completed', 'finished', 'cancelled', 'archived'].includes(sit.status);
+                      const sitHref = `/annonces/${sit.slug && String(sit.slug).trim().length > 0 ? sit.slug : sit.id}`;
+                      return (
+                        <Link
+                          key={sit.id}
+                          to={sitHref}
+                          className={`flex items-center gap-3 bg-card border border-border rounded-xl px-3 py-2.5 hover:border-primary/40 hover:bg-muted/30 transition-colors ${isPast ? 'opacity-60' : ''}`}
+                        >
+                          {sit.cover_photo_url ? (
+                            <img src={sit.cover_photo_url} alt="" loading="lazy" className="w-14 h-14 rounded-lg object-cover shrink-0" />
+                          ) : (
+                            <div className="w-14 h-14 rounded-lg bg-muted shrink-0 flex items-center justify-center text-foreground/30">
+                              <Home className="h-5 w-5" aria-hidden="true" />
+                            </div>
+                          )}
+                          <div className="min-w-0 flex-1">
+                            <p className="text-sm font-medium text-foreground font-body truncate">{sit.title || 'Garde'}</p>
+                            <p className="text-xs text-foreground/50 font-body mt-0.5 truncate">
+                              {sit.city ? `${sit.city} · ` : ''}
+                              {sit.start_date && fmt(sit.start_date)}{sit.end_date && ` → ${fmt(sit.end_date)}`}
+                            </p>
+                          </div>
+                          <span className={`text-xs font-medium px-2.5 py-1 rounded-full shrink-0 font-body whitespace-nowrap ${s.style}`}>
+                            {s.label}
+                          </span>
+                        </Link>
+                      );
+                    })}
+                    <div className="flex flex-col items-start gap-2 mt-2">
+                      <ShowMoreBtn items={ownerSits} showAll={showAllOwnerSits} setShowAll={setShowAllOwnerSits} />
+                      {showAllOwnerSits && ownerSits.length < ownerSitsTotal && (
+                        <button
+                          type="button"
+                          onClick={loadMoreOwnerSits}
+                          disabled={ownerSitsLoadingMore}
+                          className="text-sm text-primary hover:underline font-body disabled:opacity-50"
+                        >
+                          {ownerSitsLoadingMore
+                            ? 'Chargement...'
+                            : `Charger ${Math.min(OWNER_SITS_PAGE_SIZE, ownerSitsTotal - ownerSits.length)} de plus`}
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                ) : (
+                  <p className="text-sm text-muted-foreground italic font-body">
+                    {firstName} prépare sa première annonce.
+                  </p>
+                )}
+              </section>
+
+              {/* Confiance (miroir) */}
+              {((userBadges && userBadges.length > 0) || profile?.created_at) && (
+                <TrustStory
+                  variant="desktop"
+                  title={`Ce qui rassure chez ${firstName}.`}
+                  eyebrow="Confiance"
+                >
+                  <span id="confiance-mobile" aria-hidden="true" />
+                  <div className="space-y-6">
+                    {userBadges && userBadges.length > 0 && (
+                      <div id="badges" className="scroll-mt-24 space-y-6">
+                        <SpecialBadgeHighlight userBadges={userBadges} />
+                        <BadgeRow badges={userBadges} />
+                      </div>
+                    )}
+                    {id && <MissionBadgesReceived profileId={id} />}
+                    <TrustTimeline
+                      memberSince={profile?.created_at}
+                      reviews={ownerReviews as any}
+                      badges={(userBadges || []).map((b: any) => ({
+                        badge_id: b.badge_id,
+                        created_at: b.created_at,
+                        count: b.count ?? 1,
+                      }))}
+                      completedSits={ownerSitsTotal}
+                      lastActivity={null}
+                      firstName={firstName}
+                    />
+                  </div>
+                </TrustStory>
               )}
-            </TabsList>
 
-            {/* Onglet À propos */}
-            <TabsContent value="apropos" forceMount className="mt-0 data-[state=inactive]:hidden px-4 pt-5 pb-4 space-y-5">
-              {/* Présentation propriétaire : priorité au mot d'accueil owner_profiles, repli sur la bio générale. */}
-              {ownerProfile?.welcome_notes ? (
-                <div className="space-y-2">
-                  <p className="text-sm text-foreground leading-relaxed font-body whitespace-pre-line">{ownerProfile.welcome_notes}</p>
-                  {bio && bio !== ownerProfile.welcome_notes && (
-                    <p className="text-sm text-foreground/70 leading-relaxed font-body whitespace-pre-line">{bio}</p>
+              {/* Les avis */}
+              <section aria-label="Avis reçus" className="scroll-mt-20">
+                <div className="mb-5">
+                  <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-secondary">
+                    Avis
+                  </p>
+                  <h2 className="font-heading text-[22px] sm:text-[26px] font-semibold text-foreground mt-1 leading-tight">
+                    {ownerReviews.length > 0
+                      ? 'Ce que les gardiens racontent.'
+                      : `${firstName} accueillera son premier gardien bientôt.`}
+                  </h2>
+                  {ownerReviews.length > 0 && (
+                    <p className="text-sm text-muted-foreground mt-1">
+                      {ownerReviews.length} retour{ownerReviews.length > 1 ? 's' : ''} · moyenne {ownerAvg.toFixed(1)}★
+                    </p>
                   )}
                 </div>
-              ) : bio ? (
-                <p className="text-sm text-foreground/75 leading-relaxed font-body whitespace-pre-line">{bio}</p>
-              ) : (
-                <p className="text-sm text-muted-foreground italic font-body">Pas encore de présentation.</p>
-              )}
-
-              {/* Environnements */}
-              {(ownerProfile?.environments?.length ?? 0) > 0 && (
-                <div className="space-y-2">
-                  <p className="text-xs uppercase tracking-widest text-foreground/50 font-body">Environnements</p>
-                  <div className="flex flex-wrap gap-2">
-                    {ownerProfile?.environments?.map((env: string) => (
-                      <span key={env} className="text-sm bg-muted text-foreground/70 px-3 py-1 rounded-full font-body">
-                        {ENV_LABELS[env] || env}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Compétences propriétaire */}
-              {(ownerProfile?.competences?.length ?? 0) > 0 && (
-                <div className="space-y-2">
-                  <p className="text-xs uppercase tracking-widest text-foreground/50 font-body">Savoir-faire</p>
-                  <div className="flex flex-wrap gap-1.5">
-                    {ownerProfile?.competences?.map((c: string) => (
-                      <span key={c} className="border border-border bg-card rounded-full text-xs px-2.5 py-1 text-foreground/80 font-body">{c}</span>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Badges confiance */}
-              {userBadges && userBadges.length > 0 && (
-                <div className="space-y-2">
-                  <p className="text-xs uppercase tracking-widest text-foreground/50 font-body">Écussons de confiance</p>
-                  <BadgeRow badges={userBadges} size="compact" />
-                </div>
-              )}
-            </TabsContent>
-
-            {/* Onglet Avis */}
-            <TabsContent value="avis" forceMount className="mt-0 data-[state=inactive]:hidden px-4 pt-5 pb-4 space-y-6">
-              {/* Avis gardes */}
-              <div className="space-y-3">
-                <p className="text-xs uppercase tracking-widest text-foreground/50 font-body">
-                  Avis des gardiens{ownerReviews.length > 0 ? ` (${ownerReviews.length})` : ''}
-                </p>
                 {ownerDataLoading ? (
                   <div className="space-y-3" aria-busy="true">
                     {[0, 1, 2].map((i) => (
@@ -1705,10 +1843,8 @@ export default function PublicSitterProfile() {
                         <div className="flex items-center gap-2.5">
                           <Skeleton className="h-8 w-8 rounded-full" />
                           <Skeleton className="h-3 w-24" />
-                          <Skeleton className="h-3 w-16 ml-auto" />
                         </div>
                         <Skeleton className="h-3 w-full" />
-                        <Skeleton className="h-3 w-4/5" />
                       </div>
                     ))}
                   </div>
@@ -1745,30 +1881,15 @@ export default function PublicSitterProfile() {
                     <ShowMoreBtn items={ownerReviews} showAll={showAllOwnerReviews} setShowAll={setShowAllOwnerReviews} />
                   </div>
                 ) : (
-                  <p className="text-sm text-foreground/50 font-body italic">Les avis des gardiens apparaîtront ici après la première garde.</p>
-                )}
-              </div>
-
-              {/* Avis entraide */}
-              {(ownerDataLoading || missionFeedbacks.length > 0) && (
-                <div className="space-y-3 border-t border-border/50 pt-5">
-                  <p className="text-xs uppercase tracking-widest text-foreground/50 font-body">
-                    Avis d'entraide{missionFeedbacks.length > 0 ? ` (${missionFeedbacks.length})` : ''}
+                  <p className="text-sm text-muted-foreground italic font-body">
+                    Les premiers retours des gardiens apparaîtront ici.
                   </p>
-                  {ownerDataLoading ? (
-                    <div className="space-y-3" aria-busy="true">
-                      {[0, 1].map((i) => (
-                        <div key={i} className="bg-card border border-border rounded-xl p-4 space-y-2">
-                          <div className="flex items-center gap-2.5">
-                            <Skeleton className="h-8 w-8 rounded-full" />
-                            <Skeleton className="h-5 w-20 rounded-full" />
-                            <Skeleton className="h-3 w-16 ml-auto" />
-                          </div>
-                          <Skeleton className="h-3 w-3/4" />
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
+                )}
+                {missionFeedbacks.length > 0 && (
+                  <div className="mt-6 space-y-3 border-t border-border/50 pt-5">
+                    <p className="text-xs uppercase tracking-widest text-foreground/50 font-body">
+                      Avis d'entraide ({missionFeedbacks.length})
+                    </p>
                     <div className="space-y-3">
                       {(showAllOwnerFeedbacks ? missionFeedbacks : missionFeedbacks.slice(0, VISIBLE_COUNT)).map((fb) => (
                         <article key={fb.id} className="bg-card border border-border rounded-xl p-4 space-y-2">
@@ -1788,249 +1909,49 @@ export default function PublicSitterProfile() {
                       ))}
                       <ShowMoreBtn items={missionFeedbacks} showAll={showAllOwnerFeedbacks} setShowAll={setShowAllOwnerFeedbacks} />
                     </div>
-                  )}
-                </div>
-              )}
-            </TabsContent>
-
-            {/* Onglet Animaux */}
-            <TabsContent value="animaux" forceMount className="mt-0 data-[state=inactive]:hidden px-4 pt-5 pb-4">
-              {ownerDataLoading ? (
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3" aria-busy="true">
-                  {[0, 1].map((i) => (
-                    <div key={i} className="flex items-center gap-3 bg-card border border-border rounded-xl p-4">
-                      <Skeleton className="w-12 h-12 rounded-full shrink-0" />
-                      <div className="space-y-2 flex-1">
-                        <Skeleton className="h-3 w-24" />
-                        <Skeleton className="h-3 w-16" />
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              ) : pets.length > 0 ? (
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  {pets.map((pet) => {
-                    const ageNum = parseInt(String(pet.age ?? ''));
-                    const ageLabel = !isNaN(ageNum) ? `${ageNum} an${ageNum > 1 ? 's' : ''}` : null;
-                    return (
-                      <div key={pet.id} className="flex items-center gap-3 bg-card border border-border rounded-xl p-4">
-                        {pet.photo_url ? (
-                          <img src={pet.photo_url} alt={pet.name} className="w-12 h-12 rounded-full object-cover shrink-0" />
-                        ) : (
-                          <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center shrink-0">
-                            <PawPrint className="w-5 h-5 text-foreground/30" aria-hidden="true" />
-                          </div>
-                        )}
-                        <div className="min-w-0">
-                          <p className="font-heading font-semibold text-foreground text-sm truncate">{pet.name}</p>
-                          <p className="text-xs text-foreground/60 font-body truncate">
-                            {[pet.species, pet.breed, ageLabel].filter(Boolean).join(' · ')}
-                          </p>
-                          {pet.character && (
-                            <p className="text-xs text-foreground/50 font-body mt-0.5 truncate italic">{pet.character}</p>
-                          )}
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              ) : (
-                <p className="text-sm text-foreground/50 font-body italic">Aucun animal renseigné pour l'instant.</p>
-              )}
-            </TabsContent>
-
-            {/* Onglet Annonces/Gardes */}
-            <TabsContent value="annonces" forceMount className="mt-0 data-[state=inactive]:hidden px-4 pt-5 pb-4 space-y-3">
-              {ownerDataLoading ? (
-                <div className="space-y-2" aria-busy="true">
-                  {[0, 1, 2].map((i) => (
-                    <div key={i} className="flex items-center justify-between gap-4 bg-card border border-border rounded-xl px-4 py-3">
-                      <div className="min-w-0 flex-1 space-y-2">
-                        <Skeleton className="h-4 w-2/3" />
-                        <Skeleton className="h-3 w-1/2" />
-                      </div>
-                      <Skeleton className="h-6 w-20 rounded-full" />
-                    </div>
-                  ))}
-                </div>
-              ) : ownerSits.length > 0 ? (
-                <div className="space-y-2">
-                  {(showAllOwnerSits ? ownerSits : ownerSits.slice(0, VISIBLE_COUNT)).map((sit) => {
-                    const statusMap: Record<string, { label: string; style: string }> = {
-                      published: { label: 'Publiée', style: 'bg-primary/10 text-primary' },
-                      active: { label: 'Active', style: 'bg-primary/10 text-primary' },
-                      confirmed: { label: 'Confirmée', style: 'bg-primary/10 text-primary' },
-                      completed: { label: 'Terminée', style: 'bg-muted text-foreground/60' },
-                      finished: { label: 'Terminée', style: 'bg-muted text-foreground/60' },
-                      cancelled: { label: 'Annulée', style: 'bg-destructive/10 text-destructive' },
-                      draft: { label: 'Brouillon', style: 'bg-muted text-foreground/40' },
-                      archived: { label: 'Archivée', style: 'bg-muted text-foreground/40' },
-                      pending: { label: 'En attente', style: 'bg-muted text-foreground/60' },
-                    };
-                    const s = statusMap[sit.status] ?? { label: sit.status, style: 'bg-muted text-foreground/40' };
-                    const fmt = (d: string) => new Date(d).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
-                    const isPast = ['completed', 'finished', 'cancelled', 'archived'].includes(sit.status);
-                    const sitHref = `/annonces/${sit.slug && String(sit.slug).trim().length > 0 ? sit.slug : sit.id}`;
-                    return (
-                      <Link
-                        key={sit.id}
-                        to={sitHref}
-                        className={`flex items-center gap-3 bg-card border border-border rounded-xl px-3 py-2.5 hover:border-primary/40 hover:bg-muted/30 transition-colors ${isPast ? 'opacity-60' : ''}`}
-                      >
-                        {sit.cover_photo_url ? (
-                          <img
-                            src={sit.cover_photo_url}
-                            alt=""
-                            loading="lazy"
-                            className="w-14 h-14 rounded-lg object-cover shrink-0"
-                          />
-                        ) : (
-                          <div className="w-14 h-14 rounded-lg bg-muted shrink-0 flex items-center justify-center text-foreground/30">
-                            <Home className="h-5 w-5" aria-hidden="true" />
-                          </div>
-                        )}
-                        <div className="min-w-0 flex-1">
-                          <p className="text-sm font-medium text-foreground font-body truncate">{sit.title || 'Garde'}</p>
-                          <p className="text-xs text-foreground/50 font-body mt-0.5 truncate">
-                            {sit.city ? `${sit.city} · ` : ''}
-                            {sit.start_date && fmt(sit.start_date)}{sit.end_date && ` → ${fmt(sit.end_date)}`}
-                          </p>
-                        </div>
-                        <span className={`text-xs font-medium px-2.5 py-1 rounded-full shrink-0 font-body whitespace-nowrap ${s.style}`}>
-                          {s.label}
-                        </span>
-                      </Link>
-                    );
-                  })}
-                  <div className="flex flex-col items-start gap-2 mt-2">
-                    <ShowMoreBtn items={ownerSits} showAll={showAllOwnerSits} setShowAll={setShowAllOwnerSits} />
-                    {showAllOwnerSits && ownerSits.length < ownerSitsTotal && (
-                      <button
-                        type="button"
-                        onClick={loadMoreOwnerSits}
-                        disabled={ownerSitsLoadingMore}
-                        className="text-sm text-primary hover:underline font-body disabled:opacity-50"
-                      >
-                        {ownerSitsLoadingMore
-                          ? 'Chargement...'
-                          : `Charger ${Math.min(OWNER_SITS_PAGE_SIZE, ownerSitsTotal - ownerSits.length)} de plus`}
-                      </button>
-                    )}
                   </div>
-                </div>
-              ) : (
-                <p className="text-sm text-foreground/50 font-body italic">Aucune garde publiée pour l'instant.</p>
+                )}
+              </section>
+
+              {/* Galerie propriétaire, uniquement si contenu */}
+              {ownerGalleryPhotos.length > 0 && (
+                <section aria-label="Galerie du foyer" className="scroll-mt-20">
+                  <div className="mb-5">
+                    <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-secondary">
+                      Galerie
+                    </p>
+                    <h2 className="font-heading text-[22px] sm:text-[26px] font-semibold text-foreground mt-1 leading-tight">
+                      Quelques instants du foyer.
+                    </h2>
+                  </div>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                    {ownerGalleryPhotos.map((photo, i) => (
+                      <div key={photo.id} className="group relative rounded-xl overflow-hidden aspect-square">
+                        <img
+                          src={photo.photo_url}
+                          alt={photo.caption || `Photo ${i + 1} du foyer de ${firstName}`}
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                          loading="lazy"
+                        />
+                      </div>
+                    ))}
+                  </div>
+                </section>
               )}
-            </TabsContent>
 
-            {/* Onglet Galerie */}
-            {ownerGalleryPhotos.length > 0 && (
-              <TabsContent value="galerie" forceMount className="mt-0 data-[state=inactive]:hidden px-4 pt-5 pb-4">
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                  {ownerGalleryPhotos.map((photo, i) => (
-                    <div key={photo.id} className="group relative rounded-xl overflow-hidden aspect-square">
-                      <img
-                        src={photo.photo_url}
-                        alt={photo.caption || `Photo ${i + 1} de ${firstName}`}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                        loading="lazy"
-                      />
-                      {photo.caption && (
-                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors flex items-end">
-                          <p className="p-2 text-white text-xs opacity-0 group-hover:opacity-100 transition-opacity line-clamp-2">{photo.caption}</p>
-                        </div>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              </TabsContent>
-            )}
-          </Tabs>
-
-          {/* Section Confiance propriétaire, toujours visible (miroir du gardien). */}
-          {(userBadges && userBadges.length > 0) || profile?.created_at ? (
-            <section
-              aria-label="Confiance et vérifications du propriétaire"
-              className="px-4 md:px-6 mt-8 pt-6 border-t border-border space-y-5"
-            >
-              <header>
-                <p className="text-xs uppercase tracking-[2px] text-muted-foreground font-body mb-1.5">
-                  Confiance et vérifications
-                </p>
-                <h2 className="text-lg font-heading font-semibold text-foreground">
-                  Ce qui rassure chez {firstName}
-                </h2>
-              </header>
-              {userBadges && userBadges.length > 0 && (
-                <>
-                  <SpecialBadgeHighlight userBadges={userBadges} />
-                  <BadgeRow badges={userBadges} size="compact" />
-                </>
-              )}
-              <TrustTimeline
-                memberSince={profile?.created_at}
-                reviews={ownerReviews as any}
-                badges={(userBadges || []).map((b: any) => ({
-                  badge_id: b.badge_id,
-                  created_at: b.created_at,
-                  count: b.count ?? 1,
-                }))}
-                completedSits={ownerSitsTotal}
-                lastActivity={null}
-                firstName={firstName}
-              />
-            </section>
-          ) : null}
-
-
-          {/* CTA sticky bottom-16, au-dessus de la BottomNav h-16 */}
-          {showCTA && (
-            <div className="md:hidden fixed bottom-16 left-0 right-0 z-40 bg-background border-t border-border px-3 sm:px-4 pt-2.5 sm:pt-3 pb-[calc(env(safe-area-inset-bottom)+0.625rem)] shadow-lg">
-              {isOwn ? (
-                <button
-                  type="button"
-                  disabled
-                  aria-disabled="true"
-                  className="flex items-center justify-center bg-muted text-muted-foreground rounded-lg px-4 py-3 text-sm font-medium w-full opacity-70 cursor-not-allowed"
-                >
-                  Aperçu de votre profil propriétaire
-                </button>
-              ) : !isAuthenticated ? (
-                <Link
-                  to={`/inscription?redirect=${encodeURIComponent(`/gardiens/${id}?tab=proprio`)}`}
-                  className="flex items-center justify-center bg-primary text-primary-foreground rounded-lg px-4 py-3 text-sm font-medium w-full"
-                >
-                  S'inscrire pour contacter {firstName}
-                </Link>
-              ) : isSitter ? (
-                <button
-                  type="button"
-                  onClick={async () => {
-                    if (!auth?.user?.id || !id) return;
-                    const { startConversation } = await import('@/lib/conversation');
-                    const { conversationId, error } = await startConversation({
-                      otherUserId: id,
-                      context: 'owner_pitch',
-                    });
-                    if (conversationId) {
-                      navigate(`/messages?c=${conversationId}`);
-                    } else if (error?.includes('propositions spontanées')) {
-                      const { toast } = await import('sonner');
-                      toast.error('Ce propriétaire ne reçoit pas de propositions spontanées.');
-                    } else {
-                      const { toast } = await import('sonner');
-                      toast.error("Impossible d'ouvrir la conversation.");
-                    }
-                  }}
-                  className="flex items-center justify-center bg-primary text-primary-foreground rounded-lg px-4 py-3 text-sm font-medium w-full"
-                >
-                  Contacter {firstName}
-                </button>
-              ) : null}
+              {/* Rail inline mobile */}
+              <div className="lg:hidden">
+                <ProfileRail inline>{proprioRailChildren}</ProfileRail>
+              </div>
             </div>
-          )}
+
+            {/* Rail sticky desktop */}
+            <ProfileRail>{proprioRailChildren}</ProfileRail>
+          </div>
         </div>
-      )}
+        );
+      })()}
+
 
 
       {/* ── ONGLET ENTRAIDE ── */}
@@ -2179,6 +2100,55 @@ export default function PublicSitterProfile() {
         </div>
       )}
 
+      {/* ── CTA sticky mobile UNIFIÉ (vague 38) ──
+          Mirroir strict du CTA hero courant (facette active), gaté par
+          IntersectionObserver : n'apparaît que si le hero est hors écran.
+          Un seul bloc, jamais deux CTA concurrents. */}
+      {!heroCtaVisible && (() => {
+        const baseCls =
+          "md:hidden fixed bottom-16 left-0 right-0 z-40 bg-background border-t border-border px-3 sm:px-4 pt-2.5 sm:pt-3 pb-[calc(env(safe-area-inset-bottom)+0.625rem)] shadow-lg";
+        const btnCls =
+          "flex items-center justify-center bg-primary text-primary-foreground rounded-lg px-3 sm:px-4 py-3 text-[13px] sm:text-sm font-medium w-full leading-tight text-center break-words";
+        const mutedCls =
+          "flex items-center justify-center bg-muted text-muted-foreground rounded-lg px-4 py-3 text-sm font-medium w-full opacity-70 cursor-not-allowed";
+        if (heroCta.kind === "own") return null;
+        if (heroCta.kind === "muted") {
+          return (
+            <div className={baseCls}>
+              <button type="button" disabled aria-disabled="true" className={mutedCls} title={heroCta.hint}>
+                {heroCta.label}
+              </button>
+            </div>
+          );
+        }
+        if (heroCta.kind === "unauthenticated") {
+          return (
+            <div className={baseCls}>
+              <Link to={heroCta.signupHref} className={btnCls}>
+                <span className="line-clamp-2">{heroCta.label ?? `S'inscrire pour contacter ${firstName}`}</span>
+              </Link>
+            </div>
+          );
+        }
+        if (heroCta.kind === "owner") {
+          return (
+            <div className={baseCls}>
+              <button type="button" onClick={heroCta.onContact} className={btnCls}>
+                <span className="line-clamp-2">{heroCta.label ?? `Contacter ${firstName}`}</span>
+              </button>
+            </div>
+          );
+        }
+        return (
+          <div className={baseCls}>
+            <button type="button" onClick={heroCta.onActivate} className={btnCls}>
+              <span className="line-clamp-2">{heroCta.label ?? `Contacter ${firstName}`}</span>
+            </button>
+          </div>
+        );
+      })()}
+
+
       {/* ── Lightbox ── */}
       {lightboxIdx !== null && (
         <div
@@ -2244,6 +2214,13 @@ export default function PublicSitterProfile() {
         targetRole="proprio"
         contactContext={activateProprioIntent ?? undefined}
       />
+
+      <ActivateRoleDialog
+        open={activateGardienOpen}
+        onClose={() => setActivateGardienOpen(false)}
+        targetRole="gardien"
+      />
+
       </div>
     </div>
   );
