@@ -72,9 +72,27 @@ const PW_ADJ = ["Joyeux", "Calme", "Sauvage", "Doux", "Brave", "Curieux", "Vif",
 const PW_NOUN = ["Chat", "Chien", "Lapin", "Renard", "Loup", "Cheval", "Hibou", "Ours"];
 const PW_VERB = ["adore", "croque", "grimpe", "danse", "veille", "murmure", "explore"];
 const PW_SYM = ["!", "?", "#", "$", "*"];
+/**
+ * Génère un mot de passe suggéré cryptographiquement sûr, style mémorisable
+ * Adjectif+Nom+Symbole+Verbe+4 chiffres. Utilise crypto.getRandomValues pour
+ * l'entropie (jamais Math.random). Résultat garanti >= 12 caractères et
+ * conçu pour passer le contrôle de force (mix majuscules/minuscules/chiffres/symbole).
+ */
 const generateSuggestedPassword = (): string => {
-  const pick = <T,>(arr: T[]): T => arr[Math.floor(Math.random() * arr.length)];
-  const num = String(Math.floor(Math.random() * 90) + 10);
+  const rand = (max: number): number => {
+    // Rejet des valeurs qui biaiseraient le modulo (uniformité stricte).
+    const buf = new Uint32Array(1);
+    const limit = Math.floor(0xffffffff / max) * max;
+    let x = 0;
+    do {
+      crypto.getRandomValues(buf);
+      x = buf[0];
+    } while (x >= limit);
+    return x % max;
+  };
+  const pick = <T,>(arr: T[]): T => arr[rand(arr.length)];
+  // 4 chiffres [1000, 9999] : ~13 bits d'entropie supplémentaires.
+  const num = String(1000 + rand(9000));
   return `${pick(PW_ADJ)}${pick(PW_NOUN)}${pick(PW_SYM)}${pick(PW_VERB)}${num}`;
 };
 
