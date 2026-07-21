@@ -1440,7 +1440,20 @@ const SearchOwner = () => {
               const profile = s.profile;
               const firstName = profile?.first_name || "Gardien";
               return (
-                <div key={s.id} className="flex gap-3 p-3 rounded-xl border border-border hover:shadow-sm transition-shadow cursor-pointer" onClick={() => navigate(`/gardiens/${s.user_id}`)}>
+                <div
+                  key={s.id}
+                  role="link"
+                  tabIndex={0}
+                  aria-label={`Voir le profil de ${firstName}`}
+                  className="flex gap-3 p-3 rounded-xl border border-border hover:shadow-sm transition-shadow cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  onClick={() => navigate(`/gardiens/${s.user_id}`)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault();
+                      navigate(`/gardiens/${s.user_id}`);
+                    }
+                  }}
+                >
                   {profile?.avatar_url ? (
                     <img src={profile.avatar_url} alt={firstName} className="h-14 w-14 rounded-xl object-cover shrink-0" />
                   ) : (
@@ -1460,7 +1473,13 @@ const SearchOwner = () => {
                       {(profile?.completed_sits_count || 0) > 0 && <span>{profile.completed_sits_count} garde{profile.completed_sits_count > 1 ? "s" : ""}</span>}
                     </div>
                   </div>
-                  <button onClick={(e) => { e.stopPropagation(); handleContact(s.user_id); }} className="shrink-0 self-center px-3 py-1.5 text-xs bg-primary text-primary-foreground rounded-lg font-medium">Contacter</button>
+                  <button
+                    onClick={(e) => { e.stopPropagation(); handleContact(s.user_id); }}
+                    aria-label={`Contacter ${firstName}`}
+                    className="shrink-0 self-center px-3 py-1.5 text-xs bg-primary text-primary-foreground rounded-lg font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  >
+                    Contacter
+                  </button>
                 </div>
               );
             })}
