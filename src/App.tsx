@@ -417,12 +417,12 @@ const AppRoutes = () => {
       </Route>
       {/* App routes */}
       <Route path="/dashboard" element={<DashboardRouteShell />} />
-      {/* /search est public (consultable sans connexion) */}
+      {/* /search et /recherche-gardiens sont publics (consultables sans connexion, vague 40) */}
       <Route path="/search" element={<AppLayout><SearchPage /></AppLayout>} />
       <Route path="/recherche" element={<AppLayout><SearchPage /></AppLayout>} />
+      <Route path="/recherche-gardiens" element={<AppLayout><SearchOwner /></AppLayout>} />
       <Route element={<ProtectedRoute><AppLayout /></ProtectedRoute>}>
         <Route path="/profile" element={<Profile />} />
-        <Route path="/recherche-gardiens" element={<SearchOwner />} />
 
         <Route path="/messages" element={<Messages />} />
         <Route path="/sits" element={<Sits />} />
