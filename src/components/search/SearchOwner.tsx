@@ -1102,12 +1102,30 @@ const SearchOwner = () => {
 
 
         {/* Sort bar + view toggle (sticky avec les pills pour cohérence visuelle) */}
-        <div className="flex items-center justify-between gap-2 -mx-6 px-6 pt-2.5 border-t border-border/60 flex-nowrap">
+        <div className="flex items-start justify-between gap-3 -mx-6 px-6 pt-3 border-t border-border/60 flex-nowrap">
           <div className="flex items-center gap-2 min-w-0 flex-1 overflow-x-auto no-scrollbar snap-x snap-mandatory">
-            <p className="text-xs sm:text-sm font-medium text-foreground shrink-0" aria-live="polite">{loading ? "Recherche en cours…" : (<>{results.length} gardien{results.length !== 1 ? "s" : ""} trouvé{results.length !== 1 ? "s" : ""}</>)}</p>
+            <div className="shrink-0 min-w-0" aria-live="polite">
+              <p className="font-heading text-[17px] sm:text-lg font-semibold leading-tight text-foreground">
+                {loading
+                  ? "Recherche en cours…"
+                  : `${results.length} gardien${results.length !== 1 ? "s" : ""} trouvé${results.length !== 1 ? "s" : ""}`}
+              </p>
+              {!loading && results.length > 0 && (
+                <p className="text-[11.5px] text-muted-foreground leading-snug mt-0.5">
+                  {sort === "affinity" && viewerOwner
+                    ? "Classés par affinité avec votre foyer, les gardiens d'urgence d'abord."
+                    : sort === "rating"
+                      ? "Classés par note, les gardiens d'urgence d'abord."
+                      : sort === "experience"
+                        ? "Classés par expérience, les gardiens d'urgence d'abord."
+                        : "Classés du plus proche au plus loin, les gardiens d'urgence d'abord."}
+                </p>
+              )}
+            </div>
             {hasActiveFilters && (
               <button onClick={resetFilters} className="text-xs text-primary hover:underline whitespace-nowrap shrink-0">Réinit.</button>
             )}
+
             {/* Options de tri : « Meilleure affinité » n'apparaît que si le viewer
                 a un profil owner (sinon le score est masqué et le tri n'a pas de sens). */}
             {(() => {
