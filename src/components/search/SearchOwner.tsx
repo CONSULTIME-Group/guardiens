@@ -392,9 +392,9 @@ const SearchOwner = () => {
     setSearchError(null);
 
     setResultsTruncated(false);
-    const { data: sitters, error: sittersError } = await supabase
-      .from("sitter_profiles")
-      .select("*, reply_median_minutes")
+    const { data: sitters, error: sittersError } = await (supabase as any)
+      .from("public_sitter_profiles")
+      .select("*")
       .limit(SITTERS_SERVER_CAP);
 
     if (sittersError) {
