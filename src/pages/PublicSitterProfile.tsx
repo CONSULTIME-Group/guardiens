@@ -21,7 +21,7 @@ import { fr } from "date-fns/locale";
 import { Skeleton } from "@/components/ui/skeleton";
 import { buildAbsoluteUrl } from "@/lib/seo";
 import {
-  Car, MapPin, X, BadgeCheck,
+  MapPin, X,
   ChevronLeft, ChevronRight,
   Shield, Star, PawPrint,
   Home, KeyRound, Handshake, Heart,
