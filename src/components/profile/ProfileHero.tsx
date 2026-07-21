@@ -159,7 +159,20 @@ const ProfileHero = ({
           title="Ceci est votre profil public. Utilisez « Modifier mon profil » pour le mettre à jour."
           className={`${baseCls} bg-muted text-muted-foreground cursor-not-allowed opacity-70`}
         >
-          Aperçu de votre profil
+          {cta.label ?? "Aperçu de votre profil"}
+        </button>
+      );
+    }
+    if (cta.kind === "muted") {
+      return (
+        <button
+          type="button"
+          disabled
+          aria-disabled="true"
+          title={cta.hint}
+          className={`${baseCls} bg-muted text-muted-foreground cursor-not-allowed opacity-70`}
+        >
+          {cta.label}
         </button>
       );
     }
@@ -169,7 +182,7 @@ const ProfileHero = ({
           to={cta.signupHref}
           className={`${baseCls} bg-primary text-primary-foreground hover:bg-primary/90`}
         >
-          S'inscrire pour contacter {firstName}
+          {cta.label ?? `S'inscrire pour contacter ${firstName}`}
         </Link>
       );
     }
@@ -180,7 +193,7 @@ const ProfileHero = ({
           onClick={cta.onContact}
           className={`${baseCls} bg-primary text-primary-foreground hover:bg-primary/90 cursor-pointer`}
         >
-          Contacter {firstName}
+          {cta.label ?? `Contacter ${firstName}`}
         </button>
       );
     }
@@ -190,17 +203,21 @@ const ProfileHero = ({
         onClick={cta.onActivate}
         className={`${baseCls} bg-primary text-primary-foreground hover:bg-primary/90 cursor-pointer`}
       >
-        Contacter {firstName}
+        {cta.label ?? `Contacter ${firstName}`}
       </button>
     );
   };
 
-  const reassurance =
+  const defaultReassurance =
     cta.kind === "own"
       ? "Vous voyez cette page comme un visiteur."
-      : cta.kind === "unauthenticated"
-        ? "L'inscription est gratuite, sans engagement."
-        : "Contact direct, sans intermédiaire.";
+      : cta.kind === "muted"
+        ? (cta.hint ?? "")
+        : cta.kind === "unauthenticated"
+          ? "L'inscription est gratuite, sans engagement."
+          : "Contact direct, sans intermédiaire.";
+  const reassurance = ctaReassurance ?? defaultReassurance;
+
 
   return (
     <div className="relative overflow-hidden w-full flex items-end bg-[hsl(var(--hero-paper))] md:max-h-[520px] md:[aspect-ratio:1536/544]">
