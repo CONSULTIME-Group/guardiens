@@ -49,6 +49,8 @@ const SitterResultCard = ({
   city,
 }: SitterResultCardProps) => {
   const [photoIdx, setPhotoIdx] = useState(0);
+  const { user } = useAuth();
+  const isAnon = !user;
   const profile = sitter.profile;
   const firstName = profile?.first_name || "Gardien";
   const bio = profile?.bio
@@ -67,6 +69,7 @@ const SitterResultCard = ({
   const initials = firstName.charAt(0).toUpperCase();
   const hasPhotos = photos.length > 0;
   const currentPhoto = hasPhotos ? photos[photoIdx % photos.length] : null;
+  const signupRedirect = `/gardiens/${sitter.user_id}`;
 
   const stop = (e: MouseEvent) => {
     e.preventDefault();
@@ -82,10 +85,10 @@ const SitterResultCard = ({
     setPhotoIdx((i) => (i + 1) % photos.length);
   };
 
-  // Affinité : score affichable, sinon libellé fallback discret.
-  const showAffinityBadge = !!affinity && affinity.displayed !== false;
+  // Affinité : score affichable, sinon libellé fallback discret (jamais pour les anonymes, vague 40).
+  const showAffinityBadge = !isAnon && !!affinity && affinity.displayed !== false;
   const showAffinityFallback =
-    hasOwnerProfile && !showAffinityBadge; // owner sait qu'il pourrait déverrouiller
+    !isAnon && hasOwnerProfile && !showAffinityBadge;
 
   return (
     <Link
