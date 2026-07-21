@@ -1058,7 +1058,7 @@ const SearchOwner = () => {
         {/* Sort bar + view toggle (sticky avec les pills pour cohérence visuelle) */}
         <div className="flex items-center justify-between gap-2 -mx-6 px-6 pt-2.5 border-t border-border/60 flex-nowrap">
           <div className="flex items-center gap-2 min-w-0 flex-1 overflow-x-auto no-scrollbar snap-x snap-mandatory">
-            <p className="text-xs sm:text-sm font-medium text-foreground shrink-0" aria-live="polite">{loading ? "Recherche en cours…" : (<>{results.length} gardien{results.length !== 1 ? "s" : ""}<span className="hidden sm:inline"> disponible{results.length !== 1 ? "s" : ""}</span></>)}</p>
+            <p className="text-xs sm:text-sm font-medium text-foreground shrink-0" aria-live="polite">{loading ? "Recherche en cours…" : (<>{results.length} gardien{results.length !== 1 ? "s" : ""} trouvé{results.length !== 1 ? "s" : ""}</>)}</p>
             {hasActiveFilters && (
               <button onClick={resetFilters} className="text-xs text-primary hover:underline whitespace-nowrap shrink-0">Réinit.</button>
             )}
