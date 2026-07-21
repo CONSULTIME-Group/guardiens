@@ -17,10 +17,11 @@ import FavoriteButton from "@/components/shared/FavoriteButton";
 import ReplyTimeBadge from "@/components/sitters/ReplyTimeBadge";
 
 export type HeroCtaVariant =
-  | { kind: "own" }
-  | { kind: "unauthenticated"; signupHref: string }
-  | { kind: "owner"; onContact: () => void }
-  | { kind: "sitter"; onActivate: () => void };
+  | { kind: "own"; label?: string }
+  | { kind: "unauthenticated"; signupHref: string; label?: string }
+  | { kind: "owner"; onContact: () => void; label?: string }
+  | { kind: "sitter"; onActivate: () => void; label?: string }
+  | { kind: "muted"; label: string; hint?: string };
 
 interface ProfileHeroProps {
   id: string;
@@ -54,7 +55,9 @@ interface ProfileHeroProps {
   roleTabActive: "gardien" | "proprio" | "entraide";
 
   cta: HeroCtaVariant;
+  ctaReassurance?: string;
 }
+
 
 const ProfileHero = ({
   id,
