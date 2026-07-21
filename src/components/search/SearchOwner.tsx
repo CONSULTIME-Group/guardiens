@@ -1534,6 +1534,7 @@ const SearchOwner = () => {
         </div>
       )}
     </div>
+    </>
   );
 };
 
