@@ -183,11 +183,11 @@ const SearchOwner = () => {
     })();
   }, [user, searchParams]);
 
-  // Fetch true France-wide sitter count (for unbiased counter + launch detection)
+  // Fetch true France-wide sitter count via la vue publique (lisible par anon, vague 40).
   useEffect(() => {
     (async () => {
-      const { count } = await supabase
-        .from("sitter_profiles")
+      const { count } = await (supabase as any)
+        .from("public_sitter_profiles")
         .select("user_id", { count: "exact", head: true });
       setFranceTotalSitters(count ?? 0);
     })();
