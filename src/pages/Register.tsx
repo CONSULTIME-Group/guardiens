@@ -660,7 +660,7 @@ const Register = () => {
   {step === 2 && (
   <form onSubmit={handleSubmit} className="space-y-5 animate-in fade-in-0 slide-in-from-bottom-4 duration-300">
   {detectedIntent && (
-   <div className="rounded-lg border border-terra-border/60 bg-terra-soft px-4 py-3 text-sm text-terra-foreground">
+   <div className="rounded-lg border border-terra-border/60 bg-terra-soft/60 px-4 py-3 text-sm text-foreground">
     {t(`register_page.intent_banner.${detectedIntent}`)}
    </div>
   )}
