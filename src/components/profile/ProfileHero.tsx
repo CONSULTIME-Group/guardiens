@@ -86,7 +86,9 @@ const ProfileHero = ({
   hasOwnerProfile,
   roleTabActive,
   cta,
+  ctaReassurance,
 }: ProfileHeroProps) => {
+
   // Chips : cap à 3, priorité ID > Abonné > Urgence.
   const chips: Array<{ key: string; node: JSX.Element }> = [];
   if (identityVerified) {
