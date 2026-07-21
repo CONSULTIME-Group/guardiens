@@ -25,6 +25,7 @@ import PresenceBadge from "@/components/messages/PresenceBadge";
 import ReplyTimeBadge from "@/components/sitters/ReplyTimeBadge";
 import AffinityBadge from "@/components/matching/AffinityBadge";
 import type { AffinityResult } from "@/lib/affinityScore";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface SitterResultCardProps {
   sitter: any;
@@ -48,6 +49,8 @@ const SitterResultCard = ({
   city,
 }: SitterResultCardProps) => {
   const [photoIdx, setPhotoIdx] = useState(0);
+  const { user } = useAuth();
+  const isAnon = !user;
   const profile = sitter.profile;
   const firstName = profile?.first_name || "Gardien";
   const bio = profile?.bio
@@ -66,6 +69,7 @@ const SitterResultCard = ({
   const initials = firstName.charAt(0).toUpperCase();
   const hasPhotos = photos.length > 0;
   const currentPhoto = hasPhotos ? photos[photoIdx % photos.length] : null;
+  const signupRedirect = `/gardiens/${sitter.user_id}`;
 
   const stop = (e: MouseEvent) => {
     e.preventDefault();
@@ -81,10 +85,10 @@ const SitterResultCard = ({
     setPhotoIdx((i) => (i + 1) % photos.length);
   };
 
-  // Affinité : score affichable, sinon libellé fallback discret.
-  const showAffinityBadge = !!affinity && affinity.displayed !== false;
+  // Affinité : score affichable, sinon libellé fallback discret (jamais pour les anonymes, vague 40).
+  const showAffinityBadge = !isAnon && !!affinity && affinity.displayed !== false;
   const showAffinityFallback =
-    hasOwnerProfile && !showAffinityBadge; // owner sait qu'il pourrait déverrouiller
+    !isAnon && hasOwnerProfile && !showAffinityBadge;
 
   return (
     <Link
@@ -94,13 +98,13 @@ const SitterResultCard = ({
     >
       {/* Favori */}
       <div className="absolute top-2 right-2 z-10">
-        <FavoriteButton targetType="sitter" targetId={sitter.user_id} />
+        <FavoriteButton targetType="sitter" targetId={sitter.user_id} anonRedirect={signupRedirect} />
       </div>
 
       {/* Urgence */}
       {sitter.isEmergency && (
         <span className="absolute top-2 left-2 z-10 flex items-center gap-1 bg-card/90 rounded-full px-2 py-0.5 text-[11px] font-medium">
-          <Zap className="h-3 w-3 text-amber-500" /> Urgence
+          <Zap className="h-3 w-3 text-warning" /> Urgence
         </span>
       )}
 
@@ -215,7 +219,7 @@ const SitterResultCard = ({
         <div className="flex items-center gap-2 mt-1 min-h-[1rem]">
           {sitter.avgRating !== null && (
             <span className="flex items-center gap-0.5 text-xs text-muted-foreground">
-              <Star className="h-3 w-3 text-yellow-500 fill-yellow-500" />
+              <Star className="h-3 w-3 text-primary fill-primary" />
               {sitter.avgRating.toFixed(1)}
             </span>
           )}
@@ -269,25 +273,37 @@ const SitterResultCard = ({
           {bio || <span className="opacity-0">.</span>}
         </p>
 
-        {/* CTA : épingle en bas de carte pour aligner les boutons sur une rangée */}
+        {/* CTA : anon → inscription avec redirect encodé ; membre → conversation directe. */}
         <div className="mt-auto pt-2">
-          <button
-            type="button"
-            onClick={(e) => {
-              stop(e);
-              onContact(sitter.user_id);
-            }}
-            disabled={contactingId === sitter.user_id}
-            aria-label={`Contacter ${firstName}`}
-            className="inline-flex items-center justify-center gap-1.5 min-h-11 w-full rounded-full bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors disabled:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-          >
-            {contactingId === sitter.user_id ? (
-              <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
-            ) : (
+          {isAnon ? (
+            <Link
+              to={`/inscription?redirect=${encodeURIComponent(signupRedirect)}`}
+              onClick={stop}
+              aria-label={`S'inscrire pour contacter ${firstName}`}
+              className="inline-flex items-center justify-center gap-1.5 min-h-11 w-full rounded-full bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            >
               <MessageCircle className="h-4 w-4" aria-hidden />
-            )}
-            Contacter
-          </button>
+              Contacter
+            </Link>
+          ) : (
+            <button
+              type="button"
+              onClick={(e) => {
+                stop(e);
+                onContact(sitter.user_id);
+              }}
+              disabled={contactingId === sitter.user_id}
+              aria-label={`Contacter ${firstName}`}
+              className="inline-flex items-center justify-center gap-1.5 min-h-11 w-full rounded-full bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors disabled:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            >
+              {contactingId === sitter.user_id ? (
+                <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
+              ) : (
+                <MessageCircle className="h-4 w-4" aria-hidden />
+              )}
+              Contacter
+            </button>
+          )}
         </div>
       </div>
     </Link>

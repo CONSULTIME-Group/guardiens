@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useMemo, useRef, lazy, Suspense } from "react";
+import { Helmet } from "react-helmet-async";
 import { logger } from "@/lib/logger";
 import { useNavigate, Link, useSearchParams } from "react-router-dom";
 import ReportButton from "@/components/reports/ReportButton";
@@ -85,6 +86,14 @@ const SearchOwner = () => {
   const [minRating, setMinRating] = useState<string>("all");
   const [sort, setSort] = useState<SortOption>("affinity");
   const [sortUserOverride, setSortUserOverride] = useState(false);
+  // Sans profil owner (visiteur anonyme ou gardien pur), l'affinité n'a pas de sens :
+  // on force le Select mobile sur « Plus proches » pour ne jamais afficher une valeur vide.
+  useEffect(() => {
+    if (!viewerOwner && !sortUserOverride && sort === "affinity") {
+      setSort("closest");
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [viewerOwner]);
   const [viewMode, setViewMode] = useState<ViewMode>("list");
 
   // rawResults = jeu brut rapatrié et enrichi par le fetch réseau (sitters + coords + reviews + badges + gallery + affinité).
@@ -182,11 +191,11 @@ const SearchOwner = () => {
     })();
   }, [user, searchParams]);
 
-  // Fetch true France-wide sitter count (for unbiased counter + launch detection)
+  // Fetch true France-wide sitter count via la vue publique (lisible par anon, vague 40).
   useEffect(() => {
     (async () => {
-      const { count } = await supabase
-        .from("sitter_profiles")
+      const { count } = await (supabase as any)
+        .from("public_sitter_profiles")
         .select("user_id", { count: "exact", head: true });
       setFranceTotalSitters(count ?? 0);
     })();
@@ -198,12 +207,11 @@ const SearchOwner = () => {
   // Reference postal code (selected city if available, else user CP)
   const getZoneRefPostalCode = (): string | null => cityPostalCode ?? userPostalCode;
 
-  // Contact handler, propriétaire qui sonde un gardien (context: sitter_inquiry)
+  // Contact handler, propriétaire qui sonde un gardien (context: sitter_inquiry).
+  // Anonyme (vague 40) : renvoi propre vers l'inscription avec redirect encodé, sans toast.
   const handleContact = async (sitterId: string) => {
     if (!user) {
-      toast.error("Connectez-vous pour contacter un gardien");
-      const redirect = `/gardiens/${sitterId}`;
-      navigate(`/login?redirect=${encodeURIComponent(redirect)}`);
+      navigate(`/inscription?redirect=${encodeURIComponent(`/gardiens/${sitterId}`)}`);
       return;
     }
     if (sitterId === user.id) {
@@ -224,6 +232,16 @@ const SearchOwner = () => {
     } finally {
       setContactingId(null);
     }
+  };
+
+  // Alerte : anonyme → redirection propre vers l'inscription (vague 40).
+  const handleCreateAlertGated = () => {
+    if (!user) {
+      const target = `/recherche-gardiens${city ? `?city=${encodeURIComponent(city)}` : ""}`;
+      navigate(`/inscription?redirect=${encodeURIComponent(target)}`);
+      return;
+    }
+    void handleCreateAlert();
   };
 
   // Create sitter alert
@@ -365,7 +383,7 @@ const SearchOwner = () => {
   const handleShareInvite = async () => {
     trackEvent("search_empty_action", { source: "owner", metadata: { action: "share_invite", zone_mode: zoneMode } });
     const url = `${window.location.origin}/inscription?role=sitter`;
-    const shareText = `Je cherche un gardien d'animaux près de ${city || "chez moi"} sur Guardiens. Tu peux t'inscrire ici :`;
+    const shareText = `Je cherche un gardien d'animaux près de ${city || "chez moi"} sur Guardiens. Vous pouvez vous inscrire ici :`;
     if (navigator.share) {
       try {
         await navigator.share({ title: "Guardiens, devenez gardien", text: shareText, url });
@@ -382,10 +400,13 @@ const SearchOwner = () => {
     setSearchError(null);
 
     setResultsTruncated(false);
-    const { data: sitters, error: sittersError } = await supabase
-      .from("sitter_profiles")
-      .select("*, reply_median_minutes")
+    // Vue publique (vague 40) : lecture anon OK. On alias user_id -> id pour préserver
+    // les clés React et le contrat de mapping historique côté sitter_profiles.
+    const { data: sittersRaw, error: sittersError } = await (supabase as any)
+      .from("public_sitter_profiles")
+      .select("*")
       .limit(SITTERS_SERVER_CAP);
+    const sitters = (sittersRaw || []).map((s: any) => ({ ...s, id: s.user_id }));
 
     if (sittersError) {
       console.error("[SearchOwner] Erreur chargement gardiens:", sittersError);
@@ -415,7 +436,9 @@ const SearchOwner = () => {
       });
     }
 
-    let items = rawSitters.filter((s: any) => s.profile?.profile_completion >= 60);
+    // Seuil de complétion abaissé à 40 (vague 40, 20/07/2026) : le profil public
+    // refondu gère les profils clairsemés, on ne masque plus de vrais gardiens.
+    let items = rawSitters.filter((s: any) => s.profile?.profile_completion >= 40);
 
     // Geocode all sitter cities once
     const uniqueCities = [...new Set(items.map((s: any) => s.profile?.city).filter(Boolean))] as string[];
@@ -452,7 +475,7 @@ const SearchOwner = () => {
     const [allBadgesRes, emergencyRes, galleryRes] = allUserIds.length > 0
       ? await Promise.all([
           supabase.from("badge_attributions").select("user_id, badge_id").in("user_id", allUserIds),
-          supabase.from("emergency_sitter_profiles").select("user_id, is_active").in("user_id", allUserIds).eq("is_active", true),
+          (supabase as any).from("public_emergency_sitter_profiles").select("user_id, is_active").in("user_id", allUserIds).eq("is_active", true),
           supabase.from("sitter_gallery").select("user_id, photo_url, created_at").in("user_id", allUserIds).order("created_at", { ascending: false }),
         ])
       : [{ data: [] as any[], error: null }, { data: [] as any[], error: null }, { data: [] as any[], error: null }] as const;
@@ -700,7 +723,33 @@ const SearchOwner = () => {
   const { data: activeSittersCount } = useActiveSittersCount();
   const { data: activeOwnersCount } = useActiveOwnersCount();
 
+  // SEO vague 40 : page indexable pour capter la demande organique.
+  const seoTitle = "Trouver un gardien d'animaux près de chez vous · Guardiens";
+  const seoDescription = "Consultez librement les profils de gardiens d'animaux en France : chats, chiens, NAC. Inscription gratuite pour contacter un gardien.";
+  const seoCanonical = "https://guardiens.fr/recherche-gardiens";
+  const seoJsonLd = [
+    { "@context": "https://schema.org", "@type": "WebPage", name: seoTitle, description: seoDescription, url: seoCanonical, inLanguage: "fr-FR", isPartOf: { "@type": "WebSite", name: "Guardiens", url: "https://guardiens.fr" } },
+    { "@context": "https://schema.org", "@type": "BreadcrumbList", itemListElement: [
+      { "@type": "ListItem", position: 1, name: "Accueil", item: "https://guardiens.fr/" },
+      { "@type": "ListItem", position: 2, name: "Trouver un gardien", item: seoCanonical },
+    ] },
+  ];
+
   return (
+    <>
+    <Helmet>
+      <title>{seoTitle}</title>
+      <meta name="description" content={seoDescription} />
+      <meta name="robots" content="index,follow" />
+      <link rel="canonical" href={seoCanonical} />
+      <meta property="og:title" content={seoTitle} />
+      <meta property="og:description" content={seoDescription} />
+      <meta property="og:url" content={seoCanonical} />
+      <meta property="og:type" content="website" />
+      <meta property="og:locale" content="fr_FR" />
+      <meta name="twitter:card" content="summary_large_image" />
+      <script type="application/ld+json">{JSON.stringify(seoJsonLd)}</script>
+    </Helmet>
     <div className="animate-fade-in">
       {/* Title */}
       <div className="px-6 pt-6 pb-2 md:pt-8 space-y-1.5">
@@ -951,7 +1000,7 @@ const SearchOwner = () => {
                     <Switch checked={verifiedOnly} onCheckedChange={setVerifiedOnly} />
                   </div>
                   <div className="flex items-center justify-between">
-                    <p className="text-sm flex items-center gap-1.5"><Zap className="h-3.5 w-3.5 text-amber-500" /> Gardiens d'urgence</p>
+                    <p className="text-sm flex items-center gap-1.5"><Zap className="h-3.5 w-3.5 text-warning" /> Gardiens d'urgence</p>
                     <Switch checked={emergencyOnly} onCheckedChange={setEmergencyOnly} />
                   </div>
                   <div className="flex items-center justify-between">
@@ -1043,7 +1092,7 @@ const SearchOwner = () => {
         {/* Sort bar + view toggle (sticky avec les pills pour cohérence visuelle) */}
         <div className="flex items-center justify-between gap-2 -mx-6 px-6 pt-2.5 border-t border-border/60 flex-nowrap">
           <div className="flex items-center gap-2 min-w-0 flex-1 overflow-x-auto no-scrollbar snap-x snap-mandatory">
-            <p className="text-xs sm:text-sm font-medium text-foreground shrink-0" aria-live="polite">{loading ? "Recherche en cours…" : (<>{results.length} gardien{results.length !== 1 ? "s" : ""}<span className="hidden sm:inline"> disponible{results.length !== 1 ? "s" : ""}</span></>)}</p>
+            <p className="text-xs sm:text-sm font-medium text-foreground shrink-0" aria-live="polite">{loading ? "Recherche en cours…" : (<>{results.length} gardien{results.length !== 1 ? "s" : ""} trouvé{results.length !== 1 ? "s" : ""}</>)}</p>
             {hasActiveFilters && (
               <button onClick={resetFilters} className="text-xs text-primary hover:underline whitespace-nowrap shrink-0">Réinit.</button>
             )}
@@ -1086,7 +1135,7 @@ const SearchOwner = () => {
             {city && (
               <button
                 type="button"
-                onClick={alertCreated ? undefined : handleCreateAlert}
+                onClick={alertCreated ? undefined : handleCreateAlertGated}
                 disabled={!city || isCreatingAlert}
                 aria-label={alertCreated ? "Alerte créée" : "Créer une alerte pour cette recherche"}
                 title={alertCreated ? "Alerte créée" : "Créer une alerte"}
@@ -1297,7 +1346,7 @@ const SearchOwner = () => {
 
                 {/* Carte 2, Créer une alerte */}
                 <button
-                  onClick={handleCreateAlert}
+                  onClick={handleCreateAlertGated}
                   disabled={!city || alertCreated || isCreatingAlert}
                   className="text-left p-4 rounded-xl border border-border bg-card hover:border-primary transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
                 >
@@ -1367,7 +1416,7 @@ const SearchOwner = () => {
                     Recevez une alerte e-mail dès qu'un nouveau gardien rejoint la zone autour de {city}.
                   </p>
                   <button
-                    onClick={handleCreateAlert}
+                    onClick={handleCreateAlertGated}
                     disabled={isCreatingAlert}
                     className="text-xs font-medium text-primary hover:underline disabled:opacity-60 whitespace-nowrap"
                   >
@@ -1417,7 +1466,20 @@ const SearchOwner = () => {
               const profile = s.profile;
               const firstName = profile?.first_name || "Gardien";
               return (
-                <div key={s.id} className="flex gap-3 p-3 rounded-xl border border-border hover:shadow-sm transition-shadow cursor-pointer" onClick={() => navigate(`/gardiens/${s.user_id}`)}>
+                <div
+                  key={s.id}
+                  role="link"
+                  tabIndex={0}
+                  aria-label={`Voir le profil de ${firstName}`}
+                  className="flex gap-3 p-3 rounded-xl border border-border hover:shadow-sm transition-shadow cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  onClick={() => navigate(`/gardiens/${s.user_id}`)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault();
+                      navigate(`/gardiens/${s.user_id}`);
+                    }
+                  }}
+                >
                   {profile?.avatar_url ? (
                     <img src={profile.avatar_url} alt={firstName} className="h-14 w-14 rounded-xl object-cover shrink-0" />
                   ) : (
@@ -1433,11 +1495,17 @@ const SearchOwner = () => {
                       <ReplyTimeBadge minutes={s.reply_median_minutes} />
                     </div>
                     <div className="flex gap-3 text-xs text-muted-foreground mt-0.5">
-                      {s.avgRating !== null && <span className="flex items-center gap-0.5"><Star className="h-3 w-3 text-yellow-500 fill-yellow-500" />{s.avgRating.toFixed(1)}</span>}
+                      {s.avgRating !== null && <span className="flex items-center gap-0.5"><Star className="h-3 w-3 text-primary fill-primary" />{s.avgRating.toFixed(1)}</span>}
                       {(profile?.completed_sits_count || 0) > 0 && <span>{profile.completed_sits_count} garde{profile.completed_sits_count > 1 ? "s" : ""}</span>}
                     </div>
                   </div>
-                  <button onClick={(e) => { e.stopPropagation(); handleContact(s.user_id); }} className="shrink-0 self-center px-3 py-1.5 text-xs bg-primary text-primary-foreground rounded-lg font-medium">Contacter</button>
+                  <button
+                    onClick={(e) => { e.stopPropagation(); handleContact(s.user_id); }}
+                    aria-label={`Contacter ${firstName}`}
+                    className="shrink-0 self-center px-3 py-1.5 text-xs bg-primary text-primary-foreground rounded-lg font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  >
+                    Contacter
+                  </button>
                 </div>
               );
             })}
@@ -1466,6 +1534,7 @@ const SearchOwner = () => {
         </div>
       )}
     </div>
+    </>
   );
 };
 
