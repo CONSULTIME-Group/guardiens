@@ -86,6 +86,14 @@ const SearchOwner = () => {
   const [minRating, setMinRating] = useState<string>("all");
   const [sort, setSort] = useState<SortOption>("affinity");
   const [sortUserOverride, setSortUserOverride] = useState(false);
+  // Sans profil owner (visiteur anonyme ou gardien pur), l'affinité n'a pas de sens :
+  // on force le Select mobile sur « Plus proches » pour ne jamais afficher une valeur vide.
+  useEffect(() => {
+    if (!viewerOwner && !sortUserOverride && sort === "affinity") {
+      setSort("closest");
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [viewerOwner]);
   const [viewMode, setViewMode] = useState<ViewMode>("list");
 
   // rawResults = jeu brut rapatrié et enrichi par le fetch réseau (sitters + coords + reviews + badges + gallery + affinité).
