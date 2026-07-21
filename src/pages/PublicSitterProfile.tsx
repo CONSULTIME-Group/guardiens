@@ -433,7 +433,7 @@ export default function PublicSitterProfile() {
         await Promise.all([
           supabase.from("public_profiles").select(PUBLIC_PROFILE_COLS).eq("id", id).maybeSingle(),
           supabase.from("profiles").select(BASE_PROFILE_COLS).eq("id", id).maybeSingle(),
-          supabase.from("sitter_profiles").select("*").eq("user_id", id).maybeSingle(),
+          (supabase as any).from("public_sitter_profiles").select("*").eq("user_id", id).maybeSingle(),
           supabase.from("badge_attributions").select("badge_id").eq("user_id", id),
           supabase
             .from("reviews")
@@ -448,13 +448,15 @@ export default function PublicSitterProfile() {
             .select("id, photo_url, caption, created_at")
             .eq("user_id", id)
             .order("created_at", { ascending: false }),
-          supabase.from("emergency_sitter_profiles").select("is_active").eq("user_id", id).maybeSingle(),
-          supabase.from("subscriptions").select("status").eq("user_id", id).eq("status", "active").limit(1),
-          supabase
-            .from("owner_profiles")
-            .select("id, user_id, welcome_notes, environments, competences, competences_disponible, preferred_sitter_types, home_ambiance, languages, interests, life_pace, presence_expected")
+          (supabase as any).from("public_emergency_sitter_profiles").select("is_active").eq("user_id", id).maybeSingle(),
+          // Chip Abonné : fonction booléenne (vague 39) pour ne jamais exposer subscriptions à anon.
+          (supabase as any).rpc("has_active_subscription", { p_user_id: id }),
+          (supabase as any)
+            .from("public_owner_profiles")
+            .select("user_id, welcome_notes, environments, competences, competences_disponible, preferred_sitter_types, home_ambiance, languages, interests, life_pace, presence_expected")
             .eq("user_id", id)
             .maybeSingle(),
+
           supabase
             .from("small_missions")
             .select("id", { count: "exact", head: true })
@@ -492,7 +494,7 @@ export default function PublicSitterProfile() {
       if (fetchedSitterProfile) setSitterProfile(fetchedSitterProfile);
       if (galleryRes.data) setGallery(galleryRes.data);
       if (fetchedEmergencyProfile) setEmergencyActive(fetchedEmergencyProfile.is_active);
-      setHasActiveSubscription(!!(subRes.data && (subRes.data as any[]).length > 0));
+      setHasActiveSubscription(Boolean((subRes as any)?.data));
       setOwnerProfile(fetchedOwnerProfile);
       setTargetOwnerAffinity(fetchedOwnerProfile);
       // Charge les animaux du propriétaire cible (via ses properties) pour permettre le calcul d'affinité côté gardien visitant l'onglet propriétaire.
@@ -652,7 +654,7 @@ export default function PublicSitterProfile() {
 
         // Query 4, Feedbacks missions
         const { data: fbData, error: fbErr } = await supabase
-          .from('mission_feedbacks')
+          .from('public_mission_feedbacks' as any)
           .select('id, positive, comment, created_at, badge_key')
           .eq('receiver_id', id)
           .order('created_at', { ascending: false });

@@ -6166,6 +6166,159 @@ export type Database = {
         }
         Relationships: []
       }
+      public_emergency_sitter_profiles: {
+        Row: {
+          is_active: boolean | null
+          user_id: string | null
+        }
+        Insert: {
+          is_active?: boolean | null
+          user_id?: string | null
+        }
+        Update: {
+          is_active?: boolean | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "emergency_sitter_profiles_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "profile_reputation"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "emergency_sitter_profiles_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "emergency_sitter_profiles_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "public_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      public_mission_feedbacks: {
+        Row: {
+          badge_key: string | null
+          comment: string | null
+          created_at: string | null
+          id: string | null
+          positive: boolean | null
+          receiver_id: string | null
+        }
+        Insert: {
+          badge_key?: string | null
+          comment?: string | null
+          created_at?: string | null
+          id?: string | null
+          positive?: boolean | null
+          receiver_id?: string | null
+        }
+        Update: {
+          badge_key?: string | null
+          comment?: string | null
+          created_at?: string | null
+          id?: string | null
+          positive?: boolean | null
+          receiver_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mission_feedbacks_receiver_id_fkey"
+            columns: ["receiver_id"]
+            isOneToOne: false
+            referencedRelation: "profile_reputation"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "mission_feedbacks_receiver_id_fkey"
+            columns: ["receiver_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mission_feedbacks_receiver_id_fkey"
+            columns: ["receiver_id"]
+            isOneToOne: false
+            referencedRelation: "public_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      public_owner_profiles: {
+        Row: {
+          competences: string[] | null
+          competences_disponible: boolean | null
+          created_at: string | null
+          environments: string[] | null
+          home_ambiance: string[] | null
+          interests: string[] | null
+          languages: string[] | null
+          life_pace: string | null
+          preferred_sitter_types: string[] | null
+          presence_expected: string | null
+          user_id: string | null
+          welcome_notes: string | null
+        }
+        Insert: {
+          competences?: string[] | null
+          competences_disponible?: boolean | null
+          created_at?: string | null
+          environments?: string[] | null
+          home_ambiance?: string[] | null
+          interests?: string[] | null
+          languages?: string[] | null
+          life_pace?: string | null
+          preferred_sitter_types?: string[] | null
+          presence_expected?: string | null
+          user_id?: string | null
+          welcome_notes?: string | null
+        }
+        Update: {
+          competences?: string[] | null
+          competences_disponible?: boolean | null
+          created_at?: string | null
+          environments?: string[] | null
+          home_ambiance?: string[] | null
+          interests?: string[] | null
+          languages?: string[] | null
+          life_pace?: string | null
+          preferred_sitter_types?: string[] | null
+          presence_expected?: string | null
+          user_id?: string | null
+          welcome_notes?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "owner_profiles_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "profile_reputation"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "owner_profiles_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "owner_profiles_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "public_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       public_pets: {
         Row: {
           activity_level: Database["public"]["Enums"]["activity_level"] | null
@@ -6290,6 +6443,139 @@ export type Database = {
           skill_categories?: string[] | null
         }
         Relationships: []
+      }
+      public_sitter_profiles: {
+        Row: {
+          accompanied_by: string | null
+          animal_types: string[] | null
+          availability_during: string | null
+          bonus_skills: string[] | null
+          competences: string[] | null
+          created_at: string | null
+          dog_sizes_accepted: string[] | null
+          experience_years: string | null
+          farm_animals_ok: boolean | null
+          geographic_radius: number | null
+          guard_experience: string | null
+          has_vehicle: boolean | null
+          household_composition: string[] | null
+          interests: string[] | null
+          is_available: boolean | null
+          languages: string[] | null
+          life_pace: string | null
+          lifestyle: string[] | null
+          max_duration: number | null
+          min_duration: number | null
+          min_notice: string | null
+          min_stay_duration: string | null
+          motivation: string | null
+          own_animals: string[] | null
+          preferred_environments: string[] | null
+          preferred_frequency: string | null
+          preferred_periods: string[] | null
+          reply_median_minutes: number | null
+          sitter_type: string | null
+          smoker: boolean | null
+          special_animal_skills: string[] | null
+          travels_with_children: boolean | null
+          travels_with_own_animals: boolean | null
+          user_id: string | null
+        }
+        Insert: {
+          accompanied_by?: string | null
+          animal_types?: string[] | null
+          availability_during?: string | null
+          bonus_skills?: string[] | null
+          competences?: string[] | null
+          created_at?: string | null
+          dog_sizes_accepted?: string[] | null
+          experience_years?: string | null
+          farm_animals_ok?: boolean | null
+          geographic_radius?: number | null
+          guard_experience?: string | null
+          has_vehicle?: boolean | null
+          household_composition?: string[] | null
+          interests?: string[] | null
+          is_available?: boolean | null
+          languages?: string[] | null
+          life_pace?: string | null
+          lifestyle?: string[] | null
+          max_duration?: number | null
+          min_duration?: number | null
+          min_notice?: string | null
+          min_stay_duration?: string | null
+          motivation?: string | null
+          own_animals?: string[] | null
+          preferred_environments?: string[] | null
+          preferred_frequency?: string | null
+          preferred_periods?: string[] | null
+          reply_median_minutes?: number | null
+          sitter_type?: string | null
+          smoker?: boolean | null
+          special_animal_skills?: string[] | null
+          travels_with_children?: boolean | null
+          travels_with_own_animals?: boolean | null
+          user_id?: string | null
+        }
+        Update: {
+          accompanied_by?: string | null
+          animal_types?: string[] | null
+          availability_during?: string | null
+          bonus_skills?: string[] | null
+          competences?: string[] | null
+          created_at?: string | null
+          dog_sizes_accepted?: string[] | null
+          experience_years?: string | null
+          farm_animals_ok?: boolean | null
+          geographic_radius?: number | null
+          guard_experience?: string | null
+          has_vehicle?: boolean | null
+          household_composition?: string[] | null
+          interests?: string[] | null
+          is_available?: boolean | null
+          languages?: string[] | null
+          life_pace?: string | null
+          lifestyle?: string[] | null
+          max_duration?: number | null
+          min_duration?: number | null
+          min_notice?: string | null
+          min_stay_duration?: string | null
+          motivation?: string | null
+          own_animals?: string[] | null
+          preferred_environments?: string[] | null
+          preferred_frequency?: string | null
+          preferred_periods?: string[] | null
+          reply_median_minutes?: number | null
+          sitter_type?: string | null
+          smoker?: boolean | null
+          special_animal_skills?: string[] | null
+          travels_with_children?: boolean | null
+          travels_with_own_animals?: boolean | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sitter_profiles_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "profile_reputation"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "sitter_profiles_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sitter_profiles_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "public_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       public_stats: {
         Row: {
@@ -7054,6 +7340,7 @@ export type Database = {
           id: string
         }[]
       }
+      has_active_subscription: { Args: { p_user_id: string }; Returns: boolean }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
