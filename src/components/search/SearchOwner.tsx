@@ -1500,13 +1500,24 @@ const SearchOwner = () => {
             {results.map((s: any) => {
               const profile = s.profile;
               const firstName = profile?.first_name || "Gardien";
+              const nSits = profile?.completed_sits_count || 0;
+              const distTxt =
+                s._dist === 0 ? "Dans votre ville" : (s._dist != null && s._dist !== Infinity) ? `${s._dist} km` : null;
+              const metaBits = [
+                distTxt,
+                s.avgRating != null && nSits > 0
+                  ? `${s.avgRating.toFixed(1).replace(".", ",")} sur ${nSits} garde${nSits > 1 ? "s" : ""}`
+                  : nSits > 0
+                    ? `${nSits} garde${nSits > 1 ? "s" : ""}`
+                    : null,
+              ].filter(Boolean) as string[];
               return (
                 <div
                   key={s.id}
                   role="link"
                   tabIndex={0}
                   aria-label={`Voir le profil de ${firstName}`}
-                  className="flex gap-3 p-3 rounded-xl border border-border hover:shadow-sm transition-shadow cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  className="flex gap-3 p-3 rounded-xl border border-border bg-card hover:shadow-sm hover:border-primary/40 transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                   onClick={() => navigate(`/gardiens/${s.user_id}`)}
                   onKeyDown={(e) => {
                     if (e.key === "Enter" || e.key === " ") {
@@ -1523,27 +1534,25 @@ const SearchOwner = () => {
                     </div>
                   )}
                   <div className="flex-1 min-w-0">
-                    <p className="font-semibold text-sm truncate">{firstName}</p>
-                    {s._dist != null && s._dist !== Infinity && <p className="text-xs text-muted-foreground">{s._dist === 0 ? "Dans votre ville" : `${s._dist} km`}</p>}
-                    <div className="flex items-center gap-1.5 flex-wrap">
+                    <p className="font-heading text-[16px] font-semibold truncate text-foreground">{firstName}</p>
+                    {metaBits.length > 0 && (
+                      <p className="text-[12.5px] text-muted-foreground truncate">{metaBits.join(" · ")}</p>
+                    )}
+                    <div className="flex items-center gap-1.5 flex-wrap mt-1">
                       <PresenceBadge lastSeenAt={profile?.last_seen_at} />
                       <ReplyTimeBadge minutes={s.reply_median_minutes} />
                     </div>
-                    <div className="flex gap-3 text-xs text-muted-foreground mt-0.5">
-                      {s.avgRating !== null && <span className="flex items-center gap-0.5"><Star className="h-3 w-3 text-primary fill-primary" />{s.avgRating.toFixed(1)}</span>}
-                      {(profile?.completed_sits_count || 0) > 0 && <span>{profile.completed_sits_count} garde{profile.completed_sits_count > 1 ? "s" : ""}</span>}
-                    </div>
                   </div>
-                  <button
-                    onClick={(e) => { e.stopPropagation(); handleContact(s.user_id); }}
-                    aria-label={`Contacter ${firstName}`}
-                    className="shrink-0 self-center px-3 py-1.5 text-xs bg-primary text-primary-foreground rounded-lg font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  <span
+                    aria-hidden
+                    className="shrink-0 self-center inline-flex items-center rounded-full border border-border bg-card px-3 py-1.5 text-xs font-semibold text-foreground shadow-sm"
                   >
-                    Contacter
-                  </button>
+                    Voir le profil
+                  </span>
                 </div>
               );
             })}
+
           </div>
           <div className="order-1 md:order-2 w-full md:w-1/2 h-[45vh] md:h-auto relative bg-muted/30">
             <Suspense fallback={<div className="absolute inset-0 flex items-center justify-center text-sm text-muted-foreground">Chargement de la carte…</div>}>
