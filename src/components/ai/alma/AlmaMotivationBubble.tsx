@@ -49,7 +49,14 @@ export function AlmaMotivationBubble({ currentValue, onPick }: Props) {
       setDrafts(list);
       await trackEvent("alma_bio_drafts_generated", { metadata: { count: list.length } });
     } catch (e: any) {
-      toast({ title: "Alma indisponible", description: e?.message || "Réessaie plus tard.", variant: "destructive" });
+      const status = e?.context?.status ?? e?.status;
+      const description =
+        status === 402
+          ? "Les crédits IA sont épuisés pour le moment, réessayez plus tard."
+          : status === 429
+          ? "Trop de demandes en même temps, réessayez dans un instant."
+          : e?.message || "Réessayez plus tard.";
+      toast({ title: "Alma indisponible", description, variant: "destructive" });
     } finally {
       setLoading(false);
     }
