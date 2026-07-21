@@ -654,7 +654,7 @@ export default function PublicSitterProfile() {
 
         // Query 4, Feedbacks missions
         const { data: fbData, error: fbErr } = await supabase
-          .from('mission_feedbacks')
+          .from('public_mission_feedbacks' as any)
           .select('id, positive, comment, created_at, badge_key')
           .eq('receiver_id', id)
           .order('created_at', { ascending: false });
