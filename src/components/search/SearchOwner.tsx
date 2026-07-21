@@ -751,13 +751,23 @@ const SearchOwner = () => {
       <script type="application/ld+json">{JSON.stringify(seoJsonLd)}</script>
     </Helmet>
     <div className="animate-fade-in">
-      {/* Title */}
-      <div className="px-6 pt-6 pb-2 md:pt-8 space-y-1.5">
-        <h2 className="font-heading text-3xl font-bold">Trouver un gardien</h2>
-        <p className="text-sm text-muted-foreground">Près de chez vous par défaut, partout en France en un clic.</p>
-        {/* KPI preuve sociale, desktop uniquement, discret (masqué mobile pour désencombrer above-the-fold) */}
+      {/* Hero signature vague 42 — eyebrow terra + H1 Playfair + lede contextuel */}
+      <div className="px-6 pt-6 pb-3 md:pt-10 md:pb-4 space-y-3">
+        <p className="inline-flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.16em] text-terra">
+          <span aria-hidden className="inline-block h-[1.5px] w-5 bg-terra" />
+          Les gardiens
+        </p>
+        <h1 className="font-heading text-[clamp(26px,4vw,34px)] font-semibold leading-tight text-foreground">
+          Quelqu'un du coin veille sur eux.
+        </h1>
+        <p className="text-sm md:text-[15px] text-muted-foreground max-w-2xl leading-relaxed">
+          Des gardiens de confiance près de chez vous, rencontrés avant chaque garde.{" "}
+          {viewerOwner
+            ? "Classés par affinité avec votre foyer."
+            : "Classés du plus proche au plus loin."}
+        </p>
         {(activeSittersCount || activeOwnersCount) && (
-          <p className="hidden md:flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-muted-foreground pt-1">
+          <p className="hidden md:flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-muted-foreground pt-0.5">
             {!!activeSittersCount && (
               <span className="inline-flex items-center">
                 <span className="font-semibold text-foreground mr-1">{activeSittersCount.toLocaleString("fr-FR")}</span>
@@ -776,6 +786,7 @@ const SearchOwner = () => {
           </p>
         )}
       </div>
+
 
 
 
