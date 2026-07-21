@@ -150,6 +150,8 @@ export default function PublicSitterProfile() {
   const [thanksReceived, setThanksReceived] = useState<number>(0);
   const [entraideLoading, setEntraideLoading] = useState(true);
   const [activateProprioIntent, setActivateProprioIntent] = useState<ContactIntentContext | null>(null);
+  const [activateGardienOpen, setActivateGardienOpen] = useState(false);
+
   const [externalExperiences, setExternalExperiences] = useState<any[]>([]);
   const [ownerGalleryPhotos, setOwnerGalleryPhotos] = useState<any[]>([]);
 
