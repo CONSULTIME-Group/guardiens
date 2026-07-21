@@ -129,6 +129,18 @@ const Register = () => {
  const navigate = useNavigate();
  const { toast } = useToast();
  const redirectTarget = sanitizeRedirect(searchParams.get("redirect"));
+
+ // Intention déduite du redirect : /gardiens/… => visiteur = propriétaire,
+ // /annonces/… => visiteur = gardien. Un ?role= ou ?as=pro explicite gagne
+ // toujours. On n'écrase jamais un choix utilisateur.
+ const detectedIntent: "owner" | "sitter" | null = useMemo(() => {
+  if (asPro || presetRoleRaw) return null;
+  if (!redirectTarget) return null;
+  if (redirectTarget.startsWith("/gardiens/")) return "owner";
+  if (redirectTarget.startsWith("/annonces/")) return "sitter";
+  return null;
+ }, [asPro, presetRoleRaw, redirectTarget]);
+
  // Si l'utilisateur sélectionne le rôle « pro », on l'envoie systématiquement vers le formulaire fiche pro.
  const postAuthTarget = selectedRole === "pro" ? "/pros/inscription" : (redirectTarget ?? "/dashboard");
 
