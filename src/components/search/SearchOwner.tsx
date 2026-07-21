@@ -723,7 +723,33 @@ const SearchOwner = () => {
   const { data: activeSittersCount } = useActiveSittersCount();
   const { data: activeOwnersCount } = useActiveOwnersCount();
 
+  // SEO vague 40 : page indexable pour capter la demande organique.
+  const seoTitle = "Trouver un gardien d'animaux près de chez vous · Guardiens";
+  const seoDescription = "Consultez librement les profils de gardiens d'animaux en France : chats, chiens, NAC. Inscription gratuite pour contacter un gardien.";
+  const seoCanonical = "https://guardiens.fr/recherche-gardiens";
+  const seoJsonLd = [
+    { "@context": "https://schema.org", "@type": "WebPage", name: seoTitle, description: seoDescription, url: seoCanonical, inLanguage: "fr-FR", isPartOf: { "@type": "WebSite", name: "Guardiens", url: "https://guardiens.fr" } },
+    { "@context": "https://schema.org", "@type": "BreadcrumbList", itemListElement: [
+      { "@type": "ListItem", position: 1, name: "Accueil", item: "https://guardiens.fr/" },
+      { "@type": "ListItem", position: 2, name: "Trouver un gardien", item: seoCanonical },
+    ] },
+  ];
+
   return (
+    <>
+    <Helmet>
+      <title>{seoTitle}</title>
+      <meta name="description" content={seoDescription} />
+      <meta name="robots" content="index,follow" />
+      <link rel="canonical" href={seoCanonical} />
+      <meta property="og:title" content={seoTitle} />
+      <meta property="og:description" content={seoDescription} />
+      <meta property="og:url" content={seoCanonical} />
+      <meta property="og:type" content="website" />
+      <meta property="og:locale" content="fr_FR" />
+      <meta name="twitter:card" content="summary_large_image" />
+      <script type="application/ld+json">{JSON.stringify(seoJsonLd)}</script>
+    </Helmet>
     <div className="animate-fade-in">
       {/* Title */}
       <div className="px-6 pt-6 pb-2 md:pt-8 space-y-1.5">
