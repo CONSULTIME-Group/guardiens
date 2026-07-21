@@ -392,10 +392,13 @@ const SearchOwner = () => {
     setSearchError(null);
 
     setResultsTruncated(false);
-    const { data: sitters, error: sittersError } = await (supabase as any)
+    // Vue publique (vague 40) : lecture anon OK. On alias user_id -> id pour préserver
+    // les clés React et le contrat de mapping historique côté sitter_profiles.
+    const { data: sittersRaw, error: sittersError } = await (supabase as any)
       .from("public_sitter_profiles")
       .select("*")
       .limit(SITTERS_SERVER_CAP);
+    const sitters = (sittersRaw || []).map((s: any) => ({ ...s, id: s.user_id }));
 
     if (sittersError) {
       console.error("[SearchOwner] Erreur chargement gardiens:", sittersError);
