@@ -2214,6 +2214,13 @@ export default function PublicSitterProfile() {
         targetRole="proprio"
         contactContext={activateProprioIntent ?? undefined}
       />
+
+      <ActivateRoleDialog
+        open={activateGardienOpen}
+        onClose={() => setActivateGardienOpen(false)}
+        targetRole="gardien"
+      />
+
       </div>
     </div>
   );
