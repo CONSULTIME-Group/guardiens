@@ -1320,7 +1320,7 @@ const SearchOwner = () => {
 
                 {/* Carte 2, Créer une alerte */}
                 <button
-                  onClick={handleCreateAlert}
+                  onClick={handleCreateAlertGated}
                   disabled={!city || alertCreated || isCreatingAlert}
                   className="text-left p-4 rounded-xl border border-border bg-card hover:border-primary transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
                 >
