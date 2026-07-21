@@ -53,7 +53,14 @@ export default function GenerateBioButton({ onPick }: Props) {
       setDrafts(((data as any)?.drafts || []) as Draft[]);
       setStep("drafts");
     } catch (e: any) {
-      toast({ title: "Génération impossible", description: e?.message || "Réessayez plus tard.", variant: "destructive" });
+      const status = e?.context?.status ?? e?.status;
+      const description =
+        status === 402
+          ? "Les crédits IA sont épuisés pour le moment, réessayez plus tard."
+          : status === 429
+          ? "Trop de demandes en même temps, réessayez dans un instant."
+          : e?.message || "Réessayez plus tard.";
+      toast({ title: "Génération impossible", description, variant: "destructive" });
       setStep("form");
     }
   };
