@@ -1506,61 +1506,8 @@ export default function PublicSitterProfile() {
           {/* Rail STICKY (desktop ≥ lg) — 340 px, aligné haut, self-start. */}
           <ProfileRail>{railChildren}</ProfileRail>
           </div>
+          {/* CTA sticky mobile : unifié en dehors des onglets (vague 38). */}
 
-
-          {/* CTA sticky bottom mobile — gaté par IntersectionObserver :
-              n'apparaît que lorsque le CTA du hero est sorti du viewport. */}
-          {showCTA && !heroCtaVisible && (
-            <div className="md:hidden fixed bottom-16 left-0 right-0 z-40 bg-background border-t border-border px-3 sm:px-4 pt-2.5 sm:pt-3 pb-[calc(env(safe-area-inset-bottom)+0.625rem)] shadow-lg">
-              {!isAuthenticated && (
-                <Link
-                  to={`/inscription?redirect=${encodeURIComponent(`/gardiens/${id}`)}`}
-                  className="flex items-center justify-center bg-primary text-primary-foreground rounded-lg px-3 sm:px-4 py-3 text-[13px] sm:text-sm font-medium w-full leading-tight text-center break-words"
-                >
-                  <span className="line-clamp-2">S'inscrire pour contacter {firstName}</span>
-                </Link>
-              )}
-              {isAuthenticated && isOwner && (
-                <button
-                  onClick={async () => {
-                    if (!auth?.user?.id || !id) return;
-                    const { startConversation } = await import("@/lib/conversation");
-                    const { conversationId, error } = await startConversation({
-                      otherUserId: id,
-                      context: "sitter_inquiry",
-                    });
-                    if (conversationId) {
-                      navigate(`/messages?c=${conversationId}`);
-                    } else if (error?.includes("propositions spontanées")) {
-                      const { toast } = await import("sonner");
-                      toast.error("Ce membre ne reçoit pas de propositions spontanées.");
-                    } else {
-                      const { toast } = await import("sonner");
-                      toast.error("Impossible d'ouvrir la conversation.");
-                    }
-                  }}
-                  className="flex items-center justify-center bg-primary text-primary-foreground rounded-lg px-3 sm:px-4 py-3 text-[13px] sm:text-sm font-medium w-full leading-tight text-center break-words"
-                >
-                  <span className="line-clamp-2">Contacter {firstName}</span>
-                </button>
-              )}
-              {isAuthenticated && isSitter && id && (
-                <button
-                  type="button"
-                  onClick={() =>
-                    setActivateProprioIntent({
-                      recipientId: id,
-                      recipientFirstName: firstName,
-                      conversationContext: "sitter_inquiry",
-                    })
-                  }
-                  className="flex items-center justify-center bg-primary text-primary-foreground rounded-lg px-3 sm:px-4 py-3 text-[13px] sm:text-sm font-medium w-full leading-tight text-center break-words"
-                >
-                  <span className="line-clamp-2">Contacter {firstName}</span>
-                </button>
-              )}
-            </div>
-          )}
         </div>
         );
       })()}
