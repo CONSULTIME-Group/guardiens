@@ -143,7 +143,15 @@
     --founder-foreground: 30 60% 18%;
     --founder-soft: 45 90% 96%;
     --founder-border: 43 80% 78%;
+
+    /* Terra (accent chaud éditorial : eyebrows, bandeaux alerte doux).
+       La couleur signature du carnet, complémentaire au vert pin --primary. */
+    --terra: 22 55% 48%;
+    --terra-foreground: 40 33% 97%;
+    --terra-soft: 22 65% 96%;
+    --terra-border: 22 45% 82%;
   }
+
 
   .dark {
     --background: 160 10% 8%;
@@ -220,6 +228,12 @@
     --founder-soft: 38 30% 18%;
     --founder-border: 38 50% 32%;
 
+    /* Terra dark : chaleur préservée sur fond sombre. */
+    --terra: 22 60% 60%;
+    --terra-foreground: 40 15% 95%;
+    --terra-soft: 22 25% 18%;
+    --terra-border: 22 30% 32%;
+
     /* Papier sketchbook en dark mode — teinte chaude suffisamment soutenue pour le contraste */
     --hero-paper: 40 15% 18%;
 
@@ -228,6 +242,7 @@
     --photo-placeholder-green: linear-gradient(160deg, hsl(153 22% 14%), hsl(153 18% 11%) 60%, hsl(153 15% 9%));
     --photo-placeholder-sand: linear-gradient(160deg, hsl(30 18% 16%), hsl(30 15% 13%) 60%, hsl(30 12% 10%));
   }
+
 }
 
 @layer base {

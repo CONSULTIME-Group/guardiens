@@ -87,6 +87,13 @@ export default {
           soft: "hsl(var(--founder-soft))",
           border: "hsl(var(--founder-border))",
         },
+        terra: {
+          DEFAULT: "hsl(var(--terra))",
+          foreground: "hsl(var(--terra-foreground))",
+          soft: "hsl(var(--terra-soft))",
+          border: "hsl(var(--terra-border))",
+        },
+
         sidebar: {
           DEFAULT: "hsl(var(--sidebar-background))",
           foreground: "hsl(var(--sidebar-foreground))",
