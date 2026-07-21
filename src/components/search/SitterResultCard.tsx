@@ -1,29 +1,30 @@
 /**
- * Carte gardien de la liste /recherche-gardiens (vue proprio).
+ * Carte gardien — vague 42, refonte visuelle "carnet".
  *
- * - Mini-carrousel (avatar + galerie) avec points et flèches au hover.
- * - Photo 4:3, cadrage haut (visages centrés).
- * - Affinité en variant numeric (%) + fallback « Affinité à découvrir »
- *   quand le score est masqué (owner incomplet, seuil, disqualification).
- * - Clic sur la photo → fiche gardien, favoris en overlay.
- * - Densité contenu : nom + statuts, ville · distance, présence/reply,
- *   note · nb gardes, badges animaux (max 3), bio 1 ligne, CTA Contacter.
+ * Comportement (vague 40) INCHANGÉ :
+ *  - carte = Link vers /gardiens/:id
+ *  - FavoriteButton en overlay (redirect encodé pour anon)
+ *  - clavier / focus visible
+ *
+ * Signature visuelle :
+ *  - photo 4:3, mini-carrousel préservé, badge lieu incrusté ("Ville · X km")
+ *  - prénom Playfair, chips en pin doux (bg-primary/10 text-primary), sans amber
+ *  - ligne meta en langage naturel (chaque segment omis si donnée absente)
+ *  - accroche Playfair italique = première phrase de bio (< 120 chars), sinon rien
+ *  - pied : mini ring d'affinité 54px (owner + score affichable), sinon micro-histoire réelle
+ *          + bouton SECONDAIRE "Faire connaissance" (menant au profil, comme la carte).
+ * Le bouton primaire "Contacter" DISPARAÎT (la rencontre vit sur le profil refondu).
  */
 import { useState, type MouseEvent } from "react";
 import { Link } from "react-router-dom";
 import {
-  Star,
-  Zap,
-  MessageCircle,
-  Loader2,
   ChevronLeft,
   ChevronRight,
   Camera,
+  ShieldCheck,
 } from "lucide-react";
 import FavoriteButton from "@/components/shared/FavoriteButton";
-import PresenceBadge from "@/components/messages/PresenceBadge";
-import ReplyTimeBadge from "@/components/sitters/ReplyTimeBadge";
-import AffinityBadge from "@/components/matching/AffinityBadge";
+import AffinityRing from "@/components/matching/AffinityRing";
 import type { AffinityResult } from "@/lib/affinityScore";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -32,10 +33,36 @@ interface SitterResultCardProps {
   photos: string[];
   affinity: AffinityResult | null;
   hasOwnerProfile: boolean;
-  onContact: (userId: string) => void;
-  contactingId: string | null;
   duplicateName: boolean;
   city: string;
+}
+
+/**
+ * Extrait la première phrase d'une bio si elle tient sous 120 caractères,
+ * sinon renvoie null (jamais de troncature ni de génération).
+ */
+function firstSentenceUnder(bio: string | null | undefined, max = 120): string | null {
+  if (!bio) return null;
+  const trimmed = bio.trim();
+  if (!trimmed) return null;
+  const m = trimmed.match(/^[^.!?…]+[.!?…]/);
+  const first = (m ? m[0] : trimmed).trim();
+  if (first.length === 0 || first.length > max) return null;
+  return first;
+}
+
+/**
+ * "Répond en moins de 2 h" / "Répond en moins de 30 min" à partir des minutes médianes.
+ * Aucun affichage si la donnée est absente ou aberrante.
+ */
+function replyPhrase(minutes: number | null | undefined): string | null {
+  if (minutes == null || !Number.isFinite(minutes) || minutes <= 0) return null;
+  if (minutes < 60) {
+    const rounded = Math.max(5, Math.round(minutes / 5) * 5);
+    return `Répond en moins de ${rounded} min`;
+  }
+  const hours = Math.max(1, Math.round(minutes / 60));
+  return `Répond en moins de ${hours} h`;
 }
 
 const SitterResultCard = ({
@@ -43,8 +70,6 @@ const SitterResultCard = ({
   photos,
   affinity,
   hasOwnerProfile,
-  onContact,
-  contactingId,
   duplicateName,
   city,
 }: SitterResultCardProps) => {
@@ -52,12 +77,13 @@ const SitterResultCard = ({
   const { user } = useAuth();
   const isAnon = !user;
   const profile = sitter.profile;
-  const firstName = profile?.first_name || "Gardien";
-  const bio = profile?.bio
-    ? profile.bio.length > 90
-      ? profile.bio.slice(0, 90) + "…"
-      : profile.bio
-    : null;
+  const firstName: string = profile?.first_name || "Gardien";
+  const sitterAnimalTypes: string[] = sitter.animal_types || [];
+  const initials = firstName.charAt(0).toUpperCase();
+  const hasPhotos = photos.length > 0;
+  const currentPhoto = hasPhotos ? photos[photoIdx % photos.length] : null;
+  const signupRedirect = `/gardiens/${sitter.user_id}`;
+
   const sameCity =
     sitter._dist === 0 ||
     (city && profile?.city && profile.city.toLowerCase() === city.toLowerCase());
@@ -65,17 +91,42 @@ const SitterResultCard = ({
     !sameCity && sitter._dist != null && sitter._dist !== Infinity
       ? `${sitter._dist} km`
       : null;
-  const sitterAnimalTypes: string[] = sitter.animal_types || [];
-  const initials = firstName.charAt(0).toUpperCase();
-  const hasPhotos = photos.length > 0;
-  const currentPhoto = hasPhotos ? photos[photoIdx % photos.length] : null;
-  const signupRedirect = `/gardiens/${sitter.user_id}`;
+
+  // Badge lieu incrusté : "Ville · 2 km", ou "Ville" seule, ou rien.
+  const locChunks = [profile?.city, distLabel].filter(Boolean) as string[];
+  const locLabel = locChunks.length > 0 ? locChunks.join(" · ") : null;
+
+  // Ligne meta naturelle : "Répond en moins de 2 h · 4,9 sur 7 gardes"
+  const reply = replyPhrase(sitter.reply_median_minutes);
+  const nSits: number = profile?.completed_sits_count || 0;
+  const rating: number | null = sitter.avgRating;
+  const ratingChunk =
+    rating != null && nSits > 0
+      ? `${rating.toFixed(1).replace(".", ",")} sur ${nSits} garde${nSits > 1 ? "s" : ""}`
+      : nSits > 0
+        ? `${nSits} garde${nSits > 1 ? "s" : ""} réalisée${nSits > 1 ? "s" : ""}`
+        : null;
+  const metaChunks = [reply, ratingChunk].filter(Boolean) as string[];
+
+  // Accroche Playfair : première phrase de bio courte, sinon rien.
+  const quote = firstSentenceUnder(profile?.bio, 120);
+
+  // Affinité affichable : owner connecté + score non masqué.
+  const showAffinityRing = !isAnon && !!affinity && affinity.displayed !== false;
+  // Fallback owner sans score affichable : petite mention discrète.
+  const showAffinityFallback = !isAnon && hasOwnerProfile && !showAffinityRing;
+
+  // Micro-histoire : uniquement des faits réels, jamais générée.
+  //   - "Prépare sa première garde" si aucun garde à ce jour.
+  //   - "Identité vérifiée" si applicable.
+  const microFacts: string[] = [];
+  if (nSits === 0) microFacts.push("Prépare sa première garde");
+  if (profile?.identity_verified) microFacts.push("Identité vérifiée");
 
   const stop = (e: MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
   };
-
   const prev = (e: MouseEvent) => {
     stop(e);
     setPhotoIdx((i) => (i - 1 + photos.length) % photos.length);
@@ -85,30 +136,18 @@ const SitterResultCard = ({
     setPhotoIdx((i) => (i + 1) % photos.length);
   };
 
-  // Affinité : score affichable, sinon libellé fallback discret (jamais pour les anonymes, vague 40).
-  const showAffinityBadge = !isAnon && !!affinity && affinity.displayed !== false;
-  const showAffinityFallback =
-    !isAnon && hasOwnerProfile && !showAffinityBadge;
-
   return (
     <Link
       to={`/gardiens/${sitter.user_id}`}
       aria-label={`Voir le profil de ${firstName}`}
-      className="group relative bg-card rounded-xl overflow-hidden border border-border hover:shadow-md hover:-translate-y-0.5 hover:border-primary/40 transition-all flex flex-col h-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+      className="group relative bg-card rounded-[20px] overflow-hidden border border-border shadow-sm hover:shadow-lg hover:-translate-y-0.5 hover:border-primary/40 transition-all flex flex-col h-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
     >
-      {/* Favori */}
+      {/* Favori (overlay, redirect encodé pour anon) */}
       <div className="absolute top-2 right-2 z-10">
         <FavoriteButton targetType="sitter" targetId={sitter.user_id} anonRedirect={signupRedirect} />
       </div>
 
-      {/* Urgence */}
-      {sitter.isEmergency && (
-        <span className="absolute top-2 left-2 z-10 flex items-center gap-1 bg-card/90 rounded-full px-2 py-0.5 text-[11px] font-medium">
-          <Zap className="h-3 w-3 text-warning" /> Urgence
-        </span>
-      )}
-
-      {/* Mini-carrousel photo : 4:3, ~180px hauteur, cadrage haut */}
+      {/* Photo 4:3 avec mini-carrousel préservé */}
       <div className="relative aspect-[4/3] w-full overflow-hidden bg-muted">
         {currentPhoto ? (
           <img
@@ -119,13 +158,10 @@ const SitterResultCard = ({
           />
         ) : (
           <div className="w-full h-full bg-primary/10 flex items-center justify-center">
-            <span className="text-4xl text-primary font-heading font-bold">
-              {initials}
-            </span>
+            <span className="text-4xl text-primary font-heading font-bold">{initials}</span>
           </div>
         )}
 
-        {/* Flèches (hover desktop, toujours actives) */}
         {photos.length > 1 && (
           <>
             <button
@@ -144,166 +180,130 @@ const SitterResultCard = ({
             >
               <ChevronRight className="h-4 w-4" />
             </button>
+            <div
+              className="absolute bottom-2 left-1/2 -translate-x-1/2 flex items-center gap-1"
+              onClick={stop}
+            >
+              {photos.map((_, i) => (
+                <button
+                  key={i}
+                  type="button"
+                  aria-label={`Photo ${i + 1}`}
+                  onClick={(e) => {
+                    stop(e);
+                    setPhotoIdx(i);
+                  }}
+                  className={`h-1.5 rounded-full transition-all ${
+                    i === photoIdx ? "w-4 bg-white" : "w-1.5 bg-white/60 hover:bg-white/80"
+                  }`}
+                />
+              ))}
+            </div>
+            <span className="absolute top-2 left-1/2 -translate-x-1/2 z-[1] inline-flex items-center gap-1 rounded-full bg-background/85 px-2 py-0.5 text-[10px] font-medium text-foreground shadow-sm opacity-0 group-hover:opacity-100 transition-opacity">
+              <Camera className="h-3 w-3" aria-hidden />
+              {photoIdx + 1}/{photos.length}
+            </span>
           </>
         )}
 
-        {/* Points de navigation */}
-        {photos.length > 1 && (
-          <div
-            className="absolute bottom-2 left-1/2 -translate-x-1/2 flex items-center gap-1"
-            onClick={stop}
-          >
-            {photos.map((_, i) => (
-              <button
-                key={i}
-                type="button"
-                aria-label={`Photo ${i + 1}`}
-                onClick={(e) => {
-                  stop(e);
-                  setPhotoIdx(i);
-                }}
-                className={`h-1.5 rounded-full transition-all ${
-                  i === photoIdx
-                    ? "w-4 bg-white"
-                    : "w-1.5 bg-white/60 hover:bg-white/80"
-                }`}
-              />
-            ))}
-          </div>
-        )}
-
-        {/* Compteur photos (visible uniquement si galerie enrichie) */}
-        {photos.length > 1 && (
-          <span className="absolute top-2 left-1/2 -translate-x-1/2 z-[1] inline-flex items-center gap-1 rounded-full bg-background/85 px-2 py-0.5 text-[10px] font-medium text-foreground shadow-sm opacity-0 group-hover:opacity-100 transition-opacity">
-            <Camera className="h-3 w-3" aria-hidden />
-            {photoIdx + 1}/{photos.length}
+        {/* Badge lieu incrusté (bas-gauche) */}
+        {locLabel && (
+          <span className="absolute left-3 bottom-3 rounded-full bg-background/90 backdrop-blur-sm px-3 py-1 text-[11px] font-semibold text-foreground shadow-sm">
+            {locLabel}
           </span>
         )}
       </div>
 
-      {/* Body */}
-      <div className="p-3 flex flex-col flex-1">
-        <p className="text-sm font-semibold truncate">
-          {firstName}
+      {/* Corps */}
+      <div className="p-4 flex flex-col flex-1">
+        {/* Nom + chips statut */}
+        <div className="flex flex-wrap items-center gap-1.5">
+          <span className="font-heading text-[18px] leading-tight font-semibold text-foreground">
+            {firstName}
+          </span>
           {duplicateName && profile?.city && (
-            <span className="text-xs font-normal text-muted-foreground ml-1">
+            <span className="text-xs font-normal text-muted-foreground">
               · {profile.city}
             </span>
           )}
           {profile?.identity_verified && (
-            <span className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-full font-medium ml-1.5 inline-block align-middle">
-              Vérifié
+            <span className="inline-flex items-center gap-1 rounded-full bg-primary/10 text-primary px-2 py-0.5 text-[11px] font-semibold">
+              <ShieldCheck className="h-3 w-3" aria-hidden />
+              Vérifiée
+            </span>
+          )}
+          {sitter.isEmergency && (
+            <span className="rounded-full bg-primary/10 text-primary px-2 py-0.5 text-[11px] font-semibold">
+              Gardien d'urgence
             </span>
           )}
           {profile?.pro_status === "verified" && (
-            <span className="text-xs bg-accent text-accent-foreground px-2 py-0.5 rounded-full font-medium ml-1.5 inline-block align-middle">
+            <span className="rounded-full bg-primary/10 text-primary px-2 py-0.5 text-[11px] font-semibold">
               Pro
             </span>
           )}
-        </p>
+        </div>
 
-        {(profile?.city || distLabel) && (
-          <p className="text-xs text-muted-foreground truncate">
-            {profile?.city}
-            {profile?.city && distLabel && " · "}
-            {distLabel}
+        {/* Ligne meta naturelle */}
+        {metaChunks.length > 0 && (
+          <p className="mt-2 text-[13px] text-muted-foreground">
+            {metaChunks.join(" · ")}
           </p>
         )}
 
-        <div className="flex items-center gap-1.5 mt-0.5 flex-wrap">
-          <PresenceBadge lastSeenAt={profile?.last_seen_at} />
-          <ReplyTimeBadge minutes={sitter.reply_median_minutes} />
-        </div>
+        {/* Chips animaux (max 3), pin doux */}
+        {sitterAnimalTypes.length > 0 && (
+          <div className="flex flex-wrap gap-1.5 mt-2.5">
+            {sitterAnimalTypes.slice(0, 3).map((a) => (
+              <span
+                key={a}
+                className="rounded-full bg-primary/10 text-primary px-2.5 py-0.5 text-[11.5px] font-semibold"
+              >
+                {a}
+              </span>
+            ))}
+            {sitterAnimalTypes.length > 3 && (
+              <span className="text-[11px] text-muted-foreground self-center">
+                +{sitterAnimalTypes.length - 3}
+              </span>
+            )}
+          </div>
+        )}
 
-        {/* Note + expérience */}
-        <div className="flex items-center gap-2 mt-1 min-h-[1rem]">
-          {sitter.avgRating !== null && (
-            <span className="flex items-center gap-0.5 text-xs text-muted-foreground">
-              <Star className="h-3 w-3 text-primary fill-primary" />
-              {sitter.avgRating.toFixed(1)}
-            </span>
-          )}
-          {(profile?.completed_sits_count || 0) > 0 && (
-            <span className="text-xs text-muted-foreground">
-              {profile.completed_sits_count} garde
-              {profile.completed_sits_count > 1 ? "s" : ""}
-            </span>
-          )}
-        </div>
+        {/* Accroche Playfair italique, uniquement si bio courte réelle */}
+        {quote && (
+          <p className="mt-3 font-heading italic text-[13.5px] leading-snug text-foreground/80 line-clamp-2">
+            « {quote} »
+          </p>
+        )}
 
-        {/* Affinité — numeric % avec popover de transparence, ou fallback discret */}
-        <div className="mt-1.5 min-h-[1.75rem] flex items-center">
-          {showAffinityBadge ? (
-            <AffinityBadge
-              result={affinity!}
-              size="sm"
-              variant="numeric"
-              trackingContext="search_owner_listing"
-              trackingId={sitter.user_id}
-            />
-          ) : showAffinityFallback ? (
-            <span
-              className="inline-flex items-center rounded-full border border-border bg-muted/60 px-2 py-0.5 text-[11px] font-medium text-muted-foreground"
-              title="Complétez votre profil propriétaire pour révéler le score d'affinité."
-            >
-              Affinité à découvrir
-            </span>
-          ) : null}
-        </div>
+        {/* Pied : ring OU micro-histoire + CTA secondaire vers profil */}
+        <div className="mt-auto pt-4 flex items-center justify-between gap-3">
+          <div className="min-w-0 flex-1">
+            {showAffinityRing ? (
+              <AffinityRing score={affinity!.score} result={affinity} size={54} />
+            ) : showAffinityFallback ? (
+              <span
+                className="inline-flex items-center rounded-full border border-border bg-muted/60 px-2.5 py-1 text-[11px] font-medium text-muted-foreground"
+                title="Complétez votre profil propriétaire pour révéler le score d'affinité."
+              >
+                Affinité à découvrir
+              </span>
+            ) : microFacts.length > 0 ? (
+              <ul className="space-y-0.5 text-[12px] leading-snug text-muted-foreground">
+                {microFacts.map((f) => (
+                  <li key={f} className="truncate">{f}</li>
+                ))}
+              </ul>
+            ) : null}
+          </div>
 
-        {/* Animaux (max 3) */}
-        <div className="flex flex-wrap gap-1 mt-1.5 min-h-[1.5rem]">
-          {sitterAnimalTypes.slice(0, 3).map((a: string) => (
-            <span
-              key={a}
-              className="text-[11px] bg-muted text-foreground/80 rounded-full px-2 py-0.5"
-            >
-              {a}
-            </span>
-          ))}
-          {sitterAnimalTypes.length > 3 && (
-            <span className="text-[11px] text-muted-foreground self-center">
-              +{sitterAnimalTypes.length - 3}
-            </span>
-          )}
-        </div>
-
-        {/* Bio 1 ligne (line-clamp-1 pour préserver la densité 4 col) */}
-        <p className="text-xs text-muted-foreground mt-1.5 line-clamp-1 min-h-[1rem]">
-          {bio || <span className="opacity-0">.</span>}
-        </p>
-
-        {/* CTA : anon → inscription avec redirect encodé ; membre → conversation directe. */}
-        <div className="mt-auto pt-2">
-          {isAnon ? (
-            <Link
-              to={`/inscription?redirect=${encodeURIComponent(signupRedirect)}`}
-              onClick={stop}
-              aria-label={`S'inscrire pour contacter ${firstName}`}
-              className="inline-flex items-center justify-center gap-1.5 min-h-11 w-full rounded-full bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-            >
-              <MessageCircle className="h-4 w-4" aria-hidden />
-              Contacter
-            </Link>
-          ) : (
-            <button
-              type="button"
-              onClick={(e) => {
-                stop(e);
-                onContact(sitter.user_id);
-              }}
-              disabled={contactingId === sitter.user_id}
-              aria-label={`Contacter ${firstName}`}
-              className="inline-flex items-center justify-center gap-1.5 min-h-11 w-full rounded-full bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors disabled:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-            >
-              {contactingId === sitter.user_id ? (
-                <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
-              ) : (
-                <MessageCircle className="h-4 w-4" aria-hidden />
-              )}
-              Contacter
-            </button>
-          )}
+          <span
+            aria-hidden
+            className="shrink-0 inline-flex items-center justify-center rounded-full border border-border bg-card px-4 py-2 text-[13px] font-semibold text-foreground shadow-sm group-hover:border-primary/50 group-hover:text-primary transition-colors"
+          >
+            Faire connaissance
+          </span>
         </div>
       </div>
     </Link>
