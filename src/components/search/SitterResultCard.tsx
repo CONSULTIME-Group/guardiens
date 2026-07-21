@@ -25,6 +25,7 @@ import PresenceBadge from "@/components/messages/PresenceBadge";
 import ReplyTimeBadge from "@/components/sitters/ReplyTimeBadge";
 import AffinityBadge from "@/components/matching/AffinityBadge";
 import type { AffinityResult } from "@/lib/affinityScore";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface SitterResultCardProps {
   sitter: any;
