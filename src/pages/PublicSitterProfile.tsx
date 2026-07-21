@@ -860,7 +860,7 @@ export default function PublicSitterProfile() {
     ? visibleGallery
     : (profile?.avatar_url ? [{ photo_url: profile.avatar_url, caption: null }] : []);
 
-  const showCTA = !(isAuthenticated && isSitter); // visible aussi pour soi-même (état désactivé)
+  // showCTA supprimé (vague 38) : le sticky mobile suit heroCta.kind.
 
    // SEO
   const animalLabels = animalTypes.map(a => ANIMAL_LABELS[a] || a).join(", ");
