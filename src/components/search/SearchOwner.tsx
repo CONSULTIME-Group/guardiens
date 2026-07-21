@@ -1437,26 +1437,32 @@ const SearchOwner = () => {
             </div>
           ) : (
             <>
-              {/* Bandeau « Recevez une alerte » : masqué quand la zone est déjà bien peuplée
-                  (≥ 8 résultats). L'action reste accessible via la cloche dans le toolbar. */}
+              {/* Bandeau alerte pied de liste : nudge terracotta doux avec le SEUL
+                  bouton primaire de la page. Masqué quand la zone est déjà bien
+                  peuplée (≥ 8 résultats) ou quand l'alerte a déjà été créée. */}
               {city && !alertCreated && results.length > 0 && results.length < 8 && (
-                <div className="mb-4 flex flex-wrap items-center justify-between gap-2 rounded-xl border border-border bg-muted/40 px-4 py-2.5">
-                  <p className="text-xs text-muted-foreground flex items-center gap-2">
-                    <Bell className="h-3.5 w-3.5 text-primary shrink-0" aria-hidden="true" />
-                    Recevez une alerte e-mail dès qu'un nouveau gardien rejoint la zone autour de {city}.
-                  </p>
+                <div className="mb-5 rounded-[20px] border border-terra-border bg-terra-soft px-5 py-4 md:px-6 md:py-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                  <div className="min-w-0">
+                    <p className="font-heading text-[16px] font-semibold text-foreground">
+                      Peu de gardiens correspondent encore&nbsp;?
+                    </p>
+                    <p className="text-[13px] text-muted-foreground mt-1 leading-snug">
+                      Recevez un e-mail dès qu'un nouveau gardien rejoint la zone autour de&nbsp;{city}.
+                    </p>
+                  </div>
                   <button
                     onClick={handleCreateAlertGated}
                     disabled={isCreatingAlert}
-                    className="text-xs font-medium text-primary hover:underline disabled:opacity-60 whitespace-nowrap"
+                    className="shrink-0 inline-flex items-center justify-center gap-2 min-h-11 rounded-full bg-primary px-5 py-2.5 text-[13px] font-semibold text-primary-foreground shadow-sm hover:bg-primary/90 disabled:opacity-60 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                   >
-                    {isCreatingAlert ? "Création…" : "Créer une alerte"}
+                    {isCreatingAlert ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden /> : <Bell className="h-4 w-4" aria-hidden />}
+                    Créer mon alerte
                   </button>
                 </div>
               )}
               {city && alertCreated && (
-                <div className="mb-4 flex items-center gap-2 rounded-xl border border-primary/30 bg-primary/5 px-4 py-2.5 text-xs text-primary">
-                  <BellRing className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+                <div className="mb-5 flex items-center gap-2 rounded-[20px] border border-primary/30 bg-primary/5 px-4 py-3 text-sm text-primary">
+                  <BellRing className="h-4 w-4 shrink-0" aria-hidden="true" />
                   Alerte créée, l'e-mail partira automatiquement.
                 </div>
               )}
@@ -1464,7 +1470,7 @@ const SearchOwner = () => {
             {/* Grille dense 4 col desktop / 3 laptop / 2 tablette / 1 mobile.
                 Padding-right sur >= xl pour éviter que la dernière colonne passe
                 sous le AlmaDock fixé (right-6 md:). */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 auto-rows-fr xl:pr-16">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5 auto-rows-fr xl:pr-16">
               {(() => {
                 const nameCounts: Record<string, number> = {};
                 results.forEach((s: any) => {
@@ -1478,8 +1484,6 @@ const SearchOwner = () => {
                     photos={s._photos || []}
                     affinity={s._affinity || null}
                     hasOwnerProfile={!!viewerOwner}
-                    onContact={handleContact}
-                    contactingId={contactingId}
                     duplicateName={nameCounts[(s.profile?.first_name || "Gardien").toLowerCase()] > 1}
                     city={city}
                   />
@@ -1489,6 +1493,7 @@ const SearchOwner = () => {
             </>
           )}
         </div>
+
       ) : (
         <div className="flex flex-col md:flex-row h-[calc(100dvh-180px)] md:h-[calc(100dvh-220px)]">
           <div className="order-2 md:order-1 w-full md:w-1/2 flex-1 min-h-0 overflow-y-auto border-r border-border p-4 space-y-3">
