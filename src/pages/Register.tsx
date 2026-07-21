@@ -496,7 +496,7 @@ const Register = () => {
  />
  </div>
  </div>
- <p className="text-foreground font-medium text-sm lg:text-base mt-2 lg:mt-3">
+ <p className="font-heading text-foreground text-xl lg:text-2xl mt-2 lg:mt-3">
  {step === 1 ? t("register_page.welcome") : t("register_page.almost_done")}
  </p>
  <p className="text-xs lg:text-sm text-muted-foreground mt-0.5 lg:mt-1">
