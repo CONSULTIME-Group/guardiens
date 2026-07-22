@@ -90,11 +90,14 @@ const FirstApplicationEmail = ({
             </Button>
           </Section>
 
+          <Text style={note}>
+            Vous pourrez lire son message et lui répondre directement dans le chat du site. Inutile de répondre à cet email, il n'est pas relevé.
+          </Text>
+
           <Hr style={hr} />
           <Text style={tips}>
             <strong>Nos conseils pour ce premier échange :</strong><br />
             · Répondez même si vous hésitez, un simple «&nbsp;merci&nbsp;» est apprécié.<br />
-            · Posez vos questions dès la messagerie, avant toute décision.<br />
             · Proposez une visio ou une rencontre avant de confirmer.
           </Text>
 

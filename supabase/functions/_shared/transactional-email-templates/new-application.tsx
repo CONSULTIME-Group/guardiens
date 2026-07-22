@@ -89,6 +89,10 @@ const NewApplicationEmail = ({
             </Button>
           </Section>
 
+          <Text style={note}>
+            Vous pourrez lire son message et lui répondre directement dans le chat du site. Inutile de répondre à cet email, il n'est pas relevé.
+          </Text>
+
           <LegalFooter
             purpose="la gestion de votre annonce"
             basis="6.1.b"

@@ -84,6 +84,10 @@ const NewMessageEmail = ({
             <Button style={button} href={link}>Lire et répondre</Button>
           </Section>
 
+          <Text style={note}>
+            Toute la conversation se passe dans la messagerie Guardiens. Cliquez sur le bouton pour répondre directement dans le chat du site. Inutile de répondre à cet email, il n'est pas relevé.
+          </Text>
+
         <LegalFooter
           purpose="la bonne marche du service de messagerie"
           basis="6.1.f"
