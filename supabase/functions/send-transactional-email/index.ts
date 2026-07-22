@@ -654,14 +654,21 @@ Deno.serve(async (req) => {
     })
   }
 
-  // Log pending
-  await supabase.from('email_send_log').insert({
-    message_id: messageId,
-    template_name: templateName,
-    recipient_email: effectiveRecipient,
-    status: 'pending',
-    metadata: { idempotency_key: idempotencyKey, category, bypass, isUrgent },
-  })
+  // Log pending — on capture l'id pour faire évoluer CETTE ligne vers
+  // 'sent' ou 'failed' (UPDATE), au lieu d'insérer une seconde ligne.
+  // Fix double-logging (vague 45) : ~1 pending orphelin par envoi historiquement.
+  const { data: pendingRow } = await supabase
+    .from('email_send_log')
+    .insert({
+      message_id: messageId,
+      template_name: templateName,
+      recipient_email: effectiveRecipient,
+      status: 'pending',
+      metadata: { idempotency_key: idempotencyKey, category, bypass, isUrgent, ...logMetadata },
+    })
+    .select('id')
+    .single()
+  const pendingRowId: string | null = (pendingRow as { id?: string } | null)?.id ?? null
 
   // RFC 8058 List-Unsubscribe headers — Gmail/Apple Mail one-click unsubscribe.
   // Only meaningful for non-transactional emails. The unsubscribe handler accepts
