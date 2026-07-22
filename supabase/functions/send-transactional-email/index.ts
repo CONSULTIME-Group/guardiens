@@ -97,6 +97,11 @@ Deno.serve(async (req) => {
   let idempotencyKey: string
   let messageId: string
   let templateData: Record<string, any> = {}
+  // logMetadata: métadonnées additionnelles fusionnées dans email_send_log.metadata.
+  // Ex : notify-new-message y passe { conversation_id, recipient_id } pour que le
+  // throttle « WHERE status='sent' AND metadata->>conversation_id » continue à
+  // fonctionner sans nécessiter une seconde ligne de log dédiée (fix double-logging).
+  let logMetadata: Record<string, any> = {}
   try {
     const body = await req.json()
     templateName = body.templateName || body.template_name
@@ -105,6 +110,9 @@ Deno.serve(async (req) => {
     idempotencyKey = body.idempotencyKey || body.idempotency_key || messageId
     if (body.templateData && typeof body.templateData === 'object') {
       templateData = body.templateData
+    }
+    if (body.logMetadata && typeof body.logMetadata === 'object') {
+      logMetadata = body.logMetadata
     }
   } catch {
     return new Response(
