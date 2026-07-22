@@ -421,19 +421,31 @@ Deno.serve(async (req) => {
     }
     const campaignId = campaign.id as string;
 
+    // Trois compteurs distincts (vague 45) :
+    //   - sent     : envoi Resend accepté (data.success && data.sent)
+    //   - excluded : destinataire écarté légitimement en aval par
+    //                send-transactional-email (opt-out catégorie, suppressed,
+    //                idempotence déjà envoyée, envoi différé par le cap).
+    //   - errors   : vrais échecs techniques (invoke non-2xx, exception).
+    // Le pré-filtre en amont exclut déjà product_emails=false et suppressed,
+    // mais la catégorie « alert » a sa propre préférence (alert_emails) qui
+    // est réévaluée côté send-transactional-email — d'où l'importance de
+    // reconnaître ici les 200 « exclus » et ne pas les compter en erreur.
     let sent = 0;
+    let excluded = 0;
     let errors = 0;
 
     // Idempotence stable par (campagne, destinataire) : un rejeu de la même
     // campagne ne double pas les envois, mais un nouveau broadcast admin
     // (nouvelle mass_emails.id) permet un renvoi légitime.
     const CONCURRENCY = 8;
+    type Outcome = "sent" | "excluded" | "error";
     for (let i = 0; i < recipients.length; i += CONCURRENCY) {
       const slice = recipients.slice(i, i + CONCURRENCY);
-      const results = await Promise.all(slice.map(async (r) => {
+      const results = await Promise.all(slice.map(async (r): Promise<{ outcome: Outcome; err?: string }> => {
         const idem = `listing-proximity-${campaignId}-${r.user_id}`;
         try {
-          const { error } = await serviceClient.functions.invoke("send-transactional-email", {
+          const { data, error } = await serviceClient.functions.invoke("send-transactional-email", {
             body: {
               templateName: "nearby-sit-alert",
               recipientEmail: r.email,
@@ -452,14 +464,38 @@ Deno.serve(async (req) => {
               },
             },
           });
-          if (error) return { ok: false, err: String(error) };
-          return { ok: true };
+          if (error) return { outcome: "error", err: String(error) };
+          const body = (data ?? {}) as { success?: boolean; sent?: boolean; deferred?: boolean; skipped?: boolean; reason?: string };
+          // Exclusion RGPD / cap / idempotence : jamais comptée en erreur.
+          const excludedReasons = new Set([
+            "unsubscribed_category",
+            "email_suppressed",
+            "duplicate_idempotency_key",
+            "already_queued",
+            "unsubscribe_deferred",
+            "frequency_cap",
+          ]);
+          if (body.reason && excludedReasons.has(body.reason)) {
+            return { outcome: "excluded" };
+          }
+          if (body.deferred === true || body.skipped === true) {
+            return { outcome: "excluded" };
+          }
+          if (body.success === true && body.sent === true) {
+            return { outcome: "sent" };
+          }
+          if (body.success === false) {
+            return { outcome: "excluded" };
+          }
+          return { outcome: "sent" };
         } catch (e) {
-          return { ok: false, err: String(e) };
+          return { outcome: "error", err: String(e) };
         }
       }));
       for (const r of results) {
-        if (r.ok) sent++; else { errors++; console.error("listing-proximity send failed:", r.err); }
+        if (r.outcome === "sent") sent++;
+        else if (r.outcome === "excluded") excluded++;
+        else { errors++; console.error("listing-proximity send failed:", r.err); }
       }
     }
 
@@ -482,7 +518,7 @@ Deno.serve(async (req) => {
         .eq("id", signalId);
     }
 
-    return new Response(JSON.stringify({ sent, errors, campaign_id: campaignId }), {
+    return new Response(JSON.stringify({ sent, excluded, errors, campaign_id: campaignId }), {
       status: 200,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
