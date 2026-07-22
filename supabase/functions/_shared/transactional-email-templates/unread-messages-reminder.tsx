@@ -70,6 +70,12 @@ const UnreadMessagesReminderEmail = ({
             </Text>
           )}
 
+          {messagePreview ? (
+            <Section style={quoteWrap}>
+              <Text style={quoteText}>« {messagePreview} »</Text>
+            </Section>
+          ) : null}
+
           <Text style={text}>
             Une réponse rapide augmente fortement vos chances de finaliser un échange.
           </Text>
@@ -77,6 +83,10 @@ const UnreadMessagesReminderEmail = ({
           <Section style={{ textAlign: 'center', margin: '24px 0' }}>
             <Button style={button} href={link}>Lire et répondre</Button>
           </Section>
+
+          <Text style={note}>
+            Toute la conversation se passe dans la messagerie Guardiens. Cliquez sur le bouton pour répondre directement dans le chat du site. Inutile de répondre à cet email, il n'est pas relevé.
+          </Text>
 
           <Text style={hint}>
             Vous recevez ce rappel car ce message est resté non lu depuis plus de 24 heures. Vous pouvez ajuster vos préférences de notifications dans votre compte.
