@@ -717,20 +717,58 @@ Deno.serve(async (req) => {
 
     if (!resendRes.ok) {
       console.error('Resend API error', { status: resendRes.status, data: resendData })
-      await supabase.from('email_send_log').insert({
-        message_id: messageId,
-        template_name: templateName,
-        recipient_email: effectiveRecipient,
-        status: 'failed',
-        error_message: `Resend ${resendRes.status}: ${resendData.message || 'Unknown error'}`,
-      })
+      // Fait évoluer la ligne pending -> failed (une seule ligne par envoi).
+      if (pendingRowId) {
+        await supabase.from('email_send_log').update({
+          status: 'failed',
+          error_message: `Resend ${resendRes.status}: ${resendData.message || 'Unknown error'}`,
+        }).eq('id', pendingRowId)
+      } else {
+        await supabase.from('email_send_log').insert({
+          message_id: messageId,
+          template_name: templateName,
+          recipient_email: effectiveRecipient,
+          status: 'failed',
+          error_message: `Resend ${resendRes.status}: ${resendData.message || 'Unknown error'}`,
+          metadata: { idempotency_key: idempotencyKey, ...logMetadata },
+        })
+      }
       return new Response(JSON.stringify({ error: 'Failed to send email' }), {
         status: 500,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       })
     }
 
-    // Log success
+    // Fait évoluer la ligne pending -> sent (une seule ligne par envoi).
+    // Le throttle de notify-new-message lit WHERE status='sent' AND
+    // metadata->>conversation_id : la métadata a été fusionnée dès l'insert
+    // pending, donc l'UPDATE ci-dessous préserve le mécanisme.
+    const sentMetadata = {
+      idempotency_key: idempotencyKey,
+      resend_id: resendData.id ?? null,
+      category,
+      bypass,
+      isUrgent,
+      alma_signed: isAlmaSigned(templateName),
+      ...logMetadata,
+    }
+    if (pendingRowId) {
+      await supabase.from('email_send_log').update({
+        status: 'sent',
+        resend_id: resendData.id ?? null,
+        metadata: sentMetadata,
+      }).eq('id', pendingRowId)
+    } else {
+      // Fallback si la capture d'id a échoué (n'insère qu'une ligne).
+      await supabase.from('email_send_log').insert({
+        message_id: messageId,
+        template_name: templateName,
+        recipient_email: effectiveRecipient,
+        status: 'sent',
+        resend_id: resendData.id ?? null,
+        metadata: sentMetadata,
+      })
+    }
     await supabase.from('email_send_log').insert({
       message_id: messageId,
       template_name: templateName,
