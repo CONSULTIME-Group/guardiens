@@ -778,13 +778,22 @@ Deno.serve(async (req) => {
     )
   } catch (sendError) {
     console.error('Resend fetch error', sendError)
-    await supabase.from('email_send_log').insert({
-      message_id: messageId,
-      template_name: templateName,
-      recipient_email: effectiveRecipient,
-      status: 'failed',
-      error_message: (sendError instanceof Error ? sendError.message : String(sendError)) || 'Network error sending via Resend',
-    })
+    const errMsg = (sendError instanceof Error ? sendError.message : String(sendError)) || 'Network error sending via Resend'
+    if (pendingRowId) {
+      await supabase.from('email_send_log').update({
+        status: 'failed',
+        error_message: errMsg,
+      }).eq('id', pendingRowId)
+    } else {
+      await supabase.from('email_send_log').insert({
+        message_id: messageId,
+        template_name: templateName,
+        recipient_email: effectiveRecipient,
+        status: 'failed',
+        error_message: errMsg,
+        metadata: { idempotency_key: idempotencyKey, ...logMetadata },
+      })
+    }
     return new Response(JSON.stringify({ error: 'Failed to send email' }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
