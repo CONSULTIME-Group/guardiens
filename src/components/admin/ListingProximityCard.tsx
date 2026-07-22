@@ -171,11 +171,16 @@ const ListingProximityCard = ({
         setWarningMessage(await buildCoordsErrorMessage(msg));
         return;
       }
-      toast.success(
-        `Envoi terminé, ${(data as { sent: number }).sent} email(s) expédié(s)${
-          (data as { errors?: number }).errors ? `, ${(data as { errors: number }).errors} erreur(s)` : ""
-        }.`,
-      );
+      const sent = (data as { sent?: number }).sent ?? 0;
+      const excluded = (data as { excluded?: number }).excluded ?? 0;
+      const errors = (data as { errors?: number }).errors ?? 0;
+      const parts: string[] = [`${sent} envoyé${sent > 1 ? "s" : ""}`];
+      if (excluded > 0) {
+        parts.push(`${excluded} exclu${excluded > 1 ? "s" : ""} (désinscrits ou adresses en quarantaine)`);
+      }
+      parts.push(`${errors} erreur${errors > 1 ? "s" : ""}`);
+      toast.success(`Envoi terminé, ${parts.join(", ")}.`);
+
       setPreview(null);
       setConfirmInput("");
     } catch (err: unknown) {
