@@ -20,6 +20,8 @@ interface Props {
   /** Si présent, active le variant "1 conversation" avec le contexte
    *  ("votre annonce X", "l'entraide Y", etc.). */
   contextLabel?: string
+  /** Aperçu du dernier message non lu (tronqué côté edge). */
+  messagePreview?: string
 }
 
 const UnreadMessagesReminderEmail = ({
