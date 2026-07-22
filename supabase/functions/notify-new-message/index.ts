@@ -187,7 +187,13 @@ Deno.serve(async (req) => {
   // 7. Tronquer aperçu
   const preview = (payload.content || '').trim().slice(0, 200)
 
-  // 8. Invoquer send-transactional-email
+  // 8. Invoquer send-transactional-email en lui passant `logMetadata`
+  //    (conversation_id / recipient_id). send-transactional-email fusionne
+  //    ces champs dans email_send_log.metadata dès la ligne 'pending' puis
+  //    lors du passage 'sent', pour que le throttle 30 min ci-dessus
+  //    (WHERE status='sent' AND metadata->>conversation_id = ...) continue
+  //    à fonctionner sans avoir besoin d'une seconde ligne dédiée
+  //    (fix double-logging vague 45).
   const { error: sendErr } = await supabase.functions.invoke('send-transactional-email', {
     body: {
       templateName: 'new-message',
@@ -203,6 +209,11 @@ Deno.serve(async (req) => {
         recipientRole,
         messagePreview: preview || null,
       },
+      logMetadata: {
+        conversation_id: conv.id,
+        recipient_id: recipientId,
+        source: 'notify-new-message',
+      },
     },
   })
 
@@ -212,15 +223,6 @@ Deno.serve(async (req) => {
       status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     })
   }
-
-  // Log meta pour le throttle (on ré-insère car send-transactional-email log sans conversation_id)
-  await supabase.from('email_send_log').insert({
-    message_id: crypto.randomUUID(),
-    template_name: 'new-message',
-    recipient_email: recipientProfile.email,
-    status: 'sent',
-    metadata: { conversation_id: conv.id, recipient_id: recipientId, source: 'notify-new-message' },
-  })
 
   return new Response(JSON.stringify({ success: true }), {
     status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
