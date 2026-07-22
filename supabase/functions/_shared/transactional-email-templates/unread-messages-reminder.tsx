@@ -128,3 +128,6 @@ const h1 = { fontSize: '24px', fontWeight: 'bold' as const, color: 'hsl(153, 42%
 const text = { fontSize: '14px', color: 'hsl(37, 7%, 43%)', lineHeight: '1.6', margin: '0 0 16px' }
 const button = { backgroundColor: 'hsl(153, 42%, 30%)', color: '#ffffff', padding: '12px 28px', borderRadius: '8px', fontSize: '15px', fontWeight: '600' as const, textDecoration: 'none', display: 'inline-block' }
 const hint = { fontSize: '12px', color: 'hsl(37, 7%, 60%)', lineHeight: '1.5', margin: '20px 0 0', fontStyle: 'italic' as const }
+const note = { fontSize: '12px', color: 'hsl(37, 7%, 50%)', lineHeight: '1.5', margin: '12px 0 0' }
+const quoteWrap = { borderLeft: '3px solid hsl(153, 42%, 30%)', padding: '8px 14px', margin: '0 0 16px', backgroundColor: 'hsl(153, 20%, 97%)' }
+const quoteText = { fontSize: '14px', color: 'hsl(37, 7%, 30%)', lineHeight: '1.6', margin: 0, fontStyle: 'italic' as const }
