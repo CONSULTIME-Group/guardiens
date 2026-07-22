@@ -118,6 +118,7 @@ const main = { backgroundColor: '#ffffff', fontFamily: "'Outfit', Arial, sans-se
 const container = { padding: '24px 28px', maxWidth: '560px', margin: '0 auto' }
 const h1 = { fontSize: '24px', fontWeight: 'bold' as const, color: 'hsl(153, 42%, 30%)', margin: '0 0 20px' }
 const text = { fontSize: '14px', color: 'hsl(37, 7%, 43%)', lineHeight: '1.6', margin: '0 0 16px' }
+const note = { ...text, fontSize: '12px' }
 const hr = { borderColor: 'hsl(37, 22%, 89%)', margin: '20px 0' }
 const button = { backgroundColor: 'hsl(153, 42%, 30%)', color: '#ffffff', padding: '12px 28px', borderRadius: '8px', fontSize: '15px', fontWeight: '600' as const, textDecoration: 'none', display: 'inline-block' }
 const detailsBox = { backgroundColor: 'hsl(37, 30%, 96%)', border: '1px solid hsl(37, 22%, 89%)', padding: '12px 16px', margin: '8px 0 16px', borderRadius: '6px' }
