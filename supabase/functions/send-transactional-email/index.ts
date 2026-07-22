@@ -97,6 +97,11 @@ Deno.serve(async (req) => {
   let idempotencyKey: string
   let messageId: string
   let templateData: Record<string, any> = {}
+  // logMetadata: métadonnées additionnelles fusionnées dans email_send_log.metadata.
+  // Ex : notify-new-message y passe { conversation_id, recipient_id } pour que le
+  // throttle « WHERE status='sent' AND metadata->>conversation_id » continue à
+  // fonctionner sans nécessiter une seconde ligne de log dédiée (fix double-logging).
+  let logMetadata: Record<string, any> = {}
   try {
     const body = await req.json()
     templateName = body.templateName || body.template_name
@@ -105,6 +110,9 @@ Deno.serve(async (req) => {
     idempotencyKey = body.idempotencyKey || body.idempotency_key || messageId
     if (body.templateData && typeof body.templateData === 'object') {
       templateData = body.templateData
+    }
+    if (body.logMetadata && typeof body.logMetadata === 'object') {
+      logMetadata = body.logMetadata
     }
   } catch {
     return new Response(
@@ -646,14 +654,21 @@ Deno.serve(async (req) => {
     })
   }
 
-  // Log pending
-  await supabase.from('email_send_log').insert({
-    message_id: messageId,
-    template_name: templateName,
-    recipient_email: effectiveRecipient,
-    status: 'pending',
-    metadata: { idempotency_key: idempotencyKey, category, bypass, isUrgent },
-  })
+  // Log pending — on capture l'id pour faire évoluer CETTE ligne vers
+  // 'sent' ou 'failed' (UPDATE), au lieu d'insérer une seconde ligne.
+  // Fix double-logging (vague 45) : ~1 pending orphelin par envoi historiquement.
+  const { data: pendingRow } = await supabase
+    .from('email_send_log')
+    .insert({
+      message_id: messageId,
+      template_name: templateName,
+      recipient_email: effectiveRecipient,
+      status: 'pending',
+      metadata: { idempotency_key: idempotencyKey, category, bypass, isUrgent, ...logMetadata },
+    })
+    .select('id')
+    .single()
+  const pendingRowId: string | null = (pendingRow as { id?: string } | null)?.id ?? null
 
   // RFC 8058 List-Unsubscribe headers — Gmail/Apple Mail one-click unsubscribe.
   // Only meaningful for non-transactional emails. The unsubscribe handler accepts
@@ -702,34 +717,58 @@ Deno.serve(async (req) => {
 
     if (!resendRes.ok) {
       console.error('Resend API error', { status: resendRes.status, data: resendData })
-      await supabase.from('email_send_log').insert({
-        message_id: messageId,
-        template_name: templateName,
-        recipient_email: effectiveRecipient,
-        status: 'failed',
-        error_message: `Resend ${resendRes.status}: ${resendData.message || 'Unknown error'}`,
-      })
+      // Fait évoluer la ligne pending -> failed (une seule ligne par envoi).
+      if (pendingRowId) {
+        await supabase.from('email_send_log').update({
+          status: 'failed',
+          error_message: `Resend ${resendRes.status}: ${resendData.message || 'Unknown error'}`,
+        }).eq('id', pendingRowId)
+      } else {
+        await supabase.from('email_send_log').insert({
+          message_id: messageId,
+          template_name: templateName,
+          recipient_email: effectiveRecipient,
+          status: 'failed',
+          error_message: `Resend ${resendRes.status}: ${resendData.message || 'Unknown error'}`,
+          metadata: { idempotency_key: idempotencyKey, ...logMetadata },
+        })
+      }
       return new Response(JSON.stringify({ error: 'Failed to send email' }), {
         status: 500,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       })
     }
 
-    // Log success
-    await supabase.from('email_send_log').insert({
-      message_id: messageId,
-      template_name: templateName,
-      recipient_email: effectiveRecipient,
-      status: 'sent',
+    // Fait évoluer la ligne pending -> sent (une seule ligne par envoi).
+    // Le throttle de notify-new-message lit WHERE status='sent' AND
+    // metadata->>conversation_id : la métadata a été fusionnée dès l'insert
+    // pending, donc l'UPDATE ci-dessous préserve le mécanisme.
+    const sentMetadata = {
+      idempotency_key: idempotencyKey,
       resend_id: resendData.id ?? null,
-      metadata: {
-        idempotency_key: idempotencyKey,
+      category,
+      bypass,
+      isUrgent,
+      alma_signed: isAlmaSigned(templateName),
+      ...logMetadata,
+    }
+    if (pendingRowId) {
+      await supabase.from('email_send_log').update({
+        status: 'sent',
         resend_id: resendData.id ?? null,
-        bypass,
-        isUrgent,
-        alma_signed: isAlmaSigned(templateName),
-      },
-    })
+        metadata: sentMetadata,
+      }).eq('id', pendingRowId)
+    } else {
+      // Fallback si la capture d'id a échoué (n'insère qu'une ligne).
+      await supabase.from('email_send_log').insert({
+        message_id: messageId,
+        template_name: templateName,
+        recipient_email: effectiveRecipient,
+        status: 'sent',
+        resend_id: resendData.id ?? null,
+        metadata: sentMetadata,
+      })
+    }
 
     console.log('Transactional email sent via Resend', { templateName, effectiveRecipient, resendId: resendData.id })
 
@@ -739,13 +778,22 @@ Deno.serve(async (req) => {
     )
   } catch (sendError) {
     console.error('Resend fetch error', sendError)
-    await supabase.from('email_send_log').insert({
-      message_id: messageId,
-      template_name: templateName,
-      recipient_email: effectiveRecipient,
-      status: 'failed',
-      error_message: (sendError instanceof Error ? sendError.message : String(sendError)) || 'Network error sending via Resend',
-    })
+    const errMsg = (sendError instanceof Error ? sendError.message : String(sendError)) || 'Network error sending via Resend'
+    if (pendingRowId) {
+      await supabase.from('email_send_log').update({
+        status: 'failed',
+        error_message: errMsg,
+      }).eq('id', pendingRowId)
+    } else {
+      await supabase.from('email_send_log').insert({
+        message_id: messageId,
+        template_name: templateName,
+        recipient_email: effectiveRecipient,
+        status: 'failed',
+        error_message: errMsg,
+        metadata: { idempotency_key: idempotencyKey, ...logMetadata },
+      })
+    }
     return new Response(JSON.stringify({ error: 'Failed to send email' }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },

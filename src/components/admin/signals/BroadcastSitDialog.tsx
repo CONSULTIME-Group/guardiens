@@ -110,10 +110,17 @@ export const BroadcastSitDialog = ({ open, onOpenChange, signal, onSent }: Props
     try {
       const data = await invokeProximity("send");
       const sent = (data as { sent?: number })?.sent ?? 0;
+      const excluded = (data as { excluded?: number })?.excluded ?? 0;
       const errors = (data as { errors?: number })?.errors ?? 0;
-      toast.success(
-        `${sent} email${sent > 1 ? "s" : ""} envoyé${sent > 1 ? "s" : ""}${errors ? `, ${errors} erreur${errors > 1 ? "s" : ""}` : ""}.`,
-      );
+      const parts: string[] = [
+        `${sent} envoyé${sent > 1 ? "s" : ""}`,
+      ];
+      if (excluded > 0) {
+        parts.push(`${excluded} exclu${excluded > 1 ? "s" : ""} (désinscrits ou adresses en quarantaine)`);
+      }
+      parts.push(`${errors} erreur${errors > 1 ? "s" : ""}`);
+      toast.success(`${parts.join(", ")}.`);
+
       onOpenChange(false);
       onSent();
     } catch (e) {
