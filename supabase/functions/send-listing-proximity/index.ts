@@ -445,8 +445,10 @@ Deno.serve(async (req) => {
       const results = await Promise.all(slice.map(async (r): Promise<{ outcome: Outcome; err?: string }> => {
         const idem = `listing-proximity-${campaignId}-${r.user_id}`;
         try {
-          const { data, error } = await serviceClient.functions.invoke("send-transactional-email", {
-            body: {
+          const _steRes = await fetch(`${Deno.env.get('SUPABASE_URL')}/functions/v1/send-transactional-email`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')}` },
+            body: JSON.stringify({
               templateName: "nearby-sit-alert",
               recipientEmail: r.email,
               idempotencyKey: idem,
@@ -462,8 +464,12 @@ Deno.serve(async (req) => {
                 animalsSummary: petsSentence || undefined,
                 coverPhotoUrl: coverPhotoUrl || null,
               },
-            },
+            }),
           });
+          const _steTxt1 = _steRes.ok ? '' : await _steRes.text().catch(() => '');
+          if (!_steRes.ok) console.error('send-transactional-email failed', _steRes.status, _steTxt1);
+          const error = _steRes.ok ? null : new Error(`send-transactional-email ${_steRes.status}: ${_steTxt1}`);
+          const data = _steRes.ok ? await _steRes.json().catch(() => null) : null;
           if (error) return { outcome: "error", err: String(error) };
           const body = (data ?? {}) as { success?: boolean; sent?: boolean; deferred?: boolean; skipped?: boolean; reason?: string };
           // Exclusion RGPD / cap / idempotence : jamais comptée en erreur.

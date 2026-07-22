@@ -188,14 +188,19 @@ Deno.serve(async (req) => {
         .select("first_name")
         .eq("id", user.id)
         .maybeSingle();
-      const { error: sendErr } = await sc.functions.invoke("send-transactional-email", {
-        body: {
+      const _steRes = await fetch(`${Deno.env.get('SUPABASE_URL')}/functions/v1/send-transactional-email`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')}` },
+        body: JSON.stringify({
           templateName: "owner-activation-nudge",
           recipientEmail: adminEmail,
           idempotencyKey: `owner_activation_test_${user.id}_${Date.now()}`,
           templateData: { firstName: (adminProfile as any)?.first_name ?? "" },
-        },
+        }),
       });
+      const _steTxt1 = _steRes.ok ? '' : await _steRes.text().catch(() => '');
+      if (!_steRes.ok) console.error('send-transactional-email failed', _steRes.status, _steTxt1);
+      const sendErr = _steRes.ok ? null : new Error(`send-transactional-email ${_steRes.status}: ${_steTxt1}`);
       if (sendErr) throw sendErr;
       return new Response(JSON.stringify({ sent: 1, errors: 0, mode: "test_only" }), {
         status: 200,
@@ -278,14 +283,19 @@ Deno.serve(async (req) => {
       await Promise.all(
         batch.map(async (r) => {
           try {
-            const { error } = await sc.functions.invoke("send-transactional-email", {
-              body: {
+            const _steRes2 = await fetch(`${Deno.env.get('SUPABASE_URL')}/functions/v1/send-transactional-email`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')}` },
+              body: JSON.stringify({
                 templateName: "owner-activation-nudge",
                 recipientEmail: r.email,
                 idempotencyKey: `${dedupeKey}_${r.id}`,
                 templateData: { firstName: r.first_name ?? "" },
-              },
+              }),
             });
+            const _steTxt2 = _steRes2.ok ? '' : await _steRes2.text().catch(() => '');
+            if (!_steRes2.ok) console.error('send-transactional-email failed', _steRes2.status, _steTxt2);
+            const error = _steRes2.ok ? null : new Error(`send-transactional-email ${_steRes2.status}: ${_steTxt2}`);
             if (error) throw error;
             sent += 1;
           } catch (e) {

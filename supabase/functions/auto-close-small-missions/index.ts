@@ -241,8 +241,10 @@ Deno.serve(async (req) => {
           .maybeSingle()
         if (sup) continue
 
-        await admin.functions.invoke('send-transactional-email', {
-          body: {
+        const _steRes = await fetch(`${Deno.env.get('SUPABASE_URL')}/functions/v1/send-transactional-email`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')}` },
+          body: JSON.stringify({
             templateName: 'mission-auto-closed',
             recipientEmail: email,
             idempotencyKey: `mission-auto-closed-${m.id}`,
@@ -253,8 +255,10 @@ Deno.serve(async (req) => {
               ageDays: m.ageDays,
             },
             metadata: { mission_id: m.id, close_reason: 'expired', age_days: m.ageDays, reason: m.reason },
-          },
-        })
+          }),
+        });
+        const _steTxt1 = _steRes.ok ? '' : await _steRes.text().catch(() => '');
+        if (!_steRes.ok) console.error('send-transactional-email failed', _steRes.status, _steTxt1);
       } catch (e) {
         console.warn('[auto-close] notify/email failed', m.id, e)
       }
