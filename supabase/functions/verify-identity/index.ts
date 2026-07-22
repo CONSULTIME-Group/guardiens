@@ -222,9 +222,13 @@ Rules:
     const sendEmail = async (templateName: string, idempotencyKey: string, templateData: Record<string, unknown> = {}) => {
       if (!userEmail) return;
       try {
-        await supabaseAdmin.functions.invoke("send-transactional-email", {
-          body: { templateName, recipientEmail: userEmail, idempotencyKey, templateData },
+        const _steRes = await fetch(`${Deno.env.get('SUPABASE_URL')}/functions/v1/send-transactional-email`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')}` },
+          body: JSON.stringify({ templateName, recipientEmail: userEmail, idempotencyKey, templateData }),
         });
+        const _steTxt1 = _steRes.ok ? '' : await _steRes.text().catch(() => '');
+        if (!_steRes.ok) console.error('send-transactional-email failed', _steRes.status, _steTxt1);
       } catch (e) {
         console.error("send-transactional-email failed", { templateName, error: e });
       }

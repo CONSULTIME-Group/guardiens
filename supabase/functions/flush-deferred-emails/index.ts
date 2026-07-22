@@ -84,14 +84,20 @@ Deno.serve(async (req) => {
       .eq("id", row.id);
 
     try {
-      const { data, error } = await supabase.functions.invoke("send-transactional-email", {
-        body: {
+      const _steRes = await fetch(`${Deno.env.get('SUPABASE_URL')}/functions/v1/send-transactional-email`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')}` },
+        body: JSON.stringify({
           templateName: row.template_name,
           recipientEmail: row.recipient_email,
           idempotencyKey: row.idempotency_key,
           templateData: row.template_data || {},
-        },
+        }),
       });
+      const _steTxt1 = _steRes.ok ? '' : await _steRes.text().catch(() => '');
+      if (!_steRes.ok) console.error('send-transactional-email failed', _steRes.status, _steTxt1);
+      const error = _steRes.ok ? null : new Error(`send-transactional-email ${_steRes.status}: ${_steTxt1}`);
+      const data = _steRes.ok ? await _steRes.json().catch(() => null) : null;
 
       if (error) throw error;
 

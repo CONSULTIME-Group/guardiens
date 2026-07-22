@@ -87,7 +87,7 @@ export const buildLeadSentence = (
 export const buildSubject = (data: NewMessageData): string => {
   const sender = data.senderFirstName || 'Un membre'
   const role = data.recipientRole
-  const suffix = ' \u2014 Guardiens'
+  const suffix = ' \u00B7 Guardiens'
   const base = (() => {
     switch (data.contextType) {
       case 'sit_application':

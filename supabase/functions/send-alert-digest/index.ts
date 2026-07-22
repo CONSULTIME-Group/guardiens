@@ -283,8 +283,10 @@ Deno.serve(async (req) => {
 
       const idem = `alert-digest-${pref.id}-${now.toISOString().slice(0, 10)}-${currentHourStr}`;
 
-      const { error: sendErr } = await supabase.functions.invoke("send-transactional-email", {
-        body: {
+      const _steRes = await fetch(`${Deno.env.get('SUPABASE_URL')}/functions/v1/send-transactional-email`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')}` },
+        body: JSON.stringify({
           templateName: "alert-digest",
           recipientEmail: profile.email,
           idempotencyKey: idem,
@@ -294,8 +296,11 @@ Deno.serve(async (req) => {
             sits: sitsPayload,
             missions: missionsPayload,
           },
-        },
+        }),
       });
+      const _steTxt1 = _steRes.ok ? '' : await _steRes.text().catch(() => '');
+      if (!_steRes.ok) console.error('send-transactional-email failed', _steRes.status, _steTxt1);
+      const sendErr = _steRes.ok ? null : new Error(`send-transactional-email ${_steRes.status}: ${_steTxt1}`);
       if (sendErr) {
         errors.push({ user_id: profile.id, reason: String(sendErr) });
         continue;

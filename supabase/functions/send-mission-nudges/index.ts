@@ -219,8 +219,10 @@ async function sendNudge(
     return
   }
 
-  const { error: sendErr } = await admin.functions.invoke('send-transactional-email', {
-    body: {
+  const _steRes = await fetch(`${Deno.env.get('SUPABASE_URL')}/functions/v1/send-transactional-email`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')}` },
+    body: JSON.stringify({
       templateName,
       recipientEmail: email,
       idempotencyKey,
@@ -230,8 +232,11 @@ async function sendNudge(
         missionId: m.id,
       },
       metadata: { mission_id: m.id, nudge_type: kind },
-    },
-  })
+    }),
+  });
+  const _steTxt1 = _steRes.ok ? '' : await _steRes.text().catch(() => '');
+  if (!_steRes.ok) console.error('send-transactional-email failed', _steRes.status, _steTxt1);
+  const sendErr = _steRes.ok ? null : new Error(`send-transactional-email ${_steRes.status}: ${_steTxt1}`);
   if (sendErr) {
     results.push({ mission_id: m.id, nudge_type: kind, status: 'error', reason: String(sendErr) })
     return
@@ -307,8 +312,10 @@ async function sendResponseWaitingNudge(
     return
   }
 
-  const { error: sendErr } = await admin.functions.invoke('send-transactional-email', {
-    body: {
+  const _steRes2 = await fetch(`${Deno.env.get('SUPABASE_URL')}/functions/v1/send-transactional-email`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')}` },
+    body: JSON.stringify({
       templateName,
       recipientEmail: email,
       idempotencyKey,
@@ -318,8 +325,11 @@ async function sendResponseWaitingNudge(
         missionId: mission.id,
       },
       metadata: { mission_id: mission.id, response_id: responseId, nudge_type: 'response_waiting' },
-    },
-  })
+    }),
+  });
+  const _steTxt2 = _steRes2.ok ? '' : await _steRes2.text().catch(() => '');
+  if (!_steRes2.ok) console.error('send-transactional-email failed', _steRes2.status, _steTxt2);
+  const sendErr = _steRes2.ok ? null : new Error(`send-transactional-email ${_steRes2.status}: ${_steTxt2}`);
   if (sendErr) {
     results.push({ mission_id: mission.id, nudge_type: 'response_waiting', status: 'error', reason: String(sendErr) })
     return

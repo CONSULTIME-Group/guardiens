@@ -61,8 +61,10 @@ Deno.serve(async (req) => {
   const sinceLabel = since.toLocaleString("fr-FR", { dateStyle: "long", timeStyle: "short" });
   const idemKey = `analysis-digest-${new Date().toISOString().slice(0, 10)}`;
 
-  const { error: sendErr } = await supabase.functions.invoke("send-transactional-email", {
-    body: {
+  const _steRes = await fetch(`${Deno.env.get('SUPABASE_URL')}/functions/v1/send-transactional-email`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')}` },
+    body: JSON.stringify({
       templateName: "analysis-requests-digest",
       recipientEmail: adminEmail,
       idempotencyKey: idemKey,
@@ -72,8 +74,11 @@ Deno.serve(async (req) => {
         items,
         adminUrl: "https://guardiens.fr/admin/analysis-requests",
       },
-    },
+    }),
   });
+  const _steTxt1 = _steRes.ok ? '' : await _steRes.text().catch(() => '');
+  if (!_steRes.ok) console.error('send-transactional-email failed', _steRes.status, _steTxt1);
+  const sendErr = _steRes.ok ? null : new Error(`send-transactional-email ${_steRes.status}: ${_steTxt1}`);
 
   if (sendErr) {
     console.error("send failed", sendErr);
