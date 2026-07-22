@@ -20,6 +20,8 @@ interface Props {
   /** Si présent, active le variant "1 conversation" avec le contexte
    *  ("votre annonce X", "l'entraide Y", etc.). */
   contextLabel?: string
+  /** Aperçu du dernier message non lu (tronqué côté edge). */
+  messagePreview?: string
 }
 
 const UnreadMessagesReminderEmail = ({
@@ -30,6 +32,7 @@ const UnreadMessagesReminderEmail = ({
   topSenderFirstName,
   conversationUrl,
   contextLabel,
+  messagePreview,
 }: Props) => {
   const link = conversationUrl || `${SITE_URL}/messages`
   const greeting = firstName ? `Bonjour ${firstName},` : 'Bonjour,'
@@ -67,6 +70,12 @@ const UnreadMessagesReminderEmail = ({
             </Text>
           )}
 
+          {messagePreview ? (
+            <Section style={quoteWrap}>
+              <Text style={quoteText}>« {messagePreview} »</Text>
+            </Section>
+          ) : null}
+
           <Text style={text}>
             Une réponse rapide augmente fortement vos chances de finaliser un échange.
           </Text>
@@ -74,6 +83,10 @@ const UnreadMessagesReminderEmail = ({
           <Section style={{ textAlign: 'center', margin: '24px 0' }}>
             <Button style={button} href={link}>Lire et répondre</Button>
           </Section>
+
+          <Text style={note}>
+            Toute la conversation se passe dans la messagerie Guardiens. Cliquez sur le bouton pour répondre directement dans le chat du site. Inutile de répondre à cet email, il n'est pas relevé.
+          </Text>
 
           <Text style={hint}>
             Vous recevez ce rappel car ce message est resté non lu depuis plus de 24 heures. Vous pouvez ajuster vos préférences de notifications dans votre compte.
@@ -115,3 +128,6 @@ const h1 = { fontSize: '24px', fontWeight: 'bold' as const, color: 'hsl(153, 42%
 const text = { fontSize: '14px', color: 'hsl(37, 7%, 43%)', lineHeight: '1.6', margin: '0 0 16px' }
 const button = { backgroundColor: 'hsl(153, 42%, 30%)', color: '#ffffff', padding: '12px 28px', borderRadius: '8px', fontSize: '15px', fontWeight: '600' as const, textDecoration: 'none', display: 'inline-block' }
 const hint = { fontSize: '12px', color: 'hsl(37, 7%, 60%)', lineHeight: '1.5', margin: '20px 0 0', fontStyle: 'italic' as const }
+const note = { fontSize: '12px', color: 'hsl(37, 7%, 50%)', lineHeight: '1.5', margin: '12px 0 0' }
+const quoteWrap = { borderLeft: '3px solid hsl(153, 42%, 30%)', padding: '8px 14px', margin: '0 0 16px', backgroundColor: 'hsl(153, 20%, 97%)' }
+const quoteText = { fontSize: '14px', color: 'hsl(37, 7%, 30%)', lineHeight: '1.6', margin: 0, fontStyle: 'italic' as const }

@@ -32,22 +32,32 @@ Deno.serve(async (req) => {
     Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
   );
 
-  const cutoff = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+  const now = Date.now();
+  const cutoff24 = new Date(now - 24 * 60 * 60 * 1000).toISOString();
+  const cutoff96 = new Date(now - 96 * 60 * 60 * 1000).toISOString();
+  const SEND_CAP = 200;
   let sent = 0;
   let skipped = 0;
   let failed = 0;
+  let capReached = false;
 
   try {
     // 1) Conversations candidates : dernier message unread, non-système,
-    //    créé il y a >24h, pas encore relancé pour ce message.
+    //    créé il y a entre 24h et 96h, pas encore relancé.
     const { data: convs, error: convErr } = await supabase
       .from("conversations")
       .select("id, owner_id, sitter_id, sit_id, small_mission_id, context_type, unread_reminder_sent_at, last_message_at")
-      .lt("last_message_at", cutoff);
+      .lt("last_message_at", cutoff24)
+      .gt("last_message_at", cutoff96);
 
     if (convErr) throw convErr;
 
     for (const conv of convs ?? []) {
+      if (sent >= SEND_CAP) { capReached = true; break; }
+
+      // Un seul rappel par conversation (candidature comprise) : strict.
+      if (conv.unread_reminder_sent_at) { skipped++; continue; }
+
       // Récupère le dernier message non-système de la conversation
       const { data: lastMsg } = await supabase
         .from("messages")
@@ -58,30 +68,9 @@ Deno.serve(async (req) => {
         .limit(1)
         .maybeSingle();
 
-      if (!lastMsg || lastMsg.read_at || new Date(lastMsg.created_at) > new Date(cutoff)) {
-        skipped++;
-        continue;
-      }
-
-      // Déjà relancé pour ce message ?
-      if (conv.unread_reminder_sent_at &&
-          new Date(conv.unread_reminder_sent_at) >= new Date(lastMsg.created_at)) {
-        skipped++;
-        continue;
-      }
-
-      // Ceinture : new-message email pour ce message il y a <24h ?
-      // (le champ email_send_log.message_id porte l'idempotency key)
-      const { data: recentNewMsg } = await supabase
-        .from("email_send_log")
-        .select("id, created_at")
-        .eq("template_name", "new-message")
-        .in("status", ["sent", "pending"])
-        .eq("message_id", `msg_${lastMsg.id}`)
-        .gte("created_at", cutoff)
-        .limit(1);
-
-      if (recentNewMsg && recentNewMsg.length > 0) {
+      if (!lastMsg || lastMsg.read_at
+          || new Date(lastMsg.created_at) > new Date(cutoff24)
+          || new Date(lastMsg.created_at) < new Date(cutoff96)) {
         skipped++;
         continue;
       }
@@ -90,12 +79,53 @@ Deno.serve(async (req) => {
       const recipientId = lastMsg.sender_id === conv.owner_id ? conv.sitter_id : conv.owner_id;
       const recipientRole: "owner" | "sitter" = recipientId === conv.owner_id ? "owner" : "sitter";
 
-      const [{ data: sender }, { data: recipient }] = await Promise.all([
+      // Le proprio ne doit pas avoir déjà répondu dans cette conv
+      const { count: replyCount } = await supabase
+        .from("messages")
+        .select("id", { count: "exact", head: true })
+        .eq("conversation_id", conv.id)
+        .eq("sender_id", recipientId)
+        .eq("is_system", false);
+      if ((replyCount ?? 0) > 0) { skipped++; continue; }
+
+      // Pour les candidatures : vérifie que l'application est encore pending/viewed
+      if (conv.context_type === "sit_application" && conv.sit_id && recipientRole === "owner") {
+        const senderId = lastMsg.sender_id;
+        const { data: app } = await supabase
+          .from("applications")
+          .select("status")
+          .eq("sit_id", conv.sit_id)
+          .eq("sitter_id", senderId)
+          .in("status", ["pending", "viewed"])
+          .maybeSingle();
+        if (!app) { skipped++; continue; }
+      }
+
+      // Ceinture : new-message email pour ce message il y a <24h ?
+      const { data: recentNewMsg } = await supabase
+        .from("email_send_log")
+        .select("id, created_at")
+        .eq("template_name", "new-message")
+        .in("status", ["sent", "pending"])
+        .eq("message_id", `msg_${lastMsg.id}`)
+        .gte("created_at", cutoff24)
+        .limit(1);
+
+      if (recentNewMsg && recentNewMsg.length > 0) {
+        skipped++;
+        continue;
+      }
+
+      const [{ data: sender }, { data: recipient }, { data: recipientAccount }] = await Promise.all([
         supabase.from("profiles").select("first_name").eq("id", lastMsg.sender_id).maybeSingle(),
         supabase.from("profiles").select("email, first_name").eq("id", recipientId).maybeSingle(),
+        supabase.from("profiles").select("account_status").eq("id", recipientId).maybeSingle(),
       ]);
 
       if (!recipient?.email) { skipped++; continue; }
+      if (recipientAccount?.account_status && recipientAccount.account_status !== "active") {
+        skipped++; continue;
+      }
 
       // Construction du label contextuel
       let contextLabel: string | undefined;
@@ -115,11 +145,17 @@ Deno.serve(async (req) => {
         }
       }
 
+      // Aperçu du message (tronqué, guillemets français ajoutés par le template)
+      const rawPreview = (lastMsg.content ?? "").trim().replace(/\s+/g, " ");
+      const messagePreview = rawPreview.length > 220
+        ? rawPreview.slice(0, 217) + "…"
+        : rawPreview;
+
       const { error: sendErr } = await supabase.functions.invoke("send-transactional-email", {
         body: {
           templateName: "unread-messages-reminder",
           recipientEmail: recipient.email,
-          idempotencyKey: `unread-reminder-${lastMsg.id}`,
+          idempotencyKey: `unread-reminder-${conv.id}`,
           templateData: {
             firstName: recipient.first_name ?? null,
             unreadCount: 1,
@@ -128,6 +164,7 @@ Deno.serve(async (req) => {
             topSenderFirstName: sender?.first_name ?? "Un membre",
             conversationUrl: `https://guardiens.fr/messages?c=${conv.id}`,
             contextLabel: contextLabel ?? null,
+            messagePreview: messagePreview || null,
           },
         },
       });
@@ -145,8 +182,9 @@ Deno.serve(async (req) => {
       sent++;
     }
 
-    await run.finish("success", { sent, skipped, failed, scanned: convs?.length ?? 0 });
-    return new Response(JSON.stringify({ success: true, sent, skipped, failed }), {
+    await run.finish("success", { sent, skipped, failed, scanned: convs?.length ?? 0, capReached });
+    if (capReached) console.warn("remind-unread-messages: SEND_CAP atteint", { cap: SEND_CAP });
+    return new Response(JSON.stringify({ success: true, sent, skipped, failed, capReached }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (e) {
