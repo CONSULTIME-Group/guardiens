@@ -89,6 +89,10 @@ const NewApplicationEmail = ({
             </Button>
           </Section>
 
+          <Text style={note}>
+            Vous pourrez lire son message et lui répondre directement dans le chat du site. Inutile de répondre à cet email, il n'est pas relevé.
+          </Text>
+
           <LegalFooter
             purpose="la gestion de votre annonce"
             basis="6.1.b"
@@ -120,6 +124,7 @@ const container = { padding: '24px 28px', maxWidth: '560px', margin: '0 auto' }
 const h1 = { fontSize: '24px', fontWeight: 'bold' as const, color: 'hsl(153, 42%, 30%)', margin: '0 0 16px' }
 const lead = { fontSize: '15px', color: 'hsl(37, 12%, 25%)', lineHeight: '1.6', margin: '0 0 18px' }
 const text = { fontSize: '14px', color: 'hsl(37, 7%, 43%)', lineHeight: '1.6', margin: '0 0 16px' }
+const note = { ...text, fontSize: '12px' }
 const highlightBox = { backgroundColor: 'hsl(153, 42%, 97%)', border: '1px solid hsl(153, 42%, 85%)', padding: '14px 18px', margin: '12px 0 16px', borderRadius: '8px' }
 const avatarImg = { borderRadius: '50%', objectFit: 'cover' as const, display: 'block' }
 const highlightLabel = { fontSize: '11px', color: 'hsl(153, 30%, 40%)', textTransform: 'uppercase' as const, letterSpacing: '0.5px', margin: '0 0 4px', fontWeight: '600' as const }
