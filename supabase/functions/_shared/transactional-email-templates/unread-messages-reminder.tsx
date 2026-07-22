@@ -32,6 +32,7 @@ const UnreadMessagesReminderEmail = ({
   topSenderFirstName,
   conversationUrl,
   contextLabel,
+  messagePreview,
 }: Props) => {
   const link = conversationUrl || `${SITE_URL}/messages`
   const greeting = firstName ? `Bonjour ${firstName},` : 'Bonjour,'
