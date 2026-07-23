@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
-import { Send, Image as ImageIcon } from "lucide-react";
+import { Send, Image as ImageIcon, Video } from "lucide-react";
 
 interface MessageComposerProps {
   value: string;
