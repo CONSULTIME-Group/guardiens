@@ -56,7 +56,7 @@ interface Message {
   is_system: boolean;
   read_at: string | null;
   created_at: string;
-  metadata: { action?: string; actor?: string; actor_id?: string; garde_id?: string; actor_name?: string; dates?: string } | null;
+  metadata: { action?: string; actor?: string; actor_id?: string; garde_id?: string; actor_name?: string; dates?: string; kind?: string; room_url?: string } | null;
 }
 
 
@@ -90,6 +90,7 @@ const Messages = () => {
   const [newMessage, setNewMessage] = useState("");
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
+  const [sendingVideoInvite, setSendingVideoInvite] = useState(false);
   const [pill, setPill] = useState<ConvPill>("all");
   const [searchFilter, setSearchFilter] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -865,15 +866,34 @@ const Messages = () => {
               onSend={handleSend}
               onProposeVideoCall={async () => {
                 if (!user || !activeConv) return;
+                if (sendingVideoInvite) return;
+
+                const tenMinutesAgo = new Date(Date.now() - 10 * 60 * 1000).toISOString();
+                const recentInvite = messages.find(
+                  (m) => m.metadata?.kind === "video_call_invite" && m.created_at >= tenMinutesAgo,
+                );
+                if (recentInvite) {
+                  toast({
+                    title: "Lien déjà créé",
+                    description: "Un appel vidéo a déjà été proposé il y a moins de 10 minutes. Faites défiler pour retrouver le lien.",
+                  });
+                  return;
+                }
+
                 const roomUrl = `https://meet.jit.si/guardiens-${activeConv.id}`;
-                await supabase.from("messages").insert({
-                  conversation_id: activeConv.id,
-                  sender_id: user.id,
-                  content: "Je vous propose un appel vidéo, si vous voulez qu'on se voie avant. Rien d'obligatoire, on fait comme vous préférez (téléphone, messages).",
-                  metadata: { kind: "video_call_invite", room_url: roomUrl } as any,
-                } as any);
-                await supabase.from("conversations").update({ updated_at: new Date().toISOString() }).eq("id", activeConv.id);
-                loadConversations();
+                setSendingVideoInvite(true);
+                try {
+                  await supabase.from("messages").insert({
+                    conversation_id: activeConv.id,
+                    sender_id: user.id,
+                    content: "Je vous propose un appel vidéo, si vous voulez qu'on se voie avant. Rien d'obligatoire, on fait comme vous préférez (téléphone, messages).",
+                    metadata: { kind: "video_call_invite", room_url: roomUrl },
+                  });
+                  await supabase.from("conversations").update({ updated_at: new Date().toISOString() }).eq("id", activeConv.id);
+                  loadConversations();
+                } finally {
+                  setSendingVideoInvite(false);
+                }
               }}
 
               onPickPhoto={async (file) => {
@@ -890,6 +910,7 @@ const Messages = () => {
                 loadConversations();
               }}
               sending={sending}
+              sendingVideoInvite={sendingVideoInvite}
             />
             </>
           )}

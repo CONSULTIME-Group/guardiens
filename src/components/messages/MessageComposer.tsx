@@ -9,6 +9,7 @@ interface MessageComposerProps {
   onPickPhoto: (file: File) => void;
   onProposeVideoCall?: () => void;
   sending: boolean;
+  sendingVideoInvite?: boolean;
 }
 
 /**
@@ -16,7 +17,7 @@ interface MessageComposerProps {
  * et Shift+Enter pour nouvelle ligne.
  * Safe-area iOS : pb-[env(safe-area-inset-bottom)] pour le notch.
  */
-const MessageComposer = ({ value, onChange, onSend, onPickPhoto, onProposeVideoCall, sending }: MessageComposerProps) => {
+const MessageComposer = ({ value, onChange, onSend, onPickPhoto, onProposeVideoCall, sending, sendingVideoInvite }: MessageComposerProps) => {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -87,7 +88,13 @@ const MessageComposer = ({ value, onChange, onSend, onPickPhoto, onProposeVideoC
         <button
           type="button"
           onClick={onProposeVideoCall}
-          className="h-11 w-11 flex items-center justify-center rounded-full bg-background border border-border hover:bg-accent active:bg-accent/80 text-muted-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring shrink-0"
+          disabled={sendingVideoInvite}
+          className={[
+            "h-11 w-11 flex items-center justify-center rounded-full bg-background border border-border transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring shrink-0",
+            sendingVideoInvite
+              ? "opacity-50 cursor-not-allowed text-muted-foreground"
+              : "hover:bg-accent active:bg-accent/80 text-muted-foreground",
+          ].join(" ")}
           aria-label="Proposer un appel vidéo"
           title="Proposer un appel vidéo"
         >
