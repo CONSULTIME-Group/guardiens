@@ -17,7 +17,7 @@ interface MessageComposerProps {
  * et Shift+Enter pour nouvelle ligne.
  * Safe-area iOS : pb-[env(safe-area-inset-bottom)] pour le notch.
  */
-const MessageComposer = ({ value, onChange, onSend, onPickPhoto, onProposeVideoCall, sending }: MessageComposerProps) => {
+const MessageComposer = ({ value, onChange, onSend, onPickPhoto, onProposeVideoCall, sending, sendingVideoInvite }: MessageComposerProps) => {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
