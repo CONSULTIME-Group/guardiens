@@ -910,6 +910,7 @@ const Messages = () => {
                 loadConversations();
               }}
               sending={sending}
+              sendingVideoInvite={sendingVideoInvite}
             />
             </>
           )}
