@@ -683,7 +683,7 @@ async function enrollForSequence(
     const { data: responses, error: respErr } = await supabase
       .from('small_mission_responses')
       .select('responder_id, created_at')
-      .in('status', ['accepted', 'completed'])
+      .eq('status', 'accepted')
       .gte('created_at', windowAt)
       .limit(2000)
     if (respErr) {
