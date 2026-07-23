@@ -121,23 +121,22 @@ const Messages = () => {
 
     if (!convs) { setLoading(false); return; }
 
-    // Fetch blocked users to filter them out
-    const { data: blockedRows } = await supabase
-      .from("blocked_users")
-      .select("blocked_id")
-      .eq("blocker_id", user.id);
-    const blockedSet = new Set((blockedRows || []).map((b: any) => b.blocked_id));
-
-    // Also fetch users who blocked us (hide their convs too)
-    const { data: blockedByRows } = await supabase
-      .from("blocked_users")
-      .select("blocker_id")
-      .eq("blocked_id", user.id);
-    const blockedBySet = new Set((blockedByRows || []).map((b: any) => b.blocker_id));
+    // Collecte les IDs des partenaires puis délègue le filtrage à une RPC
+    // SECURITY DEFINER : on n'expose jamais l'identité d'un bloqueur non déjà
+    // visible côté client (le caller passe uniquement des IDs déjà connus).
+    const otherIdsAll = Array.from(new Set(
+      convs.map((c: any) => (c.owner_id === user.id ? c.sitter_id : c.owner_id)).filter(Boolean)
+    ));
+    let hiddenSet = new Set<string>();
+    if (otherIdsAll.length > 0) {
+      const { data: hiddenRows } = await (supabase as any)
+        .rpc("filter_blocked_partners", { p_other_ids: otherIdsAll });
+      hiddenSet = new Set(((hiddenRows as string[] | null) || []));
+    }
 
     const filteredConvs = convs.filter((conv: any) => {
       const otherId = conv.owner_id === user.id ? conv.sitter_id : conv.owner_id;
-      return !blockedSet.has(otherId) && !blockedBySet.has(otherId);
+      return !hiddenSet.has(otherId);
     });
 
     const otherIds = filteredConvs.map((conv: any) => conv.owner_id === user.id ? conv.sitter_id : conv.owner_id);
