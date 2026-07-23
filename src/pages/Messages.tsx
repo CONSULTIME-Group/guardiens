@@ -129,7 +129,7 @@ const Messages = () => {
     ));
     let hiddenSet = new Set<string>();
     if (otherIdsAll.length > 0) {
-      const { data: hiddenRows } = await supabase
+      const { data: hiddenRows } = await (supabase as any)
         .rpc("filter_blocked_partners", { p_other_ids: otherIdsAll });
       hiddenSet = new Set(((hiddenRows as string[] | null) || []));
     }
