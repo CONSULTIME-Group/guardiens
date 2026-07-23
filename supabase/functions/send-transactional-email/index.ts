@@ -391,13 +391,18 @@ Deno.serve(async (req) => {
 
     if (deferReason && scheduledFor) {
       if (idempotencyKey && idempotencyKey !== messageId) {
-        const { data: existingDefer } = await supabase
+        let existingQuery = supabase
           .from('email_deferred_queue')
           .select('id')
           .eq('idempotency_key', idempotencyKey)
           .eq('template_name', templateName)
           .in('status', ['pending', 'sent'])
-          .limit(1)
+        // Exclut la ligne source (re-traitement flush) pour éviter que la garde
+        // se déclenche sur elle-même et clôture silencieusement l'envoi.
+        if (sourceQueueId) {
+          existingQuery = existingQuery.neq('id', sourceQueueId)
+        }
+        const { data: existingDefer } = await existingQuery.limit(1)
         if (existingDefer && existingDefer.length > 0) {
           console.warn('[ALERT] Duplicate idempotency hit (already_queued)', { idempotencyKey, templateName, effectiveRecipient, deferReason })
           void supabase.from('email_idempotency_hits').insert({
@@ -413,6 +418,7 @@ Deno.serve(async (req) => {
           )
         }
       }
+
 
       const { error: enqErr } = await supabase.from('email_deferred_queue').insert({
         template_name: templateName,
