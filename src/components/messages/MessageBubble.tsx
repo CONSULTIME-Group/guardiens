@@ -137,10 +137,10 @@ const MessageBubble = ({ msg, isMe, readerRole = "gardien", isLastInGroup = true
             </div>
             <div className="min-w-0">
               <p className="font-heading text-[14px] font-medium text-foreground leading-tight">
-                Appel vidéo proposé
+                Appel vidéo
               </p>
               <p className="text-[11.5px] text-muted-foreground leading-tight mt-0.5">
-                {isMe ? "Vous avez partagé un lien d'appel" : "Vous êtes invité à rejoindre l'appel"}
+                {isMe ? "Vous avez proposé un appel vidéo" : "Un lien pour vous voir, si vous le souhaitez"}
               </p>
             </div>
           </div>
@@ -154,7 +154,7 @@ const MessageBubble = ({ msg, isMe, readerRole = "gardien", isLastInGroup = true
             </a>
           </Button>
           <p className="text-[11px] text-muted-foreground text-center mt-2 leading-snug">
-            Gratuit, sans compte, s'ouvre dans le navigateur.
+            Une option, pas une obligation. Vous restez libres de vous joindre autrement. Sans compte ni installation.
           </p>
           {isLastInGroup && (
             <div className={`flex items-center gap-1 mt-1.5 ${isMe ? "justify-end" : "justify-start"}`}>
