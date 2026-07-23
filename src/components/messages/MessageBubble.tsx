@@ -14,7 +14,7 @@ interface MessageBubbleProps {
     is_system: boolean;
     read_at: string | null;
     created_at: string;
-    metadata?: { action?: string; actor?: string; actor_id?: string; actor_name?: string; dates?: string } | null;
+    metadata?: { action?: string; actor?: string; actor_id?: string; actor_name?: string; dates?: string; kind?: string; room_url?: string } | null;
   };
   isMe: boolean;
   readerRole?: "proprio" | "gardien";
