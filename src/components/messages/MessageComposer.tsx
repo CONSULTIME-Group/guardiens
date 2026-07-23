@@ -1,12 +1,13 @@
 import { useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
-import { Send, Image as ImageIcon } from "lucide-react";
+import { Send, Image as ImageIcon, Video } from "lucide-react";
 
 interface MessageComposerProps {
   value: string;
   onChange: (v: string) => void;
   onSend: () => void;
   onPickPhoto: (file: File) => void;
+  onProposeVideoCall?: () => void;
   sending: boolean;
 }
 
@@ -15,7 +16,7 @@ interface MessageComposerProps {
  * et Shift+Enter pour nouvelle ligne.
  * Safe-area iOS : pb-[env(safe-area-inset-bottom)] pour le notch.
  */
-const MessageComposer = ({ value, onChange, onSend, onPickPhoto, sending }: MessageComposerProps) => {
+const MessageComposer = ({ value, onChange, onSend, onPickPhoto, onProposeVideoCall, sending }: MessageComposerProps) => {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -81,6 +82,18 @@ const MessageComposer = ({ value, onChange, onSend, onPickPhoto, sending }: Mess
       >
         <ImageIcon className="h-[20px] w-[20px]" aria-hidden="true" />
       </button>
+
+      {onProposeVideoCall && (
+        <button
+          type="button"
+          onClick={onProposeVideoCall}
+          className="h-11 w-11 flex items-center justify-center rounded-full bg-background border border-border hover:bg-accent active:bg-accent/80 text-muted-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring shrink-0"
+          aria-label="Proposer un appel vidéo"
+          title="Proposer un appel vidéo"
+        >
+          <Video className="h-[20px] w-[20px]" aria-hidden="true" />
+        </button>
+      )}
 
       {/* Champ texte autosize */}
       <textarea
