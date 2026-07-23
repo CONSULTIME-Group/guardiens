@@ -9,6 +9,7 @@ interface MessageComposerProps {
   onPickPhoto: (file: File) => void;
   onProposeVideoCall?: () => void;
   sending: boolean;
+  sendingVideoInvite?: boolean;
 }
 
 /**
