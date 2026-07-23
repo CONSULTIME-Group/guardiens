@@ -92,6 +92,11 @@ Deno.serve(async (req) => {
           recipientEmail: row.recipient_email,
           idempotencyKey: row.idempotency_key,
           templateData: row.template_data || {},
+          // Fournit l'id de la ligne source pour que la garde anti-doublon
+          // "already_queued" côté send-transactional-email l'exclue de sa
+          // recherche : sinon elle se retrouve elle-même (encore 'pending' à
+          // ce stade) et clôture silencieusement l'envoi sans le transmettre.
+          sourceQueueId: row.id,
         }),
       });
       const _steTxt1 = _steRes.ok ? '' : await _steRes.text().catch(() => '');
