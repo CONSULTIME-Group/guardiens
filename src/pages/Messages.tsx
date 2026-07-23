@@ -865,15 +865,11 @@ const Messages = () => {
               onSend={handleSend}
               onProposeVideoCall={async () => {
                 if (!user || !activeConv) return;
-                const alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789abcdefghijkmnpqrstuvwxyz";
-                const bytes = new Uint8Array(8);
-                (globalThis.crypto ?? window.crypto).getRandomValues(bytes);
-                const token = Array.from(bytes, (b) => alphabet[b % alphabet.length]).join("");
-                const roomUrl = `https://meet.jit.si/guardiens-${activeConv.id}-${token}`;
+                const roomUrl = `https://meet.jit.si/guardiens-${activeConv.id}`;
                 await supabase.from("messages").insert({
                   conversation_id: activeConv.id,
                   sender_id: user.id,
-                  content: "J'ai proposé un appel vidéo. Rejoignez-moi via le lien.",
+                  content: "Je vous propose un appel vidéo, si vous voulez qu'on se voie avant. Rien d'obligatoire, on fait comme vous préférez (téléphone, messages).",
                   metadata: { kind: "video_call_invite", room_url: roomUrl } as any,
                 } as any);
                 await supabase.from("conversations").update({ updated_at: new Date().toISOString() }).eq("id", activeConv.id);
