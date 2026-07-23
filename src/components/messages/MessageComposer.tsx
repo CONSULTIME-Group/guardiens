@@ -7,6 +7,7 @@ interface MessageComposerProps {
   onChange: (v: string) => void;
   onSend: () => void;
   onPickPhoto: (file: File) => void;
+  onProposeVideoCall?: () => void;
   sending: boolean;
 }
 
