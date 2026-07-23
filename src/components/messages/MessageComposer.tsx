@@ -83,6 +83,18 @@ const MessageComposer = ({ value, onChange, onSend, onPickPhoto, onProposeVideoC
         <ImageIcon className="h-[20px] w-[20px]" aria-hidden="true" />
       </button>
 
+      {onProposeVideoCall && (
+        <button
+          type="button"
+          onClick={onProposeVideoCall}
+          className="h-11 w-11 flex items-center justify-center rounded-full bg-background border border-border hover:bg-accent active:bg-accent/80 text-muted-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring shrink-0"
+          aria-label="Proposer un appel vidéo"
+          title="Proposer un appel vidéo"
+        >
+          <Video className="h-[20px] w-[20px]" aria-hidden="true" />
+        </button>
+      )}
+
       {/* Champ texte autosize */}
       <textarea
         ref={textareaRef}
