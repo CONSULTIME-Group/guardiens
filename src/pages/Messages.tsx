@@ -90,6 +90,7 @@ const Messages = () => {
   const [newMessage, setNewMessage] = useState("");
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
+  const [sendingVideoInvite, setSendingVideoInvite] = useState(false);
   const [pill, setPill] = useState<ConvPill>("all");
   const [searchFilter, setSearchFilter] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
