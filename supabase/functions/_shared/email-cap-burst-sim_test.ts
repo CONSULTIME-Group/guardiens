@@ -378,3 +378,129 @@ Deno.test('SIM 10 — bypass template en quiet hours : envoyé immédiatement, q
   assertEquals(sys.sentRows().length, 1)
   assertEquals(sys.queue.length, 0, 'aucune insertion dans la file différée pour bypass template')
 })
+
+// =============================================================
+// SIM 11 — Anti-régression bug prod (2026-07-23) :
+// Deux lignes 'pending' pour le MÊME destinataire arrivent à échéance dans
+// le même run de flush. La 1re part. Pour la 2e, le cap horaire vient de
+// retomber → send-transactional-email tente d'insérer une nouvelle ligne
+// différée mais sa garde "already_queued" ne doit PAS se déclencher sur
+// la ligne source (celle en cours de retraitement, toujours 'pending').
+// Sans le fix : la 2e ligne était marquée 'sent' sans email envoyé.
+// Avec le fix (sourceQueueId exclu) : la 2e ligne est correctement
+// re-différée et repartira au prochain flush.
+// =============================================================
+Deno.test('SIM 11 — flush 2 lignes dues même destinataire : 1 envoyée, 1 re-différée (pas clôturée en fantôme)', () => {
+  // Fake dédié modélisant fidèlement la garde "already_queued" côté prod
+  // + le support du sourceQueueId.
+  interface Row {
+    id: string
+    idempotency_key: string
+    recipient: string
+    template: string
+    scheduled_for: Date
+    status: 'pending' | 'sent' | 'failed'
+  }
+  const CAP_HOUR = 1
+  const sendLog: { recipient: string; created_at: Date; status: 'sent' }[] = []
+  const queue: Row[] = []
+  let seq = 0
+  const nid = (p: string) => `${p}-${++seq}`
+
+  // Mirror strict de send-transactional-email pour cette régression.
+  function send(
+    now: Date,
+    recipient: string,
+    template: string,
+    idempotencyKey: string,
+    sourceQueueId: string | null = null,
+  ): { result: 'sent' } | { result: 'deferred'; queueId: string } | { result: 'already_queued' } {
+    const hourAgo = now.getTime() - 3600_000
+    const hourSent = sendLog.filter(
+      (r) => r.recipient === recipient && r.status === 'sent' && r.created_at.getTime() >= hourAgo,
+    )
+    if (hourSent.length >= CAP_HOUR) {
+      // Garde anti-doublon prod, avec exclusion sourceQueueId.
+      const existing = queue.find(
+        (q) =>
+          q.idempotency_key === idempotencyKey &&
+          q.template === template &&
+          (q.status === 'pending' || q.status === 'sent') &&
+          q.id !== sourceQueueId,
+      )
+      if (existing) {
+        return { result: 'already_queued' }
+      }
+      const scheduled = new Date(hourSent[0].created_at.getTime() + 3600_000 + 30_000)
+      const row: Row = {
+        id: nid('q'),
+        idempotency_key: idempotencyKey,
+        recipient,
+        template,
+        scheduled_for: scheduled,
+        status: 'pending',
+      }
+      queue.push(row)
+      return { result: 'deferred', queueId: row.id }
+    }
+    sendLog.push({ recipient, created_at: now, status: 'sent' })
+    return { result: 'sent' }
+  }
+
+  // Mirror flush-deferred-emails.
+  function flush(now: Date) {
+    const due = queue
+      .filter((q) => q.status === 'pending' && q.scheduled_for.getTime() <= now.getTime())
+      .sort((a, b) => a.scheduled_for.getTime() - b.scheduled_for.getTime())
+    let sent = 0, redeferred = 0, ghosted = 0
+    for (const row of due) {
+      const r = send(now, row.recipient, row.template, row.idempotency_key, row.id)
+      if (r.result === 'sent') {
+        row.status = 'sent'
+        sent++
+      } else if (r.result === 'deferred') {
+        // Le sender a inséré une NOUVELLE ligne : la source peut être clôturée.
+        row.status = 'sent'
+        redeferred++
+      } else {
+        // already_queued : flush clôture… mais s'il n'y a PAS de nouvelle ligne,
+        // c'est une perte silencieuse (le bug de prod).
+        row.status = 'sent'
+        ghosted++
+      }
+    }
+    return { processed: due.length, sent, redeferred, ghosted }
+  }
+
+  // Scénario : 2 lignes 'pending' même destinataire, mêmes échéances.
+  const recipient = 'barbara@example.com'
+  const flushAt = new Date('2026-07-23T06:00:00Z')
+  const scheduledPast = new Date(flushAt.getTime() - 60_000)
+  queue.push({
+    id: nid('q'), idempotency_key: 'msg_A', recipient, template: 'new-message',
+    scheduled_for: scheduledPast, status: 'pending',
+  })
+  queue.push({
+    id: nid('q'), idempotency_key: 'msg_B', recipient, template: 'new-message',
+    scheduled_for: scheduledPast, status: 'pending',
+  })
+
+  const r = flush(flushAt)
+
+  assertEquals(r.processed, 2)
+  assertEquals(r.sent, 1, '1 email réellement envoyé (cap horaire)')
+  assertEquals(r.redeferred, 1, '1 ligne correctement re-différée dans une nouvelle row')
+  assertEquals(r.ghosted, 0, 'aucune perte silencieuse (fix sourceQueueId opérant)')
+
+  // Il DOIT rester une ligne pending pour le message non envoyé.
+  const pending = queue.filter((q) => q.status === 'pending')
+  assertEquals(pending.length, 1, 'une nouvelle ligne pending doit exister pour le retry')
+  assert(
+    pending[0].idempotency_key === 'msg_A' || pending[0].idempotency_key === 'msg_B',
+    'la ligne pending doit reprendre une idempotency_key existante',
+  )
+  assert(
+    pending[0].scheduled_for.getTime() > flushAt.getTime(),
+    'la nouvelle ligne doit être planifiée dans le futur',
+  )
+})

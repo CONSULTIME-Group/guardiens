@@ -102,6 +102,11 @@ Deno.serve(async (req) => {
   // throttle « WHERE status='sent' AND metadata->>conversation_id » continue à
   // fonctionner sans nécessiter une seconde ligne de log dédiée (fix double-logging).
   let logMetadata: Record<string, any> = {}
+  // sourceQueueId: id de la ligne email_deferred_queue en cours de retraitement par
+  // flush-deferred-emails. Doit être exclu de la garde anti-doublon "already_queued"
+  // ci-dessous, sinon la ligne se trouve elle-même et flush clôture silencieusement
+  // l'envoi sans jamais le transmettre au provider.
+  let sourceQueueId: string | null = null
   try {
     const body = await req.json()
     templateName = body.templateName || body.template_name
@@ -113,6 +118,11 @@ Deno.serve(async (req) => {
     }
     if (body.logMetadata && typeof body.logMetadata === 'object') {
       logMetadata = body.logMetadata
+    }
+    if (typeof body.sourceQueueId === 'string' && body.sourceQueueId.length > 0) {
+      sourceQueueId = body.sourceQueueId
+    } else if (typeof body.source_queue_id === 'string' && body.source_queue_id.length > 0) {
+      sourceQueueId = body.source_queue_id
     }
   } catch {
     return new Response(
@@ -381,13 +391,18 @@ Deno.serve(async (req) => {
 
     if (deferReason && scheduledFor) {
       if (idempotencyKey && idempotencyKey !== messageId) {
-        const { data: existingDefer } = await supabase
+        let existingQuery = supabase
           .from('email_deferred_queue')
           .select('id')
           .eq('idempotency_key', idempotencyKey)
           .eq('template_name', templateName)
           .in('status', ['pending', 'sent'])
-          .limit(1)
+        // Exclut la ligne source (re-traitement flush) pour éviter que la garde
+        // se déclenche sur elle-même et clôture silencieusement l'envoi.
+        if (sourceQueueId) {
+          existingQuery = existingQuery.neq('id', sourceQueueId)
+        }
+        const { data: existingDefer } = await existingQuery.limit(1)
         if (existingDefer && existingDefer.length > 0) {
           console.warn('[ALERT] Duplicate idempotency hit (already_queued)', { idempotencyKey, templateName, effectiveRecipient, deferReason })
           void supabase.from('email_idempotency_hits').insert({
@@ -403,6 +418,7 @@ Deno.serve(async (req) => {
           )
         }
       }
+
 
       const { error: enqErr } = await supabase.from('email_deferred_queue').insert({
         template_name: templateName,
