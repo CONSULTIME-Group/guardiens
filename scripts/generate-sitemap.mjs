@@ -188,22 +188,22 @@ async function main() {
   const today = new Date().toISOString().split("T")[0];
   const cache = loadCache();
 
+  // Slugs volontairement exclus du sitemap (doublons/anciennes URLs).
+  // NE PAS confondre avec `noindex` en base : cette liste ne concerne que des
+  // contenus redondants dont l'exclusion ne peut pas se déduire d'un champ DB.
+  // Toute décision d'indexation par article passe par la colonne `noindex`.
   const excludedSlugs = new Set([
     "guide-house-sitting-lyon", "guide-lieu-meilleurs-parcs-chiens-lyon",
-    "house-sitting-aix-les-bains", "house-sitting-haute-savoie-annecy-megeve",
     "pet-sitting-chambery-savoie",
-    "pet-sitting-grenoble-chartreuse", "pet-sitting-lyon-ouest-lyonnais",
-    "pet-sitting-valence-drome",
-    "pet-sitting-venissieux", "pet-sitting-villeurbanne",
-    "pet-sitting-lyon-guide-complet", "pet-sitting-annecy-guide",
+    "pet-sitting-annecy-guide",
     "pet-sitting-grenoble-guide", "pet-sitting-clermont-ferrand-guide",
     "house-sitting-saint-etienne-guide", "border-collie-lyon-guide-race",
     "bouledogue-francais-lyon-guide-race", "malinois-lyon-guide-race",
     "golden-retriever-lyon-guide-race", "berger-australien-guide",
     "conseil-gardien-creer-profil-attractif-lyon", "preparer-maison-avant-vacances",
     "garde-chien-lyon-solutions",
-    "boom-pet-sitting-lyon-2026",
   ]);
+
 
   console.log("🗺️  Sitemap incremental build…");
 
