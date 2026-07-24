@@ -261,6 +261,9 @@ const CreateSit = () => {
   const [ownerMessage, setOwnerMessage] = useState("");
   const [dailyRoutine, setDailyRoutine] = useState("");
   const [coverPhotoUrl, setCoverPhotoUrl] = useState<string | null>(null);
+  const [smartCover, setSmartCover] = useState<string | null>(null);
+  const smartCoverAttemptedRef = useRef<string>("");
+
   const [sitCity, setSitCity] = useState<string>("");
   const [sitCountry, setSitCountry] = useState<string>("FR");
   const [acceptsSitterPets, setAcceptsSitterPets] = useState<"yes" | "no" | "discuss">("discuss");
