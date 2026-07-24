@@ -1,18 +1,19 @@
 /**
  * remind-unread-messages
  *
- * Cron quotidien (16h UTC, 18h Paris été) : envoie un email de relance
- * au destinataire d'un message resté non lu depuis plus de 24 heures.
+ * Cron quotidien (16h UTC, 18h Paris été) : envoie une relance email au
+ * destinataire quand il reste au moins un message non lu dans le fil,
+ * plus récent que son propre dernier message envoyé (« la balle est
+ * dans son camp et il ne l'a pas vue »).
  *
  * Règles :
- *  - Un seul email par conversation ET par message déclencheur.
- *    Idempotence : `conversations.unread_reminder_sent_at` doit être <
- *    au created_at du dernier message unread.
- *  - Pas de relance si l'email `new-message` initial est parti il y a
- *    moins de 24h (déjà couvert par la fenêtre >24h + ceinture sur
- *    email_send_log en secours).
- *  - Messages système exclus.
- *  - Idempotency send : `unread-reminder-<message_id>`.
+ *  - Fenêtre : message déclencheur créé entre 24h et 96h.
+ *  - Idempotence par conversation via `unread_reminder_sent_at` :
+ *    on ne renvoie que si un nouveau message non lu est arrivé APRÈS
+ *    la dernière relance.
+ *  - Idempotency send : `unread-reminder-<conv>-<message_id>`.
+ *  - Messages système exclus. Quiet hours / anti-spam gérés par
+ *    send-transactional-email.
  */
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
 import { startCronRun } from "../_shared/cron-run-log.ts";
@@ -42,8 +43,7 @@ Deno.serve(async (req) => {
   let capReached = false;
 
   try {
-    // 1) Conversations candidates : dernier message unread, non-système,
-    //    créé il y a entre 24h et 96h, pas encore relancé.
+    // 1) Conversations candidates (dernier message dans la fenêtre 24-96h).
     const { data: convs, error: convErr } = await supabase
       .from("conversations")
       .select("id, owner_id, sitter_id, sit_id, small_mission_id, context_type, unread_reminder_sent_at, last_message_at")
@@ -55,59 +55,68 @@ Deno.serve(async (req) => {
     for (const conv of convs ?? []) {
       if (sent >= SEND_CAP) { capReached = true; break; }
 
-      // Un seul rappel par conversation (candidature comprise) : strict.
-      if (conv.unread_reminder_sent_at) { skipped++; continue; }
-
-      // Récupère le dernier message non-système de la conversation
-      const { data: lastMsg } = await supabase
+      // 2) Trouve le message non lu le plus récent, non-système,
+      //    envoyé par l'AUTRE partie (owner ↔ sitter), dans la fenêtre.
+      const { data: unreadMsgs } = await supabase
         .from("messages")
-        .select("id, sender_id, content, created_at, read_at, is_system")
+        .select("id, sender_id, content, created_at")
         .eq("conversation_id", conv.id)
         .eq("is_system", false)
+        .is("read_at", null)
+        .gte("created_at", cutoff96)
+        .lte("created_at", cutoff24)
         .order("created_at", { ascending: false })
-        .limit(1)
-        .maybeSingle();
+        .limit(5);
 
-      if (!lastMsg || lastMsg.read_at
-          || new Date(lastMsg.created_at) > new Date(cutoff24)
-          || new Date(lastMsg.created_at) < new Date(cutoff96)) {
-        skipped++;
-        continue;
-      }
+      const triggerMsg = (unreadMsgs ?? []).find(
+        (m) => m.sender_id === conv.owner_id || m.sender_id === conv.sitter_id,
+      );
+      if (!triggerMsg) { skipped++; continue; }
 
-      // Destinataire = l'autre partie
-      const recipientId = lastMsg.sender_id === conv.owner_id ? conv.sitter_id : conv.owner_id;
+      const recipientId = triggerMsg.sender_id === conv.owner_id ? conv.sitter_id : conv.owner_id;
       const recipientRole: "owner" | "sitter" = recipientId === conv.owner_id ? "owner" : "sitter";
 
-      // Le proprio ne doit pas avoir déjà répondu dans cette conv
-      const { count: replyCount } = await supabase
+      // 3) Le destinataire a-t-il répondu APRÈS ce message ? Alors la
+      //    balle n'est plus dans son camp → skip.
+      const { count: laterReplies } = await supabase
         .from("messages")
         .select("id", { count: "exact", head: true })
         .eq("conversation_id", conv.id)
         .eq("sender_id", recipientId)
-        .eq("is_system", false);
-      if ((replyCount ?? 0) > 0) { skipped++; continue; }
+        .eq("is_system", false)
+        .gt("created_at", triggerMsg.created_at);
+      if ((laterReplies ?? 0) > 0) { skipped++; continue; }
 
-      // Pour les candidatures : vérifie que l'application est encore pending/viewed
+      // 4) Idempotence : ne renvoie que si un message non lu est arrivé
+      //    APRÈS la dernière relance de cette conversation.
+      if (
+        conv.unread_reminder_sent_at &&
+        new Date(conv.unread_reminder_sent_at) >= new Date(triggerMsg.created_at)
+      ) {
+        skipped++;
+        continue;
+      }
+
+      // 5) Candidatures : ne pas relancer le proprio si la candidature
+      //    n'est plus en pending/viewed (déjà décidée).
       if (conv.context_type === "sit_application" && conv.sit_id && recipientRole === "owner") {
-        const senderId = lastMsg.sender_id;
         const { data: app } = await supabase
           .from("applications")
           .select("status")
           .eq("sit_id", conv.sit_id)
-          .eq("sitter_id", senderId)
+          .eq("sitter_id", triggerMsg.sender_id)
           .in("status", ["pending", "viewed"])
           .maybeSingle();
         if (!app) { skipped++; continue; }
       }
 
-      // Ceinture : new-message email pour ce message il y a <24h ?
+      // 6) Ceinture : new-message email pour CE message envoyé il y a <24h ?
       const { data: recentNewMsg } = await supabase
         .from("email_send_log")
         .select("id, created_at")
         .eq("template_name", "new-message")
         .in("status", ["sent", "pending"])
-        .eq("message_id", `msg_${lastMsg.id}`)
+        .eq("message_id", `msg_${triggerMsg.id}`)
         .gte("created_at", cutoff24)
         .limit(1);
 
@@ -117,7 +126,7 @@ Deno.serve(async (req) => {
       }
 
       const [{ data: sender }, { data: recipient }, { data: recipientAccount }] = await Promise.all([
-        supabase.from("profiles").select("first_name").eq("id", lastMsg.sender_id).maybeSingle(),
+        supabase.from("profiles").select("first_name").eq("id", triggerMsg.sender_id).maybeSingle(),
         supabase.from("profiles").select("email, first_name").eq("id", recipientId).maybeSingle(),
         supabase.from("profiles").select("account_status").eq("id", recipientId).maybeSingle(),
       ]);
@@ -127,7 +136,7 @@ Deno.serve(async (req) => {
         skipped++; continue;
       }
 
-      // Construction du label contextuel
+      // Label contextuel
       let contextLabel: string | undefined;
       if (conv.sit_id) {
         const { data: sit } = await supabase
@@ -145,8 +154,7 @@ Deno.serve(async (req) => {
         }
       }
 
-      // Aperçu du message (tronqué, guillemets français ajoutés par le template)
-      const rawPreview = (lastMsg.content ?? "").trim().replace(/\s+/g, " ");
+      const rawPreview = (triggerMsg.content ?? "").trim().replace(/\s+/g, " ");
       const messagePreview = rawPreview.length > 220
         ? rawPreview.slice(0, 217) + "…"
         : rawPreview;
@@ -157,12 +165,12 @@ Deno.serve(async (req) => {
         body: JSON.stringify({
           templateName: "unread-messages-reminder",
           recipientEmail: recipient.email,
-          idempotencyKey: `unread-reminder-${conv.id}`,
+          idempotencyKey: `unread-reminder-${conv.id}-${triggerMsg.id}`,
           templateData: {
             firstName: recipient.first_name ?? null,
             unreadCount: 1,
             conversationsCount: 1,
-            oldestUnreadDays: Math.max(1, Math.floor((Date.now() - new Date(lastMsg.created_at).getTime()) / (24 * 3600 * 1000))),
+            oldestUnreadDays: Math.max(1, Math.floor((Date.now() - new Date(triggerMsg.created_at).getTime()) / (24 * 3600 * 1000))),
             topSenderFirstName: sender?.first_name ?? "Un membre",
             conversationUrl: `https://guardiens.fr/messages?c=${conv.id}`,
             contextLabel: contextLabel ?? null,
