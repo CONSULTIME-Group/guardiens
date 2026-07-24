@@ -66,6 +66,20 @@ const ReviewReminderEmail = ({ firstName, sitTitle, revieweeName, sitId, isOwner
 
           <Hr style={hr} />
 
+          <Section style={googleBox}>
+            <Text style={googleTitle}>Vous avez apprécié votre expérience Guardiens ?</Text>
+            <Text style={googleText}>
+              Un avis Google nous aide à nous faire connaître. C'est facultatif et sans incidence sur votre avis Guardiens.
+            </Text>
+            <Section style={ctaSection}>
+              <Button style={buttonSecondary} href="https://g.page/r/CcG68dHWYoHIEAE/review">
+                Laisser un avis Google
+              </Button>
+            </Section>
+          </Section>
+
+          <Hr style={hr} />
+
         <LegalFooter
           purpose="la bonne marche du service d'avis"
           basis="6.1.f"
