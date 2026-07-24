@@ -389,7 +389,7 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, prope
 
       const { data: proprioProfile } = await supabase
         .from("profiles")
-        .select("first_name, city, phone_number")
+        .select("first_name, city")
         .eq("id", user!.id)
         .maybeSingle() as any;
 
