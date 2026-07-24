@@ -698,12 +698,15 @@ const OwnerSitView = ({
 
 
 
-      {/* Photos & couverture, déplacé en bas dans un Collapsible (gestion ponctuelle) */}
-      <Collapsible className="mt-2 mb-8 rounded-2xl border border-border bg-card">
+      {/* Photos & couverture, ouvert par défaut pour rendre le choix visible sans clic */}
+      <Collapsible defaultOpen className="mt-2 mb-8 rounded-2xl border border-border bg-card">
         <CollapsibleTrigger className="group w-full flex items-center justify-between gap-2 p-5 md:p-6 text-left">
           <div>
-            <h2 className="text-base font-semibold flex items-center gap-2">
-              <Home className="h-5 w-5 text-primary" /> Photos & couverture
+            <h2 className="text-base font-semibold flex items-center gap-2 flex-wrap">
+              <Home className="h-5 w-5 text-primary" /> Photos et couverture
+              <span className="inline-flex items-center rounded-full border border-primary/30 bg-primary/5 text-primary px-2 py-0.5 text-[11px] font-medium">
+                Vérifiez votre couverture
+              </span>
             </h2>
             <p className="text-sm text-muted-foreground mt-1">
               Gérer la galerie et choisir la photo de couverture de cette annonce.
@@ -711,6 +714,7 @@ const OwnerSitView = ({
           </div>
           <ChevronDown className="h-5 w-5 text-muted-foreground shrink-0 transition-transform group-data-[state=open]:rotate-180" />
         </CollapsibleTrigger>
+
         <CollapsibleContent className="px-5 md:px-6 pb-5 md:pb-6">
           <SitPhotoManager
             sitId={sit.id}

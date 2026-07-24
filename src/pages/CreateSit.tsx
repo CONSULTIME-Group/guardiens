@@ -10,7 +10,7 @@ import { Label } from "@/components/ui/label";
 import ChipSelect from "@/components/profile/ChipSelect";
 import { Helmet } from "react-helmet-async";
 import EnvironmentPills from "@/components/shared/EnvironmentPills";
-import { Calendar, Home, PawPrint, ShieldCheck, MessageSquare, Users, ArrowLeft, AlertCircle, Zap, Eye, ChevronRight, ChevronLeft, Check } from "lucide-react";
+import { Calendar, Home, PawPrint, ShieldCheck, MessageSquare, Users, ArrowLeft, AlertCircle, Zap, Eye, ChevronRight, ChevronLeft, Check, Image as ImageIcon, Star } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
@@ -358,7 +358,7 @@ const CreateSit = () => {
         supabase.from("properties").select("*").eq("user_id", user.id).limit(1).maybeSingle(),
         supabase.from("owner_profiles").select("*").eq("user_id", user.id).maybeSingle(),
         supabase.from("profiles").select("profile_completion, city, bio").eq("id", user.id).single(),
-        supabase.from("owner_gallery").select("photo_url").eq("user_id", user.id).limit(4),
+        supabase.from("owner_gallery").select("photo_url").eq("user_id", user.id).order("position", { ascending: true }).limit(30),
       ]);
 
       let sourceSitRes: { data: any } | null = null;
@@ -1347,6 +1347,70 @@ const CreateSit = () => {
       {/* ===================== STEP 2 : PRÉFÉRENCES ===================== */}
       {currentStep === 2 && (
         <div className="px-4 max-w-3xl mx-auto space-y-6">
+          {/* Photo de couverture (étape explicite avant publication) */}
+          {(() => {
+            const suggestedCover = coverPhotoUrl
+              ?? (ownerPhotos[0] || null)
+              ?? pets.find(p => !!p.photo_url)?.photo_url
+              ?? null;
+            if (!suggestedCover && ownerPhotos.length === 0) {
+              return (
+                <section aria-labelledby="cover-picker-title" className="rounded-2xl border border-border bg-card p-4 md:p-5">
+                  <h2 id="cover-picker-title" className="text-base font-semibold flex items-center gap-2">
+                    <ImageIcon className="h-5 w-5 text-primary" /> Photo de couverture
+                  </h2>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    Ajoutez d'abord des photos à votre galerie pour choisir la couverture qui donnera le plus envie.
+                  </p>
+                  <Link to="/owner-profile#galerie" className="text-sm text-primary hover:underline mt-2 inline-block">
+                    Gérer mes photos dans mon profil →
+                  </Link>
+                </section>
+              );
+            }
+            return (
+              <section aria-labelledby="cover-picker-title" className="rounded-2xl border border-border bg-card p-4 md:p-5">
+                <div className="mb-3">
+                  <h2 id="cover-picker-title" className="text-base font-semibold flex items-center gap-2">
+                    <ImageIcon className="h-5 w-5 text-primary" /> Photo de couverture
+                  </h2>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    Choisissez celle qui donne le plus envie. Une suggestion est déjà pré-sélectionnée, cliquez une autre photo pour changer.
+                  </p>
+                </div>
+                <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-2">
+                  {ownerPhotos.map((url, i) => {
+                    const isCover = suggestedCover === url;
+                    return (
+                      <button
+                        key={`${url}-${i}`}
+                        type="button"
+                        onClick={() => setCoverPhotoUrl(url)}
+                        aria-label={isCover ? "Photo de couverture actuelle" : "Définir comme photo de couverture"}
+                        aria-pressed={isCover}
+                        className={cn(
+                          "group relative aspect-[4/3] w-full overflow-hidden rounded-lg border-2 transition-all",
+                          isCover ? "border-primary ring-2 ring-primary/30" : "border-transparent hover:border-primary/50",
+                        )}
+                      >
+                        <img src={url} alt="" loading="lazy" className="w-full h-full object-cover" />
+                        {isCover && (
+                          <span className="absolute bottom-0 inset-x-0 bg-primary text-primary-foreground text-[10px] font-medium py-0.5 px-1 flex items-center justify-center gap-1">
+                            <Star className="h-3 w-3 fill-current" /> Couverture
+                          </span>
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+                <Link to="/owner-profile#galerie" className="text-xs text-primary hover:underline mt-3 inline-block">
+                  Ajouter ou gérer mes photos dans mon profil →
+                </Link>
+              </section>
+            );
+          })()}
+
+
           {/* Expérience souhaitée */}
           <div>
             <Label className="text-sm font-medium text-foreground mb-1 block">Expérience souhaitée du gardien</Label>
@@ -1466,46 +1530,14 @@ const CreateSit = () => {
                       </div>
                     )}
                     <div className="mt-3">
-                      <p className="text-sm font-medium text-foreground mb-1">Photos affichées sur l'annonce</p>
-                      {ownerPhotos.length > 0 ? (
-                        <>
-                          <p className="text-xs text-muted-foreground mb-2">
-                            Sélectionnez une photo de couverture pour cette annonce.
-                          </p>
-                          <div className="grid grid-cols-4 gap-2">
-                            {ownerPhotos.slice(0, 8).map((url, i) => {
-                              const isCover = coverPhotoUrl === url || (!coverPhotoUrl && i === 0);
-                              return (
-                                <button
-                                  key={i}
-                                  type="button"
-                                  onClick={() => setCoverPhotoUrl(url)}
-                                  className={cn(
-                                    "relative rounded-lg overflow-hidden h-16 w-full border-2 transition-all",
-                                    isCover ? "border-primary ring-2 ring-primary/30" : "border-transparent hover:border-primary/50"
-                                  )}
-                                  aria-label={`Définir la photo ${i + 1} comme couverture`}
-                                >
-                                  <img src={url} alt={`Photo ${i + 1}`} className="object-cover h-full w-full" />
-                                  {isCover && (
-                                    <span className="absolute bottom-0 inset-x-0 bg-primary text-primary-foreground text-[10px] font-medium py-0.5 text-center">
-                                      Couverture
-                                    </span>
-                                  )}
-                                </button>
-                              );
-                            })}
-                          </div>
-                        </>
-                      ) : (
-                        <div className="bg-muted rounded-xl p-3">
-                          <p className="text-xs text-muted-foreground">Aucune photo – les annonces avec photos reçoivent davantage de candidatures.</p>
-                        </div>
-                      )}
-                      <Link to="/owner-profile#galerie" className="text-xs text-primary hover:underline mt-2 inline-block">
+                      <p className="text-xs text-muted-foreground">
+                        Photo de couverture, à choisir dans le bloc en haut de cette étape.
+                      </p>
+                      <Link to="/owner-profile#galerie" className="text-xs text-primary hover:underline mt-1 inline-block">
                         Gérer mes photos dans mon profil →
                       </Link>
                     </div>
+
                   </div>
                 ) : <p className="text-sm text-muted-foreground italic">Aucun logement renseigné</p>}
               </SummaryCard>
