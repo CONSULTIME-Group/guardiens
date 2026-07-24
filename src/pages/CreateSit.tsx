@@ -1347,6 +1347,70 @@ const CreateSit = () => {
       {/* ===================== STEP 2 : PRÉFÉRENCES ===================== */}
       {currentStep === 2 && (
         <div className="px-4 max-w-3xl mx-auto space-y-6">
+          {/* Photo de couverture (étape explicite avant publication) */}
+          {(() => {
+            const suggestedCover = coverPhotoUrl
+              ?? (ownerPhotos[0] || null)
+              ?? pets.find(p => !!p.photo_url)?.photo_url
+              ?? null;
+            if (!suggestedCover && ownerPhotos.length === 0) {
+              return (
+                <section aria-labelledby="cover-picker-title" className="rounded-2xl border border-border bg-card p-4 md:p-5">
+                  <h2 id="cover-picker-title" className="text-base font-semibold flex items-center gap-2">
+                    <ImageIcon className="h-5 w-5 text-primary" /> Photo de couverture
+                  </h2>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    Ajoutez d'abord des photos à votre galerie pour choisir la couverture qui donnera le plus envie.
+                  </p>
+                  <Link to="/owner-profile#galerie" className="text-sm text-primary hover:underline mt-2 inline-block">
+                    Gérer mes photos dans mon profil →
+                  </Link>
+                </section>
+              );
+            }
+            return (
+              <section aria-labelledby="cover-picker-title" className="rounded-2xl border border-border bg-card p-4 md:p-5">
+                <div className="mb-3">
+                  <h2 id="cover-picker-title" className="text-base font-semibold flex items-center gap-2">
+                    <ImageIcon className="h-5 w-5 text-primary" /> Photo de couverture
+                  </h2>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    Choisissez celle qui donne le plus envie. Une suggestion est déjà pré-sélectionnée, cliquez une autre photo pour changer.
+                  </p>
+                </div>
+                <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-2">
+                  {ownerPhotos.map((url, i) => {
+                    const isCover = suggestedCover === url;
+                    return (
+                      <button
+                        key={`${url}-${i}`}
+                        type="button"
+                        onClick={() => setCoverPhotoUrl(url)}
+                        aria-label={isCover ? "Photo de couverture actuelle" : "Définir comme photo de couverture"}
+                        aria-pressed={isCover}
+                        className={cn(
+                          "group relative aspect-[4/3] w-full overflow-hidden rounded-lg border-2 transition-all",
+                          isCover ? "border-primary ring-2 ring-primary/30" : "border-transparent hover:border-primary/50",
+                        )}
+                      >
+                        <img src={url} alt="" loading="lazy" className="w-full h-full object-cover" />
+                        {isCover && (
+                          <span className="absolute bottom-0 inset-x-0 bg-primary text-primary-foreground text-[10px] font-medium py-0.5 px-1 flex items-center justify-center gap-1">
+                            <Star className="h-3 w-3 fill-current" /> Couverture
+                          </span>
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+                <Link to="/owner-profile#galerie" className="text-xs text-primary hover:underline mt-3 inline-block">
+                  Ajouter ou gérer mes photos dans mon profil →
+                </Link>
+              </section>
+            );
+          })()}
+
+
           {/* Expérience souhaitée */}
           <div>
             <Label className="text-sm font-medium text-foreground mb-1 block">Expérience souhaitée du gardien</Label>
