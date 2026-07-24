@@ -54,6 +54,7 @@ export function useMissionDistance(missions: MissionLike[]) {
     return (RADIUS_OPTIONS as readonly number[]).includes(n) ? (n as RadiusKm) : DEFAULT_RADIUS;
   });
   const [origin, setOrigin] = useState<{ lat: number; lng: number } | null>(null);
+  const [originError, setOriginError] = useState(false);
   const [distanceMap, setDistanceMap] = useState<Map<string, number>>(new Map());
   const [resolving, setResolving] = useState(false);
   const [computing, setComputing] = useState(false);
