@@ -177,6 +177,7 @@ export function useMissionDistance(missions: MissionLike[]) {
             setPostalState("");
             writeLS(LS_POSTAL, null);
             setOrigin({ lat: pos.coords.latitude, lng: pos.coords.longitude });
+            setOriginError(false);
             done({ ok: true });
           },
           (err) => {
