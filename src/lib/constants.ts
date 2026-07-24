@@ -14,3 +14,8 @@ export const GRACE_END = new Date("2026-10-01T00:00:00Z");
 export const isBeforeLaunch = () => new Date() < LAUNCH_DATE;
 // La bannière "À 0 € pour tous" reste visible tant que l'on est avant GRACE_END.
 export const isInGracePeriod = () => new Date() < GRACE_END;
+
+// ── Avis Google (fiche Guardiens) ──
+// Lien affiché sans filtrage à TOUS les utilisateurs après une garde terminée
+// (contrainte politique Google, pas de review gating).
+export const GOOGLE_REVIEW_URL = "https://g.page/r/CcG68dHWYoHIEAE/review";

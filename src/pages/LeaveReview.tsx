@@ -13,6 +13,8 @@ import { BadgeSelector } from "@/components/badges/BadgeSelector";
 import AlmaReviewDraftBubble from "@/components/ai/alma/AlmaReviewDraftBubble";
 import { trackEvent } from "@/lib/analytics";
 import { Helmet } from "react-helmet-async";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
+import { GOOGLE_REVIEW_URL } from "@/lib/constants";
 
 type ReviewDirection = "owner_to_sitter" | "sitter_to_owner";
 
@@ -46,6 +48,7 @@ const LeaveReview = () => {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
+  const [showThanks, setShowThanks] = useState(false);
 
   const [overallRating, setOverallRating] = useState(0);
   const [subRatings, setSubRatings] = useState<Record<string, number>>({});
@@ -292,6 +295,11 @@ const LeaveReview = () => {
       title: "Avis envoyé !",
       description: "Il sera publié quand les deux parties auront donné le leur.",
     });
+    setShowThanks(true);
+  };
+
+  const closeThanksAndLeave = () => {
+    setShowThanks(false);
     navigate(`/sits/${sitId}`);
   };
 
@@ -476,6 +484,34 @@ const LeaveReview = () => {
           </Button>
         </div>
       </div>
+
+      <Dialog open={showThanks} onOpenChange={(o) => { if (!o) closeThanksAndLeave(); }}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="font-heading">Merci pour votre avis</DialogTitle>
+            <DialogDescription>
+              Votre retour sera publié dès que l'autre partie aura envoyé le sien.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="rounded-lg border border-border bg-muted/40 p-4 space-y-3">
+            <p className="text-sm text-foreground">
+              Vous avez apprécié votre expérience Guardiens ? Un avis Google nous aide à nous faire connaître et à
+              soutenir la communauté.
+            </p>
+            <Button asChild variant="outline" className="w-full">
+              <a href={GOOGLE_REVIEW_URL} target="_blank" rel="noopener noreferrer">
+                Laisser un avis Google
+              </a>
+            </Button>
+            <p className="text-[11px] text-muted-foreground">
+              Facultatif, sans incidence sur votre avis Guardiens.
+            </p>
+          </div>
+          <DialogFooter>
+            <Button variant="ghost" onClick={closeThanksAndLeave}>Retour à la garde</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
