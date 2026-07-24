@@ -318,6 +318,15 @@ const OwnerDashboard = () => {
               pendingAppCount={pendingAppCount}
             />
 
+            {/* 3bis. CTA Entraide — visible sans scroll excessif */}
+            <EntraideCtaCard
+              signal={
+                nearbyHelpersCount && nearbyHelpersCount > 0
+                  ? `${nearbyHelpersCount} personne${nearbyHelpersCount > 1 ? "s" : ""} prête${nearbyHelpersCount > 1 ? "s" : ""} à aider autour de vous.`
+                  : null
+              }
+            />
+
             {/* 4. VOTRE FAMILLE */}
             <OwnerFamilySection pets={pets} getNextSitForPet={getNextSitForPet} />
 
