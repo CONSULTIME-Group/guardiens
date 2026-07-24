@@ -609,7 +609,8 @@ const CreateSit = () => {
         max_applications: maxApplications,
         owner_message: ownerMessage.trim() || null,
         daily_routine: dailyRoutine.trim() || null,
-        cover_photo_url: coverPhotoUrl ?? (ownerPhotos[0] || null) ?? pets.find(p => !!p.photo_url)?.photo_url ?? null,
+        cover_photo_url: coverPhotoUrl ?? smartCover ?? (ownerPhotos[0] || null) ?? pets.find(p => !!p.photo_url)?.photo_url ?? null,
+
         city: sitCity.trim() || null,
         country: sitCountry.trim() || "FR",
         accepts_sitter_pets: acceptsSitterPets,
