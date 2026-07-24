@@ -24,6 +24,7 @@ import SitterEntraideSection from "./sitter/SitterEntraideSection";
 import { useFirstNearbyMission } from "@/hooks/useFirstNearbyMission";
 import NearbySittersSection from "./owner/NearbySittersSection";
 import ReadingsSection from "./shared/ReadingsSection";
+import EntraideCtaCard from "./shared/EntraideCtaCard";
 
 import MobileStickyCTA from "./owner/MobileStickyCTA";
 import OwnerFirstNBAGardiens from "./OwnerFirstNBAGardiens";
