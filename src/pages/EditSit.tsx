@@ -148,6 +148,19 @@ const EditSit = () => {
       setIsUrgent(data.is_urgent || false);
       setMinGardienSits((data as any).min_gardien_sits || 0);
       setSitStatus(data.status || "");
+      setCoverPhotoUrl(((data as any).cover_photo_url as string | null) ?? null);
+      // Charge la galerie propriétaire (owner_gallery) pour permettre le choix
+      // de la photo de couverture depuis la page d'édition, en parallèle du
+      // reste des états locaux.
+      supabase
+        .from("owner_gallery")
+        .select("id, photo_url")
+        .eq("owner_id", user.id)
+        .order("created_at", { ascending: true })
+        .then(({ data: gallery }) => {
+          if (cancelled) return;
+          setOwnerGallery((gallery || []) as { id: string; photo_url: string }[]);
+        });
       initialSnapshot.current = JSON.stringify({
         title: data.title || "",
         startDate: data.start_date || "",
