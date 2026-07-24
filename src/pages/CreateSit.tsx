@@ -1372,9 +1372,11 @@ const CreateSit = () => {
           {/* Photo de couverture (étape explicite avant publication) */}
           {(() => {
             const suggestedCover = coverPhotoUrl
+              ?? smartCover
               ?? (ownerPhotos[0] || null)
               ?? pets.find(p => !!p.photo_url)?.photo_url
               ?? null;
+
             if (!suggestedCover && ownerPhotos.length === 0) {
               return (
                 <section aria-labelledby="cover-picker-title" className="rounded-2xl border border-border bg-card p-4 md:p-5">
