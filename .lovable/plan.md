@@ -1,45 +1,47 @@
-Chantier lourd (2747 lignes, hero + flux + rail + extraction en composants). Je propose de le livrer en 5 lots atomiques, chacun compilable et testable, plutôt qu'un seul commit géant qui risque de casser des chemins critiques (SEO, JSON-LD, sticky, tabs mobile).
+Investigation uniquement, aucun correctif appliqué. Diagnostic fichier par fichier des deux bugs constatés.
 
-## Lot 1 — Extraction squelette (aucun changement visuel)
-- Créer `src/components/profile/ProfileHero.tsx`, `StoryTiles.tsx`, `TrustStory.tsx`, `ProfileRail.tsx`, `AffinityTeaserCard.tsx`, `CommunityPulseCard.tsx`, `AlmaWhisperCard.tsx` avec props typées.
-- Déplacer d'abord des blocs existants tels quels dans ces composants (juste couper/coller). Page passe de 2747 lignes à ~1200.
-- Nettoyage code mort : objet `jsonLd` non utilisé, `cancellations`, `gardeReviewsCount`, rgba() en dur → tokens, `text-amber-500` → `text-primary`.
+## 1. Filtre proximité complètement inactif
 
-## Lot 2 — Hero resserré
-- Illustration 170-200px, avatar chevauchant, badge lieu droite.
-- H1 + pastille "Disponible" (motion-safe pulse) / "Indisponible" crème.
-- Sous-titre "Gardien·ne à {ville} · Membre depuis {mois année}" + note intégrée si avis ≥ 1.
-- Accroche Playfair italique conditionnelle (tagline pro > motivation ≤ 140c > rien).
-- ≤ 3 chips (Identité vérifiée / Répond aux messages si donnée réelle / Dès {mois} si connu / Gardien d'urgence existant).
-- CTA primaire sous hairline + réassurance non-connecté.
-- Suppression : stats line KPI, TrustScore composite hero, Alma hero, affinité hero, stats strip mobile.
+Chaîne du filtre :
+- `src/pages/EntraideHub.tsx` L324 : `const proximity = useMissionDistance(missions);`
+- L371–386 : le filtre `filteredMissions` applique le rayon uniquement `if (proximity.active)`. Sinon aucun filtre distance.
+- `src/hooks/useMissionDistance.ts` L109–120 : `active = Boolean(origin)`. `origin` n'est renseigné que par géoloc navigateur OU par géocode du code postal saisi.
+- Branche CP L100–116 : `geocodeCity(postal, "France")` avec `postal = "69003"`.
+- `src/lib/geocode.ts` L58–70 : appelle l'edge function `geocode` avec `{ city: "69003", country: "France" }`.
+- `supabase/functions/geocode/index.ts` L99–105 : construit `URLSearchParams({ format, limit:1, city: "69003", country: "France", countrycodes: "fr" })` et appelle Nominatim.
 
-## Lot 3 — Tuiles histoire + sections flux
-- StoryTiles : 3 tuiles max, phrases construites, aucune tuile si donnée absente, grille masquée si < 2 tuiles.
-- Sections trio signature espacées 52px : "Qui est {prénom}" (bio + motivation + grille de faits 2 col), "Confiance" id=confiance (TrustStory racontée + timeline existante + SpecialBadge + MissionBadges), "Les avis" (ReviewGrid existant OU empty raconté carte pointillée), "En images" (galerie + lightbox existants).
-- Suppression des Tabs Radix desktop À propos/Avis/Pratique/Galerie → flux unique. Mobile même flux empilé.
-- PublicExperiences absorbé dans "Qui est {prénom}".
+**Cause racine** : Nominatim traite le paramètre `city=` comme un nom de ville, pas comme un code postal. « 69003 » n'est pas une ville → Nominatim renvoie `[]` → l'edge renvoie `{ lat:null, lng:null }` → `geocodeCity` renvoie `null` (mis en cache mémoire) → `origin` reste `null` → `proximity.active = false` → le bloc `if (proximity.active) { if (d > radius) return false; }` n'est **jamais évalué**. Résultat : toutes les 120 dernières missions passent, d'où l'affichage d'Épinay-sur-Seine (93800) et Noyal-sur-Vilaine (35530) alors qu'on a saisi 69003.
 
-## Lot 4 — Rail droit + sticky CTA
-- ProfileRail sticky ≥ 1024px (340px), s'empile en fin de flux mobile.
-- AffinityTeaserCard visiteur non connecté (ring flouté forêt→or, lien inscription encodé) OU composants OwnerToSitterAffinity/AffinitySection existants déplacés ici pour connecté.
-- AlmaWhisperCard : UNE seule phrase Playfair italique, premier whisper pertinent parmi existants.
-- CommunityPulseCard : seul bloc sombre (dégradé pine-deep→pine), 2 chiffres max, uniquement données réelles locales. Titre élargi "Sur Guardiens" si pas de donnée locale ; bloc masqué si aucun chiffre réel.
-- Sticky mobile existant conservé mais gated par IntersectionObserver sur CTA hero.
+Confirmation base :
+- `SELECT ... FROM geocode_cache WHERE normalized_name ILIKE '%69003%'` → 0 ligne. Aucun code postal n'a jamais pu être géocodé.
+- Aucun symptôme n'apparaît côté « Ma position » car cette branche pose `origin = {lat,lng}` directement sans passer par l'edge.
 
-## Lot 5 — QA + captures
-- Vérifier tabs proprio/entraide inchangés fonctionnellement sous nouveau hero.
-- Typecheck, vitest (jsonld, em-dash, main-flex, footer-bg guards).
-- Playwright 390 + 1280, deux profils (avec avis / neuf).
+L'UI trompe l'utilisateur : le `Select` de rayon reste actif visuellement (L125 `disabled={!active}` — `active` prop vient d'`EntraideHub`, à vérifier au passage), mais aucune boucle silencieuse n'informe que l'origine n'a pas pu être résolue. Aucun toast d'erreur n'est levé côté saisie CP (contrairement à la branche géoloc).
 
-## Points techniques
+**Options de correctif** (à valider, non appliquées) :
+- A. Faire supporter les CP FR côté edge `geocode` : détecter `/^\d{5}$/`, appeler Nominatim avec `postalcode=…` au lieu de `city=…` (ou requête structurée `q=<cp>, France`), et normaliser la clé de cache en `cp:<cp>|fr`.
+- B. Fallback côté client dans `useMissionDistance` : si `geocodeCity(cp)` renvoie null pour un CP valide, tenter un second appel avec la ville associée (mais on n'a que le CP saisi, donc nécessite une table de correspondance ou l'appel `postalcode` côté edge → option A reste préférable).
+- C. Ajouter un état d'erreur explicite dans le hook (`originResolveError`) et un message dans `ProximityFilter` quand la résolution échoue, pour ne plus laisser croire à l'utilisateur que le filtre est actif.
 
-**Tokens** : réutiliser `--primary` (forêt), `--secondary`/`--accent` pour terra, `--muted`, `--border`, `--card`, `--foreground`. Pastille "Disponible" = `bg-primary text-primary-foreground` avec pulse motion-safe. Pouls communauté = `bg-gradient-to-br from-primary to-primary/80`. Or (#C8A24B) : à ajouter au design system comme `--gold` HSL ou réutiliser un token doré existant si présent (à vérifier dans index.css lot 4).
+## 2. Cartes sans vraie photo
 
-**Données** : toutes déjà chargées dans la page (bio, motivation, gallery, identity_verified, verification_date, mobility_radius_km, has_vehicle, min_duration, animals_accepted, city, member_since, response_time, availability_date). Aucun nouveau hook, aucune nouvelle requête.
+Composant carte : `src/components/missions/connected/MissionCard.tsx`
+- L82 : `const hasPhoto = Array.isArray(m.photos) && m.photos.length > 0;`
+- L83 : `const cover = hasPhoto ? m.photos[0] : null;`
+- Fallback : `CategoryGlyph` (SVGs génériques maison/patte/etc. sur gradient `primary`). **Aucun fallback intermédiaire** vers l'avatar auteur ni vers `owner_gallery`.
 
-**Hors périmètre** : PageMeta, ProfileSchemaOrg, canonical, noindex, window.prerenderReady (vague 36).
+Champs disponibles côté données :
+- `small_missions.photos text[]` : existe, alimenté via `MissionPhotoUpload` dans `src/pages/CreateSmallMission.tsx` (L112, L253, L676–677). Techniquement fonctionnel.
+- État réel en base : sur les 9 missions ouvertes/en cours/terminées récentes échantillonnées, **toutes ont `array_length(photos,1)=0`**. Personne n'a joint de photo à ce jour. Les cartes tombent donc systématiquement dans la branche `CategoryGlyph`.
+- Avatar auteur : `m.profiles.avatar_url` est hydraté L286–294 dans `EntraideHub.tsx` (via `public_profiles`). Utilisé uniquement pour la pastille auteur, jamais comme couverture.
+- `owner_gallery` : jamais requêté par le hub Entraide.
+- `pets.photo_url` : jamais requêté (les missions ne sont pas liées formellement à un pet).
 
-**Volumétrie** : ~2000 lignes touchées, 7 nouveaux fichiers. Je livre les 5 lots dans cette conversation, en commençant par le Lot 1 dès validation.
+**Diagnostic** : le champ existe, l'upload existe, mais l'usage est nul. Le rendu générique est donc le comportement observé partout, pas un bug de rendu — c'est un bug produit à deux niveaux : (a) auteurs ne joignent aucune photo, (b) la carte n'a pas de plan B au-dessus du glyph gris.
 
-Confirmez le plan (ou ajustez le découpage) et j'enchaîne.
+**Options de correctif** (à valider, non appliquées) :
+- A. Pousser plus fortement l'upload dans `CreateSmallMission` (photo obligatoire pour catégorie « animals » ou « house », ou nudge visuel bloquant à l'édition).
+- B. Ajouter une cascade de fallback couverture dans `MissionCard` : `m.photos[0]` → (si catégorie=animals) première `pets.photo_url` de l'auteur → (si catégorie=house/garden) première `owner_gallery` de l'auteur → avatar auteur agrandi et flouté en fond → glyph générique. Nécessite d'enrichir la query L272–275 de `EntraideHub.tsx` avec un batch `pets`/`owner_gallery` par `user_id`.
+- C. Solution minimale : n'ajouter que l'avatar auteur agrandi en couverture floutée si aucune photo mission. Zéro requête supplémentaire, ambiance plus humaine que la silhouette grise.
+
+Aucun changement ne sera appliqué sans arbitrage sur les options ci-dessus.
