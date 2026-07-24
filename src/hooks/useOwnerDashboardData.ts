@@ -141,7 +141,15 @@ export function useOwnerDashboardData(userId: string | undefined) {
         const propertyType = firstProp?.type ?? null;
         const propertyEnvironment = firstProp?.environment ?? null;
         const photos = firstProp?.photos ?? null;
-        const propertyCoverPhoto = Array.isArray(photos) && photos.length > 0 ? photos[0] : null;
+        const propertyPhotoFallback = Array.isArray(photos) && photos.length > 0 ? photos[0] : null;
+        // Alignement dashboard / carte annonce publiée : on affiche en priorité
+        // la cover_photo_url choisie sur l'annonce (même image que dans le feed),
+        // et on ne retombe sur properties.photos[0] que si aucune annonce n'a de
+        // cover explicite.
+        const sitCoverPhoto = sitsData
+          .map((s) => (s as any).cover_photo_url as string | null | undefined)
+          .find((u) => !!u) ?? null;
+        const propertyCoverPhoto = sitCoverPhoto ?? propertyPhotoFallback;
 
         const onboardingChecks: OnboardingChecks = {
           hasName: !!p?.first_name,
