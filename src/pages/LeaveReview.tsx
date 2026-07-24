@@ -295,6 +295,11 @@ const LeaveReview = () => {
       title: "Avis envoyé !",
       description: "Il sera publié quand les deux parties auront donné le leur.",
     });
+    setShowThanks(true);
+  };
+
+  const closeThanksAndLeave = () => {
+    setShowThanks(false);
     navigate(`/sits/${sitId}`);
   };
 
