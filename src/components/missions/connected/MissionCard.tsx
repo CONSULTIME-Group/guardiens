@@ -1,6 +1,10 @@
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { formatCity, ModeFilter, DURATION_LABELS } from "./constants";
+import spotChien from "@/assets/missions/spot-chien.png";
+import spotJardin from "@/assets/missions/spot-jardin.png";
+import spotBricolage from "@/assets/missions/spot-bricolage.png";
+import spotBienetre from "@/assets/missions/spot-bienetre.png";
 
 const LOCALE_MAP: Record<string, string> = { fr: "fr-FR", en: "en-US", es: "es-ES", it: "it-IT", de: "de-DE" };
 
@@ -10,6 +14,16 @@ const CATEGORY_GRADIENT: Record<string, string> = {
   garden: "from-primary/80 to-primary/50",
   house: "from-primary/85 to-primary/55",
   skills: "from-primary/75 to-primary/45",
+};
+
+// Illustration gouache par catégorie (réutilise les assets existants src/assets/missions/).
+// Les 4 catégories réelles du schéma small_mission_category ont toutes une gouache adaptée,
+// donc l'avatar flouté n'est plus utilisé qu'en filet ultime pour d'éventuelles catégories futures.
+const CATEGORY_ILLUSTRATION: Record<string, string> = {
+  animals: spotChien,
+  garden: spotJardin,
+  house: spotBricolage,
+  skills: spotBienetre,
 };
 
 // Icônes de repli discrètes pour les couvertures sans photo.
@@ -115,7 +129,7 @@ const MissionCard = ({ mission: m, currentUserId, isAuthenticated, canApplyMissi
         isCompleted ? "opacity-70" : "",
       ].join(" ")}
     >
-      {/* Cover : photo mission OU avatar auteur flouté OU gradient + glyph */}
+      {/* Cover : photo mission → gouache catégorie → avatar flouté → gradient + glyph */}
       <div className="relative h-52 overflow-hidden shrink-0">
         {cover ? (
           <img
@@ -125,6 +139,17 @@ const MissionCard = ({ mission: m, currentUserId, isAuthenticated, canApplyMissi
             decoding="async"
             className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
           />
+        ) : CATEGORY_ILLUSTRATION[catKey] ? (
+          <div className={`relative w-full h-full bg-gradient-to-br ${CATEGORY_GRADIENT[catKey]} overflow-hidden`}>
+            <img
+              src={CATEGORY_ILLUSTRATION[catKey]}
+              alt=""
+              aria-hidden="true"
+              loading="lazy"
+              decoding="async"
+              className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+            />
+          </div>
         ) : avatarUrl ? (
           <>
             <img
