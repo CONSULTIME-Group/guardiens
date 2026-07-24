@@ -115,7 +115,7 @@ const MissionCard = ({ mission: m, currentUserId, isAuthenticated, canApplyMissi
         isCompleted ? "opacity-70" : "",
       ].join(" ")}
     >
-      {/* Cover : photo OU gradient teinté catégorie */}
+      {/* Cover : photo mission OU avatar auteur flouté OU gradient + glyph */}
       <div className="relative h-52 overflow-hidden shrink-0">
         {cover ? (
           <img
@@ -125,6 +125,18 @@ const MissionCard = ({ mission: m, currentUserId, isAuthenticated, canApplyMissi
             decoding="async"
             className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
           />
+        ) : avatarUrl ? (
+          <>
+            <img
+              src={avatarUrl}
+              alt=""
+              aria-hidden="true"
+              loading="lazy"
+              decoding="async"
+              className="absolute inset-0 w-full h-full object-cover scale-125 blur-2xl transition-transform duration-700 group-hover:scale-[1.35]"
+            />
+            <div className={`absolute inset-0 bg-gradient-to-br ${CATEGORY_GRADIENT[catKey]} opacity-40 mix-blend-multiply`} />
+          </>
         ) : (
           <div className={`w-full h-full bg-gradient-to-br ${CATEGORY_GRADIENT[catKey]} flex items-center justify-center transition-transform duration-700 group-hover:scale-105`}>
             <CategoryGlyph category={catKey} />
