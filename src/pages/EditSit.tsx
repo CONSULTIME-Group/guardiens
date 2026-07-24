@@ -19,6 +19,7 @@ import {
   Lock,
 } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
+import SitPhotoManager from "@/components/sits/owner/SitPhotoManager";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -101,6 +102,9 @@ const EditSit = () => {
   const [isUrgent, setIsUrgent] = useState(false);
   const [minGardienSits, setMinGardienSits] = useState(0);
   const [sitStatus, setSitStatus] = useState("");
+  const [coverPhotoUrl, setCoverPhotoUrl] = useState<string | null>(null);
+  const [ownerGallery, setOwnerGallery] = useState<{ id: string; photo_url: string }[]>([]);
+
 
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
