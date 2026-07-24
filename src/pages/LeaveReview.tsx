@@ -13,6 +13,8 @@ import { BadgeSelector } from "@/components/badges/BadgeSelector";
 import AlmaReviewDraftBubble from "@/components/ai/alma/AlmaReviewDraftBubble";
 import { trackEvent } from "@/lib/analytics";
 import { Helmet } from "react-helmet-async";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
+import { GOOGLE_REVIEW_URL } from "@/lib/constants";
 
 type ReviewDirection = "owner_to_sitter" | "sitter_to_owner";
 
