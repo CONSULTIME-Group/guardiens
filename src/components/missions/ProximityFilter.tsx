@@ -27,6 +27,8 @@ interface Props {
   isValidPostal: boolean;
   onUseMyLocation: () => Promise<GeolocationResult>;
   onClear: () => void;
+  /** Vrai quand le CP saisi est valide mais que Nominatim n'a rien renvoyé. */
+  originError?: boolean;
 }
 
 const GEO_ERROR_MESSAGES: Record<GeolocationErrorReason, string> = {
@@ -40,6 +42,9 @@ const GEO_ERROR_MESSAGES: Record<GeolocationErrorReason, string> = {
     "Votre navigateur ne prend pas en charge la géolocalisation. Saisissez votre code postal.",
 };
 
+const POSTAL_UNRESOLVED_MSG =
+  "Position introuvable pour ce code postal, réessayez ou utilisez « Ma position ».";
+
 const ProximityFilter = ({
   postal,
   onPostalChange,
@@ -50,11 +55,17 @@ const ProximityFilter = ({
   isValidPostal,
   onUseMyLocation,
   onClear,
+  originError = false,
 }: Props) => {
   const [locating, setLocating] = useState(false);
   const [geoError, setGeoError] = useState<GeolocationErrorReason | null>(null);
   const showPostalError = postal.length > 0 && !isValidPostal;
-  const errorMsg = geoError ? GEO_ERROR_MESSAGES[geoError] : null;
+  const showOriginError = originError && !resolving && !showPostalError;
+  const errorMsg = geoError
+    ? GEO_ERROR_MESSAGES[geoError]
+    : showOriginError
+      ? POSTAL_UNRESOLVED_MSG
+      : null;
 
   const handleLocate = async () => {
     setLocating(true);
