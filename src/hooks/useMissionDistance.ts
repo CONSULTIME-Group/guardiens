@@ -98,13 +98,21 @@ export function useMissionDistance(missions: MissionLike[]) {
     let cancelled = false;
     if (!isValidFrPostal(postal)) {
       setOrigin(null);
+      setOriginError(false);
       return;
     }
     setResolving(true);
+    setOriginError(false);
     (async () => {
       const res = await geocodeCity(postal, "France");
       if (cancelled) return;
-      setOrigin(res ? { lat: res.lat, lng: res.lng } : null);
+      if (res) {
+        setOrigin({ lat: res.lat, lng: res.lng });
+        setOriginError(false);
+      } else {
+        setOrigin(null);
+        setOriginError(true);
+      }
       setResolving(false);
     })();
     return () => {
