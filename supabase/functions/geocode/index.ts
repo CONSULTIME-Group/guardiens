@@ -75,7 +75,17 @@ Deno.serve(async (req) => {
         : "FR";
     const cityName = parts.length > 1 ? parts.slice(0, -1).join(", ") : city.trim();
     const resolvedCountry = normalizeCountry(inferredCountry);
-    const normalized = `${normalize(cityName)}|${normalize(resolvedCountry.label)}`;
+
+    // Détecte un code postal français (5 chiffres) pour interroger Nominatim
+    // par `postalcode=` au lieu de `city=` (sinon "69003" tombe parfois sur des
+    // localités homonymes ou rien). La clé de cache est préfixée pour éviter
+    // toute collision avec une éventuelle ville nommée identiquement.
+    const isFrPostal =
+      /^\d{5}$/.test(cityName.trim()) &&
+      (resolvedCountry.code === "fr" || normalize(resolvedCountry.label) === "france");
+    const normalized = isFrPostal
+      ? `cp:${cityName.trim()}|fr`
+      : `city:${normalize(cityName)}|${normalize(resolvedCountry.label)}`;
 
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
@@ -100,10 +110,15 @@ Deno.serve(async (req) => {
     const params = new URLSearchParams({
       format: "json",
       limit: "1",
-      city: cityName.trim(),
-      country: resolvedCountry.label,
+      country: isFrPostal ? "France" : resolvedCountry.label,
     });
-    if (resolvedCountry.code) params.set("countrycodes", resolvedCountry.code);
+    if (isFrPostal) {
+      params.set("postalcode", cityName.trim());
+      params.set("countrycodes", "fr");
+    } else {
+      params.set("city", cityName.trim());
+      if (resolvedCountry.code) params.set("countrycodes", resolvedCountry.code);
+    }
     const url = `https://nominatim.openstreetmap.org/search?${params}`;
     const res = await fetch(url, {
       headers: { "User-Agent": "Guardiens-App/1.0" },
