@@ -646,8 +646,17 @@ const EditSit = () => {
           {/* SECTION 4 : Photos */}
           <SectionCard
             title="Photos et couverture"
-            description="Les photos du logement sont communes à toutes vos annonces."
+            description="Choisissez la photo de couverture qui apparaîtra sur la carte publique de cette annonce."
           >
+            {id && user ? (
+              <SitPhotoManager
+                sitId={id}
+                ownerId={user.id}
+                initialCoverPhotoUrl={coverPhotoUrl}
+                initialGallery={ownerGallery}
+                onCoverChange={(url) => setCoverPhotoUrl(url)}
+              />
+            ) : null}
             <Link to="/owner-profile">
               <Button variant="outline" size="sm" className="gap-1.5">
                 Gérer ma galerie sur le profil <ArrowRight className="h-3.5 w-3.5" />
