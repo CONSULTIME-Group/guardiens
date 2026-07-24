@@ -379,6 +379,12 @@
     <xhtml:link rel="alternate" hreflang="x-default" href="https://guardiens.fr/actualites/devenir-gardien-pro-animalier"/>
   </url>
   <url>
+    <loc>https://guardiens.fr/actualites/boom-pet-sitting-lyon-2026</loc>
+    <lastmod>2026-07-24</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
     <loc>https://guardiens.fr/actualites/house-sitting-ete-aura-guide</loc>
     <lastmod>2026-06-15</lastmod>
     <changefreq>monthly</changefreq>
@@ -407,6 +413,30 @@
     <lastmod>2026-07-24</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://guardiens.fr/actualites/pet-sitting-lyon-guide-complet</loc>
+    <lastmod>2026-07-24</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://guardiens.fr/actualites/pet-sitting-lyon-guide-complet"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://guardiens.fr/actualites/pet-sitting-lyon-guide-complet?lang=en"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://guardiens.fr/actualites/pet-sitting-lyon-guide-complet?lang=es"/>
+    <xhtml:link rel="alternate" hreflang="it" href="https://guardiens.fr/actualites/pet-sitting-lyon-guide-complet?lang=it"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://guardiens.fr/actualites/pet-sitting-lyon-guide-complet?lang=de"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://guardiens.fr/actualites/pet-sitting-lyon-guide-complet"/>
+  </url>
+  <url>
+    <loc>https://guardiens.fr/actualites/pet-sitting-valence-drome</loc>
+    <lastmod>2026-07-24</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://guardiens.fr/actualites/pet-sitting-valence-drome"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://guardiens.fr/actualites/pet-sitting-valence-drome?lang=en"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://guardiens.fr/actualites/pet-sitting-valence-drome?lang=es"/>
+    <xhtml:link rel="alternate" hreflang="it" href="https://guardiens.fr/actualites/pet-sitting-valence-drome?lang=it"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://guardiens.fr/actualites/pet-sitting-valence-drome?lang=de"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://guardiens.fr/actualites/pet-sitting-valence-drome"/>
   </url>
   <url>
     <loc>https://guardiens.fr/actualites/jardinage-entraide-locale-grenoble</loc>
@@ -443,6 +473,18 @@
     <xhtml:link rel="alternate" hreflang="it" href="https://guardiens.fr/actualites/pension-chien-alternatives-guide?lang=it"/>
     <xhtml:link rel="alternate" hreflang="de" href="https://guardiens.fr/actualites/pension-chien-alternatives-guide?lang=de"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://guardiens.fr/actualites/pension-chien-alternatives-guide"/>
+  </url>
+  <url>
+    <loc>https://guardiens.fr/actualites/house-sitting-haute-savoie-annecy-megeve</loc>
+    <lastmod>2026-07-24</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://guardiens.fr/actualites/house-sitting-haute-savoie-annecy-megeve"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://guardiens.fr/actualites/house-sitting-haute-savoie-annecy-megeve?lang=en"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://guardiens.fr/actualites/house-sitting-haute-savoie-annecy-megeve?lang=es"/>
+    <xhtml:link rel="alternate" hreflang="it" href="https://guardiens.fr/actualites/house-sitting-haute-savoie-annecy-megeve?lang=it"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://guardiens.fr/actualites/house-sitting-haute-savoie-annecy-megeve?lang=de"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://guardiens.fr/actualites/house-sitting-haute-savoie-annecy-megeve"/>
   </url>
   <url>
     <loc>https://guardiens.fr/actualites/c-est-quoi-le-house-sitting</loc>
@@ -556,6 +598,18 @@
     <xhtml:link rel="alternate" hreflang="x-default" href="https://guardiens.fr/actualites/labrador-retriever-guide-race"/>
   </url>
   <url>
+    <loc>https://guardiens.fr/actualites/pet-sitting-venissieux</loc>
+    <lastmod>2026-07-24</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://guardiens.fr/actualites/pet-sitting-venissieux"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://guardiens.fr/actualites/pet-sitting-venissieux?lang=en"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://guardiens.fr/actualites/pet-sitting-venissieux?lang=es"/>
+    <xhtml:link rel="alternate" hreflang="it" href="https://guardiens.fr/actualites/pet-sitting-venissieux?lang=it"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://guardiens.fr/actualites/pet-sitting-venissieux?lang=de"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://guardiens.fr/actualites/pet-sitting-venissieux"/>
+  </url>
+  <url>
     <loc>https://guardiens.fr/actualites/garde-animaux-croix-rousse-lyon</loc>
     <lastmod>2026-06-15</lastmod>
     <changefreq>monthly</changefreq>
@@ -592,6 +646,18 @@
     <xhtml:link rel="alternate" hreflang="x-default" href="https://guardiens.fr/actualites/maine-coon-guide-race"/>
   </url>
   <url>
+    <loc>https://guardiens.fr/actualites/pet-sitting-villeurbanne</loc>
+    <lastmod>2026-07-24</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://guardiens.fr/actualites/pet-sitting-villeurbanne"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://guardiens.fr/actualites/pet-sitting-villeurbanne?lang=en"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://guardiens.fr/actualites/pet-sitting-villeurbanne?lang=es"/>
+    <xhtml:link rel="alternate" hreflang="it" href="https://guardiens.fr/actualites/pet-sitting-villeurbanne?lang=it"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://guardiens.fr/actualites/pet-sitting-villeurbanne?lang=de"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://guardiens.fr/actualites/pet-sitting-villeurbanne"/>
+  </url>
+  <url>
     <loc>https://guardiens.fr/actualites/persan-guide-race</loc>
     <lastmod>2026-06-15</lastmod>
     <changefreq>monthly</changefreq>
@@ -602,6 +668,12 @@
     <xhtml:link rel="alternate" hreflang="it" href="https://guardiens.fr/actualites/persan-guide-race?lang=it"/>
     <xhtml:link rel="alternate" hreflang="de" href="https://guardiens.fr/actualites/persan-guide-race?lang=de"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://guardiens.fr/actualites/persan-guide-race"/>
+  </url>
+  <url>
+    <loc>https://guardiens.fr/actualites/pet-sitting-lyon-ouest-lyonnais</loc>
+    <lastmod>2026-07-24</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
   </url>
   <url>
     <loc>https://guardiens.fr/actualites/bengal-guide-race</loc>
@@ -779,6 +851,18 @@
     <xhtml:link rel="alternate" hreflang="it" href="https://guardiens.fr/actualites/pet-sitting-clermont-ferrand?lang=it"/>
     <xhtml:link rel="alternate" hreflang="de" href="https://guardiens.fr/actualites/pet-sitting-clermont-ferrand?lang=de"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://guardiens.fr/actualites/pet-sitting-clermont-ferrand"/>
+  </url>
+  <url>
+    <loc>https://guardiens.fr/actualites/pet-sitting-grenoble-chartreuse</loc>
+    <lastmod>2026-07-24</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://guardiens.fr/actualites/pet-sitting-grenoble-chartreuse"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://guardiens.fr/actualites/pet-sitting-grenoble-chartreuse?lang=es"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://guardiens.fr/actualites/pet-sitting-grenoble-chartreuse?lang=en"/>
+    <xhtml:link rel="alternate" hreflang="it" href="https://guardiens.fr/actualites/pet-sitting-grenoble-chartreuse?lang=it"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://guardiens.fr/actualites/pet-sitting-grenoble-chartreuse?lang=de"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://guardiens.fr/actualites/pet-sitting-grenoble-chartreuse"/>
   </url>
   <url>
     <loc>https://guardiens.fr/actualites/faire-garder-animal-pendant-hospitalisation</loc>
@@ -994,6 +1078,18 @@
     <xhtml:link rel="alternate" hreflang="it" href="https://guardiens.fr/actualites/choisir-gardien-bons-criteres?lang=it"/>
     <xhtml:link rel="alternate" hreflang="de" href="https://guardiens.fr/actualites/choisir-gardien-bons-criteres?lang=de"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://guardiens.fr/actualites/choisir-gardien-bons-criteres"/>
+  </url>
+  <url>
+    <loc>https://guardiens.fr/actualites/house-sitting-aix-les-bains</loc>
+    <lastmod>2026-07-24</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://guardiens.fr/actualites/house-sitting-aix-les-bains"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://guardiens.fr/actualites/house-sitting-aix-les-bains?lang=en"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://guardiens.fr/actualites/house-sitting-aix-les-bains?lang=es"/>
+    <xhtml:link rel="alternate" hreflang="it" href="https://guardiens.fr/actualites/house-sitting-aix-les-bains?lang=it"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://guardiens.fr/actualites/house-sitting-aix-les-bains?lang=de"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://guardiens.fr/actualites/house-sitting-aix-les-bains"/>
   </url>
   <url>
     <loc>https://guardiens.fr/actualites/reussir-premiere-garde-house-sitting</loc>
