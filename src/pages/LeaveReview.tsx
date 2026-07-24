@@ -484,6 +484,34 @@ const LeaveReview = () => {
           </Button>
         </div>
       </div>
+
+      <Dialog open={showThanks} onOpenChange={(o) => { if (!o) closeThanksAndLeave(); }}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="font-heading">Merci pour votre avis</DialogTitle>
+            <DialogDescription>
+              Votre retour sera publié dès que l'autre partie aura envoyé le sien.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="rounded-lg border border-border bg-muted/40 p-4 space-y-3">
+            <p className="text-sm text-foreground">
+              Vous avez apprécié votre expérience Guardiens ? Un avis Google nous aide à nous faire connaître et à
+              soutenir la communauté.
+            </p>
+            <Button asChild variant="outline" className="w-full">
+              <a href={GOOGLE_REVIEW_URL} target="_blank" rel="noopener noreferrer">
+                Laisser un avis Google
+              </a>
+            </Button>
+            <p className="text-[11px] text-muted-foreground">
+              Facultatif, sans incidence sur votre avis Guardiens.
+            </p>
+          </div>
+          <DialogFooter>
+            <Button variant="ghost" onClick={closeThanksAndLeave}>Retour à la garde</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
