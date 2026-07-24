@@ -129,8 +129,6 @@ const MissionCard = ({ mission: m, currentUserId, isAuthenticated, canApplyMissi
         isCompleted ? "opacity-70" : "",
       ].join(" ")}
     >
-      {/* Cover : photo mission OU avatar auteur flouté OU gradient + glyph */}
-      <div className="relative h-52 overflow-hidden shrink-0">
       {/* Cover : photo mission → gouache catégorie → avatar flouté → gradient + glyph */}
       <div className="relative h-52 overflow-hidden shrink-0">
         {cover ? (
