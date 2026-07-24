@@ -155,7 +155,7 @@ const EditSit = () => {
       supabase
         .from("owner_gallery")
         .select("id, photo_url")
-        .eq("owner_id", user.id)
+        .eq("user_id", user.id)
         .order("created_at", { ascending: true })
         .then(({ data: gallery }) => {
           if (cancelled) return;
