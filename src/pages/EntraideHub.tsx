@@ -746,6 +746,7 @@ const EntraideHub = () => {
                       isValidPostal={proximity.isValidPostal}
                       onUseMyLocation={proximity.useMyLocation}
                       onClear={() => proximity.setPostal("")}
+                      originError={proximity.originError}
                     />
                     {!proximity.active && (
                       <p className="text-[11px] text-muted-foreground mt-2">
