@@ -131,6 +131,8 @@ const MissionCard = ({ mission: m, currentUserId, isAuthenticated, canApplyMissi
     >
       {/* Cover : photo mission OU avatar auteur flouté OU gradient + glyph */}
       <div className="relative h-52 overflow-hidden shrink-0">
+      {/* Cover : photo mission → gouache catégorie → avatar flouté → gradient + glyph */}
+      <div className="relative h-52 overflow-hidden shrink-0">
         {cover ? (
           <img
             src={cover}
@@ -139,6 +141,17 @@ const MissionCard = ({ mission: m, currentUserId, isAuthenticated, canApplyMissi
             decoding="async"
             className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
           />
+        ) : CATEGORY_ILLUSTRATION[catKey] ? (
+          <div className={`relative w-full h-full bg-gradient-to-br ${CATEGORY_GRADIENT[catKey]} overflow-hidden`}>
+            <img
+              src={CATEGORY_ILLUSTRATION[catKey]}
+              alt=""
+              aria-hidden="true"
+              loading="lazy"
+              decoding="async"
+              className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+            />
+          </div>
         ) : avatarUrl ? (
           <>
             <img
