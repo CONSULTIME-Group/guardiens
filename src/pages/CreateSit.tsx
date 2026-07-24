@@ -741,6 +741,18 @@ const CreateSit = () => {
         expectations = `${expectations}\n\nDates flexibles : ${flexibleNotes}`.trim();
       }
 
+      // Filet de sécurité : si l'utilisateur n'a rien choisi et qu'aucun smart
+      // cover n'a été calculé (étape survolée), on tente une dernière analyse IA.
+      // Soft-fail garanti par pickSmartCover : ne bloque jamais la publication.
+      let resolvedCover = coverPhotoUrl ?? smartCover;
+      if (!resolvedCover && ownerPhotos.length > 1) {
+        resolvedCover = await pickSmartCover(ownerPhotos, ownerPhotos[0] ?? null);
+      }
+      const finalCover = resolvedCover
+        ?? (ownerPhotos[0] || null)
+        ?? pets.find(p => !!p.photo_url)?.photo_url
+        ?? null;
+
       const payload: any = {
         user_id: user.id,
         property_id: property.id,
@@ -757,7 +769,8 @@ const CreateSit = () => {
         max_applications: maxApplications,
         owner_message: ownerMessage.trim() || null,
         daily_routine: dailyRoutine.trim() || null,
-        cover_photo_url: coverPhotoUrl ?? (ownerPhotos[0] || null) ?? pets.find(p => !!p.photo_url)?.photo_url ?? null,
+        cover_photo_url: finalCover,
+
         city: sitCity.trim() || null,
         country: sitCountry.trim() || "FR",
         accepts_sitter_pets: acceptsSitterPets,
