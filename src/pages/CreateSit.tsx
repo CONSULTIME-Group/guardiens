@@ -40,6 +40,8 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import PetsEditor from "@/components/pets/PetsEditor";
+import { pickSmartCover } from "@/lib/pickSmartCover";
+
 
 
 interface PropertySummary {
