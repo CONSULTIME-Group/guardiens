@@ -222,11 +222,12 @@ export function useMissionDistance(missions: MissionLike[]) {
       active,
       resolving,
       computing,
+      originError,
       getDistance,
       hasDistance,
       useMyLocation,
       isValidPostal: isValidFrPostal(postal),
     }),
-    [postal, setPostal, radius, setRadius, origin, active, resolving, computing, getDistance, hasDistance, useMyLocation],
+    [postal, setPostal, radius, setRadius, origin, active, resolving, computing, originError, getDistance, hasDistance, useMyLocation],
   );
 }
