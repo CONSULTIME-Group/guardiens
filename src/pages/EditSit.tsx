@@ -19,6 +19,7 @@ import {
   Lock,
 } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
+import SitPhotoManager from "@/components/sits/owner/SitPhotoManager";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -101,6 +102,9 @@ const EditSit = () => {
   const [isUrgent, setIsUrgent] = useState(false);
   const [minGardienSits, setMinGardienSits] = useState(0);
   const [sitStatus, setSitStatus] = useState("");
+  const [coverPhotoUrl, setCoverPhotoUrl] = useState<string | null>(null);
+  const [ownerGallery, setOwnerGallery] = useState<{ id: string; photo_url: string }[]>([]);
+
 
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
@@ -144,6 +148,19 @@ const EditSit = () => {
       setIsUrgent(data.is_urgent || false);
       setMinGardienSits((data as any).min_gardien_sits || 0);
       setSitStatus(data.status || "");
+      setCoverPhotoUrl(((data as any).cover_photo_url as string | null) ?? null);
+      // Charge la galerie propriétaire (owner_gallery) pour permettre le choix
+      // de la photo de couverture depuis la page d'édition, en parallèle du
+      // reste des états locaux.
+      supabase
+        .from("owner_gallery")
+        .select("id, photo_url")
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: true })
+        .then(({ data: gallery }) => {
+          if (cancelled) return;
+          setOwnerGallery((gallery || []) as { id: string; photo_url: string }[]);
+        });
       initialSnapshot.current = JSON.stringify({
         title: data.title || "",
         startDate: data.start_date || "",
@@ -629,8 +646,17 @@ const EditSit = () => {
           {/* SECTION 4 : Photos */}
           <SectionCard
             title="Photos et couverture"
-            description="Les photos du logement sont communes à toutes vos annonces."
+            description="Choisissez la photo de couverture qui apparaîtra sur la carte publique de cette annonce."
           >
+            {id && user ? (
+              <SitPhotoManager
+                sitId={id}
+                ownerId={user.id}
+                initialCoverPhotoUrl={coverPhotoUrl}
+                initialGallery={ownerGallery}
+                onCoverChange={(url) => setCoverPhotoUrl(url)}
+              />
+            ) : null}
             <Link to="/owner-profile">
               <Button variant="outline" size="sm" className="gap-1.5">
                 Gérer ma galerie sur le profil <ArrowRight className="h-3.5 w-3.5" />
