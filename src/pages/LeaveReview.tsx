@@ -48,6 +48,7 @@ const LeaveReview = () => {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
+  const [showThanks, setShowThanks] = useState(false);
 
   const [overallRating, setOverallRating] = useState(0);
   const [subRatings, setSubRatings] = useState<Record<string, number>>({});
