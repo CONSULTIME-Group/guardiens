@@ -133,3 +133,24 @@ const note = { fontSize: '12px', color: 'hsl(37, 7%, 55%)', lineHeight: '1.5', m
 const hr = { borderColor: 'hsl(37, 22%, 89%)', margin: '20px 0' }
 const legalNote = { fontSize: '10px', color: 'hsl(37, 7%, 60%)', lineHeight: '1.5', margin: '0 0 12px' }
 const footer = { fontSize: '12px', color: 'hsl(37, 7%, 60%)', margin: '10px 0 0' }
+const googleBox = {
+  backgroundColor: 'hsl(37, 22%, 96%)',
+  borderRadius: '12px',
+  padding: '16px 20px',
+  margin: '8px 0 20px',
+  border: '1px solid hsl(37, 22%, 89%)',
+  textAlign: 'center' as const,
+}
+const googleTitle = { fontSize: '14px', fontWeight: '600' as const, color: 'hsl(40, 12%, 25%)', margin: '0 0 8px' }
+const googleText = { fontSize: '13px', color: 'hsl(37, 7%, 43%)', lineHeight: '1.5', margin: '0 0 8px' }
+const buttonSecondary = {
+  backgroundColor: '#ffffff',
+  color: 'hsl(153, 42%, 30%)',
+  padding: '12px 28px',
+  borderRadius: '8px',
+  fontSize: '14px',
+  fontWeight: '600' as const,
+  textDecoration: 'none',
+  display: 'inline-block',
+  border: '1px solid hsl(153, 42%, 30%)',
+}
