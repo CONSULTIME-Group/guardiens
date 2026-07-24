@@ -10,7 +10,7 @@ import { Label } from "@/components/ui/label";
 import ChipSelect from "@/components/profile/ChipSelect";
 import { Helmet } from "react-helmet-async";
 import EnvironmentPills from "@/components/shared/EnvironmentPills";
-import { Calendar, Home, PawPrint, ShieldCheck, MessageSquare, Users, ArrowLeft, AlertCircle, Zap, Eye, ChevronRight, ChevronLeft, Check } from "lucide-react";
+import { Calendar, Home, PawPrint, ShieldCheck, MessageSquare, Users, ArrowLeft, AlertCircle, Zap, Eye, ChevronRight, ChevronLeft, Check, Image as ImageIcon, Star } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
