@@ -556,6 +556,23 @@ const CreateSit = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [title, startDate, endDate, flexibleDates, flexibleNotes, specificExpectations, openTo, isUrgent, sitEnvironments, minGardienSits, maxApplications, ownerMessage, dailyRoutine, coverPhotoUrl, sitCity, sitCountry, acceptsSitterPets, acceptsSitterChildren]);
 
+  // Smart cover picker : scoring IA de la galerie, silencieux si quota/rate-limit.
+  // Se déclenche à l'arrivée sur l'étape Préférences si le propriétaire n'a rien
+  // choisi explicitement et si la galerie n'a pas déjà été scorée.
+  useEffect(() => {
+    if (currentStep !== 2) return;
+    if (coverPhotoUrl) return;
+    if (ownerPhotos.length < 2) return;
+    const sig = ownerPhotos.slice().sort().join("|");
+    if (smartCoverAttemptedRef.current === sig) return;
+    smartCoverAttemptedRef.current = sig;
+    const fallback = ownerPhotos[0] ?? null;
+    pickSmartCover(ownerPhotos, fallback).then((best) => {
+      if (best) setSmartCover(best);
+    });
+  }, [currentStep, ownerPhotos, coverPhotoUrl]);
+
+
   const saveDraft = async ({ silent = false }: { silent?: boolean } = {}) => {
     if (!user || !property) return null;
     // Anti-brouillon fantôme : ne pas créer de brouillon vide en base.
