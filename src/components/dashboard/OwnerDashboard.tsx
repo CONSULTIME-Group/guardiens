@@ -24,6 +24,7 @@ import SitterEntraideSection from "./sitter/SitterEntraideSection";
 import { useFirstNearbyMission } from "@/hooks/useFirstNearbyMission";
 import NearbySittersSection from "./owner/NearbySittersSection";
 import ReadingsSection from "./shared/ReadingsSection";
+import EntraideCtaCard from "./shared/EntraideCtaCard";
 
 import MobileStickyCTA from "./owner/MobileStickyCTA";
 import OwnerFirstNBAGardiens from "./OwnerFirstNBAGardiens";
@@ -315,6 +316,15 @@ const OwnerDashboard = () => {
               sits={sits}
               coverPhoto={propertyCoverPhoto}
               pendingAppCount={pendingAppCount}
+            />
+
+            {/* 3bis. CTA Entraide — visible sans scroll excessif */}
+            <EntraideCtaCard
+              signal={
+                nearbyHelpersCount && nearbyHelpersCount > 0
+                  ? `${nearbyHelpersCount} personne${nearbyHelpersCount > 1 ? "s" : ""} prête${nearbyHelpersCount > 1 ? "s" : ""} à aider autour de vous.`
+                  : null
+              }
             />
 
             {/* 4. VOTRE FAMILLE */}

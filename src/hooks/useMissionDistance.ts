@@ -54,6 +54,7 @@ export function useMissionDistance(missions: MissionLike[]) {
     return (RADIUS_OPTIONS as readonly number[]).includes(n) ? (n as RadiusKm) : DEFAULT_RADIUS;
   });
   const [origin, setOrigin] = useState<{ lat: number; lng: number } | null>(null);
+  const [originError, setOriginError] = useState(false);
   const [distanceMap, setDistanceMap] = useState<Map<string, number>>(new Map());
   const [resolving, setResolving] = useState(false);
   const [computing, setComputing] = useState(false);
@@ -97,13 +98,21 @@ export function useMissionDistance(missions: MissionLike[]) {
     let cancelled = false;
     if (!isValidFrPostal(postal)) {
       setOrigin(null);
+      setOriginError(false);
       return;
     }
     setResolving(true);
+    setOriginError(false);
     (async () => {
       const res = await geocodeCity(postal, "France");
       if (cancelled) return;
-      setOrigin(res ? { lat: res.lat, lng: res.lng } : null);
+      if (res) {
+        setOrigin({ lat: res.lat, lng: res.lng });
+        setOriginError(false);
+      } else {
+        setOrigin(null);
+        setOriginError(true);
+      }
       setResolving(false);
     })();
     return () => {
@@ -168,6 +177,7 @@ export function useMissionDistance(missions: MissionLike[]) {
             setPostalState("");
             writeLS(LS_POSTAL, null);
             setOrigin({ lat: pos.coords.latitude, lng: pos.coords.longitude });
+            setOriginError(false);
             done({ ok: true });
           },
           (err) => {
@@ -212,11 +222,12 @@ export function useMissionDistance(missions: MissionLike[]) {
       active,
       resolving,
       computing,
+      originError,
       getDistance,
       hasDistance,
       useMyLocation,
       isValidPostal: isValidFrPostal(postal),
     }),
-    [postal, setPostal, radius, setRadius, origin, active, resolving, computing, getDistance, hasDistance, useMyLocation],
+    [postal, setPostal, radius, setRadius, origin, active, resolving, computing, originError, getDistance, hasDistance, useMyLocation],
   );
 }
