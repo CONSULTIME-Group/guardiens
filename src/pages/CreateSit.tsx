@@ -40,6 +40,8 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import PetsEditor from "@/components/pets/PetsEditor";
+import { pickSmartCover } from "@/lib/pickSmartCover";
+
 
 
 interface PropertySummary {
@@ -261,6 +263,9 @@ const CreateSit = () => {
   const [ownerMessage, setOwnerMessage] = useState("");
   const [dailyRoutine, setDailyRoutine] = useState("");
   const [coverPhotoUrl, setCoverPhotoUrl] = useState<string | null>(null);
+  const [smartCover, setSmartCover] = useState<string | null>(null);
+  const smartCoverAttemptedRef = useRef<string>("");
+
   const [sitCity, setSitCity] = useState<string>("");
   const [sitCountry, setSitCountry] = useState<string>("FR");
   const [acceptsSitterPets, setAcceptsSitterPets] = useState<"yes" | "no" | "discuss">("discuss");
@@ -551,6 +556,23 @@ const CreateSit = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [title, startDate, endDate, flexibleDates, flexibleNotes, specificExpectations, openTo, isUrgent, sitEnvironments, minGardienSits, maxApplications, ownerMessage, dailyRoutine, coverPhotoUrl, sitCity, sitCountry, acceptsSitterPets, acceptsSitterChildren]);
 
+  // Smart cover picker : scoring IA de la galerie, silencieux si quota/rate-limit.
+  // Se déclenche à l'arrivée sur l'étape Préférences si le propriétaire n'a rien
+  // choisi explicitement et si la galerie n'a pas déjà été scorée.
+  useEffect(() => {
+    if (currentStep !== 2) return;
+    if (coverPhotoUrl) return;
+    if (ownerPhotos.length < 2) return;
+    const sig = ownerPhotos.slice().sort().join("|");
+    if (smartCoverAttemptedRef.current === sig) return;
+    smartCoverAttemptedRef.current = sig;
+    const fallback = ownerPhotos[0] ?? null;
+    pickSmartCover(ownerPhotos, fallback).then((best) => {
+      if (best) setSmartCover(best);
+    });
+  }, [currentStep, ownerPhotos, coverPhotoUrl]);
+
+
   const saveDraft = async ({ silent = false }: { silent?: boolean } = {}) => {
     if (!user || !property) return null;
     // Anti-brouillon fantôme : ne pas créer de brouillon vide en base.
@@ -587,7 +609,8 @@ const CreateSit = () => {
         max_applications: maxApplications,
         owner_message: ownerMessage.trim() || null,
         daily_routine: dailyRoutine.trim() || null,
-        cover_photo_url: coverPhotoUrl ?? (ownerPhotos[0] || null) ?? pets.find(p => !!p.photo_url)?.photo_url ?? null,
+        cover_photo_url: coverPhotoUrl ?? smartCover ?? (ownerPhotos[0] || null) ?? pets.find(p => !!p.photo_url)?.photo_url ?? null,
+
         city: sitCity.trim() || null,
         country: sitCountry.trim() || "FR",
         accepts_sitter_pets: acceptsSitterPets,
@@ -718,6 +741,18 @@ const CreateSit = () => {
         expectations = `${expectations}\n\nDates flexibles : ${flexibleNotes}`.trim();
       }
 
+      // Filet de sécurité : si l'utilisateur n'a rien choisi et qu'aucun smart
+      // cover n'a été calculé (étape survolée), on tente une dernière analyse IA.
+      // Soft-fail garanti par pickSmartCover : ne bloque jamais la publication.
+      let resolvedCover = coverPhotoUrl ?? smartCover;
+      if (!resolvedCover && ownerPhotos.length > 1) {
+        resolvedCover = await pickSmartCover(ownerPhotos, ownerPhotos[0] ?? null);
+      }
+      const finalCover = resolvedCover
+        ?? (ownerPhotos[0] || null)
+        ?? pets.find(p => !!p.photo_url)?.photo_url
+        ?? null;
+
       const payload: any = {
         user_id: user.id,
         property_id: property.id,
@@ -734,7 +769,8 @@ const CreateSit = () => {
         max_applications: maxApplications,
         owner_message: ownerMessage.trim() || null,
         daily_routine: dailyRoutine.trim() || null,
-        cover_photo_url: coverPhotoUrl ?? (ownerPhotos[0] || null) ?? pets.find(p => !!p.photo_url)?.photo_url ?? null,
+        cover_photo_url: finalCover,
+
         city: sitCity.trim() || null,
         country: sitCountry.trim() || "FR",
         accepts_sitter_pets: acceptsSitterPets,
@@ -1350,9 +1386,11 @@ const CreateSit = () => {
           {/* Photo de couverture (étape explicite avant publication) */}
           {(() => {
             const suggestedCover = coverPhotoUrl
+              ?? smartCover
               ?? (ownerPhotos[0] || null)
               ?? pets.find(p => !!p.photo_url)?.photo_url
               ?? null;
+
             if (!suggestedCover && ownerPhotos.length === 0) {
               return (
                 <section aria-labelledby="cover-picker-title" className="rounded-2xl border border-border bg-card p-4 md:p-5">
