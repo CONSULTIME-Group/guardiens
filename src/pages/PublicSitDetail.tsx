@@ -418,7 +418,10 @@ const PublicSitDetail = () => {
  const propertyDescShort = property?.description
  ? (property.description.length > 80 ? property.description.slice(0, 77) + "…" : property.description)
  : "";
- const datesPart = startFmt && endFmt ? `Du ${startFmt} au ${endFmt}.` : "Dates flexibles.";
+ const datesPart = startFmt && endFmt
+   ? `Du ${startFmt} au ${endFmt}.`
+   : (hideDates ? (sit.status === "confirmed" ? "Période pourvue." : "Garde terminée.") : "Dates flexibles.");
+
  const cityPart = ownerCity ? `${ownerCity}. ` : "";
  const ogDescription = propertyDescShort
  ? `${cityPart}${datesPart} ${propertyDescShort} Partagez la confiance entre gens du coin avec Guardiens.`
