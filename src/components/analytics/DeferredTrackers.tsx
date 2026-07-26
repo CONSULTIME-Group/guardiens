@@ -31,6 +31,7 @@ export const DeferredTrackers = () => {
     <Suspense fallback={null}>
       <PageViewTracker />
       <FacebookReferralTracker />
+      <AiReferralTracker />
       <NetworkErrorMonitor />
       <FacebookReferralFeedback />
     </Suspense>
