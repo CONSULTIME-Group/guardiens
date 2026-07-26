@@ -33,7 +33,7 @@ export async function sendErasureAcknowledgement(
           .toISOString()
           .slice(0, 10)}`,
         templateData: { firstName: firstName ?? "" },
-        metadata: { reason: "gdpr_erasure" },
+        logMetadata: { reason: "gdpr_erasure" },
       }),
     });
     if (!resp.ok) {
