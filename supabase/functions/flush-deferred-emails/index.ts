@@ -142,8 +142,46 @@ Deno.serve(async (req) => {
     }
   }
 
+  // Lot 9 : alerte si la file accumule des echecs. Seuil volontairement bas,
+  // la file normale doit rester vide d'echecs.
+  const FAILED_ALERT_THRESHOLD = 50
+  let failedRecent = 0
+  try {
+    const since = new Date(Date.now() - 24 * 3600_000).toISOString()
+    const { count } = await supabase
+      .from("email_deferred_queue")
+      .select("id", { count: "exact", head: true })
+      .eq("status", "failed")
+      .gte("created_at", since)
+    failedRecent = count ?? 0
+    if (failedRecent > FAILED_ALERT_THRESHOLD) {
+      const { data: existing } = await supabase
+        .from("admin_signals")
+        .select("id")
+        .eq("signal_type", "email_queue_failures")
+        .is("resolved_at", null)
+        .gte("detected_at", since)
+        .limit(1)
+      if (!existing || existing.length === 0) {
+        await supabase.from("admin_signals").insert({
+          signal_type: "email_queue_failures",
+          severity: "critical",
+          entity_type: "cron_run",
+          entity_id: "00000000-0000-0000-0000-000000000000",
+          metadata: {
+            title: `File email differee, ${failedRecent} echecs sur 24h`,
+            failed_24h: failedRecent,
+            threshold: FAILED_ALERT_THRESHOLD,
+          },
+        })
+      }
+    }
+  } catch (alertErr) {
+    console.warn("failed-queue alert check failed", alertErr)
+  }
+
   return new Response(
-    JSON.stringify({ ok: true, processed: (due ?? []).length, sent, failed, redeferred }),
+    JSON.stringify({ ok: true, processed: (due ?? []).length, sent, failed, redeferred, failed_24h: failedRecent }),
     { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
   );
 });

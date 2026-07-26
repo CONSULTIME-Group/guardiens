@@ -28,8 +28,7 @@ const corsHeaders = {
 // Pure logic lives in _shared/email-cap.ts so it can be unit-tested.
 import {
   BYPASS_TEMPLATES,
-  CAP_PER_HOUR,
-  CAP_PER_DAY,
+  decideDeferral,
   isQuietAt,
   nextQuietEndFrom,
 } from '../_shared/email-cap.ts'
@@ -288,13 +287,18 @@ Deno.serve(async (req) => {
         (category === 'digest' && (prefRow as any).digest_emails) ||
         (category === 'alert' && (prefRow as any).alert_emails)
       if (!allowed) {
-        await supabase.from('email_send_log').insert({
+        const { error: logOptOutErr } = await supabase.from('email_send_log').insert({
           message_id: messageId,
           template_name: templateName,
           recipient_email: effectiveRecipient,
           status: 'unsubscribed_category',
           metadata: { idempotency_key: idempotencyKey, category },
         })
+        if (logOptOutErr) {
+          console.error('email_send_log insert failed (unsubscribed_category)', {
+            templateName, category, error: logOptOutErr.message, code: logOptOutErr.code,
+          })
+        }
         console.log('Email blocked by category preference', { effectiveRecipient, category, templateName })
         return new Response(
           JSON.stringify({ success: false, reason: 'unsubscribed_category', category }),
@@ -352,8 +356,12 @@ Deno.serve(async (req) => {
     const nowMs = Date.now()
     const oneHourAgo = new Date(nowMs - 3600_000).toISOString()
     const oneDayAgo = new Date(nowMs - 86400_000).toISOString()
+    const oneWeekAgo = new Date(nowMs - 7 * 86400_000).toISOString()
 
-    const [{ data: hourRows }, { data: dayRows }] = await Promise.all([
+    // Lot 6 : le plafond depend de la categorie. Les envois non transactionnels
+    // (product / digest / alert) sont comptes ensemble : 1 / 24h et 3 / 7 jours.
+    const NON_TX = ['product', 'digest', 'alert']
+    const [{ data: hourRows }, { data: dayRows }, { data: nonTxWeekRows }] = await Promise.all([
       supabase
         .from('email_send_log')
         .select('created_at')
@@ -368,26 +376,34 @@ Deno.serve(async (req) => {
         .eq('status', 'sent')
         .gte('created_at', oneDayAgo)
         .order('created_at', { ascending: true }),
+      supabase
+        .from('email_send_log')
+        .select('created_at')
+        .ilike('recipient_email', recipientLower)
+        .eq('status', 'sent')
+        .gte('created_at', oneWeekAgo)
+        .in('metadata->>category', NON_TX)
+        .order('created_at', { ascending: true }),
     ])
 
-    const hourCount = hourRows?.length ?? 0
-    const dayCount = dayRows?.length ?? 0
+    const toIso = (rows: Array<{ created_at: string }> | null) =>
+      (rows ?? []).map((r) => r.created_at as string)
+    const nonTxWeek = toIso(nonTxWeekRows as Array<{ created_at: string }> | null)
+    const nonTxDay = nonTxWeek.filter((t) => t >= oneDayAgo)
 
-    let deferReason: string | null = null
-    let scheduledFor: Date | null = null
+    const decision = decideDeferral({
+      now: new Date(nowMs),
+      templateName,
+      isUrgent,
+      category,
+      hourSentAt: toIso(hourRows as Array<{ created_at: string }> | null),
+      daySentAt: toIso(dayRows as Array<{ created_at: string }> | null),
+      nonTxDaySentAt: nonTxDay,
+      nonTxWeekSentAt: nonTxWeek,
+    })
 
-    if (isQuietNow()) {
-      deferReason = 'quiet_hours'
-      scheduledFor = nextQuietEnd()
-    } else if (dayCount >= CAP_PER_DAY) {
-      const oldest = dayRows![0].created_at as string
-      deferReason = 'frequency_cap_day'
-      scheduledFor = new Date(new Date(oldest).getTime() + 86400_000 + 30_000)
-    } else if (hourCount >= CAP_PER_HOUR) {
-      const oldest = hourRows![0].created_at as string
-      deferReason = 'frequency_cap_hour'
-      scheduledFor = new Date(new Date(oldest).getTime() + 3600_000 + 30_000)
-    }
+    const deferReason: string | null = decision.action === 'defer' ? decision.reason : null
+    const scheduledFor: Date | null = decision.action === 'defer' ? decision.scheduledFor : null
 
     if (deferReason && scheduledFor) {
       if (idempotencyKey && idempotencyKey !== messageId) {
@@ -431,13 +447,18 @@ Deno.serve(async (req) => {
       if (enqErr) {
         console.error('Failed to enqueue deferred email — falling open and sending', enqErr)
       } else {
-        await supabase.from('email_send_log').insert({
+        const { error: logDeferErr } = await supabase.from('email_send_log').insert({
           message_id: messageId,
           template_name: templateName,
           recipient_email: effectiveRecipient,
           status: 'deferred',
-          metadata: { idempotency_key: idempotencyKey, defer_reason: deferReason, scheduled_for: scheduledFor.toISOString() },
+          metadata: { idempotency_key: idempotencyKey, category, defer_reason: deferReason, scheduled_for: scheduledFor.toISOString() },
         })
+        if (logDeferErr) {
+          console.error('email_send_log insert failed (deferred)', {
+            templateName, deferReason, error: logDeferErr.message, code: logDeferErr.code,
+          })
+        }
         console.log('Email deferred', { templateName, recipientLower, deferReason, scheduledFor: scheduledFor.toISOString() })
         return new Response(
           JSON.stringify({ success: true, deferred: true, reason: deferReason, scheduled_for: scheduledFor.toISOString() }),
@@ -613,10 +634,11 @@ Deno.serve(async (req) => {
   }
   plainText = `${plainText}${footerText}`
 
-  // 4c. Engagement tracking — only for nurturing emails (idempotencyKey "journey-*").
-  // Adds a 1x1 open pixel and rewrites guardiens.fr links through the click tracker.
-  const isNurturing = typeof idempotencyKey === 'string' && idempotencyKey.startsWith('journey-')
-  if (isNurturing) {
+  // 4c. Engagement tracking — actif sur TOUS les envois (Lot 5, 26/07/2026).
+  // Auparavant conditionne a idempotencyKey "journey-*", ce qui laissait 0 open
+  // mesure sur l'immense majorite des envois.
+  // Ajoute un pixel 1x1 et reecrit les liens guardiens.fr via le click tracker.
+  {
     const trackBase = `${supabaseUrl}/functions/v1`
     const pixelUrl = `${trackBase}/track-email-pixel?mid=${messageId}`
     const pixelHtml = `<img src="${pixelUrl}" width="1" height="1" alt="" style="display:none;width:1px;height:1px;border:0;" />`
@@ -673,7 +695,7 @@ Deno.serve(async (req) => {
   // Log pending — on capture l'id pour faire évoluer CETTE ligne vers
   // 'sent' ou 'failed' (UPDATE), au lieu d'insérer une seconde ligne.
   // Fix double-logging (vague 45) : ~1 pending orphelin par envoi historiquement.
-  const { data: pendingRow } = await supabase
+  const { data: pendingRow, error: pendingErr } = await supabase
     .from('email_send_log')
     .insert({
       message_id: messageId,
@@ -684,6 +706,11 @@ Deno.serve(async (req) => {
     })
     .select('id')
     .single()
+  if (pendingErr) {
+    console.error('email_send_log insert failed (pending)', {
+      templateName, error: pendingErr.message, code: pendingErr.code,
+    })
+  }
   const pendingRowId: string | null = (pendingRow as { id?: string } | null)?.id ?? null
 
   // RFC 8058 List-Unsubscribe headers — Gmail/Apple Mail one-click unsubscribe.

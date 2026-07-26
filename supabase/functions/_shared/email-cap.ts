@@ -1,8 +1,15 @@
 // Pure helpers for email frequency cap & quiet hours.
 // Extracted from send-transactional-email so the behaviour can be unit-tested.
+//
+// Lot 6 (26/07/2026) : le plafond depend desormais de la CATEGORIE.
+//   - transactional         : 1 / heure et 3 / 24h (inchange)
+//   - product/digest/alert   : 1 / 24h et 3 / 7 jours, cumul toutes categories
+//                              non transactionnelles confondues.
 
 export const CAP_PER_HOUR = 1
 export const CAP_PER_DAY = 3
+export const CAP_NON_TX_PER_DAY = 1
+export const CAP_NON_TX_PER_WEEK = 3
 export const QUIET_START_HOUR = 22 // inclusive (Europe/Paris)
 export const QUIET_END_HOUR = 8 //   exclusive (Europe/Paris)
 
@@ -64,29 +71,47 @@ export function nextQuietEndFrom(now: Date = new Date()): Date {
 
 export type DeferDecision =
   | { action: 'send' }
-  | { action: 'defer'; reason: 'quiet_hours' | 'frequency_cap_day' | 'frequency_cap_hour'; scheduledFor: Date }
+  | {
+      action: 'defer'
+      reason:
+        | 'quiet_hours'
+        | 'frequency_cap_day'
+        | 'frequency_cap_hour'
+        | 'frequency_cap_category_day'
+        | 'frequency_cap_category_week'
+      scheduledFor: Date
+    }
 
 export interface DeferInput {
   now: Date
   templateName: string
   isUrgent?: boolean
+  /** Categorie de l'email. Absente = traitee comme transactionnelle (retro-compat). */
+  category?: 'transactional' | 'product' | 'digest' | 'alert'
   /** ISO timestamps of `sent` emails to this recipient in the last hour, ascending. */
   hourSentAt: string[]
   /** ISO timestamps of `sent` emails to this recipient in the last 24h, ascending. */
   daySentAt: string[]
+  /** ISO timestamps of `sent` NON transactional emails in the last 24h, ascending. */
+  nonTxDaySentAt?: string[]
+  /** ISO timestamps of `sent` NON transactional emails in the last 7 days, ascending. */
+  nonTxWeekSentAt?: string[]
 }
 
 /**
  * Pure decision: should this email be sent now, or deferred?
  * Order of precedence:
- *  1. Bypass templates / urgent → send.
- *  2. Quiet hours (22:00–08:00 Europe/Paris) → defer to next 08:00 Paris.
- *  3. Daily cap (>= 3 in 24h) → defer to oldest+24h+30s.
- *  4. Hourly cap (>= 1 in 1h) → defer to oldest+1h+30s.
- *  5. Otherwise → send.
+ *  1. Bypass templates / urgent -> send.
+ *  2. Quiet hours (22:00-08:00 Europe/Paris) -> defer to next 08:00 Paris.
+ *  3. Categorie non transactionnelle : 3 / 7 jours puis 1 / 24h.
+ *  4. Categorie transactionnelle : 3 / 24h puis 1 / heure.
+ *  5. Otherwise -> send.
  */
 export function decideDeferral(input: DeferInput): DeferDecision {
-  const { now, templateName, isUrgent, hourSentAt, daySentAt } = input
+  const {
+    now, templateName, isUrgent, category,
+    hourSentAt, daySentAt, nonTxDaySentAt = [], nonTxWeekSentAt = [],
+  } = input
 
   if (BYPASS_TEMPLATES.has(templateName) || isUrgent) {
     return { action: 'send' }
@@ -94,6 +119,27 @@ export function decideDeferral(input: DeferInput): DeferDecision {
 
   if (isQuietAt(now)) {
     return { action: 'defer', reason: 'quiet_hours', scheduledFor: nextQuietEndFrom(now) }
+  }
+
+  const isNonTx = category === 'product' || category === 'digest' || category === 'alert'
+
+  if (isNonTx) {
+    if (nonTxWeekSentAt.length >= CAP_NON_TX_PER_WEEK) {
+      const oldest = new Date(nonTxWeekSentAt[0])
+      return {
+        action: 'defer',
+        reason: 'frequency_cap_category_week',
+        scheduledFor: new Date(oldest.getTime() + 7 * 86400_000 + 30_000),
+      }
+    }
+    if (nonTxDaySentAt.length >= CAP_NON_TX_PER_DAY) {
+      const oldest = new Date(nonTxDaySentAt[0])
+      return {
+        action: 'defer',
+        reason: 'frequency_cap_category_day',
+        scheduledFor: new Date(oldest.getTime() + 86400_000 + 30_000),
+      }
+    }
   }
 
   if (daySentAt.length >= CAP_PER_DAY) {

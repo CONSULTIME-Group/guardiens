@@ -231,7 +231,7 @@ async function sendNudge(
         missionTitle: m.title,
         missionId: m.id,
       },
-      metadata: { mission_id: m.id, nudge_type: kind },
+      logMetadata: { mission_id: m.id, nudge_type: kind },
     }),
   });
   const _steTxt1 = _steRes.ok ? '' : await _steRes.text().catch(() => '');
@@ -324,7 +324,7 @@ async function sendResponseWaitingNudge(
         missionTitle: mission.title,
         missionId: mission.id,
       },
-      metadata: { mission_id: mission.id, response_id: responseId, nudge_type: 'response_waiting' },
+      logMetadata: { mission_id: mission.id, response_id: responseId, nudge_type: 'response_waiting' },
     }),
   });
   const _steTxt2 = _steRes2.ok ? '' : await _steRes2.text().catch(() => '');

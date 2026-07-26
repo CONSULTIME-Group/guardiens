@@ -4,17 +4,32 @@ Source de vérité : `supabase/functions/_shared/email-cap.ts` +
 `supabase/functions/send-transactional-email/index.ts` (étape 2b) +
 `supabase/functions/flush-deferred-emails/index.ts`.
 
-## 1. Limites globales
+## 1. Limites par catégorie
 
-| Limite | Valeur | Constante |
+Depuis le 26/07/2026 (lot 6), le plafond dépend de la **catégorie** de
+l'email (`_shared/email-categories.ts`).
+
+| Catégorie | Plafond | Constante |
 |---|---|---|
-| Plafond horaire par destinataire | 1 / heure | `CAP_PER_HOUR` |
-| Plafond journalier par destinataire | 3 / 24 h | `CAP_PER_DAY` |
+| `transactional` | 1 / heure et 3 / 24 h par destinataire | `CAP_PER_HOUR`, `CAP_PER_DAY` |
+| `product`, `digest`, `alert` (cumul) | 1 / 24 h et 3 / 7 jours par destinataire | `CAP_NON_TX_PER_DAY`, `CAP_NON_TX_PER_WEEK` |
+
+Le cumul non transactionnel est **inter-catégories** : un digest consomme le
+même quota qu'un email produit ou une alerte. Les plafonds transactionnels
+s'appliquent en plus, jamais à la place.
+
 | Quiet hours (Europe/Paris, DST géré) | 22h00 → 08h00 | `QUIET_START_HOUR` / `QUIET_END_HOUR` |
+|---|---|---|
 
 Le décompte se fait sur `email_send_log` filtré par
-`recipient_email ILIKE` + `status = 'sent'` sur les 1h / 24h glissantes.
-Un email `deferred` ne consomme pas le quota — seul un `sent` le fait.
+`recipient_email ILIKE` + `status = 'sent'` sur les fenêtres 1h / 24h / 7j
+glissantes. Le comptage non transactionnel filtre en plus sur
+`metadata->>category IN ('product','digest','alert')`.
+Un email `deferred` ne consomme pas le quota, seul un `sent` le fait.
+
+Pression maximale théorique par destinataire et par semaine :
+3 emails non transactionnels + le flux transactionnel réel (au plus 3 / jour,
+en pratique déclenché par les actions du membre).
 
 ## 2. Templates en bypass (cap + quiet hours ignorés)
 
@@ -59,12 +74,23 @@ finalisations critiques) — pas pour contourner le cap depuis l'UI.
 Pour les templates **non bypass** et **non urgent** :
 
 1. **Quiet hours** (22h–8h Paris) → `defer` au prochain 08h00 Paris.
-2. **Cap journalier** (≥ 3 envoyés sur 24 h) → `defer` à `oldest + 24h + 30s`.
-3. **Cap horaire** (≥ 1 envoyé sur 1 h) → `defer` à `oldest + 1h + 30s`.
-4. Sinon → `send`.
+2. Si catégorie non transactionnelle :
+   a. **3 envois non transactionnels sur 7 jours** → `defer` à `oldest + 7j + 30s`
+      (`frequency_cap_category_week`).
+   b. **1 envoi non transactionnel sur 24 h** → `defer` à `oldest + 24h + 30s`
+      (`frequency_cap_category_day`).
+3. **Cap journalier global** (≥ 3 envoyés sur 24 h) → `defer` à `oldest + 24h + 30s`.
+4. **Cap horaire global** (≥ 1 envoyé sur 1 h) → `defer` à `oldest + 1h + 30s`.
+5. Sinon → `send`.
 
 Le quiet hours prime toujours sur les caps : un email refusé pour cap
 pendant la nuit est reporté au matin (08h00), pas au prochain créneau cap.
+
+Statuts journalisés : un report écrit une ligne `email_send_log` en
+`deferred`, un blocage par désinscription de catégorie écrit
+`unsubscribed_category`. Ces deux statuts sont autorisés par la contrainte
+`email_send_log_status_check` depuis le lot 3 ; toute erreur d'insertion
+produit désormais un `console.error` explicite.
 
 ## 5. Interaction `idempotencyKey` ↔ file différée
 
@@ -129,6 +155,8 @@ d'origine. À ce moment :
   `decideDeferral`, `isQuietAt`, `nextQuietEndFrom` (DST inclus).
 - `supabase/functions/_shared/email-cap-burst-sim_test.ts` — 6 simulations
   bout-en-bout (pics, quiet hours, idempotence, flush sans doublon).
+- `src/__tests__/email-pressure-lots.test.ts` — plafond par catégorie,
+  bornes `max_age_days`, unicité du parcours actif, garde `logMetadata`.
 
 Toute modification de `BYPASS_TEMPLATES`, des constantes de cap, ou de la
 logique de `decideDeferral` **doit** mettre à jour ces tests.

@@ -163,7 +163,7 @@ Deno.serve(async (req) => {
             firstName: u.first_name || "",
             hours: u.hours_since_started,
           },
-          metadata: { user_id: u.profile_id, hours_since_started: u.hours_since_started },
+          logMetadata: { user_id: u.profile_id, hours_since_started: u.hours_since_started },
         }),
       });
       if (!resp.ok) {
