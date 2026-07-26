@@ -27,13 +27,6 @@ interface DormantSitter {
   profile_completion: number | null;
 }
 
-function escapeHtml(s: string): string {
-  return s
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;");
-}
 
 /** ISO week number (1-53). */
 function isoWeek(d: Date): { year: number; week: number } {
