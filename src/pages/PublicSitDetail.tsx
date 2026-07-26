@@ -20,6 +20,10 @@ import { trackEvent } from "@/lib/analytics";
 import { sanitizeUserTitle } from "@/lib/sanitizeTitle";
 import { logger } from "@/lib/logger";
 import { captureDigestAttribution } from "@/lib/digestAttribution";
+import { isSitRichEnough, isClosedSitStatus } from "@/lib/sitIndexability";
+import NearbySitsModule from "@/components/sits/NearbySitsModule";
+import { DEFAULT_OG_IMAGE } from "@/data/siteRoutes";
+
 
 import ApplicationModal from "@/components/sits/ApplicationModal";
 import { useSubscriptionAccess } from "@/hooks/useSubscriptionAccess";
