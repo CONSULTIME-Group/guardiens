@@ -9,22 +9,31 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 import { callLovableAI, extractToolArgs, STYLE_GUARDRAILS, CORS_HEADERS } from "../_shared/ai-gateway.ts";
 
-const PHONE_RE = /(?:(?:\+33|0033|0)\s?[1-9](?:[\s.\-]?\d{2}){4})/g;
-const EMAIL_RE = /[\w.+-]+@[\w-]+\.[\w.-]+/g;
-const URL_RE = /\bhttps?:\/\/\S+/gi;
-const FORBIDDEN_WORDS = /\b(voisin|voisine|voisins|voisinage)\b/gi;
+// Regex sans flag /g : .test() sur une regex globale fait avancer lastIndex,
+// ce qui rend la détection intermittente dans un isolate Deno réutilisé.
+const PHONE_RE = /(?:(?:\+33|0033|0)\s?[1-9](?:[\s.\-]?\d{2}){4})/;
+const EMAIL_RE = /[\w.+-]+@[\w-]+\.[\w.-]+/;
+const URL_RE = /\bhttps?:\/\/\S+/i;
+const FORBIDDEN_WORDS = /\b(voisin|voisine|voisins|voisinage)\b/i;
 
 type Reason = string;
 
-function heuristics(text: string): { reasons: Reason[]; block: boolean } {
+// Doctrine produit : l'échange de coordonnées est AUTORISÉ en messagerie privée
+// (le propriétaire doit pouvoir joindre son gardien). Il reste interdit dans les
+// annonces, qui sont des pages publiques indexées.
+function heuristics(text: string, contentType: string): { reasons: Reason[]; block: boolean } {
   const reasons: Reason[] = [];
   let block = false;
-  if (PHONE_RE.test(text)) { reasons.push("Numéro de téléphone détecté"); block = true; }
-  if (EMAIL_RE.test(text)) { reasons.push("Adresse email détectée"); block = true; }
+  const isPublicListing = contentType === "sit";
+  if (isPublicListing) {
+    if (PHONE_RE.test(text)) { reasons.push("Numéro de téléphone détecté"); block = true; }
+    if (EMAIL_RE.test(text)) { reasons.push("Adresse email détectée"); block = true; }
+  }
   if (URL_RE.test(text)) { reasons.push("Lien externe détecté"); }
   if (FORBIDDEN_WORDS.test(text)) { reasons.push("Vocabulaire à éviter : « voisin »"); }
   return { reasons, block };
 }
+
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: CORS_HEADERS });
@@ -59,7 +68,7 @@ Deno.serve(async (req) => {
     }
 
     // 1) Heuristiques
-    const h = heuristics(text);
+    const h = heuristics(text, ct);
 
     // 2) LLM (skip si texte très court)
     let llmReasons: string[] = [];
@@ -67,17 +76,27 @@ Deno.serve(async (req) => {
     let suggestion: string | undefined;
 
     if (text.length >= 30) {
+      const isPublicListing = ct === "sit";
+      const rules = isPublicListing
+        ? `- status :
+  * "block" si propos haineux/discriminatoires, contenu sexuel, arnaque évidente, tentative explicite de paiement direct hors plateforme, coordonnées personnelles en clair (téléphone, email) : cette annonce est une page publique indexée.
+  * "warning" si ton trop commercial, vocabulaire à éviter, faute grave de ton.
+  * "ok" sinon.`
+        : `Contexte : il s'agit d'un message privé entre deux membres. L'échange de coordonnées personnelles (téléphone, email, réseaux, prise de contact directe) est AUTORISÉ et normal : ne le signalez jamais, ne le considérez jamais comme une sortie de plateforme.
+- status :
+  * "block" uniquement si propos haineux/discriminatoires, contenu sexuel, arnaque évidente, ou proposition explicite de transaction financière directe entre membres (paiement, virement, espèces).
+  * "warning" si propos agressifs ou vocabulaire à éviter.
+  * "ok" sinon. Donner ou demander un numéro de téléphone ou un email est toujours "ok".`;
+
       const system = `Vous êtes modérateur d'une plateforme française de garde de maison et d'animaux entre particuliers.
 
 ${STYLE_GUARDRAILS}
 
 Évaluez le texte suivant et renvoyez :
-- status :
-  * "block" si propos haineux/discriminatoires, contenu sexuel, arnaque évidente, tentative explicite de paiement direct hors plateforme.
-  * "warning" si ton trop commercial, vocabulaire à éviter, incitation indirecte au hors-plateforme, faute grave de ton.
-  * "ok" sinon.
+${rules}
 - reasons : liste courte et concrète (max 3).
 - suggestion : si warning, une reformulation brève en vouvoiement. Sinon laissez vide.`;
+
 
       const r = await callLovableAI({
         messages: [

@@ -15,6 +15,7 @@ import ConversationHeader from "@/components/messages/ConversationHeader";
 import DaySeparator from "@/components/messages/DaySeparator";
 import MessageBubble from "@/components/messages/MessageBubble";
 import MessageComposer from "@/components/messages/MessageComposer";
+import ContactSharingNotice from "@/components/messages/ContactSharingNotice";
 import MessagesListSkeleton from "@/components/messages/MessagesListSkeleton";
 import { useToast } from "@/hooks/use-toast";
 import { useSubscriptionAccess } from "@/hooks/useSubscriptionAccess";
@@ -406,14 +407,14 @@ const Messages = () => {
     if (!user || !activeConv || !newMessage.trim()) return;
     setSending(true);
     const trimmed = newMessage.trim();
-    // Modération pré-envoi : seulement pour messages > 30 car. pour limiter le coût.
-    if (trimmed.length >= 30) {
+    // Modération pré-envoi sur tous les messages (la passe LLM est arbitrée côté edge function).
+    {
       const verdict = await moderateContent("message", trimmed);
       if (verdict.status === "block") {
         toast({
           variant: "destructive",
           title: "Message bloqué",
-          description: verdict.reasons.join(" · ") || "Retirez les coordonnées ou contenus contraires aux CGS.",
+          description: verdict.reasons.join(" · ") || "Ce message n'a pas pu être envoyé. Reformulez-le, ou écrivez-nous si le problème persiste.",
         });
         setSending(false);
         return;
@@ -422,6 +423,7 @@ const Messages = () => {
         toast({ title: "Conseil", description: verdict.suggestion });
       }
     }
+
     await supabase.from("messages").insert({ conversation_id: activeConv.id, sender_id: user.id, content: trimmed });
     // last_message_at + first_message_sent gérés automatiquement par trigger DB
     try { await trackFirstAction("message_sent", { conversation_id: activeConv.id }); } catch {}
@@ -744,6 +746,8 @@ const Messages = () => {
             aria-relevant="additions"
             aria-label="Historique des messages"
           >
+            <ContactSharingNotice conversationId={activeConv.id} />
+
             {(activeConv.sit?.status === "confirmed" || activeConv.sit?.status === "in_progress") && activeConv.sit?.property_id && (
               <HouseGuideBlock
                 propertyId={activeConv.sit.property_id}

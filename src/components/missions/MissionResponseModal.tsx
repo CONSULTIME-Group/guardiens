@@ -84,10 +84,24 @@ const MissionResponseModal = ({
 
   const handleSubmit = async () => {
     if (!valid || submitting) return;
+    // Modération pré-envoi (content_type "message") : coordonnées autorisées,
+    // seule une proposition de paiement direct est interceptée.
+    const { moderateContent } = await import("@/lib/moderation");
+    const { toast } = await import("@/hooks/use-toast");
+    const verdict = await moderateContent("message", trimmed);
+    if (verdict.status === "block") {
+      toast({
+        title: "Message bloqué",
+        description: verdict.reasons.join(" · ") || "Ce message n'a pas pu être envoyé. Reformulez-le, ou écrivez-nous si le problème persiste.",
+        variant: "destructive",
+      });
+      return;
+    }
     await onSubmit(message, pickedTemplate);
     setMessage("");
     setPickedTemplate(null);
   };
+
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
