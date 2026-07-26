@@ -11,6 +11,7 @@
  */
 
 import { createClient } from 'npm:@supabase/supabase-js@2'
+import { recordDeliveryFailure } from '../_shared/delivery-failure.ts'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -131,9 +132,20 @@ Deno.serve(async (req) => {
   const sendErr = _steRes.ok ? null : new Error(`send-transactional-email ${_steRes.status}: ${_steTxt1}`);
 
   if (sendErr) {
-    // Best-effort: la notification en base est déjà créée par la RPC.
-    // On journalise mais on renvoie 200 pour ne pas polluer les moniteurs réseau côté client.
     console.error('send_failed', { err: sendErr.message, mission_id: payload.mission_id, helper_id: payload.helper_id })
+    await recordDeliveryFailure(supabase, {
+      templateName: 'mission-invitation',
+      recipientEmail: helper.email,
+      recipientId: payload.helper_id,
+      entityType: 'small_mission',
+      entityId: payload.mission_id,
+      source: 'notify-mission-invitation',
+      errorMessage: sendErr.message,
+    })
+    // 200 assume : la notification en base est deja creee par la RPC et le
+    // client ne doit pas voir une erreur reseau. Acceptable UNIQUEMENT grace a
+    // la trace persistante ci-dessus (email_send_log failed + admin_signals).
+    // Ne supprimez pas recordDeliveryFailure.
     return new Response(JSON.stringify({ ok: false, warning: 'send_failed' }), {
       status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     })
