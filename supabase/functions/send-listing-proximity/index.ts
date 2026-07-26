@@ -438,12 +438,21 @@ Deno.serve(async (req) => {
     // Idempotence stable par (campagne, destinataire) : un rejeu de la même
     // campagne ne double pas les envois, mais un nouveau broadcast admin
     // (nouvelle mass_emails.id) permet un renvoi légitime.
-    const CONCURRENCY = 8;
+    // Resend limite a environ 2 requetes par seconde. On envoie donc par
+    // paquets de 2 avec une pause d'une seconde, et on retente une fois les
+    // envois rejetes pour depassement de quota.
+    const CONCURRENCY = 2;
+    const BATCH_PAUSE_MS = 1100;
+    const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+    const isRateLimited = (msg?: string) =>
+      !!msg && (/rate limit/i.test(msg) || /\b429\b/.test(msg));
     type Outcome = "sent" | "excluded" | "error";
     for (let i = 0; i < recipients.length; i += CONCURRENCY) {
+      if (i > 0) await sleep(BATCH_PAUSE_MS);
       const slice = recipients.slice(i, i + CONCURRENCY);
       const results = await Promise.all(slice.map(async (r): Promise<{ outcome: Outcome; err?: string }> => {
         const idem = `listing-proximity-${campaignId}-${r.user_id}`;
+        const attempt = async (): Promise<{ outcome: Outcome; err?: string }> => {
         try {
           const _steRes = await fetch(`${Deno.env.get('SUPABASE_URL')}/functions/v1/send-transactional-email`, {
             method: 'POST',
