@@ -597,6 +597,24 @@ const PublicSitDetail = () => {
 
       {!isAuthenticated && <PublicHeader />}
 
+      {/* Bandeau statut : garde pourvue ou annonce terminée */}
+      {isClosedSit && (
+        <>
+          <div className="bg-muted/60 border-b border-border">
+            <div className="max-w-6xl mx-auto px-4 py-3">
+              <p className="text-sm text-foreground">
+                {sit.status === "confirmed"
+                  ? "Cette garde a trouvé son gardien."
+                  : "Cette annonce est terminée."}
+              </p>
+            </div>
+          </div>
+          <NearbySitsModule city={sitCity} excludeId={sit.id} />
+        </>
+      )}
+
+
+
       {/* Bandeau "aperçu public", propriétaire de l'annonce */}
       {viewerType === "owner_of_sit" && (
         <div className="bg-primary/5 border-b border-primary/15">
