@@ -4,6 +4,7 @@
 // - mission_help / owner_pitch : aucune relance
 // 1 relance max par conversation (champ reminder_sent_at).
 
+import { recordDeliveryFailure } from "../_shared/delivery-failure.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 
 const corsHeaders = {
@@ -132,6 +133,16 @@ Deno.serve(async (req) => {
 
       if (emailErr) {
         console.error("reminder email failed", conv.id, emailErr);
+        await recordDeliveryFailure(supabase, {
+          templateName: "new-message",
+          recipientEmail: recipient.email,
+          recipientId,
+          conversationId: conv.id,
+          entityType: "conversation",
+          entityId: conv.id,
+          source: "send-message-reminders",
+          errorMessage: String(emailErr),
+        });
         stats.errors++;
         continue;
       }

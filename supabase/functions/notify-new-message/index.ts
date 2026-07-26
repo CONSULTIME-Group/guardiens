@@ -10,6 +10,7 @@
  */
 
 import { createClient } from 'npm:@supabase/supabase-js@2'
+import { recordDeliveryFailure } from '../_shared/delivery-failure.ts'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -230,9 +231,24 @@ Deno.serve(async (req) => {
   const sendErr = _steRes.ok ? null : new Error(`send-transactional-email ${_steRes.status}: ${_steTxt1}`);
 
   if (sendErr) {
-    // On journalise, mais on renvoie 200 : l'echec d'une notification email ne
-    // doit pas faire echouer le declencheur cote base ni polluer les erreurs.
     console.error('send_failed', { err: sendErr.message })
+    await recordDeliveryFailure(supabase, {
+      templateName: 'new-message',
+      recipientEmail: recipientProfile.email,
+      recipientId,
+      conversationId: conv.id,
+      entityType: 'conversation',
+      entityId: conv.id,
+      source: 'notify-new-message',
+      errorMessage: sendErr.message,
+      extra: { message_id: payload.message_id },
+    })
+    // 200 assume : l'appelant est un trigger DB, le faire echouer bloquerait
+    // l'insertion du message. Ce 200 n'est acceptable QUE parce que l'echec
+    // laisse une trace persistante (email_send_log statut failed +
+    // admin_signals notification_delivery_failed). Ne retirez pas l'appel a
+    // recordDeliveryFailure ci-dessus en croyant simplifier : sans lui, la
+    // panne redevient totalement silencieuse.
     return new Response(JSON.stringify({ success: false, error: 'send_failed' }), {
       status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     })
