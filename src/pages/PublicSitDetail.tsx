@@ -395,9 +395,12 @@ const PublicSitDetail = () => {
   const cityForTitle = (sitCity && ownerCountry && ownerCountry !== "FR")
     ? `${sitCity} (${ownerCountry})`
     : (sitCity || "France");
- const startFmt = sit.start_date ? format(new Date(sit.start_date), "d MMMM", { locale: fr }) : "";
- const endFmt = sit.end_date ? format(new Date(sit.end_date), "d MMMM yyyy", { locale: fr }) : "";
- const datesShort = startFmt && endFmt ? `du ${startFmt} au ${endFmt}` : "dates flexibles";
+ const startFmt = hideDates || !sit.start_date ? "" : format(new Date(sit.start_date), "d MMMM", { locale: fr });
+ const endFmt = hideDates || !sit.end_date ? "" : format(new Date(sit.end_date), "d MMMM yyyy", { locale: fr });
+ const datesShort = startFmt && endFmt
+   ? `du ${startFmt} au ${endFmt}`
+   : (hideDates ? (sit.status === "confirmed" ? "période pourvue" : "garde passée") : "dates flexibles");
+
 
  const petsSummary = pets.length > 0
  ? pets.map((p: any) => `${p.name} (${speciesLabel[p.species] || p.species})`).join(", ")
