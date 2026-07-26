@@ -19,6 +19,7 @@
  */
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+import { sanitizeBioForPublic } from "../_shared/sanitize-bio.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -115,7 +116,7 @@ Deno.serve(async (req) => {
   const firstName = capitalize(profile.first_name || "");
   const role = profile.role as "sitter" | "owner" | "both" | undefined;
   const city = profile.city || "";
-  const bio = (sitter?.motivation || profile.bio || "").slice(0, 200);
+  const bio = sanitizeBioForPublic(sitter?.motivation || profile.bio || "").slice(0, 200);
   const pageUrl = `${SITE_ORIGIN}/gardiens/${id}`;
   const avatarUrl = profile.avatar_url || undefined;
   const isSitter = role === "sitter" || role === "both";
