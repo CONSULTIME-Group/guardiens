@@ -903,7 +903,9 @@ const Messages = () => {
               onPickPhoto={async (file) => {
                 if (!user || !activeConv) return;
                 const ext = file.name.split(".").pop();
-                const path = `messages/${activeConv.id}/${Date.now()}.${ext}`;
+                // Le premier segment DOIT etre l'identifiant utilisateur :
+                // les regles de securite du stockage l'exigent.
+                const path = `${user.id}/messages/${activeConv.id}/${Date.now()}.${ext}`;
                 const { error } = await supabase.storage.from("property-photos").upload(path, file);
                 if (error) return;
                 const { data: urlData } = supabase.storage.from("property-photos").getPublicUrl(path);
