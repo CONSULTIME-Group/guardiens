@@ -27,10 +27,8 @@ Deno.serve(async (req) => {
     const authHeader = req.headers.get('Authorization') ?? ''
     const callerToken = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : ''
     const isServiceRole = !!callerToken && callerToken === serviceKey
-    const bootstrap = Deno.env.get('ADMIN_TRACKING_BOOTSTRAP')
-    const bootstrapOk = !!bootstrap && req.headers.get('X-Admin-Bootstrap') === bootstrap
 
-    if (!isServiceRole && !bootstrapOk) {
+    if (!isServiceRole) {
       if (!callerToken) return json({ error: 'Unauthorized' }, 401)
       const { data: userData } = await supabase.auth.getUser(callerToken)
       if (!userData?.user) return json({ error: 'Unauthorized' }, 401)
