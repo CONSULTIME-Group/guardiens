@@ -441,7 +441,11 @@ const PublicSitDetail = () => {
  // og:image, visuel personnalisé généré à la volée (photo de couverture réelle
  // de l'annonce + titre + ville + dates + animaux + propriétaire). Servi par
  // l'edge function `og-sit` (1200×630, optimisé Facebook/LinkedIn/WhatsApp/X).
- const ogImageUrl = `https://erhccyqevdyevpyctsjj.supabase.co/functions/v1/og-sit?id=${sit.id}&v=cover-only-20260522`;
+ // Sur une garde pourvue ou terminée, l'image dynamique porterait les dates :
+ // on retombe sur le visuel générique.
+ const ogImageUrl = hideDates
+   ? DEFAULT_OG_IMAGE
+   : `https://erhccyqevdyevpyctsjj.supabase.co/functions/v1/og-sit?id=${sit.id}&v=cover-only-20260522`;
  const ogImageAlt = `${sit.title || "Annonce de garde"}, ${cityForTitle}, ${datesShort}`;
 
   const MetaReady = () => {
@@ -480,9 +484,10 @@ const PublicSitDetail = () => {
  priceCurrency: "EUR",
  eligibleCustomerType: "Owner",
   description: "Gratuit pour les propriétaires, sans abonnement requis.",
- availability: "https://schema.org/InStock",
- ...(sit.start_date && { validFrom: sit.start_date }),
- ...(sit.end_date && { validThrough: sit.end_date }),
+ availability: hideDates ? "https://schema.org/SoldOut" : "https://schema.org/InStock",
+ // Aucune date exposée sur une garde pourvue ou terminée.
+ ...(!hideDates && sit.start_date && { validFrom: sit.start_date }),
+ ...(!hideDates && sit.end_date && { validThrough: sit.end_date }),
  },
  ...(owner?.completed_sits_count && owner.completed_sits_count > 0 && {
    interactionStatistic: {
@@ -495,22 +500,12 @@ const PublicSitDetail = () => {
  };
 
 
-  // Critère d'indexation (qualité minimum pour éviter le thin content) :
-   // - ≥3 photos dont au moins 2 en haute résolution (≥800×600px)
-   // - ≥200 caractères de texte substantiel (description + routine)
-   // - titre personnalisé (≥10 caractères)
-   // - au moins 1 animal renseigné
-   // - bio propriétaire ≥50 caractères (signal de profil complet)
-   // Tolérance : si aucune photo n'a ses dimensions stockées (anciennes annonces),
-   // on garde le filtre simple par nombre de photos.
-   const galleryCount = property?.photos?.length || 0;
-   const hiQualityCount: number = (property as any)?._hiQualityCount ?? 0;
-   const photosOk = galleryCount >= 3 && (hiQualityCount === 0 || hiQualityCount >= 2);
-   const richTextLength = (property?.description || "").length + (sit.daily_routine || "").length;
-   const hasCustomTitle = typeof sit.title === "string" && sit.title.trim().length >= 10;
-   const hasPets = pets.length > 0;
-   const hasOwnerBio = (owner?.bio || "").trim().length >= 50;
-   const isIndexable = photosOk && richTextLength >= 200 && hasCustomTitle && hasPets && hasOwnerBio;
+  // Critère d'indexation : règle de richesse partagée avec
+  // scripts/generate-sitemap.mjs (src/lib/sitIndexability.js), pour que les
+  // deux implémentations ne puissent plus diverger. Une garde pourvue ou
+  // terminée n'est jamais indexable (sécurité : dates d'absence du foyer).
+  const isIndexable = !isClosedSit && isSitRichEnough(sit);
+
 
  const citySlug = (cityForTitle || "")
  .toLowerCase()
