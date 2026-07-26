@@ -173,7 +173,7 @@ const NearbyDailyDigestEmail = ({ firstName, radiusKm = 15, city, items = [] }: 
             autour de chez vous. Vous pouvez à tout moment ajuster la fréquence,
             le rayon (5, 15 ou 30 km) ou désactiver cet email depuis vos
             {' '}
-            <Link style={link} href={`${SITE_URL}/preferences-email`}>
+            <Link style={link} href={`${SITE_URL}/email-preferences`}>
               préférences email
             </Link>.
           </Text>
