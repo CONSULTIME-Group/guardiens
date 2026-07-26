@@ -27,6 +27,7 @@ import FavoriteButton from "@/components/shared/FavoriteButton";
 import AffinityRing from "@/components/matching/AffinityRing";
 import type { AffinityResult } from "@/lib/affinityScore";
 import { useAuth } from "@/contexts/AuthContext";
+import { sanitizeBioForCard } from "@/lib/sanitizeBio";
 
 interface SitterResultCardProps {
   sitter: any;
@@ -109,7 +110,7 @@ const SitterResultCard = ({
   const metaChunks = [reply, ratingChunk].filter(Boolean) as string[];
 
   // Accroche Playfair : première phrase de bio courte, sinon rien.
-  const quote = firstSentenceUnder(profile?.bio, 120);
+  const quote = firstSentenceUnder(sanitizeBioForCard(profile?.bio), 120);
 
   // Affinité affichable : owner connecté + score non masqué.
   const showAffinityRing = !isAnon && !!affinity && affinity.displayed !== false;

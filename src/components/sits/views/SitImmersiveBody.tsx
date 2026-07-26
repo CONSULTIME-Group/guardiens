@@ -20,6 +20,7 @@ import TabLogement from "./tabs/TabLogement";
 import TabAttentes from "./tabs/TabAttentes";
 import SitSidebar from "./tabs/SitSidebar";
 import { speciesLabel } from "./tabs/sitMeta";
+import { sanitizeBioForPublic } from "@/lib/sanitizeBio";
 
 const GUIDE_SLUGS = new Set(CITIES.map((c) => c.slug));
 
@@ -99,7 +100,7 @@ const SitImmersiveBody = ({
   const propertyDescription =
     typeof property?.description === "string" ? property.description.trim() : "";
 
-  const ownerBio = (owner?.bio || ownerProfile?.welcome_notes || "").toString().trim();
+  const ownerBio = sanitizeBioForPublic((owner?.bio || ownerProfile?.welcome_notes || "").toString().trim());
   const hasOwnerCard = Boolean(owner && (ownerName || cityName || ownerBio));
 
   const { data: dbGuide } = useQuery({
