@@ -80,7 +80,17 @@ Deno.serve(async (req) => {
 
   const breaches: Breach[] = []
   if (bounce_rate > t.bounce_pct_max) breaches.push({ metric: 'bounce', value: bounce_rate, threshold: t.bounce_pct_max })
-  if (sent > t.min_sends && open_rate < t.open_pct_min) breaches.push({ metric: 'open', value: open_rate, threshold: t.open_pct_min, detail: `${sent} envois` })
+  // Lot 5 : tant que l'instrumentation d'ouverture ne remonte pas un volume
+  // minimum d'evenements, le taux mesure est faux (0 %) et l'alerte doit se
+  // taire sur ce critere plutot que crier chaque matin.
+  const MIN_OPEN_EVENTS = 20
+  const openMeasurable = opened >= MIN_OPEN_EVENTS
+  if (openMeasurable && sent > t.min_sends && open_rate < t.open_pct_min) {
+    breaches.push({ metric: 'open', value: open_rate, threshold: t.open_pct_min, detail: `${sent} envois` })
+  }
+  if (!openMeasurable) {
+    console.warn('[email-delivery-daily] open criterion skipped, instrumentation volume too low', { opened, min: MIN_OPEN_EVENTS })
+  }
   if (complaint_rate > t.complaint_pct_max) breaches.push({ metric: 'complaint', value: complaint_rate, threshold: t.complaint_pct_max })
 
   const per_template = Array.from(perTpl.entries()).map(([k, v]) => ({ template: k, ...v }))

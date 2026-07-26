@@ -110,7 +110,6 @@ Deno.serve(async (req) => {
       .from("email_send_log")
       .select("id, open_count, click_count, first_opened_at, first_clicked_at")
       .eq("resend_id", emailId)
-      .eq("status", "sent")
       .order("created_at", { ascending: false })
       .limit(1)
       .maybeSingle();
