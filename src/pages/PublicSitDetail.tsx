@@ -197,10 +197,12 @@ const PublicSitDetail = () => {
 
         if (user) {
           try {
-            const { data: appRows } = await supabase.from("applications").select("id").eq("sit_id", id!).eq("sitter_id", user.id).limit(1);
+            const { data: appRows } = await supabase.from("applications").select("id, status").eq("sit_id", id!).eq("sitter_id", user.id).limit(1);
             if (appRows?.[0]) setHasApplied(true);
+            if (appRows?.[0]?.status === "accepted") setIsAcceptedSitter(true);
           } catch (e) { logger.warn("[PublicSitDetail] applications check failed", { error: (e as any)?.message }); }
         }
+
 
         let resolvedViewer: ViewerType = "anonymous";
         if (user) {
