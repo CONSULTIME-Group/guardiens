@@ -194,7 +194,7 @@ Deno.serve(async (req) => {
   //    (WHERE status='sent' AND metadata->>conversation_id = ...) continue
   //    à fonctionner sans avoir besoin d'une seconde ligne dédiée
   //    (fix double-logging vague 45).
-  const _steRes = await fetch(`${Deno.env.get('SUPABASE_URL')}/functions/v1/send-transactional-email`, {
+  const callSender = () => fetch(`${Deno.env.get('SUPABASE_URL')}/functions/v1/send-transactional-email`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')}` },
     body: JSON.stringify({
@@ -218,14 +218,23 @@ Deno.serve(async (req) => {
       },
     }),
   });
+  // Une retentative apres une seconde couvre les 429 (quota fournisseur) et
+  // les 5xx transitoires du runtime. L'idempotencyKey empeche tout doublon.
+  let _steRes = await callSender()
+  if (!_steRes.ok && (_steRes.status === 429 || _steRes.status >= 500)) {
+    await new Promise((r) => setTimeout(r, 1000))
+    _steRes = await callSender()
+  }
   const _steTxt1 = _steRes.ok ? '' : await _steRes.text().catch(() => '');
   if (!_steRes.ok) console.error('send-transactional-email failed', _steRes.status, _steTxt1);
   const sendErr = _steRes.ok ? null : new Error(`send-transactional-email ${_steRes.status}: ${_steTxt1}`);
 
   if (sendErr) {
+    // On journalise, mais on renvoie 200 : l'echec d'une notification email ne
+    // doit pas faire echouer le declencheur cote base ni polluer les erreurs.
     console.error('send_failed', { err: sendErr.message })
-    return new Response(JSON.stringify({ error: 'send_failed' }), {
-      status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    return new Response(JSON.stringify({ success: false, error: 'send_failed' }), {
+      status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     })
   }
 
