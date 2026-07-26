@@ -195,9 +195,18 @@ const Settings = () => {
       .from("notification_preferences")
       .upsert({ user_id: user.id, ...newPrefs, updated_at: new Date().toISOString() }, { onConflict: "user_id" });
     // Miroir vers la source de verite unique utilisee par la chaine d'envoi.
-    await supabase.rpc("patch_my_email_preferences" as any, {
-      p_product_emails: Boolean(newPrefs.email_sitter_suggestions || newPrefs.email_review_prompts),
-    } as any);
+    // On ne reecrit product_emails QUE si l'utilisateur a touche l'un des deux
+    // reglages concernes. Sinon on preserve la valeur existante (une
+    // desinscription faite depuis un email ne doit jamais etre annulee par le
+    // basculement d'un reglage sans rapport).
+    const touchesProduct =
+      Object.prototype.hasOwnProperty.call(updated, "email_sitter_suggestions") ||
+      Object.prototype.hasOwnProperty.call(updated, "email_review_prompts");
+    if (touchesProduct) {
+      await supabase.rpc("patch_my_email_preferences" as any, {
+        p_product_emails: Boolean(newPrefs.email_sitter_suggestions || newPrefs.email_review_prompts),
+      } as any);
+    }
     setSavingKey(null);
     if (error) toast.error("Erreur lors de la sauvegarde");
   };
