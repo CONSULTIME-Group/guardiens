@@ -303,13 +303,31 @@ Deno.serve(async (req) => {
           { apiKey, sendUrl: Deno.env.get('LOVABLE_SEND_URL') }
         )
 
-        // Log success
-        await supabase.from('email_send_log').insert({
-          message_id: payload.message_id,
-          template_name: payload.label || queue,
-          recipient_email: payload.to,
-          status: 'sent',
-        })
+        // Log success — Lot 4 : on fait EVOLUER la ligne 'pending' creee par
+        // auth-email-hook au lieu d'inserer un jumeau (double journalisation).
+        const { data: pendingRow } = await supabase
+          .from('email_send_log')
+          .select('id')
+          .eq('message_id', payload.message_id)
+          .eq('status', 'pending')
+          .order('created_at', { ascending: false })
+          .limit(1)
+          .maybeSingle()
+        if (pendingRow?.id) {
+          const { error: upErr } = await supabase
+            .from('email_send_log')
+            .update({ status: 'sent' })
+            .eq('id', pendingRow.id)
+          if (upErr) console.error('email_send_log update failed (pending -> sent)', upErr)
+        } else {
+          const { error: insErr } = await supabase.from('email_send_log').insert({
+            message_id: payload.message_id,
+            template_name: payload.label || queue,
+            recipient_email: payload.to,
+            status: 'sent',
+          })
+          if (insErr) console.error('email_send_log insert failed (sent)', insErr)
+        }
 
         // Delete from queue
         const { error: delError } = await supabase.rpc('delete_email', {
