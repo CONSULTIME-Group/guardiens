@@ -142,7 +142,11 @@ const ArticleEditor = () => {
     const file = e.target.files?.[0];
     if (!file) return;
     const ext = file.name.split(".").pop();
-    const path = `articles/${Date.now()}.${ext}`;
+    const { data: authData } = await supabase.auth.getUser();
+    const uid = authData?.user?.id;
+    if (!uid) { toast.error("Session expirée"); return; }
+    // Le premier segment DOIT etre l'identifiant utilisateur (regles de securite du stockage).
+    const path = `${uid}/articles/${Date.now()}.${ext}`;
     const { error } = await supabase.storage.from("property-photos").upload(path, file);
     if (error) { toast.error("Erreur upload"); return; }
     const { data: urlData } = supabase.storage.from("property-photos").getPublicUrl(path);
