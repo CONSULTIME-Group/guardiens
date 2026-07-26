@@ -11,6 +11,8 @@ import { createClient } from "@supabase/supabase-js";
 import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
+import { sitRichnessRejectionReason } from "../src/lib/sitIndexability.js";
+
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const CACHE_PATH = path.resolve(__dirname, "../.sitemap-cache.json");
@@ -282,22 +284,36 @@ async function main() {
       }))
     ),
     // Annonces individuelles `/annonces/:id` — filtre qualité aligné avec
-    // l'indexabilité côté client (PublicSitDetail) : statut publié, candidatures
-    // ouvertes, titre ≥10 car, description riche.
+    // l'indexabilité côté client (PublicSitDetail) via la règle partagée
+    // src/lib/sitIndexability.js : statut publié, candidatures ouvertes,
+    // titre ≥10 caractères, cumul de contenu rédigé ≥200 caractères.
     fetchOrCache(
       "public_sits", cache,
       () => maxUpdatedAt("sits", "updated_at", q => q.eq("status", "published").eq("accepting_applications", true)),
-      async () => (await supabase.from("sits").select("id, slug, title, updated_at, created_at, daily_routine").eq("status", "published").eq("accepting_applications", true).limit(2000)).data,
-      rows => rows
-        .filter(s => typeof s.title === "string" && s.title.trim().length >= 10)
-        .filter(s => ((s.daily_routine || "").length) >= 100)
-        .map(s => ({
+      async () => (await supabase.from("sits").select("id, slug, title, updated_at, created_at, owner_message, daily_routine, specific_expectations").eq("status", "published").eq("accepting_applications", true).limit(2000)).data,
+      rows => {
+        const rejected = { titre_trop_court: 0, contenu_insuffisant: 0 };
+        const kept = rows.filter(s => {
+          const reason = sitRichnessRejectionReason(s);
+          if (reason) { rejected[reason] += 1; return false; }
+          return true;
+        });
+        console.log(
+          `[sitemap] annonces : ${kept.length} retenues sur ${rows.length} · recalées : ` +
+          `titre trop court ${rejected.titre_trop_court}, contenu insuffisant ${rejected.contenu_insuffisant}`
+        );
+        if (kept.length === 0 && rows.length > 0) {
+          console.warn("[sitemap] ATTENTION : aucune annonce retenue alors que des annonces publiées existent.");
+        }
+        return kept.map(s => ({
           loc: `/annonces/${s.slug || s.id}`,
           lastmod: (s.updated_at || s.created_at || today).split("T")[0],
           changefreq: "weekly",
           priority: "0.7",
-        }))
+        }));
+      }
     ),
+
     // Fiches pros animaliers approuvées : /pros/:slug
     fetchOrCache(
       "pro_profiles", cache,

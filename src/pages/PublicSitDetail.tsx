@@ -20,6 +20,10 @@ import { trackEvent } from "@/lib/analytics";
 import { sanitizeUserTitle } from "@/lib/sanitizeTitle";
 import { logger } from "@/lib/logger";
 import { captureDigestAttribution } from "@/lib/digestAttribution";
+import { isSitRichEnough, isClosedSitStatus } from "@/lib/sitIndexability";
+import NearbySitsModule from "@/components/sits/NearbySitsModule";
+import { DEFAULT_OG_IMAGE } from "@/data/siteRoutes";
+
 
 import ApplicationModal from "@/components/sits/ApplicationModal";
 import { useSubscriptionAccess } from "@/hooks/useSubscriptionAccess";
@@ -54,6 +58,8 @@ const PublicSitDetail = () => {
   const [loadError, setLoadError] = useState<string | null>(null);
  const [applyOpen, setApplyOpen] = useState(false);
  const [hasApplied, setHasApplied] = useState(false);
+ const [isAcceptedSitter, setIsAcceptedSitter] = useState(false);
+
  const [viewerType, setViewerType] = useState<ViewerType>("anonymous");
  const sitViewFired = useRef(false);
 
@@ -191,10 +197,12 @@ const PublicSitDetail = () => {
 
         if (user) {
           try {
-            const { data: appRows } = await supabase.from("applications").select("id").eq("sit_id", id!).eq("sitter_id", user.id).limit(1);
+            const { data: appRows } = await supabase.from("applications").select("id, status").eq("sit_id", id!).eq("sitter_id", user.id).limit(1);
             if (appRows?.[0]) setHasApplied(true);
+            if (appRows?.[0]?.status === "accepted") setIsAcceptedSitter(true);
           } catch (e) { logger.warn("[PublicSitDetail] applications check failed", { error: (e as any)?.message }); }
         }
+
 
         let resolvedViewer: ViewerType = "anonymous";
         if (user) {
@@ -307,7 +315,15 @@ const PublicSitDetail = () => {
     );
   }
   if (!sit) return null;
-  if (sit.status !== "published") return <div className="max-w-2xl mx-auto p-6 md:p-10 text-center"><p className="text-muted-foreground">Cette annonce n'est plus disponible.</p></div>;
+  // `confirmed` et `archived` restent accessibles (HTTP 200, noindex) ; les
+  // autres statuts non publiés (brouillons, annulés) restent privés.
+  const isClosedSit = isClosedSitStatus(sit.status);
+  if (sit.status !== "published" && !isClosedSit) return <div className="max-w-2xl mx-auto p-6 md:p-10 text-center"><p className="text-muted-foreground">Cette annonce n'est plus disponible.</p></div>;
+  // Participants à la garde : le propriétaire, un administrateur, ou le
+  // gardien retenu. Eux seuls voient les dates réelles d'une garde close.
+  const isParticipant = viewerType === "owner_of_sit" || viewerType === "admin" || isAcceptedSitter;
+  const hideDates = isClosedSit && !isParticipant;
+
 
  const photos: string[] = property?.photos || [];
  const formatDate = (d: string | null) => d ? format(new Date(d), "d MMMM yyyy", { locale: fr }) : "";
@@ -331,6 +347,7 @@ const PublicSitDetail = () => {
  return diff;
  })();
  const urgencyLabel = (() => {
+ if (hideDates) return null;
  if (daysUntilStart == null || daysUntilStart < 0) return null;
  if (daysUntilStart === 0) return "Commence aujourd'hui";
  if (daysUntilStart === 1) return "Commence demain";
@@ -338,14 +355,18 @@ const PublicSitDetail = () => {
  return null;
  })();
 
- // Label date naturel : « Du 5 au 15 août 2026 · 11 jours »
+ // Label date naturel : « Du 5 au 15 août 2026 · 11 jours ».
+ // Sur une garde pourvue ou terminée, les dates précises sont masquées aux
+ // visiteurs : elles révéleraient les périodes d'absence du foyer.
  const naturalDateLabel = (() => {
+ if (hideDates) return sit.status === "confirmed" ? "Période pourvue" : "Garde passée";
  if (!sit.start_date || !sit.end_date) return "Dates flexibles";
  const startDay = format(new Date(sit.start_date), "d MMMM", { locale: fr });
  const endDay = format(new Date(sit.end_date), "d MMMM yyyy", { locale: fr });
  const base = `Du ${startDay} au ${endDay}`;
  return durationDays ? `${base} · ${durationDays} jour${durationDays > 1 ? "s" : ""}` : base;
  })();
+
 
  // Résumé des animaux pour le pitch (« 2 chats », « un chien et un chat »)
  const capitalize = (s: string) => s ? s.charAt(0).toUpperCase() + s.slice(1) : s;
@@ -374,9 +395,12 @@ const PublicSitDetail = () => {
   const cityForTitle = (sitCity && ownerCountry && ownerCountry !== "FR")
     ? `${sitCity} (${ownerCountry})`
     : (sitCity || "France");
- const startFmt = sit.start_date ? format(new Date(sit.start_date), "d MMMM", { locale: fr }) : "";
- const endFmt = sit.end_date ? format(new Date(sit.end_date), "d MMMM yyyy", { locale: fr }) : "";
- const datesShort = startFmt && endFmt ? `du ${startFmt} au ${endFmt}` : "dates flexibles";
+ const startFmt = hideDates || !sit.start_date ? "" : format(new Date(sit.start_date), "d MMMM", { locale: fr });
+ const endFmt = hideDates || !sit.end_date ? "" : format(new Date(sit.end_date), "d MMMM yyyy", { locale: fr });
+ const datesShort = startFmt && endFmt
+   ? `du ${startFmt} au ${endFmt}`
+   : (hideDates ? (sit.status === "confirmed" ? "période pourvue" : "garde passée") : "dates flexibles");
+
 
  const petsSummary = pets.length > 0
  ? pets.map((p: any) => `${p.name} (${speciesLabel[p.species] || p.species})`).join(", ")
@@ -394,7 +418,10 @@ const PublicSitDetail = () => {
  const propertyDescShort = property?.description
  ? (property.description.length > 80 ? property.description.slice(0, 77) + "…" : property.description)
  : "";
- const datesPart = startFmt && endFmt ? `Du ${startFmt} au ${endFmt}.` : "Dates flexibles.";
+ const datesPart = startFmt && endFmt
+   ? `Du ${startFmt} au ${endFmt}.`
+   : (hideDates ? (sit.status === "confirmed" ? "Période pourvue." : "Garde terminée.") : "Dates flexibles.");
+
  const cityPart = ownerCity ? `${ownerCity}. ` : "";
  const ogDescription = propertyDescShort
  ? `${cityPart}${datesPart} ${propertyDescShort} Partagez la confiance entre gens du coin avec Guardiens.`
@@ -414,7 +441,11 @@ const PublicSitDetail = () => {
  // og:image, visuel personnalisé généré à la volée (photo de couverture réelle
  // de l'annonce + titre + ville + dates + animaux + propriétaire). Servi par
  // l'edge function `og-sit` (1200×630, optimisé Facebook/LinkedIn/WhatsApp/X).
- const ogImageUrl = `https://erhccyqevdyevpyctsjj.supabase.co/functions/v1/og-sit?id=${sit.id}&v=cover-only-20260522`;
+ // Sur une garde pourvue ou terminée, l'image dynamique porterait les dates :
+ // on retombe sur le visuel générique.
+ const ogImageUrl = hideDates
+   ? DEFAULT_OG_IMAGE
+   : `https://erhccyqevdyevpyctsjj.supabase.co/functions/v1/og-sit?id=${sit.id}&v=cover-only-20260522`;
  const ogImageAlt = `${sit.title || "Annonce de garde"}, ${cityForTitle}, ${datesShort}`;
 
   const MetaReady = () => {
@@ -453,9 +484,10 @@ const PublicSitDetail = () => {
  priceCurrency: "EUR",
  eligibleCustomerType: "Owner",
   description: "Gratuit pour les propriétaires, sans abonnement requis.",
- availability: "https://schema.org/InStock",
- ...(sit.start_date && { validFrom: sit.start_date }),
- ...(sit.end_date && { validThrough: sit.end_date }),
+ availability: hideDates ? "https://schema.org/SoldOut" : "https://schema.org/InStock",
+ // Aucune date exposée sur une garde pourvue ou terminée.
+ ...(!hideDates && sit.start_date && { validFrom: sit.start_date }),
+ ...(!hideDates && sit.end_date && { validThrough: sit.end_date }),
  },
  ...(owner?.completed_sits_count && owner.completed_sits_count > 0 && {
    interactionStatistic: {
@@ -468,22 +500,12 @@ const PublicSitDetail = () => {
  };
 
 
-  // Critère d'indexation (qualité minimum pour éviter le thin content) :
-   // - ≥3 photos dont au moins 2 en haute résolution (≥800×600px)
-   // - ≥200 caractères de texte substantiel (description + routine)
-   // - titre personnalisé (≥10 caractères)
-   // - au moins 1 animal renseigné
-   // - bio propriétaire ≥50 caractères (signal de profil complet)
-   // Tolérance : si aucune photo n'a ses dimensions stockées (anciennes annonces),
-   // on garde le filtre simple par nombre de photos.
-   const galleryCount = property?.photos?.length || 0;
-   const hiQualityCount: number = (property as any)?._hiQualityCount ?? 0;
-   const photosOk = galleryCount >= 3 && (hiQualityCount === 0 || hiQualityCount >= 2);
-   const richTextLength = (property?.description || "").length + (sit.daily_routine || "").length;
-   const hasCustomTitle = typeof sit.title === "string" && sit.title.trim().length >= 10;
-   const hasPets = pets.length > 0;
-   const hasOwnerBio = (owner?.bio || "").trim().length >= 50;
-   const isIndexable = photosOk && richTextLength >= 200 && hasCustomTitle && hasPets && hasOwnerBio;
+  // Critère d'indexation : règle de richesse partagée avec
+  // scripts/generate-sitemap.mjs (src/lib/sitIndexability.js), pour que les
+  // deux implémentations ne puissent plus diverger. Une garde pourvue ou
+  // terminée n'est jamais indexable (sécurité : dates d'absence du foyer).
+  const isIndexable = !isClosedSit && isSitRichEnough(sit);
+
 
  const citySlug = (cityForTitle || "")
  .toLowerCase()
@@ -574,6 +596,24 @@ const PublicSitDetail = () => {
       </Helmet>
 
       {!isAuthenticated && <PublicHeader />}
+
+      {/* Bandeau statut : garde pourvue ou annonce terminée */}
+      {isClosedSit && (
+        <>
+          <div className="bg-muted/60 border-b border-border">
+            <div className="max-w-6xl mx-auto px-4 py-3">
+              <p className="text-sm text-foreground">
+                {sit.status === "confirmed"
+                  ? "Cette garde a trouvé son gardien."
+                  : "Cette annonce est terminée."}
+              </p>
+            </div>
+          </div>
+          <NearbySitsModule city={sitCity} excludeId={sit.id} />
+        </>
+      )}
+
+
 
       {/* Bandeau "aperçu public", propriétaire de l'annonce */}
       {viewerType === "owner_of_sit" && (

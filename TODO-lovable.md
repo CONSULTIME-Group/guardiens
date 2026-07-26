@@ -32,3 +32,10 @@ Fichier de suivi des tâches reportées. Mis à jour manuellement après chaque 
   - Une fois connecté, flow META verification sur `https://guardiens.lovable.app/` puis soumettre `https://guardiens.lovable.app/sitemap.xml` (ou idéalement `https://guardiens.fr/sitemap.xml` si on déclare la propriété sur le domaine custom).
   - **Échéance impérative** : à définir (pas de date fixée, pivot pricing "gratuit sans deadline" du 5 juillet 2026).
   - Finding tracker associé : `gsc:gsc` (catégorie indexing, impact mid). Marqué « ignored » manuellement dans Lovable → SEO & AI search.
+
+## Preuve d'activité locale dans seo_city_pages (reporté)
+
+- [ ] Injecter les gardes archivées comme preuve d'activité sur les pages ville (« 12 gardes réalisées à Lyon depuis mai 2026 »).
+  - Reporté volontairement : avec 18 annonces au total (dont 8 archivées), les chiffres affichés seraient trop faibles pour rassurer, et parfois nuls sur la majorité des villes. Un compteur à 1 ou 2 dessert la page.
+  - Reprendre quand le stock d'annonces archivées le justifie (ordre de grandeur : au moins 10 gardes réalisées sur une même ville).
+  - Contrainte de sécurité à respecter à ce moment : agrégats uniquement, jamais de dates précises ni de lien vers l'annonce archivée.
