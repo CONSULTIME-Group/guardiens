@@ -1,3 +1,4 @@
+import { Helmet } from "react-helmet-async";
 import { useTranslation } from "react-i18next";
 import { staticRoutes, DEFAULT_OG_IMAGE } from "@/data/siteRoutes";
 import howtoStep1 from "@/assets/illustrations/howto-step-1-annonce.png";
@@ -17,10 +18,9 @@ export default function HomeJsonLd() {
   const { t } = useTranslation();
 
   return (
-    <script
-      type="application/ld+json"
-      dangerouslySetInnerHTML={{
-        __html: JSON.stringify({
+    <Helmet>
+      <script type="application/ld+json">
+        {JSON.stringify({
           "@context": "https://schema.org",
           "@graph": [
             {
@@ -37,30 +37,39 @@ export default function HomeJsonLd() {
               },
               description:
                 "Plateforme de house-sitting, garde d'animaux à domicile et petites missions d'entraide entre gens du coin. Sans abonnement pour les propriétaires.",
-              areaServed: [
-                { "@type": "Country", name: "France" },
-                { "@type": "City", name: "Lyon" },
-                { "@type": "City", name: "Annecy" },
-                { "@type": "City", name: "Grenoble" },
-              ],
+              areaServed: { "@type": "Country", name: "France" },
               knowsAbout: [
                 "House-sitting",
                 "Pet-sitting",
                 "Garde d'animaux à domicile",
                 "Garde de chien",
                 "Garde de chat",
-                "Entraide entre gens du coin",
+                "Entraide entre particuliers",
                 "Petites missions de proximité",
               ],
-              slogan: "Quelqu'un du coin veille sur votre maison.",
+              slogan: "Proches de chez vous.",
+              identifier: {
+                "@type": "PropertyValue",
+                propertyID: "SIRET",
+                value: "894 864 040 00015",
+              },
               founder: [
-                { "@type": "Person", name: "Jérémie Martinot" },
-                { "@type": "Person", name: "Elisa" },
+                { "@id": "https://guardiens.fr/#founder-jeremie" },
+                { "@id": "https://guardiens.fr/#founder-elisa" },
               ],
+              address: {
+                "@type": "PostalAddress",
+                streetAddress: "22 rue Juiverie",
+                postalCode: "69005",
+                addressLocality: "Lyon",
+                addressCountry: "FR",
+              },
+              email: "contact@guardiens.fr",
               sameAs: [
                 "https://www.linkedin.com/in/jeremiemartinot",
                 "https://maps.app.goo.gl/wBCoMpnyRu8GbrTV7",
               ],
+
             },
             {
               "@type": "WebSite",
@@ -207,8 +216,9 @@ export default function HomeJsonLd() {
               url: "https://guardiens.fr/a-propos",
             },
           ],
-        }),
-      }}
-    />
+        })}
+      </script>
+    </Helmet>
   );
 }
+
