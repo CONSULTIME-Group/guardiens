@@ -753,6 +753,30 @@ async function enrollForSequence(
     if (!candidates.length) return 0
   }
 
+  // Lot 7 : une seule sequence de nurturing ACTIVE par personne. Si un
+  // parcours actif existe deja (quelle que soit la sequence), on n'inscrit pas
+  // dans un second, on attend qu'il se termine. La priorite des sequences est
+  // appliquee en amont par l'ordre de traitement dans runEvaluation.
+  {
+    const withActive = new Set<string>()
+    const ids = candidates.map((c) => c.id)
+    for (let i = 0; i < ids.length; i += 100) {
+      const chunk = ids.slice(i, i + 100)
+      const { data, error } = await supabase
+        .from('user_journeys')
+        .select('user_id')
+        .eq('status', 'active')
+        .in('user_id', chunk)
+      if (error) {
+        console.error('[enrollment] active-journey cross-check failed', seq.key, error.message)
+        return 0
+      }
+      for (const r of (data ?? []) as Array<{ user_id: string }>) withActive.add(r.user_id)
+    }
+    candidates = candidates.filter((c) => !withActive.has(c.id))
+    if (!candidates.length) return 0
+  }
+
   // Vérification des journeys existantes, chunkée par 100 pour éviter
   // les URL trop longues qui faisaient silencieusement échouer la dédup.
   // Tout échec est fatal : on n'insère rien, plutôt que risquer un ré-enrôlement massif.
