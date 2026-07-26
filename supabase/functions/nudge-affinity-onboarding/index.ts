@@ -34,45 +34,6 @@ function escapeHtml(s: string): string {
     .replace(/"/g, "&quot;");
 }
 
-function buildEmailHtml(params: { firstName: string; hours: number; ctaUrl: string }): string {
-  const greeting = params.firstName
-    ? `Bonjour ${escapeHtml(params.firstName)},`
-    : "Bonjour,";
-  return `<!DOCTYPE html><html><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/></head>
-<body style="margin:0;padding:0;background-color:#FAF9F6;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif">
-<table width="100%" cellpadding="0" cellspacing="0" style="background-color:#FAF9F6;padding:32px 16px">
-<tr><td align="center">
-<table width="600" cellpadding="0" cellspacing="0" style="max-width:600px;background-color:#ffffff;border-radius:16px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,0.04)">
-<tr><td style="padding:0;background:linear-gradient(135deg,#2C6E49 0%,#3a8a5d 100%);height:6px;line-height:6px;font-size:0">&nbsp;</td></tr>
-<tr><td style="padding:32px 40px 8px;text-align:center;background-color:#ffffff">
-<img src="https://guardiens.fr/logo-guardiens.png" alt="Guardiens" width="120" style="display:block;margin:0 auto;height:auto"/>
-</td></tr>
-<tr><td style="padding:24px 40px 8px">
-<h1 style="margin:0 0 20px;font-size:22px;line-height:1.35;color:#1a1a1a;font-weight:700">Il ne vous reste que quelques étapes</h1>
-<p style="margin:0 0 14px;font-size:15px;line-height:1.7;color:#3a3a3a">${greeting}</p>
-<p style="margin:0 0 14px;font-size:15px;line-height:1.7;color:#3a3a3a">Vous avez commencé à compléter votre profil d'affinité il y a ${params.hours} heures. Il ne vous reste que quelques étapes pour activer votre score de compatibilité.</p>
-</td></tr>
-<tr><td align="center" style="padding:16px 0 8px">
-<a href="${escapeHtml(params.ctaUrl)}" style="display:inline-block;padding:14px 32px;background-color:#2C6E49;color:#ffffff;text-decoration:none;border-radius:10px;font-weight:600;font-size:16px;box-shadow:0 4px 12px rgba(44,110,73,0.25)">Reprendre</a>
-</td></tr>
-<tr><td style="padding:24px 40px 8px">
-<p style="margin:0 0 4px;font-size:15px;line-height:1.7;color:#3a3a3a">À bientôt,</p>
-<p style="margin:0 0 14px;font-size:15px;line-height:1.7;color:#3a3a3a">L'équipe Guardiens</p>
-</td></tr>
-<tr><td style="padding:20px 40px;border-top:1px solid #eee;background-color:#FAF9F6;text-align:center">
-<p style="margin:0 0 6px;font-size:13px;color:#555;font-weight:600">Guardiens</p>
-<p style="margin:0;font-size:12px;color:#888;line-height:1.6">L'entraide locale entre propriétaires et gardiens d'animaux.</p>
-<p style="margin:14px 0 0;font-size:11px;color:#aaa">
-<a href="https://guardiens.fr" style="color:#aaa;text-decoration:none">guardiens.fr</a>
-&nbsp;·&nbsp;
-<a href="https://guardiens.fr/unsubscribe" style="color:#aaa;text-decoration:underline">Se désinscrire</a>
-</p>
-</td></tr>
-</table>
-</td></tr></table>
-</body></html>`;
-}
-
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
