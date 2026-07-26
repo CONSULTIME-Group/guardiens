@@ -48,7 +48,7 @@ const SitImmersiveBody = ({
     : [];
 
   const ownerName = owner?.first_name || "L'hôte";
-  const cityName = owner?.city || "";
+  const cityName = (sit as any)?.city?.trim() || owner?.city || "";
   const citySlug = cityName ? slugify(cityName) : null;
   const department: string | undefined =
     owner?.department || (owner?.postal_code ? String(owner.postal_code).slice(0, 2) : undefined);
