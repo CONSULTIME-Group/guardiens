@@ -383,7 +383,7 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, prope
       // 3) Construire accordData enrichi (sit + property + pets réels).
       const { data: sitFull } = await supabase
         .from("sits")
-        .select("id, start_date, end_date, property_id, properties(address, city, pets(name, species, breed, birth_date))")
+        .select("id, start_date, end_date, property_id, properties(address, city, pets(name, species, breed, age))")
         .eq("id", sitId)
         .maybeSingle() as any;
 
