@@ -42,9 +42,11 @@ Deno.serve(async (req) => {
     }
 
     let action = 'status'
+    let target = TARGET_DOMAIN
     try {
       const body = await req.json()
       if (body && typeof body.action === 'string') action = body.action
+      if (body && typeof body.domain === 'string' && body.domain) target = body.domain
     } catch {
       // no body -> status
     }
