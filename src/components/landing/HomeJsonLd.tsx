@@ -206,8 +206,9 @@ export default function HomeJsonLd() {
               url: "https://guardiens.fr/a-propos",
             },
           ],
-        }),
-      }}
-    />
+        })}
+      </script>
+    </Helmet>
   );
 }
+
