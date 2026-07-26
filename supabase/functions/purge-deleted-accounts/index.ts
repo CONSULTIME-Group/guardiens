@@ -1,5 +1,6 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.4";
 import { requireAdminOrServiceRole } from "../_shared/require-admin.ts";
+import { finalizeErasure } from "../_shared/account-erasure.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -23,7 +24,7 @@ Deno.serve(async (req) => {
     // Find deletion requests that have passed their scheduled date
     const { data: requests, error: fetchErr } = await adminClient
       .from("account_deletion_requests")
-      .select("id, user_id")
+      .select("id, user_id, requester_email")
       .eq("status", "pending")
       .lte("scheduled_deletion_at", new Date().toISOString());
 
@@ -46,6 +47,19 @@ Deno.serve(async (req) => {
 
     for (const request of requests) {
       try {
+        // Accusé de traitement RGPD + liste de blocage, AVANT la suppression.
+        const { data: prof } = await adminClient
+          .from("profiles")
+          .select("email, first_name")
+          .eq("id", request.user_id)
+          .maybeSingle();
+        const purgeEmail =
+          (prof as { email?: string } | null)?.email ?? request.requester_email ?? null;
+        await finalizeErasure(adminClient, purgeEmail, {
+          firstName: (prof as { first_name?: string } | null)?.first_name ?? null,
+          metadata: { source: "purge_cron", user_id: request.user_id },
+        });
+
         // Delete user from auth (cascades to profiles and related data)
         const { error: deleteErr } = await adminClient.auth.admin.deleteUser(
           request.user_id
@@ -65,7 +79,7 @@ Deno.serve(async (req) => {
         // so we ignore errors here)
         await adminClient
           .from("account_deletion_requests")
-          .update({ status: "completed" })
+          .update({ status: "completed", processed_at: new Date().toISOString() })
           .eq("id", request.id);
 
         results.push({ userId: request.user_id, success: true });

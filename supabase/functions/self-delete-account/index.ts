@@ -1,4 +1,5 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.4";
+import { finalizeErasure } from "../_shared/account-erasure.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -74,13 +75,30 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Trace admin (best-effort) : marquer une demande "completed" pour l'historique.
+    // Accusé de traitement RGPD + mise en liste de blocage de l'adresse.
+    // Fait AVANT la suppression : l'email doit partir tant que l'adresse n'est
+    // pas encore dans suppressed_emails, et le profil est encore lisible.
+    const { data: prof } = await adminClient
+      .from("profiles")
+      .select("email, first_name")
+      .eq("id", caller.id)
+      .maybeSingle();
+    const targetEmail = (prof as { email?: string } | null)?.email ?? caller.email ?? null;
+    await finalizeErasure(adminClient, targetEmail, {
+      firstName: (prof as { first_name?: string } | null)?.first_name ?? null,
+      metadata: { source: "self_delete", user_id: caller.id },
+    });
+
+    // Trace de conformité : demande marquée "completed" pour l'historique.
     await adminClient
       .from("account_deletion_requests")
       .upsert(
         {
           user_id: caller.id,
+          requester_email: targetEmail,
+          source: "self",
           status: "completed",
+          processed_at: new Date().toISOString(),
           scheduled_deletion_at: new Date().toISOString(),
         },
         { onConflict: "user_id" }
