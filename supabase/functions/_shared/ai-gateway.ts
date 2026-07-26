@@ -60,15 +60,23 @@ export function extractToolArgs(data: any): any | null {
   }
 }
 
-export const STYLE_GUARDRAILS = `Règles éditoriales strictes (à respecter sans exception) :
+const STYLE_GUARDRAILS_BASE = `Règles éditoriales strictes (à respecter sans exception) :
 - Vouvoiement obligatoire. Jamais de tutoiement.
 - Ton factuel, chaleureux, sans superlatifs commerciaux.
 - INTERDIT : les mots « voisin », « voisine », « voisins », « voisinage ». Remplacez par « gardien », « personne de confiance », « membre du coin », « proche ».
 - INTERDIT : mention de région (« AURA », « Auvergne-Rhône-Alpes »).
 - INTERDIT : caractère tiret cadratin « — » (U+2014). Utilisez virgule, deux-points, parenthèses, point ou tiret demi-cadratin « – ».
-- Pas d'emoji, pas d'icônes décoratives, pas de hashtags.
+- Pas d'emoji, pas d'icônes décoratives, pas de hashtags.`;
+
+export const STYLE_GUARDRAILS = `${STYLE_GUARDRAILS_BASE}
 - Pas de coordonnées de contact (téléphone, email, adresse postale, réseaux sociaux).
 - Pas d'incitation à sortir de la plateforme pour transiger.`;
+
+/**
+ * Variante pour la messagerie privée entre membres : les règles de forme
+ * s'appliquent, mais l'échange de contacts personnels y est autorisé.
+ */
+export const STYLE_GUARDRAILS_MESSAGING = STYLE_GUARDRAILS_BASE;
 
 export const CORS_HEADERS = {
   "Access-Control-Allow-Origin": "*",
