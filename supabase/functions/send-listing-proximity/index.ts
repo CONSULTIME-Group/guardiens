@@ -444,8 +444,8 @@ Deno.serve(async (req) => {
     const CONCURRENCY = 2;
     const BATCH_PAUSE_MS = 1100;
     const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
-    const isRateLimited = (msg?: string) =>
-      !!msg && (/rate limit/i.test(msg) || /\b429\b/.test(msg));
+    const isRetryable = (msg?: string) =>
+      !!msg && (/rate limit/i.test(msg) || /\b429\b/.test(msg) || /send-transactional-email 5\d\d/.test(msg));
     type Outcome = "sent" | "excluded" | "error";
     for (let i = 0; i < recipients.length; i += CONCURRENCY) {
       if (i > 0) await sleep(BATCH_PAUSE_MS);
@@ -508,7 +508,7 @@ Deno.serve(async (req) => {
         }
         };
         const first = await attempt();
-        if (first.outcome === "error" && isRateLimited(first.err)) {
+        if (first.outcome === "error" && isRetryable(first.err)) {
           await sleep(2000);
           return await attempt();
         }

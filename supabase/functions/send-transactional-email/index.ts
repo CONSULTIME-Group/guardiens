@@ -789,8 +789,12 @@ Deno.serve(async (req) => {
           metadata: { idempotency_key: idempotencyKey, ...logMetadata },
         })
       }
-      return new Response(JSON.stringify({ error: 'Failed to send email' }), {
-        status: 500,
+      return new Response(JSON.stringify({
+        error: 'Failed to send email',
+        providerStatus: resendRes.status,
+        details: resendData?.message ?? null,
+      }), {
+        status: resendRes.status === 429 ? 429 : 500,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       })
     }
