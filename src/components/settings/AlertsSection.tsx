@@ -146,9 +146,15 @@ const AlertsSection = ({ user }: { user: any }) => {
 
   const handleAutourToggle = async (newValue: boolean) => {
     setAutourDeVous(newValue);
+    // Source de verite unique : la table email_preferences.
+    const { error } = await supabase.rpc("patch_my_email_preferences" as any, {
+      p_nearby_daily_digest: newValue,
+    } as any);
+    // Compatibilite lecture : on garde l'ancien JSONB aligne le temps de la transition.
     const { data: profileData } = await supabase.from("profiles").select("email_preferences").eq("id", user.id).single();
     const currentPrefs = ((profileData as any)?.email_preferences as any) || {};
     await supabase.from("profiles").update({ email_preferences: { ...currentPrefs, autour_de_vous: newValue } } as any).eq("id", user.id);
+    if (error) toast.error("Une erreur est survenue. Veuillez réessayer.");
   };
 
   const zoneDescription = (a: AlertPref) => {
