@@ -56,6 +56,7 @@ const AdminOverview = () => {
       <KpiCards stats={stats} />
       <RecentActivity activity={activity} />
       <AcquisitionPilotCard />
+      <AiAcquisitionCard />
       <AffinityPilotCard />
       <DashboardCharts weeklySignups={weeklySignups} deptData={deptData} />
       <OnboardingReminderCard />
