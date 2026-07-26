@@ -15,6 +15,7 @@
  *  - Messages système exclus. Quiet hours / anti-spam gérés par
  *    send-transactional-email.
  */
+import { recordDeliveryFailure } from "../_shared/delivery-failure.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
 import { startCronRun } from "../_shared/cron-run-log.ts";
 
@@ -185,6 +186,18 @@ Deno.serve(async (req) => {
       if (sendErr) {
         failed++;
         console.error("send failed", { conv: conv.id, err: sendErr.message });
+        // Trace persistante obligatoire : sans elle, un cron qui echoue en
+        // boucle reste invisible.
+        await recordDeliveryFailure(supabase, {
+          templateName: "unread-messages-reminder",
+          recipientEmail: recipient.email,
+          recipientId: recipient.id ?? null,
+          conversationId: conv.id,
+          entityType: "conversation",
+          entityId: conv.id,
+          source: "remind-unread-messages",
+          errorMessage: sendErr.message,
+        });
         continue;
       }
 

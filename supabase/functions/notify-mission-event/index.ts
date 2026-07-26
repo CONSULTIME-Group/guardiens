@@ -19,6 +19,7 @@
  */
 
 import { createClient } from 'npm:@supabase/supabase-js@2'
+import { recordDeliveryFailure } from '../_shared/delivery-failure.ts'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -355,9 +356,35 @@ async function sendEmailSafely(
       }),
     });
     const _steTxt1 = _steRes.ok ? '' : await _steRes.text().catch(() => '');
-    if (!_steRes.ok) console.error('send-transactional-email failed', _steRes.status, _steTxt1);
+    if (!_steRes.ok) {
+      console.error('send-transactional-email failed', _steRes.status, _steTxt1);
+      // Trace persistante : cet emetteur est appele en arriere-plan, aucun
+      // appelant ne verra jamais l'echec autrement.
+      await recordDeliveryFailure(admin, {
+        templateName,
+        recipientEmail: email,
+        recipientId: userId,
+        entityType: 'profile',
+        entityId: userId,
+        source: 'notify-mission-event',
+        errorMessage: `send-transactional-email ${_steRes.status}: ${_steTxt1}`,
+        extra: { idempotency_key: idempotencyKey },
+      })
+    }
   } catch (err) {
     console.error('[notify-mission-event] email send failed', { userId, templateName, err })
+    try {
+      await recordDeliveryFailure(admin, {
+        templateName,
+        recipientId: userId,
+        entityType: 'profile',
+        entityId: userId,
+        source: 'notify-mission-event',
+        errorMessage: (err as Error)?.message ?? String(err),
+      })
+    } catch (traceErr) {
+      console.error('[notify-mission-event] failure trace failed', traceErr)
+    }
   }
 }
 
