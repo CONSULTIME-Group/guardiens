@@ -66,7 +66,7 @@ export default function HomeJsonLd() {
               },
               email: "contact@guardiens.fr",
               sameAs: [
-                "https://www.linkedin.com/in/jeremiemartinot",
+                "https://www.linkedin.com/company/112564191",
                 "https://maps.app.goo.gl/wBCoMpnyRu8GbrTV7",
               ],
 
