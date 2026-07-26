@@ -575,7 +575,7 @@ Deno.serve(async (req) => {
 
   // 4b. Append branded footer with preferences + unsubscribe links.
   // The token is per-recipient (one per email address) and used for one-click and category opt-out.
-  const prefsUrl = `${SITE_URL}/preferences-email`
+  const prefsUrl = `${SITE_URL}/email-preferences`
   const unsubUrl = `${SITE_URL}/unsubscribe?token=${unsubscribeToken}&category=${category}`
   const unsubAllUrl = `${SITE_URL}/unsubscribe?token=${unsubscribeToken}`
 
@@ -628,7 +628,7 @@ Deno.serve(async (req) => {
         const host = u.hostname.toLowerCase()
         const isAllowed = host === 'guardiens.fr' || host === 'www.guardiens.fr'
         // Don't wrap unsubscribe / preference links so the user always reaches them
-        const isOptOut = u.pathname.startsWith('/unsubscribe') || u.pathname.startsWith('/preferences-email')
+        const isOptOut = u.pathname.startsWith('/unsubscribe') || u.pathname.startsWith('/email-preferences')
         if (!isAllowed || isOptOut) return raw
         const b64 = btoa(raw).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '')
         return `${trackBase}/track-email-click?mid=${messageId}&u=${b64}`
