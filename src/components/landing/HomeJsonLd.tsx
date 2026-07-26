@@ -1,3 +1,4 @@
+import { Helmet } from "react-helmet-async";
 import { useTranslation } from "react-i18next";
 import { staticRoutes, DEFAULT_OG_IMAGE } from "@/data/siteRoutes";
 import howtoStep1 from "@/assets/illustrations/howto-step-1-annonce.png";
