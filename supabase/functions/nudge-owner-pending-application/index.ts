@@ -34,12 +34,11 @@ interface PendingApp {
 
 async function sendReminderEmail(params: {
   serviceClient: ReturnType<typeof createClient>;
-  resendKey: string;
   app: PendingApp;
   messageId: string;
   templateName: string;
 }): Promise<{ ok: boolean; error?: string }> {
-  const { serviceClient, resendKey, app, messageId, templateName } = params;
+  const { serviceClient, app, messageId, templateName } = params;
   const email = app.owner_email.trim().toLowerCase();
 
   // Dédup : si un log existe déjà pour ce message_id → skip
@@ -209,7 +208,6 @@ Deno.serve(async (req) => {
       const ts = Date.now();
       const result = await sendReminderEmail({
         serviceClient,
-        resendKey: RESEND_API_KEY,
         app,
         messageId: `pending-app-manual-${app.application_id}-${ts}`,
         templateName: "pending_application_manual_reminder",
@@ -283,7 +281,6 @@ Deno.serve(async (req) => {
       }
       const result = await sendReminderEmail({
         serviceClient,
-        resendKey: RESEND_API_KEY,
         app,
         messageId: `pending-app-${app.application_id}`,
         templateName: "pending_application_reminder",
