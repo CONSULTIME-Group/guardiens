@@ -17,10 +17,9 @@ export default function HomeJsonLd() {
   const { t } = useTranslation();
 
   return (
-    <script
-      type="application/ld+json"
-      dangerouslySetInnerHTML={{
-        __html: JSON.stringify({
+    <Helmet>
+      <script type="application/ld+json">
+        {JSON.stringify({
           "@context": "https://schema.org",
           "@graph": [
             {
