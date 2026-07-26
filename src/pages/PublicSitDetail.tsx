@@ -347,6 +347,7 @@ const PublicSitDetail = () => {
  return diff;
  })();
  const urgencyLabel = (() => {
+ if (hideDates) return null;
  if (daysUntilStart == null || daysUntilStart < 0) return null;
  if (daysUntilStart === 0) return "Commence aujourd'hui";
  if (daysUntilStart === 1) return "Commence demain";
@@ -354,14 +355,18 @@ const PublicSitDetail = () => {
  return null;
  })();
 
- // Label date naturel : « Du 5 au 15 août 2026 · 11 jours »
+ // Label date naturel : « Du 5 au 15 août 2026 · 11 jours ».
+ // Sur une garde pourvue ou terminée, les dates précises sont masquées aux
+ // visiteurs : elles révéleraient les périodes d'absence du foyer.
  const naturalDateLabel = (() => {
+ if (hideDates) return sit.status === "confirmed" ? "Période pourvue" : "Garde passée";
  if (!sit.start_date || !sit.end_date) return "Dates flexibles";
  const startDay = format(new Date(sit.start_date), "d MMMM", { locale: fr });
  const endDay = format(new Date(sit.end_date), "d MMMM yyyy", { locale: fr });
  const base = `Du ${startDay} au ${endDay}`;
  return durationDays ? `${base} · ${durationDays} jour${durationDays > 1 ? "s" : ""}` : base;
  })();
+
 
  // Résumé des animaux pour le pitch (« 2 chats », « un chien et un chat »)
  const capitalize = (s: string) => s ? s.charAt(0).toUpperCase() + s.slice(1) : s;
