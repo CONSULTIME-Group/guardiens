@@ -7,7 +7,13 @@ const CATEGORIES = path.join(ROOT, "supabase/functions/_shared/email-categories.
 const SEND_FN = path.join(ROOT, "supabase/functions/send-transactional-email/index.ts");
 const TEMPLATES_DIR = path.join(ROOT, "supabase/functions/_shared/transactional-email-templates");
 
-const categoriesSrc = fs.readFileSync(CATEGORIES, "utf8");
+// On retire les commentaires : ils contiennent des apostrophes qui fausseraient
+// l'extraction des chaînes entre quotes simples.
+const categoriesSrc = fs
+  .readFileSync(CATEGORIES, "utf8")
+  .split("\n")
+  .filter((l) => !l.trim().startsWith("//"))
+  .join("\n");
 const sendSrc = fs.readFileSync(SEND_FN, "utf8");
 
 function listArray(name: string): string[] {
