@@ -3246,6 +3246,7 @@ export type Database = {
           enrollment_rule: Json
           id: string
           key: string
+          priority: number
           updated_at: string
         }
         Insert: {
@@ -3257,6 +3258,7 @@ export type Database = {
           enrollment_rule?: Json
           id?: string
           key: string
+          priority?: number
           updated_at?: string
         }
         Update: {
@@ -3268,6 +3270,7 @@ export type Database = {
           enrollment_rule?: Json
           id?: string
           key?: string
+          priority?: number
           updated_at?: string
         }
         Relationships: []
