@@ -223,6 +223,21 @@ const ApplicationModal = ({
       return;
     }
 
+    // Modération pré-envoi (content_type "message" : les coordonnées sont autorisées,
+    // seule une proposition de paiement direct est interceptée).
+    {
+      const { moderateContent } = await import("@/lib/moderation");
+      const verdict = await moderateContent("message", message.trim());
+      if (verdict.status === "block") {
+        toast({
+          title: "Message bloqué",
+          description: verdict.reasons.join(" · ") || "Ce message n'a pas pu être envoyé. Reformulez-le, ou écrivez-nous si le problème persiste.",
+          variant: "destructive",
+        });
+        return;
+      }
+    }
+
     if (viaUneditedDraft) {
       try {
         await trackEvent("application_sent_unedited_draft", { metadata: { sit_id: sitId } });
@@ -230,6 +245,7 @@ const ApplicationModal = ({
     }
 
     setSending(true);
+
 
     // Garde-fou : vérifier que l'annonce accepte encore les candidatures
     const { data: sitCheck } = await supabase
