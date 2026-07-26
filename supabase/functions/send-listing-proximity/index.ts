@@ -506,6 +506,13 @@ Deno.serve(async (req) => {
         } catch (e) {
           return { outcome: "error", err: String(e) };
         }
+        };
+        const first = await attempt();
+        if (first.outcome === "error" && isRateLimited(first.err)) {
+          await sleep(2000);
+          return await attempt();
+        }
+        return first;
       }));
       for (const r of results) {
         if (r.outcome === "sent") sent++;
