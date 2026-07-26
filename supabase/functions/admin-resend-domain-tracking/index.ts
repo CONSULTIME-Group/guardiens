@@ -73,11 +73,11 @@ Deno.serve(async (req) => {
 
     const domains: any[] = Array.isArray(listBody?.data) ? listBody.data : (listBody?.data?.data ?? [])
     const summary = domains.map((d) => ({ id: d.id, name: d.name, status: d.status }))
-    const match = domains.find((d) => d?.name === TARGET_DOMAIN)
+    const match = domains.find((d) => d?.name === target)
 
     if (!match) {
-      console.error('[resend] target domain not found', { target: TARGET_DOMAIN, domains: summary })
-      return json({ error: `Domain ${TARGET_DOMAIN} not found in Resend account`, domains: summary }, 404)
+      console.error('[resend] target domain not found', { target, domains: summary })
+      return json({ error: `Domain ${target} not found in Resend account`, domains: summary }, 404)
     }
 
     // Full detail GET (list payload can be partial)
