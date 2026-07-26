@@ -383,7 +383,7 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, prope
       // 3) Construire accordData enrichi (sit + property + pets réels).
       const { data: sitFull } = await supabase
         .from("sits")
-        .select("id, start_date, end_date, property_id, properties(address, city, pets(name, species, breed, age))")
+        .select("id, start_date, end_date, property_id, city, properties(pets(name, species, breed, age))")
         .eq("id", sitId)
         .maybeSingle() as any;
 
@@ -402,8 +402,7 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, prope
           }))
         : petNames.map((name: string) => ({ prenom: name, espece: "" }));
 
-      const adresse = sitFull?.properties?.address
-        || sitFull?.properties?.city
+      const adresse = sitFull?.city
         || proprioProfile?.city
         || "";
 
