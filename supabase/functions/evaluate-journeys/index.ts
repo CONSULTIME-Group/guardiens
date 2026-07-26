@@ -52,6 +52,7 @@ interface Sequence {
   active: boolean
   enrollment_rule: EnrollmentRule
   anchor_field: string
+  priority?: number | null
 }
 
 Deno.serve(async (req) => {
@@ -156,14 +157,14 @@ async function runEvaluation(
 
   const { data: sequencesRaw } = await supabase
     .from('nurturing_sequences')
-    .select('id, key, audience, active, enrollment_rule, anchor_field')
+    .select('id, key, audience, active, enrollment_rule, anchor_field, priority')
     .eq('active', true)
 
   // Lot 7 : on traite les sequences par priorite croissante, pour que
   // l'onboarding gagne quand plusieurs sequences sont eligibles au meme run.
   const sequences = ((sequencesRaw ?? []) as Sequence[])
     .slice()
-    .sort((a, b) => sequencePriority(a.key) - sequencePriority(b.key))
+    .sort((a, b) => (a.priority ?? sequencePriority(a.key)) - (b.priority ?? sequencePriority(b.key)))
   if (!sequences.length) return stats
 
   const { data: stepsRaw } = await supabase
