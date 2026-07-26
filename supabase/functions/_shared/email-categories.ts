@@ -51,13 +51,14 @@ const TRANSACTIONAL: ReadonlyArray<string> = [
   // Direct human reply / messaging
   'contact-reply',
   'new-message',
-  'unread-messages-reminder',
   // Financial / subscription
   'subscription-expires-30d',
   'subscription-expires-7d',
   'subscription-expired',
   // Reviews received about the user (legitimate interest, expected)
   'review-received',
+  // Exercice des droits (droit d'opposition) : doit toujours partir
+  'unsubscribe-link',
   // Interne / opérationnel (destinataire = équipe, pas un membre)
   'admin-delivery-alert',
 ]
@@ -95,6 +96,9 @@ const PRODUCT: ReadonlyArray<string> = [
   // Avis / parrainage
   'review-reminder',
   'referral-boost-monthly',
+  'unread-messages-reminder',
+  'dormant-sitter-nudge',
+  'affinity-onboarding-nudge',
 ]
 
 const DIGEST: ReadonlyArray<string> = [
