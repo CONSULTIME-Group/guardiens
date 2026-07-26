@@ -4,6 +4,7 @@
 // dispatches due steps via send-transactional-email.
 import { createClient } from 'npm:@supabase/supabase-js@2'
 import { startCronRun } from '../_shared/cron-run-log.ts'
+import { ageWindow, sequencePriority } from '../_shared/nurturing-rules.ts'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -24,14 +25,16 @@ type ExitCondition =
   | Record<string, never>
 
 type EnrollmentRule =
-  | { type: 'signup'; window_days?: number; min_age_days?: number }
-  | { type: 'inactivity'; days: number; window_days?: number }
-  | { type: 'owner_no_sit'; min_age_days?: number; window_days?: number }
-  | { type: 'sitter_no_application'; min_age_days?: number; window_days?: number }
-  | { type: 'active_referral'; min_age_days?: number; active_within_days?: number; window_days?: number }
-  | { type: 'sitter_missing_affinity'; min_age_days?: number }
-  | { type: 'owner_missing_affinity'; min_age_days?: number }
-  | { type: 'helper_no_guard_activity'; min_age_days?: number; window_days?: number }
+  | { type: 'signup'; window_days?: number; min_age_days?: number; max_age_days?: number }
+  | { type: 'inactivity'; days: number; window_days?: number; max_age_days?: number }
+  | { type: 'owner_no_sit'; min_age_days?: number; window_days?: number; max_age_days?: number }
+  | { type: 'sitter_no_application'; min_age_days?: number; window_days?: number; max_age_days?: number }
+  | { type: 'active_referral'; min_age_days?: number; active_within_days?: number; window_days?: number; max_age_days?: number }
+  | { type: 'sitter_missing_affinity'; min_age_days?: number; max_age_days?: number }
+  | { type: 'owner_missing_affinity'; min_age_days?: number; max_age_days?: number }
+  | { type: 'helper_no_guard_activity'; min_age_days?: number; window_days?: number; max_age_days?: number }
+
+type AgeRule = { min_age_days?: number; max_age_days?: number; window_days?: number }
 
 interface Step {
   id: string
@@ -156,7 +159,11 @@ async function runEvaluation(
     .select('id, key, audience, active, enrollment_rule, anchor_field')
     .eq('active', true)
 
-  const sequences = (sequencesRaw ?? []) as Sequence[]
+  // Lot 7 : on traite les sequences par priorite croissante, pour que
+  // l'onboarding gagne quand plusieurs sequences sont eligibles au meme run.
+  const sequences = ((sequencesRaw ?? []) as Sequence[])
+    .slice()
+    .sort((a, b) => sequencePriority(a.key) - sequencePriority(b.key))
   if (!sequences.length) return stats
 
   const { data: stepsRaw } = await supabase
@@ -537,9 +544,7 @@ async function enrollForSequence(
   if (rule.type === 'signup') {
     // Optional min_age_days targets users older than N days.
     // Candidates: created between (min_age_days + window_days) and min_age_days ago.
-    const minAge = (rule as { min_age_days?: number }).min_age_days ?? 0
-    const upperBound = new Date(nowMs - minAge * 86400_000).toISOString()
-    const lowerBound = new Date(nowMs - (minAge + windowDays) * 86400_000).toISOString()
+    const { lowerBound, upperBound } = ageWindow(rule as AgeRule, nowMs, { windowDays })
     let q = supabase
       .from('profiles')
       .select('id, role, created_at')
@@ -568,9 +573,7 @@ async function enrollForSequence(
       .filter((c: { last_seen_at: string | null }) => !!c.last_seen_at)
       .map((c: { id: string; last_seen_at: string }) => ({ id: c.id, anchor_at: c.last_seen_at }))
   } else if (rule.type === 'owner_no_sit') {
-    const minAge = rule.min_age_days ?? 7
-    const minAgeAt = new Date(nowMs - minAge * 86400_000).toISOString()
-    const windowAt = new Date(nowMs - (minAge + windowDays) * 86400_000).toISOString()
+    const { lowerBound: windowAt, upperBound: minAgeAt } = ageWindow(rule as AgeRule, nowMs, { minAgeDays: 7, windowDays })
     let q = supabase
       .from('profiles')
       .select('id, role, created_at')
@@ -589,9 +592,7 @@ async function enrollForSequence(
       .filter((c: { id: string }) => !withSitSet.has(c.id))
       .map((c: { id: string; created_at: string }) => ({ id: c.id, anchor_at: c.created_at }))
   } else if (rule.type === 'sitter_no_application') {
-    const minAge = rule.min_age_days ?? 14
-    const minAgeAt = new Date(nowMs - minAge * 86400_000).toISOString()
-    const windowAt = new Date(nowMs - (minAge + windowDays) * 86400_000).toISOString()
+    const { lowerBound: windowAt, upperBound: minAgeAt } = ageWindow(rule as AgeRule, nowMs, { minAgeDays: 14, windowDays })
     let q = supabase
       .from('profiles')
       .select('id, role, created_at')
@@ -629,11 +630,11 @@ async function enrollForSequence(
   } else if (rule.type === 'sitter_missing_affinity') {
     // Gardiens inscrits depuis min_age_days jours dont animal_types OU
     // work_during_sit est vide. Chunké par pages de 500 pour rester frugal.
-    const minAge = rule.min_age_days ?? 7
-    const minAgeAt = new Date(nowMs - minAge * 86400_000).toISOString()
+    const { lowerBound: sitterFloor, upperBound: minAgeAt } = ageWindow(rule as AgeRule, nowMs, { minAgeDays: 7, windowDays: 14 })
     let q = supabase
       .from('profiles')
       .select('id, role, created_at, sitter_profiles!inner(animal_types, work_during_sit)')
+      .gt('created_at', sitterFloor)
       .lt('created_at', minAgeAt)
       .not('email', 'is', null)
       .eq('account_status', 'active')
@@ -654,11 +655,11 @@ async function enrollForSequence(
       .map((c: any) => ({ id: c.id, anchor_at: c.created_at }))
   } else if (rule.type === 'owner_missing_affinity') {
     // Propriétaires inscrits depuis min_age_days jours dont presence_expected est vide.
-    const minAge = rule.min_age_days ?? 7
-    const minAgeAt = new Date(nowMs - minAge * 86400_000).toISOString()
+    const { lowerBound: ownerFloor, upperBound: minAgeAt } = ageWindow(rule as AgeRule, nowMs, { minAgeDays: 7, windowDays: 14 })
     let q = supabase
       .from('profiles')
       .select('id, role, created_at, owner_profiles!inner(presence_expected)')
+      .gt('created_at', ownerFloor)
       .lt('created_at', minAgeAt)
       .not('email', 'is', null)
       .eq('account_status', 'active')
@@ -679,7 +680,7 @@ async function enrollForSequence(
     // Membres qui ont répondu à au moins une petite mission dans la fenêtre
     // (window_days, défaut 180) et n'ont ni candidature de garde envoyée ni
     // annonce publiée. Pont éditorial « du coup de main à la garde ».
-    const windowAt = new Date(nowMs - ((rule.window_days ?? 180) * 86400_000)).toISOString()
+    const windowAt = new Date(nowMs - ((rule.max_age_days ?? rule.window_days ?? 180) * 86400_000)).toISOString()
     const { data: responses, error: respErr } = await supabase
       .from('small_mission_responses')
       .select('responder_id, created_at')
