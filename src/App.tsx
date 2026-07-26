@@ -94,6 +94,7 @@ const AdminProDirectory = lazy(() => import("./pages/admin/AdminProDirectory"));
 const ArticleEditor = lazy(() => import("./pages/ArticleEditor"));
 const AdminOverview = lazy(() => import("./pages/admin/AdminOverview"));
 const AdminAudit = lazy(() => import("./pages/admin/AdminAudit"));
+const AdminDeletionRequests = lazy(() => import("./pages/admin/AdminDeletionRequests"));
 const AdminUsers = lazy(() => import("./pages/admin/AdminUsers"));
 const AdminListings = lazy(() => import("./pages/admin/AdminListings"));
 const AdminSitsManagement = lazy(() => import("./pages/admin/AdminSitsManagement"));
@@ -372,6 +373,7 @@ const AppRoutes = () => {
         <Route path="/admin" element={<AdminOverview />} />
         <Route path="/admin/dashboard" element={<Navigate to="/admin" replace />} />
         <Route path="/admin/audit" element={<AdminAudit />} />
+        <Route path="/admin/demandes-suppression" element={<AdminDeletionRequests />} />
         <Route path="/admin/subscriptions" element={<AdminSubscriptions />} />
         <Route path="/admin/users" element={<AdminUsers />} />
         <Route path="/admin/listings" element={<AdminListings />} />
