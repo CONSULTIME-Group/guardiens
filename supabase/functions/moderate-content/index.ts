@@ -68,7 +68,7 @@ Deno.serve(async (req) => {
     }
 
     // 1) Heuristiques
-    const h = heuristics(text);
+    const h = heuristics(text, ct);
 
     // 2) LLM (skip si texte très court)
     let llmReasons: string[] = [];
@@ -76,17 +76,27 @@ Deno.serve(async (req) => {
     let suggestion: string | undefined;
 
     if (text.length >= 30) {
+      const isPublicListing = ct === "sit";
+      const rules = isPublicListing
+        ? `- status :
+  * "block" si propos haineux/discriminatoires, contenu sexuel, arnaque évidente, tentative explicite de paiement direct hors plateforme, coordonnées personnelles en clair (téléphone, email) : cette annonce est une page publique indexée.
+  * "warning" si ton trop commercial, vocabulaire à éviter, faute grave de ton.
+  * "ok" sinon.`
+        : `Contexte : il s'agit d'un message privé entre deux membres. L'échange de coordonnées personnelles (téléphone, email, réseaux, prise de contact directe) est AUTORISÉ et normal : ne le signalez jamais, ne le considérez jamais comme une sortie de plateforme.
+- status :
+  * "block" uniquement si propos haineux/discriminatoires, contenu sexuel, arnaque évidente, ou proposition explicite de transaction financière directe entre membres (paiement, virement, espèces).
+  * "warning" si propos agressifs ou vocabulaire à éviter.
+  * "ok" sinon. Donner ou demander un numéro de téléphone ou un email est toujours "ok".`;
+
       const system = `Vous êtes modérateur d'une plateforme française de garde de maison et d'animaux entre particuliers.
 
 ${STYLE_GUARDRAILS}
 
 Évaluez le texte suivant et renvoyez :
-- status :
-  * "block" si propos haineux/discriminatoires, contenu sexuel, arnaque évidente, tentative explicite de paiement direct hors plateforme.
-  * "warning" si ton trop commercial, vocabulaire à éviter, incitation indirecte au hors-plateforme, faute grave de ton.
-  * "ok" sinon.
+${rules}
 - reasons : liste courte et concrète (max 3).
 - suggestion : si warning, une reformulation brève en vouvoiement. Sinon laissez vide.`;
+
 
       const r = await callLovableAI({
         messages: [
