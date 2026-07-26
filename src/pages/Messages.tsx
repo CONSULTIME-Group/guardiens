@@ -15,6 +15,7 @@ import ConversationHeader from "@/components/messages/ConversationHeader";
 import DaySeparator from "@/components/messages/DaySeparator";
 import MessageBubble from "@/components/messages/MessageBubble";
 import MessageComposer from "@/components/messages/MessageComposer";
+import ContactSharingNotice from "@/components/messages/ContactSharingNotice";
 import MessagesListSkeleton from "@/components/messages/MessagesListSkeleton";
 import { useToast } from "@/hooks/use-toast";
 import { useSubscriptionAccess } from "@/hooks/useSubscriptionAccess";
