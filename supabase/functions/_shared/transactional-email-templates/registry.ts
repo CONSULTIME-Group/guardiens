@@ -86,6 +86,7 @@ import { template as questionAnswerReceived } from './question-answer-received.t
 import { template as helperToGuard } from './helper-to-guard.tsx'
 import { template as dormantSitterNudge } from './dormant-sitter-nudge.tsx'
 import { template as affinityOnboardingNudge } from './affinity-onboarding-nudge.tsx'
+import { template as accountDeleted } from './account-deleted.tsx'
 import { template as unsubscribeLink } from './unsubscribe-link.tsx'
 import { template as ownerPendingApplicationNudge } from './owner-pending-application-nudge.tsx'
 
@@ -172,6 +173,7 @@ export const TEMPLATES: Record<string, TemplateEntry> = {
   'dormant-sitter-nudge': dormantSitterNudge,
   'affinity-onboarding-nudge': affinityOnboardingNudge,
   'unsubscribe-link': unsubscribeLink,
+  'account-deleted': accountDeleted,
   'owner-pending-application-nudge': ownerPendingApplicationNudge,
 }
 

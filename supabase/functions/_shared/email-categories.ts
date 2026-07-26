@@ -59,6 +59,8 @@ const TRANSACTIONAL: ReadonlyArray<string> = [
   'review-received',
   // Exercice des droits (droit d'opposition) : doit toujours partir
   'unsubscribe-link',
+  // Accusé de traitement d'une demande d'effacement (preuve de traitement CNIL)
+  'account-deleted',
   // Interne / opérationnel (destinataire = équipe, pas un membre)
   'admin-delivery-alert',
 ]
