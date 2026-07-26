@@ -452,6 +452,9 @@ const AppRoutes = () => {
       <Route path="/dev/preview/mission-cards" element={<PreviewMissionCards />} />
       <Route path="/unsubscribe" element={<Unsubscribe />} />
       <Route path="/email-preferences" element={<EmailPreferences />} />
+      {/* Compatibilité: les emails déjà envoyés contiennent /preferences-email (chemin inversé). */}
+      <Route path="/preferences-email" element={<Navigate to="/email-preferences" replace />} />
+      <Route path="/desinscription" element={<Navigate to="/unsubscribe" replace />} />
       <Route path="/parrainage" element={<ParrainageRoute />} />
       <Route path="/devenir-home-sitter" element={<DevenirHomeSitter />} />
       <Route path="*" element={<NotFound />} />
