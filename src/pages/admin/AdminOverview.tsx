@@ -9,6 +9,7 @@ import { KpiCards } from "./_components/dashboard/KpiCards";
 import { DashboardCharts } from "./_components/dashboard/DashboardCharts";
 import { OnboardingReminderCard } from "./_components/dashboard/OnboardingReminderCard";
 import { AcquisitionPilotCard } from "./_components/dashboard/AcquisitionPilotCard";
+import { AiAcquisitionCard } from "./_components/dashboard/AiAcquisitionCard";
 import AffinityPilotCard from "./_components/dashboard/AffinityPilotCard";
 import { SignalsSection } from "./_components/dashboard/SignalsSection";
 import { CronHealthCard } from "./_components/dashboard/CronHealthCard";
@@ -55,6 +56,7 @@ const AdminOverview = () => {
       <KpiCards stats={stats} />
       <RecentActivity activity={activity} />
       <AcquisitionPilotCard />
+      <AiAcquisitionCard />
       <AffinityPilotCard />
       <DashboardCharts weeklySignups={weeklySignups} deptData={deptData} />
       <OnboardingReminderCard />

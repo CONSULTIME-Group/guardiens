@@ -6,6 +6,7 @@ import { lazy, Suspense, useEffect, useState } from "react";
 // simplement déclenchés juste après le premier rendu.
 const PageViewTracker = lazy(() => import("./PageViewTracker"));
 const FacebookReferralTracker = lazy(() => import("./FacebookReferralTracker"));
+const AiReferralTracker = lazy(() => import("./AiReferralTracker"));
 const FacebookReferralFeedback = lazy(() => import("./FacebookReferralFeedback"));
 const NetworkErrorMonitor = lazy(() => import("@/components/layout/NetworkErrorMonitor"));
 
@@ -30,6 +31,7 @@ export const DeferredTrackers = () => {
     <Suspense fallback={null}>
       <PageViewTracker />
       <FacebookReferralTracker />
+      <AiReferralTracker />
       <NetworkErrorMonitor />
       <FacebookReferralFeedback />
     </Suspense>

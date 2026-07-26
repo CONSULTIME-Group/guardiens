@@ -50,6 +50,7 @@ export type EventType =
   | "fb_referral_landing"      // Visiteur arrivé depuis Facebook (referrer ou utm_source=facebook)
   | "fb_referral_feedback"     // Réaction au prompt de feedback (metadata.reaction)
   | "fb_referral_dismissed"    // Prompt fermé sans feedback
+  | "ai_referral_landing"     // Visiteur arrivé depuis une IA génératrice (metadata.engine)
   // Mesure before/after : impact de la mini-bio sur MissionCard --------------
   // Tag de cohorte dans metadata.release (ex: "mission_card_bio_v1_2026_05_17").
   | "exp_mission_bio_exposure" // 1ère impression de la liste missions (release, mission_count)
