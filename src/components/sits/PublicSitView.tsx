@@ -14,6 +14,7 @@ import SitHero from "@/components/sits/views/tabs/SitHero";
 import AffinitySection from "@/components/matching/AffinitySection";
 import AffinityTeaser from "@/components/matching/AffinityTeaser";
 import { useViewerSitterForAffinity } from "@/hooks/useViewerSitterForAffinity";
+import { sanitizeBioForPublic } from "@/lib/sanitizeBio";
 
 interface SitLike {
   slug?: string | null;
@@ -261,7 +262,7 @@ const PublicSitView = ({
                         </p>
                         {owner.bio && (
                           <p className="text-sm text-foreground/80 mt-3 leading-relaxed line-clamp-3">
-                            {owner.bio}
+                            {sanitizeBioForPublic(owner.bio)}
                           </p>
                         )}
                         {sit.specific_expectations && (

@@ -38,6 +38,7 @@ import AffinitySection from "@/components/matching/AffinitySection";
 import AffinityTeaser from "@/components/matching/AffinityTeaser";
 import { useViewerSitterForAffinity } from "@/hooks/useViewerSitterForAffinity";
 import AlmaFitGardien from "@/components/ai/alma/AlmaFitGardien";
+import { sanitizeBioForPublic } from "@/lib/sanitizeBio";
 import { AlmaReciprocityWhisper } from "@/components/ai/alma/wiring/AlmaReciprocityWhisper";
 import { AlmaOwnerActiveSitterWhisper } from "@/components/ai/alma/wiring/AlmaOwnerActiveSitterWhisper";
 import ProfileSchemaOrg from "@/components/seo/ProfileSchemaOrg";
@@ -825,8 +826,9 @@ export default function PublicSitterProfile() {
 
   const firstName = capitalize(profile?.first_name || "");
   const city = profile?.city || "";
-  const bio = profile?.bio || "";
-  const motivation = sitterProfile?.motivation || "";
+  // RGPD : masquage présentationnel des coordonnées (jamais de modification en base).
+  const bio = sanitizeBioForPublic(profile?.bio);
+  const motivation = sanitizeBioForPublic(sitterProfile?.motivation);
   const animalTypes: string[] = sitterProfile?.animal_types || [];
   const hasVehicle = sitterProfile?.has_vehicle || false;
   const rawRadius = sitterProfile?.geographic_radius;
@@ -1656,7 +1658,7 @@ export default function PublicSitterProfile() {
                   <div className="space-y-4 max-w-2xl">
                     {ownerProfile?.welcome_notes && (
                       <p className="text-base text-foreground leading-relaxed font-body whitespace-pre-line">
-                        {ownerProfile.welcome_notes}
+                        {sanitizeBioForPublic(ownerProfile.welcome_notes)}
                       </p>
                     )}
                     {bio && bio !== ownerProfile?.welcome_notes && (

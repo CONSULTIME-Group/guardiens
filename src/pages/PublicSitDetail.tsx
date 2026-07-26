@@ -368,9 +368,12 @@ const PublicSitDetail = () => {
 
  // ── SEO / OG ──
   const ownerCountry = ((owner as any)?.country as string | undefined)?.trim() || (sit as any)?.country?.trim() || "FR";
-  const cityForTitle = (owner?.city && ownerCountry && ownerCountry !== "FR")
-    ? `${owner.city} (${ownerCountry})`
-    : (owner?.city || "France");
+  // Source de vérité : la ville portée par l'annonce (résidence secondaire,
+  // étranger), avec repli sur la ville du profil propriétaire.
+  const sitCity = ((sit as any)?.city as string | undefined)?.trim() || owner?.city?.trim() || "";
+  const cityForTitle = (sitCity && ownerCountry && ownerCountry !== "FR")
+    ? `${sitCity} (${ownerCountry})`
+    : (sitCity || "France");
  const startFmt = sit.start_date ? format(new Date(sit.start_date), "d MMMM", { locale: fr }) : "";
  const endFmt = sit.end_date ? format(new Date(sit.end_date), "d MMMM yyyy", { locale: fr }) : "";
  const datesShort = startFmt && endFmt ? `du ${startFmt} au ${endFmt}` : "dates flexibles";
@@ -380,7 +383,7 @@ const PublicSitDetail = () => {
  : "animaux à confier";
 
  // og:title, titre de l'annonce + ville (si dispo) + suffixe Guardiens
- const ownerCity = owner?.city?.trim() || "";
+ const ownerCity = sitCity;
  const baseTitle = sit.title || "Garde de maison et animaux";
  const ogTitle = ownerCity
  ? `${baseTitle} à ${ownerCity}, Guardiens`
@@ -644,7 +647,7 @@ const PublicSitDetail = () => {
           ownerId={sit.user_id}
           ownerFirstName={owner?.first_name || ""}
           petNames={pets.map((p: any) => p.name)}
-          city={owner?.city || ""}
+          city={sitCity}
           startDate={formatDate(sit.start_date)}
           endDate={formatDate(sit.end_date)}
           onSuccess={() => setHasApplied(true)}

@@ -96,6 +96,9 @@ const StepIdentity = ({ data, onChange, onUploadAvatar }: Props) => {
           className="rounded-lg min-h-[120px]"
           maxLength={2000}
         />
+        <p className="text-xs text-muted-foreground">
+          Les numéros de téléphone et les adresses email saisis ici sont masqués automatiquement sur votre profil public. Pour les transmettre à un gardien, utilisez la messagerie.
+        </p>
       </div>
 
       {/* Motivation */}

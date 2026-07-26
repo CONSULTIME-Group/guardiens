@@ -35,6 +35,7 @@ import SitHero from "@/components/sits/shared/SitHero";
 import ShareButtons from "@/components/sits/ShareButtons";
 import { getSitStatusConfig } from "@/components/sits/shared/sitConstants";
 import { sanitizeUserTitle } from "@/lib/sanitizeTitle";
+import { sanitizeBioForCard } from "@/lib/sanitizeBio";
 
 interface SitDetailHeaderProps {
   sitId: string;
@@ -287,7 +288,7 @@ const SitDetailHeader = ({
             </div>
             <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
               {owner.bio
-                ? owner.bio
+                ? sanitizeBioForCard(owner.bio)
                 : "Ce membre n'a pas encore renseigné de présentation."}
             </p>
           </div>

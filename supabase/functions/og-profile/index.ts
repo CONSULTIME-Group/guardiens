@@ -8,6 +8,7 @@
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 import { Resvg, initWasm } from "https://esm.sh/@resvg/resvg-wasm@2.6.2";
+import { sanitizeBioForPublic } from "../_shared/sanitize-bio.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -175,7 +176,7 @@ Deno.serve(async (req) => {
       rating: avg.toFixed(1),
       reviewCount: reviews.length,
       completedSits,
-      bio: profile.bio || "Membre de la communauté Guardiens.",
+      bio: sanitizeBioForPublic(profile.bio) || "Membre de la communauté Guardiens.",
       role: roleLabel,
       verified: !!profile.identity_verified,
     });

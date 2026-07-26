@@ -38,6 +38,7 @@ import { Search, MapPin, Calendar, Star, Lock, Zap, Sparkles, Globe2, X, AlertCi
 import { format, differenceInDays, differenceInHours } from "date-fns";
 import { fr } from "date-fns/locale";
 import { geocodeCity, haversineDistance } from "@/lib/geocode";
+import { sanitizeBioForCard } from "@/lib/sanitizeBio";
 import { ALLOWED_ALERT_RADII, snapToAllowedRadius } from "@/lib/alertRadius";
 import { useSubscriptionAccess } from "@/hooks/useSubscriptionAccess";
 import FavoriteButton from "@/components/shared/FavoriteButton";
@@ -1999,7 +2000,7 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
  <p className="text-xs text-muted-foreground italic line-clamp-2 mt-0.5">{member.specialty_description}</p>
  )}
  {!member.specialty_description && member.bio && (
- <p className="text-xs text-muted-foreground line-clamp-2 mt-1">{member.bio}</p>
+ <p className="text-xs text-muted-foreground line-clamp-2 mt-1">{sanitizeBioForCard(member.bio)}</p>
  )}
  <div className="flex flex-wrap gap-1.5 mt-1.5">
  {visibleSkills.map((s: string) => {
