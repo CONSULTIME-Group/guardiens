@@ -307,7 +307,15 @@ const PublicSitDetail = () => {
     );
   }
   if (!sit) return null;
-  if (sit.status !== "published") return <div className="max-w-2xl mx-auto p-6 md:p-10 text-center"><p className="text-muted-foreground">Cette annonce n'est plus disponible.</p></div>;
+  // `confirmed` et `archived` restent accessibles (HTTP 200, noindex) ; les
+  // autres statuts non publiés (brouillons, annulés) restent privés.
+  const isClosedSit = isClosedSitStatus(sit.status);
+  if (sit.status !== "published" && !isClosedSit) return <div className="max-w-2xl mx-auto p-6 md:p-10 text-center"><p className="text-muted-foreground">Cette annonce n'est plus disponible.</p></div>;
+  // Participants à la garde : le propriétaire, un administrateur, ou le
+  // gardien retenu. Eux seuls voient les dates réelles d'une garde close.
+  const isParticipant = viewerType === "owner_of_sit" || viewerType === "admin" || isAcceptedSitter;
+  const hideDates = isClosedSit && !isParticipant;
+
 
  const photos: string[] = property?.photos || [];
  const formatDate = (d: string | null) => d ? format(new Date(d), "d MMMM yyyy", { locale: fr }) : "";
