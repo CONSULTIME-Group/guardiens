@@ -338,7 +338,7 @@ async function runEvaluation(
               : undefined,
             ...ownerContext,
           },
-          metadata: { source: `journey:${j.sequence_key}:${nextStep.step_order}`, user_id: j.user_id },
+          logMetadata: { source: `journey:${j.sequence_key}:${nextStep.step_order}`, user_id: j.user_id },
         }),
       })
 

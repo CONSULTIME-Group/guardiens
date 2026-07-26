@@ -151,7 +151,7 @@ Deno.serve(async (req) => {
             firstName: s.sitter_first_name || "",
             days: s.days_since_signup,
           },
-          metadata: { sitter_id: s.sitter_id, days_since_signup: s.days_since_signup },
+          logMetadata: { sitter_id: s.sitter_id, days_since_signup: s.days_since_signup },
         }),
       });
       if (!resp.ok) {

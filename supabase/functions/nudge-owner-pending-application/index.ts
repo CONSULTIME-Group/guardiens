@@ -93,7 +93,7 @@ async function sendReminderEmail(params: {
         daysSince,
         ctaUrl,
       },
-      metadata: {
+      logMetadata: {
         application_id: app.application_id,
         sit_id: app.sit_id,
         sitter_id: app.sitter_id,

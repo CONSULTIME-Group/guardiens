@@ -254,7 +254,7 @@ Deno.serve(async (req) => {
               missionId: m.id,
               ageDays: m.ageDays,
             },
-            metadata: { mission_id: m.id, close_reason: 'expired', age_days: m.ageDays, reason: m.reason },
+            logMetadata: { mission_id: m.id, close_reason: 'expired', age_days: m.ageDays, reason: m.reason },
           }),
         });
         const _steTxt1 = _steRes.ok ? '' : await _steRes.text().catch(() => '');

@@ -218,7 +218,7 @@ Deno.serve(async (req) => {
             questions,
             topMembers,
           },
-          metadata: { digest: 'mutual_aid_weekly' },
+          logMetadata: { digest: 'mutual_aid_weekly' },
         }),
       });
       const _steTxt1 = _steRes.ok ? '' : await _steRes.text().catch(() => '');
