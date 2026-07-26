@@ -746,6 +746,8 @@ const Messages = () => {
             aria-relevant="additions"
             aria-label="Historique des messages"
           >
+            <ContactSharingNotice conversationId={activeConv.id} />
+
             {(activeConv.sit?.status === "confirmed" || activeConv.sit?.status === "in_progress") && activeConv.sit?.property_id && (
               <HouseGuideBlock
                 propertyId={activeConv.sit.property_id}
