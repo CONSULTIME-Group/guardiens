@@ -99,6 +99,7 @@ const PRODUCT: ReadonlyArray<string> = [
   'unread-messages-reminder',
   'dormant-sitter-nudge',
   'affinity-onboarding-nudge',
+  'owner-pending-application-nudge',
 ]
 
 const DIGEST: ReadonlyArray<string> = [
