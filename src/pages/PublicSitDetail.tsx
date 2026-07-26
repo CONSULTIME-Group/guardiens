@@ -58,6 +58,8 @@ const PublicSitDetail = () => {
   const [loadError, setLoadError] = useState<string | null>(null);
  const [applyOpen, setApplyOpen] = useState(false);
  const [hasApplied, setHasApplied] = useState(false);
+ const [isAcceptedSitter, setIsAcceptedSitter] = useState(false);
+
  const [viewerType, setViewerType] = useState<ViewerType>("anonymous");
  const sitViewFired = useRef(false);
 
