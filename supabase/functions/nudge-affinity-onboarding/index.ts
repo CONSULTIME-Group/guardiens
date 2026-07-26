@@ -194,44 +194,27 @@ Deno.serve(async (req) => {
         continue;
       }
 
-      const html = buildEmailHtml({
-        firstName: u.first_name || "",
-        hours: u.hours_since_started,
-        ctaUrl: "https://guardiens.fr/onboarding/affinity",
-      });
-
-      const resp = await fetch("https://api.resend.com/emails", {
+      const resp = await fetch(`${SUPABASE_URL}/functions/v1/send-transactional-email`, {
         method: "POST",
         headers: {
-          Authorization: `Bearer ${RESEND_API_KEY}`,
           "Content-Type": "application/json",
+          Authorization: `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,
+          apikey: SUPABASE_SERVICE_ROLE_KEY,
         },
         body: JSON.stringify({
-          from: "Guardiens <bonjour@guardiens.fr>",
-          to: [u.email],
-          subject: "Il ne vous reste que quelques étapes",
-          html,
+          templateName: "affinity-onboarding-nudge",
+          recipientEmail: u.email,
+          idempotencyKey: messageId,
+          templateData: {
+            firstName: u.first_name || "",
+            hours: u.hours_since_started,
+          },
+          metadata: { user_id: u.profile_id, hours_since_started: u.hours_since_started },
         }),
       });
-      const status = resp.ok ? "sent" : "failed";
-      let resendId: string | null = null;
-      let errMsg: string | null = null;
-      try {
-        const j = await resp.json();
-        if (resp.ok) resendId = j?.id ?? null;
-        else errMsg = JSON.stringify(j);
-      } catch {
-        if (!resp.ok) errMsg = `HTTP ${resp.status}`;
+      if (!resp.ok) {
+        console.error("[nudge-affinity-onboarding] send failed", resp.status, await resp.text());
       }
-      await service.from("email_send_log").insert({
-        message_id: messageId,
-        template_name: "affinity_onboarding_stale_nudge",
-        recipient_email: u.email,
-        status,
-        error_message: errMsg,
-        resend_id: resendId,
-        metadata: { user_id: u.profile_id, hours_since_started: u.hours_since_started },
-      });
       if (resp.ok) emailsSent += 1;
       else emailsSkipped += 1;
     }

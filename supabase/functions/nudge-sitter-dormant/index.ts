@@ -185,45 +185,29 @@ Deno.serve(async (req) => {
         continue;
       }
 
-      const html = buildEmailHtml({
-        firstName: s.sitter_first_name || "",
-        days: s.days_since_signup,
-        ctaUrl: "https://guardiens.fr/recherche",
-      });
-      const subject = `${s.sitter_first_name || "Bonjour"}, il y a peut-être une garde pour vous cette semaine`;
-
-      const resp = await fetch("https://api.resend.com/emails", {
+      // Envoi via send-transactional-email : cap, suppression, opt-out categorie,
+      // en-tetes List-Unsubscribe et pied de page tokenise centralises.
+      const resp = await fetch(`${SUPABASE_URL}/functions/v1/send-transactional-email`, {
         method: "POST",
         headers: {
-          Authorization: `Bearer ${RESEND_API_KEY}`,
           "Content-Type": "application/json",
+          Authorization: `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,
+          apikey: SUPABASE_SERVICE_ROLE_KEY,
         },
         body: JSON.stringify({
-          from: "Guardiens <bonjour@guardiens.fr>",
-          to: [s.sitter_email],
-          subject,
-          html,
+          templateName: "dormant-sitter-nudge",
+          recipientEmail: s.sitter_email,
+          idempotencyKey: messageId,
+          templateData: {
+            firstName: s.sitter_first_name || "",
+            days: s.days_since_signup,
+          },
+          metadata: { sitter_id: s.sitter_id, days_since_signup: s.days_since_signup },
         }),
       });
-      const status = resp.ok ? "sent" : "failed";
-      let resendId: string | null = null;
-      let errMsg: string | null = null;
-      try {
-        const j = await resp.json();
-        if (resp.ok) resendId = j?.id ?? null;
-        else errMsg = JSON.stringify(j);
-      } catch {
-        if (!resp.ok) errMsg = `HTTP ${resp.status}`;
+      if (!resp.ok) {
+        console.error("[nudge-sitter-dormant] send failed", resp.status, await resp.text());
       }
-      await service.from("email_send_log").insert({
-        message_id: messageId,
-        template_name: "dormant_sitter_nudge",
-        recipient_email: s.sitter_email,
-        status,
-        error_message: errMsg,
-        resend_id: resendId,
-        metadata: { sitter_id: s.sitter_id, days_since_signup: s.days_since_signup },
-      });
       if (resp.ok) emailsSent += 1;
       else emailsSkipped += 1;
     }
