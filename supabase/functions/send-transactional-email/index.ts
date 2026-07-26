@@ -3,6 +3,7 @@ import { renderAsync } from 'npm:@react-email/components@0.0.22'
 import { createClient } from 'npm:@supabase/supabase-js@2'
 import { TEMPLATES } from '../_shared/transactional-email-templates/registry.ts'
 import { getEmailCategory, type EmailCategory } from '../_shared/email-categories.ts'
+import { bypassesSuppression } from '../_shared/email-suppression.ts'
 
 const SITE_URL = 'https://guardiens.fr'
 
@@ -308,44 +309,52 @@ Deno.serve(async (req) => {
     }
   }
 
-  // 2. Check suppression list (fail-closed: if we can't verify, don't send)
-  const { data: suppressed, error: suppressionError } = await supabase
-    .from('suppressed_emails')
-    .select('id')
-    .eq('email', effectiveRecipient.toLowerCase())
-    .maybeSingle()
+  // 2. Check suppression list (fail-closed: if we can't verify, don't send).
+  // Exception : les templates légaux de la liste blanche (accusé RGPD, lien de
+  // désinscription) franchissent la liste de suppression. Voir
+  // docs/email-frequency-cap.md, section liste de suppression.
+  const suppressionBypass = bypassesSuppression(templateName)
+  if (!suppressionBypass) {
+    const { data: suppressed, error: suppressionError } = await supabase
+      .from('suppressed_emails')
+      .select('id')
+      .eq('email', effectiveRecipient.toLowerCase())
+      .maybeSingle()
 
-  if (suppressionError) {
-    console.error('Suppression check failed — refusing to send', {
-      error: suppressionError,
-      effectiveRecipient,
-    })
-    return new Response(
-      JSON.stringify({ error: 'Failed to verify suppression status' }),
-      {
-        status: 500,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      }
-    )
-  }
+    if (suppressionError) {
+      console.error('Suppression check failed, refusing to send', {
+        error: suppressionError,
+        effectiveRecipient,
+      })
+      return new Response(
+        JSON.stringify({ error: 'Failed to verify suppression status' }),
+        {
+          status: 500,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        }
+      )
+    }
 
-  if (suppressed) {
-    // Log the suppressed attempt
-    await supabase.from('email_send_log').insert({
-      message_id: messageId,
-      template_name: templateName,
-      recipient_email: effectiveRecipient,
-      status: 'suppressed',
-    })
+    if (suppressed) {
+      // Log the suppressed attempt
+      await supabase.from('email_send_log').insert({
+        message_id: messageId,
+        template_name: templateName,
+        recipient_email: effectiveRecipient,
+        status: 'suppressed',
+      })
 
-    console.log('Email suppressed', { effectiveRecipient, templateName })
-    return new Response(
-      JSON.stringify({ success: false, reason: 'email_suppressed' }),
-      {
-        status: 200,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      }
-    )
+      console.log('Email suppressed', { effectiveRecipient, templateName })
+      return new Response(
+        JSON.stringify({ success: false, reason: 'email_suppressed' }),
+        {
+          status: 200,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        }
+      )
+    }
+  } else {
+    console.log('Suppression list bypassed (legal template)', { templateName, effectiveRecipient })
   }
 
   // 2b. Frequency cap & quiet hours (skipped for bypass templates and when caller marks urgent)
@@ -562,9 +571,13 @@ Deno.serve(async (req) => {
       )
     }
     unsubscribeToken = storedToken.token
+  } else if (suppressionBypass) {
+    // Templates légaux : le jeton déjà consommé est réutilisé tel quel, l'envoi
+    // ne doit pas être bloqué (accusé RGPD, lien de désinscription).
+    unsubscribeToken = existingToken.token
   } else {
-    // Token exists but is already used — email should have been caught by suppression check above.
-    // This is a safety fallback; log and skip sending.
+    // Token exists but is already used, the email should have been caught by the
+    // suppression check above. This is a safety fallback: log and skip sending.
     console.warn('Unsubscribe token already used but email not suppressed', {
       email: normalizedEmail,
     })

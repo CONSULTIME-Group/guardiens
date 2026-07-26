@@ -4,12 +4,20 @@
 //   - purge-deleted-accounts (cron sur les demandes planifiées)
 //
 // Deux obligations de conformité, dans cet ordre :
-//   1. Accusé de traitement au demandeur (preuve attendue par la CNIL),
-//      envoyé AVANT l'ajout à suppressed_emails sinon le pipeline le bloquerait.
-//   2. Ajout de l'email à suppressed_emails (ceinture de sécurité anti ré-envoi).
+//   1. Accusé de traitement au demandeur (preuve attendue par la CNIL). Le
+//      template `account-deleted` figure dans SUPPRESSION_BYPASS_TEMPLATES : il
+//      part même si l'adresse est déjà dans suppressed_emails (cas d'une
+//      personne désinscrite avant de demander l'effacement).
+//   2. Ajout de l'email à suppressed_emails avec le motif `account_deleted`
+//      (ceinture de sécurité anti ré-envoi), motif autorisé par la contrainte
+//      suppressed_emails_reason_check.
+
+import type { SuppressionReason } from "./email-suppression.ts";
 
 // deno-lint-ignore no-explicit-any
 type Client = any;
+
+const ERASURE_REASON: SuppressionReason = "account_deleted";
 
 export async function sendErasureAcknowledgement(
   email: string | null | undefined,
@@ -58,7 +66,7 @@ export async function suppressEmail(
     .upsert(
       {
         email: email.toLowerCase(),
-        reason: "account_deleted",
+        reason: ERASURE_REASON,
         metadata: { ...metadata, suppressed_at: new Date().toISOString() },
       },
       { onConflict: "email" },

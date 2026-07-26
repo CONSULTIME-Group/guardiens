@@ -160,3 +160,36 @@ d'origine. À ce moment :
 
 Toute modification de `BYPASS_TEMPLATES`, des constantes de cap, ou de la
 logique de `decideDeferral` **doit** mettre à jour ces tests.
+
+## 7. Liste de suppression (`suppressed_emails`)
+
+Source de vérité : `supabase/functions/_shared/email-suppression.ts`.
+
+### 7.1 Motifs autorisés
+
+La contrainte `suppressed_emails_reason_check` accepte exactement :
+`unsubscribe`, `bounce`, `complaint`, `account_deleted`. La constante
+`SUPPRESSION_REASONS` en est le miroir côté code. Tout nouveau motif doit
+être ajouté dans les deux endroits, sinon l'insertion échoue en silence
+(l'appelant ne fait qu'un `console.error`). Le test
+`src/__tests__/email-suppression-exceptions.test.ts` échoue si un motif
+écrit par le code n'est pas dans la liste.
+
+### 7.2 Exception légale : templates qui franchissent la liste
+
+`send-transactional-email` vérifie `suppressed_emails` en fail-closed pour
+toutes les catégories, sauf pour les templates de
+`SUPPRESSION_BYPASS_TEMPLATES` :
+
+| Template | Raison de l'exception |
+|---|---|
+| `account-deleted` | Accusé de traitement d'une demande d'effacement RGPD, preuve attendue par la CNIL. Bloqué, il priverait la personne de la preuve de traitement, y compris quand elle s'était désinscrite avant de demander l'effacement. |
+| `unsubscribe-link` | Lien de désinscription et de préférences envoyé sur demande, il sert l'exercice du droit d'opposition. |
+
+Ces deux templates servent l'exercice des droits de la personne : les
+bloquer va contre l'objectif même de la liste de suppression.
+
+NE PAS RETIRER cette exception. NE PAS y ajouter d'email produit, digest,
+alerte ou marketing : la liste de suppression reste absolue pour tout le
+reste. Le bypass court aussi sur le repli « jeton de désinscription déjà
+consommé », qui sinon bloquerait ces mêmes envois.
