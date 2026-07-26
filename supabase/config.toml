@@ -93,6 +93,8 @@ project_id = "erhccyqevdyevpyctsjj"
     verify_jwt = true
   [functions.remind-unread-messages]
     verify_jwt = false
+  [functions.admin-resend-domain-tracking]
+    verify_jwt = true
 
 
 
