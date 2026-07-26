@@ -191,7 +191,7 @@ Deno.serve(async (req) => {
         await recordDeliveryFailure(supabase, {
           templateName: "unread-messages-reminder",
           recipientEmail: recipient.email,
-          recipientId: recipient.id ?? null,
+          recipientId,
           conversationId: conv.id,
           entityType: "conversation",
           entityId: conv.id,

@@ -136,7 +136,7 @@ Deno.serve(async (req) => {
         await recordDeliveryFailure(supabase, {
           templateName: "new-message",
           recipientEmail: recipient.email,
-          recipientId: (recipient as any).id ?? null,
+          recipientId,
           conversationId: conv.id,
           entityType: "conversation",
           entityId: conv.id,
