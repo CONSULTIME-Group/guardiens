@@ -18,26 +18,44 @@ export type Database = {
         Row: {
           cancelled_at: string | null
           id: string
+          notes: string | null
+          processed_at: string | null
+          processed_by: string | null
           requested_at: string
+          requester_email: string | null
           scheduled_deletion_at: string
+          source: string
           status: string
-          user_id: string
+          updated_at: string
+          user_id: string | null
         }
         Insert: {
           cancelled_at?: string | null
           id?: string
+          notes?: string | null
+          processed_at?: string | null
+          processed_by?: string | null
           requested_at?: string
+          requester_email?: string | null
           scheduled_deletion_at?: string
+          source?: string
           status?: string
-          user_id: string
+          updated_at?: string
+          user_id?: string | null
         }
         Update: {
           cancelled_at?: string | null
           id?: string
+          notes?: string | null
+          processed_at?: string | null
+          processed_by?: string | null
           requested_at?: string
+          requester_email?: string | null
           scheduled_deletion_at?: string
+          source?: string
           status?: string
-          user_id?: string
+          updated_at?: string
+          user_id?: string | null
         }
         Relationships: []
       }
