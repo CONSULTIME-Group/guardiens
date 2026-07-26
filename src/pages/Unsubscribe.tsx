@@ -4,10 +4,11 @@ import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
+import { Input } from "@/components/ui/input";
 import { CheckCircle, XCircle, Loader2 } from "lucide-react";
 import { Helmet } from "react-helmet-async";
 
-type Status = "loading" | "valid" | "already" | "invalid" | "success_all" | "success_partial" | "error";
+type Status = "loading" | "request" | "request_sent" | "valid" | "already" | "invalid" | "success_all" | "success_partial" | "error";
 type Prefs = { product_emails: boolean; digest_emails: boolean; alert_emails: boolean };
 
 const FN_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/handle-email-unsubscribe`;
@@ -27,11 +28,13 @@ const Unsubscribe = () => {
   const [status, setStatus] = useState<Status>("loading");
   const [submitting, setSubmitting] = useState<"all" | "partial" | null>(null);
   const [email, setEmail] = useState<string | null>(null);
+  const [requestEmail, setRequestEmail] = useState("");
+  const [requesting, setRequesting] = useState(false);
   const [prefs, setPrefs] = useState<Prefs>({ product_emails: true, digest_emails: true, alert_emails: true });
 
   useEffect(() => {
     if (!token) {
-      setStatus("invalid");
+      setStatus("request");
       return;
     }
     (async () => {
@@ -58,6 +61,15 @@ const Unsubscribe = () => {
       }
     })();
   }, [token]);
+
+  const handleRequestLink = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!requestEmail.trim()) return;
+    setRequesting(true);
+    await post({ request_email: requestEmail.trim() });
+    setRequesting(false);
+    setStatus("request_sent");
+  };
 
   const handleUnsubscribeAll = async () => {
     if (!token) return;
@@ -101,6 +113,39 @@ const Unsubscribe = () => {
             <div className="flex flex-col items-center gap-2 text-muted-foreground py-8">
               <Loader2 className="h-8 w-8 animate-spin" />
               <p>{t("unsubscribe.loading")}</p>
+            </div>
+          )}
+
+          {status === "request" && (
+            <form onSubmit={handleRequestLink} className="space-y-4">
+              <p className="text-sm text-muted-foreground">
+                Indiquez l'adresse email qui reçoit nos messages. Nous vous enverrons un lien
+                de confirmation pour gérer ou arrêter vos envois.
+              </p>
+              <Input
+                type="email"
+                required
+                autoComplete="email"
+                placeholder="vous@exemple.com"
+                value={requestEmail}
+                onChange={(e) => setRequestEmail(e.target.value)}
+                className="h-11"
+              />
+              <Button type="submit" disabled={requesting} className="w-full h-11">
+                {requesting && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
+                Recevoir mon lien de désinscription
+              </Button>
+            </form>
+          )}
+
+          {status === "request_sent" && (
+            <div className="flex flex-col items-center gap-2 text-primary py-6">
+              <CheckCircle className="h-10 w-10" />
+              <p className="font-medium text-center">Demande enregistrée</p>
+              <p className="text-sm text-muted-foreground text-center">
+                Si cette adresse est connue de nous, vous allez recevoir un lien de confirmation
+                dans quelques minutes. Pensez à vérifier vos indésirables.
+              </p>
             </div>
           )}
 
