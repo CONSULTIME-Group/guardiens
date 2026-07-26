@@ -7,7 +7,7 @@
 //  2) LLM léger pour propos hors-charte, tentative de transaction off-platform.
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
-import { callLovableAI, extractToolArgs, STYLE_GUARDRAILS, CORS_HEADERS } from "../_shared/ai-gateway.ts";
+import { callLovableAI, extractToolArgs, STYLE_GUARDRAILS, STYLE_GUARDRAILS_MESSAGING, CORS_HEADERS } from "../_shared/ai-gateway.ts";
 
 // Regex sans flag /g : .test() sur une regex globale fait avancer lastIndex,
 // ce qui rend la détection intermittente dans un isolate Deno réutilisé.
@@ -82,15 +82,15 @@ Deno.serve(async (req) => {
   * "block" si propos haineux/discriminatoires, contenu sexuel, arnaque évidente, tentative explicite de paiement direct hors plateforme, coordonnées personnelles en clair (téléphone, email) : cette annonce est une page publique indexée.
   * "warning" si ton trop commercial, vocabulaire à éviter, faute grave de ton.
   * "ok" sinon.`
-        : `Contexte : il s'agit d'un message privé entre deux membres. L'échange de coordonnées personnelles (téléphone, email, réseaux, prise de contact directe) est AUTORISÉ et normal : ne le signalez jamais, ne le considérez jamais comme une sortie de plateforme.
+        : `Contexte : il s'agit d'un message privé entre deux membres, qui organisent une garde réelle. Échanger un numéro de téléphone, un email, une adresse ou un rendez-vous fait partie de l'usage normal et ne constitue jamais un motif de signalement.
 - status :
   * "block" uniquement si propos haineux/discriminatoires, contenu sexuel, arnaque évidente, ou proposition explicite de transaction financière directe entre membres (paiement, virement, espèces).
   * "warning" si propos agressifs ou vocabulaire à éviter.
-  * "ok" sinon. Donner ou demander un numéro de téléphone ou un email est toujours "ok".`;
+  * "ok" sinon.`;
 
       const system = `Vous êtes modérateur d'une plateforme française de garde de maison et d'animaux entre particuliers.
 
-${STYLE_GUARDRAILS}
+${isPublicListing ? STYLE_GUARDRAILS : STYLE_GUARDRAILS_MESSAGING}
 
 Évaluez le texte suivant et renvoyez :
 ${rules}
