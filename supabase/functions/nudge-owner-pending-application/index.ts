@@ -32,71 +32,13 @@ interface PendingApp {
   hours_since_created: number;
 }
 
-function escapeHtml(s: string): string {
-  return s
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;");
-}
-
-function buildEmailHtml(params: {
-  ownerFirstName: string;
-  sitterFirstName: string;
-  sitTitle: string;
-  daysSince: number;
-  ctaUrl: string;
-}): string {
-  const greeting = params.ownerFirstName
-    ? `Bonjour ${escapeHtml(params.ownerFirstName)},`
-    : "Bonjour,";
-  const sitter = escapeHtml(params.sitterFirstName || "Un gardien");
-  const title = escapeHtml(params.sitTitle || "votre annonce");
-  const days = params.daysSince;
-  return `<!DOCTYPE html><html><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/></head>
-<body style="margin:0;padding:0;background-color:#FAF9F6;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif">
-<table width="100%" cellpadding="0" cellspacing="0" style="background-color:#FAF9F6;padding:32px 16px">
-<tr><td align="center">
-<table width="600" cellpadding="0" cellspacing="0" style="max-width:600px;background-color:#ffffff;border-radius:16px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,0.04)">
-<tr><td style="padding:0;background:linear-gradient(135deg,#2C6E49 0%,#3a8a5d 100%);height:6px;line-height:6px;font-size:0">&nbsp;</td></tr>
-<tr><td style="padding:32px 40px 8px;text-align:center;background-color:#ffffff">
-<img src="https://guardiens.fr/logo-guardiens.png" alt="Guardiens" width="120" style="display:block;margin:0 auto;height:auto"/>
-</td></tr>
-<tr><td style="padding:24px 40px 8px">
-<h1 style="margin:0 0 20px;font-size:22px;line-height:1.35;color:#1a1a1a;font-weight:700">${sitter} attend votre réponse</h1>
-<p style="margin:0 0 14px;font-size:15px;line-height:1.7;color:#3a3a3a">${greeting}</p>
-<p style="margin:0 0 14px;font-size:15px;line-height:1.7;color:#3a3a3a">${sitter} a candidaté à votre annonce «&nbsp;${title}&nbsp;» il y a ${days} jour${days > 1 ? "s" : ""}, et vous n'avez pas encore répondu.</p>
-<p style="margin:0 0 14px;font-size:15px;line-height:1.7;color:#3a3a3a">Une réponse rapide, même brève, aide ${sitter} à s'organiser. Prenez un moment pour lui écrire.</p>
-</td></tr>
-<tr><td align="center" style="padding:16px 0 8px">
-<a href="${escapeHtml(params.ctaUrl)}" style="display:inline-block;padding:14px 32px;background-color:#2C6E49;color:#ffffff;text-decoration:none;border-radius:10px;font-weight:600;font-size:16px;box-shadow:0 4px 12px rgba(44,110,73,0.25)">Voir la candidature</a>
-</td></tr>
-<tr><td style="padding:24px 40px 8px">
-<p style="margin:0 0 4px;font-size:15px;line-height:1.7;color:#3a3a3a">À bientôt,</p>
-<p style="margin:0 0 14px;font-size:15px;line-height:1.7;color:#3a3a3a">L'équipe Guardiens</p>
-</td></tr>
-<tr><td style="padding:20px 40px;border-top:1px solid #eee;background-color:#FAF9F6;text-align:center">
-<p style="margin:0 0 6px;font-size:13px;color:#555;font-weight:600">Guardiens</p>
-<p style="margin:0;font-size:12px;color:#888;line-height:1.6">L'entraide locale entre propriétaires et gardiens d'animaux.</p>
-<p style="margin:14px 0 0;font-size:11px;color:#aaa">
-<a href="https://guardiens.fr" style="color:#aaa;text-decoration:none">guardiens.fr</a>
-&nbsp;·&nbsp;
-<a href="https://guardiens.fr/unsubscribe" style="color:#aaa;text-decoration:underline">Se désinscrire</a>
-</p>
-</td></tr>
-</table>
-</td></tr></table>
-</body></html>`;
-}
-
 async function sendReminderEmail(params: {
   serviceClient: ReturnType<typeof createClient>;
-  resendKey: string;
   app: PendingApp;
   messageId: string;
   templateName: string;
 }): Promise<{ ok: boolean; error?: string }> {
-  const { serviceClient, resendKey, app, messageId, templateName } = params;
+  const { serviceClient, app, messageId, templateName } = params;
   const email = app.owner_email.trim().toLowerCase();
 
   // Dédup : si un log existe déjà pour ce message_id → skip
@@ -128,57 +70,46 @@ async function sendReminderEmail(params: {
 
   const daysSince = Math.max(1, Math.floor(app.hours_since_created / 24));
   const ctaUrl = `https://guardiens.fr/dashboard/candidatures/${app.application_id}`;
-  const subject = `${app.sitter_first_name || "Un gardien"} attend votre réponse sur Guardiens`;
-  const html = buildEmailHtml({
-    ownerFirstName: app.owner_first_name || "",
-    sitterFirstName: app.sitter_first_name || "",
-    sitTitle: app.sit_title,
-    daysSince,
-    ctaUrl,
-  });
 
-  const resp = await fetch("https://api.resend.com/emails", {
+  // Envoi via send-transactional-email : cap, suppression, opt-out, en-tetes
+  // List-Unsubscribe, pied de page tokenise et journalisation centralises.
+  const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
+  const SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+  const resp = await fetch(`${SUPABASE_URL}/functions/v1/send-transactional-email`, {
     method: "POST",
     headers: {
-      Authorization: `Bearer ${resendKey}`,
       "Content-Type": "application/json",
+      Authorization: `Bearer ${SERVICE_KEY}`,
+      apikey: SERVICE_KEY,
     },
     body: JSON.stringify({
-      from: "Guardiens <bonjour@guardiens.fr>",
-      to: [app.owner_email],
-      subject,
-      html,
+      templateName: "owner-pending-application-nudge",
+      recipientEmail: email,
+      idempotencyKey: messageId,
+      templateData: {
+        ownerFirstName: app.owner_first_name || "",
+        sitterFirstName: app.sitter_first_name || "",
+        sitTitle: app.sit_title,
+        daysSince,
+        ctaUrl,
+      },
+      metadata: {
+        application_id: app.application_id,
+        sit_id: app.sit_id,
+        sitter_id: app.sitter_id,
+        owner_id: app.owner_id,
+        hours_since_created: app.hours_since_created,
+        source_template: templateName,
+      },
     }),
   });
 
-  const status = resp.ok ? "sent" : "failed";
-  let resendId: string | null = null;
-  let errorMessage: string | null = null;
-  try {
-    const j = await resp.json();
-    if (resp.ok) resendId = j?.id ?? null;
-    else errorMessage = JSON.stringify(j);
-  } catch {
-    if (!resp.ok) errorMessage = `HTTP ${resp.status}`;
+  if (!resp.ok) {
+    const body = await resp.text();
+    console.error("[nudge-owner-pending-application] send failed", resp.status, body);
+    return { ok: false, error: `send_failed_${resp.status}` };
   }
-
-  await serviceClient.from("email_send_log").insert({
-    message_id: messageId,
-    template_name: templateName,
-    recipient_email: app.owner_email,
-    status,
-    error_message: errorMessage,
-    resend_id: resendId,
-    metadata: {
-      application_id: app.application_id,
-      sit_id: app.sit_id,
-      sitter_id: app.sitter_id,
-      owner_id: app.owner_id,
-      hours_since_created: app.hours_since_created,
-    },
-  });
-
-  return resp.ok ? { ok: true } : { ok: false, error: errorMessage || "resend_error" };
+  return { ok: true };
 }
 
 Deno.serve(async (req) => {
@@ -277,7 +208,6 @@ Deno.serve(async (req) => {
       const ts = Date.now();
       const result = await sendReminderEmail({
         serviceClient,
-        resendKey: RESEND_API_KEY,
         app,
         messageId: `pending-app-manual-${app.application_id}-${ts}`,
         templateName: "pending_application_manual_reminder",
@@ -351,7 +281,6 @@ Deno.serve(async (req) => {
       }
       const result = await sendReminderEmail({
         serviceClient,
-        resendKey: RESEND_API_KEY,
         app,
         messageId: `pending-app-${app.application_id}`,
         templateName: "pending_application_reminder",

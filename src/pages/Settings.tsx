@@ -194,6 +194,10 @@ const Settings = () => {
     const { error } = await supabase
       .from("notification_preferences")
       .upsert({ user_id: user.id, ...newPrefs, updated_at: new Date().toISOString() }, { onConflict: "user_id" });
+    // Miroir vers la source de verite unique utilisee par la chaine d'envoi.
+    await supabase.rpc("patch_my_email_preferences" as any, {
+      p_product_emails: Boolean(newPrefs.email_sitter_suggestions || newPrefs.email_review_prompts),
+    } as any);
     setSavingKey(null);
     if (error) toast.error("Erreur lors de la sauvegarde");
   };

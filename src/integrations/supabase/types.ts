@@ -7432,6 +7432,18 @@ export type Database = {
         Args: { _application_id: string }
         Returns: string
       }
+      patch_my_email_preferences: {
+        Args: {
+          p_alert_emails?: boolean
+          p_digest_emails?: boolean
+          p_nearby_daily_digest?: boolean
+          p_nearby_daily_radius_km?: number
+          p_new_mission_digest?: boolean
+          p_new_sit_digest?: boolean
+          p_product_emails?: boolean
+        }
+        Returns: undefined
+      }
       purge_email_queue: { Args: { queue_name: string }; Returns: number }
       read_email_batch: {
         Args: { batch_size: number; queue_name: string; vt: number }

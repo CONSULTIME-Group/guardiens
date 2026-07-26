@@ -84,6 +84,10 @@ import { template as missionResponseReceived } from './mission-response-received
 import { template as missionResponseWaiting } from './mission-response-waiting.tsx'
 import { template as questionAnswerReceived } from './question-answer-received.tsx'
 import { template as helperToGuard } from './helper-to-guard.tsx'
+import { template as dormantSitterNudge } from './dormant-sitter-nudge.tsx'
+import { template as affinityOnboardingNudge } from './affinity-onboarding-nudge.tsx'
+import { template as unsubscribeLink } from './unsubscribe-link.tsx'
+import { template as ownerPendingApplicationNudge } from './owner-pending-application-nudge.tsx'
 
 
 
@@ -165,6 +169,10 @@ export const TEMPLATES: Record<string, TemplateEntry> = {
   'mission-response-waiting': missionResponseWaiting,
   'question-answer-received': questionAnswerReceived,
   'helper-to-guard': helperToGuard,
+  'dormant-sitter-nudge': dormantSitterNudge,
+  'affinity-onboarding-nudge': affinityOnboardingNudge,
+  'unsubscribe-link': unsubscribeLink,
+  'owner-pending-application-nudge': ownerPendingApplicationNudge,
 }
 
 

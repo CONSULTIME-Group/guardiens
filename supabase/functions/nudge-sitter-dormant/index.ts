@@ -27,13 +27,6 @@ interface DormantSitter {
   profile_completion: number | null;
 }
 
-function escapeHtml(s: string): string {
-  return s
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;");
-}
 
 /** ISO week number (1-53). */
 function isoWeek(d: Date): { year: number; week: number } {
@@ -43,50 +36,6 @@ function isoWeek(d: Date): { year: number; week: number } {
   const yearStart = new Date(Date.UTC(date.getUTCFullYear(), 0, 1));
   const week = Math.ceil((((date.getTime() - yearStart.getTime()) / 86400000) + 1) / 7);
   return { year: date.getUTCFullYear(), week };
-}
-
-function buildEmailHtml(params: {
-  firstName: string;
-  days: number;
-  ctaUrl: string;
-}): string {
-  const greeting = params.firstName
-    ? `Bonjour ${escapeHtml(params.firstName)},`
-    : "Bonjour,";
-  return `<!DOCTYPE html><html><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/></head>
-<body style="margin:0;padding:0;background-color:#FAF9F6;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif">
-<table width="100%" cellpadding="0" cellspacing="0" style="background-color:#FAF9F6;padding:32px 16px">
-<tr><td align="center">
-<table width="600" cellpadding="0" cellspacing="0" style="max-width:600px;background-color:#ffffff;border-radius:16px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,0.04)">
-<tr><td style="padding:0;background:linear-gradient(135deg,#2C6E49 0%,#3a8a5d 100%);height:6px;line-height:6px;font-size:0">&nbsp;</td></tr>
-<tr><td style="padding:32px 40px 8px;text-align:center;background-color:#ffffff">
-<img src="https://guardiens.fr/logo-guardiens.png" alt="Guardiens" width="120" style="display:block;margin:0 auto;height:auto"/>
-</td></tr>
-<tr><td style="padding:24px 40px 8px">
-<h1 style="margin:0 0 20px;font-size:22px;line-height:1.35;color:#1a1a1a;font-weight:700">Il y a peut-être une garde pour vous cette semaine</h1>
-<p style="margin:0 0 14px;font-size:15px;line-height:1.7;color:#3a3a3a">${greeting}</p>
-<p style="margin:0 0 14px;font-size:15px;line-height:1.7;color:#3a3a3a">Votre profil est complet depuis ${params.days} jours, mais vous n'avez pas encore candidaté à une garde. Peut-être n'avez-vous pas vu passer les bonnes annonces ?</p>
-<p style="margin:0 0 14px;font-size:15px;line-height:1.7;color:#3a3a3a">Prenez deux minutes pour parcourir les dernières annonces près de chez vous.</p>
-</td></tr>
-<tr><td align="center" style="padding:16px 0 8px">
-<a href="${escapeHtml(params.ctaUrl)}" style="display:inline-block;padding:14px 32px;background-color:#2C6E49;color:#ffffff;text-decoration:none;border-radius:10px;font-weight:600;font-size:16px;box-shadow:0 4px 12px rgba(44,110,73,0.25)">Voir les annonces</a>
-</td></tr>
-<tr><td style="padding:24px 40px 8px">
-<p style="margin:0 0 4px;font-size:15px;line-height:1.7;color:#3a3a3a">À bientôt,</p>
-<p style="margin:0 0 14px;font-size:15px;line-height:1.7;color:#3a3a3a">L'équipe Guardiens</p>
-</td></tr>
-<tr><td style="padding:20px 40px;border-top:1px solid #eee;background-color:#FAF9F6;text-align:center">
-<p style="margin:0 0 6px;font-size:13px;color:#555;font-weight:600">Guardiens</p>
-<p style="margin:0;font-size:12px;color:#888;line-height:1.6">L'entraide locale entre propriétaires et gardiens d'animaux.</p>
-<p style="margin:14px 0 0;font-size:11px;color:#aaa">
-<a href="https://guardiens.fr" style="color:#aaa;text-decoration:none">guardiens.fr</a>
-&nbsp;·&nbsp;
-<a href="https://guardiens.fr/unsubscribe" style="color:#aaa;text-decoration:underline">Se désinscrire</a>
-</p>
-</td></tr>
-</table>
-</td></tr></table>
-</body></html>`;
 }
 
 Deno.serve(async (req) => {
@@ -185,45 +134,29 @@ Deno.serve(async (req) => {
         continue;
       }
 
-      const html = buildEmailHtml({
-        firstName: s.sitter_first_name || "",
-        days: s.days_since_signup,
-        ctaUrl: "https://guardiens.fr/recherche",
-      });
-      const subject = `${s.sitter_first_name || "Bonjour"}, il y a peut-être une garde pour vous cette semaine`;
-
-      const resp = await fetch("https://api.resend.com/emails", {
+      // Envoi via send-transactional-email : cap, suppression, opt-out categorie,
+      // en-tetes List-Unsubscribe et pied de page tokenise centralises.
+      const resp = await fetch(`${SUPABASE_URL}/functions/v1/send-transactional-email`, {
         method: "POST",
         headers: {
-          Authorization: `Bearer ${RESEND_API_KEY}`,
           "Content-Type": "application/json",
+          Authorization: `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,
+          apikey: SUPABASE_SERVICE_ROLE_KEY,
         },
         body: JSON.stringify({
-          from: "Guardiens <bonjour@guardiens.fr>",
-          to: [s.sitter_email],
-          subject,
-          html,
+          templateName: "dormant-sitter-nudge",
+          recipientEmail: s.sitter_email,
+          idempotencyKey: messageId,
+          templateData: {
+            firstName: s.sitter_first_name || "",
+            days: s.days_since_signup,
+          },
+          metadata: { sitter_id: s.sitter_id, days_since_signup: s.days_since_signup },
         }),
       });
-      const status = resp.ok ? "sent" : "failed";
-      let resendId: string | null = null;
-      let errMsg: string | null = null;
-      try {
-        const j = await resp.json();
-        if (resp.ok) resendId = j?.id ?? null;
-        else errMsg = JSON.stringify(j);
-      } catch {
-        if (!resp.ok) errMsg = `HTTP ${resp.status}`;
+      if (!resp.ok) {
+        console.error("[nudge-sitter-dormant] send failed", resp.status, await resp.text());
       }
-      await service.from("email_send_log").insert({
-        message_id: messageId,
-        template_name: "dormant_sitter_nudge",
-        recipient_email: s.sitter_email,
-        status,
-        error_message: errMsg,
-        resend_id: resendId,
-        metadata: { sitter_id: s.sitter_id, days_since_signup: s.days_since_signup },
-      });
       if (resp.ok) emailsSent += 1;
       else emailsSkipped += 1;
     }

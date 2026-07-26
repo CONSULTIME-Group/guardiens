@@ -36,6 +36,7 @@ Deno.serve(async (req) => {
   let category: string | null = url.searchParams.get('category')
   let categoriesPayload: { product?: boolean; digest?: boolean; alert?: boolean } | null = null
   let unsubscribeAll = false
+  let requestEmail: string | null = null
 
   if (req.method === 'POST') {
     const contentType = req.headers.get('content-type') ?? ''
@@ -48,6 +49,7 @@ Deno.serve(async (req) => {
         if (body.token) token = body.token
         if (body.category) category = body.category
         if (body.all === true) unsubscribeAll = true
+        if (typeof body.request_email === 'string') requestEmail = body.request_email
         if (body.categories && typeof body.categories === 'object') {
           categoriesPayload = body.categories
         }
@@ -55,9 +57,65 @@ Deno.serve(async (req) => {
     }
   }
 
-  if (!token) return jsonResponse({ error: 'Token is required' }, 400)
-
   const supabase = createClient(supabaseUrl, supabaseServiceKey)
+
+  // Branch 0 : demande d'un lien de désinscription par adresse email (aucun token en main).
+  // Réponse TOUJOURS neutre : on ne révèle jamais si l'adresse est connue.
+  if (req.method === 'POST' && requestEmail !== null) {
+    const cleaned = requestEmail.trim().toLowerCase()
+    const looksValid = /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(cleaned)
+    if (looksValid) {
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('id')
+        .ilike('email', cleaned)
+        .maybeSingle()
+
+      if (profile) {
+        let linkToken: string | null = null
+        const { data: existing } = await supabase
+          .from('email_unsubscribe_tokens')
+          .select('token')
+          .eq('email', cleaned)
+          .maybeSingle()
+        if (existing?.token) {
+          linkToken = existing.token
+        } else {
+          const fresh = crypto.randomUUID().replace(/-/g, '') + crypto.randomUUID().replace(/-/g, '')
+          const { data: inserted } = await supabase
+            .from('email_unsubscribe_tokens')
+            .insert({ email: cleaned, token: fresh })
+            .select('token')
+            .maybeSingle()
+          linkToken = inserted?.token ?? null
+        }
+
+        if (linkToken) {
+          const siteUrl = 'https://guardiens.fr'
+          const resp = await fetch(`${supabaseUrl}/functions/v1/send-transactional-email`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${supabaseServiceKey}`,
+              apikey: supabaseServiceKey,
+            },
+            body: JSON.stringify({
+              templateName: 'unsubscribe-link',
+              recipientEmail: cleaned,
+              idempotencyKey: `unsub-link-${cleaned}-${new Date().toISOString().slice(0, 10)}`,
+              templateData: { unsubscribeUrl: `${siteUrl}/unsubscribe?token=${linkToken}` },
+            }),
+          })
+          if (!resp.ok) {
+            console.error('[handle-email-unsubscribe] link email failed', resp.status, await resp.text())
+          }
+        }
+      }
+    }
+    return jsonResponse({ success: true, mode: 'request_link' })
+  }
+
+  if (!token) return jsonResponse({ error: 'Token is required' }, 400)
 
   const { data: tokenRecord, error: lookupError } = await supabase
     .from('email_unsubscribe_tokens')

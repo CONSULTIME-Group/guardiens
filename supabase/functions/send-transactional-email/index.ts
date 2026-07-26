@@ -590,7 +590,7 @@ Deno.serve(async (req) => {
           <a href="${prefsUrl}" style="color:#666;text-decoration:underline;">Gérer mes préférences email</a>
         </td></tr>
       </table>`
-    footerText = `\n\n—\nCet email essentiel est lié au fonctionnement de votre compte Guardiens.\nGérer mes préférences : ${prefsUrl}\n`
+    footerText = `\n\n· · ·\nCet email essentiel est lié au fonctionnement de votre compte Guardiens.\nGérer mes préférences : ${prefsUrl}\n`
   } else {
     footerHtml = `
       <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-top:24px;border-top:1px solid #e7e1d8;padding-top:16px;font-family:Arial,sans-serif;">
@@ -602,7 +602,7 @@ Deno.serve(async (req) => {
           <a href="${unsubAllUrl}" style="color:#666;text-decoration:underline;">Tout désinscrire</a>
         </td></tr>
       </table>`
-    footerText = `\n\n—\nGérer mes préférences : ${prefsUrl}\nMe désinscrire de cette catégorie : ${unsubUrl}\nTout désinscrire : ${unsubAllUrl}\n`
+    footerText = `\n\n· · ·\nGérer mes préférences : ${prefsUrl}\nMe désinscrire de cette catégorie : ${unsubUrl}\nTout désinscrire : ${unsubAllUrl}\n`
   }
 
   // Inject footer just before </body> (or append if not found)
