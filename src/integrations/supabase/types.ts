@@ -7503,6 +7503,7 @@ export type Database = {
         }
         Returns: undefined
       }
+      publish_stale_reviews: { Args: { p_days?: number }; Returns: number }
       purge_email_queue: { Args: { queue_name: string }; Returns: number }
       read_email_batch: {
         Args: { batch_size: number; queue_name: string; vt: number }
