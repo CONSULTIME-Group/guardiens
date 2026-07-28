@@ -309,8 +309,10 @@ Deno.serve(async (req) => {
         messageId: `pending-app-${app.application_id}`,
         templateName: "pending_application_reminder",
       });
-      if (result.ok) emailsSent += 1;
-      else emailsSkipped += 1;
+      if (result.outcome === "sent") emailsSent += 1;
+      else if (result.outcome === "deferred") emailsDeferred += 1;
+      else if (result.outcome === "skipped") emailsSkipped += 1;
+      else errors.push({ application_id: app.application_id, error: result.error ?? "send_failed" });
     }
 
     if (run) {
@@ -319,6 +321,7 @@ Deno.serve(async (req) => {
         signals_inserted: signalsInserted,
         signals_skipped: signalsSkipped,
         emails_sent: emailsSent,
+        emails_deferred: emailsDeferred,
         emails_skipped: emailsSkipped,
         errors_count: errors.length,
       });
@@ -330,6 +333,7 @@ Deno.serve(async (req) => {
         signals_inserted: signalsInserted,
         signals_skipped: signalsSkipped,
         emails_sent: emailsSent,
+        emails_deferred: emailsDeferred,
         emails_skipped: emailsSkipped,
         errors,
         generated_at: new Date().toISOString(),
