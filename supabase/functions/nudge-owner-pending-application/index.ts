@@ -61,15 +61,9 @@ async function sendReminderEmail(params: {
     .maybeSingle();
   if (sup) return { ok: false, error: "suppressed" };
 
-  // Opt-out product
-  const { data: pref } = await serviceClient
-    .from("email_preferences")
-    .select("product_emails")
-    .eq("user_id", app.owner_id)
-    .maybeSingle();
-  if (pref && (pref as { product_emails: boolean | null }).product_emails === false) {
-    return { ok: false, error: "opted_out" };
-  }
+  // Le filtrage par categorie d'email est centralise dans send-transactional-email.
+  // owner-pending-application-nudge est transactionnel : il n'est jamais bloque
+  // par l'opt-out produit. La suppression globale reste verifiee ci-dessus.
 
   const daysSince = Math.max(1, Math.floor(app.hours_since_created / 24));
   // Urgence : une candidature sans reponse sur une garde qui demarre dans
