@@ -11,6 +11,17 @@ const corsHeaders = {
 const GUIDE_MESSAGE =
   "Le guide de la maison est disponible. Vous y trouverez l'adresse exacte, les codes d'accès, les contacts utiles et toutes les consignes.";
 
+const PHOTO_NUDGE_MESSAGE =
+  "Une photo de temps en temps rassure beaucoup le propriétaire. Vous pouvez en envoyer directement dans cette conversation, avec le bouton en bas à gauche.";
+const PHOTO_NUDGE_DEDUP = "%une photo de temps en temps rassure%";
+const PHOTO_RECAP_DEDUP = "%vous avez partagé%pendant cette garde%";
+
+function photoRecapMessage(count: number) {
+  return count === 1
+    ? "Vous avez partagé 1 photo pendant cette garde. Vous pouvez la garder dans votre galerie, elle restera rattachée à cette garde."
+    : `Vous avez partagé ${count} photos pendant cette garde. Vous pouvez en garder dans votre galerie, elles resteront rattachées à cette garde.`;
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
