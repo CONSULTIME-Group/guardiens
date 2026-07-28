@@ -358,19 +358,21 @@ const HouseGuide = () => {
           placeholder="Bienvenue chez nous ! N'hésitez pas à utiliser les épices du placard et le café est offert." type="textarea" />
       </Section>
 
-      <div className="mt-8 rounded-2xl border border-border bg-card p-4 flex items-center justify-between gap-4">
-        <div>
-          <p className="font-medium text-foreground">Publier le guide</p>
-          <p className="text-xs text-muted-foreground mt-1">
-            Une fois publié, le guide sera visible par le gardien confirmé pendant les dates de la garde.
-          </p>
+      {isOwner && (
+        <div className="mt-8 rounded-2xl border border-border bg-card p-4 flex items-center justify-between gap-4">
+          <div>
+            <p className="font-medium text-foreground">Publier le guide</p>
+            <p className="text-xs text-muted-foreground mt-1">
+              Une fois publié, le guide sera visible par le gardien retenu à partir de 7 jours avant le début de la garde.
+            </p>
+          </div>
+          <Switch
+            checked={guide.published}
+            onCheckedChange={(v) => update("published", v)}
+            aria-label="Publier le guide"
+          />
         </div>
-        <Switch
-          checked={guide.published}
-          onCheckedChange={(v) => update("published", v)}
-          aria-label="Publier le guide"
-        />
-      </div>
+      )}
 
       {/* Bloc urgence inline (pas sticky pour éviter le chevauchement avec la barre de sauvegarde) */}
       {(guide.emergency_contact_name || guide.emergency_contact_phone) && (
@@ -391,16 +393,20 @@ const HouseGuide = () => {
         </div>
       )}
 
-      <div className="fixed bottom-20 md:bottom-0 left-0 right-0 md:left-64 bg-card border-t border-border p-4 z-40 pb-[max(1rem,env(safe-area-inset-bottom))]">
-        <div className="max-w-2xl mx-auto">
-          <Button className="w-full h-12 text-base font-semibold gap-2" onClick={handleSave} disabled={saving}>
-            <Save className="h-5 w-5" />
-            {saving ? "Enregistrement..." : "Enregistrer le guide"}
-          </Button>
+      {isOwner && (
+        <div className="fixed bottom-20 md:bottom-0 left-0 right-0 md:left-64 bg-card border-t border-border p-4 z-40 pb-[max(1rem,env(safe-area-inset-bottom))]">
+          <div className="max-w-2xl mx-auto">
+            <Button className="w-full h-12 text-base font-semibold gap-2" onClick={handleSave} disabled={saving}>
+              <Save className="h-5 w-5" />
+              {saving ? "Enregistrement..." : "Enregistrer le guide"}
+            </Button>
+          </div>
         </div>
-      </div>
+      )}
     </div>
+    </ReadOnlyContext.Provider>
   );
+
 };
 
 export default HouseGuide;
