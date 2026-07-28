@@ -40,18 +40,19 @@ async function sendReminderEmail(params: {
   app: PendingApp;
   messageId: string;
   templateName: string;
-}): Promise<{ ok: boolean; error?: string }> {
+}): Promise<{ ok: boolean; outcome: "sent" | "deferred" | "skipped" | "failed"; error?: string }> {
   const { serviceClient, app, messageId, templateName } = params;
   const email = app.owner_email.trim().toLowerCase();
 
-  // Dédup : si un log existe déjà pour ce message_id → skip
+  // Dédup : si un log existe déjà pour ce message_id, skip
   const { data: existing } = await serviceClient
     .from("email_send_log")
     .select("id")
     .eq("message_id", messageId)
     .limit(1)
     .maybeSingle();
-  if (existing) return { ok: false, error: "already_sent" };
+  if (existing) return { ok: false, outcome: "skipped", error: "already_sent" };
+
 
   // Suppressed
   const { data: sup } = await serviceClient
