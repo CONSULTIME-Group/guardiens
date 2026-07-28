@@ -344,6 +344,11 @@ export default function PublicSitterProfile() {
             className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-300"
             loading="lazy"
           />
+          {g.source === "guardiens" && (
+            <span className="absolute inset-x-0 bottom-0 px-2 py-1 text-[10px] leading-tight tracking-wide text-left bg-background/80 backdrop-blur-[2px] text-muted-foreground">
+              Photo prise pendant une garde
+            </span>
+          )}
         </button>
       ))}
     </div>
