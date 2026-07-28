@@ -60,7 +60,7 @@ async function sendReminderEmail(params: {
     .select("email")
     .eq("email", email)
     .maybeSingle();
-  if (sup) return { ok: false, error: "suppressed" };
+  if (sup) return { ok: false, outcome: "skipped", error: "suppressed" };
 
   // Le filtrage par categorie d'email est centralise dans send-transactional-email.
   // owner-pending-application-nudge est transactionnel : il n'est jamais bloque
