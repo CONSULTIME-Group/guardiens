@@ -7107,6 +7107,8 @@ export type Database = {
           owner_first_name: string
           owner_id: string
           sit_id: string
+          sit_start_date: string
+          sit_status: string
           sit_title: string
           sitter_first_name: string
           sitter_id: string
