@@ -45,7 +45,66 @@ Deno.serve(async (req) => {
     const today = new Date().toISOString().split("T")[0];
     let transitioned = 0;
     let guideMessagesBackfilled = 0;
+    let photoNudgesPosted = 0;
+    let photoRecapsPosted = 0;
     const errors: string[] = [];
+
+    async function findConversation(sitId: string, sitterId: string) {
+      const { data: conv } = await supabase
+        .from("conversations")
+        .select("id")
+        .eq("sit_id", sitId)
+        .eq("sitter_id", sitterId)
+        .maybeSingle();
+      return conv?.id ?? null;
+    }
+
+    async function alreadyPosted(conversationId: string, pattern: string) {
+      const { data } = await supabase
+        .from("messages")
+        .select("id")
+        .eq("conversation_id", conversationId)
+        .eq("is_system", true)
+        .ilike("content", pattern)
+        .maybeSingle();
+      return !!data;
+    }
+
+    async function postSystemMessage(conversationId: string, senderId: string, content: string) {
+      await supabase.from("messages").insert({
+        conversation_id: conversationId,
+        sender_id: senderId,
+        content,
+        is_system: true,
+      });
+      await supabase
+        .from("conversations")
+        .update({ updated_at: new Date().toISOString() })
+        .eq("id", conversationId);
+    }
+
+    // Nombre de photos envoyees par le gardien dans la conversation.
+    async function countSitterPhotos(conversationId: string, sitterId: string) {
+      const { count } = await supabase
+        .from("messages")
+        .select("id", { count: "exact", head: true })
+        .eq("conversation_id", conversationId)
+        .eq("sender_id", sitterId)
+        .not("photo_url", "is", null);
+      return count ?? 0;
+    }
+
+    // Recapitulatif de fin de garde : propose de conserver les photos partagees.
+    async function postPhotoRecap(sit: { id: string; user_id: string }, sitterId: string) {
+      const convId = await findConversation(sit.id, sitterId);
+      if (!convId) return false;
+      const photoCount = await countSitterPhotos(convId, sitterId);
+      if (photoCount === 0) return false;
+      if (await alreadyPosted(convId, PHOTO_RECAP_DEDUP)) return false;
+      await postSystemMessage(convId, sit.user_id, photoRecapMessage(photoCount));
+      return true;
+    }
+
 
     // Poste le message systeme "guide disponible" si la conversation existe,
     // que le guide existe, et que le message n'a pas deja ete poste.
