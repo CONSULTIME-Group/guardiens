@@ -452,7 +452,7 @@ export default function PublicSitterProfile() {
             .order("created_at", { ascending: false }),
           supabase
             .from("sitter_gallery")
-            .select("id, photo_url, caption, created_at")
+            .select("id, photo_url, caption, created_at, source")
             .eq("user_id", id)
             .order("created_at", { ascending: false }),
           (supabase as any).from("public_emergency_sitter_profiles").select("is_active").eq("user_id", id).maybeSingle(),
