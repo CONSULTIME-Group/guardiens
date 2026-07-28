@@ -72,6 +72,7 @@ Deno.serve(async (req) => {
     let signalsInserted = 0;
     let signalsSkipped = 0;
     let emailsSent = 0;
+    let emailsDeferred = 0;
     let emailsSkipped = 0;
     const errors: Array<{ sitter_id: string; error: string }> = [];
 
