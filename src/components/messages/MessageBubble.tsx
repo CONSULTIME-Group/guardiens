@@ -215,6 +215,21 @@ const MessageBubble = ({
               />
             </button>
           )}
+          {msg.photo_url && canSaveToGallery && (
+            isInGallery ? (
+              <p className="text-[11.5px] text-muted-foreground mb-1">Dans votre galerie</p>
+            ) : (
+              <button
+                type="button"
+                onClick={() => onSaveToGallery?.(msg.photo_url as string)}
+                disabled={savingToGallery}
+                className="text-[11.5px] text-primary hover:underline disabled:opacity-60 mb-1"
+              >
+                {savingToGallery ? "Ajout en cours…" : "Garder dans ma galerie"}
+              </button>
+            )
+          )}
+
           {msg.content && (
             <p className="text-[14px] whitespace-pre-line break-words leading-[1.5] text-foreground">
               {msg.content}
