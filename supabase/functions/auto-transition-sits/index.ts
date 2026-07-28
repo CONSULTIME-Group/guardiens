@@ -13,14 +13,23 @@ const GUIDE_MESSAGE =
 
 const PHOTO_NUDGE_MESSAGE =
   "Une photo de temps en temps rassure beaucoup le propriétaire. Vous pouvez en envoyer directement dans cette conversation, avec le bouton en bas à gauche.";
-const PHOTO_NUDGE_DEDUP = "%une photo de temps en temps rassure%";
-const PHOTO_RECAP_DEDUP = "%vous avez partagé%pendant cette garde%";
+// Fragments internes stables : ils matchent avec ou sans prefixe de prenom.
+const PHOTO_NUDGE_DEDUP = "%photo de temps en temps rassure%";
+const PHOTO_RECAP_DEDUP = "%avez partagé%pendant cette garde%";
+
+// Prefixe "Prenom, " et met la premiere lettre du texte en minuscule.
+function withFirstName(firstName: string | null | undefined, text: string) {
+  const name = (firstName ?? "").trim();
+  if (!name) return text;
+  return `${name}, ${text.charAt(0).toLowerCase()}${text.slice(1)}`;
+}
 
 function photoRecapMessage(count: number) {
   return count === 1
     ? "Vous avez partagé 1 photo pendant cette garde. Vous pouvez la garder dans votre galerie, elle restera rattachée à cette garde."
     : `Vous avez partagé ${count} photos pendant cette garde. Vous pouvez en garder dans votre galerie, elles resteront rattachées à cette garde.`;
 }
+
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
