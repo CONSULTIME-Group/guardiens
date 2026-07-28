@@ -419,9 +419,12 @@
   </url>
   <url>
     <loc>https://guardiens.fr/actualites/c-est-quoi-le-house-sitting</loc>
-    <lastmod>2026-07-27</lastmod>
+    <lastmod>2026-07-28</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://guardiens.fr/actualites/c-est-quoi-le-house-sitting"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://guardiens.fr/actualites/c-est-quoi-le-house-sitting?lang=en"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://guardiens.fr/actualites/c-est-quoi-le-house-sitting"/>
   </url>
   <url>
     <loc>https://guardiens.fr/actualites/arroser-plantes-vacances-grenoble</loc>
