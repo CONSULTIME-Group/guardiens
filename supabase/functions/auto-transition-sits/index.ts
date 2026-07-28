@@ -8,6 +8,9 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type",
 };
 
+const GUIDE_MESSAGE =
+  "Le guide de la maison est disponible. Vous y trouverez l'adresse exacte, les codes d'accès, les contacts utiles et toutes les consignes.";
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -30,134 +33,180 @@ Deno.serve(async (req) => {
   try {
     const today = new Date().toISOString().split("T")[0];
     let transitioned = 0;
+    let guideMessagesBackfilled = 0;
+    const errors: string[] = [];
 
-    // 1. Confirmed sits where start_date <= today → in_progress
-
-  const { data: toStart } = await supabase
-    .from("sits")
-    .select("id, title, user_id, start_date, property_id")
-    .eq("status", "confirmed")
-    .lte("start_date", today);
-
-  for (const sit of toStart || []) {
-    await supabase.from("sits").update({ status: "in_progress" as any }).eq("id", sit.id);
-
-    // Notify owner
-    await supabase.from("notifications").insert({
-      user_id: sit.user_id,
-      type: "sit_started",
-      title: "Garde en cours",
-      body: `Votre garde « ${sit.title} » a commencé aujourd'hui.`,
-      link: `/sits/${sit.id}`,
-    });
-
-    // Guide de la maison : disponible désormais (accès RLS ouvert à start_date).
-    let guideAvailable = false;
-    if (sit.property_id) {
+    // Poste le message systeme "guide disponible" si la conversation existe,
+    // que le guide existe, et que le message n'a pas deja ete poste.
+    async function postGuideMessage(sit: { id: string; user_id: string; property_id: string | null }, sitterId: string) {
+      if (!sit.property_id) return false;
       const { data: guide } = await supabase
         .from("house_guides")
         .select("id")
         .eq("property_id", sit.property_id)
         .maybeSingle();
-      guideAvailable = !!guide;
+      if (!guide) return false;
+
+      const { data: conv } = await supabase
+        .from("conversations")
+        .select("id")
+        .eq("sit_id", sit.id)
+        .eq("sitter_id", sitterId)
+        .maybeSingle();
+      if (!conv) return false;
+
+      // Dedup : ne pas reinserer si un message identique existe deja.
+      const { data: existing } = await supabase
+        .from("messages")
+        .select("id")
+        .eq("conversation_id", conv.id)
+        .eq("is_system", true)
+        .ilike("content", "%le guide de la maison est disponible%")
+        .maybeSingle();
+      if (existing) return false;
+
+      await supabase.from("messages").insert({
+        conversation_id: conv.id,
+        sender_id: sit.user_id,
+        content: GUIDE_MESSAGE,
+        is_system: true,
+      });
+      await supabase
+        .from("conversations")
+        .update({ updated_at: new Date().toISOString() })
+        .eq("id", conv.id);
+      return true;
     }
 
-    // Notify accepted sitter(s) + message système "guide disponible" dans la conversation
-    const { data: apps } = await supabase
-      .from("applications")
-      .select("sitter_id")
-      .eq("sit_id", sit.id)
-      .eq("status", "accepted");
+    // 1. Confirmed sits where start_date <= today -> in_progress
+    const { data: toStart } = await supabase
+      .from("sits")
+      .select("id, title, user_id, start_date, property_id")
+      .eq("status", "confirmed")
+      .lte("start_date", today);
 
-    for (const app of apps || []) {
-      await supabase.from("notifications").insert({
-        user_id: app.sitter_id,
-        type: "sit_started",
-        title: "Garde en cours",
-        body: `La garde « ${sit.title} » commence aujourd'hui. Bonne garde !`,
-        link: `/sits/${sit.id}`,
-      });
+    for (const sit of toStart || []) {
+      try {
+        await supabase.from("sits").update({ status: "in_progress" as any }).eq("id", sit.id);
 
-      if (guideAvailable) {
-        const { data: conv } = await supabase
-          .from("conversations")
-          .select("id")
+        // Notify owner
+        await supabase.from("notifications").insert({
+          user_id: sit.user_id,
+          type: "sit_started",
+          title: "Garde en cours",
+          body: `Votre garde « ${sit.title} » a commencé aujourd'hui.`,
+          link: `/sits/${sit.id}`,
+        });
+
+        // Notify accepted sitter(s) + message systeme "guide disponible"
+        const { data: apps } = await supabase
+          .from("applications")
+          .select("sitter_id")
           .eq("sit_id", sit.id)
-          .eq("sitter_id", app.sitter_id)
-          .maybeSingle();
-        if (conv) {
-          // Dédup : ne pas réinsérer si un message identique existe déjà.
-          const { data: existing } = await supabase
-            .from("messages")
-            .select("id")
-            .eq("conversation_id", conv.id)
-            .eq("is_system", true)
-            .ilike("content", "%le guide de la maison est disponible%")
-            .maybeSingle();
-          if (!existing) {
-            await supabase.from("messages").insert({
-              conversation_id: conv.id,
-              sender_id: sit.user_id,
-              content: "Le guide de la maison est disponible. Vous y trouverez l'adresse exacte, les codes d'accès, les contacts utiles et toutes les consignes.",
-              is_system: true,
-            });
-            await supabase
-              .from("conversations")
-              .update({ updated_at: new Date().toISOString() })
-              .eq("id", conv.id);
-          }
+          .eq("status", "accepted");
+
+        for (const app of apps || []) {
+          await supabase.from("notifications").insert({
+            user_id: app.sitter_id,
+            type: "sit_started",
+            title: "Garde en cours",
+            body: `La garde « ${sit.title} » commence aujourd'hui. Bonne garde !`,
+            link: `/sits/${sit.id}`,
+          });
+
+          await postGuideMessage(sit, app.sitter_id);
         }
+        transitioned++;
+      } catch (e) {
+        const msg = e instanceof Error ? e.message : String(e);
+        console.error("[auto-transition] start failed", sit.id, msg);
+        errors.push(`start ${sit.id}: ${msg}`);
       }
     }
-    transitioned++;
-  }
 
+    // 2. In-progress sits where end_date < today -> completed
+    const { data: toEnd } = await supabase
+      .from("sits")
+      .select("id, title, user_id, end_date")
+      .eq("status", "in_progress")
+      .lt("end_date", today);
 
-  // 2. In-progress sits where end_date < today → completed
-  const { data: toEnd } = await supabase
-    .from("sits")
-    .select("id, title, user_id, end_date")
-    .eq("status", "in_progress")
-    .lt("end_date", today);
+    for (const sit of toEnd || []) {
+      try {
+        await supabase.from("sits").update({ status: "completed" as any }).eq("id", sit.id);
 
-  for (const sit of toEnd || []) {
-    await supabase.from("sits").update({ status: "completed" as any }).eq("id", sit.id);
+        // Notify owner
+        await supabase.from("notifications").insert({
+          user_id: sit.user_id,
+          type: "sit_completed",
+          title: "Garde terminée !",
+          body: `Votre garde « ${sit.title} » est terminée. Pensez à laisser un avis !`,
+          link: `/review/${sit.id}`,
+        });
 
-    // Notify owner
-    await supabase.from("notifications").insert({
-      user_id: sit.user_id,
-      type: "sit_completed",
-      title: "Garde terminée !",
-      body: `Votre garde « ${sit.title} » est terminée. Pensez à laisser un avis !`,
-      link: `/review/${sit.id}`,
-    });
+        // Notify accepted sitter
+        const { data: apps } = await supabase
+          .from("applications")
+          .select("sitter_id")
+          .eq("sit_id", sit.id)
+          .eq("status", "accepted");
 
-    // Notify accepted sitter
-    const { data: apps } = await supabase
-      .from("applications")
-      .select("sitter_id")
-      .eq("sit_id", sit.id)
-      .eq("status", "accepted");
-
-    for (const app of apps || []) {
-      await supabase.from("notifications").insert({
-        user_id: app.sitter_id,
-        type: "sit_completed",
-        title: "Garde terminée !",
-        body: `La garde « ${sit.title} » est terminée. Pensez à laisser un avis !`,
-        link: `/review/${sit.id}`,
-      });
+        for (const app of apps || []) {
+          await supabase.from("notifications").insert({
+            user_id: app.sitter_id,
+            type: "sit_completed",
+            title: "Garde terminée !",
+            body: `La garde « ${sit.title} » est terminée. Pensez à laisser un avis !`,
+            link: `/review/${sit.id}`,
+          });
+        }
+        transitioned++;
+      } catch (e) {
+        const msg = e instanceof Error ? e.message : String(e);
+        console.error("[auto-transition] end failed", sit.id, msg);
+        errors.push(`end ${sit.id}: ${msg}`);
+      }
     }
-    transitioned++;
-  }
 
-    await run.finish("success", { transitioned });
-    return new Response(JSON.stringify({ transitioned }), {
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    // 3. Passe de rattrapage idempotente : une garde peut avoir bascule en
+    // 'in_progress' par un autre chemin, sans message systeme du guide.
+    const { data: ongoing } = await supabase
+      .from("sits")
+      .select("id, title, user_id, property_id")
+      .eq("status", "in_progress")
+      .not("property_id", "is", null);
+
+    for (const sit of ongoing || []) {
+      try {
+        const { data: apps } = await supabase
+          .from("applications")
+          .select("sitter_id")
+          .eq("sit_id", sit.id)
+          .eq("status", "accepted");
+
+        for (const app of apps || []) {
+          const posted = await postGuideMessage(sit, app.sitter_id);
+          if (posted) guideMessagesBackfilled++;
+        }
+      } catch (e) {
+        const msg = e instanceof Error ? e.message : String(e);
+        console.error("[auto-transition] guide backfill failed", sit.id, msg);
+        errors.push(`guide ${sit.id}: ${msg}`);
+      }
+    }
+
+    await run.finish(errors.length > 0 ? "partial" : "success", {
+      transitioned,
+      guide_messages_backfilled: guideMessagesBackfilled,
+      errors: errors.length,
+      error_samples: errors.slice(0, 5),
     });
+    return new Response(
+      JSON.stringify({ transitioned, guide_messages_backfilled: guideMessagesBackfilled, errors: errors.length }),
+      { headers: { ...corsHeaders, "Content-Type": "application/json" } },
+    );
   } catch (e) {
     await run.fail(e);
     throw e;
   }
 });
-
