@@ -117,7 +117,16 @@ const systemMessageText = (
   return map[action]?.[readerRole] || fallback;
 };
 
-const MessageBubble = ({ msg, isMe, readerRole = "gardien", isLastInGroup = true }: MessageBubbleProps) => {
+const MessageBubble = ({
+  msg,
+  isMe,
+  readerRole = "gardien",
+  isLastInGroup = true,
+  canSaveToGallery = false,
+  isInGallery = false,
+  savingToGallery = false,
+  onSaveToGallery,
+}: MessageBubbleProps) => {
   const [lightboxOpen, setLightboxOpen] = useState(false);
 
   if (msg.is_system) {
