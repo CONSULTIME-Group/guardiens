@@ -2279,12 +2279,16 @@ export default function PublicSitterProfile() {
               <ChevronRight className="w-8 h-8" aria-hidden="true" />
             </button>
           )}
-          <img
-            src={lightboxItems[lightboxIdx]?.photo_url}
-            alt={lightboxItems[lightboxIdx]?.caption || `Photo ${lightboxIdx + 1} du profil de ${profile?.first_name || "ce gardien"}`}
-            className="max-h-[85vh] max-w-[90vw] object-contain rounded-lg"
-            onClick={(e) => e.stopPropagation()}
-          />
+          <div className="flex flex-col items-center gap-2" onClick={(e) => e.stopPropagation()}>
+            <img
+              src={lightboxItems[lightboxIdx]?.photo_url}
+              alt={lightboxItems[lightboxIdx]?.caption || `Photo ${lightboxIdx + 1} du profil de ${profile?.first_name || "ce gardien"}`}
+              className="max-h-[85vh] max-w-[90vw] object-contain rounded-lg"
+            />
+            {lightboxItems[lightboxIdx]?.source === "guardiens" && (
+              <span className="text-xs tracking-wide text-white/70">Photo prise pendant une garde</span>
+            )}
+          </div>
         </div>
       )}
 
