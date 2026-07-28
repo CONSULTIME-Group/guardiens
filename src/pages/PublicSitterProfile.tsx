@@ -344,6 +344,11 @@ export default function PublicSitterProfile() {
             className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-300"
             loading="lazy"
           />
+          {g.source === "guardiens" && (
+            <span className="absolute inset-x-0 bottom-0 px-2 py-1 text-[10px] leading-tight tracking-wide text-left bg-background/80 backdrop-blur-[2px] text-muted-foreground">
+              Photo prise pendant une garde
+            </span>
+          )}
         </button>
       ))}
     </div>
@@ -447,7 +452,7 @@ export default function PublicSitterProfile() {
             .order("created_at", { ascending: false }),
           supabase
             .from("sitter_gallery")
-            .select("id, photo_url, caption, created_at")
+            .select("id, photo_url, caption, created_at, source")
             .eq("user_id", id)
             .order("created_at", { ascending: false }),
           (supabase as any).from("public_emergency_sitter_profiles").select("is_active").eq("user_id", id).maybeSingle(),
@@ -2274,12 +2279,16 @@ export default function PublicSitterProfile() {
               <ChevronRight className="w-8 h-8" aria-hidden="true" />
             </button>
           )}
-          <img
-            src={lightboxItems[lightboxIdx]?.photo_url}
-            alt={lightboxItems[lightboxIdx]?.caption || `Photo ${lightboxIdx + 1} du profil de ${profile?.first_name || "ce gardien"}`}
-            className="max-h-[85vh] max-w-[90vw] object-contain rounded-lg"
-            onClick={(e) => e.stopPropagation()}
-          />
+          <div className="flex flex-col items-center gap-2" onClick={(e) => e.stopPropagation()}>
+            <img
+              src={lightboxItems[lightboxIdx]?.photo_url}
+              alt={lightboxItems[lightboxIdx]?.caption || `Photo ${lightboxIdx + 1} du profil de ${profile?.first_name || "ce gardien"}`}
+              className="max-h-[85vh] max-w-[90vw] object-contain rounded-lg"
+            />
+            {lightboxItems[lightboxIdx]?.source === "guardiens" && (
+              <span className="text-xs tracking-wide text-white/70">Photo prise pendant une garde</span>
+            )}
+          </div>
         </div>
       )}
 

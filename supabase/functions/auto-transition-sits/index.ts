@@ -11,6 +11,17 @@ const corsHeaders = {
 const GUIDE_MESSAGE =
   "Le guide de la maison est disponible. Vous y trouverez l'adresse exacte, les codes d'accès, les contacts utiles et toutes les consignes.";
 
+const PHOTO_NUDGE_MESSAGE =
+  "Une photo de temps en temps rassure beaucoup le propriétaire. Vous pouvez en envoyer directement dans cette conversation, avec le bouton en bas à gauche.";
+const PHOTO_NUDGE_DEDUP = "%une photo de temps en temps rassure%";
+const PHOTO_RECAP_DEDUP = "%vous avez partagé%pendant cette garde%";
+
+function photoRecapMessage(count: number) {
+  return count === 1
+    ? "Vous avez partagé 1 photo pendant cette garde. Vous pouvez la garder dans votre galerie, elle restera rattachée à cette garde."
+    : `Vous avez partagé ${count} photos pendant cette garde. Vous pouvez en garder dans votre galerie, elles resteront rattachées à cette garde.`;
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -34,7 +45,66 @@ Deno.serve(async (req) => {
     const today = new Date().toISOString().split("T")[0];
     let transitioned = 0;
     let guideMessagesBackfilled = 0;
+    let photoNudgesPosted = 0;
+    let photoRecapsPosted = 0;
     const errors: string[] = [];
+
+    async function findConversation(sitId: string, sitterId: string) {
+      const { data: conv } = await supabase
+        .from("conversations")
+        .select("id")
+        .eq("sit_id", sitId)
+        .eq("sitter_id", sitterId)
+        .maybeSingle();
+      return conv?.id ?? null;
+    }
+
+    async function alreadyPosted(conversationId: string, pattern: string) {
+      const { data } = await supabase
+        .from("messages")
+        .select("id")
+        .eq("conversation_id", conversationId)
+        .eq("is_system", true)
+        .ilike("content", pattern)
+        .maybeSingle();
+      return !!data;
+    }
+
+    async function postSystemMessage(conversationId: string, senderId: string, content: string) {
+      await supabase.from("messages").insert({
+        conversation_id: conversationId,
+        sender_id: senderId,
+        content,
+        is_system: true,
+      });
+      await supabase
+        .from("conversations")
+        .update({ updated_at: new Date().toISOString() })
+        .eq("id", conversationId);
+    }
+
+    // Nombre de photos envoyees par le gardien dans la conversation.
+    async function countSitterPhotos(conversationId: string, sitterId: string) {
+      const { count } = await supabase
+        .from("messages")
+        .select("id", { count: "exact", head: true })
+        .eq("conversation_id", conversationId)
+        .eq("sender_id", sitterId)
+        .not("photo_url", "is", null);
+      return count ?? 0;
+    }
+
+    // Recapitulatif de fin de garde : propose de conserver les photos partagees.
+    async function postPhotoRecap(sit: { id: string; user_id: string }, sitterId: string) {
+      const convId = await findConversation(sit.id, sitterId);
+      if (!convId) return false;
+      const photoCount = await countSitterPhotos(convId, sitterId);
+      if (photoCount === 0) return false;
+      if (await alreadyPosted(convId, PHOTO_RECAP_DEDUP)) return false;
+      await postSystemMessage(convId, sit.user_id, photoRecapMessage(photoCount));
+      return true;
+    }
+
 
     // Poste le message systeme "guide disponible" si la conversation existe,
     // que le guide existe, et que le message n'a pas deja ete poste.
@@ -159,6 +229,16 @@ Deno.serve(async (req) => {
             body: `La garde « ${sit.title} » est terminée. Pensez à laisser un avis !`,
             link: `/review/${sit.id}`,
           });
+
+          // Proposition de recuperation des photos partagees pendant la garde.
+          try {
+            const posted = await postPhotoRecap(sit, app.sitter_id);
+            if (posted) photoRecapsPosted++;
+          } catch (e) {
+            const msg = e instanceof Error ? e.message : String(e);
+            console.error("[auto-transition] photo recap failed", sit.id, msg);
+            errors.push(`photo-recap ${sit.id}: ${msg}`);
+          }
         }
         transitioned++;
       } catch (e) {
@@ -195,14 +275,66 @@ Deno.serve(async (req) => {
       }
     }
 
+    // 4. Passe idempotente d'incitation photo : gardes en cours depuis au moins
+    // 2 jours, sans aucune photo echangee dans la conversation.
+    const twoDaysAgo = new Date(Date.now() - 2 * 24 * 60 * 60 * 1000)
+      .toISOString()
+      .split("T")[0];
+
+    const { data: ongoingForPhotos } = await supabase
+      .from("sits")
+      .select("id, user_id, start_date")
+      .eq("status", "in_progress")
+      .lte("start_date", twoDaysAgo);
+
+    for (const sit of ongoingForPhotos || []) {
+      try {
+        const { data: apps } = await supabase
+          .from("applications")
+          .select("sitter_id")
+          .eq("sit_id", sit.id)
+          .eq("status", "accepted");
+
+        for (const app of apps || []) {
+          const convId = await findConversation(sit.id, app.sitter_id);
+          if (!convId) continue;
+
+          // Aucune photo, quel que soit l'expediteur.
+          const { count: photoCount } = await supabase
+            .from("messages")
+            .select("id", { count: "exact", head: true })
+            .eq("conversation_id", convId)
+            .not("photo_url", "is", null);
+          if ((photoCount ?? 0) > 0) continue;
+
+          if (await alreadyPosted(convId, PHOTO_NUDGE_DEDUP)) continue;
+
+          await postSystemMessage(convId, sit.user_id, PHOTO_NUDGE_MESSAGE);
+          photoNudgesPosted++;
+        }
+      } catch (e) {
+        const msg = e instanceof Error ? e.message : String(e);
+        console.error("[auto-transition] photo nudge failed", sit.id, msg);
+        errors.push(`photo-nudge ${sit.id}: ${msg}`);
+      }
+    }
+
     await run.finish(errors.length > 0 ? "partial" : "success", {
       transitioned,
       guide_messages_backfilled: guideMessagesBackfilled,
+      photo_nudges_posted: photoNudgesPosted,
+      photo_recaps_posted: photoRecapsPosted,
       errors: errors.length,
       error_samples: errors.slice(0, 5),
     });
     return new Response(
-      JSON.stringify({ transitioned, guide_messages_backfilled: guideMessagesBackfilled, errors: errors.length }),
+      JSON.stringify({
+        transitioned,
+        guide_messages_backfilled: guideMessagesBackfilled,
+        photo_nudges_posted: photoNudgesPosted,
+        photo_recaps_posted: photoRecapsPosted,
+        errors: errors.length,
+      }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } },
     );
   } catch (e) {
