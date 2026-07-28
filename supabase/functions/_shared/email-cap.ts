@@ -25,6 +25,10 @@ export const BYPASS_TEMPLATES = new Set<string>([
   'cancellation-review-published',
   'cancellation-response-published',
   'sit-confirmed',
+  // Pendant strict de 'sit-confirmed' : l'un annonce la garde confirmee au
+  // proprietaire, l'autre au gardien accepte. Un gardien accepte doit etre
+  // prevenu immediatement, jamais differe.
+  'application-accepted',
   'contact-reply',
 ])
 
