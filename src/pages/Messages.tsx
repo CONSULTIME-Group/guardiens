@@ -345,6 +345,52 @@ const Messages = () => {
     }
   }, [user]);
 
+  // ── Galerie du gardien : peut-on rattacher les photos de cette conversation ? ──
+  const canSaveToGallery = !!(
+    user &&
+    activeConv?.sit &&
+    activeConv.sitter_id === user.id &&
+    activeConv.application_status === "accepted" &&
+    (activeConv.sit.status === "in_progress" || activeConv.sit.status === "completed")
+  );
+
+  // Précharge en une requête les photos déjà présentes dans la galerie du gardien.
+  useEffect(() => {
+    if (!user || !canSaveToGallery) { setGalleryUrls(new Set()); return; }
+    let cancelled = false;
+    (async () => {
+      const { data } = await supabase
+        .from("sitter_gallery")
+        .select("photo_url")
+        .eq("user_id", user.id);
+      if (cancelled) return;
+      setGalleryUrls(new Set((data || []).map((r: any) => r.photo_url).filter(Boolean)));
+    })();
+    return () => { cancelled = true; };
+  }, [user, canSaveToGallery, activeConv?.id]);
+
+  const handleSaveToGallery = useCallback(async (photoUrl: string) => {
+    if (!user || !activeConv?.sit || galleryUrls.has(photoUrl)) return;
+    setSavingGalleryUrl(photoUrl);
+    const { error } = await supabase.from("sitter_gallery").insert({
+      user_id: user.id,
+      photo_url: photoUrl,
+      sit_id: activeConv.sit.id,
+      source: "guardiens",
+      city: activeConv.sit.city ?? null,
+      caption: null,
+    });
+    setSavingGalleryUrl(null);
+    if (error) {
+      toastSonner.error("La photo n'a pas pu être ajoutée à votre galerie. Réessayez dans un instant.");
+      return;
+    }
+    setGalleryUrls((prev) => new Set(prev).add(photoUrl));
+    toastSonner.success("Photo ajoutée à votre galerie.");
+  }, [user, activeConv, galleryUrls]);
+
+
+
   const loadOlderMessages = useCallback(async () => {
     if (!activeConv || loadingMoreMessages || messages.length === 0) return;
     setLoadingMoreMessages(true);
