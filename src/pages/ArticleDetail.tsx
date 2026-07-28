@@ -142,6 +142,11 @@ export default function ArticleDetail() {
  // true si lang=fr OU si une traduction existe pour la langue courante.
  // Sert à noindex les variantes ?lang=xx pointant vers du contenu FR (thin content SEO).
  const [hasTranslationForLang, setHasTranslationForLang] = useState<boolean>(true);
+ // article_translations.noindex de la langue courante (true = variante désindexée).
+ const [translationNoindex, setTranslationNoindex] = useState<boolean>(false);
+ // Langues dont la traduction est indexable (noindex = false) : seules celles-là
+ // sont déclarées en hreflang alternate.
+ const [indexableLangs, setIndexableLangs] = useState<string[]>([]);
 
   useEffect(() => {
   if (!slug) return;
@@ -174,32 +179,48 @@ export default function ArticleDetail() {
  let art = data as ArticleFull | null;
  // Overlay traduction si langue ≠ fr
  const currentLang = (i18n.language || "fr").split("-")[0].toLowerCase();
- if (art && ["en", "es", "it", "de"].includes(currentLang)) {
-   const { data: tr, error: trErr } = await supabase
+ if (art) {
+   // Toutes les traductions de l'article : sert à l'overlay ET aux hreflang
+   // (seules les traductions noindex = false sont déclarées en alternate).
+   const { data: trAll, error: trErr } = await supabase
      .from("article_translations")
-     .select("title, excerpt, content, meta_title, meta_description, hero_image_alt")
-     .eq("article_id", art.id)
-     .eq("lang", currentLang)
-     .maybeSingle();
+     .select("lang, noindex, title, excerpt, content, meta_title, meta_description, hero_image_alt")
+     .eq("article_id", art.id);
    if (trErr) console.warn("[i18n] translation fetch error", trErr);
-   if (tr) {
-     art = {
-       ...art,
-       title: tr.title || art.title,
-       excerpt: tr.excerpt || art.excerpt,
-       content: tr.content || art.content,
-       meta_title: tr.meta_title ?? art.meta_title,
-       meta_description: tr.meta_description ?? art.meta_description,
-       hero_image_alt: tr.hero_image_alt ?? art.hero_image_alt,
-     };
-     if (!cancelled) setHasTranslationForLang(true);
-   } else {
-     console.info(`[i18n] no ${currentLang} translation for ${art.slug}`);
-     // Pas de traduction : la variante ?lang=xx sera noindexée (thin content).
-     if (!cancelled) setHasTranslationForLang(false);
+   const rows = (trAll as Array<Record<string, any>> | null) || [];
+   if (!cancelled) {
+     setIndexableLangs(rows.filter((r) => r.noindex === false).map((r) => r.lang));
    }
- } else {
-   if (!cancelled) setHasTranslationForLang(true);
+   if (["en", "es", "it", "de"].includes(currentLang)) {
+     const tr = rows.find((r) => r.lang === currentLang);
+     if (tr) {
+       art = {
+         ...art,
+         title: tr.title || art.title,
+         excerpt: tr.excerpt || art.excerpt,
+         content: tr.content || art.content,
+         meta_title: tr.meta_title ?? art.meta_title,
+         meta_description: tr.meta_description ?? art.meta_description,
+         hero_image_alt: tr.hero_image_alt ?? art.hero_image_alt,
+       };
+       if (!cancelled) {
+         setHasTranslationForLang(true);
+         // noindex par défaut true côté base : absence de valeur = désindexé.
+         setTranslationNoindex(tr.noindex !== false);
+       }
+     } else {
+       console.info(`[i18n] no ${currentLang} translation for ${art.slug}`);
+       // Pas de traduction : la variante ?lang=xx sera noindexée (thin content).
+       if (!cancelled) {
+         setHasTranslationForLang(false);
+         setTranslationNoindex(true);
+       }
+     }
+   } else if (!cancelled) {
+     // Version française : suit uniquement articles.noindex.
+     setHasTranslationForLang(true);
+     setTranslationNoindex(false);
+   }
  }
  setArticle(art);
  setLoading(false);
@@ -394,8 +415,9 @@ export default function ArticleDetail() {
     type="article"
     publishedAt={article.published_at || undefined}
     author={article.author_name}
-    noindex={article.noindex === true || !hasTranslationForLang}
+    noindex={article.noindex === true || !hasTranslationForLang || translationNoindex}
     canonical={article.canonical_url || undefined}
+    hreflangLangs={indexableLangs}
     />
     <ArticleSeoLogger article={article} />
 

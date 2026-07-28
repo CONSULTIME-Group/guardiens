@@ -50,6 +50,13 @@ interface PageMetaProps {
   author?: string;
   noindex?: boolean;
   canonical?: string;
+  /**
+   * Langues autorisées comme alternates hreflang (hors fr, toujours inclus).
+   * Par défaut : toutes les langues supportées. Les pages d'article passent ici
+   * uniquement les traductions indexables (article_translations.noindex = false),
+   * car déclarer une alternate désindexée est un signal contradictoire.
+   */
+  hreflangLangs?: readonly string[];
 }
 
 const PageMeta = ({
@@ -62,6 +69,7 @@ const PageMeta = ({
   author,
   noindex = false,
   canonical,
+  hreflangLangs,
 }: PageMetaProps) => {
   const location = useLocation();
   const { i18n } = useTranslation();
@@ -77,7 +85,11 @@ const PageMeta = ({
   const titleWithoutSuffix = title.replace(/\s*\|\s*Guardiens\s*$/i, "").replace(/\s*,\s*Guardiens\s*$/i, "");
   const fullTitle = currentPath === "/" ? titleWithoutSuffix : `${titleWithoutSuffix} | ${SITE_NAME}`;
   // hreflang alternates : same URL with ?lang=xx (fr = no param, also serves as x-default)
-  const hreflangAlternates = SUPPORTED_LANGS.map((lng) => ({
+  const allowedLangs = hreflangLangs
+    ? SUPPORTED_LANGS.filter((lng) => lng === "fr" || hreflangLangs.includes(lng))
+    : SUPPORTED_LANGS;
+  const hreflangKey = allowedLangs.join(",");
+  const hreflangAlternates = allowedLangs.map((lng) => ({
     lang: lng,
     href: addLangParam(canonicalUrl, lng),
   }));
@@ -179,7 +191,7 @@ const PageMeta = ({
         type,
       },
     });
-  }, [author, canonical, canonicalUrl, currentPath, currentUrl, currentLang, fullTitle, metaDescription, noindex, publishedAt, resolvedImage, type]);
+  }, [author, canonical, canonicalUrl, currentPath, currentUrl, currentLang, fullTitle, hreflangKey, metaDescription, noindex, publishedAt, resolvedImage, type]);
 
   // NB : on n'émet PAS via Helmet les tags déjà gérés impérativement dans le
   // useEffect ci-dessus (robots, canonical, hreflang, og:*, twitter:*,

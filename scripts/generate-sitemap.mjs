@@ -374,18 +374,28 @@ async function main() {
 
 
   // Map slug → langs disponibles (article_translations join articles)
+  // Filtre d'indexation : une traduction n'est déclarée que si
+  //   article_translations.noindex = false
+  //   ET l'article FR parent est indexable (published = true, noindex faux/null).
   const articleLangs = new Map();
   try {
     const { data: trRows } = await supabase
       .from("article_translations")
-      .select("lang, articles!inner(slug)");
+      .select("lang, noindex, articles!inner(slug, published, noindex)");
+    let kept = 0;
     for (const r of trRows || []) {
       const slug = r.articles?.slug;
       if (!slug) continue;
+      if (r.noindex !== false) continue;
+      if (r.articles?.published !== true) continue;
+      if (r.articles?.noindex === true) continue;
       if (!articleLangs.has(slug)) articleLangs.set(slug, new Set());
       articleLangs.get(slug).add(r.lang);
+      kept++;
     }
-    console.log(`  ↳ article_translations: ${trRows?.length || 0} alternates (${articleLangs.size} articles)`);
+    console.log(
+      `  ↳ article_translations: ${kept} alternates indexables sur ${trRows?.length || 0} (${articleLangs.size} articles)`,
+    );
   } catch (e) {
     console.warn("  ⚠️  Failed to fetch article_translations:", e.message);
   }

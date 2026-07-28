@@ -773,6 +773,7 @@ export type Database = {
           lang: string
           meta_description: string | null
           meta_title: string | null
+          noindex: boolean
           slug: string
           title: string
           updated_at: string
@@ -787,6 +788,7 @@ export type Database = {
           lang: string
           meta_description?: string | null
           meta_title?: string | null
+          noindex?: boolean
           slug: string
           title?: string
           updated_at?: string
@@ -801,6 +803,7 @@ export type Database = {
           lang?: string
           meta_description?: string | null
           meta_title?: string | null
+          noindex?: boolean
           slug?: string
           title?: string
           updated_at?: string
