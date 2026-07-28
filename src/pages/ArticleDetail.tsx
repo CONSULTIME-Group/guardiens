@@ -142,6 +142,11 @@ export default function ArticleDetail() {
  // true si lang=fr OU si une traduction existe pour la langue courante.
  // Sert à noindex les variantes ?lang=xx pointant vers du contenu FR (thin content SEO).
  const [hasTranslationForLang, setHasTranslationForLang] = useState<boolean>(true);
+ // article_translations.noindex de la langue courante (true = variante désindexée).
+ const [translationNoindex, setTranslationNoindex] = useState<boolean>(false);
+ // Langues dont la traduction est indexable (noindex = false) : seules celles-là
+ // sont déclarées en hreflang alternate.
+ const [indexableLangs, setIndexableLangs] = useState<string[]>([]);
 
   useEffect(() => {
   if (!slug) return;
