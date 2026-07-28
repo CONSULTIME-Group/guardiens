@@ -81,18 +81,29 @@ const Section = ({ icon: Icon, title, children }: { icon: React.ElementType; tit
   </section>
 );
 
+const ReadOnlyContext = createContext(false);
+
 const Field = ({ label, value, onChange, placeholder, type = "text" }: {
   label: string; value: string; onChange: (v: string) => void; placeholder?: string; type?: string;
-}) => (
-  <div>
-    <label className="text-xs font-medium text-muted-foreground mb-1 block">{label}</label>
-    {type === "textarea" ? (
-      <Textarea value={value} onChange={e => onChange(e.target.value)} placeholder={placeholder} className="text-sm" rows={3} />
-    ) : (
-      <Input value={value} onChange={e => onChange(e.target.value)} placeholder={placeholder} className="text-sm" />
-    )}
-  </div>
-);
+}) => {
+  const readOnly = useContext(ReadOnlyContext);
+  return (
+    <div>
+      <label className="text-xs font-medium text-muted-foreground mb-1 block">{label}</label>
+      {readOnly ? (
+        <p className={`text-sm whitespace-pre-line ${value ? "text-foreground" : "text-muted-foreground italic"}`}>
+          {value || "Non renseigné"}
+        </p>
+      ) : type === "textarea" ? (
+        <Textarea value={value} onChange={e => onChange(e.target.value)} placeholder={placeholder} className="text-sm" rows={3} />
+      ) : (
+        <Input value={value} onChange={e => onChange(e.target.value)} placeholder={placeholder} className="text-sm" />
+      )}
+    </div>
+  );
+};
+
+type AccessState = "owner" | "readable" | "pending" | "denied";
 
 const HouseGuide = () => {
   const { propertyId } = useParams<{ propertyId: string }>();
@@ -100,15 +111,18 @@ const HouseGuide = () => {
   const [guide, setGuide] = useState<GuideData | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [access, setAccess] = useState<AccessState>("denied");
+  const [openDate, setOpenDate] = useState<Date | null>(null);
 
   useEffect(() => {
     if (!propertyId || !user) return;
     const load = async () => {
-      const { data } = await supabase
-        .from("house_guides")
-        .select("*")
-        .eq("property_id", propertyId)
-        .maybeSingle();
+      const [{ data: property }, { data }] = await Promise.all([
+        supabase.from("properties").select("id, user_id").eq("id", propertyId).maybeSingle(),
+        supabase.from("house_guides").select("*").eq("property_id", propertyId).maybeSingle(),
+      ]);
+
+      const isOwner = !!property && property.user_id === user.id;
       const base = emptyGuide(propertyId, user.id);
       if (data) {
         // Normalise les champs nullables (DB) en strings vides pour les inputs contrôlés
@@ -126,10 +140,40 @@ const HouseGuide = () => {
       } else {
         setGuide(base);
       }
+
+      if (isOwner) {
+        setAccess("owner");
+      } else if (data) {
+        setAccess("readable");
+      } else {
+        // Guide non lisible : soit la garde n'a pas encore atteint l'ouverture
+        // à J-7, soit la personne n'a aucun droit d'accès.
+        const { data: apps } = await supabase
+          .from("applications")
+          .select("status, sit:sits!inner(id, start_date, property_id, status)")
+          .eq("sitter_id", user.id)
+          .eq("status", "accepted")
+          .eq("sits.property_id", propertyId);
+
+        const upcoming = (apps ?? [])
+          .map((a: any) => a.sit)
+          .filter((s: any) => s && (s.status === "confirmed" || s.status === "in_progress") && s.start_date)
+          .sort((a: any, b: any) => a.start_date.localeCompare(b.start_date))[0];
+
+        if (upcoming) {
+          const start = new Date(`${upcoming.start_date}T00:00:00`);
+          const open = new Date(start.getTime() - 7 * 86400000);
+          setOpenDate(open);
+          setAccess("pending");
+        } else {
+          setAccess("denied");
+        }
+      }
       setLoading(false);
     };
     load();
   }, [propertyId, user]);
+
 
   const update = <K extends keyof GuideData>(field: K, value: GuideData[K]) => {
     if (!guide) return;
