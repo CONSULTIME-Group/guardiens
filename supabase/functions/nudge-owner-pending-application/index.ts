@@ -8,8 +8,9 @@
  *  - manual (body { application_id, admin_id }) : appelé depuis l'admin pour
  *    envoyer une relance manuelle. Bypass la dédup cron (message_id distinct).
  *
- * Respecte : feature flag admin_signals_active, suppressed_emails,
- * email_preferences.product_emails.
+ * Respecte : feature flag admin_signals_active et suppressed_emails.
+ * Le filtrage par categorie est centralise dans send-transactional-email,
+ * qui laisse toujours passer les templates transactionnels.
  */
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
 import { startCronRun, type CronRun } from "../_shared/cron-run-log.ts";
@@ -60,15 +61,9 @@ async function sendReminderEmail(params: {
     .maybeSingle();
   if (sup) return { ok: false, error: "suppressed" };
 
-  // Opt-out product
-  const { data: pref } = await serviceClient
-    .from("email_preferences")
-    .select("product_emails")
-    .eq("user_id", app.owner_id)
-    .maybeSingle();
-  if (pref && (pref as { product_emails: boolean | null }).product_emails === false) {
-    return { ok: false, error: "opted_out" };
-  }
+  // Le filtrage par categorie d'email est centralise dans send-transactional-email.
+  // owner-pending-application-nudge est transactionnel : il n'est jamais bloque
+  // par l'opt-out produit. La suppression globale reste verifiee ci-dessus.
 
   const daysSince = Math.max(1, Math.floor(app.hours_since_created / 24));
   // Urgence : une candidature sans reponse sur une garde qui demarre dans
