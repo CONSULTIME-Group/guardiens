@@ -20,7 +20,13 @@ interface MessageBubbleProps {
   readerRole?: "proprio" | "gardien";
   /** N'afficher le timestamp que sur la dernière bulle d'une séquence consécutive */
   isLastInGroup?: boolean;
+  /** Action gardien : rattacher la photo à sa galerie de gardes */
+  canSaveToGallery?: boolean;
+  isInGallery?: boolean;
+  savingToGallery?: boolean;
+  onSaveToGallery?: (photoUrl: string) => void;
 }
+
 
 const systemMessageText = (
   metadata: { action?: string; actor?: string; actor_name?: string; dates?: string } | null | undefined,
