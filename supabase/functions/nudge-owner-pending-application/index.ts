@@ -118,10 +118,21 @@ async function sendReminderEmail(params: {
   if (!resp.ok) {
     const body = await resp.text();
     console.error("[nudge-owner-pending-application] send failed", resp.status, body);
-    return { ok: false, error: `send_failed_${resp.status}` };
+    return { ok: false, outcome: "failed", error: `send_failed_${resp.status}` };
   }
-  return { ok: true };
+
+  // Un HTTP 200 ne signifie pas envoye : le sender repond 200 avec deferred:true
+  // quand il diffère, et 200 avec skipped:true quand il deduplique.
+  const payload = (await resp.json().catch(() => null)) as Record<string, unknown> | null;
+  if (payload?.deferred) {
+    return { ok: false, outcome: "deferred", error: String(payload?.reason ?? "deferred") };
+  }
+  if (payload?.skipped) {
+    return { ok: false, outcome: "skipped", error: String(payload?.reason ?? "skipped") };
+  }
+  return { ok: true, outcome: "sent" };
 }
+
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
