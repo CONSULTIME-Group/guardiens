@@ -415,8 +415,9 @@ export default function ArticleDetail() {
     type="article"
     publishedAt={article.published_at || undefined}
     author={article.author_name}
-    noindex={article.noindex === true || !hasTranslationForLang}
+    noindex={article.noindex === true || !hasTranslationForLang || translationNoindex}
     canonical={article.canonical_url || undefined}
+    hreflangLangs={indexableLangs}
     />
     <ArticleSeoLogger article={article} />
 
