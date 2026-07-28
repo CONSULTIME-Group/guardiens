@@ -111,6 +111,9 @@ const Messages = () => {
   // Pagination des messages
   const [hasMoreMessages, setHasMoreMessages] = useState(false);
   const [loadingMoreMessages, setLoadingMoreMessages] = useState(false);
+  const [galleryUrls, setGalleryUrls] = useState<Set<string>>(new Set());
+  const [savingGalleryUrl, setSavingGalleryUrl] = useState<string | null>(null);
+
   const isInitialMessagesLoad = useRef(true);
 
   const loadConversations = useCallback(async () => {
