@@ -275,14 +275,66 @@ Deno.serve(async (req) => {
       }
     }
 
+    // 4. Passe idempotente d'incitation photo : gardes en cours depuis au moins
+    // 2 jours, sans aucune photo echangee dans la conversation.
+    const twoDaysAgo = new Date(Date.now() - 2 * 24 * 60 * 60 * 1000)
+      .toISOString()
+      .split("T")[0];
+
+    const { data: ongoingForPhotos } = await supabase
+      .from("sits")
+      .select("id, user_id, start_date")
+      .eq("status", "in_progress")
+      .lte("start_date", twoDaysAgo);
+
+    for (const sit of ongoingForPhotos || []) {
+      try {
+        const { data: apps } = await supabase
+          .from("applications")
+          .select("sitter_id")
+          .eq("sit_id", sit.id)
+          .eq("status", "accepted");
+
+        for (const app of apps || []) {
+          const convId = await findConversation(sit.id, app.sitter_id);
+          if (!convId) continue;
+
+          // Aucune photo, quel que soit l'expediteur.
+          const { count: photoCount } = await supabase
+            .from("messages")
+            .select("id", { count: "exact", head: true })
+            .eq("conversation_id", convId)
+            .not("photo_url", "is", null);
+          if ((photoCount ?? 0) > 0) continue;
+
+          if (await alreadyPosted(convId, PHOTO_NUDGE_DEDUP)) continue;
+
+          await postSystemMessage(convId, sit.user_id, PHOTO_NUDGE_MESSAGE);
+          photoNudgesPosted++;
+        }
+      } catch (e) {
+        const msg = e instanceof Error ? e.message : String(e);
+        console.error("[auto-transition] photo nudge failed", sit.id, msg);
+        errors.push(`photo-nudge ${sit.id}: ${msg}`);
+      }
+    }
+
     await run.finish(errors.length > 0 ? "partial" : "success", {
       transitioned,
       guide_messages_backfilled: guideMessagesBackfilled,
+      photo_nudges_posted: photoNudgesPosted,
+      photo_recaps_posted: photoRecapsPosted,
       errors: errors.length,
       error_samples: errors.slice(0, 5),
     });
     return new Response(
-      JSON.stringify({ transitioned, guide_messages_backfilled: guideMessagesBackfilled, errors: errors.length }),
+      JSON.stringify({
+        transitioned,
+        guide_messages_backfilled: guideMessagesBackfilled,
+        photo_nudges_posted: photoNudgesPosted,
+        photo_recaps_posted: photoRecapsPosted,
+        errors: errors.length,
+      }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } },
     );
   } catch (e) {
