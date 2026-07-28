@@ -229,6 +229,16 @@ Deno.serve(async (req) => {
             body: `La garde « ${sit.title} » est terminée. Pensez à laisser un avis !`,
             link: `/review/${sit.id}`,
           });
+
+          // Proposition de recuperation des photos partagees pendant la garde.
+          try {
+            const posted = await postPhotoRecap(sit, app.sitter_id);
+            if (posted) photoRecapsPosted++;
+          } catch (e) {
+            const msg = e instanceof Error ? e.message : String(e);
+            console.error("[auto-transition] photo recap failed", sit.id, msg);
+            errors.push(`photo-recap ${sit.id}: ${msg}`);
+          }
         }
         transitioned++;
       } catch (e) {
