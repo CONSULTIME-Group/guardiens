@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle,
 } from "@/components/ui/dialog";
+import { Textarea } from "@/components/ui/textarea";
 import { AlertTriangle, PawPrint, Home, Phone, Zap, CheckCircle2, Loader2 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { toast } from "@/hooks/use-toast";
@@ -14,13 +15,80 @@ interface HelpButtonProps {
   ownerName: string;
   sitId?: string;
   sitCity?: string;
+  conversationId?: string;
+  isOwner?: boolean;
 }
 
-const HelpButton = ({ propertyId, ownerId, ownerName, sitId, sitCity }: HelpButtonProps) => {
+const HelpButton = ({ propertyId, ownerId, ownerName, sitId, sitCity, conversationId, isOwner }: HelpButtonProps) => {
   const [open, setOpen] = useState(false);
   const [guide, setGuide] = useState<any>(null);
   const [alerting, setAlerting] = useState(false);
   const [alerted, setAlerted] = useState(false);
+  const [notes, setNotes] = useState<Record<string, string>>({ animal: "", logement: "", urgence: "" });
+  const [sendingCategory, setSendingCategory] = useState<string | null>(null);
+
+  const notifyLabel = isOwner ? "Prévenir le gardien" : "Prévenir le propriétaire";
+
+  const handleNotify = async (category: "animal" | "logement" | "urgence") => {
+    const message = (notes[category] || "").trim();
+    if (!conversationId) {
+      toast({ title: "Envoi impossible", description: "Conversation introuvable.", variant: "destructive" });
+      return;
+    }
+    if (message.length < 2) {
+      toast({ title: "Message trop court", description: "Décrivez la situation en quelques mots.", variant: "destructive" });
+      return;
+    }
+    setSendingCategory(category);
+    try {
+      const { data, error } = await supabase.functions.invoke("help-during-sit", {
+        body: { conversationId, category, message },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      setNotes((n) => ({ ...n, [category]: "" }));
+      toast({
+        title: "Message envoyé",
+        description: category === "urgence"
+          ? "Votre alerte a été transmise immédiatement."
+          : "Votre message a été ajouté à la conversation et transmis par email.",
+      });
+    } catch (err: any) {
+      toast({
+        title: "Envoi impossible",
+        description: err?.message || "Réessayez dans quelques instants, ou appelez directement le contact ci-dessus.",
+        variant: "destructive",
+      });
+    } finally {
+      setSendingCategory(null);
+    }
+  };
+
+  const NotifyBox = ({ category }: { category: "animal" | "logement" | "urgence" }) => (
+    <div className="mt-3 pt-3 border-t border-border space-y-2">
+      <Textarea
+        rows={3}
+        className="text-sm"
+        placeholder="Décrivez la situation en quelques mots"
+        value={notes[category] || ""}
+        onChange={(e) => setNotes((n) => ({ ...n, [category]: e.target.value }))}
+        aria-label={notifyLabel}
+      />
+      <Button
+        size="sm"
+        className="w-full gap-1.5"
+        variant={category === "urgence" ? "destructive" : "default"}
+        disabled={sendingCategory === category}
+        onClick={() => handleNotify(category)}
+      >
+        {sendingCategory === category ? (
+          <><Loader2 className="h-3.5 w-3.5 animate-spin" /> Envoi en cours...</>
+        ) : (
+          notifyLabel
+        )}
+      </Button>
+    </div>
+  );
 
   useEffect(() => {
     if (!open || !propertyId) return;
@@ -77,6 +145,7 @@ const HelpButton = ({ propertyId, ownerId, ownerName, sitId, sitCity }: HelpButt
           <p className="text-xs text-muted-foreground mt-2">
             En cas d'urgence animale, appelez d'abord le vétérinaire puis contactez {ownerName}.
           </p>
+          {conversationId && <NotifyBox category="animal" />}
         </div>
       ),
     },
@@ -109,6 +178,7 @@ const HelpButton = ({ propertyId, ownerId, ownerName, sitId, sitCity }: HelpButt
           {!guide.plumber_phone && !guide.electrician_phone && !guide.emergency_contact_name && (
             <p className="text-muted-foreground italic">Aucun contact d'urgence renseigné.</p>
           )}
+          {conversationId && <NotifyBox category="logement" />}
         </div>
       ),
     },
@@ -127,6 +197,7 @@ const HelpButton = ({ propertyId, ownerId, ownerName, sitId, sitCity }: HelpButt
           <p className="text-xs text-muted-foreground">
             En cas d'urgence grave (incendie, accident), appelez d'abord les secours (15, 18 ou 112).
           </p>
+          {conversationId && <NotifyBox category="urgence" />}
         </div>
       ),
     },

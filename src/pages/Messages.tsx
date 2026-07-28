@@ -153,7 +153,7 @@ const Messages = () => {
       supabase.from("reviews").select("reviewee_id, overall_rating").in("reviewee_id", otherIds).eq("published", true),
       supabase.from("emergency_sitter_profiles").select("user_id, is_active").in("user_id", otherIds).eq("is_active", true),
       sitIds.length > 0
-        ? supabase.from("sits").select("id, title, status, property_id, start_date, end_date, user_id").in("id", sitIds)
+        ? supabase.from("sits").select("id, title, status, property_id, start_date, end_date, user_id, city").in("id", sitIds)
         : Promise.resolve({ data: [], error: null }),
       sitIds.length > 0
         ? supabase.from("applications").select("sit_id, sitter_id, status").in("sit_id", sitIds)
