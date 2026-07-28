@@ -1,6 +1,8 @@
 // publish-stale-reviews
-// Publie tout avis non publié déposé depuis plus de 14 jours quand l'autre
-// partie n'a rien soumis. Idempotent (filtre published=false).
+// Publie tout avis non publie depose depuis plus de 14 jours quand l'autre
+// partie n'a rien soumis. Delegue a la RPC SECURITY DEFINER
+// public.publish_stale_reviews, seule capable de poser le drapeau
+// app.review_publisher qui autorise le passage des triggers de garde.
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.4";
 import { startCronRun } from "../_shared/cron-run-log.ts";
 
@@ -8,6 +10,8 @@ const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
+
+const STALE_DAYS = 14;
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
@@ -19,58 +23,57 @@ Deno.serve(async (req) => {
   const run = await startCronRun("publish-stale-reviews");
 
   try {
-    const cutoff = new Date(Date.now() - 14 * 86400_000).toISOString();
-
-    const { data: candidates, error } = await supabase
+    // Recupere les avis concernes avant publication, pour pouvoir notifier.
+    const cutoff = new Date(Date.now() - STALE_DAYS * 86400_000).toISOString();
+    const { data: candidates } = await supabase
       .from("reviews")
-      .select("id, sit_id, reviewer_id, reviewee_id, created_at")
+      .select("id, reviewee_id")
       .eq("published", false)
       .lt("created_at", cutoff)
       .limit(500);
-    if (error) throw error;
 
-    let published = 0;
-    const errors: Array<{ review_id: string; reason: string }> = [];
+    const { data: publishedCount, error: rpcErr } = await supabase.rpc(
+      "publish_stale_reviews",
+      { p_days: STALE_DAYS },
+    );
+    if (rpcErr) throw rpcErr;
 
-    for (const r of candidates ?? []) {
-      const { error: updErr } = await supabase
-        .from("reviews")
-        .update({ published: true } as any)
-        .eq("id", r.id)
-        .eq("published", false);
-      if (updErr) {
-        errors.push({ review_id: r.id, reason: updErr.message });
-        continue;
-      }
-      published++;
+    const published = (publishedCount as number) ?? 0;
+    let notified = 0;
 
-      // Notification à la personne évaluée
-      try {
-        await supabase.from("notifications").insert({
-          user_id: r.reviewee_id,
-          type: "review_published",
-          title: "Un avis vous concernant est publié",
-          body: "L'avis déposé à votre sujet est désormais visible sur votre profil.",
-          link: `/gardiens/${r.reviewee_id}`,
-        });
-      } catch (e) {
-        console.warn("[publish-stale-reviews] notif failed", r.id, e);
+    if (published > 0) {
+      for (const r of candidates ?? []) {
+        try {
+          await supabase.from("notifications").insert({
+            user_id: r.reviewee_id,
+            type: "review_published",
+            title: "Un avis vous concernant est publie",
+            body: "L'avis depose a votre sujet est desormais visible sur votre profil.",
+            link: `/gardiens/${r.reviewee_id}`,
+          });
+          notified++;
+        } catch (e) {
+          console.warn("[publish-stale-reviews] notif failed", r.id, e);
+        }
       }
     }
 
     await run.finish("success", {
       candidates: candidates?.length ?? 0,
       published,
-      errors: errors.length,
+      notified,
     });
-    return new Response(JSON.stringify({ ok: true, published, errors }), {
+    return new Response(JSON.stringify({ ok: true, published, notified }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (e) {
+    const msg = e instanceof Error ? e.message : String(e);
+    console.error("[publish-stale-reviews] failed", msg);
     await run.fail(e);
-    return new Response(JSON.stringify({ error: String(e) }), {
+    return new Response(JSON.stringify({ ok: false, error: msg }), {
       status: 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   }
 });
+
