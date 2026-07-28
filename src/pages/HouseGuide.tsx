@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, createContext, useContext } from "react";
 import { useParams, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -81,18 +81,29 @@ const Section = ({ icon: Icon, title, children }: { icon: React.ElementType; tit
   </section>
 );
 
+const ReadOnlyContext = createContext(false);
+
 const Field = ({ label, value, onChange, placeholder, type = "text" }: {
   label: string; value: string; onChange: (v: string) => void; placeholder?: string; type?: string;
-}) => (
-  <div>
-    <label className="text-xs font-medium text-muted-foreground mb-1 block">{label}</label>
-    {type === "textarea" ? (
-      <Textarea value={value} onChange={e => onChange(e.target.value)} placeholder={placeholder} className="text-sm" rows={3} />
-    ) : (
-      <Input value={value} onChange={e => onChange(e.target.value)} placeholder={placeholder} className="text-sm" />
-    )}
-  </div>
-);
+}) => {
+  const readOnly = useContext(ReadOnlyContext);
+  return (
+    <div>
+      <label className="text-xs font-medium text-muted-foreground mb-1 block">{label}</label>
+      {readOnly ? (
+        <p className={`text-sm whitespace-pre-line ${value ? "text-foreground" : "text-muted-foreground italic"}`}>
+          {value || "Non renseigné"}
+        </p>
+      ) : type === "textarea" ? (
+        <Textarea value={value} onChange={e => onChange(e.target.value)} placeholder={placeholder} className="text-sm" rows={3} />
+      ) : (
+        <Input value={value} onChange={e => onChange(e.target.value)} placeholder={placeholder} className="text-sm" />
+      )}
+    </div>
+  );
+};
+
+type AccessState = "owner" | "readable" | "pending" | "denied";
 
 const HouseGuide = () => {
   const { propertyId } = useParams<{ propertyId: string }>();
@@ -100,15 +111,18 @@ const HouseGuide = () => {
   const [guide, setGuide] = useState<GuideData | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [access, setAccess] = useState<AccessState>("denied");
+  const [openDate, setOpenDate] = useState<Date | null>(null);
 
   useEffect(() => {
     if (!propertyId || !user) return;
     const load = async () => {
-      const { data } = await supabase
-        .from("house_guides")
-        .select("*")
-        .eq("property_id", propertyId)
-        .maybeSingle();
+      const [{ data: property }, { data }] = await Promise.all([
+        supabase.from("properties").select("id, user_id").eq("id", propertyId).maybeSingle(),
+        supabase.from("house_guides").select("*").eq("property_id", propertyId).maybeSingle(),
+      ]);
+
+      const isOwner = !!property && property.user_id === user.id;
       const base = emptyGuide(propertyId, user.id);
       if (data) {
         // Normalise les champs nullables (DB) en strings vides pour les inputs contrôlés
@@ -126,10 +140,40 @@ const HouseGuide = () => {
       } else {
         setGuide(base);
       }
+
+      if (isOwner) {
+        setAccess("owner");
+      } else if (data) {
+        setAccess("readable");
+      } else {
+        // Guide non lisible : soit la garde n'a pas encore atteint l'ouverture
+        // à J-7, soit la personne n'a aucun droit d'accès.
+        const { data: apps } = await supabase
+          .from("applications")
+          .select("status, sit:sits!inner(id, start_date, property_id, status)")
+          .eq("sitter_id", user.id)
+          .eq("status", "accepted")
+          .eq("sits.property_id", propertyId);
+
+        const upcoming = (apps ?? [])
+          .map((a: any) => a.sit)
+          .filter((s: any) => s && (s.status === "confirmed" || s.status === "in_progress") && s.start_date)
+          .sort((a: any, b: any) => a.start_date.localeCompare(b.start_date))[0];
+
+        if (upcoming) {
+          const start = new Date(`${upcoming.start_date}T00:00:00`);
+          const open = new Date(start.getTime() - 7 * 86400000);
+          setOpenDate(open);
+          setAccess("pending");
+        } else {
+          setAccess("denied");
+        }
+      }
       setLoading(false);
     };
     load();
   }, [propertyId, user]);
+
 
   const update = <K extends keyof GuideData>(field: K, value: GuideData[K]) => {
     if (!guide) return;
@@ -178,7 +222,53 @@ const HouseGuide = () => {
   if (loading) return <div className="p-6 text-muted-foreground">Chargement...</div>;
   if (!guide) return <div className="p-6">Guide introuvable.</div>;
 
+  const isOwner = access === "owner";
+
+  const Shell = ({ children }: { children: React.ReactNode }) => (
+    <div className="p-6 md:p-10 max-w-2xl mx-auto animate-fade-in pb-32">
+      <Helmet><meta name="robots" content="noindex, nofollow" /></Helmet>
+      <Link to="/sits" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-6">
+        <ArrowLeft className="h-4 w-4" /> Retour
+      </Link>
+      <h1 className="font-heading text-2xl font-bold mb-1">Guide de la maison</h1>
+      {children}
+    </div>
+  );
+
+  if (access === "pending") {
+    return (
+      <Shell>
+        <div className="mt-6 rounded-2xl border border-border bg-card p-5">
+          <p className="text-sm text-foreground font-medium">Guide bientôt accessible</p>
+          <p className="text-sm text-muted-foreground mt-2 leading-relaxed">
+            Le propriétaire ouvre le guide 7 jours avant le début de la garde. Vous y trouverez l'adresse exacte,
+            les codes d'accès, les contacts utiles et les consignes.
+          </p>
+          {openDate && (
+            <p className="text-sm text-foreground mt-3">
+              Ouverture prévue le {openDate.toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" })}.
+            </p>
+          )}
+        </div>
+      </Shell>
+    );
+  }
+
+  if (access === "denied") {
+    return (
+      <Shell>
+        <div className="mt-6 rounded-2xl border border-border bg-card p-5">
+          <p className="text-sm text-muted-foreground leading-relaxed">
+            Ce guide n'est pas accessible avec votre compte. Il est réservé au propriétaire du logement
+            et au gardien retenu, à l'approche de la garde.
+          </p>
+        </div>
+      </Shell>
+    );
+  }
+
   return (
+    <ReadOnlyContext.Provider value={!isOwner}>
     <div className="p-6 md:p-10 max-w-2xl mx-auto animate-fade-in pb-32">
       <Helmet><meta name="robots" content="noindex, nofollow" /></Helmet>
       <Link to="/sits" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-6">
@@ -187,8 +277,11 @@ const HouseGuide = () => {
 
       <h1 className="font-heading text-2xl font-bold mb-1">Guide de la maison</h1>
       <p className="text-sm text-muted-foreground mb-6">
-        Ces informations seront partagées avec le gardien une fois la garde confirmée.
+        {isOwner
+          ? "Ces informations seront partagées avec le gardien une fois la garde confirmée, 7 jours avant le début."
+          : "Guide partagé par le propriétaire, en lecture seule."}
       </p>
+
 
       <Section icon={Home} title="Adresse & accès">
         <Field label="Adresse exacte" value={guide.exact_address} onChange={v => update("exact_address", v)} placeholder="12 rue des Lilas, 75011 Paris" />
@@ -265,19 +358,21 @@ const HouseGuide = () => {
           placeholder="Bienvenue chez nous ! N'hésitez pas à utiliser les épices du placard et le café est offert." type="textarea" />
       </Section>
 
-      <div className="mt-8 rounded-2xl border border-border bg-card p-4 flex items-center justify-between gap-4">
-        <div>
-          <p className="font-medium text-foreground">Publier le guide</p>
-          <p className="text-xs text-muted-foreground mt-1">
-            Une fois publié, le guide sera visible par le gardien confirmé pendant les dates de la garde.
-          </p>
+      {isOwner && (
+        <div className="mt-8 rounded-2xl border border-border bg-card p-4 flex items-center justify-between gap-4">
+          <div>
+            <p className="font-medium text-foreground">Publier le guide</p>
+            <p className="text-xs text-muted-foreground mt-1">
+              Une fois publié, le guide sera visible par le gardien retenu à partir de 7 jours avant le début de la garde.
+            </p>
+          </div>
+          <Switch
+            checked={guide.published}
+            onCheckedChange={(v) => update("published", v)}
+            aria-label="Publier le guide"
+          />
         </div>
-        <Switch
-          checked={guide.published}
-          onCheckedChange={(v) => update("published", v)}
-          aria-label="Publier le guide"
-        />
-      </div>
+      )}
 
       {/* Bloc urgence inline (pas sticky pour éviter le chevauchement avec la barre de sauvegarde) */}
       {(guide.emergency_contact_name || guide.emergency_contact_phone) && (
@@ -298,16 +393,20 @@ const HouseGuide = () => {
         </div>
       )}
 
-      <div className="fixed bottom-20 md:bottom-0 left-0 right-0 md:left-64 bg-card border-t border-border p-4 z-40 pb-[max(1rem,env(safe-area-inset-bottom))]">
-        <div className="max-w-2xl mx-auto">
-          <Button className="w-full h-12 text-base font-semibold gap-2" onClick={handleSave} disabled={saving}>
-            <Save className="h-5 w-5" />
-            {saving ? "Enregistrement..." : "Enregistrer le guide"}
-          </Button>
+      {isOwner && (
+        <div className="fixed bottom-20 md:bottom-0 left-0 right-0 md:left-64 bg-card border-t border-border p-4 z-40 pb-[max(1rem,env(safe-area-inset-bottom))]">
+          <div className="max-w-2xl mx-auto">
+            <Button className="w-full h-12 text-base font-semibold gap-2" onClick={handleSave} disabled={saving}>
+              <Save className="h-5 w-5" />
+              {saving ? "Enregistrement..." : "Enregistrer le guide"}
+            </Button>
+          </div>
         </div>
-      </div>
+      )}
     </div>
+    </ReadOnlyContext.Provider>
   );
+
 };
 
 export default HouseGuide;

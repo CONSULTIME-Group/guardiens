@@ -520,7 +520,9 @@ const ConversationHeader = ({
               ownerId={conv.owner_id}
               ownerName={capitalize(conv.other_user?.first_name) || "le propriétaire"}
               sitId={conv.sit_id || undefined}
-              sitCity={conv.other_user?.city || undefined}
+              sitCity={conv.sit?.city || undefined}
+              conversationId={conv.id}
+              isOwner={isOwner}
             />
           )}
         </div>
