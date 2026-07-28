@@ -23,6 +23,7 @@ import { trackFirstAction } from "@/lib/analytics";
 import { moderateContent } from "@/lib/moderation";
 import { appStatusBadge as appStatusLabels } from "@/lib/messageStatus";
 import { useAutoOpenConversation } from "@/hooks/useAutoOpenConversation";
+import { toast as toastSonner } from "sonner";
 import AlmaMessageOpener from "@/components/ai/alma/AlmaMessageOpener";
 import { AlmaStagnantConversationWhisper } from "@/components/ai/alma/wiring/AlmaStagnantConversationWhisper";
 
@@ -111,6 +112,9 @@ const Messages = () => {
   // Pagination des messages
   const [hasMoreMessages, setHasMoreMessages] = useState(false);
   const [loadingMoreMessages, setLoadingMoreMessages] = useState(false);
+  const [galleryUrls, setGalleryUrls] = useState<Set<string>>(new Set());
+  const [savingGalleryUrl, setSavingGalleryUrl] = useState<string | null>(null);
+
   const isInitialMessagesLoad = useRef(true);
 
   const loadConversations = useCallback(async () => {
@@ -341,6 +345,52 @@ const Messages = () => {
         .is("read_at", null);
     }
   }, [user]);
+
+  // ── Galerie du gardien : peut-on rattacher les photos de cette conversation ? ──
+  const canSaveToGallery = !!(
+    user &&
+    activeConv?.sit &&
+    activeConv.sitter_id === user.id &&
+    activeConv.application_status === "accepted" &&
+    (activeConv.sit.status === "in_progress" || activeConv.sit.status === "completed")
+  );
+
+  // Précharge en une requête les photos déjà présentes dans la galerie du gardien.
+  useEffect(() => {
+    if (!user || !canSaveToGallery) { setGalleryUrls(new Set()); return; }
+    let cancelled = false;
+    (async () => {
+      const { data } = await supabase
+        .from("sitter_gallery")
+        .select("photo_url")
+        .eq("user_id", user.id);
+      if (cancelled) return;
+      setGalleryUrls(new Set((data || []).map((r: any) => r.photo_url).filter(Boolean)));
+    })();
+    return () => { cancelled = true; };
+  }, [user, canSaveToGallery, activeConv?.id]);
+
+  const handleSaveToGallery = useCallback(async (photoUrl: string) => {
+    if (!user || !activeConv?.sit || galleryUrls.has(photoUrl)) return;
+    setSavingGalleryUrl(photoUrl);
+    const { error } = await supabase.from("sitter_gallery").insert({
+      user_id: user.id,
+      photo_url: photoUrl,
+      sit_id: activeConv.sit_id,
+      source: "guardiens",
+      city: activeConv.sit.city ?? null,
+      caption: null,
+    });
+    setSavingGalleryUrl(null);
+    if (error) {
+      toastSonner.error("La photo n'a pas pu être ajoutée à votre galerie. Réessayez dans un instant.");
+      return;
+    }
+    setGalleryUrls((prev) => new Set(prev).add(photoUrl));
+    toastSonner.success("Photo ajoutée à votre galerie.");
+  }, [user, activeConv, galleryUrls]);
+
+
 
   const loadOlderMessages = useCallback(async () => {
     if (!activeConv || loadingMoreMessages || messages.length === 0) return;
@@ -794,7 +844,17 @@ const Messages = () => {
                   <div key={msg.id}>
                     {showDaySep && <DaySeparator date={msg.created_at} />}
                     <div className={isLastInGroup ? "pb-2" : "pb-0.5"}>
-                      <MessageBubble msg={msg} isMe={isMe} isLastInGroup={isLastInGroup} readerRole={activeConv.owner_id === user?.id ? "proprio" : "gardien"} />
+                      <MessageBubble
+                        msg={msg}
+                        isMe={isMe}
+                        isLastInGroup={isLastInGroup}
+                        readerRole={activeConv.owner_id === user?.id ? "proprio" : "gardien"}
+                        canSaveToGallery={canSaveToGallery && isMe && !!msg.photo_url}
+                        isInGallery={!!msg.photo_url && galleryUrls.has(msg.photo_url)}
+                        savingToGallery={!!msg.photo_url && savingGalleryUrl === msg.photo_url}
+                        onSaveToGallery={handleSaveToGallery}
+                      />
+
                     </div>
                   </div>
                 );

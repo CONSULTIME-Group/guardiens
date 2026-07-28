@@ -20,7 +20,13 @@ interface MessageBubbleProps {
   readerRole?: "proprio" | "gardien";
   /** N'afficher le timestamp que sur la dernière bulle d'une séquence consécutive */
   isLastInGroup?: boolean;
+  /** Action gardien : rattacher la photo à sa galerie de gardes */
+  canSaveToGallery?: boolean;
+  isInGallery?: boolean;
+  savingToGallery?: boolean;
+  onSaveToGallery?: (photoUrl: string) => void;
 }
+
 
 const systemMessageText = (
   metadata: { action?: string; actor?: string; actor_name?: string; dates?: string } | null | undefined,
@@ -111,7 +117,16 @@ const systemMessageText = (
   return map[action]?.[readerRole] || fallback;
 };
 
-const MessageBubble = ({ msg, isMe, readerRole = "gardien", isLastInGroup = true }: MessageBubbleProps) => {
+const MessageBubble = ({
+  msg,
+  isMe,
+  readerRole = "gardien",
+  isLastInGroup = true,
+  canSaveToGallery = false,
+  isInGallery = false,
+  savingToGallery = false,
+  onSaveToGallery,
+}: MessageBubbleProps) => {
   const [lightboxOpen, setLightboxOpen] = useState(false);
 
   if (msg.is_system) {
@@ -200,6 +215,21 @@ const MessageBubble = ({ msg, isMe, readerRole = "gardien", isLastInGroup = true
               />
             </button>
           )}
+          {msg.photo_url && canSaveToGallery && (
+            isInGallery ? (
+              <p className="text-[11.5px] text-muted-foreground mb-1">Dans votre galerie</p>
+            ) : (
+              <button
+                type="button"
+                onClick={() => onSaveToGallery?.(msg.photo_url as string)}
+                disabled={savingToGallery}
+                className="text-[11.5px] text-primary hover:underline disabled:opacity-60 mb-1"
+              >
+                {savingToGallery ? "Ajout en cours…" : "Garder dans ma galerie"}
+              </button>
+            )
+          )}
+
           {msg.content && (
             <p className="text-[14px] whitespace-pre-line break-words leading-[1.5] text-foreground">
               {msg.content}
