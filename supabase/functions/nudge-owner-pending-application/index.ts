@@ -30,6 +30,8 @@ interface PendingApp {
   owner_first_name: string | null;
   owner_email: string;
   hours_since_created: number;
+  sit_start_date: string | null;
+  sit_status: string | null;
 }
 
 async function sendReminderEmail(params: {
@@ -69,6 +71,16 @@ async function sendReminderEmail(params: {
   }
 
   const daysSince = Math.max(1, Math.floor(app.hours_since_created / 24));
+  // Urgence : une candidature sans reponse sur une garde qui demarre dans
+  // moins de 7 jours ne doit jamais etre retardee par un plafond de frequence.
+  let daysUntilStart: number | null = null;
+  if (app.sit_start_date) {
+    const start = new Date(`${app.sit_start_date}T00:00:00Z`).getTime();
+    const today = new Date();
+    const todayUtc = Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate());
+    daysUntilStart = Math.round((start - todayUtc) / 86400000);
+  }
+  const isUrgent = daysUntilStart !== null && daysUntilStart <= 7;
   const ctaUrl = `https://guardiens.fr/dashboard/candidatures/${app.application_id}`;
 
   // Envoi via send-transactional-email : cap, suppression, opt-out, en-tetes
@@ -91,7 +103,9 @@ async function sendReminderEmail(params: {
         sitterFirstName: app.sitter_first_name || "",
         sitTitle: app.sit_title,
         daysSince,
+        daysUntilStart,
         ctaUrl,
+        ...(isUrgent ? { __urgent: true } : {}),
       },
       logMetadata: {
         application_id: app.application_id,
@@ -99,6 +113,8 @@ async function sendReminderEmail(params: {
         sitter_id: app.sitter_id,
         owner_id: app.owner_id,
         hours_since_created: app.hours_since_created,
+        days_until_start: daysUntilStart,
+        urgent: isUrgent,
         source_template: templateName,
       },
     }),
