@@ -412,7 +412,21 @@ Deno.serve(async (req) => {
     })
 
     const deferReason: string | null = decision.action === 'defer' ? decision.reason : null
-    const scheduledFor: Date | null = decision.action === 'defer' ? decision.scheduledFor : null
+    // Jitter deterministe de 0 a 900 s applique cote appelant (decideDeferral
+    // reste pure). Evite que deux emails differes au meme instant soient
+    // reprogrammes a la seconde pres et se retapent mutuellement le cap.
+    const jitterSeconds = (() => {
+      const key = idempotencyKey || messageId || ''
+      let h = 2166136261
+      for (let i = 0; i < key.length; i++) {
+        h ^= key.charCodeAt(i)
+        h = Math.imul(h, 16777619)
+      }
+      return Math.abs(h) % 901
+    })()
+    const scheduledFor: Date | null = decision.action === 'defer'
+      ? new Date(decision.scheduledFor.getTime() + jitterSeconds * 1000)
+      : null
 
     if (deferReason && scheduledFor) {
       if (idempotencyKey && idempotencyKey !== messageId) {
