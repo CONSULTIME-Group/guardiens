@@ -3681,6 +3681,39 @@ export type Database = {
           },
         ]
       }
+      prerender_recache_log: {
+        Row: {
+          article_id: string | null
+          created_at: string
+          detail: string | null
+          id: string
+          ok: boolean
+          source: string
+          status_code: number | null
+          url: string
+        }
+        Insert: {
+          article_id?: string | null
+          created_at?: string
+          detail?: string | null
+          id?: string
+          ok?: boolean
+          source?: string
+          status_code?: number | null
+          url: string
+        }
+        Update: {
+          article_id?: string | null
+          created_at?: string
+          detail?: string | null
+          id?: string
+          ok?: boolean
+          source?: string
+          status_code?: number | null
+          url?: string
+        }
+        Relationships: []
+      }
       pro_google_reviews_cache: {
         Row: {
           created_at: string
