@@ -222,7 +222,53 @@ const HouseGuide = () => {
   if (loading) return <div className="p-6 text-muted-foreground">Chargement...</div>;
   if (!guide) return <div className="p-6">Guide introuvable.</div>;
 
+  const isOwner = access === "owner";
+
+  const Shell = ({ children }: { children: React.ReactNode }) => (
+    <div className="p-6 md:p-10 max-w-2xl mx-auto animate-fade-in pb-32">
+      <Helmet><meta name="robots" content="noindex, nofollow" /></Helmet>
+      <Link to="/sits" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-6">
+        <ArrowLeft className="h-4 w-4" /> Retour
+      </Link>
+      <h1 className="font-heading text-2xl font-bold mb-1">Guide de la maison</h1>
+      {children}
+    </div>
+  );
+
+  if (access === "pending") {
+    return (
+      <Shell>
+        <div className="mt-6 rounded-2xl border border-border bg-card p-5">
+          <p className="text-sm text-foreground font-medium">Guide bientôt accessible</p>
+          <p className="text-sm text-muted-foreground mt-2 leading-relaxed">
+            Le propriétaire ouvre le guide 7 jours avant le début de la garde. Vous y trouverez l'adresse exacte,
+            les codes d'accès, les contacts utiles et les consignes.
+          </p>
+          {openDate && (
+            <p className="text-sm text-foreground mt-3">
+              Ouverture prévue le {openDate.toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" })}.
+            </p>
+          )}
+        </div>
+      </Shell>
+    );
+  }
+
+  if (access === "denied") {
+    return (
+      <Shell>
+        <div className="mt-6 rounded-2xl border border-border bg-card p-5">
+          <p className="text-sm text-muted-foreground leading-relaxed">
+            Ce guide n'est pas accessible avec votre compte. Il est réservé au propriétaire du logement
+            et au gardien retenu, à l'approche de la garde.
+          </p>
+        </div>
+      </Shell>
+    );
+  }
+
   return (
+    <ReadOnlyContext.Provider value={!isOwner}>
     <div className="p-6 md:p-10 max-w-2xl mx-auto animate-fade-in pb-32">
       <Helmet><meta name="robots" content="noindex, nofollow" /></Helmet>
       <Link to="/sits" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-6">
@@ -231,8 +277,11 @@ const HouseGuide = () => {
 
       <h1 className="font-heading text-2xl font-bold mb-1">Guide de la maison</h1>
       <p className="text-sm text-muted-foreground mb-6">
-        Ces informations seront partagées avec le gardien une fois la garde confirmée.
+        {isOwner
+          ? "Ces informations seront partagées avec le gardien une fois la garde confirmée, 7 jours avant le début."
+          : "Guide partagé par le propriétaire, en lecture seule."}
       </p>
+
 
       <Section icon={Home} title="Adresse & accès">
         <Field label="Adresse exacte" value={guide.exact_address} onChange={v => update("exact_address", v)} placeholder="12 rue des Lilas, 75011 Paris" />
