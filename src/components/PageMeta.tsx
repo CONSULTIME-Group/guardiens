@@ -191,7 +191,7 @@ const PageMeta = ({
         type,
       },
     });
-  }, [author, canonical, canonicalUrl, currentPath, currentUrl, currentLang, fullTitle, metaDescription, noindex, publishedAt, resolvedImage, type]);
+  }, [author, canonical, canonicalUrl, currentPath, currentUrl, currentLang, fullTitle, hreflangKey, metaDescription, noindex, publishedAt, resolvedImage, type]);
 
   // NB : on n'émet PAS via Helmet les tags déjà gérés impérativement dans le
   // useEffect ci-dessus (robots, canonical, hreflang, og:*, twitter:*,
