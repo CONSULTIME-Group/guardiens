@@ -64,7 +64,8 @@ const HelpButton = ({ propertyId, ownerId, ownerName, sitId, sitCity, conversati
     }
   };
 
-  const NotifyBox = ({ category }: { category: "animal" | "logement" | "urgence" }) => (
+  // Fonction (et non composant) pour éviter tout remontage à chaque frappe.
+  const notifyBox = (category: "animal" | "logement" | "urgence") => (
     <div className="mt-3 pt-3 border-t border-border space-y-2">
       <Textarea
         rows={3}
@@ -145,7 +146,7 @@ const HelpButton = ({ propertyId, ownerId, ownerName, sitId, sitCity, conversati
           <p className="text-xs text-muted-foreground mt-2">
             En cas d'urgence animale, appelez d'abord le vétérinaire puis contactez {ownerName}.
           </p>
-          {conversationId && <NotifyBox category="animal" />}
+          {conversationId && notifyBox("animal")}
         </div>
       ),
     },
@@ -178,7 +179,7 @@ const HelpButton = ({ propertyId, ownerId, ownerName, sitId, sitCity, conversati
           {!guide.plumber_phone && !guide.electrician_phone && !guide.emergency_contact_name && (
             <p className="text-muted-foreground italic">Aucun contact d'urgence renseigné.</p>
           )}
-          {conversationId && <NotifyBox category="logement" />}
+          {conversationId && notifyBox("logement")}
         </div>
       ),
     },
@@ -197,7 +198,7 @@ const HelpButton = ({ propertyId, ownerId, ownerName, sitId, sitCity, conversati
           <p className="text-xs text-muted-foreground">
             En cas d'urgence grave (incendie, accident), appelez d'abord les secours (15, 18 ou 112).
           </p>
-          {conversationId && <NotifyBox category="urgence" />}
+          {conversationId && notifyBox("urgence")}
         </div>
       ),
     },
