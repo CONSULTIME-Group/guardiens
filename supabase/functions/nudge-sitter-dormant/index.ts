@@ -72,6 +72,7 @@ Deno.serve(async (req) => {
     let signalsInserted = 0;
     let signalsSkipped = 0;
     let emailsSent = 0;
+    let emailsDeferred = 0;
     let emailsSkipped = 0;
     const errors: Array<{ sitter_id: string; error: string }> = [];
 
@@ -156,9 +157,15 @@ Deno.serve(async (req) => {
       });
       if (!resp.ok) {
         console.error("[nudge-sitter-dormant] send failed", resp.status, await resp.text());
+        emailsSkipped += 1;
+        continue;
       }
-      if (resp.ok) emailsSent += 1;
-      else emailsSkipped += 1;
+      // Un HTTP 200 ne signifie pas envoye : le sender repond 200 avec
+      // deferred:true quand il diffère et skipped:true quand il deduplique.
+      const outcome = (await resp.json().catch(() => null)) as Record<string, unknown> | null;
+      if (outcome?.deferred) emailsDeferred += 1;
+      else if (outcome?.skipped) emailsSkipped += 1;
+      else emailsSent += 1;
     }
 
     await run.finish(errors.length > 0 ? "partial" : "success", {
@@ -166,6 +173,7 @@ Deno.serve(async (req) => {
       signals_inserted: signalsInserted,
       signals_skipped: signalsSkipped,
       emails_sent: emailsSent,
+      emails_deferred: emailsDeferred,
       emails_skipped: emailsSkipped,
       errors_count: errors.length,
     });
@@ -175,6 +183,7 @@ Deno.serve(async (req) => {
         signals_inserted: signalsInserted,
         signals_skipped: signalsSkipped,
         emails_sent: emailsSent,
+        emails_deferred: emailsDeferred,
         emails_skipped: emailsSkipped,
         errors,
         generated_at: new Date().toISOString(),

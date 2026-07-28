@@ -40,18 +40,19 @@ async function sendReminderEmail(params: {
   app: PendingApp;
   messageId: string;
   templateName: string;
-}): Promise<{ ok: boolean; error?: string }> {
+}): Promise<{ ok: boolean; outcome: "sent" | "deferred" | "skipped" | "failed"; error?: string }> {
   const { serviceClient, app, messageId, templateName } = params;
   const email = app.owner_email.trim().toLowerCase();
 
-  // Dédup : si un log existe déjà pour ce message_id → skip
+  // Dédup : si un log existe déjà pour ce message_id, skip
   const { data: existing } = await serviceClient
     .from("email_send_log")
     .select("id")
     .eq("message_id", messageId)
     .limit(1)
     .maybeSingle();
-  if (existing) return { ok: false, error: "already_sent" };
+  if (existing) return { ok: false, outcome: "skipped", error: "already_sent" };
+
 
   // Suppressed
   const { data: sup } = await serviceClient
@@ -59,7 +60,7 @@ async function sendReminderEmail(params: {
     .select("email")
     .eq("email", email)
     .maybeSingle();
-  if (sup) return { ok: false, error: "suppressed" };
+  if (sup) return { ok: false, outcome: "skipped", error: "suppressed" };
 
   // Le filtrage par categorie d'email est centralise dans send-transactional-email.
   // owner-pending-application-nudge est transactionnel : il n'est jamais bloque
@@ -118,10 +119,21 @@ async function sendReminderEmail(params: {
   if (!resp.ok) {
     const body = await resp.text();
     console.error("[nudge-owner-pending-application] send failed", resp.status, body);
-    return { ok: false, error: `send_failed_${resp.status}` };
+    return { ok: false, outcome: "failed", error: `send_failed_${resp.status}` };
   }
-  return { ok: true };
+
+  // Un HTTP 200 ne signifie pas envoye : le sender repond 200 avec deferred:true
+  // quand il diffère, et 200 avec skipped:true quand il deduplique.
+  const payload = (await resp.json().catch(() => null)) as Record<string, unknown> | null;
+  if (payload?.deferred) {
+    return { ok: false, outcome: "deferred", error: String(payload?.reason ?? "deferred") };
+  }
+  if (payload?.skipped) {
+    return { ok: false, outcome: "skipped", error: String(payload?.reason ?? "skipped") };
+  }
+  return { ok: true, outcome: "sent" };
 }
+
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -251,6 +263,7 @@ Deno.serve(async (req) => {
     let signalsInserted = 0;
     let signalsSkipped = 0;
     let emailsSent = 0;
+    let emailsDeferred = 0;
     let emailsSkipped = 0;
     const errors: Array<{ application_id: string; error: string }> = [];
 
@@ -296,8 +309,10 @@ Deno.serve(async (req) => {
         messageId: `pending-app-${app.application_id}`,
         templateName: "pending_application_reminder",
       });
-      if (result.ok) emailsSent += 1;
-      else emailsSkipped += 1;
+      if (result.outcome === "sent") emailsSent += 1;
+      else if (result.outcome === "deferred") emailsDeferred += 1;
+      else if (result.outcome === "skipped") emailsSkipped += 1;
+      else errors.push({ application_id: app.application_id, error: result.error ?? "send_failed" });
     }
 
     if (run) {
@@ -306,6 +321,7 @@ Deno.serve(async (req) => {
         signals_inserted: signalsInserted,
         signals_skipped: signalsSkipped,
         emails_sent: emailsSent,
+        emails_deferred: emailsDeferred,
         emails_skipped: emailsSkipped,
         errors_count: errors.length,
       });
@@ -317,6 +333,7 @@ Deno.serve(async (req) => {
         signals_inserted: signalsInserted,
         signals_skipped: signalsSkipped,
         emails_sent: emailsSent,
+        emails_deferred: emailsDeferred,
         emails_skipped: emailsSkipped,
         errors,
         generated_at: new Date().toISOString(),

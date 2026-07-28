@@ -435,7 +435,9 @@ Deno.serve(async (req) => {
           .select('id')
           .eq('idempotency_key', idempotencyKey)
           .eq('template_name', templateName)
-          .in('status', ['pending', 'sent'])
+          // Seule une ligne encore en attente doit bloquer un re-enfilement.
+          // Une ligne 'sent' ou 'superseded' ne represente plus un envoi a venir.
+          .eq('status', 'pending')
         // Exclut la ligne source (re-traitement flush) pour éviter que la garde
         // se déclenche sur elle-même et clôture silencieusement l'envoi.
         if (sourceQueueId) {
