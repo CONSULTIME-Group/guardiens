@@ -844,7 +844,17 @@ const Messages = () => {
                   <div key={msg.id}>
                     {showDaySep && <DaySeparator date={msg.created_at} />}
                     <div className={isLastInGroup ? "pb-2" : "pb-0.5"}>
-                      <MessageBubble msg={msg} isMe={isMe} isLastInGroup={isLastInGroup} readerRole={activeConv.owner_id === user?.id ? "proprio" : "gardien"} />
+                      <MessageBubble
+                        msg={msg}
+                        isMe={isMe}
+                        isLastInGroup={isLastInGroup}
+                        readerRole={activeConv.owner_id === user?.id ? "proprio" : "gardien"}
+                        canSaveToGallery={canSaveToGallery && isMe && !!msg.photo_url}
+                        isInGallery={!!msg.photo_url && galleryUrls.has(msg.photo_url)}
+                        savingToGallery={!!msg.photo_url && savingGalleryUrl === msg.photo_url}
+                        onSaveToGallery={handleSaveToGallery}
+                      />
+
                     </div>
                   </div>
                 );
