@@ -29,8 +29,8 @@
       "fetchedAt": "2026-07-26T19:32:32.471Z"
     },
     "articles": {
-      "head": "2026-07-27T17:20:53.88422+00:00",
-      "fetchedAt": "2026-07-28T05:27:24.423Z"
+      "head": "2026-07-28T05:33:27.381578+00:00",
+      "fetchedAt": "2026-07-28T05:34:18.562Z"
     }
   },
   "entries": {
@@ -1920,7 +1920,7 @@
       },
       {
         "loc": "/actualites/c-est-quoi-le-house-sitting",
-        "lastmod": "2026-07-27",
+        "lastmod": "2026-07-28",
         "changefreq": "monthly",
         "priority": "0.6"
       },
