@@ -13,14 +13,23 @@ const GUIDE_MESSAGE =
 
 const PHOTO_NUDGE_MESSAGE =
   "Une photo de temps en temps rassure beaucoup le propriétaire. Vous pouvez en envoyer directement dans cette conversation, avec le bouton en bas à gauche.";
-const PHOTO_NUDGE_DEDUP = "%une photo de temps en temps rassure%";
-const PHOTO_RECAP_DEDUP = "%vous avez partagé%pendant cette garde%";
+// Fragments internes stables : ils matchent avec ou sans prefixe de prenom.
+const PHOTO_NUDGE_DEDUP = "%photo de temps en temps rassure%";
+const PHOTO_RECAP_DEDUP = "%avez partagé%pendant cette garde%";
+
+// Prefixe "Prenom, " et met la premiere lettre du texte en minuscule.
+function withFirstName(firstName: string | null | undefined, text: string) {
+  const name = (firstName ?? "").trim();
+  if (!name) return text;
+  return `${name}, ${text.charAt(0).toLowerCase()}${text.slice(1)}`;
+}
 
 function photoRecapMessage(count: number) {
   return count === 1
     ? "Vous avez partagé 1 photo pendant cette garde. Vous pouvez la garder dans votre galerie, elle restera rattachée à cette garde."
     : `Vous avez partagé ${count} photos pendant cette garde. Vous pouvez en garder dans votre galerie, elles resteront rattachées à cette garde.`;
 }
+
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -94,6 +103,16 @@ Deno.serve(async (req) => {
       return count ?? 0;
     }
 
+    // Prenom du gardien accepte, pour lever l'ambiguite du "vous".
+    async function getSitterFirstName(sitterId: string) {
+      const { data } = await supabase
+        .from("profiles")
+        .select("first_name")
+        .eq("id", sitterId)
+        .maybeSingle();
+      return data?.first_name ?? null;
+    }
+
     // Recapitulatif de fin de garde : propose de conserver les photos partagees.
     async function postPhotoRecap(sit: { id: string; user_id: string }, sitterId: string) {
       const convId = await findConversation(sit.id, sitterId);
@@ -101,9 +120,15 @@ Deno.serve(async (req) => {
       const photoCount = await countSitterPhotos(convId, sitterId);
       if (photoCount === 0) return false;
       if (await alreadyPosted(convId, PHOTO_RECAP_DEDUP)) return false;
-      await postSystemMessage(convId, sit.user_id, photoRecapMessage(photoCount));
+      const firstName = await getSitterFirstName(sitterId);
+      await postSystemMessage(
+        convId,
+        sit.user_id,
+        withFirstName(firstName, photoRecapMessage(photoCount)),
+      );
       return true;
     }
+
 
 
     // Poste le message systeme "guide disponible" si la conversation existe,
@@ -309,7 +334,13 @@ Deno.serve(async (req) => {
 
           if (await alreadyPosted(convId, PHOTO_NUDGE_DEDUP)) continue;
 
-          await postSystemMessage(convId, sit.user_id, PHOTO_NUDGE_MESSAGE);
+          const nudgeFirstName = await getSitterFirstName(app.sitter_id);
+          await postSystemMessage(
+            convId,
+            sit.user_id,
+            withFirstName(nudgeFirstName, PHOTO_NUDGE_MESSAGE),
+          );
+
           photoNudgesPosted++;
         }
       } catch (e) {
