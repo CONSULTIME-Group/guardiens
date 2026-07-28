@@ -334,7 +334,13 @@ Deno.serve(async (req) => {
 
           if (await alreadyPosted(convId, PHOTO_NUDGE_DEDUP)) continue;
 
-          await postSystemMessage(convId, sit.user_id, PHOTO_NUDGE_MESSAGE);
+          const nudgeFirstName = await getSitterFirstName(app.sitter_id);
+          await postSystemMessage(
+            convId,
+            sit.user_id,
+            withFirstName(nudgeFirstName, PHOTO_NUDGE_MESSAGE),
+          );
+
           photoNudgesPosted++;
         }
       } catch (e) {
