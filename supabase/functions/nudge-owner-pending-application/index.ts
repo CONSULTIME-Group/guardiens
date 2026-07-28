@@ -8,8 +8,9 @@
  *  - manual (body { application_id, admin_id }) : appelé depuis l'admin pour
  *    envoyer une relance manuelle. Bypass la dédup cron (message_id distinct).
  *
- * Respecte : feature flag admin_signals_active, suppressed_emails,
- * email_preferences.product_emails.
+ * Respecte : feature flag admin_signals_active et suppressed_emails.
+ * Le filtrage par categorie est centralise dans send-transactional-email,
+ * qui laisse toujours passer les templates transactionnels.
  */
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
 import { startCronRun, type CronRun } from "../_shared/cron-run-log.ts";
