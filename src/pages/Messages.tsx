@@ -23,6 +23,7 @@ import { trackFirstAction } from "@/lib/analytics";
 import { moderateContent } from "@/lib/moderation";
 import { appStatusBadge as appStatusLabels } from "@/lib/messageStatus";
 import { useAutoOpenConversation } from "@/hooks/useAutoOpenConversation";
+import { toast as toastSonner } from "sonner";
 import AlmaMessageOpener from "@/components/ai/alma/AlmaMessageOpener";
 import { AlmaStagnantConversationWhisper } from "@/components/ai/alma/wiring/AlmaStagnantConversationWhisper";
 
@@ -375,7 +376,7 @@ const Messages = () => {
     const { error } = await supabase.from("sitter_gallery").insert({
       user_id: user.id,
       photo_url: photoUrl,
-      sit_id: activeConv.sit.id,
+      sit_id: activeConv.sit_id,
       source: "guardiens",
       city: activeConv.sit.city ?? null,
       caption: null,
