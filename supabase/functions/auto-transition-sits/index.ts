@@ -103,6 +103,16 @@ Deno.serve(async (req) => {
       return count ?? 0;
     }
 
+    // Prenom du gardien accepte, pour lever l'ambiguite du "vous".
+    async function getSitterFirstName(sitterId: string) {
+      const { data } = await supabase
+        .from("profiles")
+        .select("first_name")
+        .eq("id", sitterId)
+        .maybeSingle();
+      return data?.first_name ?? null;
+    }
+
     // Recapitulatif de fin de garde : propose de conserver les photos partagees.
     async function postPhotoRecap(sit: { id: string; user_id: string }, sitterId: string) {
       const convId = await findConversation(sit.id, sitterId);
@@ -110,9 +120,15 @@ Deno.serve(async (req) => {
       const photoCount = await countSitterPhotos(convId, sitterId);
       if (photoCount === 0) return false;
       if (await alreadyPosted(convId, PHOTO_RECAP_DEDUP)) return false;
-      await postSystemMessage(convId, sit.user_id, photoRecapMessage(photoCount));
+      const firstName = await getSitterFirstName(sitterId);
+      await postSystemMessage(
+        convId,
+        sit.user_id,
+        withFirstName(firstName, photoRecapMessage(photoCount)),
+      );
       return true;
     }
+
 
 
     // Poste le message systeme "guide disponible" si la conversation existe,
