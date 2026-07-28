@@ -2,10 +2,17 @@
  * Cloudflare Worker — Prerender.io proxy for guardiens.fr
  * ========================================================
  * Deploy: Cloudflare Dashboard > Workers & Pages > guardiens-prerender > Edit code
+ *         ou `npx wrangler deploy`
  * Route:  guardiens.fr/* + *guardiens.fr/*
  *
- * DIAGNOSTIC VERSION — adds X-Prerender-* headers on every response
- * so you can curl and see exactly what the Worker decided.
+ * v6 (2026-07-28)
+ *  - Liste des crawlers IA complétée (oai-searchbot, meta-externalagent,
+ *    amazonbot, applebot-extended, mistralai-user, duckassistbot, cohere-ai,
+ *    youbot). oai-searchbot est le crawler de recherche de ChatGPT, distinct
+ *    de gptbot qui sert l'entraînement : sans lui, les requêtes de recherche
+ *    ChatGPT recevaient le shell React vide.
+ *  - En-têtes X-Prerender-* désormais conditionnés à env.PRERENDER_DEBUG === '1'.
+ *  - bytespider isolé, activable par env.PRERENDER_ALLOW_BYTESPIDER.
  */
 
 // PRERENDER_TOKEN est lu exclusivement depuis env.PRERENDER_TOKEN
@@ -21,8 +28,10 @@ const BOT_AGENTS = [
   'googlebot', 'bingbot', 'slurp', 'duckduckbot', 'yandexbot',
   'baiduspider', 'applebot',
   // Generative AI bots
-  'chatgpt-user', 'gptbot', 'claudebot', 'claude-web',
-  'anthropic-ai', 'perplexitybot', 'perplexity-user', 'bytespider',
+  'chatgpt-user', 'gptbot', 'oai-searchbot', 'claudebot', 'claude-web', 'claude-searchbot',
+  'anthropic-ai', 'perplexitybot', 'perplexity-user', 'meta-externalagent',
+  'meta-externalfetcher', 'amazonbot', 'applebot-extended', 'mistralai-user',
+  'duckassistbot', 'cohere-ai', 'youbot',
   // Social sharing bots
   'facebookexternalhit', 'facebot', 'twitterbot', 'linkedinbot',
   'slackbot', 'whatsapp', 'telegrambot', 'discordbot',
@@ -31,9 +40,12 @@ const BOT_AGENTS = [
   'ahrefsbot', 'semrushbot', 'mj12bot', 'dotbot',
 ];
 
-const BOT_REGEX = new RegExp(BOT_AGENTS.join('|'), 'i');
+const OPTIONAL_BOT_AGENTS = ['bytespider'];
 
-function detectBot(request) {
+const BOT_REGEX = new RegExp(BOT_AGENTS.join('|'), 'i');
+const OPTIONAL_BOT_REGEX = new RegExp(OPTIONAL_BOT_AGENTS.join('|'), 'i');
+
+function detectBot(request, env) {
   const url = new URL(request.url);
   const ua = request.headers.get('user-agent') || '';
   const reasons = [];
@@ -42,8 +54,14 @@ function detectBot(request) {
   if (request.method !== 'GET' && request.method !== 'HEAD') reasons.push('non-get');
   if (request.headers.get('x-prerender')) reasons.push('loop-guard');
 
-  const isBot = BOT_REGEX.test(ua);
-  if (!isBot) reasons.push('not-a-bot');
+  const isBot = BOT_REGEX.test(ua) || (OPTIONAL_BOT_REGEX.test(ua) && env && env.PRERENDER_ALLOW_BYTESPIDER === '1');
+  if (!isBot) {
+    if (OPTIONAL_BOT_REGEX.test(ua)) {
+      reasons.push('optional-bot-disabled');
+    } else {
+      reasons.push('not-a-bot');
+    }
+  }
 
   return { shouldPrerender: reasons.length === 0 && isBot, isBot, ua, reasons };
 }
@@ -65,7 +83,8 @@ async function fetchPrerender(url, token) {
   }
 }
 
-function withDiagHeaders(response, diag) {
+function withDiagHeaders(response, diag, debug) {
+  if (!debug) return response;
   const headers = new Headers(response.headers);
   for (const [k, v] of Object.entries(diag)) {
     headers.set(k, String(v).slice(0, 200));
@@ -166,34 +185,35 @@ export default {
   async fetch(request, env, ctx) {
     const urlObj = new URL(request.url);
     const pathname = urlObj.pathname;
+    const debug = Boolean(env && env.PRERENDER_DEBUG === '1');
 
     // === 301 www → apex (canonical hostname) ===
     // Évite le duplicate content SEO : guardiens.fr est la seule version canonique.
     if (urlObj.hostname === 'www.guardiens.fr') {
       const target = `https://guardiens.fr${pathname}${urlObj.search}`;
-      return new Response(null, {
-        status: 301,
-        headers: {
-          'location': target,
-          'cache-control': 'public, max-age=3600',
-          'x-prerender-worker': 'guardiens-prerender-v5',
-          'x-prerender-status': 'www-to-apex-301',
-        },
-      });
+      const headers = {
+        'location': target,
+        'cache-control': 'public, max-age=3600',
+      };
+      if (debug) {
+        headers['x-prerender-worker'] = 'guardiens-prerender-v6';
+        headers['x-prerender-status'] = 'www-to-apex-301';
+      }
+      return new Response(null, { status: 301, headers });
     }
 
     // /robots.txt : plus intercepté — laissé passer vers l'origine
     // (public/robots.txt généré liste toutes les routes privées à Disallow).
 
-    const { shouldPrerender, isBot, ua, reasons } = detectBot(request);
+    const { shouldPrerender, isBot, ua, reasons } = detectBot(request, env);
     const url = request.url;
 
-    const baseDiag = {
-      'X-Prerender-Worker': 'guardiens-prerender-v5',
+    const baseDiag = debug ? {
+      'X-Prerender-Worker': 'guardiens-prerender-v6',
       'X-Prerender-Bot-Detected': String(isBot),
       'X-Prerender-UA': ua || '(empty)',
       'X-Prerender-Skip-Reasons': reasons.join(',') || 'none',
-    };
+    } : {};
 
     if (!shouldPrerender) {
       const originResp = await fetchOrigin(request);
@@ -204,7 +224,7 @@ export default {
       return withDiagHeaders(finalResp, {
         ...baseDiag,
         'X-Prerender-Status': 'bypass',
-      });
+      }, debug);
     }
 
     console.log('[Prerender] Bot — UA: "' + ua + '" — URL: ' + url);
@@ -217,7 +237,7 @@ export default {
         return withDiagHeaders(originResp, {
           ...baseDiag,
           'X-Prerender-Status': 'fallback-no-token',
-        });
+        }, debug);
       }
       const prerenderResponse = await fetchPrerender(url, token);
 
@@ -226,7 +246,7 @@ export default {
           ...baseDiag,
           'X-Prerender-Status': 'hit',
           'X-Prerender-Upstream-Status': prerenderResponse.status,
-        });
+        }, debug);
       }
 
       console.log('[Prerender] Error ' + prerenderResponse.status + ' for ' + url);
@@ -235,7 +255,7 @@ export default {
         ...baseDiag,
         'X-Prerender-Status': 'fallback-upstream-error',
         'X-Prerender-Upstream-Status': prerenderResponse.status,
-      });
+      }, debug);
     } catch (err) {
       console.log('[Prerender] Failed for ' + url + ': ' + err.message);
       const originResp = await fetchOrigin(request);
@@ -243,7 +263,7 @@ export default {
         ...baseDiag,
         'X-Prerender-Status': 'fallback-exception',
         'X-Prerender-Error': err.message,
-      });
+      }, debug);
     }
   },
 };
