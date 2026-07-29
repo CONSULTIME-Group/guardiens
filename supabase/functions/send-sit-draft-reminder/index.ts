@@ -50,13 +50,17 @@ Deno.serve(async (req) => {
 
   const now = Date.now();
   const cutoffDate = new Date(now - 24 * 60 * 60 * 1000).toISOString();
+  const today = new Date(now).toISOString().slice(0, 10);
 
-  // Récupérer les drafts créés il y a plus de 24h, les plus anciens d'abord
+  // Récupérer les drafts créés il y a plus de 24h, les plus anciens d'abord.
+  // Filtre dates : on ne relance que les brouillons sans date de début
+  // ou dont la garde est encore à venir (start_date strictement après aujourd'hui).
   const { data: drafts, error } = await supabase
     .from("sits")
     .select("id, user_id, title, start_date, end_date, specific_expectations, environments, city, owner_message, daily_routine, created_at")
     .eq("status", "draft")
     .lt("created_at", cutoffDate)
+    .or(`start_date.is.null,start_date.gt.${today}`)
     .order("created_at", { ascending: true })
     .limit(100);
 
