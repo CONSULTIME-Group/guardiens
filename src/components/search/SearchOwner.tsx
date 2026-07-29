@@ -857,18 +857,7 @@ const SearchOwner = () => {
             </PopoverContent>
           </Popover>
 
-          {zoneMode === "radius" && (
-            <Select value={String(radius[0])} onValueChange={(v) => setRadius([Number(v)])}>
-              <SelectTrigger className="w-[140px] h-[52px] rounded-2xl border-border bg-card shadow-sm">
-                <SelectValue placeholder="Rayon" />
-              </SelectTrigger>
-              <SelectContent>
-                {ALLOWED_ALERT_RADII.map((r) => (
-                  <SelectItem key={r} value={String(r)}>{r} km</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          )}
+          {/* Select « Rayon » retiré : contrôle unique porté par la chip rayon du sélecteur de zone. */}
 
           {/* CTA « Rechercher » retiré : la recherche est live (ville/rayon → refetch auto),
               le bouton primary volait l'attention pour zéro action utile. */}
