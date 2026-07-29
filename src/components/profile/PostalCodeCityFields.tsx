@@ -86,7 +86,8 @@ const PostalCodeCityFields = ({
             <Input
               id={cityId}
               value={city}
-              onChange={(e) => onChange({ city: normalizeCityName(e.target.value) })}
+              onChange={(e) => onChange({ city: normalizeCityTyping(e.target.value) })}
+              onBlur={(e) => onChange({ city: normalizeCityName(e.target.value) })}
               className={inputClassName}
               maxLength={100}
               disabled={disabled}
@@ -151,7 +152,8 @@ const PostalCodeCityFields = ({
             <Input
               id={cityId}
               value={city}
-              onChange={(e) => onChange({ city: normalizeCityName(e.target.value) })}
+              onChange={(e) => onChange({ city: normalizeCityTyping(e.target.value) })}
+              onBlur={(e) => onChange({ city: normalizeCityName(e.target.value) })}
               className={inputClassName}
               maxLength={100}
               disabled={disabled}
