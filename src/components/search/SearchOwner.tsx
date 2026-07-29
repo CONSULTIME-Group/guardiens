@@ -1260,7 +1260,7 @@ const SearchOwner = () => {
                   <PopoverTrigger asChild>
                     <button
                       type="button"
-                      onClick={() => setZoneMode("radius")}
+                      onClick={() => { setSelectedCountry(null); setZoneMode("radius"); }}
                       disabled={z.disabled}
                       aria-pressed={active}
                       className={chipClass}
@@ -1298,7 +1298,7 @@ const SearchOwner = () => {
               <button
                 key={z.key}
                 type="button"
-                onClick={() => setZoneMode(z.key)}
+                onClick={() => { setSelectedCountry(null); setZoneMode(z.key); }}
                 disabled={z.disabled}
                 aria-pressed={active}
                 className={chipClass}
@@ -1307,6 +1307,54 @@ const SearchOwner = () => {
               </button>
             );
           })}
+
+          {/* Pill Pays, en dernier. Liste construite depuis la base : jamais d'entrée
+              à zéro gardien. Masquée s'il n'existe qu'un seul pays peuplé. */}
+          {sitterCountries.length > 1 && (() => {
+            const active = zoneMode === "country" && !!selectedCountry;
+            const chipClass = `min-h-9 rounded-full border px-3 py-1 text-xs transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-40 disabled:cursor-not-allowed ${
+              active
+                ? "bg-primary text-primary-foreground border-primary"
+                : "bg-card text-muted-foreground border-border hover:border-primary"
+            }`;
+            return (
+              <Popover open={openPop === "country"} onOpenChange={(o) => setOpenPop(o ? "country" : null)}>
+                <PopoverTrigger asChild>
+                  <button type="button" aria-pressed={active} className={chipClass}>
+                    {active && selectedCountry ? countryName(selectedCountry) : "Pays"}
+                  </button>
+                </PopoverTrigger>
+                <PopoverContent align="start" className="w-56 p-2 space-y-1 max-h-72 overflow-y-auto">
+                  <button
+                    type="button"
+                    className="w-full text-left px-3 py-2 rounded-lg text-sm hover:bg-muted transition-colors"
+                    onClick={() => {
+                      setSelectedCountry(null);
+                      setZoneMode(prevZoneModeRef.current ?? "radius");
+                      setOpenPop(null);
+                    }}
+                  >
+                    Tous les pays
+                  </button>
+                  {sitterCountries.map((c) => (
+                    <button
+                      key={c.code}
+                      type="button"
+                      className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-colors ${selectedCountry === c.code ? "bg-primary/10 text-primary font-medium" : "hover:bg-muted"}`}
+                      onClick={() => {
+                        setSelectedCountry(c.code);
+                        setZoneMode("country");
+                        setOpenPop(null);
+                      }}
+                    >
+                      {countryName(c.code)}
+                      <span className="ml-1 text-muted-foreground">({c.count})</span>
+                    </button>
+                  ))}
+                </PopoverContent>
+              </Popover>
+            );
+          })()}
         </div>
 
 
