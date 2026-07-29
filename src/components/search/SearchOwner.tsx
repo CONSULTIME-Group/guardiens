@@ -782,7 +782,7 @@ const SearchOwner = () => {
     }
 
     return { results: sorted, densityCounts: density };
-  }, [rawResults, searchCenter, city, cityPostalCode, userPostalCode, radius, zoneMode, animalTypes, vehicled, availableOnly, verifiedOnly, emergencyOnly, proOnly, minSits, minRating, sort, sortUserOverride, viewerOwner]);
+  }, [rawResults, searchCenter, city, cityPostalCode, userPostalCode, radius, zoneMode, selectedCountry, countryByUser, animalTypes, vehicled, availableOnly, verifiedOnly, emergencyOnly, proOnly, minSits, minRating, sort, sortUserOverride, viewerOwner]);
 
 
   const hasActiveFilters = vehicled || availableOnly || verifiedOnly || emergencyOnly || proOnly || minSits !== "all" || minRating !== "all";
@@ -841,11 +841,15 @@ const SearchOwner = () => {
   const sortPillActive = "snap-start shrink-0 rounded-full px-3 py-1 min-h-9 inline-flex items-center text-xs bg-primary/10 text-primary border border-primary/30 font-semibold cursor-pointer whitespace-nowrap";
 
 
+  // Hors France, les zones françaises (rayon, département, région) n'ont aucun sens :
+  // elles reposent toutes sur le code postal français. On les désactive sans les masquer.
+  const foreignCountrySelected = zoneMode === "country" && !!selectedCountry && selectedCountry !== "FR";
+
   // Mode région exposé : le filtrage régional est implémenté plus haut dans ce fichier. Ne pas remasquer.
   const zoneChips: Array<{ key: ZoneMode; label: string; count: number; disabled?: boolean }> = [
-    { key: "radius", label: `${radius[0]} km`, count: densityCounts.radius, disabled: !city },
-    { key: "dept", label: refDept ? `Dép. ${refDept}` : "Département", count: densityCounts.dept, disabled: !refDept },
-    { key: "region", label: refRegion ? REGION_NAMES[refRegion] ?? "Ma région" : "Ma région", count: densityCounts.region, disabled: !refRegion },
+    { key: "radius", label: `${radius[0]} km`, count: densityCounts.radius, disabled: !city || foreignCountrySelected },
+    { key: "dept", label: refDept ? `Dép. ${refDept}` : "Département", count: densityCounts.dept, disabled: !refDept || foreignCountrySelected },
+    { key: "region", label: refRegion ? REGION_NAMES[refRegion] ?? "Ma région" : "Ma région", count: densityCounts.region, disabled: !refRegion || foreignCountrySelected },
     { key: "france", label: "France", count: densityCounts.france },
   ];
 
