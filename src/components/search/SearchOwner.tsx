@@ -542,7 +542,7 @@ const SearchOwner = () => {
     if (sitterUserIds.length > 0) {
       const { data: sitterProfs } = await supabase
         .from("public_profiles")
-        .select("id, first_name, avatar_url, city, postal_code, profile_completion, identity_verified, completed_sits_count, bio, pro_status, pro_specialty, last_seen_at")
+        .select("id, first_name, avatar_url, city, postal_code, profile_completion, identity_verified, completed_sits_count, bio, pro_status, pro_specialty, last_seen_at, latitude, longitude")
         .in("id", sitterUserIds);
 
       const sitterProfMap = new Map<string, any>();
