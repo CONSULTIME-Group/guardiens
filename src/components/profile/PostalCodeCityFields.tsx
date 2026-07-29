@@ -23,14 +23,21 @@ interface Props {
   showAbroadToggle?: boolean;
 }
 
-/** Même logique que public.normalize_city_name en base. */
-const normalizeCityName = (value: string) =>
+/**
+ * Normalisation en deux temps, équivalente au total à public.normalize_city_name en base.
+ * 1. Pendant la frappe (onChange) : retrait des parenthèses et des codes postaux isolés
+ *    uniquement. Ne JAMAIS y remettre trim() ni la réduction des espaces multiples,
+ *    cela supprimerait l'espace en cours de frappe (« New York » deviendrait « NewYork »).
+ * 2. À la sortie du champ (onBlur) : réduction des espaces multiples puis trim().
+ */
+const normalizeCityTyping = (value: string) =>
   value
     .replace(/\([^)]*\)/g, " ")
     .replace(/[()]/g, " ")
-    .replace(/\b\d{5}\b/g, " ")
-    .replace(/\s+/g, " ")
-    .trim();
+    .replace(/\b\d{5}\b/g, " ");
+
+const normalizeCityName = (value: string) =>
+  normalizeCityTyping(value).replace(/\s+/g, " ").trim();
 
 
 
@@ -79,7 +86,8 @@ const PostalCodeCityFields = ({
             <Input
               id={cityId}
               value={city}
-              onChange={(e) => onChange({ city: normalizeCityName(e.target.value) })}
+              onChange={(e) => onChange({ city: normalizeCityTyping(e.target.value) })}
+              onBlur={(e) => onChange({ city: normalizeCityName(e.target.value) })}
               className={inputClassName}
               maxLength={100}
               disabled={disabled}
@@ -144,7 +152,8 @@ const PostalCodeCityFields = ({
             <Input
               id={cityId}
               value={city}
-              onChange={(e) => onChange({ city: normalizeCityName(e.target.value) })}
+              onChange={(e) => onChange({ city: normalizeCityTyping(e.target.value) })}
+              onBlur={(e) => onChange({ city: normalizeCityName(e.target.value) })}
               className={inputClassName}
               maxLength={100}
               disabled={disabled}
