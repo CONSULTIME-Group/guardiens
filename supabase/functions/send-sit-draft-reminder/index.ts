@@ -118,13 +118,14 @@ Deno.serve(async (req) => {
         continue;
       }
 
-      // Respect des préférences email
+      // Respect des préférences email. Le template sit-draft-reminder est
+      // classé "product" dans _shared/email-categories.ts, on lit donc product_emails.
       const { data: prefs } = await supabase
         .from("email_preferences")
-        .select("marketing_enabled, transactional_enabled")
+        .select("product_emails")
         .eq("user_id", draft.user_id)
         .maybeSingle();
-      if (prefs && (prefs as any).transactional_enabled === false) {
+      if (prefs && (prefs as any).product_emails === false) {
         skipped++;
         continue;
       }
