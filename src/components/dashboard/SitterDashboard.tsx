@@ -134,7 +134,7 @@ const SitterDashboard = () => {
   ];
   const secondaryItems = [
     { key: "experience", done: hasAnimalExperience, label: "Ajouter une expérience animale", to: "/profile?section=experience" },
-    { key: "identity", done: identityStatus === "verified" || identityVerified, label: "Vérifier votre identité (recommandé)", to: "/settings#verification" },
+    { key: "identity", done: identityStatus === "verified" || identityVerified, label: "Vérifier votre identité (recommandé)", to: "/settings?section=security" },
   ];
   const allItems = [...primaryItems, ...secondaryItems];
   const completedItems = allItems.filter(c => c.done);

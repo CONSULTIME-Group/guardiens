@@ -45,7 +45,7 @@ import { useViewerSitterForAffinity } from "@/hooks/useViewerSitterForAffinity";
 /* ── Status configs (tokens sémantiques uniquement, compat dark mode) ── */
 const statusConfig: Record<string, { label: string; className: string }> = {
   draft: { label: "Brouillon", className: "bg-muted text-muted-foreground" },
-  published: { label: "En attente", className: "bg-muted text-muted-foreground" },
+  published: { label: "En ligne", className: "bg-primary/10 text-primary" },
   published_with_apps: { label: "Candidature(s) reçue(s)", className: "bg-info-soft text-info border border-info-border" },
   confirmed: { label: "Garde confirmée", className: "bg-success-soft text-success border border-success-border" },
   in_progress: { label: "En cours", className: "bg-success-soft text-success border border-success-border" },
