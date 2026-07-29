@@ -707,8 +707,14 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
  if (!searchCoords) return { items, cityCoords };
  filtered = items.filter((s) => {
  if (passThrough(s)) return true;
- const ownerCity = getCityFn(s); if (!ownerCity) return false;
- const coords = cityCoords.get(ownerCity); if (!coords) return false;
+  const ownerCity = getCityFn(s); if (!ownerCity) return false;
+  const coords = cityCoords.get(ownerCity);
+  // Repli département : une ville non géocodable ne doit pas faire disparaître une annonce du rayon. On retombe sur le code postal, seule donnée fiable. Ne pas revenir à un return false sec.
+  if (!coords) {
+    const cp = getPostalCodeFn?.(s);
+    if (!cp || !refDept) return false;
+    return getDeptCode(cp) === refDept;
+  }
  return haversineDistance(searchCoords.lat, searchCoords.lng, coords.lat, coords.lng) <= radius[0];
  });
  } else if (zoneMode === "dept" && refDept) {
