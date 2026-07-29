@@ -929,36 +929,7 @@ const SearchOwner = () => {
             </PopoverContent>
           </Popover>
 
-          {/* PILL 2, Rayon — mobile uniquement (desktop a le Select rayon dans le hero) */}
-          {zoneMode === "radius" && (
-            <Popover open={openPop === "rad"} onOpenChange={(o) => setOpenPop(o ? "rad" : null)}>
-              <PopoverTrigger asChild>
-                <button className={`md:hidden ${pillBase}`}>{radius[0]} km</button>
-              </PopoverTrigger>
-              <PopoverContent align="start" className="w-64 p-3 space-y-3">
-                <div className="flex gap-2 flex-wrap">
-                  {RADIUS_SHORTCUTS.map(r => (
-                    <button key={r} onClick={() => setRadius([r])} className={`rounded-full px-3 py-1 text-xs border transition-colors ${radius[0] === r ? "bg-primary text-primary-foreground border-primary" : "border-border text-muted-foreground hover:border-primary"}`}>{r} km</button>
-                  ))}
-                </div>
-                {(() => {
-                  const currentIdx = Math.max(0, ALLOWED_ALERT_RADII.indexOf(radius[0] as any));
-                  return (
-                    <>
-                      <Slider
-                        value={[currentIdx]}
-                        onValueChange={(v) => setRadius([ALLOWED_ALERT_RADII[v[0]]])}
-                        min={0}
-                        max={ALLOWED_ALERT_RADII.length - 1}
-                        step={1}
-                      />
-                      <p className="text-xs text-muted-foreground text-center">{radius[0]} km</p>
-                    </>
-                  );
-                })()}
-              </PopoverContent>
-            </Popover>
-          )}
+          {/* PILL rayon retirée : le réglage du rayon est porté par la chip « x km » du sélecteur de zone. */}
 
 
           {/* PILL 3, Dates : retiré tant que la disponibilité datée gardien n'est pas modélisée */}
