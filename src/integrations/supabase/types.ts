@@ -7494,6 +7494,7 @@ export type Database = {
         Returns: number
       }
       normalize_analytics_source: { Args: { raw: string }; Returns: string }
+      normalize_city_name: { Args: { txt: string }; Returns: string }
       notify_owner_of_new_application: {
         Args: { _application_id: string }
         Returns: string
