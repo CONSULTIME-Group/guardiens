@@ -5,6 +5,7 @@ const ENV_OPTIONS = [
   { key: "campagne", label: "Campagne" },
   { key: "montagne", label: "Montagne" },
   { key: "lac", label: "Lac" },
+  { key: "mer", label: "Bord de mer" },
   { key: "vignes", label: "Vignes" },
   { key: "foret", label: "Forêt" },
 ] as const;
@@ -14,6 +15,7 @@ export const ENV_LABEL_MAP: Record<string, string> = {
   campagne: "Campagne",
   montagne: "Montagne",
   lac: "Lac",
+  mer: "Bord de mer",
   vignes: "Vignes",
   foret: "Forêt",
 };

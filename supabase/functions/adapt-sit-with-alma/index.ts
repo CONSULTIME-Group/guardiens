@@ -10,7 +10,7 @@ import { isLlmRefusal } from "../_shared/refusal-guard.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 
 const RATE_LIMIT_PER_HOUR = 5;
-const ALLOWED_ENVIRONMENTS = ["ville", "campagne", "montagne", "lac", "vignes", "foret"] as const;
+const ALLOWED_ENVIRONMENTS = ["ville", "campagne", "montagne", "lac", "mer", "vignes", "foret"] as const;
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: CORS_HEADERS });
@@ -69,7 +69,7 @@ RÈGLE ABSOLUE : vous produisez TOUJOURS une version adaptée exploitable. Vous 
 Contraintes :
 - Ne supprimez pas d'information essentielle de l'original (animaux, ville, contexte) sauf si l'ajustement le demande explicitement.
 - Ne recopiez pas mot pour mot : reformulez pour intégrer les changements de façon naturelle.
-- environments : 0 à 3 valeurs STRICTEMENT parmi { ville, campagne, montagne, lac, vignes, foret }. Ne renvoyez cette clé que si vous êtes sûr d'un changement pertinent, sinon renvoyez la liste d'origine.
+- environments : 0 à 3 valeurs STRICTEMENT parmi { ville, campagne, montagne, lac, mer, vignes, foret }. Ne renvoyez cette clé que si vous êtes sûr d'un changement pertinent, sinon renvoyez la liste d'origine.
 - open_to : gardez les valeurs de l'original sauf si l'ajustement demande de les modifier.`;
 
     const originalCtx = `Annonce d'origine :

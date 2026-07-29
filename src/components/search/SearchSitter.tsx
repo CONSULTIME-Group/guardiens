@@ -200,6 +200,7 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
  { key: "countryside", label: "Campagne" },
  { key: "mountain", label: "Montagne" },
  { key: "lake", label: "Lac" },
+ { key: "mer", label: "Bord de mer" },
  { key: "vineyard", label: "Vignes" },
  { key: "forest", label: "Forêt" },
  ];
