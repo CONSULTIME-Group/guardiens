@@ -238,15 +238,18 @@ const Landing = () => {
             </p>
 
 
-            {(kpiMaisons > 0 || kpiAnimaux > 0 || kpiInscrits > 0 || kpiMissions > 0) && (
+            {(kpiMaisons >= 10 || kpiAnimaux >= 10 || kpiInscrits > 0 || kpiMissions >= 30) && (
               <div className="flex flex-row flex-wrap justify-start gap-x-6 gap-y-3 mt-8 md:gap-x-12 md:gap-y-6 md:mt-14 animate-hero-fade-up animation-delay-1100">
-                {kpiMaisons > 0 && (
+                {/* Seuils : un compteur ne s'affiche qu'au-dessus d'un volume qui prouve
+                    l'activité. En dessous, il souligne le vide. Décision produit, ne pas
+                    abaisser sans arbitrage. */}
+                {kpiMaisons >= 10 && (
                   <div className="border-r border-white/20 pr-6 md:pr-12 last:border-r-0 last:pr-0">
                     <span className="block text-3xl font-heading font-bold text-white tabular-nums">{kpiMaisons}</span>
                     <span className="text-xs font-body text-white/80 tracking-wide uppercase mt-1 block">{t("landing.hero.kpi_houses")}</span>
                   </div>
                 )}
-                {kpiAnimaux > 0 && (
+                {kpiAnimaux >= 10 && (
                   <div className="border-r border-white/20 pr-6 md:pr-12 last:border-r-0 last:pr-0">
                     <span className="block text-3xl font-heading font-bold text-white tabular-nums">{kpiAnimaux}</span>
                     <span className="text-xs font-body text-white/80 tracking-wide uppercase mt-1 block">{t("landing.hero.kpi_animals")}</span>
@@ -258,7 +261,7 @@ const Landing = () => {
                     <span className="text-xs font-body text-white/80 tracking-wide uppercase mt-1 block">{t("landing.hero.kpi_members")}</span>
                   </div>
                 )}
-                {/* Seuil 30 : en dessous, un compteur d'entraide isolé à côté de 38 maisons souligne le vide au lieu de prouver l'activité. Décision produit, ne pas abaisser sans arbitrage. */}
+                {/* Seuil 30 : en dessous, un compteur d'entraide isolé à côté des autres compteurs souligne le vide au lieu de prouver l'activité. Décision produit, ne pas abaisser sans arbitrage. */}
                 {kpiMissions >= 30 && (
                   <div>
                     <span className="block text-3xl font-heading font-bold text-white tabular-nums">{kpiMissions}</span>
