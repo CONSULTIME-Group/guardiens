@@ -868,15 +868,16 @@ const SearchOwner = () => {
             <PopoverContent align="start" className="w-[420px] p-3 space-y-3">
               <div className="relative">
                 <Input
-                  placeholder="Rechercher une ville..."
+                  placeholder="Ville, département (ex. 69) ou région…"
                   value={city}
                   onChange={(e) => {
                     setCity(e.target.value);
+                    setLocQuery(e.target.value);
                     setCityPostalCode(null);
                     fetchCitySuggestions(e.target.value);
                   }}
                   className="pr-10"
-                  aria-label="Ville ou commune"
+                  aria-label="Ville, département ou région"
                   autoFocus
                 />
                 <button
@@ -890,6 +891,7 @@ const SearchOwner = () => {
               </div>
               {citySuggestions.length > 0 && (
                 <div className="space-y-1 max-h-64 overflow-y-auto">
+                  <p className="px-3 text-[10px] uppercase tracking-wide text-muted-foreground/70">Communes</p>
                   {citySuggestions.map((s: any, i: number) => (
                     <button
                       key={i}
@@ -898,11 +900,41 @@ const SearchOwner = () => {
                         setCity(s.nom);
                         setCityPostalCode(s.codesPostaux?.[0] ?? null);
                         setCitySuggestions([]);
+                        setLocQuery("");
                         setOpenPop(null);
                       }}
                     >
                       <span className="font-medium">{s.nom}</span>
                       {s.codesPostaux?.[0] && <span className="text-muted-foreground ml-1">({s.codesPostaux[0]})</span>}
+                    </button>
+                  ))}
+                </div>
+              )}
+              {deptSuggestions.length > 0 && (
+                <div className="space-y-1">
+                  <p className="px-3 text-[10px] uppercase tracking-wide text-muted-foreground/70">Départements</p>
+                  {deptSuggestions.map((d) => (
+                    <button
+                      key={d}
+                      className="w-full text-left px-3 py-2 rounded-lg text-sm hover:bg-muted transition-colors"
+                      onClick={() => handleSelectDept(d)}
+                    >
+                      <span className="font-medium">{DEPT_NAMES[d]}</span>
+                      <span className="text-muted-foreground ml-1">({d})</span>
+                    </button>
+                  ))}
+                </div>
+              )}
+              {regionSuggestions.length > 0 && (
+                <div className="space-y-1">
+                  <p className="px-3 text-[10px] uppercase tracking-wide text-muted-foreground/70">Régions</p>
+                  {regionSuggestions.map((r) => (
+                    <button
+                      key={r}
+                      className="w-full text-left px-3 py-2 rounded-lg text-sm hover:bg-muted transition-colors"
+                      onClick={() => handleSelectRegion(r)}
+                    >
+                      <span className="font-medium">{REGION_NAMES[r]}</span>
                     </button>
                   ))}
                 </div>
