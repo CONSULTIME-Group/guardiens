@@ -260,7 +260,7 @@ const Landing = () => {
                     <span className="text-xs font-body text-white/80 tracking-wide uppercase mt-1 block">{t("landing.hero.kpi_members")}</span>
                   </div>
                 )}
-                {kpiMissions >= 5 && (
+                {kpiMissions > 0 && (
                   <div>
                     <span className="block text-3xl font-heading font-bold text-white tabular-nums">{kpiMissions}</span>
                     <span className="text-xs font-body text-white/80 tracking-wide uppercase mt-1 block">{t("landing.hero.kpi_missions")}</span>
