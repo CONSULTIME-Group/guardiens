@@ -208,6 +208,49 @@ const SearchOwner = () => {
     setOpenPop(null);
   }, []);
 
+  // Pays réellement peuplés : source unique = RPC public.get_sitter_country_map()
+  // (jointure sitter_profiles × profiles). Aucune liste de pays en dur, donc aucune
+  // entrée à zéro gardien ne peut apparaître.
+  const [countryByUser, setCountryByUser] = useState<Map<string, string>>(new Map());
+  const [sitterCountries, setSitterCountries] = useState<Array<{ code: string; count: number }>>([]);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const { data, error } = await (supabase as any).rpc("get_sitter_country_map");
+      if (cancelled || error || !data) return;
+      const map = new Map<string, string>();
+      const counts = new Map<string, number>();
+      (data as any[]).forEach((r) => {
+        if (!r?.user_id || !r?.country) return;
+        map.set(r.user_id, r.country);
+        counts.set(r.country, (counts.get(r.country) || 0) + 1);
+      });
+      setCountryByUser(map);
+      setSitterCountries(
+        Array.from(counts.entries())
+          .map(([code, count]) => ({ code, count }))
+          .sort((a, b) => b.count - a.count || a.code.localeCompare(b.code)),
+      );
+    })();
+    return () => { cancelled = true; };
+  }, []);
+
+  const countryName = useCallback((code: string) => {
+    try {
+      return new Intl.DisplayNames(["fr"], { type: "region" }).of(code) || code;
+    } catch {
+      return code;
+    }
+  }, []);
+
+  // Mémorise le dernier mode hors pays, pour le restaurer via « Tous les pays ».
+  useEffect(() => {
+    if (zoneMode !== "country") prevZoneModeRef.current = zoneMode;
+  }, [zoneMode]);
+
+
+
   // Geolocation
   const handleGeolocate = useCallback(() => {
     if (!navigator.geolocation) { toast.error("Géolocalisation non disponible"); return; }
