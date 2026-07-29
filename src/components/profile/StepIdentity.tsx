@@ -79,6 +79,7 @@ const StepIdentity = ({ data, onChange, onUploadAvatar }: Props) => {
       <PostalCodeCityFields
         city={data.city}
         postalCode={data.postal_code}
+        country={data.country}
         onChange={onChange}
       />
 

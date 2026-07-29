@@ -23,6 +23,17 @@ interface Props {
   showAbroadToggle?: boolean;
 }
 
+/** Même logique que public.normalize_city_name en base. */
+const normalizeCityName = (value: string) =>
+  value
+    .replace(/\([^)]*\)/g, " ")
+    .replace(/[()]/g, " ")
+    .replace(/\b\d{5}\b/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+
+
+
 const PostalCodeCityFields = ({
   city,
   postalCode,
@@ -68,7 +79,7 @@ const PostalCodeCityFields = ({
             <Input
               id={cityId}
               value={city}
-              onChange={(e) => onChange({ city: e.target.value })}
+              onChange={(e) => onChange({ city: normalizeCityName(e.target.value) })}
               className={inputClassName}
               maxLength={100}
               disabled={disabled}
@@ -116,9 +127,9 @@ const PostalCodeCityFields = ({
             {cityLabel}
             {required && " *"}
           </Label>
-          {cities.length > 1 && !disabled ? (
+          {cities.length >= 1 && !disabled ? (
             <Select value={city} onValueChange={(v) => selectCity(v)} disabled={disabled}>
-              <SelectTrigger className={inputClassName}>
+              <SelectTrigger id={cityId} className={inputClassName}>
                 <SelectValue placeholder="Choisir la ville…" />
               </SelectTrigger>
               <SelectContent>
@@ -133,7 +144,7 @@ const PostalCodeCityFields = ({
             <Input
               id={cityId}
               value={city}
-              onChange={(e) => onChange({ city: e.target.value })}
+              onChange={(e) => onChange({ city: normalizeCityName(e.target.value) })}
               className={inputClassName}
               maxLength={100}
               disabled={disabled}
@@ -148,6 +159,7 @@ const PostalCodeCityFields = ({
           <div className="relative">
             <Input
               id={postalId}
+              data-field="postal_code"
               value={postalCode}
               onChange={(e) => {
                 const v = e.target.value.replace(/\D/g, "");
