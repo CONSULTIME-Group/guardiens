@@ -320,8 +320,16 @@ const OnboardingModal = ({ open, onClose, onMinimalComplete }: OnboardingModalPr
       } catch (compressErr) {
         console.warn("[avatar] compression failed, uploading original", compressErr);
       }
-      const ext = (toUpload.name.split(".").pop() || "jpg").toLowerCase();
+      let ext = (toUpload.name.split(".").pop() || "jpg").toLowerCase();
+      // Le stockage refuse le HEIC/HEIF brut : si la conversion n'a pas abouti,
+      // on arrête proprement plutôt que d'envoyer un fichier voué au rejet.
+      if (/heic|heif/.test(ext) || /heic|heif/i.test(toUpload.type)) {
+        toast.error("Cette photo est au format HEIC et n'a pas pu être convertie. Enregistrez-la en JPG depuis votre téléphone, puis réessayez.");
+        return;
+      }
+      if (!/^(jpe?g|png|webp)$/.test(ext)) ext = "jpg";
       const path = `${user.id}/avatar.${ext}`;
+
       const { error: uploadError } = await supabase.storage
         .from("avatars")
         .upload(path, toUpload, { upsert: true, contentType: toUpload.type || undefined });
