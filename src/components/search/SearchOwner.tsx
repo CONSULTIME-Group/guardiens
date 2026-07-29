@@ -975,13 +975,7 @@ const SearchOwner = () => {
                     <button
                       key={i}
                       className="w-full text-left px-3 py-2 rounded-lg text-sm hover:bg-muted transition-colors"
-                      onClick={() => {
-                        setCity(s.nom);
-                        setCityPostalCode(s.codesPostaux?.[0] ?? null);
-                        setCitySuggestions([]);
-                        setLocQuery("");
-                        setOpenPop(null);
-                      }}
+                      onClick={() => handleSelectCity(s)}
                     >
                       <span className="font-medium">{s.nom}</span>
                       {s.codesPostaux?.[0] && <span className="text-muted-foreground ml-1">({s.codesPostaux[0]})</span>}
@@ -1068,13 +1062,7 @@ const SearchOwner = () => {
                     <button
                       key={i}
                       className="w-full text-left px-3 py-2 rounded-lg text-sm hover:bg-muted transition-colors"
-                      onClick={() => {
-                        setCity(s.nom);
-                        setCityPostalCode(s.codesPostaux?.[0] ?? null);
-                        setCitySuggestions([]);
-                        setLocQuery("");
-                        setOpenPop(null);
-                      }}
+                      onClick={() => handleSelectCity(s)}
                     >
                       <span className="font-medium">{s.nom}</span>
                       {s.codesPostaux?.[0] && <span className="text-muted-foreground ml-1">({s.codesPostaux[0]})</span>}
