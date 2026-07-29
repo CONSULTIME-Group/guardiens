@@ -89,15 +89,13 @@ const Landing = () => {
     return () => { cancelled = true; };
   }, [navigate]);
 
-  // KPIs : valeurs réelles depuis public_stats + socle historique équipe.
-  // - Maisons : 37 maisons gardées en 5 ans par Jérémie & Elisa (cité dans le récit d'origine).
-  // - Animaux : 234 animaux accompagnés sur la même période (cité dans le récit d'origine,
-  // src/data/cityContent.ts). On part donc de 234 et on ajoute les nouveaux comptés en base.
-  const FOUNDERS_HOUSES_OFFSET = 37;
-  const FOUNDERS_ANIMALS_OFFSET = 234;
-
-  const kpiMaisons = (publicStats?.maisons_gardees ?? 0) + FOUNDERS_HOUSES_OFFSET;
-  const kpiAnimaux = (publicStats?.animaux_accompagnes ?? 0) + FOUNDERS_ANIMALS_OFFSET;
+  // KPI hero : valeurs réelles de la plateforme uniquement. L'historique personnel
+  // des fondateurs (37 maisons, 234 animaux) n'est PAS additionné ici : il est
+  // raconté comme tel dans la section Notre histoire et dans la carte piliers.
+  // Ne pas réintroduire d'offset, cela ferait passer un vécu perso pour de
+  // l'activité plateforme.
+  const kpiMaisons = publicStats?.maisons_gardees ?? 0;
+  const kpiAnimaux = publicStats?.animaux_accompagnes ?? 0;
   const kpiInscrits = publicStats?.total_inscrits ?? 0;
   const kpiMissions = publicStats?.missions_entraide ?? 0;
 
