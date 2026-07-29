@@ -243,6 +243,28 @@ const SitDetail = () => {
     onApplicationsChange: handleApplicationsCounts,
   });
 
+  // Vue membre : `/sits/:id` est la route où atterrissent tous les gardiens
+  // connectés (recherche, emails, redirection depuis `/annonces/:id`). Sans cet
+  // événement, les vues des membres n'étaient jamais comptées.
+  useEffect(() => {
+    if (!sit?.id || sitViewFired.current === sit.id) return;
+    sitViewFired.current = sit.id;
+    const ownerOfSit = !!user && user.id === (sit as any).user_id;
+    const viewerType = !user
+      ? "anonymous"
+      : ownerOfSit
+        ? "owner_of_sit"
+        : activeRole === "sitter"
+          ? "gardien"
+          : "proprio";
+    try {
+      trackEvent("sit_view", {
+        source: "/sits/:id",
+        metadata: { sit_id: sit.id, viewer_type: viewerType },
+      });
+    } catch {}
+  }, [sit?.id, user, activeRole]);
+
   // Revalidation silencieuse de l'indexation SEO : si le visiteur est l'owner,
   // on mesure et persiste les dimensions des photos historiques manquantes
   // pour réactiver le filtre `isIndexable` sur la page publique.
@@ -250,6 +272,7 @@ const SitDetail = () => {
     if (!user || !sit || user.id !== (sit as any).user_id) return;
     backfillOwnerGalleryDimensions(user.id);
   }, [user, sit]);
+
 
 
 
