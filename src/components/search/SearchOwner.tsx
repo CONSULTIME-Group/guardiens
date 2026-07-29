@@ -857,18 +857,7 @@ const SearchOwner = () => {
             </PopoverContent>
           </Popover>
 
-          {zoneMode === "radius" && (
-            <Select value={String(radius[0])} onValueChange={(v) => setRadius([Number(v)])}>
-              <SelectTrigger className="w-[140px] h-[52px] rounded-2xl border-border bg-card shadow-sm">
-                <SelectValue placeholder="Rayon" />
-              </SelectTrigger>
-              <SelectContent>
-                {ALLOWED_ALERT_RADII.map((r) => (
-                  <SelectItem key={r} value={String(r)}>{r} km</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          )}
+          {/* Select « Rayon » retiré : contrôle unique porté par la chip rayon du sélecteur de zone. */}
 
           {/* CTA « Rechercher » retiré : la recherche est live (ville/rayon → refetch auto),
               le bouton primary volait l'attention pour zéro action utile. */}
@@ -929,36 +918,7 @@ const SearchOwner = () => {
             </PopoverContent>
           </Popover>
 
-          {/* PILL 2, Rayon — mobile uniquement (desktop a le Select rayon dans le hero) */}
-          {zoneMode === "radius" && (
-            <Popover open={openPop === "rad"} onOpenChange={(o) => setOpenPop(o ? "rad" : null)}>
-              <PopoverTrigger asChild>
-                <button className={`md:hidden ${pillBase}`}>{radius[0]} km</button>
-              </PopoverTrigger>
-              <PopoverContent align="start" className="w-64 p-3 space-y-3">
-                <div className="flex gap-2 flex-wrap">
-                  {RADIUS_SHORTCUTS.map(r => (
-                    <button key={r} onClick={() => setRadius([r])} className={`rounded-full px-3 py-1 text-xs border transition-colors ${radius[0] === r ? "bg-primary text-primary-foreground border-primary" : "border-border text-muted-foreground hover:border-primary"}`}>{r} km</button>
-                  ))}
-                </div>
-                {(() => {
-                  const currentIdx = Math.max(0, ALLOWED_ALERT_RADII.indexOf(radius[0] as any));
-                  return (
-                    <>
-                      <Slider
-                        value={[currentIdx]}
-                        onValueChange={(v) => setRadius([ALLOWED_ALERT_RADII[v[0]]])}
-                        min={0}
-                        max={ALLOWED_ALERT_RADII.length - 1}
-                        step={1}
-                      />
-                      <p className="text-xs text-muted-foreground text-center">{radius[0]} km</p>
-                    </>
-                  );
-                })()}
-              </PopoverContent>
-            </Popover>
-          )}
+          {/* PILL rayon retirée : le réglage du rayon est porté par la chip « x km » du sélecteur de zone. */}
 
 
           {/* PILL 3, Dates : retiré tant que la disponibilité datée gardien n'est pas modélisée */}
@@ -1076,6 +1036,68 @@ const SearchOwner = () => {
         >
           {zoneChips.map((z) => {
             const active = zoneMode === z.key;
+            const chipClass = `min-h-9 rounded-full border px-3 py-1 text-xs transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-40 disabled:cursor-not-allowed ${
+              active
+                ? "bg-primary text-primary-foreground border-primary"
+                : "bg-card text-muted-foreground border-border hover:border-primary"
+            }`;
+            const chipInner = (
+              <>
+                {z.label}
+                {z.count > 0 && (
+                  <span className={`ml-1 text-[10px] ${active ? "text-primary-foreground/80" : "text-muted-foreground/70"}`}>
+                    ({z.count})
+                  </span>
+                )}
+              </>
+            );
+
+            // Chip rayon : unique contrôle de rayon du fichier. Un clic active le mode radius
+            // ET ouvre le réglage, sur tous les breakpoints.
+            if (z.key === "radius") {
+              return (
+                <Popover
+                  key={z.key}
+                  open={openPop === "rad"}
+                  onOpenChange={(o) => setOpenPop(o ? "rad" : null)}
+                >
+                  <PopoverTrigger asChild>
+                    <button
+                      type="button"
+                      onClick={() => setZoneMode("radius")}
+                      disabled={z.disabled}
+                      aria-pressed={active}
+                      className={chipClass}
+                    >
+                      {chipInner}
+                    </button>
+                  </PopoverTrigger>
+                  <PopoverContent align="start" className="w-64 p-3 space-y-3">
+                    <div className="flex gap-2 flex-wrap">
+                      {RADIUS_SHORTCUTS.map(r => (
+                        <button key={r} onClick={() => setRadius([r])} className={`rounded-full px-3 py-1 text-xs border transition-colors ${radius[0] === r ? "bg-primary text-primary-foreground border-primary" : "border-border text-muted-foreground hover:border-primary"}`}>{r} km</button>
+                      ))}
+                    </div>
+                    {(() => {
+                      const currentIdx = Math.max(0, ALLOWED_ALERT_RADII.indexOf(radius[0] as any));
+                      return (
+                        <>
+                          <Slider
+                            value={[currentIdx]}
+                            onValueChange={(v) => setRadius([ALLOWED_ALERT_RADII[v[0]]])}
+                            min={0}
+                            max={ALLOWED_ALERT_RADII.length - 1}
+                            step={1}
+                          />
+                          <p className="text-xs text-muted-foreground text-center">{radius[0]} km</p>
+                        </>
+                      );
+                    })()}
+                  </PopoverContent>
+                </Popover>
+              );
+            }
+
             return (
               <button
                 key={z.key}
@@ -1083,18 +1105,9 @@ const SearchOwner = () => {
                 onClick={() => setZoneMode(z.key)}
                 disabled={z.disabled}
                 aria-pressed={active}
-                className={`min-h-9 rounded-full border px-3 py-1 text-xs transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-40 disabled:cursor-not-allowed ${
-                  active
-                    ? "bg-primary text-primary-foreground border-primary"
-                    : "bg-card text-muted-foreground border-border hover:border-primary"
-                }`}
+                className={chipClass}
               >
-                {z.label}
-                {z.count > 0 && (
-                  <span className={`ml-1 text-[10px] ${active ? "text-primary-foreground/80" : "text-muted-foreground/70"}`}>
-                    ({z.count})
-                  </span>
-                )}
+                {chipInner}
               </button>
             );
           })}
