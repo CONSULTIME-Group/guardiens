@@ -15,6 +15,20 @@ const TEMPLATE = "sit-draft-reminder";
 const TOTAL_FIELDS = 8;
 const MAX_PER_RUN = 25;
 
+const NEARBY_RADIUS_KM = 30;
+
+// Aligné sur send-mass-email-proximity/index.ts
+function haversineKm(lat1: number, lon1: number, lat2: number, lon2: number): number {
+  const R = 6371;
+  const toRad = (d: number) => (d * Math.PI) / 180;
+  const dLat = toRad(lat2 - lat1);
+  const dLon = toRad(lon2 - lon1);
+  const a =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon / 2) ** 2;
+  return 2 * R * Math.asin(Math.min(1, Math.sqrt(a)));
+}
+
 function countRemaining(sit: Record<string, any>): number {
   const filled = [
     sit.title,
@@ -27,6 +41,40 @@ function countRemaining(sit: Record<string, any>): number {
     sit.daily_routine,
   ].filter((v) => (typeof v === "string" ? v.trim().length > 0 : !!v)).length;
   return Math.max(0, TOTAL_FIELDS - filled);
+}
+
+// Compte les gardiens vérifiés dans un rayon de 30 km du lieu de la garde.
+// Ne doit jamais faire échouer l'envoi : retombe sur 0 en cas d'erreur.
+async function countNearbyVerifiedSitters(
+  supabase: any,
+  centerLat: number | null,
+  centerLon: number | null,
+): Promise<number> {
+  try {
+    if (typeof centerLat !== "number" || typeof centerLon !== "number") return 0;
+    const latDelta = NEARBY_RADIUS_KM / 111;
+    const lonDelta = NEARBY_RADIUS_KM / (111 * Math.max(0.1, Math.cos((centerLat * Math.PI) / 180)));
+    const { data, error } = await supabase
+      .from("profiles")
+      .select("id, latitude, longitude")
+      .in("role", ["sitter", "both"])
+      .eq("identity_verified", true)
+      .eq("account_status", "active")
+      .not("latitude", "is", null)
+      .not("longitude", "is", null)
+      .gte("latitude", centerLat - latDelta)
+      .lte("latitude", centerLat + latDelta)
+      .gte("longitude", centerLon - lonDelta)
+      .lte("longitude", centerLon + lonDelta)
+      .limit(2000);
+    if (error || !data) return 0;
+    return data.filter(
+      (p: any) =>
+        haversineKm(centerLat, centerLon, Number(p.latitude), Number(p.longitude)) <= NEARBY_RADIUS_KM,
+    ).length;
+  } catch (_e) {
+    return 0;
+  }
 }
 
 Deno.serve(async (req) => {
