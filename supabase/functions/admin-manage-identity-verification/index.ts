@@ -18,27 +18,32 @@ Deno.serve(async (req) => {
 
   try {
     const authHeader = req.headers.get("Authorization");
-    if (!authHeader) return json({ error: "Non autorisé" }, 401);
+    if (!authHeader?.startsWith("Bearer ")) return json({ error: "Non autorisé" }, 401);
+    const token = authHeader.replace("Bearer ", "").trim();
 
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-    const anonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
 
-    const callerClient = createClient(supabaseUrl, anonKey, {
-      global: { headers: { Authorization: authHeader } },
-    });
+    const adminClient = createClient(supabaseUrl, serviceRoleKey);
 
-    const { data: { user: caller } } = await callerClient.auth.getUser();
-    if (!caller) return json({ error: "Non autorisé" }, 401);
+    // Validation du jeton côté serveur avec la clé service_role
+    // (évite les 401 liés à une clé anon obsolète / aux clés de signature).
+    const { data: userData, error: userError } = await adminClient.auth.getUser(token);
+    const caller = userData?.user;
+    if (userError || !caller) {
+      console.error("auth.getUser failed", userError?.message);
+      return json({ error: "Non autorisé" }, 401);
+    }
 
-    const { data: isAdmin } = await callerClient.rpc("has_role", {
+    const { data: isAdmin, error: roleError } = await adminClient.rpc("has_role", {
       _user_id: caller.id,
       _role: "admin",
     });
+    if (roleError) console.error("has_role failed", roleError.message);
 
     if (!isAdmin) return json({ error: "Accès refusé" }, 403);
 
-    const adminClient = createClient(supabaseUrl, serviceRoleKey);
+
     const { action, userId, reason } = await req.json() as { action?: Action; userId?: string; reason?: string };
 
     if (!action || !userId) return json({ error: "action et userId sont requis" }, 400);
