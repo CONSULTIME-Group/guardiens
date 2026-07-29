@@ -81,12 +81,13 @@ const SitDraftReminderEmail = ({
 export const template = {
   component: SitDraftReminderEmail,
   subject: 'Vous avez commencé une annonce chez Guardiens',
-  displayName: 'Rappel brouillon annonce (J+1)',
+  displayName: 'Rappel brouillon annonce',
   previewData: {
     firstName: 'Camille',
     sitId: 'demo-sit-id',
     fieldsRemaining: 3,
     nearbySittersCount: 12,
+    daysSinceCreated: 12,
     resumeUrl: 'https://guardiens.fr/sits/create?resume=demo-sit-id',
   },
 } satisfies TemplateEntry
