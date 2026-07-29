@@ -704,6 +704,10 @@ const SearchOwner = () => {
       filtered = filtered.filter((s: any) => s.avgRating !== null && s.avgRating >= min);
     }
 
+    // Pays d'un gardien, résolu via la RPC (la vue publique n'expose pas `country`).
+    const countryOf = (s: any) => countryByUser.get(s.user_id) ?? null;
+    const countryReady = countryByUser.size > 0;
+
     const density = {
       radius: searchCenter ? filtered.filter((s: any) => s._dist != null && s._dist <= radius[0]).length : 0,
       dept: refDept ? filtered.filter((s: any) => {
@@ -712,7 +716,10 @@ const SearchOwner = () => {
       region: refRegion ? filtered.filter((s: any) => {
         const cp = s.profile?.postal_code; return cp ? getRegionCode(getDeptCode(cp)) === refRegion : false;
       }).length : 0,
-      france: filtered.length,
+      france: countryReady ? filtered.filter((s: any) => countryOf(s) === "FR").length : filtered.length,
+      country: selectedCountry && countryReady
+        ? filtered.filter((s: any) => countryOf(s) === selectedCountry).length
+        : 0,
     };
 
     let zoned = filtered;
@@ -730,6 +737,11 @@ const SearchOwner = () => {
       zoned = zoned.filter((s: any) => {
         const cp = s.profile?.postal_code; return cp ? getRegionCode(getDeptCode(cp)) === refRegion : false;
       });
+    } else if (zoneMode === "country" && selectedCountry && countryReady) {
+      zoned = zoned.filter((s: any) => countryOf(s) === selectedCountry);
+    } else if (zoneMode === "france" && countryReady) {
+      // « France » est désormais un vrai filtre : tous les profils ont un pays renseigné.
+      zoned = zoned.filter((s: any) => countryOf(s) === "FR");
     }
 
     let effectiveSort: SortOption = sort;
