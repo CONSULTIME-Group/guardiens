@@ -529,7 +529,7 @@ const Settings = () => {
             <div className="rounded-lg border border-warning/30 bg-warning/10 p-3 text-sm">
               <p className="font-medium text-warning">Engagement(s) en cours</p>
               <p className="text-xs text-foreground/80 mt-1">
-                Vous avez {activeCommitmentsCount} engagement{activeCommitmentsCount > 1 ? "s" : ""} actif{activeCommitmentsCount > 1 ? "s" : ""} (gardes confirmées ou candidatures en attente). Veuillez les finaliser ou annuler avant de demander la suppression.
+                Vous avez {activeCommitmentsCount} engagement{activeCommitmentsCount > 1 ? "s" : ""} actif{activeCommitmentsCount > 1 ? "s" : ""} (gardes confirmées ou candidatures en attente). Veuillez les finaliser ou annuler avant de supprimer votre compte.
               </p>
             </div>
           )}
