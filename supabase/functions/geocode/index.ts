@@ -53,6 +53,22 @@ function normalizeCountry(country?: string | null) {
   return COUNTRY_BY_ALIAS[key] ?? { label: raw || "France", code: /^[a-z]{2}$/i.test(raw) ? raw.toLowerCase() : undefined };
 }
 
+/**
+ * Nettoie un nom de ville avant géocodage : retire les parenthèses et leur
+ * contenu, un code postal FR isolé (préfixe ou suffixe), et normalise les
+ * espaces. « CONQUEREUIL (44290) » devient « CONQUEREUIL ».
+ */
+function cleanCityName(raw: string): string {
+  return raw
+    .replace(/\([^)]*\)/g, " ")
+    .replace(/[()]/g, " ")
+    .replace(/(^|[\s,;-])\d{5}(?=$|[\s,;-])/g, "$1 ")
+    .replace(/\s+/g, " ")
+    .replace(/^[\s,;-]+|[\s,;-]+$/g, "")
+    .trim();
+}
+
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
