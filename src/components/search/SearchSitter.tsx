@@ -1448,6 +1448,11 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
         setRadius={setRadius}
         userPostalCode={userPostalCode}
         densityCounts={densityCounts}
+        regionCode={getRegionCode(getDeptCode(getZoneRefPostalCode()))}
+        regionName={(() => {
+          const rc = getRegionCode(getDeptCode(getZoneRefPostalCode()));
+          return rc ? REGION_NAMES[rc] ?? null : null;
+        })()}
       />
 
    {/* Dates pill */}
