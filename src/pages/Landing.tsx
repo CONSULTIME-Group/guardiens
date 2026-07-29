@@ -222,16 +222,16 @@ const Landing = () => {
               </button>
             </div>
 
-            <button
-              type="button"
+            <Link
+              to="/petites-missions"
               onClick={() => {
                 trackEvent("cta_aid_clicked", { metadata: { location: "hero" } });
-                navigate("/petites-missions");
               }}
               className="block mt-4 font-body text-sm text-white/80 underline underline-offset-4 decoration-white/30 hover:text-white hover:decoration-white/60 transition-colors animate-hero-fade-up animation-delay-1000"
             >
               {t("landing.hero.cta_aid")}
-            </button>
+            </Link>
+
 
             <p className="font-body text-sm text-white/85 mt-3 animate-hero-fade-up animation-delay-1000">
               {t("landing.hero.reassurance")}

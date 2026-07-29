@@ -41,6 +41,8 @@ import {
 } from "@/components/ui/alert-dialog";
 import PetsEditor from "@/components/pets/PetsEditor";
 import { pickSmartCover } from "@/lib/pickSmartCover";
+import { normalizeCityTyping, normalizeCityName } from "@/lib/normalizeCity";
+
 
 
 
@@ -1292,11 +1294,13 @@ const CreateSit = () => {
                   <Input
                     id="sit_city"
                     value={sitCity}
-                    onChange={(e) => setSitCity(e.target.value)}
+                    onChange={(e) => setSitCity(normalizeCityTyping(e.target.value))}
+                    onBlur={(e) => setSitCity(normalizeCityName(e.target.value))}
                     placeholder={ownerCity || "Ex : Bruxelles"}
                     className="mt-1 h-12 text-base"
                     maxLength={100}
                   />
+
                 </div>
                 <div>
                   <Label htmlFor="sit_country" className="text-xs text-muted-foreground">Pays</Label>
