@@ -135,6 +135,59 @@ const SearchOwner = () => {
     }, 300);
   }, []);
 
+  // Saisie brute du champ de lieu : sert uniquement aux suggestions locales
+  // (départements / régions). Vidée dès qu'une suggestion est choisie, pour ne
+  // pas re-proposer une zone déjà sélectionnée.
+  const [locQuery, setLocQuery] = useState("");
+
+  const normalizeLoc = (s: string) =>
+    s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]/g, "");
+
+  const deptSuggestions = useMemo<string[]>(() => {
+    const q = locQuery.trim();
+    if (q.length < 2) return [];
+    const nq = normalizeLoc(q);
+    const out: string[] = [];
+    if (/^\d{5}$/.test(q)) {
+      const d = getDeptCode(q);
+      if (d && DEPT_NAMES[d]) out.push(d);
+    }
+    for (const code of Object.keys(DEPT_NAMES)) {
+      if (out.length >= 4) break;
+      if (out.includes(code)) continue;
+      if (normalizeLoc(code).startsWith(nq) || normalizeLoc(DEPT_NAMES[code]).includes(nq)) out.push(code);
+    }
+    return out.slice(0, 4);
+  }, [locQuery]);
+
+  const regionSuggestions = useMemo<string[]>(() => {
+    const q = locQuery.trim();
+    if (q.length < 2) return [];
+    const nq = normalizeLoc(q);
+    return Object.keys(REGION_NAMES)
+      .filter((code) => normalizeLoc(REGION_NAMES[code]).includes(nq))
+      .slice(0, 3);
+  }, [locQuery]);
+
+  const handleSelectDept = useCallback((deptCode: string) => {
+    setCity(`${deptCode} ${DEPT_NAMES[deptCode]}`);
+    setCityPostalCode(deptToRefPostalCode(deptCode));
+    setZoneMode("dept");
+    setCitySuggestions([]);
+    setLocQuery("");
+    setOpenPop(null);
+  }, []);
+
+  const handleSelectRegion = useCallback((regionCode: string) => {
+    const firstDept = Object.keys(DEPT_TO_REGION).find((d) => DEPT_TO_REGION[d] === regionCode);
+    setCity(REGION_NAMES[regionCode] ?? "");
+    if (firstDept) setCityPostalCode(deptToRefPostalCode(firstDept));
+    setZoneMode("region");
+    setCitySuggestions([]);
+    setLocQuery("");
+    setOpenPop(null);
+  }, []);
+
   // Geolocation
   const handleGeolocate = useCallback(() => {
     if (!navigator.geolocation) { toast.error("Géolocalisation non disponible"); return; }
