@@ -53,6 +53,22 @@ function normalizeCountry(country?: string | null) {
   return COUNTRY_BY_ALIAS[key] ?? { label: raw || "France", code: /^[a-z]{2}$/i.test(raw) ? raw.toLowerCase() : undefined };
 }
 
+/**
+ * Nettoie un nom de ville avant géocodage : retire les parenthèses et leur
+ * contenu, un code postal FR isolé (préfixe ou suffixe), et normalise les
+ * espaces. « CONQUEREUIL (44290) » devient « CONQUEREUIL ».
+ */
+function cleanCityName(raw: string): string {
+  return raw
+    .replace(/\([^)]*\)/g, " ")
+    .replace(/[()]/g, " ")
+    .replace(/(^|[\s,;-])\d{5}(?=$|[\s,;-])/g, "$1 ")
+    .replace(/\s+/g, " ")
+    .replace(/^[\s,;-]+|[\s,;-]+$/g, "")
+    .trim();
+}
+
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -73,7 +89,7 @@ Deno.serve(async (req) => {
       : parts.length > 1
         ? parts[parts.length - 1]
         : "FR";
-    const cityName = parts.length > 1 ? parts.slice(0, -1).join(", ") : city.trim();
+    const rawCityName = parts.length > 1 ? parts.slice(0, -1).join(", ") : city.trim();
     const resolvedCountry = normalizeCountry(inferredCountry);
 
     // Détecte un code postal français (5 chiffres) pour interroger Nominatim
@@ -81,11 +97,22 @@ Deno.serve(async (req) => {
     // localités homonymes ou rien). La clé de cache est préfixée pour éviter
     // toute collision avec une éventuelle ville nommée identiquement.
     const isFrPostal =
-      /^\d{5}$/.test(cityName.trim()) &&
+      /^\d{5}$/.test(rawCityName.trim()) &&
       (resolvedCountry.code === "fr" || normalize(resolvedCountry.label) === "france");
+
+    // Nettoyage avant requête ET avant clé de cache, pour rester cohérents.
+    const cityName = isFrPostal ? rawCityName.trim() : cleanCityName(rawCityName);
+    if (!isFrPostal && !cityName) {
+      return new Response(JSON.stringify({ error: "City not found", lat: null, lng: null }), {
+        status: 200,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     const normalized = isFrPostal
-      ? `cp:${cityName.trim()}|fr`
+      ? `cp:${cityName}|fr`
       : `city:${normalize(cityName)}|${normalize(resolvedCountry.label)}`;
+
 
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
