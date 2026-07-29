@@ -556,8 +556,17 @@ const SearchOwner = () => {
     // refondu gère les profils clairsemés, on ne masque plus de vrais gardiens.
     let items = rawSitters.filter((s: any) => s.profile?.profile_completion >= 40);
 
-    // Geocode all sitter cities once
-    const uniqueCities = [...new Set(items.map((s: any) => s.profile?.city).filter(Boolean))] as string[];
+    // Coordonnées : profiles.latitude/longitude en priorité, alimentées par trg_geocode_profile. Le géocodage à la volée n'est qu'un repli pour les profils sans coordonnées. Ne pas revenir à un géocodage systématique, c'était des centaines d'appels réseau par recherche.
+    const hasStoredCoords = (p: any) =>
+      typeof p?.latitude === "number" && typeof p?.longitude === "number";
+
+    // Seules les villes des gardiens sans coordonnées en base sont géocodées.
+    const uniqueCities = [...new Set(
+      items
+        .filter((s: any) => !hasStoredCoords(s.profile))
+        .map((s: any) => s.profile?.city)
+        .filter(Boolean),
+    )] as string[];
     const cityCoords = new Map<string, { lat: number; lng: number }>();
     await Promise.all(uniqueCities.map(async (c) => {
       const coords = await geocodeCity(c);
@@ -577,11 +586,14 @@ const SearchOwner = () => {
 
     // Helper: enrich a sitter with coords and distance
     const withCoords = (s: any) => {
-      const sitterCity = s.profile?.city;
-      const coords = sitterCity ? cityCoords.get(sitterCity) : null;
+      const p = s.profile;
+      const coords = hasStoredCoords(p)
+        ? { lat: p.latitude as number, lng: p.longitude as number }
+        : (p?.city ? cityCoords.get(p.city) ?? null : null);
       const dist = coords && searchCoords ? Math.round(haversineDistance(searchCoords.lat, searchCoords.lng, coords.lat, coords.lng)) : null;
       return { ...s, _dist: dist, _lat: coords?.lat ?? null, _lng: coords?.lng ?? null };
     };
+
 
     // Enrich ALL items with coords (needed for density counts across zones)
     const allItems = items.map(withCoords);
