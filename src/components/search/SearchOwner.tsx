@@ -28,7 +28,7 @@ import { ToastAction } from "@/components/ui/toast";
 import VerifiedBadge from "@/components/profile/VerifiedBadge";
 import EmergencyBadge from "@/components/profile/EmergencyBadge";
 import { getDeptCode, DEPT_NAMES } from "@/lib/departments";
-import { getRegionCode, getRegionName } from "@/lib/regions";
+import { getRegionCode, getRegionName, REGION_NAMES } from "@/lib/regions";
 import { trackEvent } from "@/lib/analytics";
 import TrustHaloAvatar from "@/components/sitters/TrustHaloAvatar";
 import ReachReassuranceBanner from "@/components/marketing/ReachReassuranceBanner";
