@@ -181,6 +181,17 @@ Deno.serve(async (req) => {
       const fieldsRemaining = countRemaining(draft as Record<string, any>);
       const resumeUrl = `https://guardiens.fr/sits/create?resume=${draft.id}`;
 
+      // Âge réel du brouillon, pour éviter le "Hier" en dur dans le template.
+      const daysSinceCreated = draft.created_at
+        ? Math.max(0, Math.floor((now - new Date(draft.created_at as string).getTime()) / 86400000))
+        : undefined;
+
+      // Lieu de la garde : pas de coordonnées sur sits ni properties,
+      // on retient donc celles du profil du propriétaire.
+      const centerLat = typeof (profile as any).latitude === "number" ? (profile as any).latitude : null;
+      const centerLon = typeof (profile as any).longitude === "number" ? (profile as any).longitude : null;
+      const nearbySittersCount = await countNearbyVerifiedSitters(supabase, centerLat, centerLon);
+
       const _steRes = await fetch(`${Deno.env.get('SUPABASE_URL')}/functions/v1/send-transactional-email`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')}` },
@@ -192,7 +203,8 @@ Deno.serve(async (req) => {
             firstName: profile.first_name || "",
             sitId: draft.id,
             fieldsRemaining,
-            nearbySittersCount: 0,
+            nearbySittersCount,
+            daysSinceCreated,
             resumeUrl,
           },
         }),
