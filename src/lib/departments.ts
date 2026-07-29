@@ -55,3 +55,14 @@ export const postalToDept = (postalCode: string | null | undefined): string => {
   const code = cp.substring(0, 2);
   return DEPT_NAMES[code] ? `${code} ${DEPT_NAMES[code]}` : "Non renseigné";
 };
+
+/**
+ * Convertit un code département en code postal de référence utilisable
+ * comme centre de zone (Corse et outre-mer inclus).
+ */
+export const deptToRefPostalCode = (dept: string): string => {
+  if (dept === "2A") return "20000";
+  if (dept === "2B") return "20200";
+  if (dept.startsWith("97")) return `${dept}00`;
+  return `${dept}000`;
+};
