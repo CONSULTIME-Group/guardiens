@@ -7380,6 +7380,13 @@ export type Database = {
         Args: { _owner_id: string; _sitter_id: string }
         Returns: Json
       }
+      get_sitter_country_map: {
+        Args: never
+        Returns: {
+          country: string
+          user_id: string
+        }[]
+      }
       get_sitter_stay_stats: {
         Args: { p_sitter_id: string }
         Returns: {

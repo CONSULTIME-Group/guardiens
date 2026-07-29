@@ -56,7 +56,7 @@ const RADIUS_SHORTCUTS = [5, 15, 30, 50];
 
 type SortOption = "affinity" | "closest" | "rating" | "experience";
 type ViewMode = "list" | "map";
-type ZoneMode = "radius" | "dept" | "region" | "france";
+type ZoneMode = "radius" | "dept" | "region" | "france" | "country";
 
 const SearchOwnerMapView = lazy(() => import("@/components/search/SearchOwnerMapView"));
 
@@ -75,6 +75,10 @@ const SearchOwner = () => {
   const [citySuggestions, setCitySuggestions] = useState<any[]>([]);
   const [radius, setRadius] = useState([15]);
   const [zoneMode, setZoneMode] = useState<ZoneMode>("radius");
+  // Pays sélectionné (code ISO 2 lettres) quand zoneMode === "country".
+  const [selectedCountry, setSelectedCountry] = useState<string | null>(null);
+  // Dernier mode de zone hors "country", restauré par « Tous les pays ».
+  const prevZoneModeRef = useRef<ZoneMode>("radius");
   // Note: filtre Dates retiré tant que la disponibilité datée n'est pas modélisée côté gardien.
   const [animalTypes, setAnimalTypes] = useState<string[]>([]);
   const [vehicled, setVehicled] = useState(false);
@@ -172,6 +176,9 @@ const SearchOwner = () => {
   const handleSelectDept = useCallback((deptCode: string) => {
     setCity(`${deptCode} ${DEPT_NAMES[deptCode]}`);
     setCityPostalCode(deptToRefPostalCode(deptCode));
+    // Une zone française explicite annule tout filtre pays, sinon deux filtres
+    // géographiques contradictoires s'appliqueraient.
+    setSelectedCountry(null);
     setZoneMode("dept");
     setCitySuggestions([]);
     setLocQuery("");
@@ -182,11 +189,67 @@ const SearchOwner = () => {
     const firstDept = Object.keys(DEPT_TO_REGION).find((d) => DEPT_TO_REGION[d] === regionCode);
     setCity(REGION_NAMES[regionCode] ?? "");
     if (firstDept) setCityPostalCode(deptToRefPostalCode(firstDept));
+    setSelectedCountry(null);
     setZoneMode("region");
     setCitySuggestions([]);
     setLocQuery("");
     setOpenPop(null);
   }, []);
+
+  // Sélection d'une commune (suggestions geo.api.gouv.fr), factorisée entre les
+  // popovers desktop et mobile : annule aussi le filtre pays.
+  const handleSelectCity = useCallback((s: any) => {
+    setCity(s.nom);
+    setCityPostalCode(s.codesPostaux?.[0] ?? null);
+    setSelectedCountry(null);
+    setZoneMode((prev) => (prev === "country" ? "radius" : prev));
+    setCitySuggestions([]);
+    setLocQuery("");
+    setOpenPop(null);
+  }, []);
+
+  // Pays réellement peuplés : source unique = RPC public.get_sitter_country_map()
+  // (jointure sitter_profiles × profiles). Aucune liste de pays en dur, donc aucune
+  // entrée à zéro gardien ne peut apparaître.
+  const [countryByUser, setCountryByUser] = useState<Map<string, string>>(new Map());
+  const [sitterCountries, setSitterCountries] = useState<Array<{ code: string; count: number }>>([]);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const { data, error } = await (supabase as any).rpc("get_sitter_country_map");
+      if (cancelled || error || !data) return;
+      const map = new Map<string, string>();
+      const counts = new Map<string, number>();
+      (data as any[]).forEach((r) => {
+        if (!r?.user_id || !r?.country) return;
+        map.set(r.user_id, r.country);
+        counts.set(r.country, (counts.get(r.country) || 0) + 1);
+      });
+      setCountryByUser(map);
+      setSitterCountries(
+        Array.from(counts.entries())
+          .map(([code, count]) => ({ code, count }))
+          .sort((a, b) => b.count - a.count || a.code.localeCompare(b.code)),
+      );
+    })();
+    return () => { cancelled = true; };
+  }, []);
+
+  const countryName = useCallback((code: string) => {
+    try {
+      return new Intl.DisplayNames(["fr"], { type: "region" }).of(code) || code;
+    } catch {
+      return code;
+    }
+  }, []);
+
+  // Mémorise le dernier mode hors pays, pour le restaurer via « Tous les pays ».
+  useEffect(() => {
+    if (zoneMode !== "country") prevZoneModeRef.current = zoneMode;
+  }, [zoneMode]);
+
+
 
   // Geolocation
   const handleGeolocate = useCallback(() => {
@@ -641,6 +704,10 @@ const SearchOwner = () => {
       filtered = filtered.filter((s: any) => s.avgRating !== null && s.avgRating >= min);
     }
 
+    // Pays d'un gardien, résolu via la RPC (la vue publique n'expose pas `country`).
+    const countryOf = (s: any) => countryByUser.get(s.user_id) ?? null;
+    const countryReady = countryByUser.size > 0;
+
     const density = {
       radius: searchCenter ? filtered.filter((s: any) => s._dist != null && s._dist <= radius[0]).length : 0,
       dept: refDept ? filtered.filter((s: any) => {
@@ -649,7 +716,10 @@ const SearchOwner = () => {
       region: refRegion ? filtered.filter((s: any) => {
         const cp = s.profile?.postal_code; return cp ? getRegionCode(getDeptCode(cp)) === refRegion : false;
       }).length : 0,
-      france: filtered.length,
+      france: countryReady ? filtered.filter((s: any) => countryOf(s) === "FR").length : filtered.length,
+      country: selectedCountry && countryReady
+        ? filtered.filter((s: any) => countryOf(s) === selectedCountry).length
+        : 0,
     };
 
     let zoned = filtered;
@@ -667,6 +737,11 @@ const SearchOwner = () => {
       zoned = zoned.filter((s: any) => {
         const cp = s.profile?.postal_code; return cp ? getRegionCode(getDeptCode(cp)) === refRegion : false;
       });
+    } else if (zoneMode === "country" && selectedCountry && countryReady) {
+      zoned = zoned.filter((s: any) => countryOf(s) === selectedCountry);
+    } else if (zoneMode === "france" && countryReady) {
+      // « France » est désormais un vrai filtre : tous les profils ont un pays renseigné.
+      zoned = zoned.filter((s: any) => countryOf(s) === "FR");
     }
 
     let effectiveSort: SortOption = sort;
@@ -707,7 +782,7 @@ const SearchOwner = () => {
     }
 
     return { results: sorted, densityCounts: density };
-  }, [rawResults, searchCenter, city, cityPostalCode, userPostalCode, radius, zoneMode, animalTypes, vehicled, availableOnly, verifiedOnly, emergencyOnly, proOnly, minSits, minRating, sort, sortUserOverride, viewerOwner]);
+  }, [rawResults, searchCenter, city, cityPostalCode, userPostalCode, radius, zoneMode, selectedCountry, countryByUser, animalTypes, vehicled, availableOnly, verifiedOnly, emergencyOnly, proOnly, minSits, minRating, sort, sortUserOverride, viewerOwner]);
 
 
   const hasActiveFilters = vehicled || availableOnly || verifiedOnly || emergencyOnly || proOnly || minSits !== "all" || minRating !== "all";
@@ -766,11 +841,15 @@ const SearchOwner = () => {
   const sortPillActive = "snap-start shrink-0 rounded-full px-3 py-1 min-h-9 inline-flex items-center text-xs bg-primary/10 text-primary border border-primary/30 font-semibold cursor-pointer whitespace-nowrap";
 
 
+  // Hors France, les zones françaises (rayon, département, région) n'ont aucun sens :
+  // elles reposent toutes sur le code postal français. On les désactive sans les masquer.
+  const foreignCountrySelected = zoneMode === "country" && !!selectedCountry && selectedCountry !== "FR";
+
   // Mode région exposé : le filtrage régional est implémenté plus haut dans ce fichier. Ne pas remasquer.
   const zoneChips: Array<{ key: ZoneMode; label: string; count: number; disabled?: boolean }> = [
-    { key: "radius", label: `${radius[0]} km`, count: densityCounts.radius, disabled: !city },
-    { key: "dept", label: refDept ? `Dép. ${refDept}` : "Département", count: densityCounts.dept, disabled: !refDept },
-    { key: "region", label: refRegion ? REGION_NAMES[refRegion] ?? "Ma région" : "Ma région", count: densityCounts.region, disabled: !refRegion },
+    { key: "radius", label: `${radius[0]} km`, count: densityCounts.radius, disabled: !city || foreignCountrySelected },
+    { key: "dept", label: refDept ? `Dép. ${refDept}` : "Département", count: densityCounts.dept, disabled: !refDept || foreignCountrySelected },
+    { key: "region", label: refRegion ? REGION_NAMES[refRegion] ?? "Ma région" : "Ma région", count: densityCounts.region, disabled: !refRegion || foreignCountrySelected },
     { key: "france", label: "France", count: densityCounts.france },
   ];
 
@@ -896,13 +975,7 @@ const SearchOwner = () => {
                     <button
                       key={i}
                       className="w-full text-left px-3 py-2 rounded-lg text-sm hover:bg-muted transition-colors"
-                      onClick={() => {
-                        setCity(s.nom);
-                        setCityPostalCode(s.codesPostaux?.[0] ?? null);
-                        setCitySuggestions([]);
-                        setLocQuery("");
-                        setOpenPop(null);
-                      }}
+                      onClick={() => handleSelectCity(s)}
                     >
                       <span className="font-medium">{s.nom}</span>
                       {s.codesPostaux?.[0] && <span className="text-muted-foreground ml-1">({s.codesPostaux[0]})</span>}
@@ -989,13 +1062,7 @@ const SearchOwner = () => {
                     <button
                       key={i}
                       className="w-full text-left px-3 py-2 rounded-lg text-sm hover:bg-muted transition-colors"
-                      onClick={() => {
-                        setCity(s.nom);
-                        setCityPostalCode(s.codesPostaux?.[0] ?? null);
-                        setCitySuggestions([]);
-                        setLocQuery("");
-                        setOpenPop(null);
-                      }}
+                      onClick={() => handleSelectCity(s)}
                     >
                       <span className="font-medium">{s.nom}</span>
                       {s.codesPostaux?.[0] && <span className="text-muted-foreground ml-1">({s.codesPostaux[0]})</span>}
@@ -1181,7 +1248,7 @@ const SearchOwner = () => {
                   <PopoverTrigger asChild>
                     <button
                       type="button"
-                      onClick={() => setZoneMode("radius")}
+                      onClick={() => { setSelectedCountry(null); setZoneMode("radius"); }}
                       disabled={z.disabled}
                       aria-pressed={active}
                       className={chipClass}
@@ -1219,7 +1286,7 @@ const SearchOwner = () => {
               <button
                 key={z.key}
                 type="button"
-                onClick={() => setZoneMode(z.key)}
+                onClick={() => { setSelectedCountry(null); setZoneMode(z.key); }}
                 disabled={z.disabled}
                 aria-pressed={active}
                 className={chipClass}
@@ -1228,6 +1295,54 @@ const SearchOwner = () => {
               </button>
             );
           })}
+
+          {/* Pill Pays, en dernier. Liste construite depuis la base : jamais d'entrée
+              à zéro gardien. Masquée s'il n'existe qu'un seul pays peuplé. */}
+          {sitterCountries.length > 1 && (() => {
+            const active = zoneMode === "country" && !!selectedCountry;
+            const chipClass = `min-h-9 rounded-full border px-3 py-1 text-xs transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-40 disabled:cursor-not-allowed ${
+              active
+                ? "bg-primary text-primary-foreground border-primary"
+                : "bg-card text-muted-foreground border-border hover:border-primary"
+            }`;
+            return (
+              <Popover open={openPop === "country"} onOpenChange={(o) => setOpenPop(o ? "country" : null)}>
+                <PopoverTrigger asChild>
+                  <button type="button" aria-pressed={active} className={chipClass}>
+                    {active && selectedCountry ? countryName(selectedCountry) : "Pays"}
+                  </button>
+                </PopoverTrigger>
+                <PopoverContent align="start" className="w-56 p-2 space-y-1 max-h-72 overflow-y-auto">
+                  <button
+                    type="button"
+                    className="w-full text-left px-3 py-2 rounded-lg text-sm hover:bg-muted transition-colors"
+                    onClick={() => {
+                      setSelectedCountry(null);
+                      setZoneMode(prevZoneModeRef.current ?? "radius");
+                      setOpenPop(null);
+                    }}
+                  >
+                    Tous les pays
+                  </button>
+                  {sitterCountries.map((c) => (
+                    <button
+                      key={c.code}
+                      type="button"
+                      className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-colors ${selectedCountry === c.code ? "bg-primary/10 text-primary font-medium" : "hover:bg-muted"}`}
+                      onClick={() => {
+                        setSelectedCountry(c.code);
+                        setZoneMode("country");
+                        setOpenPop(null);
+                      }}
+                    >
+                      {countryName(c.code)}
+                      <span className="ml-1 text-muted-foreground">({c.count})</span>
+                    </button>
+                  ))}
+                </PopoverContent>
+              </Popover>
+            );
+          })()}
         </div>
 
 
