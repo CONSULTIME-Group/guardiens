@@ -14,7 +14,9 @@ interface Props {
   radius: number[];
   setRadius: (v: number[]) => void;
   userPostalCode: string | null;
-  densityCounts: { radius: number; dept: number; france: number };
+  densityCounts: { radius: number; dept: number; region: number; france: number };
+  regionCode: string | null;
+  regionName: string | null;
 }
 
 export default function ZonePickerPopover({
