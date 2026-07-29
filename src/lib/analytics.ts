@@ -33,6 +33,7 @@ export type EventType =
   | "cta_click"
   | "cta_proprio_clicked"
   | "cta_sitter_clicked"
+  | "cta_aid_clicked"
   | "login_completed"
   | "cp_recovered"
   | "search_empty_action"
