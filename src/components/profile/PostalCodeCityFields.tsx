@@ -5,6 +5,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Loader2 } from "lucide-react";
 import { usePostalCodeCity } from "@/hooks/usePostalCodeCity";
 import { COUNTRIES } from "@/lib/countries";
+import { normalizeCityTyping, normalizeCityName } from "@/lib/normalizeCity";
+
 
 interface Props {
   city: string;
@@ -24,20 +26,10 @@ interface Props {
 }
 
 /**
- * Normalisation en deux temps, équivalente au total à public.normalize_city_name en base.
- * 1. Pendant la frappe (onChange) : retrait des parenthèses et des codes postaux isolés
- *    uniquement. Ne JAMAIS y remettre trim() ni la réduction des espaces multiples,
- *    cela supprimerait l'espace en cours de frappe (« New York » deviendrait « NewYork »).
- * 2. À la sortie du champ (onBlur) : réduction des espaces multiples puis trim().
+ * Normalisation en deux temps (voir src/lib/normalizeCity.ts), équivalente au
+ * total à public.normalize_city_name en base.
  */
-const normalizeCityTyping = (value: string) =>
-  value
-    .replace(/\([^)]*\)/g, " ")
-    .replace(/[()]/g, " ")
-    .replace(/\b\d{5}\b/g, " ");
 
-const normalizeCityName = (value: string) =>
-  normalizeCityTyping(value).replace(/\s+/g, " ").trim();
 
 
 

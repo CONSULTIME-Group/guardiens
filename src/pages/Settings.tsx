@@ -529,7 +529,7 @@ const Settings = () => {
             <div className="rounded-lg border border-warning/30 bg-warning/10 p-3 text-sm">
               <p className="font-medium text-warning">Engagement(s) en cours</p>
               <p className="text-xs text-foreground/80 mt-1">
-                Vous avez {activeCommitmentsCount} engagement{activeCommitmentsCount > 1 ? "s" : ""} actif{activeCommitmentsCount > 1 ? "s" : ""} (gardes confirmées ou candidatures en attente). Veuillez les finaliser ou annuler avant de demander la suppression.
+                Vous avez {activeCommitmentsCount} engagement{activeCommitmentsCount > 1 ? "s" : ""} actif{activeCommitmentsCount > 1 ? "s" : ""} (gardes confirmées ou candidatures en attente). Veuillez les finaliser ou annuler avant de supprimer votre compte.
               </p>
             </div>
           )}
@@ -551,7 +551,7 @@ const Settings = () => {
               className="flex items-center gap-2 rounded-lg border border-border bg-muted/40 p-3 text-sm text-foreground/80"
             >
               <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
-              Enregistrement de votre demande en cours…
+              Suppression en cours…
             </div>
           )}
           {deleteStatus && (
@@ -597,12 +597,13 @@ const Settings = () => {
               {deleting ? (
                 <>
                   <Loader2 className="h-4 w-4 mr-2 animate-spin" aria-hidden="true" />
-                  Suppression…
+                  Suppression en cours…
                 </>
               ) : deleteStatus?.type === "success" ? (
-                "Demande envoyée"
+                "Compte supprimé"
               ) : (
-                "Demander la suppression"
+                "Supprimer définitivement"
+
               )}
             </Button>
           </DialogFooter>
