@@ -224,9 +224,21 @@ const Landing = () => {
               </button>
             </div>
 
-            <p className="font-body text-sm text-white/85 mt-4 animate-hero-fade-up animation-delay-1000">
+            <button
+              type="button"
+              onClick={() => {
+                trackEvent("cta_aid_clicked", { metadata: { location: "hero" } });
+                navigate("/petites-missions");
+              }}
+              className="block mt-4 font-body text-sm text-white/80 underline underline-offset-4 decoration-white/30 hover:text-white hover:decoration-white/60 transition-colors animate-hero-fade-up animation-delay-1000"
+            >
+              {t("landing.hero.cta_aid")}
+            </button>
+
+            <p className="font-body text-sm text-white/85 mt-3 animate-hero-fade-up animation-delay-1000">
               {t("landing.hero.reassurance")}
             </p>
+
 
             {(kpiMaisons > 0 || kpiAnimaux > 0 || kpiInscrits > 0 || kpiMissions > 0) && (
               <div className="flex flex-row flex-wrap justify-start gap-x-6 gap-y-3 mt-8 md:gap-x-12 md:gap-y-6 md:mt-14 animate-hero-fade-up animation-delay-1100">
@@ -248,7 +260,7 @@ const Landing = () => {
                     <span className="text-xs font-body text-white/80 tracking-wide uppercase mt-1 block">{t("landing.hero.kpi_members")}</span>
                   </div>
                 )}
-                {kpiMissions >= 5 && (
+                {kpiMissions > 0 && (
                   <div>
                     <span className="block text-3xl font-heading font-bold text-white tabular-nums">{kpiMissions}</span>
                     <span className="text-xs font-body text-white/80 tracking-wide uppercase mt-1 block">{t("landing.hero.kpi_missions")}</span>
