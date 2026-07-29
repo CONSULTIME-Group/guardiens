@@ -28,7 +28,7 @@ import { ToastAction } from "@/components/ui/toast";
 import VerifiedBadge from "@/components/profile/VerifiedBadge";
 import EmergencyBadge from "@/components/profile/EmergencyBadge";
 import { getDeptCode, DEPT_NAMES } from "@/lib/departments";
-import { getRegionCode, getRegionName } from "@/lib/regions";
+import { getRegionCode, getRegionName, REGION_NAMES } from "@/lib/regions";
 import { trackEvent } from "@/lib/analytics";
 import TrustHaloAvatar from "@/components/sitters/TrustHaloAvatar";
 import ReachReassuranceBanner from "@/components/marketing/ReachReassuranceBanner";
@@ -713,11 +713,11 @@ const SearchOwner = () => {
   const sortPillActive = "snap-start shrink-0 rounded-full px-3 py-1 min-h-9 inline-flex items-center text-xs bg-primary/10 text-primary border border-primary/30 font-semibold cursor-pointer whitespace-nowrap";
 
 
-  // Zone mode chips, l'option "région" est volontairement absente : la
-  // promesse produit est « France entière », pas régionale (mémoire "No AURA").
+  // Mode région exposé : le filtrage régional est implémenté plus haut dans ce fichier. Ne pas remasquer.
   const zoneChips: Array<{ key: ZoneMode; label: string; count: number; disabled?: boolean }> = [
     { key: "radius", label: `${radius[0]} km`, count: densityCounts.radius, disabled: !city },
     { key: "dept", label: refDept ? `Dép. ${refDept}` : "Département", count: densityCounts.dept, disabled: !refDept },
+    { key: "region", label: refRegion ? REGION_NAMES[refRegion] ?? "Ma région" : "Ma région", count: densityCounts.region, disabled: !refRegion },
     { key: "france", label: "France", count: densityCounts.france },
   ];
 

@@ -14,11 +14,13 @@ interface Props {
   radius: number[];
   setRadius: (v: number[]) => void;
   userPostalCode: string | null;
-  densityCounts: { radius: number; dept: number; france: number };
+  densityCounts: { radius: number; dept: number; region: number; france: number };
+  regionCode: string | null;
+  regionName: string | null;
 }
 
 export default function ZonePickerPopover({
-  pillClass, zoneMode, setZoneMode, radius, setRadius, userPostalCode, densityCounts,
+  pillClass, zoneMode, setZoneMode, radius, setRadius, userPostalCode, densityCounts, regionCode, regionName,
 }: Props) {
   const deptCode = getDeptCode(userPostalCode);
 
@@ -29,7 +31,7 @@ export default function ZonePickerPopover({
           <span className="text-foreground">
             {zoneMode === "radius" && `${radius[0]} km`}
             {zoneMode === "dept" && (deptCode ? `Dépt ${deptCode}` : "Mon département")}
-            {zoneMode === "region" && "Ma région"}
+            {zoneMode === "region" && (regionName || "Ma région")}
             {zoneMode === "france" && "Toute la France"}
           </span>
         </button>
@@ -53,8 +55,18 @@ export default function ZonePickerPopover({
               </span>
             )}
           </button>
-          {/* L'option "Ma région" est volontairement masquée : la promesse produit
-              est « France entière », pas régionale (mémoire core "No AURA"). */}
+          {/* Mode région exposé : le filtrage régional est implémenté dans SearchSitter/SearchOwner. Ne pas remasquer. */}
+          <button
+            onClick={() => setZoneMode("region")}
+            disabled={!regionCode}
+            className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-colors disabled:opacity-40 disabled:cursor-not-allowed ${zoneMode === "region" ? "bg-primary/10 text-primary font-medium" : "hover:bg-accent text-foreground"}`}
+          >
+            Ma région {regionName && (
+              <span className="text-xs text-muted-foreground">
+                ({regionName} · {densityCounts.region})
+              </span>
+            )}
+          </button>
           <button
             onClick={() => setZoneMode("france")}
             className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-colors ${zoneMode === "france" ? "bg-primary/10 text-primary font-medium" : "hover:bg-accent text-foreground"}`}
