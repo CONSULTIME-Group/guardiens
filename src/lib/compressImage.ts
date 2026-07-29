@@ -54,12 +54,21 @@ async function convertHeicIfNeeded(file: File): Promise<File> {
     nameLower.endsWith(".heif");
   if (!isHeic) return file;
   // Lazy import : ~200 ko, chargé uniquement si un HEIC est détecté.
-  const { default: heic2any } = await import("heic2any");
-  const converted = await heic2any({ blob: file, toType: "image/jpeg", quality: 0.9 });
-  const blob = Array.isArray(converted) ? converted[0] : converted;
-  const newName = file.name.replace(/\.(heic|heif)$/i, ".jpg") || "photo.jpg";
-  return new File([blob], newName, { type: "image/jpeg" });
+  try {
+    const { default: heic2any } = await import("heic2any");
+    const converted = await heic2any({ blob: file, toType: "image/jpeg", quality: 0.9 });
+    const blob = Array.isArray(converted) ? converted[0] : converted;
+    const newName = file.name.replace(/\.(heic|heif)$/i, ".jpg") || "photo.jpg";
+    return new File([blob], newName, { type: "image/jpeg" });
+  } catch {
+    // Sur iOS, Safari sait décoder le HEIC nativement : on laisse le pipeline
+    // canvas prendre le relais, il produira un JPG ou un WebP.
+    return new File([file], file.name.replace(/\.(heic|heif)$/i, ".jpg"), {
+      type: "image/jpeg",
+    });
+  }
 }
+
 
 export async function compressImageFile(
   file: File,
