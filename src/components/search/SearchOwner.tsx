@@ -588,7 +588,7 @@ const SearchOwner = () => {
     const withCoords = (s: any) => {
       const p = s.profile;
       const coords = hasStoredCoords(p)
-        ? { lat: p.latitude as number, lng: p.longitude as number }
+        ? { lat: p.latitude_approx as number, lng: p.longitude_approx as number }
         : (p?.city ? cityCoords.get(p.city) ?? null : null);
       const dist = coords && searchCoords ? Math.round(haversineDistance(searchCoords.lat, searchCoords.lng, coords.lat, coords.lng)) : null;
       return { ...s, _dist: dist, _lat: coords?.lat ?? null, _lng: coords?.lng ?? null };
