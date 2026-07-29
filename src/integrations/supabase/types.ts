@@ -7133,6 +7133,19 @@ export type Database = {
           sit_title_pattern: string
         }[]
       }
+      detect_stale_drafts: {
+        Args: never
+        Returns: {
+          city: string
+          days_since_created: number
+          owner_email: string
+          owner_first_name: string
+          owner_id: string
+          sit_id: string
+          sit_title: string
+          start_date: string
+        }[]
+      }
       detect_stale_sits: {
         Args: never
         Returns: {
