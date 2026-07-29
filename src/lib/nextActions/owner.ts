@@ -159,7 +159,7 @@ export function computeOwnerNextActions(input: NextActionInput): NextAction[] {
       eyebrow: "Confiance",
       title: "Vérifiez votre identité pour rassurer les gardiens.",
       ctaLabel: "Vérifier mon identité",
-      ctaTo: "/settings#verification",
+      ctaTo: "/settings?section=security",
       urgency: "medium",
     });
   }
@@ -211,7 +211,7 @@ export function computeOwnerActivationScore(
       key: "identity",
       label: "Vérifiez votre identité",
       done: verificationStatus === "verified" || verificationStatus === "pending",
-      ctaTo: "/settings#verification",
+      ctaTo: "/settings?section=security",
     },
     {
       key: "pet",

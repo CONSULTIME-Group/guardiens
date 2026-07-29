@@ -423,7 +423,7 @@ const ApplicationModal = ({
               <p className="text-xs text-muted-foreground">
                 Les propriétaires acceptent en priorité les profils vérifiés. Vous pouvez postuler dès maintenant et vérifier votre identité plus tard.
               </p>
-              <Link to="/settings#verification" className="text-xs text-primary font-medium hover:underline inline-block mt-0.5">
+              <Link to="/settings?section=security" className="text-xs text-primary font-medium hover:underline inline-block mt-0.5">
                 Vérifier mon identité (1 min) →
               </Link>
             </div>

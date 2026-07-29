@@ -83,7 +83,7 @@ function buildProposition(
     return {
       message: "Vérifions votre identité pour rassurer la communauté.",
       ctaLabel: "Vérifier mon identité",
-      ctaTo: "/settings#verification",
+      ctaTo: "/settings?section=security",
     };
   }
   if (activeRole === "owner") {

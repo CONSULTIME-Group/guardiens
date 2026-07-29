@@ -156,7 +156,7 @@ export function useOwnerPriorityAction(input: Input): OwnerPriorityAction {
         title: "Vérifiez votre identité pour rassurer les gardiens.",
         description: "Les annonces vérifiées reçoivent en moyenne plus de candidatures de qualité.",
         ctaLabel: "Vérifier mon identité",
-        ctaTo: "/settings#verification",
+        ctaTo: "/settings?section=security",
         urgency: "medium",
       };
     }
