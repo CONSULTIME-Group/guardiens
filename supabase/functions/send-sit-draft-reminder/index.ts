@@ -50,13 +50,17 @@ Deno.serve(async (req) => {
 
   const now = Date.now();
   const cutoffDate = new Date(now - 24 * 60 * 60 * 1000).toISOString();
+  const today = new Date(now).toISOString().slice(0, 10);
 
-  // Récupérer les drafts créés il y a plus de 24h, les plus anciens d'abord
+  // Récupérer les drafts créés il y a plus de 24h, les plus anciens d'abord.
+  // Filtre dates : on ne relance que les brouillons sans date de début
+  // ou dont la garde est encore à venir (start_date strictement après aujourd'hui).
   const { data: drafts, error } = await supabase
     .from("sits")
     .select("id, user_id, title, start_date, end_date, specific_expectations, environments, city, owner_message, daily_routine, created_at")
     .eq("status", "draft")
     .lt("created_at", cutoffDate)
+    .or(`start_date.is.null,start_date.gt.${today}`)
     .order("created_at", { ascending: true })
     .limit(100);
 
@@ -114,13 +118,14 @@ Deno.serve(async (req) => {
         continue;
       }
 
-      // Respect des préférences email
+      // Respect des préférences email. Le template sit-draft-reminder est
+      // classé "product" dans _shared/email-categories.ts, on lit donc product_emails.
       const { data: prefs } = await supabase
         .from("email_preferences")
-        .select("marketing_enabled, transactional_enabled")
+        .select("product_emails")
         .eq("user_id", draft.user_id)
         .maybeSingle();
-      if (prefs && (prefs as any).transactional_enabled === false) {
+      if (prefs && (prefs as any).product_emails === false) {
         skipped++;
         continue;
       }
