@@ -16,7 +16,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 
 const RATE_LIMIT_PER_HOUR = 3;
 const PROSCRIBED = /(voisin(e|s|age)?|gratuit à vie|pour toujours|période d'essai|programme fondateur|auvergne-rhône-alpes|\bAURA\b)/i;
-const ALLOWED_ENVIRONMENTS = ["ville", "campagne", "montagne", "lac", "vignes", "foret"] as const;
+const ALLOWED_ENVIRONMENTS = ["ville", "campagne", "montagne", "lac", "mer", "vignes", "foret"] as const;
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: CORS_HEADERS });
@@ -120,7 +120,7 @@ ${petsCtx}
 Extraction attendue depuis la phrase du propriétaire :
 - Ville : extraite du prompt, sinon utilisez « ${profile?.city ?? ""} » (peut rester vide).
 - Animaux : privilégiez ceux du contexte ci-dessus s'ils existent, sinon ceux du prompt.
-- Environnement : choisir 0 à 3 valeurs STRICTEMENT parmi cette liste (aucune autre valeur autorisée) : ville, campagne, montagne, lac, vignes, foret. N'inventez pas « maison », « appartement », « jardin » : ces mots vont dans la description, pas dans environments.
+- Environnement : choisir 0 à 3 valeurs STRICTEMENT parmi cette liste (aucune autre valeur autorisée) : ville, campagne, montagne, lac, mer, vignes, foret. N'inventez pas « maison », « appartement », « jardin » : ces mots vont dans la description, pas dans environments.
 - Préférences gardien : télétravail, présence continue, calme, sportif (choisir 1 à 3 dans open_to).
 
 Génération (personnalisée à partir du contexte, sans inventer de données absentes) :
@@ -151,7 +151,7 @@ Si le prompt mentionne un prix ou une transaction financière, ignorez-le : Guar
               end_date: { type: "string", description: "YYYY-MM-DD, vide si inconnue" },
               flexible_dates: { type: "boolean" },
               city: { type: "string" },
-              environments: { type: "array", items: { type: "string", enum: ["ville", "campagne", "montagne", "lac", "vignes", "foret"] }, minItems: 0, maxItems: 3 },
+              environments: { type: "array", items: { type: "string", enum: ["ville", "campagne", "montagne", "lac", "mer", "vignes", "foret"] }, minItems: 0, maxItems: 3 },
               open_to: { type: "array", items: { type: "string" }, minItems: 0, maxItems: 4 },
               specific_expectations: { type: "string", minLength: 60, maxLength: 900 },
               daily_routine: { type: "string", minLength: 60, maxLength: 900 },
