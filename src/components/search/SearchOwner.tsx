@@ -56,7 +56,7 @@ const RADIUS_SHORTCUTS = [5, 15, 30, 50];
 
 type SortOption = "affinity" | "closest" | "rating" | "experience";
 type ViewMode = "list" | "map";
-type ZoneMode = "radius" | "dept" | "region" | "france";
+type ZoneMode = "radius" | "dept" | "region" | "france" | "country";
 
 const SearchOwnerMapView = lazy(() => import("@/components/search/SearchOwnerMapView"));
 
@@ -75,6 +75,10 @@ const SearchOwner = () => {
   const [citySuggestions, setCitySuggestions] = useState<any[]>([]);
   const [radius, setRadius] = useState([15]);
   const [zoneMode, setZoneMode] = useState<ZoneMode>("radius");
+  // Pays sélectionné (code ISO 2 lettres) quand zoneMode === "country".
+  const [selectedCountry, setSelectedCountry] = useState<string | null>(null);
+  // Dernier mode de zone hors "country", restauré par « Tous les pays ».
+  const prevZoneModeRef = useRef<ZoneMode>("radius");
   // Note: filtre Dates retiré tant que la disponibilité datée n'est pas modélisée côté gardien.
   const [animalTypes, setAnimalTypes] = useState<string[]>([]);
   const [vehicled, setVehicled] = useState(false);
@@ -172,6 +176,9 @@ const SearchOwner = () => {
   const handleSelectDept = useCallback((deptCode: string) => {
     setCity(`${deptCode} ${DEPT_NAMES[deptCode]}`);
     setCityPostalCode(deptToRefPostalCode(deptCode));
+    // Une zone française explicite annule tout filtre pays, sinon deux filtres
+    // géographiques contradictoires s'appliqueraient.
+    setSelectedCountry(null);
     setZoneMode("dept");
     setCitySuggestions([]);
     setLocQuery("");
@@ -182,7 +189,20 @@ const SearchOwner = () => {
     const firstDept = Object.keys(DEPT_TO_REGION).find((d) => DEPT_TO_REGION[d] === regionCode);
     setCity(REGION_NAMES[regionCode] ?? "");
     if (firstDept) setCityPostalCode(deptToRefPostalCode(firstDept));
+    setSelectedCountry(null);
     setZoneMode("region");
+    setCitySuggestions([]);
+    setLocQuery("");
+    setOpenPop(null);
+  }, []);
+
+  // Sélection d'une commune (suggestions geo.api.gouv.fr), factorisée entre les
+  // popovers desktop et mobile : annule aussi le filtre pays.
+  const handleSelectCity = useCallback((s: any) => {
+    setCity(s.nom);
+    setCityPostalCode(s.codesPostaux?.[0] ?? null);
+    setSelectedCountry(null);
+    setZoneMode((prev) => (prev === "country" ? "radius" : prev));
     setCitySuggestions([]);
     setLocQuery("");
     setOpenPop(null);
