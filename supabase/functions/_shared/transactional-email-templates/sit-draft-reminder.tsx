@@ -14,13 +14,27 @@ interface Props {
   sitId?: string
   fieldsRemaining?: number
   nearbySittersCount?: number
+  daysSinceCreated?: number
   resumeUrl?: string
+}
+
+// Amorce adaptée à l'âge réel du brouillon. Sans valeur exploitable,
+// on retombe sur la formulation neutre, jamais sur "Hier".
+function openingSentence(days?: number): string {
+  if (typeof days !== 'number' || !Number.isFinite(days)) {
+    return 'Vous avez commencé à rédiger une annonce il y a un moment'
+  }
+  if (days <= 1) return 'Hier, vous avez commencé à rédiger une annonce'
+  if (days <= 6) return 'Il y a quelques jours, vous avez commencé à rédiger une annonce'
+  if (days <= 29) return 'Il y a quelques semaines, vous avez commencé à rédiger une annonce'
+  return 'Vous avez commencé à rédiger une annonce il y a un moment'
 }
 
 const SitDraftReminderEmail = ({
   firstName = '',
   fieldsRemaining = 3,
   nearbySittersCount = 0,
+  daysSinceCreated,
   resumeUrl = 'https://guardiens.fr/dashboard',
 }: Props) => (
   <Html lang="fr" dir="ltr">
@@ -36,19 +50,20 @@ const SitDraftReminderEmail = ({
           seen="Voici où en est votre annonce en brouillon."
         />
         <Text style={text}>
-          Hier, vous avez commencé à rédiger une annonce pour faire garder vos
+          {openingSentence(daysSinceCreated)} pour faire garder vos
           animaux et votre maison. Elle vous attend en brouillon dans votre espace.
         </Text>
         <Text style={text}>
-          Il vous reste environ {fieldsRemaining} champ{fieldsRemaining > 1 ? 's' : ''} à
-          remplir pour la publier.
+          {fieldsRemaining === 0
+            ? 'Votre annonce est complète, il ne reste plus qu\u2019à la publier.'
+            : `Il vous reste environ ${fieldsRemaining} champ${fieldsRemaining > 1 ? 's' : ''} à remplir pour la publier.`}
           {nearbySittersCount > 0
             ? ` ${nearbySittersCount} gardien${nearbySittersCount > 1 ? 's' : ''} vérifié${nearbySittersCount > 1 ? 's' : ''} dans un rayon de 30 km attendent une annonce comme la vôtre.`
             : ''}
         </Text>
         <Section style={{ textAlign: 'center', margin: '24px 0' }}>
           <Button href={resumeUrl} style={btn}>
-            Reprendre mon annonce
+            {fieldsRemaining === 0 ? 'Publier mon annonce' : 'Reprendre mon annonce'}
           </Button>
         </Section>
         <Text style={textSmall}>
@@ -66,12 +81,13 @@ const SitDraftReminderEmail = ({
 export const template = {
   component: SitDraftReminderEmail,
   subject: 'Vous avez commencé une annonce chez Guardiens',
-  displayName: 'Rappel brouillon annonce (J+1)',
+  displayName: 'Rappel brouillon annonce',
   previewData: {
     firstName: 'Camille',
     sitId: 'demo-sit-id',
     fieldsRemaining: 3,
     nearbySittersCount: 12,
+    daysSinceCreated: 12,
     resumeUrl: 'https://guardiens.fr/sits/create?resume=demo-sit-id',
   },
 } satisfies TemplateEntry

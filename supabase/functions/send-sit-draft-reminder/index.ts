@@ -15,6 +15,20 @@ const TEMPLATE = "sit-draft-reminder";
 const TOTAL_FIELDS = 8;
 const MAX_PER_RUN = 25;
 
+const NEARBY_RADIUS_KM = 30;
+
+// Aligné sur send-mass-email-proximity/index.ts
+function haversineKm(lat1: number, lon1: number, lat2: number, lon2: number): number {
+  const R = 6371;
+  const toRad = (d: number) => (d * Math.PI) / 180;
+  const dLat = toRad(lat2 - lat1);
+  const dLon = toRad(lon2 - lon1);
+  const a =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon / 2) ** 2;
+  return 2 * R * Math.asin(Math.min(1, Math.sqrt(a)));
+}
+
 function countRemaining(sit: Record<string, any>): number {
   const filled = [
     sit.title,
@@ -27,6 +41,40 @@ function countRemaining(sit: Record<string, any>): number {
     sit.daily_routine,
   ].filter((v) => (typeof v === "string" ? v.trim().length > 0 : !!v)).length;
   return Math.max(0, TOTAL_FIELDS - filled);
+}
+
+// Compte les gardiens vérifiés dans un rayon de 30 km du lieu de la garde.
+// Ne doit jamais faire échouer l'envoi : retombe sur 0 en cas d'erreur.
+async function countNearbyVerifiedSitters(
+  supabase: any,
+  centerLat: number | null,
+  centerLon: number | null,
+): Promise<number> {
+  try {
+    if (typeof centerLat !== "number" || typeof centerLon !== "number") return 0;
+    const latDelta = NEARBY_RADIUS_KM / 111;
+    const lonDelta = NEARBY_RADIUS_KM / (111 * Math.max(0.1, Math.cos((centerLat * Math.PI) / 180)));
+    const { data, error } = await supabase
+      .from("profiles")
+      .select("id, latitude, longitude")
+      .in("role", ["sitter", "both"])
+      .eq("identity_verified", true)
+      .eq("account_status", "active")
+      .not("latitude", "is", null)
+      .not("longitude", "is", null)
+      .gte("latitude", centerLat - latDelta)
+      .lte("latitude", centerLat + latDelta)
+      .gte("longitude", centerLon - lonDelta)
+      .lte("longitude", centerLon + lonDelta)
+      .limit(2000);
+    if (error || !data) return 0;
+    return data.filter(
+      (p: any) =>
+        haversineKm(centerLat, centerLon, Number(p.latitude), Number(p.longitude)) <= NEARBY_RADIUS_KM,
+    ).length;
+  } catch (_e) {
+    return 0;
+  }
 }
 
 Deno.serve(async (req) => {
@@ -99,7 +147,7 @@ Deno.serve(async (req) => {
       // Charger le profil
       const { data: profile } = await supabase
         .from("profiles")
-        .select("email, first_name")
+        .select("email, first_name, latitude, longitude")
         .eq("id", draft.user_id)
         .maybeSingle();
       if (!profile?.email) {
@@ -133,6 +181,17 @@ Deno.serve(async (req) => {
       const fieldsRemaining = countRemaining(draft as Record<string, any>);
       const resumeUrl = `https://guardiens.fr/sits/create?resume=${draft.id}`;
 
+      // Âge réel du brouillon, pour éviter le "Hier" en dur dans le template.
+      const daysSinceCreated = draft.created_at
+        ? Math.max(0, Math.floor((now - new Date(draft.created_at as string).getTime()) / 86400000))
+        : undefined;
+
+      // Lieu de la garde : pas de coordonnées sur sits ni properties,
+      // on retient donc celles du profil du propriétaire.
+      const centerLat = typeof (profile as any).latitude === "number" ? (profile as any).latitude : null;
+      const centerLon = typeof (profile as any).longitude === "number" ? (profile as any).longitude : null;
+      const nearbySittersCount = await countNearbyVerifiedSitters(supabase, centerLat, centerLon);
+
       const _steRes = await fetch(`${Deno.env.get('SUPABASE_URL')}/functions/v1/send-transactional-email`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')}` },
@@ -144,7 +203,8 @@ Deno.serve(async (req) => {
             firstName: profile.first_name || "",
             sitId: draft.id,
             fieldsRemaining,
-            nearbySittersCount: 0,
+            nearbySittersCount,
+            daysSinceCreated,
             resumeUrl,
           },
         }),
