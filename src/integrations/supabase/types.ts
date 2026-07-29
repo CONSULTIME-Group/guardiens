@@ -6440,9 +6440,7 @@ export type Database = {
           identity_verified: boolean | null
           is_founder: boolean | null
           last_seen_at: string | null
-          latitude: number | null
           latitude_approx: number | null
-          longitude: number | null
           longitude_approx: number | null
           postal_code: string | null
           pro_specialty: string | null
@@ -6466,9 +6464,7 @@ export type Database = {
           identity_verified?: boolean | null
           is_founder?: boolean | null
           last_seen_at?: string | null
-          latitude?: number | null
           latitude_approx?: never
-          longitude?: number | null
           longitude_approx?: never
           postal_code?: string | null
           pro_specialty?: string | null
@@ -6492,9 +6488,7 @@ export type Database = {
           identity_verified?: boolean | null
           is_founder?: boolean | null
           last_seen_at?: string | null
-          latitude?: number | null
           latitude_approx?: never
-          longitude?: number | null
           longitude_approx?: never
           postal_code?: string | null
           pro_specialty?: string | null
