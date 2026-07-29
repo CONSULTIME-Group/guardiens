@@ -556,9 +556,9 @@ const SearchOwner = () => {
     // refondu gère les profils clairsemés, on ne masque plus de vrais gardiens.
     let items = rawSitters.filter((s: any) => s.profile?.profile_completion >= 40);
 
-    // Coordonnées : profiles.latitude/longitude en priorité, alimentées par trg_geocode_profile. Le géocodage à la volée n'est qu'un repli pour les profils sans coordonnées. Ne pas revenir à un géocodage systématique, c'était des centaines d'appels réseau par recherche.
+    // Coordonnées : on utilise latitude_approx / longitude_approx de la vue public_profiles, arrondies à 2 décimales (environ 1,1 km) pour ne jamais exposer la position exacte des membres, la vue étant lisible par le rôle anon. Cette précision suffit largement : rayon minimum de recherche 5 km et pins à l'échelle de la commune. Ces colonnes sont alimentées par trg_geocode_profile. Le géocodage à la volée n'est qu'un repli pour les profils sans coordonnées. Ne pas revenir à un géocodage systématique, c'était des centaines d'appels réseau par recherche, et ne jamais réintroduire les coordonnées brutes.
     const hasStoredCoords = (p: any) =>
-      typeof p?.latitude === "number" && typeof p?.longitude === "number";
+      typeof p?.latitude_approx === "number" && typeof p?.longitude_approx === "number";
 
     // Seules les villes des gardiens sans coordonnées en base sont géocodées.
     const uniqueCities = [...new Set(
