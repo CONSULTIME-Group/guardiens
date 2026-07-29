@@ -147,7 +147,7 @@ Deno.serve(async (req) => {
       // Charger le profil
       const { data: profile } = await supabase
         .from("profiles")
-        .select("email, first_name")
+        .select("email, first_name, latitude, longitude")
         .eq("id", draft.user_id)
         .maybeSingle();
       if (!profile?.email) {
