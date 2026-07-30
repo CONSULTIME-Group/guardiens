@@ -41,7 +41,7 @@ const COPY: Record<Locale, Record<DeclineReason, string[]>> = {
     different_profile: [
       "Le propriétaire cherche un profil au fonctionnement différent pour cette garde précise. Cela tient à ses besoins du moment, pas à votre parcours.",
       "Pour cette garde, le propriétaire s'oriente vers un autre type de profil. C'est une question de correspondance avec son animal et son quotidien.",
-      "Les attentes de cette annonce visent un profil différent du vôtre. Une autre annonce collera mieux à ce que vous proposez.",
+      "Cette garde précise appelle des conditions particulières du côté du foyer. D'autres annonces correspondront à ce que vous pouvez offrir.",
     ],
   },
   en: {
