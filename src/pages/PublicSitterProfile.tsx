@@ -495,19 +495,7 @@ export default function PublicSitterProfile() {
             pro_business_name: baseData?.pro_business_name ?? null,
           }
         : baseData;
-      let fetchedSitterProfile = sitterRes?.data ?? null;
-      // Complément d'affinité : vue réservée aux membres connectés, chargée
-      // seulement pour un propriétaire connecté. Elle apporte work_during_sit
-      // et sensitivities, indispensables au critère de présence et à la
-      // disqualification.
-      if (fetchedSitterProfile && auth?.isAuthenticated && auth?.activeRole === "owner") {
-        const { data: affinityRow } = await (supabase as any)
-          .from("sitter_profiles_affinity")
-          .select("user_id, experience_years, life_pace, languages, interests, work_during_sit, sensitivities")
-          .eq("user_id", id)
-          .maybeSingle();
-        if (affinityRow) fetchedSitterProfile = { ...fetchedSitterProfile, ...affinityRow };
-      }
+      const fetchedSitterProfile = sitterRes?.data ?? null;
       const fetchedOwnerProfile = (ownerRes?.data as OwnerProfileData | null) ?? null;
       const fetchedEmergencyProfile = emergencyRes?.data ?? null;
       const fetchedMissionCount = missionsRes?.count ?? 0;
@@ -635,6 +623,40 @@ export default function PublicSitterProfile() {
     };
     load();
   }, [id, loadNonce]);
+
+  // Complément d'affinité réservé aux propriétaires connectés. Le user_id
+  // déclenche ce chargement lorsque le profil public est prêt, sans rejouer le
+  // grand effet. La fusion fonctionnelle conserve toute la projection publique.
+  useEffect(() => {
+    if (
+      !id ||
+      !auth?.isAuthenticated ||
+      auth?.activeRole !== "owner" ||
+      sitterProfile?.user_id !== id
+    ) return;
+
+    let cancelled = false;
+
+    const loadAffinityProfile = async () => {
+      const { data: affinityRow } = await (supabase as any)
+        .from("sitter_profiles_affinity")
+        .select("user_id, experience_years, life_pace, languages, interests, work_during_sit, sensitivities")
+        .eq("user_id", id)
+        .maybeSingle();
+
+      if (cancelled || !affinityRow) return;
+      setSitterProfile((current: any) =>
+        current?.user_id === id ? { ...current, ...affinityRow } : current,
+      );
+    };
+
+    void loadAffinityProfile();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [id, auth?.isAuthenticated, auth?.activeRole, sitterProfile?.user_id]);
+
   useEffect(() => {
     if (activeTab !== 'proprio') return;
     if (!id || loading) return;
