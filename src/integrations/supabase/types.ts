@@ -614,6 +614,44 @@ export type Database = {
         }
         Relationships: []
       }
+      application_action_tokens: {
+        Row: {
+          action: string
+          application_id: string
+          created_at: string
+          expires_at: string
+          id: string
+          token: string
+          used_at: string | null
+        }
+        Insert: {
+          action: string
+          application_id: string
+          created_at?: string
+          expires_at?: string
+          id?: string
+          token: string
+          used_at?: string | null
+        }
+        Update: {
+          action?: string
+          application_id?: string
+          created_at?: string
+          expires_at?: string
+          id?: string
+          token?: string
+          used_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "application_action_tokens_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: false
+            referencedRelation: "applications"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       applications: {
         Row: {
           created_at: string
@@ -7026,6 +7064,10 @@ export type Database = {
         }
         Returns: boolean
       }
+      consume_application_action_token: {
+        Args: { p_token: string }
+        Returns: Json
+      }
       count_eligible_sitters: {
         Args: { p_lat: number; p_lng: number; p_radius_km?: number }
         Returns: number
@@ -7462,6 +7504,10 @@ export type Database = {
         Args: { p_user_id?: string }
         Returns: boolean
       }
+      issue_application_action_token: {
+        Args: { p_action: string; p_application_id: string }
+        Returns: string
+      }
       list_identity_documents_to_purge: {
         Args: { _retention_days?: number }
         Returns: {
@@ -7530,6 +7576,10 @@ export type Database = {
           p_product_emails?: boolean
         }
         Returns: undefined
+      }
+      peek_application_action_token: {
+        Args: { p_token: string }
+        Returns: Json
       }
       publish_stale_reviews: { Args: { p_days?: number }; Returns: number }
       purge_email_queue: { Args: { queue_name: string }; Returns: number }

@@ -19,6 +19,7 @@ const TRANSACTIONAL: ReadonlyArray<string> = [
   'sit-reminder-j48',
   'application-accepted',
   'application-declined',
+  'application-under-review',
   'application-reopened',
   'application-message-restored',
   'new-application',

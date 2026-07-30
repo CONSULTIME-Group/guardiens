@@ -79,6 +79,26 @@ async function sendReminderEmail(params: {
   const isUrgent = daysUntilStart !== null && daysUntilStart <= 7;
   const ctaUrl = `https://guardiens.fr/dashboard/candidatures/${app.application_id}`;
 
+  // Reponses en un clic depuis l'email (jetons a usage unique, 30 jours).
+  let declineUrl: string | undefined;
+  let thinkingUrl: string | undefined;
+  try {
+    const [{ data: dTok }, { data: tTok }] = await Promise.all([
+      serviceClient.rpc("issue_application_action_token", {
+        p_application_id: app.application_id,
+        p_action: "decline",
+      }),
+      serviceClient.rpc("issue_application_action_token", {
+        p_application_id: app.application_id,
+        p_action: "thinking",
+      }),
+    ]);
+    if (dTok) declineUrl = `https://guardiens.fr/candidature/reponse?t=${dTok}`;
+    if (tTok) thinkingUrl = `https://guardiens.fr/candidature/reponse?t=${tTok}`;
+  } catch (e) {
+    console.error("[nudge-owner-pending-application] token issue failed", e);
+  }
+
   // Envoi via send-transactional-email : cap, suppression, opt-out, en-tetes
   // List-Unsubscribe, pied de page tokenise et journalisation centralises.
   const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
@@ -101,6 +121,8 @@ async function sendReminderEmail(params: {
         daysSince,
         daysUntilStart,
         ctaUrl,
+        declineUrl,
+        thinkingUrl,
         ...(isUrgent ? { __urgent: true } : {}),
       },
       logMetadata: {

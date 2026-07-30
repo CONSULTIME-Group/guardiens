@@ -1565,5 +1565,30 @@
     "owner_raise_option": "{{value}} candidatures",
     "owner_raise_success": "Plafond porté à {{max}} candidatures.",
     "owner_raise_error": "Le plafond n'a pas pu être modifié, réessayez."
+  },
+  "application_quick_action": {
+    "page_title": "Répondre à une candidature",
+    "page_description": "Confirmez votre réponse à une candidature reçue sur Guardiens.",
+    "confirm_title_decline": "Décliner poliment cette candidature",
+    "confirm_body_decline": "{{sitter}} sera prévenu que vous avez fait un autre choix pour « {{listing}} ». Le message envoyé reste bienveillant et ne met jamais son profil en cause.",
+    "confirm_cta_decline": "Confirmer le refus",
+    "confirm_title_thinking": "Indiquer que vous réfléchissez",
+    "confirm_body_thinking": "{{sitter}} sera informé que vous avez bien vu sa candidature pour « {{listing}} » et que vous prenez le temps de décider. Le statut de la candidature ne change pas.",
+    "confirm_cta_thinking": "Confirmer l'envoi",
+    "done_title_decline": "Réponse envoyée",
+    "done_body_decline": "La candidature est déclinée et le gardien vient d'être prévenu.",
+    "done_title_thinking": "Message envoyé",
+    "done_body_thinking": "Le gardien sait que vous avez vu sa candidature. Vous pourrez décider quand vous le souhaitez.",
+    "error_title": "Action impossible",
+    "reason_invalid": "Ce lien n'est pas valide. Connectez-vous pour répondre à la candidature.",
+    "reason_expired": "Ce lien a expiré. Connectez-vous pour répondre à la candidature.",
+    "reason_already_used": "Ce lien a déjà été utilisé.",
+    "reason_already_answered": "Cette candidature a déjà reçu une réponse.",
+    "reason_error": "Une erreur est survenue. Connectez-vous pour répondre à la candidature.",
+    "go_dashboard": "Aller à mon espace",
+    "open_application": "Ouvrir la candidature",
+    "accept_notice": "Accepter une candidature demande de vous connecter.",
+    "the_sitter": "le gardien",
+    "your_listing": "votre annonce"
   }
 }

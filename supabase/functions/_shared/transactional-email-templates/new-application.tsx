@@ -5,6 +5,7 @@ import {
 import { BrandedHead } from './_branded-head.tsx'
 import { BrandHeader } from './_brand-header.tsx'
 import { LegalFooter } from './_legal-footer.tsx'
+import { QuickActions } from './_quick-actions.tsx'
 import type { TemplateEntry } from './registry.ts'
 
 const SITE_URL = 'https://guardiens.fr'
@@ -17,6 +18,8 @@ interface Props {
   sitterCity?: string
   sitterExperience?: string
   sitterAvatarUrl?: string | null
+  declineUrl?: string
+  thinkingUrl?: string
 }
 
 const NewApplicationEmail = ({
@@ -27,6 +30,8 @@ const NewApplicationEmail = ({
   sitterCity,
   sitterExperience,
   sitterAvatarUrl,
+  declineUrl,
+  thinkingUrl,
 }: Props) => {
   const sitter = sitterFirstName || 'Un gardien'
   const ctaHref = sitId
@@ -83,11 +88,7 @@ const NewApplicationEmail = ({
             rapide augmente les chances qu'un échange de confiance s'installe.
           </Text>
 
-          <Section style={{ textAlign: 'center', margin: '28px 0' }}>
-            <Button style={button} href={ctaHref}>
-              Voir la candidature
-            </Button>
-          </Section>
+          <QuickActions primaryHref={ctaHref} declineUrl={declineUrl} thinkingUrl={thinkingUrl} />
 
           <Text style={note}>
             Vous pourrez lire son message et lui répondre directement dans le chat du site. Inutile de répondre à cet email, il n'est pas relevé.
@@ -116,6 +117,8 @@ export const template = {
     sitterCity: 'Paris',
     sitterExperience: '3 ans d\'expérience',
     sitterAvatarUrl: null,
+    declineUrl: 'https://guardiens.fr/candidature/reponse?t=exemple-decline',
+    thinkingUrl: 'https://guardiens.fr/candidature/reponse?t=exemple-attente',
   },
 } satisfies TemplateEntry
 

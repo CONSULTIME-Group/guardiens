@@ -1,55 +1,72 @@
 import * as React from 'npm:react@18.3.1'
 import {
-  Body, Container, Head, Heading, Html, Preview, Text, Button, Hr,
+  Body, Container, Heading, Html, Preview, Text, Button, Section, Hr,
 } from 'npm:@react-email/components@0.0.22'
 import { BrandedHead } from './_branded-head.tsx'
 import { BrandHeader } from './_brand-header.tsx'
 import { LegalFooter } from './_legal-footer.tsx'
 import type { TemplateEntry } from './registry.ts'
 
-const SITE_NAME = "Guardiens"
-const SITE_URL = "https://guardiens.fr"
+const SITE_URL = 'https://guardiens.fr'
 
-interface Props { sitTitle?: string }
+interface Props {
+  sitTitle?: string
+  sitterFirstName?: string
+  sitCity?: string
+}
 
-const ApplicationDeclinedEmail = ({ sitTitle }: Props) => (
-  <Html lang="fr" dir="ltr">
-    <BrandedHead />
-    <Preview>Votre candidature n'a pas été retenue</Preview>
-    <Body style={main}>
-      <Container style={container}>
-        <BrandHeader />
-        <Heading style={h1}>Candidature non retenue</Heading>
-        <Text style={text}>
-          Malheureusement, votre candidature{sitTitle ? ` pour "${sitTitle}"` : ''} n'a pas été retenue par le propriétaire.
-        </Text>
-        <Text style={text}>
-          Ne vous découragez pas ! De nouvelles gardes sont publiées chaque jour. Continuez à postuler, le bon match arrivera bientôt
-        </Text>
-        <Button style={button} href={`${SITE_URL}/recherche`}>
-          Voir les gardes disponibles
-        </Button>
-        <LegalFooter
-          purpose="la gestion de votre candidature"
-          basis="6.1.b"
-        />
-      </Container>
+const ApplicationDeclinedEmail = ({ sitTitle, sitterFirstName, sitCity }: Props) => {
+  const searchHref = sitCity
+    ? `${SITE_URL}/recherche?ville=${encodeURIComponent(sitCity)}`
+    : `${SITE_URL}/recherche`
+  return (
+    <Html lang="fr" dir="ltr">
+      <BrandedHead />
+      <Preview>Le propriétaire a fait un autre choix</Preview>
+      <Body style={main}>
+        <Container style={container}>
+          <BrandHeader />
+          <Heading style={h1}>Le propriétaire a fait un autre choix</Heading>
+          <Text style={text}>
+            Bonjour{sitterFirstName ? ` ${sitterFirstName}` : ''},
+          </Text>
+          <Text style={text}>
+            Le propriétaire a retenu une autre candidature
+            {sitTitle ? <> pour «&nbsp;{sitTitle}&nbsp;»</> : null}. Cela ne dit rien de votre
+            profil : chaque garde a ses contraintes de dates, de lieu et d'animaux.
+          </Text>
+          <Text style={text}>
+            Votre candidature est libérée, vous êtes de nouveau disponible pour d'autres
+            annonces{sitCity ? <>, notamment près de {sitCity}</> : null}.
+          </Text>
+          <Section style={ctaSection}>
+            <Button style={button} href={searchHref}>
+              Voir d'autres annonces
+            </Button>
+          </Section>
+          <Hr style={hr} />
+          <LegalFooter purpose="la gestion de votre candidature" basis="6.1.b" />
+        </Container>
       </Body>
-      </Html>
-)
+    </Html>
+  )
+}
 
 export const template = {
   component: ApplicationDeclinedEmail,
-  subject: 'Votre candidature n’a pas été retenue',
+  subject: 'Le propriétaire a fait un autre choix',
   displayName: 'Candidature déclinée',
-  previewData: { sitTitle: 'Garde chat Paris 11e' },
+  previewData: {
+    sitTitle: 'Garde chat Paris 11e',
+    sitterFirstName: 'Camille',
+    sitCity: 'Paris',
+  },
 } satisfies TemplateEntry
 
 const main = { backgroundColor: '#ffffff', fontFamily: "'Outfit', Arial, sans-serif" }
 const container = { padding: '24px 28px', maxWidth: '560px', margin: '0 auto' }
-const h1 = { fontSize: '24px', fontWeight: 'bold' as const, color: 'hsl(153, 42%, 30%)', margin: '0 0 20px' }
-const text = { fontSize: '14px', color: 'hsl(37, 7%, 43%)', lineHeight: '1.6', margin: '0 0 16px' }
-const hr = { borderColor: 'hsl(37, 22%, 89%)', margin: '20px 0' }
-const button = { backgroundColor: 'hsl(153, 42%, 30%)', color: '#ffffff', padding: '12px 28px', borderRadius: '8px', fontSize: '15px', fontWeight: '600' as const, textDecoration: 'none', display: 'inline-block' }
-const legal = { fontSize: '10px', color: 'hsl(37, 7%, 60%)', lineHeight: '1.5', margin: '0 0 12px' }
-const footer = { fontSize: '12px', color: 'hsl(37, 7%, 60%)', margin: '10px 0 0' }
+const h1 = { fontSize: '22px', fontWeight: 'bold' as const, color: 'hsl(153, 42%, 30%)', margin: '0 0 18px' }
+const text = { fontSize: '15px', color: 'hsl(37, 7%, 30%)', lineHeight: '1.65', margin: '0 0 16px' }
+const ctaSection = { textAlign: 'center' as const, margin: '26px 0 8px' }
+const button = { backgroundColor: 'hsl(153, 42%, 30%)', color: '#ffffff', padding: '13px 28px', borderRadius: '10px', fontSize: '15px', fontWeight: '600' as const, textDecoration: 'none', display: 'inline-block' }
+const hr = { borderColor: 'hsl(37, 22%, 89%)', margin: '24px 0 16px' }

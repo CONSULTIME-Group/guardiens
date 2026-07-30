@@ -1544,5 +1544,30 @@
     "owner_raise_option": "{{value}} candidature",
     "owner_raise_success": "Limite portato a {{max}} candidature.",
     "owner_raise_error": "Non è stato possibile modificare il limite, riprovi."
+  },
+  "application_quick_action": {
+    "page_title": "Rispondere a una candidatura",
+    "page_description": "Confermi la sua risposta a una candidatura ricevuta su Guardiens.",
+    "confirm_title_decline": "Rifiutare con garbo questa candidatura",
+    "confirm_body_decline": "{{sitter}} sarà informato che ha fatto un'altra scelta per « {{listing}} ». Il messaggio resta gentile e non mette mai in discussione il suo profilo.",
+    "confirm_cta_decline": "Confermare il rifiuto",
+    "confirm_title_thinking": "Indicare che sta ancora decidendo",
+    "confirm_body_thinking": "{{sitter}} saprà che ha visto la sua candidatura per « {{listing}} » e che si prende il tempo di decidere. Lo stato non cambia.",
+    "confirm_cta_thinking": "Confermare l'invio",
+    "done_title_decline": "Risposta inviata",
+    "done_body_decline": "La candidatura è stata rifiutata e la persona è stata avvisata.",
+    "done_title_thinking": "Messaggio inviato",
+    "done_body_thinking": "La persona sa che ha visto la sua candidatura. Potrà decidere quando vorrà.",
+    "error_title": "Azione impossibile",
+    "reason_invalid": "Questo link non è valido. Acceda per rispondere alla candidatura.",
+    "reason_expired": "Questo link è scaduto. Acceda per rispondere alla candidatura.",
+    "reason_already_used": "Questo link è già stato utilizzato.",
+    "reason_already_answered": "Questa candidatura ha già ricevuto una risposta.",
+    "reason_error": "Si è verificato un errore. Acceda per rispondere alla candidatura.",
+    "go_dashboard": "Vai al mio spazio",
+    "open_application": "Apri la candidatura",
+    "accept_notice": "Accettare una candidatura richiede l'accesso.",
+    "the_sitter": "la persona candidata",
+    "your_listing": "il suo annuncio"
   }
 }

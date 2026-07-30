@@ -5,6 +5,7 @@ import {
 import { BrandedHead } from './_branded-head.tsx'
 import { BrandHeader } from './_brand-header.tsx'
 import { LegalFooter } from './_legal-footer.tsx'
+import { QuickActions } from './_quick-actions.tsx'
 import type { TemplateEntry } from './registry.ts'
 
 interface Props {
@@ -13,6 +14,8 @@ interface Props {
   sitTitle?: string
   daysSince?: number
   ctaUrl?: string
+  declineUrl?: string
+  thinkingUrl?: string
 }
 
 const OwnerPendingApplicationNudgeEmail = ({
@@ -21,6 +24,8 @@ const OwnerPendingApplicationNudgeEmail = ({
   sitTitle,
   daysSince,
   ctaUrl,
+  declineUrl,
+  thinkingUrl,
 }: Props) => {
   const sitter = sitterFirstName || 'Un gardien'
   const days = typeof daysSince === 'number' && daysSince > 0 ? daysSince : 2
@@ -47,11 +52,11 @@ const OwnerPendingApplicationNudgeEmail = ({
             Une réponse rapide, même brève, aide {sitter} à s'organiser. Prenez un moment pour lui écrire.
           </Text>
 
-          <Section style={ctaSection} className="em-cta">
-            <Button style={button} className="em-btn" href={ctaUrl || 'https://guardiens.fr/dashboard'}>
-              Voir la candidature
-            </Button>
-          </Section>
+          <QuickActions
+            primaryHref={ctaUrl || 'https://guardiens.fr/dashboard'}
+            declineUrl={declineUrl}
+            thinkingUrl={thinkingUrl}
+          />
 
           <Hr style={hr} />
 
@@ -94,5 +99,7 @@ export const template = {
     sitTitle: 'Garde de deux chats à Annecy',
     daysSince: 3,
     ctaUrl: 'https://guardiens.fr/dashboard',
+    declineUrl: 'https://guardiens.fr/candidature/reponse?t=exemple-decline',
+    thinkingUrl: 'https://guardiens.fr/candidature/reponse?t=exemple-attente',
   },
 } satisfies TemplateEntry

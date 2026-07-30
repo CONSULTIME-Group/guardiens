@@ -1544,5 +1544,30 @@
     "owner_raise_option": "{{value}} Bewerbungen",
     "owner_raise_success": "Grenze auf {{max}} Bewerbungen erhöht.",
     "owner_raise_error": "Die Grenze konnte nicht geändert werden, bitte erneut versuchen."
+  },
+  "application_quick_action": {
+    "page_title": "Auf eine Bewerbung antworten",
+    "page_description": "Bestätigen Sie Ihre Antwort auf eine bei Guardiens eingegangene Bewerbung.",
+    "confirm_title_decline": "Diese Bewerbung höflich ablehnen",
+    "confirm_body_decline": "{{sitter}} wird informiert, dass Sie sich für « {{listing}} » anders entschieden haben. Die Nachricht bleibt wohlwollend und stellt das Profil nie infrage.",
+    "confirm_cta_decline": "Absage bestätigen",
+    "confirm_title_thinking": "Mitteilen, dass Sie noch überlegen",
+    "confirm_body_thinking": "{{sitter}} erfährt, dass Sie die Bewerbung für « {{listing}} » gesehen haben und sich Zeit zum Entscheiden nehmen. Der Status ändert sich nicht.",
+    "confirm_cta_thinking": "Senden bestätigen",
+    "done_title_decline": "Antwort gesendet",
+    "done_body_decline": "Die Bewerbung wurde abgelehnt und die betreuende Person wurde benachrichtigt.",
+    "done_title_thinking": "Nachricht gesendet",
+    "done_body_thinking": "Die betreuende Person weiß, dass Sie die Bewerbung gesehen haben. Sie können jederzeit entscheiden.",
+    "error_title": "Aktion nicht möglich",
+    "reason_invalid": "Dieser Link ist ungültig. Bitte melden Sie sich an, um zu antworten.",
+    "reason_expired": "Dieser Link ist abgelaufen. Bitte melden Sie sich an, um zu antworten.",
+    "reason_already_used": "Dieser Link wurde bereits verwendet.",
+    "reason_already_answered": "Diese Bewerbung wurde bereits beantwortet.",
+    "reason_error": "Ein Fehler ist aufgetreten. Bitte melden Sie sich an, um zu antworten.",
+    "go_dashboard": "Zu meinem Bereich",
+    "open_application": "Bewerbung öffnen",
+    "accept_notice": "Für die Zusage einer Bewerbung ist eine Anmeldung erforderlich.",
+    "the_sitter": "die betreuende Person",
+    "your_listing": "Ihre Anzeige"
   }
 }
