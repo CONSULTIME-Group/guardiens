@@ -592,7 +592,19 @@ const PublicSitView = ({
                 </div>
               </div>
 
-              {capReached ? (
+              {isClosed ? (
+                <div className="rounded-2xl border border-border bg-muted/40 p-4 text-center">
+                  <p className="text-sm text-foreground leading-relaxed">
+                    {isPast
+                      ? "Cette garde est terminée, vous pouvez la consulter librement et "
+                      : "Cette garde a déjà trouvé son gardien, vous pouvez la consulter librement et "}
+                    <Link to="/annonces" className="text-primary font-medium hover:underline">
+                      découvrir les annonces ouvertes
+                    </Link>
+                    .
+                  </p>
+                </div>
+              ) : capReached ? (
                 <div className="rounded-2xl border border-border bg-muted/40 p-4 text-center">
                   <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
                     {t("application_cap.badge")}
