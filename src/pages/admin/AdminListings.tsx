@@ -13,7 +13,7 @@ import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
 import { format, formatDistanceToNow } from "date-fns";
 import { fr } from "date-fns/locale";
-import { Eye, EyeOff, Trash2, Search, Sparkles, Share2, Link2, Mail, BarChart3, MessageSquare, Download, ChevronLeft, ChevronRight, Send, Loader2 } from "lucide-react";
+import { Eye, EyeOff, Trash2, Search, Sparkles, Share2, Link2, Mail, BarChart3, MessageSquare, Download, ChevronLeft, ChevronRight, Send, Loader2, Image as ImageIcon } from "lucide-react";
 import { useMessageAiAssistant, type MessageAiAction } from "@/hooks/useMessageAiAssistant";
 import {
   DropdownMenu,
@@ -27,6 +27,7 @@ import { useNavigate } from "react-router-dom";
 import DraftStatsPanel from "@/components/admin/DraftStatsPanel";
 import ListingDrilldownDialog from "@/components/admin/ListingDrilldownDialog";
 import ListingProximityCard from "@/components/admin/ListingProximityCard";
+import ListingCoverPickerDialog from "@/components/admin/ListingCoverPickerDialog";
 import { getCountryName } from "@/lib/countries";
 
 type BadgeVariant = "default" | "secondary" | "outline" | "destructive";
@@ -112,6 +113,11 @@ const AdminListings = () => {
     setDrillTab(tab);
     setDrillOpen(true);
   };
+
+  // Sélecteur de photo de couverture (choix explicite administrateur)
+  const [coverListing, setCoverListing] = useState<any | null>(null);
+  // URLs de photos d'animaux (galerie animals_life + table pets), pour le repère visuel
+  const [animalPhotoUrls, setAnimalPhotoUrls] = useState<Set<string>>(new Set());
 
   const fetchListings = useCallback(async () => {
     setLoading(true);
