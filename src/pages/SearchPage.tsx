@@ -67,21 +67,13 @@ const SearchPage = () => {
 
   return (
     <>
-      <Helmet>
-        <title>{TITLE}</title>
-        <meta name="description" content={DESCRIPTION} />
-        <meta name="robots" content="index,follow" />
-        <link rel="canonical" href={CANONICAL} />
-        <meta property="og:title" content={TITLE} />
-        <meta property="og:description" content={DESCRIPTION} />
-        <meta property="og:url" content={CANONICAL} />
-        <meta property="og:type" content="website" />
-        <meta property="og:locale" content="fr_FR" />
-        <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content={TITLE} />
-        <meta name="twitter:description" content={DESCRIPTION} />
-        <script type="application/ld+json">{JSON.stringify(jsonLd)}</script>
-      </Helmet>
+      <PageMeta
+        title={TITLE}
+        description={DESCRIPTION}
+        canonical={CANONICAL}
+        noindex
+        jsonLd={jsonLd}
+      />
 
       {/* H1 SEO invisible, contextualisé selon la vue (gardiens vs annonces).
           Les h2 visibles des vues SearchOwner/SearchSitter restent la seule
