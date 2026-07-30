@@ -521,9 +521,11 @@ const SearchOwner = () => {
     const { data: sittersRaw, error: sittersError } = await (supabase as any)
       .from("public_sitter_profiles")
       // Projection explicite : colonnes réellement consommées (filtres, tri,
-      // carte, carte de résultat, calcul d'affinité). Le reste de la vue n'est
-      // pas rapatrié au navigateur.
-      .select("user_id, created_at, animal_types, has_vehicle, is_available, reply_median_minutes, sitter_type, experience_years, life_pace, languages, interests, special_animal_skills, travels_with_children, travels_with_own_animals")
+      // carte, carte de résultat). Les colonnes d'affinité (experience_years,
+      // life_pace, languages, interests, work_during_sit, sensitivities) ne
+      // sont plus dans la vue publique, elles sont chargées séparément via
+      // `sitter_profiles_affinity`, réservée aux membres connectés.
+      .select("user_id, animal_types, has_vehicle, is_available, reply_median_minutes, sitter_type, travels_with_children, travels_with_own_animals")
       .limit(SITTERS_SERVER_CAP);
     const sitters = (sittersRaw || []).map((s: any) => ({ ...s, id: s.user_id }));
 
