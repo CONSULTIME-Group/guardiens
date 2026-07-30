@@ -191,10 +191,15 @@ async function runEvaluation(
     }
   }
 
+  // Garde-fou : les parcours arretes par epuisement des tentatives passent en
+  // status 'exited' et ne sont donc plus selectionnes ici.
+  const MAX_TRANSIENT_FAILURES = 5
+
   const { data: activeJourneys } = await supabase
     .from('user_journeys')
-    .select('id, user_id, sequence_key, current_step, started_at, last_step_at, created_at')
+    .select('id, user_id, sequence_key, current_step, started_at, last_step_at, created_at, transient_failure_count')
     .eq('status', 'active')
+    .lt('transient_failure_count', MAX_TRANSIENT_FAILURES)
     .limit(2000)
 
   const seqByKey = new Map(sequences.map((s) => [s.key, s]))
@@ -436,7 +441,32 @@ async function runEvaluation(
         await supabase.from('user_journeys').update({
           current_step: nextStep.step_order,
           last_step_at: new Date().toISOString(),
+          transient_failure_count: 0,
         }).eq('id', j.id)
+      } else {
+        // Garde-fou : on borne les tentatives sur echec transitoire repete.
+        const failureCount = (j.transient_failure_count ?? 0) + 1
+        if (failureCount >= MAX_TRANSIENT_FAILURES) {
+          await supabase.from('user_journeys').update({
+            transient_failure_count: failureCount,
+            status: 'exited',
+            exit_reason: 'transient_send_failures_exhausted',
+            completed_at: new Date().toISOString(),
+          }).eq('id', j.id)
+          console.error('[ALERT] Journey stopped after repeated transient send failures', {
+            journey_id: j.id,
+            sequence_key: j.sequence_key,
+            step: nextStep.step_order,
+            transient_failure_count: failureCount,
+            max_transient_failures: MAX_TRANSIENT_FAILURES,
+          })
+          bumpSeq(j.sequence_key, 'exited')
+          stats.exited++
+        } else {
+          await supabase.from('user_journeys').update({
+            transient_failure_count: failureCount,
+          }).eq('id', j.id)
+        }
       }
 
       if (actuallySent) {
