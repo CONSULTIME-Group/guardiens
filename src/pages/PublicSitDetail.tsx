@@ -601,15 +601,20 @@ const PublicSitDetail = () => {
 
       {!isAuthenticated && <PublicHeader />}
 
-      {/* Bandeau statut : garde pourvue ou annonce terminée */}
+      {/* Mention sobre : garde déjà attribuée ou déjà passée. Ton factuel,
+          lien vers les annonces ouvertes, aucune action de candidature. */}
       {isClosedSit && (
         <>
           <div className="bg-muted/60 border-b border-border">
             <div className="max-w-6xl mx-auto px-4 py-3">
               <p className="text-sm text-foreground">
-                {sit.status === "confirmed"
-                  ? "Cette garde a trouvé son gardien."
-                  : "Cette annonce est terminée."}
+                {isPastSit
+                  ? "Cette garde est terminée, vous pouvez la consulter librement et "
+                  : "Cette garde a déjà trouvé son gardien, vous pouvez la consulter librement et "}
+                <Link to="/annonces" className="text-primary font-medium hover:underline">
+                  découvrir les annonces ouvertes
+                </Link>
+                .
               </p>
             </div>
           </div>
