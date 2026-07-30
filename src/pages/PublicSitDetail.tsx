@@ -437,7 +437,8 @@ const PublicSitDetail = () => {
  : "";
  const datesPart = startFmt && endFmt
    ? `Du ${startFmt} au ${endFmt}.`
-   : (hideDates ? (sit.status === "confirmed" ? "Période pourvue." : "Garde terminée.") : "Dates flexibles.");
+   : (hideDates ? (isPastSit ? "Garde terminée." : "Annonce close.") : "Dates flexibles.");
+
 
  const cityPart = ownerCity ? `${ownerCity}. ` : "";
  const ogDescription = propertyDescShort
