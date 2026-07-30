@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useMemo, useRef, lazy, Suspense } from "react";
-import { Helmet } from "react-helmet-async";
+import PageMeta from "@/components/PageMeta";
 import { logger } from "@/lib/logger";
 import { useNavigate, Link, useSearchParams } from "react-router-dom";
 import ReportButton from "@/components/reports/ReportButton";
@@ -958,19 +958,13 @@ const SearchOwner = () => {
 
   return (
     <>
-    <Helmet>
-      <title>{seoTitle}</title>
-      <meta name="description" content={seoDescription} />
-      <meta name="robots" content="index,follow" />
-      <link rel="canonical" href={seoCanonical} />
-      <meta property="og:title" content={seoTitle} />
-      <meta property="og:description" content={seoDescription} />
-      <meta property="og:url" content={seoCanonical} />
-      <meta property="og:type" content="website" />
-      <meta property="og:locale" content="fr_FR" />
-      <meta name="twitter:card" content="summary_large_image" />
-      <script type="application/ld+json">{JSON.stringify(seoJsonLd)}</script>
-    </Helmet>
+    <PageMeta
+      title={seoTitle}
+      description={seoDescription}
+      canonical={seoCanonical}
+      noindex
+      jsonLd={seoJsonLd}
+    />
     <div className="animate-fade-in">
       {/* Hero signature vague 42 — eyebrow terra + H1 Playfair + lede contextuel */}
       <div className="px-6 pt-6 pb-3 md:pt-10 md:pb-4 space-y-3">
@@ -1033,7 +1027,7 @@ const SearchOwner = () => {
                     <span className="text-muted-foreground">Où cherchez-vous un gardien&nbsp;?</span>
                   )}
                 </span>
-                <span className="text-xs text-muted-foreground shrink-0 hidden lg:inline">Ville, code postal…</span>
+                <span className="text-xs text-muted-foreground shrink-0 hidden lg:inline">Ville, département ou région</span>
               </button>
             </PopoverTrigger>
             <PopoverContent align="start" className="w-[420px] p-3 space-y-3">

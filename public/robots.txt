@@ -111,7 +111,6 @@ Disallow: /messages
 Disallow: /mon-abonnement
 Disallow: /notifications
 Disallow: /sits
-Disallow: /recherche-gardiens
 Disallow: /review/
 Disallow: /house-guide/
 Disallow: /profile
@@ -127,7 +126,6 @@ Disallow: /auth/
 
 # Routes publiques marquées index:false dans staticRoutes
 # (outils internes / pages d'auth — cohérent avec <meta robots> + sitemap)
-Disallow: /recherche
 
 # Profils publics : /gardiens/:id reste indexable.
 # Le sitemap filtre déjà les profils non-publics (politique : seuls sitter/both publics).
