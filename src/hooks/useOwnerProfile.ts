@@ -6,6 +6,7 @@ import { logger } from "@/lib/logger";
 import { validateAvatarFile } from "@/lib/validateAvatarFile";
 import { compressImageFile } from "@/lib/compressImage";
 import { clearViewerOwnerCache } from "@/hooks/useViewerOwnerForAffinity";
+import { ENV_KEYS } from "@/components/shared/EnvironmentPills";
 
 // Exported so the page can recompute missing fields against the LIVE preview state
 // (mergedData = data + localData) instead of the stale server snapshot.
@@ -118,6 +119,74 @@ const defaultData: OwnerProfileData = {
   owner_competences: [], owner_competences_disponible: false, owner_skill_categories: [],
   languages: [], interests: [], life_pace: "", household_composition: [], home_ambiance: [],
 };
+
+/** Champs owner_profiles stockés en tableau de chaînes (colonnes NOT NULL côté base). */
+const OWNER_ARRAY_FIELDS = [
+  "home_ambiance", "household_composition", "interests", "languages",
+  "preferred_sitter_types", "meeting_preference", "space_usage", "news_format",
+] as const;
+
+/** Champs owner_profiles stockés en texte : null interdit, chaîne vide acceptée. */
+const OWNER_TEXT_FIELDS = [
+  "presence_expected", "specific_expectations", "visits_allowed", "overnight_guest",
+  "smoker_accepted", "rules_notes", "handover_preference", "welcome_notes",
+  "news_frequency", "preferred_time", "communication_notes", "life_pace",
+] as const;
+
+const toStringArray = (value: unknown, limit?: number): string[] => {
+  const arr = Array.isArray(value) ? value : [];
+  const cleaned = arr
+    .filter((v): v is string => typeof v === "string")
+    .map(v => v.trim())
+    .filter(v => v.length > 0);
+  const unique = Array.from(new Set(cleaned));
+  return typeof limit === "number" ? unique.slice(0, limit) : unique;
+};
+
+/**
+ * Neutralise toute valeur qui ferait échouer l'écriture owner_profiles :
+ * clés undefined, environnements hors référentiel ou au-delà de 3,
+ * compétences au-delà de 10, colonnes NOT NULL reçues à null.
+ */
+export function sanitizeOwnerUpdate(update: Record<string, any>): Record<string, any> {
+  const out: Record<string, any> = {};
+
+  Object.entries(update ?? {}).forEach(([key, value]) => {
+    if (value === undefined) return;
+    out[key] = value;
+  });
+
+  if ("environments" in out) {
+    out.environments = toStringArray(out.environments, undefined)
+      .filter(v => ENV_KEYS.includes(v))
+      .slice(0, 3);
+  }
+  if ("competences" in out) {
+    out.competences = toStringArray(out.competences, 10);
+  }
+  OWNER_ARRAY_FIELDS.forEach(field => {
+    if (field in out) out[field] = toStringArray(out[field]);
+  });
+  OWNER_TEXT_FIELDS.forEach(field => {
+    if (field in out && (out[field] === null || out[field] === undefined)) out[field] = "";
+  });
+
+  return out;
+}
+
+/**
+ * Nettoie un brouillon localStorage : retire les clés inconnues de
+ * OwnerProfileData et applique les mêmes règles de normalisation.
+ */
+export function sanitizeOwnerDraft(values: unknown): Partial<OwnerProfileData> {
+  if (!values || typeof values !== "object") return {};
+  const known = Object.keys(defaultData);
+  const filtered: Record<string, any> = {};
+  Object.entries(values as Record<string, any>).forEach(([key, value]) => {
+    if (known.includes(key)) filtered[key] = value;
+  });
+  return sanitizeOwnerUpdate(filtered) as Partial<OwnerProfileData>;
+}
 
 export function useOwnerProfile() {
   const { user, refreshProfile } = useAuth();
@@ -342,13 +411,14 @@ export function useOwnerProfile() {
       // Map owner-specific competence fields
       if ("owner_competences" in stepData) ownerUpdate.competences = (stepData as any).owner_competences;
       if ("owner_competences_disponible" in stepData) ownerUpdate.competences_disponible = (stepData as any).owner_competences_disponible;
-      if (Object.keys(ownerUpdate).length > 0) {
+      const ownerPayload = sanitizeOwnerUpdate(ownerUpdate);
+      if (Object.keys(ownerPayload).length > 0) {
         if (ownerProfileId) {
-          const { error } = await supabase.from("owner_profiles").update(ownerUpdate).eq("id", ownerProfileId);
+          const { error } = await supabase.from("owner_profiles").update(ownerPayload).eq("id", ownerProfileId);
           if (error) throw error;
         } else {
           const { data: newOwner, error } = await supabase
-            .from("owner_profiles").insert({ ...ownerUpdate, user_id: user.id }).select("id").single();
+            .from("owner_profiles").insert({ ...ownerPayload, user_id: user.id }).select("id").single();
           if (error) throw error;
           if (newOwner) setOwnerProfileId(newOwner.id);
         }
@@ -366,9 +436,17 @@ export function useOwnerProfile() {
       toast({ title: "Sauvegardé", description: "Vos modifications ont été enregistrées." });
       return true;
     } catch (error) {
-      logger.error("Failed to save owner profile", { error: String(error) });
+      const err = error as { message?: string; code?: string; details?: string; hint?: string };
+      logger.error("Failed to save owner profile", {
+        error: String(error),
+        code: err?.code ?? null,
+        message: err?.message ?? null,
+        details: err?.details ?? null,
+        hint: err?.hint ?? null,
+      });
       setData(previousData);
-      toast({ variant: "destructive", title: "Erreur", description: "Impossible de sauvegarder." });
+      const description = (err?.message ?? "").trim() || "Impossible de sauvegarder.";
+      toast({ variant: "destructive", title: "Erreur", description });
       return false;
     } finally {
       setSaving(false);
