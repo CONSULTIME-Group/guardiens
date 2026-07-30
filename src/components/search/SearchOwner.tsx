@@ -223,6 +223,26 @@ const SearchOwner = () => {
     setOpenPop(null);
   }, []);
 
+  // À chaque ouverture du sélecteur de lieu, la saisie repart de la valeur
+  // métier courante et les suggestions sont vidées, sinon la nouvelle frappe
+  // se concatène à l'ancienne.
+  useEffect(() => {
+    if (openPop !== "loc" && openPop !== "loc-hero") return;
+    setCityInput(city);
+    setCitySuggestions([]);
+    setLocQuery("");
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [openPop]);
+
+  // Validation clavier : la touche Entrée promeut la saisie en état métier.
+  const handleCityKeyDown = useCallback((e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key !== "Enter") return;
+    cityTouchedRef.current = true;
+    setCity(cityInput);
+    setCitySuggestions([]);
+    setOpenPop(null);
+  }, [cityInput]);
+
   // Pays réellement peuplés : source unique = RPC public.get_sitter_country_map()
   // (jointure sitter_profiles × profiles). Aucune liste de pays en dur, donc aucune
   // entrée à zéro gardien ne peut apparaître.
@@ -991,7 +1011,11 @@ const SearchOwner = () => {
       {/* Sticky search bar */}
       <div className="sticky top-[52px] md:top-0 z-[1100] bg-background border-b-2 border-border shadow-sm px-6 py-3 space-y-3">
         {/* ─── Hero search (desktop V2) : ville dominante + rayon + CTA ─── */}
-        <div className="hidden md:flex items-center gap-3">
+        {/* Une seule instance du sélecteur de lieu est montée : rendu
+            conditionné en JavaScript, jamais masqué en CSS (le portail du
+            popover échappe au display:none). */}
+        {!isMobile && (
+        <div className="flex items-center gap-3">
           <Popover open={openPop === "loc-hero"} onOpenChange={(o) => setOpenPop(o ? "loc-hero" : null)}>
             <PopoverTrigger asChild>
               <button
@@ -1013,13 +1037,14 @@ const SearchOwner = () => {
               <div className="relative">
                 <Input
                   placeholder="Ville, département (ex. 69) ou région…"
-                  value={city}
+                  value={cityInput}
                   onChange={(e) => {
-                    setCity(e.target.value);
+                    cityTouchedRef.current = true;
+                    setCityInput(e.target.value);
                     setLocQuery(e.target.value);
-                    setCityPostalCode(null);
                     fetchCitySuggestions(e.target.value);
                   }}
+                  onKeyDown={handleCityKeyDown}
                   className="pr-10"
                   aria-label="Ville, département ou région"
                   autoFocus
@@ -1085,13 +1110,15 @@ const SearchOwner = () => {
           {/* CTA « Rechercher » retiré : la recherche est live (ville/rayon → refetch auto),
               le bouton primary volait l'attention pour zéro action utile. */}
         </div>
+        )}
 
         <div className="relative -mr-6 sm:mr-0">
           <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pr-10 sm:pr-0 snap-x snap-mandatory scroll-px-6 overscroll-x-contain">
-          {/* PILL 1, Localisation (mobile — desktop a le hero search au-dessus) */}
+          {/* PILL 1, Localisation (mobile uniquement, desktop a le hero search au-dessus) */}
+          {isMobile && (
           <Popover open={openPop === "loc"} onOpenChange={(o) => setOpenPop(o ? "loc" : null)}>
             <PopoverTrigger asChild>
-              <button className={`md:hidden ${city ? pillActive : pillBase}`}>
+              <button className={city ? pillActive : pillBase}>
                 <MapPin className="h-3.5 w-3.5 shrink-0" />
                 {city || "Localisation"}
               </button>
@@ -1100,14 +1127,14 @@ const SearchOwner = () => {
               <div className="relative">
                 <Input
                   placeholder="Ville, département (ex. 69) ou région…"
-                  value={city}
+                  value={cityInput}
                   onChange={(e) => {
-                    setCity(e.target.value);
+                    cityTouchedRef.current = true;
+                    setCityInput(e.target.value);
                     setLocQuery(e.target.value);
-                    // Reset le code postal si l'utilisateur tape sans choisir de suggestion
-                    setCityPostalCode(null);
                     fetchCitySuggestions(e.target.value);
                   }}
+                  onKeyDown={handleCityKeyDown}
                   className="pr-10"
                   aria-label="Ville, département ou région"
                 />
