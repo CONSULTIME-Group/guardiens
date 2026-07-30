@@ -239,6 +239,9 @@ const SearchOwner = () => {
     if (e.key !== "Enter") return;
     cityTouchedRef.current = true;
     setCity(cityInput);
+    // Saisie libre validée au clavier : la référence postale précédente ne
+    // correspond plus, on la remet à zéro.
+    setCityPostalCode(null);
     setCitySuggestions([]);
     setOpenPop(null);
   }, [cityInput]);
