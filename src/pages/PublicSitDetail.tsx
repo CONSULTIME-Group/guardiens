@@ -363,6 +363,8 @@ const PublicSitDetail = () => {
  return diff;
  })();
  const urgencyLabel = (() => {
+ // Une annonce close ou passée n'a jamais de badge d'urgence, connecté ou non.
+ if (isClosedSit || isPastSit) return null;
  if (hideDates) return null;
  if (daysUntilStart == null || daysUntilStart < 0) return null;
  if (daysUntilStart === 0) return "Commence aujourd'hui";
