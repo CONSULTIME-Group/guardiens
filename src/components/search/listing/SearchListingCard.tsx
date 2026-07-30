@@ -52,6 +52,18 @@ const SearchListingCard = ({
   const isAssigned = !isMission && !!item.isAssigned;
   const isCompleted = !isMission && !!item.isCompleted;
   const isPast = !isMission && !!item.isPast;
+  // Une garde n'est réellement passée que si sa date de fin est antérieure à
+  // aujourd'hui. Le statut (archivée, terminée) ne suffit pas.
+  const isDateElapsed = (() => {
+    const raw = (item as any).end_date;
+    if (!raw) return false;
+    const end = new Date(raw);
+    if (isNaN(end.getTime())) return false;
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    end.setHours(0, 0, 0, 0);
+    return end.getTime() < today.getTime();
+  })();
   const isInactive = isAssigned || isCompleted || isPast;
   // Plafond de candidatures atteint : l'annonce reste visible et lisible.
   const isCapReached =
@@ -260,7 +272,7 @@ const SearchListingCard = ({
         {(isAssigned || isCompleted || isPast) && (
           <div className="absolute inset-0 bg-white/45 backdrop-blur-[1px] flex items-center justify-center">
             <span className="bg-white/95 text-foreground text-[10px] font-semibold uppercase tracking-[0.2em] px-4 py-1.5 rounded-full border border-black/[0.06] shadow-sm">
-              {isPast || isCompleted ? "Annonce passée" : "Gardiennage attribué"}
+              {isDateElapsed ? "Annonce passée" : "Gardiennage attribué"}
             </span>
           </div>
         )}
@@ -336,10 +348,10 @@ const SearchListingCard = ({
           {isAssigned && (
             <p className="mt-2 text-[11px] text-muted-foreground italic">Cette garde a déjà trouvé son gardien.</p>
           )}
-          {isCompleted && (
+          {isCompleted && isDateElapsed && (
             <p className="mt-2 text-[11px] text-muted-foreground italic">Garde déjà réalisée, aperçu de l'activité.</p>
           )}
-          {isPast && !isCompleted && (
+          {isPast && !isCompleted && isDateElapsed && (
             <p className="mt-2 text-[11px] text-muted-foreground italic">Annonce passée, consultable à titre d'historique.</p>
           )}
           {isDemo && (
