@@ -7,6 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { geocodeCity, haversineDistance } from "@/lib/geocode";
 import { ALLOWED_ALERT_RADII, snapToAllowedRadius } from "@/lib/alertRadius";
 import { useAuth } from "@/contexts/AuthContext";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
@@ -66,10 +67,18 @@ const SearchOwner = () => {
   const { owner: viewerOwner } = useViewerOwnerForAffinity();
 
   const { toast: toastUi } = useToast();
+  const isMobile = useIsMobile();
   const [searchParams] = useSearchParams();
 
   // Filter state
   const [city, setCity] = useState("");
+  // Saisie brute du champ de lieu, découplée de l'état métier `city` : taper
+  // ne doit plus relancer le cycle réseau complet (handleSearch est debouncé
+  // sur `city`). `city` n'est écrit que par une sélection explicite.
+  const [cityInput, setCityInput] = useState("");
+  // Vrai dès que l'utilisateur a touché au champ, empêche le chargement
+  // asynchrone du profil d'écraser la saisie en cours.
+  const cityTouchedRef = useRef(false);
   const [cityPostalCode, setCityPostalCode] = useState<string | null>(null);
   const [userPostalCode, setUserPostalCode] = useState<string | null>(null);
   const [citySuggestions, setCitySuggestions] = useState<any[]>([]);
@@ -174,7 +183,9 @@ const SearchOwner = () => {
   }, [locQuery]);
 
   const handleSelectDept = useCallback((deptCode: string) => {
+    cityTouchedRef.current = true;
     setCity(`${deptCode} ${DEPT_NAMES[deptCode]}`);
+    setCityInput(`${deptCode} ${DEPT_NAMES[deptCode]}`);
     setCityPostalCode(deptToRefPostalCode(deptCode));
     // Une zone française explicite annule tout filtre pays, sinon deux filtres
     // géographiques contradictoires s'appliqueraient.
@@ -186,8 +197,10 @@ const SearchOwner = () => {
   }, []);
 
   const handleSelectRegion = useCallback((regionCode: string) => {
+    cityTouchedRef.current = true;
     const firstDept = Object.keys(DEPT_TO_REGION).find((d) => DEPT_TO_REGION[d] === regionCode);
     setCity(REGION_NAMES[regionCode] ?? "");
+    setCityInput(REGION_NAMES[regionCode] ?? "");
     if (firstDept) setCityPostalCode(deptToRefPostalCode(firstDept));
     setSelectedCountry(null);
     setZoneMode("region");
@@ -199,7 +212,9 @@ const SearchOwner = () => {
   // Sélection d'une commune (suggestions geo.api.gouv.fr), factorisée entre les
   // popovers desktop et mobile : annule aussi le filtre pays.
   const handleSelectCity = useCallback((s: any) => {
+    cityTouchedRef.current = true;
     setCity(s.nom);
+    setCityInput(s.nom);
     setCityPostalCode(s.codesPostaux?.[0] ?? null);
     setSelectedCountry(null);
     setZoneMode((prev) => (prev === "country" ? "radius" : prev));
@@ -260,7 +275,9 @@ const SearchOwner = () => {
           const res = await fetch(`https://geo.api.gouv.fr/communes?lat=${pos.coords.latitude}&lon=${pos.coords.longitude}&fields=nom,codesPostaux&limit=1`);
           const data = await res.json();
           if (data?.[0]) {
+            cityTouchedRef.current = true;
             setCity(data[0].nom);
+            setCityInput(data[0].nom);
             setCityPostalCode(data[0].codesPostaux?.[0] ?? null);
             setCitySuggestions([]);
           }
@@ -279,7 +296,9 @@ const SearchOwner = () => {
     if (Number.isFinite(urlRadius) && urlRadius > 0 && urlRadius <= 200) setRadius([snapToAllowedRadius(urlRadius)]);
 
     if (urlCity) {
+      cityTouchedRef.current = true;
       setCity(urlCity);
+      setCityInput(urlCity);
       if (urlPostal) {
         setCityPostalCode(urlPostal);
         setUserPostalCode(urlPostal);
@@ -298,7 +317,10 @@ const SearchOwner = () => {
     }
     (async () => {
       const { data } = await supabase.from("profiles").select("city, postal_code").eq("id", user.id).single();
-      if (data?.city) setCity(data.city);
+      if (data?.city && !cityTouchedRef.current) {
+        setCity(data.city);
+        setCityInput(data.city);
+      }
       if (data?.postal_code) {
         setUserPostalCode(data.postal_code);
         setCityPostalCode(data.postal_code);
