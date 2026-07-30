@@ -71,7 +71,14 @@ function parseSiteRoutes() {
     }
   }
 
-  return { siteUrl, privatePaths, noindexFromStatic };
+  // Surfaces de recherche : crawlables, non indexables, liens suivis.
+  // Un Disallow empêcherait Google de lire leur meta robots noindex.
+  const CRAWLABLE_NOINDEX = ["/search", "/recherche", "/recherche-gardiens"];
+  return {
+    siteUrl,
+    privatePaths: privatePaths.filter((p) => !CRAWLABLE_NOINDEX.includes(p)),
+    noindexFromStatic: noindexFromStatic.filter((p) => !CRAWLABLE_NOINDEX.includes(p)),
+  };
 }
 
 // ─── 2. Composer le robots.txt ────────────────────────────────────────
