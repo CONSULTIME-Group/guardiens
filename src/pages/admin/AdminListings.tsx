@@ -145,6 +145,33 @@ const AdminListings = () => {
 
   useEffect(() => { fetchListings(); }, [fetchListings]);
 
+  // Repère visuel : couverture absente ou couverture montrant un animal
+  useEffect(() => {
+    if (!listings.length) { setAnimalPhotoUrls(new Set()); return; }
+    let cancelled = false;
+    (async () => {
+      const ownerIds = [...new Set(listings.map((l: any) => l.user_id).filter(Boolean))];
+      const propertyIds = [...new Set(listings.map((l: any) => l.property_id).filter(Boolean))];
+      const [galleryRes, petsRes] = await Promise.all([
+        ownerIds.length
+          ? supabase.from("owner_gallery").select("photo_url").eq("category", "animals_life" as any).in("user_id", ownerIds)
+          : Promise.resolve({ data: [] } as any),
+        propertyIds.length
+          ? supabase.from("pets").select("photo_url").in("property_id", propertyIds)
+          : Promise.resolve({ data: [] } as any),
+      ]);
+      if (cancelled) return;
+      const urls = new Set<string>();
+      for (const row of [...(((galleryRes as any).data as any[]) || []), ...(((petsRes as any).data as any[]) || [])]) {
+        if (row?.photo_url) urls.add(row.photo_url as string);
+      }
+      setAnimalPhotoUrls(urls);
+    })();
+    return () => { cancelled = true; };
+  }, [listings]);
+
+
+
   // KPI counts (indépendants des filtres, calculés au montage)
   useEffect(() => {
     (async () => {
