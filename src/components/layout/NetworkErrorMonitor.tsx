@@ -97,6 +97,29 @@ const isCriticalRoute = (pathname: string) =>
 const shouldIgnoreUrl = (url: string) =>
   IGNORED_URL_PATTERNS.some((re) => re.test(url));
 
+/** Longueur max du corps de réponse journalisé. */
+const MAX_BODY_CHARS = 500;
+
+const EMAIL_RE = /[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/gi;
+
+/**
+ * Lit le corps d'une réponse d'erreur pour le diagnostic (PostgREST renvoie
+ * message / details / hint / code). Lecture sur un CLONE uniquement : le flux
+ * d'origine reste intact pour l'application. Jamais de corps de requête,
+ * jamais d'en-tête, jamais de jeton. Les emails sont masqués.
+ */
+const readErrorBody = async (response: Response): Promise<string | null> => {
+  try {
+    const clone = response.clone();
+    const raw = await clone.text();
+    if (!raw) return null;
+    return raw.slice(0, MAX_BODY_CHARS).replace(EMAIL_RE, "[email masqué]");
+  } catch {
+    return null;
+  }
+};
+
+
 const NetworkErrorMonitor = () => {
   const location = useLocation();
   const pathnameRef = useRef(location.pathname);
