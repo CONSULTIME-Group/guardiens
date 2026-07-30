@@ -1,4 +1,3 @@
-import { Helmet } from "react-helmet-async";
 import { useTranslation } from "react-i18next";
 import { staticRoutes, DEFAULT_OG_IMAGE } from "@/data/siteRoutes";
 import howtoStep1 from "@/assets/illustrations/howto-step-1-annonce.png";
@@ -18,9 +17,10 @@ export default function HomeJsonLd() {
   const { t } = useTranslation();
 
   return (
-    <Helmet>
-      <script type="application/ld+json">
-        {JSON.stringify({
+    <script
+      type="application/ld+json"
+      dangerouslySetInnerHTML={{
+        __html: JSON.stringify({
           "@context": "https://schema.org",
           "@graph": [
             {
@@ -216,9 +216,9 @@ export default function HomeJsonLd() {
               url: "https://guardiens.fr/a-propos",
             },
           ],
-        })}
-      </script>
-    </Helmet>
+        }),
+      }}
+    />
   );
 }
 

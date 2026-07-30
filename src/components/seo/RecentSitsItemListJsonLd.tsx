@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { Helmet } from "react-helmet-async";
 import { supabase } from "@/integrations/supabase/client";
 
 // Schema.org ItemList des annonces récentes publiées (max 8).
@@ -75,9 +74,7 @@ const RecentSitsItemListJsonLd = ({ limit = 8 }: { limit?: number }) => {
   };
 
   return (
-    <Helmet>
-      <script type="application/ld+json">{JSON.stringify(jsonLd)}</script>
-    </Helmet>
+    <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
   );
 };
 
