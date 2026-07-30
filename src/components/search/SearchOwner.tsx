@@ -308,14 +308,17 @@ const SearchOwner = () => {
   }, [user, searchParams]);
 
   // Fetch true France-wide sitter count via la vue publique (lisible par anon, vague 40).
+  // Le compte courant est exclu du total, comme dans la liste de résultats.
   useEffect(() => {
     (async () => {
-      const { count } = await (supabase as any)
+      let q = (supabase as any)
         .from("public_sitter_profiles")
         .select("user_id", { count: "exact", head: true });
+      if (user?.id) q = q.neq("user_id", user.id);
+      const { count } = await q;
       setFranceTotalSitters(count ?? 0);
     })();
-  }, []);
+  }, [user?.id]);
 
   // Reset alert state when zone changes
   useEffect(() => { setAlertCreated(false); }, [city, radius, zoneMode]);
