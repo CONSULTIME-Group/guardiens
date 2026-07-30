@@ -54,20 +54,6 @@ const CONFIG: Record<string, BannerConfig> = {
       "L'annonce reste consultable librement, avec ses photos et son contenu. Pour candidater, choisissez une garde à venir.",
     tone: "border-muted-foreground/20 bg-muted/40 text-muted-foreground",
   },
-  confirmed: {
-    Icon: UserCheck,
-    title: "Cette garde a déjà trouvé son gardien",
-    description:
-      "L'annonce reste consultable librement. Pour candidater, choisissez une garde encore ouverte.",
-    tone: "border-muted-foreground/20 bg-muted/40 text-muted-foreground",
-  },
-  in_progress: {
-    Icon: UserCheck,
-    title: "Cette garde est en cours",
-    description:
-      "L'annonce reste consultable librement. Pour candidater, choisissez une garde encore ouverte.",
-    tone: "border-muted-foreground/20 bg-muted/40 text-muted-foreground",
-  },
 };
 
 const UNPUBLISHED_FOUND: BannerConfig = {
