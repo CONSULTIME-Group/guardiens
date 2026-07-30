@@ -818,8 +818,19 @@ const SearchOwner = () => {
     const countryOf = (s: any) => countryByUser.get(s.user_id) ?? null;
     const countryReady = countryByUser.size > 0;
 
+    // Repli département : quand un gardien n'a ni coordonnées en base ni
+    // géocodage abouti, on le rattache au rayon si son code postal partage les
+    // deux premiers chiffres de la référence (même logique que côté annonces).
+    // Une panne de géocodage dégrade la précision, elle ne vide pas la liste.
+    const inRadius = (s: any) => {
+      if (s._dist != null) return s._dist <= radius[0];
+      if (!refDept) return false;
+      const cp = s.profile?.postal_code;
+      return cp ? getDeptCode(cp) === refDept : false;
+    };
+
     const density = {
-      radius: searchCenter ? filtered.filter((s: any) => s._dist != null && s._dist <= radius[0]).length : 0,
+      radius: searchCenter ? filtered.filter(inRadius).length : 0,
       dept: refDept ? filtered.filter((s: any) => {
         const cp = s.profile?.postal_code; return cp ? getDeptCode(cp) === refDept : false;
       }).length : 0,
