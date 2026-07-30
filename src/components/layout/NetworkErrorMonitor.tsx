@@ -119,6 +119,28 @@ const readErrorBody = async (response: Response): Promise<string | null> => {
   }
 };
 
+/**
+ * Extrait les champs d'erreur PostgREST (code / message / details / hint) quand
+ * le corps est du JSON. Silencieux si le corps n'est pas exploitable.
+ */
+const extractPgFields = (body: string | null): Record<string, string> => {
+  if (!body) return {};
+  try {
+    const parsed = JSON.parse(body);
+    if (!parsed || typeof parsed !== "object") return {};
+    const out: Record<string, string> = {};
+    const mask = (v: unknown) =>
+      String(v).slice(0, MAX_BODY_CHARS).replace(EMAIL_RE, "[email masqué]");
+    if (parsed.code) out.pg_code = mask(parsed.code);
+    if (parsed.message) out.pg_message = mask(parsed.message);
+    if (parsed.details) out.pg_details = mask(parsed.details);
+    if (parsed.hint) out.pg_hint = mask(parsed.hint);
+    return out;
+  } catch {
+    return {};
+  }
+};
+
 
 const NetworkErrorMonitor = () => {
   const location = useLocation();
@@ -216,6 +238,7 @@ const NetworkErrorMonitor = () => {
                   url,
                   status,
                   ...(responseBody ? { response_body: responseBody } : {}),
+                  ...extractPgFields(responseBody),
                 }
               );
             })();
