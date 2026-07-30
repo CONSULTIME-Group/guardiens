@@ -880,6 +880,23 @@ const AdminListings = () => {
         initialTab={drillTab}
       />
 
+      {/* Photo de couverture (choix explicite administrateur) */}
+      <ListingCoverPickerDialog
+        open={!!coverListing}
+        onOpenChange={(o) => !o && setCoverListing(null)}
+        sitId={coverListing?.id ?? null}
+        sitTitle={coverListing?.title ?? null}
+        ownerId={coverListing?.user_id ?? null}
+        propertyId={coverListing?.property_id ?? null}
+        currentCover={(coverListing as any)?.cover_photo_url ?? null}
+        onSaved={(sitId, url) => {
+          setListings((prev) => prev.map((l: any) => (l.id === sitId ? { ...l, cover_photo_url: url } : l)));
+          setCoverListing((prev: any) => (prev && prev.id === sitId ? { ...prev, cover_photo_url: url } : prev));
+        }}
+      />
+
+
+
       {/* Message rapide au propriétaire */}
       <Dialog
         open={messageModal.open}
