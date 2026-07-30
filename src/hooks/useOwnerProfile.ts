@@ -418,7 +418,7 @@ export function useOwnerProfile() {
       const ownerPayload = sanitizeOwnerUpdate(ownerUpdate);
       if (Object.keys(ownerPayload).length > 0) {
         if (ownerProfileId) {
-          const { error } = await supabase.from("owner_profiles").update(ownerPayload).eq("id", ownerProfileId);
+          const { error } = await supabase.from("owner_profiles").update(ownerPayload as any).eq("id", ownerProfileId);
           if (error) throw error;
         } else {
           const { data: newOwner, error } = await supabase
