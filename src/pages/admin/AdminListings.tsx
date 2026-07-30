@@ -641,6 +641,15 @@ const AdminListings = () => {
                   <TableCell><Badge variant={s.variant}>{s.label}</Badge></TableCell>
                   <TableCell className="text-right">
                     <div className="flex justify-end gap-1">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        title="Photo de couverture"
+                        aria-label="Choisir la photo de couverture"
+                        onClick={() => setCoverListing(listing)}
+                      >
+                        <ImageIcon className={`h-4 w-4 ${coverNotPlace ? "text-warning" : ""}`} />
+                      </Button>
                       <Button variant="ghost" size="icon" title="Sources de trafic" aria-label="Sources de trafic" onClick={() => openTraffic(listing)}>
                         <BarChart3 className="h-4 w-4" />
                       </Button>
