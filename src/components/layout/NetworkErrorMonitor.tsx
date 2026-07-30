@@ -203,16 +203,22 @@ const NetworkErrorMonitor = () => {
               },
             });
 
-            reportError(
-              new Error(`Network non-2xx: ${status} ${method} ${url}`),
-              {
-                source: "NetworkErrorMonitor",
-                route: path,
-                method,
-                url,
-                status,
-              }
-            );
+            // Lecture du corps sur un clone, en tâche de fond : ne retarde ni
+            // ne consomme jamais la réponse rendue à l'application.
+            void (async () => {
+              const responseBody = await readErrorBody(response);
+              reportError(
+                new Error(`Network non-2xx: ${status} ${method} ${url}`),
+                {
+                  source: "NetworkErrorMonitor",
+                  route: path,
+                  method,
+                  url,
+                  status,
+                  ...(responseBody ? { response_body: responseBody } : {}),
+                }
+              );
+            })();
           }
         }
       } catch {
