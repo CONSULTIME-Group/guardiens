@@ -185,7 +185,11 @@ export function sanitizeOwnerDraft(values: unknown): Partial<OwnerProfileData> {
   Object.entries(values as Record<string, any>).forEach(([key, value]) => {
     if (known.includes(key)) filtered[key] = value;
   });
-  return sanitizeOwnerUpdate(filtered) as Partial<OwnerProfileData>;
+  const sanitized = sanitizeOwnerUpdate(filtered) as Record<string, any>;
+  if ("owner_competences" in sanitized) {
+    sanitized.owner_competences = toStringArray(sanitized.owner_competences, 10);
+  }
+  return sanitized as Partial<OwnerProfileData>;
 }
 
 export function useOwnerProfile() {

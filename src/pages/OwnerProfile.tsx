@@ -20,7 +20,7 @@ import ProfileSkeleton from "@/components/profile/ProfileSkeleton";
 import ScoreBreakdown, { type ScoreCriterion } from "@/components/profile/ScoreBreakdown";
 import ProfileProgressStrip from "@/components/profile/ProfileProgressStrip";
 import TrustProfile from "@/components/profile/TrustProfile";
-import { useOwnerProfile, type OwnerProfileData } from "@/hooks/useOwnerProfile";
+import { useOwnerProfile, sanitizeOwnerDraft, type OwnerProfileData } from "@/hooks/useOwnerProfile";
 import { useUnsavedChanges } from "@/hooks/useUnsavedChanges";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
@@ -158,9 +158,12 @@ const OwnerProfilePage = () => {
         return;
       }
 
-      if (Object.keys(parsedDraft.values).length > 0) {
-        setLocalData(parsedDraft.values);
+      const cleanedDraft = sanitizeOwnerDraft(parsedDraft.values);
+      if (Object.keys(cleanedDraft).length > 0) {
+        setLocalData(cleanedDraft);
         setDirty(true);
+      } else {
+        localStorage.removeItem(draftKey);
       }
     } catch {
       localStorage.removeItem(draftKey);
