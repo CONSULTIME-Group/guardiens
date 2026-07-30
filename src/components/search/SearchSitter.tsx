@@ -143,7 +143,6 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
  const [duration, setDuration] = useState("all");
  const [verifiedOnly, setVerifiedOnly] = useState(false);
  const [withPhotosOnly, setWithPhotosOnly] = useState(false);
- const [minExperience, setMinExperience] = useState<ExperienceFilter>("all");
  const [visibleCount, setVisibleCount] = useState(12);
  const [emergencyOnly, setEmergencyOnly] = useState(searchParams.get("emergency") === "true");
  // Mode test démos : ?testDemos=1 dans l'URL active un panneau de diagnostic
@@ -645,12 +644,6 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
  );
  }, [testDemoMode, loading, results, availableMembers, tab, missionSubTab, city, startDate, endDate, sort]);
 
-
- // Persist zone mode preference for next visit
- useEffect(() => {
- if (typeof window === "undefined") return;
- try { localStorage.setItem("search.zoneMode", zoneMode); } catch { /* ignore quota */ }
- }, [zoneMode]);
 
  // ─── Effet d'élargissement automatique ───
  useEffect(() => {
@@ -1297,7 +1290,6 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
  setHousingTypes([]);
  setVerifiedOnly(false);
  setWithPhotosOnly(false);
- setMinExperience("all");
  setEnvironments([]);
  setAnimalTypes([]);
  setStartDate("");
@@ -1601,8 +1593,6 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
         setVerifiedOnly={setVerifiedOnly}
         withPhotosOnly={withPhotosOnly}
         setWithPhotosOnly={setWithPhotosOnly}
-         minExperience={minExperience}
-         setMinExperience={setMinExperience}
          duration={duration as any}
          setDuration={setDuration as any}
          currentResultsCount={results.length}
@@ -2222,7 +2212,6 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
           emergencyOnly,
           verifiedOnly,
           withPhotosOnly,
-          minExperience,
           environments,
           housingTypes,
           animalTypes,
@@ -2239,8 +2228,7 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
           if (filter === "emergencyOnly") setEmergencyOnly(false);
           else if (filter === "verifiedOnly") setVerifiedOnly(false);
           else if (filter === "withPhotosOnly") setWithPhotosOnly(false);
-          else if (filter === "minExperience") setMinExperience("all");
-          else if (filter === "environments") setEnvironments([]);
+          else if (filter === "minExperience")          else if (filter === "environments") setEnvironments([]);
           else if (filter === "housingType") setHousingTypes([]);
           else if (filter === "animalTypes") setAnimalTypes([]);
           else if (filter === "dates") { setStartDate(""); setEndDate(""); }
