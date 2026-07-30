@@ -706,7 +706,7 @@ const SearchOwner = () => {
     setRawResults(enrichedAll);
     setSearchCenter(searchCoords);
     setLoading(false);
-  }, [city, cityPostalCode, userPostalCode, viewerOwner]);
+  }, [city, cityPostalCode, userPostalCode, viewerOwner, user?.id]);
 
   // Auto-search on network dep change (debounced) : ville / code postal uniquement.
   // Les filtres purement clients (véhicule, vérifié, note min, animaux, radius, zone, tri…)
