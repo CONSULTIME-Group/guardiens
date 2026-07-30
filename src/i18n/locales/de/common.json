@@ -1568,6 +1568,12 @@
     "open_application": "Bewerbung öffnen",
     "accept_notice": "Für die Zusage einer Bewerbung ist eine Anmeldung erforderlich.",
     "the_sitter": "die betreuende Person",
-    "your_listing": "Ihre Anzeige"
+    "your_listing": "Ihre Anzeige",
+    "decline_reason_title": "Grund der Absage",
+    "decline_reason_hint": "Der neutralste Grund ist bereits ausgewählt, Sie können ohne Änderung bestätigen.",
+    "decline_reason_other_chosen": "Ich habe mich für jemand anderen entschieden",
+    "decline_reason_dates_changed": "Meine Daten haben sich geändert",
+    "decline_reason_not_right_time": "Es ist gerade nicht der richtige Moment",
+    "decline_reason_different_profile": "Ich bevorzuge ein anderes Profil"
   }
 }

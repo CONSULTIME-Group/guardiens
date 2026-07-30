@@ -1589,6 +1589,12 @@
     "open_application": "Ouvrir la candidature",
     "accept_notice": "Accepter une candidature demande de vous connecter.",
     "the_sitter": "le gardien",
-    "your_listing": "votre annonce"
+    "your_listing": "votre annonce",
+    "decline_reason_title": "Motif du refus",
+    "decline_reason_hint": "Le motif le plus neutre est déjà sélectionné, vous pouvez valider sans rien changer.",
+    "decline_reason_other_chosen": "J'ai retenu quelqu'un d'autre",
+    "decline_reason_dates_changed": "Mes dates ont changé",
+    "decline_reason_not_right_time": "Ce n'est pas le bon moment pour moi",
+    "decline_reason_different_profile": "Je préfère un profil différent"
   }
 }

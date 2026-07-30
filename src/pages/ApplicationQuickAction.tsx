@@ -4,11 +4,21 @@ import { useTranslation } from "react-i18next";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Loader2 } from "lucide-react";
 import { trackEvent } from "@/lib/analytics";
 import PageMeta from "@/components/PageMeta";
 
 type Action = "decline" | "thinking";
+
+const DECLINE_REASONS = [
+  "other_chosen",
+  "dates_changed",
+  "not_right_time",
+  "different_profile",
+] as const;
+
 
 interface PeekResult {
   valid: boolean;
@@ -31,6 +41,8 @@ export default function ApplicationQuickAction() {
   const [loading, setLoading] = useState(true);
   const [peek, setPeek] = useState<PeekResult | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [declineReason, setDeclineReason] =
+    useState<(typeof DECLINE_REASONS)[number]>("other_chosen");
   const [done, setDone] = useState<null | { ok: boolean; reason?: string; action?: Action }>(null);
 
   useEffect(() => {
@@ -58,7 +70,11 @@ export default function ApplicationQuickAction() {
     if (!peek?.valid || !peek.action) return;
     setSubmitting(true);
     const { data, error } = await supabase.functions.invoke("application-quick-action", {
-      body: { token, mode: "confirm" },
+      body: {
+        token,
+        mode: "confirm",
+        ...(peek.action === "decline" ? { reason: declineReason } : {}),
+      },
     });
     setSubmitting(false);
     const result = (error ? { ok: false, reason: "error" } : data) as {
@@ -75,10 +91,12 @@ export default function ApplicationQuickAction() {
         metadata: {
           source_template: params.get("src") || "email",
           result: result?.ok ? "success" : result?.reason || "error",
+          ...(peek.action === "decline" ? { decline_reason: declineReason } : {}),
         },
       },
     );
   };
+
 
   const title = t("application_quick_action.page_title");
 
@@ -126,6 +144,31 @@ export default function ApplicationQuickAction() {
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-3">
+              {peek.action === "decline" ? (
+                <div className="space-y-2 rounded-lg border border-border p-3">
+                  <p className="text-sm font-medium">
+                    {t("application_quick_action.decline_reason_title")}
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    {t("application_quick_action.decline_reason_hint")}
+                  </p>
+                  <RadioGroup
+                    value={declineReason}
+                    onValueChange={(v) => setDeclineReason(v as typeof declineReason)}
+                    className="gap-2 pt-1"
+                  >
+                    {DECLINE_REASONS.map((r) => (
+                      <div key={r} className="flex items-center gap-2">
+                        <RadioGroupItem value={r} id={`decline-reason-${r}`} />
+                        <Label htmlFor={`decline-reason-${r}`} className="text-sm font-normal">
+                          {t(`application_quick_action.decline_reason_${r}`)}
+                        </Label>
+                      </div>
+                    ))}
+                  </RadioGroup>
+                </div>
+              ) : null}
+
               <Button className="w-full" onClick={confirm} disabled={submitting}>
                 {submitting ? (
                   <Loader2 className="h-4 w-4 animate-spin" aria-hidden />

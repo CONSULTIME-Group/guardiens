@@ -47,10 +47,13 @@ Deno.serve(async (req) => {
     const body = await req.json().catch(() => ({}));
     const token = typeof body?.token === "string" ? body.token.trim() : "";
     const mode = body?.mode === "confirm" ? "confirm" : "peek";
+    const allowedReasons = ["other_chosen", "dates_changed", "not_right_time", "different_profile"];
+    const reason = allowedReasons.includes(body?.reason) ? body.reason : "other_chosen";
 
     if (!token || token.length < 20 || token.length > 200 || !/^[a-f0-9]+$/i.test(token)) {
       return json({ valid: false, ok: false, reason: "invalid" }, 200);
     }
+
 
     if (mode === "peek") {
       const { data, error } = await service.rpc("peek_application_action_token", {
@@ -65,7 +68,9 @@ Deno.serve(async (req) => {
 
     const { data, error } = await service.rpc("consume_application_action_token", {
       p_token: token,
+      p_reason: reason,
     });
+
     if (error) {
       console.error("[application-quick-action] consume failed", error.message);
       return json({ ok: false, reason: "error" }, 200);
@@ -97,14 +102,19 @@ Deno.serve(async (req) => {
             sitTitle: result.sit_title ?? "",
             sitCity: result.sit_city ?? "",
             ownerFirstName: result.owner_first_name ?? "",
+            declineReason: result.decline_reason ?? null,
+            declineVariant: result.decline_variant ?? null,
           },
           logMetadata: {
             application_id: result.application_id,
             source: "email_quick_action",
             action,
+            decline_reason: result.decline_reason ?? null,
+            decline_variant: result.decline_variant ?? null,
           },
         }),
       });
+
       if (!resp.ok) {
         console.error(
           "[application-quick-action] sitter email failed",
@@ -114,7 +124,13 @@ Deno.serve(async (req) => {
       }
     }
 
-    return json({ ok: true, action, application_id: result.application_id });
+    return json({
+      ok: true,
+      action,
+      application_id: result.application_id,
+      decline_reason: result.decline_reason ?? null,
+    });
+
   } catch (e) {
     console.error("[application-quick-action] unexpected", e);
     return json({ ok: false, reason: "error" }, 500);

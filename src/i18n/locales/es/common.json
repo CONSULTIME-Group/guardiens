@@ -1568,6 +1568,12 @@
     "open_application": "Abrir la candidatura",
     "accept_notice": "Aceptar una candidatura requiere iniciar sesión.",
     "the_sitter": "el cuidador",
-    "your_listing": "su anuncio"
+    "your_listing": "su anuncio",
+    "decline_reason_title": "Motivo del rechazo",
+    "decline_reason_hint": "El motivo más neutro ya está seleccionado, puede confirmar sin cambiar nada.",
+    "decline_reason_other_chosen": "He elegido a otra persona",
+    "decline_reason_dates_changed": "Mis fechas han cambiado",
+    "decline_reason_not_right_time": "No es el buen momento para mí",
+    "decline_reason_different_profile": "Prefiero un perfil diferente"
   }
 }
