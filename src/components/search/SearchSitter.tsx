@@ -1523,10 +1523,10 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
     onCitySelect={handleCitySelect}
     onDeptSelect={handleDeptSelect}
     onRegionSelect={handleRegionSelect}
-
     onGeolocate={handleGeolocation}
   />
-  </div>
+  )}
+
 
 
    {/* Zone pill (radius / dept / region / france) : accessible aussi aux visiteurs anonymes pour régler le rayon. */}
