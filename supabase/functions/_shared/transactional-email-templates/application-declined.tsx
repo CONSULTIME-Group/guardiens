@@ -5,7 +5,7 @@ import {
 import { BrandedHead } from './_branded-head.tsx'
 import { BrandHeader } from './_brand-header.tsx'
 import { LegalFooter } from './_legal-footer.tsx'
-import { declineBody } from '../decline-reasons.ts'
+import { declineBody, declineSubject, declineTitle, declineReassurance } from '../decline-reasons.ts'
 import type { TemplateEntry } from './registry.ts'
 
 const SITE_URL = 'https://guardiens.fr'
@@ -30,39 +30,28 @@ const ApplicationDeclinedEmail = ({
   const searchHref = sitCity
     ? `${SITE_URL}/recherche?ville=${encodeURIComponent(sitCity)}`
     : `${SITE_URL}/recherche`
-  const reasonText = declineBody(declineReason, declineVariant, locale || 'fr')
+  const loc = locale || 'fr'
+  const reasonText = declineBody(declineReason, declineVariant, loc)
+    ?? declineBody('other_chosen', declineVariant, loc)!
+  const heading = declineTitle(declineReason, loc)
+  const reassurance = declineReassurance(declineReason, loc)
   return (
     <Html lang="fr" dir="ltr">
       <BrandedHead />
-      <Preview>Le propriétaire a fait un autre choix</Preview>
+      <Preview>{heading}</Preview>
       <Body style={main}>
         <Container style={container}>
           <BrandHeader />
-          <Heading style={h1}>Le propriétaire a fait un autre choix</Heading>
+          <Heading style={h1}>{heading}</Heading>
           <Text style={text}>
             Bonjour{sitterFirstName ? ` ${sitterFirstName}` : ''},
           </Text>
-          {reasonText ? (
-            <>
-              <Text style={text}>
-                {sitTitle ? <>Au sujet de «&nbsp;{sitTitle}&nbsp;» : </> : null}
-                {reasonText}
-              </Text>
-            </>
-          ) : (
-            <>
-              <Text style={text}>
-                Le propriétaire a retenu une autre candidature
-                {sitTitle ? <> pour «&nbsp;{sitTitle}&nbsp;»</> : null}. Cela ne dit rien de votre
-                profil : chaque garde a ses contraintes de dates, de lieu et d'animaux.
-              </Text>
-              <Text style={text}>
-                Votre candidature est libérée, vous êtes de nouveau disponible pour d'autres
-                annonces{sitCity ? <>, notamment près de {sitCity}</> : null}.
-              </Text>
-            </>
-          )}
-          {reasonText && sitCity ? (
+          <Text style={text}>
+            {sitTitle ? <>Au sujet de «&nbsp;{sitTitle}&nbsp;» : </> : null}
+            {reasonText}
+          </Text>
+          {reassurance ? <Text style={text}>{reassurance}</Text> : null}
+          {sitCity ? (
             <Text style={text}>
               D'autres annonces sont ouvertes près de {sitCity}.
             </Text>
@@ -83,12 +72,18 @@ const ApplicationDeclinedEmail = ({
 
 export const template = {
   component: ApplicationDeclinedEmail,
-  subject: 'Le propriétaire a fait un autre choix',
+  subject: (data: Record<string, unknown>) =>
+    declineSubject(
+      typeof data?.declineReason === 'string' ? data.declineReason : null,
+      typeof data?.locale === 'string' ? data.locale : 'fr',
+    ),
   displayName: 'Candidature déclinée',
   previewData: {
     sitTitle: 'Garde chat Paris 11e',
     sitterFirstName: 'Camille',
     sitCity: 'Paris',
+    declineReason: 'dates_changed',
+    declineVariant: 0,
   },
 } satisfies TemplateEntry
 
