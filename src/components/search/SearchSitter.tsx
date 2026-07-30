@@ -70,7 +70,6 @@ type SearchTab = "sits" | "missions";
 type MissionSubTab = "published" | "members";
 type ViewMode = "list" | "map";
 type HousingFilter = "all" | "house" | "apartment" | "farm";
-type ExperienceFilter = "all" | "1" | "3";
 type ZoneMode = "radius" | "dept" | "region" | "france";
 
 interface SearchSitterProps {
@@ -2228,7 +2227,7 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
           if (filter === "emergencyOnly") setEmergencyOnly(false);
           else if (filter === "verifiedOnly") setVerifiedOnly(false);
           else if (filter === "withPhotosOnly") setWithPhotosOnly(false);
-          else if (filter === "minExperience")          else if (filter === "environments") setEnvironments([]);
+          else if (filter === "environments") setEnvironments([]);
           else if (filter === "housingType") setHousingTypes([]);
           else if (filter === "animalTypes") setAnimalTypes([]);
           else if (filter === "dates") { setStartDate(""); setEndDate(""); }
