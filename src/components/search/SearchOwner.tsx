@@ -1193,6 +1193,7 @@ const SearchOwner = () => {
               )}
             </PopoverContent>
           </Popover>
+          )}
 
           {/* PILL rayon retirée : le réglage du rayon est porté par la chip « x km » du sélecteur de zone. */}
 
