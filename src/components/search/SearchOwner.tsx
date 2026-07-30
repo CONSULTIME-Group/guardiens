@@ -846,7 +846,7 @@ const SearchOwner = () => {
     let zoned = filtered;
     if (zoneMode === "radius") {
       if (searchCenter) {
-        zoned = zoned.filter((s: any) => s._dist != null && s._dist <= radius[0]);
+        zoned = zoned.filter(inRadius);
       } else if (city) {
         zoned = zoned.filter((s: any) => s.profile?.city?.toLowerCase().includes(city.toLowerCase()));
       }
