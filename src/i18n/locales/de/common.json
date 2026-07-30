@@ -889,7 +889,8 @@
     "show_password": "Passwort anzeigen",
     "hide_password": "Passwort verbergen",
     "capslock_on": "Feststelltaste ist aktiv.",
-    "error_title": "Fehler"
+    "error_title": "Fehler",
+    "back_to_home": "Zurück zur Startseite"
   },
   "forgot_password": {
     "panel_title": "Keine Sorge",
