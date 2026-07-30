@@ -3,9 +3,9 @@
 // département/ville/critères + carte live, mais dans un shell public
 // (header + footer), sans la sidebar dashboard.
 import { Suspense, useEffect, useState } from "react";
-import { Helmet } from "react-helmet-async";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import PageMeta from "@/components/PageMeta";
 import PublicHeader from "@/components/layout/PublicHeader";
 import PublicFooter from "@/components/layout/PublicFooter";
 import { lazyWithRetry } from "@/lib/lazyWithRetry";
@@ -133,21 +133,14 @@ export default function PublicListings() {
 
   return (
     <div className="min-h-screen bg-background text-foreground flex flex-col">
-      <Helmet>
-        <title>{TITLE}</title>
-        <meta name="description" content={DESCRIPTION} />
-        <meta name="robots" content="index,follow" />
-        <link rel="canonical" href={CANONICAL} />
-        <meta property="og:type" content="website" />
-        <meta property="og:url" content={CANONICAL} />
-        <meta property="og:title" content={TITLE} />
-        <meta property="og:description" content={DESCRIPTION} />
-        <meta property="og:site_name" content="Guardiens" />
-        <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content={TITLE} />
-        <meta name="twitter:description" content={DESCRIPTION} />
-        <script type="application/ld+json">{JSON.stringify(jsonld)}</script>
-      </Helmet>
+      <PageMeta
+        title={TITLE}
+        description={DESCRIPTION}
+        path="/annonces"
+        canonical={CANONICAL}
+        jsonLd={jsonld}
+        ready={itemListLd !== null}
+      />
 
       <PublicHeader />
 
