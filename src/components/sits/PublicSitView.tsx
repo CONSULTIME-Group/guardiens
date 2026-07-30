@@ -745,33 +745,45 @@ const PublicSitView = ({
               <p className="text-lg opacity-90 leading-relaxed">
                 Rejoignez la communauté Guardiens : des gardiens vérifiés, un cadre clair, et la liberté de partir sans inquiétude.
               </p>
-              <div className="flex flex-wrap gap-3 justify-center pt-2">
-                <Link to={`/inscription?role=sitter&redirect=${encodeURIComponent(redirect)}`}>
-                  <Button size="lg" variant="secondary" className="rounded-full font-bold">
-                    S'inscrire et postuler
-                  </Button>
-                </Link>
-                <Link to={`/login?redirect=${encodeURIComponent(redirect)}`}>
-                  <Button
-                    size="lg"
-                    variant="outline"
-                    className="rounded-full font-bold bg-transparent border-primary-foreground/30 text-primary-foreground hover:bg-primary-foreground/10"
-                  >
-                    Se connecter
-                  </Button>
-                </Link>
-              </div>
-              <div className="flex flex-wrap items-center justify-center gap-5 pt-4 text-sm opacity-80">
-                <span className="inline-flex items-center gap-2">
-                  <CheckCircle2 className="h-4 w-4" /> Gratuit
-                </span>
-                <span className="inline-flex items-center gap-2">
-                  <CheckCircle2 className="h-4 w-4" /> Sans engagement
-                </span>
-                <span className="inline-flex items-center gap-2">
-                  <CheckCircle2 className="h-4 w-4" /> 2 minutes
-                </span>
-              </div>
+              {isClosed ? (
+                <div className="flex flex-wrap gap-3 justify-center pt-2">
+                  <Link to="/recherche">
+                    <Button size="lg" variant="secondary" className="rounded-full font-bold">
+                      Voir les annonces ouvertes
+                    </Button>
+                  </Link>
+                </div>
+              ) : (
+                <>
+                  <div className="flex flex-wrap gap-3 justify-center pt-2">
+                    <Link to={`/inscription?role=sitter&redirect=${encodeURIComponent(redirect)}`}>
+                      <Button size="lg" variant="secondary" className="rounded-full font-bold">
+                        S'inscrire et postuler
+                      </Button>
+                    </Link>
+                    <Link to={`/login?redirect=${encodeURIComponent(redirect)}`}>
+                      <Button
+                        size="lg"
+                        variant="outline"
+                        className="rounded-full font-bold bg-transparent border-primary-foreground/30 text-primary-foreground hover:bg-primary-foreground/10"
+                      >
+                        Se connecter
+                      </Button>
+                    </Link>
+                  </div>
+                  <div className="flex flex-wrap items-center justify-center gap-5 pt-4 text-sm opacity-80">
+                    <span className="inline-flex items-center gap-2">
+                      <CheckCircle2 className="h-4 w-4" /> Gratuit
+                    </span>
+                    <span className="inline-flex items-center gap-2">
+                      <CheckCircle2 className="h-4 w-4" /> Sans engagement
+                    </span>
+                    <span className="inline-flex items-center gap-2">
+                      <CheckCircle2 className="h-4 w-4" /> 2 minutes
+                    </span>
+                  </div>
+                </>
+              )}
             </div>
           </section>
         )}
