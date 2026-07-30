@@ -1569,6 +1569,12 @@
     "open_application": "Open the application",
     "accept_notice": "Accepting an application requires signing in.",
     "the_sitter": "the sitter",
-    "your_listing": "your listing"
+    "your_listing": "your listing",
+    "decline_reason_title": "Reason for declining",
+    "decline_reason_hint": "The most neutral reason is already selected, you can confirm without changing anything.",
+    "decline_reason_other_chosen": "I have chosen someone else",
+    "decline_reason_dates_changed": "My dates have changed",
+    "decline_reason_not_right_time": "It is not the right moment for me",
+    "decline_reason_different_profile": "I prefer a different profile"
   }
 }

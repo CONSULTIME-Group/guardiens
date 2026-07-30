@@ -1568,6 +1568,12 @@
     "open_application": "Apri la candidatura",
     "accept_notice": "Accettare una candidatura richiede l'accesso.",
     "the_sitter": "la persona candidata",
-    "your_listing": "il suo annuncio"
+    "your_listing": "il suo annuncio",
+    "decline_reason_title": "Motivo del rifiuto",
+    "decline_reason_hint": "Il motivo più neutro è già selezionato, può confermare senza cambiare nulla.",
+    "decline_reason_other_chosen": "Ho scelto un'altra persona",
+    "decline_reason_dates_changed": "Le mie date sono cambiate",
+    "decline_reason_not_right_time": "Non è il momento giusto per me",
+    "decline_reason_different_profile": "Preferisco un profilo diverso"
   }
 }
