@@ -958,19 +958,13 @@ const SearchOwner = () => {
 
   return (
     <>
-    <Helmet>
-      <title>{seoTitle}</title>
-      <meta name="description" content={seoDescription} />
-      <meta name="robots" content="index,follow" />
-      <link rel="canonical" href={seoCanonical} />
-      <meta property="og:title" content={seoTitle} />
-      <meta property="og:description" content={seoDescription} />
-      <meta property="og:url" content={seoCanonical} />
-      <meta property="og:type" content="website" />
-      <meta property="og:locale" content="fr_FR" />
-      <meta name="twitter:card" content="summary_large_image" />
-      <script type="application/ld+json">{JSON.stringify(seoJsonLd)}</script>
-    </Helmet>
+    <PageMeta
+      title={seoTitle}
+      description={seoDescription}
+      canonical={seoCanonical}
+      noindex
+      jsonLd={seoJsonLd}
+    />
     <div className="animate-fade-in">
       {/* Hero signature vague 42 — eyebrow terra + H1 Playfair + lede contextuel */}
       <div className="px-6 pt-6 pb-3 md:pt-10 md:pb-4 space-y-3">
