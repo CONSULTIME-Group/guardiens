@@ -37,7 +37,7 @@ Chaque entrée `SiteRoute` porte un flag `index?: boolean` (défaut `true`).
 {
   path: "/recherche",
   // …
-  index: false,   // ← outil interne : Disallow + hors sitemap + meta noindex
+  index: false,   // ← outil interne : hors sitemap + meta noindex (sans Disallow)
 }
 ```
 
@@ -77,7 +77,9 @@ Liste explicite dans `siteRoutes.ts`. Critère d'inclusion :
 - Tout endpoint d'auth interne (`/auth/`, `/forgot-password`, `/reset-password`,
   `/unsubscribe`)
 - Pages de test (`/test-accord`)
-- Variantes de la recherche en zone privée (`/search`, `/recherche-gardiens`)
+- Les surfaces de recherche (`/search`, `/recherche`, `/recherche-gardiens`) ne
+  figurent PAS ici : elles sont crawlables (aucun `Disallow`), non indexables
+  (`noindex, follow`), pour que Google lise leur meta robots et suive leurs liens.
 
 > ⚠️ **Ne pas dupliquer** dans `privateDisallowPaths` une route qui figure déjà
 > dans `staticRoutes` avec `index: false`. Le générateur lève une erreur si un
@@ -200,9 +202,10 @@ bien `robots.txt`.
 - Page publique (pas d'auth) → accessible aux visiteurs.
 - Mais : contenu généré dynamiquement (combinaisons infinies de filtres) → pas
   de valeur SEO + risque de duplicate content massif.
-- **Décision :** `index: false`. Route présente dans `staticRoutes` (pour avoir
-  un title/description corrects côté composant), mais exclue du sitemap +
-  Disallow + meta noindex.
+- **Décision :** `index: false`, avec `noindex, follow` côté composant et AUCUN
+  `Disallow` dans `robots.txt` (même règle pour `/search` et
+  `/recherche-gardiens`) : la page reste crawlable, donc Google lit son
+  `noindex` et suit ses liens vers `/annonces`, qui couvre déjà ce contenu.
 
 ### 6.2 `/login`
 
