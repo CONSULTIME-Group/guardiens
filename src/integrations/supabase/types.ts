@@ -7424,6 +7424,8 @@ export type Database = {
         Args: { p_param: string }
         Returns: {
           accepting_applications: boolean
+          accepts_sitter_children: string
+          accepts_sitter_pets: string
           city: string
           country: string
           daily_routine: string
