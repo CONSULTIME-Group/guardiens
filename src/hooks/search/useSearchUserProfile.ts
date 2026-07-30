@@ -12,7 +12,14 @@ interface Params {
   setSitterEligible: (b: boolean) => void;
   setCity: (v: string) => void;
   setCityInput: (v: string) => void;
+  /**
+   * Garde anti écrasement : la promesse de chargement du profil se résout
+   * souvent après que l'utilisateur a commencé à saisir un lieu. On ne
+   * pré-remplit la ville que si le champ n'a pas encore été touché.
+   */
+  canPrefillCity?: () => boolean;
 }
+
 
 /**
  * Charge le profil utilisateur + sitter_profile pour pré-remplir
