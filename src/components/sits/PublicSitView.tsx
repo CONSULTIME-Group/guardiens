@@ -28,6 +28,7 @@ interface SitLike {
   latitude?: number | null;
   longitude?: number | null;
   accepting_applications?: boolean | null;
+  max_applications?: number | null;
   specific_expectations?: string | null;
   owner_message?: string | null;
   city?: string | null;
@@ -157,6 +158,8 @@ const PublicSitView = ({
   const title = sit.title ? sanitizeUserTitle(sit.title) : `Une mission de garde à ${cityLabel}`;
   const description = property?.description || "";
   const accepting = sit.accepting_applications !== false;
+  // Plafond atteint : choix du propriétaire, jamais une panne ni un refus.
+  const capReached = !accepting && !!sit.max_applications;
 
   return (
     <>
@@ -575,7 +578,16 @@ const PublicSitView = ({
                 </div>
               </div>
 
-              {!accepting ? (
+              {capReached ? (
+                <div className="rounded-2xl border border-border bg-muted/40 p-4 text-center">
+                  <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+                    {t("application_cap.badge")}
+                  </p>
+                  <p className="mt-2 text-sm text-foreground leading-relaxed">
+                    {t("application_cap.sitter_message", { max: sit.max_applications })}
+                  </p>
+                </div>
+              ) : !accepting ? (
                 <Button className="w-full py-6 rounded-full font-bold text-base" disabled>
                   Candidatures fermées
                 </Button>
