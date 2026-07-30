@@ -41,6 +41,8 @@ export default function ApplicationQuickAction() {
   const [loading, setLoading] = useState(true);
   const [peek, setPeek] = useState<PeekResult | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [declineReason, setDeclineReason] =
+    useState<(typeof DECLINE_REASONS)[number]>("other_chosen");
   const [done, setDone] = useState<null | { ok: boolean; reason?: string; action?: Action }>(null);
 
   useEffect(() => {
@@ -68,7 +70,11 @@ export default function ApplicationQuickAction() {
     if (!peek?.valid || !peek.action) return;
     setSubmitting(true);
     const { data, error } = await supabase.functions.invoke("application-quick-action", {
-      body: { token, mode: "confirm" },
+      body: {
+        token,
+        mode: "confirm",
+        ...(peek.action === "decline" ? { reason: declineReason } : {}),
+      },
     });
     setSubmitting(false);
     const result = (error ? { ok: false, reason: "error" } : data) as {
@@ -85,10 +91,12 @@ export default function ApplicationQuickAction() {
         metadata: {
           source_template: params.get("src") || "email",
           result: result?.ok ? "success" : result?.reason || "error",
+          ...(peek.action === "decline" ? { decline_reason: declineReason } : {}),
         },
       },
     );
   };
+
 
   const title = t("application_quick_action.page_title");
 
