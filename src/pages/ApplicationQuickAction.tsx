@@ -4,11 +4,21 @@ import { useTranslation } from "react-i18next";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Loader2 } from "lucide-react";
 import { trackEvent } from "@/lib/analytics";
 import PageMeta from "@/components/PageMeta";
 
 type Action = "decline" | "thinking";
+
+const DECLINE_REASONS = [
+  "other_chosen",
+  "dates_changed",
+  "not_right_time",
+  "different_profile",
+] as const;
+
 
 interface PeekResult {
   valid: boolean;
