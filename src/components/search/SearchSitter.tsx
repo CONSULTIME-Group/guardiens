@@ -789,7 +789,7 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
  // exposer au navigateur la modération, la télémétrie interne et les champs longs.
  .select("id, user_id, property_id, title, slug, status, city, country, start_date, end_date, created_at, unpublished_at, environments, is_urgent, cover_photo_url, accepting_applications, max_applications, property:properties!sits_property_id_fkey(type, environment, photos, cover_photo_url)")
 .or(isPublic
-  ? "status.in.(published,confirmed,in_progress,completed,cancelled)"
+  ? "status.in.(published,confirmed,in_progress,completed,cancelled,archived)"
   : "status.in.(published,confirmed,in_progress,completed,cancelled,archived),and(status.eq.draft,unpublished_at.not.is.null)")
 .order("created_at", { ascending: false })
 .limit(SITS_SERVER_CAP);

@@ -779,7 +779,7 @@ const PublicSitView = ({
     </div>
 
     {/* ── Sticky CTA mobile (< lg) pour visiteurs non connectés ou abonnés ── */}
-    {accepting && !isAuthenticated && (
+    {accepting && !isClosed && !isAuthenticated && (
       <div className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-background/95 backdrop-blur border-t border-border px-4 py-3 pb-[calc(env(safe-area-inset-bottom)+0.75rem)] shadow-[0_-8px_24px_-12px_hsl(var(--foreground)/0.15)]">
         <Link
           to={`/inscription?role=sitter&redirect=${encodeURIComponent(redirect)}`}
@@ -791,7 +791,7 @@ const PublicSitView = ({
         </Link>
       </div>
     )}
-    {accepting && isAuthenticated && !hasApplied && hasAccess && onApply && (
+    {accepting && !isClosed && isAuthenticated && !hasApplied && hasAccess && onApply && (
       <div className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-background/95 backdrop-blur border-t border-border px-4 py-3 pb-[calc(env(safe-area-inset-bottom)+0.75rem)] shadow-[0_-8px_24px_-12px_hsl(var(--foreground)/0.15)]">
         <Button
           onClick={onApply}

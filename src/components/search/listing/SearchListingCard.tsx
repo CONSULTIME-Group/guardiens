@@ -87,7 +87,7 @@ const SearchListingCard = ({
     ? `/sits/${item.id}`
     : `/annonces/${item.id}`;
 
-  const isClickable = (isDemo || hasAccess || isPublicContext || isAuthenticated) && !isInactive;
+  const isClickable = (isDemo || hasAccess || isPublicContext || isAuthenticated);
 
   const dateLabel = !isMission && item.start_date
     ? `${formatDate(item.start_date)} → ${formatDate(item.end_date)}`
