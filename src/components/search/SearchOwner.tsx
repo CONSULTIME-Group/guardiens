@@ -661,10 +661,18 @@ const SearchOwner = () => {
         .filter(Boolean),
     )] as string[];
     const cityCoords = new Map<string, { lat: number; lng: number }>();
-    await Promise.all(uniqueCities.map(async (c) => {
-      const coords = await geocodeCity(c);
-      if (coords) cityCoords.set(c, { lat: coords.lat, lng: coords.lng });
-    }));
+    // Concurrence plafonnée à 10 appels simultanés : au delà, la limitation de
+    // débit du service de géocodage se déclenche et plus aucune coordonnée ne
+    // revient. Un échec dégrade la précision, il ne doit jamais vider la liste
+    // (repli département sur le code postal, plus bas).
+    const GEOCODE_CONCURRENCY = 10;
+    for (let i = 0; i < uniqueCities.length; i += GEOCODE_CONCURRENCY) {
+      const chunk = uniqueCities.slice(i, i + GEOCODE_CONCURRENCY);
+      await Promise.all(chunk.map(async (c) => {
+        const coords = await geocodeCity(c);
+        if (coords) cityCoords.set(c, { lat: coords.lat, lng: coords.lng });
+      }));
+    }
 
     // Reference postal code for dept/region zones
     const refPostalCode = cityPostalCode ?? userPostalCode;
