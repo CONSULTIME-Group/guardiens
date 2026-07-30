@@ -326,7 +326,12 @@ async function runEvaluation(
         }
       }
 
-      const sendRes = await fetch(`${Deno.env.get('SUPABASE_URL')}/functions/v1/send-transactional-email`, {
+      // Echec transitoire = 5xx (dont le 502 renvoye par la passerelle avant
+      // demarrage de la fonction) ou 429. Dans ce cas on NE fait PAS avancer
+      // le parcours : il sera rejoue au prochain passage du cron.
+      const isTransientStatus = (s: number) => s >= 500 || s === 429
+
+      const doSend = () => fetch(`${Deno.env.get('SUPABASE_URL')}/functions/v1/send-transactional-email`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -350,26 +355,46 @@ async function runEvaluation(
         }),
       })
 
+      let sendRes = await doSend()
+      let retried = false
+      // Retry unique sur 502/503 uniquement. La cle d'idempotence protege du doublon.
+      if (!sendRes.ok && (sendRes.status === 502 || sendRes.status === 503)) {
+        await new Promise((r) => setTimeout(r, 1500))
+        retried = true
+        sendRes = await doSend()
+      }
+
       const sendOk = sendRes.ok
       let reason: string | null = null
       let errorDetail: Record<string, unknown> | null = null
       let messageId: string | null = null
       let actuallySent = sendOk
+      let transientFailure = false
       if (!sendOk) {
         const errBody = await sendRes.text().catch(() => '')
-        reason = `send_failed_${sendRes.status}`
+        transientFailure = isTransientStatus(sendRes.status)
+        reason = transientFailure
+          ? `send_transient_failure_${sendRes.status}`
+          : `send_failed_${sendRes.status}`
         errorDetail = {
           status: sendRes.status,
+          failure_kind: transientFailure ? 'transient' : 'permanent',
+          retried,
           body_excerpt: errBody.slice(0, 1000),
           template: nextStep.template_name,
           at: new Date().toISOString(),
         }
-        console.error('[ALERT] Journey step send failed', {
-          journey_id: j.id,
-          sequence: j.sequence_key,
-          step: nextStep.step_order,
-          ...errorDetail,
-        })
+        console.error(
+          transientFailure
+            ? '[ALERT] Journey step send TRANSIENT failure (step not advanced, will retry next run)'
+            : '[ALERT] Journey step send PERMANENT failure (step advanced)',
+          {
+            journey_id: j.id,
+            sequence: j.sequence_key,
+            step: nextStep.step_order,
+            ...errorDetail,
+          },
+        )
       } else {
         try {
           const okBody = await sendRes.json()
@@ -406,20 +431,26 @@ async function runEvaluation(
         message_id: messageId,
       })
 
-      await supabase.from('user_journeys').update({
-        current_step: nextStep.step_order,
-        last_step_at: new Date().toISOString(),
-      }).eq('id', j.id)
+      // Avancement CONDITIONNEL : succes ou echec definitif seulement.
+      if (!transientFailure) {
+        await supabase.from('user_journeys').update({
+          current_step: nextStep.step_order,
+          last_step_at: new Date().toISOString(),
+        }).eq('id', j.id)
+      }
 
       if (actuallySent) {
         stats.sent++
         bumpSeq(j.sequence_key, 'sent')
         recentlyServed.add(profile.email.toLowerCase())
         await new Promise((r) => setTimeout(r, SEND_DELAY_MS))
+      } else if (transientFailure) {
+        stats.errors++
       } else {
         stats.skipped++
         bumpSeq(j.sequence_key, 'skipped')
       }
+
 
     } catch (err) {
       console.error('Journey eval error', j.id, err)
