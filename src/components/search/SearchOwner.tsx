@@ -557,6 +557,27 @@ const SearchOwner = () => {
       });
     }
 
+    // Données d'affinité : vue réservée aux membres connectés, chargée
+    // uniquement lorsque le visiteur dispose d'un profil propriétaire.
+    // Elle apporte notamment work_during_sit et sensitivities, indispensables
+    // au critère de présence (poids 2) et à la disqualification.
+    if (viewerOwner && sitterUserIds.length > 0) {
+      const { data: affinityRows, error: affinityError } = await (supabase as any)
+        .from("sitter_profiles_affinity")
+        .select("user_id, experience_years, life_pace, languages, interests, work_during_sit, sensitivities")
+        .in("user_id", sitterUserIds);
+      if (affinityError) {
+        console.error("[SearchOwner] Erreur chargement affinité:", affinityError);
+      } else {
+        const affinityMap = new Map<string, any>();
+        (affinityRows ?? []).forEach((a: any) => affinityMap.set(a.user_id, a));
+        rawSitters.forEach((s: any) => {
+          const a = affinityMap.get(s.user_id);
+          if (a) Object.assign(s, a);
+        });
+      }
+    }
+
     // Seuil de complétion abaissé à 40 (vague 40, 20/07/2026) : le profil public
     // refondu gère les profils clairsemés, on ne masque plus de vrais gardiens.
     let items = rawSitters.filter((s: any) => s.profile?.profile_completion >= 40);
