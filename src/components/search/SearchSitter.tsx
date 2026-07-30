@@ -230,22 +230,18 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
  { key: "forest", label: "Forêt" },
  ];
 
- // Derive housingType for existing filter logic (backward compat)
- const housingType = housingTypes.length === 1 ? housingTypes[0] : "all";
-
+ // Le rayon et le mode de zone ont leur propre puce visible, ils ne sont pas
+ // comptés ici (sinon compteur à 1 sans contrôle correspondant dans le panneau).
  const activeFiltersCount =
   housingTypes.length +
   environments.length +
   (verifiedOnly ? 1 : 0) +
   (withPhotosOnly ? 1 : 0) +
-  (minExperience !== "all" ? 1 : 0) +
   animalTypes.length +
   (startDate ? 1 : 0) +
   (endDate ? 1 : 0) +
    (duration !== "all" ? 1 : 0) +
-   (emergencyOnly ? 1 : 0) +
-   (radius[0] !== 15 ? 1 : 0) +
-   (zoneMode !== "radius" ? 1 : 0);
+   (emergencyOnly ? 1 : 0);
  const hasActiveFilters = activeFiltersCount > 0;
 
  // ─── City autocomplete via geo.api.gouv.fr ───

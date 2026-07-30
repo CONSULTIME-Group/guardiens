@@ -151,7 +151,7 @@ function normalizeSpecies(value?: string | null): string | null {
 
 const NAC_UMBRELLA = new Set<string>(NAC_UMBRELLA_LIST);
 
-function speciesIntersects(ownerSpecies: string[], sitterTypes: string[]): number {
+export function speciesIntersects(ownerSpecies: string[], sitterTypes: string[]): number {
   const owners = ownerSpecies.map(normalizeSpecies).filter(Boolean) as string[];
   const sitters = sitterTypes.map(normalizeSpecies).filter(Boolean) as string[];
   if (sitters.includes("all")) return owners.length;
