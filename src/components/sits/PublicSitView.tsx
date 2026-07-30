@@ -125,6 +125,9 @@ interface Props {
   hasAccess?: boolean;
   hasApplied?: boolean;
   onApply?: () => void;
+  /** Garde déjà attribuée ou passée : contenu consultable, aucune candidature. */
+  isClosed?: boolean;
+  isPast?: boolean;
 }
 
 const PublicSitView = ({
