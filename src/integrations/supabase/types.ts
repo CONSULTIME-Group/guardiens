@@ -5950,6 +5950,7 @@ export type Database = {
           sequence_key: string
           started_at: string
           status: string
+          transient_failure_count: number
           updated_at: string
           user_id: string
         }
@@ -5963,6 +5964,7 @@ export type Database = {
           sequence_key: string
           started_at?: string
           status?: string
+          transient_failure_count?: number
           updated_at?: string
           user_id: string
         }
@@ -5976,6 +5978,7 @@ export type Database = {
           sequence_key?: string
           started_at?: string
           status?: string
+          transient_failure_count?: number
           updated_at?: string
           user_id?: string
         }
