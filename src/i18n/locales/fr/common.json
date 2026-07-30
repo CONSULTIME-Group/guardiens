@@ -896,7 +896,8 @@
     "show_password": "Afficher le mot de passe",
     "hide_password": "Masquer le mot de passe",
     "capslock_on": "Verrouillage majuscules activé.",
-    "error_title": "Erreur"
+    "error_title": "Erreur",
+    "back_to_home": "Retour à l'accueil"
   },
   "forgot_password": {
     "panel_title": "Pas de panique",

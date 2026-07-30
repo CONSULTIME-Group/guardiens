@@ -469,11 +469,12 @@ const Register = () => {
 
  <Link
  to="/"
- className="absolute top-4 left-4 lg:top-6 lg:left-6 z-20 inline-flex items-center gap-1.5 rounded-full bg-card/85 backdrop-blur-md border border-border/60 px-3 py-1.5 text-xs lg:text-sm text-foreground/80 hover:text-foreground hover:bg-card transition-colors shadow-sm"
+ className="absolute top-4 left-4 lg:top-6 lg:left-6 z-20 inline-flex items-center gap-2 rounded-full bg-card border border-border px-4 py-2.5 min-h-[44px] text-sm font-medium text-foreground hover:bg-accent hover:text-accent-foreground transition-colors shadow-md"
  >
- <ArrowLeft className="h-3.5 w-3.5" aria-hidden="true" />
+ <ArrowLeft className="h-4 w-4" aria-hidden="true" />
  {t("register_page.retour_site")}
  </Link>
+
 
  <div className="flex-1 flex items-center justify-center px-6 pt-16 pb-24 md:pt-12 md:pb-12">
  <div className="w-full max-w-md">
@@ -830,8 +831,16 @@ const Register = () => {
     {t("register_page.have_account")}{" "}
     <Link to={`/login${buildRedirectQuery(redirectTarget)}`} className="text-primary font-medium hover:underline">{t("register_page.sign_in")}</Link>
     </p>
+    <Link
+     to="/"
+     className="mt-4 inline-flex items-center gap-1.5 py-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
+    >
+     <ArrowLeft className="h-4 w-4" aria-hidden="true" />
+     {t("auth_common.back_to_home")}
+    </Link>
    </div>
    )}
+
  </div>
  </div>
 

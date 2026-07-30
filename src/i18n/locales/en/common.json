@@ -889,7 +889,8 @@
     "show_password": "Show password",
     "hide_password": "Hide password",
     "capslock_on": "Caps Lock is on.",
-    "error_title": "Error"
+    "error_title": "Error",
+    "back_to_home": "Back to home"
   },
   "forgot_password": {
     "panel_title": "Don't worry",

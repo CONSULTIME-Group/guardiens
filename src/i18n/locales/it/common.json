@@ -889,7 +889,8 @@
     "show_password": "Mostra password",
     "hide_password": "Nascondi password",
     "capslock_on": "Bloc Maiusc attivato.",
-    "error_title": "Errore"
+    "error_title": "Errore",
+    "back_to_home": "Torna alla home"
   },
   "forgot_password": {
     "panel_title": "Niente panico",

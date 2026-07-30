@@ -889,7 +889,8 @@
     "show_password": "Mostrar contraseña",
     "hide_password": "Ocultar contraseña",
     "capslock_on": "Bloq Mayús activado.",
-    "error_title": "Error"
+    "error_title": "Error",
+    "back_to_home": "Volver al inicio"
   },
   "forgot_password": {
     "panel_title": "No te preocupes",
