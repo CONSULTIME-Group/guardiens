@@ -319,9 +319,20 @@ const PublicSitDetail = () => {
   // archived) restent entièrement consultables (HTTP 200, noindex) : elles
   // montrent la vie de la communauté. Les brouillons et les annulées restent privés.
   const CLOSED_STATUSES = ["confirmed", "in_progress", "completed", "archived"];
-  const PAST_STATUSES = ["completed", "archived"];
   const isClosedSit = CLOSED_STATUSES.includes(String(sit.status));
-  const isPastSit = PAST_STATUSES.includes(String(sit.status));
+  // Une garde n'est PASSÉE que si sa date de fin est strictement antérieure à
+  // aujourd'hui. Le statut n'est pas fiable (une annonce archivée peut avoir
+  // des dates à venir). Sans end_date, on considère la garde comme non passée :
+  // le doute profite à la protection du domicile (calendrier d'absence).
+  const isPastSit = (() => {
+    if (!sit.end_date) return false;
+    const end = new Date(sit.end_date);
+    if (isNaN(end.getTime())) return false;
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    end.setHours(0, 0, 0, 0);
+    return end.getTime() < today.getTime();
+  })();
   if (sit.status !== "published" && !isClosedSit) return <div className="max-w-2xl mx-auto p-6 md:p-10 text-center"><p className="text-muted-foreground">Cette annonce n'est plus disponible.</p></div>;
   // Participants à la garde : le propriétaire, un administrateur, ou le
   // gardien retenu. Eux seuls voient les dates réelles d'une garde en cours.
