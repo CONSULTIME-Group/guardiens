@@ -13,7 +13,7 @@ import { ShieldCheck, ShieldX, RotateCcw, Clock, CheckCircle2, XCircle, AlertTri
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
-type HistoryFilter = "all" | "verified" | "rejected" | "pending";
+type HistoryFilter = "all" | "verified" | "rejected" | "pending" | "needs_review";
 
 const AdminVerifications = () => {
   const [queue, setQueue] = useState<any[]>([]);
@@ -87,8 +87,10 @@ const AdminVerifications = () => {
     //          (b) les profils "not_submitted" qui ont quand même déposé au moins un fichier (selfie OU pièce) → dossier incomplet à relancer
     // NB : on fait deux requêtes séparées car PostgREST gère mal les `or()` imbriqués dans un `and()`.
     const SELECT = "id, first_name, last_name, email, avatar_url, identity_document_url, identity_selfie_url, identity_verification_status, created_at, updated_at";
+    // (c) les profils en "needs_review" : analysés par l'IA, confiance jugée
+    //     insuffisante, ils demandent un arbitrage humain prioritaire.
     const [pendingFull, incompleteDoc, incompleteSelfie] = await Promise.all([
-      supabase.from("profiles").select(SELECT).eq("identity_verification_status", "pending"),
+      supabase.from("profiles").select(SELECT).in("identity_verification_status", ["pending", "needs_review"]),
       supabase.from("profiles").select(SELECT).eq("identity_verification_status", "not_submitted").not("identity_document_url", "is", null),
       supabase.from("profiles").select(SELECT).eq("identity_verification_status", "not_submitted").not("identity_selfie_url", "is", null),
     ]);
@@ -96,9 +98,13 @@ const AdminVerifications = () => {
     [...(pendingFull.data || []), ...(incompleteDoc.data || []), ...(incompleteSelfie.data || [])].forEach((p: any) => {
       map.set(p.id, p);
     });
-    const merged = Array.from(map.values()).sort((a, b) =>
-      new Date(a.updated_at).getTime() - new Date(b.updated_at).getTime()
-    );
+    // Les dossiers en révision IA remontent en tête : ils ont déjà été analysés
+    // et jugés douteux, ils ne se traitent pas comme un dossier jamais examiné.
+    const merged = Array.from(map.values()).sort((a, b) => {
+      const rank = (u: any) => (u.identity_verification_status === "needs_review" ? 0 : 1);
+      if (rank(a) !== rank(b)) return rank(a) - rank(b);
+      return new Date(a.updated_at).getTime() - new Date(b.updated_at).getTime();
+    });
     setQueue(await hydrateIdentityAssets(merged));
 
     const weekStart = startOfWeek(new Date(), { weekStartsOn: 1 }).toISOString();
@@ -118,7 +124,7 @@ const AdminVerifications = () => {
     let query = supabase
       .from("profiles")
       .select("id, first_name, last_name, email, avatar_url, identity_document_url, identity_selfie_url, identity_verification_status, created_at, updated_at", { count: "exact" })
-      .in("identity_verification_status", historyFilter === "all" ? ["verified", "rejected", "pending"] : [historyFilter])
+      .in("identity_verification_status", historyFilter === "all" ? ["verified", "rejected", "pending", "needs_review"] : [historyFilter])
       .order("updated_at", { ascending: false })
       .range(historyPage * PAGE_SIZE, (historyPage + 1) * PAGE_SIZE - 1);
 
@@ -251,6 +257,7 @@ const AdminVerifications = () => {
       case "verified": return <Badge className="bg-success-soft text-success border-0">Validée</Badge>;
       case "rejected": return <Badge className="bg-destructive/10 text-destructive border-0">Refusée</Badge>;
       case "pending": return <Badge className="bg-warning-soft text-warning-foreground border-0">En attente</Badge>;
+      case "needs_review": return <Badge className="bg-info/10 text-info border-0">Révision IA</Badge>;
       default: return <Badge variant="outline">{status}</Badge>;
     }
   };
@@ -295,6 +302,11 @@ const AdminVerifications = () => {
               const hasDoc = !!user.identity_document_url;
               const hasSelfie = !!user.identity_selfie_url;
               const isIncomplete = user.identity_verification_status === "not_submitted" && (!hasDoc || !hasSelfie);
+              const needsReview = user.identity_verification_status === "needs_review";
+              // Motif renvoyé par l'IA lors de la mise en révision, s'il existe.
+              const reviewReason = needsReview
+                ? (userLogs[user.id] || []).find((l) => l.result === "needs_review")?.rejection_reason || null
+                : null;
               return (
                 <Card key={user.id} className="overflow-hidden">
                   <CardContent className="p-5 space-y-4">
@@ -311,6 +323,11 @@ const AdminVerifications = () => {
                         </div>
                       </div>
                       <div className="flex flex-wrap items-center gap-2">
+                        {needsReview && (
+                          <Badge className="bg-info/10 text-info border-0 text-xs">
+                            <AlertTriangle className="h-3 w-3 mr-1" /> Révision IA, confiance insuffisante
+                          </Badge>
+                        )}
                         {isIncomplete && (
                           <Badge className="bg-warning-soft text-warning-foreground border-0 text-xs">
                             <AlertTriangle className="h-3 w-3 mr-1" /> Dossier incomplet ({hasSelfie ? "pièce manquante" : "selfie manquant"})
@@ -321,6 +338,16 @@ const AdminVerifications = () => {
                         <span className="text-xs text-muted-foreground font-mono">#{idx + 1}</span>
                       </div>
                     </div>
+                    {needsReview && (
+                      <div className="rounded-lg border border-info/30 bg-info/5 p-3">
+                        <p className="text-xs font-medium text-info uppercase tracking-wide">Analyse automatique non concluante</p>
+                        <p className="text-xs text-muted-foreground mt-1">
+                          {reviewReason
+                            ? `Motif relevé : ${reviewReason}`
+                            : "Aucun motif détaillé n'a été enregistré, contrôlez la pièce à l'oeil."}
+                        </p>
+                      </div>
+                    )}
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                       <div className="space-y-1">
                         <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Document d'identité</p>
@@ -444,14 +471,14 @@ const AdminVerifications = () => {
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <h2 className="font-heading text-lg font-semibold">Historique des vérifications</h2>
           <div className="flex flex-wrap gap-2">
-            {(["all", "verified", "rejected", "pending"] as HistoryFilter[]).map(f => (
+            {(["all", "verified", "rejected", "pending", "needs_review"] as HistoryFilter[]).map(f => (
               <Button
                 key={f}
                 size="sm"
                 variant={historyFilter === f ? "default" : "outline"}
                 onClick={() => { setHistoryFilter(f); setHistoryPage(0); }}
               >
-                {{ all: "Toutes", verified: "Validées", rejected: "Refusées", pending: "En attente" }[f]}
+                {{ all: "Toutes", verified: "Validées", rejected: "Refusées", pending: "En attente", needs_review: "Révision IA" }[f]}
               </Button>
             ))}
           </div>
@@ -523,7 +550,7 @@ const AdminVerifications = () => {
                           >
                             <ExternalLink className="h-3.5 w-3.5" /> Profil
                           </Button>
-                          {user.identity_verification_status === "pending" && (
+                          {["pending", "needs_review"].includes(user.identity_verification_status) && (
                             <>
                               <Button
                                 size="sm"
