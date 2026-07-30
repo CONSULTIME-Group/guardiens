@@ -270,7 +270,13 @@ export type EventType =
   | "application_sent_unedited_draft"           // Candidature envoyée avec brouillon Alma non modifié (sit_id)
   // Vague 14 — tracking des sections vedettes des dashboards ---------------
   | "dashboard_star_seen"                        // Impression 1×/session d'une section vedette (surface, variant, ...)
-  | "dashboard_star_cta_clicked";                // Clic CTA principal d'une section vedette (surface, variant, ...)
+  | "dashboard_star_cta_clicked"                 // Clic CTA principal d'une section vedette (surface, variant, ...)
+  // Parcours vérification d'identité ---------------------------------------
+  | "identity_section_viewed"                    // Section de vérification ouverte (status, has_document, has_selfie)
+  | "identity_document_submitted"                // Pièce d'identité envoyée (step)
+  | "identity_auto_check_failed"                 // Vérification automatique en échec ou refus (status, reason_kind)
+  | "identity_selfie_submitted"                  // Selfie envoyé (step, status)
+  | "identity_dossier_completed";                // Document et selfie présents (status)
 
 
 
