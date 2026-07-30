@@ -8,6 +8,7 @@ import { compressImageFile } from "@/lib/compressImage";
 import { convertHeicToJpeg, isHeicFile } from "@/lib/heicToJpeg";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
+import { trackEvent } from "@/lib/analytics";
 
 const IdentityVerificationSection = ({ user }: { user: any }) => {
   const [status, setStatus] = useState<string>("not_submitted");
