@@ -2,6 +2,7 @@
 // Cible : visiteurs anonymes ET connectés (hors propriétaire de l'annonce).
 // Objectif : conversion + clarté. Pattern aligné avec PublicMissionView.
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Share2, CheckCircle2, Star } from "lucide-react";
@@ -157,6 +158,7 @@ const PublicSitView = ({
   const redirect = `/annonces/${sit.slug || sit.id}`;
   const title = sit.title ? sanitizeUserTitle(sit.title) : `Une mission de garde à ${cityLabel}`;
   const description = property?.description || "";
+  const { t } = useTranslation();
   const accepting = sit.accepting_applications !== false;
   // Plafond atteint : choix du propriétaire, jamais une panne ni un refus.
   const capReached = !accepting && !!sit.max_applications;

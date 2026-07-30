@@ -299,7 +299,16 @@ const SitterSitView = ({
               )}
 
               <div className="w-full md:w-auto md:shrink-0">
-                {!sit.accepting_applications ? (
+                {!sit.accepting_applications && sit.max_applications ? (
+                  <div className="rounded-2xl border border-border bg-muted/40 p-4 md:min-w-[16rem]">
+                    <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+                      {t("application_cap.badge")}
+                    </p>
+                    <p className="mt-2 text-sm text-foreground leading-relaxed">
+                      {t("application_cap.sitter_message", { max: sit.max_applications })}
+                    </p>
+                  </div>
+                ) : !sit.accepting_applications ? (
                   <Button className="w-full md:w-auto md:min-w-[16rem] h-11 md:h-12 px-6 rounded-full text-base font-semibold" disabled>
                     Candidatures fermées
                   </Button>
