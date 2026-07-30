@@ -49,7 +49,7 @@ const RelancePieceIdentiteEmail = ({ firstName }: RelancePieceIdentiteProps) => 
           <Text style={listItem}>3. Déposez le recto de votre pièce d'identité</Text>
 
           <Section style={ctaSection}>
-            <Button style={button} href={`${SITE_URL}/settings?tab=identity`}>
+            <Button style={button} href={`${SITE_URL}/settings?section=security&focus=identity`}>
               Finaliser ma vérification
             </Button>
             </Section>

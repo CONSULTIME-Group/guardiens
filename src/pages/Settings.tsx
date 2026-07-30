@@ -96,6 +96,7 @@ const Settings = () => {
   const [activeSection, setActiveSection] = useState<SectionId>("account");
   const [searchParams] = useSearchParams();
   const proSectionRef = useRef<HTMLDivElement | null>(null);
+  const identitySectionRef = useRef<HTMLDivElement | null>(null);
 
   // Deep-link via ?section=xxx ou ?tab=xxx (aliases). Toutes les sections déclarées sont valides.
   useEffect(() => {
@@ -103,8 +104,11 @@ const Settings = () => {
     const valid: SectionId[] = SECTIONS.map((s) => s.id);
     if (param && valid.includes(param)) {
       setActiveSection(param);
-      if (searchParams.get("focus") === "pro") {
+      const focus = searchParams.get("focus");
+      if (focus === "pro") {
         setTimeout(() => proSectionRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }), 300);
+      } else if (focus === "identity") {
+        setTimeout(() => identitySectionRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }), 300);
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -497,7 +501,9 @@ const Settings = () => {
               {activeSection === "security" && (
                 <>
                   <Separator className="my-8" />
-                  <IdentityVerificationSection user={user} />
+                  <div ref={identitySectionRef} id="identity-verification" className="scroll-mt-24">
+                    <IdentityVerificationSection user={user} />
+                  </div>
                   <Separator className="my-8" />
                   <div ref={proSectionRef} id="pro-verification">
                     <ProVerificationSection user={user} />

@@ -95,9 +95,17 @@ serve(async (req) => {
       });
     }
 
-    // Convert to base64 for the AI
+    // Convert to base64 for the AI.
+    // Parcours par tranches : le spread d'un Uint8Array volumineux dépasse la pile d'appels
+    // (RangeError: Maximum call stack size exceeded) dès quelques centaines de kilooctets.
     const arrayBuffer = await fileData.arrayBuffer();
-    const base64 = btoa(String.fromCharCode(...new Uint8Array(arrayBuffer)));
+    const bytes = new Uint8Array(arrayBuffer);
+    const CHUNK_SIZE = 8192;
+    let binary = "";
+    for (let i = 0; i < bytes.length; i += CHUNK_SIZE) {
+      binary += String.fromCharCode.apply(null, Array.from(bytes.subarray(i, i + CHUNK_SIZE)));
+    }
+    const base64 = btoa(binary);
     const mimeType = fileData.type || "image/jpeg";
 
     // Call Lovable AI with the image for verification
@@ -246,7 +254,7 @@ Rules:
           type: "identity_verified",
           title: "Identité vérifiée",
           body: "Votre pièce d'identité a été validée avec succès. Vous avez maintenant accès à toutes les fonctionnalités.",
-          link: "/settings#verification",
+          link: "/settings?section=security&focus=identity",
         }),
         sendEmail("identity-verified", `identity-verified-${user.id}`),
       ]);
@@ -261,7 +269,7 @@ Rules:
         type: "identity_pending",
         title: "Vérification en cours",
         body: "Votre document est en cours de revue par notre équipe. Vous serez notifié sous 24h.",
-        link: "/settings#verification",
+        link: "/settings?section=security&focus=identity",
       });
     } else {
       await supabaseAdmin
@@ -276,7 +284,7 @@ Rules:
           type: "identity_rejected",
           title: "Vérification refusée",
           body: `Votre document n'a pas pu être validé : ${reason}. Vous pouvez soumettre un nouveau document.`,
-          link: "/settings#verification",
+          link: "/settings?section=security&focus=identity",
         }),
         sendEmail("identity-rejected", `identity-rejected-${user.id}-${Date.now()}`, { reason }),
       ]);
@@ -300,11 +308,22 @@ Rules:
       }
     );
   } catch (e) {
-    console.error("verify-identity error:", e);
+    // Journalisation explicite : nom, message et pile, pour que l'équipe voie l'échec réel.
+    const errName = e instanceof Error ? e.name : "UnknownError";
+    const errMessage = e instanceof Error ? e.message : String(e);
+    console.error("verify-identity failure", JSON.stringify({
+      error_name: errName,
+      error_message: errMessage,
+      stack: e instanceof Error ? e.stack?.slice(0, 1500) : undefined,
+    }));
     return new Response(
-      JSON.stringify({ error: e instanceof Error ? e.message : "Unknown error" }),
+      JSON.stringify({
+        code: "auto_verification_failed",
+        error_name: errName,
+        error: errMessage,
+      }),
       {
-        status: 500,
+        status: 502,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       }
     );
