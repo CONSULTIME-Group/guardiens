@@ -272,7 +272,7 @@ const SearchListingCard = ({
         {(isAssigned || isCompleted || isPast) && (
           <div className="absolute inset-0 bg-white/45 backdrop-blur-[1px] flex items-center justify-center">
             <span className="bg-white/95 text-foreground text-[10px] font-semibold uppercase tracking-[0.2em] px-4 py-1.5 rounded-full border border-black/[0.06] shadow-sm">
-              {isPast || isCompleted ? "Annonce passée" : "Gardiennage attribué"}
+              {isDateElapsed ? "Annonce passée" : "Gardiennage attribué"}
             </span>
           </div>
         )}
