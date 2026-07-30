@@ -617,9 +617,7 @@ const PublicSitDetail = () => {
                 .
               </p>
             </div>
-          </div>
-          <NearbySitsModule city={sitCity} excludeId={sit.id} />
-        </>
+        </div>
       )}
 
 
