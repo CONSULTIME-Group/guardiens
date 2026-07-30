@@ -616,20 +616,33 @@ const SearchOwner = () => {
     // Elle apporte notamment work_during_sit et sensitivities, indispensables
     // au critère de présence (poids 2) et à la disqualification.
     if (viewerOwner && sitterUserIds.length > 0) {
-      const { data: affinityRows, error: affinityError } = await (supabase as any)
-        .from("sitter_profiles_affinity")
-        .select("user_id, experience_years, life_pace, languages, interests, work_during_sit, sensitivities")
-        .in("user_id", sitterUserIds);
-      if (affinityError) {
-        console.error("[SearchOwner] Erreur chargement affinité:", affinityError);
-      } else {
-        const affinityMap = new Map<string, any>();
-        (affinityRows ?? []).forEach((a: any) => affinityMap.set(a.user_id, a));
-        rawSitters.forEach((s: any) => {
-          const a = affinityMap.get(s.user_id);
-          if (a) Object.assign(s, a);
-        });
+      // Découpage par lots de 200 identifiants au maximum : au delà, la chaîne
+      // de requête GET dépasse la limite de longueur d'URL et l'appel échoue.
+      const AFFINITY_BATCH = 200;
+      const batches: string[][] = [];
+      for (let i = 0; i < sitterUserIds.length; i += AFFINITY_BATCH) {
+        batches.push(sitterUserIds.slice(i, i + AFFINITY_BATCH));
       }
+      const affinityResults = await Promise.all(
+        batches.map((ids) =>
+          (supabase as any)
+            .from("sitter_profiles_affinity")
+            .select("user_id, experience_years, life_pace, languages, interests, work_during_sit, sensitivities")
+            .in("user_id", ids),
+        ),
+      );
+      const affinityMap = new Map<string, any>();
+      affinityResults.forEach((res: any) => {
+        if (res?.error) {
+          console.error("[SearchOwner] Erreur chargement affinité:", res.error);
+          return;
+        }
+        (res?.data ?? []).forEach((a: any) => affinityMap.set(a.user_id, a));
+      });
+      rawSitters.forEach((s: any) => {
+        const a = affinityMap.get(s.user_id);
+        if (a) Object.assign(s, a);
+      });
     }
 
     // Seuil de complétion abaissé à 40 (vague 40, 20/07/2026) : le profil public
