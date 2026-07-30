@@ -19,7 +19,7 @@ import { useMemo } from "react";
  */
 
 export type SitterPriorityAction = {
-  variant: "next-guard" | "profile" | "skills" | "interests" | "postal" | "nearby" | "entraide" | "availability" | "explore";
+  variant: "next-guard" | "profile" | "skills" | "interests" | "identity" | "postal" | "nearby" | "entraide" | "availability" | "explore";
   eyebrow: string;
   title: string;
   description: string;
@@ -36,11 +36,13 @@ interface Input {
   isAvailable: boolean;
   competencesCount?: number;
   interestsCount?: number;
+  /** true si la pièce d'identité est validée ou en cours d'examen. */
+  identityDone?: boolean;
 }
 
 export function useSitterPriorityAction(input: Input): SitterPriorityAction {
   return useMemo(() => {
-    const { nextGuard, profileCompletion, postalCode, nearbyListings, isAvailable, competencesCount = 0, interestsCount = 0 } = input;
+    const { nextGuard, profileCompletion, postalCode, nearbyListings, isAvailable, competencesCount = 0, interestsCount = 0, identityDone = true } = input;
 
     // 1. Prochaine garde imminente — toujours prioritaire
     if (nextGuard) {
@@ -111,6 +113,22 @@ export function useSitterPriorityAction(input: Input): SitterPriorityAction {
 
 
 
+    // 3d. Identité non vérifiée, invitation positive et non bloquante.
+    //     Placée APRÈS les actions plus urgentes (garde imminente, profil
+    //     incomplet, code postal, compétences, intérêts) : postuler reste
+    //     possible sans vérification.
+    if (!identityDone) {
+      return {
+        variant: "identity",
+        eyebrow: "Confiance",
+        title: "Vérifiez votre identité pour être retenu plus souvent.",
+        description: "Les propriétaires choisissent en priorité les gardiens dont l'identité est vérifiée. Une minute suffit.",
+        ctaLabel: "Vérifier mon identité",
+        ctaTo: "/settings?section=security",
+        urgency: "medium",
+      };
+    }
+
     // 4. Annonce à proximité — opportunité fraîche
     //    On EXCLUT les annonces flaggées `is_beyond` : sinon le cockpit
     //    annonce « 2 annonces près de chez vous » alors que la carte
@@ -170,5 +188,5 @@ export function useSitterPriorityAction(input: Input): SitterPriorityAction {
       ctaTo: "/petites-missions",
       urgency: "low",
     };
-  }, [input.nextGuard, input.profileCompletion, input.postalCode, input.nearbyListings, input.isAvailable, input.competencesCount, input.interestsCount]);
+  }, [input.nextGuard, input.profileCompletion, input.postalCode, input.nearbyListings, input.isAvailable, input.competencesCount, input.interestsCount, input.identityDone]);
 }
