@@ -336,8 +336,8 @@ const PublicSitDetail = () => {
   if (sit.status !== "published" && !isClosedSit) return <div className="max-w-2xl mx-auto p-6 md:p-10 text-center"><p className="text-muted-foreground">Cette annonce n'est plus disponible.</p></div>;
   // Participants à la garde : le propriétaire, un administrateur, ou le
   // gardien retenu. Eux seuls voient les dates réelles d'une garde en cours.
-  const isParticipant = viewerType === "owner_of_sit" || viewerType === "admin" || isAcceptedSitter;
-  const hideDates = isClosedSit && !isPastSit && !isParticipant;
+  // isParticipant n'entre plus dans le masquage des dates (décision produit)
+  const hideDates = isClosedSit && !isPastSit && !isAuthenticated;
 
 
  const photos: string[] = property?.photos || [];
