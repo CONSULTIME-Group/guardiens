@@ -47,10 +47,13 @@ Deno.serve(async (req) => {
     const body = await req.json().catch(() => ({}));
     const token = typeof body?.token === "string" ? body.token.trim() : "";
     const mode = body?.mode === "confirm" ? "confirm" : "peek";
+    const allowedReasons = ["other_chosen", "dates_changed", "not_right_time", "different_profile"];
+    const reason = allowedReasons.includes(body?.reason) ? body.reason : "other_chosen";
 
     if (!token || token.length < 20 || token.length > 200 || !/^[a-f0-9]+$/i.test(token)) {
       return json({ valid: false, ok: false, reason: "invalid" }, 200);
     }
+
 
     if (mode === "peek") {
       const { data, error } = await service.rpc("peek_application_action_token", {
