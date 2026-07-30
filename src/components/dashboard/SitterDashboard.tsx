@@ -37,6 +37,7 @@ import { shouldShowVerifiedCard } from "@/lib/shouldShowVerifiedCard";
 import SitterOpeningCard from "./sitter/SitterOpeningCard";
 import SitterTeaserCard from "./sitter/SitterTeaserCard";
 import SitterNextStepRailCard from "./sitter/SitterNextStepRailCard";
+import { useSitterPriorityAction } from "@/hooks/useSitterPriorityAction";
 import SitterEntraideSection from "./sitter/SitterEntraideSection";
 import ReadingsSection from "./shared/ReadingsSection";
 
@@ -114,6 +115,30 @@ const SitterDashboard = () => {
   // DOIT rester avant tout early return pour respecter la règle des hooks.
   const { data: nearbyHelpersData } = useNearbyHelpers(user?.id);
   const nearbyHelpersCount = nearbyHelpersData?.helpers?.length ?? 0;
+
+  // Prochain pas déterministe. Sert uniquement à savoir si l'invitation à
+  // vérifier l'identité est bien le pas suivant, ou si une action plus
+  // urgente passe devant. Aucun fetch.
+  const sitterPriorityAction = useSitterPriorityAction({
+    nextGuard,
+    profileCompletion: profileCompletion ?? 0,
+    postalCode: postalCode ?? null,
+    nearbyListings: nearbyListings ?? [],
+    isAvailable: !!isAvailable,
+    competencesCount: competencesCount ?? 0,
+    interestsCount: interestsCount ?? 0,
+    identityDone: identityStatus === "verified" || identityStatus === "pending" || !!identityVerified,
+  });
+  const identityRailAction =
+    sitterPriorityAction.variant === "identity"
+      ? {
+          eyebrow: sitterPriorityAction.eyebrow,
+          title: sitterPriorityAction.title,
+          description: sitterPriorityAction.description,
+          ctaLabel: sitterPriorityAction.ctaLabel,
+          ctaTo: sitterPriorityAction.ctaTo,
+        }
+      : null;
 
   if (loading) return <SitterDashboardSkeleton />;
   if (error) return <DashboardLoadError onRetry={reload} detail={error} />;
@@ -352,12 +377,13 @@ const SitterDashboard = () => {
                   ? <AccessGateBanner level={level} profileCompletion={accessProfileCompletion} context="guard" />
                   : <FreePeriodBanner />}
               </div>
-              {!allChecklistDone && (
+              {(!allChecklistDone || identityRailAction) && (
                 <div className="">
                   <SitterNextStepRailCard
                     hasAvatar={!!avatarUrl}
                     hasBioMin={!!(bio && bio.length >= 50)}
                     hasPostalCode={!!postalCode}
+                    action={identityRailAction}
                   />
                 </div>
               )}
@@ -481,6 +507,16 @@ const SitterDashboard = () => {
                   badgeCount={badgeCount ?? 0}
                 />
               </div>
+              {identityRailAction && (
+                <div className="">
+                  <SitterNextStepRailCard
+                    hasAvatar={!!avatarUrl}
+                    hasBioMin={!!(bio && bio.length >= 50)}
+                    hasPostalCode={!!postalCode}
+                    action={identityRailAction}
+                  />
+                </div>
+              )}
               {shouldShowVerifiedCard(isPricingActive(), !!hasSubscription) && (
                 <div>
                   <VerifiedSitterRailCard />

@@ -37,6 +37,7 @@ import AlmaRailWhisper from "./sitter/AlmaRailWhisper";
 import OwnerAffinityBanner from "@/components/matching/OwnerAffinityBanner";
 
 import { useOwnerPriorityAction } from "@/hooks/useOwnerPriorityAction";
+import PriorityActionCard from "./shared/PriorityActionCard";
 import { useOwnerPrimaryAction } from "@/hooks/useOwnerPrimaryAction";
 import AlmaSilentSitBubble from "@/components/ai/alma/AlmaSilentSitBubble";
 import { AlmaOwnerTrafficNoActionWhisper } from "@/components/ai/alma/wiring/AlmaOwnerTrafficNoActionWhisper";
@@ -303,6 +304,19 @@ const OwnerDashboard = () => {
               showConcierge={!ongoingSit && !latestDraft && (showAlmaProactive || hasPrimaryAction)}
               primaryAction={primaryAction}
             />
+
+            {/* 2bis. Prochain pas, uniquement s'il diffère de l'action primaire
+                déjà portée par la section vedette (jamais deux appels concurrents). */}
+            {!(hasPrimaryAction && (priorityAction.variant === "publish" || priorityAction.variant === "explore")) && (
+              <PriorityActionCard
+                eyebrow={priorityAction.eyebrow}
+                title={priorityAction.title}
+                description={priorityAction.description}
+                ctaLabel={priorityAction.ctaLabel}
+                ctaTo={priorityAction.ctaTo}
+                urgency={priorityAction.urgency}
+              />
+            )}
 
             {/* Alma bulle silencieuse : conservée dans le flux */}
             <AlmaSilentSitBubble sits={sits as any} />

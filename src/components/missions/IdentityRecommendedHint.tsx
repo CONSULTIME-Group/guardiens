@@ -17,8 +17,8 @@ const IdentityRecommendedHint = ({ compact = false }: { compact?: boolean }) => 
     <p className="min-w-0">
       <span className="font-semibold">Vérification d'identité recommandée.</span>{" "}
       Non obligatoire, mais elle rassure les autres membres et fait grandir votre écusson de confiance.{" "}
-      <Link to="/profile" className="underline underline-offset-2 font-medium">
-        Vérifier plus tard
+      <Link to="/settings?section=security" className="underline underline-offset-2 font-medium">
+        Vérifier mon identité
       </Link>
       .
     </p>

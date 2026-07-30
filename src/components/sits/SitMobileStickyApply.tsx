@@ -3,6 +3,7 @@
  * Visible uniquement < md, fixée en bas de l'écran, respecte safe-area iOS.
  * Se masque discrètement au scroll-down et réapparaît au scroll-up (pattern 2026).
  */
+import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { CheckCircle2 } from "lucide-react";
 import FavoriteButton from "@/components/shared/FavoriteButton";
@@ -14,13 +15,23 @@ interface SitMobileStickyApplyProps {
   sitId: string;
   state: "apply" | "applied" | "closed" | "blocked";
   onApply: () => void;
+  /** Motif court affiché en mobile quand la candidature n'est pas encore ouverte. */
+  blockedReason?: string;
+  blockedCtaTo?: string;
+  blockedCtaLabel?: string;
 }
 
-const SitMobileStickyApply = ({ sitId, state, onApply }: SitMobileStickyApplyProps) => {
+const SitMobileStickyApply = ({
+  sitId,
+  state,
+  onApply,
+  blockedReason = "Complétez votre profil pour postuler",
+  blockedCtaTo,
+  blockedCtaLabel,
+}: SitMobileStickyApplyProps) => {
   const scrollDir = useScrollDirection(12);
   const applyBarVisible = useStarVisibilityGate("sitter");
 
-  if (state === "blocked") return null;
   if (applyBarVisible) return null;
 
   return (
@@ -41,6 +52,20 @@ const SitMobileStickyApply = ({ sitId, state, onApply }: SitMobileStickyApplyPro
           <Button className="flex-1 h-11 text-sm font-semibold" disabled>
             <CheckCircle2 className="h-4 w-4 mr-2" aria-hidden="true" /> Candidature envoyée
           </Button>
+        ) : state === "blocked" ? (
+          <div className="flex-1 min-w-0">
+            <Button className="w-full h-11 text-sm font-semibold" disabled>
+              {blockedReason}
+            </Button>
+            {blockedCtaTo && blockedCtaLabel && (
+              <Link
+                to={blockedCtaTo}
+                className="block mt-1 text-center text-xs font-medium text-primary underline underline-offset-2"
+              >
+                {blockedCtaLabel}
+              </Link>
+            )}
+          </div>
         ) : state === "closed" ? (
           <Button className="flex-1 h-11 text-sm font-semibold" disabled>
             Candidatures fermées
