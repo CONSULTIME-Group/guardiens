@@ -308,11 +308,17 @@ const ProfileHero = ({
               aria-label={`Agrandir la photo de ${firstName}`}
               className="block rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary disabled:cursor-default"
             >
-              <img
-                src={avatarUrl || "/placeholder.svg"}
-                alt={firstName}
-                className="w-20 h-20 sm:w-28 sm:h-28 md:w-36 md:h-36 rounded-full object-cover object-center border-4 border-background shadow-md ring-2 ring-primary ring-offset-2"
-              />
+              {avatarUrl && !avatarUrl.includes("placeholder.svg") ? (
+                <img
+                  src={avatarUrl}
+                  alt={firstName}
+                  className="w-20 h-20 sm:w-28 sm:h-28 md:w-36 md:h-36 rounded-full object-cover object-center border-4 border-background shadow-md ring-2 ring-primary ring-offset-2"
+                />
+              ) : (
+                <div className="w-20 h-20 sm:w-28 sm:h-28 md:w-36 md:h-36 rounded-full bg-muted flex items-center justify-center font-heading font-bold text-foreground text-3xl sm:text-4xl md:text-5xl border-4 border-background shadow-md ring-2 ring-primary ring-offset-2">
+                  {firstName?.charAt(0) || "?"}
+                </div>
+              )}
             </button>
             {statutGardien && statutGardien !== "novice" && (
               <div className="absolute -bottom-2 -right-2">
