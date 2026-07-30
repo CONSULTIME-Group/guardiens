@@ -1533,5 +1533,17 @@
     "to_region": "No listing close to you. Here are the {{count}} listings in your region.",
     "to_france": "No listing close to you at the moment. Here are all the listings available in France.",
     "back": "Back to {{radius}} km"
+  },
+  "application_cap": {
+    "badge": "Applications full",
+    "sitter_message": "The owner limited this listing to {{max}} applications, and it is full. They can reopen it at any time.",
+    "owner_eyebrow": "Application cap reached",
+    "owner_title": "Your listing no longer receives new applications, you have reached your cap of {{max}}.",
+    "owner_description": "Reply to the applicants waiting, or raise the cap.",
+    "owner_review_cta": "View applications",
+    "owner_raise_label": "Raise the cap",
+    "owner_raise_option": "{{value}} applications",
+    "owner_raise_success": "Cap raised to {{max}} applications.",
+    "owner_raise_error": "The cap could not be changed, please try again."
   }
 }

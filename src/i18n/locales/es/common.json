@@ -1532,5 +1532,17 @@
     "to_region": "No hay anuncios cerca de usted. Estos son los {{count}} anuncios de su región.",
     "to_france": "No hay anuncios cerca de usted por ahora. Estos son todos los anuncios disponibles en Francia.",
     "back": "Volver a {{radius}} km"
+  },
+  "application_cap": {
+    "badge": "Candidaturas completas",
+    "sitter_message": "El propietario limitó este anuncio a {{max}} candidaturas y está completo. Puede reabrirlo en cualquier momento.",
+    "owner_eyebrow": "Límite de candidaturas alcanzado",
+    "owner_title": "Su anuncio ya no recibe nuevas candidaturas, ha alcanzado su límite de {{max}}.",
+    "owner_description": "Responda a las personas en espera, o aumente el límite.",
+    "owner_review_cta": "Ver candidaturas",
+    "owner_raise_label": "Aumentar el límite",
+    "owner_raise_option": "{{value}} candidaturas",
+    "owner_raise_success": "Límite ampliado a {{max}} candidaturas.",
+    "owner_raise_error": "No se pudo cambiar el límite, inténtelo de nuevo."
   }
 }

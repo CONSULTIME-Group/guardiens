@@ -1532,5 +1532,17 @@
     "to_region": "Keine Anzeige in Ihrer Nähe. Hier sind die {{count}} Anzeigen aus Ihrer Region.",
     "to_france": "Derzeit keine Anzeige in Ihrer Nähe. Hier sind alle in Frankreich verfügbaren Anzeigen.",
     "back": "Zurück zu {{radius}} km"
+  },
+  "application_cap": {
+    "badge": "Bewerbungen vollständig",
+    "sitter_message": "Die Eigentümerseite hat diese Anzeige auf {{max}} Bewerbungen begrenzt, sie ist voll. Eine Wiedereröffnung ist jederzeit möglich.",
+    "owner_eyebrow": "Bewerbungsgrenze erreicht",
+    "owner_title": "Ihre Anzeige erhält keine neuen Bewerbungen mehr, Sie haben Ihre Grenze von {{max}} erreicht.",
+    "owner_description": "Antworten Sie den wartenden Personen, oder erhöhen Sie die Grenze.",
+    "owner_review_cta": "Bewerbungen ansehen",
+    "owner_raise_label": "Grenze erhöhen",
+    "owner_raise_option": "{{value}} Bewerbungen",
+    "owner_raise_success": "Grenze auf {{max}} Bewerbungen erhöht.",
+    "owner_raise_error": "Die Grenze konnte nicht geändert werden, bitte erneut versuchen."
   }
 }
