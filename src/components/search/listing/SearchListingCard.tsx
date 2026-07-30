@@ -52,6 +52,18 @@ const SearchListingCard = ({
   const isAssigned = !isMission && !!item.isAssigned;
   const isCompleted = !isMission && !!item.isCompleted;
   const isPast = !isMission && !!item.isPast;
+  // Une garde n'est réellement passée que si sa date de fin est antérieure à
+  // aujourd'hui. Le statut (archivée, terminée) ne suffit pas.
+  const isDateElapsed = (() => {
+    const raw = (item as any).end_date;
+    if (!raw) return false;
+    const end = new Date(raw);
+    if (isNaN(end.getTime())) return false;
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    end.setHours(0, 0, 0, 0);
+    return end.getTime() < today.getTime();
+  })();
   const isInactive = isAssigned || isCompleted || isPast;
   // Plafond de candidatures atteint : l'annonce reste visible et lisible.
   const isCapReached =
