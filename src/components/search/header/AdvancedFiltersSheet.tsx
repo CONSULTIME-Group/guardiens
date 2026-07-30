@@ -4,7 +4,6 @@ import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
 
 export type HousingFilter = "all" | "house" | "apartment" | "farm";
-export type ExperienceFilter = "all" | "1" | "3";
 export type DurationFilter = "all" | "short" | "medium" | "long";
 
 interface EnvOption {
@@ -29,8 +28,6 @@ interface AdvancedFiltersSheetProps {
   setVerifiedOnly: (v: boolean) => void;
   withPhotosOnly: boolean;
   setWithPhotosOnly: (v: boolean) => void;
-  minExperience: ExperienceFilter;
-  setMinExperience: (v: ExperienceFilter) => void;
   duration?: DurationFilter;
   setDuration?: (v: DurationFilter) => void;
   onApply: () => void;
@@ -55,8 +52,6 @@ export const AdvancedFiltersSheet = ({
   setVerifiedOnly,
   withPhotosOnly,
   setWithPhotosOnly,
-  minExperience,
-  setMinExperience,
   duration,
   setDuration,
   onApply,
@@ -158,29 +153,9 @@ export const AdvancedFiltersSheet = ({
             <Switch checked={withPhotosOnly} onCheckedChange={setWithPhotosOnly} />
           </div>
 
-          {/* Min experience */}
-          <div>
-            <label className="text-sm font-medium text-foreground mb-2 block">Expérience du propriétaire</label>
-            <div className="flex flex-wrap gap-2">
-              {([
-                { key: "all" as ExperienceFilter, label: "Tous" },
-                { key: "1" as ExperienceFilter, label: "1 garde+" },
-                { key: "3" as ExperienceFilter, label: "3 gardes+" },
-              ]).map(({ key, label }) => (
-                <button
-                  key={key}
-                  onClick={() => setMinExperience(key)}
-                  className={`rounded-full px-3 py-1.5 text-xs transition-colors ${
-                    minExperience === key
-                      ? "bg-primary text-primary-foreground"
-                      : "border border-border text-muted-foreground hover:border-primary"
-                  }`}
-                >
-                  {label}
-                </button>
-              ))}
-            </div>
-          </div>
+          {/* Filtre « expérience du propriétaire » retiré (vague 51) : il portait
+              sur les avis reçus par le propriétaire, quasi inexistants en base. */}
+
 
           {/* Durée du séjour (bornes exclusives : court < 7j, moyen 7 à 21j, long > 21j) */}
           {setDuration && (

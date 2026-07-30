@@ -70,7 +70,6 @@ type SearchTab = "sits" | "missions";
 type MissionSubTab = "published" | "members";
 type ViewMode = "list" | "map";
 type HousingFilter = "all" | "house" | "apartment" | "farm";
-type ExperienceFilter = "all" | "1" | "3";
 type ZoneMode = "radius" | "dept" | "region" | "france";
 
 interface SearchSitterProps {
@@ -108,10 +107,11 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
  if (typeof window === "undefined") return "radius";
  // Param URL ?zone=france, utilisé depuis le dashboard pour ouvrir la
  // recherche directement en mode élargi (« annonces plus loin »).
+ // Aucune persistance localStorage : la zone n'est retenue d'une session à
+ // l'autre que si elle est explicitement demandée dans l'URL.
  const urlZone = searchParams.get("zone");
  if (urlZone === "radius" || urlZone === "dept" || urlZone === "region" || urlZone === "france") return urlZone;
- const saved = localStorage.getItem("search.zoneMode");
- return saved === "radius" || saved === "dept" || saved === "region" || saved === "france" ? saved : "radius";
+ return "radius";
  });
  const [densityCounts, setDensityCounts] = useState<{ radius: number; dept: number; region: number; france: number }>({ radius: 0, dept: 0, region: 0, france: 0 });
  // ─── Élargissement automatique de zone (offre nationale encore faible) ───
@@ -142,7 +142,6 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
  const [duration, setDuration] = useState("all");
  const [verifiedOnly, setVerifiedOnly] = useState(false);
  const [withPhotosOnly, setWithPhotosOnly] = useState(false);
- const [minExperience, setMinExperience] = useState<ExperienceFilter>("all");
  const [visibleCount, setVisibleCount] = useState(12);
  const [emergencyOnly, setEmergencyOnly] = useState(searchParams.get("emergency") === "true");
  // Mode test démos : ?testDemos=1 dans l'URL active un panneau de diagnostic
@@ -230,22 +229,18 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
  { key: "forest", label: "Forêt" },
  ];
 
- // Derive housingType for existing filter logic (backward compat)
- const housingType = housingTypes.length === 1 ? housingTypes[0] : "all";
-
+ // Le rayon et le mode de zone ont leur propre puce visible, ils ne sont pas
+ // comptés ici (sinon compteur à 1 sans contrôle correspondant dans le panneau).
  const activeFiltersCount =
   housingTypes.length +
   environments.length +
   (verifiedOnly ? 1 : 0) +
   (withPhotosOnly ? 1 : 0) +
-  (minExperience !== "all" ? 1 : 0) +
   animalTypes.length +
   (startDate ? 1 : 0) +
   (endDate ? 1 : 0) +
    (duration !== "all" ? 1 : 0) +
-   (emergencyOnly ? 1 : 0) +
-   (radius[0] !== 15 ? 1 : 0) +
-   (zoneMode !== "radius" ? 1 : 0);
+   (emergencyOnly ? 1 : 0);
  const hasActiveFilters = activeFiltersCount > 0;
 
  // ─── City autocomplete via geo.api.gouv.fr ───
@@ -492,7 +487,7 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
  const results = useMemo(() => {
    if (tab === "sits") {
      let final = rawResults.slice();
-     if (housingType !== "all") final = final.filter((s: any) => s.property?.type === housingType);
+     if (housingTypes.length > 0) final = final.filter((s: any) => housingTypes.includes(s.property?.type));
      if (withPhotosOnly) final = final.filter((s: any) => s.property?.photos?.length > 0);
      if (duration !== "all") {
        final = final.filter((s: any) => {
@@ -507,10 +502,10 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
        const wantedSpecies = animalTypes.map(a => animalChipToSpecies[a]).filter(Boolean);
        final = final.filter((s: any) => (s.pets || []).some((p: any) => wantedSpecies.includes(p.species)));
      }
-     if (minExperience !== "all") {
-       const minCount = parseInt(minExperience);
-       final = final.filter((s: any) => (s.reviewCount || 0) >= minCount);
-     }
+     // Filtre « expérience du propriétaire » retiré (vague 51) : il portait sur
+     // les avis reçus par le propriétaire, quasi inexistants en base, et vidait
+     // la liste dans tous les cas.
+
      // Les annonces passées ou attribuées restent visibles pour les visiteurs
      // non connectés : elles montrent l'activité réelle de la communauté. Elles
      // restent regroupées à part et hors du compteur d'annonces disponibles.
@@ -534,7 +529,7 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
    if (sort === "closest") final.sort((a: any, b: any) => (a.distance ?? 9999) - (b.distance ?? 9999));
    else if (sort === "recent") final.sort((a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
    return interleaveDemos(final, DEMO_MISSIONS, 3);
- }, [tab, missionSubTab, rawResults, housingType, withPhotosOnly, duration, emergencyOnly, verifiedOnly, animalTypes, minExperience, isPublic, environments, sort, missionTypeFilter, missionCategoryFilter]);
+ }, [tab, missionSubTab, rawResults, housingTypes, withPhotosOnly, duration, emergencyOnly, verifiedOnly, animalTypes, isPublic, environments, sort, missionTypeFilter, missionCategoryFilter]);
 
  const availableMembers = useMemo(() => {
    if (!(tab === "missions" && missionSubTab === "members")) return [];
@@ -648,12 +643,6 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
  );
  }, [testDemoMode, loading, results, availableMembers, tab, missionSubTab, city, startDate, endDate, sort]);
 
-
- // Persist zone mode preference for next visit
- useEffect(() => {
- if (typeof window === "undefined") return;
- try { localStorage.setItem("search.zoneMode", zoneMode); } catch { /* ignore quota */ }
- }, [zoneMode]);
 
  // ─── Effet d'élargissement automatique ───
  useEffect(() => {
@@ -1300,7 +1289,6 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
  setHousingTypes([]);
  setVerifiedOnly(false);
  setWithPhotosOnly(false);
- setMinExperience("all");
  setEnvironments([]);
  setAnimalTypes([]);
  setStartDate("");
@@ -1604,8 +1592,6 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
         setVerifiedOnly={setVerifiedOnly}
         withPhotosOnly={withPhotosOnly}
         setWithPhotosOnly={setWithPhotosOnly}
-         minExperience={minExperience}
-         setMinExperience={setMinExperience}
          duration={duration as any}
          setDuration={setDuration as any}
          currentResultsCount={results.length}
@@ -2225,7 +2211,6 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
           emergencyOnly,
           verifiedOnly,
           withPhotosOnly,
-          minExperience,
           environments,
           housingTypes,
           animalTypes,
@@ -2242,7 +2227,6 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
           if (filter === "emergencyOnly") setEmergencyOnly(false);
           else if (filter === "verifiedOnly") setVerifiedOnly(false);
           else if (filter === "withPhotosOnly") setWithPhotosOnly(false);
-          else if (filter === "minExperience") setMinExperience("all");
           else if (filter === "environments") setEnvironments([]);
           else if (filter === "housingType") setHousingTypes([]);
           else if (filter === "animalTypes") setAnimalTypes([]);
