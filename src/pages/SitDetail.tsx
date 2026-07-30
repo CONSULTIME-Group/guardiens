@@ -66,7 +66,7 @@ const SitDetail = () => {
   const [hasReviewedThisSit, setHasReviewedThisSit] = useState(false);
   const [initialLogementOverride, setInitialLogementOverride] = useState("");
   const [initialAnimauxOverride, setInitialAnimauxOverride] = useState("");
-  const [ownerGallery, setOwnerGallery] = useState<{ id: string; photo_url: string }[]>([]);
+  const [ownerGallery, setOwnerGallery] = useState<{ id: string; photo_url: string; category?: string | null }[]>([]);
   const [loading, setLoading] = useState(true);
   const sitViewFired = useRef<string | null>(null);
 
@@ -113,7 +113,7 @@ const SitDetail = () => {
         // Galerie propriétaire = source de vérité unique pour les photos.
         supabase
           .from("owner_gallery")
-          .select("id, photo_url, position")
+          .select("id, photo_url, position, category")
           .eq("user_id", sitData.user_id)
           .order("position", { ascending: true }),
       ]);

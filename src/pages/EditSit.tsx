@@ -103,7 +103,7 @@ const EditSit = () => {
   const [minGardienSits, setMinGardienSits] = useState(0);
   const [sitStatus, setSitStatus] = useState("");
   const [coverPhotoUrl, setCoverPhotoUrl] = useState<string | null>(null);
-  const [ownerGallery, setOwnerGallery] = useState<{ id: string; photo_url: string }[]>([]);
+  const [ownerGallery, setOwnerGallery] = useState<{ id: string; photo_url: string; category?: string | null }[]>([]);
 
 
   const [loading, setLoading] = useState(true);
@@ -154,12 +154,12 @@ const EditSit = () => {
       // reste des états locaux.
       supabase
         .from("owner_gallery")
-        .select("id, photo_url")
+        .select("id, photo_url, category")
         .eq("user_id", user.id)
         .order("created_at", { ascending: true })
         .then(({ data: gallery }) => {
           if (cancelled) return;
-          setOwnerGallery((gallery || []) as { id: string; photo_url: string }[]);
+          setOwnerGallery((gallery || []) as { id: string; photo_url: string; category?: string | null }[]);
         });
       initialSnapshot.current = JSON.stringify({
         title: data.title || "",
