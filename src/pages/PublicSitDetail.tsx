@@ -74,17 +74,18 @@ const PublicSitDetail = () => {
     const load = async () => {
       try {
         // Param peut être un UUID (URL legacy) ou un slug SEO.
+        // Les dates sont masquées côté serveur par get_public_sit (fuite réseau).
         const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
         const isUuid = UUID_RE.test(param);
-        const query = supabase.from("sits").select("*").limit(1);
-        const { data: sitRows, error: sitErr } = await (isUuid ? query.eq("id", param) : query.eq("slug", param));
+        const { data: sitRows, error: sitErr } = await supabase.rpc("get_public_sit", { p_param: param });
         if (sitErr) throw sitErr;
-        const sitData = sitRows?.[0];
+        const sitData = (sitRows as any[])?.[0];
         if (!sitData) {
           setLoadError("not_found");
           return;
         }
         setSit(sitData);
+
 
         // 301-like : si on est arrivés via UUID mais qu'un slug existe, on
         // remplace l'URL par la version slug (mieux pour SEO, partages, CTR).
@@ -334,10 +335,10 @@ const PublicSitDetail = () => {
     return end.getTime() < today.getTime();
   })();
   if (sit.status !== "published" && !isClosedSit) return <div className="max-w-2xl mx-auto p-6 md:p-10 text-center"><p className="text-muted-foreground">Cette annonce n'est plus disponible.</p></div>;
-  // Participants à la garde : le propriétaire, un administrateur, ou le
-  // gardien retenu. Eux seuls voient les dates réelles d'une garde en cours.
-  // isParticipant n'entre plus dans le masquage des dates (décision produit)
-  const hideDates = isClosedSit && !isPastSit && !isAuthenticated;
+  // Le masquage des dates est décidé côté serveur (get_public_sit) : les
+  // colonnes start_date et end_date arrivent nulles, elles ne transitent pas.
+  const hideDates = sit.dates_hidden === true;
+
 
 
  const photos: string[] = property?.photos || [];
@@ -374,7 +375,7 @@ const PublicSitDetail = () => {
  // Sur une garde pourvue ou terminée, les dates précises sont masquées aux
  // visiteurs : elles révéleraient les périodes d'absence du foyer.
  const naturalDateLabel = (() => {
- if (hideDates) return isPastSit ? "Garde passée" : "Dates communiquées au gardien retenu";
+ if (hideDates) return isPastSit ? "Garde passée" : "Dates non communiquées";
  if (!sit.start_date || !sit.end_date) return "Dates flexibles";
  const startDay = format(new Date(sit.start_date), "d MMMM", { locale: fr });
  const endDay = format(new Date(sit.end_date), "d MMMM yyyy", { locale: fr });
@@ -414,7 +415,8 @@ const PublicSitDetail = () => {
  const endFmt = hideDates || !sit.end_date ? "" : format(new Date(sit.end_date), "d MMMM yyyy", { locale: fr });
  const datesShort = startFmt && endFmt
    ? `du ${startFmt} au ${endFmt}`
-   : (hideDates ? (sit.status === "confirmed" ? "période pourvue" : "garde passée") : "dates flexibles");
+   : (hideDates ? (isPastSit ? "garde passée" : "annonce close") : "dates flexibles");
+
 
 
  const petsSummary = pets.length > 0
@@ -435,7 +437,8 @@ const PublicSitDetail = () => {
  : "";
  const datesPart = startFmt && endFmt
    ? `Du ${startFmt} au ${endFmt}.`
-   : (hideDates ? (sit.status === "confirmed" ? "Période pourvue." : "Garde terminée.") : "Dates flexibles.");
+   : (hideDates ? (isPastSit ? "Garde terminée." : "Annonce close.") : "Dates flexibles.");
+
 
  const cityPart = ownerCity ? `${ownerCity}. ` : "";
  const ogDescription = propertyDescShort
@@ -620,7 +623,8 @@ const PublicSitDetail = () => {
             <p className="text-sm text-foreground">
               {isPastSit
                 ? "Cette garde est terminée, vous pouvez la consulter librement et "
-                : "Cette garde a déjà trouvé son gardien, vous pouvez la consulter librement et "}
+                : "Cette annonce n'est plus ouverte aux candidatures, vous pouvez la consulter librement et "}
+
               <Link to="/annonces" className="text-primary font-medium hover:underline">
                 découvrir les annonces ouvertes
               </Link>

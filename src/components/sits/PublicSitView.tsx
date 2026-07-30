@@ -566,7 +566,7 @@ const PublicSitView = ({
                   {isClosed ? (
                     <span className="inline-flex items-center gap-2 text-sm font-medium text-muted-foreground">
                       <span className="w-2 h-2 rounded-full bg-muted-foreground/60" />
-                      {isPast ? "Garde terminée" : "Garde attribuée"}
+                      {isPast ? "Garde terminée" : "Annonce close"}
                     </span>
                   ) : (
                     <span className="inline-flex items-center gap-2 text-sm font-medium text-success">
@@ -597,7 +597,8 @@ const PublicSitView = ({
                   <p className="text-sm text-foreground leading-relaxed">
                     {isPast
                       ? "Cette garde est terminée, vous pouvez la consulter librement et "
-                      : "Cette garde a déjà trouvé son gardien, vous pouvez la consulter librement et "}
+                      : "Cette annonce n'est plus ouverte aux candidatures, vous pouvez la consulter librement et "}
+
                     <Link to="/annonces" className="text-primary font-medium hover:underline">
                       découvrir les annonces ouvertes
                     </Link>
