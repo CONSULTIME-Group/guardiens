@@ -497,7 +497,9 @@ const Settings = () => {
               {activeSection === "security" && (
                 <>
                   <Separator className="my-8" />
-                  <IdentityVerificationSection user={user} />
+                  <div ref={identitySectionRef} id="identity-verification" className="scroll-mt-24">
+                    <IdentityVerificationSection user={user} />
+                  </div>
                   <Separator className="my-8" />
                   <div ref={proSectionRef} id="pro-verification">
                     <ProVerificationSection user={user} />
