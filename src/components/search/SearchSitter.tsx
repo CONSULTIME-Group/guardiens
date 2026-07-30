@@ -209,6 +209,11 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
  const [editingCity, setEditingCity] = useState(false);
  const [cityInput, setCityInput] = useState("");
  const [citySuggestions, setCitySuggestions] = useState<{ nom: string; codesPostaux?: string[] }[]>([]);
+ // Vrai dès que l'utilisateur a touché au champ de lieu (saisie, sélection,
+ // géolocalisation) ou qu'un lien profond a imposé une ville. Empêche le
+ // chargement asynchrone du profil d'écraser la saisie en cours.
+ const cityTouchedRef = useRef<boolean>(!!searchParams.get("ville"));
+
   
  const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
  const [filterSheetOpen, setFilterSheetOpen] = useState(false);
