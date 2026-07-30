@@ -487,9 +487,9 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
        const minCount = parseInt(minExperience);
        final = final.filter((s: any) => (s.reviewCount || 0) >= minCount);
      }
-     if (isPublic) {
-       final = final.filter((item: any) => !item.isPast && !item.isAssigned && !item.isCompleted);
-     }
+     // Les annonces passées ou attribuées restent visibles pour les visiteurs
+     // non connectés : elles montrent l'activité réelle de la communauté. Elles
+     // restent regroupées à part et hors du compteur d'annonces disponibles.
      if (environments.length > 0) {
        final = final.filter((item: any) => {
          const envs: string[] = item.environments || [];
