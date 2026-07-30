@@ -4,7 +4,6 @@ import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
 
 export type HousingFilter = "all" | "house" | "apartment" | "farm";
-export type ExperienceFilter = "all" | "1" | "3";
 export type DurationFilter = "all" | "short" | "medium" | "long";
 
 interface EnvOption {
@@ -29,8 +28,6 @@ interface AdvancedFiltersSheetProps {
   setVerifiedOnly: (v: boolean) => void;
   withPhotosOnly: boolean;
   setWithPhotosOnly: (v: boolean) => void;
-  minExperience: ExperienceFilter;
-  setMinExperience: (v: ExperienceFilter) => void;
   duration?: DurationFilter;
   setDuration?: (v: DurationFilter) => void;
   onApply: () => void;
@@ -55,8 +52,6 @@ export const AdvancedFiltersSheet = ({
   setVerifiedOnly,
   withPhotosOnly,
   setWithPhotosOnly,
-  minExperience,
-  setMinExperience,
   duration,
   setDuration,
   onApply,
