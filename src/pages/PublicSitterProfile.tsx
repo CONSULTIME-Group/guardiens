@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 
 import ProBadge from "@/components/badges/ProBadge";
 import { useParams, Link, useSearchParams, useNavigate } from "react-router-dom";
-import { Helmet } from "react-helmet-async";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useAlmaCulturalFact } from "@/hooks/useAlmaCulturalFact";
@@ -1184,9 +1183,6 @@ export default function PublicSitterProfile() {
         type="website"
         noindex={shouldNoindex}
       />
-      <Helmet>
-        {/* JSON-LD Person détaillé géré par <ProfileSchemaOrg /> ci-dessus */}
-      </Helmet>
 
       {/* ── Contenu principal z-1 ── */}
       <div className="relative z-[1]">

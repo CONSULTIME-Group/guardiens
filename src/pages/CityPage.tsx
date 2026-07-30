@@ -2,7 +2,6 @@ import { useEffect } from "react";
 import ReactMarkdown from "react-markdown";
 import { useParams, Link, Navigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { Helmet } from "react-helmet-async";
 import { supabase } from "@/integrations/supabase/client";
 
 import { Button } from "@/components/ui/button";
@@ -571,11 +570,10 @@ const CityPage = () => {
       />
 
       {dbSchemaGraph && (
-        <Helmet>
-          <script type="application/ld+json">
-            {JSON.stringify({ "@context": "https://schema.org", "@graph": dbSchemaGraph })}
-          </script>
-        </Helmet>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify({ "@context": "https://schema.org", "@graph": dbSchemaGraph }) }}
+        />
       )}
 
       <div className="min-h-screen bg-background">
