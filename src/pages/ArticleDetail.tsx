@@ -8,7 +8,6 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Card, CardContent } from "@/components/ui/card";
 import { ArrowLeft, ArrowRight, Calendar, MapPin, User, Compass, Building2 } from "lucide-react";
 import PageMeta from "@/components/PageMeta";
-import { Helmet } from "react-helmet-async";
 import { logSeoSnapshot } from "@/lib/seoDebugLog";
 import { format } from "date-fns";
 import { fr, enUS, es, it as itLocale, de as deLocale } from "date-fns/locale";
@@ -423,20 +422,19 @@ export default function ArticleDetail() {
 
     {/* Schema.org, Article + (optionnel) FAQPage + (optionnel) HowTo. */}
     {/* On émet 3 <script> séparés pour rester lisible côté Search Console. */}
-    <Helmet>
-    <script type="application/ld+json">{JSON.stringify(articleSchema)}</script>
+    <>
+    <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(articleSchema) }} />
     {faqSchema && (
-    <script type="application/ld+json">{JSON.stringify(faqSchema)}</script>
+    <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />
     )}
     {howToSchema && (
-    <script type="application/ld+json">{JSON.stringify(howToSchema)}</script>
+    <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(howToSchema) }} />
     )}
-    </Helmet>
+    </>
 
  {/* Product/Offer Schema for pricing articles */}
  {article.slug === "nouveaux-tarifs-2026" && (
- <Helmet>
- <script type="application/ld+json">{JSON.stringify({
+ <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
   "@context": "https://schema.org",
   "@type": "Service",
   "serviceType": "Abonnement plateforme de gardiennage entre particuliers",
@@ -453,14 +451,12 @@ export default function ArticleDetail() {
  "description": "Accès gardien gratuit aujourd'hui, sans engagement.",
  "availability": "https://schema.org/InStock"
  }
- })}</script>
- </Helmet>
+ }) }} />
  )}
 
  {/* LocalBusiness Schema for geo-targeted guide articles */}
  {article.category === "guide_lieu" && article.city && (
- <Helmet>
- <script type="application/ld+json">{JSON.stringify({
+ <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
  "@context": "https://schema.org",
  "@type": "LocalBusiness",
  "name": `Guardiens, Pet-sitting & House-sitting ${article.city}`,
@@ -473,8 +469,7 @@ export default function ArticleDetail() {
  "addressCountry": "FR"
  },
  "priceRange": "Gratuit pour les propriétaires",
- })}</script>
- </Helmet>
+ }) }} />
  )}
 
  <main id="main-content">
