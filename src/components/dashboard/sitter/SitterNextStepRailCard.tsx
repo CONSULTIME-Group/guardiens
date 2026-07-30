@@ -9,12 +9,25 @@ interface SitterNextStepRailCardProps {
   hasAvatar: boolean;
   hasBioMin: boolean;
   hasPostalCode: boolean;
+  /**
+   * Prochain pas de rechange quand les trois touches sont faites.
+   * Sert à rendre visible une invitation positive (vérification d'identité)
+   * au lieu de laisser la carte disparaître du rail.
+   */
+  action?: {
+    eyebrow: string;
+    title: string;
+    description: string;
+    ctaLabel: string;
+    ctaTo: string;
+  } | null;
 }
 
 const SitterNextStepRailCard = ({
   hasAvatar,
   hasBioMin,
   hasPostalCode,
+  action = null,
 }: SitterNextStepRailCardProps) => {
   const steps = [
     { done: hasAvatar, to: "/profile?section=identite" },
@@ -22,8 +35,27 @@ const SitterNextStepRailCard = ({
     { done: hasPostalCode, to: "/profile?focus=postal_code" },
   ];
   const doneCount = steps.filter((s) => s.done).length;
-  if (doneCount === steps.length) return null;
-  const firstUndone = steps.find((s) => !s.done)!;
+  const stepsDone = doneCount === steps.length;
+  if (stepsDone && !action) return null;
+  const firstUndone = steps.find((s) => !s.done);
+
+  const content = stepsDone
+    ? {
+        eyebrow: action!.eyebrow,
+        title: action!.title,
+        description: action!.description,
+        ctaLabel: action!.ctaLabel,
+        ctaTo: action!.ctaTo,
+      }
+    : {
+        eyebrow: "Votre prochain pas",
+        title: "Les annonces s'ouvrent avec votre profil.",
+        description:
+          "Dès vos trois touches terminées, vous pouvez postuler à toutes les gardes autour de vous.",
+        ctaLabel: "Reprendre là où vous en étiez",
+        ctaTo: firstUndone!.to,
+      };
+
 
   return (
     <article
