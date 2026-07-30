@@ -572,9 +572,22 @@ const AdminListings = () => {
               const st = stats[listing.id];
               const isAdminHidden = listing.status === "cancelled" && !!listing.hidden_by;
               const isAuthorCancelled = listing.status === "cancelled" && !listing.hidden_by;
+              const coverUrl = (listing as any).cover_photo_url as string | null;
+              const coverNotPlace = !coverUrl || animalPhotoUrls.has(coverUrl);
               return (
                 <TableRow key={listing.id}>
-                  <TableCell className="font-medium max-w-[200px] truncate">{listing.title || "Sans titre"}</TableCell>
+                  <TableCell className="font-medium max-w-[200px]">
+                    <div className="flex items-center gap-2 min-w-0">
+                      {coverNotPlace && (
+                        <span
+                          className="h-2 w-2 shrink-0 rounded-full bg-warning"
+                          title={coverUrl ? "Couverture montrant un animal" : "Aucune couverture définie"}
+                          aria-label={coverUrl ? "Couverture montrant un animal" : "Aucune couverture définie"}
+                        />
+                      )}
+                      <span className="truncate">{listing.title || "Sans titre"}</span>
+                    </div>
+                  </TableCell>
                   <TableCell className="text-sm">
                     <div className="flex items-center gap-2">
                       {listing.owner?.avatar_url && <img src={listing.owner.avatar_url} className="w-6 h-6 rounded-full object-cover" />}
