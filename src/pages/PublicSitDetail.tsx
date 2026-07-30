@@ -684,6 +684,8 @@ const PublicSitDetail = () => {
         hasAccess={hasAccess}
         hasApplied={hasApplied}
         onApply={handleApply}
+        isClosed={isClosedSit}
+        isPast={isPastSit}
       />
 
       {!isAuthenticated && <PublicFooter />}
