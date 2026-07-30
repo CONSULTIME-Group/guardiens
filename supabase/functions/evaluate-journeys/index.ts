@@ -191,10 +191,15 @@ async function runEvaluation(
     }
   }
 
+  // Garde-fou : les parcours arretes par epuisement des tentatives passent en
+  // status 'exited' et ne sont donc plus selectionnes ici.
+  const MAX_TRANSIENT_FAILURES = 5
+
   const { data: activeJourneys } = await supabase
     .from('user_journeys')
-    .select('id, user_id, sequence_key, current_step, started_at, last_step_at, created_at')
+    .select('id, user_id, sequence_key, current_step, started_at, last_step_at, created_at, transient_failure_count')
     .eq('status', 'active')
+    .lt('transient_failure_count', MAX_TRANSIENT_FAILURES)
     .limit(2000)
 
   const seqByKey = new Map(sequences.map((s) => [s.key, s]))
