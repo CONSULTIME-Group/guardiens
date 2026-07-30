@@ -144,6 +144,31 @@ export default function ApplicationQuickAction() {
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-3">
+              {peek.action === "decline" ? (
+                <div className="space-y-2 rounded-lg border border-border p-3">
+                  <p className="text-sm font-medium">
+                    {t("application_quick_action.decline_reason_title")}
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    {t("application_quick_action.decline_reason_hint")}
+                  </p>
+                  <RadioGroup
+                    value={declineReason}
+                    onValueChange={(v) => setDeclineReason(v as typeof declineReason)}
+                    className="gap-2 pt-1"
+                  >
+                    {DECLINE_REASONS.map((r) => (
+                      <div key={r} className="flex items-center gap-2">
+                        <RadioGroupItem value={r} id={`decline-reason-${r}`} />
+                        <Label htmlFor={`decline-reason-${r}`} className="text-sm font-normal">
+                          {t(`application_quick_action.decline_reason_${r}`)}
+                        </Label>
+                      </div>
+                    ))}
+                  </RadioGroup>
+                </div>
+              ) : null}
+
               <Button className="w-full" onClick={confirm} disabled={submitting}>
                 {submitting ? (
                   <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
