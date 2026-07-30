@@ -158,29 +158,9 @@ export const AdvancedFiltersSheet = ({
             <Switch checked={withPhotosOnly} onCheckedChange={setWithPhotosOnly} />
           </div>
 
-          {/* Min experience */}
-          <div>
-            <label className="text-sm font-medium text-foreground mb-2 block">Expérience du propriétaire</label>
-            <div className="flex flex-wrap gap-2">
-              {([
-                { key: "all" as ExperienceFilter, label: "Tous" },
-                { key: "1" as ExperienceFilter, label: "1 garde+" },
-                { key: "3" as ExperienceFilter, label: "3 gardes+" },
-              ]).map(({ key, label }) => (
-                <button
-                  key={key}
-                  onClick={() => setMinExperience(key)}
-                  className={`rounded-full px-3 py-1.5 text-xs transition-colors ${
-                    minExperience === key
-                      ? "bg-primary text-primary-foreground"
-                      : "border border-border text-muted-foreground hover:border-primary"
-                  }`}
-                >
-                  {label}
-                </button>
-              ))}
-            </div>
-          </div>
+          {/* Filtre « expérience du propriétaire » retiré (vague 51) : il portait
+              sur les avis reçus par le propriétaire, quasi inexistants en base. */}
+
 
           {/* Durée du séjour (bornes exclusives : court < 7j, moyen 7 à 21j, long > 21j) */}
           {setDuration && (
