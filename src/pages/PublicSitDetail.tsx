@@ -170,7 +170,7 @@ const PublicSitDetail = () => {
         setLatestReviews(withComment as any);
 
         const badgeMap = new Map<string, number>();
-        (badgeRes.data || []).forEach((b: any) => badgeMap.set(b.badge_key, (badgeMap.get(b.badge_key) || 0) + 1));
+        (badgeRes.data || []).forEach((b: any) => badgeMap.set(b.badge_id, (badgeMap.get(b.badge_id) || 0) + 1));
         setBadges(Array.from(badgeMap.entries()).map(([badge_key, count]) => ({ badge_key, count })).sort((a, b) => b.count - a.count));
 
         if (propertyData) {

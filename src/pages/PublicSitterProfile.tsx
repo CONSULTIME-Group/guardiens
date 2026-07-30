@@ -432,15 +432,18 @@ export default function PublicSitterProfile() {
       // champs pro_* — ils viennent de `profiles` (BASE_PROFILE_COLS) et sont
       // mergés plus bas. Les inclure ici ferait échouer toute la requête.
       const PUBLIC_PROFILE_COLS =
-        "id, first_name, avatar_url, bio, city, postal_code, created_at, identity_verified, is_founder, completed_sits_count";
+        "id, first_name, avatar_url, bio, city, postal_code, created_at, identity_verified, is_founder, completed_sits_count, last_seen_at";
       // `last_name` retiré du select — jamais rendu publiquement.
       const BASE_PROFILE_COLS =
         "id, first_name, avatar_url, bio, city, postal_code, created_at, identity_verified, is_founder, profile_completion, completed_sits_count, cancellation_count, hero_image_index, pro_status, pro_specialty, pro_tagline, pro_pricing_note, pro_business_name";
+      // Vue publique réduite : 19 colonnes d'affichage, sans donnée d'affinité.
+      const PUBLIC_SITTER_COLS =
+        "user_id, motivation, sitter_type, accompanied_by, lifestyle, animal_types, has_vehicle, geographic_radius, min_duration, is_available, competences, preferred_frequency, min_notice, preferred_environments, farm_animals_ok, own_animals, reply_median_minutes, travels_with_children, travels_with_own_animals";
       const [profileRes, baseProfileRes, sitterRes, badgesRes, reviewsRes, galleryRes, emergencyRes, subRes, ownerRes, missionsRes, extExpRes] =
         await Promise.all([
           supabase.from("public_profiles").select(PUBLIC_PROFILE_COLS).eq("id", id).maybeSingle(),
           supabase.from("profiles").select(BASE_PROFILE_COLS).eq("id", id).maybeSingle(),
-          (supabase as any).from("public_sitter_profiles").select("*").eq("user_id", id).maybeSingle(),
+          (supabase as any).from("public_sitter_profiles").select(PUBLIC_SITTER_COLS).eq("user_id", id).maybeSingle(),
           supabase.from("badge_attributions").select("badge_id").eq("user_id", id),
           supabase
             .from("reviews")
@@ -492,7 +495,19 @@ export default function PublicSitterProfile() {
             pro_business_name: baseData?.pro_business_name ?? null,
           }
         : baseData;
-      const fetchedSitterProfile = sitterRes?.data ?? null;
+      let fetchedSitterProfile = sitterRes?.data ?? null;
+      // Complément d'affinité : vue réservée aux membres connectés, chargée
+      // seulement pour un propriétaire connecté. Elle apporte work_during_sit
+      // et sensitivities, indispensables au critère de présence et à la
+      // disqualification.
+      if (fetchedSitterProfile && auth?.isAuthenticated && auth?.activeRole === "owner") {
+        const { data: affinityRow } = await (supabase as any)
+          .from("sitter_profiles_affinity")
+          .select("user_id, experience_years, life_pace, languages, interests, work_during_sit, sensitivities")
+          .eq("user_id", id)
+          .maybeSingle();
+        if (affinityRow) fetchedSitterProfile = { ...fetchedSitterProfile, ...affinityRow };
+      }
       const fetchedOwnerProfile = (ownerRes?.data as OwnerProfileData | null) ?? null;
       const fetchedEmergencyProfile = emergencyRes?.data ?? null;
       const fetchedMissionCount = missionsRes?.count ?? 0;
@@ -1117,7 +1132,7 @@ export default function PublicSitterProfile() {
               count: b.count ?? 1,
             })),
             completedSits,
-            lastActivity: sitterProfile?.last_seen_at ?? null,
+            lastActivity: profile?.last_seen_at ?? null,
           }).map((e) => ({ name: e.label, date: e.date }))}
         />
       )}
@@ -1443,7 +1458,7 @@ export default function PublicSitterProfile() {
                       count: b.count ?? 1,
                     }))}
                     completedSits={completedSits}
-                    lastActivity={sitterProfile?.last_seen_at ?? null}
+                    lastActivity={profile?.last_seen_at ?? null}
                     firstName={firstName}
                   />
                 </div>
