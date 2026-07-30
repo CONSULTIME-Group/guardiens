@@ -1,0 +1,2 @@
+UPDATE public.user_journeys SET current_step = 0, last_step_at = NULL WHERE id = 'efc49541-af75-4977-9de7-372c7a005899';
+UPDATE public.user_journeys SET current_step = 2 WHERE id = '92920f84-bcc1-404e-ae4b-c226b7279efb';
