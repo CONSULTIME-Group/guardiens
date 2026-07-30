@@ -1525,5 +1525,11 @@
     "empty_body": "Assistenti locali sono già iscritti e aspettano la tua richiesta.",
     "empty_cta": "Pubblica il mio annuncio",
     "loading": "Caricamento annunci"
+  },
+  "search_auto_widen": {
+    "to_dept": "Nessun annuncio entro {{radius}} km da lei. Ecco i {{count}} annunci del suo dipartimento.",
+    "to_region": "Nessun annuncio vicino a lei. Ecco i {{count}} annunci della sua regione.",
+    "to_france": "Nessun annuncio vicino a lei per il momento. Ecco tutti gli annunci disponibili in Francia.",
+    "back": "Tornare a {{radius}} km"
   }
 }

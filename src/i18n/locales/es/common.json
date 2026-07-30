@@ -1525,5 +1525,11 @@
     "empty_body": "Cuidadores locales ya están inscritos y esperan tu solicitud.",
     "empty_cta": "Publicar mi anuncio",
     "loading": "Cargando anuncios"
+  },
+  "search_auto_widen": {
+    "to_dept": "No hay anuncios a menos de {{radius}} km de su ubicación. Estos son los {{count}} anuncios de su departamento.",
+    "to_region": "No hay anuncios cerca de usted. Estos son los {{count}} anuncios de su región.",
+    "to_france": "No hay anuncios cerca de usted por ahora. Estos son todos los anuncios disponibles en Francia.",
+    "back": "Volver a {{radius}} km"
   }
 }

@@ -1526,5 +1526,11 @@
     "empty_body": "Local sitters are already signed up and waiting for your request.",
     "empty_cta": "Post my listing",
     "loading": "Loading listings"
+  },
+  "search_auto_widen": {
+    "to_dept": "No listing within {{radius}} km of your location. Here are the {{count}} listings in your department.",
+    "to_region": "No listing close to you. Here are the {{count}} listings in your region.",
+    "to_france": "No listing close to you at the moment. Here are all the listings available in France.",
+    "back": "Back to {{radius}} km"
   }
 }

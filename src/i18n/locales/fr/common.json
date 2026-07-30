@@ -1546,5 +1546,11 @@
     "empty_body": "Des gardiens du coin sont déjà inscrits et attendent votre demande.",
     "empty_cta": "Publier mon annonce",
     "loading": "Chargement des annonces en cours"
+  },
+  "search_auto_widen": {
+    "to_dept": "Aucune annonce à moins de {{radius}} km de chez vous. Voici les {{count}} annonces de votre département.",
+    "to_region": "Aucune annonce près de chez vous. Voici les {{count}} annonces de votre région.",
+    "to_france": "Aucune annonce près de chez vous pour l'instant. Voici toutes les annonces disponibles en France.",
+    "back": "Revenir à {{radius}} km"
   }
 }

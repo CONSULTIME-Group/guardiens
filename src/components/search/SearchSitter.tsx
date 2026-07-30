@@ -5,6 +5,7 @@ import InviteToMySitButton from "@/components/sits/owner/InviteToMySitButton";
 import { Sprout, PawPrint, GraduationCap, Handshake as HandshakeIcon, LayoutGrid, Map as MapIcon, Cat, Bird, SlidersHorizontal, ShieldCheck, Crosshair, Bell, BellRing, Loader2, Home, Wrench } from "lucide-react";
 import EnvironmentPills from "@/components/shared/EnvironmentPills";
 import { Link, useSearchParams, useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useToast } from "@/hooks/use-toast";
 import { ToastAction } from "@/components/ui/toast";
@@ -88,6 +89,7 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
  const { user } = useAuth();
  const { hasAccess } = useSubscriptionAccess();
  const isMobile = useIsMobile();
+ const { t } = useTranslation();
  const navigate = useNavigate();
  const { toast } = useToast();
  const [searchParams, setSearchParams] = useSearchParams();
@@ -111,6 +113,23 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
  return saved === "radius" || saved === "dept" || saved === "region" || saved === "france" ? saved : "radius";
  });
  const [densityCounts, setDensityCounts] = useState<{ radius: number; dept: number; region: number; france: number }>({ radius: 0, dept: 0, region: 0, france: 0 });
+ // ─── Élargissement automatique de zone (offre nationale encore faible) ───
+ // Quand la recherche par rayon ne renvoie rien alors que des annonces existent
+ // ailleurs, on bascule UNE SEULE FOIS vers la zone la plus étroite non vide.
+ // Jamais si l'utilisateur a lui-même réglé sa zone, ni sur un deep-link.
+ const [zoneTouchedByUser, setZoneTouchedByUser] = useState(false);
+ const autoWidenedRef = useRef(false);
+ const [autoWidened, setAutoWidened] = useState<{ to: Exclude<ZoneMode, "radius">; fromRadius: number; count: number } | null>(null);
+ const deepLinkLockedRef = useRef(
+  ["zone", "ville", "rayon", "debut", "fin"].some((k) => !!searchParams.get(k)),
+ );
+ const markZoneTouched = () => {
+  setZoneTouchedByUser(true);
+  autoWidenedRef.current = true;
+  setAutoWidened(null);
+ };
+ const setZoneModeByUser = (m: ZoneMode) => { markZoneTouched(); setZoneMode(m); };
+ const setRadiusByUser = (v: number[]) => { markZoneTouched(); setRadius(v); };
  const [userPostalCode, setUserPostalCode] = useState<string | null>(null);
  const [startDate, setStartDate] = useState(() => searchParams.get("debut") || "");
  const [endDate, setEndDate] = useState(() => searchParams.get("fin") || "");
@@ -347,6 +366,7 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
  setCity(name);
  setCityPostalCode(refCp);
  setCitySuggestions([]);
+ markZoneTouched();
  setZoneMode("dept");
  setEditingCity(false);
  };
@@ -360,6 +380,7 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
  setCity(name);
  setCityPostalCode(refCp);
  setCitySuggestions([]);
+ markZoneTouched();
  setZoneMode("region");
  setEditingCity(false);
  };
@@ -609,6 +630,26 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
  if (typeof window === "undefined") return;
  try { localStorage.setItem("search.zoneMode", zoneMode); } catch { /* ignore quota */ }
  }, [zoneMode]);
+
+ // ─── Effet d'élargissement automatique ───
+ useEffect(() => {
+  if (loading || tab !== "sits" || zoneMode !== "radius") return;
+  if (zoneTouchedByUser || autoWidenedRef.current || deepLinkLockedRef.current) return;
+  if (densityCounts.radius > 0) return;
+  let target: Exclude<ZoneMode, "radius"> | null = null;
+  let count = 0;
+  if (densityCounts.dept > 0) { target = "dept"; count = densityCounts.dept; }
+  else if (densityCounts.region > 0) { target = "region"; count = densityCounts.region; }
+  else if (densityCounts.france > 0) { target = "france"; count = densityCounts.france; }
+  if (!target) return;
+  autoWidenedRef.current = true;
+  setAutoWidened({ to: target, fromRadius: radius[0], count });
+  void trackEvent("search_auto_widened", {
+   source: "search_sitter",
+   metadata: { from: "radius", to: target, radius: radius[0], results: count },
+  });
+  setZoneMode(target);
+ }, [loading, tab, zoneMode, zoneTouchedByUser, densityCounts, radius]);
 
  // Track out-of-zone banner impression (déduplique par tab+zoneMode dans la session)
  const outOfZoneTrackedRef = useRef<Set<string>>(new Set());
@@ -1450,9 +1491,9 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
       <ZonePickerPopover
         pillClass={pillClass}
         zoneMode={zoneMode}
-        setZoneMode={setZoneMode}
+        setZoneMode={setZoneModeByUser}
         radius={radius}
-        setRadius={setRadius}
+        setRadius={setRadiusByUser}
         userPostalCode={userPostalCode}
         densityCounts={densityCounts}
         regionCode={getRegionCode(getDeptCode(getZoneRefPostalCode()))}
@@ -1599,8 +1640,34 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
 
     {/* ─── Out-of-zone banner ─── PRIORITÉ 1 : quand il s'affiche, il masque
          SitterDiscoveryBanner et AffinityMissingCTA (une seule bannière au-dessus des résultats). */}
+    {autoWidened && tab === "sits" && zoneMode === autoWidened.to && (
+      <div className="mx-6 mt-4 rounded-2xl border border-primary/20 bg-primary/5 p-4 text-sm text-foreground flex flex-col sm:flex-row sm:items-center gap-3">
+        <p className="flex-1 min-w-0 leading-relaxed">
+          {autoWidened.to === "dept"
+            ? t("search_auto_widen.to_dept", { radius: autoWidened.fromRadius, count: autoWidened.count })
+            : autoWidened.to === "region"
+            ? t("search_auto_widen.to_region", { count: autoWidened.count })
+            : t("search_auto_widen.to_france")}
+        </p>
+        <Button
+          size="sm"
+          variant="outline"
+          className="shrink-0 bg-card"
+          onClick={() => {
+            const back = autoWidened.fromRadius;
+            markZoneTouched();
+            setRadius([back]);
+            setZoneMode("radius");
+          }}
+        >
+          {t("search_auto_widen.back", { radius: autoWidened.fromRadius })}
+        </Button>
+      </div>
+    )}
+
     {(() => {
-      const showOutOfZone = tab === "sits" && !loading && zoneMode !== "france" && densityCounts.france > densityCounts.radius;
+      const widenBannerVisible = !!autoWidened && tab === "sits" && zoneMode === autoWidened.to;
+      const showOutOfZone = !widenBannerVisible && tab === "sits" && !loading && zoneMode !== "france" && densityCounts.france > densityCounts.radius;
       return showOutOfZone ? (
         <OutOfZoneBanner
           zoneMode={zoneMode}

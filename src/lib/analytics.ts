@@ -39,6 +39,7 @@ export type EventType =
   | "search_empty_action"
   | "search_outofzone_impression"
   | "search_outofzone_click"
+  | "search_auto_widened"
   | "sit_view"
   | "sit_apply_clicked"
   | "sit_apply_blocked"

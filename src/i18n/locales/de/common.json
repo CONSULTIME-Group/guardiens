@@ -1525,5 +1525,11 @@
     "empty_body": "Lokale Betreuer sind bereits angemeldet und warten auf deine Anfrage.",
     "empty_cta": "Meine Anzeige veröffentlichen",
     "loading": "Anzeigen werden geladen"
+  },
+  "search_auto_widen": {
+    "to_dept": "Keine Anzeige im Umkreis von {{radius}} km. Hier sind die {{count}} Anzeigen aus Ihrem Departement.",
+    "to_region": "Keine Anzeige in Ihrer Nähe. Hier sind die {{count}} Anzeigen aus Ihrer Region.",
+    "to_france": "Derzeit keine Anzeige in Ihrer Nähe. Hier sind alle in Frankreich verfügbaren Anzeigen.",
+    "back": "Zurück zu {{radius}} km"
   }
 }
