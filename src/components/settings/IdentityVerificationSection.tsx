@@ -349,7 +349,7 @@ const IdentityVerificationSection = ({ user }: { user: any }) => {
           </div>
         )}
 
-        {(documentUrl || status !== "verified") && (
+        {(status !== "verified" || (documentUrl && !selfieUrl)) && (
           <div className={`space-y-2 ${status !== "verified" ? "pt-3 mt-4 border-t border-border" : ""}`}>
             <p className="text-sm font-medium text-foreground">Étape 2, Selfie de vérification</p>
             <p className="text-xs text-muted-foreground">
