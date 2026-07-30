@@ -22,10 +22,12 @@ import { compressImageFile } from "@/lib/compressImage";
 import { getImageDimensions } from "@/lib/imageDimensions";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { pickPlaceCover, sortForCover } from "@/lib/coverPriority";
 
 interface GalleryPhoto {
   id: string;
   photo_url: string;
+  category?: string | null;
 }
 
 interface SitPhotoManagerProps {
@@ -52,7 +54,9 @@ const SitPhotoManager = ({
   const [suggesting, setSuggesting] = useState(false);
   const [suggestion, setSuggestion] = useState<{ url: string; score: number; summary: string } | null>(null);
 
-  const effectiveCover = coverUrl || gallery[0]?.photo_url || null;
+  // À défaut de choix explicite du propriétaire, la couverture montre le lieu
+  // (logement ou jardin en priorité), jamais un animal.
+  const effectiveCover = coverUrl || pickPlaceCover(gallery) || null;
 
   // Debounce & cache pour éviter la sur-consommation Gemini :
   // - Session (window) : scores par URL, gardés tant que l'onglet vit.
@@ -252,7 +256,7 @@ const SitPhotoManager = ({
               width: dims.width || null,
               height: dims.height || null,
             } as any)
-            .select("id, photo_url")
+            .select("id, photo_url, category")
             .single();
           if (insErr) throw insErr;
           inserted.push(row as GalleryPhoto);

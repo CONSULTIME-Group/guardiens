@@ -18,6 +18,7 @@ import { DEMO_SITS, DEMO_MISSIONS, DEMO_MEMBERS, interleaveDemos, auditInterleav
 import { normalize } from "@/lib/normalize";
 import { normalizeSkillKey, tokenizeSkillPhrases } from "@/lib/skills/tokenize";
 import { supabase } from "@/integrations/supabase/client";
+import { pickPlaceCover } from "@/lib/coverPriority";
 import { useAuth } from "@/contexts/AuthContext";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Input } from "@/components/ui/input";
@@ -814,7 +815,7 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
 .in("id", ownerIds),
      supabase
 .from("owner_gallery")
-.select("user_id, photo_url, position")
+.select("user_id, photo_url, position, category")
 .in("user_id", ownerIds)
 .order("position", { ascending: true }),
    ]);
@@ -826,11 +827,19 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
    const owners = ownersRes.data;
    const galleryRows = galleryRes.data;
    const ownerMap = new Map((owners || []).map((o: any) => [o.id, o]));
-   const galleryFirstMap = new Map<string, string>();
+   // Repli d'affichage : on retient la photo de LIEU la mieux placée
+   // (logement, jardin, puis quartier), jamais une photo d'animal en priorité.
+   const galleryByOwner = new Map<string, any[]>();
    (galleryRows || []).forEach((g: any) => {
-     if (g?.user_id && g?.photo_url && !galleryFirstMap.has(g.user_id)) {
-       galleryFirstMap.set(g.user_id, g.photo_url);
-     }
+     if (!g?.user_id || !g?.photo_url) return;
+     const arr = galleryByOwner.get(g.user_id) || [];
+     arr.push(g);
+     galleryByOwner.set(g.user_id, arr);
+   });
+   const galleryFirstMap = new Map<string, string>();
+   galleryByOwner.forEach((rows, ownerId) => {
+     const best = pickPlaceCover(rows);
+     if (best) galleryFirstMap.set(ownerId, best);
    });
    items = items.map((s: any) => ({
      ...s,
