@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { Upload, CheckCircle2, Clock, AlertCircle, ShieldCheck, History } from "lucide-react";
 import { compressImageFile } from "@/lib/compressImage";
+import { convertHeicToJpeg, isHeicFile } from "@/lib/heicToJpeg";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 
@@ -19,6 +20,7 @@ const IdentityVerificationSection = ({ user }: { user: any }) => {
   const [selfieUrl, setSelfieUrl] = useState<string | null>(null);
   const [selfiePreview, setSelfiePreview] = useState<string | null>(null);
   const [uploadingSelfie, setUploadingSelfie] = useState(false);
+  const [converting, setConverting] = useState(false);
 
   useEffect(() => {
     if (!user) return;
@@ -78,7 +80,7 @@ const IdentityVerificationSection = ({ user }: { user: any }) => {
     const allowedTypes = ["image/jpeg", "image/png", "image/webp", "application/pdf", "image/heic", "image/heif"];
     const ext = file.name.split(".").pop()?.toLowerCase() || "";
     if (!allowedTypes.includes(file.type) && !["heic", "heif"].includes(ext)) {
-      return "Votre fichier n'a pas pu être envoyé. Vérifiez le format (JPG, PNG, PDF, HEIC) et la taille (max 10 Mo).";
+      return `Votre fichier n'a pas pu être envoyé. Vérifiez le format (JPG, PNG, PDF, HEIC converti automatiquement) et la taille (max ${maxMb} Mo).`;
     }
     return null;
   };
@@ -93,21 +95,32 @@ const IdentityVerificationSection = ({ user }: { user: any }) => {
     const validationError = validateFile(file);
     if (validationError) { toast.error(validationError); return; }
 
-    if (file.type.startsWith("image/")) {
+    // Le bucket refuse le HEIC : conversion en JPEG avant tout, sinon on
+    // n'envoie rien plutôt que d'échouer à l'upload.
+    let source = file;
+    if (isHeicFile(file)) {
+      setConverting(true);
+      try {
+        source = await convertHeicToJpeg(file);
+      } catch (err) {
+        setConverting(false);
+        logger.error("HEIC conversion failed", { err: err instanceof Error ? err.message : String(err) });
+        toast.error("Cette photo est au format HEIC et n'a pas pu être convertie. Prenez la photo en JPEG (réglage Appareil photo, Format, Plus compatible) ou enregistrez l'image en JPG, puis réessayez.");
+        return;
+      }
+      setConverting(false);
+    }
+
+    if (source.type.startsWith("image/")) {
       const reader = new FileReader();
       reader.onload = (ev) => setPreviewUrl(ev.target?.result as string);
-      reader.readAsDataURL(file);
+      reader.readAsDataURL(source);
     } else setPreviewUrl(null);
 
     setUploading(true);
     setUploadProgress(10);
     try {
-      // HEIC/HEIF (photos iPhone) ne sont pas décodables par <canvas> hors Safari iOS
-      // → on uploade le fichier brut au lieu de tenter une compression qui échouerait
-      // avec un message trompeur "vérifiez le format".
-      const ext = (file.name.split(".").pop() || "").toLowerCase();
-      const isHeic = ext === "heic" || ext === "heif" || file.type === "image/heic" || file.type === "image/heif";
-      const toUpload = isHeic ? file : await compressImageFile(file, 5, 2048);
+      const toUpload = source.type === "application/pdf" ? source : await compressImageFile(source, 5, 2048);
       setUploadProgress(30);
       const finalExt = toUpload.name.split(".").pop();
       const path = `${user.id}/identity-document.${finalExt}`;
@@ -168,16 +181,27 @@ const IdentityVerificationSection = ({ user }: { user: any }) => {
     if (!file || !user) return;
     const validationError = validateFile(file, 5);
     if (validationError) { toast.error(validationError); return; }
-    if (file.type.startsWith("image/")) {
+    let source = file;
+    if (isHeicFile(file)) {
+      setConverting(true);
+      try {
+        source = await convertHeicToJpeg(file);
+      } catch (err) {
+        setConverting(false);
+        logger.error("HEIC conversion failed", { err: err instanceof Error ? err.message : String(err) });
+        toast.error("Cette photo est au format HEIC et n'a pas pu être convertie. Prenez la photo en JPEG (réglage Appareil photo, Format, Plus compatible) ou enregistrez l'image en JPG, puis réessayez.");
+        return;
+      }
+      setConverting(false);
+    }
+    if (source.type.startsWith("image/")) {
       const reader = new FileReader();
       reader.onload = (ev) => setSelfiePreview(ev.target?.result as string);
-      reader.readAsDataURL(file);
+      reader.readAsDataURL(source);
     }
     setUploadingSelfie(true);
     try {
-      const ext = (file.name.split(".").pop() || "").toLowerCase();
-      const isHeic = ext === "heic" || ext === "heif" || file.type === "image/heic" || file.type === "image/heif";
-      const toUpload = isHeic ? file : await compressImageFile(file, 5, 2048);
+      const toUpload = await compressImageFile(source, 5, 2048);
       const finalExt = toUpload.name.split(".").pop();
       const path = `${user.id}/identity-selfie.${finalExt}`;
       await supabase.storage.from("identity-documents").remove([path]);
@@ -248,7 +272,8 @@ const IdentityVerificationSection = ({ user }: { user: any }) => {
                 <li>Permis de conduire</li>
                 <li>Titre de séjour</li>
               </ul>
-              <p className="mt-2">Formats : JPG, PNG, PDF, HEIC · Max 10 Mo</p>
+              <p className="mt-2">Formats : JPG, PNG, WebP, PDF · Max 10 Mo</p>
+              <p className="text-[11px] text-muted-foreground/80">Les photos HEIC d'iPhone sont converties automatiquement en JPG avant l'envoi.</p>
             </div>
 
             {uploadProgress > 0 && (
@@ -271,11 +296,12 @@ const IdentityVerificationSection = ({ user }: { user: any }) => {
             )}
 
             <label className="block">
-              <input type="file" accept="image/jpeg,image/png,image/webp,application/pdf,image/heic,image/heif,.heic,.heif" onChange={handleUpload} disabled={uploading} className="hidden" />
-              <Button variant={status === "rejected" ? "default" : "outline"} size="sm" className="gap-2 cursor-pointer" disabled={uploading || rateLimited} asChild>
+              <input type="file" accept="image/jpeg,image/png,image/webp,application/pdf,image/heic,image/heif,.heic,.heif" onChange={handleUpload} disabled={uploading || converting} className="hidden" />
+              <Button variant={status === "rejected" ? "default" : "outline"} size="sm" className="gap-2 cursor-pointer" disabled={uploading || converting || rateLimited} asChild>
                 <span>
                   <Upload className="h-4 w-4" />
                   {rateLimited ? "Limite atteinte (5/jour)" :
+                   converting ? "Conversion de la photo..." :
                    uploading ? "Envoi en cours..." :
                    status === "pending" ? "Renvoyer un document" :
                    status === "needs_review" ? "Retirer et renvoyer un document" :
@@ -290,18 +316,19 @@ const IdentityVerificationSection = ({ user }: { user: any }) => {
               <p className="text-sm font-medium text-foreground">Étape 2, Selfie de vérification</p>
               <p className="text-xs text-muted-foreground">
                 {documentUrl
-                  ? "Prenez un selfie pour confirmer que la pièce vous appartient. Formats : JPG, PNG · Max 5 Mo"
+                  ? "Prenez un selfie pour confirmer que la pièce vous appartient. Formats : JPG, PNG, WebP (HEIC converti automatiquement) · Max 5 Mo"
                   : "Envoyez d'abord votre pièce d'identité (étape 1) pour débloquer le selfie."}
               </p>
               {selfiePreview && (
                 <img src={selfiePreview} alt="Aperçu selfie" className="max-h-32 rounded-lg border border-border object-contain" />
               )}
               <label className="block">
-                <input type="file" accept="image/jpeg,image/png,image/webp" capture="user" onChange={handleSelfieUpload} disabled={uploadingSelfie || !documentUrl} className="hidden" />
+                <input type="file" accept="image/jpeg,image/png,image/webp,image/heic,image/heif,.heic,.heif" capture="user" onChange={handleSelfieUpload} disabled={uploadingSelfie || !documentUrl} className="hidden" />
                 <Button variant="outline" size="sm" className="gap-2 cursor-pointer" disabled={uploadingSelfie || !documentUrl} asChild>
                   <span>
                     <Upload className="h-4 w-4" />
                     {!documentUrl ? "Pièce d'identité requise" :
+                     converting ? "Conversion de la photo..." :
                      uploadingSelfie ? "Envoi en cours..." :
                      selfieUrl ? "Changer le selfie" : "Prendre / envoyer un selfie"}
                   </span>
