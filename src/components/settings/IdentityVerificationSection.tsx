@@ -63,6 +63,10 @@ const IdentityVerificationSection = ({ user }: { user: any }) => {
         setStatus(currentStatus);
         setDocumentUrl(docUrl);
         setSelfieUrl(selfie);
+        void trackEvent("identity_section_viewed", {
+          source: "settings",
+          metadata: { status: currentStatus, has_document: !!docUrl, has_selfie: !!selfie },
+        });
       }
       setLogs((logsRes.data as any[]) || []);
       setLoaded(true);
