@@ -1467,8 +1467,12 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
      </span>
     </button>
    )}
-    {/* ─── Hero search bar (desktop) ─── Champ ville dominant + CTA Rechercher */}
-    <div className="hidden md:flex items-center gap-3 px-6 pt-4 pb-2">
+    {/* ─── Hero search bar (desktop) ─── Champ ville dominant.
+        Une seule instance du sélecteur de lieu est montée : le rendu est
+        conditionné en JavaScript (isMobile), jamais masqué en CSS, sinon le
+        portail du popover produisait deux contenus ouverts simultanément. */}
+    {!isMobile && (
+    <div className="flex items-center gap-3 px-6 pt-4 pb-2">
       <div className="flex-1 min-w-0">
         <LocationPickerPopover
           open={editingCity}
@@ -1495,14 +1499,15 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
         </div>
       )}
     </div>
+    )}
 
     <div
      id="search-filter-pills"
      className={`relative -mr-6 sm:mr-0 ${isMobile && viewMode === "map" && !mobileFiltersOpen ? "hidden" : ""}`}
     >
     <div className="flex flex-row items-center gap-2 px-6 py-3 overflow-x-auto no-scrollbar pr-10 sm:pr-6 snap-x snap-mandatory scroll-px-6 overscroll-x-contain">
-  {/* Location pill (mobile uniquement — sur desktop, le champ ville hero est au-dessus) */}
-  <div className="md:hidden contents">
+  {/* Location pill (mobile uniquement, sur desktop le champ ville hero est au-dessus) */}
+  {isMobile && (
   <LocationPickerPopover
     open={editingCity}
     onOpenChange={setEditingCity}
@@ -1518,6 +1523,7 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
     onCitySelect={handleCitySelect}
     onDeptSelect={handleDeptSelect}
     onRegionSelect={handleRegionSelect}
+
     onGeolocate={handleGeolocation}
   />
   </div>
