@@ -291,6 +291,9 @@ const IdentityVerificationSection = ({ user }: { user: any }) => {
             <p className={`text-sm font-medium ${cfg.color}`}>{cfg.label}</p>
             <p className="text-xs text-muted-foreground mt-0.5">{cfg.desc}</p>
             <p className="text-[11px] text-muted-foreground/80 mt-2 leading-relaxed">
+              Ce que couvre la mention « identité vérifiée » : une pièce d'identité officielle a été fournie et contrôlée automatiquement. C'est un signal de confiance, pas une garantie absolue.
+            </p>
+            <p className="text-[11px] text-muted-foreground/80 mt-2 leading-relaxed">
               Votre document est stocké dans un espace sécurisé et privé, et supprimé automatiquement de nos serveurs 30 jours après la vérification. Seule l'équipe Guardiens peut le consulter pendant l'examen.
             </p>
           </div>
@@ -355,7 +358,10 @@ const IdentityVerificationSection = ({ user }: { user: any }) => {
 
         {(status !== "verified" || (documentUrl && !selfieUrl)) && (
           <div className={`space-y-2 ${status !== "verified" ? "pt-3 mt-4 border-t border-border" : ""}`}>
-            <p className="text-sm font-medium text-foreground">Étape 2, Selfie de vérification</p>
+            <p className="text-sm font-medium text-foreground">Pour aller plus loin, optionnel : selfie de vérification</p>
+            <p className="text-xs text-muted-foreground">
+              Le selfie n'est pas nécessaire pour valider votre identité. Il ajoute un signal de confiance supplémentaire, visible par les membres.
+            </p>
             <p className="text-xs text-muted-foreground">
               {documentUrl
                 ? "Prenez un selfie pour confirmer que la pièce vous appartient. Formats : JPG, PNG, WebP (HEIC converti automatiquement) · Max 5 Mo"

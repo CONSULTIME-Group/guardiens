@@ -14,6 +14,7 @@ import { MapPin, Shield, BadgeCheck, Image as ImageIcon } from "lucide-react";
 import ProBadge from "@/components/badges/ProBadge";
 import StatutGardienBadge from "@/components/profile/StatutGardienBadge";
 import FavoriteButton from "@/components/shared/FavoriteButton";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import ReplyTimeBadge from "@/components/sitters/ReplyTimeBadge";
 
 export type HeroCtaVariant =
@@ -95,6 +96,9 @@ const ProfileHero = ({
     chips.push({
       key: "id",
       node: (
+        <TooltipProvider delayDuration={200}>
+          <Tooltip>
+            <TooltipTrigger asChild>
         <button
           type="button"
           onClick={() => {
@@ -111,6 +115,12 @@ const ProfileHero = ({
         >
           <Shield size={11} className="text-primary" /> ID vérifiée
         </button>
+            </TooltipTrigger>
+            <TooltipContent side="bottom" className="max-w-xs text-xs leading-relaxed">
+              Une pièce d'identité officielle a été fournie et contrôlée automatiquement. C'est un signal de confiance, pas une garantie absolue.
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
       ),
     });
   }
