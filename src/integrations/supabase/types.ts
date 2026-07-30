@@ -655,6 +655,9 @@ export type Database = {
       applications: {
         Row: {
           created_at: string
+          decline_reason: string | null
+          decline_variant: number | null
+          declined_at: string | null
           id: string
           message: string | null
           sit_id: string
@@ -664,6 +667,9 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          decline_reason?: string | null
+          decline_variant?: number | null
+          declined_at?: string | null
           id?: string
           message?: string | null
           sit_id: string
@@ -673,6 +679,9 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          decline_reason?: string | null
+          decline_variant?: number | null
+          declined_at?: string | null
           id?: string
           message?: string | null
           sit_id?: string
@@ -7064,10 +7073,9 @@ export type Database = {
         }
         Returns: boolean
       }
-      consume_application_action_token: {
-        Args: { p_token: string }
-        Returns: Json
-      }
+      consume_application_action_token:
+        | { Args: { p_token: string }; Returns: Json }
+        | { Args: { p_reason?: string; p_token: string }; Returns: Json }
       count_eligible_sitters: {
         Args: { p_lat: number; p_lng: number; p_radius_km?: number }
         Returns: number
