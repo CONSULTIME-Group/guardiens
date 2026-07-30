@@ -85,7 +85,7 @@ const COPY: Record<Locale, Record<DeclineReason, string[]>> = {
     different_profile: [
       'El propietario busca un perfil con otro funcionamiento para esta estancia concreta. Responde a sus necesidades del momento, no a su trayectoria.',
       'Para esta estancia, el propietario se orienta hacia otro tipo de perfil. Es una cuestión de encaje con su animal y su día a día.',
-      'Las expectativas de este anuncio apuntan a un perfil distinto del suyo. Otro anuncio se ajustará mejor a lo que propone.',
+      'Esta estancia concreta requiere condiciones particulares del lado del hogar. Otros anuncios se ajustarán a lo que puede ofrecer.',
     ],
   },
   de: {
