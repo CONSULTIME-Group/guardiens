@@ -12,6 +12,7 @@ export interface TemplateEntry {
 import { template as reportResolved } from './report-resolved.tsx'
 import { template as newApplication } from './new-application.tsx'
 import { template as applicationDeclined } from './application-declined.tsx'
+import { template as applicationUnderReview } from './application-under-review.tsx'
 import { template as applicationAccepted } from './application-accepted.tsx'
 import { template as newMessage } from './new-message.tsx'
 import { template as subscriptionExpires30d } from './subscription-expires-30d.tsx'
@@ -102,6 +103,7 @@ export const TEMPLATES: Record<string, TemplateEntry> = {
   'report-resolved': reportResolved,
   'new-application': newApplication,
   'application-declined': applicationDeclined,
+  'application-under-review': applicationUnderReview,
   'application-accepted': applicationAccepted,
   'new-message': newMessage,
   'subscription-expires-30d': subscriptionExpires30d,

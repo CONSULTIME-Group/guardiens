@@ -61,6 +61,9 @@ export type EventType =
   | "affinity_badge_seen"     // Badge d'affinité affiché (context: sit_detail|public_profile|search|favorites, score, total)
   | "interests_focus_click"  // Clic sur l'indicateur de progression OU le CTA cockpit menant au champ Centres d'intérêt (source: indicator|cockpit_cta, count actuel)
   // Workflow acceptation candidature ----------------------------------------
+  // Reponse a une candidature en un clic depuis un email -------------------
+  | "application_quick_decline"      // Refus poli confirme (source: email|app, result)
+  | "application_quick_thinking"     // Reponse « pas encore decide » (source: email|app, result)
   | "application_accepted"          // RPC accept_application OK (application_id, sit_id)
   | "sit_confirmed"                 // Sit passe à confirmed (sit_id, auto_rejected_count)
   | "application_accept_failed"     // RPC accept_application KO (reason, application_id)

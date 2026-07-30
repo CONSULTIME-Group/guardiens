@@ -1545,5 +1545,30 @@
     "owner_raise_option": "{{value}} applications",
     "owner_raise_success": "Cap raised to {{max}} applications.",
     "owner_raise_error": "The cap could not be changed, please try again."
+  },
+  "application_quick_action": {
+    "page_title": "Reply to an application",
+    "page_description": "Confirm your reply to an application received on Guardiens.",
+    "confirm_title_decline": "Politely decline this application",
+    "confirm_body_decline": "{{sitter}} will be told that you made another choice for « {{listing}} ». The message stays kind and never questions their profile.",
+    "confirm_cta_decline": "Confirm the decline",
+    "confirm_title_thinking": "Let them know you are still deciding",
+    "confirm_body_thinking": "{{sitter}} will be told that you have seen their application for « {{listing}} » and are taking time to decide. The application status does not change.",
+    "confirm_cta_thinking": "Confirm sending",
+    "done_title_decline": "Reply sent",
+    "done_body_decline": "The application is declined and the sitter has just been notified.",
+    "done_title_thinking": "Message sent",
+    "done_body_thinking": "The sitter knows you have seen their application. You can decide whenever you wish.",
+    "error_title": "Action not possible",
+    "reason_invalid": "This link is not valid. Please sign in to reply to the application.",
+    "reason_expired": "This link has expired. Please sign in to reply to the application.",
+    "reason_already_used": "This link has already been used.",
+    "reason_already_answered": "This application has already received a reply.",
+    "reason_error": "Something went wrong. Please sign in to reply to the application.",
+    "go_dashboard": "Go to my space",
+    "open_application": "Open the application",
+    "accept_notice": "Accepting an application requires signing in.",
+    "the_sitter": "the sitter",
+    "your_listing": "your listing"
   }
 }

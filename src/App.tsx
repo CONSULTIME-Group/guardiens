@@ -120,6 +120,7 @@ const MesCandidatures = lazy(() => import("./pages/MesCandidatures"));
 const PreviewOngoingSitHero = lazy(() => import("./pages/dev/PreviewOngoingSitHero"));
 const PreviewMissionCards = lazy(() => import("./pages/dev/PreviewMissionCards"));
 const Unsubscribe = lazy(() => import("./pages/Unsubscribe"));
+const ApplicationQuickAction = lazy(() => import("./pages/ApplicationQuickAction"));
 const EmailPreferences = lazy(() => import("./pages/EmailPreferences"));
 const CityPage = lazy(() => import("./pages/CityPage"));
 const AdminCityPages = lazy(() => import("./pages/admin/AdminCityPages"));
@@ -453,6 +454,8 @@ const AppRoutes = () => {
       <Route path="/dev/preview/ongoing-sit-hero" element={<PreviewOngoingSitHero />} />
       <Route path="/dev/preview/mission-cards" element={<PreviewMissionCards />} />
       <Route path="/unsubscribe" element={<Unsubscribe />} />
+      <Route path="/candidature/reponse" element={<ApplicationQuickAction />} />
+
       <Route path="/email-preferences" element={<EmailPreferences />} />
       {/* Compatibilité: les emails déjà envoyés contiennent /preferences-email (chemin inversé). */}
       <Route path="/preferences-email" element={<Navigate to="/email-preferences" replace />} />

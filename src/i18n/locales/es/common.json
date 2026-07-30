@@ -1544,5 +1544,30 @@
     "owner_raise_option": "{{value}} candidaturas",
     "owner_raise_success": "Límite ampliado a {{max}} candidaturas.",
     "owner_raise_error": "No se pudo cambiar el límite, inténtelo de nuevo."
+  },
+  "application_quick_action": {
+    "page_title": "Responder a una candidatura",
+    "page_description": "Confirme su respuesta a una candidatura recibida en Guardiens.",
+    "confirm_title_decline": "Rechazar amablemente esta candidatura",
+    "confirm_body_decline": "Se informará a {{sitter}} de que ha elegido otra opción para « {{listing}} ». El mensaje es amable y nunca cuestiona su perfil.",
+    "confirm_cta_decline": "Confirmar el rechazo",
+    "confirm_title_thinking": "Indicar que aún lo está pensando",
+    "confirm_body_thinking": "Se informará a {{sitter}} de que ha visto su candidatura para « {{listing}} » y de que se toma tiempo para decidir. El estado no cambia.",
+    "confirm_cta_thinking": "Confirmar el envío",
+    "done_title_decline": "Respuesta enviada",
+    "done_body_decline": "La candidatura ha sido rechazada y el cuidador acaba de ser avisado.",
+    "done_title_thinking": "Mensaje enviado",
+    "done_body_thinking": "El cuidador sabe que ha visto su candidatura. Podrá decidir cuando quiera.",
+    "error_title": "Acción imposible",
+    "reason_invalid": "Este enlace no es válido. Inicie sesión para responder a la candidatura.",
+    "reason_expired": "Este enlace ha caducado. Inicie sesión para responder a la candidatura.",
+    "reason_already_used": "Este enlace ya se ha utilizado.",
+    "reason_already_answered": "Esta candidatura ya ha recibido respuesta.",
+    "reason_error": "Se ha producido un error. Inicie sesión para responder a la candidatura.",
+    "go_dashboard": "Ir a mi espacio",
+    "open_application": "Abrir la candidatura",
+    "accept_notice": "Aceptar una candidatura requiere iniciar sesión.",
+    "the_sitter": "el cuidador",
+    "your_listing": "su anuncio"
   }
 }
