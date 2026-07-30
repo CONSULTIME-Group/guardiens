@@ -89,6 +89,7 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
  const { user } = useAuth();
  const { hasAccess } = useSubscriptionAccess();
  const isMobile = useIsMobile();
+ const { t } = useTranslation();
  const navigate = useNavigate();
  const { toast } = useToast();
  const [searchParams, setSearchParams] = useSearchParams();
