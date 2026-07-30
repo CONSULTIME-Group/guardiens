@@ -685,6 +685,9 @@ const PublicSitDetail = () => {
         isPast={isPastSit}
       />
 
+      {/* Rebond : annonces ouvertes à proximité, sous le contenu de la fiche. */}
+      {isClosedSit && <NearbySitsModule city={sitCity} excludeId={sit.id} />}
+
       {!isAuthenticated && <PublicFooter />}
 
       {isAuthenticated && sit && (
