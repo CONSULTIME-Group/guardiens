@@ -1,10 +1,9 @@
 // Page publique partagée d'une annonce, accessible sans compte, indexable.
 // Utilisée pour le partage externe (Facebook, LinkedIn, WhatsApp, lien direct).
-// Les meta og:* sont injectées via Helmet ; les caches sociaux liront index.html
+// Les meta og:* sont injectées impérativement par PageMeta ; les caches sociaux liront index.html
 // après prerender (Prerender.io / Cloudflare Worker, TODO infra).
 import { useState, useEffect, useRef } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
-import { Helmet } from "react-helmet-async";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
@@ -603,17 +602,17 @@ const PublicSitDetail = () => {
         type="article"
         canonical={canonicalUrl}
         noindex={!isIndexable}
+        extraMeta={[
+          { attr: "property", key: "og:image:alt", content: ogImageAlt },
+          { attr: "property", key: "og:image:width", content: "1200" },
+          { attr: "property", key: "og:image:height", content: "630" },
+          { attr: "property", key: "og:image:type", content: "image/png" },
+          { attr: "name", key: "twitter:image:alt", content: ogImageAlt },
+        ]}
       />
       <MetaReady />
-      <Helmet>
-        <meta property="og:image:alt" content={ogImageAlt} />
-        <meta property="og:image:width" content="1200" />
-        <meta property="og:image:height" content="630" />
-        <meta property="og:image:type" content="image/png" />
-        <meta name="twitter:image:alt" content={ogImageAlt} />
-        <script type="application/ld+json">{JSON.stringify(jsonLd)}</script>
-        <script type="application/ld+json">{JSON.stringify(breadcrumbLd)}</script>
-      </Helmet>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
 
       {!isAuthenticated && <PublicHeader />}
 

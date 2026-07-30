@@ -100,7 +100,7 @@ function generateAltText(article: ArticleFull): string {
 // sert le worker Cloudflare prerender pour émettre un vrai 301 aux crawlers).
 
 /**
- * Tiny child component: re-runs after PageMeta has flushed Helmet so we can
+ * Tiny child component: re-runs after PageMeta has written the head so we can
  * record both the DB-level article context and the resulting <head>.
  */
 function ArticleSeoLogger({ article }: { article: ArticleFull }) {
