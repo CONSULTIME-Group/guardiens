@@ -150,6 +150,8 @@ const PublicSitView = ({
   hasAccess = false,
   hasApplied = false,
   onApply,
+  isClosed = false,
+  isPast = false,
 }: Props) => {
   const [openPet, setOpenPet] = useState<PetLike | null>(null);
   const { sitter: viewerSitter } = useViewerSitterForAffinity();
