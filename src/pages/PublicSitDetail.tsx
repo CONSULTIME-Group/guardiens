@@ -623,7 +623,8 @@ const PublicSitDetail = () => {
             <p className="text-sm text-foreground">
               {isPastSit
                 ? "Cette garde est terminée, vous pouvez la consulter librement et "
-                : "Cette garde a déjà trouvé son gardien, vous pouvez la consulter librement et "}
+                : "Cette annonce n'est plus ouverte aux candidatures, vous pouvez la consulter librement et "}
+
               <Link to="/annonces" className="text-primary font-medium hover:underline">
                 découvrir les annonces ouvertes
               </Link>
