@@ -13,7 +13,7 @@ import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
 import { format, formatDistanceToNow } from "date-fns";
 import { fr } from "date-fns/locale";
-import { Eye, EyeOff, Trash2, Search, Sparkles, Share2, Link2, Mail, BarChart3, MessageSquare, Download, ChevronLeft, ChevronRight, Send, Loader2 } from "lucide-react";
+import { Eye, EyeOff, Trash2, Search, Sparkles, Share2, Link2, Mail, BarChart3, MessageSquare, Download, ChevronLeft, ChevronRight, Send, Loader2, Image as ImageIcon } from "lucide-react";
 import { useMessageAiAssistant, type MessageAiAction } from "@/hooks/useMessageAiAssistant";
 import {
   DropdownMenu,
@@ -27,6 +27,7 @@ import { useNavigate } from "react-router-dom";
 import DraftStatsPanel from "@/components/admin/DraftStatsPanel";
 import ListingDrilldownDialog from "@/components/admin/ListingDrilldownDialog";
 import ListingProximityCard from "@/components/admin/ListingProximityCard";
+import ListingCoverPickerDialog from "@/components/admin/ListingCoverPickerDialog";
 import { getCountryName } from "@/lib/countries";
 
 type BadgeVariant = "default" | "secondary" | "outline" | "destructive";
@@ -113,6 +114,11 @@ const AdminListings = () => {
     setDrillOpen(true);
   };
 
+  // Sélecteur de photo de couverture (choix explicite administrateur)
+  const [coverListing, setCoverListing] = useState<any | null>(null);
+  // URLs de photos d'animaux (galerie animals_life + table pets), pour le repère visuel
+  const [animalPhotoUrls, setAnimalPhotoUrls] = useState<Set<string>>(new Set());
+
   const fetchListings = useCallback(async () => {
     setLoading(true);
     let q = supabase
@@ -138,6 +144,33 @@ const AdminListings = () => {
   }, [filterStatus]);
 
   useEffect(() => { fetchListings(); }, [fetchListings]);
+
+  // Repère visuel : couverture absente ou couverture montrant un animal
+  useEffect(() => {
+    if (!listings.length) { setAnimalPhotoUrls(new Set()); return; }
+    let cancelled = false;
+    (async () => {
+      const ownerIds = [...new Set(listings.map((l: any) => l.user_id).filter(Boolean))];
+      const propertyIds = [...new Set(listings.map((l: any) => l.property_id).filter(Boolean))];
+      const [galleryRes, petsRes] = await Promise.all([
+        ownerIds.length
+          ? supabase.from("owner_gallery").select("photo_url").eq("category", "animals_life" as any).in("user_id", ownerIds)
+          : Promise.resolve({ data: [] } as any),
+        propertyIds.length
+          ? supabase.from("pets").select("photo_url").in("property_id", propertyIds)
+          : Promise.resolve({ data: [] } as any),
+      ]);
+      if (cancelled) return;
+      const urls = new Set<string>();
+      for (const row of [...(((galleryRes as any).data as any[]) || []), ...(((petsRes as any).data as any[]) || [])]) {
+        if (row?.photo_url) urls.add(row.photo_url as string);
+      }
+      setAnimalPhotoUrls(urls);
+    })();
+    return () => { cancelled = true; };
+  }, [listings]);
+
+
 
   // KPI counts (indépendants des filtres, calculés au montage)
   useEffect(() => {
@@ -539,9 +572,22 @@ const AdminListings = () => {
               const st = stats[listing.id];
               const isAdminHidden = listing.status === "cancelled" && !!listing.hidden_by;
               const isAuthorCancelled = listing.status === "cancelled" && !listing.hidden_by;
+              const coverUrl = (listing as any).cover_photo_url as string | null;
+              const coverNotPlace = !coverUrl || animalPhotoUrls.has(coverUrl);
               return (
                 <TableRow key={listing.id}>
-                  <TableCell className="font-medium max-w-[200px] truncate">{listing.title || "Sans titre"}</TableCell>
+                  <TableCell className="font-medium max-w-[200px]">
+                    <div className="flex items-center gap-2 min-w-0">
+                      {coverNotPlace && (
+                        <span
+                          className="h-2 w-2 shrink-0 rounded-full bg-warning"
+                          title={coverUrl ? "Couverture montrant un animal" : "Aucune couverture définie"}
+                          aria-label={coverUrl ? "Couverture montrant un animal" : "Aucune couverture définie"}
+                        />
+                      )}
+                      <span className="truncate">{listing.title || "Sans titre"}</span>
+                    </div>
+                  </TableCell>
                   <TableCell className="text-sm">
                     <div className="flex items-center gap-2">
                       {listing.owner?.avatar_url && <img src={listing.owner.avatar_url} className="w-6 h-6 rounded-full object-cover" />}
@@ -595,6 +641,15 @@ const AdminListings = () => {
                   <TableCell><Badge variant={s.variant}>{s.label}</Badge></TableCell>
                   <TableCell className="text-right">
                     <div className="flex justify-end gap-1">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        title="Photo de couverture"
+                        aria-label="Choisir la photo de couverture"
+                        onClick={() => setCoverListing(listing)}
+                      >
+                        <ImageIcon className={`h-4 w-4 ${coverNotPlace ? "text-warning" : ""}`} />
+                      </Button>
                       <Button variant="ghost" size="icon" title="Sources de trafic" aria-label="Sources de trafic" onClick={() => openTraffic(listing)}>
                         <BarChart3 className="h-4 w-4" />
                       </Button>
@@ -824,6 +879,23 @@ const AdminListings = () => {
         sitTitle={drillSit?.title ?? null}
         initialTab={drillTab}
       />
+
+      {/* Photo de couverture (choix explicite administrateur) */}
+      <ListingCoverPickerDialog
+        open={!!coverListing}
+        onOpenChange={(o) => !o && setCoverListing(null)}
+        sitId={coverListing?.id ?? null}
+        sitTitle={coverListing?.title ?? null}
+        ownerId={coverListing?.user_id ?? null}
+        propertyId={coverListing?.property_id ?? null}
+        currentCover={(coverListing as any)?.cover_photo_url ?? null}
+        onSaved={(sitId, url) => {
+          setListings((prev) => prev.map((l: any) => (l.id === sitId ? { ...l, cover_photo_url: url } : l)));
+          setCoverListing((prev: any) => (prev && prev.id === sitId ? { ...prev, cover_photo_url: url } : prev));
+        }}
+      />
+
+
 
       {/* Message rapide au propriétaire */}
       <Dialog
