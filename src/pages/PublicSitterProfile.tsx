@@ -495,7 +495,19 @@ export default function PublicSitterProfile() {
             pro_business_name: baseData?.pro_business_name ?? null,
           }
         : baseData;
-      const fetchedSitterProfile = sitterRes?.data ?? null;
+      let fetchedSitterProfile = sitterRes?.data ?? null;
+      // Complément d'affinité : vue réservée aux membres connectés, chargée
+      // seulement pour un propriétaire connecté. Elle apporte work_during_sit
+      // et sensitivities, indispensables au critère de présence et à la
+      // disqualification.
+      if (fetchedSitterProfile && auth?.isAuthenticated && auth?.activeRole === "owner") {
+        const { data: affinityRow } = await (supabase as any)
+          .from("sitter_profiles_affinity")
+          .select("user_id, experience_years, life_pace, languages, interests, work_during_sit, sensitivities")
+          .eq("user_id", id)
+          .maybeSingle();
+        if (affinityRow) fetchedSitterProfile = { ...fetchedSitterProfile, ...affinityRow };
+      }
       const fetchedOwnerProfile = (ownerRes?.data as OwnerProfileData | null) ?? null;
       const fetchedEmergencyProfile = emergencyRes?.data ?? null;
       const fetchedMissionCount = missionsRes?.count ?? 0;
