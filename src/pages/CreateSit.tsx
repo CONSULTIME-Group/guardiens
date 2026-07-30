@@ -41,6 +41,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import PetsEditor from "@/components/pets/PetsEditor";
 import { pickSmartCover } from "@/lib/pickSmartCover";
+import { sortForCover, withoutAnimalPhotos } from "@/lib/coverPriority";
 import { normalizeCityTyping, normalizeCityName } from "@/lib/normalizeCity";
 import { DEFAULT_MAX_APPLICATIONS } from "@/lib/applicationCap";
 
@@ -293,6 +294,8 @@ const CreateSit = () => {
   const [pets, setPets] = useState<PetSummary[]>([]);
   const [ownerProfile, setOwnerProfile] = useState<OwnerSummary | null>(null);
   const [ownerPhotos, setOwnerPhotos] = useState<string[]>([]);
+  // Galerie sans photo d'animal, seule éligible au scoring IA de couverture.
+  const [ownerPlacePhotos, setOwnerPlacePhotos] = useState<string[]>([]);
   const [profileCompletion, setProfileCompletion] = useState(0);
   const [ownerCity, setOwnerCity] = useState<string>("");
   const [ownerBio, setOwnerBio] = useState<string>("");
@@ -366,7 +369,7 @@ const CreateSit = () => {
         supabase.from("properties").select("*").eq("user_id", user.id).limit(1).maybeSingle(),
         supabase.from("owner_profiles").select("*").eq("user_id", user.id).maybeSingle(),
         supabase.from("profiles").select("profile_completion, city, bio").eq("id", user.id).single(),
-        supabase.from("owner_gallery").select("photo_url").eq("user_id", user.id).order("position", { ascending: true }).limit(30),
+        supabase.from("owner_gallery").select("photo_url, category").eq("user_id", user.id).order("position", { ascending: true }).limit(30),
       ]);
 
       let sourceSitRes: { data: any } | null = null;
@@ -377,7 +380,10 @@ const CreateSit = () => {
       setProfileCompletion(profileRes.data?.profile_completion || 0);
       setOwnerCity(profileRes.data?.city || "");
       setOwnerBio((profileRes.data as any)?.bio || "");
-      setOwnerPhotos((galleryRes.data || []).map((g: any) => g.photo_url));
+      // Couverture = le lieu, jamais un animal : la galerie est réordonnée
+      // selon la priorité produit (logement, jardin, puis quartier, etc.).
+      setOwnerPhotos(sortForCover((galleryRes.data || []) as any[]).map((g: any) => g.photo_url));
+      setOwnerPlacePhotos(sortForCover(withoutAnimalPhotos((galleryRes.data || []) as any[])).map((g: any) => g.photo_url));
 
       if (sourceSitRes?.data) {
         const s = sourceSitRes.data;
@@ -565,15 +571,15 @@ const CreateSit = () => {
   useEffect(() => {
     if (currentStep !== 2) return;
     if (coverPhotoUrl) return;
-    if (ownerPhotos.length < 2) return;
-    const sig = ownerPhotos.slice().sort().join("|");
+    if (ownerPlacePhotos.length < 2) return;
+    const sig = ownerPlacePhotos.slice().sort().join("|");
     if (smartCoverAttemptedRef.current === sig) return;
     smartCoverAttemptedRef.current = sig;
-    const fallback = ownerPhotos[0] ?? null;
-    pickSmartCover(ownerPhotos, fallback).then((best) => {
+    const fallback = ownerPlacePhotos[0] ?? null;
+    pickSmartCover(ownerPlacePhotos, fallback).then((best) => {
       if (best) setSmartCover(best);
     });
-  }, [currentStep, ownerPhotos, coverPhotoUrl]);
+  }, [currentStep, ownerPlacePhotos, coverPhotoUrl]);
 
 
   const saveDraft = async ({ silent = false }: { silent?: boolean } = {}) => {
@@ -612,7 +618,7 @@ const CreateSit = () => {
         max_applications: maxApplications,
         owner_message: ownerMessage.trim() || null,
         daily_routine: dailyRoutine.trim() || null,
-        cover_photo_url: coverPhotoUrl ?? smartCover ?? (ownerPhotos[0] || null) ?? pets.find(p => !!p.photo_url)?.photo_url ?? null,
+        cover_photo_url: coverPhotoUrl ?? smartCover ?? (ownerPhotos[0] || null) ?? null,
 
         city: sitCity.trim() || null,
         country: sitCountry.trim() || "FR",
@@ -748,12 +754,11 @@ const CreateSit = () => {
       // cover n'a été calculé (étape survolée), on tente une dernière analyse IA.
       // Soft-fail garanti par pickSmartCover : ne bloque jamais la publication.
       let resolvedCover = coverPhotoUrl ?? smartCover;
-      if (!resolvedCover && ownerPhotos.length > 1) {
-        resolvedCover = await pickSmartCover(ownerPhotos, ownerPhotos[0] ?? null);
+      if (!resolvedCover && ownerPlacePhotos.length > 1) {
+        resolvedCover = await pickSmartCover(ownerPlacePhotos, ownerPlacePhotos[0] ?? null);
       }
       const finalCover = resolvedCover
         ?? (ownerPhotos[0] || null)
-        ?? pets.find(p => !!p.photo_url)?.photo_url
         ?? null;
 
       const payload: any = {
@@ -1393,7 +1398,6 @@ const CreateSit = () => {
             const suggestedCover = coverPhotoUrl
               ?? smartCover
               ?? (ownerPhotos[0] || null)
-              ?? pets.find(p => !!p.photo_url)?.photo_url
               ?? null;
 
             if (!suggestedCover && ownerPhotos.length === 0) {
