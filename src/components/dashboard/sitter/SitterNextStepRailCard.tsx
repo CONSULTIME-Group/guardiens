@@ -81,7 +81,7 @@ const SitterNextStepRailCard = ({
             textTransform: "uppercase",
           }}
         >
-          Votre prochain pas
+          {content.eyebrow}
         </p>
       </div>
 
@@ -89,25 +89,26 @@ const SitterNextStepRailCard = ({
         className="font-heading text-foreground mt-[14px]"
         style={{ fontSize: "17px", fontWeight: 600, lineHeight: 1.3 }}
       >
-        Les annonces s'ouvrent avec votre profil.
+        {content.title}
       </h3>
 
       <p
         className="font-sans text-muted-foreground mt-[8px]"
         style={{ fontSize: "13.5px", lineHeight: 1.45 }}
       >
-        Dès vos trois touches terminées, vous pouvez postuler à toutes les gardes autour de vous.
+        {content.description}
       </p>
 
       <div className="mt-[14px]">
         <Link
-          to={firstUndone.to}
+          to={content.ctaTo}
           className="text-primary hover:underline underline-offset-4"
           style={{ fontSize: "13px", fontWeight: 700 }}
         >
-          Reprendre là où vous en étiez
+          {content.ctaLabel}
         </Link>
       </div>
+
     </article>
   );
 };
