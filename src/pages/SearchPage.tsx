@@ -1,7 +1,7 @@
 import { Suspense } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
-import { Helmet } from "react-helmet-async";
+import PageMeta from "@/components/PageMeta";
 import { lazyWithRetry } from "@/lib/lazyWithRetry";
 import { Button } from "@/components/ui/button";
 import SearchSeoIntro from "@/components/search/SearchSeoIntro";
