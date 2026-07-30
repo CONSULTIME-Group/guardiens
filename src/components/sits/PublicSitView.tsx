@@ -125,6 +125,9 @@ interface Props {
   hasAccess?: boolean;
   hasApplied?: boolean;
   onApply?: () => void;
+  /** Garde déjà attribuée ou passée : contenu consultable, aucune candidature. */
+  isClosed?: boolean;
+  isPast?: boolean;
 }
 
 const PublicSitView = ({
@@ -147,6 +150,8 @@ const PublicSitView = ({
   hasAccess = false,
   hasApplied = false,
   onApply,
+  isClosed = false,
+  isPast = false,
 }: Props) => {
   const [openPet, setOpenPet] = useState<PetLike | null>(null);
   const { sitter: viewerSitter } = useViewerSitterForAffinity();
@@ -558,10 +563,17 @@ const PublicSitView = ({
                   <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-1">
                     Statut
                   </p>
-                  <span className="inline-flex items-center gap-2 text-sm font-medium text-success">
-                    <span className="w-2 h-2 rounded-full bg-success" />
-                    Annonce ouverte
-                  </span>
+                  {isClosed ? (
+                    <span className="inline-flex items-center gap-2 text-sm font-medium text-muted-foreground">
+                      <span className="w-2 h-2 rounded-full bg-muted-foreground/60" />
+                      {isPast ? "Garde terminée" : "Garde attribuée"}
+                    </span>
+                  ) : (
+                    <span className="inline-flex items-center gap-2 text-sm font-medium text-success">
+                      <span className="w-2 h-2 rounded-full bg-success" />
+                      Annonce ouverte
+                    </span>
+                  )}
                 </div>
                 <div>
                   <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-1">
@@ -580,7 +592,19 @@ const PublicSitView = ({
                 </div>
               </div>
 
-              {capReached ? (
+              {isClosed ? (
+                <div className="rounded-2xl border border-border bg-muted/40 p-4 text-center">
+                  <p className="text-sm text-foreground leading-relaxed">
+                    {isPast
+                      ? "Cette garde est terminée, vous pouvez la consulter librement et "
+                      : "Cette garde a déjà trouvé son gardien, vous pouvez la consulter librement et "}
+                    <Link to="/annonces" className="text-primary font-medium hover:underline">
+                      découvrir les annonces ouvertes
+                    </Link>
+                    .
+                  </p>
+                </div>
+              ) : capReached ? (
                 <div className="rounded-2xl border border-border bg-muted/40 p-4 text-center">
                   <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
                     {t("application_cap.badge")}
@@ -755,7 +779,7 @@ const PublicSitView = ({
     </div>
 
     {/* ── Sticky CTA mobile (< lg) pour visiteurs non connectés ou abonnés ── */}
-    {accepting && !isAuthenticated && (
+    {accepting && !isClosed && !isAuthenticated && (
       <div className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-background/95 backdrop-blur border-t border-border px-4 py-3 pb-[calc(env(safe-area-inset-bottom)+0.75rem)] shadow-[0_-8px_24px_-12px_hsl(var(--foreground)/0.15)]">
         <Link
           to={`/inscription?role=sitter&redirect=${encodeURIComponent(redirect)}`}
@@ -767,7 +791,7 @@ const PublicSitView = ({
         </Link>
       </div>
     )}
-    {accepting && isAuthenticated && !hasApplied && hasAccess && onApply && (
+    {accepting && !isClosed && isAuthenticated && !hasApplied && hasAccess && onApply && (
       <div className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-background/95 backdrop-blur border-t border-border px-4 py-3 pb-[calc(env(safe-area-inset-bottom)+0.75rem)] shadow-[0_-8px_24px_-12px_hsl(var(--foreground)/0.15)]">
         <Button
           onClick={onApply}

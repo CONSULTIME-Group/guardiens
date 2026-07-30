@@ -20,7 +20,7 @@ import { trackEvent } from "@/lib/analytics";
 import { sanitizeUserTitle } from "@/lib/sanitizeTitle";
 import { logger } from "@/lib/logger";
 import { captureDigestAttribution } from "@/lib/digestAttribution";
-import { isSitRichEnough, isClosedSitStatus } from "@/lib/sitIndexability";
+import { isSitRichEnough } from "@/lib/sitIndexability";
 import NearbySitsModule from "@/components/sits/NearbySitsModule";
 import { DEFAULT_OG_IMAGE } from "@/data/siteRoutes";
 
@@ -315,14 +315,18 @@ const PublicSitDetail = () => {
     );
   }
   if (!sit) return null;
-  // `confirmed` et `archived` restent accessibles (HTTP 200, noindex) ; les
-  // autres statuts non publiés (brouillons, annulés) restent privés.
-  const isClosedSit = isClosedSitStatus(sit.status);
+  // Les gardes déjà attribuées ou passées (confirmed, in_progress, completed,
+  // archived) restent entièrement consultables (HTTP 200, noindex) : elles
+  // montrent la vie de la communauté. Les brouillons et les annulées restent privés.
+  const CLOSED_STATUSES = ["confirmed", "in_progress", "completed", "archived"];
+  const PAST_STATUSES = ["completed", "archived"];
+  const isClosedSit = CLOSED_STATUSES.includes(String(sit.status));
+  const isPastSit = PAST_STATUSES.includes(String(sit.status));
   if (sit.status !== "published" && !isClosedSit) return <div className="max-w-2xl mx-auto p-6 md:p-10 text-center"><p className="text-muted-foreground">Cette annonce n'est plus disponible.</p></div>;
   // Participants à la garde : le propriétaire, un administrateur, ou le
-  // gardien retenu. Eux seuls voient les dates réelles d'une garde close.
+  // gardien retenu. Eux seuls voient les dates réelles d'une garde en cours.
   const isParticipant = viewerType === "owner_of_sit" || viewerType === "admin" || isAcceptedSitter;
-  const hideDates = isClosedSit && !isParticipant;
+  const hideDates = isClosedSit && !isPastSit && !isParticipant;
 
 
  const photos: string[] = property?.photos || [];
@@ -597,20 +601,22 @@ const PublicSitDetail = () => {
 
       {!isAuthenticated && <PublicHeader />}
 
-      {/* Bandeau statut : garde pourvue ou annonce terminée */}
+      {/* Mention sobre : garde déjà attribuée ou déjà passée. Ton factuel,
+          lien vers les annonces ouvertes, aucune action de candidature. */}
       {isClosedSit && (
-        <>
-          <div className="bg-muted/60 border-b border-border">
-            <div className="max-w-6xl mx-auto px-4 py-3">
-              <p className="text-sm text-foreground">
-                {sit.status === "confirmed"
-                  ? "Cette garde a trouvé son gardien."
-                  : "Cette annonce est terminée."}
-              </p>
-            </div>
+        <div className="bg-muted/60 border-b border-border">
+          <div className="max-w-6xl mx-auto px-4 py-3">
+            <p className="text-sm text-foreground">
+              {isPastSit
+                ? "Cette garde est terminée, vous pouvez la consulter librement et "
+                : "Cette garde a déjà trouvé son gardien, vous pouvez la consulter librement et "}
+              <Link to="/annonces" className="text-primary font-medium hover:underline">
+                découvrir les annonces ouvertes
+              </Link>
+              .
+            </p>
           </div>
-          <NearbySitsModule city={sitCity} excludeId={sit.id} />
-        </>
+        </div>
       )}
 
 
@@ -675,7 +681,12 @@ const PublicSitDetail = () => {
         hasAccess={hasAccess}
         hasApplied={hasApplied}
         onApply={handleApply}
+        isClosed={isClosedSit}
+        isPast={isPastSit}
       />
+
+      {/* Rebond : annonces ouvertes à proximité, sous le contenu de la fiche. */}
+      {isClosedSit && <NearbySitsModule city={sitCity} excludeId={sit.id} />}
 
       {!isAuthenticated && <PublicFooter />}
 
