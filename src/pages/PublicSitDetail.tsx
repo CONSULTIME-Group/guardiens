@@ -337,7 +337,7 @@ const PublicSitDetail = () => {
   // Participants à la garde : le propriétaire, un administrateur, ou le
   // gardien retenu. Eux seuls voient les dates réelles d'une garde en cours.
   const isParticipant = viewerType === "owner_of_sit" || viewerType === "admin" || isAcceptedSitter;
-  const hideDates = isClosedSit && !isPastSit && !isParticipant;
+  const hideDates = isClosedSit && !isPastSit && !isAuthenticated;
 
 
  const photos: string[] = property?.photos || [];
