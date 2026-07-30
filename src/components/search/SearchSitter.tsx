@@ -428,6 +428,18 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
   canPrefillCity: () => !cityTouchedRef.current,
  });
 
+ // À chaque ouverture du sélecteur de lieu, la saisie repart de la valeur
+ // métier courante (jamais d'un libellé composite) et les suggestions sont
+ // vidées, sinon la nouvelle frappe se concatène à l'ancienne.
+ useEffect(() => {
+  if (!editingCity) return;
+  setCityInput(city);
+  setCitySuggestions([]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+ }, [editingCity]);
+
+
+
 
  // Auto-search when filters change (debounced)
  const doSearch = useCallback(async () => {
