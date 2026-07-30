@@ -262,7 +262,11 @@ const IdentityVerificationSection = ({ user }: { user: any }) => {
   };
 
 
-  const cfg = statusConfig[status] || statusConfig.not_submitted;
+  const baseCfg = statusConfig[status] || statusConfig.not_submitted;
+  // Statut vérifié mais dossier incomplet : on reconnaît l'acquis et on invite à finir.
+  const cfg = status === "verified" && !selfieUrl
+    ? { ...baseCfg, label: "Pièce d'identité validée", desc: "Votre pièce d'identité est validée. Il reste un selfie pour compléter votre dossier et rassurer davantage les membres." }
+    : baseCfg;
   const StatusIcon = cfg.icon;
 
   return (
