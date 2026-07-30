@@ -47,9 +47,16 @@ const LocationPickerPopover = ({
   const exactDeptOrRegion =
     deptSuggestions.some(d => normalize(d.name) === q) ||
     regionSuggestions.some(r => normalize(r.name) === q);
-  const territoryFirst = looksLikeDeptOrCp || exactDeptOrRegion;
+  // Préfixe à partir de 3 caractères : « bre » remonte Bretagne, « co » ne remonte pas Corse.
+  const prefixDeptOrRegion =
+    q.length >= 3 &&
+    (deptSuggestions.some(d => normalize(d.name).startsWith(q)) ||
+      regionSuggestions.some(r => normalize(r.name).startsWith(q)));
+  const territoryFirst = looksLikeDeptOrCp || exactDeptOrRegion || prefixDeptOrRegion;
   const isCp = /^\d{5}$/.test(q);
-  const communesLimit = territoryFirst ? 3 : 8;
+  // Communes plafonnées à 5 hors mode territoire (3 en mode territoire) pour que
+  // les blocs département et région restent visibles sans défilement.
+  const communesLimit = territoryFirst ? 3 : 5;
   const visibleCities = citySuggestions.slice(0, communesLimit);
   const hiddenCitiesCount = Math.max(0, citySuggestions.length - visibleCities.length);
 
