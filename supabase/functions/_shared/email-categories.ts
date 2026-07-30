@@ -67,6 +67,7 @@ const TRANSACTIONAL: ReadonlyArray<string> = [
   'account-deleted',
   // Interne / opérationnel (destinataire = équipe, pas un membre)
   'admin-delivery-alert',
+  'admin-signals-digest',
 ]
 
 const PRODUCT: ReadonlyArray<string> = [
