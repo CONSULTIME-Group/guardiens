@@ -150,6 +150,13 @@ const IdentityVerificationSection = ({ user }: { user: any }) => {
       setStatus("pending");
       setDocumentUrl(path);
       toast.info("Document envoyé ! Vérification en cours...");
+      void trackEvent("identity_document_submitted", {
+        source: "settings",
+        metadata: { step: 1, has_selfie: !!selfieUrl },
+      });
+      if (selfieUrl) {
+        void trackEvent("identity_dossier_completed", { source: "settings", metadata: { status: "pending" } });
+      }
 
 
       try {
@@ -161,11 +168,23 @@ const IdentityVerificationSection = ({ user }: { user: any }) => {
           toast.success("Identité vérifiée avec succès !");
         } else if (newStatus === "needs_review") {
           toast.info("Document reçu. Analyse approfondie en cours, réponse sous 24h.");
+          void trackEvent("identity_auto_check_failed", {
+            source: "settings",
+            metadata: { status: newStatus, reason_kind: "needs_review" },
+          });
         } else {
           toast.error(verifyResult?.rejection_reason || "Document refusé. Veuillez soumettre un document valide et lisible.");
+          void trackEvent("identity_auto_check_failed", {
+            source: "settings",
+            metadata: { status: newStatus, reason_kind: "rejected" },
+          });
         }
       } catch {
         toast.warning("Vérification automatique indisponible. Votre document sera examiné manuellement.");
+        void trackEvent("identity_auto_check_failed", {
+          source: "settings",
+          metadata: { status: "pending", reason_kind: "unavailable" },
+        });
       }
 
       setUploadProgress(100);
