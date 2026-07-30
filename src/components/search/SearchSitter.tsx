@@ -286,6 +286,7 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
  };
 
  const handleCitySelect = (name: string, postalCode?: string) => {
+ cityTouchedRef.current = true;
  setCityInput(name);
  setCity(name);
  setCityPostalCode(postalCode ?? null);
@@ -367,6 +368,7 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
  })();
 
  const handleDeptSelect = (deptCode: string) => {
+ cityTouchedRef.current = true;
  const name = DEPT_NAMES[deptCode] || deptCode;
  const refCp = deptToRefPostalCode(deptCode);
  setCityInput(`${deptCode} · ${name}`);
@@ -379,6 +381,7 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
  };
 
  const handleRegionSelect = (regionCode: string) => {
+ cityTouchedRef.current = true;
  const name = REGION_NAMES[regionCode] || regionCode;
  // CP de référence : premier département de la région
  const firstDept = Object.entries(DEPT_TO_REGION).find(([, r]) => r === regionCode)?.[0];
@@ -401,6 +404,7 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
  const res = await fetch(`https://geo.api.gouv.fr/communes?lat=${coords.lat}&lon=${coords.lng}&fields=nom&limit=1`);
  const data = await res.json();
  if (data?.[0]?.nom) {
+ cityTouchedRef.current = true;
  setCityInput(data[0].nom);
  setCity(data[0].nom);
  setUserCity(data[0].nom);
@@ -421,6 +425,7 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
   setSitterEligible,
   setCity,
   setCityInput,
+  canPrefillCity: () => !cityTouchedRef.current,
  });
 
 
@@ -1261,6 +1266,7 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
  };
 
  const handleCityConfirm = () => {
+ cityTouchedRef.current = true;
  setCity(cityInput);
  setEditingCity(false);
  setCitySuggestions([]);
