@@ -117,10 +117,12 @@ const SearchOwner = () => {
   const [searchError, setSearchError] = useState<string | null>(null);
   // Vrai quand la requête serveur a atteint le plafond (jeu potentiellement tronqué → tri distance/affinité partiel).
   const [resultsTruncated, setResultsTruncated] = useState(false);
-  // Palliatif assumé en attendant une RPC `search_sitters` en SQL : la base
-  // compte plus de 800 profils gardiens, un plafond à 500 empêchait
-  // structurellement d'atteindre tous les profils éligibles.
-  const SITTERS_SERVER_CAP = 1000;
+  // Le plafond reste à 500 tant que le géocodage en éventail n'est pas résolu :
+  // au delà, le nombre d'appels de géocodage déclenche la limitation de débit et
+  // la liste se vide. La tranche est rendue déterministe par un tri sur user_id.
+  // Le vrai correctif est une RPC `search_sitters` en SQL (filtrage et tri côté
+  // serveur, plus de rapatriement massif côté client).
+  const SITTERS_SERVER_CAP = 500;
   const [contactingId, setContactingId] = useState<string | null>(null);
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [initialLoaded, setInitialLoaded] = useState(false);
@@ -614,20 +616,33 @@ const SearchOwner = () => {
     // Elle apporte notamment work_during_sit et sensitivities, indispensables
     // au critère de présence (poids 2) et à la disqualification.
     if (viewerOwner && sitterUserIds.length > 0) {
-      const { data: affinityRows, error: affinityError } = await (supabase as any)
-        .from("sitter_profiles_affinity")
-        .select("user_id, experience_years, life_pace, languages, interests, work_during_sit, sensitivities")
-        .in("user_id", sitterUserIds);
-      if (affinityError) {
-        console.error("[SearchOwner] Erreur chargement affinité:", affinityError);
-      } else {
-        const affinityMap = new Map<string, any>();
-        (affinityRows ?? []).forEach((a: any) => affinityMap.set(a.user_id, a));
-        rawSitters.forEach((s: any) => {
-          const a = affinityMap.get(s.user_id);
-          if (a) Object.assign(s, a);
-        });
+      // Découpage par lots de 200 identifiants au maximum : au delà, la chaîne
+      // de requête GET dépasse la limite de longueur d'URL et l'appel échoue.
+      const AFFINITY_BATCH = 200;
+      const batches: string[][] = [];
+      for (let i = 0; i < sitterUserIds.length; i += AFFINITY_BATCH) {
+        batches.push(sitterUserIds.slice(i, i + AFFINITY_BATCH));
       }
+      const affinityResults = await Promise.all(
+        batches.map((ids) =>
+          (supabase as any)
+            .from("sitter_profiles_affinity")
+            .select("user_id, experience_years, life_pace, languages, interests, work_during_sit, sensitivities")
+            .in("user_id", ids),
+        ),
+      );
+      const affinityMap = new Map<string, any>();
+      affinityResults.forEach((res: any) => {
+        if (res?.error) {
+          console.error("[SearchOwner] Erreur chargement affinité:", res.error);
+          return;
+        }
+        (res?.data ?? []).forEach((a: any) => affinityMap.set(a.user_id, a));
+      });
+      rawSitters.forEach((s: any) => {
+        const a = affinityMap.get(s.user_id);
+        if (a) Object.assign(s, a);
+      });
     }
 
     // Seuil de complétion abaissé à 40 (vague 40, 20/07/2026) : le profil public
@@ -646,10 +661,18 @@ const SearchOwner = () => {
         .filter(Boolean),
     )] as string[];
     const cityCoords = new Map<string, { lat: number; lng: number }>();
-    await Promise.all(uniqueCities.map(async (c) => {
-      const coords = await geocodeCity(c);
-      if (coords) cityCoords.set(c, { lat: coords.lat, lng: coords.lng });
-    }));
+    // Concurrence plafonnée à 10 appels simultanés : au delà, la limitation de
+    // débit du service de géocodage se déclenche et plus aucune coordonnée ne
+    // revient. Un échec dégrade la précision, il ne doit jamais vider la liste
+    // (repli département sur le code postal, plus bas).
+    const GEOCODE_CONCURRENCY = 10;
+    for (let i = 0; i < uniqueCities.length; i += GEOCODE_CONCURRENCY) {
+      const chunk = uniqueCities.slice(i, i + GEOCODE_CONCURRENCY);
+      await Promise.all(chunk.map(async (c) => {
+        const coords = await geocodeCity(c);
+        if (coords) cityCoords.set(c, { lat: coords.lat, lng: coords.lng });
+      }));
+    }
 
     // Reference postal code for dept/region zones
     const refPostalCode = cityPostalCode ?? userPostalCode;
@@ -795,8 +818,19 @@ const SearchOwner = () => {
     const countryOf = (s: any) => countryByUser.get(s.user_id) ?? null;
     const countryReady = countryByUser.size > 0;
 
+    // Repli département : quand un gardien n'a ni coordonnées en base ni
+    // géocodage abouti, on le rattache au rayon si son code postal partage les
+    // deux premiers chiffres de la référence (même logique que côté annonces).
+    // Une panne de géocodage dégrade la précision, elle ne vide pas la liste.
+    const inRadius = (s: any) => {
+      if (s._dist != null) return s._dist <= radius[0];
+      if (!refDept) return false;
+      const cp = s.profile?.postal_code;
+      return cp ? getDeptCode(cp) === refDept : false;
+    };
+
     const density = {
-      radius: searchCenter ? filtered.filter((s: any) => s._dist != null && s._dist <= radius[0]).length : 0,
+      radius: searchCenter ? filtered.filter(inRadius).length : 0,
       dept: refDept ? filtered.filter((s: any) => {
         const cp = s.profile?.postal_code; return cp ? getDeptCode(cp) === refDept : false;
       }).length : 0,
@@ -812,7 +846,7 @@ const SearchOwner = () => {
     let zoned = filtered;
     if (zoneMode === "radius") {
       if (searchCenter) {
-        zoned = zoned.filter((s: any) => s._dist != null && s._dist <= radius[0]);
+        zoned = zoned.filter(inRadius);
       } else if (city) {
         zoned = zoned.filter((s: any) => s.profile?.city?.toLowerCase().includes(city.toLowerCase()));
       }
