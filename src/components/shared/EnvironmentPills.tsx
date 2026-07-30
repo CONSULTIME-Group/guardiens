@@ -10,6 +10,9 @@ const ENV_OPTIONS = [
   { key: "foret", label: "Forêt" },
 ] as const;
 
+/** Référentiel unique des environnements propriétaire (source de vérité). */
+export const ENV_KEYS = ENV_OPTIONS.map(o => o.key) as readonly string[];
+
 export const ENV_LABEL_MAP: Record<string, string> = {
   ville: "Ville",
   campagne: "Campagne",
