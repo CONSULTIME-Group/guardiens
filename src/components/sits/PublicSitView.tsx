@@ -563,10 +563,17 @@ const PublicSitView = ({
                   <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-1">
                     Statut
                   </p>
-                  <span className="inline-flex items-center gap-2 text-sm font-medium text-success">
-                    <span className="w-2 h-2 rounded-full bg-success" />
-                    Annonce ouverte
-                  </span>
+                  {isClosed ? (
+                    <span className="inline-flex items-center gap-2 text-sm font-medium text-muted-foreground">
+                      <span className="w-2 h-2 rounded-full bg-muted-foreground/60" />
+                      {isPast ? "Garde terminée" : "Garde attribuée"}
+                    </span>
+                  ) : (
+                    <span className="inline-flex items-center gap-2 text-sm font-medium text-success">
+                      <span className="w-2 h-2 rounded-full bg-success" />
+                      Annonce ouverte
+                    </span>
+                  )}
                 </div>
                 <div>
                   <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-1">
