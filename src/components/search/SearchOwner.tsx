@@ -41,17 +41,17 @@ import OwnerToSitterAffinity from "@/components/matching/OwnerToSitterAffinity";
 import OwnerAffinityBanner from "@/components/matching/OwnerAffinityBanner";
 import SitterResultCard from "@/components/search/SitterResultCard";
 import { useViewerOwnerForAffinity } from "@/hooks/useViewerOwnerForAffinity";
-import { computeAffinityResultFull, type AffinityOwnerInput, type AffinitySitterInput } from "@/lib/affinityScore";
+import { computeAffinityResultFull, speciesIntersects, type AffinityOwnerInput, type AffinitySitterInput } from "@/lib/affinityScore";
 
 import { TooltipProvider } from "@/components/ui/tooltip";
 
 
 
 const animalChips = ["Chiens", "Chats", "Chevaux", "Oiseaux", "Animaux de ferme", "NAC", "Tous"];
-const animalChipToType: Record<string, string> = {
-  Chiens: "dog", Chats: "cat", Chevaux: "horse", Oiseaux: "bird",
-  "Animaux de ferme": "farm_animal", NAC: "nac",
-};
+// Pas de table de correspondance locale : `speciesIntersects` (src/lib/affinityScore)
+// et `SPECIES_NORMALIZE` (src/lib/affinityVocab) savent déjà ramener les libellés
+// français de `sitter_profiles.animal_types` vers les codes canoniques, y compris
+// la valeur « Tous » qui satisfait n'importe quelle puce.
 
 const RADIUS_SHORTCUTS = [5, 15, 30, 50];
 
@@ -94,7 +94,6 @@ const SearchOwner = () => {
   const [availableOnly, setAvailableOnly] = useState(false);
   const [verifiedOnly, setVerifiedOnly] = useState(false);
   const [emergencyOnly, setEmergencyOnly] = useState(false);
-  const [proOnly, setProOnly] = useState(false);
   const [minSits, setMinSits] = useState<string>("all");
   const [minRating, setMinRating] = useState<string>("all");
   const [sort, setSort] = useState<SortOption>("affinity");
@@ -118,7 +117,10 @@ const SearchOwner = () => {
   const [searchError, setSearchError] = useState<string | null>(null);
   // Vrai quand la requête serveur a atteint le plafond (jeu potentiellement tronqué → tri distance/affinité partiel).
   const [resultsTruncated, setResultsTruncated] = useState(false);
-  const SITTERS_SERVER_CAP = 500;
+  // Palliatif assumé en attendant une RPC `search_sitters` en SQL : la base
+  // compte plus de 800 profils gardiens, un plafond à 500 empêchait
+  // structurellement d'atteindre tous les profils éligibles.
+  const SITTERS_SERVER_CAP = 1000;
   const [contactingId, setContactingId] = useState<string | null>(null);
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [initialLoaded, setInitialLoaded] = useState(false);
@@ -576,7 +578,7 @@ const SearchOwner = () => {
       .select("user_id, animal_types, has_vehicle, is_available, reply_median_minutes, sitter_type, travels_with_children, travels_with_own_animals");
     // Exclusion du compte courant (cas du rôle `both`), uniquement si connecté.
     if (user?.id) sittersQuery = sittersQuery.neq("user_id", user.id);
-    const { data: sittersRaw, error: sittersError } = await sittersQuery.limit(SITTERS_SERVER_CAP);
+    const { data: sittersRaw, error: sittersError } = await sittersQuery.order("user_id", { ascending: true }).limit(SITTERS_SERVER_CAP);
     const sitters = (sittersRaw || []).map((s: any) => ({ ...s, id: s.user_id }));
 
     if (sittersError) {
@@ -774,13 +776,10 @@ const SearchOwner = () => {
     if (vehicled) filtered = filtered.filter((s: any) => s.has_vehicle);
     if (availableOnly) filtered = filtered.filter((s: any) => s.is_available);
     if (verifiedOnly) filtered = filtered.filter((s: any) => s.profile?.identity_verified);
-    if (proOnly) filtered = filtered.filter((s: any) => s.profile?.pro_status === "verified");
     if (animalTypes.length > 0 && !animalTypes.includes("Tous")) {
-      const wanted = animalTypes.map(a => animalChipToType[a]).filter(Boolean);
-      filtered = filtered.filter((s: any) => {
-        const types: string[] = s.animal_types || [];
-        return wanted.some(w => types.includes(w));
-      });
+      filtered = filtered.filter(
+        (s: any) => speciesIntersects(animalTypes, s.animal_types || []) > 0,
+      );
     }
     if (minSits !== "all") {
       const min = parseInt(minSits);
@@ -870,10 +869,10 @@ const SearchOwner = () => {
     }
 
     return { results: sorted, densityCounts: density };
-  }, [rawResults, searchCenter, city, cityPostalCode, userPostalCode, radius, zoneMode, selectedCountry, countryByUser, animalTypes, vehicled, availableOnly, verifiedOnly, emergencyOnly, proOnly, minSits, minRating, sort, sortUserOverride, viewerOwner]);
+  }, [rawResults, searchCenter, city, cityPostalCode, userPostalCode, radius, zoneMode, selectedCountry, countryByUser, animalTypes, vehicled, availableOnly, verifiedOnly, emergencyOnly, minSits, minRating, sort, sortUserOverride, viewerOwner]);
 
 
-  const hasActiveFilters = vehicled || availableOnly || verifiedOnly || emergencyOnly || proOnly || minSits !== "all" || minRating !== "all";
+  const hasActiveFilters = vehicled || availableOnly || verifiedOnly || emergencyOnly || animalTypes.length > 0 || minSits !== "all" || minRating !== "all";
   const hasAnyRating = results.some((s: any) => s.avgRating !== null);
 
   // Zone helpers
@@ -904,7 +903,7 @@ const SearchOwner = () => {
     setAvailableOnly(false);
     setVerifiedOnly(false);
     setEmergencyOnly(false);
-    setProOnly(false);
+    setAnimalTypes([]);
     setMinSits("all");
     setMinRating("all");
   };
@@ -1248,13 +1247,6 @@ const SearchOwner = () => {
                   <div className="flex items-center justify-between">
                     <p className="text-sm flex items-center gap-1.5"><Zap className="h-3.5 w-3.5 text-warning" /> Gardiens d'urgence</p>
                     <Switch checked={emergencyOnly} onCheckedChange={setEmergencyOnly} />
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm">Gardiens Pro uniquement</p>
-                      <p className="text-xs text-muted-foreground">Professionnels animaliers déclarés et vérifiés</p>
-                    </div>
-                    <Switch checked={proOnly} onCheckedChange={setProOnly} />
                   </div>
                 </div>
 
