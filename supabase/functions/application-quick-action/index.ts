@@ -102,14 +102,19 @@ Deno.serve(async (req) => {
             sitTitle: result.sit_title ?? "",
             sitCity: result.sit_city ?? "",
             ownerFirstName: result.owner_first_name ?? "",
+            declineReason: result.decline_reason ?? null,
+            declineVariant: result.decline_variant ?? null,
           },
           logMetadata: {
             application_id: result.application_id,
             source: "email_quick_action",
             action,
+            decline_reason: result.decline_reason ?? null,
+            decline_variant: result.decline_variant ?? null,
           },
         }),
       });
+
       if (!resp.ok) {
         console.error(
           "[application-quick-action] sitter email failed",
