@@ -1,0 +1,1 @@
+DROP FUNCTION IF EXISTS public.consume_application_action_token(text);
