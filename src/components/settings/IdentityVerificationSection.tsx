@@ -236,6 +236,13 @@ const IdentityVerificationSection = ({ user }: { user: any }) => {
       await supabase.from("profiles").update({ identity_selfie_url: path } as any).eq("id", user.id);
       setSelfieUrl(path);
       toast.success("Selfie envoyé !");
+      void trackEvent("identity_selfie_submitted", {
+        source: "settings",
+        metadata: { step: 2, status },
+      });
+      if (documentUrl) {
+        void trackEvent("identity_dossier_completed", { source: "settings", metadata: { status } });
+      }
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err);
       toast.error(`Envoi impossible : ${msg.slice(0, 160)}`);
