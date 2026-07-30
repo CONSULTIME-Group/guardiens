@@ -129,7 +129,7 @@ const COPY: Record<Locale, Record<DeclineReason, string[]>> = {
     different_profile: [
       'Il proprietario cerca un profilo con un funzionamento diverso per questa custodia. Dipende dalle sue esigenze del momento, non dal suo percorso.',
       "Per questa custodia il proprietario si orienta verso un altro tipo di profilo. È una questione di corrispondenza con l'animale e la routine.",
-      'Le attese di questo annuncio puntano a un profilo diverso dal suo. Un altro annuncio corrisponderà meglio a ciò che propone.',
+      'Questa custodia specifica richiede condizioni particolari dal lato della casa. Altri annunci corrisponderanno a ciò che può offrire.',
     ],
   },
 }
