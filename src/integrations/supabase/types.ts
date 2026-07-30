@@ -6977,6 +6977,13 @@ export type Database = {
         }[]
       }
       auto_flag_urgent_sits: { Args: never; Returns: number }
+      auto_resolve_admin_signals: {
+        Args: never
+        Returns: {
+          resolved_count: number
+          signal_type: string
+        }[]
+      }
       award_badge: {
         Args: {
           p_badge_id: string
