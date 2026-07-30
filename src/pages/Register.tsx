@@ -831,8 +831,16 @@ const Register = () => {
     {t("register_page.have_account")}{" "}
     <Link to={`/login${buildRedirectQuery(redirectTarget)}`} className="text-primary font-medium hover:underline">{t("register_page.sign_in")}</Link>
     </p>
+    <Link
+     to="/"
+     className="mt-4 inline-flex items-center gap-1.5 py-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
+    >
+     <ArrowLeft className="h-4 w-4" aria-hidden="true" />
+     {t("auth_common.back_to_home")}
+    </Link>
    </div>
    )}
+
  </div>
  </div>
 
