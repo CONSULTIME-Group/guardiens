@@ -63,7 +63,7 @@ const COPY: Record<Locale, Record<DeclineReason, string[]>> = {
     different_profile: [
       'The owner is looking for a profile that works differently for this specific stay. It comes from current needs, not from your track record.',
       'For this stay, the owner is going towards another type of profile. It is a question of fit with the animal and daily routine.',
-      'The expectations of this listing point to a different profile from yours. Another listing will match what you offer better.',
+      'This specific stay calls for particular conditions on the household side. Other listings will match what you can offer.',
     ],
   },
   es: {
