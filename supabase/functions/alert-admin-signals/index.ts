@@ -43,8 +43,10 @@ const linkFor = (type: string) => ADMIN_LINKS[type] ?? 'https://guardiens.fr/adm
 const buildDetail = (metadata: Record<string, unknown>): string => {
   const m = metadata ?? {}
   const parts: string[] = []
-  const title = (m.sit_title ?? m.title) as string | undefined
-  if (title) parts.push(`Annonce : ${title}`)
+  const sitTitle = m.sit_title as string | undefined
+  if (sitTitle) parts.push(`Annonce : ${sitTitle}`)
+  const title = m.title as string | undefined
+  if (!sitTitle && title) parts.push(`Objet : ${title}`)
   const email = (m.owner_email ?? m.email ?? m.recipient_email) as string | undefined
   if (email) parts.push(`Membre : ${email}`)
   const err = (m.error ?? m.error_message ?? m.trigger) as string | undefined
