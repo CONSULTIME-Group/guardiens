@@ -292,10 +292,20 @@ const Login = () => {
             </Button>
           </form>
 
-          <p className="text-center text-sm text-muted-foreground mt-6">
-            {t("login_page.no_account")}{" "}
-            <Link to={`/inscription${buildRedirectQuery(redirectTarget)}`} className="text-primary font-medium hover:underline">{t("login_page.create_account")}</Link>
-          </p>
+          <div className="text-center mt-6">
+            <p className="text-sm text-muted-foreground">
+              {t("login_page.no_account")}{" "}
+              <Link to={`/inscription${buildRedirectQuery(redirectTarget)}`} className="text-primary font-medium hover:underline">{t("login_page.create_account")}</Link>
+            </p>
+            <Link
+              to="/"
+              className="mt-4 inline-flex items-center gap-1.5 py-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
+            >
+              <ArrowLeft className="h-4 w-4" aria-hidden="true" />
+              {t("auth_common.back_to_home")}
+            </Link>
+          </div>
+
         </div>
       </div>
     </div>
