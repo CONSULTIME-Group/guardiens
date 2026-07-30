@@ -1,4 +1,5 @@
 import { Link, useLocation } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { useAuth } from "@/contexts/AuthContext";
 
 import EnvironmentPills from "@/components/shared/EnvironmentPills";
@@ -36,6 +37,7 @@ const SearchListingCard = ({
   formatDate,
   viewerSitterProfile,
 }: SearchListingCardProps) => {
+  const { t } = useTranslation();
 
   const missionPhotos = Array.isArray((item as any).photos) ? (item as any).photos.filter(Boolean) : [];
   const photos: string[] = item.property?.photos || missionPhotos;
@@ -51,6 +53,12 @@ const SearchListingCard = ({
   const isCompleted = !isMission && !!item.isCompleted;
   const isPast = !isMission && !!item.isPast;
   const isInactive = isAssigned || isCompleted || isPast;
+  // Plafond de candidatures atteint : l'annonce reste visible et lisible.
+  const isCapReached =
+    !isMission && !isDemo && !isInactive &&
+    item.status === "published" &&
+    item.accepting_applications === false &&
+    !!item.max_applications;
   const isOutOfZone =
     !isMission &&
     !isDemo &&
@@ -239,6 +247,12 @@ const SearchListingCard = ({
             data-testid="demo-example-badge"
           >
             Exemple
+          </span>
+        )}
+
+        {isCapReached && (
+          <span className="absolute top-3 left-3 bg-muted/95 text-muted-foreground text-[10px] font-semibold uppercase tracking-[0.16em] px-2 py-0.5 rounded-full shadow-sm">
+            {t("application_cap.badge")}
           </span>
         )}
 

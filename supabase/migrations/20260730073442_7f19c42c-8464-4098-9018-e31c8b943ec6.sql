@@ -1,0 +1,1 @@
+ALTER TABLE public.sits ALTER COLUMN max_applications SET DEFAULT 5;

@@ -1553,5 +1553,17 @@
     "to_region": "Aucune annonce près de chez vous. Voici les {{count}} annonces de votre région.",
     "to_france": "Aucune annonce près de chez vous pour l'instant. Voici toutes les annonces disponibles en France.",
     "back": "Revenir à {{radius}} km"
+  },
+  "application_cap": {
+    "badge": "Candidatures complètes",
+    "sitter_message": "Le propriétaire a limité cette annonce à {{max}} candidatures, et elle est complète. Il peut rouvrir à tout moment.",
+    "owner_eyebrow": "Plafond de candidatures atteint",
+    "owner_title": "Votre annonce ne reçoit plus de nouvelles candidatures, vous avez atteint votre plafond de {{max}}.",
+    "owner_description": "Répondez aux candidats en attente, ou augmentez le plafond.",
+    "owner_review_cta": "Voir les candidatures",
+    "owner_raise_label": "Augmenter le plafond",
+    "owner_raise_option": "{{value}} candidatures",
+    "owner_raise_success": "Plafond porté à {{max}} candidatures.",
+    "owner_raise_error": "Le plafond n'a pas pu être modifié, réessayez."
   }
 }
