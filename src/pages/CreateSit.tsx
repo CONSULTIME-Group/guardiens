@@ -261,7 +261,7 @@ const CreateSit = () => {
   const [isUrgent, setIsUrgent] = useState(false);
   const [sitEnvironments, setSitEnvironments] = useState<string[]>([]);
   const [minGardienSits, setMinGardienSits] = useState(0);
-  const [maxApplications, setMaxApplications] = useState<number | null>(10);
+  const [maxApplications, setMaxApplications] = useState<number | null>(DEFAULT_MAX_APPLICATIONS);
   const [ownerMessage, setOwnerMessage] = useState("");
   const [dailyRoutine, setDailyRoutine] = useState("");
   const [coverPhotoUrl, setCoverPhotoUrl] = useState<string | null>(null);
@@ -484,7 +484,7 @@ const CreateSit = () => {
           setIsUrgent(d.is_urgent || false);
           setSitEnvironments(d.environments || []);
           setMinGardienSits(d.min_gardien_sits || 0);
-          setMaxApplications(d.max_applications ?? 10);
+          setMaxApplications(d.max_applications ?? DEFAULT_MAX_APPLICATIONS);
           setOwnerMessage(d.owner_message || "");
           setDailyRoutine(d.daily_routine || "");
           setCoverPhotoUrl(d.cover_photo_url || null);
@@ -1523,7 +1523,7 @@ const CreateSit = () => {
                 variant="outline"
                 size="icon"
                 className="h-12 w-12 shrink-0 text-lg"
-                onClick={() => setMaxApplications(prev => Math.max(1, (prev ?? 10) - 1))}
+                onClick={() => setMaxApplications(prev => Math.max(1, (prev ?? DEFAULT_MAX_APPLICATIONS) - 1))}
                 disabled={maxApplications !== null && maxApplications <= 1}
               >
                 −
@@ -1544,7 +1544,7 @@ const CreateSit = () => {
                 variant="outline"
                 size="icon"
                 className="h-12 w-12 shrink-0 text-lg"
-                onClick={() => setMaxApplications(prev => Math.min(50, (prev ?? 10) + 1))}
+                onClick={() => setMaxApplications(prev => Math.min(50, (prev ?? DEFAULT_MAX_APPLICATIONS) + 1))}
                 disabled={maxApplications !== null && maxApplications >= 50}
               >
                 +
