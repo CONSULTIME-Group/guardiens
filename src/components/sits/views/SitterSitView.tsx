@@ -10,6 +10,7 @@
  * - Bouton "Annuler ma participation" si gardien candidat sur garde confirmée
  */
 import { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { Link, useSearchParams } from "react-router-dom";
 import { CheckCircle2, PawPrint, MapPin, CalendarDays, Users, ArrowLeft } from "lucide-react";
 import { format } from "date-fns";
@@ -78,6 +79,7 @@ const SitterSitView = ({
   currentUserId,
   activeRole,
 }: SitterSitViewProps) => {
+  const { t } = useTranslation();
   // Lecture directe du profil, supprime les props `userRole`/`userFirstName`
   // qui dupliquaient l'info disponible via useAuth.
   const { user } = useAuth();
