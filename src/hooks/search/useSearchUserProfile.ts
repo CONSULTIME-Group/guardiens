@@ -35,6 +35,7 @@ export function useSearchUserProfile({
   setSitterEligible,
   setCity,
   setCityInput,
+  canPrefillCity,
 }: Params) {
   useEffect(() => {
     if (!userId) return;
@@ -53,11 +54,15 @@ export function useSearchUserProfile({
       setUserPostalCode(profileRes.data?.postal_code || null);
       setSitterProfile(spRes.data);
       if (uc) {
-        setCity(uc);
-        setCityInput(uc);
+        const mayPrefill = canPrefillCity ? canPrefillCity() : true;
+        if (mayPrefill) {
+          setCity(uc);
+          setCityInput(uc);
+        }
         const coords = await geocodeCity(uc);
         if (!cancelled && coords) setUserCoords(coords);
       }
+
       const completedSits = (eligRes.data || []).filter((a: any) => a.sit?.status === "completed").length;
       setUserCompletedSits(completedSits);
       const reviews = reviewsRes.data || [];
