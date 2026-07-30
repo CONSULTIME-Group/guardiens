@@ -19,6 +19,7 @@ import ApplicationsSection from "./owner/ApplicationsSection";
 import OwnerCockpit from "./owner/OwnerCockpit";
 import OwnerStarSection from "./owner/OwnerStarSection";
 import OwnerAnnonceSection from "./owner/OwnerAnnonceSection";
+import ApplicationCapSection from "./owner/ApplicationCapSection";
 import OwnerFamilySection from "./owner/OwnerFamilySection";
 import SitterEntraideSection from "./sitter/SitterEntraideSection";
 import { useFirstNearbyMission } from "@/hooks/useFirstNearbyMission";
@@ -317,6 +318,9 @@ const OwnerDashboard = () => {
               coverPhoto={propertyCoverPhoto}
               pendingAppCount={pendingAppCount}
             />
+
+            {/* 3ter. Plafond de candidatures atteint : deux issues offertes */}
+            <ApplicationCapSection sits={sits} onUpdated={reload} />
 
             {/* 3bis. CTA Entraide — visible sans scroll excessif */}
             <EntraideCtaCard
