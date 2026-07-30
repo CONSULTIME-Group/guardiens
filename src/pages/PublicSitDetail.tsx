@@ -335,10 +335,10 @@ const PublicSitDetail = () => {
     return end.getTime() < today.getTime();
   })();
   if (sit.status !== "published" && !isClosedSit) return <div className="max-w-2xl mx-auto p-6 md:p-10 text-center"><p className="text-muted-foreground">Cette annonce n'est plus disponible.</p></div>;
-  // Participants à la garde : le propriétaire, un administrateur, ou le
-  // gardien retenu. Eux seuls voient les dates réelles d'une garde en cours.
-  // isParticipant n'entre plus dans le masquage des dates (décision produit)
-  const hideDates = isClosedSit && !isPastSit && !isAuthenticated;
+  // Le masquage des dates est décidé côté serveur (get_public_sit) : les
+  // colonnes start_date et end_date arrivent nulles, elles ne transitent pas.
+  const hideDates = sit.dates_hidden === true;
+
 
 
  const photos: string[] = property?.photos || [];
