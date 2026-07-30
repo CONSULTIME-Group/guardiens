@@ -7073,9 +7073,10 @@ export type Database = {
         }
         Returns: boolean
       }
-      consume_application_action_token:
-        | { Args: { p_token: string }; Returns: Json }
-        | { Args: { p_reason?: string; p_token: string }; Returns: Json }
+      consume_application_action_token: {
+        Args: { p_reason?: string; p_token: string }
+        Returns: Json
+      }
       count_eligible_sitters: {
         Args: { p_lat: number; p_lng: number; p_radius_km?: number }
         Returns: number

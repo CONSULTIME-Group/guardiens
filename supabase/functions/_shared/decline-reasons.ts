@@ -134,6 +134,70 @@ const COPY: Record<Locale, Record<DeclineReason, string[]>> = {
   },
 }
 
+/** Objets d'email et titres H1, un par motif, solidaires des formulations. */
+const SUBJECTS: Record<Locale, Record<DeclineReason, string>> = {
+  fr: {
+    other_chosen: 'Le propriétaire a fait un autre choix',
+    dates_changed: 'Les dates de cette garde ont changé',
+    not_right_time: 'Cette garde est reportée par le propriétaire',
+    different_profile: 'Cette garde ne se fera pas avec vous',
+  },
+  en: {
+    other_chosen: 'The owner has made another choice',
+    dates_changed: 'The dates of this stay have changed',
+    not_right_time: 'This stay is postponed by the owner',
+    different_profile: 'This stay will not happen with you',
+  },
+  es: {
+    other_chosen: 'El propietario ha elegido otra candidatura',
+    dates_changed: 'Las fechas de esta estancia han cambiado',
+    not_right_time: 'El propietario aplaza esta estancia',
+    different_profile: 'Esta estancia no se hará con usted',
+  },
+  de: {
+    other_chosen: 'Es wurde eine andere Bewerbung gewählt',
+    dates_changed: 'Die Daten dieser Betreuung haben sich geändert',
+    not_right_time: 'Diese Betreuung wird verschoben',
+    different_profile: 'Diese Betreuung findet nicht mit Ihnen statt',
+  },
+  it: {
+    other_chosen: 'Il proprietario ha scelto un altra candidatura',
+    dates_changed: 'Le date di questa custodia sono cambiate',
+    not_right_time: 'Questa custodia è rinviata dal proprietario',
+    different_profile: 'Questa custodia non si farà con lei',
+  },
+}
+
+/** Réassurance, affichée uniquement quand le motif porte sur le profil. */
+const REASSURANCE: Record<Locale, string> = {
+  fr: "Cela ne dit rien de votre profil : chaque garde a ses contraintes de dates, de lieu et d'animaux.",
+  en: 'This says nothing about your profile: every stay has its own constraints of dates, place and animals.',
+  es: 'Esto no dice nada de su perfil: cada estancia tiene sus limitaciones de fechas, lugar y animales.',
+  de: 'Das sagt nichts über Ihr Profil aus: Jede Betreuung hat eigene Vorgaben zu Daten, Ort und Tieren.',
+  it: 'Questo non dice nulla del suo profilo: ogni custodia ha i suoi vincoli di date, luogo e animali.',
+}
+
+const resolve = (reason?: string | null, locale: string = 'fr') => {
+  const loc = (['fr', 'en', 'es', 'de', 'it'].includes(locale) ? locale : 'fr') as Locale
+  const key = (DECLINE_REASONS as string[]).includes(reason ?? '')
+    ? (reason as DeclineReason)
+    : ('other_chosen' as DeclineReason)
+  return { loc, key }
+}
+
+export const declineSubject = (reason?: string | null, locale: string = 'fr'): string => {
+  const { loc, key } = resolve(reason, locale)
+  return SUBJECTS[loc][key]
+}
+
+/** Le titre H1 reprend l'objet, pour que l'email tienne un seul discours. */
+export const declineTitle = declineSubject
+
+export const declineReassurance = (reason?: string | null, locale: string = 'fr'): string | null => {
+  const { loc, key } = resolve(reason, locale)
+  return key === 'different_profile' ? REASSURANCE[loc] : null
+}
+
 export const declineBody = (
   reason?: string | null,
   variant?: number | null,
