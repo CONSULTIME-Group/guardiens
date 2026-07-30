@@ -254,6 +254,7 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
  // `nom` sinon (l'API gère le fuzzy ascii).
  const citySearchTimeout = useRef<NodeJS.Timeout | null>(null);
  const handleCityInputChange = (val: string) => {
+ cityTouchedRef.current = true;
  setCityInput(val);
  if (citySearchTimeout.current) clearTimeout(citySearchTimeout.current);
  const q = normalize(val);
