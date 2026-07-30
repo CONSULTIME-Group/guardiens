@@ -42,11 +42,13 @@ interface ApplicationModalProps {
   startDate: string;
   endDate: string;
   onSuccess: () => void;
+  /** Vrai si la page d'annonce affiche déjà l'invitation à vérifier l'identité. */
+  hideIdentityHint?: boolean;
 }
 
 const ApplicationModal = ({
   open, onOpenChange, sitId, ownerId, ownerFirstName,
-  petNames, city, startDate, endDate, onSuccess,
+  petNames, city, startDate, endDate, onSuccess, hideIdentityHint = false,
 }: ApplicationModalProps) => {
   const { user } = useAuth();
   const { identityRecommended } = useAccessLevel();
@@ -407,7 +409,7 @@ const ApplicationModal = ({
         )}
 
 
-        {identityRecommended && (
+        {identityRecommended && !hideIdentityHint && (
           <div
             className="rounded-lg p-3 flex items-start gap-2.5 mt-1"
             style={{

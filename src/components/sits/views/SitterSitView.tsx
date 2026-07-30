@@ -83,9 +83,11 @@ const SitterSitView = ({
   // Lecture directe du profil, supprime les props `userRole`/`userFirstName`
   // qui dupliquaient l'info disponible via useAuth.
   const { user } = useAuth();
-  const { level: accessLevel, profileCompletion, canApplyGuards } = useAccessLevel();
+  const { level: accessLevel, profileCompletion, canApplyGuards, identityRecommended } = useAccessLevel();
 
   const [applyOpen, setApplyOpen] = useState(false);
+  /** Encart identité affiché sur la page. Si vrai, la modale n'en remet pas un. */
+  const showIdentityInvite = identityRecommended && accessLevel !== 0 && accessLevel !== 1 && canApplyGuards;
   const [cancelOpen, setCancelOpen] = useState(false);
   const [ownerAccordSigned, setOwnerAccordSigned] = useState(false);
   const [sitterAccordSigned, setSitterAccordSigned] = useState<{ accepted_at: string } | null>(
@@ -331,19 +333,30 @@ const SitterSitView = ({
                     context="guard"
                   />
                 ) : (
-                  <Button
-                    className="w-full md:w-auto md:min-w-[16rem] h-11 md:h-12 px-8 rounded-full text-base font-semibold"
-                    style={{ boxShadow: "0 6px 14px rgba(44,109,80,0.24)" }}
-                    onClick={() => {
-                      trackEvent("sit_apply_clicked", {
-                        source: "sit_detail_top",
-                        metadata: { sit_id: sit.id },
-                      });
-                      setApplyOpen(true);
-                    }}
-                  >
-                    Postuler pour cette garde
-                  </Button>
+                  <div className="w-full md:w-auto md:min-w-[16rem] space-y-3">
+                    {/* Invitation positive et non bloquante : le bouton reste actif. */}
+                    {showIdentityInvite && (
+                      <AccessGateBanner
+                        level={2}
+                        profileCompletion={profileCompletion}
+                        context="guard"
+                        showIdentityRecommendation
+                      />
+                    )}
+                    <Button
+                      className="w-full md:w-auto md:min-w-[16rem] h-11 md:h-12 px-8 rounded-full text-base font-semibold"
+                      style={{ boxShadow: "0 6px 14px rgba(44,109,80,0.24)" }}
+                      onClick={() => {
+                        trackEvent("sit_apply_clicked", {
+                          source: "sit_detail_top",
+                          metadata: { sit_id: sit.id },
+                        });
+                        setApplyOpen(true);
+                      }}
+                    >
+                      Postuler pour cette garde
+                    </Button>
+                  </div>
                 )}
               </div>
             </div>
@@ -552,11 +565,19 @@ const SitterSitView = ({
                 : "apply"
         }
         onApply={() => setApplyOpen(true)}
+        blockedReason={
+          accessLevel === 1
+            ? "Complétez votre profil pour postuler"
+            : "Espace gardien requis pour postuler"
+        }
+        blockedCtaTo={accessLevel === 1 ? "/profile" : "/tarifs"}
+        blockedCtaLabel={accessLevel === 1 ? "Compléter mon profil" : "Voir les avantages"}
       />
 
       <ApplicationModal
         open={applyOpen}
         onOpenChange={setApplyOpen}
+        hideIdentityHint={showIdentityInvite}
         sitId={sit.id}
         ownerId={sit.user_id}
         ownerFirstName={owner?.first_name || ""}
