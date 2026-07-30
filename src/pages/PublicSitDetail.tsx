@@ -375,7 +375,7 @@ const PublicSitDetail = () => {
  // Sur une garde pourvue ou terminée, les dates précises sont masquées aux
  // visiteurs : elles révéleraient les périodes d'absence du foyer.
  const naturalDateLabel = (() => {
- if (hideDates) return isPastSit ? "Garde passée" : "Dates communiquées au gardien retenu";
+ if (hideDates) return isPastSit ? "Garde passée" : "Dates non communiquées";
  if (!sit.start_date || !sit.end_date) return "Dates flexibles";
  const startDay = format(new Date(sit.start_date), "d MMMM", { locale: fr });
  const endDay = format(new Date(sit.end_date), "d MMMM yyyy", { locale: fr });
