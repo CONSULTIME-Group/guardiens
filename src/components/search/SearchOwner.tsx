@@ -308,14 +308,17 @@ const SearchOwner = () => {
   }, [user, searchParams]);
 
   // Fetch true France-wide sitter count via la vue publique (lisible par anon, vague 40).
+  // Le compte courant est exclu du total, comme dans la liste de résultats.
   useEffect(() => {
     (async () => {
-      const { count } = await (supabase as any)
+      let q = (supabase as any)
         .from("public_sitter_profiles")
         .select("user_id", { count: "exact", head: true });
+      if (user?.id) q = q.neq("user_id", user.id);
+      const { count } = await q;
       setFranceTotalSitters(count ?? 0);
     })();
-  }, []);
+  }, [user?.id]);
 
   // Reset alert state when zone changes
   useEffect(() => { setAlertCreated(false); }, [city, radius, zoneMode]);
@@ -518,15 +521,17 @@ const SearchOwner = () => {
     setResultsTruncated(false);
     // Vue publique (vague 40) : lecture anon OK. On alias user_id -> id pour préserver
     // les clés React et le contrat de mapping historique côté sitter_profiles.
-    const { data: sittersRaw, error: sittersError } = await (supabase as any)
+    let sittersQuery = (supabase as any)
       .from("public_sitter_profiles")
       // Projection explicite : colonnes réellement consommées (filtres, tri,
       // carte, carte de résultat). Les colonnes d'affinité (experience_years,
       // life_pace, languages, interests, work_during_sit, sensitivities) ne
       // sont plus dans la vue publique, elles sont chargées séparément via
       // `sitter_profiles_affinity`, réservée aux membres connectés.
-      .select("user_id, animal_types, has_vehicle, is_available, reply_median_minutes, sitter_type, travels_with_children, travels_with_own_animals")
-      .limit(SITTERS_SERVER_CAP);
+      .select("user_id, animal_types, has_vehicle, is_available, reply_median_minutes, sitter_type, travels_with_children, travels_with_own_animals");
+    // Exclusion du compte courant (cas du rôle `both`), uniquement si connecté.
+    if (user?.id) sittersQuery = sittersQuery.neq("user_id", user.id);
+    const { data: sittersRaw, error: sittersError } = await sittersQuery.limit(SITTERS_SERVER_CAP);
     const sitters = (sittersRaw || []).map((s: any) => ({ ...s, id: s.user_id }));
 
     if (sittersError) {
@@ -701,7 +706,7 @@ const SearchOwner = () => {
     setRawResults(enrichedAll);
     setSearchCenter(searchCoords);
     setLoading(false);
-  }, [city, cityPostalCode, userPostalCode, viewerOwner]);
+  }, [city, cityPostalCode, userPostalCode, viewerOwner, user?.id]);
 
   // Auto-search on network dep change (debounced) : ville / code postal uniquement.
   // Les filtres purement clients (véhicule, vérifié, note min, animaux, radius, zone, tri…)
