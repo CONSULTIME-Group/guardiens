@@ -7420,6 +7420,30 @@ export type Database = {
           urgences_24_7: boolean
         }[]
       }
+      get_public_sit: {
+        Args: { p_param: string }
+        Returns: {
+          accepting_applications: boolean
+          city: string
+          country: string
+          daily_routine: string
+          dates_hidden: boolean
+          end_date: string
+          environments: string[]
+          flexible_dates: boolean
+          id: string
+          max_applications: number
+          open_to: string[]
+          owner_message: string
+          property_id: string
+          slug: string
+          specific_expectations: string
+          start_date: string
+          status: string
+          title: string
+          user_id: string
+        }[]
+      }
       get_public_stats: {
         Args: never
         Returns: {
