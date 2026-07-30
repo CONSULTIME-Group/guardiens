@@ -152,11 +152,12 @@ const Login = () => {
         <div className="w-full max-w-md">
           <Link
             to="/"
-            className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground mb-6 gap-1"
+            className="inline-flex items-center gap-2 rounded-full bg-card border border-border px-4 py-2.5 min-h-[44px] text-sm font-medium text-foreground hover:bg-accent hover:text-accent-foreground transition-colors shadow-sm mb-6"
           >
             <ArrowLeft className="h-4 w-4" aria-hidden="true" />
             {t("auth_common.back_to_site")}
           </Link>
+
           <div className="text-center mb-6 md:mb-10">
             <Link to="/" className="inline-block">
               <h1 className="font-heading text-2xl md:text-3xl font-bold mb-2 hover:opacity-80 transition-opacity">
