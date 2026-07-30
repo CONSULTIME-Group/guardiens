@@ -42,6 +42,7 @@ import {
 import PetsEditor from "@/components/pets/PetsEditor";
 import { pickSmartCover } from "@/lib/pickSmartCover";
 import { normalizeCityTyping, normalizeCityName } from "@/lib/normalizeCity";
+import { DEFAULT_MAX_APPLICATIONS } from "@/lib/applicationCap";
 
 
 
