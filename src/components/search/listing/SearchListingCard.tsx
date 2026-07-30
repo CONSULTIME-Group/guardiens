@@ -348,10 +348,10 @@ const SearchListingCard = ({
           {isAssigned && (
             <p className="mt-2 text-[11px] text-muted-foreground italic">Cette garde a déjà trouvé son gardien.</p>
           )}
-          {isCompleted && (
+          {isCompleted && isDateElapsed && (
             <p className="mt-2 text-[11px] text-muted-foreground italic">Garde déjà réalisée, aperçu de l'activité.</p>
           )}
-          {isPast && !isCompleted && (
+          {isPast && !isCompleted && isDateElapsed && (
             <p className="mt-2 text-[11px] text-muted-foreground italic">Annonce passée, consultable à titre d'historique.</p>
           )}
           {isDemo && (
