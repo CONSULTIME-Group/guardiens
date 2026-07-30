@@ -107,7 +107,7 @@ const COPY: Record<Locale, Record<DeclineReason, string[]>> = {
     different_profile: [
       'Für diese Betreuung wird ein anders arbeitendes Profil gesucht. Das liegt an den aktuellen Bedürfnissen, nicht an Ihrem Werdegang.',
       'Für diese Betreuung geht die Wahl in Richtung eines anderen Profiltyps. Es geht um die Passung mit Tier und Alltag.',
-      'Die Erwartungen dieser Anzeige zielen auf ein anderes Profil als Ihres. Eine andere Anzeige passt besser zu dem, was Sie anbieten.',
+      'Diese konkrete Betreuung erfordert besondere Bedingungen auf Seiten des Haushalts. Andere Anzeigen werden besser zu dem passen, was Sie anbieten können.',
     ],
   },
   it: {
