@@ -8,6 +8,7 @@ import { compressImageFile } from "@/lib/compressImage";
 import { convertHeicToJpeg, isHeicFile } from "@/lib/heicToJpeg";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
+import { trackEvent } from "@/lib/analytics";
 
 const IdentityVerificationSection = ({ user }: { user: any }) => {
   const [status, setStatus] = useState<string>("not_submitted");
@@ -62,6 +63,10 @@ const IdentityVerificationSection = ({ user }: { user: any }) => {
         setStatus(currentStatus);
         setDocumentUrl(docUrl);
         setSelfieUrl(selfie);
+        void trackEvent("identity_section_viewed", {
+          source: "settings",
+          metadata: { status: currentStatus, has_document: !!docUrl, has_selfie: !!selfie },
+        });
       }
       setLogs((logsRes.data as any[]) || []);
       setLoaded(true);
@@ -145,6 +150,13 @@ const IdentityVerificationSection = ({ user }: { user: any }) => {
       setStatus("pending");
       setDocumentUrl(path);
       toast.info("Document envoyé ! Vérification en cours...");
+      void trackEvent("identity_document_submitted", {
+        source: "settings",
+        metadata: { step: 1, has_selfie: !!selfieUrl },
+      });
+      if (selfieUrl) {
+        void trackEvent("identity_dossier_completed", { source: "settings", metadata: { status: "pending" } });
+      }
 
 
       try {
@@ -156,11 +168,23 @@ const IdentityVerificationSection = ({ user }: { user: any }) => {
           toast.success("Identité vérifiée avec succès !");
         } else if (newStatus === "needs_review") {
           toast.info("Document reçu. Analyse approfondie en cours, réponse sous 24h.");
+          void trackEvent("identity_auto_check_failed", {
+            source: "settings",
+            metadata: { status: newStatus, reason_kind: "needs_review" },
+          });
         } else {
           toast.error(verifyResult?.rejection_reason || "Document refusé. Veuillez soumettre un document valide et lisible.");
+          void trackEvent("identity_auto_check_failed", {
+            source: "settings",
+            metadata: { status: newStatus, reason_kind: "rejected" },
+          });
         }
       } catch {
         toast.warning("Vérification automatique indisponible. Votre document sera examiné manuellement.");
+        void trackEvent("identity_auto_check_failed", {
+          source: "settings",
+          metadata: { status: "pending", reason_kind: "unavailable" },
+        });
       }
 
       setUploadProgress(100);
@@ -212,6 +236,13 @@ const IdentityVerificationSection = ({ user }: { user: any }) => {
       await supabase.from("profiles").update({ identity_selfie_url: path } as any).eq("id", user.id);
       setSelfieUrl(path);
       toast.success("Selfie envoyé !");
+      void trackEvent("identity_selfie_submitted", {
+        source: "settings",
+        metadata: { step: 2, status },
+      });
+      if (documentUrl) {
+        void trackEvent("identity_dossier_completed", { source: "settings", metadata: { status } });
+      }
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err);
       toast.error(`Envoi impossible : ${msg.slice(0, 160)}`);
@@ -231,7 +262,11 @@ const IdentityVerificationSection = ({ user }: { user: any }) => {
   };
 
 
-  const cfg = statusConfig[status] || statusConfig.not_submitted;
+  const baseCfg = statusConfig[status] || statusConfig.not_submitted;
+  // Statut vérifié mais dossier incomplet : on reconnaît l'acquis et on invite à finir.
+  const cfg = status === "verified" && !selfieUrl
+    ? { ...baseCfg, label: "Pièce d'identité validée", desc: "Votre pièce d'identité est validée. Il reste un selfie pour compléter votre dossier et rassurer davantage les membres." }
+    : baseCfg;
   const StatusIcon = cfg.icon;
 
   return (
@@ -312,33 +347,35 @@ const IdentityVerificationSection = ({ user }: { user: any }) => {
               </Button>
             </label>
 
-            <div className="pt-3 border-t border-border space-y-2">
-              <p className="text-sm font-medium text-foreground">Étape 2, Selfie de vérification</p>
-              <p className="text-xs text-muted-foreground">
-                {documentUrl
-                  ? "Prenez un selfie pour confirmer que la pièce vous appartient. Formats : JPG, PNG, WebP (HEIC converti automatiquement) · Max 5 Mo"
-                  : "Envoyez d'abord votre pièce d'identité (étape 1) pour débloquer le selfie."}
-              </p>
-              {selfiePreview && (
-                <img src={selfiePreview} alt="Aperçu selfie" className="max-h-32 rounded-lg border border-border object-contain" />
-              )}
-              <label className="block">
-                <input type="file" accept="image/jpeg,image/png,image/webp,image/heic,image/heif,.heic,.heif" capture="user" onChange={handleSelfieUpload} disabled={uploadingSelfie || !documentUrl} className="hidden" />
-                <Button variant="outline" size="sm" className="gap-2 cursor-pointer" disabled={uploadingSelfie || !documentUrl} asChild>
-                  <span>
-                    <Upload className="h-4 w-4" />
-                    {!documentUrl ? "Pièce d'identité requise" :
-                     converting ? "Conversion de la photo..." :
-                     uploadingSelfie ? "Envoi en cours..." :
-                     selfieUrl ? "Changer le selfie" : "Prendre / envoyer un selfie"}
-                  </span>
-                </Button>
-              </label>
-            </div>
-
             {rateLimited && (
               <p className="text-xs text-destructive">Vous avez atteint la limite de 5 vérifications par jour. Réessayez demain.</p>
             )}
+          </div>
+        )}
+
+        {(status !== "verified" || (documentUrl && !selfieUrl)) && (
+          <div className={`space-y-2 ${status !== "verified" ? "pt-3 mt-4 border-t border-border" : ""}`}>
+            <p className="text-sm font-medium text-foreground">Étape 2, Selfie de vérification</p>
+            <p className="text-xs text-muted-foreground">
+              {documentUrl
+                ? "Prenez un selfie pour confirmer que la pièce vous appartient. Formats : JPG, PNG, WebP (HEIC converti automatiquement) · Max 5 Mo"
+                : "Envoyez d'abord votre pièce d'identité (étape 1) pour débloquer le selfie."}
+            </p>
+            {selfiePreview && (
+              <img src={selfiePreview} alt="Aperçu selfie" className="max-h-32 rounded-lg border border-border object-contain" />
+            )}
+            <label className="block">
+              <input type="file" accept="image/jpeg,image/png,image/webp,image/heic,image/heif,.heic,.heif" capture="user" onChange={handleSelfieUpload} disabled={uploadingSelfie || !documentUrl} className="hidden" />
+              <Button variant="outline" size="sm" className="gap-2 cursor-pointer" disabled={uploadingSelfie || !documentUrl} asChild>
+                <span>
+                  <Upload className="h-4 w-4" />
+                  {!documentUrl ? "Pièce d'identité requise" :
+                   converting ? "Conversion de la photo..." :
+                   uploadingSelfie ? "Envoi en cours..." :
+                   selfieUrl ? "Changer le selfie" : "Prendre / envoyer un selfie"}
+                </span>
+              </Button>
+            </label>
           </div>
         )}
       </div>
