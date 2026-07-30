@@ -1132,7 +1132,7 @@ export default function PublicSitterProfile() {
               count: b.count ?? 1,
             })),
             completedSits,
-            lastActivity: sitterProfile?.last_seen_at ?? null,
+            lastActivity: profile?.last_seen_at ?? null,
           }).map((e) => ({ name: e.label, date: e.date }))}
         />
       )}
@@ -1458,7 +1458,7 @@ export default function PublicSitterProfile() {
                       count: b.count ?? 1,
                     }))}
                     completedSits={completedSits}
-                    lastActivity={sitterProfile?.last_seen_at ?? null}
+                    lastActivity={profile?.last_seen_at ?? null}
                     firstName={firstName}
                   />
                 </div>

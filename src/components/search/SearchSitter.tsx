@@ -1203,7 +1203,7 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
  const memberIds = items.map((m: any) => m.id);
  if (memberIds.length > 0) {
    const { data: sitterProfiles, error: sitterProfilesError } = await supabase
-     .from("sitter_profiles")
+     .from("public_sitter_profiles")
      .select("user_id, competences")
      .in("user_id", memberIds);
    if (sitterProfilesError) {
