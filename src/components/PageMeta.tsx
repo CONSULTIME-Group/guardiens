@@ -105,6 +105,8 @@ const PageMeta = ({
     ? SUPPORTED_LANGS.filter((lng) => lng === "fr" || hreflangLangs.includes(lng))
     : SUPPORTED_LANGS;
   const hreflangKey = allowedLangs.join(",");
+  const jsonLdKey = jsonLd ? JSON.stringify(jsonLd) : "";
+  const extraMetaKey = extraMeta ? JSON.stringify(extraMeta) : "";
   const hreflangAlternates = allowedLangs.map((lng) => ({
     lang: lng,
     href: addLangParam(canonicalUrl, lng),
@@ -232,7 +234,7 @@ const PageMeta = ({
     if (ready !== false) {
       (window as any).prerenderReady = true;
     }
-  }, [author, canonical, canonicalUrl, currentPath, currentUrl, currentLang, extraMeta, fullTitle, hreflangKey, jsonLd, metaDescription, noindex, publishedAt, ready, resolvedImage, type]);
+  }, [author, canonical, canonicalUrl, currentPath, currentUrl, currentLang, extraMetaKey, fullTitle, hreflangKey, jsonLdKey, metaDescription, noindex, publishedAt, ready, resolvedImage, type]);
 
   // Toutes les balises sont écrites impérativement dans le useEffect ci-dessus,
   // react-helmet-async n'atteignant pas le DOM sur ce projet.
