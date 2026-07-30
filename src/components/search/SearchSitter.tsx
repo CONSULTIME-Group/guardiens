@@ -108,10 +108,11 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
  if (typeof window === "undefined") return "radius";
  // Param URL ?zone=france, utilisé depuis le dashboard pour ouvrir la
  // recherche directement en mode élargi (« annonces plus loin »).
+ // Aucune persistance localStorage : la zone n'est retenue d'une session à
+ // l'autre que si elle est explicitement demandée dans l'URL.
  const urlZone = searchParams.get("zone");
  if (urlZone === "radius" || urlZone === "dept" || urlZone === "region" || urlZone === "france") return urlZone;
- const saved = localStorage.getItem("search.zoneMode");
- return saved === "radius" || saved === "dept" || saved === "region" || saved === "france" ? saved : "radius";
+ return "radius";
  });
  const [densityCounts, setDensityCounts] = useState<{ radius: number; dept: number; region: number; france: number }>({ radius: 0, dept: 0, region: 0, france: 0 });
  // ─── Élargissement automatique de zone (offre nationale encore faible) ───
@@ -488,7 +489,7 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
  const results = useMemo(() => {
    if (tab === "sits") {
      let final = rawResults.slice();
-     if (housingType !== "all") final = final.filter((s: any) => s.property?.type === housingType);
+     if (housingTypes.length > 0) final = final.filter((s: any) => housingTypes.includes(s.property?.type));
      if (withPhotosOnly) final = final.filter((s: any) => s.property?.photos?.length > 0);
      if (duration !== "all") {
        final = final.filter((s: any) => {
@@ -503,10 +504,10 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
        const wantedSpecies = animalTypes.map(a => animalChipToSpecies[a]).filter(Boolean);
        final = final.filter((s: any) => (s.pets || []).some((p: any) => wantedSpecies.includes(p.species)));
      }
-     if (minExperience !== "all") {
-       const minCount = parseInt(minExperience);
-       final = final.filter((s: any) => (s.reviewCount || 0) >= minCount);
-     }
+     // Filtre « expérience du propriétaire » retiré (vague 51) : il portait sur
+     // les avis reçus par le propriétaire, quasi inexistants en base, et vidait
+     // la liste dans tous les cas.
+
      // Les annonces passées ou attribuées restent visibles pour les visiteurs
      // non connectés : elles montrent l'activité réelle de la communauté. Elles
      // restent regroupées à part et hors du compteur d'annonces disponibles.
@@ -530,7 +531,7 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
    if (sort === "closest") final.sort((a: any, b: any) => (a.distance ?? 9999) - (b.distance ?? 9999));
    else if (sort === "recent") final.sort((a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
    return interleaveDemos(final, DEMO_MISSIONS, 3);
- }, [tab, missionSubTab, rawResults, housingType, withPhotosOnly, duration, emergencyOnly, verifiedOnly, animalTypes, minExperience, isPublic, environments, sort, missionTypeFilter, missionCategoryFilter]);
+ }, [tab, missionSubTab, rawResults, housingTypes, withPhotosOnly, duration, emergencyOnly, verifiedOnly, animalTypes, isPublic, environments, sort, missionTypeFilter, missionCategoryFilter]);
 
  const availableMembers = useMemo(() => {
    if (!(tab === "missions" && missionSubTab === "members")) return [];
