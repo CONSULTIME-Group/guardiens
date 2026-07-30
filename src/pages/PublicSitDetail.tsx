@@ -74,17 +74,18 @@ const PublicSitDetail = () => {
     const load = async () => {
       try {
         // Param peut être un UUID (URL legacy) ou un slug SEO.
+        // Les dates sont masquées côté serveur par get_public_sit (fuite réseau).
         const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
         const isUuid = UUID_RE.test(param);
-        const query = supabase.from("sits").select("*").limit(1);
-        const { data: sitRows, error: sitErr } = await (isUuid ? query.eq("id", param) : query.eq("slug", param));
+        const { data: sitRows, error: sitErr } = await supabase.rpc("get_public_sit", { p_param: param });
         if (sitErr) throw sitErr;
-        const sitData = sitRows?.[0];
+        const sitData = (sitRows as any[])?.[0];
         if (!sitData) {
           setLoadError("not_found");
           return;
         }
         setSit(sitData);
+
 
         // 301-like : si on est arrivés via UUID mais qu'un slug existe, on
         // remplace l'URL par la version slug (mieux pour SEO, partages, CTR).
