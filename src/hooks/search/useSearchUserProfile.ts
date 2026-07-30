@@ -12,7 +12,14 @@ interface Params {
   setSitterEligible: (b: boolean) => void;
   setCity: (v: string) => void;
   setCityInput: (v: string) => void;
+  /**
+   * Garde anti écrasement : la promesse de chargement du profil se résout
+   * souvent après que l'utilisateur a commencé à saisir un lieu. On ne
+   * pré-remplit la ville que si le champ n'a pas encore été touché.
+   */
+  canPrefillCity?: () => boolean;
 }
+
 
 /**
  * Charge le profil utilisateur + sitter_profile pour pré-remplir
@@ -28,6 +35,7 @@ export function useSearchUserProfile({
   setSitterEligible,
   setCity,
   setCityInput,
+  canPrefillCity,
 }: Params) {
   useEffect(() => {
     if (!userId) return;
@@ -46,11 +54,15 @@ export function useSearchUserProfile({
       setUserPostalCode(profileRes.data?.postal_code || null);
       setSitterProfile(spRes.data);
       if (uc) {
-        setCity(uc);
-        setCityInput(uc);
+        const mayPrefill = canPrefillCity ? canPrefillCity() : true;
+        if (mayPrefill) {
+          setCity(uc);
+          setCityInput(uc);
+        }
         const coords = await geocodeCity(uc);
         if (!cancelled && coords) setUserCoords(coords);
       }
+
       const completedSits = (eligRes.data || []).filter((a: any) => a.sit?.status === "completed").length;
       setUserCompletedSits(completedSits);
       const reviews = reviewsRes.data || [];

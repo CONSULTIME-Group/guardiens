@@ -209,6 +209,11 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
  const [editingCity, setEditingCity] = useState(false);
  const [cityInput, setCityInput] = useState("");
  const [citySuggestions, setCitySuggestions] = useState<{ nom: string; codesPostaux?: string[] }[]>([]);
+ // Vrai dès que l'utilisateur a touché au champ de lieu (saisie, sélection,
+ // géolocalisation) ou qu'un lien profond a imposé une ville. Empêche le
+ // chargement asynchrone du profil d'écraser la saisie en cours.
+ const cityTouchedRef = useRef<boolean>(!!searchParams.get("ville"));
+
   
  const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
  const [filterSheetOpen, setFilterSheetOpen] = useState(false);
@@ -249,6 +254,7 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
  // `nom` sinon (l'API gère le fuzzy ascii).
  const citySearchTimeout = useRef<NodeJS.Timeout | null>(null);
  const handleCityInputChange = (val: string) => {
+ cityTouchedRef.current = true;
  setCityInput(val);
  if (citySearchTimeout.current) clearTimeout(citySearchTimeout.current);
  const q = normalize(val);
@@ -280,6 +286,7 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
  };
 
  const handleCitySelect = (name: string, postalCode?: string) => {
+ cityTouchedRef.current = true;
  setCityInput(name);
  setCity(name);
  setCityPostalCode(postalCode ?? null);
@@ -361,6 +368,7 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
  })();
 
  const handleDeptSelect = (deptCode: string) => {
+ cityTouchedRef.current = true;
  const name = DEPT_NAMES[deptCode] || deptCode;
  const refCp = deptToRefPostalCode(deptCode);
  setCityInput(`${deptCode} · ${name}`);
@@ -373,6 +381,7 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
  };
 
  const handleRegionSelect = (regionCode: string) => {
+ cityTouchedRef.current = true;
  const name = REGION_NAMES[regionCode] || regionCode;
  // CP de référence : premier département de la région
  const firstDept = Object.entries(DEPT_TO_REGION).find(([, r]) => r === regionCode)?.[0];
@@ -395,6 +404,7 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
  const res = await fetch(`https://geo.api.gouv.fr/communes?lat=${coords.lat}&lon=${coords.lng}&fields=nom&limit=1`);
  const data = await res.json();
  if (data?.[0]?.nom) {
+ cityTouchedRef.current = true;
  setCityInput(data[0].nom);
  setCity(data[0].nom);
  setUserCity(data[0].nom);
@@ -415,7 +425,20 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
   setSitterEligible,
   setCity,
   setCityInput,
+  canPrefillCity: () => !cityTouchedRef.current,
  });
+
+ // À chaque ouverture du sélecteur de lieu, la saisie repart de la valeur
+ // métier courante (jamais d'un libellé composite) et les suggestions sont
+ // vidées, sinon la nouvelle frappe se concatène à l'ancienne.
+ useEffect(() => {
+  if (!editingCity) return;
+  setCityInput(city);
+  setCitySuggestions([]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+ }, [editingCity]);
+
+
 
 
  // Auto-search when filters change (debounced)
@@ -1255,6 +1278,7 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
  };
 
  const handleCityConfirm = () => {
+ cityTouchedRef.current = true;
  setCity(cityInput);
  setEditingCity(false);
  setCitySuggestions([]);
@@ -1443,8 +1467,12 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
      </span>
     </button>
    )}
-    {/* ─── Hero search bar (desktop) ─── Champ ville dominant + CTA Rechercher */}
-    <div className="hidden md:flex items-center gap-3 px-6 pt-4 pb-2">
+    {/* ─── Hero search bar (desktop) ─── Champ ville dominant.
+        Une seule instance du sélecteur de lieu est montée : le rendu est
+        conditionné en JavaScript (isMobile), jamais masqué en CSS, sinon le
+        portail du popover produisait deux contenus ouverts simultanément. */}
+    {!isMobile && (
+    <div className="flex items-center gap-3 px-6 pt-4 pb-2">
       <div className="flex-1 min-w-0">
         <LocationPickerPopover
           open={editingCity}
@@ -1471,14 +1499,15 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
         </div>
       )}
     </div>
+    )}
 
     <div
      id="search-filter-pills"
      className={`relative -mr-6 sm:mr-0 ${isMobile && viewMode === "map" && !mobileFiltersOpen ? "hidden" : ""}`}
     >
     <div className="flex flex-row items-center gap-2 px-6 py-3 overflow-x-auto no-scrollbar pr-10 sm:pr-6 snap-x snap-mandatory scroll-px-6 overscroll-x-contain">
-  {/* Location pill (mobile uniquement — sur desktop, le champ ville hero est au-dessus) */}
-  <div className="md:hidden contents">
+  {/* Location pill (mobile uniquement, sur desktop le champ ville hero est au-dessus) */}
+  {isMobile && (
   <LocationPickerPopover
     open={editingCity}
     onOpenChange={setEditingCity}
@@ -1496,7 +1525,8 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
     onRegionSelect={handleRegionSelect}
     onGeolocate={handleGeolocation}
   />
-  </div>
+  )}
+
 
 
    {/* Zone pill (radius / dept / region / france) : accessible aussi aux visiteurs anonymes pour régler le rayon. */}
