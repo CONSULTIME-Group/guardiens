@@ -5,6 +5,7 @@ import {
 import { BrandedHead } from './_branded-head.tsx'
 import { BrandHeader } from './_brand-header.tsx'
 import { LegalFooter } from './_legal-footer.tsx'
+import { declineBody } from '../decline-reasons.ts'
 import type { TemplateEntry } from './registry.ts'
 
 const SITE_URL = 'https://guardiens.fr'
@@ -13,12 +14,23 @@ interface Props {
   sitTitle?: string
   sitterFirstName?: string
   sitCity?: string
+  declineReason?: string
+  declineVariant?: number
+  locale?: string
 }
 
-const ApplicationDeclinedEmail = ({ sitTitle, sitterFirstName, sitCity }: Props) => {
+const ApplicationDeclinedEmail = ({
+  sitTitle,
+  sitterFirstName,
+  sitCity,
+  declineReason,
+  declineVariant,
+  locale,
+}: Props) => {
   const searchHref = sitCity
     ? `${SITE_URL}/recherche?ville=${encodeURIComponent(sitCity)}`
     : `${SITE_URL}/recherche`
+  const reasonText = declineBody(declineReason, declineVariant, locale || 'fr')
   return (
     <Html lang="fr" dir="ltr">
       <BrandedHead />
@@ -30,20 +42,37 @@ const ApplicationDeclinedEmail = ({ sitTitle, sitterFirstName, sitCity }: Props)
           <Text style={text}>
             Bonjour{sitterFirstName ? ` ${sitterFirstName}` : ''},
           </Text>
-          <Text style={text}>
-            Le propriétaire a retenu une autre candidature
-            {sitTitle ? <> pour «&nbsp;{sitTitle}&nbsp;»</> : null}. Cela ne dit rien de votre
-            profil : chaque garde a ses contraintes de dates, de lieu et d'animaux.
-          </Text>
-          <Text style={text}>
-            Votre candidature est libérée, vous êtes de nouveau disponible pour d'autres
-            annonces{sitCity ? <>, notamment près de {sitCity}</> : null}.
-          </Text>
+          {reasonText ? (
+            <>
+              <Text style={text}>
+                {sitTitle ? <>Au sujet de «&nbsp;{sitTitle}&nbsp;» : </> : null}
+                {reasonText}
+              </Text>
+            </>
+          ) : (
+            <>
+              <Text style={text}>
+                Le propriétaire a retenu une autre candidature
+                {sitTitle ? <> pour «&nbsp;{sitTitle}&nbsp;»</> : null}. Cela ne dit rien de votre
+                profil : chaque garde a ses contraintes de dates, de lieu et d'animaux.
+              </Text>
+              <Text style={text}>
+                Votre candidature est libérée, vous êtes de nouveau disponible pour d'autres
+                annonces{sitCity ? <>, notamment près de {sitCity}</> : null}.
+              </Text>
+            </>
+          )}
+          {reasonText && sitCity ? (
+            <Text style={text}>
+              D'autres annonces sont ouvertes près de {sitCity}.
+            </Text>
+          ) : null}
           <Section style={ctaSection}>
             <Button style={button} href={searchHref}>
               Voir d'autres annonces
             </Button>
           </Section>
+
           <Hr style={hr} />
           <LegalFooter purpose="la gestion de votre candidature" basis="6.1.b" />
         </Container>
