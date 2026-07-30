@@ -1,10 +1,9 @@
 import { useEffect, useState } from "react";
-import { Helmet } from "react-helmet-async";
 import { supabase } from "@/integrations/supabase/client";
 
 // Schema.org ItemList des annonces récentes publiées (max 8).
 // Aligné avec les filtres qualité du sitemap (titre ≥ 10 car, daily_routine ≥ 100 car).
-// Inséré dans <head> via Helmet pour éviter d'alourdir le @graph principal.
+// Rendu inline dans le corps du composant (react-helmet-async est inerte ici).
 interface SitRow {
   id: string;
   slug: string | null;
@@ -75,9 +74,7 @@ const RecentSitsItemListJsonLd = ({ limit = 8 }: { limit?: number }) => {
   };
 
   return (
-    <Helmet>
-      <script type="application/ld+json">{JSON.stringify(jsonLd)}</script>
-    </Helmet>
+    <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
   );
 };
 

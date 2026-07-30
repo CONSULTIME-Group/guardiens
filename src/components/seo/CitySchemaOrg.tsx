@@ -1,4 +1,3 @@
-import { Helmet } from "react-helmet-async";
 import type { CityData } from "@/data/cities";
 import type { CityStats } from "@/hooks/useCityStats";
 import { slugify } from "@/lib/normalize";
@@ -245,11 +244,10 @@ const CitySchemaOrg = ({ city }: Props) => {
  }
 
  return (
- <Helmet>
- <script type="application/ld+json">
- {JSON.stringify({ "@context": "https://schema.org", "@graph": graph })}
- </script>
- </Helmet>
+ <script
+ type="application/ld+json"
+ dangerouslySetInnerHTML={{ __html: JSON.stringify({ "@context": "https://schema.org", "@graph": graph }) }}
+ />
  );
 };
 

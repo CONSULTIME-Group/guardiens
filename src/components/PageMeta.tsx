@@ -1,11 +1,11 @@
 import { useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { Helmet } from "react-helmet-async";
 import { buildAbsoluteUrl, normalizeCanonical, normalizePathname } from "@/lib/seo";
 import { logSeoSnapshot } from "@/lib/seoDebugLog";
 import { DEFAULT_OG_IMAGE } from "@/data/siteRoutes";
 import { SUPPORTED_LANGS, type SupportedLang } from "@/i18n";
+
 
 const DEFAULT_IMAGE = DEFAULT_OG_IMAGE;
 const SITE_NAME = "Guardiens";
@@ -57,6 +57,19 @@ interface PageMetaProps {
    * car déclarer une alternate désindexée est un signal contradictoire.
    */
   hreflangLangs?: readonly string[];
+  /**
+   * JSON-LD injecté impérativement dans le head (un script par objet).
+   */
+  jsonLd?: object | object[];
+  /**
+   * Si fourni et faux, empêche le passage de window.prerenderReady à true.
+   * Utile quand le JSON-LD dépend de données asynchrones.
+   */
+  ready?: boolean;
+  /**
+   * Metas additionnelles injectées impérativement (og:image:alt, etc.).
+   */
+  extraMeta?: Array<{ attr: "name" | "property"; key: string; content: string }>;
 }
 
 const PageMeta = ({
@@ -70,6 +83,9 @@ const PageMeta = ({
   noindex = false,
   canonical,
   hreflangLangs,
+  jsonLd,
+  ready,
+  extraMeta,
 }: PageMetaProps) => {
   const location = useLocation();
   const { i18n } = useTranslation();
@@ -89,6 +105,8 @@ const PageMeta = ({
     ? SUPPORTED_LANGS.filter((lng) => lng === "fr" || hreflangLangs.includes(lng))
     : SUPPORTED_LANGS;
   const hreflangKey = allowedLangs.join(",");
+  const jsonLdKey = jsonLd ? JSON.stringify(jsonLd) : "";
+  const extraMetaKey = extraMeta ? JSON.stringify(extraMeta) : "";
   const hreflangAlternates = allowedLangs.map((lng) => ({
     lang: lng,
     href: addLangParam(canonicalUrl, lng),
@@ -142,9 +160,26 @@ const PageMeta = ({
       document.head.appendChild(xdef);
     };
 
+    const upsertJsonLd = (blocks: object[]) => {
+      document.head
+        .querySelectorAll('script[type="application/ld+json"][data-page-meta="true"]')
+        .forEach((node) => node.remove());
+      blocks.forEach((block) => {
+        const script = document.createElement("script");
+        script.setAttribute("type", "application/ld+json");
+        script.setAttribute("data-page-meta", "true");
+        // textContent, jamais innerHTML : préserve accents et apostrophes.
+        script.textContent = JSON.stringify(block);
+        document.head.appendChild(script);
+      });
+    };
+
+    // Le titre est écrit impérativement, Helmet n'atteint pas le DOM.
+    document.title = fullTitle;
+
     upsertMetaTag({ attr: "name", key: "robots", content: noindex ? "noindex, follow" : "index, follow" });
     // Écrase la meta description statique (index.html) qui sinon reste en
-    // premier dans le DOM et est lue par les crawlers avant celle de Helmet.
+    // premier dans le DOM et est lue par les crawlers avant la nôtre.
     upsertMetaTag({ attr: "name", key: "description", content: metaDescription });
     upsertCanonical(canonicalUrl);
     upsertHreflangAlternates();
@@ -163,6 +198,8 @@ const PageMeta = ({
     upsertMetaTag({ attr: "name", key: "twitter:description", content: metaDescription });
     upsertMetaTag({ attr: "name", key: "twitter:image", content: resolvedImage });
 
+    (extraMeta ?? []).forEach((m) => upsertMetaTag(m));
+
     if (type === "article" && publishedAt) {
       upsertMetaTag({ attr: "property", key: "article:published_time", content: publishedAt });
     } else {
@@ -175,9 +212,9 @@ const PageMeta = ({
       removeMetaTag({ attr: "property", key: "article:author" });
     }
 
-
-    // Signal to Prerender.io that SEO-critical content is ready
-    (window as any).prerenderReady = true;
+    if (jsonLd) {
+      upsertJsonLd(Array.isArray(jsonLd) ? jsonLd : [jsonLd]);
+    }
 
     // Record snapshot for /admin/seo-debug
     logSeoSnapshot({
@@ -191,21 +228,18 @@ const PageMeta = ({
         type,
       },
     });
-  }, [author, canonical, canonicalUrl, currentPath, currentUrl, currentLang, fullTitle, hreflangKey, metaDescription, noindex, publishedAt, resolvedImage, type]);
 
-  // NB : on n'émet PAS via Helmet les tags déjà gérés impérativement dans le
-  // useEffect ci-dessus (robots, canonical, hreflang, og:*, twitter:*,
-  // article:*), sinon ils sont dupliqués (Helmet ajoute par-dessus le DOM
-  // déjà mutée). Helmet ne sert plus qu'au <title> et à la <meta description>,
-  // que React Helmet déduplique correctement par `name`.
-  // NB : la <meta name="description"> est gérée impérativement dans le
-  // useEffect ci-dessus pour écraser la meta statique d'index.html.
-  // Helmet ne sert plus qu'au <title> (dédupliqué nativement par le navigateur).
-  return (
-    <Helmet>
-      <title>{fullTitle}</title>
-    </Helmet>
-  );
+    // Signal à Prerender.io que le contenu SEO est prêt, une fois toutes les
+    // balises effectivement écrites, et seulement si la page le permet.
+    if (ready !== false) {
+      (window as any).prerenderReady = true;
+    }
+  }, [author, canonical, canonicalUrl, currentPath, currentUrl, currentLang, extraMetaKey, fullTitle, hreflangKey, jsonLdKey, metaDescription, noindex, publishedAt, ready, resolvedImage, type]);
+
+  // Toutes les balises sont écrites impérativement dans le useEffect ci-dessus,
+  // react-helmet-async n'atteignant pas le DOM sur ce projet.
+  return null;
 };
+
 
 export default PageMeta;

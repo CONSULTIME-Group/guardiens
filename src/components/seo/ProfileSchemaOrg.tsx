@@ -1,4 +1,3 @@
-import { Helmet } from "react-helmet-async";
 
 interface ProfileSchemaProps {
   name: string;
@@ -107,12 +106,12 @@ const ProfileSchemaOrg = ({
   }
 
   return (
-    <Helmet>
-      <script type="application/ld+json">{JSON.stringify(person)}</script>
+    <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(person) }} />
       {service && (
-        <script type="application/ld+json">{JSON.stringify(service)}</script>
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(service) }} />
       )}
-    </Helmet>
+    </>
   );
 };
 

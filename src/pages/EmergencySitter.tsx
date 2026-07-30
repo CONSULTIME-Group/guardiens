@@ -1,6 +1,5 @@
 import { Zap, Bell, Home, Heart, Shield, Clock, Star, MapPin, CheckCircle2 } from "lucide-react";
 import { Link } from "react-router-dom";
-import { Helmet } from "react-helmet-async";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
@@ -76,10 +75,8 @@ const EmergencySitter = () => {
   return (
     <div className="min-h-screen bg-background">
       <PageMeta title={tp("meta_title")} description={tp("meta_description")} path="/gardien-urgence" />
-      <Helmet>
-        <script type="application/ld+json">{JSON.stringify(faqJsonLd)}</script>
-        <script type="application/ld+json">{JSON.stringify(serviceJsonLd)}</script>
-      </Helmet>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(serviceJsonLd) }} />
       <PublicHeader />
 
       <section className="bg-warning/15 border-b border-warning/25 py-3">

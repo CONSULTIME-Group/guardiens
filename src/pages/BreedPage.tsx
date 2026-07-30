@@ -1,12 +1,12 @@
 import { useEffect, useState } from "react";
 import { Link, useParams, Navigate } from "react-router-dom";
-import { Helmet } from "react-helmet-async";
 import ReactMarkdown from "react-markdown";
 import { supabase } from "@/integrations/supabase/client";
 import { slugify } from "@/lib/normalize";
 import { CITIES } from "@/data/cities";
 import { buildOgImageUrl } from "@/lib/ogImage";
 import ShareLink from "@/components/share/ShareLink";
+import PageMeta from "@/components/PageMeta";
 import { useAlmaCulturalFact } from "@/hooks/useAlmaCulturalFact";
 
 interface BreedProfile {
@@ -180,22 +180,15 @@ const BreedPage = () => {
 
   return (
     <>
-      <Helmet>
-        <title>{title}</title>
-        <meta name="description" content={description} />
-        <link rel="canonical" href={canonical} />
-        <meta property="og:title" content={title} />
-        <meta property="og:description" content={description} />
-        <meta property="og:url" content={canonical} />
-        <meta property="og:type" content="article" />
-        <meta property="og:image" content={ogImage} />
-        <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:image" content={ogImage} />
-        <script type="application/ld+json">{JSON.stringify(jsonLd)}</script>
-        <script type="application/ld+json">{JSON.stringify(breadcrumb)}</script>
-        <script type="application/ld+json">{JSON.stringify(faqSchema)}</script>
-
-      </Helmet>
+      <PageMeta
+        title={title}
+        description={description}
+        path={`/races/${slug}`}
+        canonical={canonical}
+        image={ogImage}
+        type="article"
+        jsonLd={[jsonLd, breadcrumb, faqSchema]}
+      />
 
       <main className="min-w-0 max-w-3xl mx-auto px-4 py-8 md:py-12">
         <nav className="text-sm text-muted-foreground mb-4">
