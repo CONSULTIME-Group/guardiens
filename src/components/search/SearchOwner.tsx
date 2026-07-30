@@ -1027,7 +1027,7 @@ const SearchOwner = () => {
                     <span className="text-muted-foreground">Où cherchez-vous un gardien&nbsp;?</span>
                   )}
                 </span>
-                <span className="text-xs text-muted-foreground shrink-0 hidden lg:inline">Ville, code postal…</span>
+                <span className="text-xs text-muted-foreground shrink-0 hidden lg:inline">Ville, département ou région</span>
               </button>
             </PopoverTrigger>
             <PopoverContent align="start" className="w-[420px] p-3 space-y-3">
