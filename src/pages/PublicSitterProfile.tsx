@@ -1294,7 +1294,7 @@ export default function PublicSitterProfile() {
         } else if (completedSits >= 3) {
           almaPhrase = `${firstName} a déjà mené ${completedSits} gardes à leur terme.`;
         } else if (profile?.identity_verified) {
-          almaPhrase = `L'identité de ${firstName} a été vérifiée par notre équipe.`;
+          almaPhrase = `L'identité de ${firstName} a été vérifiée à partir d'une pièce officielle.`;
         }
         const almaNode = !isOwn ? <AlmaWhisperCard phrase={almaPhrase} /> : null;
         // Pouls : chiffres RÉELS. Local via useCityStats trop coûteux ici ; on
@@ -1589,7 +1589,7 @@ export default function PublicSitterProfile() {
         } else if (pets.length > 0 && ownerSitsTotal > 0) {
           proprioAlmaPhrase = `${firstName} a déjà accueilli des gardiens pour ${pets.length > 1 ? 'ses animaux' : 'son animal'}.`;
         } else if (profile?.identity_verified) {
-          proprioAlmaPhrase = `L'identité de ${firstName} a été vérifiée par notre équipe.`;
+          proprioAlmaPhrase = `L'identité de ${firstName} a été vérifiée à partir d'une pièce officielle.`;
         }
         const proprioAlmaNode = !isOwn ? <AlmaWhisperCard phrase={proprioAlmaPhrase} /> : null;
         const pulseGlobal = communityPulse
