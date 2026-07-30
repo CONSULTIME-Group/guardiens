@@ -68,7 +68,9 @@ Deno.serve(async (req) => {
 
     const { data, error } = await service.rpc("consume_application_action_token", {
       p_token: token,
+      p_reason: reason,
     });
+
     if (error) {
       console.error("[application-quick-action] consume failed", error.message);
       return json({ ok: false, reason: "error" }, 200);
