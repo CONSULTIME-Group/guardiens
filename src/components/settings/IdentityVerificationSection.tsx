@@ -343,33 +343,35 @@ const IdentityVerificationSection = ({ user }: { user: any }) => {
               </Button>
             </label>
 
-            <div className="pt-3 border-t border-border space-y-2">
-              <p className="text-sm font-medium text-foreground">Étape 2, Selfie de vérification</p>
-              <p className="text-xs text-muted-foreground">
-                {documentUrl
-                  ? "Prenez un selfie pour confirmer que la pièce vous appartient. Formats : JPG, PNG, WebP (HEIC converti automatiquement) · Max 5 Mo"
-                  : "Envoyez d'abord votre pièce d'identité (étape 1) pour débloquer le selfie."}
-              </p>
-              {selfiePreview && (
-                <img src={selfiePreview} alt="Aperçu selfie" className="max-h-32 rounded-lg border border-border object-contain" />
-              )}
-              <label className="block">
-                <input type="file" accept="image/jpeg,image/png,image/webp,image/heic,image/heif,.heic,.heif" capture="user" onChange={handleSelfieUpload} disabled={uploadingSelfie || !documentUrl} className="hidden" />
-                <Button variant="outline" size="sm" className="gap-2 cursor-pointer" disabled={uploadingSelfie || !documentUrl} asChild>
-                  <span>
-                    <Upload className="h-4 w-4" />
-                    {!documentUrl ? "Pièce d'identité requise" :
-                     converting ? "Conversion de la photo..." :
-                     uploadingSelfie ? "Envoi en cours..." :
-                     selfieUrl ? "Changer le selfie" : "Prendre / envoyer un selfie"}
-                  </span>
-                </Button>
-              </label>
-            </div>
-
             {rateLimited && (
               <p className="text-xs text-destructive">Vous avez atteint la limite de 5 vérifications par jour. Réessayez demain.</p>
             )}
+          </div>
+        )}
+
+        {(documentUrl || status !== "verified") && (
+          <div className={`space-y-2 ${status !== "verified" ? "pt-3 mt-4 border-t border-border" : ""}`}>
+            <p className="text-sm font-medium text-foreground">Étape 2, Selfie de vérification</p>
+            <p className="text-xs text-muted-foreground">
+              {documentUrl
+                ? "Prenez un selfie pour confirmer que la pièce vous appartient. Formats : JPG, PNG, WebP (HEIC converti automatiquement) · Max 5 Mo"
+                : "Envoyez d'abord votre pièce d'identité (étape 1) pour débloquer le selfie."}
+            </p>
+            {selfiePreview && (
+              <img src={selfiePreview} alt="Aperçu selfie" className="max-h-32 rounded-lg border border-border object-contain" />
+            )}
+            <label className="block">
+              <input type="file" accept="image/jpeg,image/png,image/webp,image/heic,image/heif,.heic,.heif" capture="user" onChange={handleSelfieUpload} disabled={uploadingSelfie || !documentUrl} className="hidden" />
+              <Button variant="outline" size="sm" className="gap-2 cursor-pointer" disabled={uploadingSelfie || !documentUrl} asChild>
+                <span>
+                  <Upload className="h-4 w-4" />
+                  {!documentUrl ? "Pièce d'identité requise" :
+                   converting ? "Conversion de la photo..." :
+                   uploadingSelfie ? "Envoi en cours..." :
+                   selfieUrl ? "Changer le selfie" : "Prendre / envoyer un selfie"}
+                </span>
+              </Button>
+            </label>
           </div>
         )}
       </div>
