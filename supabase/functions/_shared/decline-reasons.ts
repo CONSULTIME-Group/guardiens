@@ -41,7 +41,7 @@ const COPY: Record<Locale, Record<DeclineReason, string[]>> = {
     different_profile: [
       "Le propriétaire cherche un profil au fonctionnement différent pour cette garde précise. Cela tient à ses besoins du moment, pas à votre parcours.",
       "Pour cette garde, le propriétaire s'oriente vers un autre type de profil. C'est une question de correspondance avec son animal et son quotidien.",
-      "Les attentes de cette annonce visent un profil différent du vôtre. Une autre annonce collera mieux à ce que vous proposez.",
+      "Cette garde précise appelle des conditions particulières du côté du foyer. D'autres annonces correspondront à ce que vous pouvez offrir.",
     ],
   },
   en: {
@@ -63,7 +63,7 @@ const COPY: Record<Locale, Record<DeclineReason, string[]>> = {
     different_profile: [
       'The owner is looking for a profile that works differently for this specific stay. It comes from current needs, not from your track record.',
       'For this stay, the owner is going towards another type of profile. It is a question of fit with the animal and daily routine.',
-      'The expectations of this listing point to a different profile from yours. Another listing will match what you offer better.',
+      'This specific stay calls for particular conditions on the household side. Other listings will match what you can offer.',
     ],
   },
   es: {
@@ -85,7 +85,7 @@ const COPY: Record<Locale, Record<DeclineReason, string[]>> = {
     different_profile: [
       'El propietario busca un perfil con otro funcionamiento para esta estancia concreta. Responde a sus necesidades del momento, no a su trayectoria.',
       'Para esta estancia, el propietario se orienta hacia otro tipo de perfil. Es una cuestión de encaje con su animal y su día a día.',
-      'Las expectativas de este anuncio apuntan a un perfil distinto del suyo. Otro anuncio se ajustará mejor a lo que propone.',
+      'Esta estancia concreta requiere condiciones particulares del lado del hogar. Otros anuncios se ajustarán a lo que puede ofrecer.',
     ],
   },
   de: {
@@ -107,7 +107,7 @@ const COPY: Record<Locale, Record<DeclineReason, string[]>> = {
     different_profile: [
       'Für diese Betreuung wird ein anders arbeitendes Profil gesucht. Das liegt an den aktuellen Bedürfnissen, nicht an Ihrem Werdegang.',
       'Für diese Betreuung geht die Wahl in Richtung eines anderen Profiltyps. Es geht um die Passung mit Tier und Alltag.',
-      'Die Erwartungen dieser Anzeige zielen auf ein anderes Profil als Ihres. Eine andere Anzeige passt besser zu dem, was Sie anbieten.',
+      'Diese konkrete Betreuung erfordert besondere Bedingungen auf Seiten des Haushalts. Andere Anzeigen werden besser zu dem passen, was Sie anbieten können.',
     ],
   },
   it: {
@@ -129,7 +129,7 @@ const COPY: Record<Locale, Record<DeclineReason, string[]>> = {
     different_profile: [
       'Il proprietario cerca un profilo con un funzionamento diverso per questa custodia. Dipende dalle sue esigenze del momento, non dal suo percorso.',
       "Per questa custodia il proprietario si orienta verso un altro tipo di profilo. È una questione di corrispondenza con l'animale e la routine.",
-      'Le attese di questo annuncio puntano a un profilo diverso dal suo. Un altro annuncio corrisponderà meglio a ciò che propone.',
+      'Questa custodia specifica richiede condizioni particolari dal lato della casa. Altri annunci corrisponderanno a ciò che può offrire.',
     ],
   },
 }
