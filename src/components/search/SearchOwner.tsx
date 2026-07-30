@@ -520,7 +520,10 @@ const SearchOwner = () => {
     // les clés React et le contrat de mapping historique côté sitter_profiles.
     const { data: sittersRaw, error: sittersError } = await (supabase as any)
       .from("public_sitter_profiles")
-      .select("*")
+      // Projection explicite : colonnes réellement consommées (filtres, tri,
+      // carte, carte de résultat, calcul d'affinité). Le reste de la vue n'est
+      // pas rapatrié au navigateur.
+      .select("user_id, created_at, animal_types, has_vehicle, is_available, reply_median_minutes, sitter_type, experience_years, life_pace, languages, interests, special_animal_skills, travels_with_children, travels_with_own_animals")
       .limit(SITTERS_SERVER_CAP);
     const sitters = (sittersRaw || []).map((s: any) => ({ ...s, id: s.user_id }));
 

@@ -784,7 +784,10 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
     // est actif (rayon / dept / région). Elles bypassent le filtre dans filterByLocation.
     let query = supabase
 .from("sits")
-.select("*, property:properties!sits_property_id_fkey(type, environment, photos, cover_photo_url)")
+ // Projection explicite : on ne rapatrie que les colonnes réellement lues en aval
+ // (filtres, tri, densité, carte, cartes de résultat). Pas d'étoile, pour ne pas
+ // exposer au navigateur la modération, la télémétrie interne et les champs longs.
+ .select("id, user_id, property_id, title, slug, status, city, country, start_date, end_date, created_at, unpublished_at, environments, is_urgent, cover_photo_url, accepting_applications, max_applications, property:properties!sits_property_id_fkey(type, environment, photos, cover_photo_url)")
 .or(isPublic
   ? "status.in.(published,confirmed,in_progress,completed,cancelled)"
   : "status.in.(published,confirmed,in_progress,completed,cancelled,archived),and(status.eq.draft,unpublished_at.not.is.null)")
