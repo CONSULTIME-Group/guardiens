@@ -57,6 +57,19 @@ interface PageMetaProps {
    * car déclarer une alternate désindexée est un signal contradictoire.
    */
   hreflangLangs?: readonly string[];
+  /**
+   * JSON-LD injecté impérativement dans le head (un script par objet).
+   */
+  jsonLd?: object | object[];
+  /**
+   * Si fourni et faux, empêche le passage de window.prerenderReady à true.
+   * Utile quand le JSON-LD dépend de données asynchrones.
+   */
+  ready?: boolean;
+  /**
+   * Metas additionnelles injectées impérativement (og:image:alt, etc.).
+   */
+  extraMeta?: Array<{ attr: "name" | "property"; key: string; content: string }>;
 }
 
 const PageMeta = ({
@@ -70,6 +83,9 @@ const PageMeta = ({
   noindex = false,
   canonical,
   hreflangLangs,
+  jsonLd,
+  ready,
+  extraMeta,
 }: PageMetaProps) => {
   const location = useLocation();
   const { i18n } = useTranslation();
