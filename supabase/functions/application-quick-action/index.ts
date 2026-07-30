@@ -124,7 +124,13 @@ Deno.serve(async (req) => {
       }
     }
 
-    return json({ ok: true, action, application_id: result.application_id });
+    return json({
+      ok: true,
+      action,
+      application_id: result.application_id,
+      decline_reason: result.decline_reason ?? null,
+    });
+
   } catch (e) {
     console.error("[application-quick-action] unexpected", e);
     return json({ ok: false, reason: "error" }, 500);
