@@ -98,7 +98,10 @@ const PageMeta = ({
     (currentLang !== "fr" ? addLangParam(currentUrl, currentLang) : currentUrl);
   const metaDescription = description.trim();
   const resolvedImage = image === DEFAULT_IMAGE ? getListingOgImageFromPath(currentPath) ?? image : image;
-  const titleWithoutSuffix = title.replace(/\s*\|\s*Guardiens\s*$/i, "").replace(/\s*,\s*Guardiens\s*$/i, "");
+  const titleWithoutSuffix = title
+    .replace(/\s*\|\s*Guardiens\s*$/i, "")
+    .replace(/\s*,\s*Guardiens\s*$/i, "")
+    .replace(/\s*·\s*Guardiens\s*$/i, "");
   const fullTitle = currentPath === "/" ? titleWithoutSuffix : `${titleWithoutSuffix} | ${SITE_NAME}`;
   // hreflang alternates : same URL with ?lang=xx (fr = no param, also serves as x-default)
   const allowedLangs = hreflangLangs
