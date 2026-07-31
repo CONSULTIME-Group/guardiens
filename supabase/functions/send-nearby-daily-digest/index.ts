@@ -1,9 +1,9 @@
 // send-nearby-daily-digest
 // -------------------------------------------------------------
-// Chaque jour à 13h (Europe/Paris), envoie à chaque utilisateur opt-in
+// Chaque jour à 9h (Europe/Paris), envoie à chaque utilisateur opt-in
 // (email_preferences.nearby_daily_digest = true) un récapitulatif des
 // nouvelles annonces (sits + petites missions) publiées dans les
-// dernières 24h à moins de nearby_daily_radius_km (5/15/30, défaut 15).
+// dernières 24h à moins de nearby_daily_radius_km (5/15/30/50/100, défaut 100).
 //
 // Contraintes :
 //  - Anti-doublon 20h sur email_send_log
@@ -174,7 +174,7 @@ Deno.serve(async (req) => {
       try {
         if (p.account_status && p.account_status !== 'active') { usersSkipped++; continue }
         const pref = (prefs ?? []).find((x: any) => x.user_id === p.id)
-        const radiusKm = pref?.nearby_daily_radius_km ?? 15
+        const radiusKm = pref?.nearby_daily_radius_km ?? 100
         // product_emails=false ne coupe PAS ce digest (opt-in dédié), mais on
         // respecte quand même si l'utilisateur a explicitement tout coupé côté
         // produit — cohérent avec les autres digests.
