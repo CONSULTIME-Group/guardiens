@@ -12,7 +12,7 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { claimSitNotification, releaseSitNotification } from "../_shared/sitNotificationClaim.ts";
 import { parisHourSlot } from "../_shared/paris-hour.ts";
-import { lookupCityCoords } from "../_shared/geocode-lookup.ts";
+import { geocodeKeyCandidates } from "../_shared/geocode-lookup.ts";
 
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SUPABASE_SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
@@ -156,6 +156,34 @@ Deno.serve(async (req) => {
     since.setHours(since.getHours() - sinceHours);
     const sinceISO = since.toISOString();
 
+    // Le cache de géocodage tient en mémoire (moins de 2000 lignes) : une
+    // seule lecture, puis résolution locale, sinon le nombre de requêtes
+    // explose avec la population.
+    const geoRows: Array<{ normalized_name: string; lat: number; lng: number }> = [];
+    for (let from = 0; ; from += 1000) {
+      const { data: page } = await supabase
+        .from("geocode_cache")
+        .select("normalized_name, lat, lng")
+        .range(from, from + 999);
+      if (!page || page.length === 0) break;
+      geoRows.push(...(page as any));
+      if (page.length < 1000) break;
+    }
+    const geoMap = new Map<string, { lat: number; lng: number }>();
+    for (const r of geoRows) {
+      if (r.lat == null || r.lng == null) continue;
+      geoMap.set(r.normalized_name, { lat: Number(r.lat), lng: Number(r.lng) });
+    }
+    const resolveCity = (city: string | null | undefined) => {
+      const v = (city ?? "").toString().trim();
+      if (!v) return null;
+      for (const k of geocodeKeyCandidates(v)) {
+        const hit = geoMap.get(k);
+        if (hit) return hit;
+      }
+      return null;
+    };
+
     let sent = 0;
     let skipped = 0;
     let claimSkipped = 0;
@@ -206,7 +234,7 @@ Deno.serve(async (req) => {
       if (pref.zone_type === "rayon") {
         const cityToResolve = pref.city || profile.city;
         if (cityToResolve) {
-          const geo = await lookupCityCoords(supabase, cityToResolve);
+          const geo = resolveCity(cityToResolve);
           if (geo) {
             alertLat = geo.lat;
             alertLng = geo.lng;
@@ -262,7 +290,7 @@ Deno.serve(async (req) => {
             const sitCity = (sit.profiles as any)?.city;
             let matched = false;
             if (alertLat != null && alertLng != null && sitCity) {
-              const geo = await lookupCityCoords(supabase, sitCity);
+              const geo = resolveCity(sitCity);
               if (geo) {
                 matched = haversine(alertLat, alertLng, geo.lat, geo.lng) <= pref.radius_km;
               } else {
