@@ -347,6 +347,7 @@ export type Database = {
           postal_code: string | null
           radius_km: number | null
           region_code: string | null
+          source: string | null
           user_id: string
           zone_type: string
         }
@@ -363,6 +364,7 @@ export type Database = {
           postal_code?: string | null
           radius_km?: number | null
           region_code?: string | null
+          source?: string | null
           user_id: string
           zone_type: string
         }
@@ -379,6 +381,7 @@ export type Database = {
           postal_code?: string | null
           radius_km?: number | null
           region_code?: string | null
+          source?: string | null
           user_id?: string
           zone_type?: string
         }
