@@ -753,7 +753,14 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
  const regionCount = refRegion ? densityItems.filter((s) => {
  const cp = getPostalCodeFn?.(s); return cp ? getRegionCode(getDeptCode(cp)) === refRegion : false;
  }).length : 0;
- setDensityCounts({ radius: radiusCount, dept: deptCount, region: regionCount, france: densityItems.length });
+ setDensityCounts({
+   radius: radiusCount,
+   dept: deptCount,
+   region: regionCount,
+   // Compteur France : total exact serveur quand il est fourni, pour ne pas
+   // plafonner à SITS_SERVER_CAP.
+   france: franceCountOverride ?? densityItems.length,
+ });
 
 
  // Apply the selected zone filter (international items always pass through)
