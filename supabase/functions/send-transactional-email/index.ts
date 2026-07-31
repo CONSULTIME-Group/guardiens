@@ -274,6 +274,58 @@ Deno.serve(async (req) => {
     }
   }
 
+  // 1b-bis. Garde de statut d'annonce (alertes de proximité).
+  // Entre l'enfilement et le drainage il peut s'écouler plus de 24 h : on relit
+  // le statut réel avant d'expédier. Si l'annonce n'est plus publiée, rien ne
+  // part et la ligne source de la file différée est close en `abandoned`.
+  if (isSitStatusGuardedTemplate(templateName)) {
+    const sitId = typeof templateData?.sitId === 'string'
+      ? templateData.sitId
+      : (typeof templateData?.sit_id === 'string' ? templateData.sit_id : null)
+    if (sitId) {
+      const { data: sitRow, error: sitErr } = await supabase
+        .from('sits')
+        .select('status')
+        .eq('id', sitId)
+        .maybeSingle()
+      if (!sitErr) {
+        const verdict = evaluateSitAlert(templateName, (sitRow as { status?: string } | null)?.status ?? null)
+        if (verdict.block) {
+          const reason = verdict.reason ?? 'annonce non publiée'
+          if (sourceQueueId) {
+            await supabase
+              .from('email_deferred_queue')
+              .update({ status: 'abandoned', last_error: reason })
+              .eq('id', sourceQueueId)
+          } else if (idempotencyKey && idempotencyKey !== messageId) {
+            await supabase
+              .from('email_deferred_queue')
+              .update({ status: 'abandoned', last_error: reason })
+              .eq('idempotency_key', idempotencyKey)
+              .eq('template_name', templateName)
+              .eq('status', 'pending')
+          }
+          await supabase.from('email_send_log').insert({
+            message_id: messageId,
+            template_name: templateName,
+            recipient_email: effectiveRecipient,
+            status: 'skipped',
+            metadata: { idempotency_key: idempotencyKey, sit_id: sitId, skip_reason: reason },
+          })
+          console.log('Alerte annulée, annonce non publiée', { sitId, reason, templateName })
+          return new Response(
+            JSON.stringify({ success: true, skipped: true, reason: 'sit_not_published', details: reason }),
+            { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          )
+        }
+      } else {
+        console.error('Lecture du statut annonce impossible, envoi maintenu', sitErr)
+      }
+    }
+  }
+
+
+
   // Compute category once — used by gating, footer and List-Unsubscribe header
   const category: EmailCategory = getEmailCategory(templateName)
 
