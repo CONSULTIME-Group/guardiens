@@ -370,8 +370,23 @@ const ApplicationModal = ({
     onSuccess();
   };
 
+  /**
+   * Point d'entrée unique de l'envoi, protégé par un verrou synchrone :
+   * un second clic pendant l'envoi (double clic, double événement tactile,
+   * ou deux boutons distincts) est ignoré.
+   */
+  const doSend = async (viaUneditedDraft = false) => {
+    if (sendingRef.current) return;
+    sendingRef.current = true;
+    try {
+      await doSendInner(viaUneditedDraft);
+    } finally {
+      sendingRef.current = false;
+    }
+  };
+
   const handleSend = () => {
-    if (!user || !message.trim() || sending) return;
+    if (!user || !message.trim() || sending || sendingRef.current) return;
     const trimmed = message.trim();
     if (almaDraftText && trimmed === almaDraftText.trim()) {
       setUnpersonalizedConfirmOpen(true);
