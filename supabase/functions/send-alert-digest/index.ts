@@ -383,13 +383,13 @@ Deno.serve(async (req) => {
         // par un autre pipeline, sans rien réserver soi-même.
         const { data: held } = await supabase
           .from("sit_notification_log")
-          .select("pipeline")
+          .select("source")
           .eq("user_id", profile.id)
           .eq("notification_date", now.toISOString().slice(0, 10))
-          .maybeSingle();
-        if (held) {
+          .limit(1);
+        if (held && held.length > 0) {
           skipped++;
-          mark(`plafond_frequence:${held.pipeline ?? "inconnu"}`, pref);
+          mark(`plafond_frequence:${held[0].source ?? "inconnu"}`, pref);
           continue;
         }
         dry.recipients++;
