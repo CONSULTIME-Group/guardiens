@@ -15,6 +15,7 @@
 // Body : { manual?: boolean, dry_run?: boolean, user_id?: string }
 
 import { createClient } from 'npm:@supabase/supabase-js@2.45.0'
+import { claimSitNotification, releaseSitNotification } from '../_shared/sitNotificationClaim.ts'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
