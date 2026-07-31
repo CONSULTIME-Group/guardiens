@@ -12,6 +12,7 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { claimSitNotification, releaseSitNotification } from "../_shared/sitNotificationClaim.ts";
 import { parisHourSlot } from "../_shared/paris-hour.ts";
+import { geocodeKeyCandidates } from "../_shared/geocode-lookup.ts";
 
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SUPABASE_SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
@@ -111,6 +112,22 @@ Deno.serve(async (req) => {
     const url = new URL(req.url);
     const forceMode = url.searchParams.get("force") === "true";
 
+    // Aperçu de mesure. Sort avant le claim et avant tout envoi, ne pose
+    // aucune réservation dans sit_notification_log.
+    let dryRun = false;
+    let sinceHours = 24;
+    try {
+      const body = await req.json();
+      if (body && typeof body === "object") {
+        dryRun = body.dry_run === true;
+        // since_hours n'est lisible qu'en dry run : la fenêtre de production
+        // reste 24h, sans exception.
+        if (dryRun && Number.isFinite(Number(body.since_hours))) {
+          sinceHours = Math.min(24 * 90, Math.max(1, Math.floor(Number(body.since_hours))));
+        }
+      }
+    } catch { /* pas de body JSON : mode normal */ }
+
     const now = new Date();
     const currentHourStr = parisHourSlot(now);
     const dayOfWeek = now.getDay();
@@ -124,7 +141,8 @@ Deno.serve(async (req) => {
         )
       `)
       .eq("active", true);
-    if (!forceMode) prefsQuery = prefsQuery.eq("heure_envoi", currentHourStr);
+    // En dry run, on mesure toute la population active, tous créneaux confondus.
+    if (!forceMode && !dryRun) prefsQuery = prefsQuery.eq("heure_envoi", currentHourStr);
 
     const { data: prefs, error: prefsError } = await prefsQuery;
     if (prefsError) throw prefsError;
@@ -135,8 +153,36 @@ Deno.serve(async (req) => {
     }
 
     const since = new Date();
-    since.setHours(since.getHours() - 24);
+    since.setHours(since.getHours() - sinceHours);
     const sinceISO = since.toISOString();
+
+    // Le cache de géocodage tient en mémoire (moins de 2000 lignes) : une
+    // seule lecture, puis résolution locale, sinon le nombre de requêtes
+    // explose avec la population.
+    const geoRows: Array<{ normalized_name: string; lat: number; lng: number }> = [];
+    for (let from = 0; ; from += 1000) {
+      const { data: page } = await supabase
+        .from("geocode_cache")
+        .select("normalized_name, lat, lng")
+        .range(from, from + 999);
+      if (!page || page.length === 0) break;
+      geoRows.push(...(page as any));
+      if (page.length < 1000) break;
+    }
+    const geoMap = new Map<string, { lat: number; lng: number }>();
+    for (const r of geoRows) {
+      if (r.lat == null || r.lng == null) continue;
+      geoMap.set(r.normalized_name, { lat: Number(r.lat), lng: Number(r.lng) });
+    }
+    const resolveCity = (city: string | null | undefined) => {
+      const v = (city ?? "").toString().trim();
+      if (!v) return null;
+      for (const k of geocodeKeyCandidates(v)) {
+        const hit = geoMap.get(k);
+        if (hit) return hit;
+      }
+      return null;
+    };
 
     let sent = 0;
     let skipped = 0;
@@ -144,6 +190,22 @@ Deno.serve(async (req) => {
     let rayonFallbackDept = 0;
     const claimSkippedBy: Record<string, number> = {};
     const errors: Array<{ user_id?: string; reason: string }> = [];
+
+    const MIGRATION_SOURCE = "migration_email_preferences_2026_07_31";
+    const dry = {
+      recipients: 0,
+      recipients_migrated: 0,
+      per_sit: {} as Record<string, { title: string; city: string | null; recipients: number }>,
+      excluded: {} as Record<string, number>,
+      excluded_migrated: {} as Record<string, number>,
+    };
+    const mark = (reason: string, pref: any) => {
+      dry.excluded[reason] = (dry.excluded[reason] ?? 0) + 1;
+      if (pref?.source === MIGRATION_SOURCE) {
+        dry.excluded_migrated[reason] = (dry.excluded_migrated[reason] ?? 0) + 1;
+      }
+    };
+
 
     // Repli départemental : deux codes département suffisent à comparer deux
     // localisations quand le géocodage manque. La précision se dégrade, le
@@ -161,9 +223,9 @@ Deno.serve(async (req) => {
 
     for (const pref of prefs) {
       const profile = pref.profiles;
-      if (!profile?.email) { skipped++; continue; }
+      if (!profile?.email) { skipped++; mark("sans_email", pref); continue; }
 
-      if (pref.frequence === "hebdo" && dayOfWeek !== 1) { skipped++; continue; }
+      if (pref.frequence === "hebdo" && dayOfWeek !== 1) { skipped++; mark("hebdo_hors_jour", pref); continue; }
 
       let alertLat: number | null = null;
       let alertLng: number | null = null;
@@ -172,11 +234,7 @@ Deno.serve(async (req) => {
       if (pref.zone_type === "rayon") {
         const cityToResolve = pref.city || profile.city;
         if (cityToResolve) {
-          const { data: geo } = await supabase
-            .from("geocode_cache")
-            .select("lat, lng")
-            .eq("normalized_name", cityToResolve.toLowerCase().trim())
-            .maybeSingle();
+          const geo = resolveCity(cityToResolve);
           if (geo) {
             alertLat = geo.lat;
             alertLng = geo.lng;
@@ -184,7 +242,7 @@ Deno.serve(async (req) => {
         }
         if (alertLat == null || alertLng == null) {
           alertDept = deptOf(profile.departement_code, profile.postal_code);
-          if (!alertDept) { skipped++; continue; }
+          if (!alertDept) { skipped++; mark("localisation_introuvable", pref); continue; }
           rayonFallbackDept++;
         }
       }
@@ -232,11 +290,7 @@ Deno.serve(async (req) => {
             const sitCity = (sit.profiles as any)?.city;
             let matched = false;
             if (alertLat != null && alertLng != null && sitCity) {
-              const { data: geo } = await supabase
-                .from("geocode_cache")
-                .select("lat, lng")
-                .eq("normalized_name", sitCity.toLowerCase().trim())
-                .maybeSingle();
+              const geo = resolveCity(sitCity);
               if (geo) {
                 matched = haversine(alertLat, alertLng, geo.lat, geo.lng) <= pref.radius_km;
               } else {
@@ -291,7 +345,7 @@ Deno.serve(async (req) => {
         }
       }
 
-      if (sits.length === 0 && missions.length === 0) { skipped++; continue; }
+      if (sits.length === 0 && missions.length === 0) { skipped++; mark("hors_zone_ou_rien_a_dire", pref); continue; }
 
       // Suppression et opt-out product
       const emailLower = String(profile.email).trim().toLowerCase();
@@ -300,14 +354,14 @@ Deno.serve(async (req) => {
         .select("email")
         .ilike("email", emailLower)
         .maybeSingle();
-      if (sup) { skipped++; continue; }
+      if (sup) { skipped++; mark("supprime", pref); continue; }
 
       const { data: emailPrefs } = await supabase
         .from("email_preferences")
         .select("product_emails")
         .eq("user_id", profile.id)
         .maybeSingle();
-      if (emailPrefs?.product_emails === false) { skipped++; continue; }
+      if (emailPrefs?.product_emails === false) { skipped++; mark("desabonne", pref); continue; }
 
       // Payload template
       const sitsPayload = sits.slice(0, 6).map((s: any) => ({
@@ -344,6 +398,32 @@ Deno.serve(async (req) => {
         || "votre secteur";
 
       const idem = `alert-digest-${pref.id}-${now.toISOString().slice(0, 10)}-${currentHourStr}`;
+
+      if (dryRun) {
+        // Lecture seule : on regarde si le créneau du jour est déjà réservé
+        // par un autre pipeline, sans rien réserver soi-même.
+        const { data: held } = await supabase
+          .from("sit_notification_log")
+          .select("source")
+          .eq("user_id", profile.id)
+          .eq("notification_date", now.toISOString().slice(0, 10))
+          .limit(1);
+        if (held && held.length > 0) {
+          skipped++;
+          mark(`plafond_frequence:${held[0].source ?? "inconnu"}`, pref);
+          continue;
+        }
+        dry.recipients++;
+        if (pref.source === MIGRATION_SOURCE) dry.recipients_migrated++;
+        for (const s of sitsPayload) {
+          const entry = dry.per_sit[s.id] ?? { title: s.title, city: s.city ?? null, recipients: 0 };
+          entry.recipients++;
+          dry.per_sit[s.id] = entry;
+        }
+        continue;
+      }
+
+
 
       // Idempotence inter-pipelines : le créneau du jour n'est réservé que
       // maintenant, une fois le contenu établi et le destinataire éligible.
@@ -388,7 +468,18 @@ Deno.serve(async (req) => {
 
 
     return new Response(
-      JSON.stringify({ sent, skipped, claim_skipped: claimSkipped, claim_skipped_by: claimSkippedBy, rayon_fallback_dept: rayonFallbackDept, errors, hour: currentHourStr }),
+      JSON.stringify({
+        dry_run: dryRun,
+        since_hours: sinceHours,
+        prefs_evaluated: prefs.length,
+        sent, skipped,
+        claim_skipped: claimSkipped,
+        claim_skipped_by: claimSkippedBy,
+        rayon_fallback_dept: rayonFallbackDept,
+        errors,
+        hour: currentHourStr,
+        ...(dryRun ? { preview: dry } : {}),
+      }),
       { status: 200, headers: { "Content-Type": "application/json" } },
     );
   } catch (err) {
