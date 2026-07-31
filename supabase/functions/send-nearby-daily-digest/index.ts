@@ -180,16 +180,15 @@ Deno.serve(async (req) => {
 
     const { data: profiles, error: profErr } = await supabase
       .from('profiles')
-      .select('id, first_name, city, latitude, longitude, email, account_status')
+      .select('id, first_name, city, latitude, longitude, postal_code, departement_code, email, account_status')
       .in('id', Array.from(optedInIds))
-      .not('latitude', 'is', null)
-      .not('longitude', 'is', null)
     if (profErr) throw profErr
 
     const today = new Date().toISOString().slice(0, 10)
     let usersSent = 0
     let usersSkipped = 0
     let claimSkipped = 0
+    let deptFallbackUsers = 0
     const claimSkippedBy: Record<string, number> = {}
     const errors: Array<{ user_id: string; reason: string }> = []
 
