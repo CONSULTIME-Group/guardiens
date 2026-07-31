@@ -167,18 +167,26 @@ Deno.serve(async (req) => {
 
       let alertLat: number | null = null;
       let alertLng: number | null = null;
+      let alertDept: string | null = null;
 
       if (pref.zone_type === "rayon") {
         const cityToResolve = pref.city || profile.city;
-        if (!cityToResolve) { skipped++; continue; }
-        const { data: geo } = await supabase
-          .from("geocode_cache")
-          .select("lat, lng")
-          .eq("normalized_name", cityToResolve.toLowerCase().trim())
-          .maybeSingle();
-        if (!geo) { skipped++; continue; }
-        alertLat = geo.lat;
-        alertLng = geo.lng;
+        if (cityToResolve) {
+          const { data: geo } = await supabase
+            .from("geocode_cache")
+            .select("lat, lng")
+            .eq("normalized_name", cityToResolve.toLowerCase().trim())
+            .maybeSingle();
+          if (geo) {
+            alertLat = geo.lat;
+            alertLng = geo.lng;
+          }
+        }
+        if (alertLat == null || alertLng == null) {
+          alertDept = deptOf(profile.departement_code, profile.postal_code);
+          if (!alertDept) { skipped++; continue; }
+          rayonFallbackDept++;
+        }
       }
 
       const alertTypes = pref.alert_types as string[];
