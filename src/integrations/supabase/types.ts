@@ -1590,6 +1590,30 @@ export type Database = {
         }
         Relationships: []
       }
+      departements: {
+        Row: {
+          code: string
+          code_region: string
+          created_at: string
+          nom: string
+          nom_region: string
+        }
+        Insert: {
+          code: string
+          code_region: string
+          created_at?: string
+          nom: string
+          nom_region: string
+        }
+        Update: {
+          code?: string
+          code_region?: string
+          created_at?: string
+          nom?: string
+          nom_region?: string
+        }
+        Relationships: []
+      }
       email_campaign_events: {
         Row: {
           created_at: string
@@ -4148,6 +4172,7 @@ export type Database = {
           created_at: string
           custom_skills: Json | null
           date_of_birth: string | null
+          departement_code: string | null
           email: string | null
           email_preferences: Json
           first_name: string | null
@@ -4208,6 +4233,7 @@ export type Database = {
           created_at?: string
           custom_skills?: Json | null
           date_of_birth?: string | null
+          departement_code?: string | null
           email?: string | null
           email_preferences?: Json
           first_name?: string | null
@@ -4268,6 +4294,7 @@ export type Database = {
           created_at?: string
           custom_skills?: Json | null
           date_of_birth?: string | null
+          departement_code?: string | null
           email?: string | null
           email_preferences?: Json
           first_name?: string | null
@@ -5022,6 +5049,33 @@ export type Database = {
           },
         ]
       }
+      sit_notification_log: {
+        Row: {
+          created_at: string
+          idempotency_key: string
+          notification_date: string
+          sit_ids: string[]
+          source: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          idempotency_key: string
+          notification_date?: string
+          sit_ids?: string[]
+          source: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          idempotency_key?: string
+          notification_date?: string
+          sit_ids?: string[]
+          source?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       sit_status_history: {
         Row: {
           changed_at: string
@@ -5075,6 +5129,7 @@ export type Database = {
           cover_photo_url: string | null
           created_at: string
           daily_routine: string | null
+          departement_code: string | null
           end_date: string | null
           environments: string[]
           flexible_dates: boolean | null
@@ -5119,6 +5174,7 @@ export type Database = {
           cover_photo_url?: string | null
           created_at?: string
           daily_routine?: string | null
+          departement_code?: string | null
           end_date?: string | null
           environments?: string[]
           flexible_dates?: boolean | null
@@ -5163,6 +5219,7 @@ export type Database = {
           cover_photo_url?: string | null
           created_at?: string
           daily_routine?: string | null
+          departement_code?: string | null
           end_date?: string | null
           environments?: string[]
           flexible_dates?: boolean | null
@@ -7041,6 +7098,15 @@ export type Database = {
         Args: { _event_type: string; _mission_id: string; _target_id: string }
         Returns: boolean
       }
+      claim_sit_notification: {
+        Args: {
+          _date?: string
+          _sit_ids?: string[]
+          _source: string
+          _user_id: string
+        }
+        Returns: boolean
+      }
       complete_onboarding: {
         Args: {
           p_animal_experience?: string
@@ -7098,6 +7164,7 @@ export type Database = {
         Args: { message_id: number; queue_name: string }
         Returns: boolean
       }
+      dept_code_from_postal: { Args: { p_postal: string }; Returns: string }
       detect_affinity_stale: {
         Args: never
         Returns: {
@@ -7630,6 +7697,10 @@ export type Database = {
           p_sit_id: string
           p_sitter_id: string
         }
+        Returns: undefined
+      }
+      release_sit_notification: {
+        Args: { _date?: string; _user_id: string }
         Returns: undefined
       }
       reopen_application: { Args: { p_application_id: string }; Returns: Json }
