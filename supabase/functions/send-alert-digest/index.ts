@@ -193,13 +193,16 @@ Deno.serve(async (req) => {
       const sits: any[] = [];
       const missions: any[] = [];
 
+      const isFrance = pref.zone_type === "france"
+        || (pref.zone_type === "region" && pref.region_code === "FR");
+
       if (alertTypes.includes("gardes")) {
         const { data: rawSits } = await supabase
           .from("sits")
           .select(`
             id, title, specific_expectations, owner_message, start_date, end_date, is_urgent, cover_photo_url,
-            city, country,
-            profiles:user_id (first_name, city, postal_code, country),
+            city, country, departement_code, accepting_applications,
+            profiles:user_id (first_name, city, postal_code, departement_code, country),
             properties:property_id (cover_photo_url, photos, pets (species, name))
           `)
           .eq("status", "published")
@@ -208,28 +211,47 @@ Deno.serve(async (req) => {
           .limit(20);
 
         for (const sit of rawSits ?? []) {
+          if (sit.accepting_applications === false) continue;
           const ownerCountry = (sit.profiles as any)?.country;
           if (ownerCountry && ownerCountry !== "FR") continue;
-          const sitCity = (sit.profiles as any)?.city;
-          if (!sitCity) continue;
 
-          if (pref.zone_type === "rayon" && alertLat != null && alertLng != null) {
-            const { data: geo } = await supabase
-              .from("geocode_cache")
-              .select("lat, lng")
-              .eq("normalized_name", sitCity.toLowerCase().trim())
-              .maybeSingle();
-            if (!geo) continue;
-            const dist = haversine(alertLat, alertLng, geo.lat, geo.lng);
-            if (dist <= pref.radius_km) sits.push(sit);
-          } else if (pref.zone_type === "departement" && pref.departement) {
-            const pc = (sit.profiles as any)?.postal_code || "";
-            if (pc.startsWith(pref.departement)) sits.push(sit);
-          } else if (pref.zone_type === "region" && pref.region_code === "FR") {
+          const sitDept = deptOf(
+            sit.departement_code,
+            (sit.profiles as any)?.departement_code,
+            (sit.profiles as any)?.postal_code,
+          );
+
+          if (isFrance) {
+            // France entière : aucune condition géographique.
             sits.push(sit);
+            continue;
+          }
+
+          if (pref.zone_type === "rayon") {
+            const sitCity = (sit.profiles as any)?.city;
+            let matched = false;
+            if (alertLat != null && alertLng != null && sitCity) {
+              const { data: geo } = await supabase
+                .from("geocode_cache")
+                .select("lat, lng")
+                .eq("normalized_name", sitCity.toLowerCase().trim())
+                .maybeSingle();
+              if (geo) {
+                matched = haversine(alertLat, alertLng, geo.lat, geo.lng) <= pref.radius_km;
+              } else {
+                // Géocodage manquant côté annonce : repli département.
+                const ownDept = alertDept
+                  ?? deptOf(profile.departement_code, profile.postal_code);
+                matched = !!ownDept && ownDept === sitDept;
+              }
+            } else if (alertDept) {
+              matched = alertDept === sitDept;
+            }
+            if (matched) sits.push(sit);
+          } else if (pref.zone_type === "departement" && pref.departement) {
+            if (sitDept === deptOf(pref.departement)) sits.push(sit);
           } else if (pref.zone_type === "region" && pref.region_code === "ARA") {
-            const pc = (sit.profiles as any)?.postal_code || "";
-            if (AURA_DEPARTMENTS.includes(pc.substring(0, 2))) sits.push(sit);
+            if (sitDept && AURA_DEPARTMENTS.includes(sitDept)) sits.push(sit);
           }
         }
       }
@@ -243,15 +265,26 @@ Deno.serve(async (req) => {
           .limit(20);
 
         for (const m of rawMissions ?? []) {
-          if (pref.zone_type === "rayon" && alertLat != null && alertLng != null && m.latitude && m.longitude) {
-            const dist = haversine(alertLat, alertLng, Number(m.latitude), Number(m.longitude));
-            if (dist <= pref.radius_km) missions.push(m);
-          } else if (pref.zone_type === "departement" && pref.departement) {
-            if ((m.postal_code || "").startsWith(pref.departement)) missions.push(m);
-          } else if (pref.zone_type === "region" && pref.region_code === "FR") {
+          const mDept = deptOf(m.postal_code);
+
+          if (isFrance) {
             missions.push(m);
+            continue;
+          }
+
+          if (pref.zone_type === "rayon") {
+            if (alertLat != null && alertLng != null && m.latitude && m.longitude) {
+              const dist = haversine(alertLat, alertLng, Number(m.latitude), Number(m.longitude));
+              if (dist <= pref.radius_km) missions.push(m);
+            } else {
+              const ownDept = alertDept
+                ?? deptOf(profile.departement_code, profile.postal_code);
+              if (ownDept && ownDept === mDept) missions.push(m);
+            }
+          } else if (pref.zone_type === "departement" && pref.departement) {
+            if (mDept === deptOf(pref.departement)) missions.push(m);
           } else if (pref.zone_type === "region" && pref.region_code === "ARA") {
-            if (AURA_DEPARTMENTS.includes((m.postal_code || "").substring(0, 2))) missions.push(m);
+            if (mDept && AURA_DEPARTMENTS.includes(mDept)) missions.push(m);
           }
         }
       }
