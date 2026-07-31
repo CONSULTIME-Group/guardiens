@@ -111,6 +111,22 @@ Deno.serve(async (req) => {
     const url = new URL(req.url);
     const forceMode = url.searchParams.get("force") === "true";
 
+    // Aperçu de mesure. Sort avant le claim et avant tout envoi, ne pose
+    // aucune réservation dans sit_notification_log.
+    let dryRun = false;
+    let sinceHours = 24;
+    try {
+      const body = await req.json();
+      if (body && typeof body === "object") {
+        dryRun = body.dry_run === true;
+        // since_hours n'est lisible qu'en dry run : la fenêtre de production
+        // reste 24h, sans exception.
+        if (dryRun && Number.isFinite(Number(body.since_hours))) {
+          sinceHours = Math.min(24 * 90, Math.max(1, Math.floor(Number(body.since_hours))));
+        }
+      }
+    } catch { /* pas de body JSON : mode normal */ }
+
     const now = new Date();
     const currentHourStr = parisHourSlot(now);
     const dayOfWeek = now.getDay();
@@ -124,7 +140,8 @@ Deno.serve(async (req) => {
         )
       `)
       .eq("active", true);
-    if (!forceMode) prefsQuery = prefsQuery.eq("heure_envoi", currentHourStr);
+    // En dry run, on mesure toute la population active, tous créneaux confondus.
+    if (!forceMode && !dryRun) prefsQuery = prefsQuery.eq("heure_envoi", currentHourStr);
 
     const { data: prefs, error: prefsError } = await prefsQuery;
     if (prefsError) throw prefsError;
@@ -135,7 +152,7 @@ Deno.serve(async (req) => {
     }
 
     const since = new Date();
-    since.setHours(since.getHours() - 24);
+    since.setHours(since.getHours() - sinceHours);
     const sinceISO = since.toISOString();
 
     let sent = 0;
@@ -144,6 +161,22 @@ Deno.serve(async (req) => {
     let rayonFallbackDept = 0;
     const claimSkippedBy: Record<string, number> = {};
     const errors: Array<{ user_id?: string; reason: string }> = [];
+
+    const MIGRATION_SOURCE = "migration_email_preferences_2026_07_31";
+    const dry = {
+      recipients: 0,
+      recipients_migrated: 0,
+      per_sit: {} as Record<string, { title: string; city: string | null; recipients: number }>,
+      excluded: {} as Record<string, number>,
+      excluded_migrated: {} as Record<string, number>,
+    };
+    const mark = (reason: string, pref: any) => {
+      dry.excluded[reason] = (dry.excluded[reason] ?? 0) + 1;
+      if (pref?.source === MIGRATION_SOURCE) {
+        dry.excluded_migrated[reason] = (dry.excluded_migrated[reason] ?? 0) + 1;
+      }
+    };
+
 
     // Repli départemental : deux codes département suffisent à comparer deux
     // localisations quand le géocodage manque. La précision se dégrade, le
