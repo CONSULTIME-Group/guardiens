@@ -19,7 +19,7 @@ vi.mock("@/integrations/supabase/client", () => ({
 const src = readFileSync(resolve(process.cwd(), "src/components/search/SearchOwner.tsx"), "utf8");
 
 describe("géocodage en panne", () => {
-  beforeEach(() => invoke.mockReset());
+  
 
   it("geocodeCity renvoie null sur erreur de l'API, sans lever", async () => {
     invoke.mockResolvedValue({ data: null, error: { message: "rate limited" } });
