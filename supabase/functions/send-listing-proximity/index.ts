@@ -555,6 +555,10 @@ Deno.serve(async (req) => {
       targeted: recipients.length,
       already_served: alreadyServed.size,
       campaign_id: campaignId,
+      radius_km: radiusKm,
+      requested_radius_km: radiusDecision.requestedRadiusKm,
+      radius_clamped: radiusDecision.clamped,
+      max_radius_km: MAX_RADIUS_KM,
     }), {
       status: 200,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
