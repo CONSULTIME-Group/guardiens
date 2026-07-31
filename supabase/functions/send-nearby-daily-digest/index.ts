@@ -56,25 +56,45 @@ Deno.serve(async (req) => {
   try {
     const since = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()
 
-    // 1) Charge les annonces récentes une seule fois.
-    const [{ data: sits }, { data: missions }] = await Promise.all([
+    // Repli départemental : quand une coordonnée manque, on compare les codes
+    // département plutôt que d'abandonner le destinataire.
+    const deptOf = (...candidates: Array<string | null | undefined>): string | null => {
+      for (const c of candidates) {
+        const v = (c ?? '').toString().trim()
+        if (!v) continue
+        if (/^(2A|2B)/i.test(v)) return v.slice(0, 2).toUpperCase()
+        const m = v.match(/^\d{2}/)
+        if (m) return m[0]
+      }
+      return null
+    }
+    const todayIso = new Date().toISOString().slice(0, 10)
+
+    // 1) Charge les annonces récentes une seule fois. `sits` ne porte pas de
+    // coordonnées, on passe par celles du propriétaire, avec repli département.
+    const [{ data: sits, error: sitsErr }, { data: missions, error: missionsErr }] = await Promise.all([
       supabase
         .from('sits')
-        .select('id, slug, title, city, start_date, end_date, latitude, longitude, user_id, status, created_at, cover_photo_url, property_id')
+        .select('id, slug, title, city, start_date, end_date, user_id, status, created_at, cover_photo_url, property_id, departement_code, accepting_applications, country, profiles:user_id (latitude, longitude, postal_code, departement_code, country)')
         .gte('created_at', since)
-        .eq('status', 'open')
-        .not('latitude', 'is', null)
-        .not('longitude', 'is', null),
+        .eq('status', 'published')
+        .or('country.is.null,country.eq.FR'),
       supabase
         .from('small_missions')
-        .select('id, slug, title, description, mission_type, city, category, date_needed, latitude, longitude, user_id, status, created_at, photos')
+        .select('id, slug, title, description, mission_type, city, category, date_needed, latitude, longitude, postal_code, user_id, status, created_at, photos')
         .gte('created_at', since)
-        .eq('status', 'open')
-        .not('latitude', 'is', null)
-        .not('longitude', 'is', null),
+        .eq('status', 'open'),
     ])
+    if (sitsErr) throw sitsErr
+    if (missionsErr) throw missionsErr
 
-    const allSits = sits ?? []
+    const allSits = (sits ?? []).filter((s: any) => {
+      if (s.accepting_applications === false) return false
+      if (s.end_date && s.end_date < todayIso) return false
+      const oc = (s.profiles as any)?.country
+      if (oc && oc !== 'FR') return false
+      return true
+    })
     const allMissions = missions ?? []
 
     if (allSits.length === 0 && allMissions.length === 0) {
