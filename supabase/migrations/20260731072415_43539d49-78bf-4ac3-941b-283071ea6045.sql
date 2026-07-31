@@ -1,0 +1,2 @@
+ALTER TABLE public.email_preferences DROP CONSTRAINT IF EXISTS email_preferences_nearby_radius_check;
+ALTER TABLE public.email_preferences ADD CONSTRAINT email_preferences_nearby_radius_check CHECK (nearby_daily_radius_km IN (5, 15, 30, 50, 100));
