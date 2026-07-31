@@ -111,12 +111,7 @@ Deno.serve(async (req) => {
     const forceMode = url.searchParams.get("force") === "true";
 
     const now = new Date();
-    // Heure de Paris calculée via le fuseau, pas via un décalage fixe :
-    // le passage heure d'été / heure d'hiver est pris en compte.
-    const parisHour = new Intl.DateTimeFormat("fr-FR", {
-      timeZone: "Europe/Paris", hour: "2-digit", hour12: false,
-    }).format(now);
-    const currentHourStr = `${parisHour.padStart(2, "0")}:00`;
+    const currentHourStr = parisHourSlot(now);
     const dayOfWeek = now.getDay();
 
     let prefsQuery = supabase
