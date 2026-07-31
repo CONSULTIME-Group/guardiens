@@ -6608,29 +6608,41 @@ export type Database = {
       }
       sitter_profiles_affinity: {
         Row: {
+          animal_types: string[] | null
           experience_years: string | null
           interests: string[] | null
           languages: string[] | null
           life_pace: string | null
           sensitivities: string[] | null
+          sitter_type: string | null
+          travels_with_children: boolean | null
+          travels_with_own_animals: boolean | null
           user_id: string | null
           work_during_sit: string | null
         }
         Insert: {
+          animal_types?: string[] | null
           experience_years?: string | null
           interests?: string[] | null
           languages?: string[] | null
           life_pace?: string | null
           sensitivities?: string[] | null
+          sitter_type?: string | null
+          travels_with_children?: boolean | null
+          travels_with_own_animals?: boolean | null
           user_id?: string | null
           work_during_sit?: string | null
         }
         Update: {
+          animal_types?: string[] | null
           experience_years?: string | null
           interests?: string[] | null
           languages?: string[] | null
           life_pace?: string | null
           sensitivities?: string[] | null
+          sitter_type?: string | null
+          travels_with_children?: boolean | null
+          travels_with_own_animals?: boolean | null
           user_id?: string | null
           work_during_sit?: string | null
         }
