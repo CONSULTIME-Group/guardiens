@@ -15,7 +15,7 @@
 // Body : { manual?: boolean, dry_run?: boolean, user_id?: string }
 
 import { createClient } from 'npm:@supabase/supabase-js@2.45.0'
-import { claimSitNotification, releaseSitNotification } from '../_shared/sitNotificationClaim.ts'
+import { claimSitNotification, raiseClaimErrorSignal, releaseSitNotification } from '../_shared/sitNotificationClaim.ts'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -374,6 +374,8 @@ Deno.serve(async (req) => {
         errors.push({ user_id: p.id, reason: String(loopErr) })
       }
     }
+
+    await raiseClaimErrorSignal(supabase, 'nearby-daily-digest', claimSkippedBy.claim_error ?? 0)
 
     return json({
       ok: true,

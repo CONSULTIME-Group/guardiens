@@ -10,8 +10,8 @@
 // et le pré-filtrage des annonces (24h glissantes, pays=FR) sont conservés
 // à l'identique.
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-import { claimSitNotification, releaseSitNotification } from "../_shared/sitNotificationClaim.ts";
-import { parisHourSlot } from "../_shared/paris-hour.ts";
+import { claimSitNotification, raiseClaimErrorSignal, releaseSitNotification } from "../_shared/sitNotificationClaim.ts";
+import { parisDateKey, parisHourSlot } from "../_shared/paris-hour.ts";
 import { geocodeKeyCandidates } from "../_shared/geocode-lookup.ts";
 
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
@@ -116,12 +116,14 @@ Deno.serve(async (req) => {
     // aucune réservation dans sit_notification_log.
     let dryRun = false;
     let sinceHours = 24;
-    let claimProbe: string | null = null;
+    let userId: string | null = null;
     try {
       const body = await req.json();
       if (body && typeof body === "object") {
         dryRun = body.dry_run === true;
-        if (typeof body.claim_probe === "string") claimProbe = body.claim_probe;
+        if (typeof body.user_id === "string" && /^[0-9a-f]{8}-[0-9a-f-]{27}$/i.test(body.user_id)) {
+          userId = body.user_id;
+        }
         // since_hours n'est lisible qu'en dry run : la fenêtre de production
         // reste 24h, sans exception.
         if (dryRun && Number.isFinite(Number(body.since_hours))) {
@@ -130,25 +132,9 @@ Deno.serve(async (req) => {
       }
     } catch { /* pas de body JSON : mode normal */ }
 
-    // Sonde de diagnostic : vérifie que le runtime de la fonction sait
-    // réellement écrire dans sit_notification_log. Date figée à 2020-01-01
-    // pour ne jamais consommer le créneau du jour d'un gardien.
-    if (claimProbe) {
-      const { data, error } = await supabase.rpc("claim_sit_notification", {
-        _user_id: claimProbe,
-        _source: "claim-probe",
-        _sit_ids: [],
-        _date: "2020-01-01",
-      });
-      return new Response(
-        JSON.stringify({ claim_probe: true, granted: data === true, error: error?.message ?? null }),
-        { status: 200, headers: { "Content-Type": "application/json" } },
-      );
-    }
-
-
     const now = new Date();
     const currentHourStr = parisHourSlot(now);
+    const currentParisDate = parisDateKey(now);
     const dayOfWeek = now.getDay();
 
     let prefsQuery = supabase
@@ -160,6 +146,7 @@ Deno.serve(async (req) => {
         )
       `)
       .eq("active", true);
+    if (userId) prefsQuery = prefsQuery.eq("user_id", userId);
     // En dry run, on mesure toute la population active, tous créneaux confondus.
     if (!forceMode && !dryRun) prefsQuery = prefsQuery.eq("heure_envoi", currentHourStr);
 
@@ -416,7 +403,7 @@ Deno.serve(async (req) => {
         || (pref.zone_type === "region" ? (pref.region_code === "FR" ? "France entière" : pref.region_code) : undefined)
         || "votre secteur";
 
-      const idem = `alert-digest-${pref.id}-${now.toISOString().slice(0, 10)}-${currentHourStr}`;
+      const idem = `alert-digest-${pref.id}-${currentParisDate}-${currentHourStr}`;
 
       if (dryRun) {
         // Lecture seule : on regarde si le créneau du jour est déjà réservé
@@ -425,7 +412,7 @@ Deno.serve(async (req) => {
           .from("sit_notification_log")
           .select("source")
           .eq("user_id", profile.id)
-          .eq("notification_date", now.toISOString().slice(0, 10))
+          .eq("notification_date", currentParisDate)
           .limit(1);
         if (held && held.length > 0) {
           skipped++;
@@ -485,6 +472,8 @@ Deno.serve(async (req) => {
       sent++;
     }
 
+
+    await raiseClaimErrorSignal(supabase, "alert-digest", claimSkippedBy.claim_error ?? 0);
 
     return new Response(
       JSON.stringify({

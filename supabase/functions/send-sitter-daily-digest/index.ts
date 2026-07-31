@@ -15,7 +15,7 @@
 // - sitter_id : limite l'exécution à un gardien précis (test ciblé).
 
 import { createClient } from 'npm:@supabase/supabase-js@2.45.0'
-import { claimSitNotification, releaseSitNotification } from '../_shared/sitNotificationClaim.ts'
+import { claimSitNotification, raiseClaimErrorSignal, releaseSitNotification } from '../_shared/sitNotificationClaim.ts'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -336,6 +336,8 @@ Deno.serve(async (req) => {
         errors.push({ sitter_id: sitterId, reason: String(loopErr) })
       }
     }
+
+    await raiseClaimErrorSignal(supabase, 'sitter-daily-digest', claimSkippedBy.claim_error ?? 0)
 
     return json({
       ok: true,

@@ -13,3 +13,14 @@ export function parisHourSlot(now: Date): string {
     .find((p) => p.type === "hour")!.value;
   return `${parisHour.padStart(2, "0")}:00`;
 }
+
+export function parisDateKey(now: Date): string {
+  const parts = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Europe/Paris",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).formatToParts(now);
+  const values = new Map(parts.map((part) => [part.type, part.value]));
+  return `${values.get("year")}-${values.get("month")}-${values.get("day")}`;
+}
