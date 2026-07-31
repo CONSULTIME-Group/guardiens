@@ -660,6 +660,8 @@ const EngagementTab = () => {
   const [loading, setLoading] = useState(true);
   const [timeRange, setTimeRange] = useState("30d");
   const [totals, setTotals] = useState({ sent: 0, delivered: 0, opened: 0, clicked: 0, bounced: 0, unsub: 0 });
+  const [uninstrumented, setUninstrumented] = useState(0);
+  const [truncated, setTruncated] = useState(false);
 
   const fetchStats = async () => {
     setLoading(true);
@@ -670,11 +672,17 @@ const EngagementTab = () => {
     else if (timeRange === "30d") start.setDate(now.getDate() - 30);
     else if (timeRange === "90d") start.setDate(now.getDate() - 90);
 
+    // Borne basse : le webhook Resend n'écoute que depuis le 22 juillet 2026.
+    // Avant cette date, aucun événement de livraison n'a pu être enregistré, ce
+    // qui rendrait tout taux calculé faux par construction (zone aveugle).
+    const effectiveStart = clampToTrackingStart(start);
+    setTruncated(effectiveStart.getTime() !== start.getTime());
+
     // 1) Pull sends within window
     const { data: logs, error: logsErr } = await supabase
       .from("email_send_log")
       .select("template_name,recipient_email,status,message_id,created_at,delivered_at,open_count,click_count,bounced_at,complained_at")
-      .gte("created_at", start.toISOString())
+      .gte("created_at", effectiveStart.toISOString())
       .order("created_at", { ascending: false })
       .limit(10000);
 
@@ -691,7 +699,13 @@ const EngagementTab = () => {
       const prev = byMsg.get(k);
       if (!prev || new Date(r.created_at) > new Date(prev.created_at)) byMsg.set(k, r);
     });
-    const dedup = Array.from(byMsg.values()).filter((r) => r.status === "sent" || r.delivered_at || r.open_count > 0 || r.click_count > 0);
+    const dedupAll = Array.from(byMsg.values()).filter((r) => r.status === "sent" || r.delivered_at || r.open_count > 0 || r.click_count > 0);
+
+    // Les emails d'authentification passent par la file auth_emails, sans
+    // resend_id, donc sans remontée webhook possible. Ils sont comptés à part.
+    const dedup = dedupAll.filter((r) => !isUninstrumentedTemplate(r.template_name));
+    setUninstrumented(dedupAll.length - dedup.length);
+
 
     // 2) Pull unsubscribes within window
     const { data: unsubs } = await supabase
