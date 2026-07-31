@@ -49,7 +49,7 @@ const EmailPreferences = () => {
         alert_emails: data.alert_emails ?? true,
         new_mission_digest: (data as any).new_mission_digest ?? true,
         nearby_daily_digest: (data as any).nearby_daily_digest ?? true,
-        nearby_daily_radius_km: ((data as any).nearby_daily_radius_km ?? 15) as 5 | 15 | 30,
+        nearby_daily_radius_km: ((data as any).nearby_daily_radius_km ?? 100) as Radius,
       });
       setLoading(false);
     })();
