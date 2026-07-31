@@ -43,7 +43,7 @@ export const BroadcastSitDialog = ({ open, onOpenChange, signal, onSent }: Props
   const m = signal.metadata ?? {};
   const sitId = signal.entity_id;
 
-  const [radiusKm, setRadiusKm] = useState<number>(m.eligible_radius_km ?? 30);
+  const [radiusKm, setRadiusKm] = useState<number>(m.eligible_radius_km ?? 150);
   const [preview, setPreview] = useState<PreviewData | null>(null);
   const [previewing, setPreviewing] = useState(false);
   const [sending, setSending] = useState(false);
