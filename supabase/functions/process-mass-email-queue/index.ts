@@ -9,6 +9,11 @@
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
 import { resendFetch } from "../_shared/resend-guard.ts";
+import {
+  acquireWorkerLock,
+  releaseWorkerLock,
+  type LockClientLike,
+} from "../_shared/worker-lock.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -107,6 +112,17 @@ Deno.serve(async (req) => {
       });
     }
 
+    // Lissage global au compte : un seul worker draine la file à la fois.
+    // Sans cela, quatre campagnes lancées en parallèle cadencent chacune à
+    // 600 ms et produisent ~6,7 envois/s, très au-dessus de la limite Resend.
+    const gotLock = await acquireWorkerLock(service as unknown as LockClientLike);
+    if (!gotLock) {
+      return new Response(JSON.stringify({ ok: true, skipped: "lock_held" }), {
+        status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    try {
     // Lit un lot depuis pgmq
     const { data: msgs, error: readErr } = await service.rpc("read_email_batch", {
       queue_name: QUEUE,
@@ -477,6 +493,9 @@ Deno.serve(async (req) => {
       JSON.stringify({ processed: messages.length, sent, failed, skipped, dlq }),
       { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } },
     );
+    } finally {
+      await releaseWorkerLock(service as unknown as LockClientLike);
+    }
   } catch (err) {
     console.error("process-mass-email-queue error:", err);
     return new Response(JSON.stringify({ error: String(err) }), {

@@ -34,6 +34,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { MAX_RADIUS_KM, clampRadiusInput } from "@/lib/proximityRadius";
 import { Loader2, Search, Send, AlertTriangle } from "lucide-react";
 
 interface PreviewRecipient {
@@ -220,10 +221,13 @@ const ListingProximityCard = ({
             id="listing-prox-radius"
             type="number"
             min={1}
-            max={2000}
+            max={MAX_RADIUS_KM}
             value={radiusKm}
-            onChange={(e) => setRadiusKm(Math.max(1, Math.min(2000, Number(e.target.value) || 30)))}
+            onChange={(e) => setRadiusKm(clampRadiusInput(e.target.value))}
           />
+          <p className="text-[11px] text-muted-foreground">
+            Plafonné à {MAX_RADIUS_KM} km : au-delà, l'objet « près de chez vous » devient faux.
+          </p>
         </div>
         <Button onClick={handlePreview} disabled={loading} size="sm" variant="outline">
           {loading ? (
@@ -234,7 +238,7 @@ const ListingProximityCard = ({
         </Button>
       </div>
 
-      {radiusKm > 500 && (
+      {radiusKm >= MAX_RADIUS_KM && (
         <Alert variant="default" className="border-warning/40 bg-warning/5 py-2">
           <AlertTriangle className="h-4 w-4" />
           <AlertDescription className="text-xs">

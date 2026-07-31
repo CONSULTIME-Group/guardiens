@@ -23,6 +23,8 @@
  * Sécurité : admin uniquement (user_roles.role = 'admin').
  */
 import { createClient, SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
+import { clampRadiusKm, MAX_RADIUS_KM } from "../_shared/proximity-radius.ts";
+import { PUBLISHED_STATUS } from "../_shared/sit-alert-guard.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -340,7 +342,18 @@ Deno.serve(async (req) => {
     const payload = await req.json();
     const mode: "preview" | "send" = payload.mode || "preview";
     const sitId: string = payload.sit_id;
-    const radiusKm: number = Math.max(1, Math.min(2000, Number(payload.radius_km) || 30));
+    // Plafond serveur : au-delà de MAX_RADIUS_KM l'objet « près de chez vous »
+    // devient faux. On ne refuse pas la campagne, on la ramène au plafond et on
+    // le journalise dans la réponse.
+    const radiusDecision = clampRadiusKm(payload.radius_km);
+    const radiusKm: number = radiusDecision.radiusKm;
+    if (radiusDecision.clamped) {
+      console.warn("radius clamped", {
+        requested: radiusDecision.requestedRadiusKm,
+        applied: radiusKm,
+        sit_id: payload.sit_id,
+      });
+    }
     const signalId: string | null = payload.signal_id ?? null;
     if (!sitId) {
       return new Response(JSON.stringify({ error: "sit_id requis" }), {
@@ -369,6 +382,11 @@ Deno.serve(async (req) => {
       return new Response(
         JSON.stringify({
           count: recipients.length,
+          radius_km: radiusKm,
+          requested_radius_km: radiusDecision.requestedRadiusKm,
+          radius_clamped: radiusDecision.clamped,
+          max_radius_km: MAX_RADIUS_KM,
+          sit_status: (sit as any).status ?? null,
           author_first_name: authorFirstName,
           sit: {
             id: sit.id,
@@ -398,6 +416,22 @@ Deno.serve(async (req) => {
     // mass_email_sends, pousse un message pgmq par destinataire, puis rend la
     // main. C'est `process-mass-email-queue` (cron chaque minute) qui expédie,
     // à cadence maîtrisée, avec ses reprises sur échec.
+
+    // Contrôle à l'enqueue : une annonce non publiée ne doit jamais alimenter
+    // la file. Le second contrôle, au moment de l'envoi, vit dans
+    // send-transactional-email (le statut peut changer après l'enfilement).
+    const sitStatus = String((sit as any).status || "");
+    if (sitStatus !== PUBLISHED_STATUS) {
+      return new Response(
+        JSON.stringify({
+          error: `Diffusion refusée : cette annonce n'est pas publiée (statut actuel: ${sitStatus || "inconnu"}). Republiez-la avant de la diffuser.`,
+          code: "sit_not_published",
+          sit_status: sitStatus || null,
+        }),
+        { status: 409, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
+    }
+
     if (recipients.length === 0) {
       return new Response(JSON.stringify({ error: "Aucun destinataire" }), {
         status: 400,
@@ -440,6 +474,10 @@ Deno.serve(async (req) => {
           targeted: recipients.length,
           already_served: alreadyServed.size,
           mode: "queue",
+          radius_km: radiusKm,
+          requested_radius_km: radiusDecision.requestedRadiusKm,
+          radius_clamped: radiusDecision.clamped,
+          max_radius_km: MAX_RADIUS_KM,
         }),
         { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } },
       );
@@ -544,6 +582,10 @@ Deno.serve(async (req) => {
       targeted: recipients.length,
       already_served: alreadyServed.size,
       campaign_id: campaignId,
+      radius_km: radiusKm,
+      requested_radius_km: radiusDecision.requestedRadiusKm,
+      radius_clamped: radiusDecision.clamped,
+      max_radius_km: MAX_RADIUS_KM,
     }), {
       status: 200,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
