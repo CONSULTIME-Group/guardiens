@@ -9,6 +9,11 @@
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
 import { resendFetch } from "../_shared/resend-guard.ts";
+import {
+  acquireWorkerLock,
+  releaseWorkerLock,
+  type LockClientLike,
+} from "../_shared/worker-lock.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
