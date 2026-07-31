@@ -11,6 +11,7 @@
 // à l'identique.
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { claimSitNotification, releaseSitNotification } from "../_shared/sitNotificationClaim.ts";
+import { parisHourSlot } from "../_shared/paris-hour.ts";
 
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SUPABASE_SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
@@ -111,12 +112,7 @@ Deno.serve(async (req) => {
     const forceMode = url.searchParams.get("force") === "true";
 
     const now = new Date();
-    // Heure de Paris calculée via le fuseau, pas via un décalage fixe :
-    // le passage heure d'été / heure d'hiver est pris en compte.
-    const parisHour = new Intl.DateTimeFormat("fr-FR", {
-      timeZone: "Europe/Paris", hour: "2-digit", hour12: false,
-    }).format(now);
-    const currentHourStr = `${parisHour.padStart(2, "0")}:00`;
+    const currentHourStr = parisHourSlot(now);
     const dayOfWeek = now.getDay();
 
     let prefsQuery = supabase
