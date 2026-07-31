@@ -389,8 +389,12 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Mode SEND — passe intégralement par send-transactional-email (cap,
-    // opt-out, suppression, logs, idempotence).
+    // Mode SEND (refonte 31/07/2026) : ENFILEMENT SEUL.
+    // La fonction ne contacte plus Resend ni send-transactional-email. Elle
+    // calcule la cible, écrit toutes les lignes en `queued` dans
+    // mass_email_sends, pousse un message pgmq par destinataire, puis rend la
+    // main. C'est `process-mass-email-queue` (cron chaque minute) qui expédie,
+    // à cadence maîtrisée, avec ses reprises sur échec.
     if (recipients.length === 0) {
       return new Response(JSON.stringify({ error: "Aucun destinataire" }), {
         status: 400,
@@ -398,9 +402,47 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Row campagne pour la traçabilité admin (SignalsSection). Le détail par
-    // destinataire vit désormais dans email_send_log; on garde une trace
-    // agrégée ici.
+    // Idempotence de ciblage : tout destinataire ayant déjà une ligne `sent`
+    // pour CETTE MÊME ANNONCE (toutes campagnes confondues) est exclu. Le
+    // plafond de fréquence reste une seconde barrière, jamais la seule.
+    const alreadyServed = new Set<string>();
+    {
+      const { data: priorCampaigns } = await serviceClient
+        .from("mass_emails")
+        .select("id, filters")
+        .eq("segment", "listing_proximity");
+      const priorIds = ((priorCampaigns || []) as any[])
+        .filter((c) => String(c?.filters?.sit_id || "") === sitId)
+        .map((c) => c.id as string);
+      if (priorIds.length > 0) {
+        const CH = 200;
+        for (let i = 0; i < priorIds.length; i += CH) {
+          const { data: served } = await serviceClient
+            .from("mass_email_sends")
+            .select("recipient_email")
+            .in("mass_email_id", priorIds.slice(i, i + CH))
+            .eq("status", "sent");
+          for (const row of (served || []) as any[]) {
+            if (row.recipient_email) alreadyServed.add(String(row.recipient_email).toLowerCase());
+          }
+        }
+      }
+    }
+
+    const targets = recipients.filter((r) => !alreadyServed.has(r.email.toLowerCase()));
+    if (targets.length === 0) {
+      return new Response(
+        JSON.stringify({
+          queued: 0,
+          targeted: recipients.length,
+          already_served: alreadyServed.size,
+          mode: "queue",
+        }),
+        { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
+    }
+
+    // Row campagne pour la traçabilité admin (SignalsSection).
     const { data: campaign, error: campErr } = await serviceClient
       .from("mass_emails")
       .insert({
@@ -410,7 +452,7 @@ Deno.serve(async (req) => {
         body: `Annonce de garde (${sit.title}) diffusée à ${radiusKm} km, propriétaire ${authorFirstName}`,
         cta_label: "Voir l'annonce",
         cta_url: `https://guardiens.fr/sits/${sit.id}`,
-        recipients_count: 0,
+        recipients_count: targets.length,
         status: "sending",
         sent_by: user.id,
       })
@@ -421,166 +463,65 @@ Deno.serve(async (req) => {
     }
     const campaignId = campaign.id as string;
 
-    // Trois compteurs distincts (vague 45) :
-    //   - sent     : envoi Resend accepté (data.success && data.sent)
-    //   - excluded : destinataire écarté légitimement en aval par
-    //                send-transactional-email (opt-out catégorie, suppressed,
-    //                idempotence déjà envoyée, envoi différé par le cap).
-    //   - errors   : vrais échecs techniques (invoke non-2xx, exception).
-    // Le pré-filtre en amont exclut déjà product_emails=false et suppressed,
-    // mais la catégorie « alert » a sa propre préférence (alert_emails) qui
-    // est réévaluée côté send-transactional-email — d'où l'importance de
-    // reconnaître ici les 200 « exclus » et ne pas les compter en erreur.
-    let sent = 0;
-    let excluded = 0;
-    let errors = 0;
-
-    // Idempotence stable par (campagne, destinataire) : un rejeu de la même
-    // campagne ne double pas les envois, mais un nouveau broadcast admin
-    // (nouvelle mass_emails.id) permet un renvoi légitime.
-    // Resend limite a environ 2 requetes par seconde. On envoie donc par
-    // paquets de 2 avec une pause d'une seconde, et on retente une fois les
-    // envois rejetes pour depassement de quota.
-    const CONCURRENCY = 2;
-    const BATCH_PAUSE_MS = 1100;
-    const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
-    const isRetryable = (msg?: string) =>
-      !!msg && (/rate limit/i.test(msg) || /\b429\b/.test(msg) || /send-transactional-email 5\d\d/.test(msg));
-    type Outcome = "sent" | "excluded" | "error";
-    // Trace par destinataire, reconstruite APRES coup. On n'ecrit jamais de
-    // ligne au statut "queued" : ce statut est consomme chaque minute par le
-    // cron process-mass-email-queue et declencherait un envoi reel.
-    const sendRows: Array<Record<string, unknown>> = [];
-    // Budget temps : au dela, on arrete proprement et on marque la campagne
-    // "paused" plutot que de se faire tuer par le wall clock de la plateforme.
-    const START_TS = Date.now();
-    const TIME_BUDGET_MS = 110_000;
-    let timedOut = false;
-    let processed = 0;
-    for (let i = 0; i < recipients.length; i += CONCURRENCY) {
-      if (Date.now() - START_TS > TIME_BUDGET_MS) {
-        timedOut = true;
-        break;
-      }
-      if (i > 0) await sleep(BATCH_PAUSE_MS);
-      const slice = recipients.slice(i, i + CONCURRENCY);
-      const results = await Promise.all(slice.map(async (r): Promise<{ outcome: Outcome; err?: string }> => {
-        const idem = `listing-proximity-${campaignId}-${r.user_id}`;
-        const attempt = async (): Promise<{ outcome: Outcome; err?: string }> => {
-        try {
-          const _steRes = await fetch(`${Deno.env.get('SUPABASE_URL')}/functions/v1/send-transactional-email`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')}` },
-            body: JSON.stringify({
-              templateName: "nearby-sit-alert",
-              recipientEmail: r.email,
-              idempotencyKey: idem,
-              templateData: {
-                sitterFirstName: toTitleCase(r.first_name) || undefined,
-                ownerFirstName: authorFirstName || undefined,
-                sitTitle: sit.title || undefined,
-                city: listingCity || undefined,
-                distanceKm: r.distance_km,
-                startDate: startDateFr || undefined,
-                endDate: endDateFr || undefined,
-                sitId: sit.id,
-                animalsSummary: petsSentence || undefined,
-                coverPhotoUrl: coverPhotoUrl || null,
-              },
-            }),
-          });
-          const _steTxt1 = _steRes.ok ? '' : await _steRes.text().catch(() => '');
-          if (!_steRes.ok) console.error('send-transactional-email failed', _steRes.status, _steTxt1);
-          const error = _steRes.ok ? null : new Error(`send-transactional-email ${_steRes.status}: ${_steTxt1}`);
-          const data = _steRes.ok ? await _steRes.json().catch(() => null) : null;
-          if (error) return { outcome: "error", err: String(error) };
-          const body = (data ?? {}) as { success?: boolean; sent?: boolean; deferred?: boolean; skipped?: boolean; reason?: string };
-          // Exclusion RGPD / cap / idempotence : jamais comptée en erreur.
-          const excludedReasons = new Set([
-            "unsubscribed_category",
-            "email_suppressed",
-            "duplicate_idempotency_key",
-            "already_queued",
-            "unsubscribe_deferred",
-            "frequency_cap",
-          ]);
-          if (body.reason && excludedReasons.has(body.reason)) {
-            return { outcome: "excluded", err: body.reason };
-          }
-          if (body.deferred === true || body.skipped === true) {
-            return { outcome: "excluded", err: body.reason || "deferred" };
-          }
-          if (body.success === true && body.sent === true) {
-            return { outcome: "sent" };
-          }
-          if (body.success === false) {
-            return { outcome: "excluded", err: body.reason || "not_sent" };
-          }
-          return { outcome: "sent" };
-        } catch (e) {
-          return { outcome: "error", err: String(e) };
-        }
-        };
-        const first = await attempt();
-        if (first.outcome === "error" && isRetryable(first.err)) {
-          await sleep(2000);
-          return await attempt();
-        }
-        return first;
-      }));
-      results.forEach((r, idx) => {
-        const rec = slice[idx];
-        processed++;
-        if (r.outcome === "sent") sent++;
-        else if (r.outcome === "excluded") excluded++;
-        else { errors++; console.error("listing-proximity send failed:", r.err); }
-        sendRows.push({
-          mass_email_id: campaignId,
-          recipient_email: rec.email,
-          // Statuts terminaux uniquement (jamais "queued") : trace pure.
-          status: r.outcome === "sent" ? "sent" : r.outcome === "excluded" ? "skipped" : "failed",
-          attempts: 1,
-          last_attempt_at: new Date().toISOString(),
-          last_error: r.outcome === "sent" ? null : (r.err || null),
-          error_message: r.outcome === "error" ? (r.err || null) : null,
-        });
-      });
-    }
-
-    // Destinataires jamais tentés faute de budget temps : tracés en "skipped".
-    if (timedOut) {
-      for (const rec of recipients.slice(processed)) {
-        sendRows.push({
-          mass_email_id: campaignId,
-          recipient_email: rec.email,
-          status: "skipped",
-          attempts: 0,
-          last_error: "time_budget_exhausted",
-        });
-      }
-    }
-
-    // Ecriture de la trace par destinataire (observabilite admin).
-    const INSERT_CHUNK = 500;
-    for (let i = 0; i < sendRows.length; i += INSERT_CHUNK) {
+    const queuedRows = targets.map((r) => ({
+      mass_email_id: campaignId,
+      recipient_email: r.email,
+      status: "queued",
+      attempts: 0,
+      resend_id: null as string | null,
+      error_message: null as string | null,
+    }));
+    const INS_CHUNK = 500;
+    for (let i = 0; i < queuedRows.length; i += INS_CHUNK) {
       const { error: insErr } = await serviceClient
         .from("mass_email_sends")
-        .insert(sendRows.slice(i, i + INSERT_CHUNK));
-      if (insErr) console.error(`mass_email_sends insert error (chunk ${i}):`, insErr);
+        .upsert(queuedRows.slice(i, i + INS_CHUNK), {
+          onConflict: "mass_email_id,recipient_email",
+          ignoreDuplicates: true,
+        });
+      if (insErr) console.error(`queued upsert error (chunk ${i}):`, insErr);
+    }
+
+    // Message pgmq par destinataire. La présence de `template_name` indique au
+    // worker qu'il doit passer par send-transactional-email (rendu React
+    // `nearby-sit-alert`) et non par le gabarit générique des campagnes.
+    let enqueued = 0;
+    for (const r of targets) {
+      const { error: qErr } = await serviceClient.rpc("enqueue_email", {
+        queue_name: "mass_emails",
+        payload: {
+          campaign_id: campaignId,
+          recipient_email: r.email,
+          template_name: "nearby-sit-alert",
+          idempotency_key: `listing-proximity-${sit.id}-${r.user_id}`,
+          template_data: {
+            sitterFirstName: toTitleCase(r.first_name) || undefined,
+            ownerFirstName: authorFirstName || undefined,
+            sitTitle: sit.title || undefined,
+            city: listingCity || undefined,
+            distanceKm: r.distance_km,
+            startDate: startDateFr || undefined,
+            endDate: endDateFr || undefined,
+            sitId: sit.id,
+            animalsSummary: petsSentence || undefined,
+            coverPhotoUrl: coverPhotoUrl || null,
+          },
+        } as any,
+      });
+      if (qErr) console.error("enqueue_email failed:", qErr, { email: r.email });
+      else enqueued++;
     }
 
     await serviceClient
       .from("mass_emails")
       .update({
-        // recipients_count = cible reelle, pas le nombre d'envois reussis.
-        recipients_count: recipients.length,
-        enqueued_count: processed,
-        sent_count: sent,
-        failed_count: errors,
-        skipped_count: excluded + (timedOut ? recipients.length - processed : 0),
-        status: timedOut ? "paused" : (errors > 0 && sent === 0 ? "error" : "sent"),
+        enqueued_count: enqueued,
+        status: "sending",
+        heartbeat_at: new Date().toISOString(),
       })
       .eq("id", campaignId);
+
+
 
 
     if (signalId) {
@@ -594,7 +535,13 @@ Deno.serve(async (req) => {
         .eq("id", signalId);
     }
 
-    return new Response(JSON.stringify({ sent, excluded, errors, targeted: recipients.length, processed, paused: timedOut, campaign_id: campaignId }), {
+    return new Response(JSON.stringify({
+      mode: "queue",
+      queued: enqueued,
+      targeted: recipients.length,
+      already_served: alreadyServed.size,
+      campaign_id: campaignId,
+    }), {
       status: 200,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
