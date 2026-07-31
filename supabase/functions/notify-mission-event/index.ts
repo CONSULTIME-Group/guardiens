@@ -233,16 +233,37 @@ Deno.serve(async (req) => {
     (actor?.display_name as string | undefined)?.trim() ||
     'Un membre'
 
+  // Participants réels de la mission, résolus côté serveur : auteur + répondants.
+  // Rien de ce que le client envoie (actor_id, target_ids) ne peut désigner un
+  // utilisateur en dehors de cet ensemble.
+  const { data: responseRows } = await admin
+    .from('small_mission_responses')
+    .select('responder_id')
+    .eq('mission_id', payload.mission_id)
+  const participants = new Set<string>([mission.user_id])
+  for (const r of responseRows ?? []) {
+    const rid = (r as { responder_id?: string }).responder_id
+    if (rid) participants.add(rid)
+  }
+
+  // L'acteur doit être un participant réel (les appels service role internes
+  // et les admins restent autorisés pour les événements systèmes).
+  if (!isServiceRoleCall && !participants.has(payload.actor_id)) {
+    return json({ error: 'forbidden' }, 403)
+  }
+
   // Résoudre les cibles (défaut : auteur de la mission si non fourni et acteur ≠ auteur)
   let targets = Array.isArray(payload.target_ids) ? [...new Set(payload.target_ids)] : []
   if (targets.length === 0 && payload.actor_id !== mission.user_id) {
     targets = [mission.user_id]
   }
-  targets = targets.filter((t) => t && t !== payload.actor_id)
+  targets = targets.filter((t) => t && t !== payload.actor_id && participants.has(t))
 
   if (targets.length === 0) {
     return json({ ok: true, event_type: payload.event_type, results: [] }, 200)
   }
+
+
 
   const copy = buildCopy(payload.event_type, mission, actorName, payload.metadata ?? {})
   const results: ResultRow[] = []

@@ -1,5 +1,6 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.4";
 import { startCronRun } from "../_shared/cron-run-log.ts";
+import { requireCronCaller } from "../_shared/require-cron-caller.ts";
 
 
 const corsHeaders = {
@@ -9,6 +10,9 @@ const corsHeaders = {
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
+
+  const guard = await requireCronCaller(req, corsHeaders);
+  if (guard) return guard;
 
   const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
   const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;

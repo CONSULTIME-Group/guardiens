@@ -246,7 +246,33 @@ Deno.serve(async (req) => {
         )
       }
     }
+
+    // Anti open-relay : un membre non admin ne peut jamais adresser un email
+    // de marque à une adresse extérieure à la plateforme. Le destinataire doit
+    // être sa propre adresse, ou celle d'un compte Guardiens existant (les
+    // notifications inter-membres légitimes visent toujours un membre réel).
+    if (!callerIsAdmin) {
+      const target = effectiveRecipient.toLowerCase()
+      if (!callerEmail || target !== callerEmail) {
+        const { data: recipientProfile } = await supabase
+          .from('profiles')
+          .select('id')
+          .ilike('email', target)
+          .maybeSingle()
+        if (!recipientProfile) {
+          console.warn('[security] Non-admin caller attempted to send to a non-member address', {
+            callerUserId,
+            templateName,
+          })
+          return new Response(
+            JSON.stringify({ error: 'Forbidden: recipient must be a Guardiens member' }),
+            { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          )
+        }
+      }
+    }
   }
+
 
   // 1b. Idempotency check — prevent duplicate sends for the same key
   if (idempotencyKey && idempotencyKey !== messageId) {

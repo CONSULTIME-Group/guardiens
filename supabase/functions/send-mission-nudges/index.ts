@@ -9,6 +9,7 @@
 // Respecte suppression et opt-in `email_preferences.product_emails`.
 // Body : { dry_run?: boolean, mission_id?: string, kind?: 'feedback'|'no_response'|'response_waiting' }
 import { createClient } from 'npm:@supabase/supabase-js@2.45.0'
+import { requireCronCaller } from '../_shared/require-cron-caller.ts'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -29,6 +30,9 @@ interface Mission {
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders })
+
+  const guard = await requireCronCaller(req, corsHeaders)
+  if (guard) return guard
 
   let body: { dry_run?: boolean; mission_id?: string; kind?: 'feedback' | 'no_response' | 'response_waiting' } = {}
   try { if (req.body) body = await req.json() } catch { /* noop */ }

@@ -88,16 +88,13 @@ Deno.serve(async (req) => {
       return json({ error: `Vous avez atteint la limite de ${RATE_LIMIT_PER_HOUR} générations Alma par heure.` }, 429);
     }
 
-    // Profils + contexte annonce/mission (colonnes RÉELLES : user_id, pas owner_id)
-    const [meRes, otherRes, mySitterRes] = await Promise.all([
-      adminClient.from("profiles").select("first_name, bio, city").eq("id", userId).maybeSingle(),
-      adminClient.from("profiles").select("first_name, bio, city").eq("id", ctx.other_user_id).maybeSingle(),
-      adminClient.from("sitter_profiles").select("motivation, experience_years, animal_types").eq("user_id", userId).maybeSingle(),
-    ]);
-
+    // Contexte annonce/mission chargé AVANT tout accès au profil de l'autre
+    // partie : `other_user_id` vient du client, il ne peut pas être utilisé
+    // pour lire un profil arbitraire (les profils sont en RLS "own or admin").
     let sitCtx: Record<string, unknown> | null = null;
     let missionCtx: Record<string, unknown> | null = null;
     let audience: "owner" | "sitter" = "sitter";
+    let posterId: string | null = null;
 
     if (ctx.sit_id) {
       const { data: sit } = await adminClient
@@ -105,17 +102,63 @@ Deno.serve(async (req) => {
         .select("id, user_id, title, city, start_date, end_date, specific_expectations, owner_message")
         .eq("id", ctx.sit_id)
         .maybeSingle();
+      if (!sit) return json({ error: "Annonce introuvable" }, 404);
       sitCtx = sit;
-      audience = sit?.user_id === userId ? "owner" : "sitter";
+      posterId = (sit as any).user_id ?? null;
+      audience = posterId === userId ? "owner" : "sitter";
     } else if (ctx.mission_id) {
       const { data: mission } = await adminClient
         .from("small_missions")
         .select("id, user_id, title, description, category")
         .eq("id", ctx.mission_id)
         .maybeSingle();
+      if (!mission) return json({ error: "Mission introuvable" }, 404);
       missionCtx = mission;
-      audience = mission?.user_id === userId ? "owner" : "sitter";
+      posterId = (mission as any).user_id ?? null;
+      audience = posterId === userId ? "owner" : "sitter";
     }
+
+    // Autorisation : l'autre partie doit être réellement liée à cette annonce
+    // ou mission. Deux cas légitimes seulement :
+    //   1. le caller contacte l'auteur de l'annonce/mission,
+    //   2. le caller EST l'auteur et contacte un candidat / répondant / une
+    //      personne avec qui une conversation existe déjà.
+    let authorized = posterId !== null && ctx.other_user_id === posterId && userId !== posterId;
+
+    if (!authorized && posterId === userId) {
+      const counterparties = new Set<string>();
+      if (ctx.sit_id) {
+        const [appsRes, convRes] = await Promise.all([
+          adminClient.from("applications").select("sitter_id").eq("sit_id", ctx.sit_id),
+          adminClient.from("conversations").select("owner_id, sitter_id").eq("sit_id", ctx.sit_id),
+        ]);
+        for (const a of appsRes.data ?? []) if ((a as any).sitter_id) counterparties.add((a as any).sitter_id);
+        for (const c of convRes.data ?? []) {
+          if ((c as any).owner_id) counterparties.add((c as any).owner_id);
+          if ((c as any).sitter_id) counterparties.add((c as any).sitter_id);
+        }
+      } else if (ctx.mission_id) {
+        const { data: responses } = await adminClient
+          .from("small_mission_responses")
+          .select("responder_id")
+          .eq("mission_id", ctx.mission_id);
+        for (const r of responses ?? []) if ((r as any).responder_id) counterparties.add((r as any).responder_id);
+      }
+      counterparties.delete(userId);
+      authorized = counterparties.has(ctx.other_user_id);
+    }
+
+    if (!authorized) {
+      return json({ error: "Forbidden: aucun lien avec cette annonce ou mission" }, 403);
+    }
+
+    // Profils (lecture autorisée seulement après la vérification du lien)
+    const [meRes, otherRes, mySitterRes] = await Promise.all([
+      adminClient.from("profiles").select("first_name, bio, city").eq("id", userId).maybeSingle(),
+      adminClient.from("profiles").select("first_name, bio, city").eq("id", ctx.other_user_id).maybeSingle(),
+      adminClient.from("sitter_profiles").select("motivation, experience_years, animal_types").eq("user_id", userId).maybeSingle(),
+    ]);
+
 
     const meFirstName = (meRes.data as any)?.first_name ?? null;
     const otherFirstName = (otherRes.data as any)?.first_name ?? null;

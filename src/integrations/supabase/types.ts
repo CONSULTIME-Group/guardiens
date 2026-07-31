@@ -7458,6 +7458,10 @@ export type Database = {
         Args: { payload: Json; queue_name: string }
         Returns: number
       }
+      filter_blocked_partners: {
+        Args: { p_other_ids: string[] }
+        Returns: string[]
+      }
       find_available_sitters_for_nudge: {
         Args: { p_department: string; p_end_date: string; p_start_date: string }
         Returns: {

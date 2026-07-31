@@ -75,21 +75,38 @@ Deno.serve(async (req) => {
     }
 
     // Colonnes RÉELLES : sits.user_id (pas owner_id)
-    const [sitRes, msgsRes, convRes] = await Promise.all([
+    const [sitRes, convRes] = await Promise.all([
       adminClient.from("sits").select("user_id, title, city, start_date, end_date").eq("id", sit_id).maybeSingle(),
-      adminClient.from("messages").select("sender_id, content, created_at").eq("conversation_id", conversation_id).order("created_at", { ascending: false }).limit(10),
-      adminClient.from("conversations").select("owner_id, sitter_id").eq("id", conversation_id).maybeSingle(),
+      adminClient.from("conversations").select("owner_id, sitter_id, sit_id").eq("id", conversation_id).maybeSingle(),
     ]);
 
     const sit = sitRes.data;
     if (!sit) return json({ error: "Annonce introuvable" }, 404);
 
-    const isOwner = (sit as any).user_id === userId;
     const conv = convRes.data as any;
+    if (!conv) return json({ error: "Conversation introuvable" }, 404);
+
+    // Autorisation : le caller doit être partie prenante de la conversation,
+    // et la conversation doit porter sur l'annonce demandée. Sans ce contrôle,
+    // le service_role permettait de lire les messages privés de n'importe qui.
+    const isParticipant = conv.owner_id === userId || conv.sitter_id === userId;
+    if (!isParticipant || (conv.sit_id && conv.sit_id !== sit_id)) {
+      return json({ error: "Forbidden: vous n'êtes pas partie à cette conversation" }, 403);
+    }
+
+    const msgsRes = await adminClient
+      .from("messages")
+      .select("sender_id, content, created_at")
+      .eq("conversation_id", conversation_id)
+      .order("created_at", { ascending: false })
+      .limit(10);
+
+    const isOwner = (sit as any).user_id === userId;
     const otherUserId = isOwner ? conv?.sitter_id : conv?.owner_id;
     const { data: otherProfile } = otherUserId
       ? await adminClient.from("profiles").select("first_name").eq("id", otherUserId).maybeSingle()
       : { data: null as any };
+
 
     const audience: "owner" | "sitter" = isOwner ? "owner" : "sitter";
     const fallbackCtx = {
