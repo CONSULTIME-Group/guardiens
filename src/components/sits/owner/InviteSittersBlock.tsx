@@ -163,10 +163,8 @@ const InviteSittersBlock = ({
     }
     setSearching(true);
     const t = setTimeout(async () => {
-      const needsSitterJoin = animals.length > 0;
-      const selectCols = needsSitterJoin
-        ? "id, first_name, avatar_url, city, bio, postal_code, identity_verified, completed_sits_count, sitter_profiles!inner(animal_types)"
-        : "id, first_name, avatar_url, city, bio, postal_code, identity_verified, completed_sits_count";
+      const selectCols =
+        "id, first_name, avatar_url, city, bio, postal_code, identity_verified, completed_sits_count";
 
       let req = supabase
         .from("public_profiles")
@@ -192,13 +190,25 @@ const InviteSittersBlock = ({
       if (minExperience > 0) {
         req = req.gte("completed_sits_count", minExperience);
       }
+
+      // Filtre animaux : lecture séparée de la vue gardiens (les vues n'ont pas
+      // de clé étrangère déclarée, donc pas d'embed possible), puis intersection
+      // côté client sur user_id.
+      let allowedAnimalIds: Set<string> | null = null;
       if (animals.length > 0) {
-        req = req.overlaps("sitter_profiles.animal_types", animals);
+        const { data: animalRows } = await supabase
+          .from("public_sitter_profiles")
+          .select("user_id")
+          .overlaps("animal_types", animals);
+        allowedAnimalIds = new Set(((animalRows as any[]) || []).map((r) => r.user_id));
       }
 
       const limit = radiusActive ? 200 : 30;
-      const { data } = await req.limit(limit);
+      const { data } = await req.limit(allowedAnimalIds ? 500 : limit);
       let rows: SitterRow[] = ((data as any[]) || []) as SitterRow[];
+      if (allowedAnimalIds) {
+        rows = rows.filter((r) => allowedAnimalIds!.has(r.id)).slice(0, limit);
+      }
 
       if (radiusActive && ownerCoords) {
         // Géocodage parallèle (avec cache) des villes candidates,
