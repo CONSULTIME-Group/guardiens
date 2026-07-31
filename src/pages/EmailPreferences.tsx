@@ -9,13 +9,17 @@ import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
+type Radius = 5 | 15 | 30 | 50 | 100;
+
+const RADIUS_OPTIONS: Radius[] = [5, 15, 30, 50, 100];
+
 type Prefs = {
   product_emails: boolean;
   digest_emails: boolean;
   alert_emails: boolean;
   new_mission_digest: boolean;
   nearby_daily_digest: boolean;
-  nearby_daily_radius_km: 5 | 15 | 30;
+  nearby_daily_radius_km: Radius;
 };
 
 const EmailPreferences = () => {
@@ -28,7 +32,7 @@ const EmailPreferences = () => {
     alert_emails: true,
     new_mission_digest: true,
     nearby_daily_digest: true,
-    nearby_daily_radius_km: 15,
+    nearby_daily_radius_km: 100,
   });
 
   useEffect(() => {
