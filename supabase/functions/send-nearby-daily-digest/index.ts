@@ -174,7 +174,7 @@ Deno.serve(async (req) => {
       try {
         if (p.account_status && p.account_status !== 'active') { usersSkipped++; continue }
         const pref = (prefs ?? []).find((x: any) => x.user_id === p.id)
-        const radiusKm = pref?.nearby_daily_radius_km ?? 15
+        const radiusKm = pref?.nearby_daily_radius_km ?? 100
         // product_emails=false ne coupe PAS ce digest (opt-in dédié), mais on
         // respecte quand même si l'utilisateur a explicitement tout coupé côté
         // produit — cohérent avec les autres digests.
