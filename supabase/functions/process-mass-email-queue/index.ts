@@ -20,6 +20,11 @@ const DLQ = "mass_emails_dlq";
 const BATCH = 25;
 const VT_SECONDS = 60;
 const MAX_ATTEMPTS = 5;
+// Cadence : Resend plafonne a environ 2 requetes/seconde. On envoie au plus
+// un email toutes les 600 ms, soit ~1,6/s en pointe, soit 25 emails en ~15 s
+// par execution, cron chaque minute => 25 emails/minute maximum.
+const SEND_INTERVAL_MS = 600;
+const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 const UNSUB_TOKEN_PLACEHOLDER = "__UNSUB_TOKEN__";
 
 interface Campaign {
@@ -136,7 +141,9 @@ Deno.serve(async (req) => {
     const affectedCampaigns = new Set<string>();
     let sent = 0, failed = 0, skipped = 0, dlq = 0;
 
+    let loopIndex = 0;
     for (const msg of messages) {
+      if (loopIndex++ > 0) await sleep(SEND_INTERVAL_MS);
       const { campaign_id: campaignId, recipient_email: rawEmail } = msg.message ?? {} as any;
       if (!campaignId || !rawEmail) {
         await service.rpc("move_to_dlq", {
