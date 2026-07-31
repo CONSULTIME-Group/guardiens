@@ -36,6 +36,7 @@ describe("géocodage en panne", () => {
     } catch (e) {
       outcome = `a levé : ${(e as Error).message}`;
     }
+    console.log("OUTCOME", outcome);
     expect(outcome).toBeNull();
   });
 
