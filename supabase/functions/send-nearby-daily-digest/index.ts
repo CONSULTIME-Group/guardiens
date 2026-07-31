@@ -85,8 +85,8 @@ Deno.serve(async (req) => {
         .gte('created_at', since)
         .eq('status', 'open'),
     ])
-    if (sitsErr) throw sitsErr
-    if (missionsErr) throw missionsErr
+    if (sitsErr) throw new Error('sits query: ' + JSON.stringify(sitsErr))
+    if (missionsErr) throw new Error('missions query: ' + JSON.stringify(missionsErr))
 
     const allSits = (sits ?? []).filter((s: any) => {
       if (s.accepting_applications === false) return false
