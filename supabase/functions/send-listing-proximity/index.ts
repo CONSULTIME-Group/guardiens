@@ -340,7 +340,18 @@ Deno.serve(async (req) => {
     const payload = await req.json();
     const mode: "preview" | "send" = payload.mode || "preview";
     const sitId: string = payload.sit_id;
-    const radiusKm: number = Math.max(1, Math.min(2000, Number(payload.radius_km) || 30));
+    // Plafond serveur : au-delà de MAX_RADIUS_KM l'objet « près de chez vous »
+    // devient faux. On ne refuse pas la campagne, on la ramène au plafond et on
+    // le journalise dans la réponse.
+    const radiusDecision = clampRadiusKm(payload.radius_km);
+    const radiusKm: number = radiusDecision.radiusKm;
+    if (radiusDecision.clamped) {
+      console.warn("radius clamped", {
+        requested: radiusDecision.requestedRadiusKm,
+        applied: radiusKm,
+        sit_id: payload.sit_id,
+      });
+    }
     const signalId: string | null = payload.signal_id ?? null;
     if (!sitId) {
       return new Response(JSON.stringify({ error: "sit_id requis" }), {
