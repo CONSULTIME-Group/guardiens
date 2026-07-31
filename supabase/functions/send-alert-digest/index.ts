@@ -378,6 +378,32 @@ Deno.serve(async (req) => {
 
       const idem = `alert-digest-${pref.id}-${now.toISOString().slice(0, 10)}-${currentHourStr}`;
 
+      if (dryRun) {
+        // Lecture seule : on regarde si le créneau du jour est déjà réservé
+        // par un autre pipeline, sans rien réserver soi-même.
+        const { data: held } = await supabase
+          .from("sit_notification_log")
+          .select("pipeline")
+          .eq("user_id", profile.id)
+          .eq("notification_date", now.toISOString().slice(0, 10))
+          .maybeSingle();
+        if (held) {
+          skipped++;
+          mark(`plafond_frequence:${held.pipeline ?? "inconnu"}`, pref);
+          continue;
+        }
+        dry.recipients++;
+        if (pref.source === MIGRATION_SOURCE) dry.recipients_migrated++;
+        for (const s of sitsPayload) {
+          const entry = dry.per_sit[s.id] ?? { title: s.title, city: s.city ?? null, recipients: 0 };
+          entry.recipients++;
+          dry.per_sit[s.id] = entry;
+        }
+        continue;
+      }
+
+
+
       // Idempotence inter-pipelines : le créneau du jour n'est réservé que
       // maintenant, une fois le contenu établi et le destinataire éligible.
       const claim = await claimSitNotification(
