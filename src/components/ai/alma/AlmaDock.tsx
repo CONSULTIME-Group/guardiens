@@ -81,8 +81,8 @@ function buildProposition(
   }
   if (!signals.identityVerified) {
     return {
-      message: "Vérifier votre identité reste facultatif, mais cela rassure la communauté.",
-      ctaLabel: "Vérifier mon identité (facultatif)",
+      message: "Vérifions votre identité pour rassurer la communauté.",
+      ctaLabel: "Vérifier mon identité",
       ctaTo: "/settings?section=security&src=alma_dock",
     };
   }

@@ -153,8 +153,8 @@ export function useOwnerPriorityAction(input: Input): OwnerPriorityAction {
       return {
         variant: "verify",
         eyebrow: "Confiance",
-        title: "Vérifier votre identité, facultatif mais rassurant pour les gardiens.",
-        description: "Rien n'est bloqué sans elle. Les annonces vérifiées reçoivent en moyenne plus de candidatures de qualité.",
+        title: "Vérifiez votre identité pour rassurer les gardiens.",
+        description: "Les annonces vérifiées reçoivent en moyenne plus de candidatures de qualité.",
         ctaLabel: "Vérifier mon identité",
         ctaTo: "/settings?section=security&src=owner_priority_action",
         urgency: "medium",

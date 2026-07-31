@@ -300,7 +300,7 @@ const IdentityVerificationSection = ({ user }: { user: any }) => {
   if (!loaded) return null;
 
   const statusConfig: Record<string, { icon: React.ElementType; label: string; desc: string; color: string }> = {
-    not_submitted: { icon: Upload, label: "Vérification facultative", desc: "Rien n'est bloqué sans elle : vous pouvez déjà candidater, apparaître dans les recherches et être contacté. Envoyer une pièce d'identité reste utile, cela rassure les membres et vous vaut le badge vérifié.", color: "text-muted-foreground" },
+    not_submitted: { icon: Upload, label: "Non vérifiée", desc: "Envoyez une pièce d'identité pour débloquer les fonctionnalités avancées (badge vérifié).", color: "text-muted-foreground" },
     pending: { icon: Clock, label: "Vérification en cours", desc: "Votre document est en cours de vérification automatique par IA.", color: "text-warning" },
     needs_review: { icon: Clock, label: "Analyse approfondie en cours", desc: "Votre document est en cours d'analyse par notre équipe. Réponse sous 24h. Vous pouvez renvoyer un document plus net si besoin.", color: "text-warning" },
     rejected: { icon: AlertCircle, label: "Document refusé", desc: "Votre document n'a pas pu être validé. Veuillez soumettre un nouveau document lisible.", color: "text-destructive" },

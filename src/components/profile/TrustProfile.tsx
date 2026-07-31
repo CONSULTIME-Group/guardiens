@@ -19,7 +19,7 @@ import { identityCtaHref } from "@/lib/identityCta";
 const TrustProfile = ({ emailVerified, identityVerified, hasAvatar, profileCompletion, hasFirstActivity, role }: Props) => {
   const steps = [
     { label: "Email vérifié", done: emailVerified },
-    { label: identityVerified ? "Identité vérifiée" : "Identité vérifiée (facultatif, mais cela rassure)", done: identityVerified, action: !identityVerified ? identityCtaHref("trust_profile") : undefined },
+    { label: "Identité vérifiée", done: identityVerified, action: !identityVerified ? identityCtaHref("trust_profile") : undefined },
     { label: "Photo de profil ajoutée", done: hasAvatar },
     { label: "Profil complété à 60%+", done: profileCompletion >= 60 },
     { label: role === "owner" ? "Première annonce publiée" : "Première garde réalisée", done: hasFirstActivity },
