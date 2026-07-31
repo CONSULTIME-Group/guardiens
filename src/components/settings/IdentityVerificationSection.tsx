@@ -9,6 +9,7 @@ import { convertHeicToJpeg, isHeicFile } from "@/lib/heicToJpeg";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { trackEvent } from "@/lib/analytics";
+import { DAILY_VERIFY_LIMIT, describeVerifyError, quotaMessage } from "@/lib/identityVerifyError";
 
 const IdentityVerificationSection = ({ user }: { user: any }) => {
   const [status, setStatus] = useState<string>("not_submitted");
@@ -81,11 +82,19 @@ const IdentityVerificationSection = ({ user }: { user: any }) => {
   }, [user]);
 
 
-  const todayAttempts = logs.filter((log: any) => {
+  const recentLogs = logs.filter((log: any) => {
     const logDate = new Date(log.created_at);
     return Date.now() - logDate.getTime() < 24 * 60 * 60 * 1000;
-  }).length;
-  const rateLimited = todayAttempts >= 5;
+  });
+  const todayAttempts = recentLogs.length;
+  const rateLimited = todayAttempts >= DAILY_VERIFY_LIMIT;
+  // Le compteur est glissant : il repart 24h après la plus ancienne tentative.
+  const quotaResetAt = recentLogs.length
+    ? new Date(
+        Math.min(...recentLogs.map((l: any) => new Date(l.created_at).getTime())) + 24 * 60 * 60 * 1000,
+      )
+    : null;
+
 
   const validateFile = (file: File, maxMb: number = 10): string | null => {
     if (file.size > maxMb * 1024 * 1024) return `Le fichier ne doit pas dépasser ${maxMb} Mo.`;
@@ -101,7 +110,11 @@ const IdentityVerificationSection = ({ user }: { user: any }) => {
     const file = e.target.files?.[0];
     if (!file || !user) return;
     if (rateLimited) {
-      toast.error("Vous avez atteint la limite de 5 vérifications par jour. Réessayez demain.");
+      toast.error(quotaMessage(todayAttempts, quotaResetAt));
+      void trackEvent("identity_upload_failed", {
+        source: "settings",
+        metadata: { kind: "document", stage: "quota", reason: "daily_limit" },
+      });
       return;
     }
     void trackEvent("identity_file_picked", {
@@ -206,11 +219,24 @@ const IdentityVerificationSection = ({ user }: { user: any }) => {
             metadata: { status: newStatus, reason_kind: "rejected" },
           });
         }
-      } catch {
-        toast.warning("Vérification automatique indisponible. Votre document sera examiné manuellement.");
+      } catch (verifyErr) {
+        // Un quota atteint n'est pas une panne : chaque motif a son message.
+        const anyErr = verifyErr as { context?: { status?: number; text?: () => Promise<string> }; message?: string };
+        let body = "";
+        try {
+          body = (await anyErr?.context?.text?.()) || "";
+        } catch {
+          body = "";
+        }
+        const info = describeVerifyError(
+          { status: anyErr?.context?.status, body, message: anyErr?.message },
+          { attempts: todayAttempts + 1, resetAt: quotaResetAt },
+        );
+        if (info.tone === "error") toast.error(info.message);
+        else toast.warning(info.message);
         void trackEvent("identity_auto_check_failed", {
           source: "settings",
-          metadata: { status: "pending", reason_kind: "unavailable" },
+          metadata: { status: "pending", reason_kind: info.kind },
         });
       }
 
@@ -384,7 +410,7 @@ const IdentityVerificationSection = ({ user }: { user: any }) => {
               <Button variant={status === "rejected" ? "default" : "outline"} size="sm" className="gap-2 cursor-pointer" disabled={uploading || converting || rateLimited} asChild>
                 <span>
                   <Upload className="h-4 w-4" />
-                  {rateLimited ? "Limite atteinte (5/jour)" :
+                  {rateLimited ? `Quota atteint (${DAILY_VERIFY_LIMIT}/24 h)` :
                    converting ? "Conversion de la photo..." :
                    uploading ? "Envoi en cours..." :
                    status === "pending" ? "Renvoyer un document" :

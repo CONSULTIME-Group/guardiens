@@ -27,6 +27,7 @@ const corsHeaders = {
 
 // === Frequency cap & quiet hours ===
 // Pure logic lives in _shared/email-cap.ts so it can be unit-tested.
+import { resendFetch } from "../_shared/resend-guard.ts";
 import {
   BYPASS_TEMPLATES,
   decideDeferral,
@@ -776,14 +777,14 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const resendRes = await fetch('https://api.resend.com/emails', {
+    const resendRes = await resendFetch('https://api.resend.com/emails', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${RESEND_API_KEY}`,
       },
       body: JSON.stringify(resendPayload),
-    })
+    }, { functionName: "send-transactional-email" })
 
     const resendData = await resendRes.json()
 

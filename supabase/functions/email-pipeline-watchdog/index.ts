@@ -7,6 +7,7 @@
 // Ne modifie PAS l'état du rate-limit ni la file : purement observationnel.
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
+import { resendFetch } from "../_shared/resend-guard.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -176,7 +177,7 @@ Deno.serve(async (req) => {
       </div>
     `;
 
-    const resendRes = await fetch("https://api.resend.com/emails", {
+    const resendRes = await resendFetch("https://api.resend.com/emails", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -188,7 +189,7 @@ Deno.serve(async (req) => {
         subject,
         html,
       }),
-    });
+    }, { functionName: "email-pipeline-watchdog" });
 
     if (!resendRes.ok) {
       const errText = await resendRes.text();

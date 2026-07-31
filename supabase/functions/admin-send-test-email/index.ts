@@ -1,6 +1,7 @@
 // Envoi d'un email de TEST à l'admin appelant (fidèle au gabarit send-mass-email).
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
 import { requireAdminOrServiceRole } from "../_shared/require-admin.ts";
+import { resendFetch } from "../_shared/resend-guard.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -97,7 +98,7 @@ Deno.serve(async (req) => {
     const html = buildHtml(subject, body, ctaLabel, ctaUrl);
     const testSubject = `[TEST] ${subject}`;
 
-    const resendRes = await fetch("https://api.resend.com/emails", {
+    const resendRes = await resendFetch("https://api.resend.com/emails", {
       method: "POST",
       headers: {
         "Authorization": `Bearer ${RESEND_API_KEY}`,
@@ -109,7 +110,7 @@ Deno.serve(async (req) => {
         subject: testSubject,
         html,
       }),
-    });
+    }, { functionName: "admin-send-test-email" });
 
     if (!resendRes.ok) {
       const errText = await resendRes.text();
