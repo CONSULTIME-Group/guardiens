@@ -369,6 +369,7 @@ Deno.serve(async (req) => {
       users_skipped: usersSkipped,
       claim_skipped: claimSkipped,
       claim_skipped_by: claimSkippedBy,
+      dept_fallback_users: deptFallbackUsers,
       errors,
       dry_run: !!body.dry_run,
     })
