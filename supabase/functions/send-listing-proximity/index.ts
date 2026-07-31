@@ -241,10 +241,13 @@ async function computeRecipients(
     for (let i = 0; i < ids.length; i += CHUNK) {
       const { data: prefs } = await serviceClient
         .from("email_preferences")
-        .select("user_id, product_emails")
+        .select("user_id, alert_emails")
         .in("user_id", ids.slice(i, i + CHUNK));
       for (const p of (prefs || []) as any[]) {
-        if (p.product_emails === false) optedOut.add(p.user_id);
+        // Le template diffusé (nearby-sit-alert) est catégorisé « alert » :
+        // le pré-filtre doit interroger alert_emails, pas product_emails.
+        if (p.alert_emails === false) optedOut.add(p.user_id);
+
       }
     }
   }
