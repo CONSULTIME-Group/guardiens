@@ -213,6 +213,96 @@ Deno.serve(async (req) => {
         }
       }
 
+      // --- Chemin « template » (diffusion de proximité d'annonce) ----------
+      // Quand le message pgmq porte un `template_name`, l'expédition passe par
+      // send-transactional-email (rendu React, cap de fréquence, opt-out,
+      // suppression, log email_send_log) et non par le gabarit générique des
+      // campagnes de masse.
+      const templateName = (msg.message as any)?.template_name as string | undefined;
+      if (templateName) {
+        const attemptsSoFar = ((locked as any).attempts ?? 0) + 1;
+        try {
+          const res = await fetch(`${SUPABASE_URL}/functions/v1/send-transactional-email`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "Authorization": `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,
+            },
+            body: JSON.stringify({
+              templateName,
+              recipientEmail: rawEmail,
+              idempotencyKey: (msg.message as any)?.idempotency_key
+                ?? `mass-${campaignId}-${email}`,
+              templateData: (msg.message as any)?.template_data ?? {},
+            }),
+          });
+          const txt = await res.text();
+
+          if (res.status === 429 || /rate.?limit/i.test(txt)) {
+            const retryAfter = Number(res.headers.get("retry-after") ?? "60") || 60;
+            const until = new Date(Date.now() + retryAfter * 1000).toISOString();
+            await service.from("email_send_state").update({ retry_after_until: until }).eq("id", 1);
+            await service.from("mass_email_sends").update({
+              status: "queued",
+              attempts: (locked as any).attempts,
+              last_error: "429 rate limited",
+            }).eq("id", (locked as any).id);
+            console.warn("Resend 429 (template) — cooldown until", until);
+            break;
+          }
+
+          if (!res.ok) {
+            await service.from("mass_email_sends").update({
+              status: "failed",
+              attempts: attemptsSoFar,
+              last_error: `${res.status}: ${txt.slice(0, 500)}`,
+              last_attempt_at: new Date().toISOString(),
+            }).eq("id", (locked as any).id);
+            if (attemptsSoFar >= MAX_ATTEMPTS) {
+              await service.rpc("move_to_dlq", {
+                source_queue: QUEUE, dlq_name: DLQ, message_id: msg.msg_id, payload: msg.message as any,
+              });
+              dlq++;
+            } else {
+              await service.rpc("delete_email", { queue_name: QUEUE, message_id: msg.msg_id });
+            }
+            failed++;
+            continue;
+          }
+
+          let body: any = null;
+          try { body = JSON.parse(txt); } catch { /* ignore */ }
+          const deferredOrSkipped = body?.deferred === true || body?.skipped === true
+            || body?.success === false;
+          await service.from("mass_email_sends").update({
+            // Un report par le plafond de fréquence n'est pas un envoi : la
+            // file différée s'en charge, la ligne est close en `skipped`.
+            status: deferredOrSkipped ? "skipped" : "sent",
+            attempts: attemptsSoFar,
+            last_error: deferredOrSkipped ? (body?.reason ?? "deferred") : null,
+            error_message: null,
+            last_attempt_at: new Date().toISOString(),
+          }).eq("id", (locked as any).id);
+          await service.rpc("delete_email", { queue_name: QUEUE, message_id: msg.msg_id });
+          if (deferredOrSkipped) skipped++; else sent++;
+        } catch (e) {
+          const errMsg = String(e).slice(0, 500);
+          await service.from("mass_email_sends").update({
+            status: "failed", attempts: attemptsSoFar, last_error: errMsg,
+            last_attempt_at: new Date().toISOString(),
+          }).eq("id", (locked as any).id);
+          if (attemptsSoFar >= MAX_ATTEMPTS || (msg.read_ct ?? 0) >= MAX_ATTEMPTS) {
+            await service.rpc("move_to_dlq", {
+              source_queue: QUEUE, dlq_name: DLQ, message_id: msg.msg_id, payload: msg.message as any,
+            });
+            dlq++;
+          }
+          failed++;
+        }
+        continue;
+      }
+
+
       // Token de désinscription (doit exister, créé par l'enqueueur ; fallback safe)
       let token = "";
       {
