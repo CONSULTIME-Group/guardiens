@@ -116,12 +116,13 @@ export async function resendFetch(
     body = undefined;
   }
   const decision = evaluateSend({ ...ctx, body });
-  if (!decision.allowed) {
-    console.error(`[resend-guard] envoi bloqué (${decision.reason})`);
+  if (decision.allowed === false) {
+    const reason = decision.reason;
+    console.error(`[resend-guard] envoi bloqué (${reason})`);
     return new Response(
       JSON.stringify({
         name: "send_blocked",
-        message: `Envoi bloqué par la barrière de sécurité : ${decision.reason}`,
+        message: `Envoi bloqué par la barrière de sécurité : ${reason}`,
         statusCode: 403,
       }),
       { status: 403, headers: { "Content-Type": "application/json" } },
