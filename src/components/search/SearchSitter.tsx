@@ -805,13 +805,27 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
  // (filtres, tri, densité, carte, cartes de résultat). Pas d'étoile, pour ne pas
  // exposer au navigateur la modération, la télémétrie interne et les champs longs.
  .select(SIT_COLUMNS)
-.or(isPublic
-  ? "status.eq.published"
-  : "status.eq.published,and(status.eq.draft,unpublished_at.not.is.null)")
-.order("created_at", { ascending: false })
-.limit(SITS_SERVER_CAP);
+ .or(isPublic
+   ? "status.eq.published"
+   : "status.eq.published,and(status.eq.draft,unpublished_at.not.is.null)")
+ .order("created_at", { ascending: false })
+ .limit(SITS_SERVER_CAP);
    if (startDate) query = query.gte("end_date", startDate);
    if (endDate) query = query.lte("start_date", endDate);
+
+   // Comptage exact, indépendant du LIMIT, pour le compteur « Toute la France ».
+   // Sans ça, au delà de SITS_SERVER_CAP le total affiché cesse de bouger.
+   let openCountQuery = supabase
+     .from("sits")
+     .select("*", { count: "exact", head: true })
+     .or(isPublic
+       ? "status.eq.published"
+       : "status.eq.published,and(status.eq.draft,unpublished_at.not.is.null)");
+   if (startDate) openCountQuery = openCountQuery.gte("end_date", startDate);
+   if (endDate) openCountQuery = openCountQuery.lte("start_date", endDate);
+   const closedCountQuery = supabase
+     .from("public_closed_sits")
+     .select("*", { count: "exact", head: true });
 
    // Lignes fermées (pourvues, terminées, annulées, archivées) : signal de vie de
    // la communauté, non actionnables, donc JAMAIS filtrées par dates. Elles passent
