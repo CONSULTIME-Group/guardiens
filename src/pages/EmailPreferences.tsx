@@ -172,9 +172,12 @@ const EmailPreferences = () => {
                     <CardTitle className="text-base">Récap quotidien près de chez vous</CardTitle>
                     <CardDescription>
                       Un email par jour maximum, envoyé à 9h, qui récapitule les nouvelles
-                      annonces (gardes et coups de main) publiées dans les dernières 24h
-                      autour de chez vous. Pas d'email si rien de nouveau.
+                      annonces de garde et les petites missions d'entraide publiées dans les
+                      dernières 24h autour de chez vous. Pas d'email si rien de nouveau.
+                      Si vous coupez le digest quotidien entraide ci-dessus, ce récap ne
+                      contiendra plus que les annonces de garde.
                     </CardDescription>
+
                   </div>
                   <Switch
                     checked={prefs.nearby_daily_digest}
