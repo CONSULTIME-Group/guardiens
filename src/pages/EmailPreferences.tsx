@@ -171,7 +171,7 @@ const EmailPreferences = () => {
                   <div>
                     <CardTitle className="text-base">Récap quotidien près de chez vous</CardTitle>
                     <CardDescription>
-                      Un email par jour maximum, envoyé à 13h, qui récapitule les nouvelles
+                      Un email par jour maximum, envoyé à 9h, qui récapitule les nouvelles
                       annonces (gardes et coups de main) publiées dans les dernières 24h
                       autour de chez vous. Pas d'email si rien de nouveau.
                     </CardDescription>
@@ -184,12 +184,12 @@ const EmailPreferences = () => {
                 {prefs.nearby_daily_digest && (
                   <div className="pt-2">
                     <p className="text-sm text-muted-foreground mb-2">Rayon autour de chez vous</p>
-                    <div className="flex gap-2">
-                      {[5, 15, 30].map((km) => (
+                    <div className="flex flex-wrap gap-2">
+                      {RADIUS_OPTIONS.map((km) => (
                         <button
                           key={km}
                           type="button"
-                          onClick={() => setPrefs((p) => ({ ...p, nearby_daily_radius_km: km as 5 | 15 | 30 }))}
+                          onClick={() => setPrefs((p) => ({ ...p, nearby_daily_radius_km: km }))}
                           className={`px-4 py-2 rounded-md text-sm border transition ${
                             prefs.nearby_daily_radius_km === km
                               ? "bg-primary text-primary-foreground border-primary"
