@@ -286,6 +286,21 @@ Deno.serve(async (req) => {
 
       const idem = `alert-digest-${pref.id}-${now.toISOString().slice(0, 10)}-${currentHourStr}`;
 
+      // Idempotence inter-pipelines : le créneau du jour n'est réservé que
+      // maintenant, une fois le contenu établi et le destinataire éligible.
+      const claim = await claimSitNotification(
+        supabase,
+        profile.id,
+        "alert-digest",
+        sitsPayload.map((s: any) => s.id),
+      );
+      if (!claim.granted) {
+        claimSkipped++;
+        const key = claim.heldBy ?? (claim.error ? "claim_error" : "inconnu");
+        claimSkippedBy[key] = (claimSkippedBy[key] ?? 0) + 1;
+        continue;
+      }
+
       const _steRes = await fetch(`${Deno.env.get('SUPABASE_URL')}/functions/v1/send-transactional-email`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')}` },
@@ -305,11 +320,13 @@ Deno.serve(async (req) => {
       if (!_steRes.ok) console.error('send-transactional-email failed', _steRes.status, _steTxt1);
       const sendErr = _steRes.ok ? null : new Error(`send-transactional-email ${_steRes.status}: ${_steTxt1}`);
       if (sendErr) {
+        await releaseSitNotification(supabase, profile.id);
         errors.push({ user_id: profile.id, reason: String(sendErr) });
         continue;
       }
       sent++;
     }
+
 
     return new Response(
       JSON.stringify({ sent, skipped, errors, hour: currentHourStr }),
