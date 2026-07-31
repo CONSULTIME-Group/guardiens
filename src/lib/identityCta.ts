@@ -6,7 +6,7 @@
  * `identity_cta_clicked` à l'arrivée, et donc de savoir lesquels des points
  * d'entrée servent réellement à quelque chose.
  *
- * Ton de référence : facultatif mais utile. Jamais bloquant, jamais accessoire.
+ * Les libellés d'incitation eux-mêmes ne sont pas gérés ici.
  */
 export type IdentityCtaSource =
   | "access_gate_banner"
@@ -24,6 +24,3 @@ export type IdentityCtaSource =
 
 export const identityCtaHref = (source: IdentityCtaSource): string =>
   `/settings?section=security&src=${source}`;
-
-/** Mention courte à accoler aux libellés d'incitation. */
-export const IDENTITY_OPTIONAL_HINT = "facultatif, mais cela rassure";

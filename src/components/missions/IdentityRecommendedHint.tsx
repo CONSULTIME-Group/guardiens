@@ -15,8 +15,8 @@ const IdentityRecommendedHint = ({ compact = false }: { compact?: boolean }) => 
   >
     <ShieldCheck className="h-4 w-4 shrink-0 mt-0.5" aria-hidden="true" />
     <p className="min-w-0">
-      <span className="font-semibold">Vérification d'identité facultative.</span>{" "}
-      Elle n'est pas obligatoire et rien n'est bloqué sans elle, mais elle rassure les autres membres et fait grandir votre écusson de confiance.{" "}
+      <span className="font-semibold">Vérification d'identité recommandée.</span>{" "}
+      Non obligatoire, mais elle rassure les autres membres et fait grandir votre écusson de confiance.{" "}
       <Link to="/settings?section=security&src=mission_hint" className="underline underline-offset-2 font-medium">
         Vérifier mon identité
       </Link>

@@ -27,20 +27,15 @@ describe("ProfileProgressStrip", () => {
     expect(screen.getByText("+15")).toBeInTheDocument();
   });
 
-  it("affiche l'état actif rassurant à partir de 80%", () => {
+  it("ne suggère jamais que la vérification est facultative", () => {
     renderStrip({
       completion: 90,
       nextIncomplete: next,
       totalRemaining: 2,
       missingScoreItems: [{ key: "identity", label: "Vérification d'identité", points: 5 }],
     });
-    expect(screen.getByText(/Votre profil est actif/)).toBeInTheDocument();
-    expect(screen.getByTestId("profile-active-note").textContent).toMatch(/candidater dès maintenant/);
-  });
-
-  it("ne promet rien de plus quand le profil est sous le seuil", () => {
-    renderStrip({ completion: 55, nextIncomplete: next, totalRemaining: 3 });
-    expect(screen.queryByTestId("profile-active-note")).toBeNull();
-    expect(screen.getByText(/3 items à compléter/)).toBeInTheDocument();
+    expect(screen.getByText("Vérification d'identité")).toBeInTheDocument();
+    expect(document.body.textContent).not.toMatch(/facultat/i);
+    expect(document.body.textContent).not.toMatch(/dès maintenant/i);
   });
 });

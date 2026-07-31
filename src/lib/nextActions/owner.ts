@@ -157,7 +157,7 @@ export function computeOwnerNextActions(input: NextActionInput): NextAction[] {
     out.push({
       id: "verify",
       eyebrow: "Confiance",
-      title: "Vérifier votre identité, facultatif mais rassurant pour les gardiens.",
+      title: "Vérifiez votre identité pour rassurer les gardiens.",
       ctaLabel: "Vérifier mon identité",
       ctaTo: "/settings?section=security&src=owner_next_actions",
       urgency: "medium",
@@ -209,7 +209,7 @@ export function computeOwnerActivationScore(
     },
     {
       key: "identity",
-      label: "Vérifiez votre identité (facultatif)",
+      label: "Vérifiez votre identité",
       done: verificationStatus === "verified" || verificationStatus === "pending",
       ctaTo: "/settings?section=security&src=owner_next_actions",
     },
