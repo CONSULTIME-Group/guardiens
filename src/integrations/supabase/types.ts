@@ -6139,6 +6139,27 @@ export type Database = {
         }
         Relationships: []
       }
+      worker_locks: {
+        Row: {
+          lock_key: string
+          locked_by: string | null
+          locked_until: string
+          updated_at: string
+        }
+        Insert: {
+          lock_key: string
+          locked_by?: string | null
+          locked_until: string
+          updated_at?: string
+        }
+        Update: {
+          lock_key?: string
+          locked_by?: string | null
+          locked_until?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       alma_public_tips: {
@@ -7839,6 +7860,7 @@ export type Database = {
         Args: { _date?: string; _user_id: string }
         Returns: undefined
       }
+      release_worker_lock: { Args: { p_lock_key: string }; Returns: boolean }
       reopen_application: { Args: { p_application_id: string }; Returns: Json }
       repondre_avis_annulation: {
         Args: {
@@ -7871,6 +7893,10 @@ export type Database = {
       trigger_indexnow_push: {
         Args: { _path: string; _source: string }
         Returns: undefined
+      }
+      try_acquire_worker_lock: {
+        Args: { p_lock_key: string; p_owner?: string; p_ttl_seconds?: number }
+        Returns: boolean
       }
       unaccent: { Args: { "": string }; Returns: string }
       unpublish_sit:
