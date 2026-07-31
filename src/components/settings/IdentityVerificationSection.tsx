@@ -81,11 +81,19 @@ const IdentityVerificationSection = ({ user }: { user: any }) => {
   }, [user]);
 
 
-  const todayAttempts = logs.filter((log: any) => {
+  const recentLogs = logs.filter((log: any) => {
     const logDate = new Date(log.created_at);
     return Date.now() - logDate.getTime() < 24 * 60 * 60 * 1000;
-  }).length;
-  const rateLimited = todayAttempts >= 5;
+  });
+  const todayAttempts = recentLogs.length;
+  const rateLimited = todayAttempts >= DAILY_VERIFY_LIMIT;
+  // Le compteur est glissant : il repart 24h après la plus ancienne tentative.
+  const quotaResetAt = recentLogs.length
+    ? new Date(
+        Math.min(...recentLogs.map((l: any) => new Date(l.created_at).getTime())) + 24 * 60 * 60 * 1000,
+      )
+    : null;
+
 
   const validateFile = (file: File, maxMb: number = 10): string | null => {
     if (file.size > maxMb * 1024 * 1024) return `Le fichier ne doit pas dépasser ${maxMb} Mo.`;
