@@ -413,6 +413,7 @@ Deno.serve(async (req) => {
           requested_radius_km: radiusDecision.requestedRadiusKm,
           radius_clamped: radiusDecision.clamped,
           max_radius_km: MAX_RADIUS_KM,
+          ...recipientFilterInfo,
           sit_status: (sit as any).status ?? null,
           author_first_name: authorFirstName,
           sit: {
@@ -505,6 +506,7 @@ Deno.serve(async (req) => {
           requested_radius_km: radiusDecision.requestedRadiusKm,
           radius_clamped: radiusDecision.clamped,
           max_radius_km: MAX_RADIUS_KM,
+          ...recipientFilterInfo,
         }),
         { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } },
       );
@@ -613,6 +615,7 @@ Deno.serve(async (req) => {
       requested_radius_km: radiusDecision.requestedRadiusKm,
       radius_clamped: radiusDecision.clamped,
       max_radius_km: MAX_RADIUS_KM,
+      ...recipientFilterInfo,
     }), {
       status: 200,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
