@@ -288,6 +288,9 @@ Deno.serve(async (req) => {
             // Un report par le plafond de fréquence n'est pas un envoi : la
             // file différée s'en charge, la ligne est close en `skipped`.
             status: deferredOrSkipped ? "skipped" : "sent",
+            // Sans cet identifiant, le webhook Resend ne retrouve jamais la
+            // ligne de campagne et les colonnes de suivi restent vides.
+            resend_id: typeof body?.resendId === "string" ? body.resendId : null,
             attempts: attemptsSoFar,
             last_error: deferredOrSkipped ? (body?.reason ?? "deferred") : null,
             error_message: null,

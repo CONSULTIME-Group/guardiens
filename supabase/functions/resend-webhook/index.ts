@@ -149,6 +149,32 @@ Deno.serve(async (req) => {
       }
     }
 
+    // === 1bis) Alimentation automatique de la liste de suppression ===
+    // Un rebond permanent ou une plainte doit sortir l'adresse des envois,
+    // sinon la réputation d'expédition se dégrade à chaque campagne.
+    if (event.type === "email.bounced" || event.type === "email.complained") {
+      const recipient = Array.isArray(event.data?.to) ? event.data.to[0] : null;
+      const subType = String(event.data.bounce?.subType ?? "").toLowerCase();
+      const isTransient = subType.includes("transient") || subType.includes("soft");
+      if (recipient && (event.type === "email.complained" || !isTransient)) {
+        const { error: supErr } = await supabase.from("suppressed_emails").upsert(
+          {
+            email: recipient.toLowerCase(),
+            reason: event.type === "email.complained" ? "complaint" : "bounce",
+            metadata: {
+              source: "resend-webhook",
+              event: event.type,
+              resend_id: emailId,
+              sub_type: event.data.bounce?.subType ?? null,
+              message: event.data.bounce?.message ?? null,
+            },
+          },
+          { onConflict: "email", ignoreDuplicates: true },
+        );
+        if (supErr) console.error("suppressed_emails upsert error:", supErr);
+      }
+    }
+
     // === 2) Update mass_email_sends (legacy mass-email tracking) ===
     const { data: send } = await supabase
       .from("mass_email_sends")
