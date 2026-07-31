@@ -380,6 +380,11 @@ Deno.serve(async (req) => {
       return new Response(
         JSON.stringify({
           count: recipients.length,
+          radius_km: radiusKm,
+          requested_radius_km: radiusDecision.requestedRadiusKm,
+          radius_clamped: radiusDecision.clamped,
+          max_radius_km: MAX_RADIUS_KM,
+          sit_status: (sit as any).status ?? null,
           author_first_name: authorFirstName,
           sit: {
             id: sit.id,
