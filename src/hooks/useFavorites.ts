@@ -8,7 +8,7 @@ export function useFavorites(targetType?: "sitter" | "sit") {
   return useQuery({
     queryKey: ["favorites", user?.id, targetType],
     queryFn: async () => {
-      let query = (supabase as any)
+      let query = supabase
         .from("favorites")
         .select("*")
         .eq("user_id", user!.id)
@@ -28,7 +28,7 @@ export function useIsFavorite(targetType: "sitter" | "sit", targetId: string | u
   const { data: favorites } = useQuery({
     queryKey: ["favorites", user?.id],
     queryFn: async () => {
-      const { data, error } = await (supabase as any)
+      const { data, error } = await supabase
         .from("favorites")
         .select("target_id, target_type")
         .eq("user_id", user!.id);
@@ -50,14 +50,14 @@ export function useToggleFavorite() {
     mutationFn: async ({ targetType, targetId, isFavorite }: { targetType: "sitter" | "sit"; targetId: string; isFavorite: boolean }) => {
       if (!user) throw new Error("Not authenticated");
       if (isFavorite) {
-        await (supabase as any)
+        await supabase
           .from("favorites")
           .delete()
           .eq("user_id", user.id)
           .eq("target_type", targetType)
           .eq("target_id", targetId);
       } else {
-        await (supabase as any)
+        await supabase
           .from("favorites")
           .insert({ user_id: user.id, target_type: targetType, target_id: targetId });
       }
