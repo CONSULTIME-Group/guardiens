@@ -28,7 +28,7 @@ describe("géocodage en panne", () => {
   });
 
   it("geocodeCity renvoie null sur exception (timeout), sans lever", async () => {
-    invoke.mockRejectedValue(new Error("timeout"));
+    invoke.mockImplementation(() => { throw new Error("timeout"); });
     const { geocodeCity } = await import("@/lib/geocode");
     await expect(geocodeCity("Ville-Inconnue-Timeout")).resolves.toBeNull();
   });
