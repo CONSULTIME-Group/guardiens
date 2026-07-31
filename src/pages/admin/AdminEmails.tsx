@@ -782,6 +782,20 @@ const EngagementTab = () => {
       <p className="text-sm text-muted-foreground">
         Open rate, click rate, désabonnements et bounces par template. Déduplication par <code className="text-xs bg-muted px-1 rounded">message_id</code>. Les taux d'ouverture/clic sont basés sur les emails <strong>livrés</strong>.
       </p>
+      <div className="rounded-md border bg-muted/40 p-3 text-xs text-muted-foreground space-y-1">
+        <p>
+          Période de calcul bornée au {EMAIL_TRACKING_START.toLocaleDateString("fr-FR")}, date de mise en service du
+          webhook Resend. Avant cette date, aucun événement de livraison n'était enregistré :
+          les envois existent mais restent sans retour, ce qui ne signifie pas qu'ils n'ont pas été délivrés.
+          {truncated ? " La fenêtre demandée a été raccourcie à cette borne." : ""}
+        </p>
+        <p>
+          {uninstrumented > 0
+            ? `${uninstrumented} email(s) d'authentification (inscription, réinitialisation, invitation) exclus des taux : non instrumentés, ils transitent par la file auth et ne peuvent pas remonter d'événement. Ce ne sont pas des non-délivrances.`
+            : "Les emails d'authentification (inscription, réinitialisation, invitation) sont exclus des taux : non instrumentés, ils ne peuvent pas remonter d'événement."}
+        </p>
+      </div>
+
 
       <div className="grid grid-cols-2 md:grid-cols-6 gap-3">
         <Card><CardContent className="pt-4 pb-3 text-center">
