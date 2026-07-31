@@ -10,6 +10,7 @@
 // et le pré-filtrage des annonces (24h glissantes, pays=FR) sont conservés
 // à l'identique.
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { claimSitNotification, releaseSitNotification } from "../_shared/sitNotificationClaim.ts";
 
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SUPABASE_SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
