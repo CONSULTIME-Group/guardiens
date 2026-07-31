@@ -276,7 +276,12 @@ export type EventType =
   | "identity_document_submitted"                // Pièce d'identité envoyée (step)
   | "identity_auto_check_failed"                 // Vérification automatique en échec ou refus (status, reason_kind)
   | "identity_selfie_submitted"                  // Selfie envoyé (step, status)
-  | "identity_dossier_completed";                // Document et selfie présents (status)
+  | "identity_dossier_completed"                 // Document et selfie présents (status)
+  | "identity_cta_clicked"                       // Arrivée depuis un point d'entrée (source)
+  | "identity_file_picked"                       // Fichier choisi (kind, mime, size_kb)
+  | "identity_upload_failed"                     // Échec technique (kind, stage, reason)
+  | "identity_verified"                          // Vérification acceptée (channel)
+  | "identity_rejected";                         // Vérification refusée (channel, reason)
 
 
 
