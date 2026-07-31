@@ -23,7 +23,7 @@ export function usePublicStats() {
     queryKey: ["public-stats"],
     staleTime: 5 * 60 * 1000,
     queryFn: async (): Promise<PublicStats> => {
-      const { data: rows, error } = await (supabase as any).rpc("get_public_stats");
+      const { data: rows, error } = await supabase.rpc("get_public_stats");
       if (error) {
         console.error("get_public_stats error", error);
         return EMPTY;

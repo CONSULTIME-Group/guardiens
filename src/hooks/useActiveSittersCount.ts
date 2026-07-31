@@ -27,8 +27,12 @@ async function fetchAllIds(
   for (let page = 0; ; page++) {
     const from = page * PAGE_SIZE;
     const { data, error } = await apply(
+      // Cast conservé volontairement : `table` et `column` sont des paramètres
+      // dynamiques, les surcharges typées de `.from()/.select()` exigent des
+      // littéraux. Ne pas retirer sans déplier le helper en appels littéraux.
       (supabase as any).from(table).select(column),
     ).range(from, from + PAGE_SIZE - 1);
+
     if (error) throw error;
     const rows = (data ?? []) as any[];
     rows.forEach((r) => {

@@ -10,14 +10,14 @@ export function useInternationalSitsCount() {
     queryKey: ["international-sits-count"],
     staleTime: 10 * 60 * 1000,
     queryFn: async (): Promise<{ count: number; recent: Array<{ id: string; city: string | null; country: string | null; title: string | null }> }> => {
-      const { count } = await (supabase as any)
+      const { count } = await supabase
         .from("sits")
         .select("id", { count: "exact", head: true })
         .eq("status", "published")
         .not("country", "is", null)
         .not("country", "in", "(FR,France)");
 
-      const { data: recent } = await (supabase as any)
+      const { data: recent } = await supabase
         .from("sits")
         .select("id,title,city,country")
         .eq("status", "published")

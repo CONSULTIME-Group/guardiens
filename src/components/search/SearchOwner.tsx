@@ -259,7 +259,7 @@ const SearchOwner = () => {
   useEffect(() => {
     let cancelled = false;
     (async () => {
-      const { data, error } = await (supabase as any).rpc("get_sitter_country_map");
+      const { data, error } = await supabase.rpc("get_sitter_country_map");
       if (cancelled || error || !data) return;
       const map = new Map<string, string>();
       const counts = new Map<string, number>();
@@ -360,7 +360,7 @@ const SearchOwner = () => {
   // Le compte courant est exclu du total, comme dans la liste de résultats.
   useEffect(() => {
     (async () => {
-      let q = (supabase as any)
+      let q = supabase
         .from("public_sitter_profiles")
         .select("user_id", { count: "exact", head: true });
       if (user?.id) q = q.neq("user_id", user.id);
@@ -570,7 +570,7 @@ const SearchOwner = () => {
     setResultsTruncated(false);
     // Vue publique (vague 40) : lecture anon OK. On alias user_id -> id pour préserver
     // les clés React et le contrat de mapping historique côté sitter_profiles.
-    let sittersQuery = (supabase as any)
+    let sittersQuery = supabase
       .from("public_sitter_profiles")
       // Projection explicite : colonnes réellement consommées (filtres, tri,
       // carte, carte de résultat). Les colonnes d'affinité (experience_years,
@@ -625,7 +625,7 @@ const SearchOwner = () => {
       }
       const affinityResults = await Promise.all(
         batches.map((ids) =>
-          (supabase as any)
+          supabase
             .from("sitter_profiles_affinity")
             .select("user_id, experience_years, life_pace, languages, interests, work_during_sit, sensitivities")
             .in("user_id", ids),
@@ -704,7 +704,7 @@ const SearchOwner = () => {
     const [allBadgesRes, emergencyRes, galleryRes] = allUserIds.length > 0
       ? await Promise.all([
           supabase.from("badge_attributions").select("user_id, badge_id").in("user_id", allUserIds),
-          (supabase as any).from("public_emergency_sitter_profiles").select("user_id, is_active").in("user_id", allUserIds).eq("is_active", true),
+          supabase.from("public_emergency_sitter_profiles").select("user_id, is_active").in("user_id", allUserIds).eq("is_active", true),
           supabase.from("sitter_gallery").select("user_id, photo_url, created_at").in("user_id", allUserIds).order("created_at", { ascending: false }),
         ])
       : [{ data: [] as any[], error: null }, { data: [] as any[], error: null }, { data: [] as any[], error: null }] as const;
