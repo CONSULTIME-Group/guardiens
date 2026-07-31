@@ -40,6 +40,7 @@ import { useActiveOwnersCount } from "@/hooks/useActiveOwnersCount";
 import OwnerToSitterAffinity from "@/components/matching/OwnerToSitterAffinity";
 import OwnerAffinityBanner from "@/components/matching/OwnerAffinityBanner";
 import SitterResultCard from "@/components/search/SitterResultCard";
+import OwnerLocationPicker from "@/components/search/header/OwnerLocationPicker";
 import { useViewerOwnerForAffinity } from "@/hooks/useViewerOwnerForAffinity";
 import { computeAffinityResultFull, speciesIntersects, type AffinityOwnerInput, type AffinitySitterInput } from "@/lib/affinityScore";
 
