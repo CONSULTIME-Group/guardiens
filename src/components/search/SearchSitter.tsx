@@ -1129,7 +1129,7 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
   }).length : items.length;
   const deptCount = refDept ? items.filter((m: any) => getDeptCode(getMissionPostalCode(m)) === refDept).length : 0;
   const regionCount = refRegion ? items.filter((m: any) => getRegionCode(getDeptCode(getMissionPostalCode(m))) === refRegion).length : 0;
-  setDensityCounts({ radius: radiusCount, dept: deptCount, region: regionCount, france: items.length });
+   setDensityCounts({ radius: radiusCount, dept: deptCount, region: regionCount, france: missionsFranceCount ?? items.length });
 
   if (zoneMode === "radius" && searchCoords) {
     items = items.filter((m: any) => {
