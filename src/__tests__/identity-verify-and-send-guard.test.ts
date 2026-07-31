@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { describeVerifyError, quotaMessage } from "@/lib/identityVerifyError";
-import { evaluateSend, extractRecipients, isReservedTestRecipient } from "../../../supabase/functions/_shared/resend-guard";
+import { evaluateSend, extractRecipients, isReservedTestRecipient } from "../../supabase/functions/_shared/resend-guard.ts";
 
 describe("messages d'échec de vérification d'identité", () => {
   const ctx = { attempts: 6, resetAt: new Date("2026-08-02T09:00:00Z") };
