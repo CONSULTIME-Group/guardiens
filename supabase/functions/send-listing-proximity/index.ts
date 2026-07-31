@@ -365,11 +365,38 @@ Deno.serve(async (req) => {
     const {
       sit,
       authorFirstName,
-      recipients,
+      recipients: geoRecipients,
       coverPhotoUrl,
       petsSentence,
       listingCity,
     } = await computeRecipients(serviceClient, sitId, radiusKm);
+
+    // Liste explicite optionnelle : INTERSECTION avec la cible géographique,
+    // jamais union. Une adresse hors rayon, exclue par une préférence, ou
+    // supprimée, reste exclue. La liste restreint, elle n'outrepasse rien.
+    const rawFilter = Array.isArray(payload.recipient_emails)
+      ? (payload.recipient_emails as unknown[])
+      : null;
+    const recipientFilter = rawFilter
+      ? new Set(
+          rawFilter
+            .map((e) => String(e || "").trim().toLowerCase())
+            .filter((e) => e.length > 0),
+        )
+      : null;
+    const recipients = recipientFilter
+      ? geoRecipients.filter((r) => recipientFilter.has(r.email.toLowerCase()))
+      : geoRecipients;
+    const recipientFilterInfo = {
+      recipient_filter_applied: recipientFilter !== null,
+      recipient_filter_size: recipientFilter ? recipientFilter.size : 0,
+      recipient_filter_intersection: recipientFilter ? recipients.length : 0,
+      geo_targeted: geoRecipients.length,
+    };
+    if (recipientFilter) {
+      console.log("recipient filter applied", { sit_id: sitId, ...recipientFilterInfo });
+    }
+
 
     const subject = buildSubject(authorFirstName, listingCity);
     const excerpt = buildExcerpt(sit.owner_message ?? sit.specific_expectations);
