@@ -26,14 +26,12 @@ async function anonRpc(fn: string, body: any) {
 }
 
 describe.runIf(enabled)("get_public_sit, masquage des dates en anonyme", () => {
-  it("renvoie start_date et end_date à null sur une garde close non terminée", async () => {
-    const today = new Date().toISOString().slice(0, 10);
-    const candidates = await anonGet(
-      `sits?select=id,status,start_date,end_date&status=in.(confirmed,in_progress)&end_date=gte.${today}&limit=1`,
-    );
+  it("renvoie start_date, end_date et les champs libres à null sur une garde close", async () => {
+    // Les gardes closes ne sont plus lisibles en anonyme sur la table `sits` :
+    // on identifie les candidates via la vue publique réduite.
+    const candidates = await anonGet(`public_closed_sits?select=id,status&status=in.(confirmed,in_progress)&limit=1`);
     if (!candidates.length) {
-      // Aucun jeu de test disponible : on ne valide rien plutôt que de valider à faux.
-      expect(candidates.length, "aucune garde close non terminée en base, test non concluant").toBeGreaterThan(0);
+      expect(candidates.length, "aucune garde close en base, test non concluant").toBeGreaterThan(0);
       return;
     }
     const sit = candidates[0];
@@ -41,8 +39,12 @@ describe.runIf(enabled)("get_public_sit, masquage des dates en anonyme", () => {
     expect(rows.length).toBe(1);
     expect(rows[0].start_date, "start_date exposée à un anonyme sur une garde close").toBeNull();
     expect(rows[0].end_date, "end_date exposée à un anonyme sur une garde close").toBeNull();
+    expect(rows[0].daily_routine, "daily_routine exposée à un anonyme sur une garde close").toBeNull();
+    expect(rows[0].specific_expectations, "specific_expectations exposées à un anonyme").toBeNull();
+    expect(rows[0].owner_message, "owner_message exposé à un anonyme").toBeNull();
     expect(rows[0].dates_hidden).toBe(true);
   }, 20000);
+
 
   it("n'expose pas les dates via une lecture directe non plus", async () => {
     const today = new Date().toISOString().slice(0, 10);

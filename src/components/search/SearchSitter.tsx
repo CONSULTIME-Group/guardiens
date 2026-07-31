@@ -795,27 +795,53 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
     // On inclut les annonces internationales : elles apparaissent comme bonus
     // sur la carte et dans la grille, même quand un filtre géographique français
     // est actif (rayon / dept / région). Elles bypassent le filtre dans filterByLocation.
+    const SIT_COLUMNS = "id, user_id, property_id, title, slug, status, city, country, start_date, end_date, created_at, unpublished_at, environments, is_urgent, cover_photo_url, accepting_applications, max_applications, property:properties!sits_property_id_fkey(type, environment, photos, cover_photo_url)";
+
+    // Lignes ouvertes (publiées, plus les dépubliées pour les membres) : ce sont
+    // les seules candidatables, donc les seules soumises au filtre de dates.
     let query = supabase
 .from("sits")
  // Projection explicite : on ne rapatrie que les colonnes réellement lues en aval
  // (filtres, tri, densité, carte, cartes de résultat). Pas d'étoile, pour ne pas
  // exposer au navigateur la modération, la télémétrie interne et les champs longs.
- .select("id, user_id, property_id, title, slug, status, city, country, start_date, end_date, created_at, unpublished_at, environments, is_urgent, cover_photo_url, accepting_applications, max_applications, property:properties!sits_property_id_fkey(type, environment, photos, cover_photo_url)")
+ .select(SIT_COLUMNS)
 .or(isPublic
-  ? "status.in.(published,confirmed,in_progress,completed,cancelled,archived)"
-  : "status.in.(published,confirmed,in_progress,completed,cancelled,archived),and(status.eq.draft,unpublished_at.not.is.null)")
+  ? "status.eq.published"
+  : "status.eq.published,and(status.eq.draft,unpublished_at.not.is.null)")
 .order("created_at", { ascending: false })
 .limit(SITS_SERVER_CAP);
    if (startDate) query = query.gte("end_date", startDate);
    if (endDate) query = query.lte("start_date", endDate);
-   const { data, error: sitsError } = await query;
+
+   // Lignes fermées (pourvues, terminées, annulées, archivées) : signal de vie de
+   // la communauté, non actionnables, donc JAMAIS filtrées par dates. En anonyme
+   // elles passent par la vue réduite `public_closed_sits`, sans date ni texte
+   // libre ni coordonnée, la table `sits` n'étant plus lisible hors `published`.
+   const closedQuery = !user
+     ? supabase
+         .from("public_closed_sits")
+         .select("id, user_id, title, slug, status, city, cover_photo_url")
+         .limit(SITS_SERVER_CAP)
+     : supabase
+         .from("sits")
+         .select(SIT_COLUMNS)
+         .in("status", ["confirmed", "in_progress", "completed", "cancelled", "archived"])
+         .order("created_at", { ascending: false })
+         .limit(SITS_SERVER_CAP);
+
+
+   const [{ data, error: sitsError }, closedRes] = await Promise.all([query, closedQuery]);
    if (sitsError) {
      console.error("[SearchSitter] Erreur chargement annonces:", sitsError);
      setSearchError("Impossible de charger les annonces.");
      return;
    }
-    let items = data || [];
-    setResultsTruncated(items.length >= SITS_SERVER_CAP);
+   if (closedRes.error) {
+     console.error("[SearchSitter] Erreur chargement annonces fermées:", closedRes.error);
+   }
+    let items = [...(data || []), ...((closedRes.data as any[]) || [])];
+    setResultsTruncated((data || []).length >= SITS_SERVER_CAP);
+
 
    // Hydrate owner data from public_profiles (safe public view) in a single batched call
    const ownerIds = Array.from(new Set(items.map((s: any) => s.user_id).filter(Boolean)));
