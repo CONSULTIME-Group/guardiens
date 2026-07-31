@@ -9,6 +9,7 @@
 // Anti-spam : dédup 6j sur email_send_log, respect suppressed_emails.
 // Body : { dry_run?: boolean, recipient_id?: string, manual?: boolean }
 import { createClient } from 'npm:@supabase/supabase-js@2.45.0'
+import { requireCronCaller } from '../_shared/require-cron-caller.ts'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -32,6 +33,9 @@ interface Recipient {
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders })
+
+  const guard = await requireCronCaller(req, corsHeaders)
+  if (guard) return guard
   let body: { dry_run?: boolean; recipient_id?: string; manual?: boolean } = {}
   try { if (req.body) body = await req.json() } catch { /* noop */ }
 
