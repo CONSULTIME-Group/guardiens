@@ -727,6 +727,7 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
  getPostalCodeFn?: (item: any) => string | undefined,
  alwaysIncludeFn?: (item: any) => boolean,
  densityFilterFn?: (item: any) => boolean,
+ franceCountOverride?: number | null,
  ) => {
  const cityCoords = new Map<string, { lat: number; lng: number }>();
  const uniqueCities = [...new Set(items.map(getCityFn).filter(Boolean))] as string[];
@@ -752,7 +753,14 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
  const regionCount = refRegion ? densityItems.filter((s) => {
  const cp = getPostalCodeFn?.(s); return cp ? getRegionCode(getDeptCode(cp)) === refRegion : false;
  }).length : 0;
- setDensityCounts({ radius: radiusCount, dept: deptCount, region: regionCount, france: densityItems.length });
+ setDensityCounts({
+   radius: radiusCount,
+   dept: deptCount,
+   region: regionCount,
+   // Compteur France : total exact serveur quand il est fourni, pour ne pas
+   // plafonner à SITS_SERVER_CAP.
+   france: franceCountOverride ?? densityItems.length,
+ });
 
 
  // Apply the selected zone filter (international items always pass through)
@@ -805,13 +813,27 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
  // (filtres, tri, densité, carte, cartes de résultat). Pas d'étoile, pour ne pas
  // exposer au navigateur la modération, la télémétrie interne et les champs longs.
  .select(SIT_COLUMNS)
-.or(isPublic
-  ? "status.eq.published"
-  : "status.eq.published,and(status.eq.draft,unpublished_at.not.is.null)")
-.order("created_at", { ascending: false })
-.limit(SITS_SERVER_CAP);
+ .or(isPublic
+   ? "status.eq.published"
+   : "status.eq.published,and(status.eq.draft,unpublished_at.not.is.null)")
+ .order("created_at", { ascending: false })
+ .limit(SITS_SERVER_CAP);
    if (startDate) query = query.gte("end_date", startDate);
    if (endDate) query = query.lte("start_date", endDate);
+
+   // Comptage exact, indépendant du LIMIT, pour le compteur « Toute la France ».
+   // Sans ça, au delà de SITS_SERVER_CAP le total affiché cesse de bouger.
+   let openCountQuery = supabase
+     .from("sits")
+     .select("*", { count: "exact", head: true })
+     .or(isPublic
+       ? "status.eq.published"
+       : "status.eq.published,and(status.eq.draft,unpublished_at.not.is.null)");
+   if (startDate) openCountQuery = openCountQuery.gte("end_date", startDate);
+   if (endDate) openCountQuery = openCountQuery.lte("start_date", endDate);
+   const closedCountQuery = supabase
+     .from("public_closed_sits")
+     .select("*", { count: "exact", head: true });
 
    // Lignes fermées (pourvues, terminées, annulées, archivées) : signal de vie de
    // la communauté, non actionnables, donc JAMAIS filtrées par dates. Elles passent
@@ -824,7 +846,12 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
 
 
 
-   const [{ data, error: sitsError }, closedRes] = await Promise.all([query, closedQuery]);
+   const [{ data, error: sitsError }, closedRes, openCountRes, closedCountRes] = await Promise.all([
+     query,
+     closedQuery,
+     openCountQuery,
+     closedCountQuery,
+   ]);
    if (sitsError) {
      console.error("[SearchSitter] Erreur chargement annonces:", sitsError);
      setSearchError("Impossible de charger les annonces.");
@@ -834,6 +861,7 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
      console.error("[SearchSitter] Erreur chargement annonces fermées:", closedRes.error);
    }
     let items = [...(data || []), ...((closedRes.data as any[]) || [])];
+    const franceExactCount = (openCountRes.count ?? 0) + (closedCountRes.count ?? 0);
     setResultsTruncated((data || []).length >= SITS_SERVER_CAP);
 
 
@@ -909,6 +937,7 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
   // Density : uniquement les annonces actionnables (publiées, ouvertes aux
   // candidatures, non expirées) pour rester aligné avec l'eyebrow SEO.
   (s: any) => s.status === "published" && s.accepting_applications !== false && (!s.end_date || s.end_date >= todayIso),
+  franceExactCount,
   );
 
   items = locFiltered;

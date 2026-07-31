@@ -7714,6 +7714,10 @@ export type Database = {
           id: string
         }[]
       }
+      has_accepted_application: {
+        Args: { p_sit_id: string; p_user_id: string }
+        Returns: boolean
+      }
       has_active_subscription: { Args: { p_user_id: string }; Returns: boolean }
       has_role: {
         Args: {

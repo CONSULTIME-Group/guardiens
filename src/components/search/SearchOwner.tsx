@@ -40,6 +40,7 @@ import { useActiveOwnersCount } from "@/hooks/useActiveOwnersCount";
 import OwnerToSitterAffinity from "@/components/matching/OwnerToSitterAffinity";
 import OwnerAffinityBanner from "@/components/matching/OwnerAffinityBanner";
 import SitterResultCard from "@/components/search/SitterResultCard";
+import OwnerLocationPicker from "@/components/search/header/OwnerLocationPicker";
 import { useViewerOwnerForAffinity } from "@/hooks/useViewerOwnerForAffinity";
 import { computeAffinityResultFull, speciesIntersects, type AffinityOwnerInput, type AffinitySitterInput } from "@/lib/affinityScore";
 
@@ -237,6 +238,16 @@ const SearchOwner = () => {
     setLocQuery("");
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [openPop]);
+
+  // Validation clavier : la touche Entrée promeut la saisie en état métier.
+  // Saisie : identique desktop et mobile, portée par le composant partagé.
+  const handleCityInputChange = useCallback((value: string) => {
+    cityTouchedRef.current = true;
+    setCityInput(value);
+    setLocQuery(value);
+    fetchCitySuggestions(value);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Validation clavier : la touche Entrée promeut la saisie en état métier.
   const handleCityKeyDown = useCallback((e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -1046,8 +1057,13 @@ const SearchOwner = () => {
             popover échappe au display:none). */}
         {!isMobile && (
         <div className="flex items-center gap-3">
-          <Popover open={openPop === "loc-hero"} onOpenChange={(o) => setOpenPop(o ? "loc-hero" : null)}>
-            <PopoverTrigger asChild>
+          <OwnerLocationPicker
+            open={openPop === "loc-hero"}
+            onOpenChange={(o) => setOpenPop(o ? "loc-hero" : null)}
+            contentClassName="w-[420px] p-3 space-y-3"
+            communesClassName="max-h-64 overflow-y-auto"
+            autoFocus
+            trigger={
               <button
                 className="flex-1 min-w-0 flex items-center gap-3 rounded-2xl border border-border bg-card hover:border-primary transition-colors px-5 py-3.5 text-left shadow-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
                 aria-label="Choisir une ville"
@@ -1062,78 +1078,18 @@ const SearchOwner = () => {
                 </span>
                 <span className="text-xs text-muted-foreground shrink-0 hidden lg:inline">Ville, département ou région</span>
               </button>
-            </PopoverTrigger>
-            <PopoverContent align="start" className="w-[420px] p-3 space-y-3">
-              <div className="relative">
-                <Input
-                  placeholder="Ville, département (ex. 69) ou région…"
-                  value={cityInput}
-                  onChange={(e) => {
-                    cityTouchedRef.current = true;
-                    setCityInput(e.target.value);
-                    setLocQuery(e.target.value);
-                    fetchCitySuggestions(e.target.value);
-                  }}
-                  onKeyDown={handleCityKeyDown}
-                  className="pr-10"
-                  aria-label="Ville, département ou région"
-                  autoFocus
-                />
-                <button
-                  type="button"
-                  onClick={handleGeolocate}
-                  aria-label="Utiliser ma position actuelle"
-                  className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-primary"
-                >
-                  <Crosshair className="h-4 w-4" aria-hidden="true" />
-                </button>
-              </div>
-              {citySuggestions.length > 0 && (
-                <div className="space-y-1 max-h-64 overflow-y-auto">
-                  <p className="px-3 text-[10px] uppercase tracking-wide text-muted-foreground/70">Communes</p>
-                  {citySuggestions.map((s: any, i: number) => (
-                    <button
-                      key={i}
-                      className="w-full text-left px-3 py-2 rounded-lg text-sm hover:bg-muted transition-colors"
-                      onClick={() => handleSelectCity(s)}
-                    >
-                      <span className="font-medium">{s.nom}</span>
-                      {s.codesPostaux?.[0] && <span className="text-muted-foreground ml-1">({s.codesPostaux[0]})</span>}
-                    </button>
-                  ))}
-                </div>
-              )}
-              {deptSuggestions.length > 0 && (
-                <div className="space-y-1">
-                  <p className="px-3 text-[10px] uppercase tracking-wide text-muted-foreground/70">Départements</p>
-                  {deptSuggestions.map((d) => (
-                    <button
-                      key={d}
-                      className="w-full text-left px-3 py-2 rounded-lg text-sm hover:bg-muted transition-colors"
-                      onClick={() => handleSelectDept(d)}
-                    >
-                      <span className="font-medium">{DEPT_NAMES[d]}</span>
-                      <span className="text-muted-foreground ml-1">({d})</span>
-                    </button>
-                  ))}
-                </div>
-              )}
-              {regionSuggestions.length > 0 && (
-                <div className="space-y-1">
-                  <p className="px-3 text-[10px] uppercase tracking-wide text-muted-foreground/70">Régions</p>
-                  {regionSuggestions.map((r) => (
-                    <button
-                      key={r}
-                      className="w-full text-left px-3 py-2 rounded-lg text-sm hover:bg-muted transition-colors"
-                      onClick={() => handleSelectRegion(r)}
-                    >
-                      <span className="font-medium">{REGION_NAMES[r]}</span>
-                    </button>
-                  ))}
-                </div>
-              )}
-            </PopoverContent>
-          </Popover>
+            }
+            cityInput={cityInput}
+            onCityInputChange={handleCityInputChange}
+            onCityKeyDown={handleCityKeyDown}
+            onGeolocate={handleGeolocate}
+            citySuggestions={citySuggestions}
+            deptSuggestions={deptSuggestions}
+            regionSuggestions={regionSuggestions}
+            onSelectCity={handleSelectCity}
+            onSelectDept={handleSelectDept}
+            onSelectRegion={handleSelectRegion}
+          />
 
           {/* Select « Rayon » retiré : contrôle unique porté par la chip rayon du sélecteur de zone. */}
 
@@ -1146,83 +1102,27 @@ const SearchOwner = () => {
           <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pr-10 sm:pr-0 snap-x snap-mandatory scroll-px-6 overscroll-x-contain">
           {/* PILL 1, Localisation (mobile uniquement, desktop a le hero search au-dessus) */}
           {isMobile && (
-          <Popover open={openPop === "loc"} onOpenChange={(o) => setOpenPop(o ? "loc" : null)}>
-            <PopoverTrigger asChild>
+          <OwnerLocationPicker
+            open={openPop === "loc"}
+            onOpenChange={(o) => setOpenPop(o ? "loc" : null)}
+            contentClassName="w-72 p-3 space-y-3"
+            trigger={
               <button className={city ? pillActive : pillBase}>
                 <MapPin className="h-3.5 w-3.5 shrink-0" />
                 {city || "Localisation"}
               </button>
-            </PopoverTrigger>
-            <PopoverContent align="start" className="w-72 p-3 space-y-3">
-              <div className="relative">
-                <Input
-                  placeholder="Ville, département (ex. 69) ou région…"
-                  value={cityInput}
-                  onChange={(e) => {
-                    cityTouchedRef.current = true;
-                    setCityInput(e.target.value);
-                    setLocQuery(e.target.value);
-                    fetchCitySuggestions(e.target.value);
-                  }}
-                  onKeyDown={handleCityKeyDown}
-                  className="pr-10"
-                  aria-label="Ville, département ou région"
-                />
-                <button
-                  type="button"
-                  onClick={handleGeolocate}
-                  aria-label="Utiliser ma position actuelle"
-                  className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-primary"
-                >
-                  <Crosshair className="h-4 w-4" aria-hidden="true" />
-                </button>
-              </div>
-              {citySuggestions.length > 0 && (
-                <div className="space-y-1">
-                  <p className="px-3 text-[10px] uppercase tracking-wide text-muted-foreground/70">Communes</p>
-                  {citySuggestions.map((s: any, i: number) => (
-                    <button
-                      key={i}
-                      className="w-full text-left px-3 py-2 rounded-lg text-sm hover:bg-muted transition-colors"
-                      onClick={() => handleSelectCity(s)}
-                    >
-                      <span className="font-medium">{s.nom}</span>
-                      {s.codesPostaux?.[0] && <span className="text-muted-foreground ml-1">({s.codesPostaux[0]})</span>}
-                    </button>
-                  ))}
-                </div>
-              )}
-              {deptSuggestions.length > 0 && (
-                <div className="space-y-1">
-                  <p className="px-3 text-[10px] uppercase tracking-wide text-muted-foreground/70">Départements</p>
-                  {deptSuggestions.map((d) => (
-                    <button
-                      key={d}
-                      className="w-full text-left px-3 py-2 rounded-lg text-sm hover:bg-muted transition-colors"
-                      onClick={() => handleSelectDept(d)}
-                    >
-                      <span className="font-medium">{DEPT_NAMES[d]}</span>
-                      <span className="text-muted-foreground ml-1">({d})</span>
-                    </button>
-                  ))}
-                </div>
-              )}
-              {regionSuggestions.length > 0 && (
-                <div className="space-y-1">
-                  <p className="px-3 text-[10px] uppercase tracking-wide text-muted-foreground/70">Régions</p>
-                  {regionSuggestions.map((r) => (
-                    <button
-                      key={r}
-                      className="w-full text-left px-3 py-2 rounded-lg text-sm hover:bg-muted transition-colors"
-                      onClick={() => handleSelectRegion(r)}
-                    >
-                      <span className="font-medium">{REGION_NAMES[r]}</span>
-                    </button>
-                  ))}
-                </div>
-              )}
-            </PopoverContent>
-          </Popover>
+            }
+            cityInput={cityInput}
+            onCityInputChange={handleCityInputChange}
+            onCityKeyDown={handleCityKeyDown}
+            onGeolocate={handleGeolocate}
+            citySuggestions={citySuggestions}
+            deptSuggestions={deptSuggestions}
+            regionSuggestions={regionSuggestions}
+            onSelectCity={handleSelectCity}
+            onSelectDept={handleSelectDept}
+            onSelectRegion={handleSelectRegion}
+          />
           )}
 
           {/* PILL rayon retirée : le réglage du rayon est porté par la chip « x km » du sélecteur de zone. */}
