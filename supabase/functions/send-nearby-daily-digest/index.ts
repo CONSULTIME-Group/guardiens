@@ -178,11 +178,18 @@ Deno.serve(async (req) => {
       return json({ ok: true, reason: 'no_recipients', users_sent: 0 })
     }
 
-    const { data: profiles, error: profErr } = await supabase
-      .from('profiles')
-      .select('id, first_name, city, latitude, longitude, postal_code, departement_code, email, account_status')
-      .in('id', Array.from(optedInIds))
-    if (profErr) throw profErr
+    // La liste des destinataires dépasse le millier : on découpe le `in` par
+    // lots de 200 pour rester sous la limite de longueur d'URL PostgREST.
+    const recipientIds = Array.from(optedInIds)
+    const profiles: any[] = []
+    for (let i = 0; i < recipientIds.length; i += 200) {
+      const { data: chunk, error: profErr } = await supabase
+        .from('profiles')
+        .select('id, first_name, city, latitude, longitude, postal_code, departement_code, email, account_status')
+        .in('id', recipientIds.slice(i, i + 200))
+      if (profErr) throw new Error('profiles query: ' + JSON.stringify(profErr))
+      profiles.push(...(chunk ?? []))
+    }
 
     const today = new Date().toISOString().slice(0, 10)
     let usersSent = 0
