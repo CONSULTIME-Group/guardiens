@@ -149,31 +149,59 @@ Deno.serve(async (req) => {
       }
     }
 
-    // === 1bis) Alimentation automatique de la liste de suppression ===
-    // Un rebond permanent ou une plainte doit sortir l'adresse des envois,
-    // sinon la réputation d'expédition se dégrade à chaque campagne.
+    // === 1bis) Alimentation de la liste de suppression, avec palier ===
+    // Règle : suppression immédiate sur plainte ou rebond explicitement permanent
+    // (subType "permanent" ou "hard"). Pour un rebond générique, sans subType
+    // exploitable, on attend trois rebonds sur la même adresse avant de la sortir
+    // définitivement. Un blocage de réputation opérateur (SFR, Neuf, Numericable)
+    // produit ce type de rebond générique et se résorbe, il ne justifie pas une
+    // exclusion définitive au premier échec.
+    const GENERIC_BOUNCE_THRESHOLD = 3;
     if (event.type === "email.bounced" || event.type === "email.complained") {
       const recipient = Array.isArray(event.data?.to) ? event.data.to[0] : null;
       const subType = String(event.data.bounce?.subType ?? "").toLowerCase();
-      const isTransient = subType.includes("transient") || subType.includes("soft");
-      if (recipient && (event.type === "email.complained" || !isTransient)) {
+      const isPermanent = subType.includes("permanent") || subType.includes("hard");
+      const isComplaint = event.type === "email.complained";
+
+      let shouldSuppress = isComplaint || isPermanent;
+      let bounceCount = 0;
+
+      if (recipient && !shouldSuppress) {
+        // Comptage des rebonds déjà enregistrés pour cette adresse.
+        const { count } = await supabase
+          .from("email_send_log")
+          .select("id", { count: "exact", head: true })
+          .ilike("recipient_email", recipient)
+          .not("bounced_at", "is", null);
+        bounceCount = count ?? 0;
+        shouldSuppress = bounceCount >= GENERIC_BOUNCE_THRESHOLD;
+      }
+
+      if (recipient && shouldSuppress) {
         const { error: supErr } = await supabase.from("suppressed_emails").upsert(
           {
             email: recipient.toLowerCase(),
-            reason: event.type === "email.complained" ? "complaint" : "bounce",
+            reason: isComplaint ? "complaint" : "bounce",
             metadata: {
               source: "resend-webhook",
               event: event.type,
               resend_id: emailId,
               sub_type: event.data.bounce?.subType ?? null,
               message: event.data.bounce?.message ?? null,
+              rule: isComplaint ? "complaint" : isPermanent ? "permanent_bounce" : "generic_bounce_threshold",
+              bounce_count: bounceCount || null,
             },
           },
           { onConflict: "email", ignoreDuplicates: true },
         );
         if (supErr) console.error("suppressed_emails upsert error:", supErr);
+      } else if (recipient) {
+        console.log(
+          `Rebond générique non suppressif pour ${recipient}, compteur ${bounceCount}/${GENERIC_BOUNCE_THRESHOLD}`,
+        );
       }
     }
+
 
     // === 2) Update mass_email_sends (legacy mass-email tracking) ===
     const { data: send } = await supabase
