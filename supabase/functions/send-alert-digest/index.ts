@@ -140,6 +140,8 @@ Deno.serve(async (req) => {
 
     let sent = 0;
     let skipped = 0;
+    let claimSkipped = 0;
+    const claimSkippedBy: Record<string, number> = {};
     const errors: Array<{ user_id?: string; reason: string }> = [];
 
     for (const pref of prefs) {
