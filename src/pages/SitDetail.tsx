@@ -91,8 +91,10 @@ const SitDetail = () => {
     setInitialAnimauxOverride("");
     setOwnerGallery([]);
     const load = async () => {
-      const { data: sitRows } = await supabase.from("sits").select("*").eq("id", id).limit(1);
-      const sitData = sitRows?.[0];
+      // Lecture via la RPC masquée : dates et champs libres sont filtrés côté
+      // serveur pour tout visiteur qui n'est ni propriétaire ni gardien accepté.
+      const { data: sitRows } = await supabase.rpc("get_public_sit", { p_param: id });
+      const sitData = (sitRows as any[] | null)?.[0];
       if (!sitData) {
         setLoading(false);
         return;
