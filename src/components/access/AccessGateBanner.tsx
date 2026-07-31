@@ -77,13 +77,13 @@ const AccessGateBanner = ({ level, profileCompletion, context = "guard", showIde
           <ShieldCheck className="h-5 w-5 text-primary mt-0.5 shrink-0" />
           <div className="space-y-2 w-full">
             <p className="font-semibold text-[14px] text-foreground">
-              Recommandé : vérifiez votre identité
+              Facultatif : vérifiez votre identité
             </p>
             <p className="text-xs text-muted-foreground">
-              Les profils vérifiés inspirent davantage confiance et sont contactés bien plus souvent. Cela ne prend qu'une minute.
+              Rien n'est bloqué sans elle. Les profils vérifiés inspirent toutefois davantage confiance et sont contactés bien plus souvent, et cela ne prend qu'une minute.
             </p>
             <Button size="sm" variant="outline" asChild>
-              <Link to="/settings?section=security">Vérifier mon identité</Link>
+              <Link to="/settings?section=security&src=access_gate_banner">Vérifier mon identité</Link>
             </Button>
           </div>
         </div>

@@ -452,13 +452,13 @@ const ApplicationModal = ({
             <ShieldCheck className="h-4 w-4 text-primary mt-0.5 shrink-0" />
             <div className="space-y-1 flex-1">
               <p className="text-xs font-semibold text-foreground">
-                Conseil, vérifiez votre identité pour être plus souvent retenu
+                Conseil facultatif, vérifiez votre identité pour être plus souvent retenu
               </p>
               <p className="text-xs text-muted-foreground">
                 Les propriétaires acceptent en priorité les profils vérifiés. Vous pouvez postuler dès maintenant et vérifier votre identité plus tard.
               </p>
-              <Link to="/settings?section=security" className="text-xs text-primary font-medium hover:underline inline-block mt-0.5">
-                Vérifier mon identité (1 min) →
+              <Link to="/settings?section=security&src=application_modal" className="text-xs text-primary font-medium hover:underline inline-block mt-0.5">
+                Vérifier mon identité (facultatif, 1 min) →
               </Link>
             </div>
           </div>

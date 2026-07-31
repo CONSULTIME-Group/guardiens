@@ -494,6 +494,9 @@ const SitterProfile = () => {
               return next ? { id: next.id, label: next.label, missingCount: next.missingCount } : undefined;
             })()}
             totalRemaining={totalRemaining}
+            missingScoreItems={scoredCriteria
+              .filter(c => !c.ok && c.points > 0)
+              .map(c => ({ key: c.label, label: c.label, points: c.points }))}
             onJumpToSection={(id) => {
               setActiveSection(id);
               requestAnimationFrame(() => {
