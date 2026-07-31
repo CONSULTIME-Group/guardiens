@@ -838,7 +838,12 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
 
 
 
-   const [{ data, error: sitsError }, closedRes] = await Promise.all([query, closedQuery]);
+   const [{ data, error: sitsError }, closedRes, openCountRes, closedCountRes] = await Promise.all([
+     query,
+     closedQuery,
+     openCountQuery,
+     closedCountQuery,
+   ]);
    if (sitsError) {
      console.error("[SearchSitter] Erreur chargement annonces:", sitsError);
      setSearchError("Impossible de charger les annonces.");
@@ -848,6 +853,7 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
      console.error("[SearchSitter] Erreur chargement annonces fermées:", closedRes.error);
    }
     let items = [...(data || []), ...((closedRes.data as any[]) || [])];
+    const franceExactCount = (openCountRes.count ?? 0) + (closedCountRes.count ?? 0);
     setResultsTruncated((data || []).length >= SITS_SERVER_CAP);
 
 
