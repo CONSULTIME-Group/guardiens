@@ -6573,48 +6573,6 @@ export type Database = {
           travels_with_own_animals: boolean | null
           user_id: string | null
         }
-        Insert: {
-          accompanied_by?: string | null
-          animal_types?: string[] | null
-          competences?: string[] | null
-          farm_animals_ok?: boolean | null
-          geographic_radius?: number | null
-          has_vehicle?: boolean | null
-          is_available?: boolean | null
-          lifestyle?: string[] | null
-          min_duration?: number | null
-          min_notice?: string | null
-          motivation?: string | null
-          own_animals?: string[] | null
-          preferred_environments?: string[] | null
-          preferred_frequency?: string | null
-          reply_median_minutes?: number | null
-          sitter_type?: string | null
-          travels_with_children?: boolean | null
-          travels_with_own_animals?: boolean | null
-          user_id?: string | null
-        }
-        Update: {
-          accompanied_by?: string | null
-          animal_types?: string[] | null
-          competences?: string[] | null
-          farm_animals_ok?: boolean | null
-          geographic_radius?: number | null
-          has_vehicle?: boolean | null
-          is_available?: boolean | null
-          lifestyle?: string[] | null
-          min_duration?: number | null
-          min_notice?: string | null
-          motivation?: string | null
-          own_animals?: string[] | null
-          preferred_environments?: string[] | null
-          preferred_frequency?: string | null
-          reply_median_minutes?: number | null
-          sitter_type?: string | null
-          travels_with_children?: boolean | null
-          travels_with_own_animals?: boolean | null
-          user_id?: string | null
-        }
         Relationships: [
           {
             foreignKeyName: "sitter_profiles_user_id_fkey"
