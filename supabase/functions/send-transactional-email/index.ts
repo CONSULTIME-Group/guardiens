@@ -27,8 +27,8 @@ const corsHeaders = {
 
 // === Frequency cap & quiet hours ===
 // Pure logic lives in _shared/email-cap.ts so it can be unit-tested.
-import {
 import { resendFetch } from "../_shared/resend-guard.ts";
+import {
   BYPASS_TEMPLATES,
   decideDeferral,
   isQuietAt,
