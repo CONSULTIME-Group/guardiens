@@ -12,6 +12,7 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { claimSitNotification, releaseSitNotification } from "../_shared/sitNotificationClaim.ts";
 import { parisHourSlot } from "../_shared/paris-hour.ts";
+import { lookupCityCoords } from "../_shared/geocode-lookup.ts";
 
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SUPABASE_SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
@@ -205,11 +206,7 @@ Deno.serve(async (req) => {
       if (pref.zone_type === "rayon") {
         const cityToResolve = pref.city || profile.city;
         if (cityToResolve) {
-          const { data: geo } = await supabase
-            .from("geocode_cache")
-            .select("lat, lng")
-            .eq("normalized_name", cityToResolve.toLowerCase().trim())
-            .maybeSingle();
+          const geo = await lookupCityCoords(supabase, cityToResolve);
           if (geo) {
             alertLat = geo.lat;
             alertLng = geo.lng;
@@ -265,11 +262,7 @@ Deno.serve(async (req) => {
             const sitCity = (sit.profiles as any)?.city;
             let matched = false;
             if (alertLat != null && alertLng != null && sitCity) {
-              const { data: geo } = await supabase
-                .from("geocode_cache")
-                .select("lat, lng")
-                .eq("normalized_name", sitCity.toLowerCase().trim())
-                .maybeSingle();
+              const geo = await lookupCityCoords(supabase, sitCity);
               if (geo) {
                 matched = haversine(alertLat, alertLng, geo.lat, geo.lng) <= pref.radius_km;
               } else {
