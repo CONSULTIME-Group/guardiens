@@ -56,25 +56,45 @@ Deno.serve(async (req) => {
   try {
     const since = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()
 
-    // 1) Charge les annonces récentes une seule fois.
-    const [{ data: sits }, { data: missions }] = await Promise.all([
+    // Repli départemental : quand une coordonnée manque, on compare les codes
+    // département plutôt que d'abandonner le destinataire.
+    const deptOf = (...candidates: Array<string | null | undefined>): string | null => {
+      for (const c of candidates) {
+        const v = (c ?? '').toString().trim()
+        if (!v) continue
+        if (/^(2A|2B)/i.test(v)) return v.slice(0, 2).toUpperCase()
+        const m = v.match(/^\d{2}/)
+        if (m) return m[0]
+      }
+      return null
+    }
+    const todayIso = new Date().toISOString().slice(0, 10)
+
+    // 1) Charge les annonces récentes une seule fois. `sits` ne porte pas de
+    // coordonnées, on passe par celles du propriétaire, avec repli département.
+    const [{ data: sits, error: sitsErr }, { data: missions, error: missionsErr }] = await Promise.all([
       supabase
         .from('sits')
-        .select('id, slug, title, city, start_date, end_date, latitude, longitude, user_id, status, created_at, cover_photo_url, property_id')
+        .select('id, slug, title, city, start_date, end_date, user_id, status, created_at, cover_photo_url, property_id, departement_code, accepting_applications, country, profiles:user_id (latitude, longitude, postal_code, departement_code, country)')
         .gte('created_at', since)
-        .eq('status', 'open')
-        .not('latitude', 'is', null)
-        .not('longitude', 'is', null),
+        .eq('status', 'published')
+        .or('country.is.null,country.eq.FR'),
       supabase
         .from('small_missions')
-        .select('id, slug, title, description, mission_type, city, category, date_needed, latitude, longitude, user_id, status, created_at, photos')
+        .select('id, slug, title, description, mission_type, city, category, date_needed, latitude, longitude, postal_code, user_id, status, created_at, photos')
         .gte('created_at', since)
-        .eq('status', 'open')
-        .not('latitude', 'is', null)
-        .not('longitude', 'is', null),
+        .eq('status', 'open'),
     ])
+    if (sitsErr) throw new Error('sits query: ' + JSON.stringify(sitsErr))
+    if (missionsErr) throw new Error('missions query: ' + JSON.stringify(missionsErr))
 
-    const allSits = sits ?? []
+    const allSits = (sits ?? []).filter((s: any) => {
+      if (s.accepting_applications === false) return false
+      if (s.end_date && s.end_date < todayIso) return false
+      const oc = (s.profiles as any)?.country
+      if (oc && oc !== 'FR') return false
+      return true
+    })
     const allMissions = missions ?? []
 
     if (allSits.length === 0 && allMissions.length === 0) {
@@ -158,18 +178,24 @@ Deno.serve(async (req) => {
       return json({ ok: true, reason: 'no_recipients', users_sent: 0 })
     }
 
-    const { data: profiles, error: profErr } = await supabase
-      .from('profiles')
-      .select('id, first_name, city, latitude, longitude, email, account_status')
-      .in('id', Array.from(optedInIds))
-      .not('latitude', 'is', null)
-      .not('longitude', 'is', null)
-    if (profErr) throw profErr
+    // La liste des destinataires dépasse le millier : on découpe le `in` par
+    // lots de 200 pour rester sous la limite de longueur d'URL PostgREST.
+    const recipientIds = Array.from(optedInIds)
+    const profiles: any[] = []
+    for (let i = 0; i < recipientIds.length; i += 200) {
+      const { data: chunk, error: profErr } = await supabase
+        .from('profiles')
+        .select('id, first_name, city, latitude, longitude, postal_code, departement_code, email, account_status')
+        .in('id', recipientIds.slice(i, i + 200))
+      if (profErr) throw new Error('profiles query: ' + JSON.stringify(profErr))
+      profiles.push(...(chunk ?? []))
+    }
 
     const today = new Date().toISOString().slice(0, 10)
     let usersSent = 0
     let usersSkipped = 0
     let claimSkipped = 0
+    let deptFallbackUsers = 0
     const claimSkippedBy: Record<string, number> = {}
     const errors: Array<{ user_id: string; reason: string }> = []
 
@@ -185,14 +211,34 @@ Deno.serve(async (req) => {
         if (pref?.product_emails === false) { usersSkipped++; continue }
 
         const origin = { lat: Number(p.latitude), lng: Number(p.longitude) }
-        if (!Number.isFinite(origin.lat) || !Number.isFinite(origin.lng)) { usersSkipped++; continue }
+        const hasOrigin = Number.isFinite(origin.lat) && Number.isFinite(origin.lng)
+        const userDept = deptOf(p.departement_code, p.postal_code)
+        if (!hasOrigin && !userDept) { usersSkipped++; continue }
+        if (!hasOrigin) deptFallbackUsers++
+
+        // Rapproche une annonce du gardien : distance si les deux points sont
+        // connus, sinon égalité de département. Renvoie la distance en km, ou
+        // null si le rapprochement s'est fait par département.
+        const match = (
+          lat: unknown, lng: unknown, dept: string | null,
+        ): { ok: boolean; km: number | null } => {
+          const la = Number(lat), lo = Number(lng)
+          if (hasOrigin && Number.isFinite(la) && Number.isFinite(lo)) {
+            const d = haversineKm(origin, { lat: la, lng: lo })
+            return { ok: d <= radiusKm, km: d }
+          }
+          if (userDept && dept && userDept === dept) return { ok: true, km: null }
+          return { ok: false, km: null }
+        }
 
         // Filtre + distance
         const items: any[] = []
         for (const s of allSits) {
           if (s.user_id === p.id) continue
-          const d = haversineKm(origin, { lat: Number(s.latitude), lng: Number(s.longitude) })
-          if (d > radiusKm) continue
+          const owner = (s.profiles as any) ?? {}
+          const sitDept = deptOf(s.departement_code, owner.departement_code, owner.postal_code)
+          const r = match(owner.latitude, owner.longitude, sitDept)
+          if (!r.ok) continue
           const sitCover = (s.cover_photo_url as string | null)
             || (s.property_id ? propertyCoverMap.get(s.property_id) ?? null : null)
           const sitAnimals = s.property_id ? propertyAnimalsMap.get(s.property_id) : undefined
@@ -202,19 +248,19 @@ Deno.serve(async (req) => {
             slug: s.slug ?? null,
             title: s.title,
             city: s.city,
-            distanceKm: Math.round(d),
+            distanceKm: r.km == null ? null : Math.round(r.km),
             startDate: formatFrDate(s.start_date),
             endDate: formatFrDate(s.end_date),
             ownerFirstName: ownerMap.get(s.user_id),
             coverPhotoUrl: sitCover,
             animalsSummary: sitAnimals,
-            _sort: d,
+            _sort: r.km ?? radiusKm + 1,
           })
         }
         for (const m of allMissions) {
           if (m.user_id === p.id) continue
-          const d = haversineKm(origin, { lat: Number(m.latitude), lng: Number(m.longitude) })
-          if (d > radiusKm) continue
+          const r = match(m.latitude, m.longitude, deptOf(m.postal_code))
+          if (!r.ok) continue
           const desc = (m.description ?? '').toString().replace(/\s+/g, ' ').trim()
           const excerpt = desc.length > 160 ? desc.slice(0, 157).trimEnd() + '...' : desc
           const missionPhoto = Array.isArray(m.photos) && m.photos.length > 0 && typeof m.photos[0] === 'string'
@@ -225,13 +271,13 @@ Deno.serve(async (req) => {
             slug: m.slug ?? null,
             title: m.title,
             city: m.city,
-            distanceKm: Math.round(d),
+            distanceKm: r.km == null ? null : Math.round(r.km),
             category: m.category,
             missionType: m.mission_type ?? 'besoin',
             excerpt,
             ownerFirstName: ownerMap.get(m.user_id),
             coverPhotoUrl: missionPhoto,
-            _sort: d,
+            _sort: r.km ?? radiusKm + 1,
           })
         }
 
@@ -330,6 +376,7 @@ Deno.serve(async (req) => {
       users_skipped: usersSkipped,
       claim_skipped: claimSkipped,
       claim_skipped_by: claimSkippedBy,
+      dept_fallback_users: deptFallbackUsers,
       errors,
       dry_run: !!body.dry_run,
     })

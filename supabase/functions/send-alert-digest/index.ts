@@ -120,7 +120,7 @@ Deno.serve(async (req) => {
       .select(`
         *,
         profiles:user_id (
-          id, first_name, email, city, postal_code, role
+          id, first_name, email, city, postal_code, departement_code, role
         )
       `)
       .eq("active", true);
@@ -141,8 +141,23 @@ Deno.serve(async (req) => {
     let sent = 0;
     let skipped = 0;
     let claimSkipped = 0;
+    let rayonFallbackDept = 0;
     const claimSkippedBy: Record<string, number> = {};
     const errors: Array<{ user_id?: string; reason: string }> = [];
+
+    // Repli départemental : deux codes département suffisent à comparer deux
+    // localisations quand le géocodage manque. La précision se dégrade, le
+    // résultat ne se vide pas.
+    const deptOf = (...candidates: Array<string | null | undefined>): string | null => {
+      for (const c of candidates) {
+        const v = (c ?? "").toString().trim();
+        if (!v) continue;
+        if (/^(2A|2B)/i.test(v)) return v.slice(0, 2).toUpperCase();
+        const m = v.match(/^\d{2}/);
+        if (m) return m[0];
+      }
+      return null;
+    };
 
     for (const pref of prefs) {
       const profile = pref.profiles;
@@ -152,31 +167,42 @@ Deno.serve(async (req) => {
 
       let alertLat: number | null = null;
       let alertLng: number | null = null;
+      let alertDept: string | null = null;
 
       if (pref.zone_type === "rayon") {
         const cityToResolve = pref.city || profile.city;
-        if (!cityToResolve) { skipped++; continue; }
-        const { data: geo } = await supabase
-          .from("geocode_cache")
-          .select("lat, lng")
-          .eq("normalized_name", cityToResolve.toLowerCase().trim())
-          .maybeSingle();
-        if (!geo) { skipped++; continue; }
-        alertLat = geo.lat;
-        alertLng = geo.lng;
+        if (cityToResolve) {
+          const { data: geo } = await supabase
+            .from("geocode_cache")
+            .select("lat, lng")
+            .eq("normalized_name", cityToResolve.toLowerCase().trim())
+            .maybeSingle();
+          if (geo) {
+            alertLat = geo.lat;
+            alertLng = geo.lng;
+          }
+        }
+        if (alertLat == null || alertLng == null) {
+          alertDept = deptOf(profile.departement_code, profile.postal_code);
+          if (!alertDept) { skipped++; continue; }
+          rayonFallbackDept++;
+        }
       }
 
       const alertTypes = pref.alert_types as string[];
       const sits: any[] = [];
       const missions: any[] = [];
 
+      const isFrance = pref.zone_type === "france"
+        || (pref.zone_type === "region" && pref.region_code === "FR");
+
       if (alertTypes.includes("gardes")) {
         const { data: rawSits } = await supabase
           .from("sits")
           .select(`
             id, title, specific_expectations, owner_message, start_date, end_date, is_urgent, cover_photo_url,
-            city, country,
-            profiles:user_id (first_name, city, postal_code, country),
+            city, country, departement_code, accepting_applications,
+            profiles:user_id (first_name, city, postal_code, departement_code, country),
             properties:property_id (cover_photo_url, photos, pets (species, name))
           `)
           .eq("status", "published")
@@ -185,28 +211,47 @@ Deno.serve(async (req) => {
           .limit(20);
 
         for (const sit of rawSits ?? []) {
+          if (sit.accepting_applications === false) continue;
           const ownerCountry = (sit.profiles as any)?.country;
           if (ownerCountry && ownerCountry !== "FR") continue;
-          const sitCity = (sit.profiles as any)?.city;
-          if (!sitCity) continue;
 
-          if (pref.zone_type === "rayon" && alertLat != null && alertLng != null) {
-            const { data: geo } = await supabase
-              .from("geocode_cache")
-              .select("lat, lng")
-              .eq("normalized_name", sitCity.toLowerCase().trim())
-              .maybeSingle();
-            if (!geo) continue;
-            const dist = haversine(alertLat, alertLng, geo.lat, geo.lng);
-            if (dist <= pref.radius_km) sits.push(sit);
-          } else if (pref.zone_type === "departement" && pref.departement) {
-            const pc = (sit.profiles as any)?.postal_code || "";
-            if (pc.startsWith(pref.departement)) sits.push(sit);
-          } else if (pref.zone_type === "region" && pref.region_code === "FR") {
+          const sitDept = deptOf(
+            sit.departement_code,
+            (sit.profiles as any)?.departement_code,
+            (sit.profiles as any)?.postal_code,
+          );
+
+          if (isFrance) {
+            // France entière : aucune condition géographique.
             sits.push(sit);
+            continue;
+          }
+
+          if (pref.zone_type === "rayon") {
+            const sitCity = (sit.profiles as any)?.city;
+            let matched = false;
+            if (alertLat != null && alertLng != null && sitCity) {
+              const { data: geo } = await supabase
+                .from("geocode_cache")
+                .select("lat, lng")
+                .eq("normalized_name", sitCity.toLowerCase().trim())
+                .maybeSingle();
+              if (geo) {
+                matched = haversine(alertLat, alertLng, geo.lat, geo.lng) <= pref.radius_km;
+              } else {
+                // Géocodage manquant côté annonce : repli département.
+                const ownDept = alertDept
+                  ?? deptOf(profile.departement_code, profile.postal_code);
+                matched = !!ownDept && ownDept === sitDept;
+              }
+            } else if (alertDept) {
+              matched = alertDept === sitDept;
+            }
+            if (matched) sits.push(sit);
+          } else if (pref.zone_type === "departement" && pref.departement) {
+            if (sitDept === deptOf(pref.departement)) sits.push(sit);
           } else if (pref.zone_type === "region" && pref.region_code === "ARA") {
-            const pc = (sit.profiles as any)?.postal_code || "";
-            if (AURA_DEPARTMENTS.includes(pc.substring(0, 2))) sits.push(sit);
+            if (sitDept && AURA_DEPARTMENTS.includes(sitDept)) sits.push(sit);
           }
         }
       }
@@ -220,15 +265,26 @@ Deno.serve(async (req) => {
           .limit(20);
 
         for (const m of rawMissions ?? []) {
-          if (pref.zone_type === "rayon" && alertLat != null && alertLng != null && m.latitude && m.longitude) {
-            const dist = haversine(alertLat, alertLng, Number(m.latitude), Number(m.longitude));
-            if (dist <= pref.radius_km) missions.push(m);
-          } else if (pref.zone_type === "departement" && pref.departement) {
-            if ((m.postal_code || "").startsWith(pref.departement)) missions.push(m);
-          } else if (pref.zone_type === "region" && pref.region_code === "FR") {
+          const mDept = deptOf(m.postal_code);
+
+          if (isFrance) {
             missions.push(m);
+            continue;
+          }
+
+          if (pref.zone_type === "rayon") {
+            if (alertLat != null && alertLng != null && m.latitude && m.longitude) {
+              const dist = haversine(alertLat, alertLng, Number(m.latitude), Number(m.longitude));
+              if (dist <= pref.radius_km) missions.push(m);
+            } else {
+              const ownDept = alertDept
+                ?? deptOf(profile.departement_code, profile.postal_code);
+              if (ownDept && ownDept === mDept) missions.push(m);
+            }
+          } else if (pref.zone_type === "departement" && pref.departement) {
+            if (mDept === deptOf(pref.departement)) missions.push(m);
           } else if (pref.zone_type === "region" && pref.region_code === "ARA") {
-            if (AURA_DEPARTMENTS.includes((m.postal_code || "").substring(0, 2))) missions.push(m);
+            if (mDept && AURA_DEPARTMENTS.includes(mDept)) missions.push(m);
           }
         }
       }
@@ -279,7 +335,8 @@ Deno.serve(async (req) => {
       }));
 
       const zoneLabel = pref.label
-        || (pref.zone_type === "rayon" ? (pref.city || profile.city) : undefined)
+        || (pref.zone_type === "france" ? "France entière" : undefined)
+        || (pref.zone_type === "rayon" ? (pref.city || profile.city || (alertDept ? `département ${alertDept}` : undefined)) : undefined)
         || (pref.zone_type === "departement" ? `département ${pref.departement}` : undefined)
         || (pref.zone_type === "region" ? (pref.region_code === "FR" ? "France entière" : pref.region_code) : undefined)
         || "votre secteur";
@@ -329,7 +386,7 @@ Deno.serve(async (req) => {
 
 
     return new Response(
-      JSON.stringify({ sent, skipped, claim_skipped: claimSkipped, claim_skipped_by: claimSkippedBy, errors, hour: currentHourStr }),
+      JSON.stringify({ sent, skipped, claim_skipped: claimSkipped, claim_skipped_by: claimSkippedBy, rayon_fallback_dept: rayonFallbackDept, errors, hour: currentHourStr }),
       { status: 200, headers: { "Content-Type": "application/json" } },
     );
   } catch (err) {
