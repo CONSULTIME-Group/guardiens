@@ -169,7 +169,10 @@ Deno.serve(async (req) => {
     const today = new Date().toISOString().slice(0, 10)
     let usersSent = 0
     let usersSkipped = 0
+    let claimSkipped = 0
+    const claimSkippedBy: Record<string, number> = {}
     const errors: Array<{ user_id: string; reason: string }> = []
+
 
     for (const p of profiles ?? []) {
       try {
