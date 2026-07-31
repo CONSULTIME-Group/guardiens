@@ -30,8 +30,15 @@ describe("géocodage en panne", () => {
   it("geocodeCity renvoie null sur exception (timeout), sans lever", async () => {
     invoke.mockImplementation(() => { throw new Error("timeout"); });
     const { geocodeCity } = await import("@/lib/geocode");
-    await expect(geocodeCity("Ville-Inconnue-Timeout")).resolves.toBeNull();
+    let outcome: any = "n'a pas résolu";
+    try {
+      outcome = await geocodeCity("Ville-Inconnue-Timeout");
+    } catch (e) {
+      outcome = `a levé : ${(e as Error).message}`;
+    }
+    expect(outcome).toBeNull();
   });
+
 
   it("SearchOwner déclare un repli département dans le prédicat de rayon", () => {
     const m = src.match(/const inRadius = \(s: any\) => \{[\s\S]*?\n {4}\};/);
