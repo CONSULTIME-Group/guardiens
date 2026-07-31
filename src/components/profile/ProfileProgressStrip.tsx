@@ -14,17 +14,11 @@ interface ProfileProgressStripProps {
   missingScoreItems?: Array<{ key: string; label: string; points: number }>;
 }
 
-/** Seuil à partir duquel le profil est actif : candidatures, recherche, contact. */
-const ACTIVE_THRESHOLD = 80;
-
 /**
  * Bandeau de progression intégré en HAUT de la save bar mobile.
- * Affiche la barre fine, les items manquants nommés avec leurs points,
- * et le CTA "Compléter".
- *
- * À partir de 80%, le registre change : le message dominant n'est plus un
- * décompte de ce qui manque mais un état de fait, le profil est actif et la
- * personne peut candidater. Ce qui reste est présenté comme un plus.
+ * Affiche la barre fine, les items manquants NOMMÉS avec leurs points,
+ * et le CTA "Compléter". Nommer les items est le seul objet de ce bandeau :
+ * dire quoi faire, sans jamais suggérer que l'on peut s'en passer.
  *
  * Caché sur desktop (sidebar déjà visible avec ScoreBreakdown + lien public).
  */
@@ -39,9 +33,9 @@ const ProfileProgressStrip = memo(
   }: ProfileProgressStripProps) => {
     const pct = Math.max(0, Math.min(100, completion));
     const isComplete = pct >= 100 || !nextIncomplete;
-    const isActive = pct >= ACTIVE_THRESHOLD;
+    const hasNamedItems = (missingScoreItems?.length ?? 0) > 0;
 
-    if (totalRemaining !== undefined && totalRemaining < 2 && !isActive) return null;
+    if (totalRemaining !== undefined && totalRemaining < 2 && !hasNamedItems) return null;
 
     const named = (missingScoreItems ?? []).slice(0, 4);
 
@@ -70,11 +64,9 @@ const ProfileProgressStrip = memo(
                 <span className="text-xs text-muted-foreground truncate">
                   {isComplete
                     ? "Profil complet, visibilité maximale"
-                    : isActive
-                      ? "Votre profil est actif"
-                      : totalRemaining !== undefined
-                        ? `${totalRemaining} item${totalRemaining > 1 ? "s" : ""} à compléter`
-                        : `Suivant : ${nextIncomplete!.label}`}
+                    : totalRemaining !== undefined
+                      ? `${totalRemaining} item${totalRemaining > 1 ? "s" : ""} à compléter`
+                      : `Suivant : ${nextIncomplete!.label}`}
                 </span>
               </div>
             </div>
@@ -99,19 +91,12 @@ const ProfileProgressStrip = memo(
                   className="inline-flex items-center gap-1 rounded-full bg-primary text-primary-foreground text-xs font-semibold px-3 py-1.5 hover:opacity-90 active:scale-95 transition-all"
                   aria-label={`Aller à la section ${nextIncomplete!.label}`}
                 >
-                  {isActive ? "Continuer" : "Compléter"}
+                  Compléter
                   <ArrowUp className="h-3 w-3 rotate-45" aria-hidden="true" />
                 </button>
               )}
             </div>
           </div>
-
-          {isActive && !isComplete && (
-            <p className="text-[11px] text-muted-foreground leading-snug" data-testid="profile-active-note">
-              Vous pouvez candidater dès maintenant, votre profil apparaît dans les recherches et
-              les propriétaires peuvent vous contacter. Ce qui suit est un plus, pas une condition.
-            </p>
-          )}
 
           {named.length > 0 && (
             <ul className="flex flex-wrap gap-1.5" data-testid="profile-missing-items">
