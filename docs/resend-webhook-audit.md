@@ -81,3 +81,61 @@ industrie : 20 à 35 % pour du transactionnel bien configuré).
 
 Si à 48 h le taux reste sous 15 %, la piste devient contenu email (objet,
 preview text, densité de CTA) ou réputation IP Resend, à creuser en Pass 2.
+
+# Pass 2, délivrabilité et instrumentation
+
+Date : 31 juillet 2026
+
+## Ce que le Pass 2 a établi
+
+- Le webhook fonctionne et écrit bien, depuis le 22 juillet 2026. Cette date
+  est la **borne basse de toute statistique d'engagement**. Avant elle, les
+  envois existent en base sans aucun événement de livraison, non parce qu'ils
+  ont échoué mais parce que personne n'écoutait. Un taux calculé sur cette
+  zone aveugle donne 32 % de livraison, contre 99,8 % réels sur la période
+  instrumentée. La borne est posée dans `src/lib/emailTracking.ts`
+  (`EMAIL_TRACKING_START`) et appliquée dans l'onglet Engagement de
+  `/admin/emails`.
+- Les emails d'authentification (inscription, réinitialisation, invitation)
+  transitent par le hook auth et la file `auth_emails`, sans `resend_id`.
+  Aucun événement webhook ne peut leur être rattaché. Ils sont **exclus des
+  taux et signalés comme non instrumentés**, jamais comptés comme des
+  non-délivrances.
+- Les rebonds du groupe SFR (sfr.fr, neuf.fr, numericable.fr, club.fr) sont
+  génériques, sans `subType`, et traduisent un blocage de réputation côté
+  opérateur, pas des adresses inexistantes. La règle de suppression a été
+  affinée : suppression immédiate sur plainte ou rebond explicitement
+  permanent, **seuil de trois rebonds** pour tout rebond générique
+  (`supabase/functions/resend-webhook/index.ts`).
+
+## Deux infrastructures d'envoi coexistent sur guardiens.fr
+
+Point à connaître avant toute intervention DNS ou email.
+
+- `send.guardiens.fr` : sous-domaine **Resend**, celui réellement utilisé par
+  toutes les fonctions d'envoi de l'application. SPF, DKIM et alignement
+  vérifiés conformes.
+- `notify.guardiens.fr` : sous-domaine **délégué à Mailgun** via les serveurs
+  de noms de Lovable (`nsN.lovable.cloud`), hérité de l'infrastructure email
+  intégrée à la plateforme. Il n'est traversé par aucun envoi applicatif
+  aujourd'hui.
+
+Conséquence pratique : chercher les enregistrements Resend sur
+`notify.guardiens.fr` ne donne rien, et inversement. Les deux zones sont
+indépendantes et peuvent coexister sans conflit tant qu'elles restent sur des
+sous-domaines distincts. Nettoyage non urgent, mais à trancher un jour pour
+éviter d'entretenir deux chaînes d'envoi sur le même domaine.
+
+## DMARC, ordre d'action retenu
+
+Politique conservée à `p=none` tant qu'aucun rapport n'a été lu. Le vrai
+problème n'est pas la valeur de la politique, c'est que les rapports partent
+vers `dmarcreports@lovable.dev` et que personne côté Guardiens ne les reçoit.
+Rediriger d'abord, observer deux à quatre semaines, durcir ensuite en
+connaissance de cause. Enregistrement à poser chez Cloudflare sur
+`_dmarc.guardiens.fr` :
+
+```
+v=DMARC1; p=none; rua=mailto:dmarc@guardiens.fr; ruf=mailto:dmarc@guardiens.fr; fo=1; adkim=r; aspf=r; pct=100
+```
+

@@ -18,6 +18,7 @@ import SitterDigestTab from "./_components/SitterDigestTab";
 import MissionDigestTab from "./_components/MissionDigestTab";
 import MutualAidDashboardTab from "./_components/MutualAidDashboardTab";
 import { supabase } from "@/integrations/supabase/client";
+import { EMAIL_TRACKING_START, clampToTrackingStart, isUninstrumentedTemplate } from "@/lib/emailTracking";
 import { toast } from "sonner";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
@@ -659,6 +660,8 @@ const EngagementTab = () => {
   const [loading, setLoading] = useState(true);
   const [timeRange, setTimeRange] = useState("30d");
   const [totals, setTotals] = useState({ sent: 0, delivered: 0, opened: 0, clicked: 0, bounced: 0, unsub: 0 });
+  const [uninstrumented, setUninstrumented] = useState(0);
+  const [truncated, setTruncated] = useState(false);
 
   const fetchStats = async () => {
     setLoading(true);
@@ -669,11 +672,17 @@ const EngagementTab = () => {
     else if (timeRange === "30d") start.setDate(now.getDate() - 30);
     else if (timeRange === "90d") start.setDate(now.getDate() - 90);
 
+    // Borne basse : le webhook Resend n'écoute que depuis le 22 juillet 2026.
+    // Avant cette date, aucun événement de livraison n'a pu être enregistré, ce
+    // qui rendrait tout taux calculé faux par construction (zone aveugle).
+    const effectiveStart = clampToTrackingStart(start);
+    setTruncated(effectiveStart.getTime() !== start.getTime());
+
     // 1) Pull sends within window
     const { data: logs, error: logsErr } = await supabase
       .from("email_send_log")
       .select("template_name,recipient_email,status,message_id,created_at,delivered_at,open_count,click_count,bounced_at,complained_at")
-      .gte("created_at", start.toISOString())
+      .gte("created_at", effectiveStart.toISOString())
       .order("created_at", { ascending: false })
       .limit(10000);
 
@@ -690,7 +699,13 @@ const EngagementTab = () => {
       const prev = byMsg.get(k);
       if (!prev || new Date(r.created_at) > new Date(prev.created_at)) byMsg.set(k, r);
     });
-    const dedup = Array.from(byMsg.values()).filter((r) => r.status === "sent" || r.delivered_at || r.open_count > 0 || r.click_count > 0);
+    const dedupAll = Array.from(byMsg.values()).filter((r) => r.status === "sent" || r.delivered_at || r.open_count > 0 || r.click_count > 0);
+
+    // Les emails d'authentification passent par la file auth_emails, sans
+    // resend_id, donc sans remontée webhook possible. Ils sont comptés à part.
+    const dedup = dedupAll.filter((r) => !isUninstrumentedTemplate(r.template_name));
+    setUninstrumented(dedupAll.length - dedup.length);
+
 
     // 2) Pull unsubscribes within window
     const { data: unsubs } = await supabase
@@ -767,6 +782,20 @@ const EngagementTab = () => {
       <p className="text-sm text-muted-foreground">
         Open rate, click rate, désabonnements et bounces par template. Déduplication par <code className="text-xs bg-muted px-1 rounded">message_id</code>. Les taux d'ouverture/clic sont basés sur les emails <strong>livrés</strong>.
       </p>
+      <div className="rounded-md border bg-muted/40 p-3 text-xs text-muted-foreground space-y-1">
+        <p>
+          Période de calcul bornée au {EMAIL_TRACKING_START.toLocaleDateString("fr-FR")}, date de mise en service du
+          webhook Resend. Avant cette date, aucun événement de livraison n'était enregistré :
+          les envois existent mais restent sans retour, ce qui ne signifie pas qu'ils n'ont pas été délivrés.
+          {truncated ? " La fenêtre demandée a été raccourcie à cette borne." : ""}
+        </p>
+        <p>
+          {uninstrumented > 0
+            ? `${uninstrumented} email(s) d'authentification (inscription, réinitialisation, invitation) exclus des taux : non instrumentés, ils transitent par la file auth et ne peuvent pas remonter d'événement. Ce ne sont pas des non-délivrances.`
+            : "Les emails d'authentification (inscription, réinitialisation, invitation) sont exclus des taux : non instrumentés, ils ne peuvent pas remonter d'événement."}
+        </p>
+      </div>
+
 
       <div className="grid grid-cols-2 md:grid-cols-6 gap-3">
         <Card><CardContent className="pt-4 pb-3 text-center">
