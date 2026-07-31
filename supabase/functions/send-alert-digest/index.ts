@@ -335,7 +335,8 @@ Deno.serve(async (req) => {
       }));
 
       const zoneLabel = pref.label
-        || (pref.zone_type === "rayon" ? (pref.city || profile.city) : undefined)
+        || (pref.zone_type === "france" ? "France entière" : undefined)
+        || (pref.zone_type === "rayon" ? (pref.city || profile.city || (alertDept ? `département ${alertDept}` : undefined)) : undefined)
         || (pref.zone_type === "departement" ? `département ${pref.departement}` : undefined)
         || (pref.zone_type === "region" ? (pref.region_code === "FR" ? "France entière" : pref.region_code) : undefined)
         || "votre secteur";
