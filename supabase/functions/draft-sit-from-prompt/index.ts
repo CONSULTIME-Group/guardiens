@@ -176,7 +176,8 @@ Si le prompt mentionne un prix ou une transaction financière, ignorez-le : Guar
     // Nettoyage : tiret cadratin résiduel
     const clean = (s: unknown) => String(s ?? "").replaceAll("—", ",").replaceAll("–", ",");
     const draft = {
-      title: clean(parsed.title),
+      // Garde-fou : jamais de date ISO dans un titre vu par un utilisateur.
+      title: frenchifyTitleDates(clean(parsed.title)),
       start_date: parsed.start_date && /^\d{4}-\d{2}-\d{2}$/.test(parsed.start_date) ? parsed.start_date : null,
       end_date: parsed.end_date && /^\d{4}-\d{2}-\d{2}$/.test(parsed.end_date) ? parsed.end_date : null,
       flexible_dates: !!parsed.flexible_dates,
