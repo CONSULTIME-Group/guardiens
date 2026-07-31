@@ -488,6 +488,9 @@ Deno.serve(async (req) => {
       JSON.stringify({ processed: messages.length, sent, failed, skipped, dlq }),
       { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } },
     );
+    } finally {
+      await releaseWorkerLock(service as unknown as LockClientLike);
+    }
   } catch (err) {
     console.error("process-mass-email-queue error:", err);
     return new Response(JSON.stringify({ error: String(err) }), {
