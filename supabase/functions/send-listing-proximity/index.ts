@@ -409,6 +409,22 @@ Deno.serve(async (req) => {
     // mass_email_sends, pousse un message pgmq par destinataire, puis rend la
     // main. C'est `process-mass-email-queue` (cron chaque minute) qui expédie,
     // à cadence maîtrisée, avec ses reprises sur échec.
+
+    // Contrôle à l'enqueue : une annonce non publiée ne doit jamais alimenter
+    // la file. Le second contrôle, au moment de l'envoi, vit dans
+    // send-transactional-email (le statut peut changer après l'enfilement).
+    const sitStatus = String((sit as any).status || "");
+    if (sitStatus !== PUBLISHED_STATUS) {
+      return new Response(
+        JSON.stringify({
+          error: `Diffusion refusée : cette annonce n'est pas publiée (statut actuel: ${sitStatus || "inconnu"}). Republiez-la avant de la diffuser.`,
+          code: "sit_not_published",
+          sit_status: sitStatus || null,
+        }),
+        { status: 409, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
+    }
+
     if (recipients.length === 0) {
       return new Response(JSON.stringify({ error: "Aucun destinataire" }), {
         status: 400,
