@@ -121,10 +121,10 @@ export function useSitterPriorityAction(input: Input): SitterPriorityAction {
       return {
         variant: "identity",
         eyebrow: "Confiance",
-        title: "Vérifiez votre identité pour être retenu plus souvent.",
-        description: "Les propriétaires choisissent en priorité les gardiens dont l'identité est vérifiée. Une minute suffit.",
+        title: "Vérifier votre identité, facultatif mais utile.",
+        description: "Vous pouvez candidater sans elle. Les propriétaires choisissent toutefois en priorité les gardiens vérifiés, et une minute suffit.",
         ctaLabel: "Vérifier mon identité",
-        ctaTo: "/settings?section=security",
+        ctaTo: "/settings?section=security&src=sitter_priority_action",
         urgency: "medium",
       };
     }
