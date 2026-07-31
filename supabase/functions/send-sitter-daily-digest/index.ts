@@ -15,6 +15,7 @@
 // - sitter_id : limite l'exécution à un gardien précis (test ciblé).
 
 import { createClient } from 'npm:@supabase/supabase-js@2.45.0'
+import { claimSitNotification, releaseSitNotification } from '../_shared/sitNotificationClaim.ts'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -96,6 +97,8 @@ Deno.serve(async (req) => {
     const today = new Date().toISOString().slice(0, 10)
     let sittersSent = 0
     let sittersSkipped = 0
+    let claimSkipped = 0
+    const claimSkippedBy: Record<string, number> = {}
     const errors: Array<{ sitter_id: string; reason: string }> = []
     const plan: Array<{ sitter_id: string; sits: string[]; skipped: string[] }> = []
 
@@ -262,6 +265,25 @@ Deno.serve(async (req) => {
           continue
         }
 
+        // 2f bis. Idempotence inter-pipelines : réservation posée seulement
+        // ici, une fois le contenu établi et le gardien éligible. En cas de
+        // refus, les lignes restent `queued` pour un passage ultérieur. Le
+        // mode manuel (action admin délibérée) n'est pas soumis à la garde.
+        if (!body.manual) {
+          const claim = await claimSitNotification(
+            supabase,
+            sitterId,
+            'sitter-daily-digest',
+            items.map((i: any) => i.sitId),
+          )
+          if (!claim.granted) {
+            claimSkipped++
+            const key = claim.heldBy ?? (claim.error ? 'claim_error' : 'inconnu')
+            claimSkippedBy[key] = (claimSkippedBy[key] ?? 0) + 1
+            continue
+          }
+        }
+
         // 2g. Envoi digest
         const idemBase = body.manual
           ? `sitter-digest-${sitterId}-${Date.now()}`
@@ -285,6 +307,7 @@ Deno.serve(async (req) => {
         const sendErr = _steRes.ok ? null : new Error(`send-transactional-email ${_steRes.status}: ${_steTxt1}`);
 
         if (sendErr) {
+          if (!body.manual) await releaseSitNotification(supabase, sitterId)
           errors.push({ sitter_id: sitterId, reason: `send_failed: ${String(sendErr)}` })
           continue
         }
@@ -319,6 +342,8 @@ Deno.serve(async (req) => {
       sitters_processed: bySitter.size,
       sitters_sent: sittersSent,
       sitters_skipped: sittersSkipped,
+      claim_skipped: claimSkipped,
+      claim_skipped_by: claimSkippedBy,
       errors,
       dry_run: !!body.dry_run,
       plan: body.dry_run ? plan : undefined,

@@ -15,6 +15,7 @@
 // Body : { manual?: boolean, dry_run?: boolean, user_id?: string }
 
 import { createClient } from 'npm:@supabase/supabase-js@2.45.0'
+import { claimSitNotification, releaseSitNotification } from '../_shared/sitNotificationClaim.ts'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -168,7 +169,10 @@ Deno.serve(async (req) => {
     const today = new Date().toISOString().slice(0, 10)
     let usersSent = 0
     let usersSkipped = 0
+    let claimSkipped = 0
+    const claimSkippedBy: Record<string, number> = {}
     const errors: Array<{ user_id: string; reason: string }> = []
+
 
     for (const p of profiles ?? []) {
       try {
@@ -268,6 +272,24 @@ Deno.serve(async (req) => {
 
         if (body.dry_run) { usersSent++; continue }
 
+        // Idempotence inter-pipelines : réservation posée seulement ici, une
+        // fois le contenu établi et le destinataire éligible. Le mode manuel
+        // (action admin délibérée) n'est pas soumis à la garde.
+        if (!body.manual) {
+          const claim = await claimSitNotification(
+            supabase,
+            p.id,
+            'nearby-daily-digest',
+            top.filter((i: any) => i.kind === 'sit').map((i: any) => i.id),
+          )
+          if (!claim.granted) {
+            claimSkipped++
+            const key = claim.heldBy ?? (claim.error ? 'claim_error' : 'inconnu')
+            claimSkippedBy[key] = (claimSkippedBy[key] ?? 0) + 1
+            continue
+          }
+        }
+
         const idem = body.manual
           ? `nearby-digest-${p.id}-${Date.now()}`
           : `nearby-digest-${p.id}-${today}`
@@ -290,7 +312,11 @@ Deno.serve(async (req) => {
         const _steTxt1 = _steRes.ok ? '' : await _steRes.text().catch(() => '');
         if (!_steRes.ok) console.error('send-transactional-email failed', _steRes.status, _steTxt1);
         const sendErr = _steRes.ok ? null : new Error(`send-transactional-email ${_steRes.status}: ${_steTxt1}`);
-        if (sendErr) { errors.push({ user_id: p.id, reason: `send_failed: ${String(sendErr)}` }); continue }
+        if (sendErr) {
+          if (!body.manual) await releaseSitNotification(supabase, p.id)
+          errors.push({ user_id: p.id, reason: `send_failed: ${String(sendErr)}` })
+          continue
+        }
         usersSent++
       } catch (loopErr) {
         errors.push({ user_id: p.id, reason: String(loopErr) })
@@ -302,6 +328,8 @@ Deno.serve(async (req) => {
       users_considered: (profiles ?? []).length,
       users_sent: usersSent,
       users_skipped: usersSkipped,
+      claim_skipped: claimSkipped,
+      claim_skipped_by: claimSkippedBy,
       errors,
       dry_run: !!body.dry_run,
     })
