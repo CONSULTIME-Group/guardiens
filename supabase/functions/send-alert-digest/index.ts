@@ -329,7 +329,7 @@ Deno.serve(async (req) => {
 
 
     return new Response(
-      JSON.stringify({ sent, skipped, errors, hour: currentHourStr }),
+      JSON.stringify({ sent, skipped, claim_skipped: claimSkipped, claim_skipped_by: claimSkippedBy, errors, hour: currentHourStr }),
       { status: 200, headers: { "Content-Type": "application/json" } },
     );
   } catch (err) {
