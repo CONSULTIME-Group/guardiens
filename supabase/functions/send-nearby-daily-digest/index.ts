@@ -159,7 +159,7 @@ Deno.serve(async (req) => {
     // 3) Récupère les destinataires opt-in avec coordonnées.
     let recipientsQ = supabase
       .from('email_preferences')
-      .select('user_id, nearby_daily_radius_km, product_emails')
+      .select('user_id, nearby_daily_radius_km, product_emails, new_mission_digest')
       .eq('nearby_daily_digest', true)
     if (body.user_id) recipientsQ = recipientsQ.eq('user_id', body.user_id)
 
@@ -257,10 +257,16 @@ Deno.serve(async (req) => {
             _sort: r.km ?? radiusKm + 1,
           })
         }
-        for (const m of allMissions) {
+        // Les petites missions relèvent de leur propre consentement
+        // (new_mission_digest) : si le gardien l'a coupé, ce canal ne doit
+        // pas les lui servir malgré tout. Les gardes restent gouvernées par
+        // nearby_daily_digest, inchangé.
+        const missionsAllowed = pref?.new_mission_digest !== false
+        for (const m of (missionsAllowed ? allMissions : [])) {
           if (m.user_id === p.id) continue
           const r = match(m.latitude, m.longitude, deptOf(m.postal_code))
           if (!r.ok) continue
+
           const desc = (m.description ?? '').toString().replace(/\s+/g, ' ').trim()
           const excerpt = desc.length > 160 ? desc.slice(0, 157).trimEnd() + '...' : desc
           const missionPhoto = Array.isArray(m.photos) && m.photos.length > 0 && typeof m.photos[0] === 'string'
