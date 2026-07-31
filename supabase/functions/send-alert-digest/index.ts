@@ -116,10 +116,12 @@ Deno.serve(async (req) => {
     // aucune réservation dans sit_notification_log.
     let dryRun = false;
     let sinceHours = 24;
+    let claimProbe: string | null = null;
     try {
       const body = await req.json();
       if (body && typeof body === "object") {
         dryRun = body.dry_run === true;
+        if (typeof body.claim_probe === "string") claimProbe = body.claim_probe;
         // since_hours n'est lisible qu'en dry run : la fenêtre de production
         // reste 24h, sans exception.
         if (dryRun && Number.isFinite(Number(body.since_hours))) {
@@ -127,6 +129,23 @@ Deno.serve(async (req) => {
         }
       }
     } catch { /* pas de body JSON : mode normal */ }
+
+    // Sonde de diagnostic : vérifie que le runtime de la fonction sait
+    // réellement écrire dans sit_notification_log. Date figée à 2020-01-01
+    // pour ne jamais consommer le créneau du jour d'un gardien.
+    if (claimProbe) {
+      const { data, error } = await supabase.rpc("claim_sit_notification", {
+        _user_id: claimProbe,
+        _source: "claim-probe",
+        _sit_ids: [],
+        _date: "2020-01-01",
+      });
+      return new Response(
+        JSON.stringify({ claim_probe: true, granted: data === true, error: error?.message ?? null }),
+        { status: 200, headers: { "Content-Type": "application/json" } },
+      );
+    }
+
 
     const now = new Date();
     const currentHourStr = parisHourSlot(now);
