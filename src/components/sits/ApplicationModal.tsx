@@ -284,6 +284,17 @@ const ApplicationModal = ({
       .single();
     if (error) {
       setSending(false);
+      // 23505 : la contrainte d'unicité (sit_id, sitter_id) a intercepté une
+      // seconde soumission. La candidature existe déjà, ce n'est pas une erreur.
+      if ((error as { code?: string }).code === "23505") {
+        toast({
+          title: "Candidature déjà envoyée",
+          description: "Vous avez déjà postulé à cette annonce.",
+        });
+        onOpenChange(false);
+        onSuccess();
+        return;
+      }
       toast({ title: "Erreur", description: "Impossible d'envoyer la candidature.", variant: "destructive" });
       return;
     }
