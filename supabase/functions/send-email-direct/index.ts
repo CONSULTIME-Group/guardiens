@@ -1,5 +1,6 @@
 import { createClient } from 'npm:@supabase/supabase-js@2'
 import { requireAdminOrServiceRole } from '../_shared/require-admin.ts'
+import { resendFetch } from "../_shared/resend-guard.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -73,14 +74,14 @@ Deno.serve(async (req) => {
     if (text) payload.text = text
     if (reply_to) payload.reply_to = reply_to
 
-    const response = await fetch('https://api.resend.com/emails', {
+    const response = await resendFetch('https://api.resend.com/emails', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${RESEND_API_KEY}`,
       },
       body: JSON.stringify(payload),
-    })
+    }, { functionName: "send-email-direct" })
 
     const data = await response.json()
 

@@ -8,6 +8,7 @@
 // aux autres watchdogs pilotés par cron).
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
+import { resendFetch } from "../_shared/resend-guard.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -348,7 +349,7 @@ Deno.serve(async (req) => {
       const idempotencyKey = `mass-${campaignId}-${email}`;
 
       try {
-        const res = await fetch("https://api.resend.com/emails", {
+        const res = await resendFetch("https://api.resend.com/emails", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -367,7 +368,7 @@ Deno.serve(async (req) => {
               "List-Unsubscribe-Post": "List-Unsubscribe=One-Click",
             },
           }),
-        });
+        }, { functionName: "process-mass-email-queue" });
 
         if (res.status === 429) {
           // Rate limit → laisse le message (VT expire), pose un cooldown partagé

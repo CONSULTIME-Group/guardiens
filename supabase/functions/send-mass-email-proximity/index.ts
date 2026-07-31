@@ -20,6 +20,7 @@
  * ce endpoint n'agit que sur appel explicite (mode="send") de l'admin.
  */
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
+import { resendFetch } from "../_shared/resend-guard.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -474,14 +475,14 @@ Deno.serve(async (req) => {
         ],
       }));
       try {
-        const res = await fetch("https://api.resend.com/emails/batch", {
+        const res = await resendFetch("https://api.resend.com/emails/batch", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
             Authorization: `Bearer ${RESEND_API_KEY}`,
           },
           body: JSON.stringify(emailObjects),
-        });
+        }, { functionName: "send-mass-email-proximity" });
         const resBody = await res.text();
         if (res.ok) {
           sent += batch.length;
