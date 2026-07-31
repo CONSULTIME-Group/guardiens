@@ -63,6 +63,13 @@ const IdentityVerificationSection = ({ user }: { user: any }) => {
         setStatus(currentStatus);
         setDocumentUrl(docUrl);
         setSelfieUrl(selfie);
+        const ctaSource = new URLSearchParams(window.location.search).get("src");
+        if (ctaSource) {
+          void trackEvent("identity_cta_clicked", {
+            source: ctaSource,
+            metadata: { status: currentStatus, has_document: !!docUrl },
+          });
+        }
         void trackEvent("identity_section_viewed", {
           source: "settings",
           metadata: { status: currentStatus, has_document: !!docUrl, has_selfie: !!selfie },
@@ -97,8 +104,19 @@ const IdentityVerificationSection = ({ user }: { user: any }) => {
       toast.error("Vous avez atteint la limite de 5 vérifications par jour. Réessayez demain.");
       return;
     }
+    void trackEvent("identity_file_picked", {
+      source: "settings",
+      metadata: { kind: "document", mime: file.type || "unknown", size_kb: Math.round(file.size / 1024) },
+    });
     const validationError = validateFile(file);
-    if (validationError) { toast.error(validationError); return; }
+    if (validationError) {
+      toast.error(validationError);
+      void trackEvent("identity_upload_failed", {
+        source: "settings",
+        metadata: { kind: "document", stage: "validation", reason: validationError.slice(0, 160) },
+      });
+      return;
+    }
 
     // Le bucket refuse le HEIC : conversion en JPEG avant tout, sinon on
     // n'envoie rien plutôt que d'échouer à l'upload.
@@ -111,6 +129,10 @@ const IdentityVerificationSection = ({ user }: { user: any }) => {
         setConverting(false);
         logger.error("HEIC conversion failed", { err: err instanceof Error ? err.message : String(err) });
         toast.error("Cette photo est au format HEIC et n'a pas pu être convertie. Prenez la photo en JPEG (réglage Appareil photo, Format, Plus compatible) ou enregistrez l'image en JPG, puis réessayez.");
+        void trackEvent("identity_upload_failed", {
+          source: "settings",
+          metadata: { kind: "document", stage: "heic_conversion", reason: err instanceof Error ? err.message.slice(0, 160) : String(err).slice(0, 160) },
+        });
         return;
       }
       setConverting(false);
@@ -166,6 +188,7 @@ const IdentityVerificationSection = ({ user }: { user: any }) => {
         setStatus(newStatus);
         if (newStatus === "verified") {
           toast.success("Identité vérifiée avec succès !");
+          void trackEvent("identity_verified", { source: "settings", metadata: { channel: "auto" } });
         } else if (newStatus === "needs_review") {
           toast.info("Document reçu. Analyse approfondie en cours, réponse sous 24h.");
           void trackEvent("identity_auto_check_failed", {
@@ -174,6 +197,10 @@ const IdentityVerificationSection = ({ user }: { user: any }) => {
           });
         } else {
           toast.error(verifyResult?.rejection_reason || "Document refusé. Veuillez soumettre un document valide et lisible.");
+          void trackEvent("identity_rejected", {
+            source: "settings",
+            metadata: { channel: "auto", reason: String(verifyResult?.rejection_reason || "unspecified").slice(0, 200) },
+          });
           void trackEvent("identity_auto_check_failed", {
             source: "settings",
             metadata: { status: newStatus, reason_kind: "rejected" },
@@ -191,6 +218,10 @@ const IdentityVerificationSection = ({ user }: { user: any }) => {
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err);
       logger.error("Settings upload error", { err: msg });
+      void trackEvent("identity_upload_failed", {
+        source: "settings",
+        metadata: { kind: "document", stage: "upload", reason: msg.slice(0, 200) },
+      });
       // Vrai message d'erreur (au lieu du générique trompeur qui faisait croire
       // à Sophie & co que leur fichier était dans un mauvais format).
       toast.error(`Envoi impossible : ${msg.slice(0, 160)}`);
@@ -203,8 +234,19 @@ const IdentityVerificationSection = ({ user }: { user: any }) => {
   const handleSelfieUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file || !user) return;
+    void trackEvent("identity_file_picked", {
+      source: "settings",
+      metadata: { kind: "selfie", mime: file.type || "unknown", size_kb: Math.round(file.size / 1024) },
+    });
     const validationError = validateFile(file, 5);
-    if (validationError) { toast.error(validationError); return; }
+    if (validationError) {
+      toast.error(validationError);
+      void trackEvent("identity_upload_failed", {
+        source: "settings",
+        metadata: { kind: "selfie", stage: "validation", reason: validationError.slice(0, 160) },
+      });
+      return;
+    }
     let source = file;
     if (isHeicFile(file)) {
       setConverting(true);
@@ -246,6 +288,10 @@ const IdentityVerificationSection = ({ user }: { user: any }) => {
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err);
       toast.error(`Envoi impossible : ${msg.slice(0, 160)}`);
+      void trackEvent("identity_upload_failed", {
+        source: "settings",
+        metadata: { kind: "selfie", stage: "upload", reason: msg.slice(0, 200) },
+      });
       setSelfiePreview(null);
     }
     setUploadingSelfie(false);
@@ -254,7 +300,7 @@ const IdentityVerificationSection = ({ user }: { user: any }) => {
   if (!loaded) return null;
 
   const statusConfig: Record<string, { icon: React.ElementType; label: string; desc: string; color: string }> = {
-    not_submitted: { icon: Upload, label: "Non vérifiée", desc: "Envoyez une pièce d'identité pour débloquer les fonctionnalités avancées (badge vérifié).", color: "text-muted-foreground" },
+    not_submitted: { icon: Upload, label: "Vérification facultative", desc: "Rien n'est bloqué sans elle : vous pouvez déjà candidater, apparaître dans les recherches et être contacté. Envoyer une pièce d'identité reste utile, cela rassure les membres et vous vaut le badge vérifié.", color: "text-muted-foreground" },
     pending: { icon: Clock, label: "Vérification en cours", desc: "Votre document est en cours de vérification automatique par IA.", color: "text-warning" },
     needs_review: { icon: Clock, label: "Analyse approfondie en cours", desc: "Votre document est en cours d'analyse par notre équipe. Réponse sous 24h. Vous pouvez renvoyer un document plus net si besoin.", color: "text-warning" },
     rejected: { icon: AlertCircle, label: "Document refusé", desc: "Votre document n'a pas pu être validé. Veuillez soumettre un nouveau document lisible.", color: "text-destructive" },
