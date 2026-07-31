@@ -535,7 +535,13 @@ Deno.serve(async (req) => {
         .eq("id", signalId);
     }
 
-    return new Response(JSON.stringify({ sent, excluded, errors, targeted: recipients.length, processed, paused: timedOut, campaign_id: campaignId }), {
+    return new Response(JSON.stringify({
+      mode: "queue",
+      queued: enqueued,
+      targeted: recipients.length,
+      already_served: alreadyServed.size,
+      campaign_id: campaignId,
+    }), {
       status: 200,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
