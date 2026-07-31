@@ -204,16 +204,19 @@ Deno.serve(async (req) => {
         continue;
       }
 
-      // Opt-out produit : email → profile.id → email_preferences
+      // Opt-out alerte : email → profile.id → email_preferences.
+      // Les diffusions passant par cette file sont catégorisées « alert »
+      // (nearby-sit-alert) : on interroge alert_emails, pas product_emails.
       const { data: profile } = await service
         .from("profiles").select("id, first_name").eq("email", rawEmail).maybeSingle();
       if (profile?.id) {
         const { data: prefs } = await service
-          .from("email_preferences").select("product_emails").eq("user_id", profile.id).maybeSingle();
-        if (prefs && (prefs as any).product_emails === false) {
+          .from("email_preferences").select("alert_emails").eq("user_id", profile.id).maybeSingle();
+        if (prefs && (prefs as any).alert_emails === false) {
           await service.from("mass_email_sends").update({
-            status: "suppressed", last_error: "product opt-out", last_attempt_at: new Date().toISOString(),
+            status: "suppressed", last_error: "alert opt-out", last_attempt_at: new Date().toISOString(),
           }).eq("id", (locked as any).id);
+
           await service.rpc("delete_email", { queue_name: QUEUE, message_id: msg.msg_id });
           skipped++;
           continue;
