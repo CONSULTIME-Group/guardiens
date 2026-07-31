@@ -194,9 +194,9 @@ Deno.serve(async (req) => {
 
     for (const pref of prefs) {
       const profile = pref.profiles;
-      if (!profile?.email) { skipped++; continue; }
+      if (!profile?.email) { skipped++; mark("sans_email", pref); continue; }
 
-      if (pref.frequence === "hebdo" && dayOfWeek !== 1) { skipped++; continue; }
+      if (pref.frequence === "hebdo" && dayOfWeek !== 1) { skipped++; mark("hebdo_hors_jour", pref); continue; }
 
       let alertLat: number | null = null;
       let alertLng: number | null = null;
@@ -217,7 +217,7 @@ Deno.serve(async (req) => {
         }
         if (alertLat == null || alertLng == null) {
           alertDept = deptOf(profile.departement_code, profile.postal_code);
-          if (!alertDept) { skipped++; continue; }
+          if (!alertDept) { skipped++; mark("localisation_introuvable", pref); continue; }
           rayonFallbackDept++;
         }
       }
@@ -324,7 +324,7 @@ Deno.serve(async (req) => {
         }
       }
 
-      if (sits.length === 0 && missions.length === 0) { skipped++; continue; }
+      if (sits.length === 0 && missions.length === 0) { skipped++; mark("hors_zone_ou_rien_a_dire", pref); continue; }
 
       // Suppression et opt-out product
       const emailLower = String(profile.email).trim().toLowerCase();
@@ -333,14 +333,14 @@ Deno.serve(async (req) => {
         .select("email")
         .ilike("email", emailLower)
         .maybeSingle();
-      if (sup) { skipped++; continue; }
+      if (sup) { skipped++; mark("supprime", pref); continue; }
 
       const { data: emailPrefs } = await supabase
         .from("email_preferences")
         .select("product_emails")
         .eq("user_id", profile.id)
         .maybeSingle();
-      if (emailPrefs?.product_emails === false) { skipped++; continue; }
+      if (emailPrefs?.product_emails === false) { skipped++; mark("desabonne", pref); continue; }
 
       // Payload template
       const sitsPayload = sits.slice(0, 6).map((s: any) => ({
