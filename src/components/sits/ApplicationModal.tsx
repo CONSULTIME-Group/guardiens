@@ -215,7 +215,7 @@ const ApplicationModal = ({
   }, [open, sitId]);
 
 
-  const doSend = async (viaUneditedDraft = false) => {
+  const doSendInner = async (viaUneditedDraft = false) => {
     if (!user || !message.trim()) return;
 
     // Garde-fou anti-refus IA : ne jamais envoyer un message qui ressemble à
