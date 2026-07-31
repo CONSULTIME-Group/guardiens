@@ -71,8 +71,8 @@ const Favorites = () => {
           .select("id, first_name, avatar_url, city")
           .in("id", sitterIds),
         supabase
-          .from("sitter_profiles")
-          .select("user_id, animal_types, life_pace, languages, interests, work_during_sit, sensitivities, special_animal_skills, sitter_type, experience_years")
+          .from("sitter_profiles_affinity")
+          .select("user_id, experience_years, life_pace, languages, interests, work_during_sit, sensitivities, animal_types, sitter_type, travels_with_children, travels_with_own_animals")
           .in("user_id", sitterIds),
       ]);
       if (error) throw error;
