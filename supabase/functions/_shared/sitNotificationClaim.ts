@@ -76,3 +76,47 @@ export async function releaseSitNotification(
     console.error("release_sit_notification failed", userId, error.message ?? error);
   }
 }
+
+export async function raiseClaimErrorSignal(
+  supabase: any,
+  source: string,
+  claimErrorCount: number,
+): Promise<void> {
+  if (claimErrorCount <= 0) return;
+
+  const entityId = await uuidFromString(`sit_notification_claim_error_${source}`);
+  const { data: existing, error: readError } = await supabase
+    .from("admin_signals")
+    .select("id")
+    .eq("signal_type", "sit_notification_claim_error")
+    .eq("entity_id", entityId)
+    .is("resolved_at", null)
+    .limit(1);
+
+  if (readError) {
+    console.error("sit notification claim signal lookup failed", source, readError);
+    return;
+  }
+  if (existing && existing.length > 0) return;
+
+  const { error } = await supabase.from("admin_signals").insert({
+    signal_type: "sit_notification_claim_error",
+    severity: "critical",
+    entity_type: "system",
+    entity_id: entityId,
+    metadata: {
+      source,
+      claim_error_count: claimErrorCount,
+      title: `Échec du garde-fou anti-doublon, ${source}`,
+    },
+  });
+  if (error && error.code !== "23505") {
+    console.error("sit notification claim signal insert failed", source, error);
+  }
+}
+
+async function uuidFromString(input: string): Promise<string> {
+  const bytes = new Uint8Array(await crypto.subtle.digest("SHA-256", new TextEncoder().encode(input)));
+  const hex = Array.from(bytes.slice(0, 16)).map((byte) => byte.toString(16).padStart(2, "0")).join("");
+  return `${hex.slice(0, 8)}-${hex.slice(8, 12)}-${hex.slice(12, 16)}-${hex.slice(16, 20)}-${hex.slice(20, 32)}`;
+}
