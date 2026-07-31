@@ -124,7 +124,7 @@ Extraction attendue depuis la phrase du propriétaire :
 - Préférences gardien : télétravail, présence continue, calme, sportif (choisir 1 à 3 dans open_to).
 
 Génération (personnalisée à partir du contexte, sans inventer de données absentes) :
-- title : 40 à 70 caractères. Format « Garde de [animaux] à [ville], du [début] au [fin] » si dates connues, sinon « Garde de [animaux] à [ville] ».
+- title : 40 à 70 caractères. Format « Garde de [animaux] à [ville], du [début] au [fin] » si dates connues, sinon « Garde de [animaux] à [ville] ». Dates du titre TOUJOURS en français lisible (exemple : « du 2 au 15 août »), JAMAIS au format AAAA-MM-JJ. Le format AAAA-MM-JJ est réservé aux champs start_date et end_date.
 - specific_expectations : 60 à 120 mots, attentes ciblées, cohérentes avec les règles maison et la présence prévue si renseignées.
 - daily_routine : 100 à 150 mots, routine quotidienne DÉDUITE des routines réelles des animaux ci-dessus (promenades, solitude, alimentation, besoins particuliers). Ne pas inventer d'animaux ni de durées.
 - owner_message : 60 à 120 mots, ton cohérent avec la bio et les notes d'accueil du propriétaire, vouvoiement, invitation à la rencontre.
