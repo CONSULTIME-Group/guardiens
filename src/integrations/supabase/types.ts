@@ -694,6 +694,13 @@ export type Database = {
             foreignKeyName: "applications_sit_id_fkey"
             columns: ["sit_id"]
             isOneToOne: false
+            referencedRelation: "public_closed_sits"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "applications_sit_id_fkey"
+            columns: ["sit_id"]
+            isOneToOne: false
             referencedRelation: "sits"
             referencedColumns: ["id"]
           },
@@ -1000,6 +1007,13 @@ export type Database = {
             columns: ["giver_id"]
             isOneToOne: false
             referencedRelation: "public_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "badge_attributions_sit_id_fkey"
+            columns: ["sit_id"]
+            isOneToOne: false
+            referencedRelation: "public_closed_sits"
             referencedColumns: ["id"]
           },
           {
@@ -1521,6 +1535,13 @@ export type Database = {
             columns: ["owner_id"]
             isOneToOne: false
             referencedRelation: "public_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "conversations_sit_id_fkey"
+            columns: ["sit_id"]
+            isOneToOne: false
+            referencedRelation: "public_closed_sits"
             referencedColumns: ["id"]
           },
           {
@@ -2350,6 +2371,13 @@ export type Database = {
           user_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "garde_accords_garde_id_fkey"
+            columns: ["garde_id"]
+            isOneToOne: false
+            referencedRelation: "public_closed_sits"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "garde_accords_garde_id_fkey"
             columns: ["garde_id"]
@@ -3502,6 +3530,13 @@ export type Database = {
             columns: ["owner_id"]
             isOneToOne: false
             referencedRelation: "public_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "owner_highlights_sit_id_fkey"
+            columns: ["sit_id"]
+            isOneToOne: false
+            referencedRelation: "public_closed_sits"
             referencedColumns: ["id"]
           },
           {
@@ -4815,6 +4850,13 @@ export type Database = {
             foreignKeyName: "reviews_sit_id_fkey"
             columns: ["sit_id"]
             isOneToOne: false
+            referencedRelation: "public_closed_sits"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reviews_sit_id_fkey"
+            columns: ["sit_id"]
+            isOneToOne: false
             referencedRelation: "sits"
             referencedColumns: ["id"]
           },
@@ -5000,6 +5042,13 @@ export type Database = {
             foreignKeyName: "sit_date_changes_sit_id_fkey"
             columns: ["sit_id"]
             isOneToOne: false
+            referencedRelation: "public_closed_sits"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sit_date_changes_sit_id_fkey"
+            columns: ["sit_id"]
+            isOneToOne: false
             referencedRelation: "sits"
             referencedColumns: ["id"]
           },
@@ -5040,6 +5089,13 @@ export type Database = {
           viewed_at?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "sit_invitations_sit_id_fkey"
+            columns: ["sit_id"]
+            isOneToOne: false
+            referencedRelation: "public_closed_sits"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "sit_invitations_sit_id_fkey"
             columns: ["sit_id"]
@@ -5105,6 +5161,13 @@ export type Database = {
           sit_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "sit_status_history_sit_id_fkey"
+            columns: ["sit_id"]
+            isOneToOne: false
+            referencedRelation: "public_closed_sits"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "sit_status_history_sit_id_fkey"
             columns: ["sit_id"]
@@ -5320,6 +5383,13 @@ export type Database = {
             foreignKeyName: "sitter_digest_queue_sit_id_fkey"
             columns: ["sit_id"]
             isOneToOne: false
+            referencedRelation: "public_closed_sits"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sitter_digest_queue_sit_id_fkey"
+            columns: ["sit_id"]
+            isOneToOne: false
             referencedRelation: "sits"
             referencedColumns: ["id"]
           },
@@ -5387,6 +5457,13 @@ export type Database = {
           user_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "sitter_gallery_sit_id_fkey"
+            columns: ["sit_id"]
+            isOneToOne: false
+            referencedRelation: "public_closed_sits"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "sitter_gallery_sit_id_fkey"
             columns: ["sit_id"]
@@ -6208,6 +6285,13 @@ export type Database = {
             foreignKeyName: "reviews_sit_id_fkey"
             columns: ["sit_id"]
             isOneToOne: false
+            referencedRelation: "public_closed_sits"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reviews_sit_id_fkey"
+            columns: ["sit_id"]
+            isOneToOne: false
             referencedRelation: "sits"
             referencedColumns: ["id"]
           },
@@ -6329,6 +6413,58 @@ export type Database = {
           user_id: string | null
         }
         Relationships: []
+      }
+      public_closed_sits: {
+        Row: {
+          city: string | null
+          cover_photo_url: string | null
+          id: string | null
+          slug: string | null
+          status: string | null
+          title: string | null
+          user_id: string | null
+        }
+        Insert: {
+          city?: string | null
+          cover_photo_url?: string | null
+          id?: string | null
+          slug?: string | null
+          status?: never
+          title?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          city?: string | null
+          cover_photo_url?: string | null
+          id?: string | null
+          slug?: string | null
+          status?: never
+          title?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sits_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profile_reputation"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "sits_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sits_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "public_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       public_emergency_sitter_profiles: {
         Row: {

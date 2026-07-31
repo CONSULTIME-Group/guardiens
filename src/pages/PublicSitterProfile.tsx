@@ -697,14 +697,15 @@ export default function PublicSitterProfile() {
         //   Les avis reçus en tant que propriétaire sont désormais dérivés du set principal
         //   `reviews` via `sitOwnerBySitId` (cf. useMemo `ownerReviewsDerived`) — plus de
         //   requête dédiée ici, pour garantir la cohérence des compteurs par rôle.
+        // Lecture via la vue publique réduite : la table `sits` n'est plus lisible
+        // en anonyme hors `published`. La vue n'expose ni date ni texte libre.
         const { data: archData, error: archErr } = await supabase
-          .from('sits')
-          .select('id, slug, title, city, cover_photo_url, start_date, end_date, status')
+          .from('public_closed_sits')
+          .select('id, slug, title, city, cover_photo_url, status')
           .eq('user_id', id)
           .eq('status', 'archived')
-          .is('moderation_hidden_at', null)
-          .order('start_date', { ascending: false })
           .limit(50);
+
         if (archErr) console.error('[archivedSits]', archErr);
         setArchivedSits(archData ?? []);
 
@@ -1880,8 +1881,8 @@ export default function PublicSitterProfile() {
                   </div>
                   <div className="space-y-2">
                     {archivedSits.map((sit: any) => {
-                      const fmt = (d: string) => new Date(d).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
                       const slug = sit.slug && String(sit.slug).trim().length > 0 ? sit.slug : sit.id;
+
                       const href = `/annonces/${slug}`;
                       return (
                         <Link
@@ -1898,10 +1899,12 @@ export default function PublicSitterProfile() {
                           )}
                           <div className="min-w-0 flex-1">
                             <p className="text-sm font-medium text-foreground font-body truncate">{sit.title || 'Garde'}</p>
-                            <p className="text-xs text-foreground/50 font-body mt-0.5 truncate">
-                              {sit.city ? `${sit.city} · ` : ''}
-                              {sit.start_date && fmt(sit.start_date)}{sit.end_date && ` → ${fmt(sit.end_date)}`}
-                            </p>
+                            {sit.city && (
+                              <p className="text-xs text-foreground/50 font-body mt-0.5 truncate">
+                                {sit.city}
+                              </p>
+                            )}
+
                           </div>
                           <span className="text-xs font-medium px-2.5 py-1 rounded-full shrink-0 font-body whitespace-nowrap bg-muted text-foreground/60">
                             Archivée
