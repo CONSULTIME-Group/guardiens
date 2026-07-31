@@ -18,6 +18,7 @@ import SitterDigestTab from "./_components/SitterDigestTab";
 import MissionDigestTab from "./_components/MissionDigestTab";
 import MutualAidDashboardTab from "./_components/MutualAidDashboardTab";
 import { supabase } from "@/integrations/supabase/client";
+import { EMAIL_TRACKING_START, clampToTrackingStart, isUninstrumentedTemplate } from "@/lib/emailTracking";
 import { toast } from "sonner";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
