@@ -97,6 +97,8 @@ Deno.serve(async (req) => {
     const today = new Date().toISOString().slice(0, 10)
     let sittersSent = 0
     let sittersSkipped = 0
+    let claimSkipped = 0
+    const claimSkippedBy: Record<string, number> = {}
     const errors: Array<{ sitter_id: string; reason: string }> = []
     const plan: Array<{ sitter_id: string; sits: string[]; skipped: string[] }> = []
 
