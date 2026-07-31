@@ -12,6 +12,7 @@
 
 import { callLovableAI, extractToolArgs, STYLE_GUARDRAILS, CORS_HEADERS } from "../_shared/ai-gateway.ts";
 import { isLlmRefusal } from "../_shared/refusal-guard.ts";
+import { frenchifyTitleDates } from "./frenchify-title-dates.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 
 const RATE_LIMIT_PER_HOUR = 3;
@@ -124,7 +125,7 @@ Extraction attendue depuis la phrase du propriétaire :
 - Préférences gardien : télétravail, présence continue, calme, sportif (choisir 1 à 3 dans open_to).
 
 Génération (personnalisée à partir du contexte, sans inventer de données absentes) :
-- title : 40 à 70 caractères. Format « Garde de [animaux] à [ville], du [début] au [fin] » si dates connues, sinon « Garde de [animaux] à [ville] ».
+- title : 40 à 70 caractères. Format « Garde de [animaux] à [ville], du [début] au [fin] » si dates connues, sinon « Garde de [animaux] à [ville] ». Dates du titre TOUJOURS en français lisible (exemple : « du 2 au 15 août »), JAMAIS au format AAAA-MM-JJ. Le format AAAA-MM-JJ est réservé aux champs start_date et end_date.
 - specific_expectations : 60 à 120 mots, attentes ciblées, cohérentes avec les règles maison et la présence prévue si renseignées.
 - daily_routine : 100 à 150 mots, routine quotidienne DÉDUITE des routines réelles des animaux ci-dessus (promenades, solitude, alimentation, besoins particuliers). Ne pas inventer d'animaux ni de durées.
 - owner_message : 60 à 120 mots, ton cohérent avec la bio et les notes d'accueil du propriétaire, vouvoiement, invitation à la rencontre.
@@ -176,7 +177,8 @@ Si le prompt mentionne un prix ou une transaction financière, ignorez-le : Guar
     // Nettoyage : tiret cadratin résiduel
     const clean = (s: unknown) => String(s ?? "").replaceAll("—", ",").replaceAll("–", ",");
     const draft = {
-      title: clean(parsed.title),
+      // Garde-fou : jamais de date ISO dans un titre vu par un utilisateur.
+      title: frenchifyTitleDates(clean(parsed.title)),
       start_date: parsed.start_date && /^\d{4}-\d{2}-\d{2}$/.test(parsed.start_date) ? parsed.start_date : null,
       end_date: parsed.end_date && /^\d{4}-\d{2}-\d{2}$/.test(parsed.end_date) ? parsed.end_date : null,
       flexible_dates: !!parsed.flexible_dates,
