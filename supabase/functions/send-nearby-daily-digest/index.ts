@@ -1,9 +1,9 @@
 // send-nearby-daily-digest
 // -------------------------------------------------------------
-// Chaque jour à 13h (Europe/Paris), envoie à chaque utilisateur opt-in
+// Chaque jour à 9h (Europe/Paris), envoie à chaque utilisateur opt-in
 // (email_preferences.nearby_daily_digest = true) un récapitulatif des
 // nouvelles annonces (sits + petites missions) publiées dans les
-// dernières 24h à moins de nearby_daily_radius_km (5/15/30, défaut 15).
+// dernières 24h à moins de nearby_daily_radius_km (5/15/30/50/100, défaut 100).
 //
 // Contraintes :
 //  - Anti-doublon 20h sur email_send_log
