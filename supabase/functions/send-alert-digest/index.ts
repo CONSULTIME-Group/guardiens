@@ -141,8 +141,23 @@ Deno.serve(async (req) => {
     let sent = 0;
     let skipped = 0;
     let claimSkipped = 0;
+    let rayonFallbackDept = 0;
     const claimSkippedBy: Record<string, number> = {};
     const errors: Array<{ user_id?: string; reason: string }> = [];
+
+    // Repli départemental : deux codes département suffisent à comparer deux
+    // localisations quand le géocodage manque. La précision se dégrade, le
+    // résultat ne se vide pas.
+    const deptOf = (...candidates: Array<string | null | undefined>): string | null => {
+      for (const c of candidates) {
+        const v = (c ?? "").toString().trim();
+        if (!v) continue;
+        if (/^(2A|2B)/i.test(v)) return v.slice(0, 2).toUpperCase();
+        const m = v.match(/^\d{2}/);
+        if (m) return m[0];
+      }
+      return null;
+    };
 
     for (const pref of prefs) {
       const profile = pref.profiles;
