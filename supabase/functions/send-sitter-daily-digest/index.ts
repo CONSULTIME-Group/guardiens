@@ -265,6 +265,25 @@ Deno.serve(async (req) => {
           continue
         }
 
+        // 2f bis. Idempotence inter-pipelines : réservation posée seulement
+        // ici, une fois le contenu établi et le gardien éligible. En cas de
+        // refus, les lignes restent `queued` pour un passage ultérieur. Le
+        // mode manuel (action admin délibérée) n'est pas soumis à la garde.
+        if (!body.manual) {
+          const claim = await claimSitNotification(
+            supabase,
+            sitterId,
+            'sitter-daily-digest',
+            items.map((i: any) => i.sitId),
+          )
+          if (!claim.granted) {
+            claimSkipped++
+            const key = claim.heldBy ?? (claim.error ? 'claim_error' : 'inconnu')
+            claimSkippedBy[key] = (claimSkippedBy[key] ?? 0) + 1
+            continue
+          }
+        }
+
         // 2g. Envoi digest
         const idemBase = body.manual
           ? `sitter-digest-${sitterId}-${Date.now()}`
@@ -288,6 +307,7 @@ Deno.serve(async (req) => {
         const sendErr = _steRes.ok ? null : new Error(`send-transactional-email ${_steRes.status}: ${_steTxt1}`);
 
         if (sendErr) {
+          if (!body.manual) await releaseSitNotification(supabase, sitterId)
           errors.push({ sitter_id: sitterId, reason: `send_failed: ${String(sendErr)}` })
           continue
         }
