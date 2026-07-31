@@ -7,7 +7,7 @@
  *     gardien sans coordonnées à son département : la précision se dégrade,
  *     la liste ne se vide pas.
  */
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi } from "vitest";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 
@@ -36,7 +36,6 @@ describe("géocodage en panne", () => {
     } catch (e) {
       outcome = `a levé : ${(e as Error).message}`;
     }
-    console.log("OUTCOME", outcome);
     expect(outcome).toBeNull();
   });
 
