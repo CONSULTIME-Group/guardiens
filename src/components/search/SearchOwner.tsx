@@ -240,6 +240,16 @@ const SearchOwner = () => {
   }, [openPop]);
 
   // Validation clavier : la touche Entrée promeut la saisie en état métier.
+  // Saisie : identique desktop et mobile, portée par le composant partagé.
+  const handleCityInputChange = useCallback((value: string) => {
+    cityTouchedRef.current = true;
+    setCityInput(value);
+    setLocQuery(value);
+    fetchCitySuggestions(value);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Validation clavier : la touche Entrée promeut la saisie en état métier.
   const handleCityKeyDown = useCallback((e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key !== "Enter") return;
     cityTouchedRef.current = true;
