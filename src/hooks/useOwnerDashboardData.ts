@@ -236,8 +236,8 @@ export function useOwnerDashboardData(userId: string | undefined) {
             const [{ data: badgeData }, { data: sitterReviews }, { data: affinityRows }] = await Promise.all([
               supabase.from("badge_attributions").select("user_id, badge_id").in("user_id", sitterIds),
               supabase.from("reviews").select("reviewee_id, overall_rating").in("reviewee_id", sitterIds).eq("published", true),
-              supabase.from("sitter_profiles")
-                .select("user_id, animal_types, life_pace, languages, interests, work_during_sit, sensitivities, special_animal_skills, sitter_type, experience_years, travels_with_children, travels_with_own_animals")
+              supabase.from("sitter_profiles_affinity")
+                .select("user_id, experience_years, life_pace, languages, interests, work_during_sit, sensitivities, animal_types, sitter_type, travels_with_children, travels_with_own_animals")
                 .in("user_id", sitterIds),
             ]);
 

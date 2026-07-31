@@ -100,7 +100,7 @@ export function useNearbyOwnerSitters(currentUserId: string | undefined) {
           .in("reviewee_id", ids)
           .eq("published", true),
         supabase
-          .from("sitter_profiles")
+          .from("public_sitter_profiles")
           .select("user_id, competences")
           .in("user_id", ids),
       ]);

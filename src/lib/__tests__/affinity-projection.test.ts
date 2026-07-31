@@ -63,7 +63,10 @@ describe("projection des colonnes d'affinité", () => {
   });
 
   it("useOwnerTopAffinitySitters projette toutes les colonnes consommées", () => {
-    const projected = projectedColumns("src/hooks/useOwnerTopAffinitySitters.ts", ["sitter_profiles"]);
+    const projected = projectedColumns("src/hooks/useOwnerTopAffinitySitters.ts", [
+      "sitter_profiles",
+      "sitter_profiles_affinity",
+    ]);
     const missing = consumed.filter((c) => !projected.has(c));
     expect(missing, `colonnes absentes de la projection useOwnerTopAffinitySitters : ${missing.join(", ")}`).toEqual([]);
   });

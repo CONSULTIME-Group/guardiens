@@ -19,7 +19,7 @@ import { SectionHeader } from "../sitter/SitterMatchSection";
 import OwnerToSitterAffinity from "@/components/matching/OwnerToSitterAffinity";
 
 const AFFINITY_COLUMNS =
-  "user_id, animal_types, life_pace, languages, interests, work_during_sit, sensitivities, special_animal_skills, sitter_type, experience_years, travels_with_children, travels_with_own_animals";
+  "user_id, experience_years, life_pace, languages, interests, work_during_sit, sensitivities, animal_types, sitter_type, travels_with_children, travels_with_own_animals";
 
 const NearbySittersSection = () => {
   const { user } = useAuth();
@@ -33,7 +33,7 @@ const NearbySittersSection = () => {
     const ids = sitters.map((s) => s.id);
     let cancelled = false;
     supabase
-      .from("sitter_profiles")
+      .from("sitter_profiles_affinity")
       .select(AFFINITY_COLUMNS)
       .in("user_id", ids)
       .then(({ data: rows }) => {
