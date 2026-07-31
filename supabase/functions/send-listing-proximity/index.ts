@@ -23,6 +23,8 @@
  * Sécurité : admin uniquement (user_roles.role = 'admin').
  */
 import { createClient, SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
+import { clampRadiusKm, MAX_RADIUS_KM } from "../_shared/proximity-radius.ts";
+import { PUBLISHED_STATUS } from "../_shared/sit-alert-guard.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
