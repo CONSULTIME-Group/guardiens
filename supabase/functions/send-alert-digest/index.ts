@@ -120,7 +120,7 @@ Deno.serve(async (req) => {
       .select(`
         *,
         profiles:user_id (
-          id, first_name, email, city, postal_code, role
+          id, first_name, email, city, postal_code, departement_code, role
         )
       `)
       .eq("active", true);
