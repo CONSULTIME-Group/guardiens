@@ -727,6 +727,7 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
  getPostalCodeFn?: (item: any) => string | undefined,
  alwaysIncludeFn?: (item: any) => boolean,
  densityFilterFn?: (item: any) => boolean,
+ franceCountOverride?: number | null,
  ) => {
  const cityCoords = new Map<string, { lat: number; lng: number }>();
  const uniqueCities = [...new Set(items.map(getCityFn).filter(Boolean))] as string[];
