@@ -212,7 +212,8 @@ Deno.serve(async (req) => {
           .eq("status", "published")
           .or("country.is.null,country.eq.FR")
           .gte("created_at", sinceISO)
-          .limit(20);
+          .order("created_at", { ascending: false })
+          .limit(200);
 
         for (const sit of rawSits ?? []) {
           if (sit.accepting_applications === false) continue;
@@ -266,7 +267,8 @@ Deno.serve(async (req) => {
           .select("id, title, description, city, postal_code, latitude, longitude, category, date_needed, photos, exchange_offer, mission_type")
           .eq("status", "open")
           .gte("created_at", sinceISO)
-          .limit(20);
+          .order("created_at", { ascending: false })
+          .limit(200);
 
         for (const m of rawMissions ?? []) {
           const mDept = deptOf(m.postal_code);
