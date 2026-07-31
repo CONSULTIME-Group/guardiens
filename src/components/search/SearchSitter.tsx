@@ -860,9 +860,12 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
    if (closedRes.error) {
      console.error("[SearchSitter] Erreur chargement annonces fermées:", closedRes.error);
    }
-    let items = [...(data || []), ...((closedRes.data as any[]) || [])];
-    const franceExactCount = (openCountRes.count ?? 0) + (closedCountRes.count ?? 0);
-    setResultsTruncated((data || []).length >= SITS_SERVER_CAP);
+     let items = [...(data || []), ...((closedRes.data as any[]) || [])];
+     const franceExactCount = (openCountRes.count ?? 0) + (closedCountRes.count ?? 0);
+     setResultsTruncated(
+       (data || []).length >= SITS_SERVER_CAP ||
+       ((closedRes.data as any[]) || []).length >= SITS_SERVER_CAP
+     );
 
 
    // Hydrate owner data from public_profiles (safe public view) in a single batched call
@@ -1059,19 +1062,30 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
  };
 
 
-  const searchMissions = async (searchCoords: { lat: number; lng: number } | null) => {
-  let query = supabase
-.from("small_missions")
-.select("*")
-.eq("status", "open")
-.order("created_at", { ascending: false });
-   const { data, error: missionsError } = await query;
+   const searchMissions = async (searchCoords: { lat: number; lng: number } | null) => {
+   const query = supabase
+     .from("small_missions")
+     .select("*")
+     .eq("status", "open")
+     .order("created_at", { ascending: false });
+   const countQuery = supabase
+     .from("small_missions")
+     .select("*", { count: "exact", head: true })
+     .eq("status", "open");
+
+   const [{ data, error: missionsError }, { count: missionsFranceCount, error: missionsCountError }] = await Promise.all([
+     query,
+     countQuery,
+   ]);
    if (missionsError) {
      console.error("[SearchSitter] Erreur chargement missions:", missionsError);
      setSearchError("Impossible de charger les coups de main.");
      return;
    }
-  let items = data || [];
+   if (missionsCountError) {
+     console.error("[SearchSitter] Erreur comptage missions:", missionsCountError);
+   }
+   let items = data || [];
   // Les « offres » sont des disponibilités de membres : elles doivent vivre dans
   // l'onglet Membres disponibles, pas dans le flux des demandes publiées.
   items = items.filter((m: any) => (m.mission_type ?? "besoin") !== "offre");
@@ -1115,7 +1129,7 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
   }).length : items.length;
   const deptCount = refDept ? items.filter((m: any) => getDeptCode(getMissionPostalCode(m)) === refDept).length : 0;
   const regionCount = refRegion ? items.filter((m: any) => getRegionCode(getDeptCode(getMissionPostalCode(m))) === refRegion).length : 0;
-  setDensityCounts({ radius: radiusCount, dept: deptCount, region: regionCount, france: items.length });
+   setDensityCounts({ radius: radiusCount, dept: deptCount, region: regionCount, france: missionsFranceCount ?? items.length });
 
   if (zoneMode === "radius" && searchCoords) {
     items = items.filter((m: any) => {
