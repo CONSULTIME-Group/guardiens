@@ -937,6 +937,7 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
   // Density : uniquement les annonces actionnables (publiées, ouvertes aux
   // candidatures, non expirées) pour rester aligné avec l'eyebrow SEO.
   (s: any) => s.status === "published" && s.accepting_applications !== false && (!s.end_date || s.end_date >= todayIso),
+  franceExactCount,
   );
 
   items = locFiltered;
