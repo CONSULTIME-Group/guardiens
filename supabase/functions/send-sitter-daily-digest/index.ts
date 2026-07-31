@@ -342,6 +342,8 @@ Deno.serve(async (req) => {
       sitters_processed: bySitter.size,
       sitters_sent: sittersSent,
       sitters_skipped: sittersSkipped,
+      claim_skipped: claimSkipped,
+      claim_skipped_by: claimSkippedBy,
       errors,
       dry_run: !!body.dry_run,
       plan: body.dry_run ? plan : undefined,
