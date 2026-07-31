@@ -64,6 +64,12 @@ const ApplicationModal = ({
   const [almaDraftText, setAlmaDraftText] = useState<string | null>(null);
   const [unpersonalizedConfirmOpen, setUnpersonalizedConfirmOpen] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  /**
+   * Verrou synchrone anti double soumission. L'état `sending` n'est posé
+   * qu'après plusieurs `await` (import dynamique, modération), ce qui laissait
+   * passer un second clic et créait des candidatures en double.
+   */
+  const sendingRef = useRef(false);
   const almaSeenRef = useRef(false);
   const [companionWarning, setCompanionWarning] = useState<{
     text: string;
@@ -209,7 +215,7 @@ const ApplicationModal = ({
   }, [open, sitId]);
 
 
-  const doSend = async (viaUneditedDraft = false) => {
+  const doSendInner = async (viaUneditedDraft = false) => {
     if (!user || !message.trim()) return;
 
     // Garde-fou anti-refus IA : ne jamais envoyer un message qui ressemble à
@@ -278,6 +284,17 @@ const ApplicationModal = ({
       .single();
     if (error) {
       setSending(false);
+      // 23505 : la contrainte d'unicité (sit_id, sitter_id) a intercepté une
+      // seconde soumission. La candidature existe déjà, ce n'est pas une erreur.
+      if ((error as { code?: string }).code === "23505") {
+        toast({
+          title: "Candidature déjà envoyée",
+          description: "Vous avez déjà postulé à cette annonce.",
+        });
+        onOpenChange(false);
+        onSuccess();
+        return;
+      }
       toast({ title: "Erreur", description: "Impossible d'envoyer la candidature.", variant: "destructive" });
       return;
     }
@@ -364,8 +381,23 @@ const ApplicationModal = ({
     onSuccess();
   };
 
+  /**
+   * Point d'entrée unique de l'envoi, protégé par un verrou synchrone :
+   * un second clic pendant l'envoi (double clic, double événement tactile,
+   * ou deux boutons distincts) est ignoré.
+   */
+  const doSend = async (viaUneditedDraft = false) => {
+    if (sendingRef.current) return;
+    sendingRef.current = true;
+    try {
+      await doSendInner(viaUneditedDraft);
+    } finally {
+      sendingRef.current = false;
+    }
+  };
+
   const handleSend = () => {
-    if (!user || !message.trim() || sending) return;
+    if (!user || !message.trim() || sending || sendingRef.current) return;
     const trimmed = message.trim();
     if (almaDraftText && trimmed === almaDraftText.trim()) {
       setUnpersonalizedConfirmOpen(true);
