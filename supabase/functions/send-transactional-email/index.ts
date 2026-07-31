@@ -4,6 +4,7 @@ import { createClient } from 'npm:@supabase/supabase-js@2'
 import { TEMPLATES } from '../_shared/transactional-email-templates/registry.ts'
 import { getEmailCategory, type EmailCategory } from '../_shared/email-categories.ts'
 import { bypassesSuppression } from '../_shared/email-suppression.ts'
+import { evaluateSitAlert, isSitStatusGuardedTemplate } from '../_shared/sit-alert-guard.ts'
 
 const SITE_URL = 'https://guardiens.fr'
 
