@@ -447,7 +447,18 @@ Deno.serve(async (req) => {
 
 
     return new Response(
-      JSON.stringify({ sent, skipped, claim_skipped: claimSkipped, claim_skipped_by: claimSkippedBy, rayon_fallback_dept: rayonFallbackDept, errors, hour: currentHourStr }),
+      JSON.stringify({
+        dry_run: dryRun,
+        since_hours: sinceHours,
+        prefs_evaluated: prefs.length,
+        sent, skipped,
+        claim_skipped: claimSkipped,
+        claim_skipped_by: claimSkippedBy,
+        rayon_fallback_dept: rayonFallbackDept,
+        errors,
+        hour: currentHourStr,
+        ...(dryRun ? { preview: dry } : {}),
+      }),
       { status: 200, headers: { "Content-Type": "application/json" } },
     );
   } catch (err) {
