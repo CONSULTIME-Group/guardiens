@@ -204,14 +204,34 @@ Deno.serve(async (req) => {
         if (pref?.product_emails === false) { usersSkipped++; continue }
 
         const origin = { lat: Number(p.latitude), lng: Number(p.longitude) }
-        if (!Number.isFinite(origin.lat) || !Number.isFinite(origin.lng)) { usersSkipped++; continue }
+        const hasOrigin = Number.isFinite(origin.lat) && Number.isFinite(origin.lng)
+        const userDept = deptOf(p.departement_code, p.postal_code)
+        if (!hasOrigin && !userDept) { usersSkipped++; continue }
+        if (!hasOrigin) deptFallbackUsers++
+
+        // Rapproche une annonce du gardien : distance si les deux points sont
+        // connus, sinon égalité de département. Renvoie la distance en km, ou
+        // null si le rapprochement s'est fait par département.
+        const match = (
+          lat: unknown, lng: unknown, dept: string | null,
+        ): { ok: boolean; km: number | null } => {
+          const la = Number(lat), lo = Number(lng)
+          if (hasOrigin && Number.isFinite(la) && Number.isFinite(lo)) {
+            const d = haversineKm(origin, { lat: la, lng: lo })
+            return { ok: d <= radiusKm, km: d }
+          }
+          if (userDept && dept && userDept === dept) return { ok: true, km: null }
+          return { ok: false, km: null }
+        }
 
         // Filtre + distance
         const items: any[] = []
         for (const s of allSits) {
           if (s.user_id === p.id) continue
-          const d = haversineKm(origin, { lat: Number(s.latitude), lng: Number(s.longitude) })
-          if (d > radiusKm) continue
+          const owner = (s.profiles as any) ?? {}
+          const sitDept = deptOf(s.departement_code, owner.departement_code, owner.postal_code)
+          const r = match(owner.latitude, owner.longitude, sitDept)
+          if (!r.ok) continue
           const sitCover = (s.cover_photo_url as string | null)
             || (s.property_id ? propertyCoverMap.get(s.property_id) ?? null : null)
           const sitAnimals = s.property_id ? propertyAnimalsMap.get(s.property_id) : undefined
@@ -221,19 +241,19 @@ Deno.serve(async (req) => {
             slug: s.slug ?? null,
             title: s.title,
             city: s.city,
-            distanceKm: Math.round(d),
+            distanceKm: r.km == null ? null : Math.round(r.km),
             startDate: formatFrDate(s.start_date),
             endDate: formatFrDate(s.end_date),
             ownerFirstName: ownerMap.get(s.user_id),
             coverPhotoUrl: sitCover,
             animalsSummary: sitAnimals,
-            _sort: d,
+            _sort: r.km ?? radiusKm + 1,
           })
         }
         for (const m of allMissions) {
           if (m.user_id === p.id) continue
-          const d = haversineKm(origin, { lat: Number(m.latitude), lng: Number(m.longitude) })
-          if (d > radiusKm) continue
+          const r = match(m.latitude, m.longitude, deptOf(m.postal_code))
+          if (!r.ok) continue
           const desc = (m.description ?? '').toString().replace(/\s+/g, ' ').trim()
           const excerpt = desc.length > 160 ? desc.slice(0, 157).trimEnd() + '...' : desc
           const missionPhoto = Array.isArray(m.photos) && m.photos.length > 0 && typeof m.photos[0] === 'string'
@@ -244,13 +264,13 @@ Deno.serve(async (req) => {
             slug: m.slug ?? null,
             title: m.title,
             city: m.city,
-            distanceKm: Math.round(d),
+            distanceKm: r.km == null ? null : Math.round(r.km),
             category: m.category,
             missionType: m.mission_type ?? 'besoin',
             excerpt,
             ownerFirstName: ownerMap.get(m.user_id),
             coverPhotoUrl: missionPhoto,
-            _sort: d,
+            _sort: r.km ?? radiusKm + 1,
           })
         }
 
