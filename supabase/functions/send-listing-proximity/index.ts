@@ -447,7 +447,21 @@ Deno.serve(async (req) => {
     const isRetryable = (msg?: string) =>
       !!msg && (/rate limit/i.test(msg) || /\b429\b/.test(msg) || /send-transactional-email 5\d\d/.test(msg));
     type Outcome = "sent" | "excluded" | "error";
+    // Trace par destinataire, reconstruite APRES coup. On n'ecrit jamais de
+    // ligne au statut "queued" : ce statut est consomme chaque minute par le
+    // cron process-mass-email-queue et declencherait un envoi reel.
+    const sendRows: Array<Record<string, unknown>> = [];
+    // Budget temps : au dela, on arrete proprement et on marque la campagne
+    // "paused" plutot que de se faire tuer par le wall clock de la plateforme.
+    const START_TS = Date.now();
+    const TIME_BUDGET_MS = 110_000;
+    let timedOut = false;
+    let processed = 0;
     for (let i = 0; i < recipients.length; i += CONCURRENCY) {
+      if (Date.now() - START_TS > TIME_BUDGET_MS) {
+        timedOut = true;
+        break;
+      }
       if (i > 0) await sleep(BATCH_PAUSE_MS);
       const slice = recipients.slice(i, i + CONCURRENCY);
       const results = await Promise.all(slice.map(async (r): Promise<{ outcome: Outcome; err?: string }> => {
@@ -491,16 +505,16 @@ Deno.serve(async (req) => {
             "frequency_cap",
           ]);
           if (body.reason && excludedReasons.has(body.reason)) {
-            return { outcome: "excluded" };
+            return { outcome: "excluded", err: body.reason };
           }
           if (body.deferred === true || body.skipped === true) {
-            return { outcome: "excluded" };
+            return { outcome: "excluded", err: body.reason || "deferred" };
           }
           if (body.success === true && body.sent === true) {
             return { outcome: "sent" };
           }
           if (body.success === false) {
-            return { outcome: "excluded" };
+            return { outcome: "excluded", err: body.reason || "not_sent" };
           }
           return { outcome: "sent" };
         } catch (e) {
@@ -514,20 +528,60 @@ Deno.serve(async (req) => {
         }
         return first;
       }));
-      for (const r of results) {
+      results.forEach((r, idx) => {
+        const rec = slice[idx];
+        processed++;
         if (r.outcome === "sent") sent++;
         else if (r.outcome === "excluded") excluded++;
         else { errors++; console.error("listing-proximity send failed:", r.err); }
+        sendRows.push({
+          mass_email_id: campaignId,
+          recipient_email: rec.email,
+          // Statuts terminaux uniquement (jamais "queued") : trace pure.
+          status: r.outcome === "sent" ? "sent" : r.outcome === "excluded" ? "skipped" : "failed",
+          attempts: 1,
+          last_attempt_at: new Date().toISOString(),
+          last_error: r.outcome === "sent" ? null : (r.err || null),
+          error_message: r.outcome === "error" ? (r.err || null) : null,
+        });
+      });
+    }
+
+    // Destinataires jamais tentés faute de budget temps : tracés en "skipped".
+    if (timedOut) {
+      for (const rec of recipients.slice(processed)) {
+        sendRows.push({
+          mass_email_id: campaignId,
+          recipient_email: rec.email,
+          status: "skipped",
+          attempts: 0,
+          last_error: "time_budget_exhausted",
+        });
       }
+    }
+
+    // Ecriture de la trace par destinataire (observabilite admin).
+    const INSERT_CHUNK = 500;
+    for (let i = 0; i < sendRows.length; i += INSERT_CHUNK) {
+      const { error: insErr } = await serviceClient
+        .from("mass_email_sends")
+        .insert(sendRows.slice(i, i + INSERT_CHUNK));
+      if (insErr) console.error(`mass_email_sends insert error (chunk ${i}):`, insErr);
     }
 
     await serviceClient
       .from("mass_emails")
       .update({
-        recipients_count: sent,
-        status: errors > 0 && sent === 0 ? "error" : "sent",
+        // recipients_count = cible reelle, pas le nombre d'envois reussis.
+        recipients_count: recipients.length,
+        enqueued_count: processed,
+        sent_count: sent,
+        failed_count: errors,
+        skipped_count: excluded + (timedOut ? recipients.length - processed : 0),
+        status: timedOut ? "paused" : (errors > 0 && sent === 0 ? "error" : "sent"),
       })
       .eq("id", campaignId);
+
 
     if (signalId) {
       await serviceClient
@@ -540,7 +594,7 @@ Deno.serve(async (req) => {
         .eq("id", signalId);
     }
 
-    return new Response(JSON.stringify({ sent, excluded, errors, campaign_id: campaignId }), {
+    return new Response(JSON.stringify({ sent, excluded, errors, targeted: recipients.length, processed, paused: timedOut, campaign_id: campaignId }), {
       status: 200,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
