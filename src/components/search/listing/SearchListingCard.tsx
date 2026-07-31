@@ -90,12 +90,18 @@ const SearchListingCard = ({
 
   const location = useLocation();
   const isPublicContext = location.pathname.startsWith("/annonces") || location.pathname.startsWith("/petites-missions") || location.pathname.startsWith("/search");
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, user } = useAuth();
+  // Seuls le propriétaire et le gardien accepté accèdent à la vue membre non
+  // masquée ; les autres comptes authentifiés vont sur la version publique.
+  const isOwnerOfSit = !!user && !!(item as any).user_id && (item as any).user_id === user.id;
+  const isAcceptedSitterOfSit =
+    (item as any).viewerApplicationStatus === "accepted" ||
+    (item as any).isAcceptedSitter === true;
   const linkTo = isMission
     ? `/petites-missions/${item.id}`
     : isDemo
     ? `/annonces/demo/${item.slug || item.id}`
-    : isAuthenticated
+    : isAuthenticated && (isOwnerOfSit || isAcceptedSitterOfSit)
     ? `/sits/${item.id}`
     : `/annonces/${item.id}`;
 

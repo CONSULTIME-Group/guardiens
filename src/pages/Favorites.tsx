@@ -106,7 +106,7 @@ const Favorites = () => {
 
 
   const { data: sits, isLoading: isLoadingSits } = useQuery({
-    queryKey: ["favorite-sits", sitIds],
+    queryKey: ["favorite-sits", sitIds, user?.id],
     queryFn: async () => {
       if (!sitIds.length) return [];
       const { data, error } = await supabase
@@ -114,7 +114,27 @@ const Favorites = () => {
         .select("id, title, start_date, end_date, status, user_id, property_id, accepts_sitter_pets, accepts_sitter_children")
         .in("id", sitIds);
       if (error) throw error;
-      const rows = data ?? [];
+      const rawRows = data ?? [];
+      // Les dates ne sont conservées que sur les annonces publiées, celles dont
+      // l'utilisateur est propriétaire, ou celles où il est gardien accepté.
+      let acceptedSitIds = new Set<string>();
+      if (user) {
+        const { data: acceptedApps } = await supabase
+          .from("applications")
+          .select("sit_id")
+          .eq("sitter_id", user.id)
+          .eq("status", "accepted")
+          .in("sit_id", sitIds);
+        acceptedSitIds = new Set((acceptedApps ?? []).map((a: any) => a.sit_id));
+      }
+      const rows = rawRows.map((s: any) => {
+        const maySeeDates =
+          s.status === "published" ||
+          (!!user && s.user_id === user.id) ||
+          acceptedSitIds.has(s.id);
+        return maySeeDates ? s : { ...s, start_date: null, end_date: null };
+      });
+
       const ownerIds = [...new Set(rows.map((s: any) => s.user_id).filter(Boolean))] as string[];
       const propertyIds = [...new Set(rows.map((s: any) => s.property_id).filter(Boolean))] as string[];
       const [{ data: owners }, { data: pets }] = await Promise.all([

@@ -91,8 +91,10 @@ const SitDetail = () => {
     setInitialAnimauxOverride("");
     setOwnerGallery([]);
     const load = async () => {
-      const { data: sitRows } = await supabase.from("sits").select("*").eq("id", id).limit(1);
-      const sitData = sitRows?.[0];
+      // Lecture via la RPC masquée : dates et champs libres sont filtrés côté
+      // serveur pour tout visiteur qui n'est ni propriétaire ni gardien accepté.
+      const { data: sitRows } = await supabase.rpc("get_public_sit", { p_param: id });
+      const sitData = (sitRows as any[] | null)?.[0];
       if (!sitData) {
         setLoading(false);
         return;
@@ -287,7 +289,11 @@ const SitDetail = () => {
     );
   if (id?.startsWith("demo-")) return <Navigate to="/search" replace />;
 
-  const isOwner = sit.user_id === user?.id;
+  // `user_id` et `dates_hidden` viennent de get_public_sit : si le serveur a
+  // masqué la fiche, le visiteur n'est ni propriétaire ni gardien accepté,
+  // donc jamais la vue propriétaire.
+  const isOwner = !!user && sit.user_id === user.id && (sit as any).dates_hidden !== true;
+
 
   return (
     <div className="px-3 pt-4 pb-44 md:p-10 md:pb-40 max-w-4xl mx-auto animate-fade-in">

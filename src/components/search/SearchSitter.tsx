@@ -814,20 +814,14 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
    if (endDate) query = query.lte("start_date", endDate);
 
    // Lignes fermées (pourvues, terminées, annulées, archivées) : signal de vie de
-   // la communauté, non actionnables, donc JAMAIS filtrées par dates. En anonyme
-   // elles passent par la vue réduite `public_closed_sits`, sans date ni texte
-   // libre ni coordonnée, la table `sits` n'étant plus lisible hors `published`.
-   const closedQuery = !user
-     ? supabase
-         .from("public_closed_sits")
-         .select("id, user_id, title, slug, status, city, cover_photo_url")
-         .limit(SITS_SERVER_CAP)
-     : supabase
-         .from("sits")
-         .select(SIT_COLUMNS)
-         .in("status", ["confirmed", "in_progress", "completed", "cancelled", "archived"])
-         .order("created_at", { ascending: false })
-         .limit(SITS_SERVER_CAP);
+   // la communauté, non actionnables, donc JAMAIS filtrées par dates. Elles passent
+   // toujours par la vue réduite `public_closed_sits`, sans date ni texte libre ni
+   // coordonnée, pour tous les visiteurs, authentifiés ou non.
+   const closedQuery = supabase
+     .from("public_closed_sits")
+     .select("id, user_id, title, slug, status, city, cover_photo_url")
+     .limit(SITS_SERVER_CAP);
+
 
 
    const [{ data, error: sitsError }, closedRes] = await Promise.all([query, closedQuery]);
