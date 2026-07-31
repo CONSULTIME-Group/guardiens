@@ -64,6 +64,12 @@ const ApplicationModal = ({
   const [almaDraftText, setAlmaDraftText] = useState<string | null>(null);
   const [unpersonalizedConfirmOpen, setUnpersonalizedConfirmOpen] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  /**
+   * Verrou synchrone anti double soumission. L'état `sending` n'est posé
+   * qu'après plusieurs `await` (import dynamique, modération), ce qui laissait
+   * passer un second clic et créait des candidatures en double.
+   */
+  const sendingRef = useRef(false);
   const almaSeenRef = useRef(false);
   const [companionWarning, setCompanionWarning] = useState<{
     text: string;
