@@ -86,44 +86,117 @@ Répondez UNIQUEMENT en JSON valide avec cette structure exacte (chaque champ do
   "compatibility": "Compatibilité avec d'autres animaux en 3-5 phrases : autres chiens (même sexe / sexe opposé), chats, petits animaux (rongeurs, lapins), enfants en bas âge.",
   "sitter_tips": "Conseils pratiques pour le gardien en 5-7 phrases : routine à respecter, signaux d'apaisement à reconnaître, erreurs classiques à éviter (laisse trop courte, surstimulation…), comment instaurer la confiance dès la première heure, quoi demander au propriétaire avant la garde.",
   "difficulty_level": "Niveau de difficulté pour un gardien débutant : Facile, Modéré ou Exigeant, suivi de 2-3 phrases de justification concrète.",
-  "ideal_for": "1 paragraphe de 3-5 phrases décrivant le profil de gardien idéal : niveau d'expérience attendu, mode de vie compatible, contraintes à anticiper.",
-  "rich_content": "Article long de garde complet en MARKDOWN (1800-2500 mots). Structure OBLIGATOIRE avec ces titres H2 exacts :\\n\\n## Portrait du ${breedPrompt}\\n(origine brève, morphologie, poids, taille, espérance de vie, personnalité dominante, 3-4 paragraphes)\\n\\n## Une journée type de garde\\n(matin, midi, après-midi, soir : routines, repas, sorties, jeux, repos. Concret, horaires indicatifs)\\n\\n## Alimentation détaillée\\n(quantités exactes selon poids, marques de croquettes adaptées, friandises OK et à éviter, transitions alimentaires, eau)\\n\\n## Exercice et stimulation mentale\\n(durée précise, types d'activités, jeux d'occupation, signaux de fatigue, météo)\\n\\n## Hygiène et toilettage\\n(brossage fréquence, bains, oreilles, yeux, dents, griffes, mue saisonnière)\\n\\n## Santé : ce que tout gardien doit savoir\\n(pathologies fréquentes, signes d'alerte précis à surveiller, comportements anormaux, quand appeler le véto)\\n\\n## Comportement et socialisation\\n(avec gardien inconnu, autres animaux, enfants, bruits, séparation, peurs typiques de la race)\\n\\n## Conseils pratiques pour le gardien\\n(checklist arrivée, premières 24h, instaurer la confiance, gestion des laisses/harnais, sécurité maison, urgences)\\n\\n## Erreurs classiques à éviter\\n(liste 5-7 erreurs concrètes, expliquer pourquoi et comment corriger)\\n\\n## Questions à poser au propriétaire avant la garde\\n(liste 8-12 questions pratiques)\\n\\nRÈGLES MARKDOWN : utilisez **gras** pour les points clés, listes à puces, sous-sections H3 si pertinent. Pas de tableaux. Pas d'introductions plates type 'Dans cet article…'. Allez droit au but, ton expert mais accessible."
+  "ideal_for": "1 paragraphe de 3-5 phrases décrivant le profil de gardien idéal : niveau d'expérience attendu, mode de vie compatible, contraintes à anticiper."
 }`;
 
-    const aiResponse = await fetch(LOVABLE_API_URL, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${LOVABLE_API_KEY}`,
-      },
-      body: JSON.stringify({
+    const richPrompt = `Vous êtes vétérinaire-comportementaliste expert et rédacteur pour Guardiens (plateforme française de garde d'animaux entre particuliers). Rédigez un article long de garde complet en MARKDOWN (1800-2500 mots) pour : ${breedPrompt}.
+
+RÈGLES :
+- Vouvoiement systématique.
+- Ton chaleureux, pratique, orienté gardien débutant.
+- Pas d'emoji, pas de tiret cadratin « — » (utilisez virgule, deux-points, parenthèses).
+- Pas de superlatif marketing, soyez concret et chiffré.
+- Répondez uniquement avec le markdown, sans bloc de code, sans JSON, sans commentaire.
+
+Structure OBLIGATOIRE avec ces titres H2 exacts :
+
+## Portrait du ${breedPrompt}
+(origine brève, morphologie, poids, taille, espérance de vie, personnalité dominante, 3-4 paragraphes)
+
+## Une journée type de garde
+(matin, midi, après-midi, soir : routines, repas, sorties, jeux, repos. Concret, horaires indicatifs)
+
+## Alimentation détaillée
+(quantités exactes selon poids, marques de croquettes adaptées, friandises OK et à éviter, transitions alimentaires, eau)
+
+## Exercice et stimulation mentale
+(durée précise, types d'activités, jeux d'occupation, signaux de fatigue, météo)
+
+## Hygiène et toilettage
+(brossage fréquence, bains, oreilles, yeux, dents, griffes, mue saisonnière)
+
+## Santé : ce que tout gardien doit savoir
+(pathologies fréquentes, signes d'alerte précis à surveiller, comportements anormaux, quand appeler le véto)
+
+## Comportement et socialisation
+(avec gardien inconnu, autres animaux, enfants, bruits, séparation, peurs typiques de la race)
+
+## Conseils pratiques pour le gardien
+(checklist arrivée, premières 24h, instaurer la confiance, gestion des laisses/harnais, sécurité maison, urgences)
+
+## Erreurs classiques à éviter
+(liste 5-7 erreurs concrètes, expliquer pourquoi et comment corriger)
+
+## Questions à poser au propriétaire avant la garde
+(liste 8-12 questions pratiques)
+
+RÈGLES MARKDOWN : utilisez **gras** pour les points clés, listes à puces, sous-sections H3 si pertinent. Pas de tableaux. Pas d'introductions plates type 'Dans cet article…'.`;
+
+    const callAi = async (body: Record<string, unknown>) => {
+      const res = await fetch(LOVABLE_API_URL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${LOVABLE_API_KEY}`,
+        },
+        body: JSON.stringify(body),
+      });
+      if (!res.ok) {
+        const errText = await res.text();
+        throw new Error(`AI API call failed [${res.status}]: ${errText}`);
+      }
+      const json = await res.json();
+      return {
+        content: json.choices?.[0]?.message?.content || json.content || "",
+        finishReason: json.choices?.[0]?.finish_reason || null,
+      };
+    };
+
+    const parseJsonLoose = (content: string) => {
+      try { return JSON.parse(content); } catch { /* continue */ }
+      const m = content.match(/\{[\s\S]*\}/);
+      if (!m) return null;
+      try { return JSON.parse(m[0]); } catch { /* continue */ }
+      const repaired = m[0].replace(/,\s*([}\]])/g, "$1").replace(/[\x00-\x1F\x7F]/g, " ");
+      try { return JSON.parse(repaired); } catch { return null; }
+    };
+
+    // Appel 1, champs structurés courts (JSON)
+    let profile: any = null;
+    let lastFinish: string | null = null;
+    for (let attempt = 0; attempt < 2 && !profile; attempt++) {
+      const { content, finishReason } = await callAi({
         model: "google/gemini-2.5-flash",
         messages: [{ role: "user", content: prompt }],
-        max_tokens: 8000,
-        temperature: 0.7,
+        max_tokens: 6000,
+        temperature: attempt === 0 ? 0.7 : 0.3,
         response_format: { type: "json_object" },
-      }),
-    });
-
-    if (!aiResponse.ok) {
-      const errText = await aiResponse.text();
-      throw new Error(`AI API call failed [${aiResponse.status}]: ${errText}`);
-    }
-
-    const aiData = await aiResponse.json();
-    const content = aiData.choices?.[0]?.message?.content || aiData.content || "";
-
-    let profile: any = null;
-    try { profile = JSON.parse(content); } catch {
-      const m = content.match(/\{[\s\S]*\}/);
-      if (m) {
-        try { profile = JSON.parse(m[0]); } catch {
-          const repaired = m[0].replace(/,\s*([}\]])/g, "$1").replace(/[\x00-\x1F\x7F]/g, " ");
-          try { profile = JSON.parse(repaired); } catch {}
-        }
+      });
+      lastFinish = finishReason;
+      profile = parseJsonLoose(content);
+      if (!profile) {
+        console.error("JSON parse failed", { attempt, finishReason, preview: String(content).slice(0, 400) });
       }
     }
-    if (!profile) throw new Error("Could not parse AI response as JSON");
+    if (!profile) {
+      throw new Error(`Could not parse AI response as JSON (finish_reason: ${lastFinish})`);
+    }
+
+    // Appel 2, article long en markdown brut (aucun parsing JSON, donc pas de troncature fatale)
+    let richContent = "";
+    try {
+      const { content } = await callAi({
+        model: "google/gemini-2.5-flash",
+        messages: [{ role: "user", content: richPrompt }],
+        max_tokens: 12000,
+        temperature: 0.7,
+      });
+      richContent = String(content || "").replace(/^```(?:markdown)?\s*/i, "").replace(/```\s*$/, "").trim();
+    } catch (e) {
+      console.error("Rich content generation failed", e);
+    }
+    profile.rich_content = richContent;
+
 
     const record: Record<string, unknown> = {
       species: normalizedSpecies,
