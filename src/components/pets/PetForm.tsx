@@ -54,13 +54,26 @@ interface Props {
   onSubmit: (values: PetFormValues) => Promise<void>;
   onCancel: () => void;
   submitLabel?: string;
+  /** Clé de brouillon local, pour ne pas perdre la saisie en quittant la page. */
+  draftKey?: string;
 }
 
-const PetForm = ({ initialValues, onSubmit, onCancel, submitLabel = "Enregistrer" }: Props) => {
+const PetForm = ({ initialValues, onSubmit, onCancel, submitLabel = "Enregistrer", draftKey }: Props) => {
   const { user } = useAuth();
   const fileRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [draftRestored, setDraftRestored] = useState(false);
+
+  const baseValues = (): PetFormValues => ({
+    name: initialValues?.name ?? "",
+    species: (initialValues?.species as any) ?? "dog",
+    breed: initialValues?.breed ?? "",
+    age: initialValues?.age ?? null,
+    character: initialValues?.character ?? "",
+    special_needs: initialValues?.special_needs ?? "",
+    photo_url: initialValues?.photo_url ?? null,
+  });
 
   const {
     register,
@@ -71,32 +84,34 @@ const PetForm = ({ initialValues, onSubmit, onCancel, submitLabel = "Enregistrer
     reset,
   } = useForm<PetFormValues>({
     resolver: zodResolver(petSchema),
-    defaultValues: {
-      name: initialValues?.name ?? "",
-      species: (initialValues?.species as any) ?? "dog",
-      breed: initialValues?.breed ?? "",
-      age: initialValues?.age ?? null,
-      character: initialValues?.character ?? "",
-      special_needs: initialValues?.special_needs ?? "",
-      photo_url: initialValues?.photo_url ?? null,
-    },
+    defaultValues: (() => {
+      const stored = draftKey ? readFormDraft<PetFormValues>(draftKey) : null;
+      return stored ? { ...baseValues(), ...stored } : baseValues();
+    })(),
   });
 
   useEffect(() => {
-    reset({
-      name: initialValues?.name ?? "",
-      species: (initialValues?.species as any) ?? "dog",
-      breed: initialValues?.breed ?? "",
-      age: initialValues?.age ?? null,
-      character: initialValues?.character ?? "",
-      special_needs: initialValues?.special_needs ?? "",
-      photo_url: initialValues?.photo_url ?? null,
-    });
-  }, [initialValues, reset]);
+    if (draftKey && readFormDraft<PetFormValues>(draftKey)) {
+      setDraftRestored(true);
+      return;
+    }
+    reset(baseValues());
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initialValues, reset, draftKey]);
 
   const photoUrl = watch("photo_url");
   const species = watch("species");
   const name = watch("name");
+
+  // Sauvegarde locale au fil de la frappe, aucune requête réseau.
+  useEffect(() => {
+    if (!draftKey) return;
+    const sub = watch((values) => {
+      writeFormDraft(draftKey, values);
+    });
+    return () => sub.unsubscribe();
+  }, [watch, draftKey]);
+
 
   const handleFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
