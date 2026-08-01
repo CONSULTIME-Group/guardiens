@@ -48,15 +48,44 @@ interface Props {
   onRemovePet: (id: string) => Promise<void>;
 }
 
+const DRAFT_PREFIX = "owner-pet:";
+const draftKeyFor = (isNew: boolean, id?: string | null) => `${DRAFT_PREFIX}${isNew ? "new" : id ?? "new"}`;
+
 const OwnerStepAnimals = ({ pets, onAddPet, onUpdatePet, onRemovePet }: Props) => {
   const [editingPet, setEditingPet] = useState<Pet | null>(null);
   const [isNew, setIsNew] = useState(false);
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [draftRestored, setDraftRestored] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const editFormRef = useRef<HTMLDivElement>(null);
   const [lightboxUrl, setLightboxUrl] = useState<string | null>(null);
+
+  // Reprise automatique d'une saisie interrompue (bascule d'onglet, rechargement).
+  useEffect(() => {
+    const keys = listFormDraftKeys(DRAFT_PREFIX);
+    if (keys.length === 0) return;
+    const stored = readFormDraft<{ isNew: boolean; pet: Pet }>(keys[0]);
+    if (!stored?.pet) return;
+    setEditingPet(stored.pet);
+    setIsNew(stored.isNew);
+    setDraftRestored(true);
+  }, []);
+
+  // Sauvegarde locale au fil de la frappe, sans requête réseau.
+  useEffect(() => {
+    if (!editingPet) return;
+    const key = draftKeyFor(isNew, editingPet.id);
+    const timer = setTimeout(() => writeFormDraft(key, { isNew, pet: editingPet }), 400);
+    return () => clearTimeout(timer);
+  }, [editingPet, isNew]);
+
+  const discardDraft = useCallback((pet: Pet | null, wasNew: boolean) => {
+    clearFormDraft(draftKeyFor(wasNew, pet?.id));
+    listFormDraftKeys(DRAFT_PREFIX).forEach(clearFormDraft);
+    setDraftRestored(false);
+  }, []);
 
   // Notes race : édition locale + debounce 700 ms → 1 UPDATE au lieu d'un par frappe.
   const [noteDraft, setNoteDraft] = useState<Record<string, string>>({});
