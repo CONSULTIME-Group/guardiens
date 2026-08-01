@@ -23,8 +23,49 @@
  * Sécurité : admin uniquement (user_roles.role = 'admin').
  */
 import { createClient, SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
-import { clampRadiusKm, MAX_RADIUS_KM } from "../_shared/proximity-radius.ts";
+import { clampRadiusKm, MAX_RADIUS_KM, PROXIMITY_DEDUP_DAYS } from "../_shared/proximity-radius.ts";
 import { PUBLISHED_STATUS } from "../_shared/sit-alert-guard.ts";
+
+/**
+ * Adresses à ne pas resservir :
+ * - celles déjà servies pour CETTE annonce, toutes campagnes confondues,
+ * - celles servies par n'importe quelle diffusion de proximité dans les
+ *   PROXIMITY_DEDUP_DAYS derniers jours.
+ * Le rayon est libre, la déduplication est la garde.
+ */
+async function computeAlreadyServed(
+  serviceClient: SupabaseClient,
+  sitId: string,
+): Promise<Set<string>> {
+  const served = new Set<string>();
+  const cutoff = new Date(Date.now() - PROXIMITY_DEDUP_DAYS * 86400_000).toISOString();
+
+  const { data: campaigns } = await serviceClient
+    .from("mass_emails")
+    .select("id, filters, created_at")
+    .eq("segment", "listing_proximity");
+
+  const ids = ((campaigns || []) as any[])
+    .filter(
+      (c) =>
+        String(c?.filters?.sit_id || "") === sitId ||
+        String(c?.created_at || "") >= cutoff,
+    )
+    .map((c) => c.id as string);
+
+  const CH = 200;
+  for (let i = 0; i < ids.length; i += CH) {
+    const { data: rows } = await serviceClient
+      .from("mass_email_sends")
+      .select("recipient_email")
+      .in("mass_email_id", ids.slice(i, i + CH))
+      .eq("status", "sent");
+    for (const row of (rows || []) as any[]) {
+      if (row.recipient_email) served.add(String(row.recipient_email).toLowerCase());
+    }
+  }
+  return served;
+}
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -397,6 +438,15 @@ Deno.serve(async (req) => {
       console.log("recipient filter applied", { sit_id: sitId, ...recipientFilterInfo });
     }
 
+    // Déduplication (même annonce, ou toute diffusion de proximité des 7
+    // derniers jours). Appliquée en preview comme à l'envoi, pour que le
+    // compte affiché à l'admin soit celui réellement expédié.
+    const alreadyServed = await computeAlreadyServed(serviceClient, sitId);
+    const targets = recipients.filter((r) => !alreadyServed.has(r.email.toLowerCase()));
+    const dedupInfo = {
+      dedup_days: PROXIMITY_DEDUP_DAYS,
+      excluded_recent: recipients.length - targets.length,
+    };
 
     const subject = buildSubject(authorFirstName, listingCity);
     const excerpt = buildExcerpt(sit.owner_message ?? sit.specific_expectations);
@@ -408,12 +458,13 @@ Deno.serve(async (req) => {
       const PREVIEW_LIMIT = 500;
       return new Response(
         JSON.stringify({
-          count: recipients.length,
+          count: targets.length,
           radius_km: radiusKm,
           requested_radius_km: radiusDecision.requestedRadiusKm,
           radius_clamped: radiusDecision.clamped,
           max_radius_km: MAX_RADIUS_KM,
           ...recipientFilterInfo,
+          ...dedupInfo,
           sit_status: (sit as any).status ?? null,
           author_first_name: authorFirstName,
           sit: {
@@ -426,13 +477,13 @@ Deno.serve(async (req) => {
             pets_sentence: petsSentence,
           },
           subject,
-          recipients: recipients.slice(0, PREVIEW_LIMIT).map((r) => ({
+          recipients: targets.slice(0, PREVIEW_LIMIT).map((r) => ({
             first_name: toTitleCase(r.first_name),
             city: r.city,
             distance_km: r.distance_km,
             email: r.email,
           })),
-          truncated: recipients.length > PREVIEW_LIMIT,
+          truncated: targets.length > PREVIEW_LIMIT,
         }),
         { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } },
       );
@@ -467,34 +518,6 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Idempotence de ciblage : tout destinataire ayant déjà une ligne `sent`
-    // pour CETTE MÊME ANNONCE (toutes campagnes confondues) est exclu. Le
-    // plafond de fréquence reste une seconde barrière, jamais la seule.
-    const alreadyServed = new Set<string>();
-    {
-      const { data: priorCampaigns } = await serviceClient
-        .from("mass_emails")
-        .select("id, filters")
-        .eq("segment", "listing_proximity");
-      const priorIds = ((priorCampaigns || []) as any[])
-        .filter((c) => String(c?.filters?.sit_id || "") === sitId)
-        .map((c) => c.id as string);
-      if (priorIds.length > 0) {
-        const CH = 200;
-        for (let i = 0; i < priorIds.length; i += CH) {
-          const { data: served } = await serviceClient
-            .from("mass_email_sends")
-            .select("recipient_email")
-            .in("mass_email_id", priorIds.slice(i, i + CH))
-            .eq("status", "sent");
-          for (const row of (served || []) as any[]) {
-            if (row.recipient_email) alreadyServed.add(String(row.recipient_email).toLowerCase());
-          }
-        }
-      }
-    }
-
-    const targets = recipients.filter((r) => !alreadyServed.has(r.email.toLowerCase()));
     if (targets.length === 0) {
       return new Response(
         JSON.stringify({
@@ -507,6 +530,7 @@ Deno.serve(async (req) => {
           radius_clamped: radiusDecision.clamped,
           max_radius_km: MAX_RADIUS_KM,
           ...recipientFilterInfo,
+          ...dedupInfo,
         }),
         { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } },
       );
@@ -610,6 +634,7 @@ Deno.serve(async (req) => {
       queued: enqueued,
       targeted: recipients.length,
       already_served: alreadyServed.size,
+      ...dedupInfo,
       campaign_id: campaignId,
       radius_km: radiusKm,
       requested_radius_km: radiusDecision.requestedRadiusKm,

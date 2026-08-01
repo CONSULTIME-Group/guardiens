@@ -14,7 +14,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { MAX_RADIUS_KM, clampRadiusInput } from "@/lib/proximityRadius";
+import { MAX_RADIUS_KM, LARGE_RADIUS_WARN_KM, PROXIMITY_DEDUP_DAYS, clampRadiusInput } from "@/lib/proximityRadius";
 import type { AdminSignal } from "./NoApplicationsCard";
 
 interface Props {
@@ -131,7 +131,7 @@ export const BroadcastSitDialog = ({ open, onOpenChange, signal, onSent }: Props
     }
   };
 
-  const showLargeRadiusWarning = radiusKm >= MAX_RADIUS_KM;
+  const showLargeRadiusWarning = radiusKm >= LARGE_RADIUS_WARN_KM;
 
   const recipientCount = preview?.count ?? 0;
   const sendLabel = sending
@@ -164,7 +164,7 @@ export const BroadcastSitDialog = ({ open, onOpenChange, signal, onSent }: Props
                 onChange={(e) => setRadiusKm(clampRadiusInput(e.target.value))}
               />
               <p className="text-[11px] text-muted-foreground">
-                Plafonné à {MAX_RADIUS_KM} km : au-delà, l'objet « près de chez vous » devient faux.
+                Rayon libre. Les gardiens déjà servis pour cette annonce, ou touchés par une diffusion dans les {PROXIMITY_DEDUP_DAYS} derniers jours, sont exclus.
               </p>
             </div>
             <p
