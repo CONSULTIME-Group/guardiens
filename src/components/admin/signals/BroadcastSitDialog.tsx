@@ -164,7 +164,7 @@ export const BroadcastSitDialog = ({ open, onOpenChange, signal, onSent }: Props
                 onChange={(e) => setRadiusKm(clampRadiusInput(e.target.value))}
               />
               <p className="text-[11px] text-muted-foreground">
-                Plafonné à {MAX_RADIUS_KM} km : au-delà, l'objet « près de chez vous » devient faux.
+                Rayon libre. Les gardiens déjà servis pour cette annonce, ou touchés par une diffusion dans les {PROXIMITY_DEDUP_DAYS} derniers jours, sont exclus.
               </p>
             </div>
             <p
