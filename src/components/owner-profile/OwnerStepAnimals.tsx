@@ -246,6 +246,15 @@ const OwnerStepAnimals = ({ pets, onAddPet, onUpdatePet, onRemovePet }: Props) =
       {editingPet ? (
         <div ref={editFormRef} className="bg-card rounded-lg border border-primary/30 p-5 space-y-4">
           <h3 className="font-heading text-lg font-semibold">{isNew ? "Nouvel animal" : `Modifier ${editingPet.name}`}</h3>
+          {draftRestored && (
+            <p className="text-sm text-muted-foreground bg-muted/50 rounded-lg px-3 py-2" role="status">
+              Nous avons retrouvé votre saisie en cours et l'avons restaurée. Pensez à enregistrer.
+            </p>
+          )}
+          <p className="text-xs text-muted-foreground">
+            Votre saisie est conservée sur cet appareil, vous pouvez quitter la page, coller un texte depuis un autre logiciel, puis revenir.
+          </p>
+
 
           {/* Photo upload */}
           <div className="space-y-2">
