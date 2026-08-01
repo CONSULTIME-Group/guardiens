@@ -438,6 +438,15 @@ Deno.serve(async (req) => {
       console.log("recipient filter applied", { sit_id: sitId, ...recipientFilterInfo });
     }
 
+    // Déduplication (même annonce, ou toute diffusion de proximité des 7
+    // derniers jours). Appliquée en preview comme à l'envoi, pour que le
+    // compte affiché à l'admin soit celui réellement expédié.
+    const alreadyServed = await computeAlreadyServed(serviceClient, sitId);
+    const targets = recipients.filter((r) => !alreadyServed.has(r.email.toLowerCase()));
+    const dedupInfo = {
+      dedup_days: PROXIMITY_DEDUP_DAYS,
+      excluded_recent: recipients.length - targets.length,
+    };
 
     const subject = buildSubject(authorFirstName, listingCity);
     const excerpt = buildExcerpt(sit.owner_message ?? sit.specific_expectations);
@@ -449,12 +458,13 @@ Deno.serve(async (req) => {
       const PREVIEW_LIMIT = 500;
       return new Response(
         JSON.stringify({
-          count: recipients.length,
+          count: targets.length,
           radius_km: radiusKm,
           requested_radius_km: radiusDecision.requestedRadiusKm,
           radius_clamped: radiusDecision.clamped,
           max_radius_km: MAX_RADIUS_KM,
           ...recipientFilterInfo,
+          ...dedupInfo,
           sit_status: (sit as any).status ?? null,
           author_first_name: authorFirstName,
           sit: {
@@ -467,13 +477,13 @@ Deno.serve(async (req) => {
             pets_sentence: petsSentence,
           },
           subject,
-          recipients: recipients.slice(0, PREVIEW_LIMIT).map((r) => ({
+          recipients: targets.slice(0, PREVIEW_LIMIT).map((r) => ({
             first_name: toTitleCase(r.first_name),
             city: r.city,
             distance_km: r.distance_km,
             email: r.email,
           })),
-          truncated: recipients.length > PREVIEW_LIMIT,
+          truncated: targets.length > PREVIEW_LIMIT,
         }),
         { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } },
       );
