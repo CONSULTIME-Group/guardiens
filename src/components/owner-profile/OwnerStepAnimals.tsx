@@ -11,7 +11,8 @@ import HintBubble from "../profile/HintBubble";
 import BreedProfileCard from "../breeds/BreedProfileCard";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { readFormDraft, writeFormDraft, clearFormDraft, listFormDraftKeys } from "@/lib/formDraft";
+import { readFormDraft, writeFormDraft, clearFormDraft, listFormDraftKeys, getFormDraftSavedAt } from "@/lib/formDraft";
+import DraftStatus, { type DraftState } from "@/components/shared/DraftStatus";
 import type { Pet } from "@/hooks/useOwnerProfile";
 
 const SPECIES = [
@@ -59,11 +60,13 @@ const OwnerStepAnimals = ({ pets, onAddPet, onUpdatePet, onRemovePet }: Props) =
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [draftRestored, setDraftRestored] = useState(false);
+  const [draftState, setDraftState] = useState<DraftState>("idle");
+  const [draftSavedAt, setDraftSavedAt] = useState<number | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const editFormRef = useRef<HTMLDivElement>(null);
   const [lightboxUrl, setLightboxUrl] = useState<string | null>(null);
 
-  // Reprise automatique d'une saisie interrompue (bascule d'onglet, rechargement).
+  // Reprise automatique d'une saisie interrompue (bascule d'onglet, rechargement complet).
   useEffect(() => {
     const keys = listFormDraftKeys(DRAFT_PREFIX);
     if (keys.length === 0) return;
@@ -72,13 +75,21 @@ const OwnerStepAnimals = ({ pets, onAddPet, onUpdatePet, onRemovePet }: Props) =
     setEditingPet(stored.pet);
     setIsNew(stored.isNew);
     setDraftRestored(true);
+    setDraftState("saved");
+    setDraftSavedAt(getFormDraftSavedAt(keys[0]));
+    setTimeout(() => editFormRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }), 150);
   }, []);
 
   // Sauvegarde locale au fil de la frappe, sans requête réseau.
   useEffect(() => {
     if (!editingPet) return;
     const key = draftKeyFor(isNew, editingPet.id);
-    const timer = setTimeout(() => writeFormDraft(key, { isNew, pet: editingPet }), 400);
+    setDraftState("saving");
+    const timer = setTimeout(() => {
+      writeFormDraft(key, { isNew, pet: editingPet });
+      setDraftSavedAt(Date.now());
+      setDraftState("saved");
+    }, 400);
     return () => clearTimeout(timer);
   }, [editingPet, isNew]);
 
@@ -86,7 +97,10 @@ const OwnerStepAnimals = ({ pets, onAddPet, onUpdatePet, onRemovePet }: Props) =
     clearFormDraft(draftKeyFor(wasNew, pet?.id));
     listFormDraftKeys(DRAFT_PREFIX).forEach(clearFormDraft);
     setDraftRestored(false);
+    setDraftState("idle");
+    setDraftSavedAt(null);
   }, []);
+
 
   // Notes race : édition locale + debounce 700 ms → 1 UPDATE au lieu d'un par frappe.
   const [noteDraft, setNoteDraft] = useState<Record<string, string>>({});
@@ -245,15 +259,19 @@ const OwnerStepAnimals = ({ pets, onAddPet, onUpdatePet, onRemovePet }: Props) =
 
       {editingPet ? (
         <div ref={editFormRef} className="bg-card rounded-lg border border-primary/30 p-5 space-y-4">
-          <h3 className="font-heading text-lg font-semibold">{isNew ? "Nouvel animal" : `Modifier ${editingPet.name}`}</h3>
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <h3 className="font-heading text-lg font-semibold">{isNew ? "Nouvel animal" : `Modifier ${editingPet.name}`}</h3>
+            <DraftStatus state={draftState} savedAt={draftSavedAt} />
+          </div>
           {draftRestored && (
             <p className="text-sm text-muted-foreground bg-muted/50 rounded-lg px-3 py-2" role="status">
               Nous avons retrouvé votre saisie en cours et l'avons restaurée. Pensez à enregistrer.
             </p>
           )}
           <p className="text-xs text-muted-foreground">
-            Votre saisie est conservée sur cet appareil, vous pouvez quitter la page, coller un texte depuis un autre logiciel, puis revenir.
+            Votre saisie est conservée sur cet appareil, vous pouvez quitter la page, la rafraîchir, coller un texte depuis un autre logiciel, puis revenir.
           </p>
+
 
 
           {/* Photo upload */}

@@ -14,7 +14,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { safeUUID } from "@/lib/uuid";
-import { readFormDraft, writeFormDraft, clearFormDraft } from "@/lib/formDraft";
+import { readFormDraft, writeFormDraft, clearFormDraft, getFormDraftSavedAt } from "@/lib/formDraft";
+import DraftStatus, { type DraftState } from "@/components/shared/DraftStatus";
 
 export type PetFormValues = {
   name: string;
@@ -105,13 +106,27 @@ const PetForm = ({ initialValues, onSubmit, onCancel, submitLabel = "Enregistrer
   const name = watch("name");
 
   // Sauvegarde locale au fil de la frappe, aucune requête réseau.
+  const [draftState, setDraftState] = useState<DraftState>(
+    draftKey && readFormDraft<PetFormValues>(draftKey) ? "saved" : "idle",
+  );
+  const [draftSavedAt, setDraftSavedAt] = useState<number | null>(
+    draftKey ? getFormDraftSavedAt(draftKey) : null,
+  );
   useEffect(() => {
     if (!draftKey) return;
+    let timer: ReturnType<typeof setTimeout>;
     const sub = watch((values) => {
-      writeFormDraft(draftKey, values);
+      setDraftState("saving");
+      clearTimeout(timer);
+      timer = setTimeout(() => {
+        writeFormDraft(draftKey, values);
+        setDraftSavedAt(Date.now());
+        setDraftState("saved");
+      }, 400);
     });
-    return () => sub.unsubscribe();
+    return () => { clearTimeout(timer); sub.unsubscribe(); };
   }, [watch, draftKey]);
+
 
 
   const handleFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -141,6 +156,8 @@ const PetForm = ({ initialValues, onSubmit, onCancel, submitLabel = "Enregistrer
       await onSubmit(values);
       if (draftKey) clearFormDraft(draftKey);
       setDraftRestored(false);
+      setDraftState("idle");
+      setDraftSavedAt(null);
     } finally {
       setSubmitting(false);
     }
@@ -149,6 +166,8 @@ const PetForm = ({ initialValues, onSubmit, onCancel, submitLabel = "Enregistrer
   const handleCancel = () => {
     if (draftKey) clearFormDraft(draftKey);
     setDraftRestored(false);
+    setDraftState("idle");
+    setDraftSavedAt(null);
     onCancel();
   };
 
@@ -159,6 +178,8 @@ const PetForm = ({ initialValues, onSubmit, onCancel, submitLabel = "Enregistrer
           Nous avons retrouvé votre saisie en cours et l'avons restaurée. Pensez à enregistrer.
         </p>
       )}
+      <DraftStatus state={draftState} savedAt={draftSavedAt} />
+
 
       <div className="flex items-center gap-4">
         <Avatar className="h-16 w-16">

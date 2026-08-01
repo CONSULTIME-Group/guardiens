@@ -39,6 +39,18 @@ export function writeFormDraft<T>(key: string, value: T): void {
   }
 }
 
+/** Horodatage de la dernière sauvegarde locale, ou null. */
+export function getFormDraftSavedAt(key: string): number | null {
+  try {
+    const raw = localStorage.getItem(PREFIX + key);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as StoredDraft<unknown>;
+    return typeof parsed?.savedAt === "number" ? parsed.savedAt : null;
+  } catch {
+    return null;
+  }
+}
+
 export function clearFormDraft(key: string): void {
   try {
     localStorage.removeItem(PREFIX + key);
