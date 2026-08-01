@@ -172,15 +172,21 @@ const ListingProximityCard = ({
         setWarningMessage(await buildCoordsErrorMessage(msg));
         return;
       }
-      const sent = (data as { sent?: number }).sent ?? 0;
-      const excluded = (data as { excluded?: number }).excluded ?? 0;
-      const errors = (data as { errors?: number }).errors ?? 0;
-      const parts: string[] = [`${sent} envoyé${sent > 1 ? "s" : ""}`];
-      if (excluded > 0) {
-        parts.push(`${excluded} exclu${excluded > 1 ? "s" : ""} (désinscrits ou adresses en quarantaine)`);
+      const d = data as { queued?: number; targeted?: number; excluded_recent?: number };
+      const queued = d.queued ?? 0;
+      const excludedRecent = d.excluded_recent ?? 0;
+      const parts: string[] = [`${queued} email${queued > 1 ? "s" : ""} mis en file`];
+      if (excludedRecent > 0) {
+        parts.push(
+          `${excludedRecent} écarté${excludedRecent > 1 ? "s" : ""} (déjà servis pour cette annonce ou dans les 7 derniers jours)`,
+        );
       }
-      parts.push(`${errors} erreur${errors > 1 ? "s" : ""}`);
-      toast.success(`Envoi terminé, ${parts.join(", ")}.`);
+      toast.success(
+        queued > 0
+          ? `Diffusion enfilée, ${parts.join(", ")}. L'expédition se fait par la file, en quelques minutes.`
+          : `Aucun envoi, ${parts.join(", ")}.`,
+      );
+
 
       setPreview(null);
       setConfirmInput("");
