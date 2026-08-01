@@ -14,25 +14,23 @@ import {
 
 const read = (p: string) => fs.readFileSync(path.join(process.cwd(), p), "utf8");
 
-describe("Défaut 1, plafond de rayon des diffusions de proximité", () => {
-  it("ramène une demande de 800 km à 200 km et signale l'écrêtage", () => {
+describe("Défaut 1, rayon libre et déduplication des diffusions de proximité", () => {
+  it("laisse passer un rayon supérieur à 200 km sans écrêtage", () => {
     const d = clampRadiusKm(800);
-    expect(d.radiusKm).toBe(200);
-    expect(d.requestedRadiusKm).toBe(800);
-    expect(d.clamped).toBe(true);
-    expect(MAX_RADIUS_KM).toBe(200);
+    expect(d.radiusKm).toBe(800);
+    expect(d.clamped).toBe(false);
+    expect(MAX_RADIUS_KM).toBeGreaterThan(200);
   });
 
   it("laisse passer un rayon raisonnable sans écrêtage", () => {
     expect(clampRadiusKm(47)).toEqual({ radiusKm: 47, requestedRadiusKm: 47, clamped: false });
   });
 
-  it("est appliqué côté serveur et remonté dans la réponse", () => {
+  it("exclut côté serveur les adresses déjà servies sur 7 jours", () => {
     const src = read("supabase/functions/send-listing-proximity/index.ts");
-    expect(src).toContain("clampRadiusKm");
-    expect(src).toContain("radius_clamped");
-    expect(src).toContain("requested_radius_km");
-    expect(src).not.toContain("Math.min(2000");
+    expect(src).toContain("computeAlreadyServed");
+    expect(src).toContain("PROXIMITY_DEDUP_DAYS");
+    expect(src).toContain("excluded_recent");
   });
 
   it("est reflété par l'UI admin", () => {
@@ -41,9 +39,8 @@ describe("Défaut 1, plafond de rayon des diffusions de proximité", () => {
       "src/components/admin/signals/BroadcastSitDialog.tsx",
     ]) {
       const src = read(f);
-      expect(src).toContain("max={MAX_RADIUS_KM}");
       expect(src).toContain("clampRadiusInput");
-      expect(src).toContain("Plafonné à");
+      expect(src).toContain("PROXIMITY_DEDUP_DAYS");
     }
   });
 });
