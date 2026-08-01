@@ -23,8 +23,49 @@
  * Sécurité : admin uniquement (user_roles.role = 'admin').
  */
 import { createClient, SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
-import { clampRadiusKm, MAX_RADIUS_KM } from "../_shared/proximity-radius.ts";
+import { clampRadiusKm, MAX_RADIUS_KM, PROXIMITY_DEDUP_DAYS } from "../_shared/proximity-radius.ts";
 import { PUBLISHED_STATUS } from "../_shared/sit-alert-guard.ts";
+
+/**
+ * Adresses à ne pas resservir :
+ * - celles déjà servies pour CETTE annonce, toutes campagnes confondues,
+ * - celles servies par n'importe quelle diffusion de proximité dans les
+ *   PROXIMITY_DEDUP_DAYS derniers jours.
+ * Le rayon est libre, la déduplication est la garde.
+ */
+async function computeAlreadyServed(
+  serviceClient: SupabaseClient,
+  sitId: string,
+): Promise<Set<string>> {
+  const served = new Set<string>();
+  const cutoff = new Date(Date.now() - PROXIMITY_DEDUP_DAYS * 86400_000).toISOString();
+
+  const { data: campaigns } = await serviceClient
+    .from("mass_emails")
+    .select("id, filters, created_at")
+    .eq("segment", "listing_proximity");
+
+  const ids = ((campaigns || []) as any[])
+    .filter(
+      (c) =>
+        String(c?.filters?.sit_id || "") === sitId ||
+        String(c?.created_at || "") >= cutoff,
+    )
+    .map((c) => c.id as string);
+
+  const CH = 200;
+  for (let i = 0; i < ids.length; i += CH) {
+    const { data: rows } = await serviceClient
+      .from("mass_email_sends")
+      .select("recipient_email")
+      .in("mass_email_id", ids.slice(i, i + CH))
+      .eq("status", "sent");
+    for (const row of (rows || []) as any[]) {
+      if (row.recipient_email) served.add(String(row.recipient_email).toLowerCase());
+    }
+  }
+  return served;
+}
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
