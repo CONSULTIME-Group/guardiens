@@ -518,34 +518,6 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Idempotence de ciblage : tout destinataire ayant déjà une ligne `sent`
-    // pour CETTE MÊME ANNONCE (toutes campagnes confondues) est exclu. Le
-    // plafond de fréquence reste une seconde barrière, jamais la seule.
-    const alreadyServed = new Set<string>();
-    {
-      const { data: priorCampaigns } = await serviceClient
-        .from("mass_emails")
-        .select("id, filters")
-        .eq("segment", "listing_proximity");
-      const priorIds = ((priorCampaigns || []) as any[])
-        .filter((c) => String(c?.filters?.sit_id || "") === sitId)
-        .map((c) => c.id as string);
-      if (priorIds.length > 0) {
-        const CH = 200;
-        for (let i = 0; i < priorIds.length; i += CH) {
-          const { data: served } = await serviceClient
-            .from("mass_email_sends")
-            .select("recipient_email")
-            .in("mass_email_id", priorIds.slice(i, i + CH))
-            .eq("status", "sent");
-          for (const row of (served || []) as any[]) {
-            if (row.recipient_email) alreadyServed.add(String(row.recipient_email).toLowerCase());
-          }
-        }
-      }
-    }
-
-    const targets = recipients.filter((r) => !alreadyServed.has(r.email.toLowerCase()));
     if (targets.length === 0) {
       return new Response(
         JSON.stringify({
@@ -558,6 +530,7 @@ Deno.serve(async (req) => {
           radius_clamped: radiusDecision.clamped,
           max_radius_km: MAX_RADIUS_KM,
           ...recipientFilterInfo,
+          ...dedupInfo,
         }),
         { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } },
       );
