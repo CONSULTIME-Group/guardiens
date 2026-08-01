@@ -1,11 +1,15 @@
-// Plafond de rayon des diffusions de proximité (send-listing-proximity).
+// Rayon des diffusions de proximité (send-listing-proximity).
 //
-// Un rayon de 800 km rend le message faux : l'objet affirme « près de chez
-// vous » à une personne située à 779 km. Le plafond est appliqué côté serveur,
-// l'UI admin n'étant qu'une commodité.
-export const MAX_RADIUS_KM = 200;
+// Le rayon est un choix admin, il n'est plus bridé à 200 km. Seule une borne
+// technique très large empêche les valeurs absurdes. La protection réelle
+// contre la sur-sollicitation est la déduplication : un gardien déjà servi
+// pour cette annonce, ou touché par une diffusion de proximité dans les
+// 7 derniers jours, est exclu de la cible.
+export const MAX_RADIUS_KM = 20000;
+export const LARGE_RADIUS_WARN_KM = 200;
 export const MIN_RADIUS_KM = 1;
 export const DEFAULT_RADIUS_KM = 30;
+export const PROXIMITY_DEDUP_DAYS = 7;
 
 export interface RadiusDecision {
   radiusKm: number;
