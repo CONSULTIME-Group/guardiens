@@ -34,7 +34,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { MAX_RADIUS_KM, clampRadiusInput } from "@/lib/proximityRadius";
+import { MAX_RADIUS_KM, LARGE_RADIUS_WARN_KM, PROXIMITY_DEDUP_DAYS, clampRadiusInput } from "@/lib/proximityRadius";
 import { Loader2, Search, Send, AlertTriangle } from "lucide-react";
 
 interface PreviewRecipient {
