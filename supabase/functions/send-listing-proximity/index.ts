@@ -634,6 +634,7 @@ Deno.serve(async (req) => {
       queued: enqueued,
       targeted: recipients.length,
       already_served: alreadyServed.size,
+      ...dedupInfo,
       campaign_id: campaignId,
       radius_km: radiusKm,
       requested_radius_km: radiusDecision.requestedRadiusKm,
