@@ -156,6 +156,8 @@ const PetForm = ({ initialValues, onSubmit, onCancel, submitLabel = "Enregistrer
       await onSubmit(values);
       if (draftKey) clearFormDraft(draftKey);
       setDraftRestored(false);
+      setDraftState("idle");
+      setDraftSavedAt(null);
     } finally {
       setSubmitting(false);
     }
@@ -164,6 +166,8 @@ const PetForm = ({ initialValues, onSubmit, onCancel, submitLabel = "Enregistrer
   const handleCancel = () => {
     if (draftKey) clearFormDraft(draftKey);
     setDraftRestored(false);
+    setDraftState("idle");
+    setDraftSavedAt(null);
     onCancel();
   };
 
@@ -174,6 +178,8 @@ const PetForm = ({ initialValues, onSubmit, onCancel, submitLabel = "Enregistrer
           Nous avons retrouvé votre saisie en cours et l'avons restaurée. Pensez à enregistrer.
         </p>
       )}
+      <DraftStatus state={draftState} savedAt={draftSavedAt} />
+
 
       <div className="flex items-center gap-4">
         <Avatar className="h-16 w-16">
