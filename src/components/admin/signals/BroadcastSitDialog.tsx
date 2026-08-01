@@ -14,7 +14,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { MAX_RADIUS_KM, clampRadiusInput } from "@/lib/proximityRadius";
+import { MAX_RADIUS_KM, LARGE_RADIUS_WARN_KM, PROXIMITY_DEDUP_DAYS, clampRadiusInput } from "@/lib/proximityRadius";
 import type { AdminSignal } from "./NoApplicationsCard";
 
 interface Props {
