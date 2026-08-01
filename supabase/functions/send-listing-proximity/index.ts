@@ -53,17 +53,23 @@ async function computeAlreadyServed(
     )
     .map((c) => c.id as string);
 
+  // On exclut toute adresse déjà engagée sur ces campagnes, quel que soit
+  // l'aboutissement (sent, delivered, opened, skipped, queued, sending,
+  // suppressed). Seul "failed" reste rejouable : c'est un échec technique.
+  // Ne retenir que "sent" laissait repasser des adresses que l'idempotence
+  // bloquait ensuite au moment de l'envoi, d'où des campagnes à zéro départ.
   const CH = 200;
   for (let i = 0; i < ids.length; i += CH) {
     const { data: rows } = await serviceClient
       .from("mass_email_sends")
-      .select("recipient_email")
+      .select("recipient_email, status")
       .in("mass_email_id", ids.slice(i, i + CH))
-      .eq("status", "sent");
+      .neq("status", "failed");
     for (const row of (rows || []) as any[]) {
       if (row.recipient_email) served.add(String(row.recipient_email).toLowerCase());
     }
   }
+
   return served;
 }
 
