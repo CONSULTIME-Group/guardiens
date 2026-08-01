@@ -14,6 +14,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { safeUUID } from "@/lib/uuid";
+import { readFormDraft, writeFormDraft, clearFormDraft } from "@/lib/formDraft";
 
 export type PetFormValues = {
   name: string;
