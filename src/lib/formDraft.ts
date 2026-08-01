@@ -36,6 +36,7 @@ export function writeFormDraft<T>(key: string, value: T): void {
     localStorage.setItem(PREFIX + key, JSON.stringify({ savedAt: Date.now(), value }));
   } catch {
     /* quota ou mode privé : la saisie continue normalement */
+  }
 }
 
 /** Horodatage de la dernière sauvegarde locale, ou null. */
@@ -48,7 +49,6 @@ export function getFormDraftSavedAt(key: string): number | null {
   } catch {
     return null;
   }
-}
 }
 
 export function clearFormDraft(key: string): void {
