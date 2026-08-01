@@ -105,13 +105,27 @@ const PetForm = ({ initialValues, onSubmit, onCancel, submitLabel = "Enregistrer
   const name = watch("name");
 
   // Sauvegarde locale au fil de la frappe, aucune requête réseau.
+  const [draftState, setDraftState] = useState<DraftState>(
+    draftKey && readFormDraft<PetFormValues>(draftKey) ? "saved" : "idle",
+  );
+  const [draftSavedAt, setDraftSavedAt] = useState<number | null>(
+    draftKey ? getFormDraftSavedAt(draftKey) : null,
+  );
   useEffect(() => {
     if (!draftKey) return;
+    let timer: ReturnType<typeof setTimeout>;
     const sub = watch((values) => {
-      writeFormDraft(draftKey, values);
+      setDraftState("saving");
+      clearTimeout(timer);
+      timer = setTimeout(() => {
+        writeFormDraft(draftKey, values);
+        setDraftSavedAt(Date.now());
+        setDraftState("saved");
+      }, 400);
     });
-    return () => sub.unsubscribe();
+    return () => { clearTimeout(timer); sub.unsubscribe(); };
   }, [watch, draftKey]);
+
 
 
   const handleFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
