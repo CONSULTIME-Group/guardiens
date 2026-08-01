@@ -216,7 +216,7 @@ const PetForm = ({ initialValues, onSubmit, onCancel, submitLabel = "Enregistrer
       </div>
 
       <div className="flex justify-end gap-2 pt-2">
-        <Button type="button" variant="ghost" onClick={onCancel} disabled={submitting}>Annuler</Button>
+        <Button type="button" variant="ghost" onClick={handleCancel} disabled={submitting}>Annuler</Button>
         <Button type="submit" disabled={submitting || uploading}>
           {submitting && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
           {submitLabel}
