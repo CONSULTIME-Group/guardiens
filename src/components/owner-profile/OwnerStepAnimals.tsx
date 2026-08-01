@@ -183,12 +183,20 @@ const OwnerStepAnimals = ({ pets, onAddPet, onUpdatePet, onRemovePet }: Props) =
   const handleSave = async () => {
     if (!editingPet || !editingPet.name.trim()) return;
     setSaving(true);
-    if (isNew) {
-      await onAddPet(editingPet);
-    } else {
-      await onUpdatePet(editingPet);
+    const wasNew = isNew;
+    const pet = editingPet;
+    try {
+      if (wasNew) {
+        await onAddPet(pet);
+      } else {
+        await onUpdatePet(pet);
+      }
+      discardDraft(pet, wasNew);
+      setEditingPet(null);
+    } catch (err) {
+      logger.error("Owner pet save failed", { error: String(err) });
+      toast.error("Échec de l'enregistrement. Votre saisie est conservée, réessayez.");
     }
-    setEditingPet(null);
     setSaving(false);
   };
 
