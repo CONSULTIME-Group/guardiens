@@ -368,7 +368,7 @@ const OwnerStepAnimals = ({ pets, onAddPet, onUpdatePet, onRemovePet }: Props) =
             <Button type="button" onClick={handleSave} disabled={saving || !editingPet.name.trim()}>
               {saving ? "Enregistrement..." : "Enregistrer"}
             </Button>
-            <Button type="button" variant="outline" onClick={() => setEditingPet(null)}>Annuler</Button>
+            <Button type="button" variant="outline" onClick={() => { discardDraft(editingPet, isNew); setEditingPet(null); }}>Annuler</Button>
           </div>
         </div>
       ) : (
