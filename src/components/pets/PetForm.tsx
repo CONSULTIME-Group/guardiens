@@ -139,13 +139,27 @@ const PetForm = ({ initialValues, onSubmit, onCancel, submitLabel = "Enregistrer
     setSubmitting(true);
     try {
       await onSubmit(values);
+      if (draftKey) clearFormDraft(draftKey);
+      setDraftRestored(false);
     } finally {
       setSubmitting(false);
     }
   });
 
+  const handleCancel = () => {
+    if (draftKey) clearFormDraft(draftKey);
+    setDraftRestored(false);
+    onCancel();
+  };
+
   return (
     <form onSubmit={submit} className="space-y-4">
+      {draftRestored && (
+        <p className="text-sm text-muted-foreground bg-muted/50 rounded-lg px-3 py-2" role="status">
+          Nous avons retrouvé votre saisie en cours et l'avons restaurée. Pensez à enregistrer.
+        </p>
+      )}
+
       <div className="flex items-center gap-4">
         <Avatar className="h-16 w-16">
           {photoUrl ? <AvatarImage src={photoUrl} alt={name || "Animal"} className="object-cover" /> : null}
