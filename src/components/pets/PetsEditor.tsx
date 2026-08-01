@@ -152,6 +152,7 @@ const PetsEditor = ({ propertyId, onChange }: Props) => {
           </DialogHeader>
           <PetForm
             initialValues={editing ?? undefined}
+            draftKey={`pet-form:${propertyId}:${editing?.id ?? "new"}`}
             onSubmit={handleSubmit}
             onCancel={() => { setDialogOpen(false); setEditing(null); }}
             submitLabel={editing ? "Enregistrer" : "Ajouter"}
