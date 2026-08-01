@@ -131,7 +131,7 @@ export const BroadcastSitDialog = ({ open, onOpenChange, signal, onSent }: Props
     }
   };
 
-  const showLargeRadiusWarning = radiusKm >= MAX_RADIUS_KM;
+  const showLargeRadiusWarning = radiusKm >= LARGE_RADIUS_WARN_KM;
 
   const recipientCount = preview?.count ?? 0;
   const sendLabel = sending
