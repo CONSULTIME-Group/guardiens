@@ -65,6 +65,18 @@ const PetsEditor = ({ propertyId, onChange }: Props) => {
 
   const pets = petsQuery.data ?? [];
 
+  // Après un rafraîchissement complet, rouvrir le formulaire si un brouillon local existe.
+  const restoredRef = useRef(false);
+  useEffect(() => {
+    if (restoredRef.current || petsQuery.isLoading) return;
+    const keys = listFormDraftKeys(`pet-form:${propertyId}:`);
+    if (keys.length === 0) return;
+    restoredRef.current = true;
+    const petId = keys[0].split(":").pop();
+    setEditing(pets.find((p) => p.id === petId) ?? null);
+    setDialogOpen(true);
+  }, [petsQuery.isLoading, pets, propertyId]);
+
   const openAdd = () => { setEditing(null); setDialogOpen(true); };
   const openEdit = (p: Pet) => { setEditing(p); setDialogOpen(true); };
 
