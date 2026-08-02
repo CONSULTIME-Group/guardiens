@@ -702,7 +702,8 @@ const CreateSit = () => {
     !startDate ? { id: "start", label: "Date de début", anchor: "dates-field" } : null,
     !endDate ? { id: "end", label: "Date de fin", anchor: "dates-field" } : null,
     dateError ? { id: "date-error", label: dateError, anchor: "dates-field" } : null,
-    !descriptionValid ? { id: "desc", label: `Description d'au moins ${MIN_DESCRIPTION} caractères (actuellement ${specificExpectations.length})`, anchor: "description-field" } : null,
+    !reasonValid ? { id: "desc-reason", label: `Raison de votre besoin de garde (${MIN_SUB_DESCRIPTION} caractères minimum, actuellement ${absenceReason.trim().length})`, anchor: "description-field" } : null,
+    !expectationsValid ? { id: "desc-expectations", label: `Attentes envers le gardien (${MIN_SUB_DESCRIPTION} caractères minimum, actuellement ${sitterExpectations.trim().length})`, anchor: "description-field" } : null,
     !hasPhoto ? { id: "photo", label: "Au moins 1 photo de votre logement ou galerie", action: "/owner-profile" } : null,
     pets.length === 0 ? { id: "pets", label: "Au moins un animal à faire garder", anchor: "pets-field" } : null,
   ].filter(Boolean) as PublishBlocker[];
