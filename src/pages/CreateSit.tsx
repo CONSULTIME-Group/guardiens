@@ -295,9 +295,8 @@ const CreateSit = () => {
   const [specificExpectations, setSpecificExpectations] = useState("");
   const [absenceReason, setAbsenceReason] = useState("");
   const [sitterExpectations, setSitterExpectations] = useState("");
-  const EXPECTATIONS_SEPARATOR = "\n\n";
-  const joinExpectations = (a: string, b: string) =>
-    [a.trim(), b.trim()].filter(Boolean).join(EXPECTATIONS_SEPARATOR);
+  // Séparateur et recomposition : source unique, voir src/lib/sitPublishRules.ts.
+
   // Reprend un texte existant (brouillon, republication, Alma) et le répartit
   // sur les deux sous-champs, sans perte de contenu. La découpe n'est retenue
   // que si les deux parties tiennent le seuil : un simple saut de ligne avant
