@@ -156,14 +156,14 @@ export const getSitPublishBlockers = (input: SitPublishInput): PublishBlocker[] 
    */
   const start = (input.startDate || "").trim();
   const end = (input.endDate || "").trim();
-  const computedDateError = !hasDates
-    ? null
-    : start < todayIso()
-      ? "La date de début ne peut pas être dans le passé."
-      : end <= start
-        ? "La date de fin doit être après la date de début."
-        : null;
-  const dateError = computedDateError || input.dateError || null;
+  /**
+   * Deux identifiants distincts : une garde déjà commencée (date-past) n'est
+   * pas la même chose qu'un intervalle incohérent (date-error). Les écrans qui
+   * neutralisent l'un doivent pouvoir le faire sans comparer un libellé.
+   */
+  const startIsPast = hasDates && start < todayIso();
+  const rangeIsInvalid = hasDates && !startIsPast && end <= start;
+  const fallbackDateError = !startIsPast && !rangeIsInvalid ? input.dateError || null : null;
 
   const blockers: (PublishBlocker | null)[] = [
     !input.hasProperty
@@ -179,7 +179,24 @@ export const getSitPublishBlockers = (input: SitPublishInput): PublishBlocker[] 
           anchor: "dates-field",
         }
       : null,
-    dateError ? { id: "date-error", label: dateError, anchor: "dates-field" } : null,
+    startIsPast
+      ? {
+          id: "date-past",
+          label: "La date de début ne peut pas être dans le passé.",
+          anchor: "dates-field",
+        }
+      : null,
+    rangeIsInvalid
+      ? {
+          id: "date-error",
+          label: "La date de fin doit être après la date de début.",
+          anchor: "dates-field",
+        }
+      : null,
+    fallbackDateError
+      ? { id: "date-error", label: fallbackDateError, anchor: "dates-field" }
+      : null,
+
 
     ...getDescriptionBlockers(input),
     photoCount === 0
