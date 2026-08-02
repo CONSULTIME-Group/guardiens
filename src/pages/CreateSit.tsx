@@ -756,6 +756,11 @@ const CreateSit = () => {
     });
   }, [currentStep, ownerPlacePhotos, coverPhotoUrl]);
 
+  // Garde-fou de sortie : tant qu'une modification n'est pas enregistrée à
+  // distance, on prévient avant la fermeture de l'onglet.
+  useUnsavedChanges(unsavedRemote);
+
+
 
   const saveDraft = async ({ silent = false }: { silent?: boolean } = {}) => {
     if (!user || !property) return null;
