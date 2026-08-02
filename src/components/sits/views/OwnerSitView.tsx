@@ -39,6 +39,7 @@ import { useToast } from "@/hooks/use-toast";
 import { formatSitPeriod } from "@/lib/dateRange";
 import {
   getSitPublishBlockers,
+  getBlockingBlockers,
   getSitPublishRequirements,
   buildSitPublishInput,
   wasValidatedByCreateForm,
@@ -342,9 +343,9 @@ const OwnerSitView = ({
       galleryPhotos: ownerGallery,
       pets: pets as any,
     }),
-    { viaCreateForm: publishNeedsForm },
+    { viaCreateForm: publishNeedsForm, resumeHref: `/sits/create?resume=${sit.id}` },
   );
-  const canPublish = publishBlockers.length === 0;
+  const canPublish = getBlockingBlockers(publishBlockers).length === 0;
 
 
 
