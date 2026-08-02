@@ -50,6 +50,7 @@ import { DEFAULT_MAX_APPLICATIONS } from "@/lib/applicationCap";
 import {
   getSitPublishBlockers,
   buildSitPublishInput,
+  MAX_TITLE_LENGTH,
   joinExpectations,
   MIN_SUB_DESCRIPTION,
   type PublishBlocker,
@@ -1397,8 +1398,12 @@ const CreateSit = () => {
               onChange={e => setTitle(e.target.value)}
               onPaste={makePlainTextPasteHandler(setTitle)}
               onBlur={() => touch("title")}
+              maxLength={MAX_TITLE_LENGTH}
               className={cn("h-12 text-base", fieldState("title", !title))}
             />
+            <p className="text-xs text-muted-foreground mt-1 text-right">
+              {title.trim().length}/{MAX_TITLE_LENGTH}
+            </p>
             {touched.title && !title.trim() && (
               <p className="text-sm text-destructive flex items-center gap-1.5 mt-1"><AlertCircle className="h-3.5 w-3.5" /> Ajoutez un titre.</p>
             )}
