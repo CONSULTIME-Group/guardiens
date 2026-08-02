@@ -935,6 +935,7 @@ const CreateSit = () => {
         } catch {}
       }
       publishedRef.current = true;
+      if (localDraftKey) clearFormDraft(localDraftKey);
       toast({ title: "Annonce publiée", description: "Les gardiens peuvent maintenant postuler." });
       navigate(`/sits/${sitId}`);
     } catch (err: any) {
