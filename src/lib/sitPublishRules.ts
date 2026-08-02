@@ -243,8 +243,10 @@ export const getSitPublishBlockers = (
           id: "date-past",
           label: "La date de début ne peut pas être dans le passé.",
           anchor: "dates-field",
+          action: options.pastDatesAction,
         }
       : null,
+
     rangeIsInvalid
       ? {
           id: "date-error",
