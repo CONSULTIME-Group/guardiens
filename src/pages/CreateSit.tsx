@@ -481,7 +481,12 @@ const CreateSit = () => {
     let savedAt = getFormDraftSavedAt(localDraftKey) ?? 0;
     if (!stored && legacyLocalDraftKey && legacyLocalDraftKey !== localDraftKey) {
       const legacy = readFormDraft<SitLocalDraft>(legacyLocalDraftKey);
-      if (legacy) {
+      const currentIdentity = draftIdParam ?? fromSitId ?? null;
+      // Contamination croisée : la copie orpheline n'est adoptée que si elle
+      // n'appartient à aucun brouillon, ou au brouillon effectivement ouvert.
+      const adoptable =
+        !!legacy && (!legacy.draftId || legacy.draftId === currentIdentity);
+      if (legacy && adoptable) {
         stored = legacy;
         savedAt = getFormDraftSavedAt(legacyLocalDraftKey) ?? 0;
         writeFormDraft<SitLocalDraft>(localDraftKey, legacy);
