@@ -321,16 +321,20 @@ const OwnerSitView = ({
           : "Elle est archivée. Vous pouvez la republier quand vous voulez depuis l'onglet « Archivées ».",
     });
   };
-  // Critères de complétude pour la checklist de publication.
-  const description = (sit.specific_expectations || "").trim();
-  const checklist = {
-    hasTitle: Boolean((sit.title || "").trim()),
-    hasDates: Boolean(sit.flexible_dates || (sit.start_date && sit.end_date)),
-    hasDescription: description.length >= 50,
-    hasPhoto: ownerGallery.length > 0,
-    hasPet: Array.isArray(pets) && pets.length > 0,
-  };
-  const canPublish = Object.values(checklist).every(Boolean);
+  // Règles de publication : source unique, voir src/lib/sitPublishRules.ts.
+  const publishBlockers = getSitPublishBlockers({
+    title: sit.title,
+    startDate: sit.start_date,
+    endDate: sit.end_date,
+    flexibleDates: (sit as any).flexible_dates,
+    specificExpectations: sit.specific_expectations,
+    hasProperty: !!property,
+    galleryPhotoCount: ownerGallery.length,
+    propertyPhotoCount: Array.isArray(property?.photos) ? property.photos.length : 0,
+    petCount: Array.isArray(pets) ? pets.length : 0,
+  });
+  const canPublish = publishBlockers.length === 0;
+
 
   // Dérivés partagés (avgRating + formatDate), voir useSitDerived.
   const { avgRating, formatDate } = useSitDerived({
