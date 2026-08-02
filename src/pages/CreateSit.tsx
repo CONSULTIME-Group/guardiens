@@ -1210,41 +1210,85 @@ const CreateSit = () => {
                 />
               </div>
             </div>
-            <Textarea
-              id="description-textarea"
-              placeholder={`Décrivez ce qui est particulier à cette garde, en plus de ce qui est déjà dans votre profil (min. ${MIN_DESCRIPTION} caractères). Les annonces détaillées reçoivent 3 fois plus de candidatures.`}
-              value={specificExpectations}
-              onChange={e => setSpecificExpectations(e.target.value)}
-              onBlur={() => touch("description")}
-              className={cn(
-                "text-base min-h-[140px]",
-                touched.description && !descriptionValid
-                  ? "border-destructive focus-visible:ring-destructive"
-                  : touched.description && descriptionValid
-                    ? "border-green-500 focus-visible:ring-green-500"
-                    : ""
-              )}
-              rows={5}
-            />
-            <p className={cn(
-              "text-xs mt-1 flex justify-between",
-              touched.description && !descriptionValid
-                ? "text-destructive"
-                : specificExpectations.length >= MIN_DESCRIPTION
-                  ? "text-green-600"
-                  : "text-muted-foreground"
-            )}>
-              <span>
-                {touched.description && !descriptionValid
-                  ? specificExpectations.length === 0
-                    ? `Décrivez la garde (${MIN_DESCRIPTION} caractères minimum).`
-                    : `Encore ${MIN_DESCRIPTION - specificExpectations.length} caractères`
-                  : specificExpectations.length >= MIN_DESCRIPTION
-                    ? "Longueur suffisante"
-                    : `Décrivez la garde (${MIN_DESCRIPTION} caractères minimum)`}
-              </span>
-              <span>{specificExpectations.length} / {MIN_DESCRIPTION} min.</span>
-            </p>
+            <div className="space-y-4">
+              <div>
+                <Label htmlFor="description-textarea" className="text-sm font-medium">
+                  Pourquoi avez-vous besoin d'un gardien pour cette période ?
+                </Label>
+                <Textarea
+                  id="description-textarea"
+                  placeholder="Voyage, événement familial…"
+                  value={absenceReason}
+                  onChange={e => updateAbsenceReason(e.target.value)}
+                  onBlur={() => touch("descriptionReason")}
+                  className={cn(
+                    "text-base min-h-[90px] mt-1.5",
+                    touched.descriptionReason && !reasonValid
+                      ? "border-destructive focus-visible:ring-destructive"
+                      : touched.descriptionReason && reasonValid
+                        ? "border-green-500 focus-visible:ring-green-500"
+                        : ""
+                  )}
+                  rows={3}
+                />
+                <p className={cn(
+                  "text-xs mt-1 flex justify-between",
+                  touched.descriptionReason && !reasonValid
+                    ? "text-destructive"
+                    : reasonValid
+                      ? "text-green-600"
+                      : "text-muted-foreground"
+                )}>
+                  <span>
+                    {reasonValid
+                      ? "Longueur suffisante"
+                      : touched.descriptionReason && absenceReason.trim().length > 0
+                        ? `Encore ${MIN_SUB_DESCRIPTION - absenceReason.trim().length} caractères`
+                        : `En quelques mots (${MIN_SUB_DESCRIPTION} caractères minimum)`}
+                  </span>
+                  <span>{absenceReason.trim().length} / {MIN_SUB_DESCRIPTION} min.</span>
+                </p>
+              </div>
+
+              <div>
+                <Label htmlFor="expectations-textarea" className="text-sm font-medium">
+                  Qu'attendez-vous du gardien pendant votre absence ?
+                </Label>
+                <Textarea
+                  id="expectations-textarea"
+                  placeholder="Présence rassurante, sorties avec l'animal…"
+                  value={sitterExpectations}
+                  onChange={e => updateSitterExpectations(e.target.value)}
+                  onBlur={() => touch("descriptionExpectations")}
+                  className={cn(
+                    "text-base min-h-[90px] mt-1.5",
+                    touched.descriptionExpectations && !expectationsValid
+                      ? "border-destructive focus-visible:ring-destructive"
+                      : touched.descriptionExpectations && expectationsValid
+                        ? "border-green-500 focus-visible:ring-green-500"
+                        : ""
+                  )}
+                  rows={3}
+                />
+                <p className={cn(
+                  "text-xs mt-1 flex justify-between",
+                  touched.descriptionExpectations && !expectationsValid
+                    ? "text-destructive"
+                    : expectationsValid
+                      ? "text-green-600"
+                      : "text-muted-foreground"
+                )}>
+                  <span>
+                    {expectationsValid
+                      ? "Longueur suffisante"
+                      : touched.descriptionExpectations && sitterExpectations.trim().length > 0
+                        ? `Encore ${MIN_SUB_DESCRIPTION - sitterExpectations.trim().length} caractères`
+                        : `En quelques mots (${MIN_SUB_DESCRIPTION} caractères minimum)`}
+                  </span>
+                  <span>{sitterExpectations.trim().length} / {MIN_SUB_DESCRIPTION} min.</span>
+                </p>
+              </div>
+            </div>
           </div>
 
           {/* Journée type */}
