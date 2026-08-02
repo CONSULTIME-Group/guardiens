@@ -1,4 +1,4 @@
-import { useState, useEffect, createContext, useContext } from "react";
+import { useState, useEffect, createContext, useContext, useRef } from "react";
 import { useParams, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -9,6 +9,9 @@ import { toast } from "@/hooks/use-toast";
 import { Switch } from "@/components/ui/switch";
 import { ArrowLeft, Save, Home, Phone, Key, Wifi, Trash2, Thermometer, Info, Car, Mail, Sprout, Ban, MessageSquare } from "lucide-react";
 import { Helmet } from "react-helmet-async";
+import { readFormDraft, writeFormDraft, clearFormDraft } from "@/lib/formDraft";
+import DraftStatus, { type DraftState } from "@/components/shared/DraftStatus";
+import { useUnsavedChanges } from "@/hooks/useUnsavedChanges";
 
 interface GuideData {
   id?: string;
