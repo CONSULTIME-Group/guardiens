@@ -554,6 +554,7 @@ const CreateSit = () => {
         }
       }
 
+      let remoteDraftUpdatedAt: string | null = null;
       if (!sourceSitRes?.data) {
         let draftRes: { data: any } | null = null;
         if (draftIdParam) {
