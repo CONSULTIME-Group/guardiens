@@ -59,9 +59,11 @@ interface Props {
   submitLabel?: string;
   /** Clé de brouillon local, pour ne pas perdre la saisie en quittant la page. */
   draftKey?: string;
+  /** Prévient le parent qu'une saisie est en cours, pour protéger la fermeture. */
+  onDirtyChange?: (dirty: boolean) => void;
 }
 
-const PetForm = ({ initialValues, onSubmit, onCancel, submitLabel = "Enregistrer", draftKey }: Props) => {
+const PetForm = ({ initialValues, onSubmit, onCancel, submitLabel = "Enregistrer", draftKey, onDirtyChange }: Props) => {
   const { user } = useAuth();
   const fileRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
