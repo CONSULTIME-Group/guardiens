@@ -1090,18 +1090,11 @@ const CreateSit = () => {
                 )}
               >
                 <p className="font-medium text-sm text-foreground">À mon domicile</p>
-                <p className="text-xs text-muted-foreground mt-0.5">Le gardien vient chez moi</p>
+                <p className="text-xs text-muted-foreground mt-0.5">Le gardien s'installe chez vous pendant votre absence</p>
               </button>
               <button
                 type="button"
-                onClick={() => {
-                  setSitLocation("away");
-                  toast({
-                    title: "Redirection vers Coup de main",
-                    description: "Visite, balade, pension ou garde chez la personne se publient dans Coup de main.",
-                  });
-                  setTimeout(() => navigate("/petites-missions/creer"), 1200);
-                }}
+                onClick={() => setSitLocation("away")}
                 className={cn(
                   "text-left rounded-lg border p-3 transition-colors",
                   sitLocation === "away"
@@ -1109,18 +1102,18 @@ const CreateSit = () => {
                     : "border-input bg-card hover:bg-accent/40"
                 )}
               >
-                <p className="font-medium text-sm text-foreground">Ailleurs</p>
-                <p className="text-xs text-muted-foreground mt-0.5">Visite, balade, pension, chez la personne…</p>
+                <p className="font-medium text-sm text-foreground">Visite, balade ou pension</p>
+                <p className="text-xs text-muted-foreground mt-0.5">Le gardien ne reste pas chez vous : passages, promenades, ou garde chez lui</p>
               </button>
             </div>
 
             {sitLocation === "away" && (
               <div className="mt-4 rounded-lg border border-amber-300 bg-amber-50 p-4">
                 <p className="text-sm font-medium text-amber-900 mb-1">
-                  Redirection en cours vers Coup de main…
+                  Publier dans Coup de main
                 </p>
                 <p className="text-sm text-amber-900/80 mb-3">
-                  Si rien ne se passe, cliquez ci-dessous.
+                  Les visites, balades et pensions se publient dans notre espace Coup de main. Vous pouvez y aller quand vous le souhaitez.
                 </p>
                 <Button asChild size="sm">
                   <Link to="/petites-missions/creer">Publier dans Coup de main</Link>
