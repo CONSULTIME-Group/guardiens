@@ -672,7 +672,8 @@ const EditSit = () => {
               >
                 {descBlocker
                   ? descBlocker.label
-                  : `${trimmedDesc.length} caractères, minimum atteint.`}
+                  : `${persistedDesc.length} caractères, minimum atteint.`}
+
               </p>
               {forbiddenInDesc && (
                 <p className="text-xs text-destructive mt-1 flex items-center gap-1">
