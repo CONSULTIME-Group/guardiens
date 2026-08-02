@@ -419,8 +419,14 @@ const CreateSit = () => {
     sitCountry: string;
     acceptsSitterPets: "yes" | "no" | "discuss";
     acceptsSitterChildren: "yes" | "no" | "discuss";
+    sitLocation?: "home" | "away" | null;
+    currentStep?: number;
   };
   const localDraftKey = user ? `sit-create:${user.id}:${draftIdParam ?? fromSitId ?? "current"}` : null;
+  // Clé historique posée lors d'une première visite sans paramètre d'URL. Au
+  // retour via le dashboard, l'identifiant du brouillon change la clé, la copie
+  // locale doit donc être récupérée puis migrée.
+  const legacyLocalDraftKey = user ? `sit-create:${user.id}:current` : null;
   const applyLocalDraft = useCallback((d: SitLocalDraft) => {
     setTitle(d.title ?? "");
     setStartDate(d.startDate ?? "");
@@ -442,21 +448,41 @@ const CreateSit = () => {
     setSitCountry(d.sitCountry ?? "FR");
     setAcceptsSitterPets(d.acceptsSitterPets ?? "discuss");
     setAcceptsSitterChildren(d.acceptsSitterChildren ?? "discuss");
+    if (d.sitLocation) setSitLocation(d.sitLocation);
+    if (typeof d.currentStep === "number" && d.currentStep > 0) {
+      setCurrentStep(prev => Math.max(prev, Math.min(d.currentStep as number, STEPS.length - 1)));
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   const [localDraftRestored, setLocalDraftRestored] = useState(false);
+  const [remoteDraftResumed, setRemoteDraftResumed] = useState(false);
   // Restaure la copie locale si elle est postérieure au brouillon distant.
   const restoreLocalDraftIfFresher = useCallback((remoteUpdatedAt: string | null) => {
     if (!localDraftKey) return;
-    const stored = readFormDraft<SitLocalDraft>(localDraftKey);
+    let stored = readFormDraft<SitLocalDraft>(localDraftKey);
+    let savedAt = getFormDraftSavedAt(localDraftKey) ?? 0;
+    if (!stored && legacyLocalDraftKey && legacyLocalDraftKey !== localDraftKey) {
+      const legacy = readFormDraft<SitLocalDraft>(legacyLocalDraftKey);
+      if (legacy) {
+        stored = legacy;
+        savedAt = getFormDraftSavedAt(legacyLocalDraftKey) ?? 0;
+        writeFormDraft<SitLocalDraft>(localDraftKey, legacy);
+        clearFormDraft(legacyLocalDraftKey);
+      }
+    }
     if (!stored) return;
-    const savedAt = getFormDraftSavedAt(localDraftKey) ?? 0;
     const remote = remoteUpdatedAt ? new Date(remoteUpdatedAt).getTime() : 0;
-    if (remote && savedAt <= remote) return;
+    if (remote && savedAt <= remote) {
+      // Le distant est plus frais, mais l'étape atteinte n'y est pas stockée.
+      if (typeof stored.currentStep === "number" && stored.currentStep > 0) {
+        setCurrentStep(prev => Math.max(prev, Math.min(stored!.currentStep as number, STEPS.length - 1)));
+      }
+      return;
+    }
     applyLocalDraft(stored);
     setLocalDraftRestored(true);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [localDraftKey, applyLocalDraft]);
+  }, [localDraftKey, legacyLocalDraftKey, applyLocalDraft]);
 
 
 
@@ -599,6 +625,26 @@ const CreateSit = () => {
           setSitCountry((d as any).country || "FR");
           setAcceptsSitterPets(((d as any).accepts_sitter_pets as any) || "discuss");
           setAcceptsSitterChildren(((d as any).accepts_sitter_children as any) || "discuss");
+          // Le lieu de garde n'est pas persisté en base et seul le domicile est
+          // réellement supporté par le formulaire : tout brouillon existant est
+          // donc un brouillon à domicile. Sans cela, l'étape 1 paraît vide.
+          const rawExpectations = d.specific_expectations || "";
+          const hasContent = !!(d.title || rawExpectations || cleanStart || d.daily_routine || d.owner_message);
+          if (hasContent) setSitLocation("home");
+          // L'étape atteinte n'est pas stockée en base, on la recalcule à partir
+          // du contenu pour ne pas refaire franchir l'étape 1.
+          const sepIdx = rawExpectations.indexOf(EXPECTATIONS_SEPARATOR);
+          const reason = sepIdx >= 0 ? rawExpectations.slice(0, sepIdx) : rawExpectations;
+          const expect = sepIdx >= 0 ? rawExpectations.slice(sepIdx + EXPECTATIONS_SEPARATOR.length) : "";
+          const step0Complete =
+            !!(d.title || "").trim()
+            && !!cleanStart
+            && !!cleanEnd
+            && cleanStart < cleanEnd
+            && reason.trim().length >= MIN_SUB_DESCRIPTION
+            && expect.trim().length >= MIN_SUB_DESCRIPTION;
+          if (step0Complete) setCurrentStep(prev => Math.max(prev, 1));
+          if (hasContent) setRemoteDraftResumed(true);
           if (datesWerePast) {
             toast({
               title: "Dates à redéfinir",
@@ -677,12 +723,13 @@ const CreateSit = () => {
         absenceReason, sitterExpectations, openTo, isUrgent, sitEnvironments,
         minGardienSits, maxApplications, ownerMessage, dailyRoutine,
         coverPhotoUrl, sitCity, sitCountry, acceptsSitterPets, acceptsSitterChildren,
+        sitLocation, currentStep,
       });
       setLocalDraftSavedAt(Date.now());
     }, 300);
     return () => clearTimeout(t);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [localDraftKey, loading, title, startDate, endDate, flexibleDates, flexibleNotes, absenceReason, sitterExpectations, openTo, isUrgent, sitEnvironments, minGardienSits, maxApplications, ownerMessage, dailyRoutine, coverPhotoUrl, sitCity, sitCountry, acceptsSitterPets, acceptsSitterChildren]);
+  }, [localDraftKey, loading, title, startDate, endDate, flexibleDates, flexibleNotes, absenceReason, sitterExpectations, openTo, isUrgent, sitEnvironments, minGardienSits, maxApplications, ownerMessage, dailyRoutine, coverPhotoUrl, sitCity, sitCountry, acceptsSitterPets, acceptsSitterChildren, sitLocation, currentStep]);
 
 
   // Smart cover picker : scoring IA de la galerie, silencieux si quota/rate-limit.
@@ -1130,6 +1177,12 @@ const CreateSit = () => {
         {localDraftRestored && (
           <p className="text-sm text-muted-foreground bg-muted/50 rounded-lg px-3 py-2 mb-4" role="status">
             Nous avons retrouvé votre saisie en cours sur cet appareil et l'avons restaurée. Pensez à publier ou à enregistrer.
+          </p>
+        )}
+
+        {remoteDraftResumed && !localDraftRestored && (
+          <p className="text-sm text-muted-foreground bg-muted/50 rounded-lg px-3 py-2 mb-4" role="status">
+            Nous avons retrouvé votre annonce en cours, vous reprenez là où vous vous étiez arrêté.
           </p>
         )}
 
