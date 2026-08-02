@@ -246,40 +246,13 @@ const Sits = () => {
 
         const rows: any[] = (data as any[]) || [];
 
-        // Auto-expire cote client, reserve aux annonces reellement en ligne ou
-        // confirmees. Un brouillon n'est pas une garde en cours : il reste un
-        // brouillon, ses dates sont simplement a redefinir.
-        const toExpire = rows.filter((s: any) =>
-          s.end_date
-          && ["published", "confirmed"].includes(s.status)
-          && isBefore(parseISO(s.end_date), new Date())
-        );
-
-        if (toExpire.length > 0) {
-          const ids = toExpire.map((s: any) => s.id);
-          const { error: expErr } = await supabase
-            .from("sits")
-            .update({ status: "cancelled" as any, cancellation_reason: "expired" })
-            .in("id", ids)
-            .eq("user_id", user.id);
-          if (expErr) {
-            // Non bloquant pour l'affichage : on log seulement.
-            console.warn("[Sits] auto-expire failed", expErr);
-          }
-        }
-
+        // Aucune ecriture de statut cote client : le passage d'une garde
+        // confirmee a terminee releve du cron dedie. L'affichage se contente
+        // de signaler visuellement les dates depassees.
         const enriched = rows.map((sit: any) => {
-          const wasExpired = toExpire.some((e: any) => e.id === sit.id);
-          const overlaid = {
-            ...sit,
-            status: wasExpired ? "cancelled" : sit.status,
-            cancellation_reason: wasExpired ? "expired" : sit.cancellation_reason,
-          };
           return {
             ...sit,
-            status: overlaid.status,
-            cancellation_reason: overlaid.cancellation_reason,
-            effectiveStatus: getOwnerEffectiveStatus(overlaid),
+            effectiveStatus: getOwnerEffectiveStatus(sit),
             applicationCount: sit.application_count || 0,
             pendingApplicationCount: sit.pending_application_count || 0,
             acceptedSitter: sit.accepted_sitter || null,
@@ -586,7 +559,9 @@ const Sits = () => {
         variant: "destructive",
         title: "Republication impossible",
         description:
-          code === "42501" || code === "PGRST301"
+          code === "P0001"
+            ? "Cette annonce ne peut pas être republiée sans au moins un animal à faire garder. Ajoutez-le dans votre logement, puis republiez."
+            : code === "42501" || code === "PGRST301"
             ? "Vous n'avez pas les droits pour republier cette annonce."
             : "La base a refusé la republication : vérifiez le titre, les dates, la description et la photo de cette annonce, puis republiez.",
       });
@@ -1654,7 +1629,7 @@ const QuickActions = ({
     );
   }
 
-  if (effectiveStatus === "expired" || effectiveStatus === "unpublished" || effectiveStatus === "archived") {
+  if (isOwner && (effectiveStatus === "expired" || effectiveStatus === "unpublished" || effectiveStatus === "archived")) {
     return (
       <>
         <button onClick={onRepublish} className={cn(btnClass, "bg-primary/10 text-primary hover:bg-primary/20")}>
@@ -1724,10 +1699,11 @@ const QuickActions = ({
   }
 
   if (effectiveStatus === "cancelled") {
+    // La fiche publique ne sert pas les annonces annulees : pas de lien mort.
     return (
-      <Link to={`/sits/${sit.id}`} className={cn(btnClass, "bg-accent text-muted-foreground hover:text-foreground")}>
-        <Eye className="h-3.5 w-3.5" /> Voir les détails
-      </Link>
+      <span className={cn(btnClass, "border border-border text-muted-foreground cursor-default")}>
+        Annonce annulée
+      </span>
     );
   }
 
@@ -1760,11 +1736,13 @@ const ActionsMenu = ({
         </button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-52">
-        <DropdownMenuItem asChild>
-          <Link to={`/sits/${sit.id}`} className="flex items-center gap-2">
-            <Eye className="h-4 w-4" /> Voir l'annonce
-          </Link>
-        </DropdownMenuItem>
+        {effectiveStatus !== "cancelled" && (
+          <DropdownMenuItem asChild>
+            <Link to={`/sits/${sit.id}`} className="flex items-center gap-2">
+              <Eye className="h-4 w-4" /> Voir l'annonce
+            </Link>
+          </DropdownMenuItem>
+        )}
         {canEdit && (
           <DropdownMenuItem asChild>
             <Link to={`/sits/${sit.id}/edit`} className="flex items-center gap-2">
