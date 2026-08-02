@@ -138,6 +138,7 @@ const HouseGuide = () => {
 
       const isOwner = !!property && property.user_id === user.id;
       const base = emptyGuide(propertyId, user.id);
+      let loaded: GuideData = base;
       if (data) {
         // Normalise les champs nullables (DB) en strings vides pour les inputs contrôlés
         const merged: GuideData = { ...base } as GuideData;
@@ -150,10 +151,20 @@ const HouseGuide = () => {
           }
         }
         merged.id = (data as any).id;
-        setGuide(merged);
-      } else {
-        setGuide(base);
+        loaded = merged;
       }
+
+      // Copie locale plus récente : on la restaure et on prévient l'utilisateur.
+      if (isOwner && localDraftKey) {
+        const local = readFormDraft<GuideData>(localDraftKey);
+        if (local && JSON.stringify({ ...local, id: undefined }) !== JSON.stringify({ ...loaded, id: undefined })) {
+          loaded = { ...loaded, ...local, id: loaded.id };
+          setLocalDraftRestored(true);
+          setDirty(true);
+        }
+      }
+      setGuide(loaded);
+
 
       if (isOwner) {
         setAccess("owner");
