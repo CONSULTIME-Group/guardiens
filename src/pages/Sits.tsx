@@ -1840,7 +1840,7 @@ const ActionsMenu = ({
         </button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-52">
-        {effectiveStatus !== "cancelled" && (
+        {canOpenSitPage(sit) && (
           <DropdownMenuItem asChild>
             <Link to={`/sits/${sit.id}`} className="flex items-center gap-2">
               <Eye className="h-4 w-4" /> Voir l'annonce
