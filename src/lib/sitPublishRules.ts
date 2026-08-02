@@ -1,15 +1,20 @@
 /**
  * Source de vérité unique des règles de publication d'une annonce de garde.
  *
- * Consommée par `src/pages/CreateSit.tsx`, `src/components/sits/owner/DraftChecklist.tsx`,
- * `src/components/sits/views/OwnerSitView.tsx` et `src/hooks/useAccessLevel.ts`.
- * Aucune de ces sources ne doit porter sa propre règle.
+ * Consommée par `src/pages/CreateSit.tsx`, `src/pages/EditSit.tsx`,
+ * `src/components/sits/views/OwnerSitView.tsx`, `src/components/sits/owner/DraftChecklist.tsx`
+ * et `src/hooks/useAccessLevel.ts`. Aucune de ces sources ne doit porter sa propre règle.
  *
  * Doctrine retenue :
+ *  - le mode de description est DÉCLARÉ par l'appelant, jamais deviné. Chercher
+ *    un double saut de ligne dans un texte rédigé par un humain est faux : les
+ *    gens sautent des lignes et signent leurs annonces ;
+ *  - mode "two-fields" (formulaire à deux zones de saisie) : deux textes
+ *    obligatoires, 30 caractères minimum chacun ;
+ *  - mode "single-block" (une seule zone de saisie, texte concaténé) :
+ *    50 caractères minimum au total, jamais de découpe ;
  *  - aucun seuil de pourcentage de complétion de profil (non actionnable),
  *    remplacé par ses composantes concrètes : logement décrit, une photo, un animal ;
- *  - descriptions rétrocompatibles : deux sous-champs de 30 caractères minimum
- *    quand le séparateur est présent, sinon un bloc unique de 50 caractères minimum ;
  *  - date de début ET date de fin toujours exigées, la case dates flexibles
  *    enrichit l'annonce mais ne dispense jamais de dates ;
  *  - photos comptées sur la galerie du profil ET sur les photos du logement ;
@@ -19,6 +24,9 @@
 export const MIN_SUB_DESCRIPTION = 30;
 export const MIN_SINGLE_DESCRIPTION = 50;
 export const EXPECTATIONS_SEPARATOR = "\n\n";
+
+/** Mode de saisie de la description, déclaré par l'appelant. */
+export type DescriptionMode = "two-fields" | "single-block";
 
 export type PublishBlocker = {
   id: string;
@@ -30,18 +38,13 @@ export type PublishBlocker = {
   action?: string;
 };
 
-export interface SitPublishInput {
+interface SitPublishBase {
   title?: string | null;
   startDate?: string | null;
   endDate?: string | null;
   flexibleDates?: boolean | null;
   /** Erreur de cohérence des dates déjà calculée par le formulaire. */
   dateError?: string | null;
-  /** Descriptions séparées, prioritaires si fournies. */
-  absenceReason?: string | null;
-  sitterExpectations?: string | null;
-  /** Texte concaténé (colonne `specific_expectations`), utilisé en repli. */
-  specificExpectations?: string | null;
   /** Logement renseigné sur le profil propriétaire. */
   hasProperty?: boolean | null;
   /** Photos de la galerie du profil. */
@@ -54,7 +57,24 @@ export interface SitPublishInput {
   petCount?: number | null;
 }
 
-/** Répartit un texte concaténé sur les deux sous-champs de description. */
+export interface SitPublishTwoFieldsInput extends SitPublishBase {
+  descriptionMode: "two-fields";
+  absenceReason?: string | null;
+  sitterExpectations?: string | null;
+}
+
+export interface SitPublishSingleBlockInput extends SitPublishBase {
+  descriptionMode: "single-block";
+  /** Texte concaténé (colonne `specific_expectations`), jamais découpé. */
+  specificExpectations?: string | null;
+}
+
+export type SitPublishInput = SitPublishTwoFieldsInput | SitPublishSingleBlockInput;
+
+/**
+ * Répartit un texte concaténé sur deux sous-champs de saisie.
+ * Utilitaire de formulaire uniquement : les règles ne l'utilisent jamais.
+ */
 export const splitExpectations = (raw?: string | null) => {
   const text = raw || "";
   const idx = text.indexOf(EXPECTATIONS_SEPARATOR);
@@ -69,34 +89,11 @@ export const joinExpectations = (a: string, b: string) =>
 
 const len = (v?: string | null) => (v || "").trim().length;
 
-/**
- * Contrôle rétrocompatible des descriptions.
- *
- * Deux conventions coexistent en base :
- *  - les annonces récentes portent deux sous-champs séparés par `\n\n`, chacun
- *    contrôlé à 30 caractères minimum ;
- *  - les annonces antérieures n'ont qu'un bloc de texte, accepté à partir de
- *    50 caractères au total. Aucune annonce existante ne doit devenir non
- *    publiable du fait de la convention à deux champs.
- */
-export const getDescriptionBlockers = (
-  reason: string,
-  expectations: string,
+/** Bloquants de description en mode deux champs, les deux étant obligatoires. */
+export const getTwoFieldsDescriptionBlockers = (
+  reason?: string | null,
+  expectations?: string | null,
 ): PublishBlocker[] => {
-  const singleBlock = len(expectations) === 0;
-
-  if (singleBlock) {
-    return len(reason) < MIN_SINGLE_DESCRIPTION
-      ? [
-          {
-            id: "desc-reason",
-            label: `Description de la garde (${MIN_SINGLE_DESCRIPTION} caractères minimum, actuellement ${len(reason)})`,
-            anchor: "description-field",
-          },
-        ]
-      : [];
-  }
-
   const out: PublishBlocker[] = [];
   if (len(reason) < MIN_SUB_DESCRIPTION) {
     out.push({
@@ -115,15 +112,29 @@ export const getDescriptionBlockers = (
   return out;
 };
 
+/** Bloquant de description en mode bloc unique, sans jamais découper le texte. */
+export const getSingleBlockDescriptionBlockers = (text?: string | null): PublishBlocker[] =>
+  len(text) < MIN_SINGLE_DESCRIPTION
+    ? [
+        {
+          id: "desc-reason",
+          label: `Description de la garde (${MIN_SINGLE_DESCRIPTION} caractères minimum, actuellement ${len(text)})`,
+          anchor: "description-field",
+        },
+      ]
+    : [];
+
+/** Bloquants de description selon le mode déclaré. */
+export const getDescriptionBlockers = (input: SitPublishInput): PublishBlocker[] =>
+  input.descriptionMode === "two-fields"
+    ? getTwoFieldsDescriptionBlockers(input.absenceReason, input.sitterExpectations)
+    : getSingleBlockDescriptionBlockers(input.specificExpectations);
+
 /**
  * Renvoie la liste ordonnée des éléments manquants pour publier.
  * Liste vide, la publication est possible.
  */
 export const getSitPublishBlockers = (input: SitPublishInput): PublishBlocker[] => {
-  const fallback = splitExpectations(input.specificExpectations);
-  const reason = input.absenceReason ?? fallback.absenceReason;
-  const expectations = input.sitterExpectations ?? fallback.sitterExpectations;
-
   /**
    * Une date de début et une date de fin sont toujours exigées. La case dates
    * flexibles enrichit l'annonce, elle ne dispense jamais de dates : sans elles
@@ -149,7 +160,7 @@ export const getSitPublishBlockers = (input: SitPublishInput): PublishBlocker[] 
         }
       : null,
     input.dateError ? { id: "date-error", label: input.dateError, anchor: "dates-field" } : null,
-    ...getDescriptionBlockers(reason, expectations),
+    ...getDescriptionBlockers(input),
     photoCount === 0
       ? {
           id: "photo",
@@ -168,13 +179,34 @@ export const getSitPublishBlockers = (input: SitPublishInput): PublishBlocker[] 
 export const canPublishSit = (input: SitPublishInput): boolean =>
   getSitPublishBlockers(input).length === 0;
 
-/** Libellés affichables de tous les prérequis, dans l'ordre de la checklist. */
-export const SIT_PUBLISH_REQUIREMENTS: { id: string; label: string }[] = [
+/**
+ * Libellés affichables de tous les prérequis, dans l'ordre de la checklist.
+ * Les lignes de description suivent le mode déclaré : une annonce en bloc
+ * unique n'affiche pas de ligne « Attentes envers le gardien » qu'elle n'a pas.
+ */
+export const getSitPublishRequirements = (
+  mode: DescriptionMode,
+): { id: string; label: string }[] => [
   { id: "property", label: "Logement décrit sur votre profil" },
   { id: "title", label: "Titre de l'annonce" },
   { id: "dates", label: "Date de début et date de fin de la garde" },
-  { id: "desc-reason", label: `Raison de votre besoin de garde (${MIN_SUB_DESCRIPTION} caractères minimum)` },
-  { id: "desc-expectations", label: `Attentes envers le gardien (${MIN_SUB_DESCRIPTION} caractères minimum)` },
+  ...(mode === "two-fields"
+    ? [
+        {
+          id: "desc-reason",
+          label: `Raison de votre besoin de garde (${MIN_SUB_DESCRIPTION} caractères minimum)`,
+        },
+        {
+          id: "desc-expectations",
+          label: `Attentes envers le gardien (${MIN_SUB_DESCRIPTION} caractères minimum)`,
+        },
+      ]
+    : [
+        {
+          id: "desc-reason",
+          label: `Description de la garde (${MIN_SINGLE_DESCRIPTION} caractères minimum)`,
+        },
+      ]),
   { id: "photo", label: "Au moins une photo de votre logement ou de votre galerie" },
   { id: "pets", label: "Au moins un animal à faire garder" },
 ];

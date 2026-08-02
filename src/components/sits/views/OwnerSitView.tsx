@@ -37,7 +37,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { formatSitPeriod } from "@/lib/dateRange";
-import { getSitPublishBlockers, SIT_PUBLISH_REQUIREMENTS } from "@/lib/sitPublishRules";
+import { getSitPublishBlockers, getSitPublishRequirements } from "@/lib/sitPublishRules";
 
 import EmergencyAlertBanner from "@/components/sits/EmergencyAlertBanner";
 import SitDateHistory from "@/components/sits/SitDateHistory";
@@ -324,6 +324,7 @@ const OwnerSitView = ({
   };
   // Règles de publication : source unique, voir src/lib/sitPublishRules.ts.
   const publishBlockers = getSitPublishBlockers({
+    descriptionMode: "single-block",
     title: sit.title,
     startDate: sit.start_date,
     endDate: sit.end_date,
@@ -383,7 +384,7 @@ const OwnerSitView = ({
       {isDraft && (
         <DraftChecklist
           blockers={publishBlockers}
-          requirements={SIT_PUBLISH_REQUIREMENTS}
+          requirements={getSitPublishRequirements("single-block")}
           editHref={`/sits/${sit.id}/edit`}
           publishing={publishing}
           onPublish={() => {

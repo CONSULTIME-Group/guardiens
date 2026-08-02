@@ -619,7 +619,7 @@ const CreateSit = () => {
           setTitle(d.title || "");
           setStartDate(cleanStart);
           setEndDate(cleanEnd);
-          setFlexibleDates(d.flexible_dates || datesWerePast);
+          setFlexibleDates(d.flexible_dates || false);
           applyExpectations(d.specific_expectations || "");
           setOpenTo(d.open_to || []);
           setIsUrgent(d.is_urgent || false);
@@ -792,18 +792,16 @@ const CreateSit = () => {
     if (!draftId && !hasAnyContent) return null;
     setSavingDraft(true);
     try {
-      let expectations = specificExpectations;
-      if (flexibleDates && flexibleNotes) {
-        expectations = `${expectations}\n\nDates flexibles : ${flexibleNotes}`.trim();
-      }
+      const expectations = specificExpectations;
       const payload: any = {
         user_id: user.id,
         property_id: property.id,
         title: title || "",
         start_date: safeStart,
         end_date: safeEnd,
-        flexible_dates: flexibleDates || (!safeStart || !safeEnd),
+        flexible_dates: flexibleDates,
         specific_expectations: expectations,
+        flexibility_notes: flexibleDates && flexibleNotes.trim() ? flexibleNotes.trim() : null,
         open_to: openTo,
         is_urgent: isUrgent,
         environments: sitEnvironments,
@@ -885,6 +883,7 @@ const CreateSit = () => {
 
   // Règles de publication : source unique, voir src/lib/sitPublishRules.ts.
   const publishBlockers: PublishBlocker[] = getSitPublishBlockers({
+    descriptionMode: "two-fields",
     title,
     startDate,
     endDate,
@@ -968,10 +967,7 @@ const CreateSit = () => {
         toast({ title: "Annonce publiée avec une réserve", description: verdict.reasons.join(" · ") });
       }
 
-      let expectations = specificExpectations;
-      if (flexibleDates && flexibleNotes) {
-        expectations = `${expectations}\n\nDates flexibles : ${flexibleNotes}`.trim();
-      }
+      const expectations = specificExpectations;
 
       // Filet de sécurité : si l'utilisateur n'a rien choisi et qu'aucun smart
       // cover n'a été calculé (étape survolée), on tente une dernière analyse IA.
@@ -992,6 +988,7 @@ const CreateSit = () => {
         end_date: endDate,
         flexible_dates: flexibleDates,
         specific_expectations: expectations,
+        flexibility_notes: flexibleDates && flexibleNotes.trim() ? flexibleNotes.trim() : null,
         open_to: openTo,
         is_urgent: isUrgent,
         status: "published",
@@ -2209,11 +2206,7 @@ const CreateSit = () => {
         flexibleDates={flexibleDates}
         city={(sitCity || ownerCity || "").trim()}
         country={sitCountry}
-        specificExpectations={
-          flexibleDates && flexibleNotes
-            ? `${specificExpectations}\n\nDates flexibles : ${flexibleNotes}`.trim()
-            : specificExpectations
-        }
+        specificExpectations={specificExpectations}
         ownerMessage={ownerMessage}
         dailyRoutine={dailyRoutine}
         coverPhotoUrl={coverPhotoUrl}
