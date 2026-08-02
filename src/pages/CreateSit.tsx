@@ -1099,17 +1099,8 @@ const CreateSit = () => {
       // Le texte renvoyé par la base est technique et en anglais : il reste en
       // console, l'utilisateur reçoit une phrase compréhensible.
       console.error("[CreateSit] publish failed", err);
-      const code = String(err?.code || "");
-      const description =
-        code === "P0001"
-          ? "Votre annonce ne peut pas être publiée sans au moins un animal à faire garder. Ajoutez-le dans votre logement, puis republiez."
-          : code === "23505"
-          ? "Une annonce identique existe déjà. Ouvrez la liste de vos annonces, l'annonce y figure peut-être déjà."
-          : code === "42501" || code === "PGRST301"
-            ? "Vous n'avez pas les droits pour publier cette annonce. Reconnectez-vous, puis recommencez."
-            : code === "23514" || code === "23502"
-              ? "Un élément obligatoire manque ou n'est pas valide : titre, dates, description ou photo. Vérifiez le formulaire."
-              : "La publication n'a pas abouti. Vérifiez votre connexion, puis vos informations de titre, de dates, de description et de photo.";
+      const description = describeSitWriteError(err, "publish");
+
       toast({
         variant: "destructive",
         title: "Impossible de publier l'annonce",
