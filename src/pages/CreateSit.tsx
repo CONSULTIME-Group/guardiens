@@ -49,6 +49,26 @@ import { makePlainTextPasteHandler } from "@/lib/pastePlainText";
 import { DEFAULT_MAX_APPLICATIONS } from "@/lib/applicationCap";
 import { getSitPublishBlockers, MIN_SUB_DESCRIPTION, type PublishBlocker } from "@/lib/sitPublishRules";
 
+/**
+ * Répartit un texte existant sur les deux champs de description.
+ * La découpe au double saut de ligne n'est acceptée que si les deux parties
+ * atteignent le seuil ; sinon tout le texte va dans le premier champ.
+ */
+function splitForFields(raw: string): { first: string; rest: string; reliable: boolean } {
+  const text = raw || "";
+  const idx = text.indexOf("\n\n");
+  if (idx >= 0) {
+    const first = text.slice(0, idx);
+    const rest = text.slice(idx + 2);
+    if (
+      first.trim().length >= MIN_SUB_DESCRIPTION &&
+      rest.trim().length >= MIN_SUB_DESCRIPTION
+    ) {
+      return { first, rest, reliable: true };
+    }
+  }
+  return { first: text, rest: "", reliable: false };
+}
 
 
 
@@ -271,16 +291,24 @@ const CreateSit = () => {
   const joinExpectations = (a: string, b: string) =>
     [a.trim(), b.trim()].filter(Boolean).join(EXPECTATIONS_SEPARATOR);
   // Reprend un texte existant (brouillon, republication, Alma) et le répartit
-  // sur les deux sous-champs, sans perte de contenu.
+  // sur les deux sous-champs, sans perte de contenu. La découpe n'est retenue
+  // que si les deux parties tiennent le seuil : un simple saut de ligne avant
+  // une signature ne doit jamais atterrir dans le champ des attentes.
   const applyExpectations = useCallback((raw: string | null | undefined) => {
     const text = raw || "";
-    const idx = text.indexOf(EXPECTATIONS_SEPARATOR);
-    const first = idx >= 0 ? text.slice(0, idx) : text;
-    const rest = idx >= 0 ? text.slice(idx + EXPECTATIONS_SEPARATOR.length) : "";
+    const { first, rest, reliable } = splitForFields(text);
     setAbsenceReason(first);
     setSitterExpectations(rest);
     setSpecificExpectations(text);
-  }, []);
+    if (text.trim() && !reliable) {
+      toast({
+        title: "Description à compléter",
+        description:
+          "Votre texte a été replacé dans la première question, complétez vos attentes envers le gardien.",
+      });
+    }
+  }, [toast]);
+
   const updateAbsenceReason = (v: string) => {
     setAbsenceReason(v);
     setSpecificExpectations(joinExpectations(v, sitterExpectations));
@@ -641,9 +669,8 @@ const CreateSit = () => {
           if (hasContent) setSitLocation("home");
           // L'étape atteinte n'est pas stockée en base, on la recalcule à partir
           // du contenu pour ne pas refaire franchir l'étape 1.
-          const sepIdx = rawExpectations.indexOf(EXPECTATIONS_SEPARATOR);
-          const reason = sepIdx >= 0 ? rawExpectations.slice(0, sepIdx) : rawExpectations;
-          const expect = sepIdx >= 0 ? rawExpectations.slice(sepIdx + EXPECTATIONS_SEPARATOR.length) : "";
+          const { first: reason, rest: expect } = splitForFields(rawExpectations);
+
           const step0Complete =
             !!(d.title || "").trim()
             && !!cleanStart

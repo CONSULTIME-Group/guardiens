@@ -45,6 +45,8 @@ interface SitDetailHeaderProps {
   startDate: string | null;
   endDate: string | null;
   flexibleDates: boolean | null;
+  flexibilityNotes?: string | null;
+
   photos: string[];
   owner: any;
   isOwner: boolean;
@@ -73,6 +75,8 @@ const SitDetailHeader = ({
   startDate,
   endDate,
   flexibleDates,
+  flexibilityNotes,
+
   photos,
   owner,
   isOwner,
@@ -216,6 +220,10 @@ const SitDetailHeader = ({
             {flexibleDates && (
               <span className="text-xs bg-accent px-2 py-0.5 rounded-full ml-1">Flexible</span>
             )}
+            {flexibilityNotes && (
+              <span className="text-xs text-muted-foreground">{flexibilityNotes}</span>
+            )}
+
           </span>
           <span
             className={`px-2.5 py-0.5 rounded-full text-xs font-medium ${status.className}`}

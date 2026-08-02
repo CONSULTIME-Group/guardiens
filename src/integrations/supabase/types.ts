@@ -7788,6 +7788,7 @@ export type Database = {
           dates_hidden: boolean
           end_date: string
           environments: string[]
+          flexibility_notes: string
           flexible_dates: boolean
           id: string
           max_applications: number

@@ -63,6 +63,10 @@ const SitQuickFacts = ({
             {durationDays} {durationDays === 1 ? "jour" : "jours"}
           </p>
         )}
+        {sit?.flexibility_notes && (
+          <p className="text-xs text-muted-foreground mt-1">{sit.flexibility_notes}</p>
+        )}
+
       </Card>,
     );
   }

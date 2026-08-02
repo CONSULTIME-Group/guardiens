@@ -8,6 +8,9 @@ export interface SitData {
   start_date: string | null;
   end_date: string | null;
   flexible_dates: boolean | null;
+  /** Précisions libres sur les dates approximatives. */
+  flexibility_notes?: string | null;
+
   specific_expectations: string | null;
   open_to: string[] | null;
   status: string;

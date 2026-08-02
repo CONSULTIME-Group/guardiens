@@ -73,36 +73,52 @@ const MAX_DESC_LENGTH = 2000;
  */
 const FLEX_REGEX = /\n*(?:Flexibilité|Dates flexibles)\s*:\s*(.+?)(?=\n\n|$)/i;
 
-/** Analyse une note de flexibilité au format « Mois : … · Durée : … ». */
-function parseFlexNote(payload: string): { months: string[]; duration: string } {
+/**
+ * Analyse une note de flexibilité. Le format structuré « Mois : … · Durée : … »
+ * est reconnu, tout le reste est conservé tel quel comme texte libre : une note
+ * saisie à la main par un propriétaire ne doit jamais être perdue.
+ */
+function parseFlexNote(payload: string): { months: string[]; duration: string; free: string } {
   const monthsMatch = payload.match(/Mois\s*:\s*([^·]+)/i);
-  const durationMatch = payload.match(/Durée\s*:\s*(.+)/i);
+  const durationMatch = payload.match(/Durée\s*:\s*([^·]+)/i);
+  const free = payload
+    .replace(/Mois\s*:\s*[^·]+/i, "")
+    .replace(/Durée\s*:\s*[^·]+/i, "")
+    .split("·")
+    .map((s) => s.trim())
+    .filter(Boolean)
+    .join(" · ");
   return {
     months: monthsMatch
       ? monthsMatch[1].split(",").map((s) => s.trim()).filter(Boolean)
       : [],
     duration: durationMatch ? durationMatch[1].trim() : "",
+    free,
   };
 }
 
 /** Extrait la flexibilité héritée du corps de la description, et la retire. */
-function parseFlexibility(text: string): { months: string[]; duration: string; clean: string } {
+function parseFlexibility(
+  text: string,
+): { months: string[]; duration: string; free: string; clean: string } {
   const match = text.match(FLEX_REGEX);
-  if (!match) return { months: [], duration: "", clean: text };
-  const { months, duration } = parseFlexNote(match[1] || "");
-  return { months, duration, clean: text.replace(FLEX_REGEX, "").trim() };
+  if (!match) return { months: [], duration: "", free: "", clean: text };
+  const parsed = parseFlexNote(match[1] || "");
+  return { ...parsed, clean: text.replace(FLEX_REGEX, "").trim() };
 }
 
 /** Sérialise la flexibilité pour la colonne dédiée. */
-function buildFlexNote(months: string[], duration: string): string | null {
+function buildFlexNote(months: string[], duration: string, free: string): string | null {
   const note = [
     months.length > 0 ? `Mois : ${months.join(", ")}` : "",
     duration ? `Durée : ${duration}` : "",
+    free.trim(),
   ]
     .filter(Boolean)
     .join(" · ");
   return note || null;
 }
+
 
 const LOCKED_STATUSES = new Set(["archived", "cancelled", "expired", "completed"]);
 
@@ -120,6 +136,8 @@ const EditSit = () => {
   const [flexibleDates, setFlexibleDates] = useState(false);
   const [flexibleMonths, setFlexibleMonths] = useState<string[]>([]);
   const [flexibleDuration, setFlexibleDuration] = useState("");
+  const [flexibleFreeNote, setFlexibleFreeNote] = useState("");
+
   const [specificExpectations, setSpecificExpectations] = useState("");
   const [descTouched, setDescTouched] = useState(false);
   const [openTo, setOpenTo] = useState<string[]>([]);
@@ -162,18 +180,22 @@ const EditSit = () => {
       const rawExp = data.specific_expectations || "";
       // La flexibilité vient de sa colonne dédiée ; on ne retombe sur la
       // description que pour les annonces antérieures à cette séparation.
+      // Le texte libre hérité est migré dans la note, jamais jeté.
       const legacy = parseFlexibility(rawExp);
       const storedNote = ((data as any).flexibility_notes as string | null) || "";
       const stored = storedNote ? parseFlexNote(storedNote) : null;
       const months = stored ? stored.months : legacy.months;
       const duration = stored ? stored.duration : legacy.duration;
+      const freeNote = stored && stored.free ? stored.free : legacy.free;
       const clean = legacy.clean;
       setTitle(data.title || "");
       setStartDate(data.start_date || "");
       setEndDate(data.end_date || "");
-      setFlexibleDates(data.flexible_dates || false);
+      setFlexibleDates(data.flexible_dates || !!(months.length || duration || freeNote));
       setFlexibleMonths(months);
       setFlexibleDuration(duration);
+      setFlexibleFreeNote(freeNote);
+
       setSpecificExpectations(clean);
       setOpenTo((data.open_to as string[]) || []);
       setIsUrgent(data.is_urgent || false);
@@ -196,9 +218,11 @@ const EditSit = () => {
         title: data.title || "",
         startDate: data.start_date || "",
         endDate: data.end_date || "",
-        flexibleDates: data.flexible_dates || false,
+        flexibleDates: data.flexible_dates || !!(months.length || duration || freeNote),
         flexibleMonths: months,
         flexibleDuration: duration,
+        flexibleFreeNote: freeNote,
+
         specificExpectations: clean,
         openTo: (data.open_to as string[]) || [],
         isUrgent: data.is_urgent || false,
@@ -216,6 +240,15 @@ const EditSit = () => {
 
   const trimmedTitle = title.trim();
   const trimmedDesc = specificExpectations.trim();
+  /**
+   * Texte réellement écrit en base : le bloc de flexibilité est retiré à
+   * l'enregistrement, la validation et le compteur doivent donc porter sur ce
+   * texte, sinon la contrainte de longueur côté base rejette silencieusement.
+   */
+  const persistedDesc = useMemo(
+    () => trimmedDesc.replace(FLEX_REGEX, "").trim(),
+    [trimmedDesc],
+  );
 
   /**
    * Les règles de contenu viennent de la source unique `sitPublishRules`.
@@ -231,13 +264,14 @@ const EditSit = () => {
       endDate,
       flexibleDates,
       dateError,
-      specificExpectations: trimmedDesc,
+      specificExpectations: persistedDesc,
+
       // Champs hors de ce formulaire, neutralisés pour ne pas produire de bruit.
       hasProperty: true,
       galleryPhotoCount: 1,
       petCount: 1,
     }).filter((b) => owned.has(b.id));
-  }, [trimmedTitle, startDate, endDate, flexibleDates, dateError, trimmedDesc]);
+  }, [trimmedTitle, startDate, endDate, flexibleDates, dateError, persistedDesc]);
 
   const descBlocker = formBlockers.find((b) => b.id.startsWith("desc-")) || null;
 
@@ -267,11 +301,12 @@ const EditSit = () => {
     () =>
       JSON.stringify({
         title, startDate, endDate, flexibleDates, flexibleMonths,
-        flexibleDuration, specificExpectations, openTo, isUrgent, minGardienSits,
+        flexibleDuration, flexibleFreeNote, specificExpectations, openTo, isUrgent, minGardienSits,
       }),
     [title, startDate, endDate, flexibleDates, flexibleMonths, flexibleDuration,
-      specificExpectations, openTo, isUrgent, minGardienSits],
+      flexibleFreeNote, specificExpectations, openTo, isUrgent, minGardienSits],
   );
+
   const isDirty = !loading && currentSnapshot !== initialSnapshot.current;
 
   useEffect(() => {
@@ -290,8 +325,11 @@ const EditSit = () => {
 
     // La flexibilité n'est jamais concaténée à la description : le `\n\n`
     // servirait alors de séparateur des deux sous-champs de description.
-    const expectations = trimmedDesc.replace(FLEX_REGEX, "").trim();
-    const flexNote = flexibleDates ? buildFlexNote(flexibleMonths, flexibleDuration) : null;
+    const expectations = persistedDesc;
+    const flexNote = flexibleDates
+      ? buildFlexNote(flexibleMonths, flexibleDuration, flexibleFreeNote)
+      : null;
+
 
     const { error } = await supabase
       .from("sits")
@@ -317,10 +355,11 @@ const EditSit = () => {
     toast({ title: "Annonce mise à jour" });
     navigate(`/sits/${id}`);
   }, [
-    user, id, canSave, trimmedDesc, trimmedTitle, startDate, endDate,
-    flexibleDates, flexibleMonths, flexibleDuration, openTo, isUrgent,
+    user, id, canSave, persistedDesc, trimmedTitle, startDate, endDate,
+    flexibleDates, flexibleMonths, flexibleDuration, flexibleFreeNote, openTo, isUrgent,
     minGardienSits, currentSnapshot, navigate, toast,
   ]);
+
 
   const handleSave = () => {
     if (!canSave) return;
@@ -585,7 +624,25 @@ const EditSit = () => {
                       ))}
                     </div>
                   </div>
+                  <div>
+                    <Label htmlFor="sit-flexible-note" className="text-xs text-muted-foreground">
+                      Précisez vos dates approximatives
+                    </Label>
+                    <Textarea
+                      id="sit-flexible-note"
+                      placeholder="Ex : arrivée entre le 3 et le 5, départ possible après le 16."
+                      value={flexibleFreeNote}
+                      onChange={(e) => setFlexibleFreeNote(e.target.value.slice(0, 300))}
+                      rows={2}
+                      maxLength={300}
+                      className="mt-1.5 text-base resize-none"
+                    />
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Ce texte s'affiche à côté des dates, dans l'annonce.
+                    </p>
+                  </div>
                 </div>
+
               )}
             </div>
           </SectionCard>
@@ -615,7 +672,8 @@ const EditSit = () => {
               >
                 {descBlocker
                   ? descBlocker.label
-                  : `${trimmedDesc.length} caractères, minimum atteint.`}
+                  : `${persistedDesc.length} caractères, minimum atteint.`}
+
               </p>
               {forbiddenInDesc && (
                 <p className="text-xs text-destructive mt-1 flex items-center gap-1">
