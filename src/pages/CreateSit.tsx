@@ -1180,6 +1180,12 @@ const CreateSit = () => {
           </p>
         )}
 
+        {remoteDraftResumed && !localDraftRestored && (
+          <p className="text-sm text-muted-foreground bg-muted/50 rounded-lg px-3 py-2 mb-4" role="status">
+            Nous avons retrouvé votre annonce en cours, vous reprenez là où vous vous étiez arrêté.
+          </p>
+        )}
+
 
 
         {showAlmaCreateBubble && (
