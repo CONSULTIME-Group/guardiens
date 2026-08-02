@@ -218,9 +218,11 @@ const EditSit = () => {
         title: data.title || "",
         startDate: data.start_date || "",
         endDate: data.end_date || "",
-        flexibleDates: data.flexible_dates || false,
+        flexibleDates: data.flexible_dates || !!(months.length || duration || freeNote),
         flexibleMonths: months,
         flexibleDuration: duration,
+        flexibleFreeNote: freeNote,
+
         specificExpectations: clean,
         openTo: (data.open_to as string[]) || [],
         isUrgent: data.is_urgent || false,
