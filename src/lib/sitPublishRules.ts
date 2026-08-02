@@ -144,6 +144,23 @@ export const getSitPublishBlockers = (input: SitPublishInput): PublishBlocker[] 
   const photoCount =
     (input.galleryPhotoCount || 0) + (input.propertyPhotoCount || 0) + (input.hasCoverPhoto ? 1 : 0);
 
+  /**
+   * Cohérence des dates, calculée ici pour que les trois écrans l'appliquent :
+   * une date de début déjà passée, ou une date de fin antérieure ou égale à la
+   * date de début, interdisent la publication. L'erreur transmise par un
+   * formulaire ne sert que de repli quand aucune incohérence n'est détectée.
+   */
+  const start = (input.startDate || "").trim();
+  const end = (input.endDate || "").trim();
+  const computedDateError = !hasDates
+    ? null
+    : start < todayIso()
+      ? "La date de début ne peut pas être dans le passé."
+      : end <= start
+        ? "La date de fin doit être après la date de début."
+        : null;
+  const dateError = computedDateError || input.dateError || null;
+
   const blockers: (PublishBlocker | null)[] = [
     !input.hasProperty
       ? { id: "property", label: "Logement décrit sur votre profil", action: "/owner-profile" }
@@ -158,7 +175,8 @@ export const getSitPublishBlockers = (input: SitPublishInput): PublishBlocker[] 
           anchor: "dates-field",
         }
       : null,
-    input.dateError ? { id: "date-error", label: input.dateError, anchor: "dates-field" } : null,
+    dateError ? { id: "date-error", label: dateError, anchor: "dates-field" } : null,
+
     ...getDescriptionBlockers(input),
     photoCount === 0
       ? {
