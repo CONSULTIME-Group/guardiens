@@ -328,19 +328,22 @@ const OwnerSitView = ({
     });
   };
   // Règles de publication : source unique, voir src/lib/sitPublishRules.ts.
-  const publishBlockers = getSitPublishBlockers({
-    descriptionMode: "single-block",
-    title: sit.title,
-    startDate: sit.start_date,
-    endDate: sit.end_date,
-    flexibleDates: (sit as any).flexible_dates,
-    specificExpectations: sit.specific_expectations,
-    hasProperty: !!property,
-    galleryPhotoCount: ownerGallery.length,
-    propertyPhotoCount: Array.isArray(property?.photos) ? property.photos.length : 0,
-    petCount: Array.isArray(pets) ? pets.length : 0,
-  });
+  const publishBlockers = getSitPublishBlockers(
+    buildSitPublishInput({
+      sit: sit as any,
+      property: property as any,
+      galleryPhotos: ownerGallery,
+      pets: pets as any,
+    }),
+  );
   const canPublish = publishBlockers.length === 0;
+  /**
+   * Un brouillon jamais publié n'a pas été validé en deux champs par le
+   * formulaire de création : sa publication passe par ce formulaire, pour que
+   * les deux écrans ne rendent plus deux verdicts opposés sur la même annonce.
+   */
+  const publishNeedsForm = isDraft && !wasValidatedByCreateForm(sit as any);
+
 
 
   // Dérivés partagés (avgRating + formatDate), voir useSitDerived.
