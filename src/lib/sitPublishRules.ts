@@ -8,13 +8,16 @@
  * Doctrine retenue :
  *  - aucun seuil de pourcentage de complétion de profil (non actionnable),
  *    remplacé par ses composantes concrètes : logement décrit, une photo, un animal ;
- *  - descriptions contrôlées champ par champ, 30 caractères minimum chacun ;
- *  - dates exactes OU case dates flexibles cochée ;
+ *  - descriptions rétrocompatibles : deux sous-champs de 30 caractères minimum
+ *    quand le séparateur est présent, sinon un bloc unique de 50 caractères minimum ;
+ *  - date de début ET date de fin toujours exigées, la case dates flexibles
+ *    enrichit l'annonce mais ne dispense jamais de dates ;
  *  - photos comptées sur la galerie du profil ET sur les photos du logement ;
  *  - identité vérifiée non bloquante.
  */
 
 export const MIN_SUB_DESCRIPTION = 30;
+export const MIN_SINGLE_DESCRIPTION = 50;
 export const EXPECTATIONS_SEPARATOR = "\n\n";
 
 export type PublishBlocker = {
