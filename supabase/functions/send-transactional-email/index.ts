@@ -853,14 +853,31 @@ Deno.serve(async (req) => {
   }
   plainText = `${plainText}${footerText}`
 
-  // 4c. Engagement tracking — pixel d'ouverture uniquement.
-  // Les liens guardiens.fr restent en clair, sans redirection trackée, car
-  // certains webmails (Yahoo confirmé) désactivent silencieusement les liens
-  // réécrits vers un domaine tiers (*.supabase.co) avec payload encodé.
+  // 4c. Engagement tracking : pixel d'ouverture + suivi de clic via une page
+  // de l'app (guardiens.fr/go). Aucun lien visible vers un domaine tiers brut
+  // (*.supabase.co), neutralisé par certains scanners de messagerie (Yahoo).
   {
     const trackBase = `${supabaseUrl}/functions/v1`
     const pixelUrl = `${trackBase}/track-email-pixel?mid=${messageId}`
     const pixelHtml = `<img src="${pixelUrl}" width="1" height="1" alt="" style="display:none;width:1px;height:1px;border:0;" />`
+
+    const b64url = (s: string) =>
+      btoa(s).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '')
+
+    const wrap = (href: string): string => {
+      try {
+        const u = new URL(href)
+        const allowed = new Set(['guardiens.fr', 'www.guardiens.fr', 'guardiens.lovable.app'])
+        if (!allowed.has(u.hostname)) return href
+        if (u.pathname.startsWith('/unsubscribe') || u.pathname.startsWith('/email-preferences')) return href
+        if (u.pathname.startsWith('/go')) return href
+        return `${SITE_URL}/go?mid=${messageId}&u=${b64url(u.toString())}`
+      } catch {
+        return href
+      }
+    }
+
+    html = html.replace(/href="([^"]+)"/g, (_m, href) => `href="${wrap(href)}"`)
 
     if (html.includes('</body>')) {
       html = html.replace('</body>', `${pixelHtml}</body>`)
