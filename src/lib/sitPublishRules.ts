@@ -225,28 +225,50 @@ export const getSitPublishBlockers = (input: SitPublishInput): PublishBlocker[] 
 export const canPublishSit = (input: SitPublishInput): boolean =>
   getSitPublishBlockers(input).length === 0;
 
+/** Options d'affichage de la checklist. */
+export interface SitPublishRequirementsOptions {
+  /**
+   * La publication passera par le formulaire de création, qui exige deux
+   * questions de 30 caractères. La checklist doit l'annoncer avant le clic,
+   * même quand l'annonce est évaluée en bloc unique.
+   */
+  viaCreateForm?: boolean;
+}
+
 /**
  * Libellés affichables de tous les prérequis, dans l'ordre de la checklist.
+ * Règle générale : aucun bloquant possible ne doit exister sans ligne ici,
+ * sans quoi la checklist affiche « tout est prêt » avec un bouton désactivé.
  * Les lignes de description suivent le mode déclaré : une annonce en bloc
  * unique n'affiche pas de ligne « Attentes envers le gardien » qu'elle n'a pas.
  */
 export const getSitPublishRequirements = (
   mode: DescriptionMode,
+  options: SitPublishRequirementsOptions = {},
 ): { id: string; label: string }[] => [
   { id: "property", label: "Logement décrit sur votre profil" },
   { id: "title", label: "Titre de l'annonce" },
   { id: "dates", label: "Date de début et date de fin de la garde" },
-  ...(mode === "two-fields"
-    ? [
-        {
-          id: "desc-reason",
-          label: `Raison de votre besoin de garde (${MIN_SUB_DESCRIPTION} caractères minimum)`,
-        },
-        {
-          id: "desc-expectations",
-          label: `Attentes envers le gardien (${MIN_SUB_DESCRIPTION} caractères minimum)`,
-        },
-      ]
+  { id: "date-past", label: "Date de début à venir, pas dans le passé" },
+  { id: "date-error", label: "Date de fin postérieure à la date de début" },
+  ...(mode === "two-fields" || options.viaCreateForm
+    ? mode === "two-fields"
+      ? [
+          {
+            id: "desc-reason",
+            label: `Raison de votre besoin de garde (${MIN_SUB_DESCRIPTION} caractères minimum)`,
+          },
+          {
+            id: "desc-expectations",
+            label: `Attentes envers le gardien (${MIN_SUB_DESCRIPTION} caractères minimum)`,
+          },
+        ]
+      : [
+          {
+            id: "desc-reason",
+            label: `Description en deux questions à compléter dans le formulaire : raison de la garde et attentes envers le gardien, ${MIN_SUB_DESCRIPTION} caractères minimum chacune`,
+          },
+        ]
     : [
         {
           id: "desc-reason",
@@ -256,6 +278,7 @@ export const getSitPublishRequirements = (
   { id: "photo", label: "Au moins une photo de votre logement ou de votre galerie" },
   { id: "pets", label: "Au moins un animal à faire garder" },
 ];
+
 
 /**
  * Annonce brute, telle que lue en base ou tenue par un formulaire.
