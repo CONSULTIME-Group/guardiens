@@ -125,3 +125,14 @@ export const getSitPublishBlockers = (input: SitPublishInput): PublishBlocker[] 
 
 export const canPublishSit = (input: SitPublishInput): boolean =>
   getSitPublishBlockers(input).length === 0;
+
+/** Libellés affichables de tous les prérequis, dans l'ordre de la checklist. */
+export const SIT_PUBLISH_REQUIREMENTS: { id: string; label: string }[] = [
+  { id: "property", label: "Logement décrit sur votre profil" },
+  { id: "title", label: "Titre de l'annonce" },
+  { id: "dates", label: "Dates de garde, ou case dates flexibles cochée" },
+  { id: "desc-reason", label: `Raison de votre besoin de garde (${MIN_SUB_DESCRIPTION} caractères minimum)` },
+  { id: "desc-expectations", label: `Attentes envers le gardien (${MIN_SUB_DESCRIPTION} caractères minimum)` },
+  { id: "photo", label: "Au moins une photo de votre logement ou de votre galerie" },
+  { id: "pets", label: "Au moins un animal à faire garder" },
+];
