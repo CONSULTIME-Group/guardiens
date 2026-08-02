@@ -162,7 +162,9 @@ export const getSitPublishBlockers = (input: SitPublishInput): PublishBlocker[] 
    * neutralisent l'un doivent pouvoir le faire sans comparer un libellé.
    */
   const startIsPast = hasDates && start < todayIso();
-  const rangeIsInvalid = hasDates && !startIsPast && end <= start;
+  // L'ordre des dates est vérifié indépendamment du fait que la date de début
+  // soit passée, sinon la base refuse ce que le formulaire acceptait.
+  const rangeIsInvalid = hasDates && end <= start;
   const fallbackDateError = !startIsPast && !rangeIsInvalid ? input.dateError || null : null;
 
   const blockers: (PublishBlocker | null)[] = [
