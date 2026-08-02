@@ -95,7 +95,22 @@ interface OwnerSummary {
   environments: string[];
 }
 
+/**
+ * Valeurs d'environnement acceptées par la base pour une annonce, plafonnées à
+ * trois. Toute autre valeur fait échouer la publication côté base.
+ */
+const ALLOWED_SIT_ENVIRONMENTS = ["ville", "campagne", "montagne", "lac", "vignes", "foret", "mer"];
+const sanitizeSitEnvironments = (values: unknown[]): string[] =>
+  Array.from(
+    new Set(
+      values
+        .map((v) => String(v ?? "").toLowerCase().trim())
+        .filter((v) => ALLOWED_SIT_ENVIRONMENTS.includes(v)),
+    ),
+  ).slice(0, 3);
+
 const envLabels: Record<string, string> = {
+
   city_center: "Centre-ville", suburban: "Périurbain", countryside: "Campagne",
   mountain: "Montagne", seaside: "Bord de mer", forest: "Forêt",
 };
