@@ -80,12 +80,16 @@ export const joinExpectations = (a: string, b: string) =>
 
 const len = (v?: string | null) => (v || "").trim().length;
 
-/** Date du jour au format ISO court, en heure locale. */
-const todayIso = (): string => {
-  const d = new Date();
-  const pad = (n: number) => String(n).padStart(2, "0");
-  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
-};
+/**
+ * Date du jour au format ISO court, en temps universel.
+ *
+ * Les formulaires comparent des chaînes de dates produites en UTC : utiliser
+ * l'heure locale ici faisait diverger les deux entre minuit et deux heures du
+ * matin à Paris, les règles déclarant passée une date que le formulaire
+ * acceptait encore.
+ */
+const todayIso = (): string => new Date().toISOString().slice(0, 10);
+
 
 
 /** Bloquants de description en mode deux champs, les deux étant obligatoires. */
