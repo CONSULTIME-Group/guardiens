@@ -325,8 +325,11 @@ const EditSit = () => {
 
     // La flexibilité n'est jamais concaténée à la description : le `\n\n`
     // servirait alors de séparateur des deux sous-champs de description.
-    const expectations = trimmedDesc.replace(FLEX_REGEX, "").trim();
-    const flexNote = flexibleDates ? buildFlexNote(flexibleMonths, flexibleDuration) : null;
+    const expectations = persistedDesc;
+    const flexNote = flexibleDates
+      ? buildFlexNote(flexibleMonths, flexibleDuration, flexibleFreeNote)
+      : null;
+
 
     const { error } = await supabase
       .from("sits")
