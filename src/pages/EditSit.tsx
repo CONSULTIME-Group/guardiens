@@ -155,6 +155,10 @@ const EditSit = () => {
 
   const initialSnapshot = useRef<string>("");
   const initialStartDateRef = useRef("");
+  /** Textes tels que chargés en base, pour ne pas bloquer sur du vocabulaire préexistant. */
+  const initialTitleRef = useRef("");
+  const initialDescRef = useRef("");
+
 
   useEffect(() => {
     if (!id || !user) return;
