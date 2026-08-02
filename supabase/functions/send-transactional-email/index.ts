@@ -853,32 +853,14 @@ Deno.serve(async (req) => {
   }
   plainText = `${plainText}${footerText}`
 
-  // 4c. Engagement tracking — actif sur TOUS les envois (Lot 5, 26/07/2026).
-  // Auparavant conditionne a idempotencyKey "journey-*", ce qui laissait 0 open
-  // mesure sur l'immense majorite des envois.
-  // Ajoute un pixel 1x1 et reecrit les liens guardiens.fr via le click tracker.
+  // 4c. Engagement tracking — pixel d'ouverture uniquement.
+  // Les liens guardiens.fr restent en clair, sans redirection trackée, car
+  // certains webmails (Yahoo confirmé) désactivent silencieusement les liens
+  // réécrits vers un domaine tiers (*.supabase.co) avec payload encodé.
   {
     const trackBase = `${supabaseUrl}/functions/v1`
     const pixelUrl = `${trackBase}/track-email-pixel?mid=${messageId}`
     const pixelHtml = `<img src="${pixelUrl}" width="1" height="1" alt="" style="display:none;width:1px;height:1px;border:0;" />`
-
-    // Wrap guardiens.fr links via click tracker
-    const wrap = (raw: string) => {
-      try {
-        const u = new URL(raw)
-        const host = u.hostname.toLowerCase()
-        const isAllowed = host === 'guardiens.fr' || host === 'www.guardiens.fr'
-        // Don't wrap unsubscribe / preference links so the user always reaches them
-        const isOptOut = u.pathname.startsWith('/unsubscribe') || u.pathname.startsWith('/email-preferences')
-        if (!isAllowed || isOptOut) return raw
-        const b64 = btoa(raw).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '')
-        return `${trackBase}/track-email-click?mid=${messageId}&u=${b64}`
-      } catch {
-        return raw
-      }
-    }
-
-    html = html.replace(/href="(https:\/\/(?:www\.)?guardiens\.fr[^"]*)"/g, (_m, raw) => `href="${wrap(raw)}"`)
 
     if (html.includes('</body>')) {
       html = html.replace('</body>', `${pixelHtml}</body>`)
