@@ -240,6 +240,15 @@ const EditSit = () => {
 
   const trimmedTitle = title.trim();
   const trimmedDesc = specificExpectations.trim();
+  /**
+   * Texte réellement écrit en base : le bloc de flexibilité est retiré à
+   * l'enregistrement, la validation et le compteur doivent donc porter sur ce
+   * texte, sinon la contrainte de longueur côté base rejette silencieusement.
+   */
+  const persistedDesc = useMemo(
+    () => trimmedDesc.replace(FLEX_REGEX, "").trim(),
+    [trimmedDesc],
+  );
 
   /**
    * Les règles de contenu viennent de la source unique `sitPublishRules`.
@@ -255,7 +264,8 @@ const EditSit = () => {
       endDate,
       flexibleDates,
       dateError,
-      specificExpectations: trimmedDesc,
+      specificExpectations: persistedDesc,
+
       // Champs hors de ce formulaire, neutralisés pour ne pas produire de bruit.
       hasProperty: true,
       galleryPhotoCount: 1,
