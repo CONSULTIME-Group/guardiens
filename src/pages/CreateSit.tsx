@@ -712,6 +712,7 @@ const CreateSit = () => {
   useEffect(() => {
     if (!user || !property || !initialLoadedRef.current) return;
     hasUserEditedRef.current = true;
+    setUnsavedRemote(true);
     const t = setTimeout(async () => {
       await saveDraft({ silent: true });
     }, 1500);
