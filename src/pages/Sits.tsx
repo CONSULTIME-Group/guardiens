@@ -386,23 +386,46 @@ const Sits = () => {
         }));
 
         setSits(
-          data?.map((a: any) => ({
-            ...a.sit,
-            effectiveStatus: getEffectiveStatus(a.sit),
-            application_status: a.status,
-            application_id: a.id,
-            application_created_at: a.created_at,
-            application_viewed_at: a.viewed_at,
-            owner: a.sit?.owner || null,
-            hasReviewed: reviewedSitIds.includes(a.sit?.id),
-            pets: petsByProperty[a.sit?.property_id] || [],
-            ownerAffinity: ownerAffinityById[a.sit?.user_id] || null,
-            houseGuide: guideMap[a.sit?.id] || null,
-            conversationId: convMap[a.sit?.id] || null,
-            lastMessage: lastMsgMap[a.sit?.id] || null,
-            unreadCount: unreadMap[a.sit?.id] || 0,
-          })) || []
+          data?.map((a: any) => {
+            /**
+             * L'annonce jointe peut être nulle : la sécurité en base masque les
+             * annonces annulées, y compris celles sur lesquelles le gardien a
+             * candidaté. On ne déréférence jamais cette valeur, la carte est
+             * remplacée par un message explicite.
+             */
+            if (!a.sit) {
+              return {
+                id: `unavailable-${a.id}`,
+                unavailable: true,
+                status: "unavailable",
+                effectiveStatus: "unavailable",
+                application_status: a.status,
+                application_id: a.id,
+                application_created_at: a.created_at,
+                application_viewed_at: a.viewed_at,
+                owner: null,
+                pets: [],
+              };
+            }
+            return {
+              ...a.sit,
+              effectiveStatus: getEffectiveStatus(a.sit),
+              application_status: a.status,
+              application_id: a.id,
+              application_created_at: a.created_at,
+              application_viewed_at: a.viewed_at,
+              owner: a.sit?.owner || null,
+              hasReviewed: reviewedSitIds.includes(a.sit?.id),
+              pets: petsByProperty[a.sit?.property_id] || [],
+              ownerAffinity: ownerAffinityById[a.sit?.user_id] || null,
+              houseGuide: guideMap[a.sit?.id] || null,
+              conversationId: convMap[a.sit?.id] || null,
+              lastMessage: lastMsgMap[a.sit?.id] || null,
+              unreadCount: unreadMap[a.sit?.id] || 0,
+            };
+          }) || []
         );
+
       }
     } catch (err: any) {
       console.error("[Sits] loadSits failed", err);
