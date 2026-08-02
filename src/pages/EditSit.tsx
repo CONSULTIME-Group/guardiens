@@ -291,11 +291,12 @@ const EditSit = () => {
     () =>
       JSON.stringify({
         title, startDate, endDate, flexibleDates, flexibleMonths,
-        flexibleDuration, specificExpectations, openTo, isUrgent, minGardienSits,
+        flexibleDuration, flexibleFreeNote, specificExpectations, openTo, isUrgent, minGardienSits,
       }),
     [title, startDate, endDate, flexibleDates, flexibleMonths, flexibleDuration,
-      specificExpectations, openTo, isUrgent, minGardienSits],
+      flexibleFreeNote, specificExpectations, openTo, isUrgent, minGardienSits],
   );
+
   const isDirty = !loading && currentSnapshot !== initialSnapshot.current;
 
   useEffect(() => {
