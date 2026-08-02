@@ -154,15 +154,32 @@ const HouseGuide = () => {
         loaded = merged;
       }
 
-      // Copie locale plus récente : on la restaure et on prévient l'utilisateur.
+      // Copie locale plus récente que la base : on la restaure et on prévient.
+      // Une copie antérieure à la dernière modification en base est périmée,
+      // elle est ignorée puis purgée pour ne pas réécraser la version récente.
       if (isOwner && localDraftKey) {
-        const local = readFormDraft<GuideData>(localDraftKey);
-        if (local && JSON.stringify({ ...local, id: undefined }) !== JSON.stringify({ ...loaded, id: undefined })) {
-          loaded = { ...loaded, ...local, id: loaded.id };
-          setLocalDraftRestored(true);
-          setDirty(true);
+        const local = readFormDraft<LocalGuideDraft>(localDraftKey);
+        const localSavedAt = getFormDraftSavedAt(localDraftKey);
+        const remoteUpdatedAt = (data as any)?.updated_at
+          ? new Date((data as any).updated_at).getTime()
+          : null;
+        const localIsFresher =
+          localSavedAt !== null &&
+          (remoteUpdatedAt === null || localSavedAt > remoteUpdatedAt);
+
+        if (local && !localIsFresher) {
+          clearFormDraft(localDraftKey);
+        } else if (local) {
+          const candidate = { ...loaded, ...local, id: loaded.id } as GuideData;
+          if (JSON.stringify({ ...candidate, id: undefined }) !== JSON.stringify({ ...loaded, id: undefined })) {
+            loaded = candidate;
+            setLocalDraftRestored(true);
+            // Pas de passage en « modifié » : le propriétaire n'a rien touché,
+            // l'avertissement de sortie ne doit pas s'armer au chargement.
+          }
         }
       }
+
       setGuide(loaded);
 
 
