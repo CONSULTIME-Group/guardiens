@@ -37,6 +37,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { formatSitPeriod } from "@/lib/dateRange";
+import { getSitPublishBlockers, SIT_PUBLISH_REQUIREMENTS } from "@/lib/sitPublishRules";
 
 import EmergencyAlertBanner from "@/components/sits/EmergencyAlertBanner";
 import SitDateHistory from "@/components/sits/SitDateHistory";
