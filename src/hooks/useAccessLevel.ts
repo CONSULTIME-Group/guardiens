@@ -80,7 +80,7 @@ export const useAccessLevel = (): AccessInfo => {
     };
   }
 
-  // Profile ≥ 60% + ID verified
+  // Identité vérifiée
   if (effectiveRole === "owner") {
     return {
       level: "3B",
