@@ -140,7 +140,7 @@ const HouseGuide = () => {
   const [access, setAccess] = useState<AccessState>("denied");
   const [openDate, setOpenDate] = useState<Date | null>(null);
 
-  // Filet local : 23 champs libres, aucune perte de saisie tolérable.
+  // Filet local : 19 champs libres, hors champs sensibles jamais stockés.
   const localDraftKey = propertyId && user ? `house-guide:${user.id}:${propertyId}` : null;
   const [draftState, setDraftState] = useState<DraftState>("idle");
   const [localDraftSavedAt, setLocalDraftSavedAt] = useState<number | null>(null);
