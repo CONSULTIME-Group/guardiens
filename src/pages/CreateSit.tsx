@@ -872,7 +872,8 @@ const CreateSit = () => {
       if (!startDate) errors.push({ field: "startDate", anchor: "dates-field" });
       if (!endDate) errors.push({ field: "endDate", anchor: "dates-field" });
       if (dateError) errors.push({ field: "endDate", anchor: "dates-field" });
-      if (!descriptionValid) errors.push({ field: "description", anchor: "description-field" });
+      if (!reasonValid) errors.push({ field: "descriptionReason", anchor: "description-field" });
+      if (!expectationsValid) errors.push({ field: "descriptionExpectations", anchor: "description-field" });
       if (errors.length > 0) {
         setTouched(prev => {
           const next = { ...prev };
@@ -1173,7 +1174,7 @@ const CreateSit = () => {
           {/* Description */}
           <div id="description-field" className="scroll-mt-24">
             <div className="flex items-center justify-between gap-2 mb-1.5 flex-wrap">
-              <Label htmlFor="description-textarea" className="text-sm font-medium">Description de la garde *</Label>
+              <p className="text-sm font-medium">Description de la garde *</p>
               <div className="flex items-center gap-2">
                 {(() => {
                   const parts: string[] = [];
