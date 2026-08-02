@@ -44,6 +44,29 @@ interface GuideData {
   published: boolean;
 }
 
+/**
+ * Champs jamais écrits dans le stockage du navigateur.
+ * Ce sont les moyens d'entrer physiquement dans la maison (adresse exacte,
+ * codes d'accès, instructions de clés) et le mot de passe du réseau WiFi.
+ * Sur un poste partagé, une copie locale en clair les exposerait pendant
+ * sept jours. Les dix neuf autres champs restent protégés contre la perte.
+ */
+const SENSITIVE_FIELDS = [
+  "exact_address",
+  "access_codes",
+  "key_instructions",
+  "wifi_password",
+] as const satisfies readonly (keyof GuideData)[];
+
+type LocalGuideDraft = Omit<GuideData, (typeof SENSITIVE_FIELDS)[number]>;
+
+/** Retire les champs sensibles avant écriture locale. */
+const stripSensitive = (g: GuideData): LocalGuideDraft => {
+  const copy = { ...g } as Partial<GuideData>;
+  for (const field of SENSITIVE_FIELDS) delete copy[field];
+  return copy as LocalGuideDraft;
+};
+
 const emptyGuide = (propertyId: string, userId: string): GuideData => ({
   property_id: propertyId,
   user_id: userId,
