@@ -104,7 +104,10 @@ const getDuration = (start: string | null, end: string | null) => {
 const capitalize = (s: string) => s ? s.charAt(0).toUpperCase() + s.slice(1) : "";
 
 const getEffectiveStatus = (sit: any): string => {
+  // Annonce masquée par la sécurité en base : jamais de déréférencement nul.
+  if (!sit) return "unavailable";
   // Rule A1: expiration a la priorite absolue sur le statut brut cancelled.
+
   if (sit.cancellation_reason === "expired") return "expired";
   if (sit.status === "cancelled") return "cancelled";
   if (sit.status === "completed") return "completed";
