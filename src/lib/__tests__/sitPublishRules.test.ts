@@ -364,6 +364,16 @@ describe("blocages informatifs et limite de titre", () => {
     expect(blockers.some((b) => b.id === "desc-two-fields")).toBe(true);
   });
 
+  it("émet la ligne des deux questions même quand la description est trop courte", () => {
+    const blockers = getSitPublishBlockers(
+      { ...base, specificExpectations: "" },
+      { viaCreateForm: true },
+    );
+    expect(blockers.some((b) => b.id === "desc-reason")).toBe(true);
+    expect(blockers.some((b) => b.id === "desc-two-fields")).toBe(true);
+  });
+
+
   it("bloque un titre au-delà de la limite partagée", () => {
     const blockers = getSitPublishBlockers({ ...base, title: "t".repeat(MAX_TITLE_LENGTH + 22) });
     const long = blockers.find((b) => b.id === "title-long");
