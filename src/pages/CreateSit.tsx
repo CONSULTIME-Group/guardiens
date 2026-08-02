@@ -909,21 +909,25 @@ const CreateSit = () => {
   const NUDGE_PROFILE_THRESHOLD = 80;
 
   // Règles de publication : source unique, voir src/lib/sitPublishRules.ts.
-  const publishBlockers: PublishBlocker[] = getSitPublishBlockers({
-    descriptionMode: "two-fields",
-    title,
-    startDate,
-    endDate,
-    flexibleDates,
-    dateError,
-    absenceReason,
-    sitterExpectations,
-    hasProperty: !!property,
-    galleryPhotoCount: ownerPhotos.length,
-    propertyPhotoCount: Array.isArray((property as any)?.photos) ? (property as any).photos.length : 0,
-    hasCoverPhoto: !!coverPhotoUrl,
-    petCount: pets.length,
-  });
+  const publishBlockers: PublishBlocker[] = getSitPublishBlockers(
+    buildSitPublishInput({
+      sit: {
+        title,
+        start_date: startDate,
+        end_date: endDate,
+        flexible_dates: flexibleDates,
+        cover_photo_url: coverPhotoUrl,
+      },
+      property: property as any,
+      dateError,
+      twoFields: { absenceReason, sitterExpectations },
+      overrides: {
+        galleryPhotoCount: ownerPhotos.length,
+        petCount: pets.length,
+      },
+    }),
+  );
+
   const canPublish = publishBlockers.length === 0;
   const hasPhoto = !publishBlockers.some((b) => b.id === "photo");
 
