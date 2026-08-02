@@ -1390,7 +1390,16 @@ const SitCard = ({
                   </span>
                 )}
               </div>
+              {isOwner && hasOutdatedDraftDates(sit) && (
+                <p className="mt-2 text-xs text-warning-foreground">
+                  Les dates de ce brouillon sont passées, elles sont à redéfinir.{" "}
+                  <Link to={`/sits/${sit.id}/edit`} className="underline underline-offset-2">
+                    Modifier les dates
+                  </Link>
+                </p>
+              )}
             </div>
+
 
             <div className="flex items-center gap-2 shrink-0">
               {isOwner && sit.pendingApplicationCount > 0 && (
