@@ -1079,7 +1079,9 @@ const CreateSit = () => {
       console.error("[CreateSit] publish failed", err);
       const code = String(err?.code || "");
       const description =
-        code === "23505"
+        code === "P0001"
+          ? "Votre annonce ne peut pas être publiée sans au moins un animal à faire garder. Ajoutez-le dans votre logement, puis republiez."
+          : code === "23505"
           ? "Une annonce identique existe déjà. Ouvrez la liste de vos annonces, l'annonce y figure peut-être déjà."
           : code === "42501" || code === "PGRST301"
             ? "Vous n'avez pas les droits pour publier cette annonce. Reconnectez-vous, puis recommencez."
