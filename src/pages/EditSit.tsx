@@ -154,6 +154,7 @@ const EditSit = () => {
   const [confirmDatesOpen, setConfirmDatesOpen] = useState(false);
 
   const initialSnapshot = useRef<string>("");
+  const initialStartDateRef = useRef("");
 
   useEffect(() => {
     if (!id || !user) return;
@@ -190,6 +191,7 @@ const EditSit = () => {
       const clean = legacy.clean;
       setTitle(data.title || "");
       setStartDate(data.start_date || "");
+      initialStartDateRef.current = data.start_date || "";
       setEndDate(data.end_date || "");
       setFlexibleDates(data.flexible_dates || !!(months.length || duration || freeNote));
       setFlexibleMonths(months);
@@ -245,10 +247,8 @@ const EditSit = () => {
    * l'enregistrement, la validation et le compteur doivent donc porter sur ce
    * texte, sinon la contrainte de longueur côté base rejette silencieusement.
    */
-  const persistedDesc = useMemo(
-    () => trimmedDesc.replace(FLEX_REGEX, "").trim(),
-    [trimmedDesc],
-  );
+  const inlineFlexibility = useMemo(() => parseFlexibility(trimmedDesc), [trimmedDesc]);
+  const persistedDesc = inlineFlexibility.clean.trim();
 
   /**
    * Les règles de contenu viennent de la source unique `sitPublishRules`.
@@ -274,7 +274,15 @@ const EditSit = () => {
           petCount: 1,
         },
       }),
-    ).filter((b) => owned.has(b.id));
+    ).filter((b) => {
+      if (!owned.has(b.id)) return false;
+      if (
+        b.id === "date-error"
+        && b.label === "La date de début ne peut pas être dans le passé."
+        && startDate === initialStartDateRef.current
+      ) return false;
+      return true;
+    });
   }, [trimmedTitle, startDate, endDate, flexibleDates, dateError, persistedDesc]);
 
 
@@ -331,8 +339,16 @@ const EditSit = () => {
     // La flexibilité n'est jamais concaténée à la description : le `\n\n`
     // servirait alors de séparateur des deux sous-champs de description.
     const expectations = persistedDesc;
-    const flexNote = flexibleDates
-      ? buildFlexNote(flexibleMonths, flexibleDuration, flexibleFreeNote)
+    const hasInlineFlexibility = Boolean(
+      inlineFlexibility.months.length || inlineFlexibility.duration || inlineFlexibility.free,
+    );
+    const savedFlexibleDates = flexibleDates || hasInlineFlexibility;
+    const flexNote = savedFlexibleDates
+      ? buildFlexNote(
+          inlineFlexibility.months.length ? inlineFlexibility.months : flexibleMonths,
+          inlineFlexibility.duration || flexibleDuration,
+          inlineFlexibility.free || flexibleFreeNote,
+        )
       : null;
 
 
@@ -342,7 +358,7 @@ const EditSit = () => {
         title: trimmedTitle,
         start_date: startDate,
         end_date: endDate,
-        flexible_dates: flexibleDates,
+        flexible_dates: savedFlexibleDates,
         flexibility_notes: flexNote,
         specific_expectations: expectations,
         open_to: openTo,
@@ -361,7 +377,7 @@ const EditSit = () => {
     navigate(`/sits/${id}`);
   }, [
     user, id, canSave, persistedDesc, trimmedTitle, startDate, endDate,
-    flexibleDates, flexibleMonths, flexibleDuration, flexibleFreeNote, openTo, isUrgent,
+    flexibleDates, flexibleMonths, flexibleDuration, flexibleFreeNote, inlineFlexibility, openTo, isUrgent,
     minGardienSits, currentSnapshot, navigate, toast,
   ]);
 
@@ -569,7 +585,12 @@ const EditSit = () => {
                 <Checkbox
                   id="sit-flexible"
                   checked={flexibleDates}
-                  onCheckedChange={(v) => setFlexibleDates(v === true)}
+                  onCheckedChange={(v) => {
+                    const next = v === true;
+                    const hasNotes = flexibleMonths.length > 0 || !!flexibleDuration || !!flexibleFreeNote.trim();
+                    if (!next && hasNotes && !window.confirm("Désactiver les dates flexibles supprimera vos précisions. Continuer ?")) return;
+                    setFlexibleDates(next);
+                  }}
                   className="mt-0.5"
                 />
                 <div className="min-w-0">

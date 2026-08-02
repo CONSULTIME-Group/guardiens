@@ -239,13 +239,16 @@ const SitDetailHeader = ({
           )}
         </div>
       ) : (
-        <div className="mb-4">
+        <div className="mb-4 space-y-1.5">
           <span
             className={`inline-block px-2.5 py-0.5 rounded-full text-xs font-medium ${status.className}`}
             aria-label={`Statut de l'annonce : ${status.label}`}
           >
             {status.label}
           </span>
+          {flexibilityNotes && (
+            <p className="text-xs text-muted-foreground">Dates flexibles : {flexibilityNotes}</p>
+          )}
         </div>
       )}
 
