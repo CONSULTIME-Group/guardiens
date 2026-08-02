@@ -51,34 +51,9 @@ import {
   getSitPublishBlockers,
   buildSitPublishInput,
   joinExpectations,
-  EXPECTATIONS_SEPARATOR,
   MIN_SUB_DESCRIPTION,
   type PublishBlocker,
 } from "@/lib/sitPublishRules";
-
-/**
- * Répartit un texte existant sur les deux champs de description.
- * La découpe au séparateur n'est acceptée que si les deux parties
- * atteignent le seuil ; sinon tout le texte va dans le premier champ.
- */
-function splitForFields(raw: string): { first: string; rest: string; reliable: boolean } {
-  const text = raw || "";
-  const idx = text.indexOf(EXPECTATIONS_SEPARATOR);
-  if (idx >= 0) {
-    const first = text.slice(0, idx);
-    const rest = text.slice(idx + EXPECTATIONS_SEPARATOR.length);
-    if (
-      first.trim().length >= MIN_SUB_DESCRIPTION &&
-      rest.trim().length >= MIN_SUB_DESCRIPTION
-    ) {
-      return { first, rest, reliable: true };
-    }
-  }
-  return { first: text, rest: "", reliable: false };
-}
-
-
-
 
 interface PropertySummary {
   id: string;
@@ -297,21 +272,18 @@ const CreateSit = () => {
   const [sitterExpectations, setSitterExpectations] = useState("");
   // Séparateur et recomposition : source unique, voir src/lib/sitPublishRules.ts.
 
-  // Reprend un texte existant (brouillon, republication, Alma) et le répartit
-  // sur les deux sous-champs, sans perte de contenu. La découpe n'est retenue
-  // que si les deux parties tiennent le seuil : un simple saut de ligne avant
-  // une signature ne doit jamais atterrir dans le champ des attentes.
+  // Un texte existant reste intégralement dans la première question. Son sens
+  // ne peut pas être déduit de sa mise en forme, même avec un double saut de ligne.
   const applyExpectations = useCallback((raw: string | null | undefined) => {
     const text = raw || "";
-    const { first, rest, reliable } = splitForFields(text);
-    setAbsenceReason(first);
-    setSitterExpectations(rest);
+    setAbsenceReason(text);
+    setSitterExpectations("");
     setSpecificExpectations(text);
-    if (text.trim() && !reliable) {
+    if (text.trim()) {
       toast({
         title: "Description à compléter",
         description:
-          "Votre texte a été replacé dans la première question, complétez vos attentes envers le gardien.",
+          "Votre texte a été placé dans la première question. Répartissez-le si nécessaire, puis complétez vos attentes envers le gardien.",
       });
     }
   }, [toast]);
@@ -654,7 +626,8 @@ const CreateSit = () => {
           setTitle(d.title || "");
           setStartDate(cleanStart);
           setEndDate(cleanEnd);
-          setFlexibleDates(d.flexible_dates || false);
+          setFlexibleDates(d.flexible_dates || !!(d as any).flexibility_notes);
+          setFlexibleNotes((d as any).flexibility_notes || "");
           applyExpectations(d.specific_expectations || "");
           setOpenTo(d.open_to || []);
           setIsUrgent(d.is_urgent || false);
@@ -676,15 +649,9 @@ const CreateSit = () => {
           if (hasContent) setSitLocation("home");
           // L'étape atteinte n'est pas stockée en base, on la recalcule à partir
           // du contenu pour ne pas refaire franchir l'étape 1.
-          const { first: reason, rest: expect } = splitForFields(rawExpectations);
-
-          const step0Complete =
-            !!(d.title || "").trim()
-            && !!cleanStart
-            && !!cleanEnd
-            && cleanStart < cleanEnd
-            && reason.trim().length >= MIN_SUB_DESCRIPTION
-            && expect.trim().length >= MIN_SUB_DESCRIPTION;
+          // Une description historique ne peut pas être répartie de façon fiable.
+          // Le second champ reste donc à compléter avant de poursuivre.
+          const step0Complete = false;
           if (step0Complete) setCurrentStep(prev => Math.max(prev, 1));
           if (hasContent) setRemoteDraftResumed(true);
           if (datesWerePast) {
@@ -1727,7 +1694,11 @@ const CreateSit = () => {
             <Checkbox
               id="flexible-dates"
               checked={flexibleDates}
-              onCheckedChange={(v) => setFlexibleDates(v === true)}
+              onCheckedChange={(v) => {
+                const next = v === true;
+                if (!next && flexibleNotes.trim() && !window.confirm("Désactiver les dates flexibles supprimera vos précisions. Continuer ?")) return;
+                setFlexibleDates(next);
+              }}
               className="mt-0.5"
             />
             <div className="flex-1">
