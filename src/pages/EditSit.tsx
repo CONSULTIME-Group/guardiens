@@ -205,6 +205,8 @@ const EditSit = () => {
       setFlexibleFreeNote(freeNote);
 
       setSpecificExpectations(clean);
+      initialDescRef.current = clean;
+
       setOpenTo((data.open_to as string[]) || []);
       setIsUrgent(data.is_urgent || false);
       setMinGardienSits((data as any).min_gardien_sits || 0);
