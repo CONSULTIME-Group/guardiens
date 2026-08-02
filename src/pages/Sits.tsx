@@ -41,6 +41,13 @@ import MobileStickyCTA from "@/components/dashboard/owner/MobileStickyCTA";
 import { RepublishAlmaDialog } from "@/components/ai/alma/RepublishAlmaDialog";
 import AffinitySection from "@/components/matching/AffinitySection";
 import { useViewerSitterForAffinity } from "@/hooks/useViewerSitterForAffinity";
+import {
+  buildSitPublishInput,
+  getBlockingBlockers,
+  getSitPublishBlockers,
+  wasValidatedByCreateForm,
+} from "@/lib/sitPublishRules";
+
 
 /* ── Status configs (tokens sémantiques uniquement, compat dark mode) ── */
 const statusConfig: Record<string, { label: string; className: string }> = {
@@ -117,17 +124,22 @@ const getEffectiveStatus = (sit: any): string => {
   return sit.status;
 };
 
+/** Brouillon dont les dates sont depassees : a redefinir, jamais annule. */
+const hasOutdatedDraftDates = (sit: any): boolean =>
+  sit.status === "draft"
+  && !!sit.end_date
+  && isBefore(parseISO(sit.end_date), new Date());
+
 // Owner-only: overlays d'affichage supplementaires (dépubliée, archivée manuelle)
 // La vue sitter continue d'utiliser getEffectiveStatus tel quel.
 const getOwnerEffectiveStatus = (sit: any): string => {
   if (sit.cancellation_reason === "archived") return "archived";
-  if (sit.status === "draft" && sit.unpublished_at) {
-    // Dépubliée dont end_date est passee → traitée comme "expirée" (Passées).
-    if (sit.end_date && isBefore(parseISO(sit.end_date), new Date())) return "expired";
-    return "unpublished";
-  }
+  // Un brouillon reste un brouillon, meme si ses dates sont passees : il n'est
+  // ni annule ni expire, ses dates sont simplement a redefinir.
+  if (sit.status === "draft") return sit.unpublished_at ? "unpublished" : "draft";
   return getEffectiveStatus(sit);
 };
+
 
 const Sits = () => {
   const { user, activeRole } = useAuth();
@@ -234,12 +246,15 @@ const Sits = () => {
 
         const rows: any[] = (data as any[]) || [];
 
-        // Auto-expire cote client (publiees ET brouillons dont end_date est passee).
+        // Auto-expire cote client, reserve aux annonces reellement en ligne ou
+        // confirmees. Un brouillon n'est pas une garde en cours : il reste un
+        // brouillon, ses dates sont simplement a redefinir.
         const toExpire = rows.filter((s: any) =>
           s.end_date
-          && ["published", "draft"].includes(s.status)
+          && ["published", "confirmed"].includes(s.status)
           && isBefore(parseISO(s.end_date), new Date())
         );
+
         if (toExpire.length > 0) {
           const ids = toExpire.map((s: any) => s.id);
           const { error: expErr } = await supabase
@@ -272,6 +287,8 @@ const Sits = () => {
             hasReviewed: !!sit.has_reviewed,
             ownerCity,
             ownerGalleryFirstPhoto: firstGalleryPhoto,
+            ownerGalleryCount: ownerGalleryPhotos.length,
+
           };
         });
         setSits(enriched);
@@ -501,39 +518,81 @@ const Sits = () => {
     }
   };
 
+  /**
+   * Republication : elle consulte la source unique de règles avant toute
+   * écriture. Un brouillon peut désormais être enregistré incomplet, donc une
+   * annonce dépubliée peut violer les contraintes de publication. Dans ce cas,
+   * la base n'est pas appelée, les éléments manquants sont nommés et le chemin
+   * de correction est proposé, comme la checklist de la fiche annonce.
+   */
   const handleRepublish = async (sitId: string) => {
     const sit = sits.find((s) => s.id === sitId);
-    const todayIso = new Date().toISOString().split("T")[0];
-    // Garde A3 : ne pas republier une annonce dont les dates sont deja passees.
-    if (sit?.end_date && sit.end_date < todayIso) {
+    if (!sit) return;
+
+    const needsForm = !wasValidatedByCreateForm(sit);
+    const resumeHref = `/sits/create?resume=${sitId}`;
+    const blockers = getBlockingBlockers(
+      getSitPublishBlockers(
+        buildSitPublishInput({
+          sit,
+          property: sit.properties,
+          pets: sit.pets,
+          overrides: { galleryPhotoCount: sit.ownerGalleryCount ?? 0 },
+        }),
+        { viaCreateForm: needsForm, resumeHref },
+      ),
+    );
+
+    if (blockers.length > 0) {
+      const labels = blockers.slice(0, 3).map((b) => b.label).join(" ; ");
       toast({
-        title: "Dates a mettre a jour",
-        description: "Les dates de cette annonce sont passees. Modifiez-les avant de republier.",
+        variant: "destructive",
+        title: "Il manque quelque chose pour republier",
+        description: `${labels}${blockers.length > 3 ? " ; et d'autres éléments" : ""}.`,
       });
-      navigate(`/sits/${sitId}/edit`);
+      navigate(blockers.find((b) => b.action)?.action || `/sits/${sitId}/edit`);
       return;
     }
+
     try {
-      const { error } = await supabase.from("sits").update({
+      // On lit les lignes réellement modifiées : en vue gardien, le filtre sur
+      // le propriétaire ne correspond à aucune ligne, l'ancien code annonçait
+      // pourtant une republication réussie.
+      const { data, error } = await supabase.from("sits").update({
         status: "published" as any,
         cancellation_reason: null,
         cancelled_at: null,
         cancelled_by: null,
         unpublished_at: null,
         last_unpublished_reason: null,
-      } as any).eq("id", sitId).eq("user_id", user!.id);
+      } as any).eq("id", sitId).eq("user_id", user!.id).select("id");
       if (error) throw error;
+      if (!data || data.length === 0) {
+        toast({
+          variant: "destructive",
+          title: "Republication impossible",
+          description: "Seul le propriétaire de cette annonce peut la republier. Ouvrez votre espace propriétaire pour la remettre en ligne.",
+        });
+        return;
+      }
       toast({ title: "Annonce republiée" });
       loadSits();
     } catch (err: any) {
+      // Le détail technique reste en console : l'utilisateur reçoit ce qui
+      // bloque, jamais une invitation à réessayer.
       console.error("[Sits] republish failed", err);
+      const code = String(err?.code || "");
       toast({
         variant: "destructive",
         title: "Republication impossible",
-        description: "La republication a échoué. Réessayez dans un instant.",
+        description:
+          code === "42501" || code === "PGRST301"
+            ? "Vous n'avez pas les droits pour republier cette annonce."
+            : "La base a refusé la republication : vérifiez le titre, les dates, la description et la photo de cette annonce, puis republiez.",
       });
     }
   };
+
 
   // Bucketing owner : En ligne / Brouillons / Passees
   //  - En ligne  : publiees, confirmees, en cours (avec ou sans candidatures)
@@ -1331,7 +1390,16 @@ const SitCard = ({
                   </span>
                 )}
               </div>
+              {isOwner && hasOutdatedDraftDates(sit) && (
+                <p className="mt-2 text-xs text-warning-foreground">
+                  Les dates de ce brouillon sont passées, elles sont à redéfinir.{" "}
+                  <Link to={`/sits/${sit.id}/edit`} className="underline underline-offset-2">
+                    Modifier les dates
+                  </Link>
+                </p>
+              )}
             </div>
+
 
             <div className="flex items-center gap-2 shrink-0">
               {isOwner && sit.pendingApplicationCount > 0 && (
