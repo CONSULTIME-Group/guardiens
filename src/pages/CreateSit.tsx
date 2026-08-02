@@ -493,8 +493,11 @@ const CreateSit = () => {
   const [localDraftRestored, setLocalDraftRestored] = useState(false);
   const [remoteDraftResumed, setRemoteDraftResumed] = useState(false);
   // Restaure la copie locale si elle est postérieure au brouillon distant.
-  const restoreLocalDraftIfFresher = useCallback((remoteUpdatedAt: string | null, remoteDraftId?: string | null) => {
+  const restoreLocalDraftIfFresher = useCallback((remoteUpdatedAt: string | null, remoteDraftId?: string | null, sourceLoaded?: boolean) => {
     if (!localDraftKey) return;
+    // Republication : le contenu de l'annonce source fait autorité, aucune copie
+    // locale ne doit venir l'écraser (ni afficher un message de restauration).
+    if (sourceLoaded) return;
     // Identité du brouillon réellement ouvert, paramètre d'URL ou brouillon
     // distant chargé à défaut de paramètre.
     const currentIdentity = draftIdParam ?? fromSitId ?? remoteDraftId ?? null;
@@ -504,7 +507,7 @@ const CreateSit = () => {
     const isAdoptable = (d: SitLocalDraft | null): d is SitLocalDraft => {
       if (!d) return false;
       if (d.draftId) return d.draftId === currentIdentity;
-      return !remoteDraftId;
+      return !remoteDraftId && !fromSitId;
     };
     let stored = readFormDraft<SitLocalDraft>(localDraftKey);
     let savedAt = getFormDraftSavedAt(localDraftKey) ?? 0;
@@ -519,6 +522,9 @@ const CreateSit = () => {
       }
     }
     if (!stored) return;
+    // Une copie locale sans aucun contenu n'a rien à restaurer : l'appliquer
+    // reviendrait à vider le formulaire tout en annonçant une restauration.
+    if (!localDraftHasContent(stored)) return;
     const remote = remoteUpdatedAt ? new Date(remoteUpdatedAt).getTime() : 0;
     if (remote && savedAt <= remote) {
       // Le distant est plus frais, mais l'étape atteinte n'y est pas stockée.
