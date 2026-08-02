@@ -419,8 +419,14 @@ const CreateSit = () => {
     sitCountry: string;
     acceptsSitterPets: "yes" | "no" | "discuss";
     acceptsSitterChildren: "yes" | "no" | "discuss";
+    sitLocation?: "home" | "away" | null;
+    currentStep?: number;
   };
   const localDraftKey = user ? `sit-create:${user.id}:${draftIdParam ?? fromSitId ?? "current"}` : null;
+  // Clé historique posée lors d'une première visite sans paramètre d'URL. Au
+  // retour via le dashboard, l'identifiant du brouillon change la clé, la copie
+  // locale doit donc être récupérée puis migrée.
+  const legacyLocalDraftKey = user ? `sit-create:${user.id}:current` : null;
   const applyLocalDraft = useCallback((d: SitLocalDraft) => {
     setTitle(d.title ?? "");
     setStartDate(d.startDate ?? "");
@@ -442,21 +448,41 @@ const CreateSit = () => {
     setSitCountry(d.sitCountry ?? "FR");
     setAcceptsSitterPets(d.acceptsSitterPets ?? "discuss");
     setAcceptsSitterChildren(d.acceptsSitterChildren ?? "discuss");
+    if (d.sitLocation) setSitLocation(d.sitLocation);
+    if (typeof d.currentStep === "number" && d.currentStep > 0) {
+      setCurrentStep(prev => Math.max(prev, Math.min(d.currentStep as number, STEPS.length - 1)));
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   const [localDraftRestored, setLocalDraftRestored] = useState(false);
+  const [remoteDraftResumed, setRemoteDraftResumed] = useState(false);
   // Restaure la copie locale si elle est postérieure au brouillon distant.
   const restoreLocalDraftIfFresher = useCallback((remoteUpdatedAt: string | null) => {
     if (!localDraftKey) return;
-    const stored = readFormDraft<SitLocalDraft>(localDraftKey);
+    let stored = readFormDraft<SitLocalDraft>(localDraftKey);
+    let savedAt = getFormDraftSavedAt(localDraftKey) ?? 0;
+    if (!stored && legacyLocalDraftKey && legacyLocalDraftKey !== localDraftKey) {
+      const legacy = readFormDraft<SitLocalDraft>(legacyLocalDraftKey);
+      if (legacy) {
+        stored = legacy;
+        savedAt = getFormDraftSavedAt(legacyLocalDraftKey) ?? 0;
+        writeFormDraft<SitLocalDraft>(localDraftKey, legacy);
+        clearFormDraft(legacyLocalDraftKey);
+      }
+    }
     if (!stored) return;
-    const savedAt = getFormDraftSavedAt(localDraftKey) ?? 0;
     const remote = remoteUpdatedAt ? new Date(remoteUpdatedAt).getTime() : 0;
-    if (remote && savedAt <= remote) return;
+    if (remote && savedAt <= remote) {
+      // Le distant est plus frais, mais l'étape atteinte n'y est pas stockée.
+      if (typeof stored.currentStep === "number" && stored.currentStep > 0) {
+        setCurrentStep(prev => Math.max(prev, Math.min(stored!.currentStep as number, STEPS.length - 1)));
+      }
+      return;
+    }
     applyLocalDraft(stored);
     setLocalDraftRestored(true);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [localDraftKey, applyLocalDraft]);
+  }, [localDraftKey, legacyLocalDraftKey, applyLocalDraft]);
 
 
 
