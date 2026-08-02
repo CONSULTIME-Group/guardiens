@@ -136,6 +136,8 @@ const EditSit = () => {
   const [flexibleDates, setFlexibleDates] = useState(false);
   const [flexibleMonths, setFlexibleMonths] = useState<string[]>([]);
   const [flexibleDuration, setFlexibleDuration] = useState("");
+  const [flexibleFreeNote, setFlexibleFreeNote] = useState("");
+
   const [specificExpectations, setSpecificExpectations] = useState("");
   const [descTouched, setDescTouched] = useState(false);
   const [openTo, setOpenTo] = useState<string[]>([]);
