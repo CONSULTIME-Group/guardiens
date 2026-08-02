@@ -579,7 +579,13 @@ const CreateSit = () => {
               { body: { sourceSitId: fromSitId, prompt: republishPrompt.trim() } },
             );
             if (adaptErr || !adapted || (adapted as any).error) {
-              const msg = (adapted as any)?.error || adaptErr?.message || "Adaptation impossible pour le moment.";
+              console.error("[CreateSit] adapt-sit-with-alma failed", adaptErr, adapted);
+              const status = (adaptErr as any)?.context?.status ?? (adaptErr as any)?.status;
+              const msg = status === 429
+                ? "Vous avez atteint la limite d'adaptations pour cette heure, réessayez plus tard."
+                : status === 402
+                  ? "Les crédits de l'assistante sont épuisés pour le moment."
+                  : "L'assistante n'a pas pu adapter votre annonce.";
               toast({
                 variant: "destructive",
                 title: "Adaptation Alma indisponible",
