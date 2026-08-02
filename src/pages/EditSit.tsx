@@ -589,7 +589,7 @@ const EditSit = () => {
           {/* SECTION 2 : Description */}
           <SectionCard
             title="Description de la garde"
-            description="Ce qui rend cette garde unique (champ optionnel)."
+            description="Ce qui rend cette garde unique."
           >
             <div>
               <Textarea
@@ -606,14 +606,12 @@ const EditSit = () => {
               <p
                 className={cn(
                   "text-xs mt-1.5",
-                  descTouched && trimmedDesc.length > 0 && trimmedDesc.length < MIN_DESC_LENGTH
-                    ? "text-destructive"
-                    : "text-muted-foreground",
+                  descTouched && descBlocker ? "text-destructive" : "text-muted-foreground",
                 )}
               >
-                {trimmedDesc.length === 0
-                  ? `Optionnel. Si renseigné, ${MIN_DESC_LENGTH} caractères minimum.`
-                  : `${trimmedDesc.length} / ${MIN_DESC_LENGTH} min`}
+                {descBlocker
+                  ? descBlocker.label
+                  : `${trimmedDesc.length} caractères, minimum atteint.`}
               </p>
               {forbiddenInDesc && (
                 <p className="text-xs text-destructive mt-1 flex items-center gap-1">
