@@ -271,16 +271,24 @@ const CreateSit = () => {
   const joinExpectations = (a: string, b: string) =>
     [a.trim(), b.trim()].filter(Boolean).join(EXPECTATIONS_SEPARATOR);
   // Reprend un texte existant (brouillon, republication, Alma) et le répartit
-  // sur les deux sous-champs, sans perte de contenu.
+  // sur les deux sous-champs, sans perte de contenu. La découpe n'est retenue
+  // que si les deux parties tiennent le seuil : un simple saut de ligne avant
+  // une signature ne doit jamais atterrir dans le champ des attentes.
   const applyExpectations = useCallback((raw: string | null | undefined) => {
     const text = raw || "";
-    const idx = text.indexOf(EXPECTATIONS_SEPARATOR);
-    const first = idx >= 0 ? text.slice(0, idx) : text;
-    const rest = idx >= 0 ? text.slice(idx + EXPECTATIONS_SEPARATOR.length) : "";
+    const { first, rest, reliable } = splitForFields(text);
     setAbsenceReason(first);
     setSitterExpectations(rest);
     setSpecificExpectations(text);
-  }, []);
+    if (text.trim() && !reliable) {
+      toast({
+        title: "Description à compléter",
+        description:
+          "Votre texte a été replacé dans la première question, complétez vos attentes envers le gardien.",
+      });
+    }
+  }, [toast]);
+
   const updateAbsenceReason = (v: string) => {
     setAbsenceReason(v);
     setSpecificExpectations(joinExpectations(v, sitterExpectations));
