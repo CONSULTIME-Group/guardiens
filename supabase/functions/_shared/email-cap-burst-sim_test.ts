@@ -1,6 +1,11 @@
 // Simulation de pics d'envoi pour vérifier :
-//  1. report correct via decideDeferral (cap 1/h, 3/j, quiet hours)
+//  1. report correct via decideDeferral (doctrine 02/08/2026 : aucun plafond de
+//     fréquence pour la catégorie 'transactional', 1 / 24h et 3 / 7 jours pour
+//     les catégories product, digest et alert, heures calmes pour tout le monde)
 //  2. flush-deferred-emails (re-évaluation au moment du scheduled_for) ne crée pas de doublons
+//
+// Chaque simulation passe explicitement une catégorie à decideDeferral. Une
+// catégorie absente retomberait sur 'product' avec un avertissement console.
 //
 // Modèle in-memory : reproduit fidèlement le comportement de
 //  - send-transactional-email (insert email_send_log status=sent OU defer)
@@ -10,12 +15,15 @@
 import { assert, assertEquals } from 'https://deno.land/std@0.224.0/assert/mod.ts'
 import { decideDeferral } from './email-cap.ts'
 
+type Category = 'transactional' | 'product' | 'digest' | 'alert'
+
 // ── In-memory stores ─────────────────────────────────────────
 interface SendLogRow {
   message_id: string
   idempotency_key: string | null
   recipient: string
   template: string
+  category: Category
   status: 'sent' | 'deferred'
   created_at: Date
 }
