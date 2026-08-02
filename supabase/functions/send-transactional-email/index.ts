@@ -544,9 +544,25 @@ Deno.serve(async (req) => {
       // Re-report depuis la file : on met a jour la ligne source au lieu d'en
       // creer une nouvelle. Sinon attempts repart a 0 et first_enqueued_at est
       // perdu, ce qui neutralise MAX_ATTEMPTS et le TTL (famine).
-      const { error: enqErr } = sourceQueueId
-        ? await supabase.rpc('noop_never_called').then(() => ({ error: null }))
-        : await supabase.from('email_deferred_queue').insert({
+      let enqErr: { message?: string } | null = null
+      if (sourceQueueId) {
+        const { data: srcRow } = await supabase
+          .from('email_deferred_queue')
+          .select('attempts')
+          .eq('id', sourceQueueId)
+          .maybeSingle()
+        const { error: updErr } = await supabase
+          .from('email_deferred_queue')
+          .update({
+            status: 'pending',
+            defer_reason: deferReason,
+            scheduled_for: scheduledFor.toISOString(),
+            attempts: ((srcRow as { attempts?: number } | null)?.attempts ?? 0) + 1,
+          })
+          .eq('id', sourceQueueId)
+        enqErr = updErr
+      } else {
+        const { error: insErr } = await supabase.from('email_deferred_queue').insert({
           template_name: templateName,
           recipient_email: effectiveRecipient,
           template_data: templateData,
@@ -554,6 +570,9 @@ Deno.serve(async (req) => {
           defer_reason: deferReason,
           scheduled_for: scheduledFor.toISOString(),
         })
+        enqErr = insErr
+      }
+
 
       if (enqErr) {
         console.error('Failed to enqueue deferred email — falling open and sending', enqErr)
