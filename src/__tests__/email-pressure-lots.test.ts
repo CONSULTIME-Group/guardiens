@@ -91,16 +91,30 @@ describe("Lot 6 — plafond par categorie", () => {
     expect(d.action).toBe("send");
   });
 
-  it("transactionnel : 1 par heure applique", () => {
+  it("transactionnel : aucun plafond de frequence, meme avec plusieurs envois dans l'heure", () => {
     const d = decideDeferral({
       now: NOON,
       templateName: "new-application",
       category: "transactional",
-      hourSentAt: [iso(-600_000)],
-      daySentAt: [iso(-600_000)],
+      hourSentAt: [iso(-600_000), iso(-300_000), iso(-60_000)],
+      daySentAt: [iso(-7200_000), iso(-600_000), iso(-300_000), iso(-60_000)],
+      nonTxDaySentAt: [iso(-7200_000)],
+      nonTxWeekSentAt: [iso(-7200_000)],
     });
-    expect(d).toMatchObject({ action: "defer", reason: "frequency_cap_hour" });
+    expect(d).toMatchObject({ action: "send" });
   });
+
+  it("transactionnel : reste differe pendant les heures calmes", () => {
+    const d = decideDeferral({
+      now: MIDNIGHT,
+      templateName: "new-application",
+      category: "transactional",
+      hourSentAt: [],
+      daySentAt: [],
+    });
+    expect(d).toMatchObject({ action: "defer", reason: "quiet_hours" });
+  });
+
 
   it("product : 1 seul par 24h", () => {
     expect(CAP_NON_TX_PER_DAY).toBe(1);
