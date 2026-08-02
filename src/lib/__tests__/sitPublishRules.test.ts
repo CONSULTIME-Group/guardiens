@@ -1,8 +1,9 @@
 import { describe, it, expect } from "vitest";
 import {
+  buildSitPublishInput,
+  wasValidatedByCreateForm,
   getSitPublishBlockers,
   canPublishSit,
-  splitExpectations,
   joinExpectations,
   getDescriptionBlockers,
   getTwoFieldsDescriptionBlockers,
@@ -18,12 +19,22 @@ import {
 
 const text = (n: number) => "a".repeat(n);
 
+/** Dates toujours à venir, pour que la suite ne périme pas avec le temps. */
+const iso = (offsetDays: number) => {
+  const d = new Date();
+  d.setDate(d.getDate() + offsetDays);
+  return d.toISOString().slice(0, 10);
+};
+const FUTURE_START = iso(30);
+const FUTURE_END = iso(40);
+const PAST_START = iso(-30);
+
 /** Annonce complète et publiable en mode deux champs. */
 const validTwoFields = (): SitPublishTwoFieldsInput => ({
   descriptionMode: "two-fields",
   title: "Garde de deux chiens",
-  startDate: "2026-09-01",
-  endDate: "2026-09-10",
+  startDate: FUTURE_START,
+  endDate: FUTURE_END,
   flexibleDates: false,
   absenceReason: text(40),
   sitterExpectations: text(40),
@@ -36,8 +47,8 @@ const validTwoFields = (): SitPublishTwoFieldsInput => ({
 const validSingleBlock = (): SitPublishSingleBlockInput => ({
   descriptionMode: "single-block",
   title: "Garde de deux chiens",
-  startDate: "2026-09-01",
-  endDate: "2026-09-10",
+  startDate: FUTURE_START,
+  endDate: FUTURE_END,
   flexibleDates: false,
   specificExpectations: text(120),
   hasProperty: true,
@@ -164,8 +175,8 @@ describe("autres prérequis", () => {
     const empty: SitPublishInput = {
       descriptionMode: "two-fields",
       title: "",
-      startDate: "2026-09-01",
-      endDate: "2026-09-10",
+      startDate: FUTURE_START,
+      endDate: FUTURE_END,
       absenceReason: text(40),
       sitterExpectations: text(40),
       hasProperty: false,
@@ -195,24 +206,85 @@ describe("autres prérequis", () => {
   });
 });
 
-describe("découpe et recomposition des descriptions", () => {
-  it("répartit un texte concaténé sur les deux sous-champs", () => {
-    expect(splitExpectations(`un${EXPECTATIONS_SEPARATOR}deux`)).toEqual({
-      absenceReason: "un",
-      sitterExpectations: "deux",
-    });
-  });
-
-  it("laisse le second sous-champ vide sans séparateur", () => {
-    expect(splitExpectations("bloc unique")).toEqual({
-      absenceReason: "bloc unique",
-      sitterExpectations: "",
-    });
-  });
-
+describe("recomposition des descriptions", () => {
   it("recompose sans séparateur orphelin", () => {
     expect(joinExpectations("un", "")).toBe("un");
     expect(joinExpectations("un", "deux")).toBe(`un${EXPECTATIONS_SEPARATOR}deux`);
+  });
+});
+
+describe("validité des dates", () => {
+  it("bloque une date de début déjà passée", () => {
+    const blockers = getSitPublishBlockers({ ...validTwoFields(), startDate: PAST_START });
+    expect(blockers.map((b) => b.id)).toContain("date-error");
+    expect(blockers.find((b) => b.id === "date-error")?.label).toContain("passé");
+  });
+
+  it("bloque une date de fin antérieure ou égale à la date de début", () => {
+    expect(
+      ids({ ...validTwoFields(), endDate: FUTURE_START }),
+    ).toContain("date-error");
+    expect(
+      ids({ ...validTwoFields(), startDate: FUTURE_END, endDate: FUTURE_START }),
+    ).toContain("date-error");
+  });
+
+  it("applique la règle en mode bloc unique aussi", () => {
+    expect(
+      canPublishSit({ ...validSingleBlock(), startDate: PAST_START }),
+    ).toBe(false);
+  });
+});
+
+describe("adaptateur unique", () => {
+  it("construit une entrée bloc unique depuis une annonce et son propriétaire", () => {
+    const input = buildSitPublishInput({
+      sit: {
+        title: "Garde",
+        start_date: FUTURE_START,
+        end_date: FUTURE_END,
+        specific_expectations: text(120),
+        cover_photo_url: "https://exemple.test/photo.jpg",
+      },
+      property: { photos: [] },
+      galleryPhotos: [],
+      pets: [{}],
+    });
+    expect(input.descriptionMode).toBe("single-block");
+    expect(getSitPublishBlockers(input)).toEqual([]);
+  });
+
+  it("passe en deux champs quand les sous-champs sont fournis", () => {
+    const input = buildSitPublishInput({
+      sit: { title: "Garde", start_date: FUTURE_START, end_date: FUTURE_END },
+      property: { photos: ["a.jpg"] },
+      pets: [{}],
+      twoFields: { absenceReason: text(40), sitterExpectations: text(40) },
+    });
+    expect(input.descriptionMode).toBe("two-fields");
+    expect(getSitPublishBlockers(input)).toEqual([]);
+  });
+
+  it("compte la photo de couverture de l'annonce", () => {
+    const input = buildSitPublishInput({
+      sit: {
+        title: "Garde",
+        start_date: FUTURE_START,
+        end_date: FUTURE_END,
+        specific_expectations: text(120),
+        cover_photo_url: "https://exemple.test/photo.jpg",
+      },
+      property: {},
+      pets: [{}],
+    });
+    expect(getSitPublishBlockers(input).map((b) => b.id)).not.toContain("photo");
+  });
+});
+
+describe("validation par le formulaire de création", () => {
+  it("ne reconnaît qu'une annonce déjà publiée une fois", () => {
+    expect(wasValidatedByCreateForm({ published_at: null })).toBe(false);
+    expect(wasValidatedByCreateForm({ published_at: "2026-01-01" })).toBe(true);
   });
 });
 
