@@ -626,7 +626,7 @@ const CreateSit = () => {
           setTitle(d.title || "");
           setStartDate(cleanStart);
           setEndDate(cleanEnd);
-          setFlexibleDates(d.flexible_dates || false);
+          setFlexibleDates(d.flexible_dates || !!(d as any).flexibility_notes);
           setFlexibleNotes((d as any).flexibility_notes || "");
           applyExpectations(d.specific_expectations || "");
           setOpenTo(d.open_to || []);
@@ -649,12 +649,9 @@ const CreateSit = () => {
           if (hasContent) setSitLocation("home");
           // L'étape atteinte n'est pas stockée en base, on la recalcule à partir
           // du contenu pour ne pas refaire franchir l'étape 1.
-          const step0Complete =
-            !!(d.title || "").trim()
-            && !!cleanStart
-            && !!cleanEnd
-            && cleanStart < cleanEnd
-            && false;
+          // Une description historique ne peut pas être répartie de façon fiable.
+          // Le second champ reste donc à compléter avant de poursuivre.
+          const step0Complete = false;
           if (step0Complete) setCurrentStep(prev => Math.max(prev, 1));
           if (hasContent) setRemoteDraftResumed(true);
           if (datesWerePast) {

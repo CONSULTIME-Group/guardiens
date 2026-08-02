@@ -246,8 +246,10 @@ const SitDetailHeader = ({
           >
             {status.label}
           </span>
-          {flexibilityNotes && (
-            <p className="text-xs text-muted-foreground">Dates flexibles : {flexibilityNotes}</p>
+          {(flexibleDates || flexibilityNotes) && (
+            <p className="text-xs text-muted-foreground">
+              Dates flexibles{flexibilityNotes ? ` : ${flexibilityNotes}` : ""}
+            </p>
           )}
         </div>
       )}
