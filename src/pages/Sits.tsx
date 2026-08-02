@@ -628,19 +628,28 @@ const Sits = () => {
   const activeSits = useMemo(() => sits.filter(s => !isArchived(s)), [sits]);
   
 
-  // Comptages onglets sitter (vue inchangée)
-  // Une expiration/archivage owner-side est mappe vers "cancelled" cote sitter pour preserver le comportement.
+  /**
+   * Source unique du rangement d'une candidature côté gardien : le comptage des
+   * onglets et le filtrage d'affichage consomment tous deux cette fonction, donc
+   * chaque état possible est compté dans l'onglet où sa carte apparaît.
+   */
+  const sitterTabOf = (s: any): Tab => {
+    const es = s.effectiveStatus || s.status;
+    const appStatus = s.application_status;
+    if (
+      appStatus === "cancelled" || appStatus === "rejected" ||
+      ["cancelled", "unavailable", "expired", "archived"].includes(es)
+    ) return "cancelled";
+    if (es === "completed") return "completed";
+    if (es === "in_progress") return "in_progress";
+    return "upcoming";
+  };
+
+  // Comptages onglets sitter, strictement alignés sur sitterTabOf.
   const tabCounts = useMemo(() => {
     const counts: Record<Tab, number> = { upcoming: 0, in_progress: 0, completed: 0, cancelled: 0 };
     if (isOwnerView) return counts;
-    activeSits.forEach((s) => {
-      const es = s.effectiveStatus || s.status;
-      const appStatus = s.application_status;
-      if (appStatus === "cancelled" || appStatus === "rejected" || es === "cancelled" || es === "expired" || es === "archived") counts.cancelled++;
-      else if (es === "completed") counts.completed++;
-      else if (es === "in_progress" && appStatus === "accepted") counts.in_progress++;
-      else counts.upcoming++;
-    });
+    activeSits.forEach((s) => { counts[sitterTabOf(s)]++; });
     return counts;
   }, [activeSits, isOwnerView]);
 
