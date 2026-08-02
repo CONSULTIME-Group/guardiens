@@ -55,16 +55,17 @@ Deno.serve(async (req) => {
     .from("email_deferred_queue")
     .update({ status: "expired", last_error: "TTL exceeded" })
     .eq("status", "pending")
-    .lt("created_at", ttlCutoff);
+    .lt("first_enqueued_at", ttlCutoff);
 
-  // 2. Pull due rows
+  // 2. Pull due rows, plus anciennement enfilees d'abord (anti famine)
   const { data: due, error: fetchErr } = await supabase
     .from("email_deferred_queue")
     .select("id, template_name, recipient_email, template_data, idempotency_key, attempts")
     .eq("status", "pending")
     .lte("scheduled_for", nowIso)
-    .order("scheduled_for", { ascending: true })
+    .order("first_enqueued_at", { ascending: true })
     .limit(MAX_BATCH);
+
 
   if (fetchErr) {
     console.error("flush fetch error", fetchErr);
