@@ -193,8 +193,9 @@ const HouseGuide = () => {
       }
 
       // Copie locale plus récente que la base : on la restaure et on prévient.
-      // Une copie antérieure à la dernière modification en base est périmée,
-      // elle est ignorée puis purgée pour ne pas réécraser la version récente.
+      // Une copie antérieure à la dernière modification en base est simplement
+      // ignorée, jamais supprimée : une comparaison d'horloges ne doit pas
+      // détruire une saisie.
       if (isOwner && localDraftKey) {
         const local = readFormDraft<LocalGuideDraft>(localDraftKey);
         const localSavedAt = getFormDraftSavedAt(localDraftKey);
@@ -205,9 +206,7 @@ const HouseGuide = () => {
           localSavedAt !== null &&
           (remoteUpdatedAt === null || localSavedAt > remoteUpdatedAt);
 
-        if (local && !localIsFresher) {
-          clearFormDraft(localDraftKey);
-        } else if (local) {
+        if (local && localIsFresher) {
           const candidate = { ...loaded, ...local, id: loaded.id } as GuideData;
           if (JSON.stringify({ ...candidate, id: undefined }) !== JSON.stringify({ ...loaded, id: undefined })) {
             loaded = candidate;
