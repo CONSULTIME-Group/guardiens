@@ -47,19 +47,26 @@ import { normalizeCityTyping, normalizeCityName } from "@/lib/normalizeCity";
 import { readFormDraft, writeFormDraft, clearFormDraft, getFormDraftSavedAt } from "@/lib/formDraft";
 import { makePlainTextPasteHandler } from "@/lib/pastePlainText";
 import { DEFAULT_MAX_APPLICATIONS } from "@/lib/applicationCap";
-import { getSitPublishBlockers, MIN_SUB_DESCRIPTION, type PublishBlocker } from "@/lib/sitPublishRules";
+import {
+  getSitPublishBlockers,
+  buildSitPublishInput,
+  joinExpectations,
+  EXPECTATIONS_SEPARATOR,
+  MIN_SUB_DESCRIPTION,
+  type PublishBlocker,
+} from "@/lib/sitPublishRules";
 
 /**
  * Répartit un texte existant sur les deux champs de description.
- * La découpe au double saut de ligne n'est acceptée que si les deux parties
+ * La découpe au séparateur n'est acceptée que si les deux parties
  * atteignent le seuil ; sinon tout le texte va dans le premier champ.
  */
 function splitForFields(raw: string): { first: string; rest: string; reliable: boolean } {
   const text = raw || "";
-  const idx = text.indexOf("\n\n");
+  const idx = text.indexOf(EXPECTATIONS_SEPARATOR);
   if (idx >= 0) {
     const first = text.slice(0, idx);
-    const rest = text.slice(idx + 2);
+    const rest = text.slice(idx + EXPECTATIONS_SEPARATOR.length);
     if (
       first.trim().length >= MIN_SUB_DESCRIPTION &&
       rest.trim().length >= MIN_SUB_DESCRIPTION
@@ -69,6 +76,7 @@ function splitForFields(raw: string): { first: string; rest: string; reliable: b
   }
   return { first: text, rest: "", reliable: false };
 }
+
 
 
 
