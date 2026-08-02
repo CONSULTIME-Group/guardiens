@@ -760,6 +760,18 @@ const CreateSit = () => {
   // distance, on prévient avant la fermeture de l'onglet.
   useUnsavedChanges(unsavedRemote);
 
+  const handleSaveAndExit = async () => {
+    const id = await saveDraft();
+    if (id) {
+      void trackEvent("sit_draft_saved_manually", {
+        source: "create_sit_page",
+        metadata: { sit_id: id },
+      });
+      toast({ title: "Brouillon enregistré", description: "Vous pourrez le reprendre depuis votre dashboard." });
+      navigate("/dashboard");
+    }
+  };
+
 
 
   const saveDraft = async ({ silent = false }: { silent?: boolean } = {}) => {
