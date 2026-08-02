@@ -802,15 +802,19 @@ const CreateSit = () => {
   const [localDraftSavedAt, setLocalDraftSavedAt] = useState<number | null>(null);
   useEffect(() => {
     if (!localDraftKey || loading) return;
+    const snapshot: SitLocalDraft = {
+      title, startDate, endDate, flexibleDates, flexibleNotes,
+      absenceReason, sitterExpectations, openTo, isUrgent, sitEnvironments,
+      minGardienSits, maxApplications, ownerMessage, dailyRoutine,
+      coverPhotoUrl, sitCity, sitCountry, acceptsSitterPets, acceptsSitterChildren,
+      sitLocation, currentStep,
+      draftId: draftIdParam ?? fromSitId ?? draftId ?? null,
+    };
+    // Aucune copie locale sur un formulaire vide : rien à sauvegarder, donc pas
+    // de badge d'enregistrement local trompeur.
+    if (!localDraftHasContent(snapshot)) return;
     const t = setTimeout(() => {
-      writeFormDraft<SitLocalDraft>(localDraftKey, {
-        title, startDate, endDate, flexibleDates, flexibleNotes,
-        absenceReason, sitterExpectations, openTo, isUrgent, sitEnvironments,
-        minGardienSits, maxApplications, ownerMessage, dailyRoutine,
-        coverPhotoUrl, sitCity, sitCountry, acceptsSitterPets, acceptsSitterChildren,
-        sitLocation, currentStep,
-        draftId: draftIdParam ?? fromSitId ?? draftId ?? null,
-      });
+      writeFormDraft<SitLocalDraft>(localDraftKey, snapshot);
       setLocalDraftSavedAt(Date.now());
     }, 300);
     return () => clearTimeout(t);
