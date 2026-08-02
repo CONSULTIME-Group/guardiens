@@ -237,6 +237,8 @@ const EditSit = () => {
     }).filter((b) => owned.has(b.id));
   }, [trimmedTitle, startDate, endDate, flexibleDates, dateError, trimmedDesc]);
 
+  const descBlocker = formBlockers.find((b) => b.id.startsWith("desc-")) || null;
+
   const titleValid = trimmedTitle.length >= 3 && trimmedTitle.length <= MAX_TITLE_LENGTH;
   const isLocked = LOCKED_STATUSES.has(sitStatus);
 
