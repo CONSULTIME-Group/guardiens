@@ -1276,6 +1276,14 @@ const Sits = () => {
 };
 
 /**
+ * La fiche publique ne sert jamais une annonce réellement annulée en base, ni
+ * une annonce masquée. Le test porte sur le statut réel, jamais sur le statut
+ * effectif, qui bascule en « archivé » dès qu'un motif d'archivage est posé.
+ */
+const canOpenSitPage = (sit: any): boolean =>
+  !!sit && !sit.unavailable && sit.status !== "cancelled";
+
+/**
  * Candidature dont l'annonce n'est plus visible (annulée ou retirée par le
  * propriétaire, donc masquée par la sécurité en base). On affiche une carte
  * explicite plutôt que de faire échouer toute la liste du gardien.
