@@ -271,7 +271,7 @@ const EditSit = () => {
       galleryPhotoCount: 1,
       petCount: 1,
     }).filter((b) => owned.has(b.id));
-  }, [trimmedTitle, startDate, endDate, flexibleDates, dateError, trimmedDesc]);
+  }, [trimmedTitle, startDate, endDate, flexibleDates, dateError, persistedDesc]);
 
   const descBlocker = formBlockers.find((b) => b.id.startsWith("desc-")) || null;
 
