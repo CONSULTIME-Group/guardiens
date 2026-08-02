@@ -332,13 +332,19 @@ Deno.serve(async (req) => {
               .eq('template_name', templateName)
               .eq('status', 'pending')
           }
-          await supabase.from('email_send_log').insert({
+          const { error: logAbandonSitErr } = await supabase.from('email_send_log').insert({
             message_id: messageId,
             template_name: templateName,
             recipient_email: effectiveRecipient,
-            status: 'skipped',
-            metadata: { idempotency_key: idempotencyKey, sit_id: sitId, skip_reason: reason },
+            status: 'abandoned',
+            error_message: reason,
+            metadata: { idempotency_key: idempotencyKey, sit_id: sitId, skip_reason: reason, abandon_reason: 'sit_not_published' },
           })
+          if (logAbandonSitErr) {
+            console.error('email_send_log insert failed (sit_not_published)', {
+              templateName, idempotencyKey, error: logAbandonSitErr,
+            })
+          }
           console.log('Alerte annulée, annonce non publiée', { sitId, reason, templateName })
           return new Response(
             JSON.stringify({ success: true, skipped: true, abandoned: true, reason: 'sit_not_published', details: reason }),
@@ -570,11 +576,11 @@ Deno.serve(async (req) => {
             .update({ status: 'abandoned', last_error: abandonReason })
             .eq('id', sourceQueueId)
         }
-        await supabase.from('email_send_log').insert({
+        const { error: logAbandonCapErr } = await supabase.from('email_send_log').insert({
           message_id: messageId,
           template_name: templateName,
           recipient_email: effectiveRecipient,
-          status: 'skipped',
+          status: 'abandoned',
           error_message: abandonReason,
           metadata: {
             idempotency_key: idempotencyKey,
@@ -584,6 +590,11 @@ Deno.serve(async (req) => {
             scheduled_for: scheduledFor.toISOString(),
           },
         })
+        if (logAbandonCapErr) {
+          console.error('email_send_log insert failed (cap_window_exceeds_ttl)', {
+            templateName, idempotencyKey, error: logAbandonCapErr,
+          })
+        }
         console.warn('Email abandonne, fenetre de cap au dela du TTL', {
           templateName, recipientLower, deferReason, scheduledFor: scheduledFor.toISOString(),
         })

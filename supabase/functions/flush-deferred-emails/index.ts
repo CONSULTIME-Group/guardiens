@@ -49,6 +49,14 @@ Deno.serve(async (req) => {
 
   const nowIso = new Date().toISOString();
 
+  // 0. Recupere les lignes coincees en traitement (worker mort en cours de route).
+  const staleProcessing = new Date(Date.now() - 10 * 60_000).toISOString();
+  await supabase
+    .from("email_deferred_queue")
+    .update({ status: "pending", last_error: "reclaimed from stale processing" })
+    .eq("status", "processing")
+    .lt("last_attempt_at", staleProcessing);
+
   // 1. Expire stale entries
   const ttlCutoff = new Date(Date.now() - TTL_HOURS * 3600_000).toISOString();
   await supabase
@@ -74,16 +82,28 @@ Deno.serve(async (req) => {
     });
   }
 
-  let sent = 0, failed = 0, redeferred = 0, abandoned = 0, closed = 0;
+  let sent = 0, failed = 0, redeferred = 0, abandoned = 0, closed = 0, skippedLocked = 0;
 
   for (const row of due ?? []) {
-    // Defaut 2 : l'increment d'attempts appartient au sender (il met a jour la
-    // ligne source lors d'un re-report). Ici on ne pose que l'horodatage.
-    const newAttempts = (row.attempts ?? 0) + 1;
-    await supabase
+    // Verrou optimiste : deux executions concurrentes du cron peuvent selectionner
+    // la meme ligne. Seule celle qui reussit la transition pending -> processing
+    // la traite. Toutes les branches de sortie doivent reposer la ligne dans un
+    // statut final ou 'pending'.
+    const { data: claimed } = await supabase
       .from("email_deferred_queue")
-      .update({ last_attempt_at: nowIso })
-      .eq("id", row.id);
+      .update({ status: "processing", last_attempt_at: nowIso })
+      .eq("id", row.id)
+      .eq("status", "pending")
+      .select("id");
+    if (!claimed || claimed.length === 0) {
+      skippedLocked++;
+      continue;
+    }
+
+    // Defaut 2 : l'increment d'attempts appartient au sender (il met a jour la
+    // ligne source lors d'un re-report).
+    const newAttempts = (row.attempts ?? 0) + 1;
+
 
     try {
       const _steRes = await fetch(`${Deno.env.get('SUPABASE_URL')}/functions/v1/send-transactional-email`, {
@@ -111,9 +131,15 @@ Deno.serve(async (req) => {
       const result = data as Record<string, unknown> | null;
       const reason = typeof result?.reason === 'string' ? result.reason : null;
 
-      // Defaut 5 : le sender a deja clos la ligne (abandon). On respecte son statut.
+      // Defaut 5 : le sender a deja clos la ligne (abandon). On respecte son statut,
+      // en filet de securite si la ligne est restee en traitement.
       if (result?.abandoned) {
         console.log("flush abandoned by sender", { id: row.id, reason });
+        await supabase
+          .from("email_deferred_queue")
+          .update({ status: "abandoned", last_error: reason ?? "abandoned by sender" })
+          .eq("id", row.id)
+          .eq("status", "processing");
         abandoned++;
       } else if (reason === 'already_queued') {
         // Defaut 4 : une ligne doublonnee ne doit pas repasser chaque minute.
@@ -131,7 +157,7 @@ Deno.serve(async (req) => {
         closed++;
       } else if (result?.deferred) {
         // Le sender a re-programme la ligne source elle-meme (attempts et
-        // first_enqueued_at conserves).
+        // first_enqueued_at conserves), et l'a remise en 'pending'.
         // Defaut 3 : MAX_ATTEMPTS s'applique aussi sur le chemin de re-report.
         if (newAttempts >= MAX_ATTEMPTS) {
           await supabase
@@ -144,6 +170,13 @@ Deno.serve(async (req) => {
           failed++;
         } else {
           console.log("flush redeferred", { id: row.id, reason });
+          // Filet de securite : si le sender n'a pas repose la ligne, on la rend
+          // a la file au lieu de la laisser coincee en traitement.
+          await supabase
+            .from("email_deferred_queue")
+            .update({ status: "pending" })
+            .eq("id", row.id)
+            .eq("status", "processing");
           redeferred++;
         }
       } else if (result?.sent || result?.skipped || result?.success) {
@@ -151,9 +184,25 @@ Deno.serve(async (req) => {
         await supabase.from("email_deferred_queue").update({ status: "sent" }).eq("id", row.id);
         sent++;
       } else {
-        // Unknown response shape — treat as failure
+        // Reponse de forme inattendue : meme traitement que l'erreur reseau,
+        // sinon la ligne reste 'pending' avec attempts fige et repasse chaque minute.
+        const unexpected = `Unexpected response: ${JSON.stringify(result)}`;
         if (newAttempts >= MAX_ATTEMPTS) {
-          await supabase.from("email_deferred_queue").update({ status: "failed", last_error: `Unexpected response: ${JSON.stringify(result)}` }).eq("id", row.id);
+          await supabase
+            .from("email_deferred_queue")
+            .update({ status: "failed", last_error: unexpected })
+            .eq("id", row.id);
+        } else {
+          const backoffMin = [5, 15, 30, 60, 120][Math.min(newAttempts - 1, 4)];
+          await supabase
+            .from("email_deferred_queue")
+            .update({
+              status: "pending",
+              scheduled_for: new Date(Date.now() + backoffMin * 60_000).toISOString(),
+              attempts: newAttempts,
+              last_error: unexpected,
+            })
+            .eq("id", row.id);
         }
         failed++;
       }
@@ -170,6 +219,7 @@ Deno.serve(async (req) => {
         await supabase
           .from("email_deferred_queue")
           .update({
+            status: "pending",
             scheduled_for: new Date(Date.now() + backoffMin * 60_000).toISOString(),
             attempts: newAttempts,
             last_error: msg,
@@ -179,6 +229,7 @@ Deno.serve(async (req) => {
 
       failed++;
     }
+
   }
 
   // Lot 9 : alerte si la file accumule des echecs. Seuil volontairement bas,
@@ -220,7 +271,7 @@ Deno.serve(async (req) => {
   }
 
   return new Response(
-    JSON.stringify({ ok: true, processed: (due ?? []).length, sent, failed, redeferred, abandoned, closed, failed_24h: failedRecent }),
+    JSON.stringify({ ok: true, processed: (due ?? []).length, sent, failed, redeferred, abandoned, closed, skipped_locked: skippedLocked, failed_24h: failedRecent }),
     { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
   );
 });
