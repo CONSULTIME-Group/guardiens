@@ -15,6 +15,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { safeUUID } from "@/lib/uuid";
 import { readFormDraft, writeFormDraft, clearFormDraft, getFormDraftSavedAt } from "@/lib/formDraft";
+import { makePlainTextPasteHandler } from "@/lib/pastePlainText";
 import DraftStatus, { type DraftState } from "@/components/shared/DraftStatus";
 
 export type PetFormValues = {
@@ -58,9 +59,11 @@ interface Props {
   submitLabel?: string;
   /** Clé de brouillon local, pour ne pas perdre la saisie en quittant la page. */
   draftKey?: string;
+  /** Prévient le parent qu'une saisie est en cours, pour protéger la fermeture. */
+  onDirtyChange?: (dirty: boolean) => void;
 }
 
-const PetForm = ({ initialValues, onSubmit, onCancel, submitLabel = "Enregistrer", draftKey }: Props) => {
+const PetForm = ({ initialValues, onSubmit, onCancel, submitLabel = "Enregistrer", draftKey, onDirtyChange }: Props) => {
   const { user } = useAuth();
   const fileRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
@@ -92,14 +95,21 @@ const PetForm = ({ initialValues, onSubmit, onCancel, submitLabel = "Enregistrer
     })(),
   });
 
+  // Une saisie en cours ne doit jamais être écrasée par une nouvelle instance
+  // d'`initialValues` (re-render du parent, rafraîchissement de la liste).
+  // On compare donc le contenu, pas l'identité de l'objet, et on ne réinitialise
+  // jamais après la première frappe.
+  const dirtyRef = useRef(false);
+  const initialSignature = JSON.stringify(initialValues ?? null);
   useEffect(() => {
+    if (dirtyRef.current) return;
     if (draftKey && readFormDraft<PetFormValues>(draftKey)) {
       setDraftRestored(true);
       return;
     }
     reset(baseValues());
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [initialValues, reset, draftKey]);
+  }, [initialSignature, reset, draftKey]);
 
   const photoUrl = watch("photo_url");
   const species = watch("species");
@@ -113,9 +123,11 @@ const PetForm = ({ initialValues, onSubmit, onCancel, submitLabel = "Enregistrer
     draftKey ? getFormDraftSavedAt(draftKey) : null,
   );
   useEffect(() => {
-    if (!draftKey) return;
     let timer: ReturnType<typeof setTimeout>;
     const sub = watch((values) => {
+      dirtyRef.current = true;
+      onDirtyChange?.(true);
+      if (!draftKey) return;
       setDraftState("saving");
       clearTimeout(timer);
       timer = setTimeout(() => {
@@ -125,7 +137,8 @@ const PetForm = ({ initialValues, onSubmit, onCancel, submitLabel = "Enregistrer
       }, 400);
     });
     return () => { clearTimeout(timer); sub.unsubscribe(); };
-  }, [watch, draftKey]);
+  }, [watch, draftKey, onDirtyChange]);
+
 
 
 
@@ -155,6 +168,8 @@ const PetForm = ({ initialValues, onSubmit, onCancel, submitLabel = "Enregistrer
     try {
       await onSubmit(values);
       if (draftKey) clearFormDraft(draftKey);
+      dirtyRef.current = false;
+      onDirtyChange?.(false);
       setDraftRestored(false);
       setDraftState("idle");
       setDraftSavedAt(null);
@@ -165,6 +180,8 @@ const PetForm = ({ initialValues, onSubmit, onCancel, submitLabel = "Enregistrer
 
   const handleCancel = () => {
     if (draftKey) clearFormDraft(draftKey);
+    dirtyRef.current = false;
+    onDirtyChange?.(false);
     setDraftRestored(false);
     setDraftState("idle");
     setDraftSavedAt(null);
@@ -201,7 +218,7 @@ const PetForm = ({ initialValues, onSubmit, onCancel, submitLabel = "Enregistrer
       <div className="grid grid-cols-2 gap-3">
         <div className="space-y-1.5">
           <Label htmlFor="pet-name">Nom<span className="text-destructive">*</span></Label>
-          <Input id="pet-name" {...register("name")} maxLength={30} aria-invalid={!!errors.name} />
+          <Input id="pet-name" {...register("name")} onPaste={makePlainTextPasteHandler(v => setValue("name", v, { shouldDirty: true }), { maxLength: 30 })} maxLength={30} aria-invalid={!!errors.name} />
           {errors.name && <p className="text-xs text-destructive">{errors.name.message}</p>}
         </div>
         <div className="space-y-1.5">
@@ -218,7 +235,7 @@ const PetForm = ({ initialValues, onSubmit, onCancel, submitLabel = "Enregistrer
         </div>
         <div className="space-y-1.5">
           <Label htmlFor="pet-breed">Race</Label>
-          <Input id="pet-breed" {...register("breed")} maxLength={50} placeholder="Optionnel" />
+          <Input id="pet-breed" {...register("breed")} onPaste={makePlainTextPasteHandler(v => setValue("breed", v, { shouldDirty: true }), { maxLength: 50 })} maxLength={50} placeholder="Optionnel" />
         </div>
         <div className="space-y-1.5">
           <Label htmlFor="pet-age">Âge (années)</Label>
@@ -228,12 +245,12 @@ const PetForm = ({ initialValues, onSubmit, onCancel, submitLabel = "Enregistrer
 
       <div className="space-y-1.5">
         <Label htmlFor="pet-character">Tempérament</Label>
-        <Textarea id="pet-character" {...register("character")} maxLength={300} rows={2} placeholder="Doux, joueur, sociable…" />
+        <Textarea id="pet-character" {...register("character")} onPaste={makePlainTextPasteHandler(v => setValue("character", v, { shouldDirty: true }), { maxLength: 300 })} maxLength={300} rows={2} placeholder="Doux, joueur, sociable…" />
       </div>
 
       <div className="space-y-1.5">
         <Label htmlFor="pet-special">Besoins spéciaux</Label>
-        <Textarea id="pet-special" {...register("special_needs")} maxLength={500} rows={2} placeholder="Traitement, allergies, régime…" />
+        <Textarea id="pet-special" {...register("special_needs")} onPaste={makePlainTextPasteHandler(v => setValue("special_needs", v, { shouldDirty: true }), { maxLength: 500 })} maxLength={500} rows={2} placeholder="Traitement, allergies, régime…" />
       </div>
 
       <div className="flex justify-end gap-2 pt-2">

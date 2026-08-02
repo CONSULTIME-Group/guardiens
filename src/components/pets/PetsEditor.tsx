@@ -46,6 +46,8 @@ const PetsEditor = ({ propertyId, onChange }: Props) => {
   const qc = useQueryClient();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editing, setEditing] = useState<Pet | null>(null);
+  // Une saisie en cours empêche toute fermeture involontaire du dialogue.
+  const [formDirty, setFormDirty] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState<Pet | null>(null);
 
   const petsQuery = useQuery({
@@ -155,8 +157,12 @@ const PetsEditor = ({ propertyId, onChange }: Props) => {
         <Plus className="h-4 w-4 mr-2" /> Ajouter un animal
       </Button>
 
-      <Dialog open={dialogOpen} onOpenChange={(o) => { setDialogOpen(o); if (!o) setEditing(null); }}>
-        <DialogContent className="max-w-lg">
+      <Dialog open={dialogOpen} onOpenChange={(o) => { if (!o && formDirty) return; setDialogOpen(o); if (!o) setEditing(null); }}>
+        <DialogContent
+          className="max-w-lg"
+          onPointerDownOutside={(e) => { if (formDirty) e.preventDefault(); }}
+          onInteractOutside={(e) => { if (formDirty) e.preventDefault(); }}
+        >
           <DialogHeader>
             <DialogTitle>{editing ? "Modifier l'animal" : "Ajouter un animal"}</DialogTitle>
             <DialogDescription>
@@ -166,8 +172,9 @@ const PetsEditor = ({ propertyId, onChange }: Props) => {
           <PetForm
             initialValues={editing ?? undefined}
             draftKey={`pet-form:${propertyId}:${editing?.id ?? "new"}`}
+            onDirtyChange={setFormDirty}
             onSubmit={handleSubmit}
-            onCancel={() => { setDialogOpen(false); setEditing(null); }}
+            onCancel={() => { setFormDirty(false); setDialogOpen(false); setEditing(null); }}
             submitLabel={editing ? "Enregistrer" : "Ajouter"}
           />
         </DialogContent>

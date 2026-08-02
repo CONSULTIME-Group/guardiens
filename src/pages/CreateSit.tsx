@@ -43,6 +43,8 @@ import PetsEditor from "@/components/pets/PetsEditor";
 import { pickSmartCover } from "@/lib/pickSmartCover";
 import { sortForCover, withoutAnimalPhotos } from "@/lib/coverPriority";
 import { normalizeCityTyping, normalizeCityName } from "@/lib/normalizeCity";
+import { readFormDraft, writeFormDraft, clearFormDraft, getFormDraftSavedAt } from "@/lib/formDraft";
+import { makePlainTextPasteHandler } from "@/lib/pastePlainText";
 import { DEFAULT_MAX_APPLICATIONS } from "@/lib/applicationCap";
 
 
@@ -388,6 +390,76 @@ const CreateSit = () => {
     setAlmaBubbleDismissed(true);
   }, []);
 
+  // ---------------------------------------------------------------------------
+  // Filet de sécurité local du brouillon d'annonce.
+  //
+  // Le brouillon distant part avec un délai de 1500 ms. Une fermeture d'onglet,
+  // un plantage du navigateur ou une coupure réseau pendant cette fenêtre faisait
+  // perdre la saisie. On duplique donc l'état du formulaire dans le stockage
+  // local toutes les 300 ms, et on le restaure au chargement s'il est plus récent
+  // que le brouillon distant.
+  // ---------------------------------------------------------------------------
+  type SitLocalDraft = {
+    title: string;
+    startDate: string;
+    endDate: string;
+    flexibleDates: boolean;
+    flexibleNotes: string;
+    absenceReason: string;
+    sitterExpectations: string;
+    openTo: string[];
+    isUrgent: boolean;
+    sitEnvironments: string[];
+    minGardienSits: number;
+    maxApplications: number | null;
+    ownerMessage: string;
+    dailyRoutine: string;
+    coverPhotoUrl: string | null;
+    sitCity: string;
+    sitCountry: string;
+    acceptsSitterPets: "yes" | "no" | "discuss";
+    acceptsSitterChildren: "yes" | "no" | "discuss";
+  };
+  const localDraftKey = user ? `sit-create:${user.id}:${draftIdParam ?? fromSitId ?? "current"}` : null;
+  const applyLocalDraft = useCallback((d: SitLocalDraft) => {
+    setTitle(d.title ?? "");
+    setStartDate(d.startDate ?? "");
+    setEndDate(d.endDate ?? "");
+    setFlexibleDates(!!d.flexibleDates);
+    setFlexibleNotes(d.flexibleNotes ?? "");
+    setAbsenceReason(d.absenceReason ?? "");
+    setSitterExpectations(d.sitterExpectations ?? "");
+    setSpecificExpectations(joinExpectations(d.absenceReason ?? "", d.sitterExpectations ?? ""));
+    setOpenTo(Array.isArray(d.openTo) ? d.openTo : []);
+    setIsUrgent(!!d.isUrgent);
+    setSitEnvironments(Array.isArray(d.sitEnvironments) ? d.sitEnvironments : []);
+    setMinGardienSits(d.minGardienSits ?? 0);
+    setMaxApplications(d.maxApplications ?? DEFAULT_MAX_APPLICATIONS);
+    setOwnerMessage(d.ownerMessage ?? "");
+    setDailyRoutine(d.dailyRoutine ?? "");
+    if (d.coverPhotoUrl) setCoverPhotoUrl(d.coverPhotoUrl);
+    setSitCity(d.sitCity ?? "");
+    setSitCountry(d.sitCountry ?? "FR");
+    setAcceptsSitterPets(d.acceptsSitterPets ?? "discuss");
+    setAcceptsSitterChildren(d.acceptsSitterChildren ?? "discuss");
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+  const [localDraftRestored, setLocalDraftRestored] = useState(false);
+  // Restaure la copie locale si elle est postérieure au brouillon distant.
+  const restoreLocalDraftIfFresher = useCallback((remoteUpdatedAt: string | null) => {
+    if (!localDraftKey) return;
+    const stored = readFormDraft<SitLocalDraft>(localDraftKey);
+    if (!stored) return;
+    const savedAt = getFormDraftSavedAt(localDraftKey) ?? 0;
+    const remote = remoteUpdatedAt ? new Date(remoteUpdatedAt).getTime() : 0;
+    if (remote && savedAt <= remote) return;
+    applyLocalDraft(stored);
+    setLocalDraftRestored(true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [localDraftKey, applyLocalDraft]);
+
+
+
   useEffect(() => {
     if (!user) return;
     const load = async () => {
@@ -482,6 +554,7 @@ const CreateSit = () => {
         }
       }
 
+      let remoteDraftUpdatedAt: string | null = null;
       if (!sourceSitRes?.data) {
         let draftRes: { data: any } | null = null;
         if (draftIdParam) {
@@ -501,6 +574,7 @@ const CreateSit = () => {
         }
         if (draftRes?.data) {
           const d = draftRes.data;
+          remoteDraftUpdatedAt = (d as any).updated_at || (d as any).created_at || null;
           const today = new Date().toISOString().slice(0, 10);
           const rawStart: string | null = d.start_date || null;
           const rawEnd: string | null = d.end_date || null;
@@ -574,10 +648,12 @@ const CreateSit = () => {
           setSitEnvironments(prev => (prev.length > 0 ? prev : ((o as any).environments || [])));
         }
       }
+      restoreLocalDraftIfFresher(remoteDraftUpdatedAt);
       setLoading(false);
       setTimeout(() => { initialLoadedRef.current = true; }, 300);
     };
     load();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user, fromSitId, draftIdParam]);
 
   // Auto-save draft (debounced)
@@ -590,6 +666,24 @@ const CreateSit = () => {
     return () => clearTimeout(t);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [title, startDate, endDate, flexibleDates, flexibleNotes, specificExpectations, openTo, isUrgent, sitEnvironments, minGardienSits, maxApplications, ownerMessage, dailyRoutine, coverPhotoUrl, sitCity, sitCountry, acceptsSitterPets, acceptsSitterChildren]);
+
+  // Copie locale immédiate (300 ms), indépendante du réseau et du brouillon distant.
+  const [localDraftSavedAt, setLocalDraftSavedAt] = useState<number | null>(null);
+  useEffect(() => {
+    if (!localDraftKey || loading) return;
+    const t = setTimeout(() => {
+      writeFormDraft<SitLocalDraft>(localDraftKey, {
+        title, startDate, endDate, flexibleDates, flexibleNotes,
+        absenceReason, sitterExpectations, openTo, isUrgent, sitEnvironments,
+        minGardienSits, maxApplications, ownerMessage, dailyRoutine,
+        coverPhotoUrl, sitCity, sitCountry, acceptsSitterPets, acceptsSitterChildren,
+      });
+      setLocalDraftSavedAt(Date.now());
+    }, 300);
+    return () => clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [localDraftKey, loading, title, startDate, endDate, flexibleDates, flexibleNotes, absenceReason, sitterExpectations, openTo, isUrgent, sitEnvironments, minGardienSits, maxApplications, ownerMessage, dailyRoutine, coverPhotoUrl, sitCity, sitCountry, acceptsSitterPets, acceptsSitterChildren]);
+
 
   // Smart cover picker : scoring IA de la galerie, silencieux si quota/rate-limit.
   // Se déclenche à l'arrivée sur l'étape Préférences si le propriétaire n'a rien
@@ -841,6 +935,7 @@ const CreateSit = () => {
         } catch {}
       }
       publishedRef.current = true;
+      if (localDraftKey) clearFormDraft(localDraftKey);
       toast({ title: "Annonce publiée", description: "Les gardiens peuvent maintenant postuler." });
       navigate(`/sits/${sitId}`);
     } catch (err: any) {
@@ -971,7 +1066,9 @@ const CreateSit = () => {
     ? "Brouillon en cours d'enregistrement…"
     : lastSavedAt
       ? `Brouillon enregistré · ${relativeTime(lastSavedAt)}`
-      : draftId ? "Brouillon en cours" : null;
+      : localDraftSavedAt
+        ? "Brouillon enregistré sur cet appareil"
+        : draftId ? "Brouillon en cours" : null;
 
   return (
     <div className="animate-fade-in pb-40">
@@ -1029,6 +1126,14 @@ const CreateSit = () => {
             {draftLabel}
           </div>
         )}
+
+        {localDraftRestored && (
+          <p className="text-sm text-muted-foreground bg-muted/50 rounded-lg px-3 py-2 mb-4" role="status">
+            Nous avons retrouvé votre saisie en cours sur cet appareil et l'avons restaurée. Pensez à publier ou à enregistrer.
+          </p>
+        )}
+
+
 
         {showAlmaCreateBubble && (
           <div className="mb-4">
@@ -1145,6 +1250,7 @@ const CreateSit = () => {
               placeholder={nDays > 0 ? buildSuggestedTitle() : "Ex : Garde de 2 chats à Écully, 10 jours en août"}
               value={title}
               onChange={e => setTitle(e.target.value)}
+              onPaste={makePlainTextPasteHandler(setTitle)}
               onBlur={() => touch("title")}
               className={cn("h-12 text-base", fieldState("title", !title))}
             />
@@ -1279,6 +1385,7 @@ const CreateSit = () => {
                   placeholder="Voyage, événement familial…"
                   value={absenceReason}
                   onChange={e => updateAbsenceReason(e.target.value)}
+                  onPaste={makePlainTextPasteHandler(updateAbsenceReason)}
                   onBlur={() => touch("descriptionReason")}
                   className={cn(
                     "text-base min-h-[90px] mt-1.5",
@@ -1318,6 +1425,7 @@ const CreateSit = () => {
                   placeholder="Présence rassurante, sorties avec l'animal…"
                   value={sitterExpectations}
                   onChange={e => updateSitterExpectations(e.target.value)}
+                  onPaste={makePlainTextPasteHandler(updateSitterExpectations)}
                   onBlur={() => touch("descriptionExpectations")}
                   className={cn(
                     "text-base min-h-[90px] mt-1.5",
@@ -1361,6 +1469,7 @@ const CreateSit = () => {
               placeholder={"Ex :\nMatin, Sortie du chien 30 min, gamelles, ouverture du jardin.\nMidi, Visite rapide, fontaine à recharger.\nSoir, Promenade 30 min, repas, câlins obligatoires 🥰"}
               value={dailyRoutine}
               onChange={e => setDailyRoutine(e.target.value.slice(0, 1500))}
+              onPaste={makePlainTextPasteHandler(setDailyRoutine, { maxLength: 1500 })}
               className="text-base min-h-[120px]"
               rows={5}
             />
@@ -1399,6 +1508,7 @@ const CreateSit = () => {
               placeholder="Ex : On confie nos animaux à un membre de confiance plutôt qu'à une pension. Vous repartirez sûrement avec des cookies maison et une connaissance fine du quartier !"
               value={ownerMessage}
               onChange={e => setOwnerMessage(e.target.value.slice(0, 800))}
+              onPaste={makePlainTextPasteHandler(setOwnerMessage, { maxLength: 800 })}
               className="text-base"
               rows={4}
             />
@@ -1481,6 +1591,7 @@ const CreateSit = () => {
                 placeholder="Ex : autour du 15 août, flexible d'une semaine"
                 value={flexibleNotes}
                 onChange={e => setFlexibleNotes(e.target.value)}
+                onPaste={makePlainTextPasteHandler(setFlexibleNotes)}
                 className="mt-1.5 h-12 text-base"
               />
             </div>
