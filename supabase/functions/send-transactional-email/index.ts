@@ -341,7 +341,7 @@ Deno.serve(async (req) => {
           })
           console.log('Alerte annulée, annonce non publiée', { sitId, reason, templateName })
           return new Response(
-            JSON.stringify({ success: true, skipped: true, reason: 'sit_not_published', details: reason }),
+            JSON.stringify({ success: true, skipped: true, abandoned: true, reason: 'sit_not_published', details: reason }),
             { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
           )
         }
