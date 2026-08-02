@@ -60,7 +60,7 @@ const SitDetail = () => {
   const { id } = useParams<{ id: string }>();
   const { user, activeRole } = useAuth();
 
-  // Alma étape 1 — compagnon culturel + usage_nudge sur la fiche annonce.
+  // Alma étape 1, compagnon culturel + usage_nudge sur la fiche annonce.
   useAlmaCulturalFact({ surface: "sit_detail", context: { role: activeRole } });
   useAlmaUsageNudge({
     surface: "sit_detail",
