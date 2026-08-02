@@ -32,6 +32,7 @@ interface QueueRow {
   idempotency_key: string
   recipient: string
   template: string
+  category: Category
   scheduled_for: Date
   status: 'pending' | 'sent' | 'failed'
   reason: string
@@ -50,7 +51,14 @@ class FakeSystem {
   }
 
   /** Mirrors send-transactional-email entry point. */
-  send(now: Date, recipient: string, template: string, idempotencyKey: string, isUrgent = false) {
+  send(
+    now: Date,
+    recipient: string,
+    template: string,
+    idempotencyKey: string,
+    isUrgent = false,
+    category: Category = 'product',
+  ) {
     const recipientLower = recipient.toLowerCase()
 
     // Idempotence : si une ligne sent existe déjà pour cette clé → no-op (= comportement
@@ -63,34 +71,32 @@ class FakeSystem {
       return { result: 'idempotent_hit' as const }
     }
 
-    // Récupère l'historique "sent" du destinataire (last 1h / 24h).
+    // Historique "sent" du destinataire. Les compteurs qui pilotent la decision
+    // sont ceux des categories NON transactionnelles (1 / 24h, 3 / 7 jours).
     const oneHourAgo = now.getTime() - 3600_000
     const oneDayAgo = now.getTime() - 86400_000
-    const hourSent = this.sendLog
-      .filter(
-        (r) =>
-          r.recipient === recipientLower &&
-          r.status === 'sent' &&
-          r.created_at.getTime() >= oneHourAgo,
-      )
-      .sort((a, b) => a.created_at.getTime() - b.created_at.getTime())
-      .map((r) => r.created_at.toISOString())
-    const daySent = this.sendLog
-      .filter(
-        (r) =>
-          r.recipient === recipientLower &&
-          r.status === 'sent' &&
-          r.created_at.getTime() >= oneDayAgo,
-      )
-      .sort((a, b) => a.created_at.getTime() - b.created_at.getTime())
-      .map((r) => r.created_at.toISOString())
+    const oneWeekAgo = now.getTime() - 7 * 86400_000
+    const sentFor = (since: number, nonTxOnly: boolean) =>
+      this.sendLog
+        .filter(
+          (r) =>
+            r.recipient === recipientLower &&
+            r.status === 'sent' &&
+            r.created_at.getTime() >= since &&
+            (!nonTxOnly || r.category !== 'transactional'),
+        )
+        .sort((a, b) => a.created_at.getTime() - b.created_at.getTime())
+        .map((r) => r.created_at.toISOString())
 
     const decision = decideDeferral({
       now,
       templateName: template,
       isUrgent,
-      hourSentAt: hourSent,
-      daySentAt: daySent,
+      category,
+      hourSentAt: sentFor(oneHourAgo, false),
+      daySentAt: sentFor(oneDayAgo, false),
+      nonTxDaySentAt: sentFor(oneDayAgo, true),
+      nonTxWeekSentAt: sentFor(oneWeekAgo, true),
     })
 
     if (decision.action === 'send') {
@@ -99,6 +105,7 @@ class FakeSystem {
         idempotency_key: idempotencyKey,
         recipient: recipientLower,
         template,
+        category,
         status: 'sent',
         created_at: now,
       })
@@ -119,6 +126,7 @@ class FakeSystem {
       idempotency_key: idempotencyKey,
       recipient: recipientLower,
       template,
+      category,
       scheduled_for: decision.scheduledFor,
       status: 'pending',
       reason: decision.reason,
@@ -130,11 +138,13 @@ class FakeSystem {
       idempotency_key: idempotencyKey,
       recipient: recipientLower,
       template,
+      category,
       status: 'deferred',
       created_at: now,
     })
     return { result: 'deferred' as const, scheduledFor: decision.scheduledFor }
   }
+
 
   /** Mirrors flush-deferred-emails. */
   flush(now: Date) {
