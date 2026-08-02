@@ -559,7 +559,9 @@ const Sits = () => {
         variant: "destructive",
         title: "Republication impossible",
         description:
-          code === "42501" || code === "PGRST301"
+          code === "P0001"
+            ? "Cette annonce ne peut pas être republiée sans au moins un animal à faire garder. Ajoutez-le dans votre logement, puis republiez."
+            : code === "42501" || code === "PGRST301"
             ? "Vous n'avez pas les droits pour republier cette annonce."
             : "La base a refusé la republication : vérifiez le titre, les dates, la description et la photo de cette annonce, puis republiez.",
       });
