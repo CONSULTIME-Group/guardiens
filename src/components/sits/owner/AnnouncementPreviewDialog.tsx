@@ -15,12 +15,21 @@ interface PreviewPet {
   photo_url: string | null;
 }
 
+export interface PreviewBlocker {
+  id: string;
+  label: string;
+  anchor?: string;
+  action?: string;
+}
+
 interface AnnouncementPreviewDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onConfirmPublish: () => void;
   publishing: boolean;
   canPublish: boolean;
+  blockers?: PreviewBlocker[];
+  onResolveBlocker?: (blocker: PreviewBlocker) => void;
   title: string;
   startDate: string;
   endDate: string;
