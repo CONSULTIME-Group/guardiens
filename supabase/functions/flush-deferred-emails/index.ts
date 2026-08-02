@@ -74,16 +74,28 @@ Deno.serve(async (req) => {
     });
   }
 
-  let sent = 0, failed = 0, redeferred = 0, abandoned = 0, closed = 0;
+  let sent = 0, failed = 0, redeferred = 0, abandoned = 0, closed = 0, skippedLocked = 0;
 
   for (const row of due ?? []) {
-    // Defaut 2 : l'increment d'attempts appartient au sender (il met a jour la
-    // ligne source lors d'un re-report). Ici on ne pose que l'horodatage.
-    const newAttempts = (row.attempts ?? 0) + 1;
-    await supabase
+    // Verrou optimiste : deux executions concurrentes du cron peuvent selectionner
+    // la meme ligne. Seule celle qui reussit la transition pending -> processing
+    // la traite. Toutes les branches de sortie doivent reposer la ligne dans un
+    // statut final ou 'pending'.
+    const { data: claimed } = await supabase
       .from("email_deferred_queue")
-      .update({ last_attempt_at: nowIso })
-      .eq("id", row.id);
+      .update({ status: "processing", last_attempt_at: nowIso })
+      .eq("id", row.id)
+      .eq("status", "pending")
+      .select("id");
+    if (!claimed || claimed.length === 0) {
+      skippedLocked++;
+      continue;
+    }
+
+    // Defaut 2 : l'increment d'attempts appartient au sender (il met a jour la
+    // ligne source lors d'un re-report).
+    const newAttempts = (row.attempts ?? 0) + 1;
+
 
     try {
       const _steRes = await fetch(`${Deno.env.get('SUPABASE_URL')}/functions/v1/send-transactional-email`, {
