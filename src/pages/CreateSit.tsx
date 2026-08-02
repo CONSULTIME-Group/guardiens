@@ -802,6 +802,10 @@ const CreateSit = () => {
   const [localDraftSavedAt, setLocalDraftSavedAt] = useState<number | null>(null);
   useEffect(() => {
     if (!localDraftKey || loading) return;
+    // Rien n'est écrit tant que l'utilisateur n'a pas réellement saisi quelque
+    // chose : un contenu simplement pré-rempli depuis une annonce source ne doit
+    // pas créer de copie locale, ni afficher le badge d'enregistrement local.
+    if (!initialLoadedRef.current) return;
     const snapshot: SitLocalDraft = {
       title, startDate, endDate, flexibleDates, flexibleNotes,
       absenceReason, sitterExpectations, openTo, isUrgent, sitEnvironments,
