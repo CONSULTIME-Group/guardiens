@@ -355,10 +355,11 @@ const EditSit = () => {
     toast({ title: "Annonce mise à jour" });
     navigate(`/sits/${id}`);
   }, [
-    user, id, canSave, trimmedDesc, trimmedTitle, startDate, endDate,
-    flexibleDates, flexibleMonths, flexibleDuration, openTo, isUrgent,
+    user, id, canSave, persistedDesc, trimmedTitle, startDate, endDate,
+    flexibleDates, flexibleMonths, flexibleDuration, flexibleFreeNote, openTo, isUrgent,
     minGardienSits, currentSnapshot, navigate, toast,
   ]);
+
 
   const handleSave = () => {
     if (!canSave) return;
