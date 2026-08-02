@@ -1,0 +1,2 @@
+ALTER TABLE public.sits ADD COLUMN IF NOT EXISTS flexibility_notes text;
+COMMENT ON COLUMN public.sits.flexibility_notes IS 'Notes de flexibilite (mois, duree). Ne doit jamais etre concatene a specific_expectations.';
