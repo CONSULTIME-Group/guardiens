@@ -74,7 +74,7 @@ Deno.serve(async (req) => {
     });
   }
 
-  let sent = 0, failed = 0, redeferred = 0;
+  let sent = 0, failed = 0, redeferred = 0, abandoned = 0, closed = 0;
 
   for (const row of due ?? []) {
     // Defaut 2 : l'increment d'attempts appartient au sender (il met a jour la
@@ -220,7 +220,7 @@ Deno.serve(async (req) => {
   }
 
   return new Response(
-    JSON.stringify({ ok: true, processed: (due ?? []).length, sent, failed, redeferred, failed_24h: failedRecent }),
+    JSON.stringify({ ok: true, processed: (due ?? []).length, sent, failed, redeferred, abandoned, closed, failed_24h: failedRecent }),
     { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
   );
 });
