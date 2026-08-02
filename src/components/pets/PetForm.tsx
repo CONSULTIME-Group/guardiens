@@ -168,6 +168,8 @@ const PetForm = ({ initialValues, onSubmit, onCancel, submitLabel = "Enregistrer
     try {
       await onSubmit(values);
       if (draftKey) clearFormDraft(draftKey);
+      dirtyRef.current = false;
+      onDirtyChange?.(false);
       setDraftRestored(false);
       setDraftState("idle");
       setDraftSavedAt(null);
@@ -178,6 +180,8 @@ const PetForm = ({ initialValues, onSubmit, onCancel, submitLabel = "Enregistrer
 
   const handleCancel = () => {
     if (draftKey) clearFormDraft(draftKey);
+    dirtyRef.current = false;
+    onDirtyChange?.(false);
     setDraftRestored(false);
     setDraftState("idle");
     setDraftSavedAt(null);
@@ -214,7 +218,7 @@ const PetForm = ({ initialValues, onSubmit, onCancel, submitLabel = "Enregistrer
       <div className="grid grid-cols-2 gap-3">
         <div className="space-y-1.5">
           <Label htmlFor="pet-name">Nom<span className="text-destructive">*</span></Label>
-          <Input id="pet-name" {...register("name")} maxLength={30} aria-invalid={!!errors.name} />
+          <Input id="pet-name" {...register("name")} onPaste={makePlainTextPasteHandler(v => setValue("name", v, { shouldDirty: true }), { maxLength: 30 })} maxLength={30} aria-invalid={!!errors.name} />
           {errors.name && <p className="text-xs text-destructive">{errors.name.message}</p>}
         </div>
         <div className="space-y-1.5">
@@ -231,7 +235,7 @@ const PetForm = ({ initialValues, onSubmit, onCancel, submitLabel = "Enregistrer
         </div>
         <div className="space-y-1.5">
           <Label htmlFor="pet-breed">Race</Label>
-          <Input id="pet-breed" {...register("breed")} maxLength={50} placeholder="Optionnel" />
+          <Input id="pet-breed" {...register("breed")} onPaste={makePlainTextPasteHandler(v => setValue("breed", v, { shouldDirty: true }), { maxLength: 50 })} maxLength={50} placeholder="Optionnel" />
         </div>
         <div className="space-y-1.5">
           <Label htmlFor="pet-age">Âge (années)</Label>
@@ -241,12 +245,12 @@ const PetForm = ({ initialValues, onSubmit, onCancel, submitLabel = "Enregistrer
 
       <div className="space-y-1.5">
         <Label htmlFor="pet-character">Tempérament</Label>
-        <Textarea id="pet-character" {...register("character")} maxLength={300} rows={2} placeholder="Doux, joueur, sociable…" />
+        <Textarea id="pet-character" {...register("character")} onPaste={makePlainTextPasteHandler(v => setValue("character", v, { shouldDirty: true }), { maxLength: 300 })} maxLength={300} rows={2} placeholder="Doux, joueur, sociable…" />
       </div>
 
       <div className="space-y-1.5">
         <Label htmlFor="pet-special">Besoins spéciaux</Label>
-        <Textarea id="pet-special" {...register("special_needs")} maxLength={500} rows={2} placeholder="Traitement, allergies, régime…" />
+        <Textarea id="pet-special" {...register("special_needs")} onPaste={makePlainTextPasteHandler(v => setValue("special_needs", v, { shouldDirty: true }), { maxLength: 500 })} maxLength={500} rows={2} placeholder="Traitement, allergies, régime…" />
       </div>
 
       <div className="flex justify-end gap-2 pt-2">
