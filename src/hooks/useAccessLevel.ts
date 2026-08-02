@@ -4,7 +4,7 @@ import { useSubscriptionAccess } from "@/hooks/useSubscriptionAccess";
 /**
  * Access levels:
  * 0 — Not logged in
- * 1 — Réservé, plus jamais renvoyé : le seuil de complétion de profil a été supprimé.
+ * 1 — Connecté, profil incomplet (moins de 60 pour cent) : ne peut pas postuler
  * 2 — Connecté, identité non vérifiée (NON-BLOQUANT, recommandation seulement)
  * 3A — Gardien, identité vérifiée, sans abonnement
  * 3B — Propriétaire, identité vérifiée (gratuit)
