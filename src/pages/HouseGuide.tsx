@@ -117,8 +117,19 @@ const HouseGuide = () => {
   const [access, setAccess] = useState<AccessState>("denied");
   const [openDate, setOpenDate] = useState<Date | null>(null);
 
+  // Filet local : 23 champs libres, aucune perte de saisie tolérable.
+  const localDraftKey = propertyId && user ? `house-guide:${user.id}:${propertyId}` : null;
+  const [draftState, setDraftState] = useState<DraftState>("idle");
+  const [localDraftSavedAt, setLocalDraftSavedAt] = useState<number | null>(null);
+  const [localDraftRestored, setLocalDraftRestored] = useState(false);
+  const [dirty, setDirty] = useState(false);
+  const loadedRef = useRef(false);
+
+  useUnsavedChanges(dirty);
+
   useEffect(() => {
     if (!propertyId || !user) return;
+
     const load = async () => {
       const [{ data: property }, { data }] = await Promise.all([
         supabase.from("properties").select("id, user_id").eq("id", propertyId).maybeSingle(),
