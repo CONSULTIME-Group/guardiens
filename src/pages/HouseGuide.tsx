@@ -246,7 +246,7 @@ const HouseGuide = () => {
     if (!guide || !localDraftKey || access !== "owner" || !loadedRef.current || !dirty) return;
     setDraftState("saving");
     const t = setTimeout(() => {
-      writeFormDraft<GuideData>(localDraftKey, guide);
+      writeFormDraft<LocalGuideDraft>(localDraftKey, stripSensitive(guide));
       const now = Date.now();
       setLocalDraftSavedAt(now);
       setDraftState("saved");
