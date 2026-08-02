@@ -681,8 +681,10 @@ const CreateSit = () => {
     ? "La date de début ne peut pas être dans le passé."
     : null;
 
-  const MIN_DESCRIPTION = 150;
-  const descriptionValid = specificExpectations.length >= MIN_DESCRIPTION;
+  const MIN_SUB_DESCRIPTION = 30;
+  const reasonValid = absenceReason.trim().length >= MIN_SUB_DESCRIPTION;
+  const expectationsValid = sitterExpectations.trim().length >= MIN_SUB_DESCRIPTION;
+  const descriptionValid = reasonValid && expectationsValid;
   const hasPhoto = !!coverPhotoUrl || ownerPhotos.length > 0;
   // Seuil de publication abaissé de 60 % à 40 % (owner Pass 2) : débloque
   // les propriétaires en cours d'onboarding sans sacrifier la qualité minimale
