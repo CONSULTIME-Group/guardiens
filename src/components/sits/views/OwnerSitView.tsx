@@ -396,8 +396,19 @@ const OwnerSitView = ({
           editHref={`/sits/${sit.id}/edit`}
           publishing={publishing}
           onPublish={() => {
-            if (canPublish) setPublishConfirmOpen(true);
+            if (!canPublish) return;
+            if (publishNeedsForm) {
+              toast({
+                title: "Dernière étape dans le formulaire",
+                description:
+                  "Cette annonce n'a jamais été publiée : finalisez sa description en deux questions, puis publiez.",
+              });
+              navigate(`/sits/create?resume=${sit.id}`);
+              return;
+            }
+            setPublishConfirmOpen(true);
           }}
+
         />
 
       )}
