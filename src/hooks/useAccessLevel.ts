@@ -4,15 +4,15 @@ import { useSubscriptionAccess } from "@/hooks/useSubscriptionAccess";
 /**
  * Access levels:
  * 0 — Not logged in
- * 1 — Logged in, profile < 60%
- * 2 — Profile ≥ 60%, ID not verified (NON-BLOQUANT — recommandation seulement)
- * 3A — Sitter, profile ≥ 60%, ID verified, no subscription
- * 3B — Owner, profile ≥ 60%, ID verified (free forever)
- * 4 — Sitter subscribed + profile ≥ 60% + ID verified
+ * 1 — Réservé, plus jamais renvoyé : le seuil de complétion de profil a été supprimé.
+ * 2 — Connecté, identité non vérifiée (NON-BLOQUANT, recommandation seulement)
+ * 3A — Gardien, identité vérifiée, sans abonnement
+ * 3B — Propriétaire, identité vérifiée (gratuit)
+ * 4 — Gardien abonné + identité vérifiée
  *
- * Politique : la vérification d'identité est FORTEMENT RECOMMANDÉE
- * mais n'est plus bloquante pour postuler ou publier. Elle reste
- * mise en avant via `identityRecommended` et des bandeaux d'incitation.
+ * Politique : ni la vérification d'identité ni un pourcentage de complétion de
+ * profil ne bloquent la publication. Les prérequis concrets d'une annonce sont
+ * portés par la source unique `src/lib/sitPublishRules.ts`, jamais ici.
  */
 export type AccessLevel = 0 | 1 | 2 | "3A" | "3B" | 4;
 
@@ -51,19 +51,6 @@ export const useAccessLevel = (): AccessInfo => {
   const effectiveRole = user.role === "both" ? activeRole : user.role;
   const identityRecommended = !identityVerified;
 
-  if (completion < 60) {
-    return {
-      level: 1,
-      profileCompletion: completion,
-      identityVerified,
-      identityRecommended,
-      canApplyMissions: false,
-      canApplyGuards: false,
-      canPublish: false,
-      loading,
-    };
-  }
-
   // ID non vérifié — NON-BLOQUANT : on autorise les candidatures et la publication.
   // Côté sitter, on traite comme 3A (peut postuler aux missions, garde nécessite abonnement).
   // Côté owner, on traite comme 3B (peut publier librement).
@@ -93,7 +80,7 @@ export const useAccessLevel = (): AccessInfo => {
     };
   }
 
-  // Profile ≥ 60% + ID verified
+  // Identité vérifiée
   if (effectiveRole === "owner") {
     return {
       level: "3B",

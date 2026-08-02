@@ -1,49 +1,44 @@
 /**
  * DraftChecklist, état de complétude d'une annonce en brouillon avant publication.
  *
- * Affiché à la place de l'ancien bandeau "Brouillon → Publier".
- * Liste les éléments requis :
- *  - titre
- *  - dates (ou flexibilité activée)
- *  - description (≥ 50 caractères)
- *  - au moins 1 photo (galerie owner)
- *  - au moins 1 animal renseigné dans le profil owner
+ * Les règles ne sont plus portées ici : elles viennent de la source unique
+ * `src/lib/sitPublishRules.ts`, partagée avec le formulaire de création,
+ * la vue propriétaire et le bandeau d'accès.
  *
- * Le bouton "Publier" reste accessible mais grisé tant qu'un item est manquant
- * (on autorise la publication forcée si TOUS les requis sont remplis).
+ * Le bouton "Publier" reste grisé tant qu'un élément manque.
  */
 import { Check, Circle, Send } from "lucide-react";
+import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import type { PublishBlocker } from "@/lib/sitPublishRules";
 
 interface DraftChecklistProps {
-  hasTitle: boolean;
-  hasDates: boolean;
-  hasDescription: boolean;
-  hasPhoto: boolean;
-  hasPet: boolean;
+  /** Éléments manquants, calculés par `getSitPublishBlockers`. */
+  blockers: PublishBlocker[];
+  /** Libellés de tous les prérequis, dans l'ordre, pour l'affichage coché. */
+  requirements: { id: string; label: string }[];
   publishing: boolean;
   onPublish: () => void;
+  /** Lien d'édition de l'annonce, pour les éléments qui se corrigent dans le formulaire. */
+  editHref?: string;
 }
 
 const DraftChecklist = ({
-  hasTitle,
-  hasDates,
-  hasDescription,
-  hasPhoto,
-  hasPet,
+  blockers,
+  requirements,
   publishing,
   onPublish,
+  editHref,
 }: DraftChecklistProps) => {
-  const items: { ok: boolean; label: string; href?: string }[] = [
-    { ok: hasTitle, label: "Titre de l'annonce", href: "edit" },
-    { ok: hasDates, label: "Dates de garde (ou dates flexibles)", href: "edit" },
-    { ok: hasDescription, label: "Description (50 caractères minimum)", href: "edit" },
-    { ok: hasPhoto, label: "Au moins 1 photo dans votre galerie" },
-    { ok: hasPet, label: "Au moins 1 animal renseigné sur votre profil" },
-  ];
+  const missingIds = new Set(blockers.map((b) => b.id));
+  const items = requirements.map((r) => ({
+    ...r,
+    ok: !missingIds.has(r.id),
+    fix: blockers.find((b) => b.id === r.id)?.action,
+  }));
 
-  const allOk = items.every((i) => i.ok);
+  const allOk = blockers.length === 0;
   const doneCount = items.filter((i) => i.ok).length;
 
   return (
@@ -59,11 +54,7 @@ const DraftChecklist = ({
               : "Complétez les éléments ci-dessous pour publier votre annonce."}
           </p>
         </div>
-        <Button
-          onClick={onPublish}
-          disabled={!allOk || publishing}
-          className="gap-2"
-        >
+        <Button onClick={onPublish} disabled={!allOk || publishing} className="gap-2">
           <Send className="h-4 w-4" />
           {publishing ? "Publication…" : "Publier l'annonce"}
         </Button>
@@ -72,7 +63,7 @@ const DraftChecklist = ({
       <ul className="space-y-1.5">
         {items.map((item) => (
           <li
-            key={item.label}
+            key={item.id}
             className={cn(
               "flex items-center gap-2 text-sm",
               item.ok ? "text-muted-foreground line-through" : "text-foreground",
@@ -84,6 +75,14 @@ const DraftChecklist = ({
               <Circle className="h-4 w-4 text-muted-foreground shrink-0" />
             )}
             <span>{item.label}</span>
+            {!item.ok && (item.fix || editHref) && (
+              <Link
+                to={(item.fix || editHref) as string}
+                className="text-primary underline underline-offset-2 shrink-0"
+              >
+                Compléter
+              </Link>
+            )}
           </li>
         ))}
       </ul>

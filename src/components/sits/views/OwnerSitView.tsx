@@ -37,6 +37,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { formatSitPeriod } from "@/lib/dateRange";
+import { getSitPublishBlockers, SIT_PUBLISH_REQUIREMENTS } from "@/lib/sitPublishRules";
 
 import EmergencyAlertBanner from "@/components/sits/EmergencyAlertBanner";
 import SitDateHistory from "@/components/sits/SitDateHistory";
@@ -321,16 +322,20 @@ const OwnerSitView = ({
           : "Elle est archivée. Vous pouvez la republier quand vous voulez depuis l'onglet « Archivées ».",
     });
   };
-  // Critères de complétude pour la checklist de publication.
-  const description = (sit.specific_expectations || "").trim();
-  const checklist = {
-    hasTitle: Boolean((sit.title || "").trim()),
-    hasDates: Boolean(sit.flexible_dates || (sit.start_date && sit.end_date)),
-    hasDescription: description.length >= 50,
-    hasPhoto: ownerGallery.length > 0,
-    hasPet: Array.isArray(pets) && pets.length > 0,
-  };
-  const canPublish = Object.values(checklist).every(Boolean);
+  // Règles de publication : source unique, voir src/lib/sitPublishRules.ts.
+  const publishBlockers = getSitPublishBlockers({
+    title: sit.title,
+    startDate: sit.start_date,
+    endDate: sit.end_date,
+    flexibleDates: (sit as any).flexible_dates,
+    specificExpectations: sit.specific_expectations,
+    hasProperty: !!property,
+    galleryPhotoCount: ownerGallery.length,
+    propertyPhotoCount: Array.isArray(property?.photos) ? property.photos.length : 0,
+    petCount: Array.isArray(pets) ? pets.length : 0,
+  });
+  const canPublish = publishBlockers.length === 0;
+
 
   // Dérivés partagés (avgRating + formatDate), voir useSitDerived.
   const { avgRating, formatDate } = useSitDerived({
@@ -377,16 +382,15 @@ const OwnerSitView = ({
       {/* Brouillon : checklist de publication (remplace l'ancien bandeau) */}
       {isDraft && (
         <DraftChecklist
-          hasTitle={checklist.hasTitle}
-          hasDates={checklist.hasDates}
-          hasDescription={checklist.hasDescription}
-          hasPhoto={checklist.hasPhoto}
-          hasPet={checklist.hasPet}
+          blockers={publishBlockers}
+          requirements={SIT_PUBLISH_REQUIREMENTS}
+          editHref={`/sits/${sit.id}/edit`}
           publishing={publishing}
           onPublish={() => {
             if (canPublish) setPublishConfirmOpen(true);
           }}
         />
+
       )}
 
       {/* Confirmation publication, rappel des dates exactes */}
