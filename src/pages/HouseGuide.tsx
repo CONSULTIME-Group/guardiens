@@ -195,13 +195,28 @@ const HouseGuide = () => {
         }
       }
       setLoading(false);
+      setTimeout(() => { loadedRef.current = true; }, 300);
     };
     load();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [propertyId, user]);
 
+  // Copie locale automatique (400 ms) une fois le guide chargé.
+  useEffect(() => {
+    if (!guide || !localDraftKey || access !== "owner" || !loadedRef.current) return;
+    setDraftState("saving");
+    const t = setTimeout(() => {
+      writeFormDraft<GuideData>(localDraftKey, guide);
+      const now = Date.now();
+      setLocalDraftSavedAt(now);
+      setDraftState("saved");
+    }, 400);
+    return () => clearTimeout(t);
+  }, [guide, localDraftKey, access]);
 
   const update = <K extends keyof GuideData>(field: K, value: GuideData[K]) => {
     if (!guide) return;
+    setDirty(true);
     setGuide({ ...guide, [field]: value });
   };
 
@@ -229,7 +244,12 @@ const HouseGuide = () => {
         if (error) throw error;
         if (data) setGuide({ ...guide, id: data.id });
       }
+      if (localDraftKey) clearFormDraft(localDraftKey);
+      setDirty(false);
+      setLocalDraftRestored(false);
+      setDraftState("idle");
       toast({ title: "Guide sauvegardé" });
+
     } catch (err: any) {
       console.error("[HouseGuide] save failed", err);
       // Rétablir l'état du formulaire tel qu'avant la tentative de sauvegarde
