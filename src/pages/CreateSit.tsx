@@ -636,6 +636,7 @@ const CreateSit = () => {
         if (draftRes?.data) {
           const d = draftRes.data;
           remoteDraftUpdatedAt = (d as any).updated_at || (d as any).created_at || null;
+          remoteDraftId = d.id;
           const today = new Date().toISOString().slice(0, 10);
           const rawStart: string | null = d.start_date || null;
           const rawEnd: string | null = d.end_date || null;
@@ -723,7 +724,7 @@ const CreateSit = () => {
           setSitEnvironments(prev => (prev.length > 0 ? prev : ((o as any).environments || [])));
         }
       }
-      restoreLocalDraftIfFresher(remoteDraftUpdatedAt);
+      restoreLocalDraftIfFresher(remoteDraftUpdatedAt, remoteDraftId);
       setLoading(false);
       setTimeout(() => { initialLoadedRef.current = true; }, 300);
     };
