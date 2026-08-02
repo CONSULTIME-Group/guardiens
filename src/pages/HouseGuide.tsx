@@ -153,8 +153,20 @@ const HouseGuide = () => {
 
   useUnsavedChanges(dirty);
 
+  // Purge inconditionnelle des copies locales héritées, et de toute copie
+  // contenant encore un champ sensible, sans jamais tenter de les restaurer.
+  useEffect(() => {
+    if (legacyDraftKey) clearFormDraft(legacyDraftKey);
+    if (!localDraftKey) return;
+    const existing = readFormDraft<Record<string, unknown>>(localDraftKey);
+    if (existing && SENSITIVE_FIELDS.some((f) => f in existing)) {
+      clearFormDraft(localDraftKey);
+    }
+  }, [legacyDraftKey, localDraftKey]);
+
   useEffect(() => {
     if (!propertyId || !user) return;
+
 
     const load = async () => {
       const [{ data: property }, { data }] = await Promise.all([
