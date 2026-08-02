@@ -543,6 +543,8 @@ const OwnerSitView = ({
         startDate={sit.start_date}
         endDate={sit.end_date}
         flexibleDates={sit.flexible_dates}
+        flexibilityNotes={(sit as any).flexibility_notes}
+
         photos={[
           ...(((property as any)?.photos as string[] | undefined) ?? []),
           ...pets
