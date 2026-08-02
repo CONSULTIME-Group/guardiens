@@ -2109,6 +2109,19 @@ const CreateSit = () => {
       </AlertDialog>
 
       <AnnouncementPreviewDialog
+        blockers={publishBlockers}
+        onResolveBlocker={(b) => {
+          setPreviewOpen(false);
+          if (b.action) {
+            navigate(b.action);
+            return;
+          }
+          if (b.anchor && typeof document !== "undefined") {
+            setTimeout(() => {
+              document.getElementById(b.anchor as string)?.scrollIntoView({ behavior: "smooth", block: "center" });
+            }, 150);
+          }
+        }}
         open={previewOpen}
         onOpenChange={setPreviewOpen}
         onConfirmPublish={async () => { await handlePublish(); }}
