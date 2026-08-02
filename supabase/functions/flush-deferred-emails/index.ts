@@ -49,6 +49,14 @@ Deno.serve(async (req) => {
 
   const nowIso = new Date().toISOString();
 
+  // 0. Recupere les lignes coincees en traitement (worker mort en cours de route).
+  const staleProcessing = new Date(Date.now() - 10 * 60_000).toISOString();
+  await supabase
+    .from("email_deferred_queue")
+    .update({ status: "pending", last_error: "reclaimed from stale processing" })
+    .eq("status", "processing")
+    .lt("last_attempt_at", staleProcessing);
+
   // 1. Expire stale entries
   const ttlCutoff = new Date(Date.now() - TTL_HOURS * 3600_000).toISOString();
   await supabase
