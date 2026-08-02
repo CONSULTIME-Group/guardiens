@@ -537,7 +537,7 @@ const EditSit = () => {
                 className="mt-1.5 h-12 text-base"
                 maxLength={MAX_TITLE_LENGTH}
               />
-              {titleTouched && !titleValid && trimmedTitle.length > 0 && (
+              {(titleTouched || trimmedTitle.length > MAX_TITLE_LENGTH) && !titleValid && trimmedTitle.length > 0 && (
                 <p className="text-xs text-destructive mt-1.5 flex items-center gap-1">
                   <AlertCircle className="h-3 w-3 shrink-0" />
                   {trimmedTitle.length > MAX_TITLE_LENGTH
