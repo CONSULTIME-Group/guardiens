@@ -727,7 +727,7 @@ const Sits = () => {
       return bySort;
     }
     return searched;
-  }, [activeSits, sits, isOwnerView, activeTab, activeOwnerTab, searchQuery, ownerSortMode]);
+  }, [activeSits, sitterSits, sits, isOwnerView, activeTab, activeOwnerTab, searchQuery, ownerSortMode]);
 
   // Suggestions de recherche : titres, villes, gardiens/propriétaires, animaux (uniques)
   const searchSuggestions = useMemo(() => {
