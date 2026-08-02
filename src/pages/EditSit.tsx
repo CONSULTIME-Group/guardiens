@@ -73,36 +73,52 @@ const MAX_DESC_LENGTH = 2000;
  */
 const FLEX_REGEX = /\n*(?:Flexibilité|Dates flexibles)\s*:\s*(.+?)(?=\n\n|$)/i;
 
-/** Analyse une note de flexibilité au format « Mois : … · Durée : … ». */
-function parseFlexNote(payload: string): { months: string[]; duration: string } {
+/**
+ * Analyse une note de flexibilité. Le format structuré « Mois : … · Durée : … »
+ * est reconnu, tout le reste est conservé tel quel comme texte libre : une note
+ * saisie à la main par un propriétaire ne doit jamais être perdue.
+ */
+function parseFlexNote(payload: string): { months: string[]; duration: string; free: string } {
   const monthsMatch = payload.match(/Mois\s*:\s*([^·]+)/i);
-  const durationMatch = payload.match(/Durée\s*:\s*(.+)/i);
+  const durationMatch = payload.match(/Durée\s*:\s*([^·]+)/i);
+  const free = payload
+    .replace(/Mois\s*:\s*[^·]+/i, "")
+    .replace(/Durée\s*:\s*[^·]+/i, "")
+    .split("·")
+    .map((s) => s.trim())
+    .filter(Boolean)
+    .join(" · ");
   return {
     months: monthsMatch
       ? monthsMatch[1].split(",").map((s) => s.trim()).filter(Boolean)
       : [],
     duration: durationMatch ? durationMatch[1].trim() : "",
+    free,
   };
 }
 
 /** Extrait la flexibilité héritée du corps de la description, et la retire. */
-function parseFlexibility(text: string): { months: string[]; duration: string; clean: string } {
+function parseFlexibility(
+  text: string,
+): { months: string[]; duration: string; free: string; clean: string } {
   const match = text.match(FLEX_REGEX);
-  if (!match) return { months: [], duration: "", clean: text };
-  const { months, duration } = parseFlexNote(match[1] || "");
-  return { months, duration, clean: text.replace(FLEX_REGEX, "").trim() };
+  if (!match) return { months: [], duration: "", free: "", clean: text };
+  const parsed = parseFlexNote(match[1] || "");
+  return { ...parsed, clean: text.replace(FLEX_REGEX, "").trim() };
 }
 
 /** Sérialise la flexibilité pour la colonne dédiée. */
-function buildFlexNote(months: string[], duration: string): string | null {
+function buildFlexNote(months: string[], duration: string, free: string): string | null {
   const note = [
     months.length > 0 ? `Mois : ${months.join(", ")}` : "",
     duration ? `Durée : ${duration}` : "",
+    free.trim(),
   ]
     .filter(Boolean)
     .join(" · ");
   return note || null;
 }
+
 
 const LOCKED_STATUSES = new Set(["archived", "cancelled", "expired", "completed"]);
 
