@@ -43,6 +43,8 @@ import PetsEditor from "@/components/pets/PetsEditor";
 import { pickSmartCover } from "@/lib/pickSmartCover";
 import { sortForCover, withoutAnimalPhotos } from "@/lib/coverPriority";
 import { normalizeCityTyping, normalizeCityName } from "@/lib/normalizeCity";
+import { readFormDraft, writeFormDraft, clearFormDraft, getFormDraftSavedAt } from "@/lib/formDraft";
+import { makePlainTextPasteHandler } from "@/lib/pastePlainText";
 import { DEFAULT_MAX_APPLICATIONS } from "@/lib/applicationCap";
 
 
