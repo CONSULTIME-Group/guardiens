@@ -30,6 +30,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { getSitPublishBlockers } from "@/lib/sitPublishRules";
 
 /** Carte de section pour grouper visuellement les champs d'édition. */
 const SectionCard = ({
@@ -61,23 +62,46 @@ const MIN_SITS_OPTIONS = [
   { label: "3 gardes+", value: 3 },
   { label: "5 gardes+", value: 5 },
 ];
-const MIN_DESC_LENGTH = 50;
 const MAX_TITLE_LENGTH = 120;
 const MAX_DESC_LENGTH = 2000;
 
+/**
+ * Ancienne convention : la flexibilité était concaténée à la description après
+ * un `\n\n`, qui est exactement le séparateur des deux sous-champs de
+ * description. Cette expression ne sert plus qu'à nettoyer l'existant à la
+ * lecture ; la flexibilité est désormais stockée dans `flexibility_notes`.
+ */
 const FLEX_REGEX = /\n*Flexibilité\s*:\s*(.+?)(?=\n\n|$)/i;
+
+/** Analyse une note de flexibilité au format « Mois : … · Durée : … ». */
+function parseFlexNote(payload: string): { months: string[]; duration: string } {
+  const monthsMatch = payload.match(/Mois\s*:\s*([^·]+)/i);
+  const durationMatch = payload.match(/Durée\s*:\s*(.+)/i);
+  return {
+    months: monthsMatch
+      ? monthsMatch[1].split(",").map((s) => s.trim()).filter(Boolean)
+      : [],
+    duration: durationMatch ? durationMatch[1].trim() : "",
+  };
+}
+
+/** Extrait la flexibilité héritée du corps de la description, et la retire. */
 function parseFlexibility(text: string): { months: string[]; duration: string; clean: string } {
   const match = text.match(FLEX_REGEX);
   if (!match) return { months: [], duration: "", clean: text };
-  const payload = match[1] || "";
-  const monthsMatch = payload.match(/Mois\s*:\s*([^·]+)/i);
-  const durationMatch = payload.match(/Durée\s*:\s*(.+)/i);
-  const months = monthsMatch
-    ? monthsMatch[1].split(",").map((s) => s.trim()).filter(Boolean)
-    : [];
-  const duration = durationMatch ? durationMatch[1].trim() : "";
-  const clean = text.replace(FLEX_REGEX, "").trim();
-  return { months, duration, clean };
+  const { months, duration } = parseFlexNote(match[1] || "");
+  return { months, duration, clean: text.replace(FLEX_REGEX, "").trim() };
+}
+
+/** Sérialise la flexibilité pour la colonne dédiée. */
+function buildFlexNote(months: string[], duration: string): string | null {
+  const note = [
+    months.length > 0 ? `Mois : ${months.join(", ")}` : "",
+    duration ? `Durée : ${duration}` : "",
+  ]
+    .filter(Boolean)
+    .join(" · ");
+  return note || null;
 }
 
 const LOCKED_STATUSES = new Set(["archived", "cancelled", "expired", "completed"]);
@@ -136,7 +160,14 @@ const EditSit = () => {
         return;
       }
       const rawExp = data.specific_expectations || "";
-      const { months, duration, clean } = parseFlexibility(rawExp);
+      // La flexibilité vient de sa colonne dédiée ; on ne retombe sur la
+      // description que pour les annonces antérieures à cette séparation.
+      const legacy = parseFlexibility(rawExp);
+      const storedNote = ((data as any).flexibility_notes as string | null) || "";
+      const stored = storedNote ? parseFlexNote(storedNote) : null;
+      const months = stored ? stored.months : legacy.months;
+      const duration = stored ? stored.duration : legacy.duration;
+      const clean = legacy.clean;
       setTitle(data.title || "");
       setStartDate(data.start_date || "");
       setEndDate(data.end_date || "");
@@ -180,18 +211,36 @@ const EditSit = () => {
     };
   }, [id, user, navigate]);
 
-  const dateError = !flexibleDates && startDate && endDate && startDate >= endDate
+  const dateError = startDate && endDate && startDate >= endDate
     ? "La date de fin doit être après la date de début." : null;
 
   const trimmedTitle = title.trim();
   const trimmedDesc = specificExpectations.trim();
 
-  const hasDatesOrFlexible = flexibleDates
-    ? flexibleMonths.length > 0
-    : !!(startDate && endDate && !dateError);
+  /**
+   * Les règles de contenu viennent de la source unique `sitPublishRules`.
+   * Cette page ne porte plus ses propres seuils : on ne retient que les
+   * bloquants dont elle détient les champs (titre, dates, description).
+   */
+  const formBlockers = useMemo(() => {
+    const owned = new Set(["title", "dates", "date-error", "desc-reason", "desc-expectations"]);
+    return getSitPublishBlockers({
+      title: trimmedTitle,
+      startDate,
+      endDate,
+      flexibleDates,
+      dateError,
+      specificExpectations: trimmedDesc,
+      // Champs hors de ce formulaire, neutralisés pour ne pas produire de bruit.
+      hasProperty: true,
+      galleryPhotoCount: 1,
+      petCount: 1,
+    }).filter((b) => owned.has(b.id));
+  }, [trimmedTitle, startDate, endDate, flexibleDates, dateError, trimmedDesc]);
+
+  const descBlocker = formBlockers.find((b) => b.id.startsWith("desc-")) || null;
 
   const titleValid = trimmedTitle.length >= 3 && trimmedTitle.length <= MAX_TITLE_LENGTH;
-  const descValid = trimmedDesc.length === 0 || trimmedDesc.length >= MIN_DESC_LENGTH;
   const isLocked = LOCKED_STATUSES.has(sitStatus);
 
   const FORBIDDEN_REGEX = /\b(voisin(?:e|s|es)?|voisinage|AURA|Auvergne[\s-]Rh[oô]ne[\s-]Alpes)\b/i;
@@ -199,7 +248,8 @@ const EditSit = () => {
   const forbiddenInDesc = FORBIDDEN_REGEX.test(specificExpectations);
   const hasForbidden = forbiddenInTitle || forbiddenInDesc;
 
-  const canSave = !isLocked && titleValid && hasDatesOrFlexible && !dateError && descValid && !hasForbidden;
+  const canSave =
+    !isLocked && titleValid && formBlockers.length === 0 && !hasForbidden;
 
   const isConfirmed = sitStatus === "confirmed" || sitStatus === "in_progress";
 
@@ -237,29 +287,19 @@ const EditSit = () => {
     if (!user || !id || !canSave) return;
     setSaving(true);
 
-    const cleanDesc = trimmedDesc.replace(FLEX_REGEX, "").trim();
-    let expectations = cleanDesc;
-    if (flexibleDates) {
-      const flexNote = [
-        flexibleMonths.length > 0 ? `Mois : ${flexibleMonths.join(", ")}` : "",
-        flexibleDuration ? `Durée : ${flexibleDuration}` : "",
-      ]
-        .filter(Boolean)
-        .join(" · ");
-      if (flexNote) {
-        expectations = cleanDesc
-          ? `${cleanDesc}\n\nFlexibilité : ${flexNote}`
-          : `Flexibilité : ${flexNote}`;
-      }
-    }
+    // La flexibilité n'est jamais concaténée à la description : le `\n\n`
+    // servirait alors de séparateur des deux sous-champs de description.
+    const expectations = trimmedDesc.replace(FLEX_REGEX, "").trim();
+    const flexNote = flexibleDates ? buildFlexNote(flexibleMonths, flexibleDuration) : null;
 
     const { error } = await supabase
       .from("sits")
       .update({
         title: trimmedTitle,
-        start_date: flexibleDates ? null : startDate,
-        end_date: flexibleDates ? null : endDate,
+        start_date: startDate,
+        end_date: endDate,
         flexible_dates: flexibleDates,
+        flexibility_notes: flexNote,
         specific_expectations: expectations,
         open_to: openTo,
         is_urgent: isUrgent,
@@ -319,20 +359,18 @@ const EditSit = () => {
     );
   }
 
-  /* Bloquants affichables inline */
+  /* Bloquants affichables inline, issus de la source unique de règles */
   const saveBlockerMsg = isLocked
     ? "Annonce verrouillée"
     : !isDirty
       ? "Aucune modification à enregistrer"
       : !titleValid
         ? "Titre trop court (3 caractères minimum)"
-        : !hasDatesOrFlexible
-          ? "Renseignez des dates ou un mois flexible"
-          : !descValid
-            ? `Description : ${MIN_DESC_LENGTH} caractères minimum`
-            : hasForbidden
-              ? "Vocabulaire non autorisé dans le titre ou la description"
-              : null;
+        : formBlockers.length > 0
+          ? formBlockers[0].label
+          : hasForbidden
+            ? "Vocabulaire non autorisé dans le titre ou la description"
+            : null;
 
   return (
     <div className="px-4 md:px-10 py-6 max-w-3xl mx-auto animate-fade-in pb-36">
@@ -436,55 +474,72 @@ const EditSit = () => {
               <Label className="text-sm font-medium mb-2 block">
                 Dates de la garde
               </Label>
-              {!flexibleDates ? (
-                <>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                      <Label htmlFor="sit-start" className="text-xs text-muted-foreground">
-                        Date de début
-                      </Label>
-                      <Input
-                        id="sit-start"
-                        type="date"
-                        value={startDate}
-                        onChange={(e) => setStartDate(e.target.value)}
-                        onBlur={() => setDatesTouched(true)}
-                        min={new Date().toISOString().slice(0, 10)}
-                        className="mt-1.5 h-12 text-base"
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="sit-end" className="text-xs text-muted-foreground">
-                        Date de fin
-                      </Label>
-                      <Input
-                        id="sit-end"
-                        type="date"
-                        value={endDate}
-                        onChange={(e) => setEndDate(e.target.value)}
-                        onBlur={() => setDatesTouched(true)}
-                        min={startDate || undefined}
-                        className="mt-1.5 h-12 text-base"
-                      />
-                    </div>
-                  </div>
-                  {datesTouched && dateError && (
-                    <p className="text-sm text-destructive flex items-center gap-1.5 mt-2">
-                      <AlertCircle className="h-3.5 w-3.5 shrink-0" /> {dateError}
-                    </p>
-                  )}
-                  <Button
-                    type="button"
-                    variant="link"
-                    size="sm"
-                    onClick={() => setFlexibleDates(true)}
-                    className="px-0 mt-2 h-auto gap-1"
-                  >
-                    Mes dates sont flexibles <ArrowRight className="h-3 w-3" />
-                  </Button>
-                </>
-              ) : (
-                <div className="space-y-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="sit-start" className="text-xs text-muted-foreground">
+                    Date de début
+                  </Label>
+                  <Input
+                    id="sit-start"
+                    type="date"
+                    value={startDate}
+                    onChange={(e) => setStartDate(e.target.value)}
+                    onBlur={() => setDatesTouched(true)}
+                    min={new Date().toISOString().slice(0, 10)}
+                    className="mt-1.5 h-12 text-base"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="sit-end" className="text-xs text-muted-foreground">
+                    Date de fin
+                  </Label>
+                  <Input
+                    id="sit-end"
+                    type="date"
+                    value={endDate}
+                    onChange={(e) => setEndDate(e.target.value)}
+                    onBlur={() => setDatesTouched(true)}
+                    min={startDate || undefined}
+                    className="mt-1.5 h-12 text-base"
+                  />
+                </div>
+              </div>
+              {datesTouched && dateError && (
+                <p className="text-sm text-destructive flex items-center gap-1.5 mt-2">
+                  <AlertCircle className="h-3.5 w-3.5 shrink-0" /> {dateError}
+                </p>
+              )}
+              {datesTouched && !dateError && !(startDate && endDate) && (
+                <p className="text-sm text-destructive flex items-center gap-1.5 mt-2">
+                  <AlertCircle className="h-3.5 w-3.5 shrink-0" /> Une date de début et une date de
+                  fin sont nécessaires.
+                </p>
+              )}
+
+              {/*
+                La flexibilité enrichit l'annonce, elle ne remplace jamais les
+                dates : les gardiens et les alertes ont besoin d'une période.
+              */}
+              <div className="mt-4 flex items-start gap-3 rounded-xl border border-border p-4">
+                <Checkbox
+                  id="sit-flexible"
+                  checked={flexibleDates}
+                  onCheckedChange={(v) => setFlexibleDates(v === true)}
+                  className="mt-0.5"
+                />
+                <div className="min-w-0">
+                  <Label htmlFor="sit-flexible" className="text-sm font-medium cursor-pointer">
+                    Mes dates sont flexibles
+                  </Label>
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    Précisez les mois et la durée qui vous conviennent. Les dates ci-dessus restent
+                    nécessaires, elles servent de repère aux gardiens.
+                  </p>
+                </div>
+              </div>
+
+              {flexibleDates && (
+                <div className="space-y-4 mt-4">
                   <div>
                     <p className="text-xs text-muted-foreground mb-2">Quel mois ?</p>
                     <div className="grid grid-cols-3 gap-2">
@@ -529,15 +584,6 @@ const EditSit = () => {
                       ))}
                     </div>
                   </div>
-                  <Button
-                    type="button"
-                    variant="link"
-                    size="sm"
-                    onClick={() => setFlexibleDates(false)}
-                    className="px-0 h-auto text-muted-foreground"
-                  >
-                    <ArrowLeft className="h-3 w-3 mr-1" /> Renseigner des dates précises
-                  </Button>
                 </div>
               )}
             </div>
@@ -546,7 +592,7 @@ const EditSit = () => {
           {/* SECTION 2 : Description */}
           <SectionCard
             title="Description de la garde"
-            description="Ce qui rend cette garde unique (champ optionnel)."
+            description="Ce qui rend cette garde unique."
           >
             <div>
               <Textarea
@@ -563,14 +609,12 @@ const EditSit = () => {
               <p
                 className={cn(
                   "text-xs mt-1.5",
-                  descTouched && trimmedDesc.length > 0 && trimmedDesc.length < MIN_DESC_LENGTH
-                    ? "text-destructive"
-                    : "text-muted-foreground",
+                  descTouched && descBlocker ? "text-destructive" : "text-muted-foreground",
                 )}
               >
-                {trimmedDesc.length === 0
-                  ? `Optionnel. Si renseigné, ${MIN_DESC_LENGTH} caractères minimum.`
-                  : `${trimmedDesc.length} / ${MIN_DESC_LENGTH} min`}
+                {descBlocker
+                  ? descBlocker.label
+                  : `${trimmedDesc.length} caractères, minimum atteint.`}
               </p>
               {forbiddenInDesc && (
                 <p className="text-xs text-destructive mt-1 flex items-center gap-1">

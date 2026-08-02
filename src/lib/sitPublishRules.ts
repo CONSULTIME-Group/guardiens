@@ -8,13 +8,16 @@
  * Doctrine retenue :
  *  - aucun seuil de pourcentage de complétion de profil (non actionnable),
  *    remplacé par ses composantes concrètes : logement décrit, une photo, un animal ;
- *  - descriptions contrôlées champ par champ, 30 caractères minimum chacun ;
- *  - dates exactes OU case dates flexibles cochée ;
+ *  - descriptions rétrocompatibles : deux sous-champs de 30 caractères minimum
+ *    quand le séparateur est présent, sinon un bloc unique de 50 caractères minimum ;
+ *  - date de début ET date de fin toujours exigées, la case dates flexibles
+ *    enrichit l'annonce mais ne dispense jamais de dates ;
  *  - photos comptées sur la galerie du profil ET sur les photos du logement ;
  *  - identité vérifiée non bloquante.
  */
 
 export const MIN_SUB_DESCRIPTION = 30;
+export const MIN_SINGLE_DESCRIPTION = 50;
 export const EXPECTATIONS_SEPARATOR = "\n\n";
 
 export type PublishBlocker = {
@@ -67,6 +70,52 @@ export const joinExpectations = (a: string, b: string) =>
 const len = (v?: string | null) => (v || "").trim().length;
 
 /**
+ * Contrôle rétrocompatible des descriptions.
+ *
+ * Deux conventions coexistent en base :
+ *  - les annonces récentes portent deux sous-champs séparés par `\n\n`, chacun
+ *    contrôlé à 30 caractères minimum ;
+ *  - les annonces antérieures n'ont qu'un bloc de texte, accepté à partir de
+ *    50 caractères au total. Aucune annonce existante ne doit devenir non
+ *    publiable du fait de la convention à deux champs.
+ */
+export const getDescriptionBlockers = (
+  reason: string,
+  expectations: string,
+): PublishBlocker[] => {
+  const singleBlock = len(expectations) === 0;
+
+  if (singleBlock) {
+    return len(reason) < MIN_SINGLE_DESCRIPTION
+      ? [
+          {
+            id: "desc-reason",
+            label: `Description de la garde (${MIN_SINGLE_DESCRIPTION} caractères minimum, actuellement ${len(reason)})`,
+            anchor: "description-field",
+          },
+        ]
+      : [];
+  }
+
+  const out: PublishBlocker[] = [];
+  if (len(reason) < MIN_SUB_DESCRIPTION) {
+    out.push({
+      id: "desc-reason",
+      label: `Raison de votre besoin de garde (${MIN_SUB_DESCRIPTION} caractères minimum, actuellement ${len(reason)})`,
+      anchor: "description-field",
+    });
+  }
+  if (len(expectations) < MIN_SUB_DESCRIPTION) {
+    out.push({
+      id: "desc-expectations",
+      label: `Attentes envers le gardien (${MIN_SUB_DESCRIPTION} caractères minimum, actuellement ${len(expectations)})`,
+      anchor: "description-field",
+    });
+  }
+  return out;
+};
+
+/**
  * Renvoie la liste ordonnée des éléments manquants pour publier.
  * Liste vide, la publication est possible.
  */
@@ -75,7 +124,13 @@ export const getSitPublishBlockers = (input: SitPublishInput): PublishBlocker[] 
   const reason = input.absenceReason ?? fallback.absenceReason;
   const expectations = input.sitterExpectations ?? fallback.sitterExpectations;
 
-  const hasDates = Boolean(input.flexibleDates) || Boolean(input.startDate && input.endDate);
+  /**
+   * Une date de début et une date de fin sont toujours exigées. La case dates
+   * flexibles enrichit l'annonce, elle ne dispense jamais de dates : sans elles
+   * la publication envoie une chaîne vide sur une colonne de type date et
+   * l'annonce diffusée affiche « Dates non renseignées ».
+   */
+  const hasDates = Boolean(len(input.startDate) && len(input.endDate));
   const photoCount =
     (input.galleryPhotoCount || 0) + (input.propertyPhotoCount || 0) + (input.hasCoverPhoto ? 1 : 0);
 
@@ -89,25 +144,12 @@ export const getSitPublishBlockers = (input: SitPublishInput): PublishBlocker[] 
     !hasDates
       ? {
           id: "dates",
-          label: "Dates de garde, ou case dates flexibles cochée",
+          label: "Date de début et date de fin de la garde",
           anchor: "dates-field",
         }
       : null,
     input.dateError ? { id: "date-error", label: input.dateError, anchor: "dates-field" } : null,
-    len(reason) < MIN_SUB_DESCRIPTION
-      ? {
-          id: "desc-reason",
-          label: `Raison de votre besoin de garde (${MIN_SUB_DESCRIPTION} caractères minimum, actuellement ${len(reason)})`,
-          anchor: "description-field",
-        }
-      : null,
-    len(expectations) < MIN_SUB_DESCRIPTION
-      ? {
-          id: "desc-expectations",
-          label: `Attentes envers le gardien (${MIN_SUB_DESCRIPTION} caractères minimum, actuellement ${len(expectations)})`,
-          anchor: "description-field",
-        }
-      : null,
+    ...getDescriptionBlockers(reason, expectations),
     photoCount === 0
       ? {
           id: "photo",
@@ -130,7 +172,7 @@ export const canPublishSit = (input: SitPublishInput): boolean =>
 export const SIT_PUBLISH_REQUIREMENTS: { id: string; label: string }[] = [
   { id: "property", label: "Logement décrit sur votre profil" },
   { id: "title", label: "Titre de l'annonce" },
-  { id: "dates", label: "Dates de garde, ou case dates flexibles cochée" },
+  { id: "dates", label: "Date de début et date de fin de la garde" },
   { id: "desc-reason", label: `Raison de votre besoin de garde (${MIN_SUB_DESCRIPTION} caractères minimum)` },
   { id: "desc-expectations", label: `Attentes envers le gardien (${MIN_SUB_DESCRIPTION} caractères minimum)` },
   { id: "photo", label: "Au moins une photo de votre logement ou de votre galerie" },

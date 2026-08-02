@@ -5303,6 +5303,7 @@ export type Database = {
           departement_code: string | null
           end_date: string | null
           environments: string[]
+          flexibility_notes: string | null
           flexible_dates: boolean | null
           hidden_at: string | null
           hidden_by: string | null
@@ -5348,6 +5349,7 @@ export type Database = {
           departement_code?: string | null
           end_date?: string | null
           environments?: string[]
+          flexibility_notes?: string | null
           flexible_dates?: boolean | null
           hidden_at?: string | null
           hidden_by?: string | null
@@ -5393,6 +5395,7 @@ export type Database = {
           departement_code?: string | null
           end_date?: string | null
           environments?: string[]
+          flexibility_notes?: string | null
           flexible_dates?: boolean | null
           hidden_at?: string | null
           hidden_by?: string | null
