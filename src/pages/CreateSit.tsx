@@ -436,11 +436,14 @@ const CreateSit = () => {
     acceptsSitterChildren: "yes" | "no" | "discuss";
     sitLocation?: "home" | "away" | null;
     currentStep?: number;
+    /** Identifiant du brouillon auquel appartient cette copie locale. */
+    draftId?: string | null;
   };
   const localDraftKey = user ? `sit-create:${user.id}:${draftIdParam ?? fromSitId ?? "current"}` : null;
   // Clé historique posée lors d'une première visite sans paramètre d'URL. Au
   // retour via le dashboard, l'identifiant du brouillon change la clé, la copie
-  // locale doit donc être récupérée puis migrée.
+  // locale doit donc être récupérée puis migrée, mais uniquement si elle
+  // n'appartient à aucun autre brouillon.
   const legacyLocalDraftKey = user ? `sit-create:${user.id}:current` : null;
   const applyLocalDraft = useCallback((d: SitLocalDraft) => {
     setTitle(d.title ?? "");
@@ -478,7 +481,12 @@ const CreateSit = () => {
     let savedAt = getFormDraftSavedAt(localDraftKey) ?? 0;
     if (!stored && legacyLocalDraftKey && legacyLocalDraftKey !== localDraftKey) {
       const legacy = readFormDraft<SitLocalDraft>(legacyLocalDraftKey);
-      if (legacy) {
+      const currentIdentity = draftIdParam ?? fromSitId ?? null;
+      // Contamination croisée : la copie orpheline n'est adoptée que si elle
+      // n'appartient à aucun brouillon, ou au brouillon effectivement ouvert.
+      const adoptable =
+        !!legacy && (!legacy.draftId || legacy.draftId === currentIdentity);
+      if (legacy && adoptable) {
         stored = legacy;
         savedAt = getFormDraftSavedAt(legacyLocalDraftKey) ?? 0;
         writeFormDraft<SitLocalDraft>(localDraftKey, legacy);
@@ -497,7 +505,7 @@ const CreateSit = () => {
     applyLocalDraft(stored);
     setLocalDraftRestored(true);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [localDraftKey, legacyLocalDraftKey, applyLocalDraft]);
+  }, [localDraftKey, legacyLocalDraftKey, applyLocalDraft, draftIdParam, fromSitId]);
 
 
 
@@ -541,6 +549,10 @@ const CreateSit = () => {
         setAcceptsSitterPets(((s as any).accepts_sitter_pets as any) || "discuss");
         setAcceptsSitterChildren(((s as any).accepts_sitter_children as any) || "discuss");
         setIsRepublish(true);
+        // Le lieu de garde n'est pas persisté en base et seule la garde à
+        // domicile est supportée : sans cela, l'étape 1 d'une republication
+        // reste vide alors que le contenu a bien été copié.
+        setSitLocation("home");
         try {
           trackEvent("alma_republish_bubble_seen", {
             source: "create_sit_page",
@@ -734,12 +746,13 @@ const CreateSit = () => {
         minGardienSits, maxApplications, ownerMessage, dailyRoutine,
         coverPhotoUrl, sitCity, sitCountry, acceptsSitterPets, acceptsSitterChildren,
         sitLocation, currentStep,
+        draftId: draftIdParam ?? fromSitId ?? draftId ?? null,
       });
       setLocalDraftSavedAt(Date.now());
     }, 300);
     return () => clearTimeout(t);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [localDraftKey, loading, title, startDate, endDate, flexibleDates, flexibleNotes, absenceReason, sitterExpectations, openTo, isUrgent, sitEnvironments, minGardienSits, maxApplications, ownerMessage, dailyRoutine, coverPhotoUrl, sitCity, sitCountry, acceptsSitterPets, acceptsSitterChildren, sitLocation, currentStep]);
+  }, [localDraftKey, loading, title, startDate, endDate, flexibleDates, flexibleNotes, absenceReason, sitterExpectations, openTo, isUrgent, sitEnvironments, minGardienSits, maxApplications, ownerMessage, dailyRoutine, coverPhotoUrl, sitCity, sitCountry, acceptsSitterPets, acceptsSitterChildren, sitLocation, currentStep, draftId, draftIdParam, fromSitId]);
 
 
   // Smart cover picker : scoring IA de la galerie, silencieux si quota/rate-limit.

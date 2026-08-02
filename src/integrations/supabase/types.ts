@@ -7784,6 +7784,7 @@ export type Database = {
           accepts_sitter_pets: string
           city: string
           country: string
+          cover_photo_url: string
           daily_routine: string
           dates_hidden: boolean
           end_date: string
@@ -7795,6 +7796,7 @@ export type Database = {
           open_to: string[]
           owner_message: string
           property_id: string
+          published_at: string
           slug: string
           specific_expectations: string
           start_date: string

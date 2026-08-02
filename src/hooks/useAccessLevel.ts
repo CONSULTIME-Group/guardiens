@@ -4,7 +4,7 @@ import { useSubscriptionAccess } from "@/hooks/useSubscriptionAccess";
 /**
  * Access levels:
  * 0 — Not logged in
- * 1 — Réservé, plus jamais renvoyé : le seuil de complétion de profil a été supprimé.
+ * 1 — Connecté, profil incomplet (moins de 60 pour cent) : ne peut pas postuler
  * 2 — Connecté, identité non vérifiée (NON-BLOQUANT, recommandation seulement)
  * 3A — Gardien, identité vérifiée, sans abonnement
  * 3B — Propriétaire, identité vérifiée (gratuit)
@@ -50,6 +50,23 @@ export const useAccessLevel = (): AccessInfo => {
   const identityVerified = user.identityVerified ?? false;
   const effectiveRole = user.role === "both" ? activeRole : user.role;
   const identityRecommended = !identityVerified;
+
+  // Palier 1 : profil trop incomplet pour postuler. Garde-fou côté gardien
+  // uniquement, sans rapport avec les prérequis de publication d'un propriétaire.
+  if (completion < 60) {
+    return {
+      level: 1,
+      profileCompletion: completion,
+      identityVerified,
+      identityRecommended,
+      canApplyMissions: false,
+      canApplyGuards: false,
+      canPublish: effectiveRole === "owner",
+      loading,
+    };
+  }
+
+
 
   // ID non vérifié — NON-BLOQUANT : on autorise les candidatures et la publication.
   // Côté sitter, on traite comme 3A (peut postuler aux missions, garde nécessite abonnement).
