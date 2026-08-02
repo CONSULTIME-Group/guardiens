@@ -91,12 +91,13 @@ import { template as affinityOnboardingNudge } from './affinity-onboarding-nudge
 import { template as accountDeleted } from './account-deleted.tsx'
 import { template as unsubscribeLink } from './unsubscribe-link.tsx'
 import { template as ownerPendingApplicationNudge } from './owner-pending-application-nudge.tsx'
-
+import { template as founderPersonalNotice } from './founder-personal-notice.tsx'
 
 
 
 
 export const TEMPLATES: Record<string, TemplateEntry> = {
+  'founder-personal-notice': founderPersonalNotice,
   'nearby-sit-alert': nearbySitAlert,
   'sit-confirmed': sitConfirmed,
   'dispute-resolved': disputeResolved,
