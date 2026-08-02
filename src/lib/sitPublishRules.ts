@@ -176,8 +176,18 @@ export const getDescriptionBlockers = (
  */
 export const getSitPublishBlockers = (
   input: SitPublishInput,
-  options: { viaCreateForm?: boolean; resumeHref?: string } = {},
+  options: {
+    viaCreateForm?: boolean;
+    resumeHref?: string;
+    /**
+     * Destination associée au bloquant de date passée. Sans elle, l'écran
+     * appelant renvoie vers l'édition, verrouillée pour une annonce archivée
+     * ou annulée : le propriétaire n'a alors aucune issue.
+     */
+    pastDatesAction?: string;
+  } = {},
 ): PublishBlocker[] => {
+
   /**
    * Une date de début et une date de fin sont toujours exigées. La case dates
    * flexibles enrichit l'annonce, elle ne dispense jamais de dates : sans elles
