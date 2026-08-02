@@ -8,6 +8,7 @@
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
 import { resendFetch } from "../_shared/resend-guard.ts";
+import { getEmailCategory } from "../_shared/email-categories.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
