@@ -216,9 +216,10 @@ describe("recomposition des descriptions", () => {
 describe("validité des dates", () => {
   it("bloque une date de début déjà passée", () => {
     const blockers = getSitPublishBlockers({ ...validTwoFields(), startDate: PAST_START });
-    expect(blockers.map((b) => b.id)).toContain("date-error");
-    expect(blockers.find((b) => b.id === "date-error")?.label).toContain("passé");
+    expect(blockers.map((b) => b.id)).toContain("date-past");
+    expect(blockers.find((b) => b.id === "date-past")?.label).toContain("passé");
   });
+
 
   it("bloque une date de fin antérieure ou égale à la date de début", () => {
     expect(
