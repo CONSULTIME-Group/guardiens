@@ -541,6 +541,10 @@ const CreateSit = () => {
         setAcceptsSitterPets(((s as any).accepts_sitter_pets as any) || "discuss");
         setAcceptsSitterChildren(((s as any).accepts_sitter_children as any) || "discuss");
         setIsRepublish(true);
+        // Le lieu de garde n'est pas persisté en base et seule la garde à
+        // domicile est supportée : sans cela, l'étape 1 d'une republication
+        // reste vide alors que le contenu a bien été copié.
+        setSitLocation("home");
         try {
           trackEvent("alma_republish_bubble_seen", {
             source: "create_sit_page",
