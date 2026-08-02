@@ -46,6 +46,8 @@ const PetsEditor = ({ propertyId, onChange }: Props) => {
   const qc = useQueryClient();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editing, setEditing] = useState<Pet | null>(null);
+  // Une saisie en cours empêche toute fermeture involontaire du dialogue.
+  const [formDirty, setFormDirty] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState<Pet | null>(null);
 
   const petsQuery = useQuery({
