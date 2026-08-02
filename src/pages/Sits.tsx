@@ -41,6 +41,13 @@ import MobileStickyCTA from "@/components/dashboard/owner/MobileStickyCTA";
 import { RepublishAlmaDialog } from "@/components/ai/alma/RepublishAlmaDialog";
 import AffinitySection from "@/components/matching/AffinitySection";
 import { useViewerSitterForAffinity } from "@/hooks/useViewerSitterForAffinity";
+import {
+  buildSitPublishInput,
+  getBlockingBlockers,
+  getSitPublishBlockers,
+  wasValidatedByCreateForm,
+} from "@/lib/sitPublishRules";
+
 
 /* ── Status configs (tokens sémantiques uniquement, compat dark mode) ── */
 const statusConfig: Record<string, { label: string; className: string }> = {
