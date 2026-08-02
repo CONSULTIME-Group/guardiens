@@ -393,8 +393,17 @@ const OwnerSitView = ({
       {isDraft && (
         <DraftChecklist
           blockers={publishBlockers}
-          requirements={getSitPublishRequirements("single-block")}
+          requirements={getSitPublishRequirements("single-block", {
+            viaCreateForm: publishNeedsForm,
+          })}
+          publishLabel={publishNeedsForm ? "Terminer dans le formulaire" : "Publier l'annonce"}
+          readyMessage={
+            publishNeedsForm
+              ? "Dernière étape : le formulaire vous demandera de répartir votre description en deux questions, la raison de la garde et vos attentes, trente caractères minimum chacune."
+              : "Tout est prêt. Publiez votre annonce pour qu'elle apparaisse dans la recherche."
+          }
           editHref={`/sits/${sit.id}/edit`}
+
           publishing={publishing}
           onPublish={() => {
             if (!canPublish) return;
