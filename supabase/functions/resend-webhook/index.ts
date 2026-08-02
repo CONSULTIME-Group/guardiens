@@ -108,7 +108,7 @@ Deno.serve(async (req) => {
     // Strategy: read latest sent row, compute incremental update, write back.
     const { data: logRow } = await supabase
       .from("email_send_log")
-      .select("id, open_count, click_count, first_opened_at, first_clicked_at")
+      .select("id, template_name, open_count, click_count, first_opened_at, first_clicked_at")
       .eq("resend_id", emailId)
       .order("created_at", { ascending: false })
       .limit(1)

@@ -423,12 +423,18 @@ Deno.serve(async (req) => {
 
     if (suppressed) {
       // Log the suppressed attempt
-      await supabase.from('email_send_log').insert({
+      const { error: logSuppErr } = await supabase.from('email_send_log').insert({
         message_id: messageId,
         template_name: templateName,
         recipient_email: effectiveRecipient,
         status: 'suppressed',
       })
+      if (logSuppErr) {
+        console.error('email_send_log write failed', {
+          status: 'suppressed', template_name: templateName, message_id: messageId,
+          error: logSuppErr.message, code: logSuppErr.code,
+        })
+      }
 
       console.log('Email suppressed', { effectiveRecipient, templateName })
       return new Response(
@@ -669,13 +675,19 @@ Deno.serve(async (req) => {
       error: tokenLookupError,
       email: normalizedEmail,
     })
-    await supabase.from('email_send_log').insert({
+    const { error: logTokenLookupErr } = await supabase.from('email_send_log').insert({
       message_id: messageId,
       template_name: templateName,
       recipient_email: effectiveRecipient,
       status: 'failed',
       error_message: 'Failed to look up unsubscribe token',
     })
+  if (logTokenLookupErr) {
+    console.error('email_send_log write failed', {
+      status: 'failed', template_name: templateName, message_id: messageId,
+      error: logTokenLookupErr.message, code: logTokenLookupErr.code,
+    })
+  }
     return new Response(
       JSON.stringify({ error: 'Failed to prepare email' }),
       {
@@ -757,7 +769,7 @@ Deno.serve(async (req) => {
     console.warn('Unsubscribe token already used but email not suppressed', {
       email: normalizedEmail,
     })
-    await supabase.from('email_send_log').insert({
+    const { error: logTokenUsedErr } = await supabase.from('email_send_log').insert({
       message_id: messageId,
       template_name: templateName,
       recipient_email: effectiveRecipient,
@@ -765,6 +777,12 @@ Deno.serve(async (req) => {
       error_message:
         'Unsubscribe token used but email missing from suppressed list',
     })
+  if (logTokenUsedErr) {
+    console.error('email_send_log write failed', {
+      status: 'suppressed', template_name: templateName, message_id: messageId,
+      error: logTokenUsedErr.message, code: logTokenUsedErr.code,
+    })
+  }
     return new Response(
       JSON.stringify({ success: false, reason: 'email_suppressed' }),
       {
@@ -868,13 +886,19 @@ Deno.serve(async (req) => {
   const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY')
   if (!RESEND_API_KEY) {
     console.error('RESEND_API_KEY is not configured')
-    await supabase.from('email_send_log').insert({
+    const { error: logNoKeyErr } = await supabase.from('email_send_log').insert({
       message_id: messageId,
       template_name: templateName,
       recipient_email: effectiveRecipient,
       status: 'failed',
       error_message: 'RESEND_API_KEY not configured',
     })
+  if (logNoKeyErr) {
+    console.error('email_send_log write failed', {
+      status: 'failed', template_name: templateName, message_id: messageId,
+      error: logNoKeyErr.message, code: logNoKeyErr.code,
+    })
+  }
     return new Response(JSON.stringify({ error: 'Email service not configured' }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -950,13 +974,15 @@ Deno.serve(async (req) => {
     if (!resendRes.ok) {
       console.error('Resend API error', { status: resendRes.status, data: resendData })
       // Fait évoluer la ligne pending -> failed (une seule ligne par envoi).
+      let logResendErr: { message: string; code?: string } | null = null
       if (pendingRowId) {
-        await supabase.from('email_send_log').update({
+        const { error } = await supabase.from('email_send_log').update({
           status: 'failed',
           error_message: `Resend ${resendRes.status}: ${resendData.message || 'Unknown error'}`,
         }).eq('id', pendingRowId)
+        logResendErr = error
       } else {
-        await supabase.from('email_send_log').insert({
+        const { error } = await supabase.from('email_send_log').insert({
           message_id: messageId,
           template_name: templateName,
           recipient_email: effectiveRecipient,
@@ -964,7 +990,14 @@ Deno.serve(async (req) => {
           error_message: `Resend ${resendRes.status}: ${resendData.message || 'Unknown error'}`,
           metadata: { idempotency_key: idempotencyKey, ...logMetadata },
         })
+        logResendErr = error
       }
+  if (logResendErr) {
+    console.error('email_send_log write failed', {
+      status: 'failed', template_name: templateName, message_id: messageId,
+      error: logResendErr.message, code: logResendErr.code,
+    })
+  }
       return new Response(JSON.stringify({
         error: 'Failed to send email',
         providerStatus: resendRes.status,
@@ -988,15 +1021,17 @@ Deno.serve(async (req) => {
       alma_signed: isAlmaSigned(templateName),
       ...logMetadata,
     }
+    let logSentErr: { message: string; code?: string } | null = null
     if (pendingRowId) {
-      await supabase.from('email_send_log').update({
+      const { error } = await supabase.from('email_send_log').update({
         status: 'sent',
         resend_id: resendData.id ?? null,
         metadata: sentMetadata,
       }).eq('id', pendingRowId)
+      logSentErr = error
     } else {
       // Fallback si la capture d'id a échoué (n'insère qu'une ligne).
-      await supabase.from('email_send_log').insert({
+      const { error } = await supabase.from('email_send_log').insert({
         message_id: messageId,
         template_name: templateName,
         recipient_email: effectiveRecipient,
@@ -1004,7 +1039,14 @@ Deno.serve(async (req) => {
         resend_id: resendData.id ?? null,
         metadata: sentMetadata,
       })
+      logSentErr = error
     }
+  if (logSentErr) {
+    console.error('email_send_log write failed', {
+      status: 'sent', template_name: templateName, message_id: messageId,
+      error: logSentErr.message, code: logSentErr.code,
+    })
+  }
 
     console.log('Transactional email sent via Resend', { templateName, effectiveRecipient, resendId: resendData.id })
 
@@ -1015,13 +1057,15 @@ Deno.serve(async (req) => {
   } catch (sendError) {
     console.error('Resend fetch error', sendError)
     const errMsg = (sendError instanceof Error ? sendError.message : String(sendError)) || 'Network error sending via Resend'
+    let logCatchErr: { message: string; code?: string } | null = null
     if (pendingRowId) {
-      await supabase.from('email_send_log').update({
+      const { error } = await supabase.from('email_send_log').update({
         status: 'failed',
         error_message: errMsg,
       }).eq('id', pendingRowId)
+      logCatchErr = error
     } else {
-      await supabase.from('email_send_log').insert({
+      const { error } = await supabase.from('email_send_log').insert({
         message_id: messageId,
         template_name: templateName,
         recipient_email: effectiveRecipient,
@@ -1029,7 +1073,14 @@ Deno.serve(async (req) => {
         error_message: errMsg,
         metadata: { idempotency_key: idempotencyKey, ...logMetadata },
       })
+      logCatchErr = error
     }
+  if (logCatchErr) {
+    console.error('email_send_log write failed', {
+      status: 'failed', template_name: templateName, message_id: messageId,
+      error: logCatchErr.message, code: logCatchErr.code,
+    })
+  }
     return new Response(JSON.stringify({ error: 'Failed to send email' }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
