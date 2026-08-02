@@ -180,18 +180,22 @@ const EditSit = () => {
       const rawExp = data.specific_expectations || "";
       // La flexibilité vient de sa colonne dédiée ; on ne retombe sur la
       // description que pour les annonces antérieures à cette séparation.
+      // Le texte libre hérité est migré dans la note, jamais jeté.
       const legacy = parseFlexibility(rawExp);
       const storedNote = ((data as any).flexibility_notes as string | null) || "";
       const stored = storedNote ? parseFlexNote(storedNote) : null;
       const months = stored ? stored.months : legacy.months;
       const duration = stored ? stored.duration : legacy.duration;
+      const freeNote = stored && stored.free ? stored.free : legacy.free;
       const clean = legacy.clean;
       setTitle(data.title || "");
       setStartDate(data.start_date || "");
       setEndDate(data.end_date || "");
-      setFlexibleDates(data.flexible_dates || false);
+      setFlexibleDates(data.flexible_dates || !!(months.length || duration || freeNote));
       setFlexibleMonths(months);
       setFlexibleDuration(duration);
+      setFlexibleFreeNote(freeNote);
+
       setSpecificExpectations(clean);
       setOpenTo((data.open_to as string[]) || []);
       setIsUrgent(data.is_urgent || false);
