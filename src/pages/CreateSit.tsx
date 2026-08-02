@@ -415,7 +415,7 @@ const CreateSit = () => {
         const s = sourceSitRes.data;
         setTitle(s.title || "");
         setSourceSitTitle(s.title || null);
-        setSpecificExpectations(s.specific_expectations || "");
+        applyExpectations(s.specific_expectations || "");
         setOpenTo(s.open_to || []);
         setSitEnvironments(s.environments || []);
         setMinGardienSits(s.min_gardien_sits || 0);
@@ -454,7 +454,7 @@ const CreateSit = () => {
             } else {
               const a = adapted as any;
               if (typeof a.title === "string" && a.title.length > 0) setTitle(a.title);
-              if (typeof a.specific_expectations === "string") setSpecificExpectations(a.specific_expectations);
+              if (typeof a.specific_expectations === "string") applyExpectations(a.specific_expectations);
               if (typeof a.daily_routine === "string") setDailyRoutine(a.daily_routine);
               if (typeof a.owner_message === "string") setOwnerMessage(a.owner_message);
               if (Array.isArray(a.open_to)) setOpenTo(a.open_to);
@@ -512,7 +512,7 @@ const CreateSit = () => {
           setStartDate(cleanStart);
           setEndDate(cleanEnd);
           setFlexibleDates(d.flexible_dates || datesWerePast);
-          setSpecificExpectations(d.specific_expectations || "");
+          applyExpectations(d.specific_expectations || "");
           setOpenTo(d.open_to || []);
           setIsUrgent(d.is_urgent || false);
           setSitEnvironments(d.environments || []);
@@ -1184,7 +1184,7 @@ const CreateSit = () => {
                       type="button"
                       onClick={() => {
                         if (specificExpectations.trim() && !window.confirm("Remplacer le texte actuel par les éléments de votre profil ?")) return;
-                        setSpecificExpectations(seed);
+                        applyExpectations(seed);
                       }}
                       className="text-xs text-primary hover:underline"
                     >
@@ -1203,7 +1203,7 @@ const CreateSit = () => {
                   }}
                   onApply={(patch) => {
                     if (patch.title) setTitle(patch.title);
-                    if (patch.description) setSpecificExpectations(patch.description);
+                    if (patch.description) applyExpectations(patch.description);
                   }}
                 />
               </div>
