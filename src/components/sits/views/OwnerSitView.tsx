@@ -381,16 +381,15 @@ const OwnerSitView = ({
       {/* Brouillon : checklist de publication (remplace l'ancien bandeau) */}
       {isDraft && (
         <DraftChecklist
-          hasTitle={checklist.hasTitle}
-          hasDates={checklist.hasDates}
-          hasDescription={checklist.hasDescription}
-          hasPhoto={checklist.hasPhoto}
-          hasPet={checklist.hasPet}
+          blockers={publishBlockers}
+          requirements={SIT_PUBLISH_REQUIREMENTS}
+          editHref={`/sits/${sit.id}/edit`}
           publishing={publishing}
           onPublish={() => {
             if (canPublish) setPublishConfirmOpen(true);
           }}
         />
+
       )}
 
       {/* Confirmation publication, rappel des dates exactes */}
