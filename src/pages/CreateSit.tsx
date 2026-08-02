@@ -475,18 +475,25 @@ const CreateSit = () => {
   const [localDraftRestored, setLocalDraftRestored] = useState(false);
   const [remoteDraftResumed, setRemoteDraftResumed] = useState(false);
   // Restaure la copie locale si elle est postérieure au brouillon distant.
-  const restoreLocalDraftIfFresher = useCallback((remoteUpdatedAt: string | null) => {
+  const restoreLocalDraftIfFresher = useCallback((remoteUpdatedAt: string | null, remoteDraftId?: string | null) => {
     if (!localDraftKey) return;
+    // Identité du brouillon réellement ouvert, paramètre d'URL ou brouillon
+    // distant chargé à défaut de paramètre.
+    const currentIdentity = draftIdParam ?? fromSitId ?? remoteDraftId ?? null;
+    // Contamination croisée : une copie locale n'est adoptée que si elle porte
+    // le même identifiant, ou aucun identifiant alors qu'aucun brouillon
+    // distant n'a été chargé. La règle vaut pour toutes les provenances.
+    const isAdoptable = (d: SitLocalDraft | null): d is SitLocalDraft => {
+      if (!d) return false;
+      if (d.draftId) return d.draftId === currentIdentity;
+      return !remoteDraftId;
+    };
     let stored = readFormDraft<SitLocalDraft>(localDraftKey);
     let savedAt = getFormDraftSavedAt(localDraftKey) ?? 0;
+    if (!isAdoptable(stored)) stored = null;
     if (!stored && legacyLocalDraftKey && legacyLocalDraftKey !== localDraftKey) {
       const legacy = readFormDraft<SitLocalDraft>(legacyLocalDraftKey);
-      const currentIdentity = draftIdParam ?? fromSitId ?? null;
-      // Contamination croisée : la copie orpheline n'est adoptée que si elle
-      // n'appartient à aucun brouillon, ou au brouillon effectivement ouvert.
-      const adoptable =
-        !!legacy && (!legacy.draftId || legacy.draftId === currentIdentity);
-      if (legacy && adoptable) {
+      if (isAdoptable(legacy)) {
         stored = legacy;
         savedAt = getFormDraftSavedAt(legacyLocalDraftKey) ?? 0;
         writeFormDraft<SitLocalDraft>(localDraftKey, legacy);
@@ -608,6 +615,7 @@ const CreateSit = () => {
       }
 
       let remoteDraftUpdatedAt: string | null = null;
+      let remoteDraftId: string | null = null;
       if (!sourceSitRes?.data) {
         let draftRes: { data: any } | null = null;
         if (draftIdParam) {
@@ -628,6 +636,7 @@ const CreateSit = () => {
         if (draftRes?.data) {
           const d = draftRes.data;
           remoteDraftUpdatedAt = (d as any).updated_at || (d as any).created_at || null;
+          remoteDraftId = d.id;
           const today = new Date().toISOString().slice(0, 10);
           const rawStart: string | null = d.start_date || null;
           const rawEnd: string | null = d.end_date || null;
@@ -715,7 +724,7 @@ const CreateSit = () => {
           setSitEnvironments(prev => (prev.length > 0 ? prev : ((o as any).environments || [])));
         }
       }
-      restoreLocalDraftIfFresher(remoteDraftUpdatedAt);
+      restoreLocalDraftIfFresher(remoteDraftUpdatedAt, remoteDraftId);
       setLoading(false);
       setTimeout(() => { initialLoadedRef.current = true; }, 300);
     };

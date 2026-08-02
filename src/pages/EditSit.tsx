@@ -445,7 +445,9 @@ const EditSit = () => {
     : !isDirty
       ? "Aucune modification à enregistrer"
       : !titleValid
-        ? "Titre trop court (3 caractères minimum)"
+        ? trimmedTitle.length > MAX_TITLE_LENGTH
+          ? `Titre trop long de ${trimmedTitle.length - MAX_TITLE_LENGTH} caractères (${MAX_TITLE_LENGTH} maximum)`
+          : "Titre trop court (3 caractères minimum)"
         : formBlockers.length > 0
           ? formBlockers[0].label
           : hasForbidden
@@ -535,9 +537,12 @@ const EditSit = () => {
                 className="mt-1.5 h-12 text-base"
                 maxLength={MAX_TITLE_LENGTH}
               />
-              {titleTouched && !titleValid && trimmedTitle.length > 0 && (
+              {(titleTouched || trimmedTitle.length > MAX_TITLE_LENGTH) && !titleValid && trimmedTitle.length > 0 && (
                 <p className="text-xs text-destructive mt-1.5 flex items-center gap-1">
-                  <AlertCircle className="h-3 w-3 shrink-0" /> Le titre doit contenir au moins 3 caractères.
+                  <AlertCircle className="h-3 w-3 shrink-0" />
+                  {trimmedTitle.length > MAX_TITLE_LENGTH
+                    ? `Le titre dépasse de ${trimmedTitle.length - MAX_TITLE_LENGTH} caractères la limite de ${MAX_TITLE_LENGTH}.`
+                    : "Le titre doit contenir au moins 3 caractères."}
                 </p>
               )}
               {forbiddenInTitle && (

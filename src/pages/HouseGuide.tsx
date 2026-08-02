@@ -141,7 +141,10 @@ const HouseGuide = () => {
   const [openDate, setOpenDate] = useState<Date | null>(null);
 
   // Filet local : 19 champs libres, hors champs sensibles jamais stockés.
-  const localDraftKey = propertyId && user ? `house-guide:${user.id}:${propertyId}` : null;
+  // Clé versionnée : les copies écrites par l'ancien code (clé v1) contenaient
+  // des données sensibles en clair, elles sont purgées au premier chargement.
+  const legacyDraftKey = propertyId && user ? `house-guide:${user.id}:${propertyId}` : null;
+  const localDraftKey = propertyId && user ? `house-guide:v2:${user.id}:${propertyId}` : null;
   const [draftState, setDraftState] = useState<DraftState>("idle");
   const [localDraftSavedAt, setLocalDraftSavedAt] = useState<number | null>(null);
   const [localDraftRestored, setLocalDraftRestored] = useState(false);
@@ -150,8 +153,20 @@ const HouseGuide = () => {
 
   useUnsavedChanges(dirty);
 
+  // Purge inconditionnelle des copies locales héritées, et de toute copie
+  // contenant encore un champ sensible, sans jamais tenter de les restaurer.
+  useEffect(() => {
+    if (legacyDraftKey) clearFormDraft(legacyDraftKey);
+    if (!localDraftKey) return;
+    const existing = readFormDraft<Record<string, unknown>>(localDraftKey);
+    if (existing && SENSITIVE_FIELDS.some((f) => f in existing)) {
+      clearFormDraft(localDraftKey);
+    }
+  }, [legacyDraftKey, localDraftKey]);
+
   useEffect(() => {
     if (!propertyId || !user) return;
+
 
     const load = async () => {
       const [{ data: property }, { data }] = await Promise.all([
@@ -178,8 +193,9 @@ const HouseGuide = () => {
       }
 
       // Copie locale plus récente que la base : on la restaure et on prévient.
-      // Une copie antérieure à la dernière modification en base est périmée,
-      // elle est ignorée puis purgée pour ne pas réécraser la version récente.
+      // Une copie antérieure à la dernière modification en base est simplement
+      // ignorée, jamais supprimée : une comparaison d'horloges ne doit pas
+      // détruire une saisie.
       if (isOwner && localDraftKey) {
         const local = readFormDraft<LocalGuideDraft>(localDraftKey);
         const localSavedAt = getFormDraftSavedAt(localDraftKey);
@@ -190,9 +206,7 @@ const HouseGuide = () => {
           localSavedAt !== null &&
           (remoteUpdatedAt === null || localSavedAt > remoteUpdatedAt);
 
-        if (local && !localIsFresher) {
-          clearFormDraft(localDraftKey);
-        } else if (local) {
+        if (local && localIsFresher) {
           const candidate = { ...loaded, ...local, id: loaded.id } as GuideData;
           if (JSON.stringify({ ...candidate, id: undefined }) !== JSON.stringify({ ...loaded, id: undefined })) {
             loaded = candidate;
@@ -265,7 +279,9 @@ const HouseGuide = () => {
     setSaving(true);
     // Snapshot pour rollback en cas d'échec
     const snapshot: GuideData = { ...guide };
-    const payload = { ...guide, user_id: user.id };
+    // La date de modification est envoyée explicitement, pour ne pas dépendre
+    // seulement du trigger en base dans la comparaison de fraîcheur.
+    const payload = { ...guide, user_id: user.id, updated_at: new Date().toISOString() };
     delete (payload as any).id;
 
     try {

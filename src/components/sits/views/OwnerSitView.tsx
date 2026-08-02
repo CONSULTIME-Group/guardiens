@@ -328,6 +328,12 @@ const OwnerSitView = ({
           : "Elle est archivée. Vous pouvez la republier quand vous voulez depuis l'onglet « Archivées ».",
     });
   };
+  /**
+   * Un brouillon jamais publié n'a pas été validé en deux champs par le
+   * formulaire de création : sa publication passe par ce formulaire, pour que
+   * les deux écrans ne rendent plus deux verdicts opposés sur la même annonce.
+   */
+  const publishNeedsForm = isDraft && !wasValidatedByCreateForm(sit as any);
   // Règles de publication : source unique, voir src/lib/sitPublishRules.ts.
   const publishBlockers = getSitPublishBlockers(
     buildSitPublishInput({
@@ -336,14 +342,9 @@ const OwnerSitView = ({
       galleryPhotos: ownerGallery,
       pets: pets as any,
     }),
+    { viaCreateForm: publishNeedsForm },
   );
   const canPublish = publishBlockers.length === 0;
-  /**
-   * Un brouillon jamais publié n'a pas été validé en deux champs par le
-   * formulaire de création : sa publication passe par ce formulaire, pour que
-   * les deux écrans ne rendent plus deux verdicts opposés sur la même annonce.
-   */
-  const publishNeedsForm = isDraft && !wasValidatedByCreateForm(sit as any);
 
 
 
