@@ -1865,6 +1865,43 @@ const CreateSit = () => {
             </div>
           </div>
 
+          {/* Animaux : sorti du bloc replié, c'est le point de blocage numéro un
+              des annonces non publiées. */}
+          <div
+            id="pets-field"
+            className={cn(
+              "scroll-mt-24 rounded-lg border p-5",
+              pets.length === 0 ? "border-destructive/40 bg-destructive/5" : "border-border bg-card"
+            )}
+          >
+            <div className="flex items-center gap-2 mb-3">
+              <PawPrint className={cn("h-4 w-4", pets.length === 0 ? "text-destructive" : "text-primary")} />
+              <h3 className="font-heading text-sm font-semibold">Les animaux à faire garder</h3>
+            </div>
+            {pets.length === 0 && (
+              <p className="text-sm text-destructive mb-3">
+                Votre annonce ne peut pas être publiée sans au moins un animal. Ajoutez-le ici, cela prend une minute.
+              </p>
+            )}
+            {property ? (
+              <PetsEditor
+                propertyId={property.id}
+                onChange={(list) => {
+                  setPets(list.map((a) => ({
+                    name: a.name, species: a.species, breed: a.breed,
+                    photo_url: a.photo_url, walk_duration: (a as any).walk_duration ?? null,
+                    alone_duration: (a as any).alone_duration ?? null,
+                    medication: (a as any).medication ?? null,
+                    activity_level: (a as any).activity_level ?? null,
+                  })));
+                  hasUserEditedRef.current = true;
+                }}
+              />
+            ) : (
+              <p className="text-sm text-muted-foreground italic">Renseignez d'abord votre logement pour ajouter des animaux.</p>
+            )}
+          </div>
+
           {/* Profile summaries */}
           <details className="group">
             <summary className="cursor-pointer flex items-center justify-between p-3 rounded-xl border border-border bg-card mb-3 list-none select-none hover:bg-muted/30 transition-colors">
