@@ -60,9 +60,10 @@ const DraftChecklist = ({
           </p>
           <p className="text-sm text-muted-foreground">
             {allOk
-              ? "Tout est prêt. Publiez votre annonce pour qu'elle apparaisse dans la recherche."
+              ? readyMessage
               : "Complétez les éléments ci-dessous pour publier votre annonce."}
           </p>
+
         </div>
         <Button onClick={onPublish} disabled={!allOk || publishing} className="gap-2">
           <Send className="h-4 w-4" />
