@@ -1161,11 +1161,13 @@ const CreateSit = () => {
   // Draft label
   const draftLabel = savingDraft
     ? "Brouillon en cours d'enregistrement…"
-    : lastSavedAt
-      ? `Brouillon enregistré · ${relativeTime(lastSavedAt)}`
-      : localDraftSavedAt
-        ? "Brouillon enregistré sur cet appareil"
-        : draftId ? "Brouillon en cours" : null;
+    : remoteSaveFailed
+      ? "Enregistrement impossible, votre saisie n'est conservée que sur cet appareil"
+      : lastSavedAt
+        ? `Brouillon enregistré · ${relativeTime(lastSavedAt)}`
+        : localDraftSavedAt
+          ? "Brouillon enregistré sur cet appareil"
+          : draftId ? "Brouillon en cours" : null;
 
   return (
     <div className="animate-fade-in pb-40">
