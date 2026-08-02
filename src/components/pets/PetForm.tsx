@@ -95,14 +95,21 @@ const PetForm = ({ initialValues, onSubmit, onCancel, submitLabel = "Enregistrer
     })(),
   });
 
+  // Une saisie en cours ne doit jamais être écrasée par une nouvelle instance
+  // d'`initialValues` (re-render du parent, rafraîchissement de la liste).
+  // On compare donc le contenu, pas l'identité de l'objet, et on ne réinitialise
+  // jamais après la première frappe.
+  const dirtyRef = useRef(false);
+  const initialSignature = JSON.stringify(initialValues ?? null);
   useEffect(() => {
+    if (dirtyRef.current) return;
     if (draftKey && readFormDraft<PetFormValues>(draftKey)) {
       setDraftRestored(true);
       return;
     }
     reset(baseValues());
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [initialValues, reset, draftKey]);
+  }, [initialSignature, reset, draftKey]);
 
   const photoUrl = watch("photo_url");
   const species = watch("species");
@@ -116,9 +123,11 @@ const PetForm = ({ initialValues, onSubmit, onCancel, submitLabel = "Enregistrer
     draftKey ? getFormDraftSavedAt(draftKey) : null,
   );
   useEffect(() => {
-    if (!draftKey) return;
     let timer: ReturnType<typeof setTimeout>;
     const sub = watch((values) => {
+      dirtyRef.current = true;
+      onDirtyChange?.(true);
+      if (!draftKey) return;
       setDraftState("saving");
       clearTimeout(timer);
       timer = setTimeout(() => {
@@ -128,7 +137,8 @@ const PetForm = ({ initialValues, onSubmit, onCancel, submitLabel = "Enregistrer
       }, 400);
     });
     return () => { clearTimeout(timer); sub.unsubscribe(); };
-  }, [watch, draftKey]);
+  }, [watch, draftKey, onDirtyChange]);
+
 
 
 
