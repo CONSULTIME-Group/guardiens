@@ -282,6 +282,8 @@ const Sits = () => {
             hasReviewed: !!sit.has_reviewed,
             ownerCity,
             ownerGalleryFirstPhoto: firstGalleryPhoto,
+            ownerGalleryCount: ownerGalleryPhotos.length,
+
           };
         });
         setSits(enriched);
