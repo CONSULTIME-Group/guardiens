@@ -1127,6 +1127,14 @@ const CreateSit = () => {
           </div>
         )}
 
+        {localDraftRestored && (
+          <p className="text-sm text-muted-foreground bg-muted/50 rounded-lg px-3 py-2 mb-4" role="status">
+            Nous avons retrouvé votre saisie en cours sur cet appareil et l'avons restaurée. Pensez à publier ou à enregistrer.
+          </p>
+        )}
+
+
+
         {showAlmaCreateBubble && (
           <div className="mb-4">
             <AlmaBubble
