@@ -1229,7 +1229,7 @@ const CreateSit = () => {
       {currentStep === 0 && (
         <div className="px-4 max-w-3xl mx-auto space-y-6">
           {/* ===== Filtre d'usage bloquant : garde à domicile uniquement ===== */}
-          <div className="rounded-xl border border-primary/30 bg-primary/5 p-5">
+          <div id="sit-location-field" className="scroll-mt-24 rounded-xl border border-primary/30 bg-primary/5 p-5">
             <p className="font-heading text-base font-semibold text-foreground mb-1">
               Où se déroulera la garde&nbsp;?
             </p>
