@@ -284,13 +284,13 @@ const EditSit = () => {
       }),
     ).filter((b) => {
       if (!owned.has(b.id)) return false;
-      if (
-        b.id === "date-error"
-        && b.label === "La date de début ne peut pas être dans le passé."
-        && startDate === initialStartDateRef.current
-      ) return false;
+      // Une garde déjà commencée doit rester modifiable : le blocage de date
+      // passée ne s'applique que si le propriétaire change lui-même la date de
+      // début. Comparaison sur l'identifiant, jamais sur le libellé.
+      if (b.id === "date-past" && startDate === initialStartDateRef.current) return false;
       return true;
     });
+
   }, [trimmedTitle, startDate, endDate, flexibleDates, dateError, persistedDesc]);
 
 
