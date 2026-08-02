@@ -501,39 +501,81 @@ const Sits = () => {
     }
   };
 
+  /**
+   * Republication : elle consulte la source unique de règles avant toute
+   * écriture. Un brouillon peut désormais être enregistré incomplet, donc une
+   * annonce dépubliée peut violer les contraintes de publication. Dans ce cas,
+   * la base n'est pas appelée, les éléments manquants sont nommés et le chemin
+   * de correction est proposé, comme la checklist de la fiche annonce.
+   */
   const handleRepublish = async (sitId: string) => {
     const sit = sits.find((s) => s.id === sitId);
-    const todayIso = new Date().toISOString().split("T")[0];
-    // Garde A3 : ne pas republier une annonce dont les dates sont deja passees.
-    if (sit?.end_date && sit.end_date < todayIso) {
+    if (!sit) return;
+
+    const needsForm = !wasValidatedByCreateForm(sit);
+    const resumeHref = `/sits/create?resume=${sitId}`;
+    const blockers = getBlockingBlockers(
+      getSitPublishBlockers(
+        buildSitPublishInput({
+          sit,
+          property: sit.properties,
+          pets: sit.pets,
+          overrides: { galleryPhotoCount: sit.ownerGalleryCount ?? 0 },
+        }),
+        { viaCreateForm: needsForm, resumeHref },
+      ),
+    );
+
+    if (blockers.length > 0) {
+      const labels = blockers.slice(0, 3).map((b) => b.label).join(" ; ");
       toast({
-        title: "Dates a mettre a jour",
-        description: "Les dates de cette annonce sont passees. Modifiez-les avant de republier.",
+        variant: "destructive",
+        title: "Il manque quelque chose pour republier",
+        description: `${labels}${blockers.length > 3 ? " ; et d'autres éléments" : ""}.`,
       });
-      navigate(`/sits/${sitId}/edit`);
+      navigate(blockers.find((b) => b.action)?.action || `/sits/${sitId}/edit`);
       return;
     }
+
     try {
-      const { error } = await supabase.from("sits").update({
+      // On lit les lignes réellement modifiées : en vue gardien, le filtre sur
+      // le propriétaire ne correspond à aucune ligne, l'ancien code annonçait
+      // pourtant une republication réussie.
+      const { data, error } = await supabase.from("sits").update({
         status: "published" as any,
         cancellation_reason: null,
         cancelled_at: null,
         cancelled_by: null,
         unpublished_at: null,
         last_unpublished_reason: null,
-      } as any).eq("id", sitId).eq("user_id", user!.id);
+      } as any).eq("id", sitId).eq("user_id", user!.id).select("id");
       if (error) throw error;
+      if (!data || data.length === 0) {
+        toast({
+          variant: "destructive",
+          title: "Republication impossible",
+          description: "Seul le propriétaire de cette annonce peut la republier. Ouvrez votre espace propriétaire pour la remettre en ligne.",
+        });
+        return;
+      }
       toast({ title: "Annonce republiée" });
       loadSits();
     } catch (err: any) {
+      // Le détail technique reste en console : l'utilisateur reçoit ce qui
+      // bloque, jamais une invitation à réessayer.
       console.error("[Sits] republish failed", err);
+      const code = String(err?.code || "");
       toast({
         variant: "destructive",
         title: "Republication impossible",
-        description: "La republication a échoué. Réessayez dans un instant.",
+        description:
+          code === "42501" || code === "PGRST301"
+            ? "Vous n'avez pas les droits pour republier cette annonce."
+            : "La base a refusé la republication : vérifiez le titre, les dates, la description et la photo de cette annonce, puis republiez.",
       });
     }
   };
+
 
   // Bucketing owner : En ligne / Brouillons / Passees
   //  - En ligne  : publiees, confirmees, en cours (avec ou sans candidatures)
