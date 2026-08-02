@@ -66,8 +66,9 @@ const DraftChecklist = ({
         </div>
         <Button onClick={onPublish} disabled={!allOk || publishing} className="gap-2">
           <Send className="h-4 w-4" />
-          {publishing ? "Publication…" : "Publier l'annonce"}
+          {publishing ? "Publication…" : publishLabel}
         </Button>
+
       </div>
 
       <ul className="space-y-1.5">
