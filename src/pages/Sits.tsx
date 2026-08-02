@@ -246,40 +246,13 @@ const Sits = () => {
 
         const rows: any[] = (data as any[]) || [];
 
-        // Auto-expire cote client, reserve aux annonces reellement en ligne ou
-        // confirmees. Un brouillon n'est pas une garde en cours : il reste un
-        // brouillon, ses dates sont simplement a redefinir.
-        const toExpire = rows.filter((s: any) =>
-          s.end_date
-          && ["published", "confirmed"].includes(s.status)
-          && isBefore(parseISO(s.end_date), new Date())
-        );
-
-        if (toExpire.length > 0) {
-          const ids = toExpire.map((s: any) => s.id);
-          const { error: expErr } = await supabase
-            .from("sits")
-            .update({ status: "cancelled" as any, cancellation_reason: "expired" })
-            .in("id", ids)
-            .eq("user_id", user.id);
-          if (expErr) {
-            // Non bloquant pour l'affichage : on log seulement.
-            console.warn("[Sits] auto-expire failed", expErr);
-          }
-        }
-
+        // Aucune ecriture de statut cote client : le passage d'une garde
+        // confirmee a terminee releve du cron dedie. L'affichage se contente
+        // de signaler visuellement les dates depassees.
         const enriched = rows.map((sit: any) => {
-          const wasExpired = toExpire.some((e: any) => e.id === sit.id);
-          const overlaid = {
-            ...sit,
-            status: wasExpired ? "cancelled" : sit.status,
-            cancellation_reason: wasExpired ? "expired" : sit.cancellation_reason,
-          };
           return {
             ...sit,
-            status: overlaid.status,
-            cancellation_reason: overlaid.cancellation_reason,
-            effectiveStatus: getOwnerEffectiveStatus(overlaid),
+            effectiveStatus: getOwnerEffectiveStatus(sit),
             applicationCount: sit.application_count || 0,
             pendingApplicationCount: sit.pending_application_count || 0,
             acceptedSitter: sit.accepted_sitter || null,
