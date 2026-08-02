@@ -241,12 +241,15 @@ const Sits = () => {
 
         const rows: any[] = (data as any[]) || [];
 
-        // Auto-expire cote client (publiees ET brouillons dont end_date est passee).
+        // Auto-expire cote client, reserve aux annonces reellement en ligne ou
+        // confirmees. Un brouillon n'est pas une garde en cours : il reste un
+        // brouillon, ses dates sont simplement a redefinir.
         const toExpire = rows.filter((s: any) =>
           s.end_date
-          && ["published", "draft"].includes(s.status)
+          && ["published", "confirmed"].includes(s.status)
           && isBefore(parseISO(s.end_date), new Date())
         );
+
         if (toExpire.length > 0) {
           const ids = toExpire.map((s: any) => s.id);
           const { error: expErr } = await supabase
