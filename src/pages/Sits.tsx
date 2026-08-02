@@ -626,6 +626,9 @@ const Sits = () => {
   const isArchived = isPast;
 
   const activeSits = useMemo(() => sits.filter(s => !isArchived(s)), [sits]);
+  // Côté gardien, aucun filtrage en amont : l'historique (terminées, expirées,
+  // archivées, annulées) doit rester accessible, c'est le calcul d'onglet qui range.
+  const sitterSits = sits;
   
 
   /**
@@ -636,6 +639,12 @@ const Sits = () => {
   const sitterTabOf = (s: any): Tab => {
     const es = s.effectiveStatus || s.status;
     const appStatus = s.application_status;
+    // Une candidature acceptée sur une garde arrivée au bout de son cycle
+    // appartient à l'historique du gardien (et ouvre le droit à l'avis).
+    if (
+      appStatus === "accepted" &&
+      ["completed", "archived", "expired", "unavailable"].includes(es)
+    ) return "completed";
     if (
       appStatus === "cancelled" || appStatus === "rejected" ||
       ["cancelled", "unavailable", "expired", "archived"].includes(es)
@@ -649,9 +658,10 @@ const Sits = () => {
   const tabCounts = useMemo(() => {
     const counts: Record<Tab, number> = { upcoming: 0, in_progress: 0, completed: 0, cancelled: 0 };
     if (isOwnerView) return counts;
-    activeSits.forEach((s) => { counts[sitterTabOf(s)]++; });
+    sitterSits.forEach((s) => { counts[sitterTabOf(s)]++; });
     return counts;
-  }, [activeSits, isOwnerView]);
+  }, [sitterSits, isOwnerView]);
+
 
   // Comptages onglets owner : En ligne / Brouillons / Passees
   const ownerTabCounts = useMemo(() => {
