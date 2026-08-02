@@ -77,11 +77,12 @@ Deno.serve(async (req) => {
   let sent = 0, failed = 0, redeferred = 0;
 
   for (const row of due ?? []) {
-    // Mark in-flight (set last_attempt_at, increment attempts) BEFORE invoking — avoids dup if cron overlaps
+    // Defaut 2 : l'increment d'attempts appartient au sender (il met a jour la
+    // ligne source lors d'un re-report). Ici on ne pose que l'horodatage.
     const newAttempts = (row.attempts ?? 0) + 1;
     await supabase
       .from("email_deferred_queue")
-      .update({ last_attempt_at: nowIso, attempts: newAttempts })
+      .update({ last_attempt_at: nowIso })
       .eq("id", row.id);
 
     try {
@@ -108,11 +109,43 @@ Deno.serve(async (req) => {
       if (error) throw error;
 
       const result = data as Record<string, unknown> | null;
-      if (result?.deferred) {
+      const reason = typeof result?.reason === 'string' ? result.reason : null;
+
+      // Defaut 5 : le sender a deja clos la ligne (abandon). On respecte son statut.
+      if (result?.abandoned) {
+        console.log("flush abandoned by sender", { id: row.id, reason });
+        abandoned++;
+      } else if (reason === 'already_queued') {
+        // Defaut 4 : une ligne doublonnee ne doit pas repasser chaque minute.
+        await supabase
+          .from("email_deferred_queue")
+          .update({ status: "superseded", last_error: "already_queued: un autre envoi couvre cette cle" })
+          .eq("id", row.id);
+        closed++;
+      } else if (reason === 'unsubscribed_category' || reason === 'email_suppressed') {
+        // Defaut 4 : desinscription ou adresse supprimee, cloture definitive.
+        await supabase
+          .from("email_deferred_queue")
+          .update({ status: "abandoned", last_error: reason })
+          .eq("id", row.id);
+        closed++;
+      } else if (result?.deferred) {
         // Le sender a re-programme la ligne source elle-meme (attempts et
-        // first_enqueued_at conserves). Rien a faire ici : elle reste 'pending'.
-        console.log("flush redeferred", { id: row.id, reason: result?.reason ?? null });
-        redeferred++;
+        // first_enqueued_at conserves).
+        // Defaut 3 : MAX_ATTEMPTS s'applique aussi sur le chemin de re-report.
+        if (newAttempts >= MAX_ATTEMPTS) {
+          await supabase
+            .from("email_deferred_queue")
+            .update({
+              status: "failed",
+              last_error: `MAX_ATTEMPTS atteint sur chaine de re-report (${newAttempts}), dernier motif: ${reason ?? 'inconnu'}`,
+            })
+            .eq("id", row.id);
+          failed++;
+        } else {
+          console.log("flush redeferred", { id: row.id, reason });
+          redeferred++;
+        }
       } else if (result?.sent || result?.skipped || result?.success) {
 
         await supabase.from("email_deferred_queue").update({ status: "sent" }).eq("id", row.id);
@@ -124,6 +157,7 @@ Deno.serve(async (req) => {
         }
         failed++;
       }
+
     } catch (e) {
       const msg = e instanceof Error ? e.message : String(e);
       console.error("flush invoke error", { id: row.id, err: msg });
