@@ -539,7 +539,10 @@ const EditSit = () => {
               />
               {titleTouched && !titleValid && trimmedTitle.length > 0 && (
                 <p className="text-xs text-destructive mt-1.5 flex items-center gap-1">
-                  <AlertCircle className="h-3 w-3 shrink-0" /> Le titre doit contenir au moins 3 caractères.
+                  <AlertCircle className="h-3 w-3 shrink-0" />
+                  {trimmedTitle.length > MAX_TITLE_LENGTH
+                    ? `Le titre dépasse de ${trimmedTitle.length - MAX_TITLE_LENGTH} caractères la limite de ${MAX_TITLE_LENGTH}.`
+                    : "Le titre doit contenir au moins 3 caractères."}
                 </p>
               )}
               {forbiddenInTitle && (
