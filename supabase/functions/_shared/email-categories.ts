@@ -25,8 +25,8 @@ const TRANSACTIONAL: ReadonlyArray<string> = [
   'new-application',
   'first-application-received',
   // Consequence directe de l'action d'un membre identifie sur l'annonce du
-  // destinataire, au meme titre que 'new-application'. Plafonne par le cap
-  // transactionnel (1/heure, 3/24h), plus par le cap categorie.
+  // destinataire, au meme titre que 'new-application'. Aucun plafond de
+  // frequence depuis le 02/08/2026, seules les heures calmes s'appliquent.
   'owner-pending-application-nudge',
   'cancellation-by-owner',
   'cancellation-by-sitter',
