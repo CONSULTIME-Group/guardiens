@@ -15,6 +15,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { safeUUID } from "@/lib/uuid";
 import { readFormDraft, writeFormDraft, clearFormDraft, getFormDraftSavedAt } from "@/lib/formDraft";
+import { makePlainTextPasteHandler } from "@/lib/pastePlainText";
 import DraftStatus, { type DraftState } from "@/components/shared/DraftStatus";
 
 export type PetFormValues = {
