@@ -778,7 +778,7 @@ const CreateSit = () => {
           setSitEnvironments(prev => (prev.length > 0 ? prev : ((o as any).environments || [])));
         }
       }
-      restoreLocalDraftIfFresher(remoteDraftUpdatedAt, remoteDraftId);
+      restoreLocalDraftIfFresher(remoteDraftUpdatedAt, remoteDraftId, !!sourceSitRes?.data);
       setLoading(false);
       setTimeout(() => { initialLoadedRef.current = true; }, 300);
     };
