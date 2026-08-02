@@ -667,8 +667,9 @@ const Sits = () => {
         switch (activeTab) {
           case "in_progress": return es === "in_progress" && appStatus === "accepted";
           case "completed": return es === "completed";
-          case "cancelled": return appStatus === "cancelled" || appStatus === "rejected" || es === "cancelled";
-          case "upcoming": return !["completed", "cancelled"].includes(es) && !["cancelled", "rejected"].includes(appStatus) && es !== "in_progress";
+          case "cancelled": return appStatus === "cancelled" || appStatus === "rejected" || es === "cancelled" || es === "unavailable";
+          case "upcoming": return !["completed", "cancelled", "unavailable"].includes(es) && !["cancelled", "rejected"].includes(appStatus) && es !== "in_progress";
+
         }
         return false;
       });
