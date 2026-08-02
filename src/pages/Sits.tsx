@@ -1734,11 +1734,13 @@ const ActionsMenu = ({
         </button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-52">
-        <DropdownMenuItem asChild>
-          <Link to={`/sits/${sit.id}`} className="flex items-center gap-2">
-            <Eye className="h-4 w-4" /> Voir l'annonce
-          </Link>
-        </DropdownMenuItem>
+        {effectiveStatus !== "cancelled" && (
+          <DropdownMenuItem asChild>
+            <Link to={`/sits/${sit.id}`} className="flex items-center gap-2">
+              <Eye className="h-4 w-4" /> Voir l'annonce
+            </Link>
+          </DropdownMenuItem>
+        )}
         {canEdit && (
           <DropdownMenuItem asChild>
             <Link to={`/sits/${sit.id}/edit`} className="flex items-center gap-2">
