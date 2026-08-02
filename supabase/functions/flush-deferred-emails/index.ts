@@ -141,13 +141,15 @@ Deno.serve(async (req) => {
           .eq("id", row.id)
           .eq("status", "processing");
         abandoned++;
-      } else if (reason === 'already_queued') {
+      } else if (reason === 'already_queued' || reason === 'duplicate_idempotency_key') {
         // Defaut 4 : une ligne doublonnee ne doit pas repasser chaque minute.
+        // Aucun email n'est parti : on ne compte pas cette ligne comme envoyee.
         await supabase
           .from("email_deferred_queue")
-          .update({ status: "superseded", last_error: "already_queued: un autre envoi couvre cette cle" })
+          .update({ status: "superseded", last_error: `${reason}: un autre envoi couvre cette cle` })
           .eq("id", row.id);
         closed++;
+
       } else if (reason === 'unsubscribed_category' || reason === 'email_suppressed') {
         // Defaut 4 : desinscription ou adresse supprimee, cloture definitive.
         await supabase

@@ -107,7 +107,10 @@ const PRODUCT: ReadonlyArray<string> = [
   'unread-messages-reminder',
   'dormant-sitter-nudge',
   'affinity-onboarding-nudge',
+  // Message personnel du fondateur aux membres : editorial, avec desinscription.
+  'founder-personal-notice',
 ]
+
 
 const DIGEST: ReadonlyArray<string> = [
   'mission-daily-digest',
