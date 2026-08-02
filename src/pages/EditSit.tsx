@@ -730,10 +730,19 @@ const EditSit = () => {
 
               </p>
               {forbiddenInDesc && (
-                <p className="text-xs text-destructive mt-1 flex items-center gap-1">
-                  <AlertCircle className="h-3 w-3 shrink-0" /> Mot non autorisé. Préférez « gardien » ou « personne de confiance ».
+                <p
+                  className={cn(
+                    "text-xs mt-1 flex items-center gap-1",
+                    forbiddenDescBlocking ? "text-destructive" : "text-muted-foreground",
+                  )}
+                >
+                  <AlertCircle className="h-3 w-3 shrink-0" />
+                  {forbiddenDescBlocking
+                    ? "Mot non autorisé. Préférez « gardien » ou « personne de confiance »."
+                    : "Ce texte contient un mot que nous préférons éviter. Remplacez-le par « gardien » ou « personne de confiance » quand vous le pourrez, l'enregistrement reste possible."}
                 </p>
               )}
+
             </div>
           </SectionCard>
 
