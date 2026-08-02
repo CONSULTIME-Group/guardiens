@@ -1250,6 +1250,7 @@ const CreateSit = () => {
               placeholder={nDays > 0 ? buildSuggestedTitle() : "Ex : Garde de 2 chats à Écully, 10 jours en août"}
               value={title}
               onChange={e => setTitle(e.target.value)}
+              onPaste={makePlainTextPasteHandler(setTitle)}
               onBlur={() => touch("title")}
               className={cn("h-12 text-base", fieldState("title", !title))}
             />
@@ -1384,6 +1385,7 @@ const CreateSit = () => {
                   placeholder="Voyage, événement familial…"
                   value={absenceReason}
                   onChange={e => updateAbsenceReason(e.target.value)}
+                  onPaste={makePlainTextPasteHandler(updateAbsenceReason)}
                   onBlur={() => touch("descriptionReason")}
                   className={cn(
                     "text-base min-h-[90px] mt-1.5",
@@ -1423,6 +1425,7 @@ const CreateSit = () => {
                   placeholder="Présence rassurante, sorties avec l'animal…"
                   value={sitterExpectations}
                   onChange={e => updateSitterExpectations(e.target.value)}
+                  onPaste={makePlainTextPasteHandler(updateSitterExpectations)}
                   onBlur={() => touch("descriptionExpectations")}
                   className={cn(
                     "text-base min-h-[90px] mt-1.5",
@@ -1466,6 +1469,7 @@ const CreateSit = () => {
               placeholder={"Ex :\nMatin, Sortie du chien 30 min, gamelles, ouverture du jardin.\nMidi, Visite rapide, fontaine à recharger.\nSoir, Promenade 30 min, repas, câlins obligatoires 🥰"}
               value={dailyRoutine}
               onChange={e => setDailyRoutine(e.target.value.slice(0, 1500))}
+              onPaste={makePlainTextPasteHandler(setDailyRoutine, { maxLength: 1500 })}
               className="text-base min-h-[120px]"
               rows={5}
             />
@@ -1504,6 +1508,7 @@ const CreateSit = () => {
               placeholder="Ex : On confie nos animaux à un membre de confiance plutôt qu'à une pension. Vous repartirez sûrement avec des cookies maison et une connaissance fine du quartier !"
               value={ownerMessage}
               onChange={e => setOwnerMessage(e.target.value.slice(0, 800))}
+              onPaste={makePlainTextPasteHandler(setOwnerMessage, { maxLength: 800 })}
               className="text-base"
               rows={4}
             />
@@ -1586,6 +1591,7 @@ const CreateSit = () => {
                 placeholder="Ex : autour du 15 août, flexible d'une semaine"
                 value={flexibleNotes}
                 onChange={e => setFlexibleNotes(e.target.value)}
+                onPaste={makePlainTextPasteHandler(setFlexibleNotes)}
                 className="mt-1.5 h-12 text-base"
               />
             </div>
