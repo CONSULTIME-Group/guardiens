@@ -302,10 +302,21 @@ const EditSit = () => {
   const FORBIDDEN_REGEX = /\b(voisin(?:e|s|es)?|voisinage|AURA|Auvergne[\s-]Rh[oô]ne[\s-]Alpes)\b/i;
   const forbiddenInTitle = FORBIDDEN_REGEX.test(title);
   const forbiddenInDesc = FORBIDDEN_REGEX.test(specificExpectations);
-  const hasForbidden = forbiddenInTitle || forbiddenInDesc;
+  /**
+   * Vocabulaire préexistant : ce texte a pu être injecté par le produit lui
+   * même (règles de maison recopiées) et le formulaire de création n'applique
+   * pas ce filtre. Le signaler oui, interdire tout enregistrement non.
+   * Le filtre reste bloquant sur un mot que le propriétaire vient de saisir.
+   */
+  const titleForbiddenPreexisting = FORBIDDEN_REGEX.test(initialTitleRef.current);
+  const descForbiddenPreexisting = FORBIDDEN_REGEX.test(initialDescRef.current);
+  const forbiddenTitleBlocking = forbiddenInTitle && !titleForbiddenPreexisting;
+  const forbiddenDescBlocking = forbiddenInDesc && !descForbiddenPreexisting;
+  const hasForbidden = forbiddenTitleBlocking || forbiddenDescBlocking;
 
   const canSave =
     !isLocked && titleValid && formBlockers.length === 0 && !hasForbidden;
+
 
   const isConfirmed = sitStatus === "confirmed" || sitStatus === "in_progress";
 
