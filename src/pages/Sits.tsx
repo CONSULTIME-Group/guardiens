@@ -1026,7 +1026,20 @@ const Sits = () => {
             // effectiveStatus deja calcule par getOwnerEffectiveStatus dans l'enrichissement.
             // Dans l'onglet Passees, l'affichage suit directement effectiveStatus.
             const cardSit = sit;
+            if (sit.unavailable) {
+              return (
+                <UnavailableSitCard
+                  key={sit.id}
+                  onWithdraw={
+                    sit.application_id && ["pending", "viewed", "discussing"].includes(sit.application_status)
+                      ? () => setWithdrawApp({ appId: sit.application_id, sitTitle: "cette annonce" })
+                      : undefined
+                  }
+                />
+              );
+            }
             return (
+
               <SitCard
                 key={sit.id + (sit.application_id || "")}
                 sit={cardSit}
