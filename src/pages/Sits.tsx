@@ -1786,9 +1786,10 @@ const QuickActions = ({
           </Link>
         ) : (
           <span className={cn(btnClass, "border border-border text-muted-foreground cursor-default")}>
-            Annonce retirée par le propriétaire
+            Annonce non consultable
           </span>
         )}
+
 
         {sit.conversationId && (
           <Link
