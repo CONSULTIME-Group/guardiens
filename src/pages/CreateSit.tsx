@@ -9,7 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import ChipSelect from "@/components/profile/ChipSelect";
 import { Helmet } from "react-helmet-async";
-import EnvironmentPills from "@/components/shared/EnvironmentPills";
+import EnvironmentPills, { ENV_KEYS } from "@/components/shared/EnvironmentPills";
 import { Calendar, Home, PawPrint, ShieldCheck, MessageSquare, Users, ArrowLeft, AlertCircle, Zap, Eye, ChevronRight, ChevronLeft, Check, Image as ImageIcon, Star } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Link } from "react-router-dom";
@@ -100,7 +100,7 @@ interface OwnerSummary {
  * Valeurs d'environnement acceptées par la base pour une annonce, plafonnées à
  * trois. Toute autre valeur fait échouer la publication côté base.
  */
-const ALLOWED_SIT_ENVIRONMENTS = ["ville", "campagne", "montagne", "lac", "vignes", "foret", "mer"];
+const ALLOWED_SIT_ENVIRONMENTS = ENV_KEYS;
 const sanitizeSitEnvironments = (values: unknown[]): string[] =>
   Array.from(
     new Set(
@@ -374,7 +374,7 @@ const CreateSit = () => {
   const hasUserEditedRef = useRef(false);
   const initialLoadedRef = useRef(false);
 
-  // Chantier 3 — Concierge IA sur /sits/create : bulle Alma proposant de
+  // Chantier 3, Concierge IA sur /sits/create : bulle Alma proposant de
   // décrire l'absence en une phrase plutôt que de remplir manuellement.
   // Ne s'affiche que sur formulaire vierge et hors reprise de brouillon.
   const [almaBubbleDismissed, setAlmaBubbleDismissed] = useState<boolean>(() => {
@@ -563,7 +563,9 @@ const CreateSit = () => {
         setSourceSitTitle(s.title || null);
         applyExpectations(s.specific_expectations || "");
         setOpenTo(s.open_to || []);
-        setSitEnvironments(s.environments || []);
+        // Une annonce ancienne peut porter une valeur d'environnement obsolète,
+        // on applique le même filtrage que partout ailleurs.
+        setSitEnvironments(sanitizeSitEnvironments(s.environments || []));
         setMinGardienSits(s.min_gardien_sits || 0);
         setFlexibleDates(s.flexible_dates || false);
         setMaxApplications(s.max_applications || null);
