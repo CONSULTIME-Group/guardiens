@@ -483,55 +483,72 @@ const EditSit = () => {
               <Label className="text-sm font-medium mb-2 block">
                 Dates de la garde
               </Label>
-              {!flexibleDates ? (
-                <>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                      <Label htmlFor="sit-start" className="text-xs text-muted-foreground">
-                        Date de début
-                      </Label>
-                      <Input
-                        id="sit-start"
-                        type="date"
-                        value={startDate}
-                        onChange={(e) => setStartDate(e.target.value)}
-                        onBlur={() => setDatesTouched(true)}
-                        min={new Date().toISOString().slice(0, 10)}
-                        className="mt-1.5 h-12 text-base"
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="sit-end" className="text-xs text-muted-foreground">
-                        Date de fin
-                      </Label>
-                      <Input
-                        id="sit-end"
-                        type="date"
-                        value={endDate}
-                        onChange={(e) => setEndDate(e.target.value)}
-                        onBlur={() => setDatesTouched(true)}
-                        min={startDate || undefined}
-                        className="mt-1.5 h-12 text-base"
-                      />
-                    </div>
-                  </div>
-                  {datesTouched && dateError && (
-                    <p className="text-sm text-destructive flex items-center gap-1.5 mt-2">
-                      <AlertCircle className="h-3.5 w-3.5 shrink-0" /> {dateError}
-                    </p>
-                  )}
-                  <Button
-                    type="button"
-                    variant="link"
-                    size="sm"
-                    onClick={() => setFlexibleDates(true)}
-                    className="px-0 mt-2 h-auto gap-1"
-                  >
-                    Mes dates sont flexibles <ArrowRight className="h-3 w-3" />
-                  </Button>
-                </>
-              ) : (
-                <div className="space-y-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="sit-start" className="text-xs text-muted-foreground">
+                    Date de début
+                  </Label>
+                  <Input
+                    id="sit-start"
+                    type="date"
+                    value={startDate}
+                    onChange={(e) => setStartDate(e.target.value)}
+                    onBlur={() => setDatesTouched(true)}
+                    min={new Date().toISOString().slice(0, 10)}
+                    className="mt-1.5 h-12 text-base"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="sit-end" className="text-xs text-muted-foreground">
+                    Date de fin
+                  </Label>
+                  <Input
+                    id="sit-end"
+                    type="date"
+                    value={endDate}
+                    onChange={(e) => setEndDate(e.target.value)}
+                    onBlur={() => setDatesTouched(true)}
+                    min={startDate || undefined}
+                    className="mt-1.5 h-12 text-base"
+                  />
+                </div>
+              </div>
+              {datesTouched && dateError && (
+                <p className="text-sm text-destructive flex items-center gap-1.5 mt-2">
+                  <AlertCircle className="h-3.5 w-3.5 shrink-0" /> {dateError}
+                </p>
+              )}
+              {datesTouched && !dateError && !(startDate && endDate) && (
+                <p className="text-sm text-destructive flex items-center gap-1.5 mt-2">
+                  <AlertCircle className="h-3.5 w-3.5 shrink-0" /> Une date de début et une date de
+                  fin sont nécessaires.
+                </p>
+              )}
+
+              {/*
+                La flexibilité enrichit l'annonce, elle ne remplace jamais les
+                dates : les gardiens et les alertes ont besoin d'une période.
+              */}
+              <div className="mt-4 flex items-start gap-3 rounded-xl border border-border p-4">
+                <Checkbox
+                  id="sit-flexible"
+                  checked={flexibleDates}
+                  onCheckedChange={(v) => setFlexibleDates(v === true)}
+                  className="mt-0.5"
+                />
+                <div className="min-w-0">
+                  <Label htmlFor="sit-flexible" className="text-sm font-medium cursor-pointer">
+                    Mes dates sont flexibles
+                  </Label>
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    Précisez les mois et la durée qui vous conviennent. Les dates ci-dessus restent
+                    nécessaires, elles servent de repère aux gardiens.
+                  </p>
+                </div>
+              </div>
+
+              {flexibleDates && (
+                <div className="space-y-4 mt-4">
                   <div>
                     <p className="text-xs text-muted-foreground mb-2">Quel mois ?</p>
                     <div className="grid grid-cols-3 gap-2">
@@ -576,15 +593,6 @@ const EditSit = () => {
                       ))}
                     </div>
                   </div>
-                  <Button
-                    type="button"
-                    variant="link"
-                    size="sm"
-                    onClick={() => setFlexibleDates(false)}
-                    className="px-0 h-auto text-muted-foreground"
-                  >
-                    <ArrowLeft className="h-3 w-3 mr-1" /> Renseigner des dates précises
-                  </Button>
                 </div>
               )}
             </div>
