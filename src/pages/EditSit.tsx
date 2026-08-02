@@ -445,7 +445,9 @@ const EditSit = () => {
     : !isDirty
       ? "Aucune modification à enregistrer"
       : !titleValid
-        ? "Titre trop court (3 caractères minimum)"
+        ? trimmedTitle.length > MAX_TITLE_LENGTH
+          ? `Titre trop long de ${trimmedTitle.length - MAX_TITLE_LENGTH} caractères (${MAX_TITLE_LENGTH} maximum)`
+          : "Titre trop court (3 caractères minimum)"
         : formBlockers.length > 0
           ? formBlockers[0].label
           : hasForbidden
