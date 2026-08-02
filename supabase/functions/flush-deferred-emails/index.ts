@@ -109,19 +109,9 @@ Deno.serve(async (req) => {
 
       const result = data as Record<string, unknown> | null;
       if (result?.deferred) {
-        // Le sender a cree une nouvelle ligne de report (cap ou quiet hours
-        // toujours actifs). Cette ligne source est remplacee, elle ne doit
-        // surtout pas passer en 'sent' : le statut 'sent' est reserve aux
-        // envois reellement transmis au provider. Sinon la garde anti doublon
-        // du sender la retrouvait et bloquait definitivement l'email.
-        await supabase
-          .from("email_deferred_queue")
-          .update({
-            status: "superseded",
-            last_error: `Report remplace par une nouvelle ligne (raison: ${String(result?.reason ?? "cap_or_quiet_hours")})`,
-          })
-          .eq("id", row.id);
-        console.log("flush superseded", { id: row.id, reason: result?.reason ?? null });
+        // Le sender a re-programme la ligne source elle-meme (attempts et
+        // first_enqueued_at conserves). Rien a faire ici : elle reste 'pending'.
+        console.log("flush redeferred", { id: row.id, reason: result?.reason ?? null });
         redeferred++;
       } else if (result?.sent || result?.skipped || result?.success) {
 
