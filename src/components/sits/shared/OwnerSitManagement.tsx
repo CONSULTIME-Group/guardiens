@@ -7,7 +7,7 @@
  */
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Pencil, Share2, XCircle, BookOpen, Settings2, Archive } from "lucide-react";
+import { Pencil, Share2, XCircle, BookOpen, Settings2, Archive, RotateCcw } from "lucide-react";
 
 interface OwnerSitManagementProps {
   sitId: string;
@@ -53,7 +53,21 @@ const OwnerSitManagement = ({
       </p>
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-        {status !== "completed" && status !== "cancelled" && (
+        {status === "archived" ? (
+          /* L'éditeur est verrouillé sur une annonce archivée : la seule issue
+             utile est le formulaire d'adaptation, qui purge les dates passées. */
+          <Button
+            variant="outline"
+            size="sm"
+            asChild
+            className="justify-start gap-2"
+          >
+            <Link to={`/sits/create?from=${sitId}&mode=copy`}>
+              <RotateCcw className="h-3.5 w-3.5" />
+              Republier
+            </Link>
+          </Button>
+        ) : status !== "completed" && status !== "cancelled" ? (
           <Button
             variant="outline"
             size="sm"
@@ -65,7 +79,7 @@ const OwnerSitManagement = ({
               Modifier
             </Link>
           </Button>
-        )}
+        ) : null}
 
         <Button
           variant="outline"

@@ -1038,6 +1038,7 @@ const Sits = () => {
               return (
                 <UnavailableSitCard
                   key={sit.id}
+                  applicationStatus={sit.application_status}
                   onWithdraw={
                     sit.application_id && ["pending", "viewed", "discussing"].includes(sit.application_status)
                       ? () => setWithdrawApp({ appId: sit.application_id, sitTitle: "cette annonce", conversationId: "" })
