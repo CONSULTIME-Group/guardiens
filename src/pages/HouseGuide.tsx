@@ -1,4 +1,4 @@
-import { useState, useEffect, createContext, useContext } from "react";
+import { useState, useEffect, createContext, useContext, useRef } from "react";
 import { useParams, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -9,6 +9,9 @@ import { toast } from "@/hooks/use-toast";
 import { Switch } from "@/components/ui/switch";
 import { ArrowLeft, Save, Home, Phone, Key, Wifi, Trash2, Thermometer, Info, Car, Mail, Sprout, Ban, MessageSquare } from "lucide-react";
 import { Helmet } from "react-helmet-async";
+import { readFormDraft, writeFormDraft, clearFormDraft } from "@/lib/formDraft";
+import DraftStatus, { type DraftState } from "@/components/shared/DraftStatus";
+import { useUnsavedChanges } from "@/hooks/useUnsavedChanges";
 
 interface GuideData {
   id?: string;
@@ -114,8 +117,19 @@ const HouseGuide = () => {
   const [access, setAccess] = useState<AccessState>("denied");
   const [openDate, setOpenDate] = useState<Date | null>(null);
 
+  // Filet local : 23 champs libres, aucune perte de saisie tolérable.
+  const localDraftKey = propertyId && user ? `house-guide:${user.id}:${propertyId}` : null;
+  const [draftState, setDraftState] = useState<DraftState>("idle");
+  const [localDraftSavedAt, setLocalDraftSavedAt] = useState<number | null>(null);
+  const [localDraftRestored, setLocalDraftRestored] = useState(false);
+  const [dirty, setDirty] = useState(false);
+  const loadedRef = useRef(false);
+
+  useUnsavedChanges(dirty);
+
   useEffect(() => {
     if (!propertyId || !user) return;
+
     const load = async () => {
       const [{ data: property }, { data }] = await Promise.all([
         supabase.from("properties").select("id, user_id").eq("id", propertyId).maybeSingle(),
@@ -124,6 +138,7 @@ const HouseGuide = () => {
 
       const isOwner = !!property && property.user_id === user.id;
       const base = emptyGuide(propertyId, user.id);
+      let loaded: GuideData = base;
       if (data) {
         // Normalise les champs nullables (DB) en strings vides pour les inputs contrôlés
         const merged: GuideData = { ...base } as GuideData;
@@ -136,10 +151,20 @@ const HouseGuide = () => {
           }
         }
         merged.id = (data as any).id;
-        setGuide(merged);
-      } else {
-        setGuide(base);
+        loaded = merged;
       }
+
+      // Copie locale plus récente : on la restaure et on prévient l'utilisateur.
+      if (isOwner && localDraftKey) {
+        const local = readFormDraft<GuideData>(localDraftKey);
+        if (local && JSON.stringify({ ...local, id: undefined }) !== JSON.stringify({ ...loaded, id: undefined })) {
+          loaded = { ...loaded, ...local, id: loaded.id };
+          setLocalDraftRestored(true);
+          setDirty(true);
+        }
+      }
+      setGuide(loaded);
+
 
       if (isOwner) {
         setAccess("owner");
@@ -170,13 +195,28 @@ const HouseGuide = () => {
         }
       }
       setLoading(false);
+      setTimeout(() => { loadedRef.current = true; }, 300);
     };
     load();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [propertyId, user]);
 
+  // Copie locale automatique (400 ms) une fois le guide chargé.
+  useEffect(() => {
+    if (!guide || !localDraftKey || access !== "owner" || !loadedRef.current || !dirty) return;
+    setDraftState("saving");
+    const t = setTimeout(() => {
+      writeFormDraft<GuideData>(localDraftKey, guide);
+      const now = Date.now();
+      setLocalDraftSavedAt(now);
+      setDraftState("saved");
+    }, 400);
+    return () => clearTimeout(t);
+  }, [guide, localDraftKey, access, dirty]);
 
   const update = <K extends keyof GuideData>(field: K, value: GuideData[K]) => {
     if (!guide) return;
+    setDirty(true);
     setGuide({ ...guide, [field]: value });
   };
 
@@ -204,7 +244,12 @@ const HouseGuide = () => {
         if (error) throw error;
         if (data) setGuide({ ...guide, id: data.id });
       }
+      if (localDraftKey) clearFormDraft(localDraftKey);
+      setDirty(false);
+      setLocalDraftRestored(false);
+      setDraftState("idle");
       toast({ title: "Guide sauvegardé" });
+
     } catch (err: any) {
       console.error("[HouseGuide] save failed", err);
       // Rétablir l'état du formulaire tel qu'avant la tentative de sauvegarde
@@ -271,16 +316,43 @@ const HouseGuide = () => {
     <ReadOnlyContext.Provider value={!isOwner}>
     <div className="p-6 md:p-10 max-w-2xl mx-auto animate-fade-in pb-32">
       <Helmet><meta name="robots" content="noindex, nofollow" /></Helmet>
-      <Link to="/sits" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-6">
+      <Link
+        to="/sits"
+        className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-6"
+        onClick={(e) => {
+          if (!dirty) return;
+          const ok = window.confirm("Des modifications ne sont pas encore enregistrées. Quitter cette page maintenant ?");
+          if (!ok) e.preventDefault();
+        }}
+      >
         <ArrowLeft className="h-4 w-4" /> Retour
       </Link>
 
       <h1 className="font-heading text-2xl font-bold mb-1">Guide de la maison</h1>
-      <p className="text-sm text-muted-foreground mb-6">
+      <p className="text-sm text-muted-foreground mb-3">
         {isOwner
           ? "Ces informations seront partagées avec le gardien une fois la garde confirmée, 7 jours avant le début."
           : "Guide partagé par le propriétaire, en lecture seule."}
       </p>
+
+      {isOwner && localDraftRestored && (
+        <p className="text-sm text-muted-foreground bg-muted/50 rounded-lg px-3 py-2 mb-3" role="status">
+          Nous avons retrouvé votre saisie en cours sur cet appareil et l'avons restaurée. Pensez à enregistrer le guide.
+        </p>
+      )}
+
+      {isOwner && (
+        <div className="mb-6 min-h-5">
+          <DraftStatus state={draftState} savedAt={localDraftSavedAt} />
+          {dirty && draftState !== "saving" && (
+            <p className="text-xs text-muted-foreground mt-1">
+              Copie locale uniquement, enregistrez le guide pour le partager avec votre gardien.
+            </p>
+          )}
+        </div>
+      )}
+
+
 
 
       <Section icon={Home} title="Adresse & accès">

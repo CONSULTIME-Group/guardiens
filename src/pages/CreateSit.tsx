@@ -23,6 +23,7 @@ import ImproveListingButton from "@/components/ai/ImproveListingButton";
 import { moderateContent } from "@/lib/moderation";
 import AnnouncementPreviewDialog from "@/components/sits/owner/AnnouncementPreviewDialog";
 import { AlmaBubble } from "@/components/ai/alma/AlmaBubble";
+import { useUnsavedChanges } from "@/hooks/useUnsavedChanges";
 import {
   Sheet,
   SheetContent,
@@ -334,6 +335,12 @@ const CreateSit = () => {
   const [draftId, setDraftId] = useState<string | null>(null);
   const [savingDraft, setSavingDraft] = useState(false);
   const [lastSavedAt, setLastSavedAt] = useState<Date | null>(null);
+  // Fiabilité de la sauvegarde distante : un échec silencieux ne doit plus
+  // laisser croire que tout est enregistré.
+  const [remoteSaveFailed, setRemoteSaveFailed] = useState(false);
+  const [unsavedRemote, setUnsavedRemote] = useState(false);
+  const saveFailCountRef = useRef(0);
+  const saveFailToastShownRef = useRef(false);
   const [adaptingWithAlma, setAdaptingWithAlma] = useState(false);
   const [previewOpen, setPreviewOpen] = useState(false);
   const [incompleteNudgeOpen, setIncompleteNudgeOpen] = useState(false);
@@ -706,6 +713,7 @@ const CreateSit = () => {
   useEffect(() => {
     if (!user || !property || !initialLoadedRef.current) return;
     hasUserEditedRef.current = true;
+    setUnsavedRemote(true);
     const t = setTimeout(async () => {
       await saveDraft({ silent: true });
     }, 1500);
@@ -747,6 +755,23 @@ const CreateSit = () => {
       if (best) setSmartCover(best);
     });
   }, [currentStep, ownerPlacePhotos, coverPhotoUrl]);
+
+  // Garde-fou de sortie : tant qu'une modification n'est pas enregistrée à
+  // distance, on prévient avant la fermeture de l'onglet.
+  useUnsavedChanges(unsavedRemote);
+
+  const handleSaveAndExit = async () => {
+    const id = await saveDraft();
+    if (id) {
+      void trackEvent("sit_draft_saved_manually", {
+        source: "create_sit_page",
+        metadata: { sit_id: id },
+      });
+      toast({ title: "Brouillon enregistré", description: "Vous pourrez le reprendre depuis votre dashboard." });
+      navigate("/dashboard");
+    }
+  };
+
 
 
   const saveDraft = async ({ silent = false }: { silent?: boolean } = {}) => {
@@ -792,22 +817,52 @@ const CreateSit = () => {
         accepts_sitter_pets: acceptsSitterPets,
         accepts_sitter_children: acceptsSitterChildren,
       };
+      const markSaved = () => {
+        saveFailCountRef.current = 0;
+        saveFailToastShownRef.current = false;
+        setRemoteSaveFailed(false);
+        setUnsavedRemote(false);
+        setLastSavedAt(new Date());
+      };
       if (draftId) {
         const { error } = await supabase.from("sits").update(payload).eq("id", draftId).eq("status", "draft");
         if (error) throw error;
-        setLastSavedAt(new Date());
+        markSaved();
         return draftId;
       } else {
         const { data, error } = await supabase.from("sits").insert({ ...payload, status: "draft" as any }).select("id").single();
         if (error) throw error;
         setDraftId(data.id);
-        setLastSavedAt(new Date());
+        markSaved();
         return data.id;
       }
     } catch (e) {
+      // Même en mode silencieux, l'échec doit être visible : le badge passe en
+      // état d'alerte et l'événement analytique part systématiquement.
+      console.error("[CreateSit] saveDraft failed", e);
+      saveFailCountRef.current += 1;
+      setRemoteSaveFailed(true);
+      setUnsavedRemote(true);
+      try {
+        void trackEvent("sit_draft_autosave_failed", {
+          source: "create_sit_page",
+          metadata: {
+            sit_id: draftId,
+            step: currentStep + 1,
+            attempts: saveFailCountRef.current,
+            error_message: e instanceof Error ? e.message : String((e as any)?.message ?? e),
+          },
+        });
+      } catch { /* l'analytique ne doit jamais bloquer la saisie */ }
       if (!silent) {
-        console.error("[CreateSit] saveDraft failed", e);
         toast({ variant: "destructive", title: "Sauvegarde du brouillon impossible" });
+      } else if (saveFailCountRef.current >= 3 && !saveFailToastShownRef.current) {
+        saveFailToastShownRef.current = true;
+        toast({
+          variant: "destructive",
+          title: "Enregistrement impossible",
+          description: "Votre saisie n'est conservée que sur cet appareil. Ne fermez pas cet onglet avant que la sauvegarde reparte.",
+        });
       }
       return null;
     } finally {
@@ -1124,11 +1179,13 @@ const CreateSit = () => {
   // Draft label
   const draftLabel = savingDraft
     ? "Brouillon en cours d'enregistrement…"
-    : lastSavedAt
-      ? `Brouillon enregistré · ${relativeTime(lastSavedAt)}`
-      : localDraftSavedAt
-        ? "Brouillon enregistré sur cet appareil"
-        : draftId ? "Brouillon en cours" : null;
+    : remoteSaveFailed
+      ? "Enregistrement impossible, votre saisie n'est conservée que sur cet appareil"
+      : lastSavedAt
+        ? `Brouillon enregistré · ${relativeTime(lastSavedAt)}`
+        : localDraftSavedAt
+          ? "Brouillon enregistré sur cet appareil"
+          : draftId ? "Brouillon en cours" : null;
 
   return (
     <div className="animate-fade-in pb-40">
@@ -1138,7 +1195,15 @@ const CreateSit = () => {
       <StepperBar currentStep={currentStep} onStepClick={setCurrentStep} />
 
       <div className="px-4 pt-5 pb-2 max-w-3xl mx-auto">
-        <Link to="/sits" className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground mb-4">
+        <Link
+          to="/sits"
+          className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground mb-4"
+          onClick={(e) => {
+            if (!unsavedRemote) return;
+            const ok = window.confirm("Des modifications ne sont pas encore enregistrées. Quitter cette page maintenant ?");
+            if (!ok) e.preventDefault();
+          }}
+        >
           <ArrowLeft className="h-4 w-4" /> Retour à mes annonces
         </Link>
 
@@ -1180,9 +1245,14 @@ const CreateSit = () => {
             "inline-flex items-center gap-1.5 text-xs rounded-full px-2.5 py-1 mb-4",
             savingDraft
               ? "bg-muted text-muted-foreground"
-              : lastSavedAt ? "bg-green-50 text-green-700 border border-green-200" : "bg-muted text-muted-foreground"
-          )}>
-            {lastSavedAt && !savingDraft && <Check className="h-3 w-3 shrink-0" />}
+              : remoteSaveFailed
+                ? "bg-destructive/10 text-destructive border border-destructive/30"
+                : lastSavedAt ? "bg-green-50 text-green-700 border border-green-200" : "bg-muted text-muted-foreground"
+          )}
+            role="status"
+          >
+            {remoteSaveFailed && !savingDraft && <AlertCircle className="h-3 w-3 shrink-0" />}
+            {lastSavedAt && !remoteSaveFailed && !savingDraft && <Check className="h-3 w-3 shrink-0" />}
             {draftLabel}
           </div>
         )}
@@ -2009,32 +2079,35 @@ const CreateSit = () => {
                 type="button"
                 variant="outline"
                 className="h-12 px-4 shrink-0 text-base"
-                onClick={async () => {
-                  const id = await saveDraft();
-                  if (id) {
-                    void trackEvent("sit_draft_saved_manually", {
-                      source: "create_sit_page",
-                      metadata: { sit_id: id },
-                    });
-                    toast({ title: "Brouillon enregistré", description: "Vous pourrez le reprendre depuis votre dashboard." });
-                    navigate("/dashboard");
-                  }
-                }}
+                onClick={handleSaveAndExit}
                 disabled={savingDraft || !property}
               >
                 {savingDraft ? "Sauvegarde…" : <><span className="hidden sm:inline">Enregistrer & quitter</span><span className="sm:hidden">Brouillon</span></>}
               </Button>
             ) : (
-              <Button
-                type="button"
-                variant="outline"
-                className="h-12 px-4 shrink-0 gap-1.5 text-base"
-                onClick={() => setCurrentStep(s => s - 1)}
-              >
-                <ChevronLeft className="h-4 w-4" />
-                <span className="hidden sm:inline">Précédent</span>
-              </Button>
+              <>
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="h-12 px-4 shrink-0 gap-1.5 text-base"
+                  onClick={() => setCurrentStep(s => s - 1)}
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                  <span className="hidden sm:inline">Précédent</span>
+                </Button>
+                {/* Sauvegarder et partir reste accessible à toutes les étapes. */}
+                <Button
+                  type="button"
+                  variant="ghost"
+                  className="h-12 px-3 shrink-0 text-sm"
+                  onClick={handleSaveAndExit}
+                  disabled={savingDraft || !property}
+                >
+                  {savingDraft ? "Sauvegarde…" : "Enregistrer & quitter"}
+                </Button>
+              </>
             )}
+
 
             {/* Preview (last step, desktop) : toujours accessible, la modale
                 gère elle-même le blocage de la publication. */}
