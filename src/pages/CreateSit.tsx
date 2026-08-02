@@ -334,6 +334,12 @@ const CreateSit = () => {
   const [draftId, setDraftId] = useState<string | null>(null);
   const [savingDraft, setSavingDraft] = useState(false);
   const [lastSavedAt, setLastSavedAt] = useState<Date | null>(null);
+  // Fiabilité de la sauvegarde distante : un échec silencieux ne doit plus
+  // laisser croire que tout est enregistré.
+  const [remoteSaveFailed, setRemoteSaveFailed] = useState(false);
+  const [unsavedRemote, setUnsavedRemote] = useState(false);
+  const saveFailCountRef = useRef(0);
+  const saveFailToastShownRef = useRef(false);
   const [adaptingWithAlma, setAdaptingWithAlma] = useState(false);
   const [previewOpen, setPreviewOpen] = useState(false);
   const [incompleteNudgeOpen, setIncompleteNudgeOpen] = useState(false);
