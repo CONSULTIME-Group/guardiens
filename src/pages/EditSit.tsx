@@ -194,6 +194,8 @@ const EditSit = () => {
       const freeNote = stored && stored.free ? stored.free : legacy.free;
       const clean = legacy.clean;
       setTitle(data.title || "");
+      initialTitleRef.current = data.title || "";
+
       setStartDate(data.start_date || "");
       initialStartDateRef.current = data.start_date || "";
       setEndDate(data.end_date || "");
