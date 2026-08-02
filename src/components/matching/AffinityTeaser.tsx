@@ -29,32 +29,35 @@ const AffinityTeaser = ({ role, targetLabel, redirectTo, className }: Props) => 
   return (
     <div
       className={
-        "rounded-2xl border border-border bg-muted/40 p-4 flex items-center gap-3 " +
+        "w-full min-w-0 rounded-2xl border border-border bg-muted/40 p-4 " +
         (className ?? "")
       }
     >
-      <div
-        aria-hidden
-        className="shrink-0 h-10 w-10 rounded-full bg-primary/10 text-primary flex items-center justify-center font-semibold text-sm"
-      >
-        ✦
-      </div>
-      <div className="flex-1 min-w-0">
-        <p className="text-sm font-semibold text-foreground leading-snug">
-          Découvrez votre affinité avec {targetLabel}
-        </p>
-        <p className="text-xs text-muted-foreground mt-0.5 leading-snug">
-          Créez votre compte pour voir votre score de compatibilité.
-        </p>
+      <div className="flex items-start gap-3 min-w-0">
+        <div
+          aria-hidden
+          className="shrink-0 h-10 w-10 rounded-full bg-primary/10 text-primary flex items-center justify-center font-semibold text-sm"
+        >
+          ✦
+        </div>
+        <div className="flex-1 min-w-0">
+          <p className="text-sm font-semibold text-foreground leading-snug break-words">
+            Découvrez votre affinité avec {targetLabel}
+          </p>
+          <p className="text-xs text-muted-foreground mt-0.5 leading-snug break-words">
+            Créez votre compte pour voir votre score de compatibilité.
+          </p>
+        </div>
       </div>
       <Link
         to={href}
-        className="shrink-0 inline-flex items-center rounded-full bg-primary text-primary-foreground text-xs font-semibold px-3 py-1.5 hover:opacity-90 transition-opacity"
+        className="mt-3 w-full inline-flex items-center justify-center rounded-full bg-primary text-primary-foreground text-xs font-semibold px-3 py-2 hover:opacity-90 transition-opacity"
       >
         Créer un compte
       </Link>
     </div>
   );
+
 };
 
 export default AffinityTeaser;
