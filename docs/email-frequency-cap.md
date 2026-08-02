@@ -6,30 +6,38 @@ Source de vérité : `supabase/functions/_shared/email-cap.ts` +
 
 ## 1. Limites par catégorie
 
-Depuis le 26/07/2026 (lot 6), le plafond dépend de la **catégorie** de
-l'email (`_shared/email-categories.ts`).
+Depuis le 02/08/2026, le plafond dépend de la **catégorie** de l'email
+(`_shared/email-categories.ts`). Doctrine : un email déclenché par l'action
+directe d'un membre identifié n'est jamais du spam, il n'est jamais plafonné.
 
 | Catégorie | Plafond | Constante |
 |---|---|---|
-| `transactional` | 1 / heure et 3 / 24 h par destinataire | `CAP_PER_HOUR`, `CAP_PER_DAY` |
+| `transactional` | aucun plafond de fréquence, seules les heures calmes s'appliquent | – |
 | `product`, `digest`, `alert` (cumul) | 1 / 24 h et 3 / 7 jours par destinataire | `CAP_NON_TX_PER_DAY`, `CAP_NON_TX_PER_WEEK` |
+| catégorie absente ou inconnue | traitée comme `product`, donc plafonnée, avec un `console.warn` | – |
 
 Le cumul non transactionnel est **inter-catégories** : un digest consomme le
-même quota qu'un email produit ou une alerte. Les plafonds transactionnels
-s'appliquent en plus, jamais à la place.
+même quota qu'un email produit ou une alerte. En revanche un transactionnel ne
+consomme aucun quota et n'en libère aucun.
+
+`CAP_PER_HOUR` et `CAP_PER_DAY` existent encore dans `email-cap.ts` pour la
+compatibilité d'import, mais ne sont **plus appliqués**. Ces plafonds globaux
+croisaient les compteurs entre catégories : le 31/07/2026, 44 % des tentatives
+d'envoi ont été différées, certaines notifications jusqu'à 48 h. Ne pas les
+réintroduire dans la logique de décision.
 
 | Quiet hours (Europe/Paris, DST géré) | 22h00 → 08h00 | `QUIET_START_HOUR` / `QUIET_END_HOUR` |
 |---|---|---|
 
 Le décompte se fait sur `email_send_log` filtré par
-`recipient_email ILIKE` + `status = 'sent'` sur les fenêtres 1h / 24h / 7j
-glissantes. Le comptage non transactionnel filtre en plus sur
-`metadata->>category IN ('product','digest','alert')`.
+`recipient_email ILIKE` + `status = 'sent'` sur les fenêtres 24h / 7j
+glissantes, avec `metadata->>category IN ('product','digest','alert')`.
 Un email `deferred` ne consomme pas le quota, seul un `sent` le fait.
 
 Pression maximale théorique par destinataire et par semaine :
-3 emails non transactionnels + le flux transactionnel réel (au plus 3 / jour,
-en pratique déclenché par les actions du membre).
+3 emails non transactionnels + le flux transactionnel réel, entièrement piloté
+par les actions des autres membres (message, candidature, réponse).
+
 
 ## 2. Templates en bypass (cap + quiet hours ignorés)
 
