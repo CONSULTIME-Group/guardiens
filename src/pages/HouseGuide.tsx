@@ -316,16 +316,43 @@ const HouseGuide = () => {
     <ReadOnlyContext.Provider value={!isOwner}>
     <div className="p-6 md:p-10 max-w-2xl mx-auto animate-fade-in pb-32">
       <Helmet><meta name="robots" content="noindex, nofollow" /></Helmet>
-      <Link to="/sits" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-6">
+      <Link
+        to="/sits"
+        className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-6"
+        onClick={(e) => {
+          if (!dirty) return;
+          const ok = window.confirm("Des modifications ne sont pas encore enregistrées. Quitter cette page maintenant ?");
+          if (!ok) e.preventDefault();
+        }}
+      >
         <ArrowLeft className="h-4 w-4" /> Retour
       </Link>
 
       <h1 className="font-heading text-2xl font-bold mb-1">Guide de la maison</h1>
-      <p className="text-sm text-muted-foreground mb-6">
+      <p className="text-sm text-muted-foreground mb-3">
         {isOwner
           ? "Ces informations seront partagées avec le gardien une fois la garde confirmée, 7 jours avant le début."
           : "Guide partagé par le propriétaire, en lecture seule."}
       </p>
+
+      {isOwner && localDraftRestored && (
+        <p className="text-sm text-muted-foreground bg-muted/50 rounded-lg px-3 py-2 mb-3" role="status">
+          Nous avons retrouvé votre saisie en cours sur cet appareil et l'avons restaurée. Pensez à enregistrer le guide.
+        </p>
+      )}
+
+      {isOwner && (
+        <div className="mb-6 min-h-5">
+          <DraftStatus state={draftState} savedAt={localDraftSavedAt} />
+          {dirty && draftState !== "saving" && (
+            <p className="text-xs text-muted-foreground mt-1">
+              Copie locale uniquement, enregistrez le guide pour le partager avec votre gardien.
+            </p>
+          )}
+        </div>
+      )}
+
+
 
 
       <Section icon={Home} title="Adresse & accès">
