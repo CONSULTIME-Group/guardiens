@@ -225,7 +225,7 @@ export const getSitPublishBlockers = (
       : null,
 
 
-    ...getDescriptionBlockers(input),
+    ...getDescriptionBlockers(input, options),
     photoCount === 0
       ? {
           id: "photo",
