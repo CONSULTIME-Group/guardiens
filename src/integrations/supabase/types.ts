@@ -14,6 +14,108 @@ export type Database = {
   }
   public: {
     Tables: {
+      _backup_fusion_conv_20260802: {
+        Row: {
+          archived_by: string[] | null
+          context_type:
+            | Database["public"]["Enums"]["conversation_context"]
+            | null
+          created_at: string | null
+          first_message_sent: boolean | null
+          id: string | null
+          last_message_at: string | null
+          owner_id: string | null
+          reminder_sent_at: string | null
+          sauvegarde_le: string | null
+          sit_id: string | null
+          sitter_id: string | null
+          small_mission_id: string | null
+          unread_reminder_sent_at: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          archived_by?: string[] | null
+          context_type?:
+            | Database["public"]["Enums"]["conversation_context"]
+            | null
+          created_at?: string | null
+          first_message_sent?: boolean | null
+          id?: string | null
+          last_message_at?: string | null
+          owner_id?: string | null
+          reminder_sent_at?: string | null
+          sauvegarde_le?: string | null
+          sit_id?: string | null
+          sitter_id?: string | null
+          small_mission_id?: string | null
+          unread_reminder_sent_at?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          archived_by?: string[] | null
+          context_type?:
+            | Database["public"]["Enums"]["conversation_context"]
+            | null
+          created_at?: string | null
+          first_message_sent?: boolean | null
+          id?: string | null
+          last_message_at?: string | null
+          owner_id?: string | null
+          reminder_sent_at?: string | null
+          sauvegarde_le?: string | null
+          sit_id?: string | null
+          sitter_id?: string | null
+          small_mission_id?: string | null
+          unread_reminder_sent_at?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      _backup_fusion_msg_20260802: {
+        Row: {
+          content: string | null
+          conversation_id: string | null
+          created_at: string | null
+          id: string | null
+          is_system: boolean | null
+          metadata: Json | null
+          moderation_hidden_at: string | null
+          moderation_hidden_by: string | null
+          photo_url: string | null
+          read_at: string | null
+          sauvegarde_le: string | null
+          sender_id: string | null
+        }
+        Insert: {
+          content?: string | null
+          conversation_id?: string | null
+          created_at?: string | null
+          id?: string | null
+          is_system?: boolean | null
+          metadata?: Json | null
+          moderation_hidden_at?: string | null
+          moderation_hidden_by?: string | null
+          photo_url?: string | null
+          read_at?: string | null
+          sauvegarde_le?: string | null
+          sender_id?: string | null
+        }
+        Update: {
+          content?: string | null
+          conversation_id?: string | null
+          created_at?: string | null
+          id?: string | null
+          is_system?: boolean | null
+          metadata?: Json | null
+          moderation_hidden_at?: string | null
+          moderation_hidden_by?: string | null
+          photo_url?: string | null
+          read_at?: string | null
+          sauvegarde_le?: string | null
+          sender_id?: string | null
+        }
+        Relationships: []
+      }
       account_deletion_requests: {
         Row: {
           cancelled_at: string | null
