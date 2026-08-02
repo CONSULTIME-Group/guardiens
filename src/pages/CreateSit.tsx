@@ -23,6 +23,7 @@ import ImproveListingButton from "@/components/ai/ImproveListingButton";
 import { moderateContent } from "@/lib/moderation";
 import AnnouncementPreviewDialog from "@/components/sits/owner/AnnouncementPreviewDialog";
 import { AlmaBubble } from "@/components/ai/alma/AlmaBubble";
+import { useUnsavedChanges } from "@/hooks/useUnsavedChanges";
 import {
   Sheet,
   SheetContent,
