@@ -714,13 +714,19 @@ Deno.serve(async (req) => {
       console.error('Failed to create unsubscribe token', {
         error: tokenError,
       })
-      await supabase.from('email_send_log').insert({
+      const { error: logTokenCreateErr } = await supabase.from('email_send_log').insert({
         message_id: messageId,
         template_name: templateName,
         recipient_email: effectiveRecipient,
         status: 'failed',
         error_message: 'Failed to create unsubscribe token',
       })
+      if (logTokenCreateErr) {
+        console.error('email_send_log write failed', {
+          status: 'failed', template_name: templateName, message_id: messageId,
+          error: logTokenCreateErr.message, code: logTokenCreateErr.code,
+        })
+      }
       return new Response(
         JSON.stringify({ error: 'Failed to prepare email' }),
         {
@@ -743,13 +749,19 @@ Deno.serve(async (req) => {
         error: reReadError,
         email: normalizedEmail,
       })
-      await supabase.from('email_send_log').insert({
+      const { error: logTokenReadErr } = await supabase.from('email_send_log').insert({
         message_id: messageId,
         template_name: templateName,
         recipient_email: effectiveRecipient,
         status: 'failed',
         error_message: 'Failed to confirm unsubscribe token storage',
       })
+      if (logTokenReadErr) {
+        console.error('email_send_log write failed', {
+          status: 'failed', template_name: templateName, message_id: messageId,
+          error: logTokenReadErr.message, code: logTokenReadErr.code,
+        })
+      }
       return new Response(
         JSON.stringify({ error: 'Failed to prepare email' }),
         {
