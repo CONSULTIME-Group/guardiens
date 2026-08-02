@@ -71,7 +71,7 @@ const MAX_DESC_LENGTH = 2000;
  * description. Cette expression ne sert plus qu'à nettoyer l'existant à la
  * lecture ; la flexibilité est désormais stockée dans `flexibility_notes`.
  */
-const FLEX_REGEX = /\n*Flexibilité\s*:\s*(.+?)(?=\n\n|$)/i;
+const FLEX_REGEX = /\n*(?:Flexibilité|Dates flexibles)\s*:\s*(.+?)(?=\n\n|$)/i;
 
 /** Analyse une note de flexibilité au format « Mois : … · Durée : … ». */
 function parseFlexNote(payload: string): { months: string[]; duration: string } {
@@ -225,6 +225,7 @@ const EditSit = () => {
   const formBlockers = useMemo(() => {
     const owned = new Set(["title", "dates", "date-error", "desc-reason", "desc-expectations"]);
     return getSitPublishBlockers({
+      descriptionMode: "single-block",
       title: trimmedTitle,
       startDate,
       endDate,
