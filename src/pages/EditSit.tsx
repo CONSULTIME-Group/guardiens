@@ -30,7 +30,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { getSitPublishBlockers } from "@/lib/sitPublishRules";
+import { getSitPublishBlockers, buildSitPublishInput } from "@/lib/sitPublishRules";
 
 /** Carte de section pour grouper visuellement les champs d'édition. */
 const SectionCard = ({
@@ -257,21 +257,26 @@ const EditSit = () => {
    */
   const formBlockers = useMemo(() => {
     const owned = new Set(["title", "dates", "date-error", "desc-reason", "desc-expectations"]);
-    return getSitPublishBlockers({
-      descriptionMode: "single-block",
-      title: trimmedTitle,
-      startDate,
-      endDate,
-      flexibleDates,
-      dateError,
-      specificExpectations: persistedDesc,
-
-      // Champs hors de ce formulaire, neutralisés pour ne pas produire de bruit.
-      hasProperty: true,
-      galleryPhotoCount: 1,
-      petCount: 1,
-    }).filter((b) => owned.has(b.id));
+    return getSitPublishBlockers(
+      buildSitPublishInput({
+        sit: {
+          title: trimmedTitle,
+          start_date: startDate,
+          end_date: endDate,
+          flexible_dates: flexibleDates,
+        },
+        dateError,
+        // Champs hors de ce formulaire, neutralisés pour ne pas produire de bruit.
+        overrides: {
+          specificExpectations: persistedDesc,
+          hasProperty: true,
+          galleryPhotoCount: 1,
+          petCount: 1,
+        },
+      }),
+    ).filter((b) => owned.has(b.id));
   }, [trimmedTitle, startDate, endDate, flexibleDates, dateError, persistedDesc]);
+
 
   const descBlocker = formBlockers.find((b) => b.id.startsWith("desc-")) || null;
 

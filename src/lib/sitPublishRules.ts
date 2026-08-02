@@ -72,22 +72,21 @@ export interface SitPublishSingleBlockInput extends SitPublishBase {
 export type SitPublishInput = SitPublishTwoFieldsInput | SitPublishSingleBlockInput;
 
 /**
- * Répartit un texte concaténé sur deux sous-champs de saisie.
+ * Recompose un texte concaténé depuis deux sous-champs de saisie.
  * Utilitaire de formulaire uniquement : les règles ne l'utilisent jamais.
  */
-export const splitExpectations = (raw?: string | null) => {
-  const text = raw || "";
-  const idx = text.indexOf(EXPECTATIONS_SEPARATOR);
-  return {
-    absenceReason: idx >= 0 ? text.slice(0, idx) : text,
-    sitterExpectations: idx >= 0 ? text.slice(idx + EXPECTATIONS_SEPARATOR.length) : "",
-  };
-};
-
 export const joinExpectations = (a: string, b: string) =>
   [a.trim(), b.trim()].filter(Boolean).join(EXPECTATIONS_SEPARATOR);
 
 const len = (v?: string | null) => (v || "").trim().length;
+
+/** Date du jour au format ISO court, en heure locale. */
+const todayIso = (): string => {
+  const d = new Date();
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+};
+
 
 /** Bloquants de description en mode deux champs, les deux étant obligatoires. */
 export const getTwoFieldsDescriptionBlockers = (
@@ -145,6 +144,23 @@ export const getSitPublishBlockers = (input: SitPublishInput): PublishBlocker[] 
   const photoCount =
     (input.galleryPhotoCount || 0) + (input.propertyPhotoCount || 0) + (input.hasCoverPhoto ? 1 : 0);
 
+  /**
+   * Cohérence des dates, calculée ici pour que les trois écrans l'appliquent :
+   * une date de début déjà passée, ou une date de fin antérieure ou égale à la
+   * date de début, interdisent la publication. L'erreur transmise par un
+   * formulaire ne sert que de repli quand aucune incohérence n'est détectée.
+   */
+  const start = (input.startDate || "").trim();
+  const end = (input.endDate || "").trim();
+  const computedDateError = !hasDates
+    ? null
+    : start < todayIso()
+      ? "La date de début ne peut pas être dans le passé."
+      : end <= start
+        ? "La date de fin doit être après la date de début."
+        : null;
+  const dateError = computedDateError || input.dateError || null;
+
   const blockers: (PublishBlocker | null)[] = [
     !input.hasProperty
       ? { id: "property", label: "Logement décrit sur votre profil", action: "/owner-profile" }
@@ -159,7 +175,8 @@ export const getSitPublishBlockers = (input: SitPublishInput): PublishBlocker[] 
           anchor: "dates-field",
         }
       : null,
-    input.dateError ? { id: "date-error", label: input.dateError, anchor: "dates-field" } : null,
+    dateError ? { id: "date-error", label: dateError, anchor: "dates-field" } : null,
+
     ...getDescriptionBlockers(input),
     photoCount === 0
       ? {
@@ -210,3 +227,88 @@ export const getSitPublishRequirements = (
   { id: "photo", label: "Au moins une photo de votre logement ou de votre galerie" },
   { id: "pets", label: "Au moins un animal à faire garder" },
 ];
+
+/**
+ * Annonce brute, telle que lue en base ou tenue par un formulaire.
+ * Les noms de colonnes sont conservés pour éviter toute recomposition manuelle.
+ */
+export interface SitPublishSit {
+  title?: string | null;
+  start_date?: string | null;
+  end_date?: string | null;
+  flexible_dates?: boolean | null;
+  specific_expectations?: string | null;
+  cover_photo_url?: string | null;
+  published_at?: string | null;
+}
+
+export interface BuildSitPublishInputOptions {
+  sit: SitPublishSit;
+  /** Logement du propriétaire, tel que chargé par l'écran. */
+  property?: { photos?: unknown } | null;
+  /** Photos de la galerie du profil propriétaire. */
+  galleryPhotos?: unknown[] | null;
+  /** Animaux du propriétaire. */
+  pets?: unknown[] | null;
+  /**
+   * Deux sous-champs de saisie, quand l'écran en dispose. Leur présence
+   * déclare le mode deux champs, leur absence le mode bloc unique.
+   */
+  twoFields?: { absenceReason?: string | null; sitterExpectations?: string | null };
+  /** Erreur de dates déjà calculée par un formulaire, en repli. */
+  dateError?: string | null;
+  /** Neutralisations, pour un écran qui ne détient pas ces champs. */
+  overrides?: {
+    hasProperty?: boolean;
+    galleryPhotoCount?: number;
+    propertyPhotoCount?: number;
+    petCount?: number;
+    /** Texte réellement écrit en base, quand il diffère de l'affichage. */
+    specificExpectations?: string | null;
+  };
+}
+
+const count = (v?: unknown[] | null) => (Array.isArray(v) ? v.length : 0);
+
+/**
+ * Adaptateur unique : construit l'entrée des règles depuis une annonce et son
+ * propriétaire. Aucun écran ne compose cette entrée à la main, sans quoi les
+ * écarts entre le formulaire de création et la fiche annonce réapparaissent.
+ */
+export const buildSitPublishInput = (o: BuildSitPublishInputOptions): SitPublishInput => {
+  const ov = o.overrides || {};
+  const base: SitPublishBase = {
+    title: o.sit.title,
+    startDate: o.sit.start_date,
+    endDate: o.sit.end_date,
+    flexibleDates: o.sit.flexible_dates,
+    dateError: o.dateError,
+    hasProperty: ov.hasProperty ?? !!o.property,
+    galleryPhotoCount: ov.galleryPhotoCount ?? count(o.galleryPhotos),
+    propertyPhotoCount:
+      ov.propertyPhotoCount ?? count((o.property as { photos?: unknown[] } | null)?.photos),
+    hasCoverPhoto: !!o.sit.cover_photo_url,
+    petCount: ov.petCount ?? count(o.pets),
+  };
+
+  if (o.twoFields) {
+    return {
+      ...base,
+      descriptionMode: "two-fields",
+      absenceReason: o.twoFields.absenceReason,
+      sitterExpectations: o.twoFields.sitterExpectations,
+    };
+  }
+  return {
+    ...base,
+    descriptionMode: "single-block",
+    specificExpectations: ov.specificExpectations ?? o.sit.specific_expectations,
+  };
+};
+
+/**
+ * Une annonce déjà publiée une fois a été validée par le formulaire de
+ * création. Un brouillon qui ne l'a jamais été doit repasser par le formulaire
+ * en deux champs plutôt que d'être publié directement depuis la fiche.
+ */
+export const wasValidatedByCreateForm = (sit: SitPublishSit): boolean => !!sit.published_at;

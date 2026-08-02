@@ -47,19 +47,26 @@ import { normalizeCityTyping, normalizeCityName } from "@/lib/normalizeCity";
 import { readFormDraft, writeFormDraft, clearFormDraft, getFormDraftSavedAt } from "@/lib/formDraft";
 import { makePlainTextPasteHandler } from "@/lib/pastePlainText";
 import { DEFAULT_MAX_APPLICATIONS } from "@/lib/applicationCap";
-import { getSitPublishBlockers, MIN_SUB_DESCRIPTION, type PublishBlocker } from "@/lib/sitPublishRules";
+import {
+  getSitPublishBlockers,
+  buildSitPublishInput,
+  joinExpectations,
+  EXPECTATIONS_SEPARATOR,
+  MIN_SUB_DESCRIPTION,
+  type PublishBlocker,
+} from "@/lib/sitPublishRules";
 
 /**
  * Répartit un texte existant sur les deux champs de description.
- * La découpe au double saut de ligne n'est acceptée que si les deux parties
+ * La découpe au séparateur n'est acceptée que si les deux parties
  * atteignent le seuil ; sinon tout le texte va dans le premier champ.
  */
 function splitForFields(raw: string): { first: string; rest: string; reliable: boolean } {
   const text = raw || "";
-  const idx = text.indexOf("\n\n");
+  const idx = text.indexOf(EXPECTATIONS_SEPARATOR);
   if (idx >= 0) {
     const first = text.slice(0, idx);
-    const rest = text.slice(idx + 2);
+    const rest = text.slice(idx + EXPECTATIONS_SEPARATOR.length);
     if (
       first.trim().length >= MIN_SUB_DESCRIPTION &&
       rest.trim().length >= MIN_SUB_DESCRIPTION
@@ -69,6 +76,7 @@ function splitForFields(raw: string): { first: string; rest: string; reliable: b
   }
   return { first: text, rest: "", reliable: false };
 }
+
 
 
 
@@ -287,9 +295,8 @@ const CreateSit = () => {
   const [specificExpectations, setSpecificExpectations] = useState("");
   const [absenceReason, setAbsenceReason] = useState("");
   const [sitterExpectations, setSitterExpectations] = useState("");
-  const EXPECTATIONS_SEPARATOR = "\n\n";
-  const joinExpectations = (a: string, b: string) =>
-    [a.trim(), b.trim()].filter(Boolean).join(EXPECTATIONS_SEPARATOR);
+  // Séparateur et recomposition : source unique, voir src/lib/sitPublishRules.ts.
+
   // Reprend un texte existant (brouillon, republication, Alma) et le répartit
   // sur les deux sous-champs, sans perte de contenu. La découpe n'est retenue
   // que si les deux parties tiennent le seuil : un simple saut de ligne avant
@@ -909,21 +916,25 @@ const CreateSit = () => {
   const NUDGE_PROFILE_THRESHOLD = 80;
 
   // Règles de publication : source unique, voir src/lib/sitPublishRules.ts.
-  const publishBlockers: PublishBlocker[] = getSitPublishBlockers({
-    descriptionMode: "two-fields",
-    title,
-    startDate,
-    endDate,
-    flexibleDates,
-    dateError,
-    absenceReason,
-    sitterExpectations,
-    hasProperty: !!property,
-    galleryPhotoCount: ownerPhotos.length,
-    propertyPhotoCount: Array.isArray((property as any)?.photos) ? (property as any).photos.length : 0,
-    hasCoverPhoto: !!coverPhotoUrl,
-    petCount: pets.length,
-  });
+  const publishBlockers: PublishBlocker[] = getSitPublishBlockers(
+    buildSitPublishInput({
+      sit: {
+        title,
+        start_date: startDate,
+        end_date: endDate,
+        flexible_dates: flexibleDates,
+        cover_photo_url: coverPhotoUrl,
+      },
+      property: property as any,
+      dateError,
+      twoFields: { absenceReason, sitterExpectations },
+      overrides: {
+        galleryPhotoCount: ownerPhotos.length,
+        petCount: pets.length,
+      },
+    }),
+  );
+
   const canPublish = publishBlockers.length === 0;
   const hasPhoto = !publishBlockers.some((b) => b.id === "photo");
 

@@ -13,7 +13,7 @@
  */
 import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import { Calendar, MapPin, Send, Star, Home, Users, ChevronDown } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import {
   AlertDialog,
@@ -37,7 +37,12 @@ import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { formatSitPeriod } from "@/lib/dateRange";
-import { getSitPublishBlockers, getSitPublishRequirements } from "@/lib/sitPublishRules";
+import {
+  getSitPublishBlockers,
+  getSitPublishRequirements,
+  buildSitPublishInput,
+  wasValidatedByCreateForm,
+} from "@/lib/sitPublishRules";
 
 import EmergencyAlertBanner from "@/components/sits/EmergencyAlertBanner";
 import SitDateHistory from "@/components/sits/SitDateHistory";
@@ -103,6 +108,7 @@ const OwnerSitView = ({
   currentUserId,
 }: OwnerSitViewProps) => {
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [publishing, setPublishing] = useState(false);
   const [publishConfirmOpen, setPublishConfirmOpen] = useState(false);
   const [cancelOpen, setCancelOpen] = useState(false);
@@ -323,19 +329,22 @@ const OwnerSitView = ({
     });
   };
   // Règles de publication : source unique, voir src/lib/sitPublishRules.ts.
-  const publishBlockers = getSitPublishBlockers({
-    descriptionMode: "single-block",
-    title: sit.title,
-    startDate: sit.start_date,
-    endDate: sit.end_date,
-    flexibleDates: (sit as any).flexible_dates,
-    specificExpectations: sit.specific_expectations,
-    hasProperty: !!property,
-    galleryPhotoCount: ownerGallery.length,
-    propertyPhotoCount: Array.isArray(property?.photos) ? property.photos.length : 0,
-    petCount: Array.isArray(pets) ? pets.length : 0,
-  });
+  const publishBlockers = getSitPublishBlockers(
+    buildSitPublishInput({
+      sit: sit as any,
+      property: property as any,
+      galleryPhotos: ownerGallery,
+      pets: pets as any,
+    }),
+  );
   const canPublish = publishBlockers.length === 0;
+  /**
+   * Un brouillon jamais publié n'a pas été validé en deux champs par le
+   * formulaire de création : sa publication passe par ce formulaire, pour que
+   * les deux écrans ne rendent plus deux verdicts opposés sur la même annonce.
+   */
+  const publishNeedsForm = isDraft && !wasValidatedByCreateForm(sit as any);
+
 
 
   // Dérivés partagés (avgRating + formatDate), voir useSitDerived.
@@ -388,8 +397,19 @@ const OwnerSitView = ({
           editHref={`/sits/${sit.id}/edit`}
           publishing={publishing}
           onPublish={() => {
-            if (canPublish) setPublishConfirmOpen(true);
+            if (!canPublish) return;
+            if (publishNeedsForm) {
+              toast({
+                title: "Dernière étape dans le formulaire",
+                description:
+                  "Cette annonce n'a jamais été publiée : finalisez sa description en deux questions, puis publiez.",
+              });
+              navigate(`/sits/create?resume=${sit.id}`);
+              return;
+            }
+            setPublishConfirmOpen(true);
           }}
+
         />
 
       )}
