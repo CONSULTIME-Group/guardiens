@@ -9,7 +9,7 @@ import { toast } from "@/hooks/use-toast";
 import { Switch } from "@/components/ui/switch";
 import { ArrowLeft, Save, Home, Phone, Key, Wifi, Trash2, Thermometer, Info, Car, Mail, Sprout, Ban, MessageSquare } from "lucide-react";
 import { Helmet } from "react-helmet-async";
-import { readFormDraft, writeFormDraft, clearFormDraft } from "@/lib/formDraft";
+import { readFormDraft, writeFormDraft, clearFormDraft, getFormDraftSavedAt } from "@/lib/formDraft";
 import DraftStatus, { type DraftState } from "@/components/shared/DraftStatus";
 import { useUnsavedChanges } from "@/hooks/useUnsavedChanges";
 
@@ -43,6 +43,29 @@ interface GuideData {
   owner_message: string;
   published: boolean;
 }
+
+/**
+ * Champs jamais écrits dans le stockage du navigateur.
+ * Ce sont les moyens d'entrer physiquement dans la maison (adresse exacte,
+ * codes d'accès, instructions de clés) et le mot de passe du réseau WiFi.
+ * Sur un poste partagé, une copie locale en clair les exposerait pendant
+ * sept jours. Les dix neuf autres champs restent protégés contre la perte.
+ */
+const SENSITIVE_FIELDS = [
+  "exact_address",
+  "access_codes",
+  "key_instructions",
+  "wifi_password",
+] as const satisfies readonly (keyof GuideData)[];
+
+type LocalGuideDraft = Omit<GuideData, (typeof SENSITIVE_FIELDS)[number]>;
+
+/** Retire les champs sensibles avant écriture locale. */
+const stripSensitive = (g: GuideData): LocalGuideDraft => {
+  const copy = { ...g } as Partial<GuideData>;
+  for (const field of SENSITIVE_FIELDS) delete copy[field];
+  return copy as LocalGuideDraft;
+};
 
 const emptyGuide = (propertyId: string, userId: string): GuideData => ({
   property_id: propertyId,
@@ -117,7 +140,7 @@ const HouseGuide = () => {
   const [access, setAccess] = useState<AccessState>("denied");
   const [openDate, setOpenDate] = useState<Date | null>(null);
 
-  // Filet local : 23 champs libres, aucune perte de saisie tolérable.
+  // Filet local : 19 champs libres, hors champs sensibles jamais stockés.
   const localDraftKey = propertyId && user ? `house-guide:${user.id}:${propertyId}` : null;
   const [draftState, setDraftState] = useState<DraftState>("idle");
   const [localDraftSavedAt, setLocalDraftSavedAt] = useState<number | null>(null);
@@ -154,15 +177,32 @@ const HouseGuide = () => {
         loaded = merged;
       }
 
-      // Copie locale plus récente : on la restaure et on prévient l'utilisateur.
+      // Copie locale plus récente que la base : on la restaure et on prévient.
+      // Une copie antérieure à la dernière modification en base est périmée,
+      // elle est ignorée puis purgée pour ne pas réécraser la version récente.
       if (isOwner && localDraftKey) {
-        const local = readFormDraft<GuideData>(localDraftKey);
-        if (local && JSON.stringify({ ...local, id: undefined }) !== JSON.stringify({ ...loaded, id: undefined })) {
-          loaded = { ...loaded, ...local, id: loaded.id };
-          setLocalDraftRestored(true);
-          setDirty(true);
+        const local = readFormDraft<LocalGuideDraft>(localDraftKey);
+        const localSavedAt = getFormDraftSavedAt(localDraftKey);
+        const remoteUpdatedAt = (data as any)?.updated_at
+          ? new Date((data as any).updated_at).getTime()
+          : null;
+        const localIsFresher =
+          localSavedAt !== null &&
+          (remoteUpdatedAt === null || localSavedAt > remoteUpdatedAt);
+
+        if (local && !localIsFresher) {
+          clearFormDraft(localDraftKey);
+        } else if (local) {
+          const candidate = { ...loaded, ...local, id: loaded.id } as GuideData;
+          if (JSON.stringify({ ...candidate, id: undefined }) !== JSON.stringify({ ...loaded, id: undefined })) {
+            loaded = candidate;
+            setLocalDraftRestored(true);
+            // Pas de passage en « modifié » : le propriétaire n'a rien touché,
+            // l'avertissement de sortie ne doit pas s'armer au chargement.
+          }
         }
       }
+
       setGuide(loaded);
 
 
@@ -206,7 +246,7 @@ const HouseGuide = () => {
     if (!guide || !localDraftKey || access !== "owner" || !loadedRef.current || !dirty) return;
     setDraftState("saving");
     const t = setTimeout(() => {
-      writeFormDraft<GuideData>(localDraftKey, guide);
+      writeFormDraft<LocalGuideDraft>(localDraftKey, stripSensitive(guide));
       const now = Date.now();
       setLocalDraftSavedAt(now);
       setDraftState("saved");
