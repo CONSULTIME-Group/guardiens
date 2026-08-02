@@ -9,6 +9,7 @@ import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/compone
 import { Plus, Pencil, Trash2, ChevronDown, ChevronUp, Camera, X } from "lucide-react";
 import HintBubble from "../profile/HintBubble";
 import BreedProfileCard from "../breeds/BreedProfileCard";
+import { makePlainTextPasteHandler } from "@/lib/pastePlainText";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { readFormDraft, writeFormDraft, clearFormDraft, listFormDraftKeys, getFormDraftSavedAt } from "@/lib/formDraft";
@@ -318,14 +319,14 @@ const OwnerStepAnimals = ({ pets, onAddPet, onUpdatePet, onRemovePet }: Props) =
             </div>
             <div className="space-y-2">
               <Label>Race</Label>
-              <Input value={editingPet.breed} onChange={e => setEditingPet({ ...editingPet, breed: e.target.value })} className="rounded-lg h-10" maxLength={100} />
+              <Input value={editingPet.breed} onChange={e => setEditingPet({ ...editingPet, breed: e.target.value })} onPaste={makePlainTextPasteHandler(v => setEditingPet({ ...editingPet, breed: v }))} className="rounded-lg h-10" maxLength={100} />
             </div>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label>Nom</Label>
-              <Input value={editingPet.name} onChange={e => setEditingPet({ ...editingPet, name: e.target.value })} className="rounded-lg h-10" maxLength={50} />
+              <Input value={editingPet.name} onChange={e => setEditingPet({ ...editingPet, name: e.target.value })} onPaste={makePlainTextPasteHandler(v => setEditingPet({ ...editingPet, name: v }))} className="rounded-lg h-10" maxLength={50} />
             </div>
             <div className="space-y-2">
               <Label>Âge</Label>
@@ -335,7 +336,7 @@ const OwnerStepAnimals = ({ pets, onAddPet, onUpdatePet, onRemovePet }: Props) =
 
           <div className="space-y-2">
             <Label>Caractère</Label>
-            <Input value={editingPet.character} onChange={e => setEditingPet({ ...editingPet, character: e.target.value })}
+            <Input value={editingPet.character} onChange={e => setEditingPet({ ...editingPet, character: e.target.value })} onPaste={makePlainTextPasteHandler(v => setEditingPet({ ...editingPet, character: v }))}
               placeholder="Joueur, câlin, timide, indépendant..." className="rounded-lg h-10" maxLength={200} />
           </div>
 
@@ -366,19 +367,19 @@ const OwnerStepAnimals = ({ pets, onAddPet, onUpdatePet, onRemovePet }: Props) =
 
           <div className="space-y-2">
             <Label>Médication</Label>
-            <Input value={editingPet.medication} onChange={e => setEditingPet({ ...editingPet, medication: e.target.value })}
+            <Input value={editingPet.medication} onChange={e => setEditingPet({ ...editingPet, medication: e.target.value })} onPaste={makePlainTextPasteHandler(v => setEditingPet({ ...editingPet, medication: v }))}
               placeholder="Aucune, ou détaillez la fréquence et le dosage" className="rounded-lg h-10" maxLength={500} />
           </div>
 
           <div className="space-y-2">
             <Label>Alimentation</Label>
-            <Textarea value={editingPet.food} onChange={e => setEditingPet({ ...editingPet, food: e.target.value })}
+            <Textarea value={editingPet.food} onChange={e => setEditingPet({ ...editingPet, food: e.target.value })} onPaste={makePlainTextPasteHandler(v => setEditingPet({ ...editingPet, food: v }))}
               placeholder="Type de nourriture, fréquence, quantité, habitudes" className="rounded-lg" maxLength={1000} />
           </div>
 
           <div className="space-y-2">
             <Label>Besoins spéciaux</Label>
-            <Textarea value={editingPet.special_needs} onChange={e => setEditingPet({ ...editingPet, special_needs: e.target.value })}
+            <Textarea value={editingPet.special_needs} onChange={e => setEditingPet({ ...editingPet, special_needs: e.target.value })} onPaste={makePlainTextPasteHandler(v => setEditingPet({ ...editingPet, special_needs: v }))}
               placeholder="Peurs, habitudes particulières, consignes spécifiques" className="rounded-lg" maxLength={1000} />
           </div>
 
