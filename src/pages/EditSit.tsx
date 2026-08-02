@@ -30,6 +30,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { getSitPublishBlockers } from "@/lib/sitPublishRules";
 
 /** Carte de section pour grouper visuellement les champs d'édition. */
 const SectionCard = ({
