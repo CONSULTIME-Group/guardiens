@@ -2059,32 +2059,35 @@ const CreateSit = () => {
                 type="button"
                 variant="outline"
                 className="h-12 px-4 shrink-0 text-base"
-                onClick={async () => {
-                  const id = await saveDraft();
-                  if (id) {
-                    void trackEvent("sit_draft_saved_manually", {
-                      source: "create_sit_page",
-                      metadata: { sit_id: id },
-                    });
-                    toast({ title: "Brouillon enregistré", description: "Vous pourrez le reprendre depuis votre dashboard." });
-                    navigate("/dashboard");
-                  }
-                }}
+                onClick={handleSaveAndExit}
                 disabled={savingDraft || !property}
               >
                 {savingDraft ? "Sauvegarde…" : <><span className="hidden sm:inline">Enregistrer & quitter</span><span className="sm:hidden">Brouillon</span></>}
               </Button>
             ) : (
-              <Button
-                type="button"
-                variant="outline"
-                className="h-12 px-4 shrink-0 gap-1.5 text-base"
-                onClick={() => setCurrentStep(s => s - 1)}
-              >
-                <ChevronLeft className="h-4 w-4" />
-                <span className="hidden sm:inline">Précédent</span>
-              </Button>
+              <>
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="h-12 px-4 shrink-0 gap-1.5 text-base"
+                  onClick={() => setCurrentStep(s => s - 1)}
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                  <span className="hidden sm:inline">Précédent</span>
+                </Button>
+                {/* Sauvegarder et partir reste accessible à toutes les étapes. */}
+                <Button
+                  type="button"
+                  variant="ghost"
+                  className="h-12 px-3 shrink-0 text-sm"
+                  onClick={handleSaveAndExit}
+                  disabled={savingDraft || !property}
+                >
+                  {savingDraft ? "Sauvegarde…" : "Enregistrer & quitter"}
+                </Button>
+              </>
             )}
+
 
             {/* Preview (last step, desktop) : toujours accessible, la modale
                 gère elle-même le blocage de la publication. */}
