@@ -1032,12 +1032,13 @@ const Sits = () => {
                   key={sit.id}
                   onWithdraw={
                     sit.application_id && ["pending", "viewed", "discussing"].includes(sit.application_status)
-                      ? () => setWithdrawApp({ appId: sit.application_id, sitTitle: "cette annonce" })
+                      ? () => setWithdrawApp({ appId: sit.application_id, sitTitle: "cette annonce", conversationId: "" })
                       : undefined
                   }
                 />
               );
             }
+
             return (
 
               <SitCard
