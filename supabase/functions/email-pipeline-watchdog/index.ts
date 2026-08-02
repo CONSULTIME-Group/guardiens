@@ -232,7 +232,8 @@ Deno.serve(async (req) => {
           oldest_pending_age_seconds = ${String(health.oldest_pending_age_seconds)}<br/>
           failure_rate_1h = ${String(health.failure_rate_1h)} (${String(health.attempts_1h)} tentatives)<br/>
           dlq_last_hour = ${String(health.dlq_last_hour)}<br/>
-          stuck_rate_limit = ${String(health.stuck_rate_limit)} (${String(health.retry_after_until)})
+          stuck_rate_limit = ${String(health.stuck_rate_limit)} (${String(health.retry_after_until)})<br/>
+          file différée : pending = ${String(health.deferred_pending_total)}, &gt; 2h = ${String(health.deferred_pending_over_2h)}, &gt; 24h = ${String(health.deferred_pending_over_24h)}, attempts &ge; 3 = ${String(health.deferred_attempts_ge_3)}, expirés 24h = ${String(health.deferred_expired_24h)}
         </p>
         <p style="color:#999;font-size:11px">1 alerte max par type d'anomalie par heure.</p>
       </div>
