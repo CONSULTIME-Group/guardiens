@@ -356,20 +356,18 @@ const EditSit = () => {
     );
   }
 
-  /* Bloquants affichables inline */
+  /* Bloquants affichables inline, issus de la source unique de règles */
   const saveBlockerMsg = isLocked
     ? "Annonce verrouillée"
     : !isDirty
       ? "Aucune modification à enregistrer"
       : !titleValid
         ? "Titre trop court (3 caractères minimum)"
-        : !hasDatesOrFlexible
-          ? "Renseignez des dates ou un mois flexible"
-          : !descValid
-            ? `Description : ${MIN_DESC_LENGTH} caractères minimum`
-            : hasForbidden
-              ? "Vocabulaire non autorisé dans le titre ou la description"
-              : null;
+        : formBlockers.length > 0
+          ? formBlockers[0].label
+          : hasForbidden
+            ? "Vocabulaire non autorisé dans le titre ou la description"
+            : null;
 
   return (
     <div className="px-4 md:px-10 py-6 max-w-3xl mx-auto animate-fade-in pb-36">
