@@ -455,6 +455,7 @@ const AppRoutes = () => {
       <Route path="/dev/preview/ongoing-sit-hero" element={<PreviewOngoingSitHero />} />
       <Route path="/dev/preview/mission-cards" element={<PreviewMissionCards />} />
       <Route path="/unsubscribe" element={<Unsubscribe />} />
+      <Route path="/go" element={<EmailClickRedirect />} />
       <Route path="/candidature/reponse" element={<ApplicationQuickAction />} />
 
       <Route path="/email-preferences" element={<EmailPreferences />} />
