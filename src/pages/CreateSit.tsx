@@ -897,6 +897,34 @@ const CreateSit = () => {
     setCurrentStep(s => s + 1);
   };
 
+  // Prérequis vérifiés à l'entrée du flow, pas en cours de route : inutile de
+  // faire remplir l'étape 0 à quelqu'un qui ne pourra pas publier au bout.
+  const preflightMissing: Array<{ id: string; label: string; anchor: string }> = [
+    !property ? { id: "property", label: "Votre logement", anchor: "logement" } : null,
+    pets.length === 0 ? { id: "pets", label: "Au moins un animal à faire garder", anchor: "animaux" } : null,
+    !hasPhoto ? { id: "photo", label: "Au moins une photo de votre logement", anchor: "galerie" } : null,
+    profileCompletion < PUBLISH_PROFILE_THRESHOLD
+      ? { id: "profile", label: `Un profil complété à ${PUBLISH_PROFILE_THRESHOLD} % minimum (actuellement ${profileCompletion} %)`, anchor: "" }
+      : null,
+  ].filter(Boolean) as Array<{ id: string; label: string; anchor: string }>;
+  const preflightBlocked = !loading && preflightMissing.length > 0;
+  const preflightSignature = preflightMissing.map(m => m.id).join(",");
+  const preflightTrackedRef = useRef<string>("");
+
+  useEffect(() => {
+    if (!preflightBlocked) return;
+    if (preflightTrackedRef.current === preflightSignature) return;
+    preflightTrackedRef.current = preflightSignature;
+    void trackEvent("sits_create_preflight_blocked", {
+      source: "/sits/create",
+      metadata: {
+        missing: preflightSignature.split(","),
+        profile_completion: profileCompletion,
+      },
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [preflightBlocked, preflightSignature]);
+
 
   if (loading) {
     return <div className="p-6 md:p-10 max-w-3xl mx-auto text-muted-foreground">Chargement...</div>;
