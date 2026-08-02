@@ -227,3 +227,88 @@ export const getSitPublishRequirements = (
   { id: "photo", label: "Au moins une photo de votre logement ou de votre galerie" },
   { id: "pets", label: "Au moins un animal à faire garder" },
 ];
+
+/**
+ * Annonce brute, telle que lue en base ou tenue par un formulaire.
+ * Les noms de colonnes sont conservés pour éviter toute recomposition manuelle.
+ */
+export interface SitPublishSit {
+  title?: string | null;
+  start_date?: string | null;
+  end_date?: string | null;
+  flexible_dates?: boolean | null;
+  specific_expectations?: string | null;
+  cover_photo_url?: string | null;
+  published_at?: string | null;
+}
+
+export interface BuildSitPublishInputOptions {
+  sit: SitPublishSit;
+  /** Logement du propriétaire, tel que chargé par l'écran. */
+  property?: { photos?: unknown } | null;
+  /** Photos de la galerie du profil propriétaire. */
+  galleryPhotos?: unknown[] | null;
+  /** Animaux du propriétaire. */
+  pets?: unknown[] | null;
+  /**
+   * Deux sous-champs de saisie, quand l'écran en dispose. Leur présence
+   * déclare le mode deux champs, leur absence le mode bloc unique.
+   */
+  twoFields?: { absenceReason?: string | null; sitterExpectations?: string | null };
+  /** Erreur de dates déjà calculée par un formulaire, en repli. */
+  dateError?: string | null;
+  /** Neutralisations, pour un écran qui ne détient pas ces champs. */
+  overrides?: {
+    hasProperty?: boolean;
+    galleryPhotoCount?: number;
+    propertyPhotoCount?: number;
+    petCount?: number;
+    /** Texte réellement écrit en base, quand il diffère de l'affichage. */
+    specificExpectations?: string | null;
+  };
+}
+
+const count = (v?: unknown[] | null) => (Array.isArray(v) ? v.length : 0);
+
+/**
+ * Adaptateur unique : construit l'entrée des règles depuis une annonce et son
+ * propriétaire. Aucun écran ne compose cette entrée à la main, sans quoi les
+ * écarts entre le formulaire de création et la fiche annonce réapparaissent.
+ */
+export const buildSitPublishInput = (o: BuildSitPublishInputOptions): SitPublishInput => {
+  const ov = o.overrides || {};
+  const base: SitPublishBase = {
+    title: o.sit.title,
+    startDate: o.sit.start_date,
+    endDate: o.sit.end_date,
+    flexibleDates: o.sit.flexible_dates,
+    dateError: o.dateError,
+    hasProperty: ov.hasProperty ?? !!o.property,
+    galleryPhotoCount: ov.galleryPhotoCount ?? count(o.galleryPhotos),
+    propertyPhotoCount:
+      ov.propertyPhotoCount ?? count((o.property as { photos?: unknown[] } | null)?.photos),
+    hasCoverPhoto: !!o.sit.cover_photo_url,
+    petCount: ov.petCount ?? count(o.pets),
+  };
+
+  if (o.twoFields) {
+    return {
+      ...base,
+      descriptionMode: "two-fields",
+      absenceReason: o.twoFields.absenceReason,
+      sitterExpectations: o.twoFields.sitterExpectations,
+    };
+  }
+  return {
+    ...base,
+    descriptionMode: "single-block",
+    specificExpectations: ov.specificExpectations ?? o.sit.specific_expectations,
+  };
+};
+
+/**
+ * Une annonce déjà publiée une fois a été validée par le formulaire de
+ * création. Un brouillon qui ne l'a jamais été doit repasser par le formulaire
+ * en deux champs plutôt que d'être publié directement depuis la fiche.
+ */
+export const wasValidatedByCreateForm = (sit: SitPublishSit): boolean => !!sit.published_at;
