@@ -156,7 +156,7 @@ class FakeSystem {
     let redeferred = 0
     for (const row of due) {
       row.attempts += 1
-      const r = this.send(now, row.recipient, row.template, row.idempotency_key, row.isUrgent)
+      const r = this.send(now, row.recipient, row.template, row.idempotency_key, row.isUrgent, row.category)
       if (r.result === 'sent') {
         // Marque la row comme "sent" (consumed). La nouvelle ligne send_log status=sent
         // a déjà été créée par send().
