@@ -1,0 +1,2 @@
+ALTER TABLE public.email_deferred_queue ADD COLUMN IF NOT EXISTS first_enqueued_at timestamptz NOT NULL DEFAULT now();
+UPDATE public.email_deferred_queue SET first_enqueued_at = created_at WHERE first_enqueued_at <> created_at;

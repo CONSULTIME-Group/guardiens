@@ -1784,6 +1784,7 @@ export type Database = {
           attempts: number
           created_at: string
           defer_reason: string
+          first_enqueued_at: string
           id: string
           idempotency_key: string | null
           last_attempt_at: string | null
@@ -1799,6 +1800,7 @@ export type Database = {
           attempts?: number
           created_at?: string
           defer_reason: string
+          first_enqueued_at?: string
           id?: string
           idempotency_key?: string | null
           last_attempt_at?: string | null
@@ -1814,6 +1816,7 @@ export type Database = {
           attempts?: number
           created_at?: string
           defer_reason?: string
+          first_enqueued_at?: string
           id?: string
           idempotency_key?: string | null
           last_attempt_at?: string | null
