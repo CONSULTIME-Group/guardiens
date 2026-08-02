@@ -382,8 +382,9 @@ const EditSit = () => {
       .from("sits")
       .update({
         title: trimmedTitle,
-        start_date: startDate,
-        end_date: endDate,
+        // Colonnes de type date : une chaîne vide déclenche une erreur Postgres.
+        start_date: startDate || null,
+        end_date: endDate || null,
         flexible_dates: savedFlexibleDates,
         flexibility_notes: flexNote,
         specific_expectations: expectations,

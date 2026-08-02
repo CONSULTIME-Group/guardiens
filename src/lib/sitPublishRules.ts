@@ -148,7 +148,7 @@ export const getDescriptionBlockers = (
     return getTwoFieldsDescriptionBlockers(input.absenceReason, input.sitterExpectations);
   }
   const single = getSingleBlockDescriptionBlockers(input.specificExpectations);
-  if (single.length > 0 || !options.viaCreateForm) return single;
+  if (!options.viaCreateForm) return single;
   /**
    * Publication déléguée au formulaire de création : celui-ci ne découpe jamais
    * le texte, il place tout dans la première question et laisse la seconde
@@ -158,6 +158,7 @@ export const getDescriptionBlockers = (
    * la résoudre.
    */
   return [
+    ...single,
     {
       id: "desc-two-fields",
       label: `Répartir la description en deux questions dans le formulaire : raison de la garde et attentes envers le gardien, ${MIN_SUB_DESCRIPTION} caractères minimum chacune`,

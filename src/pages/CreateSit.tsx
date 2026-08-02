@@ -49,6 +49,7 @@ import { makePlainTextPasteHandler } from "@/lib/pastePlainText";
 import { DEFAULT_MAX_APPLICATIONS } from "@/lib/applicationCap";
 import {
   getSitPublishBlockers,
+  getBlockingBlockers,
   buildSitPublishInput,
   MAX_TITLE_LENGTH,
   joinExpectations,
@@ -925,7 +926,10 @@ const CreateSit = () => {
     }),
   );
 
-  const canPublish = publishBlockers.length === 0;
+  // Même filtrage que la fiche annonce : un blocage informatif ne doit jamais
+  // désactiver le bouton de publication.
+  const canPublish = getBlockingBlockers(publishBlockers).length === 0;
+  const titleTooLong = title.trim().length > MAX_TITLE_LENGTH;
   const hasPhoto = !publishBlockers.some((b) => b.id === "photo");
 
 
@@ -1102,6 +1106,9 @@ const CreateSit = () => {
       }
       const errors: Array<{ field: string; anchor: string }> = [];
       if (!title.trim()) errors.push({ field: "title", anchor: "title-field" });
+      // Un titre repris d'une annonce existante peut dépasser la limite : le
+      // contrôle appartient à l'étape, pas au seul clic final sur publier.
+      if (titleTooLong) errors.push({ field: "title", anchor: "title-field" });
       if (!startDate) errors.push({ field: "startDate", anchor: "dates-field" });
       if (!endDate) errors.push({ field: "endDate", anchor: "dates-field" });
       if (dateError) errors.push({ field: "endDate", anchor: "dates-field" });
@@ -1399,13 +1406,19 @@ const CreateSit = () => {
               onPaste={makePlainTextPasteHandler(setTitle)}
               onBlur={() => touch("title")}
               maxLength={MAX_TITLE_LENGTH}
-              className={cn("h-12 text-base", fieldState("title", !title))}
+              className={cn("h-12 text-base", fieldState("title", !title || titleTooLong))}
             />
             <p className="text-xs text-muted-foreground mt-1 text-right">
               {title.trim().length}/{MAX_TITLE_LENGTH}
             </p>
             {touched.title && !title.trim() && (
               <p className="text-sm text-destructive flex items-center gap-1.5 mt-1"><AlertCircle className="h-3.5 w-3.5" /> Ajoutez un titre.</p>
+            )}
+            {titleTooLong && (
+              <p className="text-sm text-destructive flex items-center gap-1.5 mt-1">
+                <AlertCircle className="h-3.5 w-3.5" />
+                Titre trop long de {title.trim().length - MAX_TITLE_LENGTH} caractères ({MAX_TITLE_LENGTH} maximum).
+              </p>
             )}
           </div>
 
