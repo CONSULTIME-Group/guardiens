@@ -49,6 +49,26 @@ import { makePlainTextPasteHandler } from "@/lib/pastePlainText";
 import { DEFAULT_MAX_APPLICATIONS } from "@/lib/applicationCap";
 import { getSitPublishBlockers, MIN_SUB_DESCRIPTION, type PublishBlocker } from "@/lib/sitPublishRules";
 
+/**
+ * Répartit un texte existant sur les deux champs de description.
+ * La découpe au double saut de ligne n'est acceptée que si les deux parties
+ * atteignent le seuil ; sinon tout le texte va dans le premier champ.
+ */
+function splitForFields(raw: string): { first: string; rest: string; reliable: boolean } {
+  const text = raw || "";
+  const idx = text.indexOf("\n\n");
+  if (idx >= 0) {
+    const first = text.slice(0, idx);
+    const rest = text.slice(idx + 2);
+    if (
+      first.trim().length >= MIN_SUB_DESCRIPTION &&
+      rest.trim().length >= MIN_SUB_DESCRIPTION
+    ) {
+      return { first, rest, reliable: true };
+    }
+  }
+  return { first: text, rest: "", reliable: false };
+}
 
 
 
