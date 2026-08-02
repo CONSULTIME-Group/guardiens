@@ -625,6 +625,26 @@ const CreateSit = () => {
           setSitCountry((d as any).country || "FR");
           setAcceptsSitterPets(((d as any).accepts_sitter_pets as any) || "discuss");
           setAcceptsSitterChildren(((d as any).accepts_sitter_children as any) || "discuss");
+          // Le lieu de garde n'est pas persisté en base et seul le domicile est
+          // réellement supporté par le formulaire : tout brouillon existant est
+          // donc un brouillon à domicile. Sans cela, l'étape 1 paraît vide.
+          const rawExpectations = d.specific_expectations || "";
+          const hasContent = !!(d.title || rawExpectations || cleanStart || d.daily_routine || d.owner_message);
+          if (hasContent) setSitLocation("home");
+          // L'étape atteinte n'est pas stockée en base, on la recalcule à partir
+          // du contenu pour ne pas refaire franchir l'étape 1.
+          const sepIdx = rawExpectations.indexOf(EXPECTATIONS_SEPARATOR);
+          const reason = sepIdx >= 0 ? rawExpectations.slice(0, sepIdx) : rawExpectations;
+          const expect = sepIdx >= 0 ? rawExpectations.slice(sepIdx + EXPECTATIONS_SEPARATOR.length) : "";
+          const step0Complete =
+            !!(d.title || "").trim()
+            && !!cleanStart
+            && !!cleanEnd
+            && cleanStart < cleanEnd
+            && reason.trim().length >= MIN_SUB_DESCRIPTION
+            && expect.trim().length >= MIN_SUB_DESCRIPTION;
+          if (step0Complete) setCurrentStep(prev => Math.max(prev, 1));
+          if (hasContent) setRemoteDraftResumed(true);
           if (datesWerePast) {
             toast({
               title: "Dates à redéfinir",
