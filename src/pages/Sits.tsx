@@ -124,17 +124,22 @@ const getEffectiveStatus = (sit: any): string => {
   return sit.status;
 };
 
+/** Brouillon dont les dates sont depassees : a redefinir, jamais annule. */
+const hasOutdatedDraftDates = (sit: any): boolean =>
+  sit.status === "draft"
+  && !!sit.end_date
+  && isBefore(parseISO(sit.end_date), new Date());
+
 // Owner-only: overlays d'affichage supplementaires (dépubliée, archivée manuelle)
 // La vue sitter continue d'utiliser getEffectiveStatus tel quel.
 const getOwnerEffectiveStatus = (sit: any): string => {
   if (sit.cancellation_reason === "archived") return "archived";
-  if (sit.status === "draft" && sit.unpublished_at) {
-    // Dépubliée dont end_date est passee → traitée comme "expirée" (Passées).
-    if (sit.end_date && isBefore(parseISO(sit.end_date), new Date())) return "expired";
-    return "unpublished";
-  }
+  // Un brouillon reste un brouillon, meme si ses dates sont passees : il n'est
+  // ni annule ni expire, ses dates sont simplement a redefinir.
+  if (sit.status === "draft") return sit.unpublished_at ? "unpublished" : "draft";
   return getEffectiveStatus(sit);
 };
+
 
 const Sits = () => {
   const { user, activeRole } = useAuth();
