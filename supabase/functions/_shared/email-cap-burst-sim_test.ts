@@ -205,21 +205,22 @@ function parisAt(yyyyMmDd: string, hour: number, minute = 0): Date {
 }
 
 // =============================================================
-// SIM 1 — Pic en heure active : 5 envois en 30 secondes
-// Attendu : 1 envoyé immédiat, 4 reportés (cap 1/h)
+// SIM 1 — Pic en heure active, catégorie product : 5 envois en 30 secondes
+// Attendu : 1 envoyé immédiat, 4 reportés (cap catégorie 1 / 24h)
 // Aucun doublon (par idempotency_key).
 // =============================================================
-Deno.test('SIM 1 — burst 5×30s en heure active : 1 sent, 4 deferred, no dup', () => {
+Deno.test('SIM 1 — burst product 5×30s en heure active : 1 sent, 4 deferred, no dup', () => {
   const sys = new FakeSystem()
   const start = parisAt('2026-01-15', 14)
   const recipient = 'user@example.com'
   for (let i = 0; i < 5; i++) {
-    sys.send(new Date(start.getTime() + i * 6_000), recipient, 'review-reminder', `key-${i}`)
+    sys.send(new Date(start.getTime() + i * 6_000), recipient, 'review-reminder', `key-${i}`, false, 'product')
   }
 
   const sent = sys.sentRows()
-  assertEquals(sent.length, 1, 'un seul envoi immédiat (cap 1/h)')
+  assertEquals(sent.length, 1, 'un seul envoi immédiat (cap catégorie 1 / 24h)')
   assertEquals(sys.queue.filter((q) => q.status === 'pending').length, 4)
+  assertEquals(sys.queue[0].reason, 'frequency_cap_category_day')
   // No duplicate per key
   for (let i = 0; i < 5; i++) {
     assert(sys.countSentByKey(`key-${i}`) <= 1, `clé key-${i} envoyée plusieurs fois`)
@@ -227,17 +228,35 @@ Deno.test('SIM 1 — burst 5×30s en heure active : 1 sent, 4 deferred, no dup',
 })
 
 // =============================================================
-// SIM 2 — Flush respecte le cap : drain 4 due → 1 nouveau sent + 3 re-defer
+// SIM 1bis — Même pic, mais catégorie transactionnelle : AUCUN plafond.
+// Doctrine 02/08/2026 : un email déclenché par l'action directe d'un membre
+// n'est jamais du spam, il part même si l'heure est déjà chargée.
 // =============================================================
-Deno.test('SIM 2 — flush au +1h ne casse PAS le cap, 1 sent + 3 redéfer', () => {
+Deno.test('SIM 1bis — burst transactionnel 5×30s : les 5 partent, aucune ligne différée', () => {
   const sys = new FakeSystem()
   const start = parisAt('2026-01-15', 14)
   const recipient = 'user@example.com'
   for (let i = 0; i < 5; i++) {
-    sys.send(new Date(start.getTime() + i * 6_000), recipient, 'review-reminder', `key-${i}`)
+    sys.send(new Date(start.getTime() + i * 6_000), recipient, 'new-message', `tx-${i}`, false, 'transactional')
   }
-  // Avance à T+1h05 → toutes les queue rows initiales sont dues
-  const flushAt = new Date(start.getTime() + 65 * 60_000)
+
+  assertEquals(sys.sentRows().length, 5, 'aucun plafond de fréquence sur le transactionnel')
+  assertEquals(sys.queue.length, 0, 'aucune ligne dans la file différée')
+})
+
+// =============================================================
+// SIM 2 — Flush respecte le cap catégorie : drain 4 due à J+1
+// → 1 nouveau sent + 3 re-defer
+// =============================================================
+Deno.test('SIM 2 — flush à J+1 ne casse PAS le cap catégorie, 1 sent + 3 redéfer', () => {
+  const sys = new FakeSystem()
+  const start = parisAt('2026-01-15', 14)
+  const recipient = 'user@example.com'
+  for (let i = 0; i < 5; i++) {
+    sys.send(new Date(start.getTime() + i * 6_000), recipient, 'review-reminder', `key-${i}`, false, 'product')
+  }
+  // Avance à T+24h05 → toutes les queue rows initiales sont dues
+  const flushAt = new Date(start.getTime() + 24 * 3600_000 + 5 * 60_000)
   const r = sys.flush(flushAt)
 
   assertEquals(r.processed, 4)
@@ -255,15 +274,16 @@ Deno.test('SIM 2 — flush au +1h ne casse PAS le cap, 1 sent + 3 redéfer', () 
 })
 
 // =============================================================
-// SIM 3 — Drain complet sur 24h : 5 envois → exactement 3 atteindront sent
-// (cap journalier = 3). Les 2 restants doivent être en queue ou re-deferred.
+// SIM 3 — Drain sur 24h, catégorie product : le cap est de 1 / 24h, donc
+// un seul email atteint le destinataire sur la fenêtre, les 4 autres restent
+// en attente et ne se dupliquent jamais.
 // =============================================================
-Deno.test('SIM 3 — drain 24h : exactement 3 envoyés (cap jour=3), 2 reportés', () => {
+Deno.test('SIM 3 — drain 24h product : exactement 1 envoyé (cap 1 / 24h), 4 en attente', () => {
   const sys = new FakeSystem()
   const start = parisAt('2026-01-15', 9) // matin actif
   const recipient = 'user@example.com'
   for (let i = 0; i < 5; i++) {
-    sys.send(new Date(start.getTime() + i * 6_000), recipient, 'review-reminder', `k${i}`)
+    sys.send(new Date(start.getTime() + i * 6_000), recipient, 'review-reminder', `k${i}`, false, 'product')
   }
   // Flush toutes les heures pendant 24h
   for (let h = 1; h <= 24; h++) {
@@ -271,7 +291,8 @@ Deno.test('SIM 3 — drain 24h : exactement 3 envoyés (cap jour=3), 2 reportés
     sys.flush(t)
   }
   const sent = sys.sentRows()
-  assertEquals(sent.length, 3, 'cap journalier = 3 respecté')
+  assertEquals(sent.length, 1, 'cap catégorie 1 / 24h respecté')
+  assertEquals(sys.queue.filter((q) => q.status === 'pending').length, 4)
 
   // Aucun doublon par clé
   const counts = new Map<string, number>()
@@ -282,12 +303,12 @@ Deno.test('SIM 3 — drain 24h : exactement 3 envoyés (cap jour=3), 2 reportés
 // =============================================================
 // SIM 4 — Quiet hours : envoi à 23h reporté à 08h le lendemain
 // =============================================================
-Deno.test('SIM 4 — pic en quiet hours : tout reporté à 08:00, flush à 08:01 envoie 1', () => {
+Deno.test('SIM 4 — pic product en quiet hours : tout reporté à 08:00, flush à 08:01 envoie 1', () => {
   const sys = new FakeSystem()
   const start = parisAt('2026-01-15', 23) // quiet
   const recipient = 'user@example.com'
   for (let i = 0; i < 3; i++) {
-    sys.send(new Date(start.getTime() + i * 60_000), recipient, 'review-reminder', `q${i}`)
+    sys.send(new Date(start.getTime() + i * 60_000), recipient, 'review-reminder', `q${i}`, false, 'product')
   }
   assertEquals(sys.sentRows().length, 0, 'aucun envoi en quiet hours')
   assertEquals(sys.queue.filter((q) => q.status === 'pending').length, 3)
@@ -296,9 +317,31 @@ Deno.test('SIM 4 — pic en quiet hours : tout reporté à 08:00, flush à 08:01
   const flushAt = new Date(parisAt('2026-01-16', 8, 1).getTime())
   const r = sys.flush(flushAt)
   assertEquals(r.processed, 3)
-  assertEquals(r.sent, 1, '1 envoyé (cap horaire)')
+  assertEquals(r.sent, 1, '1 envoyé (cap catégorie 1 / 24h)')
   assertEquals(r.redeferred, 2)
   assertEquals(sys.sentRows().length, 1)
+})
+
+// =============================================================
+// SIM 4bis — Transactionnel en quiet hours : différé quand même, puis TOUT
+// part au premier flush de 08:01, sans plafond de fréquence.
+// =============================================================
+Deno.test('SIM 4bis — transactionnel en quiet hours : reporté à 08:00 puis les 3 partent', () => {
+  const sys = new FakeSystem()
+  const start = parisAt('2026-01-15', 23)
+  const recipient = 'user@example.com'
+  for (let i = 0; i < 3; i++) {
+    sys.send(new Date(start.getTime() + i * 60_000), recipient, 'new-message', `txq${i}`, false, 'transactional')
+  }
+  assertEquals(sys.sentRows().length, 0, 'on ne réveille personne la nuit')
+  assertEquals(sys.queue.filter((q) => q.status === 'pending').length, 3)
+  assertEquals(sys.queue[0].reason, 'quiet_hours')
+
+  const r = sys.flush(new Date(parisAt('2026-01-16', 8, 1).getTime()))
+  assertEquals(r.processed, 3)
+  assertEquals(r.sent, 3, 'aucun plafond de fréquence sur le transactionnel')
+  assertEquals(r.redeferred, 0)
+  assertEquals(sys.queue.filter((q) => q.status === 'pending').length, 0)
 })
 
 // =============================================================
@@ -309,7 +352,7 @@ Deno.test('SIM 5 — même idempotency_key rejouée 10× : 1 seul envoi', () => 
   const sys = new FakeSystem()
   const t = parisAt('2026-01-15', 14)
   for (let i = 0; i < 10; i++) {
-    sys.send(new Date(t.getTime() + i * 1000), 'user@x.com', 'review-reminder', 'same-key')
+    sys.send(new Date(t.getTime() + i * 1000), 'user@x.com', 'review-reminder', 'same-key', false, 'product')
   }
   assertEquals(sys.countSentByKey('same-key'), 1, 'idempotence violée')
   // Et la queue ne doit pas exploser non plus (replays sur clé déjà sent → no-op)
@@ -324,7 +367,7 @@ Deno.test('SIM 6 — 50 destinataires distincts : tous envoyés immédiatement',
   const sys = new FakeSystem()
   const t = parisAt('2026-01-15', 14)
   for (let i = 0; i < 50; i++) {
-    sys.send(new Date(t.getTime() + i * 100), `user${i}@x.com`, 'review-reminder', `bulk-${i}`)
+    sys.send(new Date(t.getTime() + i * 100), `user${i}@x.com`, 'review-reminder', `bulk-${i}`, false, 'product')
   }
   assertEquals(sys.sentRows().length, 50)
   assertEquals(sys.queue.length, 0)
@@ -336,7 +379,7 @@ Deno.test('SIM 6 — 50 destinataires distincts : tous envoyés immédiatement',
 Deno.test('SIM 7 — __urgent à 23h Paris : envoyé immédiatement, aucune ligne en queue', () => {
   const sys = new FakeSystem()
   const t = parisAt('2026-01-15', 23) // quiet hours
-  const r = sys.send(t, 'user@x.com', 'review-reminder', 'urgent-quiet', true)
+  const r = sys.send(t, 'user@x.com', 'review-reminder', 'urgent-quiet', true, 'product')
 
   assertEquals(r.result, 'sent')
   assertEquals(sys.sentRows().length, 1)
@@ -344,44 +387,62 @@ Deno.test('SIM 7 — __urgent à 23h Paris : envoyé immédiatement, aucune lign
 })
 
 // =============================================================
-// SIM 8 — __urgent avec cap horaire dépassé : envoi immédiat, queue vide
+// SIM 8 — __urgent avec cap journalier catégorie saturé : envoi immédiat
 // =============================================================
-Deno.test('SIM 8 — __urgent avec cap horaire saturé : envoyé immédiatement, queue vide', () => {
+Deno.test('SIM 8 — __urgent avec cap catégorie 1 / 24h saturé : envoyé immédiatement', () => {
   const sys = new FakeSystem()
   const t = parisAt('2026-01-15', 14) // heure active
-  // Saturation du cap horaire : 1 envoi normal, le suivant dans la même heure est defer
-  sys.send(t, 'user@x.com', 'review-reminder', 'normal-1')
-  const rNormal = sys.send(new Date(t.getTime() + 1000), 'user@x.com', 'review-reminder', 'normal-2')
+  // Saturation du cap catégorie : 1 envoi product, le suivant dans les 24h est defer
+  sys.send(t, 'user@x.com', 'review-reminder', 'normal-1', false, 'product')
+  const rNormal = sys.send(new Date(t.getTime() + 1000), 'user@x.com', 'review-reminder', 'normal-2', false, 'product')
   assertEquals(rNormal.result, 'deferred')
 
   // Même destinataire, même template, mais urgent → passe
-  const rUrgent = sys.send(new Date(t.getTime() + 2000), 'user@x.com', 'review-reminder', 'urgent-cap', true)
+  const rUrgent = sys.send(new Date(t.getTime() + 2000), 'user@x.com', 'review-reminder', 'urgent-cap', true, 'product')
   assertEquals(rUrgent.result, 'sent')
   assertEquals(sys.queue.filter((q) => q.status === 'pending').length, 1, 'seul normal-2 en queue')
   assertEquals(sys.sentRows().length, 2, '2 sent total (normal-1 + urgent-cap)')
 })
 
 // =============================================================
-// SIM 9 — __urgent avec cap journalier dépassé : envoi immédiat, queue vide
+// SIM 9 — Cap hebdomadaire catégorie (3 / 7 jours), toutes catégories non
+// transactionnelles confondues : product, digest et alert partagent le compteur.
+// L'urgent passe malgré la saturation.
 // =============================================================
-Deno.test('SIM 9 — __urgent avec cap journalier saturé : envoyé immédiatement, queue vide', () => {
+Deno.test('SIM 9 — cap 3 / 7 jours partagé product+digest+alert, urgent exempté', () => {
   const sys = new FakeSystem()
   const t = parisAt('2026-01-15', 10) // heure active
-  // 3 envois normaux espacés de 2h pour saturer le cap journalier sans toucher le cap horaire
-  for (let i = 0; i < 3; i++) {
-    sys.send(new Date(t.getTime() + i * 2 * 3600_000), 'user@x.com', 'review-reminder', `day-${i}`)
-  }
+  // 3 envois non transactionnels espacés de 25h : le cap 1 / 24h n'est jamais touché
+  sys.send(t, 'user@x.com', 'review-reminder', 'w-0', false, 'product')
+  sys.send(new Date(t.getTime() + 25 * 3600_000), 'user@x.com', 'weekly-digest', 'w-1', false, 'digest')
+  sys.send(new Date(t.getTime() + 50 * 3600_000), 'user@x.com', 'new-listing-alert', 'w-2', false, 'alert')
   assertEquals(sys.sentRows().length, 3)
 
-  // 4e envoi normal → defer (cap jour)
-  const rNormal = sys.send(new Date(t.getTime() + 6 * 3600_000 + 1000), 'user@x.com', 'review-reminder', 'day-3')
+  // 4e envoi non transactionnel dans la fenêtre de 7 jours → defer (cap semaine)
+  const rNormal = sys.send(new Date(t.getTime() + 75 * 3600_000), 'user@x.com', 'review-reminder', 'w-3', false, 'product')
   assertEquals(rNormal.result, 'deferred')
+  assertEquals(sys.queue[0].reason, 'frequency_cap_category_week')
 
   // Urgent → passe
-  const rUrgent = sys.send(new Date(t.getTime() + 6 * 3600_000 + 2000), 'user@x.com', 'review-reminder', 'urgent-day', true)
+  const rUrgent = sys.send(new Date(t.getTime() + 75 * 3600_000 + 2000), 'user@x.com', 'review-reminder', 'urgent-week', true, 'product')
   assertEquals(rUrgent.result, 'sent')
   assertEquals(sys.queue.filter((q) => q.status === 'pending').length, 1)
   assertEquals(sys.sentRows().length, 4)
+})
+
+// =============================================================
+// SIM 9bis — Le compteur non transactionnel ignore les transactionnels :
+// une salve de messages humains ne consomme jamais le quota d'un digest.
+// =============================================================
+Deno.test('SIM 9bis — 5 transactionnels puis 1 digest : le digest part quand même', () => {
+  const sys = new FakeSystem()
+  const t = parisAt('2026-01-15', 10)
+  for (let i = 0; i < 5; i++) {
+    sys.send(new Date(t.getTime() + i * 60_000), 'user@x.com', 'new-message', `mix-tx-${i}`, false, 'transactional')
+  }
+  const r = sys.send(new Date(t.getTime() + 10 * 60_000), 'user@x.com', 'weekly-digest', 'mix-digest', false, 'digest')
+  assertEquals(r.result, 'sent', 'les transactionnels ne consomment pas le quota catégorie')
+  assertEquals(sys.sentRows().length, 6)
 })
 
 // =============================================================
@@ -390,12 +451,13 @@ Deno.test('SIM 9 — __urgent avec cap journalier saturé : envoyé immédiateme
 Deno.test('SIM 10 — bypass template en quiet hours : envoyé immédiatement, queue vide', () => {
   const sys = new FakeSystem()
   const t = parisAt('2026-01-15', 23) // quiet hours
-  const r = sys.send(t, 'user@x.com', 'identity-verified', 'bypass-quiet')
+  const r = sys.send(t, 'user@x.com', 'identity-verified', 'bypass-quiet', false, 'transactional')
 
   assertEquals(r.result, 'sent')
   assertEquals(sys.sentRows().length, 1)
   assertEquals(sys.queue.length, 0, 'aucune insertion dans la file différée pour bypass template')
 })
+
 
 // =============================================================
 // SIM 11 — Anti-régression bug prod (2026-07-23) :
