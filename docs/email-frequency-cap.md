@@ -142,18 +142,26 @@ Conséquence : un même `idempotencyKey` rejoué N fois pendant un pic produit
 
 ### 5.3 Flush par `flush-deferred-emails`
 
-Le cron lit les lignes `status='pending'` avec `scheduled_for <= now()`,
-puis ré-appelle `send-transactional-email` en propageant l'`idempotency_key`
-d'origine. À ce moment :
+Le cron lit les lignes `status='pending'` triées par `first_enqueued_at`
+croissant (le plus anciennement enfilé passe en premier, pas de famine), puis
+ré-appelle `send-transactional-email` en propageant l'`idempotency_key`
+d'origine et l'identifiant de la ligne source (`sourceQueueId`). À ce moment :
 
-- Le cap est ré-évalué. S'il est encore dépassé → la ligne est
-  re-différée (nouvelle ligne en file via le même chemin), avec **le même
-  `idempotencyKey`** : la garde 5.2 garantit qu'on n'en crée pas une
-  deuxième tant que la précédente est `pending`.
+- Le cap est ré-évalué. S'il est encore dépassé → **la ligne source elle-même
+  est mise à jour** : nouveau `scheduled_for`, nouveau `defer_reason`,
+  `attempts = attempts + 1`, `status` reste `pending`, et `first_enqueued_at`
+  reste inchangé. Aucune nouvelle ligne n'est créée, plus aucun `superseded`
+  n'est écrit sur ce chemin. Les garde-fous `MAX_ATTEMPTS` et `TTL_HOURS`
+  peuvent donc réellement se déclencher, le TTL étant calculé sur
+  `first_enqueued_at`.
+- Une nouvelle ligne n'est insérée qu'au **premier** enfilement, quand il n'y a
+  pas de `sourceQueueId`.
 - Si l'envoi part → la ligne `email_send_log` `status='sent'` portant
-  l'`idempotency_key` rend tout rejeu ultérieur idempotent (garde 5.1).
-- La ligne traitée en file passe à `sent` (ou `failed` / `dlq` après N
-  tentatives) — elle ne peut plus déclencher d'envoi.
+  l'`idempotency_key` rend tout rejeu ultérieur idempotent (garde 5.1), et la
+  ligne de file passe à `sent`.
+- Une ligne qui dépasse `MAX_ATTEMPTS` ou son TTL passe à `expired` et ne
+  déclenche plus d'envoi.
+
 
 ### 5.4 Recommandations clé idempotence
 
