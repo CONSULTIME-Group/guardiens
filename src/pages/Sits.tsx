@@ -1325,12 +1325,15 @@ const UnavailableSitCard = ({
           Cette annonce n'est plus consultable
         </h3>
         <p className="text-xs text-muted-foreground mt-1">
-          {applicationStatus === "rejected"
-            ? "Votre candidature n'a pas été retenue, et cette annonce n'est plus consultable. Vous gardez l'accès à toutes vos autres candidatures."
-            : applicationStatus === "cancelled"
-              ? "Vous avez retiré votre candidature, et cette annonce n'est plus consultable. Vous gardez l'accès à toutes vos autres candidatures."
-              : "Le propriétaire l'a retirée, ou elle a été confiée à un autre gardien. Vous gardez l'accès à toutes vos autres candidatures."}
+          {applicationStatus === "accepted"
+            ? "Cette garde est terminée. Vous gardez l'accès à toutes vos autres candidatures."
+            : applicationStatus === "rejected"
+              ? "Votre candidature n'a pas été retenue, et cette annonce n'est plus consultable. Vous gardez l'accès à toutes vos autres candidatures."
+              : applicationStatus === "cancelled"
+                ? "Vous avez retiré votre candidature, et cette annonce n'est plus consultable. Vous gardez l'accès à toutes vos autres candidatures."
+                : "Elle a été retirée ou archivée par le propriétaire. Vous gardez l'accès à toutes vos autres candidatures."}
         </p>
+
         <div className="flex items-center gap-2 mt-3 flex-wrap">
           <Link
             to="/search"
