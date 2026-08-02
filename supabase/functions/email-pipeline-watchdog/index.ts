@@ -100,6 +100,66 @@ Deno.serve(async (req) => {
       });
     }
 
+    // --- File d'emails différés (email_deferred_queue) ---
+    type StaleRow = {
+      template_name: string;
+      recipient_email: string;
+      attempts: number;
+      defer_reason: string | null;
+      first_enqueued_at: string;
+      age_seconds: number;
+    };
+    const staleRows: StaleRow[] = Array.isArray(health.deferred_stale_rows)
+      ? (health.deferred_stale_rows as StaleRow[])
+      : [];
+
+    const fmtAge = (s: number) => {
+      const h = Math.floor(s / 3600);
+      const m = Math.round((s % 3600) / 60);
+      return h > 0 ? `${h}h${String(m).padStart(2, "0")}` : `${m} min`;
+    };
+    const describe = (r: StaleRow) =>
+      `${r.template_name} vers ${r.recipient_email} (${fmtAge(Number(r.age_seconds))}, ${r.attempts} tentative(s))`;
+
+    const txStale = staleRows.filter(
+      (r) => getEmailCategory(r.template_name) === "transactional",
+    );
+    if (txStale.length > 0) {
+      anomalies.push({
+        code: "email_deferred_transactional_stuck",
+        title: "Email transactionnel différé depuis plus de 2 heures",
+        detail: `${txStale.length} email(s) transactionnel(s) bloqué(s) en file. Les plus anciens : ${txStale
+          .slice(0, 5)
+          .map(describe)
+          .join(" ; ")}.`,
+      });
+    }
+
+    const over24h = staleRows.filter((r) => Number(r.age_seconds) >= 24 * 3600);
+    const over24hCount = Number(health.deferred_pending_over_24h ?? 0);
+    if (over24hCount > 0) {
+      anomalies.push({
+        code: "email_deferred_stale_24h",
+        title: "Email différé depuis plus de 24 heures",
+        detail: `${over24hCount} email(s) en attente depuis plus de 24h. Les plus anciens : ${
+          over24h.slice(0, 5).map(describe).join(" ; ") || "détail indisponible"
+        }.`,
+      });
+    }
+
+    const attemptsGe3 = Number(health.deferred_attempts_ge_3 ?? 0);
+    if (attemptsGe3 > 0) {
+      anomalies.push({
+        code: "email_deferred_retry_chain",
+        title: "Chaîne de reports qui n'aboutit pas",
+        detail: `${attemptsGe3} email(s) en file avec au moins 3 reports. Total en attente : ${
+          String(health.deferred_pending_total ?? 0)
+        }, expirés sur 24h : ${String(health.deferred_expired_24h ?? 0)}.`,
+      });
+    }
+
+
+
 
     if (anomalies.length === 0) {
       return new Response(JSON.stringify({ ok: true, anomalies: 0 }), {
