@@ -690,7 +690,7 @@ const Sits = () => {
         }
       });
     } else {
-      base = activeSits.filter((s) => sitterTabOf(s) === activeTab);
+      base = sitterSits.filter((s) => sitterTabOf(s) === activeTab);
     }
     const q = searchQuery.trim().toLowerCase();
     let searched = q
