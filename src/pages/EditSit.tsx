@@ -61,23 +61,46 @@ const MIN_SITS_OPTIONS = [
   { label: "3 gardes+", value: 3 },
   { label: "5 gardes+", value: 5 },
 ];
-const MIN_DESC_LENGTH = 50;
 const MAX_TITLE_LENGTH = 120;
 const MAX_DESC_LENGTH = 2000;
 
+/**
+ * Ancienne convention : la flexibilité était concaténée à la description après
+ * un `\n\n`, qui est exactement le séparateur des deux sous-champs de
+ * description. Cette expression ne sert plus qu'à nettoyer l'existant à la
+ * lecture ; la flexibilité est désormais stockée dans `flexibility_notes`.
+ */
 const FLEX_REGEX = /\n*Flexibilité\s*:\s*(.+?)(?=\n\n|$)/i;
+
+/** Analyse une note de flexibilité au format « Mois : … · Durée : … ». */
+function parseFlexNote(payload: string): { months: string[]; duration: string } {
+  const monthsMatch = payload.match(/Mois\s*:\s*([^·]+)/i);
+  const durationMatch = payload.match(/Durée\s*:\s*(.+)/i);
+  return {
+    months: monthsMatch
+      ? monthsMatch[1].split(",").map((s) => s.trim()).filter(Boolean)
+      : [],
+    duration: durationMatch ? durationMatch[1].trim() : "",
+  };
+}
+
+/** Extrait la flexibilité héritée du corps de la description, et la retire. */
 function parseFlexibility(text: string): { months: string[]; duration: string; clean: string } {
   const match = text.match(FLEX_REGEX);
   if (!match) return { months: [], duration: "", clean: text };
-  const payload = match[1] || "";
-  const monthsMatch = payload.match(/Mois\s*:\s*([^·]+)/i);
-  const durationMatch = payload.match(/Durée\s*:\s*(.+)/i);
-  const months = monthsMatch
-    ? monthsMatch[1].split(",").map((s) => s.trim()).filter(Boolean)
-    : [];
-  const duration = durationMatch ? durationMatch[1].trim() : "";
-  const clean = text.replace(FLEX_REGEX, "").trim();
-  return { months, duration, clean };
+  const { months, duration } = parseFlexNote(match[1] || "");
+  return { months, duration, clean: text.replace(FLEX_REGEX, "").trim() };
+}
+
+/** Sérialise la flexibilité pour la colonne dédiée. */
+function buildFlexNote(months: string[], duration: string): string | null {
+  const note = [
+    months.length > 0 ? `Mois : ${months.join(", ")}` : "",
+    duration ? `Durée : ${duration}` : "",
+  ]
+    .filter(Boolean)
+    .join(" · ");
+  return note || null;
 }
 
 const LOCKED_STATUSES = new Set(["archived", "cancelled", "expired", "completed"]);
