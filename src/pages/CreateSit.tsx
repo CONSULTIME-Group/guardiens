@@ -648,10 +648,12 @@ const CreateSit = () => {
           setSitEnvironments(prev => (prev.length > 0 ? prev : ((o as any).environments || [])));
         }
       }
+      restoreLocalDraftIfFresher(remoteDraftUpdatedAt);
       setLoading(false);
       setTimeout(() => { initialLoadedRef.current = true; }, 300);
     };
     load();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user, fromSitId, draftIdParam]);
 
   // Auto-save draft (debounced)
@@ -664,6 +666,24 @@ const CreateSit = () => {
     return () => clearTimeout(t);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [title, startDate, endDate, flexibleDates, flexibleNotes, specificExpectations, openTo, isUrgent, sitEnvironments, minGardienSits, maxApplications, ownerMessage, dailyRoutine, coverPhotoUrl, sitCity, sitCountry, acceptsSitterPets, acceptsSitterChildren]);
+
+  // Copie locale immédiate (300 ms), indépendante du réseau et du brouillon distant.
+  const [localDraftSavedAt, setLocalDraftSavedAt] = useState<number | null>(null);
+  useEffect(() => {
+    if (!localDraftKey || loading) return;
+    const t = setTimeout(() => {
+      writeFormDraft<SitLocalDraft>(localDraftKey, {
+        title, startDate, endDate, flexibleDates, flexibleNotes,
+        absenceReason, sitterExpectations, openTo, isUrgent, sitEnvironments,
+        minGardienSits, maxApplications, ownerMessage, dailyRoutine,
+        coverPhotoUrl, sitCity, sitCountry, acceptsSitterPets, acceptsSitterChildren,
+      });
+      setLocalDraftSavedAt(Date.now());
+    }, 300);
+    return () => clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [localDraftKey, loading, title, startDate, endDate, flexibleDates, flexibleNotes, absenceReason, sitterExpectations, openTo, isUrgent, sitEnvironments, minGardienSits, maxApplications, ownerMessage, dailyRoutine, coverPhotoUrl, sitCity, sitCountry, acceptsSitterPets, acceptsSitterChildren]);
+
 
   // Smart cover picker : scoring IA de la galerie, silencieux si quota/rate-limit.
   // Se déclenche à l'arrivée sur l'étape Préférences si le propriétaire n'a rien
