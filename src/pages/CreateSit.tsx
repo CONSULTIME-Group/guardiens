@@ -1009,6 +1009,19 @@ const CreateSit = () => {
   // Le bouton reste visuellement actif (feedback au clic, pas de disabled).
   const validateCurrentStep = (): boolean => {
     if (currentStep === 0) {
+      // Le lieu de garde conditionne tout le reste de l'étape : au lieu d'un
+      // bouton inerte, on renvoie au sélecteur avec un message explicite.
+      if (sitLocation !== "home") {
+        if (typeof document !== "undefined") {
+          document.getElementById("sit-location-field")?.scrollIntoView({ behavior: "smooth", block: "center" });
+        }
+        toast({
+          variant: "destructive",
+          title: "Commencez par nous dire où se déroulera la garde.",
+          description: "Choisissez le lieu de la garde pour continuer.",
+        });
+        return false;
+      }
       const errors: Array<{ field: string; anchor: string }> = [];
       if (!title.trim()) errors.push({ field: "title", anchor: "title-field" });
       if (!startDate) errors.push({ field: "startDate", anchor: "dates-field" });
