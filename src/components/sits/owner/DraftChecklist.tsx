@@ -24,6 +24,8 @@ interface DraftChecklistProps {
   editHref?: string;
   /** Libellé du bouton principal, quand la publication passe par un autre écran. */
   publishLabel?: string;
+  /** Message affiché quand tous les prérequis sont remplis. */
+  readyMessage?: string;
 }
 
 const DraftChecklist = ({
@@ -33,7 +35,9 @@ const DraftChecklist = ({
   onPublish,
   editHref,
   publishLabel = "Publier l'annonce",
+  readyMessage = "Tout est prêt. Publiez votre annonce pour qu'elle apparaisse dans la recherche.",
 }: DraftChecklistProps) => {
+
   const missingIds = new Set(blockers.map((b) => b.id));
   const knownIds = new Set(requirements.map((r) => r.id));
   const items = requirements.map((r) => ({
