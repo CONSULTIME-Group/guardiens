@@ -51,6 +51,23 @@ export const useAccessLevel = (): AccessInfo => {
   const effectiveRole = user.role === "both" ? activeRole : user.role;
   const identityRecommended = !identityVerified;
 
+  // Palier 1 : profil trop incomplet pour postuler. Garde-fou côté gardien
+  // uniquement, sans rapport avec les prérequis de publication d'un propriétaire.
+  if (completion < 60) {
+    return {
+      level: 1,
+      profileCompletion: completion,
+      identityVerified,
+      identityRecommended,
+      canApplyMissions: false,
+      canApplyGuards: false,
+      canPublish: effectiveRole === "owner",
+      loading,
+    };
+  }
+
+
+
   // ID non vérifié — NON-BLOQUANT : on autorise les candidatures et la publication.
   // Côté sitter, on traite comme 3A (peut postuler aux missions, garde nécessite abonnement).
   // Côté owner, on traite comme 3B (peut publier librement).
