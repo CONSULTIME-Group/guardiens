@@ -159,7 +159,14 @@ const EditSit = () => {
         return;
       }
       const rawExp = data.specific_expectations || "";
-      const { months, duration, clean } = parseFlexibility(rawExp);
+      // La flexibilité vient de sa colonne dédiée ; on ne retombe sur la
+      // description que pour les annonces antérieures à cette séparation.
+      const legacy = parseFlexibility(rawExp);
+      const storedNote = ((data as any).flexibility_notes as string | null) || "";
+      const stored = storedNote ? parseFlexNote(storedNote) : null;
+      const months = stored ? stored.months : legacy.months;
+      const duration = stored ? stored.duration : legacy.duration;
+      const clean = legacy.clean;
       setTitle(data.title || "");
       setStartDate(data.start_date || "");
       setEndDate(data.end_date || "");
