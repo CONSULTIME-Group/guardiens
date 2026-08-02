@@ -164,16 +164,19 @@ Deno.serve(async (req) => {
       if (newAttempts >= MAX_ATTEMPTS) {
         await supabase.from("email_deferred_queue").update({ status: "failed", last_error: msg }).eq("id", row.id);
       } else {
-        // Backoff: push scheduled_for forward (5min, 15, 30, 60, 120)
+        // Backoff: push scheduled_for forward (5min, 15, 30, 60, 120).
+        // Sur ce chemin le sender n'a rien incremente : on le fait ici.
         const backoffMin = [5, 15, 30, 60, 120][Math.min(newAttempts - 1, 4)];
         await supabase
           .from("email_deferred_queue")
           .update({
             scheduled_for: new Date(Date.now() + backoffMin * 60_000).toISOString(),
+            attempts: newAttempts,
             last_error: msg,
           })
           .eq("id", row.id);
       }
+
       failed++;
     }
   }
