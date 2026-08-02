@@ -390,6 +390,76 @@ const CreateSit = () => {
     setAlmaBubbleDismissed(true);
   }, []);
 
+  // ---------------------------------------------------------------------------
+  // Filet de sécurité local du brouillon d'annonce.
+  //
+  // Le brouillon distant part avec un délai de 1500 ms. Une fermeture d'onglet,
+  // un plantage du navigateur ou une coupure réseau pendant cette fenêtre faisait
+  // perdre la saisie. On duplique donc l'état du formulaire dans le stockage
+  // local toutes les 300 ms, et on le restaure au chargement s'il est plus récent
+  // que le brouillon distant.
+  // ---------------------------------------------------------------------------
+  type SitLocalDraft = {
+    title: string;
+    startDate: string;
+    endDate: string;
+    flexibleDates: boolean;
+    flexibleNotes: string;
+    absenceReason: string;
+    sitterExpectations: string;
+    openTo: string[];
+    isUrgent: boolean;
+    sitEnvironments: string[];
+    minGardienSits: number;
+    maxApplications: number | null;
+    ownerMessage: string;
+    dailyRoutine: string;
+    coverPhotoUrl: string | null;
+    sitCity: string;
+    sitCountry: string;
+    acceptsSitterPets: "yes" | "no" | "discuss";
+    acceptsSitterChildren: "yes" | "no" | "discuss";
+  };
+  const localDraftKey = user ? `sit-create:${user.id}:${draftIdParam ?? fromSitId ?? "current"}` : null;
+  const applyLocalDraft = useCallback((d: SitLocalDraft) => {
+    setTitle(d.title ?? "");
+    setStartDate(d.startDate ?? "");
+    setEndDate(d.endDate ?? "");
+    setFlexibleDates(!!d.flexibleDates);
+    setFlexibleNotes(d.flexibleNotes ?? "");
+    setAbsenceReason(d.absenceReason ?? "");
+    setSitterExpectations(d.sitterExpectations ?? "");
+    setSpecificExpectations(joinExpectations(d.absenceReason ?? "", d.sitterExpectations ?? ""));
+    setOpenTo(Array.isArray(d.openTo) ? d.openTo : []);
+    setIsUrgent(!!d.isUrgent);
+    setSitEnvironments(Array.isArray(d.sitEnvironments) ? d.sitEnvironments : []);
+    setMinGardienSits(d.minGardienSits ?? 0);
+    setMaxApplications(d.maxApplications ?? DEFAULT_MAX_APPLICATIONS);
+    setOwnerMessage(d.ownerMessage ?? "");
+    setDailyRoutine(d.dailyRoutine ?? "");
+    if (d.coverPhotoUrl) setCoverPhotoUrl(d.coverPhotoUrl);
+    setSitCity(d.sitCity ?? "");
+    setSitCountry(d.sitCountry ?? "FR");
+    setAcceptsSitterPets(d.acceptsSitterPets ?? "discuss");
+    setAcceptsSitterChildren(d.acceptsSitterChildren ?? "discuss");
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+  const [localDraftRestored, setLocalDraftRestored] = useState(false);
+  // Restaure la copie locale si elle est postérieure au brouillon distant.
+  const restoreLocalDraftIfFresher = useCallback((remoteUpdatedAt: string | null) => {
+    if (!localDraftKey) return;
+    const stored = readFormDraft<SitLocalDraft>(localDraftKey);
+    if (!stored) return;
+    const savedAt = getFormDraftSavedAt(localDraftKey) ?? 0;
+    const remote = remoteUpdatedAt ? new Date(remoteUpdatedAt).getTime() : 0;
+    if (remote && savedAt <= remote) return;
+    applyLocalDraft(stored);
+    setLocalDraftRestored(true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [localDraftKey, applyLocalDraft]);
+
+
+
   useEffect(() => {
     if (!user) return;
     const load = async () => {
