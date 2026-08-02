@@ -235,6 +235,21 @@ const DateSheet = ({
   </Sheet>
 );
 
+/**
+ * Une copie locale ne vaut d'être restaurée que si elle porte réellement du
+ * contenu. Sans ce contrôle, un formulaire ouvert puis quitté sans saisie
+ * écrase le contenu chargé depuis une annonce source et annonce à tort une
+ * restauration.
+ */
+export function localDraftHasContent(d: Record<string, any> | null | undefined): boolean {
+  if (!d) return false;
+  const texts = [d.title, d.absenceReason, d.sitterExpectations, d.ownerMessage, d.dailyRoutine, d.flexibleNotes, d.startDate, d.endDate, d.coverPhotoUrl, d.sitCity];
+  if (texts.some((t) => typeof t === "string" && t.trim().length > 0)) return true;
+  if (Array.isArray(d.openTo) && d.openTo.length > 0) return true;
+  if (Array.isArray(d.sitEnvironments) && d.sitEnvironments.length > 0) return true;
+  return false;
+}
+
 const CreateSit = () => {
   const { user } = useAuth();
   const { toast } = useToast();
