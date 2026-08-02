@@ -279,7 +279,9 @@ const HouseGuide = () => {
     setSaving(true);
     // Snapshot pour rollback en cas d'échec
     const snapshot: GuideData = { ...guide };
-    const payload = { ...guide, user_id: user.id };
+    // La date de modification est envoyée explicitement, pour ne pas dépendre
+    // seulement du trigger en base dans la comparaison de fraîcheur.
+    const payload = { ...guide, user_id: user.id, updated_at: new Date().toISOString() };
     delete (payload as any).id;
 
     try {
