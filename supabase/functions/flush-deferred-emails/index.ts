@@ -271,7 +271,7 @@ Deno.serve(async (req) => {
   }
 
   return new Response(
-    JSON.stringify({ ok: true, processed: (due ?? []).length, sent, failed, redeferred, abandoned, closed, failed_24h: failedRecent }),
+    JSON.stringify({ ok: true, processed: (due ?? []).length, sent, failed, redeferred, abandoned, closed, skipped_locked: skippedLocked, failed_24h: failedRecent }),
     { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
   );
 });
