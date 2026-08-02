@@ -56,6 +56,7 @@ import {
   MIN_SUB_DESCRIPTION,
   type PublishBlocker,
 } from "@/lib/sitPublishRules";
+import { describeSitWriteError } from "@/lib/sitDbErrors";
 
 interface PropertySummary {
   id: string;
@@ -95,7 +96,22 @@ interface OwnerSummary {
   environments: string[];
 }
 
+/**
+ * Valeurs d'environnement acceptées par la base pour une annonce, plafonnées à
+ * trois. Toute autre valeur fait échouer la publication côté base.
+ */
+const ALLOWED_SIT_ENVIRONMENTS = ["ville", "campagne", "montagne", "lac", "vignes", "foret", "mer"];
+const sanitizeSitEnvironments = (values: unknown[]): string[] =>
+  Array.from(
+    new Set(
+      values
+        .map((v) => String(v ?? "").toLowerCase().trim())
+        .filter((v) => ALLOWED_SIT_ENVIRONMENTS.includes(v)),
+    ),
+  ).slice(0, 3);
+
 const envLabels: Record<string, string> = {
+
   city_center: "Centre-ville", suburban: "Périurbain", countryside: "Campagne",
   mountain: "Montagne", seaside: "Bord de mer", forest: "Forêt",
 };
@@ -598,7 +614,10 @@ const CreateSit = () => {
               if (typeof a.daily_routine === "string") setDailyRoutine(a.daily_routine);
               if (typeof a.owner_message === "string") setOwnerMessage(a.owner_message);
               if (Array.isArray(a.open_to)) setOpenTo(a.open_to);
-              if (Array.isArray(a.environments)) setSitEnvironments(a.environments);
+              // La base plafonne à 3 environnements et n'accepte qu'une liste
+              // fermée de valeurs : on filtre avant d'appliquer, sinon la
+              // publication est refusée par un contrôle en base.
+              if (Array.isArray(a.environments)) setSitEnvironments(sanitizeSitEnvironments(a.environments));
               try {
                 trackEvent("alma_republish_adapted", {
                   source: "create_sit_page",
@@ -611,11 +630,15 @@ const CreateSit = () => {
               });
             }
           } catch (e) {
+            // Le détail technique reste en console : l'utilisateur reçoit une
+            // phrase compréhensible, jamais le texte brut du serveur.
+            console.error("[CreateSit] adapt-sit-with-alma threw", e);
             toast({
               variant: "destructive",
               title: "Adaptation Alma indisponible",
-              description: e instanceof Error ? e.message : "Réessayez dans un instant.",
+              description: "L'assistante n'a pas pu adapter votre annonce. Votre brouillon reste tel quel, vous pouvez l'éditer manuellement.",
             });
+
           } finally {
             setAdaptingWithAlma(false);
           }
@@ -835,7 +858,7 @@ const CreateSit = () => {
         flexibility_notes: flexibleDates && flexibleNotes.trim() ? flexibleNotes.trim() : null,
         open_to: openTo,
         is_urgent: isUrgent,
-        environments: sitEnvironments,
+        environments: sanitizeSitEnvironments(sitEnvironments),
         min_gardien_sits: minGardienSits,
         max_applications: maxApplications,
         owner_message: ownerMessage.trim() || null,
@@ -1030,7 +1053,7 @@ const CreateSit = () => {
         open_to: openTo,
         is_urgent: isUrgent,
         status: "published",
-        environments: sitEnvironments,
+        environments: sanitizeSitEnvironments(sitEnvironments),
         min_gardien_sits: minGardienSits,
         max_applications: maxApplications,
         owner_message: ownerMessage.trim() || null,
@@ -1077,17 +1100,8 @@ const CreateSit = () => {
       // Le texte renvoyé par la base est technique et en anglais : il reste en
       // console, l'utilisateur reçoit une phrase compréhensible.
       console.error("[CreateSit] publish failed", err);
-      const code = String(err?.code || "");
-      const description =
-        code === "P0001"
-          ? "Votre annonce ne peut pas être publiée sans au moins un animal à faire garder. Ajoutez-le dans votre logement, puis republiez."
-          : code === "23505"
-          ? "Une annonce identique existe déjà. Ouvrez la liste de vos annonces, l'annonce y figure peut-être déjà."
-          : code === "42501" || code === "PGRST301"
-            ? "Vous n'avez pas les droits pour publier cette annonce. Reconnectez-vous, puis recommencez."
-            : code === "23514" || code === "23502"
-              ? "Un élément obligatoire manque ou n'est pas valide : titre, dates, description ou photo. Vérifiez le formulaire."
-              : "La publication n'a pas abouti. Vérifiez votre connexion, puis vos informations de titre, de dates, de description et de photo.";
+      const description = describeSitWriteError(err, "publish");
+
       toast({
         variant: "destructive",
         title: "Impossible de publier l'annonce",

@@ -47,6 +47,7 @@ import {
   getSitPublishBlockers,
   wasValidatedByCreateForm,
 } from "@/lib/sitPublishRules";
+import { describeSitWriteError } from "@/lib/sitDbErrors";
 
 
 /* ── Status configs (tokens sémantiques uniquement, compat dark mode) ── */
@@ -104,7 +105,10 @@ const getDuration = (start: string | null, end: string | null) => {
 const capitalize = (s: string) => s ? s.charAt(0).toUpperCase() + s.slice(1) : "";
 
 const getEffectiveStatus = (sit: any): string => {
+  // Annonce masquée par la sécurité en base : jamais de déréférencement nul.
+  if (!sit) return "unavailable";
   // Rule A1: expiration a la priorite absolue sur le statut brut cancelled.
+
   if (sit.cancellation_reason === "expired") return "expired";
   if (sit.status === "cancelled") return "cancelled";
   if (sit.status === "completed") return "completed";
@@ -386,23 +390,46 @@ const Sits = () => {
         }));
 
         setSits(
-          data?.map((a: any) => ({
-            ...a.sit,
-            effectiveStatus: getEffectiveStatus(a.sit),
-            application_status: a.status,
-            application_id: a.id,
-            application_created_at: a.created_at,
-            application_viewed_at: a.viewed_at,
-            owner: a.sit?.owner || null,
-            hasReviewed: reviewedSitIds.includes(a.sit?.id),
-            pets: petsByProperty[a.sit?.property_id] || [],
-            ownerAffinity: ownerAffinityById[a.sit?.user_id] || null,
-            houseGuide: guideMap[a.sit?.id] || null,
-            conversationId: convMap[a.sit?.id] || null,
-            lastMessage: lastMsgMap[a.sit?.id] || null,
-            unreadCount: unreadMap[a.sit?.id] || 0,
-          })) || []
+          data?.map((a: any) => {
+            /**
+             * L'annonce jointe peut être nulle : la sécurité en base masque les
+             * annonces annulées, y compris celles sur lesquelles le gardien a
+             * candidaté. On ne déréférence jamais cette valeur, la carte est
+             * remplacée par un message explicite.
+             */
+            if (!a.sit) {
+              return {
+                id: `unavailable-${a.id}`,
+                unavailable: true,
+                status: "unavailable",
+                effectiveStatus: "unavailable",
+                application_status: a.status,
+                application_id: a.id,
+                application_created_at: a.created_at,
+                application_viewed_at: a.viewed_at,
+                owner: null,
+                pets: [],
+              };
+            }
+            return {
+              ...a.sit,
+              effectiveStatus: getEffectiveStatus(a.sit),
+              application_status: a.status,
+              application_id: a.id,
+              application_created_at: a.created_at,
+              application_viewed_at: a.viewed_at,
+              owner: a.sit?.owner || null,
+              hasReviewed: reviewedSitIds.includes(a.sit?.id),
+              pets: petsByProperty[a.sit?.property_id] || [],
+              ownerAffinity: ownerAffinityById[a.sit?.user_id] || null,
+              houseGuide: guideMap[a.sit?.id] || null,
+              conversationId: convMap[a.sit?.id] || null,
+              lastMessage: lastMsgMap[a.sit?.id] || null,
+              unreadCount: unreadMap[a.sit?.id] || 0,
+            };
+          }) || []
         );
+
       }
     } catch (err: any) {
       console.error("[Sits] loadSits failed", err);
@@ -504,6 +531,12 @@ const Sits = () => {
 
     const needsForm = !wasValidatedByCreateForm(sit);
     const resumeHref = `/sits/create?resume=${sitId}`;
+    /**
+     * Une annonce passée ne peut pas être corrigée depuis l'édition, verrouillée
+     * pour les statuts archivé et annulé. Le formulaire d'adaptation repart du
+     * contenu, purge les dates dépassées et permet d'en saisir de nouvelles.
+     */
+    const adaptHref = `/sits/create?from=${sitId}&mode=copy`;
     const blockers = getBlockingBlockers(
       getSitPublishBlockers(
         buildSitPublishInput({
@@ -512,19 +545,27 @@ const Sits = () => {
           pets: sit.pets,
           overrides: { galleryPhotoCount: sit.ownerGalleryCount ?? 0 },
         }),
-        { viaCreateForm: needsForm, resumeHref },
+        { viaCreateForm: needsForm, resumeHref, pastDatesAction: adaptHref },
       ),
     );
 
     if (blockers.length > 0) {
       const labels = blockers.slice(0, 3).map((b) => b.label).join(" ; ");
+      const hasPastDates = blockers.some((b) => b.id === "date-past" || b.id === "dates");
       toast({
         variant: "destructive",
-        title: "Il manque quelque chose pour republier",
-        description: `${labels}${blockers.length > 3 ? " ; et d'autres éléments" : ""}.`,
+        title: hasPastDates ? "Les dates de cette annonce sont à redéfinir" : "Il manque quelque chose pour republier",
+        description: hasPastDates
+          ? "Nous rouvrons votre annonce dans le formulaire, saisissez simplement de nouvelles dates."
+          : `${labels}${blockers.length > 3 ? " ; et d'autres éléments" : ""}.`,
       });
-      navigate(blockers.find((b) => b.action)?.action || `/sits/${sitId}/edit`);
+      navigate(
+        hasPastDates
+          ? adaptHref
+          : blockers.find((b) => b.action)?.action || `/sits/${sitId}/edit`,
+      );
       return;
+
     }
 
     try {
@@ -554,17 +595,12 @@ const Sits = () => {
       // Le détail technique reste en console : l'utilisateur reçoit ce qui
       // bloque, jamais une invitation à réessayer.
       console.error("[Sits] republish failed", err);
-      const code = String(err?.code || "");
       toast({
         variant: "destructive",
         title: "Republication impossible",
-        description:
-          code === "P0001"
-            ? "Cette annonce ne peut pas être republiée sans au moins un animal à faire garder. Ajoutez-le dans votre logement, puis republiez."
-            : code === "42501" || code === "PGRST301"
-            ? "Vous n'avez pas les droits pour republier cette annonce."
-            : "La base a refusé la republication : vérifiez le titre, les dates, la description et la photo de cette annonce, puis republiez.",
+        description: describeSitWriteError(err, "republish"),
       });
+
     }
   };
 
@@ -641,8 +677,9 @@ const Sits = () => {
         switch (activeTab) {
           case "in_progress": return es === "in_progress" && appStatus === "accepted";
           case "completed": return es === "completed";
-          case "cancelled": return appStatus === "cancelled" || appStatus === "rejected" || es === "cancelled";
-          case "upcoming": return !["completed", "cancelled"].includes(es) && !["cancelled", "rejected"].includes(appStatus) && es !== "in_progress";
+          case "cancelled": return appStatus === "cancelled" || appStatus === "rejected" || es === "cancelled" || es === "unavailable";
+          case "upcoming": return !["completed", "cancelled", "unavailable"].includes(es) && !["cancelled", "rejected"].includes(appStatus) && es !== "in_progress";
+
         }
         return false;
       });
@@ -999,7 +1036,21 @@ const Sits = () => {
             // effectiveStatus deja calcule par getOwnerEffectiveStatus dans l'enrichissement.
             // Dans l'onglet Passees, l'affichage suit directement effectiveStatus.
             const cardSit = sit;
+            if (sit.unavailable) {
+              return (
+                <UnavailableSitCard
+                  key={sit.id}
+                  onWithdraw={
+                    sit.application_id && ["pending", "viewed", "discussing"].includes(sit.application_status)
+                      ? () => setWithdrawApp({ appId: sit.application_id, sitTitle: "cette annonce", conversationId: "" })
+                      : undefined
+                  }
+                />
+              );
+            }
+
             return (
+
               <SitCard
                 key={sit.id + (sit.application_id || "")}
                 sit={cardSit}
@@ -1234,7 +1285,56 @@ const Sits = () => {
   );
 };
 
+/**
+ * La fiche publique ne sert jamais une annonce réellement annulée en base, ni
+ * une annonce masquée. Le test porte sur le statut réel, jamais sur le statut
+ * effectif, qui bascule en « archivé » dès qu'un motif d'archivage est posé.
+ */
+const canOpenSitPage = (sit: any): boolean =>
+  !!sit && !sit.unavailable && sit.status !== "cancelled";
+
+/**
+ * Candidature dont l'annonce n'est plus visible (annulée ou retirée par le
+ * propriétaire, donc masquée par la sécurité en base). On affiche une carte
+ * explicite plutôt que de faire échouer toute la liste du gardien.
+ */
+const UnavailableSitCard = ({ onWithdraw }: { onWithdraw?: () => void }) => (
+  <div className="bg-card rounded-xl border border-border p-4">
+    <div className="flex items-start gap-3">
+      <div className="shrink-0 w-10 h-10 rounded-lg bg-muted flex items-center justify-center">
+        <Archive className="h-4 w-4 text-muted-foreground" />
+      </div>
+      <div className="min-w-0 flex-1">
+        <h3 className="font-heading font-semibold text-sm md:text-base">
+          Cette annonce n'est plus disponible
+        </h3>
+        <p className="text-xs text-muted-foreground mt-1">
+          Le propriétaire a retiré cette annonce, votre candidature n'a plus d'objet. Vous gardez l'accès à toutes vos autres annonces.
+        </p>
+        <div className="flex items-center gap-2 mt-3 flex-wrap">
+          <Link
+            to="/search"
+            className="text-xs font-medium flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-primary/10 text-primary hover:bg-primary/20 transition-colors"
+          >
+            <Search className="h-3.5 w-3.5" /> Voir les autres gardes
+          </Link>
+          {onWithdraw && (
+            <button
+              type="button"
+              onClick={onWithdraw}
+              className="text-xs font-medium px-2.5 py-1.5 rounded-lg text-muted-foreground hover:text-destructive transition-colors"
+            >
+              Retirer ma candidature
+            </button>
+          )}
+        </div>
+      </div>
+    </div>
+  </div>
+);
+
 /* ── Card ── */
+
 const SitCard = ({
   sit, isOwner, onArchive, onDelete, onRepublish, onOpenGuide, onWithdraw,
 }: {
@@ -1327,11 +1427,18 @@ const SitCard = ({
           {/* Top row */}
           <div className="flex items-start justify-between gap-3">
             <div className="min-w-0 flex-1">
-              <Link to={`/sits/${sit.id}`} className="hover:underline">
+              {canOpenSitPage(sit) ? (
+                <Link to={`/sits/${sit.id}`} className="hover:underline">
+                  <h3 className="font-heading font-semibold truncate text-sm md:text-base">
+                    {displayTitle}
+                  </h3>
+                </Link>
+              ) : (
                 <h3 className="font-heading font-semibold truncate text-sm md:text-base">
                   {displayTitle}
                 </h3>
-              </Link>
+              )}
+
               <div className="flex items-center gap-2 mt-1 flex-wrap">
                 {city && (
                   <span className="text-xs text-muted-foreground flex items-center gap-1">
@@ -1650,9 +1757,16 @@ const QuickActions = ({
   if (!isOwner && ["pending", "viewed", "discussing"].includes(sit.application_status)) {
     return (
       <>
-        <Link to={`/sits/${sit.id}`} className={cn(btnClass, "bg-accent text-muted-foreground hover:text-foreground")}>
-          <ChevronRight className="h-3.5 w-3.5" /> Voir l'annonce
-        </Link>
+        {canOpenSitPage(sit) ? (
+          <Link to={`/sits/${sit.id}`} className={cn(btnClass, "bg-accent text-muted-foreground hover:text-foreground")}>
+            <ChevronRight className="h-3.5 w-3.5" /> Voir l'annonce
+          </Link>
+        ) : (
+          <span className={cn(btnClass, "border border-border text-muted-foreground cursor-default")}>
+            Annonce retirée par le propriétaire
+          </span>
+        )}
+
         {sit.conversationId && (
           <Link
             to={`/messages?c=${sit.conversationId}`}
@@ -1736,7 +1850,7 @@ const ActionsMenu = ({
         </button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-52">
-        {effectiveStatus !== "cancelled" && (
+        {canOpenSitPage(sit) && (
           <DropdownMenuItem asChild>
             <Link to={`/sits/${sit.id}`} className="flex items-center gap-2">
               <Eye className="h-4 w-4" /> Voir l'annonce
