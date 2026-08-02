@@ -210,18 +210,34 @@ const EditSit = () => {
     };
   }, [id, user, navigate]);
 
-  const dateError = !flexibleDates && startDate && endDate && startDate >= endDate
+  const dateError = startDate && endDate && startDate >= endDate
     ? "La date de fin doit être après la date de début." : null;
 
   const trimmedTitle = title.trim();
   const trimmedDesc = specificExpectations.trim();
 
-  const hasDatesOrFlexible = flexibleDates
-    ? flexibleMonths.length > 0
-    : !!(startDate && endDate && !dateError);
+  /**
+   * Les règles de contenu viennent de la source unique `sitPublishRules`.
+   * Cette page ne porte plus ses propres seuils : on ne retient que les
+   * bloquants dont elle détient les champs (titre, dates, description).
+   */
+  const formBlockers = useMemo(() => {
+    const owned = new Set(["title", "dates", "date-error", "desc-reason", "desc-expectations"]);
+    return getSitPublishBlockers({
+      title: trimmedTitle,
+      startDate,
+      endDate,
+      flexibleDates,
+      dateError,
+      specificExpectations: trimmedDesc,
+      // Champs hors de ce formulaire, neutralisés pour ne pas produire de bruit.
+      hasProperty: true,
+      galleryPhotoCount: 1,
+      petCount: 1,
+    }).filter((b) => owned.has(b.id));
+  }, [trimmedTitle, startDate, endDate, flexibleDates, dateError, trimmedDesc]);
 
   const titleValid = trimmedTitle.length >= 3 && trimmedTitle.length <= MAX_TITLE_LENGTH;
-  const descValid = trimmedDesc.length === 0 || trimmedDesc.length >= MIN_DESC_LENGTH;
   const isLocked = LOCKED_STATUSES.has(sitStatus);
 
   const FORBIDDEN_REGEX = /\b(voisin(?:e|s|es)?|voisinage|AURA|Auvergne[\s-]Rh[oô]ne[\s-]Alpes)\b/i;
@@ -229,7 +245,8 @@ const EditSit = () => {
   const forbiddenInDesc = FORBIDDEN_REGEX.test(specificExpectations);
   const hasForbidden = forbiddenInTitle || forbiddenInDesc;
 
-  const canSave = !isLocked && titleValid && hasDatesOrFlexible && !dateError && descValid && !hasForbidden;
+  const canSave =
+    !isLocked && titleValid && formBlockers.length === 0 && !hasForbidden;
 
   const isConfirmed = sitStatus === "confirmed" || sitStatus === "in_progress";
 
