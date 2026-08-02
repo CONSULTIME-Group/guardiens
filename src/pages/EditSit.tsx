@@ -264,7 +264,7 @@ const EditSit = () => {
    * bloquants dont elle détient les champs (titre, dates, description).
    */
   const formBlockers = useMemo(() => {
-    const owned = new Set(["title", "dates", "date-error", "desc-reason", "desc-expectations"]);
+    const owned = new Set(["title", "dates", "date-past", "date-error", "desc-reason", "desc-expectations"]);
     return getSitPublishBlockers(
       buildSitPublishInput({
         sit: {
