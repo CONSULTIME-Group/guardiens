@@ -281,12 +281,11 @@ const SitDetail = () => {
 
 
   if (loading) return <SitDetailSkeleton />;
-  if (!sit)
-    return (
-      <div className="p-6 md:p-10">
-        <p>Annonce introuvable.</p>
-      </div>
-    );
+  if (!sit) {
+    /* Cible disparue (annonce annulée ou supprimée), souvent atteinte depuis une
+       notification : on ramène vers la liste des annonces avec un message. */
+    return <MissingSitRedirect />;
+  }
   if (id?.startsWith("demo-")) return <Navigate to="/search" replace />;
 
   // `user_id` et `dates_hidden` viennent de get_public_sit : si le serveur a
