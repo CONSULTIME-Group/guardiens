@@ -12,6 +12,8 @@ import {
   MIN_SINGLE_DESCRIPTION,
   EXPECTATIONS_SEPARATOR,
   getSitPublishRequirements,
+  getBlockingBlockers,
+  MAX_TITLE_LENGTH,
   type SitPublishInput,
   type SitPublishTwoFieldsInput,
   type SitPublishSingleBlockInput,
@@ -294,6 +296,7 @@ describe("libellés des prérequis, suivant le mode", () => {
     expect(getSitPublishRequirements("two-fields").map((r) => r.id)).toEqual([
       "property",
       "title",
+      "title-long",
       "dates",
       "date-past",
       "date-error",
@@ -309,6 +312,7 @@ describe("libellés des prérequis, suivant le mode", () => {
     expect(reqs.map((r) => r.id)).toEqual([
       "property",
       "title",
+      "title-long",
       "dates",
       "date-past",
       "date-error",
@@ -324,5 +328,47 @@ describe("libellés des prérequis, suivant le mode", () => {
   it("ne présente plus les dates comme dispensables", () => {
     const dates = getSitPublishRequirements("two-fields").find((r) => r.id === "dates");
     expect(dates?.label).not.toMatch(/flexible/i);
+  });
+});
+
+
+describe("blocages informatifs et limite de titre", () => {
+  const base = {
+    descriptionMode: "single-block" as const,
+    title: "Garde de deux chats",
+    startDate: iso(10),
+    endDate: iso(20),
+    hasProperty: true,
+    galleryPhotoCount: 1,
+    petCount: 1,
+    specificExpectations: "x".repeat(120),
+  };
+
+  it("la ligne des deux questions informe sans verrouiller la publication", () => {
+    const blockers = getSitPublishBlockers(base, {
+      viaCreateForm: true,
+      resumeHref: "/sits/create?resume=abc",
+    });
+    const advisory = blockers.find((b) => b.id === "desc-two-fields");
+    expect(advisory?.advisory).toBe(true);
+    expect(advisory?.action).toBe("/sits/create?resume=abc");
+    expect(getBlockingBlockers(blockers)).toHaveLength(0);
+  });
+
+  it("ne se déclare jamais satisfaite, même avec deux blocs séparés", () => {
+    const twoBlocks = ["y".repeat(40), "z".repeat(40)].join("\n\n");
+    const blockers = getSitPublishBlockers(
+      { ...base, specificExpectations: twoBlocks },
+      { viaCreateForm: true },
+    );
+    expect(blockers.some((b) => b.id === "desc-two-fields")).toBe(true);
+  });
+
+  it("bloque un titre au-delà de la limite partagée", () => {
+    const blockers = getSitPublishBlockers({ ...base, title: "t".repeat(MAX_TITLE_LENGTH + 22) });
+    const long = blockers.find((b) => b.id === "title-long");
+    expect(long).toBeTruthy();
+    expect(long?.label).toContain("22");
+    expect(getBlockingBlockers(blockers)).toContain(long);
   });
 });

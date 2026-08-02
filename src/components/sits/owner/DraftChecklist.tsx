@@ -11,7 +11,7 @@ import { Check, Circle, Send } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import type { PublishBlocker } from "@/lib/sitPublishRules";
+import { getBlockingBlockers, type PublishBlocker } from "@/lib/sitPublishRules";
 
 interface DraftChecklistProps {
   /** Éléments manquants, calculés par `getSitPublishBlockers`. */
@@ -51,7 +51,13 @@ const DraftChecklist = ({
     if (!knownIds.has(b.id)) items.push({ id: b.id, label: b.label, ok: false, fix: b.action });
   }
 
-  const allOk = blockers.length === 0;
+  /**
+   * Seuls les blocages non informatifs verrouillent la publication. Un blocage
+   * informatif signale une étape restante dans le formulaire de création : le
+   * bouton doit rester actif, sans quoi le propriétaire n'a plus aucune sortie
+   * depuis sa fiche.
+   */
+  const allOk = getBlockingBlockers(blockers).length === 0;
   const doneCount = items.filter((i) => i.ok).length;
 
 

@@ -30,7 +30,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { getSitPublishBlockers, buildSitPublishInput } from "@/lib/sitPublishRules";
+import { getSitPublishBlockers, buildSitPublishInput, MAX_TITLE_LENGTH } from "@/lib/sitPublishRules";
 
 /** Carte de section pour grouper visuellement les champs d'édition. */
 const SectionCard = ({
@@ -62,7 +62,7 @@ const MIN_SITS_OPTIONS = [
   { label: "3 gardes+", value: 3 },
   { label: "5 gardes+", value: 5 },
 ];
-const MAX_TITLE_LENGTH = 120;
+
 const MAX_DESC_LENGTH = 2000;
 
 /**
@@ -298,6 +298,13 @@ const EditSit = () => {
 
   const titleValid = trimmedTitle.length >= 3 && trimmedTitle.length <= MAX_TITLE_LENGTH;
   const isLocked = LOCKED_STATUSES.has(sitStatus);
+  /**
+   * Sur un brouillon, la contrainte de contenu ne s'applique pas en base : les
+   * règles de publication informent, elles n'interdisent pas d'enregistrer.
+   * Sans cela, un brouillon sans description ne peut plus corriger son titre.
+   */
+  const isDraftSit = sitStatus === "draft";
+  const savingBlockers = isDraftSit ? [] : formBlockers;
 
   const FORBIDDEN_REGEX = /\b(voisin(?:e|s|es)?|voisinage|AURA|Auvergne[\s-]Rh[oô]ne[\s-]Alpes)\b/i;
   const forbiddenInTitle = FORBIDDEN_REGEX.test(title);
@@ -315,7 +322,7 @@ const EditSit = () => {
   const hasForbidden = forbiddenTitleBlocking || forbiddenDescBlocking;
 
   const canSave =
-    !isLocked && titleValid && formBlockers.length === 0 && !hasForbidden;
+    !isLocked && titleValid && savingBlockers.length === 0 && !hasForbidden;
 
 
   const isConfirmed = sitStatus === "confirmed" || sitStatus === "in_progress";
@@ -448,8 +455,8 @@ const EditSit = () => {
         ? trimmedTitle.length > MAX_TITLE_LENGTH
           ? `Titre trop long de ${trimmedTitle.length - MAX_TITLE_LENGTH} caractères (${MAX_TITLE_LENGTH} maximum)`
           : "Titre trop court (3 caractères minimum)"
-        : formBlockers.length > 0
-          ? formBlockers[0].label
+        : savingBlockers.length > 0
+          ? savingBlockers[0].label
           : hasForbidden
             ? "Vocabulaire non autorisé dans le titre ou la description"
             : null;
@@ -532,10 +539,12 @@ const EditSit = () => {
               <Input
                 id="sit-title"
                 value={title}
-                onChange={(e) => setTitle(e.target.value.slice(0, MAX_TITLE_LENGTH))}
+                /* Jamais de troncature à la saisie : un titre trop long reste
+                   visible en entier, le dépassement est signalé et le
+                   propriétaire coupe lui-même où il le souhaite. */
+                onChange={(e) => setTitle(e.target.value)}
                 onBlur={() => setTitleTouched(true)}
                 className="mt-1.5 h-12 text-base"
-                maxLength={MAX_TITLE_LENGTH}
               />
               {(titleTouched || trimmedTitle.length > MAX_TITLE_LENGTH) && !titleValid && trimmedTitle.length > 0 && (
                 <p className="text-xs text-destructive mt-1.5 flex items-center gap-1">

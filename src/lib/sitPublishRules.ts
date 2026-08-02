@@ -23,6 +23,8 @@
 
 export const MIN_SUB_DESCRIPTION = 30;
 export const MIN_SINGLE_DESCRIPTION = 50;
+/** Longueur maximale du titre, appliquée par la création comme par l'édition. */
+export const MAX_TITLE_LENGTH = 120;
 export const EXPECTATIONS_SEPARATOR = "\n\n";
 
 /** Mode de saisie de la description, déclaré par l'appelant. */
@@ -36,7 +38,17 @@ export type PublishBlocker = {
   anchor?: string;
   /** Route de correction quand l'élément se règle ailleurs. */
   action?: string;
+  /**
+   * Blocage informatif : il signale une étape restante dans le formulaire de
+   * création, il n'interdit pas la publication. Un blocage informatif ne doit
+   * jamais désactiver le bouton qui mène à l'écran capable de le résoudre.
+   */
+  advisory?: boolean;
 };
+
+/** Blocages qui interdisent réellement la publication. */
+export const getBlockingBlockers = (blockers: PublishBlocker[]): PublishBlocker[] =>
+  blockers.filter((b) => !b.advisory);
 
 interface SitPublishBase {
   title?: string | null;
@@ -130,7 +142,7 @@ export const getSingleBlockDescriptionBlockers = (text?: string | null): Publish
 /** Bloquants de description selon le mode déclaré. */
 export const getDescriptionBlockers = (
   input: SitPublishInput,
-  options: { viaCreateForm?: boolean } = {},
+  options: { viaCreateForm?: boolean; resumeHref?: string } = {},
 ): PublishBlocker[] => {
   if (input.descriptionMode === "two-fields") {
     return getTwoFieldsDescriptionBlockers(input.absenceReason, input.sitterExpectations);
@@ -138,22 +150,24 @@ export const getDescriptionBlockers = (
   const single = getSingleBlockDescriptionBlockers(input.specificExpectations);
   if (single.length > 0 || !options.viaCreateForm) return single;
   /**
-   * Publication déléguée au formulaire de création : celui-ci exige deux blocs
-   * de trente caractères. Un texte en bloc unique qui n'en contient pas deux
-   * n'est donc pas prêt, la ligne reste non satisfaite avant le clic.
+   * Publication déléguée au formulaire de création : celui-ci ne découpe jamais
+   * le texte, il place tout dans la première question et laisse la seconde
+   * vide. Toute prédiction de découpe serait un faux positif : la ligne annonce
+   * donc toujours l'étape restante, sans jamais se déclarer satisfaite, et sans
+   * bloquer la publication puisque le formulaire est le seul écran capable de
+   * la résoudre.
    */
-  const parts = (input.specificExpectations || "").split(EXPECTATIONS_SEPARATOR);
-  const ready = parts.length >= 2 && parts.every((p) => len(p) >= MIN_SUB_DESCRIPTION);
-  return ready
-    ? []
-    : [
-        {
-          id: "desc-reason",
-          label: `Description en deux questions à compléter dans le formulaire : raison de la garde et attentes envers le gardien, ${MIN_SUB_DESCRIPTION} caractères minimum chacune`,
-          anchor: "description-field",
-        },
-      ];
+  return [
+    {
+      id: "desc-two-fields",
+      label: `Répartir la description en deux questions dans le formulaire : raison de la garde et attentes envers le gardien, ${MIN_SUB_DESCRIPTION} caractères minimum chacune`,
+      anchor: "description-field",
+      action: options.resumeHref,
+      advisory: true,
+    },
+  ];
 };
+
 
 /**
  * Renvoie la liste ordonnée des éléments manquants pour publier.
@@ -161,7 +175,7 @@ export const getDescriptionBlockers = (
  */
 export const getSitPublishBlockers = (
   input: SitPublishInput,
-  options: { viaCreateForm?: boolean } = {},
+  options: { viaCreateForm?: boolean; resumeHref?: string } = {},
 ): PublishBlocker[] => {
   /**
    * Une date de début et une date de fin sont toujours exigées. La case dates
@@ -198,6 +212,13 @@ export const getSitPublishBlockers = (
       : null,
     !len(input.title)
       ? { id: "title", label: "Titre de l'annonce", anchor: "title-field" }
+      : null,
+    len(input.title) > MAX_TITLE_LENGTH
+      ? {
+          id: "title-long",
+          label: `Titre trop long de ${len(input.title) - MAX_TITLE_LENGTH} caractères (${MAX_TITLE_LENGTH} maximum)`,
+          anchor: "title-field",
+        }
       : null,
     !hasDates
       ? {
@@ -250,7 +271,7 @@ export const getSitPublishBlockers = (
 };
 
 export const canPublishSit = (input: SitPublishInput): boolean =>
-  getSitPublishBlockers(input).length === 0;
+  getBlockingBlockers(getSitPublishBlockers(input)).length === 0;
 
 /** Options d'affichage de la checklist. */
 export interface SitPublishRequirementsOptions {
@@ -275,6 +296,7 @@ export const getSitPublishRequirements = (
 ): { id: string; label: string }[] => [
   { id: "property", label: "Logement décrit sur votre profil" },
   { id: "title", label: "Titre de l'annonce" },
+  { id: "title-long", label: `Titre de ${MAX_TITLE_LENGTH} caractères maximum` },
   { id: "dates", label: "Date de début et date de fin de la garde" },
   { id: "date-past", label: "Date de début à venir, pas dans le passé" },
   { id: "date-error", label: "Date de fin postérieure à la date de début" },
@@ -293,7 +315,11 @@ export const getSitPublishRequirements = (
       : [
           {
             id: "desc-reason",
-            label: `Description en deux questions à compléter dans le formulaire : raison de la garde et attentes envers le gardien, ${MIN_SUB_DESCRIPTION} caractères minimum chacune`,
+            label: `Description de la garde (${MIN_SINGLE_DESCRIPTION} caractères minimum)`,
+          },
+          {
+            id: "desc-two-fields",
+            label: `Répartir la description en deux questions dans le formulaire : raison de la garde et attentes envers le gardien, ${MIN_SUB_DESCRIPTION} caractères minimum chacune`,
           },
         ]
     : [
