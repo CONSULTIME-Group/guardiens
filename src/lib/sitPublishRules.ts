@@ -128,16 +128,41 @@ export const getSingleBlockDescriptionBlockers = (text?: string | null): Publish
     : [];
 
 /** Bloquants de description selon le mode déclaré. */
-export const getDescriptionBlockers = (input: SitPublishInput): PublishBlocker[] =>
-  input.descriptionMode === "two-fields"
-    ? getTwoFieldsDescriptionBlockers(input.absenceReason, input.sitterExpectations)
-    : getSingleBlockDescriptionBlockers(input.specificExpectations);
+export const getDescriptionBlockers = (
+  input: SitPublishInput,
+  options: { viaCreateForm?: boolean } = {},
+): PublishBlocker[] => {
+  if (input.descriptionMode === "two-fields") {
+    return getTwoFieldsDescriptionBlockers(input.absenceReason, input.sitterExpectations);
+  }
+  const single = getSingleBlockDescriptionBlockers(input.specificExpectations);
+  if (single.length > 0 || !options.viaCreateForm) return single;
+  /**
+   * Publication déléguée au formulaire de création : celui-ci exige deux blocs
+   * de trente caractères. Un texte en bloc unique qui n'en contient pas deux
+   * n'est donc pas prêt, la ligne reste non satisfaite avant le clic.
+   */
+  const parts = (input.specificExpectations || "").split(EXPECTATIONS_SEPARATOR);
+  const ready = parts.length >= 2 && parts.every((p) => len(p) >= MIN_SUB_DESCRIPTION);
+  return ready
+    ? []
+    : [
+        {
+          id: "desc-reason",
+          label: `Description en deux questions à compléter dans le formulaire : raison de la garde et attentes envers le gardien, ${MIN_SUB_DESCRIPTION} caractères minimum chacune`,
+          anchor: "description-field",
+        },
+      ];
+};
 
 /**
  * Renvoie la liste ordonnée des éléments manquants pour publier.
  * Liste vide, la publication est possible.
  */
-export const getSitPublishBlockers = (input: SitPublishInput): PublishBlocker[] => {
+export const getSitPublishBlockers = (
+  input: SitPublishInput,
+  options: { viaCreateForm?: boolean } = {},
+): PublishBlocker[] => {
   /**
    * Une date de début et une date de fin sont toujours exigées. La case dates
    * flexibles enrichit l'annonce, elle ne dispense jamais de dates : sans elles
