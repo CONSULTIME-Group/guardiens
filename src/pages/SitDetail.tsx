@@ -25,6 +25,22 @@ import { backfillOwnerGalleryDimensions } from "@/lib/backfillGalleryDimensions"
 import fallbackMarrakech from "@/assets/fallback-marrakech.webp";
 import { trackEvent } from "@/lib/analytics";
 import type { SitData } from "@/components/sits/views/types";
+import { useToast } from "@/hooks/use-toast";
+
+/**
+ * Cible de notification disparue : au lieu d'une page introuvable, on renvoie
+ * vers la liste des annonces avec un message explicite.
+ */
+const MissingSitRedirect = () => {
+  const { toast } = useToast();
+  useEffect(() => {
+    toast({
+      title: "Cette annonce n'est plus consultable",
+      description: "Elle a été retirée ou annulée. Voici vos annonces.",
+    });
+  }, [toast]);
+  return <Navigate to="/sits" replace />;
+};
 
 /**
  * Photo d'ambiance par défaut quand la propriété n'a aucune photo en base.
@@ -281,12 +297,11 @@ const SitDetail = () => {
 
 
   if (loading) return <SitDetailSkeleton />;
-  if (!sit)
-    return (
-      <div className="p-6 md:p-10">
-        <p>Annonce introuvable.</p>
-      </div>
-    );
+  if (!sit) {
+    /* Cible disparue (annonce annulée ou supprimée), souvent atteinte depuis une
+       notification : on ramène vers la liste des annonces avec un message. */
+    return <MissingSitRedirect />;
+  }
   if (id?.startsWith("demo-")) return <Navigate to="/search" replace />;
 
   // `user_id` et `dates_hidden` viennent de get_public_sit : si le serveur a

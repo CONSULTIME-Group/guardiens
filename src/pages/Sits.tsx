@@ -154,7 +154,7 @@ const Sits = () => {
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
 
-  // Alma étape 1 — compagnon culturel + usage_nudge sur la liste sits.
+  // Alma étape 1 : compagnon culturel + usage_nudge sur la liste sits.
   useAlmaCulturalFact({ surface: "sits_list", context: { role: activeRole } });
   useAlmaUsageNudge({
     surface: "sits_list",
@@ -628,19 +628,28 @@ const Sits = () => {
   const activeSits = useMemo(() => sits.filter(s => !isArchived(s)), [sits]);
   
 
-  // Comptages onglets sitter (vue inchangée)
-  // Une expiration/archivage owner-side est mappe vers "cancelled" cote sitter pour preserver le comportement.
+  /**
+   * Source unique du rangement d'une candidature côté gardien : le comptage des
+   * onglets et le filtrage d'affichage consomment tous deux cette fonction, donc
+   * chaque état possible est compté dans l'onglet où sa carte apparaît.
+   */
+  const sitterTabOf = (s: any): Tab => {
+    const es = s.effectiveStatus || s.status;
+    const appStatus = s.application_status;
+    if (
+      appStatus === "cancelled" || appStatus === "rejected" ||
+      ["cancelled", "unavailable", "expired", "archived"].includes(es)
+    ) return "cancelled";
+    if (es === "completed") return "completed";
+    if (es === "in_progress") return "in_progress";
+    return "upcoming";
+  };
+
+  // Comptages onglets sitter, strictement alignés sur sitterTabOf.
   const tabCounts = useMemo(() => {
     const counts: Record<Tab, number> = { upcoming: 0, in_progress: 0, completed: 0, cancelled: 0 };
     if (isOwnerView) return counts;
-    activeSits.forEach((s) => {
-      const es = s.effectiveStatus || s.status;
-      const appStatus = s.application_status;
-      if (appStatus === "cancelled" || appStatus === "rejected" || es === "cancelled" || es === "expired" || es === "archived") counts.cancelled++;
-      else if (es === "completed") counts.completed++;
-      else if (es === "in_progress" && appStatus === "accepted") counts.in_progress++;
-      else counts.upcoming++;
-    });
+    activeSits.forEach((s) => { counts[sitterTabOf(s)]++; });
     return counts;
   }, [activeSits, isOwnerView]);
 
@@ -671,18 +680,7 @@ const Sits = () => {
         }
       });
     } else {
-      base = activeSits.filter((s) => {
-        const es = s.effectiveStatus || s.status;
-        const appStatus = s.application_status;
-        switch (activeTab) {
-          case "in_progress": return es === "in_progress" && appStatus === "accepted";
-          case "completed": return es === "completed";
-          case "cancelled": return appStatus === "cancelled" || appStatus === "rejected" || es === "cancelled" || es === "unavailable";
-          case "upcoming": return !["completed", "cancelled", "unavailable"].includes(es) && !["cancelled", "rejected"].includes(appStatus) && es !== "in_progress";
-
-        }
-        return false;
-      });
+      base = activeSits.filter((s) => sitterTabOf(s) === activeTab);
     }
     const q = searchQuery.trim().toLowerCase();
     let searched = q
@@ -1040,6 +1038,7 @@ const Sits = () => {
               return (
                 <UnavailableSitCard
                   key={sit.id}
+                  applicationStatus={sit.application_status}
                   onWithdraw={
                     sit.application_id && ["pending", "viewed", "discussing"].includes(sit.application_status)
                       ? () => setWithdrawApp({ appId: sit.application_id, sitTitle: "cette annonce", conversationId: "" })
@@ -1294,11 +1293,18 @@ const canOpenSitPage = (sit: any): boolean =>
   !!sit && !sit.unavailable && sit.status !== "cancelled";
 
 /**
- * Candidature dont l'annonce n'est plus visible (annulée ou retirée par le
- * propriétaire, donc masquée par la sécurité en base). On affiche une carte
- * explicite plutôt que de faire échouer toute la liste du gardien.
+ * Candidature dont l'annonce n'est plus consultable (retirée, confiée à un
+ * autre gardien, ou archivée en fin de cycle). Le gardien ne dispose pas de
+ * l'information exacte, le message reste donc factuel, sauf quand son propre
+ * statut de candidature permet de conclure.
  */
-const UnavailableSitCard = ({ onWithdraw }: { onWithdraw?: () => void }) => (
+const UnavailableSitCard = ({
+  onWithdraw,
+  applicationStatus,
+}: {
+  onWithdraw?: () => void;
+  applicationStatus?: string;
+}) => (
   <div className="bg-card rounded-xl border border-border p-4">
     <div className="flex items-start gap-3">
       <div className="shrink-0 w-10 h-10 rounded-lg bg-muted flex items-center justify-center">
@@ -1306,10 +1312,14 @@ const UnavailableSitCard = ({ onWithdraw }: { onWithdraw?: () => void }) => (
       </div>
       <div className="min-w-0 flex-1">
         <h3 className="font-heading font-semibold text-sm md:text-base">
-          Cette annonce n'est plus disponible
+          Cette annonce n'est plus consultable
         </h3>
         <p className="text-xs text-muted-foreground mt-1">
-          Le propriétaire a retiré cette annonce, votre candidature n'a plus d'objet. Vous gardez l'accès à toutes vos autres annonces.
+          {applicationStatus === "rejected"
+            ? "Votre candidature n'a pas été retenue, et cette annonce n'est plus consultable. Vous gardez l'accès à toutes vos autres candidatures."
+            : applicationStatus === "cancelled"
+              ? "Vous avez retiré votre candidature, et cette annonce n'est plus consultable. Vous gardez l'accès à toutes vos autres candidatures."
+              : "Le propriétaire l'a retirée, ou elle a été confiée à un autre gardien. Vous gardez l'accès à toutes vos autres candidatures."}
         </p>
         <div className="flex items-center gap-2 mt-3 flex-wrap">
           <Link
