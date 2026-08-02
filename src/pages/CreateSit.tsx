@@ -258,7 +258,33 @@ const CreateSit = () => {
   const [endDate, setEndDate] = useState("");
   const [flexibleDates, setFlexibleDates] = useState(false);
   const [flexibleNotes, setFlexibleNotes] = useState("");
+  // La description de la garde est saisie en deux micro-questions courtes,
+  // puis concaténée dans `specificExpectations` (colonne specific_expectations).
   const [specificExpectations, setSpecificExpectations] = useState("");
+  const [absenceReason, setAbsenceReason] = useState("");
+  const [sitterExpectations, setSitterExpectations] = useState("");
+  const EXPECTATIONS_SEPARATOR = "\n\n";
+  const joinExpectations = (a: string, b: string) =>
+    [a.trim(), b.trim()].filter(Boolean).join(EXPECTATIONS_SEPARATOR);
+  // Reprend un texte existant (brouillon, republication, Alma) et le répartit
+  // sur les deux sous-champs, sans perte de contenu.
+  const applyExpectations = useCallback((raw: string | null | undefined) => {
+    const text = raw || "";
+    const idx = text.indexOf(EXPECTATIONS_SEPARATOR);
+    const first = idx >= 0 ? text.slice(0, idx) : text;
+    const rest = idx >= 0 ? text.slice(idx + EXPECTATIONS_SEPARATOR.length) : "";
+    setAbsenceReason(first);
+    setSitterExpectations(rest);
+    setSpecificExpectations(text);
+  }, []);
+  const updateAbsenceReason = (v: string) => {
+    setAbsenceReason(v);
+    setSpecificExpectations(joinExpectations(v, sitterExpectations));
+  };
+  const updateSitterExpectations = (v: string) => {
+    setSitterExpectations(v);
+    setSpecificExpectations(joinExpectations(absenceReason, v));
+  };
   const [openTo, setOpenTo] = useState<string[]>([]);
   const [isUrgent, setIsUrgent] = useState(false);
   const [sitEnvironments, setSitEnvironments] = useState<string[]>([]);
@@ -389,7 +415,7 @@ const CreateSit = () => {
         const s = sourceSitRes.data;
         setTitle(s.title || "");
         setSourceSitTitle(s.title || null);
-        setSpecificExpectations(s.specific_expectations || "");
+        applyExpectations(s.specific_expectations || "");
         setOpenTo(s.open_to || []);
         setSitEnvironments(s.environments || []);
         setMinGardienSits(s.min_gardien_sits || 0);
@@ -428,7 +454,7 @@ const CreateSit = () => {
             } else {
               const a = adapted as any;
               if (typeof a.title === "string" && a.title.length > 0) setTitle(a.title);
-              if (typeof a.specific_expectations === "string") setSpecificExpectations(a.specific_expectations);
+              if (typeof a.specific_expectations === "string") applyExpectations(a.specific_expectations);
               if (typeof a.daily_routine === "string") setDailyRoutine(a.daily_routine);
               if (typeof a.owner_message === "string") setOwnerMessage(a.owner_message);
               if (Array.isArray(a.open_to)) setOpenTo(a.open_to);
@@ -486,7 +512,7 @@ const CreateSit = () => {
           setStartDate(cleanStart);
           setEndDate(cleanEnd);
           setFlexibleDates(d.flexible_dates || datesWerePast);
-          setSpecificExpectations(d.specific_expectations || "");
+          applyExpectations(d.specific_expectations || "");
           setOpenTo(d.open_to || []);
           setIsUrgent(d.is_urgent || false);
           setSitEnvironments(d.environments || []);
@@ -655,8 +681,10 @@ const CreateSit = () => {
     ? "La date de début ne peut pas être dans le passé."
     : null;
 
-  const MIN_DESCRIPTION = 150;
-  const descriptionValid = specificExpectations.length >= MIN_DESCRIPTION;
+  const MIN_SUB_DESCRIPTION = 30;
+  const reasonValid = absenceReason.trim().length >= MIN_SUB_DESCRIPTION;
+  const expectationsValid = sitterExpectations.trim().length >= MIN_SUB_DESCRIPTION;
+  const descriptionValid = reasonValid && expectationsValid;
   const hasPhoto = !!coverPhotoUrl || ownerPhotos.length > 0;
   // Seuil de publication abaissé de 60 % à 40 % (owner Pass 2) : débloque
   // les propriétaires en cours d'onboarding sans sacrifier la qualité minimale
@@ -674,7 +702,8 @@ const CreateSit = () => {
     !startDate ? { id: "start", label: "Date de début", anchor: "dates-field" } : null,
     !endDate ? { id: "end", label: "Date de fin", anchor: "dates-field" } : null,
     dateError ? { id: "date-error", label: dateError, anchor: "dates-field" } : null,
-    !descriptionValid ? { id: "desc", label: `Description d'au moins ${MIN_DESCRIPTION} caractères (actuellement ${specificExpectations.length})`, anchor: "description-field" } : null,
+    !reasonValid ? { id: "desc-reason", label: `Raison de votre besoin de garde (${MIN_SUB_DESCRIPTION} caractères minimum, actuellement ${absenceReason.trim().length})`, anchor: "description-field" } : null,
+    !expectationsValid ? { id: "desc-expectations", label: `Attentes envers le gardien (${MIN_SUB_DESCRIPTION} caractères minimum, actuellement ${sitterExpectations.trim().length})`, anchor: "description-field" } : null,
     !hasPhoto ? { id: "photo", label: "Au moins 1 photo de votre logement ou galerie", action: "/owner-profile" } : null,
     pets.length === 0 ? { id: "pets", label: "Au moins un animal à faire garder", anchor: "pets-field" } : null,
   ].filter(Boolean) as PublishBlocker[];
@@ -843,7 +872,8 @@ const CreateSit = () => {
       if (!startDate) errors.push({ field: "startDate", anchor: "dates-field" });
       if (!endDate) errors.push({ field: "endDate", anchor: "dates-field" });
       if (dateError) errors.push({ field: "endDate", anchor: "dates-field" });
-      if (!descriptionValid) errors.push({ field: "description", anchor: "description-field" });
+      if (!reasonValid) errors.push({ field: "descriptionReason", anchor: "description-field" });
+      if (!expectationsValid) errors.push({ field: "descriptionExpectations", anchor: "description-field" });
       if (errors.length > 0) {
         setTouched(prev => {
           const next = { ...prev };
@@ -867,10 +897,74 @@ const CreateSit = () => {
     setCurrentStep(s => s + 1);
   };
 
+  // Prérequis vérifiés à l'entrée du flow, pas en cours de route : inutile de
+  // faire remplir l'étape 0 à quelqu'un qui ne pourra pas publier au bout.
+  const preflightMissing: Array<{ id: string; label: string; anchor: string }> = [
+    !property ? { id: "property", label: "Votre logement", anchor: "housing" } : null,
+    pets.length === 0 ? { id: "pets", label: "Au moins un animal à faire garder", anchor: "animals" } : null,
+    !hasPhoto ? { id: "photo", label: "Au moins une photo de votre logement", anchor: "gallery" } : null,
+    profileCompletion < PUBLISH_PROFILE_THRESHOLD
+      ? { id: "profile", label: `Un profil complété à ${PUBLISH_PROFILE_THRESHOLD} % minimum (actuellement ${profileCompletion} %)`, anchor: "" }
+      : null,
+  ].filter(Boolean) as Array<{ id: string; label: string; anchor: string }>;
+  const preflightBlocked = !loading && preflightMissing.length > 0;
+  const preflightSignature = preflightMissing.map(m => m.id).join(",");
+  const preflightTrackedRef = useRef<string>("");
+
+  useEffect(() => {
+    if (!preflightBlocked) return;
+    if (preflightTrackedRef.current === preflightSignature) return;
+    preflightTrackedRef.current = preflightSignature;
+    void trackEvent("sits_create_preflight_blocked", {
+      source: "/sits/create",
+      metadata: {
+        missing: preflightSignature.split(","),
+        profile_completion: profileCompletion,
+      },
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [preflightBlocked, preflightSignature]);
+
 
   if (loading) {
     return <div className="p-6 md:p-10 max-w-3xl mx-auto text-muted-foreground">Chargement...</div>;
   }
+
+  if (preflightBlocked) {
+    const anchored = preflightMissing.find(m => m.anchor);
+    const target = anchored?.anchor ? `/owner-profile?section=${anchored.anchor}` : "/owner-profile";
+    return (
+      <div className="animate-fade-in px-4 py-8 max-w-3xl mx-auto">
+        <Helmet><meta name="robots" content="noindex, nofollow" /></Helmet>
+        <Link to="/sits" className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground mb-6">
+          <ArrowLeft className="h-4 w-4" /> Retour à mes annonces
+        </Link>
+        <h1 className="font-heading text-2xl md:text-3xl font-bold mb-2">
+          Complétez votre profil avant de publier
+        </h1>
+        <p className="text-sm text-muted-foreground mb-6">
+          Les gardiens choisissent une maison et des animaux, pas seulement des dates. Il manque quelques éléments à votre profil, quelques minutes suffisent, puis vous publiez votre annonce d'une traite.
+        </p>
+        <div className="rounded-xl border border-border bg-card p-5 mb-6">
+          <p className="text-sm font-medium mb-3">Ce qu'il reste à renseigner :</p>
+          <ul className="space-y-2">
+            {preflightMissing.map(m => (
+              <li key={m.id} className="flex items-start gap-2 text-sm text-muted-foreground">
+                <AlertCircle className="h-4 w-4 text-destructive mt-0.5 shrink-0" />
+                <span>{m.label}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+        <div className="flex flex-wrap gap-2">
+          <Button onClick={() => navigate(target)}>Compléter mon profil</Button>
+          <Button variant="ghost" onClick={() => navigate("/sits")}>Plus tard</Button>
+        </div>
+      </div>
+    );
+  }
+
+
 
   // Draft label
   const draftLabel = savingDraft
@@ -1144,7 +1238,7 @@ const CreateSit = () => {
           {/* Description */}
           <div id="description-field" className="scroll-mt-24">
             <div className="flex items-center justify-between gap-2 mb-1.5 flex-wrap">
-              <Label htmlFor="description-textarea" className="text-sm font-medium">Description de la garde *</Label>
+              <p className="text-sm font-medium">Description de la garde *</p>
               <div className="flex items-center gap-2">
                 {(() => {
                   const parts: string[] = [];
@@ -1158,7 +1252,7 @@ const CreateSit = () => {
                       type="button"
                       onClick={() => {
                         if (specificExpectations.trim() && !window.confirm("Remplacer le texte actuel par les éléments de votre profil ?")) return;
-                        setSpecificExpectations(seed);
+                        applyExpectations(seed);
                       }}
                       className="text-xs text-primary hover:underline"
                     >
@@ -1177,46 +1271,90 @@ const CreateSit = () => {
                   }}
                   onApply={(patch) => {
                     if (patch.title) setTitle(patch.title);
-                    if (patch.description) setSpecificExpectations(patch.description);
+                    if (patch.description) applyExpectations(patch.description);
                   }}
                 />
               </div>
             </div>
-            <Textarea
-              id="description-textarea"
-              placeholder={`Décrivez ce qui est particulier à cette garde, en plus de ce qui est déjà dans votre profil (min. ${MIN_DESCRIPTION} caractères). Les annonces détaillées reçoivent 3 fois plus de candidatures.`}
-              value={specificExpectations}
-              onChange={e => setSpecificExpectations(e.target.value)}
-              onBlur={() => touch("description")}
-              className={cn(
-                "text-base min-h-[140px]",
-                touched.description && !descriptionValid
-                  ? "border-destructive focus-visible:ring-destructive"
-                  : touched.description && descriptionValid
-                    ? "border-green-500 focus-visible:ring-green-500"
-                    : ""
-              )}
-              rows={5}
-            />
-            <p className={cn(
-              "text-xs mt-1 flex justify-between",
-              touched.description && !descriptionValid
-                ? "text-destructive"
-                : specificExpectations.length >= MIN_DESCRIPTION
-                  ? "text-green-600"
-                  : "text-muted-foreground"
-            )}>
-              <span>
-                {touched.description && !descriptionValid
-                  ? specificExpectations.length === 0
-                    ? `Décrivez la garde (${MIN_DESCRIPTION} caractères minimum).`
-                    : `Encore ${MIN_DESCRIPTION - specificExpectations.length} caractères`
-                  : specificExpectations.length >= MIN_DESCRIPTION
-                    ? "Longueur suffisante"
-                    : `Décrivez la garde (${MIN_DESCRIPTION} caractères minimum)`}
-              </span>
-              <span>{specificExpectations.length} / {MIN_DESCRIPTION} min.</span>
-            </p>
+            <div className="space-y-4">
+              <div>
+                <Label htmlFor="description-textarea" className="text-sm font-medium">
+                  Pourquoi avez-vous besoin d'un gardien pour cette période ?
+                </Label>
+                <Textarea
+                  id="description-textarea"
+                  placeholder="Voyage, événement familial…"
+                  value={absenceReason}
+                  onChange={e => updateAbsenceReason(e.target.value)}
+                  onBlur={() => touch("descriptionReason")}
+                  className={cn(
+                    "text-base min-h-[90px] mt-1.5",
+                    touched.descriptionReason && !reasonValid
+                      ? "border-destructive focus-visible:ring-destructive"
+                      : touched.descriptionReason && reasonValid
+                        ? "border-green-500 focus-visible:ring-green-500"
+                        : ""
+                  )}
+                  rows={3}
+                />
+                <p className={cn(
+                  "text-xs mt-1 flex justify-between",
+                  touched.descriptionReason && !reasonValid
+                    ? "text-destructive"
+                    : reasonValid
+                      ? "text-green-600"
+                      : "text-muted-foreground"
+                )}>
+                  <span>
+                    {reasonValid
+                      ? "Longueur suffisante"
+                      : touched.descriptionReason && absenceReason.trim().length > 0
+                        ? `Encore ${MIN_SUB_DESCRIPTION - absenceReason.trim().length} caractères`
+                        : `En quelques mots (${MIN_SUB_DESCRIPTION} caractères minimum)`}
+                  </span>
+                  <span>{absenceReason.trim().length} / {MIN_SUB_DESCRIPTION} min.</span>
+                </p>
+              </div>
+
+              <div>
+                <Label htmlFor="expectations-textarea" className="text-sm font-medium">
+                  Qu'attendez-vous du gardien pendant votre absence ?
+                </Label>
+                <Textarea
+                  id="expectations-textarea"
+                  placeholder="Présence rassurante, sorties avec l'animal…"
+                  value={sitterExpectations}
+                  onChange={e => updateSitterExpectations(e.target.value)}
+                  onBlur={() => touch("descriptionExpectations")}
+                  className={cn(
+                    "text-base min-h-[90px] mt-1.5",
+                    touched.descriptionExpectations && !expectationsValid
+                      ? "border-destructive focus-visible:ring-destructive"
+                      : touched.descriptionExpectations && expectationsValid
+                        ? "border-green-500 focus-visible:ring-green-500"
+                        : ""
+                  )}
+                  rows={3}
+                />
+                <p className={cn(
+                  "text-xs mt-1 flex justify-between",
+                  touched.descriptionExpectations && !expectationsValid
+                    ? "text-destructive"
+                    : expectationsValid
+                      ? "text-green-600"
+                      : "text-muted-foreground"
+                )}>
+                  <span>
+                    {expectationsValid
+                      ? "Longueur suffisante"
+                      : touched.descriptionExpectations && sitterExpectations.trim().length > 0
+                        ? `Encore ${MIN_SUB_DESCRIPTION - sitterExpectations.trim().length} caractères`
+                        : `En quelques mots (${MIN_SUB_DESCRIPTION} caractères minimum)`}
+                  </span>
+                  <span>{sitterExpectations.trim().length} / {MIN_SUB_DESCRIPTION} min.</span>
+                </p>
+              </div>
+            </div>
           </div>
 
           {/* Journée type */}
