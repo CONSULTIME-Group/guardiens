@@ -66,6 +66,7 @@ const formatDate = (d: string) => {
 
 const AnnouncementPreviewDialog = ({
   open, onOpenChange, onConfirmPublish, publishing, canPublish,
+  blockers = [], onResolveBlocker,
   title, startDate, endDate, flexibleDates, city, country,
   specificExpectations, ownerMessage, dailyRoutine,
   coverPhotoUrl, ownerPhotos, pets, propertyType, environments, isUrgent,
