@@ -436,11 +436,14 @@ const CreateSit = () => {
     acceptsSitterChildren: "yes" | "no" | "discuss";
     sitLocation?: "home" | "away" | null;
     currentStep?: number;
+    /** Identifiant du brouillon auquel appartient cette copie locale. */
+    draftId?: string | null;
   };
   const localDraftKey = user ? `sit-create:${user.id}:${draftIdParam ?? fromSitId ?? "current"}` : null;
   // Clé historique posée lors d'une première visite sans paramètre d'URL. Au
   // retour via le dashboard, l'identifiant du brouillon change la clé, la copie
-  // locale doit donc être récupérée puis migrée.
+  // locale doit donc être récupérée puis migrée, mais uniquement si elle
+  // n'appartient à aucun autre brouillon.
   const legacyLocalDraftKey = user ? `sit-create:${user.id}:current` : null;
   const applyLocalDraft = useCallback((d: SitLocalDraft) => {
     setTitle(d.title ?? "");
