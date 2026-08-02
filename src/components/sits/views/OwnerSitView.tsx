@@ -108,6 +108,7 @@ const OwnerSitView = ({
   currentUserId,
 }: OwnerSitViewProps) => {
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [publishing, setPublishing] = useState(false);
   const [publishConfirmOpen, setPublishConfirmOpen] = useState(false);
   const [cancelOpen, setCancelOpen] = useState(false);
