@@ -626,6 +626,9 @@ const Sits = () => {
   const isArchived = isPast;
 
   const activeSits = useMemo(() => sits.filter(s => !isArchived(s)), [sits]);
+  // Côté gardien, aucun filtrage en amont : l'historique (terminées, expirées,
+  // archivées, annulées) doit rester accessible, c'est le calcul d'onglet qui range.
+  const sitterSits = sits;
   
 
   /**
@@ -636,6 +639,12 @@ const Sits = () => {
   const sitterTabOf = (s: any): Tab => {
     const es = s.effectiveStatus || s.status;
     const appStatus = s.application_status;
+    // Une candidature acceptée sur une garde arrivée au bout de son cycle
+    // appartient à l'historique du gardien (et ouvre le droit à l'avis).
+    if (
+      appStatus === "accepted" &&
+      ["completed", "archived", "expired", "unavailable"].includes(es)
+    ) return "completed";
     if (
       appStatus === "cancelled" || appStatus === "rejected" ||
       ["cancelled", "unavailable", "expired", "archived"].includes(es)
@@ -649,9 +658,10 @@ const Sits = () => {
   const tabCounts = useMemo(() => {
     const counts: Record<Tab, number> = { upcoming: 0, in_progress: 0, completed: 0, cancelled: 0 };
     if (isOwnerView) return counts;
-    activeSits.forEach((s) => { counts[sitterTabOf(s)]++; });
+    sitterSits.forEach((s) => { counts[sitterTabOf(s)]++; });
     return counts;
-  }, [activeSits, isOwnerView]);
+  }, [sitterSits, isOwnerView]);
+
 
   // Comptages onglets owner : En ligne / Brouillons / Passees
   const ownerTabCounts = useMemo(() => {
@@ -680,7 +690,7 @@ const Sits = () => {
         }
       });
     } else {
-      base = activeSits.filter((s) => sitterTabOf(s) === activeTab);
+      base = sitterSits.filter((s) => sitterTabOf(s) === activeTab);
     }
     const q = searchQuery.trim().toLowerCase();
     let searched = q
@@ -717,7 +727,7 @@ const Sits = () => {
       return bySort;
     }
     return searched;
-  }, [activeSits, sits, isOwnerView, activeTab, activeOwnerTab, searchQuery, ownerSortMode]);
+  }, [activeSits, sitterSits, sits, isOwnerView, activeTab, activeOwnerTab, searchQuery, ownerSortMode]);
 
   // Suggestions de recherche : titres, villes, gardiens/propriétaires, animaux (uniques)
   const searchSuggestions = useMemo(() => {
@@ -1315,12 +1325,15 @@ const UnavailableSitCard = ({
           Cette annonce n'est plus consultable
         </h3>
         <p className="text-xs text-muted-foreground mt-1">
-          {applicationStatus === "rejected"
-            ? "Votre candidature n'a pas été retenue, et cette annonce n'est plus consultable. Vous gardez l'accès à toutes vos autres candidatures."
-            : applicationStatus === "cancelled"
-              ? "Vous avez retiré votre candidature, et cette annonce n'est plus consultable. Vous gardez l'accès à toutes vos autres candidatures."
-              : "Le propriétaire l'a retirée, ou elle a été confiée à un autre gardien. Vous gardez l'accès à toutes vos autres candidatures."}
+          {applicationStatus === "accepted"
+            ? "Cette garde est terminée. Vous gardez l'accès à toutes vos autres candidatures."
+            : applicationStatus === "rejected"
+              ? "Votre candidature n'a pas été retenue, et cette annonce n'est plus consultable. Vous gardez l'accès à toutes vos autres candidatures."
+              : applicationStatus === "cancelled"
+                ? "Vous avez retiré votre candidature, et cette annonce n'est plus consultable. Vous gardez l'accès à toutes vos autres candidatures."
+                : "Elle a été retirée ou archivée par le propriétaire. Vous gardez l'accès à toutes vos autres candidatures."}
         </p>
+
         <div className="flex items-center gap-2 mt-3 flex-wrap">
           <Link
             to="/search"
@@ -1773,9 +1786,10 @@ const QuickActions = ({
           </Link>
         ) : (
           <span className={cn(btnClass, "border border-border text-muted-foreground cursor-default")}>
-            Annonce retirée par le propriétaire
+            Annonce non consultable
           </span>
         )}
+
 
         {sit.conversationId && (
           <Link

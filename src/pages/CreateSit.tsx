@@ -1565,7 +1565,7 @@ const CreateSit = () => {
                     animaux: pets?.map(p => `${p.species}${p.breed ? ` (${p.breed})` : ""}`).join(", "),
                     logement: property?.type,
                     ville: sitCity || ownerCity || undefined,
-                    dates: startDate && endDate ? `${startDate} – ${endDate}` : undefined,
+                    dates: startDate && endDate ? `${startDate} à ${endDate}` : undefined,
                   }}
                   onApply={(patch) => {
                     if (patch.title) setTitle(patch.title);
@@ -1824,7 +1824,7 @@ const CreateSit = () => {
               />
               <div>
                 <label className="text-sm font-medium flex items-center gap-1.5 cursor-pointer text-amber-800" onClick={() => setIsUrgent(!isUrgent)}>
-                  <Zap className="h-4 w-4" /> Urgent – garde dans moins de 48 h
+                  <Zap className="h-4 w-4" /> Urgent, garde dans moins de 48 h
                 </label>
                 <p className="text-xs text-amber-600 mt-0.5">
                   Les gardiens d'urgence seront alertés en priorité.
