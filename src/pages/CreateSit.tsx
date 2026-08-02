@@ -877,32 +877,29 @@ const CreateSit = () => {
     ? "La date de début ne peut pas être dans le passé."
     : null;
 
-  const MIN_SUB_DESCRIPTION = 30;
   const reasonValid = absenceReason.trim().length >= MIN_SUB_DESCRIPTION;
   const expectationsValid = sitterExpectations.trim().length >= MIN_SUB_DESCRIPTION;
   const descriptionValid = reasonValid && expectationsValid;
-  const hasPhoto = !!coverPhotoUrl || ownerPhotos.length > 0;
-  // Seuil de publication abaissé de 60 % à 40 % (owner Pass 2) : débloque
-  // les propriétaires en cours d'onboarding sans sacrifier la qualité minimale
-  // (photo, description, dates). Un badge non bloquant rappelle la complétion
-  // du profil sur l'annonce tant qu'elle est < 80 %.
-  const PUBLISH_PROFILE_THRESHOLD = 40;
   const NUDGE_PROFILE_THRESHOLD = 80;
-  const canPublish = profileCompletion >= PUBLISH_PROFILE_THRESHOLD && property && title && startDate && endDate && !dateError && descriptionValid && hasPhoto && pets.length > 0;
 
-  type PublishBlocker = { id: string; label: string; anchor?: string; action?: string };
-  const publishBlockers: PublishBlocker[] = [
-    profileCompletion < PUBLISH_PROFILE_THRESHOLD ? { id: "profile", label: `Profil complété à ${PUBLISH_PROFILE_THRESHOLD} % minimum (actuellement ${profileCompletion} %)`, action: "/owner-profile" } : null,
-    !property ? { id: "property", label: "Logement renseigné", action: "/owner-profile" } : null,
-    !title ? { id: "title", label: "Titre de l'annonce", anchor: "title-field" } : null,
-    !startDate ? { id: "start", label: "Date de début", anchor: "dates-field" } : null,
-    !endDate ? { id: "end", label: "Date de fin", anchor: "dates-field" } : null,
-    dateError ? { id: "date-error", label: dateError, anchor: "dates-field" } : null,
-    !reasonValid ? { id: "desc-reason", label: `Raison de votre besoin de garde (${MIN_SUB_DESCRIPTION} caractères minimum, actuellement ${absenceReason.trim().length})`, anchor: "description-field" } : null,
-    !expectationsValid ? { id: "desc-expectations", label: `Attentes envers le gardien (${MIN_SUB_DESCRIPTION} caractères minimum, actuellement ${sitterExpectations.trim().length})`, anchor: "description-field" } : null,
-    !hasPhoto ? { id: "photo", label: "Au moins 1 photo de votre logement ou galerie", action: "/owner-profile" } : null,
-    pets.length === 0 ? { id: "pets", label: "Au moins un animal à faire garder", anchor: "pets-field" } : null,
-  ].filter(Boolean) as PublishBlocker[];
+  // Règles de publication : source unique, voir src/lib/sitPublishRules.ts.
+  const publishBlockers: PublishBlocker[] = getSitPublishBlockers({
+    title,
+    startDate,
+    endDate,
+    flexibleDates,
+    dateError,
+    absenceReason,
+    sitterExpectations,
+    hasProperty: !!property,
+    galleryPhotoCount: ownerPhotos.length,
+    propertyPhotoCount: Array.isArray((property as any)?.photos) ? (property as any).photos.length : 0,
+    hasCoverPhoto: !!coverPhotoUrl,
+    petCount: pets.length,
+  });
+  const canPublish = publishBlockers.length === 0;
+  const hasPhoto = !publishBlockers.some((b) => b.id === "photo");
+
 
 
 
