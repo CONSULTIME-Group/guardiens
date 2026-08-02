@@ -55,6 +55,7 @@ la nuit, y compris au-delà de 3/jour :
 - `cancellation-review-published`
 - `cancellation-response-published`
 - `sit-confirmed`
+- `application-accepted` (pendant strict de `sit-confirmed`, côté gardien accepté)
 - `contact-reply`
 
 Critères d'inclusion : sécurité/identité, résolution litige/signalement,
