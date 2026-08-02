@@ -574,6 +574,7 @@ const CreateSit = () => {
         }
         if (draftRes?.data) {
           const d = draftRes.data;
+          remoteDraftUpdatedAt = (d as any).updated_at || (d as any).created_at || null;
           const today = new Date().toISOString().slice(0, 10);
           const rawStart: string | null = d.start_date || null;
           const rawEnd: string | null = d.end_date || null;
