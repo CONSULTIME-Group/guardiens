@@ -1066,7 +1066,9 @@ const CreateSit = () => {
     ? "Brouillon en cours d'enregistrement…"
     : lastSavedAt
       ? `Brouillon enregistré · ${relativeTime(lastSavedAt)}`
-      : draftId ? "Brouillon en cours" : null;
+      : localDraftSavedAt
+        ? "Brouillon enregistré sur cet appareil"
+        : draftId ? "Brouillon en cours" : null;
 
   return (
     <div className="animate-fade-in pb-40">
