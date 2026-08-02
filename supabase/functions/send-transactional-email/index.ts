@@ -545,19 +545,62 @@ Deno.serve(async (req) => {
       // creer une nouvelle. Sinon attempts repart a 0 et first_enqueued_at est
       // perdu, ce qui neutralise MAX_ATTEMPTS et le TTL (famine).
       let enqErr: { message?: string } | null = null
+      let srcAttempts = 0
+      let firstEnqueuedAt = new Date()
       if (sourceQueueId) {
         const { data: srcRow } = await supabase
           .from('email_deferred_queue')
-          .select('attempts')
+          .select('attempts, first_enqueued_at')
           .eq('id', sourceQueueId)
           .maybeSingle()
+        const row = srcRow as { attempts?: number; first_enqueued_at?: string } | null
+        srcAttempts = row?.attempts ?? 0
+        if (row?.first_enqueued_at) firstEnqueuedAt = new Date(row.first_enqueued_at)
+      }
+
+      // Defaut 1 : un report au dela du TTL de la file (36 h) condamne l'email
+      // a expirer sans jamais partir. On l'abandonne franchement, avec motif.
+      const DEFERRED_TTL_HOURS = 36
+      const ttlDeadline = new Date(firstEnqueuedAt.getTime() + DEFERRED_TTL_HOURS * 3600_000)
+      if (scheduledFor.getTime() > ttlDeadline.getTime()) {
+        const abandonReason = `cap_window_exceeds_ttl (${deferReason}, report ${scheduledFor.toISOString()} > TTL ${ttlDeadline.toISOString()})`
+        if (sourceQueueId) {
+          await supabase
+            .from('email_deferred_queue')
+            .update({ status: 'abandoned', last_error: abandonReason })
+            .eq('id', sourceQueueId)
+        }
+        await supabase.from('email_send_log').insert({
+          message_id: messageId,
+          template_name: templateName,
+          recipient_email: effectiveRecipient,
+          status: 'skipped',
+          error_message: abandonReason,
+          metadata: {
+            idempotency_key: idempotencyKey,
+            category,
+            defer_reason: deferReason,
+            abandon_reason: 'cap_window_exceeds_ttl',
+            scheduled_for: scheduledFor.toISOString(),
+          },
+        })
+        console.warn('Email abandonne, fenetre de cap au dela du TTL', {
+          templateName, recipientLower, deferReason, scheduledFor: scheduledFor.toISOString(),
+        })
+        return new Response(
+          JSON.stringify({ success: true, skipped: true, abandoned: true, reason: 'cap_window_exceeds_ttl', defer_reason: deferReason }),
+          { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        )
+      }
+
+      if (sourceQueueId) {
         const { error: updErr } = await supabase
           .from('email_deferred_queue')
           .update({
             status: 'pending',
             defer_reason: deferReason,
             scheduled_for: scheduledFor.toISOString(),
-            attempts: ((srcRow as { attempts?: number } | null)?.attempts ?? 0) + 1,
+            attempts: srcAttempts + 1,
           })
           .eq('id', sourceQueueId)
         enqErr = updErr
@@ -572,6 +615,7 @@ Deno.serve(async (req) => {
         })
         enqErr = insErr
       }
+
 
 
       if (enqErr) {
