@@ -505,7 +505,7 @@ const CreateSit = () => {
     applyLocalDraft(stored);
     setLocalDraftRestored(true);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [localDraftKey, legacyLocalDraftKey, applyLocalDraft]);
+  }, [localDraftKey, legacyLocalDraftKey, applyLocalDraft, draftIdParam, fromSitId]);
 
 
 
