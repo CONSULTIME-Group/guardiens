@@ -155,6 +155,10 @@ const EditSit = () => {
 
   const initialSnapshot = useRef<string>("");
   const initialStartDateRef = useRef("");
+  /** Textes tels que chargés en base, pour ne pas bloquer sur du vocabulaire préexistant. */
+  const initialTitleRef = useRef("");
+  const initialDescRef = useRef("");
+
 
   useEffect(() => {
     if (!id || !user) return;
@@ -190,6 +194,8 @@ const EditSit = () => {
       const freeNote = stored && stored.free ? stored.free : legacy.free;
       const clean = legacy.clean;
       setTitle(data.title || "");
+      initialTitleRef.current = data.title || "";
+
       setStartDate(data.start_date || "");
       initialStartDateRef.current = data.start_date || "";
       setEndDate(data.end_date || "");
@@ -199,6 +205,8 @@ const EditSit = () => {
       setFlexibleFreeNote(freeNote);
 
       setSpecificExpectations(clean);
+      initialDescRef.current = clean;
+
       setOpenTo((data.open_to as string[]) || []);
       setIsUrgent(data.is_urgent || false);
       setMinGardienSits((data as any).min_gardien_sits || 0);
@@ -256,7 +264,7 @@ const EditSit = () => {
    * bloquants dont elle détient les champs (titre, dates, description).
    */
   const formBlockers = useMemo(() => {
-    const owned = new Set(["title", "dates", "date-error", "desc-reason", "desc-expectations"]);
+    const owned = new Set(["title", "dates", "date-past", "date-error", "desc-reason", "desc-expectations"]);
     return getSitPublishBlockers(
       buildSitPublishInput({
         sit: {
@@ -276,13 +284,13 @@ const EditSit = () => {
       }),
     ).filter((b) => {
       if (!owned.has(b.id)) return false;
-      if (
-        b.id === "date-error"
-        && b.label === "La date de début ne peut pas être dans le passé."
-        && startDate === initialStartDateRef.current
-      ) return false;
+      // Une garde déjà commencée doit rester modifiable : le blocage de date
+      // passée ne s'applique que si le propriétaire change lui-même la date de
+      // début. Comparaison sur l'identifiant, jamais sur le libellé.
+      if (b.id === "date-past" && startDate === initialStartDateRef.current) return false;
       return true;
     });
+
   }, [trimmedTitle, startDate, endDate, flexibleDates, dateError, persistedDesc]);
 
 
@@ -294,10 +302,21 @@ const EditSit = () => {
   const FORBIDDEN_REGEX = /\b(voisin(?:e|s|es)?|voisinage|AURA|Auvergne[\s-]Rh[oô]ne[\s-]Alpes)\b/i;
   const forbiddenInTitle = FORBIDDEN_REGEX.test(title);
   const forbiddenInDesc = FORBIDDEN_REGEX.test(specificExpectations);
-  const hasForbidden = forbiddenInTitle || forbiddenInDesc;
+  /**
+   * Vocabulaire préexistant : ce texte a pu être injecté par le produit lui
+   * même (règles de maison recopiées) et le formulaire de création n'applique
+   * pas ce filtre. Le signaler oui, interdire tout enregistrement non.
+   * Le filtre reste bloquant sur un mot que le propriétaire vient de saisir.
+   */
+  const titleForbiddenPreexisting = FORBIDDEN_REGEX.test(initialTitleRef.current);
+  const descForbiddenPreexisting = FORBIDDEN_REGEX.test(initialDescRef.current);
+  const forbiddenTitleBlocking = forbiddenInTitle && !titleForbiddenPreexisting;
+  const forbiddenDescBlocking = forbiddenInDesc && !descForbiddenPreexisting;
+  const hasForbidden = forbiddenTitleBlocking || forbiddenDescBlocking;
 
   const canSave =
     !isLocked && titleValid && formBlockers.length === 0 && !hasForbidden;
+
 
   const isConfirmed = sitStatus === "confirmed" || sitStatus === "in_progress";
 
@@ -522,10 +541,19 @@ const EditSit = () => {
                 </p>
               )}
               {forbiddenInTitle && (
-                <p className="text-xs text-destructive mt-1.5 flex items-center gap-1">
-                  <AlertCircle className="h-3 w-3 shrink-0" /> Mot non autorisé. Préférez « gardien » ou « personne de confiance ».
+                <p
+                  className={cn(
+                    "text-xs mt-1.5 flex items-center gap-1",
+                    forbiddenTitleBlocking ? "text-destructive" : "text-muted-foreground",
+                  )}
+                >
+                  <AlertCircle className="h-3 w-3 shrink-0" />
+                  {forbiddenTitleBlocking
+                    ? "Mot non autorisé. Préférez « gardien » ou « personne de confiance »."
+                    : "Ce texte contient un mot que nous préférons éviter. Remplacez-le par « gardien » ou « personne de confiance » quand vous le pourrez, l'enregistrement reste possible."}
                 </p>
               )}
+
               <p className="text-xs text-muted-foreground mt-1 text-right">
                 {trimmedTitle.length}/{MAX_TITLE_LENGTH}
               </p>
@@ -702,10 +730,19 @@ const EditSit = () => {
 
               </p>
               {forbiddenInDesc && (
-                <p className="text-xs text-destructive mt-1 flex items-center gap-1">
-                  <AlertCircle className="h-3 w-3 shrink-0" /> Mot non autorisé. Préférez « gardien » ou « personne de confiance ».
+                <p
+                  className={cn(
+                    "text-xs mt-1 flex items-center gap-1",
+                    forbiddenDescBlocking ? "text-destructive" : "text-muted-foreground",
+                  )}
+                >
+                  <AlertCircle className="h-3 w-3 shrink-0" />
+                  {forbiddenDescBlocking
+                    ? "Mot non autorisé. Préférez « gardien » ou « personne de confiance »."
+                    : "Ce texte contient un mot que nous préférons éviter. Remplacez-le par « gardien » ou « personne de confiance » quand vous le pourrez, l'enregistrement reste possible."}
                 </p>
               )}
+
             </div>
           </SectionCard>
 

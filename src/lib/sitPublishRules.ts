@@ -80,12 +80,16 @@ export const joinExpectations = (a: string, b: string) =>
 
 const len = (v?: string | null) => (v || "").trim().length;
 
-/** Date du jour au format ISO court, en heure locale. */
-const todayIso = (): string => {
-  const d = new Date();
-  const pad = (n: number) => String(n).padStart(2, "0");
-  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
-};
+/**
+ * Date du jour au format ISO court, en temps universel.
+ *
+ * Les formulaires comparent des chaînes de dates produites en UTC : utiliser
+ * l'heure locale ici faisait diverger les deux entre minuit et deux heures du
+ * matin à Paris, les règles déclarant passée une date que le formulaire
+ * acceptait encore.
+ */
+const todayIso = (): string => new Date().toISOString().slice(0, 10);
+
 
 
 /** Bloquants de description en mode deux champs, les deux étant obligatoires. */
@@ -152,14 +156,14 @@ export const getSitPublishBlockers = (input: SitPublishInput): PublishBlocker[] 
    */
   const start = (input.startDate || "").trim();
   const end = (input.endDate || "").trim();
-  const computedDateError = !hasDates
-    ? null
-    : start < todayIso()
-      ? "La date de début ne peut pas être dans le passé."
-      : end <= start
-        ? "La date de fin doit être après la date de début."
-        : null;
-  const dateError = computedDateError || input.dateError || null;
+  /**
+   * Deux identifiants distincts : une garde déjà commencée (date-past) n'est
+   * pas la même chose qu'un intervalle incohérent (date-error). Les écrans qui
+   * neutralisent l'un doivent pouvoir le faire sans comparer un libellé.
+   */
+  const startIsPast = hasDates && start < todayIso();
+  const rangeIsInvalid = hasDates && !startIsPast && end <= start;
+  const fallbackDateError = !startIsPast && !rangeIsInvalid ? input.dateError || null : null;
 
   const blockers: (PublishBlocker | null)[] = [
     !input.hasProperty
@@ -175,7 +179,24 @@ export const getSitPublishBlockers = (input: SitPublishInput): PublishBlocker[] 
           anchor: "dates-field",
         }
       : null,
-    dateError ? { id: "date-error", label: dateError, anchor: "dates-field" } : null,
+    startIsPast
+      ? {
+          id: "date-past",
+          label: "La date de début ne peut pas être dans le passé.",
+          anchor: "dates-field",
+        }
+      : null,
+    rangeIsInvalid
+      ? {
+          id: "date-error",
+          label: "La date de fin doit être après la date de début.",
+          anchor: "dates-field",
+        }
+      : null,
+    fallbackDateError
+      ? { id: "date-error", label: fallbackDateError, anchor: "dates-field" }
+      : null,
+
 
     ...getDescriptionBlockers(input),
     photoCount === 0
@@ -186,8 +207,16 @@ export const getSitPublishBlockers = (input: SitPublishInput): PublishBlocker[] 
         }
       : null,
     (input.petCount || 0) === 0
-      ? { id: "pets", label: "Au moins un animal à faire garder", anchor: "pets-field" }
+      ? {
+          id: "pets",
+          label: "Au moins un animal à faire garder",
+          anchor: "pets-field",
+          // Les animaux se gèrent sur le profil propriétaire, jamais dans le
+          // formulaire d'édition de l'annonce, qui ne porte aucun champ animal.
+          action: "/owner-profile?section=animals",
+        }
       : null,
+
   ];
 
   return blockers.filter(Boolean) as PublishBlocker[];
@@ -196,28 +225,50 @@ export const getSitPublishBlockers = (input: SitPublishInput): PublishBlocker[] 
 export const canPublishSit = (input: SitPublishInput): boolean =>
   getSitPublishBlockers(input).length === 0;
 
+/** Options d'affichage de la checklist. */
+export interface SitPublishRequirementsOptions {
+  /**
+   * La publication passera par le formulaire de création, qui exige deux
+   * questions de 30 caractères. La checklist doit l'annoncer avant le clic,
+   * même quand l'annonce est évaluée en bloc unique.
+   */
+  viaCreateForm?: boolean;
+}
+
 /**
  * Libellés affichables de tous les prérequis, dans l'ordre de la checklist.
+ * Règle générale : aucun bloquant possible ne doit exister sans ligne ici,
+ * sans quoi la checklist affiche « tout est prêt » avec un bouton désactivé.
  * Les lignes de description suivent le mode déclaré : une annonce en bloc
  * unique n'affiche pas de ligne « Attentes envers le gardien » qu'elle n'a pas.
  */
 export const getSitPublishRequirements = (
   mode: DescriptionMode,
+  options: SitPublishRequirementsOptions = {},
 ): { id: string; label: string }[] => [
   { id: "property", label: "Logement décrit sur votre profil" },
   { id: "title", label: "Titre de l'annonce" },
   { id: "dates", label: "Date de début et date de fin de la garde" },
-  ...(mode === "two-fields"
-    ? [
-        {
-          id: "desc-reason",
-          label: `Raison de votre besoin de garde (${MIN_SUB_DESCRIPTION} caractères minimum)`,
-        },
-        {
-          id: "desc-expectations",
-          label: `Attentes envers le gardien (${MIN_SUB_DESCRIPTION} caractères minimum)`,
-        },
-      ]
+  { id: "date-past", label: "Date de début à venir, pas dans le passé" },
+  { id: "date-error", label: "Date de fin postérieure à la date de début" },
+  ...(mode === "two-fields" || options.viaCreateForm
+    ? mode === "two-fields"
+      ? [
+          {
+            id: "desc-reason",
+            label: `Raison de votre besoin de garde (${MIN_SUB_DESCRIPTION} caractères minimum)`,
+          },
+          {
+            id: "desc-expectations",
+            label: `Attentes envers le gardien (${MIN_SUB_DESCRIPTION} caractères minimum)`,
+          },
+        ]
+      : [
+          {
+            id: "desc-reason",
+            label: `Description en deux questions à compléter dans le formulaire : raison de la garde et attentes envers le gardien, ${MIN_SUB_DESCRIPTION} caractères minimum chacune`,
+          },
+        ]
     : [
         {
           id: "desc-reason",
@@ -227,6 +278,7 @@ export const getSitPublishRequirements = (
   { id: "photo", label: "Au moins une photo de votre logement ou de votre galerie" },
   { id: "pets", label: "Au moins un animal à faire garder" },
 ];
+
 
 /**
  * Annonce brute, telle que lue en base ou tenue par un formulaire.
