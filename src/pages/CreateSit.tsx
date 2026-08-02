@@ -2018,14 +2018,14 @@ const CreateSit = () => {
               </Button>
             )}
 
-            {/* Preview (last step, desktop) */}
+            {/* Preview (last step, desktop) : toujours accessible, la modale
+                gère elle-même le blocage de la publication. */}
             {currentStep === 2 && (
               <Button
                 type="button"
                 variant="outline"
                 className="h-12 px-4 shrink-0 gap-2 inline-flex text-base"
                 onClick={() => setPreviewOpen(true)}
-                disabled={!canPublish}
               >
                 <Eye className="h-4 w-4" />
                 Aperçu
@@ -2038,7 +2038,6 @@ const CreateSit = () => {
                 type="button"
                 className="flex-1 h-12 text-base font-semibold gap-1.5"
                 onClick={handleNext}
-                disabled={currentStep === 0 && sitLocation !== "home"}
               >
                 Suivant
                 <ChevronRight className="h-4 w-4" />
@@ -2047,13 +2046,9 @@ const CreateSit = () => {
             ) : (
               <Button
                 onClick={() => {
-                  if (!canPublish) {
-                    onPublishClick();
-                    return;
-                  }
                   // Nudge non bloquant si profil < 80 % : on ouvre une modale
                   // qui laisse le choix "Publier maintenant" ou "Compléter d'abord".
-                  if (profileCompletion < NUDGE_PROFILE_THRESHOLD) {
+                  if (canPublish && profileCompletion < NUDGE_PROFILE_THRESHOLD) {
                     if (!incompleteNudgeSeenRef.current) {
                       incompleteNudgeSeenRef.current = true;
                       trackEvent("owner_publish_with_incomplete_profile_modal_seen", {
@@ -2066,15 +2061,9 @@ const CreateSit = () => {
                   setPreviewOpen(true);
                 }}
                 disabled={publishing}
-                aria-disabled={!canPublish}
-                className={cn(
-                  "flex-1 h-12 text-base font-semibold",
-                  canPublish
-                    ? "bg-primary text-primary-foreground hover:bg-primary/90"
-                    : "bg-muted text-muted-foreground hover:bg-muted"
-                )}
+                className="flex-1 h-12 text-base font-semibold bg-primary text-primary-foreground hover:bg-primary/90"
               >
-                {publishing ? "Publication en cours…" : canPublish ? "Aperçu & publier" : "Voir ce qui manque"}
+                {publishing ? "Publication en cours…" : canPublish ? "Aperçu & publier" : "Aperçu"}
               </Button>
             )}
           </div>
