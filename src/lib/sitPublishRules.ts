@@ -72,22 +72,21 @@ export interface SitPublishSingleBlockInput extends SitPublishBase {
 export type SitPublishInput = SitPublishTwoFieldsInput | SitPublishSingleBlockInput;
 
 /**
- * Répartit un texte concaténé sur deux sous-champs de saisie.
+ * Recompose un texte concaténé depuis deux sous-champs de saisie.
  * Utilitaire de formulaire uniquement : les règles ne l'utilisent jamais.
  */
-export const splitExpectations = (raw?: string | null) => {
-  const text = raw || "";
-  const idx = text.indexOf(EXPECTATIONS_SEPARATOR);
-  return {
-    absenceReason: idx >= 0 ? text.slice(0, idx) : text,
-    sitterExpectations: idx >= 0 ? text.slice(idx + EXPECTATIONS_SEPARATOR.length) : "",
-  };
-};
-
 export const joinExpectations = (a: string, b: string) =>
   [a.trim(), b.trim()].filter(Boolean).join(EXPECTATIONS_SEPARATOR);
 
 const len = (v?: string | null) => (v || "").trim().length;
+
+/** Date du jour au format ISO court, en heure locale. */
+const todayIso = (): string => {
+  const d = new Date();
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+};
+
 
 /** Bloquants de description en mode deux champs, les deux étant obligatoires. */
 export const getTwoFieldsDescriptionBlockers = (
