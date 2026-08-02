@@ -930,6 +930,42 @@ const CreateSit = () => {
     return <div className="p-6 md:p-10 max-w-3xl mx-auto text-muted-foreground">Chargement...</div>;
   }
 
+  if (preflightBlocked) {
+    const anchored = preflightMissing.find(m => m.anchor);
+    const target = anchored?.anchor ? `/owner-profile#${anchored.anchor}` : "/owner-profile";
+    return (
+      <div className="animate-fade-in px-4 py-8 max-w-3xl mx-auto">
+        <Helmet><meta name="robots" content="noindex, nofollow" /></Helmet>
+        <Link to="/sits" className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground mb-6">
+          <ArrowLeft className="h-4 w-4" /> Retour à mes annonces
+        </Link>
+        <h1 className="font-heading text-2xl md:text-3xl font-bold mb-2">
+          Complétez votre profil avant de publier
+        </h1>
+        <p className="text-sm text-muted-foreground mb-6">
+          Les gardiens choisissent une maison et des animaux, pas seulement des dates. Il manque quelques éléments à votre profil, quelques minutes suffisent, puis vous publiez votre annonce d'une traite.
+        </p>
+        <div className="rounded-xl border border-border bg-card p-5 mb-6">
+          <p className="text-sm font-medium mb-3">Ce qu'il reste à renseigner :</p>
+          <ul className="space-y-2">
+            {preflightMissing.map(m => (
+              <li key={m.id} className="flex items-start gap-2 text-sm text-muted-foreground">
+                <AlertCircle className="h-4 w-4 text-destructive mt-0.5 shrink-0" />
+                <span>{m.label}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+        <div className="flex flex-wrap gap-2">
+          <Button onClick={() => navigate(target)}>Compléter mon profil</Button>
+          <Button variant="ghost" onClick={() => navigate("/sits")}>Plus tard</Button>
+        </div>
+      </div>
+    );
+  }
+
+
+
   // Draft label
   const draftLabel = savingDraft
     ? "Brouillon en cours d'enregistrement…"
