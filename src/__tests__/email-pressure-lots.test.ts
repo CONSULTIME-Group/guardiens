@@ -27,6 +27,8 @@ function walk(dir: string): string[] {
 
 // Midi (heure de Paris) hors quiet hours
 const NOON = new Date("2026-07-26T10:00:00Z");
+// 01h00 Paris en ete, donc dans la plage des heures calmes (22h-08h).
+const MIDNIGHT = new Date("2026-07-26T23:00:00Z");
 const iso = (offsetMs: number) => new Date(NOON.getTime() + offsetMs).toISOString();
 
 describe("Lot 1 — les appelants doivent passer logMetadata, jamais metadata", () => {
