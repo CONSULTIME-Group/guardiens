@@ -1219,9 +1219,14 @@ const CreateSit = () => {
             "inline-flex items-center gap-1.5 text-xs rounded-full px-2.5 py-1 mb-4",
             savingDraft
               ? "bg-muted text-muted-foreground"
-              : lastSavedAt ? "bg-green-50 text-green-700 border border-green-200" : "bg-muted text-muted-foreground"
-          )}>
-            {lastSavedAt && !savingDraft && <Check className="h-3 w-3 shrink-0" />}
+              : remoteSaveFailed
+                ? "bg-destructive/10 text-destructive border border-destructive/30"
+                : lastSavedAt ? "bg-green-50 text-green-700 border border-green-200" : "bg-muted text-muted-foreground"
+          )}
+            role="status"
+          >
+            {remoteSaveFailed && !savingDraft && <AlertCircle className="h-3 w-3 shrink-0" />}
+            {lastSavedAt && !remoteSaveFailed && !savingDraft && <Check className="h-3 w-3 shrink-0" />}
             {draftLabel}
           </div>
         )}
