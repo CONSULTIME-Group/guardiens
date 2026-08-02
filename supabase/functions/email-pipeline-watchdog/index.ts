@@ -8,7 +8,14 @@
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
 import { resendFetch } from "../_shared/resend-guard.ts";
-import { getEmailCategory } from "../_shared/email-categories.ts";
+import { EMAIL_CATEGORY_MAP } from "../_shared/email-categories.ts";
+
+// Liste des templates transactionnels, transmise en SQL pour que le compteur
+// transactionnel en retard soit calcule sur toute la file, pas sur la liste
+// d'exemples plafonnee a 50 lignes.
+const TRANSACTIONAL_TEMPLATES = Object.entries(EMAIL_CATEGORY_MAP)
+  .filter(([, category]) => category === "transactional")
+  .map(([template]) => template);
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -43,9 +50,9 @@ Deno.serve(async (req) => {
     const service = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
     const { data: healthRows, error: healthErr } = await service
-      .from("v_email_pipeline_health")
-      .select("*")
-      .limit(1);
+      .rpc("get_email_pipeline_health", {
+        p_transactional_templates: TRANSACTIONAL_TEMPLATES,
+      });
 
     if (healthErr) throw new Error(`health read failed: ${healthErr.message}`);
     const health = (healthRows || [])[0];
@@ -120,31 +127,35 @@ Deno.serve(async (req) => {
       return h > 0 ? `${h}h${String(m).padStart(2, "0")}` : `${m} min`;
     };
     const describe = (r: StaleRow) =>
-      `${r.template_name} vers ${r.recipient_email} (${fmtAge(Number(r.age_seconds))}, ${r.attempts} tentative(s))`;
+      `${r.template_name} vers ${r.recipient_email} (retard ${fmtAge(Number(r.age_seconds))}, ${r.attempts} tentative(s))`;
 
-    const txStale = staleRows.filter(
-      (r) => getEmailCategory(r.template_name) === "transactional",
-    );
-    if (txStale.length > 0) {
+    // Compteur calcule en SQL sur l'integralite de la file. staleRows ne sert
+    // qu'a illustrer l'alerte.
+    const txOverdueCount = Number(health.deferred_transactional_overdue_2h ?? 0);
+    if (txOverdueCount > 0) {
+      const examples = staleRows
+        .filter((r) => EMAIL_CATEGORY_MAP[r.template_name] === "transactional")
+        .slice(0, 5)
+        .map(describe)
+        .join(" ; ");
       anomalies.push({
         code: "email_deferred_transactional_stuck",
-        title: "Email transactionnel différé depuis plus de 2 heures",
-        detail: `${txStale.length} email(s) transactionnel(s) bloqué(s) en file. Les plus anciens : ${txStale
-          .slice(0, 5)
-          .map(describe)
-          .join(" ; ")}.`,
+        title: "Email transactionnel en retard de plus de 2 heures",
+        detail: `${txOverdueCount} email(s) transactionnel(s) dont l'heure d'envoi prevue est depassee de plus de 2h. Les plus anciens : ${examples || "detail indisponible"}.`,
       });
     }
 
-    const over24h = staleRows.filter((r) => Number(r.age_seconds) >= 24 * 3600);
     const over24hCount = Number(health.deferred_pending_over_24h ?? 0);
     if (over24hCount > 0) {
+      const examples = staleRows
+        .filter((r) => Number(r.age_seconds) >= 24 * 3600)
+        .slice(0, 5)
+        .map(describe)
+        .join(" ; ");
       anomalies.push({
         code: "email_deferred_stale_24h",
-        title: "Email différé depuis plus de 24 heures",
-        detail: `${over24hCount} email(s) en attente depuis plus de 24h. Les plus anciens : ${
-          over24h.slice(0, 5).map(describe).join(" ; ") || "détail indisponible"
-        }.`,
+        title: "Email en retard de plus de 24 heures",
+        detail: `${over24hCount} email(s) dont l'heure d'envoi prevue est depassee de plus de 24h. Les plus anciens : ${examples || "detail indisponible"}.`,
       });
     }
 
@@ -152,15 +163,12 @@ Deno.serve(async (req) => {
     if (attemptsGe3 > 0) {
       anomalies.push({
         code: "email_deferred_retry_chain",
-        title: "Chaîne de reports qui n'aboutit pas",
+        title: "Chaine de reports qui n'aboutit pas",
         detail: `${attemptsGe3} email(s) en file avec au moins 3 reports. Total en attente : ${
           String(health.deferred_pending_total ?? 0)
-        }, expirés sur 24h : ${String(health.deferred_expired_24h ?? 0)}.`,
+        }, expires sur 24h : ${String(health.deferred_expired_24h ?? 0)}, abandonnes sur 24h : ${String(health.deferred_abandoned_24h ?? 0)}.`,
       });
     }
-
-
-
 
     if (anomalies.length === 0) {
       return new Response(JSON.stringify({ ok: true, anomalies: 0 }), {
@@ -233,7 +241,7 @@ Deno.serve(async (req) => {
           failure_rate_1h = ${String(health.failure_rate_1h)} (${String(health.attempts_1h)} tentatives)<br/>
           dlq_last_hour = ${String(health.dlq_last_hour)}<br/>
           stuck_rate_limit = ${String(health.stuck_rate_limit)} (${String(health.retry_after_until)})<br/>
-          file différée : pending = ${String(health.deferred_pending_total)}, &gt; 2h = ${String(health.deferred_pending_over_2h)}, &gt; 24h = ${String(health.deferred_pending_over_24h)}, attempts &ge; 3 = ${String(health.deferred_attempts_ge_3)}, expirés 24h = ${String(health.deferred_expired_24h)}
+          file différée : pending = ${String(health.deferred_pending_total)}, en retard &gt; 2h = ${String(health.deferred_pending_over_2h)}, transactionnels en retard &gt; 2h = ${String(health.deferred_transactional_overdue_2h)}, en retard &gt; 24h = ${String(health.deferred_pending_over_24h)}, attempts &ge; 3 = ${String(health.deferred_attempts_ge_3)}, expirés 24h = ${String(health.deferred_expired_24h)}, abandonnés 24h = ${String(health.deferred_abandoned_24h)}
         </p>
         <p style="color:#999;font-size:11px">1 alerte max par type d'anomalie par heure.</p>
       </div>
