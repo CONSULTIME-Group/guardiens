@@ -25,6 +25,22 @@ import { backfillOwnerGalleryDimensions } from "@/lib/backfillGalleryDimensions"
 import fallbackMarrakech from "@/assets/fallback-marrakech.webp";
 import { trackEvent } from "@/lib/analytics";
 import type { SitData } from "@/components/sits/views/types";
+import { useToast } from "@/hooks/use-toast";
+
+/**
+ * Cible de notification disparue : au lieu d'une page introuvable, on renvoie
+ * vers la liste des annonces avec un message explicite.
+ */
+const MissingSitRedirect = () => {
+  const { toast } = useToast();
+  useEffect(() => {
+    toast({
+      title: "Cette annonce n'est plus consultable",
+      description: "Elle a été retirée ou annulée. Voici vos annonces.",
+    });
+  }, [toast]);
+  return <Navigate to="/sits" replace />;
+};
 
 /**
  * Photo d'ambiance par défaut quand la propriété n'a aucune photo en base.
