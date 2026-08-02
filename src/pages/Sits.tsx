@@ -1409,11 +1409,18 @@ const SitCard = ({
           {/* Top row */}
           <div className="flex items-start justify-between gap-3">
             <div className="min-w-0 flex-1">
-              <Link to={`/sits/${sit.id}`} className="hover:underline">
+              {canOpenSitPage(sit) ? (
+                <Link to={`/sits/${sit.id}`} className="hover:underline">
+                  <h3 className="font-heading font-semibold truncate text-sm md:text-base">
+                    {displayTitle}
+                  </h3>
+                </Link>
+              ) : (
                 <h3 className="font-heading font-semibold truncate text-sm md:text-base">
                   {displayTitle}
                 </h3>
-              </Link>
+              )}
+
               <div className="flex items-center gap-2 mt-1 flex-wrap">
                 {city && (
                   <span className="text-xs text-muted-foreground flex items-center gap-1">
