@@ -1934,27 +1934,8 @@ const CreateSit = () => {
                 ) : <p className="text-sm text-muted-foreground italic">Aucun logement renseigné</p>}
               </SummaryCard>
 
-              <SummaryCard icon={PawPrint} title="Les animaux à faire garder">
-                <div id="pets-field">
-                  {property ? (
-                    <PetsEditor
-                      propertyId={property.id}
-                      onChange={(list) => {
-                        setPets(list.map((a) => ({
-                          name: a.name, species: a.species, breed: a.breed,
-                          photo_url: a.photo_url, walk_duration: (a as any).walk_duration ?? null,
-                          alone_duration: (a as any).alone_duration ?? null,
-                          medication: (a as any).medication ?? null,
-                          activity_level: (a as any).activity_level ?? null,
-                        })));
-                        hasUserEditedRef.current = true;
-                      }}
-                    />
-                  ) : (
-                    <p className="text-sm text-muted-foreground italic">Renseignez d'abord votre logement pour ajouter des animaux.</p>
-                  )}
-                </div>
-              </SummaryCard>
+
+
 
 
               <SummaryCard icon={ShieldCheck} title="Règles de la maison" editLink="/profile">
