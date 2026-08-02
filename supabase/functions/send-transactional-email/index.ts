@@ -576,11 +576,11 @@ Deno.serve(async (req) => {
             .update({ status: 'abandoned', last_error: abandonReason })
             .eq('id', sourceQueueId)
         }
-        await supabase.from('email_send_log').insert({
+        const { error: logAbandonCapErr } = await supabase.from('email_send_log').insert({
           message_id: messageId,
           template_name: templateName,
           recipient_email: effectiveRecipient,
-          status: 'skipped',
+          status: 'abandoned',
           error_message: abandonReason,
           metadata: {
             idempotency_key: idempotencyKey,
@@ -590,6 +590,11 @@ Deno.serve(async (req) => {
             scheduled_for: scheduledFor.toISOString(),
           },
         })
+        if (logAbandonCapErr) {
+          console.error('email_send_log insert failed (cap_window_exceeds_ttl)', {
+            templateName, idempotencyKey, error: logAbandonCapErr,
+          })
+        }
         console.warn('Email abandonne, fenetre de cap au dela du TTL', {
           templateName, recipientLower, deferReason, scheduledFor: scheduledFor.toISOString(),
         })
