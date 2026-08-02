@@ -203,7 +203,7 @@ const HouseGuide = () => {
 
   // Copie locale automatique (400 ms) une fois le guide chargé.
   useEffect(() => {
-    if (!guide || !localDraftKey || access !== "owner" || !loadedRef.current) return;
+    if (!guide || !localDraftKey || access !== "owner" || !loadedRef.current || !dirty) return;
     setDraftState("saving");
     const t = setTimeout(() => {
       writeFormDraft<GuideData>(localDraftKey, guide);
@@ -212,7 +212,7 @@ const HouseGuide = () => {
       setDraftState("saved");
     }, 400);
     return () => clearTimeout(t);
-  }, [guide, localDraftKey, access]);
+  }, [guide, localDraftKey, access, dirty]);
 
   const update = <K extends keyof GuideData>(field: K, value: GuideData[K]) => {
     if (!guide) return;
