@@ -799,22 +799,52 @@ const CreateSit = () => {
         accepts_sitter_pets: acceptsSitterPets,
         accepts_sitter_children: acceptsSitterChildren,
       };
+      const markSaved = () => {
+        saveFailCountRef.current = 0;
+        saveFailToastShownRef.current = false;
+        setRemoteSaveFailed(false);
+        setUnsavedRemote(false);
+        setLastSavedAt(new Date());
+      };
       if (draftId) {
         const { error } = await supabase.from("sits").update(payload).eq("id", draftId).eq("status", "draft");
         if (error) throw error;
-        setLastSavedAt(new Date());
+        markSaved();
         return draftId;
       } else {
         const { data, error } = await supabase.from("sits").insert({ ...payload, status: "draft" as any }).select("id").single();
         if (error) throw error;
         setDraftId(data.id);
-        setLastSavedAt(new Date());
+        markSaved();
         return data.id;
       }
     } catch (e) {
+      // Même en mode silencieux, l'échec doit être visible : le badge passe en
+      // état d'alerte et l'événement analytique part systématiquement.
+      console.error("[CreateSit] saveDraft failed", e);
+      saveFailCountRef.current += 1;
+      setRemoteSaveFailed(true);
+      setUnsavedRemote(true);
+      try {
+        void trackEvent("sit_draft_autosave_failed", {
+          source: "create_sit_page",
+          metadata: {
+            sit_id: draftId,
+            step: currentStep + 1,
+            attempts: saveFailCountRef.current,
+            error_message: e instanceof Error ? e.message : String((e as any)?.message ?? e),
+          },
+        });
+      } catch { /* l'analytique ne doit jamais bloquer la saisie */ }
       if (!silent) {
-        console.error("[CreateSit] saveDraft failed", e);
         toast({ variant: "destructive", title: "Sauvegarde du brouillon impossible" });
+      } else if (saveFailCountRef.current >= 3 && !saveFailToastShownRef.current) {
+        saveFailToastShownRef.current = true;
+        toast({
+          variant: "destructive",
+          title: "Enregistrement impossible",
+          description: "Votre saisie n'est conservée que sur cet appareil. Ne fermez pas cet onglet avant que la sauvegarde reparte.",
+        });
       }
       return null;
     } finally {
