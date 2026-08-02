@@ -746,12 +746,13 @@ const CreateSit = () => {
         minGardienSits, maxApplications, ownerMessage, dailyRoutine,
         coverPhotoUrl, sitCity, sitCountry, acceptsSitterPets, acceptsSitterChildren,
         sitLocation, currentStep,
+        draftId: draftIdParam ?? fromSitId ?? draftId ?? null,
       });
       setLocalDraftSavedAt(Date.now());
     }, 300);
     return () => clearTimeout(t);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [localDraftKey, loading, title, startDate, endDate, flexibleDates, flexibleNotes, absenceReason, sitterExpectations, openTo, isUrgent, sitEnvironments, minGardienSits, maxApplications, ownerMessage, dailyRoutine, coverPhotoUrl, sitCity, sitCountry, acceptsSitterPets, acceptsSitterChildren, sitLocation, currentStep]);
+  }, [localDraftKey, loading, title, startDate, endDate, flexibleDates, flexibleNotes, absenceReason, sitterExpectations, openTo, isUrgent, sitEnvironments, minGardienSits, maxApplications, ownerMessage, dailyRoutine, coverPhotoUrl, sitCity, sitCountry, acceptsSitterPets, acceptsSitterChildren, sitLocation, currentStep, draftId, draftIdParam, fromSitId]);
 
 
   // Smart cover picker : scoring IA de la galerie, silencieux si quota/rate-limit.
