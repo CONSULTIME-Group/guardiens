@@ -6995,6 +6995,13 @@ export type Database = {
       v_email_pipeline_health: {
         Row: {
           attempts_1h: number | null
+          deferred_attempts_ge_3: number | null
+          deferred_expired_24h: number | null
+          deferred_oldest_age_seconds: number | null
+          deferred_pending_over_24h: number | null
+          deferred_pending_over_2h: number | null
+          deferred_pending_total: number | null
+          deferred_stale_rows: Json | null
           dlq_last_hour: number | null
           failure_rate_1h: number | null
           last_run_age_seconds: number | null
@@ -7625,6 +7632,13 @@ export type Database = {
         Args: never
         Returns: {
           attempts_1h: number
+          deferred_attempts_ge_3: number
+          deferred_expired_24h: number
+          deferred_oldest_age_seconds: number
+          deferred_pending_over_24h: number
+          deferred_pending_over_2h: number
+          deferred_pending_total: number
+          deferred_stale_rows: Json
           dlq_last_hour: number
           failure_rate_1h: number
           last_run_age_seconds: number
