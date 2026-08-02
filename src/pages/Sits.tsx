@@ -530,6 +530,12 @@ const Sits = () => {
 
     const needsForm = !wasValidatedByCreateForm(sit);
     const resumeHref = `/sits/create?resume=${sitId}`;
+    /**
+     * Une annonce passée ne peut pas être corrigée depuis l'édition, verrouillée
+     * pour les statuts archivé et annulé. Le formulaire d'adaptation repart du
+     * contenu, purge les dates dépassées et permet d'en saisir de nouvelles.
+     */
+    const adaptHref = `/sits/create?from=${sitId}&mode=copy`;
     const blockers = getBlockingBlockers(
       getSitPublishBlockers(
         buildSitPublishInput({
@@ -538,19 +544,27 @@ const Sits = () => {
           pets: sit.pets,
           overrides: { galleryPhotoCount: sit.ownerGalleryCount ?? 0 },
         }),
-        { viaCreateForm: needsForm, resumeHref },
+        { viaCreateForm: needsForm, resumeHref, pastDatesAction: adaptHref },
       ),
     );
 
     if (blockers.length > 0) {
       const labels = blockers.slice(0, 3).map((b) => b.label).join(" ; ");
+      const hasPastDates = blockers.some((b) => b.id === "date-past" || b.id === "dates");
       toast({
         variant: "destructive",
-        title: "Il manque quelque chose pour republier",
-        description: `${labels}${blockers.length > 3 ? " ; et d'autres éléments" : ""}.`,
+        title: hasPastDates ? "Les dates de cette annonce sont à redéfinir" : "Il manque quelque chose pour republier",
+        description: hasPastDates
+          ? "Nous rouvrons votre annonce dans le formulaire, saisissez simplement de nouvelles dates."
+          : `${labels}${blockers.length > 3 ? " ; et d'autres éléments" : ""}.`,
       });
-      navigate(blockers.find((b) => b.action)?.action || `/sits/${sitId}/edit`);
+      navigate(
+        hasPastDates
+          ? adaptHref
+          : blockers.find((b) => b.action)?.action || `/sits/${sitId}/edit`,
+      );
       return;
+
     }
 
     try {
