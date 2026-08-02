@@ -235,6 +235,21 @@ const DateSheet = ({
   </Sheet>
 );
 
+/**
+ * Une copie locale ne vaut d'être restaurée que si elle porte réellement du
+ * contenu. Sans ce contrôle, un formulaire ouvert puis quitté sans saisie
+ * écrase le contenu chargé depuis une annonce source et annonce à tort une
+ * restauration.
+ */
+export function localDraftHasContent(d: Record<string, any> | null | undefined): boolean {
+  if (!d) return false;
+  const texts = [d.title, d.absenceReason, d.sitterExpectations, d.ownerMessage, d.dailyRoutine, d.flexibleNotes, d.startDate, d.endDate, d.coverPhotoUrl, d.sitCity];
+  if (texts.some((t) => typeof t === "string" && t.trim().length > 0)) return true;
+  if (Array.isArray(d.openTo) && d.openTo.length > 0) return true;
+  if (Array.isArray(d.sitEnvironments) && d.sitEnvironments.length > 0) return true;
+  return false;
+}
+
 const CreateSit = () => {
   const { user } = useAuth();
   const { toast } = useToast();
@@ -493,8 +508,11 @@ const CreateSit = () => {
   const [localDraftRestored, setLocalDraftRestored] = useState(false);
   const [remoteDraftResumed, setRemoteDraftResumed] = useState(false);
   // Restaure la copie locale si elle est postérieure au brouillon distant.
-  const restoreLocalDraftIfFresher = useCallback((remoteUpdatedAt: string | null, remoteDraftId?: string | null) => {
+  const restoreLocalDraftIfFresher = useCallback((remoteUpdatedAt: string | null, remoteDraftId?: string | null, sourceLoaded?: boolean) => {
     if (!localDraftKey) return;
+    // Republication : le contenu de l'annonce source fait autorité, aucune copie
+    // locale ne doit venir l'écraser (ni afficher un message de restauration).
+    if (sourceLoaded) return;
     // Identité du brouillon réellement ouvert, paramètre d'URL ou brouillon
     // distant chargé à défaut de paramètre.
     const currentIdentity = draftIdParam ?? fromSitId ?? remoteDraftId ?? null;
@@ -504,7 +522,7 @@ const CreateSit = () => {
     const isAdoptable = (d: SitLocalDraft | null): d is SitLocalDraft => {
       if (!d) return false;
       if (d.draftId) return d.draftId === currentIdentity;
-      return !remoteDraftId;
+      return !remoteDraftId && !fromSitId;
     };
     let stored = readFormDraft<SitLocalDraft>(localDraftKey);
     let savedAt = getFormDraftSavedAt(localDraftKey) ?? 0;
@@ -519,6 +537,9 @@ const CreateSit = () => {
       }
     }
     if (!stored) return;
+    // Une copie locale sans aucun contenu n'a rien à restaurer : l'appliquer
+    // reviendrait à vider le formulaire tout en annonçant une restauration.
+    if (!localDraftHasContent(stored)) return;
     const remote = remoteUpdatedAt ? new Date(remoteUpdatedAt).getTime() : 0;
     if (remote && savedAt <= remote) {
       // Le distant est plus frais, mais l'étape atteinte n'y est pas stockée.
@@ -757,7 +778,7 @@ const CreateSit = () => {
           setSitEnvironments(prev => (prev.length > 0 ? prev : ((o as any).environments || [])));
         }
       }
-      restoreLocalDraftIfFresher(remoteDraftUpdatedAt, remoteDraftId);
+      restoreLocalDraftIfFresher(remoteDraftUpdatedAt, remoteDraftId, !!sourceSitRes?.data);
       setLoading(false);
       setTimeout(() => { initialLoadedRef.current = true; }, 300);
     };
@@ -781,15 +802,19 @@ const CreateSit = () => {
   const [localDraftSavedAt, setLocalDraftSavedAt] = useState<number | null>(null);
   useEffect(() => {
     if (!localDraftKey || loading) return;
+    const snapshot: SitLocalDraft = {
+      title, startDate, endDate, flexibleDates, flexibleNotes,
+      absenceReason, sitterExpectations, openTo, isUrgent, sitEnvironments,
+      minGardienSits, maxApplications, ownerMessage, dailyRoutine,
+      coverPhotoUrl, sitCity, sitCountry, acceptsSitterPets, acceptsSitterChildren,
+      sitLocation, currentStep,
+      draftId: draftIdParam ?? fromSitId ?? draftId ?? null,
+    };
+    // Aucune copie locale sur un formulaire vide : rien à sauvegarder, donc pas
+    // de badge d'enregistrement local trompeur.
+    if (!localDraftHasContent(snapshot)) return;
     const t = setTimeout(() => {
-      writeFormDraft<SitLocalDraft>(localDraftKey, {
-        title, startDate, endDate, flexibleDates, flexibleNotes,
-        absenceReason, sitterExpectations, openTo, isUrgent, sitEnvironments,
-        minGardienSits, maxApplications, ownerMessage, dailyRoutine,
-        coverPhotoUrl, sitCity, sitCountry, acceptsSitterPets, acceptsSitterChildren,
-        sitLocation, currentStep,
-        draftId: draftIdParam ?? fromSitId ?? draftId ?? null,
-      });
+      writeFormDraft<SitLocalDraft>(localDraftKey, snapshot);
       setLocalDraftSavedAt(Date.now());
     }, 300);
     return () => clearTimeout(t);
