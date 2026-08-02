@@ -159,8 +159,11 @@ d'origine et l'identifiant de la ligne source (`sourceQueueId`). À ce moment :
 - Si l'envoi part → la ligne `email_send_log` `status='sent'` portant
   l'`idempotency_key` rend tout rejeu ultérieur idempotent (garde 5.1), et la
   ligne de file passe à `sent`.
-- Une ligne qui dépasse `MAX_ATTEMPTS` ou son TTL passe à `expired` et ne
+- Une ligne dont l'ancienneté dépasse le TTL (36 h à partir de
+  `first_enqueued_at`) passe à `expired`. Une ligne dont l'appel au sender
+  échoue `MAX_ATTEMPTS` fois (6) passe à `failed`. Dans les deux cas elle ne
   déclenche plus d'envoi.
+
 
 
 ### 5.4 Recommandations clé idempotence
