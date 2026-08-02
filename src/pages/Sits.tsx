@@ -1296,7 +1296,7 @@ const UnavailableSitCard = ({ onWithdraw }: { onWithdraw?: () => void }) => (
       </div>
       <div className="min-w-0 flex-1">
         <h3 className="font-heading font-semibold text-sm md:text-base">
-          Annonce n'est plus disponible
+          Cette annonce n'est plus disponible
         </h3>
         <p className="text-xs text-muted-foreground mt-1">
           Le propriétaire a retiré cette annonce, votre candidature n'a plus d'objet. Vous gardez l'accès à toutes vos autres annonces.
