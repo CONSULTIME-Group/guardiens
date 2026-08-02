@@ -1747,9 +1747,16 @@ const QuickActions = ({
   if (!isOwner && ["pending", "viewed", "discussing"].includes(sit.application_status)) {
     return (
       <>
-        <Link to={`/sits/${sit.id}`} className={cn(btnClass, "bg-accent text-muted-foreground hover:text-foreground")}>
-          <ChevronRight className="h-3.5 w-3.5" /> Voir l'annonce
-        </Link>
+        {canOpenSitPage(sit) ? (
+          <Link to={`/sits/${sit.id}`} className={cn(btnClass, "bg-accent text-muted-foreground hover:text-foreground")}>
+            <ChevronRight className="h-3.5 w-3.5" /> Voir l'annonce
+          </Link>
+        ) : (
+          <span className={cn(btnClass, "border border-border text-muted-foreground cursor-default")}>
+            Annonce retirée par le propriétaire
+          </span>
+        )}
+
         {sit.conversationId && (
           <Link
             to={`/messages?c=${sit.conversationId}`}
