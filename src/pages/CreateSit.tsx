@@ -669,9 +669,8 @@ const CreateSit = () => {
           if (hasContent) setSitLocation("home");
           // L'étape atteinte n'est pas stockée en base, on la recalcule à partir
           // du contenu pour ne pas refaire franchir l'étape 1.
-          const sepIdx = rawExpectations.indexOf(EXPECTATIONS_SEPARATOR);
-          const reason = sepIdx >= 0 ? rawExpectations.slice(0, sepIdx) : rawExpectations;
-          const expect = sepIdx >= 0 ? rawExpectations.slice(sepIdx + EXPECTATIONS_SEPARATOR.length) : "";
+          const { first: reason, rest: expect } = splitForFields(rawExpectations);
+
           const step0Complete =
             !!(d.title || "").trim()
             && !!cleanStart
