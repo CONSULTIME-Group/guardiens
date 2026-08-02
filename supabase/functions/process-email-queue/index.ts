@@ -61,13 +61,19 @@ async function moveToDlq(
   reason: string
 ): Promise<void> {
   const payload = msg.message
-  await supabase.from('email_send_log').insert({
+  const { error: logDlqErr } = await supabase.from('email_send_log').insert({
     message_id: payload.message_id,
     template_name: (payload.label || queue) as string,
     recipient_email: payload.to,
     status: 'dlq',
     error_message: reason,
   })
+  if (logDlqErr) {
+    console.error('email_send_log insert failed', {
+      status: 'dlq', template_name: payload.label || queue, queue,
+      message_id: payload.message_id, error: logDlqErr.message, code: logDlqErr.code,
+    })
+  }
   const { error } = await supabase.rpc('move_to_dlq', {
     source_queue: queue,
     dlq_name: `${queue}_dlq`,
@@ -318,7 +324,12 @@ Deno.serve(async (req) => {
             .from('email_send_log')
             .update({ status: 'sent' })
             .eq('id', pendingRow.id)
-          if (upErr) console.error('email_send_log update failed (pending -> sent)', upErr)
+          if (upErr) {
+            console.error('email_send_log update failed', {
+              status: 'sent', template_name: payload.label || queue, queue,
+              message_id: payload.message_id, error: upErr.message, code: upErr.code,
+            })
+          }
         } else {
           const { error: insErr } = await supabase.from('email_send_log').insert({
             message_id: payload.message_id,
@@ -326,7 +337,12 @@ Deno.serve(async (req) => {
             recipient_email: payload.to,
             status: 'sent',
           })
-          if (insErr) console.error('email_send_log insert failed (sent)', insErr)
+          if (insErr) {
+            console.error('email_send_log insert failed', {
+              status: 'sent', template_name: payload.label || queue, queue,
+              message_id: payload.message_id, error: insErr.message, code: insErr.code,
+            })
+          }
         }
 
         // Delete from queue
@@ -349,13 +365,19 @@ Deno.serve(async (req) => {
         })
 
         if (isRateLimited(error)) {
-          await supabase.from('email_send_log').insert({
+          const { error: logRateErr } = await supabase.from('email_send_log').insert({
             message_id: payload.message_id,
             template_name: payload.label || queue,
             recipient_email: payload.to,
             status: 'rate_limited',
             error_message: errorMsg.slice(0, 1000),
           })
+          if (logRateErr) {
+            console.error('email_send_log insert failed', {
+              status: 'rate_limited', template_name: payload.label || queue, queue,
+              message_id: payload.message_id, error: logRateErr.message, code: logRateErr.code,
+            })
+          }
 
           const retryAfterSecs = getRetryAfterSeconds(error)
           await supabase
@@ -381,13 +403,19 @@ Deno.serve(async (req) => {
 
 
         // Log non-429 failures to track real retry attempts.
-        await supabase.from('email_send_log').insert({
+        const { error: logFailErr } = await supabase.from('email_send_log').insert({
           message_id: payload.message_id,
           template_name: payload.label || queue,
           recipient_email: payload.to,
           status: 'failed',
           error_message: errorMsg.slice(0, 1000),
         })
+        if (logFailErr) {
+          console.error('email_send_log insert failed', {
+            status: 'failed', template_name: payload.label || queue, queue,
+            message_id: payload.message_id, error: logFailErr.message, code: logFailErr.code,
+          })
+        }
         if (payload?.message_id && typeof payload.message_id === 'string') {
           failedAttemptsByMessageId.set(payload.message_id, failedAttempts + 1)
         }

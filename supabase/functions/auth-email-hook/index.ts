@@ -243,12 +243,18 @@ async function handleWebhook(req: Request): Promise<Response> {
   const messageId = crypto.randomUUID()
 
   // Log pending BEFORE enqueue so we have a record even if enqueue crashes
-  await supabase.from('email_send_log').insert({
+  const { error: logPendingErr } = await supabase.from('email_send_log').insert({
     message_id: messageId,
     template_name: emailType,
     recipient_email: payload.data.email,
     status: 'pending',
   })
+  if (logPendingErr) {
+    console.error('email_send_log insert failed', {
+      status: 'pending', template_name: emailType, message_id: messageId,
+      error: logPendingErr.message, code: logPendingErr.code,
+    })
+  }
 
   const { error: enqueueError } = await supabase.rpc('enqueue_email', {
     queue_name: 'auth_emails',
@@ -269,13 +275,19 @@ async function handleWebhook(req: Request): Promise<Response> {
 
   if (enqueueError) {
     console.error('Failed to enqueue auth email', { error: enqueueError, run_id, emailType })
-    await supabase.from('email_send_log').insert({
+    const { error: logFailedErr } = await supabase.from('email_send_log').insert({
       message_id: messageId,
       template_name: emailType,
       recipient_email: payload.data.email,
       status: 'failed',
       error_message: 'Failed to enqueue email',
     })
+    if (logFailedErr) {
+      console.error('email_send_log insert failed', {
+        status: 'failed', template_name: emailType, message_id: messageId,
+        error: logFailedErr.message, code: logFailedErr.code,
+      })
+    }
     return new Response(JSON.stringify({ error: 'Failed to enqueue email' }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },

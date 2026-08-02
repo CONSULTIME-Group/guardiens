@@ -119,8 +119,11 @@ Deno.serve(async (req) => {
 
   if (insertError) {
     // Non-fatal — log and continue. The suppression was already recorded.
-    console.warn('Failed to insert email_send_log', {
-      error: insertError,
+    console.error('email_send_log insert failed', {
+      status: sendLogStatus,
+      template_name: 'system',
+      error: insertError.message,
+      code: insertError.code,
     })
   }
 

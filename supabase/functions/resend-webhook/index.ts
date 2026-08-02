@@ -108,7 +108,7 @@ Deno.serve(async (req) => {
     // Strategy: read latest sent row, compute incremental update, write back.
     const { data: logRow } = await supabase
       .from("email_send_log")
-      .select("id, open_count, click_count, first_opened_at, first_clicked_at")
+      .select("id, template_name, open_count, click_count, first_opened_at, first_clicked_at")
       .eq("resend_id", emailId)
       .order("created_at", { ascending: false })
       .limit(1)
@@ -145,7 +145,15 @@ Deno.serve(async (req) => {
           .from("email_send_log")
           .update(logUpdate)
           .eq("id", logRow.id);
-        if (logErr) console.error("email_send_log update error:", logErr);
+        if (logErr) {
+          console.error("email_send_log update failed", {
+            event_type: event.type,
+            template_name: logRow.template_name ?? null,
+            log_id: logRow.id,
+            error: logErr.message,
+            code: logErr.code,
+          });
+        }
       }
     }
 
