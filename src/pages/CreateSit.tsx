@@ -258,7 +258,33 @@ const CreateSit = () => {
   const [endDate, setEndDate] = useState("");
   const [flexibleDates, setFlexibleDates] = useState(false);
   const [flexibleNotes, setFlexibleNotes] = useState("");
+  // La description de la garde est saisie en deux micro-questions courtes,
+  // puis concaténée dans `specificExpectations` (colonne specific_expectations).
   const [specificExpectations, setSpecificExpectations] = useState("");
+  const [absenceReason, setAbsenceReason] = useState("");
+  const [sitterExpectations, setSitterExpectations] = useState("");
+  const EXPECTATIONS_SEPARATOR = "\n\n";
+  const joinExpectations = (a: string, b: string) =>
+    [a.trim(), b.trim()].filter(Boolean).join(EXPECTATIONS_SEPARATOR);
+  // Reprend un texte existant (brouillon, republication, Alma) et le répartit
+  // sur les deux sous-champs, sans perte de contenu.
+  const applyExpectations = useCallback((raw: string | null | undefined) => {
+    const text = raw || "";
+    const idx = text.indexOf(EXPECTATIONS_SEPARATOR);
+    const first = idx >= 0 ? text.slice(0, idx) : text;
+    const rest = idx >= 0 ? text.slice(idx + EXPECTATIONS_SEPARATOR.length) : "";
+    setAbsenceReason(first);
+    setSitterExpectations(rest);
+    setSpecificExpectations(text);
+  }, []);
+  const updateAbsenceReason = (v: string) => {
+    setAbsenceReason(v);
+    setSpecificExpectations(joinExpectations(v, sitterExpectations));
+  };
+  const updateSitterExpectations = (v: string) => {
+    setSitterExpectations(v);
+    setSpecificExpectations(joinExpectations(absenceReason, v));
+  };
   const [openTo, setOpenTo] = useState<string[]>([]);
   const [isUrgent, setIsUrgent] = useState(false);
   const [sitEnvironments, setSitEnvironments] = useState<string[]>([]);
