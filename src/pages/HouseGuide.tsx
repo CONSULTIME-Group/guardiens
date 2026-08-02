@@ -141,7 +141,10 @@ const HouseGuide = () => {
   const [openDate, setOpenDate] = useState<Date | null>(null);
 
   // Filet local : 19 champs libres, hors champs sensibles jamais stockés.
-  const localDraftKey = propertyId && user ? `house-guide:${user.id}:${propertyId}` : null;
+  // Clé versionnée : les copies écrites par l'ancien code (clé v1) contenaient
+  // des données sensibles en clair, elles sont purgées au premier chargement.
+  const legacyDraftKey = propertyId && user ? `house-guide:${user.id}:${propertyId}` : null;
+  const localDraftKey = propertyId && user ? `house-guide:v2:${user.id}:${propertyId}` : null;
   const [draftState, setDraftState] = useState<DraftState>("idle");
   const [localDraftSavedAt, setLocalDraftSavedAt] = useState<number | null>(null);
   const [localDraftRestored, setLocalDraftRestored] = useState(false);
