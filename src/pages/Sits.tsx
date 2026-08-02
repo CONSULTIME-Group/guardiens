@@ -1697,10 +1697,11 @@ const QuickActions = ({
   }
 
   if (effectiveStatus === "cancelled") {
+    // La fiche publique ne sert pas les annonces annulees : pas de lien mort.
     return (
-      <Link to={`/sits/${sit.id}`} className={cn(btnClass, "bg-accent text-muted-foreground hover:text-foreground")}>
-        <Eye className="h-3.5 w-3.5" /> Voir les détails
-      </Link>
+      <span className={cn(btnClass, "border border-border text-muted-foreground cursor-default")}>
+        Annonce annulée
+      </span>
     );
   }
 
