@@ -75,6 +75,8 @@ const SitDetailHeader = ({
   startDate,
   endDate,
   flexibleDates,
+  flexibilityNotes,
+
   photos,
   owner,
   isOwner,
