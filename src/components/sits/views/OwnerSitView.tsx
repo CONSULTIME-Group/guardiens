@@ -13,7 +13,7 @@
  */
 import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import { Calendar, MapPin, Send, Star, Home, Users, ChevronDown } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import {
   AlertDialog,
