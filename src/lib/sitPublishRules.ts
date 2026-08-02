@@ -130,7 +130,7 @@ export const getSingleBlockDescriptionBlockers = (text?: string | null): Publish
 /** Bloquants de description selon le mode déclaré. */
 export const getDescriptionBlockers = (
   input: SitPublishInput,
-  options: { viaCreateForm?: boolean } = {},
+  options: { viaCreateForm?: boolean; resumeHref?: string } = {},
 ): PublishBlocker[] => {
   if (input.descriptionMode === "two-fields") {
     return getTwoFieldsDescriptionBlockers(input.absenceReason, input.sitterExpectations);
@@ -138,22 +138,24 @@ export const getDescriptionBlockers = (
   const single = getSingleBlockDescriptionBlockers(input.specificExpectations);
   if (single.length > 0 || !options.viaCreateForm) return single;
   /**
-   * Publication déléguée au formulaire de création : celui-ci exige deux blocs
-   * de trente caractères. Un texte en bloc unique qui n'en contient pas deux
-   * n'est donc pas prêt, la ligne reste non satisfaite avant le clic.
+   * Publication déléguée au formulaire de création : celui-ci ne découpe jamais
+   * le texte, il place tout dans la première question et laisse la seconde
+   * vide. Toute prédiction de découpe serait un faux positif : la ligne annonce
+   * donc toujours l'étape restante, sans jamais se déclarer satisfaite, et sans
+   * bloquer la publication puisque le formulaire est le seul écran capable de
+   * la résoudre.
    */
-  const parts = (input.specificExpectations || "").split(EXPECTATIONS_SEPARATOR);
-  const ready = parts.length >= 2 && parts.every((p) => len(p) >= MIN_SUB_DESCRIPTION);
-  return ready
-    ? []
-    : [
-        {
-          id: "desc-reason",
-          label: `Description en deux questions à compléter dans le formulaire : raison de la garde et attentes envers le gardien, ${MIN_SUB_DESCRIPTION} caractères minimum chacune`,
-          anchor: "description-field",
-        },
-      ];
+  return [
+    {
+      id: "desc-two-fields",
+      label: `Répartir la description en deux questions dans le formulaire : raison de la garde et attentes envers le gardien, ${MIN_SUB_DESCRIPTION} caractères minimum chacune`,
+      anchor: "description-field",
+      action: options.resumeHref,
+      advisory: true,
+    },
+  ];
 };
+
 
 /**
  * Renvoie la liste ordonnée des éléments manquants pour publier.
