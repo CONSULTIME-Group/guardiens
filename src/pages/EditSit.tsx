@@ -624,7 +624,25 @@ const EditSit = () => {
                       ))}
                     </div>
                   </div>
+                  <div>
+                    <Label htmlFor="sit-flexible-note" className="text-xs text-muted-foreground">
+                      Précisez vos dates approximatives
+                    </Label>
+                    <Textarea
+                      id="sit-flexible-note"
+                      placeholder="Ex : arrivée entre le 3 et le 5, départ possible après le 16."
+                      value={flexibleFreeNote}
+                      onChange={(e) => setFlexibleFreeNote(e.target.value.slice(0, 300))}
+                      rows={2}
+                      maxLength={300}
+                      className="mt-1.5 text-base resize-none"
+                    />
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Ce texte s'affiche à côté des dates, dans l'annonce.
+                    </p>
+                  </div>
                 </div>
+
               )}
             </div>
           </SectionCard>
