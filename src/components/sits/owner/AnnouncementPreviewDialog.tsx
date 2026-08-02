@@ -15,12 +15,21 @@ interface PreviewPet {
   photo_url: string | null;
 }
 
+export interface PreviewBlocker {
+  id: string;
+  label: string;
+  anchor?: string;
+  action?: string;
+}
+
 interface AnnouncementPreviewDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onConfirmPublish: () => void;
   publishing: boolean;
   canPublish: boolean;
+  blockers?: PreviewBlocker[];
+  onResolveBlocker?: (blocker: PreviewBlocker) => void;
   title: string;
   startDate: string;
   endDate: string;
@@ -57,6 +66,7 @@ const formatDate = (d: string) => {
 
 const AnnouncementPreviewDialog = ({
   open, onOpenChange, onConfirmPublish, publishing, canPublish,
+  blockers = [], onResolveBlocker,
   title, startDate, endDate, flexibleDates, city, country,
   specificExpectations, ownerMessage, dailyRoutine,
   coverPhotoUrl, ownerPhotos, pets, propertyType, environments, isUrgent,
@@ -167,6 +177,32 @@ const AnnouncementPreviewDialog = ({
             )}
           </div>
         </article>
+
+        {blockers.length > 0 && (
+          <div className="rounded-xl border border-destructive/30 bg-destructive/5 p-4">
+            <p className="text-sm font-medium text-destructive mb-2">
+              Il manque {blockers.length} élément{blockers.length > 1 ? "s" : ""} pour publier cette annonce :
+            </p>
+            <ul className="space-y-2">
+              {blockers.map((b) => (
+                <li key={b.id} className="flex flex-wrap items-center justify-between gap-2">
+                  <span className="text-sm text-destructive">{b.label}</span>
+                  {onResolveBlocker && (
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="outline"
+                      onClick={() => onResolveBlocker(b)}
+                    >
+                      Compléter
+                    </Button>
+                  )}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+
 
         <DialogFooter className="gap-2">
           <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>

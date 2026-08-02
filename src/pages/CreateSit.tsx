@@ -1009,6 +1009,19 @@ const CreateSit = () => {
   // Le bouton reste visuellement actif (feedback au clic, pas de disabled).
   const validateCurrentStep = (): boolean => {
     if (currentStep === 0) {
+      // Le lieu de garde conditionne tout le reste de l'étape : au lieu d'un
+      // bouton inerte, on renvoie au sélecteur avec un message explicite.
+      if (sitLocation !== "home") {
+        if (typeof document !== "undefined") {
+          document.getElementById("sit-location-field")?.scrollIntoView({ behavior: "smooth", block: "center" });
+        }
+        toast({
+          variant: "destructive",
+          title: "Commencez par nous dire où se déroulera la garde.",
+          description: "Choisissez le lieu de la garde pour continuer.",
+        });
+        return false;
+      }
       const errors: Array<{ field: string; anchor: string }> = [];
       if (!title.trim()) errors.push({ field: "title", anchor: "title-field" });
       if (!startDate) errors.push({ field: "startDate", anchor: "dates-field" });
@@ -1229,7 +1242,7 @@ const CreateSit = () => {
       {currentStep === 0 && (
         <div className="px-4 max-w-3xl mx-auto space-y-6">
           {/* ===== Filtre d'usage bloquant : garde à domicile uniquement ===== */}
-          <div className="rounded-xl border border-primary/30 bg-primary/5 p-5">
+          <div id="sit-location-field" className="scroll-mt-24 rounded-xl border border-primary/30 bg-primary/5 p-5">
             <p className="font-heading text-base font-semibold text-foreground mb-1">
               Où se déroulera la garde&nbsp;?
             </p>
@@ -1852,6 +1865,43 @@ const CreateSit = () => {
             </div>
           </div>
 
+          {/* Animaux : sorti du bloc replié, c'est le point de blocage numéro un
+              des annonces non publiées. */}
+          <div
+            id="pets-field"
+            className={cn(
+              "scroll-mt-24 rounded-lg border p-5",
+              pets.length === 0 ? "border-destructive/40 bg-destructive/5" : "border-border bg-card"
+            )}
+          >
+            <div className="flex items-center gap-2 mb-3">
+              <PawPrint className={cn("h-4 w-4", pets.length === 0 ? "text-destructive" : "text-primary")} />
+              <h3 className="font-heading text-sm font-semibold">Les animaux à faire garder</h3>
+            </div>
+            {pets.length === 0 && (
+              <p className="text-sm text-destructive mb-3">
+                Votre annonce ne peut pas être publiée sans au moins un animal. Ajoutez-le ici, cela prend une minute.
+              </p>
+            )}
+            {property ? (
+              <PetsEditor
+                propertyId={property.id}
+                onChange={(list) => {
+                  setPets(list.map((a) => ({
+                    name: a.name, species: a.species, breed: a.breed,
+                    photo_url: a.photo_url, walk_duration: (a as any).walk_duration ?? null,
+                    alone_duration: (a as any).alone_duration ?? null,
+                    medication: (a as any).medication ?? null,
+                    activity_level: (a as any).activity_level ?? null,
+                  })));
+                  hasUserEditedRef.current = true;
+                }}
+              />
+            ) : (
+              <p className="text-sm text-muted-foreground italic">Renseignez d'abord votre logement pour ajouter des animaux.</p>
+            )}
+          </div>
+
           {/* Profile summaries */}
           <details className="group">
             <summary className="cursor-pointer flex items-center justify-between p-3 rounded-xl border border-border bg-card mb-3 list-none select-none hover:bg-muted/30 transition-colors">
@@ -1884,27 +1934,8 @@ const CreateSit = () => {
                 ) : <p className="text-sm text-muted-foreground italic">Aucun logement renseigné</p>}
               </SummaryCard>
 
-              <SummaryCard icon={PawPrint} title="Les animaux à faire garder">
-                <div id="pets-field">
-                  {property ? (
-                    <PetsEditor
-                      propertyId={property.id}
-                      onChange={(list) => {
-                        setPets(list.map((a) => ({
-                          name: a.name, species: a.species, breed: a.breed,
-                          photo_url: a.photo_url, walk_duration: (a as any).walk_duration ?? null,
-                          alone_duration: (a as any).alone_duration ?? null,
-                          medication: (a as any).medication ?? null,
-                          activity_level: (a as any).activity_level ?? null,
-                        })));
-                        hasUserEditedRef.current = true;
-                      }}
-                    />
-                  ) : (
-                    <p className="text-sm text-muted-foreground italic">Renseignez d'abord votre logement pour ajouter des animaux.</p>
-                  )}
-                </div>
-              </SummaryCard>
+
+
 
 
               <SummaryCard icon={ShieldCheck} title="Règles de la maison" editLink="/profile">
@@ -2005,14 +2036,14 @@ const CreateSit = () => {
               </Button>
             )}
 
-            {/* Preview (last step, desktop) */}
+            {/* Preview (last step, desktop) : toujours accessible, la modale
+                gère elle-même le blocage de la publication. */}
             {currentStep === 2 && (
               <Button
                 type="button"
                 variant="outline"
                 className="h-12 px-4 shrink-0 gap-2 inline-flex text-base"
                 onClick={() => setPreviewOpen(true)}
-                disabled={!canPublish}
               >
                 <Eye className="h-4 w-4" />
                 Aperçu
@@ -2025,7 +2056,6 @@ const CreateSit = () => {
                 type="button"
                 className="flex-1 h-12 text-base font-semibold gap-1.5"
                 onClick={handleNext}
-                disabled={currentStep === 0 && sitLocation !== "home"}
               >
                 Suivant
                 <ChevronRight className="h-4 w-4" />
@@ -2034,13 +2064,9 @@ const CreateSit = () => {
             ) : (
               <Button
                 onClick={() => {
-                  if (!canPublish) {
-                    onPublishClick();
-                    return;
-                  }
                   // Nudge non bloquant si profil < 80 % : on ouvre une modale
                   // qui laisse le choix "Publier maintenant" ou "Compléter d'abord".
-                  if (profileCompletion < NUDGE_PROFILE_THRESHOLD) {
+                  if (canPublish && profileCompletion < NUDGE_PROFILE_THRESHOLD) {
                     if (!incompleteNudgeSeenRef.current) {
                       incompleteNudgeSeenRef.current = true;
                       trackEvent("owner_publish_with_incomplete_profile_modal_seen", {
@@ -2053,15 +2079,9 @@ const CreateSit = () => {
                   setPreviewOpen(true);
                 }}
                 disabled={publishing}
-                aria-disabled={!canPublish}
-                className={cn(
-                  "flex-1 h-12 text-base font-semibold",
-                  canPublish
-                    ? "bg-primary text-primary-foreground hover:bg-primary/90"
-                    : "bg-muted text-muted-foreground hover:bg-muted"
-                )}
+                className="flex-1 h-12 text-base font-semibold bg-primary text-primary-foreground hover:bg-primary/90"
               >
-                {publishing ? "Publication en cours…" : canPublish ? "Aperçu & publier" : "Voir ce qui manque"}
+                {publishing ? "Publication en cours…" : canPublish ? "Aperçu & publier" : "Aperçu"}
               </Button>
             )}
           </div>
@@ -2107,6 +2127,19 @@ const CreateSit = () => {
       </AlertDialog>
 
       <AnnouncementPreviewDialog
+        blockers={publishBlockers}
+        onResolveBlocker={(b) => {
+          setPreviewOpen(false);
+          if (b.action) {
+            navigate(b.action);
+            return;
+          }
+          if (b.anchor && typeof document !== "undefined") {
+            setTimeout(() => {
+              document.getElementById(b.anchor as string)?.scrollIntoView({ behavior: "smooth", block: "center" });
+            }, 150);
+          }
+        }}
         open={previewOpen}
         onOpenChange={setPreviewOpen}
         onConfirmPublish={async () => { await handlePublish(); }}
