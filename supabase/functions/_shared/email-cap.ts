@@ -1,11 +1,33 @@
 // Pure helpers for email frequency cap & quiet hours.
 // Extracted from send-transactional-email so the behaviour can be unit-tested.
 //
-// Lot 6 (26/07/2026) : le plafond depend desormais de la CATEGORIE.
-//   - transactional         : 1 / heure et 3 / 24h (inchange)
+// DOCTRINE (02/08/2026)
+// ---------------------
+// Un email declenche par l'action directe d'un autre membre identifie (nouveau
+// message, nouvelle candidature, reponse) n'est jamais du spam et ne doit jamais
+// etre plafonne. Le plafond de frequence protege l'utilisateur du marketing, pas
+// de ses interlocuteurs.
+//
+// Regles effectives :
+//   - transactional          : AUCUN plafond de frequence. Seules les heures
+//                              calmes s'appliquent, on ne reveille personne la nuit.
 //   - product/digest/alert   : 1 / 24h et 3 / 7 jours, cumul toutes categories
-//                              non transactionnelles confondues.
+//                              non transactionnelles confondues. Aucun plafond
+//                              global supplementaire.
+//   - categorie absente ou inconnue : traitee comme 'product', donc plafonnee.
+//     Seule la valeur explicite 'transactional' donne droit a l'exemption.
+//
+// Correctif du Lot 6 (26/07/2026), dont le comportement decrit ici est caduc :
+// ce lot appliquait 1 / heure et 3 / 24h aux emails transactionnels, sur des
+// compteurs non filtres par categorie. Un digest consommait donc le quota d'un
+// message humain, et 44% des tentatives d'envoi du 31/07 ont ete differees,
+// certaines notifications jusqu'a 48h.
 
+// Conservees pour compatibilite d'import uniquement : ces deux plafonds
+// globaux, toutes categories confondues, NE SONT PLUS APPLIQUES par
+// `decideDeferral`. Ils croisaient les compteurs entre categories et bloquaient
+// des emails declenches par une action humaine. Ne pas les reintroduire dans la
+// logique de decision.
 export const CAP_PER_HOUR = 1
 export const CAP_PER_DAY = 3
 export const CAP_NON_TX_PER_DAY = 1
@@ -90,7 +112,10 @@ export interface DeferInput {
   now: Date
   templateName: string
   isUrgent?: boolean
-  /** Categorie de l'email. Absente = traitee comme transactionnelle (retro-compat). */
+  /**
+   * Categorie de l'email. Seule la valeur explicite 'transactional' exempte de
+   * plafond. Absente ou inconnue = traitee comme 'product', donc plafonnee.
+   */
   category?: 'transactional' | 'product' | 'digest' | 'alert'
   /** ISO timestamps of `sent` emails to this recipient in the last hour, ascending. */
   hourSentAt: string[]
@@ -107,60 +132,60 @@ export interface DeferInput {
  * Order of precedence:
  *  1. Bypass templates / urgent -> send.
  *  2. Quiet hours (22:00-08:00 Europe/Paris) -> defer to next 08:00 Paris.
- *  3. Categorie non transactionnelle : 3 / 7 jours puis 1 / 24h.
- *  4. Categorie transactionnelle : 3 / 24h puis 1 / heure.
+ *  3. Categorie transactionnelle -> send, sans aucun plafond de frequence.
+ *  4. Categorie non transactionnelle : 3 / 7 jours puis 1 / 24h.
  *  5. Otherwise -> send.
  */
 export function decideDeferral(input: DeferInput): DeferDecision {
   const {
     now, templateName, isUrgent, category,
-    hourSentAt, daySentAt, nonTxDaySentAt = [], nonTxWeekSentAt = [],
+    nonTxDaySentAt = [], nonTxWeekSentAt = [],
   } = input
+
+  // Categorie effective. Regle de securite : seule la valeur explicite
+  // 'transactional' donne droit a l'exemption de plafond. Toute categorie
+  // absente ou inconnue retombe sur 'product', donc plafonnee.
+  const KNOWN = ['transactional', 'product', 'digest', 'alert'] as const
+  const effectiveCategory: 'transactional' | 'product' | 'digest' | 'alert' =
+    (KNOWN as readonly string[]).includes(category as string)
+      ? (category as 'transactional' | 'product' | 'digest' | 'alert')
+      : 'product'
+  if (!(KNOWN as readonly string[]).includes(category as string)) {
+    console.warn(
+      `[email-cap] Template "${templateName}" sans categorie connue (recu: ${String(category)}). ` +
+      `Traite comme 'product' et donc plafonne. Categoriser ce template.`,
+    )
+  }
 
   if (BYPASS_TEMPLATES.has(templateName) || isUrgent) {
     return { action: 'send' }
   }
 
+  // Heures calmes : elles s'appliquent a toutes les categories, y compris
+  // transactionnelle. Volontaire, on ne reveille personne la nuit.
   if (isQuietAt(now)) {
     return { action: 'defer', reason: 'quiet_hours', scheduledFor: nextQuietEndFrom(now) }
   }
 
-  const isNonTx = category === 'product' || category === 'digest' || category === 'alert'
+  if (effectiveCategory === 'transactional') {
+    return { action: 'send' }
+  }
 
-  if (isNonTx) {
-    if (nonTxWeekSentAt.length >= CAP_NON_TX_PER_WEEK) {
-      const oldest = new Date(nonTxWeekSentAt[0])
-      return {
-        action: 'defer',
-        reason: 'frequency_cap_category_week',
-        scheduledFor: new Date(oldest.getTime() + 7 * 86400_000 + 30_000),
-      }
-    }
-    if (nonTxDaySentAt.length >= CAP_NON_TX_PER_DAY) {
-      const oldest = new Date(nonTxDaySentAt[0])
-      return {
-        action: 'defer',
-        reason: 'frequency_cap_category_day',
-        scheduledFor: new Date(oldest.getTime() + 86400_000 + 30_000),
-      }
+  if (nonTxWeekSentAt.length >= CAP_NON_TX_PER_WEEK) {
+    const oldest = new Date(nonTxWeekSentAt[0])
+    return {
+      action: 'defer',
+      reason: 'frequency_cap_category_week',
+      scheduledFor: new Date(oldest.getTime() + 7 * 86400_000 + 30_000),
     }
   }
 
-  if (daySentAt.length >= CAP_PER_DAY) {
-    const oldest = new Date(daySentAt[0])
+  if (nonTxDaySentAt.length >= CAP_NON_TX_PER_DAY) {
+    const oldest = new Date(nonTxDaySentAt[0])
     return {
       action: 'defer',
-      reason: 'frequency_cap_day',
+      reason: 'frequency_cap_category_day',
       scheduledFor: new Date(oldest.getTime() + 86400_000 + 30_000),
-    }
-  }
-
-  if (hourSentAt.length >= CAP_PER_HOUR) {
-    const oldest = new Date(hourSentAt[0])
-    return {
-      action: 'defer',
-      reason: 'frequency_cap_hour',
-      scheduledFor: new Date(oldest.getTime() + 3600_000 + 30_000),
     }
   }
 

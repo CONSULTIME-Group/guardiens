@@ -97,7 +97,10 @@ Deno.test('nextQuietEndFrom — across DST boundary (last Sunday of March)', () 
 })
 
 // =============================================================
-// decideDeferral — frequency caps & bypass
+// decideDeferral — doctrine 02/08/2026
+//   transactional : aucun plafond, seules les heures calmes s'appliquent.
+//   non transactionnel : plafonds de categorie uniquement.
+//   categorie absente ou inconnue : traitee comme 'product'.
 // =============================================================
 
 const ACTIVE_HOUR = parisAt('2026-01-15', 14) // not quiet, mid-afternoon
@@ -105,7 +108,8 @@ const ACTIVE_HOUR = parisAt('2026-01-15', 14) // not quiet, mid-afternoon
 Deno.test('decideDeferral — empty history at active hour → SEND', () => {
   const r = decideDeferral({
     now: ACTIVE_HOUR,
-    templateName: 'review-reminder',
+    templateName: 'new-message',
+    category: 'transactional',
     hourSentAt: [],
     daySentAt: [],
   })
@@ -117,8 +121,9 @@ Deno.test('decideDeferral — bypass template during quiet hours → SEND', () =
     const r = decideDeferral({
       now: parisAt('2026-01-15', 23),
       templateName: tpl,
-      hourSentAt: ['2026-01-15T20:00:00.000Z', '2026-01-15T21:00:00.000Z', '2026-01-15T21:30:00.000Z'],
-      daySentAt: ['2026-01-15T20:00:00.000Z', '2026-01-15T21:00:00.000Z', '2026-01-15T21:30:00.000Z'],
+      category: 'transactional',
+      hourSentAt: ['2026-01-15T20:00:00.000Z', '2026-01-15T21:00:00.000Z'],
+      daySentAt: ['2026-01-15T20:00:00.000Z', '2026-01-15T21:00:00.000Z'],
     })
     assertEquals(r.action, 'send', `bypass failed for ${tpl}`)
   }
@@ -135,10 +140,41 @@ Deno.test('decideDeferral — __urgent flag bypasses everything', () => {
   assertEquals(r.action, 'send')
 })
 
-Deno.test('decideDeferral — quiet hours take precedence over caps', () => {
+// -------------------------------------------------------------
+// Transactionnel : jamais plafonne
+// -------------------------------------------------------------
+
+Deno.test('decideDeferral — transactionnel avec 10 envois dans l\'heure → SEND', () => {
+  const hour = Array.from({ length: 10 }, (_, i) =>
+    new Date(Date.parse('2026-01-15T13:00:00.000Z') + i * 60_000).toISOString())
+  const r = decideDeferral({
+    now: ACTIVE_HOUR,
+    templateName: 'new-message',
+    category: 'transactional',
+    hourSentAt: hour,
+    daySentAt: hour,
+  })
+  assertEquals(r.action, 'send')
+})
+
+Deno.test('decideDeferral — transactionnel ignore aussi les compteurs non tx', () => {
+  const r = decideDeferral({
+    now: ACTIVE_HOUR,
+    templateName: 'new-application',
+    category: 'transactional',
+    hourSentAt: [],
+    daySentAt: [],
+    nonTxDaySentAt: ['2026-01-15T09:00:00.000Z'],
+    nonTxWeekSentAt: ['2026-01-10T09:00:00.000Z', '2026-01-12T09:00:00.000Z', '2026-01-15T09:00:00.000Z'],
+  })
+  assertEquals(r.action, 'send')
+})
+
+Deno.test('decideDeferral — transactionnel toujours differe pendant les heures calmes', () => {
   const r = decideDeferral({
     now: parisAt('2026-01-15', 23),
-    templateName: 'review-reminder',
+    templateName: 'new-message',
+    category: 'transactional',
     hourSentAt: [],
     daySentAt: [],
   })
@@ -149,76 +185,95 @@ Deno.test('decideDeferral — quiet hours take precedence over caps', () => {
   }
 })
 
-Deno.test('decideDeferral — daily cap (3 sent in 24h) → defer to oldest+24h+30s', () => {
+// -------------------------------------------------------------
+// Non transactionnel : plafonds de categorie uniquement
+// -------------------------------------------------------------
+
+Deno.test('decideDeferral — product plafonne par le cap categorie 24h', () => {
   const oldest = '2026-01-15T10:00:00.000Z'
   const r = decideDeferral({
     now: ACTIVE_HOUR,
     templateName: 'review-reminder',
+    category: 'product',
     hourSentAt: [],
-    daySentAt: [oldest, '2026-01-15T11:00:00.000Z', '2026-01-15T12:00:00.000Z'],
+    daySentAt: [],
+    nonTxDaySentAt: [oldest],
   })
   assertEquals(r.action, 'defer')
   if (r.action === 'defer') {
-    assertEquals(r.reason, 'frequency_cap_day')
+    assertEquals(r.reason, 'frequency_cap_category_day')
     const expected = new Date(new Date(oldest).getTime() + 86400_000 + 30_000)
     assertEquals(r.scheduledFor.toISOString(), expected.toISOString())
   }
 })
 
-Deno.test('decideDeferral — hourly cap (1 sent in 1h) → defer to oldest+1h+30s', () => {
-  const oldest = '2026-01-15T13:30:00.000Z'
+Deno.test('decideDeferral — product plafonne par le cap categorie 7 jours (prioritaire)', () => {
+  const oldest = '2026-01-09T10:00:00.000Z'
   const r = decideDeferral({
-    now: ACTIVE_HOUR, // 14:00 Paris
+    now: ACTIVE_HOUR,
     templateName: 'review-reminder',
-    hourSentAt: [oldest],
-    daySentAt: [oldest],
+    category: 'digest',
+    hourSentAt: [],
+    daySentAt: [],
+    nonTxDaySentAt: ['2026-01-15T10:00:00.000Z'],
+    nonTxWeekSentAt: [oldest, '2026-01-11T10:00:00.000Z', '2026-01-15T10:00:00.000Z'],
   })
   assertEquals(r.action, 'defer')
   if (r.action === 'defer') {
-    assertEquals(r.reason, 'frequency_cap_hour')
-    const expected = new Date(new Date(oldest).getTime() + 3600_000 + 30_000)
+    assertEquals(r.reason, 'frequency_cap_category_week')
+    const expected = new Date(new Date(oldest).getTime() + 7 * 86400_000 + 30_000)
     assertEquals(r.scheduledFor.toISOString(), expected.toISOString())
   }
 })
 
-Deno.test('decideDeferral — daily cap takes precedence over hourly cap', () => {
-  const oldestDay = '2026-01-15T10:00:00.000Z'
+Deno.test('decideDeferral — product NON plafonne par les anciens caps globaux', () => {
+  const many = ['2026-01-15T09:00:00.000Z', '2026-01-15T10:00:00.000Z', '2026-01-15T11:00:00.000Z', '2026-01-15T13:50:00.000Z']
   const r = decideDeferral({
     now: ACTIVE_HOUR,
     templateName: 'review-reminder',
-    hourSentAt: ['2026-01-15T13:45:00.000Z'],
-    daySentAt: [oldestDay, '2026-01-15T11:00:00.000Z', '2026-01-15T13:45:00.000Z'],
+    category: 'product',
+    hourSentAt: ['2026-01-15T13:50:00.000Z'],
+    daySentAt: many,
+    nonTxDaySentAt: [],
+    nonTxWeekSentAt: [],
+  })
+  assertEquals(r.action, 'send')
+})
+
+Deno.test('decideDeferral — template sans categorie traite comme product', () => {
+  const oldest = '2026-01-15T10:00:00.000Z'
+  const r = decideDeferral({
+    now: ACTIVE_HOUR,
+    templateName: 'template-non-categorise',
+    hourSentAt: [],
+    daySentAt: [],
+    nonTxDaySentAt: [oldest],
   })
   assertEquals(r.action, 'defer')
-  if (r.action === 'defer') assertEquals(r.reason, 'frequency_cap_day')
+  if (r.action === 'defer') assertEquals(r.reason, 'frequency_cap_category_day')
 })
 
-Deno.test('decideDeferral — exactly at cap boundary defers (>=, not >)', () => {
-  // 1 in last hour → at hourly cap (CAP_PER_HOUR=1) → defer
-  const r1 = decideDeferral({
+Deno.test('decideDeferral — categorie inconnue traitee comme product', () => {
+  const r = decideDeferral({
     now: ACTIVE_HOUR,
-    templateName: 'review-reminder',
-    hourSentAt: ['2026-01-15T13:50:00.000Z'],
-    daySentAt: ['2026-01-15T13:50:00.000Z'],
-  })
-  assert(r1.action === 'defer' && r1.reason === 'frequency_cap_hour')
-
-  // 3 in last 24h → at daily cap (CAP_PER_DAY=3) → defer
-  const r2 = decideDeferral({
-    now: ACTIVE_HOUR,
-    templateName: 'review-reminder',
+    templateName: 'template-categorie-inconnue',
+    category: 'marketing' as unknown as 'product',
     hourSentAt: [],
-    daySentAt: ['2026-01-15T01:00:00.000Z', '2026-01-15T05:00:00.000Z', '2026-01-15T11:00:00.000Z'],
+    daySentAt: [],
+    nonTxDaySentAt: ['2026-01-15T10:00:00.000Z'],
   })
-  assert(r2.action === 'defer' && r2.reason === 'frequency_cap_day')
+  assert(r.action === 'defer' && r.reason === 'frequency_cap_category_day')
 })
 
-Deno.test('decideDeferral — under cap (2 in 24h, 0 in 1h) → SEND', () => {
+Deno.test('decideDeferral — product sous les plafonds de categorie → SEND', () => {
   const r = decideDeferral({
     now: ACTIVE_HOUR,
     templateName: 'review-reminder',
+    category: 'product',
     hourSentAt: [],
-    daySentAt: ['2026-01-15T01:00:00.000Z', '2026-01-15T05:00:00.000Z'],
+    daySentAt: [],
+    nonTxDaySentAt: [],
+    nonTxWeekSentAt: ['2026-01-10T09:00:00.000Z', '2026-01-12T09:00:00.000Z'],
   })
   assertEquals(r.action, 'send')
 })
@@ -232,6 +287,7 @@ Deno.test('Report — quiet hour deferral schedules at 08:00 Paris exactly', () 
   const r = decideDeferral({
     now,
     templateName: 'review-reminder',
+    category: 'product',
     hourSentAt: [],
     daySentAt: [],
   })
@@ -244,24 +300,26 @@ Deno.test('Report — quiet hour deferral schedules at 08:00 Paris exactly', () 
   }
 })
 
-Deno.test('Report — hourly cap deferral re-evaluates correctly after slot opens', () => {
-  // First call: 1 sent at 13:50 → defer to 14:50:30
-  const oldest = '2026-01-15T13:50:00.000Z'
+Deno.test('Report — cap categorie re-evalue correctement une fois le creneau ouvert', () => {
+  const oldest = '2026-01-15T10:00:00.000Z'
   const r1 = decideDeferral({
-    now: parisAt('2026-01-15', 14),
+    now: ACTIVE_HOUR,
     templateName: 'review-reminder',
-    hourSentAt: [oldest],
-    daySentAt: [oldest],
+    category: 'product',
+    hourSentAt: [],
+    daySentAt: [],
+    nonTxDaySentAt: [oldest],
   })
-  assert(r1.action === 'defer' && r1.reason === 'frequency_cap_hour')
+  assert(r1.action === 'defer' && r1.reason === 'frequency_cap_category_day')
   const scheduled = (r1 as any).scheduledFor as Date
 
-  // Replay at the scheduled moment: the old send is now > 1h ago → falls out of window → SEND
   const r2 = decideDeferral({
     now: scheduled,
     templateName: 'review-reminder',
-    hourSentAt: [], // oldest is 1h+30s old → no longer in 1h window
-    daySentAt: [oldest],
+    category: 'product',
+    hourSentAt: [],
+    daySentAt: [],
+    nonTxDaySentAt: [], // sorti de la fenetre 24h
   })
   assertEquals(r2.action, 'send')
 })
