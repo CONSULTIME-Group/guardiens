@@ -598,7 +598,10 @@ const CreateSit = () => {
               if (typeof a.daily_routine === "string") setDailyRoutine(a.daily_routine);
               if (typeof a.owner_message === "string") setOwnerMessage(a.owner_message);
               if (Array.isArray(a.open_to)) setOpenTo(a.open_to);
-              if (Array.isArray(a.environments)) setSitEnvironments(a.environments);
+              // La base plafonne à 3 environnements et n'accepte qu'une liste
+              // fermée de valeurs : on filtre avant d'appliquer, sinon la
+              // publication est refusée par un contrôle en base.
+              if (Array.isArray(a.environments)) setSitEnvironments(sanitizeSitEnvironments(a.environments));
               try {
                 trackEvent("alma_republish_adapted", {
                   source: "create_sit_page",
@@ -611,11 +614,15 @@ const CreateSit = () => {
               });
             }
           } catch (e) {
+            // Le détail technique reste en console : l'utilisateur reçoit une
+            // phrase compréhensible, jamais le texte brut du serveur.
+            console.error("[CreateSit] adapt-sit-with-alma threw", e);
             toast({
               variant: "destructive",
               title: "Adaptation Alma indisponible",
-              description: e instanceof Error ? e.message : "Réessayez dans un instant.",
+              description: "L'assistante n'a pas pu adapter votre annonce. Votre brouillon reste tel quel, vous pouvez l'éditer manuellement.",
             });
+
           } finally {
             setAdaptingWithAlma(false);
           }
