@@ -81,15 +81,22 @@ finalisations critiques) — pas pour contourner le cap depuis l'UI.
 
 Pour les templates **non bypass** et **non urgent** :
 
-1. **Quiet hours** (22h–8h Paris) → `defer` au prochain 08h00 Paris.
-2. Si catégorie non transactionnelle :
+1. **Quiet hours** (22h–8h Paris) → `defer` au prochain 08h00 Paris. S'applique
+   à toutes les catégories, y compris transactionnelle : on ne réveille personne
+   la nuit.
+2. **Catégorie `transactional`** → `send`, sans aucun plafond de fréquence.
+3. Catégorie non transactionnelle (product, digest, alert, ou catégorie absente
+   ou inconnue) :
    a. **3 envois non transactionnels sur 7 jours** → `defer` à `oldest + 7j + 30s`
       (`frequency_cap_category_week`).
    b. **1 envoi non transactionnel sur 24 h** → `defer` à `oldest + 24h + 30s`
       (`frequency_cap_category_day`).
-3. **Cap journalier global** (≥ 3 envoyés sur 24 h) → `defer` à `oldest + 24h + 30s`.
-4. **Cap horaire global** (≥ 1 envoyé sur 1 h) → `defer` à `oldest + 1h + 30s`.
-5. Sinon → `send`.
+4. Sinon → `send`.
+
+Les motifs `frequency_cap_hour` et `frequency_cap_day` restent déclarés dans le
+type `DeferDecision` pour lire l'historique de la file, mais ne sont plus jamais
+produits.
+
 
 Le quiet hours prime toujours sur les caps : un email refusé pour cap
 pendant la nuit est reporté au matin (08h00), pas au prochain créneau cap.
