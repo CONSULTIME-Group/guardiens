@@ -284,29 +284,19 @@ const EditSit = () => {
     if (!user || !id || !canSave) return;
     setSaving(true);
 
-    const cleanDesc = trimmedDesc.replace(FLEX_REGEX, "").trim();
-    let expectations = cleanDesc;
-    if (flexibleDates) {
-      const flexNote = [
-        flexibleMonths.length > 0 ? `Mois : ${flexibleMonths.join(", ")}` : "",
-        flexibleDuration ? `Durée : ${flexibleDuration}` : "",
-      ]
-        .filter(Boolean)
-        .join(" · ");
-      if (flexNote) {
-        expectations = cleanDesc
-          ? `${cleanDesc}\n\nFlexibilité : ${flexNote}`
-          : `Flexibilité : ${flexNote}`;
-      }
-    }
+    // La flexibilité n'est jamais concaténée à la description : le `\n\n`
+    // servirait alors de séparateur des deux sous-champs de description.
+    const expectations = trimmedDesc.replace(FLEX_REGEX, "").trim();
+    const flexNote = flexibleDates ? buildFlexNote(flexibleMonths, flexibleDuration) : null;
 
     const { error } = await supabase
       .from("sits")
       .update({
         title: trimmedTitle,
-        start_date: flexibleDates ? null : startDate,
-        end_date: flexibleDates ? null : endDate,
+        start_date: startDate,
+        end_date: endDate,
         flexible_dates: flexibleDates,
+        flexibility_notes: flexNote,
         specific_expectations: expectations,
         open_to: openTo,
         is_urgent: isUrgent,
