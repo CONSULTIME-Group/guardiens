@@ -1275,7 +1275,48 @@ const Sits = () => {
   );
 };
 
+/**
+ * Candidature dont l'annonce n'est plus visible (annulée ou retirée par le
+ * propriétaire, donc masquée par la sécurité en base). On affiche une carte
+ * explicite plutôt que de faire échouer toute la liste du gardien.
+ */
+const UnavailableSitCard = ({ onWithdraw }: { onWithdraw?: () => void }) => (
+  <div className="bg-card rounded-xl border border-border p-4">
+    <div className="flex items-start gap-3">
+      <div className="shrink-0 w-10 h-10 rounded-lg bg-muted flex items-center justify-center">
+        <Archive className="h-4 w-4 text-muted-foreground" />
+      </div>
+      <div className="min-w-0 flex-1">
+        <h3 className="font-heading font-semibold text-sm md:text-base">
+          Annonce n'est plus disponible
+        </h3>
+        <p className="text-xs text-muted-foreground mt-1">
+          Le propriétaire a retiré cette annonce, votre candidature n'a plus d'objet. Vous gardez l'accès à toutes vos autres annonces.
+        </p>
+        <div className="flex items-center gap-2 mt-3 flex-wrap">
+          <Link
+            to="/search"
+            className="text-xs font-medium flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-primary/10 text-primary hover:bg-primary/20 transition-colors"
+          >
+            <Search className="h-3.5 w-3.5" /> Voir les autres gardes
+          </Link>
+          {onWithdraw && (
+            <button
+              type="button"
+              onClick={onWithdraw}
+              className="text-xs font-medium px-2.5 py-1.5 rounded-lg text-muted-foreground hover:text-destructive transition-colors"
+            >
+              Retirer ma candidature
+            </button>
+          )}
+        </div>
+      </div>
+    </div>
+  </div>
+);
+
 /* ── Card ── */
+
 const SitCard = ({
   sit, isOwner, onArchive, onDelete, onRepublish, onOpenGuide, onWithdraw,
 }: {
