@@ -45,6 +45,8 @@ interface SitDetailHeaderProps {
   startDate: string | null;
   endDate: string | null;
   flexibleDates: boolean | null;
+  flexibilityNotes?: string | null;
+
   photos: string[];
   owner: any;
   isOwner: boolean;
