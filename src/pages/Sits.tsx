@@ -680,18 +680,7 @@ const Sits = () => {
         }
       });
     } else {
-      base = activeSits.filter((s) => {
-        const es = s.effectiveStatus || s.status;
-        const appStatus = s.application_status;
-        switch (activeTab) {
-          case "in_progress": return es === "in_progress" && appStatus === "accepted";
-          case "completed": return es === "completed";
-          case "cancelled": return appStatus === "cancelled" || appStatus === "rejected" || es === "cancelled" || es === "unavailable";
-          case "upcoming": return !["completed", "cancelled", "unavailable"].includes(es) && !["cancelled", "rejected"].includes(appStatus) && es !== "in_progress";
-
-        }
-        return false;
-      });
+      base = activeSits.filter((s) => sitterTabOf(s) === activeTab);
     }
     const q = searchQuery.trim().toLowerCase();
     let searched = q
