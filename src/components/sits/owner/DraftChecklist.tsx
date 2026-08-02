@@ -22,6 +22,8 @@ interface DraftChecklistProps {
   onPublish: () => void;
   /** Lien d'édition de l'annonce, pour les éléments qui se corrigent dans le formulaire. */
   editHref?: string;
+  /** Libellé du bouton principal, quand la publication passe par un autre écran. */
+  publishLabel?: string;
 }
 
 const DraftChecklist = ({
@@ -30,16 +32,24 @@ const DraftChecklist = ({
   publishing,
   onPublish,
   editHref,
+  publishLabel = "Publier l'annonce",
 }: DraftChecklistProps) => {
   const missingIds = new Set(blockers.map((b) => b.id));
+  const knownIds = new Set(requirements.map((r) => r.id));
   const items = requirements.map((r) => ({
     ...r,
     ok: !missingIds.has(r.id),
     fix: blockers.find((b) => b.id === r.id)?.action,
   }));
+  // Filet de sécurité : aucun blocage ne peut rester invisible. Un bloquant
+  // sans ligne de prérequis est ajouté en fin de liste avec son propre libellé.
+  for (const b of blockers) {
+    if (!knownIds.has(b.id)) items.push({ id: b.id, label: b.label, ok: false, fix: b.action });
+  }
 
   const allOk = blockers.length === 0;
   const doneCount = items.filter((i) => i.ok).length;
+
 
   return (
     <div className="mb-6 rounded-2xl border border-border bg-accent/40 p-5 md:p-6">
