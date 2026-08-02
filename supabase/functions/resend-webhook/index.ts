@@ -145,7 +145,15 @@ Deno.serve(async (req) => {
           .from("email_send_log")
           .update(logUpdate)
           .eq("id", logRow.id);
-        if (logErr) console.error("email_send_log update error:", logErr);
+        if (logErr) {
+          console.error("email_send_log update failed", {
+            event_type: event.type,
+            template_name: logRow.template_name ?? null,
+            log_id: logRow.id,
+            error: logErr.message,
+            code: logErr.code,
+          });
+        }
       }
     }
 
