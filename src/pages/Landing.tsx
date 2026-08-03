@@ -89,13 +89,16 @@ const Landing = () => {
     return () => { cancelled = true; };
   }, [navigate]);
 
-  // KPI hero : valeurs réelles de la plateforme uniquement. L'historique personnel
-  // des fondateurs (37 maisons, 234 animaux) n'est PAS additionné ici : il est
-  // raconté comme tel dans la section Notre histoire et dans la carte piliers.
-  // Ne pas réintroduire d'offset, cela ferait passer un vécu perso pour de
-  // l'activité plateforme.
-  const kpiMaisons = publicStats?.maisons_gardees ?? 0;
-  const kpiAnimaux = publicStats?.animaux_accompagnes ?? 0;
+  // KPI hero : "maisons gardées" et "animaux accompagnés" additionnent l'historique
+  // personnel des fondateurs (37 maisons, 234 animaux, raconté dans Notre histoire
+  // et la carte piliers) et l'activité réelle de la plateforme. Décision produit
+  // confirmée par Jérémie le 03/08/2026 : partir de ce socle vécu et cumuler
+  // par-dessus au fur et à mesure que la plateforme grandit. "Inscrits" et
+  // "missions_entraide" restent des compteurs plateforme purs, sans offset.
+  const FOUNDER_BASE_MAISONS = 37;
+  const FOUNDER_BASE_ANIMAUX = 234;
+  const kpiMaisons = FOUNDER_BASE_MAISONS + (publicStats?.maisons_gardees ?? 0);
+  const kpiAnimaux = FOUNDER_BASE_ANIMAUX + (publicStats?.animaux_accompagnes ?? 0);
   const kpiInscrits = publicStats?.total_inscrits ?? 0;
   const kpiMissions = publicStats?.missions_entraide ?? 0;
 
@@ -241,8 +244,9 @@ const Landing = () => {
             {(kpiMaisons >= 10 || kpiAnimaux >= 10 || kpiInscrits > 0 || kpiMissions >= 30) && (
               <div className="flex flex-row flex-wrap justify-start gap-x-6 gap-y-3 mt-8 md:gap-x-12 md:gap-y-6 md:mt-14 animate-hero-fade-up animation-delay-1100">
                 {/* Seuils : un compteur ne s'affiche qu'au-dessus d'un volume qui prouve
-                    l'activité. En dessous, il souligne le vide. Décision produit, ne pas
-                    abaisser sans arbitrage. */}
+                    l'activité. maisons/animaux intègrent désormais le socle fondateurs donc
+                    passent toujours ce seuil ; inscrits et missions restent de purs compteurs
+                    plateforme soumis au seuil. Décision produit, ne pas abaisser sans arbitrage. */}
                 {kpiMaisons >= 10 && (
                   <div className="border-r border-white/20 pr-6 md:pr-12 last:border-r-0 last:pr-0">
                     <span className="block text-3xl font-heading font-bold text-white tabular-nums">{kpiMaisons}</span>
