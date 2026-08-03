@@ -241,12 +241,13 @@ const Landing = () => {
             </p>
 
 
-            {(kpiMaisons >= 10 || kpiAnimaux >= 10 || kpiInscrits > 0 || kpiMissions >= 30) && (
+            {(kpiMaisons >= 10 || kpiAnimaux >= 10 || kpiInscrits > 0 || kpiMissions >= 10) && (
               <div className="flex flex-row flex-wrap justify-start gap-x-6 gap-y-3 mt-8 md:gap-x-12 md:gap-y-6 md:mt-14 animate-hero-fade-up animation-delay-1100">
                 {/* Seuils : un compteur ne s'affiche qu'au-dessus d'un volume qui prouve
-                    l'activité. maisons/animaux intègrent désormais le socle fondateurs donc
-                    passent toujours ce seuil ; inscrits et missions restent de purs compteurs
-                    plateforme soumis au seuil. Décision produit, ne pas abaisser sans arbitrage. */}
+                    l'activité. maisons/animaux intègrent le socle fondateurs donc passent
+                    toujours ce seuil ; inscrits est un pur compteur sans seuil bloquant ;
+                    missions_entraide passe à un seuil de 10 (arbitrage Jérémie, 03/08/2026,
+                    aligné sur le seuil maisons/animaux). */}
                 {kpiMaisons >= 10 && (
                   <div className="border-r border-white/20 pr-6 md:pr-12 last:border-r-0 last:pr-0">
                     <span className="block text-3xl font-heading font-bold text-white tabular-nums">{kpiMaisons}</span>
@@ -266,7 +267,7 @@ const Landing = () => {
                   </div>
                 )}
                 {/* Seuil 30 : en dessous, un compteur d'entraide isolé à côté des autres compteurs souligne le vide au lieu de prouver l'activité. Décision produit, ne pas abaisser sans arbitrage. */}
-                {kpiMissions >= 30 && (
+                {kpiMissions >= 10 && (
                   <div>
                     <span className="block text-3xl font-heading font-bold text-white tabular-nums">{kpiMissions}</span>
                     <span className="text-xs font-body text-white/80 tracking-wide uppercase mt-1 block">{t("landing.hero.kpi_missions")}</span>
