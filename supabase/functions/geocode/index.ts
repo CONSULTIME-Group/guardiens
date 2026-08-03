@@ -147,9 +147,14 @@ Deno.serve(async (req) => {
       if (resolvedCountry.code) params.set("countrycodes", resolvedCountry.code);
     }
     const url = `https://nominatim.openstreetmap.org/search?${params}`;
+    // Timeout explicite : sans borne, un pic de requêtes simultanées sur
+    // Nominatim (rate limité) fait traîner les workers jusqu'à saturation et
+    // la plateforme répond alors 502 avant que le handler ne rende sa réponse.
     const res = await fetch(url, {
       headers: { "User-Agent": "Guardiens-App/1.0" },
+      signal: AbortSignal.timeout(6000),
     });
+
 
     if (!res.ok) {
       // Rate limit ou indisponibilité, on dégrade proprement, pas de 500.
