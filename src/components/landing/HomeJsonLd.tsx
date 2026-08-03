@@ -4,7 +4,7 @@ import howtoStep1 from "@/assets/illustrations/howto-step-1-annonce.png";
 import howtoStep2 from "@/assets/illustrations/howto-step-2-rencontre.png";
 import howtoStep3 from "@/assets/illustrations/howto-step-3-depart.png";
 
-const HOME_CONTENT_LAST_MODIFIED = "2026-07-01";
+const HOME_CONTENT_LAST_MODIFIED = "2026-08-03";
 
 const HOME_ROUTE = staticRoutes.find((route) => route.path === "/");
 const HOME_OG_IMAGE = HOME_ROUTE?.ogImage ?? DEFAULT_OG_IMAGE;
@@ -171,12 +171,7 @@ export default function HomeJsonLd() {
               description:
                 "Deux services indépendants : house-sitting et garde d'animaux à domicile d'un côté ; petites missions d'entraide entre gens du coin de l'autre. Avis croisés, vérification d'identité, sans commission.",
               provider: { "@id": "https://guardiens.fr/#organization" },
-              areaServed: [
-                { "@type": "Country", name: "France" },
-                { "@type": "City", name: "Lyon" },
-                { "@type": "City", name: "Annecy" },
-                { "@type": "City", name: "Grenoble" },
-              ],
+              areaServed: { "@type": "Country", name: "France" },
               serviceType: [
                 "House-sitting",
                 "Pet sitting",
