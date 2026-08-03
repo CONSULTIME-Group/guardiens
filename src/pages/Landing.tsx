@@ -185,7 +185,8 @@ const Landing = () => {
         <div className="relative z-10 w-full max-w-7xl mx-auto px-6 md:px-12 lg:px-16 py-12 md:py-24">
           <div className="max-w-2xl lg:max-w-3xl">
 
-            <p className="font-body text-xs text-white/85 tracking-[0.2em] uppercase mb-6">
+            <p className="flex items-center gap-2 font-body text-xs text-white/85 tracking-[0.2em] uppercase mb-6">
+              <span className="inline-block w-5 h-0.5 bg-[#9A6A44] align-middle" aria-hidden="true" />
               {t("landing.hero.eyebrow")}
             </p>
 
@@ -210,7 +211,8 @@ const Landing = () => {
                   trackEvent("cta_proprio_clicked", { metadata: { location: "hero" } });
                   navigate("/inscription?role=owner");
                 }}
-                className="font-body text-base font-semibold tracking-wide rounded-full px-12 py-4 bg-primary text-primary-foreground hover:brightness-95 hover:scale-[1.03] transition-all duration-200 shadow-xl shadow-primary/40 ring-2 ring-primary-foreground/10"
+                style={{ boxShadow: "0 6px 14px rgba(44,109,80,.24)" }}
+                className="font-body text-base font-semibold tracking-wide rounded-full px-12 py-4 bg-primary text-primary-foreground hover:brightness-95 hover:scale-[1.03] transition-all duration-200"
               >
                 {t("landing.hero.cta_owner")}
               </button>

@@ -304,8 +304,9 @@ const LiveListingsStrip: React.FC = () => {
                   <Link
                     key={s.id}
                     to={`/annonces/${s.slug || s.id}`}
-                    className="group bg-card border border-border rounded-2xl overflow-hidden hover:border-primary/50 hover:shadow-md transition-all flex lg:flex-row flex-col"
+                    className="notebook-card notebook-card-paper group relative flex lg:flex-row flex-col"
                   >
+                    <div className="notebook-card-edge" aria-hidden="true" />
                     <div className="lg:w-2/5 aspect-[4/3] lg:aspect-auto bg-muted relative overflow-hidden shrink-0">
                       {photo ? (
                         <img
@@ -357,8 +358,9 @@ const LiveListingsStrip: React.FC = () => {
                 <Link
                   key={s.id}
                   to={`/annonces/${s.slug || s.id}`}
-                  className="group bg-card border border-border rounded-2xl overflow-hidden hover:border-primary/50 hover:shadow-lg transition-all"
+                  className="notebook-card notebook-card-paper group relative"
                 >
+                  <div className="notebook-card-edge" aria-hidden="true" />
                   <div className="aspect-[4/3] bg-muted relative overflow-hidden">
                     {photo ? (
                       <img
