@@ -115,9 +115,23 @@ const SitDetail = () => {
         setLoading(false);
         return;
       }
-      setSit(sitData as SitData);
-      setInitialLogementOverride((sitData as any).logement_override || "");
-      setInitialAnimauxOverride((sitData as any).animaux_override || "");
+      // La RPC masquée n'expose qu'une liste blanche de colonnes. Le propriétaire
+      // doit récupérer en plus ses champs privés (photo de couverture, notes
+      // spécifiques, raison de dépublication), sinon l'auto-save débounced
+      // réécrirait des valeurs vides par-dessus le contenu réel.
+      let ownerFields: Record<string, any> = {};
+      if (user?.id && user.id === (sitData as any).user_id) {
+        const { data: privateRow } = await supabase
+          .from("sits")
+          .select("cover_photo_url, logement_override, animaux_override, last_unpublished_reason")
+          .eq("id", (sitData as any).id)
+          .maybeSingle();
+        if (privateRow) ownerFields = privateRow as Record<string, any>;
+      }
+      setSit({ ...(sitData as any), ...ownerFields } as SitData);
+      setInitialLogementOverride(ownerFields.logement_override || "");
+      setInitialAnimauxOverride(ownerFields.animaux_override || "");
+
 
       const [ownerRes, propRes, ownerProfRes, reviewsRes, galleryRes] = await Promise.all([
         supabase.from("public_profiles").select("*").eq("id", sitData.user_id).limit(1),
