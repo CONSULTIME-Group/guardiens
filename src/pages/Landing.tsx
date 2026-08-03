@@ -212,7 +212,7 @@ const Landing = () => {
                   navigate("/inscription?role=owner");
                 }}
                 style={{ boxShadow: "0 6px 14px rgba(44,109,80,.24)" }}
-                className="font-body text-base font-semibold tracking-wide rounded-full px-12 py-4 bg-primary text-primary-foreground hover:brightness-95 hover:scale-[1.03] transition-all duration-200"
+                className="font-body text-base font-semibold tracking-wide rounded-full px-12 py-4 bg-primary text-primary-foreground hover:brightness-95 hover:scale-[1.03] transition-all duration-200 ring-2 ring-primary-foreground/10"
               >
                 {t("landing.hero.cta_owner")}
               </button>
