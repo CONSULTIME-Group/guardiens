@@ -1,3 +1,4 @@
+import { requireAdminOrServiceRole } from '../_shared/require-admin.ts'
 // GA4 diagnostic: Measurement ID, property ID, realtime users, last event date.
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -54,6 +55,9 @@ async function getAccessToken(sa: { client_email: string; private_key: string })
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
+
+  const denied = await requireAdminOrServiceRole(req, corsHeaders)
+  if (denied) return denied
 
   const json = (status: number, data: unknown) =>
     new Response(JSON.stringify(data), {
