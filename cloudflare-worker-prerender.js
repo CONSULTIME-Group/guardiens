@@ -28,7 +28,7 @@ const BOT_AGENTS = [
   'googlebot', 'bingbot', 'slurp', 'duckduckbot', 'yandexbot',
   'baiduspider', 'applebot',
   // Generative AI bots
-  'chatgpt-user', 'gptbot', 'oai-searchbot', 'claudebot', 'claude-web', 'claude-searchbot',
+  'chatgpt-user', 'gptbot', 'oai-searchbot', 'google-extended', 'claudebot', 'claude-web', 'claude-searchbot',
   'anthropic-ai', 'perplexitybot', 'perplexity-user', 'meta-externalagent',
   'meta-externalfetcher', 'amazonbot', 'applebot-extended', 'mistralai-user',
   'duckassistbot', 'cohere-ai', 'youbot',
