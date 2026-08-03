@@ -120,8 +120,8 @@ export interface DynamicRouteConfig {
 export const staticRoutes: SiteRoute[] = [
  {
  path: "/",
-title: "Garde d'animaux à domicile et house-sitting entre particuliers | Guardiens",
-metaDescription: "Trouvez un gardien du coin pour votre maison et vos animaux. House-sitting et entraide entre particuliers, vérifiés et notés. Partout en France.",
+		title: "Garde d'animaux à domicile et house-sitting | Guardiens",
+		metaDescription: "Trouvez un gardien du coin pour votre maison et vos animaux. House-sitting entre particuliers, profils vérifiés et notés, sans engagement. Partout en France.",
  h1: "Guardiens — Comme confier ses clés à quelqu'un du coin",
  sitemapPriority: "1.0",
  changeFreq: "daily",
@@ -129,9 +129,9 @@ metaDescription: "Trouvez un gardien du coin pour votre maison et vos animaux. H
  },
  {
  path: "/tarifs",
-title: "Tarifs Guardiens, gratuit aujourd'hui sans engagement | Guardiens",
- metaDescription: "Guardiens est gratuit aujourd'hui pour les propriétaires comme pour les gardiens, sans engagement, sans commission, sans frais cachés.",
- h1: "Nos tarifs",
+		title: "Tarifs Guardiens : nos engagements de service | Guardiens",
+		metaDescription: "Guardiens est gratuit aujourd'hui pour les propriétaires comme pour les gardiens, sans engagement, sans commission, sans frais cachés.",
+		h1: "Tarifs Guardiens : nos engagements de service",
  sitemapPriority: "0.8",
  changeFreq: "weekly",
  },
@@ -339,11 +339,11 @@ export const dynamicRoutes: DynamicRouteConfig[] = [
  changeFreq: "monthly",
  dynamicTitle: true,
  dynamicDescription: true,
- // Instance représentative : l'article "nouveaux-tarifs-2026" (contenu stable, pilier SEO)
- sampleParams: { slug: "nouveaux-tarifs-2026" },
- // Titre et description réels servis par la page (vérifiés strictement)
- sampleTitle: "Tarifs Guardiens 2026 | Guardiens",
- sampleDescription: "Guardiens reste gratuit tant que le service ne nous satisfait pas. Sans engagement, sans commission, sans deadline annoncée.",
+		// Instance représentative : l'article "c-est-quoi-le-house-sitting" (publié, indexable, stable)
+		sampleParams: { slug: "c-est-quoi-le-house-sitting" },
+		// Titre et description réels servis par la page (vérifiés strictement)
+		sampleTitle: "House sitting : comment ça marche en France (guide 2026) | Guardiens",
+		sampleDescription: "Le house sitting, c'est faire garder sa maison et ses animaux par un particulier qui loge sur place. Fonctionnement, coûts réels, cadre légal : le guide 2026.",
  },
  {
  pathPattern: "/house-sitting/:city",
