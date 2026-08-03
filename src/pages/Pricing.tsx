@@ -62,7 +62,7 @@ const Pricing = () => {
   return (
     <>
       <PageMeta
-        title="Nos engagements de service | Guardiens"
+        title="Tarifs Guardiens : nos engagements de service | Guardiens"
         description="Guardiens reste gratuit tant que nous ne sommes pas satisfaits du service. Accès complet, sans engagement, sans carte bancaire."
         path="/tarifs"
       />
@@ -77,7 +77,7 @@ const Pricing = () => {
         <main className="max-w-3xl mx-auto px-4 min-w-0">
           <section className="py-10 md:py-14 text-center">
             <h1 className="font-heading text-3xl md:text-5xl font-bold text-foreground leading-tight mb-4">
-              Nos engagements de service
+              Tarifs Guardiens : nos engagements de service
             </h1>
             <p className="text-base md:text-lg font-body text-foreground/70 leading-relaxed">
               {getPricingBaselineShort()}
