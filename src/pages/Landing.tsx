@@ -266,7 +266,7 @@ const Landing = () => {
                     <span className="text-xs font-body text-white/80 tracking-wide uppercase mt-1 block">{t("landing.hero.kpi_members")}</span>
                   </div>
                 )}
-                {/* Seuil 30 : en dessous, un compteur d'entraide isolé à côté des autres compteurs souligne le vide au lieu de prouver l'activité. Décision produit, ne pas abaisser sans arbitrage. */}
+                {/* Seuil 10 : en dessous, un compteur d'entraide isolé à côté des autres compteurs souligne le vide au lieu de prouver l'activité. Abaissé de 30 à 10 le 03/08/2026 (arbitrage Jérémie), aligné sur le seuil maisons/animaux. */}
                 {kpiMissions >= 10 && (
                   <div>
                     <span className="block text-3xl font-heading font-bold text-white tabular-nums">{kpiMissions}</span>
