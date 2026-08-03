@@ -1,3 +1,4 @@
+import { requireAdminOrServiceRole } from '../_shared/require-admin.ts'
 // Chrome UX Report API (Core Web Vitals données réelles).
 // Doc: https://developer.chrome.com/docs/crux/api
 //
@@ -52,6 +53,9 @@ function extractMetrics(record: any) {
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
+
+  const denied = await requireAdminOrServiceRole(req, corsHeaders)
+  if (denied) return denied
 
   const apiKey = Deno.env.get("CRUX_API_KEY");
   if (!apiKey) {

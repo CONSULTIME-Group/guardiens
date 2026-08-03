@@ -1,3 +1,4 @@
+import { requireAdminOrServiceRole } from '../_shared/require-admin.ts'
 // GSC URL Inspection API
 // Doc: https://developers.google.com/webmaster-tools/v1/urlInspection.index/inspect
 //
@@ -57,6 +58,9 @@ async function getAccessToken(sa: { client_email: string; private_key: string })
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
+
+  const denied = await requireAdminOrServiceRole(req, corsHeaders)
+  if (denied) return denied
 
   try {
     const saJson = Deno.env.get("GOOGLE_SERVICE_ACCOUNT_JSON");

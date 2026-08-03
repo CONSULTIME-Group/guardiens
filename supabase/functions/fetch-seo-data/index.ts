@@ -1,3 +1,4 @@
+import { requireAdminOrServiceRole } from '../_shared/require-admin.ts'
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
@@ -247,6 +248,9 @@ function daysAgo(n: number): Date {
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
+
+  const denied = await requireAdminOrServiceRole(req, corsHeaders)
+  if (denied) return denied
     return new Response(null, { headers: corsHeaders });
   }
 

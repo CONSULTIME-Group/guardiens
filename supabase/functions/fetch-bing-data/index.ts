@@ -1,3 +1,4 @@
+import { requireAdminOrServiceRole } from '../_shared/require-admin.ts'
 // Bing Webmaster Tools API.
 // Doc : https://learn.microsoft.com/en-us/bingwebmaster/getting-access
 //
@@ -76,6 +77,9 @@ function summarize(rows: BingDailyRow[], startMs: number, endMs: number): Period
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
+
+  const denied = await requireAdminOrServiceRole(req, corsHeaders)
+  if (denied) return denied
 
   const apiKey = Deno.env.get("BING_WEBMASTER_API_KEY");
   if (!apiKey) {
