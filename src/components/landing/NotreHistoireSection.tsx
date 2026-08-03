@@ -26,27 +26,39 @@ export function NotreHistoireSection() {
               {t("landing.story.p2")}
             </p>
             <p className="text-lg font-body leading-relaxed text-foreground/85 mb-7">
-              {t("landing.story.p3")}
+              {t("landing.story.quote_lead")}
             </p>
             <div className="border-l-4 border-primary pl-6 my-8">
               <p className="text-2xl md:text-3xl font-heading font-semibold italic text-foreground leading-snug">
                 {t("landing.story.quote")}
               </p>
             </div>
-          </RevealSection>
-
-          <RevealSection delay={0.2}>
+            <p className="text-lg font-body leading-relaxed text-foreground/85 mb-7">
+              {t("landing.story.p3")}
+            </p>
             <p className="text-lg font-body leading-relaxed text-foreground/85 mb-7">
               {t("landing.story.p4")}
             </p>
+          </RevealSection>
+
+          <RevealSection delay={0.2}>
             <p className="text-lg font-body leading-relaxed text-foreground/85 mb-7">
               {t("landing.story.p5")}
             </p>
             <p className="text-lg font-body leading-relaxed text-foreground/85 mb-7">
               {t("landing.story.p6")}
             </p>
-            <p className="text-lg font-body leading-relaxed text-foreground/85 mb-7">
+            <p className="text-lg md:text-xl font-body font-bold leading-relaxed text-foreground mb-7">
               {t("landing.story.p7")}
+            </p>
+            <p className="text-lg font-body leading-relaxed text-foreground/85 mb-7">
+              {t("landing.story.p8")}
+            </p>
+            <p className="text-lg font-body leading-relaxed text-foreground/85 mb-7">
+              {t("landing.story.p9")}
+            </p>
+            <p className="text-lg font-body leading-relaxed text-foreground/85 mb-7">
+              {t("landing.story.p10")}
             </p>
             <span className="text-sm font-body italic text-foreground/50 mt-10 block">
               {t("landing.story.signature")}
