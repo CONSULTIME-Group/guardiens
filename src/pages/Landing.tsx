@@ -89,13 +89,16 @@ const Landing = () => {
     return () => { cancelled = true; };
   }, [navigate]);
 
-  // KPI hero : valeurs réelles de la plateforme uniquement. L'historique personnel
-  // des fondateurs (37 maisons, 234 animaux) n'est PAS additionné ici : il est
-  // raconté comme tel dans la section Notre histoire et dans la carte piliers.
-  // Ne pas réintroduire d'offset, cela ferait passer un vécu perso pour de
-  // l'activité plateforme.
-  const kpiMaisons = publicStats?.maisons_gardees ?? 0;
-  const kpiAnimaux = publicStats?.animaux_accompagnes ?? 0;
+  // KPI hero : "maisons gardées" et "animaux accompagnés" additionnent l'historique
+  // personnel des fondateurs (37 maisons, 234 animaux, raconté dans Notre histoire
+  // et la carte piliers) et l'activité réelle de la plateforme. Décision produit
+  // confirmée par Jérémie le 03/08/2026 : partir de ce socle vécu et cumuler
+  // par-dessus au fur et à mesure que la plateforme grandit. "Inscrits" et
+  // "missions_entraide" restent des compteurs plateforme purs, sans offset.
+  const FOUNDER_BASE_MAISONS = 37;
+  const FOUNDER_BASE_ANIMAUX = 234;
+  const kpiMaisons = FOUNDER_BASE_MAISONS + (publicStats?.maisons_gardees ?? 0);
+  const kpiAnimaux = FOUNDER_BASE_ANIMAUX + (publicStats?.animaux_accompagnes ?? 0);
   const kpiInscrits = publicStats?.total_inscrits ?? 0;
   const kpiMissions = publicStats?.missions_entraide ?? 0;
 
