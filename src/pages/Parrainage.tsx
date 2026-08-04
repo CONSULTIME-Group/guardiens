@@ -150,7 +150,7 @@ const ParrainagePage = () => {
               <p className="text-sm text-muted-foreground font-body">
                 Votre lien de parrainage est généré automatiquement après connexion.
               </p>
-              <Button onClick={() => navigate("/connexion")}>
+              <Button onClick={() => navigate("/login")}>
                 Se connecter <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
             </CardContent>
