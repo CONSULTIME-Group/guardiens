@@ -157,8 +157,12 @@ const ProfileHero = ({
       ? "Propriétaire"
       : "Gardien";
 
-  const showTagline = proStatus === "verified" && !!proTagline;
-  const showPricingNote = proStatus === "verified" && !!proPricingNote;
+  // Le bloc pro s'ouvre dès le statut déclaré ; le badge distingue déclaré et vérifié.
+  const isPro = proStatus === "verified" || proStatus === "declared";
+  const proSpecialtyLabel = isPro ? specialtyLabel(proSpecialty) : null;
+  const showBusinessName = isPro && !!proBusinessName;
+  const showTagline = isPro && !!proTagline;
+  const showPricingNote = isPro && !!proPricingNote;
 
   // CTA
   const renderCta = () => {
