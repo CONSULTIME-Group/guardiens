@@ -1,6 +1,9 @@
 import { useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Send, Image as ImageIcon, Video } from "lucide-react";
+import { shouldWarnPricing } from "@/lib/pricingDetection";
+import { useMyProStatus } from "@/hooks/useMyProStatus";
+import { PricingAuthorWarning } from "@/components/pricing/PricingNotices";
 
 interface MessageComposerProps {
   value: string;
