@@ -134,6 +134,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const profile = mapProfile(data, supabaseUser.email);
       userRef.current = profile;
       setUser(profile);
+      setProfileError(false);
 
       // Only initialize role ONCE per session — never override user's manual choice
       if (!roleInitialized.current) {
@@ -365,6 +366,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     userRef.current = null;
     setUser(null);
     setHasSession(false);
+    setProfileError(false);
     roleInitialized.current = false;
     await supabase.auth.signOut();
   }, []);
@@ -372,7 +374,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const refreshProfile = useCallback(async () => {
     const { data: { session } } = await supabase.auth.getSession();
     if (session?.user) {
-      await fetchProfile(session.user);
+      try {
+        await fetchProfile(session.user);
+      } catch (e) {
+        setProfileError(true);
+        throw e;
+      }
     }
   }, [fetchProfile]);
 
