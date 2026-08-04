@@ -20,6 +20,11 @@ interface Props {
   detecteurCasse?: boolean
   derive?: boolean
   cibles?: ContentDefectItem[]
+  controleArrete?: boolean
+  joursDepuisRun?: number | null
+  derniereExecution?: string | null
+  runEnErreur?: boolean
+  runErreurMessage?: string
 }
 
 const Email = ({
@@ -29,14 +34,39 @@ const Email = ({
   detecteurCasse = false,
   derive = false,
   cibles = [],
+  controleArrete = false,
+  joursDepuisRun = null,
+  derniereExecution = null,
+  runEnErreur = false,
+  runErreurMessage,
 }: Props) => (
   <Html lang="fr" dir="ltr">
     <BrandedHead />
-    <Preview>Qualité de contenu : {horsGel} défaut(s) hors périmètre gelé</Preview>
+    <Preview>
+      {controleArrete
+        ? "Contrôle qualité de contenu à l'arrêt"
+        : `Qualité de contenu : ${horsGel} défaut(s) hors périmètre gelé`}
+    </Preview>
     <Body style={main}>
       <Container style={container}>
         <BrandHeader />
         <Heading style={h1}>Contrôle qualité de contenu</Heading>
+
+        {controleArrete ? (
+          <Text style={alert}>
+            Le contrôle qualité de contenu ne s'est pas exécuté depuis{' '}
+            {joursDepuisRun === null ? 'une durée inconnue' : `${joursDepuisRun} jour${joursDepuisRun > 1 ? 's' : ''}`}.
+            {derniereExecution
+              ? ` Dernière exécution : ${derniereExecution}.`
+              : " Aucune exécution n'a jamais été enregistrée."}
+          </Text>
+        ) : null}
+
+        {runEnErreur ? (
+          <Text style={alert}>
+            La dernière exécution est en erreur : {runErreurMessage ?? 'erreur sans message'}.
+          </Text>
+        ) : null}
 
         <Text style={text}>Alertes ouvertes : {alertesOuvertes}.</Text>
         <Text style={text}>Hors périmètre gelé : {horsGel}.</Text>
@@ -59,6 +89,7 @@ const Email = ({
             ))}
           </Section>
         ) : null}
+
 
         <LegalFooter />
       </Container>
