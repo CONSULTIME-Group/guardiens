@@ -611,6 +611,18 @@ export const BottomNav = () => {
             <SheetContent side="bottom" className="rounded-t-2xl max-h-[80vh] overflow-y-auto">
               <SheetTitle className="sr-only">Menu</SheetTitle>
               <SheetDescription className="sr-only">Accès rapide aux profils, raccourcis et paramètres.</SheetDescription>
+
+              {/* Retour à l'accueil du site */}
+              <Link
+                to="/"
+                onClick={() => setSheetOpen(false)}
+                aria-label="Accueil du site"
+                className="flex items-center gap-3 px-4 py-3 mb-3 rounded-lg text-sm font-medium text-foreground hover:bg-accent transition-colors"
+              >
+                <Home className="h-5 w-5" strokeWidth={1.8} aria-hidden="true" />
+                Accueil du site
+              </Link>
+
               {/* Role switcher */}
               <div className="mb-4">
                 <p className="text-xs text-muted-foreground mb-2 font-medium">Profil actif</p>
