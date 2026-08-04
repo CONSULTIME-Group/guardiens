@@ -201,9 +201,12 @@ const queryClient = new QueryClient({
 });
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
-  const { isAuthenticated, user, loading } = useAuth();
+  const { isAuthenticated, user, hasSession, loading } = useAuth();
   const location = useLocation();
   if (loading) return <FallbackSpinner />;
+  // Session valide mais profil illisible durablement : message explicite et
+  // actionnable, jamais un retour muet au formulaire de connexion.
+  if (hasSession && !user) return <ProfileUnavailable />;
   if (!isAuthenticated) {
     // Preserve the originally requested URL so the user is returned
     // to it after a successful login/signup.
