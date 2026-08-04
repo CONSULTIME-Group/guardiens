@@ -109,7 +109,7 @@
       "urgency": {
         "eyebrow": "Imprevisto dell'ultimo minuto",
         "title": "Una partenza improvvisa?",
-        "text": "Ospedalizzazione, trasferta dell'ultimo minuto, emergenza familiare: un custode della zona può intervenire in poche ore.",
+        "text": "La rete di custodi d'emergenza Guardiens si costruisce con i suoi primi membri. Può iscriversi come custode disponibile o pubblicare una richiesta vicino a Lei.",
         "cta": "Trovare un custode in urgenza →"
       }
     },
@@ -166,7 +166,7 @@
     "trust": {
       "eyebrow": "Fiducia & raggio d'azione",
       "title": "Scegliere con fiducia, a un chilometro come a mille.",
-      "lede": "Quattro riferimenti per partire tranquilli: incontro prima di ogni custodia, profili verificati, recensioni incrociate e un raggio d'azione stabilito da Lei.",
+      "lede": "Quattro riferimenti per partire sereni: incontro prima di ogni custodia, profili documentati, recensioni incrociate e un perimetro che stabilisce Lei.",
       "p1_title": "Tra membri, senza transazione",
       "p1_text": "Tra membri, tutto avviene senza transazione: un servizio in cambio di un servizio.",
       "p2_title": "Incontro prima di ogni custodia",
@@ -332,7 +332,7 @@
     },
     "what_is": {
       "title": "Che cos'è Guardiens?",
-      "body": "Guardiens è una piattaforma francese di house-sitting e mutuo aiuto tra privati. Il principio: una persona di fiducia verificata, che vive vicino a lei, si installa a casa sua durante la sua assenza e si occupa dei suoi animali nel loro ambiente. Lo scambio si basa sulla fiducia e sull'incontro, senza costi per il proprietario. Guardiens copre tutta la Francia."
+      "body": "Guardiens è una piattaforma francese di house-sitting e di aiuto reciproco tra privati. Il principio: un custode che vive vicino a Lei si installa in casa Sua durante la Sua assenza e si occupa dei Suoi animali nel loro ambiente. Lo scambio si basa sulla fiducia e sull'incontro, senza costi per il proprietario. Guardiens copre tutta la Francia."
     },
     "compare": {
       "title": "House-sitting, pensione, pet-sitter: cosa scegliere?",
@@ -407,7 +407,7 @@
       "cities": {
         "c1": {
           "label": "House-sitting a Lione",
-          "desc": "Sitter verificati in ogni arrondissement, dal Vieux Lyon a Croix-Rousse, passando per Part-Dieu e Confluence."
+          "desc": "Custodi in ogni quartiere, dal Vieux Lyon alla Croix-Rousse, passando per Part-Dieu e Confluence."
         },
         "c2": {
           "label": "House-sitting ad Annecy",
@@ -497,7 +497,7 @@
       "cta": "Pubblicare un annuncio",
       "features": [
         "Pubblichi un annuncio in 5 minuti",
-        "Riceva candidature di custodi con identità verificata",
+        "Riceva candidature di custodi della zona",
         "Scambi messaggi con loro prima di scegliere",
         "I Suoi animali rimangono nella loro casa, con le loro abitudini e i loro riferimenti",
         "Lasci una recensione dopo ogni custodia"
@@ -574,7 +574,7 @@
     },
     "cities": {
       "title": "House-sitting per città",
-      "lede_a": "Scopra i custodi verificati disponibili nella Sua città. Un imprevisto? I nostri",
+      "lede_a": "Scopra i custodi disponibili nella Sua città. Un imprevisto? I nostri",
       "lede_link": "custodi d'emergenza",
       "lede_b": "sono mobilitabili in poche ore."
     },
@@ -1073,26 +1073,26 @@
     "members_badge_suffix": "membri già iscritti"
   },
   "emergency_page": {
-    "meta_title": "Sitter d'emergenza, custodia in meno di 24h | Guardiens",
-    "meta_description": "Hai bisogno di un sitter d'urgenza per i tuoi animali? Attiva l'allerta Guardiens e trova un sitter verificato vicino a te in meno di 24 ore.",
+    "meta_title": "Custode d'emergenza per i Suoi animali | Guardiens",
+    "meta_description": "Ha bisogno di un custode d'urgenza per i Suoi animali? Attivi l'allerta Guardiens: i custodi d'emergenza della zona sono avvisati in via prioritaria.",
     "breadcrumb": "Sitter d'emergenza",
-    "soon_title": "Presto disponibile. La rete di sitter d'emergenza si attiverà non appena avremo profili verificati a sufficienza.",
+    "soon_title": "Presto disponibile. La rete di custodi d'emergenza si attiverà non appena avremo abbastanza custodi idonei ed esperti.",
     "soon_subtitle": "La nostra piattaforma è giovane. Ci prendiamo il tempo per designare sitter d'emergenza con criteri rigorosi.",
     "hero_title": "I sitter d'emergenza",
-    "hero_lead": "La tua rete di sicurezza locale. Un imprevisto, una cancellazione dell'ultimo minuto, una partenza precipitosa? Persone del posto formate all'urgenza, verificate, mobilitabili in meno di 24h.",
-    "hero_tagline": "La forza della prossimità: una soluzione in ore, non in giorni.",
+    "hero_lead": "La Sua rete di sicurezza locale. Un imprevisto, una cancellazione dell'ultimo minuto, una partenza precipitosa? Persone del posto formate all'urgenza, pronte a mobilitarsi in via prioritaria.",
+    "hero_tagline": "È la forza della prossimità: persone già sul posto, non dall'altra parte del paese.",
     "how_it_works": "Come funziona?",
     "step1_title": "Un proprietario ha un bisogno urgente",
     "step1_desc": "Cancellazione dell'ultimo minuto, imprevisto familiare, trasferta… la vita non avvisa sempre.",
     "step2_title": "I sitter d'emergenza vengono allertati",
     "step2_desc": "Notifica automatica inviata ai sitter d'emergenza disponibili in un raggio di 35 km.",
-    "step3_title": "La custodia è organizzata in poche ore",
+    "step3_title": "La custodia si organizza con il custode",
     "step3_desc": "Scambio rapido, conferma, si parte. Gli animali sono in buone mani.",
     "stories_kicker": "Sei casi, sei emergenze",
     "stories_title": "Quando il bisogno è reale.",
-    "stories_lead": "L'emergenza non assomiglia sempre a ciò che si immagina. Sei situazioni reali su Guardiens, tutte risolte in meno di 24 ore.",
+    "stories_lead": "L'emergenza non assomiglia sempre a ciò che si immagina. Sei situazioni che la rete è progettata per gestire. Questi scenari sono illustrativi, descrivono il funzionamento previsto del servizio.",
     "story1_name": "Hélène, Lione",
-    "story1_text": "Ricovero programmato anticipato all'ultimo minuto. Due gatti in casa, nessuno intorno. Ha attivato l'allerta martedì sera. Un sitter d'emergenza verificato ha risposto in due ore.",
+    "story1_text": "Ricovero programmato anticipato all'ultimo minuto. Due gatti in casa, nessuno intorno. Ha attivato l'allerta martedì sera. Un custode d'emergenza, già recensito da altri membri, ha risposto in due ore.",
     "story2_name": "Pierre, Annecy",
     "story2_text": "Pastore australiano di 5 anni, magnifico ma reattivo con gli sconosciuti. Pierre doveva partire cinque giorni per lavoro. Ha attivato l'allerta. Un sitter formato per cani di carattere ha risposto la sera stessa.",
     "story3_name": "Camille, Grenoble",
@@ -1110,12 +1110,12 @@
     "compare_th_urgent": "Custodia d'urgenza",
     "compare_row1_label": "Tempo",
     "compare_row1_classic": "Pianificato (settimane)",
-    "compare_row1_urgent": "Meno di 24h",
+    "compare_row1_urgent": "Trattata in via prioritaria",
     "compare_row2_label": "Durata tipica",
-    "compare_row2_classic": "7-21 giorni",
-    "compare_row2_urgent": "Spesso breve (1-7 giorni)",
+    "compare_row2_classic": "Prenotazione da prevedere con diverse settimane di anticipo",
+    "compare_row2_urgent": "Spesso breve, qualche giorno",
     "compare_row3_label": "Profilo sitter",
-    "compare_row3_classic": "Qualsiasi sitter verificato",
+    "compare_row3_classic": "Qualsiasi custode iscritto",
     "compare_row3_urgent": "5+ custodie, voto 4.7+, 0 cancellazioni",
     "compare_row4_label": "Tipo di richiesta",
     "compare_row4_classic": "Pianificata",
@@ -1125,9 +1125,9 @@
     "compare_row5_urgent": "Tutti (anche reattivi)",
     "owner_title": "La tranquillità di persone del posto di fiducia",
     "owner_subtitle": "Per i proprietari",
-    "owner_card1_title": "Mobilitabile in poche ore",
-    "owner_card1_desc": "Non serve aspettare giorni. I sitter d'emergenza rispondono in fretta.",
-    "owner_card2_title": "Verificato ed esperto",
+    "owner_card1_title": "Mobilitazione prioritaria",
+    "owner_card1_desc": "Le richieste d'urgenza vanno in cima alle notifiche inviate ai custodi d'emergenza della zona.",
+    "owner_card2_title": "Idoneità esigente",
     "owner_card2_desc": "5+ custodie completate, voto 4.7+, 0 cancellazioni, identità verificata.",
     "owner_card3_title": "Persone del posto",
     "owner_card3_desc": "Sollecitati automaticamente in un raggio di 35 km, sono persone del posto, non sconosciuti.",
@@ -1151,7 +1151,7 @@
     "engagement_p2": "Le cancellazioni sono rivalutate ogni 6 mesi: solo quelle degli ultimi 6 mesi contano per l'idoneità.",
     "faq_title": "Domande frequenti",
     "cities_title": "Sitter d'emergenza per città",
-    "cities_lead": "La rete d'emergenza si basa su sitter locali in tutta la Francia. Ecco le città dove sono più attivi.",
+    "cities_lead": "La rete d'emergenza si basa su custodi locali in tutta la Francia. Ecco le città dove la rete si costruisce per prima.",
     "see_pricing": "Vedi tariffe",
     "further_kicker": "Per andare oltre",
     "further1_title": "Piccole missioni di aiuto reciproco",
@@ -1164,15 +1164,15 @@
     "footer_eligibility": "Vedi la mia idoneità (prossimamente)",
     "footer_full_faq": "FAQ completa",
     "faq1_q": "Quanto tempo per essere contattato in caso di emergenza?",
-    "faq1_a": "Su Guardiens, le allerte d'emergenza sono prioritarie: i sitter idonei nel tuo raggio sono notificati all'istante. In media ricevi una risposta in meno di 4 ore.",
+    "faq1_a": "Su Guardiens, le allerte d'emergenza sono prioritarie: i custodi idonei nel Suo raggio sono notificati all'istante. Il nostro impegno: una risposta entro 4 ore.",
     "faq2_q": "Funziona di notte o nel weekend?",
-    "faq2_a": "Sì. Le allerte d'emergenza sono attive 24/7. Di notte e nei weekend le notifiche vanno in priorità ai sitter con disponibilità estesa.",
+    "faq2_a": "Sì. Le allerte d'emergenza sono attive 24/7. Di notte e nei weekend le notifiche vanno in priorità ai custodi con disponibilità estesa. I tempi di risposta possono essere un po' più lunghi in fasce atipiche, ma il servizio resta attivo.",
     "faq3_q": "Il mio cane è reattivo o ansioso, è possibile lo stesso?",
     "faq3_a": "Sì, è anche un caso tipico d'emergenza. Quando attivi l'allerta, specifichi il profilo del tuo animale. Solo i sitter con esperienza adeguata sono notificati.",
     "faq4_q": "Quanto costa una custodia d'urgenza?",
     "faq4_a": "Per i proprietari, l'iscrizione e l'uso di Guardiens (compresa l'allerta d'urgenza) sono gratuiti. Nessun supplemento rispetto a una custodia classica.",
     "faq5_q": "Qual è la differenza con una custodia classica?",
-    "faq5_a": "Una classica si prepara in anticipo. Una d'urgenza è immediata: un sitter idoneo risponde rapidamente, lo incontri lo stesso giorno o l'indomani, la custodia inizia entro 24h.",
+    "faq5_a": "Una custodia classica si prepara in anticipo. Una d'urgenza segue un percorso più breve: un custode idoneo (5 custodie minimo, voto 4.7+, 0 cancellazioni, identità verificata) è notificato in via prioritaria, Lei lo incontra e la custodia può iniziare non appena siete d'accordo.",
     "faq6_q": "E se sono ricoverato, come funziona?",
     "faq6_a": "È uno dei casi più frequenti. Tu (o un parente) attivi l'allerta dalla dashboard o per telefono. Il sitter d'emergenza prende il relè.",
     "faq7_q": "Come diventare sitter d'emergenza?",
@@ -1186,7 +1186,8 @@
     "faq11_q": "Come vengo avvisato di un'emergenza?",
     "faq11_a": "SMS + email + notifica push (se attivata). Configuri le tue preferenze dalla dashboard.",
     "faq12_q": "Posso perdere lo status di sitter d'emergenza?",
-    "faq12_a": "Sì, in vari casi: voto sotto 4.7, cancellazione di una custodia accettata, secondo rifiuto d'urgenza consecutivo, abbonamento scaduto."
+    "faq12_a": "Sì, in vari casi: voto sotto 4.7, cancellazione di una custodia accettata, secondo rifiuto d'urgenza consecutivo, abbonamento scaduto.",
+    "story_disclaimer": "Scenario illustrativo"
   },
   "small_missions_page": {
     "meta_title": "Piccole missioni, Tra persone del posto | Guardiens",
@@ -1529,7 +1530,7 @@
   },
   "search_auto_widen": {
     "to_dept": "Nessun annuncio entro {{radius}} km da lei. Ecco i {{count}} annunci del suo dipartimento.",
-    "to_region": "Nessun annuncio vicino a lei. Ecco i {{count}} annunci della sua regione.",
+    "to_region": "Nessun annuncio nelle immediate vicinanze. Ecco i {{count}} annunci in un perimetro più ampio.",
     "to_france": "Nessun annuncio vicino a lei per il momento. Ecco tutti gli annunci disponibili in Francia.",
     "back": "Tornare a {{radius}} km"
   },

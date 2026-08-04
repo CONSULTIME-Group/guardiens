@@ -110,7 +110,7 @@
       "urgency": {
         "eyebrow": "Réseau en construction",
         "title": "Devenir gardien d'urgence",
-        "text": "Le réseau de gardiens d'urgence Guardiens se construit avec les premiers profils vérifiés. Vous pouvez vous inscrire comme gardien mobilisable, ou déposer une demande pour votre région.",
+        "text": "Le réseau de gardiens d'urgence Guardiens se construit avec ses premiers membres. Vous pouvez vous inscrire comme gardien mobilisable, ou déposer une demande près de chez vous.",
         "cta": "Rejoindre le réseau d'urgence"
       }
     },
@@ -167,7 +167,7 @@
     "trust": {
       "eyebrow": "Confiance & périmètre",
       "title": "Choisir en confiance, à un kilomètre comme à mille.",
-      "lede": "Quatre repères pour partir tranquille : rencontre avant chaque garde, profils vérifiés, avis croisés, et un périmètre que vous fixez vous-même.",
+      "lede": "Quatre repères pour partir tranquille : rencontre avant chaque garde, profils documentés, avis croisés, et un périmètre que vous fixez vous-même.",
       "p1_title": "Entre membres, sans transaction",
       "p1_text": "Entre membres, tout se passe sans transaction : un service contre un service.",
       "p2_title": "Rencontre avant chaque garde",
@@ -337,7 +337,7 @@
     },
     "what_is": {
       "title": "Qu'est-ce que Guardiens ?",
-      "body": "Guardiens est une plateforme française de house-sitting et d'entraide entre particuliers. Le principe : un gardien vérifié, qui vit près de chez vous, s'installe dans votre maison pendant votre absence et s'occupe de vos animaux dans leur environnement. L'échange repose sur la confiance et la rencontre, sans frais pour le propriétaire. Guardiens couvre toute la France."
+      "body": "Guardiens est une plateforme française de house-sitting et d'entraide entre particuliers. Le principe : un gardien qui vit près de chez vous s'installe dans votre maison pendant votre absence et s'occupe de vos animaux dans leur environnement. L'échange repose sur la confiance et la rencontre, sans frais pour le propriétaire. Guardiens couvre toute la France."
     },
     "compare": {
       "title": "House-sitting, pension, pet-sitter : que choisir ?",
@@ -412,7 +412,7 @@
       "cities": {
         "c1": {
           "label": "House-sitting à Lyon",
-          "desc": "Des gardiens vérifiés dans chaque arrondissement, du Vieux Lyon à la Croix-Rousse, en passant par la Part-Dieu et Confluence."
+          "desc": "Des gardiens dans chaque arrondissement, du Vieux Lyon à la Croix-Rousse, en passant par la Part-Dieu et Confluence."
         },
         "c2": {
           "label": "House-sitting à Annecy",
@@ -502,7 +502,7 @@
       "cta": "Publier une annonce",
       "features": [
         "Publiez une annonce en 5 minutes",
-        "Recevez des candidatures de gardiens dont l'identité est vérifiée",
+        "Recevez des candidatures de gardiens du coin",
         "Échangez avec eux avant de choisir",
         "Vos animaux restent dans leur maison, leurs habitudes, leurs repères",
         "Laissez un avis après chaque garde"
@@ -579,7 +579,7 @@
     },
     "cities": {
       "title": "House-sitting par ville",
-      "lede_a": "Découvrez les gardiens vérifiés disponibles dans votre ville. Un imprévu ? Nos",
+      "lede_a": "Découvrez les gardiens disponibles dans votre ville. Un imprévu ? Nos",
       "lede_link": "gardiens d'urgence",
       "lede_b": "sont mobilisables en quelques heures."
     },
@@ -1021,7 +1021,7 @@
     "after_sitter": "Vous pourrez <1>compléter votre profil et candidater</1> juste après.",
     "after_both": "Vous pourrez <1>publier vos annonces ET candidater</1> juste après.",
     "after_pro": "Vous pourrez <1>créer votre fiche pro</1> juste après. Validation manuelle sous 48 h.",
-    "pro_step1_sub": "Compte pro animalier — votre fiche dans l'annuaire en 3 minutes.",
+    "pro_step1_sub": "Compte pro animalier : votre fiche dans l'annuaire en 3 minutes.",
     "pro_pill": "Compte pro animalier",
     "google_cta": "Continuer avec Google",
     "google_loading": "Connexion…",
@@ -1097,27 +1097,27 @@
     "members_badge_suffix": "membres déjà inscrits"
   },
   "emergency_page": {
-    "meta_title": "Gardien d'urgence, Garde en moins de 24h | Guardiens",
-    "meta_description": "Besoin d'un gardien en urgence pour vos animaux ? Activez l'alerte Guardiens et trouvez un gardien vérifié près de chez vous en moins de 24 heures.",
+    "meta_title": "Gardien d'urgence pour vos animaux | Guardiens",
+    "meta_description": "Besoin d'un gardien en urgence pour vos animaux ? Activez l'alerte Guardiens : les gardiens d'urgence du coin sont notifiés en priorité.",
     "breadcrumb": "Gardien d'urgence",
-    "soon_title": "Bientôt disponible, Le réseau de gardiens d'urgence sera activé dès que nous aurons suffisamment de profils vérifiés et éprouvés.",
+    "soon_title": "Bientôt disponible, Le réseau de gardiens d'urgence sera activé dès que nous aurons suffisamment de gardiens éligibles et expérimentés.",
     "soon_subtitle": "Notre plateforme est jeune. Nous prenons le temps de désigner des gardiens d'urgence sur des critères stricts pour garantir la fiabilité du service.",
     "hero_title": "Les gardiens d'urgence",
-    "hero_lead": "Votre filet de sécurité local. Un imprévu, une annulation de dernière minute, un départ précipité ? Des gens du coin formés à l'urgence, vérifiés, mobilisables en moins de 24h.",
-    "hero_tagline": "C'est la force de la proximité : une solution en quelques heures, pas en quelques jours.",
+    "hero_lead": "Votre filet de sécurité local. Un imprévu, une annulation de dernière minute, un départ précipité ? Des gens du coin formés à l'urgence, prêts à se mobiliser en priorité.",
+    "hero_tagline": "C'est la force de la proximité : des personnes déjà sur place, pas à l'autre bout du pays.",
     "how_it_works": "Comment ça marche ?",
     "step1_title": "Un proprio a un besoin urgent",
     "step1_desc": "Annulation de dernière minute, imprévu familial, départ professionnel… la vie ne prévient pas toujours.",
     "step2_title": "Les gardiens d'urgence sont alertés",
     "step2_desc": "Notification automatique envoyée aux gardiens d'urgence disponibles dans un rayon de 35 km.",
-    "step3_title": "La garde est organisée en quelques heures",
+    "step3_title": "La garde s'organise avec le gardien",
     "step3_desc": "Échange rapide, confirmation, c'est parti. Les animaux sont entre de bonnes mains.",
     "stories_kicker": "Six cas, six urgences",
     "stories_title": "Quand le besoin est réel.",
     "story_disclaimer": "Scénario illustratif",
-      "stories_lead": "L'urgence ne ressemble pas toujours à ce qu'on imagine. Six situations que le réseau est conçu pour traiter. Ces scénarios sont illustratifs, ils décrivent le fonctionnement prévu du dispositif.",
+    "stories_lead": "L'urgence ne ressemble pas toujours à ce qu'on imagine. Six situations que le réseau est conçu pour traiter. Ces scénarios sont illustratifs, ils décrivent le fonctionnement prévu du dispositif.",
     "story1_name": "Hélène, Lyon 6e",
-    "story1_text": "Hospitalisation programmée mais avancée à la dernière minute. Deux chats à la maison, personne autour pour s'en occuper. Elle active l'alerte le mardi soir. Un gardien d'urgence, déjà vérifié, déjà noté, répond dans les deux heures. Rendez-vous le lendemain matin avant qu'elle parte. Au retour, les chats sont toujours là, le frigo aussi.",
+    "story1_text": "Hospitalisation programmée mais avancée à la dernière minute. Deux chats à la maison, personne autour pour s'en occuper. Elle active l'alerte le mardi soir. Un gardien d'urgence, déjà noté par d'autres membres, répond dans les deux heures. Rendez-vous le lendemain matin avant qu'elle parte. Au retour, les chats sont toujours là, le frigo aussi.",
     "story2_name": "Pierre, Annecy",
     "story2_text": "Berger australien de 5 ans, magnifique mais réactif avec les inconnus. Pierre doit partir cinq jours pour un déplacement pro. Pas question de l'envoyer en pension. Il active l'alerte. Un gardien d'urgence formé aux chiens à fort caractère répond le soir même. Première rencontre dehors, en terrain neutre, comme il faut. Pierre est parti rassuré.",
     "story3_name": "Camille, Grenoble",
@@ -1135,12 +1135,12 @@
     "compare_th_urgent": "Garde d'urgence",
     "compare_row1_label": "Délai",
     "compare_row1_classic": "Anticipé (semaines)",
-    "compare_row1_urgent": "Moins de 24h",
+    "compare_row1_urgent": "Traitée en priorité",
     "compare_row2_label": "Durée typique",
     "compare_row2_classic": "Réservation à prévoir plusieurs semaines à l'avance",
     "compare_row2_urgent": "Souvent courte, quelques jours",
     "compare_row3_label": "Profil gardien",
-    "compare_row3_classic": "Tout gardien vérifié",
+    "compare_row3_classic": "Tout gardien inscrit",
     "compare_row3_urgent": "5+ gardes, note 4.7+, 0 annulation",
     "compare_row4_label": "Type de demande",
     "compare_row4_classic": "Planifiée",
@@ -1150,9 +1150,9 @@
     "compare_row5_urgent": "Tous (y compris réactifs)",
     "owner_title": "La tranquillité d'avoir des gens du coin de confiance",
     "owner_subtitle": "Pour les propriétaires",
-    "owner_card1_title": "Mobilisable en quelques heures",
-    "owner_card1_desc": "Pas besoin d'attendre des jours. Les gardiens d'urgence répondent vite.",
-    "owner_card2_title": "Vérifié et expérimenté",
+    "owner_card1_title": "Mobilisation prioritaire",
+    "owner_card1_desc": "Les demandes d'urgence passent en tête des notifications envoyées aux gardiens d'urgence du secteur.",
+    "owner_card2_title": "Éligibilité exigeante",
     "owner_card2_desc": "5+ gardes réalisées, note 4.7+, 0 annulation, identité vérifiée.",
     "owner_card3_title": "Des gens du coin",
     "owner_card3_desc": "Sollicités automatiquement dans un rayon de 35 km, ce sont des gens du coin, pas des inconnus.",
@@ -1176,7 +1176,7 @@
     "engagement_p2": "Les annulations sont réévaluées tous les 6 mois : seules celles des 6 derniers mois comptent pour l'éligibilité.",
     "faq_title": "Questions fréquentes",
     "cities_title": "Gardiens d'urgence par ville",
-    "cities_lead": "Le réseau d'urgence s'appuie sur des gardiens locaux partout en France. Voici les villes où les gardiens d'urgence y sont les plus actifs.",
+    "cities_lead": "Le réseau d'urgence s'appuie sur des gardiens locaux partout en France. Voici les villes où le réseau se construit en priorité.",
     "see_pricing": "Voir les tarifs",
     "further_kicker": "Pour aller plus loin",
     "further1_title": "Petites missions d'entraide",
@@ -1197,7 +1197,7 @@
     "faq4_q": "Combien ça coûte une garde d'urgence ?",
     "faq4_a": "Pour les propriétaires, l'inscription et l'utilisation de Guardiens (y compris l'alerte d'urgence) sont sans frais. Aucun supplément n'est appliqué pour une garde d'urgence par rapport à une garde classique. La logique reste celle du house-sitting : pas d'argent qui circule entre vous et le gardien.",
     "faq5_q": "Quelle différence avec une garde classique ?",
-    "faq5_a": "Une garde classique se prépare à l'avance : vous publiez votre annonce, recevez plusieurs candidatures, choisissez. Une garde d'urgence est immédiate : un gardien éligible (5 gardes minimum, note 4.7+, 0 annulation, ID vérifiée) répond rapidement, vous le rencontrez le jour même ou le lendemain, la garde commence dans les 24h.",
+    "faq5_a": "Une garde classique se prépare à l'avance : vous publiez votre annonce, recevez plusieurs candidatures, choisissez. Une garde d'urgence suit un chemin plus court : un gardien éligible (5 gardes minimum, note 4.7+, 0 annulation, identité vérifiée) est notifié en priorité, vous le rencontrez, puis la garde peut démarrer dès que vous êtes d'accord tous les deux.",
     "faq6_q": "Et si je suis hospitalisé(e), comment ça se passe ?",
     "faq6_a": "C'est l'un des cas les plus fréquents. Vous (ou un proche) activez l'alerte directement depuis votre dashboard ou par téléphone. Si vous n'êtes pas en état, un proche peut le faire à votre place avec votre accord. Le gardien d'urgence prend le relais : maison, animaux, courrier si besoin. Vous reprenez tout en main au retour.",
     "faq7_q": "Comment devenir gardien d'urgence sur Guardiens ?",
@@ -1555,7 +1555,7 @@
   },
   "search_auto_widen": {
     "to_dept": "Aucune annonce à moins de {{radius}} km de chez vous. Voici les {{count}} annonces de votre département.",
-    "to_region": "Aucune annonce près de chez vous. Voici les {{count}} annonces de votre région.",
+    "to_region": "Aucune annonce à proximité immédiate. Voici les {{count}} annonces dans un périmètre élargi.",
     "to_france": "Aucune annonce près de chez vous pour l'instant. Voici toutes les annonces disponibles en France.",
     "back": "Revenir à {{radius}} km"
   },
