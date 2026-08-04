@@ -90,7 +90,7 @@ export const AppLayout = ({ children }: { children?: ReactNode }) => {
       <Sidebar showHeaderBells={!mobileHeader} />
       <main id="main-content" className="flex-1 min-w-0 pb-20 md:pb-24 overflow-x-clip" role="main">
         {/* Mobile top bar unifiée : back (si applicable) + logo + cloche */}
-        <div className="md:hidden sticky top-0 z-40 flex items-center justify-between gap-2 px-3 py-2 bg-background/95 backdrop-blur border-b border-border">
+        <div ref={topBarRef} className="md:hidden sticky top-0 z-40 flex items-center justify-between gap-2 px-3 py-2 bg-background/95 backdrop-blur border-b border-border">click
           <div className="flex items-center gap-1 min-w-0">
             <BackButton inline />
             <Link to="/" aria-label="Guardiens, accueil" className="font-heading text-lg font-bold tracking-tight truncate">
