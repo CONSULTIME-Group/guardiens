@@ -12,9 +12,12 @@
 const stripAccents = (txt: string): string =>
   txt.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
 
-const AMOUNT_BEFORE = /\d+([.,]\d+)?\s*(€|eur\b|euros?\b)/;
-const AMOUNT_AFTER = /(€|eur\b|euros?\b)\s*\d+/;
+/** Motif monnaie : €, EUR, euro, euros, sans matcher un mot plus long (europe). */
+const CURRENCY = "(€|eur(os?)?\\b)";
+const AMOUNT_BEFORE = new RegExp(`\\d+([.,]\\d+)?\\s*${CURRENCY}`);
+const AMOUNT_AFTER = new RegExp(`${CURRENCY}\\s*\\d+`);
 const PRICING_WORDS = /(tarif|devis|facture|prestation payante|par jour|par nuit|par visite|par passage)/;
+
 
 export function looksLikePricing(input: string | null | undefined): boolean {
   if (!input || !input.trim()) return false;

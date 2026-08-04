@@ -416,7 +416,7 @@ export default function MyProProfile() {
                   <strong className="font-medium italic text-primary-foreground">Pro vérifié</strong> sur votre profil personnel de gardien, complétez la section dédiée dans vos paramètres.
                 </p>
                 <a
-                  href="/settings#pro"
+                  href="/settings?section=security&focus=pro"
                   className="inline-flex items-center gap-2 text-sm font-medium text-primary-foreground border-b border-primary-foreground/40 pb-0.5 hover:border-primary-foreground transition-all"
                 >
                   Accéder aux paramètres

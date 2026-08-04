@@ -280,7 +280,7 @@ Analysez le document ci-joint et remplissez l'outil avec votre jugement.`;
         type: "pro_verified",
         title: "Badge Pro validé",
         body: "Votre document a été validé automatiquement. Votre pastille « Pro vérifié » est désormais visible sur votre profil.",
-        link: "/profil#pro",
+        link: "/settings?section=security&focus=pro",
       });
     } else {
       await supabaseAdmin.from("notifications").insert({
@@ -288,7 +288,7 @@ Analysez le document ci-joint et remplissez l'outil avec votre jugement.`;
         type: "pro_review",
         title: "Document en cours d'examen",
         body: "Votre document professionnel demande une vérification humaine. Notre équipe revient vers vous sous 48 h.",
-        link: "/profil#pro",
+        link: "/settings?section=security&focus=pro",
       });
     }
 
