@@ -6,6 +6,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
 import { useInventaireCounts } from "@/hooks/useInventaireCounts";
+import { useSpeciesBreakdown } from "@/hooks/useSpeciesBreakdown";
+
 
 /**
  * /observatoire-garde-animaux
@@ -41,14 +43,15 @@ const KEY_STATS: Stat[] = [
  },
  {
  label: "Coût pour les propriétaires",
- value: "Gratuit",
+ value: "Aucun frais",
  detail: "Aucun frais d'inscription, aucune commission sur les gardes, aucun prélèvement entre membres. Modèle inchangé depuis la création.",
  },
  {
  label: "Abonnement gardien",
- value: "Gratuit",
- detail: "Guardiens reste gratuit tant que nous ne sommes pas satisfaits du service que nous vous offrons. Aucune date de bascule n'est fixée à ce jour.",
+ value: "Aucun frais",
+ detail: "Guardiens reste gratuit tant que nous ne sommes pas satisfaits du service que nous vous offrons. Vous avez accès à tout, sans limite, sans engagement. Vous serez prévenu à l'avance quand cela changera.",
  },
+
  {
  label: "Vérification d'identité",
  value: "100 %",
@@ -73,9 +76,29 @@ const KEY_STATS: Stat[] = [
 
 const PAGE_URL = "https://guardiens.fr/observatoire-garde-animaux";
 
+const SPECIES_LABELS: Record<string, string> = {
+  cat: "Chats",
+  dog: "Chiens",
+  farm_animal: "Animaux de ferme",
+  rodent: "Rongeurs",
+  horse: "Chevaux",
+  nac: "NAC",
+  bird: "Oiseaux",
+  fish: "Poissons",
+  reptile: "Reptiles",
+};
+
+const formatFrDate = (iso: string) => {
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return iso;
+  return d.toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" });
+};
+
 const Observatoire = () => {
   const { data: counts } = useInventaireCounts();
+  const { data: species } = useSpeciesBreakdown();
   const fmt = (n: number) => new Intl.NumberFormat("fr-FR").format(n || 0);
+
  const datasetSchema = {
  "@context": "https://schema.org",
  "@type": "Dataset",
@@ -97,6 +120,8 @@ const Observatoire = () => {
  license: "https://guardiens.fr/mentions-legales",
  isAccessibleForFree: true,
  datePublished: "2026-06-08",
+ dateModified: "2026-08-04",
+
  inLanguage: "fr",
  };
 
@@ -115,10 +140,11 @@ const Observatoire = () => {
  return (
  <>
  <PageMeta
- title="Observatoire de la garde d'animaux en France, chiffres-clés"
- description="Chiffres-clés sur la garde d'animaux à domicile en France : volumes, modèle économique, dispositif de confiance. Données Guardiens 2021-2026."
+ title="Observatoire de la garde d'animaux à domicile en France | Guardiens"
+ description="Chiffres-clés sur la garde d'animaux à domicile en France : nombre d'animaux accompagnés, modèle économique, vérifications, badges. Datapoints sourcés Guardiens."
  path="/observatoire-garde-animaux"
  />
+
  <Helmet>
  <script type="application/ld+json">{JSON.stringify(datasetSchema)}</script>
  <script type="application/ld+json">{JSON.stringify(orgSchema)}</script>
@@ -135,11 +161,12 @@ const Observatoire = () => {
  Chiffres-clés, modèle économique, dispositif de confiance. Données issues de la plateforme Guardiens et de l'expérience terrain des fondateurs entre 2021 et 2026. Mises à jour régulières.
  </p>
  <p className="mt-3 text-sm text-muted-foreground">
- Dernière mise à jour : juin 2026. Source : Guardiens, Jérémie Martinot, SIRET 894 864 040 00015.
+ Dernière mise à jour : {species?.calcule_le ? formatFrDate(species.calcule_le) : "août 2026"}. Source : Guardiens, Jérémie Martinot, SIRET 894 864 040 00015.
  </p>
+
  </header>
 
- <section className="max-w-5xl mx-auto px-4 pb-12">
+ <section id="datapoints" className="max-w-5xl mx-auto px-4 pb-12 scroll-mt-24">
  <h2 className="font-serif text-2xl font-semibold text-foreground mb-6">
  Volumes et activité
  </h2>
@@ -175,12 +202,37 @@ const Observatoire = () => {
     <Card><CardContent className="p-5"><p className="text-3xl font-bold text-primary leading-none mb-2">{fmt(counts?.places_total || 0)}</p><p className="text-sm font-semibold text-foreground mb-1">Lieux dog-friendly</p><p className="text-xs text-muted-foreground">Parcs, cafés, sentiers, vétérinaires…</p></CardContent></Card>
     <Card><CardContent className="p-5"><p className="text-3xl font-bold text-primary leading-none mb-2">{fmt(counts?.pros_total || 0)}</p><p className="text-sm font-semibold text-foreground mb-1">Professionnels</p><p className="text-xs text-muted-foreground">Fiches vérifiées de l'annuaire.</p></CardContent></Card>
   </div>
-  <div className="mt-5">
-    <Link to="/actualites/inventaire-guardiens-france#demande" className="text-primary hover:underline text-sm font-medium">
-      Voir l'inventaire complet et demander une analyse →
-    </Link>
-  </div>
  </section>
+
+ <section className="max-w-5xl mx-auto px-4 py-12 border-t border-border">
+   <h2 className="font-serif text-2xl font-semibold text-foreground mb-2">
+     Quels animaux sont confiés sur Guardiens ?
+   </h2>
+   <p className="text-muted-foreground mb-6 max-w-3xl leading-relaxed">
+     Ces chiffres portent sur les animaux déclarés par les membres sur leur profil, pas sur les animaux effectivement gardés. Ils décrivent qui cherche une solution de garde, pas qui en a déjà bénéficié. Compteur recalculé à chaque visite.
+   </p>
+   <div className="grid gap-4 sm:grid-cols-2 mb-6">
+     <Card><CardContent className="p-5"><p className="text-3xl font-bold text-primary leading-none mb-2">{fmt(species?.total_animaux_declares || 0)}</p><p className="text-sm font-semibold text-foreground mb-1">Animaux déclarés</p><p className="text-xs text-muted-foreground">Renseignés par les membres sur leur profil.</p></CardContent></Card>
+     <Card><CardContent className="p-5"><p className="text-3xl font-bold text-primary leading-none mb-2">{fmt(species?.total_membres || 0)}</p><p className="text-sm font-semibold text-foreground mb-1">Membres inscrits</p><p className="text-xs text-muted-foreground">Propriétaires et gardiens confondus.</p></CardContent></Card>
+   </div>
+   <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+     {(species?.par_espece ?? []).map((row) => (
+       <Card key={row.espece}>
+         <CardContent className="p-5">
+           <p className="text-3xl font-bold text-primary leading-none mb-2">{fmt(row.nombre)}</p>
+           <p className="text-sm font-semibold text-foreground mb-1">{SPECIES_LABELS[row.espece] ?? row.espece}</p>
+           <p className="text-xs text-muted-foreground">{new Intl.NumberFormat("fr-FR", { maximumFractionDigits: 1 }).format(row.part_pourcent)} % des animaux déclarés.</p>
+         </CardContent>
+       </Card>
+     ))}
+   </div>
+   {species?.calcule_le ? (
+     <p className="mt-5 text-sm text-muted-foreground">
+       Calculé le {formatFrDate(species.calcule_le)}.
+     </p>
+   ) : null}
+ </section>
+
 
  <section className="max-w-4xl mx-auto px-4 py-12 border-t border-border">
  <h2 className="font-serif text-2xl font-semibold text-foreground mb-6">
@@ -191,11 +243,9 @@ const Observatoire = () => {
  Guardiens fonctionne sur un modèle volontairement déséquilibré : <strong>les propriétaires d'animaux n'ont jamais rien à payer</strong>. Pas d'inscription, pas de frais de mise en relation, pas de commission sur les gardes. C'est un choix structurel qui distingue la plateforme depuis sa création.
  </p>
  <p>
- Les gardiens accèdent aujourd'hui à toutes les fonctionnalités sans abonnement et sans carte bancaire. <strong>Guardiens reste gratuit tant que nous ne sommes pas satisfaits du service que nous vous offrons.</strong> Aucune commission n'est prélevée sur les échanges, parce qu'il n'y a pas de transaction financière entre membres : l'échange repose sur la garde du logement contre la garde des animaux.
+ Les gardiens accèdent aujourd'hui à toutes les fonctionnalités sans abonnement. <strong>Guardiens reste gratuit tant que nous ne sommes pas satisfaits du service que nous vous offrons. Vous avez accès à tout, sans limite, sans engagement. Vous serez prévenu à l'avance quand cela changera.</strong> Aucune commission n'est prélevée sur les échanges, parce qu'il n'y a pas de transaction financière entre membres : l'échange repose sur la garde du logement contre la garde des animaux.
  </p>
- <p>
- Aucune date de bascule tarifaire n'est fixée à ce jour. Chaque membre sera informé par email 30 jours à l'avance si le modèle change.
- </p>
+
  </div>
  </section>
 
@@ -266,8 +316,9 @@ const Observatoire = () => {
  Les chiffres « 37 maisons gardées » et « 234 animaux accompagnés » correspondent au cumul vécu par les fondateurs Jérémie et Elisa entre 2021 et 2026, période de validation terrain qui a précédé l'ouverture publique de Guardiens.
  </p>
  <p>
- Les éléments tarifaires (accès gratuit pour tout le monde aujourd'hui, sans engagement, sans carte bancaire) sont publiés sur <Link to="/tarifs" className="text-primary hover:underline">la page Nos engagements</Link>.
+ Les éléments tarifaires (accès complet, sans limite et sans engagement) sont publiés sur <Link to="/tarifs" className="text-primary hover:underline">la page Nos engagements</Link>.
  </p>
+
  <p>
  Les éléments structurels (vérification d'identité, badges, Trust Score, réseau Gardien d'Urgence) sont décrits sur <Link to="/a-propos" className="text-primary hover:underline">la page À propos</Link> et dans la <Link to="/faq" className="text-primary hover:underline">FAQ</Link>.
  </p>
@@ -282,13 +333,14 @@ const Observatoire = () => {
  Vous voulez tester ?
  </h2>
  <p className="text-muted-foreground mb-6">
- Publication d'annonce gratuite, candidatures sous quelques jours.
+ Publication d'annonce sans engagement, candidatures sous quelques jours.
  </p>
  <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
  <Link to="/inscription?role=owner">
  <Button size="lg" className="gap-2">
- Créer mon annonce gratuite
+ Créer mon annonce
  <ArrowRight className="h-4 w-4" />
+
  </Button>
  </Link>
  <Link to="/tarifs" className="text-sm text-primary hover:underline">
