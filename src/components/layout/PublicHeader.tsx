@@ -51,7 +51,6 @@ export default function PublicHeader({ authedVariant = false }: { authedVariant?
   const [open, setOpen] = useState(false);
   const [msgUnread, setMsgUnread] = useState(0);
   const [notifUnread, setNotifUnread] = useState(0);
-  const headerRef = useRef<HTMLElement | null>(null);
   const fixedBarRef = useRef<HTMLDivElement | null>(null);
 
   const onMsgUnread = useCallback((n: number) => setMsgUnread(n), []);
@@ -121,7 +120,7 @@ export default function PublicHeader({ authedVariant = false }: { authedVariant?
 
   return (
     <>
-    <header ref={headerRef} className="sticky top-0 z-50 bg-background/80 backdrop-blur-md border-b border-border/50">
+    <header className="sticky top-0 z-50 bg-background/80 backdrop-blur-md border-b border-border/50">
       <div ref={fixedBarRef} className="flex items-center justify-between px-[5%] md:px-[8%] py-4">
         <Link to="/" aria-label="Guardiens, accueil" className="font-heading text-xl md:text-2xl font-bold">
           <span aria-hidden="true"><span className="text-primary">g</span>uardiens</span>
