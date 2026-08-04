@@ -203,7 +203,7 @@ const queryClient = new QueryClient({
 // Session valide, profil illisible : écran explicite avec réessai et sortie.
 const ProfileUnavailable = () => {
   const { refreshProfile, logout } = useAuth();
-  const [retrying, setRetrying] = React.useState(false);
+  const [retrying, setRetrying] = useState(false);
   return (
     <div className="min-h-screen flex items-center justify-center px-6 bg-background">
       <div className="max-w-md text-center space-y-4">
@@ -320,7 +320,7 @@ const PublicShellRoute = ({ children }: { children: React.ReactNode }) => {
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <PublicHeader />
-      <main className="flex-1 min-w-0">{children}</main>
+      <main id="main-content" className="flex-1 min-w-0">{children}</main>
       <PublicFooter />
     </div>
   );
