@@ -735,9 +735,14 @@ const CreateSit = () => {
           if (hasContent) setSitLocation("home");
           // L'étape atteinte n'est pas stockée en base, on la recalcule à partir
           // du contenu pour ne pas refaire franchir l'étape 1.
-          // Une description historique ne peut pas être répartie de façon fiable.
-          // Le second champ reste donc à compléter avant de poursuivre.
-          const step0Complete = false;
+          // Cas legacy (pas de sous-champs bruts en base) : une description
+          // historique ne peut pas être répartie de façon fiable, on reste à l'étape 0.
+          const titleOk = !!(d.title || "").trim() && (d.title || "").trim().length <= MAX_TITLE_LENGTH;
+          const datesOk = !!cleanStart && !!cleanEnd && cleanEnd >= cleanStart;
+          const subFieldsOk = faithfulRestore
+            && rawReason.length >= MIN_SUB_DESCRIPTION
+            && rawSitterExp.length >= MIN_SUB_DESCRIPTION;
+          const step0Complete = titleOk && datesOk && subFieldsOk;
           if (step0Complete) setCurrentStep(prev => Math.max(prev, 1));
           if (hasContent) setRemoteDraftResumed(true);
           if (datesWerePast) {
