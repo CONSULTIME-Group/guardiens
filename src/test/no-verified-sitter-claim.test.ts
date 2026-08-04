@@ -19,7 +19,9 @@ import { readFileSync } from "node:fs";
  * écrits en clair, et les fichiers légitimes sont exclus nommément ci-dessous.
  */
 
-const SCAN_PATHS = ["src", "src/data", "public/llms.txt", "index.html"];
+// « src » couvre déjà src/data et src/i18n/locales (fichiers .json inclus,
+// `rg --files` ne filtre pas par extension).
+const SCAN_PATHS = ["src", "public/llms.txt", "index.html"];
 
 /**
  * Exclusions nommées, bloc 1.
