@@ -23,6 +23,9 @@ interface MessageComposerProps {
 const MessageComposer = ({ value, onChange, onSend, onPickPhoto, onProposeVideoCall, sending, sendingVideoInvite }: MessageComposerProps) => {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const proStatus = useMyProStatus();
+  const pricingWarning = shouldWarnPricing(value, proStatus);
+
 
   // Auto-grow : ajuste la hauteur au contenu, plafonnée à ~6 lignes
   useEffect(() => {
