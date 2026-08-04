@@ -193,17 +193,6 @@ export default function PublicHeader({ authedVariant = false }: { authedVariant?
                 <Button className="w-full" size="sm" onClick={() => { setOpen(false); navigate("/dashboard"); }}>
                   Mon espace
                 </Button>
-                <div className="flex items-center gap-1 pt-1">
-                  <Suspense fallback={<div className="w-11 h-11" aria-hidden />}>
-                    <MessageBell onUnreadChange={onMsgUnread} />
-                  </Suspense>
-                  <Suspense fallback={<div className="w-11 h-11" aria-hidden />}>
-                    <NotificationBell onUnreadChange={onNotifUnread} />
-                  </Suspense>
-                  <div className="ml-auto">
-                    <LanguageSwitcher compact />
-                  </div>
-                </div>
               </>
             ) : (
               <Button className="w-full" size="sm" onClick={() => { setOpen(false); navigate("/inscription"); }}>
@@ -213,18 +202,25 @@ export default function PublicHeader({ authedVariant = false }: { authedVariant?
           </div>
         </nav>
       )}
+
+      {/* Messagerie, notifications et langue : montés en permanence pour
+          alimenter la pastille du burger, visibles uniquement menu ouvert. */}
+      {authChecked && hasSession && (
+        <div
+          className={`sm:hidden items-center gap-1 border-t border-border bg-background px-[5%] py-3 ${open ? "flex" : "hidden"}`}
+        >
+          <Suspense fallback={<div className="w-11 h-11" aria-hidden />}>
+            <MessageBell onUnreadChange={onMsgUnread} />
+          </Suspense>
+          <Suspense fallback={<div className="w-11 h-11" aria-hidden />}>
+            <NotificationBell onUnreadChange={onNotifUnread} />
+          </Suspense>
+          <div className="ml-auto">
+            <LanguageSwitcher compact />
+          </div>
+        </div>
+      )}
     </header>
-    {/* Les compteurs alimentent la pastille du burger même menu fermé. */}
-    {authChecked && hasSession && (
-      <div className="sm:hidden sr-only" aria-hidden="true">
-        <Suspense fallback={null}>
-          <MessageBell onUnreadChange={onMsgUnread} />
-        </Suspense>
-        <Suspense fallback={null}>
-          <NotificationBell onUnreadChange={onNotifUnread} />
-        </Suspense>
-      </div>
-    )}
     {withBottomNav && <BottomNav />}
     </>
   );
