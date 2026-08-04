@@ -392,6 +392,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         loading,
         hasSession,
         authChecked,
+        profileError,
         switchRole,
         setActiveRole,
         login,
