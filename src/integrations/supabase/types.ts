@@ -1577,6 +1577,7 @@ export type Database = {
           resolved_at: string | null
           rule_code: string
           slug: string
+          source_table: string
         }
         Insert: {
           article_id: string
@@ -1586,6 +1587,7 @@ export type Database = {
           resolved_at?: string | null
           rule_code: string
           slug: string
+          source_table?: string
         }
         Update: {
           article_id?: string
@@ -1595,6 +1597,7 @@ export type Database = {
           resolved_at?: string | null
           rule_code?: string
           slug?: string
+          source_table?: string
         }
         Relationships: []
       }
@@ -7052,6 +7055,16 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      v_content_defects: {
+        Row: {
+          excerpt: string | null
+          label: string | null
+          row_id: string | null
+          rule_code: string | null
+          source_table: string | null
+        }
+        Relationships: []
       }
       v_email_pipeline_health: {
         Row: {
