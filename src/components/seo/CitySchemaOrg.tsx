@@ -99,7 +99,7 @@ const GRENOBLE_FAQ = [
 const CHAMBERY_FAQ = [
  {
  q: "Comment trouver un gardien de confiance à Chambéry ?",
- a: "Vous publiez votre annonce gratuitement sur Guardiens, les gardiens vérifiés disponibles à Chambéry et en Savoie postulent. Vous échangez avec eux et organisez une rencontre avant la garde.",
+ a: "Vous publiez votre annonce gratuitement sur Guardiens, les gardiens disponibles à Chambéry et en Savoie postulent. La vérification d'identité est ouverte à tous les membres et contrôlée manuellement par l'équipe Guardiens : regardez l'écusson « Identité vérifiée » sur les profils, échangez avec eux et organisez une rencontre avant la garde.",
  },
  {
  q: "Les gardiens à Chambéry connaissent-ils les contraintes saisonnières ?",
