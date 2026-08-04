@@ -41,6 +41,18 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+const isInvalidSessionError = (error: unknown): boolean => {
+  if (!error || typeof error !== "object") return false;
+  const candidate = error as { status?: number; code?: string; name?: string; message?: string };
+  const details = `${candidate.code ?? ""} ${candidate.name ?? ""} ${candidate.message ?? ""}`.toLowerCase();
+  return candidate.status === 401
+    || details.includes("jwt expired")
+    || details.includes("invalid jwt")
+    || details.includes("invalid token")
+    || details.includes("session_not_found")
+    || details.includes("session not found");
+};
+
 /**
  * Détection synchrone d'un token Supabase persistant en localStorage.
  * Utilisée en initialisation paresseuse de `hasSession`, pour que le premier
@@ -95,6 +107,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [profileError, setProfileError] = useState(false);
   const roleInitialized = useRef(false);
   const userRef = useRef<Profile | null>(null);
+
+  const clearInvalidSession = useCallback(() => {
+    userRef.current = null;
+    setUser(null);
+    setHasSession(false);
+    setProfileError(false);
+    roleInitialized.current = false;
+    void supabase.auth.signOut({ scope: "local" }).catch(() => {});
+  }, []);
 
   const switchRole = useCallback((role: ActiveRole) => {
     setActiveRoleState(role);
@@ -214,14 +235,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 logOAuthStage("user_endpoint_ok", "auth-context");
                 endOAuthFlow("success");
               }
-            } catch {
-              // Échec avéré de lecture du profil : la session reste valide,
-              // on signale l'erreur sans renvoyer l'utilisateur au formulaire.
-              userRef.current = null;
-              setUser(null);
-              setHasSession(true);
-              setAuthChecked(true);
-              setProfileError(true);
+            } catch (error) {
+              if (isInvalidSessionError(error)) {
+                clearInvalidSession();
+              } else {
+                // Échec avéré de lecture du profil avec une session valide.
+                userRef.current = null;
+                setUser(null);
+                setHasSession(true);
+                setAuthChecked(true);
+                setProfileError(true);
+              }
             } finally {
               setLoading(false);
             }
@@ -250,13 +274,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           setHasSession(true);
           setAuthChecked(true);
           setProfileError(false);
-        } catch {
-          // Session valide, lecture du profil en échec avéré.
-          userRef.current = null;
-          setUser(null);
-          setHasSession(true);
-          setAuthChecked(true);
-          setProfileError(true);
+        } catch (error) {
+          if (isInvalidSessionError(error)) {
+            clearInvalidSession();
+          } else {
+            // Session valide, lecture du profil en échec avéré.
+            userRef.current = null;
+            setUser(null);
+            setHasSession(true);
+            setAuthChecked(true);
+            setProfileError(true);
+          }
         }
       } else {
         markChecked(false);
@@ -268,18 +296,33 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setLoading(false);
     });
 
-    // (C) Timeout de sécurité : toute vérification doit aboutir à un rendu.
+    // (C) Timeout court : sans token persistant, libère le parcours visiteur.
+    // Avec un token probable, conserve le chargement pour éviter toute bascule.
     const safety = window.setTimeout(() => {
       setAuthChecked(true);
-      setLoading(false);
-      if (!settled && !userRef.current) setHasSession(false);
+      if (!hasPersistedToken && !settled && !userRef.current) {
+        setHasSession(false);
+        setLoading(false);
+      }
     }, 1500);
+
+    // Une attente anormalement longue devient une erreur explicite, jamais une
+    // redirection silencieuse vers la connexion.
+    const extendedSafety = window.setTimeout(() => {
+      if (hasPersistedToken && !settled && !userRef.current) {
+        setHasSession(true);
+        setAuthChecked(true);
+        setProfileError(true);
+        setLoading(false);
+      }
+    }, 8000);
 
     return () => {
       subscription.unsubscribe();
       window.clearTimeout(safety);
+      window.clearTimeout(extendedSafety);
     };
-  }, [fetchProfile]);
+  }, [clearInvalidSession, fetchProfile]);
 
   const login = useCallback(async (email: string, password: string) => {
     setLoading(true);
@@ -376,12 +419,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (session?.user) {
       try {
         await fetchProfile(session.user);
-      } catch (e) {
-        setProfileError(true);
-        throw e;
+      } catch (error) {
+        if (isInvalidSessionError(error)) {
+          clearInvalidSession();
+        } else {
+          setHasSession(true);
+          setProfileError(true);
+        }
+        throw error;
       }
     }
-  }, [fetchProfile]);
+  }, [clearInvalidSession, fetchProfile]);
 
   return (
     <AuthContext.Provider

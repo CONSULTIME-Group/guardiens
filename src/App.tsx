@@ -275,8 +275,15 @@ const RegisterRedirect = () => {
 
 const PublicOnlyRoute = ({ children }: { children: React.ReactNode }) => {
   const { isAuthenticated, loading } = useAuth();
+  const location = useLocation();
   if (loading) return <div className="min-h-screen flex items-center justify-center text-muted-foreground">Chargement...</div>;
-  if (isAuthenticated) return <Navigate to="/dashboard" replace />;
+  if (isAuthenticated) {
+    const requested = new URLSearchParams(location.search).get("redirect");
+    const destination = requested?.startsWith("/") && !requested.startsWith("//")
+      ? requested
+      : "/dashboard";
+    return <Navigate to={destination} replace />;
+  }
   return <>{children}</>;
 };
 

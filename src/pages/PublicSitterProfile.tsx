@@ -626,7 +626,7 @@ export default function PublicSitterProfile() {
   useEffect(() => {
     if (
       !id ||
-      !auth?.isAuthenticated ||
+      !auth?.user ||
       auth?.activeRole !== "owner" ||
       sitterProfile?.user_id !== id
     ) return;
@@ -651,7 +651,7 @@ export default function PublicSitterProfile() {
     return () => {
       cancelled = true;
     };
-  }, [id, auth?.isAuthenticated, auth?.activeRole, sitterProfile?.user_id]);
+  }, [id, auth?.user, auth?.activeRole, sitterProfile?.user_id]);
 
   useEffect(() => {
     if (activeTab !== 'proprio') return;
