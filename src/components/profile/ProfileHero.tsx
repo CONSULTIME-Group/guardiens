@@ -335,6 +335,14 @@ const ProfileHero = ({
                 <StatutGardienBadge statut={statutGardien as any} />
               </div>
             )}
+            <ProAvatarBadge
+              status={proStatus}
+              className={
+                statutGardien && statutGardien !== "novice"
+                  ? "left-0 right-auto bottom-1"
+                  : undefined
+              }
+            />
           </div>
 
           <div className="flex flex-col gap-1.5 pb-1 min-w-0 flex-1">
