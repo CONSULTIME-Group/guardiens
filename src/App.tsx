@@ -338,36 +338,10 @@ const ShellPendingContent = () => {
   );
 };
 
-const ParrainageRoute = () => {
-  const shell = useShellMode();
-  if (shell === "pending") return <ShellPending />;
-  if (shell === "app") {
-    return (
-      <AppLayout>
-        <Parrainage />
-      </AppLayout>
-    );
-  }
-  return (
-    <main id="main-content">
-      <Parrainage />
-    </main>
-  );
-};
-
-// Routes de contenu (ressources, SEO) : coquille AppLayout pour les
-// utilisateurs connectés, repère principal neutre pour les visiteurs
-// (les pages rendent elles-mêmes leur PublicHeader/PublicFooter).
-const ContentRoute = ({ children }: { children: React.ReactNode }) => {
-  const shell = useShellMode();
-  if (shell === "pending") return <ShellPending />;
-  if (shell === "app") return <AppLayout>{children}</AppLayout>;
-  return <main id="main-content">{children}</main>;
-};
-
 // Coquille publique complète (PublicHeader + PublicFooter) pour les visiteurs
-// non connectés sur les pages de contenu/SEO qui ne rendent PAS leur propre
-// PublicHeader. Pour les utilisateurs connectés : AppLayout (sidebar).
+// non connectés sur les pages de contenu/SEO. Les repères sémantiques sont
+// frères : header (banner), main (contenu), footer (contentinfo).
+// Pour les utilisateurs connectés : AppLayout (sidebar).
 const PublicShellRoute = ({ children }: { children: React.ReactNode }) => {
   const shell = useShellMode();
   if (shell === "pending") return <ShellPending />;
@@ -378,6 +352,14 @@ const PublicShellRoute = ({ children }: { children: React.ReactNode }) => {
       <main id="main-content" className="flex-1 min-w-0">{children}</main>
       <PublicFooter />
     </div>
+  );
+};
+
+const ParrainageRoute = () => {
+  return (
+    <PublicShellRoute>
+      <Parrainage />
+    </PublicShellRoute>
   );
 };
 
