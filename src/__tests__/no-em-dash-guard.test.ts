@@ -4,58 +4,79 @@ import { execSync } from 'child_process';
 /**
  * Garde anti-régression : le tiret cadratin « — » (U+2014) est PROSCRIT
  * dans tout le contenu user-visible (UI, copy, SEO, articles, emails, alt, OG, toasts).
- * Remplacer par virgule, deux-points, parenthèses, point, ou demi-cadratin « – » pour les plages.
+ * Le demi-cadratin « – » (U+2013) est proscrit lui aussi en ponctuation de phrase.
+ * Remplacer par virgule, deux-points, parenthèses ou point.
  * cf. mem://style/no-em-dash
  *
  * Tests, logs techniques et fichiers utilitaires non-visibles sont exclus.
  */
-describe('Tiret cadratin « — » (U+2014)', () => {
-  it("ne doit jamais apparaître dans le contenu user-visible", () => {
-    const exclude = [
-      '--glob=!**/*.test.*',
-      '--glob=!**/__tests__/**',
-      '--glob=!src/test/**',
-      '--glob=!src/lib/logger.ts',
-      '--glob=!src/lib/errorLogger.ts',
-      '--glob=!src/lib/seoDebugLog.ts',
-      '--glob=!src/lib/analytics.ts',
-      '--glob=!src/lib/heroBank.ts',
-      '--glob=!src/lib/fatalErrorOverlay.ts',
-      '--glob=!src/lib/campaignAttribution.ts',
-      '--glob=!src/lib/sendTransactionalEmail.ts',
-      '--glob=!src/lib/normalize.ts',
-      '--glob=!src/lib/sanitize*.ts',
-      '--glob=!src/lib/imageDimensions.ts',
-      '--glob=!src/lib/backfillGalleryDimensions.ts',
-      '--glob=!src/lib/queryKeys.ts',
-      '--glob=!src/lib/conversation.ts',
-      '--glob=!src/lib/ogImages.ts',
-      '--glob=!src/lib/skills/tokenize.ts',
-      '--glob=!src/lib/departments.ts',
-      '--glob=!src/lib/countries.ts',
-      '--glob=!src/data/siteRoutes.ts',
-      '--glob=!src/__tests__/no-em-dash-guard.test.ts',
-    ];
 
-    let output = '';
-    try {
-      output = execSync(
-        `rg -n "\\xE2\\x80\\x94" src/pages src/components src/data ${exclude.join(' ')}`,
-        { encoding: 'utf8' }
-      );
-    } catch (e: any) {
-      // rg exit 1 = no match = OK
-      if (e.status === 1) output = '';
-      else throw e;
-    }
+const SCAN_PATHS = 'src/pages src/components src/data src/i18n/locales index.html';
 
-    const lines = output.split('\n').filter(Boolean);
+const EXCLUDE = [
+  '--glob=!**/*.test.*',
+  '--glob=!**/__tests__/**',
+  '--glob=!src/test/**',
+  '--glob=!src/lib/logger.ts',
+  '--glob=!src/lib/errorLogger.ts',
+  '--glob=!src/lib/seoDebugLog.ts',
+  '--glob=!src/lib/analytics.ts',
+  '--glob=!src/lib/heroBank.ts',
+  '--glob=!src/lib/fatalErrorOverlay.ts',
+  '--glob=!src/lib/campaignAttribution.ts',
+  '--glob=!src/lib/sendTransactionalEmail.ts',
+  '--glob=!src/lib/normalize.ts',
+  '--glob=!src/lib/sanitize*.ts',
+  '--glob=!src/lib/imageDimensions.ts',
+  '--glob=!src/lib/backfillGalleryDimensions.ts',
+  '--glob=!src/lib/queryKeys.ts',
+  '--glob=!src/lib/conversation.ts',
+  '--glob=!src/lib/ogImages.ts',
+  '--glob=!src/lib/skills/tokenize.ts',
+  '--glob=!src/lib/departments.ts',
+  '--glob=!src/lib/countries.ts',
+  '--glob=!src/__tests__/no-em-dash-guard.test.ts',
+];
+
+function search(pattern: string): string[] {
+  let output = '';
+  try {
+    output = execSync(`rg -n "${pattern}" ${SCAN_PATHS} ${EXCLUDE.join(' ')}`, {
+      encoding: 'utf8',
+    });
+  } catch (e: any) {
+    // rg exit 1 = aucun résultat = conforme
+    if (e.status === 1) output = '';
+    else throw e;
+  }
+  return output.split('\n').filter(Boolean);
+}
+
+describe('Tirets longs', () => {
+  it("le cadratin « — » (U+2014) n'apparaît jamais dans le contenu user-visible", () => {
+    const lines = search('\\xE2\\x80\\x94');
     if (lines.length > 0) {
-      const preview = lines.slice(0, 10).join('\n');
       throw new Error(
         `${lines.length} tiret(s) cadratin « — » détecté(s) dans le contenu user-visible.\n` +
-        `Remplacer par virgule, deux-points, parenthèses, point, ou « – » pour les plages.\n` +
-        `cf. mem://style/no-em-dash\n\nExemples :\n${preview}`
+          `Remplacer par virgule, deux-points, parenthèses ou point.\n` +
+          `cf. mem://style/no-em-dash\n\nExemples :\n${lines.slice(0, 10).join('\n')}`
+      );
+    }
+    expect(lines.length).toBe(0);
+  });
+
+  it("le demi-cadratin « – » (U+2013) n'est jamais utilisé en ponctuation de phrase", () => {
+    // Seul cas toléré : séparateur de plage numérique collé, du type « 10–12 » ou
+    // « 2024–2026 ». Toute autre occurrence est de la ponctuation de phrase.
+    const lines = search('\\xE2\\x80\\x93').filter(
+      (line) => !/(?<=\d)\u2013(?=\d)/.test(line) || /\s\u2013\s|\u2013(?=\D)|(?<=\D)\u2013/.test(line)
+    );
+    if (lines.length > 0) {
+      throw new Error(
+        `${lines.length} tiret(s) demi-cadratin « – » utilisé(s) en ponctuation.\n` +
+          `Remplacer par virgule, deux-points, parenthèses ou point. ` +
+          `Seules les plages numériques collées (10–12) sont tolérées.\n` +
+          `cf. mem://style/no-em-dash\n\nExemples :\n${lines.slice(0, 10).join('\n')}`
       );
     }
     expect(lines.length).toBe(0);
