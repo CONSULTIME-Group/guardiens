@@ -15,6 +15,8 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { shouldWarnPricing } from "@/lib/pricingDetection";
+import { PricingAuthorWarning } from "@/components/pricing/PricingNotices";
 import { useAccessLevel } from "@/hooks/useAccessLevel";
 import { toast } from "@/hooks/use-toast";
 import { Send, Star, MapPin, Shield, ShieldCheck, CheckCircle2, Calendar } from "lucide-react";
@@ -524,6 +526,7 @@ const ApplicationModal = ({
               className="resize-none"
               placeholder="Votre message de candidature..."
             />
+            {shouldWarnPricing(message, sitterInfo?.profile?.pro_status) && <PricingAuthorWarning />}
             {almaUsed && (
               <p className="text-xs text-muted-foreground">Brouillon Alma inséré, à personnaliser avant envoi.</p>
             )}

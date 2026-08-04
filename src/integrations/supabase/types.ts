@@ -765,6 +765,7 @@ export type Database = {
           declined_at: string | null
           id: string
           message: string | null
+          pricing_flag: boolean
           sit_id: string
           sitter_id: string
           status: Database["public"]["Enums"]["application_status"]
@@ -777,6 +778,7 @@ export type Database = {
           declined_at?: string | null
           id?: string
           message?: string | null
+          pricing_flag?: boolean
           sit_id: string
           sitter_id: string
           status?: Database["public"]["Enums"]["application_status"]
@@ -789,6 +791,7 @@ export type Database = {
           declined_at?: string | null
           id?: string
           message?: string | null
+          pricing_flag?: boolean
           sit_id?: string
           sitter_id?: string
           status?: Database["public"]["Enums"]["application_status"]
@@ -8098,6 +8101,7 @@ export type Database = {
         }
         Returns: string
       }
+      looks_like_pricing: { Args: { txt: string }; Returns: boolean }
       mark_sit_applications_viewed: {
         Args: { p_sit_id: string }
         Returns: number
@@ -8213,6 +8217,7 @@ export type Database = {
         Returns: boolean
       }
       unaccent: { Args: { "": string }; Returns: string }
+      unaccent_immutable_safe: { Args: { txt: string }; Returns: string }
       unpublish_sit:
         | { Args: { p_sit_id: string }; Returns: number }
         | { Args: { p_reason?: string; p_sit_id: string }; Returns: number }

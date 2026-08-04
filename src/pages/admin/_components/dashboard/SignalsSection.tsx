@@ -54,6 +54,12 @@ function entityLink(s: Signal): string {
       return `/admin/reviews`;
     case "report":
       return `/admin/reports`;
+    case "message":
+      return s.metadata?.conversation_id
+        ? `/admin/messages?conversation=${s.metadata.conversation_id as string}`
+        : `/admin/messages`;
+    case "application":
+      return `/admin/listings`;
     default:
       return "/admin";
   }
@@ -129,6 +135,31 @@ export const SignalsSection = () => {
                   <RepeatedRepublishCard signal={s as unknown as import("@/components/admin/signals/RepeatedRepublishCard").RepeatedRepublishSignal} />
                 ) : s.signal_type === "owner_missing_coordinates" ? (
                   <OwnerMissingCoordinatesCard signal={s as unknown as import("@/components/admin/signals/OwnerMissingCoordinatesCard").OwnerMissingCoordinatesSignal} />
+                ) : s.signal_type === "undeclared_pricing" ? (
+                  <Link
+                    to={entityLink(s)}
+                    className="flex items-start gap-3 rounded-lg border p-3 hover:bg-accent/50 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  >
+                    <Badge
+                      variant="outline"
+                      className={cn("text-[10px] uppercase tracking-wide", SEVERITY_STYLE[s.severity])}
+                    >
+                      Tarif
+                    </Badge>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-foreground">
+                        Mention de tarif par un membre non déclaré professionnel
+                      </p>
+                      {typeof s.metadata?.excerpt === "string" && (
+                        <p className="text-xs text-muted-foreground line-clamp-2 mt-0.5">
+                          {s.metadata.excerpt as string}
+                        </p>
+                      )}
+                      <p className="text-xs text-muted-foreground mt-0.5">
+                        {s.entity_type === "application" ? "Candidature" : "Message"} · {new Date(s.detected_at).toLocaleString("fr-FR")}
+                      </p>
+                    </div>
+                  </Link>
                 ) : s.signal_type === "stale_draft" ? (
                   <StaleDraftCard signal={s as unknown as import("@/components/admin/signals/StaleDraftCard").StaleDraftSignal} />
                 ) : (

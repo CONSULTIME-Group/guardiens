@@ -4,6 +4,7 @@ import { format } from "date-fns";
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import { Button } from "@/components/ui/button";
+import { PricingRecipientNotice } from "@/components/pricing/PricingNotices";
 
 interface MessageBubbleProps {
   msg: {
@@ -14,7 +15,7 @@ interface MessageBubbleProps {
     is_system: boolean;
     read_at: string | null;
     created_at: string;
-    metadata?: { action?: string; actor?: string; actor_id?: string; actor_name?: string; dates?: string; kind?: string; room_url?: string } | null;
+    metadata?: { action?: string; actor?: string; actor_id?: string; actor_name?: string; dates?: string; kind?: string; room_url?: string; pricing_flag?: boolean } | null;
   };
   isMe: boolean;
   readerRole?: "proprio" | "gardien";
@@ -190,6 +191,7 @@ const MessageBubble = ({
 
   return (
     <>
+      <div className={`flex flex-col ${isMe ? "items-end" : "items-start"}`}>
       <div className={`flex ${isMe ? "justify-end" : "justify-start"}`}>
         <div
           className={[
@@ -250,6 +252,11 @@ const MessageBubble = ({
           )}
         </div>
       </div>
+      {msg.metadata?.pricing_flag && !isMe && (
+        <PricingRecipientNotice className="mt-1 max-w-[78%]" />
+      )}
+      </div>
+
 
 
       {msg.photo_url && (

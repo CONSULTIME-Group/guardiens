@@ -1,6 +1,9 @@
 import { useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Send, Image as ImageIcon, Video } from "lucide-react";
+import { shouldWarnPricing } from "@/lib/pricingDetection";
+import { useMyProStatus } from "@/hooks/useMyProStatus";
+import { PricingAuthorWarning } from "@/components/pricing/PricingNotices";
 
 interface MessageComposerProps {
   value: string;
@@ -20,6 +23,9 @@ interface MessageComposerProps {
 const MessageComposer = ({ value, onChange, onSend, onPickPhoto, onProposeVideoCall, sending, sendingVideoInvite }: MessageComposerProps) => {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const proStatus = useMyProStatus();
+  const pricingWarning = shouldWarnPricing(value, proStatus);
+
 
   // Auto-grow : ajuste la hauteur au contenu, plafonnée à ~6 lignes
   useEffect(() => {
@@ -60,10 +66,12 @@ const MessageComposer = ({ value, onChange, onSend, onPickPhoto, onProposeVideoC
         "px-3 pt-2.5 pb-2.5",
         // Safe area iOS (notch / home indicator)
         "[padding-bottom:max(10px,env(safe-area-inset-bottom))]",
-        "flex items-end gap-2",
         "shadow-[0_-1px_0_0_hsl(var(--border)),0_-8px_16px_-8px_hsl(var(--foreground)/0.06)]",
       ].join(" ")}
     >
+      {pricingWarning && <PricingAuthorWarning className="mb-2" />}
+      <div className="flex items-end gap-2">
+
       <input
         type="file"
         ref={fileInputRef}
@@ -132,7 +140,9 @@ const MessageComposer = ({ value, onChange, onSend, onPickPhoto, onProposeVideoC
       >
         <Send className="h-[18px] w-[18px]" aria-hidden="true" />
       </Button>
+      </div>
     </div>
+
   );
 };
 
