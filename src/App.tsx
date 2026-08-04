@@ -1,7 +1,7 @@
 import { Suspense, useState } from "react";
 import { lazyWithRetry as lazy } from "@/lib/lazyWithRetry";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Route, Routes, Navigate, useParams, useLocation } from "react-router-dom";
+import { BrowserRouter, Route, Routes, Navigate, useParams, useLocation, useNavigate } from "react-router-dom";
 import { Loader2 } from "lucide-react";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
@@ -246,26 +246,36 @@ const ProfileUnavailable = () => {
   );
 };
 
-const AuthTimeout = () => (
-  <div className="min-h-screen flex items-center justify-center px-6 bg-background">
-    <div className="max-w-md text-center space-y-4">
-      <h1 className="font-heading text-xl font-semibold text-foreground">
-        La vérification prend plus de temps que prévu
-      </h1>
-      <p className="text-sm text-muted-foreground">
-        Votre connexion n'a pas pu être vérifiée. Vous pouvez réessayer ou ouvrir la page de connexion.
-      </p>
-      <div className="flex items-center justify-center gap-3">
-        <Button type="button" onClick={() => window.location.reload()}>
-          Réessayer
-        </Button>
-        <Button asChild variant="outline">
-          <a href="/login">Se connecter</a>
-        </Button>
+const AuthTimeout = () => {
+  const { logout } = useAuth();
+  const navigate = useNavigate();
+  return (
+    <div className="min-h-screen flex items-center justify-center px-6 bg-background">
+      <div className="max-w-md text-center space-y-4">
+        <h1 className="font-heading text-xl font-semibold text-foreground">
+          La vérification prend plus de temps que prévu
+        </h1>
+        <p className="text-sm text-muted-foreground">
+          Votre connexion n'a pas pu être vérifiée. Vous pouvez réessayer ou ouvrir la page de connexion.
+        </p>
+        <div className="flex items-center justify-center gap-3">
+          <Button type="button" onClick={() => window.location.reload()}>
+            Réessayer
+          </Button>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => {
+              void Promise.resolve(logout()).finally(() => navigate("/login", { replace: true }));
+            }}
+          >
+            Se connecter
+          </Button>
+        </div>
       </div>
     </div>
-  </div>
-);
+  );
+};
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { isAuthenticated, user, hasSession, loading, profileError, authTimeout } = useAuth();
