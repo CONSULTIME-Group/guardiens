@@ -88,11 +88,41 @@ const SPECIES_LABELS: Record<string, string> = {
   reptile: "Reptiles",
 };
 
+const AUTONOMY_LABELS: Record<string, string> = {
+  all_day: "Toute la journée",
+  "6h": "Jusqu'à six heures",
+  "2h": "Deux heures maximum",
+  never: "Jamais seul",
+};
+
+const ACTIVITY_LABELS: Record<string, string> = {
+  calm: "Calme",
+  moderate: "Modéré",
+  sportive: "Sportif",
+};
+
+const HOUSING_LABELS: Record<string, string> = {
+  house: "Maison",
+  apartment: "Appartement",
+  farm: "Ferme",
+  other: "Autre",
+};
+
+const ENVIRONMENT_LABELS: Record<string, string> = {
+  countryside: "Campagne",
+  city_center: "Centre-ville",
+  suburban: "Périurbain",
+  seaside: "Bord de mer",
+  mountain: "Montagne",
+  forest: "Forêt",
+};
+
 const formatFrDate = (iso: string) => {
   const d = new Date(iso);
   if (Number.isNaN(d.getTime())) return iso;
   return d.toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" });
 };
+
 
 const Observatoire = () => {
   const { data: counts } = useInventaireCounts();
