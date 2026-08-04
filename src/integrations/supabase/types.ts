@@ -8315,7 +8315,12 @@ export type Database = {
         | "other"
       pro_moderation_status: "pending" | "approved" | "rejected"
       pro_pricing_tier: "standard" | "verified"
-      pro_profile_status_enum: "none" | "pending" | "verified" | "rejected"
+      pro_profile_status_enum:
+        | "none"
+        | "pending"
+        | "verified"
+        | "rejected"
+        | "declared"
       pro_verification_status_enum:
         | "pending"
         | "auto_approved"
@@ -8570,7 +8575,13 @@ export const Constants = {
       ],
       pro_moderation_status: ["pending", "approved", "rejected"],
       pro_pricing_tier: ["standard", "verified"],
-      pro_profile_status_enum: ["none", "pending", "verified", "rejected"],
+      pro_profile_status_enum: [
+        "none",
+        "pending",
+        "verified",
+        "rejected",
+        "declared",
+      ],
       pro_verification_status_enum: [
         "pending",
         "auto_approved",
