@@ -653,6 +653,7 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, prope
                     .join(", ")}
                 </p>
               )}
+            {app.pricing_flag && <PricingRecipientNotice className="mt-1.5" />}
             <div className="flex items-center gap-3 text-sm text-muted-foreground flex-wrap mt-0.5">
               {sitter?.city && (
                 <span className="inline-flex items-center gap-1">
