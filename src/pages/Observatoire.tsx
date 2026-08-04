@@ -6,7 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
 import { useInventaireCounts } from "@/hooks/useInventaireCounts";
-import { useSpeciesBreakdown } from "@/hooks/useSpeciesBreakdown";
+import { useSpeciesBreakdown, type BreakdownRow } from "@/hooks/useSpeciesBreakdown";
 
 
 /**
