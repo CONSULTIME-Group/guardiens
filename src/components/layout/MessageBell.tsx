@@ -132,6 +132,11 @@ const MessageBell = ({ onUnreadChange }: MessageBellProps = {}) => {
     void load();
   }, [load]);
 
+  useEffect(() => {
+    onUnreadChange?.(unreadCount);
+  }, [unreadCount, onUnreadChange]);
+
+
   // Realtime : nouveau message dans une conversation où je participe
   useEffect(() => {
     if (!userId) return;
