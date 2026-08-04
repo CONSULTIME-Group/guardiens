@@ -589,6 +589,7 @@ const Messages = () => {
                 {conv.other_user?.first_name?.charAt(0)?.toUpperCase() || "?"}
               </div>
             )}
+            <ProAvatarBadge status={conv.other_user?.pro_status} size="sm" />
           </div>
           <div className="flex-1 min-w-0">
             <div className="flex items-center justify-between gap-2">
