@@ -428,14 +428,14 @@ export default function PublicSitterProfile() {
       try {
       // Colonnes explicites : évite un select("*") qui exposerait/rapatrierait
       // des colonnes non utilisées côté client (privacy + payload).
-      // Note : la vue `public_profiles` n'expose PAS cancellation_count ni les
-      // champs pro_* — ils viennent de `profiles` (BASE_PROFILE_COLS) et sont
-      // mergés plus bas. Les inclure ici ferait échouer toute la requête.
+      // Les champs pro_* viennent de la vue publique `public_profiles`, lisible
+      // par tout visiteur ; `profiles` reste réservé au propriétaire du profil.
       const PUBLIC_PROFILE_COLS =
-        "id, first_name, avatar_url, bio, city, postal_code, created_at, identity_verified, is_founder, completed_sits_count, last_seen_at";
+        "id, first_name, avatar_url, bio, city, postal_code, created_at, identity_verified, is_founder, completed_sits_count, last_seen_at, pro_status, pro_specialty, pro_tagline, pro_pricing_note, pro_business_name";
       // `last_name` retiré du select — jamais rendu publiquement.
       const BASE_PROFILE_COLS =
-        "id, first_name, avatar_url, bio, city, postal_code, created_at, identity_verified, is_founder, profile_completion, completed_sits_count, cancellation_count, hero_image_index, pro_status, pro_specialty, pro_tagline, pro_pricing_note, pro_business_name";
+        "id, first_name, avatar_url, bio, city, postal_code, created_at, identity_verified, is_founder, profile_completion, completed_sits_count, cancellation_count, hero_image_index";
+
       // Vue publique réduite : 19 colonnes d'affichage, sans donnée d'affinité.
       const PUBLIC_SITTER_COLS =
         "user_id, motivation, sitter_type, accompanied_by, lifestyle, animal_types, has_vehicle, geographic_radius, min_duration, is_available, competences, preferred_frequency, min_notice, preferred_environments, farm_animals_ok, own_animals, reply_median_minutes, travels_with_children, travels_with_own_animals";
