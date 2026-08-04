@@ -64,7 +64,7 @@ const SidebarItem = ({
 );
 
 export const Sidebar = () => {
-  const { user, logout, activeRole, setActiveRole } = useAuth();
+  const { user, activeRole, setActiveRole } = useAuth();
   const { isAdmin } = useAdmin();
   const navigate = useNavigate();
   const { hasAccess } = useSubscriptionAccess();

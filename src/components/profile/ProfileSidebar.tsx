@@ -401,8 +401,6 @@ const ProfileSidebar = ({
       {/* Lien profil public */}
       <Link
         to={publicProfileUrl}
-        target="_blank"
-        rel="noopener noreferrer"
         className="flex items-center justify-center gap-2 border border-border rounded-full px-4 min-h-[44px] text-sm text-foreground hover:border-primary transition-colors w-full"
       >
         <Eye className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
