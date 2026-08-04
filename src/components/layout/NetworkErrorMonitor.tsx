@@ -141,6 +141,21 @@ const extractPgFields = (body: string | null): Record<string, string> => {
   }
 };
 
+/**
+ * Erreurs métier levées volontairement par une fonction Postgres via
+ * RAISE EXCEPTION (code P0001). PostgREST les renvoie en 400, mais ce sont
+ * des refus fonctionnels attendus (doublon d'alerte, quota de zones atteint,
+ * ville ou rayon invalide), déjà traités par un message clair côté appelant.
+ * Aucun toast technique, aucun log admin.
+ */
+const isBusinessRpcRefusal = (
+  url: string,
+  status: number,
+  pg: Record<string, string>,
+): boolean =>
+  status === 400 &&
+  /\/rest\/v1\/rpc\//.test(url) &&
+  pg.pg_code === "P0001";
 
 const NetworkErrorMonitor = () => {
   const location = useLocation();
