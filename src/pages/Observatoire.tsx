@@ -173,8 +173,15 @@ const Observatoire = () => {
  "@type": "Dataset",
  name: "Observatoire de la garde d'animaux à domicile en France, Guardiens",
  description:
- "Chiffres-clés sur la garde d'animaux à domicile (house-sitting, pet-sitting) en France : volumes, modèle économique, dispositif de confiance. Données issues de la plateforme Guardiens et de l'expérience des fondateurs (2021-2026).",
+ "Chiffres-clés sur la garde d'animaux à domicile (house-sitting, pet-sitting) en France : volumes, modèle économique, dispositif de confiance. Le jeu de données décrit également les membres de la plateforme Guardiens, leurs animaux (espèces, autonomie, niveau d'activité) et leurs logements (type, environnement), ainsi que l'expérience des fondateurs (2021-2026).",
  url: PAGE_URL,
+ variableMeasured: [
+ "Répartition des animaux par espèce",
+ "Répartition des animaux par durée de solitude supportée",
+ "Répartition des animaux par niveau d'activité",
+ "Répartition des logements par type",
+ "Répartition des logements par environnement",
+ ],
  keywords: [
  "garde d'animaux à domicile",
  "house-sitting France",
