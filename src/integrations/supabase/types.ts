@@ -1595,6 +1595,30 @@ export type Database = {
         }
         Relationships: []
       }
+      content_freeze: {
+        Row: {
+          created_at: string
+          frozen_until: string
+          reason: string | null
+          slug: string
+          source_table: string
+        }
+        Insert: {
+          created_at?: string
+          frozen_until: string
+          reason?: string | null
+          slug: string
+          source_table?: string
+        }
+        Update: {
+          created_at?: string
+          frozen_until?: string
+          reason?: string | null
+          slug?: string
+          source_table?: string
+        }
+        Relationships: []
+      }
       content_quality_alerts: {
         Row: {
           article_id: string
@@ -7499,7 +7523,7 @@ export type Database = {
         Returns: undefined
       }
       check_content_quality: {
-        Args: { p_seuil_alertes?: number }
+        Args: { p_forcer_erreur?: boolean; p_seuil_alertes?: number }
         Returns: Json
       }
       check_invitation_quota: { Args: { _owner_id: string }; Returns: boolean }

@@ -74,12 +74,18 @@ const ProfileSidebar = ({
       <div className="lg:hidden space-y-3">
         {/* Ligne 1 : avatar + identité + score badge */}
         <div className="flex items-center gap-3">
-          <Avatar className="h-9 w-9 shrink-0 border border-border">
-            {avatarUrl && <AvatarImage src={avatarUrl} alt={displayName} />}
-            <AvatarFallback className="text-sm font-semibold bg-muted">
-              {firstName ? firstName.charAt(0).toUpperCase() : "?"}
-            </AvatarFallback>
-          </Avatar>
+          <Link
+            to={publicProfileUrl}
+            aria-label="Voir mon profil public"
+            className="shrink-0 rounded-full transition-opacity hover:opacity-80 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
+          >
+            <Avatar className="h-9 w-9 border border-border">
+              {avatarUrl && <AvatarImage src={avatarUrl} alt={displayName} />}
+              <AvatarFallback className="text-sm font-semibold bg-muted">
+                {firstName ? firstName.charAt(0).toUpperCase() : "?"}
+              </AvatarFallback>
+            </Avatar>
+          </Link>
           <div className="flex-1 min-w-0">
             <p className="text-sm font-semibold text-foreground leading-tight truncate">{displayName}</p>
             {city && <p className="text-xs text-muted-foreground leading-tight truncate">{city}</p>}
@@ -164,12 +170,18 @@ const ProfileSidebar = ({
       <div className="hidden lg:block space-y-5">
         {/* Avatar + nom + ville */}
         <div className="flex flex-col items-center text-center space-y-2">
-          <Avatar className="h-16 w-16 border border-border">
-            {avatarUrl && <AvatarImage src={avatarUrl} alt={displayName} />}
-            <AvatarFallback className="text-base font-semibold bg-muted">
-              {firstName ? firstName.charAt(0).toUpperCase() : "?"}
-            </AvatarFallback>
-          </Avatar>
+          <Link
+            to={publicProfileUrl}
+            aria-label="Voir mon profil public"
+            className="rounded-full transition-opacity hover:opacity-80 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
+          >
+            <Avatar className="h-16 w-16 border border-border">
+              {avatarUrl && <AvatarImage src={avatarUrl} alt={displayName} />}
+              <AvatarFallback className="text-base font-semibold bg-muted">
+                {firstName ? firstName.charAt(0).toUpperCase() : "?"}
+              </AvatarFallback>
+            </Avatar>
+          </Link>
           <div className="space-y-0.5">
             <p className="text-base font-semibold text-foreground">{displayName}</p>
             {city && <p className="text-sm text-muted-foreground">{city}</p>}

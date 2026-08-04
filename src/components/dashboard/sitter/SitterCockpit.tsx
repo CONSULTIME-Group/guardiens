@@ -168,9 +168,7 @@ const SitterCockpit = ({
             {userId && (
               <Link
                 to={`/gardiens/${userId}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label="Voir votre profil public (nouvel onglet)"
+                aria-label="Voir votre profil public"
                 className="inline-flex items-center justify-center gap-1.5 rounded-full border border-border bg-card hover:bg-muted/40 text-foreground font-semibold px-[14px] transition-colors"
                 style={{ minHeight: "44px", fontSize: "12px" }}
               >

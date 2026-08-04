@@ -785,3 +785,13 @@
     padding-bottom: 18rem;
   }
 }
+
+@layer utilities {
+  /* Pages publiques hors coquille authentifiée : réserve la place de la
+     pilule de navigation flottante mobile pour ne masquer aucun contenu. */
+  @media (max-width: 767px) {
+    body.has-public-bottom-nav {
+      padding-bottom: 6rem;
+    }
+  }
+}

@@ -1,4 +1,4 @@
-import { NavLink, useLocation, useNavigate } from "react-router-dom";
+import { NavLink, Link, useLocation, useNavigate } from "react-router-dom";
 import {
   Home, Search, Calendar, MessageSquare, MessageCircle, User, LogOut, Settings,
   PawPrint, Newspaper, Shield, Compass, Handshake, Menu, Star,
@@ -8,9 +8,11 @@ import {
 import { useAuth } from "@/contexts/AuthContext";
 import { useAdmin } from "@/hooks/useAdmin";
 import { cn } from "@/lib/utils";
-import { lazy, Suspense, useEffect, useState } from "react";
+import { lazy, Suspense, useEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useScrollDirection } from "@/hooks/useScrollDirection";
+import { useInAppShell } from "./AppShellContext";
+import UserMenu from "./UserMenu";
 
 // Lazy : NotificationBell tire date-fns. On évite vendor-date dans l'entry.
 const NotificationBell = lazy(() => import("./NotificationBell"));
@@ -156,11 +158,15 @@ export const Sidebar = () => {
     <aside className="hidden md:flex flex-col w-64 border-r border-border bg-card h-screen sticky top-0">
       {/* Logo + bell */}
       <div className="p-6 pb-4 flex items-center justify-between">
-        <span className="font-heading text-2xl font-bold tracking-tight" aria-label="Guardiens, version bêta">
+        <Link
+          to="/"
+          aria-label="Guardiens, accueil"
+          className="font-heading text-2xl font-bold tracking-tight rounded-md transition-colors hover:opacity-80"
+        >
           <span className="text-primary" aria-hidden="true">g</span>
           <span className="text-foreground" aria-hidden="true">uardiens</span>
           <span className="ml-1.5 text-[10px] font-medium tracking-wide text-foreground/35 align-middle select-none" aria-hidden="true">bêta</span>
-        </span>
+        </Link>
         <div className="flex items-center gap-1">
           <Suspense fallback={<div className="w-9 h-9" aria-hidden />}>
             <MessageBell />
@@ -170,6 +176,15 @@ export const Sidebar = () => {
           </Suspense>
         </div>
       </div>
+
+      {/* Avatar et menu compte */}
+      <div className="px-6 pb-3 flex items-center gap-2">
+        <UserMenu />
+        <span className="text-sm text-muted-foreground truncate">
+          {user?.firstName || "Mon compte"}
+        </span>
+      </div>
+
       <FeedbackDialog open={feedbackOpen} onOpenChange={setFeedbackOpen} />
       <PremiumGateDialog open={gateOpen} onClose={() => setGateOpen(false)} featureName={gateFeature} />
       <ActivateRoleDialog open={roleDialogOpen} onClose={() => setRoleDialogOpen(false)} targetRole={roleDialogTarget} />
@@ -415,7 +430,31 @@ export const BottomNav = () => {
 
   const navigate = useNavigate();
   const scrollDir = useScrollDirection();
-  const hideNav = scrollDir === "down";
+  const inAppShell = useInAppShell();
+
+  // La nav ne se masque jamais sur les routes publiques hors coquille
+  // authentifiée : elle y est le seul recours de navigation. Ailleurs, elle
+  // se masque au scroll bas, revient au scroll haut, et revient aussi seule
+  // après 1,5 seconde sans scroll.
+  const [idleVisible, setIdleVisible] = useState(true);
+  const idleTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    if (!inAppShell) return;
+    const onScroll = () => {
+      setIdleVisible(false);
+      if (idleTimer.current) clearTimeout(idleTimer.current);
+      idleTimer.current = setTimeout(() => setIdleVisible(true), 1500);
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      if (idleTimer.current) clearTimeout(idleTimer.current);
+    };
+  }, [inAppShell]);
+
+  const hideNav = inAppShell && scrollDir === "down" && !idleVisible;
+
 
   // Signature Dock 2026 — 4 tabs role-aware + FAB contextuel + Plus sheet
   const isOwnerView = effectiveRole === "owner";
@@ -445,7 +484,7 @@ export const BottomNav = () => {
 
   // 2 onglets à gauche du FAB
   const leftTabs = [
-    { to: "/dashboard", icon: Home, label: "Accueil", badge: isOwnerView ? ownerInboxCount : 0 },
+    { to: "/dashboard", icon: Home, label: "Tableau de bord", badge: isOwnerView ? ownerInboxCount : 0 },
     isOwnerView
       ? { to: "/sits", icon: Calendar, label: "Annonces", badge: ownerInboxCount }
       : { to: "/search", icon: Search, label: "Recherche", badge: 0 },
@@ -572,6 +611,18 @@ export const BottomNav = () => {
             <SheetContent side="bottom" className="rounded-t-2xl max-h-[80vh] overflow-y-auto">
               <SheetTitle className="sr-only">Menu</SheetTitle>
               <SheetDescription className="sr-only">Accès rapide aux profils, raccourcis et paramètres.</SheetDescription>
+
+              {/* Retour à l'accueil du site */}
+              <Link
+                to="/"
+                onClick={() => setSheetOpen(false)}
+                aria-label="Accueil du site"
+                className="flex items-center gap-3 px-4 py-3 mb-3 rounded-lg text-sm font-medium text-foreground hover:bg-accent transition-colors"
+              >
+                <Home className="h-5 w-5" strokeWidth={1.8} aria-hidden="true" />
+                Accueil du site
+              </Link>
+
               {/* Role switcher */}
               <div className="mb-4">
                 <p className="text-xs text-muted-foreground mb-2 font-medium">Profil actif</p>

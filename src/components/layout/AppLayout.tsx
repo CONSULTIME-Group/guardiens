@@ -20,6 +20,8 @@ import OnboardingGate from "@/components/onboarding/OnboardingGate";
 // même quand l'utilisateur retombe sur une page publique (Landing, FAQ…)
 // après le retour OAuth Google. Ne pas le re-monter ici.
 import { usePresenceHeartbeat } from "@/hooks/usePresenceHeartbeat";
+import { AppShellProvider } from "./AppShellContext";
+import UserMenu from "./UserMenu";
 
 export const AppLayout = ({ children }: { children?: ReactNode }) => {
   const { user, refreshProfile } = useAuth();
@@ -41,6 +43,7 @@ export const AppLayout = ({ children }: { children?: ReactNode }) => {
 
 
   return (
+    <AppShellProvider value={true}>
     <AlmaProvider>
     <OnboardingGate />
     <div className="flex min-h-screen bg-background">
@@ -50,7 +53,7 @@ export const AppLayout = ({ children }: { children?: ReactNode }) => {
         <div className="md:hidden sticky top-0 z-40 flex items-center justify-between gap-2 px-3 py-2 bg-background/95 backdrop-blur border-b border-border">
           <div className="flex items-center gap-1 min-w-0">
             <BackButton inline />
-            <Link to="/dashboard" className="font-heading text-lg font-bold tracking-tight truncate">
+            <Link to="/" aria-label="Guardiens, accueil" className="font-heading text-lg font-bold tracking-tight truncate">
               <span className="text-primary">g</span>
               <span className="text-foreground">uardiens</span>
             </Link>
@@ -63,6 +66,7 @@ export const AppLayout = ({ children }: { children?: ReactNode }) => {
             <Suspense fallback={<div className="w-11 h-11" aria-hidden />}>
               <NotificationBell />
             </Suspense>
+            <UserMenu compact />
           </div>
         </div>
         <div className="hidden md:block">
@@ -92,5 +96,6 @@ export const AppLayout = ({ children }: { children?: ReactNode }) => {
       {/* DuplicateAccountGuard mont\u00e9 globalement dans App.tsx */}
     </div>
     </AlmaProvider>
+    </AppShellProvider>
   );
 };
