@@ -12,8 +12,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import PageMeta from "@/components/PageMeta";
-import PublicHeader from "@/components/layout/PublicHeader";
-import PublicFooter from "@/components/layout/PublicFooter";
 import PageBreadcrumb from "@/components/seo/PageBreadcrumb";
 import { supabase } from "@/integrations/supabase/client";
 import { AlmaAvatar } from "@/components/ai/alma/AlmaAvatar";
@@ -333,8 +331,7 @@ export default function AlmaTips() {
       />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(collectionJsonLd) }} />
 
-      <div className="min-h-screen bg-background flex flex-col">
-        <PublicHeader />
+      <div className="flex flex-col">
 
         <div className="flex-1 min-w-0 px-[5%] md:px-[8%] py-8 md:py-12">
           <PageBreadcrumb items={[{ label: "Les conseils d'Alma" }]} />
@@ -504,7 +501,6 @@ export default function AlmaTips() {
           </aside>
         </div>
 
-        <PublicFooter />
       </div>
     </>
   );

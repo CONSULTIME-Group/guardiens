@@ -4,8 +4,6 @@ import { getOptimizedImageUrl } from "@/lib/imageOptim";
 import { useSearchParams, Link } from "react-router-dom";
 import PageMeta from "@/components/PageMeta";
 import PageBreadcrumb from "@/components/seo/PageBreadcrumb";
-import PublicHeader from "@/components/layout/PublicHeader";
-import PublicFooter from "@/components/layout/PublicFooter";
 import inventoryCover from "@/assets/inventaire-guardiens-france.jpg";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent } from "@/components/ui/card";
@@ -306,7 +304,6 @@ export default function News() {
         description={t("news.meta_description")}
         path={metaPath}
       />
-      <PublicHeader />
       <div className="max-w-4xl mx-auto px-4 py-4 md:py-8 animate-fade-in">
         <PageBreadcrumb items={[{ label: t("news.breadcrumb") }]} />
 
@@ -576,7 +573,6 @@ export default function News() {
           </>
         )}
       </div>
-      <PublicFooter />
     </>
   );
 }

@@ -4,8 +4,6 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import PageMeta from "@/components/PageMeta";
 import PageBreadcrumb from "@/components/seo/PageBreadcrumb";
-import PublicHeader from "@/components/layout/PublicHeader";
-import PublicFooter from "@/components/layout/PublicFooter";
 import { Link, useNavigate } from "react-router-dom";
 import { MapPin, Search, ArrowLeft } from "lucide-react";
 const guideHeaderImg = "https://erhccyqevdyevpyctsjj.supabase.co/storage/v1/object/public/property-photos/misc/guide-header.webp";
@@ -96,8 +94,7 @@ const GuidesListing = () => {
         path="/guides"
       />
 
-      <div className="min-h-screen bg-background">
-        <PublicHeader />
+      <div className="bg-background">
         <PageBreadcrumb items={[{ label: t("guides.breadcrumb") }]} />
         <header className="relative border-b border-border overflow-hidden">
           <div className="absolute inset-0">
@@ -224,7 +221,6 @@ const GuidesListing = () => {
             }),
           }}
         />
-        <PublicFooter />
       </div>
     </>
   );
