@@ -1,4 +1,4 @@
-import { NavLink, useLocation, useNavigate } from "react-router-dom";
+import { NavLink, Link, useLocation, useNavigate } from "react-router-dom";
 import {
   Home, Search, Calendar, MessageSquare, MessageCircle, User, LogOut, Settings,
   PawPrint, Newspaper, Shield, Compass, Handshake, Menu, Star,
@@ -8,9 +8,11 @@ import {
 import { useAuth } from "@/contexts/AuthContext";
 import { useAdmin } from "@/hooks/useAdmin";
 import { cn } from "@/lib/utils";
-import { lazy, Suspense, useEffect, useState } from "react";
+import { lazy, Suspense, useEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useScrollDirection } from "@/hooks/useScrollDirection";
+import { useInAppShell } from "./AppShellContext";
+import UserMenu from "./UserMenu";
 
 // Lazy : NotificationBell tire date-fns. On évite vendor-date dans l'entry.
 const NotificationBell = lazy(() => import("./NotificationBell"));
@@ -156,11 +158,15 @@ export const Sidebar = () => {
     <aside className="hidden md:flex flex-col w-64 border-r border-border bg-card h-screen sticky top-0">
       {/* Logo + bell */}
       <div className="p-6 pb-4 flex items-center justify-between">
-        <span className="font-heading text-2xl font-bold tracking-tight" aria-label="Guardiens, version bêta">
+        <Link
+          to="/"
+          aria-label="Guardiens, accueil"
+          className="font-heading text-2xl font-bold tracking-tight rounded-md transition-colors hover:opacity-80"
+        >
           <span className="text-primary" aria-hidden="true">g</span>
           <span className="text-foreground" aria-hidden="true">uardiens</span>
           <span className="ml-1.5 text-[10px] font-medium tracking-wide text-foreground/35 align-middle select-none" aria-hidden="true">bêta</span>
-        </span>
+        </Link>
         <div className="flex items-center gap-1">
           <Suspense fallback={<div className="w-9 h-9" aria-hidden />}>
             <MessageBell />
@@ -170,6 +176,15 @@ export const Sidebar = () => {
           </Suspense>
         </div>
       </div>
+
+      {/* Avatar et menu compte */}
+      <div className="px-6 pb-3 flex items-center gap-2">
+        <UserMenu />
+        <span className="text-sm text-muted-foreground truncate">
+          {user?.firstName || "Mon compte"}
+        </span>
+      </div>
+
       <FeedbackDialog open={feedbackOpen} onOpenChange={setFeedbackOpen} />
       <PremiumGateDialog open={gateOpen} onClose={() => setGateOpen(false)} featureName={gateFeature} />
       <ActivateRoleDialog open={roleDialogOpen} onClose={() => setRoleDialogOpen(false)} targetRole={roleDialogTarget} />
