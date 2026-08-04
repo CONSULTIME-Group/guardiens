@@ -269,7 +269,7 @@
     },
     "pros": {
       "title": "Veterinari, toelettatori, educatori, verificati Guardiens",
-      "subtitle": "Un elenco locale di professionisti per animali. Verifica SIRET manuale del nostro team per chi mostra il distintivo.",
+      "subtitle": "Un elenco locale di professionisti per animali. I documenti SIRET sono analizzati automaticamente e le pratiche che non superano questo primo controllo sono riviste dal team. Il distintivo indica un SIRET convalidato.",
       "card1": {
         "title": "Veterinari",
         "cta": "Trovare un veterinario vicino"
@@ -794,7 +794,7 @@
     "my_space": "Il mio spazio pro",
     "sitter_box_title": "Sei un sitter privato registrato come autonomo?",
     "sitter_box_body_before": "Questo elenco include professionisti animali (veterinari, educatori, toelettatori…) che non necessariamente offrono cure. Se offri cure retribuite professionalmente, richiedi il badge ",
-    "sitter_box_badge": "Sitter Pro verificato",
+    "sitter_box_badge": "SIRET convalidato",
     "sitter_box_body_after": " da ",
     "sitter_box_link": "Impostazioni > Sicurezza > Sitter Pro",
     "sitter_box_body_end": ". Apparirà sul tuo profilo e nella ricerca sitter.",

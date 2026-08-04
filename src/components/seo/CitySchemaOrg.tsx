@@ -17,7 +17,7 @@ const LYON_FAQ = [
  a: "Une alerte prioritaire peut être envoyée aux gardiens d'urgence éligibles à Lyon. En cas de problème vétérinaire, le gardien contacte la clinique indiquée dans le guide de la maison. En cas de problème technique, il suit les consignes laissées par le propriétaire.",
  },
  {
- q: "Comment sont vérifiés les gardiens à Lyon ?",
+ q: "Comment fonctionne la vérification d'identité à Lyon ?",
  a: "La vérification d'identité est ouverte à tous les membres. Vous envoyez une pièce d'identité, elle est analysée automatiquement, et les dossiers qui ne passent pas ce premier contrôle sont revus par l'équipe. Les profils validés affichent l'écusson « Identité vérifiée ». Les avis croisés après chaque garde et les badges de fiabilité complètent le dispositif de confiance.",
  },
  {

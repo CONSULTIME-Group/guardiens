@@ -88,7 +88,7 @@ const TrustProfile = ({ emailVerified, identityVerified, hasAvatar, profileCompl
           )}
 
           <p className="text-xs text-muted-foreground italic leading-relaxed">
-            Plus votre profil de confiance est complet, plus vous inspirez confiance. Un profil 100% vérifié, c'est comme une poignée de main ferme : ça rassure.
+            Plus votre profil de confiance est complet, plus vous inspirez confiance. Un profil de confiance complet, c'est comme une poignée de main ferme : ça rassure.
           </p>
         </CollapsibleContent>
       </Collapsible>

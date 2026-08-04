@@ -269,7 +269,7 @@
     },
     "pros": {
       "title": "Tierärzte, Groomer, Trainer, von Guardiens verifiziert",
-      "subtitle": "Ein lokales Verzeichnis von Tierprofis. Manuelle SIRET-Verifizierung durch unser Team für alle mit dem Badge.",
+      "subtitle": "Ein lokales Verzeichnis von Tierprofis. SIRET-Nachweise werden automatisch analysiert, Unterlagen ohne bestandene Erstprüfung werden vom Team geprüft. Das Badge steht für eine bestätigte SIRET.",
       "card1": {
         "title": "Tierärzte",
         "cta": "Einen Tierarzt in der Nähe finden"
@@ -794,7 +794,7 @@
     "my_space": "Mein Profi-Bereich",
     "sitter_box_title": "Sind Sie privater Sitter als Selbstständiger registriert?",
     "sitter_box_body_before": "Dieses Verzeichnis listet Tierprofis (Tierärzte, Trainer, Hundefriseure…), die nicht unbedingt Betreuung anbieten. Wenn Sie professionell bezahlte Betreuungen anbieten, beantragen Sie das Abzeichen ",
-    "sitter_box_badge": "Verifizierter Profi-Sitter",
+    "sitter_box_badge": "Bestätigte SIRET",
     "sitter_box_body_after": " unter ",
     "sitter_box_link": "Einstellungen > Sicherheit > Profi-Sitter",
     "sitter_box_body_end": ". Es erscheint auf Ihrem Profil und in der Sittersuche.",

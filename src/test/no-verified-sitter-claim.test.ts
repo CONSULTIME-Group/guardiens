@@ -19,7 +19,9 @@ import { readFileSync } from "node:fs";
  * écrits en clair, et les fichiers légitimes sont exclus nommément ci-dessous.
  */
 
-const SCAN_PATHS = ["src", "src/data", "public/llms.txt", "index.html"];
+// « src » couvre déjà src/data et src/i18n/locales (fichiers .json inclus,
+// `rg --files` ne filtre pas par extension).
+const SCAN_PATHS = ["src", "public/llms.txt", "index.html"];
 
 /**
  * Exclusions nommées, bloc 1.
@@ -33,6 +35,9 @@ const SCAN_PATHS = ["src", "src/data", "public/llms.txt", "index.html"];
  *   pas la vérification d'identité des gardiens.
  * - SitDraftFromPrompt.tsx : « vérifier manuellement » décrit la relecture d'un
  *   brouillon, sans rapport avec l'identité ou le statut d'un membre.
+ * - AdminUsers.tsx : écran d'administration interne. La « vérification manuelle »
+ *   y désigne l'action réelle d'un admin qui valide un dossier à la main, et le
+ *   texte n'est jamais montré à un membre.
  */
 const EXCLUDE_CLAIM = new Set([
   "src/test/no-verified-sitter-claim.test.ts",
@@ -42,17 +47,30 @@ const EXCLUDE_CLAIM = new Set([
   "src/lib/trustTier.ts",
   "src/pages/ProsListing.tsx",
   "src/components/dashboard/SitDraftFromPrompt.tsx",
+  "src/pages/admin/AdminUsers.tsx",
 ]);
 
-const FORBIDDEN_CLAIMS: RegExp[] = [
-  /(vérifi|contrôl)\w*\s+(manuelle?ment|à la main)/i,
-  /vérification\s+d'identité\s+manuelle/i,
-  /gardiens?\s+(sont\s+|est\s+)?vérifiés?\b/i,
-  /profils?\s+vérifiés?\b/i,
-  /vérification\s+obligatoire/i,
-  /jamais\s+par\s+un\s+algorithme/i,
-  /des\s+yeux\s+humains/i,
-  /chaque\s+(gardien|membre|profil)\s+(est|passe|doit)\b[^.]{0,40}vérifi/i,
+/**
+ * Motifs de la revendication interdite.
+ *
+ * Règles techniques, apprises d'un faux vert :
+ * - flag `u` obligatoire, le contenu est accentué ;
+ * - `\p{L}` au lieu de `\w`, qui ne couvre que l'ASCII et laissait passer
+ *   « contrôlées manuellement » (le `é` cassait `\w*\s+`) ;
+ * - `(?!\p{L})` au lieu de `\b` en fin de motif accentué, sinon le singulier
+ *   « vérifié » échappait faute de frontière ASCII ;
+ * - tolérance d'un à deux mots intercalés (`(?:\S+\s+){0,2}`) pour attraper
+ *   « gardiens rigoureusement vérifiés » ou « gardiens sont tous vérifiés ».
+ */
+export const FORBIDDEN_CLAIMS: RegExp[] = [
+  /(?:vérifi|contrôl)\p{L}*\s+(?:\S+\s+){0,2}(?:manuelle?ment|à\s+la\s+main)/iu,
+  /(?:vérification|contrôle)\s+(?:\S+\s+){0,2}manuel(?:le)?s?(?!\p{L})/iu,
+  /gardiens?\s+(?:\S+\s+){0,2}vérifiés?(?!\p{L})/iu,
+  /profils?\s+(?:\S+\s+){0,2}vérifiés?(?!\p{L})/iu,
+  /vérification\s+obligatoire/iu,
+  /jamais\s+par\s+un\s+algorithme/iu,
+  /des\s+yeux\s+humains/iu,
+  /chaque\s+(?:gardien|membre|profil)\s+[^.]{0,40}vérifi/iu,
 ];
 
 /**
@@ -60,7 +78,7 @@ const FORBIDDEN_CLAIMS: RegExp[] = [
  * Seules les chaînes entre guillemets « Identité vérifiée » et « ID vérifiée »
  * sont retirées avant le scan. Les mêmes mots hors guillemets restent contrôlés.
  */
-function removeAllowedBadgeNames(source: string): string {
+export function removeAllowedBadgeNames(source: string): string {
   return source
     .split("« Identité vérifiée »").join("")
     .split('"Identité vérifiée"').join("")
@@ -140,5 +158,54 @@ describe("Positionnement national", () => {
       );
     }
     expect(hits.length).toBe(0);
+  });
+});
+
+/**
+ * Tests du garde-fou lui-même. Sans eux, un motif qui ne matche rien reste vert.
+ */
+const MUST_DETECT: string[] = [
+  "Les pièces d'identité soumises sont contrôlées manuellement par l'équipe Guardiens",
+  "Un gardien vérifié vous attend.",
+  "Un profil vérifié",
+  "gardiens rigoureusement vérifiés",
+  "Nos gardiens sont tous vérifiés",
+  "Contrôle manuel par notre équipe",
+  "profils vérifiés et notés",
+  "Tous nos gardiens sont vérifiés.",
+  "Vérification SIRET manuelle par notre équipe",
+  "Chaque pièce d'identité est vérifiée à la main",
+  "chaque gardien est vérifié avant publication",
+];
+
+const MUST_NOT_DETECT: string[] = [
+  "Les profils validés affichent l'écusson « Identité vérifiée ».",
+  "Vous envoyez une pièce d'identité, elle est analysée automatiquement.",
+  "Comment fonctionne la vérification d'identité à Lyon ?",
+  "Les justificatifs SIRET sont analysés automatiquement.",
+];
+
+function isDetected(text: string): boolean {
+  const source = removeAllowedBadgeNames(text);
+  return FORBIDDEN_CLAIMS.some((pattern) => pattern.test(source));
+}
+
+describe("Motifs du garde-fou", () => {
+  it.each(MUST_DETECT)("détecte : %s", (text) => {
+    expect(isDetected(text)).toBe(true);
+  });
+
+  it.each(MUST_NOT_DETECT)("laisse passer : %s", (text) => {
+    expect(isDetected(text)).toBe(false);
+  });
+
+  it("protège le nom de l'écusson entre guillemets", () => {
+    expect(isDetected("Gardien porteur de « Identité vérifiée »")).toBe(false);
+  });
+
+  it("ne neutralise pas une violation voisine du nom de l'écusson", () => {
+    expect(
+      isDetected("Tous nos gardiens sont vérifiés. Écusson « Identité vérifiée ».")
+    ).toBe(true);
   });
 });
