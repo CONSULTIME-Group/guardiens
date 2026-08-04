@@ -11,7 +11,6 @@ export interface CityData {
  name: string;
  department: string;
  departmentCode: string;
- region: "Auvergne-Rhône-Alpes";
  coordinates: { lat: number; lng: number };
  zoneProfile: ZoneProfile;
  keywordPrimary: string;
@@ -30,7 +29,6 @@ export const CITIES: CityData[] = [
  name: "Annecy",
  department: "Haute-Savoie",
  departmentCode: "74",
- region: "Auvergne-Rhône-Alpes",
  coordinates: { lat: 45.8992, lng: 6.1294 },
  zoneProfile: "montagne",
  keywordPrimary: "house-sitting Annecy",
@@ -76,7 +74,6 @@ export const CITIES: CityData[] = [
  name: "Lyon",
  department: "Rhône",
  departmentCode: "69",
- region: "Auvergne-Rhône-Alpes",
  coordinates: { lat: 45.764, lng: 4.8357 },
  zoneProfile: "urbain",
  keywordPrimary: "garde chien Lyon",
@@ -124,7 +121,6 @@ export const CITIES: CityData[] = [
  name: "Grenoble",
  department: "Isère",
  departmentCode: "38",
- region: "Auvergne-Rhône-Alpes",
  coordinates: { lat: 45.1885, lng: 5.7245 },
  zoneProfile: "urbain",
  keywordPrimary: "house-sitting Grenoble",
@@ -171,7 +167,6 @@ export const CITIES: CityData[] = [
  name: "Caluire-et-Cuire",
  department: "Rhône",
  departmentCode: "69",
- region: "Auvergne-Rhône-Alpes",
  coordinates: { lat: 45.796, lng: 4.851 },
  zoneProfile: "périurbain",
  keywordPrimary: "house-sitting Caluire-et-Cuire",
@@ -216,7 +211,6 @@ export const CITIES: CityData[] = [
  name: "Chambéry",
  department: "Savoie",
  departmentCode: "73",
- region: "Auvergne-Rhône-Alpes",
  coordinates: { lat: 45.5646, lng: 5.9178 },
  zoneProfile: "montagne",
  keywordPrimary: "house-sitting Chambéry",

@@ -121,7 +121,7 @@ export const staticRoutes: SiteRoute[] = [
  {
  path: "/",
 		title: "Garde d'animaux à domicile et house-sitting | Guardiens",
-		metaDescription: "Trouvez un gardien du coin pour votre maison et vos animaux. House-sitting entre particuliers, profils vérifiés et notés, sans engagement. Partout en France.",
+		metaDescription: "Trouvez un gardien du coin pour votre maison et vos animaux. House-sitting entre particuliers, profils documentés et notés, sans engagement. Partout en France.",
  h1: "Guardiens — Comme confier ses clés à quelqu'un du coin",
  sitemapPriority: "1.0",
  changeFreq: "daily",
@@ -178,7 +178,7 @@ export const staticRoutes: SiteRoute[] = [
  {
  path: "/gardien-urgence",
  title: "Gardien d'urgence — Garde en moins de 24h | Guardiens",
- metaDescription: "Besoin d'un gardien en urgence pour vos animaux ? Activez l'alerte Guardiens et trouvez un gardien vérifié près de chez vous en moins de 24 heures.",
+ metaDescription: "Besoin d'un gardien en urgence pour vos animaux ? Activez l'alerte Guardiens : les gardiens d'urgence près de chez vous sont notifiés en priorité.",
  h1: "Gardien d'urgence",
  sitemapPriority: "0.8",
  changeFreq: "weekly",
@@ -349,7 +349,7 @@ export const dynamicRoutes: DynamicRouteConfig[] = [
  pathPattern: "/house-sitting/:city",
  source: "sitemap",
  title: "House-sitting à {city} | Guardiens",
- metaDescription: "Trouvez un gardien de maison à {city}. House-sitting local, propriétaires et gardiens vérifiés.",
+ metaDescription: "Trouvez un gardien de maison à {city}. House-sitting local entre propriétaires et gardiens du coin.",
  sitemapPriority: "0.8",
  changeFreq: "weekly",
  dynamicTitle: true, // les pages géo ont un titre SEO précis, non strict

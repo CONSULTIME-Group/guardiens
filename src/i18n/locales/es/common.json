@@ -109,7 +109,7 @@
       "urgency": {
         "eyebrow": "Imprevisto de último minuto",
         "title": "¿Una salida precipitada?",
-        "text": "Hospitalización, viaje de último minuto, emergencia familiar: un cuidador de la zona puede tomar el relevo en pocas horas.",
+        "text": "La red de cuidadores de urgencia Guardiens se construye con sus primeros miembros. Puede inscribirse como cuidador disponible o publicar una solicitud cerca de usted.",
         "cta": "Encontrar un cuidador de emergencia →"
       }
     },
@@ -166,7 +166,7 @@
     "trust": {
       "eyebrow": "Confianza y perímetro",
       "title": "Elegir con confianza, a un kilómetro como a mil.",
-      "lede": "Cuatro puntos de referencia para partir tranquilo: encuentro antes de cada cuidado, perfiles verificados, opiniones cruzadas y un perímetro que usted mismo fija.",
+      "lede": "Cuatro puntos de referencia para partir tranquilo: encuentro antes de cada cuidado, perfiles documentados, opiniones cruzadas y un perímetro que usted mismo fija.",
       "p1_title": "Entre miembros, sin transacción",
       "p1_text": "Entre miembros, todo ocurre sin transacción: un servicio a cambio de un servicio.",
       "p2_title": "Encuentro antes de cada cuidado",
@@ -332,7 +332,7 @@
     },
     "what_is": {
       "title": "¿Qué es Guardiens?",
-      "body": "Guardiens es una plataforma francesa de house-sitting y ayuda mutua entre particulares. El principio: una persona de confianza verificada, que vive cerca de usted, se instala en su casa durante su ausencia y cuida de sus animales en su entorno. El intercambio se basa en la confianza y el encuentro, sin costes para el propietario. Guardiens cubre toda Francia."
+      "body": "Guardiens es una plataforma francesa de house-sitting y ayuda mutua entre particulares. El principio: una persona de confianza que vive cerca de usted se instala en su casa durante su ausencia y cuida de sus animales en su entorno. El intercambio se basa en la confianza y el encuentro, sin costes para el propietario. Guardiens cubre toda Francia."
     },
     "compare": {
       "title": "House-sitting, residencia, pet-sitter: ¿qué elegir?",
@@ -407,7 +407,7 @@
       "cities": {
         "c1": {
           "label": "House-sitting en Lyon",
-          "desc": "Cuidadores verificados en cada distrito, del Vieux Lyon a la Croix-Rousse, pasando por Part-Dieu y Confluence."
+          "desc": "Cuidadores en cada distrito, del Vieux Lyon a la Croix-Rousse, pasando por Part-Dieu y Confluence."
         },
         "c2": {
           "label": "House-sitting en Annecy",
@@ -497,7 +497,7 @@
       "cta": "Publicar un anuncio",
       "features": [
         "Publique un anuncio en 5 minutos",
-        "Reciba candidaturas de cuidadores con identidad verificada",
+        "Reciba candidaturas de cuidadores de la zona",
         "Intercambie mensajes con ellos antes de elegir",
         "Sus mascotas permanecen en su hogar, con sus rutinas y referencias",
         "Deje una reseña después de cada cuidado"
@@ -574,7 +574,7 @@
     },
     "cities": {
       "title": "house-sitting por ciudad",
-      "lede_a": "Descubra a los cuidadores verificados disponibles en su ciudad. ¿Un imprevisto? Nuestros",
+      "lede_a": "Descubra los cuidadores disponibles en su ciudad. ¿Un imprevisto? Nuestros",
       "lede_link": "cuidadores de emergencia",
       "lede_b": "se pueden movilizar en pocas horas."
     },
@@ -1073,26 +1073,26 @@
     "members_badge_suffix": "miembros ya inscritos"
   },
   "emergency_page": {
-    "meta_title": "Cuidador de urgencia, cuidado en menos de 24h | Guardiens",
-    "meta_description": "¿Necesita un cuidador urgente para sus animales? Active la alerta Guardiens y encuentre un cuidador verificado cerca de usted en menos de 24 horas.",
+    "meta_title": "Cuidador de urgencia para sus animales | Guardiens",
+    "meta_description": "¿Necesita un cuidador urgente para sus animales? Active la alerta Guardiens: los cuidadores de urgencia de la zona reciben la notificación con prioridad.",
     "breadcrumb": "Cuidador de urgencia",
-    "soon_title": "Próximamente. La red de cuidadores de urgencia se activará en cuanto tengamos suficientes perfiles verificados y probados.",
+    "soon_title": "Próximamente. La red de cuidadores de urgencia se activará en cuanto tengamos suficientes cuidadores elegibles y con experiencia.",
     "soon_subtitle": "Nuestra plataforma es joven. Nos tomamos el tiempo para designar cuidadores de urgencia con criterios estrictos.",
     "hero_title": "Los cuidadores de urgencia",
-    "hero_lead": "Su red de seguridad local. ¿Un imprevisto, una cancelación de última hora, una salida precipitada? Gente del lugar formada para la urgencia, verificada, movilizable en menos de 24h.",
-    "hero_tagline": "La fuerza de la proximidad: una solución en horas, no en días.",
+    "hero_lead": "Su red de seguridad local. ¿Un imprevisto, una cancelación de última hora, una salida precipitada? Gente del lugar formada para la urgencia, lista para movilizarse con prioridad.",
+    "hero_tagline": "Esa es la fuerza de la proximidad: personas que ya están en el sitio, no al otro lado del país.",
     "how_it_works": "¿Cómo funciona?",
     "step1_title": "Un propietario tiene una necesidad urgente",
     "step1_desc": "Cancelación de última hora, imprevisto familiar, viaje profesional… la vida no siempre avisa.",
     "step2_title": "Los cuidadores de urgencia son alertados",
     "step2_desc": "Notificación automática enviada a los cuidadores de urgencia disponibles en un radio de 35 km.",
-    "step3_title": "El cuidado se organiza en horas",
+    "step3_title": "El cuidado se organiza con el cuidador",
     "step3_desc": "Intercambio rápido, confirmación, listo. Los animales están en buenas manos.",
     "stories_kicker": "Seis casos, seis urgencias",
     "stories_title": "Cuando la necesidad es real.",
-    "stories_lead": "La urgencia no siempre se parece a lo que uno imagina. Seis situaciones reales en Guardiens, todas resueltas en menos de 24 horas.",
+    "stories_lead": "La urgencia no siempre se parece a lo que uno imagina. Seis situaciones que la red está diseñada para atender. Estos escenarios son ilustrativos, describen el funcionamiento previsto del servicio.",
     "story1_name": "Hélène, Lyon",
-    "story1_text": "Hospitalización programada adelantada en el último momento. Dos gatos en casa, nadie alrededor. Activó la alerta el martes por la noche. Un cuidador de urgencia, ya verificado, respondió en dos horas. Cita la mañana siguiente. Al volver, todo bien.",
+    "story1_text": "Hospitalización programada adelantada en el último momento. Dos gatos en casa, nadie alrededor. Activó la alerta el martes por la noche. Un cuidador de urgencia, ya valorado por otros miembros, respondió en dos horas. Cita la mañana siguiente. Al volver, todo bien.",
     "story2_name": "Pierre, Annecy",
     "story2_text": "Pastor australiano de 5 años, reactivo con desconocidos. Pierre debía irse cinco días por trabajo. Sin opción de residencia. Activó la alerta. Un cuidador formado en perros de carácter respondió esa misma noche. Pierre partió tranquilo.",
     "story3_name": "Camille, Grenoble",
@@ -1110,12 +1110,12 @@
     "compare_th_urgent": "Cuidado de urgencia",
     "compare_row1_label": "Plazo",
     "compare_row1_classic": "Planificado (semanas)",
-    "compare_row1_urgent": "Menos de 24h",
+    "compare_row1_urgent": "Tratada con prioridad",
     "compare_row2_label": "Duración típica",
-    "compare_row2_classic": "7 a 21 días",
-    "compare_row2_urgent": "A menudo corta (1 a 7 días)",
+    "compare_row2_classic": "Reserva prevista con varias semanas de antelación",
+    "compare_row2_urgent": "A menudo corta, unos días",
     "compare_row3_label": "Perfil del cuidador",
-    "compare_row3_classic": "Cualquier cuidador verificado",
+    "compare_row3_classic": "Cualquier cuidador inscrito",
     "compare_row3_urgent": "5+ estancias, valoración 4.7+, 0 cancelaciones",
     "compare_row4_label": "Tipo de solicitud",
     "compare_row4_classic": "Planificada",
@@ -1125,9 +1125,9 @@
     "compare_row5_urgent": "Todos (incluso reactivos)",
     "owner_title": "La tranquilidad de gente del lugar de confianza",
     "owner_subtitle": "Para los propietarios",
-    "owner_card1_title": "Movilizable en horas",
-    "owner_card1_desc": "No hace falta esperar días. Los cuidadores de urgencia responden rápido.",
-    "owner_card2_title": "Verificado y con experiencia",
+    "owner_card1_title": "Movilización prioritaria",
+    "owner_card1_desc": "Las solicitudes de urgencia encabezan las notificaciones enviadas a los cuidadores de urgencia de la zona.",
+    "owner_card2_title": "Elegibilidad exigente",
     "owner_card2_desc": "5+ estancias realizadas, valoración 4.7+, 0 cancelaciones, identidad verificada.",
     "owner_card3_title": "Gente del lugar",
     "owner_card3_desc": "Solicitados automáticamente en un radio de 35 km, son gente del lugar, no desconocidos.",
@@ -1151,7 +1151,7 @@
     "engagement_p2": "Las cancelaciones se reevalúan cada 6 meses: solo las de los últimos 6 meses cuentan para la elegibilidad.",
     "faq_title": "Preguntas frecuentes",
     "cities_title": "Cuidadores de urgencia por ciudad",
-    "cities_lead": "La red de urgencia se apoya en cuidadores locales por toda Francia. Aquí las ciudades donde son más activos.",
+    "cities_lead": "La red de urgencia se apoya en cuidadores locales por toda Francia. Estas son las ciudades donde la red se construye primero.",
     "see_pricing": "Ver tarifas",
     "further_kicker": "Para ir más lejos",
     "further1_title": "Pequeñas misiones de ayuda mutua",
@@ -1164,15 +1164,15 @@
     "footer_eligibility": "Ver mi elegibilidad (próximamente)",
     "footer_full_faq": "FAQ completa",
     "faq1_q": "¿Cuánto tiempo para ser contactado en una urgencia?",
-    "faq1_a": "En Guardiens, las alertas de urgencia tienen prioridad: los cuidadores elegibles en su radio reciben una notificación inmediata. De media, recibe una respuesta en menos de 4 horas y una cita en 24 horas.",
+    "faq1_a": "En Guardiens, las alertas de urgencia tienen prioridad: los cuidadores elegibles en su radio reciben una notificación inmediata. Nuestro compromiso: una respuesta en menos de 4 horas.",
     "faq2_q": "¿Funciona de noche o en fin de semana?",
-    "faq2_a": "Sí. Las alertas de urgencia están activas 24/7. De noche y los fines de semana, las notificaciones se envían en prioridad a los cuidadores con disponibilidad extendida.",
+    "faq2_a": "Sí. Las alertas de urgencia están activas 24/7. De noche y los fines de semana, las notificaciones se envían con prioridad a los cuidadores con disponibilidad ampliada. Los plazos pueden ser algo más largos en franjas atípicas, pero el servicio sigue activo.",
     "faq3_q": "Mi perro es reactivo o ansioso, ¿es posible igualmente?",
     "faq3_a": "Sí, es incluso un caso típico de urgencia. Al activar la alerta, especifica el perfil de su animal. Solo los cuidadores con la experiencia requerida son notificados.",
     "faq4_q": "¿Cuánto cuesta una guardia de urgencia?",
     "faq4_a": "Para los propietarios, la inscripción y el uso de Guardiens (incluida la alerta de urgencia) son gratuitos. No se aplica ningún suplemento por una guardia de urgencia frente a una clásica.",
     "faq5_q": "¿Qué diferencia hay con una guardia clásica?",
-    "faq5_a": "Una guardia clásica se prepara con antelación. Una de urgencia es inmediata: un cuidador elegible responde rápido, lo conoce el mismo día o el siguiente, y la guardia empieza en 24h.",
+    "faq5_a": "Un cuidado clásico se prepara con antelación. Uno de urgencia sigue un camino más corto: un cuidador elegible (5 cuidados mínimo, nota 4.7+, 0 cancelaciones, identidad verificada) recibe la notificación con prioridad, lo conoce y el cuidado puede empezar en cuanto ambos estén de acuerdo.",
     "faq6_q": "¿Y si estoy hospitalizado, cómo funciona?",
     "faq6_a": "Es uno de los casos más frecuentes. Usted (o un familiar) activa la alerta desde el dashboard o por teléfono. El cuidador de urgencia toma el relevo.",
     "faq7_q": "¿Cómo me convierto en cuidador de urgencia?",
@@ -1186,7 +1186,8 @@
     "faq11_q": "¿Cómo se me avisa de una urgencia?",
     "faq11_a": "SMS + email + notificación push (si está activada). Configura sus preferencias desde el dashboard.",
     "faq12_q": "¿Puedo perder mi estatus de cuidador de urgencia?",
-    "faq12_a": "Sí, en varios casos: valoración por debajo de 4.7, cancelación de una guardia aceptada, segundo rechazo consecutivo de urgencia, suscripción expirada."
+    "faq12_a": "Sí, en varios casos: valoración por debajo de 4.7, cancelación de una guardia aceptada, segundo rechazo consecutivo de urgencia, suscripción expirada.",
+    "story_disclaimer": "Escenario ilustrativo"
   },
   "small_missions_page": {
     "meta_title": "Pequeñas misiones, Entre gente del lugar | Guardiens",
@@ -1529,7 +1530,7 @@
   },
   "search_auto_widen": {
     "to_dept": "No hay anuncios a menos de {{radius}} km de su ubicación. Estos son los {{count}} anuncios de su departamento.",
-    "to_region": "No hay anuncios cerca de usted. Estos son los {{count}} anuncios de su región.",
+    "to_region": "Ningún anuncio muy cerca. Estos son los {{count}} anuncios en un perímetro más amplio.",
     "to_france": "No hay anuncios cerca de usted por ahora. Estos son todos los anuncios disponibles en Francia.",
     "back": "Volver a {{radius}} km"
   },

@@ -455,7 +455,7 @@ const ApplicationModal = ({
                 Conseil, vérifiez votre identité pour être plus souvent retenu
               </p>
               <p className="text-xs text-muted-foreground">
-                Les propriétaires acceptent en priorité les profils vérifiés. Vous pouvez postuler dès maintenant et vérifier votre identité plus tard.
+                L'écusson « Identité vérifiée » rassure les propriétaires. Vous pouvez postuler dès maintenant et vérifier votre identité plus tard.
               </p>
               <Link to="/settings?section=security&src=application_modal" className="text-xs text-primary font-medium hover:underline inline-block mt-0.5">
                 Vérifier mon identité (1 min) →

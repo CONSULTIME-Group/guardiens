@@ -744,7 +744,7 @@ const PublicSitView = ({
                 Partir l'esprit léger, c'est confier à quelqu'un de confiance.
               </h2>
               <p className="text-lg opacity-90 leading-relaxed">
-                Rejoignez la communauté Guardiens : des gardiens vérifiés, un cadre clair, et la liberté de partir sans inquiétude.
+                Rejoignez la communauté Guardiens : des gardiens du coin, un cadre clair, et la liberté de partir sans inquiétude.
               </p>
               {isClosed ? (
                 <div className="flex flex-wrap gap-3 justify-center pt-2">

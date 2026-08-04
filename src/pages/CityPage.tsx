@@ -277,7 +277,7 @@ const CityPage = () => {
  <div className="grid md:grid-cols-3 gap-6">
  <div className="space-y-3">
  <ShieldCheck className="h-6 w-6 text-primary" />
- <h3 className="font-semibold text-foreground">Gardiens vérifiés</h3>
+ <h3 className="font-semibold text-foreground">Vérification d'identité</h3>
  <p className="text-sm text-muted-foreground">
  Vérification d'identité contrôlée manuellement par l'équipe, avis croisés détaillés, écussons de fiabilité. Regardez l'écusson « Identité vérifiée » avant de confier vos clés.
  </p>
@@ -555,7 +555,6 @@ const CityPage = () => {
           name: dbPage.city,
           department: dbPage.department,
           departmentCode: "",
-          region: "Auvergne-Rhône-Alpes",
           coordinates: { lat: 0, lng: 0 },
           zoneProfile: "urbain",
           keywordPrimary: "",

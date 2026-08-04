@@ -69,7 +69,7 @@ const EmergencySitter = () => {
     areaServed: { "@type": "Country", name: "France" },
     audience: { "@type": "Audience", audienceType: "Propriétaires d'animaux ayant un besoin de garde imprévu" },
     description:
-      "Trouvez un gardien vérifié près de chez vous en moins de 24h pour vos animaux et votre maison en cas d'imprévu : hospitalisation, deuil, déplacement professionnel.",
+      "Mobilisez les gardiens d'urgence près de chez vous pour vos animaux et votre maison en cas d'imprévu : hospitalisation, deuil, déplacement professionnel.",
   };
 
   return (

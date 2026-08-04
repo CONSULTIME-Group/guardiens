@@ -40,7 +40,7 @@ const cityContent: Record<string, CityContentData> = {
 
 Les pensions pour animaux autour d'Annecy coûtent entre 25 et 45 € par jour. Pour deux semaines, ça fait vite 350 à 600 €. Et votre chat qui déteste les cages ? Votre chien qui a besoin de son jardin ?
 
-Le house-sitting (parfois appelé home sitting en français), c'est la solution de bon sens : un gardien vérifié vient chez vous, s'occupe de vos animaux dans leur environnement, arrose le jardin, et veille sur la maison. **Gratuit pour le propriétaire. Logement offert pour le gardien.**
+Le house-sitting (parfois appelé home sitting en français), c'est la solution de bon sens : un gardien du coin vient chez vous, s'occupe de vos animaux dans leur environnement, arrose le jardin, et veille sur la maison. **Gratuit pour le propriétaire. Logement offert pour le gardien.**
 
 À Annecy, cette logique de proximité est naturelle. Les gens se connaissent entre quartiers, l'entraide est dans l'ADN savoyard. Guardiens digitalise cette confiance de proximité.`,
  },
@@ -79,7 +79,7 @@ Pour un séjour de 14 jours avec un chien et un chat, **vous économisez 500 à 
 
 **2. Publiez votre annonce**, décrivez votre maison, vos animaux, les dates, et vos attentes.
 
-**3. Recevez des candidatures**, les gardiens vérifiés de la région postulent. Regardez leurs avis, leur profil, leur expérience.
+**3. Recevez des candidatures**, les gardiens du coin postulent. Regardez leurs avis, leur profil, leur expérience.
 
 **4. Choisissez et partez serein**, échangez par messagerie, organisez la passation, et c'est parti.
 
@@ -119,7 +119,7 @@ Tout est sur la plateforme : messagerie, avis croisés, guide de la maison, et m
 
  lyon: {
  heroAlt: "Garde de chien et de chat à Lyon - Vue panoramique depuis Fourvière au coucher du soleil - Guardiens",
- subtitle: "Faites garder votre chien, votre chat ou votre maison à Lyon par un home sitter de proximité vérifié. Sans commission, sans frais de pension.",
+ subtitle: "Faites garder votre chien, votre chat ou votre maison à Lyon par un home sitter de proximité. Sans commission, sans frais de pension.",
  articleSections: [
   {
  id: "introduction",
@@ -130,7 +130,7 @@ Lyon est l'une des villes les plus accueillantes de France pour les animaux de c
 
 Mais quand vient le moment de partir, vacances, déplacement professionnel, week-end en famille, la question se pose : **à qui confier votre animal et votre maison à Lyon ?**
 
-Guardiens est une plateforme de garde d'animaux et de home sitting fondée par Jérémie et Elisa, installés dans le Vieux-Lyon, rue Juiverie. Après cinq ans de house-sitting à travers la France, des dizaines de maisons gardées, des centaines d'animaux accompagnés, ils ont construit un outil pensé pour les propriétaires lyonnais : des gardiens de proximité, une rencontre physique systématique avant chaque garde, et un système de confiance vérifiée.
+Guardiens est une plateforme de garde d'animaux et de home sitting fondée par Jérémie et Elisa, installés dans le Vieux-Lyon, rue Juiverie. Après cinq ans de house-sitting à travers la France, des dizaines de maisons gardées, des centaines d'animaux accompagnés, ils ont construit un outil pensé pour les propriétaires lyonnais : des gardiens de proximité, une rencontre physique systématique avant chaque garde, et un dispositif de confiance fondé sur les avis croisés.
 
 Ce que Guardiens propose concrètement : vous publiez votre annonce, des gardiens de votre quartier postulent, vous les rencontrez autour d'un café ou lors d'une visite de votre logement, puis vous confirmez la garde. Votre animal reste chez lui, dans ses repères. Votre maison reste vivante. [Inscrivez-vous pour publier votre annonce](/inscription?role=owner).`,
  },
@@ -160,7 +160,7 @@ Le home sitting existe depuis des décennies dans les pays anglo-saxons. Le prin
  {
  id: "fonctionnement",
  title: "Comment trouver un gardien fiable à Lyon ?",
- content: `Pour trouver un gardien fiable à Lyon, publiez votre annonce sur Guardiens, recevez des candidatures de gardiens vérifiés de votre quartier, consultez leurs avis, puis organisez une rencontre avant de confirmer. Chaque profil est vérifié (identité, avis publics de la communauté) et la rencontre physique est systématique.
+ content: `Pour trouver un gardien fiable à Lyon, publiez votre annonce sur Guardiens, recevez des candidatures de gardiens de votre quartier, consultez leurs avis, puis organisez une rencontre avant de confirmer. La vérification d'identité est ouverte à tous les membres et contrôlée manuellement par l'équipe Guardiens : regardez l'écusson « Identité vérifiée » sur les profils, et rencontrez toujours la personne avant de confier vos clés.
 
 ### Etape 1, Publiez votre annonce
 
@@ -168,7 +168,7 @@ Décrivez votre maison, vos animaux, les dates de votre absence et vos attentes.
 
 ### Etape 2, Rencontrez les gardiens intéressés
 
-Les gardiens vérifiés de Lyon et de ses environs consultent votre annonce et postulent avec un message personnalisé. Vous consultez leur profil, leurs avis, leur expérience. Puis vous organisez une rencontre : un café dans votre quartier, une visite de votre logement, une promenade avec votre chien. C'est cette rencontre physique qui fait la différence.
+Les gardiens de Lyon et de ses environs consultent votre annonce et postulent avec un message personnalisé. Vous consultez leur profil, leurs avis, leur expérience. Puis vous organisez une rencontre : un café dans votre quartier, une visite de votre logement, une promenade avec votre chien. C'est cette rencontre physique qui fait la différence.
 
 ### Etape 3, Confirmez la garde
 
@@ -220,7 +220,7 @@ Lyon se compose de neuf arrondissements et d'une ceinture de communes limitrophe
 
 **Un accord de garde clair.** Un document optionnel formalise les engagements de chaque partie : dates, responsabilités, contacts d'urgence. Jamais contraignant, toujours rassurant.
 
-**Des gardiens vérifiés.** Chaque gardien passe par une vérification d'identité et une rencontre physique. Les avis croisés après chaque garde construisent un historique de confiance visible sur le profil.`,
+**Une vérification d'identité ouverte à tous.** Chaque pièce soumise est contrôlée manuellement par l'équipe Guardiens, et les profils qui l'ont obtenue affichent l'écusson « Identité vérifiée ». Les avis croisés après chaque garde construisent un historique de confiance visible sur le profil.`,
  },
  {
  id: "gardiens",
@@ -233,7 +233,7 @@ Lyon se compose de neuf arrondissements et d'une ceinture de communes limitrophe
 
 **Familles** qui souhaitent offrir à leurs enfants l'expérience de s'occuper d'un animal sans l'engagement permanent. Une garde de deux semaines avec un labrador, c'est une aventure pour toute la famille.
 
-**Etudiants vérifiés**, pour les gardes courtes, les week-ends ou les ponts. Leur disponibilité et leur énergie conviennent parfaitement aux chiens actifs qui ont besoin de longues promenades.
+**Étudiants**, pour les gardes courtes, les week-ends ou les ponts. Leur disponibilité et leur énergie conviennent parfaitement aux chiens actifs qui ont besoin de longues promenades.
 
 Tous passent par le même processus de vérification : identité contrôlée, profil détaillé, rencontre physique avec le propriétaire avant chaque garde.`,
  },
@@ -269,7 +269,7 @@ Après avoir accepté une candidature, vous organisez une rencontre directement 
 Guardiens dispose d'un réseau de [gardiens d'urgence à Lyon](/gardien-urgence), mobilisables rapidement. En cas de problème vétérinaire, le gardien contacte la clinique indiquée dans le guide de la maison. En cas de problème technique (fuite, panne), il suit les consignes laissées par le propriétaire.
 
 **Comment sont vérifiés les gardiens à Lyon ?**
-Chaque gardien fournit une pièce d'identité vérifiée manuellement par l'équipe Guardiens. Les avis croisés après chaque garde et les badges de fiabilité complètent le dispositif de confiance. [En savoir plus dans la FAQ](/faq#confiance-securite).
+La vérification d'identité est ouverte à tous les membres : chaque pièce soumise est contrôlée manuellement par l'équipe Guardiens, et les profils qui l'ont obtenue affichent l'écusson « Identité vérifiée ». Les avis croisés après chaque garde et les badges de fiabilité complètent le dispositif de confiance. [En savoir plus dans la FAQ](/faq#confiance-securite).
 
 **Puis-je publier une annonce pour un chien ET un chat ?**
 Absolument. Votre annonce peut inclure tous vos animaux. Les gardiens qui postulent voient la composition exacte de votre foyer et décident en connaissance de cause.
@@ -291,7 +291,7 @@ Oui. La plateforme est conçue pour les gardes de toute durée, du week-end prol
  title: "Lyon, point de départ de Guardiens partout en France",
  content: `Lyon est le coeur du réseau Guardiens. C'est ici que la plateforme est née, ici que les premiers gardiens et propriétaires se sont rencontrés, ici que le modèle de confiance de proximité a été testé et validé.
 
-Que vous viviez dans le Vieux-Lyon, à la Croix-Rousse, à Monplaisir ou à Villeurbanne, Guardiens vous connecte avec des gardiens vérifiés de votre quartier. Votre animal reste dans ses repères, votre maison reste vivante, et vous partez l'esprit libre.
+Que vous viviez dans le Vieux-Lyon, à la Croix-Rousse, à Monplaisir ou à Villeurbanne, Guardiens vous connecte avec des gardiens de votre quartier. Votre animal reste dans ses repères, votre maison reste vivante, et vous partez l'esprit libre.
 
 Le réseau s'étend progressivement à toute la France : [Annecy](/actualites/house-sitting-annecy), Grenoble, Chambéry, et bien au-delà. Mais Lyon reste le pilier, la ville de référence, celle où tout a commencé.
 
@@ -340,14 +340,14 @@ Consultez également le [guide complet du gardien à Lyon](/guides/lyon), la pag
 
  grenoble: {
  heroAlt: "Vue de Grenoble avec les Alpes et la Bastille en arrière-plan",
- subtitle: "Trouvez un home sitter de confiance au pied des Alpes, gardiens vérifiés dans l'agglomération grenobloise.",
+ subtitle: "Trouvez un home sitter de confiance au pied des Alpes, gardiens de proximité dans l'agglomération grenobloise.",
  articleSections: [
  {
  id: "pourquoi",
  title: "Pourquoi le house-sitting à Grenoble ?",
  content: `Grenoble, ceinturée par trois massifs montagneux, Chartreuse, Vercors, Belledonne, attire des passionnés d'outdoor. Mais quand on part randonner, skier ou voyager, qui garde la maison et les animaux ?
 
-Le house-sitting (parfois appelé home sitting en français) à Grenoble, c'est la réponse locale : un home sitter vérifié s'installe chez vous, s'occupe de vos animaux dans leur environnement, et veille sur votre logement. **Gratuit pour le propriétaire.**
+Le house-sitting (parfois appelé home sitting en français) à Grenoble, c'est la réponse locale : un home sitter du coin s'installe chez vous, s'occupe de vos animaux dans leur environnement, et veille sur votre logement. **Gratuit pour le propriétaire.**
 
 La cuvette grenobloise crée des contraintes spécifiques : pics de pollution en hiver, chaleur estivale concentrée, et quartiers en pente parfois difficiles d'accès par temps de neige. Un home sitter local connaît ces réalités.`,
  },

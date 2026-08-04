@@ -45,7 +45,7 @@ const LYON_FAQ = [
 const ANNECY_FAQ = [
  {
  q: "Comment trouver un gardien de confiance à Annecy ?",
- a: "Vous publiez votre annonce gratuitement et les gardiens disponibles à Annecy et en Haute-Savoie postulent. Les pièces d'identité soumises sont contrôlées manuellement par l'équipe Guardiens, et les profils vérifiés affichent l'écusson « Identité vérifiée », complété par les avis croisés et les badges de fiabilité. Vous échangez avec les candidats via la messagerie et organisez une rencontre avant de confier vos clés.",
+ a: "Vous publiez votre annonce gratuitement et les gardiens disponibles à Annecy et en Haute-Savoie postulent. Les pièces d'identité soumises sont contrôlées manuellement par l'équipe Guardiens, et les profils qui l'ont obtenue affichent l'écusson « Identité vérifiée », complété par les avis croisés et les badges de fiabilité. Vous échangez avec les candidats via la messagerie et organisez une rencontre avant de confier vos clés.",
  },
  {
  q: "Les gardiens à Annecy sont-ils habitués aux logements de montagne ?",
@@ -72,7 +72,7 @@ const ANNECY_FAQ = [
 const GRENOBLE_FAQ = [
  {
  q: "Comment trouver un home sitter à Grenoble et en Isère ?",
- a: "Vous publiez gratuitement votre annonce sur Guardiens et les gardiens vérifiés disponibles à Grenoble et dans le bassin grenoblois postulent. Vous choisissez le profil qui vous convient après échange et rencontre.",
+ a: "Vous publiez gratuitement votre annonce sur Guardiens et les gardiens disponibles à Grenoble et dans le bassin grenoblois postulent. La vérification d'identité est ouverte à tous les membres et contrôlée manuellement par l'équipe Guardiens : regardez l'écusson « Identité vérifiée » sur les profils, puis choisissez après échange et rencontre.",
  },
  {
  q: "Les gardiens à Grenoble connaissent-ils les sorties chien adaptées en montagne ?",
@@ -99,7 +99,7 @@ const GRENOBLE_FAQ = [
 const CHAMBERY_FAQ = [
  {
  q: "Comment trouver un gardien de confiance à Chambéry ?",
- a: "Vous publiez votre annonce gratuitement sur Guardiens, les gardiens vérifiés disponibles à Chambéry et en Savoie postulent. Vous échangez avec eux et organisez une rencontre avant la garde.",
+ a: "Vous publiez votre annonce gratuitement sur Guardiens, les gardiens disponibles à Chambéry et en Savoie postulent. La vérification d'identité est ouverte à tous les membres et contrôlée manuellement par l'équipe Guardiens : regardez l'écusson « Identité vérifiée » sur les profils, échangez avec eux et organisez une rencontre avant la garde.",
  },
  {
  q: "Les gardiens à Chambéry connaissent-ils les contraintes saisonnières ?",
@@ -222,7 +222,7 @@ const CitySchemaOrg = ({ city }: Props) => {
  graph.push({
  "@type": "LocalBusiness",
  name: `Guardiens, Garde d'animaux à ${city.name}`,
- description: `Plateforme de garde de chien, de chat et de home sitting à ${city.name}. Gardiens de proximité vérifiés, sans commission.`,
+ description: `Plateforme de garde de chien, de chat et de home sitting à ${city.name}. Gardiens de proximité, sans commission.`,
  url: `https://guardiens.fr/house-sitting/${city.slug}`,
  address: {
  "@type": "PostalAddress",

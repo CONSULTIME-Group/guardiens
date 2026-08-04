@@ -459,7 +459,7 @@ const DemoSitDetail = () => {
  Gardiens à {sit.owner.city}
  </p>
  <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
- Voir les profils vérifiés et l'activité du coin.
+ Voir les profils et l'activité du coin.
  </p>
  </div>
  <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:text-primary group-hover:translate-x-0.5 transition-all shrink-0 mt-2" />
