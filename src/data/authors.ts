@@ -64,7 +64,10 @@ export const COSIGNED_AUTHOR_VARIANTS = [
   "Jérémie & Elisa",
   "Elisa & Jérémie",
   "Elisa & Jérémie, fondateurs de Guardiens",
+  "Jérémie et Elisa",
+  "Elisa et Jérémie",
 ];
+
 
 export function getAuthorBySlug(slug: string): Author | undefined {
   return AUTHORS.find((a) => a.slug === slug);
