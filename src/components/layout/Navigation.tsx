@@ -447,6 +447,30 @@ export const BottomNav = () => {
 
   const hideNav = inAppShell && scrollDir === "down" && !idleVisible;
 
+  // Hauteur réelle de la pilule exposée en variable CSS, pour que les barres
+  // d'action collantes des pages s'empilent au dessus sans valeur en dur.
+  const pillRef = useRef<HTMLDivElement | null>(null);
+  useEffect(() => {
+    const el = pillRef.current;
+    if (!el || typeof window === "undefined") return;
+    const apply = () => {
+      const h = hideNav ? 0 : Math.round(el.getBoundingClientRect().height);
+      document.documentElement.style.setProperty("--bottom-nav-h", `${h}px`);
+    };
+    apply();
+    let ro: ResizeObserver | null = null;
+    if (typeof ResizeObserver !== "undefined") {
+      ro = new ResizeObserver(apply);
+      ro.observe(el);
+    }
+    window.addEventListener("resize", apply);
+    return () => {
+      ro?.disconnect();
+      window.removeEventListener("resize", apply);
+      document.documentElement.style.setProperty("--bottom-nav-h", "0px");
+    };
+  }, [hideNav]);
+
 
   // Signature Dock 2026 — 4 tabs role-aware + FAB contextuel + Plus sheet
   const isOwnerView = effectiveRole === "owner";
@@ -557,7 +581,7 @@ export const BottomNav = () => {
         )}
         aria-label="Navigation mobile"
       >
-        <div className="pointer-events-auto mx-auto max-w-md bg-card border border-border/60 shadow-[0_20px_50px_-12px_hsl(var(--primary)/0.18)] rounded-3xl h-16 flex items-center justify-between px-1.5 relative">
+        <div ref={pillRef} className="pointer-events-auto mx-auto max-w-md bg-card border border-border/60 shadow-[0_20px_50px_-12px_hsl(var(--primary)/0.18)] rounded-3xl h-16 flex items-center justify-between px-1.5 relative">
 
           {leftTabs.map(renderTab)}
 

@@ -41,7 +41,7 @@ const PublicSitDetail = () => {
  const { id: rawParam } = useParams<{ id: string }>();
  const param = rawParam?.replace(/[\s\u00A0\u200B-\u200D\uFEFF]+/g, "") || undefined;
  const navigate = useNavigate();
- const { user, isAuthenticated, activeRole } = useAuth();
+ const { user, isAuthenticated, hasSession, activeRole } = useAuth();
  const { hasAccess } = useSubscriptionAccess();
  const [sit, setSit] = useState<any>(null);
  const [owner, setOwner] = useState<any>(null);
@@ -614,7 +614,7 @@ const PublicSitDetail = () => {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
 
-      <PublicHeader authedVariant={isAuthenticated} />
+      <PublicHeader authedVariant={hasSession} />
 
       {/* Mention sobre : garde déjà attribuée ou déjà passée. Ton factuel,
           lien vers les annonces ouvertes, aucune action de candidature. */}
