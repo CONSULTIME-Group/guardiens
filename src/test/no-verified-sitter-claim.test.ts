@@ -1,5 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { execSync } from "node:child_process";
+import { readFileSync } from "node:fs";
 
 /**
  * Garde-fou éditorial, deux blocs.
@@ -18,7 +19,7 @@ import { execSync } from "node:child_process";
  * écrits en clair, et les fichiers légitimes sont exclus nommément ci-dessous.
  */
 
-const SCAN_PATHS = "src public/llms.txt";
+const SCAN_PATHS = ["src", "src/data", "public/llms.txt", "index.html"];
 
 /**
  * Exclusions nommées, bloc 1.
@@ -28,28 +29,44 @@ const SCAN_PATHS = "src public/llms.txt";
  * - VerifiedSitterRailCard.tsx / shouldShowVerifiedCard.ts / trustTier.ts :
  *   ces fichiers parlent d'un gardien individuel dont l'identité est réellement
  *   validée, la carte n'est montée que dans ce cas.
+ * - ProsListing.tsx : le contrôle manuel concerne le SIRET des professionnels,
+ *   pas la vérification d'identité des gardiens.
+ * - SitDraftFromPrompt.tsx : « vérifier manuellement » décrit la relecture d'un
+ *   brouillon, sans rapport avec l'identité ou le statut d'un membre.
  */
-const EXCLUDE_CLAIM = [
-  "--glob=!src/test/no-verified-sitter-claim.test.ts",
-  "--glob=!src/components/badges/badge-definitions.ts",
-  "--glob=!src/components/dashboard/sitter/VerifiedSitterRailCard.tsx",
-  "--glob=!src/lib/shouldShowVerifiedCard.ts",
-  "--glob=!src/lib/trustTier.ts",
+const EXCLUDE_CLAIM = new Set([
+  "src/test/no-verified-sitter-claim.test.ts",
+  "src/components/badges/badge-definitions.ts",
+  "src/components/dashboard/sitter/VerifiedSitterRailCard.tsx",
+  "src/lib/shouldShowVerifiedCard.ts",
+  "src/lib/trustTier.ts",
+  "src/pages/ProsListing.tsx",
+  "src/components/dashboard/SitDraftFromPrompt.tsx",
+]);
+
+const FORBIDDEN_CLAIMS: RegExp[] = [
+  /(vérifi|contrôl)\w*\s+(manuelle?ment|à la main)/i,
+  /vérification\s+d'identité\s+manuelle/i,
+  /gardiens?\s+(sont\s+|est\s+)?vérifiés?\b/i,
+  /profils?\s+vérifiés?\b/i,
+  /vérification\s+obligatoire/i,
+  /jamais\s+par\s+un\s+algorithme/i,
+  /des\s+yeux\s+humains/i,
+  /chaque\s+(gardien|membre|profil)\s+(est|passe|doit)\b[^.]{0,40}vérifi/i,
 ];
 
-const FORBIDDEN_CLAIMS = [
-  "gardien vérifié",
-  "gardiens vérifiés",
-  "profils vérifiés",
-  "profil vérifié",
-  "vérification obligatoire",
-  "chaque gardien est vérifié",
-  "vérifié avant",
-  "jamais par un algorithme",
-  "des yeux humains",
-  "vérifié manuellement",
-  "vérifiés manuellement",
-];
+/**
+ * Exceptions lexicales exactes : ce sont les noms propres des écussons.
+ * Seules les chaînes entre guillemets « Identité vérifiée » et « ID vérifiée »
+ * sont retirées avant le scan. Les mêmes mots hors guillemets restent contrôlés.
+ */
+function removeAllowedBadgeNames(source: string): string {
+  return source
+    .replaceAll("« Identité vérifiée »", "")
+    .replaceAll('"Identité vérifiée"', "")
+    .replaceAll("« ID vérifiée »", "")
+    .replaceAll('"ID vérifiée"', "");
+}
 
 /**
  * Exclusions nommées, bloc 2.
@@ -63,34 +80,39 @@ const FORBIDDEN_CLAIMS = [
  * - src/__tests__/sync-index-html-guard.test.ts et jsonld-validation.test.ts :
  *   garde-fous existants qui définissent eux aussi la liste d'interdits.
  */
-const EXCLUDE_REGION = [
-  "--glob=!src/test/no-verified-sitter-claim.test.ts",
-  "--glob=!src/lib/regions.ts",
-  "--glob=!src/pages/AdminArticles.tsx",
-  "--glob=!src/pages/EditSit.tsx",
-  "--glob=!src/lib/__tests__/normalize.test.ts",
-  "--glob=!src/__tests__/sync-index-html-guard.test.ts",
-  "--glob=!src/__tests__/jsonld-validation.test.ts",
-];
+const EXCLUDE_REGION = new Set([
+  "src/test/no-verified-sitter-claim.test.ts",
+  "src/lib/regions.ts",
+  "src/pages/AdminArticles.tsx",
+  "src/pages/EditSit.tsx",
+  "src/lib/__tests__/normalize.test.ts",
+  "src/__tests__/sync-index-html-guard.test.ts",
+  "src/__tests__/jsonld-validation.test.ts",
+]);
 
-function scan(patterns: string[], excludes: string[], caseSensitive = false): string[] {
-  const flags = caseSensitive ? "-n -F" : "-n -i -F";
-  const args = patterns.map((p) => `-e ${JSON.stringify(p)}`).join(" ");
-  try {
-    const out = execSync(`rg ${flags} ${args} ${SCAN_PATHS} ${excludes.join(" ")}`, {
-      encoding: "utf8",
+function scannedFiles(): string[] {
+  const output = execSync(`rg --files ${SCAN_PATHS.join(" ")}`, { encoding: "utf8" });
+  return [...new Set(output.split("\n").filter(Boolean))];
+}
+
+function scan(patterns: RegExp[], excludes: Set<string>, allowBadgeNames = false): string[] {
+  const hits: string[] = [];
+  for (const file of scannedFiles()) {
+    if (excludes.has(file)) continue;
+    const raw = readFileSync(file, "utf8");
+    const source = allowBadgeNames ? removeAllowedBadgeNames(raw) : raw;
+    source.split("\n").forEach((line, index) => {
+      if (patterns.some((pattern) => pattern.test(line))) {
+        hits.push(`${file}:${index + 1}:${line.trim()}`);
+      }
     });
-    return out.split("\n").filter(Boolean);
-  } catch (e: unknown) {
-    const err = e as { status?: number };
-    if (err.status === 1) return []; // aucun match
-    throw e;
   }
+  return hits;
 }
 
 describe("Revendication « gardiens vérifiés »", () => {
   it("n'apparaît nulle part dans src/, public/llms.txt et les locales", () => {
-    const hits = scan(FORBIDDEN_CLAIMS, EXCLUDE_CLAIM);
+    const hits = scan(FORBIDDEN_CLAIMS, EXCLUDE_CLAIM, true);
     if (hits.length > 0) {
       throw new Error(
         `${hits.length} revendication(s) de vérification interdite(s).\n` +
@@ -107,8 +129,8 @@ describe("Revendication « gardiens vérifiés »", () => {
 describe("Positionnement national", () => {
   it("ne mentionne ni AURA, ni Auvergne-Rhône-Alpes, ni « votre région »", () => {
     const hits = [
-      ...scan(["AURA"], EXCLUDE_REGION, true),
-      ...scan(["Auvergne-Rhône-Alpes", "votre région"], EXCLUDE_REGION),
+      ...scan([/\bAURA\b/], EXCLUDE_REGION),
+      ...scan([/Auvergne-Rhône-Alpes/i, /votre région/i], EXCLUDE_REGION),
     ];
     if (hits.length > 0) {
       throw new Error(
