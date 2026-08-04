@@ -4,6 +4,7 @@ import { format } from "date-fns";
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import { Button } from "@/components/ui/button";
+import { PricingRecipientNotice } from "@/components/pricing/PricingNotices";
 
 interface MessageBubbleProps {
   msg: {
