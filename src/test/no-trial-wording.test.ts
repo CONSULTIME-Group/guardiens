@@ -48,6 +48,16 @@ const ALLOWED_FILES = new Set<string>([
   // (formulation juridiquement utile pour cadrer la promesse).
   "src/pages/Cgs.tsx",
 
+  // Circularité assumée : ces fichiers SONT la définition du garde-fou métier.
+  // Un validateur qui interdit « période d'essai » doit contenir cette chaîne,
+  // sinon il ne peut pas la détecter. Les y masquer (classe de caractères,
+  // concaténation) rendrait le test vert sans rien protéger. Ils ne contiennent
+  // aucune copy visible utilisateur : uniquement des motifs d'interdiction.
+  "src/lib/refreshArticleValidator.ts",
+  "supabase/functions/refresh-articles-post-pivot/validator.ts",
+  "supabase/functions/refresh-articles-post-pivot/index.ts",
+  "supabase/functions/draft-sit-from-prompt/index.ts",
+
   // Migrations DB = historique figé, jamais ré-exécuté contre du contenu vivant.
   // (les migrations contiennent du seed FAQ obsolète, non servi.)
 ]);

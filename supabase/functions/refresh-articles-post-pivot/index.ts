@@ -22,7 +22,7 @@ ${STYLE_GUARDRAILS}
 
 Règles éditoriales additionnelles ABSOLUES :
 - Vouvoiement partout, jamais de tutoiement.
-- Interdits stricts : "voisin", "voisinage", "à vie", "gratuitement", "essai" (sous toutes ses formes), "période gratuite", "gratuit jusqu'au", tiret cadratin (—), tiret demi-cadratin (–) en ponctuation de phrase.
+- Interdits stricts : "voisin", "voisinage", "à vie", "gratuitement", "essai" (sous toutes ses formes, dont "période d'essai"), "période gratuite", "gratuit jusqu'au", tiret cadratin (—), tiret demi-cadratin (–) en ponctuation de phrase.
 - Utiliser virgule, point, deux-points, parenthèses à la place des tirets longs.
 - Ton factuel, chaleureux, sans superlatif ("meilleur", "révolutionnaire", "unique", "seul" sont proscrits).
 - Le mot "gratuit" est autorisé, "gratuitement" est interdit.

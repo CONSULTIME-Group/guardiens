@@ -20,7 +20,7 @@ export interface SpeciesBreakdown {
   calcule_le: string | null;
 }
 
-const EMPTY: SpeciesBreakdown = {
+const EMPTY: Omit<SpeciesBreakdown, "calcule_le"> & { calcule_le: string | null } = {
   total_membres: 0,
   departements_couverts: 0,
   total_animaux: 0,
@@ -39,10 +39,10 @@ export function useSpeciesBreakdown() {
     staleTime: 5 * 60 * 1000,
     queryFn: async (): Promise<SpeciesBreakdown> => {
       const { data, error } = await (supabase as any).rpc("get_species_breakdown");
-      if (error) {
-        console.error("get_species_breakdown error", error);
-        return EMPTY;
-      }
+      // Un échec doit remonter comme une erreur : renvoyer des compteurs à zéro
+      // afficherait une donnée fausse au lieu d'une absence de donnée.
+      if (error) throw error;
+      if (!data) throw new Error("get_species_breakdown: réponse vide");
       return { ...EMPTY, ...(data as any) };
     },
   });

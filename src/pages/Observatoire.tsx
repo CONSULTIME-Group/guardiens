@@ -165,7 +165,7 @@ const BreakdownList = ({
 
 const Observatoire = () => {
   const { data: counts } = useInventaireCounts();
-  const { data: species } = useSpeciesBreakdown();
+  const { data: species, isError: speciesError } = useSpeciesBreakdown();
   const fmt = (n: number) => new Intl.NumberFormat("fr-FR").format(n || 0);
 
  const datasetSchema = {
@@ -236,9 +236,15 @@ const Observatoire = () => {
  <p className="text-base md:text-lg text-muted-foreground leading-relaxed max-w-3xl">
  Chiffres-clés, modèle économique, dispositif de confiance. Données issues de la plateforme Guardiens et de l'expérience terrain des fondateurs entre 2021 et 2026. Mises à jour régulières.
  </p>
+ {species?.calcule_le ? (
  <p className="mt-3 text-sm text-muted-foreground">
- Dernière mise à jour : {species?.calcule_le ? formatFrDate(species.calcule_le) : "août 2026"}. Source : Guardiens, Jérémie Martinot, SIRET 894 864 040 00015.
+ Dernière mise à jour : {formatFrDate(species.calcule_le)}. Source : Guardiens, Jérémie Martinot, SIRET 894 864 040 00015.
  </p>
+ ) : (
+ <p className="mt-3 text-sm text-muted-foreground">
+ Source : Guardiens, Jérémie Martinot, SIRET 894 864 040 00015.
+ </p>
+ )}
 
  </header>
 
@@ -288,9 +294,11 @@ const Observatoire = () => {
      Ces chiffres viennent des profils créés sur Guardiens et se recalculent à chaque visite. Ils décrivent nos membres, leurs animaux et leurs logements, pas les gardes réalisées.
    </p>
 
-   {!species ? (
-     <p className="text-sm text-muted-foreground">Chargement des données en cours.</p>
-   ) : (
+    {speciesError ? (
+      <p className="text-sm text-muted-foreground">Les données de la plateforme ne sont pas disponibles pour le moment.</p>
+    ) : !species ? (
+      <p className="text-sm text-muted-foreground">Chargement des données en cours.</p>
+    ) : (
      <>
        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 mb-10">
          <Card><CardContent className="p-5"><p className="text-3xl font-bold text-primary leading-none mb-2">{fmt(species.total_membres)}</p><p className="text-sm font-semibold text-foreground mb-1">Membres inscrits</p><p className="text-xs text-muted-foreground">Propriétaires et gardiens confondus.</p></CardContent></Card>
