@@ -555,7 +555,6 @@ const CityPage = () => {
           name: dbPage.city,
           department: dbPage.department,
           departmentCode: "",
-          region: "Auvergne-Rhône-Alpes",
           coordinates: { lat: 0, lng: 0 },
           zoneProfile: "urbain",
           keywordPrimary: "",
