@@ -37,7 +37,7 @@ export const SEARCH_FAQ = [
   },
   {
     q: "Comment être sûr que le gardien est fiable ?",
-    a: "Chaque profil affiche un score de confiance, les avis vérifiés des gardes précédentes, les badges obtenus, l'ancienneté et l'expérience animale. Une vérification d'identité est proposée à tous les membres.",
+    a: "Chaque profil affiche un score de confiance, les avis laissés après les gardes précédentes, les badges obtenus, l'ancienneté et l'expérience animale. Une vérification d'identité est proposée à tous les membres.",
   },
 ];
 

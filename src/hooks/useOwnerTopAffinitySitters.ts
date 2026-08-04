@@ -1,7 +1,7 @@
 /**
  * Owner Pass 3 — 3 gardiens qui vous correspondent (score d'affinité).
  *
- * Charge le profil owner, un pool de gardiens actifs vérifiés à proximité
+ * Charge le profil owner, un pool de gardiens actifs à proximité
  * (fallback progressif 30 → 50 → 100 km), calcule le score d'affinité via
  * `computeAffinityScore` et retourne les 3 meilleurs.
  */

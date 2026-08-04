@@ -35,6 +35,9 @@ const SCAN_PATHS = ["src", "public/llms.txt", "index.html"];
  *   pas la vérification d'identité des gardiens.
  * - SitDraftFromPrompt.tsx : « vérifier manuellement » décrit la relecture d'un
  *   brouillon, sans rapport avec l'identité ou le statut d'un membre.
+ * - AdminUsers.tsx : écran d'administration interne. La « vérification manuelle »
+ *   y désigne l'action réelle d'un admin qui valide un dossier à la main, et le
+ *   texte n'est jamais montré à un membre.
  */
 const EXCLUDE_CLAIM = new Set([
   "src/test/no-verified-sitter-claim.test.ts",
@@ -44,6 +47,7 @@ const EXCLUDE_CLAIM = new Set([
   "src/lib/trustTier.ts",
   "src/pages/ProsListing.tsx",
   "src/components/dashboard/SitDraftFromPrompt.tsx",
+  "src/pages/admin/AdminUsers.tsx",
 ]);
 
 /**
@@ -60,7 +64,7 @@ const EXCLUDE_CLAIM = new Set([
  */
 export const FORBIDDEN_CLAIMS: RegExp[] = [
   /(?:vérifi|contrôl)\p{L}*\s+(?:\S+\s+){0,2}(?:manuelle?ment|à\s+la\s+main)/iu,
-  /(?:vérification|contrôle)\s+(?:\S+\s+){0,2}manuelles?(?!\p{L})/iu,
+  /(?:vérification|contrôle)\s+(?:\S+\s+){0,2}manuel(?:le)?s?(?!\p{L})/iu,
   /gardiens?\s+(?:\S+\s+){0,2}vérifiés?(?!\p{L})/iu,
   /profils?\s+(?:\S+\s+){0,2}vérifiés?(?!\p{L})/iu,
   /vérification\s+obligatoire/iu,
