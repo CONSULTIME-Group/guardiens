@@ -66,10 +66,12 @@ const MessageComposer = ({ value, onChange, onSend, onPickPhoto, onProposeVideoC
         "px-3 pt-2.5 pb-2.5",
         // Safe area iOS (notch / home indicator)
         "[padding-bottom:max(10px,env(safe-area-inset-bottom))]",
-        "flex items-end gap-2",
         "shadow-[0_-1px_0_0_hsl(var(--border)),0_-8px_16px_-8px_hsl(var(--foreground)/0.06)]",
       ].join(" ")}
     >
+      {pricingWarning && <PricingAuthorWarning className="mb-2" />}
+      <div className="flex items-end gap-2">
+
       <input
         type="file"
         ref={fileInputRef}
