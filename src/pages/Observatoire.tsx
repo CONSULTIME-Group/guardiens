@@ -97,6 +97,8 @@ const Observatoire = () => {
  license: "https://guardiens.fr/mentions-legales",
  isAccessibleForFree: true,
  datePublished: "2026-06-08",
+ dateModified: "2026-08-04",
+
  inLanguage: "fr",
  };
 
