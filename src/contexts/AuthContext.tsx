@@ -241,15 +241,25 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
     );
 
-
     supabase.auth.getSession().then(async ({ data: { session } }) => {
       if (session?.user) {
         markChecked(true);
-        await fetchProfile(session.user);
-        setHasSession(true);
-        setAuthChecked(true);
+        try {
+          await fetchProfile(session.user);
+          setHasSession(true);
+          setAuthChecked(true);
+          setProfileError(false);
+        } catch {
+          // Session valide, lecture du profil en échec avéré.
+          userRef.current = null;
+          setUser(null);
+          setHasSession(true);
+          setAuthChecked(true);
+          setProfileError(true);
+        }
       } else {
         markChecked(false);
+        setProfileError(false);
       }
       setLoading(false);
     }).catch(() => {
