@@ -38,6 +38,8 @@ interface ProfileHeroProps {
   hasAvatarLightbox: boolean;
 
   proStatus: string | null;
+  proSpecialty?: string | null;
+  proBusinessName?: string | null;
   proTagline: string | null;
   proPricingNote: string | null;
 
