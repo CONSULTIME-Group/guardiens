@@ -73,9 +73,29 @@ const KEY_STATS: Stat[] = [
 
 const PAGE_URL = "https://guardiens.fr/observatoire-garde-animaux";
 
+const SPECIES_LABELS: Record<string, string> = {
+  cat: "Chats",
+  dog: "Chiens",
+  farm_animal: "Animaux de ferme",
+  rodent: "Rongeurs",
+  horse: "Chevaux",
+  nac: "NAC",
+  bird: "Oiseaux",
+  fish: "Poissons",
+  reptile: "Reptiles",
+};
+
+const formatFrDate = (iso: string) => {
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return iso;
+  return d.toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" });
+};
+
 const Observatoire = () => {
   const { data: counts } = useInventaireCounts();
+  const { data: species } = useSpeciesBreakdown();
   const fmt = (n: number) => new Intl.NumberFormat("fr-FR").format(n || 0);
+
  const datasetSchema = {
  "@context": "https://schema.org",
  "@type": "Dataset",
