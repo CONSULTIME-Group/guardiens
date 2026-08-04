@@ -101,10 +101,10 @@ export const AppLayout = ({ children }: { children?: ReactNode }) => {
           onClose={() => {
             setDismissed(true);
             setSearchParams({});
-            refreshProfile();
+            void Promise.resolve(refreshProfile()).catch(() => {});
           }}
           onMinimalComplete={() => {
-            refreshProfile();
+            void Promise.resolve(refreshProfile()).catch(() => {});
           }}
         />
       )}

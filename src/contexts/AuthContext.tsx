@@ -252,7 +252,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const safety = window.setTimeout(() => {
       setAuthChecked(true);
       setLoading(false);
-      if (!userRef.current) setHasSession(false);
+      if (!settled && !userRef.current) setHasSession(false);
     }, 1500);
 
     return () => {
@@ -268,7 +268,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (error) throw error;
 
       if (data.user) {
-        await fetchProfile(data.user);
+        // La session posée fait foi : une erreur de lecture du profil ne doit
+        // jamais faire échouer la connexion, le profil sera rechargé ensuite.
+        try {
+          await fetchProfile(data.user);
+        } catch {
+          // silencieux, onAuthStateChange et refreshProfile prendront le relais
+        }
       }
     } finally {
       setLoading(false);
