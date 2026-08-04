@@ -75,6 +75,8 @@ const ProfileHero = ({
   onOpenAvatarLightbox,
   hasAvatarLightbox,
   proStatus,
+  proSpecialty,
+  proBusinessName,
   proTagline,
   proPricingNote,
   isAvailable,
