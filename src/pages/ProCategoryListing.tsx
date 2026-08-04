@@ -149,7 +149,7 @@ export default function ProCategoryListing() {
         <script type="application/ld+json">{JSON.stringify(breadcrumbJsonLd)}</script>
       </Helmet>
 
-      <main className="container mx-auto px-4 py-6 md:py-10 max-w-6xl min-w-0">
+      <div className="container mx-auto px-4 py-6 md:py-10 max-w-6xl min-w-0">
         <header className="mb-6 md:mb-10">
           <h1 className="text-2xl md:text-4xl font-display font-bold mb-2">{h1}</h1>
           <p className="text-lg text-muted-foreground max-w-2xl">{category.shortDesc}</p>
@@ -294,7 +294,7 @@ export default function ProCategoryListing() {
             ))}
           </div>
         </section>
-      </main>
+      </div>
     </div>
   );
 }

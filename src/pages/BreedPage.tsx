@@ -81,13 +81,13 @@ const BreedPage = () => {
   if (notFound) return <Navigate to="/races" replace />;
   if (loading || !breed) {
     return (
-      <main className="min-w-0 max-w-3xl mx-auto px-4 py-8 md:py-12">
+      <div className="min-w-0 max-w-3xl mx-auto px-4 py-8 md:py-12">
         <div className="animate-pulse space-y-3">
           <div className="h-8 bg-muted rounded w-1/2" />
           <div className="h-4 bg-muted rounded w-3/4" />
           <div className="h-4 bg-muted rounded w-2/3" />
         </div>
-      </main>
+      </div>
     );
   }
 
@@ -190,7 +190,7 @@ const BreedPage = () => {
         jsonLd={[jsonLd, breadcrumb, faqSchema]}
       />
 
-      <main className="min-w-0 max-w-3xl mx-auto px-4 py-8 md:py-12">
+      <div className="min-w-0 max-w-3xl mx-auto px-4 py-8 md:py-12">
         <nav className="text-sm text-muted-foreground mb-4">
           <Link to="/" className="hover:underline">Accueil</Link>
           <span className="mx-2">/</span>
@@ -274,7 +274,7 @@ const BreedPage = () => {
             </Link>
           </div>
         </section>
-      </main>
+      </div>
     </>
   );
 };
