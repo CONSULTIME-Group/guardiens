@@ -43,14 +43,15 @@ const KEY_STATS: Stat[] = [
  },
  {
  label: "Coût pour les propriétaires",
- value: "Gratuit",
+ value: "Aucun frais",
  detail: "Aucun frais d'inscription, aucune commission sur les gardes, aucun prélèvement entre membres. Modèle inchangé depuis la création.",
  },
  {
  label: "Abonnement gardien",
- value: "Gratuit",
- detail: "Guardiens reste gratuit tant que nous ne sommes pas satisfaits du service que nous vous offrons. Aucune date de bascule n'est fixée à ce jour.",
+ value: "Aucun frais",
+ detail: "Guardiens reste gratuit tant que nous ne sommes pas satisfaits du service que nous vous offrons. Vous avez accès à tout, sans limite, sans engagement. Vous serez prévenu à l'avance quand cela changera.",
  },
+
  {
  label: "Vérification d'identité",
  value: "100 %",
