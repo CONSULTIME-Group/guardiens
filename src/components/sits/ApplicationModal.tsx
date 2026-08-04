@@ -524,6 +524,7 @@ const ApplicationModal = ({
               className="resize-none"
               placeholder="Votre message de candidature..."
             />
+            {shouldWarnPricing(message, sitterInfo?.profile?.pro_status) && <PricingAuthorWarning />}
             {almaUsed && (
               <p className="text-xs text-muted-foreground">Brouillon Alma inséré, à personnaliser avant envoi.</p>
             )}
