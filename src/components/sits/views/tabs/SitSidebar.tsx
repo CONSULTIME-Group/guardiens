@@ -145,8 +145,8 @@ const SitSidebar = ({
               </p>
               <p className="text-xs text-muted-foreground mt-1 leading-relaxed line-clamp-2">
                 {sittersScope.mode === "city"
-                  ? `${sittersScope.count}+ profils vérifiés à ${cityName}.`
-                  : `${sittersScope.count}+ profils vérifiés dans le département.`}
+                  ? `${sittersScope.count}+ profils de gardiens à ${cityName}.`
+                  : `${sittersScope.count}+ profils de gardiens dans le département.`}
               </p>
             </div>
             <ChevronRight

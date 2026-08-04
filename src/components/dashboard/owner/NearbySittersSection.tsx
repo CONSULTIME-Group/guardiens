@@ -56,8 +56,8 @@ const NearbySittersSection = () => {
   if (isLoading || sitters.length === 0) return null;
 
   const subtitle = radiusUsed
-    ? `Trois profils vérifiés dans un rayon de ${radiusUsed} km.`
-    : "Trois profils vérifiés parmi les plus proches disponibles.";
+    ? `Trois profils de gardiens dans un rayon de ${radiusUsed} km.`
+    : "Trois profils de gardiens parmi les plus proches disponibles.";
 
   return (
     <section aria-label="Les gens du coin" className="min-w-0">

@@ -231,7 +231,7 @@ const DepartmentPage = () => {
       Comment trouver un gardien fiable dans le {page.department} ?
     </h2>
     <p className="text-base text-foreground/90 leading-relaxed mb-4">
-      Pour trouver un gardien fiable dans le {page.department}, publiez votre annonce sur Guardiens, recevez des candidatures de gardiens vérifiés de votre secteur, consultez leurs profils et avis, puis organisez une rencontre avant de confirmer la garde. Le processus tient en trois étapes.
+      Pour trouver un gardien fiable dans le {page.department}, publiez votre annonce sur Guardiens, recevez des candidatures de gardiens de votre secteur, consultez leurs profils et avis, puis organisez une rencontre avant de confirmer la garde. Le processus tient en trois étapes.
     </p>
     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
       <Card>
@@ -243,7 +243,7 @@ const DepartmentPage = () => {
       <Card>
         <CardContent className="p-5">
           <h3 className="font-semibold text-foreground mb-2">2. Rencontrez les candidats</h3>
-          <p className="text-sm text-muted-foreground">Consultez les profils vérifiés, les avis de la communauté, l'expérience animale. Rencontrez-vous autour d'un café ou lors d'une visite du logement. C'est cette rencontre physique qui fait la différence.</p>
+          <p className="text-sm text-muted-foreground">Consultez les profils, l'écusson « Identité vérifiée » quand il est présent, les avis de la communauté, l'expérience animale. Rencontrez-vous autour d'un café ou lors d'une visite du logement. C'est cette rencontre physique qui fait la différence.</p>
         </CardContent>
       </Card>
       <Card>
@@ -408,7 +408,7 @@ const DepartmentPage = () => {
  name: `Comment trouver un pet sitter dans le ${page.department} ?`,
  acceptedAnswer: {
  "@type": "Answer",
- text: `Inscrivez-vous sans frais sur Guardiens et parcourez les ${cityPages.length} villes du ${page.department} pour trouver un gardien vérifié près de chez vous.`,
+ text: `Inscrivez-vous sans frais sur Guardiens et parcourez les ${cityPages.length} villes du ${page.department} pour trouver un gardien près de chez vous.`,
  },
  },
  {

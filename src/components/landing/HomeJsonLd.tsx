@@ -138,7 +138,7 @@ export default function HomeJsonLd() {
                   "@type": "HowToStep",
                   position: 2,
                   name: "Recevez des candidatures",
-                  text: "Des gardiens proches de chez vous postulent. Consultez leurs profils vérifiés, lisez les avis, échangez par messagerie et rencontrez celui ou celle qui vous correspond.",
+                  text: "Des gardiens proches de chez vous postulent. Consultez leurs profils, lisez les avis, échangez par messagerie et rencontrez celui ou celle qui vous correspond.",
                   url: "https://guardiens.fr/#how-it-works",
                   image: `https://guardiens.fr${howtoStep2}`,
                 },

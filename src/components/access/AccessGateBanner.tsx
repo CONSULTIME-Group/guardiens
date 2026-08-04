@@ -80,7 +80,7 @@ const AccessGateBanner = ({ level, profileCompletion, context = "guard", showIde
               Recommandé : vérifiez votre identité
             </p>
             <p className="text-xs text-muted-foreground">
-              Les profils vérifiés inspirent davantage confiance et sont contactés bien plus souvent. Cela ne prend qu'une minute.
+              L'écusson « Identité vérifiée » rassure les autres membres au moment de choisir. Cela ne prend qu'une minute.
             </p>
             <Button size="sm" variant="outline" asChild>
               <Link to="/settings?section=security&src=access_gate_banner">Vérifier mon identité</Link>

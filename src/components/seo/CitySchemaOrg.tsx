@@ -45,7 +45,7 @@ const LYON_FAQ = [
 const ANNECY_FAQ = [
  {
  q: "Comment trouver un gardien de confiance à Annecy ?",
- a: "Vous publiez votre annonce gratuitement et les gardiens disponibles à Annecy et en Haute-Savoie postulent. Les pièces d'identité soumises sont contrôlées manuellement par l'équipe Guardiens, et les profils vérifiés affichent l'écusson « Identité vérifiée », complété par les avis croisés et les badges de fiabilité. Vous échangez avec les candidats via la messagerie et organisez une rencontre avant de confier vos clés.",
+ a: "Vous publiez votre annonce gratuitement et les gardiens disponibles à Annecy et en Haute-Savoie postulent. Les pièces d'identité soumises sont contrôlées manuellement par l'équipe Guardiens, et les profils qui l'ont obtenue affichent l'écusson « Identité vérifiée », complété par les avis croisés et les badges de fiabilité. Vous échangez avec les candidats via la messagerie et organisez une rencontre avant de confier vos clés.",
  },
  {
  q: "Les gardiens à Annecy sont-ils habitués aux logements de montagne ?",
