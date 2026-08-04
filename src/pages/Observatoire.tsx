@@ -206,8 +206,8 @@ const Observatoire = () => {
  "@type": "Organization",
  name: "Guardiens",
  url: "https://guardiens.fr",
- description:
- "Plateforme française de mise en relation entre propriétaires d'animaux et gardiens vérifiés pour la garde à domicile, sans commission.",
+    description:
+      "Plateforme française de mise en relation entre propriétaires d'animaux et gardiens pour la garde à domicile, sans commission.",
  founder: { "@type": "Person", name: "Jérémie Martinot" },
  foundingDate: "2021",
  areaServed: { "@type": "Country", name: "France" },
