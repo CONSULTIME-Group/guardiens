@@ -1,7 +1,6 @@
 import { useRef } from "react";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { Home, Plane } from "lucide-react";
 import { useInternationalSitsCount } from "@/hooks/useInternationalSitsCount";
 import { useImpressionOnce } from "@/hooks/useImpressionOnce";
 import { trackEvent } from "@/lib/analytics";
@@ -21,14 +20,12 @@ export default function InternationalStrip() {
   const cards = [
     {
       id: "owner_fr",
-      Icon: Home,
       title: t("landing.international.card1.title"),
       cta: t("landing.international.card1.cta"),
       to: "/inscription?role=owner&intent=fr",
     },
     {
       id: "sitter_intl",
-      Icon: Plane,
       title: t("landing.international.card2.title"),
       cta: t("landing.international.card2.cta"),
       to: "/annonces/international",
@@ -56,9 +53,8 @@ export default function InternationalStrip() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 max-w-4xl mx-auto">
-          {cards.map(({ id, Icon, title, cta, to }) => (
+          {cards.map(({ id, title, cta, to }) => (
             <div key={id} className="rounded-2xl border border-border bg-card p-6 flex flex-col gap-3">
-              <Icon className="w-6 h-6 text-primary" aria-hidden="true" />
               <div className="font-body text-base text-foreground">{title}</div>
               <div className="mt-auto pt-2">
                 <Link
