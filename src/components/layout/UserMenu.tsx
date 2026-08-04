@@ -68,10 +68,15 @@ const UserMenu = ({ compact = false, className }: UserMenuProps) => {
           <Eye className="h-4 w-4" aria-hidden="true" />
           Mon profil public
         </DropdownMenuItem>
+        <DropdownMenuItem onSelect={() => navigate("/settings?section=security&focus=pro")} className="gap-2 min-h-11">
+          <BriefcaseBusiness className="h-4 w-4" aria-hidden="true" />
+          Je suis un professionnel
+        </DropdownMenuItem>
         <DropdownMenuItem onSelect={() => navigate("/settings")} className="gap-2 min-h-11">
           <Settings className="h-4 w-4" aria-hidden="true" />
           Paramètres
         </DropdownMenuItem>
+
         <DropdownMenuSeparator />
         <DropdownMenuItem onSelect={() => logout()} className="gap-2 min-h-11 text-destructive focus:text-destructive">
           <LogOut className="h-4 w-4" aria-hidden="true" />
