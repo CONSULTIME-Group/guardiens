@@ -255,7 +255,7 @@ Lyon se compose de neuf arrondissements et d'une ceinture de communes limitrophe
 
 234 animaux accompagnés, des chiens de berger aux chats craintifs, des poules de jardin aux tortues de terrarium. Chaque garde leur a appris quelque chose : comment gérer un chien anxieux en l'absence de son maître, comment rassurer un chat qui se cache pendant trois jours, comment intervenir quand une chaudière tombe en panne un dimanche soir.
 
-C'est cette expérience de terrain qui structure aujourd'hui la plateforme : la rencontre physique obligatoire avant chaque garde, le guide de la maison qui centralise toutes les informations pratiques, le réseau de gardiens d'urgence mobilisables en quelques heures, les avis croisés qui construisent la confiance au fil du temps.
+C'est cette expérience de terrain qui structure aujourd'hui la plateforme : le guide de la maison qui centralise toutes les informations pratiques, les alertes prioritaires envoyées aux gardiens d'urgence éligibles, les avis croisés qui construisent la confiance au fil du temps.
 
 Guardiens accueille aujourd'hui ses premiers membres, ceux qui rejoignent la plateforme pendant sa phase de construction et contribuent à façonner l'outil. Lyon est le point de départ, la France entière le terrain naturel d'expansion.`,
  },
@@ -266,7 +266,7 @@ Guardiens accueille aujourd'hui ses premiers membres, ceux qui rejoignent la pla
 Après avoir accepté une candidature, vous organisez une rencontre directement via la messagerie Guardiens. La plupart des propriétaires à Lyon choisissent un café de quartier ou une visite du logement. Cette étape est systématique et fortement recommandée.
 
 **Que se passe-t-il en cas d'urgence ou d'imprévu ?**
-Guardiens dispose d'un réseau de [gardiens d'urgence à Lyon](/gardien-urgence), mobilisables rapidement. En cas de problème vétérinaire, le gardien contacte la clinique indiquée dans le guide de la maison. En cas de problème technique (fuite, panne), il suit les consignes laissées par le propriétaire.
+Une alerte prioritaire peut être envoyée aux [gardiens d'urgence à Lyon](/gardien-urgence) qui remplissent les critères. En cas de problème vétérinaire, le gardien contacte la clinique indiquée dans le guide de la maison. En cas de problème technique (fuite, panne), il suit les consignes laissées par le propriétaire.
 
 **Comment sont vérifiés les gardiens à Lyon ?**
 La vérification d'identité est ouverte à tous les membres : la pièce envoyée est analysée automatiquement, les dossiers qui ne passent pas sont revus par l'équipe, et les profils validés affichent l'écusson « Identité vérifiée ». Les avis croisés après chaque garde et les badges de fiabilité complètent le dispositif de confiance. [En savoir plus dans la FAQ](/faq#confiance-securite).

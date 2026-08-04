@@ -14,7 +14,7 @@ const LYON_FAQ = [
  },
  {
  q: "Que se passe-t-il en cas d'urgence ou d'imprévu ?",
- a: "Guardiens dispose d'un réseau de gardiens d'urgence à Lyon, mobilisables rapidement. En cas de problème vétérinaire, le gardien contacte la clinique indiquée dans le guide de la maison. En cas de problème technique, il suit les consignes laissées par le propriétaire.",
+ a: "Une alerte prioritaire peut être envoyée aux gardiens d'urgence éligibles à Lyon. En cas de problème vétérinaire, le gardien contacte la clinique indiquée dans le guide de la maison. En cas de problème technique, il suit les consignes laissées par le propriétaire.",
  },
  {
  q: "Comment sont vérifiés les gardiens à Lyon ?",
