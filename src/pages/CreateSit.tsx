@@ -703,7 +703,18 @@ const CreateSit = () => {
           setEndDate(cleanEnd);
           setFlexibleDates(d.flexible_dates || !!(d as any).flexibility_notes);
           setFlexibleNotes((d as any).flexibility_notes || "");
-          applyExpectations(d.specific_expectations || "");
+          // Restauration fidèle si les deux sous-champs bruts existent en base
+          // (brouillons créés après le correctif). Sinon, repli historique.
+          const rawReason: string = ((d as any).absence_reason || "").trim();
+          const rawSitterExp: string = ((d as any).sitter_expectations || "").trim();
+          const faithfulRestore = !!(rawReason || rawSitterExp);
+          if (faithfulRestore) {
+            setAbsenceReason(rawReason);
+            setSitterExpectations(rawSitterExp);
+            setSpecificExpectations(joinExpectations(rawReason, rawSitterExp));
+          } else {
+            applyExpectations(d.specific_expectations || "");
+          }
           setOpenTo(d.open_to || []);
           setIsUrgent(d.is_urgent || false);
           setSitEnvironments(d.environments || []);
@@ -724,9 +735,14 @@ const CreateSit = () => {
           if (hasContent) setSitLocation("home");
           // L'étape atteinte n'est pas stockée en base, on la recalcule à partir
           // du contenu pour ne pas refaire franchir l'étape 1.
-          // Une description historique ne peut pas être répartie de façon fiable.
-          // Le second champ reste donc à compléter avant de poursuivre.
-          const step0Complete = false;
+          // Cas legacy (pas de sous-champs bruts en base) : une description
+          // historique ne peut pas être répartie de façon fiable, on reste à l'étape 0.
+          const titleOk = !!(d.title || "").trim() && (d.title || "").trim().length <= MAX_TITLE_LENGTH;
+          const datesOk = !!cleanStart && !!cleanEnd && cleanEnd >= cleanStart;
+          const subFieldsOk = faithfulRestore
+            && rawReason.length >= MIN_SUB_DESCRIPTION
+            && rawSitterExp.length >= MIN_SUB_DESCRIPTION;
+          const step0Complete = titleOk && datesOk && subFieldsOk;
           if (step0Complete) setCurrentStep(prev => Math.max(prev, 1));
           if (hasContent) setRemoteDraftResumed(true);
           if (datesWerePast) {
@@ -886,6 +902,8 @@ const CreateSit = () => {
         end_date: safeEnd,
         flexible_dates: flexibleDates,
         specific_expectations: expectations,
+        absence_reason: absenceReason || null,
+        sitter_expectations: sitterExpectations || null,
         flexibility_notes: flexibleDates && flexibleNotes.trim() ? flexibleNotes.trim() : null,
         open_to: openTo,
         is_urgent: isUrgent,
