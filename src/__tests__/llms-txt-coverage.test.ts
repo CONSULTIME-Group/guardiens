@@ -43,6 +43,7 @@ describe("llms.txt coverage", () => {
   });
 
   it("annonce le bon nombre de badges, aligné sur BADGE_DEFINITIONS", async () => {
+    const llmsTxt = readFileSync(resolve(process.cwd(), "public/llms.txt"), "utf-8");
     const { BADGE_DEFINITIONS } = await import("@/components/badges/badge-definitions");
     const count = Object.keys(BADGE_DEFINITIONS).length;
     expect(
