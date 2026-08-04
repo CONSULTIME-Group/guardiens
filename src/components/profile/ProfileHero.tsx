@@ -380,6 +380,16 @@ const ProfileHero = ({
                 </p>
               )}
 
+              {proSpecialtyLabel && (
+                <p className="text-sm text-foreground/85 font-medium mt-0.5 break-words">
+                  {proSpecialtyLabel}
+                </p>
+              )}
+              {showBusinessName && (
+                <p className="text-[13px] sm:text-sm text-foreground/80 break-words">
+                  {proBusinessName}
+                </p>
+              )}
               {showTagline && (
                 <p className="font-heading italic text-foreground/85 mt-1 text-[13.5px] sm:text-sm max-w-full break-words">
                   «&nbsp;{proTagline}&nbsp;»
