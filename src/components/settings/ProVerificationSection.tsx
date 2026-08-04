@@ -187,7 +187,7 @@ const ProVerificationSection = ({ user }: { user: any }) => {
         <div className="flex-1 min-w-0">
           <h2 className="font-heading text-xl font-bold text-foreground">Espace Pro vérifié</h2>
           <p className="text-sm text-muted-foreground mt-1">
-            Vous êtes éducateur, vétérinaire, toiletteur, comportementaliste ou pension agréée ? Justifiez votre statut professionnel et obtenez la pastille « Pro vérifié » sur votre profil public. Libre à vous ensuite de proposer vos services rémunérés en toute transparence.
+            Vous êtes éducateur, vétérinaire, toiletteur, comportementaliste ou pension agréée ? Déclarez votre activité pour que les propriétaires sachent à qui ils parlent. Vos prestations rémunérées passent par votre fiche dans l'annuaire des pros, jamais par une garde.
           </p>
         </div>
         {proStatus === "verified" && (
