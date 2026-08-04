@@ -264,7 +264,7 @@ const GuideDetail = () => {
         )}
 
         {/* Places by category */}
-        <main className="max-w-5xl mx-auto px-4 pb-16">
+        <div className="max-w-5xl mx-auto px-4 pb-16">
           <div className="space-y-10">
             {categories.map((cat) => {
               const config = CATEGORY_CONFIG[cat] || { key: cat, icon: MapPin, color: "gray" };
@@ -373,7 +373,7 @@ const GuideDetail = () => {
               {t("guide_detail.see_sits", { city: guide.city })}
             </Link>
           </div>
-        </main>
+        </div>
 
         {/* Schema.org */}
         {/* JSON-LD: Breadcrumb */}

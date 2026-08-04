@@ -71,7 +71,7 @@ const BreedsListing = () => {
         <script type="application/ld+json">{JSON.stringify(jsonLd)}</script>
       </Helmet>
 
-      <main className="min-w-0 max-w-5xl mx-auto px-4 py-8 md:py-12">
+      <div className="min-w-0 max-w-5xl mx-auto px-4 py-8 md:py-12">
         <header className="mb-6 md:mb-10">
           <h1 className="font-serif text-2xl md:text-4xl font-bold text-foreground mb-3">
             {t("breeds_listing.h1")}
@@ -102,7 +102,7 @@ const BreedsListing = () => {
             </div>
           </section>
         ))}
-      </main>
+      </div>
     </>
   );
 };

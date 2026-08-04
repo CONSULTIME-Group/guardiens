@@ -29,6 +29,8 @@ interface AuthContextType {
   loading: boolean;
   hasSession: boolean;
   authChecked: boolean;
+  /** Vrai uniquement sur un échec avéré de lecture du profil, jamais sur un simple délai. */
+  profileError: boolean;
   switchRole: (role: ActiveRole) => void;
   setActiveRole: (role: ActiveRole) => void;
   login: (email: string, password: string) => Promise<void>;
@@ -90,6 +92,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [loading, setLoading] = useState(true);
   const [hasSession, setHasSession] = useState(() => detectPersistedToken());
   const [authChecked, setAuthChecked] = useState(false);
+  const [profileError, setProfileError] = useState(false);
   const roleInitialized = useRef(false);
   const userRef = useRef<Profile | null>(null);
 
@@ -131,6 +134,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const profile = mapProfile(data, supabaseUser.email);
       userRef.current = profile;
       setUser(profile);
+      setProfileError(false);
 
       // Only initialize role ONCE per session — never override user's manual choice
       if (!roleInitialized.current) {
@@ -205,15 +209,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
               await fetchProfile(session.user);
               setHasSession(true);
               setAuthChecked(true);
+              setProfileError(false);
               if (getOAuthTraceId()) {
                 logOAuthStage("user_endpoint_ok", "auth-context");
                 endOAuthFlow("success");
               }
             } catch {
+              // Échec avéré de lecture du profil : la session reste valide,
+              // on signale l'erreur sans renvoyer l'utilisateur au formulaire.
               userRef.current = null;
               setUser(null);
-              setHasSession(false);
+              setHasSession(true);
               setAuthChecked(true);
+              setProfileError(true);
             } finally {
               setLoading(false);
             }
@@ -227,6 +235,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           markChecked(false);
           userRef.current = null;
           setUser(null);
+          setProfileError(false);
           roleInitialized.current = false;
           setLoading(false);
         }
@@ -236,11 +245,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     supabase.auth.getSession().then(async ({ data: { session } }) => {
       if (session?.user) {
         markChecked(true);
-        await fetchProfile(session.user);
-        setHasSession(true);
-        setAuthChecked(true);
+        try {
+          await fetchProfile(session.user);
+          setHasSession(true);
+          setAuthChecked(true);
+          setProfileError(false);
+        } catch {
+          // Session valide, lecture du profil en échec avéré.
+          userRef.current = null;
+          setUser(null);
+          setHasSession(true);
+          setAuthChecked(true);
+          setProfileError(true);
+        }
       } else {
         markChecked(false);
+        setProfileError(false);
       }
       setLoading(false);
     }).catch(() => {
@@ -346,6 +366,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     userRef.current = null;
     setUser(null);
     setHasSession(false);
+    setProfileError(false);
     roleInitialized.current = false;
     await supabase.auth.signOut();
   }, []);
@@ -353,7 +374,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const refreshProfile = useCallback(async () => {
     const { data: { session } } = await supabase.auth.getSession();
     if (session?.user) {
-      await fetchProfile(session.user);
+      try {
+        await fetchProfile(session.user);
+      } catch (e) {
+        setProfileError(true);
+        throw e;
+      }
     }
   }, [fetchProfile]);
 
@@ -366,6 +392,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         loading,
         hasSession,
         authChecked,
+        profileError,
         switchRole,
         setActiveRole,
         login,

@@ -810,14 +810,9 @@
 }
 
 /* Barres de filtres collantes des pages de recherche : elles s'accrochent à
-   la hauteur réelle de l'en tête public quand il est monté. Sans en tête
-   public, repli sur la top bar mobile de la coquille applicative (52 px) et
-   sur zéro en desktop, où aucune bande fixe ne précède le contenu. */
+   la hauteur réelle de l'en tête public quand il est monté, sinon à la hauteur
+   réelle de la top bar mobile de la coquille applicative. Aucune valeur en dur,
+   les deux variables sont mesurées au runtime et retirées au démontage. */
 .search-sticky-offset {
-  top: var(--public-header-h, 52px);
-}
-@media (min-width: 768px) {
-  .search-sticky-offset {
-    top: var(--public-header-h, 0px);
-  }
+  top: var(--public-header-h, var(--app-topbar-h, 0px));
 }

@@ -245,12 +245,14 @@ const ProfileUnavailable = () => {
 };
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
-  const { isAuthenticated, user, hasSession, loading } = useAuth();
+  const { isAuthenticated, user, hasSession, loading, profileError } = useAuth();
   const location = useLocation();
   if (loading) return <FallbackSpinner />;
-  // Session valide mais profil illisible durablement : message explicite et
-  // actionnable, jamais un retour muet au formulaire de connexion.
-  if (hasSession && !user) return <ProfileUnavailable />;
+  // Échec avéré de lecture du profil : message explicite et actionnable, jamais
+  // un retour muet au formulaire. Un simple délai réseau ne déclenche pas cet
+  // écran, il laisse la coquille en chargement.
+  if (profileError && !user) return <ProfileUnavailable />;
+  if (hasSession && !user) return <FallbackSpinner />;
   if (!isAuthenticated) {
     // Preserve the originally requested URL so the user is returned
     // to it after a successful login/signup.

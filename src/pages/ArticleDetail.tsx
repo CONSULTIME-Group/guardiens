@@ -472,7 +472,7 @@ export default function ArticleDetail() {
  }) }} />
  )}
 
- <main id="main-content">
+ <div>
   <PageBreadcrumb items={[
  { label: t("article.news", "Le journal"), href: "/actualites" },
  { label: article.title },
@@ -648,7 +648,7 @@ export default function ArticleDetail() {
  </div>
  )}
  </article>
- </main>
+ </div>
  </>
  );
 }

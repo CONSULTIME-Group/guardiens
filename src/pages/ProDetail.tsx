@@ -176,7 +176,7 @@ export default function ProDetail() {
         </div>
       )}
 
-      <main className="container mx-auto px-4 py-6 md:py-10 max-w-4xl min-w-0">
+      <div className="container mx-auto px-4 py-6 md:py-10 max-w-4xl min-w-0">
         {/* Fil d'Ariane visible */}
         <nav aria-label="Fil d'Ariane" className="text-xs text-muted-foreground mb-4">
           <ol className="flex flex-wrap items-center gap-1">
@@ -341,7 +341,7 @@ export default function ProDetail() {
         {pro.status === "approved" && (
           <SimilarPros currentId={pro.id} category={pro.category} city={pro.city} />
         )}
-      </main>
+      </div>
     </div>
   );
 }
