@@ -1128,7 +1128,7 @@ export default function PublicSitterProfile() {
 
 
   return (
-    <div className="min-h-screen bg-background">
+    <div id="main-content" className="min-h-screen bg-background">
       {/* Coquille connectée : en tête et pilule de navigation, pour ne pas
           enfermer l'utilisateur sur cette page. Visiteur : rendu inchangé. */}
       {hasSession && (

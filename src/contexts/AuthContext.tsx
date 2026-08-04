@@ -31,6 +31,8 @@ interface AuthContextType {
   authChecked: boolean;
   /** Vrai uniquement sur un échec avéré de lecture du profil, jamais sur un simple délai. */
   profileError: boolean;
+  /** Vrai quand la vérification distante n'a pas répondu dans le délai prévu. */
+  authTimeout: boolean;
   switchRole: (role: ActiveRole) => void;
   setActiveRole: (role: ActiveRole) => void;
   login: (email: string, password: string) => Promise<void>;
@@ -40,6 +42,16 @@ interface AuthContextType {
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
+
+class AuthTimeoutError extends Error {
+  constructor() {
+    super("Auth timeout");
+    this.name = "AuthTimeoutError";
+  }
+}
+
+const isAuthTimeoutError = (error: unknown): error is AuthTimeoutError =>
+  error instanceof AuthTimeoutError;
 
 const isInvalidSessionError = (error: unknown): boolean => {
   if (!error || typeof error !== "object") return false;
@@ -105,15 +117,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [hasSession, setHasSession] = useState(() => detectPersistedToken());
   const [authChecked, setAuthChecked] = useState(false);
   const [profileError, setProfileError] = useState(false);
+  const [authTimeout, setAuthTimeout] = useState(false);
   const roleInitialized = useRef(false);
   const userRef = useRef<Profile | null>(null);
+  const settledRef = useRef(false);
 
   const clearInvalidSession = useCallback(() => {
+    settledRef.current = true;
     userRef.current = null;
     setUser(null);
     setHasSession(false);
     setAuthChecked(true);
     setProfileError(false);
+    setAuthTimeout(false);
     setLoading(false);
     roleInitialized.current = false;
     void supabase.auth.signOut({ scope: "local" }).catch(() => {});
@@ -145,11 +161,34 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   const fetchProfile = useCallback(async (supabaseUser: SupabaseUser) => {
-    const { data, error } = await supabase
+    setAuthTimeout(false);
+    const profileRequest = supabase
       .from("profiles")
       .select("id, role, first_name, last_name, avatar_url, profile_completion, identity_verified, is_founder, onboarding_completed, onboarding_minimal_completed, onboarding_dismissed_at")
       .eq("id", supabaseUser.id)
       .single();
+
+    let timeoutId: ReturnType<typeof window.setTimeout> | undefined;
+    const profileTimeout = new Promise<never>((_, reject) => {
+      timeoutId = window.setTimeout(() => reject(new AuthTimeoutError()), 8000);
+    });
+
+    let result: Awaited<typeof profileRequest>;
+    try {
+      result = await Promise.race([profileRequest, profileTimeout]);
+    } catch (error) {
+      if (isAuthTimeoutError(error)) {
+        setHasSession(false);
+        setAuthChecked(true);
+        setAuthTimeout(true);
+        setLoading(false);
+      }
+      throw error;
+    } finally {
+      if (timeoutId !== undefined) window.clearTimeout(timeoutId);
+    }
+
+    const { data, error } = result;
 
     if (error || !data) throw error ?? new Error("Profil introuvable");
 
@@ -158,6 +197,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       userRef.current = profile;
       setUser(profile);
       setProfileError(false);
+      setAuthTimeout(false);
 
       // Only initialize role ONCE per session — never override user's manual choice
       if (!roleInitialized.current) {
@@ -209,11 +249,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     // temps que le refresh se résolve.
     const hasPersistedToken = detectPersistedToken();
 
-    let settled = false;
+    settledRef.current = false;
     const markChecked = (session: boolean) => {
-      settled = true;
+      settledRef.current = true;
       setHasSession(session);
       setAuthChecked(true);
+      setAuthTimeout(false);
     };
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
@@ -238,12 +279,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 endOAuthFlow("success");
               }
             } catch (error) {
+              if (isAuthTimeoutError(error)) return;
               if (isInvalidSessionError(error)) {
                 clearInvalidSession();
               } else {
                 // Échec avéré de lecture du profil avec une session valide.
-                userRef.current = null;
-                setUser(null);
                 setHasSession(true);
                 setAuthChecked(true);
                 setProfileError(true);
@@ -255,7 +295,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         } else {
           // (B) INITIAL_SESSION à null + token persistant : on attend
           // SIGNED_IN / TOKEN_REFRESHED ou la résolution de getSession().
-          if (event === "INITIAL_SESSION" && hasPersistedToken && !settled) {
+          if (event === "INITIAL_SESSION" && hasPersistedToken && !settledRef.current) {
             return;
           }
           markChecked(false);
@@ -277,12 +317,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           setAuthChecked(true);
           setProfileError(false);
         } catch (error) {
+          if (isAuthTimeoutError(error)) return;
           if (isInvalidSessionError(error)) {
             clearInvalidSession();
           } else {
             // Session valide, lecture du profil en échec avéré.
-            userRef.current = null;
-            setUser(null);
             setHasSession(true);
             setAuthChecked(true);
             setProfileError(true);
@@ -297,9 +336,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (isInvalidSessionError(error) || !hasPersistedToken) {
         clearInvalidSession();
       } else {
-        setHasSession(true);
+        setHasSession(false);
         setAuthChecked(true);
-        setProfileError(true);
+        setAuthTimeout(true);
       }
       setLoading(false);
     });
@@ -308,19 +347,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     // Avec un token probable, conserve le chargement pour éviter toute bascule.
     const safety = window.setTimeout(() => {
       setAuthChecked(true);
-      if (!hasPersistedToken && !settled && !userRef.current) {
+      if (!hasPersistedToken && !settledRef.current && !userRef.current) {
         setHasSession(false);
         setLoading(false);
       }
     }, 1500);
 
-    // Une attente anormalement longue devient une erreur explicite, jamais une
-    // redirection silencieuse vers la connexion.
+    // Ce délai couvre getSession. fetchProfile possède son propre délai afin
+    // qu'une session déjà résolue ne puisse pas laisser le chargement bloqué.
     const extendedSafety = window.setTimeout(() => {
-      if (hasPersistedToken && !settled && !userRef.current) {
-        setHasSession(true);
+      if (hasPersistedToken && !settledRef.current && !userRef.current) {
+        setHasSession(false);
         setAuthChecked(true);
-        setProfileError(true);
+        setAuthTimeout(true);
         setLoading(false);
       }
     }, 8000);
@@ -344,6 +383,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         try {
           await fetchProfile(data.user);
         } catch (error) {
+          if (isAuthTimeoutError(error)) return;
           if (isInvalidSessionError(error)) {
             clearInvalidSession();
           } else {
@@ -424,6 +464,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setUser(null);
     setHasSession(false);
     setProfileError(false);
+    setAuthTimeout(false);
     roleInitialized.current = false;
     await supabase.auth.signOut();
   }, []);
@@ -434,6 +475,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       try {
         await fetchProfile(session.user);
       } catch (error) {
+        if (isAuthTimeoutError(error)) throw error;
         if (isInvalidSessionError(error)) {
           clearInvalidSession();
         } else {
@@ -455,6 +497,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         hasSession,
         authChecked,
         profileError,
+        authTimeout,
         switchRole,
         setActiveRole,
         login,

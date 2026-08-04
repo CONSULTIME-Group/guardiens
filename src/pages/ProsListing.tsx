@@ -87,7 +87,7 @@ export default function ProsListing() {
       </Helmet>
       <PublicHeader />
 
-      <main className="container mx-auto px-4 py-6 md:py-10 max-w-6xl min-w-0">
+      <div className="container mx-auto px-4 py-6 md:py-10 max-w-6xl min-w-0">
         {/* En-tête épuré */}
         <header className="mb-6 md:mb-8">
           <div className="flex items-baseline gap-2 flex-wrap">
@@ -309,7 +309,7 @@ export default function ProsListing() {
             ))}
           </div>
         </section>
-      </main>
+      </div>
       <PublicFooter />
     </div>
   );

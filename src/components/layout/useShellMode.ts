@@ -15,8 +15,9 @@ export type ShellMode = "app" | "public" | "pending";
  *             donc aucune permutation de coquille visible.
  */
 export const useShellMode = (): ShellMode => {
-  const { hasSession, authChecked, loading, user } = useAuth();
+  const { hasSession, authChecked, loading, user, authTimeout } = useAuth();
 
+  if (authTimeout) return "pending";
   if (!hasSession && !authChecked) return "public";
   if (authChecked && !hasSession) return "public";
   if (hasSession && user) return "app";
