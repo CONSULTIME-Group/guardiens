@@ -230,7 +230,7 @@ const Observatoire = () => {
  <script type="application/ld+json">{JSON.stringify(orgSchema)}</script>
  </Helmet>
 
- <div id="main-content" className="min-w-0">
+ <div className="min-w-0">
  <PageBreadcrumb items={[{ label: "Observatoire" }]} />
 
  <header className="max-w-4xl mx-auto px-4 pt-8 pb-10">

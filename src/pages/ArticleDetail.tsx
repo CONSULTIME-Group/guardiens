@@ -472,7 +472,7 @@ export default function ArticleDetail() {
  }) }} />
  )}
 
- <div id="main-content">
+ <div>
   <PageBreadcrumb items={[
  { label: t("article.news", "Le journal"), href: "/actualites" },
  { label: article.title },

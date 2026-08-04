@@ -144,7 +144,7 @@ export default function ArticleInventaire() {
         <script type="application/ld+json">{JSON.stringify(faqSchema)}</script>
       </Helmet>
 
-      <div id="main-content" className="min-w-0">
+      <div className="min-w-0">
         <PageBreadcrumb
           items={[
             { label: "Le journal", href: "/actualites" },
