@@ -1568,6 +1568,33 @@ export type Database = {
         }
         Relationships: []
       }
+      content_defect_test_cases: {
+        Row: {
+          created_at: string
+          doit_matcher: boolean
+          id: number
+          origine: string | null
+          regle_attendue: string
+          texte: string
+        }
+        Insert: {
+          created_at?: string
+          doit_matcher: boolean
+          id?: number
+          origine?: string | null
+          regle_attendue: string
+          texte: string
+        }
+        Update: {
+          created_at?: string
+          doit_matcher?: boolean
+          id?: number
+          origine?: string | null
+          regle_attendue?: string
+          texte?: string
+        }
+        Relationships: []
+      }
       content_quality_alerts: {
         Row: {
           article_id: string
@@ -7066,6 +7093,36 @@ export type Database = {
         }
         Relationships: []
       }
+      v_detector_selftest: {
+        Row: {
+          detecte: boolean | null
+          doit_matcher: boolean | null
+          id: number | null
+          origine: string | null
+          regle_attendue: string | null
+          texte: string | null
+          verdict: string | null
+        }
+        Insert: {
+          detecte?: never
+          doit_matcher?: boolean | null
+          id?: number | null
+          origine?: string | null
+          regle_attendue?: string | null
+          texte?: string | null
+          verdict?: never
+        }
+        Update: {
+          detecte?: never
+          doit_matcher?: boolean | null
+          id?: number | null
+          origine?: string | null
+          regle_attendue?: string | null
+          texte?: string | null
+          verdict?: never
+        }
+        Relationships: []
+      }
       v_email_pipeline_health: {
         Row: {
           attempts_1h: number | null
@@ -7440,6 +7497,10 @@ export type Database = {
           p_user_id: string
         }
         Returns: undefined
+      }
+      check_content_quality: {
+        Args: { p_seuil_alertes?: number }
+        Returns: Json
       }
       check_invitation_quota: { Args: { _owner_id: string }; Returns: boolean }
       claim_mission_event: {
