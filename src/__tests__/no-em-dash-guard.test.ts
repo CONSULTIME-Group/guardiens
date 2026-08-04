@@ -67,9 +67,10 @@ describe('Tirets longs', () => {
 
   it("le demi-cadratin « – » (U+2013) n'est jamais utilisé en ponctuation de phrase", () => {
     // Seul cas toléré : séparateur de plage numérique collé, du type « 10–12 » ou
-    // « 2024–2026 ». Toute autre occurrence est de la ponctuation de phrase.
-    const lines = search('\\xE2\\x80\\x93').filter(
-      (line) => !/(?<=\d)\u2013(?=\d)/.test(line) || /\s\u2013\s|\u2013(?=\D)|(?<=\D)\u2013/.test(line)
+    // « 2024–2026 ». Toute occurrence non encadrée par deux chiffres est de la
+    // ponctuation de phrase.
+    const lines = search('\\xE2\\x80\\x93').filter((line) =>
+      /(?<!\d)\u2013|\u2013(?!\d)/.test(line)
     );
     if (lines.length > 0) {
       throw new Error(
