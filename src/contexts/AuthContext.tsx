@@ -119,11 +119,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   const fetchProfile = useCallback(async (supabaseUser: SupabaseUser) => {
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from("profiles")
       .select("id, role, first_name, last_name, avatar_url, profile_completion, identity_verified, is_founder, onboarding_completed, onboarding_minimal_completed, onboarding_dismissed_at")
       .eq("id", supabaseUser.id)
       .single();
+
+    if (error || !data) throw error ?? new Error("Profil introuvable");
 
     if (data) {
       const profile = mapProfile(data, supabaseUser.email);
@@ -201,6 +203,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           setTimeout(async () => {
             try {
               await fetchProfile(session.user);
+              setHasSession(true);
+              setAuthChecked(true);
               if (getOAuthTraceId()) {
                 logOAuthStage("user_endpoint_ok", "auth-context");
                 endOAuthFlow("success");
@@ -233,6 +237,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (session?.user) {
         markChecked(true);
         await fetchProfile(session.user);
+        setHasSession(true);
+        setAuthChecked(true);
       } else {
         markChecked(false);
       }
