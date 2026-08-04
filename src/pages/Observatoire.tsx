@@ -175,12 +175,37 @@ const Observatoire = () => {
     <Card><CardContent className="p-5"><p className="text-3xl font-bold text-primary leading-none mb-2">{fmt(counts?.places_total || 0)}</p><p className="text-sm font-semibold text-foreground mb-1">Lieux dog-friendly</p><p className="text-xs text-muted-foreground">Parcs, cafés, sentiers, vétérinaires…</p></CardContent></Card>
     <Card><CardContent className="p-5"><p className="text-3xl font-bold text-primary leading-none mb-2">{fmt(counts?.pros_total || 0)}</p><p className="text-sm font-semibold text-foreground mb-1">Professionnels</p><p className="text-xs text-muted-foreground">Fiches vérifiées de l'annuaire.</p></CardContent></Card>
   </div>
-  <div className="mt-5">
-    <Link to="/actualites/inventaire-guardiens-france#demande" className="text-primary hover:underline text-sm font-medium">
-      Voir l'inventaire complet et demander une analyse →
-    </Link>
-  </div>
  </section>
+
+ <section className="max-w-5xl mx-auto px-4 py-12 border-t border-border">
+   <h2 className="font-serif text-2xl font-semibold text-foreground mb-2">
+     Quels animaux sont confiés sur Guardiens ?
+   </h2>
+   <p className="text-muted-foreground mb-6 max-w-3xl leading-relaxed">
+     Ces chiffres portent sur les animaux déclarés par les membres sur leur profil, pas sur les animaux effectivement gardés. Ils décrivent qui cherche une solution de garde, pas qui en a déjà bénéficié. Compteur recalculé à chaque visite.
+   </p>
+   <div className="grid gap-4 sm:grid-cols-2 mb-6">
+     <Card><CardContent className="p-5"><p className="text-3xl font-bold text-primary leading-none mb-2">{fmt(species?.total_animaux_declares || 0)}</p><p className="text-sm font-semibold text-foreground mb-1">Animaux déclarés</p><p className="text-xs text-muted-foreground">Renseignés par les membres sur leur profil.</p></CardContent></Card>
+     <Card><CardContent className="p-5"><p className="text-3xl font-bold text-primary leading-none mb-2">{fmt(species?.total_membres || 0)}</p><p className="text-sm font-semibold text-foreground mb-1">Membres inscrits</p><p className="text-xs text-muted-foreground">Propriétaires et gardiens confondus.</p></CardContent></Card>
+   </div>
+   <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+     {(species?.par_espece ?? []).map((row) => (
+       <Card key={row.espece}>
+         <CardContent className="p-5">
+           <p className="text-3xl font-bold text-primary leading-none mb-2">{fmt(row.nombre)}</p>
+           <p className="text-sm font-semibold text-foreground mb-1">{SPECIES_LABELS[row.espece] ?? row.espece}</p>
+           <p className="text-xs text-muted-foreground">{new Intl.NumberFormat("fr-FR", { maximumFractionDigits: 1 }).format(row.part_pourcent)} % des animaux déclarés.</p>
+         </CardContent>
+       </Card>
+     ))}
+   </div>
+   {species?.calcule_le ? (
+     <p className="mt-5 text-sm text-muted-foreground">
+       Calculé le {formatFrDate(species.calcule_le)}.
+     </p>
+   ) : null}
+ </section>
+
 
  <section className="max-w-4xl mx-auto px-4 py-12 border-t border-border">
  <h2 className="font-serif text-2xl font-semibold text-foreground mb-6">
