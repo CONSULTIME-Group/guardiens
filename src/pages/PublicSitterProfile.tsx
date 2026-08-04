@@ -488,13 +488,9 @@ export default function PublicSitterProfile() {
             ...publicData,
             hero_image_index: baseData?.hero_image_index ?? null,
             cancellation_count: baseData?.cancellation_count ?? 0,
-            pro_status: baseData?.pro_status ?? null,
-            pro_specialty: baseData?.pro_specialty ?? null,
-            pro_tagline: baseData?.pro_tagline ?? null,
-            pro_pricing_note: baseData?.pro_pricing_note ?? null,
-            pro_business_name: baseData?.pro_business_name ?? null,
           }
         : baseData;
+
       const fetchedSitterProfile = sitterRes?.data ?? null;
       const fetchedOwnerProfile = (ownerRes?.data as OwnerProfileData | null) ?? null;
       const fetchedEmergencyProfile = emergencyRes?.data ?? null;
