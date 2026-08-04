@@ -294,9 +294,11 @@ const Observatoire = () => {
      Ces chiffres viennent des profils créés sur Guardiens et se recalculent à chaque visite. Ils décrivent nos membres, leurs animaux et leurs logements, pas les gardes réalisées.
    </p>
 
-   {!species ? (
-     <p className="text-sm text-muted-foreground">Chargement des données en cours.</p>
-   ) : (
+    {speciesError ? (
+      <p className="text-sm text-muted-foreground">Les données de la plateforme ne sont pas disponibles pour le moment.</p>
+    ) : !species ? (
+      <p className="text-sm text-muted-foreground">Chargement des données en cours.</p>
+    ) : (
      <>
        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 mb-10">
          <Card><CardContent className="p-5"><p className="text-3xl font-bold text-primary leading-none mb-2">{fmt(species.total_membres)}</p><p className="text-sm font-semibold text-foreground mb-1">Membres inscrits</p><p className="text-xs text-muted-foreground">Propriétaires et gardiens confondus.</p></CardContent></Card>
