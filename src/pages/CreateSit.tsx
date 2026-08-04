@@ -902,6 +902,8 @@ const CreateSit = () => {
         end_date: safeEnd,
         flexible_dates: flexibleDates,
         specific_expectations: expectations,
+        absence_reason: absenceReason || null,
+        sitter_expectations: sitterExpectations || null,
         flexibility_notes: flexibleDates && flexibleNotes.trim() ? flexibleNotes.trim() : null,
         open_to: openTo,
         is_urgent: isUrgent,
