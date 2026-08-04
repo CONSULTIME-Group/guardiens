@@ -62,10 +62,10 @@ const FORBIDDEN_CLAIMS: RegExp[] = [
  */
 function removeAllowedBadgeNames(source: string): string {
   return source
-    .replaceAll("« Identité vérifiée »", "")
-    .replaceAll('"Identité vérifiée"', "")
-    .replaceAll("« ID vérifiée »", "")
-    .replaceAll('"ID vérifiée"', "");
+    .split("« Identité vérifiée »").join("")
+    .split('"Identité vérifiée"').join("")
+    .split("« ID vérifiée »").join("")
+    .split('"ID vérifiée"').join("");
 }
 
 /**
