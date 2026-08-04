@@ -491,7 +491,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       value={{
         user,
         activeRole,
-        isAuthenticated: !!user || (hasSession && authChecked),
+        isAuthenticated: !!user || (hasSession && authChecked && !authTimeout),
         loading,
         hasSession,
         authChecked,
