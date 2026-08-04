@@ -123,6 +123,45 @@ const formatFrDate = (iso: string) => {
   return d.toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" });
 };
 
+const formatPct = (n: number) =>
+  new Intl.NumberFormat("fr-FR", { maximumFractionDigits: 1 }).format(n || 0);
+
+const BreakdownList = ({
+  title,
+  rows,
+  labels,
+}: {
+  title: string;
+  rows: BreakdownRow[];
+  labels: Record<string, string>;
+}) => {
+  if (!rows?.length) return null;
+  return (
+    <div>
+      <h3 className="font-serif text-lg font-semibold text-foreground mb-4">{title}</h3>
+      <ul className="space-y-3">
+        {rows.map((row) => (
+          <li key={row.cle}>
+            <div className="flex items-baseline justify-between gap-3 text-sm">
+              <span className="font-medium text-foreground">{labels[row.cle] ?? row.cle}</span>
+              <span className="text-muted-foreground tabular-nums">
+                {new Intl.NumberFormat("fr-FR").format(row.nombre)} ({formatPct(row.part_pourcent)} %)
+              </span>
+            </div>
+            <div className="mt-1 h-1.5 rounded-full bg-muted overflow-hidden">
+              <div
+                className="h-full rounded-full bg-primary"
+                style={{ width: `${Math.min(100, Math.max(0, row.part_pourcent || 0))}%` }}
+              />
+            </div>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+};
+
+
 
 const Observatoire = () => {
   const { data: counts } = useInventaireCounts();
