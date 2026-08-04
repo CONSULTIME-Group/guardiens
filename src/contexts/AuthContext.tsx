@@ -112,7 +112,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     userRef.current = null;
     setUser(null);
     setHasSession(false);
+    setAuthChecked(true);
     setProfileError(false);
+    setLoading(false);
     roleInitialized.current = false;
     void supabase.auth.signOut({ scope: "local" }).catch(() => {});
   }, []);
@@ -291,8 +293,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setProfileError(false);
       }
       setLoading(false);
-    }).catch(() => {
-      markChecked(false);
+    }).catch((error) => {
+      if (isInvalidSessionError(error) || !hasPersistedToken) {
+        clearInvalidSession();
+      } else {
+        setHasSession(true);
+        setAuthChecked(true);
+        setProfileError(true);
+      }
       setLoading(false);
     });
 
@@ -335,14 +343,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         // jamais faire échouer la connexion, le profil sera rechargé ensuite.
         try {
           await fetchProfile(data.user);
-        } catch {
-          // silencieux, onAuthStateChange et refreshProfile prendront le relais
+        } catch (error) {
+          if (isInvalidSessionError(error)) {
+            clearInvalidSession();
+          } else {
+            setHasSession(true);
+            setAuthChecked(true);
+            setProfileError(true);
+          }
         }
       }
     } finally {
       setLoading(false);
     }
-  }, [fetchProfile]);
+  }, [clearInvalidSession, fetchProfile]);
 
   const register = useCallback(async (email: string, password: string, role: Role, nextPath?: string) => {
     const { data, error } = await supabase.auth.signUp({
