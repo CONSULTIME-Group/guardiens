@@ -400,9 +400,9 @@ const AppRoutes = () => {
       <Route path="/forgot-password" element={<PublicOnlyRoute><ForgotPassword /></PublicOnlyRoute>} />
       <Route path="/reset-password" element={<ResetPassword />} />
       
-      <Route path="/conseils" element={<ContentRoute><AlmaTips /></ContentRoute>} />
+      <Route path="/conseils" element={<PublicShellRoute><AlmaTips /></PublicShellRoute>} />
       <Route path="/alma" element={<PublicShellRoute><AlmaEvolution /></PublicShellRoute>} />
-      <Route path="/actualites" element={<ContentRoute><News /></ContentRoute>} />
+      <Route path="/actualites" element={<PublicShellRoute><News /></PublicShellRoute>} />
       <Route path="/actualites/inventaire-guardiens-france" element={<PublicShellRoute><ArticleInventaire /></PublicShellRoute>} />
       <Route path="/actualites/:slug" element={<PublicShellRoute><ArticleDetail /></PublicShellRoute>} />
       <Route path="/auteurs/:slug" element={<AuthorPage />} />
@@ -424,7 +424,7 @@ const AppRoutes = () => {
       <Route path="/confidentialite" element={<Privacy />} />
       <Route path="/mentions-legales" element={<MentionsLegales />} />
       <Route path="/faq" element={<FAQ />} />
-      <Route path="/guides" element={<ContentRoute><GuidesListing /></ContentRoute>} />
+      <Route path="/guides" element={<PublicShellRoute><GuidesListing /></PublicShellRoute>} />
       <Route path="/guides/:slug" element={<PublicShellRoute><GuideDetail /></PublicShellRoute>} />
       <Route path="/guide" element={<Navigate to="/guides" replace />} />
       <Route path="/guide/:slug" element={<NavigateGuideSlug />} />
@@ -436,7 +436,7 @@ const AppRoutes = () => {
       <Route path="/tarifs" element={<Pricing />} />
       <Route path="/test-accord" element={<div className="p-6 bg-background min-h-screen"><TestAccordLazy /></div>} />
       <Route path="/gardien-urgence" element={<EmergencySitter />} />
-      <Route path="/petites-missions" element={<ContentRoute><EntraideHub /></ContentRoute>} />
+      <Route path="/petites-missions" element={<PublicShellRoute><EntraideHub /></PublicShellRoute>} />
       <Route path="/petites-missions/creer" element={<ProtectedRoute><CreateSmallMission /></ProtectedRoute>} />
       <Route path="/petites-missions/nouveau" element={<Navigate to="/petites-missions/creer" replace />} />
       <Route path="/petites-missions/lyon" element={<MissionsCityPage />} />
@@ -452,7 +452,7 @@ const AppRoutes = () => {
       <Route path="/annonces/demo/:slug" element={<DemoSitDetail />} />
       <Route path="/annonces/:id" element={<PublicSitDetail />} />
       <Route path="/gardiens/:id" element={<PublicSitterProfile />} />
-      <Route path="/pros" element={<ContentRoute><ProsListing /></ContentRoute>} />
+      <Route path="/pros" element={<PublicShellRoute><ProsListing /></PublicShellRoute>} />
       <Route path="/pros/inscription" element={<AppLayout><ProOnboarding /></AppLayout>} />
       <Route path="/onboarding/affinity" element={<ProtectedRoute><OnboardingAffinity /></ProtectedRoute>} />
       <Route path="/pros/mon-espace" element={<AppLayout><MyProProfile /></AppLayout>} />
