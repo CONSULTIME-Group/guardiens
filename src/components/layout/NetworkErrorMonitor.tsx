@@ -141,6 +141,21 @@ const extractPgFields = (body: string | null): Record<string, string> => {
   }
 };
 
+/**
+ * Erreurs métier levées volontairement par une fonction Postgres via
+ * RAISE EXCEPTION (code P0001). PostgREST les renvoie en 400, mais ce sont
+ * des refus fonctionnels attendus (doublon d'alerte, quota de zones atteint,
+ * ville ou rayon invalide), déjà traités par un message clair côté appelant.
+ * Aucun toast technique, aucun log admin.
+ */
+const isBusinessRpcRefusal = (
+  url: string,
+  status: number,
+  pg: Record<string, string>,
+): boolean =>
+  status === 400 &&
+  /\/rest\/v1\/rpc\//.test(url) &&
+  pg.pg_code === "P0001";
 
 const NetworkErrorMonitor = () => {
   const location = useLocation();
@@ -194,41 +209,45 @@ const NetworkErrorMonitor = () => {
           const now = Date.now();
           const last = lastAlertRef.current;
           if (!last || last.key !== dedupeKey || now - last.ts > 5000) {
-            lastAlertRef.current = { key: dedupeKey, ts: now };
-
-            // Action "Réessayer" :
-            //  - GET idempotent → on rejoue silencieusement la même requête.
-            //    Si elle réussit (2xx/3xx), on confirme. Sinon, on recharge.
-            //  - Autres méthodes (POST/PUT/PATCH/DELETE) → reload page direct
-            //    pour éviter tout double-effet (paiement, message, etc.).
-            const handleRetry = async () => {
-              if (method === "GET") {
-                try {
-                  const retryRes = await originalFetch(...args);
-                  if (retryRes.ok) {
-                    toast.success("Connexion rétablie", { duration: 3000 });
-                    return;
-                  }
-                } catch {
-                  // ignore, fallback reload
-                }
-              }
-              window.location.reload();
-            };
-
-            toast.error("Problème de connexion au service", {
-              description: `Une requête a échoué (statut ${status}). Veuillez réessayer.`,
-              duration: 8000,
-              action: {
-                label: "Réessayer",
-                onClick: () => { void handleRetry(); },
-              },
-            });
-
-            // Lecture du corps sur un clone, en tâche de fond : ne retarde ni
-            // ne consomme jamais la réponse rendue à l'application.
+            // Le corps est lu sur un clone avant toute alerte : il permet de
+            // distinguer une panne technique d'un refus métier volontaire.
             void (async () => {
               const responseBody = await readErrorBody(response);
+              const pgFields = extractPgFields(responseBody);
+
+              if (isBusinessRpcRefusal(url, status, pgFields)) return;
+
+              lastAlertRef.current = { key: dedupeKey, ts: now };
+
+              // Action "Réessayer" :
+              //  - GET idempotent, on rejoue silencieusement la même requête.
+              //    Si elle réussit (2xx/3xx), on confirme. Sinon, on recharge.
+              //  - Autres méthodes (POST/PUT/PATCH/DELETE), reload page direct
+              //    pour éviter tout double-effet (paiement, message, etc.).
+              const handleRetry = async () => {
+                if (method === "GET") {
+                  try {
+                    const retryRes = await originalFetch(...args);
+                    if (retryRes.ok) {
+                      toast.success("Connexion rétablie", { duration: 3000 });
+                      return;
+                    }
+                  } catch {
+                    // ignore, fallback reload
+                  }
+                }
+                window.location.reload();
+              };
+
+              toast.error("Problème de connexion au service", {
+                description: `Une requête a échoué (statut ${status}). Veuillez réessayer.`,
+                duration: 8000,
+                action: {
+                  label: "Réessayer",
+                  onClick: () => { void handleRetry(); },
+                },
+              });
+
               reportError(
                 new Error(`Network non-2xx: ${status} ${method} ${url}`),
                 {
@@ -238,7 +257,7 @@ const NetworkErrorMonitor = () => {
                   url,
                   status,
                   ...(responseBody ? { response_body: responseBody } : {}),
-                  ...extractPgFields(responseBody),
+                  ...pgFields,
                 }
               );
             })();
