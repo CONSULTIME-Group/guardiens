@@ -1,4 +1,4 @@
-import { lazy, Suspense, useLayoutEffect, useState, type ReactNode } from "react";
+import { lazy, Suspense, useLayoutEffect, useRef, useState, type ReactNode } from "react";
 import { Outlet, useSearchParams, useLocation, Link } from "react-router-dom";
 import { Sidebar, BottomNav } from "./Navigation";
 import { BackButton } from "./BackButton";
@@ -35,6 +35,8 @@ export const AppLayout = ({ children }: { children?: ReactNode }) => {
       : false,
   );
 
+  const topBarRef = useRef<HTMLDivElement | null>(null);
+
   useLayoutEffect(() => {
     if (typeof window === "undefined" || typeof window.matchMedia !== "function") return;
     const query = window.matchMedia("(max-width: 767.98px)");
@@ -42,6 +44,30 @@ export const AppLayout = ({ children }: { children?: ReactNode }) => {
     update();
     query.addEventListener("change", update);
     return () => query.removeEventListener("change", update);
+  }, []);
+
+  // Hauteur réelle de la top bar mobile de la coquille applicative, exposée en
+  // variable CSS pour que les barres collantes des pages s'y accrochent sans
+  // valeur devinée. Nettoyée au démontage.
+  useLayoutEffect(() => {
+    const el = topBarRef.current;
+    if (!el || typeof window === "undefined") return;
+    const apply = () => {
+      const h = Math.round(el.getBoundingClientRect().height);
+      document.documentElement.style.setProperty("--app-topbar-h", `${h}px`);
+    };
+    apply();
+    let ro: ResizeObserver | null = null;
+    if (typeof ResizeObserver !== "undefined") {
+      ro = new ResizeObserver(apply);
+      ro.observe(el);
+    }
+    window.addEventListener("resize", apply);
+    return () => {
+      ro?.disconnect();
+      window.removeEventListener("resize", apply);
+      document.documentElement.style.removeProperty("--app-topbar-h");
+    };
   }, []);
 
   // Determine if onboarding modal should show
