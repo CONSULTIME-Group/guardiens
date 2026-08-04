@@ -234,11 +234,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           markChecked(false);
           userRef.current = null;
           setUser(null);
+          setProfileError(false);
           roleInitialized.current = false;
           setLoading(false);
         }
       }
     );
+
 
     supabase.auth.getSession().then(async ({ data: { session } }) => {
       if (session?.user) {
