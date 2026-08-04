@@ -1,4 +1,4 @@
-import { useState, useEffect, lazy, Suspense } from "react";
+import { useState, useEffect, useCallback, lazy, Suspense } from "react";
 import { useNavigate, Link, useLocation } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
@@ -29,6 +29,11 @@ export default function PublicHeader({ authedVariant = false }: { authedVariant?
   const { hasSession, authChecked } = useAuth();
   const inAppShell = useInAppShell();
   const [open, setOpen] = useState(false);
+  const [msgUnread, setMsgUnread] = useState(0);
+  const [notifUnread, setNotifUnread] = useState(0);
+
+  const onMsgUnread = useCallback((n: number) => setMsgUnread(n), []);
+  const onNotifUnread = useCallback((n: number) => setNotifUnread(n), []);
 
   // Utilisateur connecté rendu dans la coquille authentifiée (AppLayout) :
   // la sidebar et la top bar mobile fournissent déjà la navigation, on ne
@@ -36,8 +41,10 @@ export default function PublicHeader({ authedVariant = false }: { authedVariant?
   const hidden = hasSession && inAppShell && !authedVariant;
 
   // Hors coquille authentifiée, la BottomNav mobile accompagne l'en tête
-  // connecté : le contenu doit réserver la place de la pilule flottante.
-  const withBottomNav = hasSession && !inAppShell;
+  // connecté. On attend la résolution de l'auth pour la monter, afin de ne
+  // jamais provoquer un montage puis un démontage immédiat (saut de layout).
+  const withBottomNav = authChecked && hasSession && !inAppShell;
+  const hasUnread = msgUnread + notifUnread > 0;
 
   useEffect(() => {
     if (!withBottomNav) return;
@@ -105,23 +112,16 @@ export default function PublicHeader({ authedVariant = false }: { authedVariant?
           <LanguageSwitcher />
         </nav>
 
-        {/* Mobile: auth + burger */}
+        {/* Mobile : barre allégée (avatar et burger uniquement pour un
+            connecté). Langue, messagerie et notifications sont dans le menu. */}
         <div className="flex sm:hidden items-center gap-1">
-          <LanguageSwitcher compact />
           {!authChecked ? (
             <div className="h-9 w-24 rounded-md bg-muted/40 animate-pulse" aria-hidden="true" />
           ) : hasSession ? (
-            <>
-              <Suspense fallback={<div className="w-11 h-11" aria-hidden />}>
-                <MessageBell />
-              </Suspense>
-              <Suspense fallback={<div className="w-11 h-11" aria-hidden />}>
-                <NotificationBell />
-              </Suspense>
-              <UserMenu compact />
-            </>
+            <UserMenu compact />
           ) : (
             <>
+              <LanguageSwitcher compact />
               <Button
                 variant="ghost"
                 size="sm"
@@ -143,11 +143,21 @@ export default function PublicHeader({ authedVariant = false }: { authedVariant?
             size="icon"
             variant="ghost"
             onClick={() => setOpen(!open)}
-            aria-label={t("nav.menu")}
+            aria-label={
+              hasSession && hasUnread
+                ? `${t("nav.menu")}, éléments non lus`
+                : t("nav.menu")
+            }
             aria-expanded={open}
-            className="min-h-11 min-w-11"
+            className="relative min-h-11 min-w-11"
           >
             {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+            {hasSession && hasUnread && !open && (
+              <span
+                aria-hidden="true"
+                className="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-primary"
+              />
+            )}
           </Button>
         </div>
       </div>
@@ -161,7 +171,7 @@ export default function PublicHeader({ authedVariant = false }: { authedVariant?
               to={l.to}
               onClick={() => setOpen(false)}
               aria-current={isActive(l.to) ? "page" : undefined}
-              className={`block py-2.5 px-3 rounded-lg text-sm font-medium transition-colors ${
+              className={`block py-2.5 px-3 rounded-lg text-sm font-medium transition-colors min-h-[44px] ${
                 isActive(l.to)
                   ? "text-primary bg-primary/5 font-semibold"
                   : "text-foreground hover:bg-accent"
@@ -175,13 +185,15 @@ export default function PublicHeader({ authedVariant = false }: { authedVariant?
               )}
             </Link>
           ))}
-          <div className="pt-2 border-t border-border">
+          <div className="pt-2 border-t border-border space-y-2">
             {!authChecked ? (
               <div className="h-9 w-full rounded-md bg-muted/40 animate-pulse" aria-hidden="true" />
             ) : hasSession ? (
-              <Button className="w-full" size="sm" onClick={() => { setOpen(false); navigate("/dashboard"); }}>
-                Mon espace
-              </Button>
+              <>
+                <Button className="w-full" size="sm" onClick={() => { setOpen(false); navigate("/dashboard"); }}>
+                  Mon espace
+                </Button>
+              </>
             ) : (
               <Button className="w-full" size="sm" onClick={() => { setOpen(false); navigate("/inscription"); }}>
                 {t("nav.register")}
@@ -189,6 +201,24 @@ export default function PublicHeader({ authedVariant = false }: { authedVariant?
             )}
           </div>
         </nav>
+      )}
+
+      {/* Messagerie, notifications et langue : montés en permanence pour
+          alimenter la pastille du burger, visibles uniquement menu ouvert. */}
+      {authChecked && hasSession && (
+        <div
+          className={`sm:hidden items-center gap-1 border-t border-border bg-background px-[5%] py-3 ${open ? "flex" : "hidden"}`}
+        >
+          <Suspense fallback={<div className="w-11 h-11" aria-hidden />}>
+            <MessageBell onUnreadChange={onMsgUnread} />
+          </Suspense>
+          <Suspense fallback={<div className="w-11 h-11" aria-hidden />}>
+            <NotificationBell onUnreadChange={onNotifUnread} />
+          </Suspense>
+          <div className="ml-auto">
+            <LanguageSwitcher compact />
+          </div>
+        </div>
       )}
     </header>
     {withBottomNav && <BottomNav />}

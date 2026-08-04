@@ -6,6 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useAlmaCulturalFact } from "@/hooks/useAlmaCulturalFact";
 import PageMeta from "@/components/PageMeta";
+import PublicHeader from "@/components/layout/PublicHeader";
 import BadgeRow from "@/components/badges/BadgeRow";
 import MissionBadgesReceived from "@/components/missions/MissionBadgesReceived";
 import SpecialBadgeHighlight from "@/components/badges/SpecialBadgeHighlight";
@@ -880,6 +881,7 @@ export default function PublicSitterProfile() {
   const radius = rawRadius && rawRadius > 0 ? rawRadius : null;
   const isOwn = auth?.user?.id === id;
   const isAuthenticated = auth?.isAuthenticated;
+  const hasSession = !!auth?.hasSession;
   const isOwner = auth?.activeRole === "owner";
   const isSitter = auth?.activeRole === "sitter";
   const isAvailable = sitterProfile?.is_available || false;
@@ -1129,6 +1131,9 @@ export default function PublicSitterProfile() {
 
   return (
     <div className="min-h-screen bg-background">
+      {/* Coquille connectée : en tête et pilule de navigation, pour ne pas
+          enfermer l'utilisateur sur cette page. Visiteur : rendu inchangé. */}
+      {hasSession && <PublicHeader authedVariant />}
       {/* JSON-LD */}
       {profile && (
         <ProfileSchemaOrg
@@ -1234,7 +1239,7 @@ export default function PublicSitterProfile() {
 
       {/* ── BARRE D'ONGLETS, visible si ≥ 2 onglets ── */}
       {availableTabs > 1 && (
-        <div className="flex border-b border-border bg-card sticky top-12 md:top-0 z-10 max-w-5xl mx-auto">
+        <div className={`flex border-b border-border bg-card sticky ${hasSession ? "top-[60px] md:top-[68px]" : "top-12 md:top-0"} z-10 max-w-5xl mx-auto`}>
           {hasSitterProfile && (
             <button
               type="button"

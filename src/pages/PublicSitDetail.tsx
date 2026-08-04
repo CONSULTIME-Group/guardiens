@@ -614,7 +614,7 @@ const PublicSitDetail = () => {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
 
-      {!isAuthenticated && <PublicHeader />}
+      <PublicHeader authedVariant={isAuthenticated} />
 
       {/* Mention sobre : garde déjà attribuée ou déjà passée. Ton factuel,
           lien vers les annonces ouvertes, aucune action de candidature. */}
@@ -704,7 +704,7 @@ const PublicSitDetail = () => {
       {/* Rebond : annonces ouvertes à proximité, sous le contenu de la fiche. */}
       {isClosedSit && <NearbySitsModule city={sitCity} excludeId={sit.id} />}
 
-      {!isAuthenticated && <PublicFooter />}
+      <PublicFooter />
 
       {isAuthenticated && sit && (
         <ApplicationModal

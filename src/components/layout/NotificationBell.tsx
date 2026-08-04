@@ -23,7 +23,12 @@ interface Notification {
   created_at: string;
 }
 
-const NotificationBell = () => {
+interface NotificationBellProps {
+  /** Remonte le nombre de non-lus au parent (pastille de synthèse). */
+  onUnreadChange?: (count: number) => void;
+}
+
+const NotificationBell = ({ onUnreadChange }: NotificationBellProps = {}) => {
   const { user } = useAuth();
   const { hasAccess } = useSubscriptionAccess();
   const userId = user?.id;
@@ -53,6 +58,10 @@ const NotificationBell = () => {
   useEffect(() => {
     void load();
   }, [load]);
+
+  useEffect(() => {
+    onUnreadChange?.(unreadCount);
+  }, [unreadCount, onUnreadChange]);
 
   useEffect(() => {
     if (!userId) return;

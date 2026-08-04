@@ -44,8 +44,7 @@ const UserMenu = ({ compact = false, className }: UserMenuProps) => {
           type="button"
           aria-label="Mon compte et mon profil"
           className={cn(
-            "shrink-0 inline-flex items-center justify-center rounded-full transition-colors hover:bg-accent focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40",
-            compact ? "min-h-11 min-w-11" : "min-h-11 min-w-11",
+            "shrink-0 inline-flex items-center justify-center rounded-full transition-colors hover:bg-accent focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 min-h-11 min-w-11",
             className,
           )}
         >
