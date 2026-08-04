@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect, useState } from "react";
+import { lazy, Suspense, useEffect, useState, type ComponentType } from "react";
 
 // Trackers non essentiels au premier rendu. Chargés après le premier paint
 // via requestIdleCallback (fallback setTimeout) pour ne pas alourdir le
