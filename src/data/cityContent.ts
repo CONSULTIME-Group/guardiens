@@ -160,7 +160,7 @@ Le home sitting existe depuis des décennies dans les pays anglo-saxons. Le prin
  {
  id: "fonctionnement",
  title: "Comment trouver un gardien fiable à Lyon ?",
- content: `Pour trouver un gardien fiable à Lyon, publiez votre annonce sur Guardiens, recevez des candidatures de gardiens de votre quartier, consultez leurs avis, puis organisez une rencontre avant de confirmer. La vérification d'identité est ouverte à tous les membres et contrôlée manuellement par l'équipe Guardiens : regardez l'écusson « Identité vérifiée » sur les profils, et rencontrez toujours la personne avant de confier vos clés.
+ content: `Pour trouver un gardien fiable à Lyon, publiez votre annonce sur Guardiens, recevez des candidatures de gardiens de votre quartier, consultez leurs avis, puis organisez une rencontre avant de confirmer. La vérification d'identité est ouverte à tous les membres : la pièce envoyée est analysée automatiquement, les dossiers qui ne passent pas sont revus par l'équipe, et les profils validés affichent l'écusson « Identité vérifiée ». Regardez cet écusson, et rencontrez toujours la personne avant de confier vos clés.
 
 ### Etape 1, Publiez votre annonce
 
@@ -220,7 +220,7 @@ Lyon se compose de neuf arrondissements et d'une ceinture de communes limitrophe
 
 **Un accord de garde clair.** Un document optionnel formalise les engagements de chaque partie : dates, responsabilités, contacts d'urgence. Jamais contraignant, toujours rassurant.
 
-**Une vérification d'identité ouverte à tous.** Chaque pièce soumise est contrôlée manuellement par l'équipe Guardiens, et les profils qui l'ont obtenue affichent l'écusson « Identité vérifiée ». Les avis croisés après chaque garde construisent un historique de confiance visible sur le profil.`,
+**Une vérification d'identité ouverte à tous.** La pièce envoyée est analysée automatiquement, les dossiers qui ne passent pas sont revus par l'équipe, et les profils validés affichent l'écusson « Identité vérifiée ». Les avis croisés après chaque garde construisent un historique de confiance visible sur le profil.`,
  },
  {
  id: "gardiens",
@@ -269,7 +269,7 @@ Après avoir accepté une candidature, vous organisez une rencontre directement 
 Guardiens dispose d'un réseau de [gardiens d'urgence à Lyon](/gardien-urgence), mobilisables rapidement. En cas de problème vétérinaire, le gardien contacte la clinique indiquée dans le guide de la maison. En cas de problème technique (fuite, panne), il suit les consignes laissées par le propriétaire.
 
 **Comment sont vérifiés les gardiens à Lyon ?**
-La vérification d'identité est ouverte à tous les membres : chaque pièce soumise est contrôlée manuellement par l'équipe Guardiens, et les profils qui l'ont obtenue affichent l'écusson « Identité vérifiée ». Les avis croisés après chaque garde et les badges de fiabilité complètent le dispositif de confiance. [En savoir plus dans la FAQ](/faq#confiance-securite).
+La vérification d'identité est ouverte à tous les membres : la pièce envoyée est analysée automatiquement, les dossiers qui ne passent pas sont revus par l'équipe, et les profils validés affichent l'écusson « Identité vérifiée ». Les avis croisés après chaque garde et les badges de fiabilité complètent le dispositif de confiance. [En savoir plus dans la FAQ](/faq#confiance-securite).
 
 **Puis-je publier une annonce pour un chien ET un chat ?**
 Absolument. Votre annonce peut inclure tous vos animaux. Les gardiens qui postulent voient la composition exacte de votre foyer et décident en connaissance de cause.

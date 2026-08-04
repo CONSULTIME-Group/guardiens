@@ -40,7 +40,7 @@
       "pet_pros": "Pet professionals"
     },
     "tagline": "Local house-sitting",
-    "version": "Guardiens · Beta version · 2026",
+    "version": "Guardiens · Beta version · {{year}}",
     "legal": {
       "cgu": "T&Cs",
       "cgs": "S-T&Cs",
@@ -218,7 +218,7 @@
       "q3": "How can I find a pet sitter near me?",
       "a3": "Register on Guardiens, publish your sitting listing with dates and your pets, and receive applications from caretaker / pet & home sitters who live near you. You choose after a meeting.",
       "q4": "Who are the sitters on Guardiens?",
-      "a4": "Local people, whose profiles are each reviewed by our team. Trust is built on the in-person meeting held before every sit, on cross-reviews published after each experience, and on the history visible on every profile.",
+      "a4": "Local people. Identity verification is open to every member, and validated profiles display the « Identity verified » badge. Trust is built on the in-person meeting held before every sit, on cross-reviews published after each experience, and on the history visible on every profile.",
       "q5": "How does a sit take place on Guardiens?",
       "a5": "You publish your listing, local caretaker / pet & home sitters apply, you choose after a meeting, then your sitter moves in. An optional sitting agreement frames the commitments of each party during the sit.",
       "q6": "Is Guardiens available everywhere in France?",

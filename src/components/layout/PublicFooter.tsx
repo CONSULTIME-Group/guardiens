@@ -74,7 +74,7 @@ const PublicFooter = React.forwardRef<HTMLElement>((_props, ref) => {
             </p>
           </div>
           <div className="flex flex-wrap gap-4 text-sm text-white/75 font-body">
-            <span className="text-xs text-white/80 font-body">{t("footer.version")}</span>
+            <span className="text-xs text-white/80 font-body">{t("footer.version", { year: new Date().getFullYear() })}</span>
             <span aria-hidden="true" className="text-white/40">·</span>
             <Link to="/cgu" className="hover:text-white transition-colors">{t("footer.legal.cgu")}</Link>
             <span aria-hidden="true" className="text-white/40">·</span>

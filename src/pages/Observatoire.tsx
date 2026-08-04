@@ -7,6 +7,10 @@ import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
 import { useInventaireCounts } from "@/hooks/useInventaireCounts";
 import { useSpeciesBreakdown, type BreakdownRow } from "@/hooks/useSpeciesBreakdown";
+import { BADGE_DEFINITIONS } from "@/components/badges/badge-definitions";
+
+/** Nombre de badges dérivé du catalogue, jamais recopié à la main. */
+const BADGE_COUNT = Object.keys(BADGE_DEFINITIONS).length;
 
 
 /**
@@ -54,12 +58,12 @@ const KEY_STATS: Stat[] = [
 
  {
  label: "Vérification d'identité",
- value: "Manuelle",
- detail: "La vérification d'identité est ouverte à tous les membres. Chaque pièce soumise est contrôlée manuellement par l'équipe Guardiens, jamais par un algorithme. Les profils qui l'ont obtenue affichent l'écusson « Identité vérifiée ».",
+ value: "Ouverte à tous",
+ detail: "La vérification d'identité est ouverte à tous les membres. Vous envoyez une pièce d'identité, elle est analysée automatiquement, et les dossiers qui ne passent pas ce premier contrôle sont revus par l'équipe. Les profils validés affichent l'écusson « Identité vérifiée ».",
  },
  {
  label: "Badges de reconnaissance",
- value: "31",
+ value: String(BADGE_COUNT),
  detail: "Système de badges couvrant la fiabilité, l'expérience, la spécialisation animale et l'engagement communautaire.",
  },
  {
@@ -347,13 +351,13 @@ const Observatoire = () => {
  </h2>
  <div className="space-y-4 text-foreground leading-relaxed">
  <p>
- La <strong>vérification d'identité</strong> est ouverte à tous les membres. Chaque pièce soumise est contrôlée manuellement par l'équipe Guardiens, jamais par un algorithme, jamais par un prestataire automatique. Les profils qui l'ont obtenue affichent l'écusson « Identité vérifiée ». Regardez cet écusson avant de choisir.
+ La <strong>vérification d'identité</strong> est ouverte à tous les membres. Vous envoyez une pièce d'identité, elle est analysée automatiquement, et les dossiers qui ne passent pas ce premier contrôle sont revus par l'équipe. Les profils validés affichent l'écusson « Identité vérifiée ». Regardez cet écusson avant de choisir.
  </p>
  <p>
  À l'issue de chaque garde, propriétaires et gardiens laissent un <strong>avis croisé détaillé</strong>. Ces avis alimentent le <strong>Trust Score (0 à 100)</strong>, calculé sur l'identité vérifiée, le volume d'avis, la note moyenne, le nombre de gardes réalisées et l'ancienneté du compte.
  </p>
  <p>
- Un système de <strong>31 badges de reconnaissance</strong> distingue les profils particulièrement fiables, expérimentés ou engagés (Super Sitter, Identité vérifiée, Spécialiste NAC, Sceau de cire fondateur, etc.). Les badges sont attribués automatiquement selon des règles publiques.
+ Un système de <strong>{BADGE_COUNT} badges de reconnaissance</strong> distingue les profils particulièrement fiables, expérimentés ou engagés (Super Sitter, Identité vérifiée, Spécialiste NAC, Sceau de cire fondateur, etc.). Les badges sont attribués automatiquement selon des règles publiques.
  </p>
  <p>
  En cas d'imprévu, le réseau <strong>Gardien d'Urgence</strong> peut être mobilisé en quelques heures sur les zones couvertes, en complément du gardien titulaire.

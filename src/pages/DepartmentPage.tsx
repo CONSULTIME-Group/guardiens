@@ -312,7 +312,7 @@ const DepartmentPage = () => {
  <ShieldCheck className="h-8 w-8 text-primary mb-3" />
  <h3 className="font-semibold text-foreground mb-2">Confiance</h3>
  <p className="text-sm text-muted-foreground">
- Profils vérifiés, avis croisés détaillés, métriques de fiabilité.
+ Écusson « Identité vérifiée » sur les profils validés, avis croisés détaillés, métriques de fiabilité.
  </p>
  </CardContent>
  </Card>
@@ -369,7 +369,7 @@ const DepartmentPage = () => {
  "@context": "https://schema.org",
  "@type": "Service",
  name: `Pet sitting & House sitting dans le ${page.department}`,
- description: `Service de garde d'animaux et house sitting gratuit pour les propriétaires dans le ${page.department}. ${cityPages.length} villes couvertes. Gardiens vérifiés.`,
+ description: `Service de garde d'animaux et house sitting gratuit pour les propriétaires dans le ${page.department}. ${cityPages.length} villes couvertes.`,
  provider: {
  "@type": "Organization",
  name: "Guardiens",

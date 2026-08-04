@@ -40,7 +40,7 @@
       "pet_pros": "Pros animaliers"
     },
     "tagline": "House-sitting de proximité",
-    "version": "Guardiens · Version bêta · 2026",
+    "version": "Guardiens · Version bêta · {{year}}",
     "legal": {
       "cgu": "CGU",
       "cgs": "CGS",
@@ -223,7 +223,7 @@
       "q3": "Comment trouver un pet sitter près de chez moi ?",
       "a3": "Inscrivez-vous sur Guardiens, publiez votre annonce de garde avec les dates et vos animaux, et recevez des candidatures de gardiens qui habitent près de chez vous. Vous choisissez après une rencontre.",
       "q4": "Qui sont les gardiens sur Guardiens ?",
-      "a4": "Des gens du coin, dont chaque profil est examiné par notre équipe. La confiance se construit sur la rencontre physique préalable à toute garde, les avis croisés publiés après chaque expérience, et l'historique visible sur chaque profil.",
+      "a4": "Des gens du coin. La vérification d'identité est ouverte à tous les membres, et les profils validés affichent l'écusson « Identité vérifiée ». La confiance se construit sur la rencontre physique préalable à toute garde, les avis croisés publiés après chaque expérience, et l'historique visible sur chaque profil.",
       "q5": "Comment se déroule une garde sur Guardiens ?",
       "a5": "Vous publiez votre annonce, les gardiens du coin postulent, vous choisissez après une rencontre, puis votre gardien s'installe. Un accord de garde optionnel encadre les engagements de chacun pendant la garde.",
       "q6": "Guardiens est-il disponible partout en France ?",
@@ -231,7 +231,7 @@
       "q7": "Quel est le modèle économique de Guardiens ?",
       "a7": "Guardiens reste gratuit tant que nous ne sommes pas satisfaits du service que nous vous offrons. Vous avez accès à tout, sans limite, sans engagement. Vous serez prévenu à l'avance quand cela changera.",
       "q8": "Le house-sitting est-il sécurisé ?",
-      "a8": "La vérification d'identité est ouverte à tous les membres : chaque pièce soumise est contrôlée manuellement par notre équipe, jamais par un algorithme, et les profils qui l'ont obtenue affichent l'écusson « Identité vérifiée ». Une rencontre préalable entre le propriétaire et le gardien est vivement recommandée avant toute garde. Après chaque expérience, les avis croisés publiés sur le profil construisent une réputation vérifiable, visible par tous les membres."
+      "a8": "La vérification d'identité est ouverte à tous les membres : la pièce envoyée est analysée automatiquement, les dossiers qui ne passent pas ce premier contrôle sont revus par notre équipe, et les profils validés affichent l'écusson « Identité vérifiée ». Une rencontre préalable entre le propriétaire et le gardien est vivement recommandée avant toute garde. Après chaque expérience, les avis croisés publiés sur le profil construisent une réputation vérifiable, visible par tous les membres."
     },
     "inventory": {
       "title": "Ce qu'on a construit pour vous",

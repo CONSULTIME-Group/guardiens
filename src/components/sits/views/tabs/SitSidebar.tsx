@@ -162,7 +162,7 @@ const SitSidebar = ({
           Sur Guardiens, c'est gratuit, entre gens du coin
         </p>
         <p className="leading-relaxed">
-          Aucun paiement entre membres. Profils vérifiés, avis croisés, accord de garde
+          Aucun paiement entre membres. Écusson « Identité vérifiée », avis croisés, accord de garde
           signé. La confiance entre gens du coin.
         </p>
       </div>

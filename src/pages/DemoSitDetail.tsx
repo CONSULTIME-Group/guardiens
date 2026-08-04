@@ -473,7 +473,7 @@ const DemoSitDetail = () => {
  Sur Guardiens, c'est gratuit pour les propriétaires, entre gens du coin
  </p>
  <p>
- Aucun paiement entre membres. Profils vérifiés, avis croisés,
+ Aucun paiement entre membres. Écusson « Identité vérifiée », avis croisés,
  accord de garde signé. La confiance entre gens du coin.
  </p>
  </div>

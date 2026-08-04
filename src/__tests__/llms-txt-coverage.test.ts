@@ -41,4 +41,14 @@ describe("llms.txt coverage", () => {
       `Routes publiques indexables absentes de public/llms.txt : ${missing.join(", ")}`,
     ).toEqual([]);
   });
+
+  it("annonce le bon nombre de badges, aligné sur BADGE_DEFINITIONS", async () => {
+    const llmsTxt = readFileSync(resolve(process.cwd(), "public/llms.txt"), "utf-8");
+    const { BADGE_DEFINITIONS } = await import("@/components/badges/badge-definitions");
+    const count = Object.keys(BADGE_DEFINITIONS).length;
+    expect(
+      llmsTxt.includes(`${count} badges de reconnaissance`),
+      `public/llms.txt doit annoncer ${count} badges de reconnaissance.`,
+    ).toBe(true);
+  });
 });

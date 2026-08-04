@@ -16,6 +16,7 @@ interface SitterRow {
   first_name: string | null;
   avatar_url: string | null;
   city: string | null;
+  identity_verified: boolean | null;
 }
 
 /**
@@ -28,7 +29,7 @@ const CitySittersGrid = ({ city, citySlug }: Props) => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("public_profiles")
-        .select("id, first_name, avatar_url, city, role")
+        .select("id, first_name, avatar_url, city, role, identity_verified")
         .in("role", ["sitter", "both"])
         .ilike("city", `%${city}%`)
         .not("first_name", "is", null)
@@ -50,12 +51,12 @@ const CitySittersGrid = ({ city, citySlug }: Props) => {
       <div className="mb-8">
         <h2 className="font-serif text-2xl md:text-3xl font-bold text-foreground mb-2">
           {list.length > 0
-            ? `Gardiens vérifiés à ${city}`
+            ? `Gardiens inscrits à ${city}`
             : `Soyez le premier gardien à ${city}`}
         </h2>
         <p className="text-muted-foreground">
           {list.length > 0
-            ? "Profils publics, identités vérifiées manuellement par l'équipe Guardiens."
+            ? "Profils publics. L'écusson « Identité vérifiée » apparaît sur les profils dont la pièce d'identité a été validée."
             : "Le réseau se construit. Rejoignez les premiers gardiens, l'accès est gratuit aujourd'hui, sans engagement."}
         </p>
       </div>
@@ -69,7 +70,7 @@ const CitySittersGrid = ({ city, citySlug }: Props) => {
               className="group flex flex-col items-center text-center"
             >
               <TrustHaloAvatar
-                verified
+                verified={s.identity_verified === true}
                 avgRating={null}
                 sitsCount={null}
                 size="h-16 w-16"

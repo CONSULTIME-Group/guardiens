@@ -142,7 +142,7 @@ const CityPage = () => {
  ? [
  { q: "Comment rencontrer un gardien avant de confier ma maison ?", a: "Après avoir accepté une candidature, vous organisez une rencontre directement via la messagerie Guardiens. La plupart des propriétaires à Lyon choisissent un café de quartier ou une visite du logement. Cette étape est fortement recommandée." },
  { q: "Que se passe-t-il en cas d'urgence ou d'imprévu ?", a: "Guardiens dispose d'un réseau de gardiens d'urgence à Lyon, mobilisables rapidement. En cas de problème vétérinaire, le gardien contacte la clinique indiquée dans le guide de la maison. En cas de problème technique, il suit les consignes laissées par le propriétaire." },
- { q: "Comment sont vérifiés les gardiens à Lyon ?", a: "La vérification d'identité est ouverte à tous les membres. Chaque pièce soumise est contrôlée manuellement par l'équipe Guardiens, jamais par un algorithme, et les profils qui l'ont obtenue affichent l'écusson « Identité vérifiée ». Les avis croisés après chaque garde et les badges de fiabilité complètent le dispositif de confiance." },
+ { q: "Comment sont vérifiés les gardiens à Lyon ?", a: "La vérification d'identité est ouverte à tous les membres. Vous envoyez une pièce d'identité, elle est analysée automatiquement, et les dossiers qui ne passent pas ce premier contrôle sont revus par l'équipe. Les profils validés affichent l'écusson « Identité vérifiée ». Les avis croisés après chaque garde et les badges de fiabilité complètent le dispositif de confiance." },
  { q: "Puis-je publier une annonce pour un chien ET un chat ?", a: "Absolument. Votre annonce peut inclure tous vos animaux. Les gardiens qui postulent voient la composition exacte de votre foyer et décident en connaissance de cause." },
  { q: "Combien de temps à l'avance faut-il publier mon annonce ?", a: "Pour les vacances d'été à Lyon, nous recommandons un mois à l'avance. Pour un week-end, une à deux semaines suffisent. Plus l'annonce est publiée tôt, plus vous recevez de candidatures de qualité." },
  { q: "Que faire si mon gardien annule au dernier moment ?", a: "C'est rare mais cela peut arriver. Guardiens active alors le réseau de gardiens d'urgence de votre zone. Le système de fiabilité pénalise les annulations répétées pour garantir la qualité du réseau." },
@@ -150,10 +150,10 @@ const CityPage = () => {
  { q: "Guardiens fonctionne-t-il pour les gardes de plusieurs semaines ?", a: "Oui. La plateforme est conçue pour les gardes de toute durée, du week-end prolongé aux absences de plusieurs semaines. Les gardiens indiquent leurs disponibilités sur leur profil." },
  ]
  : [
- { q: `Comment trouver un gardien de maison à ${cityData.name} ?`, a: `Sur Guardiens, vous publiez une annonce et les gardiens disponibles à ${cityData.name} et ses environs postulent directement. La vérification d'identité est ouverte à tous les membres et contrôlée manuellement par l'équipe Guardiens : regardez l'écusson « Identité vérifiée » sur les profils avant de choisir.` },
+ { q: `Comment trouver un gardien de maison à ${cityData.name} ?`, a: `Sur Guardiens, vous publiez une annonce et les gardiens disponibles à ${cityData.name} et ses environs postulent directement. La vérification d'identité est ouverte à tous les membres : la pièce envoyée est analysée automatiquement, les dossiers qui ne passent pas sont revus par l'équipe, et les profils validés affichent l'écusson « Identité vérifiée ». Regardez cet écusson sur les profils avant de choisir.` },
  { q: `Est-ce vraiment gratuit pour les propriétaires à ${cityData.name} ?`, a: "Oui. Guardiens est gratuit pour tous les propriétaires. L'espace gardien est également gratuit aujourd'hui, sans engagement." },
  { q: `Que se passe-t-il en cas d'urgence pendant la garde à ${cityData.name} ?`, a: `Guardiens dispose d'un réseau de Gardiens d'Urgence dans chaque zone. En cas d'imprévu, animal malade, problème technique, le gardien en poste peut déclencher une alerte.` },
- { q: `Combien coûte une pension pour animaux à ${cityData.name} ?`, a: `Les pensions autour de ${cityData.name} facturent en moyenne 25 à 45 euros par nuit et par animal. Sur Guardiens, c'est sans frais pour le propriétaire : le gardien s'installe chez vous et s'occupe de vos animaux dans leur environnement habituel.` },
+ { q: `Combien coûte une pension pour animaux à ${cityData.name} ?`, a: `Les pensions autour de ${cityData.name} facturent en moyenne 25 à 45 euros par nuit et par animal. Ordres de grandeur constatés en 2026, variables selon la ville, la saison et la taille de l'animal. Sur Guardiens, c'est sans frais pour le propriétaire : le gardien s'installe chez vous et s'occupe de vos animaux dans leur environnement habituel.` },
  { q: `Comment devenir gardien à ${cityData.name} ?`, a: `Inscrivez-vous, complétez votre profil et faites vérifier votre identité. Vous pourrez ensuite postuler aux gardes disponibles en ${cityData.department}. L'accès gardien est gratuit aujourd'hui, sans engagement.` },
  ];
 
@@ -279,7 +279,7 @@ const CityPage = () => {
  <ShieldCheck className="h-6 w-6 text-primary" />
  <h3 className="font-semibold text-foreground">Vérification d'identité</h3>
  <p className="text-sm text-muted-foreground">
- Vérification d'identité contrôlée manuellement par l'équipe, avis croisés détaillés, écussons de fiabilité. Regardez l'écusson « Identité vérifiée » avant de confier vos clés.
+ Vérification d'identité ouverte à tous (analyse automatique, revue par l'équipe si besoin), avis croisés détaillés, écussons de fiabilité. Regardez l'écusson « Identité vérifiée » avant de confier vos clés.
  </p>
  </div>
  <div className="space-y-3">
@@ -477,7 +477,7 @@ const CityPage = () => {
   const dbFaqItems = [
     {
       q: `Comment trouver un gardien de maison à ${dbPage.city} ?`,
-      a: `Sur Guardiens, vous publiez une annonce et les gardiens disponibles à ${dbPage.city} et ses environs postulent directement. La vérification d'identité est ouverte à tous les membres et contrôlée manuellement par l'équipe Guardiens : regardez l'écusson « Identité vérifiée » sur les profils avant de choisir.`,
+      a: `Sur Guardiens, vous publiez une annonce et les gardiens disponibles à ${dbPage.city} et ses environs postulent directement. La vérification d'identité est ouverte à tous les membres : la pièce envoyée est analysée automatiquement, les dossiers qui ne passent pas sont revus par l'équipe, et les profils validés affichent l'écusson « Identité vérifiée ». Regardez cet écusson sur les profils avant de choisir.`,
     },
     {
       q: `Est-ce vraiment gratuit pour les propriétaires à ${dbPage.city} ?`,
@@ -489,7 +489,7 @@ const CityPage = () => {
     },
     {
       q: `Combien coûte une pension pour animaux à ${dbPage.city} ?`,
-      a: `Les pensions autour de ${dbPage.city} facturent en moyenne 25 à 45 euros par nuit et par animal. Sur Guardiens, c'est sans frais pour le propriétaire : le gardien s'installe chez vous et s'occupe de vos animaux dans leur environnement habituel.`,
+      a: `Les pensions autour de ${dbPage.city} facturent en moyenne 25 à 45 euros par nuit et par animal. Ordres de grandeur constatés en 2026, variables selon la ville, la saison et la taille de l'animal. Sur Guardiens, c'est sans frais pour le propriétaire : le gardien s'installe chez vous et s'occupe de vos animaux dans leur environnement habituel.`,
     },
     {
       q: `Comment devenir gardien à ${dbPage.city} ?`,

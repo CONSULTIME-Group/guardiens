@@ -40,7 +40,7 @@ export const CITIES: CityData[] = [
  ],
  h1: "House-sitting à Annecy : partez l'esprit libre",
  metaDescription:
- "Trouvez un home sitter de confiance à Annecy et en Haute-Savoie. Gardiens vérifiés, locaux, disponibles en 15 min. Gratuit pour les propriétaires.",
+ "Trouvez un home sitter de confiance à Annecy et en Haute-Savoie. Gardiens du coin, disponibles rapidement. Gratuit pour les propriétaires.",
  localSpots: [
  {
  name: "Lac d'Annecy",
@@ -133,7 +133,7 @@ export const CITIES: CityData[] = [
  ],
  h1: "House-sitting à Grenoble : des gardiens dans votre quartier",
  metaDescription:
- "Home sitting à Grenoble : trouvez un home sitter de confiance en Isère. Gardiens vérifiés, locaux, disponibles rapidement. Gratuit pour les propriétaires.",
+ "Home sitting à Grenoble : trouvez un home sitter de confiance en Isère. Gardiens du coin, disponibles rapidement. Gratuit pour les propriétaires.",
  localSpots: [
  {
  name: "Parc Paul Mistral",
@@ -177,7 +177,7 @@ export const CITIES: CityData[] = [
  ],
  h1: "House-sitting à Caluire-et-Cuire : votre gardien de confiance",
  metaDescription:
- "Garde de maison et animaux à Caluire-et-Cuire. Gardiens vérifiés à 15 min. Résidences avec jardin, chiens et chats bienvenus. Gratuit propriétaires.",
+ "Garde de maison et animaux à Caluire-et-Cuire. Gardiens du coin à 15 min. Résidences avec jardin, chiens et chats bienvenus. Gratuit propriétaires.",
  localSpots: [
  {
  name: "Parc de Montribloud",
@@ -223,7 +223,7 @@ export const CITIES: CityData[] = [
  ],
  h1: "House-sitting à Chambéry : partez sans inquiétude",
  metaDescription:
- "Home sitting à Chambéry : trouvez un home sitter de confiance en Savoie. Gardiens vérifiés, locaux, disponibles rapidement. Gratuit pour les propriétaires.",
+ "Home sitting à Chambéry : trouvez un home sitter de confiance en Savoie. Gardiens du coin, disponibles rapidement. Gratuit pour les propriétaires.",
  localSpots: [
  {
  name: "Lac du Bourget (rive sud)",

@@ -50,7 +50,7 @@ const formatDateRange = (start: string | null, end: string | null): string | nul
 
 const scopeSubtitle = (scope: PoolScope): string => {
   if (scope === "dept") return "Dans votre département.";
-  if (scope === "region") return "Dans votre région.";
+  if (scope === "region") return "Près de chez vous.";
   if (scope === "country") return "Ailleurs en France.";
   return "";
 };

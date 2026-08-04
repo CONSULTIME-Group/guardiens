@@ -40,7 +40,7 @@
       "pet_pros": "Tierprofis"
     },
     "tagline": "Lokales House-sitting",
-    "version": "Guardiens · Beta-Version · 2026",
+    "version": "Guardiens · Beta-Version · {{year}}",
     "legal": {
       "cgu": "AGB (Nutzer)",
       "cgs": "AGB (Service)",
@@ -218,7 +218,7 @@
       "q3": "Wie finde ich einen Tierbetreuer in meiner Nähe?",
       "a3": "Registrieren Sie sich auf Guardiens, veröffentlichen Sie Ihre Anzeige mit Daten und Tieren und erhalten Sie Bewerbungen von Betreuern, die in Ihrer Nähe wohnen. Sie wählen nach einem persönlichen Kennenlernen.",
       "q4": "Wer sind die Betreuer auf Guardiens?",
-      "a4": "Menschen aus der Umgebung, deren Profile jeweils von unserem Team geprüft werden. Vertrauen entsteht durch das persönliche Treffen vor jeder Betreuung, durch die nach jeder Erfahrung veröffentlichten Bewertungen und durch die auf jedem Profil sichtbare Historie.",
+      "a4": "Menschen aus der Umgebung. Die Identitätsprüfung steht allen Mitgliedern offen, und bestätigte Profile tragen das Abzeichen « Identität verifiziert ». Vertrauen entsteht durch das persönliche Treffen vor jeder Betreuung, durch die nach jeder Erfahrung veröffentlichten Bewertungen und durch die auf jedem Profil sichtbare Historie.",
       "q5": "Wie läuft eine Betreuung auf Guardiens ab?",
       "a5": "Sie veröffentlichen Ihre Anzeige, Betreuer aus der Nähe bewerben sich, Sie wählen nach einem Treffen und Ihr Betreuer zieht ein. Eine optionale Betreuungsvereinbarung regelt die Pflichten beider Seiten während des Zeitraums.",
       "q6": "Ist Guardiens überall in Frankreich verfügbar?",

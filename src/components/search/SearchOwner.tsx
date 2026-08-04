@@ -924,11 +924,11 @@ const SearchOwner = () => {
   const refDept = getDeptCode(getZoneRefPostalCode());
   const refRegion = getRegionCode(refDept);
   const deptLabel = refDept ? `${refDept} ${DEPT_NAMES[refDept] || ""}`.trim() : "Département";
-  // regionLabel volontairement supprimé (mémoire "No AURA").
+  // regionLabel volontairement supprimé (positionnement national, pas régional).
 
   // Suggest expanding when current zone is empty and a wider zone has results.
   // L'étape "région" est volontairement omise : la promesse produit est « France
-  // entière », pas régionale (voir mémoire core "No AURA").
+  // entière », pas régionale (positionnement national).
   const suggestExpansion = (): { target: ZoneMode; count: number; label: string } | null => {
     if (results.length > 0) return null;
     if (zoneMode === "radius" && densityCounts.dept > 0) {
@@ -1175,7 +1175,7 @@ const SearchOwner = () => {
                 <div className="space-y-3">
                   <h4 className="text-sm font-medium">Profil de confiance</h4>
                   <div className="flex items-center justify-between">
-                    <p className="text-sm">Profils vérifiés uniquement</p>
+                    <p className="text-sm">Identité vérifiée uniquement</p>
                     <Switch checked={verifiedOnly} onCheckedChange={setVerifiedOnly} />
                   </div>
                   <div className="flex items-center justify-between">
