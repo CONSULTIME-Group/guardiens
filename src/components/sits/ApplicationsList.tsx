@@ -17,6 +17,7 @@ import { useNavigate } from "react-router-dom";
 import VerifiedBadge from "@/components/profile/VerifiedBadge";
 import EmergencyBadge from "@/components/profile/EmergencyBadge";
 import TrustHaloAvatar from "@/components/sitters/TrustHaloAvatar";
+import ProAvatarBadge from "@/components/badges/ProAvatarBadge";
 import OwnerToSitterAffinity from "@/components/matching/OwnerToSitterAffinity";
 import { computeAffinityResultFull, type AffinitySitterInput, type AffinityOwnerInput } from "@/lib/affinityScore";
 import { useViewerOwnerForAffinity } from "@/hooks/useViewerOwnerForAffinity";
@@ -105,7 +106,7 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, prope
     // NOTE: `last_name` n'est pas exposé par public_profiles, on l'omet (non consommé en aval).
     const { data: sitterProfs } = await supabase
       .from("public_profiles")
-      .select("id, first_name, city, avatar_url, bio, identity_verified, completed_sits_count, is_founder")
+      .select("id, first_name, city, avatar_url, bio, identity_verified, completed_sits_count, is_founder, pro_status")
       .in("id", sitterIds);
     const sitterProfMap = new Map<string, any>();
     (sitterProfs ?? []).forEach((p: any) => sitterProfMap.set(p.id, p));
@@ -613,7 +614,7 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, prope
       <div key={app.id} className="bg-card border border-border rounded-2xl p-5 mb-4">
         {/* Identité + signaux de confiance */}
         <div className="flex items-start gap-3">
-          <Link to={`/gardiens/${app.sitter_id}`} className="shrink-0" aria-label={`Voir le profil de ${sitter?.first_name || "ce gardien"}`}>
+          <Link to={`/gardiens/${app.sitter_id}`} className="shrink-0 relative block" aria-label={`Voir le profil de ${sitter?.first_name || "ce gardien"}`}>
             <TrustHaloAvatar
               size="h-12 w-12"
               verified={sitter?.identity_verified}
@@ -628,6 +629,7 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, prope
                 </div>
               )}
             </TrustHaloAvatar>
+            <ProAvatarBadge status={sitter?.pro_status} size="sm" />
           </Link>
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 flex-wrap">

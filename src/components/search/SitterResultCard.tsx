@@ -15,6 +15,7 @@
  *          + bouton SECONDAIRE "Faire connaissance" (menant au profil, comme la carte).
  * Le bouton primaire "Contacter" DISPARAÎT (la rencontre vit sur le profil refondu).
  */
+import ProBadge from "@/components/badges/ProBadge";
 import { useState, type MouseEvent } from "react";
 import { Link } from "react-router-dom";
 import {
@@ -238,11 +239,7 @@ const SitterResultCard = ({
               Gardien d'urgence
             </span>
           )}
-          {profile?.pro_status === "verified" && (
-            <span className="rounded-full bg-primary/10 text-primary px-2 py-0.5 text-[11px] font-semibold">
-              Pro
-            </span>
-          )}
+          <ProBadge status={profile?.pro_status} size="sm" />
         </div>
 
         {/* Ligne meta naturelle */}

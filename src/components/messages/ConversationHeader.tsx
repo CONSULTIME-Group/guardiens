@@ -16,6 +16,7 @@ import { fr } from "date-fns/locale";
 import { appStatusBadge } from "@/lib/messageStatus";
 import ContextHeaderCard from "./ContextHeaderCard";
 import PresenceBadge from "./PresenceBadge";
+import ProAvatarBadge from "@/components/badges/ProAvatarBadge";
 
 interface ConversationHeaderProps {
   conv: any;
@@ -253,7 +254,7 @@ const ConversationHeader = ({
             </button>
           )}
           {conv.other_user?.id ? (
-            <Link to={`/gardiens/${conv.other_user.id}`} className="shrink-0">
+            <Link to={`/gardiens/${conv.other_user.id}`} className="shrink-0 relative block">
               {conv.other_user?.avatar_url ? (
                 <img src={conv.other_user.avatar_url} alt={`Photo de ${conv.other_user.first_name || 'utilisateur'}`} className="w-11 h-11 rounded-full object-cover hover:ring-2 hover:ring-primary/50 transition-all" />
               ) : (
@@ -261,6 +262,7 @@ const ConversationHeader = ({
                   {conv.other_user?.first_name?.charAt(0)?.toUpperCase() || "?"}
                 </div>
               )}
+              <ProAvatarBadge status={conv.other_user?.pro_status} size="sm" />
             </Link>
           ) : conv.other_user?.avatar_url ? (
             <img src={conv.other_user.avatar_url} alt={`Photo de ${conv.other_user.first_name || 'utilisateur'}`} className="w-10 h-10 rounded-full object-cover" />
