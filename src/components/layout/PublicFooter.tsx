@@ -67,7 +67,9 @@ const PublicFooter = React.forwardRef<HTMLElement>((_props, ref) => {
         <div className="pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-white/10">
           <div>
             <h3 className="font-heading text-lg font-semibold text-white/90">
-              <span className="text-primary">g</span>uardiens
+              <Link to="/" aria-label="Guardiens, accueil" className="hover:opacity-80 transition-opacity">
+                <span className="text-primary">g</span>uardiens
+              </Link>
             </h3>
             <p className="font-body text-sm text-white/70">
               {t("footer.tagline")}
