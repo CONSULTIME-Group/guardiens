@@ -29,6 +29,8 @@ interface AuthContextType {
   loading: boolean;
   hasSession: boolean;
   authChecked: boolean;
+  /** Vrai uniquement sur un échec avéré de lecture du profil, jamais sur un simple délai. */
+  profileError: boolean;
   switchRole: (role: ActiveRole) => void;
   setActiveRole: (role: ActiveRole) => void;
   login: (email: string, password: string) => Promise<void>;
@@ -90,6 +92,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [loading, setLoading] = useState(true);
   const [hasSession, setHasSession] = useState(() => detectPersistedToken());
   const [authChecked, setAuthChecked] = useState(false);
+  const [profileError, setProfileError] = useState(false);
   const roleInitialized = useRef(false);
   const userRef = useRef<Profile | null>(null);
 
