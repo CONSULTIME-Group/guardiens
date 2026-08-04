@@ -5,8 +5,8 @@ import { dirname, extname, join, normalize } from "node:path";
 /**
  * Garde-fou structurel : un seul repère `main` par arbre rendu.
  *
- * Les pages montées sous `PublicShellRoute` (ou sous `AppLayout` pour un
- * utilisateur connecté) sont déjà enveloppées dans le `<main>` de la coquille.
+ * Les pages montées sous `PublicShellRoute`, `ContentRoute` ou
+ * `ParrainageRoute` sont enveloppées dans le `<main>` de la coquille connectée.
  * Si elles rendent leur propre `<main>`, le document contient deux repères
  * `main`, ce qui est du HTML invalide et casse la navigation d'assistance.
  */
@@ -21,15 +21,21 @@ const resolveSourcePath = (specifier: string): string => {
   return normalize(extname(base) ? base : `${base}.tsx`);
 };
 
-const getPublicShellMountedPages = (): string[] => {
+const getShellMountedPages = (): string[] => {
   const app = readFileSync(APP_PATH, "utf8");
   const imports = new Map<string, string>();
   const lazyImportPattern = /const\s+(\w+)\s*=\s*lazy\(\s*\(\)\s*=>\s*import\(["']([^"']+)["']\)/g;
   for (const match of app.matchAll(lazyImportPattern)) imports.set(match[1], match[2]);
 
   const components = new Set<string>();
-  const publicShellPattern = /<PublicShellRoute>\s*<(\w+)\b/g;
-  for (const match of app.matchAll(publicShellPattern)) components.add(match[1]);
+  const wrapperPattern = /<(?:PublicShellRoute|ContentRoute)>\s*<(\w+)\b/g;
+  for (const match of app.matchAll(wrapperPattern)) components.add(match[1]);
+
+  const parrainageRouteBody = app.match(/const\s+ParrainageRoute\s*=\s*\(\)\s*=>\s*\{([\s\S]*?)\n\};/);
+  expect(parrainageRouteBody, "Définition de ParrainageRoute introuvable").toBeTruthy();
+  for (const match of (parrainageRouteBody?.[1] ?? "").matchAll(/<(\w+)\b/g)) {
+    if (imports.has(match[1])) components.add(match[1]);
+  }
 
   return [...components].map((component) => {
     const specifier = imports.get(component);
@@ -39,8 +45,8 @@ const getPublicShellMountedPages = (): string[] => {
 };
 
 describe("Structural guard, un seul repere main par arbre rendu", () => {
-  it("les pages montees sous PublicShellRoute ne rendent pas de main imbrique", () => {
-    const pages = getPublicShellMountedPages();
+  it("les pages montees sous une coquille ne rendent pas de main imbrique", () => {
+    const pages = getShellMountedPages();
     expect(pages.length).toBeGreaterThan(0);
 
     const violations: string[] = [];
@@ -54,7 +60,7 @@ describe("Structural guard, un seul repere main par arbre rendu", () => {
 
     expect(
       violations,
-      `PublicShellRoute fournit deja le main. Utilisez un div dans ces pages:\n${violations.join("\n")}`,
+      `La coquille connectee fournit deja le main. Utilisez un div dans ces pages:\n${violations.join("\n")}`,
     ).toEqual([]);
   });
 });

@@ -1,7 +1,7 @@
 import { Suspense, useState } from "react";
 import { lazyWithRetry as lazy } from "@/lib/lazyWithRetry";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Route, Routes, Navigate, useParams, useLocation } from "react-router-dom";
+import { BrowserRouter, Route, Routes, Navigate, useParams, useLocation, useNavigate } from "react-router-dom";
 import { Loader2 } from "lucide-react";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
@@ -19,6 +19,8 @@ import DeferredTrackers from "@/components/analytics/DeferredTrackers";
 // CookieConsent retiré (mesure d'audience exemptée CNIL)
 import { toast } from "sonner";
 import { reportError } from "@/lib/errorLogger";
+import { sanitizeRedirect } from "@/lib/safeRedirect";
+import { Button } from "@/components/ui/button";
 
 // ──── Critical routes (eager) ────
 import Landing from "./pages/Landing";
@@ -244,10 +246,42 @@ const ProfileUnavailable = () => {
   );
 };
 
+const AuthTimeout = () => {
+  const { logout } = useAuth();
+  const navigate = useNavigate();
+  return (
+    <div className="min-h-screen flex items-center justify-center px-6 bg-background">
+      <div className="max-w-md text-center space-y-4">
+        <h1 className="font-heading text-xl font-semibold text-foreground">
+          La vérification prend plus de temps que prévu
+        </h1>
+        <p className="text-sm text-muted-foreground">
+          Votre connexion n'a pas pu être vérifiée. Vous pouvez réessayer ou ouvrir la page de connexion.
+        </p>
+        <div className="flex items-center justify-center gap-3">
+          <Button type="button" onClick={() => window.location.reload()}>
+            Réessayer
+          </Button>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => {
+              void Promise.resolve(logout()).finally(() => navigate("/login", { replace: true }));
+            }}
+          >
+            Se connecter
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
-  const { isAuthenticated, user, hasSession, loading, profileError } = useAuth();
+  const { isAuthenticated, user, hasSession, loading, profileError, authTimeout } = useAuth();
   const location = useLocation();
   if (loading) return <FallbackSpinner />;
+  if (authTimeout && !user) return <AuthTimeout />;
   // Échec avéré de lecture du profil : message explicite et actionnable, jamais
   // un retour muet au formulaire. Un simple délai réseau ne déclenche pas cet
   // écran, il laisse la coquille en chargement.
@@ -257,7 +291,7 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
     // Preserve the originally requested URL so the user is returned
     // to it after a successful login/signup.
     const target = `${location.pathname}${location.search}${location.hash}`;
-    const safe = target.startsWith("/") && !target.startsWith("//") ? target : "/dashboard";
+    const safe = sanitizeRedirect(target) ?? "/dashboard";
     const redirectQuery = safe && safe !== "/dashboard"
       ? `?redirect=${encodeURIComponent(safe)}`
       : "";
@@ -274,14 +308,13 @@ const RegisterRedirect = () => {
 };
 
 const PublicOnlyRoute = ({ children }: { children: React.ReactNode }) => {
-  const { isAuthenticated, loading } = useAuth();
+  const { isAuthenticated, user, loading, authTimeout } = useAuth();
   const location = useLocation();
   if (loading) return <div className="min-h-screen flex items-center justify-center text-muted-foreground">Chargement...</div>;
+  if (authTimeout && !user) return <AuthTimeout />;
   if (isAuthenticated) {
     const requested = new URLSearchParams(location.search).get("redirect");
-    const destination = requested?.startsWith("/") && !requested.startsWith("//")
-      ? requested
-      : "/dashboard";
+    const destination = sanitizeRedirect(requested) ?? "/dashboard";
     return <Navigate to={destination} replace />;
   }
   return <>{children}</>;
@@ -291,11 +324,19 @@ const PublicOnlyRoute = ({ children }: { children: React.ReactNode }) => {
 // Écran neutre pendant la vérification d'un token persistant : ni coquille
 // publique, ni coquille authentifiée, donc aucune permutation visible.
 const ShellPending = () => (
-  <div aria-busy="true" aria-live="polite">
-    <FallbackSpinner />
-    <span className="sr-only">Chargement de votre espace</span>
-  </div>
+  <ShellPendingContent />
 );
+
+const ShellPendingContent = () => {
+  const { authTimeout } = useAuth();
+  if (authTimeout) return <AuthTimeout />;
+  return (
+    <div aria-busy="true" aria-live="polite">
+      <FallbackSpinner />
+      <span className="sr-only">Chargement de votre espace</span>
+    </div>
+  );
+};
 
 const ParrainageRoute = () => {
   const shell = useShellMode();

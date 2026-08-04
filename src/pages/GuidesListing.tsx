@@ -114,7 +114,7 @@ const GuidesListing = () => {
           </div>
         </header>
 
-        <main className="max-w-5xl mx-auto px-4 py-6 md:py-10">
+        <div className="max-w-5xl mx-auto px-4 py-6 md:py-10">
           {/* Filters */}
           <div className="flex flex-col sm:flex-row gap-3 mb-8">
             <div className="relative flex-1">
@@ -188,7 +188,7 @@ const GuidesListing = () => {
               })}
             </div>
           )}
-        </main>
+        </div>
 
         {/* JSON-LD: Breadcrumb */}
         <script

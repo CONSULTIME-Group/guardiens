@@ -336,7 +336,7 @@ export default function AlmaTips() {
       <div className="min-h-screen bg-background flex flex-col">
         <PublicHeader />
 
-        <main className="flex-1 min-w-0 px-[5%] md:px-[8%] py-8 md:py-12">
+        <div className="flex-1 min-w-0 px-[5%] md:px-[8%] py-8 md:py-12">
           <PageBreadcrumb items={[{ label: "Les conseils d'Alma" }]} />
 
           {/* Header */}
@@ -502,7 +502,7 @@ export default function AlmaTips() {
               </Link>
             </p>
           </aside>
-        </main>
+        </div>
 
         <PublicFooter />
       </div>
