@@ -45,7 +45,7 @@ const formatDateRange = (start: string | null, end: string | null): string | nul
 
 const scopeSubtitle = (scope: PoolScope): string => {
   if (scope === "dept") return "Dans votre département, en ce moment.";
-  if (scope === "region") return "Dans votre région, en ce moment.";
+  if (scope === "region") return "Près de chez vous, en ce moment.";
   if (scope === "country") return "En France, en ce moment.";
   return "Près de chez vous, en ce moment.";
 };

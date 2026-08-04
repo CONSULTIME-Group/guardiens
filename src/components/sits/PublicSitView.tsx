@@ -724,7 +724,7 @@ const PublicSitView = ({
                 Pourquoi Guardiens
               </p>
               {[
-                "Profils vérifiés",
+                "Écusson « Identité vérifiée »",
                 "Avis croisés",
                 "Gardien d'urgence en relais",
               ].map((t) => (

@@ -104,7 +104,7 @@ describe("useAlmaCulturalFact", () => {
       data: {
         id: "fact-2",
         type: "social_stat",
-        content: "Plus de 2 200 gardiens vérifiés.",
+        content: "Plus de 2 200 gardiens inscrits.",
         source_url: null,
       },
       error: null,

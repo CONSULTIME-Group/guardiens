@@ -9,7 +9,7 @@ const SitFooterReassurance = () => (
       de gardiens prend le relais.
     </p>
     <p className="text-xs text-muted-foreground mt-1">
-      Profils vérifiés · Avis croisés · Gardiens d'urgence mobilisables
+      Écusson « Identité vérifiée » · Avis croisés · Gardiens d'urgence mobilisables
     </p>
   </div>
 );

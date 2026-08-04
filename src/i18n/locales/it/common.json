@@ -40,7 +40,7 @@
       "pet_pros": "Professionisti per animali"
     },
     "tagline": "House-sitting di prossimità",
-    "version": "Guardiens · Version Beta · 2026",
+    "version": "Guardiens · Version Beta · {{year}}",
     "legal": {
       "cgu": "CGU",
       "cgs": "CGS",
@@ -218,7 +218,7 @@
       "q3": "Come trovare un pet sitter vicino a me?",
       "a3": "Si iscriva su Guardiens, pubblichi il Suo annuncio di custodia con le date e i Suoi animali, e riceva candidature di custodi che vivono vicino a Lei. Sceglierà dopo un incontro.",
       "q4": "Chi sono i custodi su Guardiens?",
-      "a4": "Persone della zona, il cui profilo è esaminato dal nostro team. La fiducia si costruisce sull'incontro di persona prima di ogni custodia, sulle recensioni incrociate pubblicate dopo ogni esperienza e sulla cronologia visibile su ogni profilo.",
+      "a4": "Persone della zona. La verifica d'identità è aperta a tutti i membri, e i profili validati mostrano il distintivo « Identità verificata ». La fiducia si costruisce sull'incontro di persona prima di ogni custodia, sulle recensioni incrociate pubblicate dopo ogni esperienza e sulla cronologia visibile su ogni profilo.",
       "q5": "Come si svolge una custodia su Guardiens?",
       "a5": "Lei pubblica l'annuncio, i custodi della zona si candidano, Lei sceglie dopo un incontro, poi il Suo custode si stabilisce. Un accordo di custodia opzionale definisce gli impegni di ciascuno durante la custodia.",
       "q6": "Guardiens è disponibile in tutta la Francia?",

@@ -3,8 +3,9 @@
  * pousse dans le module `src/lib/affinityScore.ts` via `setAffinityThresholds`.
  *
  * À monter au niveau racine (App.tsx). Silencieux en cas d'erreur réseau :
- * on garde les valeurs par défaut (2 critères / 40 %) codées en dur, ce qui
- * évite tout freeze visuel du discovery. Défauts : 2 critères / 35 %.
+ * on garde les valeurs par défaut codées en dur dans `affinityScore.ts`,
+ * ce qui évite tout freeze visuel du discovery.
+ * Défauts réels : 3 critères communs, 35 % de score minimum.
  */
 import { useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";

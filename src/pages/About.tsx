@@ -1,13 +1,48 @@
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import PageMeta from "@/components/PageMeta";
 import PublicHeader from "@/components/layout/PublicHeader";
 import PublicFooter from "@/components/layout/PublicFooter";
+import { supabase } from "@/integrations/supabase/client";
+import { getAffinityThresholds } from "@/lib/affinityScore";
+
+const CRITERIA_WORDS = ["zéro", "un", "deux", "trois", "quatre", "cinq"];
+
+/**
+ * Seuils d'affichage du score d'affinité, pilotés en base (feature_flags).
+ * Repli sur les valeurs par défaut du moteur si la lecture échoue.
+ */
+function useAffinityThresholdsDisplay() {
+  const fallback = getAffinityThresholds();
+  const { data } = useQuery({
+    queryKey: ["affinity-thresholds-public"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("feature_flags")
+        .select("key, value_int, enabled")
+        .in("key", ["affinity_min_common_criteria", "affinity_min_score_percent"]);
+      if (error) throw error;
+      const out = { ...fallback };
+      for (const row of (data ?? []) as { key: string; value_int: number | null; enabled: boolean | null }[]) {
+        if (row.enabled === false || row.value_int == null) continue;
+        if (row.key === "affinity_min_common_criteria") out.minCommonCriteria = row.value_int;
+        if (row.key === "affinity_min_score_percent") out.minScorePercent = row.value_int;
+      }
+      return out;
+    },
+    staleTime: 10 * 60 * 1000,
+  });
+  return data ?? fallback;
+}
 
 const About = () => {
   const navigate = useNavigate();
   const { t } = useTranslation();
+  const thresholds = useAffinityThresholdsDisplay();
+  const criteriaLabel = CRITERIA_WORDS[thresholds.minCommonCriteria] ?? String(thresholds.minCommonCriteria);
+
 
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -77,7 +112,7 @@ const About = () => {
             <li><strong className="text-foreground">Ambiance du foyer (11 %)</strong> : le rythme et les centres d'intérêt du gardien collent à l'ambiance déclarée.</li>
           </ul>
           <p>
-            Des garde-fous coupent le score si les sensibilités du gardien sont incompatibles avec une espèce, si aucune espèce ne matche, ou si le gardien voyage avec des enfants ou des animaux non acceptés. Le score n'est affiché qu'au-delà d'un seuil minimum (35 % par défaut) et de deux critères comparables.
+            Des garde-fous coupent le score si les sensibilités du gardien sont incompatibles avec une espèce, si aucune espèce ne matche, ou si le gardien voyage avec des enfants ou des animaux non acceptés. Le score n'est affiché qu'au-delà d'un seuil minimum ({thresholds.minScorePercent} % actuellement) et de {criteriaLabel} critères comparables.
           </p>
           <p className="text-sm text-foreground/60 italic">
             La règle est publique : elle n'est ni un classement caché, ni un tri commercial. Vous voyez le détail, vous décidez.
