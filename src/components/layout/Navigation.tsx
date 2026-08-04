@@ -8,7 +8,7 @@ import {
 import { useAuth } from "@/contexts/AuthContext";
 import { useAdmin } from "@/hooks/useAdmin";
 import { cn } from "@/lib/utils";
-import { lazy, Suspense, useEffect, useRef, useState } from "react";
+import { lazy, Suspense, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useScrollDirection } from "@/hooks/useScrollDirection";
 import { useInAppShell } from "./AppShellContext";
@@ -63,7 +63,7 @@ const SidebarItem = ({
   </NavLink>
 );
 
-export const Sidebar = () => {
+export const Sidebar = ({ showHeaderBells = true }: { showHeaderBells?: boolean }) => {
   const { user, activeRole, setActiveRole } = useAuth();
   const { isAdmin } = useAdmin();
   const navigate = useNavigate();
@@ -167,14 +167,14 @@ export const Sidebar = () => {
           <span className="text-foreground" aria-hidden="true">uardiens</span>
           <span className="ml-1.5 text-[10px] font-medium tracking-wide text-foreground/35 align-middle select-none" aria-hidden="true">bêta</span>
         </Link>
-        <div className="flex items-center gap-1">
+        {showHeaderBells && <div className="flex items-center gap-1">
           <Suspense fallback={<div className="w-9 h-9" aria-hidden />}>
             <MessageBell />
           </Suspense>
           <Suspense fallback={<div className="w-9 h-9" aria-hidden />}>
             <NotificationBell />
           </Suspense>
-        </div>
+        </div>}
       </div>
 
       {/* Avatar et menu compte */}
@@ -449,8 +449,8 @@ export const BottomNav = () => {
 
   // Hauteur réelle de la pilule exposée en variable CSS, pour que les barres
   // d'action collantes des pages s'empilent au dessus sans valeur en dur.
-  const pillRef = useRef<HTMLDivElement | null>(null);
-  useEffect(() => {
+  const pillRef = useRef<HTMLElement | null>(null);
+  useLayoutEffect(() => {
     const el = pillRef.current;
     if (!el || typeof window === "undefined") return;
     const apply = () => {
@@ -573,6 +573,7 @@ export const BottomNav = () => {
       <ActivateRoleDialog open={roleDialogOpen} onClose={() => setRoleDialogOpen(false)} targetRole={roleDialogTarget} />
 
       <nav
+        ref={pillRef}
         className={cn(
           "md:hidden fixed bottom-0 left-0 right-0 z-50 pointer-events-none px-3 pb-[max(0.5rem,env(safe-area-inset-bottom))]",
           // PASS 2 — Hide-on-scroll : libère 80px d'écran utile au scroll bas
@@ -581,7 +582,7 @@ export const BottomNav = () => {
         )}
         aria-label="Navigation mobile"
       >
-        <div ref={pillRef} className="pointer-events-auto mx-auto max-w-md bg-card border border-border/60 shadow-[0_20px_50px_-12px_hsl(var(--primary)/0.18)] rounded-3xl h-16 flex items-center justify-between px-1.5 relative">
+        <div className="pointer-events-auto mx-auto max-w-md bg-card border border-border/60 shadow-[0_20px_50px_-12px_hsl(var(--primary)/0.18)] rounded-3xl h-16 flex items-center justify-between px-1.5 relative">
 
           {leftTabs.map(renderTab)}
 

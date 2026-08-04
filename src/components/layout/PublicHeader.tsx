@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef, lazy, Suspense } from "react";
+import { useState, useEffect, useLayoutEffect, useCallback, useRef, lazy, Suspense } from "react";
 import { useNavigate, Link, useLocation } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
@@ -14,7 +14,7 @@ const MessageBell = lazy(() => import("./MessageBell"));
 
 /** Vrai sous le point de rupture sm de Tailwind (640 px). */
 const useIsCompactViewport = () => {
-  const query = "(max-width: 639px)";
+  const query = "(max-width: 639.98px)";
   const [compact, setCompact] = useState(() =>
     typeof window !== "undefined" && typeof window.matchMedia === "function"
       ? window.matchMedia(query).matches
@@ -52,6 +52,7 @@ export default function PublicHeader({ authedVariant = false }: { authedVariant?
   const [msgUnread, setMsgUnread] = useState(0);
   const [notifUnread, setNotifUnread] = useState(0);
   const headerRef = useRef<HTMLElement | null>(null);
+  const fixedBarRef = useRef<HTMLDivElement | null>(null);
 
   const onMsgUnread = useCallback((n: number) => setMsgUnread(n), []);
   const onNotifUnread = useCallback((n: number) => setNotifUnread(n), []);
@@ -77,9 +78,9 @@ export default function PublicHeader({ authedVariant = false }: { authedVariant?
   // Hauteur réelle de l'en tête exposée en variable CSS, pour que les barres
   // collantes des pages (onglets de profil public par exemple) s'y accrochent
   // sans valeur en dur. Remise à zéro au démontage : sans en tête, offset nul.
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (hidden) return;
-    const el = headerRef.current;
+    const el = fixedBarRef.current;
     if (!el || typeof window === "undefined") return;
     const apply = () => {
       document.documentElement.style.setProperty(
@@ -121,7 +122,7 @@ export default function PublicHeader({ authedVariant = false }: { authedVariant?
   return (
     <>
     <header ref={headerRef} className="sticky top-0 z-50 bg-background/80 backdrop-blur-md border-b border-border/50">
-      <div className="flex items-center justify-between px-[5%] md:px-[8%] py-4">
+      <div ref={fixedBarRef} className="flex items-center justify-between px-[5%] md:px-[8%] py-4">
         <Link to="/" aria-label="Guardiens, accueil" className="font-heading text-xl md:text-2xl font-bold">
           <span aria-hidden="true"><span className="text-primary">g</span>uardiens</span>
         </Link>

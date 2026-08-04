@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, lazy, Suspense } from "react";
+import { useState, useEffect, useRef } from "react";
 
 import ProBadge from "@/components/badges/ProBadge";
 import { useParams, Link, useSearchParams, useNavigate } from "react-router-dom";
@@ -6,7 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useAlmaCulturalFact } from "@/hooks/useAlmaCulturalFact";
 import PageMeta from "@/components/PageMeta";
-const PublicHeader = lazy(() => import("@/components/layout/PublicHeader"));
+import PublicHeader from "@/components/layout/PublicHeader";
 import BadgeRow from "@/components/badges/BadgeRow";
 import MissionBadgesReceived from "@/components/missions/MissionBadgesReceived";
 import SpecialBadgeHighlight from "@/components/badges/SpecialBadgeHighlight";
@@ -1134,9 +1134,7 @@ export default function PublicSitterProfile() {
       {/* Coquille connectée : en tête et pilule de navigation, pour ne pas
           enfermer l'utilisateur sur cette page. Visiteur : rendu inchangé. */}
       {hasSession && (
-        <Suspense fallback={null}>
-          <PublicHeader authedVariant />
-        </Suspense>
+        <PublicHeader authedVariant />
       )}
       {/* JSON-LD */}
       {profile && (

@@ -91,6 +91,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [hasSession, setHasSession] = useState(() => detectPersistedToken());
   const [authChecked, setAuthChecked] = useState(false);
   const roleInitialized = useRef(false);
+  const userRef = useRef<Profile | null>(null);
 
   const switchRole = useCallback((role: ActiveRole) => {
     setActiveRoleState(role);
@@ -126,6 +127,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     if (data) {
       const profile = mapProfile(data, supabaseUser.email);
+      userRef.current = profile;
       setUser(profile);
 
       // Only initialize role ONCE per session — never override user's manual choice
@@ -197,11 +199,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             });
           }
           setTimeout(async () => {
-            await fetchProfile(session.user);
-            setLoading(false);
-            if (getOAuthTraceId()) {
-              logOAuthStage("user_endpoint_ok", "auth-context");
-              endOAuthFlow("success");
+            try {
+              await fetchProfile(session.user);
+              if (getOAuthTraceId()) {
+                logOAuthStage("user_endpoint_ok", "auth-context");
+                endOAuthFlow("success");
+              }
+            } catch {
+              userRef.current = null;
+              setUser(null);
+              setHasSession(false);
+              setAuthChecked(true);
+            } finally {
+              setLoading(false);
             }
           }, 0);
         } else {
@@ -211,6 +221,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             return;
           }
           markChecked(false);
+          userRef.current = null;
           setUser(null);
           roleInitialized.current = false;
           setLoading(false);
@@ -231,12 +242,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setLoading(false);
     });
 
-    // (C) Timeout de sécurité : ne jamais geler le header si le refresh échoue.
+    // (C) Timeout de sécurité : toute vérification doit aboutir à un rendu.
     const safety = window.setTimeout(() => {
-      if (!settled) {
-        setAuthChecked(true);
-        setLoading(false);
-      }
+      setAuthChecked(true);
+      setLoading(false);
+      if (!userRef.current) setHasSession(false);
     }, 1500);
 
     return () => {
@@ -321,6 +331,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       localStorage.removeItem('guardiens_active_role');
     } catch {}
+    userRef.current = null;
     setUser(null);
     setHasSession(false);
     roleInitialized.current = false;
