@@ -282,13 +282,14 @@ const Observatoire = () => {
  Vous voulez tester ?
  </h2>
  <p className="text-muted-foreground mb-6">
- Publication d'annonce gratuite, candidatures sous quelques jours.
+ Publication d'annonce sans engagement, candidatures sous quelques jours.
  </p>
  <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
  <Link to="/inscription?role=owner">
  <Button size="lg" className="gap-2">
- Créer mon annonce gratuite
+ Créer mon annonce
  <ArrowRight className="h-4 w-4" />
+
  </Button>
  </Link>
  <Link to="/tarifs" className="text-sm text-primary hover:underline">
