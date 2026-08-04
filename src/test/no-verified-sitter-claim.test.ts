@@ -156,3 +156,52 @@ describe("Positionnement national", () => {
     expect(hits.length).toBe(0);
   });
 });
+
+/**
+ * Tests du garde-fou lui-même. Sans eux, un motif qui ne matche rien reste vert.
+ */
+const MUST_DETECT: string[] = [
+  "Les pièces d'identité soumises sont contrôlées manuellement par l'équipe Guardiens",
+  "Un gardien vérifié vous attend.",
+  "Un profil vérifié",
+  "gardiens rigoureusement vérifiés",
+  "Nos gardiens sont tous vérifiés",
+  "Contrôle manuel par notre équipe",
+  "profils vérifiés et notés",
+  "Tous nos gardiens sont vérifiés.",
+  "Vérification SIRET manuelle par notre équipe",
+  "Chaque pièce d'identité est vérifiée à la main",
+  "chaque gardien est vérifié avant publication",
+];
+
+const MUST_NOT_DETECT: string[] = [
+  "Les profils validés affichent l'écusson « Identité vérifiée ».",
+  "Vous envoyez une pièce d'identité, elle est analysée automatiquement.",
+  "Comment fonctionne la vérification d'identité à Lyon ?",
+  "Les justificatifs SIRET sont analysés automatiquement.",
+];
+
+function isDetected(text: string): boolean {
+  const source = removeAllowedBadgeNames(text);
+  return FORBIDDEN_CLAIMS.some((pattern) => pattern.test(source));
+}
+
+describe("Motifs du garde-fou", () => {
+  it.each(MUST_DETECT)("détecte : %s", (text) => {
+    expect(isDetected(text)).toBe(true);
+  });
+
+  it.each(MUST_NOT_DETECT)("laisse passer : %s", (text) => {
+    expect(isDetected(text)).toBe(false);
+  });
+
+  it("protège le nom de l'écusson entre guillemets", () => {
+    expect(isDetected("Gardien porteur de « Identité vérifiée »")).toBe(false);
+  });
+
+  it("ne neutralise pas une violation voisine du nom de l'écusson", () => {
+    expect(
+      isDetected("Tous nos gardiens sont vérifiés. Écusson « Identité vérifiée ».")
+    ).toBe(true);
+  });
+});
