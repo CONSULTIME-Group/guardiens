@@ -30,7 +30,7 @@ export default function MySubscription() {
             Vous avez accès complet à Guardiens
           </h1>
           <p className="font-body text-foreground/70 mb-6">
-            Aucun abonnement actif à gérer pour le moment.
+            Aucun paiement à gérer pour le moment.
           </p>
 
           <Card className="border-2 border-primary/40">

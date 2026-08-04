@@ -325,7 +325,7 @@ export default function MyProProfile() {
                 ) : profile.status === "approved" ? (
                   <>
                     <p className="text-sm text-foreground mb-3">
-                      Vous pouvez demander la vérification SIRET pour obtenir le badge « Vérifié Guardiens ». Contrôle manuel par notre équipe, sous 48 h ouvrées.
+                      Vous pouvez demander la vérification SIRET pour obtenir le badge « Vérifié Guardiens ». Les justificatifs sont examinés par notre équipe.
                     </p>
                     <Button
                       size="sm"

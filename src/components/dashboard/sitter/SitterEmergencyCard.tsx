@@ -255,7 +255,7 @@ const SitterEmergencyCard = ({ hasEmergencyProfile }: SitterEmergencyCardProps) 
     { label: `Note : ${effectiveChecks.avgRating || ","}/4.7`, ok: effectiveChecks.avgRating >= 4.7 },
     { label: `Annulations (6 mois) : ${effectiveChecks.recentCancellations}`, ok: effectiveChecks.recentCancellations === 0 },
     { label: "Identité vérifiée", ok: effectiveChecks.identityVerified },
-    { label: "Abonnement actif", ok: effectiveChecks.hasSubscription },
+    { label: "Accès autorisé", ok: effectiveChecks.hasSubscription },
   ];
   const allOk = previewMode === "eligible" ? true : items.every(i => i.ok);
   const remaining = Math.max(0, 5 - effectiveChecks.completedSits);
