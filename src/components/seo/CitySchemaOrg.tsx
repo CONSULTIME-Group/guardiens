@@ -10,7 +10,7 @@ interface Props {
 const LYON_FAQ = [
  {
  q: "Comment rencontrer un gardien avant de confier ma maison ?",
- a: "Après avoir accepté une candidature, vous organisez une rencontre directement via la messagerie Guardiens. La plupart des propriétaires à Lyon choisissent un café de quartier ou une visite du logement. Cette étape est systématique et fortement recommandée.",
+ a: "Après avoir accepté une candidature, vous organisez une rencontre directement via la messagerie Guardiens. La plupart des propriétaires à Lyon choisissent un café de quartier ou une visite du logement. Cette étape est fortement recommandée.",
  },
  {
  q: "Que se passe-t-il en cas d'urgence ou d'imprévu ?",
@@ -18,7 +18,7 @@ const LYON_FAQ = [
  },
  {
  q: "Comment sont vérifiés les gardiens à Lyon ?",
- a: "Chaque gardien fournit une pièce d'identité vérifiée manuellement par l'équipe Guardiens. Les avis croisés après chaque garde et les badges de fiabilité complètent le dispositif de confiance.",
+ a: "La vérification d'identité est ouverte à tous les membres. Chaque pièce soumise est contrôlée manuellement par l'équipe Guardiens, jamais par un algorithme, et les profils qui l'ont obtenue affichent l'écusson « Identité vérifiée ». Les avis croisés après chaque garde et les badges de fiabilité complètent le dispositif de confiance.",
  },
  {
  q: "Puis-je publier une annonce pour un chien ET un chat ?",
@@ -45,7 +45,7 @@ const LYON_FAQ = [
 const ANNECY_FAQ = [
  {
  q: "Comment trouver un gardien de confiance à Annecy ?",
- a: "Vous publiez votre annonce gratuitement et les gardiens disponibles à Annecy et en Haute-Savoie postulent. Chaque profil est vérifié manuellement (pièce d'identité, avis croisés, badges de fiabilité). Vous échangez avec les candidats via la messagerie et organisez une rencontre avant de confier vos clés.",
+ a: "Vous publiez votre annonce gratuitement et les gardiens disponibles à Annecy et en Haute-Savoie postulent. Les pièces d'identité soumises sont contrôlées manuellement par l'équipe Guardiens, et les profils vérifiés affichent l'écusson « Identité vérifiée », complété par les avis croisés et les badges de fiabilité. Vous échangez avec les candidats via la messagerie et organisez une rencontre avant de confier vos clés.",
  },
  {
  q: "Les gardiens à Annecy sont-ils habitués aux logements de montagne ?",
@@ -122,7 +122,7 @@ const CHAMBERY_FAQ = [
 const DEFAULT_FAQ = (cityName: string) => [
  {
  q: `Comment trouver un gardien de maison à ${cityName} ?`,
- a: `Sur Guardiens, vous publiez une annonce gratuite et les gardiens disponibles à ${cityName} et ses environs postulent directement. Chaque gardien est vérifié manuellement avant d'apparaître sur la plateforme.`,
+ a: `Sur Guardiens, vous publiez une annonce gratuite et les gardiens disponibles à ${cityName} et ses environs postulent directement. La vérification d'identité est ouverte à tous les membres et contrôlée manuellement par l'équipe Guardiens : regardez l'écusson « Identité vérifiée » sur les profils avant de choisir.`,
  },
  {
  q: `Est-ce vraiment gratuit pour les propriétaires à ${cityName} ?`,

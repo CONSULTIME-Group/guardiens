@@ -11,7 +11,6 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { safeUUID } from "@/lib/uuid";
 
-const SITTER_PRICE_START = "";  // pivot pricing sans deadline
 
 const ParrainagePage = () => {
   const { user } = useAuth();
@@ -78,7 +77,7 @@ const ParrainagePage = () => {
   };
 
   const shareTextFor = (channel: string) =>
-    `Je vous invite à rejoindre Guardiens, la communauté de garde d'animaux entre gens du coin. Inscription gratuite jusqu'au ${SITTER_PRICE_START} : ${trackedUrl(channel)}`;
+    `Je vous invite à rejoindre Guardiens, la communauté de garde d'animaux entre gens du coin : ${trackedUrl(channel)}`;
 
   const copy = () => {
     navigator.clipboard.writeText(trackedUrl("copy"));
@@ -191,7 +190,6 @@ const ParrainagePage = () => {
               </div>
 
               <p className="text-xs text-muted-foreground font-body">
-                Votre filleul rejoint Guardiens gratuitement jusqu'au {SITTER_PRICE_START}.
                 Quand l'abonnement gardien deviendra payant, vous recevez tous les deux un mois d'accès offert dès son activation.
               </p>
             </CardContent>

@@ -44,7 +44,7 @@ const StickyCTA = ({ city, stats }: Props) => {
     ctaText = "Rejoindre Guardiens";
     ctaLink = "/inscription";
   } else if (stats.activeListings > 0) {
-    message = `${stats.activeListings} annonce${stats.activeListings > 1 ? "s" : ""} active${stats.activeListings > 1 ? "s" : ""} à ${city.name} cette semaine.`;
+    message = `${stats.activeListings} annonce${stats.activeListings > 1 ? "s" : ""} active${stats.activeListings > 1 ? "s" : ""} à ${city.name} en ce moment.`;
     ctaText = "Voir les annonces";
     ctaLink = `/sits?ville=${city.slug}`;
   } else {

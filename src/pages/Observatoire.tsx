@@ -54,8 +54,8 @@ const KEY_STATS: Stat[] = [
 
  {
  label: "Vérification d'identité",
- value: "100 %",
- detail: "Chaque gardien fournit une pièce d'identité vérifiée manuellement par l'équipe Guardiens avant publication de son profil.",
+ value: "Manuelle",
+ detail: "La vérification d'identité est ouverte à tous les membres. Chaque pièce soumise est contrôlée manuellement par l'équipe Guardiens, jamais par un algorithme. Les profils qui l'ont obtenue affichent l'écusson « Identité vérifiée ».",
  },
  {
  label: "Badges de reconnaissance",
@@ -196,7 +196,7 @@ const Observatoire = () => {
  license: "https://guardiens.fr/mentions-legales",
  isAccessibleForFree: true,
  datePublished: "2026-06-08",
- dateModified: "2026-08-04",
+ ...(species?.calcule_le ? { dateModified: species.calcule_le.slice(0, 10) } : {}),
 
  inLanguage: "fr",
  };
@@ -347,7 +347,7 @@ const Observatoire = () => {
  </h2>
  <div className="space-y-4 text-foreground leading-relaxed">
  <p>
- Chaque gardien fournit une <strong>pièce d'identité vérifiée manuellement</strong> par l'équipe Guardiens avant que son profil soit publié. Cette étape n'est pas déléguée à un prestataire automatique.
+ La <strong>vérification d'identité</strong> est ouverte à tous les membres. Chaque pièce soumise est contrôlée manuellement par l'équipe Guardiens, jamais par un algorithme, jamais par un prestataire automatique. Les profils qui l'ont obtenue affichent l'écusson « Identité vérifiée ». Regardez cet écusson avant de choisir.
  </p>
  <p>
  À l'issue de chaque garde, propriétaires et gardiens laissent un <strong>avis croisé détaillé</strong>. Ces avis alimentent le <strong>Trust Score (0 à 100)</strong>, calculé sur l'identité vérifiée, le volume d'avis, la note moyenne, le nombre de gardes réalisées et l'ancienneté du compte.
