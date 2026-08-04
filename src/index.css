@@ -790,7 +790,16 @@
   /* Pages publiques hors coquille authentifiée : réserve la place de la
      pilule de navigation flottante mobile pour ne masquer aucun contenu. */
   @media (max-width: 767px) {
+    /* Sans pied de page : le padding sur le body suffit (fond identique). */
     body.has-public-bottom-nav {
+      padding-bottom: 6rem;
+    }
+    /* Avec pied de page sombre : le padding est porté par le footer lui même,
+       pour ne jamais laisser apparaître une bande de fond clair en dessous. */
+    body.has-public-bottom-nav:has(footer) {
+      padding-bottom: 0;
+    }
+    body.has-public-bottom-nav footer:last-of-type {
       padding-bottom: 6rem;
     }
   }

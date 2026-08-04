@@ -276,7 +276,6 @@ export const Sidebar = () => {
               <SidebarItem to="/dashboard" icon={Home} label="Dashboard" />
               <SidebarItem to={effectiveRole === "owner" ? "/sits" : "/mes-candidatures"} icon={Calendar} label={effectiveRole === "owner" ? "Mes annonces" : "Mes candidatures"} badge={sitsBadge} />
               <SidebarItem to="/messages" icon={MessageCircle} label="Messages" badge={unreadCount} />
-              <SidebarItem to={effectiveRole === "owner" ? "/owner-profile" : "/profile"} icon={User} label="Mon profil" />
               <SidebarItem to="/mes-avis" icon={Star} label="Mes avis" />
               <SidebarItem to="/favoris" icon={Heart} label="Mes favoris" />
 
@@ -331,13 +330,6 @@ export const Sidebar = () => {
           </Button>
         </div>
 
-        <button
-          onClick={logout}
-          className="flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium text-muted-foreground hover:bg-accent hover:text-foreground transition-colors w-full"
-        >
-          <LogOut className="h-[18px] w-[18px]" strokeWidth={1.8} />
-          Déconnexion
-        </button>
       </div>
     </aside>
   );
@@ -617,7 +609,7 @@ export const BottomNav = () => {
                 to="/"
                 onClick={() => setSheetOpen(false)}
                 aria-label="Accueil du site"
-                className="flex items-center gap-3 px-4 py-3 mb-3 rounded-lg text-sm font-medium text-foreground hover:bg-accent transition-colors"
+                className="flex items-center gap-3 px-4 py-3 mb-3 min-h-[44px] rounded-lg text-sm font-medium text-foreground hover:bg-accent transition-colors"
               >
                 <Home className="h-5 w-5" strokeWidth={1.8} aria-hidden="true" />
                 Accueil du site
