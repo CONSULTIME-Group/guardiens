@@ -140,7 +140,9 @@ const MessageComposer = ({ value, onChange, onSend, onPickPhoto, onProposeVideoC
       >
         <Send className="h-[18px] w-[18px]" aria-hidden="true" />
       </Button>
+      </div>
     </div>
+
   );
 };
 
