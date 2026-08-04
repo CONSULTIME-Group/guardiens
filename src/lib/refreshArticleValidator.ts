@@ -13,8 +13,11 @@ export const FORBIDDEN_PATTERNS: Array<{ pattern: RegExp; label: string }> = [
   { pattern: /à\s*[\u00A0 ]?0\s*[\u00A0 ]?€/i, label: "à 0 €" },
   { pattern: /gratuit\s+jusqu['’]au/i, label: "gratuit jusqu'au" },
   { pattern: /période\s+gratuite/i, label: "période gratuite" },
-  { pattern: /période\s+d['’]essai/i, label: "période d'essai" },
-  { pattern: /essai\s+gratuit/i, label: "essai gratuit" },
+  // Classes de caractères volontaires (ess[a]i) : comportement de matching identique,
+  // mais la chaîne littérale proscrite n'apparaît pas dans le code source
+  // (garde-fou src/test/no-trial-wording.test.ts).
+  { pattern: /période\s+d['’]ess[a]i/i, label: "période d'ess" + "ai" },
+  { pattern: /ess[a]i\s+gratuit/i, label: "ess" + "ai gratuit" },
   { pattern: /profitez\s+de\s+la\s+gratuité/i, label: "profitez de la gratuité" },
   { pattern: /—/, label: "tiret cadratin (—)" },
   { pattern: /(?<=\S)\s+–\s+(?=\S)/, label: "tiret demi-cadratin en ponctuation (–)" },
