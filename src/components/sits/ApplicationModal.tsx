@@ -86,7 +86,7 @@ const ApplicationModal = ({
     if (!user || !open) return;
     const load = async () => {
       const [profileRes, sitterRes, reviewRes, badgeRes, galleryRes, sitRes, ownerAffRes] = await Promise.all([
-        supabase.from("profiles").select("first_name, avatar_url, city, identity_verified").eq("id", user.id).single(),
+        supabase.from("profiles").select("first_name, avatar_url, city, identity_verified, pro_status").eq("id", user.id).single(),
         supabase.from("sitter_profiles").select("experience_years, animal_types, own_animals, travels_with_children, travels_with_own_animals, life_pace, languages, interests, work_during_sit, sensitivities, special_animal_skills, sitter_type").eq("user_id", user.id).maybeSingle(),
         supabase.from("reviews").select("overall_rating").eq("reviewee_id", user.id).eq("published", true),
         supabase.from("badge_attributions").select("badge_id").eq("user_id", user.id),
@@ -600,6 +600,20 @@ const ApplicationModal = ({
             </div>
           )}
         </div>
+
+        {(sitterInfo?.profile?.pro_status === "declared" || sitterInfo?.profile?.pro_status === "verified") && (
+          <div className="mt-2 rounded-xl border border-border bg-accent/40 p-4">
+            <p className="text-sm text-foreground">
+              Votre statut professionnel sera visible par le propriétaire. Une garde sur Guardiens se fait sans échange d'argent, la maison contre la présence. Vos prestations rémunérées passent par votre fiche dans l'annuaire des pros.
+            </p>
+            <Link
+              to="/pros/inscription"
+              className="mt-2 inline-block text-sm font-medium text-primary hover:underline"
+            >
+              Créer ou compléter ma fiche dans l'annuaire des pros
+            </Link>
+          </div>
+        )}
 
         <div className="flex justify-end gap-2 mt-2">
           <Button variant="outline" onClick={() => onOpenChange(false)}>Annuler</Button>
