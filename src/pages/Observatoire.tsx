@@ -136,8 +136,9 @@ const Observatoire = () => {
  Chiffres-clés, modèle économique, dispositif de confiance. Données issues de la plateforme Guardiens et de l'expérience terrain des fondateurs entre 2021 et 2026. Mises à jour régulières.
  </p>
  <p className="mt-3 text-sm text-muted-foreground">
- Dernière mise à jour : juin 2026. Source : Guardiens, Jérémie Martinot, SIRET 894 864 040 00015.
+ Dernière mise à jour : {species?.calcule_le ? formatFrDate(species.calcule_le) : "août 2026"}. Source : Guardiens, Jérémie Martinot, SIRET 894 864 040 00015.
  </p>
+
  </header>
 
  <section id="datapoints" className="max-w-5xl mx-auto px-4 pb-12 scroll-mt-24">
