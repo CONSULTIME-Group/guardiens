@@ -430,7 +430,31 @@ export const BottomNav = () => {
 
   const navigate = useNavigate();
   const scrollDir = useScrollDirection();
-  const hideNav = scrollDir === "down";
+  const inAppShell = useInAppShell();
+
+  // La nav ne se masque jamais sur les routes publiques hors coquille
+  // authentifiée : elle y est le seul recours de navigation. Ailleurs, elle
+  // se masque au scroll bas, revient au scroll haut, et revient aussi seule
+  // après 1,5 seconde sans scroll.
+  const [idleVisible, setIdleVisible] = useState(true);
+  const idleTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    if (!inAppShell) return;
+    const onScroll = () => {
+      setIdleVisible(false);
+      if (idleTimer.current) clearTimeout(idleTimer.current);
+      idleTimer.current = setTimeout(() => setIdleVisible(true), 1500);
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      if (idleTimer.current) clearTimeout(idleTimer.current);
+    };
+  }, [inAppShell]);
+
+  const hideNav = inAppShell && scrollDir === "down" && !idleVisible;
+
 
   // Signature Dock 2026 — 4 tabs role-aware + FAB contextuel + Plus sheet
   const isOwnerView = effectiveRole === "owner";
@@ -460,7 +484,7 @@ export const BottomNav = () => {
 
   // 2 onglets à gauche du FAB
   const leftTabs = [
-    { to: "/dashboard", icon: Home, label: "Accueil", badge: isOwnerView ? ownerInboxCount : 0 },
+    { to: "/dashboard", icon: Home, label: "Tableau de bord", badge: isOwnerView ? ownerInboxCount : 0 },
     isOwnerView
       ? { to: "/sits", icon: Calendar, label: "Annonces", badge: ownerInboxCount }
       : { to: "/search", icon: Search, label: "Recherche", badge: 0 },
