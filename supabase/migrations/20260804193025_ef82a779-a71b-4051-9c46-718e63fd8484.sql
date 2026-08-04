@@ -1,0 +1,1 @@
+ALTER TYPE public.pro_profile_status_enum ADD VALUE IF NOT EXISTS 'declared';

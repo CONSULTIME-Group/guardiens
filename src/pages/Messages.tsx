@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { Helmet } from "react-helmet-async";
 import { supabase } from "@/integrations/supabase/client";
+import ProAvatarBadge from "@/components/badges/ProAvatarBadge";
 import { useAuth } from "@/contexts/AuthContext";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -41,7 +42,7 @@ interface Conversation {
   context_type: string | null;
   sit?: { title: string; status: string; property_id: string; start_date?: string | null; end_date?: string | null; city?: string | null } | null;
   small_mission?: { id: string; title?: string | null; city?: string | null; date_needed?: string | null } | null;
-  other_user?: { id: string; first_name: string; avatar_url: string | null; identity_verified: boolean; city?: string | null; is_founder?: boolean; last_seen_at?: string | null; show_last_seen?: boolean } | null;
+  other_user?: { id: string; first_name: string; avatar_url: string | null; identity_verified: boolean; pro_status?: string | null; city?: string | null; is_founder?: boolean; last_seen_at?: string | null; show_last_seen?: boolean } | null;
   last_message?: { content: string; created_at: string; sender_id: string; is_system?: boolean } | null;
   unread_count: number;
   application_status?: string | null;
@@ -151,7 +152,7 @@ const Messages = () => {
     const missionIds = filteredConvs.map((conv: any) => conv.small_mission_id).filter(Boolean);
 
     const [profilesRes, allLastMsgsRes, allUnreadRes, ratingsRes, emergencyRes, sitsRes, applicationsRes, missionsRes, prefsRes] = await Promise.all([
-      supabase.from("public_profiles").select("id, first_name, avatar_url, identity_verified, city, is_founder").in("id", otherIds),
+      supabase.from("public_profiles").select("id, first_name, avatar_url, identity_verified, city, is_founder, pro_status").in("id", otherIds),
       supabase.from("messages").select("conversation_id, content, created_at, sender_id, is_system").in("conversation_id", convIds).order("created_at", { ascending: false }),
       supabase.from("messages").select("conversation_id, id").in("conversation_id", convIds).neq("sender_id", user.id).is("read_at", null),
       supabase.from("reviews").select("reviewee_id, overall_rating").in("reviewee_id", otherIds).eq("published", true),
@@ -589,6 +590,7 @@ const Messages = () => {
                 {conv.other_user?.first_name?.charAt(0)?.toUpperCase() || "?"}
               </div>
             )}
+            <ProAvatarBadge status={conv.other_user?.pro_status} size="sm" />
           </div>
           <div className="flex-1 min-w-0">
             <div className="flex items-center justify-between gap-2">

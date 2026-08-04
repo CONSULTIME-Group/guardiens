@@ -6930,10 +6930,13 @@ export type Database = {
           latitude_approx: number | null
           longitude_approx: number | null
           postal_code: string | null
+          pro_business_name: string | null
+          pro_pricing_note: string | null
           pro_specialty: string | null
           pro_status:
             | Database["public"]["Enums"]["pro_profile_status_enum"]
             | null
+          pro_tagline: string | null
           profile_completion: number | null
           role: Database["public"]["Enums"]["user_role"] | null
           skill_categories: string[] | null
@@ -6954,10 +6957,13 @@ export type Database = {
           latitude_approx?: never
           longitude_approx?: never
           postal_code?: string | null
+          pro_business_name?: string | null
+          pro_pricing_note?: string | null
           pro_specialty?: string | null
           pro_status?:
             | Database["public"]["Enums"]["pro_profile_status_enum"]
             | null
+          pro_tagline?: string | null
           profile_completion?: number | null
           role?: Database["public"]["Enums"]["user_role"] | null
           skill_categories?: string[] | null
@@ -6978,10 +6984,13 @@ export type Database = {
           latitude_approx?: never
           longitude_approx?: never
           postal_code?: string | null
+          pro_business_name?: string | null
+          pro_pricing_note?: string | null
           pro_specialty?: string | null
           pro_status?:
             | Database["public"]["Enums"]["pro_profile_status_enum"]
             | null
+          pro_tagline?: string | null
           profile_completion?: number | null
           role?: Database["public"]["Enums"]["user_role"] | null
           skill_categories?: string[] | null
@@ -8315,7 +8324,12 @@ export type Database = {
         | "other"
       pro_moderation_status: "pending" | "approved" | "rejected"
       pro_pricing_tier: "standard" | "verified"
-      pro_profile_status_enum: "none" | "pending" | "verified" | "rejected"
+      pro_profile_status_enum:
+        | "none"
+        | "pending"
+        | "verified"
+        | "rejected"
+        | "declared"
       pro_verification_status_enum:
         | "pending"
         | "auto_approved"
@@ -8570,7 +8584,13 @@ export const Constants = {
       ],
       pro_moderation_status: ["pending", "approved", "rejected"],
       pro_pricing_tier: ["standard", "verified"],
-      pro_profile_status_enum: ["none", "pending", "verified", "rejected"],
+      pro_profile_status_enum: [
+        "none",
+        "pending",
+        "verified",
+        "rejected",
+        "declared",
+      ],
       pro_verification_status_enum: [
         "pending",
         "auto_approved",

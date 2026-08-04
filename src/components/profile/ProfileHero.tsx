@@ -12,6 +12,8 @@
 import { Link } from "react-router-dom";
 import { MapPin, Shield, BadgeCheck, Image as ImageIcon } from "lucide-react";
 import ProBadge from "@/components/badges/ProBadge";
+import ProAvatarBadge from "@/components/badges/ProAvatarBadge";
+import { specialtyLabel } from "@/lib/proSpecialties";
 import StatutGardienBadge from "@/components/profile/StatutGardienBadge";
 import FavoriteButton from "@/components/shared/FavoriteButton";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
@@ -38,6 +40,8 @@ interface ProfileHeroProps {
   hasAvatarLightbox: boolean;
 
   proStatus: string | null;
+  proSpecialty?: string | null;
+  proBusinessName?: string | null;
   proTagline: string | null;
   proPricingNote: string | null;
 
@@ -73,6 +77,8 @@ const ProfileHero = ({
   onOpenAvatarLightbox,
   hasAvatarLightbox,
   proStatus,
+  proSpecialty,
+  proBusinessName,
   proTagline,
   proPricingNote,
   isAvailable,
@@ -153,8 +159,12 @@ const ProfileHero = ({
       ? "Propriétaire"
       : "Gardien";
 
-  const showTagline = proStatus === "verified" && !!proTagline;
-  const showPricingNote = proStatus === "verified" && !!proPricingNote;
+  // Le bloc pro s'ouvre dès le statut déclaré ; le badge distingue déclaré et vérifié.
+  const isPro = proStatus === "verified" || proStatus === "declared";
+  const proSpecialtyLabel = isPro ? specialtyLabel(proSpecialty) : null;
+  const showBusinessName = isPro && !!proBusinessName;
+  const showTagline = isPro && !!proTagline;
+  const showPricingNote = isPro && !!proPricingNote;
 
   // CTA
   const renderCta = () => {
@@ -325,6 +335,14 @@ const ProfileHero = ({
                 <StatutGardienBadge statut={statutGardien as any} />
               </div>
             )}
+            <ProAvatarBadge
+              status={proStatus}
+              className={
+                statutGardien && statutGardien !== "novice"
+                  ? "left-0 right-auto bottom-1"
+                  : undefined
+              }
+            />
           </div>
 
           <div className="flex flex-col gap-1.5 pb-1 min-w-0 flex-1">
@@ -370,6 +388,16 @@ const ProfileHero = ({
                 </p>
               )}
 
+              {proSpecialtyLabel && (
+                <p className="text-sm text-foreground/85 font-medium mt-0.5 break-words">
+                  {proSpecialtyLabel}
+                </p>
+              )}
+              {showBusinessName && (
+                <p className="text-[13px] sm:text-sm text-foreground/80 break-words">
+                  {proBusinessName}
+                </p>
+              )}
               {showTagline && (
                 <p className="font-heading italic text-foreground/85 mt-1 text-[13.5px] sm:text-sm max-w-full break-words">
                   «&nbsp;{proTagline}&nbsp;»
