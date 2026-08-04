@@ -178,7 +178,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       result = await Promise.race([profileRequest, profileTimeout]);
     } catch (error) {
       if (isAuthTimeoutError(error)) {
-        setHasSession(false);
         setAuthChecked(true);
         setAuthTimeout(true);
         setLoading(false);
@@ -346,8 +345,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     // (C) Timeout court : sans token persistant, libère le parcours visiteur.
     // Avec un token probable, conserve le chargement pour éviter toute bascule.
     const safety = window.setTimeout(() => {
-      setAuthChecked(true);
       if (!hasPersistedToken && !settledRef.current && !userRef.current) {
+        setAuthChecked(true);
         setHasSession(false);
         setLoading(false);
       }
@@ -492,7 +491,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       value={{
         user,
         activeRole,
-        isAuthenticated: !!user || hasSession,
+        isAuthenticated: !!user || (hasSession && authChecked),
         loading,
         hasSession,
         authChecked,

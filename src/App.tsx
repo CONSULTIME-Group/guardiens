@@ -271,7 +271,7 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { isAuthenticated, user, hasSession, loading, profileError, authTimeout } = useAuth();
   const location = useLocation();
   if (loading) return <FallbackSpinner />;
-  if (authTimeout) return <AuthTimeout />;
+  if (authTimeout && !user) return <AuthTimeout />;
   // Échec avéré de lecture du profil : message explicite et actionnable, jamais
   // un retour muet au formulaire. Un simple délai réseau ne déclenche pas cet
   // écran, il laisse la coquille en chargement.
@@ -298,10 +298,10 @@ const RegisterRedirect = () => {
 };
 
 const PublicOnlyRoute = ({ children }: { children: React.ReactNode }) => {
-  const { isAuthenticated, loading, authTimeout } = useAuth();
+  const { isAuthenticated, user, loading, authTimeout } = useAuth();
   const location = useLocation();
   if (loading) return <div className="min-h-screen flex items-center justify-center text-muted-foreground">Chargement...</div>;
-  if (authTimeout) return <AuthTimeout />;
+  if (authTimeout && !user) return <AuthTimeout />;
   if (isAuthenticated) {
     const requested = new URLSearchParams(location.search).get("redirect");
     const destination = sanitizeRedirect(requested) ?? "/dashboard";

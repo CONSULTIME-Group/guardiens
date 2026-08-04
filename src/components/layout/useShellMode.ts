@@ -17,10 +17,10 @@ export type ShellMode = "app" | "public" | "pending";
 export const useShellMode = (): ShellMode => {
   const { hasSession, authChecked, loading, user, authTimeout } = useAuth();
 
+  if (user && hasSession) return "app";
   if (authTimeout) return "pending";
   if (!hasSession && !authChecked) return "public";
   if (authChecked && !hasSession) return "public";
-  if (hasSession && user) return "app";
   // Session annoncée mais profil absent une fois le chargement terminé :
   // repli explicite sur la page publique plutôt qu'une coquille vide.
   if (authChecked && !loading && !user) return "public";
