@@ -165,7 +165,7 @@ const BreakdownList = ({
 
 const Observatoire = () => {
   const { data: counts } = useInventaireCounts();
-  const { data: species } = useSpeciesBreakdown();
+  const { data: species, isError: speciesError } = useSpeciesBreakdown();
   const fmt = (n: number) => new Intl.NumberFormat("fr-FR").format(n || 0);
 
  const datasetSchema = {
