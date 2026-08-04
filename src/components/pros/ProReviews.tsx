@@ -196,7 +196,7 @@ export default function ProReviews({
       ) : (
         <Card className="mb-6 bg-muted/30">
           <CardContent className="p-5 text-sm">
-            <Link to="/connexion" className="underline font-medium">
+            <Link to="/login" className="underline font-medium">
               Connectez-vous
             </Link>{" "}
             pour laisser un avis vérifié.
