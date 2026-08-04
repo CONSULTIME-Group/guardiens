@@ -20,6 +20,7 @@ import TrustHaloAvatar from "@/components/sitters/TrustHaloAvatar";
 import ProAvatarBadge from "@/components/badges/ProAvatarBadge";
 import ProBadge from "@/components/badges/ProBadge";
 import { specialtyLabel } from "@/lib/proSpecialties";
+import { PricingRecipientNotice } from "@/components/pricing/PricingNotices";
 import OwnerToSitterAffinity from "@/components/matching/OwnerToSitterAffinity";
 import { computeAffinityResultFull, type AffinitySitterInput, type AffinityOwnerInput } from "@/lib/affinityScore";
 import { useViewerOwnerForAffinity } from "@/hooks/useViewerOwnerForAffinity";
