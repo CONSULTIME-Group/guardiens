@@ -101,7 +101,7 @@ const AccessGateBanner = ({ level, profileCompletion, context = "guard", showIde
               Espace gardien requis pour postuler aux gardes
             </p>
             <p className="text-sm text-muted-foreground">
-              Les petites missions sont accessibles, mais les gardes nécessitent un abonnement actif.
+              Les petites missions sont accessibles, mais les gardes nécessitent l'activation de votre espace gardien.
             </p>
             <Button size="sm" asChild>
               <Link to="/tarifs">Voir les avantages →</Link>
