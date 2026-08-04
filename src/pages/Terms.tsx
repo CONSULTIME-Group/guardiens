@@ -180,6 +180,21 @@ const Terms = () => {
           </ul>
           <p>Tout manquement à ces engagements peut entraîner la suspension ou la résiliation immédiate du compte, sans préjudice des poursuites éventuelles et des mesures prévues à l'article 11.</p>
 
+          {/* 10 bis */}
+          <h2 className="font-heading text-xl font-bold text-foreground pt-4">10 bis. Membres professionnels du secteur animalier</h2>
+          <p>
+            Les professionnels du secteur animalier (éducateurs, vétérinaires, toiletteurs, comportementalistes, pensions, pet-sitters professionnels) sont les bienvenus sur la Plateforme.
+          </p>
+          <ul className="list-disc pl-6 space-y-1">
+            <li>Ils doivent déclarer leur activité dans leur espace personnel, afin que leur statut soit visible avant tout échange avec un autre membre&nbsp;;</li>
+            <li>un professionnel peut candidater à une garde dans les mêmes conditions que tout autre membre, c'est à dire sans contrepartie financière, conformément à l'article 4 des <a href="/cgs" className="text-primary hover:underline">Conditions Générales de Services</a>&nbsp;;</li>
+            <li>ses prestations rémunérées relèvent exclusivement de sa fiche dans l'annuaire des pros, jamais d'une garde conclue entre membres.</li>
+          </ul>
+          <p>
+            L'absence de déclaration, ou la proposition d'une prestation rémunérée dans le cadre d'une garde, constitue un usage commercial non autorisé au sens de l'article 10 et peut entraîner les mesures prévues à l'article 11.
+          </p>
+
+
           {/* 11 */}
           <h2 className="font-heading text-xl font-bold text-foreground pt-4">11. Sanctions et mesures de modération</h2>
           <p>Guardiens se réserve le droit, sans préavis, de&nbsp;:</p>
