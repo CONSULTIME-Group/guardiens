@@ -22,18 +22,19 @@ export function useCityStats(
 
     async function fetchStats() {
       try {
-        // Count verified sitters in same city or nearby
+        // Count registered sitters in same city or nearby
         const { count: sitterCount } = await supabase
           .from("public_profiles")
           .select("id", { count: "exact", head: true })
           .in("role", ["sitter", "both"])
           .ilike("city", `%${cityName}%`);
 
-        // Count active sits
+        // Count active sits in the same city
         const { count: sitCount } = await supabase
           .from("sits")
           .select("id", { count: "exact", head: true })
-          .eq("status", "published");
+          .eq("status", "published")
+          .ilike("city", `%${cityName}%`);
 
         if (!cancelled) {
           setStats({

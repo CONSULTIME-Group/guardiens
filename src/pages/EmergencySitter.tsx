@@ -124,6 +124,9 @@ const EmergencySitter = () => {
           <div className="grid md:grid-cols-2 gap-5">
             {stories.map((s) => (
               <article key={s.name} className="bg-card border border-border rounded-lg p-6">
+                <p className="inline-flex items-center rounded-full border border-border bg-muted/50 px-2.5 py-0.5 text-[11px] font-medium uppercase tracking-wide text-muted-foreground mb-3">
+                  {tp("story_disclaimer")}
+                </p>
                 <h3 className="font-heading font-semibold mb-3">{s.name}</h3>
                 <p className="text-sm text-muted-foreground leading-relaxed">{s.text}</p>
               </article>

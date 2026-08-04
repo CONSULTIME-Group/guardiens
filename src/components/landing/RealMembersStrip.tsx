@@ -20,7 +20,6 @@ interface Member {
  * montrer qu'ils existent et de pointer vers leurs profils publics. Les
  * citations détaillées vivent dans la section témoignages anonymisés.
  */
-const FALLBACK_COUNT = 460;
 const STRIP_SIZE = 14;
 
 const RealMembersStrip = () => {
@@ -62,8 +61,10 @@ const RealMembersStrip = () => {
   }, []);
 
   // Même source que le hero : total_inscrits via usePublicStats.
-  const totalInscrits = publicStats?.total_inscrits ?? 0;
-  const memberCount = totalInscrits > 0 ? totalInscrits : FALLBACK_COUNT;
+  // Aucune valeur de repli : si la donnée n'est pas disponible, le bloc n'est
+  // pas rendu plutôt que d'afficher un compteur faux.
+  const memberCount = publicStats?.total_inscrits ?? 0;
+  if (memberCount <= 0) return null;
 
   return (
     <div className="mb-16 flex flex-col items-center gap-5">
