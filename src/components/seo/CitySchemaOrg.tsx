@@ -72,7 +72,7 @@ const ANNECY_FAQ = [
 const GRENOBLE_FAQ = [
  {
  q: "Comment trouver un home sitter à Grenoble et en Isère ?",
- a: "Vous publiez gratuitement votre annonce sur Guardiens et les gardiens vérifiés disponibles à Grenoble et dans le bassin grenoblois postulent. Vous choisissez le profil qui vous convient après échange et rencontre.",
+ a: "Vous publiez gratuitement votre annonce sur Guardiens et les gardiens disponibles à Grenoble et dans le bassin grenoblois postulent. La vérification d'identité est ouverte à tous les membres et contrôlée manuellement par l'équipe Guardiens : regardez l'écusson « Identité vérifiée » sur les profils, puis choisissez après échange et rencontre.",
  },
  {
  q: "Les gardiens à Grenoble connaissent-ils les sorties chien adaptées en montagne ?",
