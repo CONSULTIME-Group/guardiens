@@ -237,7 +237,8 @@ const PublicOnlyRoute = ({ children }: { children: React.ReactNode }) => {
 // Écran neutre pendant la vérification d'un token persistant : ni coquille
 // publique, ni coquille authentifiée, donc aucune permutation visible.
 const ShellPending = () => (
-  <div className="min-h-screen bg-background" aria-busy="true" aria-live="polite">
+  <div aria-busy="true" aria-live="polite">
+    <FallbackSpinner />
     <span className="sr-only">Chargement de votre espace</span>
   </div>
 );
@@ -318,7 +319,7 @@ const AppRoutes = () => {
       <Route path="/reset-password" element={<ResetPassword />} />
       
       <Route path="/conseils" element={<ContentRoute><AlmaTips /></ContentRoute>} />
-      <Route path="/alma" element={<AppLayout><AlmaEvolution /></AppLayout>} />
+      <Route path="/alma" element={<ContentRoute><AlmaEvolution /></ContentRoute>} />
       <Route path="/actualites" element={<ContentRoute><News /></ContentRoute>} />
       <Route path="/actualites/inventaire-guardiens-france" element={<PublicShellRoute><ArticleInventaire /></PublicShellRoute>} />
       <Route path="/actualites/:slug" element={<PublicShellRoute><ArticleDetail /></PublicShellRoute>} />
@@ -360,12 +361,12 @@ const AppRoutes = () => {
       <Route path="/petites-missions/:id" element={<SmallMissionDetail />} />
       <Route path="/questions" element={<Navigate to="/petites-missions?tab=questions" replace />} />
       <Route path="/questions/nouvelle" element={<ProtectedRoute><AppLayout><QuestionCreate /></AppLayout></ProtectedRoute>} />
-      <Route path="/questions/:id" element={<AppLayout><QuestionDetail /></AppLayout>} />
+      <Route path="/questions/:id" element={<ContentRoute><QuestionDetail /></ContentRoute>} />
       <Route path="/actualites/gardes-longue-duree-guide" element={<Navigate to="/actualites" replace />} />
       <Route path="/profil/:id" element={<RedirectProfil />} />
       <Route path="/proprietaires/:id" element={<RedirectProprietaire />} />
       <Route path="/annonces" element={<PublicListings />}/>
-      <Route path="/annonces/international" element={<AppLayout><InternationalListings /></AppLayout>} />
+      <Route path="/annonces/international" element={<ContentRoute><InternationalListings /></ContentRoute>} />
       <Route path="/annonces/demo/:slug" element={<DemoSitDetail />} />
       <Route path="/annonces/:id" element={<PublicSitDetail />} />
       <Route path="/gardiens/:id" element={<PublicSitterProfile />} />
@@ -374,9 +375,9 @@ const AppRoutes = () => {
       <Route path="/onboarding/affinity" element={<ProtectedRoute><OnboardingAffinity /></ProtectedRoute>} />
       <Route path="/pros/mon-espace" element={<AppLayout><MyProProfile /></AppLayout>} />
 
-      <Route path="/pros/categorie/:catSlug" element={<AppLayout><ProCategoryListing /></AppLayout>} />
-      <Route path="/pros/categorie/:catSlug/:villeSlug" element={<AppLayout><ProCategoryListing /></AppLayout>} />
-      <Route path="/pros/:slug" element={<AppLayout><ProDetail /></AppLayout>} />
+      <Route path="/pros/categorie/:catSlug" element={<ContentRoute><ProCategoryListing /></ContentRoute>} />
+      <Route path="/pros/categorie/:catSlug/:villeSlug" element={<ContentRoute><ProCategoryListing /></ContentRoute>} />
+      <Route path="/pros/:slug" element={<ContentRoute><ProDetail /></ContentRoute>} />
       <Route element={<AdminLayout />}>
         <Route path="/admin/seo-debug" element={<SeoDebug />} />
         <Route path="/admin/build-info" element={<BuildInfo />} />
@@ -432,9 +433,9 @@ const AppRoutes = () => {
       {/* App routes */}
       <Route path="/dashboard" element={<DashboardRouteShell />} />
       {/* /search et /recherche-gardiens sont publics (consultables sans connexion, vague 40) */}
-      <Route path="/search" element={<AppLayout><SearchPage /></AppLayout>} />
-      <Route path="/recherche" element={<AppLayout><SearchPage /></AppLayout>} />
-      <Route path="/recherche-gardiens" element={<AppLayout><SearchOwner /></AppLayout>} />
+      <Route path="/search" element={<ContentRoute><SearchPage /></ContentRoute>} />
+      <Route path="/recherche" element={<ContentRoute><SearchPage /></ContentRoute>} />
+      <Route path="/recherche-gardiens" element={<ContentRoute><SearchOwner /></ContentRoute>} />
       <Route element={<ProtectedRoute><AppLayout /></ProtectedRoute>}>
         <Route path="/profile" element={<Profile />} />
 

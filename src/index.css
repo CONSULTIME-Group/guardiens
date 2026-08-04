@@ -794,8 +794,6 @@
     body.has-public-bottom-nav {
       padding-bottom: 6rem;
     }
-    /* Avec pied de page sombre : le padding est porté par le footer lui même,
-       pour ne jamais laisser apparaître une bande de fond clair en dessous. */
     /* Avec le pied de page public : le padding est porté par le footer lui
        même, pour ne jamais laisser apparaître une bande de fond clair en
        dessous. Cible uniquement .public-footer, jamais un footer imbriqué. */

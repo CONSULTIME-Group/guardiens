@@ -1,4 +1,4 @@
-import { lazy, Suspense, useState, type ReactNode } from "react";
+import { lazy, Suspense, useLayoutEffect, useState, type ReactNode } from "react";
 import { Outlet, useSearchParams, useLocation, Link } from "react-router-dom";
 import { Sidebar, BottomNav } from "./Navigation";
 import { BackButton } from "./BackButton";
@@ -29,6 +29,20 @@ export const AppLayout = ({ children }: { children?: ReactNode }) => {
   const [searchParams, setSearchParams] = useSearchParams();
   const location = useLocation();
   const [dismissed, setDismissed] = useState(false);
+  const [mobileHeader, setMobileHeader] = useState(() =>
+    typeof window !== "undefined" && typeof window.matchMedia === "function"
+      ? window.matchMedia("(max-width: 767.98px)").matches
+      : false,
+  );
+
+  useLayoutEffect(() => {
+    if (typeof window === "undefined" || typeof window.matchMedia !== "function") return;
+    const query = window.matchMedia("(max-width: 767.98px)");
+    const update = () => setMobileHeader(query.matches);
+    update();
+    query.addEventListener("change", update);
+    return () => query.removeEventListener("change", update);
+  }, []);
 
   // Determine if onboarding modal should show
   const isTour = searchParams.get("tour") === "true";
@@ -47,7 +61,7 @@ export const AppLayout = ({ children }: { children?: ReactNode }) => {
     <AlmaProvider>
     <OnboardingGate />
     <div className="flex min-h-screen bg-background">
-      <Sidebar />
+      <Sidebar showHeaderBells={!mobileHeader} />
       <main id="main-content" className="flex-1 min-w-0 pb-20 md:pb-24 overflow-x-clip" role="main">
         {/* Mobile top bar unifiée : back (si applicable) + logo + cloche */}
         <div className="md:hidden sticky top-0 z-40 flex items-center justify-between gap-2 px-3 py-2 bg-background/95 backdrop-blur border-b border-border">
@@ -60,12 +74,16 @@ export const AppLayout = ({ children }: { children?: ReactNode }) => {
           </div>
           <div className="flex items-center gap-2 shrink-0">
             <LanguageSwitcher compact />
-            <Suspense fallback={<div className="w-11 h-11" aria-hidden />}>
-              <MessageBell />
-            </Suspense>
-            <Suspense fallback={<div className="w-11 h-11" aria-hidden />}>
-              <NotificationBell />
-            </Suspense>
+            {mobileHeader && (
+              <>
+                <Suspense fallback={<div className="w-11 h-11" aria-hidden />}>
+                  <MessageBell />
+                </Suspense>
+                <Suspense fallback={<div className="w-11 h-11" aria-hidden />}>
+                  <NotificationBell />
+                </Suspense>
+              </>
+            )}
             <UserMenu compact />
           </div>
         </div>
