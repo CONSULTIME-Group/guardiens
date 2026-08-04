@@ -703,7 +703,18 @@ const CreateSit = () => {
           setEndDate(cleanEnd);
           setFlexibleDates(d.flexible_dates || !!(d as any).flexibility_notes);
           setFlexibleNotes((d as any).flexibility_notes || "");
-          applyExpectations(d.specific_expectations || "");
+          // Restauration fidèle si les deux sous-champs bruts existent en base
+          // (brouillons créés après le correctif). Sinon, repli historique.
+          const rawReason: string = ((d as any).absence_reason || "").trim();
+          const rawSitterExp: string = ((d as any).sitter_expectations || "").trim();
+          const faithfulRestore = !!(rawReason || rawSitterExp);
+          if (faithfulRestore) {
+            setAbsenceReason(rawReason);
+            setSitterExpectations(rawSitterExp);
+            setSpecificExpectations(joinExpectations(rawReason, rawSitterExp));
+          } else {
+            applyExpectations(d.specific_expectations || "");
+          }
           setOpenTo(d.open_to || []);
           setIsUrgent(d.is_urgent || false);
           setSitEnvironments(d.environments || []);
