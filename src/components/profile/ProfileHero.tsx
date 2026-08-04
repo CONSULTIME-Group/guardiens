@@ -12,6 +12,8 @@
 import { Link } from "react-router-dom";
 import { MapPin, Shield, BadgeCheck, Image as ImageIcon } from "lucide-react";
 import ProBadge from "@/components/badges/ProBadge";
+import ProAvatarBadge from "@/components/badges/ProAvatarBadge";
+import { specialtyLabel } from "@/lib/proSpecialties";
 import StatutGardienBadge from "@/components/profile/StatutGardienBadge";
 import FavoriteButton from "@/components/shared/FavoriteButton";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
