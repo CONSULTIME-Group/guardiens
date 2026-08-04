@@ -5317,6 +5317,7 @@ export type Database = {
       }
       sits: {
         Row: {
+          absence_reason: string | null
           accepting_applications: boolean
           accepts_sitter_children: string | null
           accepts_sitter_pets: string | null
@@ -5353,6 +5354,7 @@ export type Database = {
           reminder_j7_sent: boolean | null
           review_j1_sent: boolean | null
           review_j5_sent: boolean | null
+          sitter_expectations: string | null
           slug: string | null
           specific_expectations: string | null
           start_date: string | null
@@ -5363,6 +5365,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          absence_reason?: string | null
           accepting_applications?: boolean
           accepts_sitter_children?: string | null
           accepts_sitter_pets?: string | null
@@ -5399,6 +5402,7 @@ export type Database = {
           reminder_j7_sent?: boolean | null
           review_j1_sent?: boolean | null
           review_j5_sent?: boolean | null
+          sitter_expectations?: string | null
           slug?: string | null
           specific_expectations?: string | null
           start_date?: string | null
@@ -5409,6 +5413,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          absence_reason?: string | null
           accepting_applications?: boolean
           accepts_sitter_children?: string | null
           accepts_sitter_pets?: string | null
@@ -5445,6 +5450,7 @@ export type Database = {
           reminder_j7_sent?: boolean | null
           review_j1_sent?: boolean | null
           review_j5_sent?: boolean | null
+          sitter_expectations?: string | null
           slug?: string | null
           specific_expectations?: string | null
           start_date?: string | null
