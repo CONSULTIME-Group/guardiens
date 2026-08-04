@@ -15,6 +15,8 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { shouldWarnPricing } from "@/lib/pricingDetection";
+import { PricingAuthorWarning } from "@/components/pricing/PricingNotices";
 import { useAccessLevel } from "@/hooks/useAccessLevel";
 import { toast } from "@/hooks/use-toast";
 import { Send, Star, MapPin, Shield, ShieldCheck, CheckCircle2, Calendar } from "lucide-react";
