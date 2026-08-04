@@ -7,19 +7,11 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "@/hooks/use-toast";
+import { SPECIALTY_OPTIONS } from "@/lib/proSpecialties";
 import { Loader2, ShieldCheck, FileText, AlertCircle, Clock, Trash2 } from "lucide-react";
 
-type ProStatus = "none" | "pending" | "verified" | "rejected";
+type ProStatus = "none" | "declared" | "pending" | "verified" | "rejected";
 
-const SPECIALTY_OPTIONS = [
-  { value: "educator", label: "Éducateur / comportementaliste canin" },
-  { value: "vet", label: "Vétérinaire ou ASV" },
-  { value: "groomer", label: "Toiletteur" },
-  { value: "boarding", label: "Pension / refuge agréé" },
-  { value: "petsitter_pro", label: "Pet-sitter professionnel déclaré" },
-  { value: "trainer_equine", label: "Équin / NAC spécialisé" },
-  { value: "other", label: "Autre professionnel animalier" },
-];
 
 const DOC_TYPE_OPTIONS = [
   { value: "diploma_acaced", label: "ACACED" },
