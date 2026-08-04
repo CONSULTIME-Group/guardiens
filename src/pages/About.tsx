@@ -41,8 +41,13 @@ const About = () => {
   const navigate = useNavigate();
   const { t } = useTranslation();
   const thresholds = useAffinityThresholdsDisplay();
-  const criteriaLabel = CRITERIA_WORDS[thresholds.minCommonCriteria] ?? String(thresholds.minCommonCriteria);
-  const criteriaNoun = thresholds.minCommonCriteria === 1 ? "critère comparable" : "critères comparables";
+  const criteriaCount = thresholds.minCommonCriteria;
+  const criteriaLabel = CRITERIA_WORDS[criteriaCount] ?? String(criteriaCount);
+  // « un » impose l'élision (« d'un »), et le singulier vaut pour 0 et 1.
+  const criteriaPhrase =
+    criteriaCount === 1
+      ? "d'un critère comparable"
+      : `de ${criteriaLabel} ${criteriaCount === 0 ? "critère comparable" : "critères comparables"}`;
 
 
   return (
