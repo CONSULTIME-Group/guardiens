@@ -347,7 +347,7 @@ const Observatoire = () => {
  </h2>
  <div className="space-y-4 text-foreground leading-relaxed">
  <p>
- Chaque gardien fournit une <strong>pièce d'identité vérifiée manuellement</strong> par l'équipe Guardiens avant que son profil soit publié. Cette étape n'est pas déléguée à un prestataire automatique.
+ La <strong>vérification d'identité</strong> est ouverte à tous les membres. Chaque pièce soumise est contrôlée manuellement par l'équipe Guardiens, jamais par un algorithme, jamais par un prestataire automatique. Les profils qui l'ont obtenue affichent l'écusson « Identité vérifiée ». Regardez cet écusson avant de choisir.
  </p>
  <p>
  À l'issue de chaque garde, propriétaires et gardiens laissent un <strong>avis croisé détaillé</strong>. Ces avis alimentent le <strong>Trust Score (0 à 100)</strong>, calculé sur l'identité vérifiée, le volume d'avis, la note moyenne, le nombre de gardes réalisées et l'ancienneté du compte.
