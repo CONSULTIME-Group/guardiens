@@ -16,9 +16,7 @@ import { frenchifyTitleDates } from "./frenchify-title-dates.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 
 const RATE_LIMIT_PER_HOUR = 3;
-// ess[a]i : classe de caractères volontaire, matching identique, littéral proscrit évité
-// (garde-fou src/test/no-trial-wording.test.ts).
-const PROSCRIBED = /(voisin(e|s|age)?|gratuit à vie|pour toujours|période d'ess[a]i|programme fondateur|auvergne-rhône-alpes|\bAURA\b)/i;
+const PROSCRIBED = /(voisin(e|s|age)?|gratuit à vie|pour toujours|période d'essai|programme fondateur|auvergne-rhône-alpes|\bAURA\b)/i;
 const ALLOWED_ENVIRONMENTS = ["ville", "campagne", "montagne", "lac", "mer", "vignes", "foret"] as const;
 
 Deno.serve(async (req) => {
