@@ -2,13 +2,16 @@ import React from "react";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useInAppShell } from "./AppShellContext";
+import { useAuth } from "@/contexts/AuthContext";
 
 const PublicFooter = React.forwardRef<HTMLElement>((_props, ref) => {
   const { t } = useTranslation();
-  // Dans la coquille applicative, le pied de page public n'est jamais rendu.
-  // Rendu visiteur et Prerender.io strictement inchangés.
+  // Garde alignée sur PublicHeader : le pied de page public n'est retiré que
+  // pour un utilisateur porteur d'une session dans la coquille applicative.
+  // Un visiteur non connecté le conserve partout, Prerender.io compris.
   const inAppShell = useInAppShell();
-  if (inAppShell) return null;
+  const { hasSession } = useAuth();
+  if (hasSession && inAppShell) return null;
   return (
     <footer ref={ref} className="public-footer bg-footer border-t border-white/10">
       <div className="max-w-6xl mx-auto px-6 md:px-12 py-16">
