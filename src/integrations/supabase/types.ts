@@ -1568,6 +1568,36 @@ export type Database = {
         }
         Relationships: []
       }
+      content_quality_alerts: {
+        Row: {
+          article_id: string
+          detected_at: string
+          excerpt: string
+          id: number
+          resolved_at: string | null
+          rule_code: string
+          slug: string
+        }
+        Insert: {
+          article_id: string
+          detected_at?: string
+          excerpt: string
+          id?: number
+          resolved_at?: string | null
+          rule_code: string
+          slug: string
+        }
+        Update: {
+          article_id?: string
+          detected_at?: string
+          excerpt?: string
+          id?: number
+          resolved_at?: string | null
+          rule_code?: string
+          slug?: string
+        }
+        Relationships: []
+      }
       conversations: {
         Row: {
           archived_by: string[] | null
@@ -7473,6 +7503,13 @@ export type Database = {
           profile_id: string
         }[]
       }
+      detect_content_defects: {
+        Args: { p_content: string }
+        Returns: {
+          excerpt: string
+          rule_code: string
+        }[]
+      }
       detect_dormant_sitters: {
         Args: never
         Returns: {
@@ -7582,6 +7619,7 @@ export type Database = {
           signal: string
         }[]
       }
+      detect_unsourced_stats: { Args: { p_content: string }; Returns: string[] }
       detect_untapped_cities: {
         Args: never
         Returns: {
@@ -7853,6 +7891,7 @@ export type Database = {
           long_stays: number
         }[]
       }
+      get_species_breakdown: { Args: never; Returns: Json }
       get_unread_messages_count: { Args: { _user_id: string }; Returns: number }
       get_user_email_for_notification: {
         Args: { target_user_id: string }
