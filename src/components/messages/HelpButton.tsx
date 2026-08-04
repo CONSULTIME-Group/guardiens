@@ -209,7 +209,7 @@ const HelpButton = ({ propertyId, ownerId, ownerName, sitId, sitCity, conversati
       content: (
         <div className="space-y-3 text-sm">
           <p className="text-muted-foreground">
-            Besoin d'un remplaçant rapidement ? Les gardiens d'urgence sont des membres expérimentés mobilisables en quelques heures dans un rayon de 35 km.
+            Besoin d'un remplaçant rapidement ? Une alerte prioritaire peut être envoyée aux gardiens d'urgence éligibles dans un rayon de 35 km.
           </p>
 
           {sitId && sitCity && (
