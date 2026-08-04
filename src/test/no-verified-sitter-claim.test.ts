@@ -44,15 +44,27 @@ const EXCLUDE_CLAIM = new Set([
   "src/components/dashboard/SitDraftFromPrompt.tsx",
 ]);
 
-const FORBIDDEN_CLAIMS: RegExp[] = [
-  /(vérifi|contrôl)\w*\s+(manuelle?ment|à la main)/i,
-  /vérification\s+d'identité\s+manuelle/i,
-  /gardiens?\s+(sont\s+|est\s+)?vérifiés?\b/i,
-  /profils?\s+vérifiés?\b/i,
-  /vérification\s+obligatoire/i,
-  /jamais\s+par\s+un\s+algorithme/i,
-  /des\s+yeux\s+humains/i,
-  /chaque\s+(gardien|membre|profil)\s+(est|passe|doit)\b[^.]{0,40}vérifi/i,
+/**
+ * Motifs de la revendication interdite.
+ *
+ * Règles techniques, apprises d'un faux vert :
+ * - flag `u` obligatoire, le contenu est accentué ;
+ * - `\p{L}` au lieu de `\w`, qui ne couvre que l'ASCII et laissait passer
+ *   « contrôlées manuellement » (le `é` cassait `\w*\s+`) ;
+ * - `(?!\p{L})` au lieu de `\b` en fin de motif accentué, sinon le singulier
+ *   « vérifié » échappait faute de frontière ASCII ;
+ * - tolérance d'un à deux mots intercalés (`(?:\S+\s+){0,2}`) pour attraper
+ *   « gardiens rigoureusement vérifiés » ou « gardiens sont tous vérifiés ».
+ */
+export const FORBIDDEN_CLAIMS: RegExp[] = [
+  /(?:vérifi|contrôl)\p{L}*\s+(?:\S+\s+){0,2}(?:manuelle?ment|à\s+la\s+main)/iu,
+  /(?:vérification|contrôle)\s+(?:\S+\s+){0,2}manuelles?(?!\p{L})/iu,
+  /gardiens?\s+(?:\S+\s+){0,2}vérifiés?(?!\p{L})/iu,
+  /profils?\s+(?:\S+\s+){0,2}vérifiés?(?!\p{L})/iu,
+  /vérification\s+obligatoire/iu,
+  /jamais\s+par\s+un\s+algorithme/iu,
+  /des\s+yeux\s+humains/iu,
+  /chaque\s+(?:gardien|membre|profil)\s+[^.]{0,40}vérifi/iu,
 ];
 
 /**
@@ -60,7 +72,7 @@ const FORBIDDEN_CLAIMS: RegExp[] = [
  * Seules les chaînes entre guillemets « Identité vérifiée » et « ID vérifiée »
  * sont retirées avant le scan. Les mêmes mots hors guillemets restent contrôlés.
  */
-function removeAllowedBadgeNames(source: string): string {
+export function removeAllowedBadgeNames(source: string): string {
   return source
     .split("« Identité vérifiée »").join("")
     .split('"Identité vérifiée"').join("")
