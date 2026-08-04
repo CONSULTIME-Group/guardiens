@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, lazy, Suspense } from "react";
+import { useState, useEffect, useCallback, useRef, lazy, Suspense } from "react";
 import { useNavigate, Link, useLocation } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
@@ -11,6 +11,25 @@ import UserMenu from "./UserMenu";
 
 const NotificationBell = lazy(() => import("./NotificationBell"));
 const MessageBell = lazy(() => import("./MessageBell"));
+
+/** Vrai sous le point de rupture sm de Tailwind (640 px). */
+const useIsCompactViewport = () => {
+  const query = "(max-width: 639px)";
+  const [compact, setCompact] = useState(() =>
+    typeof window !== "undefined" && typeof window.matchMedia === "function"
+      ? window.matchMedia(query).matches
+      : false,
+  );
+  useEffect(() => {
+    if (typeof window === "undefined" || typeof window.matchMedia !== "function") return;
+    const mql = window.matchMedia(query);
+    const onChange = () => setCompact(mql.matches);
+    onChange();
+    mql.addEventListener("change", onChange);
+    return () => mql.removeEventListener("change", onChange);
+  }, []);
+  return compact;
+};
 
 
 const NAV_DEFS: ReadonlyArray<{ key: string; to: string; beta?: boolean }> = [
@@ -28,9 +47,11 @@ export default function PublicHeader({ authedVariant = false }: { authedVariant?
   const { t } = useTranslation();
   const { hasSession, authChecked } = useAuth();
   const inAppShell = useInAppShell();
+  const isCompact = useIsCompactViewport();
   const [open, setOpen] = useState(false);
   const [msgUnread, setMsgUnread] = useState(0);
   const [notifUnread, setNotifUnread] = useState(0);
+  const headerRef = useRef<HTMLElement | null>(null);
 
   const onMsgUnread = useCallback((n: number) => setMsgUnread(n), []);
   const onNotifUnread = useCallback((n: number) => setNotifUnread(n), []);
@@ -45,6 +66,7 @@ export default function PublicHeader({ authedVariant = false }: { authedVariant?
   // jamais provoquer un montage puis un démontage immédiat (saut de layout).
   const withBottomNav = authChecked && hasSession && !inAppShell;
   const hasUnread = msgUnread + notifUnread > 0;
+  const showBells = authChecked && hasSession;
 
   useEffect(() => {
     if (!withBottomNav) return;
@@ -52,14 +74,53 @@ export default function PublicHeader({ authedVariant = false }: { authedVariant?
     return () => document.body.classList.remove("has-public-bottom-nav");
   }, [withBottomNav]);
 
+  // Hauteur réelle de l'en tête exposée en variable CSS, pour que les barres
+  // collantes des pages (onglets de profil public par exemple) s'y accrochent
+  // sans valeur en dur. Remise à zéro au démontage : sans en tête, offset nul.
+  useEffect(() => {
+    if (hidden) return;
+    const el = headerRef.current;
+    if (!el || typeof window === "undefined") return;
+    const apply = () => {
+      document.documentElement.style.setProperty(
+        "--public-header-h",
+        `${Math.round(el.getBoundingClientRect().height)}px`,
+      );
+    };
+    apply();
+    let ro: ResizeObserver | null = null;
+    if (typeof ResizeObserver !== "undefined") {
+      ro = new ResizeObserver(apply);
+      ro.observe(el);
+    }
+    window.addEventListener("resize", apply);
+    return () => {
+      ro?.disconnect();
+      window.removeEventListener("resize", apply);
+      document.documentElement.style.setProperty("--public-header-h", "0px");
+    };
+  }, [hidden]);
+
   if (hidden) return null;
 
   const isActive = (path: string) => location.pathname === path || location.pathname.startsWith(path + "/");
 
+  // Cloches montées une seule fois dans l'arbre, quel que soit le viewport :
+  // un seul abonnement realtime et un seul jeu de requêtes par utilisateur.
+  const bells = showBells ? (
+    <>
+      <Suspense fallback={<div className="w-11 h-11" aria-hidden />}>
+        <MessageBell onUnreadChange={onMsgUnread} />
+      </Suspense>
+      <Suspense fallback={<div className="w-11 h-11" aria-hidden />}>
+        <NotificationBell onUnreadChange={onNotifUnread} />
+      </Suspense>
+    </>
+  ) : null;
 
   return (
     <>
-    <header className="sticky top-0 z-50 bg-background/80 backdrop-blur-md border-b border-border/50">
+    <header ref={headerRef} className="sticky top-0 z-50 bg-background/80 backdrop-blur-md border-b border-border/50">
       <div className="flex items-center justify-between px-[5%] md:px-[8%] py-4">
         <Link to="/" aria-label="Guardiens, accueil" className="font-heading text-xl md:text-2xl font-bold">
           <span aria-hidden="true"><span className="text-primary">g</span>uardiens</span>
@@ -91,12 +152,7 @@ export default function PublicHeader({ authedVariant = false }: { authedVariant?
               <Button size="sm" onClick={() => navigate("/dashboard")}>
                 Mon espace
               </Button>
-              <Suspense fallback={<div className="w-11 h-11" aria-hidden />}>
-                <MessageBell />
-              </Suspense>
-              <Suspense fallback={<div className="w-11 h-11" aria-hidden />}>
-                <NotificationBell />
-              </Suspense>
+              {!isCompact && bells}
               <UserMenu />
             </>
           ) : (
@@ -145,7 +201,7 @@ export default function PublicHeader({ authedVariant = false }: { authedVariant?
             onClick={() => setOpen(!open)}
             aria-label={
               hasSession && hasUnread
-                ? `${t("nav.menu")}, éléments non lus`
+                ? `${t("nav.menu")}, ${t("nav.unread_items")}`
                 : t("nav.menu")
             }
             aria-expanded={open}
@@ -203,18 +259,14 @@ export default function PublicHeader({ authedVariant = false }: { authedVariant?
         </nav>
       )}
 
-      {/* Messagerie, notifications et langue : montés en permanence pour
+      {/* Messagerie, notifications et langue sur mobile : montés en
+          permanence (une seule instance dans tout le composant) pour
           alimenter la pastille du burger, visibles uniquement menu ouvert. */}
-      {authChecked && hasSession && (
+      {isCompact && showBells && (
         <div
           className={`sm:hidden items-center gap-1 border-t border-border bg-background px-[5%] py-3 ${open ? "flex" : "hidden"}`}
         >
-          <Suspense fallback={<div className="w-11 h-11" aria-hidden />}>
-            <MessageBell onUnreadChange={onMsgUnread} />
-          </Suspense>
-          <Suspense fallback={<div className="w-11 h-11" aria-hidden />}>
-            <NotificationBell onUnreadChange={onNotifUnread} />
-          </Suspense>
+          {bells}
           <div className="ml-auto">
             <LanguageSwitcher compact />
           </div>

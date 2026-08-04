@@ -39,6 +39,28 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+/**
+ * Détection synchrone d'un token Supabase persistant en localStorage.
+ * Utilisée en initialisation paresseuse de `hasSession`, pour que le premier
+ * rendu connaisse déjà la présence probable d'une session (pas de permutation
+ * de coquille après le premier paint). Protégée pour le SSR et le prerender.
+ */
+export const detectPersistedToken = (): boolean => {
+  try {
+    if (typeof window === "undefined" || !window.localStorage) return false;
+    for (let i = 0; i < window.localStorage.length; i++) {
+      const key = window.localStorage.key(i);
+      if (key && /^sb-.*-auth-token$/.test(key)) {
+        const raw = window.localStorage.getItem(key);
+        if (raw && raw.length > 2) return true;
+      }
+    }
+  } catch {
+    return false;
+  }
+  return false;
+};
+
 const mapProfile = (profile: any, authEmail?: string): Profile => ({
   id: profile.id,
   email: authEmail || profile.email || "",
@@ -66,7 +88,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return (saved === 'owner' || saved === 'sitter') ? saved : 'sitter';
   });
   const [loading, setLoading] = useState(true);
-  const [hasSession, setHasSession] = useState(false);
+  const [hasSession, setHasSession] = useState(() => detectPersistedToken());
   const [authChecked, setAuthChecked] = useState(false);
   const roleInitialized = useRef(false);
 
@@ -151,31 +173,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       });
     }
 
-    // (A) Détection synchrone d'un token Supabase persistant en localStorage.
-    // Si présent, on maintient authChecked=false (squelette) le temps que le
-    // refresh se résolve, pour éviter le flash "Connexion" avant "Mon espace".
-    let hasPersistedToken = false;
-    try {
-      if (typeof window !== "undefined") {
-        for (let i = 0; i < window.localStorage.length; i++) {
-          const key = window.localStorage.key(i);
-          if (key && /^sb-.*-auth-token$/.test(key)) {
-            const raw = window.localStorage.getItem(key);
-            if (raw && raw.length > 2) {
-              hasPersistedToken = true;
-              break;
-            }
-          }
-        }
-      }
-    } catch {
-      hasPersistedToken = false;
-    }
-
-    if (hasPersistedToken) {
-      // Optimistic : on présuppose la session le temps de la vérifier.
-      setHasSession(true);
-    }
+    // (A) Token persistant déjà détecté en initialisation paresseuse (voir
+    // detectPersistedToken) : on maintient authChecked=false (squelette) le
+    // temps que le refresh se résolve.
+    const hasPersistedToken = detectPersistedToken();
 
     let settled = false;
     const markChecked = (session: boolean) => {

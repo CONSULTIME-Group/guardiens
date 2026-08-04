@@ -796,11 +796,17 @@
     }
     /* Avec pied de page sombre : le padding est porté par le footer lui même,
        pour ne jamais laisser apparaître une bande de fond clair en dessous. */
-    body.has-public-bottom-nav:has(footer) {
-      padding-bottom: 0;
-    }
-    body.has-public-bottom-nav footer:last-of-type {
+    /* Avec le pied de page public : le padding est porté par le footer lui
+       même, pour ne jamais laisser apparaître une bande de fond clair en
+       dessous. Cible uniquement .public-footer, jamais un footer imbriqué. */
+    body.has-public-bottom-nav .public-footer {
       padding-bottom: 6rem;
+    }
+    /* Repli sans :has() : le padding du body reste en place, le footer garde
+       le sien, aucun recouvrement par la pilule. Avec :has(), on neutralise le
+       padding du body pour éviter le doublon. */
+    body.has-public-bottom-nav:has(.public-footer) {
+      padding-bottom: 0;
     }
   }
 }

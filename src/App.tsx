@@ -16,6 +16,7 @@ import OfflineBanner from "@/components/layout/OfflineBanner";
 import { PreviewDiagnosticBanner } from "@/components/PreviewDiagnosticBanner";
 import DuplicateAccountGuard from "@/components/auth/DuplicateAccountGuard";
 import ScrollToTop from "@/components/layout/ScrollToTop";
+import { useShellMode } from "@/components/layout/useShellMode";
 import DeferredTrackers from "@/components/analytics/DeferredTrackers";
 // CookieConsent retiré (mesure d'audience exemptée CNIL)
 import { toast } from "sonner";
@@ -233,10 +234,18 @@ const PublicOnlyRoute = ({ children }: { children: React.ReactNode }) => {
 };
 
 
+// Écran neutre pendant la vérification d'un token persistant : ni coquille
+// publique, ni coquille authentifiée, donc aucune permutation visible.
+const ShellPending = () => (
+  <div className="min-h-screen bg-background" aria-busy="true" aria-live="polite">
+    <span className="sr-only">Chargement de votre espace</span>
+  </div>
+);
+
 const ParrainageRoute = () => {
-  const { hasSession } = useAuth();
-  const isAuthenticated = hasSession;
-  if (isAuthenticated) {
+  const shell = useShellMode();
+  if (shell === "pending") return <ShellPending />;
+  if (shell === "app") {
     return (
       <AppLayout>
         <Parrainage />
@@ -249,13 +258,9 @@ const ParrainageRoute = () => {
 // Routes de contenu (ressources, SEO) : coquille AppLayout pour les
 // utilisateurs connectés, page publique inchangée pour les visiteurs.
 const ContentRoute = ({ children }: { children: React.ReactNode }) => {
-  // Arbitrage sur hasSession (posé dès la détection du token) et non sur
-  // isAuthenticated (posé après le chargement du profil) : les deux coquilles
-  // (AppLayout et PublicHeader) partagent ainsi la même source de vérité,
-  // ce qui supprime le flash d'en tête au rechargement.
-  const { hasSession } = useAuth();
-  const isAuthenticated = hasSession;
-  if (isAuthenticated) return <AppLayout>{children}</AppLayout>;
+  const shell = useShellMode();
+  if (shell === "pending") return <ShellPending />;
+  if (shell === "app") return <AppLayout>{children}</AppLayout>;
   return <>{children}</>;
 };
 
@@ -263,9 +268,9 @@ const ContentRoute = ({ children }: { children: React.ReactNode }) => {
 // non connectés sur les pages de contenu/SEO qui ne rendent PAS leur propre
 // PublicHeader. Pour les utilisateurs connectés : AppLayout (sidebar).
 const PublicShellRoute = ({ children }: { children: React.ReactNode }) => {
-  const { hasSession } = useAuth();
-  const isAuthenticated = hasSession;
-  if (isAuthenticated) return <AppLayout>{children}</AppLayout>;
+  const shell = useShellMode();
+  if (shell === "pending") return <ShellPending />;
+  if (shell === "app") return <AppLayout>{children}</AppLayout>;
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <PublicHeader />
@@ -274,8 +279,6 @@ const PublicShellRoute = ({ children }: { children: React.ReactNode }) => {
     </div>
   );
 };
-
-
 
 
 const NavigateBlogSlug = () => {
