@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { UserCircle2, Eye, Settings, LogOut } from "lucide-react";
+import { UserCircle2, Eye, Settings, LogOut, BriefcaseBusiness } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
