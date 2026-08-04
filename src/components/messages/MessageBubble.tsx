@@ -251,6 +251,11 @@ const MessageBubble = ({
           )}
         </div>
       </div>
+      {msg.metadata?.pricing_flag && !isMe && (
+        <PricingRecipientNotice className="mt-1 max-w-[78%]" />
+      )}
+      </div>
+
 
 
       {msg.photo_url && (
