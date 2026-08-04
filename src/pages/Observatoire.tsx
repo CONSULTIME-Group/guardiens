@@ -115,10 +115,11 @@ const Observatoire = () => {
  return (
  <>
  <PageMeta
- title="Observatoire de la garde d'animaux en France, chiffres-clés"
- description="Chiffres-clés sur la garde d'animaux à domicile en France : volumes, modèle économique, dispositif de confiance. Données Guardiens 2021-2026."
+ title="Observatoire de la garde d'animaux à domicile en France | Guardiens"
+ description="Chiffres-clés sur la garde d'animaux à domicile en France : nombre d'animaux accompagnés, modèle économique, vérifications, badges. Datapoints sourcés Guardiens."
  path="/observatoire-garde-animaux"
  />
+
  <Helmet>
  <script type="application/ld+json">{JSON.stringify(datasetSchema)}</script>
  <script type="application/ld+json">{JSON.stringify(orgSchema)}</script>
