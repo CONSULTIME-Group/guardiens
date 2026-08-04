@@ -49,7 +49,7 @@ const KEY_STATS: Stat[] = [
  {
  label: "Abonnement gardien",
  value: "Aucun frais",
- detail: "Guardiens reste gratuit tant que nous ne sommes pas satisfaits du service que nous vous offrons. Vous avez accès à tout, sans limite, sans engagement. Vous serez prévenu à l'avance quand cela changera.",
+ detail: "Accès complet aux fonctionnalités, sans limite, sans engagement et sans carte bancaire.",
  },
 
  {
