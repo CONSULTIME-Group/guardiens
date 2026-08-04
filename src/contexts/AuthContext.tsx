@@ -208,15 +208,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
               await fetchProfile(session.user);
               setHasSession(true);
               setAuthChecked(true);
+              setProfileError(false);
               if (getOAuthTraceId()) {
                 logOAuthStage("user_endpoint_ok", "auth-context");
                 endOAuthFlow("success");
               }
             } catch {
+              // Échec avéré de lecture du profil : la session reste valide,
+              // on signale l'erreur sans renvoyer l'utilisateur au formulaire.
               userRef.current = null;
               setUser(null);
-              setHasSession(false);
+              setHasSession(true);
               setAuthChecked(true);
+              setProfileError(true);
             } finally {
               setLoading(false);
             }
