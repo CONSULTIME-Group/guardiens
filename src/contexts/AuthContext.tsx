@@ -168,7 +168,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       .eq("id", supabaseUser.id)
       .single();
 
-    let timeoutId: ReturnType<typeof window.setTimeout> | undefined;
+    let timeoutId: number | undefined;
     const profileTimeout = new Promise<never>((_, reject) => {
       timeoutId = window.setTimeout(() => reject(new AuthTimeoutError()), 8000);
     });
