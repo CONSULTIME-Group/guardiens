@@ -693,7 +693,7 @@ const PublicSitDetail = () => {
         envLabel={property?.environment ? (envLabels[property.environment] || property.environment) : null}
         speciesLabel={speciesLabel}
         onShare={handleShare}
-        isAuthenticated={isAuthenticated}
+        isAuthenticated={!!user}
         hasAccess={hasAccess}
         hasApplied={hasApplied}
         onApply={handleApply}
@@ -706,7 +706,7 @@ const PublicSitDetail = () => {
 
       <PublicFooter />
 
-      {isAuthenticated && sit && (
+      {!!user && sit && (
         <ApplicationModal
           open={applyOpen}
           onOpenChange={setApplyOpen}

@@ -880,7 +880,9 @@ export default function PublicSitterProfile() {
   const completedSits = profile?.completed_sits_count ?? 0;
   const radius = rawRadius && rawRadius > 0 ? rawRadius : null;
   const isOwn = auth?.user?.id === id;
-  const isAuthenticated = auth?.isAuthenticated;
+  // Variante connectée gatée sur la présence réelle du profil, pour ne jamais
+  // remplacer le teaser visiteur par des actions inopérantes.
+  const isAuthenticated = !!auth?.user;
   const hasSession = !!auth?.hasSession;
   const isOwner = auth?.activeRole === "owner";
   const isSitter = auth?.activeRole === "sitter";
