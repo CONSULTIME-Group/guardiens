@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, lazy, Suspense } from "react";
 
 import ProBadge from "@/components/badges/ProBadge";
 import { useParams, Link, useSearchParams, useNavigate } from "react-router-dom";
@@ -2244,7 +2244,7 @@ export default function PublicSitterProfile() {
           Un seul bloc, jamais deux CTA concurrents. */}
       {!heroCtaVisible && (() => {
         const baseCls =
-          "md:hidden fixed left-0 right-0 z-40 bg-background border-t border-border px-3 sm:px-4 pt-2.5 sm:pt-3 pb-[calc(env(safe-area-inset-bottom)+0.625rem)] shadow-lg";
+          "md:hidden fixed left-0 right-0 z-40 bg-background border-t border-border px-3 sm:px-4 pt-2.5 sm:pt-3 pb-[calc(env(safe-area-inset-bottom)+0.625rem)] shadow-lg bottom-[var(--bottom-nav-h,0px)]";
         const btnCls =
           "flex items-center justify-center bg-primary text-primary-foreground rounded-lg px-3 sm:px-4 py-3 text-[13px] sm:text-sm font-medium w-full leading-tight text-center break-words";
         const mutedCls =
