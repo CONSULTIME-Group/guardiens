@@ -1,9 +1,14 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import { useInAppShell } from "./AppShellContext";
 
 const PublicFooter = React.forwardRef<HTMLElement>((_props, ref) => {
   const { t } = useTranslation();
+  // Dans la coquille applicative, le pied de page public n'est jamais rendu.
+  // Rendu visiteur et Prerender.io strictement inchangés.
+  const inAppShell = useInAppShell();
+  if (inAppShell) return null;
   return (
     <footer ref={ref} className="public-footer bg-footer border-t border-white/10">
       <div className="max-w-6xl mx-auto px-6 md:px-12 py-16">
