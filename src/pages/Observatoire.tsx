@@ -54,8 +54,8 @@ const KEY_STATS: Stat[] = [
 
  {
  label: "Vérification d'identité",
- value: "100 %",
- detail: "Chaque gardien fournit une pièce d'identité vérifiée manuellement par l'équipe Guardiens avant publication de son profil.",
+ value: "Manuelle",
+ detail: "La vérification d'identité est ouverte à tous les membres. Chaque pièce soumise est contrôlée manuellement par l'équipe Guardiens, jamais par un algorithme. Les profils qui l'ont obtenue affichent l'écusson « Identité vérifiée ».",
  },
  {
  label: "Badges de reconnaissance",
@@ -196,7 +196,7 @@ const Observatoire = () => {
  license: "https://guardiens.fr/mentions-legales",
  isAccessibleForFree: true,
  datePublished: "2026-06-08",
- dateModified: "2026-08-04",
+ ...(species?.calcule_le ? { dateModified: species.calcule_le.slice(0, 10) } : {}),
 
  inLanguage: "fr",
  };
