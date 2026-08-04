@@ -1,10 +1,16 @@
-import { useState } from "react";
+import { useState, useEffect, lazy, Suspense } from "react";
 import { useNavigate, Link, useLocation } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { Menu, X } from "lucide-react";
 import LanguageSwitcher from "./LanguageSwitcher";
 import { useAuth } from "@/contexts/AuthContext";
+import { useInAppShell } from "./AppShellContext";
+import { BottomNav } from "./Navigation";
+import UserMenu from "./UserMenu";
+
+const NotificationBell = lazy(() => import("./NotificationBell"));
+const MessageBell = lazy(() => import("./MessageBell"));
 
 
 const NAV_DEFS: ReadonlyArray<{ key: string; to: string; beta?: boolean }> = [
@@ -21,17 +27,31 @@ export default function PublicHeader({ authedVariant = false }: { authedVariant?
   const location = useLocation();
   const { t } = useTranslation();
   const { hasSession, authChecked } = useAuth();
+  const inAppShell = useInAppShell();
   const [open, setOpen] = useState(false);
 
-  // Utilisateur connecté : l'en-tête public est masqué par défaut, la coquille
-  // authentifiée (AppLayout) fournit déjà la navigation. En mode authedVariant,
-  // on affiche quand même la barre (cas Landing hors AppLayout).
-  if (hasSession && !authedVariant) return null;
+  // Utilisateur connecté rendu dans la coquille authentifiée (AppLayout) :
+  // la sidebar et la top bar mobile fournissent déjà la navigation, on ne
+  // superpose pas un second en tête.
+  const hidden = hasSession && inAppShell && !authedVariant;
+
+  // Hors coquille authentifiée, la BottomNav mobile accompagne l'en tête
+  // connecté : le contenu doit réserver la place de la pilule flottante.
+  const withBottomNav = hasSession && !inAppShell;
+
+  useEffect(() => {
+    if (!withBottomNav) return;
+    document.body.classList.add("has-public-bottom-nav");
+    return () => document.body.classList.remove("has-public-bottom-nav");
+  }, [withBottomNav]);
+
+  if (hidden) return null;
 
   const isActive = (path: string) => location.pathname === path || location.pathname.startsWith(path + "/");
 
 
   return (
+    <>
     <header className="sticky top-0 z-50 bg-background/80 backdrop-blur-md border-b border-border/50">
       <div className="flex items-center justify-between px-[5%] md:px-[8%] py-4">
         <Link to="/" aria-label="Guardiens, accueil" className="font-heading text-xl md:text-2xl font-bold">
@@ -60,9 +80,18 @@ export default function PublicHeader({ authedVariant = false }: { authedVariant?
           {!authChecked ? (
             <div className="h-8 w-40 rounded-md bg-muted/40 animate-pulse" aria-hidden="true" />
           ) : hasSession ? (
-            <Button size="sm" onClick={() => navigate("/dashboard")}>
-              Mon espace
-            </Button>
+            <>
+              <Button size="sm" onClick={() => navigate("/dashboard")}>
+                Mon espace
+              </Button>
+              <Suspense fallback={<div className="w-11 h-11" aria-hidden />}>
+                <MessageBell />
+              </Suspense>
+              <Suspense fallback={<div className="w-11 h-11" aria-hidden />}>
+                <NotificationBell />
+              </Suspense>
+              <UserMenu />
+            </>
           ) : (
             <>
               <Button variant="ghost" size="sm" onClick={() => navigate("/login")}>
@@ -82,13 +111,15 @@ export default function PublicHeader({ authedVariant = false }: { authedVariant?
           {!authChecked ? (
             <div className="h-9 w-24 rounded-md bg-muted/40 animate-pulse" aria-hidden="true" />
           ) : hasSession ? (
-            <Button
-              size="sm"
-              onClick={() => navigate("/dashboard")}
-              className="min-h-11 px-3"
-            >
-              Mon espace
-            </Button>
+            <>
+              <Suspense fallback={<div className="w-11 h-11" aria-hidden />}>
+                <MessageBell />
+              </Suspense>
+              <Suspense fallback={<div className="w-11 h-11" aria-hidden />}>
+                <NotificationBell />
+              </Suspense>
+              <UserMenu compact />
+            </>
           ) : (
             <>
               <Button
@@ -160,5 +191,7 @@ export default function PublicHeader({ authedVariant = false }: { authedVariant?
         </nav>
       )}
     </header>
+    {withBottomNav && <BottomNav />}
+    </>
   );
 }
