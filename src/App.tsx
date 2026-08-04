@@ -1,4 +1,4 @@
-import { Suspense } from "react";
+import { Suspense, useState } from "react";
 import { lazyWithRetry as lazy } from "@/lib/lazyWithRetry";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Route, Routes, Navigate, useParams, useLocation } from "react-router-dom";
@@ -200,10 +200,57 @@ const queryClient = new QueryClient({
   },
 });
 
+// Session valide, profil illisible : écran explicite avec réessai et sortie.
+const ProfileUnavailable = () => {
+  const { refreshProfile, logout } = useAuth();
+  const [retrying, setRetrying] = useState(false);
+  return (
+    <div className="min-h-screen flex items-center justify-center px-6 bg-background">
+      <div className="max-w-md text-center space-y-4">
+        <h1 className="font-heading text-xl font-semibold text-foreground">
+          Votre profil n'a pas pu être chargé
+        </h1>
+        <p className="text-sm text-muted-foreground">
+          Vous êtes bien connecté, mais la lecture de votre profil a échoué. Réessayez, puis
+          déconnectez vous et reconnectez vous si le problème persiste. Contactez nous si cela
+          continue.
+        </p>
+        <div className="flex items-center justify-center gap-3">
+          <button
+            type="button"
+            className="min-h-[44px] px-4 rounded-md bg-primary text-primary-foreground text-sm font-medium disabled:opacity-60"
+            disabled={retrying}
+            onClick={() => {
+              setRetrying(true);
+              void Promise.resolve(refreshProfile())
+                .catch(() => {})
+                .finally(() => setRetrying(false));
+            }}
+          >
+            {retrying ? "Nouvelle tentative..." : "Réessayer"}
+          </button>
+          <button
+            type="button"
+            className="min-h-[44px] px-4 rounded-md border border-border text-sm font-medium"
+            onClick={() => {
+              void Promise.resolve(logout()).catch(() => {});
+            }}
+          >
+            Se déconnecter
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
-  const { isAuthenticated, user, loading } = useAuth();
+  const { isAuthenticated, user, hasSession, loading } = useAuth();
   const location = useLocation();
   if (loading) return <FallbackSpinner />;
+  // Session valide mais profil illisible durablement : message explicite et
+  // actionnable, jamais un retour muet au formulaire de connexion.
+  if (hasSession && !user) return <ProfileUnavailable />;
   if (!isAuthenticated) {
     // Preserve the originally requested URL so the user is returned
     // to it after a successful login/signup.
@@ -273,7 +320,7 @@ const PublicShellRoute = ({ children }: { children: React.ReactNode }) => {
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <PublicHeader />
-      <main className="flex-1 min-w-0">{children}</main>
+      <main id="main-content" className="flex-1 min-w-0">{children}</main>
       <PublicFooter />
     </div>
   );

@@ -362,7 +362,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       value={{
         user,
         activeRole,
-        isAuthenticated: !!user,
+        isAuthenticated: !!user || hasSession,
         loading,
         hasSession,
         authChecked,

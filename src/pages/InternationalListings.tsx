@@ -116,7 +116,7 @@ export default function InternationalListings() {
         <link rel="canonical" href={CANONICAL} />
       </Helmet>
 
-      <main id="main-content" className="min-w-0" role="main">
+      <div className="min-w-0">
         <section className="max-w-6xl mx-auto px-4 md:px-6 pt-10 pb-6">
           <p className="hidden md:flex text-[11px] uppercase tracking-[0.22em] text-muted-foreground mb-3 items-center gap-2">
             <Globe2 className="h-3.5 w-3.5" /> {t("intl_listings.kicker")}
@@ -230,7 +230,7 @@ export default function InternationalListings() {
             </>
           )}
         </section>
-      </main>
+      </div>
     </div>
   );
 }
