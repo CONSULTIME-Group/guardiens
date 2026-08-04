@@ -1,6 +1,5 @@
 import { useRef } from "react";
 import { Link } from "react-router-dom";
-import { MapPin, Dog, Trees, ShieldCheck } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useInventaireCounts } from "@/hooks/useInventaireCounts";
 import { useImpressionOnce } from "@/hooks/useImpressionOnce";
@@ -23,10 +22,10 @@ export default function InventoryStrip() {
     new Intl.NumberFormat(i18n.language || "fr-FR").format(n).replace(/\u0020/g, "\u202F");
 
   const cards = [
-    { key: "cities", value: data?.cities_total ?? 0, Icon: MapPin, label: t("landing.inventory.cities_label") },
-    { key: "breeds", value: data?.breeds_total ?? 0, Icon: Dog, label: t("landing.inventory.breeds_label") },
-    { key: "places", value: data?.places_total ?? 0, Icon: Trees, label: t("landing.inventory.places_label") },
-    { key: "pros", value: data?.pros_total ?? 0, Icon: ShieldCheck, label: t("landing.inventory.pros_label") },
+    { key: "cities", value: data?.cities_total ?? 0, label: t("landing.inventory.cities_label") },
+    { key: "breeds", value: data?.breeds_total ?? 0, label: t("landing.inventory.breeds_label") },
+    { key: "places", value: data?.places_total ?? 0, label: t("landing.inventory.places_label") },
+    { key: "pros", value: data?.pros_total ?? 0, label: t("landing.inventory.pros_label") },
   ].filter((c) => c.value > 0);
 
   return (
@@ -52,13 +51,12 @@ export default function InventoryStrip() {
             ? Array.from({ length: 4 }).map((_, i) => (
                 <div key={i} data-testid="inventory-skeleton" className="h-32 rounded-2xl bg-muted animate-pulse" />
               ))
-            : cards.map(({ key, value, Icon, label }) => (
+            : cards.map(({ key, value, label }) => (
                 <div
                   key={key}
                   data-testid={`inventory-card-${key}`}
                   className="rounded-2xl border border-border bg-card p-6 flex flex-col items-center gap-2"
                 >
-                  <Icon className="w-6 h-6 text-primary" aria-hidden="true" />
                   <div className="font-heading text-3xl md:text-4xl font-bold text-foreground tabular-nums">
                     {fmt(value)}
                   </div>
