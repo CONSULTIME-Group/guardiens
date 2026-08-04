@@ -97,7 +97,7 @@ export default function PublicHeader({ authedVariant = false }: { authedVariant?
     return () => {
       ro?.disconnect();
       window.removeEventListener("resize", apply);
-      document.documentElement.style.setProperty("--public-header-h", "0px");
+      document.documentElement.style.removeProperty("--public-header-h");
     };
   }, [hidden]);
 

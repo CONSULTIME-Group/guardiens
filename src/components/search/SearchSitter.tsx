@@ -1493,7 +1493,7 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
   {/* Réassurance périmètre retirée : redondante avec le sélecteur Zone (radius / dept / France). */}
 
   {/* ─── Sticky search bar ─── */}
-  <div className="sticky top-[52px] md:top-0 z-[1100] bg-background border-b-2 border-border shadow-sm">
+  <div className="search-sticky-offset sticky z-[1100] bg-background border-b-2 border-border shadow-sm">
    {/* Mobile compact bar (carte uniquement) : un résumé + bouton qui replie/déplie les filtres */}
    {isMobile && viewMode === "map" && (
     <button

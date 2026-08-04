@@ -1050,7 +1050,7 @@ const SearchOwner = () => {
 
 
       {/* Sticky search bar */}
-      <div className="sticky top-[52px] md:top-0 z-[1100] bg-background border-b-2 border-border shadow-sm px-6 py-3 space-y-3">
+      <div className="search-sticky-offset sticky z-[1100] bg-background border-b-2 border-border shadow-sm px-6 py-3 space-y-3">
         {/* ─── Hero search (desktop V2) : ville dominante + rayon + CTA ─── */}
         {/* Une seule instance du sélecteur de lieu est montée : rendu
             conditionné en JavaScript, jamais masqué en CSS (le portail du
