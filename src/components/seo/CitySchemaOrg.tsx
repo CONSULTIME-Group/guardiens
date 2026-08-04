@@ -222,7 +222,7 @@ const CitySchemaOrg = ({ city }: Props) => {
  graph.push({
  "@type": "LocalBusiness",
  name: `Guardiens, Garde d'animaux à ${city.name}`,
- description: `Plateforme de garde de chien, de chat et de home sitting à ${city.name}. Gardiens de proximité vérifiés, sans commission.`,
+ description: `Plateforme de garde de chien, de chat et de home sitting à ${city.name}. Gardiens de proximité, sans commission.`,
  url: `https://guardiens.fr/house-sitting/${city.slug}`,
  address: {
  "@type": "PostalAddress",
