@@ -190,6 +190,7 @@ const MessageBubble = ({
 
   return (
     <>
+      <div className={`flex flex-col ${isMe ? "items-end" : "items-start"}`}>
       <div className={`flex ${isMe ? "justify-end" : "justify-start"}`}>
         <div
           className={[
