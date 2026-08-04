@@ -221,7 +221,7 @@ const DepartmentPage = () => {
       Guardiens reste gratuit tant que nous ne sommes pas satisfaits du service que nous vous offrons. Aucune commission côté propriétaire, aucun frais de mise en relation, une rencontre systématique avant chaque garde.
     </p>
     <p className="text-base text-foreground/80 leading-relaxed">
-      Une pension pour animaux dans le {page.department} se facture généralement entre 25 et 50 € par nuit et par animal, soit 350 à 700 € pour deux semaines avec un chien. Confier son animal à un gardien à domicile, c'est éviter le stress de la mise en pension, garder votre logement occupé pendant votre absence, et bénéficier d'une relation directe entre particuliers, sans intermédiaire commercial. Les gardiens du réseau Guardiens dans le {page.department} sont vérifiés (identité, avis publics de la communauté) et rencontrés en amont.
+      Une pension pour animaux dans le {page.department} se facture généralement entre 25 et 50 € par nuit et par animal, soit 350 à 700 € pour deux semaines avec un chien. Confier son animal à un gardien à domicile, c'est éviter le stress de la mise en pension, garder votre logement occupé pendant votre absence, et bénéficier d'une relation directe entre particuliers, sans intermédiaire commercial. Les profils dont l'identité a été validée affichent l'écusson « Identité vérifiée ». Consultez aussi les avis publics de la communauté et organisez une rencontre en amont.
     </p>
   </section>
 

@@ -576,7 +576,7 @@
       "title": "House-sitting per città",
       "lede_a": "Scopra i custodi disponibili nella Sua città. Un imprevisto? I nostri",
       "lede_link": "custodi d'emergenza",
-      "lede_b": "sono mobilitabili in poche ore."
+      "lede_b": "possono ricevere un avviso prioritario."
     },
     "faq_section": {
       "title": "Domande frequenti",
@@ -1079,7 +1079,7 @@
     "soon_title": "Presto disponibile. La rete di custodi d'emergenza si attiverà non appena avremo abbastanza custodi idonei ed esperti.",
     "soon_subtitle": "La nostra piattaforma è giovane. Ci prendiamo il tempo per designare sitter d'emergenza con criteri rigorosi.",
     "hero_title": "I sitter d'emergenza",
-    "hero_lead": "La Sua rete di sicurezza locale. Un imprevisto, una cancellazione dell'ultimo minuto, una partenza precipitosa? Persone del posto formate all'urgenza, pronte a mobilitarsi in via prioritaria.",
+    "hero_lead": "La Sua rete di sicurezza locale. Un imprevisto, una cancellazione dell'ultimo minuto, una partenza precipitosa? Le persone idonee della zona possono ricevere un avviso prioritario.",
     "hero_tagline": "È la forza della prossimità: persone già sul posto, non dall'altra parte del paese.",
     "how_it_works": "Come funziona?",
     "step1_title": "Un proprietario ha un bisogno urgente",
@@ -1164,7 +1164,7 @@
     "footer_eligibility": "Vedi la mia idoneità (prossimamente)",
     "footer_full_faq": "FAQ completa",
     "faq1_q": "Quanto tempo per essere contattato in caso di emergenza?",
-    "faq1_a": "Su Guardiens, le allerte d'emergenza sono prioritarie: i custodi idonei nel Suo raggio sono notificati all'istante. Il nostro impegno: una risposta entro 4 ore.",
+    "faq1_a": "Su Guardiens, le allerte d'emergenza sono prioritarie: i custodi idonei nel Suo raggio sono notificati all'istante. Il dispositivo è progettato affinché una risposta possa arrivare nelle ore successive all'allerta.",
     "faq2_q": "Funziona di notte o nel weekend?",
     "faq2_a": "Sì. Le allerte d'emergenza sono attive 24/7. Di notte e nei weekend le notifiche vanno in priorità ai custodi con disponibilità estesa. I tempi di risposta possono essere un po' più lunghi in fasce atipiche, ma il servizio resta attivo.",
     "faq3_q": "Il mio cane è reattivo o ansioso, è possibile lo stesso?",

@@ -141,7 +141,7 @@ const CityPage = () => {
  const faqItems = cityData.slug === "lyon"
  ? [
  { q: "Comment rencontrer un gardien avant de confier ma maison ?", a: "Après avoir accepté une candidature, vous organisez une rencontre directement via la messagerie Guardiens. La plupart des propriétaires à Lyon choisissent un café de quartier ou une visite du logement. Cette étape est fortement recommandée." },
- { q: "Que se passe-t-il en cas d'urgence ou d'imprévu ?", a: "Guardiens dispose d'un réseau de gardiens d'urgence à Lyon, mobilisables rapidement. En cas de problème vétérinaire, le gardien contacte la clinique indiquée dans le guide de la maison. En cas de problème technique, il suit les consignes laissées par le propriétaire." },
+ { q: "Que se passe-t-il en cas d'urgence ou d'imprévu ?", a: "Une alerte prioritaire peut être envoyée aux gardiens d'urgence éligibles à Lyon. En cas de problème vétérinaire, le gardien contacte la clinique indiquée dans le guide de la maison. En cas de problème technique, il suit les consignes laissées par le propriétaire." },
  { q: "Comment sont vérifiés les gardiens à Lyon ?", a: "La vérification d'identité est ouverte à tous les membres. Vous envoyez une pièce d'identité, elle est analysée automatiquement, et les dossiers qui ne passent pas ce premier contrôle sont revus par l'équipe. Les profils validés affichent l'écusson « Identité vérifiée ». Les avis croisés après chaque garde et les badges de fiabilité complètent le dispositif de confiance." },
  { q: "Puis-je publier une annonce pour un chien ET un chat ?", a: "Absolument. Votre annonce peut inclure tous vos animaux. Les gardiens qui postulent voient la composition exacte de votre foyer et décident en connaissance de cause." },
  { q: "Combien de temps à l'avance faut-il publier mon annonce ?", a: "Pour les vacances d'été à Lyon, nous recommandons un mois à l'avance. Pour un week-end, une à deux semaines suffisent. Plus l'annonce est publiée tôt, plus vous recevez de candidatures de qualité." },
@@ -215,7 +215,7 @@ const CityPage = () => {
  <div className="flex flex-wrap gap-3 mb-8">
  <Badge variant="secondary" className="text-sm px-4 py-2 gap-2">
  <ShieldCheck className="h-4 w-4" />
- Vérification d'identité manuelle
+ Vérification d'identité
  </Badge>
  <Badge variant="outline" className="text-sm px-4 py-2 gap-2">
  <Heart className="h-4 w-4" />
@@ -293,7 +293,7 @@ const CityPage = () => {
  <Siren className="h-6 w-6 text-primary" />
  <h3 className="font-semibold text-foreground">Filet de sécurité local</h3>
  <p className="text-sm text-muted-foreground">
- Des <Link to="/gardien-urgence" className="text-primary hover:underline">gardiens d'urgence</Link> à {cityData.name}, mobilisables en quelques heures en cas d'imprévu.
+ Une alerte prioritaire peut être envoyée aux <Link to="/gardien-urgence" className="text-primary hover:underline">gardiens d'urgence</Link> éligibles à {cityData.name} en cas d'imprévu.
  </p>
  </div>
  </div>

@@ -5,11 +5,11 @@
 const SitFooterReassurance = () => (
   <div className="mt-8 bg-primary/5 border border-primary/10 rounded-xl p-5 text-center">
     <p className="font-heading text-sm font-semibold text-primary">
-      Vous partez l'esprit léger, et si un imprévu survient, votre réseau local
-      de gardiens prend le relais.
+      Si un imprévu survient, une alerte prioritaire peut être envoyée aux
+      gardiens d'urgence éligibles.
     </p>
     <p className="text-xs text-muted-foreground mt-1">
-      Écusson « Identité vérifiée » · Avis croisés · Gardiens d'urgence mobilisables
+      Écusson « Identité vérifiée », avis croisés, alertes prioritaires
     </p>
   </div>
 );

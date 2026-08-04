@@ -576,7 +576,7 @@
       "title": "House-sitting by city",
       "lede_a": "Discover the caretaker / pet & home sitters available in your city. Something unexpected? Our",
       "lede_link": "emergency sitters",
-      "lede_b": "can be mobilised in a few hours."
+      "lede_b": "can receive a priority alert."
     },
     "faq_section": {
       "title": "Frequently Asked Questions",
@@ -1079,7 +1079,7 @@
     "soon_title": "Coming soon. The emergency sitter network will activate as soon as we have enough eligible and experienced sitters.",
     "soon_subtitle": "Our platform is young. We take the time to designate emergency sitters on strict criteria to guarantee reliability.",
     "hero_title": "Emergency sitters",
-    "hero_lead": "Your local safety net. An unexpected event, a last-minute cancellation, a sudden departure? Trained local sitters, ready to step in as a priority.",
+    "hero_lead": "Your local safety net. An unexpected event, a last-minute cancellation, a sudden departure? Eligible local sitters can be alerted as a priority.",
     "hero_tagline": "That is the strength of proximity: people already on the spot, not on the other side of the country.",
     "how_it_works": "How does it work?",
     "step1_title": "An owner has an urgent need",
@@ -1164,7 +1164,7 @@
     "footer_eligibility": "See my eligibility (coming soon)",
     "footer_full_faq": "Full FAQ",
     "faq1_q": "How long to be contacted in an emergency?",
-    "faq1_a": "On Guardiens, emergency alerts are prioritized: eligible emergency sitters in your radius are notified instantly (SMS, email, push). Our commitment: a reply within 4 hours.",
+    "faq1_a": "On Guardiens, emergency alerts are prioritized: eligible emergency sitters in your radius are notified instantly (SMS, email, push). The system is designed so that a reply can arrive in the hours following the alert.",
     "faq2_q": "Does it work at night or on weekends?",
     "faq2_a": "Yes. Emergency alerts are active 24/7. At night and on weekends, notifications go first to sitters who indicated extended availability. Response times can be a bit longer in atypical slots, but the service remains active.",
     "faq3_q": "My dog is reactive or anxious, is it still possible?",

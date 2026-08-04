@@ -292,7 +292,7 @@ export default function ArticleInventaire() {
             </h2>
             <div className="space-y-4 text-foreground leading-relaxed">
               <p>
-                Depuis 2021, en tant que fondateurs, nous avons accompagné 234 animaux et gardé 37 maisons. Cette période a servi à valider une intuition simple : la garde à domicile, gratuite pour les propriétaires, tient debout quand la confiance est bâtie en amont. Vérification d'identité manuelle, avis croisés, badges publics, Trust Score : rien de tout cela n'est cosmétique.
+                Depuis 2021, en tant que fondateurs, nous avons accompagné 234 animaux et gardé 37 maisons. Cette période a servi à valider une intuition simple : la garde à domicile, gratuite pour les propriétaires, tient debout quand la confiance est bâtie en amont. Vérification d'identité, avis croisés, badges publics, Trust Score : rien de tout cela n'est cosmétique.
               </p>
               <p>
                 Ce que nous voyons monter : la demande de proximité. Les gens du coin, ceux qu'on croise vraiment. C'est ce qui nous fait ajouter des villes une à une, plutôt que de tirer une couverture bâclée sur toute la France.

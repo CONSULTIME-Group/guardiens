@@ -14,7 +14,7 @@ const LYON_FAQ = [
  },
  {
  q: "Que se passe-t-il en cas d'urgence ou d'imprévu ?",
- a: "Guardiens dispose d'un réseau de gardiens d'urgence à Lyon, mobilisables rapidement. En cas de problème vétérinaire, le gardien contacte la clinique indiquée dans le guide de la maison. En cas de problème technique, il suit les consignes laissées par le propriétaire.",
+ a: "Une alerte prioritaire peut être envoyée aux gardiens d'urgence éligibles à Lyon. En cas de problème vétérinaire, le gardien contacte la clinique indiquée dans le guide de la maison. En cas de problème technique, il suit les consignes laissées par le propriétaire.",
  },
  {
  q: "Comment sont vérifiés les gardiens à Lyon ?",
@@ -45,7 +45,7 @@ const LYON_FAQ = [
 const ANNECY_FAQ = [
  {
  q: "Comment trouver un gardien de confiance à Annecy ?",
- a: "Vous publiez votre annonce gratuitement et les gardiens disponibles à Annecy et en Haute-Savoie postulent. Les pièces d'identité soumises sont contrôlées manuellement par l'équipe Guardiens, et les profils qui l'ont obtenue affichent l'écusson « Identité vérifiée », complété par les avis croisés et les badges de fiabilité. Vous échangez avec les candidats via la messagerie et organisez une rencontre avant de confier vos clés.",
+ a: "Vous publiez votre annonce gratuitement et les gardiens disponibles à Annecy et en Haute-Savoie postulent. La vérification d'identité est ouverte à tous les membres. La pièce envoyée est analysée automatiquement, et les dossiers qui ne passent pas ce contrôle sont revus par l'équipe. Les profils validés affichent l'écusson « Identité vérifiée ». Les avis croisés et les badges de fiabilité complètent ces informations. Vous échangez avec les candidats via la messagerie et organisez une rencontre avant de confier vos clés.",
  },
  {
  q: "Les gardiens à Annecy sont-ils habitués aux logements de montagne ?",
@@ -57,7 +57,7 @@ const ANNECY_FAQ = [
  },
  {
  q: "Que se passe-t-il en cas d'urgence vétérinaire à Annecy ?",
- a: "Le guide de la maison que vous remplissez avant le départ contient les coordonnées de votre vétérinaire et de la clinique d'urgence la plus proche. En cas d'imprévu, le gardien suit ces consignes. Le réseau Gardien d'Urgence Guardiens est mobilisable en quelques heures sur la Haute-Savoie.",
+ a: "Le guide de la maison que vous remplissez avant le départ contient les coordonnées de votre vétérinaire et de la clinique d'urgence la plus proche. En cas d'imprévu, le gardien suit ces consignes. Une alerte prioritaire peut être envoyée aux gardiens d'urgence éligibles en Haute-Savoie.",
  },
  {
  q: "Combien coûte une garde de maison à Annecy ?",

@@ -360,7 +360,7 @@ const Observatoire = () => {
  Un système de <strong>{BADGE_COUNT} badges de reconnaissance</strong> distingue les profils particulièrement fiables, expérimentés ou engagés (Super Sitter, Identité vérifiée, Spécialiste NAC, Sceau de cire fondateur, etc.). Les badges sont attribués automatiquement selon des règles publiques.
  </p>
  <p>
- En cas d'imprévu, le réseau <strong>Gardien d'Urgence</strong> peut être mobilisé en quelques heures sur les zones couvertes, en complément du gardien titulaire.
+ En cas d'imprévu, une alerte prioritaire peut être envoyée aux membres éligibles du réseau <strong>Gardien d'Urgence</strong> sur les zones couvertes, en complément du gardien titulaire.
  </p>
  </div>
  </section>

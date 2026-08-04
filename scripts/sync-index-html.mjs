@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Synchronise index.html (titre, OG, Twitter, <noscript>) depuis la source
+ * Synchronise index.html (titre, description, OG, Twitter, <noscript>) depuis la source
  * unique de vérité : src/data/siteRoutes.ts (route "/" + DEFAULT_OG_IMAGE).
  *
  * Modes :
@@ -208,6 +208,7 @@ function replaceNoscriptPricing(html, pricingLong) {
 function syncIndexHtml(html, truth) {
   const patches = [
     { kind: "title", apply: (h) => replaceDocumentTitle(h, truth.title) },
+    { kind: "description", apply: (h) => replaceMetaContent(h, { attr: "name", key: "description", value: truth.description }) },
     { kind: "og:title", apply: (h) => replaceMetaContent(h, { attr: "property", key: "og:title", value: truth.title }) },
     { kind: "og:description", apply: (h) => replaceMetaContent(h, { attr: "property", key: "og:description", value: truth.description }) },
     { kind: "og:image", apply: (h) => replaceMetaContent(h, { attr: "property", key: "og:image", value: truth.image }) },

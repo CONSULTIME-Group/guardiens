@@ -576,7 +576,7 @@
       "title": "House-sitting nach Stadt",
       "lede_a": "Entdecken Sie die Betreuer in Ihrer Stadt. Etwas Unerwartetes? Unsere",
       "lede_link": "Notfall-Betreuer",
-      "lede_b": "sind innerhalb weniger Stunden einsatzbereit."
+      "lede_b": "können vorrangig benachrichtigt werden."
     },
     "faq_section": {
       "title": "Häufig gestellte Fragen",
@@ -1079,7 +1079,7 @@
     "soon_title": "Bald verfügbar. Das Notfall-Netzwerk wird aktiviert, sobald wir genügend berechtigte und erfahrene Betreuer haben.",
     "soon_subtitle": "Unsere Plattform ist jung. Wir nehmen uns die Zeit, Notfall-Sitter nach strengen Kriterien zu benennen.",
     "hero_title": "Die Notfall-Sitter",
-    "hero_lead": "Ihr lokales Sicherheitsnetz. Ein unerwarteter Vorfall, eine kurzfristige Absage, eine überstürzte Abreise? Notfallgeschulte Menschen aus der Nähe, die vorrangig einspringen.",
+    "hero_lead": "Ihr lokales Sicherheitsnetz. Ein unerwarteter Vorfall, eine kurzfristige Absage, eine überstürzte Abreise? Geeignete Personen aus der Nähe können vorrangig benachrichtigt werden.",
     "hero_tagline": "Das ist die Stärke der Nähe: Menschen, die bereits vor Ort sind, nicht am anderen Ende des Landes.",
     "how_it_works": "Wie funktioniert es?",
     "step1_title": "Ein Besitzer hat einen dringenden Bedarf",
@@ -1164,7 +1164,7 @@
     "footer_eligibility": "Meine Berechtigung sehen (demnächst)",
     "footer_full_faq": "Komplette FAQ",
     "faq1_q": "Wie lange dauert es, im Notfall kontaktiert zu werden?",
-    "faq1_a": "Auf Guardiens haben Notfallalarme Priorität: berechtigte Notfall-Betreuer in Ihrem Umkreis werden sofort benachrichtigt. Unser Versprechen: eine Antwort innerhalb von 4 Stunden.",
+    "faq1_a": "Auf Guardiens haben Notfallalarme Priorität: berechtigte Notfall-Betreuer in Ihrem Umkreis werden sofort benachrichtigt. Das System ist darauf ausgelegt, dass in den Stunden nach der Meldung eine Antwort eintreffen kann.",
     "faq2_q": "Funktioniert es nachts oder am Wochenende?",
     "faq2_a": "Ja. Notfallalarme sind rund um die Uhr aktiv. Nachts und am Wochenende werden Benachrichtigungen bevorzugt an Betreuer mit erweiterter Verfügbarkeit gesendet. Die Antwortzeiten können in atypischen Zeitfenstern etwas länger sein, der Dienst bleibt aber aktiv.",
     "faq3_q": "Mein Hund ist reaktiv oder ängstlich, ist es trotzdem möglich?",

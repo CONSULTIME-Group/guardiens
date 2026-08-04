@@ -216,7 +216,7 @@ Lyon se compose de neuf arrondissements et d'une ceinture de communes limitrophe
 
 **Vous rencontrez votre gardien avant de lui confier vos clés.** C'est un principe fondamental de Guardiens : pas de garde sans rencontre préalable. Un café dans votre quartier, une visite de votre logement, une promenade avec votre chien. Vous évaluez le contact humain, votre animal aussi.
 
-**Aucune commission sur les gardes.** Guardiens ne prélève aucun pourcentage sur les gardes. Le modèle repose sur l'abonnement des gardiens, [consultez les tarifs détaillés](/tarifs). Pour les propriétaires, tout est sans frais.
+**Aucune commission sur les gardes.** Guardiens ne prélève aucun pourcentage sur les gardes. Guardiens reste gratuit tant que nous ne sommes pas satisfaits du service que nous vous offrons. Vous avez accès à tout, sans limite, sans engagement. Vous serez prévenu à l'avance quand cela changera.
 
 **Un accord de garde clair.** Un document optionnel formalise les engagements de chaque partie : dates, responsabilités, contacts d'urgence. Jamais contraignant, toujours rassurant.
 
@@ -235,7 +235,7 @@ Lyon se compose de neuf arrondissements et d'une ceinture de communes limitrophe
 
 **Étudiants**, pour les gardes courtes, les week-ends ou les ponts. Leur disponibilité et leur énergie conviennent parfaitement aux chiens actifs qui ont besoin de longues promenades.
 
-Tous passent par le même processus de vérification : identité contrôlée, profil détaillé, rencontre physique avec le propriétaire avant chaque garde.`,
+**Vérification d'identité ouverte à tous.** La pièce envoyée est analysée automatiquement, et les dossiers qui ne passent pas ce premier contrôle sont revus par l'équipe. Les profils validés affichent l'écusson « Identité vérifiée ». Consultez aussi le profil détaillé et organisez une rencontre physique avant chaque garde.`,
  },
  {
  id: "tarifs",
@@ -246,7 +246,7 @@ Tous passent par le même processus de vérification : identité contrôlée, pr
 
 **Gardiens est gratuit aujourd'hui**, sans engagement, pour les propriétaires comme pour les gardiens. Vous serez prévenu à l'avance en cas d'évolution tarifaire. [Consultez le détail des formules sur la page tarifs](/tarifs).
 
-**Aucune commission par garde.** Contrairement aux plateformes qui prélèvent 15 à 20 pour cent sur chaque transaction, Guardiens ne touche rien sur les gardes elles-mêmes. Le gardien paie son abonnement, le propriétaire ne paie rien. C'est tout.`,
+**Aucune commission par garde.** Guardiens ne touche rien sur les gardes elles-mêmes. Guardiens reste gratuit tant que nous ne sommes pas satisfaits du service que nous vous offrons. Vous avez accès à tout, sans limite, sans engagement. Vous serez prévenu à l'avance quand cela changera.`,
  },
  {
  id: "histoire",
@@ -255,7 +255,7 @@ Tous passent par le même processus de vérification : identité contrôlée, pr
 
 234 animaux accompagnés, des chiens de berger aux chats craintifs, des poules de jardin aux tortues de terrarium. Chaque garde leur a appris quelque chose : comment gérer un chien anxieux en l'absence de son maître, comment rassurer un chat qui se cache pendant trois jours, comment intervenir quand une chaudière tombe en panne un dimanche soir.
 
-C'est cette expérience de terrain qui structure aujourd'hui la plateforme : la rencontre physique obligatoire avant chaque garde, le guide de la maison qui centralise toutes les informations pratiques, le réseau de gardiens d'urgence mobilisables en quelques heures, les avis croisés qui construisent la confiance au fil du temps.
+C'est cette expérience de terrain qui structure aujourd'hui la plateforme : le guide de la maison qui centralise toutes les informations pratiques, les alertes prioritaires envoyées aux gardiens d'urgence éligibles, les avis croisés qui construisent la confiance au fil du temps.
 
 Guardiens accueille aujourd'hui ses premiers membres, ceux qui rejoignent la plateforme pendant sa phase de construction et contribuent à façonner l'outil. Lyon est le point de départ, la France entière le terrain naturel d'expansion.`,
  },
@@ -266,7 +266,7 @@ Guardiens accueille aujourd'hui ses premiers membres, ceux qui rejoignent la pla
 Après avoir accepté une candidature, vous organisez une rencontre directement via la messagerie Guardiens. La plupart des propriétaires à Lyon choisissent un café de quartier ou une visite du logement. Cette étape est systématique et fortement recommandée.
 
 **Que se passe-t-il en cas d'urgence ou d'imprévu ?**
-Guardiens dispose d'un réseau de [gardiens d'urgence à Lyon](/gardien-urgence), mobilisables rapidement. En cas de problème vétérinaire, le gardien contacte la clinique indiquée dans le guide de la maison. En cas de problème technique (fuite, panne), il suit les consignes laissées par le propriétaire.
+Une alerte prioritaire peut être envoyée aux [gardiens d'urgence à Lyon](/gardien-urgence) qui remplissent les critères. En cas de problème vétérinaire, le gardien contacte la clinique indiquée dans le guide de la maison. En cas de problème technique (fuite, panne), il suit les consignes laissées par le propriétaire.
 
 **Comment sont vérifiés les gardiens à Lyon ?**
 La vérification d'identité est ouverte à tous les membres : la pièce envoyée est analysée automatiquement, les dossiers qui ne passent pas sont revus par l'équipe, et les profils validés affichent l'écusson « Identité vérifiée ». Les avis croisés après chaque garde et les badges de fiabilité complètent le dispositif de confiance. [En savoir plus dans la FAQ](/faq#confiance-securite).

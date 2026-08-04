@@ -34,7 +34,7 @@ export interface SiteRoute {
 }
 
 /**
- * Chemins privés — espace authentifié et endpoints système. Source de vérité
+ * Chemins privés, espace authentifié et endpoints système. Source de vérité
  * unique consommée par `scripts/generate-robots.mjs` pour générer les règles
  * `Disallow:`. Ne PAS dupliquer dans `public/robots.txt` (qui est généré).
  *
@@ -44,7 +44,7 @@ export interface SiteRoute {
  * - Tout endpoint d'auth interne (`/auth/`, `/forgot-password`…)
  *
  * Les routes publiques marquées `index: false` dans staticRoutes (ex. `/login`,
- * `/recherche`) sont automatiquement ajoutées par le générateur — ne pas les
+ * `/recherche`) sont automatiquement ajoutées par le générateur, ne pas les
  * lister ici en double.
  */
 export const privateDisallowPaths: string[] = [
@@ -122,7 +122,7 @@ export const staticRoutes: SiteRoute[] = [
  path: "/",
 		title: "Garde d'animaux à domicile et house-sitting | Guardiens",
 		metaDescription: "Trouvez un gardien du coin pour votre maison et vos animaux. House-sitting entre particuliers, profils documentés et notés, sans engagement. Partout en France.",
- h1: "Guardiens — Comme confier ses clés à quelqu'un du coin",
+ h1: "Guardiens, comme confier ses clés à quelqu'un du coin",
  sitemapPriority: "1.0",
  changeFreq: "daily",
  ogImage: DEFAULT_OG_IMAGE,
@@ -137,7 +137,7 @@ export const staticRoutes: SiteRoute[] = [
  },
  {
  path: "/faq",
- title: "FAQ — Questions fréquentes | Guardiens",
+ title: "FAQ, questions fréquentes | Guardiens",
  metaDescription: "FAQ Guardiens : toutes vos questions sur le house-sitting, l'entraide entre gens du coin, le parrainage, les gardiens d'urgence et la plateforme.",
  h1: "Questions fréquentes",
  sitemapPriority: "0.8",
@@ -161,7 +161,7 @@ export const staticRoutes: SiteRoute[] = [
  },
  {
  path: "/petites-missions",
- title: "Petites missions — Entraide communautaire | Guardiens",
+ title: "Petites missions, entraide communautaire | Guardiens",
  metaDescription: "Petites missions d'entraide entre gens du coin. Sans frais, sans argent qui circule. Arrosage du jardin, promenade de chien, courses, partage de compétences.",
  h1: "Petites missions",
  sitemapPriority: "0.8",
@@ -177,7 +177,7 @@ export const staticRoutes: SiteRoute[] = [
  },
  {
  path: "/gardien-urgence",
- title: "Gardien d'urgence — Garde en moins de 24h | Guardiens",
+ title: "Gardien d'urgence, garde d'animaux à domicile | Guardiens",
  metaDescription: "Besoin d'un gardien en urgence pour vos animaux ? Activez l'alerte Guardiens : les gardiens d'urgence près de chez vous sont notifiés en priorité.",
  h1: "Gardien d'urgence",
  sitemapPriority: "0.8",
@@ -193,7 +193,7 @@ export const staticRoutes: SiteRoute[] = [
  },
  {
  path: "/guides",
- title: "Guides locaux — Villes dog-friendly | Guardiens",
+ title: "Guides locaux, villes dog-friendly | Guardiens",
  metaDescription: "Guides locaux Guardiens : parcs à chien, vétérinaires, cafés dog-friendly et bonnes adresses dans chaque ville.",
  h1: "Guides locaux",
  sitemapPriority: "0.8",
@@ -221,7 +221,7 @@ export const staticRoutes: SiteRoute[] = [
   },
  {
  path: "/contact",
- title: "Contact — Nous écrire ou poser une question | Guardiens",
+ title: "Contact, nous écrire ou poser une question | Guardiens",
  metaDescription: "Contactez l'équipe Guardiens. Une question, une suggestion, un problème technique ou un partenariat ? Nous vous répondons sous 48 heures ouvrées.",
  h1: "Contactez-nous",
  sitemapPriority: "0.8",
@@ -229,7 +229,7 @@ export const staticRoutes: SiteRoute[] = [
  },
  {
  path: "/a-propos",
- title: "À propos — Notre histoire et nos valeurs | Guardiens",
+ title: "À propos, notre histoire et nos valeurs | Guardiens",
  metaDescription: "Découvrez l'histoire de Guardiens, notre vision du house-sitting de proximité, nos engagements de confiance et l'équipe derrière la plateforme.",
  h1: "À propos de Guardiens",
  sitemapPriority: "0.6",
@@ -237,7 +237,7 @@ export const staticRoutes: SiteRoute[] = [
  },
  {
  path: "/login",
- title: "Connexion — Accéder à votre compte | Guardiens",
+ title: "Connexion, accéder à votre compte | Guardiens",
  metaDescription: "Connectez-vous à votre compte Guardiens pour gérer vos gardes, votre profil, vos messages et suivre vos animaux ou propriétaires de confiance.",
  h1: "Connexion",
  sitemapPriority: "0.4",
@@ -247,7 +247,7 @@ export const staticRoutes: SiteRoute[] = [
  },
  {
  path: "/inscription",
- title: "Inscription — Créer un compte gratuit | Guardiens",
+ title: "Inscription, créer un compte gratuit | Guardiens",
  metaDescription: "Rejoignez la communauté Guardiens. Inscription gratuite pour tous, aujourd'hui et sans deadline. Ni carte bancaire, ni engagement.",
  h1: "Créer un compte",
  sitemapPriority: "0.6",
@@ -281,7 +281,7 @@ export const staticRoutes: SiteRoute[] = [
  },
  {
  path: "/mentions-legales",
- title: "Mentions légales — Éditeur et hébergeur | Guardiens",
+ title: "Mentions légales, éditeur et hébergeur | Guardiens",
  metaDescription: "Mentions légales de la plateforme Guardiens : éditeur, hébergeur, directeur de publication, propriété intellectuelle et coordonnées de contact.",
   h1: "Mentions légales",
   sitemapPriority: "0.3",
@@ -289,7 +289,7 @@ export const staticRoutes: SiteRoute[] = [
  },
  {
   path: "/auteurs/jeremie",
-  title: "Jérémie — Auteur Guardiens",
+  title: "Jérémie, auteur Guardiens",
   metaDescription: "Jérémie, co-fondateur de Guardiens. 5 ans de house-sitting, 37 maisons gardées, 234 animaux accompagnés. Articles écrits depuis le terrain.",
   h1: "Jérémie",
   sitemapPriority: "0.5",
@@ -297,7 +297,7 @@ export const staticRoutes: SiteRoute[] = [
  },
  {
   path: "/auteurs/elisa",
-  title: "Elisa — Auteure Guardiens",
+  title: "Elisa, auteure Guardiens",
   metaDescription: "Elisa, co-fondatrice de Guardiens. 5 ans de house-sitting à deux. Sensibilité particulière à l'expérience humaine et à l'attention portée aux animaux.",
   h1: "Elisa",
   sitemapPriority: "0.5",
@@ -322,7 +322,7 @@ export const staticRoutes: SiteRoute[] = [
 ];
 
 /**
- * Routes dynamiques — patterns utilisés par `validate-og-tags.mjs` pour valider
+ * Routes dynamiques, patterns utilisés par `validate-og-tags.mjs` pour valider
  * en masse les pages générées (articles de blog, silos géo…).
  *
  * Les instances concrètes sont découvertes automatiquement via le sitemap.xml

@@ -576,7 +576,7 @@
       "title": "house-sitting por ciudad",
       "lede_a": "Descubra los cuidadores disponibles en su ciudad. ¿Un imprevisto? Nuestros",
       "lede_link": "cuidadores de emergencia",
-      "lede_b": "se pueden movilizar en pocas horas."
+      "lede_b": "pueden recibir una alerta prioritaria."
     },
     "faq_section": {
       "title": "Preguntas frecuentes",
@@ -1079,7 +1079,7 @@
     "soon_title": "Próximamente. La red de cuidadores de urgencia se activará en cuanto tengamos suficientes cuidadores elegibles y con experiencia.",
     "soon_subtitle": "Nuestra plataforma es joven. Nos tomamos el tiempo para designar cuidadores de urgencia con criterios estrictos.",
     "hero_title": "Los cuidadores de urgencia",
-    "hero_lead": "Su red de seguridad local. ¿Un imprevisto, una cancelación de última hora, una salida precipitada? Gente del lugar formada para la urgencia, lista para movilizarse con prioridad.",
+    "hero_lead": "Su red de seguridad local. ¿Un imprevisto, una cancelación de última hora, una salida precipitada? Las personas elegibles de la zona pueden recibir una alerta prioritaria.",
     "hero_tagline": "Esa es la fuerza de la proximidad: personas que ya están en el sitio, no al otro lado del país.",
     "how_it_works": "¿Cómo funciona?",
     "step1_title": "Un propietario tiene una necesidad urgente",
@@ -1164,7 +1164,7 @@
     "footer_eligibility": "Ver mi elegibilidad (próximamente)",
     "footer_full_faq": "FAQ completa",
     "faq1_q": "¿Cuánto tiempo para ser contactado en una urgencia?",
-    "faq1_a": "En Guardiens, las alertas de urgencia tienen prioridad: los cuidadores elegibles en su radio reciben una notificación inmediata. Nuestro compromiso: una respuesta en menos de 4 horas.",
+    "faq1_a": "En Guardiens, las alertas de urgencia tienen prioridad: los cuidadores elegibles en su radio reciben una notificación inmediata. El dispositivo está diseñado para que pueda llegar una respuesta en las horas siguientes a la alerta.",
     "faq2_q": "¿Funciona de noche o en fin de semana?",
     "faq2_a": "Sí. Las alertas de urgencia están activas 24/7. De noche y los fines de semana, las notificaciones se envían con prioridad a los cuidadores con disponibilidad ampliada. Los plazos pueden ser algo más largos en franjas atípicas, pero el servicio sigue activo.",
     "faq3_q": "Mi perro es reactivo o ansioso, ¿es posible igualmente?",

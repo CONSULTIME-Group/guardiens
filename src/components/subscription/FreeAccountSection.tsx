@@ -28,7 +28,7 @@ const accesGratuits: Array<{ titre: string; detail: string }> = [
  {
  titre: "Profil public et réputation",
  detail:
- "Votre profil reste visible, vos avis reçus restent affichés, vos badges conservés même sans abonnement gardien actif.",
+  "Votre profil reste visible, vos avis reçus restent affichés et vos badges sont conservés.",
  },
  {
  titre: "Messagerie liée à l'entraide",
@@ -63,9 +63,7 @@ const FreeAccountSection = () => {
  Ce qui reste offert pour tout le monde
  </h3>
  <p className="text-sm font-body text-muted-foreground">
- Même sans abonnement gardien actif, votre compte Guardiens conserve un large
- accès à la plateforme. L'abonnement à 6,99&nbsp;€/mois sert uniquement
- à postuler aux gardes longues et à apparaître dans la recherche gardien.
+  Votre compte Guardiens conserve un large accès à la plateforme.
  </p>
  </div>
 
@@ -86,10 +84,7 @@ const FreeAccountSection = () => {
  </ul>
 
  <p className="text-xs font-body text-muted-foreground text-center mt-6 max-w-2xl mx-auto">
- À partir du 14&nbsp;juin&nbsp;2026, seules les fonctionnalités gardien
- (postuler aux gardes, messagerie liée aux gardes, visibilité dans la
- recherche) nécessitent un abonnement actif. Tout le reste demeure
- accessible librement.
+  Les conditions d'accès applicables sont présentées avant toute activation.
  </p>
  </section>
  );
