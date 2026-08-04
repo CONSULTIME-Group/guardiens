@@ -234,7 +234,8 @@ const PublicOnlyRoute = ({ children }: { children: React.ReactNode }) => {
 
 
 const ParrainageRoute = () => {
-  const { isAuthenticated } = useAuth();
+  const { hasSession } = useAuth();
+  const isAuthenticated = hasSession;
   if (isAuthenticated) {
     return (
       <AppLayout>
@@ -248,7 +249,12 @@ const ParrainageRoute = () => {
 // Routes de contenu (ressources, SEO) : coquille AppLayout pour les
 // utilisateurs connectés, page publique inchangée pour les visiteurs.
 const ContentRoute = ({ children }: { children: React.ReactNode }) => {
-  const { isAuthenticated } = useAuth();
+  // Arbitrage sur hasSession (posé dès la détection du token) et non sur
+  // isAuthenticated (posé après le chargement du profil) : les deux coquilles
+  // (AppLayout et PublicHeader) partagent ainsi la même source de vérité,
+  // ce qui supprime le flash d'en tête au rechargement.
+  const { hasSession } = useAuth();
+  const isAuthenticated = hasSession;
   if (isAuthenticated) return <AppLayout>{children}</AppLayout>;
   return <>{children}</>;
 };
@@ -257,7 +263,8 @@ const ContentRoute = ({ children }: { children: React.ReactNode }) => {
 // non connectés sur les pages de contenu/SEO qui ne rendent PAS leur propre
 // PublicHeader. Pour les utilisateurs connectés : AppLayout (sidebar).
 const PublicShellRoute = ({ children }: { children: React.ReactNode }) => {
-  const { isAuthenticated } = useAuth();
+  const { hasSession } = useAuth();
+  const isAuthenticated = hasSession;
   if (isAuthenticated) return <AppLayout>{children}</AppLayout>;
   return (
     <div className="min-h-screen flex flex-col bg-background">
