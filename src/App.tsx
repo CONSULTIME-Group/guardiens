@@ -5,8 +5,6 @@ import { BrowserRouter, Route, Routes, Navigate, useParams, useLocation } from "
 import { Loader2 } from "lucide-react";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
-import { Sidebar, BottomNav } from "./components/layout/Navigation";
-import { BackButton } from "./components/layout/BackButton";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import { ThemeProvider } from "@/contexts/ThemeContext";
@@ -319,7 +317,7 @@ const AppRoutes = () => {
       <Route path="/reset-password" element={<ResetPassword />} />
       
       <Route path="/conseils" element={<ContentRoute><AlmaTips /></ContentRoute>} />
-      <Route path="/alma" element={<ContentRoute><AlmaEvolution /></ContentRoute>} />
+      <Route path="/alma" element={<PublicShellRoute><AlmaEvolution /></PublicShellRoute>} />
       <Route path="/actualites" element={<ContentRoute><News /></ContentRoute>} />
       <Route path="/actualites/inventaire-guardiens-france" element={<PublicShellRoute><ArticleInventaire /></PublicShellRoute>} />
       <Route path="/actualites/:slug" element={<PublicShellRoute><ArticleDetail /></PublicShellRoute>} />
@@ -361,12 +359,12 @@ const AppRoutes = () => {
       <Route path="/petites-missions/:id" element={<SmallMissionDetail />} />
       <Route path="/questions" element={<Navigate to="/petites-missions?tab=questions" replace />} />
       <Route path="/questions/nouvelle" element={<ProtectedRoute><AppLayout><QuestionCreate /></AppLayout></ProtectedRoute>} />
-      <Route path="/questions/:id" element={<ContentRoute><QuestionDetail /></ContentRoute>} />
+      <Route path="/questions/:id" element={<PublicShellRoute><QuestionDetail /></PublicShellRoute>} />
       <Route path="/actualites/gardes-longue-duree-guide" element={<Navigate to="/actualites" replace />} />
       <Route path="/profil/:id" element={<RedirectProfil />} />
       <Route path="/proprietaires/:id" element={<RedirectProprietaire />} />
       <Route path="/annonces" element={<PublicListings />}/>
-      <Route path="/annonces/international" element={<ContentRoute><InternationalListings /></ContentRoute>} />
+      <Route path="/annonces/international" element={<PublicShellRoute><InternationalListings /></PublicShellRoute>} />
       <Route path="/annonces/demo/:slug" element={<DemoSitDetail />} />
       <Route path="/annonces/:id" element={<PublicSitDetail />} />
       <Route path="/gardiens/:id" element={<PublicSitterProfile />} />
@@ -375,9 +373,9 @@ const AppRoutes = () => {
       <Route path="/onboarding/affinity" element={<ProtectedRoute><OnboardingAffinity /></ProtectedRoute>} />
       <Route path="/pros/mon-espace" element={<AppLayout><MyProProfile /></AppLayout>} />
 
-      <Route path="/pros/categorie/:catSlug" element={<ContentRoute><ProCategoryListing /></ContentRoute>} />
-      <Route path="/pros/categorie/:catSlug/:villeSlug" element={<ContentRoute><ProCategoryListing /></ContentRoute>} />
-      <Route path="/pros/:slug" element={<ContentRoute><ProDetail /></ContentRoute>} />
+      <Route path="/pros/categorie/:catSlug" element={<PublicShellRoute><ProCategoryListing /></PublicShellRoute>} />
+      <Route path="/pros/categorie/:catSlug/:villeSlug" element={<PublicShellRoute><ProCategoryListing /></PublicShellRoute>} />
+      <Route path="/pros/:slug" element={<PublicShellRoute><ProDetail /></PublicShellRoute>} />
       <Route element={<AdminLayout />}>
         <Route path="/admin/seo-debug" element={<SeoDebug />} />
         <Route path="/admin/build-info" element={<BuildInfo />} />
@@ -433,9 +431,9 @@ const AppRoutes = () => {
       {/* App routes */}
       <Route path="/dashboard" element={<DashboardRouteShell />} />
       {/* /search et /recherche-gardiens sont publics (consultables sans connexion, vague 40) */}
-      <Route path="/search" element={<ContentRoute><SearchPage /></ContentRoute>} />
-      <Route path="/recherche" element={<ContentRoute><SearchPage /></ContentRoute>} />
-      <Route path="/recherche-gardiens" element={<ContentRoute><SearchOwner /></ContentRoute>} />
+      <Route path="/search" element={<PublicShellRoute><SearchPage /></PublicShellRoute>} />
+      <Route path="/recherche" element={<PublicShellRoute><SearchPage /></PublicShellRoute>} />
+      <Route path="/recherche-gardiens" element={<PublicShellRoute><SearchOwner /></PublicShellRoute>} />
       <Route element={<ProtectedRoute><AppLayout /></ProtectedRoute>}>
         <Route path="/profile" element={<Profile />} />
 
