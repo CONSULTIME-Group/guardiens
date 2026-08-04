@@ -58,8 +58,33 @@ Deno.serve(async (req) => {
       .order('detected_at', { ascending: false })
     if (error) throw error
 
+    // Quatrième cas : vérification d'absence. Si check_content_quality n'a pas
+    // tourné depuis plus de 8 jours (une semaine plus un jour de marge), aucun
+    // signal ne peut le dire, seule l'absence de trace le révèle.
+    const { data: runRows, error: runErr } = await admin
+      .from('cron_run_log')
+      .select('started_at, finished_at, status, error_message')
+      .eq('edge_name', 'check-content-quality')
+      .order('started_at', { ascending: false })
+      .limit(1)
+    if (runErr) throw runErr
+
+    const lastRun = runRows?.[0] ?? null
+    const lastRunAt = lastRun?.finished_at ?? lastRun?.started_at ?? null
+    const joursDepuisRun = lastRunAt
+      ? Math.floor((Date.now() - new Date(lastRunAt).getTime()) / 86_400_000)
+      : null
+    const controleArrete = joursDepuisRun === null || joursDepuisRun > 8
+    const derniereExecution = lastRunAt
+      ? new Date(lastRunAt).toLocaleDateString('fr-FR', { timeZone: 'Europe/Paris' })
+      : null
+    const runEnErreur = lastRun?.status === 'error'
+    const runErreurMessage = runEnErreur
+      ? String(lastRun?.error_message ?? 'erreur sans message')
+      : undefined
+
     const signals = (data ?? []) as Signal[]
-    if (signals.length === 0) {
+    if (signals.length === 0 && !controleArrete && !runEnErreur) {
       return new Response(JSON.stringify({ ok: true, sent: false, reason: 'no_content_signal' }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       })
@@ -92,6 +117,11 @@ Deno.serve(async (req) => {
       detecteurCasse: Boolean(broken),
       derive: Boolean(drift),
       cibles,
+      controleArrete,
+      joursDepuisRun,
+      derniereExecution,
+      runEnErreur,
+      runErreurMessage,
     }
 
     if (dryRun) {
@@ -99,6 +129,7 @@ Deno.serve(async (req) => {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       })
     }
+
 
     const day = new Date().toISOString().slice(0, 10)
     const res = await fetch(`${SUPABASE_URL}/functions/v1/send-transactional-email`, {
