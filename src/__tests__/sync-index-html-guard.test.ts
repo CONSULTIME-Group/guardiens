@@ -13,12 +13,34 @@ import { resolve } from "node:path";
  */
 describe("sync-index-html — garde-fou SEO", () => {
   const ROUTES_PATH = resolve(process.cwd(), "src/data/siteRoutes.ts");
+  const INDEX_PATH = resolve(process.cwd(), "index.html");
   const SCRIPT = resolve(process.cwd(), "scripts/sync-index-html.mjs");
 
   it("passe en --check quand siteRoutes.ts est conforme", () => {
     const out = execSync(`node ${SCRIPT} --check`, { encoding: "utf8" });
     expect(out).toMatch(/synchronisé/);
   });
+
+  it("contrôle la meta description principale de index.html", () => {
+    const original = readFileSync(INDEX_PATH, "utf8");
+    const patched = original.replace(
+      /(<meta\s+name=["']description["']\s+content=["'])(.*?)(["']\s*\/>)/i,
+      "$1Description incohérente$3",
+    );
+    expect(patched).not.toBe(original);
+
+    let exitCode = 0;
+    try {
+      writeFileSync(INDEX_PATH, patched, "utf8");
+      execSync(`node ${SCRIPT} --check`, { encoding: "utf8", stdio: "pipe" });
+    } catch (err: any) {
+      exitCode = err.status ?? 0;
+    } finally {
+      writeFileSync(INDEX_PATH, original, "utf8");
+    }
+
+    expect(exitCode, `Le contrôle aurait dû détecter la divergence, reçu ${exitCode}`).toBe(1);
+  }, 30000);
 
   it("bloque (exit 3) si vocabulaire proscrit injecté dans la route /", () => {
     const original = readFileSync(ROUTES_PATH, "utf8");

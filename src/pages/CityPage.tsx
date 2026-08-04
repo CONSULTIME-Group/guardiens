@@ -215,7 +215,7 @@ const CityPage = () => {
  <div className="flex flex-wrap gap-3 mb-8">
  <Badge variant="secondary" className="text-sm px-4 py-2 gap-2">
  <ShieldCheck className="h-4 w-4" />
- Vérification d'identité manuelle
+ Vérification d'identité
  </Badge>
  <Badge variant="outline" className="text-sm px-4 py-2 gap-2">
  <Heart className="h-4 w-4" />
@@ -293,7 +293,7 @@ const CityPage = () => {
  <Siren className="h-6 w-6 text-primary" />
  <h3 className="font-semibold text-foreground">Filet de sécurité local</h3>
  <p className="text-sm text-muted-foreground">
- Des <Link to="/gardien-urgence" className="text-primary hover:underline">gardiens d'urgence</Link> à {cityData.name}, mobilisables en quelques heures en cas d'imprévu.
+ Une alerte prioritaire peut être envoyée aux <Link to="/gardien-urgence" className="text-primary hover:underline">gardiens d'urgence</Link> éligibles à {cityData.name} en cas d'imprévu.
  </p>
  </div>
  </div>

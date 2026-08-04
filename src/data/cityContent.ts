@@ -216,7 +216,7 @@ Lyon se compose de neuf arrondissements et d'une ceinture de communes limitrophe
 
 **Vous rencontrez votre gardien avant de lui confier vos clés.** C'est un principe fondamental de Guardiens : pas de garde sans rencontre préalable. Un café dans votre quartier, une visite de votre logement, une promenade avec votre chien. Vous évaluez le contact humain, votre animal aussi.
 
-**Aucune commission sur les gardes.** Guardiens ne prélève aucun pourcentage sur les gardes. Le modèle repose sur l'abonnement des gardiens, [consultez les tarifs détaillés](/tarifs). Pour les propriétaires, tout est sans frais.
+**Aucune commission sur les gardes.** Guardiens ne prélève aucun pourcentage sur les gardes. Guardiens reste gratuit tant que nous ne sommes pas satisfaits du service que nous vous offrons. Vous avez accès à tout, sans limite, sans engagement. Vous serez prévenu à l'avance quand cela changera.
 
 **Un accord de garde clair.** Un document optionnel formalise les engagements de chaque partie : dates, responsabilités, contacts d'urgence. Jamais contraignant, toujours rassurant.
 
@@ -235,7 +235,7 @@ Lyon se compose de neuf arrondissements et d'une ceinture de communes limitrophe
 
 **Étudiants**, pour les gardes courtes, les week-ends ou les ponts. Leur disponibilité et leur énergie conviennent parfaitement aux chiens actifs qui ont besoin de longues promenades.
 
-Tous passent par le même processus de vérification : identité contrôlée, profil détaillé, rencontre physique avec le propriétaire avant chaque garde.`,
+**Vérification d'identité ouverte à tous.** La pièce envoyée est analysée automatiquement, et les dossiers qui ne passent pas ce premier contrôle sont revus par l'équipe. Les profils validés affichent l'écusson « Identité vérifiée ». Consultez aussi le profil détaillé et organisez une rencontre physique avant chaque garde.`,
  },
  {
  id: "tarifs",
@@ -246,7 +246,7 @@ Tous passent par le même processus de vérification : identité contrôlée, pr
 
 **Gardiens est gratuit aujourd'hui**, sans engagement, pour les propriétaires comme pour les gardiens. Vous serez prévenu à l'avance en cas d'évolution tarifaire. [Consultez le détail des formules sur la page tarifs](/tarifs).
 
-**Aucune commission par garde.** Contrairement aux plateformes qui prélèvent 15 à 20 pour cent sur chaque transaction, Guardiens ne touche rien sur les gardes elles-mêmes. Le gardien paie son abonnement, le propriétaire ne paie rien. C'est tout.`,
+**Aucune commission par garde.** Guardiens ne touche rien sur les gardes elles-mêmes. Guardiens reste gratuit tant que nous ne sommes pas satisfaits du service que nous vous offrons. Vous avez accès à tout, sans limite, sans engagement. Vous serez prévenu à l'avance quand cela changera.`,
  },
  {
  id: "histoire",
