@@ -348,16 +348,21 @@ const ParrainageRoute = () => {
       </AppLayout>
     );
   }
-  return <Parrainage />;
+  return (
+    <main id="main-content">
+      <Parrainage />
+    </main>
+  );
 };
 
 // Routes de contenu (ressources, SEO) : coquille AppLayout pour les
-// utilisateurs connectés, page publique inchangée pour les visiteurs.
+// utilisateurs connectés, repère principal neutre pour les visiteurs
+// (les pages rendent elles-mêmes leur PublicHeader/PublicFooter).
 const ContentRoute = ({ children }: { children: React.ReactNode }) => {
   const shell = useShellMode();
   if (shell === "pending") return <ShellPending />;
   if (shell === "app") return <AppLayout>{children}</AppLayout>;
-  return <>{children}</>;
+  return <main id="main-content">{children}</main>;
 };
 
 // Coquille publique complète (PublicHeader + PublicFooter) pour les visiteurs
