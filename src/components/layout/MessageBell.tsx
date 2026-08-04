@@ -26,7 +26,12 @@ interface ThreadPreview {
  *
  * Le sitter sans abonnement voit une version cadenassée (gate premium).
  */
-const MessageBell = () => {
+interface MessageBellProps {
+  /** Remonte le nombre de non-lus au parent (pastille de synthèse). */
+  onUnreadChange?: (count: number) => void;
+}
+
+const MessageBell = ({ onUnreadChange }: MessageBellProps = {}) => {
   const { user, activeRole } = useAuth();
   const { hasAccess } = useSubscriptionAccess();
   const userId = user?.id;
