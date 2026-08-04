@@ -18,6 +18,8 @@ import VerifiedBadge from "@/components/profile/VerifiedBadge";
 import EmergencyBadge from "@/components/profile/EmergencyBadge";
 import TrustHaloAvatar from "@/components/sitters/TrustHaloAvatar";
 import ProAvatarBadge from "@/components/badges/ProAvatarBadge";
+import ProBadge from "@/components/badges/ProBadge";
+import { specialtyLabel } from "@/lib/proSpecialties";
 import OwnerToSitterAffinity from "@/components/matching/OwnerToSitterAffinity";
 import { computeAffinityResultFull, type AffinitySitterInput, type AffinityOwnerInput } from "@/lib/affinityScore";
 import { useViewerOwnerForAffinity } from "@/hooks/useViewerOwnerForAffinity";
@@ -106,7 +108,7 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, prope
     // NOTE: `last_name` n'est pas exposé par public_profiles, on l'omet (non consommé en aval).
     const { data: sitterProfs } = await supabase
       .from("public_profiles")
-      .select("id, first_name, city, avatar_url, bio, identity_verified, completed_sits_count, is_founder, pro_status")
+      .select("id, first_name, city, avatar_url, bio, identity_verified, completed_sits_count, is_founder, pro_status, pro_specialty, pro_business_name")
       .in("id", sitterIds);
     const sitterProfMap = new Map<string, any>();
     (sitterProfs ?? []).forEach((p: any) => sitterProfMap.set(p.id, p));
@@ -637,11 +639,20 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, prope
                 {sitter?.first_name || "Gardien"}
               </Link>
               {sitter?.identity_verified && <VerifiedBadge size="sm" />}
+              <ProBadge status={sitter?.pro_status} size="sm" />
               {app.isEmergencySitter && <EmergencyBadge size="sm" showTooltip />}
               {receivedLabel && (
                 <span className="text-xs text-muted-foreground font-normal">· {receivedLabel}</span>
               )}
             </div>
+            {(sitter?.pro_status === "declared" || sitter?.pro_status === "verified") &&
+              (specialtyLabel(sitter?.pro_specialty) || sitter?.pro_business_name) && (
+                <p className="text-sm text-muted-foreground mt-0.5">
+                  Professionnel : {[specialtyLabel(sitter?.pro_specialty), sitter?.pro_business_name]
+                    .filter(Boolean)
+                    .join(", ")}
+                </p>
+              )}
             <div className="flex items-center gap-3 text-sm text-muted-foreground flex-wrap mt-0.5">
               {sitter?.city && (
                 <span className="inline-flex items-center gap-1">
