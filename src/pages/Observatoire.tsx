@@ -70,7 +70,7 @@ const KEY_STATS: Stat[] = [
  {
  label: "Hubs de proximité",
  value: "4",
- detail: "Lyon, Annecy, Grenoble, Chambéry : zones où le maillage de gardiens est le plus dense. Couverture France entière pour le reste.",
+ detail: "Lyon, Annecy, Grenoble, Chambéry : les zones où la densité de gardiens est la plus forte. La couverture, elle, s'étend à l'ensemble du territoire (voir la section de données ci-dessous).",
  },
 ];
 
