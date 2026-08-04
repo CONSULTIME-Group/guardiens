@@ -268,7 +268,7 @@ Après avoir accepté une candidature, vous organisez une rencontre directement 
 **Que se passe-t-il en cas d'urgence ou d'imprévu ?**
 Une alerte prioritaire peut être envoyée aux [gardiens d'urgence à Lyon](/gardien-urgence) qui remplissent les critères. En cas de problème vétérinaire, le gardien contacte la clinique indiquée dans le guide de la maison. En cas de problème technique (fuite, panne), il suit les consignes laissées par le propriétaire.
 
-**Comment sont vérifiés les gardiens à Lyon ?**
+**Comment fonctionne la vérification d'identité à Lyon ?**
 La vérification d'identité est ouverte à tous les membres : la pièce envoyée est analysée automatiquement, les dossiers qui ne passent pas sont revus par l'équipe, et les profils validés affichent l'écusson « Identité vérifiée ». Les avis croisés après chaque garde et les badges de fiabilité complètent le dispositif de confiance. [En savoir plus dans la FAQ](/faq#confiance-securite).
 
 **Puis-je publier une annonce pour un chien ET un chat ?**
