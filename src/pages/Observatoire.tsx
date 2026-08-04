@@ -139,7 +139,7 @@ const Observatoire = () => {
  </p>
  </header>
 
- <section className="max-w-5xl mx-auto px-4 pb-12">
+ <section id="datapoints" className="max-w-5xl mx-auto px-4 pb-12 scroll-mt-24">
  <h2 className="font-serif text-2xl font-semibold text-foreground mb-6">
  Volumes et activité
  </h2>
