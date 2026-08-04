@@ -269,7 +269,7 @@
     },
     "pros": {
       "title": "Veterinarios, peluqueros, educadores, verificados Guardiens",
-      "subtitle": "Un directorio local de profesionales para animales. Verificación SIRET manual por nuestro equipo para quienes muestran la insignia.",
+      "subtitle": "Un directorio local de profesionales para animales. Los justificantes SIRET se analizan automáticamente y los expedientes que no superan este primer control son revisados por el equipo. La insignia indica un SIRET validado.",
       "card1": {
         "title": "Veterinarios",
         "cta": "Encontrar un veterinario cerca"
@@ -794,7 +794,7 @@
     "my_space": "Mi espacio pro",
     "sitter_box_title": "¿Es cuidador particular registrado como autónomo?",
     "sitter_box_body_before": "Este directorio incluye profesionales animales (veterinarios, educadores, peluqueros…) que no necesariamente cuidan. Si ofrece cuidados remunerados profesionalmente, solicite la insignia ",
-    "sitter_box_badge": "Cuidador Pro verificado",
+    "sitter_box_badge": "SIRET validado",
     "sitter_box_body_after": " desde ",
     "sitter_box_link": "Ajustes > Seguridad > Cuidador Pro",
     "sitter_box_body_end": ". Aparecerá en su perfil y en la búsqueda de cuidadores.",

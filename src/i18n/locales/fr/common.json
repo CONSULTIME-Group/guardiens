@@ -274,7 +274,7 @@
     },
     "pros": {
       "title": "Vétérinaires, toiletteurs, éducateurs, vérifiés Guardiens",
-      "subtitle": "Un annuaire local de professionnels animaliers. Vérification SIRET manuelle par notre équipe pour ceux qui affichent le badge.",
+      "subtitle": "Un annuaire local de professionnels animaliers. Les justificatifs SIRET sont analysés automatiquement, et les dossiers qui ne passent pas ce premier contrôle sont revus par l'équipe. Le badge signale un SIRET validé.",
       "card1": {
         "title": "Vétérinaires",
         "cta": "Trouver un véto près de chez moi"
@@ -805,7 +805,7 @@
     "my_space": "Mon espace pro",
     "sitter_box_title": "Vous êtes gardien particulier déclaré en auto-entreprise ?",
     "sitter_box_body_before": "Cet annuaire référence des pros animaliers (vétérinaires, éducateurs, toiletteurs…) qui n'assurent pas forcément de garde. Si vous proposez des gardes rémunérées à titre professionnel, demandez plutôt le badge ",
-    "sitter_box_badge": "Gardien Pro vérifié",
+    "sitter_box_badge": "SIRET validé",
     "sitter_box_body_after": " depuis ",
     "sitter_box_link": "Paramètres > Sécurité > Gardien Pro",
     "sitter_box_body_end": ". Il s'affichera sur votre profil et dans la recherche gardiens.",

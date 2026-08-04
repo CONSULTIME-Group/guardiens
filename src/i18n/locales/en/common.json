@@ -269,7 +269,7 @@
     },
     "pros": {
       "title": "Vets, groomers, trainers, verified by Guardiens",
-      "subtitle": "A local directory of pet professionals. Manual SIRET verification by our team for those who display the badge.",
+      "subtitle": "A local directory of pet professionals. SIRET documents are analysed automatically, and files that do not pass this first check are reviewed by the team. The badge indicates a validated SIRET.",
       "card1": {
         "title": "Vets",
         "cta": "Find a vet near me"
@@ -794,7 +794,7 @@
     "my_space": "My pro space",
     "sitter_box_title": "Are you a private sitter registered as self-employed?",
     "sitter_box_body_before": "This directory lists pet pros (vets, trainers, groomers…) who don't necessarily offer sitting. If you offer paid sits professionally, request the ",
-    "sitter_box_badge": "Verified Pro Sitter",
+    "sitter_box_badge": "Validated SIRET",
     "sitter_box_body_after": " badge from ",
     "sitter_box_link": "Settings > Security > Pro Sitter",
     "sitter_box_body_end": ". It will show on your profile and in sitter search.",
