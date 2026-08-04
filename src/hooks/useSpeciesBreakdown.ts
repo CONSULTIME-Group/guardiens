@@ -1,23 +1,35 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
-export interface SpeciesRow {
-  espece: string;
+export interface BreakdownRow {
+  cle: string;
   nombre: number;
   part_pourcent: number;
 }
 
 export interface SpeciesBreakdown {
-  total_animaux_declares: number;
   total_membres: number;
-  par_espece: SpeciesRow[];
+  departements_couverts: number;
+  total_animaux: number;
+  total_logements: number;
+  par_espece: BreakdownRow[];
+  par_autonomie: BreakdownRow[];
+  par_niveau_activite: BreakdownRow[];
+  par_type_logement: BreakdownRow[];
+  par_environnement: BreakdownRow[];
   calcule_le: string | null;
 }
 
 const EMPTY: SpeciesBreakdown = {
-  total_animaux_declares: 0,
   total_membres: 0,
+  departements_couverts: 0,
+  total_animaux: 0,
+  total_logements: 0,
   par_espece: [],
+  par_autonomie: [],
+  par_niveau_activite: [],
+  par_type_logement: [],
+  par_environnement: [],
   calcule_le: null,
 };
 

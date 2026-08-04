@@ -6,7 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
 import { useInventaireCounts } from "@/hooks/useInventaireCounts";
-import { useSpeciesBreakdown } from "@/hooks/useSpeciesBreakdown";
+import { useSpeciesBreakdown, type BreakdownRow } from "@/hooks/useSpeciesBreakdown";
 
 
 /**
@@ -70,7 +70,7 @@ const KEY_STATS: Stat[] = [
  {
  label: "Hubs de proximité",
  value: "4",
- detail: "Lyon, Annecy, Grenoble, Chambéry : zones où le maillage de gardiens est le plus dense. Couverture France entière pour le reste.",
+ detail: "Lyon, Annecy, Grenoble, Chambéry : les zones où la densité de gardiens est la plus forte. La couverture, elle, s'étend à l'ensemble du territoire (voir la section de données ci-dessous).",
  },
 ];
 
@@ -88,11 +88,80 @@ const SPECIES_LABELS: Record<string, string> = {
   reptile: "Reptiles",
 };
 
+const AUTONOMY_LABELS: Record<string, string> = {
+  all_day: "Toute la journée",
+  "6h": "Jusqu'à six heures",
+  "2h": "Deux heures maximum",
+  never: "Jamais seul",
+};
+
+const ACTIVITY_LABELS: Record<string, string> = {
+  calm: "Calme",
+  moderate: "Modéré",
+  sportive: "Sportif",
+};
+
+const HOUSING_LABELS: Record<string, string> = {
+  house: "Maison",
+  apartment: "Appartement",
+  farm: "Ferme",
+  other: "Autre",
+};
+
+const ENVIRONMENT_LABELS: Record<string, string> = {
+  countryside: "Campagne",
+  city_center: "Centre-ville",
+  suburban: "Périurbain",
+  seaside: "Bord de mer",
+  mountain: "Montagne",
+  forest: "Forêt",
+};
+
 const formatFrDate = (iso: string) => {
   const d = new Date(iso);
   if (Number.isNaN(d.getTime())) return iso;
   return d.toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" });
 };
+
+const formatPct = (n: number) =>
+  new Intl.NumberFormat("fr-FR", { maximumFractionDigits: 1 }).format(n || 0);
+
+const BreakdownList = ({
+  title,
+  rows,
+  labels,
+}: {
+  title: string;
+  rows: BreakdownRow[];
+  labels: Record<string, string>;
+}) => {
+  if (!rows?.length) return null;
+  return (
+    <div>
+      <h3 className="font-serif text-lg font-semibold text-foreground mb-4">{title}</h3>
+      <ul className="space-y-3">
+        {rows.map((row) => (
+          <li key={row.cle}>
+            <div className="flex items-baseline justify-between gap-3 text-sm">
+              <span className="font-medium text-foreground">{labels[row.cle] ?? row.cle}</span>
+              <span className="text-muted-foreground tabular-nums">
+                {new Intl.NumberFormat("fr-FR").format(row.nombre)} ({formatPct(row.part_pourcent)} %)
+              </span>
+            </div>
+            <div className="mt-1 h-1.5 rounded-full bg-muted overflow-hidden">
+              <div
+                className="h-full rounded-full bg-primary"
+                style={{ width: `${Math.min(100, Math.max(0, row.part_pourcent || 0))}%` }}
+              />
+            </div>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+};
+
+
 
 const Observatoire = () => {
   const { data: counts } = useInventaireCounts();
@@ -104,8 +173,15 @@ const Observatoire = () => {
  "@type": "Dataset",
  name: "Observatoire de la garde d'animaux à domicile en France, Guardiens",
  description:
- "Chiffres-clés sur la garde d'animaux à domicile (house-sitting, pet-sitting) en France : volumes, modèle économique, dispositif de confiance. Données issues de la plateforme Guardiens et de l'expérience des fondateurs (2021-2026).",
+ "Chiffres-clés sur la garde d'animaux à domicile (house-sitting, pet-sitting) en France : volumes, modèle économique, dispositif de confiance. Le jeu de données décrit également les membres de la plateforme Guardiens, leurs animaux (espèces, autonomie, niveau d'activité) et leurs logements (type, environnement), ainsi que l'expérience des fondateurs (2021-2026).",
  url: PAGE_URL,
+ variableMeasured: [
+ "Répartition des animaux par espèce",
+ "Répartition des animaux par durée de solitude supportée",
+ "Répartition des animaux par niveau d'activité",
+ "Répartition des logements par type",
+ "Répartition des logements par environnement",
+ ],
  keywords: [
  "garde d'animaux à domicile",
  "house-sitting France",
@@ -206,32 +282,40 @@ const Observatoire = () => {
 
  <section className="max-w-5xl mx-auto px-4 py-12 border-t border-border">
    <h2 className="font-serif text-2xl font-semibold text-foreground mb-2">
-     Quels animaux sont confiés sur Guardiens ?
+     Que disent les profils de nos membres ?
    </h2>
    <p className="text-muted-foreground mb-6 max-w-3xl leading-relaxed">
-     Ces chiffres portent sur les animaux déclarés par les membres sur leur profil, pas sur les animaux effectivement gardés. Ils décrivent qui cherche une solution de garde, pas qui en a déjà bénéficié. Compteur recalculé à chaque visite.
+     Ces chiffres viennent des profils créés sur Guardiens et se recalculent à chaque visite. Ils décrivent nos membres, leurs animaux et leurs logements, pas les gardes réalisées.
    </p>
-   <div className="grid gap-4 sm:grid-cols-2 mb-6">
-     <Card><CardContent className="p-5"><p className="text-3xl font-bold text-primary leading-none mb-2">{fmt(species?.total_animaux_declares || 0)}</p><p className="text-sm font-semibold text-foreground mb-1">Animaux déclarés</p><p className="text-xs text-muted-foreground">Renseignés par les membres sur leur profil.</p></CardContent></Card>
-     <Card><CardContent className="p-5"><p className="text-3xl font-bold text-primary leading-none mb-2">{fmt(species?.total_membres || 0)}</p><p className="text-sm font-semibold text-foreground mb-1">Membres inscrits</p><p className="text-xs text-muted-foreground">Propriétaires et gardiens confondus.</p></CardContent></Card>
-   </div>
-   <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-     {(species?.par_espece ?? []).map((row) => (
-       <Card key={row.espece}>
-         <CardContent className="p-5">
-           <p className="text-3xl font-bold text-primary leading-none mb-2">{fmt(row.nombre)}</p>
-           <p className="text-sm font-semibold text-foreground mb-1">{SPECIES_LABELS[row.espece] ?? row.espece}</p>
-           <p className="text-xs text-muted-foreground">{new Intl.NumberFormat("fr-FR", { maximumFractionDigits: 1 }).format(row.part_pourcent)} % des animaux déclarés.</p>
-         </CardContent>
-       </Card>
-     ))}
-   </div>
-   {species?.calcule_le ? (
-     <p className="mt-5 text-sm text-muted-foreground">
-       Calculé le {formatFrDate(species.calcule_le)}.
-     </p>
-   ) : null}
+
+   {!species ? (
+     <p className="text-sm text-muted-foreground">Chargement des données en cours.</p>
+   ) : (
+     <>
+       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 mb-10">
+         <Card><CardContent className="p-5"><p className="text-3xl font-bold text-primary leading-none mb-2">{fmt(species.total_membres)}</p><p className="text-sm font-semibold text-foreground mb-1">Membres inscrits</p><p className="text-xs text-muted-foreground">Propriétaires et gardiens confondus.</p></CardContent></Card>
+         <Card><CardContent className="p-5"><p className="text-3xl font-bold text-primary leading-none mb-2">{fmt(species.departements_couverts)}</p><p className="text-sm font-semibold text-foreground mb-1">Départements couverts</p><p className="text-xs text-muted-foreground">Départements où au moins un membre est inscrit.</p></CardContent></Card>
+         <Card><CardContent className="p-5"><p className="text-3xl font-bold text-primary leading-none mb-2">{fmt(species.total_animaux)}</p><p className="text-sm font-semibold text-foreground mb-1">Animaux déclarés</p><p className="text-xs text-muted-foreground">Renseignés par les membres sur leur profil.</p></CardContent></Card>
+         <Card><CardContent className="p-5"><p className="text-3xl font-bold text-primary leading-none mb-2">{fmt(species.total_logements)}</p><p className="text-sm font-semibold text-foreground mb-1">Logements référencés</p><p className="text-xs text-muted-foreground">Logements décrits par les membres.</p></CardContent></Card>
+       </div>
+
+       <div className="grid gap-10 md:grid-cols-2">
+         <BreakdownList title="Quelles espèces vivent chez nos membres ?" rows={species.par_espece} labels={SPECIES_LABELS} />
+         <BreakdownList title="Combien de temps ces animaux peuvent-ils rester seuls ?" rows={species.par_autonomie} labels={AUTONOMY_LABELS} />
+         <BreakdownList title="Quel est leur niveau d'activité ?" rows={species.par_niveau_activite} labels={ACTIVITY_LABELS} />
+         <BreakdownList title="Dans quels logements vivent-ils ?" rows={species.par_type_logement} labels={HOUSING_LABELS} />
+         <BreakdownList title="Dans quel environnement ?" rows={species.par_environnement} labels={ENVIRONMENT_LABELS} />
+       </div>
+
+       {species.calcule_le ? (
+         <p className="mt-8 text-sm text-muted-foreground">
+           Calculé le {formatFrDate(species.calcule_le)}.
+         </p>
+       ) : null}
+     </>
+   )}
  </section>
+
 
 
  <section className="max-w-4xl mx-auto px-4 py-12 border-t border-border">
