@@ -1217,6 +1217,8 @@ export default function PublicSitterProfile() {
             }
             hasAvatarLightbox={lightboxItems.length > 0}
             proStatus={(profile as any)?.pro_status ?? null}
+            proSpecialty={(profile as any)?.pro_specialty ?? null}
+            proBusinessName={(profile as any)?.pro_business_name ?? null}
             proTagline={(profile as any)?.pro_tagline ?? null}
             proPricingNote={(profile as any)?.pro_pricing_note ?? null}
             isAvailable={isAvailable}
