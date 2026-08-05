@@ -183,7 +183,8 @@ Deno.serve(async (req) => {
         }
 
         // 2d. Anti-spam : déjà envoyé dans les 24h ?
-        if (!body.manual) {
+        // Le passage de rattrapage saute ce contrôle, par décision explicite.
+        if (!body.manual && !body.catchup) {
           const since = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()
           const { data: recent } = await supabase
             .from('email_send_log')
@@ -286,9 +287,13 @@ Deno.serve(async (req) => {
 
         plan.push({
           sitter_id: sitterId,
+          recipient_email: email,
+          sitter_first_name: profile.first_name ?? null,
+          subject: buildSubject(items.length, !!body.catchup),
           sits: items.map(i => i.sitId),
+          sit_titles: items.map(i => i.sitTitle),
           skipped: overflow.map(o => o.sit_id),
-        })
+        } as any)
 
         if (body.dry_run) {
           continue
@@ -298,7 +303,7 @@ Deno.serve(async (req) => {
         // ici, une fois le contenu établi et le gardien éligible. En cas de
         // refus, les lignes restent `queued` pour un passage ultérieur. Le
         // mode manuel (action admin délibérée) n'est pas soumis à la garde.
-        if (!body.manual) {
+        if (!body.manual && !body.catchup) {
           const claim = await claimSitNotification(
             supabase,
             sitterId,
@@ -331,9 +336,11 @@ Deno.serve(async (req) => {
         }
 
         // 2g. Envoi digest
-        const idemBase = body.manual
-          ? `sitter-digest-${sitterId}-${Date.now()}`
-          : `sitter-digest-${sitterId}-${today}`
+        const idemBase = body.catchup
+          ? `sitter-digest-catchup-2026-08-05-${sitterId}`
+          : body.manual
+            ? `sitter-digest-${sitterId}-${Date.now()}`
+            : `sitter-digest-${sitterId}-${today}`
 
         const _steRes = await fetch(`${Deno.env.get('SUPABASE_URL')}/functions/v1/send-transactional-email`, {
           method: 'POST',
@@ -345,6 +352,7 @@ Deno.serve(async (req) => {
             templateData: {
               sitterFirstName: profile.first_name ?? undefined,
               items,
+              isCatchup: !!body.catchup,
             },
           }),
         });
