@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { getMemberAvatarUrl, getMemberDisplayName, getMemberInitial } from "@/lib/memberUtils";
 import { supabase } from "@/integrations/supabase/client";
 import StarRating from "./StarRating";
 import { Star, ThumbsUp } from "lucide-react";

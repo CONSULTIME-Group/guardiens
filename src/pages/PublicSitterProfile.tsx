@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import { getMemberAvatarUrl, getMemberDisplayName, getMemberInitial } from "@/lib/memberUtils";
 
 import ProBadge from "@/components/badges/ProBadge";
 import { useParams, Link, useSearchParams, useNavigate } from "react-router-dom";
@@ -188,8 +189,8 @@ export default function PublicSitterProfile() {
   }) => (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
       {(showAll ? reviews : reviews.slice(0, 4)).map((r: any) => {
-        const authorName = capitalize(r.reviewer?.first_name || "Membre");
-        const avatarUrl = r.reviewer?.avatar_url || null;
+        const authorName = capitalize(getMemberDisplayName(r.reviewer, "Membre"));
+        const avatarUrl = getMemberAvatarUrl(r.reviewer);
         const reviewBadges = badgesBySitId && r.sit_id ? (badgesBySitId[r.sit_id] || []) : [];
         return (
           <article key={r.id} className="bg-card border border-border rounded-xl p-4 h-full">
