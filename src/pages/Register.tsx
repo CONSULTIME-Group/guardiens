@@ -684,6 +684,7 @@ const Register = () => {
   >
     <Checkbox
       id="accept-terms"
+      aria-label="J'accepte les conditions générales d'utilisation, les conditions générales de service et la politique de confidentialité"
       checked={acceptedTerms}
       onCheckedChange={(v) => {
         const checked = v === true;
