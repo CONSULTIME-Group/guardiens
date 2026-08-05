@@ -341,7 +341,15 @@ const CreateSmallMission = () => {
         <StepperBar current={step} total={2} />
       )}
 
-      <div className="max-w-2xl mx-auto px-4 py-6 space-y-5 pb-48 md:pb-36">
+      <div
+        className="max-w-2xl mx-auto px-4 py-6 space-y-5 md:pb-36"
+        style={{
+          // Réserve la hauteur cumulée des couches fixes, plus une marge de
+          // confort, pour qu'aucun contrôle ne finisse sous la barre d'action.
+          paddingBottom:
+            "calc(var(--mission-action-bar-h, 4.5rem) + var(--bottom-nav-h, 4rem) + 2rem)",
+        }}
+      >
         <button
           onClick={() => step === 1 ? navigate("/petites-missions") : setStep(1)}
           className="flex items-center gap-1 text-sm text-foreground/60 hover:text-foreground transition-colors -ml-1"
