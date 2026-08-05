@@ -13,7 +13,7 @@
  */
 
 const PHONE_RE = /(?:(?:\+33|0033|0)\s?[1-9](?:[\s.\-]?\d{2}){4})/;
-const EMAIL_RE = /[\w.+-]+\s?(?:@|\(at\)|\[at\]|\sarobase\s)\s?[\w-]+\.[\w.-]+/i;
+const EMAIL_RE = /[\w.+-]+\s?(?:@|\(at\)|\[at\]|\sarobase\s|\sat\s)\s?[\w-]+\.[\w.-]+/i;
 const OBFUSCATED_PHONE_RE = /\b0\s?[1-9](?:[\s.\-]*\d){8}\b/;
 
 const DIGIT_WORDS: Record<string, string> = {
