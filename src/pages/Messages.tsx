@@ -90,6 +90,9 @@ const Messages = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [activeConv, setActiveConv] = useState<Conversation | null>(null);
+  // Fil ouvert sur mobile : la barre basse et son bouton flottant recouvriraient
+  // le champ de saisie, on les retire tant que la conversation est affichée.
+  useHideBottomNav(isMobile && !!activeConv);
   const convListRef = useRef<HTMLDivElement | null>(null);
   const savedScrollRef = useRef<number>(0);
   const [messages, setMessages] = useState<Message[]>([]);
