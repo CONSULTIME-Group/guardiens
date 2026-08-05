@@ -160,6 +160,11 @@ export const template = {
   subject: (data: Record<string, any>) => {
     const n = Array.isArray(data?.items) ? data.items.length : 0
     if (n === 0) return 'Votre digest Guardiens'
+    if (data?.isCatchup) {
+      return n === 1
+        ? 'Rappel, une annonce publiée ces derniers jours vous correspond'
+        : `Rappel, ${n} annonces publiées ces derniers jours vous correspondent`
+    }
     return n === 1
       ? 'Une annonce qui vous correspond aujourd\'hui'
       : `${n} annonces qui vous correspondent aujourd'hui`
