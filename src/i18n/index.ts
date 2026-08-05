@@ -35,15 +35,14 @@ void i18n
       de: { common: deCommon },
     },
     detection: {
-      // FR par défaut (marché cible). On respecte un choix explicite
-      // (querystring `?lang=`, cookie, localStorage) mais on n'écoute pas
-      // `navigator` pour éviter qu'un browser en-US bascule tout le site en EN.
-      order: ["querystring", "cookie", "localStorage", "htmlTag"],
-      caches: ["cookie", "localStorage"],
+      // La langue vit dans l'URL, et seulement dans l'URL (`?lang=xx`).
+      // Aucune persistance en cookie ni en localStorage : une URL sans
+      // paramètre sert toujours du français, y compris au crawl. Voir
+      // src/components/LangUrlSync.tsx qui recale le state sur l'URL à
+      // chaque navigation.
+      order: ["querystring"],
+      caches: [],
       lookupQuerystring: "lang",
-      lookupCookie: "lang",
-      lookupLocalStorage: "lang",
-      cookieMinutes: 60 * 24 * 365,
     },
     interpolation: { escapeValue: false },
     react: { useSuspense: false },
