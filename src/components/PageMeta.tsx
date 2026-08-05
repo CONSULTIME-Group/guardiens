@@ -203,7 +203,15 @@ const PageMeta = ({
     // Le titre est écrit impérativement, Helmet n'atteint pas le DOM.
     document.title = fullTitle;
 
-    upsertMetaTag({ attr: "name", key: "robots", content: noindex ? "noindex, follow" : "index, follow" });
+    // `html lang` suit la langue seulement si la page est réellement traduite.
+    document.documentElement.setAttribute("lang", htmlLang);
+
+    upsertMetaTag({
+      attr: "name",
+      key: "robots",
+      content: effectiveNoindex ? "noindex, follow" : "index, follow",
+    });
+
     // Écrase la meta description statique (index.html) qui sinon reste en
     // premier dans le DOM et est lue par les crawlers avant la nôtre.
     upsertMetaTag({ attr: "name", key: "description", content: metaDescription });
