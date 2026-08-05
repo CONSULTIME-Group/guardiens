@@ -237,7 +237,8 @@ const DateSheet = ({
       </div>
     </SheetContent>
   </Sheet>
-);
+  );
+};
 
 /**
  * Une copie locale ne vaut d'être restaurée que si elle porte réellement du
