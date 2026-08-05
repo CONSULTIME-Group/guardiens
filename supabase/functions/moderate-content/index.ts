@@ -113,7 +113,7 @@ Deno.serve(async (req) => {
       const isPublicListing = ct === "sit";
       const rules = isPublicListing
         ? `- status :
-  * "block" si propos haineux/discriminatoires, contenu sexuel, arnaque évidente, tentative explicite de paiement direct hors plateforme, coordonnées personnelles en clair (téléphone, email) : cette annonce est une page publique indexée.
+  * "block" si propos haineux/discriminatoires, contenu sexuel, arnaque évidente, tentative explicite de paiement direct hors plateforme, coordonnées personnelles en clair (téléphone, email), ou contenu de test, fictif ou de recette interne (mentions du type test, recette, ne pas répondre, ignorer cette annonce, texte de remplissage) : cette annonce est une page publique indexée qui déclenche des notifications à des gardiens réels.
   * "warning" si ton trop commercial, vocabulaire à éviter, faute grave de ton.
   * "ok" sinon.`
         : `Contexte : il s'agit d'un message privé entre deux membres, qui organisent une garde réelle. Échanger un numéro de téléphone, un email, une adresse ou un rendez-vous fait partie de l'usage normal et ne constitue jamais un motif de signalement.
