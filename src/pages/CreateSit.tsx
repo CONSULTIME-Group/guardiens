@@ -1127,7 +1127,14 @@ const CreateSit = () => {
     }
     setPublishing(true);
     try {
-      const verdict = await moderateContent("sit", `${title}\n\n${specificExpectations}\n\n${ownerMessage}\n\n${dailyRoutine}`);
+      // Tous les champs texte libres publiés passent la modération, y compris
+      // le titre et les notes de flexibilité.
+      const verdict = await moderateContent(
+        "sit",
+        [title, specificExpectations, ownerMessage, dailyRoutine, flexibleDates ? flexibleNotes : ""]
+          .filter((t) => t && t.trim().length > 0)
+          .join("\n\n"),
+      );
       if (verdict.status === "block") {
         toast({
           variant: "destructive",

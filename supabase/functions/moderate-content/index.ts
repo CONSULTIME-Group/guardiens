@@ -16,6 +16,36 @@ const EMAIL_RE = /[\w.+-]+@[\w-]+\.[\w.-]+/;
 const URL_RE = /\bhttps?:\/\/\S+/i;
 const FORBIDDEN_WORDS = /\b(voisin|voisine|voisins|voisinage)\b/i;
 
+// Contenu de test ou fictif : interdit sur une annonce, qui est une page
+// publique indexée et qui déclenche une notification à des gardiens réels.
+// Détection déterministe, indépendante du LLM, appliquée sur un texte
+// désaccentué et à espaces normalisés (le titre passait au travers).
+const TEST_CONTENT_PATTERNS: RegExp[] = [
+  /\btest(s)?\s+(recette|interne|technique)\b/i,
+  /\brecette\s+interne\b/i,
+  /\bannonce\s+(de\s+)?test\b/i,
+  /\b(ceci|cette annonce)\s+est\s+un\s+test\b/i,
+  /\bne\s+pas\s+repondre\b/i,
+  /\bdo\s+not\s+reply\b/i,
+  /\bnepasrepondre\b/i,
+  /\baucune\s+candidature\s+attendue\b/i,
+  /\bmerci\s+d[e']\s?ignorer\s+cette\s+annonce\b/i,
+  /\blorem\s+ipsum\b/i,
+  /\bdummy\s+(content|text)\b/i,
+];
+
+function normalizeForTestDetection(text: string): string {
+  return text
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/\s+/g, " ");
+}
+
+function looksLikeTestContent(text: string): boolean {
+  const normalized = normalizeForTestDetection(text);
+  return TEST_CONTENT_PATTERNS.some((re) => re.test(normalized));
+}
+
 type Reason = string;
 
 // Doctrine produit : l'échange de coordonnées est AUTORISÉ en messagerie privée
@@ -28,6 +58,10 @@ function heuristics(text: string, contentType: string): { reasons: Reason[]; blo
   if (isPublicListing) {
     if (PHONE_RE.test(text)) { reasons.push("Numéro de téléphone détecté"); block = true; }
     if (EMAIL_RE.test(text)) { reasons.push("Adresse email détectée"); block = true; }
+    if (looksLikeTestContent(text)) {
+      reasons.push("Annonce de test interne, ne doit pas être publiée");
+      block = true;
+    }
   }
   if (URL_RE.test(text)) { reasons.push("Lien externe détecté"); }
   if (FORBIDDEN_WORDS.test(text)) { reasons.push("Vocabulaire à éviter : « voisin »"); }
@@ -79,7 +113,7 @@ Deno.serve(async (req) => {
       const isPublicListing = ct === "sit";
       const rules = isPublicListing
         ? `- status :
-  * "block" si propos haineux/discriminatoires, contenu sexuel, arnaque évidente, tentative explicite de paiement direct hors plateforme, coordonnées personnelles en clair (téléphone, email) : cette annonce est une page publique indexée.
+  * "block" si propos haineux/discriminatoires, contenu sexuel, arnaque évidente, tentative explicite de paiement direct hors plateforme, coordonnées personnelles en clair (téléphone, email), ou contenu de test, fictif ou de recette interne (mentions du type test, recette, ne pas répondre, ignorer cette annonce, texte de remplissage) : cette annonce est une page publique indexée qui déclenche des notifications à des gardiens réels.
   * "warning" si ton trop commercial, vocabulaire à éviter, faute grave de ton.
   * "ok" sinon.`
         : `Contexte : il s'agit d'un message privé entre deux membres, qui organisent une garde réelle. Échanger un numéro de téléphone, un email, une adresse ou un rendez-vous fait partie de l'usage normal et ne constitue jamais un motif de signalement.
