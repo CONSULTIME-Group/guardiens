@@ -83,21 +83,12 @@ Deno.serve(async (req) => {
     let confirmedSits = 0;
     let pendingApplications = 0;
     if (userId) {
-      const [{ count: sitsCount }, { count: appsCount }] = await Promise.all([
-        adminClient
-          .from("sits")
-          .select("id", { count: "exact", head: true })
-          .eq("user_id", userId)
-          .eq("status", "confirmed"),
-        adminClient
-          .from("applications")
-          .select("id", { count: "exact", head: true })
-          .eq("sitter_id", userId)
-          .eq("status", "pending"),
-      ]);
-      confirmedSits = sitsCount ?? 0;
-      pendingApplications = appsCount ?? 0;
+    if (userId) {
+      const commitments = await countActiveCommitments(adminClient, userId);
+      confirmedSits = commitments.sits;
+      pendingApplications = commitments.applications;
     }
+
     const blockers = confirmedSits + pendingApplications;
 
     if (action === "lookup") {
