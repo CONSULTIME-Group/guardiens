@@ -175,6 +175,7 @@ const PageMeta = ({
         link.setAttribute("data-page-meta", "true");
         document.head.appendChild(link);
       });
+      if (hreflangAlternates.length === 0) return;
       // x-default = FR (canonical)
       const xdef = document.createElement("link");
       xdef.setAttribute("rel", "alternate");
@@ -183,6 +184,7 @@ const PageMeta = ({
       xdef.setAttribute("data-page-meta", "true");
       document.head.appendChild(xdef);
     };
+
 
     const upsertJsonLd = (blocks: object[]) => {
       document.head
