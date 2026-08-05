@@ -58,6 +58,10 @@ function heuristics(text: string, contentType: string): { reasons: Reason[]; blo
   if (isPublicListing) {
     if (PHONE_RE.test(text)) { reasons.push("Numéro de téléphone détecté"); block = true; }
     if (EMAIL_RE.test(text)) { reasons.push("Adresse email détectée"); block = true; }
+    if (looksLikeTestContent(text)) {
+      reasons.push("Annonce de test interne, ne doit pas être publiée");
+      block = true;
+    }
   }
   if (URL_RE.test(text)) { reasons.push("Lien externe détecté"); }
   if (FORBIDDEN_WORDS.test(text)) { reasons.push("Vocabulaire à éviter : « voisin »"); }
