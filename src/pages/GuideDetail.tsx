@@ -1,4 +1,5 @@
 import { useParams, Link, useNavigate } from "react-router-dom";
+import NotFound from "@/pages/NotFound";
 import { useTranslation } from "react-i18next";
 import { slugify } from "@/lib/normalize";
 import { useQuery } from "@tanstack/react-query";
@@ -162,13 +163,9 @@ const GuideDetail = () => {
     );
   }
 
+  // Slug de guide inconnu : vraie page 404 en noindex.
   if (!guide) {
-    return (
-      <div className="min-h-screen bg-background flex flex-col items-center justify-center gap-4">
-        <p className="text-muted-foreground">{t("guide_detail.not_found")}</p>
-        <Link to="/guides" className="text-primary hover:underline">{t("guide_detail.back_to_guides")}</Link>
-      </div>
-    );
+    return <NotFound />;
   }
 
   return (

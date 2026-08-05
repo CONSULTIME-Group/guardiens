@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
+import NotFound from "@/pages/NotFound";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
@@ -337,15 +338,9 @@ export default function ArticleDetail() {
  );
  }
 
+ // Slug d'article inconnu : vraie page 404 en noindex.
  if (!article) {
- return (
- <div className="max-w-3xl mx-auto px-4 py-16 text-center">
- <h1 className="text-2xl font-heading font-bold text-foreground mb-4">Article introuvable</h1>
- <Link to="/actualites" className="text-primary hover:underline">
- ← Retour aux guides
- </Link>
- </div>
- );
+ return <NotFound />;
  }
 
  const altText = article.hero_image_alt || generateAltText(article);

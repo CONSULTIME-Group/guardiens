@@ -468,8 +468,9 @@ const CityPage = () => {
  );
  }
 
+ // Slug de ville inconnu : vraie page 404 en noindex, pas de redirection.
  if (!dbPage) {
- return <Navigate to="/" replace />;
+ return <NotFound />;
  }
 
   // Render DB-based page (simplified legacy)
