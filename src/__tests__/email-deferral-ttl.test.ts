@@ -5,6 +5,9 @@ import {
   getDeferralTtlHours,
   decideOverTtl,
   resolveDeferral,
+  decideDeferral,
+  CAP_ALERT_PER_DAY,
+  CAP_ALERT_PER_WEEK,
 } from "../../supabase/functions/_shared/email-cap";
 
 const base = new Date("2026-08-05T09:00:00Z");
