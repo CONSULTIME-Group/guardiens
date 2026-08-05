@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Helmet } from "react-helmet-async";
+import Head from "@/components/seo/Head";
 import { useNavigate, Link, useSearchParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "@/contexts/AuthContext";
@@ -137,10 +137,10 @@ const Login = () => {
 
   return (
     <div className="min-h-screen flex bg-background">
-      <Helmet>
+      <Head>
         <title>{t("login_page.meta_title")}</title>
         <meta name="robots" content="noindex, nofollow" />
-      </Helmet>
+      </Head>
 
       <AuthIllustrationPanel
         title={t("login_page.panel_title")}

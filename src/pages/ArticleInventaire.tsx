@@ -1,4 +1,4 @@
-import { Helmet } from "react-helmet-async";
+import Head from "@/components/seo/Head";
 import { Link } from "react-router-dom";
 import PageMeta from "@/components/PageMeta";
 import PageBreadcrumb from "@/components/seo/PageBreadcrumb";
@@ -138,11 +138,11 @@ export default function ArticleInventaire() {
         publishedAt="2026-07-05"
         author="Jérémie et Elisa"
       />
-      <Helmet>
+      <Head>
         <script type="application/ld+json">{JSON.stringify(articleSchema)}</script>
         <script type="application/ld+json">{JSON.stringify(datasetSchema)}</script>
         <script type="application/ld+json">{JSON.stringify(faqSchema)}</script>
-      </Helmet>
+      </Head>
 
       <div className="min-w-0">
         <PageBreadcrumb

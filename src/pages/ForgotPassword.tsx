@@ -9,7 +9,7 @@ import { useToast } from "@/hooks/use-toast";
 import { getRecoveryRedirectUrl } from "@/lib/authRedirect";
 import { mapAuthError } from "@/lib/authErrorMessages";
 import { ArrowLeft } from "lucide-react";
-import { Helmet } from "react-helmet-async";
+import Head from "@/components/seo/Head";
 import { AuthIllustrationPanel } from "@/components/auth/AuthIllustrationPanel";
 
 const ForgotPassword = () => {
@@ -43,7 +43,7 @@ const ForgotPassword = () => {
 
   return (
     <div className="min-h-screen flex bg-background">
-      <Helmet><meta name="robots" content="noindex, nofollow" /></Helmet>
+      <Head><meta name="robots" content="noindex, nofollow" /></Head>
 
       <AuthIllustrationPanel
         title={t("forgot_password.panel_title")}

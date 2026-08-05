@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
-import { Helmet } from "react-helmet-async";
+import Head from "@/components/seo/Head";
 import PageMeta from "@/components/PageMeta";
 import PageBreadcrumb from "@/components/seo/PageBreadcrumb";
 import { Button } from "@/components/ui/button";
@@ -99,9 +99,9 @@ const QuestionDetail = () => {
         description={question.body.slice(0, 160)}
         path={`/questions/${question.id}`}
       />
-      <Helmet>
+      <Head>
         <script type="application/ld+json">{JSON.stringify(qaPageSchema)}</script>
-      </Helmet>
+      </Head>
 
       <div className="min-h-screen bg-background">
         <PageBreadcrumb

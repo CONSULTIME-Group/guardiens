@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Helmet } from "react-helmet-async";
+import Head from "@/components/seo/Head";
 import { Link, useNavigate } from "react-router-dom";
 import { Loader2, MailCheck, AlertTriangle, RefreshCw } from "lucide-react";
 import { useTranslation } from "react-i18next";
@@ -150,7 +150,7 @@ const AuthConfirm = () => {
   if (error) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background px-6">
-        <Helmet><meta name="robots" content="noindex, nofollow" /></Helmet>
+        <Head><meta name="robots" content="noindex, nofollow" /></Head>
         <div className="w-full max-w-md rounded-3xl border border-border bg-card p-8 text-center shadow-sm">
           <AlertTriangle className="mx-auto mb-4 h-10 w-10 text-destructive" />
           <h1 className="font-heading text-2xl font-semibold text-foreground">{t("auth_confirm.invalid_title")}</h1>
@@ -180,7 +180,7 @@ const AuthConfirm = () => {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-background px-6">
-      <Helmet><meta name="robots" content="noindex, nofollow" /></Helmet>
+      <Head><meta name="robots" content="noindex, nofollow" /></Head>
       <div className="w-full max-w-md rounded-3xl border border-border bg-card p-8 text-center shadow-sm">
         <MailCheck className="mx-auto mb-4 h-10 w-10 text-primary" />
         <h1 className="font-heading text-2xl font-semibold text-foreground">{t("auth_confirm.validating_title")}</h1>

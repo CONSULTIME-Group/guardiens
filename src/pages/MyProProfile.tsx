@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { Helmet } from "react-helmet-async";
+import Head from "@/components/seo/Head";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -210,10 +210,10 @@ export default function MyProProfile() {
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-3xl min-w-0">
-      <Helmet>
+      <Head>
         <title>Mon espace pro | Guardiens</title>
         <meta name="robots" content="noindex" />
-      </Helmet>
+      </Head>
 
       <div className="flex items-start justify-between mb-2 gap-3 flex-wrap">
         <div>

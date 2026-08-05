@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useSubscriptionAccess } from "@/hooks/useSubscriptionAccess";
 import { Bell, CheckCheck } from "lucide-react";
-import { Helmet } from "react-helmet-async";
+import Head from "@/components/seo/Head";
 import { Button } from "@/components/ui/button";
 import { isToday, isYesterday, isThisWeek } from "date-fns";
 import { safeUUID } from "@/lib/uuid";
@@ -116,10 +116,10 @@ const Notifications = () => {
 
   return (
     <div className="relative max-w-2xl mx-auto px-4 pb-24 pt-4 md:px-6 md:pt-8 md:pb-16 animate-fade-in">
-      <Helmet>
+      <Head>
         <title>Notifications</title>
         <meta name="robots" content="noindex, nofollow" />
-      </Helmet>
+      </Head>
 
       {/* En-tête page */}
       <header className="flex items-center gap-3 mb-4 md:mb-6">

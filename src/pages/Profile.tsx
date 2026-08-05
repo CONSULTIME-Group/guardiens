@@ -1,6 +1,6 @@
 import { useAuth } from "@/contexts/AuthContext";
 import { lazy, Suspense } from "react";
-import { Helmet } from "react-helmet-async";
+import Head from "@/components/seo/Head";
 import ProfileSkeleton from "@/components/profile/ProfileSkeleton";
 
 const SitterProfilePage = lazy(() => import("./SitterProfile"));
@@ -11,7 +11,7 @@ const Profile = () => {
 
   return (
     <>
-      <Helmet><meta name="robots" content="noindex, nofollow" /></Helmet>
+      <Head><meta name="robots" content="noindex, nofollow" /></Head>
       <Suspense fallback={<ProfileSkeleton />}>
         {activeRole === "owner" ? <OwnerProfilePage /> : <SitterProfilePage />}
       </Suspense>

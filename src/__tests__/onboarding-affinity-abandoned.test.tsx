@@ -6,7 +6,7 @@
  */
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render } from "@testing-library/react";
-import { HelmetProvider } from "react-helmet-async";
+import { Fragment as HelmetProvider } from "react";
 
 const trackEventMock = vi.fn();
 

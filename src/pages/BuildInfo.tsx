@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Helmet } from "react-helmet-async";
+import Head from "@/components/seo/Head";
 import { BUILD_ID, BUILD_TIME, BUILD_MODE, getCurrentBundleHash } from "@/lib/buildInfo";
 
 /**
@@ -41,10 +41,10 @@ export default function BuildInfo() {
 
   return (
     <main className="container mx-auto max-w-3xl px-4 py-10">
-      <Helmet>
+      <Head>
         <title>Build info, Admin</title>
         <meta name="robots" content="noindex, nofollow" />
-      </Helmet>
+      </Head>
 
       <h1 className="text-2xl font-semibold mb-2">État du build frontend</h1>
       <p className="text-sm text-muted-foreground mb-6">

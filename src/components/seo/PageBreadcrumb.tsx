@@ -1,5 +1,5 @@
 import { Link, useLocation } from "react-router-dom";
-import { Helmet } from "react-helmet-async";
+import Head from "@/components/seo/Head";
 import { useTranslation } from "react-i18next";
 
 export interface BreadcrumbItem {
@@ -58,9 +58,9 @@ const PageBreadcrumb = ({ items }: PageBreadcrumbProps) => {
 
   return (
     <>
-      <Helmet>
+      <Head>
         <script type="application/ld+json">{JSON.stringify(schema)}</script>
-      </Helmet>
+      </Head>
 
       <nav
         aria-label="Fil d'Ariane"

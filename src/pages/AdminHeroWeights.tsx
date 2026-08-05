@@ -14,7 +14,7 @@
  */
 
 import { useEffect, useMemo, useState } from "react";
-import { Helmet } from "react-helmet-async";
+import Head from "@/components/seo/Head";
 import { Link, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAdmin } from "@/hooks/useAdmin";
@@ -204,10 +204,10 @@ export default function AdminHeroWeights() {
 
   return (
     <div className="min-h-screen bg-background">
-      <Helmet>
+      <Head>
         <title>Admin, Poids des hero</title>
         <meta name="robots" content="noindex,nofollow" />
-      </Helmet>
+      </Head>
 
       <div className="max-w-4xl mx-auto px-4 py-8 space-y-8">
         {/* En-tête */}

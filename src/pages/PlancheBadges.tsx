@@ -12,10 +12,10 @@ const SECTIONS = [
 export default function PlancheBadges() {
   return (
     <div className="min-h-screen bg-background px-4 py-6 md:py-10 md:px-8">
-      <Helmet>
+      <Head>
         <title>Planche des badges, Guardiens</title>
         <meta name="robots" content="noindex" />
-      </Helmet>
+      </Head>
 
       <h1 className="text-2xl md:text-3xl font-heading font-bold text-foreground text-center mb-2">
         Les badges Guardiens

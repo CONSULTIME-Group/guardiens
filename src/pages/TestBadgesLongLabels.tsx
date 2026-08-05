@@ -293,10 +293,10 @@ export default function TestBadgesLongLabels() {
 
   return (
     <div className="min-h-screen bg-background px-4 py-10 md:px-8">
-      <Helmet>
+      <Head>
         <title>Test, Badges libellés longs</title>
         <meta name="robots" content="noindex" />
-      </Helmet>
+      </Head>
 
       <div className="max-w-5xl mx-auto">
         <h1 className="text-2xl md:text-3xl font-heading font-bold text-foreground mb-2">

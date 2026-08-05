@@ -3,7 +3,7 @@
 // la source unique de vérité (`src/lib/pricing.ts`). Non indexable, non monté
 // en production.
 
-import { Helmet } from "react-helmet-async";
+import Head from "@/components/seo/Head";
 import {
   OWNER_PRICE,
   SITTER_PRICE,
@@ -285,10 +285,10 @@ const AuditTarifs = () => {
   if (!isDev) {
     return (
       <main className="min-h-screen flex items-center justify-center p-8">
-        <Helmet>
+        <Head>
           <meta name="robots" content="noindex,nofollow" />
           <title>Audit tarifs, indisponible</title>
-        </Helmet>
+        </Head>
         <div className="max-w-md text-center space-y-2">
           <h1 className="text-2xl font-semibold">Audit tarifs</h1>
           <p className="text-muted-foreground">
@@ -308,10 +308,10 @@ const AuditTarifs = () => {
 
   return (
     <main className="min-h-screen p-6 md:p-10 max-w-6xl mx-auto">
-      <Helmet>
+      <Head>
         <meta name="robots" content="noindex,nofollow" />
         <title>Audit tarifs, dev</title>
-      </Helmet>
+      </Head>
 
       <header className="mb-8 space-y-2">
         <p className="text-xs uppercase tracking-wider text-muted-foreground">

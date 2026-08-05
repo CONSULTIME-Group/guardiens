@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import ChipSelect from "@/components/profile/ChipSelect";
-import { Helmet } from "react-helmet-async";
+import Head from "@/components/seo/Head";
 import EnvironmentPills, { ENV_KEYS } from "@/components/shared/EnvironmentPills";
 import { Calendar, Home, PawPrint, ShieldCheck, MessageSquare, Users, ArrowLeft, AlertCircle, Zap, Eye, ChevronRight, ChevronLeft, Check, Image as ImageIcon, Star } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -1255,7 +1255,7 @@ const CreateSit = () => {
     const target = anchored?.anchor ? `/owner-profile?section=${anchored.anchor}` : "/owner-profile";
     return (
       <div className="animate-fade-in px-4 py-8 max-w-3xl mx-auto">
-        <Helmet><meta name="robots" content="noindex, nofollow" /></Helmet>
+        <Head><meta name="robots" content="noindex, nofollow" /></Head>
         <Link to="/sits" className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground mb-6">
           <ArrowLeft className="h-4 w-4" /> Retour à mes annonces
         </Link>
@@ -1299,7 +1299,7 @@ const CreateSit = () => {
 
   return (
     <div className="animate-fade-in pb-40">
-      <Helmet><meta name="robots" content="noindex, nofollow" /></Helmet>
+      <Head><meta name="robots" content="noindex, nofollow" /></Head>
 
       {/* Stepper sticky */}
       <StepperBar currentStep={currentStep} onStepClick={setCurrentStep} />

@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { getMemberAvatarUrl, getMemberDisplayName, getMemberInitial } from "@/lib/memberUtils";
-import { Helmet } from "react-helmet-async";
+import Head from "@/components/seo/Head";
 import { supabase } from "@/integrations/supabase/client";
 import ProAvatarBadge from "@/components/badges/ProAvatarBadge";
 import { useAuth } from "@/contexts/AuthContext";
@@ -562,7 +562,7 @@ const Messages = () => {
   if (loading) {
     return (
       <div className="flex h-screen overflow-hidden">
-        <Helmet><meta name="robots" content="noindex, nofollow" /></Helmet>
+        <Head><meta name="robots" content="noindex, nofollow" /></Head>
         <div className={`${isMobile ? "w-full" : "w-80 border-r border-border"} flex flex-col bg-card`}>
           <MessagesListSkeleton />
         </div>
@@ -706,7 +706,7 @@ const Messages = () => {
 
   return (
     <div className="flex h-[calc(100vh-0px)] md:h-screen overflow-hidden">
-      <Helmet><meta name="robots" content="noindex, nofollow" /></Helmet>
+      <Head><meta name="robots" content="noindex, nofollow" /></Head>
 
       {/* ═══ CONVERSATION LIST ═══ */}
       {showList && (

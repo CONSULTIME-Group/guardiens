@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo, useRef } from "react";
 import BlockedMembersCard from "@/components/settings/BlockedMembersCard";
 import { useSearchParams } from "react-router-dom";
-import { Helmet } from "react-helmet-async";
+import Head from "@/components/seo/Head";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -419,10 +419,10 @@ const Settings = () => {
   // Identity verification is part of "security" section
   return (
     <div className="min-h-screen bg-background">
-      <Helmet>
+      <Head>
         <title>Paramètres, Guardiens</title>
         <meta name="robots" content="noindex, nofollow" />
-      </Helmet>
+      </Head>
 
       <div className="max-w-6xl mx-auto px-4 md:px-8 py-6 md:py-10 pb-24 md:pb-10">
         <PageBreadcrumb items={[{ label: "Paramètres" }]} />

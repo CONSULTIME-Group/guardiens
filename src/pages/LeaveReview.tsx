@@ -12,7 +12,7 @@ import StarRating from "@/components/reviews/StarRating";
 import { BadgeSelector } from "@/components/badges/BadgeSelector";
 import AlmaReviewDraftBubble from "@/components/ai/alma/AlmaReviewDraftBubble";
 import { trackEvent } from "@/lib/analytics";
-import { Helmet } from "react-helmet-async";
+import Head from "@/components/seo/Head";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { GOOGLE_REVIEW_URL } from "@/lib/constants";
 
@@ -342,7 +342,7 @@ const LeaveReview = () => {
 
   return (
     <div className="p-4 md:p-10 max-w-2xl mx-auto animate-fade-in pb-32">
-      <Helmet><meta name="robots" content="noindex, nofollow" /></Helmet>
+      <Head><meta name="robots" content="noindex, nofollow" /></Head>
 
       <Link to={`/sits/${sitId}`} className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-6">
         <ArrowLeft className="h-4 w-4" /> Retour

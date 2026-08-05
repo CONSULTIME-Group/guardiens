@@ -6,7 +6,7 @@ import PageMeta from "@/components/PageMeta";
 import PageBreadcrumb from "@/components/seo/PageBreadcrumb";
 import ApproximateLocationMap from "@/components/shared/ApproximateLocationMap";
 import RelatedMissionCard from "@/components/missions/RelatedMissionCard";
-import { Helmet } from "react-helmet-async";
+import Head from "@/components/seo/Head";
 
 // (Pas de bannière de fallback : une annonce sans photo ne doit PAS
 // afficher une image générique qui rendrait toutes les annonces
@@ -131,7 +131,7 @@ const PublicMissionView = ({
         description={metaDescription}
         image={ogImage}
       />
-      <Helmet>
+      <Head>
         <script type="application/ld+json">{JSON.stringify({
           "@context": "https://schema.org",
           "@type": "Service",
@@ -148,7 +148,7 @@ const PublicMissionView = ({
           },
           datePosted: mission.created_at,
         })}</script>
-      </Helmet>
+      </Head>
 
       <div className="max-w-6xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
         {/* Breadcrumb (avec maillon ville pour le SEO local) */}
