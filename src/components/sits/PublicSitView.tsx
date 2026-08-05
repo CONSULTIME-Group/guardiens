@@ -588,7 +588,7 @@ const PublicSitView = ({
                   <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-1">
                     Hébergement
                   </p>
-                  <p className="text-base font-semibold text-foreground">Gratuit · logement inclus</p>
+                  <p className="text-base font-semibold text-foreground">Logement inclus</p>
                 </div>
               </div>
 
@@ -626,7 +626,7 @@ const PublicSitView = ({
                     </Button>
                   </Link>
                   <p className="mt-5 text-xs text-center text-muted-foreground px-2 leading-relaxed">
-                    Inscription gratuite, 2 minutes. Sans engagement.
+                    Inscription en 2 minutes, sans engagement.
                   </p>
                   <div className="mt-6 pt-6 border-t border-border space-y-2">
                     <p className="text-xs text-center text-muted-foreground">Déjà membre&nbsp;?</p>
@@ -774,7 +774,7 @@ const PublicSitView = ({
                   </div>
                   <div className="flex flex-wrap items-center justify-center gap-5 pt-4 text-sm opacity-80">
                     <span className="inline-flex items-center gap-2">
-                      <CheckCircle2 className="h-4 w-4" /> Gratuit
+                      <CheckCircle2 className="h-4 w-4" /> Sans carte bancaire
                     </span>
                     <span className="inline-flex items-center gap-2">
                       <CheckCircle2 className="h-4 w-4" /> Sans engagement

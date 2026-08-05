@@ -43,7 +43,7 @@ export function getPricingBaseline(): string {
 }
 
 export function getPricingBaselineShort(): string {
-  return "Gratuit pour vous, sans engagement.";
+  return "Sans engagement, sans carte bancaire.";
 }
 
 // ── Constantes conservées pour compatibilité (call-sites existants) ─────────
@@ -83,6 +83,6 @@ export const FOUNDER_DEADLINE = "à une date ultérieure";
 // scripts/sync-index-html.mjs puisse les extraire par regex.
 export const PRICING_LONG =
   "Guardiens reste gratuit tant que nous ne sommes pas satisfaits du service que nous vous offrons. Vous avez accès à tout, sans limite, sans engagement. Vous serez prévenu à l'avance quand cela changera.";
-export const PRICING_SHORT = "Gratuit pour vous, sans engagement.";
-export const PRICING_VERY_SHORT = "Gratuit pour vous, sans engagement.";
+export const PRICING_SHORT = "Sans engagement, sans carte bancaire.";
+export const PRICING_VERY_SHORT = "Sans engagement, sans carte bancaire.";
 
