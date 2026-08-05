@@ -852,10 +852,19 @@ export default function PublicSitterProfile() {
   }
 
   if (!profile && !ownerProfile) {
+    // Profil inexistant ou compte effacé (anonymisé) : état vide propre, jamais indexable.
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
+        <PageMeta
+          title="Profil indisponible"
+          description="Ce profil n'est plus disponible sur Guardiens."
+          noindex
+        />
         <div className="text-center">
-          <p className="text-lg font-semibold text-foreground">Profil introuvable</p>
+          <p className="text-lg font-semibold text-foreground">Profil indisponible</p>
+          <p className="text-sm text-muted-foreground mt-1">
+            Ce membre n'a plus de fiche publique.
+          </p>
           <Link to="/" className="text-sm text-primary hover:underline mt-2 block">
             Retour à l'accueil
           </Link>
@@ -863,6 +872,7 @@ export default function PublicSitterProfile() {
       </div>
     );
   }
+
 
   const firstName = capitalize(profile?.first_name || "");
   const city = profile?.city || "";
