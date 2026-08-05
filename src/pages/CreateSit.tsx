@@ -1152,13 +1152,20 @@ const CreateSit = () => {
 
       let sitId = draftId;
       if (draftId) {
-        const { error } = await supabase.from("sits").update(payload).eq("id", draftId).eq("status", "draft");
+        // On relit la ligne écrite : une mise à jour qui ne touche aucune ligne
+        // (brouillon déjà publié ou filtré) ne doit plus passer pour un succès.
+        const { data: updated, error } = await supabase
+          .from("sits").update(payload).eq("id", draftId).eq("status", "draft").select("id");
         if (error) throw error;
+        if (!updated || updated.length === 0) {
+          throw new Error("Aucun brouillon correspondant n'a été mis à jour.");
+        }
       } else {
         const { data: sit, error } = await supabase.from("sits").insert(payload).select("id").single();
         if (error) throw error;
         sitId = sit.id;
       }
+
 
       try { await trackFirstAction("sit_created", { sit_id: sitId, is_urgent: isUrgent }); } catch {}
       if (searchParams.get("source") === "ai_prompt") {
