@@ -640,6 +640,20 @@ Deno.serve(async (req) => {
             .update({ status: 'sent', last_error: null })
             .eq('id', sourceQueueId)
         }
+        // ETAPE 2, reserve 1 : ce chemin franchit deliberement le plafond de
+        // frequence. Il doit etre compte par gabarit, sinon on aura remplace
+        // une perte silencieuse par une pression silencieuse.
+        const { error: bypassErr } = await supabase.from('email_cap_bypass_log').insert({
+          template_name: templateName,
+          recipient_email: effectiveRecipient,
+          category,
+          defer_reason: deferReason,
+          scheduled_for: scheduledFor.toISOString(),
+          ttl_deadline: resolution.ttlDeadline.toISOString(),
+        })
+        if (bypassErr) {
+          console.error('email_cap_bypass_log insert failed', { templateName, error: bypassErr.message })
+        }
         console.warn('Report au dela de la TTL, envoi immediat plutot qu abandon', {
           templateName, recipientLower, deferReason,
           scheduledFor: scheduledFor.toISOString(),
