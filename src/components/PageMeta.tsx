@@ -91,7 +91,9 @@ const PageMeta = ({
   author,
   noindex = false,
   canonical,
+  translatedLangs,
   hreflangLangs,
+
   jsonLd,
   ready,
   extraMeta,
