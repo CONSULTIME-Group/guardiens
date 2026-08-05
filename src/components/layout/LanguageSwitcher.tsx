@@ -72,7 +72,7 @@ export default function LanguageSwitcher({
           return (
             <DropdownMenuItem
               key={code}
-              onClick={() => void i18n.changeLanguage(code)}
+              onClick={() => selectLang(code)}
               className={isActive ? "bg-accent font-semibold" : ""}
               aria-label={`${m.native} (${code.toUpperCase()})`}
               aria-current={isActive ? "true" : undefined}
