@@ -207,6 +207,19 @@ function stripLeadingH1(md: string): string {
   return md.replace(/^#\s+.+\n+/, "");
 }
 
+/**
+ * Enveloppe chaque tableau dans un conteneur à défilement horizontal.
+ * Sans cela, un tableau comparatif déborde du viewport sur mobile et casse
+ * la mise en page de la page entière.
+ */
+function wrapTables(html: string): string {
+  return html.replace(
+    /<table[\s\S]*?<\/table>/g,
+    (table) => `<div class="article-table-scroll" role="region" tabindex="0">${table}</div>`,
+  );
+}
+
+
 export default function ArticleRenderer({ content, userRole, slug }: ArticleRendererProps) {
   const withoutH1 = stripLeadingH1(content);
   const preprocessed = transformFaqBlocks(transformFactBoxes(withoutH1));
