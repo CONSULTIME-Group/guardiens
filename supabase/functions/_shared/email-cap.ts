@@ -55,6 +55,33 @@ export const BYPASS_TEMPLATES = new Set<string>([
 ])
 
 // ---------------------------------------------------------------------------
+// ETAPE 2 (05/08/2026) : derogation totale de file pour les deux gabarits
+// declenches par l'action directe d'un membre identifie.
+//
+// Ni plafond de categorie, ni file de report. La seule garde qui subsiste est
+// celle des heures calmes, qui repousse au prochain 08h00 Paris sans jamais
+// pouvoir annuler (voir resolveDeferral, ou l'exemption est evaluee AVANT tout
+// calcul de TTL, donc `decideOverTtl` est inatteignable pour ces gabarits).
+export const NO_QUEUE_TEMPLATES = new Set<string>([
+  'new-message',
+  'new-application',
+])
+
+// Plafond propre a la categorie 'alert'.
+//
+// Justification du chiffre : ces envois sont demandes par la personne
+// elle-meme (zones d'alerte, recap gardien quotidien) et sont par construction
+// au plus un par jour et par source. Le plafond journalier de 1 est donc la
+// cadence nominale, il ne coupe rien de legitime. Le plafond hebdomadaire de 7
+// est exactement 7 x 1 : il laisse passer un envoi chaque jour de la semaine,
+// et ne bloque que les rafales anormales (deux sources qui tirent le meme
+// jour, boucle de relance). Sous l'ancien regime, ces gabarits partageaient le
+// quota 3 / 7 jours des emails produit, ce qui condamnait 4 jours sur 7 alors
+// meme que la personne avait explicitement demande a les recevoir.
+export const CAP_ALERT_PER_DAY = 1
+export const CAP_ALERT_PER_WEEK = 7
+
+// ---------------------------------------------------------------------------
 // ETAPE 1 (05/08/2026) : TTL de report par gabarit et par motif.
 //
 // Constat : la file de report appliquait une TTL fixe de 36 h, alors qu'un
@@ -149,6 +176,12 @@ export function resolveDeferral(input: {
   scheduledFor: Date
   firstEnqueuedAt: Date
 }): { action: 'enqueue' } | { action: OverTtlAction; ttlDeadline: Date } {
+  // ETAPE 2 : garde placee AVANT tout calcul de TTL. Un gabarit en derogation
+  // ne peut donc jamais atteindre `decideOverTtl`, quel que soit le motif, et
+  // ne peut jamais etre annule. Il est simplement enfile et reparti.
+  if (NO_QUEUE_TEMPLATES.has(input.templateName)) {
+    return { action: 'enqueue' }
+  }
   const ttlHours = getDeferralTtlHours(input.templateName, input.reason)
   const ttlDeadline = new Date(input.firstEnqueuedAt.getTime() + ttlHours * 3600_000)
   if (input.scheduledFor.getTime() <= ttlDeadline.getTime()) {
@@ -231,6 +264,10 @@ export interface DeferInput {
   nonTxDaySentAt?: string[]
   /** ISO timestamps of `sent` NON transactional emails in the last 7 days, ascending. */
   nonTxWeekSentAt?: string[]
+  /** ISO timestamps of `sent` emails de categorie 'alert' sur 24h, ascendant. */
+  alertDaySentAt?: string[]
+  /** ISO timestamps of `sent` emails de categorie 'alert' sur 7 jours, ascendant. */
+  alertWeekSentAt?: string[]
 }
 
 /**
@@ -246,7 +283,9 @@ export function decideDeferral(input: DeferInput): DeferDecision {
   const {
     now, templateName, isUrgent, category,
     nonTxDaySentAt = [], nonTxWeekSentAt = [],
+    alertDaySentAt = [], alertWeekSentAt = [],
   } = input
+
 
   // Categorie effective. Regle de securite : seule la valeur explicite
   // 'transactional' donne droit a l'exemption de plafond. Toute categorie
@@ -273,7 +312,36 @@ export function decideDeferral(input: DeferInput): DeferDecision {
     return { action: 'defer', reason: 'quiet_hours', scheduledFor: nextQuietEndFrom(now) }
   }
 
+  // ETAPE 2 : derogation totale. Aucun plafond ne s'applique a un email
+  // declenche par l'action directe d'un autre membre identifie. Place juste
+  // apres les heures calmes, qui restent la seule garde sur ces gabarits.
+  if (NO_QUEUE_TEMPLATES.has(templateName)) {
+    return { action: 'send' }
+  }
+
   if (effectiveCategory === 'transactional') {
+    return { action: 'send' }
+  }
+
+  // Categorie 'alert' : compteurs propres, elle ne partage plus le quota des
+  // emails produit. Cadence nominale 1 / jour, 7 / semaine.
+  if (effectiveCategory === 'alert') {
+    if (alertWeekSentAt.length >= CAP_ALERT_PER_WEEK) {
+      const oldest = new Date(alertWeekSentAt[0])
+      return {
+        action: 'defer',
+        reason: 'frequency_cap_category_week',
+        scheduledFor: new Date(oldest.getTime() + 7 * 86400_000 + 30_000),
+      }
+    }
+    if (alertDaySentAt.length >= CAP_ALERT_PER_DAY) {
+      const oldest = new Date(alertDaySentAt[0])
+      return {
+        action: 'defer',
+        reason: 'frequency_cap_category_day',
+        scheduledFor: new Date(oldest.getTime() + 86400_000 + 30_000),
+      }
+    }
     return { action: 'send' }
   }
 

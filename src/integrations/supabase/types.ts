@@ -1866,6 +1866,39 @@ export type Database = {
         }
         Relationships: []
       }
+      email_cap_bypass_log: {
+        Row: {
+          category: string | null
+          created_at: string
+          defer_reason: string | null
+          id: string
+          recipient_email: string
+          scheduled_for: string | null
+          template_name: string
+          ttl_deadline: string | null
+        }
+        Insert: {
+          category?: string | null
+          created_at?: string
+          defer_reason?: string | null
+          id?: string
+          recipient_email: string
+          scheduled_for?: string | null
+          template_name: string
+          ttl_deadline?: string | null
+        }
+        Update: {
+          category?: string | null
+          created_at?: string
+          defer_reason?: string | null
+          id?: string
+          recipient_email?: string
+          scheduled_for?: string | null
+          template_name?: string
+          ttl_deadline?: string | null
+        }
+        Relationships: []
+      }
       email_deferred_queue: {
         Row: {
           attempts: number
@@ -7711,6 +7744,7 @@ export type Database = {
           profile_id: string
         }[]
       }
+      detect_low_email_delivery: { Args: never; Returns: number }
       detect_pending_applications: {
         Args: never
         Returns: {
@@ -7801,6 +7835,24 @@ export type Database = {
           gsc_clicks: number
           gsc_impressions: number
           local_sitters_count: number
+        }[]
+      }
+      email_cap_bypass_counts: {
+        Args: { p_days?: number }
+        Returns: {
+          bypass_count: number
+          template_name: string
+        }[]
+      }
+      email_delivery_rate_by_template: {
+        Args: { p_days?: number }
+        Returns: {
+          attempts: number
+          cancelled: number
+          delivery_rate: number
+          failed: number
+          sent: number
+          template_name: string
         }[]
       }
       email_queue_dispatch: { Args: never; Returns: undefined }

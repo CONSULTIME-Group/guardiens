@@ -481,7 +481,7 @@ Deno.serve(async (req) => {
         .order('created_at', { ascending: true }),
       supabase
         .from('email_send_log')
-        .select('created_at')
+        .select('created_at, metadata')
         .ilike('recipient_email', recipientLower)
         .eq('status', 'sent')
         .gte('created_at', oneWeekAgo)
@@ -491,8 +491,18 @@ Deno.serve(async (req) => {
 
     const toIso = (rows: Array<{ created_at: string }> | null) =>
       (rows ?? []).map((r) => r.created_at as string)
-    const nonTxWeek = toIso(nonTxWeekRows as Array<{ created_at: string }> | null)
+    type CatRow = { created_at: string; metadata?: { category?: string } | null }
+    const nonTxRows = (nonTxWeekRows ?? []) as CatRow[]
+    // ETAPE 2 : la categorie 'alert' a ses propres compteurs, elle ne consomme
+    // plus le quota des emails produit et reciproquement.
+    const alertWeek = nonTxRows
+      .filter((r) => r.metadata?.category === 'alert')
+      .map((r) => r.created_at)
+    const nonTxWeek = nonTxRows
+      .filter((r) => r.metadata?.category !== 'alert')
+      .map((r) => r.created_at)
     const nonTxDay = nonTxWeek.filter((t) => t >= oneDayAgo)
+    const alertDay = alertWeek.filter((t) => t >= oneDayAgo)
 
     const decision = decideDeferral({
       now: new Date(nowMs),
@@ -503,6 +513,8 @@ Deno.serve(async (req) => {
       daySentAt: toIso(dayRows as Array<{ created_at: string }> | null),
       nonTxDaySentAt: nonTxDay,
       nonTxWeekSentAt: nonTxWeek,
+      alertDaySentAt: alertDay,
+      alertWeekSentAt: alertWeek,
     })
 
     const deferReason: string | null = decision.action === 'defer' ? decision.reason : null
@@ -627,6 +639,20 @@ Deno.serve(async (req) => {
             .from('email_deferred_queue')
             .update({ status: 'sent', last_error: null })
             .eq('id', sourceQueueId)
+        }
+        // ETAPE 2, reserve 1 : ce chemin franchit deliberement le plafond de
+        // frequence. Il doit etre compte par gabarit, sinon on aura remplace
+        // une perte silencieuse par une pression silencieuse.
+        const { error: bypassErr } = await supabase.from('email_cap_bypass_log').insert({
+          template_name: templateName,
+          recipient_email: effectiveRecipient,
+          category,
+          defer_reason: deferReason,
+          scheduled_for: scheduledFor.toISOString(),
+          ttl_deadline: resolution.ttlDeadline.toISOString(),
+        })
+        if (bypassErr) {
+          console.error('email_cap_bypass_log insert failed', { templateName, error: bypassErr.message })
         }
         console.warn('Report au dela de la TTL, envoi immediat plutot qu abandon', {
           templateName, recipientLower, deferReason,
