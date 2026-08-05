@@ -632,29 +632,46 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, prope
       <div key={app.id} className="bg-card border border-border rounded-2xl p-5 mb-4">
         {/* Identité + signaux de confiance */}
         <div className="flex items-start gap-3">
-          {isMemberLinkable(sitter) ? (
-          <Link to={`/gardiens/${app.sitter_id}`} className="shrink-0 relative block" aria-label={`Voir le profil de ${getMemberDisplayName(sitter, "ce gardien")}`}>
-            <TrustHaloAvatar
-              size="h-12 w-12"
-              verified={sitter?.identity_verified}
-              avgRating={app.avgRating ? parseFloat(app.avgRating) : null}
-              sitsCount={completedSits}
-            >
-              {getMemberAvatarUrl(sitter) ? (
-                <img src={getMemberAvatarUrl(sitter)!} alt={`Photo de ${getMemberDisplayName(sitter, "gardien")}`} className="w-full h-full object-cover" />
-              ) : (
-                <div className="w-full h-full rounded-full bg-primary/10 flex items-center justify-center text-primary font-medium text-lg">
-                  {getMemberInitial(sitter)}
-                </div>
-              )}
-            </TrustHaloAvatar>
-            <ProAvatarBadge status={sitter?.pro_status} size="sm" />
-          </Link>
+          {(() => {
+            const avatarInner = (
+              <>
+                <TrustHaloAvatar
+                  size="h-12 w-12"
+                  verified={sitter?.identity_verified}
+                  avgRating={app.avgRating ? parseFloat(app.avgRating) : null}
+                  sitsCount={completedSits}
+                >
+                  {getMemberAvatarUrl(sitter) ? (
+                    <img src={getMemberAvatarUrl(sitter)!} alt={`Photo de ${getMemberDisplayName(sitter, "gardien")}`} className="w-full h-full object-cover" />
+                  ) : (
+                    <div className="w-full h-full rounded-full bg-primary/10 flex items-center justify-center text-primary font-medium text-lg">
+                      {getMemberInitial(sitter)}
+                    </div>
+                  )}
+                </TrustHaloAvatar>
+                <ProAvatarBadge status={sitter?.pro_status} size="sm" />
+              </>
+            );
+            return isMemberLinkable(sitter) ? (
+              <Link to={`/gardiens/${app.sitter_id}`} className="shrink-0 relative block" aria-label={`Voir le profil de ${getMemberDisplayName(sitter, "ce gardien")}`}>
+                {avatarInner}
+              </Link>
+            ) : (
+              <span className="shrink-0 relative block">{avatarInner}</span>
+            );
+          })()}
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 flex-wrap">
-              <Link to={`/gardiens/${app.sitter_id}`} className="text-base font-semibold text-foreground hover:underline">
-                {getMemberDisplayName(sitter, "Gardien")}
-              </Link>
+              {isMemberLinkable(sitter) ? (
+                <Link to={`/gardiens/${app.sitter_id}`} className="text-base font-semibold text-foreground hover:underline">
+                  {getMemberDisplayName(sitter, "Gardien")}
+                </Link>
+              ) : (
+                <span className="text-base font-semibold text-foreground">
+                  {getMemberDisplayName(sitter, "Gardien")}
+                </span>
+              )}
+
               {sitter?.identity_verified && <VerifiedBadge size="sm" />}
               <ProBadge status={sitter?.pro_status} size="sm" />
               {app.isEmergencySitter && <EmergencyBadge size="sm" showTooltip />}
