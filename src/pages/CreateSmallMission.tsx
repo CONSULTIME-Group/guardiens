@@ -99,6 +99,7 @@ const CreateSmallMission = () => {
   const [descTouched, setDescTouched] = useState(false);
   const [exchangeOffer, setExchangeOffer] = useState("");
   const [exchangeTouched, setExchangeTouched] = useState(false);
+  const [placeTouched, setPlaceTouched] = useState(false);
   const [exchangeError, setExchangeError] = useState("");
   const [city, setCity] = useState("");
   const [postalCode, setPostalCode] = useState("");
