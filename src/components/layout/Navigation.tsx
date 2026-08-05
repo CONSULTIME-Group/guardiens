@@ -578,6 +578,10 @@ export const BottomNav = () => {
     );
   };
 
+  // Retrait complet demandé par l'écran courant (fil de messagerie mobile).
+  // La barre est en md:hidden, le desktop n'est donc pas concerné.
+  if (bottomNavHidden) return null;
+
   return (
     <>
       <FeedbackDialog open={feedbackOpen} onOpenChange={setFeedbackOpen} />
