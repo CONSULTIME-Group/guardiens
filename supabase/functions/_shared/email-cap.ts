@@ -264,6 +264,10 @@ export interface DeferInput {
   nonTxDaySentAt?: string[]
   /** ISO timestamps of `sent` NON transactional emails in the last 7 days, ascending. */
   nonTxWeekSentAt?: string[]
+  /** ISO timestamps of `sent` emails de categorie 'alert' sur 24h, ascendant. */
+  alertDaySentAt?: string[]
+  /** ISO timestamps of `sent` emails de categorie 'alert' sur 7 jours, ascendant. */
+  alertWeekSentAt?: string[]
 }
 
 /**
