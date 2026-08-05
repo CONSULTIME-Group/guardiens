@@ -258,7 +258,7 @@ const PageMeta = ({
         title: fullTitle,
         description: metaDescription,
         canonical: canonical ?? null,
-        noindex,
+        noindex: effectiveNoindex,
         type,
       },
     });
@@ -268,7 +268,7 @@ const PageMeta = ({
     if (ready !== false) {
       (window as any).prerenderReady = true;
     }
-  }, [author, canonical, canonicalUrl, currentPath, currentUrl, currentLang, extraMetaKey, fullTitle, hreflangKey, jsonLdKey, metaDescription, noindex, publishedAt, ready, resolvedImage, type]);
+  }, [author, canonical, canonicalUrl, currentPath, currentUrl, currentLang, extraMetaKey, fullTitle, hreflangKey, jsonLdKey, metaDescription, effectiveNoindex, htmlLang, publishedAt, ready, resolvedImage, type]);
 
   // Toutes les balises sont écrites impérativement dans le useEffect ci-dessus,
   // react-helmet-async n'atteignant pas le DOM sur ce projet.
