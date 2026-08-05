@@ -384,6 +384,7 @@ const CreateSit = () => {
   const saveFailToastShownRef = useRef(false);
   const [adaptingWithAlma, setAdaptingWithAlma] = useState(false);
   const [previewOpen, setPreviewOpen] = useState(false);
+  const [audienceCount, setAudienceCount] = useState<number | null>(null);
   const [incompleteNudgeOpen, setIncompleteNudgeOpen] = useState(false);
   const incompleteNudgeSeenRef = useRef(false);
   const hasUserEditedRef = useRef(false);
