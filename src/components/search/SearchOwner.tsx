@@ -990,7 +990,7 @@ const SearchOwner = () => {
 
   // SEO vague 40 : page indexable pour capter la demande organique.
   const seoTitle = "Trouver un gardien d'animaux près de chez vous · Guardiens";
-  const seoDescription = "Consultez librement les profils de gardiens d'animaux en France : chats, chiens, NAC. Inscription gratuite pour contacter un gardien.";
+  const seoDescription = "Consultez librement les profils de gardiens d'animaux en France : chats, chiens, NAC. Inscription sans carte bancaire pour contacter un gardien.";
   const seoCanonical = "https://guardiens.fr/recherche-gardiens";
   const seoJsonLd = [
     { "@context": "https://schema.org", "@type": "WebPage", name: seoTitle, description: seoDescription, url: seoCanonical, inLanguage: "fr-FR", isPartOf: { "@type": "WebSite", name: "Guardiens", url: "https://guardiens.fr" } },

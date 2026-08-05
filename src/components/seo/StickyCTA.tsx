@@ -36,7 +36,7 @@ const StickyCTA = ({ city, stats }: Props) => {
   let ctaLink: string;
 
   if (stats.guardiansCount > 0 && stats.activeListings === 0) {
-    message = `${stats.guardiansCount} gardien${stats.guardiansCount > 1 ? "s" : ""} déjà inscrit${stats.guardiansCount > 1 ? "s" : ""} à ${city.name}. Rejoignez la communauté, c'est gratuit aujourd'hui.`;
+    message = `${stats.guardiansCount} gardien${stats.guardiansCount > 1 ? "s" : ""} déjà inscrit${stats.guardiansCount > 1 ? "s" : ""} à ${city.name}. Rejoignez la communauté, sans engagement et sans carte bancaire.`;
     ctaText = "Créer mon compte";
     ctaLink = "/inscription";
   } else if (stats.guardiansCount === 0 && stats.activeListings === 0) {
