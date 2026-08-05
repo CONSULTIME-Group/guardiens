@@ -13,7 +13,7 @@ interface Breed {
 const CANONICAL = "https://guardiens.fr/races";
 
 const BreedsListing = () => {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const [breeds, setBreeds] = useState<Breed[]>([]);
 
   useEffect(() => {
