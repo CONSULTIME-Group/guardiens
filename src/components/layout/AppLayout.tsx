@@ -86,6 +86,7 @@ export const AppLayout = ({ children }: { children?: ReactNode }) => {
   return (
     <AppShellProvider value={true}>
     <AlmaProvider>
+    <ChromeVisibilityProvider>
     <OnboardingGate />
     <div className="flex min-h-screen bg-background">
       <Sidebar showHeaderBells={!mobileHeader} />
