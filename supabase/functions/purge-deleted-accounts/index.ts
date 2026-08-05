@@ -1,6 +1,7 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.4";
 import { requireAdminOrServiceRole } from "../_shared/require-admin.ts";
-import { finalizeErasure } from "../_shared/account-erasure.ts";
+import { anonymizeAccount } from "../_shared/account-erasure.ts";
+
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -47,43 +48,20 @@ Deno.serve(async (req) => {
 
     for (const request of requests) {
       try {
-        // Accusé de traitement RGPD + liste de blocage, AVANT la suppression.
-        const { data: prof } = await adminClient
-          .from("profiles")
-          .select("email, first_name")
-          .eq("id", request.user_id)
-          .maybeSingle();
-        const purgeEmail =
-          (prof as { email?: string } | null)?.email ?? request.requester_email ?? null;
-        await finalizeErasure(adminClient, purgeEmail, {
-          firstName: (prof as { first_name?: string } | null)?.first_name ?? null,
-          metadata: { source: "purge_cron", user_id: request.user_id },
+        // Anonymisation (accusé de traitement, purge du stockage, neutralisation auth).
+        await anonymizeAccount(adminClient, request.user_id, {
+          fallbackEmail: request.requester_email ?? null,
+          source: "purge_cron",
         });
 
-        // Delete user from auth (cascades to profiles and related data)
-        const { error: deleteErr } = await adminClient.auth.admin.deleteUser(
-          request.user_id
-        );
-
-        if (deleteErr) {
-          console.error(`Failed to delete user ${request.user_id}:`, deleteErr);
-          results.push({
-            userId: request.user_id,
-            success: false,
-            error: deleteErr.message,
-          });
-          continue;
-        }
-
-        // Mark request as completed (the row may be cascade-deleted already,
-        // so we ignore errors here)
         await adminClient
           .from("account_deletion_requests")
           .update({ status: "completed", processed_at: new Date().toISOString() })
           .eq("id", request.id);
 
         results.push({ userId: request.user_id, success: true });
-        console.log(`Successfully purged user ${request.user_id}`);
+        console.log(`Successfully anonymized user ${request.user_id}`);
+
       } catch (err) {
         console.error(`Unexpected error for user ${request.user_id}:`, err);
         results.push({

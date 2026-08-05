@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
+import { getMemberAvatarUrl, getMemberDisplayName, getMemberInitial } from "@/lib/memberUtils";
 import { Helmet } from "react-helmet-async";
 import { supabase } from "@/integrations/supabase/client";
 import ProAvatarBadge from "@/components/badges/ProAvatarBadge";
@@ -178,6 +179,28 @@ const Messages = () => {
     });
 
     const profilesMap = new Map((profilesRes.data || []).map((p: any) => [p.id, p]));
+
+    // Comptes effacés : la fiche est anonymisée, pas détruite. Le fil reste
+    // lisible pour l'interlocuteur, sous le nom neutre "Membre supprimé".
+    const missingOtherIds = Array.from(new Set(otherIds.filter((id: string) => id && !profilesMap.has(id))));
+    if (missingOtherIds.length > 0) {
+      const { data: anonProfiles } = await supabase.rpc("get_member_display" as any, {
+        _ids: missingOtherIds,
+      });
+      (anonProfiles as any[] | null)?.forEach((p: any) => {
+        profilesMap.set(p.id, {
+          id: p.id,
+          first_name: p.first_name,
+          avatar_url: p.avatar_url,
+          identity_verified: false,
+          city: null,
+          is_founder: false,
+          pro_status: null,
+          is_deleted: Boolean(p.is_deleted),
+        });
+      });
+    }
+
 
     // Résoudre la ville du propriétaire pour chaque sit (lieu de la garde)
     //, distinct de other_user.city qui peut être la ville du gardien.
@@ -583,11 +606,11 @@ const Messages = () => {
           className={`w-full flex items-start gap-3 px-4 py-3.5 pr-10 text-left transition-colors ${activeConv?.id === conv.id ? "bg-primary/10" : "hover:bg-primary/5"}`}
         >
           <div className="relative shrink-0">
-            {conv.other_user?.avatar_url ? (
-              <img src={conv.other_user.avatar_url} alt="" className="w-11 h-11 rounded-full object-cover" />
+            {getMemberAvatarUrl(conv.other_user) ? (
+              <img src={getMemberAvatarUrl(conv.other_user)!} alt="" className="w-11 h-11 rounded-full object-cover" />
             ) : (
               <div className="w-11 h-11 rounded-full bg-secondary/[0.12] flex items-center justify-center text-secondary font-heading text-base">
-                {conv.other_user?.first_name?.charAt(0)?.toUpperCase() || "?"}
+                {getMemberInitial(conv.other_user)}
               </div>
             )}
             <ProAvatarBadge status={conv.other_user?.pro_status} size="sm" />
@@ -596,7 +619,7 @@ const Messages = () => {
             <div className="flex items-center justify-between gap-2">
               <div className="flex items-center gap-2 min-w-0">
                 <span className={`text-[15px] truncate capitalize ${hasUnread ? "font-semibold text-foreground" : "font-medium text-foreground"}`}>
-                  {capitalize(conv.other_user?.first_name) || "Utilisateur"}
+                  {capitalize(getMemberDisplayName(conv.other_user, "Utilisateur"))}
                 </span>
                 {appInfo && !isMission && (
                   <span className={`${appInfo.className} rounded-full px-2 py-0.5 text-xs shrink-0`}>
@@ -815,7 +838,7 @@ const Messages = () => {
                   </div>
                   <p className="text-sm font-medium text-foreground">Démarrez la conversation</p>
                   <p className="text-xs text-muted-foreground max-w-[220px] leading-relaxed">
-                    Présentez-vous et dites en quelques mots ce qui vous a amené à contacter {capitalize(activeConv.other_user?.first_name) || "cette personne"}.
+                    Présentez-vous et dites en quelques mots ce qui vous a amené à contacter {capitalize(getMemberDisplayName(activeConv.other_user, "cette personne"))}.
                   </p>
                 </div>
               )}

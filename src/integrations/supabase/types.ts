@@ -7487,6 +7487,10 @@ export type Database = {
         Args: { p_name: string; p_value: string }
         Returns: string
       }
+      anonymize_user_account: {
+        Args: { _new_email: string; _user_id: string }
+        Returns: Json
+      }
       apply_referral_reward: {
         Args: { p_referred_id: string }
         Returns: undefined
@@ -7845,6 +7849,15 @@ export type Database = {
         Returns: string[]
       }
       get_inventaire_counts: { Args: never; Returns: Json }
+      get_member_display: {
+        Args: { _ids: string[] }
+        Returns: {
+          avatar_url: string
+          first_name: string
+          id: string
+          is_deleted: boolean
+        }[]
+      }
       get_mission_author_public: {
         Args: { _mission_id: string }
         Returns: {

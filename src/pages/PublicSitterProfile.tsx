@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import { getMemberAvatarUrl, getMemberDisplayName, getMemberInitial } from "@/lib/memberUtils";
 
 import ProBadge from "@/components/badges/ProBadge";
 import { useParams, Link, useSearchParams, useNavigate } from "react-router-dom";
@@ -188,8 +189,8 @@ export default function PublicSitterProfile() {
   }) => (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
       {(showAll ? reviews : reviews.slice(0, 4)).map((r: any) => {
-        const authorName = capitalize(r.reviewer?.first_name || "Membre");
-        const avatarUrl = r.reviewer?.avatar_url || null;
+        const authorName = capitalize(getMemberDisplayName(r.reviewer, "Membre"));
+        const avatarUrl = getMemberAvatarUrl(r.reviewer);
         const reviewBadges = badgesBySitId && r.sit_id ? (badgesBySitId[r.sit_id] || []) : [];
         return (
           <article key={r.id} className="bg-card border border-border rounded-xl p-4 h-full">
@@ -851,10 +852,19 @@ export default function PublicSitterProfile() {
   }
 
   if (!profile && !ownerProfile) {
+    // Profil inexistant ou compte effacé (anonymisé) : état vide propre, jamais indexable.
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
+        <PageMeta
+          title="Profil indisponible"
+          description="Ce profil n'est plus disponible sur Guardiens."
+          noindex
+        />
         <div className="text-center">
-          <p className="text-lg font-semibold text-foreground">Profil introuvable</p>
+          <p className="text-lg font-semibold text-foreground">Profil indisponible</p>
+          <p className="text-sm text-muted-foreground mt-1">
+            Ce membre n'a plus de fiche publique.
+          </p>
           <Link to="/" className="text-sm text-primary hover:underline mt-2 block">
             Retour à l'accueil
           </Link>
@@ -862,6 +872,7 @@ export default function PublicSitterProfile() {
       </div>
     );
   }
+
 
   const firstName = capitalize(profile?.first_name || "");
   const city = profile?.city || "";
@@ -1991,14 +2002,15 @@ export default function PublicSitterProfile() {
                       return (
                         <article key={review.id} className="bg-card border border-border rounded-xl p-4 space-y-2">
                           <div className="flex items-center gap-2.5 flex-wrap">
-                            {review.reviewer?.avatar_url ? (
-                              <img src={review.reviewer.avatar_url} alt={review.reviewer.first_name} className="w-8 h-8 rounded-full object-cover shrink-0" />
+                            {getMemberAvatarUrl(review.reviewer) ? (
+                              <img src={getMemberAvatarUrl(review.reviewer)!} alt={getMemberDisplayName(review.reviewer, 'Gardien')} className="w-8 h-8 rounded-full object-cover shrink-0" />
                             ) : (
                               <div className="w-8 h-8 rounded-full bg-muted shrink-0 flex items-center justify-center text-xs font-bold text-foreground/40">
-                                {(review.reviewer?.first_name || '?').charAt(0).toUpperCase()}
+                                {getMemberInitial(review.reviewer)}
                               </div>
                             )}
-                            <span className="text-sm font-medium text-foreground font-body">{review.reviewer?.first_name || 'Gardien'}</span>
+                            <span className="text-sm font-medium text-foreground font-body">{getMemberDisplayName(review.reviewer, 'Gardien')}</span>
+
                             {stars > 0 && (
                               <span className="text-xs text-primary font-body tracking-wider" aria-label={`${stars} étoiles sur 5`}>
                                 {'★'.repeat(stars)}{'☆'.repeat(5 - stars)}

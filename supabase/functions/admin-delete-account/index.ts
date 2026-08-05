@@ -1,5 +1,10 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.4";
-import { finalizeErasure } from "../_shared/account-erasure.ts";
+import {
+  anonymizeAccount,
+  countActiveCommitments,
+  finalizeErasure,
+} from "../_shared/account-erasure.ts";
+
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -78,21 +83,12 @@ Deno.serve(async (req) => {
     let confirmedSits = 0;
     let pendingApplications = 0;
     if (userId) {
-      const [{ count: sitsCount }, { count: appsCount }] = await Promise.all([
-        adminClient
-          .from("sits")
-          .select("id", { count: "exact", head: true })
-          .eq("user_id", userId)
-          .eq("status", "confirmed"),
-        adminClient
-          .from("applications")
-          .select("id", { count: "exact", head: true })
-          .eq("sitter_id", userId)
-          .eq("status", "pending"),
-      ]);
-      confirmedSits = sitsCount ?? 0;
-      pendingApplications = appsCount ?? 0;
+
+      const commitments = await countActiveCommitments(adminClient, userId);
+      confirmedSits = commitments.sits;
+      pendingApplications = commitments.applications;
     }
+
     const blockers = confirmedSits + pendingApplications;
 
     if (action === "lookup") {
@@ -150,18 +146,8 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Cas 2 : compte existant. Accusé + suppression email AVANT la suppression du compte
-    // (l'accusé doit partir tant que l'adresse n'est pas encore bloquée).
-    const { acknowledged, suppressed } = await finalizeErasure(
-      adminClient,
-      profile?.email ?? rawEmail,
-      {
-        firstName: profile?.first_name ?? null,
-        metadata: { source: "admin_gdpr_request", user_id: userId },
-      },
-    );
-
-    // Trace de conformité écrite avant la suppression (user_id passe à NULL en cascade).
+    // Cas 2 : compte existant. Trace de conformité écrite d'abord, puis
+    // anonymisation (accusé de traitement, purge du stockage, neutralisation auth).
     const existing = typeof body?.requestId === "string" ? body.requestId : null;
     if (existing) {
       await adminClient.from("account_deletion_requests").update(trace).eq("id", existing);
@@ -172,16 +158,28 @@ Deno.serve(async (req) => {
       if (upErr) console.error("[admin-delete-account] trace échouée", upErr.message);
     }
 
-    const { error: delErr } = await adminClient.auth.admin.deleteUser(userId);
-    if (delErr) return json({ error: delErr.message }, 500);
+    const outcome = await anonymizeAccount(adminClient, userId, {
+      fallbackEmail: profile?.email ?? rawEmail,
+      source: "admin_gdpr_request",
+    });
+    const { acknowledged, suppressed } = outcome;
 
     await adminClient.from("admin_action_logs").insert({
       admin_id: callerId,
       action: "gdpr_account_erasure",
       target_type: "profile",
       target_id: userId,
-      note: `Effacement RGPD exécuté pour ${rawEmail}`,
-      metadata: { email: rawEmail, acknowledged, suppressed, forced: force },
+      note: `Anonymisation RGPD exécutée pour ${rawEmail}`,
+      metadata: {
+        email: rawEmail,
+        acknowledged,
+        suppressed,
+        forced: force,
+        storage_removed: outcome.storageRemoved,
+        storage_failures: outcome.storageFailures,
+        auth_neutralized: outcome.authNeutralized,
+      },
+
     });
 
     return json({ success: true, accountFound: true, userId, acknowledged, suppressed });
