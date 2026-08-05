@@ -45,6 +45,8 @@ interface AnnouncementPreviewDialogProps {
   propertyType: string | null;
   environments: string[];
   isUrgent: boolean;
+  /** Volume de gardiens qui seront prévenus à la publication, null si inconnu. */
+  audienceCount?: number | null;
 }
 
 const speciesEmoji: Record<string, string> = {
