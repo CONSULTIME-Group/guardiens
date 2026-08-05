@@ -57,7 +57,7 @@ function formatFrDate(iso?: string | null): string | undefined {
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders })
 
-  let body: { manual?: boolean; dry_run?: boolean; sitter_id?: string } = {}
+  let body: { manual?: boolean; dry_run?: boolean; sitter_id?: string; catchup?: boolean } = {}
   try {
     if (req.body) body = await req.json()
   } catch { /* empty body ok */ }
@@ -67,6 +67,26 @@ Deno.serve(async (req) => {
     Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!,
     { auth: { persistSession: false } },
   )
+
+  // Passage de rattrapage : unique, tracé, non rejouable. Le gabarit assume
+  // le rappel, le contrôle des 24h et la réservation de créneau sont sautés
+  // pour ce seul passage. Un second appel réel est refusé.
+  const CATCHUP_TAG = 'send-sitter-daily-digest-catchup-2026-08-05'
+  if (body.catchup && !body.dry_run) {
+    const { data: already } = await supabase
+      .from('cron_run_log')
+      .select('id')
+      .eq('edge_name', CATCHUP_TAG)
+      .limit(1)
+    if (already && already.length > 0) {
+      return json({ ok: false, reason: 'catchup_already_executed' }, 409)
+    }
+    await supabase.from('cron_run_log').insert({
+      edge_name: CATCHUP_TAG,
+      started_at: new Date().toISOString(),
+    })
+  }
+
 
   try {
     // 1. Récupère toutes les paires queued (filtrage optionnel par sitter)
