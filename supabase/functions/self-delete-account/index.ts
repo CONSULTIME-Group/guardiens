@@ -1,5 +1,8 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.4";
-import { finalizeErasure } from "../_shared/account-erasure.ts";
+import {
+  anonymizeAccount,
+  countActiveCommitments,
+} from "../_shared/account-erasure.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -8,16 +11,18 @@ const corsHeaders = {
 };
 
 /**
- * Suppression IMMÉDIATE et DÉFINITIVE du compte de l'appelant.
+ * Effacement du compte de l'appelant, par ANONYMISATION.
  *
- * Politique produit : plus de délai de grâce de 7 / 30 jours.
- * L'utilisateur confirme dans l'UI (tape "SUPPRIMER"), et son compte
- * auth.users est supprimé sur-le-champ (cascade sur profiles + reste).
+ * Le compte n'est plus détruit : les avis, conversations et messages
+ * appartiennent aussi aux tiers, et les textes publiés (CGU article 9,
+ * politique de confidentialité section 5) annoncent une conservation
+ * anonymisée. La ligne profiles est conservée, vidée de toute donnée
+ * personnelle, et le compte d'authentification est neutralisé.
  *
  * Sécurité :
  *  - Authentifie l'appelant via son JWT (c'est SON compte).
- *  - Vérifie qu'il n'a pas d'engagements actifs (garde-fou serveur en plus du client).
- *  - Supprime via service_role.
+ *  - Vérifie l'absence d'engagements actifs (le serveur fait foi).
+ *  - Écrit via service_role.
  */
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -51,42 +56,24 @@ Deno.serve(async (req) => {
 
     const adminClient = createClient(supabaseUrl, serviceKey);
 
-    // Garde-fou serveur : refuser si engagements actifs (gardes confirmées / candidatures pending).
-    const [{ count: sitsCount }, { count: appsCount }] = await Promise.all([
-      adminClient
-        .from("sits")
-        .select("id", { count: "exact", head: true })
-        .eq("user_id", caller.id)
-        .eq("status", "confirmed"),
-      adminClient
-        .from("applications")
-        .select("id", { count: "exact", head: true })
-        .eq("sitter_id", caller.id)
-        .eq("status", "pending"),
-    ]);
-    const activeCommitments = (sitsCount ?? 0) + (appsCount ?? 0);
-    if (activeCommitments > 0) {
+    // Garde-fou serveur, aligné sur le client : gardes confirmées ou en cours,
+    // candidatures en attente ou acceptées.
+    const commitments = await countActiveCommitments(adminClient, caller.id);
+    if (commitments.total > 0) {
       return new Response(
         JSON.stringify({
           error:
-            "Engagements actifs détectés. Finalisez ou annulez vos gardes confirmées et candidatures en attente avant de supprimer votre compte.",
+            "Engagements actifs détectés. Finalisez ou annulez vos gardes en cours et vos candidatures en attente avant de supprimer votre compte.",
+          confirmedSits: commitments.sits,
+          pendingApplications: commitments.applications,
         }),
         { status: 409, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
-    // Accusé de traitement RGPD + mise en liste de blocage de l'adresse.
-    // Fait AVANT la suppression : l'email doit partir tant que l'adresse n'est
-    // pas encore dans suppressed_emails, et le profil est encore lisible.
-    const { data: prof } = await adminClient
-      .from("profiles")
-      .select("email, first_name")
-      .eq("id", caller.id)
-      .maybeSingle();
-    const targetEmail = (prof as { email?: string } | null)?.email ?? caller.email ?? null;
-    await finalizeErasure(adminClient, targetEmail, {
-      firstName: (prof as { first_name?: string } | null)?.first_name ?? null,
-      metadata: { source: "self_delete", user_id: caller.id },
+    const outcome = await anonymizeAccount(adminClient, caller.id, {
+      fallbackEmail: caller.email ?? null,
+      source: "self_delete",
     });
 
     // Trace de conformité : demande marquée "completed" pour l'historique.
@@ -95,7 +82,7 @@ Deno.serve(async (req) => {
       .upsert(
         {
           user_id: caller.id,
-          requester_email: targetEmail,
+          requester_email: outcome.email,
           source: "self",
           status: "completed",
           processed_at: new Date().toISOString(),
@@ -104,18 +91,19 @@ Deno.serve(async (req) => {
         { onConflict: "user_id" }
       );
 
-    const { error: delErr } = await adminClient.auth.admin.deleteUser(caller.id);
-    if (delErr) {
-      return new Response(JSON.stringify({ error: delErr.message }), {
-        status: 500,
+    return new Response(
+      JSON.stringify({
+        success: true,
+        anonymized: true,
+        storageRemoved: outcome.storageRemoved,
+        storageFailures: outcome.storageFailures,
+        authNeutralized: outcome.authNeutralized,
+      }),
+      {
+        status: 200,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
-
-    return new Response(JSON.stringify({ success: true }), {
-      status: 200,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+      },
+    );
   } catch (e) {
     return new Response(
       JSON.stringify({ error: e instanceof Error ? e.message : String(e) }),
