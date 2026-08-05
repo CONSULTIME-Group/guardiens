@@ -7849,6 +7849,15 @@ export type Database = {
         Returns: string[]
       }
       get_inventaire_counts: { Args: never; Returns: Json }
+      get_member_display: {
+        Args: { _ids: string[] }
+        Returns: {
+          avatar_url: string
+          first_name: string
+          id: string
+          is_deleted: boolean
+        }[]
+      }
       get_mission_author_public: {
         Args: { _mission_id: string }
         Returns: {
