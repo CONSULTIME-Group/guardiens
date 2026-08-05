@@ -1,0 +1,252 @@
+src/pages/CityPage.tsx:179: ? `${stats.guardiansCount} gardien${stats.guardiansCount > 1 ? "s" : ""} inscrit${stats.guardiansCount > 1 ? "s" : ""} en ${cityData.department} · Gratuit pour les propriétaires`
+src/pages/CityPage.tsx:180: : `Gardiens inscrits en ${cityData.department} · Gratuit pour les propriétaires`)
+src/pages/CityPage.tsx:214: {" · Gratuit pour les propriétaires"}
+src/pages/CityPage.tsx:224: Gratuit propriétaires
+src/pages/CityPage.tsx:289: <h3 className="font-semibold text-foreground">Gratuit pour les propriétaires</h3>
+src/pages/CityPage.tsx:527:            description: "Gratuit pour les propriétaires.",
+supabase/functions/generate-longtail-article/index.ts:69:Au-delà des gardes longues, il existe aussi un mode d'entraide plus léger pour les petits besoins du quotidien : promenade ponctuelle, visite courte, dépannage. Ces coups de main entre gens du coin sont gratuits et peuvent rendre service quand vous avez un imprévu. Découvrez [comment ça fonctionne](/coup-de-main).
+supabase/functions/create-checkout-session/index.ts:170:      // Le seul "trial Stripe" encore utilisé = accès gratuit Fondateur jusqu'au 14/07/2026
+supabase/functions/refresh-articles-post-pivot/validator.ts:12:  { pattern: /gratuit\s+jusqu['’]au/i, label: "gratuit jusqu'au" },
+supabase/functions/refresh-articles-post-pivot/validator.ts:13:  { pattern: /période\s+gratuite/i, label: "période gratuite" },
+supabase/functions/refresh-articles-post-pivot/validator.ts:15:  { pattern: /essai\s+gratuit/i, label: "essai gratuit" },
+supabase/functions/refresh-articles-post-pivot/validator.ts:16:  { pattern: /profitez\s+de\s+la\s+gratuité/i, label: "profitez de la gratuité" },
+supabase/functions/refresh-articles-post-pivot/validator.ts:21:  { pattern: /gratuitement/i, label: "gratuitement" },
+supabase/functions/refresh-articles-post-pivot/pillars.ts:15:  "Guardiens reste gratuit tant que nous ne sommes pas satisfaits du service que nous vous offrons. Vous avez accès à tout, sans limite, sans engagement. Vous serez prévenu à l'avance quand cela changera.";
+supabase/functions/refresh-articles-post-pivot/pillars.ts:17:export const PRICING_BASELINE_SHORT = "Guardiens est gratuit aujourd'hui, sans engagement.";
+supabase/functions/refresh-articles-post-pivot/index.ts:25:- Interdits stricts : "voisin", "voisinage", "à vie", "gratuitement", "essai" (sous toutes ses formes, dont "période d'essai"), "période gratuite", "gratuit jusqu'au", tiret cadratin (—), tiret demi-cadratin (–) en ponctuation de phrase.
+supabase/functions/refresh-articles-post-pivot/index.ts:28:- Le mot "gratuit" est autorisé, "gratuitement" est interdit.
+supabase/functions/refresh-articles-post-pivot/index.ts:29:- "0 €" en contexte pricing devient "Gratuit".
+supabase/functions/generate-city-page/index.ts:221:- Propriétaires : gratuit. Gardiens : gratuit aujourd'hui, sans engagement. Aucune commission par garde. Service gratuit jusqu'à nouvel ordre.
+supabase/functions/generate-city-page/index.ts:231:- Préférez « gratuit » à « 0 € ». Pas de « à vie » ni « pour toujours ».
+supabase/functions/generate-city-page/index.ts:232:- Ne mentionnez AUCUN prix d'abonnement (ni 6,99 €, ni 10 €, ni 65 €, ni 9 €) ni date de fin de gratuité.
+supabase/functions/generate-city-page/index.ts:249:  "meta_description": "140-160 caractères, incite à l'inscription gratuite",
+supabase/functions/generate-city-page/index.ts:294:(un paragraphe factuel : Guardiens est gratuit pour les propriétaires et pour les gardiens aujourd'hui, sans engagement, aucune commission par garde. Lien [tarifs](/tarifs). AUCUN montant, AUCUNE date.)
+supabase/functions/generate-city-page/index.ts:300:(5 à 6 questions au format **Question ?** + réponse 2-3 phrases : rencontre préalable, urgence, animaux à besoins spécifiques, durée min/max, vérification d'identité, sécurité du logement. Aucune question sur les prix d'abonnement ou une date de fin de gratuité.)`;
+supabase/functions/generate-city-page/index.ts:387:      meta_description: generated.meta_description || existing?.meta_description || `Trouvez un gardien de confiance à ${city}. Inscription gratuite, gardiens vérifiés.`,
+supabase/functions/backfill-profile-coordinates/index.ts:5: * Gratuit, illimité, officiel, sans clé. Couvre 100 % des CP français.
+src/pages/Cgs.tsx:10:        description="Conditions Générales de Services Guardiens : gratuité actuelle, fonctionnalités incluses, passage éventuel à un modèle payant et résiliation."
+src/pages/Cgs.tsx:28:          <h2 className="font-heading text-xl font-bold text-foreground pt-4">2. Gratuité actuelle du service</h2>
+src/pages/Cgs.tsx:30:            À la date des présentes, Guardiens est fourni à titre entièrement gratuit à ses utilisateurs, propriétaires comme gardiens. Aucune somme n'est perçue auprès des membres de la Plateforme. Aucune carte bancaire n'est demandée à l'inscription. Aucune limite d'usage n'est appliquée.
+src/pages/Cgs.tsx:33:            Cette gratuité est un choix éditorial délibéré, motivé par la volonté de faire mûrir le service et de valider sa qualité avant toute demande de contrepartie financière.
+src/pages/Cgs.tsx:49:            Guardiens repose sur un échange de bons procédés à titre non lucratif entre membres (garde d'animaux contre hébergement à titre gratuit, entraide locale par échange en nature). Aucun échange d'argent n'est autorisé entre membres via la Plateforme, quel qu'en soit le motif. Tout contournement expose le compte à une suspension immédiate.
+src/pages/Cgs.tsx:63:            <li>Le maintien éventuel d'un niveau gratuit</li>
+src/pages/Observatoire.tsx:414: Les gardiens accèdent aujourd'hui à toutes les fonctionnalités sans abonnement. <strong>Guardiens reste gratuit tant que nous ne sommes pas satisfaits du service que nous vous offrons. Vous avez accès à tout, sans limite, sans engagement. Vous serez prévenu à l'avance quand cela changera.</strong> Aucune commission n'est prélevée sur les échanges, parce qu'il n'y a pas de transaction financière entre membres : l'échange repose sur la garde du logement contre la garde des animaux.
+src/pages/BreedPage.tsx:155:        "Pour les propriétaires, Guardiens est gratuit : aucun frais, aucune commission. L'accès gardien est également gratuit aujourd'hui, sans engagement.",
+src/pages/MySubscription.tsx:11: * Pivot pricing "gratuit sans deadline" : tant que PRICING_IS_ACTIVE = false,
+src/pages/MySubscription.tsx:23:        description="Vous avez accès complet à Guardiens gratuitement. Aucun abonnement à gérer aujourd'hui."
+src/pages/AuditTarifs.tsx:71:  // -------- Propriétaire (gratuit) --------
+src/pages/ArticleInventaire.tsx:124:          text: "Non. Les propriétaires ne paient rien, jamais. L'espace gardien est également gratuit aujourd'hui, sans engagement, sans commission sur les gardes.",
+src/pages/ArticleInventaire.tsx:295:                Depuis 2021, en tant que fondateurs, nous avons accompagné 234 animaux et gardé 37 maisons. Cette période a servi à valider une intuition simple : la garde à domicile, gratuite pour les propriétaires, tient debout quand la confiance est bâtie en amont. Vérification d'identité, avis croisés, badges publics, Trust Score : rien de tout cela n'est cosmétique.
+src/pages/ArticleDetail.tsx:446: "description": "Accès gardien gratuit aujourd'hui, sans engagement.",
+src/pages/ArticleDetail.tsx:466: "priceRange": "Gratuit pour les propriétaires",
+supabase/functions/send-mass-email-proximity/index.ts:138:<p style="margin:0 0 14px;font-size:15px;line-height:1.7;color:#3a3a3a">Sur Guardiens, il n'y a pas que la garde de maison. Il y a aussi l'entraide, gratuite, entre gens du coin.</p>
+supabase/functions/send-mass-email-proximity/index.ts:165:    ? `Près de chez vous, ${who} propose son aide, gratuitement`
+supabase/functions/og-sit/index.ts:233:                  children: `Publiée par ${ownerFirstName} — Du coin ou d'ailleurs en France · Garde gratuite`,
+src/pages/MentionsLegales.tsx:99:            <strong className="text-foreground">Médiation de la consommation</strong> : le service Guardiens est, à la date des présentes, fourni à titre entièrement gratuit à ses utilisateurs. Aucune somme n'est perçue auprès des consommateurs. Le dispositif de médiation de la consommation prévu aux articles L. 611-1 et suivants du Code de la consommation s'applique aux litiges nés de l'exécution d'un contrat de vente ou de fourniture de services à titre onéreux entre un professionnel et un consommateur. En l'absence de relation contractuelle onéreuse, Guardiens n'est pas tenu, à ce stade, de désigner un médiateur de la consommation. Un médiateur agréé par la Commission d'évaluation et de contrôle de la médiation de la consommation (CECMC) sera désigné préalablement à l'ouverture de toute offre payante destinée aux consommateurs.
+src/i18n/locales/it/common.json:216:      "a1": "L'house-sitting è uno scambio di servizi: un custode abita gratuitamente nella Sua casa durante la Sua assenza e si prende cura dei Suoi animali. Lo scambio non implica alcuna transazione finanziaria tra le due parti.",
+src/i18n/locales/it/common.json:218:      "a2": "L'iscrizione, la pubblicazione di annunci e gli scambi con i custodi non richiedono abbonamento per i proprietari. Nessuna carta di credito richiesta. Guardiens resta gratuito finché non siamo soddisfatti del servizio che Le offriamo. Ha accesso completo, senza limiti, senza impegno.",
+src/i18n/locales/it/common.json:452:    "pricing_cta_text": "Gratuito per Lei, senza impegno.",
+src/i18n/locales/it/common.json:455:    "meta_description": "Tutte le Sue domande su Guardiens, abbonamento custode, spazio proprietario gratuito, passaparola e piccoli aiuti di reciproco soccorso.",
+src/i18n/locales/it/common.json:474:      "title_after": "Tariffe, gratuito per proprietari · {{price}}",
+src/i18n/locales/it/common.json:476:      "desc_after": "Gratuito per i proprietari. {{price}} per i custodi, senza impegno. Senza commissioni, senza costi nascosti."
+src/i18n/locales/it/common.json:485:      "lede_after": "Gratuito per i proprietari. {{price}} per i custodi, senza impegno. Tutto qui.",
+src/i18n/locales/it/common.json:486:      "cta_owner": "Pubblicare il mio annuncio, gratuitamente",
+src/i18n/locales/it/common.json:490:      "title": "Accesso gratuito fino al {{date}}",
+src/i18n/locales/it/common.json:491:      "text": "I primi membri mantengono l'accesso gratuito, senza impegno."
+src/i18n/locales/it/common.json:494:      "badge": "Sempre gratuito",
+src/i18n/locales/it/common.json:496:      "price": "Gratuito",
+src/i18n/locales/it/common.json:513:      "price_free": "Gratuito",
+src/i18n/locales/it/common.json:514:      "free_until": "Gratuito per tutti",
+src/i18n/locales/it/common.json:546:      "note_visitor": "Iscrizione gratuita. Nessuna carta di credito prima della sottoscrizione di una formula.",
+src/i18n/locales/it/common.json:553:      "free_tag": "Gratuito per tutti",
+src/i18n/locales/it/common.json:567:        "mutual_val": "Gratuito",
+src/i18n/locales/it/common.json:780:    "explore_missions_desc": ", aiuti locali, gratuiti",
+src/i18n/locales/it/common.json:783:    "explore_pricing_desc": "Gratuito per tutti, senza impegno.",
+src/i18n/locales/it/common.json:793:    "beta_note": "Elenco in fase beta, arrivano le prime schede. Sei un professionista? L'iscrizione è gratuita e la tua scheda viene convalidata entro 48 h.",
+src/i18n/locales/it/common.json:815:    "meta_description": "Annunci di pet-sitting a domicilio fuori dalla Francia: Marocco, Spagna, Belgio, Svizzera, Portogallo e oltre. Consultazione libera, iscrizione gratuita per candidarsi.",
+src/i18n/locales/it/common.json:1174:    "faq4_a": "Per i proprietari, l'iscrizione e l'uso di Guardiens (compresa l'allerta d'urgenza) sono gratuiti. Nessun supplemento rispetto a una custodia classica.",
+src/i18n/locales/it/common.json:1525:    "hint": "Consultazione libera · Iscrizione gratuita per candidarsi",
+src/i18n/locales/fr/common.json:223:      "a2": "Guardiens reste gratuit tant que nous ne sommes pas satisfaits du service que nous vous offrons. Vous avez accès à tout, sans limite, sans engagement. Vous serez prévenu à l'avance quand cela changera.",
+src/i18n/locales/fr/common.json:233:      "a7": "Guardiens reste gratuit tant que nous ne sommes pas satisfaits du service que nous vous offrons. Vous avez accès à tout, sans limite, sans engagement. Vous serez prévenu à l'avance quand cela changera.",
+src/i18n/locales/fr/common.json:460:    "meta_description": "Toutes vos questions sur Guardiens, abonnement gardien, espace propriétaire gratuit, parrainage et petites missions d'entraide.",
+src/i18n/locales/fr/common.json:478:      "title_before": "Tarifs, gratuits jusqu'au {{date}}",
+src/i18n/locales/fr/common.json:479:      "title_after": "Tarifs, gratuit propriétaires · {{price}}",
+src/i18n/locales/fr/common.json:481:      "desc_after": "Gratuit pour les propriétaires. {{price}} pour les gardiens, sans engagement. Sans commission, sans frais cachés."
+src/i18n/locales/fr/common.json:490:      "lede_after": "Gratuit pour les propriétaires. {{price}} pour les gardiens, sans engagement. C'est tout.",
+src/i18n/locales/fr/common.json:491:      "cta_owner": "Publier mon annonce, gratuitement",
+src/i18n/locales/fr/common.json:496:      "text": "Les premiers membres bénéficient d'un accès gratuit, sans engagement."
+src/i18n/locales/fr/common.json:499:      "badge": "Toujours gratuit",
+src/i18n/locales/fr/common.json:501:      "price": "Gratuit",
+src/i18n/locales/fr/common.json:518:      "price_free": "Gratuit",
+src/i18n/locales/fr/common.json:547:      "cta_monthly": "Accéder gratuitement",
+src/i18n/locales/fr/common.json:551:      "note_visitor": "Inscription gratuite. Aucune carte bancaire avant la souscription d'une formule.",
+src/i18n/locales/fr/common.json:558:      "free_tag": "Gratuit pour tous",
+src/i18n/locales/fr/common.json:572:        "mutual_val": "Gratuit",
+src/i18n/locales/fr/common.json:774:    "meta_description": "Toutes les annonces de garde de chats, chiens et NAC à domicile, partout en France. Filtres par ville, département et critères, carte en direct. Consultation libre, inscription gratuite pour postuler.",
+src/i18n/locales/fr/common.json:791:    "explore_missions_desc": ", coups de main de proximité, gratuits",
+src/i18n/locales/fr/common.json:794:    "explore_pricing_desc": "Gratuit pour tous, sans engagement.",
+src/i18n/locales/fr/common.json:826:    "meta_description": "Annonces de garde d'animaux à domicile hors de France : Maroc, Espagne, Belgique, Suisse, Portugal et plus. Consultation libre, inscription gratuite pour postuler.",
+src/i18n/locales/fr/common.json:1389:    "free_badge": "Gratuit, pour tout le monde.",
+src/i18n/locales/fr/common.json:1548:    "section_lede": "Découvrez les propriétaires qui cherchent un gardien partout en France. Consultez les annonces librement, inscrivez-vous gratuitement pour postuler.",
+src/i18n/locales/fr/common.json:1550:    "hint": "Consultation libre · Inscription gratuite pour postuler",
+src/i18n/locales/es/common.json:218:      "a2": "El registro, la publicación de anuncios y los intercambios con los cuidadores no requieren suscripción para los propietarios. No se solicita tarjeta bancaria. Guardiens sigue siendo gratuito mientras no estemos satisfechos con el servicio que le ofrecemos. Usted tiene acceso completo, sin límites, sin compromiso.",
+src/i18n/locales/es/common.json:455:    "meta_description": "Todas sus preguntas sobre Guardiens, suscripción de cuidador, espacio gratuito para propietarios, patrocinio y pequeños favores de ayuda mutua.",
+src/i18n/locales/es/common.json:484:      "lede_before": "Hasta el {{date}}, el acceso completo es gratuito para cuidadores y propietarios. No se solicita tarjeta bancaria.",
+src/i18n/locales/es/common.json:486:      "cta_owner": "Publicar mi anuncio, gratuitamente",
+src/i18n/locales/es/common.json:490:      "title": "Acceso gratuito hasta el {{date}}",
+src/i18n/locales/es/common.json:491:      "text": "Los primeros miembros mantienen su acceso gratuito, sin compromiso."
+src/i18n/locales/es/common.json:546:      "note_visitor": "Inscripción gratuita. Sin tarjeta bancaria hasta la contratación de una fórmula.",
+src/i18n/locales/es/common.json:793:    "beta_note": "Directorio en fase beta, llegan las primeras fichas. ¿Es profesional? La inscripción es gratuita y su ficha se valida en 48 h.",
+src/i18n/locales/es/common.json:815:    "meta_description": "Anuncios de cuidado de animales a domicilio fuera de Francia: Marruecos, España, Bélgica, Suiza, Portugal y más. Consulta libre, registro gratuito para postular.",
+src/i18n/locales/es/common.json:1174:    "faq4_a": "Para los propietarios, la inscripción y el uso de Guardiens (incluida la alerta de urgencia) son gratuitos. No se aplica ningún suplemento por una guardia de urgencia frente a una clásica.",
+src/i18n/locales/es/common.json:1525:    "hint": "Consulta libre · Registro gratuito para postular",
+src/config/pricing.ts:2: * Guardiens reste gratuit tant que Jérémie considère que le service
+src/config/pricing.ts:16:// Prorata prévu pour les inscrits "période gratuite" au moment de la bascule.
+src/config/articles-post-pivot.ts:25:  "Guardiens reste gratuit tant que nous ne sommes pas satisfaits du service que nous vous offrons. Vous avez accès à tout, sans limite, sans engagement. Vous serez prévenu à l'avance quand cela changera.";
+src/config/articles-post-pivot.ts:27:export const PRICING_BASELINE_SHORT = "Guardiens est gratuit aujourd'hui, sans engagement.";
+src/hooks/useSubscriptionAccess.ts:17: * Du 14 juin au 30 septembre 2026 inclus : gratuité pour TOUS (fondateurs ou non).
+src/hooks/useSubscriptionAccess.ts:76:          // Gratuité pour tous jusqu'au 30 septembre 2026, fondateurs ou non
+src/pages/AlmaTips.tsx:483:              Guardiens reste gratuit tant que nous ne sommes pas satisfaits du service
+src/pages/EmailPreferences.tsx:158:                    dans un rayon de 30 km autour de chez vous. L'entraide reste gratuite.
+src/hooks/useSitterPriorityAction.ts:18: * `useSitterDashboardData` pour rester gratuit.
+src/lib/analytics.ts:126:  // Pivot pricing "gratuit sans deadline" -----------------------------------
+supabase/functions/draft-sit-from-prompt/index.ts:19:const PROSCRIBED = /(voisin(e|s|age)?|gratuit à vie|pour toujours|période d'essai|programme fondateur|auvergne-rhône-alpes|\bAURA\b)/i;
+src/pages/DevenirHomeSitter.tsx:22:        { "@type": "HowToStep", position: 1, name: "Créer votre profil gardien", text: "Inscrivez-vous gratuitement, complétez votre bio, ajoutez vos expériences avec les animaux et vérifiez votre identité." },
+src/pages/DevenirHomeSitter.tsx:45:            text: "Sur Guardiens, les gardes à domicile s'organisent comme des échanges de services entre particuliers, sans transaction financière directe via la plateforme. Vous bénéficiez gratuitement du logement et de la confiance des propriétaires, eux d'une garde de qualité pour leurs animaux.",
+src/pages/DevenirHomeSitter.tsx:134:                <strong>Créer votre profil.</strong> Inscription gratuite. Photo
+src/pages/DevenirHomeSitter.tsx:164:              directe via la plateforme. Vous bénéficiez gratuitement du
+src/pages/DevenirHomeSitter.tsx:218:                Créez votre profil gratuitement et candidatez aux gardes près
+src/pages/DevenirHomeSitter.tsx:219:                de chez vous. Accès gardien gratuit aujourd'hui, sans engagement.
+src/pages/DepartmentPage.tsx:389: description: "Gratuit pour les propriétaires, sans abonnement requis.",
+src/pages/DemoSitDetail.tsx:473: Sur Guardiens, c'est gratuit pour les propriétaires, entre gens du coin
+src/hooks/useAccessLevel.ts:10: * 3B — Propriétaire, identité vérifiée (gratuit)
+src/pages/EntraideHub.tsx:111:      "Celles et ceux qui proposent leur temps ou leurs compétences gratuitement, près de chez vous.",
+src/lib/pricing.ts:26:    : "Gratuit";
+src/lib/pricing.ts:30:  return PRICING_IS_ACTIVE ? `${SITTER_PRICE_YEARLY}${NBSP}€/an` : "Gratuit";
+src/lib/pricing.ts:34:  return PRICING_IS_ACTIVE ? `${CFG_SITTER_PRICE_ONESHOT}${NBSP}€` : "Gratuit";
+src/lib/pricing.ts:38:  return "Gratuit";
+src/lib/pricing.ts:42:  return "Guardiens reste gratuit tant que nous ne sommes pas satisfaits du service que nous vous offrons. Vous avez accès à tout, sans limite, sans engagement. Vous serez prévenu à l'avance quand cela changera.";
+src/lib/pricing.ts:52:export const OWNER_PRICE = "Gratuit";
+src/lib/pricing.ts:85:  "Guardiens reste gratuit tant que nous ne sommes pas satisfaits du service que nous vous offrons. Vous avez accès à tout, sans limite, sans engagement. Vous serez prévenu à l'avance quand cela changera.";
+src/pages/admin/AdminMassEmails.tsx:45:const SPAM_TRIGGERS = ["gratuit", "urgent", "gagnez", "cliquez ici", "promo", "offre limitée", "100%", "argent facile", "félicitations"];
+src/pages/admin/AdminMassEmails.tsx:73:Pourtant, autour de vous, il y a des gens prêts à donner un coup de main, gratuitement, simplement, parce que ça leur fait plaisir.
+src/pages/admin/AdminMassEmails.tsx:90:const ENTRAIDE_SUBJECT = "L'entraide entre gardiens, c'est ici et c'est gratuit";
+src/pages/admin/AdminMassEmails.tsx:101:L'essentiel reste le même : poser une question, échanger, recevoir de l'aide. C'est simple, c'est humain, et c'est gratuit.
+src/pages/admin/AdminMassEmails.tsx:103:Cet espace est gratuit. Il le restera toujours. C'est l'essence même du site : l'entraide et le réseau entre gens qui aiment les animaux.
+src/pages/admin/AdminMassEmails.tsx:142:    label: "Entraide gratuite",
+src/pages/admin/AdminMassEmails.tsx:151:    utmCampaign: "entraide-gratuite-2025-07",
+src/pages/admin/AdminMassEmails.tsx:567:                    placeholder="Ex : gratuit, 3 minutes, exemples concrets"
+src/components/missions/PublicMissionView.tsx:114:      "Coup de main entre particuliers, gratuit et sans engagement.",
+src/components/missions/PublicMissionView.tsx:459:              Une heure offerte aujourd'hui, et c'est parfois une rencontre, une amitié, une saison qui s'invente. Inscrivez-vous gratuitement pour entrer en contact.
+src/components/missions/PublicMissionView.tsx:464:                  Créer mon compte gratuit
+src/components/missions/PublicMissionView.tsx:497:            Proposer mon aide, gratuit
+src/lib/refreshArticleValidator.ts:14:  { pattern: /gratuit\s+jusqu['’]au/i, label: "gratuit jusqu'au" },
+src/lib/refreshArticleValidator.ts:15:  { pattern: /période\s+gratuite/i, label: "période gratuite" },
+src/lib/refreshArticleValidator.ts:17:  { pattern: /essai\s+gratuit/i, label: "essai gratuit" },
+src/lib/refreshArticleValidator.ts:18:  { pattern: /profitez\s+de\s+la\s+gratuité/i, label: "profitez de la gratuité" },
+src/lib/refreshArticleValidator.ts:23:  { pattern: /gratuitement/i, label: "gratuitement" },
+src/pages/Terms.tsx:116:          <p>Le house-sitting tel que proposé sur Guardiens repose sur un échange de bons procédés (garde d'animaux contre hébergement à titre gratuit) à titre non lucratif. Il ne constitue pas&nbsp;:</p>
+src/pages/Terms.tsx:121:            <li>un hébergement touristique soumis à la taxe de séjour (occupation à titre gratuit, sans transaction financière directe).</li>
+src/pages/Terms.tsx:127:            <li>vérifier que leur assurance multirisque habitation (MRH) couvre la présence d'un tiers occupant le logement à titre gratuit, et de souscrire une extension le cas échéant&nbsp;;</li>
+src/pages/Terms.tsx:214:          <p>Les utilisateurs conservent l'intégralité de leurs droits sur les contenus qu'ils publient. Ils accordent à Guardiens, conformément à l'article L.&nbsp;131-3 du CPI, une licence non exclusive, gratuite, pour le monde entier, pour la durée strictement nécessaire à la diffusion sur la Plateforme, augmentée d'un délai technique maximal de 30 jours permettant la purge des sauvegardes, aux seules fins&nbsp;:</p>
+src/pages/Terms.tsx:250:          <p>Sans préjudice des cas visés au 13.3, et conformément à l'article 1231-3 du Code civil, la responsabilité totale de Guardiens envers un utilisateur, tous chefs de préjudices confondus et toutes causes confondues, est expressément limitée au montant des sommes effectivement versées par cet utilisateur à Guardiens au titre des douze (12) derniers mois précédant le fait générateur du dommage. Pour les utilisateurs n'ayant versé aucune somme (Propriétaires, comptes non abonnés ou en période de gratuité de lancement), ce plafond est fixé à cent (100) euros.</p>
+src/pages/SearchPage.tsx:24:  "Découvrez toutes les annonces de garde de chats, chiens et NAC à domicile, partout en France. Consultation libre, inscription gratuite pour postuler.";
+src/pages/SearchPage.tsx:98:                <Link to="/inscription">Inscription gratuite</Link>
+src/pages/Settings.tsx:1131:          <p className="text-xs text-muted-foreground mt-1">L'espace propriétaire est gratuit.</p>
+src/pages/Settings.tsx:1138:              L'espace gardien est gratuit aujourd'hui, sans engagement. Vous serez prévenu à l'avance en cas d'évolution tarifaire.
+src/pages/Settings.tsx:1145:          <p className="text-xs text-muted-foreground mt-1">L'entraide est gratuite, sans frais ni commission.</p>
+src/pages/SmallMissionDetail.tsx:942:            <span className="inline-flex items-center gap-1"><CheckCircle2 className="h-3 w-3" /> Gratuit, entre membres</span>
+src/pages/SmallMissionDetail.tsx:976:            "Coup de main entre particuliers, gratuit et sans engagement.",
+src/pages/Parrainage.tsx:114:        description="Invitez vos proches à rejoindre Guardiens. Inscription gratuite, accès offert pour vous et votre filleul à l'activation de l'abonnement gardien."
+src/pages/Parrainage.tsx:267:              <li>Votre filleul crée son compte gratuitement via votre lien.</li>
+src/pages/PublicSitDetail.tsx:451:  const seoDescription = `Garde à ${cityForTitle} ${datesShort}. ${petsSummary}. ${owner?.first_name || "Un membre"} cherche un gardien du coin sur Guardiens, inscription gratuite pour les propriétaires.`;
+src/pages/PublicSitDetail.tsx:505:  description: "Gratuit pour les propriétaires, sans abonnement requis.",
+src/pages/Pricing.tsx:28:    a: "Gratuit aujourd'hui. Nous facturerons quand le service aura atteint le niveau que nous voulons vous offrir. Vous serez informé à l'avance.",
+src/pages/Pricing.tsx:32:    q: "Pourquoi c'est gratuit maintenant ?",
+src/pages/Pricing.tsx:66:        description="Guardiens reste gratuit tant que nous ne sommes pas satisfaits du service. Accès complet, sans engagement, sans carte bancaire."
+src/pages/Pricing.tsx:90:                Guardiens reste gratuit aujourd'hui
+src/pages/admin/AdminSettings.tsx:657:                  Fondateur (gratuit).
+src/pages/admin/AdminSettings.tsx:665:                <p className="text-sm font-medium">Espace propriétaire gratuit</p>
+src/pages/admin/AdminSettings.tsx:667:                  L'espace propriétaire est gratuit, sans limite de durée.
+src/pages/admin/AdminSettings.tsx:677:                  Les petites missions d'entraide sont gratuites pour tous, sans limite.
+src/pages/admin/AdminSettings.tsx:680:              <Badge variant="default" className="text-xs">Gratuit</Badge>
+src/data/siteRoutes.ts:133:		metaDescription: "Guardiens est gratuit aujourd'hui pour les propriétaires comme pour les gardiens, sans engagement, sans commission, sans frais cachés.",
+src/data/siteRoutes.ts:205:   metaDescription: "Toutes les annonces de garde de chats, chiens et NAC à domicile, partout en France. Filtres par ville, département et critères. Consultation libre, inscription gratuite pour postuler.",
+src/data/siteRoutes.ts:214:   metaDescription: "Découvrez les gardes d'animaux à domicile près de chez vous : chats, chiens, NAC. Consultez les annonces en libre accès, postulez après inscription gratuite.",
+src/data/siteRoutes.ts:250: title: "Inscription, créer un compte gratuit | Guardiens",
+src/data/siteRoutes.ts:251: metaDescription: "Rejoignez la communauté Guardiens. Inscription gratuite pour tous, aujourd'hui et sans deadline. Ni carte bancaire, ni engagement.",
+src/pages/admin/AdminSubscriptions.tsx:20:  free_launch: { label: "Lancement gratuit", color: "bg-success-soft text-success" },
+src/pages/admin/AdminSubscriptions.tsx:21:  owner_free: { label: "Proprio gratuit", color: "bg-muted text-muted-foreground" },
+src/pages/admin/AdminSubscriptions.tsx:134:      toast.success("Rétrogradé en gratuit");
+src/pages/admin/AdminSubscriptions.tsx:241:              <p className="text-2xl font-bold">Gratuit</p>
+src/pages/admin/AdminSubscriptions.tsx:242:              <p className="text-xs text-muted-foreground">Revenus (offre gratuite pour l'instant)</p>
+src/pages/admin/AdminSubscriptions.tsx:270:            <SelectItem value="free_launch">Lancement gratuit</SelectItem>
+src/pages/admin/AdminSubscriptions.tsx:271:            <SelectItem value="owner_free">Proprio gratuit</SelectItem>
+src/pages/admin/AdminSubscriptions.tsx:360:              {actionModal.action === "offer_premium" && "Offrir Premium gratuit"}
+src/pages/admin/AdminSubscriptions.tsx:364:              {actionModal.action === "downgrade" && "Rétrograder en gratuit"}
+src/data/missionsCityContent.ts:69:      a: "Non. Les petites missions d'entraide sont accessibles à tous les membres inscrits sur Guardiens, sans abonnement et sans frais. L'espace gardien, pour les longues gardes à domicile, est également gratuit aujourd'hui, sans engagement.",
+supabase/functions/_shared/transactional-email-templates/summer-listing-reminder.tsx:20:      <Preview>L'arrosage, les animaux, la surveillance : tout est gratuit sur Guardiens.</Preview>
+supabase/functions/_shared/transactional-email-templates/summer-listing-reminder.tsx:30:            Sur {SITE_NAME}, publier votre besoin est simple et entièrement gratuit.
+src/components/missions/ExchangePactBanner.tsx:13: * Ton vouvoiement, pas d'euro, pas d'engagement, mention gratuité.
+supabase/functions/_shared/transactional-email-templates/sitter-mutual-aid-invite.tsx:36:            C'est gratuit, sans engagement, et souvent l'occasion de faire une belle rencontre près de chez vous.
+supabase/functions/_shared/transactional-email-templates/_alma-signoff.tsx:33:    <Text style={pricing}>Gratuit pour vous, sans engagement.</Text>
+supabase/functions/_shared/transactional-email-templates/mission-daily-digest.tsx:69:          de 30 km autour de chez vous. L'entraide est gratuite et sans engagement.
+src/data/cityContent.ts:43:Le house-sitting (parfois appelé home sitting en français), c'est la solution de bon sens : un gardien du coin vient chez vous, s'occupe de vos animaux dans leur environnement, arrose le jardin, et veille sur la maison. **Gratuit pour le propriétaire. Logement offert pour le gardien.**
+src/data/cityContent.ts:66:| **Coût** | 25-45 €/jour | Gratuit |
+src/data/cityContent.ts:78: content: `**1. Inscrivez-vous**, gratuitement en 2 minutes, que vous soyez propriétaire ou gardien.
+src/data/cityContent.ts:219:**Aucune commission sur les gardes.** Guardiens ne prélève aucun pourcentage sur les gardes. Guardiens reste gratuit tant que nous ne sommes pas satisfaits du service que nous vous offrons. Vous avez accès à tout, sans limite, sans engagement. Vous serez prévenu à l'avance quand cela changera.
+src/data/cityContent.ts:247:**Gardiens est gratuit aujourd'hui**, sans engagement, pour les propriétaires comme pour les gardiens. Vous serez prévenu à l'avance en cas d'évolution tarifaire. [Consultez le détail des formules sur la page tarifs](/tarifs).
+src/data/cityContent.ts:249:**Aucune commission par garde.** Guardiens ne touche rien sur les gardes elles-mêmes. Guardiens reste gratuit tant que nous ne sommes pas satisfaits du service que nous vous offrons. Vous avez accès à tout, sans limite, sans engagement. Vous serez prévenu à l'avance quand cela changera.`,
+src/data/cityContent.ts:350:Le house-sitting (parfois appelé home sitting en français) à Grenoble, c'est la réponse locale : un home sitter du coin s'installe chez vous, s'occupe de vos animaux dans leur environnement, et veille sur votre logement. **Gratuit pour le propriétaire.**
+src/data/cityContent.ts:374:| **Coût** | 25-40 €/jour | Gratuit |
+src/data/cities.ts:43: "Trouvez un home sitter de confiance à Annecy et en Haute-Savoie. Gardiens du coin, disponibles rapidement. Gratuit pour les propriétaires.",
+src/data/cities.ts:136: "Home sitting à Grenoble : trouvez un home sitter de confiance en Isère. Gardiens du coin, disponibles rapidement. Gratuit pour les propriétaires.",
+src/data/cities.ts:180: "Garde de maison et animaux à Caluire-et-Cuire. Gardiens du coin à 15 min. Résidences avec jardin, chiens et chats bienvenus. Gratuit propriétaires.",
+src/data/cities.ts:226: "Home sitting à Chambéry : trouvez un home sitter de confiance en Savoie. Gardiens du coin, disponibles rapidement. Gratuit pour les propriétaires.",
+src/data/cities.ts:231: tip: "Sentier plat 8 km, chiens acceptés. Parking gratuit à Brison-Saint-Innocent.",
+src/components/subscription/FreeAccountSection.tsx:12:const accesGratuits: Array<{ titre: string; detail: string }> = [
+src/components/subscription/FreeAccountSection.tsx:16: "Arroser un potager, sortir un chien le weekend, garder des poules le temps d'un marché… Demander ou proposer un coup de main près de chez vous reste gratuit, pour préserver ce lien indépendamment de toute monétisation.",
+src/components/subscription/FreeAccountSection.tsx:71: {accesGratuits.map((item) => (
+supabase/functions/_shared/transactional-email-templates/listing-unpublished-feedback.tsx:62:          {SITE_NAME} est encore <strong>entièrement gratuit</strong> à ce stade,
+supabase/functions/_shared/transactional-email-templates/owner-no-sit-j10.tsx:64:            {SITE_NAME} est gratuit pour vous, sans engagement. Nous facturerons peut-être un
+supabase/functions/_shared/transactional-email-templates/onboarding-j1.tsx:63:                deux minutes, et c'est gratuit sans engagement.
+supabase/functions/_shared/transactional-email-templates/nearby-daily-digest.tsx:228:        excerpt: 'Je propose de promener votre chien 30 minutes chaque matin cette semaine, gratuitement.',
+supabase/functions/_shared/transactional-email-templates/discover-mutual-aid-2.tsx:49:          C'est gratuit, sans transaction financière. L'entraide repose sur la confiance
+supabase/functions/_shared/transactional-email-templates/discover-mutual-aid-1.tsx:35:          L'entraide entre membres du coin, c'est gratuit, simple, et c'est souvent ce qui crée
+src/components/marketing/FreePeriodBanner.tsx:9: * Bandeau d'information sur la période de accès gratuit en cours.
+src/components/marketing/FreePeriodBanner.tsx:38:        <span className="font-semibold">Gratuit pour tous</span>
+supabase/functions/_shared/transactional-email-templates/discover-mutual-aid-0.tsx:51:          proche, l'entraide est là, gratuite et simple à utiliser.
+supabase/functions/_shared/transactional-email-templates/mission-invitation.tsx:61:          L'entraide est gratuite, sans transaction financière. Si cette mission ne vous
+supabase/functions/_shared/transactional-email-templates/alert-digest.tsx:198:        excerpt: 'Je propose de promener votre chien 30 minutes, gratuitement.',
+src/components/inventaire/AnalysisRequestForm.tsx:107:          Ville, race, lieu, pro : dites-nous ce qui vous manque. C'est gratuit et lu par l'équipe.
+src/components/city/CitySittersGrid.tsx:60:            : "Le réseau se construit. Rejoignez les premiers gardiens, l'accès est gratuit aujourd'hui, sans engagement."}
+src/components/search/SearchSeoFooter.tsx:28:    a: "La consultation est libre et gratuite, même sans compte. L'inscription est gratuite pour postuler à une annonce. L'espace propriétaire reste gratuit. L'espace gardien est également gratuit aujourd'hui, sans engagement.",
+src/components/sits/views/tabs/SitSidebar.tsx:162:          Sur Guardiens, c'est gratuit, entre gens du coin
+src/components/search/SearchOwner.tsx:993:  const seoDescription = "Consultez librement les profils de gardiens d'animaux en France : chats, chiens, NAC. Inscription gratuite pour contacter un gardien.";
+src/components/search/SearchHowItWorksAnon.tsx:9: *    préalable, gratuité initiale) ;
+src/components/search/SearchHowItWorksAnon.tsx:10: *  - combien ça coûte (rappel : consultation libre, inscription gratuite).
+src/components/search/SearchHowItWorksAnon.tsx:27:    text: "Créez votre profil gardien gratuitement, présentez votre expérience et postulez aux annonces qui correspondent à votre disponibilité.",
+src/components/search/SearchHowItWorksAnon.tsx:125:            Inscription gratuite. L'espace gardien est également gratuit aujourd'hui, sans engagement.
+src/components/search/SearchHowItWorksAnon.tsx:130:            <Link to="/inscription">Inscription gratuite</Link>
+src/components/dashboard/shared/NearbyHelpersCarousel.tsx:523:        Les personnes prêtes à donner un coup de main près de chez vous. Cliquez sur «&nbsp;Lui écrire&nbsp;» pour proposer un échange, c'est gratuit.
+src/components/profile/ProfileHero.tsx:237:          ? "L'inscription est gratuite, sans engagement."
+src/components/settings/ActiveRolesSection.tsx:160:                Publier des annonces et trouver un gardien. Gratuit.
+src/components/dashboard/sitter/NearbyAnnoncesCard.tsx:136:                    Faites venir un propriétaire&nbsp;: votre filleul rejoint gratuitement, lui aussi.
+src/components/seo/StickyCTA.tsx:39:    message = `${stats.guardiansCount} gardien${stats.guardiansCount > 1 ? "s" : ""} déjà inscrit${stats.guardiansCount > 1 ? "s" : ""} à ${city.name}. Rejoignez la communauté, c'est gratuit aujourd'hui.`;
+src/components/seo/CitySchemaOrg.tsx:48: a: "Vous publiez votre annonce gratuitement et les gardiens disponibles à Annecy et en Haute-Savoie postulent. La vérification d'identité est ouverte à tous les membres. La pièce envoyée est analysée automatiquement, et les dossiers qui ne passent pas ce contrôle sont revus par l'équipe. Les profils validés affichent l'écusson « Identité vérifiée ». Les avis croisés et les badges de fiabilité complètent ces informations. Vous échangez avec les candidats via la messagerie et organisez une rencontre avant de confier vos clés.",
+src/components/seo/CitySchemaOrg.tsx:64: a: "Pour les propriétaires, Guardiens est gratuit : aucun frais, aucune commission. L'accès gardien est également gratuit aujourd'hui, sans engagement.",
+src/components/seo/CitySchemaOrg.tsx:75: a: "Vous publiez gratuitement votre annonce sur Guardiens et les gardiens disponibles à Grenoble et dans le bassin grenoblois postulent. La vérification d'identité est ouverte à tous les membres : la pièce envoyée est analysée automatiquement, les dossiers qui ne passent pas sont revus par l'équipe, et les profils validés affichent l'écusson « Identité vérifiée ». Regardez cet écusson, puis choisissez après échange et rencontre.",
+src/components/seo/CitySchemaOrg.tsx:95: a: "Pour les propriétaires, c'est gratuit : aucun frais ni commission sur la plateforme. L'accès gardien est également gratuit aujourd'hui, sans engagement.",
+src/components/seo/CitySchemaOrg.tsx:102: a: "Vous publiez votre annonce gratuitement sur Guardiens, les gardiens disponibles à Chambéry et en Savoie postulent. La vérification d'identité est ouverte à tous les membres : la pièce envoyée est analysée automatiquement, les dossiers qui ne passent pas sont revus par l'équipe, et les profils validés affichent l'écusson « Identité vérifiée ». Regardez cet écusson, échangez avec les gardiens et organisez une rencontre avant la garde.",
+src/components/seo/CitySchemaOrg.tsx:118: a: "Pour les propriétaires, c'est entièrement gratuit. L'accès gardien est également gratuit aujourd'hui, sans engagement.",
+src/components/seo/CitySchemaOrg.tsx:125: a: `Sur Guardiens, vous publiez une annonce gratuite et les gardiens disponibles à ${cityName} et ses environs postulent directement. La vérification d'identité est ouverte à tous les membres : la pièce envoyée est analysée automatiquement, les dossiers qui ne passent pas sont revus par l'équipe, et les profils validés affichent l'écusson « Identité vérifiée ». Regardez cet écusson sur les profils avant de choisir.`,
+src/components/seo/CitySchemaOrg.tsx:128: q: `Est-ce vraiment gratuit pour les propriétaires à ${cityName} ?`,
+src/components/seo/CitySchemaOrg.tsx:129: a: "Oui. Guardiens est gratuit pour tous les propriétaires : aucun frais, aucune commission. L'accès gardien est également gratuit aujourd'hui, sans engagement.",
+src/components/seo/CitySchemaOrg.tsx:174: description: "Gratuit pour les propriétaires, sans abonnement requis.",
+src/components/seo/CitySchemaOrg.tsx:242: priceRange: "Gratuit pour les propriétaires",
+src/components/premium/PremiumGateDialog.tsx:22:  const description = `Activez votre espace gardien pour accéder à ${featureName}. C'est gratuit aujourd'hui, sans engagement.`;
+src/components/premium/ActivateRoleDialog.tsx:153:      : "L'espace propriétaire est gratuit. Activez-le en un clic pour publier des annonces et trouver un gardien près de chez vous.";
+src/components/premium/ActivateRoleDialog.tsx:199:            L'espace gardien est <strong>gratuit aujourd'hui, sans engagement</strong>. Vous serez prévenu à l'avance en cas d'évolution tarifaire.
+src/components/dashboard/RoleActivationBanner.tsx:21:      ? "Vous avez aussi des animaux à faire garder ? Activez votre espace propriétaire, c'est gratuit →"
+src/components/dashboard/RoleActivationBanner.tsx:22:      : "Envie de garder des maisons ? Activez votre espace gardien, c'est gratuit →";
+src/components/admin/mass-email/ProximityCampaignCard.tsx:148:          ? `Près de chez vous, ${preview.author_first_name || "un membre"} propose son aide, gratuitement`
