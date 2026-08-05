@@ -211,6 +211,8 @@ const SmallMissionDetail = () => {
   const [hasResponded, setHasResponded] = useState(false);
   const [closeModalOpen, setCloseModalOpen] = useState(false);
   const [closingNoSelect, setClosingNoSelect] = useState(false);
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const [processingResponseId, setProcessingResponseId] = useState<string | null>(null);
   const [completing, setCompleting] = useState(false);
   const [responseModalOpen, setResponseModalOpen] = useState(false);
