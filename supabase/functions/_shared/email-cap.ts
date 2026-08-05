@@ -312,7 +312,36 @@ export function decideDeferral(input: DeferInput): DeferDecision {
     return { action: 'defer', reason: 'quiet_hours', scheduledFor: nextQuietEndFrom(now) }
   }
 
+  // ETAPE 2 : derogation totale. Aucun plafond ne s'applique a un email
+  // declenche par l'action directe d'un autre membre identifie. Place juste
+  // apres les heures calmes, qui restent la seule garde sur ces gabarits.
+  if (NO_QUEUE_TEMPLATES.has(templateName)) {
+    return { action: 'send' }
+  }
+
   if (effectiveCategory === 'transactional') {
+    return { action: 'send' }
+  }
+
+  // Categorie 'alert' : compteurs propres, elle ne partage plus le quota des
+  // emails produit. Cadence nominale 1 / jour, 7 / semaine.
+  if (effectiveCategory === 'alert') {
+    if (alertWeekSentAt.length >= CAP_ALERT_PER_WEEK) {
+      const oldest = new Date(alertWeekSentAt[0])
+      return {
+        action: 'defer',
+        reason: 'frequency_cap_category_week',
+        scheduledFor: new Date(oldest.getTime() + 7 * 86400_000 + 30_000),
+      }
+    }
+    if (alertDaySentAt.length >= CAP_ALERT_PER_DAY) {
+      const oldest = new Date(alertDaySentAt[0])
+      return {
+        action: 'defer',
+        reason: 'frequency_cap_category_day',
+        scheduledFor: new Date(oldest.getTime() + 86400_000 + 30_000),
+      }
+    }
     return { action: 'send' }
   }
 
