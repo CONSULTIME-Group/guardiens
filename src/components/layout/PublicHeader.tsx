@@ -169,33 +169,17 @@ export default function PublicHeader({ authedVariant = false }: { authedVariant?
           <LanguageSwitcher />
         </nav>
 
-        {/* Mobile : barre allégée (avatar et burger uniquement pour un
-            connecté). Langue, messagerie et notifications sont dans le menu. */}
-        <div className="flex sm:hidden items-center gap-1">
+        {/* Mobile : barre strictement allégée. Sous le point de rupture sm,
+            seuls le logo et le burger (plus l'avatar d'un connecté) restent
+            dans l'en tête. Langue, connexion et création de compte vivent
+            dans le panneau du menu, sinon le cluster déborde du viewport. */}
+        <div className="flex sm:hidden shrink-0 items-center gap-1">
           {!authChecked ? (
-            <div className="h-9 w-24 rounded-md bg-muted/40 animate-pulse" aria-hidden="true" />
+            <div className="h-9 w-9 rounded-md bg-muted/40 animate-pulse" aria-hidden="true" />
           ) : hasSession ? (
             <UserMenu compact />
-          ) : (
-            <>
-              <LanguageSwitcher compact />
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => navigate("/login")}
-                className="min-h-11 px-2"
-              >
-                {t("nav.login")}
-              </Button>
-              <Button
-                size="sm"
-                onClick={() => navigate("/inscription")}
-                className="min-h-11 px-3"
-              >
-                {t("nav.register")}
-              </Button>
-            </>
-          )}
+          ) : null}
+
           <Button
             size="icon"
             variant="ghost"
