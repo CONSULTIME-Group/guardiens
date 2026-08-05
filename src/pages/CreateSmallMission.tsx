@@ -113,6 +113,32 @@ const CreateSmallMission = () => {
   const [photos, setPhotos] = useState<string[]>([]);
   const [appliedTemplateId, setAppliedTemplateId] = useState<string | null>(null);
 
+  // Hauteur réelle de la barre d'action fixe, exposée en variable CSS pour que
+  // le conteneur défilant réserve exactement l'espace des couches fixes
+  // (barre d'action plus barre de navigation basse). Sans cela, les derniers
+  // contrôles du formulaire restent sous la barre en fin de défilement.
+  const actionBarRef = useRef<HTMLDivElement | null>(null);
+  useEffect(() => {
+    const el = actionBarRef.current;
+    if (!el || typeof window === "undefined") return;
+    const apply = () => {
+      const h = Math.round(el.getBoundingClientRect().height);
+      document.documentElement.style.setProperty("--mission-action-bar-h", `${h}px`);
+    };
+    apply();
+    let ro: ResizeObserver | null = null;
+    if (typeof ResizeObserver !== "undefined") {
+      ro = new ResizeObserver(apply);
+      ro.observe(el);
+    }
+    window.addEventListener("resize", apply);
+    return () => {
+      ro?.disconnect();
+      window.removeEventListener("resize", apply);
+      document.documentElement.style.removeProperty("--mission-action-bar-h");
+    };
+  });
+
   const applyTemplate = (tpl: MissionTemplate) => {
     setMissionType(tpl.type);
     setCategory(tpl.category);
@@ -315,7 +341,15 @@ const CreateSmallMission = () => {
         <StepperBar current={step} total={2} />
       )}
 
-      <div className="max-w-2xl mx-auto px-4 py-6 space-y-5 pb-48 md:pb-36">
+      <div
+        className="max-w-2xl mx-auto px-4 py-6 space-y-5 md:pb-36"
+        style={{
+          // Réserve la hauteur cumulée des couches fixes, plus une marge de
+          // confort, pour qu'aucun contrôle ne finisse sous la barre d'action.
+          paddingBottom:
+            "calc(var(--mission-action-bar-h, 4.5rem) + var(--bottom-nav-h, 4rem) + 2rem)",
+        }}
+      >
         <button
           onClick={() => step === 1 ? navigate("/petites-missions") : setStep(1)}
           className="flex items-center gap-1 text-sm text-foreground/60 hover:text-foreground transition-colors -ml-1"
@@ -709,7 +743,7 @@ const CreateSmallMission = () => {
 
       {/* CTA sticky au-dessus de la BottomNav */}
       {(accessLoading || canApplyMissions) && (
-        <div className="fixed bottom-16 inset-x-0 bg-card/95 backdrop-blur border-t border-border px-4 py-3 z-40 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
+        <div ref={actionBarRef} className="fixed bottom-16 inset-x-0 bg-card/95 backdrop-blur border-t border-border px-4 py-3 z-40 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
           <div className="max-w-2xl mx-auto space-y-2">
             {step === 2 && identityRecommended && <IdentityRecommendedHint compact />}
             {step === 1 ? (
