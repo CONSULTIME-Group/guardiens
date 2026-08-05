@@ -402,7 +402,6 @@ const AppRoutes = () => {
       <Route path="/profil" element={<Navigate to="/profile" replace />} />
       <Route path="/parametres" element={<Navigate to="/settings" replace />} />
       <Route path="/mot-de-passe-oublie" element={<Navigate to="/forgot-password" replace />} />
-      <Route path="/favoris" element={<Navigate to="/favorites" replace />} />
       <Route path="/messagerie" element={<Navigate to="/messages" replace />} />
       <Route path="/tableau-de-bord" element={<Navigate to="/dashboard" replace />} />
       <Route path="/register" element={<RegisterRedirect />} />
