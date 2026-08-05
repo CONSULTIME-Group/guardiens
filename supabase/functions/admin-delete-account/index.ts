@@ -83,7 +83,7 @@ Deno.serve(async (req) => {
     let confirmedSits = 0;
     let pendingApplications = 0;
     if (userId) {
-    if (userId) {
+
       const commitments = await countActiveCommitments(adminClient, userId);
       confirmedSits = commitments.sits;
       pendingApplications = commitments.applications;
