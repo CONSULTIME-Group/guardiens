@@ -129,6 +129,7 @@ const MessageBubble = ({
   isInGallery = false,
   savingToGallery = false,
   onSaveToGallery,
+  videoInviteState,
 }: MessageBubbleProps) => {
   const [lightboxOpen, setLightboxOpen] = useState(false);
 
