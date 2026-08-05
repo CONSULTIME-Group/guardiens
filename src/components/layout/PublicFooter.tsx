@@ -19,6 +19,7 @@ const PublicFooter = React.forwardRef<HTMLElement>((_props, ref) => {
           <div>
             <h3 className="font-body text-xs uppercase tracking-widest text-white/80 mb-4">{t("footer.sections.by_city")}</h3>
             <ul className="space-y-2">
+              <li><Link to="/house-sitting" className="font-body text-sm text-white/75 hover:text-white transition-colors">Toutes les villes couvertes</Link></li>
               <li><Link to="/house-sitting/lyon" className="font-body text-sm text-white/75 hover:text-white transition-colors">House-sitting Lyon</Link></li>
               <li><Link to="/house-sitting/annecy" className="font-body text-sm text-white/75 hover:text-white transition-colors">House-sitting Annecy</Link></li>
               <li><Link to="/house-sitting/grenoble" className="font-body text-sm text-white/75 hover:text-white transition-colors">House-sitting Grenoble</Link></li>
@@ -28,15 +29,17 @@ const PublicFooter = React.forwardRef<HTMLElement>((_props, ref) => {
           <div>
             <h3 className="font-body text-xs uppercase tracking-widest text-white/80 mb-4">{t("footer.sections.by_department")}</h3>
             <ul className="space-y-2">
+              <li><Link to="/departement" className="font-body text-sm text-white/75 hover:text-white transition-colors">Les 101 départements</Link></li>
               <li><Link to="/departement/rhone" className="font-body text-sm text-white/75 hover:text-white transition-colors">Rhône (69)</Link></li>
               <li><Link to="/departement/haute-savoie" className="font-body text-sm text-white/75 hover:text-white transition-colors">Haute-Savoie (74)</Link></li>
-              <li><Link to="/departement/isere" className="font-body text-sm text-white/75 hover:text-white transition-colors">Isère (38)</Link></li>
-              <li><Link to="/departement/savoie" className="font-body text-sm text-white/75 hover:text-white transition-colors">Savoie (73)</Link></li>
-              <li><Link to="/departement/loire" className="font-body text-sm text-white/75 hover:text-white transition-colors">Loire (42)</Link></li>
-              <li><Link to="/departement/drome" className="font-body text-sm text-white/75 hover:text-white transition-colors">Drôme (26)</Link></li>
-              <li><Link to="/departement/puy-de-dome" className="font-body text-sm text-white/75 hover:text-white transition-colors">Puy-de-Dôme (63)</Link></li>
+              <li><Link to="/departement/gironde" className="font-body text-sm text-white/75 hover:text-white transition-colors">Gironde (33)</Link></li>
+              <li><Link to="/departement/herault" className="font-body text-sm text-white/75 hover:text-white transition-colors">Hérault (34)</Link></li>
+              <li><Link to="/departement/loire-atlantique" className="font-body text-sm text-white/75 hover:text-white transition-colors">Loire-Atlantique (44)</Link></li>
+              <li><Link to="/departement/bouches-du-rhone" className="font-body text-sm text-white/75 hover:text-white transition-colors">Bouches-du-Rhône (13)</Link></li>
+              <li><Link to="/departement/paris" className="font-body text-sm text-white/75 hover:text-white transition-colors">Paris (75)</Link></li>
             </ul>
           </div>
+
           <div>
             <h3 className="font-body text-xs uppercase tracking-widest text-white/80 mb-4">{t("footer.sections.local_guides")}</h3>
             <ul className="space-y-2">
