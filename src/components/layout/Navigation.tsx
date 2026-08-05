@@ -447,12 +447,23 @@ export const BottomNav = () => {
 
   const hideNav = inAppShell && scrollDir === "down" && !idleVisible;
 
+  // Un écran plein cadre (fil de messagerie mobile) peut demander le retrait
+  // complet de la barre basse et de son bouton flottant, pour ne jamais
+  // recouvrir une zone de saisie.
+  const { bottomNavHidden } = useChromeVisibility();
+
   // Hauteur réelle de la pilule exposée en variable CSS, pour que les barres
   // d'action collantes des pages s'empilent au dessus sans valeur en dur.
   const pillRef = useRef<HTMLElement | null>(null);
   useLayoutEffect(() => {
+    if (typeof window === "undefined") return;
+    if (bottomNavHidden) {
+      document.documentElement.style.setProperty("--bottom-nav-h", "0px");
+      return;
+    }
     const el = pillRef.current;
-    if (!el || typeof window === "undefined") return;
+    if (!el) return;
+
     const apply = () => {
       const h = hideNav ? 0 : Math.round(el.getBoundingClientRect().height);
       document.documentElement.style.setProperty("--bottom-nav-h", `${h}px`);
