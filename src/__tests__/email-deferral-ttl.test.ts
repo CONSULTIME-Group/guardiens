@@ -97,7 +97,7 @@ describe("resolveDeferral, aucun report au dela de la TTL n est enfile", () => {
 
   it("le cas historique 36 h contre J+7 ne produit plus d abandon arithmetique", () => {
     const r = resolveDeferral({
-      templateName: "new-message",
+      templateName: "review-received",
       reason: "frequency_cap_category_week",
       scheduledFor: h(24 * 7),
       firstEnqueuedAt: base,
@@ -107,7 +107,7 @@ describe("resolveDeferral, aucun report au dela de la TTL n est enfile", () => {
   });
 });
 
-describe("Etape 2 — categorie alerte et derogations", () => {
+describe("Etape 2, categorie alerte et derogations", () => {
   const NOON2 = new Date("2026-07-26T10:00:00Z");
   const at = (ms: number) => new Date(NOON2.getTime() + ms).toISOString();
 
