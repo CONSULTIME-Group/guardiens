@@ -12,6 +12,7 @@ import { lazy, Suspense, useEffect, useLayoutEffect, useRef, useState } from "re
 import { supabase } from "@/integrations/supabase/client";
 import { useScrollDirection } from "@/hooks/useScrollDirection";
 import { useInAppShell } from "./AppShellContext";
+import { useChromeVisibility } from "./ChromeVisibility";
 import UserMenu from "./UserMenu";
 
 // Lazy : NotificationBell tire date-fns. On évite vendor-date dans l'entry.
