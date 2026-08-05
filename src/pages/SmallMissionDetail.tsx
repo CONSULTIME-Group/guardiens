@@ -534,6 +534,28 @@ const SmallMissionDetail = () => {
     }
   };
 
+  // Suppression définitive par l'auteur, même modèle que les annonces de garde.
+  const handleDeleteMission = async () => {
+    if (deleting) return;
+    setDeleting(true);
+    try {
+      const { error } = await supabase.from("small_missions").delete().eq("id", mission.id);
+      if (error) throw error;
+      setDeleteModalOpen(false);
+      toast({ title: "Publication supprimée", description: "Elle n'est plus visible en ligne." });
+      navigate("/petites-missions");
+    } catch (err: any) {
+      logger.error("[handleDeleteMission]", { err: String(err) });
+      toast({
+        variant: "destructive",
+        title: "Suppression impossible",
+        description: err?.message || "Réessayez dans un instant.",
+      });
+    } finally {
+      setDeleting(false);
+    }
+  };
+
   const handleCloseNoSelect = async () => {
     if (closingNoSelect) return;
     setClosingNoSelect(true);
