@@ -570,45 +570,70 @@ Deno.serve(async (req) => {
         if (row?.first_enqueued_at) firstEnqueuedAt = new Date(row.first_enqueued_at)
       }
 
-      // Defaut 1 : un report au dela du TTL de la file (36 h) condamne l'email
-      // a expirer sans jamais partir. On l'abandonne franchement, avec motif.
-      const DEFERRED_TTL_HOURS = 36
-      const ttlDeadline = new Date(firstEnqueuedAt.getTime() + DEFERRED_TTL_HOURS * 3600_000)
-      if (scheduledFor.getTime() > ttlDeadline.getTime()) {
-        const abandonReason = `cap_window_exceeds_ttl (${deferReason}, report ${scheduledFor.toISOString()} > TTL ${ttlDeadline.toISOString()})`
+      // Etape 1 (05/08/2026) : on n'enfile plus jamais un report qui depasse
+      // deja la TTL du gabarit. Si c'est le cas, on tranche tout de suite :
+      // envoyer maintenant (notification legitime) ou annuler (contenu date).
+      const resolution = resolveDeferral({
+        templateName,
+        reason: deferReason,
+        scheduledFor,
+        firstEnqueuedAt,
+      })
+
+      if (resolution.action === 'cancel') {
+        const cancelReason = `ttl_exceeded_cancelled (${deferReason}, report ${scheduledFor.toISOString()} > TTL ${resolution.ttlDeadline.toISOString()})`
         if (sourceQueueId) {
           await supabase
             .from('email_deferred_queue')
-            .update({ status: 'abandoned', last_error: abandonReason })
+            .update({ status: 'cancelled', last_error: cancelReason })
             .eq('id', sourceQueueId)
         }
-        const { error: logAbandonCapErr } = await supabase.from('email_send_log').insert({
+        const { error: logCancelErr } = await supabase.from('email_send_log').insert({
           message_id: messageId,
           template_name: templateName,
           recipient_email: effectiveRecipient,
-          status: 'abandoned',
-          error_message: abandonReason,
+          status: 'cancelled',
+          error_message: cancelReason,
           metadata: {
             idempotency_key: idempotencyKey,
             category,
             defer_reason: deferReason,
-            abandon_reason: 'cap_window_exceeds_ttl',
+            cancel_reason: 'ttl_exceeded',
+            ttl_deadline: resolution.ttlDeadline.toISOString(),
             scheduled_for: scheduledFor.toISOString(),
           },
         })
-        if (logAbandonCapErr) {
-          console.error('email_send_log insert failed (cap_window_exceeds_ttl)', {
-            templateName, idempotencyKey, error: logAbandonCapErr,
+        if (logCancelErr) {
+          console.error('email_send_log insert failed (ttl_exceeded_cancelled)', {
+            templateName, idempotencyKey, error: logCancelErr,
           })
         }
-        console.warn('Email abandonne, fenetre de cap au dela du TTL', {
+        console.warn('Email annule, contenu date et report au dela de la TTL', {
           templateName, recipientLower, deferReason, scheduledFor: scheduledFor.toISOString(),
         })
         return new Response(
-          JSON.stringify({ success: true, skipped: true, abandoned: true, reason: 'cap_window_exceeds_ttl', defer_reason: deferReason }),
+          JSON.stringify({ success: false, status: 'cancelled', reason: 'ttl_exceeded', defer_reason: deferReason }),
           { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         )
       }
+
+      if (resolution.action === 'send_now') {
+        // Le plafond protege des relances marketing, pas des notifications
+        // legitimes. Plutot que de condamner l'email, on l'envoie maintenant.
+        if (sourceQueueId) {
+          await supabase
+            .from('email_deferred_queue')
+            .update({ status: 'sent', last_error: null })
+            .eq('id', sourceQueueId)
+        }
+        console.warn('Report au dela de la TTL, envoi immediat plutot qu abandon', {
+          templateName, recipientLower, deferReason,
+          scheduledFor: scheduledFor.toISOString(),
+          ttlDeadline: resolution.ttlDeadline.toISOString(),
+        })
+        // On tombe volontairement dans le flux d'envoi normal ci-dessous.
+      } else {
+
 
       if (sourceQueueId) {
         const { error: updErr } = await supabase
