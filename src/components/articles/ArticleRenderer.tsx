@@ -230,6 +230,8 @@ export default function ArticleRenderer({ content, userRole, slug }: ArticleRend
   html = addBandedSections(html);
   html = addEndCTA(html, slug);
   html = adaptEndCTAsForRole(html, userRole);
+  html = wrapTables(html);
+
 
   // Sanitize against XSS (e.g. <script>, onerror=) before injection.
   const safeHtml = DOMPurify.sanitize(html, {
