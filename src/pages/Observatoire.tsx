@@ -217,6 +217,74 @@ const Observatoire = () => {
  areaServed: { "@type": "Country", name: "France" },
  };
 
+ const breadcrumbSchema = {
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  itemListElement: [
+   { "@type": "ListItem", position: 1, name: "Accueil", item: "https://guardiens.fr" },
+   { "@type": "ListItem", position: 2, name: "Observatoire", item: PAGE_URL },
+  ],
+ };
+
+ const articleSchema = {
+  "@context": "https://schema.org",
+  "@type": "Article",
+  headline: "Observatoire de la garde d'animaux à domicile en France",
+  description:
+   "Chiffres-clés sur la garde d'animaux à domicile en France : volumes, modèle économique, dispositif de confiance, répartitions par espèce, autonomie, activité, type de logement et environnement.",
+  mainEntityOfPage: PAGE_URL,
+  url: PAGE_URL,
+  inLanguage: "fr",
+  datePublished: "2026-06-08",
+  ...(species?.calcule_le ? { dateModified: species.calcule_le.slice(0, 10) } : {}),
+  author: { "@type": "Person", name: "Jérémie Martinot" },
+  publisher: {
+   "@type": "Organization",
+   name: "Guardiens",
+   url: "https://guardiens.fr",
+  },
+  isAccessibleForFree: true,
+ };
+
+ const faqSchema = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  mainEntity: [
+   {
+    "@type": "Question",
+    name: "D'où viennent les chiffres de cet observatoire ?",
+    acceptedAnswer: {
+     "@type": "Answer",
+     text: "Les répartitions (espèces, autonomie, activité, logements) sont calculées directement sur les profils, animaux et logements déclarés par les membres de Guardiens. Les repères historiques proviennent de l'expérience des fondateurs entre 2021 et 2026.",
+    },
+   },
+   {
+    "@type": "Question",
+    name: "À quelle fréquence les données sont-elles mises à jour ?",
+    acceptedAnswer: {
+     "@type": "Answer",
+     text: "Les répartitions sont recalculées automatiquement à partir de la base de la plateforme. La date de dernier calcul est affichée sur la page lorsqu'elle est disponible.",
+    },
+   },
+   {
+    "@type": "Question",
+    name: "La garde à domicile implique-t-elle un paiement entre particuliers ?",
+    acceptedAnswer: {
+     "@type": "Answer",
+     text: "Non. Sur Guardiens, la garde repose sur un échange : le gardien loge sur place et veille sur les animaux et le logement, sans transaction financière directe entre membres et sans commission de la plateforme.",
+    },
+   },
+   {
+    "@type": "Question",
+    name: "Les profils sont-ils vérifiés ?",
+    acceptedAnswer: {
+     "@type": "Answer",
+     text: "La vérification d'identité repose sur une revue manuelle des documents transmis. Les profils validés portent un écusson dédié, complété par les avis croisés et les indicateurs de fiabilité.",
+    },
+   },
+  ],
+ };
+
  return (
  <>
  <PageMeta
@@ -228,7 +296,11 @@ const Observatoire = () => {
  <Helmet>
  <script type="application/ld+json">{JSON.stringify(datasetSchema)}</script>
  <script type="application/ld+json">{JSON.stringify(orgSchema)}</script>
+ <script type="application/ld+json">{JSON.stringify(breadcrumbSchema)}</script>
+ <script type="application/ld+json">{JSON.stringify(articleSchema)}</script>
+ <script type="application/ld+json">{JSON.stringify(faqSchema)}</script>
  </Helmet>
+
 
  <div className="min-w-0">
  <PageBreadcrumb items={[{ label: "Observatoire" }]} />
