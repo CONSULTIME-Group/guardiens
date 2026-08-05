@@ -33,18 +33,25 @@ interface DigestItem {
 interface Props {
   sitterFirstName?: string
   items?: DigestItem[]
+  /**
+   * Passage de rattrapage : les annonces ont plusieurs jours, le gabarit
+   * assume le rappel et ne présente rien comme une nouveauté du jour.
+   */
+  isCatchup?: boolean
 }
 
 const buildCtaUrl = (sitId: string) =>
   `${SITE_URL}/annonces/${sitId}?utm_source=email&utm_campaign=sitter_daily_digest&utm_medium=daily`
 
-const SitterDailyDigestEmail = ({ sitterFirstName, items = [] }: Props) => (
+const SitterDailyDigestEmail = ({ sitterFirstName, items = [], isCatchup }: Props) => (
   <Html lang="fr" dir="ltr">
     <BrandedHead />
     <Preview>
-      {items.length > 0
-        ? `${items.length} nouvelle${items.length > 1 ? 's' : ''} annonce${items.length > 1 ? 's' : ''} qui vous correspond${items.length > 1 ? 'ent' : ''}`
-        : 'Votre digest Guardiens'}
+      {items.length === 0
+        ? 'Votre digest Guardiens'
+        : isCatchup
+          ? `${items.length} annonce${items.length > 1 ? 's' : ''} publiée${items.length > 1 ? 's' : ''} ces derniers jours, toujours ouverte${items.length > 1 ? 's' : ''}`
+          : `${items.length} nouvelle${items.length > 1 ? 's' : ''} annonce${items.length > 1 ? 's' : ''} qui vous correspond${items.length > 1 ? 'ent' : ''}`}
     </Preview>
     <Body style={main}>
       <Container style={container}>
@@ -52,17 +59,23 @@ const SitterDailyDigestEmail = ({ sitterFirstName, items = [] }: Props) => (
         <AlmaSignature />
 
         <Heading style={h1}>
-          {items.length > 1
-            ? `${items.length} annonces qui vous correspondent aujourd'hui`
-            : 'Une annonce qui vous correspond aujourd\'hui'}
+          {isCatchup
+            ? (items.length > 1
+              ? `Rappel, ${items.length} annonces publiées ces derniers jours vous correspondent`
+              : 'Rappel, une annonce publiée ces derniers jours vous correspond')
+            : (items.length > 1
+              ? `${items.length} annonces qui vous correspondent aujourd'hui`
+              : 'Une annonce qui vous correspond aujourd\'hui')}
         </Heading>
 
         <AlmaIntro firstName={sitterFirstName} />
 
         <Text style={text}>
-          Voici les nouvelles annonces publiées ces dernières 24 heures qui matchent
-          votre profil. Le score d'affinité indique la compatibilité selon vos préférences.
+          {isCatchup
+            ? "Ces annonces ont été publiées il y a un à trois jours et ne vous avaient pas encore été signalées. Elles sont toujours ouvertes aux candidatures. Le score d'affinité indique la compatibilité selon vos préférences."
+            : "Voici les nouvelles annonces publiées ces dernières 24 heures qui matchent votre profil. Le score d'affinité indique la compatibilité selon vos préférences."}
         </Text>
+
 
 
         {items.map((item, idx) => (
@@ -147,6 +160,11 @@ export const template = {
   subject: (data: Record<string, any>) => {
     const n = Array.isArray(data?.items) ? data.items.length : 0
     if (n === 0) return 'Votre digest Guardiens'
+    if (data?.isCatchup) {
+      return n === 1
+        ? 'Rappel, une annonce publiée ces derniers jours vous correspond'
+        : `Rappel, ${n} annonces publiées ces derniers jours vous correspondent`
+    }
     return n === 1
       ? 'Une annonce qui vous correspond aujourd\'hui'
       : `${n} annonces qui vous correspondent aujourd'hui`

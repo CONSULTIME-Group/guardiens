@@ -57,7 +57,7 @@ function formatFrDate(iso?: string | null): string | undefined {
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders })
 
-  let body: { manual?: boolean; dry_run?: boolean; sitter_id?: string } = {}
+  let body: { manual?: boolean; dry_run?: boolean; sitter_id?: string; catchup?: boolean } = {}
   try {
     if (req.body) body = await req.json()
   } catch { /* empty body ok */ }
@@ -67,6 +67,26 @@ Deno.serve(async (req) => {
     Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!,
     { auth: { persistSession: false } },
   )
+
+  // Passage de rattrapage : unique, tracé, non rejouable. Le gabarit assume
+  // le rappel, le contrôle des 24h et la réservation de créneau sont sautés
+  // pour ce seul passage. Un second appel réel est refusé.
+  const CATCHUP_TAG = 'send-sitter-daily-digest-catchup-2026-08-05'
+  if (body.catchup && !body.dry_run) {
+    const { data: already } = await supabase
+      .from('cron_run_log')
+      .select('id')
+      .eq('edge_name', CATCHUP_TAG)
+      .limit(1)
+    if (already && already.length > 0) {
+      return json({ ok: false, reason: 'catchup_already_executed' }, 409)
+    }
+    await supabase.from('cron_run_log').insert({
+      edge_name: CATCHUP_TAG,
+      started_at: new Date().toISOString(),
+    })
+  }
+
 
   try {
     // 1. Récupère toutes les paires queued (filtrage optionnel par sitter)
@@ -163,7 +183,8 @@ Deno.serve(async (req) => {
         }
 
         // 2d. Anti-spam : déjà envoyé dans les 24h ?
-        if (!body.manual) {
+        // Le passage de rattrapage saute ce contrôle, par décision explicite.
+        if (!body.manual && !body.catchup) {
           const since = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()
           const { data: recent } = await supabase
             .from('email_send_log')
@@ -266,9 +287,13 @@ Deno.serve(async (req) => {
 
         plan.push({
           sitter_id: sitterId,
+          recipient_email: email,
+          sitter_first_name: profile.first_name ?? null,
+          subject: buildSubject(items.length, !!body.catchup),
           sits: items.map(i => i.sitId),
+          sit_titles: items.map(i => i.sitTitle),
           skipped: overflow.map(o => o.sit_id),
-        })
+        } as any)
 
         if (body.dry_run) {
           continue
@@ -278,7 +303,7 @@ Deno.serve(async (req) => {
         // ici, une fois le contenu établi et le gardien éligible. En cas de
         // refus, les lignes restent `queued` pour un passage ultérieur. Le
         // mode manuel (action admin délibérée) n'est pas soumis à la garde.
-        if (!body.manual) {
+        if (!body.manual && !body.catchup) {
           const claim = await claimSitNotification(
             supabase,
             sitterId,
@@ -311,9 +336,11 @@ Deno.serve(async (req) => {
         }
 
         // 2g. Envoi digest
-        const idemBase = body.manual
-          ? `sitter-digest-${sitterId}-${Date.now()}`
-          : `sitter-digest-${sitterId}-${today}`
+        const idemBase = body.catchup
+          ? `sitter-digest-catchup-2026-08-05-${sitterId}`
+          : body.manual
+            ? `sitter-digest-${sitterId}-${Date.now()}`
+            : `sitter-digest-${sitterId}-${today}`
 
         const _steRes = await fetch(`${Deno.env.get('SUPABASE_URL')}/functions/v1/send-transactional-email`, {
           method: 'POST',
@@ -325,6 +352,7 @@ Deno.serve(async (req) => {
             templateData: {
               sitterFirstName: profile.first_name ?? undefined,
               items,
+              isCatchup: !!body.catchup,
             },
           }),
         });
@@ -369,8 +397,20 @@ Deno.serve(async (req) => {
       await raiseStaleClaimSignal(supabase, 'sitter-daily-digest', staleReason, staleSolded)
     }
 
+    if (body.catchup && !body.dry_run) {
+      await supabase
+        .from('cron_run_log')
+        .update({
+          finished_at: new Date().toISOString(),
+          status: errors.length > 0 ? 'partial' : 'success',
+          metrics: { sitters_sent: sittersSent, sitters_skipped: sittersSkipped, plan },
+        })
+        .eq('edge_name', CATCHUP_TAG)
+    }
+
     return json({
       ok: true,
+      catchup: !!body.catchup,
       sitters_processed: bySitter.size,
       sitters_sent: sittersSent,
       sitters_skipped: sittersSkipped,
@@ -385,6 +425,19 @@ Deno.serve(async (req) => {
     return json({ error: String(err) }, 500)
   }
 })
+
+function buildSubject(count: number, isCatchup: boolean): string {
+  if (count === 0) return 'Votre digest Guardiens'
+  if (isCatchup) {
+    return count === 1
+      ? 'Rappel, une annonce publiée ces derniers jours vous correspond'
+      : `Rappel, ${count} annonces publiées ces derniers jours vous correspondent`
+  }
+  return count === 1
+    ? 'Une annonce qui vous correspond aujourd\'hui'
+    : `${count} annonces qui vous correspondent aujourd'hui`
+}
+
 
 async function markSkipped(
   supabase: any,
