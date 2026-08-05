@@ -225,13 +225,57 @@ const CreateSmallMission = () => {
     return title.trim() === tpl.title.trim() && description.trim() === tpl.description.trim();
   }, [appliedTemplateId, title, description]);
 
+  // Volume d'audience : combien de personnes seront prévenues à la publication.
+  const [audienceCount, setAudienceCount] = useState<number | null>(null);
+  useEffect(() => {
+    if (step !== 2 || !city.trim()) {
+      setAudienceCount(null);
+      return;
+    }
+    let cancelled = false;
+    const timer = window.setTimeout(async () => {
+      try {
+        const coords = await geocodeCity(city.trim());
+        if (cancelled || !coords) return;
+        const { data } = await supabase.rpc("count_mission_notification_audience" as any, {
+          p_lat: coords.lat,
+          p_lng: coords.lng,
+          p_radius_km: 30,
+        });
+        if (!cancelled) setAudienceCount(typeof data === "number" ? data : null);
+      } catch {
+        if (!cancelled) setAudienceCount(null);
+      }
+    }, 600);
+    return () => { cancelled = true; window.clearTimeout(timer); };
+  }, [step, city]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user) return;
     if (EURO_REGEX.test(exchangeOffer)) return;
     if (submitting) return;
-    if (!title.trim() || !description.trim() || !exchangeOffer.trim() || !city.trim() || !duration) {
-      toast({ title: tp("toast_required_title"), description: tp("toast_required_desc"), variant: "destructive" });
+    const missing: string[] = [];
+    if (!title.trim()) missing.push("Titre");
+    if (!description.trim()) missing.push("Description");
+    if (!exchangeOffer.trim()) missing.push("Contrepartie");
+    if (!city.trim()) missing.push("Ville");
+    if (!postalCode.trim()) missing.push("Code postal");
+    if (!duration) missing.push("Durée estimée");
+    if (missing.length > 0) {
+      const stepOneMissing = missing.some((m) => ["Titre", "Description", "Contrepartie"].includes(m));
+      toast({
+        title: missing.length > 1 ? "Champs manquants" : "Champ manquant",
+        description: `À compléter : ${missing.join(", ")}.`,
+        variant: "destructive",
+      });
+      setStep(stepOneMissing ? 1 : 2);
+      if (stepOneMissing) {
+        setTitleTouched(true);
+        setDescTouched(true);
+        setExchangeTouched(true);
+      }
+      setPlaceTouched(true);
       return;
     }
     if (title.trim().length < MIN_TITLE_LEN || description.trim().length < MIN_DESC_LEN) {
