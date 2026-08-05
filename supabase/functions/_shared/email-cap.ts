@@ -283,7 +283,9 @@ export function decideDeferral(input: DeferInput): DeferDecision {
   const {
     now, templateName, isUrgent, category,
     nonTxDaySentAt = [], nonTxWeekSentAt = [],
+    alertDaySentAt = [], alertWeekSentAt = [],
   } = input
+
 
   // Categorie effective. Regle de securite : seule la valeur explicite
   // 'transactional' donne droit a l'exemption de plafond. Toute categorie
