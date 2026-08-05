@@ -28,6 +28,8 @@ import { useAutoOpenConversation } from "@/hooks/useAutoOpenConversation";
 import { toast as toastSonner } from "sonner";
 import AlmaMessageOpener from "@/components/ai/alma/AlmaMessageOpener";
 import { AlmaStagnantConversationWhisper } from "@/components/ai/alma/wiring/AlmaStagnantConversationWhisper";
+import { latestVideoInviteId, videoInviteState, isVideoInvite } from "@/lib/videoInvite";
+import { useHideBottomNav } from "@/components/layout/ChromeVisibility";
 
 
 const MESSAGES_PAGE_SIZE = 50;
