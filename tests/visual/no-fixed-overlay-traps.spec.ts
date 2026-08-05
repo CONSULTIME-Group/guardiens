@@ -85,6 +85,9 @@ async function findTraps(page: Page): Promise<Trap[]> {
       if (r.width < 4 || r.height < 4) return;
       // Entièrement hors viewport : hors périmètre.
       if (r.bottom <= 0 || r.top >= vh || r.right <= 0 || r.left >= vw) return;
+      // Partiellement sorti du viewport en vertical : simple position de
+      // défilement intermédiaire, pas un piège.
+      if (r.top < 0 || r.bottom > vh) return;
       // Exclusion 1 : débordement horizontal rattrapable par défilement.
       if ((r.left < 0 || r.right > vw) && inHorizontalScroller(el)) return;
 
@@ -96,12 +99,24 @@ async function findTraps(page: Page): Promise<Trap[]> {
       // Exclusion 2 : la couche au dessus est un ancêtre de la cible.
       if (top.contains(el)) return;
 
+      // Confirmation : si un simple recentrage libère l'élément, il est
+      // atteignable par défilement, ce n'est pas un piège.
+      const y0 = window.scrollY;
+      el.scrollIntoView({ block: "center" });
+      const r2 = el.getBoundingClientRect();
+      const cx2 = Math.min(Math.max(r2.left + r2.width / 2, 1), vw - 1);
+      const cy2 = Math.min(Math.max(r2.top + r2.height / 2, 1), vh - 1);
+      const top2 = document.elementFromPoint(cx2, cy2);
+      window.scrollTo(0, y0);
+      if (!top2 || top2 === el || el.contains(top2) || top2.contains(el)) return;
+
       traps.push({
         target: describe(el),
-        blocker: describe(top),
+        blocker: describe(top2),
         rect: `top ${Math.round(r.top)}, bottom ${Math.round(r.bottom)}`,
       });
     });
+
 
     return traps;
   });
