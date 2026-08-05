@@ -372,7 +372,7 @@ const PublicMissionView = ({
                   <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-1">
                     Coût
                   </p>
-                  <p className="text-base font-semibold text-foreground">Gratuit · échange entre membres</p>
+                  <p className="text-base font-semibold text-foreground">Échange entre membres</p>
                 </div>
               </div>
 
@@ -383,7 +383,7 @@ const PublicMissionView = ({
               </Link>
 
               <p className="mt-5 text-xs text-center text-muted-foreground px-2 leading-relaxed">
-                Inscription gratuite, 2 minutes. Sans engagement.
+                Inscription en 2 minutes, sans engagement.
               </p>
 
               <div className="mt-6 pt-6 border-t border-border space-y-2">
@@ -476,7 +476,7 @@ const PublicMissionView = ({
             </div>
             <div className="flex flex-wrap items-center justify-center gap-5 pt-4 text-sm opacity-80">
               <span className="inline-flex items-center gap-2">
-                <CheckCircle2 className="h-4 w-4" /> Gratuit
+                <CheckCircle2 className="h-4 w-4" /> Sans carte bancaire
               </span>
               <span className="inline-flex items-center gap-2">
                 <CheckCircle2 className="h-4 w-4" /> Sans engagement

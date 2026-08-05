@@ -14,6 +14,7 @@ import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
+import { detectContactDetails, contactDetailsMessage } from "@/lib/contactDetails";
 import { useToast } from "@/hooks/use-toast";
 import { useQueryClient } from "@tanstack/react-query";
 import PageMeta from "@/components/PageMeta";
@@ -228,6 +229,30 @@ const CreateSmallMission = () => {
 
   const performSubmit = async () => {
     if (!user) return;
+
+    // Une annonce d'entraide est une page publique indexable : les coordonnées
+    // personnelles y sont bloquantes, contrairement à la messagerie privée.
+    const contactKinds = detectContactDetails(`${title}\n${description}\n${exchangeOffer}`);
+    if (contactKinds.length > 0) {
+      toast({
+        title: "Coordonnées détectées",
+        description: contactDetailsMessage(contactKinds),
+        variant: "destructive",
+      });
+      try {
+        await supabase.rpc("report_contact_details_attempt" as any, {
+          _context: "small_mission_create",
+          _kinds: contactKinds,
+          _excerpt: `${title}\n${description}`.slice(0, 500),
+        });
+      } catch {
+        // Signal non bloquant : l'essentiel est le refus de publication.
+      }
+      setStep(1);
+      setDescTouched(true);
+      return;
+    }
+
     setSubmitting(true);
     let coords: { lat: number; lng: number } | null = null;
     try { coords = await geocodeCity(city.trim()); } catch { coords = null; }

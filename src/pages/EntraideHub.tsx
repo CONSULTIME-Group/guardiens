@@ -458,7 +458,7 @@ const EntraideHub = () => {
     <>
       <PageMeta
         title="Entraide, questions et coups de main entre gens du coin, Guardiens"
-        description="Posez une question, demandez un coup de main (garde animaux, jardin, promenade) ou proposez votre aide près de chez vous. Gratuit."
+        description="Posez une question, demandez un coup de main (garde animaux, jardin, promenade) ou proposez votre aide près de chez vous, sans engagement."
         path="/petites-missions"
       />
       <div className="bg-background">
@@ -478,7 +478,7 @@ const EntraideHub = () => {
                     Entraide
                   </h1>
                   <span className="text-[10px] font-semibold uppercase tracking-wide px-2 py-0.5 rounded-full bg-primary/10 text-primary shrink-0">
-                    Gratuit
+                    Sans engagement
                   </span>
                 </div>
                 <p className="text-sm text-muted-foreground mt-1.5 max-w-xl">

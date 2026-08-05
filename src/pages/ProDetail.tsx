@@ -138,7 +138,6 @@ export default function ProDetail() {
         description={pro.description?.slice(0, 155) ?? `${cat?.label ?? "Pro animalier"} ${pro.city ?? ""}`.trim()}
         path={`/pros/${pro.slug}`}
         canonical={canonical}
-        type="profile"
         image={pro.logo_url ?? undefined}
         noindex={isPreview || pro.status !== "approved" || isDemo}
         nofollow={isDemo}

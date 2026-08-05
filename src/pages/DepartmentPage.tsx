@@ -10,6 +10,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { MapPin, Users, ClipboardList, ShieldCheck, Heart, ArrowRight, Compass, Building2 } from "lucide-react";
 import PageBreadcrumb from "@/components/seo/PageBreadcrumb";
+import NeighborDepartments from "@/components/seo/NeighborDepartments";
 import { Skeleton } from "@/components/ui/skeleton";
 
 const DepartmentPage = () => {
@@ -86,8 +87,8 @@ const DepartmentPage = () => {
  return (
  <>
  <PageMeta
- title={page.meta_title || `Pet sitting & House sitting ${page.department}, garde d'animaux gratuite pour les propriétaires | Guardiens`}
- description={page.meta_description || `Trouvez un pet sitter ou house sitter dans le ${page.department}. Garde d'animaux entre particuliers, gratuite pour les propriétaires. ${cityPages.length} villes couvertes sur Guardiens.`}
+ title={page.meta_title || `Pet sitting & House sitting ${page.department}, garde d'animaux sans frais pour les propriétaires | Guardiens`}
+ description={page.meta_description || `Trouvez un pet sitter ou house sitter dans le ${page.department}. Garde d'animaux entre particuliers, sans frais pour les propriétaires. ${cityPages.length} villes couvertes sur Guardiens.`}
  path={`/departement/${page.slug}`}
  image={buildOgImageUrl({ title: page.department, subtitle: `${cityPages.length} villes couvertes`, kind: "departement" })}
  />
@@ -128,7 +129,7 @@ const DepartmentPage = () => {
  </Badge>
  <Badge variant="outline" className="text-base px-4 py-2 gap-2">
  <Heart className="h-4 w-4" />
- Inscription gratuite
+ Inscription sans carte bancaire
  </Badge>
  </div>
 
@@ -212,7 +213,7 @@ const DepartmentPage = () => {
       Combien coûte une garde d'animaux dans le {page.department} ?
     </h2>
     <p className="text-base text-foreground/90 leading-relaxed mb-3">
-      Guardiens reste gratuit tant que nous ne sommes pas satisfaits du service que nous vous offrons. Aucune commission côté propriétaire, aucun frais de mise en relation, une rencontre systématique avant chaque garde.
+      Guardiens reste sans frais tant que nous ne sommes pas satisfaits du service que nous vous offrons. Aucune commission côté propriétaire, aucun frais de mise en relation, une rencontre systématique avant chaque garde.
     </p>
     <p className="text-base text-foreground/80 leading-relaxed">
       Une pension pour animaux dans le {page.department} se facture généralement entre 25 et 50 € par nuit et par animal, soit 350 à 700 € pour deux semaines avec un chien. Confier son animal à un gardien à domicile, c'est éviter le stress de la mise en pension, garder votre logement occupé pendant votre absence, et bénéficier d'une relation directe entre particuliers, sans intermédiaire commercial. Les profils dont l'identité a été validée affichent l'écusson « Identité vérifiée ». Consultez aussi les avis publics de la communauté et organisez une rencontre en amont.
@@ -313,14 +314,16 @@ const DepartmentPage = () => {
  <Card>
  <CardContent className="p-4 md:p-6">
  <Heart className="h-8 w-8 text-primary mb-3" />
- <h3 className="font-semibold text-foreground mb-2">Gratuit pour les propriétaires</h3>
+ <h3 className="font-semibold text-foreground mb-2">Sans frais pour les propriétaires</h3>
  <p className="text-sm text-muted-foreground">
- Inscription gratuite. Pas de commission sur les gardes.
+ Inscription sans carte bancaire. Pas de commission sur les gardes.
  </p>
  </CardContent>
  </Card>
  </div>
  </section>
+
+ <NeighborDepartments department={page.department} />
 
  {/* Final CTA */}
  <section className="max-w-5xl mx-auto px-4 py-8 md:py-16 text-center">
@@ -363,7 +366,7 @@ const DepartmentPage = () => {
  "@context": "https://schema.org",
  "@type": "Service",
  name: `Pet sitting & House sitting dans le ${page.department}`,
- description: `Service de garde d'animaux et house sitting gratuit pour les propriétaires dans le ${page.department}. ${cityPages.length} villes couvertes.`,
+ description: `Service de garde d'animaux et house sitting sans frais pour les propriétaires dans le ${page.department}. ${cityPages.length} villes couvertes.`,
  provider: {
  "@type": "Organization",
  name: "Guardiens",
@@ -410,7 +413,7 @@ const DepartmentPage = () => {
  name: `Le house sitting dans le ${page.department} est-il sans frais ?`,
  acceptedAnswer: {
  "@type": "Answer",
- text: "Oui, Guardiens est gratuit pour les propriétaires. Le house sitting repose sur l'échange : le gardien loge sans frais en échange de la garde de vos animaux.",
+ text: "Oui, Guardiens est sans frais pour les propriétaires. Le house sitting repose sur l'échange : le gardien loge sans frais en échange de la garde de vos animaux.",
  },
  },
  ],
