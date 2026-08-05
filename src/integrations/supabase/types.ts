@@ -4074,6 +4074,7 @@ export type Database = {
           google_place_id: string | null
           horaires: Json
           id: string
+          is_paused: boolean
           latitude: number | null
           logo_url: string | null
           longitude: number | null
@@ -4118,6 +4119,7 @@ export type Database = {
           google_place_id?: string | null
           horaires?: Json
           id?: string
+          is_paused?: boolean
           latitude?: number | null
           logo_url?: string | null
           longitude?: number | null
@@ -4162,6 +4164,7 @@ export type Database = {
           google_place_id?: string | null
           horaires?: Json
           id?: string
+          is_paused?: boolean
           latitude?: number | null
           logo_url?: string | null
           longitude?: number | null
@@ -7555,6 +7558,12 @@ export type Database = {
           _user_id: string
         }
         Returns: boolean
+      }
+      clear_my_pro_status: {
+        Args: never
+        Returns: {
+          deleted_file_paths: string[]
+        }[]
       }
       complete_onboarding: {
         Args: {

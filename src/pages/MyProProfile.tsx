@@ -31,6 +31,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
 import { trackEvent } from "@/lib/analytics";
 
@@ -44,6 +45,8 @@ export default function MyProProfile() {
   const [deleteConfirm, setDeleteConfirm] = useState("");
   const [profile, setProfile] = useState<any | null>(null);
   const [logoFile, setLogoFile] = useState<File | null>(null);
+  const [isPaused, setIsPaused] = useState(false);
+  const [pausing, setPausing] = useState(false);
 
   const allowedTabs = ["overview", "edit", "stats", "settings"] as const;
   type TabId = (typeof allowedTabs)[number];
@@ -81,6 +84,7 @@ export default function MyProProfile() {
         navigate("/pros/inscription");
         return;
       }
+      setIsPaused(Boolean((data as any).is_paused));
       setProfile({
         ...data,
         diplomes: Array.isArray((data as any).diplomes) ? (data as any).diplomes.join("\n") : "",
@@ -166,6 +170,21 @@ export default function MyProProfile() {
     rejected: <Badge variant="destructive">Refusée</Badge>,
   }[profile.status as "pending" | "approved" | "rejected"];
 
+  const togglePause = async (paused: boolean) => {
+    setPausing(true);
+    const { error } = await supabase
+      .from("pro_profiles")
+      .update({ is_paused: paused } as any)
+      .eq("id", profile.id);
+    setPausing(false);
+    if (error) {
+      toast.error(error.message ?? "Modification impossible.");
+      return;
+    }
+    setIsPaused(paused);
+    toast.success(paused ? "Fiche mise en pause." : "Fiche à nouveau visible.");
+  };
+
   const handleDelete = async () => {
     if (deleteConfirm.trim().toUpperCase() !== "SUPPRIMER") return;
     setDeleting(true);
@@ -175,6 +194,12 @@ export default function MyProProfile() {
         .delete()
         .eq("id", profile.id);
       if (error) throw error;
+      const marker = "/pro-logos/";
+      const idx = profile.logo_url?.indexOf(marker) ?? -1;
+      if (profile.logo_url && idx >= 0) {
+        const path = decodeURIComponent(profile.logo_url.slice(idx + marker.length).split("?")[0]);
+        await supabase.storage.from("pro-logos").remove([path]);
+      }
       toast.success("Espace pro supprimé.");
       navigate("/dashboard", { replace: true });
     } catch (err: any) {
@@ -668,9 +693,27 @@ export default function MyProProfile() {
               <CardContent className="p-6 space-y-3">
                 <h2 className="font-heading text-lg text-foreground">Visibilité de la fiche</h2>
                 <p className="text-sm text-muted-foreground">
-                  Le statut actuel de votre fiche est géré par la modération. Pour la masquer temporairement,
-                  contactez notre équipe via la page contact.
+                  Mettre votre fiche en pause la retire de l'annuaire public et de la recherche. Vous la réactivez
+                  quand vous le souhaitez, sans repasser par la modération. Le statut de modération reste inchangé.
                 </p>
+                <div className="flex items-center justify-between gap-3 rounded-lg border border-border p-3">
+                  <div className="min-w-0">
+                    <p className="text-sm font-medium text-foreground">
+                      {isPaused ? "Fiche en pause" : "Fiche visible dans l'annuaire"}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      {isPaused
+                        ? "Elle n'apparaît plus dans l'annuaire ni dans la recherche."
+                        : "Elle apparaît dans l'annuaire si la modération l'a approuvée."}
+                    </p>
+                  </div>
+                  <Switch
+                    checked={!isPaused}
+                    disabled={pausing}
+                    onCheckedChange={(v) => void togglePause(!v)}
+                    aria-label="Afficher ma fiche dans l'annuaire"
+                  />
+                </div>
               </CardContent>
             </Card>
 

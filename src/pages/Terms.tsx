@@ -138,8 +138,12 @@ const Terms = () => {
           {/* 8 */}
           <h2 className="font-heading text-xl font-bold text-foreground pt-4">8. Vérification d'identité</h2>
           <p>
-            La Plateforme met à disposition un dispositif de vérification d'identité, actif, optionnel et sans frais. L'utilisateur qui le souhaite dépose une pièce d'identité officielle (carte nationale d'identité, passeport, permis de conduire ou titre de séjour) et une photographie prise depuis l'application. Ces éléments font l'objet d'un contrôle automatisé destiné à vérifier leur cohérence, et un réexamen humain est possible sur demande.
+            La Plateforme met à disposition un dispositif de vérification d'identité, actif, optionnel et sans frais. L'utilisateur qui le souhaite dépose une pièce d'identité officielle (carte nationale d'identité, passeport, permis de conduire ou titre de séjour) et une photographie prise depuis l'application. Ces éléments font l'objet d'un contrôle automatisé destiné à vérifier leur cohérence.
           </p>
+          <p>
+            Ce contrôle automatisé est placé sous supervision humaine. L'équipe de la Plateforme dispose d'une interface d'administration dédiée, dans laquelle elle consulte les dossiers déposés, la pièce et la photographie, ainsi que l'historique des décisions. Elle peut à tout moment infirmer une décision automatique, valider un dossier refusé, refuser un dossier accepté, demander le dépôt d'un nouveau document, ou révoquer un badge déjà attribué. Toute personne peut par ailleurs demander un réexamen humain de sa situation en écrivant à contact@guardiens.fr.
+          </p>
+
           <p>
             En cas de résultat positif, le badge Identité vérifiée est affiché sur le profil. Ce dispositif n'est jamais une condition d'accès à la Plateforme : un refus ou une absence de demande n'empêche ni l'inscription, ni l'usage du service. Les durées de conservation des documents et les modalités d'exercice des droits sont décrites dans la <a href="/confidentialite" className="text-primary hover:underline">Politique de confidentialité</a>.
           </p>

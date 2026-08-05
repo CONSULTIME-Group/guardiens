@@ -72,6 +72,17 @@ Deno.serve(async (req) => {
       });
     }
 
+    // Referme le signal admin "dossier en attente de décision humaine" dès qu'une décision est prise
+    const resolveNeedsReviewSignal = async (uid: string, actionTaken: string) => {
+      const { error } = await adminClient
+        .from("admin_signals")
+        .update({ resolved_at: new Date().toISOString(), action_taken: actionTaken })
+        .eq("signal_type", "identity_needs_review")
+        .eq("entity_id", uid)
+        .is("resolved_at", null);
+      if (error) console.error("resolveNeedsReviewSignal failed", error.message);
+    };
+
     // Helper: récupère l'email de l'utilisateur depuis auth.users
     const getUserEmail = async (uid: string): Promise<string | null> => {
       const { data, error } = await adminClient.auth.admin.getUserById(uid);
@@ -114,6 +125,8 @@ Deno.serve(async (req) => {
         email ? sendEmail("identity-verified", email, `identity-verified-${userId}`) : Promise.resolve(),
       ]);
 
+      await resolveNeedsReviewSignal(userId, "approve");
+
       return json({ success: true });
     }
 
@@ -140,6 +153,8 @@ Deno.serve(async (req) => {
         email ? sendEmail("identity-rejected", email, `identity-rejected-${userId}-${Date.now()}`, { reason }) : Promise.resolve(),
       ]);
 
+      await resolveNeedsReviewSignal(userId, "reject");
+
       return json({ success: true });
     }
 
@@ -157,6 +172,8 @@ Deno.serve(async (req) => {
         body: "Nous avons besoin d'un nouveau document d'identité. Veuillez en soumettre un depuis vos paramètres.",
         link: "/settings",
       });
+
+      await resolveNeedsReviewSignal(userId, "request_resend");
 
       return json({ success: true });
     }
@@ -187,6 +204,8 @@ Deno.serve(async (req) => {
           link: "/settings",
         }),
       ]);
+
+      await resolveNeedsReviewSignal(userId, "revoke");
 
       return json({ success: true });
     }
