@@ -120,11 +120,12 @@ export default function PublicHeader({ authedVariant = false }: { authedVariant?
 
   return (
     <>
-    <header className="sticky top-0 z-50 bg-background/80 backdrop-blur-md border-b border-border/50">
-      <div ref={fixedBarRef} className="flex items-center justify-between px-[5%] md:px-[8%] py-4">
-        <Link to="/" aria-label="Guardiens, accueil" className="font-heading text-xl md:text-2xl font-bold">
+    <header className="sticky top-0 z-50 max-w-[100vw] overflow-x-clip bg-background/80 backdrop-blur-md border-b border-border/50">
+      <div ref={fixedBarRef} className="flex items-center justify-between gap-2 px-[5%] md:px-[8%] py-4">
+        <Link to="/" aria-label="Guardiens, accueil" className="min-w-0 shrink font-heading text-xl md:text-2xl font-bold">
           <span aria-hidden="true"><span className="text-primary">g</span>uardiens</span>
         </Link>
+
 
         {/* Desktop nav */}
         <nav className="hidden sm:flex gap-1 items-center">
@@ -168,33 +169,17 @@ export default function PublicHeader({ authedVariant = false }: { authedVariant?
           <LanguageSwitcher />
         </nav>
 
-        {/* Mobile : barre allégée (avatar et burger uniquement pour un
-            connecté). Langue, messagerie et notifications sont dans le menu. */}
-        <div className="flex sm:hidden items-center gap-1">
+        {/* Mobile : barre strictement allégée. Sous le point de rupture sm,
+            seuls le logo et le burger (plus l'avatar d'un connecté) restent
+            dans l'en tête. Langue, connexion et création de compte vivent
+            dans le panneau du menu, sinon le cluster déborde du viewport. */}
+        <div className="flex sm:hidden shrink-0 items-center gap-1">
           {!authChecked ? (
-            <div className="h-9 w-24 rounded-md bg-muted/40 animate-pulse" aria-hidden="true" />
+            <div className="h-9 w-9 rounded-md bg-muted/40 animate-pulse" aria-hidden="true" />
           ) : hasSession ? (
             <UserMenu compact />
-          ) : (
-            <>
-              <LanguageSwitcher compact />
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => navigate("/login")}
-                className="min-h-11 px-2"
-              >
-                {t("nav.login")}
-              </Button>
-              <Button
-                size="sm"
-                onClick={() => navigate("/inscription")}
-                className="min-h-11 px-3"
-              >
-                {t("nav.register")}
-              </Button>
-            </>
-          )}
+          ) : null}
+
           <Button
             size="icon"
             variant="ghost"
@@ -221,6 +206,29 @@ export default function PublicHeader({ authedVariant = false }: { authedVariant?
       {/* Mobile dropdown */}
       {open && (
         <nav className="sm:hidden border-t border-border bg-background px-[5%] py-4 space-y-1 animate-in slide-in-from-top-2 duration-200">
+          {/* Actions de compte remontées en haut du panneau : elles ont quitté
+              l'en tête mobile, qui ne peut plus les accueillir. */}
+          {!authChecked ? (
+            <div className="h-9 w-full rounded-md bg-muted/40 animate-pulse" aria-hidden="true" />
+          ) : !hasSession ? (
+            <div className="pb-3 mb-2 border-b border-border space-y-2">
+              <Button
+                className="w-full min-h-11"
+                size="sm"
+                onClick={() => { setOpen(false); navigate("/inscription"); }}
+              >
+                {t("nav.register")}
+              </Button>
+              <Button
+                variant="outline"
+                className="w-full min-h-11"
+                size="sm"
+                onClick={() => { setOpen(false); navigate("/login"); }}
+              >
+                {t("nav.login")}
+              </Button>
+            </div>
+          ) : null}
           {NAV_DEFS.map((l) => (
             <Link
               key={l.to}
@@ -241,23 +249,23 @@ export default function PublicHeader({ authedVariant = false }: { authedVariant?
               )}
             </Link>
           ))}
-          <div className="pt-2 border-t border-border space-y-2">
-            {!authChecked ? (
-              <div className="h-9 w-full rounded-md bg-muted/40 animate-pulse" aria-hidden="true" />
-            ) : hasSession ? (
-              <>
-                <Button className="w-full" size="sm" onClick={() => { setOpen(false); navigate("/dashboard"); }}>
-                  Mon espace
-                </Button>
-              </>
-            ) : (
-              <Button className="w-full" size="sm" onClick={() => { setOpen(false); navigate("/inscription"); }}>
-                {t("nav.register")}
+          {authChecked && hasSession && (
+            <div className="pt-2 border-t border-border space-y-2">
+              <Button className="w-full" size="sm" onClick={() => { setOpen(false); navigate("/dashboard"); }}>
+                Mon espace
               </Button>
-            )}
-          </div>
+            </div>
+          )}
+          {/* Sélecteur de langue en pied de panneau. Pour un connecté, il est
+              déjà rendu dans la barre cloches ci dessous, on ne double pas. */}
+          {!showBells && (
+            <div className="pt-3 mt-2 border-t border-border flex justify-start">
+              <LanguageSwitcher compact />
+            </div>
+          )}
         </nav>
       )}
+
 
       {/* Messagerie, notifications et langue sur mobile : montés en
           permanence (une seule instance dans tout le composant) pour

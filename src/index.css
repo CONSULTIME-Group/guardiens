@@ -460,10 +460,29 @@
     @apply rounded-xl shadow-lg my-8 w-full;
   }
 
+  /* Tableaux d'article : défilement horizontal contenu, jamais de débordement
+     de la page sur mobile. L'ombre à droite signale la zone scrollable. */
+  .article-table-scroll {
+    @apply w-full max-w-full my-6 overflow-x-auto overscroll-x-contain;
+    -webkit-overflow-scrolling: touch;
+    background:
+      linear-gradient(to right, hsl(var(--background)) 30%, hsl(var(--background) / 0)) left center / 24px 100% no-repeat,
+      linear-gradient(to left, hsl(var(--background)) 30%, hsl(var(--background) / 0)) right center / 24px 100% no-repeat,
+      linear-gradient(to right, hsl(var(--border) / 0.5), hsl(var(--border) / 0)) left center / 12px 100% no-repeat,
+      linear-gradient(to left, hsl(var(--border) / 0.5), hsl(var(--border) / 0)) right center / 12px 100% no-repeat;
+    background-attachment: local, local, scroll, scroll;
+  }
+
+  .article-table-scroll > table {
+    @apply my-0;
+    min-width: max-content;
+  }
+
   .article-rich-content table {
     @apply w-full my-6 text-sm;
     border-collapse: collapse;
   }
+
 
   .article-rich-content th {
     @apply text-left py-3 px-4 font-semibold;
