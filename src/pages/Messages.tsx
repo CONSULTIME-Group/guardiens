@@ -179,6 +179,28 @@ const Messages = () => {
 
     const profilesMap = new Map((profilesRes.data || []).map((p: any) => [p.id, p]));
 
+    // Comptes effacés : la fiche est anonymisée, pas détruite. Le fil reste
+    // lisible pour l'interlocuteur, sous le nom neutre "Membre supprimé".
+    const missingOtherIds = Array.from(new Set(otherIds.filter((id: string) => id && !profilesMap.has(id))));
+    if (missingOtherIds.length > 0) {
+      const { data: anonProfiles } = await supabase.rpc("get_member_display" as any, {
+        _ids: missingOtherIds,
+      });
+      (anonProfiles as any[] | null)?.forEach((p: any) => {
+        profilesMap.set(p.id, {
+          id: p.id,
+          first_name: p.first_name,
+          avatar_url: p.avatar_url,
+          identity_verified: false,
+          city: null,
+          is_founder: false,
+          pro_status: null,
+          is_deleted: Boolean(p.is_deleted),
+        });
+      });
+    }
+
+
     // Résoudre la ville du propriétaire pour chaque sit (lieu de la garde)
     //, distinct de other_user.city qui peut être la ville du gardien.
     const ownerIdsForSits = Array.from(new Set((sitsRes.data || []).map((s: any) => s.user_id).filter(Boolean)));
