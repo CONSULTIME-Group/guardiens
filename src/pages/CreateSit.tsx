@@ -2372,6 +2372,7 @@ const CreateSit = () => {
         }}
         open={previewOpen}
         onOpenChange={setPreviewOpen}
+        audienceCount={audienceCount}
         onConfirmPublish={async () => { await handlePublish(); }}
         publishing={publishing}
         canPublish={!!canPublish}
