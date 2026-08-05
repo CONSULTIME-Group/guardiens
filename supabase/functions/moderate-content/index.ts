@@ -16,6 +16,36 @@ const EMAIL_RE = /[\w.+-]+@[\w-]+\.[\w.-]+/;
 const URL_RE = /\bhttps?:\/\/\S+/i;
 const FORBIDDEN_WORDS = /\b(voisin|voisine|voisins|voisinage)\b/i;
 
+// Contenu de test ou fictif : interdit sur une annonce, qui est une page
+// publique indexée et qui déclenche une notification à des gardiens réels.
+// Détection déterministe, indépendante du LLM, appliquée sur un texte
+// désaccentué et à espaces normalisés (le titre passait au travers).
+const TEST_CONTENT_PATTERNS: RegExp[] = [
+  /\btest(s)?\s+(recette|interne|technique)\b/i,
+  /\brecette\s+interne\b/i,
+  /\bannonce\s+(de\s+)?test\b/i,
+  /\b(ceci|cette annonce)\s+est\s+un\s+test\b/i,
+  /\bne\s+pas\s+repondre\b/i,
+  /\bdo\s+not\s+reply\b/i,
+  /\bnepasrepondre\b/i,
+  /\baucune\s+candidature\s+attendue\b/i,
+  /\bmerci\s+d[e']\s?ignorer\s+cette\s+annonce\b/i,
+  /\blorem\s+ipsum\b/i,
+  /\bdummy\s+(content|text)\b/i,
+];
+
+function normalizeForTestDetection(text: string): string {
+  return text
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/\s+/g, " ");
+}
+
+function looksLikeTestContent(text: string): boolean {
+  const normalized = normalizeForTestDetection(text);
+  return TEST_CONTENT_PATTERNS.some((re) => re.test(normalized));
+}
+
 type Reason = string;
 
 // Doctrine produit : l'échange de coordonnées est AUTORISÉ en messagerie privée
