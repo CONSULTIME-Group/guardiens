@@ -15,7 +15,7 @@
 // - sitter_id : limite l'exécution à un gardien précis (test ciblé).
 
 import { createClient } from 'npm:@supabase/supabase-js@2.45.0'
-import { claimSitNotification, raiseClaimErrorSignal, releaseSitNotification } from '../_shared/sitNotificationClaim.ts'
+import { claimSitNotification, raiseClaimErrorSignal, raiseStaleClaimSignal, releaseSitNotification, reportClaimOutcome } from '../_shared/sitNotificationClaim.ts'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -98,6 +98,9 @@ Deno.serve(async (req) => {
     let sittersSent = 0
     let sittersSkipped = 0
     let claimSkipped = 0
+    let claimGranted = 0
+    const staleSolded: string[] = []
+    let staleReason = ''
     const claimSkippedBy: Record<string, number> = {}
     const errors: Array<{ sitter_id: string; reason: string }> = []
     const plan: Array<{ sitter_id: string; sits: string[]; skipped: string[] }> = []
@@ -295,15 +298,16 @@ Deno.serve(async (req) => {
               return t < staleCutoff
             })
             if (staleRows.length > 0) {
-              await markSkipped(
-                supabase,
-                staleRows.map(r => r.id),
-                `claim_blocked_stale_${key}`.slice(0, 60),
-                body.dry_run,
-              )
+              const reason = `claim_blocked_stale_${key}`.slice(0, 60)
+              await markSkipped(supabase, staleRows.map(r => r.id), reason, body.dry_run)
+              // Une ligne soldée faute de créneau est une perte de diffusion :
+              // elle sort de la file mais reste visible en signal admin.
+              staleSolded.push(...staleRows.map(r => r.id))
+              staleReason = reason
             }
             continue
           }
+          claimGranted++
         }
 
         // 2g. Envoi digest
@@ -360,6 +364,10 @@ Deno.serve(async (req) => {
     }
 
     await raiseClaimErrorSignal(supabase, 'sitter-daily-digest', claimSkippedBy.claim_error ?? 0)
+    await reportClaimOutcome(supabase, 'sitter-daily-digest', claimGranted, claimSkipped, claimSkippedBy)
+    if (!body.dry_run && staleSolded.length > 0) {
+      await raiseStaleClaimSignal(supabase, 'sitter-daily-digest', staleReason, staleSolded)
+    }
 
     return json({
       ok: true,
