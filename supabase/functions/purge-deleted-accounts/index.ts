@@ -1,6 +1,7 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.4";
 import { requireAdminOrServiceRole } from "../_shared/require-admin.ts";
-import { finalizeErasure } from "../_shared/account-erasure.ts";
+import { anonymizeAccount } from "../_shared/account-erasure.ts";
+
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",

@@ -1,5 +1,10 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.4";
-import { finalizeErasure } from "../_shared/account-erasure.ts";
+import {
+  anonymizeAccount,
+  countActiveCommitments,
+  finalizeErasure,
+} from "../_shared/account-erasure.ts";
+
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
