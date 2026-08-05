@@ -54,6 +54,112 @@ export const BYPASS_TEMPLATES = new Set<string>([
   'contact-reply',
 ])
 
+// ---------------------------------------------------------------------------
+// ETAPE 1 (05/08/2026) : TTL de report par gabarit et par motif.
+//
+// Constat : la file de report appliquait une TTL fixe de 36 h, alors qu'un
+// plafond hebdomadaire reprogramme a J+7. Les deux constantes se contredisent,
+// l'abandon etait arithmetique et silencieux.
+//
+// Regle : la TTL est desormais portee par le gabarit, module par le motif de
+// report. Et surtout, on n'enfile plus jamais un report qui depasse deja la
+// TTL : on tranche immediatement entre envoyer et annuler.
+// ---------------------------------------------------------------------------
+
+/** TTL par defaut, en heures, pour un report en file. */
+export const DEFAULT_DEFERRED_TTL_HOURS = 36
+
+/**
+ * TTL specifique par gabarit, en heures. Un gabarit date (recap du jour,
+ * alerte annonce) perd sa valeur en quelques heures, il ne sert a rien de le
+ * garder trois jours en file. A l'inverse, une notification declenchee par un
+ * membre garde sa valeur plus longtemps.
+ */
+export const TEMPLATE_TTL_HOURS: Record<string, number> = {
+  // Contenu date : perime le lendemain.
+  'sitter-daily-digest': 20,
+  'nearby-daily-digest': 20,
+  'mission-daily-digest': 20,
+  'alert-digest': 20,
+  'nearby-sit-alert': 20,
+  // Declenche par un membre identifie : garde sa valeur, on laisse du mou.
+  'new-message': 48,
+  'new-application': 48,
+  'mission-response': 48,
+  'question-answer-received': 48,
+}
+
+/**
+ * Les heures calmes ne peuvent jamais repousser de plus de 10 h. Une TTL de
+ * 12 h suffit pour ce motif, quel que soit le gabarit ; au dela, c'est qu'autre
+ * chose bloque.
+ */
+export const QUIET_HOURS_TTL_HOURS = 12
+
+export function getDeferralTtlHours(
+  templateName: string,
+  reason?: string,
+): number {
+  const base = TEMPLATE_TTL_HOURS[templateName] ?? DEFAULT_DEFERRED_TTL_HOURS
+  if (reason === 'quiet_hours') return Math.min(base, QUIET_HOURS_TTL_HOURS)
+  return base
+}
+
+export type OverTtlAction = 'send_now' | 'cancel'
+
+/**
+ * Que faire quand le report calcule depasse deja la TTL du gabarit ?
+ *
+ * - Contenu date (digest, alerte annonce) : `cancel`. L'envoyer en retard, c'est
+ *   envoyer une information fausse.
+ * - Tout le reste : `send_now`. Le plafond de frequence protege des relances
+ *   marketing, il n'a pas vocation a detruire un email legitime. Mieux vaut un
+ *   email de trop qu'une notification jamais delivree.
+ *
+ * Les heures calmes ne declenchent jamais ce cas (report < 10 h), mais si cela
+ * arrivait, on annule plutot que de reveiller quelqu'un.
+ */
+export const DATED_TEMPLATES = new Set<string>([
+  'sitter-daily-digest',
+  'nearby-daily-digest',
+  'mission-daily-digest',
+  'mutual-aid-weekly-digest',
+  'alert-digest',
+  'nearby-sit-alert',
+  'analysis-requests-digest',
+])
+
+export function decideOverTtl(input: {
+  templateName: string
+  reason?: string
+}): OverTtlAction {
+  if (input.reason === 'quiet_hours') return 'cancel'
+  if (DATED_TEMPLATES.has(input.templateName)) return 'cancel'
+  return 'send_now'
+}
+
+/**
+ * Decision complete d'enfilement : etant donne un report calcule et la date de
+ * premiere mise en file, dit s'il faut enfiler, envoyer tout de suite, ou
+ * annuler. Aucun report depassant la TTL ne doit plus etre enfile.
+ */
+export function resolveDeferral(input: {
+  templateName: string
+  reason: string
+  scheduledFor: Date
+  firstEnqueuedAt: Date
+}): { action: 'enqueue' } | { action: OverTtlAction; ttlDeadline: Date } {
+  const ttlHours = getDeferralTtlHours(input.templateName, input.reason)
+  const ttlDeadline = new Date(input.firstEnqueuedAt.getTime() + ttlHours * 3600_000)
+  if (input.scheduledFor.getTime() <= ttlDeadline.getTime()) {
+    return { action: 'enqueue' }
+  }
+  return {
+    action: decideOverTtl({ templateName: input.templateName, reason: input.reason }),
+    ttlDeadline,
+  }
+}
+
 export function getParisParts(d: Date = new Date()) {
   const parts = new Intl.DateTimeFormat('en-CA', {
     timeZone: 'Europe/Paris',
