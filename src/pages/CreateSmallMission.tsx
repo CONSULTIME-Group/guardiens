@@ -113,6 +113,32 @@ const CreateSmallMission = () => {
   const [photos, setPhotos] = useState<string[]>([]);
   const [appliedTemplateId, setAppliedTemplateId] = useState<string | null>(null);
 
+  // Hauteur réelle de la barre d'action fixe, exposée en variable CSS pour que
+  // le conteneur défilant réserve exactement l'espace des couches fixes
+  // (barre d'action plus barre de navigation basse). Sans cela, les derniers
+  // contrôles du formulaire restent sous la barre en fin de défilement.
+  const actionBarRef = useRef<HTMLDivElement | null>(null);
+  useEffect(() => {
+    const el = actionBarRef.current;
+    if (!el || typeof window === "undefined") return;
+    const apply = () => {
+      const h = Math.round(el.getBoundingClientRect().height);
+      document.documentElement.style.setProperty("--mission-action-bar-h", `${h}px`);
+    };
+    apply();
+    let ro: ResizeObserver | null = null;
+    if (typeof ResizeObserver !== "undefined") {
+      ro = new ResizeObserver(apply);
+      ro.observe(el);
+    }
+    window.addEventListener("resize", apply);
+    return () => {
+      ro?.disconnect();
+      window.removeEventListener("resize", apply);
+      document.documentElement.style.removeProperty("--mission-action-bar-h");
+    };
+  });
+
   const applyTemplate = (tpl: MissionTemplate) => {
     setMissionType(tpl.type);
     setCategory(tpl.category);
