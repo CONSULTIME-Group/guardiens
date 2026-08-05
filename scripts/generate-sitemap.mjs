@@ -323,8 +323,8 @@ async function main() {
     // Fiches pros animaliers approuvées : /pros/:slug
     fetchOrCache(
       "pro_profiles", cache,
-      () => maxUpdatedAt("pro_profiles", "updated_at", q => q.eq("status", "approved")),
-      async () => (await supabase.from("pro_profiles").select("slug, raison_sociale, category, city, updated_at").eq("status", "approved")).data,
+      () => maxUpdatedAt("pro_profiles", "updated_at", q => q.eq("status", "approved").eq("is_paused", false)),
+      async () => (await supabase.from("pro_profiles").select("slug, raison_sociale, category, city, updated_at").eq("status", "approved").eq("is_paused", false)).data,
       // Les fiches de démonstration de l'annuaire (slug `demo-`) ne sont
       // jamais soumises au crawl : règle partagée avec ProDetail.tsx via
       // src/lib/proIndexability.js.

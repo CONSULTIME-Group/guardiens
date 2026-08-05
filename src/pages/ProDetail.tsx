@@ -46,14 +46,18 @@ export default function ProDetail() {
       let req = supabase
         .from("pro_profiles")
         .select(
-          "id, user_id, slug, raison_sociale, category, sub_categories, city, postal_code, description, phone, website, email_contact, urgences_24_7, siret_verified, siret_verified_at, logo_url, cover_url, tarif_min, tarif_max, tarif_note, horaires, diplomes, ordre_number, zone_radius_km, zone_cities, status, rating_avg, rating_count, google_place_id"
+          "id, user_id, slug, raison_sociale, category, sub_categories, city, postal_code, description, phone, website, email_contact, urgences_24_7, siret_verified, siret_verified_at, logo_url, cover_url, tarif_min, tarif_max, tarif_note, horaires, diplomes, ordre_number, zone_radius_km, zone_cities, status, is_paused, rating_avg, rating_count, google_place_id"
         )
         .eq("slug", slug);
       // Anon: restreint aux fiches approuvées. Connecté: la RLS expose aussi
       // sa propre fiche (auto-preview) et toutes les fiches pour l'admin.
       if (!user && !isAdminPreview) req = req.eq("status", "approved");
       const { data } = await req.maybeSingle();
-      setPro(data);
+      // Fiche mise en pause par son propriétaire : invisible pour les visiteurs,
+      // toujours consultable par le propriétaire et par l'administration.
+      const paused = Boolean((data as any)?.is_paused);
+      const viewerIsOwner = !!user && (data as any)?.user_id === user.id;
+      setPro(paused && !viewerIsOwner && !isAdminPreview ? null : data);
       setLoading(false);
       if (data && (data as any).status === "approved" && !isAdminPreview && (!user || (data as any).user_id !== user.id)) {
         supabase.rpc("increment_pro_view" as any, { _slug: slug }).then(() => {});
