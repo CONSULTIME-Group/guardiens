@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import { Helmet } from "react-helmet-async";
 import { supabase } from "@/integrations/supabase/client";
 import {
   PRO_CATEGORIES,
@@ -15,6 +14,9 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Checkbox } from "@/components/ui/checkbox";
 import ProVerifiedBadge from "@/components/pros/ProVerifiedBadge";
 import { trackEvent } from "@/lib/analytics";
+import PageMeta from "@/components/PageMeta";
+import NotFound from "@/pages/NotFound";
+import { isProIndexable } from "@/lib/proIndexability";
 
 type ProRow = {
   id: string;
@@ -82,18 +84,9 @@ export default function ProCategoryListing() {
     [pros, villeSlug],
   );
 
+  // Catégorie inconnue : vraie page 404 en noindex, pas de redirection.
   if (!category) {
-    return (
-      <div className="container mx-auto px-4 py-20 max-w-2xl text-center min-w-0">
-        <Helmet>
-          <meta name="robots" content="noindex" />
-        </Helmet>
-        <h1 className="text-2xl font-bold mb-3">Catégorie inconnue</h1>
-        <Button asChild>
-          <Link to="/pros">Voir l'annuaire complet</Link>
-        </Button>
-      </div>
-    );
+    return <NotFound />;
   }
 
   const baseUrl = "https://guardiens.fr";
@@ -137,17 +130,39 @@ export default function ProCategoryListing() {
     ],
   };
 
+  // ItemList des fiches indexables de la catégorie (démos exclues).
+  const indexableList = filtered.filter((p) => isProIndexable({ ...p, status: "approved" }));
+  const itemListJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    name: metaTitle,
+    description: metaDesc,
+    url: canonical,
+    inLanguage: "fr",
+    mainEntity: {
+      "@type": "ItemList",
+      name: h1,
+      numberOfItems: indexableList.length,
+      itemListOrder: "https://schema.org/ItemListOrderAscending",
+      itemListElement: indexableList.slice(0, 100).map((p, i) => ({
+        "@type": "ListItem",
+        position: i + 1,
+        url: `${baseUrl}/pros/${p.slug}`,
+        name: p.raison_sociale,
+      })),
+    },
+  };
+
   return (
     <div className="min-h-screen bg-background">
-      <Helmet>
-        <title>{metaTitle} | Guardiens</title>
-        <meta name="description" content={metaDesc} />
-        <link rel="canonical" href={canonical} />
-        <meta property="og:title" content={metaTitle} />
-        <meta property="og:url" content={canonical} />
-        <meta property="og:type" content="website" />
-        <script type="application/ld+json">{JSON.stringify(breadcrumbJsonLd)}</script>
-      </Helmet>
+      <PageMeta
+        title={metaTitle}
+        description={metaDesc}
+        path={path}
+        canonical={canonical}
+        jsonLd={[itemListJsonLd, breadcrumbJsonLd]}
+        ready={!loading}
+      />
 
       <div className="container mx-auto px-4 py-6 md:py-10 max-w-6xl min-w-0">
         <header className="mb-6 md:mb-10">
