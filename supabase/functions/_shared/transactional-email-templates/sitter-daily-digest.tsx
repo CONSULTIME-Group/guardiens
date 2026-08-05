@@ -33,6 +33,11 @@ interface DigestItem {
 interface Props {
   sitterFirstName?: string
   items?: DigestItem[]
+  /**
+   * Passage de rattrapage : les annonces ont plusieurs jours, le gabarit
+   * assume le rappel et ne présente rien comme une nouveauté du jour.
+   */
+  isCatchup?: boolean
 }
 
 const buildCtaUrl = (sitId: string) =>
