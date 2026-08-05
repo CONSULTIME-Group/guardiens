@@ -32,6 +32,8 @@ import { resendFetch } from "../_shared/resend-guard.ts";
 import {
   BYPASS_TEMPLATES,
   decideDeferral,
+  resolveDeferral,
+
   isQuietAt,
   nextQuietEndFrom,
 } from '../_shared/email-cap.ts'
