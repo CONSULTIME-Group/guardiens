@@ -17,6 +17,7 @@ import { SuspiciousAccountCard } from "@/components/admin/signals/SuspiciousAcco
 import { RepeatedCancellationsCard } from "@/components/admin/signals/RepeatedCancellationsCard";
 import { RepeatedRepublishCard } from "@/components/admin/signals/RepeatedRepublishCard";
 import { OwnerMissingCoordinatesCard } from "@/components/admin/signals/OwnerMissingCoordinatesCard";
+import { IdentityNeedsReviewCard } from "@/components/admin/signals/IdentityNeedsReviewCard";
 import { StaleDraftCard } from "@/components/admin/signals/StaleDraftCard";
 import { OwnerActivationCampaignCard } from "@/components/admin/signals/OwnerActivationCampaignCard";
 import { cn } from "@/lib/utils";
@@ -160,6 +161,8 @@ export const SignalsSection = () => {
                       </p>
                     </div>
                   </Link>
+                ) : s.signal_type === "identity_needs_review" ? (
+                  <IdentityNeedsReviewCard signal={s as unknown as import("@/components/admin/signals/IdentityNeedsReviewCard").IdentityNeedsReviewSignal} />
                 ) : s.signal_type === "stale_draft" ? (
                   <StaleDraftCard signal={s as unknown as import("@/components/admin/signals/StaleDraftCard").StaleDraftSignal} />
                 ) : (

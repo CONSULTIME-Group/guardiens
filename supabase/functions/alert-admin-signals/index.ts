@@ -27,6 +27,7 @@ const isServiceRoleRequest = (req: Request): boolean => {
 const ADMIN_LINKS: Record<string, string> = {
   identity_orphan_documents: 'https://guardiens.fr/admin/verifications',
   stale_verification: 'https://guardiens.fr/admin/verifications',
+  identity_needs_review: 'https://guardiens.fr/admin/verifications',
   stale_draft: 'https://guardiens.fr/admin/listings',
   no_applications: 'https://guardiens.fr/admin/listings',
   pending_application: 'https://guardiens.fr/admin/listings',

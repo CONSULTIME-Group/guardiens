@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { toast } from "@/hooks/use-toast";
 import { SPECIALTY_OPTIONS } from "@/lib/proSpecialties";
 import { Loader2, ShieldCheck, FileText, AlertCircle, Clock, Trash2 } from "lucide-react";
+import { ConfirmDialog } from "@/components/admin/ConfirmDialog";
 
 type ProStatus = "none" | "declared" | "pending" | "verified" | "rejected";
 
@@ -56,6 +57,8 @@ const ProVerificationSection = ({ user }: { user: any }) => {
   const [docType, setDocType] = useState<string>("diploma_acaced");
   const [file, setFile] = useState<File | null>(null);
   const [verifications, setVerifications] = useState<ProVerification[]>([]);
+  const [hasApprovedDirectoryProfile, setHasApprovedDirectoryProfile] = useState(false);
+  const [clearing, setClearing] = useState(false);
 
   const loadAll = async () => {
     if (!user?.id) return;
@@ -79,6 +82,12 @@ const ProVerificationSection = ({ user }: { user: any }) => {
       .eq("user_id", user.id)
       .order("created_at", { ascending: false });
     setVerifications((verifs ?? []) as ProVerification[]);
+    const { count } = await supabase
+      .from("pro_profiles")
+      .select("id", { count: "exact", head: true })
+      .eq("user_id", user.id)
+      .eq("status", "approved");
+    setHasApprovedDirectoryProfile((count ?? 0) > 0);
     setLoading(false);
   };
 
@@ -167,6 +176,24 @@ const ProVerificationSection = ({ user }: { user: any }) => {
       return;
     }
     toast({ title: "Document supprimé" });
+    await loadAll();
+  };
+
+  const clearProStatus = async () => {
+    if (!user?.id) return;
+    setClearing(true);
+    const { data, error } = await supabase.rpc("clear_my_pro_status" as any);
+    if (error) {
+      setClearing(false);
+      toast({ title: "Impossible de retirer votre statut", description: error.message, variant: "destructive" });
+      return;
+    }
+    const paths: string[] = (Array.isArray(data) ? (data[0] as any)?.deleted_file_paths : (data as any)?.deleted_file_paths) ?? [];
+    if (paths.length > 0) {
+      await supabase.storage.from("pro-documents").remove(paths).catch(() => {});
+    }
+    setClearing(false);
+    toast({ title: "Statut professionnel retiré" });
     await loadAll();
   };
 
@@ -312,6 +339,33 @@ const ProVerificationSection = ({ user }: { user: any }) => {
               );
             })}
           </ul>
+        </div>
+      )}
+
+      {/* Retirer son statut professionnel */}
+      {(proStatus !== "none" || specialty || businessName || siret || tagline || pricingNote) && (
+        <div className="rounded-xl border border-destructive/30 bg-destructive/5 p-5 space-y-3">
+          <h3 className="font-heading font-semibold text-foreground">Retirer mon statut professionnel</h3>
+          <p className="text-sm text-muted-foreground">
+            Votre spécialité, votre nom commercial, votre SIRET, votre accroche et votre tarif indicatif seront effacés. Vos documents non validés seront supprimés, fichiers compris. Votre statut repasse à « aucun ».
+          </p>
+          {hasApprovedDirectoryProfile && (
+            <p className="text-sm text-foreground">
+              Attention : vous possédez une fiche approuvée dans l'annuaire des pros. Retirer votre statut n'affecte pas cette fiche, qui se met en pause ou se supprime séparément depuis votre espace pro.
+            </p>
+          )}
+          <ConfirmDialog
+            trigger={
+              <Button variant="destructive" disabled={clearing} className="w-full sm:w-auto">
+                {clearing ? "Retrait en cours…" : "Retirer mon statut professionnel"}
+              </Button>
+            }
+            title="Retirer votre statut professionnel ?"
+            description="Vos informations professionnelles et vos documents non validés seront supprimés. Vous pourrez déclarer à nouveau votre activité plus tard."
+            confirmLabel="Retirer"
+            destructive
+            onConfirm={clearProStatus}
+          />
         </div>
       )}
     </section>

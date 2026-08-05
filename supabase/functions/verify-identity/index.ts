@@ -264,14 +264,41 @@ Rules:
         .update({ identity_verified: false, identity_verification_status: "needs_review" })
         .eq("id", user.id);
 
-      await supabaseAdmin.from("notifications").insert({
-        user_id: user.id,
-        type: "identity_pending",
-        title: "Vérification en cours",
-        body: "Votre document est en cours de revue par notre équipe. Vous serez notifié sous 24h.",
-        link: "/settings?section=security&focus=identity",
-      });
+      await Promise.allSettled([
+        supabaseAdmin.from("notifications").insert({
+          user_id: user.id,
+          type: "identity_pending",
+          title: "Vérification en cours",
+          body: "Votre document est en cours de revue par notre équipe. Vous serez notifié sous 24h.",
+          link: "/settings?section=security&focus=identity",
+        }),
+        (async () => {
+          const { data: existing } = await supabaseAdmin
+            .from("admin_signals")
+            .select("id")
+            .eq("signal_type", "identity_needs_review")
+            .eq("entity_id", user.id)
+            .is("resolved_at", null)
+            .maybeSingle();
+          if (existing) return;
+          const { error: sigErr } = await supabaseAdmin.from("admin_signals").insert({
+            signal_type: "identity_needs_review",
+            severity: "warning",
+            entity_type: "profile",
+            entity_id: user.id,
+            metadata: {
+              title: "Dossier d'identité en attente de décision humaine",
+              confidence,
+              document_type: verification.document_type ?? null,
+              red_flags: redFlags,
+            },
+          });
+          if (sigErr) console.error("admin_signals insert failed", sigErr);
+        })(),
+
+      ]);
     } else {
+
       await supabaseAdmin
         .from("profiles")
         .update({ identity_verified: false, identity_verification_status: "rejected" })

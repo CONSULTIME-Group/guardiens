@@ -278,12 +278,19 @@ const OwnerGallery = () => {
 
   const handleDelete = async (id: string) => {
     const previous = photos;
+    const target = photos.find((p) => p.id === id);
     setPhotos((prev) => prev.filter((p) => p.id !== id));
     const { error } = await supabase.from("owner_gallery").delete().eq("id", id);
     if (error) {
       setPhotos(previous);
       toast({ variant: "destructive", title: "Erreur", description: "Impossible de supprimer la photo." });
       return;
+    }
+    const marker = "/property-photos/";
+    const idx = target?.photo_url?.indexOf(marker) ?? -1;
+    if (target?.photo_url && idx >= 0) {
+      const path = decodeURIComponent(target.photo_url.slice(idx + marker.length).split("?")[0]);
+      await supabase.storage.from("property-photos").remove([path]);
     }
     toast({ title: "Photo supprimée" });
     window.dispatchEvent(new Event("owner-gallery:changed"));

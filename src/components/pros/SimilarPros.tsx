@@ -29,6 +29,7 @@ export default function SimilarPros({ currentId, category, city }: Props) {
         .from("pro_profiles")
         .select("id, slug, raison_sociale, category, city, logo_url")
         .eq("status", "approved")
+        .eq("is_paused", false)
         .eq("category", category as any)
         .neq("id", currentId)
         .limit(3);
@@ -40,6 +41,7 @@ export default function SimilarPros({ currentId, category, city }: Props) {
           .from("pro_profiles")
           .select("id, slug, raison_sociale, category, city, logo_url")
           .eq("status", "approved")
+        .eq("is_paused", false)
           .eq("category", category as any)
           .neq("id", currentId)
           .limit(6);

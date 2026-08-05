@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo, useRef } from "react";
+import BlockedMembersCard from "@/components/settings/BlockedMembersCard";
 import { useSearchParams } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { useAuth } from "@/contexts/AuthContext";
@@ -880,6 +881,7 @@ const PrivacySection = ({ prefs, onSave }: any) => (
         <Switch checked={prefs.show_last_seen} onCheckedChange={(v) => onSave({ show_last_seen: v })} />
       </div>
 
+      <BlockedMembersCard />
     </div>
   </section>
 );

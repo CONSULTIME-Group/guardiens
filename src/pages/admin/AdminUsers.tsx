@@ -10,6 +10,7 @@ import { toast } from "sonner";
 import { format, formatDistanceToNow } from "date-fns";
 import { fr } from "date-fns/locale";
 import { Eye, Ban, ShieldCheck, StickyNote, RotateCcw, Trash2, Crown, ChevronLeft, ChevronRight, MessageSquare, FileText, MailCheck, UserCog, Download } from "lucide-react";
+import { FileSearch } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { useNavigate } from "react-router-dom";
 import { SuspendUserDialog } from "./_components/users/SuspendUserDialog";
@@ -462,33 +463,17 @@ const AdminUsers = () => {
     const userId = verifyModal.userId;
     if (!userId) return;
     setVerifying(true);
-    const { data: userData } = await supabase.auth.getUser();
-    const adminId = userData.user?.id;
-    const { error } = await supabase
-      .from("profiles")
-      .update({ identity_verified: true, identity_verification_status: "verified" })
-      .eq("id", userId);
-    if (error) {
-      toast.error("Erreur");
+    // Passe par l'edge function : contrôle du rôle admin, journal métier,
+    // notification et email au membre, comme dans le parcours normal.
+    const { data, error } = await supabase.functions.invoke("admin-manage-identity-verification", {
+      body: { action: "approve", userId },
+    });
+    if (error || (data as any)?.error) {
+      toast.error((data as any)?.error ?? "Validation impossible");
       setVerifying(false);
       return;
     }
-    // Journal métier : trace la vérification manuelle admin
-    await supabase.from("identity_verification_logs").insert({
-      user_id: userId,
-      result: "verified",
-      rejection_reason: "Vérification forcée par admin",
-    });
-    // Journal d'audit admin
-    if (adminId) {
-      await supabase.from("admin_action_logs").insert({
-        admin_id: adminId,
-        action: "force_verify_identity",
-        target_type: "profile",
-        target_id: userId,
-      });
-    }
-    toast.success("Identité validée");
+    toast.success("Identité validée, le membre a été notifié");
     setVerifying(false);
     setVerifyModal({ open: false, userId: "", userName: "", email: "" });
     fetchUsers();
@@ -882,6 +867,17 @@ const AdminUsers = () => {
                           disabled={user.identity_verified || (verifying && verifyModal.userId === user.id)}
                         >
                           <ShieldCheck className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          title="Consulter les pièces dans la file de vérification"
+                          aria-label="Consulter les pièces d'identité déposées"
+                          asChild
+                        >
+                          <a href="/admin/verifications" target="_blank" rel="noopener noreferrer">
+                            <FileSearch className="h-4 w-4" />
+                          </a>
                         </Button>
                         <Button
                           variant="ghost"
