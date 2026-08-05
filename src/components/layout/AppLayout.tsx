@@ -21,6 +21,7 @@ import OnboardingGate from "@/components/onboarding/OnboardingGate";
 // après le retour OAuth Google. Ne pas le re-monter ici.
 import { usePresenceHeartbeat } from "@/hooks/usePresenceHeartbeat";
 import { AppShellProvider } from "./AppShellContext";
+import { ChromeVisibilityProvider } from "./ChromeVisibility";
 import UserMenu from "./UserMenu";
 
 export const AppLayout = ({ children }: { children?: ReactNode }) => {
