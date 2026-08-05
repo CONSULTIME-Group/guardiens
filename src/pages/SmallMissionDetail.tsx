@@ -21,7 +21,7 @@ import {
 import ReportButton from "@/components/reports/ReportButton";
 import PageMeta from "@/components/PageMeta";
 import PageBreadcrumb from "@/components/seo/PageBreadcrumb";
-import { Helmet } from "react-helmet-async";
+import Head from "@/components/seo/Head";
 const entraideHeader = "https://erhccyqevdyevpyctsjj.supabase.co/storage/v1/object/public/property-photos/misc/entraide-header.webp";
 import { useSubscriptionAccess } from "@/hooks/useSubscriptionAccess";
 import { useAccessLevel } from "@/hooks/useAccessLevel";
@@ -981,7 +981,7 @@ const SmallMissionDetail = () => {
         type="article"
         publishedAt={mission.created_at}
       />
-      <Helmet>
+      <Head>
         <script type="application/ld+json">{JSON.stringify({
           "@context": "https://schema.org",
           "@type": "Service",
@@ -993,7 +993,7 @@ const SmallMissionDetail = () => {
           offers: { "@type": "Offer", price: "0", priceCurrency: "EUR", availability: mission.status === "open" ? "https://schema.org/InStock" : "https://schema.org/OutOfStock" },
           datePosted: mission.created_at,
         })}</script>
-      </Helmet>
+      </Head>
 
       <div className="max-w-5xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-4 md:py-8">
         {/* Breadcrumb */}

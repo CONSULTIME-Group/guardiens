@@ -15,7 +15,7 @@
  */
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { Helmet } from "react-helmet-async";
+import Head from "@/components/seo/Head";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useAffinityOnboardingStatus } from "@/hooks/useAffinityOnboardingStatus";
@@ -312,10 +312,10 @@ const OnboardingAffinity = () => {
 
   return (
     <div className="min-h-screen bg-background flex items-start md:items-center justify-center px-4 py-8">
-      <Helmet>
+      <Head>
         <title>Bienvenue, une dernière étape | Guardiens</title>
         <meta name="robots" content="noindex, nofollow" />
-      </Helmet>
+      </Head>
       <div className="w-full max-w-2xl">
         <Card>
           <CardHeader className="space-y-2">

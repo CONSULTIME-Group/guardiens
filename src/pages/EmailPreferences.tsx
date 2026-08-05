@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Navigate } from "react-router-dom";
-import { Helmet } from "react-helmet-async";
+import Head from "@/components/seo/Head";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -74,10 +74,10 @@ const EmailPreferences = () => {
 
   return (
     <div className="min-h-screen bg-background py-6 md:py-10 px-4">
-      <Helmet>
+      <Head>
         <title>Préférences email, Guardiens</title>
         <meta name="robots" content="noindex, nofollow" />
-      </Helmet>
+      </Head>
       <div className="mx-auto max-w-2xl space-y-6">
         <header>
           <h1 className="font-heading text-2xl md:text-3xl mb-2">Préférences email</h1>

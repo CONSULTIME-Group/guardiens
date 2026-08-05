@@ -13,7 +13,7 @@
  */
 
 import { useMemo, useState } from "react";
-import { Helmet } from "react-helmet-async";
+import Head from "@/components/seo/Head";
 import {
   HERO_BANK,
   getSitterHeroImage,
@@ -150,10 +150,10 @@ export default function TestHeroDistribution() {
 
   return (
     <div className="min-h-screen bg-background">
-      <Helmet>
+      <Head>
         <title>Debug, Distribution des hero</title>
         <meta name="robots" content="noindex,nofollow" />
-      </Helmet>
+      </Head>
 
       <div className="max-w-5xl mx-auto px-4 py-8 space-y-8">
         {/* ── En-tête ── */}

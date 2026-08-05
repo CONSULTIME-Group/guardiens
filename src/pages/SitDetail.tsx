@@ -10,7 +10,7 @@
  */
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useParams, Navigate } from "react-router-dom";
-import { Helmet } from "react-helmet-async";
+import Head from "@/components/seo/Head";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { geocodeCity } from "@/lib/geocode";
@@ -326,10 +326,10 @@ const SitDetail = () => {
 
   return (
     <div className="px-3 pt-4 pb-44 md:p-10 md:pb-40 max-w-4xl mx-auto animate-fade-in">
-      <Helmet>
+      <Head>
         <title>{sit.title ? `${sit.title} · Mon annonce` : "Mon annonce"}</title>
         <meta name="robots" content="noindex, nofollow" />
-      </Helmet>
+      </Head>
 
       {isOwner && ownerProfile?.profile_completion != null && (
         <div className="mb-3">

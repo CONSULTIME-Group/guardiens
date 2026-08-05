@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { Helmet } from "react-helmet-async";
+import Head from "@/components/seo/Head";
 import { Link } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import {
@@ -66,9 +66,9 @@ const Pricing = () => {
         description="Guardiens reste gratuit tant que nous ne sommes pas satisfaits du service. Accès complet, sans engagement, sans carte bancaire."
         path="/tarifs"
       />
-      <Helmet>
+      <Head>
         <script type="application/ld+json">{JSON.stringify(faqJsonLd)}</script>
-      </Helmet>
+      </Head>
 
       <div className="min-h-screen bg-background">
         <PublicHeader />

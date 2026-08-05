@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Helmet } from "react-helmet-async";
+import Head from "@/components/seo/Head";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { PRO_CATEGORIES, type ProCategory } from "@/lib/proCategories";
@@ -243,10 +243,10 @@ export default function ProOnboarding() {
 
   return (
     <div className="min-h-screen bg-background">
-      <Helmet>
+      <Head>
         <title>Inscrire mon activité pro | Guardiens</title>
         <meta name="robots" content="noindex" />
-      </Helmet>
+      </Head>
 
       <main className="container mx-auto px-4 py-10 max-w-2xl min-w-0">
         <Button

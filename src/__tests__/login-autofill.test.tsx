@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen } from "@testing-library/react";
 import { BrowserRouter } from "react-router-dom";
-import { HelmetProvider } from "react-helmet-async";
+import { Fragment as HelmetProvider } from "react";
 
 // Mock auth + supabase pour pouvoir rendre Login
 vi.mock("@/contexts/AuthContext", () => ({

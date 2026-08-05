@@ -36,7 +36,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useToast } from "@/hooks/use-toast";
-import { Helmet } from "react-helmet-async";
+import Head from "@/components/seo/Head";
 import MobileStickyCTA from "@/components/dashboard/owner/MobileStickyCTA";
 import { RepublishAlmaDialog } from "@/components/ai/alma/RepublishAlmaDialog";
 import AffinitySection from "@/components/matching/AffinitySection";
@@ -778,7 +778,7 @@ const Sits = () => {
 
   return (
     <div className="p-4 md:p-8 max-w-4xl mx-auto animate-fade-in pb-[calc(9rem+env(safe-area-inset-bottom))] md:pb-8">
-      <Helmet><meta name="robots" content="noindex, nofollow" /></Helmet>
+      <Head><meta name="robots" content="noindex, nofollow" /></Head>
       {/* Header */}
       <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="min-w-0">

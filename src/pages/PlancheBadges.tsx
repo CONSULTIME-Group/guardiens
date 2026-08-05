@@ -1,4 +1,4 @@
-import { Helmet } from 'react-helmet-async'
+import Head from "@/components/seo/Head";
 import { BadgeSceauLarge } from '@/components/badges/BadgeSceauLarge'
 import { BADGE_DEFINITIONS, GARDIEN_BADGE_IDS, PROPRIO_BADGE_IDS, SPECIAL_BADGE_IDS, MISSION_BADGE_IDS } from '@/components/badges/badge-definitions'
 
@@ -12,10 +12,10 @@ const SECTIONS = [
 export default function PlancheBadges() {
   return (
     <div className="min-h-screen bg-background px-4 py-6 md:py-10 md:px-8">
-      <Helmet>
+      <Head>
         <title>Planche des badges, Guardiens</title>
         <meta name="robots" content="noindex" />
-      </Helmet>
+      </Head>
 
       <h1 className="text-2xl md:text-3xl font-heading font-bold text-foreground text-center mb-2">
         Les badges Guardiens

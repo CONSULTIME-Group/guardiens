@@ -3,7 +3,7 @@
  * Montre les 4 stades d'évolution dans l'ordre, met en avant le stade
  * actuel et propose le prochain jalon avec le lien vers l'action.
  */
-import { Helmet } from "react-helmet-async";
+import Head from "@/components/seo/Head";
 import { Link } from "react-router-dom";
 import { Check } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -37,10 +37,10 @@ export default function AlmaEvolution() {
 
   return (
     <div className="min-h-screen bg-background">
-      <Helmet>
+      <Head>
         <title>Alma grandit avec vous · Guardiens</title>
         <meta name="robots" content="noindex, nofollow" />
-      </Helmet>
+      </Head>
 
       <div className="mx-auto w-full max-w-3xl px-4 py-8 md:py-12">
         <header className="flex flex-col items-center gap-5 mb-10 text-center md:flex-row md:items-start md:text-left md:gap-6">

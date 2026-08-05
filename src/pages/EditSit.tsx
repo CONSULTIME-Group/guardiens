@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { Helmet } from "react-helmet-async";
+import Head from "@/components/seo/Head";
 import ChipSelect from "@/components/profile/ChipSelect";
 import {
   ArrowLeft,
@@ -464,10 +464,10 @@ const EditSit = () => {
 
   return (
     <div className="px-4 md:px-10 py-6 max-w-3xl mx-auto animate-fade-in pb-36">
-      <Helmet>
+      <Head>
         <meta name="robots" content="noindex, nofollow" />
         <title>Modifier mon annonce</title>
-      </Helmet>
+      </Head>
 
       <div className="flex items-center justify-between gap-3 mb-6">
         <button

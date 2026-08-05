@@ -8,7 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/hooks/use-toast";
 import { Switch } from "@/components/ui/switch";
 import { ArrowLeft, Save, Home, Phone, Key, Wifi, Trash2, Thermometer, Info, Car, Mail, Sprout, Ban, MessageSquare } from "lucide-react";
-import { Helmet } from "react-helmet-async";
+import Head from "@/components/seo/Head";
 import { readFormDraft, writeFormDraft, clearFormDraft, getFormDraftSavedAt } from "@/lib/formDraft";
 import DraftStatus, { type DraftState } from "@/components/shared/DraftStatus";
 import { useUnsavedChanges } from "@/hooks/useUnsavedChanges";
@@ -327,7 +327,7 @@ const HouseGuide = () => {
 
   const Shell = ({ children }: { children: React.ReactNode }) => (
     <div className="p-6 md:p-10 max-w-2xl mx-auto animate-fade-in pb-32">
-      <Helmet><meta name="robots" content="noindex, nofollow" /></Helmet>
+      <Head><meta name="robots" content="noindex, nofollow" /></Head>
       <Link to="/sits" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-6">
         <ArrowLeft className="h-4 w-4" /> Retour
       </Link>
@@ -371,7 +371,7 @@ const HouseGuide = () => {
   return (
     <ReadOnlyContext.Provider value={!isOwner}>
     <div className="p-6 md:p-10 max-w-2xl mx-auto animate-fade-in pb-32">
-      <Helmet><meta name="robots" content="noindex, nofollow" /></Helmet>
+      <Head><meta name="robots" content="noindex, nofollow" /></Head>
       <Link
         to="/sits"
         className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-6"

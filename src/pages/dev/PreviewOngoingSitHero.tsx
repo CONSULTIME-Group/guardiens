@@ -1,4 +1,4 @@
-import { Helmet } from "react-helmet-async";
+import Head from "@/components/seo/Head";
 import { Navigate } from "react-router-dom";
 import OngoingSitHero from "@/components/dashboard/owner/OngoingSitHero";
 import type { SitRow, SitterInfo } from "@/components/dashboard/owner/types";
@@ -36,7 +36,7 @@ export default function PreviewOngoingSitHero() {
   if (!import.meta.env.DEV) return <Navigate to="/" replace />;
   return (
     <div className="min-h-screen bg-background p-4">
-      <Helmet><meta name="robots" content="noindex,nofollow" /></Helmet>
+      <Head><meta name="robots" content="noindex,nofollow" /></Head>
       <div className="max-w-5xl mx-auto space-y-4">
         <p className="text-xs text-muted-foreground">
           Preview isolée, OngoingSitHero (J-3, sit en cours)

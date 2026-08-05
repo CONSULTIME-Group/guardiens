@@ -3,7 +3,7 @@
 // mais la position pays/ville doit être immédiatement visible.
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { Helmet } from "react-helmet-async";
+import Head from "@/components/seo/Head";
 import { Globe2, MapPin } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import "leaflet/dist/leaflet.css";
@@ -109,12 +109,12 @@ export default function InternationalListings() {
 
   return (
     <div className="bg-background text-foreground">
-      <Helmet>
+      <Head>
         <title>{t("intl_listings.meta_title")}</title>
         <meta name="description" content={t("intl_listings.meta_description")} />
         <meta name="robots" content="noindex,follow" />
         <link rel="canonical" href={CANONICAL} />
-      </Helmet>
+      </Head>
 
       <div className="min-w-0">
         <section className="max-w-6xl mx-auto px-4 md:px-6 pt-10 pb-6">

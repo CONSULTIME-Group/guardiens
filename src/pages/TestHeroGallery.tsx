@@ -21,7 +21,7 @@ import {
   type HeroCategoryName,
 } from "@/lib/heroBank";
 import { getMobileByIndex } from "@/lib/heroBankMobile";
-import { Helmet } from "react-helmet-async";
+import Head from "@/components/seo/Head";
 import { X, ZoomIn, ZoomOut, RotateCcw, ChevronLeft, ChevronRight, Maximize2 } from "lucide-react";
 
 type ViewMode = "rendered" | "raw";
@@ -145,10 +145,10 @@ export default function TestHeroGallery() {
 
   return (
     <div className="min-h-screen bg-background">
-      <Helmet>
+      <Head>
         <title>QA, Galerie hero (100 images)</title>
         <meta name="robots" content="noindex,nofollow" />
-      </Helmet>
+      </Head>
 
       {/* ── Header sticky : titre + filtres ── */}
       <header className="sticky top-0 z-20 bg-background/95 backdrop-blur border-b border-border">

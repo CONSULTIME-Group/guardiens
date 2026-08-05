@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Helmet } from "react-helmet-async";
+import Head from "@/components/seo/Head";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -104,10 +104,10 @@ export default function AdminPrerender() {
 
   return (
     <main className="container mx-auto max-w-5xl px-4 py-10">
-      <Helmet>
+      <Head>
         <title>Re-snapshot Prerender, Admin</title>
         <meta name="robots" content="noindex, nofollow" />
-      </Helmet>
+      </Head>
 
       <h1 className="text-2xl font-semibold mb-2">Re-snapshot Prerender</h1>
       <p className="text-sm text-muted-foreground mb-6">

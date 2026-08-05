@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Switch } from "@/components/ui/switch";
 import { Input } from "@/components/ui/input";
 import { CheckCircle, XCircle, Loader2 } from "lucide-react";
-import { Helmet } from "react-helmet-async";
+import Head from "@/components/seo/Head";
 
 type Status = "loading" | "request" | "request_sent" | "valid" | "already" | "invalid" | "success_all" | "success_partial" | "error";
 type Prefs = { product_emails: boolean; digest_emails: boolean; alert_emails: boolean };
@@ -99,10 +99,10 @@ const Unsubscribe = () => {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-background p-4">
-      <Helmet>
+      <Head>
         <title>{t("unsubscribe.meta_title")}</title>
         <meta name="robots" content="noindex, nofollow" />
-      </Helmet>
+      </Head>
       <Card className="w-full max-w-lg">
         <CardHeader className="text-center">
           <CardTitle className="font-heading text-xl">{t("unsubscribe.title")}</CardTitle>

@@ -18,7 +18,7 @@
  */
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Helmet } from "react-helmet-async";
+import Head from "@/components/seo/Head";
 import { format, formatDistanceToNow } from "date-fns";
 import { fr } from "date-fns/locale";
 import { Calendar, MapPin, MessageSquare, Search as SearchIcon } from "lucide-react";
@@ -199,11 +199,11 @@ const MesCandidatures = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <Helmet>
+      <Head>
         <title>Mes candidatures | Guardiens</title>
         <meta name="description" content="Suivez l'état de vos candidatures aux annonces de garde." />
         <meta name="robots" content="noindex, nofollow" />
-      </Helmet>
+      </Head>
       <div className="mx-auto w-full max-w-4xl px-4 sm:px-6 py-6 sm:py-8">
         <header className="mb-6">
           <h1 className="text-2xl sm:text-3xl font-heading font-semibold text-foreground">

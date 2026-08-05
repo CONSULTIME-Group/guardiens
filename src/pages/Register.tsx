@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo, useRef } from "react";
-import { Helmet } from "react-helmet-async";
+import Head from "@/components/seo/Head";
 import { useNavigate, Link, useSearchParams } from "react-router-dom";
 import { useTranslation, Trans } from "react-i18next";
 import { useAuth } from "@/contexts/AuthContext";
@@ -450,7 +450,7 @@ const Register = () => {
 
  return (
  <div className="min-h-screen flex bg-background">
- <Helmet><meta name="robots" content="noindex, follow" /></Helmet>
+ <Head><meta name="robots" content="noindex, follow" /></Head>
 
  <AuthIllustrationPanel
  title={t("register_page.panel_title")}

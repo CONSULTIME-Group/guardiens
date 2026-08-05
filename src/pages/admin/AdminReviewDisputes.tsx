@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Helmet } from "react-helmet-async";
+import Head from "@/components/seo/Head";
 import { supabase } from "@/integrations/supabase/client";
 import { useAdmin } from "@/hooks/useAdmin";
 import { Navigate } from "react-router-dom";
@@ -173,10 +173,10 @@ const AdminReviewDisputes = () => {
 
   return (
     <div className="p-4 md:p-8 max-w-5xl mx-auto">
-      <Helmet>
+      <Head>
         <title>Contestations d'avis, Admin Guardiens</title>
         <meta name="robots" content="noindex,nofollow" />
-      </Helmet>
+      </Head>
 
       <header className="mb-6">
         <h1 className="font-heading text-2xl md:text-3xl font-bold text-foreground flex items-center gap-2">

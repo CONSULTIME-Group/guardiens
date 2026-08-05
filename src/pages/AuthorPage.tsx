@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams, Link, Navigate } from "react-router-dom";
-import { Helmet } from "react-helmet-async";
+import Head from "@/components/seo/Head";
 import { useTranslation } from "react-i18next";
 import { supabase } from "@/integrations/supabase/client";
 import PageMeta from "@/components/PageMeta";
@@ -83,9 +83,9 @@ export default function AuthorPage() {
         description={author.shortBio}
         path={`/auteurs/${author.slug}`}
       />
-      <Helmet>
+      <Head>
         <script type="application/ld+json">{JSON.stringify(personSchema)}</script>
-      </Helmet>
+      </Head>
 
       <main id="main-content">
         <PageBreadcrumb

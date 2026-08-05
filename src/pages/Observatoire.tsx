@@ -1,4 +1,3 @@
-import { Helmet } from "react-helmet-async";
 import { Link } from "react-router-dom";
 import PageMeta from "@/components/PageMeta";
 import PageBreadcrumb from "@/components/seo/PageBreadcrumb";
@@ -291,15 +290,11 @@ const Observatoire = () => {
  title="Observatoire de la garde d'animaux à domicile en France | Guardiens"
  description="Chiffres-clés sur la garde d'animaux à domicile en France : nombre d'animaux accompagnés, modèle économique, vérifications, badges. Datapoints sourcés Guardiens."
  path="/observatoire-garde-animaux"
+ jsonLd={[datasetSchema, orgSchema, breadcrumbSchema, articleSchema, faqSchema]}
+ ready={Boolean(species) || speciesError}
  />
 
- <Helmet>
- <script type="application/ld+json">{JSON.stringify(datasetSchema)}</script>
- <script type="application/ld+json">{JSON.stringify(orgSchema)}</script>
- <script type="application/ld+json">{JSON.stringify(breadcrumbSchema)}</script>
- <script type="application/ld+json">{JSON.stringify(articleSchema)}</script>
- <script type="application/ld+json">{JSON.stringify(faqSchema)}</script>
- </Helmet>
+
 
 
  <div className="min-w-0">

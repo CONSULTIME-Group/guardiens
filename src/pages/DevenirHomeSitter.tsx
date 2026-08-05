@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { Helmet } from "react-helmet-async";
+import Head from "@/components/seo/Head";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import PageMeta from "@/components/PageMeta";
@@ -82,9 +82,9 @@ export default function DevenirHomeSitter() {
         description="Comment devenir home-sitter en France : créer votre profil, décrocher vos premières gardes, gagner la confiance des propriétaires. Guide pratique."
         canonical={URL}
       />
-      <Helmet>
+      <Head>
         <script type="application/ld+json">{JSON.stringify(jsonLd)}</script>
-      </Helmet>
+      </Head>
 
       <div className="mx-auto max-w-3xl px-4 py-8">
         <PageBreadcrumb items={[{ label: "Devenir home-sitter" }]} />

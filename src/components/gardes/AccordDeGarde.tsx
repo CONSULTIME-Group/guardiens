@@ -1,5 +1,5 @@
 import { useRef, useState, useEffect } from "react";
-import { Helmet } from "react-helmet-async";
+import Head from "@/components/seo/Head";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
@@ -456,7 +456,7 @@ const mockGarde: AccordDeGardeData = {
 export function AccordDeGardePreview() {
  return (
    <>
-     <Helmet><meta name="robots" content="noindex,nofollow" /></Helmet>
+     <Head><meta name="robots" content="noindex,nofollow" /></Head>
      <AccordDeGarde garde={mockGarde} onClose={() => { if (import.meta.env.DEV) console.log("[AccordDeGardePreview] Fermé"); }} />
    </>
  );
