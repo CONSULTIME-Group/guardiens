@@ -72,15 +72,16 @@ const ReviewsDisplay = ({ userId, showAnimalCare = false }: ReviewsDisplayProps)
           {reviews.map(r => (
             <div key={r.id} className="p-4 rounded-xl bg-card border border-border">
               <div className="flex items-center gap-2.5 mb-2">
-                {r.reviewer?.avatar_url ? (
-                  <img src={r.reviewer.avatar_url} alt={`Photo de ${r.reviewer.first_name || 'utilisateur'}`} loading="lazy" className="w-8 h-8 rounded-full object-cover" />
+                {getMemberAvatarUrl(r.reviewer) ? (
+                  <img src={getMemberAvatarUrl(r.reviewer)!} alt={`Photo de ${getMemberDisplayName(r.reviewer, 'utilisateur')}`} loading="lazy" className="w-8 h-8 rounded-full object-cover" />
                 ) : (
                   <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center text-xs font-bold">
-                    {r.reviewer?.first_name?.charAt(0) || "?"}
+                    {getMemberInitial(r.reviewer)}
                   </div>
                 )}
                 <div className="flex-1">
-                  <span className="text-sm font-medium">{r.reviewer?.first_name || "Utilisateur"}</span>
+                  <span className="text-sm font-medium">{getMemberDisplayName(r.reviewer, 'Utilisateur')}</span>
+
                   <span className="text-xs text-muted-foreground ml-2">{format(new Date(r.created_at), "d MMM yyyy", { locale: fr })}</span>
                 </div>
                 <StarRating value={r.overall_rating} readonly size="sm" />

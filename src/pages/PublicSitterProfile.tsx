@@ -1991,14 +1991,15 @@ export default function PublicSitterProfile() {
                       return (
                         <article key={review.id} className="bg-card border border-border rounded-xl p-4 space-y-2">
                           <div className="flex items-center gap-2.5 flex-wrap">
-                            {review.reviewer?.avatar_url ? (
-                              <img src={review.reviewer.avatar_url} alt={review.reviewer.first_name} className="w-8 h-8 rounded-full object-cover shrink-0" />
+                            {getMemberAvatarUrl(review.reviewer) ? (
+                              <img src={getMemberAvatarUrl(review.reviewer)!} alt={getMemberDisplayName(review.reviewer, 'Gardien')} className="w-8 h-8 rounded-full object-cover shrink-0" />
                             ) : (
                               <div className="w-8 h-8 rounded-full bg-muted shrink-0 flex items-center justify-center text-xs font-bold text-foreground/40">
-                                {(review.reviewer?.first_name || '?').charAt(0).toUpperCase()}
+                                {getMemberInitial(review.reviewer)}
                               </div>
                             )}
-                            <span className="text-sm font-medium text-foreground font-body">{review.reviewer?.first_name || 'Gardien'}</span>
+                            <span className="text-sm font-medium text-foreground font-body">{getMemberDisplayName(review.reviewer, 'Gardien')}</span>
+
                             {stars > 0 && (
                               <span className="text-xs text-primary font-body tracking-wider" aria-label={`${stars} étoiles sur 5`}>
                                 {'★'.repeat(stars)}{'☆'.repeat(5 - stars)}
