@@ -104,9 +104,8 @@ const PageMeta = ({
   const currentPath = normalizePathname(path || location.pathname);
   const currentUrl = buildAbsoluteUrl(currentPath);
   const explicitCanonical = normalizeCanonical(canonical);
-  const canonicalUrl =
-    explicitCanonical ??
-    (currentLang !== "fr" ? addLangParam(currentUrl, currentLang) : currentUrl);
+  // Règle unique : le canonical ne porte jamais de paramètre de langue.
+  const canonicalUrl = explicitCanonical ?? currentUrl;
   const metaDescription = description.trim();
   const resolvedImage = image === DEFAULT_IMAGE ? getListingOgImageFromPath(currentPath) ?? image : image;
   const titleWithoutSuffix = title
@@ -114,17 +113,28 @@ const PageMeta = ({
     .replace(/\s*,\s*Guardiens\s*$/i, "")
     .replace(/\s*·\s*Guardiens\s*$/i, "");
   const fullTitle = currentPath === "/" ? titleWithoutSuffix : `${titleWithoutSuffix} | ${SITE_NAME}`;
-  // hreflang alternates : same URL with ?lang=xx (fr = no param, also serves as x-default)
-  const allowedLangs = hreflangLangs
-    ? SUPPORTED_LANGS.filter((lng) => lng === "fr" || hreflangLangs.includes(lng))
-    : SUPPORTED_LANGS;
+  // Langues réellement traduites pour cette page (fr toujours inclus).
+  const declaredLangs = translatedLangs ?? hreflangLangs ?? [];
+  const allowedLangs = SUPPORTED_LANGS.filter(
+    (lng) => lng === "fr" || declaredLangs.includes(lng),
+  );
+  const isTranslatedVariant = (allowedLangs as readonly string[]).includes(currentLang);
+  // Variante de langue sans traduction réelle : non indexable, html lang = fr.
+  const effectiveNoindex = noindex || !isTranslatedVariant;
+  const htmlLang = isTranslatedVariant ? currentLang : "fr";
   const hreflangKey = allowedLangs.join(",");
   const jsonLdKey = jsonLd ? JSON.stringify(jsonLd) : "";
   const extraMetaKey = extraMeta ? JSON.stringify(extraMeta) : "";
-  const hreflangAlternates = allowedLangs.map((lng) => ({
-    lang: lng,
-    href: addLangParam(canonicalUrl, lng),
-  }));
+  // Alternates uniquement pour les langues réellement traduites : déclarer une
+  // variante non indexable serait un signal contradictoire.
+  const hreflangAlternates =
+    allowedLangs.length > 1
+      ? allowedLangs.map((lng) => ({
+          lang: lng,
+          href: addLangParam(canonicalUrl, lng),
+        }))
+      : [];
+
 
   useEffect(() => {
     // Bloque Prerender.io le temps que le canonical (par langue) soit injecté.
