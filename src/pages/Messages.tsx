@@ -28,6 +28,8 @@ import { useAutoOpenConversation } from "@/hooks/useAutoOpenConversation";
 import { toast as toastSonner } from "sonner";
 import AlmaMessageOpener from "@/components/ai/alma/AlmaMessageOpener";
 import { AlmaStagnantConversationWhisper } from "@/components/ai/alma/wiring/AlmaStagnantConversationWhisper";
+import { latestVideoInviteId, videoInviteState, isVideoInvite } from "@/lib/videoInvite";
+import { useHideBottomNav } from "@/components/layout/ChromeVisibility";
 
 
 const MESSAGES_PAGE_SIZE = 50;
@@ -88,6 +90,9 @@ const Messages = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [activeConv, setActiveConv] = useState<Conversation | null>(null);
+  // Fil ouvert sur mobile : la barre basse et son bouton flottant recouvriraient
+  // le champ de saisie, on les retire tant que la conversation est affichée.
+  useHideBottomNav(isMobile && !!activeConv);
   const convListRef = useRef<HTMLDivElement | null>(null);
   const savedScrollRef = useRef<number>(0);
   const [messages, setMessages] = useState<Message[]>([]);
@@ -559,6 +564,10 @@ const Messages = () => {
   const showList = !activeConv || !isMobile;
   const showThread = !!activeConv;
 
+  // Une seule proposition d'appel vidéo active par conversation.
+  const activeVideoInviteId = latestVideoInviteId(messages);
+
+
   if (loading) {
     return (
       <div className="flex h-screen overflow-hidden">
@@ -878,6 +887,7 @@ const Messages = () => {
                         isInGallery={!!msg.photo_url && galleryUrls.has(msg.photo_url)}
                         savingToGallery={!!msg.photo_url && savingGalleryUrl === msg.photo_url}
                         onSaveToGallery={handleSaveToGallery}
+                        videoInviteState={isVideoInvite(msg) ? videoInviteState(msg, activeVideoInviteId) : undefined}
                       />
 
                     </div>

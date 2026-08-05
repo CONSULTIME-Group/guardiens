@@ -21,6 +21,7 @@ import OnboardingGate from "@/components/onboarding/OnboardingGate";
 // après le retour OAuth Google. Ne pas le re-monter ici.
 import { usePresenceHeartbeat } from "@/hooks/usePresenceHeartbeat";
 import { AppShellProvider } from "./AppShellContext";
+import { ChromeVisibilityProvider } from "./ChromeVisibility";
 import UserMenu from "./UserMenu";
 
 export const AppLayout = ({ children }: { children?: ReactNode }) => {
@@ -85,6 +86,7 @@ export const AppLayout = ({ children }: { children?: ReactNode }) => {
   return (
     <AppShellProvider value={true}>
     <AlmaProvider>
+    <ChromeVisibilityProvider>
     <OnboardingGate />
     <div className="flex min-h-screen bg-background">
       <Sidebar showHeaderBells={!mobileHeader} />
@@ -139,6 +141,7 @@ export const AppLayout = ({ children }: { children?: ReactNode }) => {
       </Suspense>
       {/* DuplicateAccountGuard mont\u00e9 globalement dans App.tsx */}
     </div>
+    </ChromeVisibilityProvider>
     </AlmaProvider>
     </AppShellProvider>
   );

@@ -12,6 +12,7 @@ import { lazy, Suspense, useEffect, useLayoutEffect, useRef, useState } from "re
 import { supabase } from "@/integrations/supabase/client";
 import { useScrollDirection } from "@/hooks/useScrollDirection";
 import { useInAppShell } from "./AppShellContext";
+import { useChromeVisibility } from "./ChromeVisibility";
 import UserMenu from "./UserMenu";
 
 // Lazy : NotificationBell tire date-fns. On évite vendor-date dans l'entry.
@@ -447,12 +448,23 @@ export const BottomNav = () => {
 
   const hideNav = inAppShell && scrollDir === "down" && !idleVisible;
 
+  // Un écran plein cadre (fil de messagerie mobile) peut demander le retrait
+  // complet de la barre basse et de son bouton flottant, pour ne jamais
+  // recouvrir une zone de saisie.
+  const { bottomNavHidden } = useChromeVisibility();
+
   // Hauteur réelle de la pilule exposée en variable CSS, pour que les barres
   // d'action collantes des pages s'empilent au dessus sans valeur en dur.
   const pillRef = useRef<HTMLElement | null>(null);
   useLayoutEffect(() => {
+    if (typeof window === "undefined") return;
+    if (bottomNavHidden) {
+      document.documentElement.style.setProperty("--bottom-nav-h", "0px");
+      return;
+    }
     const el = pillRef.current;
-    if (!el || typeof window === "undefined") return;
+    if (!el) return;
+
     const apply = () => {
       const h = hideNav ? 0 : Math.round(el.getBoundingClientRect().height);
       document.documentElement.style.setProperty("--bottom-nav-h", `${h}px`);
@@ -469,7 +481,7 @@ export const BottomNav = () => {
       window.removeEventListener("resize", apply);
       document.documentElement.style.setProperty("--bottom-nav-h", "0px");
     };
-  }, [hideNav]);
+  }, [hideNav, bottomNavHidden]);
 
 
   // Signature Dock 2026 — 4 tabs role-aware + FAB contextuel + Plus sheet
@@ -565,6 +577,10 @@ export const BottomNav = () => {
       </NavLink>
     );
   };
+
+  // Retrait complet demandé par l'écran courant (fil de messagerie mobile).
+  // La barre est en md:hidden, le desktop n'est donc pas concerné.
+  if (bottomNavHidden) return null;
 
   return (
     <>
