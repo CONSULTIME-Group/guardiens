@@ -51,12 +51,21 @@ interface PageMetaProps {
   noindex?: boolean;
   canonical?: string;
   /**
-   * Langues autorisées comme alternates hreflang (hors fr, toujours inclus).
-   * Par défaut : toutes les langues supportées. Les pages d'article passent ici
-   * uniquement les traductions indexables (article_translations.noindex = false),
-   * car déclarer une alternate désindexée est un signal contradictoire.
+   * Langues pour lesquelles une traduction réelle de CETTE page existe
+   * (hors fr, toujours inclus). Règle unique du site :
+   *   - le canonical ne porte jamais de paramètre de langue ;
+   *   - une variante `?lang=xx` réellement traduite est indexable, porte
+   *     `html lang="xx"` et un title/description traduits ;
+   *   - une variante `?lang=xx` sans traduction réelle passe en
+   *     `noindex, follow` et conserve `html lang="fr"`.
+   * Par défaut : aucune traduction déclarée (fr uniquement).
+   */
+  translatedLangs?: readonly string[];
+  /**
+   * Alias historique de `translatedLangs` (pages d'article).
    */
   hreflangLangs?: readonly string[];
+
   /**
    * JSON-LD injecté impérativement dans le head (un script par objet).
    */
