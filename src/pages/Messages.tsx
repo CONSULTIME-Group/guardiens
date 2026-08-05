@@ -887,6 +887,7 @@ const Messages = () => {
                         isInGallery={!!msg.photo_url && galleryUrls.has(msg.photo_url)}
                         savingToGallery={!!msg.photo_url && savingGalleryUrl === msg.photo_url}
                         onSaveToGallery={handleSaveToGallery}
+                        videoInviteState={isVideoInvite(msg) ? videoInviteState(msg, activeVideoInviteId) : undefined}
                       />
 
                     </div>
