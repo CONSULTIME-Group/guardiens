@@ -397,8 +397,20 @@ Deno.serve(async (req) => {
       await raiseStaleClaimSignal(supabase, 'sitter-daily-digest', staleReason, staleSolded)
     }
 
+    if (body.catchup && !body.dry_run) {
+      await supabase
+        .from('cron_run_log')
+        .update({
+          finished_at: new Date().toISOString(),
+          status: errors.length > 0 ? 'partial' : 'success',
+          metrics: { sitters_sent: sittersSent, sitters_skipped: sittersSkipped, plan },
+        })
+        .eq('edge_name', CATCHUP_TAG)
+    }
+
     return json({
       ok: true,
+      catchup: !!body.catchup,
       sitters_processed: bySitter.size,
       sitters_sent: sittersSent,
       sitters_skipped: sittersSkipped,
@@ -413,6 +425,19 @@ Deno.serve(async (req) => {
     return json({ error: String(err) }, 500)
   }
 })
+
+function buildSubject(count: number, isCatchup: boolean): string {
+  if (count === 0) return 'Votre digest Guardiens'
+  if (isCatchup) {
+    return count === 1
+      ? 'Rappel, une annonce publiée ces derniers jours vous correspond'
+      : `Rappel, ${count} annonces publiées ces derniers jours vous correspondent`
+  }
+  return count === 1
+    ? 'Une annonce qui vous correspond aujourd\'hui'
+    : `${count} annonces qui vous correspondent aujourd'hui`
+}
+
 
 async function markSkipped(
   supabase: any,
