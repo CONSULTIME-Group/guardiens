@@ -22,6 +22,8 @@ export default function MySubscription() {
         title="Mon abonnement | Guardiens"
         description="Vous avez accès complet à Guardiens gratuitement. Aucun abonnement à gérer aujourd'hui."
         path="/mon-abonnement"
+        noindex
+        nofollow
       />
       <div className="min-h-screen bg-background">
         <PageBreadcrumb items={[{ label: "Mon abonnement" }]} />
