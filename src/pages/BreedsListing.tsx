@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { Helmet } from "react-helmet-async";
 import { useTranslation } from "react-i18next";
+import PageMeta from "@/components/PageMeta";
 import { supabase } from "@/integrations/supabase/client";
 import { slugify } from "@/lib/normalize";
 
@@ -13,7 +13,7 @@ interface Breed {
 const CANONICAL = "https://guardiens.fr/races";
 
 const BreedsListing = () => {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const [breeds, setBreeds] = useState<Breed[]>([]);
 
   useEffect(() => {
@@ -43,13 +43,22 @@ const BreedsListing = () => {
     };
   });
 
+  const breadcrumbJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "Accueil", item: "https://guardiens.fr/" },
+      { "@type": "ListItem", position: 2, name: "Fiches de race", item: CANONICAL },
+    ],
+  };
+
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "CollectionPage",
     name: TITLE,
     description: DESCRIPTION,
     url: CANONICAL,
-    inLanguage: i18n.language,
+    inLanguage: "fr",
     mainEntity: {
       "@type": "ItemList",
       name: "Fiches de race d'animaux",
@@ -61,15 +70,14 @@ const BreedsListing = () => {
 
   return (
     <>
-      <Helmet>
-        <title>{TITLE}</title>
-        <meta name="description" content={DESCRIPTION} />
-        <link rel="canonical" href={CANONICAL} />
-        <meta property="og:title" content={TITLE} />
-        <meta property="og:description" content={DESCRIPTION} />
-        <meta property="og:url" content={CANONICAL} />
-        <script type="application/ld+json">{JSON.stringify(jsonLd)}</script>
-      </Helmet>
+      <PageMeta
+        title={TITLE}
+        description={DESCRIPTION}
+        path="/races"
+        canonical={CANONICAL}
+        jsonLd={[jsonLd, breadcrumbJsonLd]}
+        ready={breeds.length > 0}
+      />
 
       <div className="min-w-0 max-w-5xl mx-auto px-4 py-8 md:py-12">
         <header className="mb-6 md:mb-10">

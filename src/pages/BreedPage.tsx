@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import { Link, useParams, Navigate } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
+import NotFound from "@/pages/NotFound";
 import ReactMarkdown from "react-markdown";
 import { supabase } from "@/integrations/supabase/client";
 import { slugify } from "@/lib/normalize";
@@ -78,7 +79,9 @@ const BreedPage = () => {
     },
   });
 
-  if (notFound) return <Navigate to="/races" replace />;
+  // Slug de race inconnu : vraie page 404 en noindex, jamais de redirection
+  // vers l'index (une redirection masquerait l'erreur aux moteurs).
+  if (notFound) return <NotFound />;
   if (loading || !breed) {
     return (
       <div className="min-w-0 max-w-3xl mx-auto px-4 py-8 md:py-12">

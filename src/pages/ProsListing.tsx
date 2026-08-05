@@ -1,7 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { Helmet } from "react-helmet-async";
 import { useTranslation } from "react-i18next";
+import PageMeta from "@/components/PageMeta";
+import { SITE_URL } from "@/lib/seo";
+import { isProIndexable } from "@/lib/proIndexability";
 import { supabase } from "@/integrations/supabase/client";
 import { PRO_CATEGORIES, getCategoryByValue, getProInitials } from "@/lib/proCategories";
 import { Card, CardContent } from "@/components/ui/card";
@@ -76,13 +78,51 @@ export default function ProsListing() {
     return [...list].sort(sorter[sort]);
   }, [pros, category, query, sort, only247]);
 
+  // JSON-LD : ItemList des fiches réellement indexables (les fiches de
+  // démonstration sont exclues) et fil d'Ariane.
+  const indexablePros = pros.filter((p) => isProIndexable({ ...p, status: "approved" }));
+  const jsonLd = [
+    {
+      "@context": "https://schema.org",
+      "@type": "CollectionPage",
+      name: t("pros_listing.meta_title"),
+      description: t("pros_listing.meta_description"),
+      url: `${SITE_URL}/pros`,
+      inLanguage: "fr",
+      mainEntity: {
+        "@type": "ItemList",
+        name: "Annuaire des pros animaliers",
+        numberOfItems: indexablePros.length,
+        itemListOrder: "https://schema.org/ItemListOrderAscending",
+        itemListElement: indexablePros.slice(0, 100).map((p, i) => ({
+          "@type": "ListItem",
+          position: i + 1,
+          url: `${SITE_URL}/pros/${p.slug}`,
+          name: p.raison_sociale,
+        })),
+      },
+    },
+    {
+      "@context": "https://schema.org",
+      "@type": "BreadcrumbList",
+      itemListElement: [
+        { "@type": "ListItem", position: 1, name: "Accueil", item: `${SITE_URL}/` },
+        { "@type": "ListItem", position: 2, name: "Pros animaliers", item: `${SITE_URL}/pros` },
+      ],
+    },
+  ];
+
   return (
     <div className="bg-background">
-      <Helmet>
-        <title>{t("pros_listing.meta_title")}</title>
-        <meta name="description" content={t("pros_listing.meta_description")} />
-        <link rel="canonical" href="https://guardiens.fr/pros" />
-      </Helmet>
+      <PageMeta
+        title={t("pros_listing.meta_title")}
+        description={t("pros_listing.meta_description")}
+        path="/pros"
+        canonical={`${SITE_URL}/pros`}
+        jsonLd={jsonLd}
+        ready={!loading}
+      />
+
 
       <div className="container mx-auto px-4 py-6 md:py-10 max-w-6xl min-w-0">
         {/* En-tête épuré */}

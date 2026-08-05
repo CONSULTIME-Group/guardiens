@@ -27,6 +27,7 @@ import Landing from "./pages/Landing";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import NotFound from "./pages/NotFound";
+import LangUrlSync from "./components/LangUrlSync";
 import AuthConfirm from "./pages/AuthConfirm";
 import { AppLayout } from "@/components/layout/AppLayout";
 import PublicHeader from "@/components/layout/PublicHeader";
@@ -394,6 +395,15 @@ const AppRoutes = () => {
       <Route path="/" element={<Landing />} />
 
       <Route path="/login" element={<PublicOnlyRoute><Login /></PublicOnlyRoute>} />
+      {/* Alias français des routes techniques : les libellés de navigation sont
+          en français, les chemins historiques en anglais. */}
+      <Route path="/connexion" element={<Navigate to="/login" replace />} />
+      <Route path="/se-connecter" element={<Navigate to="/login" replace />} />
+      <Route path="/profil" element={<Navigate to="/profile" replace />} />
+      <Route path="/parametres" element={<Navigate to="/settings" replace />} />
+      <Route path="/mot-de-passe-oublie" element={<Navigate to="/forgot-password" replace />} />
+      <Route path="/messagerie" element={<Navigate to="/messages" replace />} />
+      <Route path="/tableau-de-bord" element={<Navigate to="/dashboard" replace />} />
       <Route path="/register" element={<RegisterRedirect />} />
       <Route path="/inscription" element={<PublicOnlyRoute><Register /></PublicOnlyRoute>} />
       <Route path="/auth/confirm" element={<AuthConfirm />} />
@@ -574,6 +584,7 @@ const App = () => (
             <Sonner />
             <BrowserRouter>
               <ScrollToTop />
+              <LangUrlSync />
               <OfflineBanner />
               <PreviewDiagnosticBanner />
               <DuplicateAccountGuard />

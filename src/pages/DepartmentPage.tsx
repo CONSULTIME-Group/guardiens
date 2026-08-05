@@ -1,4 +1,5 @@
 import { useParams, Link } from "react-router-dom";
+import NotFound from "@/pages/NotFound";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import PageMeta from "@/components/PageMeta";
@@ -77,16 +78,9 @@ const DepartmentPage = () => {
  );
  }
 
+ // Slug de département inconnu : vraie page 404 en noindex.
  if (!page) {
- return (
- <div className="min-h-screen bg-background flex items-center justify-center">
- <div className="text-center">
- <h1 className="text-2xl font-bold text-foreground mb-2">Page non trouvée</h1>
- <p className="text-muted-foreground mb-4">Cette page département n'existe pas encore.</p>
- <Link to="/"><Button>Retour à l'accueil</Button></Link>
- </div>
- </div>
- );
+ return <NotFound />;
  }
 
  return (

@@ -49,14 +49,29 @@ interface PageMetaProps {
   publishedAt?: string;
   author?: string;
   noindex?: boolean;
+  /**
+   * Coupe aussi le suivi des liens (`noindex, nofollow`). Réservé aux pages
+   * volontairement hors du web indexable, par exemple les fiches de
+   * démonstration de l'annuaire pro.
+   */
+  nofollow?: boolean;
   canonical?: string;
   /**
-   * Langues autorisées comme alternates hreflang (hors fr, toujours inclus).
-   * Par défaut : toutes les langues supportées. Les pages d'article passent ici
-   * uniquement les traductions indexables (article_translations.noindex = false),
-   * car déclarer une alternate désindexée est un signal contradictoire.
+   * Langues pour lesquelles une traduction réelle de CETTE page existe
+   * (hors fr, toujours inclus). Règle unique du site :
+   *   - le canonical ne porte jamais de paramètre de langue ;
+   *   - une variante `?lang=xx` réellement traduite est indexable, porte
+   *     `html lang="xx"` et un title/description traduits ;
+   *   - une variante `?lang=xx` sans traduction réelle passe en
+   *     `noindex, follow` et conserve `html lang="fr"`.
+   * Par défaut : aucune traduction déclarée (fr uniquement).
+   */
+  translatedLangs?: readonly string[];
+  /**
+   * Alias historique de `translatedLangs` (pages d'article).
    */
   hreflangLangs?: readonly string[];
+
   /**
    * JSON-LD injecté impérativement dans le head (un script par objet).
    */
@@ -82,7 +97,10 @@ const PageMeta = ({
   author,
   noindex = false,
   canonical,
+  nofollow = false,
+  translatedLangs,
   hreflangLangs,
+
   jsonLd,
   ready,
   extraMeta,
@@ -93,9 +111,8 @@ const PageMeta = ({
   const currentPath = normalizePathname(path || location.pathname);
   const currentUrl = buildAbsoluteUrl(currentPath);
   const explicitCanonical = normalizeCanonical(canonical);
-  const canonicalUrl =
-    explicitCanonical ??
-    (currentLang !== "fr" ? addLangParam(currentUrl, currentLang) : currentUrl);
+  // Règle unique : le canonical ne porte jamais de paramètre de langue.
+  const canonicalUrl = explicitCanonical ?? currentUrl;
   const metaDescription = description.trim();
   const resolvedImage = image === DEFAULT_IMAGE ? getListingOgImageFromPath(currentPath) ?? image : image;
   const titleWithoutSuffix = title
@@ -103,17 +120,28 @@ const PageMeta = ({
     .replace(/\s*,\s*Guardiens\s*$/i, "")
     .replace(/\s*·\s*Guardiens\s*$/i, "");
   const fullTitle = currentPath === "/" ? titleWithoutSuffix : `${titleWithoutSuffix} | ${SITE_NAME}`;
-  // hreflang alternates : same URL with ?lang=xx (fr = no param, also serves as x-default)
-  const allowedLangs = hreflangLangs
-    ? SUPPORTED_LANGS.filter((lng) => lng === "fr" || hreflangLangs.includes(lng))
-    : SUPPORTED_LANGS;
+  // Langues réellement traduites pour cette page (fr toujours inclus).
+  const declaredLangs = translatedLangs ?? hreflangLangs ?? [];
+  const allowedLangs = SUPPORTED_LANGS.filter(
+    (lng) => lng === "fr" || declaredLangs.includes(lng),
+  );
+  const isTranslatedVariant = (allowedLangs as readonly string[]).includes(currentLang);
+  // Variante de langue sans traduction réelle : non indexable, html lang = fr.
+  const effectiveNoindex = noindex || !isTranslatedVariant;
+  const htmlLang = isTranslatedVariant ? currentLang : "fr";
   const hreflangKey = allowedLangs.join(",");
   const jsonLdKey = jsonLd ? JSON.stringify(jsonLd) : "";
   const extraMetaKey = extraMeta ? JSON.stringify(extraMeta) : "";
-  const hreflangAlternates = allowedLangs.map((lng) => ({
-    lang: lng,
-    href: addLangParam(canonicalUrl, lng),
-  }));
+  // Alternates uniquement pour les langues réellement traduites : déclarer une
+  // variante non indexable serait un signal contradictoire.
+  const hreflangAlternates =
+    allowedLangs.length > 1
+      ? allowedLangs.map((lng) => ({
+          lang: lng,
+          href: addLangParam(canonicalUrl, lng),
+        }))
+      : [];
+
 
   useEffect(() => {
     // Bloque Prerender.io le temps que le canonical (par langue) soit injecté.
@@ -154,6 +182,7 @@ const PageMeta = ({
         link.setAttribute("data-page-meta", "true");
         document.head.appendChild(link);
       });
+      if (hreflangAlternates.length === 0) return;
       // x-default = FR (canonical)
       const xdef = document.createElement("link");
       xdef.setAttribute("rel", "alternate");
@@ -162,6 +191,7 @@ const PageMeta = ({
       xdef.setAttribute("data-page-meta", "true");
       document.head.appendChild(xdef);
     };
+
 
     const upsertJsonLd = (blocks: object[]) => {
       document.head
@@ -180,7 +210,19 @@ const PageMeta = ({
     // Le titre est écrit impérativement, Helmet n'atteint pas le DOM.
     document.title = fullTitle;
 
-    upsertMetaTag({ attr: "name", key: "robots", content: noindex ? "noindex, follow" : "index, follow" });
+    // `html lang` suit la langue seulement si la page est réellement traduite.
+    document.documentElement.setAttribute("lang", htmlLang);
+
+    upsertMetaTag({
+      attr: "name",
+      key: "robots",
+      content: nofollow
+        ? "noindex, nofollow"
+        : effectiveNoindex
+          ? "noindex, follow"
+          : "index, follow",
+    });
+
     // Écrase la meta description statique (index.html) qui sinon reste en
     // premier dans le DOM et est lue par les crawlers avant la nôtre.
     upsertMetaTag({ attr: "name", key: "description", content: metaDescription });
@@ -227,7 +269,7 @@ const PageMeta = ({
         title: fullTitle,
         description: metaDescription,
         canonical: canonical ?? null,
-        noindex,
+        noindex: effectiveNoindex || nofollow,
         type,
       },
     });
@@ -237,7 +279,7 @@ const PageMeta = ({
     if (ready !== false) {
       (window as any).prerenderReady = true;
     }
-  }, [author, canonical, canonicalUrl, currentPath, currentUrl, currentLang, extraMetaKey, fullTitle, hreflangKey, jsonLdKey, metaDescription, noindex, publishedAt, ready, resolvedImage, type]);
+  }, [author, canonical, canonicalUrl, currentPath, currentUrl, currentLang, extraMetaKey, fullTitle, hreflangKey, jsonLdKey, metaDescription, effectiveNoindex, nofollow, htmlLang, publishedAt, ready, resolvedImage, type]);
 
   // Toutes les balises sont écrites impérativement dans le useEffect ci-dessus,
   // react-helmet-async n'atteignant pas le DOM sur ce projet.

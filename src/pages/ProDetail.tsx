@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
+import PageMeta from "@/components/PageMeta";
+import NotFound from "@/pages/NotFound";
+import { isDemoPro } from "@/lib/proIndexability";
 import { useParams, Link, useSearchParams } from "react-router-dom";
-import { Helmet } from "react-helmet-async";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useAdmin } from "@/hooks/useAdmin";
@@ -68,21 +70,16 @@ export default function ProDetail() {
     );
   }
 
+  // Slug inconnu ou fiche non publiée : vraie 404 en noindex, pas de
+  // redirection ni de page « introuvable » indexable.
   if (!pro) {
-    return (
-      <div className="container mx-auto px-4 py-20 max-w-2xl text-center min-w-0">
-        <h1 className="text-2xl font-bold mb-3">Fiche introuvable</h1>
-        <p className="text-muted-foreground mb-6">
-          Cette fiche n'existe pas ou n'a pas encore été validée.
-        </p>
-        <Button asChild>
-          <Link to="/pros">Voir l'annuaire</Link>
-        </Button>
-      </div>
-    );
+    return <NotFound />;
   }
 
   const cat = getCategoryByValue(pro.category);
+  // Fiches de démonstration : visibles côté produit, jamais soumises au crawl.
+  const isDemo = isDemoPro(pro);
+  const isIndexableFiche = pro.status === "approved" && !isPreview && !isDemo;
   const title = `${pro.raison_sociale}, ${cat?.label}${pro.city ? `, ${pro.city}` : ""}`;
   const canonical = `https://guardiens.fr/pros/${pro.slug}`;
   const priceRangeDisplay = formatPriceRange(
@@ -136,27 +133,17 @@ export default function ProDetail() {
 
   return (
     <div className="min-h-screen bg-background pb-24 md:pb-10">
-      <Helmet>
-        <title>{title} | Guardiens</title>
-        <meta
-          name="description"
-          content={pro.description?.slice(0, 155) ?? `${cat?.label} ${pro.city ?? ""}`}
-        />
-        {isPreview || pro.status !== "approved" ? (
-          <meta name="robots" content="noindex,nofollow" />
-        ) : null}
-        <link rel="canonical" href={canonical} />
-        <meta property="og:title" content={title} />
-        <meta property="og:url" content={canonical} />
-        <meta property="og:type" content="profile" />
-        {pro.logo_url && <meta property="og:image" content={pro.logo_url} />}
-        {pro.status === "approved" && !isPreview && (
-          <>
-            <script type="application/ld+json">{JSON.stringify(localBusinessJsonLd)}</script>
-            <script type="application/ld+json">{JSON.stringify(breadcrumbJsonLd)}</script>
-          </>
-        )}
-      </Helmet>
+      <PageMeta
+        title={title}
+        description={pro.description?.slice(0, 155) ?? `${cat?.label ?? "Pro animalier"} ${pro.city ?? ""}`.trim()}
+        path={`/pros/${pro.slug}`}
+        canonical={canonical}
+        type="profile"
+        image={pro.logo_url ?? undefined}
+        noindex={isPreview || pro.status !== "approved" || isDemo}
+        nofollow={isDemo}
+        jsonLd={isIndexableFiche ? [localBusinessJsonLd, breadcrumbJsonLd] : undefined}
+      />
 
       {isPreview && pro.status !== "approved" && (
         <div className="bg-amber-100 text-amber-900 text-sm py-2 px-4 text-center">
