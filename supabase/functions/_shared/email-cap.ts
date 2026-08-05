@@ -55,6 +55,33 @@ export const BYPASS_TEMPLATES = new Set<string>([
 ])
 
 // ---------------------------------------------------------------------------
+// ETAPE 2 (05/08/2026) : derogation totale de file pour les deux gabarits
+// declenches par l'action directe d'un membre identifie.
+//
+// Ni plafond de categorie, ni file de report. La seule garde qui subsiste est
+// celle des heures calmes, qui repousse au prochain 08h00 Paris sans jamais
+// pouvoir annuler (voir resolveDeferral, ou l'exemption est evaluee AVANT tout
+// calcul de TTL, donc `decideOverTtl` est inatteignable pour ces gabarits).
+export const NO_QUEUE_TEMPLATES = new Set<string>([
+  'new-message',
+  'new-application',
+])
+
+// Plafond propre a la categorie 'alert'.
+//
+// Justification du chiffre : ces envois sont demandes par la personne
+// elle-meme (zones d'alerte, recap gardien quotidien) et sont par construction
+// au plus un par jour et par source. Le plafond journalier de 1 est donc la
+// cadence nominale, il ne coupe rien de legitime. Le plafond hebdomadaire de 7
+// est exactement 7 x 1 : il laisse passer un envoi chaque jour de la semaine,
+// et ne bloque que les rafales anormales (deux sources qui tirent le meme
+// jour, boucle de relance). Sous l'ancien regime, ces gabarits partageaient le
+// quota 3 / 7 jours des emails produit, ce qui condamnait 4 jours sur 7 alors
+// meme que la personne avait explicitement demande a les recevoir.
+export const CAP_ALERT_PER_DAY = 1
+export const CAP_ALERT_PER_WEEK = 7
+
+// ---------------------------------------------------------------------------
 // ETAPE 1 (05/08/2026) : TTL de report par gabarit et par motif.
 //
 // Constat : la file de report appliquait une TTL fixe de 36 h, alors qu'un
