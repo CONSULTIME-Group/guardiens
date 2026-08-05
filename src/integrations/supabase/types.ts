@@ -8201,6 +8201,10 @@ export type Database = {
         }
         Returns: undefined
       }
+      report_contact_details_attempt: {
+        Args: { _context: string; _excerpt: string; _kinds: string[] }
+        Returns: undefined
+      }
       resolve_review_dispute: {
         Args: {
           p_admin_note?: string
