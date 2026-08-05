@@ -1,3 +1,4 @@
+import PageMeta from "@/components/PageMeta";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { ExternalLink } from "lucide-react";
@@ -36,6 +37,13 @@ const AdminOverview = () => {
 
   return (
     <div className="space-y-8">
+      <PageMeta
+        title="Administration | Guardiens"
+        description="Espace d'administration Guardiens."
+        path="/admin"
+        noindex
+        nofollow
+      />
       <AdminPageHeader
         title="Vue d'ensemble"
         description="Actions à mener, signaux d'alerte et indicateurs clés de la plateforme."
