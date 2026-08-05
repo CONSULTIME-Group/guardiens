@@ -176,6 +176,12 @@ export function resolveDeferral(input: {
   scheduledFor: Date
   firstEnqueuedAt: Date
 }): { action: 'enqueue' } | { action: OverTtlAction; ttlDeadline: Date } {
+  // ETAPE 2 : garde placee AVANT tout calcul de TTL. Un gabarit en derogation
+  // ne peut donc jamais atteindre `decideOverTtl`, quel que soit le motif, et
+  // ne peut jamais etre annule. Il est simplement enfile et reparti.
+  if (NO_QUEUE_TEMPLATES.has(input.templateName)) {
+    return { action: 'enqueue' }
+  }
   const ttlHours = getDeferralTtlHours(input.templateName, input.reason)
   const ttlDeadline = new Date(input.firstEnqueuedAt.getTime() + ttlHours * 3600_000)
   if (input.scheduledFor.getTime() <= ttlDeadline.getTime()) {
