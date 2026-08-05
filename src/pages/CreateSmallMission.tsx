@@ -805,6 +805,11 @@ const CreateSmallMission = () => {
         <div ref={actionBarRef} className="fixed bottom-16 inset-x-0 bg-card/95 backdrop-blur border-t border-border px-4 py-3 z-40 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
           <div className="max-w-2xl mx-auto space-y-2">
             {step === 2 && identityRecommended && <IdentityRecommendedHint compact />}
+            {step === 2 && audienceCount !== null && audienceCount > 0 && (
+              <p className="text-xs text-muted-foreground text-center">
+                Votre demande sera proposée à {audienceCount} personne{audienceCount > 1 ? "s" : ""} autour de {city.trim()}.
+              </p>
+            )}
             {step === 1 ? (
               <Button
                 type="button"
