@@ -126,6 +126,8 @@ const EmailClickRedirect = lazy(() => import("./pages/EmailClickRedirect"));
 const ApplicationQuickAction = lazy(() => import("./pages/ApplicationQuickAction"));
 const EmailPreferences = lazy(() => import("./pages/EmailPreferences"));
 const CityPage = lazy(() => import("./pages/CityPage"));
+const HouseSittingHub = lazy(() => import("./pages/HouseSittingHub"));
+const DepartmentsIndex = lazy(() => import("./pages/DepartmentsIndex"));
 const AdminCityPages = lazy(() => import("./pages/admin/AdminCityPages"));
 const FAQ = lazy(() => import("./pages/FAQ"));
 const AdminFAQ = lazy(() => import("./pages/admin/AdminFAQ"));
@@ -438,9 +440,12 @@ const AppRoutes = () => {
       <Route path="/guides/:slug" element={<PublicShellRoute><GuideDetail /></PublicShellRoute>} />
       <Route path="/guide" element={<Navigate to="/guides" replace />} />
       <Route path="/guide/:slug" element={<NavigateGuideSlug />} />
+      <Route path="/house-sitting" element={<PublicShellRoute><HouseSittingHub /></PublicShellRoute>} />
       <Route path="/house-sitting/:slug" element={<PublicShellRoute><CityPage /></PublicShellRoute>} />
       <Route path="/races" element={<PublicShellRoute><BreedsListing /></PublicShellRoute>} />
       <Route path="/races/:slug" element={<PublicShellRoute><BreedPage /></PublicShellRoute>} />
+      <Route path="/departement" element={<PublicShellRoute><DepartmentsIndex /></PublicShellRoute>} />
+      <Route path="/departements" element={<Navigate to="/departement" replace />} />
       <Route path="/departement/:slug" element={<PublicShellRoute><DepartmentPage /></PublicShellRoute>} />
 
       <Route path="/tarifs" element={<Pricing />} />

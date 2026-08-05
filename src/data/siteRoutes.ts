@@ -312,6 +312,22 @@ export const staticRoutes: SiteRoute[] = [
   changeFreq: "monthly",
  },
  {
+  path: "/house-sitting",
+  title: "House-sitting en France : toutes les villes couvertes | Guardiens",
+  metaDescription: "Toutes les villes où Guardiens met en relation propriétaires et gardiens de maison et d'animaux. Choisissez votre ville et découvrez les gardes disponibles près de chez vous.",
+  h1: "House-sitting en France, ville par ville",
+  sitemapPriority: "0.9",
+  changeFreq: "weekly",
+ },
+ {
+  path: "/departement",
+  title: "Garde d'animaux et house-sitting par département | Guardiens",
+  metaDescription: "Les 101 départements français couverts par Guardiens. Trouvez un gardien de maison et d'animaux dans votre département, ou proposez vos services près de chez vous.",
+  h1: "La garde d'animaux département par département",
+  sitemapPriority: "0.9",
+  changeFreq: "weekly",
+ },
+ {
   path: "/races",
   title: "Races d'animaux : guides de garde à domicile | Guardiens",
   metaDescription: "Conseils de garde par race : tempérament, besoins, recommandations pour gardiens. Chiens, chats, NAC, équidés. Guides rédigés à partir de gardes réelles.",
