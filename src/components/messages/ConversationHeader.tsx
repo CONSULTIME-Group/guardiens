@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { getMemberAvatarUrl, getMemberDisplayName, getMemberInitial, isMemberLinkable } from "@/lib/memberUtils";
 
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -253,33 +254,33 @@ const ConversationHeader = ({
               <ArrowLeft className="h-5 w-5" aria-hidden="true" />
             </button>
           )}
-          {conv.other_user?.id ? (
+          {conv.other_user?.id && isMemberLinkable(conv.other_user) ? (
             <Link to={`/gardiens/${conv.other_user.id}`} className="shrink-0 relative block">
-              {conv.other_user?.avatar_url ? (
-                <img src={conv.other_user.avatar_url} alt={`Photo de ${conv.other_user.first_name || 'utilisateur'}`} className="w-11 h-11 rounded-full object-cover hover:ring-2 hover:ring-primary/50 transition-all" />
+              {getMemberAvatarUrl(conv.other_user) ? (
+                <img src={getMemberAvatarUrl(conv.other_user)!} alt={`Photo de ${getMemberDisplayName(conv.other_user, 'utilisateur')}`} className="w-11 h-11 rounded-full object-cover hover:ring-2 hover:ring-primary/50 transition-all" />
               ) : (
                 <div className="w-11 h-11 rounded-full bg-primary/10 flex items-center justify-center text-primary font-medium text-sm hover:ring-2 hover:ring-primary/50 transition-all">
-                  {conv.other_user?.first_name?.charAt(0)?.toUpperCase() || "?"}
+                  {getMemberInitial(conv.other_user)}
                 </div>
               )}
               <ProAvatarBadge status={conv.other_user?.pro_status} size="sm" />
             </Link>
-          ) : conv.other_user?.avatar_url ? (
-            <img src={conv.other_user.avatar_url} alt={`Photo de ${conv.other_user.first_name || 'utilisateur'}`} className="w-10 h-10 rounded-full object-cover" />
+          ) : getMemberAvatarUrl(conv.other_user) ? (
+            <img src={getMemberAvatarUrl(conv.other_user)!} alt={`Photo de ${getMemberDisplayName(conv.other_user, 'utilisateur')}`} className="w-10 h-10 rounded-full object-cover" />
           ) : (
             <div className="w-11 h-11 rounded-full bg-primary/10 flex items-center justify-center text-primary font-medium text-sm">
-              {conv.other_user?.first_name?.charAt(0)?.toUpperCase() || "?"}
+              {getMemberInitial(conv.other_user)}
             </div>
           )}
           <div className="min-w-0">
             <div className="flex items-center gap-2">
-              {conv.other_user?.id ? (
+              {conv.other_user?.id && isMemberLinkable(conv.other_user) ? (
                 <Link to={`/gardiens/${conv.other_user.id}`} className="font-semibold text-base hover:text-primary transition-colors capitalize">
-                  {capitalize(conv.other_user?.first_name)}
+                  {capitalize(getMemberDisplayName(conv.other_user, 'Membre'))}
                 </Link>
               ) : (
                 <span className="font-semibold text-base capitalize">
-                  {capitalize(conv.other_user?.first_name)}
+                  {capitalize(getMemberDisplayName(conv.other_user, 'Membre'))}
                 </span>
               )}
               
@@ -574,7 +575,7 @@ const ConversationHeader = ({
       <Dialog open={blockOpen} onOpenChange={setBlockOpen}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>Bloquer {capitalize(conv.other_user?.first_name)} ?</DialogTitle>
+            <DialogTitle>Bloquer {capitalize(getMemberDisplayName(conv.other_user, 'Membre'))} ?</DialogTitle>
             <DialogDescription>
               Cette personne ne pourra plus vous envoyer de messages et n'apparaîtra plus dans vos conversations.
             </DialogDescription>
@@ -601,7 +602,7 @@ const ConversationHeader = ({
                   setBlockOpen(false);
                   return;
                 }
-                toast.success(`${capitalize(conv.other_user?.first_name)} a été bloqué(e)`);
+                toast.success(`${capitalize(getMemberDisplayName(conv.other_user, 'Membre'))} a été bloqué(e)`);
                 setBlockOpen(false);
                 onBlock?.();
               }}
