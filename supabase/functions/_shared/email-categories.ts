@@ -114,16 +114,21 @@ const PRODUCT: ReadonlyArray<string> = [
 
 const DIGEST: ReadonlyArray<string> = [
   'mission-daily-digest',
-  'sitter-daily-digest',
   'nearby-daily-digest',
   'mutual-aid-weekly-digest',
-  'alert-digest',
   'analysis-requests-digest',
 ]
 
+// ETAPE 2 (05/08/2026) : la categorie 'alert' regroupe desormais les envois
+// explicitement demandes par la personne (zones d'alerte, recap gardien
+// quotidien). Ils disposent d'un plafond propre, 1 / jour et 7 / semaine, et
+// ne consomment plus le quota des emails produit.
 const ALERT: ReadonlyArray<string> = [
   'nearby-sit-alert',
+  'sitter-daily-digest',
+  'alert-digest',
 ]
+
 
 export const EMAIL_CATEGORY_MAP: Record<string, EmailCategory> = (() => {
   const m: Record<string, EmailCategory> = {}
