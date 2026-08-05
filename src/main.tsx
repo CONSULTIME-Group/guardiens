@@ -1,5 +1,4 @@
 import { createRoot } from "react-dom/client";
-import { HelmetProvider } from "react-helmet-async";
 import App from "./App.tsx";
 import "./index.css";
 import reportWebVitals from "./lib/webVitals";
@@ -38,9 +37,7 @@ if (!container) {
 }
 
 createRoot(container).render(
-  <HelmetProvider>
-    <App />
-  </HelmetProvider>
+  <App />
 );
 
 // Fallback prerenderReady : PageMeta est la source de vérité et flippe le flag

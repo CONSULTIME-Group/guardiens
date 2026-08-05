@@ -1,3 +1,4 @@
+import Head from "@/components/seo/Head";
 import { useRef, useState } from 'react'
 import html2canvas from 'html2canvas'
 import BadgeSceau from '@/components/badges/BadgeSceau'

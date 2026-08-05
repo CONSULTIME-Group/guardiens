@@ -1,3 +1,4 @@
+import Head from "@/components/seo/Head";
 import { BadgeSceauLarge } from '@/components/badges/BadgeSceauLarge'
 import { BADGE_DEFINITIONS, GARDIEN_BADGE_IDS, PROPRIO_BADGE_IDS, SPECIAL_BADGE_IDS, MISSION_BADGE_IDS } from '@/components/badges/badge-definitions'
 
