@@ -559,6 +559,10 @@ const Messages = () => {
   const showList = !activeConv || !isMobile;
   const showThread = !!activeConv;
 
+  // Une seule proposition d'appel vidéo active par conversation.
+  const activeVideoInviteId = latestVideoInviteId(messages);
+
+
   if (loading) {
     return (
       <div className="flex h-screen overflow-hidden">
