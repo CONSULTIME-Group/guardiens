@@ -1748,12 +1748,32 @@ const SmallMissionDetail = () => {
             <DialogTitle>Clôturer cette mission ?</DialogTitle>
           </DialogHeader>
           <DialogDescription>
-            Voulez-vous clôturer cette mission sans avoir sélectionné quelqu'un ? Les candidats seront notifiés.
+            {pendingResponses.length > 0
+              ? `Voulez-vous clôturer cette mission sans avoir sélectionné quelqu'un ? ${pendingResponses.length} personne${pendingResponses.length > 1 ? "s" : ""} en attente ${pendingResponses.length > 1 ? "seront prévenues" : "sera prévenue"}.`
+              : "Voulez-vous clôturer cette mission ? Personne n'y a répondu, aucune notification ne sera envoyée."}
           </DialogDescription>
           <DialogFooter>
             <Button variant="outline" onClick={() => setCloseModalOpen(false)}>Annuler</Button>
             <Button variant="destructive" onClick={handleCloseNoSelect} disabled={closingNoSelect}>
               {closingNoSelect ? "Clôture..." : "Clôturer"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Suppression définitive par l'auteur */}
+      <Dialog open={deleteModalOpen} onOpenChange={setDeleteModalOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Supprimer cette publication ?</DialogTitle>
+          </DialogHeader>
+          <DialogDescription>
+            Cette action est irréversible. La publication et les réponses associées seront définitivement supprimées, et la page ne sera plus accessible en ligne.
+          </DialogDescription>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setDeleteModalOpen(false)}>Annuler</Button>
+            <Button variant="destructive" onClick={handleDeleteMission} disabled={deleting}>
+              {deleting ? "Suppression..." : "Supprimer"}
             </Button>
           </DialogFooter>
         </DialogContent>
