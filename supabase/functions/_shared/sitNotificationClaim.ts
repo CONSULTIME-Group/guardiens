@@ -83,35 +83,122 @@ export async function raiseClaimErrorSignal(
   claimErrorCount: number,
 ): Promise<void> {
   if (claimErrorCount <= 0) return;
-
-  const entityId = await uuidFromString(`sit_notification_claim_error_${source}`);
-  const { data: existing, error: readError } = await supabase
-    .from("admin_signals")
-    .select("id")
-    .eq("signal_type", "sit_notification_claim_error")
-    .eq("entity_id", entityId)
-    .is("resolved_at", null)
-    .limit(1);
-
-  if (readError) {
-    console.error("sit notification claim signal lookup failed", source, readError);
-    return;
-  }
-  if (existing && existing.length > 0) return;
-
-  const { error } = await supabase.from("admin_signals").insert({
-    signal_type: "sit_notification_claim_error",
+  await raiseSignal(supabase, {
+    signalType: "sit_notification_claim_error",
+    key: `sit_notification_claim_error_${source}`,
     severity: "critical",
-    entity_type: "system",
-    entity_id: entityId,
     metadata: {
       source,
       claim_error_count: claimErrorCount,
       title: `Échec du garde-fou anti-doublon, ${source}`,
     },
   });
+}
+
+// Seuils de bruit volontairement bas : une famine de créneau est invisible
+// autrement. Un passage qui se voit refuser au moins 10 réservations avec un
+// taux de refus d'au moins 50 pour cent est anormal, on le signale.
+const REFUSAL_MIN_COUNT = 10;
+const REFUSAL_MIN_RATE = 0.5;
+
+/**
+ * Enregistre le résultat des réservations d'un passage (obtenues, refusées,
+ * détenteurs) et lève un signal admin au delà du seuil de refus.
+ */
+export async function reportClaimOutcome(
+  supabase: any,
+  source: string,
+  granted: number,
+  refused: number,
+  heldBy: Record<string, number> = {},
+): Promise<void> {
+  if (granted <= 0 && refused <= 0) return;
+
+  const { error } = await supabase.rpc("record_claim_outcome", {
+    _source: source,
+    _granted: granted,
+    _refused: refused,
+    _held_by: heldBy,
+  });
+  if (error) console.error("record_claim_outcome failed", source, error.message ?? error);
+
+  const total = granted + refused;
+  if (refused >= REFUSAL_MIN_COUNT && refused / total >= REFUSAL_MIN_RATE) {
+    await raiseSignal(supabase, {
+      signalType: "sit_notification_claim_starvation",
+      key: `sit_notification_claim_starvation_${source}`,
+      severity: "critical",
+      metadata: {
+        source,
+        granted,
+        refused,
+        held_by: heldBy,
+        title: `Famine de créneau de notification, ${source}`,
+        detail: `${refused} réservations refusées sur ${total} sur un même passage.`,
+      },
+    });
+  }
+}
+
+/**
+ * Une ligne soldée faute de créneau est une perte de diffusion, jamais un
+ * simple nettoyage : elle doit être bruyante.
+ */
+export async function raiseStaleClaimSignal(
+  supabase: any,
+  source: string,
+  reason: string,
+  rowIds: string[],
+): Promise<void> {
+  if (rowIds.length === 0) return;
+  await raiseSignal(supabase, {
+    signalType: "sit_notification_claim_blocked_stale",
+    key: `sit_notification_claim_blocked_stale_${source}_${new Date().toISOString().slice(0, 10)}`,
+    severity: "critical",
+    metadata: {
+      source,
+      reason,
+      row_count: rowIds.length,
+      row_ids: rowIds.slice(0, 50),
+      title: `Notifications soldées faute de créneau, ${source}`,
+      detail: `${rowIds.length} lignes soldées en ${reason}, ces gardiens ne recevront jamais ces annonces.`,
+    },
+  });
+}
+
+async function raiseSignal(
+  supabase: any,
+  args: {
+    signalType: string;
+    key: string;
+    severity: string;
+    metadata: Record<string, unknown>;
+  },
+): Promise<void> {
+  const entityId = await uuidFromString(args.key);
+  const { data: existing, error: readError } = await supabase
+    .from("admin_signals")
+    .select("id")
+    .eq("signal_type", args.signalType)
+    .eq("entity_id", entityId)
+    .is("resolved_at", null)
+    .limit(1);
+
+  if (readError) {
+    console.error("admin signal lookup failed", args.signalType, readError);
+    return;
+  }
+  if (existing && existing.length > 0) return;
+
+  const { error } = await supabase.from("admin_signals").insert({
+    signal_type: args.signalType,
+    severity: args.severity,
+    entity_type: "system",
+    entity_id: entityId,
+    metadata: args.metadata,
+  });
   if (error && error.code !== "23505") {
-    console.error("sit notification claim signal insert failed", source, error);
+    console.error("admin signal insert failed", args.signalType, error);
   }
 }
 
