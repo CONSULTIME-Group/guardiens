@@ -10,7 +10,7 @@
 // et le pré-filtrage des annonces (24h glissantes, pays=FR) sont conservés
 // à l'identique.
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-import { claimSitNotification, raiseClaimErrorSignal, releaseSitNotification } from "../_shared/sitNotificationClaim.ts";
+import { claimSitNotification, raiseClaimErrorSignal, releaseSitNotification, reportClaimOutcome } from "../_shared/sitNotificationClaim.ts";
 import { parisDateKey, parisHourSlot } from "../_shared/paris-hour.ts";
 import { geocodeKeyCandidates } from "../_shared/geocode-lookup.ts";
 
@@ -193,6 +193,7 @@ Deno.serve(async (req) => {
     let sent = 0;
     let skipped = 0;
     let claimSkipped = 0;
+    let claimGranted = 0;
     let rayonFallbackDept = 0;
     const claimSkippedBy: Record<string, number> = {};
     const errors: Array<{ user_id?: string; reason: string }> = [];
@@ -445,6 +446,7 @@ Deno.serve(async (req) => {
         claimSkippedBy[key] = (claimSkippedBy[key] ?? 0) + 1;
         continue;
       }
+      claimGranted++;
 
       const _steRes = await fetch(`${Deno.env.get('SUPABASE_URL')}/functions/v1/send-transactional-email`, {
         method: 'POST',
@@ -474,6 +476,7 @@ Deno.serve(async (req) => {
 
 
     await raiseClaimErrorSignal(supabase, "alert-digest", claimSkippedBy.claim_error ?? 0);
+    await reportClaimOutcome(supabase, "alert-digest", claimGranted, claimSkipped, claimSkippedBy);
 
     return new Response(
       JSON.stringify({

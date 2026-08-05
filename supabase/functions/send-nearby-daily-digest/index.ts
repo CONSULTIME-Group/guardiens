@@ -15,7 +15,7 @@
 // Body : { manual?: boolean, dry_run?: boolean, user_id?: string }
 
 import { createClient } from 'npm:@supabase/supabase-js@2.45.0'
-import { claimSitNotification, raiseClaimErrorSignal, releaseSitNotification } from '../_shared/sitNotificationClaim.ts'
+import { claimSitNotification, raiseClaimErrorSignal, releaseSitNotification, reportClaimOutcome } from '../_shared/sitNotificationClaim.ts'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -195,6 +195,7 @@ Deno.serve(async (req) => {
     let usersSent = 0
     let usersSkipped = 0
     let claimSkipped = 0
+    let claimGranted = 0
     let deptFallbackUsers = 0
     const claimSkippedBy: Record<string, number> = {}
     const errors: Array<{ user_id: string; reason: string }> = []
@@ -340,6 +341,7 @@ Deno.serve(async (req) => {
             claimSkippedBy[key] = (claimSkippedBy[key] ?? 0) + 1
             continue
           }
+          claimGranted++
         }
 
         const idem = body.manual
@@ -376,6 +378,7 @@ Deno.serve(async (req) => {
     }
 
     await raiseClaimErrorSignal(supabase, 'nearby-daily-digest', claimSkippedBy.claim_error ?? 0)
+    await reportClaimOutcome(supabase, 'nearby-daily-digest', claimGranted, claimSkipped, claimSkippedBy)
 
     return json({
       ok: true,
