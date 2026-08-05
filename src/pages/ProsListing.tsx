@@ -1,7 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { Helmet } from "react-helmet-async";
 import { useTranslation } from "react-i18next";
+import PageMeta from "@/components/PageMeta";
+import { SITE_URL } from "@/lib/seo";
+import { isProIndexable } from "@/lib/proIndexability";
 import { supabase } from "@/integrations/supabase/client";
 import { PRO_CATEGORIES, getCategoryByValue, getProInitials } from "@/lib/proCategories";
 import { Card, CardContent } from "@/components/ui/card";
