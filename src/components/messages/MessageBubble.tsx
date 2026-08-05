@@ -144,12 +144,19 @@ const MessageBubble = ({
 
   if (msg.metadata?.kind === "video_call_invite" && msg.metadata?.room_url) {
     const roomUrl = msg.metadata.room_url;
+    const state = videoInviteState ?? "active";
+    const isActive = state === "active";
     return (
       <div className="flex justify-center px-4 py-2">
-        <div className="w-full max-w-[360px] rounded-2xl border border-border bg-card px-4 py-3.5 shadow-[0_1px_2px_hsl(var(--foreground)/0.04)]">
+        <div
+          className={[
+            "w-full max-w-[360px] rounded-2xl border border-border bg-card px-4 py-3.5 shadow-[0_1px_2px_hsl(var(--foreground)/0.04)]",
+            isActive ? "" : "opacity-70",
+          ].join(" ")}
+        >
           <div className="flex items-center gap-2.5 mb-2">
-            <div className="h-9 w-9 rounded-full bg-primary/12 flex items-center justify-center shrink-0">
-              <Video className="h-[18px] w-[18px] text-primary" aria-hidden="true" />
+            <div className={`h-9 w-9 rounded-full ${isActive ? "bg-primary/12" : "bg-muted"} flex items-center justify-center shrink-0`}>
+              <Video className={`h-[18px] w-[18px] ${isActive ? "text-primary" : "text-muted-foreground"}`} aria-hidden="true" />
             </div>
             <div className="min-w-0">
               <p className="font-heading text-[14px] font-medium text-foreground leading-tight">
@@ -160,34 +167,43 @@ const MessageBubble = ({
               </p>
             </div>
           </div>
-          <Button
-            asChild
-            size="sm"
-            className="w-full rounded-full"
-          >
-            <a href={roomUrl} target="_blank" rel="noopener noreferrer">
-              Rejoindre l'appel
-            </a>
-          </Button>
-          <p className="text-[11px] text-muted-foreground text-center mt-2 leading-snug">
-            Une option, pas une obligation. Vous restez libres de vous joindre autrement. Sans compte ni installation.
-          </p>
-          {isLastInGroup && (
-            <div className={`flex items-center gap-1 mt-1.5 ${isMe ? "justify-end" : "justify-start"}`}>
-              <span className="text-[10.5px] text-muted-foreground">
-                {format(new Date(msg.created_at), "HH:mm")}
-              </span>
-              {isMe && (
-                msg.read_at
-                  ? <CheckCheck className="h-3 w-3 text-primary/70" />
-                  : <Check className="h-3 w-3 text-muted-foreground/60" />
-              )}
-            </div>
+          {isActive ? (
+            <>
+              <Button
+                asChild
+                size="sm"
+                className="w-full rounded-full"
+              >
+                <a href={roomUrl} target="_blank" rel="noopener noreferrer">
+                  Rejoindre l'appel
+                </a>
+              </Button>
+              <p className="text-[11px] text-muted-foreground text-center mt-2 leading-snug">
+                Une option, pas une obligation. Vous restez libres de vous joindre autrement. Sans compte ni installation.
+              </p>
+            </>
+          ) : (
+            <p className="text-[11.5px] text-muted-foreground text-center leading-snug rounded-full border border-border px-3 py-2">
+              {state === "superseded"
+                ? "Proposition remplacée par une plus récente."
+                : "Proposition expirée, le lien n'est plus valable."}
+            </p>
           )}
+          <div className={`flex items-center gap-1 mt-1.5 ${isMe ? "justify-end" : "justify-start"}`}>
+            <span className="text-[10.5px] text-muted-foreground">
+              {format(new Date(msg.created_at), "HH:mm")}
+            </span>
+            {isMe && isLastInGroup && (
+              msg.read_at
+                ? <CheckCheck className="h-3 w-3 text-primary/70" />
+                : <Check className="h-3 w-3 text-muted-foreground/60" />
+            )}
+          </div>
         </div>
       </div>
     );
   }
+
 
   return (
     <>
