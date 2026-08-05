@@ -811,6 +811,12 @@ const SmallMissionDetail = () => {
               Clôturer sans sélectionner
             </button>
           )}
+          <button
+            onClick={() => setDeleteModalOpen(true)}
+            className="text-xs text-muted-foreground hover:text-destructive w-full text-center transition-colors"
+          >
+            Supprimer cette publication
+          </button>
         </div>
       );
     }
