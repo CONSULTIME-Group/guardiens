@@ -179,6 +179,8 @@ const Favorites = () => {
       <PageMeta
         title={t("favorites_page.meta_title")}
         description={t("favorites_page.meta_description")}
+        noindex
+        nofollow
       />
 
       <div className="max-w-xl mx-auto pb-10">

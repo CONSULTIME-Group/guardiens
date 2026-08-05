@@ -10,6 +10,7 @@ import { useAdmin } from "@/hooks/useAdmin";
 import { cn } from "@/lib/utils";
 import { lazy, Suspense, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { useNavBadgeCounts } from "@/hooks/useNavBadgeCounts";
 import { useScrollDirection } from "@/hooks/useScrollDirection";
 import { useInAppShell } from "./AppShellContext";
 import { useChromeVisibility } from "./ChromeVisibility";
@@ -69,10 +70,8 @@ export const Sidebar = ({ showHeaderBells = true }: { showHeaderBells?: boolean 
   const { isAdmin } = useAdmin();
   const navigate = useNavigate();
   const { hasAccess } = useSubscriptionAccess();
-  const [unreadCount, setUnreadCount] = useState(0);
-  const [ownerInboxCount, setOwnerInboxCount] = useState(0);
-  const [sitterActionCount, setSitterActionCount] = useState(0);
-  const [missionBadgeCount, setMissionBadgeCount] = useState(0);
+  const { unreadCount, ownerInboxCount, sitterActionCount, missionBadgeCount } =
+    useNavBadgeCounts(user?.id);
   const [feedbackOpen, setFeedbackOpen] = useState(false);
   const [gateOpen, setGateOpen] = useState(false);
   const [gateFeature, setGateFeature] = useState("");
@@ -84,75 +83,6 @@ export const Sidebar = ({ showHeaderBells = true }: { showHeaderBells?: boolean 
   // sitter = candidatures propres en attente d'action (pending côté gardien).
   const sitsBadge = effectiveRole === "owner" ? ownerInboxCount : sitterActionCount;
 
-  useEffect(() => {
-    if (!user) return;
-    const loadCounts = async () => {
-      // Unread messages
-      const { data: convs } = await supabase
-        .from("conversations")
-        .select("id")
-        .or(`owner_id.eq.${user.id},sitter_id.eq.${user.id}`);
-      if (convs?.length) {
-        const convIds = convs.map((c: any) => c.id);
-        const { count } = await supabase
-          .from("messages")
-          .select("id", { count: "exact", head: true })
-          .in("conversation_id", convIds)
-          .neq("sender_id", user.id)
-          .is("read_at", null);
-        setUnreadCount(count || 0);
-      } else {
-        setUnreadCount(0);
-      }
-
-      // Owner inbox : candidatures pending reçues sur les annonces de l'utilisateur
-      const { data: userSits } = await supabase
-        .from("sits")
-        .select("id")
-        .eq("user_id", user.id);
-      if (userSits?.length) {
-        const { count: appCount } = await supabase
-          .from("applications")
-          .select("id", { count: "exact", head: true })
-          .in("sit_id", userSits.map((s: any) => s.id))
-          .eq("status", "pending");
-        setOwnerInboxCount(appCount || 0);
-      } else {
-        setOwnerInboxCount(0);
-      }
-
-      // Sitter action : candidatures propres en attente (pending) côté gardien
-      const { count: myAppsCount } = await supabase
-        .from("applications")
-        .select("id", { count: "exact", head: true })
-        .eq("sitter_id", user.id)
-        .eq("status", "pending");
-      setSitterActionCount(myAppsCount || 0);
-
-
-      // Mission conversations with unread messages
-      const { data: missionConvs } = await supabase
-        .from("conversations")
-        .select("id, small_mission_id")
-        .or(`owner_id.eq.${user.id},sitter_id.eq.${user.id}`)
-        .not("small_mission_id", "is", null);
-      if (missionConvs?.length) {
-        const mConvIds = missionConvs.map((c: any) => c.id);
-        const { count: mCount } = await supabase
-          .from("messages")
-          .select("id", { count: "exact", head: true })
-          .in("conversation_id", mConvIds)
-          .neq("sender_id", user.id)
-          .is("read_at", null);
-        setMissionBadgeCount(mCount || 0);
-      } else {
-        setMissionBadgeCount(0);
-      }
-    };
-    loadCounts();
-    const interval = setInterval(loadCounts, 15000);
-    return () => clearInterval(interval);
-  }, [user]);
 
 
   return (
@@ -342,10 +272,8 @@ export const BottomNav = () => {
   const { user, activeRole, setActiveRole, logout } = useAuth();
   const { isAdmin } = useAdmin();
   const { hasAccess } = useSubscriptionAccess();
-  const [unreadCount, setUnreadCount] = useState(0);
-  const [ownerInboxCount, setOwnerInboxCount] = useState(0);
-  const [sitterActionCount, setSitterActionCount] = useState(0);
-  const [missionBadgeCount, setMissionBadgeCount] = useState(0);
+  const { unreadCount, ownerInboxCount, sitterActionCount, missionBadgeCount } =
+    useNavBadgeCounts(user?.id);
   const [sheetOpen, setSheetOpen] = useState(false);
   const [feedbackOpen, setFeedbackOpen] = useState(false);
   const [gateOpen, setGateOpen] = useState(false);
@@ -356,70 +284,6 @@ export const BottomNav = () => {
   const effectiveRole = user?.role === "both" ? activeRole : user?.role;
   const sitsBadge = effectiveRole === "owner" ? ownerInboxCount : sitterActionCount;
 
-  useEffect(() => {
-    if (!user) return;
-    const loadCount = async () => {
-      const { data: convs } = await supabase
-        .from("conversations")
-        .select("id")
-        .or(`owner_id.eq.${user.id},sitter_id.eq.${user.id}`);
-      if (convs?.length) {
-        const convIds = convs.map((c: any) => c.id);
-        const { count } = await supabase
-          .from("messages")
-          .select("id", { count: "exact", head: true })
-          .in("conversation_id", convIds)
-          .neq("sender_id", user.id)
-          .is("read_at", null);
-        setUnreadCount(count || 0);
-      } else {
-        setUnreadCount(0);
-      }
-
-      const { data: userSits } = await supabase
-        .from("sits")
-        .select("id")
-        .eq("user_id", user.id);
-      if (userSits?.length) {
-        const { count: appCount } = await supabase
-          .from("applications")
-          .select("id", { count: "exact", head: true })
-          .in("sit_id", userSits.map((s: any) => s.id))
-          .eq("status", "pending");
-        setOwnerInboxCount(appCount || 0);
-      } else {
-        setOwnerInboxCount(0);
-      }
-
-      const { count: myAppsCount } = await supabase
-        .from("applications")
-        .select("id", { count: "exact", head: true })
-        .eq("sitter_id", user.id)
-        .eq("status", "pending");
-      setSitterActionCount(myAppsCount || 0);
-
-      const { data: missionConvs } = await supabase
-        .from("conversations")
-        .select("id, small_mission_id")
-        .or(`owner_id.eq.${user.id},sitter_id.eq.${user.id}`)
-        .not("small_mission_id", "is", null);
-      if (missionConvs?.length) {
-        const mConvIds = missionConvs.map((c: any) => c.id);
-        const { count: mCount } = await supabase
-          .from("messages")
-          .select("id", { count: "exact", head: true })
-          .in("conversation_id", mConvIds)
-          .neq("sender_id", user.id)
-          .is("read_at", null);
-        setMissionBadgeCount(mCount || 0);
-      } else {
-        setMissionBadgeCount(0);
-      }
-    };
-    loadCount();
-    const interval = setInterval(loadCount, 15000);
-    return () => clearInterval(interval);
-  }, [user]);
 
   const navigate = useNavigate();
   const scrollDir = useScrollDirection();

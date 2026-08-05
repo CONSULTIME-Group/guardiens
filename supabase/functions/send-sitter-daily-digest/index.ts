@@ -72,7 +72,7 @@ Deno.serve(async (req) => {
     // 1. Récupère toutes les paires queued (filtrage optionnel par sitter)
     let queueQuery = supabase
       .from('sitter_digest_queue')
-      .select('id, sitter_id, sit_id, affinity_score, distance_km')
+      .select('id, sitter_id, sit_id, affinity_score, distance_km, queued_at')
       .eq('status', 'queued')
 
     if (body.sitter_id) {
@@ -139,6 +139,9 @@ Deno.serve(async (req) => {
         // 2b. Résout l'email auth
         const { data: authData, error: authErr } = await supabase.auth.admin.getUserById(sitterId)
         if (authErr || !authData?.user?.email) {
+          // Sans email, la ligne ne pourra jamais partir : on la sort de la
+          // file plutôt que de la laisser tourner indéfiniment en `queued`.
+          await markSkipped(supabase, rows.map(r => r.id), 'auth_email_missing', body.dry_run)
           errors.push({ sitter_id: sitterId, reason: 'auth_email_missing' })
           continue
         }
@@ -251,6 +254,9 @@ Deno.serve(async (req) => {
         }
 
         if (items.length === 0) {
+          // Aucune annonce diffusable : toutes les lignes restantes de ce
+          // gardien sont soldées, sinon elles restent en file pour toujours.
+          await markSkipped(supabase, rows.map(r => r.id), 'no_available_sit', body.dry_run)
           sittersSkipped++
           continue
         }
@@ -280,6 +286,22 @@ Deno.serve(async (req) => {
             claimSkipped++
             const key = claim.heldBy ?? (claim.error ? 'claim_error' : 'inconnu')
             claimSkippedBy[key] = (claimSkippedBy[key] ?? 0) + 1
+            // Filet anti file bloquée : une réservation refusée fait
+            // repasser la ligne au lendemain, mais au delà de 48 heures la
+            // ligne ne partira jamais, on la solde explicitement.
+            const staleCutoff = Date.now() - 48 * 60 * 60 * 1000
+            const staleRows = rows.filter(r => {
+              const t = (r as any).queued_at ? new Date((r as any).queued_at).getTime() : Date.now()
+              return t < staleCutoff
+            })
+            if (staleRows.length > 0) {
+              await markSkipped(
+                supabase,
+                staleRows.map(r => r.id),
+                `claim_blocked_stale_${key}`.slice(0, 60),
+                body.dry_run,
+              )
+            }
             continue
           }
         }

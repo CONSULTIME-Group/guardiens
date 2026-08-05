@@ -209,7 +209,11 @@ const DateSheet = ({
 }: {
   open: boolean; onOpenChange: (v: boolean) => void;
   label: string; value: string; onChange: (v: string) => void; min?: string;
-}) => (
+}) => {
+  // Démontage strict à la fermeture : une feuille fermée mais laissée dans le
+  // DOM continue de capter la saisie et écrase la date de l'autre champ.
+  if (!open) return null;
+  return (
   <Sheet open={open} onOpenChange={onOpenChange}>
     <SheetContent side="bottom" className="rounded-t-2xl pb-safe">
       <SheetHeader>
@@ -233,7 +237,8 @@ const DateSheet = ({
       </div>
     </SheetContent>
   </Sheet>
-);
+  );
+};
 
 /**
  * Une copie locale ne vaut d'être restaurée que si elle porte réellement du
@@ -384,6 +389,30 @@ const CreateSit = () => {
   const saveFailToastShownRef = useRef(false);
   const [adaptingWithAlma, setAdaptingWithAlma] = useState(false);
   const [previewOpen, setPreviewOpen] = useState(false);
+  const [audienceCount, setAudienceCount] = useState<number | null>(null);
+  // Volume de diffusion annoncé dans l'aperçu, calculé à l'ouverture seulement.
+  useEffect(() => {
+    if (!previewOpen) return;
+    const target = (sitCity || ownerCity || "").trim();
+    if (!target) { setAudienceCount(null); return; }
+    let cancelled = false;
+    (async () => {
+      try {
+        const { geocodeCity } = await import("@/lib/geocode");
+        const coords = await geocodeCity(target);
+        if (cancelled || !coords) return;
+        const { data } = await supabase.rpc("count_eligible_sitters", {
+          p_lat: coords.lat,
+          p_lng: coords.lng,
+          p_radius_km: 100,
+        });
+        if (!cancelled) setAudienceCount(typeof data === "number" ? data : null);
+      } catch {
+        if (!cancelled) setAudienceCount(null);
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [previewOpen, sitCity, ownerCity]);
   const [incompleteNudgeOpen, setIncompleteNudgeOpen] = useState(false);
   const incompleteNudgeSeenRef = useRef(false);
   const hasUserEditedRef = useRef(false);
@@ -2371,6 +2400,7 @@ const CreateSit = () => {
         }}
         open={previewOpen}
         onOpenChange={setPreviewOpen}
+        audienceCount={audienceCount}
         onConfirmPublish={async () => { await handlePublish(); }}
         publishing={publishing}
         canPublish={!!canPublish}

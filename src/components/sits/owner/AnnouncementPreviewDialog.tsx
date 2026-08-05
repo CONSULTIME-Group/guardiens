@@ -45,6 +45,8 @@ interface AnnouncementPreviewDialogProps {
   propertyType: string | null;
   environments: string[];
   isUrgent: boolean;
+  /** Volume de gardiens qui seront prévenus à la publication, null si inconnu. */
+  audienceCount?: number | null;
 }
 
 const speciesEmoji: Record<string, string> = {
@@ -69,7 +71,7 @@ const AnnouncementPreviewDialog = ({
   blockers = [], onResolveBlocker,
   title, startDate, endDate, flexibleDates, city, country,
   specificExpectations, ownerMessage, dailyRoutine,
-  coverPhotoUrl, ownerPhotos, pets, propertyType, environments, isUrgent,
+  coverPhotoUrl, ownerPhotos, pets, propertyType, environments, isUrgent, audienceCount = null,
 }: AnnouncementPreviewDialogProps) => {
   const cover = coverPhotoUrl || ownerPhotos[0] || null;
   const gallery = ownerPhotos.filter(p => p !== cover).slice(0, 3);
@@ -203,6 +205,12 @@ const AnnouncementPreviewDialog = ({
           </div>
         )}
 
+
+        {audienceCount !== null && audienceCount > 0 && (
+          <p className="text-sm text-muted-foreground">
+            À la publication, votre annonce sera proposée à {audienceCount} gardien{audienceCount > 1 ? "s" : ""} autour de {city || "votre commune"}.
+          </p>
+        )}
 
         <DialogFooter className="gap-2">
           <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>

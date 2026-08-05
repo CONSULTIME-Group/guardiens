@@ -7585,6 +7585,10 @@ export type Database = {
         Args: { p_lat: number; p_lng: number; p_radius_km?: number }
         Returns: number
       }
+      count_mission_notification_audience: {
+        Args: { p_lat: number; p_lng: number; p_radius_km?: number }
+        Returns: number
+      }
       create_alert_from_search: {
         Args: { p_city: string; p_postal_code: string; p_radius_km: number }
         Returns: string
@@ -7703,6 +7707,7 @@ export type Database = {
           sit_title_pattern: string
         }[]
       }
+      detect_stale_digest_queue: { Args: never; Returns: number }
       detect_stale_drafts: {
         Args: never
         Returns: {
