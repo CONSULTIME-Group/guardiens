@@ -7487,6 +7487,10 @@ export type Database = {
         Args: { p_name: string; p_value: string }
         Returns: string
       }
+      anonymize_user_account: {
+        Args: { _new_email: string; _user_id: string }
+        Returns: Json
+      }
       apply_referral_reward: {
         Args: { p_referred_id: string }
         Returns: undefined
