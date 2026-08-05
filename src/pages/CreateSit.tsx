@@ -209,7 +209,11 @@ const DateSheet = ({
 }: {
   open: boolean; onOpenChange: (v: boolean) => void;
   label: string; value: string; onChange: (v: string) => void; min?: string;
-}) => (
+}) => {
+  // Démontage strict à la fermeture : une feuille fermée mais laissée dans le
+  // DOM continue de capter la saisie et écrase la date de l'autre champ.
+  if (!open) return null;
+  return (
   <Sheet open={open} onOpenChange={onOpenChange}>
     <SheetContent side="bottom" className="rounded-t-2xl pb-safe">
       <SheetHeader>
