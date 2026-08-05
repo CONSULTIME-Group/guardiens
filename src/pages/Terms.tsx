@@ -17,7 +17,7 @@ const Terms = () => {
           Conditions Générales d'Utilisation
         </h1>
         <p className="text-sm text-muted-foreground mb-8">
-          Version 6, Dernière mise à jour : 4 août 2026
+          Version 7, Dernière mise à jour : 5 août 2026
         </p>
 
         <div className="prose prose-lg max-w-none text-muted-foreground space-y-6">
@@ -138,13 +138,13 @@ const Terms = () => {
           {/* 8 */}
           <h2 className="font-heading text-xl font-bold text-foreground pt-4">8. Vérification d'identité</h2>
           <p>
-            La Plateforme prévoit un dispositif de vérification d'identité optionnel, qui sera mis en œuvre par un prestataire spécialisé lorsque le service atteindra la maturité technique et le volume d'usage justifiant son ouverture.
+            La Plateforme met à disposition un dispositif de vérification d'identité, actif, optionnel et sans frais. L'utilisateur qui le souhaite dépose une pièce d'identité officielle (carte nationale d'identité, passeport, permis de conduire ou titre de séjour) et une photographie prise depuis l'application. Ces éléments font l'objet d'un contrôle automatisé destiné à vérifier leur cohérence, et un réexamen humain est possible sur demande.
           </p>
           <p>
-            À la date des présentes, ce dispositif n'est pas actif. La confiance entre utilisateurs repose sur la rencontre physique préalable à toute garde, les avis croisés publiés après chaque garde ou petite mission, l'historique visible sur chaque profil, et les mécanismes de signalement et de modération décrits aux articles 10 et 14.
+            En cas de résultat positif, le badge Identité vérifiée est affiché sur le profil. Ce dispositif n'est jamais une condition d'accès à la Plateforme : un refus ou une absence de demande n'empêche ni l'inscription, ni l'usage du service. Les durées de conservation des documents et les modalités d'exercice des droits sont décrites dans la <a href="/confidentialite" className="text-primary hover:underline">Politique de confidentialité</a>.
           </p>
           <p>
-            Les utilisateurs seront informés par email, avec un préavis de trente (30) jours, de l'activation du dispositif de vérification d'identité. Les modalités précises (prestataire retenu, base légale, conservation, exercice des droits) seront alors publiées dans la <a href="/confidentialite" className="text-primary hover:underline">Politique de confidentialité</a> et rendues opposables par un avenant aux présentes CGU.
+            La confiance entre utilisateurs repose également sur la rencontre physique préalable à toute garde, les avis croisés publiés après chaque garde ou petite mission, l'historique visible sur chaque profil, et les mécanismes de signalement et de modération décrits aux articles 10 et 14.
           </p>
 
           {/* 9 */}

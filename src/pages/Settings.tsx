@@ -528,7 +528,7 @@ const Settings = () => {
           <DialogHeader>
             <DialogTitle className="text-destructive">Supprimer mon compte</DialogTitle>
             <DialogDescription className="text-sm leading-relaxed">
-              En confirmant, vous supprimez <strong>immédiatement et définitivement</strong> votre compte, votre profil et toutes vos données personnelles associées. Vos avis publics resteront visibles de manière anonyme. Cette action est <strong>irréversible</strong>.
+              En confirmant, votre compte est <strong>immédiatement anonymisé</strong>. Sont effacés : votre profil (nom, biographie, coordonnées), vos photos, vos documents d'identité et professionnels, vos logements, vos animaux et vos préférences. Sont conservés sous forme anonymisée, sans lien avec une personne identifiable : vos avis, vos messages et vos conversations, afin de préserver l'intégrité des échanges entre membres et du système d'évaluation. Votre adresse email redevient utilisable pour une nouvelle inscription. Cette action est <strong>irréversible</strong>.
             </DialogDescription>
           </DialogHeader>
           {activeCommitmentsCount !== null && activeCommitmentsCount > 0 && (

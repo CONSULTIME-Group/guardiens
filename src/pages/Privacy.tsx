@@ -14,7 +14,7 @@ const Privacy = () => {
 
       <main className="px-6 md:px-12 py-16 max-w-3xl mx-auto">
         <h1 className="font-heading text-3xl md:text-4xl font-bold mb-2">Politique de confidentialité</h1>
-        <p className="text-sm text-muted-foreground mb-8">Version 3, dernière mise à jour : 13 juillet 2026</p>
+        <p className="text-sm text-muted-foreground mb-8">Version 4, dernière mise à jour : 5 août 2026</p>
 
         <div className="prose prose-lg max-w-none text-muted-foreground space-y-6">
           <p>
@@ -46,7 +46,12 @@ const Privacy = () => {
             <li><strong className="text-foreground">3.5 Géolocalisation</strong> : coordonnées approximatives via code postal, adresse précise uniquement après confirmation d'une garde.</li>
             <li><strong className="text-foreground">3.6 Paiement</strong> : aucune donnée bancaire complète conservée, traitement délégué à Stripe Payments Europe Limited (Dublin).</li>
             <li><strong className="text-foreground">3.7 Technique</strong> : IP, navigateur, système d'exploitation, logs, pages visitées (sous consentement).</li>
+            <li><strong className="text-foreground">3.8 Vérification d'identité (optionnelle)</strong> : pièce d'identité officielle (carte nationale d'identité, passeport, permis de conduire ou titre de séjour) et photographie de la personne prise depuis l'application, déposées volontairement par l'utilisateur qui souhaite obtenir le badge Identité vérifiée. Finalité : confiance entre membres et prévention des usurpations. Base légale : consentement, retirable à tout moment. Ces documents font l'objet d'une analyse automatisée destinée à contrôler la cohérence entre la pièce et la photographie. Cette analyse ne produit aucune décision ayant un effet juridique : un refus n'empêche ni l'inscription, ni l'usage de la plateforme, il prive seulement du badge. Un réexamen humain est possible sur demande.</li>
+            <li><strong className="text-foreground">3.9 Données professionnelles (optionnelles)</strong> : numéro SIRET, raison sociale, spécialité, tarif indicatif, et pièces justificatives (Kbis, diplômes, certificat ACACED, attestation de responsabilité civile professionnelle) déposées par les membres exerçant à titre professionnel. Finalité : affichage du statut professionnel et vérification de son authenticité. Base légale : consentement. Ces pièces font également l'objet d'une analyse automatisée, suivie le cas échéant d'un examen humain.</li>
           </ul>
+          <p>
+            Les annonces, les messages et les biographies font l'objet d'un contrôle automatisé destiné à détecter les contenus contraires aux conditions d'utilisation. Base légale : intérêt légitime.
+          </p>
 
           <h2 className="font-heading text-xl font-bold text-foreground pt-4">4. Finalités et bases légales (art. 6 RGPD)</h2>
           <ul className="list-disc pl-6 space-y-1">
@@ -64,7 +69,10 @@ const Privacy = () => {
           <h2 className="font-heading text-xl font-bold text-foreground pt-4">5. Durée de conservation</h2>
           <ul className="list-disc pl-6 space-y-1">
             <li>Données de compte actif : durée de l'inscription</li>
-            <li>Données après suppression : effacement sous 7 jours, sauf obligations légales</li>
+            <li>Données après suppression : anonymisation immédiate du compte et effacement des documents et fichiers. Les avis et les messages sont conservés sous forme anonymisée, sans lien avec une personne identifiable, pour préserver l'intégrité des échanges entre membres et du système d'évaluation. La purge des sauvegardes techniques intervient dans un délai maximal de 30 jours.</li>
+            <li>Pièce d'identité et photographie : effacement automatique 30 jours après la décision de vérification</li>
+            <li>Documents professionnels : effacement 30 jours après la décision, ou sur demande du membre</li>
+            <li>Journal des vérifications : conservation du résultat sans le document, 12 mois</li>
             <li>Messages : durée du compte, anonymisés à la suppression</li>
             <li>Avis publiés : anonymisés après suppression du compte (intérêt légitime)</li>
             <li>Logs de connexion : 12 mois (art. L. 34-1 CPCE)</li>
