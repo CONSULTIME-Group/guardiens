@@ -26,6 +26,8 @@ interface MessageBubbleProps {
   isInGallery?: boolean;
   savingToGallery?: boolean;
   onSaveToGallery?: (photoUrl: string) => void;
+  /** Une seule proposition d'appel vidéo reste active par conversation */
+  videoInviteState?: "active" | "superseded" | "expired";
 }
 
 
