@@ -1,4 +1,3 @@
-import { Helmet } from 'react-helmet-async'
 import { useRef, useState } from 'react'
 import html2canvas from 'html2canvas'
 import BadgeSceau from '@/components/badges/BadgeSceau'
