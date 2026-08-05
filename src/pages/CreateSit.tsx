@@ -1060,7 +1060,42 @@ const CreateSit = () => {
   const showUrgent = flexibleDates || (startDate && new Date(startDate).getTime() - Date.now() < 7 * 86400000);
 
   const handlePublish = async () => {
-    if (!user || !property || !canPublish) return;
+    // Aucun refus muet : chaque sortie anticipée nomme précisément ce qui manque.
+    if (!user) {
+      toast({
+        variant: "destructive",
+        title: "Session expirée",
+        description: "Reconnectez vous, votre brouillon est conservé.",
+      });
+      return;
+    }
+    if (!property) {
+      toast({
+        variant: "destructive",
+        title: "Impossible de publier l'annonce",
+        description: "Votre logement n'est pas encore décrit sur votre profil.",
+      });
+      navigate("/owner-profile?section=housing");
+      return;
+    }
+    const blocking = getBlockingBlockers(publishBlockers);
+    if (blocking.length > 0) {
+      setPreviewOpen(false);
+      toast({
+        variant: "destructive",
+        title: "Il manque quelque chose pour publier",
+        description: blocking.map((b) => b.label).join(" · "),
+      });
+      const first = blocking[0];
+      if (first.action) {
+        navigate(first.action);
+      } else if (first.anchor && typeof document !== "undefined") {
+        setTimeout(() => {
+          document.getElementById(first.anchor as string)?.scrollIntoView({ behavior: "smooth", block: "center" });
+        }, 150);
+      }
+      return;
+    }
     setPublishing(true);
     try {
       const verdict = await moderateContent("sit", `${title}\n\n${specificExpectations}\n\n${ownerMessage}\n\n${dailyRoutine}`);
@@ -1117,13 +1152,20 @@ const CreateSit = () => {
 
       let sitId = draftId;
       if (draftId) {
-        const { error } = await supabase.from("sits").update(payload).eq("id", draftId).eq("status", "draft");
+        // On relit la ligne écrite : une mise à jour qui ne touche aucune ligne
+        // (brouillon déjà publié ou filtré) ne doit plus passer pour un succès.
+        const { data: updated, error } = await supabase
+          .from("sits").update(payload).eq("id", draftId).eq("status", "draft").select("id");
         if (error) throw error;
+        if (!updated || updated.length === 0) {
+          throw new Error("Aucun brouillon correspondant n'a été mis à jour.");
+        }
       } else {
         const { data: sit, error } = await supabase.from("sits").insert(payload).select("id").single();
         if (error) throw error;
         sitId = sit.id;
       }
+
 
       try { await trackFirstAction("sit_created", { sit_id: sitId, is_urgent: isUrgent }); } catch {}
       if (searchParams.get("source") === "ai_prompt") {
