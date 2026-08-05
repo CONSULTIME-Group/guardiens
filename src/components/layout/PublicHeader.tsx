@@ -206,6 +206,29 @@ export default function PublicHeader({ authedVariant = false }: { authedVariant?
       {/* Mobile dropdown */}
       {open && (
         <nav className="sm:hidden border-t border-border bg-background px-[5%] py-4 space-y-1 animate-in slide-in-from-top-2 duration-200">
+          {/* Actions de compte remontées en haut du panneau : elles ont quitté
+              l'en tête mobile, qui ne peut plus les accueillir. */}
+          {!authChecked ? (
+            <div className="h-9 w-full rounded-md bg-muted/40 animate-pulse" aria-hidden="true" />
+          ) : !hasSession ? (
+            <div className="pb-3 mb-2 border-b border-border space-y-2">
+              <Button
+                className="w-full min-h-11"
+                size="sm"
+                onClick={() => { setOpen(false); navigate("/inscription"); }}
+              >
+                {t("nav.register")}
+              </Button>
+              <Button
+                variant="outline"
+                className="w-full min-h-11"
+                size="sm"
+                onClick={() => { setOpen(false); navigate("/login"); }}
+              >
+                {t("nav.login")}
+              </Button>
+            </div>
+          ) : null}
           {NAV_DEFS.map((l) => (
             <Link
               key={l.to}
@@ -226,23 +249,23 @@ export default function PublicHeader({ authedVariant = false }: { authedVariant?
               )}
             </Link>
           ))}
-          <div className="pt-2 border-t border-border space-y-2">
-            {!authChecked ? (
-              <div className="h-9 w-full rounded-md bg-muted/40 animate-pulse" aria-hidden="true" />
-            ) : hasSession ? (
-              <>
-                <Button className="w-full" size="sm" onClick={() => { setOpen(false); navigate("/dashboard"); }}>
-                  Mon espace
-                </Button>
-              </>
-            ) : (
-              <Button className="w-full" size="sm" onClick={() => { setOpen(false); navigate("/inscription"); }}>
-                {t("nav.register")}
+          {authChecked && hasSession && (
+            <div className="pt-2 border-t border-border space-y-2">
+              <Button className="w-full" size="sm" onClick={() => { setOpen(false); navigate("/dashboard"); }}>
+                Mon espace
               </Button>
-            )}
-          </div>
+            </div>
+          )}
+          {/* Sélecteur de langue en pied de panneau. Pour un connecté, il est
+              déjà rendu dans la barre cloches ci dessous, on ne double pas. */}
+          {!showBells && (
+            <div className="pt-3 mt-2 border-t border-border flex justify-start">
+              <LanguageSwitcher compact />
+            </div>
+          )}
         </nav>
       )}
+
 
       {/* Messagerie, notifications et langue sur mobile : montés en
           permanence (une seule instance dans tout le composant) pour
