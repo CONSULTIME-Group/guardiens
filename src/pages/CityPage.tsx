@@ -34,6 +34,7 @@ import CitySchemaOrg from "@/components/seo/CitySchemaOrg";
 import LocalExpertise from "@/components/seo/LocalExpertise";
 import LocalSpotsGrid from "@/components/seo/LocalSpotsGrid";
 import LocalNetworkGrid from "@/components/seo/LocalNetworkGrid";
+import NearbyCityLinks from "@/components/seo/NearbyCityLinks";
 import CityArticleBody from "@/components/city/CityArticleBody";
 import StickyCTA from "@/components/seo/StickyCTA";
 import PageBreadcrumb from "@/components/seo/PageBreadcrumb";
@@ -355,6 +356,8 @@ const CityPage = () => {
  {/* Network */}
  <LocalNetworkGrid current={cityData} allCities={CITIES} />
 
+ <NearbyCityLinks department={cityData.department} currentSlug={cityData.slug} />
+
  {/* FAQ */}
  <section className="max-w-5xl mx-auto px-4 py-6 md:py-12 border-t border-border">
  <h2 className="font-serif text-2xl font-bold text-foreground mb-6">
@@ -642,6 +645,8 @@ const CityPage = () => {
 
         {/* Gardiens du coin */}
         <CitySittersGrid city={dbPage.city} citySlug={dbPage.slug} />
+
+        <NearbyCityLinks department={dbPage.department} currentSlug={dbPage.slug} />
 
  {/* Cross-links */}
  {(cityGuide || departmentPage) && (
