@@ -681,7 +681,9 @@ Deno.serve(async (req) => {
           { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         )
       }
+      }
     }
+
   }
 
   // 3. Get or create unsubscribe token (one token per email address)
