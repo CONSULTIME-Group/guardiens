@@ -764,7 +764,7 @@ const CreateSmallMission = () => {
                 <div className="space-y-2">
                   <Label className="text-sm font-medium">{tp("duration_label")}</Label>
                   <Select value={duration} onValueChange={setDuration}>
-                    <SelectTrigger className="h-12 text-base">
+                    <SelectTrigger className={cn("h-12 text-base", placeTouched && !duration && "border-destructive")}>
                       <SelectValue placeholder={tp("duration_placeholder")} />
                     </SelectTrigger>
                     <SelectContent>
@@ -773,7 +773,21 @@ const CreateSmallMission = () => {
                       ))}
                     </SelectContent>
                   </Select>
+                  {placeTouched && !duration && (
+                    <p className="text-xs text-destructive flex items-center gap-1">
+                      <AlertCircle className="h-3 w-3 shrink-0" /> Indiquez une durée estimée.
+                    </p>
+                  )}
                 </div>
+
+                {/* Champs de lieu manquants, nommés explicitement */}
+                {placeTouched && (!city.trim() || !postalCode.trim()) && (
+                  <p className="text-xs text-destructive flex items-center gap-1">
+                    <AlertCircle className="h-3 w-3 shrink-0" />
+                    À compléter : {[!city.trim() ? "Ville" : null, !postalCode.trim() ? "Code postal" : null].filter(Boolean).join(", ")}.
+                  </p>
+                )}
+
 
                 {/* Photos */}
                 <div className="space-y-2">
