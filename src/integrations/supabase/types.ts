@@ -5303,6 +5303,33 @@ export type Database = {
           },
         ]
       }
+      sit_notification_claim_stats: {
+        Row: {
+          day: string
+          granted: number
+          held_by: Json
+          refused: number
+          source: string
+          updated_at: string
+        }
+        Insert: {
+          day?: string
+          granted?: number
+          held_by?: Json
+          refused?: number
+          source: string
+          updated_at?: string
+        }
+        Update: {
+          day?: string
+          granted?: number
+          held_by?: Json
+          refused?: number
+          source?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       sit_notification_log: {
         Row: {
           created_at: string
@@ -6369,6 +6396,18 @@ export type Database = {
       }
     }
     Views: {
+      admin_sit_notification_claims_daily: {
+        Row: {
+          creneaux_obtenus: number | null
+          day: string | null
+          held_by: Json | null
+          reservations_accordees: number | null
+          reservations_refusees: number | null
+          source: string | null
+          taux_refus_pct: number | null
+        }
+        Relationships: []
+      }
       alma_public_tips: {
         Row: {
           content: string | null
@@ -8185,6 +8224,15 @@ export type Database = {
       }
       recalculate_completed_sits: {
         Args: { p_user_id: string }
+        Returns: undefined
+      }
+      record_claim_outcome: {
+        Args: {
+          _granted?: number
+          _held_by?: Json
+          _refused?: number
+          _source: string
+        }
         Returns: undefined
       }
       refresh_all_sitter_reply_stats: { Args: never; Returns: number }
