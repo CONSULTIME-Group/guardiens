@@ -12,6 +12,7 @@ import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
 import { sitRichnessRejectionReason } from "../src/lib/sitIndexability.js";
+import { isDemoPro } from "../src/lib/proIndexability.js";
 
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -318,8 +319,11 @@ async function main() {
     fetchOrCache(
       "pro_profiles", cache,
       () => maxUpdatedAt("pro_profiles", "updated_at", q => q.eq("status", "approved")),
-      async () => (await supabase.from("pro_profiles").select("slug, category, city, updated_at").eq("status", "approved")).data,
-      rows => rows.map(p => ({
+      async () => (await supabase.from("pro_profiles").select("slug, raison_sociale, category, city, updated_at").eq("status", "approved")).data,
+      // Les fiches de démonstration de l'annuaire (slug `demo-`) ne sont
+      // jamais soumises au crawl : règle partagée avec ProDetail.tsx via
+      // src/lib/proIndexability.js.
+      rows => rows.filter(p => !isDemoPro(p)).map(p => ({
         loc: `/pros/${p.slug}`,
         lastmod: (p.updated_at || today).split("T")[0],
         changefreq: "monthly",
