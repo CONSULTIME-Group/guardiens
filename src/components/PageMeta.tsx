@@ -49,6 +49,12 @@ interface PageMetaProps {
   publishedAt?: string;
   author?: string;
   noindex?: boolean;
+  /**
+   * Coupe aussi le suivi des liens (`noindex, nofollow`). Réservé aux pages
+   * volontairement hors du web indexable, par exemple les fiches de
+   * démonstration de l'annuaire pro.
+   */
+  nofollow?: boolean;
   canonical?: string;
   /**
    * Langues pour lesquelles une traduction réelle de CETTE page existe
@@ -91,6 +97,7 @@ const PageMeta = ({
   author,
   noindex = false,
   canonical,
+  nofollow = false,
   translatedLangs,
   hreflangLangs,
 
@@ -209,7 +216,11 @@ const PageMeta = ({
     upsertMetaTag({
       attr: "name",
       key: "robots",
-      content: effectiveNoindex ? "noindex, follow" : "index, follow",
+      content: nofollow
+        ? "noindex, nofollow"
+        : effectiveNoindex
+          ? "noindex, follow"
+          : "index, follow",
     });
 
     // Écrase la meta description statique (index.html) qui sinon reste en
@@ -258,7 +269,7 @@ const PageMeta = ({
         title: fullTitle,
         description: metaDescription,
         canonical: canonical ?? null,
-        noindex: effectiveNoindex,
+        noindex: effectiveNoindex || nofollow,
         type,
       },
     });
@@ -268,7 +279,7 @@ const PageMeta = ({
     if (ready !== false) {
       (window as any).prerenderReady = true;
     }
-  }, [author, canonical, canonicalUrl, currentPath, currentUrl, currentLang, extraMetaKey, fullTitle, hreflangKey, jsonLdKey, metaDescription, effectiveNoindex, htmlLang, publishedAt, ready, resolvedImage, type]);
+  }, [author, canonical, canonicalUrl, currentPath, currentUrl, currentLang, extraMetaKey, fullTitle, hreflangKey, jsonLdKey, metaDescription, effectiveNoindex, nofollow, htmlLang, publishedAt, ready, resolvedImage, type]);
 
   // Toutes les balises sont écrites impérativement dans le useEffect ci-dessus,
   // react-helmet-async n'atteignant pas le DOM sur ce projet.
