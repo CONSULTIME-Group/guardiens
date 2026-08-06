@@ -822,7 +822,12 @@ const CreateSit = () => {
               : null;
             void trackEvent("sit_draft_resumed", {
               source: "create_sit_page",
-              metadata: { sit_id: d.id, days_since_created: days },
+              metadata: {
+                sit_id: d.id,
+                days_since_created: days,
+                restored_step: step0Complete ? 1 : 0,
+                dates_cleared: datesWerePast,
+              },
             });
           }
         }
