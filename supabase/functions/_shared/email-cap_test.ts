@@ -5,6 +5,10 @@ import {
   nextQuietEndFrom,
   getParisParts,
   BYPASS_TEMPLATES,
+  resolveDeferral,
+  TEMPLATE_TTL_HOURS,
+  CAP_NEARBY_SIT_PER_DAY,
+  CAP_NEARBY_SIT_PER_WEEK,
 } from './email-cap.ts'
 
 // Helper: build a UTC Date that corresponds to a specific Paris wall-clock time.
@@ -322,4 +326,95 @@ Deno.test('Report — cap categorie re-evalue correctement une fois le creneau o
     nonTxDaySentAt: [], // sorti de la fenetre 24h
   })
   assertEquals(r2.action, 'send')
+})
+
+// -------------------------------------------------------------
+// CORRECTIF 06/08/2026 : compteur propre a l'alerte de nouvelle annonce
+// -------------------------------------------------------------
+
+Deno.test("nearby-sit-alert — le recapitulatif du matin ne consomme plus son quota", () => {
+  // Scenario reel du 03 au 04/08 : un gardien recoit son recapitulatif
+  // quotidien a 5h UTC, puis une annonce est publiee dans sa zone l'apres-midi.
+  // Les deux doivent partir.
+  const digestSentAt = "2026-01-15T05:00:00.000Z"
+  const r = decideDeferral({
+    now: ACTIVE_HOUR,
+    templateName: "nearby-sit-alert",
+    category: "alert",
+    hourSentAt: [],
+    daySentAt: [digestSentAt],
+    // Le recapitulatif est compte dans le quota 'alert', pas dans celui de
+    // l'alerte de nouvelle annonce.
+    alertDaySentAt: [digestSentAt],
+    alertWeekSentAt: [digestSentAt],
+    nearbySitDaySentAt: [],
+    nearbySitWeekSentAt: [],
+  })
+  assertEquals(r.action, "send")
+})
+
+Deno.test("sitter-daily-digest — une alerte deja partie ne bloque pas le recapitulatif", () => {
+  const alertSentAt = "2026-01-15T09:00:00.000Z"
+  const r = decideDeferral({
+    now: ACTIVE_HOUR,
+    templateName: "sitter-daily-digest",
+    category: "alert",
+    hourSentAt: [],
+    daySentAt: [alertSentAt],
+    alertDaySentAt: [],
+    alertWeekSentAt: [],
+    nearbySitDaySentAt: [alertSentAt],
+    nearbySitWeekSentAt: [alertSentAt],
+  })
+  assertEquals(r.action, "send")
+})
+
+Deno.test("nearby-sit-alert — plafond propre de 3 par jour", () => {
+  const three = [
+    "2026-01-15T06:00:00.000Z",
+    "2026-01-15T08:00:00.000Z",
+    "2026-01-15T10:00:00.000Z",
+  ]
+  const r = decideDeferral({
+    now: ACTIVE_HOUR,
+    templateName: "nearby-sit-alert",
+    category: "alert",
+    hourSentAt: [],
+    daySentAt: three,
+    nearbySitDaySentAt: three,
+    nearbySitWeekSentAt: three,
+  })
+  assertEquals(r.action, "defer")
+})
+
+Deno.test("nearby-sit-alert — aucun report ne peut depasser la TTL du gabarit", () => {
+  const ttlMs = TEMPLATE_TTL_HOURS["nearby-sit-alert"] * 3600_000
+  const day = Array.from({ length: CAP_NEARBY_SIT_PER_DAY }, (_, i) =>
+    new Date(ACTIVE_HOUR.getTime() - (i + 1) * 60_000).toISOString()).reverse()
+  const week = Array.from({ length: CAP_NEARBY_SIT_PER_WEEK }, (_, i) =>
+    new Date(ACTIVE_HOUR.getTime() - (i + 1) * 60_000).toISOString()).reverse()
+  for (const counters of [{ day, week: day }, { day, week }]) {
+    const r = decideDeferral({
+      now: ACTIVE_HOUR,
+      templateName: "nearby-sit-alert",
+      category: "alert",
+      hourSentAt: [],
+      daySentAt: [],
+      nearbySitDaySentAt: counters.day,
+      nearbySitWeekSentAt: counters.week,
+    })
+    assertEquals(r.action, "defer")
+    if (r.action === "defer") {
+      // Jitter appelant de 900 s au maximum inclus dans la marge.
+      const delta = r.scheduledFor.getTime() + 900_000 - ACTIVE_HOUR.getTime()
+      assert(delta < ttlMs, `report ${delta}ms >= TTL ${ttlMs}ms`)
+      const resolution = resolveDeferral({
+        templateName: "nearby-sit-alert",
+        reason: r.reason,
+        scheduledFor: new Date(r.scheduledFor.getTime() + 900_000),
+        firstEnqueuedAt: ACTIVE_HOUR,
+      })
+      assertEquals(resolution.action, "enqueue")
+    }
+  }
 })
