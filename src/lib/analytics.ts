@@ -287,7 +287,12 @@ export type EventType =
   | "identity_file_picked"                       // Fichier choisi (kind, mime, size_kb)
   | "identity_upload_failed"                     // Échec technique (kind, stage, reason)
   | "identity_verified"                          // Vérification acceptée (channel)
-  | "identity_rejected";                         // Vérification refusée (channel, reason)
+  | "identity_rejected"                          // Vérification refusée (channel, reason)
+  // Page /mon-secteur : atterrissage dédié des relances code postal manquant
+  | "secteur_page_opened"                        // Ouverture de la page
+  | "secteur_saved"                              // Secteur enregistré (postal_code, city, radius_km)
+  | "secteur_abandoned"                          // Page modifiée puis quittée sans enregistrement
+  | "secteur_sits_found";                        // Gardes trouvées dans le rayon (count, radius_km)
 
 
 
