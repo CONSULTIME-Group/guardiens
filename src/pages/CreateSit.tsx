@@ -141,6 +141,37 @@ const STEPS = [
   { id: "preferences", label: "Préférences" },
 ];
 
+// Correspondance explicite entre chaque bloqueur de publication et l'étape du
+// parcours qui porte réellement son ancre. Sans cette table, un clic depuis
+// l'étape 2 vise un noeud non monté et le bouton reste sans effet.
+const BLOCKER_STEP_BY_ID: Record<string, number> = {
+  title: 0,
+  "title-long": 0,
+  dates: 0,
+  "date-past": 0,
+  "date-error": 0,
+  "desc-reason": 0,
+  "desc-expectations": 0,
+  "desc-two-fields": 0,
+  pets: 2,
+  cover: 2,
+};
+
+const STEP_BY_ANCHOR: Record<string, number> = {
+  "sit-location-field": 0,
+  "title-field": 0,
+  "dates-field": 0,
+  "description-field": 0,
+  "pets-field": 2,
+  "cover-picker-title": 2,
+};
+
+const stepForBlocker = (b: { id?: string; anchor?: string }): number | null => {
+  if (b.id && typeof BLOCKER_STEP_BY_ID[b.id] === "number") return BLOCKER_STEP_BY_ID[b.id];
+  if (b.anchor && typeof STEP_BY_ANCHOR[b.anchor] === "number") return STEP_BY_ANCHOR[b.anchor];
+  return null;
+};
+
 // Relative time helper
 function relativeTime(date: Date): string {
   const seconds = Math.round((Date.now() - date.getTime()) / 1000);
@@ -270,17 +301,22 @@ const CreateSit = () => {
   const stepStartedAtRef = useRef<number>(Date.now());
   const publishedRef = useRef(false);
   const lastStepRef = useRef<number>(0);
+  const visitedStepsRef = useRef<Set<number>>(new Set());
+  const funnelStartedAtRef = useRef<number>(Date.now());
 
-  // Analytics : step_started + step_completed sur transition de step
+  // Analytics : step_started + step_completed sur transition de step.
+  // step_completed porte l'index de l'étape réellement quittée, pas celui de
+  // l'étape précédente, sinon le funnel est décalé d'un cran.
   useEffect(() => {
+    const step = currentStep;
     stepStartedAtRef.current = Date.now();
-    void trackEvent("sits_create_step_started", { metadata: { step: currentStep } });
-    const prev = lastStepRef.current;
-    lastStepRef.current = currentStep;
+    const isBackward = step < lastStepRef.current || visitedStepsRef.current.has(step);
+    void trackEvent("sits_create_step_started", { metadata: { step, is_backward: isBackward } });
+    visitedStepsRef.current.add(step);
+    lastStepRef.current = step;
     return () => {
-      // Envoie step_completed pour l'étape qui vient d'être quittée
       const duration = Date.now() - stepStartedAtRef.current;
-      void trackEvent("sits_create_step_completed", { metadata: { step: prev, duration_ms: duration } });
+      void trackEvent("sits_create_step_completed", { metadata: { step, duration_ms: duration } });
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentStep]);
@@ -579,6 +615,16 @@ const CreateSit = () => {
     }
     applyLocalDraft(stored);
     setLocalDraftRestored(true);
+    const today = new Date().toISOString().slice(0, 10);
+    const storedStart = (stored.startDate ?? "").trim();
+    void trackEvent("sit_draft_resumed", {
+      source: "create_sit_page_local",
+      metadata: {
+        sit_id: stored.draftId ?? remoteDraftId ?? null,
+        restored_step: typeof stored.currentStep === "number" ? stored.currentStep : 0,
+        dates_cleared: !storedStart || storedStart < today,
+      },
+    });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [localDraftKey, legacyLocalDraftKey, applyLocalDraft, draftIdParam, fromSitId]);
 
@@ -786,7 +832,12 @@ const CreateSit = () => {
               : null;
             void trackEvent("sit_draft_resumed", {
               source: "create_sit_page",
-              metadata: { sit_id: d.id, days_since_created: days },
+              metadata: {
+                sit_id: d.id,
+                days_since_created: days,
+                restored_step: step0Complete ? 1 : 0,
+                dates_cleared: datesWerePast,
+              },
             });
           }
         }
@@ -979,7 +1030,7 @@ const CreateSit = () => {
           source: "create_sit_page",
           metadata: {
             sit_id: draftId,
-            step: currentStep + 1,
+            step: currentStep,
             attempts: saveFailCountRef.current,
             error_message: e instanceof Error ? e.message : String((e as any)?.message ?? e),
           },
@@ -1039,22 +1090,74 @@ const CreateSit = () => {
   const titleTooLong = title.trim().length > MAX_TITLE_LENGTH;
   const hasPhoto = !publishBlockers.some((b) => b.id === "photo");
 
-
-
+  // Amène le propriétaire jusqu'au champ qui bloque réellement la publication :
+  // navigation vers la bonne étape, attente du rendu, défilement, focus et
+  // anneau visuel temporaire. Aucun clic ne peut rester sans effet : si l'ancre
+  // reste introuvable, un message nomme l'étape concernée.
+  const goToBlocker = (b: { id?: string; anchor?: string; action?: string; label?: string }) => {
+    if (b.action) {
+      navigate(b.action);
+      return;
+    }
+    const targetStep = stepForBlocker(b);
+    if (typeof targetStep === "number" && targetStep !== currentStep) {
+      setCurrentStep(targetStep);
+    }
+    const stepLabel = typeof targetStep === "number"
+      ? STEPS[targetStep]?.label ?? `étape ${targetStep + 1}`
+      : null;
+    if (!b.anchor || typeof document === "undefined") {
+      toast({
+        title: stepLabel ? `À corriger à l'étape ${stepLabel}` : "Élément à compléter",
+        description: b.label,
+      });
+      return;
+    }
+    const anchor = b.anchor;
+    const delays = [60, 180, 400, 800];
+    let done = false;
+    delays.forEach((delay, index) => {
+      window.setTimeout(() => {
+        if (done) return;
+        const el = document.getElementById(anchor);
+        if (el) {
+          done = true;
+          el.scrollIntoView({ behavior: "smooth", block: "center" });
+          el.classList.add("ring-2", "ring-primary", "ring-offset-2", "rounded-lg");
+          window.setTimeout(() => {
+            el.classList.remove("ring-2", "ring-primary", "ring-offset-2", "rounded-lg");
+          }, 2200);
+          const focusable = el.querySelector<HTMLElement>(
+            "input, textarea, select, button, [tabindex]:not([tabindex='-1'])",
+          );
+          focusable?.focus({ preventScroll: true });
+          return;
+        }
+        if (index === delays.length - 1) {
+          toast({
+            title: stepLabel ? `Rendez vous à l'étape ${stepLabel}` : "Élément à compléter",
+            description: b.label,
+          });
+        }
+      }, delay);
+    });
+  };
 
   const onPublishClick = () => {
     if (canPublish) return handlePublish();
+    const blockerIds = publishBlockers.map((b) => b.id);
+    void trackEvent("sit_publish_attempted", {
+      source: "create_sit_page",
+      metadata: { sit_id: draftId, step: currentStep, blockers: blockerIds },
+    });
     const first = publishBlockers[0];
     if (!first) return;
-    if (first.action) {
-      toast({ variant: "destructive", title: "Il manque quelque chose pour publier", description: first.label });
-      navigate(first.action);
-      return;
-    }
-    if (first.anchor && typeof document !== "undefined") {
-      document.getElementById(first.anchor)?.scrollIntoView({ behavior: "smooth", block: "center" });
-    }
+    void trackEvent("sit_publish_blocked", {
+      source: "create_sit_page",
+      metadata: { sit_id: draftId, step: currentStep, blockers: blockerIds },
+    });
     toast({ variant: "destructive", title: "Il manque quelque chose pour publier", description: first.label });
+    goToBlocker(first);
   };
 
   const nDays = (startDate && endDate && !dateError)
@@ -1089,8 +1192,23 @@ const CreateSit = () => {
   const showUrgent = flexibleDates || (startDate && new Date(startDate).getTime() - Date.now() < 7 * 86400000);
 
   const handlePublish = async () => {
+    void trackEvent("sit_publish_attempted", {
+      source: "create_sit_page",
+      metadata: {
+        sit_id: draftId,
+        step: currentStep,
+        blockers: publishBlockers.map((b) => b.id),
+      },
+    });
+    const failPublish = (blockers: string[]) => {
+      void trackEvent("sit_publish_blocked", {
+        source: "create_sit_page",
+        metadata: { sit_id: draftId, step: currentStep, blockers },
+      });
+    };
     // Aucun refus muet : chaque sortie anticipée nomme précisément ce qui manque.
     if (!user) {
+      failPublish(["session"]);
       toast({
         variant: "destructive",
         title: "Session expirée",
@@ -1099,6 +1217,7 @@ const CreateSit = () => {
       return;
     }
     if (!property) {
+      failPublish(["property"]);
       toast({
         variant: "destructive",
         title: "Impossible de publier l'annonce",
@@ -1109,20 +1228,14 @@ const CreateSit = () => {
     }
     const blocking = getBlockingBlockers(publishBlockers);
     if (blocking.length > 0) {
+      failPublish(blocking.map((b) => b.id));
       setPreviewOpen(false);
       toast({
         variant: "destructive",
         title: "Il manque quelque chose pour publier",
         description: blocking.map((b) => b.label).join(" · "),
       });
-      const first = blocking[0];
-      if (first.action) {
-        navigate(first.action);
-      } else if (first.anchor && typeof document !== "undefined") {
-        setTimeout(() => {
-          document.getElementById(first.anchor as string)?.scrollIntoView({ behavior: "smooth", block: "center" });
-        }, 150);
-      }
+      goToBlocker(blocking[0]);
       return;
     }
     setPublishing(true);
@@ -1136,6 +1249,7 @@ const CreateSit = () => {
           .join("\n\n"),
       );
       if (verdict.status === "block") {
+        failPublish(["moderation"]);
         toast({
           variant: "destructive",
           title: "Publication bloquée par la modération",
@@ -1220,6 +1334,16 @@ const CreateSit = () => {
         } catch {}
       }
       publishedRef.current = true;
+      try {
+        await trackEvent("sit_publish_succeeded", {
+          source: "create_sit_page",
+          metadata: {
+            sit_id: sitId,
+            duration_ms: Date.now() - funnelStartedAtRef.current,
+            resumed_draft: !!draftIdParam,
+          },
+        });
+      } catch {}
       if (localDraftKey) clearFormDraft(localDraftKey);
       toast({ title: "Annonce publiée", description: "Les gardiens peuvent maintenant postuler." });
       navigate(`/sits/${sitId}`);
@@ -1227,6 +1351,7 @@ const CreateSit = () => {
       // Le texte renvoyé par la base est technique et en anglais : il reste en
       // console, l'utilisateur reçoit une phrase compréhensible.
       console.error("[CreateSit] publish failed", err);
+      failPublish(["write_error"]);
       const description = describeSitWriteError(err, "publish");
 
       toast({
@@ -2395,15 +2520,7 @@ const CreateSit = () => {
         blockers={publishBlockers}
         onResolveBlocker={(b) => {
           setPreviewOpen(false);
-          if (b.action) {
-            navigate(b.action);
-            return;
-          }
-          if (b.anchor && typeof document !== "undefined") {
-            setTimeout(() => {
-              document.getElementById(b.anchor as string)?.scrollIntoView({ behavior: "smooth", block: "center" });
-            }, 150);
-          }
+          goToBlocker(b);
         }}
         open={previewOpen}
         onOpenChange={setPreviewOpen}
