@@ -334,11 +334,24 @@ const SitterSitView = ({
                     Candidatures fermées
                   </Button>
                 ) : accessLevel === 1 ? (
-                  <AccessGateBanner
-                    level={accessLevel}
-                    profileCompletion={profileCompletion}
-                    context="guard"
-                  />
+                  <div className="w-full md:w-auto md:min-w-[16rem] space-y-2">
+                    <Button
+                      className="w-full md:w-auto md:min-w-[16rem] h-11 md:h-12 px-8 rounded-full text-base font-semibold"
+                      style={{ boxShadow: "0 6px 14px rgba(44,109,80,0.24)" }}
+                      onClick={() => {
+                        trackEvent("sit_apply_clicked", {
+                          source: "sit_detail_top_gate",
+                          metadata: { sit_id: sit.id },
+                        });
+                        setCompletionOpen(true);
+                      }}
+                    >
+                      Postuler pour cette garde
+                    </Button>
+                    <p className="text-center text-xs text-muted-foreground">
+                      {missingHint}
+                    </p>
+                  </div>
                 ) : hasApplied ? (
                   <Button className="w-full md:w-auto md:min-w-[16rem] h-11 md:h-12 px-6 rounded-full text-base font-semibold" disabled>
                     <CheckCircle2 className="h-5 w-5 mr-2" aria-hidden="true" /> Candidature envoyée
