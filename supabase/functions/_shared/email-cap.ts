@@ -300,11 +300,19 @@ export interface DeferInput {
   nonTxDaySentAt?: string[]
   /** ISO timestamps of `sent` NON transactional emails in the last 7 days, ascending. */
   nonTxWeekSentAt?: string[]
-  /** ISO timestamps of `sent` emails de categorie 'alert' sur 24h, ascendant. */
+  /**
+   * ISO timestamps of `sent` emails de categorie 'alert' sur 24h, ascendant,
+   * HORS alertes de nouvelle annonce (celles-ci ont leur propre compteur).
+   */
   alertDaySentAt?: string[]
-  /** ISO timestamps of `sent` emails de categorie 'alert' sur 7 jours, ascendant. */
+  /** Idem sur 7 jours, hors alertes de nouvelle annonce. */
   alertWeekSentAt?: string[]
+  /** ISO timestamps of `sent` 'nearby-sit-alert' sur 24h, ascendant. */
+  nearbySitDaySentAt?: string[]
+  /** ISO timestamps of `sent` 'nearby-sit-alert' sur 7 jours, ascendant. */
+  nearbySitWeekSentAt?: string[]
 }
+
 
 /**
  * Pure decision: should this email be sent now, or deferred?
