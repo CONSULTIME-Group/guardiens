@@ -13,8 +13,12 @@ import { useStarVisibilityGate } from "@/hooks/useStarVisibilityGate";
 
 interface SitMobileStickyApplyProps {
   sitId: string;
-  state: "apply" | "applied" | "closed" | "blocked";
+  state: "apply" | "applied" | "closed" | "blocked" | "complete_profile";
   onApply: () => void;
+  /** Ouvre la complétion de profil en place, sans quitter l'annonce. */
+  onCompleteProfile?: () => void;
+  /** Mention sous le bouton, adaptée aux critères réellement manquants. */
+  completeProfileHint?: string;
   /** Motif court affiché en mobile quand la candidature n'est pas encore ouverte. */
   blockedReason?: string;
   blockedCtaTo?: string;
@@ -25,6 +29,8 @@ const SitMobileStickyApply = ({
   sitId,
   state,
   onApply,
+  onCompleteProfile,
+  completeProfileHint = "Quelques informations de profil suffisent pour postuler",
   blockedReason = "Complétez votre profil pour postuler",
   blockedCtaTo,
   blockedCtaLabel,
@@ -52,6 +58,24 @@ const SitMobileStickyApply = ({
           <Button className="flex-1 h-11 text-sm font-semibold" disabled>
             <CheckCircle2 className="h-4 w-4 mr-2" aria-hidden="true" /> Candidature envoyée
           </Button>
+        ) : state === "complete_profile" ? (
+          <div className="flex-1 min-w-0">
+            <Button
+              className="w-full h-11 text-sm font-semibold shadow-sm"
+              onClick={() => {
+                trackEvent("sit_apply_clicked", {
+                  source: "sit_detail_mobile_sticky_gate",
+                  metadata: { sit_id: sitId },
+                });
+                onCompleteProfile?.();
+              }}
+            >
+              Postuler pour cette garde
+            </Button>
+            <p className="mt-1 text-center text-[11px] text-muted-foreground">
+              {completeProfileHint}
+            </p>
+          </div>
         ) : state === "blocked" ? (
           <div className="flex-1 min-w-0">
             <Button className="w-full h-11 text-sm font-semibold" disabled>

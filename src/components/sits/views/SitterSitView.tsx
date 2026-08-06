@@ -29,6 +29,8 @@ import ApplicationModal from "@/components/sits/ApplicationModal";
 import PostConfirmationChecklist from "@/components/sits/PostConfirmationChecklist";
 import CancelSitModal from "@/components/sits/CancelSitModal";
 import SitMobileStickyApply from "@/components/sits/SitMobileStickyApply";
+import CompleteProfileToApplyModal from "@/components/profile/CompleteProfileToApplyModal";
+import { useApplyGateMissingCount } from "@/hooks/useApplyGateMissingCount";
 
 import SitDetailHeader from "./SitDetailHeader";
 import SitFooterReassurance from "./SitFooterReassurance";
@@ -86,6 +88,19 @@ const SitterSitView = ({
   const { level: accessLevel, profileCompletion, canApplyGuards, identityRecommended } = useAccessLevel();
 
   const [applyOpen, setApplyOpen] = useState(false);
+  /**
+   * Complétion « en place » : un gardien sous 60 pour cent ne quitte plus
+   * l'annonce, il complète le strict nécessaire dans une modale puis enchaîne
+   * sur sa candidature. Le seuil lui-même reste porté par useAccessLevel.
+   */
+  const [completionOpen, setCompletionOpen] = useState(false);
+  const missingCount = useApplyGateMissingCount(accessLevel === 1);
+  const missingHint =
+    missingCount === null
+      ? "Quelques informations de profil suffisent pour postuler"
+      : missingCount <= 1
+        ? "Il vous manque une information de profil pour postuler"
+        : `Il vous manque ${missingCount} informations de profil pour postuler`;
   /** Encart identité affiché sur la page. Si vrai, la modale n'en remet pas un. */
   const showIdentityInvite = identityRecommended && accessLevel !== 0 && accessLevel !== 1 && canApplyGuards;
   const [cancelOpen, setCancelOpen] = useState(false);
@@ -319,11 +334,24 @@ const SitterSitView = ({
                     Candidatures fermées
                   </Button>
                 ) : accessLevel === 1 ? (
-                  <AccessGateBanner
-                    level={accessLevel}
-                    profileCompletion={profileCompletion}
-                    context="guard"
-                  />
+                  <div className="w-full md:w-auto md:min-w-[16rem] space-y-2">
+                    <Button
+                      className="w-full md:w-auto md:min-w-[16rem] h-11 md:h-12 px-8 rounded-full text-base font-semibold"
+                      style={{ boxShadow: "0 6px 14px rgba(44,109,80,0.24)" }}
+                      onClick={() => {
+                        trackEvent("sit_apply_clicked", {
+                          source: "sit_detail_top_gate",
+                          metadata: { sit_id: sit.id },
+                        });
+                        setCompletionOpen(true);
+                      }}
+                    >
+                      Postuler pour cette garde
+                    </Button>
+                    <p className="text-center text-xs text-muted-foreground">
+                      {missingHint}
+                    </p>
+                  </div>
                 ) : hasApplied ? (
                   <Button className="w-full md:w-auto md:min-w-[16rem] h-11 md:h-12 px-6 rounded-full text-base font-semibold" disabled>
                     <CheckCircle2 className="h-5 w-5 mr-2" aria-hidden="true" /> Candidature envoyée
@@ -562,19 +590,27 @@ const SitterSitView = ({
             ? "closed"
             : hasApplied
               ? "applied"
-              : accessLevel === 1 || !canApplyGuards
-                ? "blocked"
-                : "apply"
+              : accessLevel === 1
+                ? "complete_profile"
+                : !canApplyGuards
+                  ? "blocked"
+                  : "apply"
         }
         onApply={() => setApplyOpen(true)}
-        blockedReason={
-          accessLevel === 1
-            ? "Complétez votre profil pour postuler"
-            : "Espace gardien requis pour postuler"
-        }
-        blockedCtaTo={accessLevel === 1 ? "/profile" : "/tarifs"}
-        blockedCtaLabel={accessLevel === 1 ? "Compléter mon profil" : "Voir les avantages"}
+        onCompleteProfile={() => setCompletionOpen(true)}
+        completeProfileHint={missingHint}
+        blockedReason="Espace gardien requis pour postuler"
+        blockedCtaTo="/tarifs"
+        blockedCtaLabel="Voir les avantages"
       />
+
+      <CompleteProfileToApplyModal
+        open={completionOpen}
+        onOpenChange={setCompletionOpen}
+        sitId={sit.id}
+        onReadyToApply={() => setApplyOpen(true)}
+      />
+
 
       <ApplicationModal
         open={applyOpen}
