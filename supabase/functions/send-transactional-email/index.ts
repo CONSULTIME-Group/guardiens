@@ -33,10 +33,12 @@ import {
   BYPASS_TEMPLATES,
   decideDeferral,
   resolveDeferral,
+  NEARBY_SIT_ALERT_TEMPLATES,
 
   isQuietAt,
   nextQuietEndFrom,
 } from '../_shared/email-cap.ts'
+
 
 // Alma persona (Pass 3 C2) : liste des templates signés visuellement par Alma
 // (header + intro + signoff). Tout log/analytics de ces envois porte
