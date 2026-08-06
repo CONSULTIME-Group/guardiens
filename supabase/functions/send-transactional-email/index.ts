@@ -606,6 +606,12 @@ Deno.serve(async (req) => {
       })
 
       if (resolution.action === 'cancel') {
+        const isNearbyAlert = NEARBY_SIT_ALERT_TEMPLATES.has(templateName)
+        // Motif lisible, destine au tableau de bord admin. Une alerte de
+        // nouvelle annonce detruite doit etre comptable, pas silencieuse.
+        const humanReason = isNearbyAlert
+          ? `Alerte de nouvelle annonce detruite : report au ${scheduledFor.toISOString()} (motif ${deferReason}), au dela de la duree de vie du gabarit fixee au ${resolution.ttlDeadline.toISOString()}.`
+          : `Contenu date annule : report au ${scheduledFor.toISOString()} (motif ${deferReason}), au dela de la duree de vie du gabarit fixee au ${resolution.ttlDeadline.toISOString()}.`
         const cancelReason = `ttl_exceeded_cancelled (${deferReason}, report ${scheduledFor.toISOString()} > TTL ${resolution.ttlDeadline.toISOString()})`
         if (sourceQueueId) {
           await supabase
@@ -618,14 +624,16 @@ Deno.serve(async (req) => {
           template_name: templateName,
           recipient_email: effectiveRecipient,
           status: 'cancelled',
-          error_message: cancelReason,
+          error_message: humanReason,
           metadata: {
             idempotency_key: idempotencyKey,
             category,
             defer_reason: deferReason,
-            cancel_reason: 'ttl_exceeded',
+            cancel_reason: isNearbyAlert ? 'ttl_exceeded_nearby_sit_alert' : 'ttl_exceeded',
+            is_nearby_sit_alert: isNearbyAlert,
             ttl_deadline: resolution.ttlDeadline.toISOString(),
             scheduled_for: scheduledFor.toISOString(),
+            technical_reason: cancelReason,
           },
         })
         if (logCancelErr) {
@@ -636,6 +644,7 @@ Deno.serve(async (req) => {
         console.warn('Email annule, contenu date et report au dela de la TTL', {
           templateName, recipientLower, deferReason, scheduledFor: scheduledFor.toISOString(),
         })
+
         return new Response(
           JSON.stringify({ success: false, status: 'cancelled', reason: 'ttl_exceeded', defer_reason: deferReason }),
           { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
