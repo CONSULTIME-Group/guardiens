@@ -590,19 +590,27 @@ const SitterSitView = ({
             ? "closed"
             : hasApplied
               ? "applied"
-              : accessLevel === 1 || !canApplyGuards
-                ? "blocked"
-                : "apply"
+              : accessLevel === 1
+                ? "complete_profile"
+                : !canApplyGuards
+                  ? "blocked"
+                  : "apply"
         }
         onApply={() => setApplyOpen(true)}
-        blockedReason={
-          accessLevel === 1
-            ? "Complétez votre profil pour postuler"
-            : "Espace gardien requis pour postuler"
-        }
-        blockedCtaTo={accessLevel === 1 ? "/profile" : "/tarifs"}
-        blockedCtaLabel={accessLevel === 1 ? "Compléter mon profil" : "Voir les avantages"}
+        onCompleteProfile={() => setCompletionOpen(true)}
+        completeProfileHint={missingHint}
+        blockedReason="Espace gardien requis pour postuler"
+        blockedCtaTo="/tarifs"
+        blockedCtaLabel="Voir les avantages"
       />
+
+      <CompleteProfileToApplyModal
+        open={completionOpen}
+        onOpenChange={setCompletionOpen}
+        sitId={sit.id}
+        onReadyToApply={() => setApplyOpen(true)}
+      />
+
 
       <ApplicationModal
         open={applyOpen}
