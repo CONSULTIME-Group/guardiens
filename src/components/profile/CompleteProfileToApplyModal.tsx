@@ -45,7 +45,7 @@ import { deriveCategoriesFromCompetences } from "@/lib/skills/categories";
 /** Seuil de candidature, aligné sur useAccessLevel (source de vérité). */
 const APPLY_THRESHOLD = 60;
 
-type FieldKey = "radius" | "location" | "competences" | "avatar" | "bio";
+export type FieldKey = "radius" | "location" | "competences" | "avatar" | "bio";
 
 interface FieldMeta {
   key: FieldKey;
@@ -58,7 +58,7 @@ interface FieldMeta {
   effort: number;
 }
 
-const FIELDS: FieldMeta[] = [
+export const APPLY_GATE_FIELDS: FieldMeta[] = [
   {
     key: "radius",
     points: 15,
@@ -131,7 +131,7 @@ export interface CompleteProfileToApplyModalProps {
 }
 
 /** Champs manquants, calculés sur l'instantané serveur puis sur l'état local. */
-function missingFor(state: {
+export function missingFor(state: {
   first_name: string;
   postal_code: string;
   city: string;
@@ -256,14 +256,14 @@ const CompleteProfileToApplyModal = ({
 
   const visibleFields = useMemo(() => {
     if (!initialMissing) return [];
-    return FIELDS.filter((f) => initialMissing[f.key]).sort(
+    return APPLY_GATE_FIELDS.filter((f) => initialMissing[f.key]).sort(
       (a, b) => b.points / b.effort - a.points / a.effort,
     );
   }, [initialMissing]);
 
   const liveScore = useMemo(() => {
     if (!snapshot || !initialMissing || !liveMissing) return 0;
-    const gained = FIELDS.filter(
+    const gained = APPLY_GATE_FIELDS.filter(
       (f) => initialMissing[f.key] && !liveMissing[f.key],
     ).reduce((sum, f) => sum + f.points, 0);
     return Math.min(100, snapshot.completion + gained);
@@ -275,7 +275,7 @@ const CompleteProfileToApplyModal = ({
   // Mesure du remplissage champ par champ, une seule fois par champ.
   useEffect(() => {
     if (!initialMissing || !liveMissing) return;
-    FIELDS.forEach((f) => {
+    APPLY_GATE_FIELDS.forEach((f) => {
       if (
         initialMissing[f.key] &&
         !liveMissing[f.key] &&
