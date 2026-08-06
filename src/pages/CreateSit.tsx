@@ -141,6 +141,37 @@ const STEPS = [
   { id: "preferences", label: "Préférences" },
 ];
 
+// Correspondance explicite entre chaque bloqueur de publication et l'étape du
+// parcours qui porte réellement son ancre. Sans cette table, un clic depuis
+// l'étape 2 vise un noeud non monté et le bouton reste sans effet.
+const BLOCKER_STEP_BY_ID: Record<string, number> = {
+  title: 0,
+  "title-long": 0,
+  dates: 0,
+  "date-past": 0,
+  "date-error": 0,
+  "desc-reason": 0,
+  "desc-expectations": 0,
+  "desc-two-fields": 0,
+  pets: 2,
+  cover: 2,
+};
+
+const STEP_BY_ANCHOR: Record<string, number> = {
+  "sit-location-field": 0,
+  "title-field": 0,
+  "dates-field": 0,
+  "description-field": 0,
+  "pets-field": 2,
+  "cover-picker-title": 2,
+};
+
+const stepForBlocker = (b: { id?: string; anchor?: string }): number | null => {
+  if (b.id && typeof BLOCKER_STEP_BY_ID[b.id] === "number") return BLOCKER_STEP_BY_ID[b.id];
+  if (b.anchor && typeof STEP_BY_ANCHOR[b.anchor] === "number") return STEP_BY_ANCHOR[b.anchor];
+  return null;
+};
+
 // Relative time helper
 function relativeTime(date: Date): string {
   const seconds = Math.round((Date.now() - date.getTime()) / 1000);
