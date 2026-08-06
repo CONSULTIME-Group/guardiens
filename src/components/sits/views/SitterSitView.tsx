@@ -88,6 +88,19 @@ const SitterSitView = ({
   const { level: accessLevel, profileCompletion, canApplyGuards, identityRecommended } = useAccessLevel();
 
   const [applyOpen, setApplyOpen] = useState(false);
+  /**
+   * Complétion « en place » : un gardien sous 60 pour cent ne quitte plus
+   * l'annonce, il complète le strict nécessaire dans une modale puis enchaîne
+   * sur sa candidature. Le seuil lui-même reste porté par useAccessLevel.
+   */
+  const [completionOpen, setCompletionOpen] = useState(false);
+  const missingCount = useApplyGateMissingCount(accessLevel === 1);
+  const missingHint =
+    missingCount === null
+      ? "Quelques informations de profil suffisent pour postuler"
+      : missingCount <= 1
+        ? "Il vous manque une information de profil pour postuler"
+        : `Il vous manque ${missingCount} informations de profil pour postuler`;
   /** Encart identité affiché sur la page. Si vrai, la modale n'en remet pas un. */
   const showIdentityInvite = identityRecommended && accessLevel !== 0 && accessLevel !== 1 && canApplyGuards;
   const [cancelOpen, setCancelOpen] = useState(false);
