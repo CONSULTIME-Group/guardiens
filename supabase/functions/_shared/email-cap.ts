@@ -328,7 +328,9 @@ export function decideDeferral(input: DeferInput): DeferDecision {
     now, templateName, isUrgent, category,
     nonTxDaySentAt = [], nonTxWeekSentAt = [],
     alertDaySentAt = [], alertWeekSentAt = [],
+    nearbySitDaySentAt = [], nearbySitWeekSentAt = [],
   } = input
+
 
 
   // Categorie effective. Regle de securite : seule la valeur explicite
