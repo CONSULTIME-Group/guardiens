@@ -216,13 +216,26 @@ const AnnouncementPreviewDialog = ({
           <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
             Continuer à modifier
           </Button>
-          <Button
-            type="button"
-            onClick={onConfirmPublish}
-            disabled={!canPublish || publishing}
-          >
-            {publishing ? "Publication…" : "Publier maintenant"}
-          </Button>
+          {/* Jamais de bouton grisé sans issue : tant qu'un élément manque, le
+              bouton principal conduit au premier champ à compléter. */}
+          {canPublish ? (
+            <Button type="button" onClick={onConfirmPublish} disabled={publishing}>
+              {publishing ? "Publication…" : "Publier maintenant"}
+            </Button>
+          ) : (
+            <Button
+              type="button"
+              onClick={() => {
+                const first = blockers[0];
+                if (first && onResolveBlocker) onResolveBlocker(first);
+                else onOpenChange(false);
+              }}
+            >
+              {blockers[0]?.label
+                ? `Compléter : ${blockers[0].label}`
+                : "Compléter pour publier"}
+            </Button>
+          )}
         </DialogFooter>
       </DialogContent>
     </Dialog>

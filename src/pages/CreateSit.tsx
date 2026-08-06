@@ -21,6 +21,16 @@ import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { COUNTRIES } from "@/lib/countries";
 import ImproveListingButton from "@/components/ai/ImproveListingButton";
 import { moderateContent } from "@/lib/moderation";
+import {
+  MODERATED_FIELDS,
+  moderateSitFields,
+  describeFieldRefusal,
+  type ModeratedFieldKey,
+  type FieldVerdicts,
+} from "@/lib/sitFieldModeration";
+import InlinePhotoUpload from "@/components/sits/create/InlinePhotoUpload";
+import CreateSitSetupStep from "@/components/sits/create/CreateSitSetupStep";
+import type { InlineHousingResult } from "@/components/sits/create/InlineHousingBlock";
 import AnnouncementPreviewDialog from "@/components/sits/owner/AnnouncementPreviewDialog";
 import { AlmaBubble } from "@/components/ai/alma/AlmaBubble";
 import { useUnsavedChanges } from "@/hooks/useUnsavedChanges";
@@ -403,6 +413,9 @@ const CreateSit = () => {
 
   const [property, setProperty] = useState<PropertySummary | null>(null);
   const [pets, setPets] = useState<PetSummary[]>([]);
+  // Étape de mise en route : logement, animaux, photo, remplissables sur place.
+  const [setupOpen, setSetupOpen] = useState(false);
+  const [moderationVerdicts, setModerationVerdicts] = useState<FieldVerdicts>({});
   const [ownerProfile, setOwnerProfile] = useState<OwnerSummary | null>(null);
   const [ownerPhotos, setOwnerPhotos] = useState<string[]>([]);
   // Galerie sans photo d'animal, seule éligible au scoring IA de couverture.
@@ -1090,6 +1103,42 @@ const CreateSit = () => {
   const titleTooLong = title.trim().length > MAX_TITLE_LENGTH;
   const hasPhoto = !publishBlockers.some((b) => b.id === "photo");
 
+  // Une photo ajoutée depuis le parcours rejoint immédiatement la galerie
+  // locale, sans rechargement, pour que les bloqueurs se lèvent tout de suite.
+  const registerUploadedPhoto = (url: string) => {
+    setOwnerPhotos((prev) => (prev.includes(url) ? prev : [...prev, url]));
+    setOwnerPlacePhotos((prev) => (prev.includes(url) ? prev : [...prev, url]));
+  };
+
+  const clearFieldVerdict = (key: ModeratedFieldKey) => {
+    setModerationVerdicts((prev) => {
+      if (!prev[key]) return prev;
+      const next = { ...prev };
+      delete next[key];
+      return next;
+    });
+  };
+
+  // Verdict de modération affiché sous le champ concerné, jamais dans un toast
+  // isolé qui laisserait le propriétaire chercher le passage en cause.
+  const FieldModerationNotice = ({ fieldKey }: { fieldKey: ModeratedFieldKey }) => {
+    const verdict = moderationVerdicts[fieldKey];
+    if (!verdict || verdict.status === "ok") return null;
+    const blocking = verdict.status === "block";
+    return (
+      <p
+        className={cn(
+          "text-sm mt-1 flex items-start gap-1.5",
+          blocking ? "text-destructive" : "text-muted-foreground",
+        )}
+      >
+        <AlertCircle className="h-3.5 w-3.5 mt-0.5 shrink-0" aria-hidden="true" />
+        <span>{describeFieldRefusal(verdict)}</span>
+      </p>
+    );
+  };
+
+
   // Amène le propriétaire jusqu'au champ qui bloque réellement la publication :
   // navigation vers la bonne étape, attente du rendu, défilement, focus et
   // anneau visuel temporaire. Aucun clic ne peut rester sans effet : si l'ancre
@@ -1240,26 +1289,36 @@ const CreateSit = () => {
     }
     setPublishing(true);
     try {
-      // Tous les champs texte libres publiés passent la modération, y compris
-      // le titre et les notes de flexibilité.
-      const verdict = await moderateContent(
-        "sit",
-        [title, specificExpectations, ownerMessage, dailyRoutine, flexibleDates ? flexibleNotes : ""]
-          .filter((t) => t && t.trim().length > 0)
-          .join("\n\n"),
-      );
-      if (verdict.status === "block") {
-        failPublish(["moderation"]);
+      // Tous les champs texte libres publiés passent la modération, champ par
+      // champ, pour que le refus désigne précisément le passage en cause.
+      const moderation = await moderateSitFields({
+        title,
+        absenceReason,
+        sitterExpectations,
+        dailyRoutine,
+        ownerMessage,
+        flexibleNotes: flexibleDates ? flexibleNotes : "",
+      });
+      setModerationVerdicts(moderation.verdicts);
+      if (moderation.blocked.length > 0) {
+        failPublish(moderation.blocked.map((key) => `moderation:${key}`));
+        const firstKey = moderation.blocked[0];
+        const first = MODERATED_FIELDS[firstKey];
         toast({
           variant: "destructive",
-          title: "Publication bloquée par la modération",
-          description: verdict.reasons.join(" · ") || "Merci de retirer les coordonnées ou contenus contraires aux CGS.",
+          title: `À revoir : ${first.label}`,
+          description: describeFieldRefusal(moderation.verdicts[firstKey]),
         });
+        goToBlocker({ id: `moderation:${firstKey}`, label: first.label, anchor: first.anchor });
         setPublishing(false);
         return;
       }
-      if (verdict.status === "warning") {
-        toast({ title: "Annonce publiée avec une réserve", description: verdict.reasons.join(" · ") });
+      if (moderation.warned.length > 0) {
+        const firstWarn = moderation.warned[0];
+        toast({
+          title: "Annonce publiée avec une réserve",
+          description: `${MODERATED_FIELDS[firstWarn].label} : ${describeFieldRefusal(moderation.verdicts[firstWarn])}`,
+        });
       }
 
       const expectations = specificExpectations;
@@ -1453,36 +1512,48 @@ const CreateSit = () => {
     return <div className="p-6 md:p-10 max-w-3xl mx-auto text-muted-foreground">Chargement...</div>;
   }
 
-  if (preflightBlocked) {
-    const anchored = preflightMissing.find(m => m.anchor);
-    const target = anchored?.anchor ? `/owner-profile?section=${anchored.anchor}` : "/owner-profile";
+  // Le préflight n'est plus un cul de sac : c'est la première étape éditable du
+  // parcours, les trois éléments manquants se remplissent sur place.
+  if (preflightBlocked || setupOpen) {
     return (
-      <div className="animate-fade-in px-4 py-8 max-w-3xl mx-auto">
+      <div className="animate-fade-in py-8">
         <Head><meta name="robots" content="noindex, nofollow" /></Head>
-        <Link to="/sits" className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground mb-6">
-          <ArrowLeft className="h-4 w-4" /> Retour à mes annonces
-        </Link>
-        <h1 className="font-heading text-2xl md:text-3xl font-bold mb-2">
-          Complétez votre profil avant de publier
-        </h1>
-        <p className="text-sm text-muted-foreground mb-6">
-          Les gardiens choisissent une maison et des animaux, pas seulement des dates. Il manque quelques éléments à votre profil, quelques minutes suffisent, puis vous publiez votre annonce d'une traite.
-        </p>
-        <div className="rounded-xl border border-border bg-card p-5 mb-6">
-          <p className="text-sm font-medium mb-3">Ce qu'il reste à renseigner :</p>
-          <ul className="space-y-2">
-            {preflightMissing.map(m => (
-              <li key={m.id} className="flex items-start gap-2 text-sm text-muted-foreground">
-                <AlertCircle className="h-4 w-4 text-destructive mt-0.5 shrink-0" />
-                <span>{m.label}</span>
-              </li>
-            ))}
-          </ul>
+        <div className="px-4 max-w-3xl mx-auto">
+          <Link to="/sits" className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground mb-6">
+            <ArrowLeft className="h-4 w-4" /> Retour à mes annonces
+          </Link>
         </div>
-        <div className="flex flex-wrap gap-2">
-          <Button onClick={() => navigate(target)}>Compléter mon profil</Button>
-          <Button variant="ghost" onClick={() => navigate("/sits")}>Plus tard</Button>
-        </div>
+        {user && (
+          <CreateSitSetupStep
+            userId={user.id}
+            propertyId={property?.id ?? null}
+            petCount={pets.length}
+            photos={ownerPhotos}
+            onPropertySaved={(saved: InlineHousingResult) => {
+              setProperty({
+                id: saved.id,
+                type: saved.type,
+                environment: saved.environment,
+                equipments: [],
+                photos: [],
+                description: null,
+                rooms_count: saved.rooms_count,
+                bedrooms_count: saved.bedrooms_count,
+              });
+            }}
+            onPetsChanged={(list: any[]) => {
+              setPets((list || []).map((a: any) => ({
+                name: a.name, species: a.species, breed: a.breed,
+                photo_url: a.photo_url, walk_duration: a.walk_duration ?? null,
+                alone_duration: a.alone_duration ?? null,
+                medication: a.medication ?? null,
+                activity_level: a.activity_level ?? null,
+              })));
+            }}
+            onPhotoUploaded={registerUploadedPhoto}
+            onContinue={() => setSetupOpen(false)}
+          />
+        )}
       </div>
     );
   }
@@ -1688,7 +1759,7 @@ const CreateSit = () => {
               id="title-input"
               placeholder={nDays > 0 ? buildSuggestedTitle() : "Ex : Garde de 2 chats à Écully, 10 jours en août"}
               value={title}
-              onChange={e => setTitle(e.target.value)}
+              onChange={e => { setTitle(e.target.value); clearFieldVerdict("title"); }}
               onPaste={makePlainTextPasteHandler(setTitle)}
               onBlur={() => touch("title")}
               maxLength={MAX_TITLE_LENGTH}
@@ -1697,6 +1768,7 @@ const CreateSit = () => {
             <p className="text-xs text-muted-foreground mt-1 text-right">
               {title.trim().length}/{MAX_TITLE_LENGTH}
             </p>
+            <FieldModerationNotice fieldKey="title" />
             {touched.title && !title.trim() && (
               <p className="text-sm text-destructive flex items-center gap-1.5 mt-1"><AlertCircle className="h-3.5 w-3.5" /> Ajoutez un titre.</p>
             )}
@@ -1825,7 +1897,7 @@ const CreateSit = () => {
               </div>
             </div>
             <div className="space-y-4">
-              <div>
+              <div id="absence-reason-field" className="scroll-mt-24">
                 <Label htmlFor="description-textarea" className="text-sm font-medium">
                   Pourquoi avez-vous besoin d'un gardien pour cette période ?
                 </Label>
@@ -1833,7 +1905,7 @@ const CreateSit = () => {
                   id="description-textarea"
                   placeholder="Voyage, événement familial…"
                   value={absenceReason}
-                  onChange={e => updateAbsenceReason(e.target.value)}
+                  onChange={e => { updateAbsenceReason(e.target.value); clearFieldVerdict("absenceReason"); }}
                   onPaste={makePlainTextPasteHandler(updateAbsenceReason)}
                   onBlur={() => touch("descriptionReason")}
                   className={cn(
@@ -1863,9 +1935,10 @@ const CreateSit = () => {
                   </span>
                   <span>{absenceReason.trim().length} / {MIN_SUB_DESCRIPTION} min.</span>
                 </p>
+                <FieldModerationNotice fieldKey="absenceReason" />
               </div>
 
-              <div>
+              <div id="expectations-field" className="scroll-mt-24">
                 <Label htmlFor="expectations-textarea" className="text-sm font-medium">
                   Qu'attendez-vous du gardien pendant votre absence ?
                 </Label>
@@ -1873,7 +1946,7 @@ const CreateSit = () => {
                   id="expectations-textarea"
                   placeholder="Présence rassurante, sorties avec l'animal…"
                   value={sitterExpectations}
-                  onChange={e => updateSitterExpectations(e.target.value)}
+                  onChange={e => { updateSitterExpectations(e.target.value); clearFieldVerdict("sitterExpectations"); }}
                   onPaste={makePlainTextPasteHandler(updateSitterExpectations)}
                   onBlur={() => touch("descriptionExpectations")}
                   className={cn(
@@ -1903,12 +1976,13 @@ const CreateSit = () => {
                   </span>
                   <span>{sitterExpectations.trim().length} / {MIN_SUB_DESCRIPTION} min.</span>
                 </p>
+                <FieldModerationNotice fieldKey="sitterExpectations" />
               </div>
             </div>
           </div>
 
           {/* Journée type */}
-          <div>
+          <div id="daily-routine-field" className="scroll-mt-24">
             <Label htmlFor="daily-routine" className="text-sm font-medium">Une journée type <span className="text-muted-foreground font-normal">(optionnel)</span></Label>
             <p className="text-xs text-muted-foreground mt-0.5 mb-1.5">
               Décrivez le déroulé d'une journée, matin, midi, soir. Les gardiens adorent ce niveau de détail.
@@ -1917,16 +1991,17 @@ const CreateSit = () => {
               id="daily-routine"
               placeholder={"Ex :\nMatin, Sortie du chien 30 min, gamelles, ouverture du jardin.\nMidi, Visite rapide, fontaine à recharger.\nSoir, Promenade 30 min, repas, câlins obligatoires 🥰"}
               value={dailyRoutine}
-              onChange={e => setDailyRoutine(e.target.value.slice(0, 1500))}
+              onChange={e => { setDailyRoutine(e.target.value.slice(0, 1500)); clearFieldVerdict("dailyRoutine"); }}
               onPaste={makePlainTextPasteHandler(setDailyRoutine, { maxLength: 1500 })}
               className="text-base min-h-[120px]"
               rows={5}
             />
             <p className="text-[11px] text-muted-foreground mt-1 text-right">{dailyRoutine.length}/1500</p>
+            <FieldModerationNotice fieldKey="dailyRoutine" />
           </div>
 
           {/* Mot de l'hôte */}
-          <div>
+          <div id="owner-message-field" className="scroll-mt-24">
             <div className="flex items-center justify-between gap-2 flex-wrap">
               <Label htmlFor="owner-message" className="text-sm font-medium">Un mot de vous <span className="text-muted-foreground font-normal">(optionnel)</span></Label>
               {(() => {
@@ -1956,12 +2031,13 @@ const CreateSit = () => {
               id="owner-message"
               placeholder="Ex : On confie nos animaux à un membre de confiance plutôt qu'à une pension. Vous repartirez sûrement avec des cookies maison et une connaissance fine du quartier !"
               value={ownerMessage}
-              onChange={e => setOwnerMessage(e.target.value.slice(0, 800))}
+              onChange={e => { setOwnerMessage(e.target.value.slice(0, 800)); clearFieldVerdict("ownerMessage"); }}
               onPaste={makePlainTextPasteHandler(setOwnerMessage, { maxLength: 800 })}
               className="text-base"
               rows={4}
             />
             <p className="text-[11px] text-muted-foreground mt-1 text-right">{ownerMessage.length}/800</p>
+            <FieldModerationNotice fieldKey="ownerMessage" />
           </div>
           </>
           )}
@@ -2037,16 +2113,17 @@ const CreateSit = () => {
             </div>
           </div>
           {flexibleDates && (
-            <div>
+            <div id="flexible-notes-field" className="scroll-mt-24">
               <Label htmlFor="flexible-notes" className="text-sm font-medium">Précisez vos dates approximatives</Label>
               <Input
                 id="flexible-notes"
                 placeholder="Ex : autour du 15 août, flexible d'une semaine"
                 value={flexibleNotes}
-                onChange={e => setFlexibleNotes(e.target.value)}
+                onChange={e => { setFlexibleNotes(e.target.value); clearFieldVerdict("flexibleNotes"); }}
                 onPaste={makePlainTextPasteHandler(setFlexibleNotes)}
                 className="mt-1.5 h-12 text-base"
               />
+              <FieldModerationNotice fieldKey="flexibleNotes" />
             </div>
           )}
 
@@ -2097,15 +2174,22 @@ const CreateSit = () => {
 
             if (!suggestedCover && ownerPhotos.length === 0) {
               return (
-                <section aria-labelledby="cover-picker-title" className="rounded-2xl border border-border bg-card p-4 md:p-5">
+                <section aria-labelledby="cover-picker-title" className="scroll-mt-24 rounded-2xl border border-border bg-card p-4 md:p-5">
                   <h2 id="cover-picker-title" className="text-base font-semibold flex items-center gap-2">
                     <ImageIcon className="h-5 w-5 text-primary" /> Photo de couverture
                   </h2>
-                  <p className="text-sm text-muted-foreground mt-1">
-                    Ajoutez d'abord des photos à votre galerie pour choisir la couverture qui donnera le plus envie.
+                  <p className="text-sm text-muted-foreground mt-1 mb-3">
+                    Ajoutez une photo ici, elle deviendra la couverture de votre annonce et rejoindra la galerie de votre profil.
                   </p>
-                  <Link to="/owner-profile#galerie" className="text-sm text-primary hover:underline mt-2 inline-block">
-                    Gérer mes photos dans mon profil →
+                  {user && (
+                    <InlinePhotoUpload
+                      userId={user.id}
+                      nextPosition={ownerPhotos.length}
+                      onUploaded={registerUploadedPhoto}
+                    />
+                  )}
+                  <Link to="/owner-profile#galerie" className="text-sm text-primary hover:underline mt-3 inline-block">
+                    Gérer toutes mes photos dans mon profil
                   </Link>
                 </section>
               );
@@ -2145,9 +2229,19 @@ const CreateSit = () => {
                     );
                   })}
                 </div>
-                <Link to="/owner-profile#galerie" className="text-xs text-primary hover:underline mt-3 inline-block">
-                  Ajouter ou gérer mes photos dans mon profil →
-                </Link>
+                <div className="mt-3 flex flex-wrap items-center gap-3">
+                  {user && (
+                    <InlinePhotoUpload
+                      userId={user.id}
+                      nextPosition={ownerPhotos.length}
+                      label="Ajouter une photo"
+                      onUploaded={registerUploadedPhoto}
+                    />
+                  )}
+                  <Link to="/owner-profile#galerie" className="text-xs text-primary hover:underline">
+                    Gérer mes photos dans mon profil
+                  </Link>
+                </div>
               </section>
             );
           })()}
@@ -2285,7 +2379,14 @@ const CreateSit = () => {
                 }}
               />
             ) : (
-              <p className="text-sm text-muted-foreground italic">Renseignez d'abord votre logement pour ajouter des animaux.</p>
+              <div>
+                <p className="text-sm text-muted-foreground mb-2">
+                  Votre logement n'est pas encore décrit, c'est lui qui porte la fiche de vos animaux.
+                </p>
+                <Button type="button" variant="outline" onClick={() => setSetupOpen(true)}>
+                  Décrire mon logement ici
+                </Button>
+              </div>
             )}
           </div>
 
@@ -2446,10 +2547,12 @@ const CreateSit = () => {
                 type="button"
                 className="flex-1 h-12 text-base font-semibold gap-1.5"
                 onClick={handleNext}
+                disabled={currentStep === 0 && sitLocation !== "home"}
               >
                 Suivant
                 <ChevronRight className="h-4 w-4" />
               </Button>
+
 
             ) : (
               <Button
