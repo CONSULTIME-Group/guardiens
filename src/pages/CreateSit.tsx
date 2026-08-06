@@ -301,17 +301,22 @@ const CreateSit = () => {
   const stepStartedAtRef = useRef<number>(Date.now());
   const publishedRef = useRef(false);
   const lastStepRef = useRef<number>(0);
+  const visitedStepsRef = useRef<Set<number>>(new Set());
+  const funnelStartedAtRef = useRef<number>(Date.now());
 
-  // Analytics : step_started + step_completed sur transition de step
+  // Analytics : step_started + step_completed sur transition de step.
+  // step_completed porte l'index de l'étape réellement quittée, pas celui de
+  // l'étape précédente, sinon le funnel est décalé d'un cran.
   useEffect(() => {
+    const step = currentStep;
     stepStartedAtRef.current = Date.now();
-    void trackEvent("sits_create_step_started", { metadata: { step: currentStep } });
-    const prev = lastStepRef.current;
-    lastStepRef.current = currentStep;
+    const isBackward = step < lastStepRef.current || visitedStepsRef.current.has(step);
+    void trackEvent("sits_create_step_started", { metadata: { step, is_backward: isBackward } });
+    visitedStepsRef.current.add(step);
+    lastStepRef.current = step;
     return () => {
-      // Envoie step_completed pour l'étape qui vient d'être quittée
       const duration = Date.now() - stepStartedAtRef.current;
-      void trackEvent("sits_create_step_completed", { metadata: { step: prev, duration_ms: duration } });
+      void trackEvent("sits_create_step_completed", { metadata: { step, duration_ms: duration } });
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentStep]);
