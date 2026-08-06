@@ -369,9 +369,39 @@ export function decideDeferral(input: DeferInput): DeferDecision {
     return { action: 'send' }
   }
 
+  // Alerte de nouvelle annonce : compteur strictement propre au gabarit. Elle
+  // ne consomme pas le quota des recapitulatifs, et les recapitulatifs ne
+  // consomment pas le sien. Une alerte declenchee par un evenement reel prime
+  // donc toujours sur un recapitulatif automatique du matin.
+  if (NEARBY_SIT_ALERT_TEMPLATES.has(templateName)) {
+    // Plafond de report, garant de la coherence avec la TTL du gabarit.
+    const clamp = (d: Date) => {
+      const ceiling = new Date(now.getTime() + NEARBY_SIT_MAX_DEFER_HOURS * 3600_000)
+      return d.getTime() > ceiling.getTime() ? ceiling : d
+    }
+    if (nearbySitWeekSentAt.length >= CAP_NEARBY_SIT_PER_WEEK) {
+      const oldest = new Date(nearbySitWeekSentAt[0])
+      return {
+        action: 'defer',
+        reason: 'frequency_cap_category_week',
+        scheduledFor: clamp(new Date(oldest.getTime() + 7 * 86400_000 + 30_000)),
+      }
+    }
+    if (nearbySitDaySentAt.length >= CAP_NEARBY_SIT_PER_DAY) {
+      const oldest = new Date(nearbySitDaySentAt[0])
+      return {
+        action: 'defer',
+        reason: 'frequency_cap_category_day',
+        scheduledFor: clamp(new Date(oldest.getTime() + 86400_000 + 30_000)),
+      }
+    }
+    return { action: 'send' }
+  }
+
   // Categorie 'alert' : compteurs propres, elle ne partage plus le quota des
   // emails produit. Cadence nominale 1 / jour, 7 / semaine.
   if (effectiveCategory === 'alert') {
+
     if (alertWeekSentAt.length >= CAP_ALERT_PER_WEEK) {
       const oldest = new Date(alertWeekSentAt[0])
       return {
