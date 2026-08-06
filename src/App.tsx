@@ -175,6 +175,7 @@ const AdminTestSitterFields = lazy(() => import("./pages/admin/AdminTestSitterFi
 const EmergencySitter = lazy(() => import("./pages/EmergencySitter"));
 const MySubscription = lazy(() => import("./pages/MySubscription"));
 const Favorites = lazy(() => import("./pages/Favorites"));
+const MonSecteur = lazy(() => import("./pages/MonSecteur"));
 const PublicSitDetail = lazy(() => import("./pages/PublicSitDetail"));
 const PublicListings = lazy(() => import("./pages/PublicListings"));
 const InternationalListings = lazy(() => import("./pages/InternationalListings"));
@@ -551,6 +552,7 @@ const AppRoutes = () => {
         <Route path="/settings" element={<Settings />} />
         <Route path="/mon-abonnement" element={<MySubscription />} />
         <Route path="/favoris" element={<Favorites />} />
+        <Route path="/mon-secteur" element={<MonSecteur />} />
       </Route>
       <Route path="/planche-badges" element={<PlancheBadges />} />
       <Route path="/test/badges-long-labels" element={<TestBadgesLongLabels />} />

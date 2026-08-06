@@ -7,6 +7,22 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type",
 };
 
+/**
+ * Page d'atterrissage dédiée : elle ne demande que le code postal et le rayon.
+ * L'ancien lien pointait vers /profile?focus=postal_code, donc vers un
+ * formulaire entier, ce qui tuait la conversion.
+ */
+const CTA_URL = "https://guardiens.fr/mon-secteur";
+
+/** Plafond par défaut, surchargeable en base sans redéploiement. */
+const DEFAULT_MAX_RELANCES = 4;
+
+/**
+ * Espacement croissant, en jours depuis l'inscription, avant la relance de
+ * rang N + 1 (index = nombre de relances déjà reçues).
+ */
+const MIN_DAYS_BY_COUNT = [1, 3, 7, 21];
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -19,12 +35,27 @@ serve(async (req) => {
   );
 
   try {
-    // 1. Fetch users missing postal_code, with relance cadence filter
+    // Plafond configurable en base : feature_flags.key = 'cp_relance_max'.
+    let maxRelances = DEFAULT_MAX_RELANCES;
+    {
+      const { data: flag } = await supabase
+        .from("feature_flags")
+        .select("value_int, enabled")
+        .eq("key", "cp_relance_max")
+        .maybeSingle();
+      if (flag?.enabled && typeof flag.value_int === "number" && flag.value_int > 0) {
+        maxRelances = flag.value_int;
+      }
+    }
+
+    // Ciblage : uniquement les gardiens. Un propriétaire ne doit pas recevoir
+    // une relance formulée pour un gardien.
     const { data: users, error: fetchError } = await supabase
       .from("profiles")
-      .select("id, first_name, cp_relance_count, created_at")
+      .select("id, first_name, cp_relance_count, created_at, role")
       .or("postal_code.is.null,postal_code.eq.")
-      .lt("cp_relance_count", 3)
+      .in("role", ["sitter", "both"])
+      .lt("cp_relance_count", maxRelances)
       .limit(100);
 
     if (fetchError) {
@@ -33,13 +64,27 @@ serve(async (req) => {
     }
 
     if (!users || users.length === 0) {
-      console.log("relance-cp-manquant: 0 users éligibles");
-      return new Response(JSON.stringify({ processed: 0 }), {
+      console.log("relance-cp-manquant: 0 gardiens éligibles");
+      return new Response(JSON.stringify({ processed: 0, maxRelances }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
     console.log(`relance-cp-manquant: ${users.length} candidats trouvés`);
+
+    // Donnée concrète pour la relance de rang 2 : le nombre de gardes ouvertes.
+    // Faute de code postal, on ne peut pas restreindre au département, donc on
+    // annonce la couverture nationale, sans jamais surestimer.
+    let openSitsCount = 0;
+    {
+      const todayIso = new Date().toISOString().slice(0, 10);
+      const { count } = await supabase
+        .from("sits")
+        .select("id", { count: "exact", head: true })
+        .eq("status", "published")
+        .gte("end_date", todayIso);
+      openSitsCount = count ?? 0;
+    }
 
     const now = new Date();
     const processedIds: string[] = [];
@@ -48,7 +93,6 @@ serve(async (req) => {
 
     for (const user of users) {
       try {
-        // Get auth user for email + email_confirmed_at
         const { data: authData, error: authError } =
           await supabase.auth.admin.getUserById(user.id);
 
@@ -60,29 +104,29 @@ serve(async (req) => {
         const authUser = authData.user;
         if (!authUser.email_confirmed_at) continue;
 
-        // Apply timing rules
         const count = user.cp_relance_count ?? 0;
+        if (count >= maxRelances) continue;
+
         const createdAt = new Date(user.created_at);
-        const daysSince =
-          (now.getTime() - createdAt.getTime()) / 86_400_000;
+        const daysSince = (now.getTime() - createdAt.getTime()) / 86_400_000;
+        const minDays = MIN_DAYS_BY_COUNT[Math.min(count, MIN_DAYS_BY_COUNT.length - 1)];
+        if (daysSince < minDays) continue;
 
-        if (count === 0 && daysSince < 1) continue;
-        if (count === 1 && daysSince < 3) continue;
-        if (count === 2 && daysSince < 7) continue;
-        if (count >= 3) continue;
+        const rang = count + 1;
 
-        // Send email via send-transactional-email
         const { error: emailError } = await supabase.functions.invoke(
           "send-transactional-email",
           {
             body: {
               templateName: "relance-cp-manquant",
               recipientEmail: authUser.email,
-              idempotencyKey: `relance-cp-${user.id}-${count + 1}`,
+              idempotencyKey: `relance-cp-${user.id}-${rang}`,
               templateData: {
                 prenom: user.first_name || "",
-                cta_url:
-                  "https://guardiens.fr/profile?focus=postal_code",
+                cta_url: CTA_URL,
+                rang,
+                open_sits_count: openSitsCount,
+                open_sits_zone: "en France",
               },
             },
           }
@@ -102,7 +146,6 @@ serve(async (req) => {
       }
     }
 
-    // 3. Batch-increment relance counters
     if (processedIds.length > 0) {
       const { error: rpcError } = await supabase.rpc(
         "increment_cp_relance",
@@ -114,7 +157,7 @@ serve(async (req) => {
     }
 
     console.log(
-      `relance-cp-manquant terminé: ${emailsSent} emails envoyés, ${errors} erreurs, ${processedIds.length} profils mis à jour`
+      `relance-cp-manquant terminé: ${emailsSent} emails envoyés, ${errors} erreurs, ${processedIds.length} profils mis à jour, plafond ${maxRelances}`
     );
 
     return new Response(
@@ -123,6 +166,8 @@ serve(async (req) => {
         processed: processedIds.length,
         emailsSent,
         errors,
+        maxRelances,
+        openSitsCount,
       }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
