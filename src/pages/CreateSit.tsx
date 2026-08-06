@@ -2505,15 +2505,7 @@ const CreateSit = () => {
         blockers={publishBlockers}
         onResolveBlocker={(b) => {
           setPreviewOpen(false);
-          if (b.action) {
-            navigate(b.action);
-            return;
-          }
-          if (b.anchor && typeof document !== "undefined") {
-            setTimeout(() => {
-              document.getElementById(b.anchor as string)?.scrollIntoView({ behavior: "smooth", block: "center" });
-            }, 150);
-          }
+          goToBlocker(b);
         }}
         open={previewOpen}
         onOpenChange={setPreviewOpen}
