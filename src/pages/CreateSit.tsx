@@ -615,6 +615,16 @@ const CreateSit = () => {
     }
     applyLocalDraft(stored);
     setLocalDraftRestored(true);
+    const today = new Date().toISOString().slice(0, 10);
+    const storedStart = (stored.startDate ?? "").trim();
+    void trackEvent("sit_draft_resumed", {
+      source: "create_sit_page_local",
+      metadata: {
+        sit_id: stored.draftId ?? remoteDraftId ?? null,
+        restored_step: typeof stored.currentStep === "number" ? stored.currentStep : 0,
+        dates_cleared: !storedStart || storedStart < today,
+      },
+    });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [localDraftKey, legacyLocalDraftKey, applyLocalDraft, draftIdParam, fromSitId]);
 
