@@ -1015,7 +1015,7 @@ const CreateSit = () => {
           source: "create_sit_page",
           metadata: {
             sit_id: draftId,
-            step: currentStep + 1,
+            step: currentStep,
             attempts: saveFailCountRef.current,
             error_message: e instanceof Error ? e.message : String((e as any)?.message ?? e),
           },
