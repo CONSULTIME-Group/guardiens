@@ -225,10 +225,15 @@ d'origine et l'identifiant de la ligne source (`sourceQueueId`). À ce moment :
 
 ## 6. Tests de régression
 
-- `supabase/functions/_shared/email-cap_test.ts` — 22 tests purs sur
-  `decideDeferral`, `isQuietAt`, `nextQuietEndFrom` (DST inclus).
-- `supabase/functions/_shared/email-cap-burst-sim_test.ts` — 6 simulations
-  bout-en-bout (pics, quiet hours, idempotence, flush sans doublon).
+- `supabase/functions/_shared/email-cap_test.ts` — 29 tests purs sur
+  `decideDeferral`, `isQuietAt`, `nextQuietEndFrom` (DST inclus), dont le
+  compteur propre de `nearby-sit-alert` et la garantie qu'aucun report de ce
+  gabarit ne dépasse sa TTL.
+- `supabase/functions/_shared/email-cap-burst-sim_test.ts` — 16 simulations
+  bout-en-bout (pics, quiet hours, idempotence, flush sans doublon), dont la
+  SIM 12 qui rejoue le scénario du 03 au 04/08/2026 : récapitulatif quotidien le
+  matin puis annonce publiée dans la zone l'après-midi, les deux doivent
+  partir.
 - `src/__tests__/email-pressure-lots.test.ts` — plafond par catégorie,
   bornes `max_age_days`, unicité du parcours actif, garde `logMetadata`.
 

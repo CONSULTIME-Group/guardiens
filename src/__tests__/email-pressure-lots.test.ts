@@ -5,6 +5,11 @@ import {
   decideDeferral,
   CAP_NON_TX_PER_DAY,
   CAP_NON_TX_PER_WEEK,
+  CAP_NEARBY_SIT_PER_DAY,
+  CAP_NEARBY_SIT_PER_WEEK,
+  NEARBY_SIT_MAX_DEFER_HOURS,
+  TEMPLATE_TTL_HOURS,
+  resolveDeferral,
 } from "../../supabase/functions/_shared/email-cap";
 import {
   ageWindow,
@@ -197,5 +202,79 @@ describe("Lot 7 — un seul parcours actif par personne", () => {
       { id: "old", user_id: "u", sequence_key: "complete-affinity-sitter", created_at: "2026-07-01T00:00:00Z" },
     ]);
     expect(keep?.id).toBe("old");
+  });
+});
+
+describe("Correctif 06/08/2026 — l'alerte de nouvelle annonce a son propre plafond", () => {
+  it("un recapitulatif recu le matin n'empeche pas l'alerte de l'apres-midi", () => {
+    const morning = new Date(NOON.getTime() - 5 * 3600_000).toISOString();
+    const d = decideDeferral({
+      now: NOON,
+      templateName: "nearby-sit-alert",
+      category: "alert",
+      hourSentAt: [],
+      daySentAt: [morning],
+      alertDaySentAt: [morning],
+      alertWeekSentAt: [morning],
+      nearbySitDaySentAt: [],
+      nearbySitWeekSentAt: [],
+    });
+    expect(d.action).toBe("send");
+  });
+
+  it("une alerte deja partie n'empeche pas le recapitulatif quotidien", () => {
+    const earlier = new Date(NOON.getTime() - 3 * 3600_000).toISOString();
+    const d = decideDeferral({
+      now: NOON,
+      templateName: "sitter-daily-digest",
+      category: "alert",
+      hourSentAt: [],
+      daySentAt: [earlier],
+      alertDaySentAt: [],
+      alertWeekSentAt: [],
+      nearbySitDaySentAt: [earlier],
+      nearbySitWeekSentAt: [earlier],
+    });
+    expect(d.action).toBe("send");
+  });
+
+  it("plafonds propres : 3 par jour, 10 par semaine", () => {
+    expect(CAP_NEARBY_SIT_PER_DAY).toBe(3);
+    expect(CAP_NEARBY_SIT_PER_WEEK).toBe(10);
+    const day = [iso(-3 * 3600_000), iso(-2 * 3600_000), iso(-3600_000)];
+    const d = decideDeferral({
+      now: NOON,
+      templateName: "nearby-sit-alert",
+      category: "alert",
+      hourSentAt: [],
+      daySentAt: [],
+      nearbySitDaySentAt: day,
+      nearbySitWeekSentAt: day,
+    });
+    expect(d).toMatchObject({ action: "defer", reason: "frequency_cap_category_day" });
+  });
+
+  it("aucun report de nearby-sit-alert ne depasse sa duree de vie", () => {
+    expect(NEARBY_SIT_MAX_DEFER_HOURS).toBeLessThan(TEMPLATE_TTL_HOURS["nearby-sit-alert"]);
+    const day = [iso(-3 * 3600_000), iso(-2 * 3600_000), iso(-3600_000)];
+    const d = decideDeferral({
+      now: NOON,
+      templateName: "nearby-sit-alert",
+      category: "alert",
+      hourSentAt: [],
+      daySentAt: [],
+      nearbySitDaySentAt: day,
+      nearbySitWeekSentAt: day,
+    });
+    if (d.action !== "defer") throw new Error("report attendu");
+    // Jitter appelant de 900 s inclus.
+    const withJitter = new Date(d.scheduledFor.getTime() + 900_000);
+    const resolution = resolveDeferral({
+      templateName: "nearby-sit-alert",
+      reason: d.reason,
+      scheduledFor: withJitter,
+      firstEnqueuedAt: NOON,
+    });
+    expect(resolution.action).toBe("enqueue");
   });
 });
