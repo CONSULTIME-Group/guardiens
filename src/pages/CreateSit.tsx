@@ -1075,22 +1075,74 @@ const CreateSit = () => {
   const titleTooLong = title.trim().length > MAX_TITLE_LENGTH;
   const hasPhoto = !publishBlockers.some((b) => b.id === "photo");
 
-
-
+  // Amène le propriétaire jusqu'au champ qui bloque réellement la publication :
+  // navigation vers la bonne étape, attente du rendu, défilement, focus et
+  // anneau visuel temporaire. Aucun clic ne peut rester sans effet : si l'ancre
+  // reste introuvable, un message nomme l'étape concernée.
+  const goToBlocker = (b: { id?: string; anchor?: string; action?: string; label?: string }) => {
+    if (b.action) {
+      navigate(b.action);
+      return;
+    }
+    const targetStep = stepForBlocker(b);
+    if (typeof targetStep === "number" && targetStep !== currentStep) {
+      setCurrentStep(targetStep);
+    }
+    const stepLabel = typeof targetStep === "number"
+      ? STEPS[targetStep]?.label ?? `étape ${targetStep + 1}`
+      : null;
+    if (!b.anchor || typeof document === "undefined") {
+      toast({
+        title: stepLabel ? `À corriger à l'étape ${stepLabel}` : "Élément à compléter",
+        description: b.label,
+      });
+      return;
+    }
+    const anchor = b.anchor;
+    const delays = [60, 180, 400, 800];
+    let done = false;
+    delays.forEach((delay, index) => {
+      window.setTimeout(() => {
+        if (done) return;
+        const el = document.getElementById(anchor);
+        if (el) {
+          done = true;
+          el.scrollIntoView({ behavior: "smooth", block: "center" });
+          el.classList.add("ring-2", "ring-primary", "ring-offset-2", "rounded-lg");
+          window.setTimeout(() => {
+            el.classList.remove("ring-2", "ring-primary", "ring-offset-2", "rounded-lg");
+          }, 2200);
+          const focusable = el.querySelector<HTMLElement>(
+            "input, textarea, select, button, [tabindex]:not([tabindex='-1'])",
+          );
+          focusable?.focus({ preventScroll: true });
+          return;
+        }
+        if (index === delays.length - 1) {
+          toast({
+            title: stepLabel ? `Rendez vous à l'étape ${stepLabel}` : "Élément à compléter",
+            description: b.label,
+          });
+        }
+      }, delay);
+    });
+  };
 
   const onPublishClick = () => {
     if (canPublish) return handlePublish();
+    const blockerIds = publishBlockers.map((b) => b.id);
+    void trackEvent("sit_publish_attempted", {
+      source: "create_sit_page",
+      metadata: { sit_id: draftId, step: currentStep, blockers: blockerIds },
+    });
     const first = publishBlockers[0];
     if (!first) return;
-    if (first.action) {
-      toast({ variant: "destructive", title: "Il manque quelque chose pour publier", description: first.label });
-      navigate(first.action);
-      return;
-    }
-    if (first.anchor && typeof document !== "undefined") {
-      document.getElementById(first.anchor)?.scrollIntoView({ behavior: "smooth", block: "center" });
-    }
+    void trackEvent("sit_publish_blocked", {
+      source: "create_sit_page",
+      metadata: { sit_id: draftId, step: currentStep, blockers: blockerIds },
+    });
     toast({ variant: "destructive", title: "Il manque quelque chose pour publier", description: first.label });
+    goToBlocker(first);
   };
 
   const nDays = (startDate && endDate && !dateError)
