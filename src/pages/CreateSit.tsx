@@ -1234,6 +1234,7 @@ const CreateSit = () => {
           .join("\n\n"),
       );
       if (verdict.status === "block") {
+        failPublish(["moderation"]);
         toast({
           variant: "destructive",
           title: "Publication bloquée par la modération",
