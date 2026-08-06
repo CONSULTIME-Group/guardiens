@@ -82,6 +82,42 @@ export const CAP_ALERT_PER_DAY = 1
 export const CAP_ALERT_PER_WEEK = 7
 
 // ---------------------------------------------------------------------------
+// CORRECTIF (06/08/2026) : compteur propre a l'alerte de nouvelle annonce.
+//
+// Constat verifie en base : depuis le 03/08, plus aucun 'nearby-sit-alert'
+// n'est parti, alors que des annonces ont ete publiees les 03 et 04. Le quota
+// 'alert' de 1 par jour etait partage par trois gabarits, et il etait
+// systematiquement consomme au petit matin par 'sitter-daily-digest' (cron 5h
+// UTC) ou par 'alert-digest' (trois fois par jour). L'alerte etait ensuite
+// reportee a oldest plus 24 h, au dela de sa TTL de 20 h, donc detruite.
+//
+// Regle : 'nearby-sit-alert' sort du quota partage et compte sur lui seul.
+// Justification du chiffre : la plateforme a publie 16 annonces en 30 jours
+// sur la France entiere, et un gardien n'est alerte que sur ses zones. Le
+// risque de rafale est nul en pratique. Un plafond de 3 par jour et 10 par
+// semaine ne coupe que les boucles anormales, il ne coupe aucun envoi
+// legitime.
+export const CAP_NEARBY_SIT_PER_DAY = 3
+export const CAP_NEARBY_SIT_PER_WEEK = 10
+
+/**
+ * Gabarits d'alerte de nouvelle annonce, comptes sur leur propre quota. Ils ne
+ * consomment plus le quota de la categorie 'alert', et reciproquement les
+ * recapitulatifs ne consomment plus le leur : une alerte declenchee par un
+ * evenement reel prime toujours sur un recapitulatif automatique.
+ */
+export const NEARBY_SIT_ALERT_TEMPLATES = new Set<string>(['nearby-sit-alert'])
+
+/**
+ * Report maximal, en heures, pour une alerte de nouvelle annonce. Strictement
+ * inferieur a sa TTL (20 h) avec la marge du jitter appelant (15 min max),
+ * afin qu'aucun chemin de plafond ne puisse produire un report deja perime,
+ * ce qui ramenerait l'annulation silencieuse par une autre porte.
+ */
+export const NEARBY_SIT_MAX_DEFER_HOURS = 18
+
+
+// ---------------------------------------------------------------------------
 // ETAPE 1 (05/08/2026) : TTL de report par gabarit et par motif.
 //
 // Constat : la file de report appliquait une TTL fixe de 36 h, alors qu'un
@@ -264,11 +300,19 @@ export interface DeferInput {
   nonTxDaySentAt?: string[]
   /** ISO timestamps of `sent` NON transactional emails in the last 7 days, ascending. */
   nonTxWeekSentAt?: string[]
-  /** ISO timestamps of `sent` emails de categorie 'alert' sur 24h, ascendant. */
+  /**
+   * ISO timestamps of `sent` emails de categorie 'alert' sur 24h, ascendant,
+   * HORS alertes de nouvelle annonce (celles-ci ont leur propre compteur).
+   */
   alertDaySentAt?: string[]
-  /** ISO timestamps of `sent` emails de categorie 'alert' sur 7 jours, ascendant. */
+  /** Idem sur 7 jours, hors alertes de nouvelle annonce. */
   alertWeekSentAt?: string[]
+  /** ISO timestamps of `sent` 'nearby-sit-alert' sur 24h, ascendant. */
+  nearbySitDaySentAt?: string[]
+  /** ISO timestamps of `sent` 'nearby-sit-alert' sur 7 jours, ascendant. */
+  nearbySitWeekSentAt?: string[]
 }
+
 
 /**
  * Pure decision: should this email be sent now, or deferred?
@@ -284,7 +328,9 @@ export function decideDeferral(input: DeferInput): DeferDecision {
     now, templateName, isUrgent, category,
     nonTxDaySentAt = [], nonTxWeekSentAt = [],
     alertDaySentAt = [], alertWeekSentAt = [],
+    nearbySitDaySentAt = [], nearbySitWeekSentAt = [],
   } = input
+
 
 
   // Categorie effective. Regle de securite : seule la valeur explicite
@@ -323,9 +369,39 @@ export function decideDeferral(input: DeferInput): DeferDecision {
     return { action: 'send' }
   }
 
+  // Alerte de nouvelle annonce : compteur strictement propre au gabarit. Elle
+  // ne consomme pas le quota des recapitulatifs, et les recapitulatifs ne
+  // consomment pas le sien. Une alerte declenchee par un evenement reel prime
+  // donc toujours sur un recapitulatif automatique du matin.
+  if (NEARBY_SIT_ALERT_TEMPLATES.has(templateName)) {
+    // Plafond de report, garant de la coherence avec la TTL du gabarit.
+    const clamp = (d: Date) => {
+      const ceiling = new Date(now.getTime() + NEARBY_SIT_MAX_DEFER_HOURS * 3600_000)
+      return d.getTime() > ceiling.getTime() ? ceiling : d
+    }
+    if (nearbySitWeekSentAt.length >= CAP_NEARBY_SIT_PER_WEEK) {
+      const oldest = new Date(nearbySitWeekSentAt[0])
+      return {
+        action: 'defer',
+        reason: 'frequency_cap_category_week',
+        scheduledFor: clamp(new Date(oldest.getTime() + 7 * 86400_000 + 30_000)),
+      }
+    }
+    if (nearbySitDaySentAt.length >= CAP_NEARBY_SIT_PER_DAY) {
+      const oldest = new Date(nearbySitDaySentAt[0])
+      return {
+        action: 'defer',
+        reason: 'frequency_cap_category_day',
+        scheduledFor: clamp(new Date(oldest.getTime() + 86400_000 + 30_000)),
+      }
+    }
+    return { action: 'send' }
+  }
+
   // Categorie 'alert' : compteurs propres, elle ne partage plus le quota des
   // emails produit. Cadence nominale 1 / jour, 7 / semaine.
   if (effectiveCategory === 'alert') {
+
     if (alertWeekSentAt.length >= CAP_ALERT_PER_WEEK) {
       const oldest = new Date(alertWeekSentAt[0])
       return {

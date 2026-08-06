@@ -33,10 +33,12 @@ import {
   BYPASS_TEMPLATES,
   decideDeferral,
   resolveDeferral,
+  NEARBY_SIT_ALERT_TEMPLATES,
 
   isQuietAt,
   nextQuietEndFrom,
 } from '../_shared/email-cap.ts'
+
 
 // Alma persona (Pass 3 C2) : liste des templates signés visuellement par Alma
 // (header + intro + signoff). Tout log/analytics de ces envois porte
@@ -481,7 +483,7 @@ Deno.serve(async (req) => {
         .order('created_at', { ascending: true }),
       supabase
         .from('email_send_log')
-        .select('created_at, metadata')
+        .select('created_at, template_name, metadata')
         .ilike('recipient_email', recipientLower)
         .eq('status', 'sent')
         .gte('created_at', oneWeekAgo)
@@ -491,18 +493,24 @@ Deno.serve(async (req) => {
 
     const toIso = (rows: Array<{ created_at: string }> | null) =>
       (rows ?? []).map((r) => r.created_at as string)
-    type CatRow = { created_at: string; metadata?: { category?: string } | null }
+    type CatRow = { created_at: string; template_name?: string | null; metadata?: { category?: string } | null }
     const nonTxRows = (nonTxWeekRows ?? []) as CatRow[]
     // ETAPE 2 : la categorie 'alert' a ses propres compteurs, elle ne consomme
     // plus le quota des emails produit et reciproquement.
+    // CORRECTIF 06/08/2026 : l'alerte de nouvelle annonce sort en plus du
+    // quota partage de la categorie 'alert'. Un recapitulatif ne peut donc
+    // plus consommer le quota d'une alerte, ni l'inverse.
+    const isNearby = (r: CatRow) => NEARBY_SIT_ALERT_TEMPLATES.has(r.template_name ?? '')
+    const nearbySitWeek = nonTxRows.filter(isNearby).map((r) => r.created_at)
     const alertWeek = nonTxRows
-      .filter((r) => r.metadata?.category === 'alert')
+      .filter((r) => r.metadata?.category === 'alert' && !isNearby(r))
       .map((r) => r.created_at)
     const nonTxWeek = nonTxRows
-      .filter((r) => r.metadata?.category !== 'alert')
+      .filter((r) => r.metadata?.category !== 'alert' && !isNearby(r))
       .map((r) => r.created_at)
     const nonTxDay = nonTxWeek.filter((t) => t >= oneDayAgo)
     const alertDay = alertWeek.filter((t) => t >= oneDayAgo)
+    const nearbySitDay = nearbySitWeek.filter((t) => t >= oneDayAgo)
 
     const decision = decideDeferral({
       now: new Date(nowMs),
@@ -515,7 +523,10 @@ Deno.serve(async (req) => {
       nonTxWeekSentAt: nonTxWeek,
       alertDaySentAt: alertDay,
       alertWeekSentAt: alertWeek,
+      nearbySitDaySentAt: nearbySitDay,
+      nearbySitWeekSentAt: nearbySitWeek,
     })
+
 
     const deferReason: string | null = decision.action === 'defer' ? decision.reason : null
     // Jitter deterministe de 0 a 900 s applique cote appelant (decideDeferral
@@ -595,6 +606,12 @@ Deno.serve(async (req) => {
       })
 
       if (resolution.action === 'cancel') {
+        const isNearbyAlert = NEARBY_SIT_ALERT_TEMPLATES.has(templateName)
+        // Motif lisible, destine au tableau de bord admin. Une alerte de
+        // nouvelle annonce detruite doit etre comptable, pas silencieuse.
+        const humanReason = isNearbyAlert
+          ? `Alerte de nouvelle annonce detruite : report au ${scheduledFor.toISOString()} (motif ${deferReason}), au dela de la duree de vie du gabarit fixee au ${resolution.ttlDeadline.toISOString()}.`
+          : `Contenu date annule : report au ${scheduledFor.toISOString()} (motif ${deferReason}), au dela de la duree de vie du gabarit fixee au ${resolution.ttlDeadline.toISOString()}.`
         const cancelReason = `ttl_exceeded_cancelled (${deferReason}, report ${scheduledFor.toISOString()} > TTL ${resolution.ttlDeadline.toISOString()})`
         if (sourceQueueId) {
           await supabase
@@ -607,14 +624,16 @@ Deno.serve(async (req) => {
           template_name: templateName,
           recipient_email: effectiveRecipient,
           status: 'cancelled',
-          error_message: cancelReason,
+          error_message: humanReason,
           metadata: {
             idempotency_key: idempotencyKey,
             category,
             defer_reason: deferReason,
-            cancel_reason: 'ttl_exceeded',
+            cancel_reason: isNearbyAlert ? 'ttl_exceeded_nearby_sit_alert' : 'ttl_exceeded',
+            is_nearby_sit_alert: isNearbyAlert,
             ttl_deadline: resolution.ttlDeadline.toISOString(),
             scheduled_for: scheduledFor.toISOString(),
+            technical_reason: cancelReason,
           },
         })
         if (logCancelErr) {
@@ -625,6 +644,7 @@ Deno.serve(async (req) => {
         console.warn('Email annule, contenu date et report au dela de la TTL', {
           templateName, recipientLower, deferReason, scheduledFor: scheduledFor.toISOString(),
         })
+
         return new Response(
           JSON.stringify({ success: false, status: 'cancelled', reason: 'ttl_exceeded', defer_reason: deferReason }),
           { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }

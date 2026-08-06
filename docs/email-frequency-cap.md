@@ -13,12 +13,54 @@ directe d'un membre identifié n'est jamais du spam, il n'est jamais plafonné.
 | Catégorie | Plafond | Constante |
 |---|---|---|
 | `transactional` | aucun plafond de fréquence, seules les heures calmes s'appliquent | – |
-| `product`, `digest`, `alert` (cumul) | 1 / 24 h et 3 / 7 jours par destinataire | `CAP_NON_TX_PER_DAY`, `CAP_NON_TX_PER_WEEK` |
+| `product`, `digest` (cumul) | 1 / 24 h et 3 / 7 jours par destinataire | `CAP_NON_TX_PER_DAY`, `CAP_NON_TX_PER_WEEK` |
+| `alert`, hors `nearby-sit-alert` | 1 / 24 h et 7 / 7 jours, compteur propre | `CAP_ALERT_PER_DAY`, `CAP_ALERT_PER_WEEK` |
+| `nearby-sit-alert` | 3 / 24 h et 10 / 7 jours, compteur propre au gabarit | `CAP_NEARBY_SIT_PER_DAY`, `CAP_NEARBY_SIT_PER_WEEK` |
 | catégorie absente ou inconnue | traitée comme `product`, donc plafonnée, avec un `console.warn` | – |
 
-Le cumul non transactionnel est **inter-catégories** : un digest consomme le
-même quota qu'un email produit ou une alerte. En revanche un transactionnel ne
-consomme aucun quota et n'en libère aucun.
+Le cumul non transactionnel est **inter-catégories** entre `product` et
+`digest` : un digest consomme le même quota qu'un email produit. La catégorie
+`alert` en est sortie le 05/08/2026, et le gabarit `nearby-sit-alert` en est
+sorti à son tour le 06/08/2026. Un transactionnel ne consomme aucun quota et
+n'en libère aucun.
+
+### 1 bis. Pourquoi `nearby-sit-alert` a son propre compteur (06/08/2026)
+
+Constat vérifié en base : depuis le 03/08, plus aucun `nearby-sit-alert`
+n'était parti, alors que des annonces avaient été publiées les 03 et 04. Sur la
+même période, 21 `alert-digest` abandonnés le 04/08, 9 `sitter-daily-digest`
+abandonnés, 2 `alert-digest` abandonnés le 03/08.
+
+Mécanique : `CAP_ALERT_PER_DAY` valait 1 et ce quota était partagé par les trois
+gabarits de la catégorie. `sitter-daily-digest` part par cron tous les jours à
+05h00 UTC et `alert-digest` trois fois par jour, donc le quota du jour était
+systématiquement consommé par un récapitulatif avant qu'une annonce ne soit
+publiée. L'alerte était ensuite reportée à `oldest + 24 h`, au-delà de sa TTL de
+20 h, et comme elle figure dans `DATED_TEMPLATES`, `decideOverTtl` renvoyait
+`cancel` : l'alerte n'était pas reportée, elle était détruite.
+
+Correctif :
+
+1. `nearby-sit-alert` sort du quota partagé et compte sur lui seul
+   (`NEARBY_SIT_ALERT_TEMPLATES`). Les récapitulatifs ne consomment plus son
+   quota, et réciproquement. Une alerte déclenchée par un événement réel prime
+   donc toujours sur un récapitulatif automatique.
+2. Chiffres retenus, 3 / jour et 10 / semaine : la plateforme a publié 16
+   annonces en 30 jours sur la France entière, et un gardien n'est alerté que
+   sur ses zones. Le risque de rafale est nul en pratique, ce plafond ne coupe
+   que les boucles anormales.
+3. Cohérence TTL : tout report de ce gabarit est plafonné à
+   `NEARBY_SIT_MAX_DEFER_HOURS` (18 h), strictement inférieur à sa TTL de 20 h,
+   jitter appelant de 900 s inclus. Aucun chemin de plafond ne peut donc plus
+   produire un report déjà périmé.
+4. Traçabilité : une annulation pour dépassement de TTL écrit une ligne
+   `email_send_log` en `status = 'cancelled'` avec
+   `metadata.cancel_reason = 'ttl_exceeded_nearby_sit_alert'`,
+   `metadata.is_nearby_sit_alert = true` et un `error_message` lisible. Les
+   alertes détruites sont donc comptables dans le tableau de bord admin.
+
+`BYPASS_TEMPLATES` reste inchangé : une alerte annonce n'y a pas sa place, elle
+reste soumise aux heures calmes et à un plafond, simplement à un plafond propre.
 
 `CAP_PER_HOUR` et `CAP_PER_DAY` existent encore dans `email-cap.ts` pour la
 compatibilité d'import, mais ne sont **plus appliqués**. Ces plafonds globaux
@@ -86,13 +128,18 @@ Pour les templates **non bypass** et **non urgent** :
    à toutes les catégories, y compris transactionnelle : on ne réveille personne
    la nuit.
 2. **Catégorie `transactional`** → `send`, sans aucun plafond de fréquence.
-3. Catégorie non transactionnelle (product, digest, alert, ou catégorie absente
-   ou inconnue) :
-   a. **3 envois non transactionnels sur 7 jours** → `defer` à `oldest + 7j + 30s`
+3. **`nearby-sit-alert`** (compteur propre au gabarit) :
+   a. **10 envois sur 7 jours** → `defer` (`frequency_cap_category_week`).
+   b. **3 envois sur 24 h** → `defer` (`frequency_cap_category_day`).
+   Dans les deux cas le report est plafonné à `now + NEARBY_SIT_MAX_DEFER_HOURS`.
+4. **Catégorie `alert`** (hors `nearby-sit-alert`) : 7 / 7 jours puis 1 / 24 h.
+5. Catégorie non transactionnelle restante (product, digest, ou catégorie
+   absente ou inconnue) :
+   a. **3 envois sur 7 jours** → `defer` à `oldest + 7j + 30s`
       (`frequency_cap_category_week`).
-   b. **1 envoi non transactionnel sur 24 h** → `defer` à `oldest + 24h + 30s`
+   b. **1 envoi sur 24 h** → `defer` à `oldest + 24h + 30s`
       (`frequency_cap_category_day`).
-4. Sinon → `send`.
+6. Sinon → `send`.
 
 Les motifs `frequency_cap_hour` et `frequency_cap_day` restent déclarés dans le
 type `DeferDecision` pour lire l'historique de la file, mais ne sont plus jamais
@@ -178,10 +225,15 @@ d'origine et l'identifiant de la ligne source (`sourceQueueId`). À ce moment :
 
 ## 6. Tests de régression
 
-- `supabase/functions/_shared/email-cap_test.ts` — 22 tests purs sur
-  `decideDeferral`, `isQuietAt`, `nextQuietEndFrom` (DST inclus).
-- `supabase/functions/_shared/email-cap-burst-sim_test.ts` — 6 simulations
-  bout-en-bout (pics, quiet hours, idempotence, flush sans doublon).
+- `supabase/functions/_shared/email-cap_test.ts` — 29 tests purs sur
+  `decideDeferral`, `isQuietAt`, `nextQuietEndFrom` (DST inclus), dont le
+  compteur propre de `nearby-sit-alert` et la garantie qu'aucun report de ce
+  gabarit ne dépasse sa TTL.
+- `supabase/functions/_shared/email-cap-burst-sim_test.ts` — 16 simulations
+  bout-en-bout (pics, quiet hours, idempotence, flush sans doublon), dont la
+  SIM 12 qui rejoue le scénario du 03 au 04/08/2026 : récapitulatif quotidien le
+  matin puis annonce publiée dans la zone l'après-midi, les deux doivent
+  partir.
 - `src/__tests__/email-pressure-lots.test.ts` — plafond par catégorie,
   bornes `max_age_days`, unicité du parcours actif, garde `logMetadata`.
 

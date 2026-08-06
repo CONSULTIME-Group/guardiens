@@ -13,7 +13,7 @@
 // Idempotence : la même idempotency_key ne doit jamais aboutir à 2 lignes status=sent.
 
 import { assert, assertEquals } from 'https://deno.land/std@0.224.0/assert/mod.ts'
-import { decideDeferral } from './email-cap.ts'
+import { decideDeferral, NEARBY_SIT_ALERT_TEMPLATES } from './email-cap.ts'
 
 type Category = 'transactional' | 'product' | 'digest' | 'alert'
 
@@ -88,6 +88,24 @@ class FakeSystem {
         .sort((a, b) => a.created_at.getTime() - b.created_at.getTime())
         .map((r) => r.created_at.toISOString())
 
+    // Miroir exact du sender : la categorie 'alert' a son compteur, et
+    // 'nearby-sit-alert' a le sien, distinct du quota partage.
+    const rowsSince = (since: number, keep: (r: SendLogRow) => boolean) =>
+      this.sendLog
+        .filter(
+          (r) =>
+            r.recipient === recipientLower &&
+            r.status === 'sent' &&
+            r.created_at.getTime() >= since &&
+            r.category !== 'transactional' &&
+            keep(r),
+        )
+        .sort((a, b) => a.created_at.getTime() - b.created_at.getTime())
+        .map((r) => r.created_at.toISOString())
+    const isNearby = (r: SendLogRow) => NEARBY_SIT_ALERT_TEMPLATES.has(r.template)
+    const isAlert = (r: SendLogRow) => r.category === 'alert' && !isNearby(r)
+    const isProduct = (r: SendLogRow) => r.category !== 'alert' && !isNearby(r)
+
     const decision = decideDeferral({
       now,
       templateName: template,
@@ -95,8 +113,12 @@ class FakeSystem {
       category,
       hourSentAt: sentFor(oneHourAgo, false),
       daySentAt: sentFor(oneDayAgo, false),
-      nonTxDaySentAt: sentFor(oneDayAgo, true),
-      nonTxWeekSentAt: sentFor(oneWeekAgo, true),
+      nonTxDaySentAt: rowsSince(oneDayAgo, isProduct),
+      nonTxWeekSentAt: rowsSince(oneWeekAgo, isProduct),
+      alertDaySentAt: rowsSince(oneDayAgo, isAlert),
+      alertWeekSentAt: rowsSince(oneWeekAgo, isAlert),
+      nearbySitDaySentAt: rowsSince(oneDayAgo, isNearby),
+      nearbySitWeekSentAt: rowsSince(oneWeekAgo, isNearby),
     })
 
     if (decision.action === 'send') {
@@ -405,18 +427,23 @@ Deno.test('SIM 8 — __urgent avec cap catégorie 1 / 24h saturé : envoyé imm�
 })
 
 // =============================================================
-// SIM 9 — Cap hebdomadaire catégorie (3 / 7 jours), toutes catégories non
-// transactionnelles confondues : product, digest et alert partagent le compteur.
+// SIM 9 — Cap hebdomadaire catégorie (3 / 7 jours), product et digest partagent
+// le compteur. La catégorie 'alert' en est sortie depuis le 05/08/2026, et
+// 'nearby-sit-alert' dispose en plus de son propre compteur depuis le
+// 06/08/2026 : ni l'un ni l'autre ne consomme ce quota.
 // L'urgent passe malgré la saturation.
 // =============================================================
-Deno.test('SIM 9 — cap 3 / 7 jours partagé product+digest+alert, urgent exempté', () => {
+Deno.test('SIM 9 — cap 3 / 7 jours partagé product+digest, urgent exempté', () => {
   const sys = new FakeSystem()
   const t = parisAt('2026-01-15', 10) // heure active
   // 3 envois non transactionnels espacés de 25h : le cap 1 / 24h n'est jamais touché
   sys.send(t, 'user@x.com', 'review-reminder', 'w-0', false, 'product')
   sys.send(new Date(t.getTime() + 25 * 3600_000), 'user@x.com', 'weekly-digest', 'w-1', false, 'digest')
-  sys.send(new Date(t.getTime() + 50 * 3600_000), 'user@x.com', 'new-listing-alert', 'w-2', false, 'alert')
-  assertEquals(sys.sentRows().length, 3)
+  sys.send(new Date(t.getTime() + 50 * 3600_000), 'user@x.com', 'weekly-digest', 'w-2', false, 'digest')
+  // Une alerte de nouvelle annonce sur la meme fenetre ne doit PAS consommer
+  // ce quota : elle a son propre compteur.
+  sys.send(new Date(t.getTime() + 51 * 3600_000), 'user@x.com', 'nearby-sit-alert', 'w-alert', false, 'alert')
+  assertEquals(sys.sentRows().length, 4)
 
   // 4e envoi non transactionnel dans la fenêtre de 7 jours → defer (cap semaine)
   const rNormal = sys.send(new Date(t.getTime() + 75 * 3600_000), 'user@x.com', 'review-reminder', 'w-3', false, 'product')
@@ -427,7 +454,7 @@ Deno.test('SIM 9 — cap 3 / 7 jours partagé product+digest+alert, urgent exemp
   const rUrgent = sys.send(new Date(t.getTime() + 75 * 3600_000 + 2000), 'user@x.com', 'review-reminder', 'urgent-week', true, 'product')
   assertEquals(rUrgent.result, 'sent')
   assertEquals(sys.queue.filter((q) => q.status === 'pending').length, 1)
-  assertEquals(sys.sentRows().length, 4)
+  assertEquals(sys.sentRows().length, 5)
 })
 
 // =============================================================
@@ -583,4 +610,44 @@ Deno.test('SIM 11 — flush 2 lignes dues même destinataire : 1 envoyée, 1 re-
     pending[0].scheduled_for.getTime() > flushAt.getTime(),
     'la nouvelle ligne doit être planifiée dans le futur',
   )
+})
+
+
+// =============================================================
+// SIM 12 — Scenario du 03 au 04/08/2026 : le recapitulatif quotidien du matin
+// ne doit plus detruire l'alerte de nouvelle annonce de l'apres-midi.
+// =============================================================
+Deno.test("SIM 12 — recap du matin puis annonce l'apres-midi : les deux partent", () => {
+  const sys = new FakeSystem()
+  const morning = parisAt('2026-01-15', 8, 5) // cron recap, juste apres les heures calmes
+  const afternoon = parisAt('2026-01-15', 15) // publication d'une annonce
+
+  const digest = sys.send(morning, 'gardien@x.com', 'sitter-daily-digest', 'digest-0', false, 'alert')
+  assertEquals(digest.result, 'sent')
+
+  const alerte = sys.send(afternoon, 'gardien@x.com', 'nearby-sit-alert', 'alert-0', false, 'alert')
+  assertEquals(alerte.result, 'sent', "l'alerte de nouvelle annonce doit passer")
+
+  assertEquals(sys.sentRows().length, 2)
+  assertEquals(sys.queue.filter((q) => q.status === 'pending').length, 0)
+})
+
+// =============================================================
+// SIM 13 — Reciproque : une alerte partie le matin ne bloque pas le
+// recapitulatif, et le plafond propre de 3 alertes par jour tient.
+// =============================================================
+Deno.test('SIM 13 — 4 annonces dans la journee : 3 alertes envoyees, la 4e reportee', () => {
+  const sys = new FakeSystem()
+  const base = parisAt('2026-01-15', 9)
+  const h = (n: number) => new Date(base.getTime() + n * 3600_000)
+
+  assertEquals(sys.send(h(0), 'g@x.com', 'nearby-sit-alert', 'a-0', false, 'alert').result, 'sent')
+  assertEquals(sys.send(h(1), 'g@x.com', 'nearby-sit-alert', 'a-1', false, 'alert').result, 'sent')
+  assertEquals(sys.send(h(2), 'g@x.com', 'nearby-sit-alert', 'a-2', false, 'alert').result, 'sent')
+  const fourth = sys.send(h(3), 'g@x.com', 'nearby-sit-alert', 'a-3', false, 'alert')
+  assertEquals(fourth.result, 'deferred')
+
+  // Le recapitulatif du lendemain matin (8h Paris) passe malgre les 3 alertes de la veille.
+  const digest = sys.send(h(23), 'g@x.com', 'sitter-daily-digest', 'd-0', false, 'alert')
+  assertEquals(digest.result, 'sent')
 })
