@@ -1319,6 +1319,16 @@ const CreateSit = () => {
         } catch {}
       }
       publishedRef.current = true;
+      try {
+        await trackEvent("sit_publish_succeeded", {
+          source: "create_sit_page",
+          metadata: {
+            sit_id: sitId,
+            duration_ms: Date.now() - funnelStartedAtRef.current,
+            resumed_draft: !!draftIdParam,
+          },
+        });
+      } catch {}
       if (localDraftKey) clearFormDraft(localDraftKey);
       toast({ title: "Annonce publiée", description: "Les gardiens peuvent maintenant postuler." });
       navigate(`/sits/${sitId}`);
@@ -1326,6 +1336,7 @@ const CreateSit = () => {
       // Le texte renvoyé par la base est technique et en anglais : il reste en
       // console, l'utilisateur reçoit une phrase compréhensible.
       console.error("[CreateSit] publish failed", err);
+      failPublish(["write_error"]);
       const description = describeSitWriteError(err, "publish");
 
       toast({
