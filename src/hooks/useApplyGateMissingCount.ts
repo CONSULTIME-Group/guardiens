@@ -30,7 +30,7 @@ export function useApplyGateMissingCount(enabled: boolean): number | null {
           .maybeSingle(),
         supabase
           .from("sitter_profiles")
-          .select("geographic_radius, competences")
+          .select("geographic_radius, competences, lifestyle, interests, languages, life_pace, animal_types")
           .eq("user_id", user.id)
           .maybeSingle(),
       ]);
@@ -46,6 +46,14 @@ export function useApplyGateMissingCount(enabled: boolean): number | null {
         bio: p.bio || "",
         geographic_radius: s.geographic_radius || 0,
         competences: s.competences || [],
+        lifestyle: s.lifestyle || [],
+        interests: s.interests || [],
+        languages: s.languages || [],
+        life_pace: s.life_pace || "",
+        animal_types: s.animal_types || [],
+        // La galerie n'entre pas dans la mention sous le bouton : elle n'est
+        // proposée qu'en cas d'élargissement du barème.
+        has_gallery: true,
       });
       setCount(APPLY_GATE_FIELDS.filter((f) => missing[f.key]).length);
     })();

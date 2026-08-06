@@ -47,6 +47,7 @@ export type EventType =
   | "apply_gate_field_completed"
   | "apply_gate_threshold_reached"
   | "apply_gate_abandoned"
+  | "apply_gate_unreachable"
   | "sit_share_clicked"
   | "editorial_share_clicked"
   | "referral_link_copied"
