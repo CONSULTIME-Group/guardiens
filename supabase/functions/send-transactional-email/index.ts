@@ -947,6 +947,45 @@ Deno.serve(async (req) => {
     )
   }
 
+  // 3 bis. Lien profond authentifie pour les emails declenches par un message
+  // ou une candidature. Le bouton principal depose la personne directement
+  // dans le fil concerne, deja connectee, ce qui supprime la friction du
+  // chemin connexion, mot de passe oublie, recherche du bon fil. Le jeton est
+  // a usage unique, valable 24 heures, lie au destinataire et, quand elle
+  // existe, a la conversation ciblee. Il n'ouvre qu'une session normale, la
+  // RLS s'applique integralement.
+  if (DEEP_LINK_TEMPLATES.has(templateName)) {
+    try {
+      const conversationId =
+        (typeof templateData?.conversationId === 'string' && templateData.conversationId) ||
+        (typeof logMetadata?.conversation_id === 'string' && logMetadata.conversation_id) ||
+        null
+      const targetPath = conversationId
+        ? `/messages?c=${conversationId}`
+        : (typeof templateData?.sitId === 'string' && templateData.sitId
+          ? `/sits/${templateData.sitId}#candidatures`
+          : '/messages')
+      const isUuid = (v: string) =>
+        /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(v)
+      const { data: deepToken, error: deepErr } = await supabase.rpc('create_email_deep_link', {
+        p_email: effectiveRecipient,
+        p_target_path: targetPath,
+        p_conversation_id: conversationId && isUuid(conversationId) ? conversationId : null,
+        p_template_name: templateName,
+        p_message_id: messageId,
+      })
+      if (deepErr) {
+        console.error('[deep-link] creation failed', deepErr.message)
+      } else if (typeof deepToken === 'string' && deepToken.length > 0) {
+        templateData = { ...templateData, deepLinkUrl: `${SITE_URL}/acces?t=${deepToken}` }
+      }
+    } catch (e) {
+      // Un echec de minting ne doit jamais empecher l'envoi : le gabarit
+      // retombe sur son lien public habituel.
+      console.error('[deep-link] unexpected', e)
+    }
+  }
+
   // 4. Render React Email template to HTML and plain text
   let html = await renderAsync(
     React.createElement(template.component, templateData)
