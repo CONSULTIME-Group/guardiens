@@ -7649,6 +7649,19 @@ export type Database = {
           deleted_file_paths: string[]
         }[]
       }
+      close_orphan_applications: {
+        Args: { p_grace_hours?: number }
+        Returns: {
+          application_id: string
+          owner_first_name: string
+          sit_id: string
+          sit_status: string
+          sit_title: string
+          sitter_email: string
+          sitter_first_name: string
+          sitter_id: string
+        }[]
+      }
       complete_onboarding: {
         Args: {
           p_animal_experience?: string
