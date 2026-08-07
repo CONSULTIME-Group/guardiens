@@ -30,7 +30,6 @@ const INK = '#1D1B16'
 const PINE = '#2C6D50'
 const TERRA = '#9A6A44'
 const LINE = '#EDE7DE'
-const CARD_BG = '#FBF6EC'
 
 const DISPLAY = "'Playfair Display', Georgia, serif"
 const TEXT_FONT = "'Outfit', Arial, sans-serif"
@@ -49,18 +48,40 @@ const SectionHeader = ({ label }: { label: string }) => (
   </Section>
 )
 
+// Passe par le point de transformation d'image de Supabase Storage : il
+// négocie le format selon l'en-tête Accept (donc du JPEG pour Outlook, qui
+// ne sait pas lire le WebP) et sert la vignette à la bonne taille.
+// 184px = 2x les 92px affichés, pour les écrans à haute densité.
+const THUMB_PX = 184
+const toThumbUrl = (url: string) => {
+  if (!url) return url
+  if (url.includes('/storage/v1/render/image/')) return url
+  if (!url.includes('/storage/v1/object/public/')) return url
+  const base = url.split('?')[0].replace('/storage/v1/object/public/', '/storage/v1/render/image/public/')
+  return `${base}?width=${THUMB_PX}&height=${THUMB_PX}&resize=cover&quality=80`
+}
+
+const thumbAlt = (sit: SitCard) =>
+  `Photo du logement à ${sit.city}, ${sit.meta}`
+
 const SitRow = ({ sit }: { sit: SitCard }) => (
   <table role="presentation" cellPadding={0} cellSpacing={0} width="100%" style={cardTable}>
     <tbody>
       <tr>
-        <td width="92" valign="top" style={{ width: '92px', paddingRight: '14px' }}>
+        <td width="92" valign="top" bgcolor={LINE} style={thumbCell}>
           {sit.imageUrl ? (
-            <Img src={sit.imageUrl} width="92" height="92" alt={sit.title} style={thumb} />
+            <Img
+              src={toThumbUrl(sit.imageUrl)}
+              width="92"
+              height="92"
+              alt={thumbAlt(sit)}
+              style={thumb}
+            />
           ) : (
             <div style={thumbFallback} />
           )}
         </td>
-        <td valign="top">
+        <td valign="top" style={{ paddingLeft: '14px' }}>
           <Text style={cardMetaTop}>
             {sit.city} , {sit.distanceLabel}
           </Text>
@@ -72,6 +93,7 @@ const SitRow = ({ sit }: { sit: SitCard }) => (
     </tbody>
   </table>
 )
+
 
 const FounderPersonalNoticeEmail = ({
   firstName,
@@ -115,6 +137,26 @@ const FounderPersonalNoticeEmail = ({
 
         <Hr style={hr} />
 
+        {/* Seul bloc sombre de l'email, motif "une seule star" */}
+        <table role="presentation" cellPadding={0} cellSpacing={0} width="100%" bgcolor="#2C6D50" style={darkBox}>
+          <tbody>
+            <tr>
+              <td style={darkCell} className="em-card">
+                <Text style={darkKicker}>UN COUP DE MAIN, DANS L'AUTRE SENS</Text>
+                <Text style={darkTitle} className="em-card-title">Deux minutes pour nous faire connaître</Text>
+                <Text style={darkText} className="em-card-line">
+                  Un avis Google, c'est ce qui fait qu'on remonte quand quelqu'un cherche une garde près de chez lui. Plus de gens qui nous trouvent, c'est plus de maisons à garder pour vous. C'est le levier le plus direct que vous ayez pour faire grossir la plateforme.
+                </Text>
+                <Button style={whiteButton} href={googleReviewUrl} className="em-btn">
+                  Laisser un avis Google
+                </Button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+
+        <Hr style={hr} />
+
         <SectionHeader label="MAINTENANT, LA DEMANDE" />
         <Heading as="h2" style={h2}>C'est gratuit, et ce n'est pas un cadeau</Heading>
 
@@ -129,15 +171,6 @@ const FounderPersonalNoticeEmail = ({
           Répondez à cet email, trois lignes suffisent. Vous avez le droit d'être dur, c'est même le plus utile. Je lis tout et je réponds.
         </Text>
 
-        <Section style={box} className="em-card">
-          <Text style={boxTitle} className="em-card-title">Et si vous avez deux minutes de plus</Text>
-          <Text style={boxText} className="em-card-line">
-            Un avis Google fait connaître Guardiens. Plus de gens qui nous trouvent, c'est plus de maisons à garder pour vous. C'est le levier le plus direct que vous ayez pour faire grossir la plateforme.
-          </Text>
-          <Button style={secondaryButton} href={googleReviewUrl} className="em-btn">
-            Laisser un avis Google
-          </Button>
-        </Section>
 
         <Text style={text} className="em-text">Merci d'être là si tôt.</Text>
         <Text style={signName}>Jérémie</Text>
@@ -163,7 +196,7 @@ export const template = {
         distanceLabel: '33 km',
         meta: '1 chien · 27 août au 30 septembre',
         url: 'https://guardiens.fr/gardes/cogny-nala',
-        imageUrl: 'https://guardiens.fr/og/exemple-maison-1.jpg',
+        imageUrl: 'https://erhccyqevdyevpyctsjj.supabase.co/storage/v1/object/public/property-photos/articles/temoignage-auvergne-cover.jpg',
       },
       {
         title: 'Deux chats et un jardin à Annecy',
@@ -253,6 +286,14 @@ const thumbFallback = {
   borderRadius: '10px',
   backgroundColor: LINE,
 }
+const thumbCell = {
+  width: '92px',
+  backgroundColor: LINE,
+  borderRadius: '10px',
+  lineHeight: '0',
+  fontSize: '0',
+}
+
 const cardMetaTop = {
   fontSize: '11px',
   color: PINE,
@@ -281,17 +322,6 @@ const button = {
   textDecoration: 'none',
   display: 'inline-block',
 }
-const secondaryButton = {
-  backgroundColor: '#ffffff',
-  color: PINE,
-  border: `1px solid ${PINE}`,
-  padding: '12px 24px',
-  borderRadius: '999px',
-  fontSize: '14px',
-  fontWeight: '600' as const,
-  textDecoration: 'none',
-  display: 'inline-block',
-}
 const pullQuote = {
   fontFamily: DISPLAY,
   fontStyle: 'italic' as const,
@@ -299,19 +329,46 @@ const pullQuote = {
   color: PINE,
   margin: '0 0 18px',
 }
-const box = {
-  backgroundColor: CARD_BG,
+const darkBox = {
+  backgroundColor: PINE,
+  backgroundImage: 'linear-gradient(135deg, #245B42 0%, #2C6D50 100%)',
   borderRadius: '16px',
-  padding: '20px 22px',
-  margin: '24px 0',
+  margin: '4px 0 8px',
+  borderCollapse: 'separate' as const,
 }
-const boxTitle = {
+const darkCell = { padding: '26px 26px 28px' }
+const darkKicker = {
+  fontSize: '11px',
+  color: '#C8A24B',
+  textTransform: 'uppercase' as const,
+  letterSpacing: '.16em',
+  fontWeight: '600' as const,
+  margin: '0 0 10px',
+}
+const darkTitle = {
   fontFamily: DISPLAY,
-  fontSize: '17px',
-  color: INK,
-  margin: '0 0 8px',
+  fontSize: '21px',
+  color: '#ffffff',
+  lineHeight: '1.3',
+  margin: '0 0 10px',
 }
-const boxText = { fontSize: '14px', color: '#5C554B', lineHeight: '1.6', margin: '0 0 16px' }
+const darkText = {
+  fontSize: '14px',
+  color: '#E7F0EA',
+  lineHeight: '1.65',
+  margin: '0 0 20px',
+}
+const whiteButton = {
+  backgroundColor: '#ffffff',
+  color: PINE,
+  padding: '14px 30px',
+  borderRadius: '999px',
+  fontSize: '15px',
+  fontWeight: '600' as const,
+  textDecoration: 'none',
+  display: 'inline-block',
+}
+
 const signName = { fontFamily: DISPLAY, fontSize: '18px', color: INK, margin: '0 0 2px' }
 const signRole = { fontSize: '12px', color: '#8C857A', margin: '0 0 8px' }
 const hr = { borderColor: LINE, margin: '28px 0 24px' }
