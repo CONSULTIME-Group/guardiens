@@ -10,12 +10,19 @@ export interface SetupStepProps {
   propertyId: string | null;
   petCount: number;
   photos: string[];
+  /**
+   * Verdict photo calculé par le parcours, toutes sources confondues : galerie,
+   * photos du logement, photo de couverture. Source unique de vérité.
+   */
+  photoDone: boolean;
   /** Libellés exacts de ce qui reste à renseigner, source unique côté parcours. */
   missingLabels: string[];
   onPropertySaved: (property: InlineHousingResult) => void;
   onPetsChanged: (pets: any[]) => void;
   onPhotoUploaded: (url: string) => void;
   onContinue: () => void;
+  /** Présent seulement quand l'écran a été ouvert volontairement. */
+  onBack?: () => void;
 }
 
 const Block = ({
@@ -43,13 +50,13 @@ const Block = ({
  * saisie déjà commencée.
  */
 const CreateSitSetupStep = ({
-  userId, propertyId, petCount, photos, missingLabels,
-  onPropertySaved, onPetsChanged, onPhotoUploaded, onContinue,
+  userId, propertyId, petCount, photos, photoDone, missingLabels,
+  onPropertySaved, onPetsChanged, onPhotoUploaded, onContinue, onBack,
 }: SetupStepProps) => {
   const housingDone = !!propertyId;
   const petsDone = petCount > 0;
-  const photoDone = photos.length > 0;
   const allDone = missingLabels.length === 0;
+
 
 
   return (
