@@ -2386,7 +2386,7 @@ const CreateSit = () => {
                 <p className="text-sm text-muted-foreground mb-2">
                   Votre logement n'est pas encore décrit, c'est lui qui porte la fiche de vos animaux.
                 </p>
-                <Button type="button" variant="outline" onClick={() => setSetupOpen(true)}>
+                <Button type="button" variant="outline" onClick={() => { setSetupEntered(true); setSetupDismissed(false); }}>
                   Décrire mon logement ici
                 </Button>
               </div>
