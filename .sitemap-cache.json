@@ -5,12 +5,12 @@
       "fetchedAt": "2026-08-05T06:09:46.961Z"
     },
     "city_guides": {
-      "head": "2026-08-04T17:54:45.57371+00:00",
-      "fetchedAt": "2026-08-05T06:09:46.965Z"
+      "head": "2026-08-07T04:42:24.567339+00:00",
+      "fetchedAt": "2026-08-07T10:56:11.300Z"
     },
     "pro_profiles": {
-      "head": "2026-08-05T06:12:38.327758+00:00",
-      "fetchedAt": "2026-08-05T06:33:08.649Z"
+      "head": "2026-08-05T06:36:37.068476+00:00",
+      "fetchedAt": "2026-08-07T10:56:11.320Z"
     },
     "seo_department_pages": {
       "head": "2026-07-12T13:19:03.281729+00:00",
@@ -21,8 +21,8 @@
       "fetchedAt": "2026-08-05T06:09:46.976Z"
     },
     "public_sits": {
-      "head": "2026-08-04T11:20:12.196112+00:00",
-      "fetchedAt": "2026-08-05T06:09:46.976Z"
+      "head": "2026-08-07T05:19:11.554698+00:00",
+      "fetchedAt": "2026-08-07T10:56:11.306Z"
     },
     "breed_profiles": {
       "head": "2026-07-23T15:42:40.997631+00:00",
@@ -922,6 +922,12 @@
       {
         "loc": "/guides/cogny",
         "lastmod": "2026-08-04",
+        "changefreq": "weekly",
+        "priority": "0.7"
+      },
+      {
+        "loc": "/guides/sarry",
+        "lastmod": "2026-08-07",
         "changefreq": "weekly",
         "priority": "0.7"
       }
@@ -1889,6 +1895,12 @@
       {
         "loc": "/annonces/garde-de-deux-chats-timides-vue-montagne-et-au-calme-upaix-403f27",
         "lastmod": "2026-08-03",
+        "changefreq": "weekly",
+        "priority": "0.7"
+      },
+      {
+        "loc": "/annonces/garde-de-5-chiens-adorables-dans-une-maison-a-marrakech-618f02",
+        "lastmod": "2026-08-07",
         "changefreq": "weekly",
         "priority": "0.7"
       },
