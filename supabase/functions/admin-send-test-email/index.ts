@@ -2,6 +2,7 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
 import { requireAdminOrServiceRole } from "../_shared/require-admin.ts";
 import { resendFetch } from "../_shared/resend-guard.ts";
+import { SENDER_FROM, REPLY_TO_ADDRESS } from "../_shared/sender-address.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -105,7 +106,8 @@ Deno.serve(async (req) => {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        from: "Guardiens <bonjour@guardiens.fr>",
+        from: SENDER_FROM,
+        reply_to: REPLY_TO_ADDRESS,
         to: [adminEmail],
         subject: testSubject,
         html,
