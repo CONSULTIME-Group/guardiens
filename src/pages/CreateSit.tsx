@@ -1594,7 +1594,9 @@ const CreateSit = () => {
               })));
             }}
             onPhotoUploaded={registerUploadedPhoto}
-            onContinue={() => setSetupOpen(false)}
+            missingLabels={preflightMissing.map((m) => m.label)}
+            onContinue={handleSetupContinue}
+
           />
         )}
       </div>
