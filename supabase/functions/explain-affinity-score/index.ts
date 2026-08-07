@@ -8,6 +8,8 @@
 import { callLovableAI, extractToolArgs, STYLE_GUARDRAILS, CORS_HEADERS } from "../_shared/ai-gateway.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 
+const PROSCRIBED = /(voisin(e|s|age)?|gratuit à vie|pour toujours|période d'essai|programme fondateur|auvergne-rhône-alpes|\bAURA\b)/i;
+
 function json(body: unknown, status = 200) {
   return new Response(JSON.stringify(body), {
     status,

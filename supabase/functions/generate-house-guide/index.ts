@@ -10,7 +10,7 @@ import { isLlmRefusal, logRefusalFallback } from "../_shared/refusal-guard.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 
 const RATE_LIMIT_PER_DAY = 2;
-const PROSCRIBED = /(voisin(e|s|age)?|auvergne-rhône-alpes|\bAURA\b)/i;
+const PROSCRIBED = /(voisin(e|s|age)?|gratuit à vie|pour toujours|période d'essai|programme fondateur|auvergne-rhône-alpes|\bAURA\b)/i;
 
 const FALLBACK_DRAFTS = {
   wifi_info: "Bienvenue à la maison. Le réseau WiFi est {nom du réseau} et le mot de passe est {mot de passe}. La box internet se trouve {emplacement de la box}. En cas de coupure, un simple redémarrage de la box (couper l'alimentation 30 secondes, puis rallumer) résout la plupart des soucis. La télévision se rallume avec {télécommande / nom de l'appli}. N'hésitez pas à me demander si un point n'est pas clair.",
