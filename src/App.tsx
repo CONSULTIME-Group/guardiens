@@ -3,6 +3,8 @@ import { lazyWithRetry as lazy } from "@/lib/lazyWithRetry";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Route, Routes, Navigate, useParams, useLocation, useNavigate } from "react-router-dom";
 import { Loader2 } from "lucide-react";
+import PageMeta from "@/components/PageMeta";
+
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -374,10 +376,28 @@ const NavigateBlogSlug = () => {
   return <Navigate to={`/actualites/${slug}`} replace />;
 };
 
+// Route héritée au singulier : redirection client pour les personnes,
+// redirection permanente déclarée aux crawlers via Prerender.
 const NavigateGuideSlug = () => {
   const { slug } = useParams();
-  return <Navigate to={`/guides/${slug}`} replace />;
+  const target = `/guides/${slug}`;
+  const isPrerender =
+    typeof navigator !== "undefined" && /Prerender/i.test(navigator.userAgent);
+  return (
+    <>
+      <PageMeta
+        title="Guide local"
+        description="Cette page a été déplacée vers le guide local correspondant."
+        path={target}
+        canonical={`https://guardiens.fr${target}`}
+        statusCode={301}
+        prerenderHeader={`Location: https://guardiens.fr${target}`}
+      />
+      {!isPrerender && <Navigate to={target} replace />}
+    </>
+  );
 };
+
 
 const RedirectProfil = () => {
   const { id } = useParams();
