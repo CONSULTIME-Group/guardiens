@@ -75,6 +75,20 @@ function nextQuietEnd(): Date {
   return nextQuietEndFrom(new Date())
 }
 
+/**
+ * Gabarits declenches par un message ou une candidature, pour lesquels le
+ * bouton principal porte un lien profond authentifie vers le fil concerne.
+ * Constat qui a motive l'ajout : cinq notifications ouvertes, zero clic. Le
+ * cout du chemin de retour tuait la conversation.
+ */
+const DEEP_LINK_TEMPLATES = new Set<string>([
+  'new-message',
+  'new-application',
+  'unread-messages-reminder',
+  'owner-pending-application-nudge',
+  'first-application-received',
+])
+
 // Generate a cryptographically random 32-byte hex token
 function generateToken(): string {
   const bytes = new Uint8Array(32)
