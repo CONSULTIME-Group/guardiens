@@ -8,14 +8,17 @@
 // etre plafonne. Le plafond de frequence protege l'utilisateur du marketing, pas
 // de ses interlocuteurs.
 //
-// Regles effectives :
+// Regles effectives (mises a jour le 07/08/2026) :
 //   - transactional          : AUCUN plafond de frequence. Seules les heures
 //                              calmes s'appliquent, on ne reveille personne la nuit.
-//   - product/digest/alert   : 1 / 24h et 3 / 7 jours, cumul toutes categories
-//                              non transactionnelles confondues. Aucun plafond
-//                              global supplementaire.
+//   - alert                  : compteurs propres (voir CAP_ALERT_*).
+//   - nearby-sit-alert       : compteurs propres au gabarit (voir CAP_NEARBY_SIT_*).
+//   - digest                 : compteurs propres a la categorie (voir CAP_DIGEST_*).
+//   - product                : 1 / 24h et 3 / 7 jours, sur les compteurs
+//                              CAP_NON_TX_*, qui ne concernent plus que 'product'.
 //   - categorie absente ou inconnue : traitee comme 'product', donc plafonnee.
 //     Seule la valeur explicite 'transactional' donne droit a l'exemption.
+
 //
 // Correctif du Lot 6 (26/07/2026), dont le comportement decrit ici est caduc :
 // ce lot appliquait 1 / heure et 3 / 24h aux emails transactionnels, sur des
