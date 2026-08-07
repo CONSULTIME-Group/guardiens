@@ -73,6 +73,7 @@ import { template as missionNudgeFeedback } from './mission-nudge-feedback.tsx'
 import { template as missionNudgeNoResponse } from './mission-nudge-no-response.tsx'
 import { template as mutualAidWeeklyDigest } from './mutual-aid-weekly-digest.tsx'
 import { template as nearbyDailyDigest } from './nearby-daily-digest.tsx'
+import { template as weeklyNearbyDigest } from './weekly-nearby-digest.tsx'
 import { template as firstApplicationReceived } from './first-application-received.tsx'
 import { template as nudgeMissingPhoto } from './nudge-missing-photo.tsx'
 import { template as ownerActivationNudge } from './owner-activation-nudge.tsx'
@@ -164,6 +165,7 @@ export const TEMPLATES: Record<string, TemplateEntry> = {
   'mission-nudge-no-response': missionNudgeNoResponse,
   'mutual-aid-weekly-digest': mutualAidWeeklyDigest,
   'nearby-daily-digest': nearbyDailyDigest,
+  'weekly-nearby-digest': weeklyNearbyDigest,
   'first-application-received': firstApplicationReceived,
   'nudge-missing-photo': nudgeMissingPhoto,
   'owner-activation-nudge': ownerActivationNudge,

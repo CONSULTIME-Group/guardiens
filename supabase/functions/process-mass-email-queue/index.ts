@@ -10,6 +10,7 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
 import { resendFetch } from "../_shared/resend-guard.ts";
 import { SENDER_FROM, REPLY_TO_ADDRESS } from "../_shared/sender-address.ts";
+import { getEmailCategory } from "../_shared/email-categories.ts";
 import {
   acquireWorkerLock,
   releaseWorkerLock,
@@ -222,17 +223,27 @@ Deno.serve(async (req) => {
         continue;
       }
 
-      // Opt-out alerte : email → profile.id → email_preferences.
-      // Les diffusions passant par cette file sont catégorisées « alert »
-      // (nearby-sit-alert) : on interroge alert_emails, pas product_emails.
+      // Opt-out : email → profile.id → email_preferences.
+      // Le drapeau interrogé dépend de la catégorie RÉELLE du gabarit, pas
+      // d'une hypothèse. Une diffusion « digest » ne doit plus être bloquée
+      // par un refus d'alertes, et inversement.
+      const queuedTemplate = (msg.message as any)?.template_name as string | undefined;
+      const category = queuedTemplate ? getEmailCategory(queuedTemplate) : "alert";
+      const FLAG_BY_CATEGORY: Record<string, string | null> = {
+        transactional: null,
+        alert: "alert_emails",
+        digest: "digest_emails",
+        product: "product_emails",
+      };
+      const optOutFlag = FLAG_BY_CATEGORY[category] ?? "alert_emails";
       const { data: profile } = await service
         .from("profiles").select("id, first_name").eq("email", rawEmail).maybeSingle();
-      if (profile?.id) {
+      if (profile?.id && optOutFlag) {
         const { data: prefs } = await service
-          .from("email_preferences").select("alert_emails").eq("user_id", profile.id).maybeSingle();
-        if (prefs && (prefs as any).alert_emails === false) {
+          .from("email_preferences").select(optOutFlag).eq("user_id", profile.id).maybeSingle();
+        if (prefs && (prefs as any)[optOutFlag] === false) {
           await service.from("mass_email_sends").update({
-            status: "suppressed", last_error: "alert opt-out", last_attempt_at: new Date().toISOString(),
+            status: "suppressed", last_error: `${category} opt-out`, last_attempt_at: new Date().toISOString(),
           }).eq("id", (locked as any).id);
 
           await service.rpc("delete_email", { queue_name: QUEUE, message_id: msg.msg_id });
@@ -240,6 +251,7 @@ Deno.serve(async (req) => {
           continue;
         }
       }
+
 
       // --- Chemin « template » (diffusion de proximité d'annonce) ----------
       // Quand le message pgmq porte un `template_name`, l'expédition passe par

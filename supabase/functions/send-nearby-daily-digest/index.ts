@@ -174,8 +174,12 @@ Deno.serve(async (req) => {
     // 3) Récupère les destinataires opt-in avec coordonnées.
     let recipientsQ = supabase
       .from('email_preferences')
-      .select('user_id, nearby_daily_radius_km, product_emails, new_mission_digest')
+      .select('user_id, nearby_daily_radius_km, product_emails, new_mission_digest, sit_alert_frequency')
       .eq('nearby_daily_digest', true)
+      // Le recapitulatif quotidien ne concerne pas les personnes qui ont
+      // demande un rythme hebdomadaire, ni celles qui ont coupe ce flux.
+      .neq('sit_alert_frequency', 'weekly')
+      .neq('sit_alert_frequency', 'none')
     if (body.user_id) recipientsQ = recipientsQ.eq('user_id', body.user_id)
 
     const { data: prefs, error: prefsErr } = await recipientsQ
