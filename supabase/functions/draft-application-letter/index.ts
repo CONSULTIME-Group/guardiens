@@ -23,7 +23,7 @@ import { callLovableAI, extractToolArgs, STYLE_GUARDRAILS, CORS_HEADERS } from "
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 
 const RATE_LIMIT_PER_HOUR = 3;
-const PROSCRIBED = /(voisin(e|s|age)?|auvergne-rhône-alpes|\bAURA\b)/i;
+const PROSCRIBED = /(voisin(e|s|age)?|gratuit à vie|pour toujours|période d'essai|programme fondateur|auvergne-rhône-alpes|\bAURA\b)/i;
 
 // Motifs de refus / dégénérescence LLM. Volontairement large : tout ce qui
 // ressemble à un refus doit basculer sur le fallback statique.
