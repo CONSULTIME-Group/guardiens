@@ -65,7 +65,7 @@ const STYLE_GUARDRAILS_BASE = `Règles éditoriales strictes (à respecter sans 
 - Ton factuel, chaleureux, sans superlatifs commerciaux.
 - INTERDIT : les mots « voisin », « voisine », « voisins », « voisinage ». Remplacez par « gardien », « personne de confiance », « membre du coin », « proche ».
 - INTERDIT : mention de région (« AURA », « Auvergne-Rhône-Alpes »).
-- INTERDIT : caractère tiret cadratin « — » (U+2014). Utilisez virgule, deux-points, parenthèses, point ou tiret demi-cadratin « – ».
+- INTERDIT : tiret cadratin « — » (U+2014) et tiret demi-cadratin « – » (U+2013) en ponctuation de phrase. Utilisez virgule, deux-points, parenthèses ou point.
 - Pas d'emoji, pas d'icônes décoratives, pas de hashtags.`;
 
 export const STYLE_GUARDRAILS = `${STYLE_GUARDRAILS_BASE}
