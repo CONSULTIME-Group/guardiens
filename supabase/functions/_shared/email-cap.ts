@@ -346,6 +346,11 @@ export interface DeferInput {
   nearbySitDaySentAt?: string[]
   /** ISO timestamps of `sent` 'nearby-sit-alert' sur 7 jours, ascendant. */
   nearbySitWeekSentAt?: string[]
+  /** ISO timestamps of `sent` emails de categorie 'digest' sur 24h, ascendant. */
+  digestDaySentAt?: string[]
+  /** Idem sur 7 jours. */
+  digestWeekSentAt?: string[]
+
 }
 
 
