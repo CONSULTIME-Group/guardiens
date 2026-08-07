@@ -124,10 +124,15 @@ finalisations critiques) — pas pour contourner le cap depuis l'UI.
 
 Pour les templates **non bypass** et **non urgent** :
 
-1. **Quiet hours** (22h–8h Paris) → `defer` au prochain 08h00 Paris. S'applique
-   à toutes les catégories, y compris transactionnelle : on ne réveille personne
-   la nuit.
-2. **Catégorie `transactional`** → `send`, sans aucun plafond de fréquence.
+1. **`NO_QUEUE_TEMPLATES`** (`new-message`, `new-application`) → `send`
+   immédiatement, sans plafond, sans file, et sans heures calmes.
+2. **Catégorie `transactional`** → `send`, sans aucun plafond de fréquence et
+   sans heures calmes (règle du 07/08/2026).
+2 bis. **Quiet hours** (22h–8h Paris) → `defer` au prochain 08h00 Paris,
+   uniquement pour les catégories `product`, `digest` et `alert`. Une
+   notification email ne réveille personne, ce qui sonne la nuit relève des
+   réglages du téléphone. En revanche, personne n'attend un conseil de
+   publication à trois heures du matin, et l'envoi du matin performe mieux.
 3. **`nearby-sit-alert`** (compteur propre au gabarit) :
    a. **10 envois sur 7 jours** → `defer` (`frequency_cap_category_week`).
    b. **3 envois sur 24 h** → `defer` (`frequency_cap_category_day`).
@@ -146,8 +151,10 @@ type `DeferDecision` pour lire l'historique de la file, mais ne sont plus jamais
 produits.
 
 
-Le quiet hours prime toujours sur les caps : un email refusé pour cap
-pendant la nuit est reporté au matin (08h00), pas au prochain créneau cap.
+Pour les catégories concernées (`product`, `digest`, `alert`), le quiet hours
+prime toujours sur les caps : un email refusé pour cap pendant la nuit est
+reporté au matin (08h00), pas au prochain créneau cap. Les messages humains et
+les emails transactionnels ne passent plus par cette garde.
 
 Statuts journalisés : un report écrit une ligne `email_send_log` en
 `deferred`, un blocage par désinscription de catégorie écrit
