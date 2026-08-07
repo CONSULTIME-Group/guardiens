@@ -40,7 +40,11 @@ describe("adresse d'expedition centralisee", () => {
       const src = readFileSync(file, "utf8");
       src.split("\n").forEach((line, i) => {
         if (line.trim().startsWith("//")) return;
-        if (FORBIDDEN.some((addr) => line.includes(addr))) {
+        // Seules les adresses en position d'expediteur sont interdites :
+        // `from:` ou la forme complete "Guardiens <adresse>". Les usages en
+        // destinataire (alertes internes) restent legitimes.
+        const isSenderPosition = /\bfrom\s*:/.test(line) || /Guardiens\s*</.test(line);
+        if (isSenderPosition && FORBIDDEN.some((addr) => line.includes(addr))) {
           offenders.push(`${file}:${i + 1}: ${line.trim()}`);
         }
       });
