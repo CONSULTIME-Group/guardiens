@@ -26,6 +26,18 @@ const corsHeaders = {
     'authorization, x-client-info, apikey, content-type',
 }
 
+/**
+ * Identifiant stable au format uuid derive d'une cle texte. Sert de cle
+ * d'idempotence pour les signaux admin, dont l'index unique porte sur
+ * (signal_type, entity_id) tant que le signal n'est pas resolu.
+ */
+async function md5Uuid(key: string): Promise<string> {
+  const bytes = new Uint8Array(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(key)))
+  const hex = Array.from(bytes.slice(0, 16)).map((b) => b.toString(16).padStart(2, '0')).join('')
+  return `${hex.slice(0, 8)}-${hex.slice(8, 12)}-${hex.slice(12, 16)}-${hex.slice(16, 20)}-${hex.slice(20, 32)}`
+}
+
+
 // === Frequency cap & quiet hours ===
 // Pure logic lives in _shared/email-cap.ts so it can be unit-tested.
 import { resendFetch } from "../_shared/resend-guard.ts";
