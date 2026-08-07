@@ -53,8 +53,9 @@ serve(async (req) => {
         .eq("key", "cp_relance_max")
         .maybeSingle();
       if (flag?.enabled && typeof flag.value_int === "number" && flag.value_int > 0) {
-        maxRelances = flag.value_int;
+        maxRelances = Math.min(flag.value_int, HARD_MAX_RELANCES);
       }
+
     }
 
     // Ciblage : uniquement les gardiens. Un propriétaire ne doit pas recevoir
