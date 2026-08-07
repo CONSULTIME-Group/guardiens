@@ -59,7 +59,13 @@ const NotFound = () => {
 
   return (
     <>
-      <PageMeta title={t("not_found.meta_title")} description={t("not_found.meta_description")} noindex />
+      <PageMeta
+        title={t("not_found.meta_title")}
+        description={t("not_found.meta_description")}
+        noindex
+        statusCode={404}
+        noCanonical
+      />
       <div className="flex min-h-screen items-center justify-center px-4 bg-background">
         <div className="text-center max-w-lg space-y-6">
           <DiggingDogSvg />
