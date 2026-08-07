@@ -10,17 +10,81 @@ import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
 type Radius = 5 | 15 | 30 | 50 | 100;
-
 const RADIUS_OPTIONS: Radius[] = [5, 15, 30, 50, 100];
+
+type SitFrequency = "immediate" | "weekly" | "none";
+type MutualAidFrequency = "weekly" | "none";
 
 type Prefs = {
   product_emails: boolean;
-  digest_emails: boolean;
-  alert_emails: boolean;
-  new_mission_digest: boolean;
-  nearby_daily_digest: boolean;
+  sit_alert_frequency: SitFrequency;
+  mutual_aid_frequency: MutualAidFrequency;
   nearby_daily_radius_km: Radius;
 };
+
+const SIT_CHOICES: Array<{ value: SitFrequency; label: string; help: string }> = [
+  {
+    value: "immediate",
+    label: "À chaque nouvelle annonce",
+    help: "Un email dès qu'une garde correspond à votre secteur.",
+  },
+  {
+    value: "weekly",
+    label: "Une fois par semaine",
+    help: "Un seul résumé, le mercredi matin.",
+  },
+  {
+    value: "none",
+    label: "Jamais",
+    help: "Vous consultez les annonces quand vous le souhaitez.",
+  },
+];
+
+const MUTUAL_AID_CHOICES: Array<{ value: MutualAidFrequency; label: string; help: string }> = [
+  {
+    value: "weekly",
+    label: "Une fois par semaine",
+    help: "Les coups de main et les questions ouvertes autour de vous, le mercredi matin.",
+  },
+  { value: "none", label: "Jamais", help: "Aucun email d'entraide." },
+];
+
+function ChoiceRow<T extends string>({
+  choices,
+  value,
+  onChange,
+  name,
+}: {
+  choices: Array<{ value: T; label: string; help: string }>;
+  value: T;
+  onChange: (v: T) => void;
+  name: string;
+}) {
+  return (
+    <div role="radiogroup" aria-label={name} className="space-y-2">
+      {choices.map((c) => {
+        const selected = value === c.value;
+        return (
+          <button
+            key={c.value}
+            type="button"
+            role="radio"
+            aria-checked={selected}
+            onClick={() => onChange(c.value)}
+            className={`w-full text-left rounded-lg border px-4 py-3 transition ${
+              selected
+                ? "border-primary bg-primary/5"
+                : "border-input bg-background hover:bg-muted"
+            }`}
+          >
+            <span className="block text-sm font-medium text-foreground">{c.label}</span>
+            <span className="block text-xs text-muted-foreground mt-0.5">{c.help}</span>
+          </button>
+        );
+      })}
+    </div>
+  );
+}
 
 const EmailPreferences = () => {
   const { user, loading: authLoading } = useAuth();
@@ -28,11 +92,9 @@ const EmailPreferences = () => {
   const [saving, setSaving] = useState(false);
   const [prefs, setPrefs] = useState<Prefs>({
     product_emails: true,
-    digest_emails: true,
-    alert_emails: true,
-    new_mission_digest: true,
-    nearby_daily_digest: true,
-    nearby_daily_radius_km: 100,
+    sit_alert_frequency: "immediate",
+    mutual_aid_frequency: "weekly",
+    nearby_daily_radius_km: 30,
   });
 
   useEffect(() => {
@@ -40,17 +102,19 @@ const EmailPreferences = () => {
     (async () => {
       const { data } = await supabase
         .from("email_preferences")
-        .select("product_emails, digest_emails, alert_emails, new_mission_digest, nearby_daily_digest, nearby_daily_radius_km")
+        .select(
+          "product_emails, sit_alert_frequency, mutual_aid_frequency, nearby_daily_radius_km",
+        )
         .eq("user_id", user.id)
         .maybeSingle();
-      if (data) setPrefs({
-        product_emails: data.product_emails ?? true,
-        digest_emails: data.digest_emails ?? true,
-        alert_emails: data.alert_emails ?? true,
-        new_mission_digest: (data as any).new_mission_digest ?? true,
-        nearby_daily_digest: (data as any).nearby_daily_digest ?? true,
-        nearby_daily_radius_km: ((data as any).nearby_daily_radius_km ?? 100) as Radius,
-      });
+      if (data) {
+        setPrefs({
+          product_emails: data.product_emails ?? true,
+          sit_alert_frequency: ((data as any).sit_alert_frequency ?? "immediate") as SitFrequency,
+          mutual_aid_frequency: ((data as any).mutual_aid_frequency ?? "weekly") as MutualAidFrequency,
+          nearby_daily_radius_km: ((data as any).nearby_daily_radius_km ?? 30) as Radius,
+        });
+      }
       setLoading(false);
     })();
   }, [user]);
@@ -59,18 +123,25 @@ const EmailPreferences = () => {
 
   const save = async () => {
     setSaving(true);
+    // Les anciens drapeaux restent alimentés, de façon cohérente avec les
+    // fréquences choisies, le temps que tous les envois soient migrés.
     const { error } = await supabase.rpc("upsert_my_email_preferences", {
       p_product: prefs.product_emails,
-      p_digest: prefs.digest_emails,
-      p_alert: prefs.alert_emails,
-      p_new_mission_digest: prefs.new_mission_digest,
-      p_nearby_daily_digest: prefs.nearby_daily_digest,
+      p_digest: prefs.sit_alert_frequency !== "none" || prefs.mutual_aid_frequency !== "none",
+      p_alert: prefs.sit_alert_frequency !== "none",
+      p_new_mission_digest: prefs.mutual_aid_frequency !== "none",
+      p_nearby_daily_digest: prefs.sit_alert_frequency === "immediate",
       p_nearby_daily_radius_km: prefs.nearby_daily_radius_km,
+      p_sit_alert_frequency: prefs.sit_alert_frequency,
+      p_mutual_aid_frequency: prefs.mutual_aid_frequency,
     } as any);
     setSaving(false);
     if (error) toast.error("Impossible d'enregistrer vos préférences");
     else toast.success("Préférences enregistrées");
   };
+
+  const showRadius =
+    prefs.sit_alert_frequency !== "none" || prefs.mutual_aid_frequency !== "none";
 
   return (
     <div className="min-h-screen bg-background py-6 md:py-10 px-4">
@@ -82,32 +153,57 @@ const EmailPreferences = () => {
         <header>
           <h1 className="font-heading text-2xl md:text-3xl mb-2">Préférences email</h1>
           <p className="text-muted-foreground">
-            Choisissez les types d'emails que vous souhaitez recevoir. Les emails essentiels
-            (confirmations de garde, identité, sécurité) restent toujours envoyés.
+            Trois réglages, un par type d'email. Chaque flux est indépendant : couper l'un
+            n'éteint jamais les autres. Les emails essentiels (confirmations de garde,
+            identité, sécurité) restent toujours envoyés.
           </p>
         </header>
 
         {loading || authLoading ? (
-          <div className="flex justify-center py-12"><Loader2 className="h-6 w-6 animate-spin text-muted-foreground" /></div>
+          <div className="flex justify-center py-12">
+            <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+          </div>
         ) : (
           <>
             <Card>
               <CardHeader>
-                <CardTitle className="text-base">Emails essentiels</CardTitle>
+                <CardTitle className="text-base">Nouvelles annonces de garde</CardTitle>
                 <CardDescription>
-                  Confirmations de garde, vérification d'identité, annulations, réponses directes,
-                  rappels d'abonnement. Ces emails sont indispensables et ne peuvent pas être désactivés.
+                  Les gardes publiées autour de chez vous.
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <Switch checked disabled aria-label="Emails essentiels (toujours actifs)" />
+                <ChoiceRow
+                  name="Fréquence des nouvelles annonces"
+                  choices={SIT_CHOICES}
+                  value={prefs.sit_alert_frequency}
+                  onChange={(v) => setPrefs((p) => ({ ...p, sit_alert_frequency: v }))}
+                />
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-base">Entraide et questions</CardTitle>
+                <CardDescription>
+                  Les coups de main demandés ou proposés près de chez vous, et les questions
+                  encore sans réponse retenue. L'entraide reste sans contrepartie financière.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <ChoiceRow
+                  name="Fréquence de l'entraide"
+                  choices={MUTUAL_AID_CHOICES}
+                  value={prefs.mutual_aid_frequency}
+                  onChange={(v) => setPrefs((p) => ({ ...p, mutual_aid_frequency: v }))}
+                />
               </CardContent>
             </Card>
 
             <Card>
               <CardHeader className="flex flex-row items-start justify-between gap-4">
                 <div>
-                  <CardTitle className="text-base">Conseils & accompagnement</CardTitle>
+                  <CardTitle className="text-base">Conseils et accompagnement</CardTitle>
                   <CardDescription>
                     Conseils pour publier votre annonce, complétion de profil, rappels d'avis.
                   </CardDescription>
@@ -115,101 +211,41 @@ const EmailPreferences = () => {
                 <Switch
                   checked={prefs.product_emails}
                   onCheckedChange={(v) => setPrefs((p) => ({ ...p, product_emails: v }))}
+                  aria-label="Conseils et accompagnement"
                 />
               </CardHeader>
             </Card>
 
-            <Card>
-              <CardHeader className="flex flex-row items-start justify-between gap-4">
-                <div>
-                  <CardTitle className="text-base">Alertes nouvelles annonces</CardTitle>
+            {showRadius && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-base">Votre rayon</CardTitle>
                   <CardDescription>
-                    Notifications dès qu'une nouvelle garde apparaît dans une de vos zones d'alerte.
+                    Nous regardons d'abord dans ce rayon. S'il n'y a presque rien cette
+                    semaine, nous élargissons jusqu'à 100 km et nous vous le disons dans
+                    l'email. Si rien n'existe, aucun email ne part.
                   </CardDescription>
-                </div>
-                <Switch
-                  checked={prefs.alert_emails}
-                  onCheckedChange={(v) => setPrefs((p) => ({ ...p, alert_emails: v }))}
-                />
-              </CardHeader>
-            </Card>
-
-            <Card>
-              <CardHeader className="flex flex-row items-start justify-between gap-4">
-                <div>
-                  <CardTitle className="text-base">Récapitulatifs</CardTitle>
-                  <CardDescription>
-                    Synthèses périodiques de votre activité (à venir).
-                  </CardDescription>
-                </div>
-                <Switch
-                  checked={prefs.digest_emails}
-                  onCheckedChange={(v) => setPrefs((p) => ({ ...p, digest_emails: v }))}
-                />
-              </CardHeader>
-            </Card>
-
-            <Card>
-              <CardHeader className="flex flex-row items-start justify-between gap-4">
-                <div>
-                  <CardTitle className="text-base">Digest quotidien entraide</CardTitle>
-                  <CardDescription>
-                    Chaque soir, jusqu'à 3 nouvelles petites missions publiées dans les 24h
-                    dans un rayon de 30 km autour de chez vous. L'entraide reste gratuite.
-                  </CardDescription>
-                </div>
-                <Switch
-                  checked={prefs.new_mission_digest}
-                  onCheckedChange={(v) => setPrefs((p) => ({ ...p, new_mission_digest: v }))}
-                />
-              </CardHeader>
-            </Card>
-
-            <Card>
-              <CardHeader className="gap-3">
-                <div className="flex flex-row items-start justify-between gap-4">
-                  <div>
-                    <CardTitle className="text-base">Récap quotidien près de chez vous</CardTitle>
-                    <CardDescription>
-                      Un email par jour maximum, envoyé à 9h, qui récapitule les nouvelles
-                      annonces de garde et les petites missions d'entraide publiées dans les
-                      dernières 24h autour de chez vous. Pas d'email si rien de nouveau.
-                      Si vous coupez le digest quotidien entraide ci-dessus, ce récap ne
-                      contiendra plus que les annonces de garde.
-                    </CardDescription>
-
+                </CardHeader>
+                <CardContent>
+                  <div className="flex flex-wrap gap-2">
+                    {RADIUS_OPTIONS.map((km) => (
+                      <button
+                        key={km}
+                        type="button"
+                        onClick={() => setPrefs((p) => ({ ...p, nearby_daily_radius_km: km }))}
+                        className={`px-4 py-2 rounded-md text-sm border transition ${
+                          prefs.nearby_daily_radius_km === km
+                            ? "bg-primary text-primary-foreground border-primary"
+                            : "bg-background text-foreground border-input hover:bg-muted"
+                        }`}
+                      >
+                        {km} km
+                      </button>
+                    ))}
                   </div>
-                  <Switch
-                    checked={prefs.nearby_daily_digest}
-                    onCheckedChange={(v) => setPrefs((p) => ({ ...p, nearby_daily_digest: v }))}
-                  />
-                </div>
-                {prefs.nearby_daily_digest && (
-                  <div className="pt-2">
-                    <p className="text-sm text-muted-foreground mb-2">Rayon autour de chez vous</p>
-                    <div className="flex flex-wrap gap-2">
-                      {RADIUS_OPTIONS.map((km) => (
-                        <button
-                          key={km}
-                          type="button"
-                          onClick={() => setPrefs((p) => ({ ...p, nearby_daily_radius_km: km }))}
-                          className={`px-4 py-2 rounded-md text-sm border transition ${
-                            prefs.nearby_daily_radius_km === km
-                              ? "bg-primary text-primary-foreground border-primary"
-                              : "bg-background text-foreground border-input hover:bg-muted"
-                          }`}
-                        >
-                          {km} km
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </CardHeader>
-            </Card>
-
-
-
+                </CardContent>
+              </Card>
+            )}
 
             <div className="flex justify-end">
               <Button onClick={save} disabled={saving} className="h-11 md:h-auto">

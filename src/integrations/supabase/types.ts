@@ -2108,11 +2108,13 @@ export type Database = {
           alert_emails: boolean
           created_at: string
           digest_emails: boolean
+          mutual_aid_frequency: string
           nearby_daily_digest: boolean
           nearby_daily_radius_km: number
           new_mission_digest: boolean
           new_sit_digest: boolean
           product_emails: boolean
+          sit_alert_frequency: string
           updated_at: string
           user_id: string
         }
@@ -2120,11 +2122,13 @@ export type Database = {
           alert_emails?: boolean
           created_at?: string
           digest_emails?: boolean
+          mutual_aid_frequency?: string
           nearby_daily_digest?: boolean
           nearby_daily_radius_km?: number
           new_mission_digest?: boolean
           new_sit_digest?: boolean
           product_emails?: boolean
+          sit_alert_frequency?: string
           updated_at?: string
           user_id: string
         }
@@ -2132,11 +2136,13 @@ export type Database = {
           alert_emails?: boolean
           created_at?: string
           digest_emails?: boolean
+          mutual_aid_frequency?: string
           nearby_daily_digest?: boolean
           nearby_daily_radius_km?: number
           new_mission_digest?: boolean
           new_sit_digest?: boolean
           product_emails?: boolean
+          sit_alert_frequency?: string
           updated_at?: string
           user_id?: string
         }
@@ -8420,6 +8426,19 @@ export type Database = {
               p_nearby_daily_radius_km?: number
               p_new_mission_digest?: boolean
               p_product: boolean
+            }
+            Returns: undefined
+          }
+        | {
+            Args: {
+              p_alert: boolean
+              p_digest: boolean
+              p_mutual_aid_frequency?: string
+              p_nearby_daily_digest?: boolean
+              p_nearby_daily_radius_km?: number
+              p_new_mission_digest?: boolean
+              p_product: boolean
+              p_sit_alert_frequency?: string
             }
             Returns: undefined
           }

@@ -250,9 +250,15 @@ Deno.serve(async (req) => {
       for (let i = 0; i < candidateIds.length; i += CH) {
         const { data: eprefs } = await supabase
           .from("email_preferences")
-          .select("user_id, alert_emails")
+          .select("user_id, alert_emails, sit_alert_frequency")
           .in("user_id", candidateIds.slice(i, i + CH));
-        for (const p of (eprefs ?? []) as any[]) if (p.alert_emails === false) optedOut.add(p.user_id);
+        // Cette diffusion est l'alerte immediate. Elle ne concerne donc que
+        // les personnes ayant choisi « a chaque nouvelle annonce ». Les
+        // reglages 'weekly' et 'none' sont servis, ou pas, ailleurs.
+        for (const p of (eprefs ?? []) as any[]) {
+          if (p.alert_emails === false) optedOut.add(p.user_id);
+          else if ((p.sit_alert_frequency ?? "immediate") !== "immediate") optedOut.add(p.user_id);
+        }
       }
       const emails = [...sitterById.values()].map((s) => String(s.email || "").toLowerCase()).filter(Boolean);
       const suppressed = new Set<string>();

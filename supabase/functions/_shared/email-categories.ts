@@ -116,6 +116,7 @@ const PRODUCT: ReadonlyArray<string> = [
 const DIGEST: ReadonlyArray<string> = [
   'mission-daily-digest',
   'nearby-daily-digest',
+  'weekly-nearby-digest',
   'mutual-aid-weekly-digest',
   'analysis-requests-digest',
 ]
