@@ -17,6 +17,7 @@
 import { createClient } from 'npm:@supabase/supabase-js@2.45.0'
 import { claimSitNotification, raiseClaimErrorSignal, releaseSitNotification, reportClaimOutcome } from '../_shared/sitNotificationClaim.ts'
 import { parisWindowVerdict } from '../_shared/paris-hour.ts'
+import { recordDeliveryFailure } from '../_shared/delivery-failure.ts'
 
 const TARGET_PARIS_HOUR = 9
 
@@ -381,7 +382,17 @@ Deno.serve(async (req) => {
         if (!_steRes.ok) console.error('send-transactional-email failed', _steRes.status, _steTxt1);
         const sendErr = _steRes.ok ? null : new Error(`send-transactional-email ${_steRes.status}: ${_steTxt1}`);
         if (sendErr) {
-          if (!body.manual) await releaseSitNotification(supabase, p.id)
+          await recordDeliveryFailure(supabase, {
+            templateName: 'nearby-daily-digest',
+            recipientEmail: (p as any).email ?? null,
+            recipientId: p.id,
+            entityType: 'user',
+            entityId: p.id,
+            source: 'send-nearby-daily-digest',
+            errorMessage: `HTTP ${_steRes.status}: ${_steTxt1.slice(0, 500)}`,
+            extra: { http_status: _steRes.status, response_body: _steTxt1.slice(0, 1000) },
+          })
+          if (!body.manual) await releaseSitNotification(supabase, p.id, 'send_failed')
           errors.push({ user_id: p.id, reason: `send_failed: ${String(sendErr)}` })
           continue
         }
