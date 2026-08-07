@@ -369,6 +369,8 @@ export function decideDeferral(input: DeferInput): DeferDecision {
     nonTxDaySentAt = [], nonTxWeekSentAt = [],
     alertDaySentAt = [], alertWeekSentAt = [],
     nearbySitDaySentAt = [], nearbySitWeekSentAt = [],
+    digestDaySentAt = [], digestWeekSentAt = [],
+
   } = input
 
 
