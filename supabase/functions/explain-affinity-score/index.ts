@@ -118,12 +118,14 @@ Contraintes :
     const parsed = extractToolArgs(r.data);
     if (!parsed) return json({ error: "Réponse IA invalide" }, 502);
 
-    // Nettoyage tirets cadratin et demi-cadratin
-    const sanitize = (arr: any[]) => arr.map((n) => ({
-      ...n,
-      text: String(n.text || "").replaceAll("—", ",").replaceAll("–", "-"),
-      ...(n.suggestion ? { suggestion: String(n.suggestion).replaceAll("—", ",").replaceAll("–", "-") } : {}),
-    }));
+    // Nettoyage tirets cadratin et demi-cadratin + filtre mots proscrits
+    const sanitize = (arr: any[]) => arr.map((n) => {
+      let text = String(n.text || "").replaceAll("—", ",").replaceAll("–", "-");
+      let suggestion = n.suggestion ? String(n.suggestion).replaceAll("—", ",").replaceAll("–", "-") : undefined;
+      if (PROSCRIBED.test(text)) text = text.replace(PROSCRIBED, "gardien");
+      if (suggestion && PROSCRIBED.test(suggestion)) suggestion = suggestion.replace(PROSCRIBED, "gardien");
+      return { ...n, text, ...(suggestion !== undefined ? { suggestion } : {}) };
+    });
 
     const result = {
       score,
