@@ -91,6 +91,12 @@ interface PageMetaProps {
    */
   statusCode?: number;
   /**
+   * En-tête HTTP à déclarer à Prerender.io (meta prerender-header), par
+   * exemple "Location: https://guardiens.fr/guides/vienne" pour une
+   * redirection permanente côté crawler.
+   */
+  prerenderHeader?: string;
+  /**
    * Supprime le canonical auto-généré. Une page introuvable ne doit pas se
    * déclarer canonique d'elle-même.
    */
@@ -115,6 +121,7 @@ const PageMeta = ({
   ready,
   extraMeta,
   statusCode,
+  prerenderHeader,
   noCanonical = false,
 }: PageMetaProps) => {
   const location = useLocation();
@@ -251,6 +258,12 @@ const PageMeta = ({
       removeMetaTag({ attr: "name", key: "prerender-status-code" });
     }
 
+    if (prerenderHeader) {
+      upsertMetaTag({ attr: "name", key: "prerender-header", content: prerenderHeader });
+    } else {
+      removeMetaTag({ attr: "name", key: "prerender-header" });
+    }
+
     upsertMetaTag({ attr: "property", key: "og:title", content: fullTitle });
     upsertMetaTag({ attr: "property", key: "og:description", content: metaDescription });
     upsertMetaTag({ attr: "property", key: "og:url", content: currentUrl });
@@ -301,7 +314,7 @@ const PageMeta = ({
     if (ready !== false) {
       (window as any).prerenderReady = true;
     }
-  }, [author, canonical, canonicalUrl, currentPath, currentUrl, currentLang, extraMetaKey, fullTitle, hreflangKey, jsonLdKey, metaDescription, effectiveNoindex, nofollow, noCanonical, statusCode, htmlLang, publishedAt, ready, resolvedImage, type]);
+  }, [author, canonical, canonicalUrl, currentPath, currentUrl, currentLang, extraMetaKey, fullTitle, hreflangKey, jsonLdKey, metaDescription, effectiveNoindex, nofollow, noCanonical, statusCode, prerenderHeader, htmlLang, publishedAt, ready, resolvedImage, type]);
 
   // Toutes les balises sont écrites impérativement dans le useEffect ci-dessus,
   // react-helmet-async n'atteignant pas le DOM sur ce projet.
