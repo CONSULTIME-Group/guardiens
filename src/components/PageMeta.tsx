@@ -85,6 +85,16 @@ interface PageMetaProps {
    * Metas additionnelles injectées impérativement (og:image:alt, etc.).
    */
   extraMeta?: Array<{ attr: "name" | "property"; key: string; content: string }>;
+  /**
+   * Code HTTP à déclarer à Prerender.io (meta prerender-status-code).
+   * Utilisé par la page introuvable pour éviter les soft 404.
+   */
+  statusCode?: number;
+  /**
+   * Supprime le canonical auto-généré. Une page introuvable ne doit pas se
+   * déclarer canonique d'elle-même.
+   */
+  noCanonical?: boolean;
 }
 
 const PageMeta = ({
