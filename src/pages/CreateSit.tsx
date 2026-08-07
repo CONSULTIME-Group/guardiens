@@ -1474,13 +1474,19 @@ const CreateSit = () => {
 
   // Prérequis vérifiés à l'entrée du flow, pas en cours de route : inutile de
   // faire remplir l'étape 0 à quelqu'un qui ne pourra pas publier au bout.
-  const preflightMissing: Array<{ id: string; label: string; anchor: string }> = [
-    !property ? { id: "property", label: "Votre logement", anchor: "housing" } : null,
-    pets.length === 0 ? { id: "pets", label: "Au moins un animal à faire garder", anchor: "animals" } : null,
-    !hasPhoto ? { id: "photo", label: "Au moins une photo de votre logement", anchor: "gallery" } : null,
-  ].filter(Boolean) as Array<{ id: string; label: string; anchor: string }>;
+  // La décision vit dans resolveSetupState, source unique et testée.
+  const setupState = resolveSetupState({
+    loading,
+    hasProperty: !!property,
+    hasPets: pets.length > 0,
+    hasPhoto,
+    entered: setupEntered,
+    dismissed: setupDismissed,
+    voluntary: setupVoluntary,
+  });
+  const preflightMissing = setupState.missing;
   const preflightBlocked = !loading && preflightMissing.length > 0;
-  const preflightSignature = preflightMissing.map(m => m.id).join(",");
+  const preflightSignature = setupState.missingIds.join(",");
   const preflightTrackedRef = useRef<string>("");
 
   useEffect(() => {
@@ -1497,40 +1503,56 @@ const CreateSit = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [preflightBlocked, preflightSignature]);
 
-  // Écran de mise en route : on y entre dès qu'un prérequis manque, on n'en sort
-  // que par le bouton Continuer, pour que la personne garde la main.
+  // Écran de mise en route : on y entre dès qu'un prérequis manque au chargement.
   useEffect(() => {
     if (preflightBlocked) setSetupEntered(true);
   }, [preflightBlocked]);
 
-  const showSetup = !loading && setupEntered && !setupDismissed;
+  const showSetup = setupState.showSetup;
+  // Valeur courante lisible depuis le nettoyage d'effet, pour ne pas émettre
+  // d'événement d'étape au moment où l'écran de mise en route s'ouvre.
+  showSetupRef.current = showSetup;
   const setupStartedAtRef = useRef<number>(Date.now());
-  const setupInitialMissingRef = useRef<string[] | null>(null);
-  const setupShownTrackedRef = useRef(false);
+  const setupInitialMissingRef = useRef<string[]>([]);
+  const setupWasShownRef = useRef(false);
 
   useEffect(() => {
-    if (!showSetup || setupShownTrackedRef.current) return;
-    setupShownTrackedRef.current = true;
+    if (!showSetup) {
+      setupWasShownRef.current = false;
+      return;
+    }
+    if (setupWasShownRef.current) return;
+    // Chaque entrée dans l'écran repart d'un horodatage et d'une liste neufs.
+    setupWasShownRef.current = true;
     setupStartedAtRef.current = Date.now();
     setupInitialMissingRef.current = preflightSignature ? preflightSignature.split(",") : [];
     void trackEvent("sits_create_setup_shown", {
       source: "/sits/create",
-      metadata: { missing: setupInitialMissingRef.current },
+      metadata: { missing: setupInitialMissingRef.current, voluntary: setupVoluntary },
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [showSetup]);
 
   // Analytics d'étape : émise seulement quand le formulaire est réellement à
-  // l'écran, sinon la durée de l'étape 0 inclurait la mise en route.
+  // l'écran. L'ouverture de la mise en route ne clôt ni ne rouvre une étape.
   useEffect(() => {
-    if (showSetup || loading) return;
+    if (showSetupRef.current || loading) return;
     const step = currentStep;
-    stepStartedAtRef.current = Date.now();
-    const isBackward = step < lastStepRef.current || visitedStepsRef.current.has(step);
-    void trackEvent("sits_create_step_started", { metadata: { step, is_backward: isBackward } });
-    visitedStepsRef.current.add(step);
-    lastStepRef.current = step;
+    if (setupSuspendedRef.current) {
+      // Retour depuis l'écran de mise en route : l'étape n'a jamais été quittée.
+      setupSuspendedRef.current = false;
+    } else {
+      stepStartedAtRef.current = Date.now();
+      const isBackward = step < lastStepRef.current || visitedStepsRef.current.has(step);
+      void trackEvent("sits_create_step_started", { metadata: { step, is_backward: isBackward } });
+      visitedStepsRef.current.add(step);
+      lastStepRef.current = step;
+    }
     return () => {
+      if (showSetupRef.current) {
+        setupSuspendedRef.current = true;
+        return;
+      }
       const duration = Date.now() - stepStartedAtRef.current;
       void trackEvent("sits_create_step_completed", { metadata: { step, duration_ms: duration } });
     };
@@ -1538,17 +1560,34 @@ const CreateSit = () => {
   }, [currentStep, showSetup, loading]);
 
   const handleSetupContinue = () => {
-    if (preflightMissing.length > 0) return;
-    const initial = setupInitialMissingRef.current ?? [];
+    if (!setupState.canContinue) return;
     void trackEvent("sits_create_setup_completed", {
       source: "/sits/create",
       metadata: {
         duration_ms: Date.now() - setupStartedAtRef.current,
-        filled: initial,
+        filled: setupInitialMissingRef.current,
+        voluntary: setupVoluntary,
       },
     });
+    setSetupVoluntary(false);
     setSetupDismissed(true);
   };
+
+  // Entrée volontaire depuis le formulaire : le retour reste toujours possible.
+  const handleSetupBack = () => {
+    void trackEvent("sits_create_setup_completed", {
+      source: "/sits/create",
+      metadata: {
+        duration_ms: Date.now() - setupStartedAtRef.current,
+        filled: setupInitialMissingRef.current.filter((id) => !setupState.missingIds.includes(id)),
+        voluntary: true,
+        returned_without_completing: !setupState.canContinue,
+      },
+    });
+    setSetupVoluntary(false);
+    setSetupDismissed(true);
+  };
+
 
   if (loading) {
     return <div className="p-6 md:p-10 max-w-3xl mx-auto text-muted-foreground">Chargement...</div>;
