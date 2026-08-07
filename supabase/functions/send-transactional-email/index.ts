@@ -26,6 +26,18 @@ const corsHeaders = {
     'authorization, x-client-info, apikey, content-type',
 }
 
+/**
+ * Identifiant stable au format uuid derive d'une cle texte. Sert de cle
+ * d'idempotence pour les signaux admin, dont l'index unique porte sur
+ * (signal_type, entity_id) tant que le signal n'est pas resolu.
+ */
+async function md5Uuid(key: string): Promise<string> {
+  const bytes = new Uint8Array(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(key)))
+  const hex = Array.from(bytes.slice(0, 16)).map((b) => b.toString(16).padStart(2, '0')).join('')
+  return `${hex.slice(0, 8)}-${hex.slice(8, 12)}-${hex.slice(12, 16)}-${hex.slice(16, 20)}-${hex.slice(20, 32)}`
+}
+
+
 // === Frequency cap & quiet hours ===
 // Pure logic lives in _shared/email-cap.ts so it can be unit-tested.
 import { resendFetch } from "../_shared/resend-guard.ts";
@@ -505,12 +517,18 @@ Deno.serve(async (req) => {
     const alertWeek = nonTxRows
       .filter((r) => r.metadata?.category === 'alert' && !isNearby(r))
       .map((r) => r.created_at)
+    // CORRECTIF 07/08/2026 : la categorie 'digest' a ses propres compteurs.
+    const digestWeek = nonTxRows
+      .filter((r) => r.metadata?.category === 'digest' && !isNearby(r))
+      .map((r) => r.created_at)
     const nonTxWeek = nonTxRows
-      .filter((r) => r.metadata?.category !== 'alert' && !isNearby(r))
+      .filter((r) => r.metadata?.category !== 'alert' && r.metadata?.category !== 'digest' && !isNearby(r))
       .map((r) => r.created_at)
     const nonTxDay = nonTxWeek.filter((t) => t >= oneDayAgo)
     const alertDay = alertWeek.filter((t) => t >= oneDayAgo)
+    const digestDay = digestWeek.filter((t) => t >= oneDayAgo)
     const nearbySitDay = nearbySitWeek.filter((t) => t >= oneDayAgo)
+
 
     const decision = decideDeferral({
       now: new Date(nowMs),
@@ -525,6 +543,9 @@ Deno.serve(async (req) => {
       alertWeekSentAt: alertWeek,
       nearbySitDaySentAt: nearbySitDay,
       nearbySitWeekSentAt: nearbySitWeek,
+      digestDaySentAt: digestDay,
+      digestWeekSentAt: digestWeek,
+
     })
 
 
@@ -627,6 +648,8 @@ Deno.serve(async (req) => {
           error_message: humanReason,
           metadata: {
             idempotency_key: idempotencyKey,
+            template_name: templateName,
+
             category,
             defer_reason: deferReason,
             cancel_reason: isNearbyAlert ? 'ttl_exceeded_nearby_sit_alert' : 'ttl_exceeded',
@@ -641,9 +664,54 @@ Deno.serve(async (req) => {
             templateName, idempotencyKey, error: logCancelErr,
           })
         }
+        // Un email detruit doit toujours remonter dans /admin. Une seule ligne
+        // par gabarit tant qu'elle n'est pas resolue, grace a l'index
+        // d'idempotence (signal_type, entity_id) sur les signaux non resolus.
+        try {
+          const { count: destroyed24h } = await supabase
+            .from('email_send_log')
+            .select('id', { count: 'exact', head: true })
+            .eq('status', 'cancelled')
+            .gte('created_at', new Date(nowMs - 86400_000).toISOString())
+          const entityId = await md5Uuid(`email_destroyed:${templateName}`)
+          const signalMetadata = {
+            template_name: templateName,
+            recipient_email: effectiveRecipient,
+            reason: humanReason,
+            cancel_reason: isNearbyAlert ? 'ttl_exceeded_nearby_sit_alert' : 'ttl_exceeded',
+            defer_reason: deferReason,
+            destroyed_last_24h: destroyed24h ?? null,
+            last_detected_at: new Date(nowMs).toISOString(),
+          }
+          const { data: openSignal } = await supabase
+            .from('admin_signals')
+            .select('id')
+            .eq('signal_type', 'email_destroyed')
+            .eq('entity_id', entityId)
+            .is('resolved_at', null)
+            .maybeSingle()
+          if (openSignal?.id) {
+            await supabase
+              .from('admin_signals')
+              .update({ metadata: signalMetadata, detected_at: new Date(nowMs).toISOString() })
+              .eq('id', openSignal.id)
+          } else {
+            await supabase.from('admin_signals').insert({
+              signal_type: 'email_destroyed',
+              severity: 'warning',
+              entity_type: 'email',
+              entity_id: entityId,
+              metadata: signalMetadata,
+            })
+          }
+        } catch (signalErr) {
+          console.error('admin_signals insert failed (email_destroyed)', signalErr)
+        }
+
         console.warn('Email annule, contenu date et report au dela de la TTL', {
           templateName, recipientLower, deferReason, scheduledFor: scheduledFor.toISOString(),
         })
+
 
         return new Response(
           JSON.stringify({ success: false, status: 'cancelled', reason: 'ttl_exceeded', defer_reason: deferReason }),

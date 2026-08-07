@@ -8,14 +8,17 @@
 // etre plafonne. Le plafond de frequence protege l'utilisateur du marketing, pas
 // de ses interlocuteurs.
 //
-// Regles effectives :
+// Regles effectives (mises a jour le 07/08/2026) :
 //   - transactional          : AUCUN plafond de frequence. Seules les heures
 //                              calmes s'appliquent, on ne reveille personne la nuit.
-//   - product/digest/alert   : 1 / 24h et 3 / 7 jours, cumul toutes categories
-//                              non transactionnelles confondues. Aucun plafond
-//                              global supplementaire.
+//   - alert                  : compteurs propres (voir CAP_ALERT_*).
+//   - nearby-sit-alert       : compteurs propres au gabarit (voir CAP_NEARBY_SIT_*).
+//   - digest                 : compteurs propres a la categorie (voir CAP_DIGEST_*).
+//   - product                : 1 / 24h et 3 / 7 jours, sur les compteurs
+//                              CAP_NON_TX_*, qui ne concernent plus que 'product'.
 //   - categorie absente ou inconnue : traitee comme 'product', donc plafonnee.
 //     Seule la valeur explicite 'transactional' donne droit a l'exemption.
+
 //
 // Correctif du Lot 6 (26/07/2026), dont le comportement decrit ici est caduc :
 // ce lot appliquait 1 / heure et 3 / 24h aux emails transactionnels, sur des
@@ -30,8 +33,11 @@
 // logique de decision.
 export const CAP_PER_HOUR = 1
 export const CAP_PER_DAY = 3
+// Plafonds de la seule categorie 'product' depuis le 07/08/2026. Les digests,
+// les alertes et 'nearby-sit-alert' ont chacun leurs compteurs propres.
 export const CAP_NON_TX_PER_DAY = 1
 export const CAP_NON_TX_PER_WEEK = 3
+
 export const QUIET_START_HOUR = 22 // inclusive (Europe/Paris)
 export const QUIET_END_HOUR = 8 //   exclusive (Europe/Paris)
 
@@ -115,6 +121,35 @@ export const NEARBY_SIT_ALERT_TEMPLATES = new Set<string>(['nearby-sit-alert'])
  * ce qui ramenerait l'annulation silencieuse par une autre porte.
  */
 export const NEARBY_SIT_MAX_DEFER_HOURS = 18
+
+// ---------------------------------------------------------------------------
+// CORRECTIF (07/08/2026) : compteur propre a la categorie 'digest'.
+//
+// Constat verifie en base : environ 190 emails detruits entre le 02 et le
+// 06/08. Les digests tiraient sur le quota 'product' de 1 par jour et 3 par
+// semaine, partage par plus de vingt gabarits. Or quatre gabarits sont en
+// categorie 'digest' ('sitter-daily-digest', 'nearby-daily-digest',
+// 'mission-daily-digest', 'mutual-aid-weekly-digest'), dont trois quotidiens :
+// un digest quotidien demande 7 envois par semaine contre un plafond de 3,
+// c'est arithmetiquement impossible.
+//
+// Regle : la categorie 'digest' sort du cumul 'product' et compte sur elle
+// seule. Justification du chiffre, meme raisonnement que pour
+// CAP_NEARBY_SIT_PER_DAY : trois digests quotidiens au plus, donc un plafond de
+// 2 par jour et 10 par semaine ne coupe aucun envoi legitime, il ne coupe que
+// les boucles anormales.
+export const CAP_DIGEST_PER_DAY = 2
+export const CAP_DIGEST_PER_WEEK = 10
+
+/**
+ * Report maximal, en heures, pour un email de categorie 'digest'. Les digests
+ * ont une TTL de 20 h et figurent dans DATED_TEMPLATES : un report au dela de
+ * la TTL les detruit. Le plafond de 18 h, avec la marge du jitter appelant,
+ * garantit qu'aucun chemin de plafond ne produit un report deja perime.
+ */
+export const DIGEST_MAX_DEFER_HOURS = 18
+
+
 
 
 // ---------------------------------------------------------------------------
@@ -311,6 +346,11 @@ export interface DeferInput {
   nearbySitDaySentAt?: string[]
   /** ISO timestamps of `sent` 'nearby-sit-alert' sur 7 jours, ascendant. */
   nearbySitWeekSentAt?: string[]
+  /** ISO timestamps of `sent` emails de categorie 'digest' sur 24h, ascendant. */
+  digestDaySentAt?: string[]
+  /** Idem sur 7 jours. */
+  digestWeekSentAt?: string[]
+
 }
 
 
@@ -329,6 +369,8 @@ export function decideDeferral(input: DeferInput): DeferDecision {
     nonTxDaySentAt = [], nonTxWeekSentAt = [],
     alertDaySentAt = [], alertWeekSentAt = [],
     nearbySitDaySentAt = [], nearbySitWeekSentAt = [],
+    digestDaySentAt = [], digestWeekSentAt = [],
+
   } = input
 
 
@@ -397,6 +439,34 @@ export function decideDeferral(input: DeferInput): DeferDecision {
     }
     return { action: 'send' }
   }
+
+  // Categorie 'digest' : compteurs strictement propres. Elle ne consomme plus
+  // le quota 'product', et reciproquement. Report ecrete a
+  // DIGEST_MAX_DEFER_HOURS pour rester sous la TTL de 20 h du gabarit.
+  if (effectiveCategory === 'digest') {
+    const clampDigest = (d: Date) => {
+      const ceiling = new Date(now.getTime() + DIGEST_MAX_DEFER_HOURS * 3600_000)
+      return d.getTime() > ceiling.getTime() ? ceiling : d
+    }
+    if (digestWeekSentAt.length >= CAP_DIGEST_PER_WEEK) {
+      const oldest = new Date(digestWeekSentAt[0])
+      return {
+        action: 'defer',
+        reason: 'frequency_cap_category_week',
+        scheduledFor: clampDigest(new Date(oldest.getTime() + 7 * 86400_000 + 30_000)),
+      }
+    }
+    if (digestDaySentAt.length >= CAP_DIGEST_PER_DAY) {
+      const oldest = new Date(digestDaySentAt[0])
+      return {
+        action: 'defer',
+        reason: 'frequency_cap_category_day',
+        scheduledFor: clampDigest(new Date(oldest.getTime() + 86400_000 + 30_000)),
+      }
+    }
+    return { action: 'send' }
+  }
+
 
   // Categorie 'alert' : compteurs propres, elle ne partage plus le quota des
   // emails produit. Cadence nominale 1 / jour, 7 / semaine.

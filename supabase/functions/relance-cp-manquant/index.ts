@@ -15,13 +15,22 @@ const corsHeaders = {
 const CTA_URL = "https://guardiens.fr/mon-secteur";
 
 /** Plafond par défaut, surchargeable en base sans redéploiement. */
-const DEFAULT_MAX_RELANCES = 4;
+const DEFAULT_MAX_RELANCES = 3;
+
+/**
+ * Garde dure (07/08/2026) : jamais plus de 3 relances pour un même
+ * destinataire, quelle que soit la valeur du drapeau en base. Au delà, la
+ * relance devient de la pression, pas un service.
+ */
+const HARD_MAX_RELANCES = 3;
 
 /**
  * Espacement croissant, en jours depuis l'inscription, avant la relance de
- * rang N + 1 (index = nombre de relances déjà reçues).
+ * rang N + 1 (index = nombre de relances déjà reçues). Cadence hebdomadaire
+ * du cron, donc les paliers sont calés sur des semaines pleines.
  */
-const MIN_DAYS_BY_COUNT = [1, 3, 7, 21];
+const MIN_DAYS_BY_COUNT = [1, 7, 21];
+
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -44,8 +53,9 @@ serve(async (req) => {
         .eq("key", "cp_relance_max")
         .maybeSingle();
       if (flag?.enabled && typeof flag.value_int === "number" && flag.value_int > 0) {
-        maxRelances = flag.value_int;
+        maxRelances = Math.min(flag.value_int, HARD_MAX_RELANCES);
       }
+
     }
 
     // Ciblage : uniquement les gardiens. Un propriétaire ne doit pas recevoir
