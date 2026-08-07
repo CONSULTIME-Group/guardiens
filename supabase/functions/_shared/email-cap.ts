@@ -122,6 +122,35 @@ export const NEARBY_SIT_ALERT_TEMPLATES = new Set<string>(['nearby-sit-alert'])
  */
 export const NEARBY_SIT_MAX_DEFER_HOURS = 18
 
+// ---------------------------------------------------------------------------
+// CORRECTIF (07/08/2026) : compteur propre a la categorie 'digest'.
+//
+// Constat verifie en base : environ 190 emails detruits entre le 02 et le
+// 06/08. Les digests tiraient sur le quota 'product' de 1 par jour et 3 par
+// semaine, partage par plus de vingt gabarits. Or quatre gabarits sont en
+// categorie 'digest' ('sitter-daily-digest', 'nearby-daily-digest',
+// 'mission-daily-digest', 'mutual-aid-weekly-digest'), dont trois quotidiens :
+// un digest quotidien demande 7 envois par semaine contre un plafond de 3,
+// c'est arithmetiquement impossible.
+//
+// Regle : la categorie 'digest' sort du cumul 'product' et compte sur elle
+// seule. Justification du chiffre, meme raisonnement que pour
+// CAP_NEARBY_SIT_PER_DAY : trois digests quotidiens au plus, donc un plafond de
+// 2 par jour et 10 par semaine ne coupe aucun envoi legitime, il ne coupe que
+// les boucles anormales.
+export const CAP_DIGEST_PER_DAY = 2
+export const CAP_DIGEST_PER_WEEK = 10
+
+/**
+ * Report maximal, en heures, pour un email de categorie 'digest'. Les digests
+ * ont une TTL de 20 h et figurent dans DATED_TEMPLATES : un report au dela de
+ * la TTL les detruit. Le plafond de 18 h, avec la marge du jitter appelant,
+ * garantit qu'aucun chemin de plafond ne produit un report deja perime.
+ */
+export const DIGEST_MAX_DEFER_HOURS = 18
+
+
+
 
 // ---------------------------------------------------------------------------
 // ETAPE 1 (05/08/2026) : TTL de report par gabarit et par motif.
