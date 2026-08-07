@@ -67,6 +67,8 @@ import {
   type PublishBlocker,
 } from "@/lib/sitPublishRules";
 import { describeSitWriteError } from "@/lib/sitDbErrors";
+import { resolveSetupState } from "@/lib/setupState";
+
 
 interface PropertySummary {
   id: string;
