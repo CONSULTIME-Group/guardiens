@@ -315,17 +315,6 @@ const button = {
   textDecoration: 'none',
   display: 'inline-block',
 }
-const secondaryButton = {
-  backgroundColor: '#ffffff',
-  color: PINE,
-  border: `1px solid ${PINE}`,
-  padding: '12px 24px',
-  borderRadius: '999px',
-  fontSize: '14px',
-  fontWeight: '600' as const,
-  textDecoration: 'none',
-  display: 'inline-block',
-}
 const pullQuote = {
   fontFamily: DISPLAY,
   fontStyle: 'italic' as const,
@@ -333,19 +322,46 @@ const pullQuote = {
   color: PINE,
   margin: '0 0 18px',
 }
-const box = {
-  backgroundColor: CARD_BG,
+const darkBox = {
+  backgroundColor: PINE,
+  backgroundImage: 'linear-gradient(135deg, #245B42 0%, #2C6D50 100%)',
   borderRadius: '16px',
-  padding: '20px 22px',
-  margin: '24px 0',
+  margin: '4px 0 8px',
+  borderCollapse: 'separate' as const,
 }
-const boxTitle = {
+const darkCell = { padding: '26px 26px 28px' }
+const darkKicker = {
+  fontSize: '11px',
+  color: '#C8A24B',
+  textTransform: 'uppercase' as const,
+  letterSpacing: '.16em',
+  fontWeight: '600' as const,
+  margin: '0 0 10px',
+}
+const darkTitle = {
   fontFamily: DISPLAY,
-  fontSize: '17px',
-  color: INK,
-  margin: '0 0 8px',
+  fontSize: '21px',
+  color: '#ffffff',
+  lineHeight: '1.3',
+  margin: '0 0 10px',
 }
-const boxText = { fontSize: '14px', color: '#5C554B', lineHeight: '1.6', margin: '0 0 16px' }
+const darkText = {
+  fontSize: '14px',
+  color: '#E7F0EA',
+  lineHeight: '1.65',
+  margin: '0 0 20px',
+}
+const whiteButton = {
+  backgroundColor: '#ffffff',
+  color: PINE,
+  padding: '14px 30px',
+  borderRadius: '999px',
+  fontSize: '15px',
+  fontWeight: '600' as const,
+  textDecoration: 'none',
+  display: 'inline-block',
+}
+
 const signName = { fontFamily: DISPLAY, fontSize: '18px', color: INK, margin: '0 0 2px' }
 const signRole = { fontSize: '12px', color: '#8C857A', margin: '0 0 8px' }
 const hr = { borderColor: LINE, margin: '28px 0 24px' }
