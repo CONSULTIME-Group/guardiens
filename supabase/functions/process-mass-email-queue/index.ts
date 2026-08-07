@@ -9,6 +9,7 @@
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
 import { resendFetch } from "../_shared/resend-guard.ts";
+import { SENDER_FROM, REPLY_TO_ADDRESS } from "../_shared/sender-address.ts";
 import {
   acquireWorkerLock,
   releaseWorkerLock,
@@ -373,7 +374,8 @@ Deno.serve(async (req) => {
             "Idempotency-Key": idempotencyKey,
           },
           body: JSON.stringify({
-            from: "Guardiens <bonjour@guardiens.fr>",
+            from: SENDER_FROM,
+            reply_to: REPLY_TO_ADDRESS,
             to: [rawEmail],
             subject: personalizedSubject,
             html,

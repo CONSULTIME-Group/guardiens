@@ -4444,6 +4444,7 @@ export type Database = {
           first_name: string | null
           first_sit_email_sent_at: string | null
           free_months_credit: number | null
+          geocode_attempts: number
           hero_image_index: number | null
           id: string
           identity_document_url: string | null
@@ -4505,6 +4506,7 @@ export type Database = {
           first_name?: string | null
           first_sit_email_sent_at?: string | null
           free_months_credit?: number | null
+          geocode_attempts?: number
           hero_image_index?: number | null
           id: string
           identity_document_url?: string | null
@@ -4566,6 +4568,7 @@ export type Database = {
           first_name?: string | null
           first_sit_email_sent_at?: string | null
           free_months_credit?: number | null
+          geocode_attempts?: number
           hero_image_index?: number | null
           id?: string
           identity_document_url?: string | null
@@ -8338,6 +8341,7 @@ export type Database = {
         }
         Returns: undefined
       }
+      retry_missing_geocoding: { Args: never; Returns: Json }
       set_email_preferences_by_token: {
         Args: {
           p_alert: boolean
