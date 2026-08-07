@@ -83,7 +83,7 @@ const SitRow = ({ sit }: { sit: SitCard }) => (
         </td>
         <td valign="top" style={{ paddingLeft: '14px' }}>
           <Text style={cardMetaTop}>
-            {sit.city} , {sit.distanceLabel}
+            {sit.city} · {sit.distanceLabel}
           </Text>
           <Text style={cardTitle}>{sit.title}</Text>
           <Text style={cardMeta}>{sit.meta}</Text>
@@ -116,7 +116,7 @@ const FounderPersonalNoticeEmail = ({
           Guardiens a ouvert il y a trois mois. Vous êtes parmi les premiers inscrits, et c'est pour ça que je vous écris moi-même.
         </Text>
         <Text style={text} className="em-text">
-          Deux choses dans cet email. Les gardes qui cherchent encore quelqu'un, et une demande.
+          Trois choses dans cet email. Les gardes qui cherchent encore quelqu'un, un service que vous pouvez me rendre en deux minutes, et une demande.
         </Text>
 
         <SectionHeader label="CE QUI EST OUVERT" />
@@ -195,7 +195,7 @@ export const template = {
         city: 'Cogny, Rhône',
         distanceLabel: '33 km',
         meta: '1 chien · 27 août au 30 septembre',
-        url: 'https://guardiens.fr/gardes/cogny-nala',
+        url: 'https://guardiens.fr/annonces/cogny-nala',
         imageUrl: 'https://erhccyqevdyevpyctsjj.supabase.co/storage/v1/object/public/property-photos/articles/temoignage-auvergne-cover.jpg',
       },
       {
@@ -203,18 +203,18 @@ export const template = {
         city: 'Annecy, Haute-Savoie',
         distanceLabel: '118 km',
         meta: '2 chats · 5 au 19 septembre',
-        url: 'https://guardiens.fr/gardes/annecy-chats',
+        url: 'https://guardiens.fr/annonces/annecy-chats',
       },
       {
         title: 'Une ferme et ses animaux dans le Lot',
         city: 'Cahors, Lot',
         distanceLabel: 'loin, très loin',
         meta: '3 animaux · 1er au 14 octobre',
-        url: 'https://guardiens.fr/gardes/cahors-ferme',
+        url: 'https://guardiens.fr/annonces/cahors-ferme',
       },
     ],
-    googleReviewUrl: 'https://g.page/r/guardiens/review',
-    allListingsUrl: 'https://guardiens.fr/recherche',
+    googleReviewUrl: 'https://maps.app.goo.gl/j8YfX9QbmiLY9s9FA',
+    allListingsUrl: 'https://guardiens.fr/annonces',
   },
 } satisfies TemplateEntry
 
