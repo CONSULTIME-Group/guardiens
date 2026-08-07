@@ -90,11 +90,7 @@ const GuideDetail = () => {
     enabled: !!slug,
   });
 
-  useEffect(() => {
-    if (!guideLoading) window.prerenderReady = true;
-  }, [guideLoading]);
-
-  const { data: places = [] } = useQuery({
+  const { data: places = [], isSuccess: placesLoaded } = useQuery({
     queryKey: ["guide-places", guide?.id],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -108,6 +104,15 @@ const GuideDetail = () => {
     },
     enabled: !!guide?.id,
   });
+
+  // Le contenu principal (entête, intro, liste des lieux) doit être dans le DOM
+  // avant que Prerender ne fige la page. La carte Leaflet ne bloque pas.
+  const contentReady = !guideLoading && (!guide ? true : placesLoaded);
+
+  useEffect(() => {
+    if (contentReady) window.prerenderReady = true;
+  }, [contentReady]);
+
 
   // Fetch nearby guides from same department
   const { data: nearbyGuides = [] } = useQuery({
