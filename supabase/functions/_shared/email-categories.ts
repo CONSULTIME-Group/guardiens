@@ -21,6 +21,7 @@ const TRANSACTIONAL: ReadonlyArray<string> = [
   'application-declined',
   'application-under-review',
   'application-reopened',
+  'application-closed-listing-withdrawn',
   'application-message-restored',
   'new-application',
   'first-application-received',

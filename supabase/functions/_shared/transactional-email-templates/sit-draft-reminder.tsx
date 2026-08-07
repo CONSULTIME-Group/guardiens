@@ -9,13 +9,22 @@ import { AlmaSignoff } from './_alma-signoff.tsx'
 import { LegalFooter } from './_legal-footer.tsx'
 import type { TemplateEntry } from './registry.ts'
 
+interface MissingItem {
+  label: string
+  /** Le champ vit dans le profil, pas dans le formulaire d'annonce. */
+  inProfile?: boolean
+}
+
 interface Props {
   firstName?: string
   sitId?: string
   fieldsRemaining?: number
+  /** Liste nommée de ce qui manque, dans les mots exacts du formulaire. */
+  missingItems?: MissingItem[]
   nearbySittersCount?: number
   daysSinceCreated?: number
   resumeUrl?: string
+  profileUrl?: string
 }
 
 // Amorce adaptée à l'âge réel du brouillon. Sans valeur exploitable,
@@ -33,10 +42,17 @@ function openingSentence(days?: number): string {
 const SitDraftReminderEmail = ({
   firstName = '',
   fieldsRemaining = 3,
+  missingItems = [],
   nearbySittersCount = 0,
   daysSinceCreated,
   resumeUrl = 'https://guardiens.fr/dashboard',
-}: Props) => (
+  profileUrl = 'https://guardiens.fr/owner-profile',
+}: Props) => {
+  const items = Array.isArray(missingItems) ? missingItems : []
+  const count = items.length > 0 ? items.length : fieldsRemaining
+  const formItems = items.filter((i) => !i.inProfile)
+  const profileItems = items.filter((i) => i.inProfile)
+  return (
   <Html lang="fr" dir="ltr">
     <BrandedHead />
     <Preview>Votre annonce vous attend en brouillon</Preview>
@@ -54,16 +70,44 @@ const SitDraftReminderEmail = ({
           animaux et votre maison. Elle vous attend en brouillon dans votre espace.
         </Text>
         <Text style={text}>
-          {fieldsRemaining === 0
+          {count === 0
             ? 'Votre annonce est complète, il ne reste plus qu\u2019à la publier.'
-            : `Il vous reste environ ${fieldsRemaining} champ${fieldsRemaining > 1 ? 's' : ''} à remplir pour la publier.`}
-          {nearbySittersCount > 0
-            ? ` ${nearbySittersCount} gardien${nearbySittersCount > 1 ? 's' : ''} vérifié${nearbySittersCount > 1 ? 's' : ''} dans un rayon de 30 km attendent une annonce comme la vôtre.`
-            : ''}
+            : items.length > 0
+              ? `Voici précisément ce qu'il reste à renseigner, ${count} point${count > 1 ? 's' : ''} :`
+              : `Il vous reste environ ${count} champ${count > 1 ? 's' : ''} à remplir pour la publier.`}
         </Text>
+        {formItems.length > 0 ? (
+          <ul style={list}>
+            {formItems.map((item) => (
+              <li key={item.label} style={listItem}>{item.label}</li>
+            ))}
+          </ul>
+        ) : null}
+        {profileItems.length > 0 ? (
+          <>
+            <Text style={text}>
+              {profileItems.length > 1
+                ? 'Ces deux points ne se remplissent pas dans l\u2019annonce, ils vivent sur votre profil propriétaire :'
+                : 'Ce point ne se remplit pas dans l\u2019annonce, il vit sur votre profil propriétaire :'}
+            </Text>
+            <ul style={list}>
+              {profileItems.map((item) => (
+                <li key={item.label} style={listItem}>{item.label}</li>
+              ))}
+            </ul>
+            <Text style={textSmall}>
+              Vous pouvez le compléter ici : <a href={profileUrl} style={link}>votre profil propriétaire</a>.
+            </Text>
+          </>
+        ) : null}
+        {nearbySittersCount > 0 ? (
+          <Text style={text}>
+            {nearbySittersCount} gardien{nearbySittersCount > 1 ? 's' : ''} vérifié{nearbySittersCount > 1 ? 's' : ''} dans un rayon de 30 km attendent une annonce comme la vôtre.
+          </Text>
+        ) : null}
         <Section style={{ textAlign: 'center', margin: '24px 0' }}>
           <Button href={resumeUrl} style={btn}>
-            {fieldsRemaining === 0 ? 'Publier mon annonce' : 'Reprendre mon annonce'}
+            {count === 0 ? 'Publier mon annonce' : 'Reprendre mon annonce'}
           </Button>
         </Section>
         <Text style={textSmall}>
@@ -76,7 +120,8 @@ const SitDraftReminderEmail = ({
       </Container>
     </Body>
   </Html>
-)
+  )
+}
 
 export const template = {
   component: SitDraftReminderEmail,
@@ -85,10 +130,15 @@ export const template = {
   previewData: {
     firstName: 'Camille',
     sitId: 'demo-sit-id',
-    fieldsRemaining: 3,
+    fieldsRemaining: 2,
+    missingItems: [
+      { label: "Pourquoi avez-vous besoin d'un gardien pour cette période ?" },
+      { label: 'Au moins un animal déclaré sur votre logement', inProfile: true },
+    ],
     nearbySittersCount: 12,
     daysSinceCreated: 12,
     resumeUrl: 'https://guardiens.fr/sits/create?resume=demo-sit-id',
+    profileUrl: 'https://guardiens.fr/owner-profile',
   },
 } satisfies TemplateEntry
 
@@ -107,3 +157,6 @@ const btn = {
   textDecoration: 'none',
   display: 'inline-block',
 }
+const list = { margin: '0 0 14px', padding: '0 0 0 20px' }
+const listItem = { fontSize: '14px', color: 'hsl(37, 7%, 25%)', lineHeight: '1.6', marginBottom: '6px' }
+const link = { color: 'hsl(153, 42%, 30%)', textDecoration: 'underline' }

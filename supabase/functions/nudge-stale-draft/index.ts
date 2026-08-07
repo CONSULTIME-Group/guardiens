@@ -16,6 +16,7 @@
  */
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
 import { startCronRun, type CronRun } from "../_shared/cron-run-log.ts";
+import { loadMissingDraftItems } from "../_shared/sit-draft-missing.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -52,6 +53,16 @@ async function sendDraftReminder(params: {
   const { serviceClient, draft, messageId } = params;
   const email = draft.owner_email.trim().toLowerCase();
 
+  // Liste nommée de ce qui manque, calculée sur l'annonce réelle.
+  const { data: sitRow } = await serviceClient
+    .from("sits")
+    .select("id, user_id, title, start_date, end_date, absence_reason, sitter_expectations, cover_photo_url")
+    .eq("id", draft.sit_id)
+    .maybeSingle();
+  const missingItems = sitRow
+    ? await loadMissingDraftItems(serviceClient, sitRow as Record<string, any>)
+    : [];
+
   const { data: sup } = await serviceClient
     .from("suppressed_emails")
     .select("email")
@@ -75,8 +86,11 @@ async function sendDraftReminder(params: {
       templateData: {
         firstName: draft.owner_first_name || "",
         sitId: draft.sit_id,
-        fieldsRemaining: 0,
+        fieldsRemaining: missingItems.length,
+        missingItems,
+        profileUrl: "https://guardiens.fr/owner-profile",
         nearbySittersCount: 0,
+        daysSinceCreated: draft.days_since_created,
         resumeUrl: `https://guardiens.fr/sits/create?resume=${draft.sit_id}`,
       },
       logMetadata: {

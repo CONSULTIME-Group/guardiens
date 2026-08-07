@@ -5,6 +5,7 @@
 // Plafond : 25 envois max par run, les plus anciens d'abord.
 
 import { createClient } from "npm:@supabase/supabase-js@2.45.0";
+import { loadMissingDraftItems } from "../_shared/sit-draft-missing.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -12,7 +13,6 @@ const corsHeaders = {
 };
 
 const TEMPLATE = "sit-draft-reminder";
-const TOTAL_FIELDS = 8;
 const MAX_PER_RUN = 25;
 
 const NEARBY_RADIUS_KM = 30;
@@ -27,20 +27,6 @@ function haversineKm(lat1: number, lon1: number, lat2: number, lon2: number): nu
     Math.sin(dLat / 2) ** 2 +
     Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon / 2) ** 2;
   return 2 * R * Math.asin(Math.min(1, Math.sqrt(a)));
-}
-
-function countRemaining(sit: Record<string, any>): number {
-  const filled = [
-    sit.title,
-    sit.start_date,
-    sit.end_date,
-    sit.specific_expectations,
-    Array.isArray(sit.environments) && sit.environments.length > 0,
-    sit.city,
-    sit.owner_message,
-    sit.daily_routine,
-  ].filter((v) => (typeof v === "string" ? v.trim().length > 0 : !!v)).length;
-  return Math.max(0, TOTAL_FIELDS - filled);
 }
 
 // Compte les gardiens vérifiés dans un rayon de 30 km du lieu de la garde.
@@ -105,7 +91,7 @@ Deno.serve(async (req) => {
   // ou dont la garde est encore à venir (start_date strictement après aujourd'hui).
   const { data: drafts, error } = await supabase
     .from("sits")
-    .select("id, user_id, title, start_date, end_date, specific_expectations, environments, city, owner_message, daily_routine, created_at")
+    .select("id, user_id, title, start_date, end_date, specific_expectations, environments, city, owner_message, daily_routine, created_at, absence_reason, sitter_expectations, cover_photo_url")
     .eq("status", "draft")
     .lt("created_at", cutoffDate)
     .or(`start_date.is.null,start_date.gt.${today}`)
@@ -178,7 +164,9 @@ Deno.serve(async (req) => {
         continue;
       }
 
-      const fieldsRemaining = countRemaining(draft as Record<string, any>);
+      // Liste nommée de ce qui manque, avec les mots exacts du formulaire.
+      const missingItems = await loadMissingDraftItems(supabase, draft as Record<string, any>);
+      const fieldsRemaining = missingItems.length;
       const resumeUrl = `https://guardiens.fr/sits/create?resume=${draft.id}`;
 
       // Âge réel du brouillon, pour éviter le "Hier" en dur dans le template.
@@ -203,6 +191,8 @@ Deno.serve(async (req) => {
             firstName: profile.first_name || "",
             sitId: draft.id,
             fieldsRemaining,
+            missingItems,
+            profileUrl: "https://guardiens.fr/owner-profile",
             nearbySittersCount,
             daysSinceCreated,
             resumeUrl,
