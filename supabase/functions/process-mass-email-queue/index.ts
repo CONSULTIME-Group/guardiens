@@ -9,8 +9,8 @@
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
 import { resendFetch } from "../_shared/resend-guard.ts";
-import {
 import { SENDER_FROM, REPLY_TO_ADDRESS } from "../_shared/sender-address.ts";
+import {
   acquireWorkerLock,
   releaseWorkerLock,
   type LockClientLike,
