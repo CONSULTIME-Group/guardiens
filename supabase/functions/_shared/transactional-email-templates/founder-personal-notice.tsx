@@ -287,6 +287,14 @@ const thumbFallback = {
   borderRadius: '10px',
   backgroundColor: LINE,
 }
+const thumbCell = {
+  width: '92px',
+  backgroundColor: LINE,
+  borderRadius: '10px',
+  lineHeight: '0',
+  fontSize: '0',
+}
+
 const cardMetaTop = {
   fontSize: '11px',
   color: PINE,
