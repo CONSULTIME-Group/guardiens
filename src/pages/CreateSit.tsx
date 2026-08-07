@@ -1497,6 +1497,58 @@ const CreateSit = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [preflightBlocked, preflightSignature]);
 
+  // Écran de mise en route : on y entre dès qu'un prérequis manque, on n'en sort
+  // que par le bouton Continuer, pour que la personne garde la main.
+  useEffect(() => {
+    if (preflightBlocked) setSetupEntered(true);
+  }, [preflightBlocked]);
+
+  const showSetup = !loading && setupEntered && !setupDismissed;
+  const setupStartedAtRef = useRef<number>(Date.now());
+  const setupInitialMissingRef = useRef<string[] | null>(null);
+  const setupShownTrackedRef = useRef(false);
+
+  useEffect(() => {
+    if (!showSetup || setupShownTrackedRef.current) return;
+    setupShownTrackedRef.current = true;
+    setupStartedAtRef.current = Date.now();
+    setupInitialMissingRef.current = preflightSignature ? preflightSignature.split(",") : [];
+    void trackEvent("sits_create_setup_shown", {
+      source: "/sits/create",
+      metadata: { missing: setupInitialMissingRef.current },
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [showSetup]);
+
+  // Analytics d'étape : émise seulement quand le formulaire est réellement à
+  // l'écran, sinon la durée de l'étape 0 inclurait la mise en route.
+  useEffect(() => {
+    if (showSetup || loading) return;
+    const step = currentStep;
+    stepStartedAtRef.current = Date.now();
+    const isBackward = step < lastStepRef.current || visitedStepsRef.current.has(step);
+    void trackEvent("sits_create_step_started", { metadata: { step, is_backward: isBackward } });
+    visitedStepsRef.current.add(step);
+    lastStepRef.current = step;
+    return () => {
+      const duration = Date.now() - stepStartedAtRef.current;
+      void trackEvent("sits_create_step_completed", { metadata: { step, duration_ms: duration } });
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentStep, showSetup, loading]);
+
+  const handleSetupContinue = () => {
+    if (preflightMissing.length > 0) return;
+    const initial = setupInitialMissingRef.current ?? [];
+    void trackEvent("sits_create_setup_completed", {
+      source: "/sits/create",
+      metadata: {
+        duration_ms: Date.now() - setupStartedAtRef.current,
+        filled: initial,
+      },
+    });
+    setSetupDismissed(true);
+  };
 
   if (loading) {
     return <div className="p-6 md:p-10 max-w-3xl mx-auto text-muted-foreground">Chargement...</div>;
@@ -1504,7 +1556,8 @@ const CreateSit = () => {
 
   // Le préflight n'est plus un cul de sac : c'est la première étape éditable du
   // parcours, les trois éléments manquants se remplissent sur place.
-  if (preflightBlocked || setupOpen) {
+  if (showSetup) {
+
     return (
       <div className="animate-fade-in py-8">
         <Head><meta name="robots" content="noindex, nofollow" /></Head>
