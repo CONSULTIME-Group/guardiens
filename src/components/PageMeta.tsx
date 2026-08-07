@@ -238,8 +238,18 @@ const PageMeta = ({
     // Écrase la meta description statique (index.html) qui sinon reste en
     // premier dans le DOM et est lue par les crawlers avant la nôtre.
     upsertMetaTag({ attr: "name", key: "description", content: metaDescription });
-    upsertCanonical(canonicalUrl);
+    if (noCanonical) {
+      document.head.querySelectorAll('link[rel="canonical"]').forEach((node) => node.remove());
+    } else {
+      upsertCanonical(canonicalUrl);
+    }
     upsertHreflangAlternates();
+
+    if (typeof statusCode === "number") {
+      upsertMetaTag({ attr: "name", key: "prerender-status-code", content: String(statusCode) });
+    } else {
+      removeMetaTag({ attr: "name", key: "prerender-status-code" });
+    }
 
     upsertMetaTag({ attr: "property", key: "og:title", content: fullTitle });
     upsertMetaTag({ attr: "property", key: "og:description", content: metaDescription });
