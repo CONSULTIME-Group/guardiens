@@ -10,6 +10,8 @@ export interface SetupStepProps {
   propertyId: string | null;
   petCount: number;
   photos: string[];
+  /** Libellés exacts de ce qui reste à renseigner, source unique côté parcours. */
+  missingLabels: string[];
   onPropertySaved: (property: InlineHousingResult) => void;
   onPetsChanged: (pets: any[]) => void;
   onPhotoUploaded: (url: string) => void;
