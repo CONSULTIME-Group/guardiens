@@ -43,13 +43,14 @@ const Block = ({
  * saisie déjà commencée.
  */
 const CreateSitSetupStep = ({
-  userId, propertyId, petCount, photos,
+  userId, propertyId, petCount, photos, missingLabels,
   onPropertySaved, onPetsChanged, onPhotoUploaded, onContinue,
 }: SetupStepProps) => {
   const housingDone = !!propertyId;
   const petsDone = petCount > 0;
   const photoDone = photos.length > 0;
-  const allDone = housingDone && petsDone && photoDone;
+  const allDone = missingLabels.length === 0;
+
 
   return (
     <div className="px-4 max-w-3xl mx-auto space-y-6">
