@@ -312,7 +312,9 @@ Deno.serve(async (req) => {
       for (const t of selected) {
         const idempotencyKey = `publish-alert-${sit.id}-${t.user_id}`;
         // Idempotence stricte : la cle primaire de sit_notification_log
-        // interdit un second envoi, meme si le cron repasse.
+        // interdit un second envoi, meme si le cron repasse. Une ligne
+        // relachee apres un echec technique reste en base, et redevient
+        // envoyable au passage suivant, sans jamais disparaitre du journal.
         const { error: claimErr } = await supabase.from("sit_notification_log").insert({
           idempotency_key: idempotencyKey,
           user_id: t.user_id,
@@ -320,13 +322,23 @@ Deno.serve(async (req) => {
           sit_ids: [sit.id],
         });
         if (claimErr) {
-          if (claimErr.code === "23505") {
+          if (claimErr.code !== "23505") {
+            errors.push(`claim ${idempotencyKey}: ${claimErr.message}`);
+            continue;
+          }
+          const { data: reclaimed } = await supabase
+            .from("sit_notification_log")
+            .update({ status: "claimed", released_at: null, release_reason: null })
+            .eq("idempotency_key", idempotencyKey)
+            .eq("status", "released")
+            .select("idempotency_key")
+            .maybeSingle();
+          if (!reclaimed) {
             metrics.already_notified++;
             continue;
           }
-          errors.push(`claim ${idempotencyKey}: ${claimErr.message}`);
-          continue;
         }
+
 
         const { error: sendErr } = await supabase.functions.invoke("send-transactional-email", {
           body: {
