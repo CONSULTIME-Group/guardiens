@@ -375,7 +375,7 @@ Deno.serve(async (req) => {
           },
           body: JSON.stringify({
             from: SENDER_FROM,
-        reply_to: REPLY_TO_ADDRESS,
+            reply_to: REPLY_TO_ADDRESS,
             to: [rawEmail],
             subject: personalizedSubject,
             html,
