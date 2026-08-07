@@ -414,7 +414,10 @@ const CreateSit = () => {
   const [property, setProperty] = useState<PropertySummary | null>(null);
   const [pets, setPets] = useState<PetSummary[]>([]);
   // Étape de mise en route : logement, animaux, photo, remplissables sur place.
-  const [setupOpen, setSetupOpen] = useState(false);
+  // setupEntered mémorise le passage par cet écran, setupDismissed enregistre le
+  // clic sur Continuer, sinon l'écran disparaîtrait tout seul dès le dernier champ.
+  const [setupEntered, setSetupEntered] = useState(false);
+  const [setupDismissed, setSetupDismissed] = useState(false);
   const [moderationVerdicts, setModerationVerdicts] = useState<FieldVerdicts>({});
   const [ownerProfile, setOwnerProfile] = useState<OwnerSummary | null>(null);
   const [ownerPhotos, setOwnerPhotos] = useState<string[]>([]);
