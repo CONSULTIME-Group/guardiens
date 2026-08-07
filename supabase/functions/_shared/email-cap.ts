@@ -440,6 +440,34 @@ export function decideDeferral(input: DeferInput): DeferDecision {
     return { action: 'send' }
   }
 
+  // Categorie 'digest' : compteurs strictement propres. Elle ne consomme plus
+  // le quota 'product', et reciproquement. Report ecrete a
+  // DIGEST_MAX_DEFER_HOURS pour rester sous la TTL de 20 h du gabarit.
+  if (effectiveCategory === 'digest') {
+    const clampDigest = (d: Date) => {
+      const ceiling = new Date(now.getTime() + DIGEST_MAX_DEFER_HOURS * 3600_000)
+      return d.getTime() > ceiling.getTime() ? ceiling : d
+    }
+    if (digestWeekSentAt.length >= CAP_DIGEST_PER_WEEK) {
+      const oldest = new Date(digestWeekSentAt[0])
+      return {
+        action: 'defer',
+        reason: 'frequency_cap_category_week',
+        scheduledFor: clampDigest(new Date(oldest.getTime() + 7 * 86400_000 + 30_000)),
+      }
+    }
+    if (digestDaySentAt.length >= CAP_DIGEST_PER_DAY) {
+      const oldest = new Date(digestDaySentAt[0])
+      return {
+        action: 'defer',
+        reason: 'frequency_cap_category_day',
+        scheduledFor: clampDigest(new Date(oldest.getTime() + 86400_000 + 30_000)),
+      }
+    }
+    return { action: 'send' }
+  }
+
+
   // Categorie 'alert' : compteurs propres, elle ne partage plus le quota des
   // emails produit. Cadence nominale 1 / jour, 7 / semaine.
   if (effectiveCategory === 'alert') {
