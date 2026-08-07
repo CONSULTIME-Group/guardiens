@@ -33,8 +33,11 @@
 // logique de decision.
 export const CAP_PER_HOUR = 1
 export const CAP_PER_DAY = 3
+// Plafonds de la seule categorie 'product' depuis le 07/08/2026. Les digests,
+// les alertes et 'nearby-sit-alert' ont chacun leurs compteurs propres.
 export const CAP_NON_TX_PER_DAY = 1
 export const CAP_NON_TX_PER_WEEK = 3
+
 export const QUIET_START_HOUR = 22 // inclusive (Europe/Paris)
 export const QUIET_END_HOUR = 8 //   exclusive (Europe/Paris)
 
