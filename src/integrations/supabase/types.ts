@@ -1899,6 +1899,53 @@ export type Database = {
         }
         Relationships: []
       }
+      email_deep_link_tokens: {
+        Row: {
+          consumed_at: string | null
+          conversation_id: string | null
+          created_at: string
+          expires_at: string
+          id: string
+          message_id: string | null
+          target_path: string
+          template_name: string | null
+          token: string
+          user_id: string
+        }
+        Insert: {
+          consumed_at?: string | null
+          conversation_id?: string | null
+          created_at?: string
+          expires_at: string
+          id?: string
+          message_id?: string | null
+          target_path: string
+          template_name?: string | null
+          token: string
+          user_id: string
+        }
+        Update: {
+          consumed_at?: string | null
+          conversation_id?: string | null
+          created_at?: string
+          expires_at?: string
+          id?: string
+          message_id?: string | null
+          target_path?: string
+          template_name?: string | null
+          token?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "email_deep_link_tokens_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "conversations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       email_deferred_queue: {
         Row: {
           attempts: number
@@ -7684,6 +7731,7 @@ export type Database = {
         Args: { p_reason?: string; p_token: string }
         Returns: Json
       }
+      consume_email_deep_link: { Args: { p_token: string }; Returns: Json }
       count_eligible_sitters: {
         Args: { p_lat: number; p_lng: number; p_radius_km?: number }
         Returns: number
@@ -7718,6 +7766,16 @@ export type Database = {
           p_reviewee_id: string
           p_reviewer_id: string
           p_sit_id: string
+        }
+        Returns: string
+      }
+      create_email_deep_link: {
+        Args: {
+          p_conversation_id?: string
+          p_email: string
+          p_message_id?: string
+          p_target_path: string
+          p_template_name?: string
         }
         Returns: string
       }
