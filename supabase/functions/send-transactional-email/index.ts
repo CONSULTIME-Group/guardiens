@@ -648,6 +648,8 @@ Deno.serve(async (req) => {
           error_message: humanReason,
           metadata: {
             idempotency_key: idempotencyKey,
+            template_name: templateName,
+
             category,
             defer_reason: deferReason,
             cancel_reason: isNearbyAlert ? 'ttl_exceeded_nearby_sit_alert' : 'ttl_exceeded',
