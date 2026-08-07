@@ -8,10 +8,6 @@
  */
 
 export type AlmaWhisperType =
-  // SearchSitter (sitter)
-  | "sitter_fresh_sit_detected"
-  | "sitter_search_indecision"
-  | "sitter_search_repeated_no_action"
   // SitDetail (sitter)
   | "sitter_popular_sit_context"
   | "sitter_reactive_owner_context"
@@ -24,7 +20,6 @@ export type AlmaWhisperType =
   // Messages
   | "owner_conversation_stagnant"
   // Cross
-  | "sitter_international_discovery"
   | "long_absence_return"
   // Pass 5 — compagnon culturel (P3, ambiance)
   | "cultural_fact"
@@ -72,10 +67,6 @@ export const WHISPER_PRIORITY: Record<AlmaWhisperType, AlmaWhisperPriority> = {
   sitter_popular_sit_context: "P1",
   owner_active_sitter_context: "P1",
   owner_traffic_no_action: "P1",
-  sitter_international_discovery: "P1",
-  sitter_fresh_sit_detected: "P2",
-  sitter_search_indecision: "P2",
-  sitter_search_repeated_no_action: "P2",
   sitter_reactive_owner_context: "P2",
   owner_view_trend_up: "P2",
   usage_nudge: "P2",
