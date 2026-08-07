@@ -122,15 +122,12 @@ const CreateSitSetupStep = ({
           Continuer vers mon annonce
         </Button>
         {!allDone && (
-          <p className="text-sm text-muted-foreground mt-2">
-            Il reste à renseigner :{" "}
-            {[
-              !housingDone ? "votre logement" : null,
-              !petsDone ? "au moins un animal" : null,
-              !photoDone ? "une photo" : null,
-            ].filter(Boolean).join(", ")}.
+          <p className="text-sm text-muted-foreground mt-2" aria-live="polite">
+            Il reste à renseigner : {missingLabels.join(", ")}. Dès que ces éléments sont là,
+            le bouton s'active et vous passez à votre annonce.
           </p>
         )}
+
       </div>
     </div>
   );
