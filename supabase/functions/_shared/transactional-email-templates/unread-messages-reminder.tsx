@@ -22,6 +22,8 @@ interface Props {
   contextLabel?: string
   /** Aperçu du dernier message non lu (tronqué côté edge). */
   messagePreview?: string
+  /** Lien profond authentifie, depose directement dans le fil concerne. */
+  deepLinkUrl?: string
 }
 
 const UnreadMessagesReminderEmail = ({
@@ -33,8 +35,9 @@ const UnreadMessagesReminderEmail = ({
   conversationUrl,
   contextLabel,
   messagePreview,
+  deepLinkUrl,
 }: Props) => {
-  const link = conversationUrl || `${SITE_URL}/messages`
+  const link = deepLinkUrl || conversationUrl || `${SITE_URL}/messages`
   const greeting = firstName ? `Bonjour ${firstName},` : 'Bonjour,'
   const plural = unreadCount > 1 ? 's' : ''
   const convPlural = conversationsCount > 1 ? 's' : ''
@@ -81,7 +84,9 @@ const UnreadMessagesReminderEmail = ({
           </Text>
 
           <Section style={{ textAlign: 'center', margin: '24px 0' }}>
-            <Button style={button} href={link}>Lire et répondre</Button>
+            <Button style={button} href={link}>
+              {topSenderFirstName ? `Répondre à ${topSenderFirstName}` : 'Répondre'}
+            </Button>
           </Section>
 
           <Text style={note}>

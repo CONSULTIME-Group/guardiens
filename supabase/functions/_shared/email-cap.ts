@@ -9,8 +9,13 @@
 // de ses interlocuteurs.
 //
 // Regles effectives (mises a jour le 07/08/2026) :
-//   - transactional          : AUCUN plafond de frequence. Seules les heures
-//                              calmes s'appliquent, on ne reveille personne la nuit.
+//   - transactional          : AUCUN plafond de frequence, et depuis le
+//                              07/08/2026 AUCUNE heure calme. Un message
+//                              humain part immediatement, y compris la nuit.
+//                              Les gabarits de NO_QUEUE_TEMPLATES suivent la
+//                              meme regle.
+//   - heures calmes           : appliquees uniquement a 'product', 'digest' et
+//                              'alert'.
 //   - alert                  : compteurs propres (voir CAP_ALERT_*).
 //   - nearby-sit-alert       : compteurs propres au gabarit (voir CAP_NEARBY_SIT_*).
 //   - digest                 : compteurs propres a la categorie (voir CAP_DIGEST_*).
@@ -64,10 +69,10 @@ export const BYPASS_TEMPLATES = new Set<string>([
 // ETAPE 2 (05/08/2026) : derogation totale de file pour les deux gabarits
 // declenches par l'action directe d'un membre identifie.
 //
-// Ni plafond de categorie, ni file de report. La seule garde qui subsiste est
-// celle des heures calmes, qui repousse au prochain 08h00 Paris sans jamais
-// pouvoir annuler (voir resolveDeferral, ou l'exemption est evaluee AVANT tout
-// calcul de TTL, donc `decideOverTtl` est inatteignable pour ces gabarits).
+// Ni plafond de categorie, ni file de report, ni heures calmes depuis le
+// 07/08/2026 : ces gabarits partent immediatement. Constat qui a motive le
+// correctif : une reponse ecrite a 22h14 n'est partie qu'a 08h02 le lendemain,
+// dix heures de retard sur une reponse humaine directe.
 export const NO_QUEUE_TEMPLATES = new Set<string>([
   'new-message',
   'new-application',
@@ -358,10 +363,12 @@ export interface DeferInput {
  * Pure decision: should this email be sent now, or deferred?
  * Order of precedence:
  *  1. Bypass templates / urgent -> send.
- *  2. Quiet hours (22:00-08:00 Europe/Paris) -> defer to next 08:00 Paris.
- *  3. Categorie transactionnelle -> send, sans aucun plafond de frequence.
- *  4. Categorie non transactionnelle : 3 / 7 jours puis 1 / 24h.
- *  5. Otherwise -> send.
+ *  2. NO_QUEUE_TEMPLATES -> send, sans plafond ni heures calmes.
+ *  3. Categorie transactionnelle -> send, sans plafond ni heures calmes.
+ *  4. Heures calmes (22:00-08:00 Europe/Paris), pour 'product', 'digest' et
+ *     'alert' seulement -> report au prochain 08:00 Paris.
+ *  5. Compteurs propres par categorie ou par gabarit.
+ *  6. Otherwise -> send.
  */
 export function decideDeferral(input: DeferInput): DeferDecision {
   const {
@@ -394,21 +401,25 @@ export function decideDeferral(input: DeferInput): DeferDecision {
     return { action: 'send' }
   }
 
-  // Heures calmes : elles s'appliquent a toutes les categories, y compris
-  // transactionnelle. Volontaire, on ne reveille personne la nuit.
-  if (isQuietAt(now)) {
-    return { action: 'defer', reason: 'quiet_hours', scheduledFor: nextQuietEndFrom(now) }
-  }
-
-  // ETAPE 2 : derogation totale. Aucun plafond ne s'applique a un email
-  // declenche par l'action directe d'un autre membre identifie. Place juste
-  // apres les heures calmes, qui restent la seule garde sur ces gabarits.
+  // ETAPE 2 : derogation totale. Aucun plafond, aucune file, et depuis le
+  // 07/08/2026 aucune heure calme : un email declenche par l'action directe
+  // d'un autre membre identifie part immediatement, de jour comme de nuit.
   if (NO_QUEUE_TEMPLATES.has(templateName)) {
     return { action: 'send' }
   }
 
+  // Categorie transactionnelle : envoi immediat, sans plafond et sans heures
+  // calmes. Une notification email ne reveille personne, ce qui sonne la nuit
+  // releve des reglages du telephone, qui appartiennent a l'utilisateur.
   if (effectiveCategory === 'transactional') {
     return { action: 'send' }
+  }
+
+  // Heures calmes : desormais reservees a 'product', 'digest' et 'alert'.
+  // Personne n'attend un conseil de publication a trois heures du matin, et
+  // l'envoi du matin performe mieux sur ces categories.
+  if (isQuietAt(now)) {
+    return { action: 'defer', reason: 'quiet_hours', scheduledFor: nextQuietEndFrom(now) }
   }
 
   // Alerte de nouvelle annonce : compteur strictement propre au gabarit. Elle

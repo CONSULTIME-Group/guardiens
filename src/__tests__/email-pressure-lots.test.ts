@@ -111,11 +111,25 @@ describe("Lot 6 — plafond par categorie", () => {
     expect(d).toMatchObject({ action: "send" });
   });
 
-  it("transactionnel : reste differe pendant les heures calmes", () => {
+  // Regle du 07/08/2026 : les heures calmes ne s'appliquent plus aux messages
+  // humains ni a la categorie transactionnelle. Elles restent en vigueur pour
+  // product, digest et alert.
+  it("transactionnel : part immediatement, meme pendant les heures calmes", () => {
     const d = decideDeferral({
       now: MIDNIGHT,
       templateName: "new-application",
       category: "transactional",
+      hourSentAt: [],
+      daySentAt: [],
+    });
+    expect(d).toMatchObject({ action: "send" });
+  });
+
+  it("product : reste differe pendant les heures calmes", () => {
+    const d = decideDeferral({
+      now: MIDNIGHT,
+      templateName: "owner-no-sit-j3",
+      category: "product",
       hourSentAt: [],
       daySentAt: [],
     });

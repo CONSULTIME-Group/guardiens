@@ -20,6 +20,8 @@ interface Props {
   sitterAvatarUrl?: string | null
   declineUrl?: string
   thinkingUrl?: string
+  /** Lien profond authentifie, depose directement dans le fil concerne. */
+  deepLinkUrl?: string
 }
 
 const FirstApplicationEmail = ({
@@ -32,11 +34,11 @@ const FirstApplicationEmail = ({
   sitterAvatarUrl,
   declineUrl,
   thinkingUrl,
+  deepLinkUrl,
 }: Props) => {
   const sitter = sitterFirstName || 'Un gardien'
-  const ctaHref = sitId
-    ? `${SITE_URL}/sits/${sitId}#candidatures`
-    : `${SITE_URL}/dashboard`
+  const ctaHref = deepLinkUrl
+    || (sitId ? `${SITE_URL}/sits/${sitId}#candidatures` : `${SITE_URL}/dashboard`)
   return (
     <Html lang="fr" dir="ltr">
       <BrandedHead />
@@ -89,7 +91,12 @@ const FirstApplicationEmail = ({
             les chances qu'un échange de confiance s'installe.</strong>
           </Text>
 
-          <QuickActions primaryHref={ctaHref} declineUrl={declineUrl} thinkingUrl={thinkingUrl} />
+          <QuickActions
+            primaryHref={ctaHref}
+            primaryLabel={`Répondre à ${sitter}`}
+            declineUrl={declineUrl}
+            thinkingUrl={thinkingUrl}
+          />
 
           <Text style={note}>
             Vous pourrez lire son message et lui répondre directement dans le chat du site. Inutile de répondre à cet email, il n'est pas relevé.
