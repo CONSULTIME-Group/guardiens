@@ -179,7 +179,9 @@ const GuideDetail = () => {
         title={t("guide_detail.meta_title", { city: guide.city })}
         description={t("guide_detail.meta_description", { city: guide.city, ideal: guide.ideal_for })}
         path={`/guides/${guide.slug}`}
+        ready={contentReady}
       />
+
 
       <div className="min-h-screen bg-background">
         <PageBreadcrumb items={[
