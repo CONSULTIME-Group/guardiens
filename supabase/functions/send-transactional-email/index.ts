@@ -505,12 +505,18 @@ Deno.serve(async (req) => {
     const alertWeek = nonTxRows
       .filter((r) => r.metadata?.category === 'alert' && !isNearby(r))
       .map((r) => r.created_at)
+    // CORRECTIF 07/08/2026 : la categorie 'digest' a ses propres compteurs.
+    const digestWeek = nonTxRows
+      .filter((r) => r.metadata?.category === 'digest' && !isNearby(r))
+      .map((r) => r.created_at)
     const nonTxWeek = nonTxRows
-      .filter((r) => r.metadata?.category !== 'alert' && !isNearby(r))
+      .filter((r) => r.metadata?.category !== 'alert' && r.metadata?.category !== 'digest' && !isNearby(r))
       .map((r) => r.created_at)
     const nonTxDay = nonTxWeek.filter((t) => t >= oneDayAgo)
     const alertDay = alertWeek.filter((t) => t >= oneDayAgo)
+    const digestDay = digestWeek.filter((t) => t >= oneDayAgo)
     const nearbySitDay = nearbySitWeek.filter((t) => t >= oneDayAgo)
+
 
     const decision = decideDeferral({
       now: new Date(nowMs),
