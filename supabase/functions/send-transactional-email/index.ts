@@ -650,9 +650,54 @@ Deno.serve(async (req) => {
             templateName, idempotencyKey, error: logCancelErr,
           })
         }
+        // Un email detruit doit toujours remonter dans /admin. Une seule ligne
+        // par gabarit tant qu'elle n'est pas resolue, grace a l'index
+        // d'idempotence (signal_type, entity_id) sur les signaux non resolus.
+        try {
+          const { count: destroyed24h } = await supabase
+            .from('email_send_log')
+            .select('id', { count: 'exact', head: true })
+            .eq('status', 'cancelled')
+            .gte('created_at', new Date(nowMs - 86400_000).toISOString())
+          const entityId = await md5Uuid(`email_destroyed:${templateName}`)
+          const signalMetadata = {
+            template_name: templateName,
+            recipient_email: effectiveRecipient,
+            reason: humanReason,
+            cancel_reason: isNearbyAlert ? 'ttl_exceeded_nearby_sit_alert' : 'ttl_exceeded',
+            defer_reason: deferReason,
+            destroyed_last_24h: destroyed24h ?? null,
+            last_detected_at: new Date(nowMs).toISOString(),
+          }
+          const { data: openSignal } = await supabase
+            .from('admin_signals')
+            .select('id')
+            .eq('signal_type', 'email_destroyed')
+            .eq('entity_id', entityId)
+            .is('resolved_at', null)
+            .maybeSingle()
+          if (openSignal?.id) {
+            await supabase
+              .from('admin_signals')
+              .update({ metadata: signalMetadata, detected_at: new Date(nowMs).toISOString() })
+              .eq('id', openSignal.id)
+          } else {
+            await supabase.from('admin_signals').insert({
+              signal_type: 'email_destroyed',
+              severity: 'warning',
+              entity_type: 'email',
+              entity_id: entityId,
+              metadata: signalMetadata,
+            })
+          }
+        } catch (signalErr) {
+          console.error('admin_signals insert failed (email_destroyed)', signalErr)
+        }
+
         console.warn('Email annule, contenu date et report au dela de la TTL', {
           templateName, recipientLower, deferReason, scheduledFor: scheduledFor.toISOString(),
         })
+
 
         return new Response(
           JSON.stringify({ success: false, status: 'cancelled', reason: 'ttl_exceeded', defer_reason: deferReason }),
