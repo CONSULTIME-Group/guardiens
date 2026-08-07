@@ -8004,6 +8004,24 @@ export type Database = {
         Args: { p_period_days?: number }
         Returns: Json
       }
+      get_my_applications: {
+        Args: never
+        Returns: {
+          application_id: string
+          content_visible: boolean
+          cover_photo: string
+          created_at: string
+          owner_id: string
+          sit_city: string
+          sit_end_date: string
+          sit_id: string
+          sit_start_date: string
+          sit_status: Database["public"]["Enums"]["sit_status"]
+          sit_title: string
+          status: Database["public"]["Enums"]["application_status"]
+          viewed_at: string
+        }[]
+      }
       get_nearby_helpers: {
         Args: { p_max_radius_km?: number; p_max_results?: number }
         Returns: {
