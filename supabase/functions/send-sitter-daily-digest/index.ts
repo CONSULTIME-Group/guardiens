@@ -17,6 +17,8 @@
 import { createClient } from 'npm:@supabase/supabase-js@2.45.0'
 import { claimSitNotification, raiseClaimErrorSignal, raiseStaleClaimSignal, releaseSitNotification, reportClaimOutcome } from '../_shared/sitNotificationClaim.ts'
 import { parisWindowVerdict } from '../_shared/paris-hour.ts'
+import { recordDeliveryFailure } from '../_shared/delivery-failure.ts'
+import { startCronRun } from '../_shared/cron-run-log.ts'
 
 // Heure de Paris visée pour ce passage, garde saison-proof (voir paris-hour.ts).
 const TARGET_PARIS_HOUR = 8
@@ -81,6 +83,11 @@ Deno.serve(async (req) => {
       return json({ ok: true, skipped: true, reason: verdict.reason, paris_hour: verdict.parisHour })
     }
   }
+
+  // Passage nominal : tracé dans cron_run_log avec compteurs et erreurs.
+  const nominalRun = (!body.manual && !body.dry_run && !body.catchup && !body.sitter_id)
+    ? await startCronRun('send-sitter-daily-digest')
+    : null
 
   // Passage de rattrapage : unique, tracé, non rejouable. Le gabarit assume
   // le rappel, le contrôle des 24h et la réservation de créneau sont sautés
@@ -375,7 +382,27 @@ Deno.serve(async (req) => {
         const sendErr = _steRes.ok ? null : new Error(`send-transactional-email ${_steRes.status}: ${_steTxt1}`);
 
         if (sendErr) {
-          if (!body.manual) await releaseSitNotification(supabase, sitterId)
+          // Trace persistante : code HTTP et corps de réponse, jamais un
+          // simple console.error.
+          await recordDeliveryFailure(supabase, {
+            templateName: 'sitter-daily-digest',
+            recipientEmail: email,
+            recipientId: sitterId,
+            entityType: 'user',
+            entityId: sitterId,
+            source: 'send-sitter-daily-digest',
+            errorMessage: `HTTP ${_steRes.status}: ${_steTxt1.slice(0, 500)}`,
+            extra: { http_status: _steRes.status, response_body: _steTxt1.slice(0, 1000), idempotency_key: idemBase },
+          })
+          if (!body.manual) await releaseSitNotification(supabase, sitterId, 'send_failed')
+          // La file ne reste pas nue en `queued` : elle porte le motif du
+          // report, la ligne sera reprise au passage suivant.
+          if (!body.dry_run) {
+            await supabase
+              .from('sitter_digest_queue')
+              .update({ skip_reason: `deferred_retry:http_${_steRes.status}` })
+              .in('id', top3.map(q => q.id))
+          }
           errors.push({ sitter_id: sitterId, reason: `send_failed: ${String(sendErr)}` })
           continue
         }
@@ -422,6 +449,16 @@ Deno.serve(async (req) => {
         .eq('edge_name', CATCHUP_TAG)
     }
 
+    await nominalRun?.finish(errors.length > 0 ? 'partial' : 'success', {
+      sitters_processed: bySitter.size,
+      sitters_sent: sittersSent,
+      sitters_skipped: sittersSkipped,
+      claim_granted: claimGranted,
+      claim_skipped: claimSkipped,
+      claim_skipped_by: claimSkippedBy,
+      errors,
+    })
+
     return json({
       ok: true,
       catchup: !!body.catchup,
@@ -436,6 +473,7 @@ Deno.serve(async (req) => {
     })
   } catch (err) {
     console.error('send-sitter-daily-digest fatal', err)
+    await nominalRun?.fail(err)
     return json({ error: String(err) }, 500)
   }
 })
