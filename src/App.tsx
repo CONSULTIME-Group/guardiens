@@ -3,6 +3,8 @@ import { lazyWithRetry as lazy } from "@/lib/lazyWithRetry";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Route, Routes, Navigate, useParams, useLocation, useNavigate } from "react-router-dom";
 import { Loader2 } from "lucide-react";
+import PageMeta from "@/components/PageMeta";
+
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
