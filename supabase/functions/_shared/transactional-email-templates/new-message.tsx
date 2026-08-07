@@ -26,6 +26,8 @@ interface Props {
   contextDates?: string  // ex: "14 juin → 28 juin 2026"
   recipientRole?: RecipientRole
   messagePreview?: string
+  /** Lien profond authentifie, depose directement dans le fil concerne. */
+  deepLinkUrl?: string
 }
 
 
@@ -38,9 +40,11 @@ const NewMessageEmail = ({
   contextDates,
   recipientRole,
   messagePreview,
+  deepLinkUrl,
 }: Props) => {
   const { emoji, title } = labelByContext(contextType, recipientRole)
-  const link = conversationId ? `${SITE_URL}/messages?c=${conversationId}` : `${SITE_URL}/messages`
+  const link = deepLinkUrl
+    || (conversationId ? `${SITE_URL}/messages?c=${conversationId}` : `${SITE_URL}/messages`)
   const sender = senderFirstName?.trim() || 'Un membre'
   const lead = buildLeadSentence(sender, contextType, recipientRole, contextLabel)
 
@@ -81,7 +85,7 @@ const NewMessageEmail = ({
           </Text>
 
           <Section style={{ textAlign: 'center', margin: '24px 0' }}>
-            <Button style={button} href={link}>Lire et répondre</Button>
+            <Button style={button} href={link}>Répondre à {sender}</Button>
           </Section>
 
           <Text style={note}>

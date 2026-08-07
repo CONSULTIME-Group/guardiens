@@ -8,15 +8,17 @@ import { Button, Section, Text } from 'npm:@react-email/components@0.0.22'
  */
 export interface QuickActionProps {
   primaryHref: string
+  /** Libelle du bouton principal. Il doit dire ce qui se passe au clic. */
+  primaryLabel?: string
   declineUrl?: string
   thinkingUrl?: string
 }
 
-export const QuickActions = ({ primaryHref, declineUrl, thinkingUrl }: QuickActionProps) => (
+export const QuickActions = ({ primaryHref, primaryLabel, declineUrl, thinkingUrl }: QuickActionProps) => (
   <Section style={wrap}>
     <Section style={{ textAlign: 'center' as const, margin: '0 0 12px' }}>
       <Button style={primaryBtn} href={primaryHref}>
-        Voir la candidature
+        {primaryLabel || 'Voir la candidature'}
       </Button>
     </Section>
     {(declineUrl || thinkingUrl) ? (

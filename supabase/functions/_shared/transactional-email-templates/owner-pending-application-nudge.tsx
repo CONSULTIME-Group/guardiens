@@ -16,6 +16,8 @@ interface Props {
   ctaUrl?: string
   declineUrl?: string
   thinkingUrl?: string
+  /** Lien profond authentifie, depose directement dans le fil concerne. */
+  deepLinkUrl?: string
 }
 
 const OwnerPendingApplicationNudgeEmail = ({
@@ -26,6 +28,7 @@ const OwnerPendingApplicationNudgeEmail = ({
   ctaUrl,
   declineUrl,
   thinkingUrl,
+  deepLinkUrl,
 }: Props) => {
   const sitter = sitterFirstName || 'Un gardien'
   const days = typeof daysSince === 'number' && daysSince > 0 ? daysSince : 2
@@ -53,7 +56,8 @@ const OwnerPendingApplicationNudgeEmail = ({
           </Text>
 
           <QuickActions
-            primaryHref={ctaUrl || 'https://guardiens.fr/dashboard'}
+            primaryHref={deepLinkUrl || ctaUrl || 'https://guardiens.fr/dashboard'}
+            primaryLabel={`Répondre à ${sitter}`}
             declineUrl={declineUrl}
             thinkingUrl={thinkingUrl}
           />
