@@ -10,12 +10,19 @@ export interface SetupStepProps {
   propertyId: string | null;
   petCount: number;
   photos: string[];
+  /**
+   * Verdict photo calculé par le parcours, toutes sources confondues : galerie,
+   * photos du logement, photo de couverture. Source unique de vérité.
+   */
+  photoDone: boolean;
   /** Libellés exacts de ce qui reste à renseigner, source unique côté parcours. */
   missingLabels: string[];
   onPropertySaved: (property: InlineHousingResult) => void;
   onPetsChanged: (pets: any[]) => void;
   onPhotoUploaded: (url: string) => void;
   onContinue: () => void;
+  /** Présent seulement quand l'écran a été ouvert volontairement. */
+  onBack?: () => void;
 }
 
 const Block = ({
@@ -43,13 +50,13 @@ const Block = ({
  * saisie déjà commencée.
  */
 const CreateSitSetupStep = ({
-  userId, propertyId, petCount, photos, missingLabels,
-  onPropertySaved, onPetsChanged, onPhotoUploaded, onContinue,
+  userId, propertyId, petCount, photos, photoDone, missingLabels,
+  onPropertySaved, onPetsChanged, onPhotoUploaded, onContinue, onBack,
 }: SetupStepProps) => {
   const housingDone = !!propertyId;
   const petsDone = petCount > 0;
-  const photoDone = photos.length > 0;
   const allDone = missingLabels.length === 0;
+
 
 
   return (
@@ -85,7 +92,7 @@ const CreateSitSetupStep = ({
       </Block>
 
       <Block title="Une photo de votre logement" done={photoDone}>
-        {photoDone ? (
+        {photoDone && photos.length > 0 ? (
           <div className="flex flex-wrap gap-2">
             {photos.slice(0, 6).map((url, i) => (
               <img
@@ -97,6 +104,10 @@ const CreateSitSetupStep = ({
               />
             ))}
           </div>
+        ) : photoDone ? (
+          <p className="text-sm text-muted-foreground">
+            Vous avez déjà une photo pour votre annonce. Vous pouvez en ajouter d'autres si vous le souhaitez.
+          </p>
         ) : (
           <p className="text-sm text-muted-foreground mb-3">
             Une seule photo suffit pour commencer, vous pourrez en ajouter d'autres ensuite.
@@ -112,7 +123,7 @@ const CreateSitSetupStep = ({
         </div>
       </Block>
 
-      <div className="rounded-xl border border-border bg-card p-4">
+      <div className="rounded-xl border border-border bg-card p-4 space-y-3">
         <Button
           type="button"
           className="w-full h-12 text-base font-semibold"
@@ -122,13 +133,23 @@ const CreateSitSetupStep = ({
           Continuer vers mon annonce
         </Button>
         {!allDone && (
-          <p className="text-sm text-muted-foreground mt-2" aria-live="polite">
+          <p className="text-sm text-muted-foreground" aria-live="polite">
             Il reste à renseigner : {missingLabels.join(", ")}. Dès que ces éléments sont là,
             le bouton s'active et vous passez à votre annonce.
           </p>
         )}
-
+        {onBack && (
+          <Button
+            type="button"
+            variant="ghost"
+            className="w-full"
+            onClick={onBack}
+          >
+            Revenir à mon annonce
+          </Button>
+        )}
       </div>
+
     </div>
   );
 };
