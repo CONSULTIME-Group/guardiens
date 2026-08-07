@@ -531,6 +531,9 @@ Deno.serve(async (req) => {
       alertWeekSentAt: alertWeek,
       nearbySitDaySentAt: nearbySitDay,
       nearbySitWeekSentAt: nearbySitWeek,
+      digestDaySentAt: digestDay,
+      digestWeekSentAt: digestWeek,
+
     })
 
 
