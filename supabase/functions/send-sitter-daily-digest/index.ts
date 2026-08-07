@@ -16,6 +16,10 @@
 
 import { createClient } from 'npm:@supabase/supabase-js@2.45.0'
 import { claimSitNotification, raiseClaimErrorSignal, raiseStaleClaimSignal, releaseSitNotification, reportClaimOutcome } from '../_shared/sitNotificationClaim.ts'
+import { parisWindowVerdict } from '../_shared/paris-hour.ts'
+
+// Heure de Paris visée pour ce passage, garde saison-proof (voir paris-hour.ts).
+const TARGET_PARIS_HOUR = 8
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -67,6 +71,16 @@ Deno.serve(async (req) => {
     Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!,
     { auth: { persistSession: false } },
   )
+
+  // Règle heure de Paris : hors passage visé ou en plage calme, on sort sans
+  // rien faire, le passage suivant de la fenêtre reprend la main.
+  if (!body.manual && !body.dry_run && !body.catchup && !body.sitter_id) {
+    const verdict = parisWindowVerdict(new Date(), TARGET_PARIS_HOUR)
+    if (!verdict.run) {
+      console.log(JSON.stringify({ event: 'digest_skipped_paris_window', source: 'send-sitter-daily-digest', ...verdict }))
+      return json({ ok: true, skipped: true, reason: verdict.reason, paris_hour: verdict.parisHour })
+    }
+  }
 
   // Passage de rattrapage : unique, tracé, non rejouable. Le gabarit assume
   // le rappel, le contrôle des 24h et la réservation de créneau sont sautés

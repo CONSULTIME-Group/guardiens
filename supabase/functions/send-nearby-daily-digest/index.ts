@@ -16,6 +16,9 @@
 
 import { createClient } from 'npm:@supabase/supabase-js@2.45.0'
 import { claimSitNotification, raiseClaimErrorSignal, releaseSitNotification, reportClaimOutcome } from '../_shared/sitNotificationClaim.ts'
+import { parisWindowVerdict } from '../_shared/paris-hour.ts'
+
+const TARGET_PARIS_HOUR = 9
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -52,6 +55,17 @@ Deno.serve(async (req) => {
     Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!,
     { auth: { persistSession: false } },
   )
+
+  if (!body.manual && !body.dry_run && !body.user_id) {
+    const verdict = parisWindowVerdict(new Date(), TARGET_PARIS_HOUR)
+    if (!verdict.run) {
+      console.log(JSON.stringify({ event: 'digest_skipped_paris_window', source: 'send-nearby-daily-digest', ...verdict }))
+      return new Response(
+        JSON.stringify({ ok: true, skipped: true, reason: verdict.reason, paris_hour: verdict.parisHour }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
+      )
+    }
+  }
 
   try {
     const since = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()

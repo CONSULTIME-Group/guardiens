@@ -11,7 +11,7 @@
 // à l'identique.
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { claimSitNotification, raiseClaimErrorSignal, releaseSitNotification, reportClaimOutcome } from "../_shared/sitNotificationClaim.ts";
-import { parisDateKey, parisHourSlot } from "../_shared/paris-hour.ts";
+import { parisDateKey, parisHourSlot, parisWindowVerdict } from "../_shared/paris-hour.ts";
 import { geocodeKeyCandidates } from "../_shared/geocode-lookup.ts";
 
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
@@ -133,6 +133,20 @@ Deno.serve(async (req) => {
     } catch { /* pas de body JSON : mode normal */ }
 
     const now = new Date();
+
+    // Règle heure de Paris : ce digest ne travaille qu'au passage de 8h Paris,
+    // jamais en plage calme. Le forçage et le dry run restent possibles.
+    if (!forceMode && !dryRun && !userId) {
+      const verdict = parisWindowVerdict(now, 8);
+      if (!verdict.run) {
+        console.log(JSON.stringify({ event: "digest_skipped_paris_window", source: "send-alert-digest", ...verdict }));
+        return new Response(
+          JSON.stringify({ ok: true, skipped: true, reason: verdict.reason, paris_hour: verdict.parisHour }),
+          { headers: { "Content-Type": "application/json" } },
+        );
+      }
+    }
+
     const currentHourStr = parisHourSlot(now);
     const currentParisDate = parisDateKey(now);
     const dayOfWeek = now.getDay();
