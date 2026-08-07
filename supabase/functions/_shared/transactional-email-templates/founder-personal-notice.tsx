@@ -138,6 +138,26 @@ const FounderPersonalNoticeEmail = ({
 
         <Hr style={hr} />
 
+        {/* Seul bloc sombre de l'email, motif "une seule star" */}
+        <table role="presentation" cellPadding={0} cellSpacing={0} width="100%" bgcolor="#2C6D50" style={darkBox}>
+          <tbody>
+            <tr>
+              <td style={darkCell} className="em-card">
+                <Text style={darkKicker}>UN COUP DE MAIN, DANS L'AUTRE SENS</Text>
+                <Text style={darkTitle} className="em-card-title">Deux minutes pour nous faire connaître</Text>
+                <Text style={darkText} className="em-card-line">
+                  Un avis Google, c'est ce qui fait qu'on remonte quand quelqu'un cherche une garde près de chez lui. Plus de gens qui nous trouvent, c'est plus de maisons à garder pour vous. C'est le levier le plus direct que vous ayez pour faire grossir la plateforme.
+                </Text>
+                <Button style={whiteButton} href={googleReviewUrl} className="em-btn">
+                  Laisser un avis Google
+                </Button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+
+        <Hr style={hr} />
+
         <SectionHeader label="MAINTENANT, LA DEMANDE" />
         <Heading as="h2" style={h2}>C'est gratuit, et ce n'est pas un cadeau</Heading>
 
@@ -152,15 +172,6 @@ const FounderPersonalNoticeEmail = ({
           Répondez à cet email, trois lignes suffisent. Vous avez le droit d'être dur, c'est même le plus utile. Je lis tout et je réponds.
         </Text>
 
-        <Section style={box} className="em-card">
-          <Text style={boxTitle} className="em-card-title">Et si vous avez deux minutes de plus</Text>
-          <Text style={boxText} className="em-card-line">
-            Un avis Google fait connaître Guardiens. Plus de gens qui nous trouvent, c'est plus de maisons à garder pour vous. C'est le levier le plus direct que vous ayez pour faire grossir la plateforme.
-          </Text>
-          <Button style={secondaryButton} href={googleReviewUrl} className="em-btn">
-            Laisser un avis Google
-          </Button>
-        </Section>
 
         <Text style={text} className="em-text">Merci d'être là si tôt.</Text>
         <Text style={signName}>Jérémie</Text>
