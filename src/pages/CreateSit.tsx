@@ -405,6 +405,11 @@ const CreateSit = () => {
   // clic sur Continuer, sinon l'écran disparaîtrait tout seul dès le dernier champ.
   const [setupEntered, setSetupEntered] = useState(false);
   const [setupDismissed, setSetupDismissed] = useState(false);
+  // Entrée volontaire depuis le formulaire : le retour doit rester possible.
+  const [setupVoluntary, setSetupVoluntary] = useState(false);
+  const showSetupRef = useRef(false);
+  const setupSuspendedRef = useRef(false);
+
   const [moderationVerdicts, setModerationVerdicts] = useState<FieldVerdicts>({});
   const [ownerProfile, setOwnerProfile] = useState<OwnerSummary | null>(null);
   const [ownerPhotos, setOwnerPhotos] = useState<string[]>([]);
