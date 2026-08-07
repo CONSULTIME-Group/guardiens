@@ -10,6 +10,8 @@ export interface SetupStepProps {
   propertyId: string | null;
   petCount: number;
   photos: string[];
+  /** Libellés exacts de ce qui reste à renseigner, source unique côté parcours. */
+  missingLabels: string[];
   onPropertySaved: (property: InlineHousingResult) => void;
   onPetsChanged: (pets: any[]) => void;
   onPhotoUploaded: (url: string) => void;
@@ -41,13 +43,14 @@ const Block = ({
  * saisie déjà commencée.
  */
 const CreateSitSetupStep = ({
-  userId, propertyId, petCount, photos,
+  userId, propertyId, petCount, photos, missingLabels,
   onPropertySaved, onPetsChanged, onPhotoUploaded, onContinue,
 }: SetupStepProps) => {
   const housingDone = !!propertyId;
   const petsDone = petCount > 0;
   const photoDone = photos.length > 0;
-  const allDone = housingDone && petsDone && photoDone;
+  const allDone = missingLabels.length === 0;
+
 
   return (
     <div className="px-4 max-w-3xl mx-auto space-y-6">
@@ -119,15 +122,12 @@ const CreateSitSetupStep = ({
           Continuer vers mon annonce
         </Button>
         {!allDone && (
-          <p className="text-sm text-muted-foreground mt-2">
-            Il reste à renseigner :{" "}
-            {[
-              !housingDone ? "votre logement" : null,
-              !petsDone ? "au moins un animal" : null,
-              !photoDone ? "une photo" : null,
-            ].filter(Boolean).join(", ")}.
+          <p className="text-sm text-muted-foreground mt-2" aria-live="polite">
+            Il reste à renseigner : {missingLabels.join(", ")}. Dès que ces éléments sont là,
+            le bouton s'active et vous passez à votre annonce.
           </p>
         )}
+
       </div>
     </div>
   );

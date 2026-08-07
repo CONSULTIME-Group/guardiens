@@ -275,6 +275,8 @@ export type EventType =
   | "sits_create_step_completed"                // Étape terminée (step, duration_ms)
   | "sits_create_abandoned"                     // Wizard quitté sans publication (step, has_draft)
   | "sits_create_preflight_blocked"             // Écran de prérequis affiché avant l'étape 0 (missing, profile_completion)
+  | "sits_create_setup_shown"                   // Écran de mise en route affiché (missing)
+  | "sits_create_setup_completed"               // Mise en route terminée (duration_ms, filled)
   | "application_submitted"                     // Candidature envoyée (source, used_alma_draft, message_length)
   | "application_sent_unedited_draft"           // Candidature envoyée avec brouillon Alma non modifié (sit_id)
   // Vague 14 — tracking des sections vedettes des dashboards ---------------
