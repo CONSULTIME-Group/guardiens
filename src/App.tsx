@@ -567,6 +567,7 @@ const AppRoutes = () => {
       <Route path="/dev/preview/mission-cards" element={<PreviewMissionCards />} />
       <Route path="/unsubscribe" element={<Unsubscribe />} />
       <Route path="/go" element={<EmailClickRedirect />} />
+      <Route path="/acces" element={<EmailDeepLink />} />
       <Route path="/candidature/reponse" element={<ApplicationQuickAction />} />
 
       <Route path="/email-preferences" element={<EmailPreferences />} />
