@@ -16,6 +16,10 @@
 
 import { createClient } from 'npm:@supabase/supabase-js@2.45.0'
 import { claimSitNotification, raiseClaimErrorSignal, releaseSitNotification, reportClaimOutcome } from '../_shared/sitNotificationClaim.ts'
+import { parisWindowVerdict } from '../_shared/paris-hour.ts'
+import { recordDeliveryFailure } from '../_shared/delivery-failure.ts'
+
+const TARGET_PARIS_HOUR = 9
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -52,6 +56,17 @@ Deno.serve(async (req) => {
     Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!,
     { auth: { persistSession: false } },
   )
+
+  if (!body.manual && !body.dry_run && !body.user_id) {
+    const verdict = parisWindowVerdict(new Date(), TARGET_PARIS_HOUR)
+    if (!verdict.run) {
+      console.log(JSON.stringify({ event: 'digest_skipped_paris_window', source: 'send-nearby-daily-digest', ...verdict }))
+      return new Response(
+        JSON.stringify({ ok: true, skipped: true, reason: verdict.reason, paris_hour: verdict.parisHour }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
+      )
+    }
+  }
 
   try {
     const since = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()
@@ -367,7 +382,17 @@ Deno.serve(async (req) => {
         if (!_steRes.ok) console.error('send-transactional-email failed', _steRes.status, _steTxt1);
         const sendErr = _steRes.ok ? null : new Error(`send-transactional-email ${_steRes.status}: ${_steTxt1}`);
         if (sendErr) {
-          if (!body.manual) await releaseSitNotification(supabase, p.id)
+          await recordDeliveryFailure(supabase, {
+            templateName: 'nearby-daily-digest',
+            recipientEmail: (p as any).email ?? null,
+            recipientId: p.id,
+            entityType: 'user',
+            entityId: p.id,
+            source: 'send-nearby-daily-digest',
+            errorMessage: `HTTP ${_steRes.status}: ${_steTxt1.slice(0, 500)}`,
+            extra: { http_status: _steRes.status, response_body: _steTxt1.slice(0, 1000) },
+          })
+          if (!body.manual) await releaseSitNotification(supabase, p.id, 'send_failed')
           errors.push({ user_id: p.id, reason: `send_failed: ${String(sendErr)}` })
           continue
         }

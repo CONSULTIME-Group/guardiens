@@ -5368,24 +5368,33 @@ export type Database = {
           created_at: string
           idempotency_key: string
           notification_date: string
+          release_reason: string | null
+          released_at: string | null
           sit_ids: string[]
           source: string
+          status: string
           user_id: string
         }
         Insert: {
           created_at?: string
           idempotency_key: string
           notification_date?: string
+          release_reason?: string | null
+          released_at?: string | null
           sit_ids?: string[]
           source: string
+          status?: string
           user_id: string
         }
         Update: {
           created_at?: string
           idempotency_key?: string
           notification_date?: string
+          release_reason?: string | null
+          released_at?: string | null
           sit_ids?: string[]
           source?: string
+          status?: string
           user_id?: string
         }
         Relationships: []
@@ -8301,10 +8310,12 @@ export type Database = {
         }
         Returns: undefined
       }
-      release_sit_notification: {
-        Args: { _date?: string; _user_id: string }
-        Returns: undefined
-      }
+      release_sit_notification:
+        | { Args: { _date?: string; _user_id: string }; Returns: undefined }
+        | {
+            Args: { _date?: string; _reason?: string; _user_id: string }
+            Returns: undefined
+          }
       release_worker_lock: { Args: { p_lock_key: string }; Returns: boolean }
       reopen_application: { Args: { p_application_id: string }; Returns: Json }
       repondre_avis_annulation: {

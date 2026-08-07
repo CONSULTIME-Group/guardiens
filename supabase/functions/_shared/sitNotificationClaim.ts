@@ -68,9 +68,13 @@ export async function claimSitNotification(
 export async function releaseSitNotification(
   supabase: any,
   userId: string,
+  reason = "send_failed",
 ): Promise<void> {
+  // Relâchement non destructif : la ligne reste, avec un état `released`, un
+  // horodatage et un motif. Rien ne disparaît du journal.
   const { error } = await supabase.rpc("release_sit_notification", {
     _user_id: userId,
+    _reason: reason,
   });
   if (error) {
     console.error("release_sit_notification failed", userId, error.message ?? error);
