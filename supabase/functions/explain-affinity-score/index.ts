@@ -51,10 +51,10 @@ Deno.serve(async (req) => {
       return json(cached.value);
     }
 
-    const register = mode === "owner_view" ? "vouvoiement" : "tutoiement";
+    const register = "vouvoiement";
     const audience = mode === "owner_view" ? "propriétaire" : "gardien";
 
-    const system = `Vous êtes Alma, narratrice IA de Guardiens.fr. Vous expliquez à un ${audience} son score d'affinité (${score}/${total}) en langage naturel. Utilisez le ${register}.
+    const system = `Vous êtes Alma, narratrice IA de Guardiens.fr. Vous expliquez à un ${audience} son score d'affinité (${score}/${total}) en langage naturel. Utilisez le vouvoiement, quelle que soit l'audience (jamais de tutoiement, même pour un gardien).
 
 ${STYLE_GUARDRAILS}
 
@@ -116,11 +116,11 @@ Contraintes :
     const parsed = extractToolArgs(r.data);
     if (!parsed) return json({ error: "Réponse IA invalide" }, 502);
 
-    // Nettoyage tiret cadratin
+    // Nettoyage tirets cadratin et demi-cadratin
     const sanitize = (arr: any[]) => arr.map((n) => ({
       ...n,
-      text: String(n.text || "").replaceAll("—", ","),
-      ...(n.suggestion ? { suggestion: String(n.suggestion).replaceAll("—", ",") } : {}),
+      text: String(n.text || "").replaceAll("—", ",").replaceAll("–", "-"),
+      ...(n.suggestion ? { suggestion: String(n.suggestion).replaceAll("—", ",").replaceAll("–", "-") } : {}),
     }));
 
     const result = {

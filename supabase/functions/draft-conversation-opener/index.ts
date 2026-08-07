@@ -2,7 +2,7 @@
 // Génère un premier message (brise-glace) pour un thread vide avec contexte sit ou mission.
 // Entrée : { thread_context: { sit_id?, mission_id?, other_user_id } }
 // Sortie : { draft: string, warnings: string[], fallback?: boolean }
-// Rate limit : 5/h. Vouvoiement pour owner, tutoiement pour sitter (accroche).
+// Rate limit : 5/h. Vouvoiement absolu, quelle que soit l'audience.
 //
 // Correctifs :
 //   - `sits.owner_id` et `small_missions.owner_id` n'existent pas (c'est
@@ -171,8 +171,8 @@ Deno.serve(async (req) => {
       missionTitle: (missionCtx as any)?.title ?? null,
     };
 
-    const register = audience === "owner" ? "vouvoiement" : "tutoiement";
-    const system = `Vous êtes Alma, narratrice IA de Guardiens.fr. Vous rédigez UN PREMIER MESSAGE court (60 à 120 mots) pour engager la conversation avec ${otherFirstName ?? "l'autre membre"}. Utilisez le ${register}.
+    const register = "vouvoiement";
+    const system = `Vous êtes Alma, narratrice IA de Guardiens.fr. Vous rédigez UN PREMIER MESSAGE court (60 à 120 mots) pour engager la conversation avec ${otherFirstName ?? "l'autre membre"}. Utilisez le vouvoiement, quelle que soit l'audience (jamais de tutoiement, même pour un sitter).
 
 ${STYLE_GUARDRAILS}
 
