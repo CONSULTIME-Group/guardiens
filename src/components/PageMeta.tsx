@@ -85,6 +85,16 @@ interface PageMetaProps {
    * Metas additionnelles injectées impérativement (og:image:alt, etc.).
    */
   extraMeta?: Array<{ attr: "name" | "property"; key: string; content: string }>;
+  /**
+   * Code HTTP à déclarer à Prerender.io (meta prerender-status-code).
+   * Utilisé par la page introuvable pour éviter les soft 404.
+   */
+  statusCode?: number;
+  /**
+   * Supprime le canonical auto-généré. Une page introuvable ne doit pas se
+   * déclarer canonique d'elle-même.
+   */
+  noCanonical?: boolean;
 }
 
 const PageMeta = ({
@@ -104,6 +114,8 @@ const PageMeta = ({
   jsonLd,
   ready,
   extraMeta,
+  statusCode,
+  noCanonical = false,
 }: PageMetaProps) => {
   const location = useLocation();
   const { i18n } = useTranslation();
@@ -226,8 +238,18 @@ const PageMeta = ({
     // Écrase la meta description statique (index.html) qui sinon reste en
     // premier dans le DOM et est lue par les crawlers avant la nôtre.
     upsertMetaTag({ attr: "name", key: "description", content: metaDescription });
-    upsertCanonical(canonicalUrl);
+    if (noCanonical) {
+      document.head.querySelectorAll('link[rel="canonical"]').forEach((node) => node.remove());
+    } else {
+      upsertCanonical(canonicalUrl);
+    }
     upsertHreflangAlternates();
+
+    if (typeof statusCode === "number") {
+      upsertMetaTag({ attr: "name", key: "prerender-status-code", content: String(statusCode) });
+    } else {
+      removeMetaTag({ attr: "name", key: "prerender-status-code" });
+    }
 
     upsertMetaTag({ attr: "property", key: "og:title", content: fullTitle });
     upsertMetaTag({ attr: "property", key: "og:description", content: metaDescription });
@@ -279,7 +301,7 @@ const PageMeta = ({
     if (ready !== false) {
       (window as any).prerenderReady = true;
     }
-  }, [author, canonical, canonicalUrl, currentPath, currentUrl, currentLang, extraMetaKey, fullTitle, hreflangKey, jsonLdKey, metaDescription, effectiveNoindex, nofollow, htmlLang, publishedAt, ready, resolvedImage, type]);
+  }, [author, canonical, canonicalUrl, currentPath, currentUrl, currentLang, extraMetaKey, fullTitle, hreflangKey, jsonLdKey, metaDescription, effectiveNoindex, nofollow, noCanonical, statusCode, htmlLang, publishedAt, ready, resolvedImage, type]);
 
   // Toutes les balises sont écrites impérativement dans le useEffect ci-dessus,
   // react-helmet-async n'atteignant pas le DOM sur ce projet.
