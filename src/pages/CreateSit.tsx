@@ -1640,10 +1640,12 @@ const CreateSit = () => {
               })));
             }}
             onPhotoUploaded={registerUploadedPhoto}
-            missingLabels={preflightMissing.map((m) => m.label)}
+            photoDone={setupState.photoDone}
+            missingLabels={setupState.missingLabels}
             onContinue={handleSetupContinue}
-
+            onBack={setupState.canGoBack ? handleSetupBack : undefined}
           />
+
         )}
       </div>
     );
@@ -2474,9 +2476,10 @@ const CreateSit = () => {
                 <p className="text-sm text-muted-foreground mb-2">
                   Votre logement n'est pas encore décrit, c'est lui qui porte la fiche de vos animaux.
                 </p>
-                <Button type="button" variant="outline" onClick={() => { setSetupEntered(true); setSetupDismissed(false); }}>
+                <Button type="button" variant="outline" onClick={() => { setSetupVoluntary(true); setSetupEntered(true); setSetupDismissed(false); }}>
                   Décrire mon logement ici
                 </Button>
+
               </div>
             )}
           </div>
