@@ -367,7 +367,7 @@ Deno.serve(async (req) => {
             .from("sit_notification_log")
             .update({ status: "released", released_at: new Date().toISOString(), release_reason: "send_failed" })
             .eq("idempotency_key", idempotencyKey);
-          await supabase.from("sit_notification_log").delete().eq("idempotency_key", idempotencyKey);
+          
         } else {
           metrics.emails_sent++;
         }
