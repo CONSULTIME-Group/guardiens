@@ -30,7 +30,6 @@ const INK = '#1D1B16'
 const PINE = '#2C6D50'
 const TERRA = '#9A6A44'
 const LINE = '#EDE7DE'
-const CARD_BG = '#FBF6EC'
 
 const DISPLAY = "'Playfair Display', Georgia, serif"
 const TEXT_FONT = "'Outfit', Arial, sans-serif"
@@ -197,7 +196,7 @@ export const template = {
         distanceLabel: '33 km',
         meta: '1 chien · 27 août au 30 septembre',
         url: 'https://guardiens.fr/gardes/cogny-nala',
-        imageUrl: 'https://guardiens.fr/og/exemple-maison-1.jpg',
+        imageUrl: 'https://erhccyqevdyevpyctsjj.supabase.co/storage/v1/object/public/property-photos/articles/temoignage-auvergne-cover.jpg',
       },
       {
         title: 'Deux chats et un jardin à Annecy',
