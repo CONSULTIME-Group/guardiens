@@ -123,6 +123,7 @@ const PreviewOngoingSitHero = lazy(() => import("./pages/dev/PreviewOngoingSitHe
 const PreviewMissionCards = lazy(() => import("./pages/dev/PreviewMissionCards"));
 const Unsubscribe = lazy(() => import("./pages/Unsubscribe"));
 const EmailClickRedirect = lazy(() => import("./pages/EmailClickRedirect"));
+const EmailDeepLink = lazy(() => import("./pages/EmailDeepLink"));
 const ApplicationQuickAction = lazy(() => import("./pages/ApplicationQuickAction"));
 const EmailPreferences = lazy(() => import("./pages/EmailPreferences"));
 const CityPage = lazy(() => import("./pages/CityPage"));
