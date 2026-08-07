@@ -374,10 +374,28 @@ const NavigateBlogSlug = () => {
   return <Navigate to={`/actualites/${slug}`} replace />;
 };
 
+// Route héritée au singulier : redirection client pour les personnes,
+// redirection permanente déclarée aux crawlers via Prerender.
 const NavigateGuideSlug = () => {
   const { slug } = useParams();
-  return <Navigate to={`/guides/${slug}`} replace />;
+  const target = `/guides/${slug}`;
+  const isPrerender =
+    typeof navigator !== "undefined" && /Prerender/i.test(navigator.userAgent);
+  return (
+    <>
+      <PageMeta
+        title="Guide local"
+        description="Cette page a été déplacée vers le guide local correspondant."
+        path={target}
+        canonical={`https://guardiens.fr${target}`}
+        statusCode={301}
+        prerenderHeader={`Location: https://guardiens.fr${target}`}
+      />
+      {!isPrerender && <Navigate to={target} replace />}
+    </>
+  );
 };
+
 
 const RedirectProfil = () => {
   const { id } = useParams();
