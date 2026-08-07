@@ -49,18 +49,40 @@ const SectionHeader = ({ label }: { label: string }) => (
   </Section>
 )
 
+// Passe par le point de transformation d'image de Supabase Storage : il
+// négocie le format selon l'en-tête Accept (donc du JPEG pour Outlook, qui
+// ne sait pas lire le WebP) et sert la vignette à la bonne taille.
+// 184px = 2x les 92px affichés, pour les écrans à haute densité.
+const THUMB_PX = 184
+const toThumbUrl = (url: string) => {
+  if (!url) return url
+  if (url.includes('/storage/v1/render/image/')) return url
+  if (!url.includes('/storage/v1/object/public/')) return url
+  const base = url.split('?')[0].replace('/storage/v1/object/public/', '/storage/v1/render/image/public/')
+  return `${base}?width=${THUMB_PX}&height=${THUMB_PX}&resize=cover&quality=80`
+}
+
+const thumbAlt = (sit: SitCard) =>
+  `Photo du logement à ${sit.city}, ${sit.meta}`
+
 const SitRow = ({ sit }: { sit: SitCard }) => (
   <table role="presentation" cellPadding={0} cellSpacing={0} width="100%" style={cardTable}>
     <tbody>
       <tr>
-        <td width="92" valign="top" style={{ width: '92px', paddingRight: '14px' }}>
+        <td width="92" valign="top" bgcolor={LINE} style={thumbCell}>
           {sit.imageUrl ? (
-            <Img src={sit.imageUrl} width="92" height="92" alt={sit.title} style={thumb} />
+            <Img
+              src={toThumbUrl(sit.imageUrl)}
+              width="92"
+              height="92"
+              alt={thumbAlt(sit)}
+              style={thumb}
+            />
           ) : (
             <div style={thumbFallback} />
           )}
         </td>
-        <td valign="top">
+        <td valign="top" style={{ paddingLeft: '14px' }}>
           <Text style={cardMetaTop}>
             {sit.city} , {sit.distanceLabel}
           </Text>
@@ -72,6 +94,7 @@ const SitRow = ({ sit }: { sit: SitCard }) => (
     </tbody>
   </table>
 )
+
 
 const FounderPersonalNoticeEmail = ({
   firstName,
