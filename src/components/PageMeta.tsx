@@ -114,6 +114,8 @@ const PageMeta = ({
   jsonLd,
   ready,
   extraMeta,
+  statusCode,
+  noCanonical = false,
 }: PageMetaProps) => {
   const location = useLocation();
   const { i18n } = useTranslation();
