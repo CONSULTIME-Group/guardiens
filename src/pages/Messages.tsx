@@ -720,7 +720,7 @@ const Messages = () => {
       {/* ═══ CONVERSATION LIST ═══ */}
       {showList && (
         <div className={`${isMobile && activeConv ? "hidden" : ""} ${isMobile ? "w-full" : "w-80 border-r border-border"} flex flex-col bg-card`}>
-          <div className="sticky top-12 md:top-0 z-10 bg-card border-b border-border px-4 pt-4 pb-3 space-y-3">
+          <div className="sticky top-[var(--app-topbar-h,3.75rem)] md:top-0 z-10 bg-card border-b border-border px-4 pt-4 pb-3 space-y-3">
             {/* Titre Playfair + rôle */}
             <div className="flex items-end justify-between gap-2">
               <h1 className="font-heading text-[20px] font-semibold leading-tight truncate">Vos échanges</h1>
