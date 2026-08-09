@@ -559,6 +559,8 @@ const AppRoutes = () => {
         <Route path="/profile" element={<Profile />} />
 
         <Route path="/messages" element={<Messages />} />
+        <Route path="/messages/:conversationId" element={<Messages />} />
+
         <Route path="/sits" element={<Sits />} />
         <Route path="/mes-candidatures" element={<MesCandidatures />} />
 
