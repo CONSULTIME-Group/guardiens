@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { Eye, Pencil } from "lucide-react";
 import cockpitMorning from "@/assets/illustrations/sitter-cockpit-morning.webp";
+import cockpitWaiting from "@/assets/illustrations/sitter-match-empty.webp";
 
 
 /**
