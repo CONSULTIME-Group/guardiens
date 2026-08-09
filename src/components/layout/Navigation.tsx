@@ -292,10 +292,16 @@ export const BottomNav = () => {
   // La nav ne se masque jamais sur les routes publiques hors coquille
   // authentifiée : elle y est le seul recours de navigation. Ailleurs, elle
   // se masque au scroll bas, revient au scroll haut, et revient aussi seule
-  // après 1,5 seconde sans scroll.
+  // après 1,5 seconde sans scroll. Sur la landing mobile, le masquage au
+  // scroll bas est désactivé : la pilule se cache uniquement tout en haut de
+  // page et réapparaît dès que l'utilisateur défile.
   const [idleVisible, setIdleVisible] = useState(true);
   const [landingTopHidden, setLandingTopHidden] = useState(false);
   const idleTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const isLandingMobile = useMemo(() => {
+    if (typeof window === "undefined") return false;
+    return location.pathname === "/" && !window.matchMedia("(min-width: 768px)").matches;
+  }, [location.pathname]);
 
   useEffect(() => {
     if (!inAppShell) return;
@@ -330,7 +336,7 @@ export const BottomNav = () => {
     };
   }, [location.pathname]);
 
-  const hideNav = inAppShell && scrollDir === "down" && !idleVisible;
+  const hideNav = inAppShell && scrollDir === "down" && !idleVisible && !isLandingMobile;
   const hidden = hideNav || landingTopHidden;
 
   // Un écran plein cadre (fil de messagerie mobile) peut demander le retrait
