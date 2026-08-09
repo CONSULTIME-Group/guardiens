@@ -1665,7 +1665,7 @@ const CreateSit = () => {
           : draftId ? "Brouillon en cours" : null;
 
   return (
-    <div className="animate-fade-in pb-40">
+    <div className="animate-fade-in pb-[calc(15rem+env(safe-area-inset-bottom))] md:pb-40">
       <Head><meta name="robots" content="noindex, nofollow" /></Head>
 
       {/* Stepper sticky */}
