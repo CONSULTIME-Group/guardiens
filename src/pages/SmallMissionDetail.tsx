@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useState, useEffect, useCallback, useRef } from "react";
 import { trackEvent } from "@/lib/analytics";
 import { logger } from "@/lib/logger";
@@ -192,6 +193,7 @@ const InlineFeedbackForm = ({
 
 /* ── Main Page ── */
 const SmallMissionDetail = () => {
+  const { t: tr } = useTranslation();
   const { id: rawId } = useParams<{ id: string }>();
   // Sanitize: trim whitespace + invisible chars (nbsp \u00A0, zero-width) souvent ajoutés par les partages Facebook/messageries
   const id = rawId?.replace(/[\s\u00A0\u200B-\u200D\uFEFF]+/g, "") || undefined;
@@ -711,9 +713,9 @@ const SmallMissionDetail = () => {
     <>
       {!user && <PublicHeader />}
       <div className="p-6 md:p-10 max-w-3xl mx-auto min-h-[40vh]">
-        <h1 className="font-heading text-2xl font-bold mb-2">Mission introuvable</h1>
-        <p className="text-muted-foreground mb-4">Cette mission a peut-être été clôturée ou retirée.</p>
-        <Link to="/petites-missions"><Button>Voir les missions ouvertes</Button></Link>
+        <h1 className="font-heading text-2xl font-bold mb-2">{tr("mission_detail.not_found_title")}</h1>
+        <p className="text-muted-foreground mb-4">{tr("mission_detail.not_found_body")}</p>
+        <Link to="/petites-missions"><Button>{tr("mission_detail.see_open")}</Button></Link>
       </div>
       {!user && <PublicFooter />}
     </>

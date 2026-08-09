@@ -3,6 +3,7 @@
 // Les meta og:* sont injectées impérativement par PageMeta ; les caches sociaux liront index.html
 // après prerender (Prerender.io / Cloudflare Worker, TODO infra).
 import { useState, useEffect, useRef } from "react";
+import { useTranslation } from "react-i18next";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -42,6 +43,7 @@ const PublicSitDetail = () => {
  const param = rawParam?.replace(/[\s\u00A0\u200B-\u200D\uFEFF]+/g, "") || undefined;
  const navigate = useNavigate();
  const { user, hasSession, activeRole } = useAuth();
+ const { t } = useTranslation();
  const { hasAccess } = useSubscriptionAccess();
  const [sit, setSit] = useState<any>(null);
  const [owner, setOwner] = useState<any>(null);
@@ -292,25 +294,25 @@ const PublicSitDetail = () => {
  <div className="h-32 rounded-2xl bg-muted" />
  </div>
  </div>
- <span className="sr-only">Chargement de l'annonce…</span>
+ <span className="sr-only">{t("sit_detail.loading")}</span>
  </div>
  );
  }
   if (loadError === "not_found" || (!loading && !sit)) {
     return (
       <div className="max-w-2xl mx-auto p-6 md:p-10 text-center space-y-3">
-        <h1 className="font-heading text-2xl font-semibold">Annonce introuvable</h1>
-        <p className="text-muted-foreground text-sm">Cette annonce a peut-être été retirée par son auteur, ou le lien est incorrect.</p>
-        <Link to="/" className="inline-flex text-primary text-sm font-medium hover:underline">Retour à l'accueil</Link>
+        <h1 className="font-heading text-2xl font-semibold">{t("sit_detail.not_found_title")}</h1>
+        <p className="text-muted-foreground text-sm">{t("sit_detail.not_found_body")}</p>
+        <Link to="/" className="inline-flex text-primary text-sm font-medium hover:underline">{t("sit_detail.back_home")}</Link>
       </div>
     );
   }
   if (loadError === "error") {
     return (
       <div className="max-w-2xl mx-auto p-6 md:p-10 text-center space-y-3">
-        <h1 className="font-heading text-2xl font-semibold">Une erreur est survenue</h1>
-        <p className="text-muted-foreground text-sm">Impossible de charger cette annonce pour le moment. Veuillez réessayer dans un instant.</p>
-        <button onClick={() => window.location.reload()} className="inline-flex text-primary text-sm font-medium hover:underline">Recharger la page</button>
+        <h1 className="font-heading text-2xl font-semibold">{t("sit_detail.error_title")}</h1>
+        <p className="text-muted-foreground text-sm">{t("sit_detail.error_body")}</p>
+        <button onClick={() => window.location.reload()} className="inline-flex text-primary text-sm font-medium hover:underline">{t("sit_detail.reload")}</button>
       </div>
     );
   }
@@ -333,7 +335,7 @@ const PublicSitDetail = () => {
     end.setHours(0, 0, 0, 0);
     return end.getTime() < today.getTime();
   })();
-  if (sit.status !== "published" && !isClosedSit) return <div className="max-w-2xl mx-auto p-6 md:p-10 text-center"><p className="text-muted-foreground">Cette annonce n'est plus disponible.</p></div>;
+  if (sit.status !== "published" && !isClosedSit) return <div className="max-w-2xl mx-auto p-6 md:p-10 text-center"><p className="text-muted-foreground">{t("sit_detail.unavailable")}</p></div>;
   // Le masquage des dates est décidé côté serveur (get_public_sit) : les
   // colonnes start_date et end_date arrivent nulles, elles ne transitent pas.
   const hideDates = sit.dates_hidden === true;
@@ -561,7 +563,7 @@ const PublicSitDetail = () => {
     }
     try {
       await navigator.clipboard.writeText(canonicalUrl);
-      toast.success("Lien copié dans le presse-papiers");
+      toast.success(t("sit_detail.copied"));
       return;
     } catch {
       // fallback ultime : textarea + execCommand
@@ -575,9 +577,9 @@ const PublicSitDetail = () => {
         ta.select();
         document.execCommand("copy");
         document.body.removeChild(ta);
-        toast.success("Lien copié");
+        toast.success(t("sit_detail.copied_short"));
       } catch {
-        toast.error("Impossible de copier le lien");
+        toast.error(t("sit_detail.copy_failed"));
       }
     }
   };
@@ -623,11 +625,11 @@ const PublicSitDetail = () => {
           <div className="max-w-6xl mx-auto px-4 py-3">
             <p className="text-sm text-foreground">
               {isPastSit
-                ? "Cette garde est terminée, vous pouvez la consulter librement et "
-                : "Cette annonce n'est plus ouverte aux candidatures, vous pouvez la consulter librement et "}
+                ? t("sit_detail.closed_past_prefix")
+                : t("sit_detail.closed_open_prefix")}
 
               <Link to="/annonces" className="text-primary font-medium hover:underline">
-                découvrir les annonces ouvertes
+                {t("sit_detail.discover_open")}
               </Link>
               .
             </p>
@@ -642,17 +644,17 @@ const PublicSitDetail = () => {
         <div className="bg-primary/5 border-b border-primary/15">
           <div className="max-w-6xl mx-auto px-4 py-2 flex flex-wrap items-center justify-between gap-2">
             <p className="text-xs md:text-sm text-foreground/80">
-              <span className="font-medium text-foreground">Aperçu public</span> · ce que voient les visiteurs partageant le lien.
+              <span className="font-medium text-foreground">{t("sit_detail.owner_preview")}</span> · {t("sit_detail.owner_preview_desc")}
             </p>
             <div className="flex items-center gap-2">
               <Button asChild variant="ghost" size="sm" className="h-8 text-xs">
                 <Link to="/dashboard" className="inline-flex items-center gap-1.5">
-                  <ArrowLeft className="h-3.5 w-3.5" /> Dashboard
+                  <ArrowLeft className="h-3.5 w-3.5" /> {t("sit_detail.dashboard")}
                 </Link>
               </Button>
               <Button asChild size="sm" className="h-8 text-xs">
                 <Link to={`/sits/${sit.id}`} className="inline-flex items-center gap-1.5">
-                  Gérer mon annonce <ExternalLink className="h-3.5 w-3.5" />
+                  {t("sit_detail.manage_listing")} <ExternalLink className="h-3.5 w-3.5" />
                 </Link>
               </Button>
             </div>
@@ -665,11 +667,11 @@ const PublicSitDetail = () => {
         <div className="bg-secondary/30 border-b border-border">
           <div className="max-w-6xl mx-auto px-4 py-2 flex flex-wrap items-center justify-between gap-2">
             <p className="text-xs md:text-sm text-foreground/80">
-              Vous consultez cette annonce <span className="font-medium text-foreground">comme propriétaire</span>.
+              {t("sit_detail.viewing_as_owner_prefix")}<span className="font-medium text-foreground">{t("sit_detail.viewing_as_owner_strong")}</span>.
             </p>
             <Button asChild size="sm" variant="outline" className="h-8 text-xs">
               <Link to={`/sits/${sit.id}?from=share&view=sitter`} className="inline-flex items-center gap-1.5">
-                Voir comme gardien <ExternalLink className="h-3.5 w-3.5" />
+                {t("sit_detail.view_as_sitter")} <ExternalLink className="h-3.5 w-3.5" />
               </Link>
             </Button>
           </div>

@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { sanitizeUserTitle } from "@/lib/sanitizeTitle";
 import { Share2, CheckCircle2, ShieldCheck, Eye, Users, Dog, Flower2, Home as HomeIcon, Sparkles } from "lucide-react";
@@ -88,6 +89,7 @@ const PublicMissionView = ({
   viewCount = 0,
   responsesCount = 0,
 }: Props) => {
+  const { t } = useTranslation();
   const heroImage = mission.photos?.[0] || null;
   // Pas d'image OG générique : évite qu'une annonce sans photo affiche
   // « alpinistes coucher de soleil » sur les partages.
@@ -110,8 +112,8 @@ const PublicMissionView = ({
     if (raw && raw.length >= 60) return raw.slice(0, 155);
     const parts = [
       `${catMeta.label} à ${cityLabel}`,
-      mission.exchange_offer ? `En échange : ${mission.exchange_offer}` : null,
-      "Coup de main entre particuliers, gratuit et sans engagement.",
+      mission.exchange_offer ? t("mission_detail.meta_exchange", { offer: mission.exchange_offer }) : null,
+      t("mission_detail.meta_fallback"),
     ].filter(Boolean);
     return parts.join(". ").slice(0, 155);
   })();
@@ -128,7 +130,7 @@ const PublicMissionView = ({
     <>
     <div className="min-h-screen bg-background text-foreground animate-fade-in">
       <PageMeta
-        title={`${displayTitle} · Coup de main à ${cityLabel}`}
+        title={t("mission_detail.meta_title", { title: displayTitle, city: cityLabel })}
         description={metaDescription}
         image={ogImage}
       />
@@ -156,7 +158,7 @@ const PublicMissionView = ({
         <div className="mb-8">
           <PageBreadcrumb
             items={[
-              { label: "Coups de main", href: "/petites-missions" },
+              { label: t("mission_detail.breadcrumb"), href: "/petites-missions" },
               ...(mission.city
                 ? [{ label: cityLabel, href: `/petites-missions?city=${encodeURIComponent(mission.city)}` }]
                 : []),
@@ -179,9 +181,9 @@ const PublicMissionView = ({
                   size="sm"
                   onClick={onShare}
                   className="gap-1.5 rounded-full ml-auto"
-                  aria-label="Partager cette annonce"
+                  aria-label={t("mission_detail.share_aria")}
                 >
-                  <Share2 className="h-3.5 w-3.5" /> Partager
+                  <Share2 className="h-3.5 w-3.5" /> {t("mission_detail.share")}
                 </Button>
               </div>
               <h1 className={h1Class}>{displayTitle}</h1>
@@ -192,7 +194,7 @@ const PublicMissionView = ({
                 </div>
                 <div className="flex items-center gap-2">
                   <span className="w-1.5 h-1.5 rounded-full bg-foreground/30" />
-                  <span>Publié {timeAgoFr(mission.created_at)}</span>
+                  <span>{t("mission_detail.published_ago", { ago: timeAgoFr(mission.created_at) })}</span>
                 </div>
                 {durationLabel && (
                   <div className="flex items-center gap-2">
@@ -207,13 +209,13 @@ const PublicMissionView = ({
                   {viewCount > 0 && (
                     <span className="inline-flex items-center gap-1.5">
                       <Eye className="h-3.5 w-3.5" />
-                      {viewCount} {viewCount > 1 ? "vues" : "vue"}
+                      {t("mission_detail.views", { count: viewCount })}
                     </span>
                   )}
                   {responsesCount > 0 && (
                     <span className="inline-flex items-center gap-1.5">
                       <Users className="h-3.5 w-3.5" />
-                      {responsesCount} {responsesCount > 1 ? "propositions" : "proposition"} d'aide
+                      {t("mission_detail.offers", { count: responsesCount })}
                     </span>
                   )}
                 </div>
@@ -228,7 +230,7 @@ const PublicMissionView = ({
               <div className="mb-12 rounded-[2rem] overflow-hidden shadow-2xl shadow-foreground/10 bg-muted">
                 <img
                   src={heroImage}
-                  alt={`Photo illustrant l'annonce : ${displayTitle}`}
+                  alt={t("mission_detail.photo_alt", { title: displayTitle })}
                   className="w-full aspect-video object-cover"
                   loading="eager"
                   {...({ fetchpriority: "high" } as any)}
@@ -247,7 +249,7 @@ const PublicMissionView = ({
                       {author.avatar_url ? (
                         <img
                           src={author.avatar_url}
-                          alt={authorFirstName || "Auteur"}
+                          alt={authorFirstName || t("mission_detail.author_alt")}
                           className="w-16 h-16 rounded-full object-cover border-2 border-background shadow-sm"
                         />
                       ) : (
@@ -258,14 +260,14 @@ const PublicMissionView = ({
                     </div>
                     <div className="min-w-0">
                       <p className="text-lg font-semibold text-foreground flex items-center gap-2 flex-wrap">
-                        Proposé par {authorFirstName || "un membre"}
+                        {t("mission_detail.proposed_by", { name: authorFirstName || t("mission_detail.a_member") })}
                         {author.identity_verified && (
                           <span
                             className="inline-flex items-center gap-1 text-xs font-medium text-success bg-success-soft px-2 py-0.5 rounded-full"
-                            title="Identité vérifiée par nos équipes"
+                            title={t("mission_detail.identity_verified_title")}
                           >
                             <ShieldCheck className="h-3 w-3" />
-                            Identité vérifiée
+                            {t("mission_detail.identity_verified")}
                           </span>
                         )}
                       </p>
@@ -277,7 +279,7 @@ const PublicMissionView = ({
                       </p>
                       {author.user_id && (
                         <p className="text-xs text-primary font-medium mt-1 group-hover:underline">
-                          Voir son profil →
+                          {t("mission_detail.see_profile")}
                         </p>
                       )}
                     </div>
@@ -300,7 +302,7 @@ const PublicMissionView = ({
               {/* Description */}
               <section>
                 <h2 className="font-heading text-2xl md:text-3xl font-bold mb-5 text-foreground">
-                  La mission
+                  {t("mission_detail.mission_h2")}
                 </h2>
                 <div className="space-y-5 text-lg leading-relaxed text-foreground/85 whitespace-pre-wrap">
                   {mission.description}
@@ -312,7 +314,7 @@ const PublicMissionView = ({
                 <section className="bg-muted/60 p-8 md:p-10 rounded-[2rem] border border-border relative overflow-hidden">
                   <div className="absolute -top-6 -right-6 w-32 h-32 bg-primary/5 rounded-full blur-2xl" aria-hidden />
                   <h3 className="text-xs font-bold tracking-[0.2em] uppercase mb-4 text-muted-foreground">
-                    En échange de votre aide
+                    {t("mission_detail.exchange_h3")}
                   </h3>
                   <blockquote className="font-heading text-xl md:text-2xl italic leading-snug text-foreground/90">
                     « {mission.exchange_offer} »
@@ -329,17 +331,17 @@ const PublicMissionView = ({
               <div className="mb-8 space-y-4">
                 <div>
                   <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-1">
-                    Statut
+                    {t("mission_detail.status")}
                   </p>
                   <span className="inline-flex items-center gap-2 text-sm font-medium text-success">
                     <span className="w-2 h-2 rounded-full bg-success" />
-                    {mission.status === "open" ? "Annonce ouverte" : "Annonce fermée"}
+                    {mission.status === "open" ? t("mission_detail.status_open") : t("mission_detail.status_closed")}
                   </span>
                 </div>
                 {durationLabel && (
                   <div>
                     <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-1">
-                      Disponibilité
+                      {t("mission_detail.availability")}
                     </p>
                     <p className="text-base font-semibold text-foreground">{durationLabel}</p>
                   </div>
@@ -347,12 +349,12 @@ const PublicMissionView = ({
                 {(mission.date_needed || mission.end_date) && (
                   <div>
                     <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-1">
-                      Période
+                      {t("mission_detail.period")}
                     </p>
                     <p className="text-base font-semibold text-foreground">
                       {mission.date_needed
                         ? new Date(mission.date_needed).toLocaleDateString("fr-FR", { day: "numeric", month: "long" })
-                        : "Dès que possible"}
+                        : t("mission_detail.asap")}
                       {mission.end_date
                         ? ` → ${new Date(mission.end_date).toLocaleDateString("fr-FR", { day: "numeric", month: "long" })}`
                         : ""}
@@ -362,7 +364,7 @@ const PublicMissionView = ({
                 {mission.category === "animals" && (mission.pet_species || mission.pet_size) && (
                   <div>
                     <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-1">
-                      Animal
+                      {t("mission_detail.animal")}
                     </p>
                     <p className="text-base font-semibold text-foreground capitalize">
                       {[mission.pet_species, mission.pet_size].filter(Boolean).join(" · ")}
@@ -371,27 +373,27 @@ const PublicMissionView = ({
                 )}
                 <div>
                   <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-1">
-                    Coût
+                    {t("mission_detail.cost")}
                   </p>
-                  <p className="text-base font-semibold text-foreground">Échange entre membres</p>
+                  <p className="text-base font-semibold text-foreground">{t("mission_detail.cost_value")}</p>
                 </div>
               </div>
 
               <Link to={`/inscription?redirect=${encodeURIComponent(redirect)}`} className="block">
                 <Button className="w-full py-6 rounded-full font-bold text-base shadow-lg shadow-primary/20">
-                  Proposer mon aide
+                  {t("mission_detail.cta_help")}
                 </Button>
               </Link>
 
               <p className="mt-5 text-xs text-center text-muted-foreground px-2 leading-relaxed">
-                Inscription en 2 minutes, sans engagement.
+                {t("mission_detail.signup_2min")}
               </p>
 
               <div className="mt-6 pt-6 border-t border-border space-y-2">
-                <p className="text-xs text-center text-muted-foreground">Déjà membre ?</p>
+                <p className="text-xs text-center text-muted-foreground">{t("mission_detail.already_member")}</p>
                 <Link to={`/login?redirect=${encodeURIComponent(redirect)}`} className="block">
                   <Button variant="outline" className="w-full rounded-full">
-                    Se connecter
+                    {t("mission_detail.login")}
                   </Button>
                 </Link>
               </div>
@@ -408,7 +410,7 @@ const PublicMissionView = ({
               />
               <div className="p-4">
                 <p className="text-xs text-muted-foreground leading-relaxed">
-                  Localisation approximative. L'adresse exacte est partagée après mise en relation.
+                  {t("mission_detail.location_note")}
                 </p>
               </div>
             </div>
@@ -420,16 +422,16 @@ const PublicMissionView = ({
           <section className="mt-24 md:mt-32 pt-16 border-t border-border">
             <div className="flex flex-col md:flex-row md:items-end justify-between mb-10 gap-4">
               <div>
-                <h2 className="font-heading text-3xl md:text-4xl font-bold mb-2">Près de chez vous</h2>
+                <h2 className="font-heading text-3xl md:text-4xl font-bold mb-2">{t("mission_detail.related_title")}</h2>
                 <p className="text-muted-foreground text-lg">
-                  D'autres coups de main à {cityLabel} et alentours
+                  {t("mission_detail.related_sub", { city: cityLabel })}
                 </p>
               </div>
               <Link
                 to="/petites-missions"
                 className="font-bold text-sm border-b-2 border-foreground pb-1 hover:opacity-70 transition-opacity self-start md:self-auto"
               >
-                Tout parcourir
+                {t("mission_detail.browse_all")}
               </Link>
             </div>
 
@@ -454,15 +456,15 @@ const PublicMissionView = ({
         <section className="mt-24 md:mt-28 bg-primary text-primary-foreground rounded-[2.5rem] p-10 md:p-14 shadow-2xl shadow-primary/20">
           <div className="max-w-3xl mx-auto text-center space-y-6">
             <h2 className="font-heading text-3xl md:text-4xl font-bold">
-              Donner un coup de main, c'est ouvrir une porte.
+              {t("mission_detail.cta_title")}
             </h2>
             <p className="text-lg opacity-90 leading-relaxed">
-              Une heure offerte aujourd'hui, et c'est parfois une rencontre, une amitié, une saison qui s'invente. Inscrivez-vous gratuitement pour entrer en contact.
+              {t("mission_detail.cta_body")}
             </p>
             <div className="flex flex-wrap gap-3 justify-center pt-2">
               <Link to={`/inscription?redirect=${encodeURIComponent(redirect)}`}>
                 <Button size="lg" variant="secondary" className="rounded-full font-bold">
-                  Créer mon compte gratuit
+                  {t("mission_detail.cta_signup")}
                 </Button>
               </Link>
               <Link to={`/login?redirect=${encodeURIComponent(redirect)}`}>
@@ -471,19 +473,19 @@ const PublicMissionView = ({
                   variant="outline"
                   className="rounded-full font-bold bg-transparent border-primary-foreground/30 text-primary-foreground hover:bg-primary-foreground/10"
                 >
-                  Se connecter
+                  {t("mission_detail.login")}
                 </Button>
               </Link>
             </div>
             <div className="flex flex-wrap items-center justify-center gap-5 pt-4 text-sm opacity-80">
               <span className="inline-flex items-center gap-2">
-                <CheckCircle2 className="h-4 w-4" /> Sans carte bancaire
+                <CheckCircle2 className="h-4 w-4" /> {t("mission_detail.no_card")}
               </span>
               <span className="inline-flex items-center gap-2">
-                <CheckCircle2 className="h-4 w-4" /> Sans engagement
+                <CheckCircle2 className="h-4 w-4" /> {t("mission_detail.no_commitment")}
               </span>
               <span className="inline-flex items-center gap-2">
-                <CheckCircle2 className="h-4 w-4" /> 2 minutes
+                <CheckCircle2 className="h-4 w-4" /> {t("mission_detail.two_minutes")}
               </span>
             </div>
           </div>
@@ -497,7 +499,7 @@ const PublicMissionView = ({
       <div className="lg:hidden fixed bottom-0 inset-x-0 z-40 border-t border-border bg-background/95 backdrop-blur px-4 py-3 shadow-[0_-8px_20px_-12px_hsl(var(--foreground)/0.15)]">
         <Link to={`/inscription?redirect=${encodeURIComponent(redirect)}`} className="block">
           <Button className="w-full py-5 rounded-full font-bold text-sm shadow-lg shadow-primary/20">
-            Proposer mon aide, gratuit
+            {t("mission_detail.sticky_cta")}
           </Button>
         </Link>
       </div>

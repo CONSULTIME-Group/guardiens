@@ -161,7 +161,7 @@ const PublicSitView = ({
     .map((p) => ({ url: p.photo_url as string, name: p.name, species: speciesLabel[p.species] || p.species }));
   const cityLabel = sit.city || owner?.city || "France";
   const redirect = `/annonces/${sit.slug || sit.id}`;
-  const title = sit.title ? sanitizeUserTitle(sit.title) : `Une mission de garde à ${cityLabel}`;
+  const title = sit.title ? sanitizeUserTitle(sit.title) : t("sit_detail.fallback_title", { city: cityLabel });
   const description = property?.description || "";
   const { t } = useTranslation();
   const accepting = sit.accepting_applications !== false;
@@ -176,7 +176,7 @@ const PublicSitView = ({
         <div className="mb-4 md:mb-8">
           <PageBreadcrumb
             items={[
-              { label: "Annonces", href: "/search" },
+              { label: t("sit_detail.breadcrumb_listings"), href: "/search" },
               { label: title },
             ]}
           />
@@ -188,7 +188,7 @@ const PublicSitView = ({
             <header className="mb-6 md:mb-10">
               <div className="flex items-center gap-3 mb-6 flex-wrap">
                 <span className="inline-block px-4 py-1.5 bg-primary/10 text-primary rounded-full text-[10px] font-bold tracking-widest uppercase">
-                  Garde · Hébergement inclus
+                  {t("sit_detail.badge_stay")}
                 </span>
                 {urgencyLabel && (
                   <span className="inline-block px-4 py-1.5 bg-secondary/20 text-secondary-foreground border border-secondary/30 rounded-full text-[10px] font-bold tracking-widest uppercase">
@@ -200,9 +200,9 @@ const PublicSitView = ({
                   size="sm"
                   onClick={onShare}
                   className="gap-1.5 rounded-full ml-auto"
-                  aria-label="Partager cette annonce"
+                  aria-label={t("sit_detail.share_aria")}
                 >
-                  <Share2 className="h-3.5 w-3.5" /> Partager
+                  <Share2 className="h-3.5 w-3.5" /> {t("sit_detail.share")}
                 </Button>
               </div>
               <h1 className="font-heading text-3xl md:text-5xl lg:text-6xl font-bold leading-[1.1] mb-5 md:mb-6 text-foreground">
@@ -247,7 +247,7 @@ const PublicSitView = ({
                         {owner.avatar_url ? (
                           <img
                             src={owner.avatar_url}
-                            alt={owner.first_name || "Hôte"}
+                            alt={owner.first_name || t("sit_detail.host")}
                             className="w-16 h-16 rounded-full object-cover border-2 border-background shadow-sm"
                           />
                         ) : (
@@ -258,16 +258,16 @@ const PublicSitView = ({
                       </div>
                       <div className="min-w-0">
                         <p className="text-lg font-semibold text-foreground flex items-center gap-2 flex-wrap">
-                          Proposé par {owner.first_name || "un membre"}
+                          {t("sit_detail.proposed_by", { name: owner.first_name || t("sit_detail.a_member") })}
                           {owner.identity_verified && <VerifiedBadge />}
                         </p>
                         <p className="text-sm text-muted-foreground">
                           {[
                             owner.city,
                             typeof owner.completed_sits_count === "number" && owner.completed_sits_count > 0
-                              ? `${owner.completed_sits_count} garde${owner.completed_sits_count > 1 ? "s" : ""} accomplie${owner.completed_sits_count > 1 ? "s" : ""}`
+                              ? t("sit_detail.sits_done", { count: owner.completed_sits_count })
                               : null,
-                            avgRating ? `★ ${avgRating} (${reviewCount} avis)` : null,
+                            avgRating ? `★ ${avgRating} (${t("sit_detail.reviews_count", { count: reviewCount })})` : null,
                           ].filter(Boolean).join(" · ")}
                         </p>
                         {owner.bio && (
@@ -283,7 +283,7 @@ const PublicSitView = ({
                         {sit.owner_message && (
                           <div className="mt-5 border-l-2 border-primary/40 pl-4 py-1 italic text-base leading-relaxed text-foreground/85 whitespace-pre-line">
                             <p className="not-italic text-[10px] font-bold tracking-[0.18em] uppercase text-muted-foreground mb-1.5">
-                              {owner.first_name ? `Un mot de ${owner.first_name}` : "Un mot de l'hôte"}
+                              {owner.first_name ? t("sit_detail.word_from", { name: owner.first_name }) : t("sit_detail.word_from_host")}
                             </p>
                             {sit.owner_message}
                           </div>
@@ -301,7 +301,7 @@ const PublicSitView = ({
                       {sit.owner_message && (
                         <div className="border-l-2 border-primary/40 pl-4 py-1 italic text-base leading-relaxed text-foreground/85 whitespace-pre-line">
                           <p className="not-italic text-[10px] font-bold tracking-[0.18em] uppercase text-muted-foreground mb-1.5">
-                            Un mot de l'hôte
+                            {t("sit_detail.word_from_host")}
                           </p>
                           {sit.owner_message}
                         </div>
@@ -315,16 +315,16 @@ const PublicSitView = ({
               {property && (
                 <section>
                   <h2 className="font-heading text-2xl md:text-3xl font-bold mb-5 text-foreground">
-                    Le logement
+                    {t("sit_detail.housing_h2")}
                   </h2>
                   <p className="text-sm font-medium text-foreground mb-4">
                     {typeLabel}
                     {envLabel && <span className="text-muted-foreground font-normal"> · {envLabel}</span>}
                     {typeof property.rooms_count === "number" && property.rooms_count > 0 && (
-                      <span className="text-muted-foreground font-normal"> · {property.rooms_count} pièce{property.rooms_count > 1 ? "s" : ""}</span>
+                      <span className="text-muted-foreground font-normal"> · {t("sit_detail.rooms", { count: property.rooms_count })}</span>
                     )}
                     {typeof property.bedrooms_count === "number" && property.bedrooms_count > 0 && (
-                      <span className="text-muted-foreground font-normal"> · {property.bedrooms_count} chambre{property.bedrooms_count > 1 ? "s" : ""}</span>
+                      <span className="text-muted-foreground font-normal"> · {t("sit_detail.bedrooms", { count: property.bedrooms_count })}</span>
                     )}
                   </p>
                   {property.description && (
@@ -335,7 +335,7 @@ const PublicSitView = ({
                   {Array.isArray(sit.environments) && sit.environments.length > 0 && (
                     <div className="mb-6">
                       <h3 className="text-xs font-bold tracking-[0.2em] uppercase mb-3 text-muted-foreground">
-                        Environnement
+                        {t("sit_detail.environment")}
                       </h3>
                       <div className="flex flex-wrap gap-2">
                         {sit.environments.map((env) => (
@@ -349,7 +349,7 @@ const PublicSitView = ({
                   {(Array.isArray(property.equipments) && property.equipments.length > 0 || property.accessible || property.car_required) && (
                     <div className="mt-2">
                       <h3 className="text-xs font-bold tracking-[0.2em] uppercase mb-3 text-muted-foreground">
-                        Équipements &amp; accessibilité
+                        {t("sit_detail.equipments")}
                       </h3>
                       <div className="flex flex-wrap gap-2">
                         {Array.isArray(property.equipments) && property.equipments.map((eq) => (
@@ -359,10 +359,10 @@ const PublicSitView = ({
                           <span className="w-px h-6 bg-border self-center" aria-hidden="true" />
                         )}
                         {property.accessible && (
-                          <span className="px-3 py-1.5 rounded-full bg-primary/10 text-primary text-sm">Accès PMR</span>
+                          <span className="px-3 py-1.5 rounded-full bg-primary/10 text-primary text-sm">{t("sit_detail.accessible")}</span>
                         )}
                         {property.car_required && (
-                          <span className="px-3 py-1.5 rounded-full bg-secondary/20 text-secondary-foreground text-sm">Voiture recommandée</span>
+                          <span className="px-3 py-1.5 rounded-full bg-secondary/20 text-secondary-foreground text-sm">{t("sit_detail.car_required")}</span>
                         )}
                       </div>
                     </div>
@@ -374,7 +374,7 @@ const PublicSitView = ({
               {pets.length > 0 && (
                 <section>
                   <h2 className="font-heading text-2xl md:text-3xl font-bold mb-5 text-foreground">
-                    {pets.length === 1 ? "L'animal à garder" : `Les animaux à garder`}
+                    {pets.length === 1 ? t("sit_detail.pets_h2_one") : t("sit_detail.pets_h2_other")}
                   </h2>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     {pets.map((pet) => (
@@ -383,7 +383,7 @@ const PublicSitView = ({
                         key={pet.id}
                         onClick={() => setOpenPet(pet)}
                         className="flex items-center gap-4 bg-card border border-border rounded-2xl px-5 py-4 text-left hover:border-primary/40 hover:shadow-sm transition-all focus:outline-none focus:ring-2 focus:ring-primary/30"
-                        aria-label={`Voir la fiche de ${pet.name}`}
+                        aria-label={t("sit_detail.pet_sheet_aria", { name: pet.name })}
                       >
                         {pet.photo_url ? (
                           <img
@@ -402,10 +402,10 @@ const PublicSitView = ({
                           <p className="text-sm text-muted-foreground truncate">
                             {speciesLabel[pet.species] || pet.species}
                             {pet.breed ? ` · ${pet.breed}` : ""}
-                            {typeof pet.age === "number" && pet.age > 0 ? ` · ${pet.age} an${pet.age > 1 ? "s" : ""}` : ""}
+                            {typeof pet.age === "number" && pet.age > 0 ? ` · ${t("sit_detail.years", { count: pet.age })}` : ""}
                           </p>
                         </div>
-                        <span className="text-xs text-primary font-medium shrink-0">Voir</span>
+                        <span className="text-xs text-primary font-medium shrink-0">{t("sit_detail.view")}</span>
                       </button>
                     ))}
                   </div>
@@ -431,53 +431,53 @@ const PublicSitView = ({
                             <p className="text-muted-foreground">
                               {speciesLabel[openPet.species] || openPet.species}
                               {openPet.breed ? ` · ${openPet.breed}` : ""}
-                              {typeof openPet.age === "number" && openPet.age > 0 ? ` · ${openPet.age} an${openPet.age > 1 ? "s" : ""}` : ""}
+                              {typeof openPet.age === "number" && openPet.age > 0 ? ` · ${t("sit_detail.years", { count: openPet.age })}` : ""}
                             </p>
                             {openPet.character && (
                               <div>
-                                <p className="font-semibold text-foreground mb-1">Caractère</p>
+                                <p className="font-semibold text-foreground mb-1">{t("sit_detail.pet_character")}</p>
                                 <p className="text-foreground/85 whitespace-pre-line">{openPet.character}</p>
                               </div>
                             )}
                             {openPet.activity_level && (
                               <div>
-                                <p className="font-semibold text-foreground mb-1">Niveau d'activité</p>
+                                <p className="font-semibold text-foreground mb-1">{t("sit_detail.pet_activity")}</p>
                                 <p className="text-foreground/85">{openPet.activity_level}</p>
                               </div>
                             )}
                             {openPet.walk_duration && (
                               <div>
-                                <p className="font-semibold text-foreground mb-1">Promenades</p>
+                                <p className="font-semibold text-foreground mb-1">{t("sit_detail.pet_walks")}</p>
                                 <p className="text-foreground/85">{openPet.walk_duration}</p>
                               </div>
                             )}
                             {openPet.alone_duration && (
                               <div>
-                                <p className="font-semibold text-foreground mb-1">Tolérance à la solitude</p>
+                                <p className="font-semibold text-foreground mb-1">{t("sit_detail.pet_alone")}</p>
                                 <p className="text-foreground/85">{openPet.alone_duration}</p>
                               </div>
                             )}
                             {openPet.food && (
                               <div>
-                                <p className="font-semibold text-foreground mb-1">Alimentation</p>
+                                <p className="font-semibold text-foreground mb-1">{t("sit_detail.pet_food")}</p>
                                 <p className="text-foreground/85 whitespace-pre-line">{openPet.food}</p>
                               </div>
                             )}
                             {openPet.medication && (
                               <div>
-                                <p className="font-semibold text-foreground mb-1">Traitements / soins</p>
+                                <p className="font-semibold text-foreground mb-1">{t("sit_detail.pet_medication")}</p>
                                 <p className="text-foreground/85 whitespace-pre-line">{openPet.medication}</p>
                               </div>
                             )}
                             {openPet.special_needs && (
                               <div>
-                                <p className="font-semibold text-foreground mb-1">Besoins particuliers</p>
+                                <p className="font-semibold text-foreground mb-1">{t("sit_detail.pet_special_needs")}</p>
                                 <p className="text-foreground/85 whitespace-pre-line">{openPet.special_needs}</p>
                               </div>
                             )}
                             {openPet.owner_breed_note && (
                               <div>
-                                <p className="font-semibold text-foreground mb-1">Note du propriétaire</p>
+                                <p className="font-semibold text-foreground mb-1">{t("sit_detail.pet_owner_note")}</p>
                                 <p className="text-foreground/85 whitespace-pre-line">{openPet.owner_breed_note}</p>
                               </div>
                             )}
@@ -493,7 +493,7 @@ const PublicSitView = ({
               {sit.daily_routine && (
                 <section>
                   <h2 className="font-heading text-2xl md:text-3xl font-bold mb-5 text-foreground">
-                    La routine quotidienne
+                    {t("sit_detail.routine_h2")}
                   </h2>
                   <div className="space-y-5 text-base leading-relaxed text-foreground/85 whitespace-pre-line">
                     {sit.daily_routine}
@@ -503,7 +503,7 @@ const PublicSitView = ({
 
               {/* Le cadre & la vie sur place (depuis owner_profiles) */}
               {ownerProfile && (
-                <CadreSection ownerProfile={ownerProfile} ownerName={owner?.first_name || "l'hôte"} />
+                <CadreSection ownerProfile={ownerProfile} ownerName={owner?.first_name || t("sit_detail.host")} />
               )}
 
               {/* Le gardien idéal */}
@@ -511,7 +511,7 @@ const PublicSitView = ({
                 <section className="bg-muted/60 p-8 md:p-10 rounded-[2rem] border border-border relative overflow-hidden">
                   <div className="absolute -top-6 -right-6 w-32 h-32 bg-primary/5 rounded-full blur-2xl" aria-hidden />
                   <h3 className="text-xs font-bold tracking-[0.2em] uppercase mb-4 text-muted-foreground">
-                    Le gardien idéal
+                    {t("sit_detail.ideal_sitter")}
                   </h3>
                   <div className="flex flex-wrap gap-2">
                     {sit.open_to.map((t) => (
@@ -530,7 +530,7 @@ const PublicSitView = ({
               {latestReviews.length > 0 && (
                 <section>
                   <h2 className="font-heading text-2xl md:text-3xl font-bold mb-5 text-foreground">
-                    Ce que disent les gardiens précédents
+                    {t("sit_detail.reviews_h2")}
                   </h2>
                   <div className="space-y-4">
                     {latestReviews.map((r, i) => (
@@ -561,34 +561,34 @@ const PublicSitView = ({
               <div className="mb-8 space-y-4">
                 <div>
                   <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-1">
-                    Statut
+                    {t("sit_detail.status")}
                   </p>
                   {isClosed ? (
                     <span className="inline-flex items-center gap-2 text-sm font-medium text-muted-foreground">
                       <span className="w-2 h-2 rounded-full bg-muted-foreground/60" />
-                      {isPast ? "Garde terminée" : "Annonce close"}
+                      {isPast ? t("sit_detail.status_finished") : t("sit_detail.status_closed")}
                     </span>
                   ) : (
                     <span className="inline-flex items-center gap-2 text-sm font-medium text-success">
                       <span className="w-2 h-2 rounded-full bg-success" />
-                      Annonce ouverte
+                      {t("sit_detail.status_open")}
                     </span>
                   )}
                 </div>
                 <div>
                   <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-1">
-                    Dates
+                    {t("sit_detail.dates")}
                   </p>
                   <p className="text-base font-semibold text-foreground">{naturalDateLabel}</p>
                   {sit.flexible_dates && (
-                    <p className="text-xs text-muted-foreground mt-1">Dates flexibles</p>
+                    <p className="text-xs text-muted-foreground mt-1">{t("sit_detail.flexible_dates")}</p>
                   )}
                 </div>
                 <div>
                   <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-1">
-                    Hébergement
+                    {t("sit_detail.accommodation")}
                   </p>
-                  <p className="text-base font-semibold text-foreground">Logement inclus</p>
+                  <p className="text-base font-semibold text-foreground">{t("sit_detail.accommodation_value")}</p>
                 </div>
               </div>
 
@@ -596,11 +596,11 @@ const PublicSitView = ({
                 <div className="rounded-2xl border border-border bg-muted/40 p-4 text-center">
                   <p className="text-sm text-foreground leading-relaxed">
                     {isPast
-                      ? "Cette garde est terminée, vous pouvez la consulter librement et "
-                      : "Cette annonce n'est plus ouverte aux candidatures, vous pouvez la consulter librement et "}
+                      ? t("sit_detail.closed_past_prefix")
+                      : t("sit_detail.closed_open_prefix")}
 
                     <Link to="/annonces" className="text-primary font-medium hover:underline">
-                      découvrir les annonces ouvertes
+                      {t("sit_detail.discover_open")}
                     </Link>
                     .
                   </p>
@@ -616,35 +616,35 @@ const PublicSitView = ({
                 </div>
               ) : !accepting ? (
                 <Button className="w-full py-6 rounded-full font-bold text-base" disabled>
-                  Candidatures fermées
+                  {t("sit_detail.applications_closed")}
                 </Button>
               ) : !isAuthenticated ? (
                 <>
                   <Link to={`/inscription?role=sitter&redirect=${encodeURIComponent(redirect)}`} className="block">
                     <Button className="w-full py-6 rounded-full font-bold text-base shadow-lg shadow-primary/20">
-                      Postuler à cette garde
+                      {t("sit_detail.apply")}
                     </Button>
                   </Link>
                   <p className="mt-5 text-xs text-center text-muted-foreground px-2 leading-relaxed">
-                    Inscription en 2 minutes, sans engagement.
+                    {t("sit_detail.signup_2min")}
                   </p>
                   <div className="mt-6 pt-6 border-t border-border space-y-2">
-                    <p className="text-xs text-center text-muted-foreground">Déjà membre&nbsp;?</p>
+                    <p className="text-xs text-center text-muted-foreground">{t("sit_detail.already_member")}</p>
                     <Link to={`/login?redirect=${encodeURIComponent(redirect)}`} className="block">
                       <Button variant="outline" className="w-full rounded-full">
-                        Se connecter
+                        {t("sit_detail.login")}
                       </Button>
                     </Link>
                   </div>
                 </>
               ) : hasApplied ? (
                 <Button className="w-full py-6 rounded-full font-bold text-base" disabled>
-                  <CheckCircle2 className="h-5 w-5 mr-2" /> Candidature envoyée
+                  <CheckCircle2 className="h-5 w-5 mr-2" /> {t("sit_detail.applied")}
                 </Button>
               ) : !hasAccess ? (
                 <Link to="/mon-abonnement" className="block">
                   <Button className="w-full py-6 rounded-full font-bold text-base shadow-lg shadow-primary/20">
-                    S'abonner pour postuler
+                    {t("sit_detail.subscribe_to_apply")}
                   </Button>
                 </Link>
               ) : (
@@ -652,7 +652,7 @@ const PublicSitView = ({
                   onClick={onApply}
                   className="w-full py-6 rounded-full font-bold text-base shadow-lg shadow-primary/20"
                 >
-                  Postuler à cette garde
+                  {t("sit_detail.apply")}
                 </Button>
               )}
 
@@ -677,7 +677,7 @@ const PublicSitView = ({
                 <div className="mt-5">
                   <AffinityTeaser
                     role="sitter"
-                    targetLabel="cette annonce"
+                    targetLabel={t("sit_detail.this_listing")}
                     redirectTo={redirect}
                   />
                 </div>
@@ -696,9 +696,9 @@ const PublicSitView = ({
                 className="h-64"
               />
               <div className="p-5">
-                <p className="font-semibold text-sm text-foreground mb-1">Localisation approximative</p>
+                <p className="font-semibold text-sm text-foreground mb-1">{t("sit_detail.location_title")}</p>
                 <p className="text-xs text-muted-foreground leading-relaxed">
-                  L'adresse exacte est partagée uniquement après mise en relation, par respect de la vie privée.
+                  {t("sit_detail.location_body")}
                 </p>
               </div>
             </div>
@@ -707,12 +707,12 @@ const PublicSitView = ({
             {hasHouseGuide && (
               <div className="bg-card rounded-[2rem] p-6 border border-border">
                 <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-2">
-                  Guide de la maison
+                  {t("sit_detail.house_guide")}
                 </p>
                 <div className="flex items-start gap-3">
                   <CheckCircle2 className="h-4 w-4 text-primary shrink-0 mt-0.5" />
                   <p className="text-sm text-foreground/85 leading-relaxed">
-                    Préparé par {owner?.first_name || "l'hôte"} : wifi, contacts, vétérinaire, consignes. Partagé en intégralité après acceptation.
+                    {t("sit_detail.house_guide_body", { name: owner?.first_name || t("sit_detail.host") })}
                   </p>
                 </div>
               </div>
@@ -721,16 +721,12 @@ const PublicSitView = ({
             {/* Réassurance compacte */}
             <div className="bg-card rounded-[2rem] p-6 border border-border space-y-3">
               <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
-                Pourquoi Guardiens
+                {t("sit_detail.why_guardiens")}
               </p>
-              {[
-                "Écusson « Identité vérifiée »",
-                "Avis croisés",
-                "Gardien d'urgence en relais",
-              ].map((t) => (
-                <div key={t} className="flex items-center gap-3 text-sm text-foreground/85">
+              {[t("sit_detail.why_1"), t("sit_detail.why_2"), t("sit_detail.why_3")].map((label) => (
+                <div key={label} className="flex items-center gap-3 text-sm text-foreground/85">
                   <CheckCircle2 className="h-4 w-4 text-primary shrink-0" />
-                  <span>{t}</span>
+                  <span>{label}</span>
                 </div>
               ))}
             </div>
@@ -741,16 +737,16 @@ const PublicSitView = ({
           <section className="mt-12 md:mt-28 bg-primary text-primary-foreground rounded-[2.5rem] p-7 md:p-14 shadow-2xl shadow-primary/20">
             <div className="max-w-3xl mx-auto text-center space-y-6">
               <h2 className="font-heading text-3xl md:text-4xl font-bold">
-                Partir l'esprit léger, c'est confier à quelqu'un de confiance.
+                {t("sit_detail.cta_title")}
               </h2>
               <p className="text-lg opacity-90 leading-relaxed">
-                Rejoignez la communauté Guardiens : des gardiens du coin, un cadre clair, et la liberté de partir sans inquiétude.
+                {t("sit_detail.cta_body")}
               </p>
               {isClosed ? (
                 <div className="flex flex-wrap gap-3 justify-center pt-2">
                   <Link to="/recherche">
                     <Button size="lg" variant="secondary" className="rounded-full font-bold">
-                      Voir les annonces ouvertes
+                      {t("sit_detail.cta_see_open")}
                     </Button>
                   </Link>
                 </div>
@@ -759,7 +755,7 @@ const PublicSitView = ({
                   <div className="flex flex-wrap gap-3 justify-center pt-2">
                     <Link to={`/inscription?role=sitter&redirect=${encodeURIComponent(redirect)}`}>
                       <Button size="lg" variant="secondary" className="rounded-full font-bold">
-                        S'inscrire et postuler
+                        {t("sit_detail.cta_signup")}
                       </Button>
                     </Link>
                     <Link to={`/login?redirect=${encodeURIComponent(redirect)}`}>
@@ -768,19 +764,19 @@ const PublicSitView = ({
                         variant="outline"
                         className="rounded-full font-bold bg-transparent border-primary-foreground/30 text-primary-foreground hover:bg-primary-foreground/10"
                       >
-                        Se connecter
+                        {t("sit_detail.login")}
                       </Button>
                     </Link>
                   </div>
                   <div className="flex flex-wrap items-center justify-center gap-5 pt-4 text-sm opacity-80">
                     <span className="inline-flex items-center gap-2">
-                      <CheckCircle2 className="h-4 w-4" /> Sans carte bancaire
+                      <CheckCircle2 className="h-4 w-4" /> {t("sit_detail.no_card")}
                     </span>
                     <span className="inline-flex items-center gap-2">
-                      <CheckCircle2 className="h-4 w-4" /> Sans engagement
+                      <CheckCircle2 className="h-4 w-4" /> {t("sit_detail.no_commitment")}
                     </span>
                     <span className="inline-flex items-center gap-2">
-                      <CheckCircle2 className="h-4 w-4" /> 2 minutes
+                      <CheckCircle2 className="h-4 w-4" /> {t("sit_detail.two_minutes")}
                     </span>
                   </div>
                 </>
@@ -799,7 +795,7 @@ const PublicSitView = ({
           className="block"
         >
           <Button className="w-full rounded-full font-bold text-base shadow-lg shadow-primary/20" size="lg">
-            S'inscrire et postuler
+            {t("sit_detail.cta_signup")}
           </Button>
         </Link>
       </div>
@@ -811,7 +807,7 @@ const PublicSitView = ({
           className="w-full rounded-full font-bold text-base shadow-lg shadow-primary/20"
           size="lg"
         >
-          Postuler à cette garde
+          {t("sit_detail.apply")}
         </Button>
       </div>
     )}
@@ -831,20 +827,21 @@ const CadreSection = ({
   ownerProfile: OwnerProfileLike;
   ownerName: string;
 }) => {
+  const { t } = useTranslation();
   const blocks: { title: string; value: string | string[] | null | undefined }[] = [
-    { title: "Présence prévue", value: ownerProfile.presence_expected },
-    { title: "Accueil & passation", value: ownerProfile.handover_preference },
-    { title: "Mot d'accueil", value: ownerProfile.welcome_notes },
-    { title: "Rencontre préalable", value: ownerProfile.meeting_preference },
-    { title: "Visites pendant la garde", value: ownerProfile.visits_allowed },
-    { title: "Invités à dormir", value: ownerProfile.overnight_guest },
-    { title: "Tabac", value: ownerProfile.smoker_accepted },
-    { title: "Règles de la maison", value: ownerProfile.rules_notes },
-    { title: "Espaces accessibles", value: ownerProfile.space_usage },
-    { title: "Attentes spécifiques", value: ownerProfile.specific_expectations },
-    { title: "Fréquence des nouvelles", value: ownerProfile.news_frequency },
-    { title: "Format des nouvelles", value: ownerProfile.news_format },
-    { title: "Précisions de communication", value: ownerProfile.communication_notes },
+    { title: t("sit_detail.cadre_presence"), value: ownerProfile.presence_expected },
+    { title: t("sit_detail.cadre_handover"), value: ownerProfile.handover_preference },
+    { title: t("sit_detail.cadre_welcome"), value: ownerProfile.welcome_notes },
+    { title: t("sit_detail.cadre_meeting"), value: ownerProfile.meeting_preference },
+    { title: t("sit_detail.cadre_visits"), value: ownerProfile.visits_allowed },
+    { title: t("sit_detail.cadre_overnight"), value: ownerProfile.overnight_guest },
+    { title: t("sit_detail.cadre_smoker"), value: ownerProfile.smoker_accepted },
+    { title: t("sit_detail.cadre_rules"), value: ownerProfile.rules_notes },
+    { title: t("sit_detail.cadre_space"), value: ownerProfile.space_usage },
+    { title: t("sit_detail.cadre_expectations"), value: ownerProfile.specific_expectations },
+    { title: t("sit_detail.cadre_news_freq"), value: ownerProfile.news_frequency },
+    { title: t("sit_detail.cadre_news_format"), value: ownerProfile.news_format },
+    { title: t("sit_detail.cadre_comm"), value: ownerProfile.communication_notes },
   ];
 
   const filled = blocks.filter((b) => {
@@ -862,7 +859,7 @@ const CadreSection = ({
   return (
     <section>
       <h2 className="font-heading text-2xl md:text-3xl font-bold mb-5 text-foreground">
-        Le cadre proposé par {ownerName}
+        {t("sit_detail.cadre_title", { name: ownerName })}
       </h2>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-5">
         {filled.map((b) => (
@@ -893,7 +890,7 @@ const CadreSection = ({
       {competences.length > 0 && (
         <div className="mt-8 pt-6 border-t border-border">
           <p className="text-[10px] font-bold tracking-[0.18em] uppercase text-muted-foreground mb-3">
-            Petits coups de main proposés sur place
+            {t("sit_detail.cadre_competences")}
           </p>
           <div className="flex flex-wrap gap-2">
             {competences.map((c) => (
