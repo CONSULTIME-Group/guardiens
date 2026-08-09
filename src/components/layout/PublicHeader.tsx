@@ -151,7 +151,7 @@ export default function PublicHeader({ authedVariant = false }: { authedVariant?
           ) : hasSession ? (
             <>
               <Button size="sm" onClick={() => navigate("/dashboard")}>
-                Mon espace
+                {t("nav.my_space")}
               </Button>
               {!isCompact && bells}
               <UserMenu />
@@ -252,7 +252,7 @@ export default function PublicHeader({ authedVariant = false }: { authedVariant?
           {authChecked && hasSession && (
             <div className="pt-2 border-t border-border space-y-2">
               <Button className="w-full" size="sm" onClick={() => { setOpen(false); navigate("/dashboard"); }}>
-                Mon espace
+                {t("nav.my_space")}
               </Button>
             </div>
           )}

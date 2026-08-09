@@ -19,17 +19,17 @@ const PublicFooter = React.forwardRef<HTMLElement>((_props, ref) => {
           <div>
             <h3 className="font-body text-xs uppercase tracking-widest text-white/80 mb-4">{t("footer.sections.by_city")}</h3>
             <ul className="space-y-0">
-              <li><Link to="/house-sitting" className="font-body text-sm text-white/75 hover:text-white transition-colors">Toutes les villes couvertes</Link></li>
-              <li><Link to="/house-sitting/lyon" className="font-body text-sm text-white/75 hover:text-white transition-colors">House-sitting Lyon</Link></li>
-              <li><Link to="/house-sitting/annecy" className="font-body text-sm text-white/75 hover:text-white transition-colors">House-sitting Annecy</Link></li>
-              <li><Link to="/house-sitting/grenoble" className="font-body text-sm text-white/75 hover:text-white transition-colors">House-sitting Grenoble</Link></li>
-              <li><Link to="/house-sitting/chambery" className="font-body text-sm text-white/75 hover:text-white transition-colors">House-sitting Chambéry</Link></li>
+              <li><Link to="/house-sitting" className="font-body text-sm text-white/75 hover:text-white transition-colors">{t("footer.links.all_cities")}</Link></li>
+              <li><Link to="/house-sitting/lyon" className="font-body text-sm text-white/75 hover:text-white transition-colors">{t("footer.links.house_sitting_city", { city: "Lyon" })}</Link></li>
+              <li><Link to="/house-sitting/annecy" className="font-body text-sm text-white/75 hover:text-white transition-colors">{t("footer.links.house_sitting_city", { city: "Annecy" })}</Link></li>
+              <li><Link to="/house-sitting/grenoble" className="font-body text-sm text-white/75 hover:text-white transition-colors">{t("footer.links.house_sitting_city", { city: "Grenoble" })}</Link></li>
+              <li><Link to="/house-sitting/chambery" className="font-body text-sm text-white/75 hover:text-white transition-colors">{t("footer.links.house_sitting_city", { city: "Chambéry" })}</Link></li>
             </ul>
           </div>
           <div>
             <h3 className="font-body text-xs uppercase tracking-widest text-white/80 mb-4">{t("footer.sections.by_department")}</h3>
             <ul className="space-y-0">
-              <li><Link to="/departement" className="font-body text-sm text-white/75 hover:text-white transition-colors">Les 101 départements</Link></li>
+              <li><Link to="/departement" className="font-body text-sm text-white/75 hover:text-white transition-colors">{t("footer.links.all_departments")}</Link></li>
               <li><Link to="/departement/rhone" className="font-body text-sm text-white/75 hover:text-white transition-colors">Rhône (69)</Link></li>
               <li><Link to="/departement/haute-savoie" className="font-body text-sm text-white/75 hover:text-white transition-colors">Haute-Savoie (74)</Link></li>
               <li><Link to="/departement/gironde" className="font-body text-sm text-white/75 hover:text-white transition-colors">Gironde (33)</Link></li>
@@ -44,11 +44,11 @@ const PublicFooter = React.forwardRef<HTMLElement>((_props, ref) => {
             <h3 className="font-body text-xs uppercase tracking-widest text-white/80 mb-4">{t("footer.sections.local_guides")}</h3>
             <ul className="space-y-0">
               <li><Link to="/guides" className="font-body text-sm text-white/75 hover:text-white transition-colors">{t("footer.links.all_guides")}</Link></li>
-              <li><Link to="/guides/lyon" className="font-body text-sm text-white/75 hover:text-white transition-colors">Guide Lyon</Link></li>
-              <li><Link to="/guides/annecy" className="font-body text-sm text-white/75 hover:text-white transition-colors">Guide Annecy</Link></li>
-              <li><Link to="/guides/grenoble" className="font-body text-sm text-white/75 hover:text-white transition-colors">Guide Grenoble</Link></li>
-              <li><Link to="/guides/chambery" className="font-body text-sm text-white/75 hover:text-white transition-colors">Guide Chambéry</Link></li>
-              <li><Link to="/guides/aix-les-bains" className="font-body text-sm text-white/75 hover:text-white transition-colors">Guide Aix-les-Bains</Link></li>
+              <li><Link to="/guides/lyon" className="font-body text-sm text-white/75 hover:text-white transition-colors">{t("footer.links.guide_city", { city: "Lyon" })}</Link></li>
+              <li><Link to="/guides/annecy" className="font-body text-sm text-white/75 hover:text-white transition-colors">{t("footer.links.guide_city", { city: "Annecy" })}</Link></li>
+              <li><Link to="/guides/grenoble" className="font-body text-sm text-white/75 hover:text-white transition-colors">{t("footer.links.guide_city", { city: "Grenoble" })}</Link></li>
+              <li><Link to="/guides/chambery" className="font-body text-sm text-white/75 hover:text-white transition-colors">{t("footer.links.guide_city", { city: "Chambéry" })}</Link></li>
+              <li><Link to="/guides/aix-les-bains" className="font-body text-sm text-white/75 hover:text-white transition-colors">{t("footer.links.guide_city", { city: "Aix-les-Bains" })}</Link></li>
             </ul>
           </div>
           <div>
@@ -68,7 +68,7 @@ const PublicFooter = React.forwardRef<HTMLElement>((_props, ref) => {
               <li><Link to="/a-propos" className="font-body text-sm text-white/75 hover:text-white transition-colors">{t("footer.links.about")}</Link></li>
               <li><Link to="/contact" className="font-body text-sm text-white/75 hover:text-white transition-colors">{t("footer.links.contact")}</Link></li>
               <li><Link to="/inscription" className="font-body text-sm text-white/75 hover:text-white transition-colors">{t("footer.links.register")}</Link></li>
-              <li><Link to="/devenir-home-sitter" className="font-body text-sm text-white/75 hover:text-white transition-colors">Devenir home-sitter</Link></li>
+              <li><Link to="/devenir-home-sitter" className="font-body text-sm text-white/75 hover:text-white transition-colors">{t("footer.links.become_home_sitter")}</Link></li>
               <li><Link to="/petites-missions" className="font-body text-sm text-white/75 hover:text-white transition-colors">{t("footer.links.small_missions")}</Link></li>
 
               <li><Link to="/gardien-urgence" className="font-body text-sm text-white/75 hover:text-white transition-colors">{t("footer.links.emergency_sitter")}</Link></li>

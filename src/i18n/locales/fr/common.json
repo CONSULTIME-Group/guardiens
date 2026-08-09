@@ -15,7 +15,8 @@
     "register": "Créer mon compte",
     "menu": "Menu",
     "unread_items": "éléments non lus",
-    "beta": "Bêta"
+    "beta": "Bêta",
+    "my_space": "Mon espace"
   },
   "footer": {
     "sections": {
@@ -38,7 +39,12 @@
       "register": "Inscription",
       "small_missions": "Entraide",
       "emergency_sitter": "Gardien d'urgence",
-      "pet_pros": "Pros animaliers"
+      "pet_pros": "Pros animaliers",
+      "all_cities": "Toutes les villes couvertes",
+      "all_departments": "Les 101 départements",
+      "become_home_sitter": "Devenir home-sitter",
+      "guide_city": "Guide {{city}}",
+      "house_sitting_city": "House-sitting {{city}}"
     },
     "tagline": "House-sitting de proximité",
     "version": "Guardiens · Version bêta · {{year}}",
@@ -1608,5 +1614,21 @@
   },
   "i18n_fallback": {
     "notice": "Cette page n'est pas encore disponible dans votre langue. La version française est affichée."
+  },
+  "a11y": {
+    "skip_to_content": "Aller au contenu principal",
+    "offline": "Vous êtes hors connexion. Certaines fonctionnalités peuvent être indisponibles."
+  },
+  "questions": {
+    "page_title": "Questions & conseils, communauté Guardiens",
+    "page_description": "Posez une question à la communauté Guardiens : comportement animal, jardin, garde de maison, bricolage. Recevez plusieurs avis de gens du coin.",
+    "heading": "Questions & conseils",
+    "intro": "Une question sur un comportement animal, un coup de main, une garde ? Posez-la à la communauté.",
+    "ask": "Poser une question",
+    "ask_first": "Poser la première question",
+    "filter_all": "Toutes",
+    "filter_open": "Ouvertes",
+    "filter_resolved": "Résolues",
+    "empty": "Aucune question pour l'instant. Les gens du coin attendent la première."
   }
 }

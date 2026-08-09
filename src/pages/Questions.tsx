@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import PageMeta from "@/components/PageMeta";
@@ -9,6 +10,7 @@ import { useCommunityQuestions } from "@/hooks/useCommunityQuestions";
 import type { CommunityCategory } from "@/lib/communityCategories";
 
 const Questions = () => {
+  const { t } = useTranslation();
   const [category, setCategory] = useState<CommunityCategory | "all">("all");
   const [status, setStatus] = useState<"all" | "open" | "resolved">("all");
   const { items, loading } = useCommunityQuestions({ category, status, limit: 50 });
@@ -16,25 +18,25 @@ const Questions = () => {
   return (
     <>
       <PageMeta
-        title="Questions & conseils, communauté Guardiens"
-        description="Posez une question à la communauté Guardiens : comportement animal, jardin, garde de maison, bricolage. Recevez plusieurs avis de gens du coin."
+        title={t("questions.page_title")}
+        description={t("questions.page_description")}
         path="/questions"
       />
       <div className="min-h-screen bg-background">
-        <PageBreadcrumb items={[{ label: "Questions & conseils" }]} />
+        <PageBreadcrumb items={[{ label: t("questions.heading") }]} />
 
         <section className="max-w-3xl mx-auto px-4 sm:px-6 py-8">
           <div className="flex items-start justify-between gap-4 mb-6">
             <div>
               <h1 className="font-heading text-2xl sm:text-3xl font-bold text-foreground">
-                Questions & conseils
+                {t("questions.heading")}
               </h1>
               <p className="text-foreground/70 mt-2">
-                Une question sur un comportement animal, un coup de main, une garde ? Posez-la à la communauté.
+                {t("questions.intro")}
               </p>
             </div>
             <Link to="/questions/nouvelle" className="shrink-0">
-              <Button>Poser une question</Button>
+              <Button>{t("questions.ask")}</Button>
             </Link>
           </div>
 
@@ -52,7 +54,7 @@ const Questions = () => {
                       : "bg-card text-foreground/70 border-border hover:bg-accent"
                   }`}
                 >
-                  {s === "all" ? "Toutes" : s === "open" ? "Ouvertes" : "Résolues"}
+                  {t(`questions.filter_${s}`)}
                 </button>
               ))}
             </div>
@@ -75,10 +77,10 @@ const Questions = () => {
           ) : (
             <div className="p-8 rounded-2xl border border-dashed border-border bg-accent/20 text-center">
               <p className="font-heading text-lg text-foreground/85">
-                Aucune question pour l'instant. Les gens du coin attendent la première.
+                {t("questions.empty")}
               </p>
               <Link to="/questions/nouvelle" className="inline-block mt-4">
-                <Button>Poser la première question</Button>
+                <Button>{t("questions.ask_first")}</Button>
               </Link>
             </div>
           )}

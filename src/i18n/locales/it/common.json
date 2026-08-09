@@ -15,7 +15,8 @@
     "register": "Crea il mio account",
     "menu": "Menu",
     "unread_items": "elementi non letti",
-    "beta": "Beta"
+    "beta": "Beta",
+    "my_space": "Il mio spazio"
   },
   "footer": {
     "sections": {
@@ -38,7 +39,12 @@
       "register": "Iscrizione",
       "small_missions": "Aiuto reciproco",
       "emergency_sitter": "Custode d'emergenza",
-      "pet_pros": "Professionisti per animali"
+      "pet_pros": "Professionisti per animali",
+      "all_cities": "Tutte le città coperte",
+      "all_departments": "I 101 dipartimenti",
+      "become_home_sitter": "Diventare home-sitter",
+      "guide_city": "Guida di {{city}}",
+      "house_sitting_city": "House-sitting a {{city}}"
     },
     "tagline": "House-sitting di prossimità",
     "version": "Guardiens · Version Beta · {{year}}",
@@ -1583,5 +1589,21 @@
   },
   "i18n_fallback": {
     "notice": "Questa pagina non è ancora disponibile in italiano. Viene mostrata la versione francese."
+  },
+  "a11y": {
+    "skip_to_content": "Vai al contenuto principale",
+    "offline": "Sei offline. Alcune funzioni potrebbero non essere disponibili."
+  },
+  "questions": {
+    "page_title": "Domande e consigli, comunità Guardiens",
+    "page_description": "Chieda alla comunità Guardiens: comportamento animale, giardino, custodia della casa, piccoli lavori. Riceva più risposte da persone della zona.",
+    "heading": "Domande e consigli",
+    "intro": "Una domanda su un comportamento animale, un aiuto, una custodia? La ponga alla comunità.",
+    "ask": "Fare una domanda",
+    "ask_first": "Fare la prima domanda",
+    "filter_all": "Tutte",
+    "filter_open": "Aperte",
+    "filter_resolved": "Risolte",
+    "empty": "Nessuna domanda per ora. Le persone della zona aspettano la prima."
   }
 }
