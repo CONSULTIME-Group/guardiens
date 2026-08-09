@@ -2566,8 +2566,7 @@ const CreateSit = () => {
 
       {/* ===================== CTA STICKY BOTTOM ===================== */}
       <div
-        className="fixed inset-x-0 bg-card border-t border-border z-40 bottom-[calc(4.5rem+env(safe-area-inset-bottom))] md:bottom-0"
-        style={{ paddingBottom: "1rem" }}
+        className="fixed inset-x-0 bg-card border-t border-border z-40 bottom-[calc(4.5rem+env(safe-area-inset-bottom))] md:bottom-0 pb-4 md:pb-[max(1rem,env(safe-area-inset-bottom))]"
       >
         <div className="max-w-3xl mx-auto px-4 pt-3 space-y-2">
           {/* Blockers on last step only */}
