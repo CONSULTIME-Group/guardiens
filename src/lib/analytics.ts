@@ -307,6 +307,18 @@ interface TrackOptions {
 }
 
 /**
+ * Enrichit les métadonnées avec le contexte d'appareil dérivé.
+ * La chaîne de user agent brute n'est jamais stockée, seulement les champs
+ * catégoriels qui en sont déduits.
+ */
+function withDeviceContext(metadata?: Record<string, any>): Record<string, any> | null {
+  const device = getDeviceContext();
+  if (!device) return metadata ?? null;
+  return { ...(metadata ?? {}), ...device };
+}
+
+
+/**
  * Track un événement de manière non-bloquante.
  * Fonctionne aussi bien pour les visiteurs anonymes que connectés.
  */
