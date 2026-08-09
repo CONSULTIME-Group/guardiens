@@ -296,6 +296,15 @@ const ConversationHeader = ({
                 </span>
               )}
             </div>
+            {/* Contexte de garde fondu dans l'en tête en mobile, une ligne discrète */}
+            {isMobile && conv.sit_id && conv.sit?.title && (
+              <p className="md:hidden text-[11px] text-muted-foreground truncate mt-0.5" title={conv.sit.title}>
+                {conv.sit.title}
+                {conv.sit?.start_date && `, ${formatShortDate(conv.sit.start_date)}`}
+                {conv.sit?.start_date && conv.sit?.end_date && ` au ${formatShortDate(conv.sit.end_date)}`}
+                {conv.sit?.city && `, ${capitalize(conv.sit.city)}`}
+              </p>
+            )}
             {/* Présence inline sous le nom — RGPD : show_last_seen géré côté appelant */}
             {conv.other_user?.last_seen_at && conv.other_user?.show_last_seen !== false && (
               <PresenceBadge
@@ -375,7 +384,7 @@ const ConversationHeader = ({
 
       {/* Line 2, Sit context: title + dates + city (du propriétaire = lieu de la garde) */}
       {conv.sit_id && conv.sit?.title && (
-        <div className="px-4 py-2 border-t border-border/50 bg-accent/30">
+        <div className="hidden md:block px-4 py-2 border-t border-border/50 bg-accent/30">
           <p
             className="text-sm font-medium text-foreground truncate"
             title={conv.sit.title}

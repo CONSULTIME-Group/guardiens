@@ -187,7 +187,8 @@ const PublicSitView = ({
           {/* ── COLONNE PRINCIPALE ── */}
           <article className="lg:col-span-8 min-w-0">
             <header className="mb-6 md:mb-10">
-              <div className="flex items-center gap-3 mb-6 flex-wrap">
+              <div className="flex items-start gap-3 mb-6 flex-nowrap">
+                <div className="flex flex-wrap items-center gap-2 min-w-0">
                 <span className="inline-block px-4 py-1.5 bg-primary/10 text-primary rounded-full text-[10px] font-bold tracking-widest uppercase">
                   {t("sit_detail.badge_stay")}
                 </span>
@@ -196,11 +197,12 @@ const PublicSitView = ({
                     {urgencyLabel}
                   </span>
                 )}
+                </div>
                 <Button
                   variant="outline"
                   size="sm"
                   onClick={onShare}
-                  className="gap-1.5 rounded-full ml-auto"
+                  className="gap-1.5 rounded-full ml-auto shrink-0"
                   aria-label={t("sit_detail.share_aria")}
                 >
                   <Share2 className="h-3.5 w-3.5" /> {t("sit_detail.share")}
