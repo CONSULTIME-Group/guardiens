@@ -31,7 +31,7 @@ const useIsCompactViewport = () => {
 };
 
 
-const NAV_DEFS: ReadonlyArray<{ key: string; to: string; beta?: boolean }> = [
+export const NAV_DEFS: ReadonlyArray<{ key: string; to: string; beta?: boolean }> = [
   { key: "listings", to: "/annonces" },
   { key: "small_missions", to: "/petites-missions" },
   { key: "pros", to: "/pros", beta: true },
