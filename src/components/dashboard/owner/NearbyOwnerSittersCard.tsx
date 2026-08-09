@@ -72,22 +72,23 @@ const NearbyOwnerSittersCard = ({ hideHeader = false }: Props) => {
               <Compass className="h-3.5 w-3.5" aria-hidden="true" />
               Élargir
             </Link>
+            <div className="flex flex-wrap items-center justify-between gap-2 pt-3 border-t border-border/60">
+              <p className="text-xs text-muted-foreground">
+                Invitez un proche de confiance à devenir gardien.
+              </p>
+              <Link
+                to="/mon-abonnement#parrainage"
+                className="inline-flex items-center gap-1.5 text-xs font-semibold text-primary hover:underline"
+              >
+                <Share2 className="h-3 w-3" aria-hidden="true" />
+                Partager mon lien
+              </Link>
+            </div>
           </div>
-          <div className="flex flex-wrap items-center justify-between gap-2 pt-3 border-t border-border/60">
-            <p className="text-xs text-muted-foreground">
-              Invitez un proche de confiance à devenir gardien.
-            </p>
-            <Link
-              to="/mon-abonnement#parrainage"
-              className="inline-flex items-center gap-1.5 text-xs font-semibold text-primary hover:underline"
-            >
-              <Share2 className="h-3 w-3" aria-hidden="true" />
-              Partager mon lien
-            </Link>
-          </div>
+          <div className="notebook-card-edge" aria-hidden="true" />
         </div>
       ) : (
-        <div className="bg-card border border-border rounded-2xl p-4 sm:p-5 min-w-0">
+        <div className="notebook-card relative p-4 pr-7 sm:p-5 sm:pr-8 min-w-0">
           {hasBeyond ? (
             <p className="text-[11px] uppercase tracking-[0.18em] text-muted-foreground font-semibold mb-3">
               Aucun gardien à moins de 100 km, voici les plus proches disponibles
