@@ -10,7 +10,31 @@ import { SUPPORTED_LANGS, type SupportedLang } from "@/i18n";
  * Cette clé est aussi celle que lit et écrit le détecteur i18next
  * (lookupLocalStorage), pour qu'il n'existe qu'une seule mémoire de langue.
  */
-const STORAGE_KEY = "guardiens.lang";
+export const LANG_STORAGE_KEY = "guardiens.lang";
+const STORAGE_KEY = LANG_STORAGE_KEY;
+
+/**
+ * Clés héritées d'anciennes versions du détecteur i18next. Elles ne doivent
+ * plus jamais être écrites : elles sont lues une seule fois au démarrage, leur
+ * valeur est reprise si la clé canonique est vide, puis elles sont supprimées.
+ */
+const LEGACY_STORAGE_KEYS = ["lang", "i18nextLng"] as const;
+
+export function migrateLegacyLangStorage(): void {
+  if (typeof window === "undefined") return;
+  try {
+    const current = window.localStorage.getItem(STORAGE_KEY);
+    for (const legacy of LEGACY_STORAGE_KEYS) {
+      const value = window.localStorage.getItem(legacy);
+      if (!current && isSupportedLang(value)) {
+        window.localStorage.setItem(STORAGE_KEY, value);
+      }
+      if (value !== null) window.localStorage.removeItem(legacy);
+    }
+  } catch {
+    // stockage indisponible : sans effet
+  }
+}
 
 export const isSupportedLang = (value: string | null | undefined): value is SupportedLang =>
   !!value && (SUPPORTED_LANGS as readonly string[]).includes(value);
