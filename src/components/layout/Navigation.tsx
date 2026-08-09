@@ -397,7 +397,7 @@ export const BottomNav = () => {
 
   // 2 onglets à gauche du FAB
   const leftTabs = [
-    { to: "/dashboard", icon: Home, label: "Tableau de bord", badge: isOwnerView ? ownerInboxCount : 0 },
+    { to: "/dashboard", icon: Home, label: "Accueil", badge: isOwnerView ? ownerInboxCount : 0 },
     isOwnerView
       ? { to: "/sits", icon: Calendar, label: "Annonces", badge: ownerInboxCount }
       : { to: "/search", icon: Search, label: "Recherche", badge: 0 },
@@ -439,7 +439,7 @@ export const BottomNav = () => {
     );
 
     const baseCls = cn(
-      "flex flex-col items-center justify-center flex-1 gap-1 relative min-w-0 pt-1.5 transition-colors active:scale-95 duration-150",
+      "flex flex-col items-center justify-center flex-1 h-full min-h-[44px] gap-1 relative min-w-0 pt-1.5 transition-colors active:scale-95 duration-150",
       isActive ? "text-primary" : "text-muted-foreground hover:text-foreground"
     );
 
@@ -516,7 +516,7 @@ export const BottomNav = () => {
           {/* Plus sheet */}
           <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
             <SheetTrigger asChild>
-              <button className="flex flex-col items-center justify-center flex-1 gap-1 text-muted-foreground hover:text-foreground transition-colors min-w-0 relative pt-1.5 active:scale-95 duration-150">
+              <button className="flex flex-col items-center justify-center flex-1 h-full min-h-[44px] gap-1 text-muted-foreground hover:text-foreground transition-colors min-w-0 relative pt-1.5 active:scale-95 duration-150">
                 <div className="relative">
                   <MoreHorizontal className="h-5 w-5" strokeWidth={1.8} />
                   {moreBadge > 0 && (
