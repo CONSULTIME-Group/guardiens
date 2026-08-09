@@ -469,11 +469,13 @@ const EntraideHub = () => {
             hasCoords={proximity.active}
             onUseMyLocation={proximity.useMyLocation}
           />
-          {/* Header : H1 + sous-titre + badge + CTA principal en couleur pleine */}
+          {/* Header : sous 768 px, tout s'empile sur toute la largeur (titre,
+              badge, sous-titre) et le CTA d'en-tête disparaît, le CTA de la
+              liste faisant déjà le travail. */}
           <div className="mb-5">
-            <div className="flex items-start justify-between gap-3 flex-wrap">
+            <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-3">
               <div className="min-w-0 flex-1">
-                <div className="flex items-center gap-2 flex-wrap">
+                <div className="flex flex-col items-start gap-2 md:flex-row md:items-center md:flex-wrap">
                   <h1 className="font-heading text-2xl sm:text-3xl font-bold text-foreground">
                     Entraide
                   </h1>
@@ -481,11 +483,11 @@ const EntraideHub = () => {
                     Sans engagement
                   </span>
                 </div>
-                <p className="text-sm text-muted-foreground mt-1.5 max-w-xl">
+                <p className="text-sm text-muted-foreground mt-1.5 md:max-w-xl">
                   Questions à la communauté, demandes et propositions de coups de main entre gens du coin.
                 </p>
               </div>
-              <Button onClick={primaryCta.action} size="sm" className="shrink-0 h-9">
+              <Button onClick={primaryCta.action} size="sm" className="hidden md:inline-flex shrink-0 h-9">
                 {primaryCta.label}
               </Button>
             </div>

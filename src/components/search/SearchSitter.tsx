@@ -1410,7 +1410,10 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
 
  return (
  <>
- <div className="animate-fade-in relative">
+ {/* Réserve basse : la barre de navigation est déjà compensée par le body,
+     on ajoute ici la hauteur du bouton flottant « Carte » pour que la dernière
+     carte et le bandeau de retour au rayon initial restent lisibles. */}
+ <div className="animate-fade-in relative pb-24 sm:pb-0">
  {/* Premium overlay for non-subscribed sitters on sits tab */}
  {isSitterLocked && (
  <div className="absolute inset-0 z-30 bg-background/80 backdrop-blur-sm flex items-center justify-center">
@@ -1557,7 +1560,7 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
      id="search-filter-pills"
      className={`relative -mr-6 sm:mr-0 ${isMobile && viewMode === "map" && !mobileFiltersOpen ? "hidden" : ""}`}
     >
-    <div className="flex flex-row items-center gap-2 px-6 py-3 overflow-x-auto no-scrollbar pr-10 sm:pr-6 snap-x snap-mandatory scroll-px-6 overscroll-x-contain">
+    <div className="flex flex-row items-center gap-2 px-6 py-3 overflow-x-auto no-scrollbar scroll-fade-r sm:[mask-image:none] pr-10 sm:pr-6 snap-x snap-mandatory scroll-px-6 overscroll-x-contain">
   {/* Location pill (mobile uniquement, sur desktop le champ ville hero est au-dessus) */}
   {isMobile && (
   <LocationPickerPopover
@@ -2452,7 +2455,7 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
    {/* FAB masqué en état vide : rien à afficher sur la carte, il ne ferait que
         chevaucher les CTA de l'empty state. */}
    {isMobile && tab === "sits" && availableSitsCount > 0 && (
-    <div className="fixed bottom-20 left-1/2 -translate-x-1/2 z-[1200] sm:hidden">
+    <div className="fixed bottom-[calc(var(--bottom-nav-h,0px)+14px+env(safe-area-inset-bottom))] left-1/2 -translate-x-1/2 z-[1200] sm:hidden">
       <button
         onClick={() => setViewMode(viewMode === "list" ? "map" : "list")}
         className="inline-flex items-center gap-2 rounded-full bg-foreground text-background shadow-xl px-5 py-3 text-sm font-semibold transition-transform active:scale-95"

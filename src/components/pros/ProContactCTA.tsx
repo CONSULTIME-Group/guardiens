@@ -41,7 +41,7 @@ export default function ProContactCTA({ phone, email, website, urgences24_7 }: P
       </div>
 
       {(telHref || mailHref) && (
-        <div className="md:hidden fixed bottom-0 inset-x-0 z-40 bg-background/95 backdrop-blur border-t border-border p-3 flex gap-2">
+        <div className="md:hidden fixed bottom-[var(--bottom-nav-h,0px)] inset-x-0 z-40 bg-background/95 backdrop-blur border-t border-border p-3 flex gap-2">
           {telHref && (
             <Button asChild className="flex-1">
               <a href={telHref}>

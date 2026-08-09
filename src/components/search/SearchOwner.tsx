@@ -1099,7 +1099,7 @@ const SearchOwner = () => {
         )}
 
         <div className="relative -mr-6 sm:mr-0">
-          <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pr-10 sm:pr-0 snap-x snap-mandatory scroll-px-6 overscroll-x-contain">
+          <div className="flex items-center gap-2 overflow-x-auto no-scrollbar scroll-fade-r sm:[mask-image:none] pr-10 sm:pr-0 snap-x snap-mandatory scroll-px-6 overscroll-x-contain">
           {/* PILL 1, Localisation (mobile uniquement, desktop a le hero search au-dessus) */}
           {isMobile && (
           <OwnerLocationPicker

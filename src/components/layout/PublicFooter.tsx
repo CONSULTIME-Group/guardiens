@@ -88,19 +88,21 @@ const PublicFooter = React.forwardRef<HTMLElement>((_props, ref) => {
               {t("footer.tagline")}
             </p>
           </div>
-          <div className="flex flex-wrap gap-4 text-sm text-white/75 font-body">
-            <span className="text-xs text-white/80 font-body">{t("footer.version", { year: new Date().getFullYear() })}</span>
-            <span aria-hidden="true" className="text-white/40">·</span>
+          {/* Mobile : pile verticale, une entrée par ligne, cible 44 px, aucun
+              séparateur. Desktop : ligne unique avec séparateurs. */}
+          <div className="w-full sm:w-auto flex flex-col sm:flex-row sm:flex-wrap sm:items-center sm:gap-4 text-sm text-white/75 font-body">
+            <span className="text-xs text-white/80 font-body py-2 sm:py-0">{t("footer.version", { year: new Date().getFullYear() })}</span>
+            <span aria-hidden="true" className="hidden sm:inline text-white/40">·</span>
             <Link to="/cgu" className="hover:text-white transition-colors">{t("footer.legal.cgu")}</Link>
-            <span aria-hidden="true" className="text-white/40">·</span>
+            <span aria-hidden="true" className="hidden sm:inline text-white/40">·</span>
             <Link to="/confidentialite" className="hover:text-white transition-colors">{t("footer.legal.privacy")}</Link>
-            <span aria-hidden="true" className="text-white/40">·</span>
+            <span aria-hidden="true" className="hidden sm:inline text-white/40">·</span>
             <Link to="/cgs" className="hover:text-white transition-colors">{t("footer.legal.cgs")}</Link>
-            <span aria-hidden="true" className="text-white/40">·</span>
+            <span aria-hidden="true" className="hidden sm:inline text-white/40">·</span>
             <Link to="/cookies" className="hover:text-white transition-colors">{t("footer.legal.cookies")}</Link>
-            <span aria-hidden="true" className="text-white/40">·</span>
+            <span aria-hidden="true" className="hidden sm:inline text-white/40">·</span>
             <Link to="/mentions-legales" className="hover:text-white transition-colors">{t("footer.legal.legal_notice")}</Link>
-            <span aria-hidden="true" className="text-white/40">·</span>
+            <span aria-hidden="true" className="hidden sm:inline text-white/40">·</span>
             <Link to="/contact" className="hover:text-white transition-colors">{t("footer.legal.contact")}</Link>
           </div>
         </div>

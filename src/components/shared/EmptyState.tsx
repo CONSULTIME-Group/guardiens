@@ -85,7 +85,7 @@ const PaintedIllustration = ({
   const set = SETS[fallbackKey];
 
   const wrapperClass =
-    "illustration-wrapper relative block mx-auto h-auto w-[12.6rem] sm:w-[15.4rem] md:w-[18.2rem] lg:w-[19.6rem] max-w-[84vw] aspect-square select-none pointer-events-none motion-safe:animate-painted-reveal motion-reduce:opacity-100";
+    "illustration-wrapper relative block mx-auto h-auto w-[9rem] sm:w-[15.4rem] md:w-[18.2rem] lg:w-[19.6rem] max-w-[60vw] sm:max-w-[84vw] aspect-square select-none pointer-events-none motion-safe:animate-painted-reveal motion-reduce:opacity-100";
 
   const imgClass =
     "illustration-blend absolute inset-0 w-full h-full object-contain";
@@ -166,7 +166,7 @@ const EmptyState = ({
   const Illustration = ILLUSTRATIONS[illustration];
 
   return (
-    <div className={`text-center py-12 px-4 space-y-5 motion-safe:animate-soft-fade-in ${className}`}>
+    <div className={`text-center pt-8 pb-12 sm:py-12 px-4 space-y-5 motion-safe:animate-soft-fade-in ${className}`}>
       <Illustration />
       <div className="space-y-2">
         <h3 className="font-heading text-lg font-semibold text-foreground">{title}</h3>
