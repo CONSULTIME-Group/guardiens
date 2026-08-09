@@ -32,6 +32,7 @@ export default function LanguageSwitcher({
   // La langue vit dans l'URL : changer de langue réécrit l'URL, et
   // LangUrlSync recale i18next dessus.
   const selectLang = (code: SupportedLang) => {
+    setStoredLang(code);
     const params = new URLSearchParams(location.search);
     if (code === "fr") {
       params.delete("lang");
