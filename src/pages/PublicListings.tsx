@@ -125,9 +125,12 @@ export default function PublicListings() {
   // Eyebrow : on n'affiche le compteur de villes que s'il a un signal réel
   // (>= 2). « 1 ville » est un faux signal qui décrédibilise la promesse.
   const eyebrowDynamic = openCount > 0
-    ? citiesCount >= 2
-      ? `${openCount} annonces ouvertes en France · ${citiesCount} villes · mise à jour quotidienne`
-      : `${openCount} annonce${openCount > 1 ? "s" : ""} ouverte${openCount > 1 ? "s" : ""} en France · mise à jour quotidienne`
+    ? t("public_listings.eyebrow_stats", {
+        count: openCount,
+        cities: citiesCount >= 2
+          ? t("public_listings.cities_count", { count: citiesCount })
+          : t("public_listings.all_france"),
+      })
     : t("public_listings.eyebrow");
 
 
