@@ -1441,7 +1441,7 @@ const SearchOwner = () => {
               <button
                 type="button"
                 onClick={() => setViewMode("list")}
-                aria-label="Vue grille"
+                aria-label={t("search_results.view_grid")}
                 aria-pressed={viewMode === "list"}
                 className={`flex items-center gap-1 px-2 py-1 rounded text-xs transition-colors ${viewMode === "list" ? "bg-primary/10 text-primary font-medium" : "text-muted-foreground hover:bg-muted"}`}
               >
