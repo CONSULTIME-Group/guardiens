@@ -64,7 +64,9 @@ const PageBreadcrumb = ({ items }: PageBreadcrumbProps) => {
 
       <nav
         aria-label="Fil d'Ariane"
-        className="max-w-5xl mx-auto px-4 pt-4 pb-2"
+        /* Règle unique du produit : aucun fil d'Ariane sous 768 px, comme dans
+           la coquille applicative. Le balisage Schema.org reste émis. */
+        className="hidden md:block max-w-5xl mx-auto px-4 pt-4 pb-2"
       >
         <ol className="flex items-center flex-wrap gap-0 text-sm text-muted-foreground">
           {allItems.map((item, i) => {
