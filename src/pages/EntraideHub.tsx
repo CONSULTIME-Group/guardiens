@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState, useRef } from "react";
+import { useTranslation } from "react-i18next";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { format, formatDistanceToNow } from "date-fns";
 import { fr } from "date-fns/locale";
@@ -186,6 +187,7 @@ const DURATION_LABEL: Record<string, string> = {
 };
 
 const EntraideHub = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { isAuthenticated } = useAuth();
   const [params, setParams] = useSearchParams();
@@ -462,7 +464,7 @@ const EntraideHub = () => {
         path="/petites-missions"
       />
       <div className="bg-background">
-        <PageBreadcrumb items={[{ label: "Entraide" }]} />
+        <PageBreadcrumb items={[{ label: t("nav.small_missions", "Entraide") }]} />
 
         <section className="max-w-3xl mx-auto px-4 sm:px-6 pt-4 pb-28 sm:pt-6 sm:pb-8 min-w-0">
           <EntraideGeolocBanner

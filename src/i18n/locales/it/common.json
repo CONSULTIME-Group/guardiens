@@ -53,7 +53,8 @@
       "cgs": "CGS",
       "privacy": "Informativa sulla privacy",
       "legal_notice": "Note legali",
-      "contact": "Contatti"
+      "contact": "Contatti",
+      "cookies": "Informativa sui cookie"
     }
   },
   "landing": {
@@ -202,7 +203,11 @@
       "p5": "Guardiens è il pretesto che mancava. Da un lato, i piccoli aiuti tra vicini: un orto innaffiato in cambio di un pasto, una competenza contro un'altra, un aiuto reso in natura. Dall'altro, indipendentemente, l'home sitting: le Suo chiavi affidate a qualcuno che ha guardato negli occhi.",
       "p6": "Partirà con la mente leggera. Tornerà con una storia. Non ci aspettavamo che contasse così tanto.",
       "p7": "È per questo che abbiamo costruito Guardiens, affinché anche Lei possa vivere tutto questo.",
-      "signature": "Jérémie e Elisa"
+      "signature": "Jérémie e Elisa",
+      "quote_lead": "Una sera un proprietario gli ha detto:",
+      "p8": "Una sera da Helen, Stanley che abbaiava, Rafa sdraiato sui nostri piedi, la vista sul Monte Bianco. Ci siamo detti: perché non lo fanno più persone?",
+      "p9": "Per questo abbiamo costruito Guardiens.",
+      "p10": "Il vostro giardino in cambio di un pasto. Le vostre chiavi in cambio di una storia. Persone del posto che si danno fiducia, e a volte amici per la vita."
     },
     "cities": {
       "eyebrow": "Guide & città",
@@ -229,7 +234,11 @@
       "q5": "Come si svolge una custodia su Guardiens?",
       "a5": "Lei pubblica l'annuncio, i custodi della zona si candidano, Lei sceglie dopo un incontro, poi il Suo custode si stabilisce. Un accordo di custodia opzionale definisce gli impegni di ciascuno durante la custodia.",
       "q6": "Guardiens è disponibile in tutta la Francia?",
-      "a6": "Sì. La rete Guardiens si estende in tutte le regioni della Francia, dai Paesi Baschi alla Bretagna, passando per le Alpi e il Nord. Troverà un custode vicino a Lei ovunque si trovi."
+      "a6": "Sì. La rete Guardiens si estende in tutte le regioni della Francia, dai Paesi Baschi alla Bretagna, passando per le Alpi e il Nord. Troverà un custode vicino a Lei ovunque si trovi.",
+      "q7": "Qual è il modello economico di Guardiens?",
+      "a7": "Guardiens resta gratuito finché non saremo soddisfatti del servizio che vi offriamo. Avete accesso a tutto, senza limiti e senza vincoli. Sarete avvisati in anticipo quando questo cambierà.",
+      "q8": "Il house-sitting è sicuro?",
+      "a8": "La verifica dell'identità è aperta a tutti i membri: il documento inviato viene analizzato automaticamente, le pratiche che non superano questo primo controllo vengono riviste dal nostro team, e i profili convalidati mostrano lo stemma « Identità verificata ». Un incontro preliminare tra il proprietario e il guardiano è vivamente consigliato prima di ogni soggiorno. Dopo ogni esperienza, le recensioni incrociate pubblicate sul profilo costruiscono una reputazione verificabile, visibile a tutti i membri."
     },
     "inventory": {
       "title": "Ciò che abbiamo costruito per Lei",
@@ -791,7 +800,13 @@
     "explore_pricing": "Tariffe sitter",
     "explore_pricing_desc": "Gratuito per tutti, senza impegno.",
     "explore_intl": "Annunci fuori dalla Francia",
-    "explore_intl_desc": ", Marocco, Spagna, Belgio…"
+    "explore_intl_desc": ", Marocco, Spagna, Belgio…",
+    "eyebrow_stats_one": "{{count}} annuncio aperto · {{cities}} · aggiornato ogni giorno",
+    "eyebrow_stats_other": "{{count}} annunci aperti · {{cities}} · aggiornato ogni giorno",
+    "subtitle_short": "Gatti, cani, animali esotici, in campagna o in città. Filtrate per località, date e criteri.",
+    "become_sitter_title": "Volete diventare guardiano?",
+    "become_sitter_body": "Iscrizione in 2 minuti, senza vincoli.",
+    "become_sitter_cta": "Scoprire lo spazio guardiano"
   },
   "pros_listing": {
     "meta_title": "Elenco professionisti animali vicino a te | Guardiens",
@@ -1006,7 +1021,9 @@
       "sitter_label": "Guardiano",
       "sitter_desc": "Voglio custodire case e animali. Consulto gli annunci e offro i miei servizi.",
       "both_label": "Entrambi",
-      "both_desc": "Voglio sia far custodire che custodire. Avrà accesso a entrambi gli spazi."
+      "both_desc": "Voglio sia far custodire che custodire. Avrà accesso a entrambi gli spazi.",
+      "pro_label": "Professionista animali",
+      "pro_desc": "Veterinario, educatore, toelettatore, comportamentalista, pensione… Pubblico la mia scheda nella directory professionale."
     },
     "most_popular": "Più popolare",
     "role_change_hint": "Cambia idea? Il ruolo resta modificabile in qualsiasi momento dalle impostazioni.",
@@ -1080,7 +1097,19 @@
     "retour_site": "Torna al sito",
     "panel_title": "Si unisca a una comunità di fiducia",
     "panel_desc": "Faccia custodire la sua casa, dia una mano, scambi un servizio: qui ricuciamo i legami di prossimità, dal cuore del paese fino alle frazioni di campagna.",
-    "members_badge_suffix": "membri già iscritti"
+    "members_badge_suffix": "membri già iscritti",
+    "trust_no_spam": "Niente spam, disiscrizione con 1 clic",
+    "after_pro": "Potrete <1>creare la vostra scheda professionale</1> subito dopo. Convalida manuale entro 48 h.",
+    "pro_step1_sub": "Account professionista animali: la vostra scheda nella directory in 3 minuti.",
+    "pro_pill": "Account professionista animali",
+    "continue": "Continuare",
+    "terms_required_hint": "Selezionate la casella per continuare.",
+    "terms_accepted_confirm": "Avete accettato le condizioni d'uso, le condizioni di servizio e l'informativa sulla privacy.",
+    "terms_accepted_edit": "Modificare",
+    "intent_banner": {
+      "owner": "Ancora un passo e potrete contattare questo guardiano.",
+      "sitter": "Ancora un passo e potrete proporre i vostri servizi."
+    }
   },
   "emergency_page": {
     "meta_title": "Custode d'emergenza per i Suoi animali | Guardiens",
@@ -1516,7 +1545,8 @@
       "tab_mobility": "Scheda Mobilità e raggio.",
       "settings_verif": "Impostazioni → Verifica.",
       "chars_50": "{{count}}/50 caratteri.",
-      "add_avatar_identity": "Aggiunga una foto nella scheda Identità."
+      "add_avatar_identity": "Aggiunga una foto nella scheda Identità.",
+      "affinity_count": "{{count}}/5 compilati (minimo 3 per il punteggio massimo)."
     }
   },
   "live_listings": {

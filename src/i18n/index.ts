@@ -1,6 +1,7 @@
 import i18n from "i18next";
 import { initReactI18next } from "react-i18next";
 import LanguageDetector from "i18next-browser-languagedetector";
+import { LANG_STORAGE_KEY, migrateLegacyLangStorage } from "@/lib/langStorageKey";
 
 // Seul le français est embarqué dans le bundle d'entrée : c'est la langue de
 // repli et la langue de la très grande majorité des visites. Les quatre autres
@@ -19,6 +20,10 @@ export const LANG_LABELS: Record<SupportedLang, { native: string; flag: string }
   it: { native: "Italiano", flag: "🇮🇹" },
   de: { native: "Deutsch", flag: "🇩🇪" },
 };
+
+// Une seule mémoire de langue : les clés héritées d'anciennes versions du
+// détecteur sont reprises puis effacées avant toute détection.
+migrateLegacyLangStorage(SUPPORTED_LANGS as readonly string[]);
 
 void i18n
   .use(LanguageDetector)
@@ -41,11 +46,11 @@ void i18n
       // choix mémorisé prend le relais, puis la langue du navigateur. Sans
       // cette persistance, la première navigation interne sans querystring
       // retombait en français : c'était le mécanisme exact du bug.
-      // Une seule clé de stockage, partagée avec src/lib/lang.ts.
+      // Une seule clé de stockage, définie dans src/lib/langStorageKey.ts.
       order: ["querystring", "localStorage", "navigator"],
       caches: ["localStorage"],
       lookupQuerystring: "lang",
-      lookupLocalStorage: "guardiens.lang",
+      lookupLocalStorage: LANG_STORAGE_KEY,
     },
     interpolation: { escapeValue: false },
     react: { useSuspense: false },

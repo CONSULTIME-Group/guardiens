@@ -1,4 +1,5 @@
 import { SUPPORTED_LANGS, type SupportedLang } from "@/i18n";
+import { LANG_STORAGE_KEY } from "@/lib/langStorageKey";
 
 /**
  * Choix de langue explicite de l'utilisateur.
@@ -7,10 +8,11 @@ import { SUPPORTED_LANGS, type SupportedLang } from "@/i18n";
  * explicite est mémorisé pour survivre à une navigation vers un lien interne
  * qui ne porte pas le paramètre. Sans cela, chaque clic ramenait au français.
  *
- * Cette clé est aussi celle que lit et écrit le détecteur i18next
- * (lookupLocalStorage), pour qu'il n'existe qu'une seule mémoire de langue.
+ * Une seule clé existe dans tout le produit, définie dans
+ * `src/lib/langStorageKey.ts`, et c'est aussi celle que lit le détecteur
+ * i18next (lookupLocalStorage).
  */
-const STORAGE_KEY = "guardiens.lang";
+const STORAGE_KEY = LANG_STORAGE_KEY;
 
 export const isSupportedLang = (value: string | null | undefined): value is SupportedLang =>
   !!value && (SUPPORTED_LANGS as readonly string[]).includes(value);

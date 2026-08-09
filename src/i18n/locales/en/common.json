@@ -53,7 +53,8 @@
       "cgs": "S-T&Cs",
       "privacy": "Privacy Policy",
       "legal_notice": "Legal Notice",
-      "contact": "Contact"
+      "contact": "Contact",
+      "cookies": "Cookie policy"
     }
   },
   "landing": {
@@ -202,7 +203,11 @@
       "p5": "Guardiens is the pretext that was missing. On one side, small favours of mutual aid between local people: a vegetable garden watered in exchange for a meal, one skill for another, a small favour returned in kind. On the other, independently, house-sitting: your keys entrusted to someone you've looked in the eye.",
       "p6": "You will leave with peace of mind. You will return with a story. We didn't expect it to matter so much.",
       "p7": "That's why we built Guardiens, so you could live this too.",
-      "signature": "Jérémie and Elisa"
+      "signature": "Jérémie and Elisa",
+      "quote_lead": "One evening, an owner told him:",
+      "p8": "One evening at Helen's, Stanley barking, Rafa lying on our feet, the view over Mont Blanc. We thought: why aren't more people doing this?",
+      "p9": "That is why we built Guardiens.",
+      "p10": "Your garden for a meal. Your keys for a story. People from the area who trust each other, and sometimes friends for life."
     },
     "cities": {
       "eyebrow": "Guides & cities",
@@ -229,7 +234,11 @@
       "q5": "How does a sit take place on Guardiens?",
       "a5": "You publish your listing, local caretaker / pet & home sitters apply, you choose after a meeting, then your sitter moves in. An optional sitting agreement frames the commitments of each party during the sit.",
       "q6": "Is Guardiens available everywhere in France?",
-      "a6": "Yes. The Guardiens network extends to all regions of France, from the Basque Country to Brittany, through the Alps and the North. You will find a sitter near you regardless of your department."
+      "a6": "Yes. The Guardiens network extends to all regions of France, from the Basque Country to Brittany, through the Alps and the North. You will find a sitter near you regardless of your department.",
+      "q7": "What is the Guardiens business model?",
+      "a7": "Guardiens stays free as long as we are not satisfied with the service we offer you. You get access to everything, with no limit and no commitment. You will be told in advance when that changes.",
+      "q8": "Is house-sitting safe?",
+      "a8": "Identity verification is open to every member: the document sent in is analysed automatically, files that do not pass this first check are reviewed by our team, and validated profiles display the « Identity verified » crest. A meeting between the owner and the sitter before the stay is strongly recommended. After each experience, the cross reviews published on the profile build a verifiable reputation, visible to all members."
     },
     "inventory": {
       "title": "What we've built for you",
@@ -791,7 +800,13 @@
     "explore_pricing": "Sitter pricing",
     "explore_pricing_desc": "Free for everyone, no commitment.",
     "explore_intl": "International listings",
-    "explore_intl_desc": ", Morocco, Spain, Belgium…"
+    "explore_intl_desc": ", Morocco, Spain, Belgium…",
+    "eyebrow_stats_one": "{{count}} open listing · {{cities}} · updated daily",
+    "eyebrow_stats_other": "{{count}} open listings · {{cities}} · updated daily",
+    "subtitle_short": "Cats, dogs, exotic pets, in the countryside or in town. Filter by location, dates and criteria.",
+    "become_sitter_title": "Looking to become a sitter?",
+    "become_sitter_body": "Sign up in 2 minutes, no commitment.",
+    "become_sitter_cta": "Discover the sitter space"
   },
   "pros_listing": {
     "meta_title": "Pet pros directory near you | Guardiens",
@@ -1006,7 +1021,9 @@
       "sitter_label": "Sitter",
       "sitter_desc": "I want to look after homes and pets. I browse listings and offer my services.",
       "both_label": "Both",
-      "both_desc": "I want to both have someone sit and sit for others. You get access to both spaces."
+      "both_desc": "I want to both have someone sit and sit for others. You get access to both spaces.",
+      "pro_label": "Pet professional",
+      "pro_desc": "Vet, trainer, groomer, behaviourist, boarding… I publish my listing in the professional directory."
     },
     "most_popular": "Most popular",
     "role_change_hint": "Changed your mind? You can update your role anytime from your settings.",
@@ -1080,7 +1097,19 @@
     "retour_site": "Back to site",
     "panel_title": "Join a community of trust",
     "panel_desc": "Have your home looked after, lend a hand, exchange a service: here, we reweave proximity ties, from the heart of the village to country hamlets.",
-    "members_badge_suffix": "members already signed up"
+    "members_badge_suffix": "members already signed up",
+    "trust_no_spam": "No spam, unsubscribe in 1 click",
+    "after_pro": "You will be able to <1>create your professional listing</1> right after. Manual review within 48 h.",
+    "pro_step1_sub": "Pet professional account: your listing in the directory in 3 minutes.",
+    "pro_pill": "Pet professional account",
+    "continue": "Continue",
+    "terms_required_hint": "Tick the box to continue.",
+    "terms_accepted_confirm": "You have accepted the terms of use, the terms of service and the privacy policy.",
+    "terms_accepted_edit": "Edit",
+    "intent_banner": {
+      "owner": "One more step, and you will be able to contact this sitter.",
+      "sitter": "One more step, and you will be able to offer your services."
+    }
   },
   "emergency_page": {
     "meta_title": "Emergency Pet Sitter for your animals | Guardiens",
