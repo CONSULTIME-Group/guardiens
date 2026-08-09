@@ -321,17 +321,23 @@ export const BottomNav = () => {
   // pour éviter le recouvrement des CTA du hero. Elle réapparaît dès 120 px de scroll.
   useEffect(() => {
     if (typeof window === "undefined") return;
-    if (location.pathname !== "/") return;
+    if (location.pathname !== "/") {
+      setLandingTopHidden(false);
+      return;
+    }
     const md = window.matchMedia("(min-width: 768px)");
     const update = () => {
-      const shouldHide = !md.matches && window.scrollY < 120;
+      const y = window.scrollY || window.pageYOffset || document.documentElement.scrollTop || 0;
+      const shouldHide = !md.matches && y < 120;
       setLandingTopHidden(prev => (prev === shouldHide ? prev : shouldHide));
     };
     update();
     window.addEventListener("scroll", update, { passive: true });
+    window.addEventListener("resize", update, { passive: true });
     md.addEventListener("change", update);
     return () => {
       window.removeEventListener("scroll", update);
+      window.removeEventListener("resize", update);
       md.removeEventListener("change", update);
     };
   }, [location.pathname]);
@@ -488,6 +494,7 @@ export const BottomNav = () => {
           "transition-transform duration-300 ease-out motion-reduce:transition-none",
           hidden ? "translate-y-[150%]" : "translate-y-0"
         )}
+        style={{ transform: hidden ? "translateY(150%)" : "translateY(0)" }}
         aria-label="Navigation mobile"
       >
         <div className="pointer-events-auto mx-auto max-w-md bg-card border border-border/60 shadow-[0_20px_50px_-12px_hsl(var(--primary)/0.18)] rounded-3xl h-16 flex items-center justify-between px-1.5 relative">

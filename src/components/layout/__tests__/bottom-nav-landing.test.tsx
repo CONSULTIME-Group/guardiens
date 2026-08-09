@@ -95,6 +95,7 @@ describe("BottomNav landing hide-on-top", () => {
   it("hides the pill on / at scroll 0 under md", () => {
     setup("/", 0, false);
     expect(getNav().className).toContain("translate-y-[150%]");
+    expect(getNav().style.transform).toBe("translateY(150%)");
   });
 
   it("shows the pill on / after 120 px of scroll under md", () => {
@@ -102,6 +103,7 @@ describe("BottomNav landing hide-on-top", () => {
     fireEvent.scroll(window);
     expect(getNav().className).toContain("translate-y-0");
     expect(getNav().className).not.toContain("translate-y-[150%]");
+    expect(getNav().style.transform).toBe("translateY(0)");
   });
 
   it("keeps the pill visible on / when scrolling down past the threshold", () => {
