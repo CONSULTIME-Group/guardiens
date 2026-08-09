@@ -85,7 +85,7 @@ const OwnerCockpit = ({
           />
         </div>
 
-        <div className="relative flex items-start justify-between gap-[22px] flex-wrap">
+        <div className="relative flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 sm:gap-[22px]">
           {/* Bloc gauche : avatar + salutation */}
           <div className="flex items-center gap-[14px] min-w-0 flex-1">
             <Link
