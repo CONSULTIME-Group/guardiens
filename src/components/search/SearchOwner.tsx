@@ -65,6 +65,7 @@ const SearchOwnerMapView = lazy(() => import("@/components/search/SearchOwnerMap
 
 const SearchOwner = () => {
   const { user, switchRole } = useAuth();
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { owner: viewerOwner } = useViewerOwnerForAffinity();
 
