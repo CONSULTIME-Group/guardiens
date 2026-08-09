@@ -1,10 +1,13 @@
 /**
  * close-orphan-applications
  *
- * Solde les candidatures restées en attente sur une annonce annulée ou
- * archivée depuis plus de 24 heures. Le délai de grâce laisse le temps d'une
- * annulation faite par erreur. Chaque personne concernée reçoit un email,
- * dédupliqué par candidature via idempotencyKey.
+ * Solde les candidatures restées en attente (pending, viewed, discussing) sur
+ * une annonce annulée, archivée ou expirée depuis plus de 24 heures. Le délai
+ * de grâce laisse le temps d'une annulation faite par erreur.
+ *
+ * Notification in-app uniquement par défaut. L'envoi email est piloté par le
+ * drapeau de configuration `close_orphan_emails` dans public.feature_flags,
+ * activable sans redéploiement.
  *
  * Cron quotidien. Appel réservé au service role.
  */
@@ -18,6 +21,7 @@ const corsHeaders = {
 
 const TEMPLATE = "application-closed-listing-withdrawn";
 const GRACE_HOURS = 24;
+const EMAIL_FLAG_KEY = "close_orphan_emails";
 
 interface ClosedApp {
   application_id: string;
@@ -26,7 +30,7 @@ interface ClosedApp {
   sit_status: string | null;
   sitter_id: string;
   sitter_first_name: string | null;
-  sitter_email: string;
+  sitter_email: string | null;
   owner_first_name: string | null;
 }
 
@@ -48,18 +52,46 @@ Deno.serve(async (req) => {
     run = await startCronRun("close-orphan-applications");
     const supabase = createClient(SUPABASE_URL, SERVICE_KEY);
 
+    // Drapeau de configuration : envoi email désactivé par défaut.
+    const { data: flag } = await supabase
+      .from("feature_flags")
+      .select("enabled")
+      .eq("key", EMAIL_FLAG_KEY)
+      .maybeSingle();
+    const emailsEnabled = (flag as { enabled?: boolean } | null)?.enabled === true;
+
     const { data, error } = await supabase.rpc("close_orphan_applications", {
       p_grace_hours: GRACE_HOURS,
     });
     if (error) throw error;
     const closed: ClosedApp[] = (data as ClosedApp[]) ?? [];
 
+    let notificationsSent = 0;
     let emailsSent = 0;
     let emailsFailed = 0;
     const errors: Array<{ application_id: string; error: string }> = [];
 
     for (const app of closed) {
-      // Ville de l'annonce, utile pour orienter vers d'autres gardes.
+      // 1. Notification in-app, message neutre, lien vers les gardes ouvertes.
+      const { error: notifError } = await supabase.from("notifications").insert({
+        user_id: app.sitter_id,
+        type: "application_closed",
+        title: "Candidature clôturée",
+        body: app.sit_title
+          ? `L'annonce « ${app.sit_title} » n'est plus active. Votre candidature a été clôturée. D'autres gardes sont ouvertes.`
+          : "Cette annonce n'est plus active. Votre candidature a été clôturée. D'autres gardes sont ouvertes.",
+        link: "/search",
+      });
+      if (notifError) {
+        errors.push({ application_id: app.application_id, error: `notify_failed` });
+        console.error("[close-orphan-applications] notify failed", notifError.message);
+      } else {
+        notificationsSent += 1;
+      }
+
+      // 2. Email, uniquement si le drapeau de configuration est actif.
+      if (!emailsEnabled || !app.sitter_email) continue;
+
       const { data: sit } = await supabase
         .from("sits")
         .select("city")
@@ -104,6 +136,8 @@ Deno.serve(async (req) => {
 
     const summary = {
       closed: closed.length,
+      notifications_sent: notificationsSent,
+      emails_enabled: emailsEnabled,
       emails_sent: emailsSent,
       emails_failed: emailsFailed,
       errors_count: errors.length,

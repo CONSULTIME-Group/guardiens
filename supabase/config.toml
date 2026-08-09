@@ -114,3 +114,7 @@ project_id = "erhccyqevdyevpyctsjj"
 
 
 
+  [functions.send-avis-j10]
+    verify_jwt = true
+  [functions.send-avis-j20]
+    verify_jwt = true

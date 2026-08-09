@@ -16,9 +16,10 @@ interface Props {
   revieweeName?: string
   sitId?: string
   isOwner?: boolean
+  stage?: 'j1' | 'j5' | 'j10' | 'j20'
 }
 
-const ReviewReminderEmail = ({ firstName, sitTitle, revieweeName, sitId, isOwner }: Props) => {
+const ReviewReminderEmail = ({ firstName, sitTitle, revieweeName, sitId, isOwner, stage }: Props) => {
   const greeting = firstName ? `Bonjour ${firstName},` : 'Bonjour,'
   const who = revieweeName
     ? (isOwner ? `le gardien ${revieweeName}` : `le propriétaire ${revieweeName}`)
@@ -58,6 +59,18 @@ const ReviewReminderEmail = ({ firstName, sitTitle, revieweeName, sitId, isOwner
               Laisser mon avis
             </Button>
             </Section>
+
+          {stage === 'j20' ? (
+            <Text style={text}>
+              La fenêtre de dépôt reste ouverte jusqu'à 30 jours après la fin de la garde, puis elle se ferme.
+              Si vous souhaitez partager votre retour, c'est le bon moment; quelques lignes suffisent.
+            </Text>
+          ) : null}
+          {stage === 'j10' ? (
+            <Text style={text}>
+              Vous avez encore le temps: le dépôt reste possible jusqu'à 30 jours après la fin de la garde.
+            </Text>
+          ) : null}
 
           <Text style={note}>
             Votre avis sera publié une fois que les deux parties auront partagé le leur.
@@ -99,7 +112,7 @@ export const template = {
     data.revieweeName
       ? `Comment s’est passée la garde avec ${data.revieweeName}`
       : 'Comment s’est passée la garde',
-  displayName: 'Relance avis (J+5)',
+  displayName: 'Relance avis (J+1, J+5, J+10, J+20)',
   previewData: { firstName: 'Marie', sitTitle: 'Garde chat Paris 11e', revieweeName: 'Thomas', sitId: 'abc-123', isOwner: true },
 } satisfies TemplateEntry
 

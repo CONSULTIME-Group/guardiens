@@ -14,6 +14,7 @@ export type SitLifecycleStatus =
   | "in_progress"
   | "completed"
   | "cancelled"
+  | "expired"
   | "archived";
 
 export const ACTIVE_SIT_STATUSES: readonly string[] = ["published", "confirmed", "in_progress"];
@@ -39,6 +40,8 @@ export function sitStateNote(status: string | null | undefined): string | null {
       return "Annonce annulée par le propriétaire";
     case "archived":
       return "Annonce archivée";
+    case "expired":
+      return "Annonce expirée, les dates sont dépassées";
     case "in_progress":
       return "Garde en cours";
     case "completed":
