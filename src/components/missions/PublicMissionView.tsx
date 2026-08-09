@@ -125,6 +125,7 @@ const PublicMissionView = ({
     : "font-heading text-4xl md:text-5xl lg:text-6xl font-bold leading-[1.1] mb-6 text-foreground";
 
   return (
+    <>
     <div className="min-h-screen bg-background text-foreground animate-fade-in">
       <PageMeta
         title={`${displayTitle} · Coup de main à ${cityLabel}`}
@@ -489,6 +490,8 @@ const PublicMissionView = ({
         </section>
       </div>
 
+      <div className="lg:hidden h-20" aria-hidden />
+    </div>
       {/* CTA sticky mobile : facilite la conversion sur téléphone où la
           sidebar n'est plus visible en scrollant. Caché en lg+. */}
       <div className="lg:hidden fixed bottom-0 inset-x-0 z-40 border-t border-border bg-background/95 backdrop-blur px-4 py-3 shadow-[0_-8px_20px_-12px_hsl(var(--foreground)/0.15)]">
@@ -499,8 +502,7 @@ const PublicMissionView = ({
         </Link>
       </div>
       {/* Réserve d'espace pour éviter que la sticky masque le footer sur mobile. */}
-      <div className="lg:hidden h-20" aria-hidden />
-    </div>
+    </>
   );
 };
 

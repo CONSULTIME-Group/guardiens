@@ -341,6 +341,7 @@ const LeaveReview = () => {
   }
 
   return (
+    <>
     <div className="p-4 md:p-10 max-w-2xl mx-auto animate-fade-in pb-32">
       <Head><meta name="robots" content="noindex, nofollow" /></Head>
 
@@ -477,14 +478,6 @@ const LeaveReview = () => {
         </p>
       </div>
 
-      <div className="fixed bottom-20 md:bottom-0 left-0 right-0 md:left-64 bg-card border-t border-border p-4 z-40 pb-[max(1rem,env(safe-area-inset-bottom))]">
-        <div className="max-w-2xl mx-auto">
-          <Button className="w-full h-12 text-base font-semibold" onClick={handleSubmit} disabled={!canSubmit || submitting}>
-            {submitting ? "Envoi..." : "Envoyer mon avis"}
-          </Button>
-        </div>
-      </div>
-
       <Dialog open={showThanks} onOpenChange={(o) => { if (!o) closeThanksAndLeave(); }}>
         <DialogContent className="max-w-md">
           <DialogHeader>
@@ -513,6 +506,14 @@ const LeaveReview = () => {
         </DialogContent>
       </Dialog>
     </div>
+      <div className="fixed bottom-20 md:bottom-0 left-0 right-0 md:left-64 bg-card border-t border-border p-4 z-40 pb-[max(1rem,env(safe-area-inset-bottom))]">
+        <div className="max-w-2xl mx-auto">
+          <Button className="w-full h-12 text-base font-semibold" onClick={handleSubmit} disabled={!canSubmit || submitting}>
+            {submitting ? "Envoi..." : "Envoyer mon avis"}
+          </Button>
+        </div>
+      </div>
+    </>
   );
 };
 

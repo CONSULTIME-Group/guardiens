@@ -1409,6 +1409,7 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
   const isSitterLocked = PRICING_IS_ACTIVE && !!user && !hasAccess && tab === "sits";
 
  return (
+ <>
  <div className="animate-fade-in relative">
  {/* Premium overlay for non-subscribed sitters on sits tab */}
  {isSitterLocked && (
@@ -2446,6 +2447,7 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
  </Suspense>
  )}
 
+ </div>
   {/* ─── FAB mobile toggle carte/liste ─── */}
    {/* FAB masqué en état vide : rien à afficher sur la carte, il ne ferait que
         chevaucher les CTA de l'empty state. */}
@@ -2464,7 +2466,7 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
       </button>
     </div>
   )}
- </div>
+ </>
  );
 };
 
