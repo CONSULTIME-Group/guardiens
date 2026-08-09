@@ -60,8 +60,8 @@
   "landing": {
     "hero": {
       "eyebrow": "Mutual aid · Pet sitting · Home sitting",
-      "title_main": "Pet sitting, small favours,",
-      "title_accent": "the meeting.",
+      "title_main": "Pet sitting, a helping hand,",
+      "title_accent": "a real connection.",
       "lede": "Guardiens connects pet owners with trusted sitters, everywhere in France. In-home house-sitting, local mutual help: your pets stay home, your home stays lived in, and you leave with peace of mind.",
       "lede_italic": "And behind every exchange, a meeting you wouldn't have looked for.",
       "cta_owner": "Publish my listing",
@@ -73,7 +73,7 @@
       "kpi_missions": "mutual aid missions",
       "brand_tagline": "Close to home.",
       "reassurance": "Trusted local sitters are waiting near you.",
-      "cta_member_owner": "Publish a listing",
+      "cta_member_owner": "Post a listing",
       "cta_member_sitter": "Offer a helping hand",
       "cta_member_search": "Find a sit"
     },
@@ -333,7 +333,7 @@
         "home_care_tip": "Home",
         "seasonal_advice": "Season",
         "breed_did_you_know": "Breeds",
-        "mutual_aid_tip": "Mutual aid"
+        "mutual_aid_tip": "Community help"
       }
     },
     "real_members": {
@@ -529,7 +529,7 @@
       "label": "Owner",
       "price": "Free",
       "subtitle": "No subscription, no credit card.",
-      "cta": "Publish a listing",
+      "cta": "Post a listing",
       "features": [
         "Publish a listing in 5 minutes",
         "Receive applications from local caretaker / pet & home sitters",
@@ -543,7 +543,7 @@
       "badge_offered_days_one": "Offered still for {{count}} day",
       "badge_offered_days_other": "Offered still for {{count}} days",
       "badge_most_chosen": "Most chosen",
-      "label": "Caretaker / pet & home sitter",
+      "label": "Sitter",
       "price_free": "Free",
       "free_until": "Free for everyone",
       "per_year": "/year",
@@ -627,7 +627,7 @@
       "title_after": "Ready to join Guardiens?",
       "lede": "No credit card on registration. You decide later.",
       "cta_sitter": "Become a sitter",
-      "cta_owner": "Publish a listing"
+      "cta_owner": "Post a listing"
     }
   },
   "article": {

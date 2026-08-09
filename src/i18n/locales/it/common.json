@@ -60,7 +60,7 @@
   "landing": {
     "hero": {
       "eyebrow": "Reciproco aiuto · Cura degli animali · Home sitting",
-      "title_main": "La cura degli animali, il piccolo aiuto,",
+      "title_main": "La cura degli animali, l'aiuto reciproco,",
       "title_accent": "l'incontro.",
       "lede": "Guardiens mette in contatto proprietari di animali e custodi di fiducia, in tutta la Francia. House-sitting a domicilio, aiuto reciproco tra persone della zona: i Suoi animali restano a casa, la Sua casa resta abitata, e Lei parte sereno.",
       "lede_italic": "E dietro ogni scambio, un incontro che non avreste altrimenti cercato.",
@@ -71,11 +71,11 @@
       "kpi_animals": "animali accuditi",
       "kpi_members": "iscritti",
       "kpi_missions": "missioni di aiuto reciproco",
-      "brand_tagline": "Vicino a casa vostra.",
+      "brand_tagline": "Vicino a casa.",
       "reassurance": "Assistenti di zona ti aspettano vicino a te.",
-      "cta_member_owner": "Pubblicare un annuncio",
-      "cta_member_sitter": "Proporre un aiuto",
-      "cta_member_search": "Trovare una custodia"
+      "cta_member_owner": "Pubblica un annuncio",
+      "cta_member_sitter": "Offri aiuto",
+      "cta_member_search": "Trova una custodia"
     },
     "toc": {
       "aria": "Sommario della pagina",
@@ -529,7 +529,7 @@
       "label": "Proprietario",
       "price": "Gratuito",
       "subtitle": "Senza abbonamento, senza carta di credito.",
-      "cta": "Pubblicare un annuncio",
+      "cta": "Pubblica un annuncio",
       "features": [
         "Pubblichi un annuncio in 5 minuti",
         "Riceva candidature di custodi della zona",
@@ -543,7 +543,7 @@
       "badge_offered_days_one": "Offerto ancora per {{count}} giorno",
       "badge_offered_days_other": "Offerto ancora per {{count}} giorni",
       "badge_most_chosen": "Il più scelto",
-      "label": "Custode",
+      "label": "Sitter",
       "price_free": "Gratuito",
       "free_until": "Gratuito per tutti",
       "per_year": "/anno",
@@ -627,7 +627,7 @@
       "title_after": "Pronto a unirsi a Guardiens?",
       "lede": "Senza carta di credito all'iscrizione. Deciderà in seguito.",
       "cta_sitter": "Diventare custode",
-      "cta_owner": "Pubblicare un annuncio"
+      "cta_owner": "Pubblica un annuncio"
     }
   },
   "article": {
@@ -1035,9 +1035,9 @@
     "step_aria": "Registrazione, passaggio {{step}} di 2",
     "members_count": "membri già iscritti su Guardiens",
     "roles": {
-      "owner_label": "Proprietario/a",
+      "owner_label": "Proprietario",
       "owner_desc": "Ho animali o una casa da far custodire. Pubblico annunci e scelgo un guardiano.",
-      "sitter_label": "Guardiano",
+      "sitter_label": "Sitter",
       "sitter_desc": "Voglio custodire case e animali. Consulto gli annunci e offro i miei servizi.",
       "both_label": "Entrambi",
       "both_desc": "Voglio sia far custodire che custodire. Avrà accesso a entrambi gli spazi.",

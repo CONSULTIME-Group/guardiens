@@ -8,7 +8,7 @@
     "listings": "Aktuelle Anzeigen",
     "small_missions": "Gegenseitige Hilfe",
     "pros": "Tierprofis",
-    "guides": "Lokale Ratgeber",
+    "guides": "Lokale Guides",
     "pricing": "Tarife",
     "news": "Das Journal",
     "login": "Anmelden",
@@ -22,7 +22,7 @@
     "sections": {
       "by_city": "House-sitting nach Stadt",
       "by_department": "Nach Departement",
-      "local_guides": "Lokale Ratgeber",
+      "local_guides": "Lokale Guides",
       "resources": "Ressourcen",
       "guardiens": "Guardiens"
     },
@@ -60,8 +60,8 @@
   "landing": {
     "hero": {
       "eyebrow": "Nachbarschaftshilfe · Tierbetreuung · Home Sitting",
-      "title_main": "Tierbetreuung, eine kleine Hilfe,",
-      "title_accent": "die Begegnung.",
+      "title_main": "Tierbetreuung, gegenseitige Hilfe,",
+      "title_accent": "echte Begegnungen.",
       "lede": "Guardiens verbindet Tierbesitzer mit vertrauenswürdigen Betreuern, überall in Frankreich. House-Sitting zu Hause, gegenseitige Hilfe unter Menschen aus der Umgebung: Ihre Tiere bleiben zu Hause, Ihr Haus bleibt bewohnt, und Sie reisen unbeschwert ab.",
       "lede_italic": "Und hinter jedem Austausch steht eine Begegnung, nach der Sie sonst nicht gesucht hätten.",
       "cta_owner": "Meine Anzeige veröffentlichen",
@@ -73,9 +73,9 @@
       "kpi_missions": "Hilfseinsätze",
       "brand_tagline": "Ganz in Ihrer Nähe.",
       "reassurance": "Vertrauensvolle Betreuer aus deiner Nähe warten auf dich.",
-      "cta_member_owner": "Eine Anzeige veröffentlichen",
-      "cta_member_sitter": "Eine Hilfe anbieten",
-      "cta_member_search": "Eine Betreuung finden"
+      "cta_member_owner": "Anzeige veröffentlichen",
+      "cta_member_sitter": "Hilfe anbieten",
+      "cta_member_search": "Betreuung finden"
     },
     "toc": {
       "aria": "Inhaltsverzeichnis der Seite",
@@ -333,7 +333,7 @@
         "home_care_tip": "Zuhause",
         "seasonal_advice": "Saison",
         "breed_did_you_know": "Rassen",
-        "mutual_aid_tip": "Nachbarschaftshilfe"
+        "mutual_aid_tip": "Gegenseitige Hilfe"
       }
     },
     "real_members": {
@@ -543,7 +543,7 @@
       "badge_offered_days_one": "Noch {{count}} Tag gratis",
       "badge_offered_days_other": "Noch {{count}} Tage gratis",
       "badge_most_chosen": "Am beliebtesten",
-      "label": "Betreuer",
+      "label": "Sitter",
       "price_free": "Gratis",
       "free_until": "Kostenlos für alle",
       "per_year": "/Jahr",
@@ -690,7 +690,7 @@
       "actualite": "Aktuelles",
       "ville": "Städte",
       "thematique": "House-sitting",
-      "guide_local": "Lokale Ratgeber",
+      "guide_local": "Lokale Guides",
       "saisonnier": "Saisonal",
       "guide_pratique": "Praktische Ratgeber",
       "vie_locale": "Lokales Leben & Nachbarschaftshilfe"
@@ -702,8 +702,8 @@
   "guides": {
     "meta_title": "Lokale Pet-Sitting-Ratgeber, Parks, Tierärzte, hundefreundliche Cafés | Guardiens",
     "meta_description": "Praktische Ratgeber für Tiersitter: hundefreundliche Parks, Tierärzte, einladende Cafés, Spazierwege. Alles, was man vor der Ankunft in einer neuen Stadt wissen muss.",
-    "breadcrumb": "Lokale Ratgeber",
-    "title": "Lokale Ratgeber",
+    "breadcrumb": "Lokale Guides",
+    "title": "Lokale Guides",
     "subtitle": "Wo spazieren, wo pflegen lassen, wo brunchen, alles, was ein Sitter in einer neuen Stadt wissen sollte.",
     "search_placeholder": "Stadt suchen...",
     "all_departments": "Alle Departements",
@@ -719,7 +719,7 @@
     "back": "Zurück",
     "meta_title": "Hunde-Guide für {{city}}: Parks, Tierärzte und hundefreundliche Adressen | Guardiens",
     "meta_description": "Erprobte Adressen in {{city}}, um mit Ihrem Hund unterwegs zu sein: Parks, Wanderwege, Tierärzte, hundefreundliche Cafés und Restaurants. {{ideal}}",
-    "breadcrumb": "Lokale Reiseführer",
+    "breadcrumb": "Lokale Guides",
     "header_alt": "Hunde-Guide {{city}}",
     "title": "Hunde-Guide für {{city}}: Parks, Tierärzte und hundefreundliche Adressen",
     "search_placeholder": "Suche nach einem Ort, Park, Tierarzt...",
@@ -1035,9 +1035,9 @@
     "step_aria": "Anmeldung, Schritt {{step}} von 2",
     "members_count": "Mitglieder bereits bei Guardiens registriert",
     "roles": {
-      "owner_label": "Eigentümer/in",
+      "owner_label": "Eigentümer",
       "owner_desc": "Ich habe Tiere oder ein Haus zu betreuen. Ich veröffentliche Anzeigen und wähle eine/n Guardian.",
-      "sitter_label": "Guardian",
+      "sitter_label": "Sitter",
       "sitter_desc": "Ich möchte Häuser und Tiere betreuen. Ich sehe Anzeigen ein und biete meine Dienste an.",
       "both_label": "Beides",
       "both_desc": "Ich möchte sowohl betreuen lassen als auch selbst betreuen. Sie haben Zugang zu beiden Bereichen.",

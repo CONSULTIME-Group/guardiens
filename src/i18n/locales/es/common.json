@@ -5,9 +5,9 @@
     "current": "Idioma actual: {{lang}}"
   },
   "nav": {
-    "listings": "Anuncios en curso",
+    "listings": "Anuncios actuales",
     "small_missions": "Ayuda mutua",
-    "pros": "Prós de mascotas",
+    "pros": "Profesionales de animales",
     "guides": "Guías locales",
     "pricing": "Tarifas",
     "news": "El diario",
@@ -39,7 +39,7 @@
       "register": "Registro",
       "small_missions": "Ayuda mutua",
       "emergency_sitter": "Cuidador de emergencia",
-      "pet_pros": "Prós de mascotas",
+      "pet_pros": "Profesionales de animales",
       "all_cities": "Todas las ciudades cubiertas",
       "all_departments": "Los 101 departamentos",
       "become_home_sitter": "Ser home-sitter",
@@ -60,7 +60,7 @@
   "landing": {
     "hero": {
       "eyebrow": "Ayuda mutua · Cuidado de mascotas · Home sitting",
-      "title_main": "El cuidado de mascotas, el pequeño favor,",
+      "title_main": "El cuidado de animales, la ayuda mutua,",
       "title_accent": "el encuentro.",
       "lede": "Guardiens conecta a propietarios de animales con cuidadores de confianza, en toda Francia. House-sitting a domicilio, ayuda mutua entre gente de la zona: sus animales se quedan en casa, su casa sigue habitada y usted parte tranquilo.",
       "lede_italic": "Y detrás de cada intercambio, un encuentro que no habría buscado.",
@@ -74,8 +74,8 @@
       "brand_tagline": "Cerca de casa.",
       "reassurance": "Cuidadores de confianza cerca de ti te esperan.",
       "cta_member_owner": "Publicar un anuncio",
-      "cta_member_sitter": "Ofrecer una ayuda",
-      "cta_member_search": "Buscar un cuidado"
+      "cta_member_sitter": "Ofrecer ayuda",
+      "cta_member_search": "Encontrar un cuidado"
     },
     "toc": {
       "aria": "Sumario de la página",
@@ -1035,9 +1035,9 @@
     "step_aria": "Registro, paso {{step}} de 2",
     "members_count": "miembros ya inscritos en Guardiens",
     "roles": {
-      "owner_label": "Propietario/a",
+      "owner_label": "Propietario",
       "owner_desc": "Tengo animales o una casa que cuidar. Publico anuncios y elijo a un guardián.",
-      "sitter_label": "Guardián",
+      "sitter_label": "Cuidador",
       "sitter_desc": "Quiero cuidar casas y animales. Consulto los anuncios y ofrezco mis servicios.",
       "both_label": "Ambos",
       "both_desc": "Quiero a la vez que cuiden y cuidar. Tendrá acceso a los dos espacios.",
