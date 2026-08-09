@@ -1,6 +1,6 @@
 import { lazy, Suspense, useLayoutEffect, useRef, useState, type ReactNode } from "react";
 import { Outlet, useSearchParams, useLocation, Link } from "react-router-dom";
-import { Sidebar, BottomNav } from "./Navigation";
+import { Sidebar } from "./Navigation";
 import { BackButton } from "./BackButton";
 import Breadcrumbs from "./Breadcrumbs";
 // NotificationBell tire date-fns + locale (vendor-date ~27Ko). Chargement
@@ -21,7 +21,7 @@ import OnboardingGate from "@/components/onboarding/OnboardingGate";
 // après le retour OAuth Google. Ne pas le re-monter ici.
 import { usePresenceHeartbeat } from "@/hooks/usePresenceHeartbeat";
 import { AppShellProvider } from "./AppShellContext";
-import { ChromeVisibilityProvider, useChromeVisibility } from "./ChromeVisibility";
+import { useChromeVisibility } from "./ChromeVisibility";
 import UserMenu from "./UserMenu";
 
 /**
@@ -36,7 +36,7 @@ const ShellMain = ({ children }: { children?: ReactNode }) => {
       id="main-content"
       role="main"
       className={`flex-1 min-w-0 overflow-x-clip ${
-        bottomNavHidden ? "pb-[env(safe-area-inset-bottom)] md:pb-0" : "pb-20 md:pb-24"
+        bottomNavHidden ? "pb-[env(safe-area-inset-bottom)] md:pb-0" : "md:pb-24"
       }`}
     >
       {children}
@@ -106,7 +106,6 @@ export const AppLayout = ({ children }: { children?: ReactNode }) => {
   return (
     <AppShellProvider value={true}>
     <AlmaProvider>
-    <ChromeVisibilityProvider>
     <OnboardingGate />
     <div className="flex min-h-screen bg-background">
       <Sidebar showHeaderBells={!mobileHeader} />
@@ -141,7 +140,6 @@ export const AppLayout = ({ children }: { children?: ReactNode }) => {
 
         {children ?? <Outlet />}
       </ShellMain>
-      <BottomNav />
 
       {showOnboarding && (
         <OnboardingModal
@@ -161,7 +159,6 @@ export const AppLayout = ({ children }: { children?: ReactNode }) => {
       </Suspense>
       {/* DuplicateAccountGuard mont\u00e9 globalement dans App.tsx */}
     </div>
-    </ChromeVisibilityProvider>
     </AlmaProvider>
     </AppShellProvider>
   );

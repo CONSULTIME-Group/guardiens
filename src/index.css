@@ -828,6 +828,25 @@
   }
 }
 
+@layer utilities {
+  /* Réserve globale de la barre basse montée une seule fois sous le routeur.
+     Elle s'adosse à la hauteur réelle mesurée (--bottom-nav-h), sans valeur
+     répétée page par page, et couvre aussi bien les pages publiques que la
+     coquille applicative. */
+  @media (max-width: 767px) {
+    body.has-global-bottom-nav {
+      padding-bottom: calc(var(--bottom-nav-h, 4rem) + env(safe-area-inset-bottom) + 1rem);
+    }
+    body.has-global-bottom-nav .public-footer {
+      padding-bottom: calc(var(--bottom-nav-h, 4rem) + env(safe-area-inset-bottom) + 1rem);
+    }
+    body.has-global-bottom-nav:has(.public-footer) {
+      padding-bottom: 0;
+    }
+  }
+}
+
+
 /* Barres de filtres collantes des pages de recherche : elles s'accrochent à
    la hauteur réelle de l'en tête public quand il est monté, sinon à la hauteur
    réelle de la top bar mobile de la coquille applicative. Aucune valeur en dur,

@@ -6,7 +6,6 @@ import { Menu, X } from "lucide-react";
 import LanguageSwitcher from "./LanguageSwitcher";
 import { useAuth } from "@/contexts/AuthContext";
 import { useInAppShell } from "./AppShellContext";
-import { BottomNav } from "./Navigation";
 import UserMenu from "./UserMenu";
 
 const NotificationBell = lazy(() => import("./NotificationBell"));
@@ -61,18 +60,12 @@ export default function PublicHeader({ authedVariant = false }: { authedVariant?
   // superpose pas un second en tête.
   const hidden = hasSession && inAppShell && !authedVariant;
 
-  // Hors coquille authentifiée, la BottomNav mobile accompagne l'en tête
-  // connecté. On attend la résolution de l'auth pour la monter, afin de ne
-  // jamais provoquer un montage puis un démontage immédiat (saut de layout).
-  const withBottomNav = authChecked && hasSession && !inAppShell;
+  // La barre basse n'est plus montée ici : elle est globale (GlobalBottomNav
+  // dans App.tsx), pour couvrir aussi les routes sans coquille applicative et
+  // garantir qu'une seule instance existe. La réserve d'espace reste gérée par
+  // la classe globale posée par ce montage unique.
   const hasUnread = msgUnread + notifUnread > 0;
   const showBells = authChecked && hasSession;
-
-  useEffect(() => {
-    if (!withBottomNav) return;
-    document.body.classList.add("has-public-bottom-nav");
-    return () => document.body.classList.remove("has-public-bottom-nav");
-  }, [withBottomNav]);
 
   // Hauteur réelle de l'en tête exposée en variable CSS, pour que les barres
   // collantes des pages (onglets de profil public par exemple) s'y accrochent
@@ -281,7 +274,6 @@ export default function PublicHeader({ authedVariant = false }: { authedVariant?
         </div>
       )}
     </header>
-    {withBottomNav && <BottomNav />}
     </>
   );
 }
