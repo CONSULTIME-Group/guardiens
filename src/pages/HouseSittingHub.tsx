@@ -28,6 +28,8 @@ const HouseSittingHub = () => {
         .from("seo_city_pages" as any)
         .select("city, slug, department")
         .eq("published", true)
+        // Pages de test/QA: accessibles en direct par leur URL, jamais listées.
+        .not("slug", "like", "test-%")
         .order("city");
       if (error) throw error;
       return (data || []) as unknown as CityRow[];

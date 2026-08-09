@@ -102,6 +102,7 @@ Deno.serve(async () => {
       .from("seo_city_pages")
       .select("slug, updated_at")
       .eq("published", true)
+      .not("slug", "like", "test-%")
       .order("city"),
     supabase
       .from("city_guides")
