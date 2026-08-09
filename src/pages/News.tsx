@@ -344,6 +344,16 @@ export default function News() {
               aria-label={t("news.search_aria")}
             />
           </div>
+          {isForeignLang && (
+            <Button
+              variant={onlyTranslated ? "default" : "outline"}
+              onClick={() => setOnlyTranslated((v) => !v)}
+              className="shrink-0 min-h-[44px]"
+              aria-pressed={onlyTranslated}
+            >
+              {t("news.only_translated")}
+            </Button>
+          )}
           {hasActiveFilters && (
             <Button variant="outline" onClick={resetFilters} className="shrink-0 gap-2">
               <RotateCcw className="h-4 w-4" aria-hidden="true" />
