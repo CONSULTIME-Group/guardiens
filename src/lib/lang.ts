@@ -7,8 +7,8 @@ import { SUPPORTED_LANGS, type SupportedLang } from "@/i18n";
  * explicite est mémorisé pour survivre à une navigation vers un lien interne
  * qui ne porte pas le paramètre. Sans cela, chaque clic ramenait au français.
  *
- * Aucune détection automatique via l'en-tête du navigateur : un premier
- * visiteur sans choix reste en français, ce qui préserve l'URL canonique.
+ * Cette clé est aussi celle que lit et écrit le détecteur i18next
+ * (lookupLocalStorage), pour qu'il n'existe qu'une seule mémoire de langue.
  */
 const STORAGE_KEY = "guardiens.lang";
 
@@ -28,15 +28,21 @@ export function getStoredLang(): SupportedLang | null {
 export function setStoredLang(lang: SupportedLang): void {
   if (typeof window === "undefined") return;
   try {
-    if (lang === "fr") window.localStorage.removeItem(STORAGE_KEY);
-    else window.localStorage.setItem(STORAGE_KEY, lang);
+    // Le français est écrit comme les autres : un retour explicite au
+    // français doit primer sur la langue du navigateur.
+    window.localStorage.setItem(STORAGE_KEY, lang);
   } catch {
     // stockage indisponible (navigation privée, iframe) : sans effet
   }
 }
 
 /**
- * Ajoute le paramètre de langue à un chemin interne, sauf en français.
+ * Ajoute le paramètre de langue à une URL, sauf en français.
+ *
+ * Réservé aux cas où le contexte JavaScript est perdu : liens provoquant un
+ * rechargement complet hors routeur, balises hreflang, sitemap, liens sortants
+ * (emails, partenaires). La navigation du routeur conserve l'état i18n, donc
+ * décorer les liens internes ne ferait que dupliquer les URL crawlables.
  * Conserve les paramètres existants et le fragment.
  */
 export function withLang(path: string, lang: string | null | undefined): string {

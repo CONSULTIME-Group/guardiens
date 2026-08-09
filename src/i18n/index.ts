@@ -34,15 +34,17 @@ void i18n
       it: { common: itCommon },
       de: { common: deCommon },
     },
+    load: "languageOnly",
     detection: {
-      // La langue vit dans l'URL, et seulement dans l'URL (`?lang=xx`).
-      // Aucune persistance en cookie ni en localStorage : une URL sans
-      // paramètre sert toujours du français, y compris au crawl. Voir
-      // src/components/LangUrlSync.tsx qui recale le state sur l'URL à
-      // chaque navigation.
-      order: ["querystring"],
-      caches: [],
+      // Un lien explicite (`?lang=xx`) gagne toujours. Sans paramètre, le
+      // choix mémorisé prend le relais, puis la langue du navigateur. Sans
+      // cette persistance, la première navigation interne sans querystring
+      // retombait en français : c'était le mécanisme exact du bug.
+      // Une seule clé de stockage, partagée avec src/lib/lang.ts.
+      order: ["querystring", "localStorage", "navigator"],
+      caches: ["localStorage"],
       lookupQuerystring: "lang",
+      lookupLocalStorage: "guardiens.lang",
     },
     interpolation: { escapeValue: false },
     react: { useSuspense: false },
