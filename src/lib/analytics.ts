@@ -320,6 +320,47 @@ function withDeviceContext(metadata?: Record<string, any>): Record<string, any> 
 
 
 /**
+ * Envoi synchrone survivant à la fermeture de page, via `navigator.sendBeacon`.
+ * Le beacon ne peut pas porter d'en-tête Authorization : l'insertion se fait
+ * donc en rôle anonyme, ce qui impose `user_id` nul par politique d'accès.
+ * L'identifiant éventuel est conservé dans les métadonnées (`user_id_hint`)
+ * pour la réconciliation analytique.
+ * Repli sur `fetch(..., { keepalive: true })` si le beacon est indisponible.
+ */
+export function trackEventBeacon(eventType: EventType, opts: TrackOptions = {}): boolean {
+  try {
+    if (typeof window === "undefined") return false;
+    const url = import.meta.env.VITE_SUPABASE_URL;
+    const key = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+    if (!url || !key) return false;
+
+    const endpoint = `${url}/rest/v1/analytics_events?apikey=${encodeURIComponent(key)}`;
+    const body = JSON.stringify({
+      user_id: null,
+      event_type: eventType,
+      source: opts.source ?? null,
+      metadata: withDeviceContext(opts.metadata),
+    });
+
+    if (typeof navigator !== "undefined" && typeof navigator.sendBeacon === "function") {
+      const blob = new Blob([body], { type: "application/json" });
+      if (navigator.sendBeacon(endpoint, blob)) return true;
+    }
+
+    void fetch(endpoint, {
+      method: "POST",
+      keepalive: true,
+      headers: { "Content-Type": "application/json", apikey: key },
+      body,
+    }).catch(() => undefined);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+
+/**
  * Track un événement de manière non-bloquante.
  * Fonctionne aussi bien pour les visiteurs anonymes que connectés.
  */
