@@ -794,6 +794,26 @@
   .scrollbar-hide::-webkit-scrollbar {
     display: none;
   }
+
+  /* Alias historiques utilisés dans les pages (rangées de filtres, onglets
+     de conversation, carrousels). Ils n'existaient pas, la scrollbar grise
+     restait donc visible sur mobile. */
+  .no-scrollbar,
+  .scrollbar-none {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .no-scrollbar::-webkit-scrollbar,
+  .scrollbar-none::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Affordance de défilement horizontal : le contenu s'estompe sur les
+     24 derniers pixels, ce qui signale qu'il reste des filtres à droite. */
+  .scroll-fade-r {
+    -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 24px), transparent 100%);
+    mask-image: linear-gradient(to right, #000 calc(100% - 24px), transparent 100%);
+  }
 }
 
 @layer utilities {
