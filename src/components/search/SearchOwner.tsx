@@ -1569,7 +1569,7 @@ const SearchOwner = () => {
                           onClick={() => setRadius([next])}
                           className="rounded-full px-3 py-1.5 text-xs border border-border bg-background hover:border-primary hover:bg-primary/5 transition-colors"
                         >
-                          Élargir à {next} km
+                          {t("search_results.expand_zone", { zone: `${next} km` })}
                         </button>
                       ) : null;
                     })()}
