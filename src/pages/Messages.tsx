@@ -728,10 +728,10 @@ const Messages = () => {
     }
   });
 
+  // La barre supérieure collante de la coquille occupe déjà de la place au
+  // dessus, dans le même flux : on la retranche de la hauteur du fil, sinon
+  // le composer sort du bas de l'écran.
   return (
-    {/* La barre supérieure collante de la coquille occupe déjà de la place
-        au dessus, dans le même flux : on la retranche de la hauteur du fil,
-        sinon le composer sort du bas de l'écran. */}
     <div className="flex h-[calc(100svh-var(--app-topbar-h,0px))] md:h-screen overflow-hidden">
       <Head><meta name="robots" content="noindex, nofollow" /></Head>
 
