@@ -397,7 +397,7 @@ export const BottomNav = () => {
 
   // 2 onglets à gauche du FAB
   const leftTabs = [
-    { to: "/dashboard", icon: Home, label: "Tableau de bord", badge: isOwnerView ? ownerInboxCount : 0 },
+    { to: "/dashboard", icon: Home, label: "Accueil", badge: isOwnerView ? ownerInboxCount : 0 },
     isOwnerView
       ? { to: "/sits", icon: Calendar, label: "Annonces", badge: ownerInboxCount }
       : { to: "/search", icon: Search, label: "Recherche", badge: 0 },
