@@ -1593,5 +1593,17 @@
   "a11y": {
     "skip_to_content": "Vai al contenuto principale",
     "offline": "Sei offline. Alcune funzioni potrebbero non essere disponibili."
+  },
+  "questions": {
+    "page_title": "Domande e consigli, comunità Guardiens",
+    "page_description": "Chieda alla comunità Guardiens: comportamento animale, giardino, custodia della casa, piccoli lavori. Riceva più risposte da persone della zona.",
+    "heading": "Domande e consigli",
+    "intro": "Una domanda su un comportamento animale, un aiuto, una custodia? La ponga alla comunità.",
+    "ask": "Fare una domanda",
+    "ask_first": "Fare la prima domanda",
+    "filter_all": "Tutte",
+    "filter_open": "Aperte",
+    "filter_resolved": "Risolte",
+    "empty": "Nessuna domanda per ora. Le persone della zona aspettano la prima."
   }
 }

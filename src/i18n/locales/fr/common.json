@@ -1618,5 +1618,17 @@
   "a11y": {
     "skip_to_content": "Aller au contenu principal",
     "offline": "Vous êtes hors connexion. Certaines fonctionnalités peuvent être indisponibles."
+  },
+  "questions": {
+    "page_title": "Questions & conseils, communauté Guardiens",
+    "page_description": "Posez une question à la communauté Guardiens : comportement animal, jardin, garde de maison, bricolage. Recevez plusieurs avis de gens du coin.",
+    "heading": "Questions & conseils",
+    "intro": "Une question sur un comportement animal, un coup de main, une garde ? Posez-la à la communauté.",
+    "ask": "Poser une question",
+    "ask_first": "Poser la première question",
+    "filter_all": "Toutes",
+    "filter_open": "Ouvertes",
+    "filter_resolved": "Résolues",
+    "empty": "Aucune question pour l'instant. Les gens du coin attendent la première."
   }
 }

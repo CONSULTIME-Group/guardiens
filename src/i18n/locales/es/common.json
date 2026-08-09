@@ -1593,5 +1593,17 @@
   "a11y": {
     "skip_to_content": "Ir al contenido principal",
     "offline": "Está sin conexión. Algunas funciones pueden no estar disponibles."
+  },
+  "questions": {
+    "page_title": "Preguntas y consejos, comunidad Guardiens",
+    "page_description": "Pregunte a la comunidad Guardiens: comportamiento animal, jardín, cuidado de la casa, bricolaje. Reciba varias respuestas de personas cercanas.",
+    "heading": "Preguntas y consejos",
+    "intro": "¿Una duda sobre el comportamiento de un animal, una ayuda, un cuidado? Pregúntelo a la comunidad.",
+    "ask": "Hacer una pregunta",
+    "ask_first": "Hacer la primera pregunta",
+    "filter_all": "Todas",
+    "filter_open": "Abiertas",
+    "filter_resolved": "Resueltas",
+    "empty": "Todavía no hay preguntas. Las personas cercanas esperan la primera."
   }
 }

@@ -1593,5 +1593,17 @@
   "a11y": {
     "skip_to_content": "Zum Hauptinhalt springen",
     "offline": "Sie sind offline. Einige Funktionen sind möglicherweise nicht verfügbar."
+  },
+  "questions": {
+    "page_title": "Fragen und Ratschläge, Guardiens Gemeinschaft",
+    "page_description": "Fragen Sie die Guardiens Gemeinschaft: Tierverhalten, Garten, Haushüten, kleine Reparaturen. Erhalten Sie mehrere Antworten von Menschen aus der Nähe.",
+    "heading": "Fragen und Ratschläge",
+    "intro": "Eine Frage zum Verhalten eines Tieres, eine helfende Hand, eine Betreuung? Stellen Sie sie der Gemeinschaft.",
+    "ask": "Eine Frage stellen",
+    "ask_first": "Die erste Frage stellen",
+    "filter_all": "Alle",
+    "filter_open": "Offen",
+    "filter_resolved": "Gelöst",
+    "empty": "Noch keine Frage. Die Menschen in der Nähe warten auf die erste."
   }
 }

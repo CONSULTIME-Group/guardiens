@@ -1594,5 +1594,17 @@
   "a11y": {
     "skip_to_content": "Skip to main content",
     "offline": "You are offline. Some features may be unavailable."
+  },
+  "questions": {
+    "page_title": "Questions and advice, the Guardiens community",
+    "page_description": "Ask the Guardiens community: animal behaviour, garden, house-sitting, small repairs. Get several answers from people nearby.",
+    "heading": "Questions and advice",
+    "intro": "A question about animal behaviour, a helping hand, a sit? Ask the community.",
+    "ask": "Ask a question",
+    "ask_first": "Ask the first question",
+    "filter_all": "All",
+    "filter_open": "Open",
+    "filter_resolved": "Resolved",
+    "empty": "No question yet. People nearby are waiting for the first one."
   }
 }
