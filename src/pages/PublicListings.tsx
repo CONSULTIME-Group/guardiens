@@ -233,7 +233,7 @@ export default function PublicListings() {
           <div className="rounded-3xl border border-border bg-accent/30 px-6 py-8 md:px-10 md:py-10 flex flex-col md:flex-row md:items-center md:justify-between gap-6">
             <div className="min-w-0 max-w-xl">
               <p className="text-xs font-body font-semibold tracking-widest uppercase text-primary/60 mb-3">
-                {t("public_listings.become_sitter_eyebrow", { defaultValue: "Devenir gardien" })}
+                {t("public_listings.become_sitter_eyebrow")}
               </p>
               <h2 id="become-sitter-title" className="font-heading text-2xl md:text-3xl font-semibold leading-snug text-foreground">
                 {t("public_listings.become_sitter_title")}
