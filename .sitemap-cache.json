@@ -21,8 +21,8 @@
       "fetchedAt": "2026-08-05T06:09:46.976Z"
     },
     "public_sits": {
-      "head": "2026-08-07T05:19:11.554698+00:00",
-      "fetchedAt": "2026-08-07T10:56:11.306Z"
+      "head": "2026-08-08T06:35:06.84159+00:00",
+      "fetchedAt": "2026-08-09T05:02:58.948Z"
     },
     "breed_profiles": {
       "head": "2026-07-23T15:42:40.997631+00:00",
@@ -1911,8 +1911,14 @@
         "priority": "0.7"
       },
       {
+        "loc": "/annonces/garde-de-mon-teckel-dans-ma-maison-en-bourgogne-sarry-138e90",
+        "lastmod": "2026-08-07",
+        "changefreq": "weekly",
+        "priority": "0.7"
+      },
+      {
         "loc": "/annonces/garde-de-nougat-adorable-labrador-dans-une-maison-avec-exter-cogny-881521",
-        "lastmod": "2026-08-04",
+        "lastmod": "2026-08-08",
         "changefreq": "weekly",
         "priority": "0.7"
       },
