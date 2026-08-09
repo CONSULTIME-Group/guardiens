@@ -52,16 +52,15 @@ const OwnerFamilySection = ({ pets, getNextSitForPet }: OwnerFamilySectionProps)
           </span>
         </Link>
       ) : (
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-[14px] auto-rows-fr">
+        <div className="grid grid-cols-1 min-[430px]:grid-cols-2 md:grid-cols-3 gap-[14px] auto-rows-fr">
           {pets.map((pet) => {
             const nextSit = getNextSitForPet(pet);
             return (
               <div
                 key={pet.id}
-                className="bg-card border border-border flex items-center gap-[14px] h-full"
+                className="bg-card border border-border flex items-center gap-[14px] h-full px-[14px] py-[14px] sm:px-[22px]"
                 style={{
                   borderRadius: "16px",
-                  padding: "14px 22px",
                 }}
               >
                 <div
@@ -90,13 +89,13 @@ const OwnerFamilySection = ({ pets, getNextSitForPet }: OwnerFamilySectionProps)
                 </div>
                 <div className="min-w-0 flex-1">
                   <p
-                    className="font-heading text-foreground truncate"
+                    className="font-heading text-foreground break-words"
                     style={{ fontSize: "15px", fontWeight: 600 }}
                   >
                     {capitalize(pet.name)}
                   </p>
                   <p
-                    className="text-muted-foreground truncate"
+                    className="text-muted-foreground break-words"
                     style={{ fontSize: "12px" }}
                   >
                     {SPECIES_LABEL[pet.species] || capitalizeWords(pet.species)}

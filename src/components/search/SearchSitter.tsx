@@ -1557,7 +1557,7 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
      id="search-filter-pills"
      className={`relative -mr-6 sm:mr-0 ${isMobile && viewMode === "map" && !mobileFiltersOpen ? "hidden" : ""}`}
     >
-    <div className="flex flex-row items-center gap-2 px-6 py-3 overflow-x-auto no-scrollbar pr-10 sm:pr-6 snap-x snap-mandatory scroll-px-6 overscroll-x-contain">
+    <div className="flex flex-row items-center gap-2 px-6 py-3 overflow-x-auto no-scrollbar scroll-fade-r sm:[mask-image:none] pr-10 sm:pr-6 snap-x snap-mandatory scroll-px-6 overscroll-x-contain">
   {/* Location pill (mobile uniquement, sur desktop le champ ville hero est au-dessus) */}
   {isMobile && (
   <LocationPickerPopover

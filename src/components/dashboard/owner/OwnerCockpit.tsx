@@ -111,7 +111,7 @@ const OwnerCockpit = ({
                 Espace propriétaire
               </p>
               <h1
-                className="font-heading font-semibold tracking-tight leading-tight text-foreground mt-[8px]"
+                className="font-heading font-semibold tracking-tight leading-tight text-foreground mt-[8px] break-words"
                 style={{ fontSize: "28px" }}
               >
                 <span className="sm:hidden">
@@ -142,7 +142,7 @@ const OwnerCockpit = ({
           </div>
 
           {/* Bloc droit : une seule pilule "Mon profil public" */}
-          <div className="flex items-center gap-[8px] shrink-0 flex-wrap">
+          <div className="flex items-center gap-[8px] sm:shrink-0 flex-wrap">
             {userId && (
               <Link
                 to={`/gardiens/${userId}?tab=proprio`}
