@@ -7,6 +7,7 @@ exports[`NearestListingHero > snapshot — annonce ancienne (>48h), avec photo, 
   >
     <a
       class="group block bg-card border border-border rounded-2xl overflow-hidden transition-all duration-300 ease-out hover:shadow-lg hover:-translate-y-0.5 hover:border-primary/30"
+      data-discover="true"
       href="/sits/sit-1"
     >
       <div
@@ -182,6 +183,7 @@ exports[`NearestListingHero > snapshot — annonce nouvelle (<48h), pas urgente,
   >
     <a
       class="group block bg-card border border-border rounded-2xl overflow-hidden transition-all duration-300 ease-out hover:shadow-lg hover:-translate-y-0.5 hover:border-primary/30"
+      data-discover="true"
       href="/sits/sit-1"
     >
       <div
@@ -391,6 +393,7 @@ exports[`NearestListingHero > snapshot — annonce urgente (badge Urgent priorit
   >
     <a
       class="group block bg-card border border-border rounded-2xl overflow-hidden transition-all duration-300 ease-out hover:shadow-lg hover:-translate-y-0.5 hover:border-primary/30"
+      data-discover="true"
       href="/sits/sit-1"
     >
       <div
@@ -874,6 +877,7 @@ exports[`SitterEmergencyCard — modes aperçu > snapshot — vue ELIGIBLE (tous
     </p>
     <a
       class="inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium ring-offset-background transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 font-body rounded-pill h-9 px-4 w-full bg-amber-500 hover:bg-amber-600 text-white"
+      data-discover="true"
       href="/gardien-urgence"
     >
       Activer maintenant
@@ -1141,7 +1145,7 @@ exports[`SitterEmergencyCard — modes aperçu > snapshot — vue LOCKED (critè
         <span
           class="text-foreground"
         >
-          Abonnement actif
+          Accès autorisé
         </span>
       </div>
     </div>
@@ -1152,6 +1156,7 @@ exports[`SitterEmergencyCard — modes aperçu > snapshot — vue LOCKED (critè
     </p>
     <a
       class="text-xs text-primary hover:underline inline-flex items-center gap-1"
+      data-discover="true"
       href="/gardien-urgence"
     >
       En savoir plus 
@@ -1183,6 +1188,7 @@ exports[`SitterNextGuardEmpty > snapshot — état vide stable 1`] = `
   >
     <a
       class="group block bg-muted/30 border border-dashed border-border rounded-2xl p-4 sm:p-5 transition-all duration-300 ease-out hover:bg-muted/50 hover:border-primary/30 hover:-translate-y-0.5"
+      data-discover="true"
       href="/search"
     >
       <div
