@@ -72,7 +72,7 @@ const SitterCockpit = ({
     >
       {/* Couverture de carnet : papier hero-paper, lavis aquarelle discret,
           bord droit déchiré, ombre douce. Wrapper conservé de la vague 0. */}
-      <div className="notebook-card relative p-[22px] sm:p-[34px] pr-[34px] sm:pr-[52px]">
+      <div className="notebook-card relative p-[18px] pr-[30px] sm:p-[34px] sm:pr-[52px]">
         <div className="notebook-card-paper absolute inset-0" aria-hidden="true" />
         <div
           aria-hidden="true"
@@ -83,18 +83,18 @@ const SitterCockpit = ({
             ].join(", "),
           }}
         />
-        {/* Aquarelle signature Guardiens : scène "matin du gardien",
-            posée en douceur dans le coin bas droit de la couverture.
-            Décorative (aria-hidden, alt vide), taille contenue, masque
-            radial via .illustration-blend qui fond les bords dans le papier.
-            Réduite à 150 px entre 768 px et 1100 px pour ne jamais croiser
-            les pilules de contrôle ni le texte. */}
+        {/* Aquarelle signature Guardiens, choisie selon l'état du gardien :
+            scène "matin du gardien" quand la disponibilité est active, scène
+            d'attente quand elle ne l'est pas. Décorative (aria-hidden, alt
+            vide), masque radial via .illustration-blend qui fond les bords
+            dans le papier. En mobile elle est ancrée en haut à droite pour
+            occuper le vide existant, sans allonger la carte. */}
         <div
           aria-hidden="true"
-          className="illustration-wrapper pointer-events-none absolute bottom-[-12px] right-[-16px] hidden sm:block w-[150px] h-[150px] min-[1100px]:w-[180px] min-[1100px]:h-[180px]"
+          className="illustration-wrapper pointer-events-none absolute top-[-14px] right-[-10px] w-[124px] h-[124px] sm:top-auto sm:bottom-[-12px] sm:right-[-16px] sm:w-[150px] sm:h-[150px] min-[1100px]:w-[180px] min-[1100px]:h-[180px]"
         >
           <img
-            src={cockpitMorning}
+            src={isAvailable ? cockpitMorning : cockpitWaiting}
             alt=""
             width={180}
             height={180}
@@ -103,6 +103,7 @@ const SitterCockpit = ({
             className="illustration-blend animate-painted-reveal w-full h-full object-cover"
           />
         </div>
+
 
 
         <div className="relative flex items-start justify-between gap-[22px] flex-wrap">
