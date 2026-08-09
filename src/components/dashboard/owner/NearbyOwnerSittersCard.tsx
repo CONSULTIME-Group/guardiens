@@ -54,8 +54,9 @@ const NearbyOwnerSittersCard = ({ hideHeader = false }: Props) => {
       {isLoading ? (
         <div className="bg-card border border-border rounded-2xl p-5 h-32 animate-pulse" />
       ) : sitters.length === 0 ? (
-        <div className="bg-card border border-border rounded-2xl p-4 sm:p-5 flex flex-col gap-3 shadow-sm min-w-0">
-          <div className="flex flex-col sm:flex-row sm:items-start gap-3">
+        <div className="notebook-card relative p-4 pr-7 sm:p-5 sm:pr-8 min-w-0">
+          <div className="notebook-card-paper absolute inset-0" aria-hidden="true" />
+          <div className="relative flex flex-col gap-3">
             <div className="flex-1 min-w-0">
               <p className="text-sm font-heading font-semibold text-foreground leading-snug">
                 Les gardiens de votre secteur s'afficheront ici
@@ -71,22 +72,25 @@ const NearbyOwnerSittersCard = ({ hideHeader = false }: Props) => {
               <Compass className="h-3.5 w-3.5" aria-hidden="true" />
               Élargir
             </Link>
+            <div className="flex flex-wrap items-center justify-between gap-2 pt-3 border-t border-border/60">
+              <p className="text-xs text-muted-foreground">
+                Invitez un proche de confiance à devenir gardien.
+              </p>
+              <Link
+                to="/mon-abonnement#parrainage"
+                className="inline-flex items-center gap-1.5 text-xs font-semibold text-primary hover:underline"
+              >
+                <Share2 className="h-3 w-3" aria-hidden="true" />
+                Partager mon lien
+              </Link>
+            </div>
           </div>
-          <div className="flex flex-wrap items-center justify-between gap-2 pt-3 border-t border-border/60">
-            <p className="text-xs text-muted-foreground">
-              Invitez un proche de confiance à devenir gardien.
-            </p>
-            <Link
-              to="/mon-abonnement#parrainage"
-              className="inline-flex items-center gap-1.5 text-xs font-semibold text-primary hover:underline"
-            >
-              <Share2 className="h-3 w-3" aria-hidden="true" />
-              Partager mon lien
-            </Link>
-          </div>
+          <div className="notebook-card-edge" aria-hidden="true" />
         </div>
       ) : (
-        <div className="bg-card border border-border rounded-2xl p-4 sm:p-5 min-w-0">
+        <div className="notebook-card relative p-4 pr-7 sm:p-5 sm:pr-8 min-w-0">
+          <div className="notebook-card-paper absolute inset-0" aria-hidden="true" />
+          <div className="relative">
           {hasBeyond ? (
             <p className="text-[11px] uppercase tracking-[0.18em] text-muted-foreground font-semibold mb-3">
               Aucun gardien à moins de 100 km, voici les plus proches disponibles
@@ -205,6 +209,8 @@ const NearbyOwnerSittersCard = ({ hideHeader = false }: Props) => {
               Inviter un proche
             </Link>
           </div>
+          </div>
+          <div className="notebook-card-edge" aria-hidden="true" />
         </div>
       )}
     </section>

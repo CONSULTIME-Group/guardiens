@@ -144,13 +144,8 @@ const OngoingCard = ({
   const sitterName = sitter?.first_name ? capitalize(sitter.first_name) : "Votre gardien";
 
   return (
-    <article
-      className="bg-card border border-border overflow-hidden"
-      style={{
-        borderRadius: "20px",
-        boxShadow: "0 1px 2px rgba(29,27,22,0.04), 0 8px 24px rgba(29,27,22,0.05)",
-      }}
-    >
+    <article className="notebook-card relative">
+      <div className="notebook-card-paper absolute inset-0" aria-hidden="true" />
       <div
         className="relative w-full"
         style={{ height: "150px", background: cover ? undefined : PLACEHOLDER_BG }}
@@ -166,7 +161,10 @@ const OngoingCard = ({
           />
         )}
       </div>
-      <div style={{ padding: "22px" }} className="flex items-start gap-[22px]">
+      <div
+        style={{ padding: "22px" }}
+        className="relative flex items-start gap-[22px] pr-[34px] sm:pr-[44px]"
+      >
         <div className="w-14 h-14 rounded-full overflow-hidden bg-primary/10 shrink-0 flex items-center justify-center">
           {sitter?.avatar_url ? (
             <img src={sitter.avatar_url} alt="" className="w-full h-full object-cover" loading="lazy" />
@@ -196,6 +194,7 @@ const OngoingCard = ({
           </div>
         </div>
       </div>
+      <div className="notebook-card-edge" aria-hidden="true" />
     </article>
   );
 };
@@ -232,14 +231,11 @@ const ApplicationCard = ({
 
   return (
     <article
-      className="bg-card border border-border"
-      style={{
-        borderRadius: "20px",
-        padding: "22px",
-        boxShadow: "0 1px 2px rgba(29,27,22,0.04), 0 8px 24px rgba(29,27,22,0.05)",
-      }}
+      className="notebook-card relative"
+      style={{ padding: "22px" }}
     >
-      <div className="flex items-start gap-[22px]">
+      <div className="notebook-card-paper absolute inset-0" aria-hidden="true" />
+      <div className="relative flex items-start gap-[22px] pr-[14px] sm:pr-[22px]">
         {showRing ? (
           <AffinityRing score={affinity!.score} result={affinity} />
         ) : (
@@ -305,6 +301,7 @@ const ApplicationCard = ({
           </div>
         </div>
       </div>
+      <div className="notebook-card-edge" aria-hidden="true" />
     </article>
   );
 };

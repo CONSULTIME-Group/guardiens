@@ -14,18 +14,322 @@ exports[`Owner Dashboard — visual snapshots > MissionsTabsCard > matches snaps
     </h3>
     <a
       class="text-xs text-primary font-sans hover:underline shrink-0"
+      data-discover="true"
       href="/petites-missions"
     >
       Voir tout
     </a>
   </div>
+  <details
+    class="group mb-4 rounded-xl border border-border bg-muted/30 overflow-hidden"
+  >
+    <summary
+      class="cursor-pointer list-none px-3 py-2 flex items-center justify-between hover:bg-muted/50 transition-colors"
+    >
+      <span
+        class="text-xs font-semibold text-foreground"
+      >
+        Comment fonctionne l'entraide
+      </span>
+      <span
+        aria-hidden="true"
+        class="text-xs text-muted-foreground group-open:rotate-180 transition-transform"
+      >
+        ▾
+      </span>
+    </summary>
+    <div
+      class="px-3 pb-3 pt-2"
+    >
+      <div
+        class="rounded-2xl border border-primary/20 bg-primary/5 p-4 md:p-5 mb-3"
+      >
+        <div
+          class="flex items-start gap-3"
+        >
+          <div
+            class="rounded-xl bg-primary/10 p-2 shrink-0"
+          >
+            <svg
+              aria-hidden="true"
+              class="lucide lucide-hand-heart h-5 w-5 text-primary"
+              fill="none"
+              height="24"
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              viewBox="0 0 24 24"
+              width="24"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M11 14h2a2 2 0 1 0 0-4h-3c-.6 0-1.1.2-1.4.6L3 16"
+              />
+              <path
+                d="m7 20 1.6-1.4c.3-.4.8-.6 1.4-.6h4c1.1 0 2.1-.4 2.8-1.2l4.6-4.4a2 2 0 0 0-2.75-2.91l-4.2 3.9"
+              />
+              <path
+                d="m2 15 6 6"
+              />
+              <path
+                d="M19.5 8.5c.7-.7 1.5-1.6 1.5-2.7A2.73 2.73 0 0 0 16 4a2.78 2.78 0 0 0-5 1.8c0 1.2.8 2 1.5 2.8L16 12Z"
+              />
+            </svg>
+          </div>
+          <div
+            class="flex-1 min-w-0"
+          >
+            <p
+              class="font-heading text-sm md:text-base font-semibold text-foreground leading-snug"
+            >
+              Un coup de main, c'est un échange.
+            </p>
+            <p
+              class="text-xs md:text-sm text-foreground/75 mt-1 leading-relaxed"
+            >
+              Sans argent, sans abonnement. Vous demandez, vous proposez quelque chose en retour : un café, des œufs, un service, une histoire à raconter.
+            </p>
+            <div
+              class="flex flex-wrap gap-2 mt-3"
+            >
+              <a
+                class="inline-flex items-center gap-1.5 rounded-full bg-primary text-primary-foreground px-3.5 py-1.5 text-xs font-semibold hover:opacity-90 transition-opacity"
+                data-discover="true"
+                href="/petites-missions/creer?type=besoin"
+              >
+                Publier un besoin
+                <svg
+                  aria-hidden="true"
+                  class="lucide lucide-arrow-right h-3.5 w-3.5"
+                  fill="none"
+                  height="24"
+                  stroke="currentColor"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  viewBox="0 0 24 24"
+                  width="24"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M5 12h14"
+                  />
+                  <path
+                    d="m12 5 7 7-7 7"
+                  />
+                </svg>
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+      <section
+        aria-label="Concept des coups de main"
+        class="rounded-2xl border border-primary/20 bg-gradient-to-br from-primary/5 to-transparent p-4 md:p-6 "
+      >
+        <header
+          class="mb-4 md:mb-5"
+        >
+          <p
+            class="text-[11px] font-semibold uppercase tracking-wider text-primary"
+          >
+            Coups de main
+          </p>
+          <h3
+            class="font-heading text-lg md:text-xl font-semibold text-foreground mt-1"
+          >
+            Comment ça marche ?
+          </h3>
+          <p
+            class="text-sm text-foreground/70 mt-1"
+          >
+            Un coup de main, c'est un échange. Sans argent, sans abonnement.
+          </p>
+        </header>
+        <ol
+          class="grid gap-3 md:grid-cols-3"
+        >
+          <li
+            class="rounded-xl border border-border bg-card p-4 flex flex-col gap-2"
+          >
+            <div
+              class="rounded-lg bg-primary/10 p-2 w-fit"
+            >
+              <svg
+                aria-hidden="true"
+                class="lucide lucide-hand-heart h-4 w-4 text-primary"
+                fill="none"
+                height="24"
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+                width="24"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M11 14h2a2 2 0 1 0 0-4h-3c-.6 0-1.1.2-1.4.6L3 16"
+                />
+                <path
+                  d="m7 20 1.6-1.4c.3-.4.8-.6 1.4-.6h4c1.1 0 2.1-.4 2.8-1.2l4.6-4.4a2 2 0 0 0-2.75-2.91l-4.2 3.9"
+                />
+                <path
+                  d="m2 15 6 6"
+                />
+                <path
+                  d="M19.5 8.5c.7-.7 1.5-1.6 1.5-2.7A2.73 2.73 0 0 0 16 4a2.78 2.78 0 0 0-5 1.8c0 1.2.8 2 1.5 2.8L16 12Z"
+                />
+              </svg>
+            </div>
+            <p
+              class="font-heading text-sm font-semibold text-foreground leading-snug"
+            >
+              1. Publiez votre besoin en 1 minute
+            </p>
+            <p
+              class="text-xs text-foreground/70 leading-relaxed"
+            >
+              Une visite pour votre chat, un coup de main au jardin, une course urgente : décrivez, ajoutez une photo, publiez.
+            </p>
+          </li>
+          <li
+            class="rounded-xl border border-border bg-card p-4 flex flex-col gap-2"
+          >
+            <div
+              class="rounded-lg bg-primary/10 p-2 w-fit"
+            >
+              <svg
+                aria-hidden="true"
+                class="lucide lucide-message-circle h-4 w-4 text-primary"
+                fill="none"
+                height="24"
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+                width="24"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"
+                />
+              </svg>
+            </div>
+            <p
+              class="font-heading text-sm font-semibold text-foreground leading-snug"
+            >
+              2. Convenez d'un petit échange
+            </p>
+            <p
+              class="text-xs text-foreground/70 leading-relaxed"
+            >
+              Ni tarif ni facture. Un café, des œufs du jardin, une histoire à partager, un service en retour : vous décidez ensemble.
+            </p>
+          </li>
+          <li
+            class="rounded-xl border border-border bg-card p-4 flex flex-col gap-2"
+          >
+            <div
+              class="rounded-lg bg-primary/10 p-2 w-fit"
+            >
+              <svg
+                aria-hidden="true"
+                class="lucide lucide-sparkles h-4 w-4 text-primary"
+                fill="none"
+                height="24"
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+                width="24"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"
+                />
+                <path
+                  d="M20 3v4"
+                />
+                <path
+                  d="M22 5h-4"
+                />
+                <path
+                  d="M4 17v2"
+                />
+                <path
+                  d="M5 18H3"
+                />
+              </svg>
+            </div>
+            <p
+              class="font-heading text-sm font-semibold text-foreground leading-snug"
+            >
+              3. On se retrouve, puis on se remercie
+            </p>
+            <p
+              class="text-xs text-foreground/70 leading-relaxed"
+            >
+              Le coup de main a lieu, vous laissez un avis. La personne qui vous aide gagne en réputation locale.
+            </p>
+          </li>
+        </ol>
+        <div
+          class="flex flex-wrap items-center gap-2 mt-4 md:mt-5"
+        >
+          <a
+            class="inline-flex items-center gap-1.5 rounded-full bg-primary text-primary-foreground px-4 py-2 text-xs font-semibold hover:opacity-90 transition-opacity"
+            data-discover="true"
+            href="/petites-missions/creer?type=besoin"
+          >
+            Publier un besoin
+            <svg
+              aria-hidden="true"
+              class="lucide lucide-arrow-right h-3.5 w-3.5"
+              fill="none"
+              height="24"
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              viewBox="0 0 24 24"
+              width="24"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M5 12h14"
+              />
+              <path
+                d="m12 5 7 7-7 7"
+              />
+            </svg>
+          </a>
+          <a
+            class="inline-flex items-center gap-1.5 rounded-full border border-border bg-background px-4 py-2 text-xs font-semibold text-foreground hover:bg-accent transition-colors"
+            data-discover="true"
+            href="/petites-missions"
+          >
+            Parcourir les échanges
+          </a>
+        </div>
+      </section>
+    </div>
+  </details>
   <div
+    aria-label="Filtre des coups de main"
     class="flex gap-1 p-1 bg-muted/50 rounded-xl mb-4"
     role="tablist"
   >
     <button
-      aria-pressed="true"
-      class="flex-1 px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-200 ease-out bg-card text-foreground shadow-sm"
+      aria-controls="owner-missions-panel-mine"
+      aria-selected="true"
+      class="flex-1 px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-200 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background bg-card text-foreground shadow-sm"
+      id="owner-missions-tab-mine"
+      role="tab"
+      tabindex="0"
       type="button"
     >
       Les miennes
@@ -36,11 +340,15 @@ exports[`Owner Dashboard — visual snapshots > MissionsTabsCard > matches snaps
       </span>
     </button>
     <button
-      aria-pressed="false"
-      class="flex-1 px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-200 ease-out text-muted-foreground hover:text-foreground hover:bg-card/50"
+      aria-controls="owner-missions-panel-nearby"
+      aria-selected="false"
+      class="flex-1 px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-200 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background text-muted-foreground hover:text-foreground hover:bg-card/50"
+      id="owner-missions-tab-nearby"
+      role="tab"
+      tabindex="-1"
       type="button"
     >
-      Autour de moi
+      Autour de vous
       <span
         class="ml-1.5 text-[10px] text-muted-foreground/70"
       >
@@ -48,26 +356,39 @@ exports[`Owner Dashboard — visual snapshots > MissionsTabsCard > matches snaps
       </span>
     </button>
   </div>
-  <div>
-    <a
-      class="group flex items-center gap-3 py-2.5 border-b border-border last:border-0 hover:bg-muted/40 -mx-2 px-2 rounded-lg transition-all duration-200 ease-out hover:translate-x-0.5"
-      href="/petites-missions/mission-1"
-    >
-      <div
-        class="w-2 h-2 rounded-full shrink-0 bg-primary transition-transform duration-200 group-hover:scale-125"
-      />
-      <p
-        class="text-xs font-sans flex-1 truncate text-foreground group-hover:text-primary transition-colors"
+  <div
+    aria-labelledby="owner-missions-tab-mine"
+    id="owner-missions-panel-mine"
+    role="tabpanel"
+  >
+    <div>
+      <a
+        class="group flex items-center gap-3 py-2.5 border-b border-border last:border-0 hover:bg-muted/40 -mx-2 px-2 rounded-lg transition-all duration-200 ease-out hover:translate-x-0.5"
+        data-discover="true"
+        href="/petites-missions/mission-1"
       >
-        Promener mon chien
-      </p>
-      <p
-        class="text-xs text-muted-foreground font-sans shrink-0"
-      >
-        1 réponse
-      </p>
-    </a>
+        <div
+          class="w-2 h-2 rounded-full shrink-0 bg-primary transition-transform duration-200 group-hover:scale-125"
+        />
+        <p
+          class="text-xs font-sans flex-1 truncate text-foreground group-hover:text-primary transition-colors"
+        >
+          Promener mon chien
+        </p>
+        <p
+          class="text-xs text-muted-foreground font-sans shrink-0"
+        >
+          1 réponse
+        </p>
+      </a>
+    </div>
   </div>
+  <div
+    aria-labelledby="owner-missions-tab-nearby"
+    hidden=""
+    id="owner-missions-panel-nearby"
+    role="tabpanel"
+  />
 </div>
 `;
 
@@ -85,18 +406,322 @@ exports[`Owner Dashboard — visual snapshots > MissionsTabsCard > matches snaps
     </h3>
     <a
       class="text-xs text-primary font-sans hover:underline shrink-0"
+      data-discover="true"
       href="/petites-missions"
     >
       Voir tout
     </a>
   </div>
+  <details
+    class="group mb-4 rounded-xl border border-border bg-muted/30 overflow-hidden"
+  >
+    <summary
+      class="cursor-pointer list-none px-3 py-2 flex items-center justify-between hover:bg-muted/50 transition-colors"
+    >
+      <span
+        class="text-xs font-semibold text-foreground"
+      >
+        Comment fonctionne l'entraide
+      </span>
+      <span
+        aria-hidden="true"
+        class="text-xs text-muted-foreground group-open:rotate-180 transition-transform"
+      >
+        ▾
+      </span>
+    </summary>
+    <div
+      class="px-3 pb-3 pt-2"
+    >
+      <div
+        class="rounded-2xl border border-primary/20 bg-primary/5 p-4 md:p-5 mb-3"
+      >
+        <div
+          class="flex items-start gap-3"
+        >
+          <div
+            class="rounded-xl bg-primary/10 p-2 shrink-0"
+          >
+            <svg
+              aria-hidden="true"
+              class="lucide lucide-hand-heart h-5 w-5 text-primary"
+              fill="none"
+              height="24"
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              viewBox="0 0 24 24"
+              width="24"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M11 14h2a2 2 0 1 0 0-4h-3c-.6 0-1.1.2-1.4.6L3 16"
+              />
+              <path
+                d="m7 20 1.6-1.4c.3-.4.8-.6 1.4-.6h4c1.1 0 2.1-.4 2.8-1.2l4.6-4.4a2 2 0 0 0-2.75-2.91l-4.2 3.9"
+              />
+              <path
+                d="m2 15 6 6"
+              />
+              <path
+                d="M19.5 8.5c.7-.7 1.5-1.6 1.5-2.7A2.73 2.73 0 0 0 16 4a2.78 2.78 0 0 0-5 1.8c0 1.2.8 2 1.5 2.8L16 12Z"
+              />
+            </svg>
+          </div>
+          <div
+            class="flex-1 min-w-0"
+          >
+            <p
+              class="font-heading text-sm md:text-base font-semibold text-foreground leading-snug"
+            >
+              Un coup de main, c'est un échange.
+            </p>
+            <p
+              class="text-xs md:text-sm text-foreground/75 mt-1 leading-relaxed"
+            >
+              Sans argent, sans abonnement. Vous demandez, vous proposez quelque chose en retour : un café, des œufs, un service, une histoire à raconter.
+            </p>
+            <div
+              class="flex flex-wrap gap-2 mt-3"
+            >
+              <a
+                class="inline-flex items-center gap-1.5 rounded-full bg-primary text-primary-foreground px-3.5 py-1.5 text-xs font-semibold hover:opacity-90 transition-opacity"
+                data-discover="true"
+                href="/petites-missions/creer?type=besoin"
+              >
+                Publier un besoin
+                <svg
+                  aria-hidden="true"
+                  class="lucide lucide-arrow-right h-3.5 w-3.5"
+                  fill="none"
+                  height="24"
+                  stroke="currentColor"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  viewBox="0 0 24 24"
+                  width="24"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M5 12h14"
+                  />
+                  <path
+                    d="m12 5 7 7-7 7"
+                  />
+                </svg>
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+      <section
+        aria-label="Concept des coups de main"
+        class="rounded-2xl border border-primary/20 bg-gradient-to-br from-primary/5 to-transparent p-4 md:p-6 "
+      >
+        <header
+          class="mb-4 md:mb-5"
+        >
+          <p
+            class="text-[11px] font-semibold uppercase tracking-wider text-primary"
+          >
+            Coups de main
+          </p>
+          <h3
+            class="font-heading text-lg md:text-xl font-semibold text-foreground mt-1"
+          >
+            Comment ça marche ?
+          </h3>
+          <p
+            class="text-sm text-foreground/70 mt-1"
+          >
+            Un coup de main, c'est un échange. Sans argent, sans abonnement.
+          </p>
+        </header>
+        <ol
+          class="grid gap-3 md:grid-cols-3"
+        >
+          <li
+            class="rounded-xl border border-border bg-card p-4 flex flex-col gap-2"
+          >
+            <div
+              class="rounded-lg bg-primary/10 p-2 w-fit"
+            >
+              <svg
+                aria-hidden="true"
+                class="lucide lucide-hand-heart h-4 w-4 text-primary"
+                fill="none"
+                height="24"
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+                width="24"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M11 14h2a2 2 0 1 0 0-4h-3c-.6 0-1.1.2-1.4.6L3 16"
+                />
+                <path
+                  d="m7 20 1.6-1.4c.3-.4.8-.6 1.4-.6h4c1.1 0 2.1-.4 2.8-1.2l4.6-4.4a2 2 0 0 0-2.75-2.91l-4.2 3.9"
+                />
+                <path
+                  d="m2 15 6 6"
+                />
+                <path
+                  d="M19.5 8.5c.7-.7 1.5-1.6 1.5-2.7A2.73 2.73 0 0 0 16 4a2.78 2.78 0 0 0-5 1.8c0 1.2.8 2 1.5 2.8L16 12Z"
+                />
+              </svg>
+            </div>
+            <p
+              class="font-heading text-sm font-semibold text-foreground leading-snug"
+            >
+              1. Publiez votre besoin en 1 minute
+            </p>
+            <p
+              class="text-xs text-foreground/70 leading-relaxed"
+            >
+              Une visite pour votre chat, un coup de main au jardin, une course urgente : décrivez, ajoutez une photo, publiez.
+            </p>
+          </li>
+          <li
+            class="rounded-xl border border-border bg-card p-4 flex flex-col gap-2"
+          >
+            <div
+              class="rounded-lg bg-primary/10 p-2 w-fit"
+            >
+              <svg
+                aria-hidden="true"
+                class="lucide lucide-message-circle h-4 w-4 text-primary"
+                fill="none"
+                height="24"
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+                width="24"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"
+                />
+              </svg>
+            </div>
+            <p
+              class="font-heading text-sm font-semibold text-foreground leading-snug"
+            >
+              2. Convenez d'un petit échange
+            </p>
+            <p
+              class="text-xs text-foreground/70 leading-relaxed"
+            >
+              Ni tarif ni facture. Un café, des œufs du jardin, une histoire à partager, un service en retour : vous décidez ensemble.
+            </p>
+          </li>
+          <li
+            class="rounded-xl border border-border bg-card p-4 flex flex-col gap-2"
+          >
+            <div
+              class="rounded-lg bg-primary/10 p-2 w-fit"
+            >
+              <svg
+                aria-hidden="true"
+                class="lucide lucide-sparkles h-4 w-4 text-primary"
+                fill="none"
+                height="24"
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+                width="24"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"
+                />
+                <path
+                  d="M20 3v4"
+                />
+                <path
+                  d="M22 5h-4"
+                />
+                <path
+                  d="M4 17v2"
+                />
+                <path
+                  d="M5 18H3"
+                />
+              </svg>
+            </div>
+            <p
+              class="font-heading text-sm font-semibold text-foreground leading-snug"
+            >
+              3. On se retrouve, puis on se remercie
+            </p>
+            <p
+              class="text-xs text-foreground/70 leading-relaxed"
+            >
+              Le coup de main a lieu, vous laissez un avis. La personne qui vous aide gagne en réputation locale.
+            </p>
+          </li>
+        </ol>
+        <div
+          class="flex flex-wrap items-center gap-2 mt-4 md:mt-5"
+        >
+          <a
+            class="inline-flex items-center gap-1.5 rounded-full bg-primary text-primary-foreground px-4 py-2 text-xs font-semibold hover:opacity-90 transition-opacity"
+            data-discover="true"
+            href="/petites-missions/creer?type=besoin"
+          >
+            Publier un besoin
+            <svg
+              aria-hidden="true"
+              class="lucide lucide-arrow-right h-3.5 w-3.5"
+              fill="none"
+              height="24"
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              viewBox="0 0 24 24"
+              width="24"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M5 12h14"
+              />
+              <path
+                d="m12 5 7 7-7 7"
+              />
+            </svg>
+          </a>
+          <a
+            class="inline-flex items-center gap-1.5 rounded-full border border-border bg-background px-4 py-2 text-xs font-semibold text-foreground hover:bg-accent transition-colors"
+            data-discover="true"
+            href="/petites-missions"
+          >
+            Parcourir les échanges
+          </a>
+        </div>
+      </section>
+    </div>
+  </details>
   <div
+    aria-label="Filtre des coups de main"
     class="flex gap-1 p-1 bg-muted/50 rounded-xl mb-4"
     role="tablist"
   >
     <button
-      aria-pressed="true"
-      class="flex-1 px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-200 ease-out bg-card text-foreground shadow-sm"
+      aria-controls="owner-missions-panel-mine"
+      aria-selected="true"
+      class="flex-1 px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-200 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background bg-card text-foreground shadow-sm"
+      id="owner-missions-tab-mine"
+      role="tab"
+      tabindex="0"
       type="button"
     >
       Les miennes
@@ -107,11 +732,15 @@ exports[`Owner Dashboard — visual snapshots > MissionsTabsCard > matches snaps
       </span>
     </button>
     <button
-      aria-pressed="false"
-      class="flex-1 px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-200 ease-out text-muted-foreground hover:text-foreground hover:bg-card/50"
+      aria-controls="owner-missions-panel-nearby"
+      aria-selected="false"
+      class="flex-1 px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-200 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background text-muted-foreground hover:text-foreground hover:bg-card/50"
+      id="owner-missions-tab-nearby"
+      role="tab"
+      tabindex="-1"
       type="button"
     >
-      Autour de moi
+      Autour de vous
       <span
         class="ml-1.5 text-[10px] text-muted-foreground/70"
       >
@@ -119,26 +748,39 @@ exports[`Owner Dashboard — visual snapshots > MissionsTabsCard > matches snaps
       </span>
     </button>
   </div>
-  <div>
-    <a
-      class="group flex items-center gap-3 py-2.5 border-b border-border last:border-0 hover:bg-muted/40 -mx-2 px-2 rounded-lg transition-all duration-200 ease-out hover:translate-x-0.5"
-      href="/petites-missions/mission-1"
-    >
-      <div
-        class="w-2 h-2 rounded-full shrink-0 bg-primary transition-transform duration-200 group-hover:scale-125"
-      />
-      <p
-        class="text-xs font-sans flex-1 truncate text-foreground group-hover:text-primary transition-colors"
+  <div
+    aria-labelledby="owner-missions-tab-mine"
+    id="owner-missions-panel-mine"
+    role="tabpanel"
+  >
+    <div>
+      <a
+        class="group flex items-center gap-3 py-2.5 border-b border-border last:border-0 hover:bg-muted/40 -mx-2 px-2 rounded-lg transition-all duration-200 ease-out hover:translate-x-0.5"
+        data-discover="true"
+        href="/petites-missions/mission-1"
       >
-        Promener mon chien
-      </p>
-      <p
-        class="text-xs text-muted-foreground font-sans shrink-0"
-      >
-        1 réponse
-      </p>
-    </a>
+        <div
+          class="w-2 h-2 rounded-full shrink-0 bg-primary transition-transform duration-200 group-hover:scale-125"
+        />
+        <p
+          class="text-xs font-sans flex-1 truncate text-foreground group-hover:text-primary transition-colors"
+        >
+          Promener mon chien
+        </p>
+        <p
+          class="text-xs text-muted-foreground font-sans shrink-0"
+        >
+          1 réponse
+        </p>
+      </a>
+    </div>
   </div>
+  <div
+    aria-labelledby="owner-missions-tab-nearby"
+    hidden=""
+    id="owner-missions-panel-nearby"
+    role="tabpanel"
+  />
 </div>
 `;
 
@@ -568,552 +1210,6 @@ exports[`Owner Dashboard — visual snapshots > MonAnnonceCard > matches snapsho
 </div>
 `;
 
-exports[`Owner Dashboard — visual snapshots > OngoingSitHero > matches snapshot on desktop (1280px) 1`] = `
-<div
-  class="px-4 sm:px-5 md:px-8 mb-6 md:mb-8"
->
-  <div
-    class="group block bg-primary/5 border-2 border-primary/30 rounded-2xl overflow-hidden transition-all duration-300 ease-out hover:shadow-lg hover:border-primary/50"
-  >
-    <div
-      class="flex flex-col sm:flex-row"
-    >
-      <div
-        class="relative sm:w-48 md:w-56 h-36 sm:h-auto sm:min-h-[180px] overflow-hidden bg-muted shrink-0"
-      >
-        <div
-          class="w-full h-full bg-gradient-to-br from-primary/10 to-primary/5 flex items-center justify-center"
-        >
-          <svg
-            aria-hidden="true"
-            class="lucide lucide-sparkles h-8 w-8 text-primary/30"
-            fill="none"
-            height="24"
-            stroke="currentColor"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            viewBox="0 0 24 24"
-            width="24"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"
-            />
-            <path
-              d="M20 3v4"
-            />
-            <path
-              d="M22 5h-4"
-            />
-            <path
-              d="M4 17v2"
-            />
-            <path
-              d="M5 18H3"
-            />
-          </svg>
-        </div>
-        <div
-          aria-hidden="true"
-          class="absolute inset-x-0 top-0 h-20 bg-gradient-to-b from-black/45 via-black/20 to-transparent pointer-events-none sm:hidden"
-        />
-        <div
-          class="absolute top-2.5 left-2.5 sm:top-3 sm:left-3"
-        >
-          <span
-            class="inline-flex items-center gap-1.5 text-[13px] sm:text-xs font-heading font-bold tracking-tight rounded-full px-3 py-1.5 sm:px-2.5 sm:py-1 shadow-lg ring-1 ring-black/5 backdrop-blur-sm bg-primary text-primary-foreground"
-          >
-            <svg
-              aria-hidden="true"
-              class="lucide lucide-clock h-3.5 w-3.5 sm:h-3 sm:w-3"
-              fill="none"
-              height="24"
-              stroke="currentColor"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              viewBox="0 0 24 24"
-              width="24"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <circle
-                cx="12"
-                cy="12"
-                r="10"
-              />
-              <polyline
-                points="12 6 12 12 16 14"
-              />
-            </svg>
-            J-2
-          </span>
-        </div>
-      </div>
-      <div
-        class="flex-1 p-4 sm:p-5 flex flex-col justify-between min-w-0 gap-3"
-      >
-        <div
-          class="flex items-start gap-3 min-w-0"
-        >
-          <a
-            aria-label="Voir le profil de Claire"
-            class="shrink-0 group/avatar"
-            href="/gardiens/sitter-1"
-          >
-            <div
-              class="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-primary/15 ring-2 ring-primary/40 flex items-center justify-center text-primary font-heading font-bold text-lg transition-all duration-300 group-hover/avatar:ring-primary group-hover/avatar:scale-105"
-            >
-              C
-            </div>
-          </a>
-          <div
-            class="min-w-0 flex-1"
-          >
-            <p
-              class="text-xs uppercase tracking-widest text-primary font-sans font-medium mb-1.5 flex items-center gap-1.5"
-            >
-              <svg
-                aria-hidden="true"
-                class="lucide lucide-sparkles h-3 w-3"
-                fill="none"
-                height="24"
-                stroke="currentColor"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                viewBox="0 0 24 24"
-                width="24"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"
-                />
-                <path
-                  d="M20 3v4"
-                />
-                <path
-                  d="M22 5h-4"
-                />
-                <path
-                  d="M4 17v2"
-                />
-                <path
-                  d="M5 18H3"
-                />
-              </svg>
-              Garde en cours
-            </p>
-            <h3
-              class="text-base sm:text-lg font-heading font-semibold text-foreground leading-tight mb-1"
-            >
-              Claire
-               s'occupe de vos animaux
-            </h3>
-            <div
-              class="flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground"
-            >
-              <span
-                class="flex items-center gap-1 min-w-0 max-w-full"
-              >
-                <svg
-                  aria-hidden="true"
-                  class="lucide lucide-calendar h-3.5 w-3.5 shrink-0"
-                  fill="none"
-                  height="24"
-                  stroke="currentColor"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  viewBox="0 0 24 24"
-                  width="24"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    d="M8 2v4"
-                  />
-                  <path
-                    d="M16 2v4"
-                  />
-                  <rect
-                    height="18"
-                    rx="2"
-                    width="18"
-                    x="3"
-                    y="4"
-                  />
-                  <path
-                    d="M3 10h18"
-                  />
-                </svg>
-                <span
-                  class="sm:hidden truncate whitespace-nowrap"
-                >
-                  2 j · 14 avr.
-                </span>
-                <span
-                  class="hidden sm:inline truncate whitespace-nowrap"
-                >
-                  Encore 2 jours, fin mardi 14 avril
-                </span>
-              </span>
-            </div>
-          </div>
-        </div>
-        <div
-          class="h-1.5 w-full bg-primary/15 rounded-full overflow-hidden"
-        >
-          <div
-            aria-label="Garde réalisée à 67%"
-            aria-valuemax="100"
-            aria-valuemin="0"
-            aria-valuenow="67"
-            class="h-full bg-primary transition-all duration-500 ease-out"
-            role="progressbar"
-            style="width: 67%;"
-          />
-        </div>
-        <div
-          class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3"
-        >
-          <div
-            class="flex gap-2 w-full sm:w-auto sm:order-2 shrink-0"
-          >
-            <a
-              class="inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium ring-offset-background transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 font-body bg-primary text-primary-foreground hover:bg-primary/90 rounded-pill h-9 px-4 flex-1 sm:flex-initial rounded-xl group/btn"
-              href="/messages?with=sitter-1&sit=sit-1"
-            >
-              <svg
-                class="lucide lucide-message-square h-4 w-4 mr-1.5 transition-transform duration-200 group-hover/btn:scale-110"
-                fill="none"
-                height="24"
-                stroke="currentColor"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                viewBox="0 0 24 24"
-                width="24"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"
-                />
-              </svg>
-              Message
-            </a>
-            <a
-              class="inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium ring-offset-background transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 font-body border border-input bg-background hover:bg-accent hover:text-accent-foreground rounded-pill h-9 px-4 flex-1 sm:flex-initial rounded-xl"
-              href="/sits/sit-1"
-            >
-              Voir l'annonce
-            </a>
-          </div>
-          <a
-            class="inline-flex items-center gap-1 text-xs text-primary hover:underline transition-transform duration-200 hover:translate-x-0.5 self-start sm:self-auto sm:order-1"
-            href="/gardiens/sitter-1"
-          >
-            Voir le profil 
-            <svg
-              aria-hidden="true"
-              class="lucide lucide-arrow-right h-3 w-3"
-              fill="none"
-              height="24"
-              stroke="currentColor"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              viewBox="0 0 24 24"
-              width="24"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                d="M5 12h14"
-              />
-              <path
-                d="m12 5 7 7-7 7"
-              />
-            </svg>
-          </a>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-`;
-
-exports[`Owner Dashboard — visual snapshots > OngoingSitHero > matches snapshot on mobile (390px) 1`] = `
-<div
-  class="px-4 sm:px-5 md:px-8 mb-6 md:mb-8"
->
-  <div
-    class="group block bg-primary/5 border-2 border-primary/30 rounded-2xl overflow-hidden transition-all duration-300 ease-out hover:shadow-lg hover:border-primary/50"
-  >
-    <div
-      class="flex flex-col sm:flex-row"
-    >
-      <div
-        class="relative sm:w-48 md:w-56 h-36 sm:h-auto sm:min-h-[180px] overflow-hidden bg-muted shrink-0"
-      >
-        <div
-          class="w-full h-full bg-gradient-to-br from-primary/10 to-primary/5 flex items-center justify-center"
-        >
-          <svg
-            aria-hidden="true"
-            class="lucide lucide-sparkles h-8 w-8 text-primary/30"
-            fill="none"
-            height="24"
-            stroke="currentColor"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            viewBox="0 0 24 24"
-            width="24"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"
-            />
-            <path
-              d="M20 3v4"
-            />
-            <path
-              d="M22 5h-4"
-            />
-            <path
-              d="M4 17v2"
-            />
-            <path
-              d="M5 18H3"
-            />
-          </svg>
-        </div>
-        <div
-          aria-hidden="true"
-          class="absolute inset-x-0 top-0 h-20 bg-gradient-to-b from-black/45 via-black/20 to-transparent pointer-events-none sm:hidden"
-        />
-        <div
-          class="absolute top-2.5 left-2.5 sm:top-3 sm:left-3"
-        >
-          <span
-            class="inline-flex items-center gap-1.5 text-[13px] sm:text-xs font-heading font-bold tracking-tight rounded-full px-3 py-1.5 sm:px-2.5 sm:py-1 shadow-lg ring-1 ring-black/5 backdrop-blur-sm bg-primary text-primary-foreground"
-          >
-            <svg
-              aria-hidden="true"
-              class="lucide lucide-clock h-3.5 w-3.5 sm:h-3 sm:w-3"
-              fill="none"
-              height="24"
-              stroke="currentColor"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              viewBox="0 0 24 24"
-              width="24"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <circle
-                cx="12"
-                cy="12"
-                r="10"
-              />
-              <polyline
-                points="12 6 12 12 16 14"
-              />
-            </svg>
-            J-2
-          </span>
-        </div>
-      </div>
-      <div
-        class="flex-1 p-4 sm:p-5 flex flex-col justify-between min-w-0 gap-3"
-      >
-        <div
-          class="flex items-start gap-3 min-w-0"
-        >
-          <a
-            aria-label="Voir le profil de Claire"
-            class="shrink-0 group/avatar"
-            href="/gardiens/sitter-1"
-          >
-            <div
-              class="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-primary/15 ring-2 ring-primary/40 flex items-center justify-center text-primary font-heading font-bold text-lg transition-all duration-300 group-hover/avatar:ring-primary group-hover/avatar:scale-105"
-            >
-              C
-            </div>
-          </a>
-          <div
-            class="min-w-0 flex-1"
-          >
-            <p
-              class="text-xs uppercase tracking-widest text-primary font-sans font-medium mb-1.5 flex items-center gap-1.5"
-            >
-              <svg
-                aria-hidden="true"
-                class="lucide lucide-sparkles h-3 w-3"
-                fill="none"
-                height="24"
-                stroke="currentColor"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                viewBox="0 0 24 24"
-                width="24"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"
-                />
-                <path
-                  d="M20 3v4"
-                />
-                <path
-                  d="M22 5h-4"
-                />
-                <path
-                  d="M4 17v2"
-                />
-                <path
-                  d="M5 18H3"
-                />
-              </svg>
-              Garde en cours
-            </p>
-            <h3
-              class="text-base sm:text-lg font-heading font-semibold text-foreground leading-tight mb-1"
-            >
-              Claire
-               s'occupe de vos animaux
-            </h3>
-            <div
-              class="flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground"
-            >
-              <span
-                class="flex items-center gap-1 min-w-0 max-w-full"
-              >
-                <svg
-                  aria-hidden="true"
-                  class="lucide lucide-calendar h-3.5 w-3.5 shrink-0"
-                  fill="none"
-                  height="24"
-                  stroke="currentColor"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  viewBox="0 0 24 24"
-                  width="24"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    d="M8 2v4"
-                  />
-                  <path
-                    d="M16 2v4"
-                  />
-                  <rect
-                    height="18"
-                    rx="2"
-                    width="18"
-                    x="3"
-                    y="4"
-                  />
-                  <path
-                    d="M3 10h18"
-                  />
-                </svg>
-                <span
-                  class="sm:hidden truncate whitespace-nowrap"
-                >
-                  2 j · 14 avr.
-                </span>
-                <span
-                  class="hidden sm:inline truncate whitespace-nowrap"
-                >
-                  Encore 2 jours, fin mardi 14 avril
-                </span>
-              </span>
-            </div>
-          </div>
-        </div>
-        <div
-          class="h-1.5 w-full bg-primary/15 rounded-full overflow-hidden"
-        >
-          <div
-            aria-label="Garde réalisée à 67%"
-            aria-valuemax="100"
-            aria-valuemin="0"
-            aria-valuenow="67"
-            class="h-full bg-primary transition-all duration-500 ease-out"
-            role="progressbar"
-            style="width: 67%;"
-          />
-        </div>
-        <div
-          class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3"
-        >
-          <div
-            class="flex gap-2 w-full sm:w-auto sm:order-2 shrink-0"
-          >
-            <a
-              class="inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium ring-offset-background transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 font-body bg-primary text-primary-foreground hover:bg-primary/90 rounded-pill h-9 px-4 flex-1 sm:flex-initial rounded-xl group/btn"
-              href="/messages?with=sitter-1&sit=sit-1"
-            >
-              <svg
-                class="lucide lucide-message-square h-4 w-4 mr-1.5 transition-transform duration-200 group-hover/btn:scale-110"
-                fill="none"
-                height="24"
-                stroke="currentColor"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                viewBox="0 0 24 24"
-                width="24"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"
-                />
-              </svg>
-              Message
-            </a>
-            <a
-              class="inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium ring-offset-background transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 font-body border border-input bg-background hover:bg-accent hover:text-accent-foreground rounded-pill h-9 px-4 flex-1 sm:flex-initial rounded-xl"
-              href="/sits/sit-1"
-            >
-              Voir l'annonce
-            </a>
-          </div>
-          <a
-            class="inline-flex items-center gap-1 text-xs text-primary hover:underline transition-transform duration-200 hover:translate-x-0.5 self-start sm:self-auto sm:order-1"
-            href="/gardiens/sitter-1"
-          >
-            Voir le profil 
-            <svg
-              aria-hidden="true"
-              class="lucide lucide-arrow-right h-3 w-3"
-              fill="none"
-              height="24"
-              stroke="currentColor"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              viewBox="0 0 24 24"
-              width="24"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                d="M5 12h14"
-              />
-              <path
-                d="m12 5 7 7-7 7"
-              />
-            </svg>
-          </a>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-`;
-
 exports[`Owner Dashboard — visual snapshots > StatsStrip > matches snapshot on desktop (1280px) 1`] = `
 <section
   aria-label="Vos statistiques propriétaire"
@@ -1121,14 +1217,15 @@ exports[`Owner Dashboard — visual snapshots > StatsStrip > matches snapshot on
 >
   <a
     aria-label="Annonces : 3"
-    class="group block transition-colors duration-200 hover:bg-muted/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset"
+    class="group block min-w-0 overflow-hidden transition-colors duration-200 hover:bg-muted/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset"
+    data-discover="true"
     href="/annonces"
   >
     <div
-      class="px-4 py-3 text-center md:text-left"
+      class="min-w-0 overflow-hidden px-4 py-3 text-center md:text-left"
     >
       <p
-        class="text-xl md:text-2xl font-heading font-bold leading-none transition-transform duration-200 ease-out text-foreground group-hover:-translate-y-0.5"
+        class="text-xl md:text-2xl font-heading font-bold leading-none whitespace-nowrap transition-transform duration-200 ease-out text-foreground group-hover:-translate-y-0.5"
       >
         3
       </p>
@@ -1143,14 +1240,15 @@ exports[`Owner Dashboard — visual snapshots > StatsStrip > matches snapshot on
   </a>
   <a
     aria-label="Candidatures : 12"
-    class="group block transition-colors duration-200 hover:bg-muted/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset"
+    class="group block min-w-0 overflow-hidden transition-colors duration-200 hover:bg-muted/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset"
+    data-discover="true"
     href="/candidatures"
   >
     <div
-      class="px-4 py-3 text-center md:text-left"
+      class="min-w-0 overflow-hidden px-4 py-3 text-center md:text-left"
     >
       <p
-        class="text-xl md:text-2xl font-heading font-bold leading-none transition-transform duration-200 ease-out text-primary group-hover:-translate-y-0.5"
+        class="text-xl md:text-2xl font-heading font-bold leading-none whitespace-nowrap transition-transform duration-200 ease-out text-primary group-hover:-translate-y-0.5"
       >
         12
       </p>
@@ -1163,12 +1261,14 @@ exports[`Owner Dashboard — visual snapshots > StatsStrip > matches snapshot on
       </p>
     </div>
   </a>
-  <div>
+  <div
+    class="min-w-0 overflow-hidden"
+  >
     <div
-      class="px-4 py-3 text-center md:text-left"
+      class="min-w-0 overflow-hidden px-4 py-3 text-center md:text-left"
     >
       <p
-        class="text-xl md:text-2xl font-heading font-bold leading-none transition-transform duration-200 ease-out text-foreground "
+        class="text-xl md:text-2xl font-heading font-bold leading-none whitespace-nowrap transition-transform duration-200 ease-out text-foreground "
       >
         4.8
       </p>
@@ -1181,14 +1281,21 @@ exports[`Owner Dashboard — visual snapshots > StatsStrip > matches snapshot on
       </p>
     </div>
   </div>
-  <div>
+  <div
+    class="min-w-0 overflow-hidden"
+  >
     <div
-      class="px-4 py-3 text-center md:text-left"
+      class="min-w-0 overflow-hidden px-4 py-3 text-center md:text-left"
     >
       <p
-        class="text-sm text-muted-foreground leading-none mt-1"
+        class="text-lg md:text-xl font-heading font-bold leading-tight break-words text-accent "
       >
-        —
+        À venir
+      </p>
+      <p
+        class="text-xs font-sans leading-tight text-accent mt-1"
+      >
+        Continuez à explorer Guardiens
       </p>
       <p
         class="text-[10px] md:text-[11px] uppercase tracking-wider text-muted-foreground font-sans mt-1.5 transition-colors duration-200 inline-flex items-center gap-1 justify-center md:justify-start "
@@ -1209,14 +1316,15 @@ exports[`Owner Dashboard — visual snapshots > StatsStrip > matches snapshot on
 >
   <a
     aria-label="Annonces : 3"
-    class="group block transition-colors duration-200 hover:bg-muted/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset"
+    class="group block min-w-0 overflow-hidden transition-colors duration-200 hover:bg-muted/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset"
+    data-discover="true"
     href="/annonces"
   >
     <div
-      class="px-4 py-3 text-center md:text-left"
+      class="min-w-0 overflow-hidden px-4 py-3 text-center md:text-left"
     >
       <p
-        class="text-xl md:text-2xl font-heading font-bold leading-none transition-transform duration-200 ease-out text-foreground group-hover:-translate-y-0.5"
+        class="text-xl md:text-2xl font-heading font-bold leading-none whitespace-nowrap transition-transform duration-200 ease-out text-foreground group-hover:-translate-y-0.5"
       >
         3
       </p>
@@ -1231,14 +1339,15 @@ exports[`Owner Dashboard — visual snapshots > StatsStrip > matches snapshot on
   </a>
   <a
     aria-label="Candidatures : 12"
-    class="group block transition-colors duration-200 hover:bg-muted/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset"
+    class="group block min-w-0 overflow-hidden transition-colors duration-200 hover:bg-muted/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset"
+    data-discover="true"
     href="/candidatures"
   >
     <div
-      class="px-4 py-3 text-center md:text-left"
+      class="min-w-0 overflow-hidden px-4 py-3 text-center md:text-left"
     >
       <p
-        class="text-xl md:text-2xl font-heading font-bold leading-none transition-transform duration-200 ease-out text-primary group-hover:-translate-y-0.5"
+        class="text-xl md:text-2xl font-heading font-bold leading-none whitespace-nowrap transition-transform duration-200 ease-out text-primary group-hover:-translate-y-0.5"
       >
         12
       </p>
@@ -1251,12 +1360,14 @@ exports[`Owner Dashboard — visual snapshots > StatsStrip > matches snapshot on
       </p>
     </div>
   </a>
-  <div>
+  <div
+    class="min-w-0 overflow-hidden"
+  >
     <div
-      class="px-4 py-3 text-center md:text-left"
+      class="min-w-0 overflow-hidden px-4 py-3 text-center md:text-left"
     >
       <p
-        class="text-xl md:text-2xl font-heading font-bold leading-none transition-transform duration-200 ease-out text-foreground "
+        class="text-xl md:text-2xl font-heading font-bold leading-none whitespace-nowrap transition-transform duration-200 ease-out text-foreground "
       >
         4.8
       </p>
@@ -1269,14 +1380,21 @@ exports[`Owner Dashboard — visual snapshots > StatsStrip > matches snapshot on
       </p>
     </div>
   </div>
-  <div>
+  <div
+    class="min-w-0 overflow-hidden"
+  >
     <div
-      class="px-4 py-3 text-center md:text-left"
+      class="min-w-0 overflow-hidden px-4 py-3 text-center md:text-left"
     >
       <p
-        class="text-sm text-muted-foreground leading-none mt-1"
+        class="text-lg md:text-xl font-heading font-bold leading-tight break-words text-accent "
       >
-        —
+        À venir
+      </p>
+      <p
+        class="text-xs font-sans leading-tight text-accent mt-1"
+      >
+        Continuez à explorer Guardiens
       </p>
       <p
         class="text-[10px] md:text-[11px] uppercase tracking-wider text-muted-foreground font-sans mt-1.5 transition-colors duration-200 inline-flex items-center gap-1 justify-center md:justify-start "

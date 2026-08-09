@@ -205,21 +205,8 @@ const StarCard = ({ sit, onCtaClick }: { sit: AffinitySitCard; onCtaClick?: () =
     : null;
 
   return (
-    <article
-      className="group bg-card border border-border overflow-hidden transition-shadow"
-      style={{
-        borderRadius: "20px",
-        boxShadow: "0 1px 2px rgba(29,27,22,0.04), 0 8px 24px rgba(29,27,22,0.05)",
-      }}
-      onMouseEnter={(e) => {
-        (e.currentTarget as HTMLElement).style.boxShadow =
-          "0 2px 4px rgba(29,27,22,0.05), 0 18px 40px rgba(29,27,22,0.09)";
-      }}
-      onMouseLeave={(e) => {
-        (e.currentTarget as HTMLElement).style.boxShadow =
-          "0 1px 2px rgba(29,27,22,0.04), 0 8px 24px rgba(29,27,22,0.05)";
-      }}
-    >
+    <article className="group notebook-card relative">
+      <div className="notebook-card-paper absolute inset-0" aria-hidden="true" />
       {/* Bandeau photo, hauteur exacte 150px */}
       <div
         className="relative w-full"
@@ -254,8 +241,8 @@ const StarCard = ({ sit, onCtaClick }: { sit: AffinitySitCard; onCtaClick?: () =
 
       {/* Corps : ring + contenu */}
       <div
-        className="flex items-start"
-        style={{ padding: "22px", gap: "22px" }}
+        className="relative flex items-start"
+        style={{ padding: "22px", paddingRight: "34px", gap: "22px" }}
       >
         {sit.affinity && <AffinityRing score={sit.affinity.score} result={sit.affinity} />}
 
@@ -330,6 +317,7 @@ const StarCard = ({ sit, onCtaClick }: { sit: AffinitySitCard; onCtaClick?: () =
           )}
         </div>
       </div>
+      <div className="notebook-card-edge" aria-hidden="true" />
     </article>
   );
 };
