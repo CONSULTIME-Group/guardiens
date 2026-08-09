@@ -546,6 +546,7 @@ const EditSit = () => {
                    propriétaire coupe lui-même où il le souhaite. */
                 onChange={(e) => setTitle(e.target.value)}
                 onBlur={() => setTitleTouched(true)}
+                disabled={isLocked}
                 className="mt-1.5 h-12 text-base"
               />
               {(titleTouched || trimmedTitle.length > MAX_TITLE_LENGTH) && !titleValid && trimmedTitle.length > 0 && (
@@ -591,6 +592,7 @@ const EditSit = () => {
                     onChange={(e) => setStartDate(e.target.value)}
                     onBlur={() => setDatesTouched(true)}
                     min={new Date().toISOString().slice(0, 10)}
+                    disabled={isLocked}
                     className="mt-1.5 h-12 text-base"
                   />
                 </div>
@@ -605,6 +607,7 @@ const EditSit = () => {
                     onChange={(e) => setEndDate(e.target.value)}
                     onBlur={() => setDatesTouched(true)}
                     min={startDate || undefined}
+                    disabled={isLocked}
                     className="mt-1.5 h-12 text-base"
                   />
                 </div>
@@ -628,6 +631,7 @@ const EditSit = () => {
               <div className="mt-4 flex items-start gap-3 rounded-xl border border-border p-4">
                 <Checkbox
                   id="sit-flexible"
+                  disabled={isLocked}
                   checked={flexibleDates}
                   onCheckedChange={(v) => {
                     const next = v === true;
@@ -657,6 +661,7 @@ const EditSit = () => {
                         <button
                           key={m}
                           type="button"
+                          disabled={isLocked}
                           onClick={() =>
                             setFlexibleMonths((prev) =>
                               prev.includes(m) ? prev.filter((x) => x !== m) : [...prev, m],
@@ -680,6 +685,7 @@ const EditSit = () => {
                         <button
                           key={d}
                           type="button"
+                          disabled={isLocked}
                           onClick={() =>
                             setFlexibleDuration((prev) => (prev === d ? "" : d))
                           }
@@ -703,6 +709,7 @@ const EditSit = () => {
                       placeholder="Ex : arrivée entre le 3 et le 5, départ possible après le 16."
                       value={flexibleFreeNote}
                       onChange={(e) => setFlexibleFreeNote(e.target.value.slice(0, 300))}
+                      disabled={isLocked}
                       rows={2}
                       maxLength={300}
                       className="mt-1.5 text-base resize-none"
@@ -730,6 +737,7 @@ const EditSit = () => {
                   setSpecificExpectations(e.target.value.slice(0, MAX_DESC_LENGTH))
                 }
                 onBlur={() => setDescTouched(true)}
+                disabled={isLocked}
                 rows={5}
                 maxLength={MAX_DESC_LENGTH}
                 className="text-base resize-none"
@@ -772,6 +780,7 @@ const EditSit = () => {
               <ChipSelect
                 options={openToOptions}
                 selected={openTo}
+                disabled={isLocked}
                 onChange={(next) => {
                   const SP = "Sans préférence";
                   const justAddedSP = next.includes(SP) && !openTo.includes(SP);
@@ -789,6 +798,7 @@ const EditSit = () => {
                   <button
                     key={opt.value}
                     type="button"
+                    disabled={isLocked}
                     onClick={() => setMinGardienSits(opt.value)}
                     className={
                       minGardienSits === opt.value
@@ -806,6 +816,7 @@ const EditSit = () => {
               <div className="flex items-start gap-3 rounded-xl border border-warning-border bg-warning-soft p-4">
                 <Checkbox
                   id="sit-urgent"
+                  disabled={isLocked}
                   checked={isUrgent}
                   onCheckedChange={(v) => setIsUrgent(v === true)}
                   className="mt-0.5"
@@ -836,6 +847,7 @@ const EditSit = () => {
                 ownerId={user.id}
                 initialCoverPhotoUrl={coverPhotoUrl}
                 initialGallery={ownerGallery}
+                disabled={isLocked}
                 onCoverChange={(url) => setCoverPhotoUrl(url)}
               />
             ) : null}
