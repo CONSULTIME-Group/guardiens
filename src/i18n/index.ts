@@ -1,6 +1,7 @@
 import i18n from "i18next";
 import { initReactI18next } from "react-i18next";
 import LanguageDetector from "i18next-browser-languagedetector";
+import { LANG_STORAGE_KEY, migrateLegacyLangStorage } from "@/lib/langStorageKey";
 
 // Seul le français est embarqué dans le bundle d'entrée : c'est la langue de
 // repli et la langue de la très grande majorité des visites. Les quatre autres
