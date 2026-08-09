@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useMemo, useRef, lazy, Suspense } from "react";
+import { useTranslation } from "react-i18next";
 import PageMeta from "@/components/PageMeta";
 import { logger } from "@/lib/logger";
 import { useNavigate, Link, useSearchParams } from "react-router-dom";
