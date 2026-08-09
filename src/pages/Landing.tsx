@@ -30,6 +30,8 @@ import { FaqSection } from "@/components/landing/FaqSection";
 import { FinalCtaSection } from "@/components/landing/FinalCtaSection";
 
 import PublicHeader from "@/components/layout/PublicHeader";
+import { useShellMode } from "@/components/layout/useShellMode";
+import { useAuth } from "@/contexts/AuthContext";
 
 import RecentSitsItemListJsonLd from "@/components/seo/RecentSitsItemListJsonLd";
 
@@ -58,6 +60,12 @@ const HOME_OG_IMAGE = HOME_ROUTE?.ogImage ?? DEFAULT_OG_IMAGE;
 const Landing = () => {
   const navigate = useNavigate();
   const { t } = useTranslation();
+  const shellMode = useShellMode();
+  const { user, activeRole } = useAuth();
+  // Session vérifiée et profil chargé : on ne propose plus de créer un compte
+  // à quelqu'un qui en a déjà un, on propose son action principale.
+  const isMember = shellMode === "app";
+  const memberIsOwner = (user?.role === "both" ? activeRole : user?.role) === "owner";
   const { data: inventaire } = useInventaireCounts();
   const { data: publicStats } = usePublicStats();
   const hasPros = (inventaire?.pros_total ?? 0) > 0;
@@ -210,21 +218,29 @@ const Landing = () => {
               <button
                 onClick={() => {
                   trackEvent("cta_proprio_clicked", { metadata: { location: "hero" } });
+                  if (isMember) {
+                    navigate(memberIsOwner ? "/sits/create" : "/petites-missions/creer?type=offre");
+                    return;
+                  }
                   navigate("/inscription?role=owner");
                 }}
                 style={{ boxShadow: "0 6px 14px rgba(44,109,80,.24)" }}
                 className="font-body text-base font-semibold tracking-wide rounded-full px-12 py-4 bg-primary text-primary-foreground hover:brightness-95 hover:scale-[1.03] transition-all duration-200 ring-2 ring-primary-foreground/10"
               >
-                {t("landing.hero.cta_owner")}
+                {isMember
+                  ? memberIsOwner
+                    ? t("landing.hero.cta_member_owner", "Publier une annonce")
+                    : t("landing.hero.cta_member_sitter", "Proposer un coup de main")
+                  : t("landing.hero.cta_owner")}
               </button>
               <button
                 onClick={() => {
                   trackEvent("cta_sitter_clicked", { metadata: { location: "hero" } });
-                  navigate("/inscription?role=sitter");
+                  navigate(isMember ? "/search" : "/inscription?role=sitter");
                 }}
                 className="font-body text-sm font-medium tracking-wide rounded-full px-7 py-3 bg-transparent text-white border border-white/60 hover:bg-white/10 transition-all duration-200"
               >
-                {t("landing.hero.cta_sitter")}
+                {isMember ? t("landing.hero.cta_member_search", "Trouver une garde") : t("landing.hero.cta_sitter")}
               </button>
             </div>
 
