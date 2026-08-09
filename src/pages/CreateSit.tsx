@@ -1665,7 +1665,7 @@ const CreateSit = () => {
           : draftId ? "Brouillon en cours" : null;
 
   return (
-    <div className="animate-fade-in pb-40">
+    <div className="animate-fade-in pb-[calc(15rem+env(safe-area-inset-bottom))] md:pb-40">
       <Head><meta name="robots" content="noindex, nofollow" /></Head>
 
       {/* Stepper sticky */}
@@ -2565,7 +2565,9 @@ const CreateSit = () => {
       )}
 
       {/* ===================== CTA STICKY BOTTOM ===================== */}
-      <div className="fixed bottom-16 inset-x-0 bg-card border-t border-border z-40" style={{ paddingBottom: "max(1rem, env(safe-area-inset-bottom))" }}>
+      <div
+        className="fixed inset-x-0 bg-card border-t border-border z-40 bottom-[calc(4.5rem+env(safe-area-inset-bottom))] md:bottom-0 pb-4 md:pb-[max(1rem,env(safe-area-inset-bottom))]"
+      >
         <div className="max-w-3xl mx-auto px-4 pt-3 space-y-2">
           {/* Blockers on last step only */}
           {currentStep === 2 && publishBlockers.length > 0 && (
