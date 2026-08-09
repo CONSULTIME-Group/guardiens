@@ -57,7 +57,7 @@ const OwnerCockpit = ({
       aria-label="Espace propriétaire, accueil"
       className="pt-4 sm:pt-6 pb-2"
     >
-      <div className="notebook-card relative p-[22px] sm:p-[34px] pr-[34px] sm:pr-[52px]">
+      <div className="notebook-card relative p-[18px] pr-[30px] sm:p-[34px] sm:pr-[52px]">
         <div className="notebook-card-paper absolute inset-0" aria-hidden="true" />
         {/* Lavis discret terracotta, coin bas gauche */}
         <div
@@ -72,7 +72,7 @@ const OwnerCockpit = ({
         {/* Aquarelle signature, coin bas droit, mêmes règles que SitterCockpit */}
         <div
           aria-hidden="true"
-          className="illustration-wrapper pointer-events-none absolute bottom-[-12px] right-[-16px] hidden sm:block w-[150px] h-[150px] min-[1100px]:w-[180px] min-[1100px]:h-[180px]"
+          className="illustration-wrapper pointer-events-none absolute top-[-14px] right-[-10px] w-[124px] h-[124px] sm:top-auto sm:bottom-[-12px] sm:right-[-16px] sm:w-[150px] sm:h-[150px] min-[1100px]:w-[180px] min-[1100px]:h-[180px]"
         >
           <img
             src={ownerHome}
@@ -87,7 +87,7 @@ const OwnerCockpit = ({
 
         <div className="relative flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 sm:gap-[22px]">
           {/* Bloc gauche : avatar + salutation */}
-          <div className="flex items-center gap-[14px] min-w-0 flex-1">
+          <div className="flex items-center gap-[14px] min-w-0 flex-1 pr-[72px] sm:pr-0">
             <Link
               to="/owner-profile"
               aria-label="Modifier mon profil"
