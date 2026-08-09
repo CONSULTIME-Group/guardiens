@@ -8,7 +8,7 @@
     "listings": "Aktuelle Anzeigen",
     "small_missions": "Gegenseitige Hilfe",
     "pros": "Tierprofis",
-    "guides": "Lokale Ratgeber",
+    "guides": "Lokale Guides",
     "pricing": "Tarife",
     "news": "Das Journal",
     "login": "Anmelden",
@@ -22,7 +22,7 @@
     "sections": {
       "by_city": "House-sitting nach Stadt",
       "by_department": "Nach Departement",
-      "local_guides": "Lokale Ratgeber",
+      "local_guides": "Lokale Guides",
       "resources": "Ressourcen",
       "guardiens": "Guardiens"
     },
@@ -59,9 +59,9 @@
   },
   "landing": {
     "hero": {
-      "eyebrow": "Nachbarschaftshilfe · Tierbetreuung · Home Sitting",
-      "title_main": "Tierbetreuung, eine kleine Hilfe,",
-      "title_accent": "die Begegnung.",
+      "eyebrow": "Gegenseitige Hilfe · Tierbetreuung · Home Sitting",
+      "title_main": "Tierbetreuung, gegenseitige Hilfe,",
+      "title_accent": "echte Begegnungen.",
       "lede": "Guardiens verbindet Tierbesitzer mit vertrauenswürdigen Betreuern, überall in Frankreich. House-Sitting zu Hause, gegenseitige Hilfe unter Menschen aus der Umgebung: Ihre Tiere bleiben zu Hause, Ihr Haus bleibt bewohnt, und Sie reisen unbeschwert ab.",
       "lede_italic": "Und hinter jedem Austausch steht eine Begegnung, nach der Sie sonst nicht gesucht hätten.",
       "cta_owner": "Meine Anzeige veröffentlichen",
@@ -73,9 +73,9 @@
       "kpi_missions": "Hilfseinsätze",
       "brand_tagline": "Ganz in Ihrer Nähe.",
       "reassurance": "Vertrauensvolle Betreuer aus deiner Nähe warten auf dich.",
-      "cta_member_owner": "Eine Anzeige veröffentlichen",
-      "cta_member_sitter": "Eine Hilfe anbieten",
-      "cta_member_search": "Eine Betreuung finden"
+      "cta_member_owner": "Anzeige veröffentlichen",
+      "cta_member_sitter": "Hilfe anbieten",
+      "cta_member_search": "Betreuung finden"
     },
     "toc": {
       "aria": "Inhaltsverzeichnis der Seite",
@@ -96,7 +96,7 @@
     "usages": {
       "eyebrow": "Was wir gemeinsam tun",
       "title": "Tierbetreuung zu Hause und lokale Hilfe.",
-      "lede": "Home Sitting auf der einen Seite, Nachbarschaftshilfe auf der anderen. Sie haben die Wahl: das eine, das andere oder beides.",
+      "lede": "Home Sitting auf der einen Seite, Gegenseitige Hilfe auf der anderen. Sie haben die Wahl: das eine, das andere oder beides.",
       "owner": {
         "tag": "Eigentümer",
         "title": "Unbeschwert verreisen.",
@@ -148,7 +148,7 @@
     "aid": {
       "eyebrow": "Für alle · Unter Menschen aus der Umgebung",
       "title": "Trauen Sie sich zu fragen. Trauen Sie sich anzubieten.",
-      "p1": "Früher gab es jemanden aus der Nachbarschaft, der zum Gießen kam, den Hund hütete oder einen Fensterladen reparierte. Jemand, dem man im Gegenzug ein Stück Kuchen oder Hilfe anbot.",
+      "p1": "Früher gab es jemanden aus der Umgebung, der zum Gießen kam, den Hund hütete oder einen Fensterladen reparierte. Jemand, dem man im Gegenzug ein Stück Kuchen oder Hilfe anbot.",
       "p2": "Diese Gewohnheit ist nicht verschwunden, man traut sich nur die erste Frage nicht mehr. Guardiens ist der Vorwand, sie wieder zu stellen und dabei Erfahrungen zu machen, die Ihnen keine organisierte Reise bieten kann.",
       "need_title": "«Ich brauche eine kleine Hilfe»",
       "need_text": "Ihr Gemüsegarten während des Urlaubs. Ihre Hühner dieses Wochenende. Den Hund nach einer OP ausführen. Danach zu fragen ist kein Geständnis einer Schwäche, sondern ein Vertrauensbeweis.",
@@ -193,7 +193,15 @@
       "prev_aria": "Vorheriger Bericht",
       "next_aria": "Nächster Bericht",
       "page_aria": "Zu Seite {{n}} der Berichte gehen",
-      "program_label": "Langjähriges Mitglied"
+      "program_label": "Langjähriges Mitglied",
+      "items": {
+        "nadia": "Zwei Katzen und ein Hund. Drei Jahre lang hatten wir keinen richtigen Urlaub. Unsere Sitterin wohnt zehn Minuten entfernt. Am Donnerstag haben wir uns auf einen Kaffee getroffen. Am Samstag sind wir losgefahren.",
+        "tomas": "Ich suchte eine Bleibe zwischen zwei Jobs. In zwei Monaten habe ich vier Häuser gehütet. Ich habe Orte entdeckt, die ich seit zehn Jahren vor der Tür hatte, ohne sie wirklich zu kennen.",
+        "rania_david": "Wir haben ein Haus in der Ardèche, das acht Monate im Jahr leer stand. Jetzt lebt es. Die Menschen, die darauf aufpassen, schicken uns Fotos vom Garten. Es ist seltsam, wie gut das tut.",
+        "giulia": "Ich musste für drei Wochen weg. Mein Gemüsegarten, meine Hühner, meine Pflanzen. Ein Guardiens Mitglied hat alles übernommen, für Gemüse und Eier. Wir kannten uns nicht. Wir sehen uns immer noch.",
+        "sarah_karim": "Drei Pferde, vier Katzen, ein Papagei. Alle sagen uns, dafür finde man keine Betreuung. Unsere Sitterin kam zweimal vorbei, bevor wir losfuhren. Sie kannte alle Namen auswendig.",
+        "elena": "Angefangen habe ich damit, die Pflanzen einer Mitgliedin zu gießen, für ein Essen. Jetzt hüte ich ihr Haus, wenn sie wegfährt. So läuft es hier, langsam, ganz natürlich."
+      }
     },
     "story": {
       "eyebrow": "Unsere Geschichte",
@@ -203,7 +211,7 @@
       "p3": "Elisa und ich haben in fünf Jahren 37 Häuser gehütet, in Dörfern, Städten und Weilern.",
       "quote": "Wir haben nie bloß Häuser gehütet. Wir wurden in Leben eingeladen.",
       "p4": "Das ist es, was die Dorfgemeinschaft früher intuitiv tat.",
-      "p5": "Guardiens ist der Vorwand, der fehlte. Einerseits kleine Hilfen zwischen Nachbarn: ein gegossener Gemüsegarten für ein Essen, eine Fähigkeit gegen eine andere. Andererseits, unabhängig davon, das house-sitting: Ihre Schlüssel in die Hände von jemandem zu geben, dem Sie in die Augen geschaut haben.",
+      "p5": "Guardiens ist der Vorwand, der fehlte. Einerseits kleine Hilfen untereinander: ein gegossener Gemüsegarten für ein Essen, eine Fähigkeit gegen eine andere. Andererseits, unabhängig davon, das house-sitting: Ihre Schlüssel in die Hände von jemandem zu geben, dem Sie in die Augen geschaut haben.",
       "p6": "Sie werden unbeschwert verreisen. Sie werden mit einer Geschichte zurückkehren. Wir hätten nicht gedacht, dass das so viel zählt.",
       "p7": "Deswegen haben wir Guardiens aufgebaut, damit Sie das auch erleben können.",
       "signature": "Jérémie und Elisa",
@@ -333,7 +341,7 @@
         "home_care_tip": "Zuhause",
         "seasonal_advice": "Saison",
         "breed_did_you_know": "Rassen",
-        "mutual_aid_tip": "Nachbarschaftshilfe"
+        "mutual_aid_tip": "Gegenseitige Hilfe"
       }
     },
     "real_members": {
@@ -473,7 +481,9 @@
           "desc": "Vom Baskenland bis in die Bretagne, über die Alpen, die Provence und den Norden. Das Netzwerk erstreckt sich über alle Regionen."
         }
       }
-    }
+    },
+    "meta_title": "Tierbetreuung zu Hause und House-Sitting unter Privatpersonen | Guardiens",
+    "meta_description": "Finden Sie eine Betreuung aus Ihrer Umgebung für Ihr Zuhause und Ihre Tiere. House-Sitting und gegenseitige Hilfe unter Privatpersonen, geprüft und bewertet, in ganz Frankreich."
   },
   "faq": {
     "title": "Häufig gestellte Fragen",
@@ -543,7 +553,7 @@
       "badge_offered_days_one": "Noch {{count}} Tag gratis",
       "badge_offered_days_other": "Noch {{count}} Tage gratis",
       "badge_most_chosen": "Am beliebtesten",
-      "label": "Betreuer",
+      "label": "Sitter",
       "price_free": "Gratis",
       "free_until": "Kostenlos für alle",
       "per_year": "/Jahr",
@@ -585,8 +595,8 @@
     "mutual": {
       "title": "Hilfe, unabhängig von der Betreuung",
       "free_tag": "Kostenlos für alle",
-      "p1": "Kleine Hilfen brauchen keine Tiere, um zu existieren. Nadine sucht Hilfe beim Ernten ihres Gemüses. Jacques verbringt eine Stunde in ihrem Garten und geht mit einem hausgemachten Gericht nach Hause. Keine Betreuung, keine Kreditkarte, keine Provision – einfach ein Austausch unter Nachbarn.",
-      "p2": "Kochkurse, Pflanzen gießen, Möbel aufbauen, eine Bohrmaschine leihen, gemeinsame Fahrt zum Bahnhof: Alles läuft über die Nachbarschaftshilfe, ganz ohne Abo.",
+      "p1": "Kleine Hilfen brauchen keine Tiere, um zu existieren. Nadine sucht Hilfe beim Ernten ihres Gemüses. Jacques verbringt eine Stunde in ihrem Garten und geht mit einem hausgemachten Gericht nach Hause. Keine Betreuung, keine Kreditkarte, keine Provision – einfach ein Austausch untereinander.",
+      "p2": "Kochkurse, Pflanzen gießen, Möbel aufbauen, eine Bohrmaschine leihen, gemeinsame Fahrt zum Bahnhof: Alles läuft über die gegenseitige Hilfe, ganz ohne Abo.",
       "cta": "Kleine Hilfen entdecken →"
     },
     "promise": {
@@ -667,7 +677,7 @@
     "all": "Alle",
     "new_badge": "Neu",
     "read": "Lesen",
-    "vie_locale_title": "Lokales Leben & Nachbarschaftshilfe",
+    "vie_locale_title": "Lokales Leben und gegenseitige Hilfe",
     "vie_locale_subtitle": "Austausch ohne Geld, Leute aus der Gegend, die sich helfen, eine andere Art zusammenzuleben.",
     "see_all": "Alle Artikel ansehen",
     "empty_search": "Kein Artikel passt zu « {{q}} ».",
@@ -690,10 +700,10 @@
       "actualite": "Aktuelles",
       "ville": "Städte",
       "thematique": "House-sitting",
-      "guide_local": "Lokale Ratgeber",
+      "guide_local": "Lokale Guides",
       "saisonnier": "Saisonal",
       "guide_pratique": "Praktische Ratgeber",
-      "vie_locale": "Lokales Leben & Nachbarschaftshilfe"
+      "vie_locale": "Lokales Leben und gegenseitige Hilfe"
     },
     "fr_only_badge": "FR",
     "fr_only_title": "Nur auf Französisch verfügbar",
@@ -702,8 +712,8 @@
   "guides": {
     "meta_title": "Lokale Pet-Sitting-Ratgeber, Parks, Tierärzte, hundefreundliche Cafés | Guardiens",
     "meta_description": "Praktische Ratgeber für Tiersitter: hundefreundliche Parks, Tierärzte, einladende Cafés, Spazierwege. Alles, was man vor der Ankunft in einer neuen Stadt wissen muss.",
-    "breadcrumb": "Lokale Ratgeber",
-    "title": "Lokale Ratgeber",
+    "breadcrumb": "Lokale Guides",
+    "title": "Lokale Guides",
     "subtitle": "Wo spazieren, wo pflegen lassen, wo brunchen, alles, was ein Sitter in einer neuen Stadt wissen sollte.",
     "search_placeholder": "Stadt suchen...",
     "all_departments": "Alle Departements",
@@ -719,7 +729,7 @@
     "back": "Zurück",
     "meta_title": "Hunde-Guide für {{city}}: Parks, Tierärzte und hundefreundliche Adressen | Guardiens",
     "meta_description": "Erprobte Adressen in {{city}}, um mit Ihrem Hund unterwegs zu sein: Parks, Wanderwege, Tierärzte, hundefreundliche Cafés und Restaurants. {{ideal}}",
-    "breadcrumb": "Lokale Reiseführer",
+    "breadcrumb": "Lokale Guides",
     "header_alt": "Hunde-Guide {{city}}",
     "title": "Hunde-Guide für {{city}}: Parks, Tierärzte und hundefreundliche Adressen",
     "search_placeholder": "Suche nach einem Ort, Park, Tierarzt...",
@@ -825,7 +835,11 @@
     "subtitle_short": "Katzen, Hunde, exotische Tiere, auf dem Land oder in der Stadt. Filtern Sie nach Ort, Daten und Kriterien.",
     "become_sitter_title": "Möchten Sie Betreuer werden?",
     "become_sitter_body": "Anmeldung in 2 Minuten, ohne Bindung.",
-    "become_sitter_cta": "Den Betreuerbereich entdecken"
+    "become_sitter_cta": "Den Betreuerbereich entdecken",
+    "become_sitter_eyebrow": "Sitter werden",
+    "cities_count_one": "{{count}} Stadt",
+    "cities_count_other": "{{count}} Städte",
+    "all_france": "Ganz Frankreich"
   },
   "pros_listing": {
     "meta_title": "Tierprofi-Verzeichnis in Ihrer Nähe | Guardiens",
@@ -965,7 +979,7 @@
   },
   "login_page": {
     "meta_title": "Anmelden, guardiens",
-    "panel_title": "Nachbarschaftshilfe, wiedergefunden",
+    "panel_title": "Gegenseitige Hilfe, wiedergefunden",
     "panel_tagline": "Eine helfende Hand, ein Band des Vertrauens.",
     "panel_description": "Ein Hüter in Ihrer Nähe wacht über Ihr Zuhause und Ihre Tiere. Und unter Einheimischen trauen wir uns wieder, um Hilfe zu bitten und sie anzubieten.",
     "welcome_back": "Willkommen zurück",
@@ -1035,9 +1049,9 @@
     "step_aria": "Anmeldung, Schritt {{step}} von 2",
     "members_count": "Mitglieder bereits bei Guardiens registriert",
     "roles": {
-      "owner_label": "Eigentümer/in",
+      "owner_label": "Eigentümer",
       "owner_desc": "Ich habe Tiere oder ein Haus zu betreuen. Ich veröffentliche Anzeigen und wähle eine/n Guardian.",
-      "sitter_label": "Guardian",
+      "sitter_label": "Sitter",
       "sitter_desc": "Ich möchte Häuser und Tiere betreuen. Ich sehe Anzeigen ein und biete meine Dienste an.",
       "both_label": "Beides",
       "both_desc": "Ich möchte sowohl betreuen lassen als auch selbst betreuen. Sie haben Zugang zu beiden Bereichen.",
@@ -1181,14 +1195,14 @@
     "compare_row5_label": "Tierarten",
     "compare_row5_classic": "Alle",
     "compare_row5_urgent": "Alle (auch reaktive)",
-    "owner_title": "Die Ruhe vertrauenswürdiger Menschen aus der Nachbarschaft",
+    "owner_title": "Die Ruhe vertrauenswürdiger Menschen aus der Umgebung",
     "owner_subtitle": "Für Besitzer",
     "owner_card1_title": "Vorrangige Mobilisierung",
     "owner_card1_desc": "Notfallanfragen stehen ganz oben bei den Benachrichtigungen an die Notfall-Betreuer in der Umgebung.",
     "owner_card2_title": "Anspruchsvolle Zulassung",
     "owner_card2_desc": "5+ Aufenthalte, Bewertung 4.7+, 0 Stornierungen, verifizierte Identität.",
-    "owner_card3_title": "Menschen aus der Nachbarschaft",
-    "owner_card3_desc": "Automatisch im Umkreis von 35 km benachrichtigt, sind es Menschen aus der Nachbarschaft, keine Fremden.",
+    "owner_card3_title": "Menschen aus der Umgebung",
+    "owner_card3_desc": "Automatisch im Umkreis von 35 km benachrichtigt, sind es Menschen aus der Umgebung, keine Fremden.",
     "owner_cta": "Anmelden und über den Start informiert werden",
     "sitter_title": "Werden Sie Notfall-Sitter",
     "sitter_subtitle": "Wenn Sie die Bedingungen erfüllen, erscheint die Einladung auf Ihrem Dashboard. Sie entscheiden.",
@@ -1212,8 +1226,8 @@
     "cities_lead": "Das Notfallnetzwerk stützt sich auf lokale Betreuer in ganz Frankreich. Hier die Städte, in denen das Netzwerk zuerst aufgebaut wird.",
     "see_pricing": "Preise ansehen",
     "further_kicker": "Mehr erfahren",
-    "further1_title": "Kleine Nachbarschaftshilfe-Missionen",
-    "further1_desc": "Für punktuelle Hilfeleistungen (ohne Notfall) zwischen Menschen aus der Nachbarschaft.",
+    "further1_title": "Kleine Hilfsmissionen",
+    "further1_desc": "Für punktuelle Hilfeleistungen (ohne Notfall) zwischen Menschen aus der Umgebung.",
     "further2_title": "Lokale Stadtführer",
     "further2_desc": "Tierärzte, Parks, hundefreundliche Cafés und gute Adressen in Ihrer Nähe.",
     "further3_title": "Notfall-Sitter werden",
@@ -1248,8 +1262,8 @@
     "story_disclaimer": "Illustratives Szenario"
   },
   "small_missions_page": {
-    "meta_title": "Kleine Missionen, Unter Nachbarn | Guardiens",
-    "meta_description": "Hilfeleistungen, Austausch, Kompetenzen. Unter Menschen aus der Nachbarschaft, die sich aussuchen.",
+    "meta_title": "Kleine Missionen, Untereinander | Guardiens",
+    "meta_description": "Hilfeleistungen, Austausch, Kompetenzen. Unter Menschen aus der Umgebung, die sich aussuchen.",
     "complete_profile_cta": "Vervollständigen Sie Ihr Profil zum Veröffentlichen",
     "tabs_aria": "Liste filtern",
     "tab_need": "Ich suche eine helfende Hand",
@@ -1271,8 +1285,8 @@
     "good_news_strong": "Gute Nachricht:",
     "outofzone_offer_visible_one": " ist etwas weiter sichtbar ↓",
     "outofzone_offer_visible_other": " sind etwas weiter sichtbar ↓",
-    "empty_offer_text_no_oz": "Seien Sie die erste Person, die ihre Hilfe anbietet. Veröffentlichen Sie, was Sie können, und die Menschen aus der Nachbarschaft werden zu Ihnen kommen.",
-    "empty_need_text_no_oz": "Seien Sie die erste Person, die ihren Bedarf veröffentlicht. Eine heutige Anfrage sehen die Menschen aus der Nachbarschaft morgen.",
+    "empty_offer_text_no_oz": "Seien Sie die erste Person, die ihre Hilfe anbietet. Veröffentlichen Sie, was Sie können, und die Menschen aus der Umgebung werden zu Ihnen kommen.",
+    "empty_need_text_no_oz": "Seien Sie die erste Person, die ihren Bedarf veröffentlicht. Eine heutige Anfrage sehen die Menschen aus der Umgebung morgen.",
     "publish_offer_cta": "Ich wage es, ich veröffentliche mein Angebot",
     "publish_need_cta": "Ich wage es, ich veröffentliche meine Anfrage",
     "widen_france": "Auf ganz Frankreich erweitern",
@@ -1283,20 +1297,20 @@
     "oz_subtitle": "Über Ihren aktuellen Umkreis hinaus ({{km}} km). Erweitern Sie, um alle zu sehen.",
     "elsewhere": "Anderswo",
     "visible_yes": "Sie sind sichtbar, verfügbar zum Helfen",
-    "visible_no": "Werden Sie für die Menschen aus der Nachbarschaft sichtbar",
+    "visible_no": "Werden Sie für die Menschen aus der Umgebung sichtbar",
     "modify": "Bearbeiten",
     "and_also": "Außerdem",
     "members_for_need": "Verfügbare Mitglieder zum Helfen",
     "members_other": "Weitere verfügbare Mitglieder",
-    "people_local_one": "{{count}} Person aus der Nachbarschaft",
-    "people_local_other": "{{count}} Personen aus der Nachbarschaft",
+    "people_local_one": "{{count}} Person aus der Umgebung",
+    "people_local_other": "{{count}} Personen aus der Umgebung",
     "complementary": "Ergänzend",
     "complementary_desc": "Verfügbar ohne angegebene Kompetenz",
     "see_more_people": "Mehr Personen sehen ({{count}} übrig)",
     "empty_helpers_offer_title": "Sie wären die erste verfügbare Person hier.",
     "empty_helpers_need_title": "Niemand hat sich bisher in Ihrer Nähe als verfügbar erklärt.",
     "empty_helpers_offer_text": "Aktivieren Sie Ihre Verfügbarkeit oben: Ihre Präsenz ermutigt andere.",
-    "empty_helpers_need_text": "Erweitern Sie den Radius oder veröffentlichen Sie Ihre Anfrage: die Menschen aus der Nachbarschaft erhalten eine Benachrichtigung und melden sich oft am selben Tag.",
+    "empty_helpers_need_text": "Erweitern Sie den Radius oder veröffentlichen Sie Ihre Anfrage: die Menschen aus der Umgebung erhalten eine Benachrichtigung und melden sich oft am selben Tag.",
     "footer_about": "Über uns",
     "footer_contact": "Kontakt",
     "footer_cgu": "AGB",
@@ -1855,5 +1869,9 @@
     "expand_zone": "Auf {{zone}} erweitern",
     "expand_zone_count_one": "{{count}} Betreuer verfügbar.",
     "expand_zone_count_other": "{{count}} Betreuer verfügbar."
+  },
+  "entraide": {
+    "help_requested": "Hilfe gesucht",
+    "help_offered": "Hilfe angeboten"
   }
 }

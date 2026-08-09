@@ -85,8 +85,10 @@ const TestimonialsSection = () => {
                     <span aria-hidden className="block font-heading text-7xl leading-none mb-3 select-none text-primary/40">
                       "
                     </span>
+                    {/* Le verbatim est traduit par clé. Prénoms et villes
+                        (quote.name, quote.detail) restent tels quels. */}
                     <p className="font-body text-base md:text-lg text-foreground/70 leading-relaxed italic mb-6 flex-1">
-                      {quote.text}
+                      {t(`landing.testimonials.items.${quote.id}`, { defaultValue: quote.text })}
                     </p>
                     <figcaption className="flex items-center gap-3 pt-4 border-t border-border/60">
                       <span aria-hidden className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary font-heading text-sm font-semibold">

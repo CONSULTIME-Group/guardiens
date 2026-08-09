@@ -5,9 +5,9 @@
     "current": "Idioma actual: {{lang}}"
   },
   "nav": {
-    "listings": "Anuncios en curso",
+    "listings": "Anuncios actuales",
     "small_missions": "Ayuda mutua",
-    "pros": "Prós de mascotas",
+    "pros": "Profesionales de animales",
     "guides": "Guías locales",
     "pricing": "Tarifas",
     "news": "El diario",
@@ -39,7 +39,7 @@
       "register": "Registro",
       "small_missions": "Ayuda mutua",
       "emergency_sitter": "Cuidador de emergencia",
-      "pet_pros": "Prós de mascotas",
+      "pet_pros": "Profesionales de animales",
       "all_cities": "Todas las ciudades cubiertas",
       "all_departments": "Los 101 departamentos",
       "become_home_sitter": "Ser home-sitter",
@@ -60,7 +60,7 @@
   "landing": {
     "hero": {
       "eyebrow": "Ayuda mutua · Cuidado de mascotas · Home sitting",
-      "title_main": "El cuidado de mascotas, el pequeño favor,",
+      "title_main": "El cuidado de animales, la ayuda mutua,",
       "title_accent": "el encuentro.",
       "lede": "Guardiens conecta a propietarios de animales con cuidadores de confianza, en toda Francia. House-sitting a domicilio, ayuda mutua entre gente de la zona: sus animales se quedan en casa, su casa sigue habitada y usted parte tranquilo.",
       "lede_italic": "Y detrás de cada intercambio, un encuentro que no habría buscado.",
@@ -74,8 +74,8 @@
       "brand_tagline": "Cerca de casa.",
       "reassurance": "Cuidadores de confianza cerca de ti te esperan.",
       "cta_member_owner": "Publicar un anuncio",
-      "cta_member_sitter": "Ofrecer una ayuda",
-      "cta_member_search": "Buscar un cuidado"
+      "cta_member_sitter": "Ofrecer ayuda",
+      "cta_member_search": "Encontrar un cuidado"
     },
     "toc": {
       "aria": "Sumario de la página",
@@ -96,7 +96,7 @@
     "usages": {
       "eyebrow": "Lo que hacemos juntos",
       "title": "Cuidado de mascotas a domicilio y ayuda local.",
-      "lede": "El home sitting por un lado, la ayuda mutua entre vecinos por el otro. Usted elige: uno, otro o ambos.",
+      "lede": "El home sitting por un lado, la ayuda mutua entre personas de la zona por el otro. Usted elige: uno, otro o ambos.",
       "owner": {
         "tag": "Propietarios",
         "title": "Partir con tranquilidad.",
@@ -114,7 +114,7 @@
         "badge": "Entre gente de la zona",
         "tag": "Ayuda local, independiente del cuidado",
         "title": "Un pequeño favor, un intercambio.",
-        "text": "Regar un huerto, montar una estantería, compartir una habilidad, visitar a una persona aislada. Sin necesidad de cuidado ni de mascotas, solo vecinos que se ayudan mutuamente.",
+        "text": "Regar un huerto, montar una estantería, compartir una habilidad, visitar a una persona aislada. Sin necesidad de cuidado ni de mascotas, solo personas de la zona que se ayudan.",
         "cta": "Descubrir la ayuda mutua →"
       },
       "urgency": {
@@ -193,7 +193,15 @@
       "prev_aria": "Testimonio anterior",
       "next_aria": "Testimonio siguiente",
       "page_aria": "Ir a la página de testimonios {{n}}",
-      "program_label": "Miembro histórico"
+      "program_label": "Miembro histórico",
+      "items": {
+        "nadia": "Dos gatos y un perro. No habíamos tenido unas vacaciones de verdad en tres años. Nuestra cuidadora vive a diez minutos. Nos vimos con un café el jueves. Nos fuimos el sábado.",
+        "tomas": "Buscaba un alojamiento temporal entre dos trabajos. Cuidé cuatro casas en dos meses. Descubrí sitios que tenía al lado desde hacía diez años sin conocerlos de verdad.",
+        "rania_david": "Tenemos una casa en Ardèche que se quedaba vacía ocho meses al año. Ahora vive. Quienes la cuidan nos mandan fotos del jardín. Es raro lo bien que sienta.",
+        "giulia": "Tenía que irme tres semanas. Mi huerto, mis gallinas, mis plantas. Un miembro de Guardiens se encargó de todo a cambio de verduras y huevos. No nos conocíamos. Seguimos viéndonos.",
+        "sarah_karim": "Tres caballos, cuatro gatos, un loro. Todo el mundo nos dice que es imposible de cuidar. Nuestra cuidadora vino dos veces antes de que nos fuéramos. Se sabía sus nombres de memoria.",
+        "elena": "Empecé regando las plantas de una miembro a cambio de una comida. Ahora cuido su casa cuando se va. Aquí funciona así, despacio, con naturalidad."
+      }
     },
     "story": {
       "eyebrow": "Nuestra historia",
@@ -203,7 +211,7 @@
       "p3": "Elisa y yo cuidamos 37 casas en cinco años, en pueblos, ciudades y aldeas.",
       "quote": "Nunca cuidamos casas. Fuimos invitados a vidas.",
       "p4": "Eso es lo que la comunidad hacía de forma natural.",
-      "p5": "Guardiens es el pretexto que faltaba. Por un lado, los pequeños favores de ayuda mutua entre vecinos: un huerto regado a cambio de una comida, una habilidad por otra, una ayuda que se devuelve en especie. Por otro lado, independientemente, el house-sitting: sus llaves confiadas a alguien a quien ha mirado a los ojos.",
+      "p5": "Guardiens es el pretexto que faltaba. Por un lado, los pequeños favores de ayuda mutua entre personas de la zona: un huerto regado a cambio de una comida, una habilidad por otra, una ayuda que se devuelve en especie. Por otro lado, independientemente, el house-sitting: sus llaves confiadas a alguien a quien ha mirado a los ojos.",
       "p6": "Usted partirá con tranquilidad. Regresará con una historia. No esperábamos que esto importara tanto.",
       "p7": "Por eso construimos Guardiens, para que usted también viva esto.",
       "signature": "Jérémie y Elisa",
@@ -473,7 +481,9 @@
           "desc": "Del País Vasco a Bretaña, pasando por los Alpes, la Provenza y el Norte. La red se extiende por todas las regiones."
         }
       }
-    }
+    },
+    "meta_title": "Cuidado de animales a domicilio y house-sitting entre particulares | Guardiens",
+    "meta_description": "Encuentre a un cuidador de su zona para su casa y sus animales. House-sitting y ayuda mutua entre particulares, verificados y valorados, en toda Francia."
   },
   "faq": {
     "title": "Preguntas frecuentes",
@@ -585,7 +595,7 @@
     "mutual": {
       "title": "La ayuda mutua, independiente del cuidado",
       "free_tag": "Gratis para todos",
-      "p1": "Los pequeños favores no necesitan animales para existir. Nadine busca ayuda para recoger sus verduras. Jacques pasa una hora en su jardín y se va con un plato de comida casera. Sin cuidados, sin tarjetas bancarias, sin comisiones, solo un intercambio entre vecinos.",
+      "p1": "Los pequeños favores no necesitan animales para existir. Nadine busca ayuda para recoger sus verduras. Jacques pasa una hora en su jardín y se va con un plato de comida casera. Sin cuidados, sin tarjetas bancarias, sin comisiones, solo un intercambio entre personas de la zona.",
       "p2": "Clases de cocina, riego de plantas, montaje de muebles, préstamo de herramientas o viajes compartidos a la estación: todo se gestiona a través de la ayuda mutua, sin suscripción.",
       "cta": "Descubrir los pequeños favores →"
     },
@@ -825,7 +835,11 @@
     "subtitle_short": "Gatos, perros, animales exóticos, en el campo o en la ciudad. Filtre por ubicación, fechas y criterios.",
     "become_sitter_title": "¿Quiere convertirse en guardián?",
     "become_sitter_body": "Registro en 2 minutos, sin compromiso.",
-    "become_sitter_cta": "Descubrir el espacio guardián"
+    "become_sitter_cta": "Descubrir el espacio guardián",
+    "become_sitter_eyebrow": "Ser cuidador",
+    "cities_count_one": "{{count}} ciudad",
+    "cities_count_other": "{{count}} ciudades",
+    "all_france": "Toda Francia"
   },
   "pros_listing": {
     "meta_title": "Directorio de profesionales animales cerca de usted | Guardiens",
@@ -1035,9 +1049,9 @@
     "step_aria": "Registro, paso {{step}} de 2",
     "members_count": "miembros ya inscritos en Guardiens",
     "roles": {
-      "owner_label": "Propietario/a",
+      "owner_label": "Propietario",
       "owner_desc": "Tengo animales o una casa que cuidar. Publico anuncios y elijo a un guardián.",
-      "sitter_label": "Guardián",
+      "sitter_label": "Cuidador",
       "sitter_desc": "Quiero cuidar casas y animales. Consulto los anuncios y ofrezco mis servicios.",
       "both_label": "Ambos",
       "both_desc": "Quiero a la vez que cuiden y cuidar. Tendrá acceso a los dos espacios.",
@@ -1855,5 +1869,9 @@
     "expand_zone": "Ampliar a {{zone}}",
     "expand_zone_count_one": "{{count}} cuidador disponible.",
     "expand_zone_count_other": "{{count}} cuidadores disponibles."
+  },
+  "entraide": {
+    "help_requested": "Ayuda solicitada",
+    "help_offered": "Ayuda ofrecida"
   }
 }

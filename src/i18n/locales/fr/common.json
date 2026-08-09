@@ -193,7 +193,15 @@
       "prev_aria": "Témoignage précédent",
       "next_aria": "Témoignage suivant",
       "page_aria": "Aller à la page de témoignages {{n}}",
-      "program_label": "Membre historique"
+      "program_label": "Membre historique",
+      "items": {
+        "nadia": "Deux chats et un chien. On n'avait pas pris de vraies vacances depuis trois ans. Notre gardienne habite à dix minutes. On s'est rencontrés autour d'un café le jeudi. On est partis le samedi.",
+        "tomas": "Je cherchais un logement temporaire entre deux jobs. J'ai gardé quatre maisons en deux mois. J'ai découvert des endroits que j'habitais depuis dix ans sans jamais vraiment connaître.",
+        "rania_david": "On a une maison en Ardèche qu'on laissait vide huit mois par an. Maintenant elle vit. Les gens qui la gardent nous envoient des photos du jardin. C'est bizarre comme ça fait du bien.",
+        "giulia": "Je devais partir trois semaines. Mon potager, mes poules, mes plantes. Un membre Guardiens a tout géré contre des légumes et des œufs. On se connaissait pas. On se voit encore.",
+        "sarah_karim": "Trois chevaux, quatre chats, un perroquet. Tout le monde nous dit que c'est impossible à faire garder. Notre gardienne est venue deux fois avant qu'on parte. Elle connaissait leurs noms par cœur.",
+        "elena": "J'ai commencé par arroser les plantes d'un membre contre un repas. Maintenant je garde sa maison quand elle part. C'est comme ça que ça marche ici, doucement, naturellement."
+      }
     },
     "story": {
       "eyebrow": "Notre histoire",
@@ -469,7 +477,9 @@
           "desc": "Du Pays basque à la Bretagne, en passant par les Alpes, la Provence et le Nord. Le réseau s'étend dans toutes les régions."
         }
       }
-    }
+    },
+    "meta_title": "Garde d'animaux à domicile et house-sitting entre particuliers | Guardiens",
+    "meta_description": "Trouvez un gardien du coin pour votre maison et vos animaux. House-sitting et entraide entre particuliers, vérifiés et notés. Partout en France."
   },
   "faq": {
     "title": "Questions fréquentes",
@@ -821,7 +831,11 @@
     "explore_pricing": "Tarifs gardien",
     "explore_pricing_desc": "Gratuit pour tous, sans engagement.",
     "explore_intl": "Annonces hors France",
-    "explore_intl_desc": ", Maroc, Espagne, Belgique…"
+    "explore_intl_desc": ", Maroc, Espagne, Belgique…",
+    "become_sitter_eyebrow": "Devenir gardien",
+    "cities_count_one": "{{count}} ville",
+    "cities_count_other": "{{count}} villes",
+    "all_france": "France entière"
   },
   "pros_listing": {
     "meta_title": "Annuaire des pros animaliers près de chez vous | Guardiens",
@@ -1850,5 +1864,9 @@
     "expand_zone": "Élargir à {{zone}}",
     "expand_zone_count_one": "{{count}} gardien disponible.",
     "expand_zone_count_other": "{{count}} gardiens disponibles."
+  },
+  "entraide": {
+    "help_requested": "Coups de main demandés",
+    "help_offered": "Coups de main proposés"
   }
 }

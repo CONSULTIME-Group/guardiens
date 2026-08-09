@@ -125,9 +125,12 @@ export default function PublicListings() {
   // Eyebrow : on n'affiche le compteur de villes que s'il a un signal réel
   // (>= 2). « 1 ville » est un faux signal qui décrédibilise la promesse.
   const eyebrowDynamic = openCount > 0
-    ? citiesCount >= 2
-      ? `${openCount} annonces ouvertes en France · ${citiesCount} villes · mise à jour quotidienne`
-      : `${openCount} annonce${openCount > 1 ? "s" : ""} ouverte${openCount > 1 ? "s" : ""} en France · mise à jour quotidienne`
+    ? t("public_listings.eyebrow_stats", {
+        count: openCount,
+        cities: citiesCount >= 2
+          ? t("public_listings.cities_count", { count: citiesCount })
+          : t("public_listings.all_france"),
+      })
     : t("public_listings.eyebrow");
 
 
@@ -230,7 +233,7 @@ export default function PublicListings() {
           <div className="rounded-3xl border border-border bg-accent/30 px-6 py-8 md:px-10 md:py-10 flex flex-col md:flex-row md:items-center md:justify-between gap-6">
             <div className="min-w-0 max-w-xl">
               <p className="text-xs font-body font-semibold tracking-widest uppercase text-primary/60 mb-3">
-                {t("public_listings.become_sitter_eyebrow", { defaultValue: "Devenir gardien" })}
+                {t("public_listings.become_sitter_eyebrow")}
               </p>
               <h2 id="become-sitter-title" className="font-heading text-2xl md:text-3xl font-semibold leading-snug text-foreground">
                 {t("public_listings.become_sitter_title")}

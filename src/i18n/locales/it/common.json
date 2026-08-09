@@ -60,7 +60,7 @@
   "landing": {
     "hero": {
       "eyebrow": "Reciproco aiuto · Cura degli animali · Home sitting",
-      "title_main": "La cura degli animali, il piccolo aiuto,",
+      "title_main": "La cura degli animali, l'aiuto reciproco,",
       "title_accent": "l'incontro.",
       "lede": "Guardiens mette in contatto proprietari di animali e custodi di fiducia, in tutta la Francia. House-sitting a domicilio, aiuto reciproco tra persone della zona: i Suoi animali restano a casa, la Sua casa resta abitata, e Lei parte sereno.",
       "lede_italic": "E dietro ogni scambio, un incontro che non avreste altrimenti cercato.",
@@ -71,11 +71,11 @@
       "kpi_animals": "animali accuditi",
       "kpi_members": "iscritti",
       "kpi_missions": "missioni di aiuto reciproco",
-      "brand_tagline": "Vicino a casa vostra.",
+      "brand_tagline": "Vicino a casa.",
       "reassurance": "Assistenti di zona ti aspettano vicino a te.",
-      "cta_member_owner": "Pubblicare un annuncio",
-      "cta_member_sitter": "Proporre un aiuto",
-      "cta_member_search": "Trovare una custodia"
+      "cta_member_owner": "Pubblica un annuncio",
+      "cta_member_sitter": "Offri aiuto",
+      "cta_member_search": "Trova una custodia"
     },
     "toc": {
       "aria": "Sommario della pagina",
@@ -193,7 +193,15 @@
       "prev_aria": "Testimonianza precedente",
       "next_aria": "Testimonianza successiva",
       "page_aria": "Vai alla pagina delle testimonianze {{n}}",
-      "program_label": "Membro storico"
+      "program_label": "Membro storico",
+      "items": {
+        "nadia": "Due gatti e un cane. Non facevamo una vera vacanza da tre anni. La nostra sitter abita a dieci minuti. Ci siamo visti davanti a un caffè il giovedì. Siamo partiti il sabato.",
+        "tomas": "Cercavo un alloggio temporaneo tra due lavori. Ho custodito quattro case in due mesi. Ho scoperto posti che avevo accanto da dieci anni senza conoscerli davvero.",
+        "rania_david": "Abbiamo una casa in Ardèche che restava vuota otto mesi all'anno. Adesso vive. Chi la custodisce ci manda foto del giardino. È strano quanto faccia bene.",
+        "giulia": "Dovevo partire per tre settimane. Il mio orto, le mie galline, le mie piante. Un membro Guardiens ha gestito tutto in cambio di verdure e uova. Non ci conoscevamo. Ci vediamo ancora.",
+        "sarah_karim": "Tre cavalli, quattro gatti, un pappagallo. Tutti ci dicono che è impossibile farli accudire. La nostra sitter è venuta due volte prima della partenza. Sapeva i loro nomi a memoria.",
+        "elena": "Ho cominciato innaffiando le piante di una membra in cambio di un pasto. Adesso custodisco la sua casa quando parte. Qui funziona così, piano, con naturalezza."
+      }
     },
     "story": {
       "eyebrow": "La nostra storia",
@@ -203,7 +211,7 @@
       "p3": "Elisa ed io abbiamo custodito 37 case in cinque anni, in villaggi, città, frazioni.",
       "quote": "Non abbiamo mai solo custodito case. Siamo stati invitati nelle vite delle persone.",
       "p4": "È ciò che la vita di comunità faceva naturalmente.",
-      "p5": "Guardiens è il pretesto che mancava. Da un lato, i piccoli aiuti tra vicini: un orto innaffiato in cambio di un pasto, una competenza contro un'altra, un aiuto reso in natura. Dall'altro, indipendentemente, l'home sitting: le Suo chiavi affidate a qualcuno che ha guardato negli occhi.",
+      "p5": "Guardiens è il pretesto che mancava. Da un lato, i piccoli aiuti tra persone del posto: un orto innaffiato in cambio di un pasto, una competenza contro un'altra, un aiuto reso in natura. Dall'altro, indipendentemente, l'home sitting: le Suo chiavi affidate a qualcuno che ha guardato negli occhi.",
       "p6": "Partirà con la mente leggera. Tornerà con una storia. Non ci aspettavamo che contasse così tanto.",
       "p7": "È per questo che abbiamo costruito Guardiens, affinché anche Lei possa vivere tutto questo.",
       "signature": "Jérémie e Elisa",
@@ -473,7 +481,9 @@
           "desc": "Dai Paesi Baschi alla Bretagna, passando per le Alpi, la Provenza e il Nord. La rete si estende in tutte le regioni."
         }
       }
-    }
+    },
+    "meta_title": "Cura degli animali a domicilio e house-sitting tra privati | Guardiens",
+    "meta_description": "Trovi un sitter della sua zona per la sua casa e i suoi animali. House-sitting e aiuto reciproco tra privati, verificati e valutati, in tutta la Francia."
   },
   "faq": {
     "title": "Domande frequenti",
@@ -529,7 +539,7 @@
       "label": "Proprietario",
       "price": "Gratuito",
       "subtitle": "Senza abbonamento, senza carta di credito.",
-      "cta": "Pubblicare un annuncio",
+      "cta": "Pubblica un annuncio",
       "features": [
         "Pubblichi un annuncio in 5 minuti",
         "Riceva candidature di custodi della zona",
@@ -543,7 +553,7 @@
       "badge_offered_days_one": "Offerto ancora per {{count}} giorno",
       "badge_offered_days_other": "Offerto ancora per {{count}} giorni",
       "badge_most_chosen": "Il più scelto",
-      "label": "Custode",
+      "label": "Sitter",
       "price_free": "Gratuito",
       "free_until": "Gratuito per tutti",
       "per_year": "/anno",
@@ -627,7 +637,7 @@
       "title_after": "Pronto a unirsi a Guardiens?",
       "lede": "Senza carta di credito all'iscrizione. Deciderà in seguito.",
       "cta_sitter": "Diventare custode",
-      "cta_owner": "Pubblicare un annuncio"
+      "cta_owner": "Pubblica un annuncio"
     }
   },
   "article": {
@@ -825,7 +835,11 @@
     "subtitle_short": "Gatti, cani, animali esotici, in campagna o in città. Filtrate per località, date e criteri.",
     "become_sitter_title": "Volete diventare guardiano?",
     "become_sitter_body": "Iscrizione in 2 minuti, senza vincoli.",
-    "become_sitter_cta": "Scoprire lo spazio guardiano"
+    "become_sitter_cta": "Scoprire lo spazio guardiano",
+    "become_sitter_eyebrow": "Diventare sitter",
+    "cities_count_one": "{{count}} città",
+    "cities_count_other": "{{count}} città",
+    "all_france": "Tutta la Francia"
   },
   "pros_listing": {
     "meta_title": "Elenco professionisti animali vicino a te | Guardiens",
@@ -1035,9 +1049,9 @@
     "step_aria": "Registrazione, passaggio {{step}} di 2",
     "members_count": "membri già iscritti su Guardiens",
     "roles": {
-      "owner_label": "Proprietario/a",
+      "owner_label": "Proprietario",
       "owner_desc": "Ho animali o una casa da far custodire. Pubblico annunci e scelgo un guardiano.",
-      "sitter_label": "Guardiano",
+      "sitter_label": "Sitter",
       "sitter_desc": "Voglio custodire case e animali. Consulto gli annunci e offro i miei servizi.",
       "both_label": "Entrambi",
       "both_desc": "Voglio sia far custodire che custodire. Avrà accesso a entrambi gli spazi.",
@@ -1855,5 +1869,9 @@
     "expand_zone": "Ampliare a {{zone}}",
     "expand_zone_count_one": "{{count}} custode disponibile.",
     "expand_zone_count_other": "{{count}} custodi disponibili."
+  },
+  "entraide": {
+    "help_requested": "Aiuto richiesto",
+    "help_offered": "Aiuto offerto"
   }
 }

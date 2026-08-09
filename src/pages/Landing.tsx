@@ -147,8 +147,8 @@ const Landing = () => {
  return (
  <div className="min-h-screen bg-background text-foreground">
    <PageMeta
-        title="Garde d'animaux à domicile et house-sitting entre particuliers | Guardiens"
-        description="Trouvez un gardien du coin pour votre maison et vos animaux. House-sitting et entraide entre particuliers, vérifiés et notés. Partout en France."
+        title={t("landing.meta_title")}
+        description={t("landing.meta_description")}
  path="/"
  image={HOME_OG_IMAGE}
  /* La home est traduite dans les cinq langues : ses variantes sont
