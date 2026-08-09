@@ -5,6 +5,9 @@ import { MemoryRouter } from "react-router-dom";
 vi.mock("@/lib/analytics", () => ({ trackEvent: vi.fn() }));
 vi.mock("@/hooks/useImpressionOnce", () => ({ useImpressionOnce: () => false }));
 
+// Les libellés de la démo passent par i18n : on charge l'instance réelle,
+// dont le dictionnaire français est embarqué, sinon seules les clés sortent.
+import "@/i18n";
 import AffinityScoreShowcase from "@/components/landing/AffinityScoreShowcase";
 
 describe("AffinityScoreShowcase", () => {
