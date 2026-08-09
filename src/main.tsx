@@ -8,9 +8,12 @@ import { initConsent } from "./lib/cookieConsent";
 import { installStorageFallback } from "./lib/storageFallback";
 import { installOAuthDebugHelper } from "./lib/oauthLogger";
 import { loadLanguage, SUPPORTED_LANGS } from "./i18n";
-import { getStoredLang } from "@/lib/lang";
+import { getStoredLang, migrateLegacyLangStorage } from "@/lib/lang";
 
 installStorageFallback();
+// Une seule mémoire de langue : les clés héritées sont reprises puis effacées
+// avant toute lecture par i18next.
+migrateLegacyLangStorage();
 installOAuthDebugHelper();
 
 // RGPD : en production, forcer un loglevel restrictif pour éviter que des
