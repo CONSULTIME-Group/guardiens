@@ -1410,9 +1410,9 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
 
  return (
  <>
- {/* Réserve basse : hauteur de la barre de navigation plus celle du bouton
-     flottant « Carte », pour que la dernière carte et le bandeau de retour au
-     rayon initial restent lisibles. */}
+ {/* Réserve basse : la barre de navigation est déjà compensée par le body,
+     on ajoute ici la hauteur du bouton flottant « Carte » pour que la dernière
+     carte et le bandeau de retour au rayon initial restent lisibles. */}
  <div className="animate-fade-in relative pb-24 sm:pb-0">
  {/* Premium overlay for non-subscribed sitters on sits tab */}
  {isSitterLocked && (
