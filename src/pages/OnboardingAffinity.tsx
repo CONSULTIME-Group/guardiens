@@ -124,7 +124,10 @@ const OnboardingAffinity = () => {
   // l'utilisateur n'a pas complété. `reason` distingue le mode de sortie
   // (close_button | navigate_away | page_unload), `step` renseigne l'étape
   // courante au moment de la sortie.
-  const emitAbandoned = (reason: "close_button" | "navigate_away" | "page_unload") => {
+  const emitAbandoned = (
+    reason: "close_button" | "navigate_away" | "page_unload",
+    transport: "default" | "beacon" = "default",
+  ) => {
     if (!shownTrackedRef.current) return;
     if (completedRef.current || abandonedEmittedRef.current) return;
     abandonedEmittedRef.current = true;
@@ -133,6 +136,7 @@ const OnboardingAffinity = () => {
       : 0;
     void trackEvent("onboarding_abandoned", {
       source: "/onboarding/affinity",
+      transport,
       metadata: {
         reason,
         step: currentStepRef.current,
@@ -143,6 +147,7 @@ const OnboardingAffinity = () => {
     });
     void trackEvent("affinity_onboarding_abandoned", {
       source: "/onboarding/affinity",
+      transport,
       metadata: {
         reason,
         step: currentStepRef.current,
