@@ -209,6 +209,8 @@ const NearbyOwnerSittersCard = ({ hideHeader = false }: Props) => {
               Inviter un proche
             </Link>
           </div>
+          </div>
+          <div className="notebook-card-edge" aria-hidden="true" />
         </div>
       )}
     </section>
