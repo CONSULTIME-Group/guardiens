@@ -1,6 +1,5 @@
 import { describe, it, expect, beforeEach } from "vitest";
-import { render, screen, waitFor, cleanup } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
+import { render, screen, waitFor, cleanup, fireEvent } from "@testing-library/react";
 import { MemoryRouter, Link, Routes, Route } from "react-router-dom";
 import i18n from "@/i18n";
 import LangUrlSync from "@/components/LangUrlSync";
@@ -43,16 +42,15 @@ describe("persistance de la langue à travers la navigation", () => {
   });
 
   it("reste en anglais après chaque clic de la navigation publique", async () => {
-    const user = userEvent.setup();
     render(<Harness entry="/?lang=en" />);
     await waitFor(() => expect(htmlLang()).toBe("en"));
     expect(getStoredLang()).toBe("en");
 
     for (const def of NAV_DEFS) {
-      await user.click(screen.getByRole("link", { name: def.key }));
+      fireEvent.click(screen.getByRole("link", { name: def.key }));
       await waitFor(() => expect(htmlLang()).toBe("en"));
     }
-    await user.click(screen.getByRole("link", { name: "guide-ville" }));
+    fireEvent.click(screen.getByRole("link", { name: "guide-ville" }));
     await waitFor(() => expect(htmlLang()).toBe("en"));
   });
 
