@@ -2436,7 +2436,7 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
  </div>
  ) : (
  /* ─── Map view ─── */
- <Suspense fallback={<div className="flex items-center justify-center h-[calc(100vh-200px)]"><p className="text-muted-foreground">Chargement de la carte…</p></div>}>
+ <Suspense fallback={<div className="flex items-center justify-center h-[calc(100vh-200px)]"><p className="text-muted-foreground">{t("search_results.map_loading")}</p></div>}>
  <SearchMapView
  results={results}
  resultCoords={resultCoords}
