@@ -513,6 +513,11 @@ export default function News() {
                           {isNew(article.published_at) && (
                             <Badge className="bg-primary text-primary-foreground">{t("news.new_badge")}</Badge>
                           )}
+                          {isForeignLang && !translatedIds.has(article.id) && (
+                            <Badge variant="outline" title={t("news.fr_only_title")}>
+                              {t("news.fr_only_badge")}
+                            </Badge>
+                          )}
                           {article.city && (
                             <span className="flex items-center gap-1 text-xs text-muted-foreground">
                               <MapPin className="h-3 w-3" aria-hidden="true" />
