@@ -2385,7 +2385,7 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
         <>
           {visibleActive.length > 0 && (
             <section className="mb-10">
-              {inactive.length > 0 && groupHeader("Annonces disponibles", activeReal.length)}
+              {inactive.length > 0 && groupHeader(t("search_results.group_available"), activeReal.length)}
               <div className={gridCls}>
                 {visibleActive.map((item) => renderCard(item, globalIdx++))}
               </div>
@@ -2395,7 +2395,7 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
                     onClick={() => setVisibleCount((c) => c + 12)}
                     className="rounded-full border border-border bg-card hover:bg-accent hover:border-primary/40 px-6 py-2.5 text-sm font-medium text-foreground transition-colors"
                   >
-                    Voir plus d'annonces ({activeReal.length - visibleActive.length} restantes)
+                    {t("search_results.load_more", { count: activeReal.length - visibleActive.length })}
                   </button>
                 </div>
               )}
@@ -2405,9 +2405,9 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
           {inactive.length > 0 && (
             <section className="mb-10">
               {groupHeader(
-                "Annonces passées ou attribuées",
+                t("search_results.group_past"),
                 inactive.length,
-                "Signal d'activité dans la zone, non actionnables",
+                t("search_results.group_past_sub"),
               )}
               <div className={gridCls}>
                 {inactive.map((item) => renderCard(item, globalIdx++))}
