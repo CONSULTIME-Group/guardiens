@@ -89,6 +89,8 @@ const NearbyOwnerSittersCard = ({ hideHeader = false }: Props) => {
         </div>
       ) : (
         <div className="notebook-card relative p-4 pr-7 sm:p-5 sm:pr-8 min-w-0">
+          <div className="notebook-card-paper absolute inset-0" aria-hidden="true" />
+          <div className="relative">
           {hasBeyond ? (
             <p className="text-[11px] uppercase tracking-[0.18em] text-muted-foreground font-semibold mb-3">
               Aucun gardien à moins de 100 km, voici les plus proches disponibles
