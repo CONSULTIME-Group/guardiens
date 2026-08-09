@@ -39,7 +39,7 @@ import SitterTeaserCard from "./sitter/SitterTeaserCard";
 import SitterNextStepRailCard from "./sitter/SitterNextStepRailCard";
 import { useSitterPriorityAction } from "@/hooks/useSitterPriorityAction";
 import SitterEntraideSection from "./sitter/SitterEntraideSection";
-import ReadingsSection from "./shared/ReadingsSection";
+import JournalLine from "./shared/JournalLine";
 
 import { useIsNewSitter } from "@/hooks/useIsNewUser";
 import { useSitterTopAffinitySits } from "@/hooks/useSitterTopAffinitySits";
@@ -362,7 +362,7 @@ const SitterDashboard = () => {
 
               {/* 5. LECTURES ET GUIDES (vague 16) */}
               <div>
-                <ReadingsSection role="sitter" />
+                <JournalLine />
               </div>
             </div>
 
@@ -474,7 +474,7 @@ const SitterDashboard = () => {
 
               {/* VAGUE 16 — lectures et guides */}
               <div>
-                <ReadingsSection role="sitter" />
+                <JournalLine />
               </div>
             </div>
 

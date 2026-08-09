@@ -24,7 +24,7 @@ import OwnerFamilySection from "./owner/OwnerFamilySection";
 import SitterEntraideSection from "./sitter/SitterEntraideSection";
 import { useFirstNearbyMission } from "@/hooks/useFirstNearbyMission";
 import NearbySittersSection from "./owner/NearbySittersSection";
-import ReadingsSection from "./shared/ReadingsSection";
+import JournalLine from "./shared/JournalLine";
 import EntraideCtaCard from "./shared/EntraideCtaCard";
 
 import MobileStickyCTA from "./owner/MobileStickyCTA";
@@ -361,7 +361,7 @@ const OwnerDashboard = () => {
             </div>
 
             {/* 6. LECTURES ET GUIDES (vague 16) */}
-            <ReadingsSection role="owner" />
+            <JournalLine />
 
 
             {/* Historique candidatures : accordéon discret tout en bas */}
