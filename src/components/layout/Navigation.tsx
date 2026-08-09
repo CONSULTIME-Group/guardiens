@@ -479,8 +479,8 @@ export const BottomNav = () => {
         className={cn(
           "md:hidden fixed bottom-0 left-0 right-0 z-50 pointer-events-none px-3 pb-[max(0.5rem,env(safe-area-inset-bottom))]",
           // PASS 2 — Hide-on-scroll : libère 80px d'écran utile au scroll bas
-          "transition-transform duration-300 ease-out",
-          hideNav ? "translate-y-[150%]" : "translate-y-0"
+          "transition-transform duration-300 ease-out motion-reduce:transition-none",
+          hidden ? "translate-y-[150%]" : "translate-y-0"
         )}
         aria-label="Navigation mobile"
       >
