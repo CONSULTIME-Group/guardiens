@@ -61,7 +61,7 @@ const Breadcrumbs = () => {
   });
 
   return (
-    <nav aria-label="Fil d'Ariane" className="flex items-center gap-1 text-xs text-muted-foreground px-4 py-2 overflow-x-auto">
+    <nav aria-label="Fil d'Ariane" className="hidden md:flex items-center gap-1 text-xs text-muted-foreground px-4 py-2 overflow-x-auto">
       <Link to="/" className="hover:text-foreground transition-colors shrink-0" aria-label="Accueil">
         <Home className="h-3.5 w-3.5" />
       </Link>

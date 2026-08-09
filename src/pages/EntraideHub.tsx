@@ -462,7 +462,7 @@ const EntraideHub = () => {
         path="/petites-missions"
       />
       <div className="bg-background">
-        <PageBreadcrumb items={[{ label: "Entraide" }]} />
+        <PageBreadcrumb items={[{ label: t("nav.small_missions", "Entraide") }]} />
 
         <section className="max-w-3xl mx-auto px-4 sm:px-6 pt-4 pb-28 sm:pt-6 sm:pb-8 min-w-0">
           <EntraideGeolocBanner
