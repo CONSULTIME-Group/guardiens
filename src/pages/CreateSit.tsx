@@ -1665,7 +1665,8 @@ const CreateSit = () => {
           : draftId ? "Brouillon en cours" : null;
 
   return (
-    <div className="animate-fade-in pb-[calc(15rem+env(safe-area-inset-bottom))] md:pb-40">
+    <>
+      <div className="animate-fade-in pb-[calc(15rem+env(safe-area-inset-bottom))] md:pb-40">
       <Head><meta name="robots" content="noindex, nofollow" /></Head>
 
       {/* Stepper sticky */}
@@ -2563,8 +2564,12 @@ const CreateSit = () => {
           </details>
         </div>
       )}
+      </div>
 
-      {/* ===================== CTA STICKY BOTTOM ===================== */}
+      {/* ===================== CTA STICKY BOTTOM =====================
+          Rendue en sœur du conteneur animate-fade-in : un ancêtre porteur
+          d'un transform (même identité) deviendrait bloc conteneur des
+          descendants position:fixed. */}
       <div
         className="fixed inset-x-0 bg-card border-t border-border z-40 bottom-[calc(4.5rem+env(safe-area-inset-bottom))] md:bottom-0 pb-4 md:pb-[max(1rem,env(safe-area-inset-bottom))]"
       >
@@ -2743,7 +2748,7 @@ const CreateSit = () => {
         environments={sitEnvironments.map(e => envLabels[e] || e)}
         isUrgent={isUrgent}
       />
-    </div>
+    </>
   );
 };
 
