@@ -48,11 +48,12 @@ const GlobalBottomNav = () => {
   // unique adossée à --bottom-nav-h, plutôt qu'une valeur répétée page à page.
   useEffect(() => {
     if (typeof document === "undefined") return;
-    const root = document.documentElement;
+    const body = document.body;
     const reserve = mounted && !bottomNavHidden;
-    root.classList.toggle("has-global-bottom-nav", reserve);
-    return () => root.classList.remove("has-global-bottom-nav");
+    body.classList.toggle("has-global-bottom-nav", reserve);
+    return () => body.classList.remove("has-global-bottom-nav");
   }, [mounted, bottomNavHidden]);
+
 
   if (!mounted) return null;
   return <BottomNav />;
