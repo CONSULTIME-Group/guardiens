@@ -516,7 +516,7 @@ export const BottomNav = () => {
           {/* Plus sheet */}
           <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
             <SheetTrigger asChild>
-              <button className="flex flex-col items-center justify-center flex-1 gap-1 text-muted-foreground hover:text-foreground transition-colors min-w-0 relative pt-1.5 active:scale-95 duration-150">
+              <button className="flex flex-col items-center justify-center flex-1 h-full min-h-[44px] gap-1 text-muted-foreground hover:text-foreground transition-colors min-w-0 relative pt-1.5 active:scale-95 duration-150">
                 <div className="relative">
                   <MoreHorizontal className="h-5 w-5" strokeWidth={1.8} />
                   {moreBadge > 0 && (
