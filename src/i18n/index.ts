@@ -46,11 +46,11 @@ void i18n
       // choix mémorisé prend le relais, puis la langue du navigateur. Sans
       // cette persistance, la première navigation interne sans querystring
       // retombait en français : c'était le mécanisme exact du bug.
-      // Une seule clé de stockage, partagée avec src/lib/lang.ts.
+      // Une seule clé de stockage, définie dans src/lib/langStorageKey.ts.
       order: ["querystring", "localStorage", "navigator"],
       caches: ["localStorage"],
       lookupQuerystring: "lang",
-      lookupLocalStorage: "guardiens.lang",
+      lookupLocalStorage: LANG_STORAGE_KEY,
     },
     interpolation: { escapeValue: false },
     react: { useSuspense: false },
