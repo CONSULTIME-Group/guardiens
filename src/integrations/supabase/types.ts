@@ -3168,6 +3168,13 @@ export type Database = {
             foreignKeyName: "mass_email_sends_mass_email_id_fkey"
             columns: ["mass_email_id"]
             isOneToOne: false
+            referencedRelation: "mass_email_click_rates"
+            referencedColumns: ["mass_email_id"]
+          },
+          {
+            foreignKeyName: "mass_email_sends_mass_email_id_fkey"
+            columns: ["mass_email_id"]
+            isOneToOne: false
             referencedRelation: "mass_email_stats"
             referencedColumns: ["mass_email_id"]
           },
@@ -6662,6 +6669,19 @@ export type Database = {
           },
         ]
       }
+      email_click_rates: {
+        Row: {
+          click_rate_pct: number | null
+          click_to_open_pct: number | null
+          clicked: number | null
+          opened: number | null
+          send_day: string | null
+          sent: number | null
+          template_name: string | null
+          total_clicks: number | null
+        }
+        Relationships: []
+      }
       email_delivery_stats: {
         Row: {
           bounce_rate: number | null
@@ -6738,6 +6758,22 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      mass_email_click_rates: {
+        Row: {
+          click_rate_pct: number | null
+          click_to_open_pct: number | null
+          clicked: number | null
+          created_at: string | null
+          dedupe_key: string | null
+          mapped_to_provider: number | null
+          mass_email_id: string | null
+          opened: number | null
+          recipients: number | null
+          subject: string | null
+          total_clicks: number | null
+        }
+        Relationships: []
       }
       mass_email_stats: {
         Row: {
@@ -7945,6 +7981,7 @@ export type Database = {
         }[]
       }
       email_queue_dispatch: { Args: never; Returns: undefined }
+      email_tracking_start: { Args: never; Returns: string }
       enqueue_email: {
         Args: { payload: Json; queue_name: string }
         Returns: number
@@ -8384,6 +8421,13 @@ export type Database = {
       recalculate_completed_sits: {
         Args: { p_user_id: string }
         Returns: undefined
+      }
+      reconcile_email_click_events: {
+        Args: { p_message_id?: string }
+        Returns: {
+          mass_send_rows: number
+          send_log_rows: number
+        }[]
       }
       record_claim_outcome: {
         Args: {

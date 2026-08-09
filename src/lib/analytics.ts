@@ -4,6 +4,7 @@
  * Échec silencieux (RLS, réseau, etc.) — jamais d'exception remontée.
  */
 import { supabase } from "@/integrations/supabase/client";
+import { getDeviceContext } from "@/lib/deviceContext";
 
 export type EventType =
   | "page_view"
@@ -307,6 +308,18 @@ interface TrackOptions {
 }
 
 /**
+ * Enrichit les métadonnées avec le contexte d'appareil dérivé.
+ * La chaîne de user agent brute n'est jamais stockée, seulement les champs
+ * catégoriels qui en sont déduits.
+ */
+function withDeviceContext(metadata?: Record<string, any>): Record<string, any> | null {
+  const device = getDeviceContext();
+  if (!device) return metadata ?? null;
+  return { ...(metadata ?? {}), ...device };
+}
+
+
+/**
  * Track un événement de manière non-bloquante.
  * Fonctionne aussi bien pour les visiteurs anonymes que connectés.
  */
@@ -327,7 +340,7 @@ export async function trackEvent(eventType: EventType, opts: TrackOptions = {}) 
       user_id: user?.id ?? null,
       event_type: eventType,
       source: opts.source ?? null,
-      metadata: opts.metadata ?? null,
+      metadata: withDeviceContext(opts.metadata),
     });
   } catch {
     // silencieux
@@ -370,7 +383,7 @@ export async function trackEventWithUserId(
       user_id: userId,
       event_type: eventType,
       source: opts.source ?? null,
-      metadata: opts.metadata ?? null,
+      metadata: withDeviceContext(opts.metadata),
     });
   } catch {
     // silencieux
