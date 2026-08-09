@@ -37,7 +37,8 @@ const FORBIDDEN = [
   /nachbar/i,
   /neighbou?r/i,
   /\bvecin[oa]s?\b/i,
-  /\bvicini\b/i,
+  // « vicino a lei » (près de chez vous) est légitime : seul le voisinage l'est pas.
+  /tra vicini|vicin[oi] di casa/i,
   /\bvoisin(e|s|age)?\b/i,
   /free forever/i,
   /gratis para siempre/i,
