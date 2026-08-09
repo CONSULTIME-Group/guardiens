@@ -120,7 +120,7 @@ const HelpDuringSitDialog = ({
             senderName: senderFirstName || "L'autre partie",
             category: "urgence",
             messageExcerpt: message.trim().slice(0, 240),
-            conversationHref: `https://guardiens.fr/messages?c=${conversationId}`,
+            conversationHref: `https://guardiens.fr/messages/${conversationId}`,
           },
         }).catch((e) => logger.warn("help-during-sit email failed", { error: String(e) }));
       }

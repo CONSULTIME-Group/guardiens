@@ -26,7 +26,7 @@ const ApplicationMessageRestoredEmail = ({
   const owner = ownerFirstName || 'au propriétaire'
   const title = sitTitle || 'l\'annonce'
   const href = conversationId
-    ? `${SITE_URL}/messages?c=${conversationId}`
+    ? `${SITE_URL}/messages/${conversationId}`
     : `${SITE_URL}/messages`
   return (
     <Html lang="fr" dir="ltr">

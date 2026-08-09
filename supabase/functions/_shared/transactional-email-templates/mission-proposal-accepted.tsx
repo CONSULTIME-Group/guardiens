@@ -30,7 +30,7 @@ const Email = ({ authorFirstName, missionTitle, conversationId }: Props) => (
         <Text style={text}>
           Vous pouvez maintenant échanger par messagerie pour organiser les détails.
         </Text>
-        <Button style={button} href={conversationId ? `${SITE_URL}/messages?c=${conversationId}` : `${SITE_URL}/messages`}>
+        <Button style={button} href={conversationId ? `${SITE_URL}/messages/${conversationId}` : `${SITE_URL}/messages`}>
           Ouvrir la messagerie
         </Button>
         <LegalFooter purpose="la bonne marche du service d'entraide" basis="6.1.f" />

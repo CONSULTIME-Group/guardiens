@@ -10,7 +10,7 @@ import { Archive, Home, HeartHandshake, Loader2, MessageCircle, ChevronDown } fr
 import EmptyState from "@/components/shared/EmptyState";
 import { format, isToday, isYesterday, isSameDay } from "date-fns";
 import { fr } from "date-fns/locale";
-import { useSearchParams, Link, useNavigate } from "react-router-dom";
+import { useSearchParams, Link, useNavigate, useParams, useLocation } from "react-router-dom";
 import { useIsMobile } from "@/hooks/use-mobile";
 import HouseGuideBlock from "@/components/messages/HouseGuideBlock";
 import ConversationHeader from "@/components/messages/ConversationHeader";
@@ -88,11 +88,21 @@ const Messages = () => {
   const { hasAccess, loading: subLoading } = useSubscriptionAccess();
   const effectiveRole = user?.role === "both" ? activeRole : user?.role;
   const [searchParams, setSearchParams] = useSearchParams();
+  const { conversationId: routeConvId } = useParams<{ conversationId: string }>();
+  const location = useLocation();
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [activeConv, setActiveConv] = useState<Conversation | null>(null);
   // Fil ouvert sur mobile : la barre basse et son bouton flottant recouvriraient
   // le champ de saisie, on les retire tant que la conversation est affichée.
   useHideBottomNav(isMobile && !!activeConv);
+  // Fermer un fil : on revient a la liste. Si le fil a ete empile dans
+  // l'historique, on depile pour rester coherent avec le geste de retour
+  // systeme ; sinon (ouverture directe par lien profond), on remplace.
+  const closeConv = useCallback(() => {
+    if (location.key && location.key !== "default") navigate(-1);
+    else navigate("/messages", { replace: true });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [location.key, navigate]);
   const convListRef = useRef<HTMLDivElement | null>(null);
   const savedScrollRef = useRef<number>(0);
   const [messages, setMessages] = useState<Message[]>([]);
@@ -293,6 +303,7 @@ const Messages = () => {
     setActiveConv,
     loading,
     isMobile,
+    routeConvId: routeConvId ?? null,
     enrichConv: (raw, otherProfile) => ({
       ...(raw as any),
       archived_by: raw.archived_by || [],
@@ -520,12 +531,16 @@ const Messages = () => {
       : [...conv.archived_by, user.id];
     await supabase.from("conversations").update({ archived_by: newArchived } as any).eq("id", conv.id);
     setConversations(prev => prev.map(c => c.id === conv.id ? { ...c, archived_by: newArchived } : c));
-    if (activeConv?.id === conv.id && !conv.archived_by.includes(user.id)) setActiveConv(null);
+    if (activeConv?.id === conv.id && !conv.archived_by.includes(user.id)) closeConv();
     toast({ title: conv.archived_by.includes(user.id) ? "Conversation désarchivée" : "Conversation archivée" });
   };
 
   // ─── Reset active conv when role changes ───
+  const roleRef = useRef(activeRole);
   useEffect(() => {
+    if (roleRef.current === activeRole) return; // pas au montage : preserve les liens profonds
+    roleRef.current = activeRole;
+    if (routeConvId) navigate("/messages", { replace: true });
     setActiveConv(null);
     loadConversations();
   }, [activeRole]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -610,7 +625,7 @@ const Messages = () => {
             if (convListRef.current) {
               savedScrollRef.current = convListRef.current.scrollTop;
             }
-            setActiveConv(conv);
+            navigate(`/messages/${conv.id}`);
           }}
           className={`w-full flex items-start gap-3 px-4 py-3.5 pr-10 text-left transition-colors ${activeConv?.id === conv.id ? "bg-primary/10" : "hover:bg-primary/5"}`}
         >
@@ -808,14 +823,14 @@ const Messages = () => {
             userId={user?.id}
             userRole={effectiveRole}
             isMobile={isMobile}
-            onBack={() => setActiveConv(null)}
+            onBack={closeConv}
             onArchive={() => activeConv && handleArchive(activeConv)}
             onActionDone={() => { loadConversations(); if (activeConv) loadMessages(activeConv.id); }}
             otherUserRating={activeConv.other_user_rating}
             isFounder={activeConv.other_user?.is_founder || false}
             isEmergencySitter={activeConv.other_user_is_emergency}
             onBlock={() => {
-              setActiveConv(null);
+              closeConv();
               loadConversations();
             }}
           />

@@ -122,7 +122,7 @@ Deno.serve(async (req) => {
             firstName: recipient.first_name ?? "",
             senderName: sender?.first_name ?? "Un membre",
             messagePreview: intro,
-            conversationUrl: `https://guardiens.fr/messages?c=${conv.id}`,
+            conversationUrl: `https://guardiens.fr/messages/${conv.id}`,
             isReminder: true,
           },
         }),
