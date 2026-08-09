@@ -305,6 +305,11 @@ export type EventType =
 interface TrackOptions {
   source?: string;
   metadata?: Record<string, any>;
+  /**
+   * "beacon" : envoi survivant à la fermeture de page (sortie réelle).
+   * Défaut : envoi standard via le client, non bloquant.
+   */
+  transport?: "default" | "beacon";
 }
 
 /**
