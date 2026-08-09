@@ -660,7 +660,10 @@
       "saisonnier": "Saisonal",
       "guide_pratique": "Praktische Ratgeber",
       "vie_locale": "Lokales Leben & Nachbarschaftshilfe"
-    }
+    },
+    "fr_only_badge": "FR",
+    "fr_only_title": "Nur auf Französisch verfügbar",
+    "only_translated": "Nur übersetzte Inhalte"
   },
   "guides": {
     "meta_title": "Lokale Pet-Sitting-Ratgeber, Parks, Tierärzte, hundefreundliche Cafés | Guardiens",
@@ -1577,5 +1580,8 @@
     "decline_reason_dates_changed": "Meine Daten haben sich geändert",
     "decline_reason_not_right_time": "Es ist gerade nicht der richtige Moment",
     "decline_reason_different_profile": "Ich bevorzuge ein anderes Profil"
+  },
+  "i18n_fallback": {
+    "notice": "Diese Seite ist noch nicht auf Deutsch verfügbar. Es wird die französische Fassung angezeigt."
   }
 }
