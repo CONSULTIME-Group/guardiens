@@ -429,8 +429,8 @@ export const BottomNav = () => {
   // La barre est en md:hidden, le desktop n'est donc pas concerné.
   if (bottomNavHidden) return null;
 
-  // Landing mobile, tout en haut de page : rien n'est rendu.
-  if (isLandingMobile && !landingNavVisible) return null;
+
+
 
 
   return (
