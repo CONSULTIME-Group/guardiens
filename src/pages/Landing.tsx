@@ -151,6 +151,9 @@ const Landing = () => {
         description="Trouvez un gardien du coin pour votre maison et vos animaux. House-sitting et entraide entre particuliers, vérifiés et notés. Partout en France."
  path="/"
  image={HOME_OG_IMAGE}
+ /* La home est traduite dans les cinq langues : ses variantes sont
+    indexables et déclarées en alternates. */
+ translatedLangs={["en", "es", "it", "de"]}
  />
       <HomeJsonLd />
 

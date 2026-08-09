@@ -145,9 +145,13 @@ const PageMeta = ({
     (lng) => lng === "fr" || declaredLangs.includes(lng),
   );
   const isTranslatedVariant = (allowedLangs as readonly string[]).includes(currentLang);
-  // Variante de langue sans traduction réelle : non indexable, html lang = fr.
+  // Variante de langue sans traduction déclarée : non indexable.
   const effectiveNoindex = noindex || !isTranslatedVariant;
-  const htmlLang = isTranslatedVariant ? currentLang : "fr";
+  // `html lang` décrit la langue réellement rendue à l'écran, toujours. Le
+  // forcer à « fr » sur une interface affichée en anglais était un défaut
+  // d'accessibilité (lecteurs d'écran) et une incohérence de signal : c'est
+  // `noindex` qui traite le cas d'une variante non traduite, pas `lang`.
+  const htmlLang = currentLang;
   const hreflangKey = allowedLangs.join(",");
   const jsonLdKey = jsonLd ? JSON.stringify(jsonLd) : "";
   const extraMetaKey = extraMeta ? JSON.stringify(extraMeta) : "";
