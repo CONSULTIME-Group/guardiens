@@ -317,6 +317,7 @@ const StarCard = ({ sit, onCtaClick }: { sit: AffinitySitCard; onCtaClick?: () =
           )}
         </div>
       </div>
+      <div className="notebook-card-edge" aria-hidden="true" />
     </article>
   );
 };
