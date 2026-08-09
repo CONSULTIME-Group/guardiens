@@ -143,6 +143,7 @@ const OnboardingAffinity = () => {
         role: chosenRole,
         needs_sitter: status.needsSitter,
         needs_owner: status.needsOwner,
+        user_id_hint: user?.id ?? null,
       },
     });
     void trackEvent("affinity_onboarding_abandoned", {
@@ -155,6 +156,7 @@ const OnboardingAffinity = () => {
         last_step_index: lastStepRef.current.index,
         last_step_name: lastStepRef.current.name,
         duration_seconds: duration,
+        user_id_hint: user?.id ?? null,
       },
     });
   };

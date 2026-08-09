@@ -328,8 +328,8 @@ function withDeviceContext(metadata?: Record<string, any>): Record<string, any> 
  * Envoi synchrone survivant à la fermeture de page, via `navigator.sendBeacon`.
  * Le beacon ne peut pas porter d'en-tête Authorization : l'insertion se fait
  * donc en rôle anonyme, ce qui impose `user_id` nul par politique d'accès.
- * L'identifiant éventuel est conservé dans les métadonnées (`user_id_hint`)
- * pour la réconciliation analytique.
+ * C'est à l'appelant de placer un indice d'identité dans les métadonnées
+ * (par exemple `user_id_hint`) s'il dispose d'un identifiant utilisateur.
  * Repli sur `fetch(..., { keepalive: true })` si le beacon est indisponible.
  */
 export function trackEventBeacon(eventType: EventType, opts: TrackOptions = {}): boolean {
