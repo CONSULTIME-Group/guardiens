@@ -129,6 +129,13 @@ export default function News() {
         .in("article_id", list.map((a) => a.id));
       const map = new Map<string, { title?: string; excerpt?: string }>();
       (trs || []).forEach((tr: any) => map.set(tr.article_id, { title: tr.title, excerpt: tr.excerpt }));
+      if (!cancelled) {
+        setTranslatedIds((prev) => {
+          const next = new Set(prev);
+          map.forEach((_v, id) => next.add(id));
+          return next;
+        });
+      }
       return list.map((a) => {
         const tr = map.get(a.id);
         if (!tr) return a;
