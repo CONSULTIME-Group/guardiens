@@ -536,7 +536,10 @@ const Messages = () => {
   };
 
   // ─── Reset active conv when role changes ───
+  const roleRef = useRef(activeRole);
   useEffect(() => {
+    if (roleRef.current === activeRole) return; // pas au montage : preserve les liens profonds
+    roleRef.current = activeRole;
     if (routeConvId) navigate("/messages", { replace: true });
     setActiveConv(null);
     loadConversations();
