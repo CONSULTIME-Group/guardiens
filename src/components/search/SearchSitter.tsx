@@ -2424,10 +2424,10 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
          <Link
            to="/annonces/international"
            className="inline-flex items-center gap-2 rounded-full border border-border bg-card hover:bg-accent hover:border-primary/40 text-sm text-foreground px-4 py-2 transition-colors"
-           aria-label={`Voir les ${intlCount} annonces hors France`}
+           aria-label={t("search_results.intl_link_aria", { count: intlCount })}
          >
            <Globe2 className="h-4 w-4 text-muted-foreground" />
-           <span>Vous cherchez à l'étranger ? Voir les {intlCount} annonce{intlCount > 1 ? "s" : ""} hors France</span>
+           <span>{t("search_results.intl_link", { count: intlCount })}</span>
          </Link>
        </div>
      )}
