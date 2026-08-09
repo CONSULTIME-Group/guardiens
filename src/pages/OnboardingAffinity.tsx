@@ -163,13 +163,19 @@ const OnboardingAffinity = () => {
   const emitAbandonedRef = useRef(emitAbandoned);
   emitAbandonedRef.current = emitAbandoned;
 
+  // Sortie de page : seul `pagehide` avec `persisted === false` compte comme
+  // abandon. Un `pagehide` avec mise en cache arrière-plan (bascule
+  // d'application, verrouillage d'écran sur iOS) n'est pas un abandon, et
+  // `visibilitychange` n'est volontairement pas écouté. `beforeunload` est
+  // retiré : peu fiable et destructeur pour le bfcache.
   useEffect(() => {
-    const onUnload = () => emitAbandonedRef.current("page_unload");
-    window.addEventListener("beforeunload", onUnload);
-    window.addEventListener("pagehide", onUnload);
+    const onPageHide = (event: PageTransitionEvent) => {
+      if (event.persisted) return;
+      emitAbandonedRef.current("page_unload", "beacon");
+    };
+    window.addEventListener("pagehide", onPageHide);
     return () => {
-      window.removeEventListener("beforeunload", onUnload);
-      window.removeEventListener("pagehide", onUnload);
+      window.removeEventListener("pagehide", onPageHide);
       // Démontage React sans complétion : navigation interne vers une autre route.
       emitAbandonedRef.current("navigate_away");
     };
