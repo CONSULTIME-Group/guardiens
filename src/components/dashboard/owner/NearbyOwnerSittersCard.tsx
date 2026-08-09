@@ -58,7 +58,7 @@ const NearbyOwnerSittersCard = ({ hideHeader = false }: Props) => {
           <div className="flex flex-col sm:flex-row sm:items-start gap-3">
             <div className="flex-1 min-w-0">
               <p className="text-sm font-heading font-semibold text-foreground leading-snug">
-                Aucun gardien dans votre secteur
+                Les gardiens de votre secteur s'afficheront ici
               </p>
               <p className="text-xs text-muted-foreground leading-relaxed mt-1">
                 Personne n'est encore inscrit comme gardien près de chez vous. Publiez votre annonce&nbsp;: elle attire les nouveaux profils.

@@ -41,7 +41,7 @@ const DashboardSectionState = ({
       ? "Chargement…"
       : variant === "error"
       ? "Données momentanément indisponibles"
-      : "Aucun élément à afficher";
+      : "Le contenu s'affichera ici";
 
   const defaultDescription =
     variant === "loading"

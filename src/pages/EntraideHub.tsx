@@ -626,8 +626,8 @@ const EntraideHub = () => {
                       mineOnly
                         ? "Vous n'avez pas encore posé de question."
                         : hasQuestionFilters
-                          ? "Aucune question avec ces filtres."
-                          : "Aucune question pour le moment."
+                          ? "Rien ne correspond à ces filtres, élargissez la zone ou la période."
+                          : "Les premières questions s'afficheront ici."
                     }
                     hint={
                       hasQuestionFilters
@@ -981,10 +981,10 @@ const EntraideHub = () => {
                           ? "Vous n'avez pas encore publié de demande."
                           : "Vous n'avez pas encore publié d'offre."
                         : hasMissionFilters
-                          ? "Aucun résultat avec ces filtres."
+                          ? "Rien ne correspond à ces filtres, élargissez la zone ou la période."
                           : tab === "besoins"
-                            ? "Aucune demande ouverte pour le moment."
-                            : "Aucune proposition d'aide pour le moment."
+                            ? "Les premières demandes s'afficheront ici."
+                            : "Les premières propositions d'aide s'afficheront ici."
                     }
                     hint={
                       hasMissionFilters
