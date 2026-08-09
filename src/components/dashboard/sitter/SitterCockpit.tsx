@@ -109,7 +109,7 @@ const SitterCockpit = ({
 
         <div className="relative flex items-start justify-between gap-[22px] flex-wrap">
           {/* Bloc gauche : avatar + salutation adressée */}
-          <div className="flex items-center gap-[14px] min-w-0 flex-1">
+          <div className="flex items-center gap-[14px] min-w-0 flex-1 pr-[72px] sm:pr-0">
             <Link
               to="/profile"
               aria-label="Modifier mon profil"
