@@ -205,21 +205,8 @@ const StarCard = ({ sit, onCtaClick }: { sit: AffinitySitCard; onCtaClick?: () =
     : null;
 
   return (
-    <article
-      className="group bg-card border border-border overflow-hidden transition-shadow"
-      style={{
-        borderRadius: "20px",
-        boxShadow: "0 1px 2px rgba(29,27,22,0.04), 0 8px 24px rgba(29,27,22,0.05)",
-      }}
-      onMouseEnter={(e) => {
-        (e.currentTarget as HTMLElement).style.boxShadow =
-          "0 2px 4px rgba(29,27,22,0.05), 0 18px 40px rgba(29,27,22,0.09)";
-      }}
-      onMouseLeave={(e) => {
-        (e.currentTarget as HTMLElement).style.boxShadow =
-          "0 1px 2px rgba(29,27,22,0.04), 0 8px 24px rgba(29,27,22,0.05)";
-      }}
-    >
+    <article className="group notebook-card relative">
+      <div className="notebook-card-paper absolute inset-0" aria-hidden="true" />
       {/* Bandeau photo, hauteur exacte 150px */}
       <div
         className="relative w-full"
