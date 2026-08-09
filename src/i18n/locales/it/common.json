@@ -1545,7 +1545,8 @@
       "tab_mobility": "Scheda Mobilità e raggio.",
       "settings_verif": "Impostazioni → Verifica.",
       "chars_50": "{{count}}/50 caratteri.",
-      "add_avatar_identity": "Aggiunga una foto nella scheda Identità."
+      "add_avatar_identity": "Aggiunga una foto nella scheda Identità.",
+      "affinity_count": "{{count}}/5 compilati (minimo 3 per il punteggio massimo)."
     }
   },
   "live_listings": {

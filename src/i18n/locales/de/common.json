@@ -1545,7 +1545,8 @@
       "tab_mobility": "Tab Mobilität & Radius.",
       "settings_verif": "Einstellungen → Verifizierung.",
       "chars_50": "{{count}}/50 Zeichen.",
-      "add_avatar_identity": "Fügen Sie ein Foto im Tab Identität hinzu."
+      "add_avatar_identity": "Fügen Sie ein Foto im Tab Identität hinzu.",
+      "affinity_count": "{{count}}/5 ausgefüllt (mindestens 3 für die volle Punktzahl)."
     }
   },
   "live_listings": {
