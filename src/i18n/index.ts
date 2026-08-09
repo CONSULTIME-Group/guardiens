@@ -21,6 +21,10 @@ export const LANG_LABELS: Record<SupportedLang, { native: string; flag: string }
   de: { native: "Deutsch", flag: "🇩🇪" },
 };
 
+// Une seule mémoire de langue : les clés héritées d'anciennes versions du
+// détecteur sont reprises puis effacées avant toute détection.
+migrateLegacyLangStorage(SUPPORTED_LANGS as readonly string[]);
+
 void i18n
   .use(LanguageDetector)
   .use(initReactI18next)
