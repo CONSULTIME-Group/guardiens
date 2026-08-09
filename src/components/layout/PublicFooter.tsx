@@ -14,11 +14,11 @@ const PublicFooter = React.forwardRef<HTMLElement>((_props, ref) => {
   if (hasSession && inAppShell) return null;
   return (
     <footer ref={ref} className="public-footer bg-footer border-t border-white/10">
-      <div className="max-w-6xl mx-auto px-6 md:px-12 py-16">
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-10 mb-12">
+      <div className="max-w-6xl mx-auto px-6 md:px-12 py-10">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6 mb-8">
           <div>
             <h3 className="font-body text-xs uppercase tracking-widest text-white/80 mb-4">{t("footer.sections.by_city")}</h3>
-            <ul className="space-y-2">
+            <ul className="space-y-0">
               <li><Link to="/house-sitting" className="font-body text-sm text-white/75 hover:text-white transition-colors">Toutes les villes couvertes</Link></li>
               <li><Link to="/house-sitting/lyon" className="font-body text-sm text-white/75 hover:text-white transition-colors">House-sitting Lyon</Link></li>
               <li><Link to="/house-sitting/annecy" className="font-body text-sm text-white/75 hover:text-white transition-colors">House-sitting Annecy</Link></li>
@@ -28,7 +28,7 @@ const PublicFooter = React.forwardRef<HTMLElement>((_props, ref) => {
           </div>
           <div>
             <h3 className="font-body text-xs uppercase tracking-widest text-white/80 mb-4">{t("footer.sections.by_department")}</h3>
-            <ul className="space-y-2">
+            <ul className="space-y-0">
               <li><Link to="/departement" className="font-body text-sm text-white/75 hover:text-white transition-colors">Les 101 départements</Link></li>
               <li><Link to="/departement/rhone" className="font-body text-sm text-white/75 hover:text-white transition-colors">Rhône (69)</Link></li>
               <li><Link to="/departement/haute-savoie" className="font-body text-sm text-white/75 hover:text-white transition-colors">Haute-Savoie (74)</Link></li>
@@ -42,7 +42,7 @@ const PublicFooter = React.forwardRef<HTMLElement>((_props, ref) => {
 
           <div>
             <h3 className="font-body text-xs uppercase tracking-widest text-white/80 mb-4">{t("footer.sections.local_guides")}</h3>
-            <ul className="space-y-2">
+            <ul className="space-y-0">
               <li><Link to="/guides" className="font-body text-sm text-white/75 hover:text-white transition-colors">{t("footer.links.all_guides")}</Link></li>
               <li><Link to="/guides/lyon" className="font-body text-sm text-white/75 hover:text-white transition-colors">Guide Lyon</Link></li>
               <li><Link to="/guides/annecy" className="font-body text-sm text-white/75 hover:text-white transition-colors">Guide Annecy</Link></li>
@@ -53,7 +53,7 @@ const PublicFooter = React.forwardRef<HTMLElement>((_props, ref) => {
           </div>
           <div>
             <h3 className="font-body text-xs uppercase tracking-widest text-white/80 mb-4">{t("footer.sections.resources")}</h3>
-            <ul className="space-y-2">
+            <ul className="space-y-0">
               <li><Link to="/actualites" className="font-body text-sm text-white/75 hover:text-white transition-colors">{t("footer.links.articles")}</Link></li>
               <li><Link to="/actualites/house-sitting-aura-guide-complet" className="font-body text-sm text-white/75 hover:text-white transition-colors">{t("footer.links.house_sitting_guide")}</Link></li>
               <li><Link to="/faq" className="font-body text-sm text-white/75 hover:text-white transition-colors">{t("footer.links.faq")}</Link></li>
@@ -64,7 +64,7 @@ const PublicFooter = React.forwardRef<HTMLElement>((_props, ref) => {
           </div>
           <div>
             <h3 className="font-body text-xs uppercase tracking-widest text-white/80 mb-4">{t("footer.sections.guardiens")}</h3>
-            <ul className="space-y-2">
+            <ul className="space-y-0">
               <li><Link to="/a-propos" className="font-body text-sm text-white/75 hover:text-white transition-colors">{t("footer.links.about")}</Link></li>
               <li><Link to="/contact" className="font-body text-sm text-white/75 hover:text-white transition-colors">{t("footer.links.contact")}</Link></li>
               <li><Link to="/inscription" className="font-body text-sm text-white/75 hover:text-white transition-colors">{t("footer.links.register")}</Link></li>
