@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 
 interface ConvLike {
@@ -21,6 +21,8 @@ interface Params<C extends ConvLike> {
   setActiveConv: (c: C | null) => void;
   loading: boolean;
   isMobile: boolean;
+  /** Identifiant de conversation porte par la route /messages/:conversationId */
+  routeConvId?: string | null;
   enrichConv: (raw: any, otherProfile: any) => C;
 }
 
@@ -41,9 +43,22 @@ export function useAutoOpenConversation<C extends ConvLike>({
   setActiveConv,
   loading,
   isMobile,
+  routeConvId,
   enrichConv,
 }: Params<C>) {
   const [searchParams, setSearchParams] = useSearchParams();
+  const navigate = useNavigate();
+
+  /** Bascule une ouverture heritee (?c=, ?conv=, ...) vers la route adressable. */
+  const toRoute = (convId: string) => {
+    const next = new URLSearchParams(searchParams);
+    next.delete("c");
+    next.delete("conversation");
+    next.delete("conv");
+    next.delete("conversationId");
+    const qs = next.toString();
+    navigate(`/messages/${convId}${qs ? `?${qs}` : ""}`, { replace: true });
+  };
 
   // ── Cas 1 : ?gardien= ──
   useEffect(() => {
@@ -79,7 +94,8 @@ export function useAutoOpenConversation<C extends ConvLike>({
       setActiveConv(existing);
       const next = new URLSearchParams(searchParams);
       next.delete("gardien");
-      setSearchParams(next, { replace: true });
+      const qs = next.toString();
+      navigate(`/messages/${existing.id}${qs ? `?${qs}` : ""}`, { replace: true });
       return;
     }
 
@@ -109,7 +125,8 @@ export function useAutoOpenConversation<C extends ConvLike>({
         setActiveConv(enriched);
         const next = new URLSearchParams(searchParams);
         next.delete("gardien");
-        setSearchParams(next, { replace: true });
+        const qs = next.toString();
+        navigate(`/messages/${enriched.id}${qs ? `?${qs}` : ""}`, { replace: true });
       } catch {
         /* silently fail */
       }
@@ -121,6 +138,7 @@ export function useAutoOpenConversation<C extends ConvLike>({
   // ── Cas 2 : ?c= / ?conversation= / ?conv= / ?conversationId= ──
   useEffect(() => {
     const convId =
+      routeConvId ||
       searchParams.get("c") ||
       searchParams.get("conversation") ||
       searchParams.get("conv") ||
@@ -130,12 +148,7 @@ export function useAutoOpenConversation<C extends ConvLike>({
     const target = conversations.find((c) => c.id === convId);
     if (target) {
       setActiveConv(target);
-      const next = new URLSearchParams(searchParams);
-      next.delete("conversation");
-      next.delete("conv");
-      next.delete("conversationId");
-      next.set("c", convId);
-      setSearchParams(next, { replace: true });
+      if (!routeConvId) toRoute(convId);
       return;
     }
 
@@ -159,12 +172,7 @@ export function useAutoOpenConversation<C extends ConvLike>({
           prev.some((c) => c.id === enriched.id) ? prev : [enriched, ...prev]
         );
         setActiveConv(enriched);
-        const next = new URLSearchParams(searchParams);
-        next.delete("conversation");
-        next.delete("conv");
-        next.delete("conversationId");
-        next.set("c", convId);
-        setSearchParams(next, { replace: true });
+        if (!routeConvId) toRoute(convId);
       } catch {
         /* silently fail */
       }
@@ -172,6 +180,7 @@ export function useAutoOpenConversation<C extends ConvLike>({
     return () => { cancelled = true; };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
+    routeConvId,
     searchParams.get("c"),
     searchParams.get("conversation"),
     searchParams.get("conv"),
@@ -181,10 +190,20 @@ export function useAutoOpenConversation<C extends ConvLike>({
     conversations.length,
   ]);
 
+  // ── Fermeture : retour sur /messages sans identifiant, on ferme le fil ──
+  useEffect(() => {
+    const legacy =
+      searchParams.get("c") || searchParams.get("conversation") ||
+      searchParams.get("conv") || searchParams.get("conversationId");
+    if (!routeConvId && !legacy && activeConv && isMobile) setActiveConv(null);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [routeConvId, isMobile]);
+
   // ── Cas 3 : fallback desktop — ouvre la conv non-lue la plus récente ──
   useEffect(() => {
     if (loading || isMobile || activeConv || !user) return;
     const hasUrlParam =
+      routeConvId ||
       searchParams.get("c") || searchParams.get("conversation") ||
       searchParams.get("conv") || searchParams.get("conversationId") ||
       searchParams.get("gardien");
