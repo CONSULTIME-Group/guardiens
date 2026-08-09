@@ -55,7 +55,7 @@ const SitterBadgesSection = ({ groupedBadges, condensed = false }: SitterBadgesS
   const ratio = total > 0 ? Math.min(100, Math.round((activeCount / total) * 100)) : 0;
   const summaryText = hasActive
     ? `${activeCount} badge${activeCount > 1 ? "s" : ""} actif${activeCount > 1 ? "s" : ""} sur ${total}`
-    : `Aucun badge actif sur ${total}`;
+    : `Vos premiers badges se débloquent au fil de vos gardes (${total} à découvrir)`;
   const actionText = open ? "Masquer la grille des badges" : "Afficher la grille des badges";
 
   return (

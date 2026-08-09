@@ -252,7 +252,7 @@ const ApplicationsSection = memo(({ recentApps, sitterProfiles, sitterBadges, si
           <span className="sr-only">Chargement des candidatures reçues…</span>
         </div>
       ) : unread.length === 0 && read.length === 0 ? (
-        <p className="text-sm text-muted-foreground font-sans italic py-4 text-center">Aucune candidature reçue en attente</p>
+        <p className="text-sm text-muted-foreground font-sans italic py-4 text-center">Les candidatures reçues s'afficheront ici</p>
       ) : unread.length > 0 ? (
         <div className="space-y-3">
           {unread.map((a, i) => <AppCard key={a.id} app={a} sitterProfiles={sitterProfiles} sitterAffinityProfiles={sitterAffinityProfiles} featured={i === 0} />)}

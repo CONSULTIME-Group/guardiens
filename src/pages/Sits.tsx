@@ -971,7 +971,7 @@ const Sits = () => {
           {isOwnerView && activeOwnerTab === "active" && (
             <EmptyState
               illustration="emptyCalendar"
-              title="Aucune annonce active"
+              title="Votre prochaine garde commence ici"
               description={
                 sits.length > 0
                   ? `Vous avez ${sits.length} annonce${sits.length > 1 ? "s" : ""} dans votre historique. Republiez une garde pour retrouver un gardien de confiance près de chez vous.`
@@ -985,21 +985,21 @@ const Sits = () => {
           {isOwnerView && activeOwnerTab === "drafts" && (
             <EmptyState
               illustration="emptyCalendar"
-              title="Aucun brouillon"
+              title="Vos brouillons vous attendent ici"
               description="Vos annonces non publiées apparaîtront ici. Vous pouvez les compléter à tout moment."
             />
           )}
           {isOwnerView && activeOwnerTab === "past" && (
             <EmptyState
               illustration="quietLeaf"
-              title="Aucune annonce passée"
+              title="Votre historique d'annonces se remplira ici"
               description="Vos annonces terminées, expirées, annulées ou archivées s'afficheront ici."
             />
           )}
           {!isOwnerView && activeTab === "upcoming" && (
             <EmptyState
               illustration="sitterReady"
-              title="Aucune garde à venir"
+              title="Votre première garde se prépare ici"
               description="Consultez les annonces disponibles et postulez pour votre prochaine garde."
               actionLabel="Voir les annonces"
               actionTo="/search"
@@ -1009,7 +1009,7 @@ const Sits = () => {
           {!isOwnerView && activeTab === "in_progress" && (
             <EmptyState
               illustration="sleepingCat"
-              title="Aucune garde en cours"
+              title="Vos gardes en cours s'afficheront ici"
               description="Vos gardes en cours apparaîtront ici dès le jour J."
               actionLabel="Trouver une garde"
               actionTo="/search"
@@ -1019,7 +1019,7 @@ const Sits = () => {
           {!isOwnerView && activeTab === "completed" && (
             <EmptyState
               illustration="emptyCalendar"
-              title="Aucune garde passée"
+              title="Votre historique de gardes commence ici"
               description="Vos gardes terminées s'afficheront ici, avec les avis reçus."
               actionLabel="Trouver une garde"
               actionTo="/search"
@@ -1749,7 +1749,7 @@ const QuickActions = ({
           </Link>
         ) : (
           <span className={cn(btnClass, "border border-border text-muted-foreground cursor-default")}>
-            Aucune candidature
+            En attente de candidatures
           </span>
         )}
         <Link to={`/sits/${sit.id}/edit`} className={cn(btnClass, "bg-accent text-muted-foreground hover:text-foreground")}>

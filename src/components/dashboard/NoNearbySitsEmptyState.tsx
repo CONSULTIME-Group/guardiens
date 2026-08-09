@@ -116,7 +116,7 @@ const NoNearbySitsEmptyState = ({
     }
   };
 
-  const eyebrow = isProfileIncomplete ? "Profil à compléter" : "Aucune annonce proche";
+  const eyebrow = isProfileIncomplete ? "Profil à compléter" : "Annonces près de chez vous";
   const title = isProfileIncomplete
     ? "Complétez votre profil pour être visible"
     : "Votre profil est en veille active";

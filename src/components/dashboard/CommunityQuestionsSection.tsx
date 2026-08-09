@@ -45,7 +45,7 @@ const CommunityQuestionsSection = () => {
         </div>
       ) : (
         <div className="p-6 rounded-xl border border-dashed border-border bg-accent/30 text-center">
-          <p className="text-sm text-foreground/80">Aucune question ouverte pour le moment.</p>
+          <p className="text-sm text-foreground/80">Les questions de la communauté s'afficheront ici.</p>
           <Link
             to="/questions/nouvelle"
             className="inline-block text-sm text-primary font-semibold mt-2 hover:underline"

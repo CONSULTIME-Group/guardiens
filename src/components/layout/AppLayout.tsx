@@ -1,18 +1,11 @@
-import { lazy, Suspense, useLayoutEffect, useRef, useState, type ReactNode } from "react";
-import { Outlet, useSearchParams, useLocation, Link } from "react-router-dom";
+import { lazy, Suspense, useLayoutEffect, useState, type ReactNode } from "react";
+import { Outlet, useSearchParams, useLocation } from "react-router-dom";
 import { Sidebar } from "./Navigation";
-import { BackButton } from "./BackButton";
 import Breadcrumbs from "./Breadcrumbs";
-// NotificationBell tire date-fns + locale (vendor-date ~27Ko). Chargement
-// différé pour ne pas peser sur les pages publiques (login, landing…) qui
-// n'utilisent jamais le shell AppLayout mais partagent l'entry bundle.
-const NotificationBell = lazy(() => import("./NotificationBell"));
-const MessageBell = lazy(() => import("./MessageBell"));
 const AlmaDock = lazy(() =>
   import("@/components/ai/alma/AlmaDock").then((m) => ({ default: m.AlmaDock })),
 );
 import { AlmaProvider } from "@/contexts/AlmaContext";
-import LanguageSwitcher from "./LanguageSwitcher";
 import { useAuth } from "@/contexts/AuthContext";
 import OnboardingModal from "@/components/onboarding/OnboardingModal";
 import OnboardingGate from "@/components/onboarding/OnboardingGate";
@@ -22,7 +15,7 @@ import OnboardingGate from "@/components/onboarding/OnboardingGate";
 import { usePresenceHeartbeat } from "@/hooks/usePresenceHeartbeat";
 import { AppShellProvider } from "./AppShellContext";
 import { useChromeVisibility } from "./ChromeVisibility";
-import UserMenu from "./UserMenu";
+import AppTopBar from "./AppTopBar";
 
 /**
  * Zone principale du shell. Quand un ecran plein cadre (fil de messagerie)
@@ -56,8 +49,6 @@ export const AppLayout = ({ children }: { children?: ReactNode }) => {
       : false,
   );
 
-  const topBarRef = useRef<HTMLDivElement | null>(null);
-
   useLayoutEffect(() => {
     if (typeof window === "undefined" || typeof window.matchMedia !== "function") return;
     const query = window.matchMedia("(max-width: 767.98px)");
@@ -67,29 +58,6 @@ export const AppLayout = ({ children }: { children?: ReactNode }) => {
     return () => query.removeEventListener("change", update);
   }, []);
 
-  // Hauteur réelle de la top bar mobile de la coquille applicative, exposée en
-  // variable CSS pour que les barres collantes des pages s'y accrochent sans
-  // valeur devinée. Nettoyée au démontage.
-  useLayoutEffect(() => {
-    const el = topBarRef.current;
-    if (!el || typeof window === "undefined") return;
-    const apply = () => {
-      const h = Math.round(el.getBoundingClientRect().height);
-      document.documentElement.style.setProperty("--app-topbar-h", `${h}px`);
-    };
-    apply();
-    let ro: ResizeObserver | null = null;
-    if (typeof ResizeObserver !== "undefined") {
-      ro = new ResizeObserver(apply);
-      ro.observe(el);
-    }
-    window.addEventListener("resize", apply);
-    return () => {
-      ro?.disconnect();
-      window.removeEventListener("resize", apply);
-      document.documentElement.style.removeProperty("--app-topbar-h");
-    };
-  }, []);
 
   // Determine if onboarding modal should show
   const isTour = searchParams.get("tour") === "true";
@@ -110,30 +78,7 @@ export const AppLayout = ({ children }: { children?: ReactNode }) => {
     <div className="flex min-h-screen bg-background">
       <Sidebar showHeaderBells={!mobileHeader} />
       <ShellMain>
-        {/* Mobile top bar unifiée : back (si applicable) + logo + cloche */}
-        <div ref={topBarRef} className="md:hidden sticky top-0 z-40 flex items-center justify-between gap-2 px-3 py-2 bg-background/95 backdrop-blur border-b border-border">
-          <div className="flex items-center gap-1 min-w-0">
-            <BackButton inline />
-            <Link to="/" aria-label="Guardiens, accueil" className="font-heading text-lg font-bold tracking-tight shrink-0 whitespace-nowrap">
-              <span className="text-primary">g</span>
-              <span className="text-foreground">uardiens</span>
-            </Link>
-          </div>
-          <div className="flex items-center gap-2 shrink-0">
-            <LanguageSwitcher compact />
-            {mobileHeader && (
-              <>
-                <Suspense fallback={<div className="w-11 h-11" aria-hidden />}>
-                  <MessageBell />
-                </Suspense>
-                <Suspense fallback={<div className="w-11 h-11" aria-hidden />}>
-                  <NotificationBell />
-                </Suspense>
-              </>
-            )}
-            <UserMenu compact />
-          </div>
-        </div>
+        <AppTopBar />
         <div className="hidden md:block">
           <Breadcrumbs />
         </div>

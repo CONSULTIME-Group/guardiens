@@ -56,10 +56,13 @@ const EntraideGeolocBanner = ({ hasCoords, onUseMyLocation }: Props) => {
           les nouvelles annonces publiées autour de vous.
         </p>
         <div className="flex gap-2 mt-2">
-          <Button size="sm" onClick={activate} className="h-8 text-xs">
+          {/* Action secondaire : l'action primaire de la vue Entraide est le
+              bouton central de la barre basse (proposer ou demander). */}
+          <Button size="sm" variant="outline" onClick={activate} className="text-xs min-h-11 rounded-full">
             Utiliser ma position
           </Button>
-          <Button size="sm" variant="ghost" onClick={dismiss} className="h-8 text-xs">
+
+          <Button size="sm" variant="ghost" onClick={dismiss} className="text-xs min-h-11 rounded-full">
             Plus tard
           </Button>
         </div>
