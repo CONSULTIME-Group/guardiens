@@ -374,7 +374,7 @@ const HouseGuide = () => {
       <Head><meta name="robots" content="noindex, nofollow" /></Head>
       <Link
         to="/sits"
-        className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-6"
+        className="hidden md:inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-6"
         onClick={(e) => {
           if (!dirty) return;
           const ok = window.confirm("Des modifications ne sont pas encore enregistrées. Quitter cette page maintenant ?");
