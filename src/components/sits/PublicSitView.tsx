@@ -154,6 +154,7 @@ const PublicSitView = ({
   isPast = false,
 }: Props) => {
   const [openPet, setOpenPet] = useState<PetLike | null>(null);
+  const { t } = useTranslation();
   const { sitter: viewerSitter } = useViewerSitterForAffinity();
   const photos: string[] = (property?.photos || []).filter(Boolean);
   const petPhotos = pets
@@ -163,7 +164,7 @@ const PublicSitView = ({
   const redirect = `/annonces/${sit.slug || sit.id}`;
   const title = sit.title ? sanitizeUserTitle(sit.title) : t("sit_detail.fallback_title", { city: cityLabel });
   const description = property?.description || "";
-  const { t } = useTranslation();
+
   const accepting = sit.accepting_applications !== false;
   // Plafond atteint : choix du propriétaire, jamais une panne ni un refus.
   const capReached = !accepting && !!sit.max_applications;
