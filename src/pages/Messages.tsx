@@ -531,12 +531,13 @@ const Messages = () => {
       : [...conv.archived_by, user.id];
     await supabase.from("conversations").update({ archived_by: newArchived } as any).eq("id", conv.id);
     setConversations(prev => prev.map(c => c.id === conv.id ? { ...c, archived_by: newArchived } : c));
-    if (activeConv?.id === conv.id && !conv.archived_by.includes(user.id)) setActiveConv(null);
+    if (activeConv?.id === conv.id && !conv.archived_by.includes(user.id)) closeConv();
     toast({ title: conv.archived_by.includes(user.id) ? "Conversation désarchivée" : "Conversation archivée" });
   };
 
   // ─── Reset active conv when role changes ───
   useEffect(() => {
+    if (routeConvId) navigate("/messages", { replace: true });
     setActiveConv(null);
     loadConversations();
   }, [activeRole]); // eslint-disable-line react-hooks/exhaustive-deps
