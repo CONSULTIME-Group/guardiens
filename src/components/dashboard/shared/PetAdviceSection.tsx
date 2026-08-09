@@ -173,7 +173,7 @@ const AdviceCard = ({ tile }: { tile: Tile }) => (
         </div>
       )}
       <div className="flex-1" style={{ padding: "14px" }}>
-        <p className="text-[10px] uppercase tracking-[0.14em] font-semibold text-secondary-foreground/70">
+        <p className="text-[11px] uppercase tracking-[0.14em] font-semibold text-secondary">
           {tile.eyebrow}
         </p>
         <p
