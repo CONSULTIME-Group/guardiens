@@ -241,7 +241,7 @@ const StarCard = ({ sit, onCtaClick }: { sit: AffinitySitCard; onCtaClick?: () =
 
       {/* Corps : ring + contenu */}
       <div
-        className="flex items-start"
+        className="relative flex items-start pr-[14px] sm:pr-[22px]"
         style={{ padding: "22px", gap: "22px" }}
       >
         {sit.affinity && <AffinityRing score={sit.affinity.score} result={sit.affinity} />}
