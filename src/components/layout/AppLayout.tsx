@@ -21,8 +21,28 @@ import OnboardingGate from "@/components/onboarding/OnboardingGate";
 // après le retour OAuth Google. Ne pas le re-monter ici.
 import { usePresenceHeartbeat } from "@/hooks/usePresenceHeartbeat";
 import { AppShellProvider } from "./AppShellContext";
-import { ChromeVisibilityProvider } from "./ChromeVisibility";
+import { ChromeVisibilityProvider, useChromeVisibility } from "./ChromeVisibility";
 import UserMenu from "./UserMenu";
+
+/**
+ * Zone principale du shell. Quand un ecran plein cadre (fil de messagerie)
+ * demande le retrait de la barre basse, on supprime aussi la reserve d'espace
+ * qui lui etait destinee, en ne gardant que la zone sure du materiel.
+ */
+const ShellMain = ({ children }: { children?: ReactNode }) => {
+  const { bottomNavHidden } = useChromeVisibility();
+  return (
+    <main
+      id="main-content"
+      role="main"
+      className={`flex-1 min-w-0 overflow-x-clip ${
+        bottomNavHidden ? "pb-[env(safe-area-inset-bottom)] md:pb-0" : "pb-20 md:pb-24"
+      }`}
+    >
+      {children}
+    </main>
+  );
+};
 
 export const AppLayout = ({ children }: { children?: ReactNode }) => {
   const { user, refreshProfile } = useAuth();
@@ -90,7 +110,7 @@ export const AppLayout = ({ children }: { children?: ReactNode }) => {
     <OnboardingGate />
     <div className="flex min-h-screen bg-background">
       <Sidebar showHeaderBells={!mobileHeader} />
-      <main id="main-content" className="flex-1 min-w-0 pb-20 md:pb-24 overflow-x-clip" role="main">
+      <ShellMain>
         {/* Mobile top bar unifiée : back (si applicable) + logo + cloche */}
         <div ref={topBarRef} className="md:hidden sticky top-0 z-40 flex items-center justify-between gap-2 px-3 py-2 bg-background/95 backdrop-blur border-b border-border">
           <div className="flex items-center gap-1 min-w-0">
@@ -120,7 +140,7 @@ export const AppLayout = ({ children }: { children?: ReactNode }) => {
         </div>
 
         {children ?? <Outlet />}
-      </main>
+      </ShellMain>
       <BottomNav />
 
       {showOnboarding && (
