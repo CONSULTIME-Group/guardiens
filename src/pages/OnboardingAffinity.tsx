@@ -124,7 +124,10 @@ const OnboardingAffinity = () => {
   // l'utilisateur n'a pas complété. `reason` distingue le mode de sortie
   // (close_button | navigate_away | page_unload), `step` renseigne l'étape
   // courante au moment de la sortie.
-  const emitAbandoned = (reason: "close_button" | "navigate_away" | "page_unload") => {
+  const emitAbandoned = (
+    reason: "close_button" | "navigate_away" | "page_unload",
+    transport: "default" | "beacon" = "default",
+  ) => {
     if (!shownTrackedRef.current) return;
     if (completedRef.current || abandonedEmittedRef.current) return;
     abandonedEmittedRef.current = true;
@@ -133,6 +136,7 @@ const OnboardingAffinity = () => {
       : 0;
     void trackEvent("onboarding_abandoned", {
       source: "/onboarding/affinity",
+      transport,
       metadata: {
         reason,
         step: currentStepRef.current,
@@ -143,6 +147,7 @@ const OnboardingAffinity = () => {
     });
     void trackEvent("affinity_onboarding_abandoned", {
       source: "/onboarding/affinity",
+      transport,
       metadata: {
         reason,
         step: currentStepRef.current,
@@ -158,13 +163,19 @@ const OnboardingAffinity = () => {
   const emitAbandonedRef = useRef(emitAbandoned);
   emitAbandonedRef.current = emitAbandoned;
 
+  // Sortie de page : seul `pagehide` avec `persisted === false` compte comme
+  // abandon. Un `pagehide` avec mise en cache arrière-plan (bascule
+  // d'application, verrouillage d'écran sur iOS) n'est pas un abandon, et
+  // `visibilitychange` n'est volontairement pas écouté. `beforeunload` est
+  // retiré : peu fiable et destructeur pour le bfcache.
   useEffect(() => {
-    const onUnload = () => emitAbandonedRef.current("page_unload");
-    window.addEventListener("beforeunload", onUnload);
-    window.addEventListener("pagehide", onUnload);
+    const onPageHide = (event: PageTransitionEvent) => {
+      if (event.persisted) return;
+      emitAbandonedRef.current("page_unload", "beacon");
+    };
+    window.addEventListener("pagehide", onPageHide);
     return () => {
-      window.removeEventListener("beforeunload", onUnload);
-      window.removeEventListener("pagehide", onUnload);
+      window.removeEventListener("pagehide", onPageHide);
       // Démontage React sans complétion : navigation interne vers une autre route.
       emitAbandonedRef.current("navigate_away");
     };
@@ -304,14 +315,14 @@ const OnboardingAffinity = () => {
 
   if (!user || flagLoading || status.loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center text-muted-foreground">
+      <div className="min-h-[100svh] flex items-center justify-center text-muted-foreground">
         Chargement...
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-background flex items-start md:items-center justify-center px-4 py-8">
+    <div className="min-h-[100svh] bg-background flex items-start md:items-center justify-center px-4 py-8">
       <Head>
         <title>Bienvenue, une dernière étape | Guardiens</title>
         <meta name="robots" content="noindex, nofollow" />
@@ -442,7 +453,7 @@ const OnboardingAffinity = () => {
                           role="radio"
                           aria-checked={active}
                           onClick={() => setLifePace(o.value)}
-                          className={`px-4 py-2 rounded-full border text-sm transition-colors ${
+                          className={`inline-flex items-center justify-center min-h-[44px] px-4 py-2 rounded-full border text-sm transition-colors ${
                             active
                               ? "bg-primary text-primary-foreground border-primary"
                               : "bg-background text-foreground border-border hover:bg-accent"
