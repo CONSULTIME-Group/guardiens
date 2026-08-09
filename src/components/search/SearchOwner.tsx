@@ -1629,10 +1629,10 @@ const SearchOwner = () => {
                   >
                     <div className="flex items-center gap-2 mb-1">
                       <MapPin className="h-4 w-4 text-primary" />
-                      <span className="font-medium text-sm">Élargir à {expansion.label}</span>
+                      <span className="font-medium text-sm">{t("search_results.expand_zone", { zone: expansion.label })}</span>
                     </div>
                     <p className="text-xs text-muted-foreground">
-                      {expansion.count} gardien{expansion.count > 1 ? "s" : ""} disponible{expansion.count > 1 ? "s" : ""}.
+                      {t("search_results.expand_zone_count", { count: expansion.count })}
                     </p>
                   </button>
                 )}
