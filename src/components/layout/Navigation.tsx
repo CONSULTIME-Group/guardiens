@@ -14,6 +14,7 @@ import { useNavBadgeCounts } from "@/hooks/useNavBadgeCounts";
 import { useInAppShell } from "./AppShellContext";
 import { useChromeVisibility } from "./ChromeVisibility";
 import UserMenu from "./UserMenu";
+import { isFabHidden } from "@/lib/bottomNavFab";
 
 // Lazy : NotificationBell tire date-fns. On évite vendor-date dans l'entry.
 const NotificationBell = lazy(() => import("./NotificationBell"));
@@ -370,6 +371,8 @@ export const BottomNav = () => {
     { to: "/petites-missions", icon: Handshake, label: "Entraide", badge: missionBadgeCount },
   ];
 
+  const fabHidden = isFabHidden(path);
+
   const moreBadge = sitterActionCount + (isOwnerView ? 0 : sitsBadge);
 
   const renderTab = (item: { to: string; icon: typeof Home; label: string; badge?: number }) => {
@@ -453,7 +456,8 @@ export const BottomNav = () => {
 
           {leftTabs.map(renderTab)}
 
-          {/* FAB central — action contextuelle */}
+          {/* FAB central, masqué quand la page porte déjà une action primaire */}
+          {!fabHidden && (
           <div className="relative flex-1 flex justify-center -mt-7">
             <button
               type="button"
@@ -472,6 +476,7 @@ export const BottomNav = () => {
               </span>
             </button>
           </div>
+          )}
 
           {rightTabs.map(renderTab)}
 
