@@ -1,22 +1,23 @@
 import { useEffect } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { SUPPORTED_LANGS } from "@/i18n";
-import { getStoredLang } from "@/lib/lang";
+import { getStoredLang, isSupportedLang, setStoredLang } from "@/lib/lang";
 
 /**
- * L'URL reste l'unique source de vérité pour la langue au rendu.
+ * Recale la langue à chaque navigation, sans jamais réécrire l'URL.
  *
- * A chaque navigation :
- *   - `?lang=xx` supporté : on bascule i18next sur cette langue ;
- *   - pas de paramètre, mais un choix explicite mémorisé : on réécrit l'URL
- *     avec ce paramètre (remplacement d'historique), pour que le choix
- *     survive aux liens internes qui ne le portent pas ;
- *   - pas de paramètre et aucun choix mémorisé : français.
+ * A chaque changement de route :
+ *   - `?lang=xx` supporté : on bascule i18next dessus et on mémorise le choix
+ *     immédiatement, car une personne arrivée par un lien externe ne verra
+ *     jamais le sélecteur ;
+ *   - pas de paramètre : la langue mémorisée est conservée, la navigation du
+ *     routeur ne repasse plus en français.
  *
- * Conséquence voulue : une URL canonique partagée sans paramètre sert du
- * français au crawl, alors qu'un visiteur ayant choisi une langue la garde
- * de page en page.
+ * Aucune décoration d'URL : ajouter `?lang` sur les liens internes créerait
+ * une seconde URL crawlable pour chaque page (articles, guides, villes), donc
+ * de la duplication à grande échelle. Le paramètre reste réservé aux liens qui
+ * sortent du contexte JavaScript.
  */
 export const readLangFromSearch = (search: string): string => {
   const raw = new URLSearchParams(search).get("lang");
@@ -27,30 +28,32 @@ export const readLangFromSearch = (search: string): string => {
 
 const LangUrlSync = () => {
   const { pathname, search, hash } = useLocation();
-  const navigate = useNavigate();
   const { i18n } = useTranslation();
 
   useEffect(() => {
-    const params = new URLSearchParams(search);
-    const raw = params.get("lang");
-    const stored = getStoredLang();
+    const raw = new URLSearchParams(search).get("lang")?.toLowerCase();
 
-    // Aucun paramètre de langue mais un choix mémorisé : on recolle le
-    // paramètre sur l'URL courante plutôt que de retomber en français.
-    if (!raw && stored && stored !== "fr") {
-      params.set("lang", stored);
-      navigate(`${pathname}?${params.toString()}${hash}`, { replace: true });
-      return;
+    if (isSupportedLang(raw)) {
+      // Un lien explicite gagne toujours sur le choix mémorisé, et devient le
+      // nouveau choix mémorisé.
+      setStoredLang(raw);
+      if (i18n.language !== raw) void i18n.changeLanguage(raw);
+    } else {
+      const stored = getStoredLang();
+      if (stored && i18n.language !== stored) void i18n.changeLanguage(stored);
     }
 
-    const target = readLangFromSearch(search);
-    if (i18n.language !== target) {
-      void i18n.changeLanguage(target);
+    // L'attribut de langue du document est recalé à chaque route, pas
+    // seulement au montage initial.
+    if (typeof document !== "undefined") {
+      const code = isSupportedLang(i18n.language) ? i18n.language : "fr";
+      if (document.documentElement.getAttribute("lang") !== code) {
+        document.documentElement.setAttribute("lang", code);
+      }
     }
-  }, [pathname, search, hash, navigate, i18n]);
+  }, [pathname, search, hash, i18n, i18n.language]);
 
   return null;
 };
 
 export default LangUrlSync;
-
