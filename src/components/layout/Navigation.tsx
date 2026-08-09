@@ -11,7 +11,6 @@ import { cn } from "@/lib/utils";
 import { lazy, Suspense, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavBadgeCounts } from "@/hooks/useNavBadgeCounts";
-import { useScrollDirection } from "@/hooks/useScrollDirection";
 import { useInAppShell } from "./AppShellContext";
 import { useChromeVisibility } from "./ChromeVisibility";
 import UserMenu from "./UserMenu";
@@ -286,17 +285,8 @@ export const BottomNav = () => {
 
 
   const navigate = useNavigate();
-  const scrollDir = useScrollDirection();
   const inAppShell = useInAppShell();
 
-  // La nav ne se masque jamais sur les routes publiques hors coquille
-  // authentifiée : elle y est le seul recours de navigation. Ailleurs, elle
-  // se masque au scroll bas, revient au scroll haut, et revient aussi seule
-  // après 1,5 seconde sans scroll. Sur la landing mobile, le masquage au
-  // scroll bas est désactivé : la pilule se cache uniquement tout en haut de
-  // page et réapparaît dès que l'utilisateur défile.
-  const [idleVisible, setIdleVisible] = useState(true);
-  const idleTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [isMobileViewport, setIsMobileViewport] = useState(() =>
     typeof window !== "undefined" && typeof window.matchMedia === "function"
       ? !window.matchMedia("(min-width: 768px)").matches
@@ -312,60 +302,35 @@ export const BottomNav = () => {
   }, []);
   const isLandingMobile = location.pathname === "/" && isMobileViewport;
 
+  // Landing mobile : lecture autonome de scrollY à chaque image. Aucun
+  // événement de défilement ni observateur n'est requis par cette page.
+  const [landingNavVisible, setLandingNavVisible] = useState(() =>
+    typeof window !== "undefined" ? window.scrollY > 120 : false,
+  );
   useEffect(() => {
-    if (!inAppShell) return;
-    const onScroll = () => {
-      setIdleVisible(false);
-      if (idleTimer.current) clearTimeout(idleTimer.current);
-      idleTimer.current = setTimeout(() => setIdleVisible(true), 1500);
-    };
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => {
-      window.removeEventListener("scroll", onScroll);
-      if (idleTimer.current) clearTimeout(idleTimer.current);
-    };
-  }, [inAppShell]);
-
-  // Landing mobile : la barre n'est pas rendue tant que l'utilisateur est en
-  // haut de page, pour ne jamais recouvrir les CTA du hero. Détection par
-  // sentinelle de hauteur nulle observée en IntersectionObserver, les
-  // événements de défilement n'étant pas fiables sur cette page.
-  const [atLandingTop, setAtLandingTop] = useState(true);
-  useEffect(() => {
-    if (typeof document === "undefined") return;
+    if (typeof window === "undefined") return;
     if (!isLandingMobile) {
-      setAtLandingTop(false);
+      setLandingNavVisible(true);
       return;
     }
-    setAtLandingTop(true);
-    const IO =
-      typeof window !== "undefined"
-        ? (window as unknown as { IntersectionObserver?: typeof IntersectionObserver })
-            .IntersectionObserver
-        : undefined;
-    if (typeof IO !== "function") {
-      setAtLandingTop(false);
-      return;
-    }
-    const sentinel = document.createElement("div");
-    sentinel.setAttribute("data-landing-nav-sentinel", "");
-    sentinel.style.cssText =
-      "position:absolute;top:0;left:0;width:1px;height:1px;pointer-events:none;";
-    document.body.insertBefore(sentinel, document.body.firstChild);
-    const observer = new IO(
-      ([entry]) => setAtLandingTop(entry.isIntersecting),
-      { threshold: 0 },
-    );
-    observer.observe(sentinel);
+    let frame = 0;
+    let previous = window.scrollY > 120;
+    setLandingNavVisible(previous);
+
+    const checkPosition = () => {
+      const next = window.scrollY > 120;
+      if (next !== previous) {
+        previous = next;
+        setLandingNavVisible(next);
+      }
+      frame = window.requestAnimationFrame(checkPosition);
+    };
+    frame = window.requestAnimationFrame(checkPosition);
+
     return () => {
-      observer.disconnect();
-      sentinel.remove();
+      window.cancelAnimationFrame(frame);
     };
   }, [isLandingMobile]);
-
-  const hideNav = inAppShell && scrollDir === "down" && !idleVisible && !isLandingMobile;
-  const hidden = hideNav;
-
 
   // Un écran plein cadre (fil de messagerie mobile) peut demander le retrait
   // complet de la barre basse et de son bouton flottant, pour ne jamais
@@ -386,7 +351,7 @@ export const BottomNav = () => {
     if (!el) return;
 
     const apply = () => {
-      const h = hideNav ? 0 : Math.round(el.getBoundingClientRect().height);
+      const h = Math.round(el.getBoundingClientRect().height);
       document.documentElement.style.setProperty("--bottom-nav-h", `${h}px`);
     };
     apply();
@@ -401,7 +366,7 @@ export const BottomNav = () => {
       window.removeEventListener("resize", apply);
       document.documentElement.style.setProperty("--bottom-nav-h", "0px");
     };
-  }, [hideNav, bottomNavHidden]);
+  }, [bottomNavHidden, landingNavVisible]);
 
 
   // Signature Dock 2026 — 4 tabs role-aware + FAB contextuel + Plus sheet
@@ -503,7 +468,7 @@ export const BottomNav = () => {
   if (bottomNavHidden) return null;
 
   // Landing mobile, tout en haut de page : rien n'est rendu.
-  if (isLandingMobile && atLandingTop) return null;
+  if (isLandingMobile && !landingNavVisible) return null;
 
 
   return (
@@ -519,11 +484,7 @@ export const BottomNav = () => {
       >
         <div
           data-nav-pill
-          className={cn(
-            "pointer-events-auto mx-auto max-w-md bg-card border border-border/60 shadow-[0_20px_50px_-12px_hsl(var(--primary)/0.18)] rounded-3xl h-16 flex items-center justify-between px-1.5 relative",
-            "transition-transform duration-300 ease-out motion-reduce:transition-none",
-            hidden ? "translate-y-[150%]" : "translate-y-0"
-          )}
+          className="pointer-events-auto mx-auto max-w-md bg-card border border-border/60 shadow-[0_20px_50px_-12px_hsl(var(--primary)/0.18)] rounded-3xl h-16 flex items-center justify-between px-1.5 relative"
         >
 
 
