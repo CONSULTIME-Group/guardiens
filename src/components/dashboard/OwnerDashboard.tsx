@@ -360,7 +360,7 @@ const OwnerDashboard = () => {
               />
             </div>
 
-            {/* 6. LECTURES ET GUIDES (vague 16) */}
+            {/* 6. Point d’entrée éditorial discret (lot 4) */}
             <JournalLine />
 
 

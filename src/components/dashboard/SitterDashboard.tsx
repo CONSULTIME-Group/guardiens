@@ -360,7 +360,7 @@ const SitterDashboard = () => {
                 />
               </div>
 
-              {/* 5. LECTURES ET GUIDES (vague 16) */}
+              {/* 5. Point d’entrée éditorial discret (lot 4) */}
               <div>
                 <JournalLine />
               </div>
