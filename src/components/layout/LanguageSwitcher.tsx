@@ -9,6 +9,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { SUPPORTED_LANGS, LANG_LABELS, type SupportedLang } from "@/i18n";
+import { setStoredLang } from "@/lib/lang";
 
 interface Props {
   variant?: "ghost" | "outline";
