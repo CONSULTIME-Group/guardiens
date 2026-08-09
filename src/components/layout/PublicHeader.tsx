@@ -123,6 +123,9 @@ export default function PublicHeader({ authedVariant = false }: { authedVariant?
     };
   }, [hidden]);
 
+  // Dans la coquille applicative, la top bar est déjà montée par AppLayout :
+  // on ne la double pas.
+  if (hasSession && inAppShell && !authedVariant) return null;
   if (useAppTopBar) return <AppTopBar standalone />;
   if (hidden) return null;
 
