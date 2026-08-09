@@ -321,17 +321,30 @@ export const BottomNav = () => {
   // pour éviter le recouvrement des CTA du hero. Elle réapparaît dès 120 px de scroll.
   useEffect(() => {
     if (typeof window === "undefined") return;
-    if (location.pathname !== "/") return;
+    if (location.pathname !== "/") {
+      setLandingTopHidden(false);
+      return;
+    }
     const md = window.matchMedia("(min-width: 768px)");
+    let raf = 0;
     const update = () => {
-      const shouldHide = !md.matches && window.scrollY < 120;
+      raf = 0;
+      const y = window.scrollY || window.pageYOffset || document.documentElement.scrollTop || 0;
+      const shouldHide = !md.matches && y < 120;
       setLandingTopHidden(prev => (prev === shouldHide ? prev : shouldHide));
     };
+    const onScroll = () => {
+      if (raf) return;
+      raf = window.requestAnimationFrame(update);
+    };
     update();
-    window.addEventListener("scroll", update, { passive: true });
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll, { passive: true });
     md.addEventListener("change", update);
     return () => {
-      window.removeEventListener("scroll", update);
+      if (raf) window.cancelAnimationFrame(raf);
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onScroll);
       md.removeEventListener("change", update);
     };
   }, [location.pathname]);
