@@ -231,14 +231,11 @@ const ApplicationCard = ({
 
   return (
     <article
-      className="bg-card border border-border"
-      style={{
-        borderRadius: "20px",
-        padding: "22px",
-        boxShadow: "0 1px 2px rgba(29,27,22,0.04), 0 8px 24px rgba(29,27,22,0.05)",
-      }}
+      className="notebook-card relative"
+      style={{ padding: "22px" }}
     >
-      <div className="flex items-start gap-[22px]">
+      <div className="notebook-card-paper absolute inset-0" aria-hidden="true" />
+      <div className="relative flex items-start gap-[22px] pr-[14px] sm:pr-[22px]">
         {showRing ? (
           <AffinityRing score={affinity!.score} result={affinity} />
         ) : (
