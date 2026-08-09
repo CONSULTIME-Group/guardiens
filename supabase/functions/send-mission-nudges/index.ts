@@ -31,7 +31,7 @@ interface Mission {
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders })
 
-  const guard = await requireCronCaller(req, corsHeaders)
+  const guard = await requireCronCaller(req, corsHeaders, "send-mission-nudges")
   if (guard) return guard
 
   let body: { dry_run?: boolean; mission_id?: string; kind?: 'feedback' | 'no_response' | 'response_waiting' } = {}
