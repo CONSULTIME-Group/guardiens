@@ -2452,7 +2452,7 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
    {/* FAB masqué en état vide : rien à afficher sur la carte, il ne ferait que
         chevaucher les CTA de l'empty state. */}
    {isMobile && tab === "sits" && availableSitsCount > 0 && (
-    <div className="fixed bottom-20 left-1/2 -translate-x-1/2 z-[1200] sm:hidden">
+    <div className="fixed bottom-[calc(var(--bottom-nav-h,0px)+14px+env(safe-area-inset-bottom))] left-1/2 -translate-x-1/2 z-[1200] sm:hidden">
       <button
         onClick={() => setViewMode(viewMode === "list" ? "map" : "list")}
         className="inline-flex items-center gap-2 rounded-full bg-foreground text-background shadow-xl px-5 py-3 text-sm font-semibold transition-transform active:scale-95"

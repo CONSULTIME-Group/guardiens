@@ -59,7 +59,7 @@ const StickyCTA = ({ city, stats }: Props) => {
       <div ref={sentinelRef} className="absolute top-1/2" aria-hidden="true" />
 
       {visible && (
-        <div className="fixed bottom-0 left-0 right-0 z-50 bg-background border-t-2 border-primary shadow-md px-4 py-4">
+        <div className="fixed bottom-[var(--bottom-nav-h,0px)] left-0 right-0 z-50 bg-background border-t-2 border-primary shadow-md px-4 py-4">
           <div className="max-w-5xl mx-auto flex items-center justify-between gap-4">
             <p className="text-sm text-foreground flex-1">{message}</p>
             <Link to={ctaLink}>
