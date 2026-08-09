@@ -5545,6 +5545,8 @@ export type Database = {
           reminder_j48_sent: boolean | null
           reminder_j7_sent: boolean | null
           review_j1_sent: boolean | null
+          review_j10_sent: boolean
+          review_j20_sent: boolean
           review_j5_sent: boolean | null
           sitter_expectations: string | null
           slug: string | null
@@ -5593,6 +5595,8 @@ export type Database = {
           reminder_j48_sent?: boolean | null
           reminder_j7_sent?: boolean | null
           review_j1_sent?: boolean | null
+          review_j10_sent?: boolean
+          review_j20_sent?: boolean
           review_j5_sent?: boolean | null
           sitter_expectations?: string | null
           slug?: string | null
@@ -5641,6 +5645,8 @@ export type Database = {
           reminder_j48_sent?: boolean | null
           reminder_j7_sent?: boolean | null
           review_j1_sent?: boolean | null
+          review_j10_sent?: boolean
+          review_j20_sent?: boolean
           review_j5_sent?: boolean | null
           sitter_expectations?: string | null
           slug?: string | null
@@ -8661,6 +8667,7 @@ export type Database = {
         | "completed"
         | "cancelled"
         | "archived"
+        | "expired"
       small_mission_category: "animals" | "garden" | "house" | "skills"
       small_mission_response_status:
         | "pending"
@@ -8924,6 +8931,7 @@ export const Constants = {
         "completed",
         "cancelled",
         "archived",
+        "expired",
       ],
       small_mission_category: ["animals", "garden", "house", "skills"],
       small_mission_response_status: [
