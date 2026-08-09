@@ -57,7 +57,7 @@ const CommunityPulseBanner = memo(({ userId, className }: Props) => {
     metrics.push({
       key: "maisons",
       value: pulse.maisonsGardees,
-      label: "maisons gardées depuis le début de l'aventure",
+      label: "maisons gardées",
     });
   }
   // (c) Animaux (inclut l'historique fondateurs 2021-2026)
@@ -65,11 +65,31 @@ const CommunityPulseBanner = memo(({ userId, className }: Props) => {
     metrics.push({
       key: "animaux",
       value: pulse.animauxAccompagnes,
-      label: "animaux accompagnés depuis le début de l'aventure",
+      label: "animaux accompagnés",
     });
   }
 
   if (metrics.length === 0) return null;
+
+  // Le compteur local dit l'instant présent, les deux autres disent l'histoire.
+  // On les sépare pour que personne ne confonde les deux provenances.
+  const localMetrics = metrics.filter((m) => m.key === "local" || m.key === "national");
+  const historyMetrics = metrics.filter((m) => m.key === "maisons" || m.key === "animaux");
+
+  const renderMetric = ({ key, value, label }: Metric) => (
+    <li key={key} className="flex items-baseline gap-3 min-w-0">
+      <span
+        className="font-heading text-white tabular-nums shrink-0 text-right"
+        style={{ fontSize: "26px", fontWeight: 600, minWidth: "52px", lineHeight: 1 }}
+      >
+        {value.toLocaleString("fr-FR")}
+      </span>
+      <span className="text-[#d5e6dd] leading-snug min-w-0" style={{ fontSize: "12.5px" }}>
+        {label}
+      </span>
+    </li>
+  );
+
 
   return (
     <section
@@ -107,24 +127,24 @@ const CommunityPulseBanner = memo(({ userId, className }: Props) => {
           </h2>
         </div>
 
-        <ul className="flex flex-col" style={{ gap: "14px" }}>
-          {metrics.map(({ key, value, label }) => (
-            <li key={key} className="flex items-baseline gap-3 min-w-0">
-              <span
-                className="font-heading text-white tabular-nums shrink-0 text-right"
-                style={{ fontSize: "26px", fontWeight: 600, minWidth: "52px", lineHeight: 1 }}
-              >
-                {value.toLocaleString("fr-FR")}
-              </span>
-              <span
-                className="text-[#d5e6dd] leading-snug min-w-0"
-                style={{ fontSize: "12.5px" }}
-              >
-                {label}
-              </span>
-            </li>
-          ))}
-        </ul>
+        {localMetrics.length > 0 && (
+          <ul className="flex flex-col" style={{ gap: "14px" }}>
+            {localMetrics.map(renderMetric)}
+          </ul>
+        )}
+
+        {historyMetrics.length > 0 && (
+          <div
+            className={localMetrics.length > 0 ? "mt-5 pt-4 border-t border-white/20" : ""}
+          >
+            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[#cfe6da] mb-3">
+              Depuis nos débuts, notre histoire de fondateurs comprise
+            </p>
+            <ul className="flex flex-col" style={{ gap: "14px" }}>
+              {historyMetrics.map(renderMetric)}
+            </ul>
+          </div>
+        )}
 
         <div className="mt-5 flex justify-end">
           <Link

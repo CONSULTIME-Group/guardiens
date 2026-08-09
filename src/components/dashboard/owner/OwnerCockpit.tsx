@@ -57,7 +57,7 @@ const OwnerCockpit = ({
       aria-label="Espace propriétaire, accueil"
       className="pt-4 sm:pt-6 pb-2"
     >
-      <div className="notebook-card relative p-[18px] pr-[30px] sm:p-[34px] sm:pr-[52px]">
+      <div className="notebook-card relative p-[14px] pr-[22px] sm:p-[34px] sm:pr-[52px]">
         <div className="notebook-card-paper absolute inset-0" aria-hidden="true" />
         {/* Lavis discret terracotta, coin bas gauche */}
         <div
@@ -69,10 +69,10 @@ const OwnerCockpit = ({
             ].join(", "),
           }}
         />
-        {/* Aquarelle signature, coin bas droit, mêmes règles que SitterCockpit */}
+        {/* Aquarelle signature, fondue à droite, jamais au dessus du texte */}
         <div
           aria-hidden="true"
-          className="illustration-wrapper pointer-events-none absolute top-[-14px] right-[-10px] w-[124px] h-[124px] sm:top-auto sm:bottom-[-12px] sm:right-[-16px] sm:w-[150px] sm:h-[150px] min-[1100px]:w-[180px] min-[1100px]:h-[180px]"
+          className="illustration-wrapper pointer-events-none absolute top-[-10px] right-[-14px] w-[104px] h-[104px] sm:top-auto sm:bottom-[-12px] sm:right-[-16px] sm:w-[150px] sm:h-[150px] min-[1100px]:w-[180px] min-[1100px]:h-[180px]"
         >
           <img
             src={ownerHome}
@@ -85,63 +85,65 @@ const OwnerCockpit = ({
           />
         </div>
 
-        <div className="relative flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 sm:gap-[22px]">
-          {/* Bloc gauche : avatar + salutation */}
-          <div className="flex items-center gap-[14px] min-w-0 flex-1 pr-[72px] sm:pr-0">
-            <Link
-              to="/owner-profile"
-              aria-label="Modifier mon profil"
-              className="shrink-0 flex items-center justify-center w-[46px] h-[46px] rounded-full overflow-hidden border border-border ring-offset-background focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
-              style={{ backgroundColor: "hsl(var(--secondary) / 0.12)" }}
-            >
-              {avatarUrl ? (
-                <img src={avatarUrl} alt="" className="w-full h-full object-cover" loading="lazy" />
-              ) : (
-                <span className="font-heading font-semibold text-lg text-foreground/80">
-                  {initial}
-                </span>
-              )}
-            </Link>
-
-            <div className="min-w-0">
+        <div className="relative flex flex-col sm:flex-row sm:items-start sm:justify-between gap-[10px] sm:gap-[22px]">
+          <div className="min-w-0 flex-1">
+            {/* 1. Avatar dans le flux, avec l'eyebrow, côte à côte */}
+            <div className="flex items-center gap-[12px] min-w-0 pr-[86px] sm:pr-0">
+              <Link
+                to="/owner-profile"
+                aria-label="Modifier mon profil"
+                className="shrink-0 flex items-center justify-center w-[48px] h-[48px] rounded-full overflow-hidden border border-border ring-offset-background focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
+                style={{ backgroundColor: "hsl(var(--secondary) / 0.12)" }}
+              >
+                {avatarUrl ? (
+                  <img src={avatarUrl} alt="" className="w-full h-full object-cover" loading="lazy" />
+                ) : (
+                  <span className="font-heading font-semibold text-lg text-foreground/80">
+                    {initial}
+                  </span>
+                )}
+              </Link>
               <p
-                className="font-heading italic text-secondary"
+                className="font-heading italic text-secondary min-w-0 truncate"
                 style={{ fontSize: "13px", lineHeight: 1.2 }}
               >
                 Espace propriétaire
               </p>
-              <h1
-                className="font-heading font-semibold tracking-tight leading-tight text-foreground mt-[8px] break-words"
-                style={{ fontSize: "28px" }}
-              >
-                <span className="sm:hidden">
-                  {greeting}{displayName ? `, ${displayName}` : ""}
-                </span>
-                <span
-                  className="hidden sm:inline"
-                  style={{ fontSize: "32px" }}
-                >
-                  {greeting}{displayName ? `, ${displayName}` : ""}
-                </span>
-              </h1>
-              <p
-                className="font-sans text-muted-foreground mt-[8px]"
-                style={{ fontSize: "13px", lineHeight: 1.3 }}
-              >
-                {ancrage}
-              </p>
-              {subtitle && (
-                <p
-                  className="font-sans text-foreground/80 mt-[8px]"
-                  style={{ fontSize: "13.5px", lineHeight: 1.4 }}
-                >
-                  {subtitle}
-                </p>
-              )}
             </div>
+
+            {/* 2. Salutation, une seule ligne */}
+            <h1
+              className="font-heading font-semibold tracking-tight leading-tight text-foreground mt-[10px] whitespace-nowrap truncate"
+              style={{ fontSize: "24px" }}
+            >
+              <span className="sm:hidden">
+                {greeting}{displayName ? `, ${displayName}` : ""}
+              </span>
+              <span className="hidden sm:inline" style={{ fontSize: "32px" }}>
+                {greeting}{displayName ? `, ${displayName}` : ""}
+              </span>
+            </h1>
+
+            {/* 3. Horodatage */}
+            <p
+              className="font-sans text-muted-foreground mt-[6px]"
+              style={{ fontSize: "13px", lineHeight: 1.3 }}
+            >
+              {ancrage}
+            </p>
+
+            {/* 4. Phrase de contexte, pleine largeur */}
+            {subtitle && (
+              <p
+                className="font-sans text-foreground/80 mt-[6px]"
+                style={{ fontSize: "13.5px", lineHeight: 1.4 }}
+              >
+                {subtitle}
+              </p>
+            )}
           </div>
 
-          {/* Bloc droit : une seule pilule "Mon profil public" */}
+          {/* 5. Bouton, libellé complet, aligné à gauche sous 768 px */}
           <div className="flex items-center gap-[8px] sm:shrink-0 flex-wrap">
             {userId && (
               <Link
@@ -151,8 +153,7 @@ const OwnerCockpit = ({
                 style={{ minHeight: "44px", fontSize: "12px" }}
               >
                 <Eye className="w-3.5 h-3.5" aria-hidden="true" />
-                <span className="hidden sm:inline">Mon profil public</span>
-                <span className="sm:hidden">Profil</span>
+                Mon profil public
               </Link>
             )}
           </div>
