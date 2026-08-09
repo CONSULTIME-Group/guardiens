@@ -155,7 +155,7 @@ const Landing = () => {
       {/* ═══════════════ MAIN LANDMARK (englobe tout le contenu) ═══════════════ */}
       <main id="main-content">
       {/* ═══════════════ SECTION 1, HERO (épuré, 5 blocs) ═══════════════ */}
-      <section className="relative w-full min-h-[100svh] flex items-end md:items-center overflow-hidden">
+      <section className="relative w-full min-h-[100svh] max-h-[100svh] md:max-h-none flex items-end md:items-center overflow-hidden">
         <picture>
           <source
             type="image/avif"
