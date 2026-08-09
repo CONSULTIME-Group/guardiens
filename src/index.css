@@ -836,23 +836,21 @@
   top: var(--public-header-h, var(--app-topbar-h, 0px));
 }
 
-/* Pied de page public : cibles tactiles portées à 44 px de haut sur les
-   appareils tactiles, seuil des recommandations d'accessibilité. Typographie,
-   couleurs et contenu inchangés, seule la surface cliquable grandit. Les
-   interlignes des listes sont absorbés dans la zone cliquable pour contenir la
-   croissance du bloc. Au pointeur fin (souris), rien ne change. */
-@media (pointer: coarse) {
-  .public-footer ul > li > a {
-    display: flex;
-    align-items: center;
-    min-height: 44px;
-  }
-  .public-footer ul.space-y-2 > li + li {
-    margin-top: 0;
-  }
-  .public-footer a:not(ul a) {
-    display: inline-flex;
-    align-items: center;
-    min-height: 44px;
-  }
+/* Pied de page public : chaque lien porte une zone tactile de 44 px de haut
+   minimum, sans distinction de type de pointeur (la règle précédente était
+   limitée au pointeur grossier, elle ne s'appliquait donc pas partout). La
+   taille de texte est inchangée : les interlignes des listes sont absorbés
+   dans la zone cliquable pour contenir la hauteur du bloc. */
+.public-footer ul > li > a {
+  display: flex;
+  align-items: center;
+  min-height: 44px;
+}
+.public-footer ul > li + li {
+  margin-top: 0;
+}
+.public-footer a:not(ul a) {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
 }
