@@ -96,7 +96,7 @@
     "usages": {
       "eyebrow": "Lo que hacemos juntos",
       "title": "Cuidado de mascotas a domicilio y ayuda local.",
-      "lede": "El home sitting por un lado, la ayuda mutua entre vecinos por el otro. Usted elige: uno, otro o ambos.",
+      "lede": "El home sitting por un lado, la ayuda mutua entre personas de la zona por el otro. Usted elige: uno, otro o ambos.",
       "owner": {
         "tag": "Propietarios",
         "title": "Partir con tranquilidad.",
@@ -114,7 +114,7 @@
         "badge": "Entre gente de la zona",
         "tag": "Ayuda local, independiente del cuidado",
         "title": "Un pequeño favor, un intercambio.",
-        "text": "Regar un huerto, montar una estantería, compartir una habilidad, visitar a una persona aislada. Sin necesidad de cuidado ni de mascotas, solo vecinos que se ayudan mutuamente.",
+        "text": "Regar un huerto, montar una estantería, compartir una habilidad, visitar a una persona aislada. Sin necesidad de cuidado ni de mascotas, solo personas de la zona que se ayudan.",
         "cta": "Descubrir la ayuda mutua →"
       },
       "urgency": {
@@ -211,7 +211,7 @@
       "p3": "Elisa y yo cuidamos 37 casas en cinco años, en pueblos, ciudades y aldeas.",
       "quote": "Nunca cuidamos casas. Fuimos invitados a vidas.",
       "p4": "Eso es lo que la comunidad hacía de forma natural.",
-      "p5": "Guardiens es el pretexto que faltaba. Por un lado, los pequeños favores de ayuda mutua entre vecinos: un huerto regado a cambio de una comida, una habilidad por otra, una ayuda que se devuelve en especie. Por otro lado, independientemente, el house-sitting: sus llaves confiadas a alguien a quien ha mirado a los ojos.",
+      "p5": "Guardiens es el pretexto que faltaba. Por un lado, los pequeños favores de ayuda mutua entre personas de la zona: un huerto regado a cambio de una comida, una habilidad por otra, una ayuda que se devuelve en especie. Por otro lado, independientemente, el house-sitting: sus llaves confiadas a alguien a quien ha mirado a los ojos.",
       "p6": "Usted partirá con tranquilidad. Regresará con una historia. No esperábamos que esto importara tanto.",
       "p7": "Por eso construimos Guardiens, para que usted también viva esto.",
       "signature": "Jérémie y Elisa",
@@ -595,7 +595,7 @@
     "mutual": {
       "title": "La ayuda mutua, independiente del cuidado",
       "free_tag": "Gratis para todos",
-      "p1": "Los pequeños favores no necesitan animales para existir. Nadine busca ayuda para recoger sus verduras. Jacques pasa una hora en su jardín y se va con un plato de comida casera. Sin cuidados, sin tarjetas bancarias, sin comisiones, solo un intercambio entre vecinos.",
+      "p1": "Los pequeños favores no necesitan animales para existir. Nadine busca ayuda para recoger sus verduras. Jacques pasa una hora en su jardín y se va con un plato de comida casera. Sin cuidados, sin tarjetas bancarias, sin comisiones, solo un intercambio entre personas de la zona.",
       "p2": "Clases de cocina, riego de plantas, montaje de muebles, préstamo de herramientas o viajes compartidos a la estación: todo se gestiona a través de la ayuda mutua, sin suscripción.",
       "cta": "Descubrir los pequeños favores →"
     },
