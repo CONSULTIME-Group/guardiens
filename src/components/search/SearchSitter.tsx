@@ -1374,14 +1374,14 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
  const resultCount = tab === "missions" && missionSubTab === "members" ? availableMembers.length : availableSitsCount;
   // hasNoLocalRealMissions retiré : OutOfZoneBanner couvre déjà ce cas.
  const countLabel = tab === "missions" && missionSubTab === "members"
- ? `${resultCount} membre${resultCount > 1 ? "s" : ""} disponible${resultCount > 1 ? "s" : ""}`
+ ? t("search_results.count_members", { count: resultCount })
   : resultCount === 0 && demoCount > 0
-  ? `${demoCount} exemple${demoCount > 1 ? "s" : ""} ci-dessous, en attendant de vraies annonces`
+  ? t("search_results.count_demo", { count: demoCount })
  : resultCount === 0
- ? (city ? `Aucune annonce ouverte près de ${city}` : "Aucune annonce ouverte sur ce périmètre")
+ ? (city ? t("search_results.count_none_city", { city }) : t("search_results.count_none"))
  : city
- ? `${resultCount} annonce${resultCount > 1 ? "s" : ""} disponible${resultCount > 1 ? "s" : ""} près de vous`
- : `${resultCount} annonce${resultCount > 1 ? "s" : ""} disponible${resultCount > 1 ? "s" : ""} en France`;
+ ? t("search_results.count_available_near", { count: resultCount })
+ : t("search_results.count_available_fr", { count: resultCount });
 
  // ─── Pill style ───
  const pillClass = "snap-start flex items-center gap-2 px-4 py-2 min-h-11 rounded-full border border-border bg-card cursor-pointer hover:border-primary transition-colors text-sm whitespace-nowrap shrink-0";
