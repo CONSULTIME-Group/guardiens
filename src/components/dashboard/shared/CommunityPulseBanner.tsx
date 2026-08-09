@@ -71,6 +71,26 @@ const CommunityPulseBanner = memo(({ userId, className }: Props) => {
 
   if (metrics.length === 0) return null;
 
+  // Le compteur local dit l'instant présent, les deux autres disent l'histoire.
+  // On les sépare pour que personne ne confonde les deux provenances.
+  const localMetrics = metrics.filter((m) => m.key === "local" || m.key === "national");
+  const historyMetrics = metrics.filter((m) => m.key === "maisons" || m.key === "animaux");
+
+  const renderMetric = ({ key, value, label }: Metric) => (
+    <li key={key} className="flex items-baseline gap-3 min-w-0">
+      <span
+        className="font-heading text-white tabular-nums shrink-0 text-right"
+        style={{ fontSize: "26px", fontWeight: 600, minWidth: "52px", lineHeight: 1 }}
+      >
+        {value.toLocaleString("fr-FR")}
+      </span>
+      <span className="text-[#d5e6dd] leading-snug min-w-0" style={{ fontSize: "12.5px" }}>
+        {label}
+      </span>
+    </li>
+  );
+
+
   return (
     <section
       aria-labelledby="community-pulse-heading"
