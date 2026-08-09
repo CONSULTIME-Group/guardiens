@@ -55,3 +55,23 @@ export async function startCronRun(edgeName: string): Promise<CronRun> {
     },
   };
 }
+
+/**
+ * Trace un rejet d'authentification de cron dans public.cron_run_log.
+ * Sans cela, un 401 renvoye par le garde reste totalement invisible.
+ */
+export async function logCronRejection(
+  edgeName: string,
+  errorMessage: string,
+): Promise<void> {
+  const client = getServiceClient();
+  if (!client) return;
+  const now = new Date().toISOString();
+  await client.from("cron_run_log").insert({
+    edge_name: edgeName,
+    started_at: now,
+    finished_at: now,
+    status: "failed",
+    error_message: errorMessage.slice(0, 2000),
+  });
+}
