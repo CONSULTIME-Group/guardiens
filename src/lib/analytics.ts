@@ -370,8 +370,11 @@ export function trackEventBeacon(eventType: EventType, opts: TrackOptions = {}):
  * Fonctionne aussi bien pour les visiteurs anonymes que connectés.
  */
 export async function trackEvent(eventType: EventType, opts: TrackOptions = {}) {
+  if (opts.transport === "beacon") {
+    trackEventBeacon(eventType, opts);
+    return;
+  }
   try {
-    const { data: { user } } = await supabase.auth.getUser();
 
     if (import.meta.env.DEV) {
       // eslint-disable-next-line no-console
