@@ -26,15 +26,16 @@ export interface AffinityDemo {
 }
 
 export function useAffinityDemo(): AffinityDemo {
+  const { t } = useTranslation();
   // Pondération réelle : 2/2/1/1/1/1/1 sur 9. Affiché arrondi (22/22/11×5).
   const breakdown: AffinityBreakdownItem[] = [
-    { criterion: "Animaux", matched: true, weight: 22, note: "Chien et chat déclarés, expérience confirmée" },
-    { criterion: "Présence pendant la garde", matched: true, weight: 22, note: "Télétravail compatible avec vos attentes" },
-    { criterion: "Rythme de vie", matched: true, weight: 11, note: "Rythme actif, cohérent avec le foyer" },
-    { criterion: "Langues", matched: true, weight: 11, note: "Français en commun" },
-    { criterion: "Intérêts", matched: true, weight: 11, note: "Jardin, lecture, nature" },
-    { criterion: "Profil idéal", matched: true, weight: 11, note: "Correspond au type de gardien recherché" },
-    { criterion: "Ambiance du foyer", matched: false, weight: 11, note: "Ambiance calme, gardien plus sportif" },
+    { criterion: t("landing.affinity.demo.c_animals"), matched: true, weight: 22, note: t("landing.affinity.demo.n_animals") },
+    { criterion: t("landing.affinity.demo.c_presence"), matched: true, weight: 22, note: t("landing.affinity.demo.n_presence") },
+    { criterion: t("landing.affinity.demo.c_pace"), matched: true, weight: 11, note: t("landing.affinity.demo.n_pace") },
+    { criterion: t("landing.affinity.demo.c_languages"), matched: true, weight: 11, note: t("landing.affinity.demo.n_languages") },
+    { criterion: t("landing.affinity.demo.c_interests"), matched: true, weight: 11, note: t("landing.affinity.demo.n_interests") },
+    { criterion: t("landing.affinity.demo.c_ideal"), matched: true, weight: 11, note: t("landing.affinity.demo.n_ideal") },
+    { criterion: t("landing.affinity.demo.c_mood"), matched: false, weight: 11, note: t("landing.affinity.demo.n_mood") },
   ];
   const matchedCount = breakdown.filter((b) => b.matched).length;
   const totalCount = breakdown.length;
