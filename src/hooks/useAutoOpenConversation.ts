@@ -195,9 +195,9 @@ export function useAutoOpenConversation<C extends ConvLike>({
     const legacy =
       searchParams.get("c") || searchParams.get("conversation") ||
       searchParams.get("conv") || searchParams.get("conversationId");
-    if (!routeConvId && !legacy && activeConv && isMobile) setActiveConv(null);
+    if (!routeConvId && !legacy && activeConv) setActiveConv(null);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [routeConvId, isMobile]);
+  }, [routeConvId]);
 
   // ── Cas 3 : fallback desktop — ouvre la conv non-lue la plus récente ──
   useEffect(() => {
