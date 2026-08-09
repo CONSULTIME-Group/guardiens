@@ -120,6 +120,7 @@ export default function News() {
   useEffect(() => {
     let cancelled = false;
     const lang = (i18n.language || "fr").split("-")[0].toLowerCase();
+    setTranslatedIds(new Set());
     const overlayTranslations = async (list: Article[], lg: string): Promise<Article[]> => {
       if (!["en", "es", "it", "de"].includes(lg) || list.length === 0) return list;
       const { data: trs } = await supabase
