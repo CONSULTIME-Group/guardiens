@@ -1697,16 +1697,16 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
  {/* ─── Sort bar + view toggle (sticky avec les pills pour cohérence visuelle) ─── */}
  <div className="flex justify-between items-center gap-2 px-4 sm:px-6 py-2 border-t border-border/60 bg-background flex-nowrap">
  <div className="flex items-center gap-2 min-w-0 flex-1">
- <span className="text-xs sm:text-sm text-muted-foreground truncate flex-1 min-w-0" title={countLabel}>{loading ? "Recherche…" : countLabel}</span>
+ <span className="text-xs sm:text-sm text-muted-foreground truncate flex-1 min-w-0" title={countLabel}>{loading ? t("search_results.searching") : countLabel}</span>
  <Select value={sort} onValueChange={(v) => handleSortChange(v as SortOption)}>
  <SelectTrigger className="h-8 w-auto gap-1.5 rounded-full border-border bg-card px-3 text-xs shrink-0">
- <span className="text-muted-foreground hidden sm:inline">Trier&nbsp;:</span>
+ <span className="text-muted-foreground hidden sm:inline">{t("search_results.sort_label")}&nbsp;</span>
  <SelectValue />
  </SelectTrigger>
  <SelectContent align="start">
- <SelectItem value="closest">Plus proches</SelectItem>
- <SelectItem value="recent">Plus récentes</SelectItem>
- <SelectItem value="rating">Mieux notées</SelectItem>
+ <SelectItem value="closest">{t("search_results.sort_closest")}</SelectItem>
+ <SelectItem value="recent">{t("search_results.sort_recent")}</SelectItem>
+ <SelectItem value="rating">{t("search_results.sort_rating")}</SelectItem>
  </SelectContent>
  </Select>
  </div>
