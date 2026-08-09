@@ -8192,6 +8192,7 @@ export type Database = {
           urgences_24_7: boolean
         }[]
       }
+      get_public_content_stats: { Args: never; Returns: Json }
       get_public_sit: {
         Args: { p_param: string }
         Returns: {
@@ -8401,6 +8402,10 @@ export type Database = {
         Returns: Json
       }
       publish_stale_reviews: { Args: { p_days?: number }; Returns: number }
+      purge_cron_run_details: {
+        Args: { p_batch?: number; p_retention?: string }
+        Returns: number
+      }
       purge_email_queue: { Args: { queue_name: string }; Returns: number }
       read_email_batch: {
         Args: { batch_size: number; queue_name: string; vt: number }
