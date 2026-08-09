@@ -11,7 +11,7 @@ const corsHeaders = {
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
-  const guard = await requireCronCaller(req, corsHeaders);
+  const guard = await requireCronCaller(req, corsHeaders, "send-avis-j5");
   if (guard) return guard;
 
   const supabaseUrl = Deno.env.get("SUPABASE_URL")!;

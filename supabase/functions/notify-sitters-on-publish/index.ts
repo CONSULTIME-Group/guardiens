@@ -156,7 +156,7 @@ async function raiseSignal(
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
 
-  const denied = await requireCronCaller(req, corsHeaders);
+  const denied = await requireCronCaller(req, corsHeaders, "notify-sitters-on-publish");
   if (denied) return denied;
 
   const run = await startCronRun("notify-sitters-on-publish");

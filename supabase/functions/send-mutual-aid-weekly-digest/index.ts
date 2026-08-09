@@ -34,7 +34,7 @@ interface Recipient {
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders })
 
-  const guard = await requireCronCaller(req, corsHeaders)
+  const guard = await requireCronCaller(req, corsHeaders, "send-mutual-aid-weekly-digest")
   if (guard) return guard
   let body: { dry_run?: boolean; recipient_id?: string; manual?: boolean } = {}
   try { if (req.body) body = await req.json() } catch { /* noop */ }

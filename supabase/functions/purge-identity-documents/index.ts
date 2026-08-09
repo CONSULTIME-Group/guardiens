@@ -24,7 +24,7 @@ Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
   }
-  const guard = await requireCronCaller(req, corsHeaders);
+  const guard = await requireCronCaller(req, corsHeaders, "purge-identity-documents");
   if (guard) return guard;
 
   const run = await startCronRun("purge-identity-documents");
