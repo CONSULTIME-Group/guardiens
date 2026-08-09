@@ -16,8 +16,7 @@ import {
   Zap,
   ArrowRight,
   Eye,
-  Lock,
-} from "lucide-react";
+  Lock,, RotateCcw } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import SitPhotoManager from "@/components/sits/owner/SitPhotoManager";
 import {
@@ -508,6 +507,19 @@ const EditSit = () => {
             <p className="text-muted-foreground text-xs mt-0.5">
               Cette annonce est {sitStatus === "archived" ? "archivée" : sitStatus === "cancelled" ? "annulée" : sitStatus === "expired" ? "expirée" : "terminée"} et ne peut plus être modifiée.
             </p>
+            {/* Sortie utile : reprendre le contenu dans une nouvelle annonce,
+                même geste que "Republier" sur la fiche. */}
+            <div className="mt-3 flex flex-wrap gap-2">
+              <Button variant="default" size="sm" asChild className="h-11 gap-2">
+                <Link to={`/sits/create?from=${id}&mode=copy`}>
+                  <RotateCcw className="h-3.5 w-3.5" />
+                  Republier cette annonce
+                </Link>
+              </Button>
+              <Button variant="outline" size="sm" asChild className="h-11">
+                <Link to={`/sits/${id}`}>Voir la fiche</Link>
+              </Button>
+            </div>
           </div>
         </div>
       )}
