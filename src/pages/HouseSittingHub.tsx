@@ -28,6 +28,9 @@ const HouseSittingHub = () => {
         .from("seo_city_pages" as any)
         .select("city, slug, department")
         .eq("published", true)
+        // Les pages marquées noindex (pages de test, QA) restent accessibles en
+        // direct mais ne doivent jamais apparaître dans un listing visiteur.
+        .or("noindex.is.null,noindex.eq.false")
         .order("city");
       if (error) throw error;
       return (data || []) as unknown as CityRow[];
