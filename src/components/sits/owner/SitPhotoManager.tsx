@@ -103,6 +103,7 @@ const SitPhotoManager = ({
   };
 
   const handleSuggestBest = async () => {
+    if (disabled) return;
     if (suggesting || gallery.length === 0) return;
 
     const fingerprint = getGalleryFingerprint();
@@ -200,6 +201,7 @@ const SitPhotoManager = ({
   };
 
   const handleSetCover = async (url: string) => {
+    if (disabled) return;
     if (savingCover) return;
     const previous = coverUrl;
     setCoverUrl(url);
@@ -224,6 +226,7 @@ const SitPhotoManager = ({
   };
 
   const handleUpload = async (files: FileList | null) => {
+    if (disabled) return;
     if (!files || files.length === 0) return;
     if (gallery.length + files.length > 30) {
       toast({
