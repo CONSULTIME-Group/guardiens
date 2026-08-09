@@ -1608,7 +1608,7 @@ const CreateSit = () => {
       <div className="animate-fade-in py-8">
         <Head><meta name="robots" content="noindex, nofollow" /></Head>
         <div className="px-4 max-w-3xl mx-auto">
-          <Link to="/sits" className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground mb-6">
+          <Link to="/sits" className="hidden md:inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground mb-6">
             <ArrowLeft className="h-4 w-4" /> Retour à mes annonces
           </Link>
         </div>
@@ -1675,7 +1675,7 @@ const CreateSit = () => {
       <div className="px-4 pt-5 pb-2 max-w-3xl mx-auto">
         <Link
           to="/sits"
-          className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground mb-4"
+          className="hidden md:inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground mb-4"
           onClick={(e) => {
             if (!unsavedRemote) return;
             const ok = window.confirm("Des modifications ne sont pas encore enregistrées. Quitter cette page maintenant ?");
@@ -2571,7 +2571,7 @@ const CreateSit = () => {
           d'un transform (même identité) deviendrait bloc conteneur des
           descendants position:fixed. */}
       <div
-        className="fixed inset-x-0 bg-card border-t border-border z-40 bottom-[var(--bottom-nav-h,0px)] md:bottom-0 pb-4 md:pb-[max(1rem,env(safe-area-inset-bottom))]"
+        className="fixed inset-x-0 bg-card border-t border-border z-40 bottom-[var(--bottom-nav-h,0px)] md:bottom-0 pb-[max(1rem,env(safe-area-inset-bottom))]"
       >
         <div className="max-w-3xl mx-auto px-4 pt-3 space-y-2">
           {/* Blockers on last step only */}

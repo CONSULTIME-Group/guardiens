@@ -29,7 +29,7 @@ import { toast as toastSonner } from "sonner";
 import AlmaMessageOpener from "@/components/ai/alma/AlmaMessageOpener";
 import { AlmaStagnantConversationWhisper } from "@/components/ai/alma/wiring/AlmaStagnantConversationWhisper";
 import { latestVideoInviteId, videoInviteState, isVideoInvite } from "@/lib/videoInvite";
-import { useHideBottomNav } from "@/components/layout/ChromeVisibility";
+import { useHideBottomNav, useHideTopBar } from "@/components/layout/ChromeVisibility";
 
 
 const MESSAGES_PAGE_SIZE = 50;
@@ -95,6 +95,9 @@ const Messages = () => {
   // Fil ouvert sur mobile : la barre basse et son bouton flottant recouvriraient
   // le champ de saisie, on les retire tant que la conversation est affichée.
   useHideBottomNav(isMobile && !!activeConv);
+  // Le fil porte son propre en tête avec un retour : la barre supérieure
+  // applicative est retirée pour ne jamais afficher deux flèches retour.
+  useHideTopBar(isMobile && !!activeConv);
   // Fermer un fil : on revient a la liste. Si le fil a ete empile dans
   // l'historique, on depile pour rester coherent avec le geste de retour
   // systeme ; sinon (ouverture directe par lien profond), on remplace.
@@ -732,13 +735,19 @@ const Messages = () => {
   // dessus, dans le même flux : on la retranche de la hauteur du fil, sinon
   // le composer sort du bas de l'écran.
   return (
-    <div className="flex h-[calc(100svh-var(--app-topbar-h,0px))] md:h-screen overflow-hidden">
+    <div
+      className={
+        isMobile && !activeConv
+          ? "flex flex-col md:h-screen md:flex-row md:overflow-hidden"
+          : "flex h-[calc(100svh-var(--app-topbar-h,0px))] md:h-screen overflow-hidden"
+      }
+    >
       <Head><meta name="robots" content="noindex, nofollow" /></Head>
 
       {/* ═══ CONVERSATION LIST ═══ */}
       {showList && (
         <div className={`${isMobile && activeConv ? "hidden" : ""} ${isMobile ? "w-full" : "w-80 border-r border-border"} flex flex-col bg-card`}>
-          <div className="sticky top-[var(--app-topbar-h,3.75rem)] md:top-0 z-10 bg-card border-b border-border px-4 pt-4 pb-3 space-y-3">
+          <div className="sticky top-[var(--app-topbar-h,0px)] md:top-0 z-10 bg-card border-b border-border px-4 pt-3 pb-3 space-y-3">
             {/* Titre Playfair + rôle */}
             <div className="flex items-end justify-between gap-2">
               <h1 className="font-heading text-[20px] font-semibold leading-tight truncate">Vos échanges</h1>
@@ -790,7 +799,11 @@ const Messages = () => {
                 el.scrollTop = savedScrollRef.current;
               }
             }}
-            className="flex-1 overflow-y-auto pb-24 md:pb-0"
+            className={
+              isMobile
+                ? "pb-[calc(var(--bottom-nav-h,0px)+1rem+env(safe-area-inset-bottom))]"
+                : "flex-1 overflow-y-auto md:pb-0"
+            }
             role="region"
             aria-label="Liste des conversations"
           >

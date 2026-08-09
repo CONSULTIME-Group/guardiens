@@ -23,7 +23,7 @@ import AppTopBar from "./AppTopBar";
  * qui lui etait destinee, en ne gardant que la zone sure du materiel.
  */
 const ShellMain = ({ children }: { children?: ReactNode }) => {
-  const { bottomNavHidden } = useChromeVisibility();
+  const { bottomNavHidden, topBarHidden } = useChromeVisibility();
   return (
     <main
       id="main-content"
@@ -32,6 +32,7 @@ const ShellMain = ({ children }: { children?: ReactNode }) => {
         bottomNavHidden ? "pb-[env(safe-area-inset-bottom)] md:pb-0" : "md:pb-24"
       }`}
     >
+      {!topBarHidden && <AppTopBar />}
       {children}
     </main>
   );
@@ -78,7 +79,6 @@ export const AppLayout = ({ children }: { children?: ReactNode }) => {
     <div className="flex min-h-screen bg-background">
       <Sidebar showHeaderBells={!mobileHeader} />
       <ShellMain>
-        <AppTopBar />
         <div className="hidden md:block">
           <Breadcrumbs />
         </div>

@@ -328,7 +328,7 @@ const HouseGuide = () => {
   const Shell = ({ children }: { children: React.ReactNode }) => (
     <div className="p-6 md:p-10 max-w-2xl mx-auto animate-fade-in pb-32">
       <Head><meta name="robots" content="noindex, nofollow" /></Head>
-      <Link to="/sits" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-6">
+      <Link to="/sits" className="hidden md:inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-6">
         <ArrowLeft className="h-4 w-4" /> Retour
       </Link>
       <h1 className="font-heading text-2xl font-bold mb-1">Guide de la maison</h1>
@@ -374,7 +374,7 @@ const HouseGuide = () => {
       <Head><meta name="robots" content="noindex, nofollow" /></Head>
       <Link
         to="/sits"
-        className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-6"
+        className="hidden md:inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-6"
         onClick={(e) => {
           if (!dirty) return;
           const ok = window.confirm("Des modifications ne sont pas encore enregistrées. Quitter cette page maintenant ?");
