@@ -439,7 +439,7 @@ export const BottomNav = () => {
     );
 
     const baseCls = cn(
-      "flex flex-col items-center justify-center flex-1 gap-1 relative min-w-0 pt-1.5 transition-colors active:scale-95 duration-150",
+      "flex flex-col items-center justify-center flex-1 h-full min-h-[44px] gap-1 relative min-w-0 pt-1.5 transition-colors active:scale-95 duration-150",
       isActive ? "text-primary" : "text-muted-foreground hover:text-foreground"
     );
 
