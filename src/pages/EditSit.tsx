@@ -463,6 +463,7 @@ const EditSit = () => {
             : null;
 
   return (
+    <>
     <div className="px-4 md:px-10 py-6 max-w-3xl mx-auto animate-fade-in pb-36">
       <Head>
         <meta name="robots" content="noindex, nofollow" />
@@ -847,6 +848,32 @@ const EditSit = () => {
         </div>
       </fieldset>
 
+
+      {/* Confirmation : modification de dates sur garde confirmée */}
+      <AlertDialog open={confirmDatesOpen} onOpenChange={setConfirmDatesOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Modifier les dates d'une garde confirmée ?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Cette garde est confirmée. La modification des dates n'enverra <strong>pas</strong> de
+              notification automatique au gardien. Pensez à le prévenir via la messagerie après
+              avoir enregistré.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Annuler</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                setConfirmDatesOpen(false);
+                persist();
+              }}
+            >
+              Continuer et enregistrer
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </div>
       {/* CTA barre sticky au-dessus de la BottomNav */}
       <div className="fixed bottom-16 inset-x-0 bg-card/95 backdrop-blur border-t border-border p-3 z-40 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
         <div className="max-w-3xl mx-auto space-y-2">
@@ -874,32 +901,7 @@ const EditSit = () => {
           </div>
         </div>
       </div>
-
-      {/* Confirmation : modification de dates sur garde confirmée */}
-      <AlertDialog open={confirmDatesOpen} onOpenChange={setConfirmDatesOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Modifier les dates d'une garde confirmée ?</AlertDialogTitle>
-            <AlertDialogDescription>
-              Cette garde est confirmée. La modification des dates n'enverra <strong>pas</strong> de
-              notification automatique au gardien. Pensez à le prévenir via la messagerie après
-              avoir enregistré.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Annuler</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={() => {
-                setConfirmDatesOpen(false);
-                persist();
-              }}
-            >
-              Continuer et enregistrer
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-    </div>
+    </>
   );
 };
 
