@@ -182,30 +182,31 @@ const Landing = () => {
         <div className="absolute inset-0 bg-gradient-to-r from-black/90 via-black/75 to-black/55" />
         <div className="absolute inset-0 bg-foreground/20" aria-hidden />
 
-        <div className="relative z-10 w-full max-w-7xl mx-auto px-6 md:px-12 lg:px-16 py-12 md:py-24 pb-[calc(6rem+env(safe-area-inset-bottom))] md:pb-24">
+        <div className="relative z-10 w-full max-w-7xl mx-auto px-6 md:px-12 lg:px-16 py-6 md:py-24 pb-[calc(9rem+env(safe-area-inset-bottom))] md:pb-24">
           <div className="max-w-2xl lg:max-w-3xl">
 
-            <p className="flex items-center gap-2 font-body text-xs text-white/85 tracking-[0.2em] uppercase mb-6">
+            <p className="flex items-center gap-2 font-body text-xs text-white/85 tracking-[0.2em] uppercase mb-3 md:mb-6">
               <span className="inline-block w-5 h-0.5 bg-[#9A6A44] align-middle" aria-hidden="true" />
               {t("landing.hero.eyebrow")}
             </p>
 
-            <p className="font-heading text-2xl md:text-3xl italic text-white/90 mb-3 animate-hero-fade-up animation-delay-400">
+            <p className="font-heading text-2xl md:text-3xl italic text-white/90 mb-2 md:mb-3 animate-hero-fade-up animation-delay-400">
               {t("landing.hero.brand_tagline")}
             </p>
-            <h1 className="font-heading text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-[1.1] mb-6 max-w-3xl">
+            <h1 className="font-heading text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-[1.1] mb-3 md:mb-6 max-w-3xl">
               {t("landing.hero.title_main")} <span className="text-white/80">{t("landing.hero.title_accent")}</span>
             </h1>
 
 
-            <p className="font-body text-lg md:text-xl text-white max-w-xl mb-4 leading-relaxed animate-hero-fade-up animation-delay-700">
+            <p className="font-body text-lg md:text-xl text-white max-w-xl mb-2 md:mb-4 leading-relaxed animate-hero-fade-up animation-delay-700">
               {t("landing.hero.lede")}
             </p>
-            <p className="font-body text-base md:text-lg text-white/95 max-w-xl mb-10 leading-relaxed italic animate-hero-fade-up animation-delay-700">
+            <p className="font-body text-base md:text-lg text-white/95 max-w-xl mb-5 md:mb-10 leading-relaxed italic animate-hero-fade-up animation-delay-700">
               {t("landing.hero.lede_italic")}
             </p>
 
-            <div className="flex flex-col sm:flex-row gap-3 animate-hero-fade-up animation-delay-900">
+            <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 animate-hero-fade-up animation-delay-900">
+
               <button
                 onClick={() => {
                   trackEvent("cta_proprio_clicked", { metadata: { location: "hero" } });
@@ -232,7 +233,7 @@ const Landing = () => {
               onClick={() => {
                 trackEvent("cta_aid_clicked", { metadata: { location: "hero" } });
               }}
-              className="block mt-4 font-body text-sm text-white/80 underline underline-offset-4 decoration-white/30 hover:text-white hover:decoration-white/60 transition-colors animate-hero-fade-up animation-delay-1000"
+              className="block mt-3 md:mt-4 font-body text-sm text-white/80 underline underline-offset-4 decoration-white/30 hover:text-white hover:decoration-white/60 transition-colors animate-hero-fade-up animation-delay-1000"
             >
               {t("landing.hero.cta_aid")}
             </Link>

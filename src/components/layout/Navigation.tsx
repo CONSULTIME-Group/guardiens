@@ -287,50 +287,12 @@ export const BottomNav = () => {
   const navigate = useNavigate();
   const inAppShell = useInAppShell();
 
-  const [isMobileViewport, setIsMobileViewport] = useState(() =>
-    typeof window !== "undefined" && typeof window.matchMedia === "function"
-      ? !window.matchMedia("(min-width: 768px)").matches
-      : false,
-  );
-  useEffect(() => {
-    if (typeof window === "undefined" || typeof window.matchMedia !== "function") return;
-    const md = window.matchMedia("(min-width: 768px)");
-    const update = () => setIsMobileViewport(!md.matches);
-    update();
-    md.addEventListener("change", update);
-    return () => md.removeEventListener("change", update);
-  }, []);
-  const isLandingMobile = location.pathname === "/" && isMobileViewport;
+  // La barre basse est rendue sans condition, sur toutes les routes. Aucune
+  // lecture de défilement, aucun observateur, aucune boucle d'animation : la
+  // navigation principale ne doit jamais dépendre d'un mécanisme que le
+  // navigateur peut suspendre. Le recouvrement des boutons du hero est réglé
+  // par la géométrie du hero, pas par du code au runtime.
 
-  // Landing mobile : lecture autonome de scrollY à chaque image. Aucun
-  // événement de défilement ni observateur n'est requis par cette page.
-  const [landingNavVisible, setLandingNavVisible] = useState(() =>
-    typeof window !== "undefined" ? window.scrollY > 120 : false,
-  );
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    if (!isLandingMobile) {
-      setLandingNavVisible(true);
-      return;
-    }
-    let frame = 0;
-    let previous = window.scrollY > 120;
-    setLandingNavVisible(previous);
-
-    const checkPosition = () => {
-      const next = window.scrollY > 120;
-      if (next !== previous) {
-        previous = next;
-        setLandingNavVisible(next);
-      }
-      frame = window.requestAnimationFrame(checkPosition);
-    };
-    frame = window.requestAnimationFrame(checkPosition);
-
-    return () => {
-      window.cancelAnimationFrame(frame);
-    };
-  }, [isLandingMobile]);
 
   // Un écran plein cadre (fil de messagerie mobile) peut demander le retrait
   // complet de la barre basse et de son bouton flottant, pour ne jamais
@@ -366,7 +328,7 @@ export const BottomNav = () => {
       window.removeEventListener("resize", apply);
       document.documentElement.style.setProperty("--bottom-nav-h", "0px");
     };
-  }, [bottomNavHidden, landingNavVisible]);
+  }, [bottomNavHidden]);
 
 
   // Signature Dock 2026 — 4 tabs role-aware + FAB contextuel + Plus sheet
@@ -467,8 +429,8 @@ export const BottomNav = () => {
   // La barre est en md:hidden, le desktop n'est donc pas concerné.
   if (bottomNavHidden) return null;
 
-  // Landing mobile, tout en haut de page : rien n'est rendu.
-  if (isLandingMobile && !landingNavVisible) return null;
+
+
 
 
   return (
