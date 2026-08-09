@@ -1451,7 +1451,7 @@ const SearchOwner = () => {
               <button
                 type="button"
                 onClick={() => setViewMode("map")}
-                aria-label="Vue carte"
+                aria-label={t("search_results.view_map")}
                 aria-pressed={viewMode === "map"}
                 className={`flex items-center gap-1 px-2 py-1 rounded text-xs transition-colors ${viewMode === "map" ? "bg-primary/10 text-primary font-medium" : "text-muted-foreground hover:bg-muted"}`}
               >
