@@ -107,24 +107,24 @@ const CommunityPulseBanner = memo(({ userId, className }: Props) => {
           </h2>
         </div>
 
-        <ul className="flex flex-col" style={{ gap: "14px" }}>
-          {metrics.map(({ key, value, label }) => (
-            <li key={key} className="flex items-baseline gap-3 min-w-0">
-              <span
-                className="font-heading text-white tabular-nums shrink-0 text-right"
-                style={{ fontSize: "26px", fontWeight: 600, minWidth: "52px", lineHeight: 1 }}
-              >
-                {value.toLocaleString("fr-FR")}
-              </span>
-              <span
-                className="text-[#d5e6dd] leading-snug min-w-0"
-                style={{ fontSize: "12.5px" }}
-              >
-                {label}
-              </span>
-            </li>
-          ))}
-        </ul>
+        {localMetrics.length > 0 && (
+          <ul className="flex flex-col" style={{ gap: "14px" }}>
+            {localMetrics.map(renderMetric)}
+          </ul>
+        )}
+
+        {historyMetrics.length > 0 && (
+          <div
+            className={localMetrics.length > 0 ? "mt-5 pt-4 border-t border-white/20" : ""}
+          >
+            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[#cfe6da] mb-3">
+              Depuis nos débuts, notre histoire de fondateurs comprise
+            </p>
+            <ul className="flex flex-col" style={{ gap: "14px" }}>
+              {historyMetrics.map(renderMetric)}
+            </ul>
+          </div>
+        )}
 
         <div className="mt-5 flex justify-end">
           <Link
