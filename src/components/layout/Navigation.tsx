@@ -294,6 +294,7 @@ export const BottomNav = () => {
   // se masque au scroll bas, revient au scroll haut, et revient aussi seule
   // après 1,5 seconde sans scroll.
   const [idleVisible, setIdleVisible] = useState(true);
+  const [landingTopHidden, setLandingTopHidden] = useState(false);
   const idleTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
@@ -310,12 +311,33 @@ export const BottomNav = () => {
     };
   }, [inAppShell]);
 
+  // Masquer la pilule mobile sur la landing tant qu'on est en haut de page,
+  // pour éviter le recouvrement des CTA du hero. Elle réapparaît dès 120 px de scroll.
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (location.pathname !== "/") return;
+    const md = window.matchMedia("(min-width: 768px)");
+    const update = () => {
+      const shouldHide = !md.matches && window.scrollY < 120;
+      setLandingTopHidden(prev => (prev === shouldHide ? prev : shouldHide));
+    };
+    update();
+    window.addEventListener("scroll", update, { passive: true });
+    md.addEventListener("change", update);
+    return () => {
+      window.removeEventListener("scroll", update);
+      md.removeEventListener("change", update);
+    };
+  }, [location.pathname]);
+
   const hideNav = inAppShell && scrollDir === "down" && !idleVisible;
+  const hidden = hideNav || landingTopHidden;
 
   // Un écran plein cadre (fil de messagerie mobile) peut demander le retrait
   // complet de la barre basse et de son bouton flottant, pour ne jamais
   // recouvrir une zone de saisie.
   const { bottomNavHidden } = useChromeVisibility();
+
 
   // Hauteur réelle de la pilule exposée en variable CSS, pour que les barres
   // d'action collantes des pages s'empilent au dessus sans valeur en dur.
