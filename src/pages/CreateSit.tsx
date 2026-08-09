@@ -1675,7 +1675,7 @@ const CreateSit = () => {
       <div className="px-4 pt-5 pb-2 max-w-3xl mx-auto">
         <Link
           to="/sits"
-          className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground mb-4"
+          className="hidden md:inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground mb-4"
           onClick={(e) => {
             if (!unsavedRemote) return;
             const ok = window.confirm("Des modifications ne sont pas encore enregistrées. Quitter cette page maintenant ?");
