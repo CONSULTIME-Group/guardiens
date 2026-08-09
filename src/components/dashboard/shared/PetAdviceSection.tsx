@@ -23,6 +23,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { slugify } from "@/lib/normalize";
 import { getOptimizedImageUrl } from "@/lib/imageOptim";
 import { SectionHeader } from "../sitter/SitterMatchSection";
+import { capitalize, capitalizeWords } from "../owner/helpers";
 
 export interface AdvicePet {
   id: string;
@@ -82,7 +83,7 @@ type Tile = {
 
 /** Liste les prénoms des compagnons, sans jamais dépasser trois mentions. */
 export const petNamesPhrase = (pets: AdvicePet[]): string => {
-  const names = pets.map((p) => p.name).filter(Boolean).slice(0, 3);
+  const names = pets.map((p) => capitalize(p.name)).filter(Boolean).slice(0, 3);
   if (names.length === 0) return "vos compagnons";
   if (names.length === 1) return names[0];
   return `${names.slice(0, -1).join(", ")} et ${names[names.length - 1]}`;
@@ -269,8 +270,8 @@ const PetAdviceSection = ({
         out.push({
           key: pet.id,
           to,
-          eyebrow: `Pour ${pet.name}`,
-          title: `${match.breed}, ce qu'il faut savoir pour bien s'en occuper`,
+          eyebrow: `Pour ${capitalize(pet.name)}`,
+          title: `${capitalizeWords(match.breed)}, ce qu'il faut savoir pour bien s'en occuper`,
           image: match.image_url,
         });
         continue;
@@ -283,7 +284,7 @@ const PetAdviceSection = ({
       out.push({
         key: pet.id,
         to,
-        eyebrow: `Pour ${pet.name}`,
+        eyebrow: `Pour ${capitalize(pet.name)}`,
         title: plural
           ? `Les fiches ${plural}, habitudes, soins et caractère`
           : `Vivre avec un ${speciesLabel}, les repères essentiels`,
