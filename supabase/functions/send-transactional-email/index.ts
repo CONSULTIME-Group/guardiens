@@ -975,7 +975,7 @@ Deno.serve(async (req) => {
         (typeof logMetadata?.conversation_id === 'string' && logMetadata.conversation_id) ||
         null
       const targetPath = conversationId
-        ? `/messages?c=${conversationId}`
+        ? `/messages/${conversationId}`
         : (typeof templateData?.sitId === 'string' && templateData.sitId
           ? `/sits/${templateData.sitId}#candidatures`
           : '/messages')

@@ -44,7 +44,7 @@ const NewMessageEmail = ({
 }: Props) => {
   const { emoji, title } = labelByContext(contextType, recipientRole)
   const link = deepLinkUrl
-    || (conversationId ? `${SITE_URL}/messages?c=${conversationId}` : `${SITE_URL}/messages`)
+    || (conversationId ? `${SITE_URL}/messages/${conversationId}` : `${SITE_URL}/messages`)
   const sender = senderFirstName?.trim() || 'Un membre'
   const lead = buildLeadSentence(sender, contextType, recipientRole, contextLabel)
 

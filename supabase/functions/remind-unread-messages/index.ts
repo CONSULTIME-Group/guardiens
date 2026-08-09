@@ -173,7 +173,7 @@ Deno.serve(async (req) => {
             conversationsCount: 1,
             oldestUnreadDays: Math.max(1, Math.floor((Date.now() - new Date(triggerMsg.created_at).getTime()) / (24 * 3600 * 1000))),
             topSenderFirstName: sender?.first_name ?? "Un membre",
-            conversationUrl: `https://guardiens.fr/messages?c=${conv.id}`,
+            conversationUrl: `https://guardiens.fr/messages/${conv.id}`,
             contextLabel: contextLabel ?? null,
             messagePreview: messagePreview || null,
           },

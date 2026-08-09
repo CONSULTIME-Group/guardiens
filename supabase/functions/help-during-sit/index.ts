@@ -145,7 +145,7 @@ Deno.serve(async (req) => {
     let emailSent = false;
     const recipientEmail = (recipientProfile?.email ?? "").trim().toLowerCase();
     if (recipientEmail) {
-      const conversationHref = `${SITE_URL}/messages?c=${conv.id}`;
+      const conversationHref = `${SITE_URL}/messages/${conv.id}`;
       const resp = await fetch(`${SUPABASE_URL}/functions/v1/send-transactional-email`, {
         method: "POST",
         headers: {
