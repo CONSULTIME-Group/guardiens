@@ -375,6 +375,8 @@ export async function trackEvent(eventType: EventType, opts: TrackOptions = {}) 
     return;
   }
   try {
+    const { data: { user } } = await supabase.auth.getUser();
+
 
     if (import.meta.env.DEV) {
       // eslint-disable-next-line no-console
