@@ -301,6 +301,7 @@ const ApplicationCard = ({
           </div>
         </div>
       </div>
+      <div className="notebook-card-edge" aria-hidden="true" />
     </article>
   );
 };
