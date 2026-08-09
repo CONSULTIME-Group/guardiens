@@ -53,7 +53,8 @@
       "cgs": "AGB (Service)",
       "privacy": "Datenschutz",
       "legal_notice": "Impressum",
-      "contact": "Kontakt"
+      "contact": "Kontakt",
+      "cookies": "Cookie-Richtlinie"
     }
   },
   "landing": {
@@ -202,7 +203,11 @@
       "p5": "Guardiens ist der Vorwand, der fehlte. Einerseits kleine Hilfen zwischen Nachbarn: ein gegossener Gemüsegarten für ein Essen, eine Fähigkeit gegen eine andere. Andererseits, unabhängig davon, das house-sitting: Ihre Schlüssel in die Hände von jemandem zu geben, dem Sie in die Augen geschaut haben.",
       "p6": "Sie werden unbeschwert verreisen. Sie werden mit einer Geschichte zurückkehren. Wir hätten nicht gedacht, dass das so viel zählt.",
       "p7": "Deswegen haben wir Guardiens aufgebaut, damit Sie das auch erleben können.",
-      "signature": "Jérémie und Elisa"
+      "signature": "Jérémie und Elisa",
+      "quote_lead": "Eines Abends sagte ein Eigentümer zu ihm:",
+      "p8": "Eines Abends bei Helen, Stanley bellte, Rafa lag auf unseren Füßen, der Blick auf den Mont Blanc. Wir dachten: Warum machen das nicht mehr Menschen?",
+      "p9": "Deshalb haben wir Guardiens aufgebaut.",
+      "p10": "Ihr Garten gegen eine Mahlzeit. Ihre Schlüssel gegen eine Geschichte. Menschen aus der Gegend, die einander vertrauen, und manchmal Freunde fürs Leben."
     },
     "cities": {
       "eyebrow": "Ratgeber & Städte",
@@ -229,7 +234,11 @@
       "q5": "Wie läuft eine Betreuung auf Guardiens ab?",
       "a5": "Sie veröffentlichen Ihre Anzeige, Betreuer aus der Nähe bewerben sich, Sie wählen nach einem Treffen und Ihr Betreuer zieht ein. Eine optionale Betreuungsvereinbarung regelt die Pflichten beider Seiten während des Zeitraums.",
       "q6": "Ist Guardiens überall in Frankreich verfügbar?",
-      "a6": "Ja. Das Netzwerk von Guardiens erstreckt sich über alle Regionen Frankreichs, vom Baskenland bis zur Bretagne, über die Alpen bis in den Norden. Sie finden unabhängig von Ihrem Departement einen Betreuer in der Nähe."
+      "a6": "Ja. Das Netzwerk von Guardiens erstreckt sich über alle Regionen Frankreichs, vom Baskenland bis zur Bretagne, über die Alpen bis in den Norden. Sie finden unabhängig von Ihrem Departement einen Betreuer in der Nähe.",
+      "q7": "Welches Geschäftsmodell hat Guardiens?",
+      "a7": "Guardiens bleibt kostenlos, solange wir mit dem Service, den wir Ihnen bieten, nicht zufrieden sind. Sie haben Zugang zu allem, ohne Limit und ohne Bindung. Sie werden rechtzeitig informiert, wenn sich das ändert.",
+      "q8": "Ist House-Sitting sicher?",
+      "a8": "Die Identitätsprüfung steht allen Mitgliedern offen: das eingereichte Dokument wird automatisch analysiert, Vorgänge, die diese erste Prüfung nicht bestehen, werden von unserem Team überprüft, und geprüfte Profile tragen das Wappen « Identität geprüft ». Ein Treffen zwischen Eigentümer und Betreuer vor jedem Aufenthalt wird dringend empfohlen. Nach jeder Erfahrung bauen die gegenseitigen Bewertungen auf dem Profil eine überprüfbare Reputation auf, sichtbar für alle Mitglieder."
     },
     "inventory": {
       "title": "Was wir für Sie gebaut haben",
@@ -791,7 +800,13 @@
     "explore_pricing": "Sitter-Tarife",
     "explore_pricing_desc": "Kostenlos für alle, ohne Bindung.",
     "explore_intl": "Anzeigen außerhalb Frankreichs",
-    "explore_intl_desc": ", Marokko, Spanien, Belgien…"
+    "explore_intl_desc": ", Marokko, Spanien, Belgien…",
+    "eyebrow_stats_one": "{{count}} offene Anzeige · {{cities}} · täglich aktualisiert",
+    "eyebrow_stats_other": "{{count}} offene Anzeigen · {{cities}} · täglich aktualisiert",
+    "subtitle_short": "Katzen, Hunde, exotische Tiere, auf dem Land oder in der Stadt. Filtern Sie nach Ort, Daten und Kriterien.",
+    "become_sitter_title": "Möchten Sie Betreuer werden?",
+    "become_sitter_body": "Anmeldung in 2 Minuten, ohne Bindung.",
+    "become_sitter_cta": "Den Betreuerbereich entdecken"
   },
   "pros_listing": {
     "meta_title": "Tierprofi-Verzeichnis in Ihrer Nähe | Guardiens",
@@ -1006,7 +1021,9 @@
       "sitter_label": "Guardian",
       "sitter_desc": "Ich möchte Häuser und Tiere betreuen. Ich sehe Anzeigen ein und biete meine Dienste an.",
       "both_label": "Beides",
-      "both_desc": "Ich möchte sowohl betreuen lassen als auch selbst betreuen. Sie haben Zugang zu beiden Bereichen."
+      "both_desc": "Ich möchte sowohl betreuen lassen als auch selbst betreuen. Sie haben Zugang zu beiden Bereichen.",
+      "pro_label": "Tierprofi",
+      "pro_desc": "Tierarzt, Trainer, Groomer, Verhaltensberater, Pension… Ich veröffentliche mein Profil im Fachverzeichnis."
     },
     "most_popular": "Am beliebtesten",
     "role_change_hint": "Sie ändern Ihre Meinung? Die Rolle bleibt jederzeit in den Einstellungen änderbar.",
@@ -1080,7 +1097,19 @@
     "retour_site": "Zurück zur Website",
     "panel_title": "Treten Sie einer vertrauensvollen Gemeinschaft bei",
     "panel_desc": "Lassen Sie Ihr Zuhause betreuen, helfen Sie aus, tauschen Sie einen Dienst: Hier knüpfen wir Bande der Nähe neu, vom Herzen des Dorfes bis in die Weiler auf dem Land.",
-    "members_badge_suffix": "Mitglieder bereits registriert"
+    "members_badge_suffix": "Mitglieder bereits registriert",
+    "trust_no_spam": "Kein Spam, Abmeldung mit 1 Klick",
+    "after_pro": "Sie können <1>Ihr Profi-Profil erstellen</1> direkt danach. Manuelle Prüfung innerhalb von 48 h.",
+    "pro_step1_sub": "Tierprofi-Konto: Ihr Profil im Verzeichnis in 3 Minuten.",
+    "pro_pill": "Tierprofi-Konto",
+    "continue": "Weiter",
+    "terms_required_hint": "Kreuzen Sie das Kästchen an, um fortzufahren.",
+    "terms_accepted_confirm": "Sie haben die Nutzungsbedingungen, die Servicebedingungen und die Datenschutzerklärung akzeptiert.",
+    "terms_accepted_edit": "Ändern",
+    "intent_banner": {
+      "owner": "Noch ein Schritt und Sie können diesen Betreuer kontaktieren.",
+      "sitter": "Noch ein Schritt und Sie können Ihre Dienste anbieten."
+    }
   },
   "emergency_page": {
     "meta_title": "Notfall-Betreuer für Ihre Tiere | Guardiens",
