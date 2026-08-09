@@ -96,13 +96,13 @@ Deno.serve(async () => {
       .from("articles")
       .select("slug, category, updated_at, published_at, cover_image_url")
       .eq("published", true)
-      .or("noindex.is.null,noindex.eq.false")
+      .not("slug", "like", "test-%")
       .order("published_at", { ascending: false }),
     supabase
       .from("seo_city_pages")
       .select("slug, updated_at")
       .eq("published", true)
-      .or("noindex.is.null,noindex.eq.false")
+      .not("slug", "like", "test-%")
       .order("city"),
     supabase
       .from("city_guides")

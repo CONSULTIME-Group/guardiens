@@ -290,7 +290,7 @@ export default function ArticleDetail() {
 .from("seo_city_pages")
 .select("slug")
 .eq("published", true)
-.or("noindex.is.null,noindex.eq.false")
+.not("slug", "like", "test-%")
 .ilike("city", `%${art.city}%`)
 .maybeSingle();
  if (cp) setCityPageSlug((cp as any).slug);

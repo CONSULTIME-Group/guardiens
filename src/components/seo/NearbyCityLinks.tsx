@@ -22,7 +22,7 @@ const NearbyCityLinks = ({ department, currentSlug }: Props) => {
         .select("city, slug")
         .eq("department", department)
         .eq("published", true)
-        .or("noindex.is.null,noindex.eq.false")
+        .not("slug", "like", "test-%")
         .neq("slug", currentSlug)
         .order("city")
         .limit(12);

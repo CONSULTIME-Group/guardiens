@@ -40,7 +40,7 @@ const DepartmentPage = () => {
 .select("id, city, slug, sitter_count, active_sits_count")
 .eq("department", page!.department)
 .eq("published", true)
-.or("noindex.is.null,noindex.eq.false")
+.not("slug", "like", "test-%")
 .order("city");
  if (error) throw error;
  return (data || []) as any[];
