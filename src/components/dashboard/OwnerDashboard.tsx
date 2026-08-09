@@ -24,7 +24,7 @@ import OwnerFamilySection from "./owner/OwnerFamilySection";
 import SitterEntraideSection from "./sitter/SitterEntraideSection";
 import { useFirstNearbyMission } from "@/hooks/useFirstNearbyMission";
 import NearbySittersSection from "./owner/NearbySittersSection";
-import JournalLine from "./shared/JournalLine";
+import PetAdviceSection from "./shared/PetAdviceSection";
 import EntraideCtaCard from "./shared/EntraideCtaCard";
 
 import MobileStickyCTA from "./owner/MobileStickyCTA";
@@ -360,8 +360,18 @@ const OwnerDashboard = () => {
               />
             </div>
 
-            {/* 6. Point d’entrée éditorial discret (lot 4) */}
-            <JournalLine />
+            {/* 6. CONSEILS ANCRÉS SUR LES COMPAGNONS (lot 4, point 3) */}
+            <div className="px-4 sm:px-5 md:px-8">
+              <PetAdviceSection
+                pets={pets as any}
+                addPetTo="/owner-profile"
+                context={{
+                  hasUpcomingSit: sits.some((s: any) => s.status === "confirmed"),
+                  hasDraftSit: Boolean(latestDraft),
+                  profileIncomplete: (accessProfileCompletion ?? 100) < 100,
+                }}
+              />
+            </div>
 
 
             {/* Historique candidatures : accordéon discret tout en bas */}
