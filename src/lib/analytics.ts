@@ -4,6 +4,7 @@
  * Échec silencieux (RLS, réseau, etc.) — jamais d'exception remontée.
  */
 import { supabase } from "@/integrations/supabase/client";
+import { getDeviceContext } from "@/lib/deviceContext";
 
 export type EventType =
   | "page_view"
@@ -339,7 +340,7 @@ export async function trackEvent(eventType: EventType, opts: TrackOptions = {}) 
       user_id: user?.id ?? null,
       event_type: eventType,
       source: opts.source ?? null,
-      metadata: opts.metadata ?? null,
+      metadata: withDeviceContext(opts.metadata),
     });
   } catch {
     // silencieux
@@ -382,7 +383,7 @@ export async function trackEventWithUserId(
       user_id: userId,
       event_type: eventType,
       source: opts.source ?? null,
-      metadata: opts.metadata ?? null,
+      metadata: withDeviceContext(opts.metadata),
     });
   } catch {
     // silencieux
