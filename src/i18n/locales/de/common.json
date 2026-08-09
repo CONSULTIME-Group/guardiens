@@ -193,7 +193,15 @@
       "prev_aria": "Vorheriger Bericht",
       "next_aria": "Nächster Bericht",
       "page_aria": "Zu Seite {{n}} der Berichte gehen",
-      "program_label": "Langjähriges Mitglied"
+      "program_label": "Langjähriges Mitglied",
+      "items": {
+        "nadia": "Zwei Katzen und ein Hund. Drei Jahre lang hatten wir keinen richtigen Urlaub. Unsere Sitterin wohnt zehn Minuten entfernt. Am Donnerstag haben wir uns auf einen Kaffee getroffen. Am Samstag sind wir losgefahren.",
+        "tomas": "Ich suchte eine Bleibe zwischen zwei Jobs. In zwei Monaten habe ich vier Häuser gehütet. Ich habe Orte entdeckt, die ich seit zehn Jahren vor der Tür hatte, ohne sie wirklich zu kennen.",
+        "rania_david": "Wir haben ein Haus in der Ardèche, das acht Monate im Jahr leer stand. Jetzt lebt es. Die Menschen, die darauf aufpassen, schicken uns Fotos vom Garten. Es ist seltsam, wie gut das tut.",
+        "giulia": "Ich musste für drei Wochen weg. Mein Gemüsegarten, meine Hühner, meine Pflanzen. Ein Guardiens Mitglied hat alles übernommen, für Gemüse und Eier. Wir kannten uns nicht. Wir sehen uns immer noch.",
+        "sarah_karim": "Drei Pferde, vier Katzen, ein Papagei. Alle sagen uns, dafür finde man keine Betreuung. Unsere Sitterin kam zweimal vorbei, bevor wir losfuhren. Sie kannte alle Namen auswendig.",
+        "elena": "Angefangen habe ich damit, die Pflanzen einer Mitgliedin zu gießen, für ein Essen. Jetzt hüte ich ihr Haus, wenn sie wegfährt. So läuft es hier, langsam, ganz natürlich."
+      }
     },
     "story": {
       "eyebrow": "Unsere Geschichte",
@@ -473,7 +481,9 @@
           "desc": "Vom Baskenland bis in die Bretagne, über die Alpen, die Provence und den Norden. Das Netzwerk erstreckt sich über alle Regionen."
         }
       }
-    }
+    },
+    "meta_title": "Tierbetreuung zu Hause und House-Sitting unter Privatpersonen | Guardiens",
+    "meta_description": "Finden Sie eine Betreuung aus Ihrer Umgebung für Ihr Zuhause und Ihre Tiere. House-Sitting und gegenseitige Hilfe unter Privatpersonen, geprüft und bewertet, in ganz Frankreich."
   },
   "faq": {
     "title": "Häufig gestellte Fragen",
@@ -825,7 +835,11 @@
     "subtitle_short": "Katzen, Hunde, exotische Tiere, auf dem Land oder in der Stadt. Filtern Sie nach Ort, Daten und Kriterien.",
     "become_sitter_title": "Möchten Sie Betreuer werden?",
     "become_sitter_body": "Anmeldung in 2 Minuten, ohne Bindung.",
-    "become_sitter_cta": "Den Betreuerbereich entdecken"
+    "become_sitter_cta": "Den Betreuerbereich entdecken",
+    "become_sitter_eyebrow": "Sitter werden",
+    "cities_count_one": "{{count}} Stadt",
+    "cities_count_other": "{{count}} Städte",
+    "all_france": "Ganz Frankreich"
   },
   "pros_listing": {
     "meta_title": "Tierprofi-Verzeichnis in Ihrer Nähe | Guardiens",
@@ -1855,5 +1869,9 @@
     "expand_zone": "Auf {{zone}} erweitern",
     "expand_zone_count_one": "{{count}} Betreuer verfügbar.",
     "expand_zone_count_other": "{{count}} Betreuer verfügbar."
+  },
+  "entraide": {
+    "help_requested": "Hilfe gesucht",
+    "help_offered": "Hilfe angeboten"
   }
 }

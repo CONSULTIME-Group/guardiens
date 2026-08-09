@@ -193,7 +193,15 @@
       "prev_aria": "Testimonianza precedente",
       "next_aria": "Testimonianza successiva",
       "page_aria": "Vai alla pagina delle testimonianze {{n}}",
-      "program_label": "Membro storico"
+      "program_label": "Membro storico",
+      "items": {
+        "nadia": "Due gatti e un cane. Non facevamo una vera vacanza da tre anni. La nostra sitter abita a dieci minuti. Ci siamo visti davanti a un caffè il giovedì. Siamo partiti il sabato.",
+        "tomas": "Cercavo un alloggio temporaneo tra due lavori. Ho custodito quattro case in due mesi. Ho scoperto posti che avevo accanto da dieci anni senza conoscerli davvero.",
+        "rania_david": "Abbiamo una casa in Ardèche che restava vuota otto mesi all'anno. Adesso vive. Chi la custodisce ci manda foto del giardino. È strano quanto faccia bene.",
+        "giulia": "Dovevo partire per tre settimane. Il mio orto, le mie galline, le mie piante. Un membro Guardiens ha gestito tutto in cambio di verdure e uova. Non ci conoscevamo. Ci vediamo ancora.",
+        "sarah_karim": "Tre cavalli, quattro gatti, un pappagallo. Tutti ci dicono che è impossibile farli accudire. La nostra sitter è venuta due volte prima della partenza. Sapeva i loro nomi a memoria.",
+        "elena": "Ho cominciato innaffiando le piante di una membra in cambio di un pasto. Adesso custodisco la sua casa quando parte. Qui funziona così, piano, con naturalezza."
+      }
     },
     "story": {
       "eyebrow": "La nostra storia",
@@ -473,7 +481,9 @@
           "desc": "Dai Paesi Baschi alla Bretagna, passando per le Alpi, la Provenza e il Nord. La rete si estende in tutte le regioni."
         }
       }
-    }
+    },
+    "meta_title": "Cura degli animali a domicilio e house-sitting tra privati | Guardiens",
+    "meta_description": "Trovi un sitter della sua zona per la sua casa e i suoi animali. House-sitting e aiuto reciproco tra privati, verificati e valutati, in tutta la Francia."
   },
   "faq": {
     "title": "Domande frequenti",
@@ -825,7 +835,11 @@
     "subtitle_short": "Gatti, cani, animali esotici, in campagna o in città. Filtrate per località, date e criteri.",
     "become_sitter_title": "Volete diventare guardiano?",
     "become_sitter_body": "Iscrizione in 2 minuti, senza vincoli.",
-    "become_sitter_cta": "Scoprire lo spazio guardiano"
+    "become_sitter_cta": "Scoprire lo spazio guardiano",
+    "become_sitter_eyebrow": "Diventare sitter",
+    "cities_count_one": "{{count}} città",
+    "cities_count_other": "{{count}} città",
+    "all_france": "Tutta la Francia"
   },
   "pros_listing": {
     "meta_title": "Elenco professionisti animali vicino a te | Guardiens",
@@ -1855,5 +1869,9 @@
     "expand_zone": "Ampliare a {{zone}}",
     "expand_zone_count_one": "{{count}} custode disponibile.",
     "expand_zone_count_other": "{{count}} custodi disponibili."
+  },
+  "entraide": {
+    "help_requested": "Aiuto richiesto",
+    "help_offered": "Aiuto offerto"
   }
 }

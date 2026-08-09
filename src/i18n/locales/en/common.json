@@ -193,7 +193,15 @@
       "prev_aria": "Previous testimonial",
       "next_aria": "Next testimonial",
       "page_aria": "Go to testimonial page {{n}}",
-      "program_label": "Longtime member"
+      "program_label": "Longtime member",
+      "items": {
+        "nadia": "Two cats and a dog. We had not taken a real holiday in three years. Our sitter lives ten minutes away. We met over a coffee on the Thursday. We left on the Saturday.",
+        "tomas": "I was looking for a place to stay between two jobs. I sat four houses in two months. I discovered places I had lived next to for ten years without ever really knowing them.",
+        "rania_david": "We have a house in Ardèche that sat empty eight months a year. Now it is alive. The people who look after it send us photos of the garden. It is strange how good that feels.",
+        "giulia": "I had to leave for three weeks. My vegetable patch, my hens, my plants. A Guardiens member handled it all in exchange for vegetables and eggs. We did not know each other. We still see each other.",
+        "sarah_karim": "Three horses, four cats, a parrot. Everyone tells us that is impossible to have looked after. Our sitter came twice before we left. She knew their names by heart.",
+        "elena": "I started by watering a member's plants in exchange for a meal. Now I look after her house when she travels. That is how it works here, slowly, naturally."
+      }
     },
     "story": {
       "eyebrow": "Our story",
@@ -473,7 +481,9 @@
           "desc": "From the Basque Country to Brittany, via the Alps, Provence and the North. The network extends across all regions."
         }
       }
-    }
+    },
+    "meta_title": "Pet sitting at home and house-sitting between members | Guardiens",
+    "meta_description": "Find a sitter from your area for your home and your animals. House-sitting and community help between members, verified and rated, all across France."
   },
   "faq": {
     "title": "Frequently Asked Questions",
@@ -825,7 +835,11 @@
     "subtitle_short": "Cats, dogs, exotic pets, in the countryside or in town. Filter by location, dates and criteria.",
     "become_sitter_title": "Looking to become a sitter?",
     "become_sitter_body": "Sign up in 2 minutes, no commitment.",
-    "become_sitter_cta": "Discover the sitter space"
+    "become_sitter_cta": "Discover the sitter space",
+    "become_sitter_eyebrow": "Become a sitter",
+    "cities_count_one": "{{count}} city",
+    "cities_count_other": "{{count}} cities",
+    "all_france": "All of France"
   },
   "pros_listing": {
     "meta_title": "Pet pros directory near you | Guardiens",
@@ -1855,5 +1869,9 @@
     "expand_zone": "Widen to {{zone}}",
     "expand_zone_count_one": "{{count}} caretaker available.",
     "expand_zone_count_other": "{{count}} caretakers available."
+  },
+  "entraide": {
+    "help_requested": "Help requested",
+    "help_offered": "Help offered"
   }
 }
