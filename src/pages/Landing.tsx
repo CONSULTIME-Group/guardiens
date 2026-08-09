@@ -233,7 +233,7 @@ const Landing = () => {
               onClick={() => {
                 trackEvent("cta_aid_clicked", { metadata: { location: "hero" } });
               }}
-              className="block mt-4 font-body text-sm text-white/80 underline underline-offset-4 decoration-white/30 hover:text-white hover:decoration-white/60 transition-colors animate-hero-fade-up animation-delay-1000"
+              className="block mt-3 md:mt-4 font-body text-sm text-white/80 underline underline-offset-4 decoration-white/30 hover:text-white hover:decoration-white/60 transition-colors animate-hero-fade-up animation-delay-1000"
             >
               {t("landing.hero.cta_aid")}
             </Link>
