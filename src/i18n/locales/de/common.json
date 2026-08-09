@@ -72,7 +72,10 @@
       "kpi_members": "Mitglieder",
       "kpi_missions": "Hilfseinsätze",
       "brand_tagline": "Ganz in Ihrer Nähe.",
-      "reassurance": "Vertrauensvolle Betreuer aus deiner Nähe warten auf dich."
+      "reassurance": "Vertrauensvolle Betreuer aus deiner Nähe warten auf dich.",
+      "cta_member_owner": "Eine Anzeige veröffentlichen",
+      "cta_member_sitter": "Eine Hilfe anbieten",
+      "cta_member_search": "Eine Betreuung finden"
     },
     "toc": {
       "aria": "Inhaltsverzeichnis der Seite",
@@ -281,7 +284,23 @@
       "bullet2": "Sieben gewichtete Kriterien: Lebensstil, Tiere, Erfahrung, Verfügbarkeit, Kommunikation, Hauspräferenzen, Nähe",
       "bullet3": "Sie sehen das Detail, Sie entscheiden",
       "cta": "Den Affinitäts-Score verstehen",
-      "demo_label": "Beispiel-Match"
+      "demo_label": "Beispiel-Match",
+      "demo": {
+        "c_animals": "Tiere",
+        "n_animals": "Hund und Katze angegeben, Erfahrung bestätigt",
+        "c_presence": "Anwesenheit während der Betreuung",
+        "n_presence": "Homeoffice passend zu Ihren Erwartungen",
+        "c_pace": "Lebensrhythmus",
+        "n_pace": "Aktiver Rhythmus, passend zum Haushalt",
+        "c_languages": "Sprachen",
+        "n_languages": "Französisch als gemeinsame Sprache",
+        "c_interests": "Interessen",
+        "n_interests": "Garten, Lesen, Natur",
+        "c_ideal": "Ideales Profil",
+        "n_ideal": "Entspricht dem gesuchten Betreuertyp",
+        "c_mood": "Atmosphäre im Haushalt",
+        "n_mood": "Ruhige Atmosphäre, sportlicherer Betreuer"
+      }
     },
     "pros": {
       "title": "Tierärzte, Groomer, Trainer, von Guardiens verifiziert",

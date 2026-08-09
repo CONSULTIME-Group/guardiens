@@ -72,7 +72,10 @@
       "kpi_members": "inscritos",
       "kpi_missions": "misiones de ayuda mutua",
       "brand_tagline": "Cerca de casa.",
-      "reassurance": "Cuidadores de confianza cerca de ti te esperan."
+      "reassurance": "Cuidadores de confianza cerca de ti te esperan.",
+      "cta_member_owner": "Publicar un anuncio",
+      "cta_member_sitter": "Ofrecer una ayuda",
+      "cta_member_search": "Buscar un cuidado"
     },
     "toc": {
       "aria": "Sumario de la página",
@@ -281,7 +284,23 @@
       "bullet2": "Siete criterios ponderados: estilo de vida, animales, experiencia, disponibilidad, comunicación, preferencias del hogar, proximidad",
       "bullet3": "Ve el detalle, decide usted",
       "cta": "Entender la puntuación de afinidad",
-      "demo_label": "Ejemplo de emparejamiento"
+      "demo_label": "Ejemplo de emparejamiento",
+      "demo": {
+        "c_animals": "Animales",
+        "n_animals": "Perro y gato declarados, experiencia confirmada",
+        "c_presence": "Presencia durante el cuidado",
+        "n_presence": "Teletrabajo compatible con sus expectativas",
+        "c_pace": "Ritmo de vida",
+        "n_pace": "Ritmo activo, coherente con el hogar",
+        "c_languages": "Idiomas",
+        "n_languages": "Francés en común",
+        "c_interests": "Intereses",
+        "n_interests": "Jardín, lectura, naturaleza",
+        "c_ideal": "Perfil ideal",
+        "n_ideal": "Corresponde al tipo de cuidador buscado",
+        "c_mood": "Ambiente del hogar",
+        "n_mood": "Ambiente tranquilo, cuidador más deportista"
+      }
     },
     "pros": {
       "title": "Veterinarios, peluqueros, educadores, verificados Guardiens",

@@ -72,7 +72,10 @@
       "kpi_members": "iscritti",
       "kpi_missions": "missioni di aiuto reciproco",
       "brand_tagline": "Vicino a casa vostra.",
-      "reassurance": "Assistenti di zona ti aspettano vicino a te."
+      "reassurance": "Assistenti di zona ti aspettano vicino a te.",
+      "cta_member_owner": "Pubblicare un annuncio",
+      "cta_member_sitter": "Proporre un aiuto",
+      "cta_member_search": "Trovare una custodia"
     },
     "toc": {
       "aria": "Sommario della pagina",
@@ -281,7 +284,23 @@
       "bullet2": "Sette criteri ponderati: stile di vita, animali, esperienza, disponibilità, comunicazione, preferenze casa, vicinanza",
       "bullet3": "Vede il dettaglio, decide Lei",
       "cta": "Capire il punteggio di affinità",
-      "demo_label": "Esempio di abbinamento"
+      "demo_label": "Esempio di abbinamento",
+      "demo": {
+        "c_animals": "Animali",
+        "n_animals": "Cane e gatto dichiarati, esperienza confermata",
+        "c_presence": "Presenza durante la custodia",
+        "n_presence": "Telelavoro compatibile con le sue aspettative",
+        "c_pace": "Ritmo di vita",
+        "n_pace": "Ritmo attivo, coerente con la casa",
+        "c_languages": "Lingue",
+        "n_languages": "Francese in comune",
+        "c_interests": "Interessi",
+        "n_interests": "Giardino, lettura, natura",
+        "c_ideal": "Profilo ideale",
+        "n_ideal": "Corrisponde al tipo di custode cercato",
+        "c_mood": "Atmosfera della casa",
+        "n_mood": "Atmosfera tranquilla, custode più sportivo"
+      }
     },
     "pros": {
       "title": "Veterinari, toelettatori, educatori, verificati Guardiens",

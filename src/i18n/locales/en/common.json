@@ -72,7 +72,10 @@
       "kpi_members": "registered",
       "kpi_missions": "mutual aid missions",
       "brand_tagline": "Close to home.",
-      "reassurance": "Trusted local sitters are waiting near you."
+      "reassurance": "Trusted local sitters are waiting near you.",
+      "cta_member_owner": "Publish a listing",
+      "cta_member_sitter": "Offer a helping hand",
+      "cta_member_search": "Find a sit"
     },
     "toc": {
       "aria": "Page table of contents",
@@ -281,7 +284,23 @@
       "bullet2": "Seven weighted criteria: lifestyle, animals, experience, availability, communication, home preferences, proximity",
       "bullet3": "You see the details, you decide",
       "cta": "Understand the affinity score",
-      "demo_label": "Sample match"
+      "demo_label": "Sample match",
+      "demo": {
+        "c_animals": "Pets",
+        "n_animals": "Dog and cat declared, confirmed experience",
+        "c_presence": "Presence during the sit",
+        "n_presence": "Remote work matching your expectations",
+        "c_pace": "Pace of life",
+        "n_pace": "Active pace, consistent with the household",
+        "c_languages": "Languages",
+        "n_languages": "French in common",
+        "c_interests": "Interests",
+        "n_interests": "Garden, reading, nature",
+        "c_ideal": "Ideal profile",
+        "n_ideal": "Matches the kind of caretaker you look for",
+        "c_mood": "Household atmosphere",
+        "n_mood": "Quiet atmosphere, sportier caretaker"
+      }
     },
     "pros": {
       "title": "Vets, groomers, trainers, verified by Guardiens",

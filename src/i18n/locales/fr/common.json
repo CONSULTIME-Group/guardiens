@@ -72,7 +72,10 @@
       "kpi_members": "inscrits",
       "kpi_missions": "missions d'entraide",
       "brand_tagline": "Proches de chez vous.",
-      "reassurance": "Des gardiens du coin vous attendent près de chez vous."
+      "reassurance": "Des gardiens du coin vous attendent près de chez vous.",
+      "cta_member_owner": "Publier une annonce",
+      "cta_member_sitter": "Proposer un coup de main",
+      "cta_member_search": "Trouver une garde"
     },
     "toc": {
       "aria": "Sommaire de la page",
@@ -277,7 +280,23 @@
       "bullet2": "Sept critères pondérés : animaux, présence pendant la garde, rythme de vie, langues, intérêts, profil idéal, ambiance du foyer",
       "bullet3": "Vous voyez le détail, vous décidez",
       "cta": "Comprendre le score d'affinité",
-      "demo_label": "Exemple illustratif"
+      "demo_label": "Exemple illustratif",
+      "demo": {
+        "c_animals": "Animaux",
+        "n_animals": "Chien et chat déclarés, expérience confirmée",
+        "c_presence": "Présence pendant la garde",
+        "n_presence": "Télétravail compatible avec vos attentes",
+        "c_pace": "Rythme de vie",
+        "n_pace": "Rythme actif, cohérent avec le foyer",
+        "c_languages": "Langues",
+        "n_languages": "Français en commun",
+        "c_interests": "Intérêts",
+        "n_interests": "Jardin, lecture, nature",
+        "c_ideal": "Profil idéal",
+        "n_ideal": "Correspond au type de gardien recherché",
+        "c_mood": "Ambiance du foyer",
+        "n_mood": "Ambiance calme, gardien plus sportif"
+      }
     },
     "pros": {
       "title": "Vétérinaires, toiletteurs, éducateurs, vérifiés Guardiens",
