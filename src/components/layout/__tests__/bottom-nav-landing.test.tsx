@@ -83,7 +83,8 @@ function setup(pathname: string, scrollY = 0, mdMatches = false) {
 }
 
 function getNav() {
-  return screen.getByRole("navigation", { name: "Navigation mobile" });
+  const nav = screen.getByRole("navigation", { name: "Navigation mobile" });
+  return nav.querySelector("[data-nav-pill]") as HTMLElement;
 }
 
 describe("BottomNav landing hide-on-top", () => {
