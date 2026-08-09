@@ -1715,7 +1715,7 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
   <div className="hidden sm:flex border border-border rounded-lg overflow-hidden shrink-0">
  <button
  onClick={() => setViewMode("list")}
- aria-label="Vue grille"
+ aria-label={t("search_results.view_grid")}
  className={`p-2 transition-colors ${viewMode === "list" ? "bg-primary text-primary-foreground" : "bg-card text-muted-foreground"}`}
  >
  <LayoutGrid className="h-4 w-4" />
