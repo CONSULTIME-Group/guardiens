@@ -15,7 +15,8 @@
     "register": "Konto erstellen",
     "menu": "Menü",
     "unread_items": "ungelesene Elemente",
-    "beta": "Beta"
+    "beta": "Beta",
+    "my_space": "Mein Bereich"
   },
   "footer": {
     "sections": {
@@ -38,7 +39,12 @@
       "register": "Registrierung",
       "small_missions": "Gegenseitige Hilfe",
       "emergency_sitter": "Notfall-Betreuer",
-      "pet_pros": "Tierprofis"
+      "pet_pros": "Tierprofis",
+      "all_cities": "Alle abgedeckten Städte",
+      "all_departments": "Die 101 Departements",
+      "become_home_sitter": "Home-Sitter werden",
+      "guide_city": "Reiseführer {{city}}",
+      "house_sitting_city": "House-Sitting in {{city}}"
     },
     "tagline": "Lokales House-sitting",
     "version": "Guardiens · Beta-Version · {{year}}",
@@ -1583,5 +1589,9 @@
   },
   "i18n_fallback": {
     "notice": "Diese Seite ist noch nicht auf Deutsch verfügbar. Es wird die französische Fassung angezeigt."
+  },
+  "a11y": {
+    "skip_to_content": "Zum Hauptinhalt springen",
+    "offline": "Sie sind offline. Einige Funktionen sind möglicherweise nicht verfügbar."
   }
 }
