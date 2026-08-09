@@ -1,3 +1,4 @@
+import UntranslatedNotice from "@/components/i18n/UntranslatedNotice";
 import { useEffect, useState } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import NotFound from "@/pages/NotFound";
