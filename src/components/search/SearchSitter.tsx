@@ -1410,7 +1410,10 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
 
  return (
  <>
- <div className="animate-fade-in relative">
+ {/* Réserve basse : hauteur de la barre de navigation plus celle du bouton
+     flottant « Carte », pour que la dernière carte et le bandeau de retour au
+     rayon initial restent lisibles. */}
+ <div className="animate-fade-in relative pb-[calc(var(--bottom-nav-h,0px)+5rem)] sm:pb-0">
  {/* Premium overlay for non-subscribed sitters on sits tab */}
  {isSitterLocked && (
  <div className="absolute inset-0 z-30 bg-background/80 backdrop-blur-sm flex items-center justify-center">
