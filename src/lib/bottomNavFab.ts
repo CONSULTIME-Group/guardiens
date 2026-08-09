@@ -34,8 +34,19 @@ const NO_FAB_PATTERNS: RegExp[] = [
   /^\/pros\/[^/]+$/,
 ];
 
+/** Sous chemins qui restent des pages de liste ou de navigation. */
+const KEEP_FAB_EXACT = new Set([
+  "/annonces/international",
+  "/petites-missions/lyon",
+  "/pros/mon-espace",
+]);
+
+const KEEP_FAB_PREFIXES = ["/pros/categorie"];
+
 export const isFabHidden = (pathname: string): boolean => {
   const path = pathname.length > 1 ? pathname.replace(/\/+$/, "") : pathname;
+  if (KEEP_FAB_EXACT.has(path)) return false;
+  if (KEEP_FAB_PREFIXES.some((p) => path === p || path.startsWith(`${p}/`))) return false;
   if (NO_FAB_EXACT.has(path)) return true;
   if (NO_FAB_PREFIXES.some((p) => path === p || path.startsWith(`${p}/`) || path.startsWith(p))) {
     return true;
