@@ -37,6 +37,8 @@ interface SitPhotoManagerProps {
   initialGallery: GalleryPhoto[];
   /** Notifié quand la couverture change pour resync du parent. */
   onCoverChange?: (url: string | null) => void;
+  /** Verrouillage complet (annonce archivée, annulée ou terminée). */
+  disabled?: boolean;
 }
 
 const SitPhotoManager = ({
@@ -45,6 +47,7 @@ const SitPhotoManager = ({
   initialCoverPhotoUrl,
   initialGallery,
   onCoverChange,
+  disabled = false,
 }: SitPhotoManagerProps) => {
   const { toast } = useToast();
   const [gallery, setGallery] = useState<GalleryPhoto[]>(initialGallery);
@@ -100,6 +103,7 @@ const SitPhotoManager = ({
   };
 
   const handleSuggestBest = async () => {
+    if (disabled) return;
     if (suggesting || gallery.length === 0) return;
 
     const fingerprint = getGalleryFingerprint();
@@ -197,6 +201,7 @@ const SitPhotoManager = ({
   };
 
   const handleSetCover = async (url: string) => {
+    if (disabled) return;
     if (savingCover) return;
     const previous = coverUrl;
     setCoverUrl(url);
@@ -221,6 +226,7 @@ const SitPhotoManager = ({
   };
 
   const handleUpload = async (files: FileList | null) => {
+    if (disabled) return;
     if (!files || files.length === 0) return;
     if (gallery.length + files.length > 30) {
       toast({
@@ -300,7 +306,7 @@ const SitPhotoManager = ({
               <button
                 type="button"
                 onClick={handleSuggestBest}
-                disabled={suggesting}
+                disabled={suggesting || disabled}
                 aria-describedby="suggest-best-rgpd"
                 className={cn(
                   "inline-flex items-center gap-1.5 rounded-md border border-primary/30 bg-primary/5 text-primary px-3 py-1.5 text-sm font-medium hover:bg-primary/10 transition-colors",
@@ -347,7 +353,7 @@ const SitPhotoManager = ({
               multiple
               accept="image/*"
               className="sr-only"
-              disabled={uploading}
+              disabled={uploading || disabled}
               onChange={(e) => {
                 handleUpload(e.target.files);
                 e.target.value = "";
@@ -356,7 +362,7 @@ const SitPhotoManager = ({
             <span
               className={cn(
                 "inline-flex items-center gap-1.5 rounded-md border border-border bg-background px-3 py-1.5 text-sm font-medium cursor-pointer hover:bg-accent transition-colors",
-                uploading && "opacity-60 pointer-events-none",
+                (uploading || disabled) && "opacity-60 pointer-events-none",
               )}
             >
               {uploading ? (
@@ -390,7 +396,7 @@ const SitPhotoManager = ({
             <Button size="sm" variant="outline" onClick={() => setSuggestion(null)}>
               Ignorer
             </Button>
-            <Button size="sm" onClick={applySuggestion} disabled={!!savingCover}>
+            <Button size="sm" onClick={applySuggestion} disabled={!!savingCover || disabled}>
               Appliquer
             </Button>
           </div>
@@ -411,12 +417,18 @@ const SitPhotoManager = ({
               multiple
               accept="image/*"
               className="sr-only"
+              disabled={disabled}
               onChange={(e) => {
                 handleUpload(e.target.files);
                 e.target.value = "";
               }}
             />
-            <span className="inline-flex items-center gap-1.5 rounded-md bg-primary text-primary-foreground px-3 py-1.5 text-sm font-medium cursor-pointer hover:bg-primary/90">
+            <span
+              className={cn(
+                "inline-flex items-center gap-1.5 rounded-md bg-primary text-primary-foreground px-3 py-1.5 text-sm font-medium cursor-pointer hover:bg-primary/90",
+                disabled && "opacity-60 pointer-events-none",
+              )}
+            >
               <Plus className="h-4 w-4" /> Ajouter mes premières photos
             </span>
           </label>
@@ -431,7 +443,7 @@ const SitPhotoManager = ({
                 key={p.id}
                 type="button"
                 onClick={() => handleSetCover(p.photo_url)}
-                disabled={isSaving}
+                disabled={isSaving || disabled}
                 aria-label={
                   isCover
                     ? "Photo de couverture actuelle"

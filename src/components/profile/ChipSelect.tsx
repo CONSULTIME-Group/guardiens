@@ -8,9 +8,11 @@ interface ChipSelectProps {
   /** ID d'un Label externe qui décrit le groupe (a11y). */
   ariaLabelledBy?: string;
   ariaLabel?: string;
+  /** Désactive tous les chips (état lecture seule). */
+  disabled?: boolean;
 }
 
-const ChipSelect = ({ options, selected, onChange, className, ariaLabelledBy, ariaLabel }: ChipSelectProps) => {
+const ChipSelect = ({ options, selected, onChange, className, ariaLabelledBy, ariaLabel, disabled = false }: ChipSelectProps) => {
   const toggle = (option: string) => {
     onChange(
       selected.includes(option)
@@ -33,10 +35,12 @@ const ChipSelect = ({ options, selected, onChange, className, ariaLabelledBy, ar
             key={option}
             type="button"
             onClick={() => toggle(option)}
+            disabled={disabled}
             aria-pressed={isSelected}
             className={cn(
               "inline-flex items-center justify-center min-h-[44px] px-4 py-2 rounded-full text-sm font-medium transition-all border",
               "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+              disabled && "opacity-50 cursor-not-allowed",
               isSelected
                 ? "bg-primary text-primary-foreground border-primary"
                 : "bg-background text-foreground border-border hover:border-primary/50"
