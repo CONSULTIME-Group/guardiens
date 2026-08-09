@@ -7,6 +7,27 @@ import LanguageSwitcher from "./LanguageSwitcher";
 import { useAuth } from "@/contexts/AuthContext";
 import { useInAppShell } from "./AppShellContext";
 import UserMenu from "./UserMenu";
+import AppTopBar from "./AppTopBar";
+import { useShellMode } from "./useShellMode";
+
+/** Vrai sous le point de rupture md de Tailwind (768 px). */
+const useIsMobileShell = () => {
+  const query = "(max-width: 767.98px)";
+  const [mobile, setMobile] = useState(() =>
+    typeof window !== "undefined" && typeof window.matchMedia === "function"
+      ? window.matchMedia(query).matches
+      : false,
+  );
+  useEffect(() => {
+    if (typeof window === "undefined" || typeof window.matchMedia !== "function") return;
+    const mql = window.matchMedia(query);
+    const onChange = () => setMobile(mql.matches);
+    onChange();
+    mql.addEventListener("change", onChange);
+    return () => mql.removeEventListener("change", onChange);
+  }, []);
+  return mobile;
+};
 
 const NotificationBell = lazy(() => import("./NotificationBell"));
 const MessageBell = lazy(() => import("./MessageBell"));
@@ -47,6 +68,14 @@ export default function PublicHeader({ authedVariant = false }: { authedVariant?
   const { hasSession, authChecked } = useAuth();
   const inAppShell = useInAppShell();
   const isCompact = useIsCompactViewport();
+  const shellMode = useShellMode();
+  const isMobileShell = useIsMobileShell();
+
+  // En tête unique pour un connecté sous 768 px : la top bar applicative
+  // remplace la version burger du header public, pour ne pas exposer deux
+  // grammaires de navigation dans une même session. Au dessus de 768 px, et
+  // pour un visiteur, rien ne change.
+  const useAppTopBar = shellMode === "app" && isMobileShell;
   const [open, setOpen] = useState(false);
   const [msgUnread, setMsgUnread] = useState(0);
   const [notifUnread, setNotifUnread] = useState(0);
@@ -58,7 +87,7 @@ export default function PublicHeader({ authedVariant = false }: { authedVariant?
   // Utilisateur connecté rendu dans la coquille authentifiée (AppLayout) :
   // la sidebar et la top bar mobile fournissent déjà la navigation, on ne
   // superpose pas un second en tête.
-  const hidden = hasSession && inAppShell && !authedVariant;
+  const hidden = (hasSession && inAppShell && !authedVariant) || useAppTopBar;
 
   // La barre basse n'est plus montée ici : elle est globale (GlobalBottomNav
   // dans App.tsx), pour couvrir aussi les routes sans coquille applicative et
@@ -94,6 +123,7 @@ export default function PublicHeader({ authedVariant = false }: { authedVariant?
     };
   }, [hidden]);
 
+  if (useAppTopBar) return <AppTopBar standalone />;
   if (hidden) return null;
 
   const isActive = (path: string) => location.pathname === path || location.pathname.startsWith(path + "/");
