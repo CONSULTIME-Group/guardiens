@@ -27,5 +27,47 @@
       "type": "image/png",
       "purpose": "maskable"
     }
+  ],
+  "shortcuts": [
+    {
+      "name": "Publier une annonce",
+      "short_name": "Publier",
+      "url": "/sits/create",
+      "icons": [
+        {
+          "src": "/icons/icon-192.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "Annonces en cours",
+      "short_name": "Annonces",
+      "url": "/annonces",
+      "icons": [
+        {
+          "src": "/icons/icon-192.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/screenshot-narrow.jpg",
+      "sizes": "1088x1920",
+      "type": "image/jpeg",
+      "form_factor": "narrow",
+      "label": "Guardiens, garde d'animaux et de maison entre particuliers de confiance"
+    },
+    {
+      "src": "/screenshot-wide.jpg",
+      "sizes": "1920x1088",
+      "type": "image/jpeg",
+      "form_factor": "wide",
+      "label": "Guardiens, garde d'animaux et de maison entre particuliers de confiance"
+    }
   ]
 }
