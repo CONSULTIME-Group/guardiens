@@ -326,25 +326,18 @@ export const BottomNav = () => {
       return;
     }
     const md = window.matchMedia("(min-width: 768px)");
-    let raf = 0;
     const update = () => {
-      raf = 0;
       const y = window.scrollY || window.pageYOffset || document.documentElement.scrollTop || 0;
       const shouldHide = !md.matches && y < 120;
       setLandingTopHidden(prev => (prev === shouldHide ? prev : shouldHide));
     };
-    const onScroll = () => {
-      if (raf) return;
-      raf = window.requestAnimationFrame(update);
-    };
     update();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    window.addEventListener("resize", onScroll, { passive: true });
+    window.addEventListener("scroll", update, { passive: true });
+    window.addEventListener("resize", update, { passive: true });
     md.addEventListener("change", update);
     return () => {
-      if (raf) window.cancelAnimationFrame(raf);
-      window.removeEventListener("scroll", onScroll);
-      window.removeEventListener("resize", onScroll);
+      window.removeEventListener("scroll", update);
+      window.removeEventListener("resize", update);
       md.removeEventListener("change", update);
     };
   }, [location.pathname]);
