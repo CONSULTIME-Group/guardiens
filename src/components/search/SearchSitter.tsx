@@ -1722,7 +1722,7 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
  </button>
  <button
  onClick={() => setViewMode("map")}
- aria-label="Vue carte"
+ aria-label={t("search_results.view_map")}
  className={`p-2 transition-colors ${viewMode === "map" ? "bg-primary text-primary-foreground" : "bg-card text-muted-foreground"}`}
  >
  <MapIcon className="h-4 w-4" />
