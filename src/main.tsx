@@ -7,7 +7,8 @@ import { installGlobalErrorLogger } from "./lib/errorLogger";
 import { initConsent } from "./lib/cookieConsent";
 import { installStorageFallback } from "./lib/storageFallback";
 import { installOAuthDebugHelper } from "./lib/oauthLogger";
-import "./i18n";
+import { loadLanguage, SUPPORTED_LANGS } from "./i18n";
+import { getStoredLang } from "@/lib/lang";
 
 installStorageFallback();
 installOAuthDebugHelper();
@@ -36,9 +37,45 @@ if (!container) {
   throw new Error("Élément #root introuvable dans le DOM");
 }
 
-createRoot(container).render(
-  <App />
-);
+/**
+ * Langue cible avant le premier rendu : lien explicite, puis choix mémorisé,
+ * puis français. La logique de détection d'i18next n'est pas modifiée, on se
+ * contente de savoir quel dictionnaire précharger.
+ */
+const resolveInitialLang = (): string => {
+  try {
+    const fromUrl = new URLSearchParams(window.location.search).get("lang")?.toLowerCase();
+    if (fromUrl && (SUPPORTED_LANGS as readonly string[]).includes(fromUrl)) return fromUrl;
+  } catch {
+    // URL illisible : on continue sur le choix mémorisé.
+  }
+  return getStoredLang() ?? "fr";
+};
+
+const renderApp = () => {
+  createRoot(container).render(
+    <App />
+  );
+};
+
+const bootstrap = async () => {
+  const target = resolveInitialLang();
+  if (target !== "fr") {
+    try {
+      // Le rendu n'attend jamais plus de 1,5 s : un CDN lent dégrade en
+      // français plutôt que de retarder l'affichage.
+      await Promise.race([
+        loadLanguage(target),
+        new Promise((resolve) => window.setTimeout(resolve, 1500)),
+      ]);
+    } catch {
+      // Repli silencieux : le rendu a lieu quoi qu'il arrive.
+    }
+  }
+  renderApp();
+};
+
+void bootstrap();
 
 // Fallback prerenderReady : PageMeta est la source de vérité et flippe le flag
 // à la fin de son useEffect (après upsert du canonical par langue). Ce fallback

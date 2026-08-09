@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { SUPPORTED_LANGS } from "@/i18n";
+import { SUPPORTED_LANGS, loadLanguage } from "@/i18n";
 import { getStoredLang, isSupportedLang, setStoredLang } from "@/lib/lang";
 
 /**
@@ -31,16 +31,25 @@ const LangUrlSync = () => {
   const { i18n } = useTranslation();
 
   useEffect(() => {
+    let cancelled = false;
     const raw = new URLSearchParams(search).get("lang")?.toLowerCase();
+
+    // Le dictionnaire est chargé avant la bascule : sans cela, i18next
+    // basculerait sur une langue dont les clés ne sont pas encore là.
+    const apply = async (target: string) => {
+      await loadLanguage(target);
+      if (cancelled) return;
+      if (i18n.language !== target) await i18n.changeLanguage(target);
+    };
 
     if (isSupportedLang(raw)) {
       // Un lien explicite gagne toujours sur le choix mémorisé, et devient le
       // nouveau choix mémorisé.
       setStoredLang(raw);
-      if (i18n.language !== raw) void i18n.changeLanguage(raw);
+      void apply(raw);
     } else {
       const stored = getStoredLang();
-      if (stored && i18n.language !== stored) void i18n.changeLanguage(stored);
+      if (stored) void apply(stored);
     }
 
     // L'attribut de langue du document est recalé à chaque route, pas
@@ -51,6 +60,10 @@ const LangUrlSync = () => {
         document.documentElement.setAttribute("lang", code);
       }
     }
+
+    return () => {
+      cancelled = true;
+    };
   }, [pathname, search, hash, i18n, i18n.language]);
 
   return null;
