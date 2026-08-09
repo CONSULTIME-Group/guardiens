@@ -9,6 +9,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { SUPPORTED_LANGS, LANG_LABELS, type SupportedLang } from "@/i18n";
+import { setStoredLang } from "@/lib/lang";
 
 interface Props {
   variant?: "ghost" | "outline";
@@ -32,6 +33,7 @@ export default function LanguageSwitcher({
   // La langue vit dans l'URL : changer de langue réécrit l'URL, et
   // LangUrlSync recale i18next dessus.
   const selectLang = (code: SupportedLang) => {
+    setStoredLang(code);
     const params = new URLSearchParams(location.search);
     if (code === "fr") {
       params.delete("lang");

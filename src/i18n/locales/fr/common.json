@@ -665,7 +665,10 @@
       "saisonnier": "Saisonniers",
       "guide_pratique": "Guides pratiques",
       "vie_locale": "Vie locale & Entraide"
-    }
+    },
+    "fr_only_badge": "FR",
+    "fr_only_title": "Disponible seulement en français",
+    "only_translated": "Uniquement les contenus traduits"
   },
   "guides": {
     "meta_title": "Guides locaux pet sitting, Parcs, vétos, cafés dog-friendly | Guardiens",
@@ -1602,5 +1605,8 @@
     "decline_reason_dates_changed": "Mes dates ont changé",
     "decline_reason_not_right_time": "Ce n'est pas le bon moment pour moi",
     "decline_reason_different_profile": "Je préfère un profil différent"
+  },
+  "i18n_fallback": {
+    "notice": "Cette page n'est pas encore disponible dans votre langue. La version française est affichée."
   }
 }

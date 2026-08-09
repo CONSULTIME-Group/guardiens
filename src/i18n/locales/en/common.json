@@ -660,7 +660,10 @@
       "saisonnier": "Seasonal",
       "guide_pratique": "Practical guides",
       "vie_locale": "Local life & Mutual aid"
-    }
+    },
+    "fr_only_badge": "FR",
+    "fr_only_title": "Available in French only",
+    "only_translated": "Translated content only"
   },
   "guides": {
     "meta_title": "Local pet-sitting guides, Parks, vets, dog-friendly cafés | Guardiens",
@@ -1578,5 +1581,8 @@
     "decline_reason_dates_changed": "My dates have changed",
     "decline_reason_not_right_time": "It is not the right moment for me",
     "decline_reason_different_profile": "I prefer a different profile"
+  },
+  "i18n_fallback": {
+    "notice": "This page is not available in English yet. Showing the French version."
   }
 }

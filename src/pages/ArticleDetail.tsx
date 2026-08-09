@@ -1,3 +1,4 @@
+import UntranslatedNotice from "@/components/i18n/UntranslatedNotice";
 import { useEffect, useState } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import NotFound from "@/pages/NotFound";
@@ -475,6 +476,9 @@ export default function ArticleDetail() {
  ]} />
 
  <article className="max-w-3xl mx-auto px-4 py-8 animate-fade-in">
+
+ {!hasTranslationForLang && <UntranslatedNotice className="mb-6" />}
+
 
  <header className="mb-8">
  <div className="flex items-center gap-2 mb-3 flex-wrap">
