@@ -3,6 +3,7 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import { BottomNav } from "../Navigation";
+import { useScrollDirection } from "@/hooks/useScrollDirection";
 
 const setPathname = vi.fn();
 
@@ -55,6 +56,7 @@ vi.mock("../ChromeVisibility", async () => ({
 }));
 
 const { useLocation } = await import("react-router-dom");
+const mockedUseScrollDirection = vi.mocked(useScrollDirection);
 
 function setup(pathname: string, scrollY = 0, mdMatches = false) {
   Object.defineProperty(window, "scrollY", {
@@ -87,6 +89,7 @@ function getNav() {
 describe("BottomNav landing hide-on-top", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mockedUseScrollDirection.mockReturnValue("up");
   });
 
   it("hides the pill on / at scroll 0 under md", () => {
@@ -96,6 +99,14 @@ describe("BottomNav landing hide-on-top", () => {
 
   it("shows the pill on / after 120 px of scroll under md", () => {
     setup("/", 120, false);
+    fireEvent.scroll(window);
+    expect(getNav().className).toContain("translate-y-0");
+    expect(getNav().className).not.toContain("translate-y-[150%]");
+  });
+
+  it("keeps the pill visible on / when scrolling down past the threshold", () => {
+    mockedUseScrollDirection.mockReturnValue("down");
+    setup("/", 200, false);
     fireEvent.scroll(window);
     expect(getNav().className).toContain("translate-y-0");
     expect(getNav().className).not.toContain("translate-y-[150%]");
@@ -113,7 +124,15 @@ describe("BottomNav landing hide-on-top", () => {
     expect(getNav().className).not.toContain("translate-y-[150%]");
   });
 
-  it("hides the pill again when scrolling back to top", () => {
+  it("preserves the existing scroll-down hide on /dashboard", () => {
+    mockedUseScrollDirection.mockReturnValue("down");
+    setup("/dashboard", 200, false);
+    fireEvent.scroll(window);
+    expect(getNav().className).toContain("translate-y-[150%]");
+    expect(getNav().className).not.toContain("translate-y-0");
+  });
+
+  it("hides the pill again on / when scrolling back to top", () => {
     setup("/", 200, false);
     fireEvent.scroll(window);
     expect(getNav().className).toContain("translate-y-0");
