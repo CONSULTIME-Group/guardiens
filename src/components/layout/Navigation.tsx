@@ -296,12 +296,21 @@ export const BottomNav = () => {
   // scroll bas est désactivé : la pilule se cache uniquement tout en haut de
   // page et réapparaît dès que l'utilisateur défile.
   const [idleVisible, setIdleVisible] = useState(true);
-  const [landingTopHidden, setLandingTopHidden] = useState(false);
   const idleTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const isLandingMobile = useMemo(() => {
-    if (typeof window === "undefined") return false;
-    return location.pathname === "/" && !window.matchMedia("(min-width: 768px)").matches;
-  }, [location.pathname]);
+  const [isMobileViewport, setIsMobileViewport] = useState(() =>
+    typeof window !== "undefined" && typeof window.matchMedia === "function"
+      ? !window.matchMedia("(min-width: 768px)").matches
+      : false,
+  );
+  useEffect(() => {
+    if (typeof window === "undefined" || typeof window.matchMedia !== "function") return;
+    const md = window.matchMedia("(min-width: 768px)");
+    const update = () => setIsMobileViewport(!md.matches);
+    update();
+    md.addEventListener("change", update);
+    return () => md.removeEventListener("change", update);
+  }, []);
+  const isLandingMobile = location.pathname === "/" && isMobileViewport;
 
   useEffect(() => {
     if (!inAppShell) return;
@@ -317,33 +326,46 @@ export const BottomNav = () => {
     };
   }, [inAppShell]);
 
-  // Masquer la pilule mobile sur la landing tant qu'on est en haut de page,
-  // pour éviter le recouvrement des CTA du hero. Elle réapparaît dès 120 px de scroll.
+  // Landing mobile : la barre n'est pas rendue tant que l'utilisateur est en
+  // haut de page, pour ne jamais recouvrir les CTA du hero. Détection par
+  // sentinelle de hauteur nulle observée en IntersectionObserver, les
+  // événements de défilement n'étant pas fiables sur cette page.
+  const [atLandingTop, setAtLandingTop] = useState(true);
   useEffect(() => {
-    if (typeof window === "undefined") return;
-    if (location.pathname !== "/") {
-      setLandingTopHidden(false);
+    if (typeof document === "undefined") return;
+    if (!isLandingMobile) {
+      setAtLandingTop(false);
       return;
     }
-    const md = window.matchMedia("(min-width: 768px)");
-    const update = () => {
-      const y = window.scrollY || window.pageYOffset || document.documentElement.scrollTop || 0;
-      const shouldHide = !md.matches && y < 120;
-      setLandingTopHidden(prev => (prev === shouldHide ? prev : shouldHide));
-    };
-    update();
-    window.addEventListener("scroll", update, { passive: true });
-    window.addEventListener("resize", update, { passive: true });
-    md.addEventListener("change", update);
+    setAtLandingTop(true);
+    const IO =
+      typeof window !== "undefined"
+        ? (window as unknown as { IntersectionObserver?: typeof IntersectionObserver })
+            .IntersectionObserver
+        : undefined;
+    if (typeof IO !== "function") {
+      setAtLandingTop(false);
+      return;
+    }
+    const sentinel = document.createElement("div");
+    sentinel.setAttribute("data-landing-nav-sentinel", "");
+    sentinel.style.cssText =
+      "position:absolute;top:0;left:0;width:1px;height:1px;pointer-events:none;";
+    document.body.insertBefore(sentinel, document.body.firstChild);
+    const observer = new IO(
+      ([entry]) => setAtLandingTop(entry.isIntersecting),
+      { threshold: 0 },
+    );
+    observer.observe(sentinel);
     return () => {
-      window.removeEventListener("scroll", update);
-      window.removeEventListener("resize", update);
-      md.removeEventListener("change", update);
+      observer.disconnect();
+      sentinel.remove();
     };
-  }, [location.pathname]);
+  }, [isLandingMobile]);
 
   const hideNav = inAppShell && scrollDir === "down" && !idleVisible && !isLandingMobile;
-  const hidden = hideNav || landingTopHidden;
+  const hidden = hideNav;
+
 
   // Un écran plein cadre (fil de messagerie mobile) peut demander le retrait
   // complet de la barre basse et de son bouton flottant, pour ne jamais
