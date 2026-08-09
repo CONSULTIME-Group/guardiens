@@ -238,10 +238,12 @@ export default function News() {
   };
 
   const featuredIds = useMemo(() => new Set(vieLocaleArticles.map((a) => a.id)), [vieLocaleArticles]);
-  const visibleArticles = useMemo(
-    () => (activeCategory === "all" && !urlSearch.trim() ? articles.filter((a) => !featuredIds.has(a.id)) : articles),
-    [articles, featuredIds, activeCategory, urlSearch]
-  );
+  const visibleArticles = useMemo(() => {
+    const base =
+      activeCategory === "all" && !urlSearch.trim() ? articles.filter((a) => !featuredIds.has(a.id)) : articles;
+    if (!isForeignLang || !onlyTranslated) return base;
+    return base.filter((a) => translatedIds.has(a.id));
+  }, [articles, featuredIds, activeCategory, urlSearch, isForeignLang, onlyTranslated, translatedIds]);
 
   // Preferred display order (categories not listed here go to the end alphabetically by label)
   const CATEGORY_ORDER = [
