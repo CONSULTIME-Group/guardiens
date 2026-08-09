@@ -16,7 +16,9 @@ import {
   Zap,
   ArrowRight,
   Eye,
-  Lock,, RotateCcw } from "lucide-react";
+  Lock,
+  RotateCcw,
+} from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import SitPhotoManager from "@/components/sits/owner/SitPhotoManager";
 import {
