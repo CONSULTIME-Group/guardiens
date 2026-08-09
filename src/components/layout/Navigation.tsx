@@ -524,8 +524,8 @@ export const BottomNav = () => {
             "transition-transform duration-300 ease-out motion-reduce:transition-none",
             hidden ? "translate-y-[150%]" : "translate-y-0"
           )}
-          style={{ transform: hidden ? "translateY(150%)" : "translateY(0)" }}
         >
+
 
 
           {leftTabs.map(renderTab)}
