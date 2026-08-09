@@ -39,7 +39,7 @@ import SitterTeaserCard from "./sitter/SitterTeaserCard";
 import SitterNextStepRailCard from "./sitter/SitterNextStepRailCard";
 import { useSitterPriorityAction } from "@/hooks/useSitterPriorityAction";
 import SitterEntraideSection from "./sitter/SitterEntraideSection";
-import JournalLine from "./shared/JournalLine";
+import PetAdviceSection from "./shared/PetAdviceSection";
 
 import { useIsNewSitter } from "@/hooks/useIsNewUser";
 import { useSitterTopAffinitySits } from "@/hooks/useSitterTopAffinitySits";
@@ -360,9 +360,9 @@ const SitterDashboard = () => {
                 />
               </div>
 
-              {/* 5. Point d’entrée éditorial discret (lot 4) */}
+              {/* 5. CONSEILS ANCRÉS SUR LES COMPAGNONS (lot 4, point 3) */}
               <div>
-                <JournalLine />
+                <PetAdviceSection />
               </div>
             </div>
 
@@ -472,9 +472,9 @@ const SitterDashboard = () => {
                 />
               </div>
 
-              {/* VAGUE 16 — lectures et guides */}
+              {/* Conseils ancrés sur les compagnons (lot 4, point 3) */}
               <div>
-                <JournalLine />
+                <PetAdviceSection />
               </div>
             </div>
 
