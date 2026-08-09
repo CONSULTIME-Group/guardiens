@@ -1,47 +1,55 @@
-Investigation uniquement, aucun correctif appliqué. Diagnostic fichier par fichier des deux bugs constatés.
+# Internationalisation : état des lieux et plan
 
-## 1. Filtre proximité complètement inactif
+## État des lieux du mécanisme actuel
 
-Chaîne du filtre :
-- `src/pages/EntraideHub.tsx` L324 : `const proximity = useMissionDistance(missions);`
-- L371–386 : le filtre `filteredMissions` applique le rayon uniquement `if (proximity.active)`. Sinon aucun filtre distance.
-- `src/hooks/useMissionDistance.ts` L109–120 : `active = Boolean(origin)`. `origin` n'est renseigné que par géoloc navigateur OU par géocode du code postal saisi.
-- Branche CP L100–116 : `geocodeCity(postal, "France")` avec `postal = "69003"`.
-- `src/lib/geocode.ts` L58–70 : appelle l'edge function `geocode` avec `{ city: "69003", country: "France" }`.
-- `supabase/functions/geocode/index.ts` L99–105 : construit `URLSearchParams({ format, limit:1, city: "69003", country: "France", countrycodes: "fr" })` et appelle Nominatim.
+**La langue vit uniquement dans l'URL, en paramètre `?lang=xx`.** Le détecteur i18next est configuré sur `order: ["querystring"]` avec `caches: []`, donc aucun stockage local, aucun cookie, aucune lecture de `Accept-Language`. Le composant `LangUrlSync` va plus loin : à chaque navigation, si l'URL ne porte pas de `?lang`, il rebascule i18next sur le français.
 
-**Cause racine** : Nominatim traite le paramètre `city=` comme un nom de ville, pas comme un code postal. « 69003 » n'est pas une ville → Nominatim renvoie `[]` → l'edge renvoie `{ lat:null, lng:null }` → `geocodeCity` renvoie `null` (mis en cache mémoire) → `origin` reste `null` → `proximity.active = false` → le bloc `if (proximity.active) { if (d > radius) return false; }` n'est **jamais évalué**. Résultat : toutes les 120 dernières missions passent, d'où l'affichage d'Épinay-sur-Seine (93800) et Noyal-sur-Vilaine (35530) alors qu'on a saisi 69003.
+**Conséquence directe : c'est la cause du bug signalé.** Tous les liens internes de l'application (sidebar, header public, cartes, fils d'Ariane) pointent vers des chemins nus, sans paramètre de langue. Un anglophone qui clique sur "English" obtient `?lang=en` sur la page courante, puis perd l'anglais au premier clic sur n'importe quel lien. Ce n'est pas un problème de contenu, c'est un reset systématique.
 
-Confirmation base :
-- `SELECT ... FROM geocode_cache WHERE normalized_name ILIKE '%69003%'` → 0 ligne. Aucun code postal n'a jamais pu être géocodé.
-- Aucun symptôme n'apparaît côté « Ma position » car cette branche pose `origin = {lat,lng}` directement sans passer par l'edge.
+**Couverture réelle du contenu :**
+- Interface : 1 289 clés traduites en 5 langues, mais une partie des pages applicatives porte encore du français en dur (libellés de navigation notamment).
+- Articles : 118 publiés, 80 traductions anglaises, donc 38 sans version anglaise.
+- Fiches de race : 77, aucune table de traduction.
+- Pages villes (163) et annuaire pros : aucune traduction.
 
-L'UI trompe l'utilisateur : le `Select` de rayon reste actif visuellement (L125 `disabled={!active}` — `active` prop vient d'`EntraideHub`, à vérifier au passage), mais aucune boucle silencieuse n'informe que l'origine n'a pas pu être résolue. Aucun toast d'erreur n'est levé côté saisie CP (contrairement à la branche géoloc).
+**SEO déjà correct :** `PageMeta` met les variantes non traduites en `noindex, follow`, conserve `html lang="fr"` et ne déclare en hreflang que les langues réellement traduites. Rien à changer de ce côté.
 
-**Options de correctif** (à valider, non appliquées) :
-- A. Faire supporter les CP FR côté edge `geocode` : détecter `/^\d{5}$/`, appeler Nominatim avec `postalcode=…` au lieu de `city=…` (ou requête structurée `q=<cp>, France`), et normaliser la clé de cache en `cp:<cp>|fr`.
-- B. Fallback côté client dans `useMissionDistance` : si `geocodeCity(cp)` renvoie null pour un CP valide, tenter un second appel avec la ville associée (mais on n'a que le CP saisi, donc nécessite une table de correspondance ou l'appel `postalcode` côté edge → option A reste préférable).
-- C. Ajouter un état d'erreur explicite dans le hook (`originResolveError`) et un message dans `ProximityFilter` quand la résolution échoue, pour ne plus laisser croire à l'utilisateur que le filtre est actif.
+## Phase 1 : le bug d'expérience
 
-## 2. Cartes sans vraie photo
+### 1. Persistance de la langue
+Garder l'URL comme source de vérité, mais arrêter de la perdre :
+- Ajouter un stockage local du choix explicite de langue (écrit uniquement quand l'utilisateur sélectionne une langue dans le sélecteur).
+- `LangUrlSync` : si l'URL n'a pas de `?lang` et qu'un choix explicite existe, réécrire l'URL avec le paramètre (remplacement d'historique) au lieu de retomber en français.
+- Fournir un helper `withLang(path)` et l'appliquer à la navigation interne principale, pour que les liens portent le paramètre quand la langue active n'est pas le français.
+- Aucune détection `Accept-Language` automatique : le français reste le défaut pour un premier visiteur sans choix, ce qui préserve le canonique et le crawl.
 
-Composant carte : `src/components/missions/connected/MissionCard.tsx`
-- L82 : `const hasPhoto = Array.isArray(m.photos) && m.photos.length > 0;`
-- L83 : `const cover = hasPhoto ? m.photos[0] : null;`
-- Fallback : `CategoryGlyph` (SVGs génériques maison/patte/etc. sur gradient `primary`). **Aucun fallback intermédiaire** vers l'avatar auteur ni vers `owner_gallery`.
+### 2. Repli explicite
+Un composant `UntranslatedNotice` : bandeau sobre, en haut du contenu, affiché seulement quand la langue active n'est pas le français et que la page ne dispose pas de traduction. Texte type : "This page is not available in English yet. Showing the French version." Branché sur les pages qui savent déjà si elles ont une traduction (article, race, ville, pro, listings). La logique d'absence de traduction est déjà calculée pour le `noindex`, on la réutilise.
 
-Champs disponibles côté données :
-- `small_missions.photos text[]` : existe, alimenté via `MissionPhotoUpload` dans `src/pages/CreateSmallMission.tsx` (L112, L253, L676–677). Techniquement fonctionnel.
-- État réel en base : sur les 9 missions ouvertes/en cours/terminées récentes échantillonnées, **toutes ont `array_length(photos,1)=0`**. Personne n'a joint de photo à ce jour. Les cartes tombent donc systématiquement dans la branche `CategoryGlyph`.
-- Avatar auteur : `m.profiles.avatar_url` est hydraté L286–294 dans `EntraideHub.tsx` (via `public_profiles`). Utilisé uniquement pour la pastille auteur, jamais comme couverture.
-- `owner_gallery` : jamais requêté par le hub Entraide.
-- `pets.photo_url` : jamais requêté (les missions ne sont pas liées formellement à un pet).
+### 3. Navigation honnête
+Dans les listes d'articles et de contenus, en langue non française : marquer les entrées disponibles seulement en français par un libellé discret ("FR only"), et ajouter un filtre "Available in English" (par défaut désactivé, donc aucune perte de contenu). Le marquage repose sur les langues réellement présentes en base, chargées avec la liste.
 
-**Diagnostic** : le champ existe, l'upload existe, mais l'usage est nul. Le rendu générique est donc le comportement observé partout, pas un bug de rendu — c'est un bug produit à deux niveaux : (a) auteurs ne joignent aucune photo, (b) la carte n'a pas de plan B au-dessus du glyph gris.
+## Phase 2 : combler les traductions
 
-**Options de correctif** (à valider, non appliquées) :
-- A. Pousser plus fortement l'upload dans `CreateSmallMission` (photo obligatoire pour catégorie « animals » ou « house », ou nudge visuel bloquant à l'édition).
-- B. Ajouter une cascade de fallback couverture dans `MissionCard` : `m.photos[0]` → (si catégorie=animals) première `pets.photo_url` de l'auteur → (si catégorie=house/garden) première `owner_gallery` de l'auteur → avatar auteur agrandi et flouté en fond → glyph générique. Nécessite d'enrichir la query L272–275 de `EntraideHub.tsx` avec un batch `pets`/`owner_gallery` par `user_id`.
-- C. Solution minimale : n'ajouter que l'avatar auteur agrandi en couverture floutée si aucune photo mission. Zéro requête supplémentaire, ambiance plus humaine que la silhouette grise.
+### 2a. 38 articles publiés sans version anglaise
+La table existe. Réutiliser le script de traduction déjà en place, en lot, avec le glossaire existant (vouvoiement, marque non traduite, placeholders préservés) et un validateur bloquant sur le vocabulaire proscrit avant écriture.
 
-Aucun changement ne sera appliqué sans arbitrage sur les options ci-dessus.
+### 2b. 77 fiches de race
+Créer `breed_profile_translations` sur le modèle d'`article_translations` (clé étrangère, `lang`, champs texte de la fiche, `noindex`, horodatages), avec `GRANT` et politiques de lecture publique et écriture réservée au service. Puis générer les traductions anglaises, avec la même validation.
+
+### 2c. Pages villes
+Hors périmètre, elles restent en français.
+
+## Pages de positionnement
+Landing, tarifs, manifeste : aucune écriture automatique en base. Je vous soumets les textes anglais pour relecture avant publication.
+
+## Garde-fous
+Vouvoiement en français, aucun emoji, aucun tiret cadratin ni demi-cadratin, mots proscrits (voisin, à vie, gratuitement) interdits y compris dans les traductions et les JSON-LD. Le validateur est appliqué avant toute écriture en base, et couvert par un test.
+
+## Détails techniques
+- `src/i18n/index.ts` : conserver `order: ["querystring"]`, ajouter la relecture du choix explicite au démarrage.
+- `src/components/LangUrlSync.tsx` : réécriture d'URL au lieu du repli français inconditionnel.
+- Nouveau `src/lib/lang.ts` : `withLang`, lecture et écriture du choix explicite.
+- Nouveau `src/components/i18n/UntranslatedNotice.tsx`.
+- Migration `breed_profile_translations` avec `GRANT` puis RLS et politiques.
+- Scripts de remplissage exécutés hors application, écriture via l'outil d'insertion.
