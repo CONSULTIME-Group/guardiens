@@ -315,14 +315,14 @@ const OnboardingAffinity = () => {
 
   if (!user || flagLoading || status.loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center text-muted-foreground">
+      <div className="min-h-[100svh] flex items-center justify-center text-muted-foreground">
         Chargement...
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-background flex items-start md:items-center justify-center px-4 py-8">
+    <div className="min-h-[100svh] bg-background flex items-start md:items-center justify-center px-4 py-8">
       <Head>
         <title>Bienvenue, une dernière étape | Guardiens</title>
         <meta name="robots" content="noindex, nofollow" />
@@ -453,7 +453,7 @@ const OnboardingAffinity = () => {
                           role="radio"
                           aria-checked={active}
                           onClick={() => setLifePace(o.value)}
-                          className={`px-4 py-2 rounded-full border text-sm transition-colors ${
+                          className={`inline-flex items-center justify-center min-h-[44px] px-4 py-2 rounded-full border text-sm transition-colors ${
                             active
                               ? "bg-primary text-primary-foreground border-primary"
                               : "bg-background text-foreground border-border hover:bg-accent"
