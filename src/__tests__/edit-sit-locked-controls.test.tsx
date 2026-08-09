@@ -4,6 +4,7 @@
  */
 import { describe, it, expect, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
+import { MemoryRouter } from "react-router-dom";
 import ChipSelect from "@/components/profile/ChipSelect";
 import SitPhotoManager from "@/components/sits/owner/SitPhotoManager";
 
@@ -27,13 +28,13 @@ describe("verrouillage annonce archivée", () => {
 
   it("désactive les entrées fichier et les boutons photo", () => {
     const { container } = render(
-      <SitPhotoManager
+      <MemoryRouter><SitPhotoManager
         sitId="s1"
         ownerId="o1"
         initialCoverPhotoUrl={null}
         initialGallery={[]}
         disabled
-      />,
+      /></MemoryRouter>,
     );
     const files = container.querySelectorAll<HTMLInputElement>('input[type="file"]');
     expect(files.length).toBeGreaterThan(0);
@@ -42,7 +43,7 @@ describe("verrouillage annonce archivée", () => {
 
   it("laisse les entrées fichier actives hors verrouillage", () => {
     const { container } = render(
-      <SitPhotoManager sitId="s1" ownerId="o1" initialCoverPhotoUrl={null} initialGallery={[]} />,
+      <MemoryRouter><SitPhotoManager sitId="s1" ownerId="o1" initialCoverPhotoUrl={null} initialGallery={[]} /></MemoryRouter>,
     );
     const files = container.querySelectorAll<HTMLInputElement>('input[type="file"]');
     files.forEach((f) => expect(f.disabled).toBe(false));
