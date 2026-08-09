@@ -53,6 +53,7 @@ Deno.serve(async (req) => {
   try {
     const today = new Date().toISOString().split("T")[0];
     let transitioned = 0;
+    let expired = 0;
     let guideMessagesBackfilled = 0;
     let photoNudgesPosted = 0;
     let photoRecapsPosted = 0;
@@ -171,6 +172,45 @@ Deno.serve(async (req) => {
         .update({ updated_at: new Date().toISOString() })
         .eq("id", conv.id);
       return true;
+    }
+
+    // 0. Annonces publiées dont la date de début est dépassée de plus de 48h
+    // et sans candidature acceptée : bascule en 'expired'.
+    const twoDaysBefore = new Date(Date.now() - 2 * 24 * 60 * 60 * 1000)
+      .toISOString()
+      .split("T")[0];
+
+    const { data: stalemates } = await supabase
+      .from("sits")
+      .select("id, title, user_id, start_date")
+      .eq("status", "published")
+      .lt("start_date", twoDaysBefore);
+
+    for (const sit of stalemates || []) {
+      try {
+        const { count: acceptedCount } = await supabase
+          .from("applications")
+          .select("id", { count: "exact", head: true })
+          .eq("sit_id", sit.id)
+          .eq("status", "accepted");
+        if ((acceptedCount ?? 0) > 0) continue;
+
+        await supabase.from("sits").update({ status: "expired" as any }).eq("id", sit.id);
+
+        await supabase.from("notifications").insert({
+          user_id: sit.user_id,
+          type: "sit_expired",
+          title: "Annonce expirée",
+          body: `La date de début de votre annonce « ${sit.title} » est dépassée et aucun gardien n'a été retenu. Deux options s'offrent à vous : republier votre annonce avec de nouvelles dates, ou confirmer que vous avez trouvé une solution.`,
+          link: `/sits/${sit.id}`,
+        });
+
+        expired++;
+      } catch (e) {
+        const msg = e instanceof Error ? e.message : String(e);
+        console.error("[auto-transition] expire failed", sit.id, msg);
+        errors.push(`expire ${sit.id}: ${msg}`);
+      }
     }
 
     // 1. Confirmed sits where start_date <= today -> in_progress
@@ -352,6 +392,7 @@ Deno.serve(async (req) => {
 
     await run.finish(errors.length > 0 ? "partial" : "success", {
       transitioned,
+      expired,
       guide_messages_backfilled: guideMessagesBackfilled,
       photo_nudges_posted: photoNudgesPosted,
       photo_recaps_posted: photoRecapsPosted,
@@ -361,6 +402,7 @@ Deno.serve(async (req) => {
     return new Response(
       JSON.stringify({
         transitioned,
+        expired,
         guide_messages_backfilled: guideMessagesBackfilled,
         photo_nudges_posted: photoNudgesPosted,
         photo_recaps_posted: photoRecapsPosted,
