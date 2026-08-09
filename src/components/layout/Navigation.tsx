@@ -328,7 +328,7 @@ export const BottomNav = () => {
       window.removeEventListener("resize", apply);
       document.documentElement.style.setProperty("--bottom-nav-h", "0px");
     };
-  }, [bottomNavHidden, landingNavVisible]);
+  }, [bottomNavHidden]);
 
 
   // Signature Dock 2026 — 4 tabs role-aware + FAB contextuel + Plus sheet
