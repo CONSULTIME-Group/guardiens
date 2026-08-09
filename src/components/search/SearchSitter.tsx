@@ -1374,14 +1374,14 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
  const resultCount = tab === "missions" && missionSubTab === "members" ? availableMembers.length : availableSitsCount;
   // hasNoLocalRealMissions retiré : OutOfZoneBanner couvre déjà ce cas.
  const countLabel = tab === "missions" && missionSubTab === "members"
- ? `${resultCount} membre${resultCount > 1 ? "s" : ""} disponible${resultCount > 1 ? "s" : ""}`
+ ? t("search_results.count_members", { count: resultCount })
   : resultCount === 0 && demoCount > 0
-  ? `${demoCount} exemple${demoCount > 1 ? "s" : ""} ci-dessous, en attendant de vraies annonces`
+  ? t("search_results.count_demo", { count: demoCount })
  : resultCount === 0
- ? (city ? `Aucune annonce ouverte près de ${city}` : "Aucune annonce ouverte sur ce périmètre")
+ ? (city ? t("search_results.count_none_city", { city }) : t("search_results.count_none"))
  : city
- ? `${resultCount} annonce${resultCount > 1 ? "s" : ""} disponible${resultCount > 1 ? "s" : ""} près de vous`
- : `${resultCount} annonce${resultCount > 1 ? "s" : ""} disponible${resultCount > 1 ? "s" : ""} en France`;
+ ? t("search_results.count_available_near", { count: resultCount })
+ : t("search_results.count_available_fr", { count: resultCount });
 
  // ─── Pill style ───
  const pillClass = "snap-start flex items-center gap-2 px-4 py-2 min-h-11 rounded-full border border-border bg-card cursor-pointer hover:border-primary transition-colors text-sm whitespace-nowrap shrink-0";
@@ -1697,16 +1697,16 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
  {/* ─── Sort bar + view toggle (sticky avec les pills pour cohérence visuelle) ─── */}
  <div className="flex justify-between items-center gap-2 px-4 sm:px-6 py-2 border-t border-border/60 bg-background flex-nowrap">
  <div className="flex items-center gap-2 min-w-0 flex-1">
- <span className="text-xs sm:text-sm text-muted-foreground truncate flex-1 min-w-0" title={countLabel}>{loading ? "Recherche…" : countLabel}</span>
+ <span className="text-xs sm:text-sm text-muted-foreground truncate flex-1 min-w-0" title={countLabel}>{loading ? t("search_results.searching") : countLabel}</span>
  <Select value={sort} onValueChange={(v) => handleSortChange(v as SortOption)}>
  <SelectTrigger className="h-8 w-auto gap-1.5 rounded-full border-border bg-card px-3 text-xs shrink-0">
- <span className="text-muted-foreground hidden sm:inline">Trier&nbsp;:</span>
+ <span className="text-muted-foreground hidden sm:inline">{t("search_results.sort_label")}&nbsp;</span>
  <SelectValue />
  </SelectTrigger>
  <SelectContent align="start">
- <SelectItem value="closest">Plus proches</SelectItem>
- <SelectItem value="recent">Plus récentes</SelectItem>
- <SelectItem value="rating">Mieux notées</SelectItem>
+ <SelectItem value="closest">{t("search_results.sort_closest")}</SelectItem>
+ <SelectItem value="recent">{t("search_results.sort_recent")}</SelectItem>
+ <SelectItem value="rating">{t("search_results.sort_rating")}</SelectItem>
  </SelectContent>
  </Select>
  </div>
@@ -1715,14 +1715,14 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
   <div className="hidden sm:flex border border-border rounded-lg overflow-hidden shrink-0">
  <button
  onClick={() => setViewMode("list")}
- aria-label="Vue grille"
+ aria-label={t("search_results.view_grid")}
  className={`p-2 transition-colors ${viewMode === "list" ? "bg-primary text-primary-foreground" : "bg-card text-muted-foreground"}`}
  >
  <LayoutGrid className="h-4 w-4" />
  </button>
  <button
  onClick={() => setViewMode("map")}
- aria-label="Vue carte"
+ aria-label={t("search_results.view_map")}
  className={`p-2 transition-colors ${viewMode === "map" ? "bg-primary text-primary-foreground" : "bg-card text-muted-foreground"}`}
  >
  <MapIcon className="h-4 w-4" />
@@ -2385,7 +2385,7 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
         <>
           {visibleActive.length > 0 && (
             <section className="mb-10">
-              {inactive.length > 0 && groupHeader("Annonces disponibles", activeReal.length)}
+              {inactive.length > 0 && groupHeader(t("search_results.group_available"), activeReal.length)}
               <div className={gridCls}>
                 {visibleActive.map((item) => renderCard(item, globalIdx++))}
               </div>
@@ -2395,7 +2395,7 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
                     onClick={() => setVisibleCount((c) => c + 12)}
                     className="rounded-full border border-border bg-card hover:bg-accent hover:border-primary/40 px-6 py-2.5 text-sm font-medium text-foreground transition-colors"
                   >
-                    Voir plus d'annonces ({activeReal.length - visibleActive.length} restantes)
+                    {t("search_results.load_more", { count: activeReal.length - visibleActive.length })}
                   </button>
                 </div>
               )}
@@ -2405,9 +2405,9 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
           {inactive.length > 0 && (
             <section className="mb-10">
               {groupHeader(
-                "Annonces passées ou attribuées",
+                t("search_results.group_past"),
                 inactive.length,
-                "Signal d'activité dans la zone, non actionnables",
+                t("search_results.group_past_sub"),
               )}
               <div className={gridCls}>
                 {inactive.map((item) => renderCard(item, globalIdx++))}
@@ -2424,10 +2424,10 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
          <Link
            to="/annonces/international"
            className="inline-flex items-center gap-2 rounded-full border border-border bg-card hover:bg-accent hover:border-primary/40 text-sm text-foreground px-4 py-2 transition-colors"
-           aria-label={`Voir les ${intlCount} annonces hors France`}
+           aria-label={t("search_results.intl_link_aria", { count: intlCount })}
          >
            <Globe2 className="h-4 w-4 text-muted-foreground" />
-           <span>Vous cherchez à l'étranger ? Voir les {intlCount} annonce{intlCount > 1 ? "s" : ""} hors France</span>
+           <span>{t("search_results.intl_link", { count: intlCount })}</span>
          </Link>
        </div>
      )}
@@ -2436,7 +2436,7 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
  </div>
  ) : (
  /* ─── Map view ─── */
- <Suspense fallback={<div className="flex items-center justify-center h-[calc(100vh-200px)]"><p className="text-muted-foreground">Chargement de la carte…</p></div>}>
+ <Suspense fallback={<div className="flex items-center justify-center h-[calc(100vh-200px)]"><p className="text-muted-foreground">{t("search_results.map_loading")}</p></div>}>
  <SearchMapView
  results={results}
  resultCoords={resultCoords}

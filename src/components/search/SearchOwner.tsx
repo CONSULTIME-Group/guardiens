@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useMemo, useRef, lazy, Suspense } from "react";
+import { useTranslation } from "react-i18next";
 import PageMeta from "@/components/PageMeta";
 import { logger } from "@/lib/logger";
 import { useNavigate, Link, useSearchParams } from "react-router-dom";
@@ -64,6 +65,7 @@ const SearchOwnerMapView = lazy(() => import("@/components/search/SearchOwnerMap
 
 const SearchOwner = () => {
   const { user, switchRole } = useAuth();
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { owner: viewerOwner } = useViewerOwnerForAffinity();
 
@@ -1368,33 +1370,33 @@ const SearchOwner = () => {
             <div className="shrink-0 min-w-0" aria-live="polite">
               <p className="font-heading text-[17px] sm:text-lg font-semibold leading-tight text-foreground">
                 {loading
-                  ? "Recherche en cours…"
-                  : `${results.length} gardien${results.length !== 1 ? "s" : ""} trouvé${results.length !== 1 ? "s" : ""}`}
+                  ? t("search_results.sitters_searching")
+                  : t("search_results.sitters_found", { count: results.length })}
               </p>
               {!loading && results.length > 0 && (
                 <p className="text-[11.5px] text-muted-foreground leading-snug mt-0.5">
                   {sort === "affinity" && viewerOwner
-                    ? "Classés par affinité avec votre foyer, les gardiens d'urgence d'abord."
+                    ? t("search_results.sitters_hint_affinity")
                     : sort === "rating"
-                      ? "Classés par note, les gardiens d'urgence d'abord."
+                      ? t("search_results.sitters_hint_rating")
                       : sort === "experience"
-                        ? "Classés par expérience, les gardiens d'urgence d'abord."
-                        : "Classés du plus proche au plus loin, les gardiens d'urgence d'abord."}
+                        ? t("search_results.sitters_hint_experience")
+                        : t("search_results.sitters_hint_closest")}
                 </p>
               )}
             </div>
             {hasActiveFilters && (
-              <button onClick={resetFilters} className="text-xs text-primary hover:underline whitespace-nowrap shrink-0">Réinit.</button>
+              <button onClick={resetFilters} className="text-xs text-primary hover:underline whitespace-nowrap shrink-0">{t("search_results.reset_short")}</button>
             )}
 
             {/* Options de tri : « Meilleure affinité » n'apparaît que si le viewer
                 a un profil owner (sinon le score est masqué et le tri n'a pas de sens). */}
             {(() => {
               const sortOptions: Array<{ value: SortOption; label: string }> = [
-                ...(viewerOwner ? [{ value: "affinity" as SortOption, label: "Meilleure affinité" }] : []),
-                { value: "closest", label: "Plus proches" },
-                { value: "rating", label: "Mieux notés" },
-                { value: "experience", label: "Plus expérimentés" },
+                ...(viewerOwner ? [{ value: "affinity" as SortOption, label: t("search_results.sort_affinity") }] : []),
+                { value: "closest", label: t("search_results.sort_closest") },
+                { value: "rating", label: t("search_results.sort_rating_sitters") },
+                { value: "experience", label: t("search_results.sort_experience") },
               ];
               const handleSort = (v: SortOption) => {
                 setSort(v);
@@ -1439,7 +1441,7 @@ const SearchOwner = () => {
               <button
                 type="button"
                 onClick={() => setViewMode("list")}
-                aria-label="Vue grille"
+                aria-label={t("search_results.view_grid")}
                 aria-pressed={viewMode === "list"}
                 className={`flex items-center gap-1 px-2 py-1 rounded text-xs transition-colors ${viewMode === "list" ? "bg-primary/10 text-primary font-medium" : "text-muted-foreground hover:bg-muted"}`}
               >
@@ -1449,7 +1451,7 @@ const SearchOwner = () => {
               <button
                 type="button"
                 onClick={() => setViewMode("map")}
-                aria-label="Vue carte"
+                aria-label={t("search_results.view_map")}
                 aria-pressed={viewMode === "map"}
                 className={`flex items-center gap-1 px-2 py-1 rounded text-xs transition-colors ${viewMode === "map" ? "bg-primary/10 text-primary font-medium" : "text-muted-foreground hover:bg-muted"}`}
               >
@@ -1567,7 +1569,7 @@ const SearchOwner = () => {
                           onClick={() => setRadius([next])}
                           className="rounded-full px-3 py-1.5 text-xs border border-border bg-background hover:border-primary hover:bg-primary/5 transition-colors"
                         >
-                          Élargir à {next} km
+                          {t("search_results.expand_zone", { zone: `${next} km` })}
                         </button>
                       ) : null;
                     })()}
@@ -1627,10 +1629,10 @@ const SearchOwner = () => {
                   >
                     <div className="flex items-center gap-2 mb-1">
                       <MapPin className="h-4 w-4 text-primary" />
-                      <span className="font-medium text-sm">Élargir à {expansion.label}</span>
+                      <span className="font-medium text-sm">{t("search_results.expand_zone", { zone: expansion.label })}</span>
                     </div>
                     <p className="text-xs text-muted-foreground">
-                      {expansion.count} gardien{expansion.count > 1 ? "s" : ""} disponible{expansion.count > 1 ? "s" : ""}.
+                      {t("search_results.expand_zone_count", { count: expansion.count })}
                     </p>
                   </button>
                 )}
