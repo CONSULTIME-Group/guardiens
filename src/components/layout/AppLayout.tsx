@@ -95,7 +95,7 @@ export const AppLayout = ({ children }: { children?: ReactNode }) => {
         <div ref={topBarRef} className="md:hidden sticky top-0 z-40 flex items-center justify-between gap-2 px-3 py-2 bg-background/95 backdrop-blur border-b border-border">
           <div className="flex items-center gap-1 min-w-0">
             <BackButton inline />
-            <Link to="/" aria-label="Guardiens, accueil" className="font-heading text-lg font-bold tracking-tight truncate">
+            <Link to="/" aria-label="Guardiens, accueil" className="font-heading text-lg font-bold tracking-tight shrink-0 whitespace-nowrap">
               <span className="text-primary">g</span>
               <span className="text-foreground">uardiens</span>
             </Link>

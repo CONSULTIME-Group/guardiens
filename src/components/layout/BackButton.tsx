@@ -29,11 +29,11 @@ export const BackButton = ({ inline = false }: BackButtonProps) => {
       variant="ghost"
       size="sm"
       onClick={() => navigate(-1)}
-      className="gap-1.5 text-muted-foreground hover:text-foreground -ml-2 h-8 px-2"
+      className="gap-1.5 text-muted-foreground hover:text-foreground -ml-2 h-8 px-2 min-w-0 shrink"
       aria-label="Revenir à la page précédente"
     >
-      <ArrowLeft className="h-4 w-4" />
-      <span className="text-sm">Retour</span>
+      <ArrowLeft className="h-4 w-4 shrink-0" />
+      <span className="text-sm hidden min-[380px]:inline">Retour</span>
     </Button>
   );
 
