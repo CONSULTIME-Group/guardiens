@@ -78,6 +78,11 @@ export default function News() {
   const { t, i18n } = useTranslation();
   const tCat = (key: string) => t(`news.categories.${key}`, { defaultValue: key });
   const dateLocale = (({ fr, en: enUS, es, it: itLocale, de: deLocale } as any)[i18n.language?.split("-")[0]] || fr);
+  const isForeignLang = (i18n.language || "fr").split("-")[0].toLowerCase() !== "fr";
+  // Articles réellement traduits dans la langue active : sert au marquage
+  // « FR » et au filtre, pour qu'un visiteur ne clique plus à l'aveugle.
+  const [translatedIds, setTranslatedIds] = useState<Set<string>>(new Set());
+  const [onlyTranslated, setOnlyTranslated] = useState(false);
   const [articles, setArticles] = useState<Article[]>([]);
   const [vieLocaleArticles, setVieLocaleArticles] = useState<Article[]>([]);
   const [categoryCounts, setCategoryCounts] = useState<Record<string, number>>({});
