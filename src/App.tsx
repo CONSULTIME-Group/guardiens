@@ -17,6 +17,8 @@ import { PreviewDiagnosticBanner } from "@/components/PreviewDiagnosticBanner";
 import DuplicateAccountGuard from "@/components/auth/DuplicateAccountGuard";
 import ScrollToTop from "@/components/layout/ScrollToTop";
 import { useShellMode } from "@/components/layout/useShellMode";
+import GlobalBottomNav from "@/components/layout/GlobalBottomNav";
+import { ChromeVisibilityProvider } from "@/components/layout/ChromeVisibility";
 import DeferredTrackers from "@/components/analytics/DeferredTrackers";
 // CookieConsent retiré (mesure d'audience exemptée CNIL)
 import { toast } from "sonner";
@@ -619,7 +621,12 @@ const App = () => (
               <OfflineBanner />
               <PreviewDiagnosticBanner />
               <DuplicateAccountGuard />
-              <AppRoutes />
+              <ChromeVisibilityProvider>
+                <AppRoutes />
+                {/* Barre de navigation basse montée une seule fois, pour toutes
+                    les routes, y compris celles hors coquille applicative. */}
+                <GlobalBottomNav />
+              </ChromeVisibilityProvider>
               <DeferredTrackers />
               {/* Bannière cookies retirée : mesure d'audience GA4 exemptée CNIL
                   (anonymize_ip, pas de pub/signals). Voir src/lib/cookieConsent.ts. */}
