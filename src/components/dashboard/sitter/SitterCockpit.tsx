@@ -93,7 +93,7 @@ const SitterCockpit = ({
             occuper le vide existant, sans allonger la carte. */}
         <div
           aria-hidden="true"
-          className="illustration-wrapper pointer-events-none absolute top-[-14px] right-[-10px] w-[124px] h-[124px] sm:top-auto sm:bottom-[-12px] sm:right-[-16px] sm:w-[150px] sm:h-[150px] min-[1100px]:w-[180px] min-[1100px]:h-[180px]"
+          className="illustration-wrapper pointer-events-none absolute top-[-14px] right-[-10px] w-[100px] h-[100px] sm:top-auto sm:bottom-[-12px] sm:right-[-16px] sm:w-[150px] sm:h-[150px] min-[1100px]:w-[180px] min-[1100px]:h-[180px]"
         >
           <img
             src={isAvailable ? cockpitMorning : cockpitWaiting}
@@ -110,7 +110,7 @@ const SitterCockpit = ({
 
         <div className="relative flex items-start justify-between gap-[22px] flex-wrap">
           {/* Bloc gauche : avatar + salutation adressée */}
-          <div className="flex items-center gap-[14px] min-w-0 flex-1 pr-[72px] sm:pr-0">
+          <div className="flex items-center gap-[14px] min-w-0 flex-1 pr-[52px] sm:pr-0">
             <Link
               to="/profile"
               aria-label="Modifier mon profil"

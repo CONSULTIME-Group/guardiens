@@ -9,20 +9,21 @@ interface CockpitGreetingProps {
 /**
  * Titre de la carte d'accueil, toutes variantes de rôle et de formule.
  *
- * La taille est fluide et bornée (clamp), calculée sur la largeur du
- * viewport. Le titre tient ainsi sur une seule ligne aussi bien avec
- * "Bonjour, Léa" qu'avec "Bienvenue, Jean-Christophe", et se tronque au
- * besoin plutôt que de passer sur deux lignes.
+ * Règle absolue : le prénom n'est jamais tronqué. Aucune ellipse, aucun
+ * overflow masqué. La taille est fluide et bornée par clamp, avec une
+ * borne basse lisible (16px). Si un prénom très long ne tient pas à la
+ * borne basse, le titre passe sur deux lignes plutôt que d'être coupé.
  */
 export function CockpitGreeting({ greeting, displayName, className = "" }: CockpitGreetingProps) {
   const label = `${greeting}${displayName ? `, ${displayName}` : ""}`;
   return (
     <h1
-      className={`font-heading font-semibold tracking-tight leading-tight text-foreground whitespace-nowrap truncate min-w-0 ${className}`}
+      className={`font-heading font-semibold tracking-tight leading-tight text-foreground min-w-0 break-words ${className}`}
       style={{
-        fontSize: "clamp(18px, 6.4vw, 32px)",
+        fontSize: "clamp(16px, 5.4vw, 32px)",
+        overflowWrap: "break-word",
+        textWrap: "balance",
       }}
-      title={label}
     >
       {label}
     </h1>
