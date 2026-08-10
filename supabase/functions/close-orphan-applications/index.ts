@@ -12,7 +12,7 @@
  * Cron quotidien. Appel réservé au service role.
  */
 import { createClient } from "npm:@supabase/supabase-js@2.45.0";
-import { startCronRun, type CronRun } from "../_shared/cron-run-log.ts";
+import { startCronRun, describeError, type CronRun } from "../_shared/cron-run-log.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -83,8 +83,11 @@ Deno.serve(async (req) => {
         link: "/search",
       });
       if (notifError) {
-        errors.push({ application_id: app.application_id, error: `notify_failed` });
-        console.error("[close-orphan-applications] notify failed", notifError.message);
+        errors.push({
+          application_id: app.application_id,
+          error: `notify_failed: ${describeError(notifError)}`,
+        });
+        console.error("[close-orphan-applications] notify failed", describeError(notifError));
       } else {
         notificationsSent += 1;
       }
@@ -150,7 +153,7 @@ Deno.serve(async (req) => {
   } catch (err) {
     console.error("[close-orphan-applications]", err);
     if (run) await run.fail(err);
-    return new Response(JSON.stringify({ error: String((err as Error)?.message ?? err) }), {
+    return new Response(JSON.stringify({ error: describeError(err) }), {
       status: 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
