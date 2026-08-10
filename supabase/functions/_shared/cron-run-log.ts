@@ -76,7 +76,7 @@ export async function startCronRun(edgeName: string): Promise<CronRun> {
       });
     },
     async fail(error, metrics = {}) {
-      const msg = error instanceof Error ? error.message : String(error);
+      const msg = describeError(error);
       await update({
         finished_at: new Date().toISOString(),
         status: "failed",
