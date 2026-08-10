@@ -24,6 +24,12 @@ async function geocodeAddress(query: string): Promise<{ lat: number; lng: number
   }
 }
 
+class AiGatewayError extends Error {
+  constructor(public status: number, message: string) {
+    super(message);
+  }
+}
+
 async function callAI(apiKey: string, prompt: string, maxTokens = 1000) {
   const res = await fetch(LOVABLE_API_URL, {
     method: "POST",
@@ -38,7 +44,13 @@ async function callAI(apiKey: string, prompt: string, maxTokens = 1000) {
       temperature: 0.7,
     }),
   });
-  if (!res.ok) throw new Error(`AI error [${res.status}]: ${await res.text()}`);
+  if (res.status === 402) {
+    throw new AiGatewayError(402, "Crédits IA épuisés. Rechargez les crédits de l'espace de travail pour générer un guide.");
+  }
+  if (res.status === 429) {
+    throw new AiGatewayError(429, "Trop de requêtes IA, réessayez dans un instant.");
+  }
+  if (!res.ok) throw new AiGatewayError(res.status, `Erreur fournisseur IA (statut ${res.status}).`);
   const data = await res.json();
   const content = data.choices?.[0]?.message?.content || "";
   const match = content.match(/\{[\s\S]*\}|\[[\s\S]*\]/);
