@@ -99,14 +99,16 @@ Deno.serve(async (req) => {
       }
 
       // 5) Candidatures : ne pas relancer le proprio si la candidature
-      //    n'est plus en pending/viewed (déjà décidée).
+      //    n'est plus ouverte (accepted, rejected, cancelled). Le statut
+      //    discussing reste eligible : le trigger le pose des le premier
+      //    message du proprietaire, la candidature n'est pas tranchee.
       if (conv.context_type === "sit_application" && conv.sit_id && recipientRole === "owner") {
         const { data: app } = await supabase
           .from("applications")
           .select("status")
           .eq("sit_id", conv.sit_id)
           .eq("sitter_id", triggerMsg.sender_id)
-          .in("status", ["pending", "viewed"])
+          .in("status", ["pending", "viewed", "discussing"])
           .maybeSingle();
         if (!app) { skipped++; continue; }
       }
@@ -117,7 +119,7 @@ Deno.serve(async (req) => {
         .select("id, created_at")
         .eq("template_name", "new-message")
         .in("status", ["sent", "pending"])
-        .eq("message_id", `msg_${triggerMsg.id}`)
+        .filter("metadata->>idempotency_key", "eq", `msg_${triggerMsg.id}`)
         .gte("created_at", cutoff24)
         .limit(1);
 
@@ -165,6 +167,7 @@ Deno.serve(async (req) => {
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')}` },
         body: JSON.stringify({
           templateName: "unread-messages-reminder",
+          category: "transactional",
           recipientEmail: recipient.email,
           idempotencyKey: `unread-reminder-${conv.id}-${triggerMsg.id}`,
           templateData: {
