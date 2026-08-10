@@ -10,6 +10,7 @@
  *    pas de bouton Publier : le primaire vit dans la star).
  */
 import { Link } from "react-router-dom";
+import { CockpitGreeting } from "@/components/dashboard/CockpitGreeting";
 import { Eye } from "lucide-react";
 import ownerHome from "@/assets/illustrations/owner-cockpit-home.webp";
 
@@ -111,18 +112,8 @@ const OwnerCockpit = ({
               </p>
             </div>
 
-            {/* 2. Salutation, une seule ligne */}
-            <h1
-              className="font-heading font-semibold tracking-tight leading-tight text-foreground mt-[10px] whitespace-nowrap truncate"
-              style={{ fontSize: "24px" }}
-            >
-              <span className="sm:hidden">
-                {greeting}{displayName ? `, ${displayName}` : ""}
-              </span>
-              <span className="hidden sm:inline" style={{ fontSize: "32px" }}>
-                {greeting}{displayName ? `, ${displayName}` : ""}
-              </span>
-            </h1>
+            {/* 2. Salutation, une seule ligne, taille fluide bornée */}
+            <CockpitGreeting greeting={greeting} displayName={displayName} className="mt-[10px]" />
 
             {/* 3. Horodatage */}
             <p
