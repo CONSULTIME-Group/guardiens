@@ -22,7 +22,9 @@ export interface DeliveryFailureInput {
   entityType?: string;
   entityId?: string | null;
   source: string;
-  errorMessage: string;
+  /** Chaîne, Error ou objet d'erreur Supabase : sérialisé par describeError. */
+  errorMessage: unknown;
+
   extra?: Record<string, unknown>;
 }
 
