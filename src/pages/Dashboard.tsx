@@ -7,6 +7,7 @@ import OwnerDashboard from "@/components/dashboard/OwnerDashboard";
 import SitterDashboard from "@/components/dashboard/SitterDashboard";
 import { WelcomeBackDigest } from "@/components/ai/alma/WelcomeBackDigest";
 import { AlmaDormantReturnWhisper } from "@/components/ai/alma/wiring/AlmaDormantReturnWhisper";
+import { useOwnerPrimaryAction } from "@/hooks/useOwnerPrimaryAction";
 
 import { DashboardErrorBoundary } from "@/components/dashboard/DashboardErrorBoundary";
 import { trackEvent } from "@/lib/analytics";
