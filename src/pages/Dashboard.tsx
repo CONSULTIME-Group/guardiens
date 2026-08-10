@@ -224,11 +224,12 @@ const Dashboard = () => {
             displayedRole === "owner" ? "Le dashboard propriétaire" : "Le dashboard gardien"
           }
         >
-          <div className="mx-auto w-full max-w-6xl px-4 pt-4 md:px-6">
-            <WelcomeBackDigest />
+          {displayedRole === "owner" ? <OwnerDashboard /> : <SitterDashboard />}
+          {/* Alma clôt la page : accueil, émotion, action, contexte, puis voix. */}
+          <div className="mx-auto w-full max-w-6xl px-4 pb-6 md:px-6">
+            <WelcomeBackDigest suppressEmptyVariant={hasPendingAction} />
             <AlmaDormantReturnWhisper />
           </div>
-          {displayedRole === "owner" ? <OwnerDashboard /> : <SitterDashboard />}
         </DashboardErrorBoundary>
 
       </div>
