@@ -155,7 +155,7 @@ const SitterCockpit = ({
               style={{ minHeight: "44px", fontSize: "12px" }}
             >
               <Pencil className="w-3.5 h-3.5" aria-hidden="true" />
-              <span className="hidden sm:inline">Modifier</span>
+              Modifier
             </Link>
             {userId && (
               <Link
@@ -165,7 +165,7 @@ const SitterCockpit = ({
                 style={{ minHeight: "44px", fontSize: "12px" }}
               >
                 <Eye className="w-3.5 h-3.5" aria-hidden="true" />
-                <span className="hidden sm:inline">Profil public</span>
+                Profil public
               </Link>
             )}
             <button
