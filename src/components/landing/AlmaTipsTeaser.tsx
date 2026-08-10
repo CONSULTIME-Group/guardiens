@@ -1,4 +1,5 @@
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
+import { useInView } from "@/hooks/useInView";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { supabase } from "@/integrations/supabase/client";
@@ -57,8 +58,14 @@ export default function AlmaTipsTeaser() {
   const { t } = useTranslation();
   const [tips, setTips] = useState<Tip[]>([]);
   const [loading, setLoading] = useState(true);
+  const { ref, inView } = useInView<HTMLElement>({ rootMargin: "600px 0px" });
+  // Prerender.io ne défile jamais : sans ce contournement, le JSON-LD ne
+  // serait jamais produit pour les crawlers.
+  const isPrerender =
+    typeof navigator !== "undefined" && /Prerender/i.test(navigator.userAgent);
 
   useEffect(() => {
+    if (!inView && !isPrerender) return;
     let cancelled = false;
     (async () => {
       const { data } = await supabase
@@ -74,10 +81,11 @@ export default function AlmaTipsTeaser() {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [inView, isPrerender]);
 
-  if (loading) return null;
-  if (tips.length === 0) return null;
+  // Le conteneur porteur du ref reste toujours monté, sinon l'observateur
+  // n'aurait aucun noeud à observer et la requête ne partirait jamais.
+  if (loading || tips.length === 0) return <div ref={ref as React.Ref<HTMLDivElement>} aria-hidden="true" />;
 
   const labelFor = (factType: string | null): string => {
     const fallback = t("landing.alma_tips.fallback_label");
@@ -106,7 +114,7 @@ export default function AlmaTipsTeaser() {
 
   return (
     <>
-      <section className="py-10 md:py-20 bg-background scroll-mt-24" aria-labelledby="alma-tips-heading">
+      <section ref={ref} className="py-10 md:py-20 bg-background scroll-mt-24" aria-labelledby="alma-tips-heading">
         <div className="max-w-6xl mx-auto px-5 sm:px-6">
           <div className="mb-8 md:mb-10">
             <p className="text-[10px] md:text-xs uppercase tracking-[0.2em] text-primary font-semibold font-body mb-3">

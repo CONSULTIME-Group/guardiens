@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { supabase } from "@/integrations/supabase/client";
 import { usePublicStats } from "@/hooks/usePublicStats";
+import { useInView } from "@/hooks/useInView";
 
 interface Member {
   id: string;
@@ -26,8 +27,10 @@ const RealMembersStrip = () => {
   const { t } = useTranslation();
   const [members, setMembers] = useState<Member[]>([]);
   const { data: publicStats } = usePublicStats();
+  const { ref, inView } = useInView<HTMLDivElement>({ rootMargin: "600px 0px" });
 
   useEffect(() => {
+    if (!inView) return;
     let cancelled = false;
     (async () => {
       try {
@@ -58,16 +61,19 @@ const RealMembersStrip = () => {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [inView]);
 
   // Même source que le hero : total_inscrits via usePublicStats.
   // Aucune valeur de repli : si la donnée n'est pas disponible, le bloc n'est
   // pas rendu plutôt que d'afficher un compteur faux.
   const memberCount = publicStats?.total_inscrits ?? 0;
-  if (memberCount <= 0) return null;
+  // Le conteneur porteur du ref reste toujours monté, sinon l'observateur
+  // n'aurait aucun noeud à observer et la requête ne partirait jamais.
+  if (memberCount <= 0) return <div ref={ref} aria-hidden="true" />;
 
   return (
-    <div className="mb-16 flex flex-col items-center gap-5">
+    <div ref={ref} className="mb-16 flex flex-col items-center gap-5">
+
       {members.length > 0 && (
         <ul className="flex -space-x-3" aria-label={t("landing.real_members.members_preview_aria")}>
           {members.map((m) => (

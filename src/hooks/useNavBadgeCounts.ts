@@ -27,8 +27,9 @@ export function useNavBadgeCounts(userId: string | undefined): NavBadgeCounts {
   const { data } = useQuery({
     queryKey: ["nav-badge-counts", userId],
     enabled: !!userId,
-    staleTime: 15_000,
-    refetchInterval: 15_000,
+    staleTime: 30_000,
+    refetchInterval: 60_000,
+    refetchIntervalInBackground: false,
     refetchOnWindowFocus: true,
     queryFn: async (): Promise<NavBadgeCounts> => {
       if (!userId) return EMPTY;
