@@ -5,11 +5,42 @@
 //   catch (e) { await run.fail(e); throw e; }
 import { createClient, SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
 
+/**
+ * Sérialisation lisible d'une erreur, quelle que soit sa forme.
+ *
+ * Motif corrigé : `String(erreurPostgrest)` produisait la chaîne
+ * "[object Object]", ce qui a laissé un cron mourir en silence. Une erreur
+ * Supabase (message, code, details, hint) n'est pas une instance de Error,
+ * elle doit donc passer par une sérialisation explicite.
+ */
+export function describeError(error: unknown): string {
+  if (error == null) return "unknown_error";
+  if (typeof error === "string") return error;
+  if (error instanceof Error) {
+    const cause = (error as { cause?: unknown }).cause;
+    return cause ? `${error.message} (cause: ${describeError(cause)})` : error.message;
+  }
+  if (typeof error === "object") {
+    const e = error as Record<string, unknown>;
+    const parts = ["message", "code", "details", "hint"]
+      .filter((k) => e[k] != null && e[k] !== "")
+      .map((k) => `${k}: ${String(e[k])}`);
+    if (parts.length > 0) return parts.join(", ");
+    try {
+      return JSON.stringify(error);
+    } catch {
+      return Object.prototype.toString.call(error);
+    }
+  }
+  return String(error);
+}
+
 export interface CronRun {
   id: string | null;
   finish: (status: "success" | "partial", metrics?: Record<string, unknown>) => Promise<void>;
   fail: (error: unknown, metrics?: Record<string, unknown>) => Promise<void>;
 }
+
 
 function getServiceClient(): SupabaseClient | null {
   const url = Deno.env.get("SUPABASE_URL");
