@@ -577,7 +577,7 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, prope
   const activeApps = useMemo(() => {
     let arr = [...rawActive];
     // Filtre segmenté (chips OwnerSitView)
-    if (statusFilter === "pending") arr = arr.filter(a => a.status === "pending");
+    if (statusFilter === "pending") arr = arr.filter(a => a.status === "pending" || a.status === "viewed" || a.status === "discussing");
     else if (statusFilter === "viewed") arr = arr.filter(a => a.status === "viewed");
     else if (statusFilter === "discussing") arr = arr.filter(a => a.status === "discussing");
     else if (statusFilter === "declined") arr = [];
@@ -794,6 +794,19 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, prope
             >
               Voir le profil
             </Link>
+            <button
+              onClick={async () => {
+                if (!user) return;
+                const { startConversationAndNavigate } = await import("@/lib/conversation");
+                await startConversationAndNavigate(
+                  { otherUserId: app.sitter_id, context: "sit_application", sitId },
+                  navigate,
+                );
+              }}
+              className="border border-primary text-primary rounded-full px-4 py-2 text-sm hover:bg-primary/10 transition-colors"
+            >
+              Contacter
+            </button>
             <button
               onClick={() => setConfirmApp(app)}
               className="bg-primary text-primary-foreground rounded-full px-4 py-2 text-sm font-medium hover:bg-primary/90 transition-colors"

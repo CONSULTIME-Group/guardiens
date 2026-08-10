@@ -57,7 +57,8 @@ describe("catégorisation des emails, conformité désinscription", () => {
       "nearby-daily-digest",
       "mutual-aid-weekly-digest",
       "alert-digest",
-      "unread-messages-reminder",
+      // 'unread-messages-reminder' est volontairement transactionnel depuis le
+      // 10/08/2026 : il porte le message reel d'un membre identifie a un autre.
       "review-reminder",
       "dormant-sitter-nudge",
       "affinity-onboarding-nudge",

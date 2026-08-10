@@ -7957,6 +7957,24 @@ export type Database = {
           signal: string
         }[]
       }
+      detect_unconfirmed_sits: {
+        Args: never
+        Returns: {
+          days_until_start: number
+          discussing_count: number
+          end_date: string
+          last_message_at: string
+          owner_email: string
+          owner_first_name: string
+          owner_id: string
+          sit_id: string
+          sit_slug: string
+          sit_title: string
+          sitter_first_names: string[]
+          start_date: string
+          urgency: string
+        }[]
+      }
       detect_unsourced_stats: { Args: { p_content: string }; Returns: string[] }
       detect_untapped_cities: {
         Args: never

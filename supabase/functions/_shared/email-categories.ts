@@ -29,6 +29,10 @@ const TRANSACTIONAL: ReadonlyArray<string> = [
   // destinataire, au meme titre que 'new-application'. Aucun plafond de
   // frequence depuis le 02/08/2026, seules les heures calmes s'appliquent.
   'owner-pending-application-nudge',
+  // Relance de confirmation sur une annonce ou la mise en relation a deja eu
+  // lieu : consequence directe des echanges reels entre deux membres
+  // identifies, meme nature que 'owner-pending-application-nudge'.
+  'owner-sit-unconfirmed',
   'cancellation-by-owner',
   'cancellation-by-sitter',
   'cancellation-review-published',
@@ -73,6 +77,7 @@ const TRANSACTIONAL: ReadonlyArray<string> = [
   // Interne / opérationnel (destinataire = équipe, pas un membre)
   'admin-delivery-alert',
   'admin-signals-digest',
+  'content-quality-digest',
 ]
 
 const PRODUCT: ReadonlyArray<string> = [

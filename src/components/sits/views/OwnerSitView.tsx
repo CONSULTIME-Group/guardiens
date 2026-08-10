@@ -132,6 +132,16 @@ const OwnerSitView = ({
     declined: 0,
   });
 
+  // Porte de sortie honnête depuis l'email de relance : le lien secondaire
+  // « J'ai finalement trouvé autrement » pointe sur #depublier et ouvre
+  // directement le questionnaire de motif.
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (window.location.hash !== "#depublier") return;
+    if (sit.status !== "published") return;
+    setUnpublishConfirmOpen(true);
+  }, [sit.status]);
+
   // Recompte par statut à l'arrivée + quand appCount change (proxy refetch).
   useEffect(() => {
     let cancelled = false;
@@ -634,7 +644,15 @@ const OwnerSitView = ({
               >
                 {(
                   [
-                    { key: "pending" as const, label: "À traiter", count: appStatusCounts.pending, dot: appStatusCounts.pending > 0 },
+                    {
+                      key: "pending" as const,
+                      label: "À traiter",
+                      // Une candidature vue ou en discussion attend toujours une
+                      // décision : elle doit compter, sinon le propriétaire croit
+                      // que tout est traité alors que rien n'est confirmé.
+                      count: appStatusCounts.pending + appStatusCounts.viewed + appStatusCounts.discussing,
+                      dot: appStatusCounts.pending + appStatusCounts.viewed + appStatusCounts.discussing > 0,
+                    },
                     { key: "viewed" as const, label: "Vues", count: appStatusCounts.viewed },
                     { key: "discussing" as const, label: "En discussion", count: appStatusCounts.discussing },
                     { key: "declined" as const, label: "Refusées", count: appStatusCounts.declined },
