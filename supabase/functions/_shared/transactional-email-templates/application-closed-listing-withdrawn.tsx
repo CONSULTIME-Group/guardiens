@@ -25,9 +25,12 @@ const ApplicationClosedListingWithdrawnEmail = ({
   const searchHref = sitCity
     ? `${SITE_URL}/recherche?ville=${encodeURIComponent(sitCity)}`
     : `${SITE_URL}/recherche`
-  const cause = sitStatus === 'archived'
-    ? "l'annonce a été retirée par la personne qui l'avait publiée"
-    : "la garde a été annulée par la personne qui l'avait publiée"
+  const cause =
+    sitStatus === 'archived'
+      ? "l'annonce a été retirée par la personne qui l'avait publiée"
+      : sitStatus === 'expired'
+        ? "les dates de la garde sont passées et l'annonce s'est refermée d'elle-même"
+        : "la garde a été annulée par la personne qui l'avait publiée"
   return (
     <Html lang="fr" dir="ltr">
       <BrandedHead />
