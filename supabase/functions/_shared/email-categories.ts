@@ -57,6 +57,9 @@ const TRANSACTIONAL: ReadonlyArray<string> = [
   // Direct human reply / messaging
   'contact-reply',
   'new-message',
+  // Relance d'un message reel non lu, d'un membre identifie a un autre :
+  // meme nature que 'new-message', jamais plafonnee.
+  'unread-messages-reminder',
   // Financial / subscription
   'subscription-expires-30d',
   'subscription-expires-7d',
@@ -105,7 +108,6 @@ const PRODUCT: ReadonlyArray<string> = [
   // Avis / parrainage
   'review-reminder',
   'referral-boost-monthly',
-  'unread-messages-reminder',
   'dormant-sitter-nudge',
   'affinity-onboarding-nudge',
   // Message personnel du fondateur aux membres : editorial, avec desinscription.
