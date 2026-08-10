@@ -655,7 +655,7 @@ const SmallMissionDetail = () => {
     if (mission.user_id === user.id) return;
     setOneClickInterestBusy(true);
     try {
-      trackEvent("mission_offer_one_click_interest", { metadata: { mission_id: id } });
+      trackEvent("mission_offer_one_click_interest", { metadata: { mission_id: missionUuid } });
       // 1. Récupère/crée conversation (RPC atomique)
       const { conversationId, error: convError } = await startConversation({
         otherUserId: mission.user_id,
