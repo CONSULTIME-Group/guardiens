@@ -132,6 +132,16 @@ const OwnerSitView = ({
     declined: 0,
   });
 
+  // Porte de sortie honnête depuis l'email de relance : le lien secondaire
+  // « J'ai finalement trouvé autrement » pointe sur #depublier et ouvre
+  // directement le questionnaire de motif.
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (window.location.hash !== "#depublier") return;
+    if (sit.status !== "published") return;
+    setUnpublishConfirmOpen(true);
+  }, [sit.status]);
+
   // Recompte par statut à l'arrivée + quand appCount change (proxy refetch).
   useEffect(() => {
     let cancelled = false;
