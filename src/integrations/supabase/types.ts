@@ -7958,7 +7958,7 @@ export type Database = {
         }[]
       }
       detect_unconfirmed_sits: {
-        Args: never
+        Args: { p_silence_days?: number }
         Returns: {
           days_until_start: number
           discussing_count: number

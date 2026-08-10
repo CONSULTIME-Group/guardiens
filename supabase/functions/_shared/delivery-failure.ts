@@ -14,6 +14,8 @@
  * `notification_delivery_failed_burst`.
  */
 
+import { describeError } from "./cron-run-log.ts";
+
 export interface DeliveryFailureInput {
   templateName: string;
   recipientEmail?: string | null;
@@ -22,7 +24,9 @@ export interface DeliveryFailureInput {
   entityType?: string;
   entityId?: string | null;
   source: string;
-  errorMessage: string;
+  /** Chaîne, Error ou objet d'erreur Supabase : sérialisé par describeError. */
+  errorMessage: unknown;
+
   extra?: Record<string, unknown>;
 }
 
@@ -42,7 +46,7 @@ export async function recordDeliveryFailure(supabase: any, input: DeliveryFailur
     template_name: input.templateName,
     recipient_email: input.recipientEmail ?? "unknown",
     status: "failed",
-    error_message: input.errorMessage.slice(0, 2000),
+    error_message: describeError(input.errorMessage).slice(0, 2000),
     metadata,
   });
   if (logErr) console.error("recordDeliveryFailure: email_send_log insert failed", logErr);
@@ -58,7 +62,7 @@ export async function recordDeliveryFailure(supabase: any, input: DeliveryFailur
         ...metadata,
         template_name: input.templateName,
         recipient_email: input.recipientEmail ?? null,
-        error: input.errorMessage.slice(0, 2000),
+        error: describeError(input.errorMessage).slice(0, 2000),
       },
     });
     // 23505 = un signal non resolu existe deja pour cette entite, c'est le

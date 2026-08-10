@@ -17,7 +17,7 @@
  * plafond de securite SEND_CAP par execution.
  */
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
-import { startCronRun } from "../_shared/cron-run-log.ts";
+import { startCronRun, describeError } from "../_shared/cron-run-log.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -27,6 +27,14 @@ const corsHeaders = {
 
 /** Plafond de securite par execution, meme esprit que remind-unread-messages. */
 const SEND_CAP = 200;
+
+/** Seuil de silence nominal, celui du cron quotidien. */
+const SILENCE_DAYS = 3;
+/**
+ * Seuil du mode rattrapage, active uniquement par {"catchUp": true} dans le
+ * corps de la requete. Le cron n'envoie jamais ce drapeau.
+ */
+const CATCH_UP_SILENCE_DAYS = 2;
 
 interface UnconfirmedSit {
   sit_id: string;
@@ -77,6 +85,15 @@ Deno.serve(async (req) => {
     return new Response("ok", { headers: corsHeaders });
   }
 
+  let catchUp = false;
+  try {
+    const body = (await req.json()) as { catchUp?: unknown } | null;
+    catchUp = body?.catchUp === true;
+  } catch {
+    catchUp = false;
+  }
+  const silenceDays = catchUp ? CATCH_UP_SILENCE_DAYS : SILENCE_DAYS;
+
   const run = await startCronRun("nudge-owner-unconfirmed-sit");
   try {
     const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
@@ -96,7 +113,9 @@ Deno.serve(async (req) => {
       );
     }
 
-    const { data, error } = await service.rpc("detect_unconfirmed_sits");
+    const { data, error } = await service.rpc("detect_unconfirmed_sits", {
+      p_silence_days: silenceDays,
+    });
     if (error) throw error;
     const rows: UnconfirmedSit[] = (data as UnconfirmedSit[]) ?? [];
 
@@ -259,6 +278,8 @@ Deno.serve(async (req) => {
     }
 
     const metrics = {
+      catch_up: catchUp,
+      silence_days: silenceDays,
       detected: rows.length,
       signals_inserted: signalsInserted,
       signals_skipped: signalsSkipped,
@@ -278,7 +299,7 @@ Deno.serve(async (req) => {
     console.error("[nudge-owner-unconfirmed-sit]", err);
     await run.fail(err);
     return new Response(
-      JSON.stringify({ error: String((err as Error)?.message ?? err) }),
+      JSON.stringify({ error: describeError(err) }),
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } },
     );
   }
