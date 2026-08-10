@@ -577,7 +577,7 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, prope
   const activeApps = useMemo(() => {
     let arr = [...rawActive];
     // Filtre segmenté (chips OwnerSitView)
-    if (statusFilter === "pending") arr = arr.filter(a => a.status === "pending");
+    if (statusFilter === "pending") arr = arr.filter(a => a.status === "pending" || a.status === "viewed" || a.status === "discussing");
     else if (statusFilter === "viewed") arr = arr.filter(a => a.status === "viewed");
     else if (statusFilter === "discussing") arr = arr.filter(a => a.status === "discussing");
     else if (statusFilter === "declined") arr = [];
