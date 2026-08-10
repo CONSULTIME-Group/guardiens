@@ -634,7 +634,15 @@ const OwnerSitView = ({
               >
                 {(
                   [
-                    { key: "pending" as const, label: "À traiter", count: appStatusCounts.pending, dot: appStatusCounts.pending > 0 },
+                    {
+                      key: "pending" as const,
+                      label: "À traiter",
+                      // Une candidature vue ou en discussion attend toujours une
+                      // décision : elle doit compter, sinon le propriétaire croit
+                      // que tout est traité alors que rien n'est confirmé.
+                      count: appStatusCounts.pending + appStatusCounts.viewed + appStatusCounts.discussing,
+                      dot: appStatusCounts.pending + appStatusCounts.viewed + appStatusCounts.discussing > 0,
+                    },
                     { key: "viewed" as const, label: "Vues", count: appStatusCounts.viewed },
                     { key: "discussing" as const, label: "En discussion", count: appStatusCounts.discussing },
                     { key: "declined" as const, label: "Refusées", count: appStatusCounts.declined },
