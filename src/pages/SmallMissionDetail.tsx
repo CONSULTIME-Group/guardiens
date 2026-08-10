@@ -387,7 +387,7 @@ const SmallMissionDetail = () => {
 
       const { data: inserted, error } = await supabase
         .from("small_mission_responses")
-        .insert({ mission_id: id, responder_id: user.id, message: msg })
+        .insert({ mission_id: missionUuid!, responder_id: user.id, message: msg })
         .select("*")
         .single();
 
@@ -482,7 +482,7 @@ const SmallMissionDetail = () => {
       supabase.functions.invoke("notify-mission-event", {
         body: {
           event_type: "mission_accepted",
-          mission_id: id,
+          mission_id: missionUuid!,
           actor_id: user!.id,
           target_ids: [resp.responder_id],
           metadata: { conversation_id: convId },
@@ -492,7 +492,7 @@ const SmallMissionDetail = () => {
         supabase.functions.invoke("notify-mission-event", {
           body: {
             event_type: "mission_declined",
-            mission_id: id,
+            mission_id: missionUuid!,
             actor_id: user!.id,
             target_ids: declinedIds,
           },
@@ -523,7 +523,7 @@ const SmallMissionDetail = () => {
       supabase.functions.invoke("notify-mission-event", {
         body: {
           event_type: "mission_declined",
-          mission_id: id,
+          mission_id: missionUuid!,
           actor_id: user!.id,
           target_ids: [resp.responder_id],
         },
@@ -573,7 +573,7 @@ const SmallMissionDetail = () => {
         supabase.functions.invoke("notify-mission-event", {
           body: {
             event_type: "mission_cancelled",
-            mission_id: id,
+            mission_id: missionUuid!,
             actor_id: user!.id,
             target_ids: pending.map(r => r.responder_id),
           },
@@ -605,7 +605,7 @@ const SmallMissionDetail = () => {
         supabase.functions.invoke("notify-mission-event", {
           body: {
             event_type: "mission_completed",
-            mission_id: id,
+            mission_id: missionUuid!,
             actor_id: user!.id,
             target_ids: accepted.map(r => r.responder_id),
           },
@@ -670,7 +670,7 @@ const SmallMissionDetail = () => {
       const templateMsg = `Bonjour ${author?.first_name || ""}, votre proposition « ${mission.title} » m'intéresse. Je vous contacte en privé pour en discuter.`.trim();
       await supabase
         .from("small_mission_responses")
-        .insert({ mission_id: id, responder_id: user.id, message: templateMsg })
+        .insert({ mission_id: missionUuid!, responder_id: user.id, message: templateMsg })
         .then(() => {});
       // 3. Redirige messagerie
       navigate(`/messages?c=${conversationId}`);
@@ -871,13 +871,13 @@ const SmallMissionDetail = () => {
                   r.id === myResponse.id ? { ...r, status: "withdrawn" } : r,
                 ));
                 trackEvent("mission_response_withdrawn", {
-                  metadata: { mission_id: id, response_id: myResponse.id },
+                  metadata: { mission_id: missionUuid!, response_id: myResponse.id },
                 });
                 // Fan-out serveur (notif + email auteur)
                 supabase.functions.invoke("notify-mission-event", {
                   body: {
                     event_type: "mission_response_withdrawn",
-                    mission_id: id,
+                    mission_id: missionUuid!,
                     actor_id: user!.id,
                     target_ids: [mission.user_id],
                   },
@@ -1614,7 +1614,7 @@ const SmallMissionDetail = () => {
                     </div>
                   ) : (
                     <InlineFeedbackForm
-                      missionId={id!}
+                      missionId={missionUuid!}
                       receiverId={r.responder_id}
                       receiverName={r.responder?.first_name || "l'aidant"}
                       badges={PUBLISHER_BADGES}
@@ -1640,7 +1640,7 @@ const SmallMissionDetail = () => {
               </div>
             ) : (
               <InlineFeedbackForm
-                missionId={id!}
+                missionId={missionUuid!}
                 receiverId={mission.user_id}
                 receiverName={author?.first_name || "le publieur"}
                 badges={CANDIDATE_BADGES}
