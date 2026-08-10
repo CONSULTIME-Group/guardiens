@@ -6,6 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { useInventaireCounts } from "@/hooks/useInventaireCounts";
 import AnalysisRequestForm from "@/components/inventaire/AnalysisRequestForm";
 import coverImg from "@/assets/inventaire-guardiens-france.jpg";
+import { withOrganizationGraph } from "@/lib/seo/organizationNode";
 
 const PAGE_URL = "https://guardiens.fr/actualites/inventaire-guardiens-france";
 const TITLE = "L'inventaire vivant de Guardiens : ce que couvre la plateforme, aujourd'hui";
@@ -61,7 +62,7 @@ export default function ArticleInventaire() {
   const placesEntries = Object.entries(c.places_by_category).sort((a, b) => b[1] - a[1]);
   const prosEntries = Object.entries(c.pros_by_category).sort((a, b) => b[1] - a[1]);
 
-  const articleSchema = {
+  const articleSchema: Record<string, unknown> = {
     "@context": "https://schema.org",
     "@type": "Article",
     headline: TITLE,
@@ -134,7 +135,7 @@ export default function ArticleInventaire() {
         author="Jérémie et Elisa"
       />
       <Head>
-        <script type="application/ld+json">{JSON.stringify(articleSchema)}</script>
+        <script type="application/ld+json">{JSON.stringify(withOrganizationGraph(articleSchema))}</script>
         <script type="application/ld+json">{JSON.stringify(datasetSchema)}</script>
         <script type="application/ld+json">{JSON.stringify(faqSchema)}</script>
       </Head>

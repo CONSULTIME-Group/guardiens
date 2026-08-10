@@ -22,6 +22,7 @@ import { getOptimizedImageUrl } from "@/lib/imageOptim";
 import { resolveAuthors } from "@/data/authors";
 import { trackEvent } from "@/lib/analytics";
 import { SITTER_PRICE_NUMERIC, SITTER_PRICE_CURRENCY, SITTER_PRICE_START_ISO } from "@/lib/pricing";
+import { withOrganizationGraph } from "@/lib/seo/organizationNode";
 
 interface ArticleFull {
  id: string;
@@ -354,7 +355,7 @@ export default function ArticleDetail() {
  })).filter((l: any) => l.text);
 
  // Schema.org Article, CORRECTION 1
- const articleSchema = {
+ const articleSchema: Record<string, unknown> = {
  "@context": "https://schema.org",
  "@type": "Article",
  "headline": article.meta_title || article.title,
@@ -412,7 +413,7 @@ export default function ArticleDetail() {
     {/* Schema.org, Article + (optionnel) FAQPage + (optionnel) HowTo. */}
     {/* On émet 3 <script> séparés pour rester lisible côté Search Console. */}
     <>
-    <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(articleSchema) }} />
+    <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(withOrganizationGraph(articleSchema)) }} />
     {faqSchema && (
     <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />
     )}
