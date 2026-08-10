@@ -795,6 +795,19 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, prope
               Voir le profil
             </Link>
             <button
+              onClick={async () => {
+                if (!user) return;
+                const { startConversationAndNavigate } = await import("@/lib/conversation");
+                await startConversationAndNavigate(
+                  { otherUserId: app.sitter_id, context: "sit_application", sitId },
+                  navigate,
+                );
+              }}
+              className="border border-primary text-primary rounded-full px-4 py-2 text-sm hover:bg-primary/10 transition-colors"
+            >
+              Contacter
+            </button>
+            <button
               onClick={() => setConfirmApp(app)}
               className="bg-primary text-primary-foreground rounded-full px-4 py-2 text-sm font-medium hover:bg-primary/90 transition-colors"
             >
