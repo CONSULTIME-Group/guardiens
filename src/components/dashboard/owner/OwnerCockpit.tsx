@@ -89,7 +89,7 @@ const OwnerCockpit = ({
         <div className="relative flex flex-col sm:flex-row sm:items-start sm:justify-between gap-[10px] sm:gap-[22px]">
           <div className="min-w-0 flex-1">
             {/* 1. Avatar dans le flux, avec l'eyebrow, côte à côte */}
-            <div className="flex items-center gap-[12px] min-w-0 pr-[86px] sm:pr-0">
+            <div className="flex items-center gap-[12px] min-w-0 pr-[56px] sm:pr-0">
               <Link
                 to="/owner-profile"
                 aria-label="Modifier mon profil"
