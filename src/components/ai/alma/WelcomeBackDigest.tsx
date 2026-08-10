@@ -170,12 +170,18 @@ export interface WelcomeBackDigestProps {
   forcedVariant?: WelcomeBackVariant;
   /** Signaux injectés (utile pour tests). Si absent, appel RPC. */
   signals?: DigestSignals;
+  /**
+   * Masque les variantes "rien de neuf" quand la personne a déjà quelque
+   * chose à finir (brouillon d'annonce, première publication à faire).
+   */
+  suppressEmptyVariant?: boolean;
   className?: string;
 }
 
 export function WelcomeBackDigest({
   forcedVariant,
   signals: signalsProp,
+  suppressEmptyVariant = false,
   className,
 }: WelcomeBackDigestProps) {
   const { activeRole } = useAuth();
