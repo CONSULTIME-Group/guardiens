@@ -72,8 +72,8 @@ const CommunityPulseBanner = memo(({ userId, className }: Props) => {
   if (metrics.length === 0) return null;
 
   // Le compteur local dit l'instant présent, les deux autres disent l'histoire.
-  // On les sépare pour que personne ne confonde les deux provenances.
-  const localMetrics = metrics.filter((m) => m.key === "local" || m.key === "national");
+  // On les garde dans la même liste : le premier en haut suffit à marquer la différence.
+  const presentMetrics = metrics.filter((m) => m.key === "local" || m.key === "national");
   const historyMetrics = metrics.filter((m) => m.key === "maisons" || m.key === "animaux");
 
   const renderMetric = ({ key, value, label }: Metric) => (
