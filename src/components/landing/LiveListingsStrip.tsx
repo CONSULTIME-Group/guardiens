@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { supabase } from "@/integrations/supabase/client";
+import { useRecentPublishedSits } from "@/hooks/useRecentPublishedSits";
 import fallbackMarrakech from "@/assets/fallback-marrakech.webp";
 
 
@@ -64,33 +65,30 @@ const LiveListingsStrip: React.FC = () => {
     return dateFormatter.format(parsed);
   };
   const [sits, setSits] = useState<LiveSit[]>([]);
-  const [loading, setLoading] = useState(true);
-
+  const [enriching, setEnriching] = useState(true);
+  const { data: sharedSits, isLoading: sitsLoading } = useRecentPublishedSits();
+  const loading = sitsLoading || enriching;
 
   useEffect(() => {
+    if (sitsLoading) return;
     let cancelled = false;
     (async () => {
-      const todayIso = new Date().toISOString().slice(0, 10);
-      const { data: rawSits } = await supabase
-        .from("sits")
-        .select("id, slug, title, start_date, end_date, user_id, property_id, cover_photo_url, city, country, is_urgent")
-        .eq("status", "published")
-        .eq("accepting_applications", true)
-        .or(`end_date.is.null,end_date.gte.${todayIso}`)
-        .order("created_at", { ascending: false })
-        .limit(12);
+      const rawSits = (sharedSits ?? []).slice(0, 12);
 
-      if (cancelled || !rawSits?.length) {
-        if (!cancelled) setLoading(false);
+      if (cancelled || !rawSits.length) {
+        if (!cancelled) {
+          setSits([]);
+          setEnriching(false);
+        }
         return;
       }
 
-      const ownerIds = Array.from(new Set(rawSits.map((s: any) => s.user_id).filter(Boolean)));
-      const propIds = Array.from(new Set(rawSits.map((s: any) => s.property_id).filter(Boolean)));
+      const ownerIds = Array.from(new Set(rawSits.map((s) => s.user_id).filter(Boolean)));
+      const propIds = Array.from(new Set(rawSits.map((s) => s.property_id).filter(Boolean)));
 
       const [{ data: owners }, { data: props }, { data: gallery }] = await Promise.all([
         supabase.from("public_profiles").select("id, city").in("id", ownerIds),
-        supabase.from("properties").select("id, cover_photo_url, photos").in("id", propIds),
+        supabase.from("properties").select("id, cover_photo_url, photos").in("id", propIds as string[]),
         supabase
           .from("owner_gallery")
           .select("user_id, photo_url, position")
@@ -105,9 +103,9 @@ const LiveListingsStrip: React.FC = () => {
         if (!galleryMap.has(g.user_id) && g.photo_url) galleryMap.set(g.user_id, g.photo_url);
       });
 
-      const enriched: LiveSit[] = rawSits.map((s: any) => {
+      const enriched: LiveSit[] = rawSits.map((s) => {
         const o = ownerMap.get(s.user_id);
-        const p = propMap.get(s.property_id);
+        const p = s.property_id ? propMap.get(s.property_id) : undefined;
         return {
           id: s.id,
           slug: s.slug ?? null,
@@ -134,13 +132,13 @@ const LiveListingsStrip: React.FC = () => {
 
       if (!cancelled) {
         setSits(enriched.slice(0, 4));
-        setLoading(false);
+        setEnriching(false);
       }
     })();
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [sharedSits, sitsLoading]);
 
   if (loading) {
     return (
