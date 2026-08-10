@@ -303,11 +303,15 @@ export function WelcomeBackDigest({
 
   // Détermine si on va effectivement rendre quelque chose ; sinon on libère
   // le verrou pour laisser passer les whispers du scheduler.
+  const isEmptyVariant =
+    variant === "owner_empty_positive" || variant === "sitter_empty_positive";
+
   const willRender =
     almaFrequency !== "silent" &&
     !dismissed &&
     !!variant &&
     !!signals &&
+    !(suppressEmptyVariant && isEmptyVariant) &&
     variant !== "owner_first_visit" &&
     variant !== "sitter_first_visit";
 
