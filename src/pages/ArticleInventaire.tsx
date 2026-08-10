@@ -74,12 +74,7 @@ export default function ArticleInventaire() {
       { "@type": "Person", name: "Jérémie", url: "https://guardiens.fr/auteurs/jeremie" },
       { "@type": "Person", name: "Elisa", url: "https://guardiens.fr/auteurs/elisa" },
     ],
-    publisher: {
-      "@type": "Organization",
-      name: "Guardiens",
-      url: "https://guardiens.fr",
-      logo: { "@type": "ImageObject", url: "https://guardiens.fr/logo.png" },
-    },
+    publisher: { "@id": "https://guardiens.fr/#organization" },
     mainEntityOfPage: { "@type": "WebPage", "@id": PAGE_URL },
   };
 

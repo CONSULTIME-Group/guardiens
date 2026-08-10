@@ -48,6 +48,7 @@ export default function HomeJsonLd() {
                 "Petites missions de proximité",
               ],
               slogan: "Proches de chez vous.",
+              foundingDate: "2026-05-13",
               identifier: {
                 "@type": "PropertyValue",
                 propertyID: "SIRET",

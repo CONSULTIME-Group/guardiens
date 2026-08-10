@@ -237,11 +237,7 @@ const Observatoire = () => {
   datePublished: "2026-06-08",
   ...(species?.calcule_le ? { dateModified: species.calcule_le.slice(0, 10) } : {}),
   author: { "@type": "Person", name: "Jérémie Martinot" },
-  publisher: {
-   "@type": "Organization",
-   name: "Guardiens",
-   url: "https://guardiens.fr",
-  },
+  publisher: { "@id": "https://guardiens.fr/#organization" },
   isAccessibleForFree: true,
  };
 
