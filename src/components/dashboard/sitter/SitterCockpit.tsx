@@ -108,43 +108,46 @@ const SitterCockpit = ({
 
 
 
-        <div className="relative flex items-start justify-between gap-[22px] flex-wrap">
-          {/* Bloc gauche : avatar + salutation adressée */}
-          <div className="flex items-center gap-[14px] min-w-0 flex-1 pr-[52px] sm:pr-0">
-            <Link
-              to="/profile"
-              aria-label="Modifier mon profil"
-              className="shrink-0 flex items-center justify-center w-[46px] h-[46px] rounded-full overflow-hidden border border-border ring-offset-background focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
-              style={{ backgroundColor: "hsl(var(--primary) / 0.12)" }}
-            >
-              {avatarUrl ? (
-                <img src={avatarUrl} alt="" className="w-full h-full object-cover" loading="lazy" />
-              ) : (
-                <span className="font-heading font-semibold text-lg text-foreground/80">
-                  {initial}
-                </span>
-              )}
-            </Link>
-
-            <div className="min-w-0">
+        <div className="relative flex flex-col sm:flex-row sm:items-start sm:justify-between gap-[10px] sm:gap-[22px]">
+          <div className="min-w-0 flex-1">
+            {/* 1. Avatar dans le flux, avec l'eyebrow, côte à côte */}
+            <div className="flex items-center gap-[12px] min-w-0 pr-[56px] sm:pr-0">
+              <Link
+                to="/profile"
+                aria-label="Modifier mon profil"
+                className="shrink-0 flex items-center justify-center w-[48px] h-[48px] rounded-full overflow-hidden border border-border ring-offset-background focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
+                style={{ backgroundColor: "hsl(var(--primary) / 0.12)" }}
+              >
+                {avatarUrl ? (
+                  <img src={avatarUrl} alt="" className="w-full h-full object-cover" loading="lazy" />
+                ) : (
+                  <span className="font-heading font-semibold text-lg text-foreground/80">
+                    {initial}
+                  </span>
+                )}
+              </Link>
               <p
-                className="font-heading italic text-secondary"
+                className="font-heading italic text-secondary min-w-0 truncate"
                 style={{ fontSize: "13px", lineHeight: 1.2 }}
               >
                 Espace gardien
               </p>
-              <CockpitGreeting greeting={greeting} displayName={displayName} className="mt-[8px]" />
-              <p
-                className="font-sans text-muted-foreground mt-[8px]"
-                style={{ fontSize: "13px", lineHeight: 1.3 }}
-              >
-                {ancrage}
-              </p>
             </div>
+
+            {/* 2. Salutation, pleine largeur */}
+            <CockpitGreeting greeting={greeting} displayName={displayName} className="mt-[10px]" />
+
+            {/* 3. Horodatage */}
+            <p
+              className="font-sans text-muted-foreground mt-[6px]"
+              style={{ fontSize: "13px", lineHeight: 1.3 }}
+            >
+              {ancrage}
+            </p>
           </div>
 
-          {/* Bloc droit : utilitaires en pilules + toggle disponibilité */}
-          <div className="flex items-center gap-[8px] shrink-0 flex-wrap">
+          {/* Rangée d'actions, sous le texte en mobile, à droite au dessus de 768 px */}
+          <div className="flex items-center gap-[8px] sm:shrink-0 flex-wrap">
             <Link
               to="/profile"
               aria-label="Modifier mon profil"
