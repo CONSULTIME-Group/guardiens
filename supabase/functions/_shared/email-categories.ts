@@ -77,6 +77,7 @@ const TRANSACTIONAL: ReadonlyArray<string> = [
   // Interne / opérationnel (destinataire = équipe, pas un membre)
   'admin-delivery-alert',
   'admin-signals-digest',
+  'content-quality-digest',
 ]
 
 const PRODUCT: ReadonlyArray<string> = [
