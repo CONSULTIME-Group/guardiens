@@ -62,7 +62,7 @@ export async function recordDeliveryFailure(supabase: any, input: DeliveryFailur
         ...metadata,
         template_name: input.templateName,
         recipient_email: input.recipientEmail ?? null,
-        error: input.errorMessage.slice(0, 2000),
+        error: describeError(input.errorMessage).slice(0, 2000),
       },
     });
     // 23505 = un signal non resolu existe deja pour cette entite, c'est le
