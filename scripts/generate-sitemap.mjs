@@ -457,6 +457,29 @@ ${dedupedEntries.join("\n")}
   fs.writeFileSync(outPath, xml, "utf-8");
   saveCache(cache);
 
+  // Synchronisation des compteurs géographiques annoncés dans public/llms.txt.
+  // Les valeurs sont calculées depuis le sitemap qui vient d'être écrit, jamais
+  // saisies en dur : elles suivent automatiquement l'ajout de villes ou de
+  // départements.
+  const locs = Array.from(seen);
+  const cityCount = locs.filter((l) => /\/house-sitting\/[^/]+$/.test(l)).length;
+  const deptCount = locs.filter((l) => /\/departement\/[^/]+$/.test(l)).length;
+  const llmsPath = path.resolve(__dirname, "../public/llms.txt");
+  if (fs.existsSync(llmsPath)) {
+    let llms = fs.readFileSync(llmsPath, "utf-8");
+    llms = llms
+      .replace(
+        /^(- \[House-sitting par ville\]\(\/house-sitting\): .*?)\d+ villes couvertes\.$/m,
+        `$1${cityCount} villes couvertes.`,
+      )
+      .replace(
+        /^(- \[House-sitting par département\]\(\/departement\): .*?)\d+ départements couverts\.$/m,
+        `$1${deptCount} départements couverts.`,
+      );
+    fs.writeFileSync(llmsPath, llms, "utf-8");
+    console.log(`   llms.txt: ${cityCount} villes, ${deptCount} départements`);
+  }
+
   console.log(`\n✅ Sitemap generated: ${entries.length} URLs → ${outPath}`);
   console.log(`   Cache: ${CACHE_PATH}${FORCE ? " (forced)" : ""}`);
 }

@@ -1,12 +1,12 @@
 {
   "sources": {
     "articles": {
-      "head": "2026-08-04T11:55:09.199538+00:00",
-      "fetchedAt": "2026-08-05T06:09:46.961Z"
+      "head": "2026-08-09T10:55:03.343366+00:00",
+      "fetchedAt": "2026-08-10T07:35:13.339Z"
     },
     "city_guides": {
-      "head": "2026-08-07T04:42:24.567339+00:00",
-      "fetchedAt": "2026-08-07T10:56:11.300Z"
+      "head": "2026-08-10T07:21:56.781215+00:00",
+      "fetchedAt": "2026-08-10T07:35:13.311Z"
     },
     "pro_profiles": {
       "head": "2026-08-05T06:36:37.068476+00:00",
@@ -21,8 +21,8 @@
       "fetchedAt": "2026-08-05T06:09:46.976Z"
     },
     "public_sits": {
-      "head": "2026-08-08T06:35:06.84159+00:00",
-      "fetchedAt": "2026-08-09T05:02:58.948Z"
+      "head": "2026-08-10T07:03:25.497911+00:00",
+      "fetchedAt": "2026-08-10T07:35:13.335Z"
     },
     "breed_profiles": {
       "head": "2026-07-23T15:42:40.997631+00:00",
@@ -284,6 +284,12 @@
       {
         "loc": "/actualites/house-sitting-ete-aura-guide",
         "lastmod": "2026-08-03",
+        "changefreq": "monthly",
+        "priority": "0.6"
+      },
+      {
+        "loc": "/actualites/voyager-gratuitement-france-house-sitting",
+        "lastmod": "2026-08-09",
         "changefreq": "monthly",
         "priority": "0.6"
       },
@@ -928,6 +934,12 @@
       {
         "loc": "/guides/sarry",
         "lastmod": "2026-08-07",
+        "changefreq": "weekly",
+        "priority": "0.7"
+      },
+      {
+        "loc": "/guides/cezy",
+        "lastmod": "2026-08-10",
         "changefreq": "weekly",
         "priority": "0.7"
       }
@@ -1875,8 +1887,8 @@
     ],
     "public_sits": [
       {
-        "loc": "/annonces/garde-1-chien-et-2-chats-dans-les-vosges-st-die-des-vosges-1a1eaf",
-        "lastmod": "2026-08-02",
+        "loc": "/annonces/garde-de-trois-chiens-yonne-89-vers-joigny-cezy-768cd8",
+        "lastmod": "2026-08-10",
         "changefreq": "weekly",
         "priority": "0.7"
       },
