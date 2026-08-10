@@ -40,6 +40,13 @@ const FallbackSpinner = () => (
     <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
   </div>
 );
+
+const Landing = lazy(() => import("./pages/Landing"));
+const Login = lazy(() => import("./pages/Login"));
+const Register = lazy(() => import("./pages/Register"));
+const NotFound = lazy(() => import("./pages/NotFound"));
+const AuthConfirm = lazy(() => import("./pages/AuthConfirm"));
+
 // Dashboard est lazy : il tire OngoingSitHero, MonAnnonceCard et tout le
 // graphe propriétaire (~40Ko de chunks). Inutile sur /login, /landing, etc.
 const Dashboard = lazy(() => import("./pages/Dashboard"));
@@ -50,6 +57,7 @@ const DashboardRouteShell = () => (
     </AppLayout>
   </ProtectedRoute>
 );
+
 const AdminLayout = lazy(() => import("@/components/admin/AdminLayout").then((m) => ({ default: m.AdminLayout })));
 const ForgotPassword = lazy(() => import("./pages/ForgotPassword"));
 const ResetPassword = lazy(() => import("./pages/ResetPassword"));
