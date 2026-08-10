@@ -9,6 +9,7 @@ import { buildOgImageUrl } from "@/lib/ogImage";
 import ShareLink from "@/components/share/ShareLink";
 import PageMeta from "@/components/PageMeta";
 import { useAlmaCulturalFact } from "@/hooks/useAlmaCulturalFact";
+import { withOrganizationGraph } from "@/lib/seo/organizationNode";
 
 interface BreedProfile {
   species: string;
@@ -105,7 +106,7 @@ const BreedPage = () => {
     `Tout pour bien garder un ${speciesLabel} ${breedCap} : tempérament, besoins, conseils gardien.`;
   const canonical = `https://guardiens.fr/races/${slug}`;
 
-  const jsonLd = {
+  const jsonLd: Record<string, unknown> = {
     "@context": "https://schema.org",
     "@type": "Article",
     headline: title,
@@ -186,7 +187,7 @@ const BreedPage = () => {
         canonical={canonical}
         image={ogImage}
         type="article"
-        jsonLd={[jsonLd, breadcrumb, faqSchema]}
+        jsonLd={[withOrganizationGraph(jsonLd), breadcrumb, faqSchema]}
       />
 
       <div className="min-w-0 max-w-3xl mx-auto px-4 py-8 md:py-12">
