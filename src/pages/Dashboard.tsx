@@ -15,6 +15,10 @@ import { supabase } from "@/integrations/supabase/client";
 
 const Dashboard = () => {
   const { activeRole, user } = useAuth();
+  const { data: ownerPrimaryAction } = useOwnerPrimaryAction(
+    activeRole === "owner" ? user?.id : undefined,
+  );
+  const hasPendingAction = !!ownerPrimaryAction?.action;
   const { toast } = useToast();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
