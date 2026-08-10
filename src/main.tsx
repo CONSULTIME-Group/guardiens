@@ -39,8 +39,8 @@ if (!container) {
 
 /**
  * Langue cible avant le premier rendu : lien explicite, puis choix mémorisé,
- * puis français. La logique de détection d'i18next n'est pas modifiée, on se
- * contente de savoir quel dictionnaire précharger.
+ * puis détection navigateur, puis français. La logique de détection d'i18next
+ * n'est pas modifiée, on se contente de savoir quel dictionnaire précharger.
  */
 const resolveInitialLang = (): string => {
   try {
@@ -49,7 +49,23 @@ const resolveInitialLang = (): string => {
   } catch {
     // URL illisible : on continue sur le choix mémorisé.
   }
-  return getStoredLang() ?? "fr";
+
+  const stored = getStoredLang();
+  if (stored) return stored;
+
+  try {
+    if (typeof navigator !== "undefined") {
+      const candidate = navigator.language || (navigator.languages && navigator.languages[0]);
+      if (candidate) {
+        const code = candidate.split("-")[0].toLowerCase().slice(0, 2);
+        if ((SUPPORTED_LANGS as readonly string[]).includes(code)) return code;
+      }
+    }
+  } catch {
+    // Détection navigateur indisponible : repli sur le français.
+  }
+
+  return "fr";
 };
 
 const renderApp = () => {
