@@ -8425,6 +8425,13 @@ export type Database = {
         Args: { _user_id: string }
         Returns: undefined
       }
+      recalc_seo_city_page_counts: {
+        Args: never
+        Returns: {
+          pages_changed: number
+          pages_indexed: number
+        }[]
+      }
       recalculate_cancellations: {
         Args: { p_role: string; p_user_id: string }
         Returns: undefined
