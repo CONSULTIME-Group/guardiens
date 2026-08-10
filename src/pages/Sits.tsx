@@ -1510,8 +1510,8 @@ const SitCard = ({
               {isOwner && sit.pendingApplicationCount > 0 && (
                 <span
                   className="min-w-[20px] h-5 rounded-full bg-destructive text-destructive-foreground text-[11px] font-bold inline-flex items-center justify-center px-1.5"
-                  aria-label={`${sit.pendingApplicationCount} candidature${sit.pendingApplicationCount > 1 ? "s" : ""} en attente`}
-                  title={`${sit.pendingApplicationCount} candidature${sit.pendingApplicationCount > 1 ? "s" : ""} en attente`}
+                  aria-label={`${sit.pendingApplicationCount} candidature${sit.pendingApplicationCount > 1 ? "s" : ""} en attente de décision`}
+                  title={`${sit.pendingApplicationCount} candidature${sit.pendingApplicationCount > 1 ? "s" : ""} en attente de décision`}
                 >
                   {sit.pendingApplicationCount}
                 </span>
