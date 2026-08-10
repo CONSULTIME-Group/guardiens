@@ -209,8 +209,11 @@ En français. Maximum 5 lieux. Privilégie les lieux réels et connus.`;
     );
   } catch (error) {
     console.error("City guide generation error:", error);
-    return new Response(JSON.stringify({ error: String(error) }), {
-      status: 500,
+    const isGateway = error instanceof AiGatewayError;
+    const status = isGateway ? error.status : 500;
+    const message = error instanceof Error ? error.message : String(error);
+    return new Response(JSON.stringify({ error: message, code: isGateway ? "AI_GATEWAY" : "INTERNAL" }), {
+      status,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   }
