@@ -763,7 +763,7 @@ const Sits = () => {
       const pendingApps = activeSits.reduce((sum, s) => sum + (s.pendingApplicationCount || 0), 0);
       const inProgress = activeSits.filter((s) => (s.effectiveStatus || s.status) === "in_progress").length;
       const parts: string[] = [];
-      if (pendingApps > 0) parts.push(`${pendingApps} candidature${pendingApps > 1 ? "s" : ""} en attente`);
+      if (pendingApps > 0) parts.push(`${pendingApps} candidature${pendingApps > 1 ? "s" : ""} en attente de décision`);
       if (inProgress > 0) parts.push(`${inProgress} garde${inProgress > 1 ? "s" : ""} en cours`);
       else if (ownerTabCounts.active > 0) parts.push(`${ownerTabCounts.active} annonce${ownerTabCounts.active > 1 ? "s" : ""} active${ownerTabCounts.active > 1 ? "s" : ""}`);
       return parts.length > 0 ? parts.join(" · ") : "Gérez vos annonces et suivez vos gardes.";
