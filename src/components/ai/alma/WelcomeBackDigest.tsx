@@ -337,7 +337,7 @@ export function WelcomeBackDigest({
         copy.actionLabel && copy.actionHref && copy.actionId ? (
           <Button
             size="sm"
-            variant="secondary"
+            variant="outline"
             onClick={() => handleAction(copy.actionId!, copy.actionHref!)}
           >
             {copy.actionLabel}
