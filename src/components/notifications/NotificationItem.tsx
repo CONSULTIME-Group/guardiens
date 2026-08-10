@@ -22,6 +22,7 @@ const typeTone: Record<string, "success" | "info" | "warning" | "destructive" | 
   sit_started: "success",
   sit_completed: "success",
   sit_cancelled: "destructive",
+  sit_unconfirmed: "warning",
   review_published: "info",
   new_message: "info",
   application_accepted: "success",
