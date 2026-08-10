@@ -27,16 +27,12 @@ import { sanitizeRedirect } from "@/lib/safeRedirect";
 import { Button } from "@/components/ui/button";
 
 // ──── Critical routes (eager) ────
-import Landing from "./pages/Landing";
-import Login from "./pages/Login";
-import Register from "./pages/Register";
-import NotFound from "./pages/NotFound";
 import LangUrlSync from "./components/LangUrlSync";
-import AuthConfirm from "./pages/AuthConfirm";
 import { AppLayout } from "@/components/layout/AppLayout";
 import PublicHeader from "@/components/layout/PublicHeader";
 import PublicFooter from "@/components/layout/PublicFooter";
 import { useAffinityThresholdsBootstrap } from "@/hooks/useAffinityThresholdsBootstrap";
+
 
 // ──── Lazy-loaded routes ────
 const FallbackSpinner = () => (
