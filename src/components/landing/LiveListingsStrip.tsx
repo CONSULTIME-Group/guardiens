@@ -1,9 +1,7 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { supabase } from "@/integrations/supabase/client";
-import { format } from "date-fns";
-import { fr, enUS, es, it, de } from "date-fns/locale";
 import fallbackMarrakech from "@/assets/fallback-marrakech.webp";
 
 
@@ -23,10 +21,8 @@ interface LiveSit {
   user_id: string;
 }
 
-const LOCALE_MAP: Record<string, Locale> = { fr, en: enUS, es, it, de };
-type Locale = typeof fr;
-const fmt = (d: string | null, locale: Locale) =>
-  d ? format(new Date(d), "d MMM", { locale }) : "";
+
+
 
 const fallbackImageFor = (city: string | null, country: string | null): string | null => {
   const c = (city || "").toUpperCase();
@@ -52,7 +48,21 @@ const isHighlighted = (s: LiveSit) => s.is_urgent && isForeign(s.country);
  */
 const LiveListingsStrip: React.FC = () => {
   const { t, i18n } = useTranslation();
-  const dateLocale: Locale = LOCALE_MAP[(i18n.language || "fr").slice(0, 2)] ?? fr;
+  // Formateur natif Intl, mémorisé sur la langue active : pas de dépendance date-fns sur la landing.
+  const dateFormatter = useMemo(
+    () =>
+      new Intl.DateTimeFormat((i18n.language || "fr").slice(0, 2), {
+        day: "numeric",
+        month: "short",
+      }),
+    [i18n.language]
+  );
+  const fmt = (d: string | null) => {
+    if (!d) return "";
+    const parsed = new Date(d);
+    if (Number.isNaN(parsed.getTime())) return "";
+    return dateFormatter.format(parsed);
+  };
   const [sits, setSits] = useState<LiveSit[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -205,7 +215,7 @@ const LiveListingsStrip: React.FC = () => {
   };
 
   const fmtDates = (s: LiveSit) =>
-    s.start_date && s.end_date ? `${fmt(s.start_date, dateLocale)} – ${fmt(s.end_date, dateLocale)}` : null;
+    s.start_date && s.end_date ? `${fmt(s.start_date)} - ${fmt(s.end_date)}` : null;
 
   const featured = sits.find(isHighlighted);
   const rest = featured ? sits.filter((s) => s.id !== featured.id).slice(0, 1) : sits;
