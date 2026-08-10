@@ -1,6 +1,7 @@
 import { useRef } from "react";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import { safeLocale } from "@/lib/lang";
 import { useInventaireCounts } from "@/hooks/useInventaireCounts";
 import { useImpressionOnce } from "@/hooks/useImpressionOnce";
 import { trackEvent } from "@/lib/analytics";
@@ -19,7 +20,7 @@ export default function InventoryStrip() {
   });
 
   const fmt = (n: number) =>
-    new Intl.NumberFormat(i18n.language || "fr-FR").format(n).replace(/\u0020/g, "\u202F");
+    new Intl.NumberFormat(safeLocale(i18n.language)).format(n).replace(/\u0020/g, "\u202F");
 
   const cards = [
     { key: "cities", value: data?.cities_total ?? 0, label: t("landing.inventory.cities_label") },
@@ -42,7 +43,7 @@ export default function InventoryStrip() {
         <p className="mt-3 italic text-muted-foreground">{t("landing.inventory.subtitle")}</p>
         <p className="mt-2 text-xs text-foreground/50">
           {t("landing.inventory.updated_on", {
-            date: new Date().toLocaleDateString(i18n.language || "fr-FR", { day: "numeric", month: "long", year: "numeric" }),
+            date: new Date().toLocaleDateString(safeLocale(i18n.language), { day: "numeric", month: "long", year: "numeric" }),
           })}
         </p>
 

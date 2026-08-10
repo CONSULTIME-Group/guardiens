@@ -1,6 +1,7 @@
 import { useRef } from "react";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import { safeLocale } from "@/lib/lang";
 import { Stethoscope, Scissors, Truck } from "lucide-react";
 import { useInventaireCounts } from "@/hooks/useInventaireCounts";
 import { useImpressionOnce } from "@/hooks/useImpressionOnce";
@@ -20,7 +21,7 @@ export default function ProsShowcase() {
   if (isLoading || !data?.pros_total) return null;
 
   const fmt = (n: number) =>
-    new Intl.NumberFormat(i18n.language || "fr-FR").format(n).replace(/\u0020/g, "\u202F");
+    new Intl.NumberFormat(safeLocale(i18n.language)).format(n).replace(/\u0020/g, "\u202F");
 
   // Mapping card LP → clé db pro_profiles.category (singulier).
   const CARD_TO_DB_CATEGORY: Record<string, string> = {
