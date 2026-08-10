@@ -129,6 +129,7 @@ const MesCandidatures = lazy(() => import("./pages/MesCandidatures"));
 
 const PreviewOngoingSitHero = lazy(() => import("./pages/dev/PreviewOngoingSitHero"));
 const PreviewMissionCards = lazy(() => import("./pages/dev/PreviewMissionCards"));
+const PreviewCockpits = lazy(() => import("./pages/dev/PreviewCockpits"));
 const Unsubscribe = lazy(() => import("./pages/Unsubscribe"));
 const EmailClickRedirect = lazy(() => import("./pages/EmailClickRedirect"));
 const EmailDeepLink = lazy(() => import("./pages/EmailDeepLink"));
@@ -593,6 +594,7 @@ const AppRoutes = () => {
       
       <Route path="/dev/preview/ongoing-sit-hero" element={<PreviewOngoingSitHero />} />
       <Route path="/dev/preview/mission-cards" element={<PreviewMissionCards />} />
+      <Route path="/dev/preview/cockpits" element={<PreviewCockpits />} />
       <Route path="/unsubscribe" element={<Unsubscribe />} />
       <Route path="/go" element={<EmailClickRedirect />} />
       <Route path="/acces" element={<EmailDeepLink />} />
