@@ -21,10 +21,8 @@ interface LiveSit {
   user_id: string;
 }
 
-const LOCALE_MAP: Record<string, Locale> = { fr, en: enUS, es, it, de };
-type Locale = typeof fr;
-const fmt = (d: string | null, locale: Locale) =>
-  d ? format(new Date(d), "d MMM", { locale }) : "";
+
+
 
 const fallbackImageFor = (city: string | null, country: string | null): string | null => {
   const c = (city || "").toUpperCase();
