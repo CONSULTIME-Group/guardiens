@@ -375,15 +375,7 @@ export default function ArticleDetail() {
    }));
    return persons.length === 1 ? persons[0] : persons;
  })(),
- "publisher": {
- "@type": "Organization",
- "name": "Guardiens",
- "url": "https://guardiens.fr",
- "logo": {
- "@type": "ImageObject",
- "url": "https://guardiens.fr/logo.png"
- }
- },
+ "publisher": { "@id": "https://guardiens.fr/#organization" },
  "mainEntityOfPage": {
  "@type": "WebPage",
  "@id": `https://guardiens.fr/actualites/${article.slug}`

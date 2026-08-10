@@ -113,11 +113,7 @@ const BreedPage = () => {
     url: canonical,
     inLanguage: "fr-FR",
     about: { "@type": "Thing", name: breedCap },
-    publisher: {
-      "@type": "Organization",
-      name: "Guardiens",
-      url: "https://guardiens.fr",
-    },
+    publisher: { "@id": "https://guardiens.fr/#organization" },
   };
   const breadcrumb = {
     "@context": "https://schema.org",

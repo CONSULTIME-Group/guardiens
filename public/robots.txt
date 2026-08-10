@@ -66,6 +66,9 @@ Allow: /
 User-agent: Amazonbot
 Allow: /
 
+User-agent: CCBot
+Allow: /
+
 User-agent: Meta-ExternalAgent
 Allow: /
 
@@ -75,9 +78,6 @@ Allow: /
 # ------------------------------------------------------------
 # Scrapers sans valeur SEO/GEO — Disallow
 # ------------------------------------------------------------
-User-agent: CCBot
-Disallow: /
-
 User-agent: ByteSpider
 Disallow: /
 

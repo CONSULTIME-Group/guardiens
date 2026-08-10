@@ -118,11 +118,11 @@ function buildRobotsTxt({ siteUrl, privatePaths, noindexFromStatic }) {
     "Applebot",
     "Applebot-Extended",
     "Amazonbot",
+    "CCBot",
     "Meta-ExternalAgent",
     "FacebookBot",
   ];
   const scrapersBlocked = [
-    "CCBot",
     "ByteSpider",
     "cohere-ai",
   ];
