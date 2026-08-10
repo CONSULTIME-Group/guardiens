@@ -58,3 +58,21 @@ export function withLang(path: string, lang: string | null | undefined): string 
   params.set("lang", lang);
   return `${pathname}?${params.toString()}${hash ? `#${hash}` : ""}`;
 }
+
+/**
+ * Locale BCP 47 sûre pour Intl.
+ *
+ * Certains environnements (navigateurs headless, systèmes POSIX) exposent des
+ * valeurs invalides comme "en-US@posix", qui font lever une RangeError à
+ * toLocaleDateString ou Intl.NumberFormat. On nettoie l'extension POSIX, on
+ * valide, puis on retombe sur le français.
+ */
+export function safeLocale(value?: string | null, fallback = "fr-FR"): string {
+  const raw = (value ?? "").split("@")[0].trim();
+  if (!raw) return fallback;
+  try {
+    return Intl.DateTimeFormat.supportedLocalesOf([raw]).length ? raw : fallback;
+  } catch {
+    return fallback;
+  }
+}
