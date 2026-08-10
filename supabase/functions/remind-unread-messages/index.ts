@@ -193,7 +193,6 @@ Deno.serve(async (req) => {
         // boucle reste invisible.
         await recordDeliveryFailure(supabase, {
           templateName: "unread-messages-reminder",
-          category: "transactional",
           recipientEmail: recipient.email,
           recipientId,
           conversationId: conv.id,
