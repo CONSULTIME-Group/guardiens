@@ -187,6 +187,7 @@ export const TEMPLATES: Record<string, TemplateEntry> = {
   'unsubscribe-link': unsubscribeLink,
   'account-deleted': accountDeleted,
   'owner-pending-application-nudge': ownerPendingApplicationNudge,
+  'owner-sit-unconfirmed': ownerSitUnconfirmed,
 }
 
 
