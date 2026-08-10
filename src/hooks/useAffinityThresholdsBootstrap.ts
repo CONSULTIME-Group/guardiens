@@ -1,6 +1,7 @@
 /**
- * Charge une fois les seuils de matching affinité (feature_flags) et les
- * pousse dans le module `src/lib/affinityScore.ts` via `setAffinityThresholds`.
+ * Charge les seuils de matching affinité (feature_flags) uniquement pour un
+ * utilisateur authentifié, puis les pousse dans le module
+ * `src/lib/affinityScore.ts` via `setAffinityThresholds`.
  *
  * À monter au niveau racine (App.tsx). Silencieux en cas d'erreur réseau :
  * on garde les valeurs par défaut codées en dur dans `affinityScore.ts`,
@@ -8,13 +9,18 @@
  * Défauts réels : 3 critères communs, 35 % de score minimum.
  */
 import { useEffect } from "react";
+import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { setAffinityThresholds } from "@/lib/affinityScore";
 
 const KEYS = ["affinity_min_common_criteria", "affinity_min_score_percent"] as const;
 
 export function useAffinityThresholdsBootstrap() {
+  const { user } = useAuth();
+
   useEffect(() => {
+    if (!user?.id) return;
+
     let cancelled = false;
     (async () => {
       const { data, error } = await supabase
@@ -31,5 +37,5 @@ export function useAffinityThresholdsBootstrap() {
       setAffinityThresholds(patch);
     })();
     return () => { cancelled = true; };
-  }, []);
+  }, [user?.id]);
 }
