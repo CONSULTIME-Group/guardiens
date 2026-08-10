@@ -10,6 +10,7 @@
  *    pas de bouton Publier : le primaire vit dans la star).
  */
 import { Link } from "react-router-dom";
+import { CockpitGreeting } from "@/components/dashboard/CockpitGreeting";
 import { Eye } from "lucide-react";
 import ownerHome from "@/assets/illustrations/owner-cockpit-home.webp";
 
