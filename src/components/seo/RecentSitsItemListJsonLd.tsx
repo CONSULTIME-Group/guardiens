@@ -1,44 +1,15 @@
-import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { useRecentPublishedSits } from "@/hooks/useRecentPublishedSits";
 
 // Schema.org ItemList des annonces récentes publiées (max 8).
 // Aligné avec les filtres qualité du sitemap (titre ≥ 10 car, daily_routine ≥ 100 car).
 // Rendu inline dans le corps du composant (react-helmet-async est inerte ici).
-interface SitRow {
-  id: string;
-  slug: string | null;
-  title: string;
-  city: string | null;
-  start_date: string | null;
-  end_date: string | null;
-}
-
 const RecentSitsItemListJsonLd = ({ limit = 8 }: { limit?: number }) => {
-  const [sits, setSits] = useState<SitRow[]>([]);
+  const { data } = useRecentPublishedSits();
 
-  useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      const { data } = await supabase
-        .from("sits")
-        .select("id, slug, title, city, start_date, end_date, daily_routine, created_at")
-        .eq("status", "published")
-        .eq("accepting_applications", true)
-        .order("created_at", { ascending: false })
-        .limit(limit * 3);
-      if (cancelled || !data) return;
-      const filtered = (data as any[])
-        .filter((s) => typeof s.title === "string" && s.title.trim().length >= 10)
-        .filter((s) => ((s.daily_routine || "").length) >= 100)
-        .slice(0, limit)
-        .map((s) => ({
-          id: s.id, slug: s.slug ?? null, title: s.title, city: s.city,
-          start_date: s.start_date, end_date: s.end_date,
-        }));
-      setSits(filtered);
-    })();
-    return () => { cancelled = true; };
-  }, [limit]);
+  const sits = (data ?? [])
+    .filter((s) => typeof s.title === "string" && s.title.trim().length >= 10)
+    .filter((s) => (s.daily_routine || "").length >= 100)
+    .slice(0, limit);
 
   if (sits.length === 0) return null;
 
