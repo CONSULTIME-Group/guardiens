@@ -57,7 +57,7 @@ const CommunityPulseBanner = memo(({ userId, className }: Props) => {
     metrics.push({
       key: "maisons",
       value: pulse.maisonsGardees,
-      label: "maisons gardées",
+      label: "maisons gardées depuis le début de l'aventure",
     });
   }
   // (c) Animaux (inclut l'historique fondateurs 2021-2026)
@@ -65,7 +65,7 @@ const CommunityPulseBanner = memo(({ userId, className }: Props) => {
     metrics.push({
       key: "animaux",
       value: pulse.animauxAccompagnes,
-      label: "animaux accompagnés",
+      label: "animaux accompagnés depuis le début de l'aventure",
     });
   }
 
