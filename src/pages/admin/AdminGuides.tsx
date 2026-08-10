@@ -122,7 +122,18 @@ const AdminGuides = () => {
       const { data, error } = await supabase.functions.invoke("generate-city-guide", {
         body: { city, postal_code: postalCode, department },
       });
-      if (error) throw error;
+      if (error) {
+        const res = (error as { context?: Response }).context;
+        let msg = error.message;
+        try {
+          const body = await res?.clone().json();
+          if (body?.error) msg = body.error;
+        } catch {
+          // corps illisible, on garde le message par défaut
+        }
+        toast.error(msg);
+        return;
+      }
       toast.success(`Guide généré pour ${data.city} (${data.places_count || 0} lieux)`);
       setCity("");
       setPostalCode("");
