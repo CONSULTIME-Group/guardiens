@@ -7,6 +7,7 @@ import { ArrowRight } from "lucide-react";
 import { useInventaireCounts } from "@/hooks/useInventaireCounts";
 import { useSpeciesBreakdown, type BreakdownRow } from "@/hooks/useSpeciesBreakdown";
 import { BADGE_DEFINITIONS } from "@/components/badges/badge-definitions";
+import { ORGANIZATION_NODE } from "@/lib/seo/organizationNode";
 
 /** Nombre de badges dérivé du catalogue, jamais recopié à la main. */
 const BADGE_COUNT = Object.keys(BADGE_DEFINITIONS).length;
@@ -204,17 +205,7 @@ const Observatoire = () => {
  inLanguage: "fr",
  };
 
- const orgSchema = {
- "@context": "https://schema.org",
- "@type": "Organization",
- name: "Guardiens",
- url: "https://guardiens.fr",
-    description:
-      "Plateforme française de mise en relation entre propriétaires d'animaux et gardiens pour la garde à domicile, sans commission.",
- founder: { "@type": "Person", name: "Jérémie Martinot" },
- foundingDate: "2021",
- areaServed: { "@type": "Country", name: "France" },
- };
+ const orgSchema = { "@context": "https://schema.org", ...ORGANIZATION_NODE };
 
  const breadcrumbSchema = {
   "@context": "https://schema.org",
