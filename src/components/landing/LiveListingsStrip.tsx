@@ -48,7 +48,21 @@ const isHighlighted = (s: LiveSit) => s.is_urgent && isForeign(s.country);
  */
 const LiveListingsStrip: React.FC = () => {
   const { t, i18n } = useTranslation();
-  const dateLocale: Locale = LOCALE_MAP[(i18n.language || "fr").slice(0, 2)] ?? fr;
+  // Formateur natif Intl, mémorisé sur la langue active : pas de dépendance date-fns sur la landing.
+  const dateFormatter = useMemo(
+    () =>
+      new Intl.DateTimeFormat((i18n.language || "fr").slice(0, 2), {
+        day: "numeric",
+        month: "short",
+      }),
+    [i18n.language]
+  );
+  const fmt = (d: string | null) => {
+    if (!d) return "";
+    const parsed = new Date(d);
+    if (Number.isNaN(parsed.getTime())) return "";
+    return dateFormatter.format(parsed);
+  };
   const [sits, setSits] = useState<LiveSit[]>([]);
   const [loading, setLoading] = useState(true);
 
