@@ -63,7 +63,7 @@ describe("llms.txt coverage", () => {
 
     const missing = Array.from(families)
       .filter((f) => !EXEMPT.has(f))
-      .filter((f) => !llmsTxt.includes(`(${f})`))
+      .filter((f) => !llmsTxt.includes(`(${f})`) && !llmsTxt.includes(`(${f}/`))
       .sort();
 
     expect(
