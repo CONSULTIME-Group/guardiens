@@ -71,8 +71,12 @@
     <link rel="preload" href="/fonts/playfair-latin.woff2" as="font" type="font/woff2" crossorigin />
     <!-- Préchargement du hero de la landing avant l'exécution du JS : la
          landing est l'entrée principale du site et le hero est l'élément LCP.
-         Le léger surcoût sur les autres routes est acceptable. -->
-    <link rel="preload" as="image" type="image/avif" imagesrcset="/hero-landing-640.avif 640w, /hero-landing-960.avif 960w, /hero-landing-1280.avif 1280w, /hero-landing-1920.avif 1920w" imagesizes="100vw" fetchpriority="high" />
+         Le léger surcoût sur les autres routes est acceptable.
+         L'attribut href sert de repli pour les navigateurs qui ignorent
+         imagesrcset sur un link preload (Safari iOS antérieur à 17.2) : les
+         navigateurs modernes utilisent imagesrcset, les anciens href, sans
+         double téléchargement. -->
+    <link rel="preload" as="image" type="image/avif" href="/hero-landing-960.avif" imagesrcset="/hero-landing-640.avif 640w, /hero-landing-960.avif 960w, /hero-landing-1280.avif 1280w, /hero-landing-1920.avif 1920w" imagesizes="100vw" fetchpriority="high" />
 
     <link rel="preconnect" href="https://erhccyqevdyevpyctsjj.supabase.co" />
     <link rel="preconnect" href="https://erhccyqevdyevpyctsjj.supabase.co" crossorigin />
