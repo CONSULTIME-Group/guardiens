@@ -7,7 +7,7 @@ const AlmaDock = lazy(() =>
 );
 import { AlmaProvider } from "@/contexts/AlmaContext";
 import { useAuth } from "@/contexts/AuthContext";
-import OnboardingModal from "@/components/onboarding/OnboardingModal";
+const OnboardingModal = lazy(() => import("@/components/onboarding/OnboardingModal"));
 import OnboardingGate from "@/components/onboarding/OnboardingGate";
 // DuplicateAccountGuard est monté globalement dans App.tsx pour s'exécuter
 // même quand l'utilisateur retombe sur une page publique (Landing, FAQ…)
@@ -87,17 +87,19 @@ export const AppLayout = ({ children }: { children?: ReactNode }) => {
       </ShellMain>
 
       {showOnboarding && (
-        <OnboardingModal
-          open
-          onClose={() => {
-            setDismissed(true);
-            setSearchParams({});
-            void Promise.resolve(refreshProfile()).catch(() => {});
-          }}
-          onMinimalComplete={() => {
-            void Promise.resolve(refreshProfile()).catch(() => {});
-          }}
-        />
+        <Suspense fallback={null}>
+          <OnboardingModal
+            open
+            onClose={() => {
+              setDismissed(true);
+              setSearchParams({});
+              void Promise.resolve(refreshProfile()).catch(() => {});
+            }}
+            onMinimalComplete={() => {
+              void Promise.resolve(refreshProfile()).catch(() => {});
+            }}
+          />
+        </Suspense>
       )}
       <Suspense fallback={null}>
         <AlmaDock />
