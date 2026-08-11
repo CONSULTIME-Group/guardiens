@@ -114,12 +114,26 @@ export function initConsent() {
     disableGoogleAnalytics();
     return;
   }
-  // Charge GA tôt mais hors du chemin critique du LCP.
-  // 2 s était trop long : rebonds rapides / connexions mobiles lentes
-  // partaient avant l'envoi du page_view, ce qui sous-mesurait le trafic.
-  if (typeof (window as any).requestIdleCallback === "function") {
-    (window as any).requestIdleCallback(() => loadGoogleAnalytics(), { timeout: 1500 });
+  // Report purement temporel, jamais conditionné à une interaction :
+  // un visiteur qui arrive sur une page de contenu et repart sans agir
+  // doit rester compté. On attend la fin du chargement de la page,
+  // puis le premier créneau d'inactivité, avec un plafond de sécurité.
+  const schedule = () => {
+    if (typeof (window as any).requestIdleCallback === "function") {
+      (window as any).requestIdleCallback(() => loadGoogleAnalytics(), { timeout: 2000 });
+    } else {
+      setTimeout(loadGoogleAnalytics, 300);
+    }
+  };
+
+  if (document.readyState === "complete") {
+    schedule();
   } else {
-    setTimeout(loadGoogleAnalytics, 300);
+    window.addEventListener("load", schedule, { once: true });
+    // Filet de sécurité si l'événement load tarde (ressources lentes).
+    setTimeout(() => {
+      if (!gaLoaded) schedule();
+    }, 6000);
   }
 }
+
