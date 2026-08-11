@@ -328,18 +328,21 @@ export default function ArticleDetail() {
    return () => document.removeEventListener("click", handler, { capture: true } as any);
  }, [article]);
 
- if (loading) {
- return (
- <div className="max-w-3xl mx-auto px-4 py-8 space-y-6">
- <Skeleton className="h-8 w-48" />
- <Skeleton className="h-64 w-full rounded-lg" />
- <Skeleton className="h-6 w-3/4" />
- <Skeleton className="h-4 w-full" />
- <Skeleton className="h-4 w-full" />
- <Skeleton className="h-4 w-2/3" />
- </div>
- );
- }
+  if (loading) {
+  // Le squelette occupe au moins une hauteur d'écran : sinon le pied de page
+  // remonte dans la fenêtre puis redescend à l'arrivée du contenu, ce qui
+  // provoquait la quasi-totalité du décalage cumulé mesuré sur les articles.
+  return (
+  <div className="max-w-3xl mx-auto px-4 py-8 space-y-6 min-h-[100svh]">
+  <Skeleton className="h-8 w-48" />
+  <Skeleton className="h-64 w-full rounded-lg" />
+  <Skeleton className="h-6 w-3/4" />
+  <Skeleton className="h-4 w-full" />
+  <Skeleton className="h-4 w-full" />
+  <Skeleton className="h-4 w-2/3" />
+  </div>
+  );
+  }
 
  // Slug d'article inconnu : vraie page 404 en noindex.
  if (!article) {
