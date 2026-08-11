@@ -374,7 +374,7 @@ const LiveListingsStrip: React.FC = () => {
                   <div className="aspect-[4/3] bg-muted relative overflow-hidden">
                     {photo ? (
                       <img
-                        src={photo}
+                        src={storageImageUrl(photo, { width: 400 }) || photo}
                         alt={s.title}
                         loading="lazy"
                         width={400}
