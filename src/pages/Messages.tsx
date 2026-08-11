@@ -477,7 +477,17 @@ const Messages = () => {
         const newMsg = payload.new as Message;
         setMessages(prev => [...prev, newMsg]);
         if (user && newMsg.sender_id !== user.id) {
-          supabase.from("messages").update({ read_at: new Date().toISOString() }).eq("id", newMsg.id);
+          // Le builder Supabase est paresseux : sans consommation de la promesse
+          // aucune requête HTTP n'était émise et `read_at` restait NULL.
+          void (async () => {
+            const { error } = await supabase
+              .from("messages")
+              .update({ read_at: new Date().toISOString() })
+              .eq("id", newMsg.id);
+            if (error) {
+              logger.error("[Messages] update read_at a échoué", { error: error.message, messageId: newMsg.id });
+            }
+          })();
         }
       })
       .on("postgres_changes", { event: "UPDATE", schema: "public", table: "messages", filter: `conversation_id=eq.${activeConv.id}` }, (payload) => {
