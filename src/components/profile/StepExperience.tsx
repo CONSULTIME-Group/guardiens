@@ -15,6 +15,7 @@ import HintBubble from "./HintBubble";
 import type { SitterProfileData, PastAnimal } from "@/hooks/useSitterProfile";
 import { safeUUID } from "@/lib/uuid";
 import { SITTER_ANIMAL_TYPES_OPTIONS } from "@/lib/profileMatchingOptions";
+import { compressImageFile } from "@/lib/compressImage";
 
 const ANIMAL_TYPES = SITTER_ANIMAL_TYPES_OPTIONS;
 const EXPERIENCE_OPTIONS = ["Débutant", "1-3 ans", "3-5 ans", "5+ ans"];
@@ -54,9 +55,16 @@ const StepExperience = ({ data, pastAnimals, onChange, onAddAnimal, onRemoveAnim
 
   const uploadAnimalPhoto = async (file: File): Promise<string | null> => {
     if (!user) return null;
-    const ext = file.name.split(".").pop();
+    // Compression alignée sur les autres galeries (max 1200 px, cible 300 ko).
+    let toUpload: File = file;
+    try {
+      toUpload = await compressImageFile(file, 5, 1200);
+    } catch {
+      toUpload = file;
+    }
+    const ext = toUpload.name.split(".").pop();
     const path = `${user.id}/past-animals/${safeUUID()}.${ext}`;
-    const { error } = await supabase.storage.from("sitter-gallery").upload(path, file, { upsert: true });
+    const { error } = await supabase.storage.from("sitter-gallery").upload(path, toUpload, { upsert: true });
     if (error) { toast.error("Impossible d'uploader la photo"); return null; }
     const { data: urlData } = supabase.storage.from("sitter-gallery").getPublicUrl(path);
     return urlData.publicUrl;
