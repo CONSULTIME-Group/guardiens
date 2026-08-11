@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { getMemberAvatarUrl, getMemberDisplayName, getMemberInitial } from "@/lib/memberUtils";
 import Head from "@/components/seo/Head";
 import { supabase } from "@/integrations/supabase/client";
+import { logger } from "@/lib/logger";
 import ProAvatarBadge from "@/components/badges/ProAvatarBadge";
 import { useAuth } from "@/contexts/AuthContext";
 import { Input } from "@/components/ui/input";
