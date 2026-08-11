@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import { supabase } from "@/integrations/supabase/client";
 import { useRecentPublishedSits } from "@/hooks/useRecentPublishedSits";
 import fallbackMarrakech from "@/assets/fallback-marrakech.webp";
+import { storageImageUrl, storageImageSrcSet } from "@/lib/storageImage";
 
 
 interface LiveSit {
@@ -258,7 +259,9 @@ const LiveListingsStrip: React.FC = () => {
               <div className="aspect-[16/10] md:aspect-[16/9] relative overflow-hidden">
                 {resolvePhoto(featured) ? (
                   <img
-                    src={resolvePhoto(featured) as string}
+                    src={storageImageUrl(resolvePhoto(featured), { width: 960 }) || (resolvePhoto(featured) as string)}
+                    srcSet={storageImageSrcSet(resolvePhoto(featured), [640, 960, 1280])}
+                    sizes="(min-width: 1024px) 720px, 100vw"
                     alt={featured.title}
                     loading="lazy"
                     width={960}
@@ -317,7 +320,7 @@ const LiveListingsStrip: React.FC = () => {
                     <div className="lg:w-2/5 aspect-[4/3] lg:aspect-auto bg-muted relative overflow-hidden shrink-0">
                       {photo ? (
                         <img
-                          src={photo}
+                          src={storageImageUrl(photo, { width: 400 }) || photo}
                           alt={s.title}
                           loading="lazy"
                           width={320}
@@ -371,7 +374,7 @@ const LiveListingsStrip: React.FC = () => {
                   <div className="aspect-[4/3] bg-muted relative overflow-hidden">
                     {photo ? (
                       <img
-                        src={photo}
+                        src={storageImageUrl(photo, { width: 400 }) || photo}
                         alt={s.title}
                         loading="lazy"
                         width={400}

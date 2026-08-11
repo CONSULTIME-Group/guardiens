@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { storageImageUrl } from "@/lib/storageImage";
 
 /**
  * Cover unifiée pour les cartes de coup de main.
@@ -47,7 +48,7 @@ const MissionCardCover = ({ photo, category, title, className }: MissionCardCove
     >
       {showImage ? (
         <img
-          src={photo!}
+          src={storageImageUrl(photo, { width: 400 }) || photo!}
           alt={title}
           loading="lazy"
           decoding="async"
