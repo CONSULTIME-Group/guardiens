@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { useState } from "react";
+import { storageImageUrl } from "@/lib/storageImage";
 
 /**
  * Carte "Près de chez vous" utilisée dans PublicMissionView & SmallMissionDetail.
