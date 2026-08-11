@@ -14,14 +14,18 @@ import { componentTagger } from "lovable-tagger";
  * à purger systématiquement à chaque build prod. Toute modification de
  * JSON-LD / meta sur ces pages doit être ajoutée ici, sinon Prerender
  * continue de servir l'ancien HTML jusqu'à expiration TTL (~24h).
+ *
+ * Règle : une URL n'entre dans cette liste que si elle répond 200 en production.
+ * Une route inexistante ou un article non publié consomme un render Prerender
+ * facturé à chaque build sans rien mettre en cache, puisque Prerender ne met
+ * en cache que les réponses 200.
  */
 const STATIC_SEO_URLS = [
   "https://guardiens.fr/",
   "https://guardiens.fr/tarifs",
-  "https://guardiens.fr/actualites/nouveaux-tarifs-2026",
   "https://guardiens.fr/actualites",
   "https://guardiens.fr/faq",
-  "https://guardiens.fr/about",
+  "https://guardiens.fr/a-propos",
   "https://guardiens.fr/contact",
 ];
 
