@@ -14,6 +14,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { safeUUID } from "@/lib/uuid";
+import { compressImageFile } from "@/lib/compressImage";
 import { readFormDraft, writeFormDraft, clearFormDraft, getFormDraftSavedAt } from "@/lib/formDraft";
 import { makePlainTextPasteHandler } from "@/lib/pastePlainText";
 import DraftStatus, { type DraftState } from "@/components/shared/DraftStatus";
@@ -150,9 +151,16 @@ const PetForm = ({ initialValues, onSubmit, onCancel, submitLabel = "Enregistrer
       return;
     }
     setUploading(true);
-    const ext = file.name.split(".").pop() || "jpg";
+    // Compression alignée sur les autres galeries (max 1200 px, cible 300 ko).
+    let toUpload: File = file;
+    try {
+      toUpload = await compressImageFile(file, 5, 1200);
+    } catch {
+      toUpload = file;
+    }
+    const ext = toUpload.name.split(".").pop() || "jpg";
     const path = `${user.id}/pets/${safeUUID()}.${ext}`;
-    const { error } = await supabase.storage.from("property-photos").upload(path, file, { upsert: true });
+    const { error } = await supabase.storage.from("property-photos").upload(path, toUpload, { upsert: true });
     if (error) {
       toast.error("Impossible d'uploader la photo");
       setUploading(false);

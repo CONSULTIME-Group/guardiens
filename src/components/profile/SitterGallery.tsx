@@ -10,6 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Plus, Trash2, Camera, X, CheckCircle2, Star } from "lucide-react";
 import { toast } from "sonner";
 import { logger } from "@/lib/logger";
+import { compressImageFile } from "@/lib/compressImage";
 
 const NO_SIT_VALUE = "__none__";
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -88,9 +89,16 @@ const SitterGallery = () => {
     }
     setUploading(true);
     try {
-      const ext = file.name.split(".").pop();
+      // Compression alignée sur les autres galeries (max 1200 px, cible 300 ko).
+      let toUpload: File = file;
+      try {
+        toUpload = await compressImageFile(file, 5, 1200);
+      } catch {
+        toUpload = file;
+      }
+      const ext = toUpload.name.split(".").pop();
       const path = `${user.id}/${Date.now()}.${ext}`;
-      const { error: uploadErr } = await supabase.storage.from("sitter-gallery").upload(path, file, { upsert: false });
+      const { error: uploadErr } = await supabase.storage.from("sitter-gallery").upload(path, toUpload, { upsert: false });
       if (uploadErr) throw uploadErr;
 
       const { data: { publicUrl } } = supabase.storage.from("sitter-gallery").getPublicUrl(path);
