@@ -18,7 +18,10 @@
  *  - date de début ET date de fin toujours exigées, la case dates flexibles
  *    enrichit l'annonce mais ne dispense jamais de dates ;
  *  - photos comptées sur la galerie du profil ET sur les photos du logement ;
- *  - identité vérifiée non bloquante.
+ *  - identité vérifiée non bloquante ;
+ *  - un brouillon jamais publié ne repasse par le formulaire de création que si
+ *    sa description en bloc unique n'atteint pas 50 caractères. Au-delà, il se
+ *    publie depuis sa fiche (décision du 10/08/2026).
  */
 
 export const MIN_SUB_DESCRIPTION = 30;
@@ -430,3 +433,16 @@ export const buildSitPublishInput = (o: BuildSitPublishInputOptions): SitPublish
  * en deux champs plutôt que d'être publié directement depuis la fiche.
  */
 export const wasValidatedByCreateForm = (sit: SitPublishSit): boolean => !!sit.published_at;
+
+/**
+ * Un brouillon doit-il repasser par le formulaire de création pour être publié ?
+ *
+ * Oui uniquement quand il n'a jamais été publié ET que sa description en bloc
+ * unique n'atteint pas le seuil minimum. Un propriétaire qui a déjà écrit une
+ * description suffisante publie depuis sa fiche : lui imposer de redécouper son
+ * texte en deux questions est le point d'abandon mesuré sur les brouillons
+ * (décision du 10/08/2026).
+ */
+export const needsCreateFormToPublish = (sit: SitPublishSit): boolean =>
+  !wasValidatedByCreateForm(sit) &&
+  len(sit.specific_expectations) < MIN_SINGLE_DESCRIPTION;

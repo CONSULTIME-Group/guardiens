@@ -42,7 +42,7 @@ import {
   getBlockingBlockers,
   getSitPublishRequirements,
   buildSitPublishInput,
-  wasValidatedByCreateForm,
+  needsCreateFormToPublish,
 } from "@/lib/sitPublishRules";
 
 import EmergencyAlertBanner from "@/components/sits/EmergencyAlertBanner";
@@ -344,7 +344,7 @@ const OwnerSitView = ({
    * formulaire de création : sa publication passe par ce formulaire, pour que
    * les deux écrans ne rendent plus deux verdicts opposés sur la même annonce.
    */
-  const publishNeedsForm = isDraft && !wasValidatedByCreateForm(sit as any);
+  const publishNeedsForm = isDraft && needsCreateFormToPublish(sit as any);
   // Règles de publication : source unique, voir src/lib/sitPublishRules.ts.
   const publishBlockers = getSitPublishBlockers(
     buildSitPublishInput({

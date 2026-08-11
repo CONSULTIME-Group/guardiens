@@ -45,7 +45,7 @@ import {
   buildSitPublishInput,
   getBlockingBlockers,
   getSitPublishBlockers,
-  wasValidatedByCreateForm,
+  needsCreateFormToPublish,
 } from "@/lib/sitPublishRules";
 import { describeSitWriteError } from "@/lib/sitDbErrors";
 
@@ -529,7 +529,7 @@ const Sits = () => {
     const sit = sits.find((s) => s.id === sitId);
     if (!sit) return;
 
-    const needsForm = !wasValidatedByCreateForm(sit);
+    const needsForm = needsCreateFormToPublish(sit);
     const resumeHref = `/sits/create?resume=${sitId}`;
     /**
      * Une annonce passée ne peut pas être corrigée depuis l'édition, verrouillée
