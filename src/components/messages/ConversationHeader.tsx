@@ -10,6 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 import HelpButton from "./HelpButton";
 import MissionFeedbackModal from "@/components/missions/MissionFeedbackModal";
 import { supabase } from "@/integrations/supabase/client";
+import { logger } from "@/lib/logger";
 import { sendTransactionalEmail } from "@/lib/sendTransactionalEmail";
 import { toast } from "sonner";
 import { format, isPast } from "date-fns";
