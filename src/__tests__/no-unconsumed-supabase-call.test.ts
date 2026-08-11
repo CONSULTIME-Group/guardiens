@@ -29,7 +29,12 @@ export function findUnconsumedVoidCalls(source: string): number[] {
 
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i];
+    if (/^\s*(\/\/|\*|\/\*)/.test(line)) continue;
     if (!/\bvoid\s+supabase\w*\s*\./.test(line)) continue;
+    // `removeChannel` / `getChannels` ne sont pas des builders paresseux :
+    // l'appel part immédiatement, la promesse ne sert qu'à attendre la fin.
+    if (/\bvoid\s+supabase\w*\.(removeChannel|removeAllChannels|getChannels)\s*\(/.test(line)) continue;
+
 
     // Récupère l'instruction complète : jusqu'au `;` fermant.
     let stmt = line;
