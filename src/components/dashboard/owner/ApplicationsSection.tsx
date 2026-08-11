@@ -14,6 +14,7 @@ import AffinityRing from "@/components/affinity/AffinityRing";
 import { useViewerOwnerForAffinity } from "@/hooks/useViewerOwnerForAffinity";
 import { useAffinityWithShadow } from "@/hooks/useAffinityWithShadow";
 import { supabase } from "@/integrations/supabase/client";
+import { logger } from "@/lib/logger";
 
 interface ApplicationsSectionProps {
   recentApps: AppRow[];
