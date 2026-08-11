@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import { supabase } from "@/integrations/supabase/client";
 import { useRecentPublishedSits } from "@/hooks/useRecentPublishedSits";
 import fallbackMarrakech from "@/assets/fallback-marrakech.webp";
+import { storageImageUrl, storageImageSrcSet } from "@/lib/storageImage";
 
 
 interface LiveSit {
