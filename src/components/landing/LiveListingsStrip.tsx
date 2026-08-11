@@ -259,7 +259,9 @@ const LiveListingsStrip: React.FC = () => {
               <div className="aspect-[16/10] md:aspect-[16/9] relative overflow-hidden">
                 {resolvePhoto(featured) ? (
                   <img
-                    src={resolvePhoto(featured) as string}
+                    src={storageImageUrl(resolvePhoto(featured), { width: 960 }) || (resolvePhoto(featured) as string)}
+                    srcSet={storageImageSrcSet(resolvePhoto(featured), [640, 960, 1280])}
+                    sizes="(min-width: 1024px) 720px, 100vw"
                     alt={featured.title}
                     loading="lazy"
                     width={960}
