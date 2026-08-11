@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { storageImageUrl } from "@/lib/storageImage";
 
 /**
  * Cover unifiée pour les cartes de coup de main.
