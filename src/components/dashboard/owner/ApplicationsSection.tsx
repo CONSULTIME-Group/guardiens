@@ -197,9 +197,18 @@ const ApplicationsSection = memo(({ recentApps, sitterProfiles, sitterBadges, si
     const toMark = sitIds.filter(id => !markedRef.current.has(id));
     if (toMark.length === 0) return;
     toMark.forEach(id => markedRef.current.add(id));
-    for (const sitId of toMark) {
-      void supabase.rpc("mark_sit_applications_viewed" as any, { p_sit_id: sitId });
-    }
+    // Le builder Supabase est paresseux : sans consommation de la promesse,
+    // aucune requête HTTP n'est émise.
+    void (async () => {
+      for (const sitId of toMark) {
+        const { data, error } = await supabase.rpc("mark_sit_applications_viewed" as any, { p_sit_id: sitId });
+        if (error) {
+          logger.error("mark_sit_applications_viewed failed", { sitId, code: error.code, message: error.message });
+          continue;
+        }
+        logger.info("mark_sit_applications_viewed ok", { sitId, updated: data });
+      }
+    })();
   }, [loading, unread]);
 
   // « Voir toutes » : retiré entièrement de l'UI pendant le chargement,
