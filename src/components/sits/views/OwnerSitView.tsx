@@ -35,6 +35,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 
 import { supabase } from "@/integrations/supabase/client";
+import { logger } from "@/lib/logger";
 import { useToast } from "@/hooks/use-toast";
 import { formatSitPeriod } from "@/lib/dateRange";
 import {
@@ -171,9 +172,19 @@ const OwnerSitView = ({
   // est toujours rendue sur cette route). Idempotent, non bloquant.
   // Le cron nudge-owner-pending-application traite viewed comme toujours
   // sans réponse : marquer "viewed" ne coupe donc PAS les relances.
+  // Attention : le builder Supabase est paresseux, la requête HTTP n'est émise
+  // qu'au moment du `then`. Un simple `void supabase.rpc(...)` n'envoyait donc
+  // jamais rien, ce qui explique que viewed_at soit resté NULL partout.
   useEffect(() => {
     if (!sit?.id) return;
-    void supabase.rpc("mark_sit_applications_viewed" as any, { p_sit_id: sit.id });
+    void (async () => {
+      const { data, error } = await supabase.rpc("mark_sit_applications_viewed" as any, { p_sit_id: sit.id });
+      if (error) {
+        logger.error("mark_sit_applications_viewed failed", { sitId: sit.id, code: error.code, message: error.message });
+        return;
+      }
+      logger.info("mark_sit_applications_viewed ok", { sitId: sit.id, updated: data });
+    })();
   }, [sit?.id]);
 
 

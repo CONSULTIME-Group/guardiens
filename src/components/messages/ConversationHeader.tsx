@@ -10,6 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 import HelpButton from "./HelpButton";
 import MissionFeedbackModal from "@/components/missions/MissionFeedbackModal";
 import { supabase } from "@/integrations/supabase/client";
+import { logger } from "@/lib/logger";
 import { sendTransactionalEmail } from "@/lib/sendTransactionalEmail";
 import { toast } from "sonner";
 import { format, isPast } from "date-fns";
@@ -77,9 +78,19 @@ const ConversationHeader = ({
   // silencieusement toutes ses candidatures pending sur ce sit comme "viewed".
   // Idempotent, non bloquant. La RPC vérifie l'ownership côté serveur.
   // N'affecte pas les relances (cron traite pending + viewed comme sans réponse).
+  // Le builder Supabase est paresseux : il faut consommer la promesse, sinon
+  // aucune requête n'est émise.
   useEffect(() => {
     if (!isOwner || !conv.sit_id) return;
-    void supabase.rpc("mark_sit_applications_viewed" as any, { p_sit_id: conv.sit_id });
+    const sitId = conv.sit_id;
+    void (async () => {
+      const { data, error } = await supabase.rpc("mark_sit_applications_viewed" as any, { p_sit_id: sitId });
+      if (error) {
+        logger.error("mark_sit_applications_viewed failed", { sitId, code: error.code, message: error.message });
+        return;
+      }
+      logger.info("mark_sit_applications_viewed ok", { sitId, updated: data });
+    })();
   }, [isOwner, conv.sit_id]);
 
 
