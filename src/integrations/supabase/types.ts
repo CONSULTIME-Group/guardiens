@@ -8539,9 +8539,10 @@ export type Database = {
       }
       unaccent: { Args: { "": string }; Returns: string }
       unaccent_immutable_safe: { Args: { txt: string }; Returns: string }
-      unpublish_sit:
-        | { Args: { p_sit_id: string }; Returns: number }
-        | { Args: { p_reason?: string; p_sit_id: string }; Returns: number }
+      unpublish_sit: {
+        Args: { p_reason?: string; p_sit_id: string }
+        Returns: number
+      }
       upsert_my_email_preferences:
         | {
             Args: { p_alert: boolean; p_digest: boolean; p_product: boolean }
