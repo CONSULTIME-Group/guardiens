@@ -165,7 +165,7 @@ describe("mode bloc unique, jamais de découpe", () => {
     expect(blockers.map((b) => b.id)).not.toContain("desc-expectations");
   });
 
-  it("annonce le seuil de 50 caractères dans son libellé", () => {
+  it("annonce le seuil de 30 caractères dans son libellé", () => {
     expect(getSingleBlockDescriptionBlockers(text(10))[0].label).toContain(
       `${MIN_SINGLE_DESCRIPTION} caractères minimum`,
     );
