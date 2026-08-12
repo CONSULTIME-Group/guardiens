@@ -59,10 +59,10 @@
   },
   "landing": {
     "hero": {
-      "eyebrow": "Entraide · Garde d'animaux · House-sitting",
-      "title_main": "La garde d'animaux, le coup de main,",
-      "title_accent": "la rencontre.",
-      "lede": "Guardiens met en relation des propriétaires d'animaux et des gardiens de confiance, partout en France. House-sitting à domicile, entraide entre gens du coin : vos animaux restent chez eux, votre maison reste habitée, et vous partez l'esprit léger.",
+      "eyebrow": "Maison · Animaux · Jardin",
+      "title_main": "Votre maison vit,",
+      "title_accent": "même quand vous partez.",
+      "lede": "Quelqu'un s'installe chez vous et prend soin de ce que vous laissez. Vos animaux, votre jardin, vos habitudes. Partout en France.",
       "lede_italic": "Et derrière chaque échange, une rencontre que vous n'auriez pas cherchée.",
       "cta_owner": "Publier mon annonce",
       "cta_sitter": "Je veux garder",
@@ -479,7 +479,7 @@
       }
     },
     "meta_title": "Garde d'animaux à domicile et house-sitting entre particuliers | Guardiens",
-    "meta_description": "Trouvez un gardien du coin pour votre maison et vos animaux. House-sitting et entraide entre particuliers, vérifiés et notés. Partout en France."
+    "meta_description": "House-sitting et garde de maison entre particuliers : un gardien du coin s'installe chez vous et veille sur vos animaux, votre jardin et vos habitudes. Partout en France."
   },
   "faq": {
     "title": "Questions fréquentes",
