@@ -283,6 +283,7 @@ export default function AdminMessages() {
                   <TableHead className="text-right">Messages</TableHead>
                   <TableHead className="text-right">Conv.</TableHead>
                   <TableHead className="text-right">Dernier msg</TableHead>
+                  <TableHead className="text-right">Fils</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -309,6 +310,18 @@ export default function AdminMessages() {
                     <TableCell className="text-right text-sm text-muted-foreground">
                       {format(new Date(u.last_message_at), "dd MMM yyyy", { locale: fr })}
                     </TableCell>
+                    <TableCell className="text-right">
+                      <button
+                        type="button"
+                        className="text-xs underline text-muted-foreground hover:text-foreground"
+                        onClick={() => {
+                          setFocusUserId(u.user_id);
+                          setTab("conversations");
+                        }}
+                      >
+                        voir ses conversations
+                      </button>
+                    </TableCell>
                   </TableRow>
                 ))}
               </TableBody>
@@ -316,8 +329,11 @@ export default function AdminMessages() {
           )}
         </CardContent>
       </Card>
+        </TabsContent>
+      </Tabs>
     </div>
   );
+
 }
 
 function KpiCard({
