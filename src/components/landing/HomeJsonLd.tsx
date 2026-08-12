@@ -36,12 +36,14 @@ export default function HomeJsonLd() {
                 height: 512,
               },
               description:
-                "Plateforme de house-sitting, garde d'animaux à domicile et petites missions d'entraide entre gens du coin. Sans abonnement pour les propriétaires.",
+                "Plateforme de house-sitting, garde d'animaux à domicile, de maison et de jardin, et petites missions d'entraide entre gens du coin. Sans abonnement pour les propriétaires.",
               areaServed: { "@type": "Country", name: "France" },
               knowsAbout: [
                 "House-sitting",
                 "Pet-sitting",
                 "Garde d'animaux à domicile",
+                "Garde de maison",
+                "Garde de jardin pendant une absence",
                 "Garde de chien",
                 "Garde de chat",
                 "Entraide entre particuliers",
@@ -93,9 +95,9 @@ export default function HomeJsonLd() {
               "@type": "WebPage",
               "@id": "https://guardiens.fr/#webpage",
               url: "https://guardiens.fr/",
-              name: "Garde d'animaux à domicile et house-sitting près de chez vous | Guardiens",
+              name: "Garde d'animaux, de maison et de jardin, house-sitting près de chez vous | Guardiens",
               description:
-                "House-sitting et petites missions d'entraide entre gens du coin. Confiez votre maison, demandez un coup de main au quartier. Partout en France.",
+                "House-sitting, garde d'animaux à domicile, de maison et de jardin, et petites missions d'entraide entre gens du coin. Partout en France.",
               inLanguage: "fr-FR",
               isPartOf: { "@id": "https://guardiens.fr/#website" },
               about: { "@id": "https://guardiens.fr/#organization" },
@@ -168,15 +170,17 @@ export default function HomeJsonLd() {
             {
               "@type": "Service",
               "@id": "https://guardiens.fr/#service",
-              name: "House-sitting, garde d'animaux et entraide locale entre gens du coin",
+              name: "House-sitting, garde d'animaux, de maison et de jardin, entraide locale entre gens du coin",
               description:
-                "Deux services indépendants : house-sitting et garde d'animaux à domicile d'un côté ; petites missions d'entraide entre gens du coin de l'autre. Avis croisés, vérification d'identité, sans commission.",
+                "Deux services indépendants : house-sitting, garde d'animaux à domicile, de maison et de jardin d'un côté ; petites missions d'entraide entre gens du coin de l'autre. Avis croisés, vérification d'identité, sans commission.",
               provider: { "@id": "https://guardiens.fr/#organization" },
               areaServed: { "@type": "Country", name: "France" },
               serviceType: [
                 "House-sitting",
                 "Pet sitting",
                 "Garde d'animaux à domicile",
+                "Garde de maison",
+                "Garde de jardin pendant une absence",
                 "Garde de chien",
                 "Garde de chat",
                 "Entraide locale",

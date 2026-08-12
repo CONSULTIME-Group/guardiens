@@ -1,7 +1,7 @@
 {
   "name": "Guardiens — House-sitting de confiance",
   "short_name": "Guardiens",
-  "description": "Garde d'animaux et de maison entre particuliers de confiance en France.",
+  "description": "Garde d'animaux, de maison et de jardin entre particuliers de confiance en France.",
   "id": "/",
   "scope": "/",
   "start_url": "/",
@@ -60,14 +60,14 @@
       "sizes": "1088x1920",
       "type": "image/jpeg",
       "form_factor": "narrow",
-      "label": "Guardiens, garde d'animaux et de maison entre particuliers de confiance"
+      "label": "Guardiens, garde d'animaux, de maison et de jardin entre particuliers de confiance"
     },
     {
       "src": "/screenshot-wide.jpg",
       "sizes": "1920x1088",
       "type": "image/jpeg",
       "form_factor": "wide",
-      "label": "Guardiens, garde d'animaux et de maison entre particuliers de confiance"
+      "label": "Guardiens, garde d'animaux, de maison et de jardin entre particuliers de confiance"
     }
   ]
 }
