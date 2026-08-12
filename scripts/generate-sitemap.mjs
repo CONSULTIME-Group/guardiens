@@ -191,7 +191,7 @@ async function maxUpdatedAtWithCount(table, column, filter = null) {
       return error ? null : count;
     })(),
   ]);
-  if (!date && count == null) return null;
+  if (!date && countRes == null) return null;
   return `${date ?? "no-date"}|${countRes ?? "no-count"}`;
 }
 
