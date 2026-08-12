@@ -173,7 +173,7 @@ describe("mode bloc unique, jamais de découpe", () => {
 });
 
 describe("autres prérequis", () => {
-  it("bloque sans logement, sans titre, sans photo, sans animal", () => {
+  it("liste les éléments manquants, logement et animaux étant informatifs", () => {
     const empty: SitPublishInput = {
       descriptionMode: "two-fields",
       title: "",
@@ -187,6 +187,10 @@ describe("autres prérequis", () => {
       petCount: 0,
     };
     expect(ids(empty)).toEqual(["property", "title", "photo", "pets"]);
+    const blocking = getBlockingBlockers(getSitPublishBlockers(empty)).map((b) => b.id);
+    expect(blocking).toEqual(["title", "photo"]);
+    expect(getSitPublishBlockers(empty).find((b) => b.id === "property")?.advisory).toBe(true);
+    expect(getSitPublishBlockers(empty).find((b) => b.id === "pets")?.advisory).toBe(true);
   });
 
   it("compte les photos du logement et la couverture, pas seulement la galerie", () => {
