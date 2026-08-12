@@ -150,9 +150,9 @@ const CitySchemaOrg = ({ city }: Props) => {
  "@type": "Service",
  name: isLyon
  ? "Garde de chien et de chat à Lyon"
- : `House-sitting et garde d'animaux à ${city.name}`,
+ : `House-sitting, garde d'animaux, de maison et de jardin à ${city.name}`,
  description: city.metaDescription,
- serviceType: ["House Sitting", "Pet Sitting", "Dog Sitting", "Cat Sitting"],
+ serviceType: ["House Sitting", "Pet Sitting", "Dog Sitting", "Cat Sitting", "Garden Sitting"],
  provider: {
  "@type": "Organization",
  name: "Guardiens",
@@ -221,8 +221,8 @@ const CitySchemaOrg = ({ city }: Props) => {
  if (LOCAL_BUSINESS_CITIES.includes(city.slug)) {
  graph.push({
  "@type": "LocalBusiness",
- name: `Guardiens, Garde d'animaux à ${city.name}`,
- description: `Plateforme de garde de chien, de chat et de home sitting à ${city.name}. Gardiens de proximité, sans commission.`,
+ name: `Guardiens, Garde d'animaux, de maison et de jardin à ${city.name}`,
+ description: `Plateforme de garde de chien, de chat, de maison et de jardin, home sitting à ${city.name}. Gardiens de proximité, sans commission.`,
  url: `https://guardiens.fr/house-sitting/${city.slug}`,
  address: {
  "@type": "PostalAddress",

@@ -88,8 +88,8 @@ const DepartmentPage = () => {
  return (
  <>
  <PageMeta
- title={page.meta_title || `Pet sitting & House sitting ${page.department}, garde d'animaux sans frais pour les propriétaires | Guardiens`}
- description={page.meta_description || `Trouvez un pet sitter ou house sitter dans le ${page.department}. Garde d'animaux entre particuliers, sans frais pour les propriétaires. ${cityPages.length} villes couvertes sur Guardiens.`}
+ title={page.meta_title || `Pet sitting & House sitting ${page.department}, garde d'animaux, de maison et de jardin sans frais pour les propriétaires | Guardiens`}
+ description={page.meta_description || `Trouvez un pet sitter ou house sitter dans le ${page.department}. Garde d'animaux, de maison et de jardin entre particuliers, sans frais pour les propriétaires. ${cityPages.length} villes couvertes sur Guardiens.`}
  path={`/departement/${page.slug}`}
  image={buildOgImageUrl({ title: page.department, subtitle: `${cityPages.length} villes couvertes`, kind: "departement" })}
  />
@@ -367,7 +367,7 @@ const DepartmentPage = () => {
  "@context": "https://schema.org",
  "@type": "Service",
  name: `Pet sitting & House sitting dans le ${page.department}`,
- description: `Service de garde d'animaux et house sitting sans frais pour les propriétaires dans le ${page.department}. ${cityPages.length} villes couvertes.`,
+ description: `Service de garde d'animaux, de maison et de jardin, house sitting sans frais pour les propriétaires dans le ${page.department}. ${cityPages.length} villes couvertes.`,
  provider: {
  "@type": "Organization",
  name: "Guardiens",
@@ -381,7 +381,7 @@ const DepartmentPage = () => {
  name: page.region || "France",
  },
  },
- serviceType: ["Pet sitting", "House sitting", "Garde d'animaux", "Gardiennage de maison"],
+ serviceType: ["Pet sitting", "House sitting", "Garde d'animaux", "Gardiennage de maison", "Entretien du jardin pendant une absence"],
  offers: {
  "@type": "Offer",
  price: "0",

@@ -188,6 +188,7 @@ const Observatoire = () => {
  ],
  keywords: [
  "garde d'animaux à domicile",
+  "garde de maison et de jardin",
  "house-sitting France",
  "pet-sitting France",
  "statistiques garde animaux",

@@ -1,6 +1,6 @@
 # Guardiens
 
-> Plateforme de garde d'animaux à domicile en France. Mise en relation entre propriétaires d'animaux et gardiens de confiance habitant près de chez vous, sans frais cachés et sans transaction financière entre membres.
+> Plateforme de garde d'animaux à domicile, de maison et de jardin en France. Mise en relation entre propriétaires d'animaux et gardiens de confiance habitant près de chez vous, sans frais cachés et sans transaction financière entre membres.
 
 Guardiens reste gratuit tant que nous ne sommes pas satisfaits du service que nous vous offrons. Vous avez accès à tout, sans limite, sans engagement, sans carte bancaire. Aucune date de fin de gratuité n'est fixée à ce jour. L'entraide entre membres (petites missions du quotidien : promenade, visite, dépannage) est gratuite et n'inclut jamais de nuitée.
 
@@ -17,7 +17,7 @@ Guardiens reste gratuit tant que nous ne sommes pas satisfaits du service que no
 - [Gardien d'urgence](/gardien-urgence): Trouver un gardien rapidement en cas d'imprévu.
 - [Devenir home-sitter](/devenir-home-sitter): Guide pour devenir gardien à domicile sur Guardiens.
 - [Guides de villes](/guides): Guides locaux indépendants des annonces de garde.
-- [House-sitting par ville](/house-sitting): Pages ville dédiées au house-sitting et à la garde à domicile, 56 villes couvertes.
+- [House-sitting par ville](/house-sitting): Pages ville dédiées au house-sitting et à la garde d'animaux, de maison et de jardin, 56 villes couvertes.
 - [House-sitting par département](/departement): Pages département, chacune recense villes couvertes, gardiens inscrits et guides locaux, 101 départements couverts.
 - [Annonces de garde](/annonces): Toutes les annonces de garde à domicile, partout en France.
 - [Pros animaliers](/pros): Annuaire de vétérinaires, éducateurs, toiletteurs, ostéopathes, transporteurs vérifiés.
@@ -42,7 +42,7 @@ Guardiens reste gratuit tant que nous ne sommes pas satisfaits du service que no
 
 ## Key facts (citables)
 
-- Plateforme : Guardiens, garde d'animaux à domicile en France.
+- Plateforme : Guardiens, garde d'animaux à domicile, de maison et de jardin en France.
 - Éditeur : Jérémie Martinot, SIRET 894 864 040 00015.
 - Modèle : gratuit pour tout le monde aujourd'hui, sans commission ni frais cachés.
 - Engagement de service : Guardiens reste gratuit tant que nous ne sommes pas satisfaits du service que nous vous offrons. Aucune date de fin de gratuité n'est fixée à ce jour.
