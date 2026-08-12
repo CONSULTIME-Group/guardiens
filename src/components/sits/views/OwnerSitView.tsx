@@ -421,7 +421,7 @@ const OwnerSitView = ({
     if (declinedCount > 0) {
       toast({
         title: `${declinedCount} candidature${declinedCount > 1 ? "s déclinées" : " déclinée"}`,
-        description: `${declinedCount} candidat${declinedCount > 1 ? "s ont" : " a"} reçu votre réponse.`,
+        description: `${declinedCount} candidat${declinedCount > 1 ? "s ont" : " a"} été notifié${declinedCount > 1 ? "s" : ""} par message et par email.`,
       });
     }
     setOpenApps([]);
