@@ -273,11 +273,52 @@ async function main() {
         }));
       }
     ),
-    // Fiches gardien `/gardiens/:id` : volontairement ABSENTES du sitemap
-    // depuis la décision produit du 12/08/2026 (pages minces, quasi dupliquées,
-    // sans demande de recherche, et personnes privées). La page rend
-    // `noindex, follow` côté client. Ne pas ajouter de `Disallow` sur
-    // `/gardiens` : les URLs doivent rester crawlables pour être désindexées.
+    // Fiches gardien `/gardiens/:id` : listées si et seulement si elles passent
+    // la règle de substance partagée src/lib/sitterProfileIndexability.js
+    // (bio ≥ 80 caractères ET signal de confiance), exactement la même règle
+    // que celle appliquée par src/pages/PublicSitterProfile.tsx pour décider du
+    // `noindex`. Toute fiche non éligible reste crawlable et rend
+    // `noindex, follow` : ne pas poser de `Disallow` sur `/gardiens`, il
+    // empêcherait Google de voir ce noindex, donc bloquerait la désindexation.
+    // Le générateur tourne avec la clé anonyme : `profiles` est fermée par RLS,
+    // on lit la vue publique `public_profiles` (exposition anonyme validée).
+    fetchOrCache(
+      "public_profiles", cache,
+      () => maxUpdatedAt("public_profiles", "last_seen_at", q => q.in("role", ["sitter", "both"])),
+      async () => {
+        const [{ data: profiles }, { data: sitters }, { data: galleryRows }] = await Promise.all([
+          supabase.from("public_profiles").select("id, last_seen_at, created_at, bio, identity_verified, role").in("role", ["sitter", "both"]).limit(5000),
+          supabase.from("public_sitter_profiles").select("user_id, motivation").limit(5000),
+          supabase.from("sitter_gallery").select("user_id").limit(20000),
+        ]);
+        const motivationById = new Map((sitters || []).map(s => [s.user_id, s.motivation]));
+        const galleryCountById = new Map();
+        for (const g of galleryRows || []) {
+          galleryCountById.set(g.user_id, (galleryCountById.get(g.user_id) || 0) + 1);
+        }
+        return (profiles || []).map(p => ({
+          ...p,
+          motivation: motivationById.get(p.id) || null,
+          galleryCount: galleryCountById.get(p.id) || 0,
+        }));
+      },
+      rows => {
+        const kept = rows.filter(p => isSitterProfileIndexable({
+          bio: p.bio,
+          motivation: p.motivation,
+          identityVerified: p.identity_verified,
+          galleryCount: p.galleryCount,
+        }));
+        console.log(`[sitemap] fiches gardien : ${kept.length} retenues sur ${rows.length}`);
+        return kept.map(p => ({
+          loc: `/gardiens/${p.id}`,
+          lastmod: (p.last_seen_at || p.created_at || today).split("T")[0],
+          changefreq: "monthly",
+          priority: "0.5",
+        }));
+      }
+    ),
+
     // Annonces individuelles `/annonces/:id` — filtre qualité aligné avec
     // l'indexabilité côté client (PublicSitDetail) via la règle partagée
     // src/lib/sitIndexability.js : statut publié, candidatures ouvertes,
