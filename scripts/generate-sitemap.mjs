@@ -14,6 +14,7 @@ import { fileURLToPath } from "url";
 import { sitRichnessRejectionReason } from "../src/lib/sitIndexability.js";
 import { isDemoPro } from "../src/lib/proIndexability.js";
 import { isSitterProfileIndexable } from "../src/lib/sitterProfileIndexability.js";
+import { fetchOrCache as sharedFetchOrCache } from "./lib/sitemapCache.mjs";
 
 
 
