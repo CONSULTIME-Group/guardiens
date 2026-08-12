@@ -351,7 +351,7 @@ export const getSitPublishRequirements = (
         },
       ]),
   { id: "photo", label: "Au moins une photo de votre logement ou de votre galerie" },
-  { id: "pets", label: "Au moins un animal à faire garder" },
+  { id: "pets", label: "Vos animaux, si vous en avez" },
 ];
 
 
