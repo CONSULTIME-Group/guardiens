@@ -15,8 +15,36 @@ const OWNER_VIEW = readFileSync(
 );
 
 describe("filet de sécurité à la dépublication", () => {
-  it("ne considère comme ouvertes que les candidatures pending et viewed", () => {
-    expect([...OPEN_APPLICATION_STATUSES]).toEqual(["pending", "viewed"]);
+  it("considère comme ouvertes pending, viewed et discussing, comme le RPC", () => {
+    expect([...OPEN_APPLICATION_STATUSES]).toEqual([
+      "pending",
+      "viewed",
+      "discussing",
+    ]);
+  });
+
+  it("aligne les deux requêtes de requestUnpublish sur la même définition", () => {
+    expect(OWNER_VIEW).not.toContain('.in("status", ["pending", "viewed", "discussing"])');
+    const occurrences = OWNER_VIEW.split('.in("status", [...OPEN_APPLICATION_STATUSES])').length - 1;
+    expect(occurrences).toBe(2);
+  });
+
+  it("choisit le message type selon le statut de départ", () => {
+    expect(pickBulkDeclineMessage("discussing")).toBe(
+      BULK_DECLINE_MESSAGE_DISCUSSING,
+    );
+    expect(pickBulkDeclineMessage("pending")).toBe(BULK_DECLINE_MESSAGE);
+    expect(pickBulkDeclineMessage(undefined)).toBe(BULK_DECLINE_MESSAGE);
+  });
+
+  it("ne notifie pas si l'update n'a modifié aucune ligne", () => {
+    const LIB = readFileSync(
+      resolve(process.cwd(), "src/lib/declineOpenApplications.ts"),
+      "utf8",
+    );
+    expect(LIB).toContain('.select("id")');
+    expect(LIB).toContain("if (!updated || updated.length === 0)");
+    expect(LIB).toContain("skipped += 1");
   });
 
   it("nomme le candidat et la date de candidature", () => {
