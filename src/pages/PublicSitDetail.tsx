@@ -479,7 +479,7 @@ const PublicSitDetail = () => {
  const jsonLd: Record<string, any> = {
  "@context": "https://schema.org",
  "@type": "Service",
- name: sit.title || `Garde d'animaux à ${cityForTitle}`,
+ name: sit.title || `Garde d'animaux, de maison et de jardin à ${cityForTitle}`,
  description: truncatedSeoDesc,
  serviceType: ["House Sitting", "Pet Sitting"],
  provider: {

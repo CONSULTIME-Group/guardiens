@@ -120,8 +120,8 @@ export interface DynamicRouteConfig {
 export const staticRoutes: SiteRoute[] = [
  {
  path: "/",
-		title: "Garde d'animaux à domicile et house-sitting | Guardiens",
-		metaDescription: "Trouvez un gardien du coin pour votre maison et vos animaux. House-sitting entre particuliers, profils documentés et notés, sans engagement. Partout en France.",
+		title: "Garde d'animaux, de maison et de jardin | House-sitting entre particuliers | Guardiens",
+		metaDescription: "Un gardien du coin pour votre maison, vos animaux et votre jardin. Garde d'animaux à domicile et house-sitting entre particuliers. Partout en France.",
  h1: "Guardiens, comme confier ses clés à quelqu'un du coin",
  sitemapPriority: "1.0",
  changeFreq: "daily",
@@ -321,8 +321,8 @@ export const staticRoutes: SiteRoute[] = [
  },
  {
   path: "/departement",
-  title: "Garde d'animaux et house-sitting par département | Guardiens",
-  metaDescription: "Les 101 départements français couverts par Guardiens. Trouvez un gardien de maison et d'animaux dans votre département, ou proposez vos services près de chez vous.",
+  title: "Garde d'animaux, de maison et de jardin par département | Guardiens",
+  metaDescription: "Les 101 départements français couverts par Guardiens. Trouvez un gardien pour votre maison, vos animaux et votre jardin dans votre département, ou proposez vos services près de chez vous.",
   h1: "La garde d'animaux département par département",
   sitemapPriority: "0.9",
   changeFreq: "weekly",
@@ -364,8 +364,8 @@ export const dynamicRoutes: DynamicRouteConfig[] = [
  {
  pathPattern: "/house-sitting/:city",
  source: "sitemap",
- title: "House-sitting à {city} | Guardiens",
- metaDescription: "Trouvez un gardien de maison à {city}. House-sitting local entre propriétaires et gardiens du coin.",
+ title: "House-sitting à {city}, garde d'animaux, de maison et de jardin | Guardiens",
+ metaDescription: "Trouvez un gardien à {city} pour votre maison, vos animaux et votre jardin. House-sitting local entre propriétaires et gardiens du coin.",
  sitemapPriority: "0.8",
  changeFreq: "weekly",
  dynamicTitle: true, // les pages géo ont un titre SEO précis, non strict

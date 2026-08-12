@@ -64,7 +64,7 @@ const DepartmentsIndex = () => {
       itemListElement: depts.map((d, i) => ({
         "@type": "ListItem",
         position: i + 1,
-        name: `Garde d'animaux en ${d.department}`,
+        name: `Garde d'animaux, de maison et de jardin en ${d.department}`,
         url: `${SITE}/departement/${d.slug}`,
       })),
     },
@@ -73,8 +73,8 @@ const DepartmentsIndex = () => {
   return (
     <>
       <PageMeta
-        title="Garde d'animaux et house-sitting par département | Guardiens"
-        description="Les 101 départements français couverts par Guardiens. Trouvez un gardien de maison et d'animaux dans votre département, ou proposez vos services près de chez vous."
+        title="Garde d'animaux, de maison et de jardin par département | Guardiens"
+        description="Les 101 départements français couverts par Guardiens. Trouvez un gardien pour votre maison, vos animaux et votre jardin dans votre département, ou proposez vos services près de chez vous."
         path="/departement"
         jsonLd={jsonLd}
       />

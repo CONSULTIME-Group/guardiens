@@ -133,7 +133,7 @@ function buildLayout(opts: { title: string; subtitle: string; kind: string }) {
               padding: "0 48px", background: "rgba(0,0,0,0.35)",
               fontSize: 20, color: "rgba(255,255,255,0.85)",
             },
-            children: "Garde d'animaux entre particuliers, partout en France",
+            children: "Garde d'animaux, de maison et de jardin entre particuliers, partout en France",
           },
         },
       ],

@@ -79,7 +79,7 @@ const ProfileSchemaOrg = ({
     service = {
       "@context": "https://schema.org",
       "@type": "Service",
-      serviceType: "Garde d'animaux à domicile (house-sitting)",
+      serviceType: "Garde d'animaux à domicile, de maison et de jardin (house-sitting)",
       provider: { "@type": "Person", name, url, ...(avatarUrl && { image: avatarUrl }) },
       ...(city && { areaServed: { "@type": "City", name: city, addressCountry: "FR" } }),
       ...(bio && { description: bio.slice(0, 200) }),
