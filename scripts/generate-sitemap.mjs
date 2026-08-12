@@ -315,7 +315,10 @@ async function main() {
     // on lit la vue publique `public_profiles` (exposition anonyme validée).
     fetchOrCache(
       "public_profiles", cache,
-      () => maxUpdatedAt("public_profiles", "last_seen_at", q => q.in("role", ["sitter", "both"])),
+      // `last_seen_at` n'est pas exposée en anonyme sur la vue publique : la
+      // sonde renvoyait null, donc le cache ne s'invalidait jamais. On prend
+      // `created_at` plus le nombre de fiches comme clé composite.
+      () => maxUpdatedAtWithCount("public_profiles", "created_at", q => q.in("role", ["sitter", "both"])),
       async () => {
         const [{ data: profiles }, { data: sitters }, { data: galleryRows }] = await Promise.all([
           supabase.from("public_profiles").select("id, last_seen_at, created_at, bio, identity_verified, role").in("role", ["sitter", "both"]).limit(5000),
