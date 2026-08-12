@@ -168,7 +168,7 @@ function buildRobotsTxt({ siteUrl, privatePaths, noindexFromStatic }) {
     "# (outils internes / pages d'auth — cohérent avec <meta robots> + sitemap)",
     ...noindexFromStatic.map((p) => `Disallow: ${p}`),
     "",
-    "# Profils publics : /gardiens/:id reste indexable.",
+    "# Profils publics : /gardiens/:id reste crawlable mais noindex (decision 12/08/2026).",
     "# Le sitemap filtre déjà les profils non-publics (politique : seuls sitter/both publics).",
     "",
     `Sitemap: ${siteUrl}/sitemap.xml`,
