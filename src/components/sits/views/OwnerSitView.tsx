@@ -267,6 +267,8 @@ const OwnerSitView = ({
 
   // Étape 1 : ouvre la modale de confirmation en pré-comptant les candidatures
   // actives qui seront clôturées, l'owner doit voir l'impact avant de cliquer.
+  // On charge aussi le détail des candidatures ouvertes (pending, viewed) pour
+  // les nommer et proposer le déclin groupé avant dépublication.
   const requestUnpublish = async () => {
     const { count } = await supabase
       .from("applications")
@@ -274,10 +276,38 @@ const OwnerSitView = ({
       .eq("sit_id", sit.id)
       .in("status", ["pending", "viewed", "discussing"]);
     setPendingAppsToCancel(count ?? 0);
+
+    const { data: openRows } = await supabase
+      .from("applications")
+      .select("id, sitter_id, created_at")
+      .eq("sit_id", sit.id)
+      .in("status", [...OPEN_APPLICATION_STATUSES])
+      .order("created_at", { ascending: true });
+
+    const rows = (openRows ?? []) as Array<{ id: string; sitter_id: string; created_at: string }>;
+    const sitterIds = [...new Set(rows.map((r) => r.sitter_id).filter(Boolean))];
+    const nameById = new Map<string, string>();
+    if (sitterIds.length > 0) {
+      const { data: profs } = await supabase
+        .from("public_profiles")
+        .select("id, first_name")
+        .in("id", sitterIds);
+      (profs ?? []).forEach((p: any) => nameById.set(p.id, p.first_name ?? ""));
+    }
+    setOpenApps(
+      rows.map((r) => ({
+        id: r.id,
+        sitter_id: r.sitter_id,
+        created_at: r.created_at,
+        first_name: nameById.get(r.sitter_id) || "Candidat",
+      })),
+    );
+
     setUnpublishReason("");
     setUnpublishReasonOther("");
     setUnpublishConfirmOpen(true);
   };
+
 
   // Étape 2 : exécute la dépublication via le RPC sécurisé.
   // Le RPC valide : auth, ownership, status=published, end_date >= today.
