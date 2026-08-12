@@ -3,8 +3,10 @@ import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import {
   BULK_DECLINE_MESSAGE,
+  BULK_DECLINE_MESSAGE_DISCUSSING,
   OPEN_APPLICATION_STATUSES,
   formatOpenApplicationLabel,
+  pickBulkDeclineMessage,
 } from "@/lib/declineOpenApplications";
 
 const OWNER_VIEW = readFileSync(
