@@ -30,7 +30,7 @@
  */
 
 export const MIN_SUB_DESCRIPTION = 30;
-export const MIN_SINGLE_DESCRIPTION = 50;
+export const MIN_SINGLE_DESCRIPTION = 30;
 /** Longueur maximale du titre, appliquée par la création comme par l'édition. */
 export const MAX_TITLE_LENGTH = 120;
 export const EXPECTATIONS_SEPARATOR = "\n\n";
