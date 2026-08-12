@@ -579,7 +579,7 @@ const OwnerSitView = ({
                     <p className="text-foreground">
                       <strong>
                         {openApps.length} candidature{openApps.length > 1 ? "s" : ""} attend
-                        {openApps.length > 1 ? "ent" : ""} encore ta réponse.
+                        {openApps.length > 1 ? "ent" : ""} encore votre réponse.
                       </strong>
                     </p>
                     <ul className="mt-2 space-y-1 text-xs text-muted-foreground">
@@ -588,7 +588,7 @@ const OwnerSitView = ({
                       ))}
                     </ul>
                     <p className="text-xs text-muted-foreground mt-2">
-                      Tu peux les décliner maintenant, ou dépublier sans les traiter.
+                      Vous pouvez les décliner maintenant, ou dépublier sans les traiter.
                     </p>
                   </div>
                 )}
