@@ -7428,6 +7428,22 @@ export type Database = {
           views: number
         }[]
       }
+      admin_conversation_hidden_messages: {
+        Args: { p_conversation_id: string }
+        Returns: {
+          message_id: string
+          moderation_hidden_at: string
+        }[]
+      }
+      admin_conversation_search: {
+        Args: { p_query: string }
+        Returns: {
+          avatar_url: string
+          conv_count: number
+          full_name: string
+          user_id: string
+        }[]
+      }
       admin_cron_health: { Args: never; Returns: Json }
       admin_dashboard_snapshot: { Args: never; Returns: Json }
       admin_dashboard_summary: { Args: never; Returns: Json }
@@ -7640,6 +7656,42 @@ export type Database = {
         }[]
       }
       admin_get_user_email: { Args: { p_user_id: string }; Returns: string }
+      admin_list_conversations: {
+        Args: {
+          p_context?: string
+          p_limit?: number
+          p_offset?: number
+          p_only_unanswered?: boolean
+          p_since?: string
+          p_sort?: string
+          p_unread_days?: number
+          p_user_id?: string
+        }
+        Returns: {
+          context_type: string
+          conversation_id: string
+          created_at: string
+          distinct_senders: number
+          human_count: number
+          last_message_at: string
+          last_message_excerpt: string
+          last_sender_id: string
+          message_count: number
+          mission_title: string
+          oldest_unread_at: string
+          owner_avatar: string
+          owner_id: string
+          owner_name: string
+          sit_id: string
+          sit_title: string
+          sitter_avatar: string
+          sitter_id: string
+          sitter_name: string
+          small_mission_id: string
+          total_count: number
+          unread_count: number
+        }[]
+      }
       admin_log_message_failure: {
         Args: {
           p_content: string
