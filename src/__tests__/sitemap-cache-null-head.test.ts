@@ -1,7 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import fs from "fs";
 import path from "path";
-// @ts-expect-error module .mjs sans types
 import { shouldRefresh, fetchOrCache } from "../../scripts/lib/sitemapCache.mjs";
 
 /**
