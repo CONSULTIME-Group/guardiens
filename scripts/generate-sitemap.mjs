@@ -195,26 +195,9 @@ async function maxUpdatedAtWithCount(table, column, filter = null) {
   return `${date ?? "no-date"}|${countRes ?? "no-count"}`;
 }
 
-async function fetchOrCache(key, cache, headProbe, fetcher, builder) {
-  const head = await headProbe();
-  const cached = cache.sources[key];
-  // Une clé d'invalidation nulle ne prouve rien : elle signifie « je ne sais
-  // pas si les données ont bougé ». La traiter comme « rien n'a changé » a figé
-  // le sitemap de production sur un état intermédiaire (12/08/2026). Dans ce
-  // cas on recharge toujours, et on le dit à haute voix dans le log de build.
-  if (head == null) {
-    console.warn(`  ⚠️ ${key}: clé d'invalidation absente, rechargement forcé`);
-  }
-  if (!FORCE && head != null && cached && cached.head === head && cache.entries[key]) {
-    console.log(`  ↳ ${key}: cached (${cache.entries[key].length} URLs)`);
-    return cache.entries[key];
-  }
-  const rows = await fetcher();
-  const entries = builder(rows || []);
-  cache.sources[key] = { head, fetchedAt: new Date().toISOString() };
-  cache.entries[key] = entries;
-  console.log(`  ↳ ${key}: refreshed (${entries.length} URLs)`);
-  return entries;
+// Source de vérité unique du cache : scripts/lib/sitemapCache.mjs.
+function fetchOrCache(key, cache, headProbe, fetcher, builder) {
+  return sharedFetchOrCache(key, cache, headProbe, fetcher, builder, FORCE);
 }
 
 
