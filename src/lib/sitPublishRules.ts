@@ -278,11 +278,12 @@ export const getSitPublishBlockers = (
     (input.petCount || 0) === 0
       ? {
           id: "pets",
-          label: "Au moins un animal à faire garder",
+          label: "Vos animaux, si vous en avez",
           anchor: "pets-field",
           // Les animaux se gèrent sur le profil propriétaire, jamais dans le
           // formulaire d'édition de l'annonce, qui ne porte aucun champ animal.
           action: "/owner-profile?section=animals",
+          advisory: true,
         }
       : null,
 
