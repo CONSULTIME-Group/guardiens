@@ -14,6 +14,7 @@ import { fileURLToPath } from "url";
 import { sitRichnessRejectionReason } from "../src/lib/sitIndexability.js";
 import { isDemoPro } from "../src/lib/proIndexability.js";
 import { isSitterProfileIndexable } from "../src/lib/sitterProfileIndexability.js";
+import { fetchOrCache as sharedFetchOrCache } from "./lib/sitemapCache.mjs";
 
 
 
@@ -174,20 +175,32 @@ async function maxUpdatedAt(table, column = "updated_at", filter = null) {
   return data[0][column] || null;
 }
 
-async function fetchOrCache(key, cache, headProbe, fetcher, builder) {
-  const head = await headProbe();
-  const cached = cache.sources[key];
-  if (!FORCE && cached && cached.head === head && cache.entries[key]) {
-    console.log(`  ↳ ${key}: cached (${cache.entries[key].length} URLs)`);
-    return cache.entries[key];
-  }
-  const rows = await fetcher();
-  const entries = builder(rows || []);
-  cache.sources[key] = { head, fetchedAt: new Date().toISOString() };
-  cache.entries[key] = entries;
-  console.log(`  ↳ ${key}: refreshed (${entries.length} URLs)`);
-  return entries;
+/**
+ * Clé d'invalidation composite : date la plus récente et nombre de lignes.
+ * Utilisée quand la colonne temporelle seule n'est pas fiable (valeur nulle sur
+ * une vue publique, par exemple `public_profiles.last_seen_at` qui n'est pas
+ * exposée en anonyme). Sans cette variante, la clé restait nulle et le cache
+ * n'était jamais invalidé.
+ */
+async function maxUpdatedAtWithCount(table, column, filter = null) {
+  const [date, countRes] = await Promise.all([
+    maxUpdatedAt(table, column, filter),
+    (async () => {
+      let q = supabase.from(table).select("id", { count: "exact" }).limit(1);
+      if (filter) q = filter(q);
+      const { count, error } = await q;
+      return error ? null : count;
+    })(),
+  ]);
+  if (!date && countRes == null) return null;
+  return `${date ?? "no-date"}|${countRes ?? "no-count"}`;
 }
+
+// Source de vérité unique du cache : scripts/lib/sitemapCache.mjs.
+function fetchOrCache(key, cache, headProbe, fetcher, builder) {
+  return sharedFetchOrCache(key, cache, headProbe, fetcher, builder, FORCE);
+}
+
 
 async function main() {
   const today = new Date().toISOString().split("T")[0];
@@ -286,7 +299,10 @@ async function main() {
     // on lit la vue publique `public_profiles` (exposition anonyme validée).
     fetchOrCache(
       "public_profiles", cache,
-      () => maxUpdatedAt("public_profiles", "last_seen_at", q => q.in("role", ["sitter", "both"])),
+      // `last_seen_at` n'est pas exposée en anonyme sur la vue publique : la
+      // sonde renvoyait null, donc le cache ne s'invalidait jamais. On prend
+      // `created_at` plus le nombre de fiches comme clé composite.
+      () => maxUpdatedAtWithCount("public_profiles", "created_at", q => q.in("role", ["sitter", "both"])),
       async () => {
         const [{ data: profiles }, { data: sitters }, { data: galleryRows }] = await Promise.all([
           supabase.from("public_profiles").select("id, last_seen_at, created_at, bio, identity_verified, role").in("role", ["sitter", "both"]).limit(5000),
