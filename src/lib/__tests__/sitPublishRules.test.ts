@@ -143,9 +143,9 @@ describe("mode deux champs, les deux valeurs sont obligatoires", () => {
 });
 
 describe("mode bloc unique, jamais de découpe", () => {
-  it("exige 50 caractères au total", () => {
+  it("exige 30 caractères au total", () => {
     expect(getSingleBlockDescriptionBlockers(text(MIN_SINGLE_DESCRIPTION))).toEqual([]);
-    expect(getSingleBlockDescriptionBlockers(text(49)).map((b) => b.id)).toEqual(["desc-reason"]);
+    expect(getSingleBlockDescriptionBlockers(text(MIN_SINGLE_DESCRIPTION - 1)).map((b) => b.id)).toEqual(["desc-reason"]);
   });
 
   it("ne bloque pas un texte contenant un double saut de ligne et une signature courte", () => {
