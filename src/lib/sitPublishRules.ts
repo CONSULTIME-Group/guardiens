@@ -227,7 +227,12 @@ export const getSitPublishBlockers = (
 
   const blockers: (PublishBlocker | null)[] = [
     !input.hasProperty
-      ? { id: "property", label: "Logement décrit sur votre profil", action: "/owner-profile" }
+      ? {
+          id: "property",
+          label: "Logement décrit sur votre profil",
+          action: "/owner-profile",
+          advisory: true,
+        }
       : null,
     !len(input.title)
       ? { id: "title", label: "Titre de l'annonce", anchor: "title-field" }
