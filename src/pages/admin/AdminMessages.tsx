@@ -10,8 +10,12 @@ import { Badge } from "@/components/ui/badge";
 import { format, subDays, subMonths, formatDistanceToNow } from "date-fns";
 import { fr } from "date-fns/locale";
 import { Link } from "react-router-dom";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import ConversationsTable from "@/components/admin/messages/ConversationsTable";
 
 type Period = "7d" | "30d" | "90d" | "all";
+type Tab = "stats" | "conversations";
+
 
 interface Stats {
   total_human: number;
@@ -54,6 +58,9 @@ const CTX_COLOR: Record<string, string> = {
 
 export default function AdminMessages() {
   const [period, setPeriod] = useState<Period>("30d");
+  const [tab, setTab] = useState<Tab>("stats");
+  const [focusUserId, setFocusUserId] = useState<string | null>(null);
+
   const [stats, setStats] = useState<Stats | null>(null);
   const [topUsers, setTopUsers] = useState<TopUser[]>([]);
   const [loading, setLoading] = useState(true);
@@ -122,18 +129,32 @@ export default function AdminMessages() {
             Statistiques fiables (calculs côté serveur, sans limite de lignes)
           </p>
         </div>
-        <Select value={period} onValueChange={(v) => setPeriod(v as Period)}>
-          <SelectTrigger className="w-44"><SelectValue /></SelectTrigger>
-          <SelectContent>
-            <SelectItem value="7d">7 derniers jours</SelectItem>
-            <SelectItem value="30d">30 derniers jours</SelectItem>
-            <SelectItem value="90d">3 derniers mois</SelectItem>
-            <SelectItem value="all">Depuis le début</SelectItem>
-          </SelectContent>
-        </Select>
+        {tab === "stats" && (
+          <Select value={period} onValueChange={(v) => setPeriod(v as Period)}>
+            <SelectTrigger className="w-44"><SelectValue /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="7d">7 derniers jours</SelectItem>
+              <SelectItem value="30d">30 derniers jours</SelectItem>
+              <SelectItem value="90d">3 derniers mois</SelectItem>
+              <SelectItem value="all">Depuis le début</SelectItem>
+            </SelectContent>
+          </Select>
+        )}
       </div>
 
-      {/* KPI cards */}
+      <Tabs value={tab} onValueChange={(v) => setTab(v as Tab)}>
+        <TabsList>
+          <TabsTrigger value="stats">Statistiques</TabsTrigger>
+          <TabsTrigger value="conversations">Conversations</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="conversations" className="mt-4">
+          <ConversationsTable focusUserId={focusUserId} onClearFocusUser={() => setFocusUserId(null)} />
+        </TabsContent>
+
+        <TabsContent value="stats" className="mt-4 space-y-6">
+
+
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
         {loading || !stats ? (
           Array.from({ length: 6 }).map((_, i) => (
@@ -269,6 +290,7 @@ export default function AdminMessages() {
                   <TableHead className="text-right">Messages</TableHead>
                   <TableHead className="text-right">Conv.</TableHead>
                   <TableHead className="text-right">Dernier msg</TableHead>
+                  <TableHead className="text-right">Fils</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -295,6 +317,18 @@ export default function AdminMessages() {
                     <TableCell className="text-right text-sm text-muted-foreground">
                       {format(new Date(u.last_message_at), "dd MMM yyyy", { locale: fr })}
                     </TableCell>
+                    <TableCell className="text-right">
+                      <button
+                        type="button"
+                        className="text-xs underline text-muted-foreground hover:text-foreground"
+                        onClick={() => {
+                          setFocusUserId(u.user_id);
+                          setTab("conversations");
+                        }}
+                      >
+                        voir ses conversations
+                      </button>
+                    </TableCell>
                   </TableRow>
                 ))}
               </TableBody>
@@ -302,8 +336,11 @@ export default function AdminMessages() {
           )}
         </CardContent>
       </Card>
+        </TabsContent>
+      </Tabs>
     </div>
   );
+
 }
 
 function KpiCard({
