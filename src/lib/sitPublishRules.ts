@@ -14,7 +14,7 @@
  *  - mode "single-block" (une seule zone de saisie, texte concaténé) :
  *    50 caractères minimum au total, jamais de découpe ;
  *  - aucun seuil de pourcentage de complétion de profil (non actionnable),
- *    remplacé par ses composantes concrètes : logement décrit, une photo, un animal ;
+ *    remplacé par ses composantes concrètes : logement décrit, une photo ;
  *  - date de début ET date de fin toujours exigées, la case dates flexibles
  *    enrichit l'annonce mais ne dispense jamais de dates ;
  *  - photos comptées sur la galerie du profil ET sur les photos du logement ;
@@ -22,6 +22,11 @@
  *  - un brouillon jamais publié ne repasse par le formulaire de création que si
  *    sa description en bloc unique n'atteint pas 50 caractères. Au-delà, il se
  *    publie depuis sa fiche (décision du 10/08/2026).
+ *
+ * Décision du 12/08/2026 : un animal n'est plus exigé pour publier. Une maison,
+ * un jardin ou des plantes à garder sont des annonces légitimes. La ligne animaux
+ * reste affichée dans la checklist en tant que recommandation, puisqu'une annonce
+ * avec animaux attire davantage de candidatures, mais elle n'interdit plus rien.
  */
 
 export const MIN_SUB_DESCRIPTION = 30;
