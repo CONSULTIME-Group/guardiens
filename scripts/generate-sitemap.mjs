@@ -13,6 +13,8 @@ import path from "path";
 import { fileURLToPath } from "url";
 import { sitRichnessRejectionReason } from "../src/lib/sitIndexability.js";
 import { isDemoPro } from "../src/lib/proIndexability.js";
+import { isSitterProfileIndexable } from "../src/lib/sitterProfileIndexability.js";
+
 
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
