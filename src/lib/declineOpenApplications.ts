@@ -97,7 +97,7 @@ export async function declineOpenApplications(params: {
         .from("applications")
         .update({ status: "rejected" as any })
         .eq("id", app.id)
-        .in("status", OPEN_APPLICATION_STATUSES as unknown as string[]);
+        .in("status", [...OPEN_APPLICATION_STATUSES]);
       if (error) throw error;
 
       const { data: conv } = await supabase
