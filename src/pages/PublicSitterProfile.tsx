@@ -40,6 +40,8 @@ import AffinityTeaser from "@/components/matching/AffinityTeaser";
 import { useViewerSitterForAffinity } from "@/hooks/useViewerSitterForAffinity";
 import AlmaFitGardien from "@/components/ai/alma/AlmaFitGardien";
 import { sanitizeBioForPublic } from "@/lib/sanitizeBio";
+import { isSitterProfileIndexable } from "@/lib/sitterProfileIndexability";
+
 import { AlmaReciprocityWhisper } from "@/components/ai/alma/wiring/AlmaReciprocityWhisper";
 import { AlmaOwnerActiveSitterWhisper } from "@/components/ai/alma/wiring/AlmaOwnerActiveSitterWhisper";
 import ProfileSchemaOrg from "@/components/seo/ProfileSchemaOrg";
@@ -980,19 +982,25 @@ export default function PublicSitterProfile() {
   const descBase = `${firstName} garde vos ${animalsForDesc} ${cityForDesc}.`;
   const pageDesc = (descBase + (trustForDesc ? ` ${trustForDesc}.` : '')).slice(0, 160);
   const pageUrl = buildAbsoluteUrl(`/gardiens/${id}`);
-  // Politique noindex (décision produit du 12/08/2026) : AUCUNE fiche gardien
-  // n'est indexable. Motifs : pages minces et quasi dupliquées (86% des profils
-  // ont un champ `motivation` vide, longueur moyenne du texte libre 49
-  // caractères), absence de demande de recherche, et protection des personnes
-  // privées (RGPD). Les fiches restent publiques, crawlables et fonctionnelles :
-  // le `noindex, follow` laisse passer le jus des liens internes sortants, et
-  // aucune règle `Disallow` ne doit être posée sur `/gardiens` (un Disallow
-  // empêcherait Google de voir le noindex, donc bloquerait la désindexation).
-  // `isRichProfile` reste utilisé pour choisir le visuel og:image.
-  const hasSubstantialBio = ((bio || motivation || "") as string).length >= 80;
-  const hasTrustSignal = !!profile?.identity_verified || gallery.length >= 1;
-  const isRichProfile = hasSubstantialBio && hasTrustSignal;
-  const shouldNoindex = true;
+  // Indexabilité des fiches gardien : politique posée le 20/07/2026, confirmée
+  // le 12/08/2026. Objectif : rouvrir le canal SEO des profils sans exposer les
+  // fiches vides. Une fiche est indexable si elle a une bio substantielle (au
+  // moins 80 caractères) ET au moins un signal de confiance (identité vérifiée
+  // ou au moins une photo de galerie). Motif de la confirmation : sur 972
+  // profils, 832 ont une motivation vide et la longueur moyenne du texte libre
+  // est de 49 caractères, donc seules les fiches substantielles méritent
+  // l'index. La règle vit dans src/lib/sitterProfileIndexability.js, partagée
+  // avec scripts/generate-sitemap.mjs pour que sitemap et meta robots ne
+  // puissent pas diverger. Aucun `Disallow` ne doit être posé sur `/gardiens` :
+  // il empêcherait Google de voir le noindex des fiches non éligibles.
+  const isRichProfile = isSitterProfileIndexable({
+    bio,
+    motivation,
+    identityVerified: profile?.identity_verified,
+    galleryCount: gallery.length,
+  });
+  const shouldNoindex = !isRichProfile;
+
 
 
   const typeLabel = SITTER_TYPE_LABELS[sitterType] || sitterType;
