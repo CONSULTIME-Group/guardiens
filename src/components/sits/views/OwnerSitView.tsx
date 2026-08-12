@@ -35,6 +35,12 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 
 import { supabase } from "@/integrations/supabase/client";
+import {
+  OPEN_APPLICATION_STATUSES,
+  declineOpenApplications,
+  formatOpenApplicationLabel,
+  type OpenApplication,
+} from "@/lib/declineOpenApplications";
 import { logger } from "@/lib/logger";
 import { useToast } from "@/hooks/use-toast";
 import { formatSitPeriod } from "@/lib/dateRange";
@@ -119,6 +125,10 @@ const OwnerSitView = ({
   const [unpublishReason, setUnpublishReason] = useState<string>("");
   const [unpublishReasonOther, setUnpublishReasonOther] = useState<string>("");
   const [pendingAppsToCancel, setPendingAppsToCancel] = useState<number>(0);
+  // Candidatures ouvertes (pending, viewed) au moment de la dépublication :
+  // filet de sécurité, on les nomme et on propose de les décliner d'abord.
+  const [openApps, setOpenApps] = useState<OpenApplication[]>([]);
+  const [decliningApps, setDecliningApps] = useState(false);
   const [logementOverride, setLogementOverride] = useState(initialLogementOverride);
   const [animauxOverride, setAnimauxOverride] = useState(initialAnimauxOverride);
   const [internalAppCount, setInternalAppCount] = useState(appCount);
@@ -267,6 +277,8 @@ const OwnerSitView = ({
 
   // Étape 1 : ouvre la modale de confirmation en pré-comptant les candidatures
   // actives qui seront clôturées, l'owner doit voir l'impact avant de cliquer.
+  // On charge aussi le détail des candidatures ouvertes (pending, viewed) pour
+  // les nommer et proposer le déclin groupé avant dépublication.
   const requestUnpublish = async () => {
     const { count } = await supabase
       .from("applications")
@@ -274,18 +286,70 @@ const OwnerSitView = ({
       .eq("sit_id", sit.id)
       .in("status", ["pending", "viewed", "discussing"]);
     setPendingAppsToCancel(count ?? 0);
+
+    const { data: openRows } = await supabase
+      .from("applications")
+      .select("id, sitter_id, created_at")
+      .eq("sit_id", sit.id)
+      .in("status", [...OPEN_APPLICATION_STATUSES])
+      .order("created_at", { ascending: true });
+
+    const rows = (openRows ?? []) as Array<{ id: string; sitter_id: string; created_at: string }>;
+    const sitterIds = [...new Set(rows.map((r) => r.sitter_id).filter(Boolean))];
+    const nameById = new Map<string, string>();
+    if (sitterIds.length > 0) {
+      const { data: profs } = await supabase
+        .from("public_profiles")
+        .select("id, first_name")
+        .in("id", sitterIds);
+      (profs ?? []).forEach((p: any) => nameById.set(p.id, p.first_name ?? ""));
+    }
+    setOpenApps(
+      rows.map((r) => ({
+        id: r.id,
+        sitter_id: r.sitter_id,
+        created_at: r.created_at,
+        first_name: nameById.get(r.sitter_id) || "Candidat",
+      })),
+    );
+
     setUnpublishReason("");
     setUnpublishReasonOther("");
     setUnpublishConfirmOpen(true);
   };
 
+
   // Étape 2 : exécute la dépublication via le RPC sécurisé.
   // Le RPC valide : auth, ownership, status=published, end_date >= today.
   // Côté client on ne fait QUE le mapping des erreurs typées → message FR.
-  const handleUnpublish = async () => {
+  const handleUnpublish = async (declineOpenFirst = false) => {
     if (unpublishing) return;
     if (!unpublishReason) return;
     setUnpublishing(true);
+
+    // Filet de sécurité : si l'owner a choisi de répondre, on décline les
+    // candidatures ouvertes AVANT de dépublier, en série et via la file
+    // d'envoi habituelle. La clôture automatique des candidatures orphelines
+    // reste en place derrière, elle ne trouvera simplement plus rien à faire.
+    let declinedCount = 0;
+    if (declineOpenFirst && openApps.length > 0 && currentUserId) {
+      setDecliningApps(true);
+      const result = await declineOpenApplications({
+        applications: openApps,
+        sitId: sit.id,
+        sitTitle: sit.title ?? "",
+        ownerId: currentUserId,
+      });
+      declinedCount = result.declined;
+      setDecliningApps(false);
+      if (result.failed > 0) {
+        toast({
+          variant: "destructive",
+          title: "Certains déclins ont échoué",
+          description: `${result.failed} candidature${result.failed > 1 ? "s n'ont" : " n'a"} pas pu être déclinée${result.failed > 1 ? "s" : ""}. L'annonce est quand même dépubliée.`,
+        });
+      }
+    }
 
     const reasonText =
       unpublishReason === "other"
@@ -349,6 +413,13 @@ const OwnerSitView = ({
           ? `Archivée. ${count} candidature${count > 1 ? "s" : ""} en cours ${count > 1 ? "ont" : "a"} été clôturée${count > 1 ? "s" : ""}.`
           : "Elle est archivée. Vous pouvez la republier quand vous voulez depuis l'onglet « Archivées ».",
     });
+    if (declinedCount > 0) {
+      toast({
+        title: `${declinedCount} candidature${declinedCount > 1 ? "s déclinées" : " déclinée"}`,
+        description: "Chaque candidat a reçu votre réponse.",
+      });
+    }
+    setOpenApps([]);
   };
   /**
    * Un brouillon jamais publié n'a pas été validé en deux champs par le
@@ -503,7 +574,25 @@ const OwnerSitView = ({
                   visible des gardiens, vous pourrez la republier à tout moment depuis
                   l'onglet « Archivées ».
                 </p>
-                {pendingAppsToCancel > 0 && (
+                {openApps.length > 0 && (
+                  <div className="rounded-lg border border-destructive/30 bg-destructive/5 p-3 text-sm">
+                    <p className="text-foreground">
+                      <strong>
+                        {openApps.length} candidature{openApps.length > 1 ? "s" : ""} attend
+                        {openApps.length > 1 ? "ent" : ""} encore ta réponse.
+                      </strong>
+                    </p>
+                    <ul className="mt-2 space-y-1 text-xs text-muted-foreground">
+                      {openApps.map((a) => (
+                        <li key={a.id}>{formatOpenApplicationLabel(a)}</li>
+                      ))}
+                    </ul>
+                    <p className="text-xs text-muted-foreground mt-2">
+                      Tu peux les décliner maintenant, ou dépublier sans les traiter.
+                    </p>
+                  </div>
+                )}
+                {openApps.length === 0 && pendingAppsToCancel > 0 && (
                   <div className="rounded-lg border border-destructive/30 bg-destructive/5 p-3 text-sm">
                     <p className="text-foreground">
                       <strong>
@@ -516,6 +605,7 @@ const OwnerSitView = ({
                     </p>
                   </div>
                 )}
+
               </div>
             </AlertDialogDescription>
           </AlertDialogHeader>
@@ -560,19 +650,40 @@ const OwnerSitView = ({
             </p>
           </div>
 
-          <AlertDialogFooter>
-            <AlertDialogCancel disabled={unpublishing}>Annuler</AlertDialogCancel>
+          <AlertDialogFooter className="flex-col sm:flex-col sm:space-x-0 gap-2">
+            {openApps.length > 0 && (
+              <AlertDialogAction
+                onClick={(e) => {
+                  e.preventDefault();
+                  void handleUnpublish(true);
+                }}
+                disabled={unpublishing || !unpublishReason}
+                className="w-full"
+              >
+                {decliningApps
+                  ? "Envoi des réponses…"
+                  : "Décliner ces candidatures et dépublier"}
+              </AlertDialogAction>
+            )}
             <AlertDialogAction
               onClick={(e) => {
                 e.preventDefault();
-                void handleUnpublish();
+                void handleUnpublish(false);
               }}
               disabled={unpublishing || !unpublishReason}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              className="w-full bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
-              {unpublishing ? "Dépublication…" : "Dépublier"}
+              {unpublishing && !decliningApps
+                ? "Dépublication…"
+                : openApps.length > 0
+                  ? "Dépublier sans les traiter"
+                  : "Dépublier"}
             </AlertDialogAction>
+            <AlertDialogCancel disabled={unpublishing} className="w-full mt-0">
+              Annuler
+            </AlertDialogCancel>
           </AlertDialogFooter>
+
         </AlertDialogContent>
       </AlertDialog>
 
