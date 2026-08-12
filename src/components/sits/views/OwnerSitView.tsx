@@ -322,10 +322,34 @@ const OwnerSitView = ({
   // Étape 2 : exécute la dépublication via le RPC sécurisé.
   // Le RPC valide : auth, ownership, status=published, end_date >= today.
   // Côté client on ne fait QUE le mapping des erreurs typées → message FR.
-  const handleUnpublish = async () => {
+  const handleUnpublish = async (declineOpenFirst = false) => {
     if (unpublishing) return;
     if (!unpublishReason) return;
     setUnpublishing(true);
+
+    // Filet de sécurité : si l'owner a choisi de répondre, on décline les
+    // candidatures ouvertes AVANT de dépublier, en série et via la file
+    // d'envoi habituelle. La clôture automatique des candidatures orphelines
+    // reste en place derrière, elle ne trouvera simplement plus rien à faire.
+    let declinedCount = 0;
+    if (declineOpenFirst && openApps.length > 0 && currentUserId) {
+      setDecliningApps(true);
+      const result = await declineOpenApplications({
+        applications: openApps,
+        sitId: sit.id,
+        sitTitle: sit.title ?? "",
+        ownerId: currentUserId,
+      });
+      declinedCount = result.declined;
+      setDecliningApps(false);
+      if (result.failed > 0) {
+        toast({
+          variant: "destructive",
+          title: "Certains déclins ont échoué",
+          description: `${result.failed} candidature${result.failed > 1 ? "s n'ont" : " n'a"} pas pu être déclinée${result.failed > 1 ? "s" : ""}. L'annonce est quand même dépubliée.`,
+        });
+      }
+    }
 
     const reasonText =
       unpublishReason === "other"
@@ -389,6 +413,13 @@ const OwnerSitView = ({
           ? `Archivée. ${count} candidature${count > 1 ? "s" : ""} en cours ${count > 1 ? "ont" : "a"} été clôturée${count > 1 ? "s" : ""}.`
           : "Elle est archivée. Vous pouvez la republier quand vous voulez depuis l'onglet « Archivées ».",
     });
+    if (declinedCount > 0) {
+      toast({
+        title: `${declinedCount} candidature${declinedCount > 1 ? "s déclinées" : " déclinée"}`,
+        description: "Chaque candidat a reçu votre réponse.",
+      });
+    }
+    setOpenApps([]);
   };
   /**
    * Un brouillon jamais publié n'a pas été validé en deux champs par le
