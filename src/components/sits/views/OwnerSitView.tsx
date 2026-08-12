@@ -277,24 +277,25 @@ const OwnerSitView = ({
 
   // Étape 1 : ouvre la modale de confirmation en pré-comptant les candidatures
   // actives qui seront clôturées, l'owner doit voir l'impact avant de cliquer.
-  // On charge aussi le détail des candidatures ouvertes (pending, viewed) pour
-  // les nommer et proposer le déclin groupé avant dépublication.
+  // Les deux requêtes partagent la même définition de « candidature ouverte »,
+  // OPEN_APPLICATION_STATUSES (pending, viewed, discussing), qui est aussi
+  // l'ensemble annulé par le RPC unpublish_sit.
   const requestUnpublish = async () => {
     const { count } = await supabase
       .from("applications")
       .select("id", { count: "exact", head: true })
       .eq("sit_id", sit.id)
-      .in("status", ["pending", "viewed", "discussing"]);
+      .in("status", [...OPEN_APPLICATION_STATUSES]);
     setPendingAppsToCancel(count ?? 0);
 
     const { data: openRows } = await supabase
       .from("applications")
-      .select("id, sitter_id, created_at")
+      .select("id, sitter_id, created_at, status")
       .eq("sit_id", sit.id)
       .in("status", [...OPEN_APPLICATION_STATUSES])
       .order("created_at", { ascending: true });
 
-    const rows = (openRows ?? []) as Array<{ id: string; sitter_id: string; created_at: string }>;
+    const rows = (openRows ?? []) as Array<{ id: string; sitter_id: string; created_at: string; status: string }>;
     const sitterIds = [...new Set(rows.map((r) => r.sitter_id).filter(Boolean))];
     const nameById = new Map<string, string>();
     if (sitterIds.length > 0) {
@@ -310,6 +311,7 @@ const OwnerSitView = ({
         sitter_id: r.sitter_id,
         created_at: r.created_at,
         first_name: nameById.get(r.sitter_id) || "Candidat",
+        status: r.status,
       })),
     );
 
@@ -329,8 +331,11 @@ const OwnerSitView = ({
 
     // Filet de sécurité : si l'owner a choisi de répondre, on décline les
     // candidatures ouvertes AVANT de dépublier, en série et via la file
-    // d'envoi habituelle. La clôture automatique des candidatures orphelines
-    // reste en place derrière, elle ne trouvera simplement plus rien à faire.
+    // d'envoi habituelle. Sans ce passage, le RPC unpublish_sit annule
+    // directement les candidatures pending, viewed et discussing, sans message
+    // ni email : la clôture automatique des candidatures orphelines ne prend
+    // pas le relais, elle ne balaie que les sits cancelled, archived ou
+    // expired, or une dépublication produit un draft.
     let declinedCount = 0;
     if (declineOpenFirst && openApps.length > 0 && currentUserId) {
       setDecliningApps(true);
@@ -416,7 +421,7 @@ const OwnerSitView = ({
     if (declinedCount > 0) {
       toast({
         title: `${declinedCount} candidature${declinedCount > 1 ? "s déclinées" : " déclinée"}`,
-        description: "Chaque candidat a reçu votre réponse.",
+        description: `${declinedCount} candidat${declinedCount > 1 ? "s ont" : " a"} été notifié${declinedCount > 1 ? "s" : ""} par message et par email.`,
       });
     }
     setOpenApps([]);
@@ -579,7 +584,7 @@ const OwnerSitView = ({
                     <p className="text-foreground">
                       <strong>
                         {openApps.length} candidature{openApps.length > 1 ? "s" : ""} attend
-                        {openApps.length > 1 ? "ent" : ""} encore ta réponse.
+                        {openApps.length > 1 ? "ent" : ""} encore votre réponse.
                       </strong>
                     </p>
                     <ul className="mt-2 space-y-1 text-xs text-muted-foreground">
@@ -588,7 +593,7 @@ const OwnerSitView = ({
                       ))}
                     </ul>
                     <p className="text-xs text-muted-foreground mt-2">
-                      Tu peux les décliner maintenant, ou dépublier sans les traiter.
+                      Vous pouvez les décliner maintenant, ou dépublier sans les traiter.
                     </p>
                   </div>
                 )}

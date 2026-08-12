@@ -8,24 +8,45 @@
  *   d'idempotence `app-declined-<application_id>`), pour que les plafonds de
  *   fréquence et la file d'envoi existants s'appliquent sans exception ;
  * - les candidats sont traités en série, jamais en rafale parallèle, avec une
- *   micro-pause entre deux envois. C'est le pattern déjà utilisé pour les
- *   déclins automatiques à l'acceptation d'une candidature ;
- * - un échec sur un candidat n'interrompt pas les suivants, il est compté.
+ *   micro-pause entre deux envois ;
+ * - un échec sur un candidat n'interrompt pas les suivants, il est compté ;
+ * - une candidature dont le statut a changé entre l'ouverture de la boîte de
+ *   dialogue et le clic est ignorée : ni message, ni email.
  *
- * La fermeture automatique des candidatures orphelines reste le filet de
- * dernier recours : ce helper ne la remplace pas, il évite juste qu'elle ait
- * à s'exécuter quand le propriétaire a choisi de répondre.
+ * Ce que fait réellement le système sans ce helper, vérifié le 12/08/2026 :
+ * le RPC `unpublish_sit` passe en `cancelled` toutes les candidatures
+ * `pending`, `viewed` et `discussing` de l'annonce, sans message ni email.
+ * La clôture automatique `close_orphan_applications` ne prend PAS le relais :
+ * elle ne balaie que les sits `cancelled`, `archived` ou `expired`, alors
+ * qu'une dépublication produit un `draft`. Ce helper est donc la seule
+ * occasion de notifier les candidats.
  */
 import { supabase } from "@/integrations/supabase/client";
 import { logger } from "@/lib/logger";
 import { sendTransactionalEmail } from "@/lib/sendTransactionalEmail";
 
 /** Statuts considérés comme « candidature ouverte, sans réponse ». */
-export const OPEN_APPLICATION_STATUSES = ["pending", "viewed"] as const;
+export const OPEN_APPLICATION_STATUSES = [
+  "pending",
+  "viewed",
+  "discussing",
+] as const;
+
+export type OpenApplicationStatus = (typeof OPEN_APPLICATION_STATUSES)[number];
 
 /** Message type envoyé lors d'un déclin groupé à la dépublication. */
 export const BULK_DECLINE_MESSAGE =
   "Merci pour votre candidature ! Cette annonce n'est plus d'actualité, je la retire. N'hésitez pas à postuler à mes prochaines annonces.";
+
+/** Variante pour un candidat avec qui des échanges ont déjà eu lieu. */
+export const BULK_DECLINE_MESSAGE_DISCUSSING =
+  "Merci pour nos échanges. Cette annonce n'est plus d'actualité, je la retire. N'hésitez pas à postuler à mes prochaines annonces.";
+
+/** Choisit le message type selon le statut de départ de la candidature. */
+export const pickBulkDeclineMessage = (status?: string): string =>
+  status === "discussing"
+    ? BULK_DECLINE_MESSAGE_DISCUSSING
+    : BULK_DECLINE_MESSAGE;
 
 /** Message système déposé dans la conversation, identique au déclin unitaire. */
 export const DECLINE_SYSTEM_MESSAGE =
@@ -36,11 +57,14 @@ export interface OpenApplication {
   sitter_id: string;
   created_at: string;
   first_name: string;
+  status?: string;
 }
 
 export interface BulkDeclineResult {
   declined: number;
   failed: number;
+  /** Candidatures dont le statut avait changé, volontairement ignorées. */
+  skipped: number;
 }
 
 /** Pause entre deux candidats, évite la rafale synchrone. */
@@ -69,7 +93,7 @@ export const formatOpenApplicationLabel = (
 
 /**
  * Décline en série une liste de candidatures ouvertes.
- * Ne lève jamais : renvoie le compte des succès et des échecs.
+ * Ne lève jamais : renvoie le compte des succès, des échecs et des ignorés.
  */
 export async function declineOpenApplications(params: {
   applications: OpenApplication[];
@@ -84,21 +108,34 @@ export async function declineOpenApplications(params: {
     sitId,
     sitTitle,
     ownerId,
-    message = BULK_DECLINE_MESSAGE,
+    message,
     spacingMs = SEND_SPACING_MS,
   } = params;
 
   let declined = 0;
   let failed = 0;
+  let skipped = 0;
 
   for (const app of applications) {
     try {
-      const { error } = await supabase
+      // `.select` est indispensable : un update qui ne matche aucune ligne ne
+      // renvoie pas d'erreur. Sans lui, un candidat accepté entre-temps
+      // recevrait un déclin.
+      const { data: updated, error } = await supabase
         .from("applications")
         .update({ status: "rejected" as any })
         .eq("id", app.id)
-        .in("status", [...OPEN_APPLICATION_STATUSES]);
+        .in("status", [...OPEN_APPLICATION_STATUSES])
+        .select("id");
       if (error) throw error;
+
+      if (!updated || updated.length === 0) {
+        skipped += 1;
+        if (spacingMs > 0) await wait(spacingMs);
+        continue;
+      }
+
+      const body = (message ?? pickBulkDeclineMessage(app.status)).trim();
 
       const { data: conv } = await supabase
         .from("conversations")
@@ -114,11 +151,11 @@ export async function declineOpenApplications(params: {
           content: DECLINE_SYSTEM_MESSAGE,
           is_system: true,
         });
-        if (message.trim()) {
+        if (body) {
           await supabase.from("messages").insert({
             conversation_id: conv.id,
             sender_id: ownerId,
-            content: message.trim(),
+            content: body,
             is_system: false,
           });
         }
@@ -148,5 +185,5 @@ export async function declineOpenApplications(params: {
     if (spacingMs > 0) await wait(spacingMs);
   }
 
-  return { declined, failed };
+  return { declined, failed, skipped };
 }
