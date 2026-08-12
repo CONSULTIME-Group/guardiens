@@ -58,6 +58,9 @@ const CTX_COLOR: Record<string, string> = {
 
 export default function AdminMessages() {
   const [period, setPeriod] = useState<Period>("30d");
+  const [tab, setTab] = useState<Tab>("stats");
+  const [focusUserId, setFocusUserId] = useState<string | null>(null);
+
   const [stats, setStats] = useState<Stats | null>(null);
   const [topUsers, setTopUsers] = useState<TopUser[]>([]);
   const [loading, setLoading] = useState(true);
