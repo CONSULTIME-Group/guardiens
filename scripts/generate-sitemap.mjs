@@ -174,10 +174,38 @@ async function maxUpdatedAt(table, column = "updated_at", filter = null) {
   return data[0][column] || null;
 }
 
+/**
+ * Clé d'invalidation composite : date la plus récente et nombre de lignes.
+ * Utilisée quand la colonne temporelle seule n'est pas fiable (valeur nulle sur
+ * une vue publique, par exemple `public_profiles.last_seen_at` qui n'est pas
+ * exposée en anonyme). Sans cette variante, la clé restait nulle et le cache
+ * n'était jamais invalidé.
+ */
+async function maxUpdatedAtWithCount(table, column, filter = null) {
+  const [date, countRes] = await Promise.all([
+    maxUpdatedAt(table, column, filter),
+    (async () => {
+      let q = supabase.from(table).select("id", { count: "exact" }).limit(1);
+      if (filter) q = filter(q);
+      const { count, error } = await q;
+      return error ? null : count;
+    })(),
+  ]);
+  if (!date && count == null) return null;
+  return `${date ?? "no-date"}|${countRes ?? "no-count"}`;
+}
+
 async function fetchOrCache(key, cache, headProbe, fetcher, builder) {
   const head = await headProbe();
   const cached = cache.sources[key];
-  if (!FORCE && cached && cached.head === head && cache.entries[key]) {
+  // Une clé d'invalidation nulle ne prouve rien : elle signifie « je ne sais
+  // pas si les données ont bougé ». La traiter comme « rien n'a changé » a figé
+  // le sitemap de production sur un état intermédiaire (12/08/2026). Dans ce
+  // cas on recharge toujours, et on le dit à haute voix dans le log de build.
+  if (head == null) {
+    console.warn(`  ⚠️ ${key}: clé d'invalidation absente, rechargement forcé`);
+  }
+  if (!FORCE && head != null && cached && cached.head === head && cache.entries[key]) {
     console.log(`  ↳ ${key}: cached (${cache.entries[key].length} URLs)`);
     return cache.entries[key];
   }
@@ -188,6 +216,7 @@ async function fetchOrCache(key, cache, headProbe, fetcher, builder) {
   console.log(`  ↳ ${key}: refreshed (${entries.length} URLs)`);
   return entries;
 }
+
 
 async function main() {
   const today = new Date().toISOString().split("T")[0];
