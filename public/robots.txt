@@ -127,7 +127,10 @@ Disallow: /auth/
 # Routes publiques marquées index:false dans staticRoutes
 # (outils internes / pages d'auth — cohérent avec <meta robots> + sitemap)
 
-# Profils publics : /gardiens/:id reste crawlable mais noindex (decision 12/08/2026).
-# Aucune fiche gardien n'est listée dans le sitemap ; aucun Disallow ici, sinon la désindexation serait bloquée.
+# Profils publics : /gardiens/:id reste crawlable. Une fiche est indexable
+# et listee au sitemap si et seulement si elle passe la regle de substance
+# (src/lib/sitterProfileIndexability.js) : bio d'au moins 80 caracteres et
+# au moins un signal de confiance. Les autres rendent noindex, follow.
+# Aucun Disallow ici, sinon la desindexation des fiches non eligibles serait bloquee.
 
 Sitemap: https://guardiens.fr/sitemap.xml
