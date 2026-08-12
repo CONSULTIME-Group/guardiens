@@ -122,18 +122,32 @@ export default function AdminMessages() {
             Statistiques fiables (calculs côté serveur, sans limite de lignes)
           </p>
         </div>
-        <Select value={period} onValueChange={(v) => setPeriod(v as Period)}>
-          <SelectTrigger className="w-44"><SelectValue /></SelectTrigger>
-          <SelectContent>
-            <SelectItem value="7d">7 derniers jours</SelectItem>
-            <SelectItem value="30d">30 derniers jours</SelectItem>
-            <SelectItem value="90d">3 derniers mois</SelectItem>
-            <SelectItem value="all">Depuis le début</SelectItem>
-          </SelectContent>
-        </Select>
+        {tab === "stats" && (
+          <Select value={period} onValueChange={(v) => setPeriod(v as Period)}>
+            <SelectTrigger className="w-44"><SelectValue /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="7d">7 derniers jours</SelectItem>
+              <SelectItem value="30d">30 derniers jours</SelectItem>
+              <SelectItem value="90d">3 derniers mois</SelectItem>
+              <SelectItem value="all">Depuis le début</SelectItem>
+            </SelectContent>
+          </Select>
+        )}
       </div>
 
-      {/* KPI cards */}
+      <Tabs value={tab} onValueChange={(v) => setTab(v as Tab)}>
+        <TabsList>
+          <TabsTrigger value="stats">Statistiques</TabsTrigger>
+          <TabsTrigger value="conversations">Conversations</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="conversations" className="mt-4">
+          <ConversationsTable focusUserId={focusUserId} onClearFocusUser={() => setFocusUserId(null)} />
+        </TabsContent>
+
+        <TabsContent value="stats" className="mt-4 space-y-6">
+
+
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
         {loading || !stats ? (
           Array.from({ length: 6 }).map((_, i) => (
