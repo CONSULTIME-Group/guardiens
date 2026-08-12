@@ -169,7 +169,7 @@ function buildRobotsTxt({ siteUrl, privatePaths, noindexFromStatic }) {
     ...noindexFromStatic.map((p) => `Disallow: ${p}`),
     "",
     "# Profils publics : /gardiens/:id reste crawlable mais noindex (decision 12/08/2026).",
-    "# Le sitemap filtre déjà les profils non-publics (politique : seuls sitter/both publics).",
+    "# Aucune fiche gardien n\x27est listée dans le sitemap ; aucun Disallow ici, sinon la désindexation serait bloquée.",
     "",
     `Sitemap: ${siteUrl}/sitemap.xml`,
     "",
