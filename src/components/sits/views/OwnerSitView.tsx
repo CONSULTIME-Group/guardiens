@@ -650,19 +650,40 @@ const OwnerSitView = ({
             </p>
           </div>
 
-          <AlertDialogFooter>
-            <AlertDialogCancel disabled={unpublishing}>Annuler</AlertDialogCancel>
+          <AlertDialogFooter className="flex-col sm:flex-col sm:space-x-0 gap-2">
+            {openApps.length > 0 && (
+              <AlertDialogAction
+                onClick={(e) => {
+                  e.preventDefault();
+                  void handleUnpublish(true);
+                }}
+                disabled={unpublishing || !unpublishReason}
+                className="w-full"
+              >
+                {decliningApps
+                  ? "Envoi des réponses…"
+                  : "Décliner ces candidatures et dépublier"}
+              </AlertDialogAction>
+            )}
             <AlertDialogAction
               onClick={(e) => {
                 e.preventDefault();
-                void handleUnpublish();
+                void handleUnpublish(false);
               }}
               disabled={unpublishing || !unpublishReason}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              className="w-full bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
-              {unpublishing ? "Dépublication…" : "Dépublier"}
+              {unpublishing && !decliningApps
+                ? "Dépublication…"
+                : openApps.length > 0
+                  ? "Dépublier sans les traiter"
+                  : "Dépublier"}
             </AlertDialogAction>
+            <AlertDialogCancel disabled={unpublishing} className="w-full mt-0">
+              Annuler
+            </AlertDialogCancel>
           </AlertDialogFooter>
+
         </AlertDialogContent>
       </AlertDialog>
 
