@@ -76,9 +76,10 @@ describe("filet de sécurité à la dépublication", () => {
   it("respecte les contraintes de ton, pas de tiret cadratin ni d'emoji", () => {
     const texts = [
       BULK_DECLINE_MESSAGE,
+      BULK_DECLINE_MESSAGE_DISCUSSING,
       "Décliner ces candidatures et dépublier",
       "Dépublier sans les traiter",
-      "Tu peux les décliner maintenant, ou dépublier sans les traiter.",
+      "Vous pouvez les décliner maintenant, ou dépublier sans les traiter.",
     ];
     for (const t of texts) {
       expect(t).not.toMatch(/[—–]/);
