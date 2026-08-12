@@ -12,6 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Trash2, ArrowLeft, Info, GripVertical, UploadCloud, Pencil, Check, X, Star } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import PhotoTipsAlert from "./PhotoTipsAlert";
+import PhotoJourneyDialog from "./PhotoJourneyDialog";
 import PhotoQualityChecker from "./PhotoQualityChecker";
 import {
   DndContext,
@@ -180,6 +181,7 @@ const OwnerGallery = () => {
   const [isDraggingFile, setIsDraggingFile] = useState(false);
   const [defaultCategory, setDefaultCategory] = useState<string>("home_life");
   const [defaultSeason, setDefaultSeason] = useState<string>("");
+  const [journeyOpen, setJourneyOpen] = useState(false);
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
