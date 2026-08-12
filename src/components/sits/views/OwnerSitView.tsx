@@ -35,6 +35,12 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 
 import { supabase } from "@/integrations/supabase/client";
+import {
+  OPEN_APPLICATION_STATUSES,
+  declineOpenApplications,
+  formatOpenApplicationLabel,
+  type OpenApplication,
+} from "@/lib/declineOpenApplications";
 import { logger } from "@/lib/logger";
 import { useToast } from "@/hooks/use-toast";
 import { formatSitPeriod } from "@/lib/dateRange";
@@ -119,6 +125,10 @@ const OwnerSitView = ({
   const [unpublishReason, setUnpublishReason] = useState<string>("");
   const [unpublishReasonOther, setUnpublishReasonOther] = useState<string>("");
   const [pendingAppsToCancel, setPendingAppsToCancel] = useState<number>(0);
+  // Candidatures ouvertes (pending, viewed) au moment de la dépublication :
+  // filet de sécurité, on les nomme et on propose de les décliner d'abord.
+  const [openApps, setOpenApps] = useState<OpenApplication[]>([]);
+  const [decliningApps, setDecliningApps] = useState(false);
   const [logementOverride, setLogementOverride] = useState(initialLogementOverride);
   const [animauxOverride, setAnimauxOverride] = useState(initialAnimauxOverride);
   const [internalAppCount, setInternalAppCount] = useState(appCount);
