@@ -143,9 +143,9 @@ describe("mode deux champs, les deux valeurs sont obligatoires", () => {
 });
 
 describe("mode bloc unique, jamais de découpe", () => {
-  it("exige 50 caractères au total", () => {
+  it("exige 30 caractères au total", () => {
     expect(getSingleBlockDescriptionBlockers(text(MIN_SINGLE_DESCRIPTION))).toEqual([]);
-    expect(getSingleBlockDescriptionBlockers(text(49)).map((b) => b.id)).toEqual(["desc-reason"]);
+    expect(getSingleBlockDescriptionBlockers(text(MIN_SINGLE_DESCRIPTION - 1)).map((b) => b.id)).toEqual(["desc-reason"]);
   });
 
   it("ne bloque pas un texte contenant un double saut de ligne et une signature courte", () => {
@@ -165,7 +165,7 @@ describe("mode bloc unique, jamais de découpe", () => {
     expect(blockers.map((b) => b.id)).not.toContain("desc-expectations");
   });
 
-  it("annonce le seuil de 50 caractères dans son libellé", () => {
+  it("annonce le seuil de 30 caractères dans son libellé", () => {
     expect(getSingleBlockDescriptionBlockers(text(10))[0].label).toContain(
       `${MIN_SINGLE_DESCRIPTION} caractères minimum`,
     );
@@ -173,7 +173,7 @@ describe("mode bloc unique, jamais de découpe", () => {
 });
 
 describe("autres prérequis", () => {
-  it("bloque sans logement, sans titre, sans photo, sans animal", () => {
+  it("liste les éléments manquants, logement et animaux étant informatifs", () => {
     const empty: SitPublishInput = {
       descriptionMode: "two-fields",
       title: "",
@@ -187,6 +187,10 @@ describe("autres prérequis", () => {
       petCount: 0,
     };
     expect(ids(empty)).toEqual(["property", "title", "photo", "pets"]);
+    const blocking = getBlockingBlockers(getSitPublishBlockers(empty)).map((b) => b.id);
+    expect(blocking).toEqual(["title", "photo"]);
+    expect(getSitPublishBlockers(empty).find((b) => b.id === "property")?.advisory).toBe(true);
+    expect(getSitPublishBlockers(empty).find((b) => b.id === "pets")?.advisory).toBe(true);
   });
 
   it("compte les photos du logement et la couverture, pas seulement la galerie", () => {
@@ -307,7 +311,7 @@ describe("libellés des prérequis, suivant le mode", () => {
     ]);
   });
 
-  it("n'affiche pas les attentes en mode bloc unique et annonce 50 caractères", () => {
+  it("n'affiche pas les attentes en mode bloc unique et annonce 30 caractères", () => {
     const reqs = getSitPublishRequirements("single-block");
     expect(reqs.map((r) => r.id)).toEqual([
       "property",
