@@ -16,7 +16,7 @@ const META_TITLE_OVERRIDES: Record<string, string> = {
 const CityPageMeta = ({ city, noindex = false }: Props) => {
   const title =
     META_TITLE_OVERRIDES[city.slug] ||
-    `House-sitting à ${city.name}, garde d'animaux, de maison et de jardin | Guardiens`;
+    `House-sitting à ${city.name}, garde d'animaux, de maison et de jardin, gardiens près de chez vous | Guardiens`;
 
   return (
     <PageMeta

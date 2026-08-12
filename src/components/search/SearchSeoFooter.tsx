@@ -52,7 +52,7 @@ const SearchSeoFooter = () => (
           id="search-seo-heading"
           className="font-display text-2xl md:text-3xl font-semibold text-foreground mb-3"
         >
-          Garde d'animaux, de maison et de jardin, ville par ville
+          Garde d'animaux à domicile, de maison et de jardin, ville par ville
         </h2>
         <p className="text-sm md:text-base text-muted-foreground mb-6 max-w-3xl">
           Découvrez les annonces et les gardiens disponibles dans les villes
