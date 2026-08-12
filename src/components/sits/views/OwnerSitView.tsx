@@ -311,6 +311,7 @@ const OwnerSitView = ({
         sitter_id: r.sitter_id,
         created_at: r.created_at,
         first_name: nameById.get(r.sitter_id) || "Candidat",
+        status: r.status,
       })),
     );
 
