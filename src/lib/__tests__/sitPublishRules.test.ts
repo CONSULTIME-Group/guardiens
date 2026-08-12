@@ -307,7 +307,7 @@ describe("libellés des prérequis, suivant le mode", () => {
     ]);
   });
 
-  it("n'affiche pas les attentes en mode bloc unique et annonce 50 caractères", () => {
+  it("n'affiche pas les attentes en mode bloc unique et annonce 30 caractères", () => {
     const reqs = getSitPublishRequirements("single-block");
     expect(reqs.map((r) => r.id)).toEqual([
       "property",
