@@ -273,22 +273,11 @@ async function main() {
         }));
       }
     ),
-    fetchOrCache(
-      // Le générateur tourne avec la clé anonyme : la table `profiles` est
-      // fermée par RLS (0 ligne, donc 0 URL `/gardiens/` pendant que
-      // robots.txt les déclare indexables). On lit la vue publique
-      // `public_profiles`, qui est justement l'exposition anonyme validée et
-      // porte déjà le filtre de compte actif.
-      "public_profiles", cache,
-      () => maxUpdatedAt("public_profiles", "last_seen_at", q => q.gte("profile_completion", 60).in("role", ["sitter", "both"])),
-      async () => (await supabase.from("public_profiles").select("id, last_seen_at, created_at, postal_code, avatar_url, bio, role").gte("profile_completion", 60).in("role", ["sitter", "both"]).not("postal_code", "is", null).not("avatar_url", "is", null).not("bio", "is", null).limit(2000)).data,
-      rows => rows.filter(p => p.postal_code?.length === 5 && p.avatar_url && p.bio && p.bio.length > 50).map(p => ({
-        loc: `/gardiens/${p.id}`,
-        lastmod: (p.last_seen_at || p.created_at || today).split("T")[0],
-        changefreq: "monthly",
-        priority: "0.5",
-      }))
-    ),
+    // Fiches gardien `/gardiens/:id` : volontairement ABSENTES du sitemap
+    // depuis la décision produit du 12/08/2026 (pages minces, quasi dupliquées,
+    // sans demande de recherche, et personnes privées). La page rend
+    // `noindex, follow` côté client. Ne pas ajouter de `Disallow` sur
+    // `/gardiens` : les URLs doivent rester crawlables pour être désindexées.
     // Annonces individuelles `/annonces/:id` — filtre qualité aligné avec
     // l'indexabilité côté client (PublicSitDetail) via la règle partagée
     // src/lib/sitIndexability.js : statut publié, candidatures ouvertes,

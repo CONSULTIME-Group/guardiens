@@ -980,15 +980,19 @@ export default function PublicSitterProfile() {
   const descBase = `${firstName} garde vos ${animalsForDesc} ${cityForDesc}.`;
   const pageDesc = (descBase + (trustForDesc ? ` ${trustForDesc}.` : '')).slice(0, 160);
   const pageUrl = buildAbsoluteUrl(`/gardiens/${id}`);
-  // Politique noindex (assouplie le 20/07/2026) : un profil est indexable dès lors
-  // qu'il présente une bio substantielle (>= 80 caractères) ET au moins un signal
-  // de confiance visuelle ou identitaire (identité vérifiée OU au moins une photo
-  // de galerie). Objectif : rouvrir le canal SEO profils sans exposer les fiches
-  // vides. Ancienne règle (trop stricte) : (avis>=1 OU garde>=1) ET identité ET bio.
+  // Politique noindex (décision produit du 12/08/2026) : AUCUNE fiche gardien
+  // n'est indexable. Motifs : pages minces et quasi dupliquées (86% des profils
+  // ont un champ `motivation` vide, longueur moyenne du texte libre 49
+  // caractères), absence de demande de recherche, et protection des personnes
+  // privées (RGPD). Les fiches restent publiques, crawlables et fonctionnelles :
+  // le `noindex, follow` laisse passer le jus des liens internes sortants, et
+  // aucune règle `Disallow` ne doit être posée sur `/gardiens` (un Disallow
+  // empêcherait Google de voir le noindex, donc bloquerait la désindexation).
+  // `isRichProfile` reste utilisé pour choisir le visuel og:image.
   const hasSubstantialBio = ((bio || motivation || "") as string).length >= 80;
   const hasTrustSignal = !!profile?.identity_verified || gallery.length >= 1;
   const isRichProfile = hasSubstantialBio && hasTrustSignal;
-  const shouldNoindex = !isRichProfile;
+  const shouldNoindex = true;
 
 
   const typeLabel = SITTER_TYPE_LABELS[sitterType] || sitterType;
