@@ -73,7 +73,7 @@ const DepartmentsIndex = () => {
   return (
     <>
       <PageMeta
-        title="Garde d'animaux, de maison et de jardin par département | Guardiens"
+        title="Garde d'animaux à domicile, maison et jardin, house-sitting par département | Guardiens"
         description="Les 101 départements français couverts par Guardiens. Trouvez un gardien pour votre maison, vos animaux et votre jardin dans votre département, ou proposez vos services près de chez vous."
         path="/departement"
         jsonLd={jsonLd}

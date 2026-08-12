@@ -120,7 +120,7 @@ export interface DynamicRouteConfig {
 export const staticRoutes: SiteRoute[] = [
  {
  path: "/",
-		title: "Garde d'animaux, de maison et de jardin | House-sitting entre particuliers | Guardiens",
+		title: "Garde d'animaux à domicile, maison et jardin | House-sitting | Guardiens",
 		metaDescription: "Un gardien du coin pour votre maison, vos animaux et votre jardin. Garde d'animaux à domicile et house-sitting entre particuliers. Partout en France.",
  h1: "Guardiens, comme confier ses clés à quelqu'un du coin",
  sitemapPriority: "1.0",
@@ -321,7 +321,7 @@ export const staticRoutes: SiteRoute[] = [
  },
  {
   path: "/departement",
-  title: "Garde d'animaux, de maison et de jardin par département | Guardiens",
+  title: "Garde d'animaux à domicile, maison et jardin, house-sitting par département | Guardiens",
   metaDescription: "Les 101 départements français couverts par Guardiens. Trouvez un gardien pour votre maison, vos animaux et votre jardin dans votre département, ou proposez vos services près de chez vous.",
   h1: "La garde d'animaux département par département",
   sitemapPriority: "0.9",

@@ -64,7 +64,7 @@ export const PHOTO_JOURNEY_STEPS: PhotoJourneyStep[] = [
   {
     id: "bedroom",
     title: "La chambre",
-    why: "Elle dort chez vous, elle veut savoir où.",
+    why: "Elle dort chez toi, elle veut savoir où.",
     hint: "Le lit fait, la lumière du jour, rien à ranger d'autre.",
     category: "home_life",
     caption: "La chambre",

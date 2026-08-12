@@ -95,7 +95,7 @@ export default function HomeJsonLd() {
               "@type": "WebPage",
               "@id": "https://guardiens.fr/#webpage",
               url: "https://guardiens.fr/",
-              name: "Garde d'animaux, de maison et de jardin, house-sitting près de chez vous | Guardiens",
+              name: "Garde d'animaux à domicile, de maison et de jardin, house-sitting près de chez vous | Guardiens",
               description:
                 "House-sitting, garde d'animaux à domicile, de maison et de jardin, et petites missions d'entraide entre gens du coin. Partout en France.",
               inLanguage: "fr-FR",
