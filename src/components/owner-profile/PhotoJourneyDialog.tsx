@@ -44,11 +44,15 @@ const PhotoJourneyDialog = ({ open, onOpenChange, userId, startPosition = 0, onP
     setAddedCount(0);
     let cancelled = false;
     (async () => {
-      const { count } = await supabase
-        .from("pets")
-        .select("id", { count: "exact", head: true })
-        .eq("owner_id", userId);
-      if (!cancelled) setHasPets((count ?? 0) > 0);
+      const { data } = await supabase
+        .from("properties")
+        .select("id, pets(id)")
+        .eq("user_id", userId);
+      const total = (data ?? []).reduce(
+        (n, p: { pets?: unknown[] | null }) => n + (p.pets?.length ?? 0),
+        0,
+      );
+      if (!cancelled) setHasPets(total > 0);
     })();
     return () => { cancelled = true; };
   }, [open, userId]);
