@@ -574,7 +574,25 @@ const OwnerSitView = ({
                   visible des gardiens, vous pourrez la republier à tout moment depuis
                   l'onglet « Archivées ».
                 </p>
-                {pendingAppsToCancel > 0 && (
+                {openApps.length > 0 && (
+                  <div className="rounded-lg border border-destructive/30 bg-destructive/5 p-3 text-sm">
+                    <p className="text-foreground">
+                      <strong>
+                        {openApps.length} candidature{openApps.length > 1 ? "s" : ""} attend
+                        {openApps.length > 1 ? "ent" : ""} encore ta réponse.
+                      </strong>
+                    </p>
+                    <ul className="mt-2 space-y-1 text-xs text-muted-foreground">
+                      {openApps.map((a) => (
+                        <li key={a.id}>{formatOpenApplicationLabel(a)}</li>
+                      ))}
+                    </ul>
+                    <p className="text-xs text-muted-foreground mt-2">
+                      Tu peux les décliner maintenant, ou dépublier sans les traiter.
+                    </p>
+                  </div>
+                )}
+                {openApps.length === 0 && pendingAppsToCancel > 0 && (
                   <div className="rounded-lg border border-destructive/30 bg-destructive/5 p-3 text-sm">
                     <p className="text-foreground">
                       <strong>
@@ -587,6 +605,7 @@ const OwnerSitView = ({
                     </p>
                   </div>
                 )}
+
               </div>
             </AlertDialogDescription>
           </AlertDialogHeader>
