@@ -331,8 +331,11 @@ const OwnerSitView = ({
 
     // Filet de sécurité : si l'owner a choisi de répondre, on décline les
     // candidatures ouvertes AVANT de dépublier, en série et via la file
-    // d'envoi habituelle. La clôture automatique des candidatures orphelines
-    // reste en place derrière, elle ne trouvera simplement plus rien à faire.
+    // d'envoi habituelle. Sans ce passage, le RPC unpublish_sit annule
+    // directement les candidatures pending, viewed et discussing, sans message
+    // ni email : la clôture automatique des candidatures orphelines ne prend
+    // pas le relais, elle ne balaie que les sits cancelled, archived ou
+    // expired, or une dépublication produit un draft.
     let declinedCount = 0;
     if (declineOpenFirst && openApps.length > 0 && currentUserId) {
       setDecliningApps(true);
