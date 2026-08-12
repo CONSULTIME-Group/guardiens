@@ -10,8 +10,12 @@ import { Badge } from "@/components/ui/badge";
 import { format, subDays, subMonths, formatDistanceToNow } from "date-fns";
 import { fr } from "date-fns/locale";
 import { Link } from "react-router-dom";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import ConversationsTable from "@/components/admin/messages/ConversationsTable";
 
 type Period = "7d" | "30d" | "90d" | "all";
+type Tab = "stats" | "conversations";
+
 
 interface Stats {
   total_human: number;
