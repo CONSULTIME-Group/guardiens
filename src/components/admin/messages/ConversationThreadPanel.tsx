@@ -134,7 +134,7 @@ export const ConversationThreadPanel = ({
                 </Link>
               )}
               {!conversation.sit_id && conversation.small_mission_id && (
-                <Link className="underline text-muted-foreground" to={`/entraide/${conversation.small_mission_id}`}>
+                <Link className="underline text-muted-foreground" to={`/petites-missions/${conversation.small_mission_id}`}>
                   {title || "Coup de main lié"}
                 </Link>
               )}
