@@ -356,14 +356,29 @@ const OwnerGallery = () => {
         </Link>
       )}
 
-      <div className="flex items-center justify-between">
+      <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <h2 className="font-heading text-2xl font-bold">Ma galerie</h2>
           <p className="text-sm text-muted-foreground mt-1">
             {photos.length}/{MAX_PHOTOS} photos, Montrez aux gardiens ce qui rend votre maison unique
           </p>
         </div>
+        {canAddMore && user && (
+          <Button variant="outline" className="min-h-11" onClick={() => setJourneyOpen(true)}>
+            Parcours guidé, 5 photos
+          </Button>
+        )}
       </div>
+
+      {user && (
+        <PhotoJourneyDialog
+          open={journeyOpen}
+          onOpenChange={setJourneyOpen}
+          userId={user.id}
+          startPosition={(photos[photos.length - 1]?.position ?? -1) + 1}
+          onPhotoAdded={loadPhotos}
+        />
+      )}
 
       <div className="flex items-start gap-2 rounded-lg border border-border bg-muted/40 p-3">
         <Info className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" />
