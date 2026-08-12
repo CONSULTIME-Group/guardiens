@@ -40,6 +40,8 @@ import AffinityTeaser from "@/components/matching/AffinityTeaser";
 import { useViewerSitterForAffinity } from "@/hooks/useViewerSitterForAffinity";
 import AlmaFitGardien from "@/components/ai/alma/AlmaFitGardien";
 import { sanitizeBioForPublic } from "@/lib/sanitizeBio";
+import { isSitterProfileIndexable } from "@/lib/sitterProfileIndexability";
+
 import { AlmaReciprocityWhisper } from "@/components/ai/alma/wiring/AlmaReciprocityWhisper";
 import { AlmaOwnerActiveSitterWhisper } from "@/components/ai/alma/wiring/AlmaOwnerActiveSitterWhisper";
 import ProfileSchemaOrg from "@/components/seo/ProfileSchemaOrg";
