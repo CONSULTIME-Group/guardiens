@@ -59,10 +59,10 @@
   },
   "landing": {
     "hero": {
-      "eyebrow": "Casa · Animali · Giardino",
-      "title_main": "Gente del posto veglia sulla Sua casa,",
-      "title_accent": "anche quando parte.",
-      "lede": "I Suoi animali, il Suo giardino, le Sue abitudini. Ci si incontra prima di partire. In tutta la Francia.",
+      "eyebrow": "Custodia · Aiuto reciproco · Fiducia",
+      "title_main": "Custodire una casa. Dare una mano. Darsi fiducia.",
+      "title_accent": "A un chilometro come a mille.",
+      "lede": "Il Suo giardino per un pasto. Le Sue chiavi per una storia.",
       "lede_italic": "E dietro ogni scambio, un incontro che non avreste altrimenti cercato.",
       "cta_owner": "Pubblicare il mio annuncio",
       "cta_sitter": "Voglio fare il custode",
@@ -72,7 +72,7 @@
       "kpi_members": "iscritti",
       "kpi_missions": "missioni di aiuto reciproco",
       "brand_tagline": "Vicino a casa.",
-      "reassurance": "Assistenti di zona ti aspettano vicino a te.",
+      "reassurance": "Identità verificata, recensioni incrociate, affinità calcolata. Mantiene il controllo.",
       "cta_member_owner": "Pubblica un annuncio",
       "cta_member_sitter": "Offri aiuto",
       "cta_member_search": "Trova una custodia"

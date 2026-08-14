@@ -59,10 +59,10 @@
   },
   "landing": {
     "hero": {
-      "eyebrow": "Home · Pets · Garden",
-      "title_main": "Local people keep an eye on your home,",
-      "title_accent": "even when you are away.",
-      "lede": "Your pets, your garden, your routines. You meet before you leave. Everywhere in France.",
+      "eyebrow": "Care · Mutual aid · Trust",
+      "title_main": "Watch over a home. Lend a hand. Trust each other.",
+      "title_accent": "One kilometre away, or a thousand.",
+      "lede": "Your garden for a meal. Your keys for a story.",
       "lede_italic": "And behind every exchange, a connection you weren't looking for.",
       "cta_owner": "Publish my listing",
       "cta_sitter": "I want to sit",
@@ -72,7 +72,7 @@
       "kpi_members": "registered",
       "kpi_missions": "mutual aid missions",
       "brand_tagline": "Close to home.",
-      "reassurance": "Trusted local sitters are waiting near you.",
+      "reassurance": "Verified identity, cross-checked reviews, measured affinity. You stay in control.",
       "cta_member_owner": "Post a listing",
       "cta_member_sitter": "Offer a helping hand",
       "cta_member_search": "Find a sit"
