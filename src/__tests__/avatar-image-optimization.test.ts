@@ -1,6 +1,7 @@
 import { describe, it, expect } from "vitest";
 import fs from "fs";
 import path from "path";
+import { storageImageSrcSet, storageImageUrl } from "@/lib/storageImage";
 
 /**
  * Garde-fou performance : un avatar ne doit JAMAIS être servi via l'endpoint
@@ -120,5 +121,46 @@ describe("avatar image optimization", () => {
       }
     }
     expect(offenders).toEqual([]);
+  });
+});
+
+/**
+ * Garde comportementale sur storageImageSrcSet : le test statique ci-dessus
+ * vérifie la présence textuelle de `height:`, mais un appel sans ratio
+ * produisait des URLs sans hauteur à l'exécution (height: undefined). Le
+ * ratio est désormais obligatoire : sans lui, l'appel échoue explicitement
+ * plutôt que de servir des images déformées.
+ */
+describe("storageImageSrcSet comportement", () => {
+  const RAW_URL =
+    "https://erhccyqevdyevpyctsjj.supabase.co/storage/v1/object/public/avatars/u/avatar-1.jpg";
+
+  it("renvoie undefined si le ratio est absent, même avec une URL valide", () => {
+    expect(storageImageSrcSet(RAW_URL, [320, 640])).toBeUndefined();
+  });
+
+  it("renvoie undefined si le ratio est nul ou négatif", () => {
+    expect(storageImageSrcSet(RAW_URL, [320, 640], 75, 0)).toBeUndefined();
+    expect(storageImageSrcSet(RAW_URL, [320, 640], 75, -1)).toBeUndefined();
+  });
+
+  it("chaque entrée du srcset porte width ET height dès lors que le ratio est fourni", () => {
+    const srcset = storageImageSrcSet(RAW_URL, [320, 640], 75, 4 / 3);
+    expect(srcset).toBeDefined();
+    const entries = (srcset as string).split(", ");
+    expect(entries).toHaveLength(2);
+    for (const entry of entries) {
+      expect(entry).toContain("/storage/v1/render/image/public/");
+      expect(entry).toMatch(/width=\d+/);
+      expect(entry).toMatch(/height=\d+/);
+    }
+    expect(entries[0]).toContain("height=240");
+    expect(entries[1]).toContain("height=480");
+  });
+
+  it("storageImageUrl émet toujours width et height quand les deux sont fournis", () => {
+    const url = storageImageUrl(RAW_URL, { width: 193, height: 193 });
+    expect(url).toContain("width=193");
+    expect(url).toContain("height=193");
   });
 });
