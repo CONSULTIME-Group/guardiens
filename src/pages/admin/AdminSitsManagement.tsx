@@ -17,6 +17,7 @@ import { fr } from "date-fns/locale";
 import { AlertTriangle, Search, Eye, XCircle, Star, StickyNote, RotateCcw, User, Calendar, MapPin, ChevronRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { getCountryName } from "@/lib/countries";
+import { avatarImageUrl } from "@/lib/storageImage";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -384,14 +385,14 @@ const AdminSitsManagement = () => {
                   <TableCell className="font-medium max-w-[160px] truncate">{sit.title || "Sans titre"}</TableCell>
                   <TableCell className="text-sm">
                     <div className="flex items-center gap-2">
-                      {sit.owner?.avatar_url && <img src={sit.owner.avatar_url} className="w-5 h-5 rounded-full object-cover" />}
+                      {sit.owner?.avatar_url && <img src={avatarImageUrl(sit.owner.avatar_url, 20)} className="w-5 h-5 rounded-full object-cover" />}
                       <span>{sit.owner?.first_name} {sit.owner?.last_name}</span>
                     </div>
                   </TableCell>
                   <TableCell className="text-sm">
                     {sitter ? (
                       <div className="flex items-center gap-2">
-                        {sitter.avatar && <img src={sitter.avatar} className="w-5 h-5 rounded-full object-cover" />}
+                        {sitter.avatar && <img src={avatarImageUrl(sitter.avatar, 20)} className="w-5 h-5 rounded-full object-cover" />}
                         <span>{sitter.name}</span>
                       </div>
                     ) : ","}

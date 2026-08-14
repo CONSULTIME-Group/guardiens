@@ -13,6 +13,7 @@ import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { toast } from "sonner";
 import StarRating from "@/components/reviews/StarRating";
+import { avatarImageUrl } from "@/lib/storageImage";
 
 type DisputeStatus = "pending" | "accepted" | "rejected";
 
@@ -295,7 +296,7 @@ const DisputeCard = ({
         {/* Demandeur */}
         <div className="flex items-center gap-3">
           {dispute.disputer?.avatar_url ? (
-            <img src={dispute.disputer.avatar_url} alt="" className="w-9 h-9 rounded-full object-cover" />
+            <img src={avatarImageUrl(dispute.disputer.avatar_url, 36)} alt="" className="w-9 h-9 rounded-full object-cover" />
           ) : (
             <div className="w-9 h-9 rounded-full bg-muted flex items-center justify-center text-sm font-bold text-muted-foreground">
               {(dispute.disputer?.first_name || "?").charAt(0).toUpperCase()}
@@ -325,7 +326,7 @@ const DisputeCard = ({
             <div className="flex items-center justify-between gap-3 mb-2">
               <div className="flex items-center gap-2">
                 {dispute.reviewer?.avatar_url ? (
-                  <img src={dispute.reviewer.avatar_url} alt="" className="w-7 h-7 rounded-full object-cover" />
+                  <img src={avatarImageUrl(dispute.reviewer.avatar_url, 28)} alt="" className="w-7 h-7 rounded-full object-cover" />
                 ) : (
                   <div className="w-7 h-7 rounded-full bg-muted flex items-center justify-center text-xs font-bold text-muted-foreground">
                     {(dispute.reviewer?.first_name || "?").charAt(0).toUpperCase()}

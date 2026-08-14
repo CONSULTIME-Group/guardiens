@@ -25,6 +25,7 @@ import { fr } from "date-fns/locale";
 import { Search, Archive, Trash2, Eye, RotateCcw, Mail, AlertTriangle, ArrowUpDown, Download, Send } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import ProximityCampaignCard from "@/components/admin/mass-email/ProximityCampaignCard";
+import { avatarImageUrl } from "@/lib/storageImage";
 
 const statusLabels: Record<string, { label: string; variant: "default" | "secondary" | "outline" | "destructive" }> = {
   open: { label: "Ouverte", variant: "default" },
@@ -445,7 +446,7 @@ const AdminSmallMissions = () => {
                   </TableCell>
                   <TableCell className="text-sm">
                     <div className="flex items-center gap-2">
-                      {m.poster?.avatar_url && <img src={m.poster.avatar_url} className="w-5 h-5 rounded-full object-cover" alt="" />}
+                      {m.poster?.avatar_url && <img src={avatarImageUrl(m.poster.avatar_url, 20)} className="w-5 h-5 rounded-full object-cover" alt="" />}
                       <span>{m.poster?.first_name} {m.poster?.last_name}</span>
                     </div>
                   </TableCell>

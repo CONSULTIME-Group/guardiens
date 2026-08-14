@@ -8,6 +8,7 @@ import PageBreadcrumb from "@/components/seo/PageBreadcrumb";
 import ApproximateLocationMap from "@/components/shared/ApproximateLocationMap";
 import RelatedMissionCard from "@/components/missions/RelatedMissionCard";
 import Head from "@/components/seo/Head";
+import { avatarImageUrl } from "@/lib/storageImage";
 
 // (Pas de bannière de fallback : une annonce sans photo ne doit PAS
 // afficher une image générique qui rendrait toutes les annonces
@@ -248,7 +249,7 @@ const PublicMissionView = ({
                     <div className="shrink-0">
                       {author.avatar_url ? (
                         <img
-                          src={author.avatar_url}
+                          src={avatarImageUrl(author.avatar_url, 64)}
                           alt={authorFirstName || t("mission_detail.author_alt")}
                           className="w-16 h-16 rounded-full object-cover border-2 border-background shadow-sm"
                         />

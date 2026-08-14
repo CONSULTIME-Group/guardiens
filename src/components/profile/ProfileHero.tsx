@@ -18,6 +18,7 @@ import StatutGardienBadge from "@/components/profile/StatutGardienBadge";
 import FavoriteButton from "@/components/shared/FavoriteButton";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import ReplyTimeBadge from "@/components/sitters/ReplyTimeBadge";
+import { avatarImageUrl } from "@/lib/storageImage";
 
 export type HeroCtaVariant =
   | { kind: "own"; label?: string }
@@ -320,7 +321,7 @@ const ProfileHero = ({
             >
               {avatarUrl && !avatarUrl.includes("placeholder.svg") ? (
                 <img
-                  src={avatarUrl}
+                  src={avatarImageUrl(avatarUrl, 144)}
                   alt={firstName}
                   className="w-20 h-20 sm:w-28 sm:h-28 md:w-36 md:h-36 rounded-full object-cover object-center border-4 border-background shadow-md ring-2 ring-primary ring-offset-2"
                 />

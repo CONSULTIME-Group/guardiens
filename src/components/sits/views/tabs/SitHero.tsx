@@ -13,6 +13,7 @@ import { createPortal } from "react-dom";
 import { ChevronLeft, ChevronRight, X, Grid3x3 } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
+import { avatarImageUrl } from "@/lib/storageImage";
 
 interface PetPhotoItem {
   url: string;
@@ -226,7 +227,7 @@ const SitHero = ({
               <div className="absolute top-3 right-3 flex items-center gap-1.5 bg-background/30 backdrop-blur-sm rounded-full pl-0.5 pr-2.5 py-0.5 pointer-events-none">
                 {ownerAvatarUrl ? (
                   <img
-                    src={ownerAvatarUrl}
+                    src={avatarImageUrl(ownerAvatarUrl, 24)}
                     alt={ownerName}
                     loading="lazy"
                     className="w-6 h-6 rounded-full object-cover border border-background/40"

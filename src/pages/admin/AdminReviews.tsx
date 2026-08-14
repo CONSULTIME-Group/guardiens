@@ -14,6 +14,7 @@ import { toast } from "sonner";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { Eye, EyeOff, Trash2, Star, AlertTriangle, CheckCircle2, XCircle, ChevronLeft, ChevronRight } from "lucide-react";
+import { avatarImageUrl } from "@/lib/storageImage";
 
 const PAGE_SIZE = 50;
 
@@ -315,7 +316,7 @@ const AdminReviews = () => {
                   <TableRow key={review.id} className={review.overall_rating <= 2 ? "bg-destructive/5" : ""}>
                     <TableCell className="text-sm">
                       <div className="flex items-center gap-2">
-                        {review.reviewer?.avatar_url && <img src={review.reviewer.avatar_url} className="w-6 h-6 rounded-full object-cover" />}
+                        {review.reviewer?.avatar_url && <img src={avatarImageUrl(review.reviewer.avatar_url, 24)} className="w-6 h-6 rounded-full object-cover" />}
                         <span className="font-medium">{review.reviewer?.first_name} {review.reviewer?.last_name}</span>
                         <span className="text-muted-foreground">→</span>
                         <span>{review.reviewee?.first_name} {review.reviewee?.last_name}</span>
@@ -387,10 +388,10 @@ const AdminReviews = () => {
                     <CardContent className="p-4 space-y-3">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2 text-sm">
-                          {review.reviewer?.avatar_url && <img src={review.reviewer.avatar_url} className="w-6 h-6 rounded-full object-cover" />}
+                          {review.reviewer?.avatar_url && <img src={avatarImageUrl(review.reviewer.avatar_url, 24)} className="w-6 h-6 rounded-full object-cover" />}
                           <span className="font-medium">{review.reviewer?.first_name} {review.reviewer?.last_name}</span>
                           <span className="text-muted-foreground">→</span>
-                          {review.reviewee?.avatar_url && <img src={review.reviewee.avatar_url} className="w-6 h-6 rounded-full object-cover" />}
+                          {review.reviewee?.avatar_url && <img src={avatarImageUrl(review.reviewee.avatar_url, 24)} className="w-6 h-6 rounded-full object-cover" />}
                           <span>{review.reviewee?.first_name} {review.reviewee?.last_name}</span>
                         </div>
                         <Badge variant="outline" className="text-xs">
@@ -544,11 +545,11 @@ const AdminReviews = () => {
           {detailReview && (
             <div className="space-y-3 text-sm">
               <div className="flex items-center gap-3">
-                {detailReview.reviewer?.avatar_url && <img src={detailReview.reviewer.avatar_url} className="w-8 h-8 rounded-full object-cover" />}
+                {detailReview.reviewer?.avatar_url && <img src={avatarImageUrl(detailReview.reviewer.avatar_url, 32)} className="w-8 h-8 rounded-full object-cover" />}
                 <div><strong>De :</strong> {detailReview.reviewer?.first_name} {detailReview.reviewer?.last_name}</div>
               </div>
               <div className="flex items-center gap-3">
-                {detailReview.reviewee?.avatar_url && <img src={detailReview.reviewee.avatar_url} className="w-8 h-8 rounded-full object-cover" />}
+                {detailReview.reviewee?.avatar_url && <img src={avatarImageUrl(detailReview.reviewee.avatar_url, 32)} className="w-8 h-8 rounded-full object-cover" />}
                 <div><strong>Pour :</strong> {detailReview.reviewee?.first_name} {detailReview.reviewee?.last_name}</div>
               </div>
               <div><strong>Type :</strong> {detailReview.review_type === "annulation" ? "Avis d'annulation" : detailReview.reviewer_id === detailReview.sit?.user_id ? "Proprio → Gardien" : "Gardien → Proprio"}</div>

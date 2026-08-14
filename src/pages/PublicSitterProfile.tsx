@@ -59,6 +59,7 @@ import AffinityTeaserCard from "@/components/profile/AffinityTeaserCard";
 import AlmaWhisperCard from "@/components/profile/AlmaWhisperCard";
 import CommunityPulseCard from "@/components/profile/CommunityPulseCard";
 import { useCommunityPulse } from "@/hooks/useCommunityPulse";
+import { avatarImageUrl, storageImageUrl } from "@/lib/storageImage";
 
 const capitalize = (name: string) =>
   name ? name.charAt(0).toUpperCase() + name.slice(1).toLowerCase() : "";
@@ -957,7 +958,7 @@ export default function PublicSitterProfile() {
   // sur l'avatar seul pour que l'utilisateur puisse toujours l'agrandir.
   const lightboxItems = visibleGallery.length > 0
     ? visibleGallery
-    : (profile?.avatar_url ? [{ photo_url: profile.avatar_url, caption: null }] : []);
+    : (profile?.avatar_url ? [{ photo_url: storageImageUrl(profile.avatar_url, { width: 1024 }), caption: null }] : []);
 
   // showCTA supprimé (vague 38) : le sticky mobile suit heroCta.kind.
 
@@ -1207,7 +1208,7 @@ export default function PublicSitterProfile() {
         image={
           isRichProfile && id
             ? `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/og-profile?id=${id}`
-            : (profile?.avatar_url || undefined)
+            : (profile?.avatar_url ? avatarImageUrl(profile.avatar_url, 512) : undefined)
         }
         type="website"
         noindex={shouldNoindex}
@@ -2015,7 +2016,7 @@ export default function PublicSitterProfile() {
                         <article key={review.id} className="bg-card border border-border rounded-xl p-4 space-y-2">
                           <div className="flex items-center gap-2.5 flex-wrap">
                             {getMemberAvatarUrl(review.reviewer) ? (
-                              <img src={getMemberAvatarUrl(review.reviewer)!} alt={getMemberDisplayName(review.reviewer, 'Gardien')} className="w-8 h-8 rounded-full object-cover shrink-0" />
+                              <img src={avatarImageUrl(getMemberAvatarUrl(review.reviewer), 32)} alt={getMemberDisplayName(review.reviewer, 'Gardien')} className="w-8 h-8 rounded-full object-cover shrink-0" />
                             ) : (
                               <div className="w-8 h-8 rounded-full bg-muted shrink-0 flex items-center justify-center text-xs font-bold text-foreground/40">
                                 {getMemberInitial(review.reviewer)}

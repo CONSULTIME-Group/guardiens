@@ -36,6 +36,7 @@ import ShareButtons from "@/components/sits/ShareButtons";
 import { getSitStatusConfig } from "@/components/sits/shared/sitConstants";
 import { sanitizeUserTitle } from "@/lib/sanitizeTitle";
 import { sanitizeBioForCard } from "@/lib/sanitizeBio";
+import { avatarImageUrl } from "@/lib/storageImage";
 
 interface SitDetailHeaderProps {
   sitId: string;
@@ -260,7 +261,7 @@ const SitDetailHeader = ({
           <Link to={`/gardiens/${owner.id}`}>
             {owner.avatar_url ? (
               <img
-                src={owner.avatar_url}
+                src={avatarImageUrl(owner.avatar_url, 56)}
                 alt={`Photo de ${owner.first_name}`}
                 loading="lazy"
                 className="w-14 h-14 rounded-full object-cover hover:ring-2 hover:ring-primary/30 transition-all"

@@ -4,6 +4,7 @@ import L from "leaflet";
 import { LeafletUnmountGuard } from "@/components/shared/LeafletUnmountGuard";
 import { Link } from "react-router-dom";
 import { Star, MapPin, X } from "lucide-react";
+import { storageImageUrl } from "@/lib/storageImage";
 import "leaflet/dist/leaflet.css";
 
 interface SitterPin {
@@ -27,7 +28,7 @@ interface Props {
 const createPinIcon = (active: boolean, avatar?: string | null) => {
   const scale = active ? 1.15 : 1;
   const inner = avatar
-    ? `<img src="${avatar}" alt="" style="width:30px;height:30px;border-radius:50%;object-fit:cover;object-position:top"/>`
+    ? `<img src="${storageImageUrl(avatar, { width: 30 })}" alt="" style="width:30px;height:30px;border-radius:50%;object-fit:cover;object-position:top"/>`
     : `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>`;
   return L.divIcon({
     className: "",
@@ -111,7 +112,7 @@ const SearchOwnerMapView = ({ sitters, centerCoords, onContact, contactingId }: 
           </button>
           <Link to={`/gardiens/${active.user_id}`} className="block">
             {active.avatar ? (
-              <img src={active.avatar} alt={active.firstName} className="w-full h-[120px] object-cover object-top" />
+              <img src={storageImageUrl(active.avatar, { width: 280 })} alt={active.firstName} className="w-full h-[120px] object-cover object-top" />
             ) : (
               <div className="w-full h-[120px] bg-primary/10 flex items-center justify-center">
                 <span className="text-3xl text-primary font-heading font-bold">{active.firstName.charAt(0)}</span>

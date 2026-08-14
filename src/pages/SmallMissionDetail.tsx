@@ -44,6 +44,7 @@ import { sanitizeUserTitle } from "@/lib/sanitizeTitle";
 import { haversineDistance } from "@/utils/geo";
 
 import IdentityRecommendedHint from "@/components/missions/IdentityRecommendedHint";
+import { avatarImageUrl } from "@/lib/storageImage";
 
 /** Rayon max (km) pour considérer une mission « près de chez vous ». */
 const NEAR_RADIUS_KM = 100;
@@ -1117,7 +1118,7 @@ const SmallMissionDetail = () => {
                 >
                   {(user as any).avatarUrl ? (
                     <img
-                      src={(user as any).avatarUrl}
+                      src={avatarImageUrl((user as any).avatarUrl, 24)}
                       alt=""
                       className="w-6 h-6 rounded-full object-cover shrink-0"
                     />
@@ -1206,7 +1207,7 @@ const SmallMissionDetail = () => {
                     <div className="shrink-0">
                       {author.avatar_url ? (
                         <img
-                          src={author.avatar_url}
+                          src={avatarImageUrl(author.avatar_url, 48)}
                           alt={author.first_name || "Auteur"}
                           className="w-12 h-12 rounded-full object-cover border border-border"
                         />
@@ -1303,7 +1304,7 @@ const SmallMissionDetail = () => {
                       <>
                         {author.avatar_url ? (
                           <img
-                            src={author.avatar_url}
+                            src={avatarImageUrl(author.avatar_url, 40)}
                             alt={author.first_name || "Auteur"}
                             className="w-10 h-10 rounded-full object-cover shrink-0"
                           />
@@ -1513,7 +1514,7 @@ const SmallMissionDetail = () => {
                   >
                     {(user as any)?.avatar_url ? (
                       <img
-                        src={(user as any).avatar_url}
+                        src={avatarImageUrl((user as any).avatar_url, 40)}
                         alt=""
                         aria-hidden="true"
                         className="w-9 h-9 md:w-10 md:h-10 rounded-full object-cover shrink-0"
@@ -1658,7 +1659,7 @@ const SmallMissionDetail = () => {
               {receivedFeedbacks.map((fb: any) => (
                 <div key={fb.id} className="bg-card rounded-2xl border border-border p-4 flex items-start gap-3">
                   {fb.giver?.avatar_url ? (
-                    <img src={fb.giver.avatar_url} className="w-9 h-9 rounded-full object-cover" />
+                    <img src={avatarImageUrl(fb.giver.avatar_url, 36)} className="w-9 h-9 rounded-full object-cover" />
                   ) : (
                     <div className="w-9 h-9 rounded-full bg-muted flex items-center justify-center text-xs font-bold">{fb.giver?.first_name?.charAt(0)}</div>
                   )}

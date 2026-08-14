@@ -3,6 +3,7 @@ import { CockpitGreeting } from "@/components/dashboard/CockpitGreeting";
 import { Eye, Pencil } from "lucide-react";
 import cockpitMorning from "@/assets/illustrations/sitter-cockpit-morning.webp";
 import cockpitWaiting from "@/assets/illustrations/sitter-match-empty.webp";
+import { avatarImageUrl } from "@/lib/storageImage";
 
 
 /**
@@ -119,7 +120,7 @@ const SitterCockpit = ({
                 style={{ backgroundColor: "hsl(var(--primary) / 0.12)" }}
               >
                 {avatarUrl ? (
-                  <img src={avatarUrl} alt="" className="w-full h-full object-cover" loading="lazy" />
+                  <img src={avatarImageUrl(avatarUrl, 48)} alt="" className="w-full h-full object-cover" loading="lazy" />
                 ) : (
                   <span className="font-heading font-semibold text-lg text-foreground/80">
                     {initial}

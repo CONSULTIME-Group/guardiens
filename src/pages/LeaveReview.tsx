@@ -15,6 +15,7 @@ import { trackEvent } from "@/lib/analytics";
 import Head from "@/components/seo/Head";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { GOOGLE_REVIEW_URL } from "@/lib/constants";
+import { avatarImageUrl } from "@/lib/storageImage";
 
 type ReviewDirection = "owner_to_sitter" | "sitter_to_owner";
 
@@ -355,7 +356,7 @@ const LeaveReview = () => {
       <div className="rounded-2xl border border-border bg-muted/30 p-4 mb-8">
         <div className="flex items-center gap-3 mb-2">
           {reviewee.avatar_url ? (
-            <img src={reviewee.avatar_url} alt="" className="w-10 h-10 rounded-full object-cover" />
+            <img src={avatarImageUrl(reviewee.avatar_url, 40)} alt="" className="w-10 h-10 rounded-full object-cover" />
           ) : (
             <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center font-heading font-bold">
               {reviewee.first_name?.charAt(0) || "?"}

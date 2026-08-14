@@ -33,6 +33,7 @@ import BreedProfileCard from "@/components/breeds/BreedProfileCard";
 import { getDemoSitBySlug } from "@/data/demoListings";
 import { useAuth } from "@/contexts/AuthContext";
 import { trackEvent } from "@/lib/analytics";
+import { avatarImageUrl } from "@/lib/storageImage";
 
 const SPECIES_EMOJI: Record<string, string> = {
  dog: "🐕",
@@ -337,7 +338,7 @@ const DemoSitDetail = () => {
  <div className="flex items-center gap-3 mb-3">
  {sit.owner.avatar_url ? (
  <img
- src={sit.owner.avatar_url}
+ src={avatarImageUrl(sit.owner.avatar_url, 56)}
  alt={sit.owner.first_name}
  className="w-14 h-14 rounded-full object-cover"
  />

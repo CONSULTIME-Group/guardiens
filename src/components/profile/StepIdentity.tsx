@@ -9,6 +9,7 @@ import { cn } from "@/lib/utils";
 import type { SitterProfileData } from "@/hooks/useSitterProfile";
 import GenerateBioButton from "@/components/ai/GenerateBioButton";
 import AlmaMotivationBubble from "@/components/ai/alma/AlmaMotivationBubble";
+import { avatarImageUrl } from "@/lib/storageImage";
 
 
 interface Props {
@@ -47,7 +48,7 @@ const StepIdentity = ({ data, onChange, onUploadAvatar }: Props) => {
           className="w-28 h-28 rounded-full bg-muted border-2 border-dashed border-border flex items-center justify-center overflow-hidden hover:border-primary transition-colors"
         >
           {data.avatar_url ? (
-            <img src={data.avatar_url} alt="Avatar" className="w-full h-full object-cover" />
+            <img src={avatarImageUrl(data.avatar_url, 112)} alt="Avatar" className="w-full h-full object-cover" />
           ) : (
             <Camera className="w-8 h-8 text-muted-foreground" />
           )}

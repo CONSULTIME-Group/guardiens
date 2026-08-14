@@ -8,6 +8,7 @@ import { getOptimizedImageUrl } from "@/lib/imageOptim";
 import HelpDuringSitDialog from "@/components/sits/HelpDuringSitDialog";
 import { capitalize } from "./helpers";
 import type { SitRow, SitterInfo } from "./types";
+import { avatarImageUrl } from "@/lib/storageImage";
 
 
 interface OngoingSitHeroProps {
@@ -102,7 +103,7 @@ const OngoingSitHero = memo(({ sit, sitterProfiles, coverPhoto }: OngoingSitHero
               >
                 {sitter?.avatar_url ? (
                   <img
-                    src={sitter.avatar_url}
+                    src={avatarImageUrl(sitter.avatar_url, 56)}
                     alt={`Photo de ${sitterName}`}
                     className="w-12 h-12 sm:w-14 sm:h-14 rounded-full object-cover ring-2 ring-primary/40 transition-all duration-300 group-hover/avatar:ring-primary group-hover/avatar:scale-105"
                   />

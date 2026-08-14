@@ -5,6 +5,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, ShieldCheck } from "lucide-react";
 import TrustHaloAvatar from "@/components/sitters/TrustHaloAvatar";
+import { avatarImageUrl } from "@/lib/storageImage";
 
 interface Props {
   city: string;
@@ -77,7 +78,7 @@ const CitySittersGrid = ({ city, citySlug }: Props) => {
               >
                 {s.avatar_url ? (
                   <img
-                    src={s.avatar_url}
+                    src={avatarImageUrl(s.avatar_url, 64)}
                     alt={`${s.first_name} gardien à ${city}`}
                     className="w-full h-full object-cover"
                     loading="lazy"

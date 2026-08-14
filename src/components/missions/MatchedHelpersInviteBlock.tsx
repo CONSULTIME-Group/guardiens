@@ -18,6 +18,7 @@ import { Check, MapPin } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { MISSION_TO_SKILL } from "@/components/missions/connected/constants";
 import { haversineDistance } from "@/lib/geocode";
+import { avatarImageUrl } from "@/lib/storageImage";
 
 interface Props {
   missionId: string;
@@ -144,7 +145,7 @@ export default function MatchedHelpersInviteBlock({
             <li key={h.id} className="flex items-center gap-3 py-3">
               {h.avatar_url ? (
                 <img
-                  src={h.avatar_url}
+                  src={avatarImageUrl(h.avatar_url, 40)}
                   alt=""
                   loading="lazy"
                   className="h-10 w-10 rounded-full object-cover border border-border shrink-0"

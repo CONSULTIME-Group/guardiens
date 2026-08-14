@@ -63,6 +63,7 @@ import {
   LIFE_PACE_OPTIONS,
   SITTER_ANIMAL_TYPES_OPTIONS,
 } from "@/lib/profileMatchingOptions";
+import { avatarImageUrl } from "@/lib/storageImage";
 
 /** Seuil de candidature, aligné sur useAccessLevel (source de vérité). */
 const APPLY_THRESHOLD = 60;
@@ -753,7 +754,7 @@ const CompleteProfileToApplyModal = ({
                       >
                         {form.avatar_url ? (
                           <img
-                            src={form.avatar_url}
+                            src={avatarImageUrl(form.avatar_url, 80)}
                             alt="Votre photo de profil"
                             className="w-full h-full object-cover"
                           />

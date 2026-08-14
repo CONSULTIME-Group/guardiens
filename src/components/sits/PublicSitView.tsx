@@ -16,6 +16,7 @@ import AffinitySection from "@/components/matching/AffinitySection";
 import AffinityTeaser from "@/components/matching/AffinityTeaser";
 import { useViewerSitterForAffinity } from "@/hooks/useViewerSitterForAffinity";
 import { sanitizeBioForPublic } from "@/lib/sanitizeBio";
+import { avatarImageUrl } from "@/lib/storageImage";
 
 interface SitLike {
   slug?: string | null;
@@ -249,7 +250,7 @@ const PublicSitView = ({
                       <div className="shrink-0">
                         {owner.avatar_url ? (
                           <img
-                            src={owner.avatar_url}
+                            src={avatarImageUrl(owner.avatar_url, 64)}
                             alt={owner.first_name || t("sit_detail.host")}
                             className="w-16 h-16 rounded-full object-cover border-2 border-background shadow-sm"
                           />

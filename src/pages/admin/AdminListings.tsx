@@ -29,6 +29,7 @@ import ListingDrilldownDialog from "@/components/admin/ListingDrilldownDialog";
 import ListingProximityCard from "@/components/admin/ListingProximityCard";
 import ListingCoverPickerDialog from "@/components/admin/ListingCoverPickerDialog";
 import { getCountryName } from "@/lib/countries";
+import { avatarImageUrl } from "@/lib/storageImage";
 
 type BadgeVariant = "default" | "secondary" | "outline" | "destructive";
 const statusLabels: Record<string, { label: string; variant: BadgeVariant }> = {
@@ -590,7 +591,7 @@ const AdminListings = () => {
                   </TableCell>
                   <TableCell className="text-sm">
                     <div className="flex items-center gap-2">
-                      {listing.owner?.avatar_url && <img src={listing.owner.avatar_url} className="w-6 h-6 rounded-full object-cover" />}
+                      {listing.owner?.avatar_url && <img src={avatarImageUrl(listing.owner.avatar_url, 24)} className="w-6 h-6 rounded-full object-cover" />}
                       <span>{listing.owner?.first_name} {listing.owner?.last_name}</span>
                     </div>
                   </TableCell>

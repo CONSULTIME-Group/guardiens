@@ -31,6 +31,7 @@ import AlmaMessageOpener from "@/components/ai/alma/AlmaMessageOpener";
 import { AlmaStagnantConversationWhisper } from "@/components/ai/alma/wiring/AlmaStagnantConversationWhisper";
 import { latestVideoInviteId, videoInviteState, isVideoInvite } from "@/lib/videoInvite";
 import { useHideBottomNav, useHideTopBar } from "@/components/layout/ChromeVisibility";
+import { avatarImageUrl } from "@/lib/storageImage";
 
 
 const MESSAGES_PAGE_SIZE = 50;
@@ -645,7 +646,7 @@ const Messages = () => {
         >
           <div className="relative shrink-0">
             {getMemberAvatarUrl(conv.other_user) ? (
-              <img src={getMemberAvatarUrl(conv.other_user)!} alt="" className="w-11 h-11 rounded-full object-cover" />
+              <img src={avatarImageUrl(getMemberAvatarUrl(conv.other_user), 44)} alt="" className="w-11 h-11 rounded-full object-cover" />
             ) : (
               <div className="w-11 h-11 rounded-full bg-secondary/[0.12] flex items-center justify-center text-secondary font-heading text-base">
                 {getMemberInitial(conv.other_user)}

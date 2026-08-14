@@ -11,6 +11,7 @@ import { CheckCircle2, XCircle, Clock, MessageSquare, Image, Briefcase } from "l
 import { toast } from "sonner";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
+import { avatarImageUrl } from "@/lib/storageImage";
 
 type StatusFilter = "pending" | "verified" | "rejected";
 
@@ -123,7 +124,7 @@ const AdminExperienceVerification = () => {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             {exp.profile?.avatar_url ? (
-              <img src={exp.profile.avatar_url} alt="" className="w-10 h-10 rounded-full object-cover" />
+              <img src={avatarImageUrl(exp.profile.avatar_url, 40)} alt="" className="w-10 h-10 rounded-full object-cover" />
             ) : (
               <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center font-bold text-sm">
                 {exp.profile?.first_name?.charAt(0) || "?"}
