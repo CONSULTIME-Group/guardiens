@@ -21,8 +21,9 @@ import MessageComposer from "@/components/messages/MessageComposer";
 import ContactSharingNotice from "@/components/messages/ContactSharingNotice";
 import MessagesListSkeleton from "@/components/messages/MessagesListSkeleton";
 import { useToast } from "@/hooks/use-toast";
+import { useTranslation } from "react-i18next";
 import { useSubscriptionAccess } from "@/hooks/useSubscriptionAccess";
-import { trackFirstAction } from "@/lib/analytics";
+import { trackFirstAction, trackEvent } from "@/lib/analytics";
 import { moderateContent } from "@/lib/moderation";
 import { appStatusBadge as appStatusLabels } from "@/lib/messageStatus";
 import { useAutoOpenConversation } from "@/hooks/useAutoOpenConversation";
@@ -32,7 +33,7 @@ import { AlmaStagnantConversationWhisper } from "@/components/ai/alma/wiring/Alm
 import { latestVideoInviteId, videoInviteState, isVideoInvite } from "@/lib/videoInvite";
 import { useHideBottomNav, useHideTopBar } from "@/components/layout/ChromeVisibility";
 import { avatarImageUrl } from "@/lib/storageImage";
-import { compressImageFile } from "@/lib/compressImage";
+import { compressMessagePhotoFile } from "@/lib/compressImage";
 
 
 const MESSAGES_PAGE_SIZE = 50;
@@ -87,6 +88,7 @@ const Messages = () => {
   const { user, activeRole } = useAuth();
   const isMobile = useIsMobile();
   const { toast } = useToast();
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { hasAccess, loading: subLoading } = useSubscriptionAccess();
   const effectiveRole = user?.role === "both" ? activeRole : user?.role;
@@ -1041,12 +1043,20 @@ const Messages = () => {
 
               onPickPhoto={async (file) => {
                 if (!user || !activeConv) return;
-                // Compression avant envoi (1200 px, cible 300 ko) : jamais de brut.
+                // Échec définitif : mesure + formulation unique (le rejet de
+                // loadImage est un ProgressEvent sans message exploitable).
+                const fail = () => {
+                  void trackEvent("message_photo_upload_failed", {
+                    metadata: { ext: file.name.split(".").pop()?.toLowerCase() || "unknown", size_kb: Math.round(file.size / 1024) },
+                  });
+                  toast({ title: t("upload.photo_failed"), variant: "destructive" });
+                };
+                // Compression avant envoi (1200 px, repli dégradé 768 px) : jamais de brut.
                 let toUpload: File;
                 try {
-                  toUpload = await compressImageFile(file, 5, 1200);
+                  toUpload = await compressMessagePhotoFile(file);
                 } catch {
-                  toast({ title: "Erreur", description: "Cette photo n'a pas pu être envoyée. Veuillez réessayer.", variant: "destructive" });
+                  fail();
                   return;
                 }
                 const ext = toUpload.name.split(".").pop();
@@ -1054,7 +1064,7 @@ const Messages = () => {
                 // les regles de securite du stockage l'exigent.
                 const path = `${user.id}/messages/${activeConv.id}/${Date.now()}.${ext}`;
                 const { error } = await supabase.storage.from("property-photos").upload(path, toUpload);
-                if (error) return;
+                if (error) { fail(); return; }
                 const { data: urlData } = supabase.storage.from("property-photos").getPublicUrl(path);
                 await supabase.from("messages").insert({
                   conversation_id: activeConv.id, sender_id: user.id, content: "", photo_url: urlData.publicUrl,

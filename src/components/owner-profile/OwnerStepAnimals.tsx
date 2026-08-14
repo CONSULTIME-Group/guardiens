@@ -13,6 +13,8 @@ import BreedProfileCard from "../breeds/BreedProfileCard";
 import { makePlainTextPasteHandler } from "@/lib/pastePlainText";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { useTranslation } from "react-i18next";
+import { trackEvent } from "@/lib/analytics";
 import { readFormDraft, writeFormDraft, clearFormDraft, listFormDraftKeys, getFormDraftSavedAt } from "@/lib/formDraft";
 import DraftStatus, { type DraftState } from "@/components/shared/DraftStatus";
 import type { Pet } from "@/hooks/useOwnerProfile";
@@ -56,6 +58,7 @@ const DRAFT_PREFIX = "owner-pet:";
 const draftKeyFor = (isNew: boolean, id?: string | null) => `${DRAFT_PREFIX}${isNew ? "new" : id ?? "new"}`;
 
 const OwnerStepAnimals = ({ pets, onAddPet, onUpdatePet, onRemovePet }: Props) => {
+  const { t } = useTranslation();
   const [editingPet, setEditingPet] = useState<Pet | null>(null);
   const [isNew, setIsNew] = useState(false);
   const [expandedId, setExpandedId] = useState<string | null>(null);
@@ -172,7 +175,10 @@ const OwnerStepAnimals = ({ pets, onAddPet, onUpdatePet, onRemovePet }: Props) =
       const { error } = await supabase.storage.from("property-photos").upload(path, uploadFile, { contentType: "image/jpeg" });
       if (error) {
         logger.error("Storage upload error", { error: String(error) });
-        toast.error("Erreur lors de l'upload : " + (error.message || "réessayez"));
+        void trackEvent("pet_photo_upload_failed", {
+          metadata: { ext: file.name.split(".").pop()?.toLowerCase() || "unknown", size_kb: Math.round(file.size / 1024) },
+        });
+        toast.error(t("upload.photo_failed"));
       } else {
         const { data: urlData } = supabase.storage.from("property-photos").getPublicUrl(path);
         setEditingPet({ ...editingPet, photo_url: urlData.publicUrl });
@@ -180,7 +186,10 @@ const OwnerStepAnimals = ({ pets, onAddPet, onUpdatePet, onRemovePet }: Props) =
       }
     } catch (err) {
       logger.error("Photo processing error", { err: String(err) });
-      toast.error("Format d'image non supporté ou fichier corrompu");
+      void trackEvent("pet_photo_upload_failed", {
+        metadata: { ext: file.name.split(".").pop()?.toLowerCase() || "unknown", size_kb: Math.round(file.size / 1024) },
+      });
+      toast.error(t("upload.photo_failed"));
     }
     setUploading(false);
   };
@@ -403,7 +412,7 @@ const OwnerStepAnimals = ({ pets, onAddPet, onUpdatePet, onRemovePet }: Props) =
           <DialogTitle className="sr-only">Photo de l'animal en plein écran</DialogTitle>
           <DialogDescription className="sr-only">Aperçu agrandi de la photo de l'animal.</DialogDescription>
           {lightboxUrl && (
-            <img src={storageImageUrl(lightboxUrl, { width: 768, height: 864, resize: "contain" })} alt="Photo animal" className="w-full h-auto max-h-[80vh] object-contain rounded-lg" />
+            <img src={storageImageUrl(lightboxUrl, { width: 1200, height: 1200, resize: "contain" })} alt="Photo animal" className="w-full h-auto max-h-[80vh] object-contain rounded-lg" />
           )}
         </DialogContent>
       </Dialog>
