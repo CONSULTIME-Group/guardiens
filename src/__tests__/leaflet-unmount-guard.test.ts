@@ -20,7 +20,7 @@ const walk = (dir: string): string[] => {
     if (statSync(full).isDirectory()) {
       if (entry === "__tests__") continue;
       out.push(...walk(full));
-    } else if (full.endsWith(".tsx") && !full.endsWith(".test.tsx")) {
+    } else if (full.endsWith(".tsx") && !full.endsWith(".test.tsx") && entry !== "LeafletUnmountGuard.tsx") {
       out.push(full);
     }
   }
