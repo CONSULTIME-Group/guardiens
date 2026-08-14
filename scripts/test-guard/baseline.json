@@ -14,17 +14,17 @@
   ],
   "knownFailures": [
     {
-      "file": "src/components/search/__tests__/AlmaEmptySearchBubble.test.tsx",
+      "file": "src/components/ai/alma/__tests__/AlmaEmptySearchBubble.test.tsx",
       "test": "AlmaEmptySearchBubble > fires analytics on relax_filter click with restrictive_filter",
       "reason": "code et contenu : libellés d'actions du composant modifiés, assertions du test désynchronisées."
     },
     {
-      "file": "src/components/search/__tests__/AlmaEmptySearchBubble.test.tsx",
+      "file": "src/components/ai/alma/__tests__/AlmaEmptySearchBubble.test.tsx",
       "test": "AlmaEmptySearchBubble > renders 3 actions when a restrictive filter is active",
       "reason": "code et contenu : libellés d'actions du composant modifiés, assertions du test désynchronisées."
     },
     {
-      "file": "src/components/search/__tests__/AlmaEmptySearchBubble.test.tsx",
+      "file": "src/components/ai/alma/__tests__/AlmaEmptySearchBubble.test.tsx",
       "test": "AlmaEmptySearchBubble > utilise le vouvoiement (règle éditoriale absolue)",
       "reason": "code et contenu : formulation du composant modifiée, assertion du test désynchronisée."
     },
@@ -39,12 +39,12 @@
       "reason": "code : plafond digest modifié, test non aligné."
     },
     {
-      "file": "src/__tests__/empty-state-style-isolation.test.ts",
+      "file": "src/components/shared/__tests__/empty-state-style-isolation.test.ts",
       "test": "EmptyState style isolation > no forbidden pattern: /(WebkitMaskImage|webkitMaskImage|-webkit-mask-image|mask-image)\\s*[:=]/",
       "reason": "code : mask-image détecté hors fichier autorisé (garde-fou d'isolation de style)."
     },
     {
-      "file": "src/__tests__/empty-state-style-isolation.test.ts",
+      "file": "src/components/shared/__tests__/empty-state-style-isolation.test.ts",
       "test": "EmptyState style isolation > no forbidden pattern: /(mix-blend-(mode|multiply|screen|overlay))/",
       "reason": "code : mix-blend-mode détecté hors fichier autorisé (garde-fou d'isolation de style)."
     },
@@ -89,12 +89,12 @@
       "reason": "code : regex de scan statique désynchronisées après refonte de SmallMissionDetail."
     },
     {
-      "file": "src/__tests__/owner-dashboard-visual.test.tsx",
+      "file": "src/components/dashboard/owner/__tests__/owner-dashboard-visual.test.tsx",
       "test": "Owner Dashboard — visual snapshots > OngoingSitHero > matches snapshot on desktop (1280px)",
       "reason": "code : setup du test incomplet, useAuth appelé hors AuthProvider."
     },
     {
-      "file": "src/__tests__/owner-dashboard-visual.test.tsx",
+      "file": "src/components/dashboard/owner/__tests__/owner-dashboard-visual.test.tsx",
       "test": "Owner Dashboard — visual snapshots > OngoingSitHero > matches snapshot on mobile (390px)",
       "reason": "code : setup du test incomplet, useAuth appelé hors AuthProvider."
     },
