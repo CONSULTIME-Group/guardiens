@@ -59,11 +59,10 @@
   },
   "landing": {
     "hero": {
-      "eyebrow": "Care · Mutual aid · Trust",
-      "title_main": "Watch over a home. Lend a hand.",
-      "title_accent": "Trust each other.",
-      "lede": "Your garden for a meal. Your keys for a story.",
-      "lede_italic": "And behind every exchange, a connection you weren't looking for.",
+      "eyebrow": "House-sitting · Mutual aid · Emergencies",
+      "title_main": "A local house-sitter lives in your home",
+      "title_accent": "while you're away.",
+      "lede": "House-sitting, helping hands, emergencies. A network of people helping one another, all across France.",
       "cta_owner": "Publish my listing",
       "cta_sitter": "I want to sit",
       "cta_aid": "I need a hand, or I can lend one →",
@@ -71,7 +70,6 @@
       "kpi_animals": "pets accompanied",
       "kpi_members": "registered",
       "kpi_missions": "mutual aid missions",
-      "brand_tagline": "Close to home.",
       "reassurance": "Verified identity, cross-checked reviews, measured affinity. You stay in control.",
       "cta_member_owner": "Post a listing",
       "cta_member_sitter": "Offer a helping hand",

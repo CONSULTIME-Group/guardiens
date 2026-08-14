@@ -59,11 +59,10 @@
   },
   "landing": {
     "hero": {
-      "eyebrow": "Custodia · Aiuto reciproco · Fiducia",
-      "title_main": "Custodire una casa. Dare una mano.",
-      "title_accent": "Darsi fiducia.",
-      "lede": "Il Suo giardino per un pasto. Le Sue chiavi per una storia.",
-      "lede_italic": "E dietro ogni scambio, un incontro che non avreste altrimenti cercato.",
+      "eyebrow": "Custodia · Aiuto reciproco · Urgenze",
+      "title_main": "Un custode di zona vive a casa Sua",
+      "title_accent": "mentre Lei è via.",
+      "lede": "Custodia, piccoli aiuti, urgenze. Una rete di persone che si aiutano a vicenda, in tutta la Francia.",
       "cta_owner": "Pubblicare il mio annuncio",
       "cta_sitter": "Voglio fare il custode",
       "cta_aid": "Cerco o offro una mano →",
@@ -71,7 +70,6 @@
       "kpi_animals": "animali accuditi",
       "kpi_members": "iscritti",
       "kpi_missions": "missioni di aiuto reciproco",
-      "brand_tagline": "Vicino a casa.",
       "reassurance": "Identità verificata, recensioni incrociate, affinità calcolata. Mantiene il controllo.",
       "cta_member_owner": "Pubblica un annuncio",
       "cta_member_sitter": "Offri aiuto",

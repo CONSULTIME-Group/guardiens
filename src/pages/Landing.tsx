@@ -165,7 +165,7 @@ const Landing = () => {
 
       {/* ═══════════════ MAIN LANDMARK (englobe tout le contenu) ═══════════════ */}
       <main id="main-content">
-      {/* ═══════════════ SECTION 1, HERO (épuré, 5 blocs) ═══════════════ */}
+      {/* ═══════════════ SECTION 1, HERO (épuré, 3 blocs) ═══════════════ */}
       <section className="relative w-full min-h-[100svh] flex items-center overflow-hidden">
         <picture>
           <source
@@ -196,24 +196,18 @@ const Landing = () => {
         <div className="relative z-10 w-full max-w-7xl mx-auto px-6 md:px-12 lg:px-16 py-6 md:py-24 pb-[calc(9rem+env(safe-area-inset-bottom))] md:pb-24">
           <div className="max-w-2xl lg:max-w-3xl">
 
-            <p className="flex items-center gap-2 font-body text-xs text-white/85 tracking-[0.2em] uppercase mb-3 md:mb-6">
+            <p className="flex items-center gap-2 font-body text-xs text-white/85 tracking-[0.2em] uppercase mb-2 md:mb-[14px]">
               <span className="inline-block w-5 h-0.5 bg-[#9A6A44] align-middle" aria-hidden="true" />
               {t("landing.hero.eyebrow")}
             </p>
 
-            <p className="font-heading text-2xl md:text-3xl italic text-white/90 mb-2 md:mb-3 animate-hero-fade-up animation-delay-400">
-              {t("landing.hero.brand_tagline")}
-            </p>
-            <h1 className="font-heading text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-[1.1] mb-3 md:mb-6 max-w-3xl">
+            <h1 className="font-heading text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-[1.1] mb-[14px] md:mb-[22px] max-w-3xl">
               {t("landing.hero.title_main")} <span className="text-white/80">{t("landing.hero.title_accent")}</span>
             </h1>
 
 
-            <p className="font-body text-lg md:text-xl text-white max-w-xl mb-2 md:mb-4 leading-relaxed animate-hero-fade-up animation-delay-700">
+            <p className="font-body text-lg md:text-xl text-white max-w-xl mb-[22px] md:mb-[34px] leading-relaxed animate-hero-fade-up animation-delay-700">
               {t("landing.hero.lede")}
-            </p>
-            <p className="font-body text-base md:text-lg text-white/95 max-w-xl mb-5 md:mb-10 leading-relaxed italic animate-hero-fade-up animation-delay-700">
-              {t("landing.hero.lede_italic")}
             </p>
 
             <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 animate-hero-fade-up animation-delay-900">
@@ -252,19 +246,19 @@ const Landing = () => {
               onClick={() => {
                 trackEvent("cta_aid_clicked", { metadata: { location: "hero" } });
               }}
-              className="block mt-3 md:mt-4 font-body text-sm text-white/80 underline underline-offset-4 decoration-white/30 hover:text-white hover:decoration-white/60 transition-colors animate-hero-fade-up animation-delay-1000"
+              className="block mt-2 md:mt-[14px] font-body text-sm text-white/80 underline underline-offset-4 decoration-white/30 hover:text-white hover:decoration-white/60 transition-colors animate-hero-fade-up animation-delay-1000"
             >
               {t("landing.hero.cta_aid")}
             </Link>
 
 
-            <p className="font-body text-sm text-white/85 mt-3 animate-hero-fade-up animation-delay-1000">
+            <p className="font-body text-sm text-white/85 mt-[14px] md:mt-[22px] animate-hero-fade-up animation-delay-1000">
               {t("landing.hero.reassurance")}
             </p>
 
 
             {(kpiMaisons >= 10 || kpiAnimaux >= 10 || kpiInscrits > 0 || kpiMissions >= 10) && (
-              <div className="flex flex-row flex-wrap justify-start gap-x-6 gap-y-3 mt-8 md:gap-x-12 md:gap-y-6 md:mt-14 animate-hero-fade-up animation-delay-1100">
+              <div className="flex flex-row flex-wrap justify-start gap-x-6 gap-y-3 mt-[34px] md:gap-x-12 md:gap-y-6 md:mt-[52px] animate-hero-fade-up animation-delay-1100">
                 {/* Seuils : un compteur ne s'affiche qu'au-dessus d'un volume qui prouve
                     l'activité. maisons/animaux intègrent le socle fondateurs donc passent
                     toujours ce seuil ; inscrits est un pur compteur sans seuil bloquant ;
