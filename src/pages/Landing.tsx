@@ -210,7 +210,7 @@ const Landing = () => {
               {t("landing.hero.lede")}
             </p>
 
-            <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 animate-hero-fade-up animation-delay-900">
+            <div className="flex flex-col sm:flex-row sm:flex-wrap sm:items-center gap-2 sm:gap-3 animate-hero-fade-up animation-delay-900">
 
               <button
                 onClick={() => {
@@ -239,17 +239,19 @@ const Landing = () => {
               >
                 {isMember ? t("landing.hero.cta_member_search", "Trouver une garde") : t("landing.hero.cta_sitter")}
               </button>
+              {/* Tertiaire entraide : même rangée que les boutons, traitement texte
+                  souligné sans fond ni bordure pour préserver la hiérarchie
+                  (une seule action principale par écran). Cible 44 px minimum. */}
+              <Link
+                to="/petites-missions"
+                onClick={() => {
+                  trackEvent("cta_aid_clicked", { metadata: { location: "hero" } });
+                }}
+                className="inline-flex items-center justify-center sm:justify-start min-h-[44px] px-5 rounded-full font-body text-sm font-medium text-white underline underline-offset-4 decoration-white/40 hover:decoration-white transition-colors"
+              >
+                {t("landing.hero.cta_aid")}
+              </Link>
             </div>
-
-            <Link
-              to="/petites-missions"
-              onClick={() => {
-                trackEvent("cta_aid_clicked", { metadata: { location: "hero" } });
-              }}
-              className="block mt-2 md:mt-[14px] font-body text-sm text-white/80 underline underline-offset-4 decoration-white/30 hover:text-white hover:decoration-white/60 transition-colors animate-hero-fade-up animation-delay-1000"
-            >
-              {t("landing.hero.cta_aid")}
-            </Link>
 
 
             <p className="font-body text-sm text-white/85 mt-[14px] md:mt-[22px] animate-hero-fade-up animation-delay-1000">
