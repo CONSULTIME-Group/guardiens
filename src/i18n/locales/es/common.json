@@ -1876,5 +1876,8 @@
   "entraide": {
     "help_requested": "Ayuda solicitada",
     "help_offered": "Ayuda ofrecida"
+  },
+  "upload": {
+    "photo_failed": "La subida de la foto se ha interrumpido. Inténtelo de nuevo en unos instantes."
   }
 }

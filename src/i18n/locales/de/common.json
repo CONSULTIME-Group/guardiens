@@ -1876,5 +1876,8 @@
   "entraide": {
     "help_requested": "Hilfe gesucht",
     "help_offered": "Hilfe angeboten"
+  },
+  "upload": {
+    "photo_failed": "Das Hochladen des Fotos wurde unterbrochen. Bitte versuchen Sie es in Kürze erneut."
   }
 }
