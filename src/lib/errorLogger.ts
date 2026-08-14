@@ -124,6 +124,31 @@ export function detectThirdPartySource(
     return "webview_bridge";
   }
 
+  // 1b. Attribution par première frame : les extensions qui patchent
+  //     window.fetch insèrent leurs frames SOUS nos frames (ex: erreurs
+  //     "Network non-2xx", qui restent actionnables). On ne classe
+  //     "extension" que si la PREMIÈRE frame portant une URL (le site de
+  //     lancement) est une URL d'extension — cas des unhandledrejection,
+  //     qui n'ont pas de filename (ex: "reading 'M_ID'" levé par un
+  //     assistant de saisie tiers, empreinte l588z7).
+  if (stack) {
+    for (const line of stack.split("\n")) {
+      const trimmed = line.trim();
+      // Frames uniquement : "at fn (url)" (Chrome) ou "fn@url" (Firefox).
+      // La ligne de message peut contenir une URL (ex: "Network non-2xx:
+      // 502 GET https://…") et ne doit pas être prise pour une frame.
+      if (!/^at\s|^[^\s]*@/.test(trimmed)) continue;
+      const urlMatch = trimmed.match(
+        /((?:(?:chrome|moz|safari(?:-web)?|edge)-extension|https?):\/\/[^\s)]+)/i,
+      );
+      if (!urlMatch) continue;
+      if (/^(?:chrome|moz|safari(?:-web)?|edge)-extension:\/\//i.test(urlMatch[1])) {
+        return "extension";
+      }
+      break; // première frame en http(s) : l'erreur part de code page
+    }
+  }
+
   // 2. Source explicitement tierce
   if (source) {
     const trimmed = source.trim();
