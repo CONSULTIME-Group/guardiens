@@ -16,6 +16,8 @@ import type { SitterProfileData, PastAnimal } from "@/hooks/useSitterProfile";
 import { safeUUID } from "@/lib/uuid";
 import { SITTER_ANIMAL_TYPES_OPTIONS } from "@/lib/profileMatchingOptions";
 import { compressGalleryFile } from "@/lib/compressImage";
+import { trackEvent } from "@/lib/analytics";
+import { useTranslation } from "react-i18next";
 
 const ANIMAL_TYPES = SITTER_ANIMAL_TYPES_OPTIONS;
 const EXPERIENCE_OPTIONS = ["Débutant", "1-3 ans", "3-5 ans", "5+ ans"];
@@ -34,6 +36,7 @@ interface Props {
 
 const StepExperience = ({ data, pastAnimals, onChange, onAddAnimal, onRemoveAnimal }: Props) => {
   const { user } = useAuth();
+  const { t } = useTranslation();
   const [newSpecies, setNewSpecies] = useState("");
   const [newName, setNewName] = useState("");
   const [newBreed, setNewBreed] = useState("");
@@ -55,18 +58,25 @@ const StepExperience = ({ data, pastAnimals, onChange, onAddAnimal, onRemoveAnim
 
   const uploadAnimalPhoto = async (file: File): Promise<string | null> => {
     if (!user) return null;
-    // Plafond d'ingestion galerie (1600 px). Échec = pas d'envoi, jamais de brut.
+    // Plafond d'ingestion galerie (1600 px, repli dégradé 1024 px inclus).
+    // Échec définitif = mesure + formulation unique, jamais de brut.
+    const fail = (): null => {
+      void trackEvent("experience_photo_upload_failed", {
+        metadata: { ext: file.name.split(".").pop()?.toLowerCase() || "unknown", size_kb: Math.round(file.size / 1024) },
+      });
+      toast.error(t("upload.photo_failed"));
+      return null;
+    };
     let toUpload: File;
     try {
       toUpload = await compressGalleryFile(file);
     } catch {
-      toast.error("Impossible d'uploader la photo");
-      return null;
+      return fail();
     }
     const ext = toUpload.name.split(".").pop();
     const path = `${user.id}/past-animals/${safeUUID()}.${ext}`;
     const { error } = await supabase.storage.from("sitter-gallery").upload(path, toUpload, { upsert: true });
-    if (error) { toast.error("Impossible d'uploader la photo"); return null; }
+    if (error) return fail();
     const { data: urlData } = supabase.storage.from("sitter-gallery").getPublicUrl(path);
     return urlData.publicUrl;
   };

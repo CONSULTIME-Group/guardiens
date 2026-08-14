@@ -15,6 +15,8 @@ import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { safeUUID } from "@/lib/uuid";
 import { compressGalleryFile } from "@/lib/compressImage";
+import { trackEvent } from "@/lib/analytics";
+import { useTranslation } from "react-i18next";
 import { readFormDraft, writeFormDraft, clearFormDraft, getFormDraftSavedAt } from "@/lib/formDraft";
 import { makePlainTextPasteHandler } from "@/lib/pastePlainText";
 import DraftStatus, { type DraftState } from "@/components/shared/DraftStatus";
@@ -66,6 +68,7 @@ interface Props {
 
 const PetForm = ({ initialValues, onSubmit, onCancel, submitLabel = "Enregistrer", draftKey, onDirtyChange }: Props) => {
   const { user } = useAuth();
+  const { t } = useTranslation();
   const fileRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -151,21 +154,27 @@ const PetForm = ({ initialValues, onSubmit, onCancel, submitLabel = "Enregistrer
       return;
     }
     setUploading(true);
-    // Plafond d'ingestion (1600 px). Échec = pas d'envoi, jamais de brut.
+    // Plafond d'ingestion (1600 px, repli dégradé 1024 px inclus).
+    // Échec définitif = mesure + formulation unique, jamais de brut.
+    const fail = () => {
+      void trackEvent("pet_photo_upload_failed", {
+        metadata: { ext: file.name.split(".").pop()?.toLowerCase() || "unknown", size_kb: Math.round(file.size / 1024) },
+      });
+      toast.error(t("upload.photo_failed"));
+      setUploading(false);
+    };
     let toUpload: File;
     try {
       toUpload = await compressGalleryFile(file);
     } catch {
-      toast.error("Impossible d'uploader la photo");
-      setUploading(false);
+      fail();
       return;
     }
     const ext = toUpload.name.split(".").pop() || "jpg";
     const path = `${user.id}/pets/${safeUUID()}.${ext}`;
     const { error } = await supabase.storage.from("property-photos").upload(path, toUpload, { upsert: true });
     if (error) {
-      toast.error("Impossible d'uploader la photo");
-      setUploading(false);
+      fail();
       return;
     }
     const { data: urlData } = supabase.storage.from("property-photos").getPublicUrl(path);

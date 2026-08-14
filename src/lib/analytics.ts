@@ -299,7 +299,13 @@ export type EventType =
   | "secteur_saved"                              // Secteur enregistré (postal_code, city, radius_km)
   | "secteur_abandoned"                          // Page modifiée puis quittée sans enregistrement
   | "secteur_sits_found"                         // Gardes trouvées dans le rayon (count, radius_km)
-  | "avatar_compression_failed";                 // Échec définitif compression avatar, repli 512px inclus (ext, size_kb)
+  | "avatar_compression_failed"                  // Échec définitif compression avatar, repli 512px inclus (ext, size_kb)
+  // Uploads photo : échec définitif du parcours, repli dégradé inclus (ext, size_kb)
+  | "sitter_gallery_upload_failed"               // Galerie gardien (SitterGallery)
+  | "experience_photo_upload_failed"             // Animaux gardés par le passé (StepExperience)
+  | "pet_photo_upload_failed"                    // Photo animal (PetForm, OwnerStepAnimals)
+  | "message_photo_upload_failed"                // Photo envoyée en messagerie (Messages)
+  | "mission_photo_upload_failed";               // Photo de petite mission (MissionPhotoUpload)
 
 
 
