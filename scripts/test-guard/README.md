@@ -16,6 +16,20 @@ Les fichiers listés dans `excludedFiles` dépendent du contenu de la base de
 production et sont instables par nature en CI : ils sont ignorés dans les
 deux sens (leur échec ou leur succès ne déclenche rien).
 
+## Confirmation en isolation
+
+Plusieurs gardes-fous sont des scans statiques (comptage de fichiers,
+lecture disque) sensibles à la charge I/O du run complet : ils peuvent y
+échouer de façon non reproductible (constaté le 14/08/2026 sur
+`global-bottom-nav`, `i18n-single-storage-key`, `llms-txt-coverage`,
+`no-unconsumed-supabase-call`, rouges en run complet et verts en isolation).
+
+Tout écart (échec nouveau ou test de référence qui repasse) est donc rejoué
+fichier par fichier, séquentiellement, avant verdict. Seul un écart
+**reproductible en isolation** bloque la garde ; les écarts non
+reproductibles sont listés en avertissement (préfixe `~`). Ce rejeu ne
+coûte que lorsqu'il existe des écarts : un run sans écart n'est pas ralenti.
+
 ## Commandes
 
 ```bash

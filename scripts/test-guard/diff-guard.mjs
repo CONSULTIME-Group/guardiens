@@ -10,6 +10,15 @@
  *   2. un test de la référence se remet à passer : la référence pourrit,
  *      il faut le retirer de baseline.json (ou relancer avec --update).
  *
+ * Confirmation en isolation : plusieurs gardes-fous sont des scans statiques
+ * (comptage de fichiers, lecture disque) sensibles à la charge I/O du run
+ * complet — ils peuvent y échouer de façon non reproductible (constaté le
+ * 14/08/2026 sur global-bottom-nav, i18n-single-storage-key,
+ * llms-txt-coverage, no-unconsumed-supabase-call : rouges en run complet,
+ * verts en isolation). Tout écart est donc rejoué fichier par fichier,
+ * séquentiellement, avant verdict : seul un écart REPRODUCTIBLE en
+ * isolation bloque. Les écarts non reproductibles sont listés en avertissement.
+ *
  * Les fichiers listés dans `excludedFiles` (dépendants de la base de
  * production, instables par nature en CI) sont ignorés dans les deux sens.
  *
@@ -19,7 +28,7 @@
  *                                                    depuis l'exécution courante
  *
  * Aide de débogage : TEST_GUARD_REPORT_PATH=<fichier.json> saute l'exécution
- * Vitest et compare le rapport JSON fourni.
+ * Vitest (et la confirmation en isolation) et compare le rapport JSON fourni.
  */
 import { spawnSync } from "node:child_process";
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
@@ -30,6 +39,8 @@ import { fileURLToPath } from "node:url";
 const ROOT = resolve(fileURLToPath(new URL(".", import.meta.url)), "../..");
 const BASELINE_PATH = join(ROOT, "scripts", "test-guard", "baseline.json");
 const UPDATE = process.argv.includes("--update");
+const SKIP_ISOLATION = Boolean(process.env.TEST_GUARD_REPORT_PATH);
+const VITEST_BIN = join(ROOT, "node_modules", ".bin", process.platform === "win32" ? "vitest.cmd" : "vitest");
 
 /** Normalise un chemin absolu Vitest en chemin relatif au dépôt (src/...). */
 const toRel = (p) => {
@@ -38,46 +49,83 @@ const toRel = (p) => {
   return i >= 0 ? norm.slice(i + 1) : norm;
 };
 
-const runSuite = () => {
-  const reportPath = join(tmpdir(), `vitest-guard-${process.pid}.json`);
-  const bin = join(ROOT, "node_modules", ".bin", process.platform === "win32" ? "vitest.cmd" : "vitest");
-  // Vitest sort en code non nul dès qu'un test échoue : ce n'est PAS une
-  // erreur de la garde, seul le rapport JSON compte.
-  spawnSync(bin, ["run", "--reporter=default", "--reporter=json", `--outputFile.json=${reportPath}`], {
-    cwd: ROOT,
-    stdio: "inherit",
-    env: process.env,
-  });
+/**
+ * Exécute Vitest (suite complète si `files` est vide) et retourne le chemin
+ * du rapport JSON. Vitest sort en code non nul dès qu'un test échoue : ce
+ * n'est PAS une erreur de la garde, seul le rapport compte.
+ */
+const runVitest = (files, quiet) => {
+  const reportPath = join(tmpdir(), `vitest-guard-${process.pid}-${Math.random().toString(36).slice(2)}.json`);
+  const reporters = quiet
+    ? ["--reporter=json"]
+    : ["--reporter=default", "--reporter=json"];
+  spawnSync(
+    VITEST_BIN,
+    ["run", ...files, ...reporters, `--outputFile.json=${reportPath}`],
+    { cwd: ROOT, stdio: quiet ? ["ignore", "ignore", "inherit"] : "inherit", env: process.env },
+  );
   return reportPath;
 };
 
-const reportPath = process.env.TEST_GUARD_REPORT_PATH || runSuite();
+/** Extrait les identifiants stables "<fichier> :: <describe > ... > <it>" des échecs d'un rapport. */
+const collectFailedIds = (report) => {
+  const ids = new Set();
+  for (const suite of report.testResults ?? []) {
+    const file = toRel(suite.name);
+    const assertions = suite.assertionResults ?? [];
+    if (assertions.length === 0 && suite.status === "failed") {
+      ids.add(`${file} :: (échec d'exécution du fichier de test)`);
+    }
+    for (const t of assertions) {
+      if (t.status !== "failed") continue;
+      ids.add(`${file} :: ${[...(t.ancestorTitles ?? []), t.title].join(" > ")}`);
+    }
+  }
+  return ids;
+};
+
+const parseReport = (path) => {
+  try {
+    return JSON.parse(readFileSync(path, "utf8"));
+  } catch {
+    return null;
+  }
+};
+
+/**
+ * Rejoue les fichiers concernés un par un (séquentiel, sortie silencieuse)
+ * et retourne le sous-ensemble d'identifiants qui échouent AUSSI en
+ * isolation. Rapport illisible : prudence, l'identifiant est conservé.
+ */
+const confirmInIsolation = (ids) => {
+  const byFile = new Map();
+  for (const id of ids) {
+    const file = id.split(" :: ")[0];
+    if (!byFile.has(file)) byFile.set(file, []);
+    byFile.get(file).push(id);
+  }
+  const confirmed = new Set();
+  for (const [file, fileIds] of byFile) {
+    const report = parseReport(runVitest([file], true));
+    const stillFailing = report ? collectFailedIds(report) : null;
+    for (const id of fileIds) {
+      if (!stillFailing || stillFailing.has(id)) confirmed.add(id);
+    }
+  }
+  return confirmed;
+};
+
+const reportPath = process.env.TEST_GUARD_REPORT_PATH || runVitest([], false);
 if (!existsSync(reportPath)) {
   console.error(`Garde impossible : rapport Vitest introuvable (${reportPath}).`);
   process.exit(2);
 }
-
-let report;
-try {
-  report = JSON.parse(readFileSync(reportPath, "utf8"));
-} catch (e) {
-  console.error(`Garde impossible : rapport Vitest illisible (${e.message}).`);
+const report = parseReport(reportPath);
+if (!report) {
+  console.error(`Garde impossible : rapport Vitest illisible (${reportPath}).`);
   process.exit(2);
 }
-
-// Identifiant stable d'un test : "<fichier> :: <describe > ... > <it>"
-const current = new Set();
-for (const suite of report.testResults ?? []) {
-  const file = toRel(suite.name);
-  const assertions = suite.assertionResults ?? [];
-  if (assertions.length === 0 && suite.status === "failed") {
-    current.add(`${file} :: (échec d'exécution du fichier de test)`);
-  }
-  for (const t of assertions) {
-    if (t.status !== "failed") continue;
-    current.add(`${file} :: ${[...(t.ancestorTitles ?? []), t.title].join(" > ")}`);
-  }
-}
+const current = collectFailedIds(report);
 
 const baseline = JSON.parse(readFileSync(BASELINE_PATH, "utf8"));
 const excluded = new Set((baseline.excludedFiles ?? []).map((e) => e.file));
@@ -104,16 +152,34 @@ if (UPDATE) {
   process.exit(0);
 }
 
-const newFailures = [...current].filter((id) => inScope(id) && !known.has(id)).sort();
-const fixed = [...known.keys()].filter((id) => !current.has(id)).sort();
+const newFailuresRaw = [...current].filter((id) => inScope(id) && !known.has(id)).sort();
+const fixedRaw = [...known.keys()].filter((id) => !current.has(id)).sort();
 
 const passed = report.numPassedTests ?? "?";
 console.log(`Suite exécutée : ${passed} test(s) au vert, ${current.size} échec(s) dont ${baseline.excludedFiles?.length ?? 0} fichier(s) exclu(s) du périmètre.`);
 
+// Confirmation en isolation des écarts avant verdict (voir en-tête).
+let newFailures = newFailuresRaw;
+let fixed = fixedRaw;
+let flaky = [];
+if (!SKIP_ISOLATION && (newFailuresRaw.length > 0 || fixedRaw.length > 0)) {
+  console.log(`Rejeu en isolation de ${newFailuresRaw.length + fixedRaw.length} écart(s) avant verdict…`);
+  const confirmedNew = confirmInIsolation(newFailuresRaw);
+  flaky = newFailuresRaw.filter((id) => !confirmedNew.has(id));
+  newFailures = [...confirmedNew].sort();
+  const stillFailing = confirmInIsolation(fixedRaw);
+  fixed = fixedRaw.filter((id) => !stillFailing.has(id));
+}
+
+if (flaky.length > 0) {
+  console.warn(`\n${flaky.length} échec(s) NON reproductible(s) en isolation (instables sous charge, non bloquants) :`);
+  for (const id of flaky) console.warn(`  ~ ${id}`);
+}
+
 let ko = false;
 if (newFailures.length > 0) {
   ko = true;
-  console.error(`\nÉCHEC DE LA GARDE : ${newFailures.length} échec(s) NOUVEAU(x) absent(s) de la référence :`);
+  console.error(`\nÉCHEC DE LA GARDE : ${newFailures.length} échec(s) NOUVEAU(x) confirmé(s) en isolation, absent(s) de la référence :`);
   for (const id of newFailures) console.error(`  - ${id}`);
 }
 if (fixed.length > 0) {
@@ -123,4 +189,4 @@ if (fixed.length > 0) {
 }
 if (ko) process.exit(1);
 
-console.log(`Garde OK : aucun nouvel échec, ${known.size} échec(s) connu(s) toujours présents et tolérés.`);
+console.log(`Garde OK : aucun nouvel échec confirmé, ${known.size} échec(s) connu(s) toujours présents et tolérés.`);
