@@ -168,18 +168,20 @@ Deno.serve(async (req) => {
       }
     }
 
-    const signals = await collectSignals();
-    const { analysis, actions } = await callAI(signals);
+    const { snapshot, snapshotAt } = await collectSnapshot();
+    const { analysis, actions } = await callAI(snapshot);
 
     const { data: inserted, error: insErr } = await admin
       .from('admin_activity_analysis')
-      .insert({ summary: analysis, actions, snapshot: signals, generated_by: generatedBy })
+      .insert({ summary: analysis, actions, snapshot, snapshot_at: snapshotAt, generated_by: generatedBy })
       .select('generated_at')
       .single();
     if (insErr) throw insErr;
 
     return new Response(
-      JSON.stringify({ analysis: { analysis, actions, generated_at: inserted.generated_at } }),
+      JSON.stringify({
+        analysis: { analysis, actions, generated_at: inserted.generated_at, snapshot, snapshot_at: snapshotAt },
+      }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
     );
   } catch (e) {
