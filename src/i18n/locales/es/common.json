@@ -60,8 +60,8 @@
   "landing": {
     "hero": {
       "eyebrow": "Cuidados · Ayuda mutua · Confianza",
-      "title_main": "Cuidar una casa. Echar una mano. Darse confianza.",
-      "title_accent": "A un kilómetro como a mil.",
+      "title_main": "Cuidar una casa. Echar una mano.",
+      "title_accent": "Darse confianza.",
       "lede": "Su jardín por una comida. Sus llaves por una historia.",
       "lede_italic": "Y detrás de cada intercambio, un encuentro que no habría buscado.",
       "cta_owner": "Publicar mi anuncio",
@@ -82,7 +82,7 @@
       "title": "Sumario",
       "care_aid": "Cuidado y ayuda mutua",
       "how": "Cómo funciona",
-      "aid": "Ayuda local",
+      "aid": "Ayuda mutua",
       "trust": "Confianza",
       "testimonials": "Testimonios",
       "story": "Nuestra historia",
@@ -95,7 +95,7 @@
     },
     "usages": {
       "eyebrow": "Lo que hacemos juntos",
-      "title": "Cuidado de casas, cuidado de mascotas a domicilio, ayuda mutua entre miembros.",
+      "title": "Guardias, y pequeños favores.",
       "lede": "El home sitting por un lado, los favores entre miembros por el otro. Usted elige: uno, otro o ambos.",
       "owner": {
         "tag": "Propietarios",
@@ -111,8 +111,8 @@
         "cta": "Quiero ser cuidador →"
       },
       "mutual": {
-        "badge": "Entre gente de la zona",
-        "tag": "Ayuda local, independiente del cuidado",
+        "badge": "Entre miembros",
+        "tag": "Ayuda mutua, independiente del cuidado",
         "title": "Un pequeño favor, un intercambio.",
         "text": "Regar un huerto, montar una estantería, compartir una habilidad, visitar a una persona aislada. Sin necesidad de cuidado ni de mascotas, solo personas de la zona que se ayudan.",
         "cta": "Descubrir la ayuda mutua →"
@@ -376,7 +376,7 @@
     "what_is": {
       "title": "¿Qué es Guardiens?",
       "body_1": "Guardiens es una red de ayuda mutua entre particulares, organizada tanto por afinidad como por proximidad. Se cuidan casas, se hacen favores, se conoce gente. A un kilómetro como a mil.",
-      "body_2": "El cuidado de casas es su uso principal. Un guardián se instala en su casa durante su ausencia y vela por lo que usted deja: su casa, su jardín, sus animales.",
+      "body_2": "El cuidado de casas y el cuidado de mascotas a domicilio son su uso principal. Un guardián se instala en su casa durante su ausencia y vela por lo que usted deja: su casa, su jardín, sus animales.",
       "body_3": "Además de las guardias, los miembros se echan una mano: riego, compras, compañía. El intercambio se decide entre ustedes.",
       "body_4": "La puesta en contacto se apoya en una puntuación de afinidad calculada sobre siete criterios, donde el estilo de vida cuenta tanto como la distancia. Cada perfil está documentado, la identidad está verificada, las opiniones son cruzadas. Un estatus de guardián de urgencia responde a los imprevistos.",
       "body_5": "Guardiens publica también guías de razas y guías locales, ciudad por ciudad. Se suman un directorio de profesionales de los animales con SIRET verificado y una revista de consejos prácticos.",

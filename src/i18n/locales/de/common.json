@@ -60,8 +60,8 @@
   "landing": {
     "hero": {
       "eyebrow": "Hüten · Hilfe · Vertrauen",
-      "title_main": "Ein Haus hüten. Einen Gefallen tun. Einander vertrauen.",
-      "title_accent": "Einen Kilometer entfernt oder tausend.",
+      "title_main": "Ein Haus hüten. Einen Gefallen tun.",
+      "title_accent": "Einander vertrauen.",
       "lede": "Ihr Garten gegen ein Essen. Ihre Schlüssel gegen eine Geschichte.",
       "lede_italic": "Und hinter jedem Austausch steht eine Begegnung, nach der Sie sonst nicht gesucht hätten.",
       "cta_owner": "Meine Anzeige veröffentlichen",
@@ -82,7 +82,7 @@
       "title": "Inhalt",
       "care_aid": "Betreuung & Hilfe",
       "how": "So funktioniert es",
-      "aid": "Lokale Hilfe",
+      "aid": "Gegenseitige Hilfe",
       "trust": "Vertrauen",
       "testimonials": "Erfahrungsberichte",
       "story": "Unsere Geschichte",
@@ -95,7 +95,7 @@
     },
     "usages": {
       "eyebrow": "Was wir gemeinsam tun",
-      "title": "Haushüten, Tierbetreuung zu Hause, gegenseitige Hilfe unter Mitgliedern.",
+      "title": "Hüteeinsätze und kleine Gefallen.",
       "lede": "Home Sitting auf der einen Seite, kleine Gefallen unter Mitgliedern auf der anderen. Sie haben die Wahl: das eine, das andere oder beides.",
       "owner": {
         "tag": "Eigentümer",
@@ -111,8 +111,8 @@
         "cta": "Ich möchte betreuen →"
       },
       "mutual": {
-        "badge": "Unter Menschen aus der Umgebung",
-        "tag": "Lokale Hilfe, unabhängig von der Betreuung",
+        "badge": "Unter Mitgliedern",
+        "tag": "Gegenseitige Hilfe, unabhängig von der Betreuung",
         "title": "Eine kleine Hilfe, ein Austausch.",
         "text": "Den Gemüsegarten gießen, ein Regal aufbauen, eine Fähigkeit teilen, eine einsame Person besuchen. Keine Betreuung, kein Tier nötig – einfach Menschen aus der Nähe, die sich gegenseitig helfen.",
         "cta": "Hilfe entdecken →"
@@ -376,7 +376,7 @@
     "what_is": {
       "title": "Was ist Guardiens?",
       "body_1": "Guardiens ist ein Netzwerk gegenseitiger Hilfe unter Privatpersonen, nach Affinität ebenso wie nach Nähe organisiert. Hier werden Häuser gehütet, Gefallen getan, Menschen kennengelernt. Ein Kilometer entfernt oder tausend.",
-      "body_2": "Das Hüten von Häusern ist der Hauptanwendungsfall. Ein Betreuer zieht während Ihrer Abwesenheit in Ihr Haus und wacht über das, was Sie zurücklassen: Ihr Haus, Ihren Garten, Ihre Tiere.",
+      "body_2": "Das Hüten von Häusern und die Tierbetreuung zu Hause bilden den Hauptanwendungsfall. Ein Betreuer zieht während Ihrer Abwesenheit in Ihr Haus und wacht über das, was Sie zurücklassen: Ihr Haus, Ihren Garten, Ihre Tiere.",
       "body_3": "Neben den Hüteeinsätzen leisten sich die Mitglieder kleine Gefallen: Gießen, Einkäufe, Gesellschaft. Den Austausch entscheiden Sie untereinander.",
       "body_4": "Die Vermittlung stützt sich auf einen Affinitätswert aus sieben Kriterien, bei dem die Lebensweise ebenso zählt wie die Entfernung. Jedes Profil ist dokumentiert, die Identität ist geprüft, die Bewertungen sind gegenseitig. Ein Notfall-Status für Betreuer fängt Unvorhergesehenes auf.",
       "body_5": "Guardiens veröffentlicht außerdem Rasseführer und lokale Führer, Stadt für Stadt. Hinzu kommen ein Verzeichnis von Tierprofis mit geprüfter SIRET-Nummer und ein Journal mit praktischen Ratschlägen.",
