@@ -95,8 +95,8 @@
     },
     "usages": {
       "eyebrow": "Lo que hacemos juntos",
-      "title": "Cuidado de mascotas a domicilio y ayuda local.",
-      "lede": "El home sitting por un lado, la ayuda mutua entre personas de la zona por el otro. Usted elige: uno, otro o ambos.",
+      "title": "Cuidado de casas, cuidado de mascotas a domicilio, ayuda mutua entre miembros.",
+      "lede": "El home sitting por un lado, los favores entre miembros por el otro. Usted elige: uno, otro o ambos.",
       "owner": {
         "tag": "Propietarios",
         "title": "Partir con tranquilidad.",
@@ -375,7 +375,12 @@
     },
     "what_is": {
       "title": "¿Qué es Guardiens?",
-      "body": "Guardiens es una plataforma francesa de house-sitting y ayuda mutua entre particulares. El principio: una persona de confianza que vive cerca de usted se instala en su casa durante su ausencia y cuida de sus animales en su entorno. El intercambio se basa en la confianza y el encuentro, sin costes para el propietario. Guardiens cubre toda Francia."
+      "body_1": "Guardiens es una red de ayuda mutua entre particulares, organizada tanto por afinidad como por proximidad. Se cuidan casas, se hacen favores, se conoce gente. A un kilómetro como a mil.",
+      "body_2": "El cuidado de casas es su uso principal. Un guardián se instala en su casa durante su ausencia y vela por lo que usted deja: su casa, su jardín, sus animales.",
+      "body_3": "Además de las guardias, los miembros se echan una mano: riego, compras, compañía. El intercambio se decide entre ustedes.",
+      "body_4": "La puesta en contacto se apoya en una puntuación de afinidad calculada sobre siete criterios, donde el estilo de vida cuenta tanto como la distancia. Cada perfil está documentado, la identidad está verificada, las opiniones son cruzadas. Un estatus de guardián de urgencia responde a los imprevistos.",
+      "body_5": "Guardiens publica también guías de razas y guías locales, ciudad por ciudad. Se suman un directorio de profesionales de los animales con SIRET verificado y una revista de consejos prácticos.",
+      "body_6": "La red cubre toda Francia y pone en contacto a los franceses del extranjero con guardianes sobre el terreno. Usted tiene acceso a todo, sin compromiso."
     },
     "compare": {
       "title": "House-sitting, residencia, pet-sitter: ¿qué elegir?",
