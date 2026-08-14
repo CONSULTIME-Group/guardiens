@@ -1,6 +1,7 @@
 import { useEffect, useState, useRef } from "react";
 import { MapContainer, TileLayer, Marker, useMap } from "react-leaflet";
 import L from "leaflet";
+import { LeafletUnmountGuard } from "@/components/shared/LeafletUnmountGuard";
 import { Link } from "react-router-dom";
 import { Star, MapPin, X } from "lucide-react";
 import "leaflet/dist/leaflet.css";
@@ -76,6 +77,7 @@ const SearchOwnerMapView = ({ sitters, centerCoords, onContact, contactingId }: 
         zoomControl
         attributionControl={false}
       >
+        <LeafletUnmountGuard />
         <Centerer bounds={bounds} fallback={center} />
         <TileLayer
           url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"

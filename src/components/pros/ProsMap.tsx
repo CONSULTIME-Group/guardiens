@@ -5,6 +5,7 @@ import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
 import L from "leaflet";
 import { supabase } from "@/integrations/supabase/client";
 import { getCategoryByValue } from "@/lib/proCategories";
+import { LeafletUnmountGuard } from "@/components/shared/LeafletUnmountGuard";
 import { Skeleton } from "@/components/ui/skeleton";
 
 // Fix icônes par défaut
@@ -93,6 +94,7 @@ export default function ProsMap({ categoryFilter }: { categoryFilter?: string })
         scrollWheelZoom={false}
         style={{ height: "100%", width: "100%" }}
       >
+        <LeafletUnmountGuard />
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"

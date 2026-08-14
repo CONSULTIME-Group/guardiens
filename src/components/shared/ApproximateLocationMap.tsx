@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import "leaflet/dist/leaflet.css";
 import { MapContainer, TileLayer, Circle } from "react-leaflet";
 import L from "leaflet";
+import { LeafletUnmountGuard } from "@/components/shared/LeafletUnmountGuard";
 import { supabase } from "@/integrations/supabase/client";
 
 interface Props {
@@ -158,6 +159,7 @@ const ApproximateLocationMap = ({
         className="h-full w-full"
         style={{ background: "hsl(var(--muted))" }}
       >
+        <LeafletUnmountGuard />
         <TileLayer
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
           attribution=""
