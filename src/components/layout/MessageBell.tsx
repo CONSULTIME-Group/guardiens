@@ -8,6 +8,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { formatDistanceToNow } from "date-fns";
 import { fr } from "date-fns/locale";
 import { safeUUID } from "@/lib/uuid";
+import { avatarImageUrl } from "@/lib/storageImage";
 
 interface ThreadPreview {
   conversation_id: string;
@@ -222,7 +223,7 @@ const MessageBell = ({ onUnreadChange }: MessageBellProps = {}) => {
                   <div className="shrink-0 w-9 h-9 rounded-full overflow-hidden bg-muted flex items-center justify-center ring-1 ring-border">
                     {t.other_avatar ? (
                       <img
-                        src={t.other_avatar}
+                        src={avatarImageUrl(t.other_avatar, 36)}
                         alt=""
                         loading="lazy"
                         className="w-full h-full object-cover"

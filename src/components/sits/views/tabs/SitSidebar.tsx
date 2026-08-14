@@ -6,6 +6,7 @@
 import { Link } from "react-router-dom";
 import { ChevronRight } from "lucide-react";
 import VerifiedBadge from "@/components/profile/VerifiedBadge";
+import { avatarImageUrl } from "@/lib/storageImage";
 
 interface SitSidebarProps {
   hasOwnerCard: boolean;
@@ -44,7 +45,7 @@ const SitSidebar = ({
           <div className="flex items-center gap-3 mb-3">
             {owner.avatar_url ? (
               <img
-                src={owner.avatar_url}
+                src={avatarImageUrl(owner.avatar_url, 56)}
                 alt={ownerName}
                 className="w-14 h-14 rounded-full object-cover"
               />

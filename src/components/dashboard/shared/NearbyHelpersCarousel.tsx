@@ -11,6 +11,7 @@ import { tokenizeSkillPhrases, dedupeChipsByLabel } from "@/lib/skills/tokenize"
 import { sanitizeBioForCard } from "@/lib/sanitizeBio";
 import { startConversationAndNavigate } from "@/lib/conversation";
 import { toast } from "sonner";
+import { avatarImageUrl } from "@/lib/storageImage";
 
 
 /**
@@ -297,7 +298,7 @@ const HelperMiniCard = ({
         <div className="relative shrink-0">
           {helper.avatar_url ? (
             <img
-              src={helper.avatar_url}
+              src={avatarImageUrl(helper.avatar_url, 64)}
               alt={`Portrait de ${firstName}`}
               loading="lazy"
               className="w-16 h-16 rounded-[1.25rem] object-cover ring-1 ring-border rotate-2 group-hover/card:rotate-0 transition-transform duration-500"

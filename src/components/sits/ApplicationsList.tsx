@@ -35,6 +35,7 @@ import {
 import { format, differenceInDays, parseISO, formatDistanceToNow } from "date-fns";
 import { fr } from "date-fns/locale";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { avatarImageUrl } from "@/lib/storageImage";
 
 interface ApplicationsListProps {
   sitId: string;
@@ -642,7 +643,7 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, prope
                   sitsCount={completedSits}
                 >
                   {getMemberAvatarUrl(sitter) ? (
-                    <img src={getMemberAvatarUrl(sitter)!} alt={`Photo de ${getMemberDisplayName(sitter, "gardien")}`} className="w-full h-full object-cover" />
+                    <img src={avatarImageUrl(getMemberAvatarUrl(sitter)!, 48)} alt={`Photo de ${getMemberDisplayName(sitter, "gardien")}`} className="w-full h-full object-cover" />
                   ) : (
                     <div className="w-full h-full rounded-full bg-primary/10 flex items-center justify-center text-primary font-medium text-lg">
                       {getMemberInitial(sitter)}

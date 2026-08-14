@@ -6,6 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
+import { avatarImageUrl } from "@/lib/storageImage";
 
 type Review = {
   id: string;
@@ -215,7 +216,7 @@ export default function ProReviews({
                   <div className="flex items-center gap-3 mb-2">
                     {r.author_avatar ? (
                       <img
-                        src={r.author_avatar}
+                        src={avatarImageUrl(r.author_avatar, 36)}
                         alt=""
                         className="w-9 h-9 rounded-full object-cover bg-muted"
                       />

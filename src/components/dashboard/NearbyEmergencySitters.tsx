@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Link } from "react-router-dom";
 import { Star } from "lucide-react";
+import { avatarImageUrl } from "@/lib/storageImage";
 
 interface SitterRow {
   id: string;
@@ -124,7 +125,7 @@ const NearbyEmergencySitters = ({ hideHeader = false }: { hideHeader?: boolean }
             >
               {s.avatar_url ? (
                 <img
-                  src={s.avatar_url}
+                  src={avatarImageUrl(s.avatar_url, 40)}
                   alt=""
                   className="w-10 h-10 rounded-full object-cover shrink-0 ring-1 ring-border"
                   loading="lazy"

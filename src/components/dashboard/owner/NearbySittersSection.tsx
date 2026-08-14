@@ -17,6 +17,7 @@ import { supabase } from "@/integrations/supabase/client";
 import type { AffinitySitterInput } from "@/lib/affinityScore";
 import { SectionHeader } from "../sitter/SitterMatchSection";
 import OwnerToSitterAffinity from "@/components/matching/OwnerToSitterAffinity";
+import { avatarImageUrl } from "@/lib/storageImage";
 
 const AFFINITY_COLUMNS =
   "user_id, experience_years, life_pace, languages, interests, work_during_sit, sensitivities, animal_types, sitter_type, travels_with_children, travels_with_own_animals";
@@ -99,7 +100,7 @@ const NearbySittersSection = () => {
               >
                 {s.avatar_url ? (
                   <img
-                    src={s.avatar_url}
+                    src={avatarImageUrl(s.avatar_url, 42)}
                     alt=""
                     loading="lazy"
                     className="h-full w-full object-cover"

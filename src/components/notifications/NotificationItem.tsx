@@ -2,6 +2,7 @@ import { Check, Trash2, Lock } from "lucide-react";
 import { Link } from "react-router-dom";
 import { formatDistanceToNow } from "date-fns";
 import { fr } from "date-fns/locale";
+import { avatarImageUrl } from "@/lib/storageImage";
 
 export interface NotificationData {
   id: string;
@@ -96,7 +97,7 @@ export const NotificationItem = ({ notification: n, hasAccess, onMarkRead, onDel
         {/* Avatar / pastille */}
         {displayAvatar ? (
           <img
-            src={displayAvatar}
+            src={avatarImageUrl(displayAvatar, 36)}
             alt=""
             className="w-9 h-9 rounded-full object-cover shrink-0 mt-0.5"
           />

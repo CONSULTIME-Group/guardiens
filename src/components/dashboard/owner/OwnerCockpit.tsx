@@ -13,6 +13,7 @@ import { Link } from "react-router-dom";
 import { CockpitGreeting } from "@/components/dashboard/CockpitGreeting";
 import { Eye } from "lucide-react";
 import ownerHome from "@/assets/illustrations/owner-cockpit-home.webp";
+import { avatarImageUrl } from "@/lib/storageImage";
 
 const capitalize = (name: string) =>
   name ? name.charAt(0).toUpperCase() + name.slice(1).toLowerCase() : "";
@@ -97,7 +98,7 @@ const OwnerCockpit = ({
                 style={{ backgroundColor: "hsl(var(--secondary) / 0.12)" }}
               >
                 {avatarUrl ? (
-                  <img src={avatarUrl} alt="" className="w-full h-full object-cover" loading="lazy" />
+                  <img src={avatarImageUrl(avatarUrl, 48)} alt="" className="w-full h-full object-cover" loading="lazy" />
                 ) : (
                   <span className="font-heading font-semibold text-lg text-foreground/80">
                     {initial}

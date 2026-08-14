@@ -15,6 +15,7 @@ import { useViewerOwnerForAffinity } from "@/hooks/useViewerOwnerForAffinity";
 import { useAffinityWithShadow } from "@/hooks/useAffinityWithShadow";
 import { supabase } from "@/integrations/supabase/client";
 import { logger } from "@/lib/logger";
+import { avatarImageUrl } from "@/lib/storageImage";
 
 interface ApplicationsSectionProps {
   recentApps: AppRow[];
@@ -119,7 +120,7 @@ const AppCard = memo(({ app, sitterProfiles, sitterAffinityProfiles, featured = 
         sitsCount={sitter?.completed_sits_count}
       >
         {sitter?.avatar_url ? (
-          <img src={sitter.avatar_url} alt={`Photo de ${sitter.first_name || 'gardien'}`} className="w-full h-full object-cover" />
+          <img src={avatarImageUrl(sitter.avatar_url, 48)} alt={`Photo de ${sitter.first_name || 'gardien'}`} className="w-full h-full object-cover" />
         ) : (
           <div className="w-full h-full bg-primary/15 text-primary font-bold flex items-center justify-center text-lg font-sans">
             {sitter?.first_name?.charAt(0)?.toUpperCase() || "?"}

@@ -58,6 +58,7 @@ import { useToast } from "@/hooks/use-toast";
 import { trackEvent } from "@/lib/analytics";
 import { deriveCategoriesFromCompetences } from "@/lib/skills/categories";
 import {
+import { avatarImageUrl } from "@/lib/storageImage";
   LANGUAGE_OPTIONS,
   INTEREST_OPTIONS,
   LIFE_PACE_OPTIONS,
@@ -753,7 +754,7 @@ const CompleteProfileToApplyModal = ({
                       >
                         {form.avatar_url ? (
                           <img
-                            src={form.avatar_url}
+                            src={avatarImageUrl(form.avatar_url, 80)}
                             alt="Votre photo de profil"
                             className="w-full h-full object-cover"
                           />

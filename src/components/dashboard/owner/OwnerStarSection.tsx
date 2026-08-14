@@ -30,6 +30,7 @@ import type { OwnerPrimaryAction } from "@/hooks/useOwnerPrimaryAction";
 import { trackEvent } from "@/lib/analytics";
 import { useImpressionOnce } from "@/hooks/useImpressionOnce";
 import { selectOwnerStarVariant } from "@/lib/ownerStarVariant";
+import { avatarImageUrl } from "@/lib/storageImage";
 
 const DATE_FMT = new Intl.DateTimeFormat("fr-FR", {
   day: "numeric",
@@ -167,7 +168,7 @@ const OngoingCard = ({
       >
         <div className="w-14 h-14 rounded-full overflow-hidden bg-primary/10 shrink-0 flex items-center justify-center">
           {sitter?.avatar_url ? (
-            <img src={sitter.avatar_url} alt="" className="w-full h-full object-cover" loading="lazy" />
+            <img src={avatarImageUrl(sitter.avatar_url, 56)} alt="" className="w-full h-full object-cover" loading="lazy" />
           ) : (
             <span className="font-heading font-bold text-primary text-xl">
               {sitterName.charAt(0)}
@@ -241,7 +242,7 @@ const ApplicationCard = ({
         ) : (
           <div className="w-16 h-16 rounded-full overflow-hidden bg-primary/10 shrink-0 flex items-center justify-center">
             {sitter?.avatar_url ? (
-              <img src={sitter.avatar_url} alt="" className="w-full h-full object-cover" loading="lazy" />
+              <img src={avatarImageUrl(sitter.avatar_url, 56)} alt="" className="w-full h-full object-cover" loading="lazy" />
             ) : (
               <span className="font-heading font-bold text-primary text-xl">
                 {firstName.charAt(0)}

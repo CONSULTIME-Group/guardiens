@@ -3,6 +3,7 @@ import { Compass, Share2, Star, ShieldCheck } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNearbyOwnerSitters } from "@/hooks/useNearbyOwnerSitters";
 import TrustHaloAvatar from "@/components/sitters/TrustHaloAvatar";
+import { avatarImageUrl } from "@/lib/storageImage";
 
 interface Props {
   /** Cache le header quand le parent rend déjà un eyebrow. */
@@ -127,7 +128,7 @@ const NearbyOwnerSittersCard = ({ hideHeader = false }: Props) => {
                   >
                     {s.avatar_url ? (
                       <img
-                        src={s.avatar_url}
+                        src={avatarImageUrl(s.avatar_url, 44)}
                         alt=""
                         className="w-full h-full object-cover"
                         loading="lazy"

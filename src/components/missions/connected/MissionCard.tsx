@@ -154,7 +154,7 @@ const MissionCard = ({ mission: m, currentUserId, isAuthenticated, canApplyMissi
         ) : avatarUrl ? (
           <>
             <img
-              src={avatarUrl}
+              src={avatarImageUrl(avatarUrl, 96)}
               alt=""
               aria-hidden="true"
               loading="lazy"

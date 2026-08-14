@@ -1118,7 +1118,7 @@ const SmallMissionDetail = () => {
                 >
                   {(user as any).avatarUrl ? (
                     <img
-                      src={(user as any).avatarUrl}
+                      src={avatarImageUrl((user as any).avatarUrl, 24)}
                       alt=""
                       className="w-6 h-6 rounded-full object-cover shrink-0"
                     />
@@ -1207,7 +1207,7 @@ const SmallMissionDetail = () => {
                     <div className="shrink-0">
                       {author.avatar_url ? (
                         <img
-                          src={author.avatar_url}
+                          src={avatarImageUrl(author.avatar_url, 48)}
                           alt={author.first_name || "Auteur"}
                           className="w-12 h-12 rounded-full object-cover border border-border"
                         />
@@ -1304,7 +1304,7 @@ const SmallMissionDetail = () => {
                       <>
                         {author.avatar_url ? (
                           <img
-                            src={author.avatar_url}
+                            src={avatarImageUrl(author.avatar_url, 40)}
                             alt={author.first_name || "Auteur"}
                             className="w-10 h-10 rounded-full object-cover shrink-0"
                           />
@@ -1514,7 +1514,7 @@ const SmallMissionDetail = () => {
                   >
                     {(user as any)?.avatar_url ? (
                       <img
-                        src={(user as any).avatar_url}
+                        src={avatarImageUrl((user as any).avatar_url, 40)}
                         alt=""
                         aria-hidden="true"
                         className="w-9 h-9 md:w-10 md:h-10 rounded-full object-cover shrink-0"

@@ -54,6 +54,7 @@ const LIFESTYLE_OPTIONS = [
 // On présente une short list de compétences SPÉCIFIQUES groupées par
 // catégorie. Les catégories DB sont dérivées automatiquement au save.
 import { SKILL_CATEGORIES as SPECIFIC_SKILL_CATEGORIES, deriveCategoriesFromCompetences } from "@/lib/skills/categories";
+import { avatarImageUrl } from "@/lib/storageImage";
 
 
 const OnboardingModal = ({ open, onClose, onMinimalComplete }: OnboardingModalProps) => {
@@ -675,7 +676,7 @@ const OnboardingModal = ({ open, onClose, onMinimalComplete }: OnboardingModalPr
                     className="w-24 h-24 rounded-full bg-muted border-2 border-dashed border-border flex items-center justify-center overflow-hidden hover:border-primary transition-colors"
                   >
                     {avatarUrl ? (
-                      <img src={avatarUrl} alt="Avatar" className="w-full h-full object-cover" />
+                      <img src={avatarImageUrl(avatarUrl, 96)} alt="Avatar" className="w-full h-full object-cover" />
                     ) : (
                       <Camera className="w-7 h-7 text-muted-foreground" />
                     )}
@@ -710,7 +711,7 @@ const OnboardingModal = ({ open, onClose, onMinimalComplete }: OnboardingModalPr
                 <div className="flex items-start gap-3">
                   <div className="w-12 h-12 rounded-full bg-muted border border-border flex items-center justify-center overflow-hidden flex-shrink-0">
                     {avatarUrl ? (
-                      <img src={avatarUrl} alt="Votre photo de profil" className="w-full h-full object-cover" />
+                      <img src={avatarImageUrl(avatarUrl, 48)} alt="Votre photo de profil" className="w-full h-full object-cover" />
                     ) : (
                       <User className="w-5 h-5 text-muted-foreground/50" />
                     )}

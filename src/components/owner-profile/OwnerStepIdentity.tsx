@@ -16,6 +16,7 @@ import {
 } from "@/lib/profileMatchingOptions";
 import type { OwnerProfileData } from "@/hooks/useOwnerProfile";
 import { trackEvent } from "@/lib/analytics";
+import { avatarImageUrl } from "@/lib/storageImage";
 
 /**
  * Indicateur de progression centres d'intérêt côté propriétaire.
@@ -99,7 +100,7 @@ const OwnerStepIdentity = ({ data, onChange, onUploadPhoto }: Props) => {
       <div className="flex flex-col items-center gap-3">
         <button type="button" onClick={() => fileRef.current?.click()}
           className="w-28 h-28 rounded-full bg-muted border-2 border-dashed border-border flex items-center justify-center overflow-hidden hover:border-primary transition-colors">
-          {data.avatar_url ? <img src={data.avatar_url} alt="Avatar" className="w-full h-full object-cover" /> : <Camera className="w-8 h-8 text-muted-foreground" />}
+          {data.avatar_url ? <img src={avatarImageUrl(data.avatar_url, 112)} alt="Avatar" className="w-full h-full object-cover" /> : <Camera className="w-8 h-8 text-muted-foreground" />}
         </button>
         <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleAvatar} />
         <span className="text-sm text-muted-foreground">{uploading ? "Envoi..." : data.avatar_url ? "Cliquez pour changer la photo" : "Cliquez pour ajouter une photo"}</span>
