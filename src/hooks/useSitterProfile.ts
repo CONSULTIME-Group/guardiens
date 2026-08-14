@@ -4,7 +4,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { logger } from "@/lib/logger";
 import { validateAvatarFile } from "@/lib/validateAvatarFile";
-import { compressImageFile } from "@/lib/compressImage";
+import { compressAvatarFile } from "@/lib/compressImage";
 
 // Exported so the page can recompute missing fields against the LIVE preview state
 // (mergedData = data + localData) instead of the stale server snapshot.
@@ -459,10 +459,10 @@ export function useSitterProfile() {
       return null;
     }
 
-    // 2) Compression (webp/jpg, max 1200px, ~300 ko). Convertit HEIC en JPG.
+    // 2) Compression avatar (webp/jpg, max 1024 px, ~300 ko). Convertit HEIC en JPG.
     let toUpload: File;
     try {
-      toUpload = await compressImageFile(file);
+      toUpload = await compressAvatarFile(file);
     } catch (err) {
       logger.error("Sitter avatar compression failed", { error: String(err) });
       toast({ variant: "destructive", title: "Erreur", description: "Impossible de traiter cette image." });

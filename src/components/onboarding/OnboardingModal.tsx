@@ -28,7 +28,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { toast } from "sonner";
 import PostalCodeCityFields from "@/components/profile/PostalCodeCityFields";
 import ChipSelect from "@/components/profile/ChipSelect";
-import { compressImageFile } from "@/lib/compressImage";
+import { compressAvatarFile } from "@/lib/compressImage";
 import { trackEvent } from "@/lib/analytics";
 import { COUNTRIES } from "@/lib/countries";
 import gouacheEntraide from "@/assets/onboarding/gouache-entraide.png";
@@ -313,12 +313,15 @@ const OnboardingModal = ({ open, onClose, onMinimalComplete }: OnboardingModalPr
 
     setUploading(true);
     try {
-      // Si la compression échoue (image exotique, navigateur), on tente l'upload du fichier original.
-      let toUpload: File = file;
+      // Pas de repli sur le fichier original : un échec de compression doit
+      // échouer franchement plutôt que stocker une photo brute de plusieurs Mo.
+      let toUpload: File;
       try {
-        toUpload = await compressImageFile(file);
+        toUpload = await compressAvatarFile(file);
       } catch (compressErr) {
-        console.warn("[avatar] compression failed, uploading original", compressErr);
+        console.warn("[avatar] compression failed", compressErr);
+        toast.error("Impossible de traiter cette image. Essayez une autre photo.");
+        return;
       }
       let ext = (toUpload.name.split(".").pop() || "jpg").toLowerCase();
       // Le stockage refuse le HEIC/HEIF brut : si la conversion n'a pas abouti,

@@ -4,7 +4,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { logger } from "@/lib/logger";
 import { validateAvatarFile } from "@/lib/validateAvatarFile";
-import { compressImageFile } from "@/lib/compressImage";
+import { compressAvatarFile } from "@/lib/compressImage";
 import { clearViewerOwnerCache } from "@/hooks/useViewerOwnerForAffinity";
 import { ENV_KEYS } from "@/components/shared/EnvironmentPills";
 
@@ -569,7 +569,7 @@ export function useOwnerProfile() {
         return null;
       }
       try {
-        toUpload = await compressImageFile(file);
+        toUpload = await compressAvatarFile(file);
       } catch (err) {
         logger.error("Owner avatar compression failed", { error: String(err) });
         toast({ variant: "destructive", title: "Erreur", description: "Impossible de traiter cette image." });
