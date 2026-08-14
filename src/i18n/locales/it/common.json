@@ -95,8 +95,8 @@
     },
     "usages": {
       "eyebrow": "Cosa facciamo insieme",
-      "title": "Cura degli animali a domicilio e aiuto reciproco locale.",
-      "lede": "L'home sitting da un lato, l'aiuto tra persone della zona dall'altro. A Lei la scelta: l'uno, l'altro, o entrambi.",
+      "title": "Custodia della casa, cura degli animali a domicilio, aiuto reciproco tra membri.",
+      "lede": "L'home sitting da un lato, i favori tra membri dall'altro. A Lei la scelta: l'uno, l'altro, o entrambi.",
       "owner": {
         "tag": "Proprietari",
         "title": "Partire con la mente leggera.",
@@ -375,7 +375,12 @@
     },
     "what_is": {
       "title": "Che cos'è Guardiens?",
-      "body": "Guardiens è una piattaforma francese di house-sitting e di aiuto reciproco tra privati. Il principio: un custode che vive vicino a Lei si installa in casa Sua durante la Sua assenza e si occupa dei Suoi animali nel loro ambiente. Lo scambio si basa sulla fiducia e sull'incontro, senza costi per il proprietario. Guardiens copre tutta la Francia."
+      "body_1": "Guardiens è una rete di aiuto reciproco tra privati, organizzata per affinità quanto per vicinanza. Si custodiscono case, ci si rende favori, si incontrano persone. A un chilometro come a mille.",
+      "body_2": "La custodia della casa è il suo uso principale. Un custode si installa a casa Sua durante la Sua assenza e veglia su ciò che lascia: la Sua casa, il Suo giardino, i Suoi animali.",
+      "body_3": "Accanto alle custodie, i membri si danno una mano: innaffiatura, spese, compagnia. Lo scambio si decide tra voi.",
+      "body_4": "L'incontro si basa su un punteggio di affinità calcolato su sette criteri, dove lo stile di vita conta quanto la distanza. Ogni profilo è documentato, l'identità è verificata, le recensioni sono incrociate. Uno status di custode d'urgenza risponde agli imprevisti.",
+      "body_5": "Guardiens pubblica anche guide di razza e guide locali, città per città. Si aggiungono un elenco di professionisti del settore animale con SIRET verificato e un giornale di consigli pratici.",
+      "body_6": "La rete copre tutta la Francia e mette in contatto i francesi all'estero con custodi sul posto. Lei ha accesso a tutto, senza impegno."
     },
     "compare": {
       "title": "House-sitting, pensione, pet-sitter: cosa scegliere?",

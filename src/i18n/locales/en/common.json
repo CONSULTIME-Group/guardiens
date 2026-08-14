@@ -95,8 +95,8 @@
     },
     "usages": {
       "eyebrow": "What we do together",
-      "title": "In-home pet sitting and local mutual aid.",
-      "lede": "Home sitting on one side, mutual aid between locals on the other. You choose, one, the other, or both.",
+      "title": "House sitting, in-home pet sitting, mutual aid between members.",
+      "lede": "Home sitting on one side, helping hands between members on the other. You choose, one, the other, or both.",
       "owner": {
         "tag": "Owners",
         "title": "Leave with peace of mind.",
@@ -375,7 +375,12 @@
     },
     "what_is": {
       "title": "What is Guardiens?",
-      "body": "Guardiens is a French house-sitting and mutual aid platform between individuals. The idea: a sitter who lives near you moves into your home while you are away and looks after your pets in their own environment. The exchange is built on trust and a real meeting, at no cost for the owner. Guardiens covers all of France."
+      "body_1": "Guardiens is a mutual aid network between individuals, organised by affinity as much as by proximity. People look after homes, do each other favours, and meet. One kilometre away, or a thousand.",
+      "body_2": "House sitting is its main use. A sitter moves into your home while you are away and looks after what you leave behind: your house, your garden, your pets.",
+      "body_3": "Beyond sits, members give each other a hand: watering, shopping, company. The exchange is decided between you.",
+      "body_4": "Matching relies on an affinity score calculated on seven criteria, where lifestyle counts as much as distance. Every profile is documented, identity is verified, reviews are cross-checked. An emergency sitter status answers the unexpected.",
+      "body_5": "Guardiens also publishes breed guides and local guides, city by city. They are joined by a directory of animal professionals whose business number (SIRET) is checked, and a journal of practical advice.",
+      "body_6": "The network covers all of France, and connects French people living abroad with sitters on site. You have access to everything, with no commitment."
     },
     "compare": {
       "title": "House-sitting, boarding, pet-sitter: which to choose?",
