@@ -65,9 +65,11 @@ export function storageImageSrcSet(
  * cover centré côté serveur est visuellement équivalent au object-cover
  * centré appliqué côté client. `size` = taille réelle du cadre en px CSS.
  *
- * Exception documentée : les rendus avec `object-position: top` (pins et
- * popup de la carte de recherche) doivent appeler storageImageUrl avec
- * width seul, sans height, pour conserver le cadrage haut d'origine.
+ * Règle absolue, valable pour tout appel à storageImageUrl : toujours
+ * fournir width ET height. L'endpoint conserve la hauteur d'origine quand
+ * seule la largeur est demandée, l'image servie est alors déformée (et
+ * plus lourde que la version recadrée). Un appel avec width sans height
+ * n'est jamais acceptable, quel que soit le sujet de l'image.
  */
 export function avatarImageUrl(
   url: string | null | undefined,

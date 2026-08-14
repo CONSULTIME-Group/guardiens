@@ -958,7 +958,7 @@ export default function PublicSitterProfile() {
   // sur l'avatar seul pour que l'utilisateur puisse toujours l'agrandir.
   const lightboxItems = visibleGallery.length > 0
     ? visibleGallery
-    : (profile?.avatar_url ? [{ photo_url: storageImageUrl(profile.avatar_url, { width: 1024 }), caption: null }] : []);
+    : (profile?.avatar_url ? [{ photo_url: storageImageUrl(profile.avatar_url, { width: 1024, height: 1024, resize: "contain" }), caption: null }] : []);
 
   // showCTA supprimé (vague 38) : le sticky mobile suit heroCta.kind.
 
