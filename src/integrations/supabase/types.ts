@@ -212,6 +212,7 @@ export type Database = {
           generated_by: string | null
           id: string
           snapshot: Json | null
+          snapshot_at: string | null
           summary: string | null
         }
         Insert: {
@@ -220,6 +221,7 @@ export type Database = {
           generated_by?: string | null
           id?: string
           snapshot?: Json | null
+          snapshot_at?: string | null
           summary?: string | null
         }
         Update: {
@@ -228,6 +230,7 @@ export type Database = {
           generated_by?: string | null
           id?: string
           snapshot?: Json | null
+          snapshot_at?: string | null
           summary?: string | null
         }
         Relationships: []
