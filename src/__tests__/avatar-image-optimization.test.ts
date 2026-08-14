@@ -12,6 +12,11 @@ import path from "path";
  *    storageImageUrl avec un displaySize par défaut de 96 px ;
  *  - les <img> directs passent par avatarImageUrl / storageImageUrl avec la
  *    taille réelle du cadre.
+ *
+ * Règle transverse (passe corrective du 14/08/2026) : tout appel
+ * storageImageUrl doit fournir width ET height. L'endpoint conserve la
+ * hauteur d'origine quand seule la largeur est demandée, l'image servie
+ * est alors déformée. Aucune exception.
  */
 
 const SRC = "src";
@@ -24,11 +29,29 @@ function collect(dir: string, out: string[] = []): string[] {
     if (entry.isDirectory()) {
       if (entry.name === "__tests__") continue;
       collect(p, out);
-    } else if (/\.tsx$/.test(p) && !/\.test\.tsx$/.test(p)) {
+    } else if (/\.tsx?$/.test(p) && !/\.test\.tsx?$/.test(p)) {
       out.push(p);
     }
   }
   return out;
+}
+
+/**
+ * Extrait le contenu entre parenthèses d'un appel, en comptant la
+ * profondeur pour traverser les parenthèses imbriquées (Math.round, etc.).
+ * `openIndex` pointe sur la parenthèse ouvrante.
+ */
+function extractCallArgs(source: string, openIndex: number): string {
+  let depth = 0;
+  for (let i = openIndex; i < source.length; i++) {
+    const ch = source[i];
+    if (ch === "(") depth++;
+    else if (ch === ")") {
+      depth--;
+      if (depth === 0) return source.slice(openIndex, i);
+    }
+  }
+  return source.slice(openIndex, openIndex + 400);
 }
 
 describe("avatar image optimization", () => {
@@ -75,5 +98,27 @@ describe("avatar image optimization", () => {
       const source = fs.readFileSync(file, "utf8");
       expect(source, file).toMatch(/compressAvatarFile\(/);
     }
+  });
+
+  it("aucun appel storageImageUrl avec width sans height, quel que soit le sujet", () => {
+    // Exceptions explicites, une entrée par rendu justifié. Vide à ce jour :
+    // width sans height déforme l'image servie, aucun cas n'est acceptable.
+    const WIDTH_ONLY_EXCEPTIONS: string[] = [];
+    const offenders: string[] = [];
+    for (const file of collect(SRC)) {
+      const source = fs.readFileSync(file, "utf8");
+      let idx = source.indexOf("storageImageUrl(");
+      while (idx !== -1) {
+        const args = extractCallArgs(source, idx + "storageImageUrl".length);
+        if (/\bwidth\s*:/.test(args) && !/\bheight\s*:/.test(args)) {
+          const id = `${file} (caractère ${idx})`;
+          if (!WIDTH_ONLY_EXCEPTIONS.some((e) => id.startsWith(e))) {
+            offenders.push(id);
+          }
+        }
+        idx = source.indexOf("storageImageUrl(", idx + 1);
+      }
+    }
+    expect(offenders).toEqual([]);
   });
 });
