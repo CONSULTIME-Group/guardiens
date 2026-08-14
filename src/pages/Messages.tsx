@@ -32,6 +32,7 @@ import { AlmaStagnantConversationWhisper } from "@/components/ai/alma/wiring/Alm
 import { latestVideoInviteId, videoInviteState, isVideoInvite } from "@/lib/videoInvite";
 import { useHideBottomNav, useHideTopBar } from "@/components/layout/ChromeVisibility";
 import { avatarImageUrl } from "@/lib/storageImage";
+import { compressImageFile } from "@/lib/compressImage";
 
 
 const MESSAGES_PAGE_SIZE = 50;
@@ -1040,11 +1041,19 @@ const Messages = () => {
 
               onPickPhoto={async (file) => {
                 if (!user || !activeConv) return;
-                const ext = file.name.split(".").pop();
+                // Compression avant envoi (1200 px, cible 300 ko) : jamais de brut.
+                let toUpload: File;
+                try {
+                  toUpload = await compressImageFile(file, 5, 1200);
+                } catch {
+                  toast({ title: "Erreur", description: "Cette photo n'a pas pu être envoyée. Veuillez réessayer.", variant: "destructive" });
+                  return;
+                }
+                const ext = toUpload.name.split(".").pop();
                 // Le premier segment DOIT etre l'identifiant utilisateur :
                 // les regles de securite du stockage l'exigent.
                 const path = `${user.id}/messages/${activeConv.id}/${Date.now()}.${ext}`;
-                const { error } = await supabase.storage.from("property-photos").upload(path, file);
+                const { error } = await supabase.storage.from("property-photos").upload(path, toUpload);
                 if (error) return;
                 const { data: urlData } = supabase.storage.from("property-photos").getPublicUrl(path);
                 await supabase.from("messages").insert({

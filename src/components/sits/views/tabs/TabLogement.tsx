@@ -1,3 +1,5 @@
+import { storageImageUrl } from "@/lib/storageImage";
+
 /**
  * Onglet "Logement & quartier" : description + équipements + photos extra
  * + lien guide local + LocationProfileCard.
@@ -71,7 +73,7 @@ const TabLogement = ({
             {photos.slice(3).map((p, i) => (
               <img
                 key={i}
-                src={p}
+                src={storageImageUrl(p, { width: 224, height: 160 })}
                 alt={`Photo ${i + 4}`}
                 loading="lazy"
                 className="w-full h-32 md:h-40 object-cover rounded-lg border border-border"

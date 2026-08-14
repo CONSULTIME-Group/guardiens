@@ -16,7 +16,7 @@ import AffinitySection from "@/components/matching/AffinitySection";
 import AffinityTeaser from "@/components/matching/AffinityTeaser";
 import { useViewerSitterForAffinity } from "@/hooks/useViewerSitterForAffinity";
 import { sanitizeBioForPublic } from "@/lib/sanitizeBio";
-import { avatarImageUrl } from "@/lib/storageImage";
+import { avatarImageUrl, storageImageUrl } from "@/lib/storageImage";
 
 interface SitLike {
   slug?: string | null;
@@ -391,7 +391,7 @@ const PublicSitView = ({
                       >
                         {pet.photo_url ? (
                           <img
-                            src={pet.photo_url}
+                            src={avatarImageUrl(pet.photo_url, 56)}
                             alt={pet.name}
                             loading="lazy"
                             className="w-14 h-14 rounded-full object-cover shrink-0"
@@ -426,7 +426,7 @@ const PublicSitView = ({
                           </DialogHeader>
                           {openPet.photo_url && (
                             <img
-                              src={openPet.photo_url}
+                              src={storageImageUrl(openPet.photo_url, { width: 448, height: 256 })}
                               alt={openPet.name}
                               className="w-full h-64 object-cover rounded-2xl"
                             />

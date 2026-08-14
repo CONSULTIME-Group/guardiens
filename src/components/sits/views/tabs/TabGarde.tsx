@@ -1,3 +1,5 @@
+import { avatarImageUrl } from "@/lib/storageImage";
+
 /**
  * Onglet "Garde" : mot de l'hôte, journée type, aperçus cliquables
  * vers les autres onglets (Animaux / Logement / Attentes).
@@ -145,7 +147,7 @@ const TabGarde = ({
                       >
                         {photo ? (
                           <img
-                            src={photo}
+                            src={avatarImageUrl(photo, 24)}
                             alt=""
                             className="w-6 h-6 rounded-full object-cover"
                           />

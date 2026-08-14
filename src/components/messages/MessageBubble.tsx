@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { storageImageUrl } from "@/lib/storageImage";
 import { Check, CheckCheck, Video } from "lucide-react";
 import { format } from "date-fns";
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
@@ -229,7 +230,7 @@ const MessageBubble = ({
               aria-label="Agrandir la photo partagée"
             >
               <img
-                src={msg.photo_url}
+                src={storageImageUrl(msg.photo_url, { width: 480, height: 208, resize: "contain" })}
                 alt="Photo partagée dans la conversation"
                 loading="lazy"
                 className="max-w-full max-h-52 rounded-lg object-cover hover:opacity-90 transition-opacity cursor-zoom-in"
@@ -285,7 +286,7 @@ const MessageBubble = ({
               <DialogTitle>Photo partagée</DialogTitle>
               <DialogDescription>Aperçu agrandi de la photo échangée dans cette conversation</DialogDescription>
             </VisuallyHidden>
-            <img src={msg.photo_url} alt="Photo partagée en grand" className="w-full h-auto max-h-[80vh] object-contain rounded-lg" />
+            <img src={storageImageUrl(msg.photo_url, { width: 768, height: 864, resize: "contain" })} alt="Photo partagée en grand" className="w-full h-auto max-h-[80vh] object-contain rounded-lg" />
           </DialogContent>
         </Dialog>
       )}

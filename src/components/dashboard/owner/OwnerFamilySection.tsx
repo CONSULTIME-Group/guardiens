@@ -1,3 +1,5 @@
+import { avatarImageUrl } from "@/lib/storageImage";
+
 /**
  * OwnerFamilySection (vague 11) — VOTRE FAMILLE.
  *
@@ -73,7 +75,7 @@ const OwnerFamilySection = ({ pets, getNextSitForPet }: OwnerFamilySectionProps)
                 >
                   {pet.photo_url ? (
                     <img
-                      src={pet.photo_url}
+                      src={avatarImageUrl(pet.photo_url, 42)}
                       alt=""
                       className="w-full h-full object-cover"
                       loading="lazy"

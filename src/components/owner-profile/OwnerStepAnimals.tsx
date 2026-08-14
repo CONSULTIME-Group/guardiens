@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from "react";
+import { avatarImageUrl, storageImageUrl } from "@/lib/storageImage";
 import { logger } from "@/lib/logger";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -226,7 +227,7 @@ const OwnerStepAnimals = ({ pets, onAddPet, onUpdatePet, onRemovePet }: Props) =
         <div key={pet.id} className="bg-muted/30 rounded-lg border border-border overflow-hidden">
           <button type="button" onClick={() => setExpandedId(expandedId === pet.id ? null : pet.id!)}
             className="w-full flex items-center gap-3 p-4 text-left">
-            {pet.photo_url && <img src={pet.photo_url} alt={pet.name} className="w-12 h-12 rounded-lg object-cover cursor-pointer hover:ring-2 ring-primary transition-all" onClick={(e) => { e.stopPropagation(); setLightboxUrl(pet.photo_url!); }} />}
+            {pet.photo_url && <img src={avatarImageUrl(pet.photo_url, 48)} alt={pet.name} className="w-12 h-12 rounded-lg object-cover cursor-pointer hover:ring-2 ring-primary transition-all" onClick={(e) => { e.stopPropagation(); setLightboxUrl(pet.photo_url!); }} />}
             <div className="flex-1">
               <span className="font-semibold">{pet.name}</span>
               <span className="text-sm text-muted-foreground ml-2">{speciesLabel(pet.species)}{pet.breed ? `, ${pet.breed}` : ""}</span>
@@ -280,7 +281,7 @@ const OwnerStepAnimals = ({ pets, onAddPet, onUpdatePet, onRemovePet }: Props) =
             <Label>Photo</Label>
             <div className="flex items-center gap-4">
               {editingPet.photo_url ? (
-                <img src={editingPet.photo_url} alt="" className="w-20 h-20 rounded-xl object-cover border border-border cursor-pointer hover:ring-2 ring-primary transition-all" onClick={() => setLightboxUrl(editingPet.photo_url!)} />
+                <img src={avatarImageUrl(editingPet.photo_url, 80)} alt="" className="w-20 h-20 rounded-xl object-cover border border-border cursor-pointer hover:ring-2 ring-primary transition-all" onClick={() => setLightboxUrl(editingPet.photo_url!)} />
               ) : (
                 <div className="w-20 h-20 rounded-xl bg-muted flex items-center justify-center border border-dashed border-border">
                   <Camera className="w-6 h-6 text-muted-foreground" />
@@ -402,7 +403,7 @@ const OwnerStepAnimals = ({ pets, onAddPet, onUpdatePet, onRemovePet }: Props) =
           <DialogTitle className="sr-only">Photo de l'animal en plein écran</DialogTitle>
           <DialogDescription className="sr-only">Aperçu agrandi de la photo de l'animal.</DialogDescription>
           {lightboxUrl && (
-            <img src={lightboxUrl} alt="Photo animal" className="w-full h-auto max-h-[80vh] object-contain rounded-lg" />
+            <img src={storageImageUrl(lightboxUrl, { width: 768, height: 864, resize: "contain" })} alt="Photo animal" className="w-full h-auto max-h-[80vh] object-contain rounded-lg" />
           )}
         </DialogContent>
       </Dialog>
