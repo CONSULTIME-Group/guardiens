@@ -1,0 +1,30 @@
+name: test-guard
+
+# Signal précoce sur chaque push : typecheck + garde différentielle des tests.
+# NOTE : ce workflow ne bloque PAS la publication Lovable (voir README de
+# scripts/test-guard). Il donne le signal sur GitHub, avant toute publication.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  typecheck-and-test-guard:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - run: npm ci
+
+      - name: Typecheck
+        run: npx tsc -b
+
+      - name: Garde différentielle des tests
+        run: npm run test:guard

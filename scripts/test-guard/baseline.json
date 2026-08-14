@@ -1,0 +1,107 @@
+{
+  "$schema": "Référence des échecs de tests connus et tolérés, figée le 14/08/2026.",
+  "usage": "scripts/test-guard/diff-guard.mjs compare chaque exécution à cette liste. Un échec NOUVEAU fait échouer la garde. Un test listé ici qui se remet à passer fait aussi échouer la garde : il faut alors le retirer de knownFailures (ou lancer node scripts/test-guard/diff-guard.mjs --update).",
+  "updated": "2026-08-14",
+  "excludedFiles": [
+    {
+      "file": "src/__tests__/article-internal-links.test.ts",
+      "reason": "Dépend au contenu de la base de production (table articles). En CI, sans les mêmes accès ni les mêmes données, il échoue autrement : instable par nature, hors périmètre de la garde dans les deux sens (échec ou succès ignorés)."
+    },
+    {
+      "file": "src/__tests__/article-pricing-content.test.ts",
+      "reason": "Dépend du contenu de la base de production (table articles, slug nouveaux-tarifs-2026). Instable par nature hors environnement connecté : hors périmètre de la garde dans les deux sens."
+    }
+  ],
+  "knownFailures": [
+    {
+      "file": "src/components/ai/alma/__tests__/AlmaEmptySearchBubble.test.tsx",
+      "test": "AlmaEmptySearchBubble > fires analytics on relax_filter click with restrictive_filter",
+      "reason": "code et contenu : libellés d'actions du composant modifiés, assertions du test désynchronisées."
+    },
+    {
+      "file": "src/components/ai/alma/__tests__/AlmaEmptySearchBubble.test.tsx",
+      "test": "AlmaEmptySearchBubble > renders 3 actions when a restrictive filter is active",
+      "reason": "code et contenu : libellés d'actions du composant modifiés, assertions du test désynchronisées."
+    },
+    {
+      "file": "src/components/ai/alma/__tests__/AlmaEmptySearchBubble.test.tsx",
+      "test": "AlmaEmptySearchBubble > utilise le vouvoiement (règle éditoriale absolue)",
+      "reason": "code et contenu : formulation du composant modifiée, assertion du test désynchronisée."
+    },
+    {
+      "file": "src/__tests__/email-deferral-ttl.test.ts",
+      "test": "Etape 2, categorie alerte et derogations > plafond alerte : 1 par 24h",
+      "reason": "code : logique de plafond (send vs defer) modifiée, test non aligné."
+    },
+    {
+      "file": "src/__tests__/email-pressure-lots.test.ts",
+      "test": "Lot 6 — plafond par categorie > digest : 3 par 7 jours maximum, cumul toutes categories non transactionnelles",
+      "reason": "code : plafond digest modifié, test non aligné."
+    },
+    {
+      "file": "src/components/shared/__tests__/empty-state-style-isolation.test.ts",
+      "test": "EmptyState style isolation > no forbidden pattern: /(WebkitMaskImage|webkitMaskImage|-webkit-mask-image|mask-image)\\s*[:=]/",
+      "reason": "code : mask-image détecté hors fichier autorisé (garde-fou d'isolation de style)."
+    },
+    {
+      "file": "src/components/shared/__tests__/empty-state-style-isolation.test.ts",
+      "test": "EmptyState style isolation > no forbidden pattern: /(mix-blend-(mode|multiply|screen|overlay))/",
+      "reason": "code : mix-blend-mode détecté hors fichier autorisé (garde-fou d'isolation de style)."
+    },
+    {
+      "file": "src/test/no-trial-wording.test.ts",
+      "test": "Garde-fou : aucune promesse d'essai 7 jours dans le code > Aucun fichier visible utilisateur ne contient une mention interdite",
+      "reason": "code et contenu : 5 mentions « essai 7 jours » résiduelles dans des fichiers visibles."
+    },
+    {
+      "file": "src/test/no-verified-sitter-claim.test.ts",
+      "test": "Positionnement national > ne mentionne ni AURA, ni Auvergne-Rhône-Alpes, ni « votre région »",
+      "reason": "code et contenu : mention régionale proscrite résiduelle."
+    },
+    {
+      "file": "src/test/no-verified-sitter-claim.test.ts",
+      "test": "Revendication « gardiens vérifiés » > n'apparaît nulle part dans src/, public/llms.txt et les locales",
+      "reason": "code et contenu : 2 revendications de vérification interdites résiduelles."
+    },
+    {
+      "file": "src/pages/__tests__/notify-mission-event-invocations.test.ts",
+      "test": "SmallMissionDetail → notify-mission-event > invoque 'mission_accepted' avec des target_ids cohérents et un actor_id user-scoped",
+      "reason": "code : regex de scan statique désynchronisées après refonte de SmallMissionDetail."
+    },
+    {
+      "file": "src/pages/__tests__/notify-mission-event-invocations.test.ts",
+      "test": "SmallMissionDetail → notify-mission-event > invoque 'mission_cancelled' avec des target_ids cohérents et un actor_id user-scoped",
+      "reason": "code : regex de scan statique désynchronisées après refonte de SmallMissionDetail."
+    },
+    {
+      "file": "src/pages/__tests__/notify-mission-event-invocations.test.ts",
+      "test": "SmallMissionDetail → notify-mission-event > invoque 'mission_completed' avec des target_ids cohérents et un actor_id user-scoped",
+      "reason": "code : regex de scan statique désynchronisées après refonte de SmallMissionDetail."
+    },
+    {
+      "file": "src/pages/__tests__/notify-mission-event-invocations.test.ts",
+      "test": "SmallMissionDetail → notify-mission-event > invoque 'mission_declined' avec des target_ids cohérents et un actor_id user-scoped",
+      "reason": "code : regex de scan statique désynchronisées après refonte de SmallMissionDetail. Deux blocs it() partagent ce nom exact dans le fichier (doublon source), la garde les traite comme un seul identifiant."
+    },
+    {
+      "file": "src/pages/__tests__/notify-mission-event-invocations.test.ts",
+      "test": "SmallMissionDetail → notify-mission-event > invoque 'mission_response_withdrawn' avec des target_ids cohérents et un actor_id user-scoped",
+      "reason": "code : regex de scan statique désynchronisées après refonte de SmallMissionDetail."
+    },
+    {
+      "file": "src/components/dashboard/owner/__tests__/owner-dashboard-visual.test.tsx",
+      "test": "Owner Dashboard — visual snapshots > OngoingSitHero > matches snapshot on desktop (1280px)",
+      "reason": "code : setup du test incomplet, useAuth appelé hors AuthProvider."
+    },
+    {
+      "file": "src/components/dashboard/owner/__tests__/owner-dashboard-visual.test.tsx",
+      "test": "Owner Dashboard — visual snapshots > OngoingSitHero > matches snapshot on mobile (390px)",
+      "reason": "code : setup du test incomplet, useAuth appelé hors AuthProvider."
+    },
+    {
+      "file": "src/__tests__/pros-showcase.test.tsx",
+      "test": "ProsShowcase > affiche 3 cards + compteur quand pros_total ≥ 1",
+      "reason": "code : le composant ne rend plus le data-testid pros-card-veterinaires attendu."
+    }
+  ]
+}
