@@ -59,10 +59,10 @@
   },
   "landing": {
     "hero": {
-      "eyebrow": "Maison · Animaux · Jardin",
-      "title_main": "Des gens du coin veillent sur votre maison,",
-      "title_accent": "même quand vous partez.",
-      "lede": "Vos animaux, votre jardin, vos habitudes. On se rencontre avant que vous partiez. Partout en France.",
+      "eyebrow": "Gardes · Entraide · Confiance",
+      "title_main": "Garder une maison. Rendre un service. Se faire confiance.",
+      "title_accent": "À un kilomètre comme à mille.",
+      "lede": "Votre jardin contre un repas. Vos clés contre une histoire.",
       "lede_italic": "Et derrière chaque échange, une rencontre que vous n'auriez pas cherchée.",
       "cta_owner": "Publier mon annonce",
       "cta_sitter": "Je veux garder",
@@ -72,7 +72,7 @@
       "kpi_members": "inscrits",
       "kpi_missions": "missions d'entraide",
       "brand_tagline": "Proches de chez vous.",
-      "reassurance": "Des gardiens du coin vous attendent près de chez vous.",
+      "reassurance": "Identité vérifiée, avis croisés, affinité calculée. Vous gardez la main.",
       "cta_member_owner": "Publier une annonce",
       "cta_member_sitter": "Proposer un coup de main",
       "cta_member_search": "Trouver une garde"

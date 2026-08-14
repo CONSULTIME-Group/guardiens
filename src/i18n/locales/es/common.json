@@ -59,10 +59,10 @@
   },
   "landing": {
     "hero": {
-      "eyebrow": "Casa · Animales · Jardín",
-      "title_main": "Gente de la zona cuida su casa,",
-      "title_accent": "aunque usted se marche.",
-      "lede": "Sus animales, su jardín, sus costumbres. Se encuentran antes de partir. En toda Francia.",
+      "eyebrow": "Cuidados · Ayuda mutua · Confianza",
+      "title_main": "Cuidar una casa. Echar una mano. Darse confianza.",
+      "title_accent": "A un kilómetro como a mil.",
+      "lede": "Su jardín por una comida. Sus llaves por una historia.",
       "lede_italic": "Y detrás de cada intercambio, un encuentro que no habría buscado.",
       "cta_owner": "Publicar mi anuncio",
       "cta_sitter": "Quiero ser cuidador",
@@ -72,7 +72,7 @@
       "kpi_members": "inscritos",
       "kpi_missions": "misiones de ayuda mutua",
       "brand_tagline": "Cerca de casa.",
-      "reassurance": "Cuidadores de confianza cerca de ti te esperan.",
+      "reassurance": "Identidad verificada, opiniones cruzadas, afinidad calculada. Usted mantiene el control.",
       "cta_member_owner": "Publicar un anuncio",
       "cta_member_sitter": "Ofrecer ayuda",
       "cta_member_search": "Encontrar un cuidado"

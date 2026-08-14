@@ -59,10 +59,10 @@
   },
   "landing": {
     "hero": {
-      "eyebrow": "Haus · Tiere · Garten",
-      "title_main": "Menschen aus der Region passen auf Ihr Zuhause auf,",
-      "title_accent": "auch wenn Sie verreisen.",
-      "lede": "Ihre Tiere, Ihr Garten, Ihre Gewohnheiten. Sie treffen sich vor der Abreise. Überall in Frankreich.",
+      "eyebrow": "Hüten · Hilfe · Vertrauen",
+      "title_main": "Ein Haus hüten. Einen Gefallen tun. Einander vertrauen.",
+      "title_accent": "Einen Kilometer entfernt oder tausend.",
+      "lede": "Ihr Garten gegen ein Essen. Ihre Schlüssel gegen eine Geschichte.",
       "lede_italic": "Und hinter jedem Austausch steht eine Begegnung, nach der Sie sonst nicht gesucht hätten.",
       "cta_owner": "Meine Anzeige veröffentlichen",
       "cta_sitter": "Ich möchte betreuen",
@@ -72,7 +72,7 @@
       "kpi_members": "Mitglieder",
       "kpi_missions": "Hilfseinsätze",
       "brand_tagline": "Ganz in Ihrer Nähe.",
-      "reassurance": "Vertrauensvolle Betreuer aus deiner Nähe warten auf dich.",
+      "reassurance": "Verifizierte Identität, gegenseitige Bewertungen, berechnete Affinität. Sie behalten die Kontrolle.",
       "cta_member_owner": "Anzeige veröffentlichen",
       "cta_member_sitter": "Hilfe anbieten",
       "cta_member_search": "Betreuung finden"
