@@ -1,4 +1,5 @@
 import { Link, useLocation } from "react-router-dom";
+import { storageImageUrl } from "@/lib/storageImage";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -156,7 +157,7 @@ const SearchListingCard = ({
         <div className="relative aspect-square w-full overflow-hidden bg-muted">
           {coverPhoto ? (
             <img
-              src={coverPhoto}
+              src={storageImageUrl(coverPhoto, { width: 256, height: 256 })}
               alt=""
               className={`h-full w-full object-cover transition-transform duration-500 ${isClickable ? "group-hover:scale-105" : ""}`}
               loading="lazy"
@@ -240,7 +241,7 @@ const SearchListingCard = ({
       >
         {coverPhoto ? (
           <img
-            src={coverPhoto}
+            src={storageImageUrl(coverPhoto, { width: 440, height: 330 })}
             alt=""
             className={`w-full h-full object-cover transition-transform duration-[900ms] ease-out ${isClickable ? "group-hover:scale-[1.03]" : ""}`}
             loading="lazy"

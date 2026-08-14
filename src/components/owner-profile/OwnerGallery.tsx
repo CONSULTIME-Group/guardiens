@@ -2,6 +2,7 @@ import { useState, useRef, useEffect, useCallback } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { compressImageFile } from "@/lib/compressImage";
+import { storageImageUrl } from "@/lib/storageImage";
 import { getImageDimensions } from "@/lib/imageDimensions";
 import { backfillOwnerGalleryDimensions } from "@/lib/backfillGalleryDimensions";
 import { useAuth } from "@/contexts/AuthContext";
@@ -85,7 +86,7 @@ const SortablePhoto = ({ photo, onDelete, onEditCaption, onSetAsMain }: Sortable
       style={style}
       className="group relative rounded-xl overflow-hidden aspect-square bg-muted"
     >
-      <img src={photo.photo_url} alt={photo.caption} className="w-full h-full object-cover" />
+      <img src={storageImageUrl(photo.photo_url, { width: 306, height: 306 })} alt={photo.caption} className="w-full h-full object-cover" />
 
       {/* Drag handle */}
       <button

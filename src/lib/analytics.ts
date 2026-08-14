@@ -298,7 +298,8 @@ export type EventType =
   | "secteur_page_opened"                        // Ouverture de la page
   | "secteur_saved"                              // Secteur enregistré (postal_code, city, radius_km)
   | "secteur_abandoned"                          // Page modifiée puis quittée sans enregistrement
-  | "secteur_sits_found";                        // Gardes trouvées dans le rayon (count, radius_km)
+  | "secteur_sits_found"                         // Gardes trouvées dans le rayon (count, radius_km)
+  | "avatar_compression_failed";                 // Échec définitif compression avatar, repli 512px inclus (ext, size_kb)
 
 
 

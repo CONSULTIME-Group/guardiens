@@ -343,7 +343,7 @@ export default function PublicSitterProfile() {
           className="overflow-hidden rounded-xl aspect-square group relative"
         >
           <img
-            src={g.photo_url}
+            src={storageImageUrl(g.photo_url, { width: 193, height: 193 })}
             alt={g.caption || `Photo ${i + 1}`}
             className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-300"
             loading="lazy"
@@ -1784,7 +1784,7 @@ export default function PublicSitterProfile() {
                       return (
                         <div key={pet.id} className="flex items-center gap-3 bg-card border border-border rounded-xl p-4">
                           {pet.photo_url ? (
-                            <img src={pet.photo_url} alt={pet.name} className="w-12 h-12 rounded-full object-cover shrink-0" />
+                            <img src={avatarImageUrl(pet.photo_url, 48)} alt={pet.name} className="w-12 h-12 rounded-full object-cover shrink-0" />
                           ) : (
                             <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center shrink-0">
                               <PawPrint className="w-5 h-5 text-foreground/30" aria-hidden="true" />
@@ -2089,7 +2089,7 @@ export default function PublicSitterProfile() {
                     {ownerGalleryPhotos.map((photo, i) => (
                       <div key={photo.id} className="group relative rounded-xl overflow-hidden aspect-square">
                         <img
-                          src={photo.photo_url}
+                          src={storageImageUrl(photo.photo_url, { width: 193, height: 193 })}
                           alt={photo.caption || `Photo ${i + 1} du foyer de ${firstName}`}
                           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                           loading="lazy"
@@ -2349,7 +2349,7 @@ export default function PublicSitterProfile() {
           )}
           <div className="flex flex-col items-center gap-2" onClick={(e) => e.stopPropagation()}>
             <img
-              src={lightboxItems[lightboxIdx]?.photo_url}
+              src={storageImageUrl(lightboxItems[lightboxIdx]?.photo_url, { width: 1600, height: 1600, resize: "contain" })}
               alt={lightboxItems[lightboxIdx]?.caption || `Photo ${lightboxIdx + 1} du profil de ${profile?.first_name || "ce gardien"}`}
               className="max-h-[85vh] max-w-[90vw] object-contain rounded-lg"
             />

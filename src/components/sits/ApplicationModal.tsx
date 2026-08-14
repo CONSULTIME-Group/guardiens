@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { storageImageUrl } from "@/lib/storageImage";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -587,7 +588,7 @@ const ApplicationModal = ({
                   {sitterInfo.gallery.slice(0, 4).map((g: any, i: number) => (
                     <img
                       key={i}
-                      src={g.photo_url}
+                      src={storageImageUrl(g.photo_url, { width: 310, height: 64 })}
                       alt=""
                       className="w-full h-16 object-cover"
                     />

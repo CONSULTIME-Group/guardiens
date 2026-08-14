@@ -1,3 +1,5 @@
+import { trackEvent } from "@/lib/analytics";
+
 /**
  * Compress an image using native Canvas API.
  * - Max width: 1200px (preserves ratio)
@@ -73,7 +75,8 @@ async function convertHeicIfNeeded(file: File): Promise<File> {
 export async function compressImageFile(
   file: File,
   _maxSizeMB = 5,
-  maxWidthOrHeight = 1200
+  maxWidthOrHeight = 1200,
+  startQuality = 0.8
 ): Promise<File> {
   // Convertit HEIC/HEIF iPhone en JPG avant toute manipulation canvas.
   file = await convertHeicIfNeeded(file);
@@ -105,8 +108,8 @@ export async function compressImageFile(
   const mimeType = useWebp ? "image/webp" : "image/jpeg";
   const ext = useWebp ? "webp" : "jpg";
 
-  // Try quality 0.8 first, then reduce if > 300kb
-  let quality = 0.8;
+  // Try startQuality first, then reduce if > 300kb
+  let quality = startQuality;
   let blob = await canvasToBlob(canvas, mimeType, quality);
 
   // Progressive quality reduction to reach < 300kb
@@ -129,6 +132,41 @@ export async function compressImageFile(
  */
 export const AVATAR_MAX_DIMENSION = 1024;
 
+/**
+ * Compression avatar avec repli dégradé : un second essai à 512 px / qualité
+ * 0,6 absorbe les échecs canvas (mémoire, toBlob null) sans jamais stocker le
+ * fichier brut. Les échecs de décodage (fichier corrompu, mime mensonger)
+ * échouent vite et bloquent à juste titre : un fichier indécodable ici est
+ * inaffichable par ce navigateur de toute façon. L'échec final est tracé pour
+ * quantifier le taux réel (aucune télémétrie avant le 14/08/2026).
+ */
 export async function compressAvatarFile(file: File): Promise<File> {
-  return compressImageFile(file, 5, AVATAR_MAX_DIMENSION);
+  try {
+    return await compressImageFile(file, 5, AVATAR_MAX_DIMENSION);
+  } catch (firstError) {
+    try {
+      return await compressImageFile(file, 1, 512, 0.6);
+    } catch {
+      void trackEvent("avatar_compression_failed", {
+        metadata: {
+          ext: file.name.split(".").pop()?.toLowerCase() || "unknown",
+          size_kb: Math.round(file.size / 1024),
+        },
+      });
+      throw firstError;
+    }
+  }
+}
+
+/**
+ * Plafond d'ingestion des galeries (sitter-gallery, animaux). Le plus grand
+ * consommateur est la lightbox de la fiche publique (~85vh, soit ~920 px de
+ * haut sur un écran 1080p) ; 1600 px côté long couvre les grands écrans 1:1
+ * sans stocker des originaux de 2736 px et plus (cas mesuré : 19,2 Mo de
+ * galerie pour des vignettes de 193 px).
+ */
+export const GALLERY_MAX_DIMENSION = 1600;
+
+export async function compressGalleryFile(file: File): Promise<File> {
+  return compressImageFile(file, 5, GALLERY_MAX_DIMENSION);
 }

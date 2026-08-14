@@ -45,8 +45,10 @@ export function storageImageUrl(
 
 /**
  * Construit un srcset à plusieurs largeurs, vide si l'URL n'est pas transformable.
- * `ratio` (largeur / hauteur du cadre) ajoute la hauteur proportionnelle à
- * chaque largeur, pour la même raison que `height` ci-dessus.
+ * `ratio` (largeur / hauteur du cadre) est OBLIGATOIRE : sans lui, les URLs
+ * produites partiraient sans hauteur, donc déformées (même règle que
+ * storageImageUrl). L'appel échoue explicitement (undefined) plutôt que de
+ * produire silencieusement des URLs sans hauteur.
  */
 export function storageImageSrcSet(
   url: string | null | undefined,
@@ -55,8 +57,9 @@ export function storageImageSrcSet(
   ratio?: number,
 ): string | undefined {
   if (!url || !url.includes(PUBLIC_OBJECT_SEGMENT)) return undefined;
+  if (!ratio || ratio <= 0) return undefined;
   return widths
-    .map((w) => `${storageImageUrl(url, { width: w, quality, height: ratio ? Math.round(w / ratio) : undefined })} ${w}w`)
+    .map((w) => `${storageImageUrl(url, { width: w, quality, height: Math.round(w / ratio) })} ${w}w`)
     .join(", ");
 }
 
