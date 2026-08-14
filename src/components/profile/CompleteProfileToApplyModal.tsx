@@ -58,12 +58,12 @@ import { useToast } from "@/hooks/use-toast";
 import { trackEvent } from "@/lib/analytics";
 import { deriveCategoriesFromCompetences } from "@/lib/skills/categories";
 import {
-import { avatarImageUrl } from "@/lib/storageImage";
   LANGUAGE_OPTIONS,
   INTEREST_OPTIONS,
   LIFE_PACE_OPTIONS,
   SITTER_ANIMAL_TYPES_OPTIONS,
 } from "@/lib/profileMatchingOptions";
+import { avatarImageUrl } from "@/lib/storageImage";
 
 /** Seuil de candidature, aligné sur useAccessLevel (source de vérité). */
 const APPLY_THRESHOLD = 60;
