@@ -13,13 +13,19 @@ const PUBLIC_RENDER_SEGMENT = "/storage/v1/render/image/public/";
 
 export interface StorageImageOptions {
   width: number;
+  /**
+   * Hauteur exacte à servir. À fournir dès que le cadre d'affichage impose un
+   * ratio : l'endpoint de transformation conserve la hauteur d'origine quand
+   * seule la largeur est demandée, l'image servie est alors déformée.
+   */
+  height?: number;
   quality?: number;
   resize?: "cover" | "contain" | "fill";
 }
 
 export function storageImageUrl(
   url: string | null | undefined,
-  { width, quality = 75, resize = "cover" }: StorageImageOptions,
+  { width, height, quality = 75, resize = "cover" }: StorageImageOptions,
 ): string {
   if (!url) return "";
   if (typeof url !== "string") return "";
@@ -31,19 +37,25 @@ export function storageImageUrl(
   const rewritten = base.replace(PUBLIC_OBJECT_SEGMENT, PUBLIC_RENDER_SEGMENT);
   const params = new URLSearchParams(existingQuery || "");
   params.set("width", String(Math.round(width)));
+  if (height) params.set("height", String(Math.round(height)));
   params.set("quality", String(quality));
   params.set("resize", resize);
   return `${rewritten}?${params.toString()}`;
 }
 
-/** Construit un srcset à plusieurs largeurs, vide si l'URL n'est pas transformable. */
+/**
+ * Construit un srcset à plusieurs largeurs, vide si l'URL n'est pas transformable.
+ * `ratio` (largeur / hauteur du cadre) ajoute la hauteur proportionnelle à
+ * chaque largeur, pour la même raison que `height` ci-dessus.
+ */
 export function storageImageSrcSet(
   url: string | null | undefined,
   widths: number[],
   quality = 75,
+  ratio?: number,
 ): string | undefined {
   if (!url || !url.includes(PUBLIC_OBJECT_SEGMENT)) return undefined;
   return widths
-    .map((w) => `${storageImageUrl(url, { width: w, quality })} ${w}w`)
+    .map((w) => `${storageImageUrl(url, { width: w, quality, height: ratio ? Math.round(w / ratio) : undefined })} ${w}w`)
     .join(", ");
 }
