@@ -19,6 +19,7 @@ import { appStatusBadge } from "@/lib/messageStatus";
 import ContextHeaderCard from "./ContextHeaderCard";
 import PresenceBadge from "./PresenceBadge";
 import ProAvatarBadge from "@/components/badges/ProAvatarBadge";
+import { avatarImageUrl } from "@/lib/storageImage";
 
 interface ConversationHeaderProps {
   conv: any;
@@ -268,7 +269,7 @@ const ConversationHeader = ({
           {conv.other_user?.id && isMemberLinkable(conv.other_user) ? (
             <Link to={`/gardiens/${conv.other_user.id}`} className="shrink-0 relative block">
               {getMemberAvatarUrl(conv.other_user) ? (
-                <img src={getMemberAvatarUrl(conv.other_user)!} alt={`Photo de ${getMemberDisplayName(conv.other_user, 'utilisateur')}`} className="w-11 h-11 rounded-full object-cover hover:ring-2 hover:ring-primary/50 transition-all" />
+                <img src={avatarImageUrl(getMemberAvatarUrl(conv.other_user), 44)} alt={`Photo de ${getMemberDisplayName(conv.other_user, 'utilisateur')}`} className="w-11 h-11 rounded-full object-cover hover:ring-2 hover:ring-primary/50 transition-all" />
               ) : (
                 <div className="w-11 h-11 rounded-full bg-primary/10 flex items-center justify-center text-primary font-medium text-sm hover:ring-2 hover:ring-primary/50 transition-all">
                   {getMemberInitial(conv.other_user)}
@@ -277,7 +278,7 @@ const ConversationHeader = ({
               <ProAvatarBadge status={conv.other_user?.pro_status} size="sm" />
             </Link>
           ) : getMemberAvatarUrl(conv.other_user) ? (
-            <img src={getMemberAvatarUrl(conv.other_user)!} alt={`Photo de ${getMemberDisplayName(conv.other_user, 'utilisateur')}`} className="w-10 h-10 rounded-full object-cover" />
+            <img src={avatarImageUrl(getMemberAvatarUrl(conv.other_user), 40)} alt={`Photo de ${getMemberDisplayName(conv.other_user, 'utilisateur')}`} className="w-10 h-10 rounded-full object-cover" />
           ) : (
             <div className="w-11 h-11 rounded-full bg-primary/10 flex items-center justify-center text-primary font-medium text-sm">
               {getMemberInitial(conv.other_user)}

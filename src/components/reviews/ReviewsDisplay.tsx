@@ -7,6 +7,7 @@ import ReportButton from "@/components/reports/ReportButton";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { hydrateReviewers } from "@/lib/hydrateReviewers";
+import { avatarImageUrl } from "@/lib/storageImage";
 
 interface ReviewsDisplayProps {
   userId: string;
@@ -74,7 +75,7 @@ const ReviewsDisplay = ({ userId, showAnimalCare = false }: ReviewsDisplayProps)
             <div key={r.id} className="p-4 rounded-xl bg-card border border-border">
               <div className="flex items-center gap-2.5 mb-2">
                 {getMemberAvatarUrl(r.reviewer) ? (
-                  <img src={getMemberAvatarUrl(r.reviewer)!} alt={`Photo de ${getMemberDisplayName(r.reviewer, 'utilisateur')}`} loading="lazy" className="w-8 h-8 rounded-full object-cover" />
+                  <img src={avatarImageUrl(getMemberAvatarUrl(r.reviewer), 32)} alt={`Photo de ${getMemberDisplayName(r.reviewer, 'utilisateur')}`} loading="lazy" className="w-8 h-8 rounded-full object-cover" />
                 ) : (
                   <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center text-xs font-bold">
                     {getMemberInitial(r.reviewer)}
