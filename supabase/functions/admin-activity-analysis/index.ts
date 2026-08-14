@@ -15,50 +15,22 @@ type ActionItem = {
   link: string;
 };
 
-async function collectSignals() {
-  const signals: Record<string, unknown> = {};
-
-  const { data: summary, error: sumErr } = await admin.rpc('admin_dashboard_summary');
-  if (sumErr) console.error('admin_dashboard_summary error', sumErr);
-  signals.dashboard_summary = summary ?? null;
-
-  const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 3600 * 1000).toISOString();
-
-  const [
-    profilesTotal,
-    profilesNew7d,
-    profilesSuspended,
-    sitsPublished,
-    verificationsPending,
-    reportsOpen,
-    reviewsPending,
-  ] = await Promise.all([
-    admin.from('profiles').select('*', { count: 'exact', head: true }),
-    admin.from('profiles').select('*', { count: 'exact', head: true }).gte('created_at', sevenDaysAgo),
-    admin.from('profiles').select('*', { count: 'exact', head: true }).eq('account_status', 'suspended'),
-    admin.from('sits').select('*', { count: 'exact', head: true }).eq('status', 'published'),
-    admin
-      .from('profiles')
-      .select('*', { count: 'exact', head: true })
-      .or(
-        'identity_verification_status.eq.pending,and(identity_verification_status.eq.not_submitted,identity_document_url.not.is.null),and(identity_verification_status.eq.not_submitted,identity_selfie_url.not.is.null)',
-      ),
-    admin.from('reports').select('*', { count: 'exact', head: true }).eq('status', 'new'),
-    admin.from('reviews').select('*', { count: 'exact', head: true }).eq('moderation_status', 'pending'),
-  ]);
-
-  signals.counts = {
-    profiles_total: profilesTotal.count ?? null,
-    profiles_new_7d: profilesNew7d.count ?? null,
-    profiles_suspended: profilesSuspended.count ?? null,
-    sits_published: sitsPublished.count ?? null,
-    verifications_pending: verificationsPending.count ?? null,
-    reports_open: reportsOpen.count ?? null,
-    reviews_pending_moderation: reviewsPending.count ?? null,
-  };
-
-  signals.generated_at = new Date().toISOString();
-  return signals;
+/**
+ * Source unique des chiffres : admin_dashboard_snapshot() (mêmes définitions
+ * que les cartes KPI de /admin). Le JSONB exact est persisté avec le texte
+ * généré, avec l'horodatage du snapshot. Si le snapshot n'est pas disponible,
+ * on s'arrête : aucun contournement, aucune extraction depuis le texte.
+ */
+async function collectSnapshot(): Promise<{ snapshot: Record<string, unknown>; snapshotAt: string }> {
+  const { data, error } = await admin.rpc('admin_dashboard_snapshot');
+  if (error) {
+    throw new Error(`Snapshot dashboard indisponible : ${error.message}`);
+  }
+  const snapshot = (data ?? {}) as Record<string, unknown>;
+  const snapshotAt = typeof snapshot.generated_at === 'string'
+    ? snapshot.generated_at
+    : new Date().toISOString();
+  return { snapshot, snapshotAt };
 }
 
 const PROMPT_SYSTEM = `Vous êtes l'analyste opérationnel de l'admin de Guardiens (plateforme de house-sitting).
