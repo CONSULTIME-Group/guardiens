@@ -8,6 +8,7 @@ import { Globe2, MapPin } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import "leaflet/dist/leaflet.css";
 import { MapContainer, Marker, TileLayer, useMap } from "react-leaflet";
+import { LeafletUnmountGuard } from "@/components/shared/LeafletUnmountGuard";
 import L from "leaflet";
 import { supabase } from "@/integrations/supabase/client";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -56,6 +57,7 @@ function InternationalMap({ sits }: { sits: IntlSitWithCoords[] }) {
   return (
     <div className="rounded-2xl overflow-hidden border border-border bg-card shadow-sm h-[320px] md:h-[420px]">
       <MapContainer center={center} zoom={points.length > 1 ? 3 : 11} className="h-full w-full" attributionControl={false} scrollWheelZoom={false}>
+        <LeafletUnmountGuard />
         <FitBounds />
         <TileLayer url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png" subdomains="abcd" maxZoom={19} />
         {points.map((s) => (
