@@ -250,7 +250,7 @@ const PublicSitView = ({
                       <div className="shrink-0">
                         {owner.avatar_url ? (
                           <img
-                            src={avatarImageUrl(owner.avatar_url, 64)}
+                            src={avatarImageUrl(owner.avatar_url, 128)}
                             alt={owner.first_name || t("sit_detail.host")}
                             className="w-16 h-16 rounded-full object-cover border-2 border-background shadow-sm"
                           />
@@ -391,7 +391,7 @@ const PublicSitView = ({
                       >
                         {pet.photo_url ? (
                           <img
-                            src={avatarImageUrl(pet.photo_url, 56)}
+                            src={avatarImageUrl(pet.photo_url, 112)}
                             alt={pet.name}
                             loading="lazy"
                             className="w-14 h-14 rounded-full object-cover shrink-0"
@@ -426,7 +426,7 @@ const PublicSitView = ({
                           </DialogHeader>
                           {openPet.photo_url && (
                             <img
-                              src={storageImageUrl(openPet.photo_url, { width: 448, height: 256 })}
+                              src={storageImageUrl(openPet.photo_url, { width: 896, height: 512 })}
                               alt={openPet.name}
                               className="w-full h-64 object-cover rounded-2xl"
                             />

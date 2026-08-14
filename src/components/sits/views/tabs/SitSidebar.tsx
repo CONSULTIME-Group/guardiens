@@ -45,7 +45,7 @@ const SitSidebar = ({
           <div className="flex items-center gap-3 mb-3">
             {owner.avatar_url ? (
               <img
-                src={avatarImageUrl(owner.avatar_url, 56)}
+                src={avatarImageUrl(owner.avatar_url, 112)}
                 alt={ownerName}
                 className="w-14 h-14 rounded-full object-cover"
               />

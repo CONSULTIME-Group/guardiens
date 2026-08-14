@@ -180,7 +180,7 @@ const SitHero = ({
               aria-label={`Agrandir la photo ${index + 1} sur ${total}`}
             >
               <img
-                src={storageImageUrl(current.url, { width: 384, height: 240 })}
+                src={storageImageUrl(current.url, { width: 768, height: 480 })}
                 alt={current.caption}
                 loading="eager"
                 fetchPriority="high"
@@ -291,7 +291,7 @@ const SitHero = ({
                 aria-label="Agrandir la photo principale"
               >
                 <img
-                  src={storageImageUrl(main.url, { width: 352, height: 320 })}
+                  src={storageImageUrl(main.url, { width: 704, height: 640 })}
                   alt={main.caption}
                   loading="eager"
                   fetchPriority="high"
@@ -316,7 +316,7 @@ const SitHero = ({
                     aria-label={`Agrandir la photo ${i + 2} sur ${total}`}
                   >
                     <img
-                      src={storageImageUrl(s.url, { width: 176, height: 160 })}
+                      src={storageImageUrl(s.url, { width: 352, height: 320 })}
                       alt={s.caption}
                       loading="lazy"
                       decoding="async"
@@ -401,7 +401,7 @@ const SitHero = ({
             )}
 
             <img
-              src={storageImageUrl(current.url, { width: 1600, height: 1600, resize: "contain" })}
+              src={storageImageUrl(current.url, { width: 1200, height: 1200, resize: "contain" })}
               alt={current.caption}
               onClick={(e) => e.stopPropagation()}
               className="max-h-[90vh] max-w-[95vw] object-contain select-none"
