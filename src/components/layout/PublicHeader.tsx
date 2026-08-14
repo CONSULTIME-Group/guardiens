@@ -153,11 +153,8 @@ export default function PublicHeader({ authedVariant = false }: { authedVariant?
         </Link>
 
 
-        {/* Desktop nav. Bascule à 1440 px : la nav complète la plus large
-            (visiteur, FR) occupe ~1151 px de contenu, soit ~1371 px de
-            viewport avec les paddings de 8 %. En dessous, le logo (min-w-0
-            shrink) se compresse et son texte chevauche le premier lien. */}
-        <nav className="hidden min-[1440px]:flex gap-1 items-center">
+        {/* Desktop nav, visible à partir du breakpoint sm (640 px). */}
+        <nav className="hidden sm:flex gap-1 items-center">
           {NAV_DEFS.map((l) => (
             <Button
               key={l.to}
@@ -198,12 +195,11 @@ export default function PublicHeader({ authedVariant = false }: { authedVariant?
           <LanguageSwitcher />
         </nav>
 
-        {/* Mobile : barre strictement allégée. Sous le point de rupture de la
-            navigation complète (1440 px), seuls le logo et le burger (plus
-            l'avatar d'un connecté) restent dans l'en tête. Langue, connexion
-            et création de compte vivent dans le panneau du menu, sinon le
-            cluster déborde du viewport. */}
-        <div className="flex min-[1440px]:hidden shrink-0 items-center gap-1">
+        {/* Mobile : barre strictement allégée. Sous le breakpoint sm, seuls
+            le logo et le burger (plus l'avatar d'un connecté) restent dans
+            l'en tête. Langue, connexion et création de compte vivent dans le
+            panneau du menu, sinon le cluster déborde du viewport. */}
+        <div className="flex sm:hidden shrink-0 items-center gap-1">
           {!authChecked ? (
             <div className="h-9 w-9 rounded-md bg-muted/40 animate-pulse" aria-hidden="true" />
           ) : hasSession ? (
