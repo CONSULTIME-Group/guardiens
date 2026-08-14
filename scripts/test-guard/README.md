@@ -3,8 +3,10 @@
 ## Principe
 
 La suite Vitest complète est exécutée, puis ses échecs sont comparés à la
-référence figée dans `baseline.json` (19 échecs connus et tolérés au
-14/08/2026, chacun documenté avec sa raison).
+référence figée dans `baseline.json` (18 échecs connus et tolérés au
+14/08/2026, chacun documenté avec sa raison ; les deux blocs `it()`
+homonymes de `notify-mission-event-invocations` comptent pour un seul
+identifiant, d'où 18 entrées et non 19).
 
 La garde échoue dans deux cas :
 
