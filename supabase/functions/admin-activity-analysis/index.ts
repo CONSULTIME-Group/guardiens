@@ -136,14 +136,22 @@ Deno.serve(async (req) => {
     if (mode === 'latest') {
       const { data, error } = await admin
         .from('admin_activity_analysis')
-        .select('id, generated_at, summary, actions')
+        .select('id, generated_at, summary, actions, snapshot, snapshot_at')
         .order('generated_at', { ascending: false })
         .limit(1)
         .maybeSingle();
       if (error) throw error;
       return new Response(
         JSON.stringify({
-          analysis: data ? { analysis: data.summary, actions: data.actions ?? [], generated_at: data.generated_at } : null,
+          analysis: data
+            ? {
+                analysis: data.summary,
+                actions: data.actions ?? [],
+                generated_at: data.generated_at,
+                snapshot: data.snapshot ?? null,
+                snapshot_at: data.snapshot_at ?? null,
+              }
+            : null,
         }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
       );
