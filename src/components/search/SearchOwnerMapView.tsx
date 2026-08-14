@@ -28,7 +28,7 @@ interface Props {
 const createPinIcon = (active: boolean, avatar?: string | null) => {
   const scale = active ? 1.15 : 1;
   const inner = avatar
-    ? `<img src="${storageImageUrl(avatar, { width: 30, height: 30 })}" alt="" style="width:30px;height:30px;border-radius:50%;object-fit:cover;object-position:top"/>`
+    ? `<img src="${storageImageUrl(avatar, { width: 60, height: 60 })}" alt="" style="width:30px;height:30px;border-radius:50%;object-fit:cover;object-position:top"/>`
     : `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>`;
   return L.divIcon({
     className: "",
@@ -112,7 +112,7 @@ const SearchOwnerMapView = ({ sitters, centerCoords, onContact, contactingId }: 
           </button>
           <Link to={`/gardiens/${active.user_id}`} className="block">
             {active.avatar ? (
-              <img src={storageImageUrl(active.avatar, { width: 280, height: 120 })} alt={active.firstName} className="w-full h-[120px] object-cover" />
+              <img src={storageImageUrl(active.avatar, { width: 560, height: 240 })} alt={active.firstName} className="w-full h-[120px] object-cover" />
             ) : (
               <div className="w-full h-[120px] bg-primary/10 flex items-center justify-center">
                 <span className="text-3xl text-primary font-heading font-bold">{active.firstName.charAt(0)}</span>

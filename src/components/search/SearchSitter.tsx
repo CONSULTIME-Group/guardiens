@@ -2148,7 +2148,7 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
  return (
  <div key={member.id} className={`bg-card rounded-2xl border p-4 flex items-center gap-4 ${member.is_demo ? "border-amber-300/70 border-dashed" : member.has_published_offre ? "border-primary/40 ring-1 ring-primary/20" : "border-border"}`}>
  {member.avatar_url ? (
- <img src={avatarImageUrl(member.avatar_url, 48)} alt="" className="w-12 h-12 rounded-full object-cover shrink-0" loading="lazy" />
+ <img src={avatarImageUrl(member.avatar_url, 96)} alt="" className="w-12 h-12 rounded-full object-cover shrink-0" loading="lazy" />
  ) : (
  <div className="w-12 h-12 rounded-full bg-accent flex items-center justify-center text-sm font-bold shrink-0 text-foreground">
  {member.first_name?.charAt(0) || "?"}

@@ -343,7 +343,7 @@ export default function PublicSitterProfile() {
           className="overflow-hidden rounded-xl aspect-square group relative"
         >
           <img
-            src={storageImageUrl(g.photo_url, { width: 193, height: 193 })}
+            src={storageImageUrl(g.photo_url, { width: 386, height: 386 })}
             alt={g.caption || `Photo ${i + 1}`}
             className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-300"
             loading="lazy"
@@ -1784,7 +1784,7 @@ export default function PublicSitterProfile() {
                       return (
                         <div key={pet.id} className="flex items-center gap-3 bg-card border border-border rounded-xl p-4">
                           {pet.photo_url ? (
-                            <img src={avatarImageUrl(pet.photo_url, 48)} alt={pet.name} className="w-12 h-12 rounded-full object-cover shrink-0" />
+                            <img src={avatarImageUrl(pet.photo_url, 96)} alt={pet.name} className="w-12 h-12 rounded-full object-cover shrink-0" />
                           ) : (
                             <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center shrink-0">
                               <PawPrint className="w-5 h-5 text-foreground/30" aria-hidden="true" />
@@ -2016,7 +2016,7 @@ export default function PublicSitterProfile() {
                         <article key={review.id} className="bg-card border border-border rounded-xl p-4 space-y-2">
                           <div className="flex items-center gap-2.5 flex-wrap">
                             {getMemberAvatarUrl(review.reviewer) ? (
-                              <img src={avatarImageUrl(getMemberAvatarUrl(review.reviewer), 32)} alt={getMemberDisplayName(review.reviewer, 'Gardien')} className="w-8 h-8 rounded-full object-cover shrink-0" />
+                              <img src={avatarImageUrl(getMemberAvatarUrl(review.reviewer), 64)} alt={getMemberDisplayName(review.reviewer, 'Gardien')} className="w-8 h-8 rounded-full object-cover shrink-0" />
                             ) : (
                               <div className="w-8 h-8 rounded-full bg-muted shrink-0 flex items-center justify-center text-xs font-bold text-foreground/40">
                                 {getMemberInitial(review.reviewer)}
@@ -2089,7 +2089,7 @@ export default function PublicSitterProfile() {
                     {ownerGalleryPhotos.map((photo, i) => (
                       <div key={photo.id} className="group relative rounded-xl overflow-hidden aspect-square">
                         <img
-                          src={storageImageUrl(photo.photo_url, { width: 193, height: 193 })}
+                          src={storageImageUrl(photo.photo_url, { width: 386, height: 386 })}
                           alt={photo.caption || `Photo ${i + 1} du foyer de ${firstName}`}
                           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                           loading="lazy"

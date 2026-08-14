@@ -155,7 +155,7 @@ const SitterResultCard = ({
       <div className="relative aspect-[4/3] w-full overflow-hidden bg-muted">
         {currentPhoto ? (
           <img
-            src={storageImageUrl(currentPhoto, { width: 440, height: 330 })}
+            src={storageImageUrl(currentPhoto, { width: 880, height: 660 })}
             alt={firstName}
             loading="lazy"
             className="w-full h-full object-cover object-[center_top] group-hover:scale-[1.02] transition-transform duration-300"

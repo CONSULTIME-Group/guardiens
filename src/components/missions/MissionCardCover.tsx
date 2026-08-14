@@ -48,7 +48,7 @@ const MissionCardCover = ({ photo, category, title, className }: MissionCardCove
     >
       {showImage ? (
         <img
-          src={storageImageUrl(photo, { width: 400, height: 300 }) || photo!}
+          src={storageImageUrl(photo, { width: 800, height: 600 }) || photo!}
           alt={title}
           loading="lazy"
           decoding="async"

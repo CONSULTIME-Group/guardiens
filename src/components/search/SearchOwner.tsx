@@ -1791,7 +1791,7 @@ const SearchOwner = () => {
                   }}
                 >
                   {profile?.avatar_url ? (
-                    <img src={avatarImageUrl(profile.avatar_url, 56)} alt={firstName} className="h-14 w-14 rounded-xl object-cover shrink-0" />
+                    <img src={avatarImageUrl(profile.avatar_url, 112)} alt={firstName} className="h-14 w-14 rounded-xl object-cover shrink-0" />
                   ) : (
                     <div className="h-14 w-14 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
                       <span className="text-lg text-primary font-bold">{firstName.charAt(0)}</span>
