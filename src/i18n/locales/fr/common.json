@@ -60,8 +60,8 @@
   "landing": {
     "hero": {
       "eyebrow": "Gardes · Entraide · Confiance",
-      "title_main": "Garder une maison. Rendre un service. Se faire confiance.",
-      "title_accent": "À un kilomètre comme à mille.",
+      "title_main": "Garder une maison. Rendre un service.",
+      "title_accent": "Se faire confiance.",
       "lede": "Votre jardin contre un repas. Vos clés contre une histoire.",
       "lede_italic": "Et derrière chaque échange, une rencontre que vous n'auriez pas cherchée.",
       "cta_owner": "Publier mon annonce",
@@ -82,7 +82,7 @@
       "title": "Sommaire",
       "care_aid": "Garde & entraide",
       "how": "Comment ça marche",
-      "aid": "Entraide locale",
+      "aid": "Entraide",
       "trust": "Confiance",
       "testimonials": "Témoignages",
       "story": "Notre histoire",
@@ -95,7 +95,7 @@
     },
     "usages": {
       "eyebrow": "Ce qu'on fait ensemble",
-      "title": "Garde de maison, garde d'animaux à domicile, entraide entre membres.",
+      "title": "Des gardes, et des coups de main.",
       "lede": "Le house-sitting d'un côté, les coups de main entre membres de l'autre. À vous de choisir, l'un, l'autre, ou les deux.",
       "owner": {
         "tag": "Propriétaires",
@@ -111,8 +111,8 @@
         "cta": "Je veux garder →"
       },
       "mutual": {
-        "badge": "Entre gens du coin",
-        "tag": "Entraide locale, indépendante de la garde",
+        "badge": "Entre membres",
+        "tag": "Entraide, indépendante de la garde",
         "title": "Un coup de main, un échange.",
         "text": "Arroser un potager, monter une étagère, partager une compétence, rendre une visite à une personne isolée. Aucune garde, aucun animal nécessaire, juste des gens du coin qui s'entraident.",
         "cta": "Découvrir l'entraide →"
@@ -372,7 +372,7 @@
     "what_is": {
       "title": "Qu'est-ce que Guardiens ?",
       "body_1": "Guardiens est un réseau d'entraide entre particuliers, organisé par affinité autant que par proximité. On y garde des maisons, on s'y rend des services, on y rencontre des gens. À un kilomètre comme à mille.",
-      "body_2": "La garde de maison en est l'usage principal. Un gardien s'installe chez vous pendant votre absence et veille sur ce que vous laissez : votre maison, votre jardin, vos animaux.",
+      "body_2": "La garde de maison et la garde d'animaux à domicile en sont l'usage principal. Un gardien s'installe chez vous pendant votre absence et veille sur ce que vous laissez : votre maison, votre jardin, vos animaux.",
       "body_3": "À côté des gardes, les membres se rendent des coups de main : arrosage, courses, compagnie. L'échange se décide entre vous.",
       "body_4": "La mise en relation s'appuie sur un score d'affinité calculé sur sept critères, où le mode de vie compte autant que la distance. Chaque profil est documenté, l'identité est vérifiée, les avis sont croisés. Un statut de gardien d'urgence répond aux imprévus.",
       "body_5": "Guardiens publie aussi des guides de race et des guides locaux ville par ville. S'y ajoutent un annuaire de professionnels animaliers dont le SIRET est contrôlé, et un journal de conseils pratiques.",

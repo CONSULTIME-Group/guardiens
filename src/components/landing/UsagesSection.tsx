@@ -6,9 +6,9 @@ export function UsagesSection() {
   const { t } = useTranslation();
 
   return (
-    <section id="usages" className="py-10 md:py-20 bg-background scroll-mt-24">
+    <section id="usages" className="pt-[52px] pb-10 md:pt-20 md:pb-20 bg-background scroll-mt-24">
       <div className="max-w-5xl mx-auto px-6">
-        <div id="definition" className="max-w-3xl mb-10 md:mb-14 scroll-mt-24">
+        <div id="definition" className="max-w-[760px] mx-auto mb-[52px] scroll-mt-24">
           <h2 className="font-heading text-xl md:text-2xl font-semibold text-foreground mb-3">
             {t("landing.what_is.title")}
           </h2>

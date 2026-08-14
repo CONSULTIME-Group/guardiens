@@ -60,8 +60,8 @@
   "landing": {
     "hero": {
       "eyebrow": "Care · Mutual aid · Trust",
-      "title_main": "Watch over a home. Lend a hand. Trust each other.",
-      "title_accent": "One kilometre away, or a thousand.",
+      "title_main": "Watch over a home. Lend a hand.",
+      "title_accent": "Trust each other.",
       "lede": "Your garden for a meal. Your keys for a story.",
       "lede_italic": "And behind every exchange, a connection you weren't looking for.",
       "cta_owner": "Publish my listing",
@@ -82,7 +82,7 @@
       "title": "Summary",
       "care_aid": "Sitting & Help",
       "how": "How it works",
-      "aid": "Local mutual aid",
+      "aid": "Mutual aid",
       "trust": "Trust",
       "testimonials": "Testimonials",
       "story": "Our story",
@@ -95,7 +95,7 @@
     },
     "usages": {
       "eyebrow": "What we do together",
-      "title": "House sitting, in-home pet sitting, mutual aid between members.",
+      "title": "Sits, and small favours.",
       "lede": "Home sitting on one side, helping hands between members on the other. You choose, one, the other, or both.",
       "owner": {
         "tag": "Owners",
@@ -111,8 +111,8 @@
         "cta": "I want to sit →"
       },
       "mutual": {
-        "badge": "Between locals",
-        "tag": "Local mutual aid, independent of sitting",
+        "badge": "Between members",
+        "tag": "Mutual aid, independent of sitting",
         "title": "A small favour, an exchange.",
         "text": "Watering a vegetable garden, putting up a shelf, sharing a skill, visiting an isolated person. No sitting, no pet required, just locals helping each other.",
         "cta": "Discover mutual aid →"
@@ -376,7 +376,7 @@
     "what_is": {
       "title": "What is Guardiens?",
       "body_1": "Guardiens is a mutual aid network between individuals, organised by affinity as much as by proximity. People look after homes, do each other favours, and meet. One kilometre away, or a thousand.",
-      "body_2": "House sitting is its main use. A sitter moves into your home while you are away and looks after what you leave behind: your house, your garden, your pets.",
+      "body_2": "House sitting and in-home pet sitting form its main use. A sitter moves into your home while you are away and looks after what you leave behind: your house, your garden, your pets.",
       "body_3": "Beyond sits, members give each other a hand: watering, shopping, company. The exchange is decided between you.",
       "body_4": "Matching relies on an affinity score calculated on seven criteria, where lifestyle counts as much as distance. Every profile is documented, identity is verified, reviews are cross-checked. An emergency sitter status answers the unexpected.",
       "body_5": "Guardiens also publishes breed guides and local guides, city by city. They are joined by a directory of animal professionals whose business number (SIRET) is checked, and a journal of practical advice.",
