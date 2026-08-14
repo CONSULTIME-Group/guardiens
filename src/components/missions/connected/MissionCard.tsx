@@ -5,6 +5,7 @@ import spotChien from "@/assets/missions/spot-chien.png";
 import spotJardin from "@/assets/missions/spot-jardin.png";
 import spotBricolage from "@/assets/missions/spot-bricolage.png";
 import spotBienetre from "@/assets/missions/spot-bienetre.png";
+import { avatarImageUrl } from "@/lib/storageImage";
 
 const LOCALE_MAP: Record<string, string> = { fr: "fr-FR", en: "en-US", es: "es-ES", it: "it-IT", de: "de-DE" };
 
@@ -198,7 +199,7 @@ const MissionCard = ({ mission: m, currentUserId, isAuthenticated, canApplyMissi
         {/* Ligne meta compacte : auteur · ville · quand */}
         <div className="flex items-center gap-2 text-sm text-muted-foreground mb-5 min-w-0">
           {avatarUrl ? (
-            <img src={avatarUrl} alt="" loading="lazy" className="h-6 w-6 rounded-full border border-border object-cover shrink-0" />
+            <img src={avatarImageUrl(avatarUrl, 24)} alt="" loading="lazy" className="h-6 w-6 rounded-full border border-border object-cover shrink-0" />
           ) : (
             <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-border bg-muted text-[10px] font-semibold text-foreground">
               {authorInitial}

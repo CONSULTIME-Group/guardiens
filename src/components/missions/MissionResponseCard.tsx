@@ -14,6 +14,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import MissionBadgesReceived from "@/components/missions/MissionBadgesReceived";
+import { avatarImageUrl } from "@/lib/storageImage";
 
 interface Props {
   response: any;
@@ -106,7 +107,7 @@ const MissionResponseCard = ({
       <div className="flex items-start gap-3 md:gap-4">
         {r.responder?.avatar_url ? (
           <Link to={`/gardiens/${r.responder_id}`} className="shrink-0">
-            <img src={r.responder.avatar_url} alt="" className="w-10 h-10 md:w-12 md:h-12 rounded-full object-cover" />
+            <img src={avatarImageUrl(r.responder.avatar_url, 48)} alt="" className="w-10 h-10 md:w-12 md:h-12 rounded-full object-cover" />
           </Link>
         ) : (
           <Link to={`/gardiens/${r.responder_id}`} className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-muted flex items-center justify-center font-bold shrink-0">

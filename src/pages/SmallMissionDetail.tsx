@@ -44,6 +44,7 @@ import { sanitizeUserTitle } from "@/lib/sanitizeTitle";
 import { haversineDistance } from "@/utils/geo";
 
 import IdentityRecommendedHint from "@/components/missions/IdentityRecommendedHint";
+import { avatarImageUrl } from "@/lib/storageImage";
 
 /** Rayon max (km) pour considérer une mission « près de chez vous ». */
 const NEAR_RADIUS_KM = 100;
@@ -1658,7 +1659,7 @@ const SmallMissionDetail = () => {
               {receivedFeedbacks.map((fb: any) => (
                 <div key={fb.id} className="bg-card rounded-2xl border border-border p-4 flex items-start gap-3">
                   {fb.giver?.avatar_url ? (
-                    <img src={fb.giver.avatar_url} className="w-9 h-9 rounded-full object-cover" />
+                    <img src={avatarImageUrl(fb.giver.avatar_url, 36)} className="w-9 h-9 rounded-full object-cover" />
                   ) : (
                     <div className="w-9 h-9 rounded-full bg-muted flex items-center justify-center text-xs font-bold">{fb.giver?.first_name?.charAt(0)}</div>
                   )}

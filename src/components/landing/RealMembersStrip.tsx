@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import { supabase } from "@/integrations/supabase/client";
 import { usePublicStats } from "@/hooks/usePublicStats";
 import { useInView } from "@/hooks/useInView";
+import { avatarImageUrl } from "@/lib/storageImage";
 
 interface Member {
   id: string;
@@ -84,7 +85,7 @@ const RealMembersStrip = () => {
                 className="block h-11 w-11 rounded-full overflow-hidden border-2 border-background ring-1 ring-border bg-muted hover:ring-primary/60 transition-all hover:z-10 hover:scale-110"
               >
                 <img
-                  src={m.avatar_url ?? ""}
+                  src={avatarImageUrl(m.avatar_url, 44)}
                   alt={
                     m.city
                       ? t("landing.real_members.member_alt_with_city", { name: m.first_name, city: m.city })

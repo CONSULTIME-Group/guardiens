@@ -10,6 +10,7 @@ import { fr } from "date-fns/locale";
 import { ThumbsUp, Star, Inbox, Send, AlertTriangle, Clock, CheckCircle2, XCircle } from "lucide-react";
 import { hydrateReviewers } from "@/lib/hydrateReviewers";
 import DisputeReviewDialog from "@/components/reviews/DisputeReviewDialog";
+import { avatarImageUrl } from "@/lib/storageImage";
 
 type DisputeStatus = "pending" | "accepted" | "rejected";
 interface DisputeInfo { status: DisputeStatus; }
@@ -169,7 +170,7 @@ const ReviewsList = ({
           <div key={r.id} className="rounded-xl border border-border bg-card p-4">
             <div className="flex items-center gap-3 mb-2">
               {otherAvatar ? (
-                <img src={otherAvatar} alt="" className="w-10 h-10 rounded-full object-cover" />
+                <img src={avatarImageUrl(otherAvatar, 40)} alt="" className="w-10 h-10 rounded-full object-cover" />
               ) : (
                 <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center text-sm font-bold text-muted-foreground">
                   {otherName.charAt(0).toUpperCase()}
