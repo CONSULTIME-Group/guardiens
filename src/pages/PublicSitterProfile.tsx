@@ -2016,7 +2016,7 @@ export default function PublicSitterProfile() {
                         <article key={review.id} className="bg-card border border-border rounded-xl p-4 space-y-2">
                           <div className="flex items-center gap-2.5 flex-wrap">
                             {getMemberAvatarUrl(review.reviewer) ? (
-                              <img src={getMemberAvatarUrl(review.reviewer)!} alt={getMemberDisplayName(review.reviewer, 'Gardien')} className="w-8 h-8 rounded-full object-cover shrink-0" />
+                              <img src={avatarImageUrl(getMemberAvatarUrl(review.reviewer), 32)} alt={getMemberDisplayName(review.reviewer, 'Gardien')} className="w-8 h-8 rounded-full object-cover shrink-0" />
                             ) : (
                               <div className="w-8 h-8 rounded-full bg-muted shrink-0 flex items-center justify-center text-xs font-bold text-foreground/40">
                                 {getMemberInitial(review.reviewer)}

@@ -12,6 +12,7 @@ import { fr } from "date-fns/locale";
 import { ShieldCheck, ShieldX, RotateCcw, Clock, CheckCircle2, XCircle, AlertTriangle, Eye, ExternalLink } from "lucide-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { avatarImageUrl } from "@/lib/storageImage";
 
 type HistoryFilter = "all" | "verified" | "rejected" | "pending" | "needs_review";
 
@@ -313,7 +314,7 @@ const AdminVerifications = () => {
                     <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                       <div className="flex items-center gap-3 min-w-0">
                         {user.avatar_url ? (
-                          <img src={user.avatar_url} alt="" className="w-10 h-10 rounded-full object-cover" />
+                          <img src={avatarImageUrl(user.avatar_url, 40)} alt="" className="w-10 h-10 rounded-full object-cover" />
                         ) : (
                           <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center font-bold text-sm">{user.first_name?.charAt(0) || "?"}</div>
                         )}

@@ -13,6 +13,7 @@ import { fr } from "date-fns/locale";
 import { CreditCard, Users, Crown, AlertTriangle, Clock, Gift, Plus, Minus, ShieldCheck, ShieldX, Search, Eye, Mail, Loader2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import { avatarImageUrl } from "@/lib/storageImage";
 
 const planLabels: Record<string, { label: string; color: string }> = {
   founder_free: { label: "Fondateur", color: "bg-warning-soft text-warning-foreground dark:bg-amber-900/30 dark:text-amber-400" },
@@ -303,7 +304,7 @@ const AdminSubscriptions = () => {
                 <TableRow key={sub.id} className={isExpiringSoon ? "bg-warning-soft/50 dark:bg-orange-900/5" : ""}>
                   <TableCell>
                     <div className="flex items-center gap-2">
-                      {sub.profile?.avatar_url && <img src={sub.profile.avatar_url} className="w-6 h-6 rounded-full object-cover" />}
+                      {sub.profile?.avatar_url && <img src={avatarImageUrl(sub.profile.avatar_url, 24)} className="w-6 h-6 rounded-full object-cover" />}
                       <span className="font-medium text-sm">{sub.profile?.first_name} {sub.profile?.last_name}</span>
                     </div>
                   </TableCell>
