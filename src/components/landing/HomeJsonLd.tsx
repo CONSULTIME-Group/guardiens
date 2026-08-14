@@ -4,7 +4,7 @@ import howtoStep1 from "@/assets/illustrations/howto-step-1-annonce.png";
 import howtoStep2 from "@/assets/illustrations/howto-step-2-rencontre.png";
 import howtoStep3 from "@/assets/illustrations/howto-step-3-depart.png";
 
-const HOME_CONTENT_LAST_MODIFIED = "2026-08-03";
+const HOME_CONTENT_LAST_MODIFIED = "2026-08-14";
 
 const HOME_ROUTE = staticRoutes.find((route) => route.path === "/");
 const HOME_OG_IMAGE = HOME_ROUTE?.ogImage ?? DEFAULT_OG_IMAGE;
@@ -36,7 +36,7 @@ export default function HomeJsonLd() {
                 height: 512,
               },
               description:
-                "Plateforme de house-sitting, garde d'animaux à domicile, de maison et de jardin, et petites missions d'entraide entre gens du coin. Sans abonnement pour les propriétaires.",
+                "Réseau d'entraide entre particuliers : house-sitting, garde d'animaux à domicile, de maison et de jardin, et petites missions entre gens du coin. Mise en relation par affinité, identité vérifiée, avis croisés. France entière et Français à l'étranger.",
               areaServed: { "@type": "Country", name: "France" },
               knowsAbout: [
                 "House-sitting",

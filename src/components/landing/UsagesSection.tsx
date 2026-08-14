@@ -12,9 +12,14 @@ export function UsagesSection() {
           <h2 className="font-heading text-xl md:text-2xl font-semibold text-foreground mb-3">
             {t("landing.what_is.title")}
           </h2>
-          <p className="font-body text-base md:text-lg text-foreground/80 leading-relaxed">
-            {t("landing.what_is.body")}
-          </p>
+          {[1, 2, 3, 4, 5, 6].map((n) => (
+            <p
+              key={n}
+              className={`font-body text-base md:text-lg text-foreground/80 leading-relaxed${n < 6 ? " mb-7" : ""}`}
+            >
+              {t(`landing.what_is.body_${n}`)}
+            </p>
+          ))}
         </div>
         <RevealSection>
           <span className="text-xs tracking-widest uppercase text-primary font-body mb-4 block text-center">
