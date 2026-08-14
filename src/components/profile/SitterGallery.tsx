@@ -12,6 +12,8 @@ import { toast } from "sonner";
 import { logger } from "@/lib/logger";
 import { compressGalleryFile } from "@/lib/compressImage";
 import { storageImageUrl } from "@/lib/storageImage";
+import { trackEvent } from "@/lib/analytics";
+import { useTranslation } from "react-i18next";
 
 const NO_SIT_VALUE = "__none__";
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -38,6 +40,7 @@ interface GalleryPhoto {
 
 const SitterGallery = () => {
   const { user } = useAuth();
+  const { t } = useTranslation();
   const [photos, setPhotos] = useState<GalleryPhoto[]>([]);
   const [completedSits, setCompletedSits] = useState<{ id: string; title: string }[]>([]);
   const [loading, setLoading] = useState(true);
@@ -91,7 +94,7 @@ const SitterGallery = () => {
     setUploading(true);
     try {
       // Plafond d'ingestion galerie : 1600 px côté long, cible 300 ko.
-      // Pas de repli sur le fichier brut : un échec de compression bloque l'envoi.
+      // Repli dégradé 1024 px inclus dans compressGalleryFile ; jamais de brut.
       const toUpload = await compressGalleryFile(file);
       const ext = toUpload.name.split(".").pop();
       const path = `${user.id}/${Date.now()}.${ext}`;
@@ -137,7 +140,13 @@ const SitterGallery = () => {
       setDialogOpen(false);
       toast.success("Photo ajoutée à votre galerie !");
     } catch (err: any) {
-      toast.error(err?.message || "Erreur lors de l'upload");
+      // Le rejet de loadImage est un ProgressEvent sans propriété message :
+      // on affiche toujours la formulation unique, jamais err.message.
+      logger.error("SitterGallery upload failed", { error: String(err) });
+      void trackEvent("sitter_gallery_upload_failed", {
+        metadata: { ext: file.name.split(".").pop()?.toLowerCase() || "unknown", size_kb: Math.round(file.size / 1024) },
+      });
+      toast.error(t("upload.photo_failed"));
     } finally {
       setUploading(false);
     }
@@ -293,7 +302,7 @@ const SitterGallery = () => {
             <DialogTitle className="sr-only">{lightboxPhoto.caption || "Photo"}</DialogTitle>
             <DialogDescription className="sr-only">Aperçu agrandi de la photo de la galerie.</DialogDescription>
             <div className="relative">
-              <img src={storageImageUrl(lightboxPhoto.photo_url, { width: 1024, height: 1024, resize: "contain" })} alt={lightboxPhoto.caption} className="w-full max-h-[70vh] object-contain bg-black" />
+              <img src={storageImageUrl(lightboxPhoto.photo_url, { width: 1600, height: 1600, resize: "contain" })} alt={lightboxPhoto.caption} className="w-full max-h-[70vh] object-contain bg-black" />
               <button onClick={() => setLightboxPhoto(null)} className="absolute top-3 right-3 p-2 rounded-full bg-black/60 text-white hover:bg-black/80">
                 <X className="h-4 w-4" />
               </button>

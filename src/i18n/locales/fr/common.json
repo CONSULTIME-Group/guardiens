@@ -1871,5 +1871,8 @@
   "entraide": {
     "help_requested": "Coups de main demandés",
     "help_offered": "Coups de main proposés"
+  },
+  "upload": {
+    "photo_failed": "L'envoi de la photo a été interrompu. Réessayez dans un instant."
   }
 }

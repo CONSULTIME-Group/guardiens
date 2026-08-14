@@ -73,7 +73,7 @@ const TabLogement = ({
             {photos.slice(3).map((p, i) => (
               <img
                 key={i}
-                src={storageImageUrl(p, { width: 224, height: 160 })}
+                src={storageImageUrl(p, { width: 448, height: 320 })}
                 alt={`Photo ${i + 4}`}
                 loading="lazy"
                 className="w-full h-32 md:h-40 object-cover rounded-lg border border-border"

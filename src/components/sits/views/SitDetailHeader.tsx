@@ -261,7 +261,7 @@ const SitDetailHeader = ({
           <Link to={`/gardiens/${owner.id}`}>
             {owner.avatar_url ? (
               <img
-                src={avatarImageUrl(owner.avatar_url, 56)}
+                src={avatarImageUrl(owner.avatar_url, 112)}
                 alt={`Photo de ${owner.first_name}`}
                 loading="lazy"
                 className="w-14 h-14 rounded-full object-cover hover:ring-2 hover:ring-primary/30 transition-all"

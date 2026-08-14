@@ -3,6 +3,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { compressImageFile } from "@/lib/compressImage";
 import { ImagePlus, X, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useTranslation } from "react-i18next";
+import { trackEvent } from "@/lib/analytics";
 import { Progress } from "@/components/ui/progress";
 import { safeUUID } from "@/lib/uuid";
 
@@ -17,6 +19,7 @@ interface MissionPhotoUploadProps {
 
 const MissionPhotoUpload = ({ userId, photos, onChange }: MissionPhotoUploadProps) => {
   const { toast } = useToast();
+  const { t } = useTranslation();
   const inputRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
   const [progress, setProgress] = useState(0);
@@ -52,7 +55,10 @@ const MissionPhotoUpload = ({ userId, photos, onChange }: MissionPhotoUploadProp
         newUrls.push(urlData.publicUrl);
         setProgress(Math.round(((i + 1) / toProcess) * 100));
       } catch {
-        toast({ title: "Erreur", description: "Une photo n'a pas pu être envoyée. Veuillez réessayer.", variant: "destructive" });
+        void trackEvent("mission_photo_upload_failed", {
+          metadata: { ext: file.name.split(".").pop()?.toLowerCase() || "unknown", size_kb: Math.round(file.size / 1024) },
+        });
+        toast({ title: t("upload.photo_failed"), variant: "destructive" });
       }
     }
 

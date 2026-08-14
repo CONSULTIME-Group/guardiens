@@ -157,7 +157,7 @@ const SearchListingCard = ({
         <div className="relative aspect-square w-full overflow-hidden bg-muted">
           {coverPhoto ? (
             <img
-              src={storageImageUrl(coverPhoto, { width: 256, height: 256 })}
+              src={storageImageUrl(coverPhoto, { width: 512, height: 512 })}
               alt=""
               className={`h-full w-full object-cover transition-transform duration-500 ${isClickable ? "group-hover:scale-105" : ""}`}
               loading="lazy"
@@ -241,7 +241,7 @@ const SearchListingCard = ({
       >
         {coverPhoto ? (
           <img
-            src={storageImageUrl(coverPhoto, { width: 440, height: 330 })}
+            src={storageImageUrl(coverPhoto, { width: 880, height: 660 })}
             alt=""
             className={`w-full h-full object-cover transition-transform duration-[900ms] ease-out ${isClickable ? "group-hover:scale-[1.03]" : ""}`}
             loading="lazy"

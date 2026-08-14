@@ -108,7 +108,7 @@ const RelatedMissionCard = ({ to, photo, category, title, city, timeAgo, exchang
     <Link to={to} className="group block h-full">
       <div className="relative rounded-2xl overflow-hidden aspect-[4/3] bg-card border border-border shadow-sm transition-all duration-300 group-hover:shadow-xl group-hover:-translate-y-0.5">
         <img
-          src={storageImageUrl(photo, { width: 400, height: 300 }) || photo!}
+          src={storageImageUrl(photo, { width: 800, height: 600 }) || photo!}
           alt={title}
           loading="lazy"
           decoding="async"

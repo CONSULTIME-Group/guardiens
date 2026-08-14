@@ -1876,5 +1876,8 @@
   "entraide": {
     "help_requested": "Help requested",
     "help_offered": "Help offered"
+  },
+  "upload": {
+    "photo_failed": "The photo upload was interrupted. Please try again in a moment."
   }
 }

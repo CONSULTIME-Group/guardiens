@@ -167,6 +167,44 @@ export async function compressAvatarFile(file: File): Promise<File> {
  */
 export const GALLERY_MAX_DIMENSION = 1600;
 
+/**
+ * Repli dégradé galerie : 1024 px reste au-dessus du cadre lightbox mesuré
+ * (~920 px à 85vh sur 1080p), le repli sert donc encore le plus grand
+ * consommateur sans upscale, tout en divisant la mémoire canvas par ~2,4
+ * (rapport de surfaces (1024/1600)²). Qualité 0,6 : même delta que le repli
+ * avatar (0,8 vers 0,6). 512 px aurait été sous le cadre lightbox.
+ */
+export const GALLERY_FALLBACK_DIMENSION = 1024;
+
 export async function compressGalleryFile(file: File): Promise<File> {
-  return compressImageFile(file, 5, GALLERY_MAX_DIMENSION);
+  try {
+    return await compressImageFile(file, 5, GALLERY_MAX_DIMENSION);
+  } catch (firstError) {
+    try {
+      return await compressImageFile(file, 2, GALLERY_FALLBACK_DIMENSION, 0.6);
+    } catch {
+      throw firstError;
+    }
+  }
+}
+
+/**
+ * Photos de messagerie : plafond 1200 px, aligné sur la lightbox
+ * conversation servie en 1200x1200 contain. Repli dégradé 768 px / 0,6 :
+ * même ratio de surface que le repli galerie (~0,41x), couvre la vignette
+ * conversation (480 px) sans upscale.
+ */
+export const MESSAGE_PHOTO_MAX_DIMENSION = 1200;
+export const MESSAGE_PHOTO_FALLBACK_DIMENSION = 768;
+
+export async function compressMessagePhotoFile(file: File): Promise<File> {
+  try {
+    return await compressImageFile(file, 5, MESSAGE_PHOTO_MAX_DIMENSION);
+  } catch (firstError) {
+    try {
+      return await compressImageFile(file, 1, MESSAGE_PHOTO_FALLBACK_DIMENSION, 0.6);
+    } catch {
+      throw firstError;
+    }
+  }
 }

@@ -286,7 +286,7 @@ const MessageBubble = ({
               <DialogTitle>Photo partagée</DialogTitle>
               <DialogDescription>Aperçu agrandi de la photo échangée dans cette conversation</DialogDescription>
             </VisuallyHidden>
-            <img src={storageImageUrl(msg.photo_url, { width: 768, height: 864, resize: "contain" })} alt="Photo partagée en grand" className="w-full h-auto max-h-[80vh] object-contain rounded-lg" />
+            <img src={storageImageUrl(msg.photo_url, { width: 1200, height: 1200, resize: "contain" })} alt="Photo partagée en grand" className="w-full h-auto max-h-[80vh] object-contain rounded-lg" />
           </DialogContent>
         </Dialog>
       )}
