@@ -400,7 +400,7 @@ const AdminVerifications = () => {
                       </div>
                       <div className="space-y-1">
                         <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Photo de profil</p>
-                        {user.avatar_url ? <img src={storageImageUrl(user.avatar_url, { width: 384 })} alt="Profil" className="w-full h-48 object-contain rounded-lg border bg-muted" /> : <div className="w-full h-48 rounded-lg border bg-muted flex items-center justify-center text-xs text-muted-foreground">Aucune photo</div>}
+                        {user.avatar_url ? <img src={storageImageUrl(user.avatar_url, { width: 384, height: 384, resize: "contain" })} alt="Profil" className="w-full h-48 object-contain rounded-lg border bg-muted" /> : <div className="w-full h-48 rounded-lg border bg-muted flex items-center justify-center text-xs text-muted-foreground">Aucune photo</div>}
                       </div>
                     </div>
                     {(() => {
