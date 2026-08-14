@@ -1,3 +1,5 @@
+import { storageImageUrl } from "@/lib/storageImage";
+
 /**
  * Carte gardien — vague 42, refonte visuelle "carnet".
  *
@@ -153,7 +155,7 @@ const SitterResultCard = ({
       <div className="relative aspect-[4/3] w-full overflow-hidden bg-muted">
         {currentPhoto ? (
           <img
-            src={currentPhoto}
+            src={storageImageUrl(currentPhoto, { width: 440, height: 330 })}
             alt={firstName}
             loading="lazy"
             className="w-full h-full object-cover object-[center_top] group-hover:scale-[1.02] transition-transform duration-300"

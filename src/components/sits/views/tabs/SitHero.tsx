@@ -13,7 +13,7 @@ import { createPortal } from "react-dom";
 import { ChevronLeft, ChevronRight, X, Grid3x3 } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
-import { avatarImageUrl } from "@/lib/storageImage";
+import { avatarImageUrl, storageImageUrl } from "@/lib/storageImage";
 
 interface PetPhotoItem {
   url: string;
@@ -180,7 +180,7 @@ const SitHero = ({
               aria-label={`Agrandir la photo ${index + 1} sur ${total}`}
             >
               <img
-                src={current.url}
+                src={storageImageUrl(current.url, { width: 384, height: 240 })}
                 alt={current.caption}
                 loading="eager"
                 fetchPriority="high"
@@ -291,7 +291,7 @@ const SitHero = ({
                 aria-label="Agrandir la photo principale"
               >
                 <img
-                  src={main.url}
+                  src={storageImageUrl(main.url, { width: 352, height: 320 })}
                   alt={main.caption}
                   loading="eager"
                   fetchPriority="high"
@@ -316,7 +316,7 @@ const SitHero = ({
                     aria-label={`Agrandir la photo ${i + 2} sur ${total}`}
                   >
                     <img
-                      src={s.url}
+                      src={storageImageUrl(s.url, { width: 176, height: 160 })}
                       alt={s.caption}
                       loading="lazy"
                       decoding="async"
@@ -401,7 +401,7 @@ const SitHero = ({
             )}
 
             <img
-              src={current.url}
+              src={storageImageUrl(current.url, { width: 1600, height: 1600, resize: "contain" })}
               alt={current.caption}
               onClick={(e) => e.stopPropagation()}
               className="max-h-[90vh] max-w-[95vw] object-contain select-none"

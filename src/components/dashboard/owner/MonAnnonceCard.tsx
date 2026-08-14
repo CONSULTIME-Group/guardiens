@@ -1,4 +1,5 @@
 import { memo } from "react";
+import { avatarImageUrl, storageImageUrl } from "@/lib/storageImage";
 import { Link, useNavigate } from "react-router-dom";
 import { format, differenceInDays } from "date-fns";
 import { fr } from "date-fns/locale";
@@ -168,7 +169,7 @@ const MonAnnonceCard = memo(({ sits, pets, propertyType, propertyEnvironment, pe
       {coverPhoto ? (
         <div className="relative h-40 w-full overflow-hidden">
           <img
-            src={coverPhoto}
+            src={storageImageUrl(coverPhoto, { width: 1024, height: 160 })}
             alt={`Photo de couverture de l'annonce ${currentSit.title || ""}`.trim()}
             loading="lazy"
             className="w-full h-full object-cover transition-transform duration-500 ease-out group-hover/card:scale-[1.03]"
@@ -325,7 +326,7 @@ const MonAnnonceCard = memo(({ sits, pets, propertyType, propertyEnvironment, pe
           {pets.slice(0, 4).map(pet => (
             <div key={pet.id} className="flex items-center gap-1.5 text-xs text-muted-foreground">
               {pet.photo_url ? (
-                <img src={pet.photo_url} alt={pet.name} className="w-5 h-5 rounded-full object-cover" />
+                <img src={avatarImageUrl(pet.photo_url, 20)} alt={pet.name} className="w-5 h-5 rounded-full object-cover" />
               ) : (
                 <span className="w-5 h-5 rounded-full bg-primary/10 text-primary text-[10px] font-semibold flex items-center justify-center" aria-hidden="true">
                   {pet.name?.[0]?.toUpperCase() || "·"}

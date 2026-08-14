@@ -1,3 +1,5 @@
+import { avatarImageUrl } from "@/lib/storageImage";
+
 /**
  * Onglet "Animaux" : sommaire si plusieurs, puis fiche détaillée par animal.
  * Aucune icône Lucide décorative, seules Pill / AlertTriangle (statut santé) et Info (statut) restent.
@@ -94,7 +96,7 @@ const TabAnimaux = ({ safePets, ownerName }: TabAnimauxProps) => {
                 >
                   {p?.photo_url ? (
                     <img
-                      src={p.photo_url}
+                      src={avatarImageUrl(p.photo_url, 24)}
                       alt=""
                       className="w-6 h-6 rounded-full object-cover"
                     />

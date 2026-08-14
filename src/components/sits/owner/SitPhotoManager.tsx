@@ -19,6 +19,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { compressImageFile } from "@/lib/compressImage";
+import { storageImageUrl } from "@/lib/storageImage";
 import { getImageDimensions } from "@/lib/imageDimensions";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -382,7 +383,7 @@ const SitPhotoManager = ({
       {suggestion && (
         <div className="mb-4 rounded-xl border border-primary/30 bg-primary/5 p-3 flex flex-wrap items-center gap-3">
           <img
-            src={suggestion.url}
+            src={storageImageUrl(suggestion.url, { width: 80, height: 64 })}
             alt=""
             className="h-16 w-20 rounded-md object-cover border border-border"
           />
@@ -458,7 +459,7 @@ const SitPhotoManager = ({
                 )}
               >
                 <img
-                  src={p.photo_url}
+                  src={storageImageUrl(p.photo_url, { width: 160, height: 120 })}
                   alt=""
                   loading="lazy"
                   className="w-full h-full object-cover"

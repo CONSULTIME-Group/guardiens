@@ -15,7 +15,7 @@ import HintBubble from "./HintBubble";
 import type { SitterProfileData, PastAnimal } from "@/hooks/useSitterProfile";
 import { safeUUID } from "@/lib/uuid";
 import { SITTER_ANIMAL_TYPES_OPTIONS } from "@/lib/profileMatchingOptions";
-import { compressImageFile } from "@/lib/compressImage";
+import { compressGalleryFile } from "@/lib/compressImage";
 
 const ANIMAL_TYPES = SITTER_ANIMAL_TYPES_OPTIONS;
 const EXPERIENCE_OPTIONS = ["Débutant", "1-3 ans", "3-5 ans", "5+ ans"];
@@ -55,12 +55,13 @@ const StepExperience = ({ data, pastAnimals, onChange, onAddAnimal, onRemoveAnim
 
   const uploadAnimalPhoto = async (file: File): Promise<string | null> => {
     if (!user) return null;
-    // Compression alignée sur les autres galeries (max 1200 px, cible 300 ko).
-    let toUpload: File = file;
+    // Plafond d'ingestion galerie (1600 px). Échec = pas d'envoi, jamais de brut.
+    let toUpload: File;
     try {
-      toUpload = await compressImageFile(file, 5, 1200);
+      toUpload = await compressGalleryFile(file);
     } catch {
-      toUpload = file;
+      toast.error("Impossible d'uploader la photo");
+      return null;
     }
     const ext = toUpload.name.split(".").pop();
     const path = `${user.id}/past-animals/${safeUUID()}.${ext}`;
