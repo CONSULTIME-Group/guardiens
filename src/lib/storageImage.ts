@@ -59,3 +59,20 @@ export function storageImageSrcSet(
     .map((w) => `${storageImageUrl(url, { width: w, quality, height: ratio ? Math.round(w / ratio) : undefined })} ${w}w`)
     .join(", ");
 }
+
+/**
+ * Raccourci avatar : le cadre de rendu est toujours carré et le recadrage
+ * cover centré côté serveur est visuellement équivalent au object-cover
+ * centré appliqué côté client. `size` = taille réelle du cadre en px CSS.
+ *
+ * Exception documentée : les rendus avec `object-position: top` (pins et
+ * popup de la carte de recherche) doivent appeler storageImageUrl avec
+ * width seul, sans height, pour conserver le cadrage haut d'origine.
+ */
+export function avatarImageUrl(
+  url: string | null | undefined,
+  size: number,
+  quality = 75,
+): string {
+  return storageImageUrl(url, { width: size, height: size, quality });
+}

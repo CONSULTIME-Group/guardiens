@@ -119,3 +119,16 @@ export async function compressImageFile(
   const newName = file.name.replace(/\.\w+$/, `.${ext}`);
   return new File([blob], newName, { type: mimeType });
 }
+
+/**
+ * Plafond d'ingestion des avatars. Le plus grand consommateur est la
+ * lightbox de la fiche publique (~1000 px affichés) ; toutes les vignettes
+ * rendues font 96 px ou moins. 1024 px côté long en WebP q0,8 produit
+ * environ 60 à 150 ko, contre plusieurs Mo pour une photo brute de
+ * téléphone (cas mesuré en production : 8,8 Mo pour un rendu de 34 px).
+ */
+export const AVATAR_MAX_DIMENSION = 1024;
+
+export async function compressAvatarFile(file: File): Promise<File> {
+  return compressImageFile(file, 5, AVATAR_MAX_DIMENSION);
+}
