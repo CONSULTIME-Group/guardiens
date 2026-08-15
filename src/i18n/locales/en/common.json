@@ -60,9 +60,9 @@
   "landing": {
     "hero": {
       "eyebrow": "House-sitting · Mutual aid · Emergencies",
-      "title_main": "A local house-sitter watches over your home,",
-      "title_accent": "your pets and your garden.",
-      "lede": "House-sitting, helping hands, emergencies. A network of people helping one another, all across France.",
+      "title_main": "Your home, your pets and your plants in safe hands,",
+      "title_accent": "Sitters, listings are waiting for you.",
+      "lede": "Whether it's a trip away, watering your plants or looking after your pets, find a sitter who matches your needs. Across France, including for French residents abroad.",
       "cta_owner": "Publish my listing",
       "cta_sitter": "I want to sit",
       "cta_aid": "I need a hand, or I can lend one →",
@@ -486,7 +486,7 @@
       }
     },
     "meta_title": "Pet sitting at home, house and garden | House-sitting | Guardiens",
-    "meta_description": "Find a sitter from your area for your home, your animals and your garden. House-sitting and community help between members, verified and rated, all across France."
+    "meta_description": "Find a sitter for your home, your pets and your plants. House-sitting and community help between members, verified and rated, across France and for French residents abroad."
   },
   "faq": {
     "title": "Frequently Asked Questions",

@@ -60,9 +60,9 @@
   "landing": {
     "hero": {
       "eyebrow": "Gardes · Entraide · Urgence",
-      "title_main": "Un gardien du coin veille sur votre maison,",
-      "title_accent": "vos animaux et votre jardin.",
-      "lede": "Des gardes, des coups de main, des urgences. Un réseau de particuliers qui se rendent service, partout en France.",
+      "title_main": "Votre maison, vos animaux et vos plantes en confiance.",
+      "title_accent": "Gardiens, des annonces à garder.",
+      "lede": "Qu'il s'agisse d'une absence, d'un arrosage ou d'une garde d'animaux, trouvez un gardien qui correspond à votre besoin. Partout en France, y compris pour les Français de l'étranger.",
       "cta_owner": "Publier mon annonce",
       "cta_sitter": "Je veux garder",
       "cta_aid": "Je cherche ou je propose un coup de main →",
@@ -482,7 +482,7 @@
       }
     },
     "meta_title": "Garde d'animaux à domicile, maison et jardin | House-sitting | Guardiens",
-    "meta_description": "House-sitting et garde de maison entre particuliers : un gardien du coin s'installe chez vous et veille sur vos animaux, votre jardin et vos habitudes. Partout en France."
+    "meta_description": "House-sitting et garde de maison entre particuliers : trouvez un gardien qui veille sur vos animaux, vos plantes et votre maison. Partout en France, y compris pour les Français de l'étranger."
   },
   "faq": {
     "title": "Questions fréquentes",

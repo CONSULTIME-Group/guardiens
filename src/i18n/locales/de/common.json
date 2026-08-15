@@ -60,9 +60,9 @@
   "landing": {
     "hero": {
       "eyebrow": "Hüten · Hilfe · Notfälle",
-      "title_main": "Ein Haussitter aus Ihrer Nähe wacht über Ihr Zuhause,",
-      "title_accent": "Ihre Tiere und Ihren Garten.",
-      "lede": "Haussitting, Hilfe im Alltag, Notfälle. Ein Netzwerk von Menschen, die sich gegenseitig helfen, in ganz Frankreich.",
+      "title_main": "Ihr Zuhause, Ihre Tiere und Ihre Pflanzen in guten Händen,",
+      "title_accent": "Hüter, Anzeigen warten auf Sie.",
+      "lede": "Ob Abwesenheit, Gießen oder Tierbetreuung: Finden Sie einen Hüter, der zu Ihrem Bedarf passt. In ganz Frankreich, auch für Franzosen im Ausland.",
       "cta_owner": "Meine Anzeige veröffentlichen",
       "cta_sitter": "Ich möchte betreuen",
       "cta_aid": "Ich suche oder biete Hilfe an →",
@@ -486,7 +486,7 @@
       }
     },
     "meta_title": "Tierbetreuung zu Hause, Haus und Garten | House-Sitting | Guardiens",
-    "meta_description": "Finden Sie eine Betreuung aus Ihrer Umgebung für Ihr Zuhause, Ihre Tiere und Ihren Garten. House-Sitting und gegenseitige Hilfe unter Privatpersonen, geprüft und bewertet, in ganz Frankreich."
+    "meta_description": "Finden Sie eine Betreuung für Ihr Zuhause, Ihre Tiere und Ihre Pflanzen. House-Sitting und gegenseitige Hilfe unter Privatpersonen, geprüft und bewertet, in ganz Frankreich und für Franzosen im Ausland."
   },
   "faq": {
     "title": "Häufig gestellte Fragen",
