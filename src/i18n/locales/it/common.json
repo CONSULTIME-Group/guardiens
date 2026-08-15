@@ -60,9 +60,9 @@
   "landing": {
     "hero": {
       "eyebrow": "Custodia · Aiuto reciproco · Urgenze",
-      "title_main": "Un custode di zona veglia sulla Sua casa,",
-      "title_accent": "i Suoi animali e il Suo giardino.",
-      "lede": "Custodia, piccoli aiuti, urgenze. Una rete di persone che si aiutano a vicenda, in tutta la Francia.",
+      "title_main": "La Sua casa, animali e piante in buone mani,",
+      "title_accent": "Custodi, annunci vi aspettano.",
+      "lede": "Che si tratti di un'assenza, di un'innaffiatura o di una custodia di animali, trovi un custode che corrisponda alla Sua esigenza. In tutta la Francia, anche per i francesi all'estero.",
       "cta_owner": "Pubblicare il mio annuncio",
       "cta_sitter": "Voglio fare il custode",
       "cta_aid": "Cerco o offro una mano →",
@@ -486,7 +486,7 @@
       }
     },
     "meta_title": "Cura degli animali a domicilio, casa e giardino | House-sitting | Guardiens",
-    "meta_description": "Trovi un sitter della sua zona per la sua casa, i suoi animali e il suo giardino. House-sitting e aiuto reciproco tra privati, verificati e valutati, in tutta la Francia."
+    "meta_description": "Trovi un sitter per la sua casa, i suoi animali e le sue piante. House-sitting e aiuto reciproco tra privati, verificati e valutati, in tutta la Francia e per i francesi all'estero."
   },
   "faq": {
     "title": "Domande frequenti",

@@ -3,12 +3,10 @@ import fs from "node:fs";
 import path from "node:path";
 
 /**
- * Garde anti-régression, règle posée le 14/08/2026 :
- * dans le bloc `landing.hero` français, l'idée de proximité ne doit apparaître
- * qu'une seule fois, portée par `title_main`. Le hero est le sommaire du
- * produit : un emplacement porte une dimension, jamais deux fois la même.
- * (Emplacement déplacé le 14/08/2026 : la clé `brand_tagline` a été supprimée,
- * la proximité vit désormais dans le H1 via « du coin ».)
+ * Garde anti-régression, règle posée le 15/08/2026 :
+ * dans le bloc `landing.hero` français, l'idée de proximité ne doit plus
+ * apparaître. Le hero est recentré sur la confiance et le matching des
+ * besoins (maison, animaux, plantes), sans ancrage géographique.
  *
  * La famille de motifs contrôlée : « du coin », « près de chez vous »,
  * « proches de chez vous » (casse ignorée).
@@ -30,12 +28,12 @@ const flatten = (obj: Record<string, unknown>, prefix = "", acc: Record<string, 
   return acc;
 };
 
-describe("landing.hero, une seule mention de proximité", () => {
+describe("landing.hero, aucune mention de proximité", () => {
   const hero = flatten(
     (JSON.parse(fs.readFileSync(HERO_PATH, "utf8")) as any).landing.hero
   );
 
-  it("la famille de motifs n'apparaît qu'une fois au total, dans title_main", () => {
+  it("la famille de motifs n'apparaît pas dans le hero", () => {
     const hits: string[] = [];
     for (const [key, value] of Object.entries(hero)) {
       for (const motif of PROXIMITY_MOTIFS) {
@@ -45,7 +43,7 @@ describe("landing.hero, une seule mention de proximité", () => {
     }
     expect(
       hits,
-      `la proximité doit être portée une seule fois, par title_main. Occurrences : ${hits.join(", ")}`
-    ).toEqual([expect.stringMatching(/^title_main: /)]);
+      `la proximité ne doit plus apparaître dans le hero. Occurrences : ${hits.join(", ")}`
+    ).toEqual([]);
   });
 });

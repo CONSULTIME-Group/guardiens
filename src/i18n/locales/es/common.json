@@ -60,9 +60,9 @@
   "landing": {
     "hero": {
       "eyebrow": "Cuidados · Ayuda mutua · Urgencias",
-      "title_main": "Un cuidador de su barrio vela por su casa,",
-      "title_accent": "sus animales y su jardín.",
-      "lede": "Cuidados, ayuda puntual, urgencias. Una red de personas que se ayudan entre sí, en toda Francia.",
+      "title_main": "Su casa, animales y plantas en buenas manos,",
+      "title_accent": "Cuidadores, anuncios esperan.",
+      "lede": "Se trate de una ausencia, un riego o un cuidado de animales, encuentre un cuidador que se ajuste a su necesidad. En toda Francia, incluso para los franceses en el extranjero.",
       "cta_owner": "Publicar mi anuncio",
       "cta_sitter": "Quiero ser cuidador",
       "cta_aid": "Busco o propongo una ayuda →",
@@ -486,7 +486,7 @@
       }
     },
     "meta_title": "Cuidado de animales a domicilio, casa y jardín | House-sitting | Guardiens",
-    "meta_description": "Encuentre a un cuidador de su zona para su casa, sus animales y su jardín. House-sitting y ayuda mutua entre particulares, verificados y valorados, en toda Francia."
+    "meta_description": "Encuentre un cuidador para su casa, sus animales y sus plantas. House-sitting y ayuda mutua entre particulares, verificados y valorados, en toda Francia y para los franceses en el extranjero."
   },
   "faq": {
     "title": "Preguntas frecuentes",
