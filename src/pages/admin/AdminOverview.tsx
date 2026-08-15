@@ -18,7 +18,7 @@ import { CronHealthCard } from "./_components/dashboard/CronHealthCard";
 import { ActivityAnalysisCard } from "./_components/dashboard/ActivityAnalysisCard";
 
 const AdminOverview = () => {
-  const { loading, stats, actionCards, lateCards, activity, weeklySignups, deptData } = useDashboardData();
+  const { loading, stats, activity, weeklySignups, deptData } = useDashboardData();
 
   if (loading) {
     return (
@@ -61,7 +61,7 @@ const AdminOverview = () => {
       <ActivityAnalysisCard />
       <SignalsSection />
       <CronHealthCard />
-      <TodoSection actionCards={actionCards} lateCards={lateCards} />
+      
       <KpiCards stats={stats} />
       <RecentActivity activity={activity} />
       <AcquisitionPilotCard />
