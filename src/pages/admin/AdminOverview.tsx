@@ -10,14 +10,16 @@ import { ActivityAnalysisCard } from "./_components/dashboard/ActivityAnalysisCa
 import { CronHealthCard } from "./_components/dashboard/CronHealthCard";
 import { CollapsibleSection } from "./_components/dashboard/CollapsibleSection";
 import { PilotageLinks } from "./_components/dashboard/PilotageLinks";
+import { LiquidityBlock } from "./_components/dashboard/LiquidityBlock";
 
 /**
- * Vue d'ensemble admin, cinq blocs :
- * 1. À traiter (narratif IA puis file d'actions fusionnée signaux + IA)
- * 2. État du service (KPI puis santé des crons)
- * 3. Activité récente (repliée)
- * 4. Tendances (repliées)
- * 5. Pilotage (cartes-liens vers les pages dédiées)
+ * Vue d'ensemble admin, six blocs :
+ * 1. Liquidité de la place de marché (offre, demande, réponse, conversion)
+ * 2. À traiter (narratif IA puis file d'actions fusionnée signaux + IA)
+ * 3. État du service (KPI puis santé des crons)
+ * 4. Activité récente (repliée)
+ * 5. Tendances (repliées)
+ * 6. Pilotage (cartes-liens vers les pages dédiées)
  */
 const AdminOverview = () => {
   const { loading, stats, activity, weeklySignups, deptData } = useDashboardData();
@@ -37,7 +39,10 @@ const AdminOverview = () => {
         description="Vue d'ensemble de l'activité Guardiens : membres, annonces, gardes, tendances et signaux."
       />
 
-      {/* 1. À traiter */}
+      {/* 1. Liquidité */}
+      <LiquidityBlock />
+
+      {/* 2. À traiter */}
       <ActivityAnalysisCard
         analysis={analysis}
         loading={analysisLoading}
@@ -49,19 +54,19 @@ const AdminOverview = () => {
         aiLoading={analysisLoading}
       />
 
-      {/* 2. État du service */}
+      {/* 3. État du service */}
       <KpiCards stats={stats} />
       <CronHealthCard />
 
-      {/* 3. Activité récente (repliée) */}
+      {/* 4. Activité récente (repliée) */}
       <RecentActivity activity={activity} />
 
-      {/* 4. Tendances (repliées) */}
+      {/* 5. Tendances (repliées) */}
       <CollapsibleSection title="Tendances">
         <DashboardCharts weeklySignups={weeklySignups} deptData={deptData} />
       </CollapsibleSection>
 
-      {/* 5. Pilotage */}
+      {/* 6. Pilotage */}
       <PilotageLinks />
     </div>
   );

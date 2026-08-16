@@ -9,7 +9,6 @@ export interface Stats {
   totalReviews: number;
   avgRating: number;
   monthRevenue: number;
-  intlMembers: number;
 }
 
 export interface ActivityItem {

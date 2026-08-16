@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
-  Users, UserPlus, Megaphone, CalendarCheck, Star, CreditCard, Globe,
+  Users, UserPlus, Megaphone, CalendarCheck, Star, CreditCard,
 } from "lucide-react";
 import type { Stats } from "./types";
 import { MONTHLY_SUBSCRIPTION_EUR } from "./types";
@@ -10,6 +10,16 @@ import { PRICING_IS_ACTIVE } from "@/config/pricing";
 interface Props {
   stats: Stats;
 }
+
+/** En dessous de 10 avis, la note moyenne est du bruit statistique. */
+const MIN_REVIEWS_FOR_RATING = 10;
+
+/** Largeur de grille selon le nombre de cartes réellement affichées. */
+const GRID_COLS: Record<number, string> = {
+  4: "xl:grid-cols-4",
+  5: "xl:grid-cols-5",
+  6: "xl:grid-cols-6",
+};
 
 export const KpiCards = ({ stats }: Props) => {
   const cards = [
@@ -41,13 +51,14 @@ export const KpiCards = ({ stats }: Props) => {
       icon: CalendarCheck,
       link: "/admin/sits-management",
     },
-    {
+    // Carte masquée tant que le volume d'avis ne rend pas la note lisible.
+    ...(stats.totalReviews > MIN_REVIEWS_FOR_RATING ? [{
       title: "Avis",
       value: stats.totalReviews,
-      subtitle: stats.avgRating > 0 ? `Note moyenne : ${stats.avgRating}/5` : "Aucun avis",
+      subtitle: `Note moyenne : ${stats.avgRating}/5`,
       icon: Star,
       link: "/admin/reviews",
-    },
+    }] : []),
     // Carte conservée pour la réactivation du pricing : non rendue tant que
     // PRICING_IS_ACTIVE est false, la grille se recompose sans trou.
     ...(PRICING_IS_ACTIVE ? [{
@@ -57,17 +68,10 @@ export const KpiCards = ({ stats }: Props) => {
       icon: CreditCard,
       link: "/admin/subscriptions",
     }] : []),
-    {
-      title: "Membres hors France",
-      value: stats.intlMembers,
-      subtitle: stats.intlMembers > 0 ? "Filtrer par pays dans Membres" : "Aucun pour l'instant",
-      icon: Globe,
-      link: "/admin/users",
-    },
   ];
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
+    <div className={`grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 ${GRID_COLS[Math.min(cards.length, 6)] ?? "xl:grid-cols-6"} gap-4`}>
       {cards.map((card) => (
         <Link
           key={card.title}

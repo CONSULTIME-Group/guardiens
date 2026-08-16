@@ -1,13 +1,9 @@
 import { useCallback, useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import type { SuggestedAction } from "@/components/admin/signals/actionQueue";
 
-export interface SuggestedAction {
-  title: string;
-  why: string;
-  link: string;
-  priority: "haute" | "moyenne" | "basse";
-}
+export type { SuggestedAction };
 
 export interface ActivityAnalysis {
   generated_at: string;
