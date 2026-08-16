@@ -17,6 +17,7 @@ import { trackEvent } from "@/lib/analytics";
 
 const ArticleEditor = () => {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const { id } = useParams();
   const isNew = id === "new";
 
