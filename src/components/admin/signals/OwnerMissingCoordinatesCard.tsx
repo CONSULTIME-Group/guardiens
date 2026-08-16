@@ -4,7 +4,7 @@ import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+import { SignalPriorityBadge } from "./PriorityBadge";
 import { supabase } from "@/integrations/supabase/client";
 
 export interface OwnerMissingCoordinatesSignal {
@@ -120,12 +120,7 @@ export const OwnerMissingCoordinatesCard = ({ signal }: Props) => {
               <h3 className="text-sm font-semibold text-foreground">
                 Propriétaire sans coordonnées
               </h3>
-              <Badge
-                variant="outline"
-                className="text-[10px] uppercase tracking-wide bg-warning/10 text-warning-foreground border-warning/30"
-              >
-                À traiter
-              </Badge>
+              <SignalPriorityBadge severity={signal.severity} />
             </div>
             <p className="text-sm text-foreground">
               {firstName} a publié « {sitTitle} » mais n'a pas de coordonnées

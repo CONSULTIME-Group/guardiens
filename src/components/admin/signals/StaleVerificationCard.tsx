@@ -4,7 +4,7 @@ import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+import { SignalPriorityBadge } from "./PriorityBadge";
 import { supabase } from "@/integrations/supabase/client";
 
 export interface StaleVerificationSignal {
@@ -40,9 +40,8 @@ export const StaleVerificationCard = ({ signal }: Props) => {
   const iconTone = isCritical
     ? "bg-destructive/15 text-destructive"
     : "bg-warning/15 text-warning-foreground";
-  const badgeTone = isCritical
-    ? "bg-destructive/10 text-destructive border-destructive/30"
-    : "bg-warning/10 text-warning-foreground border-warning/30";
+
+
 
   const handleIgnore = async () => {
     setIgnoring(true);
@@ -73,9 +72,7 @@ export const StaleVerificationCard = ({ signal }: Props) => {
               <h3 className="text-sm font-semibold text-foreground">
                 Vérification d'identité en attente
               </h3>
-              <Badge variant="outline" className={`text-[10px] uppercase tracking-wide ${badgeTone}`}>
-                {isCritical ? "Critique" : "À traiter"}
-              </Badge>
+              <SignalPriorityBadge severity={signal.severity} />
             </div>
             <div className="text-sm text-foreground">
               {first} attend depuis {days} jour{days > 1 ? "s" : ""}.

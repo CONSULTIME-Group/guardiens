@@ -92,12 +92,7 @@ export const GroupedSignalCard = ({ signalType, signals, severity, renderDetail 
   return (
     <div className="rounded-lg border p-3 space-y-2">
       <div className="flex items-start gap-3">
-        <Badge
-          variant="outline"
-          className={cn("text-[10px] uppercase tracking-wide shrink-0", SEVERITY_STYLE[severity])}
-        >
-          {severity === "critical" ? "Critique" : "À traiter"}
-        </Badge>
+        <SignalPriorityBadge severity={severity} />
         <div className="flex-1 min-w-0">
           <p className="text-sm font-medium text-foreground">
             {signalTypeLabel(signalType)}, {count} {entityNoun(signals)}

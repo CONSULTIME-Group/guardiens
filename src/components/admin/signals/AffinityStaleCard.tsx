@@ -4,7 +4,7 @@ import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+import { SignalPriorityBadge } from "./PriorityBadge";
 import { supabase } from "@/integrations/supabase/client";
 
 export interface AffinityStaleSignal {
@@ -62,12 +62,7 @@ export const AffinityStaleCard = ({ signal }: Props) => {
               <h3 className="text-sm font-semibold text-foreground">
                 Onboarding affinité inachevé
               </h3>
-              <Badge
-                variant="outline"
-                className="text-[10px] uppercase tracking-wide bg-warning/10 text-warning-foreground border-warning/30"
-              >
-                À relancer
-              </Badge>
+              <SignalPriorityBadge severity={signal.severity} />
             </div>
             <div className="text-sm text-foreground">
               {first} a commencé son profil d'affinité il y a {hours} heure{hours > 1 ? "s" : ""} sans le terminer.
