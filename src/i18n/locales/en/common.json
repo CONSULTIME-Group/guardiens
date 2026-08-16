@@ -98,7 +98,7 @@
       "owner": {
         "tag": "Owners",
         "title": "Leave with peace of mind.",
-        "text": "Someone local watches over your home and your pets. You meet them before leaving. You choose.",
+        "text": "A trusted guardian watches over your home and your pets. You meet them before leaving. You choose.",
         "badge": "Between individuals",
         "cta": "I am looking for a caretaker / pet & home sitter →"
       },
@@ -112,7 +112,7 @@
         "badge": "Between members",
         "tag": "Mutual aid, independent of sitting",
         "title": "A small favour, an exchange.",
-        "text": "Watering a vegetable garden, putting up a shelf, sharing a skill, visiting an isolated person. No sitting, no pet required, just locals helping each other.",
+        "text": "Watering a vegetable garden, putting up a shelf, sharing a skill, visiting an isolated person. No sitting, no pet required, just members helping each other.",
         "cta": "Discover mutual aid →"
       },
       "urgency": {
@@ -126,7 +126,7 @@
       "eyebrow": "What is never written in a listing",
       "title_a": "The real pretext,",
       "title_b": "is the meeting.",
-      "p1": "What we rarely talk about is what happens around it. Getting to know the local grandmother and her story because you helped her pick her garden fruit. Exchanging with Gerardo while he gives you a small favour with DIY, and offering him a home-made meal in return.",
+      "p1": "What we rarely talk about is what happens around it. Getting to know a grandmother and her story because you helped her pick her garden fruit. Exchanging with Gerardo while he gives you a small favour with DIY, and offering him a home-made meal in return.",
       "p2": "You don't need a pet for a meeting to begin. Asking for a small favour, offering one: it's already opening a door. Sitting a house is opening another, same gesture, two scales.",
       "p3": "We learn, we discover, we grow attached, without looking for it. Just by leaving space for what can happen."
     },
@@ -136,7 +136,7 @@
       "step1_title": "Publish your listing",
       "step1_text": "Your dates, your pets, your house. A few minutes are enough, your listing is online.",
       "step2_title": "Choose after a meeting",
-      "step2_text": "Local caretaker / pet & home sitters apply. You read profiles, reviews, you chat. Then you meet, a coffee, a visit, before deciding.",
+      "step2_text": "Caretaker / pet & home sitters apply. You read profiles, reviews, you chat. Then you meet, a coffee, a visit, before deciding.",
       "step3_title": "Leave with peace of mind",
       "step3_text": "Once the sitting agreement is signed, your sitter moves in. You receive news. You return home, often with a new relationship.",
       "cta_owner": "Publish my listing",
@@ -144,16 +144,16 @@
       "footnote": "Registration in 2 minutes"
     },
     "aid": {
-      "eyebrow": "For everyone · Between locals",
+      "eyebrow": "For everyone · Between members",
       "title": "Dare to ask. Dare to propose.",
-      "p1": "Before, there was someone local who would come by to water the garden, who looked after the dog, who came to fix a shutter. Someone to whom we offered a piece of cake or a small favour in return.",
+      "p1": "Before, there was someone who would come by to water the garden, who looked after the dog, who came to fix a shutter. Someone to whom we offered a piece of cake or a small favour in return.",
       "p2": "This habit hasn't disappeared, we simply no longer dare to ask the first question. Guardiens is the pretext to ask it again, and along the way, live experiences that no organised trip could offer you.",
       "need_title": "« I need a small favour »",
       "need_text": "Your vegetable garden during holidays. Your chickens this weekend. Walking your dog after an operation. Asking for it isn't admitting a weakness, it's trusting.",
       "need_footer": "A service in return for a service. That's the bet.",
       "offer_title": "« I can give a little of my time »",
       "offer_text": "You know how to prune roses. You love dogs. You have two hours on Saturday morning. Propose, and live what you would never have experienced without this meeting.",
-      "offer_footer": "That is how a local fabric reweaves itself.",
+      "offer_footer": "That is how a fabric reweaves itself.",
       "seen_this_week": "A few exchanges seen on Guardiens this week",
       "examples": {
         "water_plants": "Watering plants",
@@ -183,7 +183,7 @@
       "p3_title": "Documented profiles, cross-reviews",
       "p3_text": "Every profile displays reviews published by previous owners and the history of completed sits. An in-person meeting before every sit remains at the heart of trust.",
       "p4_title": "From your street to the other side of France",
-      "p4_text": "Hyper-local for a quick fix, expanded for a change of scenery: you decide how far you want to go. Every sit becomes an opening door."
+      "p4_text": "Close to home for a quick fix, across the country for a change of scenery: you decide how far you want to go. Every sit becomes an opening door."
     },
     "testimonials": {
       "title": "They dared. Here is what they kept.",
@@ -204,12 +204,12 @@
     "story": {
       "eyebrow": "Our story",
       "title": "It all started with a visa.",
-      "p1": "The habit of opening up to locals has been lost. For lack of a pretext.",
+      "p1": "The habit of opening up to others has been lost. For lack of a pretext.",
       "p2": "Elisa, my partner and co-founder of Guardiens, arrived from Argentina with a visa that didn't allow her to work. She looked after pets. She would come home with stories: people opening their doors, their lives, freely. Strangers who ended up inviting us for Christmas.",
       "p3": "Elisa and I looked after 37 houses in five years, in villages, cities, and hamlets.",
       "quote": "We never looked after houses. We were invited into lives.",
       "p4": "That's what the village used to do naturally.",
-      "p5": "Guardiens is the pretext that was missing. On one side, small favours of mutual aid between local people: a vegetable garden watered in exchange for a meal, one skill for another, a small favour returned in kind. On the other, independently, house-sitting: your keys entrusted to someone you've looked in the eye.",
+      "p5": "Guardiens is the pretext that was missing. On one side, small favours of mutual aid between members: a vegetable garden watered in exchange for a meal, one skill for another, a small favour returned in kind. On the other, independently, house-sitting: your keys entrusted to someone you've looked in the eye.",
       "p6": "You will leave with peace of mind. You will return with a story. We didn't expect it to matter so much.",
       "p7": "That's why we built Guardiens, so you could live this too.",
       "signature": "Jérémie and Elisa",
@@ -221,7 +221,7 @@
     "cities": {
       "eyebrow": "Guides & cities",
       "title": "House-sitting near you.",
-      "lede": "Concrete guides to prepare your sit, and local hubs for the most active cities, Lyon, Annecy, Grenoble, and all over France.",
+      "lede": "Concrete guides to prepare your sit, and hubs for the most active cities, Lyon, Annecy, Grenoble, and all over France.",
       "guides_tag": "Guides & advice",
       "guides_title": "Prepare your sit",
       "all_articles": "All articles",
@@ -239,9 +239,9 @@
       "q3": "How can I find a pet sitter near me?",
       "a3": "Register on Guardiens, publish your sitting listing with dates and your pets, and receive applications from caretaker / pet & home sitters who live near you. You choose after a meeting.",
       "q4": "Who are the sitters on Guardiens?",
-      "a4": "Local people. Identity verification is open to every member, and validated profiles display the « Identity verified » badge. Trust is built on the in-person meeting held before every sit, on cross-reviews published after each experience, and on the history visible on every profile.",
+      "a4": "People you can trust. Identity verification is open to every member, and validated profiles display the « Identity verified » badge. Trust is built on the in-person meeting held before every sit, on cross-reviews published after each experience, and on the history visible on every profile.",
       "q5": "How does a sit take place on Guardiens?",
-      "a5": "You publish your listing, local caretaker / pet & home sitters apply, you choose after a meeting, then your sitter moves in. An optional sitting agreement frames the commitments of each party during the sit.",
+      "a5": "You publish your listing, caretaker / pet & home sitters apply, you choose after a meeting, then your sitter moves in. An optional sitting agreement frames the commitments of each party during the sit.",
       "q6": "Is Guardiens available everywhere in France?",
       "a6": "Yes. The Guardiens network extends to all regions of France, from the Basque Country to Brittany, through the Alps and the North. You will find a sitter near you regardless of your department.",
       "q7": "What is the Guardiens business model?",
@@ -275,7 +275,7 @@
         "cta": "Post my France listing"
       },
       "card2": {
-        "title": "You are travelling abroad, find a local sitter.",
+        "title": "You are travelling abroad, find a trusted sitter.",
         "cta": "See international listings"
       },
       "card3": {
@@ -310,7 +310,7 @@
     },
     "pros": {
       "title": "Vets, groomers, trainers, verified by Guardiens",
-      "subtitle": "A local directory of pet professionals. SIRET documents are analysed automatically, and files that do not pass this first check are reviewed by the team. The badge indicates a validated SIRET.",
+      "subtitle": "A directory of pet professionals. SIRET documents are analysed automatically, and files that do not pass this first check are reviewed by the team. The badge indicates a validated SIRET.",
       "card1": {
         "title": "Vets",
         "cta": "Find a vet near me"
@@ -441,7 +441,7 @@
           "label": "Pet sitting in Haute-Savoie: the complete guide"
         },
         "g6": {
-          "label": "Dog and cat sitting in Croix-Rousse: local specifics"
+          "label": "Dog and cat sitting in Croix-Rousse: area specifics"
         },
         "g7": {
           "label": "French expats: having your home in France looked after during your absence"
@@ -457,7 +457,7 @@
         },
         "c2": {
           "label": "House-sitting in Annecy",
-          "desc": "Lake, mountains, second homes in Haute-Savoie. Local sitters familiar with the frost, access roads and vets."
+          "desc": "Lake, mountains, second homes in Haute-Savoie. Sitters familiar with the frost, access roads and vets."
         },
         "c3": {
           "label": "House-sitting in Grenoble",
@@ -984,7 +984,7 @@
     "meta_title": "Login, guardiens",
     "panel_title": "Local help, rediscovered",
     "panel_tagline": "A helping hand, a bond of trust.",
-    "panel_description": "A keeper near you watches over your home and your animals. And among locals, we dare again to ask for, and offer, a helping hand.",
+    "panel_description": "A keeper near you watches over your home and your animals. And among members, we dare again to ask for, and offer, a helping hand.",
     "welcome_back": "Welcome back",
     "google_continue": "Continue with Google",
     "google_loading": "Signing in…",
@@ -1154,7 +1154,7 @@
     "soon_title": "Coming soon. The emergency sitter network will activate as soon as we have enough eligible and experienced sitters.",
     "soon_subtitle": "Our platform is young. We take the time to designate emergency sitters on strict criteria to guarantee reliability.",
     "hero_title": "Emergency sitters",
-    "hero_lead": "Your local safety net. An unexpected event, a last-minute cancellation, a sudden departure? Eligible local sitters can be alerted as a priority.",
+    "hero_lead": "Your safety net. An unexpected event, a last-minute cancellation, a sudden departure? Eligible sitters can be alerted as a priority.",
     "hero_tagline": "That is the strength of proximity: people already on the spot, not on the other side of the country.",
     "how_it_works": "How does it work?",
     "step1_title": "An owner has an urgent need",
@@ -1171,7 +1171,7 @@
     "story2_name": "Pierre, Annecy",
     "story2_text": "Five-year-old Australian Shepherd, magnificent but reactive with strangers. Pierre had to leave for five days on a work trip. No question of a kennel. He activated the alert. An emergency sitter trained for strong-tempered dogs replied the same evening. First meeting outside, neutral ground. Pierre left reassured.",
     "story3_name": "Camille, Grenoble",
-    "story3_text": "Sudden death of a relative in the Paris region. Camille had to leave for four days, her 14-year-old cat can no longer handle moving. Alert sent in the morning, a local emergency sitter replied before noon. The cat didn't budge. Neither did Camille, in a way.",
+    "story3_text": "Sudden death of a relative in the Paris region. Camille had to leave for four days, her 14-year-old cat can no longer handle moving. Alert sent in the morning, an emergency sitter replied before noon. The cat didn't budge. Neither did Camille, in a way.",
     "story4_name": "Sophie, Vieux-Lyon",
     "story4_text": "Diabetic dog, two daily injections at fixed times. No one in her circle knew how. Sophie had to be away three days. She activated the alert specifying the care skill. An emergency sitter with vet experience replied that day. Injection demo the morning of departure. Everything went as planned.",
     "story5_name": "Thomas, Chambéry",
@@ -1204,8 +1204,8 @@
     "owner_card1_desc": "Emergency requests go to the top of the notifications sent to emergency sitters in the area.",
     "owner_card2_title": "Demanding eligibility",
     "owner_card2_desc": "5+ completed stays, rating 4.7+, 0 cancellations, verified identity.",
-    "owner_card3_title": "Local people",
-    "owner_card3_desc": "Automatically notified within a 35 km radius, they are locals, not strangers.",
+    "owner_card3_title": "People you can trust",
+    "owner_card3_desc": "Automatically notified within a 35 km radius, they are members, not strangers.",
     "owner_cta": "Sign up and be notified of the launch",
     "sitter_title": "Become an emergency sitter",
     "sitter_subtitle": "When you meet the conditions, the invitation will appear on your dashboard. You choose.",
@@ -1226,11 +1226,11 @@
     "engagement_p2": "Cancellations are reassessed every 6 months: only those from the last 6 months count for eligibility.",
     "faq_title": "Frequently asked questions",
     "cities_title": "Emergency sitters by city",
-    "cities_lead": "The emergency network relies on local sitters across France. Here are the cities where the network is being built first.",
+    "cities_lead": "The emergency network relies on sitters across France. Here are the cities where the network is being built first.",
     "see_pricing": "See pricing",
     "further_kicker": "Going further",
     "further1_title": "Small mutual aid missions",
-    "further1_desc": "For one-off helping hands (without urgency) between locals.",
+    "further1_desc": "For one-off helping hands (without urgency) between members.",
     "further2_title": "Local city guides",
     "further2_desc": "Vets, parks, dog-friendly cafes and good spots near you.",
     "further3_title": "Become an emergency sitter",
@@ -1257,7 +1257,7 @@
     "faq9_q": "What happens if I decline an emergency request?",
     "faq9_a": "The first decline has no consequence, it's normal not to always be available. However, a second consecutive decline causes loss of status for 6 months. It's our guarantee to owners: an emergency sitter is truly available.",
     "faq10_q": "What do I gain by being an emergency sitter?",
-    "faq10_a": "Priority visibility in search results, early access to interesting stays, distinctive badge on your profile, and one month of subscription offered per emergency intervention. Above all: you provide a real service to locals who truly need it.",
+    "faq10_a": "Priority visibility in search results, early access to interesting stays, distinctive badge on your profile, and one month of subscription offered per emergency intervention. Above all: you provide a real service to members who truly need it.",
     "faq11_q": "How am I notified of an emergency?",
     "faq11_a": "SMS + email + push notification (if enabled). You configure your preferences from the dashboard: intervention radius (5 to 200 km), availability time slots, accepted pet types. Only alerts matching your preferences reach you.",
     "faq12_q": "Can I lose my emergency sitter status?",

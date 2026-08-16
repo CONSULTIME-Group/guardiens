@@ -153,7 +153,7 @@
       "need_footer": "Ein Dienst als Gegenleistung für einen Dienst. Das ist unser Versprechen.",
       "offer_title": "«Ich kann ein wenig Zeit schenken»",
       "offer_text": "Sie wissen, wie man Rosen schneidet. Sie lieben Hunde. Sie haben am Samstagmorgen zwei Stunden Zeit. Bieten Sie es an und erleben Sie etwas, das Sie ohne diese Begegnung nie erfahren hätten.",
-      "offer_footer": "So knüpft man das lokale soziale Netz neu.",
+      "offer_footer": "So knüpft man das soziale Netz neu.",
       "seen_this_week": "Einige Austausche auf Guardiens diese Woche",
       "examples": {
         "water_plants": "Pflanzen gießen",
@@ -183,7 +183,7 @@
       "p3_title": "Dokumentierte Profile, gegenseitige Bewertungen",
       "p3_text": "Jedes Profil zeigt die von früheren Eigentümern veröffentlichten Bewertungen und die Historie der durchgeführten Betreuungen. Das persönliche Treffen vor jeder Betreuung bleibt das Herzstück des Vertrauens.",
       "p4_title": "Von Ihrer Straße bis ans andere Ende des Landes",
-      "p4_text": "Hyper-lokal für eine kurze Hilfe, landesweit für einen Tapetenwechsel: Sie entscheiden, wie weit Sie gehen wollen. Jede Betreuung öffnet eine neue Tür."
+      "p4_text": "In Ihrer Nähe für eine kurze Hilfe, landesweit für einen Tapetenwechsel: Sie entscheiden, wie weit Sie gehen wollen. Jede Betreuung öffnet eine neue Tür."
     },
     "testimonials": {
       "title": "Sie haben es gewagt. Das ist ihre Erfahrung.",
@@ -221,7 +221,7 @@
     "cities": {
       "eyebrow": "Ratgeber & Städte",
       "title": "House-sitting in Ihrer Nähe.",
-      "lede": "Konkrete Ratgeber zur Vorbereitung Ihrer Betreuung und lokale Hubs für die aktivsten Städte wie Lyon, Annecy, Grenoble und ganz Frankreich.",
+      "lede": "Konkrete Ratgeber zur Vorbereitung Ihrer Betreuung und Hubs für die aktivsten Städte wie Lyon, Annecy, Grenoble und ganz Frankreich.",
       "guides_tag": "Ratgeber & Tipps",
       "guides_title": "Ihre Betreuung vorbereiten",
       "all_articles": "Alle Artikel",
@@ -275,7 +275,7 @@
         "cta": "Meine Frankreich-Anzeige veröffentlichen"
       },
       "card2": {
-        "title": "Sie reisen ins Ausland, finden Sie einen lokalen Betreuer.",
+        "title": "Sie reisen ins Ausland, finden Sie einen vertrauenswürdigen Betreuer.",
         "cta": "Internationale Anzeigen ansehen"
       },
       "card3": {
@@ -310,7 +310,7 @@
     },
     "pros": {
       "title": "Tierärzte, Groomer, Trainer, von Guardiens verifiziert",
-      "subtitle": "Ein lokales Verzeichnis von Tierprofis. SIRET-Nachweise werden automatisch analysiert, Unterlagen ohne bestandene Erstprüfung werden vom Team geprüft. Das Badge steht für eine bestätigte SIRET.",
+      "subtitle": "Ein Verzeichnis von Tierprofis. SIRET-Nachweise werden automatisch analysiert, Unterlagen ohne bestandene Erstprüfung werden vom Team geprüft. Das Badge steht für eine bestätigte SIRET.",
       "card1": {
         "title": "Tierärzte",
         "cta": "Einen Tierarzt in der Nähe finden"
@@ -457,7 +457,7 @@
         },
         "c2": {
           "label": "House-Sitting in Annecy",
-          "desc": "See, Berge, Zweitwohnsitze in Hochsavoyen. Lokale Betreuer, die Frost, Zufahrten und Tierärzte kennen."
+          "desc": "See, Berge, Zweitwohnsitze in Hochsavoyen. Betreuer, die Frost, Zufahrten und Tierärzte kennen."
         },
         "c3": {
           "label": "House-Sitting in Grenoble",
@@ -984,7 +984,7 @@
     "meta_title": "Anmelden, guardiens",
     "panel_title": "Gegenseitige Hilfe, wiedergefunden",
     "panel_tagline": "Eine helfende Hand, ein Band des Vertrauens.",
-    "panel_description": "Ein Hüter in Ihrer Nähe wacht über Ihr Zuhause und Ihre Tiere. Und unter Einheimischen trauen wir uns wieder, um Hilfe zu bitten und sie anzubieten.",
+    "panel_description": "Ein Hüter in Ihrer Nähe wacht über Ihr Zuhause und Ihre Tiere. Und unter Mitgliedern trauen wir uns wieder, um Hilfe zu bitten und sie anzubieten.",
     "welcome_back": "Willkommen zurück",
     "google_continue": "Mit Google fortfahren",
     "google_loading": "Anmeldung…",
@@ -1154,7 +1154,7 @@
     "soon_title": "Bald verfügbar. Das Notfall-Netzwerk wird aktiviert, sobald wir genügend berechtigte und erfahrene Betreuer haben.",
     "soon_subtitle": "Unsere Plattform ist jung. Wir nehmen uns die Zeit, Notfall-Sitter nach strengen Kriterien zu benennen.",
     "hero_title": "Die Notfall-Sitter",
-    "hero_lead": "Ihr lokales Sicherheitsnetz. Ein unerwarteter Vorfall, eine kurzfristige Absage, eine überstürzte Abreise? Geeignete Personen aus der Nähe können vorrangig benachrichtigt werden.",
+    "hero_lead": "Ihr Sicherheitsnetz. Ein unerwarteter Vorfall, eine kurzfristige Absage, eine überstürzte Abreise? Geeignete Personen aus der Nähe können vorrangig benachrichtigt werden.",
     "hero_tagline": "Das ist die Stärke der Nähe: Menschen, die bereits vor Ort sind, nicht am anderen Ende des Landes.",
     "how_it_works": "Wie funktioniert es?",
     "step1_title": "Ein Besitzer hat einen dringenden Bedarf",
@@ -1171,7 +1171,7 @@
     "story2_name": "Pierre, Annecy",
     "story2_text": "Australian Shepherd, 5 Jahre alt, prachtvoll aber reaktiv gegenüber Fremden. Pierre musste fünf Tage geschäftlich verreisen. Ein für temperamentvolle Hunde geschulter Sitter antwortete noch am selben Abend.",
     "story3_name": "Camille, Grenoble",
-    "story3_text": "Plötzlicher Todesfall eines Angehörigen in Paris. Camille musste vier Tage weg, ihre 14-jährige Katze verträgt keine Umzüge mehr. Ein lokaler Notfall-Sitter antwortete vor Mittag.",
+    "story3_text": "Plötzlicher Todesfall eines Angehörigen in Paris. Camille musste vier Tage weg, ihre 14-jährige Katze verträgt keine Umzüge mehr. Ein Notfall-Sitter antwortete vor Mittag.",
     "story4_name": "Sophie, Vieux-Lyon",
     "story4_text": "Diabetischer Hund, zwei tägliche Injektionen zu festen Zeiten. Niemand im Umfeld konnte es. Ein Notfall-Sitter mit tierärztlicher Erfahrung antwortete am selben Tag.",
     "story5_name": "Thomas, Chambéry",
@@ -1226,7 +1226,7 @@
     "engagement_p2": "Stornierungen werden alle 6 Monate neu bewertet: nur die der letzten 6 Monate zählen für die Berechtigung.",
     "faq_title": "Häufig gestellte Fragen",
     "cities_title": "Notfall-Sitter nach Stadt",
-    "cities_lead": "Das Notfallnetzwerk stützt sich auf lokale Betreuer in ganz Frankreich. Hier die Städte, in denen das Netzwerk zuerst aufgebaut wird.",
+    "cities_lead": "Das Notfallnetzwerk stützt sich auf Betreuer in ganz Frankreich. Hier die Städte, in denen das Netzwerk zuerst aufgebaut wird.",
     "see_pricing": "Preise ansehen",
     "further_kicker": "Mehr erfahren",
     "further1_title": "Kleine Hilfsmissionen",
