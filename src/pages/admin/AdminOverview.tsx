@@ -1,74 +1,73 @@
 import PageMeta from "@/components/PageMeta";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Button } from "@/components/ui/button";
-import { ExternalLink } from "lucide-react";
 import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
+import { DashboardSkeleton } from "@/components/admin/DashboardSkeleton";
 import { useDashboardData } from "./_components/dashboard/useDashboardData";
-
-
-import { RecentActivity } from "./_components/dashboard/RecentActivity";
+import { useActivityAnalysis } from "./_components/dashboard/useActivityAnalysis";
 import { KpiCards } from "./_components/dashboard/KpiCards";
+import { RecentActivity } from "./_components/dashboard/RecentActivity";
 import { DashboardCharts } from "./_components/dashboard/DashboardCharts";
-import { OnboardingReminderCard } from "./_components/dashboard/OnboardingReminderCard";
-import { AcquisitionPilotCard } from "./_components/dashboard/AcquisitionPilotCard";
-import { AiAcquisitionCard } from "./_components/dashboard/AiAcquisitionCard";
-import AffinityPilotCard from "./_components/dashboard/AffinityPilotCard";
 import { SignalsSection } from "./_components/dashboard/SignalsSection";
-import { CronHealthCard } from "./_components/dashboard/CronHealthCard";
 import { ActivityAnalysisCard } from "./_components/dashboard/ActivityAnalysisCard";
+import { CronHealthCard } from "./_components/dashboard/CronHealthCard";
+import { CollapsibleSection } from "./_components/dashboard/CollapsibleSection";
+import { PilotageLinks } from "./_components/dashboard/PilotageLinks";
 
+/**
+ * Vue d'ensemble admin, cinq blocs :
+ * 1. À traiter (narratif IA puis file d'actions fusionnée signaux + IA)
+ * 2. État du service (KPI puis santé des crons)
+ * 3. Activité récente (repliée)
+ * 4. Tendances (repliées)
+ * 5. Pilotage (cartes-liens vers les pages dédiées)
+ */
 const AdminOverview = () => {
   const { loading, stats, activity, weeklySignups, deptData } = useDashboardData();
+  const {
+    analysis,
+    loading: analysisLoading,
+    refreshing: analysisRefreshing,
+    refresh: refreshAnalysis,
+  } = useActivityAnalysis();
 
-  if (loading) {
-    return (
-      <div className="space-y-6">
-        <Skeleton className="h-8 w-48" />
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {[1, 2, 3].map(i => <Skeleton key={i} className="h-24 rounded-xl" />)}
-        </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
-          {[1, 2, 3, 4, 5, 6].map(i => <Skeleton key={i} className="h-28 rounded-lg" />)}
-        </div>
-      </div>
-    );
-  }
-
-  if (!stats) return null;
+  if (loading || !stats) return <DashboardSkeleton />;
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6 p-4 md:p-6 max-w-7xl mx-auto">
       <PageMeta
-        title="Administration | Guardiens"
-        description="Espace d'administration Guardiens."
+        title="Admin | Guardiens"
+        description="Tableau de bord d'administration Guardiens."
         path="/admin"
-        noindex
-        nofollow
+        noindex={true}
+        nofollow={true}
       />
       <AdminPageHeader
         title="Vue d'ensemble"
-        description="Actions à mener, signaux d'alerte et indicateurs clés de la plateforme."
-        actions={
-          <Button variant="outline" size="sm" asChild>
-            <a href="https://analytics.google.com/analytics/web/#/p/G-9JP4VR1RRP" target="_blank" rel="noopener noreferrer">
-              <ExternalLink className="h-4 w-4 mr-2" />
-              Google Analytics
-            </a>
-          </Button>
-        }
+        description="Vue d'ensemble de l'activité Guardiens : membres, annonces, gardes, tendances et signaux."
       />
 
-      <ActivityAnalysisCard />
-      <SignalsSection />
-      <CronHealthCard />
-      
+      {/* 1. À traiter */}
+      <ActivityAnalysisCard
+        analysis={analysis}
+        loading={analysisLoading}
+        refreshing={analysisRefreshing}
+        onRefresh={refreshAnalysis}
+      />
+      <SignalsSection aiActions={analysis?.actions ?? []} aiLoading={analysisLoading} />
+
+      {/* 2. État du service */}
       <KpiCards stats={stats} />
+      <CronHealthCard />
+
+      {/* 3. Activité récente (repliée) */}
       <RecentActivity activity={activity} />
-      <AcquisitionPilotCard />
-      <AiAcquisitionCard />
-      <AffinityPilotCard />
-      <DashboardCharts weeklySignups={weeklySignups} deptData={deptData} />
-      <OnboardingReminderCard />
+
+      {/* 4. Tendances (repliées) */}
+      <CollapsibleSection title="Tendances">
+        <DashboardCharts weeklySignups={weeklySignups} deptData={deptData} />
+      </CollapsibleSection>
+
+      {/* 5. Pilotage */}
+      <PilotageLinks />
     </div>
   );
 };
