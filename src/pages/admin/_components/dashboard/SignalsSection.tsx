@@ -1,8 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
-import { AlertTriangle, CheckCircle2, Sparkles } from "lucide-react";
+import { AlertTriangle, CheckCircle2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -23,14 +22,13 @@ import { StaleDraftCard } from "@/components/admin/signals/StaleDraftCard";
 import { OwnerActivationCampaignCard } from "@/components/admin/signals/OwnerActivationCampaignCard";
 import { GenericSignalCard } from "@/components/admin/signals/GenericSignalCard";
 import { GroupedSignalCard } from "@/components/admin/signals/GroupedSignalCard";
+import type { AdminSignalBase } from "@/components/admin/signals/signalGrouping";
+import { PriorityBadge } from "@/components/admin/signals/PriorityBadge";
 import {
-  groupSignals,
-  signalAdminLink,
-  GROUP_THRESHOLD,
-  type AdminSignalBase,
-  type SignalGroup,
-} from "@/components/admin/signals/signalGrouping";
-import type { SuggestedAction } from "./useActivityAnalysis";
+  buildActionQueue,
+  type QueueEntry,
+  type SuggestedAction,
+} from "@/components/admin/signals/actionQueue";
 
 interface Snapshot {
   signals: AdminSignalBase[];
@@ -82,39 +80,7 @@ function renderSignal(s: AdminSignalBase) {
   return <GenericSignalCard signal={s} />;
 }
 
-type QueueEntry =
-  | { kind: "group"; group: SignalGroup }
-  | { kind: "signal"; signal: AdminSignalBase }
-  | { kind: "ai"; action: SuggestedAction };
-
-/**
- * Priorité réelle : signal critique, action IA haute, signal avertissement,
- * action IA moyenne, action IA basse. Le tri est stable : à priorité égale,
- * l'ordre d'origine est conservé (signaux d'abord, suggestions IA ensuite).
- */
-const rankOf = (entry: QueueEntry): number => {
-  if (entry.kind === "ai") {
-    return entry.action.priority === "haute" ? 1 : entry.action.priority === "moyenne" ? 3 : 4;
-  }
-  const severity = entry.kind === "group" ? entry.group.severity : entry.signal.severity;
-  return severity === "critical" ? 0 : 2;
-};
-
-/** Chemin normalisé d'un lien admin (sans requête ni slash final). */
-const linkPath = (href: string): string => {
-  try {
-    const u = new URL(href, "https://admin.local");
-    return u.pathname.replace(/\/+$/, "") || "/";
-  } catch {
-    return href;
-  }
-};
-
-const AI_PRIORITY_VARIANT: Record<SuggestedAction["priority"], "destructive" | "secondary" | "outline"> = {
-  haute: "destructive",
-  moyenne: "secondary",
-  basse: "outline",
-};
+/** Action suggérée par l'analyse IA, sans signal équivalent dans la file. */
 
 /** Action suggérée par l'analyse IA, sans signal équivalent dans la file. */
 const AiActionCard = ({ action }: { action: SuggestedAction }) => (

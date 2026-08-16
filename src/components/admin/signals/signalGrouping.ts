@@ -104,8 +104,8 @@ export function signalAdminLink(s: AdminSignalBase): string {
   }
 }
 
-/** Au-delà de 3 signaux non résolus du même type, une seule carte groupée. */
-export const GROUP_THRESHOLD = 3;
+/** Dès 2 signaux non résolus du même type, une seule carte groupée. */
+export const GROUP_THRESHOLD = 2;
 
 export interface SignalGroup {
   signalType: string;
@@ -127,3 +127,36 @@ export function groupSignals(signals: AdminSignalBase[]): SignalGroup[] {
     severity: items.some((s) => s.severity === "critical") ? "critical" : "warning",
   }));
 }
+
+/** Échelle de priorité unifiée de la file "À traiter" (signaux et IA). */
+export type QueuePriority = "haute" | "moyenne" | "basse";
+
+/** Gravité d'un signal projetée sur l'échelle unifiée. */
+export const severityToPriority = (severity: AdminSignalBase["severity"]): QueuePriority =>
+  severity === "critical" ? "haute" : "moyenne";
+
+/**
+ * Sujet métier porté par chaque type de signal. Sert à écarter les
+ * suggestions IA qui traitent du même sujet qu'un signal visible, même
+ * quand les liens diffèrent (par exemple relance de masse vers
+ * /admin/envois-groupes contre signal pointant vers /admin/users).
+ */
+export const SIGNAL_TOPIC: Record<string, string> = {
+  dormant_sitter: "gardiens_dormants",
+  dormant_top_sitter: "gardiens_dormants",
+  affinity_onboarding_stale: "onboarding_affinite",
+  owner_sit_unconfirmed: "gardes_non_confirmees",
+  pending_application: "candidatures_sans_reponse",
+  no_applications: "liquidite_annonces",
+  stale_draft: "liquidite_annonces",
+  untapped_city: "liquidite_annonces",
+  email_delivery_low: "deliverabilite_email",
+  digest_queue_stalled: "deliverabilite_email",
+  notification_delivery_failed: "deliverabilite_email",
+  nurturing_run_anomaly: "deliverabilite_email",
+  stale_verification: "verifications_identite",
+  identity_needs_review: "verifications_identite",
+  identity_orphan_documents: "verifications_identite",
+  repeated_cancellations: "retention_membres",
+  repeated_republish: "retention_membres",
+};
