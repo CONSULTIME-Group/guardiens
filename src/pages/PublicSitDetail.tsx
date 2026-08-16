@@ -27,6 +27,7 @@ import { DEFAULT_OG_IMAGE } from "@/data/siteRoutes";
 
 import ApplicationModal from "@/components/sits/ApplicationModal";
 import { useSubscriptionAccess } from "@/hooks/useSubscriptionAccess";
+import { useCityPageExists } from "@/hooks/useCityPageExists";
 import PublicHeader from "@/components/layout/PublicHeader";
 import PublicFooter from "@/components/layout/PublicFooter";
 import PublicSitView from "@/components/sits/PublicSitView";
@@ -61,7 +62,12 @@ const PublicSitDetail = () => {
  const [hasApplied, setHasApplied] = useState(false);
  const [isAcceptedSitter, setIsAcceptedSitter] = useState(false);
 
- const [viewerType, setViewerType] = useState<ViewerType>("anonymous");
+  const [viewerType, setViewerType] = useState<ViewerType>("anonymous");
+
+  // Maillage interne : la page ville /house-sitting/<slug> n'existe que pour
+  // les villes statiques ou publiées en base. Ne jamais l'émettre sinon (404).
+  const sitCityName = ((sit as any)?.city as string | undefined)?.trim() || owner?.city?.trim() || "";
+  const hasCityPage = useCityPageExists(sitCityName ? slugify(sitCityName) : null);
  const sitViewFired = useRef(false);
 
   useEffect(() => {
