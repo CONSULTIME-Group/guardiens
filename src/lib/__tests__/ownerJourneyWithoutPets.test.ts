@@ -28,12 +28,13 @@ const iso = (offsetDays: number) => {
   return d.toISOString().slice(0, 10);
 };
 
-/** Propriétaire avec logement et photo, zéro animal. */
+/** Propriétaire avec identité, logement et photo, zéro animal. */
 const ownerWithoutPets = {
   loading: false,
   hasProperty: true,
   hasPets: false,
   hasPhoto: true,
+  hasIdentity: true,
   dismissed: false,
   voluntary: false,
 };

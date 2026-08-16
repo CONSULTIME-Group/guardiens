@@ -11,7 +11,12 @@ const buildAuthConfirmUrl = (nextPath: string) => {
     !nextPath.startsWith("/\\")
       ? nextPath
       : "/dashboard";
-  const next = encodeURIComponent(normalizePathname(safe));
+  // normalizePathname retire la query string : on la réinjecte quand elle ne
+  // contient que des caractères sûrs, pour conserver les marqueurs
+  // d'attribution (ex : /sits/create?source=signup) sur le chemin email.
+  const query = safe.includes("?") ? safe.slice(safe.indexOf("?")) : "";
+  const safeQuery = /^\?[A-Za-z0-9=_&%.-]*$/.test(query) ? query : "";
+  const next = encodeURIComponent(normalizePathname(safe) + safeQuery);
   return `${SITE_URL}${AUTH_CONFIRM_PATH}?next=${next}`;
 };
 
