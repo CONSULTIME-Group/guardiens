@@ -668,9 +668,18 @@ const SearchOwner = () => {
       typeof p?.latitude_approx === "number" && typeof p?.longitude_approx === "number";
 
     // Seules les villes des gardiens sans coordonnées en base sont géocodées.
+    // Le pays du profil est passé quand il est connu (carte des pays chargée
+    // via get_sitter_country_map) : sans lui, la ville d'un gardien établi
+    // hors France serait cherchée en France par défaut.
+    const noCoordSitters = items.filter((s: any) => !hasStoredCoords(s.profile));
+    const countryByCity = new Map<string, string>();
+    noCoordSitters.forEach((s: any) => {
+      const cityName = s.profile?.city;
+      const co = countryByUser.get(s.user_id) || (s.profile as any)?.country;
+      if (cityName && co) countryByCity.set(cityName, co);
+    });
     const uniqueCities = [...new Set(
-      items
-        .filter((s: any) => !hasStoredCoords(s.profile))
+      noCoordSitters
         .map((s: any) => s.profile?.city)
         .filter(Boolean),
     )] as string[];
@@ -683,7 +692,7 @@ const SearchOwner = () => {
     for (let i = 0; i < uniqueCities.length; i += GEOCODE_CONCURRENCY) {
       const chunk = uniqueCities.slice(i, i + GEOCODE_CONCURRENCY);
       await Promise.all(chunk.map(async (c) => {
-        const coords = await geocodeCity(c);
+        const coords = await geocodeCity(c, countryByCity.get(c));
         if (coords) cityCoords.set(c, { lat: coords.lat, lng: coords.lng });
       }));
     }

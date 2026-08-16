@@ -9,8 +9,8 @@
  * pas dans les prérequis bloquants de cet écran.
  *
  * Depuis le 16/08/2026 (tunnel post-inscription propriétaire, lot 1), le
- * prénom et le code postal du profil sont un prérequis bloquant : ils
- * portent la géolocalisation de l'annonce et son en-tête public, et
+ * prénom, le code postal et le pays du profil sont un prérequis bloquant :
+ * ils portent la géolocalisation de l'annonce et son en-tête public, et
  * n'étaient demandés nulle part avant ce parcours.
  */
 
@@ -64,16 +64,39 @@ export interface SetupState {
 }
 
 /**
+ * Code postal validé selon le pays du profil. Règle métier posée par le
+ * propriétaire de la plateforme le 16/08/2026 : un inscrit hors France
+ * peut publier une annonce, Guardiens compte des membres dans 18 pays et
+ * les formats postaux nationaux diffèrent trop pour un format unique
+ * (4 chiffres en Belgique ou en Suisse, alphanumérique au Canada ou au
+ * Royaume-Uni).
+ *
+ * France, ou pays non encore renseigné : format strict à 5 chiffres.
+ * Tout autre pays : contrôle volontairement permissif, 2 à 12 caractères
+ * parmi chiffres, lettres, espaces et tirets, casse indifférente. Coder
+ * les formats postaux de chaque pays serait une source de bugs sans fin.
+ */
+export const isPostalCodeValidForCountry = (
+  postalCode: string | null | undefined,
+  country: string | null | undefined,
+): boolean => {
+  const clean = (postalCode ?? "").trim();
+  const isFrance = !country || !country.trim() || country.trim().toUpperCase() === "FR";
+  if (isFrance) return /^\d{5}$/.test(clean);
+  return /^[0-9A-Za-z -]{2,12}$/.test(clean);
+};
+
+/**
  * Identité minimale exigée pour localiser une annonce : prénom exploitable
- * (2 caractères minimum après trim) et code postal français à 5 chiffres.
- * Le parcours de création est réservé aux annonces en France, le contrôle
- * peut donc rester strict.
+ * (2 caractères minimum après trim) et code postal valide pour le pays du
+ * profil (voir isPostalCodeValidForCountry).
  */
 export const isIdentityComplete = (
   firstName: string | null | undefined,
   postalCode: string | null | undefined,
+  country?: string | null,
 ): boolean =>
-  (firstName ?? "").trim().length >= 2 && /^\d{5}$/.test((postalCode ?? "").trim());
+  (firstName ?? "").trim().length >= 2 && isPostalCodeValidForCountry(postalCode, country);
 
 export const resolveSetupState = (input: SetupStateInput): SetupState => {
   const missing: SetupMissingItem[] = [];

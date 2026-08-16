@@ -15,9 +15,12 @@ describe("resolvePostAuthTarget", () => {
     expect(OWNER_SIGNUP_TUNNEL_TARGET).toBe("/sits/create?source=signup");
   });
 
-  it("garde le tableau de bord pour gardien, both et rôle inconnu", () => {
+  it("envoie un polyvalent (both) vers le tunnel : il est aussi propriétaire", () => {
+    expect(resolvePostAuthTarget("both", null)).toBe(OWNER_SIGNUP_TUNNEL_TARGET);
+  });
+
+  it("garde le tableau de bord pour gardien et rôle inconnu", () => {
     expect(resolvePostAuthTarget("sitter", null)).toBe("/dashboard");
-    expect(resolvePostAuthTarget("both", null)).toBe("/dashboard");
     expect(resolvePostAuthTarget(null, null)).toBe("/dashboard");
   });
 
@@ -28,6 +31,7 @@ describe("resolvePostAuthTarget", () => {
 
   it("respecte une redirection explicite, prioritaire sur le tunnel", () => {
     expect(resolvePostAuthTarget("owner", "/gardiens/abc-123")).toBe("/gardiens/abc-123");
+    expect(resolvePostAuthTarget("both", "/gardiens/abc-123")).toBe("/gardiens/abc-123");
     expect(resolvePostAuthTarget("sitter", "/annonces/xyz")).toBe("/annonces/xyz");
   });
 });
