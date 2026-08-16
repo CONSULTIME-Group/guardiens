@@ -103,6 +103,7 @@ const ProCategoryListing = lazy(() => import("./pages/ProCategoryListing"));
 const AdminProDirectory = lazy(() => import("./pages/admin/AdminProDirectory"));
 const ArticleEditor = lazy(() => import("./pages/ArticleEditor"));
 const AdminOverview = lazy(() => import("./pages/admin/AdminOverview"));
+const AdminAffinity = lazy(() => import("./pages/admin/AdminAffinity"));
 const AdminAudit = lazy(() => import("./pages/admin/AdminAudit"));
 const AdminDeletionRequests = lazy(() => import("./pages/admin/AdminDeletionRequests"));
 const AdminUsers = lazy(() => import("./pages/admin/AdminUsers"));
@@ -526,6 +527,7 @@ const AppRoutes = () => {
         <Route path="/admin/emails" element={<AdminEmailHealth />} />
         <Route path="/admin/emails-transactionnels" element={<AdminEmails />} />
         <Route path="/admin/alma" element={<AdminAlma />} />
+        <Route path="/admin/affinity" element={<AdminAffinity />} />
         <Route path="/admin/experiences" element={<AdminExperienceVerification />} />
         <Route path="/admin/articles" element={<AdminArticles />} />
         <Route path="/admin/articles/refresh-post-pivot" element={<AdminArticlesRefreshPostPivot />} />
