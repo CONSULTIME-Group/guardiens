@@ -23,35 +23,45 @@ export interface SetupStepProps {
   onContinue: () => void;
   /** Présent seulement quand l'écran a été ouvert volontairement. */
   onBack?: () => void;
+  /**
+   * Sortie vers le tableau de bord quand l'écran s'ouvre par le préflight :
+   * personne ne doit rester enfermé dans cet écran.
+   */
+  onQuit?: () => void;
 }
 
 const Block = ({
-  title, done, children,
-}: { title: string; done: boolean; children: React.ReactNode }) => (
+  title, done, optional = false, children,
+}: { title: string; done: boolean; optional?: boolean; children: React.ReactNode }) => (
   <section
     className={cn(
       "rounded-2xl border p-4 md:p-5",
-      done ? "border-border bg-card" : "border-primary/40 bg-primary/5",
+      done || optional ? "border-border bg-card" : "border-primary/40 bg-primary/5",
     )}
   >
     <div className="flex items-center gap-2 mb-3">
       {done
         ? <Check className="h-4 w-4 text-primary shrink-0" aria-hidden="true" />
-        : <AlertCircle className="h-4 w-4 text-primary shrink-0" aria-hidden="true" />}
+        : !optional
+          ? <AlertCircle className="h-4 w-4 text-primary shrink-0" aria-hidden="true" />
+          : null}
       <h2 className="font-heading text-base font-semibold">{title}</h2>
+      {optional && !done && (
+        <span className="text-xs text-muted-foreground">Optionnel</span>
+      )}
     </div>
     {children}
   </section>
 );
 
 /**
- * Première étape éditable du parcours : les trois éléments indispensables à une
+ * Première étape éditable du parcours : les éléments indispensables à une
  * annonce publiable se remplissent ici, sans quitter la page ni perdre la
- * saisie déjà commencée.
+ * saisie déjà commencée. Les animaux sont recommandés, jamais exigés.
  */
 const CreateSitSetupStep = ({
   userId, propertyId, petCount, photos, photoDone, missingLabels,
-  onPropertySaved, onPetsChanged, onPhotoUploaded, onContinue, onBack,
+  onPropertySaved, onPetsChanged, onPhotoUploaded, onContinue, onBack, onQuit,
 }: SetupStepProps) => {
   const housingDone = !!propertyId;
   const petsDone = petCount > 0;
@@ -63,7 +73,7 @@ const CreateSitSetupStep = ({
     <div className="px-4 max-w-3xl mx-auto space-y-6">
       <div>
         <h1 className="font-heading text-2xl md:text-3xl font-bold mb-2">
-          Trois éléments et votre annonce peut partir
+          Deux éléments et votre annonce peut partir
         </h1>
         <p className="text-sm text-muted-foreground">
           Les gardiens choisissent une maison et des animaux, pas seulement des dates.
@@ -81,7 +91,7 @@ const CreateSitSetupStep = ({
         )}
       </Block>
 
-      <Block title="Les animaux à faire garder" done={petsDone}>
+      <Block title="Vos animaux, si vous en avez" done={petsDone} optional>
         {propertyId ? (
           <PetsEditor propertyId={propertyId} onChange={onPetsChanged} />
         ) : (
@@ -146,6 +156,16 @@ const CreateSitSetupStep = ({
             onClick={onBack}
           >
             Revenir à mon annonce
+          </Button>
+        )}
+        {onQuit && (
+          <Button
+            type="button"
+            variant="ghost"
+            className="w-full"
+            onClick={onQuit}
+          >
+            Je préfère faire ça plus tard
           </Button>
         )}
       </div>

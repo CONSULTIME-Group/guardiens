@@ -278,6 +278,7 @@ export type EventType =
   | "sits_create_preflight_blocked"             // Écran de prérequis affiché avant l'étape 0 (missing, profile_completion)
   | "sits_create_setup_shown"                   // Écran de mise en route affiché (missing)
   | "sits_create_setup_completed"               // Mise en route terminée (duration_ms, filled)
+  | "sits_create_setup_quit"                    // Mise en route quittée vers le tableau de bord (missing)
   | "application_submitted"                     // Candidature envoyée (source, used_alma_draft, message_length)
   | "application_sent_unedited_draft"           // Candidature envoyée avec brouillon Alma non modifié (sit_id)
   // Vague 14 — tracking des sections vedettes des dashboards ---------------
