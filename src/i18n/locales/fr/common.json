@@ -59,10 +59,10 @@
   },
   "landing": {
     "hero": {
-      "eyebrow": "Gardes · Entraide · Urgence",
-      "title_main": "Votre maison, animaux et plantes en confiance,",
-      "title_accent": "Gardiens, annonces à garder.",
-      "lede": "Qu'il s'agisse d'une absence, d'un arrosage ou d'une garde d'animaux, trouvez un gardien qui correspond à votre besoin. Partout en France, y compris pour les Français de l'étranger.",
+      "eyebrow": "Gardes · Coups de main · Urgences",
+      "title_main": "Vous partez. Guardiens reste.",
+      "title_accent": "Un gardien veille sur votre maison et vos animaux.",
+      "lede": "Un réseau d'entraide entre particuliers, où chaque gardien arrive préparé : le caractère de votre animal, vos consignes et votre vétérinaire, accessibles pendant toute la garde. Partout en France.",
       "cta_owner": "Publier mon annonce",
       "cta_sitter": "Je veux garder",
       "cta_aid": "Je cherche ou je propose un coup de main →",
