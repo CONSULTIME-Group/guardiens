@@ -36,8 +36,8 @@ describe("buildActionQueue", () => {
         sig({ id: "c1", severity: "critical", signal_type: "suspicious_account" }),
       ],
       [
-        ai({ title: "basse", priority: "basse", topic: "acquisition" }),
-        ai({ title: "haute", priority: "haute", topic: "crons" }),
+        ai({ title: "basse", priority: "basse", topic: "acquisition", link: "/admin/emails" }),
+        ai({ title: "haute", priority: "haute", topic: "crons", link: "/admin/reports" }),
       ],
     );
     expect(queue.map(keyOf)).toEqual(["c1", "ai:haute", "w1", "ai:basse"]);

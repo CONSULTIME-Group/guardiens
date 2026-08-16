@@ -3,16 +3,9 @@ import { Link } from "react-router-dom";
 import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
 import { signalAdminLink, signalTypeLabel, type AdminSignalBase } from "./signalGrouping";
-
-const SEVERITY_STYLE: Record<AdminSignalBase["severity"], string> = {
-  critical: "bg-destructive/10 text-destructive border-destructive/30",
-  warning: "bg-warning/10 text-warning-foreground border-warning/30",
-  info: "bg-muted text-muted-foreground border-border",
-};
+import { SignalPriorityBadge } from "./PriorityBadge";
 
 /**
  * Carte générique des signaux sans rendu dédié : libellé français (repli
