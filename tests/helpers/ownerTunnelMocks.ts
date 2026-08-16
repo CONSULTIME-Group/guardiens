@@ -45,6 +45,17 @@ export function buildTunnelSession() {
       role: "authenticated",
       email: "marie@guardiens.test",
       created_at: now,
+      // register() traite un user sans identities comme une inscription
+      // répétée : le mock doit donc en fournir une.
+      identities: [
+        {
+          id: TUNNEL_USER_ID,
+          user_id: TUNNEL_USER_ID,
+          provider: "email",
+          identity_data: { email: "marie@guardiens.test", sub: TUNNEL_USER_ID },
+          created_at: now,
+        },
+      ],
     },
   };
 }
