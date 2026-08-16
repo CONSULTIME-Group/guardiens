@@ -575,9 +575,9 @@ const OwnerSitView = ({
             <AlertDialogDescription asChild>
               <div className="space-y-3 pt-2">
                 <p>
-                  L'annonce sera <strong>dépubliée et archivée</strong>. Elle ne sera plus
+                  L'annonce sera <strong>dépubliée et repassera en brouillon</strong>. Elle ne sera plus
                   visible des gardiens, vous pourrez la republier à tout moment depuis
-                  l'onglet « Archivées ».
+                  l'onglet « Brouillons ».
                 </p>
                 {openApps.length > 0 && (
                   <div className="rounded-lg border border-destructive/30 bg-destructive/5 p-3 text-sm">
