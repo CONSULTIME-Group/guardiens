@@ -208,3 +208,26 @@ export async function compressMessagePhotoFile(file: File): Promise<File> {
     }
   }
 }
+
+/**
+ * Couvertures d'articles : plafond 1200 px, aligné sur l'ingestion du
+ * bucket property-photos et sur le standard og:image (1200 x 630), la
+ * couverture partant dans les métadonnées de partage. Le plus grand rendu
+ * en page est le hero d'ArticleDetail, servi à 800 px de large dans une
+ * colonne max-w-3xl. Repli dégradé 1024 px / 0,6 : il couvre ce rendu de
+ * 800 px sans upscale, là où 768 px passerait sous la demande.
+ */
+export const ARTICLE_COVER_MAX_DIMENSION = 1200;
+export const ARTICLE_COVER_FALLBACK_DIMENSION = 1024;
+
+export async function compressArticleCoverFile(file: File): Promise<File> {
+  try {
+    return await compressImageFile(file, 5, ARTICLE_COVER_MAX_DIMENSION);
+  } catch (firstError) {
+    try {
+      return await compressImageFile(file, 2, ARTICLE_COVER_FALLBACK_DIMENSION, 0.6);
+    } catch {
+      throw firstError;
+    }
+  }
+}
