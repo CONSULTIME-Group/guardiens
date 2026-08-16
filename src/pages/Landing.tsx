@@ -201,9 +201,14 @@ const Landing = () => {
               {t("landing.hero.eyebrow")}
             </p>
 
-            <h1 className="font-heading text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-[1.1] mb-[14px] md:mb-[22px] max-w-3xl">
+            {/* Sous 640 px, taille fluide en clamp() : bornes 24/36 et 20/30
+                prises dans l'échelle Tailwind (2xl→4xl, xl→3xl), plafonds
+                identiques aux classes sm: pour une transition sans saut à
+                640 px. Mesures du 16/08/2026 : 4 lignes à 360 px, 3 à 390 et
+                430 px. */}
+            <h1 className="font-heading text-[clamp(24px,8vw,36px)] sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-[1.1] mb-[14px] md:mb-[22px] max-w-3xl">
               <span className="block">{t("landing.hero.title_main")}</span>
-              <span className="block text-2xl sm:text-3xl md:text-4xl lg:text-5xl text-white/80">{t("landing.hero.title_accent")}</span>
+              <span className="block text-[clamp(20px,6.4vw,30px)] sm:text-3xl md:text-4xl lg:text-5xl text-white/80">{t("landing.hero.title_accent")}</span>
             </h1>
 
 
