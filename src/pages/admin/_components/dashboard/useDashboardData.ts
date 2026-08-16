@@ -2,27 +2,22 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { format, subWeeks, startOfWeek, endOfWeek } from "date-fns";
 import { fr } from "date-fns/locale";
-import {
-  ShieldCheck, Briefcase, Flag, MessageSquare, BookOpen, ThumbsUp, UserMinus,
-} from "lucide-react";
 import { postalToDept } from "@/lib/departments";
 import type {
-  Stats, ActivityItem, ActionCard, WeeklySignup, DeptData,
+  Stats, ActivityItem, WeeklySignup, DeptData,
 } from "./types";
 import { MONTHLY_SUBSCRIPTION_EUR } from "./types";
 
 interface DashboardData {
   loading: boolean;
   stats: Stats | null;
-  actionCards: ActionCard[];
-  lateCards: ActionCard[];
   activity: ActivityItem[];
   weeklySignups: WeeklySignup[];
   deptData: DeptData[];
 }
 
 /**
- * Centralise les ~24 requêtes Supabase du Dashboard admin et expose
+ * Centralise les requêtes Supabase du Dashboard admin et expose
  * l'ensemble des données dérivées prêtes pour l'affichage.
  */
 export function useDashboardData(): DashboardData {
@@ -30,19 +25,12 @@ export function useDashboardData(): DashboardData {
   const [activity, setActivity] = useState<ActivityItem[]>([]);
   const [weeklySignups, setWeeklySignups] = useState<WeeklySignup[]>([]);
   const [deptData, setDeptData] = useState<DeptData[]>([]);
-  const [actionCards, setActionCards] = useState<ActionCard[]>([]);
-  const [lateCards, setLateCards] = useState<ActionCard[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchAll = async () => {
       const oneWeekAgo = new Date();
       oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
-
-      const now = new Date();
-      const ago24h = new Date(now.getTime() - 24 * 60 * 60 * 1000).toISOString();
-      const ago48h = new Date(now.getTime() - 48 * 60 * 60 * 1000).toISOString();
-      const ago72h = new Date(now.getTime() - 72 * 60 * 60 * 1000).toISOString();
 
       const [
         { count: totalUsers },
@@ -54,23 +42,13 @@ export function useDashboardData(): DashboardData {
         { count: ongoingSits },
         { data: reviewsData },
         { data: profilesData },
-        { count: pendingVerifications },
-        { count: pendingExperiences },
-        { count: pendingReports },
         { data: recentProfiles },
         { data: recentSits },
         { data: recentReviews },
         { data: recentApplications },
         { count: activeSubscriptions },
-        { count: pendingContactMessages },
-        { count: pendingSkills },
-        { count: pendingReviewModeration },
-        { count: lateVerifications },
-        { count: lateContactMessages },
-        { count: lateReports },
         { data: recentStatusChanges },
         { data: recentDeletions },
-        { data: pendingDeletionsCount },
         { count: intlMembers },
       ] = await Promise.all([
         supabase.from("profiles").select("id", { count: "exact", head: true }),
@@ -82,46 +60,15 @@ export function useDashboardData(): DashboardData {
         supabase.from("sits").select("id", { count: "exact", head: true }).eq("status", "confirmed"),
         supabase.from("reviews").select("overall_rating"),
         supabase.from("profiles").select("created_at, city, role, first_name, id, postal_code"),
-        supabase.from("profiles").select("id", { count: "exact", head: true }).or("identity_verification_status.eq.pending,and(identity_verification_status.eq.not_submitted,identity_document_url.not.is.null),and(identity_verification_status.eq.not_submitted,identity_selfie_url.not.is.null)"),
-        supabase.from("external_experiences").select("id", { count: "exact", head: true }).eq("verification_status", "pending"),
-        supabase.from("reports").select("id", { count: "exact", head: true }).eq("status", "new"),
         supabase.from("profiles").select("id, first_name, role, created_at").order("created_at", { ascending: false }).limit(5),
         supabase.from("sits").select("id, title, created_at, status, property_id, properties!inner(user_id, ...profiles!inner(first_name, city))").order("created_at", { ascending: false }).limit(5),
         supabase.from("reviews").select("id, overall_rating, created_at, reviewer_id, reviewee_id, sit_id, reviewer:profiles!reviews_reviewer_id_fkey(first_name), reviewee:profiles!reviews_reviewee_id_fkey(first_name)").order("created_at", { ascending: false }).limit(5),
         supabase.rpc("admin_get_recent_applications_activity", { p_limit: 5 }),
         supabase.from("subscriptions").select("id", { count: "exact", head: true }).eq("status", "active"),
-        supabase.from("contact_messages").select("id", { count: "exact", head: true }).eq("status", "new"),
-        supabase.from("skills_library").select("id", { count: "exact", head: true }).eq("status", "pending"),
-        supabase.from("reviews").select("id", { count: "exact", head: true }).eq("moderation_status", "pending"),
-        supabase.from("profiles").select("id", { count: "exact", head: true }).or("identity_verification_status.eq.pending,and(identity_verification_status.eq.not_submitted,identity_document_url.not.is.null),and(identity_verification_status.eq.not_submitted,identity_selfie_url.not.is.null)").lt("created_at", ago24h),
-        supabase.from("contact_messages").select("id", { count: "exact", head: true }).eq("status", "new").lt("created_at", ago48h),
-        supabase.from("reports").select("id", { count: "exact", head: true }).eq("status", "new").lt("created_at", ago72h),
         supabase.rpc("admin_get_recent_sit_status_changes" as any, { p_limit: 8 }),
         supabase.rpc("admin_get_recent_account_deletions" as any, { p_limit: 5 }),
-        supabase.rpc("admin_get_pending_deletions_count" as any),
         supabase.from("profiles").select("id", { count: "exact", head: true }).not("country", "is", null).neq("country", "FR"),
       ]);
-
-      // Compétences saisies dans les profils mais pas encore validées
-      // (source #2 affichée dans /admin/skills, non comptée par status='pending')
-      let pendingProfileSkills = 0;
-      try {
-        const [{ data: validatedComps }, { data: sitterComps }, { data: ownerComps }] = await Promise.all([
-          supabase.from("competences_validees").select("label"),
-          supabase.from("sitter_profiles").select("competences").not("competences", "is", null),
-          supabase.from("owner_profiles").select("competences").not("competences", "is", null),
-        ]);
-        const validatedSet = new Set((validatedComps || []).map((c: any) => c.label));
-        const seen = new Set<string>();
-        [...(sitterComps || []), ...(ownerComps || [])].forEach((row: any) => {
-          (row.competences || []).forEach((c: string) => {
-            if (c && !validatedSet.has(c)) seen.add(c);
-          });
-        });
-        pendingProfileSkills = seen.size;
-      } catch {
-        pendingProfileSkills = 0;
-      }
 
       const totalReviews = reviewsData?.length || 0;
       const avgRating = totalReviews > 0
@@ -143,26 +90,6 @@ export function useDashboardData(): DashboardData {
         monthRevenue,
         intlMembers: intlMembers || 0,
       });
-
-      // À traiter
-      const actions: ActionCard[] = [];
-      if ((pendingVerifications || 0) > 0) actions.push({ label: "Vérifications ID", count: pendingVerifications || 0, link: "/admin/verifications", icon: ShieldCheck });
-      if ((pendingExperiences || 0) > 0) actions.push({ label: "Expériences", count: pendingExperiences || 0, link: "/admin/experiences", icon: Briefcase });
-      if ((pendingReports || 0) > 0) actions.push({ label: "Signalements", count: pendingReports || 0, link: "/admin/reports", icon: Flag });
-      if ((pendingContactMessages || 0) > 0) actions.push({ label: "Messages contact", count: pendingContactMessages || 0, link: "/admin/contact-messages", icon: MessageSquare });
-      const totalSkills = (pendingSkills || 0) + pendingProfileSkills;
-      if (totalSkills > 0) actions.push({ label: "Compétences", count: totalSkills, link: "/admin/skills", icon: BookOpen });
-      if ((pendingReviewModeration || 0) > 0) actions.push({ label: "Avis en attente", count: pendingReviewModeration || 0, link: "/admin/reviews", icon: ThumbsUp });
-      const pendingDelCount = (pendingDeletionsCount as unknown as number) || 0;
-      if (pendingDelCount > 0) actions.push({ label: "Suppressions compte", count: pendingDelCount, link: "/admin/users?filter=deletion-pending", icon: UserMinus });
-      setActionCards(actions);
-
-      // En retard
-      const late: ActionCard[] = [];
-      if ((lateVerifications || 0) > 0) late.push({ label: "Vérifications > 24h", count: lateVerifications || 0, link: "/admin/verifications", icon: ShieldCheck });
-      if ((lateContactMessages || 0) > 0) late.push({ label: "Messages > 48h", count: lateContactMessages || 0, link: "/admin/contact-messages", icon: MessageSquare });
-      if ((lateReports || 0) > 0) late.push({ label: "Signalements > 72h", count: lateReports || 0, link: "/admin/reports", icon: Flag });
-      setLateCards(late);
 
       // Inscriptions hebdomadaires (12 dernières semaines)
       const weeks: WeeklySignup[] = [];
@@ -287,5 +214,5 @@ export function useDashboardData(): DashboardData {
     fetchAll();
   }, []);
 
-  return { loading, stats, actionCards, lateCards, activity, weeklySignups, deptData };
+  return { loading, stats, activity, weeklySignups, deptData };
 }

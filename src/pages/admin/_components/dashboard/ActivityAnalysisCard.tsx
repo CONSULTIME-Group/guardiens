@@ -2,11 +2,13 @@
  * ActivityAnalysisCard : analyse IA de l'activité admin (résumé + actions
  * suggérées). Chargée depuis `admin_activity_analysis` via l'edge function
  * `admin-activity-analysis`. Rafraîchissement manuel uniquement.
+ *
+ * Les chiffres affichés proviennent du snapshot JSONB persisté avec l'analyse
+ * (admin_dashboard_snapshot), jamais extraits du texte généré.
  */
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { formatDistanceToNow } from "date-fns";
-import { fr } from "date-fns/locale";
+import { format } from "date-fns";
 import { Loader2, Sparkles, RefreshCw } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -22,10 +24,25 @@ interface ActionItem {
   priority: Priority;
   link: string;
 }
+interface SnapshotKpis {
+  total_users?: number;
+  owners?: number;
+  sitters?: number;
+  new_this_week?: number;
+  active_listings?: number;
+  ongoing_sits?: number;
+  reviews_count?: number;
+  reviews_avg?: number;
+}
+interface AnalysisSnapshot {
+  kpis?: SnapshotKpis;
+}
 interface Analysis {
   analysis: string;
   actions: ActionItem[];
   generated_at: string;
+  snapshot: AnalysisSnapshot | null;
+  snapshot_at: string | null;
 }
 
 const PRIORITY_VARIANT: Record<Priority, "destructive" | "default" | "secondary"> = {
@@ -39,6 +56,11 @@ const PRIORITY_LABEL: Record<Priority, string> = {
   moyenne: "Priorité moyenne",
   basse: "Priorité basse",
 };
+
+const STALE_THRESHOLD_MS = 24 * 60 * 60 * 1000;
+
+const formatKpiValue = (value: number | undefined) =>
+  typeof value === "number" ? value.toLocaleString("fr-FR") : "·";
 
 export function ActivityAnalysisCard() {
   const navigate = useNavigate();
@@ -74,6 +96,14 @@ export function ActivityAnalysisCard() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // Horodatage des chiffres : celui du snapshot persisté, repli sur la date
+  // de génération pour les analyses antérieures à la persistance.
+  const figuresAt = analysis ? (analysis.snapshot_at ?? analysis.generated_at) : null;
+  const isStale = figuresAt
+    ? Date.now() - new Date(figuresAt).getTime() > STALE_THRESHOLD_MS
+    : false;
+  const kpis = analysis?.snapshot?.kpis ?? null;
+
   return (
     <Card>
       <CardHeader className="flex flex-row items-start justify-between gap-4 space-y-0">
@@ -82,9 +112,9 @@ export function ActivityAnalysisCard() {
             <Sparkles className="h-5 w-5 text-primary" />
             Analyse IA de l'activité
           </CardTitle>
-          {analysis && (
+          {analysis && figuresAt && (
             <p className="text-xs text-muted-foreground">
-              Généré il y a {formatDistanceToNow(new Date(analysis.generated_at), { locale: fr })}
+              Chiffres arrêtés au {format(new Date(figuresAt), "dd/MM/yyyy 'à' HH'h'mm")}
             </p>
           )}
         </div>
@@ -127,9 +157,37 @@ export function ActivityAnalysisCard() {
           </div>
         ) : (
           <>
+            {isStale && (
+              <p className="rounded-lg border border-border bg-muted/40 px-3 py-2 text-xs text-muted-foreground">
+                Analyse basée sur des chiffres de plus de 24 h. Rafraîchir pour actualiser.
+              </p>
+            )}
+
             <p className="text-sm leading-relaxed text-foreground whitespace-pre-line">
               {analysis.analysis}
             </p>
+
+            {kpis && (
+              <dl className="grid grid-cols-2 sm:grid-cols-4 gap-x-4 gap-y-3 rounded-lg border border-border bg-muted/30 p-4">
+                {([
+                  { label: "Inscrits", value: kpis.total_users },
+                  { label: "Propriétaires", value: kpis.owners },
+                  { label: "Gardiens", value: kpis.sitters },
+                  { label: "Nouveaux (7 j)", value: kpis.new_this_week },
+                  { label: "Annonces actives", value: kpis.active_listings },
+                  { label: "Gardes en cours", value: kpis.ongoing_sits },
+                  { label: "Avis publiés", value: kpis.reviews_count },
+                  { label: "Note moyenne", value: kpis.reviews_avg },
+                ] as const).map((kpi) => (
+                  <div key={kpi.label}>
+                    <dt className="text-xs text-muted-foreground">{kpi.label}</dt>
+                    <dd className="text-sm font-semibold text-foreground">
+                      {formatKpiValue(kpi.value)}
+                    </dd>
+                  </div>
+                ))}
+              </dl>
+            )}
 
             {analysis.actions.length > 0 && (
               <div className="space-y-3">
