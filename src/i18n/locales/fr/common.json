@@ -46,7 +46,7 @@
       "guide_city": "Guide {{city}}",
       "house_sitting_city": "House-sitting {{city}}"
     },
-    "tagline": "House-sitting de proximité",
+    "tagline": "House-sitting",
     "version": "Guardiens · Version bêta · {{year}}",
     "legal": {
       "cgu": "CGU",
@@ -153,7 +153,7 @@
       "need_footer": "Un service contre un service. C'est le pari.",
       "offer_title": "« Je peux donner un peu de mon temps »",
       "offer_text": "Vous savez tailler les rosiers. Vous adorez les chiens. Vous avez deux heures samedi matin. Proposez, et vivez ce que vous n'auriez jamais vécu sans cette rencontre.",
-      "offer_footer": "C'est comme ça qu'un tissu se retisse.",
+      "offer_footer": "C'est comme ça qu'un tissu social se retisse.",
       "seen_this_week": "Quelques échanges vus sur Guardiens cette semaine",
       "examples": {
         "water_plants": "Arroser les plantes",
@@ -978,7 +978,7 @@
   },
   "login_page": {
     "meta_title": "Connexion, guardiens",
-    "panel_title": "L'entraide locale, retrouvée",
+    "panel_title": "L'entraide, retrouvée",
     "panel_tagline": "Un coup de main, un lien de confiance.",
     "panel_description": "Un gardien près de chez vous veille sur votre maison et vos animaux. Et entre gens du coin, on ose à nouveau demander, et proposer un coup de main.",
     "welcome_back": "Content de vous revoir",
