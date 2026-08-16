@@ -305,7 +305,8 @@ export type EventType =
   | "experience_photo_upload_failed"             // Animaux gardés par le passé (StepExperience)
   | "pet_photo_upload_failed"                    // Photo animal (PetForm, OwnerStepAnimals)
   | "message_photo_upload_failed"                // Photo envoyée en messagerie (Messages)
-  | "mission_photo_upload_failed";               // Photo de petite mission (MissionPhotoUpload)
+  | "mission_photo_upload_failed"                // Photo de petite mission (MissionPhotoUpload)
+  | "article_cover_upload_failed";               // Couverture d'article (ArticleEditor)
 
 
 

@@ -10,7 +10,10 @@ import { Switch } from "@/components/ui/switch";
 import { ArrowLeft, Sparkles, Loader2, ImagePlus, X } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { toast } from "sonner";
+import { useTranslation } from "react-i18next";
 import { slugify } from "@/lib/normalize";
+import { compressArticleCoverFile } from "@/lib/compressImage";
+import { trackEvent } from "@/lib/analytics";
 
 const ArticleEditor = () => {
   const navigate = useNavigate();
@@ -141,17 +144,34 @@ const ArticleEditor = () => {
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    const ext = file.name.split(".").pop();
+    const isImage = file.type.startsWith("image/") || /\.(heic|heif)$/i.test(file.name);
+    if (!isImage) {
+      void trackEvent("article_cover_upload_failed", {
+        metadata: { ext: file.name.split(".").pop()?.toLowerCase() || "unknown", size_kb: Math.round(file.size / 1024) },
+      });
+      toast.error(t("upload.photo_failed"));
+      return;
+    }
     const { data: authData } = await supabase.auth.getUser();
     const uid = authData?.user?.id;
     if (!uid) { toast.error("Session expirée"); return; }
-    // Le premier segment DOIT etre l'identifiant utilisateur (regles de securite du stockage).
-    const path = `${uid}/articles/${Date.now()}.${ext}`;
-    const { error } = await supabase.storage.from("property-photos").upload(path, file);
-    if (error) { toast.error("Erreur upload"); return; }
-    const { data: urlData } = supabase.storage.from("property-photos").getPublicUrl(path);
-    updateField("cover_image_url", urlData.publicUrl);
-    toast.success("Image uploadée");
+    try {
+      // Compression avant envoi avec repli dégradé : le brut n'est jamais stocké.
+      const compressed = await compressArticleCoverFile(file);
+      const ext = compressed.name.split(".").pop() || "webp";
+      // Le premier segment DOIT etre l'identifiant utilisateur (regles de securite du stockage).
+      const path = `${uid}/articles/${Date.now()}.${ext}`;
+      const { error } = await supabase.storage.from("property-photos").upload(path, compressed);
+      if (error) throw error;
+      const { data: urlData } = supabase.storage.from("property-photos").getPublicUrl(path);
+      updateField("cover_image_url", urlData.publicUrl);
+      toast.success("Image uploadée");
+    } catch {
+      void trackEvent("article_cover_upload_failed", {
+        metadata: { ext: file.name.split(".").pop()?.toLowerCase() || "unknown", size_kb: Math.round(file.size / 1024) },
+      });
+      toast.error(t("upload.photo_failed"));
+    }
   };
 
   return (
