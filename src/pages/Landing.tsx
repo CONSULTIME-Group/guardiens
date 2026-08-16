@@ -218,11 +218,16 @@ const Landing = () => {
 
             <div className="flex flex-col sm:flex-row sm:flex-wrap sm:items-center gap-2 sm:gap-3 animate-hero-fade-up animation-delay-900">
 
+              {/* Arbitrage du 16/08/2026 : en session gardien, « Trouver une
+                  garde » est promu en action principale et « Proposer un coup
+                  de main » redescend en secondaire. États visiteur et
+                  propriétaire inchangés, H1 verrouillé sans variante. */}
               <button
                 onClick={() => {
-                  trackEvent("cta_proprio_clicked", { metadata: { location: "hero" } });
+                  const sitterSession = isMember && !memberIsOwner;
+                  trackEvent(sitterSession ? "cta_sitter_clicked" : "cta_proprio_clicked", { metadata: { location: "hero" } });
                   if (isMember) {
-                    navigate(memberIsOwner ? "/sits/create" : "/petites-missions/creer?type=offre");
+                    navigate(memberIsOwner ? "/sits/create" : "/search");
                     return;
                   }
                   navigate("/inscription?role=owner");
@@ -233,17 +238,26 @@ const Landing = () => {
                 {isMember
                   ? memberIsOwner
                     ? t("landing.hero.cta_member_owner", "Publier une annonce")
-                    : t("landing.hero.cta_member_sitter", "Proposer un coup de main")
+                    : t("landing.hero.cta_member_search", "Trouver une garde")
                   : t("landing.hero.cta_owner")}
               </button>
               <button
                 onClick={() => {
-                  trackEvent("cta_sitter_clicked", { metadata: { location: "hero" } });
-                  navigate(isMember ? "/search" : "/inscription?role=sitter");
+                  const sitterSession = isMember && !memberIsOwner;
+                  trackEvent(sitterSession ? "cta_aid_clicked" : "cta_sitter_clicked", { metadata: { location: "hero" } });
+                  if (isMember) {
+                    navigate(memberIsOwner ? "/search" : "/petites-missions/creer?type=offre");
+                    return;
+                  }
+                  navigate("/inscription?role=sitter");
                 }}
                 className="font-body text-sm font-medium tracking-wide rounded-full px-7 py-3 bg-transparent text-white border border-white/60 hover:bg-white/10 transition-all duration-200"
               >
-                {isMember ? t("landing.hero.cta_member_search", "Trouver une garde") : t("landing.hero.cta_sitter")}
+                {isMember
+                  ? memberIsOwner
+                    ? t("landing.hero.cta_member_search", "Trouver une garde")
+                    : t("landing.hero.cta_member_sitter", "Proposer un coup de main")
+                  : t("landing.hero.cta_sitter")}
               </button>
               {/* Tertiaire entraide : même rangée que les boutons, traitement texte
                   souligné sans fond ni bordure pour préserver la hiérarchie
