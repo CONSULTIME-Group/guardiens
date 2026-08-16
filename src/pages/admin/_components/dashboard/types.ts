@@ -1,5 +1,3 @@
-import type { ElementType } from "react";
-
 export interface Stats {
   totalUsers: number;
   owners: number;
@@ -20,13 +18,6 @@ export interface ActivityItem {
   time: string;
   link: string;
   type: "inscription" | "annonce" | "avis" | "candidature" | "publication" | "depublication" | "suppression";
-}
-
-export interface ActionCard {
-  label: string;
-  count: number;
-  link: string;
-  icon: ElementType;
 }
 
 export interface WeeklySignup {

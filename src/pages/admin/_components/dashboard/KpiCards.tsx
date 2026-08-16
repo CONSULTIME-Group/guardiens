@@ -5,6 +5,7 @@ import {
 } from "lucide-react";
 import type { Stats } from "./types";
 import { MONTHLY_SUBSCRIPTION_EUR } from "./types";
+import { PRICING_IS_ACTIVE } from "@/config/pricing";
 
 interface Props {
   stats: Stats;
@@ -47,13 +48,15 @@ export const KpiCards = ({ stats }: Props) => {
       icon: Star,
       link: "/admin/reviews",
     },
-    {
+    // Carte conservée pour la réactivation du pricing : non rendue tant que
+    // PRICING_IS_ACTIVE est false, la grille se recompose sans trou.
+    ...(PRICING_IS_ACTIVE ? [{
       title: "Revenus mensuels estimés",
       value: stats.monthRevenue.toLocaleString("fr-FR", { style: "currency", currency: "EUR", maximumFractionDigits: 0 }),
       subtitle: `Abonnements actifs × ${MONTHLY_SUBSCRIPTION_EUR.toLocaleString("fr-FR", { style: "currency", currency: "EUR" })}`,
       icon: CreditCard,
       link: "/admin/subscriptions",
-    },
+    }] : []),
     {
       title: "Membres hors France",
       value: stats.intlMembers,
