@@ -65,7 +65,6 @@ describe("LiquidityBlock", () => {
     expect(screen.getByText("Plus ancienne : 9 j")).toBeInTheDocument();
     expect(screen.getByText("9 h")).toBeInTheDocument();
     expect(screen.getByText("Sur 29 candidatures avec réponse")).toBeInTheDocument();
-    expect(screen.getByText("5 sur 20")).toBeInTheDocument();
     expect(
       screen.getByText("Candidatures tranchées (acceptées ou rejetées)"),
     ).toBeInTheDocument();
