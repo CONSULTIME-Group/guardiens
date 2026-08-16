@@ -553,6 +553,14 @@ export default function AdminEmailHealth() {
           </CardContent>
         </Card>
       </section>
+
+      {/* 5. Rappels onboarding (déplacé de la vue d'ensemble) */}
+      <section className="space-y-3">
+        <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wide">
+          Rappels onboarding
+        </h2>
+        <OnboardingReminderCard />
+      </section>
     </div>
   );
 }
