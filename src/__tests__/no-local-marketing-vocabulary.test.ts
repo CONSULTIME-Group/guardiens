@@ -92,19 +92,7 @@ describe("vocabulaire « local » proscrit sur landing, connexion et urgence", (
     });
   }
 
-  it("les exceptions existent toujours (sinon la liste se périmètre)", () => {
-    for (const lng of LANGS) {
-      const flat = flatten(
-        JSON.parse(
-          fs.readFileSync(path.join(LOCALES_DIR, lng, "common.json"), "utf8"),
-        ),
-      );
-      for (const key of Object.keys(EXCEPTIONS)) {
-        // Une exception peut ne pas exister dans une langue donnée : on
-        // vérifie seulement qu'au moins une langue la porte encore.
-      }
-      void flat;
-    }
+  it("les exceptions existent toujours en FR (sinon la liste se périmètre)", () => {
     const fr = flatten(
       JSON.parse(
         fs.readFileSync(path.join(LOCALES_DIR, "fr", "common.json"), "utf8"),
