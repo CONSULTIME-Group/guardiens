@@ -85,7 +85,6 @@ export function ActivityAnalysisCard() {
   const isStale = figuresAt
     ? Date.now() - new Date(figuresAt).getTime() > STALE_THRESHOLD_MS
     : false;
-  const kpis = analysis?.snapshot?.kpis ?? null;
 
   return (
     <Card>
