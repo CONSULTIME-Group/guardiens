@@ -59,8 +59,11 @@ const { siteUrl: SITE_URL, routes: STATIC_ROUTES } = loadStaticRoutes();
 // via le flag `index`. Toute incohérence est impossible par construction.
 const staticPages = STATIC_ROUTES.filter((r) => r.indexable);
 
+// Villes "statiques" (src/data/cities.ts) : pages riches garanties, toujours servies.
+// Ne jamais ajouter un slug sans page réelle : toute entrée doit être servie par
+// CityPage (CITIES) ou exister en seo_city_pages, sinon elle part en 404.
 const cityLandingPages = [
-  "annecy", "lyon", "grenoble", "caluire-et-cuire", "chambery", "aura",
+  "annecy", "lyon", "grenoble", "caluire-et-cuire", "chambery",
 ];
 
 const SUPABASE_URL = process.env.VITE_SUPABASE_URL || "https://erhccyqevdyevpyctsjj.supabase.co";
