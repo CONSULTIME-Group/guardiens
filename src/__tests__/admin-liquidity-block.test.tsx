@@ -53,7 +53,9 @@ describe("LiquidityBlock", () => {
   it("affiche chaque indicateur avec son dénominateur", async () => {
     mocks.rpc.mockResolvedValue({ data: REAL_SNAPSHOT, error: null });
     renderBlock();
-    expect(await screen.findByText("Liquidité de la place de marché")).toBeInTheDocument();
+    // Le titre s'affiche avant la fin du chargement : on attend une donnée.
+    expect(await screen.findByText("5 sur 20")).toBeInTheDocument();
+    expect(screen.getByText("Liquidité de la place de marché")).toBeInTheDocument();
     expect(screen.getByText(/Fenêtre glissante de 90 jours/)).toBeInTheDocument();
     expect(screen.getByText("8")).toBeInTheDocument();
     expect(
