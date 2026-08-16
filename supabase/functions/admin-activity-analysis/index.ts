@@ -113,13 +113,17 @@ async function callAI(signals: unknown): Promise<{ analysis: string; actions: Ac
     parsed = match ? JSON.parse(match[0]) : {};
   }
 
-  const analysis = (parsed.analysis ?? '').replace(/—/g, ',');
+  // Filet de sécurité ponctuation : le prompt interdit les deux tirets, on
+  // neutralise toute occurrence résiduelle (cadratin et demi-cadratin).
+  const clean = (s: string) => s.replace(/[—–]/g, ',');
+  const analysis = clean(parsed.analysis ?? '');
   const actions = Array.isArray(parsed.actions)
     ? parsed.actions.slice(0, 6).map((a) => ({
-        title: String(a?.title ?? '').replace(/—/g, ','),
-        why: String(a?.why ?? '').replace(/—/g, ','),
+        title: clean(String(a?.title ?? '')),
+        why: clean(String(a?.why ?? '')),
         priority: (['haute', 'moyenne', 'basse'].includes(a?.priority) ? a.priority : 'moyenne') as ActionItem['priority'],
         link: String(a?.link ?? '/admin'),
+        topic: (ALLOWED_TOPICS as readonly string[]).includes(a?.topic) ? a.topic : 'autre',
       }))
     : [];
 
