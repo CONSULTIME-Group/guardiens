@@ -42,7 +42,7 @@ export const ActivityAnalysisCard = ({ analysis, loading, refreshing, onRefresh 
             <Skeleton className="h-4 w-5/6" />
             <Skeleton className="h-4 w-4/6" />
           </div>
-        ) : !analysis ? (
+        ) : !analysis || typeof analysis.analysis !== "string" ? (
           <p className="text-sm text-muted-foreground">
             Aucune analyse disponible. Lancez un rafraîchissement pour générer la première.
           </p>
