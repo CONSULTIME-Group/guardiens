@@ -544,16 +544,17 @@ const PublicSitDetail = () => {
  .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
  .replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
  const origin = canonicalUrl.replace(/\/annonces\/.*$/, "");
+ // Le 2e niveau de breadcrumb pointe vers une page silo /house-sitting/<ville>
+ // qui n'existe que pour les villes FR réellement servies (villes statiques ou
+ // seo_city_pages publiées). On l'omet sinon pour éviter une URL en 404.
+ const showCityBreadcrumb = Boolean(hasCityPage && citySlug && (!ownerCountry || ownerCountry === "FR"));
  const breadcrumbLd = {
  "@context": "https://schema.org",
  "@type": "BreadcrumbList",
  itemListElement: [
  { "@type": "ListItem", position: 1, name: "Accueil", item: `${origin}/` },
-       // Le 2e niveau de breadcrumb pointe vers une page silo /house-sitting/<ville>
-       // qui n'existe que pour les villes FR (silos SEO Lyon/Annecy/Grenoble + autres CityPages).
-       // On l'omet pour les annonces internationales pour éviter une URL en 404.
-       ...(citySlug && (!ownerCountry || ownerCountry === "FR") ? [{ "@type": "ListItem", position: 2, name: cityForTitle, item: `${origin}/house-sitting/${citySlug}` }] : []),
-       { "@type": "ListItem", position: (citySlug && (!ownerCountry || ownerCountry === "FR")) ? 3 : 2, name: sit.title || "Annonce de garde", item: canonicalUrl },
+       ...(showCityBreadcrumb ? [{ "@type": "ListItem", position: 2, name: cityForTitle, item: `${origin}/house-sitting/${citySlug}` }] : []),
+       { "@type": "ListItem", position: showCityBreadcrumb ? 3 : 2, name: sit.title || "Annonce de garde", item: canonicalUrl },
  ],
  };
 
