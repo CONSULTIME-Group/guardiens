@@ -149,28 +149,6 @@ export function ActivityAnalysisCard() {
               {analysis.analysis}
             </p>
 
-            {kpis && (
-              <dl className="grid grid-cols-2 sm:grid-cols-4 gap-x-4 gap-y-3 rounded-lg border border-border bg-muted/30 p-4">
-                {([
-                  { label: "Inscrits", value: kpis.total_users },
-                  { label: "Propriétaires", value: kpis.owners },
-                  { label: "Gardiens", value: kpis.sitters },
-                  { label: "Nouveaux (7 j)", value: kpis.new_this_week },
-                  { label: "Annonces actives", value: kpis.active_listings },
-                  { label: "Gardes en cours", value: kpis.ongoing_sits },
-                  { label: "Avis publiés", value: kpis.reviews_count },
-                  { label: "Note moyenne", value: kpis.reviews_avg },
-                ] as const).map((kpi) => (
-                  <div key={kpi.label}>
-                    <dt className="text-xs text-muted-foreground">{kpi.label}</dt>
-                    <dd className="text-sm font-semibold text-foreground">
-                      {formatKpiValue(kpi.value)}
-                    </dd>
-                  </div>
-                ))}
-              </dl>
-            )}
-
             {analysis.actions.length > 0 && (
               <div className="space-y-3">
                 <h3 className="text-sm font-semibold text-foreground">
