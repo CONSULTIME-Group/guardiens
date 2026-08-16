@@ -204,7 +204,9 @@ const SitDetail = () => {
       setOwnerGallery((galleryRes.data || []).map((g: any) => ({ id: g.id, photo_url: g.photo_url })));
 
       if (effectiveOwner?.city) {
-        geocodeCity(effectiveOwner.city).then((result) => {
+        // Le pays de l'annonce borne le géocodage : sans lui, la ville d'un
+        // propriétaire établi hors France serait cherchée en France.
+        geocodeCity(effectiveOwner.city, sitCountry).then((result) => {
           if (result) setCoords({ lat: result.lat, lng: result.lng });
         });
       }

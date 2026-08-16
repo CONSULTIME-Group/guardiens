@@ -9,9 +9,11 @@ import { isIdentityComplete } from "@/lib/setupState";
 
 export interface SetupStepProps {
   userId: string;
-  /** Prénom et code postal actuels du profil, chaînes vides si absents. */
+  /** Prénom, code postal et pays actuels du profil, chaînes vides si absents. */
   firstName: string;
   postalCode: string;
+  /** Code ISO 2 lettres, "FR" par défaut. */
+  country: string;
   propertyId: string | null;
   petCount: number;
   photos: string[];
@@ -22,7 +24,7 @@ export interface SetupStepProps {
   photoDone: boolean;
   /** Libellés exacts de ce qui reste à renseigner, source unique côté parcours. */
   missingLabels: string[];
-  onIdentitySaved: (identity: { firstName: string; postalCode: string }) => void;
+  onIdentitySaved: (identity: { firstName: string; postalCode: string; country: string }) => void;
   onPropertySaved: (property: InlineHousingResult) => void;
   onPetsChanged: (pets: any[]) => void;
   onPhotoUploaded: (url: string) => void;
@@ -64,14 +66,14 @@ const Block = ({
  * Première étape éditable du parcours : les éléments indispensables à une
  * annonce publiable se remplissent ici, sans quitter la page ni perdre la
  * saisie déjà commencée. Les animaux sont recommandés, jamais exigés.
- * L'identité (prénom, code postal) est collectée ici quand elle manque au
- * profil : elle porte la géolocalisation de l'annonce.
+ * L'identité (prénom, code postal, pays) est collectée ici quand elle
+ * manque au profil : elle porte la géolocalisation de l'annonce.
  */
 const CreateSitSetupStep = ({
-  userId, firstName, postalCode, propertyId, petCount, photos, photoDone, missingLabels,
+  userId, firstName, postalCode, country, propertyId, petCount, photos, photoDone, missingLabels,
   onIdentitySaved, onPropertySaved, onPetsChanged, onPhotoUploaded, onContinue, onBack, onQuit,
 }: SetupStepProps) => {
-  const identityDone = isIdentityComplete(firstName, postalCode);
+  const identityDone = isIdentityComplete(firstName, postalCode, country);
   const housingDone = !!propertyId;
   const petsDone = petCount > 0;
   const allDone = missingLabels.length === 0;
@@ -114,6 +116,7 @@ const CreateSitSetupStep = ({
               userId={userId}
               initialFirstName={firstName}
               initialPostalCode={postalCode}
+              initialCountry={country}
               onSaved={onIdentitySaved}
             />
           </>

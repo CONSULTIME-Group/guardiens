@@ -103,3 +103,40 @@ describe("identité (tunnel post-inscription propriétaire, lot 1)", () => {
     expect(isIdentityComplete("Marie", "")).toBe(false);
   });
 });
+
+describe("code postal conditionné au pays (règle du 16/08/2026)", () => {
+  it("accepte un code postal belge à 4 chiffres", () => {
+    expect(isIdentityComplete("Marie", "1000", "BE")).toBe(true);
+  });
+
+  it("accepte un code postal canadien alphanumérique", () => {
+    expect(isIdentityComplete("Marie", "K1A 0B1", "CA")).toBe(true);
+  });
+
+  it("accepte un code postal britannique alphanumérique", () => {
+    expect(isIdentityComplete("Marie", "SW1A 1AA", "GB")).toBe(true);
+  });
+
+  it("refuse toujours un code postal français à 4 chiffres", () => {
+    expect(isIdentityComplete("Marie", "6900", "FR")).toBe(false);
+    expect(isIdentityComplete("Marie", "69001", "FR")).toBe(true);
+  });
+
+  it("traite un pays non renseigné comme la France, format strict", () => {
+    expect(isIdentityComplete("Marie", "6900", null)).toBe(false);
+    expect(isIdentityComplete("Marie", "6900")).toBe(false);
+    expect(isIdentityComplete("Marie", "69001", undefined)).toBe(true);
+  });
+
+  it("exige un code postal même hors France, dans des bornes permissives", () => {
+    expect(isIdentityComplete("Marie", "", "BE")).toBe(false);
+    expect(isIdentityComplete("Marie", "1", "BE")).toBe(false);
+    expect(isIdentityComplete("Marie", "A".repeat(13), "CA")).toBe(false);
+    expect(isIdentityComplete("Marie", "K1A_0B1", "CA")).toBe(false);
+  });
+
+  it("est insensible à la casse du code pays", () => {
+    expect(isIdentityComplete("Marie", "6900", "fr")).toBe(false);
+    expect(isIdentityComplete("Marie", "1000", "be")).toBe(true);
+  });
+});

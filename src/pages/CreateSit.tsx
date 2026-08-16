@@ -420,10 +420,11 @@ const CreateSit = () => {
   const [profileCompletion, setProfileCompletion] = useState(0);
   const [ownerCity, setOwnerCity] = useState<string>("");
   const [ownerBio, setOwnerBio] = useState<string>("");
-  // Identité minimale (prénom, code postal) collectée sur place quand elle
-  // manque au profil, et date d'inscription conservée pour sit_first_publish.
+  // Identité minimale (prénom, code postal, pays) collectée sur place quand
+  // elle manque au profil, et date d'inscription pour sit_first_publish.
   const [profileFirstName, setProfileFirstName] = useState<string>("");
   const [profilePostalCode, setProfilePostalCode] = useState<string>("");
+  const [profileCountry, setProfileCountry] = useState<string>("FR");
   const [profileCreatedAt, setProfileCreatedAt] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [publishing, setPublishing] = useState(false);
@@ -450,7 +451,7 @@ const CreateSit = () => {
     (async () => {
       try {
         const { geocodeCity } = await import("@/lib/geocode");
-        const coords = await geocodeCity(target);
+        const coords = await geocodeCity(target, sitCountry);
         if (cancelled || !coords) return;
         const { data } = await supabase.rpc("count_eligible_sitters", {
           p_lat: coords.lat,
@@ -463,7 +464,7 @@ const CreateSit = () => {
       }
     })();
     return () => { cancelled = true; };
-  }, [previewOpen, sitCity, ownerCity]);
+  }, [previewOpen, sitCity, ownerCity, sitCountry]);
   const [incompleteNudgeOpen, setIncompleteNudgeOpen] = useState(false);
   const incompleteNudgeSeenRef = useRef(false);
   const hasUserEditedRef = useRef(false);
@@ -651,7 +652,7 @@ const CreateSit = () => {
       const [propRes, ownerRes, profileRes, galleryRes] = await Promise.all([
         supabase.from("properties").select("*").eq("user_id", user.id).limit(1).maybeSingle(),
         supabase.from("owner_profiles").select("*").eq("user_id", user.id).maybeSingle(),
-        supabase.from("profiles").select("profile_completion, city, bio, first_name, postal_code, created_at").eq("id", user.id).single(),
+        supabase.from("profiles").select("profile_completion, city, bio, first_name, postal_code, country, created_at").eq("id", user.id).single(),
         supabase.from("owner_gallery").select("photo_url, category").eq("user_id", user.id).order("position", { ascending: true }).limit(30),
       ]);
 
@@ -666,6 +667,15 @@ const CreateSit = () => {
       setProfileFirstName((profileRes.data as any)?.first_name || "");
       setProfilePostalCode((profileRes.data as any)?.postal_code || "");
       setProfileCreatedAt((profileRes.data as any)?.created_at ?? null);
+      const profileCountryCode = ((profileRes.data as any)?.country || "FR") as string;
+      setProfileCountry(profileCountryCode);
+      // Une annonce créée par un membre établi hors France part de son pays :
+      // sinon elle serait géocodée comme française et invisible dans la
+      // recherche autour de chez lui. Brouillon repris ou copie d'annonce :
+      // le pays déjà enregistré sur l'annonce prime, on n'y touche pas.
+      if (profileCountryCode !== "FR" && !draftIdParam && !fromSitId) {
+        setSitCountry((prev) => (prev === "FR" ? profileCountryCode : prev));
+      }
       // Couverture = le lieu, jamais un animal : la galerie est réordonnée
       // selon la priorité produit (logement, jardin, puis quartier, etc.).
       setOwnerPhotos(sortForCover((galleryRes.data || []) as any[]).map((g: any) => g.photo_url));
@@ -1527,7 +1537,7 @@ const CreateSit = () => {
     hasProperty: !!property,
     hasPets: pets.length > 0,
     hasPhoto,
-    hasIdentity: isIdentityComplete(profileFirstName, profilePostalCode),
+    hasIdentity: isIdentityComplete(profileFirstName, profilePostalCode, profileCountry),
     entered: setupEntered,
     dismissed: setupDismissed,
     voluntary: setupVoluntary,
@@ -1646,11 +1656,16 @@ const CreateSit = () => {
     navigate("/dashboard");
   };
 
-  // Prénom et code postal enregistrés depuis l'écran de mise en route :
-  // l'état local suit l'écriture profil pour débloquer le bouton Continuer.
-  const handleIdentitySaved = ({ firstName, postalCode }: { firstName: string; postalCode: string }) => {
+  // Prénom, code postal et pays enregistrés depuis l'écran de mise en
+  // route : l'état local suit l'écriture profil pour débloquer Continuer.
+  const handleIdentitySaved = ({ firstName, postalCode, country }: { firstName: string; postalCode: string; country: string }) => {
     setProfileFirstName(firstName);
     setProfilePostalCode(postalCode);
+    setProfileCountry(country);
+    // Le pays du profil amorce le pays de l'annonce tant que celui-ci est
+    // resté au défaut : une annonce hors France doit être géocodée dans
+    // son pays, sinon elle reste invisible dans la recherche.
+    if (country !== "FR") setSitCountry((prev) => (prev === "FR" ? country : prev));
   };
 
 
@@ -1675,6 +1690,7 @@ const CreateSit = () => {
             userId={user.id}
             firstName={profileFirstName}
             postalCode={profilePostalCode}
+            country={profileCountry}
             onIdentitySaved={handleIdentitySaved}
             propertyId={property?.id ?? null}
             petCount={pets.length}

@@ -8,8 +8,8 @@
  * la destination finale, transportée par le paramètre redirect.
  *
  * Une redirection explicite (?redirect=, déjà assainie par sanitizeRedirect)
- * reste toujours prioritaire. Le rôle « both » garde le tableau de bord :
- * choix conservateur, le tunnel ne s'impose qu'au rôle owner explicite.
+ * reste toujours prioritaire. Le rôle « both » entre dans le tunnel depuis
+ * le 16/08/2026 : un polyvalent est aussi un propriétaire.
  */
 
 export type SignupRole = "owner" | "sitter" | "both" | "pro";
@@ -23,6 +23,9 @@ export function resolvePostAuthTarget(
 ): string {
   if (role === "pro") return "/pros/inscription";
   if (redirectTarget) return redirectTarget;
-  if (role === "owner") return OWNER_SIGNUP_TUNNEL_TARGET;
+  // Un polyvalent (both) est aussi un propriétaire : 93 comptes concernés
+  // en base au 16/08/2026. Le tunnel de création d'annonce s'impose à lui
+  // comme au rôle owner explicite.
+  if (role === "owner" || role === "both") return OWNER_SIGNUP_TUNNEL_TARGET;
   return "/dashboard";
 }
