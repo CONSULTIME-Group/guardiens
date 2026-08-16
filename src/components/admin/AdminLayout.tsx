@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { Outlet, Navigate, NavLink, useNavigate } from "react-router-dom";
+import { Outlet, Navigate, NavLink, useNavigate, useLocation } from "react-router-dom";
+import PageMeta from "@/components/PageMeta";
 import { AdminSidebar, adminNavGroups_export, BADGE_TITLES } from "./AdminSidebar";
 import { useAdminBadges } from "@/hooks/useAdminBadges";
 import { useAdmin } from "@/hooks/useAdmin";
@@ -7,10 +8,38 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Menu, X, ArrowLeft, LogOut } from "lucide-react";
 import { cn } from "@/lib/utils";
 
+/**
+ * Titres d'onglet pour les routes admin absentes de la sidebar
+ * (outils techniques et pages dynamiques).
+ */
+const ADMIN_TITLE_FALLBACKS: Record<string, string> = {
+  "/admin/seo-debug": "SEO Debug",
+  "/admin/build-info": "Build Info",
+  "/admin/audit-tarifs": "Audit des tarifs",
+  "/admin/prerender": "Prerender",
+  "/admin/articles/refresh-post-pivot": "Actualisation des articles",
+  "/admin/lifecycle": "Lifecycle",
+  "/admin/relance-incomplet": "Relance profils incomplets",
+  "/admin/test-sitter-fields": "Test champs gardien",
+};
+
+const resolveAdminTitle = (pathname: string): string => {
+  const path = pathname.replace(/\/+$/, "") || "/admin";
+  const navLabel = adminNavGroups_export
+    .flatMap((group) => group.items)
+    .find((item) => item.to === path)?.label;
+  if (navLabel) return navLabel;
+  if (ADMIN_TITLE_FALLBACKS[path]) return ADMIN_TITLE_FALLBACKS[path];
+  if (path.startsWith("/admin/articles/")) return "Édition d'article";
+  return "Administration";
+};
+
 export const AdminLayout = () => {
   const { isAuthenticated, loading: authLoading, logout } = useAuth();
   const { isAdmin, loading: adminLoading } = useAdmin();
   const navigate = useNavigate();
+  const location = useLocation();
+  const adminTitle = resolveAdminTitle(location.pathname);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const badges = useAdminBadges() as unknown as Record<string, number>;
 
@@ -27,6 +56,12 @@ export const AdminLayout = () => {
 
   return (
     <div className="flex min-h-screen bg-background">
+      <PageMeta
+        title={`${adminTitle} | Admin Guardiens`}
+        description={`${adminTitle} : administration Guardiens.`}
+        noindex={true}
+        nofollow={true}
+      />
       <AdminSidebar />
 
       {/* Mobile top bar */}

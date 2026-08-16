@@ -1,4 +1,3 @@
-import PageMeta from "@/components/PageMeta";
 import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 import DashboardSkeleton from "@/components/skeletons/DashboardSkeleton";
 import { useDashboardData } from "./_components/dashboard/useDashboardData";
@@ -33,13 +32,6 @@ const AdminOverview = () => {
 
   return (
     <div className="space-y-6 p-4 md:p-6 max-w-7xl mx-auto">
-      <PageMeta
-        title="Admin | Guardiens"
-        description="Tableau de bord d'administration Guardiens."
-        path="/admin"
-        noindex={true}
-        nofollow={true}
-      />
       <AdminPageHeader
         title="Vue d'ensemble"
         description="Vue d'ensemble de l'activité Guardiens : membres, annonces, gardes, tendances et signaux."

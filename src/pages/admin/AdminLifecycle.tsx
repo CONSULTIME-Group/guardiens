@@ -4,7 +4,6 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { supabase } from "@/integrations/supabase/client";
-import PageMeta from "@/components/PageMeta";
 import { useAdmin } from "@/hooks/useAdmin";
 import { Navigate } from "react-router-dom";
 
@@ -114,8 +113,6 @@ const AdminLifecycle = () => {
 
   return (
     <div className="min-w-0 max-w-7xl mx-auto px-4 py-6 md:py-10 space-y-6">
-      <PageMeta title="Lifecycle, pilotage des séquences" description="Dashboard admin lifecycle : séquences actives, taux de sortie, performance des templates email." noindex />
-
       <header className="flex flex-wrap items-end justify-between gap-3">
         <div>
           <h1 className="font-heading text-2xl md:text-3xl font-semibold">Lifecycle</h1>
