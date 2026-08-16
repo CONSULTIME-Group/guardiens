@@ -415,8 +415,8 @@ const OwnerSitView = ({
       title: "Annonce dépubliée",
       description:
         count > 0
-          ? `Archivée. ${count} candidature${count > 1 ? "s" : ""} en cours ${count > 1 ? "ont" : "a"} été clôturée${count > 1 ? "s" : ""}.`
-          : "Elle est archivée. Vous pouvez la republier quand vous voulez depuis l'onglet « Archivées ».",
+          ? `Repassée en brouillon. ${count} candidature${count > 1 ? "s" : ""} en cours ${count > 1 ? "ont" : "a"} été clôturée${count > 1 ? "s" : ""}.`
+          : "Elle est repassée en brouillon. Vous pouvez la republier quand vous voulez depuis l'onglet « Brouillons ».",
     });
     if (declinedCount > 0) {
       toast({
