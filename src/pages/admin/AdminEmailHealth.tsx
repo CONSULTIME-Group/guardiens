@@ -16,6 +16,7 @@ import { Link } from "react-router-dom";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { toast } from "sonner";
+import { OnboardingReminderCard } from "./_components/dashboard/OnboardingReminderCard";
 
 // ---------------------- Types ----------------------
 interface PipelineHealth {
