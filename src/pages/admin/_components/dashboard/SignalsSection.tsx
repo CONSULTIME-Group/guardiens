@@ -1,6 +1,9 @@
 import { useQuery } from "@tanstack/react-query";
-import { AlertTriangle, CheckCircle2 } from "lucide-react";
+import { Link } from "react-router-dom";
+import { AlertTriangle, CheckCircle2, Sparkles } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useFeatureFlag } from "@/hooks/useFeatureFlag";
@@ -22,9 +25,12 @@ import { GenericSignalCard } from "@/components/admin/signals/GenericSignalCard"
 import { GroupedSignalCard } from "@/components/admin/signals/GroupedSignalCard";
 import {
   groupSignals,
+  signalAdminLink,
   GROUP_THRESHOLD,
   type AdminSignalBase,
+  type SignalGroup,
 } from "@/components/admin/signals/signalGrouping";
+import type { SuggestedAction } from "./useActivityAnalysis";
 
 interface Snapshot {
   signals: AdminSignalBase[];
@@ -76,7 +82,74 @@ function renderSignal(s: AdminSignalBase) {
   return <GenericSignalCard signal={s} />;
 }
 
-export const SignalsSection = () => {
+type QueueEntry =
+  | { kind: "group"; group: SignalGroup }
+  | { kind: "signal"; signal: AdminSignalBase }
+  | { kind: "ai"; action: SuggestedAction };
+
+/**
+ * Priorité réelle : signal critique, action IA haute, signal avertissement,
+ * action IA moyenne, action IA basse. Le tri est stable : à priorité égale,
+ * l'ordre d'origine est conservé (signaux d'abord, suggestions IA ensuite).
+ */
+const rankOf = (entry: QueueEntry): number => {
+  if (entry.kind === "ai") {
+    return entry.action.priority === "haute" ? 1 : entry.action.priority === "moyenne" ? 3 : 4;
+  }
+  const severity = entry.kind === "group" ? entry.group.severity : entry.signal.severity;
+  return severity === "critical" ? 0 : 2;
+};
+
+/** Chemin normalisé d'un lien admin (sans requête ni slash final). */
+const linkPath = (href: string): string => {
+  try {
+    const u = new URL(href, "https://admin.local");
+    return u.pathname.replace(/\/+$/, "") || "/";
+  } catch {
+    return href;
+  }
+};
+
+const AI_PRIORITY_VARIANT: Record<SuggestedAction["priority"], "destructive" | "secondary" | "outline"> = {
+  haute: "destructive",
+  moyenne: "secondary",
+  basse: "outline",
+};
+
+/** Action suggérée par l'analyse IA, sans signal équivalent dans la file. */
+const AiActionCard = ({ action }: { action: SuggestedAction }) => (
+  <div className="rounded-lg border border-border p-3">
+    <div className="flex items-start justify-between gap-3">
+      <div className="min-w-0">
+        <Badge
+          variant={AI_PRIORITY_VARIANT[action.priority] ?? "outline"}
+          className="mb-1.5 text-[10px] uppercase tracking-wide"
+        >
+          <Sparkles className="h-3 w-3 mr-1" aria-hidden />
+          Priorité {action.priority}
+        </Badge>
+        <p className="text-sm font-medium text-foreground leading-snug">{action.title}</p>
+        <p className="text-xs text-muted-foreground mt-1 leading-relaxed">{action.why}</p>
+      </div>
+      <Button asChild variant="outline" size="sm" className="shrink-0">
+        <Link to={action.link}>Traiter</Link>
+      </Button>
+    </div>
+  </div>
+);
+
+interface Props {
+  aiActions: SuggestedAction[];
+  aiLoading: boolean;
+}
+
+/**
+ * File d'actions fusionnée : signaux admin_signals et actions suggérées par
+ * l'analyse IA, triés par priorité réelle. Une action IA dont la cible
+ * correspond à un signal existant est écartée : le signal porte l'action
+ * concrète, la suggestion IA n'est que descriptive.
+ */
+export const SignalsSection = ({ aiActions, aiLoading }: Props) => {
   const { enabled: flagEnabled, loading: flagLoading } = useFeatureFlag("admin_signals_active");
 
   const { data, isLoading, error } = useQuery<Snapshot>({
@@ -91,10 +164,26 @@ export const SignalsSection = () => {
   });
 
   if (flagLoading) return null;
-  if (!flagEnabled) return null;
 
-  const signals = (data?.signals ?? []).filter((s) => s.severity !== "info");
+  const signals = flagEnabled
+    ? (data?.signals ?? []).filter((s) => s.severity !== "info")
+    : [];
+
+  const signalPaths = new Set(signals.map((s) => linkPath(signalAdminLink(s))));
+  const dedupedAiActions = aiActions.filter((a) => !signalPaths.has(linkPath(a.link)));
+
   const groups = groupSignals(signals);
+  const signalEntries: QueueEntry[] = groups.flatMap((g): QueueEntry[] =>
+    g.items.length > GROUP_THRESHOLD
+      ? [{ kind: "group", group: g }]
+      : g.items.map((s) => ({ kind: "signal", signal: s })),
+  );
+  const queue: QueueEntry[] = [
+    ...signalEntries,
+    ...dedupedAiActions.map((a): QueueEntry => ({ kind: "ai", action: a })),
+  ].sort((a, b) => rankOf(a) - rankOf(b));
+
+  const loading = (flagEnabled && isLoading) || aiLoading;
 
   return (
     <Card>
@@ -107,37 +196,50 @@ export const SignalsSection = () => {
       <CardContent className="space-y-3">
         <OwnerActivationCampaignCard />
 
-        {isLoading ? (
+        {loading ? (
           <div className="space-y-2">
             <Skeleton className="h-14 rounded-lg" />
             <Skeleton className="h-14 rounded-lg" />
           </div>
-        ) : error ? (
-          <p className="text-sm text-destructive">
-            Chargement des signaux impossible. Réessayez plus tard.
-          </p>
-        ) : signals.length === 0 ? (
-          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            <CheckCircle2 className="h-4 w-4 text-success" aria-hidden />
-            Tout est calme, aucun signal ouvert.
-          </div>
         ) : (
-          <ul className="space-y-2">
-            {groups.map((g) =>
-              g.items.length > GROUP_THRESHOLD ? (
-                <li key={g.signalType}>
-                  <GroupedSignalCard
-                    signalType={g.signalType}
-                    signals={g.items}
-                    severity={g.severity}
-                    renderDetail={renderSignal}
-                  />
-                </li>
-              ) : (
-                g.items.map((s) => <li key={s.id}>{renderSignal(s)}</li>)
-              ),
+          <>
+            {error && flagEnabled && (
+              <p className="text-sm text-destructive">
+                Chargement des signaux impossible. Réessayez plus tard.
+              </p>
             )}
-          </ul>
+            {queue.length === 0 ? (
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <CheckCircle2 className="h-4 w-4 text-success" aria-hidden />
+                Tout est calme, aucune action en attente.
+              </div>
+            ) : (
+              <ul className="space-y-2">
+                {queue.map((entry) => {
+                  if (entry.kind === "group") {
+                    return (
+                      <li key={`group-${entry.group.signalType}`}>
+                        <GroupedSignalCard
+                          signalType={entry.group.signalType}
+                          signals={entry.group.items}
+                          severity={entry.group.severity}
+                          renderDetail={renderSignal}
+                        />
+                      </li>
+                    );
+                  }
+                  if (entry.kind === "signal") {
+                    return <li key={entry.signal.id}>{renderSignal(entry.signal)}</li>;
+                  }
+                  return (
+                    <li key={`ai-${entry.action.title}`}>
+                      <AiActionCard action={entry.action} />
+                    </li>
+                  );
+                })}
+              </ul>
+            )}
+          </>
         )}
       </CardContent>
     </Card>

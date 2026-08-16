@@ -10,6 +10,7 @@
 // Body : { dry_run?: boolean, mission_id?: string, kind?: 'feedback'|'no_response'|'response_waiting' }
 import { createClient } from 'npm:@supabase/supabase-js@2.45.0'
 import { requireCronCaller } from '../_shared/require-cron-caller.ts'
+import { startCronRun } from '../_shared/cron-run-log.ts'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -33,6 +34,8 @@ Deno.serve(async (req) => {
 
   const guard = await requireCronCaller(req, corsHeaders, "send-mission-nudges")
   if (guard) return guard
+
+  const run = await startCronRun("send-mission-nudges")
 
   let body: { dry_run?: boolean; mission_id?: string; kind?: 'feedback' | 'no_response' | 'response_waiting' } = {}
   try { if (req.body) body = await req.json() } catch { /* noop */ }
@@ -145,9 +148,15 @@ Deno.serve(async (req) => {
       }
     }
 
+    const sentCount = results.filter((r) => r.status === 'sent').length
+    const sendErrorCount = results.filter((r) => r.status === 'error').length
+    await run.finish(sendErrorCount > 0 ? 'partial' : 'success', {
+      total: results.length, sent: sentCount, send_errors: sendErrorCount, dry_run: !!body.dry_run,
+    })
     return json({ ok: true, dry_run: !!body.dry_run, total: results.length, results })
   } catch (err) {
     console.error('[send-mission-nudges] fatal', err)
+    await run.fail(err)
     return json({ error: String(err) }, 500)
   }
 })

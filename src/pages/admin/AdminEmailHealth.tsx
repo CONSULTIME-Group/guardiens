@@ -16,6 +16,7 @@ import { Link } from "react-router-dom";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { toast } from "sonner";
+import { OnboardingReminderCard } from "./_components/dashboard/OnboardingReminderCard";
 
 // ---------------------- Types ----------------------
 interface PipelineHealth {
@@ -551,6 +552,14 @@ export default function AdminEmailHealth() {
             )}
           </CardContent>
         </Card>
+      </section>
+
+      {/* 5. Rappels onboarding (déplacé de la vue d'ensemble) */}
+      <section className="space-y-3">
+        <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wide">
+          Rappels onboarding
+        </h2>
+        <OnboardingReminderCard />
       </section>
     </div>
   );

@@ -10,6 +10,7 @@
 // Body : { dry_run?: boolean, recipient_id?: string, manual?: boolean }
 import { createClient } from 'npm:@supabase/supabase-js@2.45.0'
 import { requireCronCaller } from '../_shared/require-cron-caller.ts'
+import { startCronRun } from '../_shared/cron-run-log.ts'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -36,6 +37,8 @@ Deno.serve(async (req) => {
 
   const guard = await requireCronCaller(req, corsHeaders, "send-mutual-aid-weekly-digest")
   if (guard) return guard
+
+  const run = await startCronRun("send-mutual-aid-weekly-digest")
   let body: { dry_run?: boolean; recipient_id?: string; manual?: boolean } = {}
   try { if (req.body) body = await req.json() } catch { /* noop */ }
 
@@ -114,7 +117,10 @@ Deno.serve(async (req) => {
     if (prefsErr) throw prefsErr
 
     const recipientIds = (prefsRows ?? []).map((r) => r.user_id).filter(Boolean)
-    if (recipientIds.length === 0) return json({ ok: true, sent: 0, reason: 'no_optin' })
+    if (recipientIds.length === 0) {
+      await run.finish('success', { sent: 0, reason: 'no_optin' })
+      return json({ ok: true, sent: 0, reason: 'no_optin' })
+    }
 
     // Charge profils par lots de 200
     const recipients: Recipient[] = []
@@ -232,6 +238,10 @@ Deno.serve(async (req) => {
       sent++
     }
 
+    await run.finish(errors.length > 0 ? 'partial' : 'success', {
+      sent, skipped, total_recipients: recipients.length,
+      error_count: errors.length, dry_run: !!body.dry_run,
+    })
     return json({
       ok: true, sent, skipped, total_recipients: recipients.length,
       errors, dry_run: !!body.dry_run,
@@ -239,6 +249,7 @@ Deno.serve(async (req) => {
     })
   } catch (err) {
     console.error('[send-mutual-aid-weekly-digest] fatal', err)
+    await run.fail(err)
     return json({ error: String(err) }, 500)
   }
 })
