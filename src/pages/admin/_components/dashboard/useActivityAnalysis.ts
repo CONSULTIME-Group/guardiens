@@ -29,7 +29,11 @@ export function useActivityAnalysis() {
     try {
       const { data, error } = await supabase.functions.invoke("admin-activity-analysis", { body: { mode } });
       if (error) throw error;
-      if (data?.analysis) setAnalysis(data as ActivityAnalysis);
+      // La fonction renvoie { analysis: {...} | null } : la charge utile est
+      // déballée avant stockage. Stocker l'enveloppe faisait planter le rendu
+      // (React error #31 : objet rendu comme enfant React).
+      const payload = data?.analysis as ActivityAnalysis | null | undefined;
+      if (payload && typeof payload.analysis === "string") setAnalysis(payload);
       else if (mode === "latest") setAnalysis(null);
       if (mode === "refresh") toast.success("Analyse régénérée.");
     } catch (e) {

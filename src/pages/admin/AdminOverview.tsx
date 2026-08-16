@@ -52,7 +52,10 @@ const AdminOverview = () => {
         refreshing={analysisRefreshing}
         onRefresh={refreshAnalysis}
       />
-      <SignalsSection aiActions={analysis?.actions ?? []} aiLoading={analysisLoading} />
+      <SignalsSection
+        aiActions={Array.isArray(analysis?.actions) ? analysis.actions : []}
+        aiLoading={analysisLoading}
+      />
 
       {/* 2. État du service */}
       <KpiCards stats={stats} />
