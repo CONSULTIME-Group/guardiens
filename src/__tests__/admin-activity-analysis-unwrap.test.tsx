@@ -18,7 +18,7 @@
  *   4. le rendu nominal du texte et de l'horodatage.
  */
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen, renderHook, waitFor } from "@testing-library/react";
+import { render, screen, renderHook, waitFor, act } from "@testing-library/react";
 
 const mocks = vi.hoisted(() => ({
   invoke: vi.fn(),
@@ -73,9 +73,11 @@ describe("useActivityAnalysis : déballage de l'enveloppe edge function", () => 
       data: { analysis: { ...EDGE_PAYLOAD, analysis: "Analyse régénérée." } },
       error: null,
     });
-    await result.current.refresh();
+    await act(async () => {
+      await result.current.refresh();
+    });
 
-    expect(result.current.analysis?.analysis).toBe("Analyse régénérée.");
+    await waitFor(() => expect(result.current.analysis?.analysis).toBe("Analyse régénérée."));
   });
 
   it("retombe à null quand aucune analyse n'est stockée", async () => {
