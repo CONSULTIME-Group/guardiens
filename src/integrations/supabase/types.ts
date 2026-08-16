@@ -8051,8 +8051,12 @@ export type Database = {
       email_delivery_rate_by_template: {
         Args: { p_days?: number }
         Returns: {
+          abandon_rate: number
+          abandoned: number
           attempts: number
           cancelled: number
+          deferred: number
+          delivered: number
           delivery_rate: number
           failed: number
           sent: number
