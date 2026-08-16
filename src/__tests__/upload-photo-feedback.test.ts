@@ -55,6 +55,7 @@ describe("upload photo : télémétrie d'échec par parcours", () => {
     ["src/pages/Messages.tsx", "message_photo_upload_failed"],
     ["src/components/missions/MissionPhotoUpload.tsx", "mission_photo_upload_failed"],
     ["src/components/owner-profile/OwnerStepAnimals.tsx", "pet_photo_upload_failed"],
+    ["src/pages/ArticleEditor.tsx", "article_cover_upload_failed"],
   ];
 
   it("chaque parcours affiche la formulation unique et mesure l'échec", () => {
@@ -103,6 +104,15 @@ describe("upload photo : repli dégradé", () => {
     expect(source).toMatch(/export async function compressMessagePhotoFile/);
     expect(source).toMatch(/MESSAGE_PHOTO_FALLBACK_DIMENSION = 768/);
     const fn = source.match(/export async function compressMessagePhotoFile[\s\S]*?\n}/);
+    expect(fn).toBeTruthy();
+    expect((fn![0].match(/compressImageFile\(/g) || []).length).toBeGreaterThanOrEqual(2);
+  });
+
+  it("compressArticleCoverFile existe avec son propre repli", () => {
+    const source = fs.readFileSync("src/lib/compressImage.ts", "utf8");
+    expect(source).toMatch(/export async function compressArticleCoverFile/);
+    expect(source).toMatch(/ARTICLE_COVER_FALLBACK_DIMENSION = 1024/);
+    const fn = source.match(/export async function compressArticleCoverFile[\s\S]*?\n}/);
     expect(fn).toBeTruthy();
     expect((fn![0].match(/compressImageFile\(/g) || []).length).toBeGreaterThanOrEqual(2);
   });
