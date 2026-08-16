@@ -45,9 +45,6 @@ const PRIORITY_LABEL: Record<Priority, string> = {
 
 const STALE_THRESHOLD_MS = 24 * 60 * 60 * 1000;
 
-const formatKpiValue = (value: number | undefined) =>
-  typeof value === "number" ? value.toLocaleString("fr-FR") : "·";
-
 export function ActivityAnalysisCard() {
   const navigate = useNavigate();
   const { toast } = useToast();
