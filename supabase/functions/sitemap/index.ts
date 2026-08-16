@@ -102,6 +102,7 @@ Deno.serve(async () => {
       .from("seo_city_pages")
       .select("slug, updated_at")
       .eq("published", true)
+      .or("noindex.is.null,noindex.eq.false")
       .not("slug", "like", "test-%")
       .order("city"),
     supabase
@@ -113,6 +114,7 @@ Deno.serve(async () => {
       .from("seo_department_pages")
       .select("slug, updated_at")
       .eq("published", true)
+      .or("noindex.is.null,noindex.eq.false")
       .order("department"),
     supabase
       .from("breed_profiles")

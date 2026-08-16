@@ -242,7 +242,11 @@ async function main() {
     ),
     fetchOrCache(
       "seo_city_pages", cache,
-      () => maxUpdatedAt("seo_city_pages", "updated_at", q => q.eq("published", true).or("noindex.is.null,noindex.eq.false")),
+      // Tête de cache sur les pages publiées, SANS le filtre noindex : une
+      // bascule noindex met à jour updated_at puis sort la ligne de
+      // l'ensemble indexable. Une tête filtrée pourrait ne pas bouger et
+      // servirait un sitemap périmé (cf. scripts/lib/sitemapCache.mjs).
+      () => maxUpdatedAt("seo_city_pages", "updated_at", q => q.eq("published", true)),
       async () => (await supabase.from("seo_city_pages").select("slug, updated_at").eq("published", true).or("noindex.is.null,noindex.eq.false")).data,
       rows => rows.map(cp => ({
         loc: `/house-sitting/${cp.slug}`,
@@ -265,7 +269,7 @@ async function main() {
     fetchOrCache(
       "seo_department_pages", cache,
       () => maxUpdatedAt("seo_department_pages", "updated_at", q => q.eq("published", true)),
-      async () => (await supabase.from("seo_department_pages").select("slug, updated_at").eq("published", true)).data,
+      async () => (await supabase.from("seo_department_pages").select("slug, updated_at").eq("published", true).or("noindex.is.null,noindex.eq.false")).data,
       rows => rows.map(dp => ({
         loc: `/departement/${dp.slug}`,
         lastmod: (dp.updated_at || today).split("T")[0],

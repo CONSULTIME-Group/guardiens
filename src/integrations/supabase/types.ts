@@ -5260,8 +5260,10 @@ export type Database = {
           intro_text: string
           meta_description: string
           meta_title: string
+          noindex: boolean
           published: boolean
           region: string
+          seo_dirty_at: string | null
           sitter_count: number
           slug: string
           updated_at: string
@@ -5276,8 +5278,10 @@ export type Database = {
           intro_text?: string
           meta_description?: string
           meta_title?: string
+          noindex?: boolean
           published?: boolean
           region?: string
+          seo_dirty_at?: string | null
           sitter_count?: number
           slug: string
           updated_at?: string
@@ -5292,8 +5296,10 @@ export type Database = {
           intro_text?: string
           meta_description?: string
           meta_title?: string
+          noindex?: boolean
           published?: boolean
           region?: string
+          seo_dirty_at?: string | null
           sitter_count?: number
           slug?: string
           updated_at?: string
@@ -8504,6 +8510,13 @@ export type Database = {
         Returns: undefined
       }
       recalc_seo_city_page_counts: {
+        Args: never
+        Returns: {
+          pages_changed: number
+          pages_indexed: number
+        }[]
+      }
+      recalc_seo_department_page_counts: {
         Args: never
         Returns: {
           pages_changed: number
