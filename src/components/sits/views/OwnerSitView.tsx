@@ -415,8 +415,8 @@ const OwnerSitView = ({
       title: "Annonce dépubliée",
       description:
         count > 0
-          ? `Archivée. ${count} candidature${count > 1 ? "s" : ""} en cours ${count > 1 ? "ont" : "a"} été clôturée${count > 1 ? "s" : ""}.`
-          : "Elle est archivée. Vous pouvez la republier quand vous voulez depuis l'onglet « Archivées ».",
+          ? `Repassée en brouillon. ${count} candidature${count > 1 ? "s" : ""} en cours ${count > 1 ? "ont" : "a"} été clôturée${count > 1 ? "s" : ""}.`
+          : "Elle est repassée en brouillon. Vous pouvez la republier quand vous voulez depuis l'onglet « Brouillons ».",
     });
     if (declinedCount > 0) {
       toast({
@@ -575,9 +575,9 @@ const OwnerSitView = ({
             <AlertDialogDescription asChild>
               <div className="space-y-3 pt-2">
                 <p>
-                  L'annonce sera <strong>dépubliée et archivée</strong>. Elle ne sera plus
+                  L'annonce sera <strong>dépubliée et repassera en brouillon</strong>. Elle ne sera plus
                   visible des gardiens, vous pourrez la republier à tout moment depuis
-                  l'onglet « Archivées ».
+                  l'onglet « Brouillons ».
                 </p>
                 {openApps.length > 0 && (
                   <div className="rounded-lg border border-destructive/30 bg-destructive/5 p-3 text-sm">

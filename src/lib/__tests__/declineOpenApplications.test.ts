@@ -73,6 +73,14 @@ describe("filet de sécurité à la dépublication", () => {
     expect(OWNER_VIEW).toContain("void handleUnpublish(false)");
   });
 
+  it("ne promet jamais un archivage lors de la dépublication", () => {
+    // L'onglet réel des brouillons est « Brouillons » (src/pages/Sits.tsx).
+    // « Archivées » désigne un autre statut du produit (onglet « Passées »).
+    expect(OWNER_VIEW).not.toContain("« Archivées »");
+    expect(OWNER_VIEW).not.toContain("dépubliée et archivée");
+    expect(OWNER_VIEW).toContain("l'onglet « Brouillons »");
+  });
+
   it("respecte les contraintes de ton, pas de tiret cadratin ni d'emoji", () => {
     const texts = [
       BULK_DECLINE_MESSAGE,
