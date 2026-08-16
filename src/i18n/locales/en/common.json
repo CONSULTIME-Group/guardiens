@@ -46,7 +46,7 @@
       "guide_city": "{{city}} guide",
       "house_sitting_city": "House-sitting in {{city}}"
     },
-    "tagline": "Local house-sitting",
+    "tagline": "House-sitting",
     "version": "Guardiens · Beta version · {{year}}",
     "legal": {
       "cgu": "T&Cs",
@@ -153,7 +153,7 @@
       "need_footer": "A service in return for a service. That's the bet.",
       "offer_title": "« I can give a little of my time »",
       "offer_text": "You know how to prune roses. You love dogs. You have two hours on Saturday morning. Propose, and live what you would never have experienced without this meeting.",
-      "offer_footer": "That is how a fabric reweaves itself.",
+      "offer_footer": "That is how a social fabric reweaves itself.",
       "seen_this_week": "A few exchanges seen on Guardiens this week",
       "examples": {
         "water_plants": "Watering plants",
@@ -982,7 +982,7 @@
   },
   "login_page": {
     "meta_title": "Login, guardiens",
-    "panel_title": "Local help, rediscovered",
+    "panel_title": "Mutual aid, rediscovered",
     "panel_tagline": "A helping hand, a bond of trust.",
     "panel_description": "A keeper near you watches over your home and your animals. And among members, we dare again to ask for, and offer, a helping hand.",
     "welcome_back": "Welcome back",

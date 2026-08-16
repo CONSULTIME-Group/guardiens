@@ -46,7 +46,7 @@
       "guide_city": "Guía de {{city}}",
       "house_sitting_city": "House-sitting en {{city}}"
     },
-    "tagline": "house-sitting de proximidad",
+    "tagline": "House-sitting",
     "version": "Guardiens · Versión Beta · {{year}}",
     "legal": {
       "cgu": "CGU",
@@ -153,7 +153,7 @@
       "need_footer": "Un servicio a cambio de un servicio. Esa es la apuesta.",
       "offer_title": "«Puedo dedicar un poco de mi tiempo»",
       "offer_text": "Usted sabe podar rosales. Le encantan los perros. Tiene dos horas el sábado por la mañana. Proponga, y viva lo que nunca habría vivido sin ese encuentro.",
-      "offer_footer": "Así es como se reconstruye el tejido.",
+      "offer_footer": "Así es como se reconstruye el tejido social.",
       "seen_this_week": "Algunos intercambios vistos en Guardiens esta semana",
       "examples": {
         "water_plants": "Regar las plantas",
@@ -982,7 +982,7 @@
   },
   "login_page": {
     "meta_title": "Iniciar sesión, guardiens",
-    "panel_title": "La ayuda local, redescubierta",
+    "panel_title": "La ayuda mutua, redescubierta",
     "panel_tagline": "Una mano amiga, un vínculo de confianza.",
     "panel_description": "Una persona de confianza cerca de ti cuida de tu casa y de tus animales. Y entre gente del lugar, nos atrevemos de nuevo a pedir y ofrecer ayuda.",
     "welcome_back": "Nos alegra verte de nuevo",

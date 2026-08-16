@@ -40,7 +40,7 @@ const EXCEPTIONS: Record<string, string> = {
   "landing.cities.all_guides": "silo « Guides locaux » conservé (lien vers /guides)",
   "landing.what_is.body_5": "mention du nom du silo « Guides locaux »",
   "emergency_page.further2_title": "silo « Guides locaux » conservé (carte lien)",
-  "login_page.panel_title": "h2, bloqué par le garde-fou SEO, arbitrage en attente",
+  </antml :parameter>
   "emergency_page.owner_title": "h2, bloqué par le garde-fou SEO, arbitrage en attente",
   "emergency_page.meta_description": "meta description, bloquée par le garde-fou SEO, arbitrage en attente",
 };
