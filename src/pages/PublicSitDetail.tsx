@@ -67,7 +67,12 @@ const PublicSitDetail = () => {
   // Maillage interne : la page ville /house-sitting/<slug> n'existe que pour
   // les villes statiques ou publiées en base. Ne jamais l'émettre sinon (404).
   const sitCityName = ((sit as any)?.city as string | undefined)?.trim() || owner?.city?.trim() || "";
-  const hasCityPage = useCityPageExists(sitCityName ? slugify(sitCityName) : null);
+  // Même normalisation que le citySlug du breadcrumb JSON-LD plus bas.
+  const cityPageSlug = sitCityName
+    .toLowerCase()
+    .normalize("NFD").replace(/[̀-ͯ]/g, "")
+    .replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+  const hasCityPage = useCityPageExists(cityPageSlug || null);
  const sitViewFired = useRef(false);
 
   useEffect(() => {
