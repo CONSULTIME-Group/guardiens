@@ -6,6 +6,7 @@
  * au choix du rôle. Le mot de passe suggéré est cryptographiquement sûr.
  */
 import { test, expect } from "../playwright-fixture";
+import { installTunnelRestMocks, buildTunnelSession } from "./helpers/ownerTunnelMocks";
 
 const REGISTER_URL = "http://localhost:8080/inscription";
 
@@ -124,5 +125,25 @@ test.describe.parallel("Signup flow — vague 43 (CGU unifiée)", () => {
     // On arrive directement à l'étape 2 avec rôle "Propriétaire" et bandeau contextuel.
     await expect(page.getByText(/Encore un pas, et vous pourrez contacter ce gardien/i)).toBeVisible();
     await expect(page.getByText(/Propriétaire/i).first()).toBeVisible();
+  });
+
+  test("1.8 Succès d'inscription propriétaire : destination /sits/create?source=signup", async ({ page }) => {
+    // Flag d'affinité OFF pour isoler la destination post-inscription elle-même.
+    await installTunnelRestMocks(page, { flagEnabled: false, affinityComplete: false });
+    await mockSupabaseSignup(page, { status: 200, body: buildTunnelSession() });
+
+    await page.goto(REGISTER_URL);
+    await page.getByRole("button", { name: /Propriétaire/i }).first().click();
+    await page.getByRole("button", { name: /Continuer/i }).click();
+    await page.getByRole("checkbox").first().check();
+    await page.getByLabel(/Email/i).first().fill(`tunnel+${Date.now()}@guardiens.test`);
+    await page.locator("#password").fill("MotDePasseFort2026!");
+    await page.getByRole("button", { name: /Créer mon compte/i }).click();
+
+    await page.waitForURL(/\/sits\/create\?source=signup/, { timeout: 15_000 });
+    await expect(
+      page.getByRole("heading", { name: /éléments et votre annonce peut partir/i }),
+    ).toBeVisible({ timeout: 15_000 });
+    await page.screenshot({ path: "test-results/signup-1-8-tunnel-landing.png" });
   });
 });

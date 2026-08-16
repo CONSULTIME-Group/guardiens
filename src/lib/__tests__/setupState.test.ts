@@ -1,11 +1,12 @@
 import { describe, it, expect } from "vitest";
-import { resolveSetupState, type SetupStateInput } from "../setupState";
+import { isIdentityComplete, resolveSetupState, type SetupStateInput } from "../setupState";
 
 const base: SetupStateInput = {
   loading: false,
   hasProperty: false,
   hasPets: false,
   hasPhoto: false,
+  hasIdentity: true,
   entered: true,
   dismissed: false,
   voluntary: false,
@@ -71,5 +72,34 @@ describe("resolveSetupState", () => {
     });
     expect(s.showSetup).toBe(false);
     expect(s.missing).toEqual([]);
+  });
+});
+
+describe("identité (tunnel post-inscription propriétaire, lot 1)", () => {
+  it("exige prénom et code postal quand ils manquent, en tête des prérequis", () => {
+    const s = resolveSetupState({ ...base, hasIdentity: false });
+    expect(s.missingIds).toEqual(["identity", "property", "photo"]);
+    expect(s.missingLabels[0]).toMatch(/prénom/);
+    expect(s.canContinue).toBe(false);
+    expect(s.identityDone).toBe(false);
+  });
+
+  it("bloque Continuer tant que l'identité manque, même avec logement et photo", () => {
+    const s = resolveSetupState({
+      ...base, hasIdentity: false, hasProperty: true, hasPhoto: true,
+    });
+    expect(s.missingIds).toEqual(["identity"]);
+    expect(s.canContinue).toBe(false);
+  });
+
+  it("isIdentityComplete valide un prénom exploitable et un code postal français", () => {
+    expect(isIdentityComplete("Marie", "69001")).toBe(true);
+    expect(isIdentityComplete("  Marie  ", " 69001 ")).toBe(true);
+    expect(isIdentityComplete("M", "69001")).toBe(false);
+    expect(isIdentityComplete("", "69001")).toBe(false);
+    expect(isIdentityComplete(null, null)).toBe(false);
+    expect(isIdentityComplete("Marie", "6900")).toBe(false);
+    expect(isIdentityComplete("Marie", "6900A")).toBe(false);
+    expect(isIdentityComplete("Marie", "")).toBe(false);
   });
 });

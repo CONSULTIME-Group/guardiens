@@ -2,11 +2,16 @@ import { Check, AlertCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import PetsEditor from "@/components/pets/PetsEditor";
 import InlineHousingBlock, { type InlineHousingResult } from "./InlineHousingBlock";
+import InlineIdentityBlock from "./InlineIdentityBlock";
 import InlinePhotoUpload from "./InlinePhotoUpload";
 import { Button } from "@/components/ui/button";
+import { isIdentityComplete } from "@/lib/setupState";
 
 export interface SetupStepProps {
   userId: string;
+  /** Prénom et code postal actuels du profil, chaînes vides si absents. */
+  firstName: string;
+  postalCode: string;
   propertyId: string | null;
   petCount: number;
   photos: string[];
@@ -17,6 +22,7 @@ export interface SetupStepProps {
   photoDone: boolean;
   /** Libellés exacts de ce qui reste à renseigner, source unique côté parcours. */
   missingLabels: string[];
+  onIdentitySaved: (identity: { firstName: string; postalCode: string }) => void;
   onPropertySaved: (property: InlineHousingResult) => void;
   onPetsChanged: (pets: any[]) => void;
   onPhotoUploaded: (url: string) => void;
@@ -58,28 +64,61 @@ const Block = ({
  * Première étape éditable du parcours : les éléments indispensables à une
  * annonce publiable se remplissent ici, sans quitter la page ni perdre la
  * saisie déjà commencée. Les animaux sont recommandés, jamais exigés.
+ * L'identité (prénom, code postal) est collectée ici quand elle manque au
+ * profil : elle porte la géolocalisation de l'annonce.
  */
 const CreateSitSetupStep = ({
-  userId, propertyId, petCount, photos, photoDone, missingLabels,
-  onPropertySaved, onPetsChanged, onPhotoUploaded, onContinue, onBack, onQuit,
+  userId, firstName, postalCode, propertyId, petCount, photos, photoDone, missingLabels,
+  onIdentitySaved, onPropertySaved, onPetsChanged, onPhotoUploaded, onContinue, onBack, onQuit,
 }: SetupStepProps) => {
+  const identityDone = isIdentityComplete(firstName, postalCode);
   const housingDone = !!propertyId;
   const petsDone = petCount > 0;
   const allDone = missingLabels.length === 0;
 
-
+  // Titre comptable et toujours vrai : il suit en direct ce qui reste à
+  // renseigner, sans jamais promettre un nombre d'éléments obsolète.
+  const remaining = missingLabels.length;
+  const headline =
+    remaining <= 0
+      ? "Tout est prêt, votre annonce peut partir"
+      : remaining === 1
+        ? "Un dernier élément et votre annonce peut partir"
+        : remaining === 2
+          ? "Deux éléments et votre annonce peut partir"
+          : "Trois éléments et votre annonce peut partir";
 
   return (
     <div className="px-4 max-w-3xl mx-auto space-y-6">
       <div>
         <h1 className="font-heading text-2xl md:text-3xl font-bold mb-2">
-          Deux éléments et votre annonce peut partir
+          {headline}
         </h1>
         <p className="text-sm text-muted-foreground">
           Les gardiens choisissent une maison et des animaux, pas seulement des dates.
           Tout se remplit ici, vous enchaînez ensuite sur votre annonce sans rien perdre.
         </p>
       </div>
+
+      <Block title="Votre identité" done={identityDone}>
+        {identityDone ? (
+          <p className="text-sm text-muted-foreground">
+            Votre prénom et votre code postal sont enregistrés. Ils servent à localiser votre annonce.
+          </p>
+        ) : (
+          <>
+            <p className="text-sm text-muted-foreground mb-3">
+              Votre prénom accompagne votre annonce, le code postal permet de la localiser.
+            </p>
+            <InlineIdentityBlock
+              userId={userId}
+              initialFirstName={firstName}
+              initialPostalCode={postalCode}
+              onSaved={onIdentitySaved}
+            />
+          </>
+        )}
+      </Block>
 
       <Block title="Votre logement" done={housingDone}>
         {housingDone ? (

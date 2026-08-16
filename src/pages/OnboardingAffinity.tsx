@@ -21,6 +21,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAffinityOnboardingStatus } from "@/hooks/useAffinityOnboardingStatus";
 import { useFeatureFlag } from "@/hooks/useFeatureFlag";
 import { trackEvent } from "@/lib/analytics";
+import { sanitizeRedirect } from "@/lib/safeRedirect";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -47,6 +48,12 @@ const OnboardingAffinity = () => {
   const { user, refreshProfile, logout } = useAuth();
   const { enabled: flagEnabled, loading: flagLoading } = useFeatureFlag("mandatory_affinity_onboarding");
   const status = useAffinityOnboardingStatus();
+
+  // Sortie du parcours : on respecte la destination d'origine quand elle
+  // existe (tunnel de création d'annonce d'un propriétaire fraîchement
+  // inscrit), sinon direction le tableau de bord. sanitizeRedirect bloque
+  // les cibles externes et les pages d'authentification.
+  const exitTarget = sanitizeRedirect(searchParams.get("redirect")) ?? "/dashboard";
 
   const [saving, setSaving] = useState(false);
   const [chosenRole, setChosenRole] = useState<Role | null>(() => (user?.role as Role) ?? null);
@@ -90,10 +97,9 @@ const OnboardingAffinity = () => {
       return;
     }
     if (!flagEnabled || !status.needsOnboarding) {
-      const redirect = searchParams.get("redirect");
-      navigate(redirect && redirect.startsWith("/") ? redirect : "/dashboard", { replace: true });
+      navigate(exitTarget, { replace: true });
     }
-  }, [flagLoading, flagEnabled, status.loading, status.needsOnboarding, user, navigate, searchParams]);
+  }, [flagLoading, flagEnabled, status.loading, status.needsOnboarding, user, navigate, exitTarget]);
 
   // Tracking : impression unique par session.
   useEffect(() => {
@@ -306,7 +312,7 @@ const OnboardingAffinity = () => {
       await refreshProfile();
       await status.refresh();
       toast.success("C'est noté, vous pourrez compléter votre profil ensuite.");
-      navigate("/dashboard", { replace: true });
+      navigate(exitTarget, { replace: true });
     } catch (e) {
       console.error("OnboardingAffinity: save failed", e);
       toast.error("Impossible d'enregistrer, réessayez.");
@@ -332,7 +338,7 @@ const OnboardingAffinity = () => {
       <div className="w-full max-w-2xl">
         <Card>
           <CardHeader className="space-y-2">
-            <CardTitle className="font-heading text-2xl">Une dernière étape avant le tableau de bord</CardTitle>
+            <CardTitle className="font-heading text-2xl">Une dernière étape avant de commencer</CardTitle>
             <p className="text-sm text-muted-foreground">
               Ces informations nous servent uniquement à calculer votre score d'affinité et à vous proposer les meilleures correspondances. Aucune saisie libre, moins d'une minute.
             </p>

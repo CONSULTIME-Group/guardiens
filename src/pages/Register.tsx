@@ -11,6 +11,7 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { cn } from "@/lib/utils";
 import { getSignupRedirectUrl } from "@/lib/authRedirect";
+import { resolvePostAuthTarget } from "@/lib/postAuthTarget";
 import { sanitizeRedirect, buildRedirectQuery } from "@/lib/safeRedirect";
 import { useToast } from "@/hooks/use-toast";
 import { trackEvent, trackEventWithUserId, mapSignupError } from "@/lib/analytics";
@@ -145,8 +146,10 @@ const Register = () => {
  const navigate = useNavigate();
  const { toast } = useToast();
 
- // Si l'utilisateur sélectionne le rôle « pro », on l'envoie systématiquement vers le formulaire fiche pro.
- const postAuthTarget = selectedRole === "pro" ? "/pros/inscription" : (redirectTarget ?? "/dashboard");
+  // Destination post-inscription centralisée (src/lib/postAuthTarget.ts) :
+  // pro vers sa fiche dédiée, propriétaire vers le tunnel de création
+  // d'annonce, redirection explicite toujours prioritaire.
+  const postAuthTarget = resolvePostAuthTarget(selectedRole, redirectTarget);
 
  const pwStrength = useMemo(() => getPasswordStrength(password), [password]);
 

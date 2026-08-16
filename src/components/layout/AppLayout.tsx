@@ -69,7 +69,12 @@ export const AppLayout = ({ children }: { children?: ReactNode }) => {
   // la modale d'onboarding propriétaire/gardien sur /pros/*.
   const isProContext = location.pathname.startsWith("/pros/");
 
-  const showOnboarding = !dismissed && !isProContext && (isTour || needsMinimal || needsOnboarding);
+  // Tunnel de création d'annonce (lot 1, 16/08/2026) : la modale d'onboarding
+  // ne doit pas s'interposer pour un propriétaire fraîchement inscrit. Elle
+  // est différée au premier retour sur une autre page, tableau de bord compris.
+  const isSitCreateTunnel = location.pathname.startsWith("/sits/create");
+
+  const showOnboarding = !dismissed && !isProContext && !isSitCreateTunnel && (isTour || needsMinimal || needsOnboarding);
 
 
   return (

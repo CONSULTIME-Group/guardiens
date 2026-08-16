@@ -67,7 +67,7 @@ import {
   type PublishBlocker,
 } from "@/lib/sitPublishRules";
 import { describeSitWriteError } from "@/lib/sitDbErrors";
-import { resolveSetupState } from "@/lib/setupState";
+import { isIdentityComplete, resolveSetupState } from "@/lib/setupState";
 
 
 interface PropertySummary {
@@ -420,6 +420,11 @@ const CreateSit = () => {
   const [profileCompletion, setProfileCompletion] = useState(0);
   const [ownerCity, setOwnerCity] = useState<string>("");
   const [ownerBio, setOwnerBio] = useState<string>("");
+  // Identité minimale (prénom, code postal) collectée sur place quand elle
+  // manque au profil, et date d'inscription conservée pour sit_first_publish.
+  const [profileFirstName, setProfileFirstName] = useState<string>("");
+  const [profilePostalCode, setProfilePostalCode] = useState<string>("");
+  const [profileCreatedAt, setProfileCreatedAt] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [publishing, setPublishing] = useState(false);
   const [isRepublish, setIsRepublish] = useState(false);
@@ -646,7 +651,7 @@ const CreateSit = () => {
       const [propRes, ownerRes, profileRes, galleryRes] = await Promise.all([
         supabase.from("properties").select("*").eq("user_id", user.id).limit(1).maybeSingle(),
         supabase.from("owner_profiles").select("*").eq("user_id", user.id).maybeSingle(),
-        supabase.from("profiles").select("profile_completion, city, bio").eq("id", user.id).single(),
+        supabase.from("profiles").select("profile_completion, city, bio, first_name, postal_code, created_at").eq("id", user.id).single(),
         supabase.from("owner_gallery").select("photo_url, category").eq("user_id", user.id).order("position", { ascending: true }).limit(30),
       ]);
 
@@ -658,6 +663,9 @@ const CreateSit = () => {
       setProfileCompletion(profileRes.data?.profile_completion || 0);
       setOwnerCity(profileRes.data?.city || "");
       setOwnerBio((profileRes.data as any)?.bio || "");
+      setProfileFirstName((profileRes.data as any)?.first_name || "");
+      setProfilePostalCode((profileRes.data as any)?.postal_code || "");
+      setProfileCreatedAt((profileRes.data as any)?.created_at ?? null);
       // Couverture = le lieu, jamais un animal : la galerie est réordonnée
       // selon la priorité produit (logement, jardin, puis quartier, etc.).
       setOwnerPhotos(sortForCover((galleryRes.data || []) as any[]).map((g: any) => g.photo_url));
@@ -1343,6 +1351,9 @@ const CreateSit = () => {
         open_to: openTo,
         is_urgent: isUrgent,
         status: "published",
+        // Horodatage de publication : alimente la cohorte « première session »
+        // (définition SQL documentée dans src/lib/analyticsCohorts.ts).
+        published_at: new Date().toISOString(),
         environments: sanitizeSitEnvironments(sitEnvironments),
         min_gardien_sits: minGardienSits,
         max_applications: maxApplications,
@@ -1399,6 +1410,35 @@ const CreateSit = () => {
             resumed_draft: !!draftIdParam,
           },
         });
+      } catch {}
+      // Première publication du compte : événement de cohorte du tunnel
+      // post-inscription (définition SQL dans src/lib/analyticsCohorts.ts).
+      // Une annonce republiée après dépublication ne compte pas : on regarde
+      // les AUTRES annonces déjà passées par une publication.
+      try {
+        const { count: alreadyPublished } = await supabase
+          .from("sits")
+          .select("id", { count: "exact", head: true })
+          .eq("user_id", user.id)
+          .neq("id", sitId)
+          .or("status.neq.draft,published_at.not.is.null,unpublished_at.not.is.null");
+        if ((alreadyPublished ?? 0) === 0) {
+          const signupMs = profileCreatedAt ? Date.parse(profileCreatedAt) : NaN;
+          const minutesSinceSignup = Number.isFinite(signupMs)
+            ? Math.max(0, Math.round((Date.now() - signupMs) / 60000))
+            : null;
+          await trackEvent("sit_first_publish", {
+            source: "create_sit_page",
+            metadata: {
+              sit_id: sitId,
+              minutes_since_signup: minutesSinceSignup,
+              // Première session : publication dans les 24 h suivant
+              // l'inscription, seuil aligné sur la requête de cohorte.
+              first_session: minutesSinceSignup !== null ? minutesSinceSignup <= 24 * 60 : null,
+              signup_source: searchParams.get("source") ?? null,
+            },
+          });
+        }
       } catch {}
       if (localDraftKey) clearFormDraft(localDraftKey);
       toast({ title: "Annonce publiée", description: "Les gardiens peuvent maintenant postuler." });
@@ -1487,6 +1527,7 @@ const CreateSit = () => {
     hasProperty: !!property,
     hasPets: pets.length > 0,
     hasPhoto,
+    hasIdentity: isIdentityComplete(profileFirstName, profilePostalCode),
     entered: setupEntered,
     dismissed: setupDismissed,
     voluntary: setupVoluntary,
@@ -1605,6 +1646,13 @@ const CreateSit = () => {
     navigate("/dashboard");
   };
 
+  // Prénom et code postal enregistrés depuis l'écran de mise en route :
+  // l'état local suit l'écriture profil pour débloquer le bouton Continuer.
+  const handleIdentitySaved = ({ firstName, postalCode }: { firstName: string; postalCode: string }) => {
+    setProfileFirstName(firstName);
+    setProfilePostalCode(postalCode);
+  };
+
 
   if (loading) {
     return <div className="p-6 md:p-10 max-w-3xl mx-auto text-muted-foreground">Chargement...</div>;
@@ -1625,6 +1673,9 @@ const CreateSit = () => {
         {user && (
           <CreateSitSetupStep
             userId={user.id}
+            firstName={profileFirstName}
+            postalCode={profilePostalCode}
+            onIdentitySaved={handleIdentitySaved}
             propertyId={property?.id ?? null}
             petCount={pets.length}
             photos={ownerPhotos}
