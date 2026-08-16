@@ -85,7 +85,18 @@ const OnboardingWelcome = ({ role, checks, onDismiss }: OnboardingWelcomeProps) 
     },
   ];
 
+  // La publication ouvre la liste : c'est l'action qui compte pour un
+  // propriétaire, les autres étapes renforcent ensuite la confiance.
   const ownerSteps: OnboardingStep[] = [
+    {
+      key: "sit",
+      icon: Megaphone,
+      title: "Publiez votre première annonce",
+      description: "Décrivez votre besoin de garde et recevez des candidatures en quelques heures.",
+      link: "/sits/create",
+      cta: "Publier une annonce",
+      done: !!checks.hasSit,
+    },
     {
       key: "name",
       icon: UserCircle,
@@ -102,7 +113,7 @@ const OnboardingWelcome = ({ role, checks, onDismiss }: OnboardingWelcomeProps) 
       description: "Les gardiens font plus confiance aux profils avec photo. C'est rapide.",
       link: "/owner-profile",
       cta: "Ajouter ma photo",
-      done: checks.hasAvatar,
+      done: !!checks.hasAvatar,
     },
     {
       key: "property",
@@ -130,15 +141,6 @@ const OnboardingWelcome = ({ role, checks, onDismiss }: OnboardingWelcomeProps) 
       link: "/settings?section=security&src=onboarding_welcome_owner",
       cta: "Vérifier mon identité",
       done: checks.hasIdentity,
-    },
-    {
-      key: "sit",
-      icon: Megaphone,
-      title: "Publiez votre première annonce",
-      description: "Décrivez votre besoin de garde et recevez des candidatures en quelques heures.",
-      link: "/sits/create",
-      cta: "Publier une annonce",
-      done: !!checks.hasSit,
     },
   ];
 
@@ -178,7 +180,7 @@ const OnboardingWelcome = ({ role, checks, onDismiss }: OnboardingWelcomeProps) 
         </div>
         <p className="text-xs text-muted-foreground text-right">
           {role === "owner"
-            ? "À 60 %, vous pourrez publier votre première annonce."
+            ? "Un profil complet rassure les gardiens et attire des candidatures plus pertinentes."
             : "À 60 %, vous pourrez postuler aux annonces."}
         </p>
       </div>

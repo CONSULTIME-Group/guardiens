@@ -12,27 +12,36 @@ const base: SetupStateInput = {
 };
 
 describe("resolveSetupState", () => {
-  it("liste les trois prérequis quand rien n'est renseigné", () => {
+  it("liste les deux prérequis bloquants quand rien n'est renseigné", () => {
     const s = resolveSetupState(base);
     expect(s.showSetup).toBe(true);
-    expect(s.missingIds).toEqual(["property", "pets", "photo"]);
+    expect(s.missingIds).toEqual(["property", "photo"]);
     expect(s.canContinue).toBe(false);
     expect(s.canGoBack).toBe(false);
   });
 
   it("retire les prérequis un par un à mesure qu'ils sont comblés", () => {
     const withProperty = resolveSetupState({ ...base, hasProperty: true });
-    expect(withProperty.missingIds).toEqual(["pets", "photo"]);
+    expect(withProperty.missingIds).toEqual(["photo"]);
     expect(withProperty.housingDone).toBe(true);
     expect(withProperty.canContinue).toBe(false);
 
-    const withPets = resolveSetupState({ ...base, hasProperty: true, hasPets: true });
-    expect(withPets.missingIds).toEqual(["photo"]);
-    expect(withPets.canContinue).toBe(false);
+    // Les animaux ne sont pas un prérequis : logement et photo suffisent.
+    const withoutPets = resolveSetupState({ ...base, hasProperty: true, hasPhoto: true });
+    expect(withoutPets.missingIds).toEqual([]);
+    expect(withoutPets.canContinue).toBe(true);
 
     const complete = resolveSetupState({ ...base, hasProperty: true, hasPets: true, hasPhoto: true });
     expect(complete.missingIds).toEqual([]);
     expect(complete.canContinue).toBe(true);
+  });
+
+  it("n'exige jamais les animaux : recommandés, absents des prérequis bloquants", () => {
+    const s = resolveSetupState({ ...base, hasProperty: true, hasPhoto: true, hasPets: false });
+    expect(s.canContinue).toBe(true);
+    expect(s.missingIds).not.toContain("pets");
+    expect(s.missingLabels.join(" ")).not.toMatch(/animal/i);
+    expect(s.petsDone).toBe(false);
   });
 
   it("considère la photo faite quand elle vient du logement et non de la galerie", () => {

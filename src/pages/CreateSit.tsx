@@ -1595,13 +1595,23 @@ const CreateSit = () => {
     setSetupDismissed(true);
   };
 
+  // Sortie honnête quand l'écran s'ouvre par le préflight : personne ne doit
+  // rester enfermé, le tableau de bord reste accessible en un clic.
+  const handleSetupQuit = () => {
+    void trackEvent("sits_create_setup_quit", {
+      source: "/sits/create",
+      metadata: { missing: setupState.missingIds },
+    });
+    navigate("/dashboard");
+  };
+
 
   if (loading) {
     return <div className="p-6 md:p-10 max-w-3xl mx-auto text-muted-foreground">Chargement...</div>;
   }
 
   // Le préflight n'est plus un cul de sac : c'est la première étape éditable du
-  // parcours, les trois éléments manquants se remplissent sur place.
+  // parcours, les éléments manquants se remplissent sur place.
   if (showSetup) {
 
     return (
@@ -1644,6 +1654,7 @@ const CreateSit = () => {
             missingLabels={setupState.missingLabels}
             onContinue={handleSetupContinue}
             onBack={setupState.canGoBack ? handleSetupBack : undefined}
+            onQuit={setupState.canGoBack ? undefined : handleSetupQuit}
           />
 
         )}
