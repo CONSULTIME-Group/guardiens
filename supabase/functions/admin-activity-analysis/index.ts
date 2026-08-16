@@ -13,7 +13,20 @@ type ActionItem = {
   why: string;
   priority: 'haute' | 'moyenne' | 'basse';
   link: string;
+  topic: string;
 };
+
+/** Sujets métier alignés sur SIGNAL_TOPIC côté front (déduplication par sujet). */
+const ALLOWED_TOPICS = [
+  'gardiens_dormants',
+  'onboarding_affinite',
+  'gardes_non_confirmees',
+  'candidatures_sans_reponse',
+  'liquidite_annonces',
+  'deliverabilite_email',
+  'verifications_identite',
+  'retention_membres',
+] as const;
 
 /**
  * Source unique des chiffres : admin_dashboard_snapshot() (mêmes définitions
