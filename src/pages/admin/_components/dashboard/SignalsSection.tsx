@@ -81,19 +81,13 @@ function renderSignal(s: AdminSignalBase) {
 }
 
 /** Action suggérée par l'analyse IA, sans signal équivalent dans la file. */
-
-/** Action suggérée par l'analyse IA, sans signal équivalent dans la file. */
 const AiActionCard = ({ action }: { action: SuggestedAction }) => (
   <div className="rounded-lg border border-border p-3">
     <div className="flex items-start justify-between gap-3">
       <div className="min-w-0">
-        <Badge
-          variant={AI_PRIORITY_VARIANT[action.priority] ?? "outline"}
-          className="mb-1.5 text-[10px] uppercase tracking-wide"
-        >
-          <Sparkles className="h-3 w-3 mr-1" aria-hidden />
-          Priorité {action.priority}
-        </Badge>
+        <div className="mb-1.5">
+          <PriorityBadge priority={action.priority} origin="suggestion" />
+        </div>
         <p className="text-sm font-medium text-foreground leading-snug">{action.title}</p>
         <p className="text-xs text-muted-foreground mt-1 leading-relaxed">{action.why}</p>
       </div>
@@ -111,9 +105,10 @@ interface Props {
 
 /**
  * File d'actions fusionnée : signaux admin_signals et actions suggérées par
- * l'analyse IA, triés par priorité réelle. Une action IA dont la cible
- * correspond à un signal existant est écartée : le signal porte l'action
- * concrète, la suggestion IA n'est que descriptive.
+ * l'analyse IA, triés sur une échelle de priorité unifiée (haute, moyenne,
+ * basse). Une action IA dont le lien ou le sujet correspond à un signal
+ * existant est écartée : le signal porte l'action concrète, la suggestion IA
+ * n'est que descriptive. Voir actionQueue.ts pour la fusion.
  */
 export const SignalsSection = ({ aiActions, aiLoading }: Props) => {
   const { enabled: flagEnabled, loading: flagLoading } = useFeatureFlag("admin_signals_active");
@@ -135,19 +130,7 @@ export const SignalsSection = ({ aiActions, aiLoading }: Props) => {
     ? (data?.signals ?? []).filter((s) => s.severity !== "info")
     : [];
 
-  const signalPaths = new Set(signals.map((s) => linkPath(signalAdminLink(s))));
-  const dedupedAiActions = aiActions.filter((a) => !signalPaths.has(linkPath(a.link)));
-
-  const groups = groupSignals(signals);
-  const signalEntries: QueueEntry[] = groups.flatMap((g): QueueEntry[] =>
-    g.items.length > GROUP_THRESHOLD
-      ? [{ kind: "group", group: g }]
-      : g.items.map((s) => ({ kind: "signal", signal: s })),
-  );
-  const queue: QueueEntry[] = [
-    ...signalEntries,
-    ...dedupedAiActions.map((a): QueueEntry => ({ kind: "ai", action: a })),
-  ].sort((a, b) => rankOf(a) - rankOf(b));
+  const queue: QueueEntry[] = buildActionQueue(signals, aiActions);
 
   const loading = (flagEnabled && isLoading) || aiLoading;
 
