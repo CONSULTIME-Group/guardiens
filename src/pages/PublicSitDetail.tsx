@@ -70,7 +70,7 @@ const PublicSitDetail = () => {
   // Même normalisation que le citySlug du breadcrumb JSON-LD plus bas.
   const cityPageSlug = sitCityName
     .toLowerCase()
-    .normalize("NFD").replace(/[̀-ͯ]/g, "")
+    .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
     .replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
   const hasCityPage = useCityPageExists(cityPageSlug || null);
  const sitViewFired = useRef(false);
