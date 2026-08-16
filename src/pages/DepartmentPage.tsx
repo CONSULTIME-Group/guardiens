@@ -91,6 +91,7 @@ const DepartmentPage = () => {
  title={page.meta_title || `Pet sitting & House sitting ${page.department}, garde d'animaux, de maison et de jardin sans frais pour les propriétaires | Guardiens`}
  description={page.meta_description || `Trouvez un pet sitter ou house sitter dans le ${page.department}. Garde d'animaux, de maison et de jardin entre particuliers, sans frais pour les propriétaires. ${cityPages.length} villes couvertes sur Guardiens.`}
  path={`/departement/${page.slug}`}
+ noindex={page.noindex === true}
  image={buildOgImageUrl({ title: page.department, subtitle: `${cityPages.length} villes couvertes`, kind: "departement" })}
  />
 

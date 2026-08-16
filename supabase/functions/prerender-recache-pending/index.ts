@@ -1,6 +1,6 @@
 // Flush pending Prerender re-cache requests.
 // Called after a successful frontend publish (Vite closeBundle hook in prod build).
-// Reads rows where seo_dirty_at IS NOT NULL across articles / seo_city_pages / city_guides,
+// Reads rows where seo_dirty_at IS NOT NULL across articles / seo_city_pages / seo_department_pages / city_guides,
 // invalidates Prerender cache for the matching public URLs, then clears the flag.
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
@@ -74,16 +74,17 @@ Deno.serve(async (req) => {
   const sb = createClient(SUPABASE_URL, SERVICE_ROLE);
 
   // 1. Collect dirty rows from each table (cap to 200 per table to stay safe).
-  const [articles, cityPages, guides] = await Promise.all([
+  const [articles, cityPages, deptPages, guides] = await Promise.all([
     sb.from("articles").select("id, slug").not("seo_dirty_at", "is", null).limit(200),
     sb.from("seo_city_pages").select("id, slug").not("seo_dirty_at", "is", null).limit(200),
+    sb.from("seo_department_pages").select("id, slug").not("seo_dirty_at", "is", null).limit(200),
     sb.from("city_guides").select("id, slug").not("seo_dirty_at", "is", null).limit(200),
   ]);
 
-  if (articles.error || cityPages.error || guides.error) {
+  if (articles.error || cityPages.error || deptPages.error || guides.error) {
     return json(500, {
       error: "DB read failed",
-      details: { articles: articles.error, cityPages: cityPages.error, guides: guides.error },
+      details: { articles: articles.error, cityPages: cityPages.error, deptPages: deptPages.error, guides: guides.error },
     });
   }
 
@@ -95,6 +96,9 @@ Deno.serve(async (req) => {
   }
   for (const r of (cityPages.data ?? []) as Row[]) {
     if (r.slug) tasks.push({ table: "seo_city_pages", id: r.id, url: `${SITE}/house-sitting/${r.slug}` });
+  }
+  for (const r of (deptPages.data ?? []) as Row[]) {
+    if (r.slug) tasks.push({ table: "seo_department_pages", id: r.id, url: `${SITE}/departement/${r.slug}` });
   }
   for (const r of (guides.data ?? []) as Row[]) {
     if (r.slug) tasks.push({ table: "city_guides", id: r.id, url: `${SITE}/guides/${r.slug}` });
@@ -111,7 +115,7 @@ Deno.serve(async (req) => {
   }
 
   // 3. Clear seo_dirty_at only on the rows we successfully recached.
-  const okIdsByTable: Record<string, string[]> = { articles: [], seo_city_pages: [], city_guides: [] };
+  const okIdsByTable: Record<string, string[]> = { articles: [], seo_city_pages: [], seo_department_pages: [], city_guides: [] };
   tasks.forEach((t, i) => {
     if (results[i].ok) okIdsByTable[t.table].push(t.id);
   });
