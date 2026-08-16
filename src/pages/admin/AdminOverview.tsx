@@ -1,6 +1,6 @@
 import PageMeta from "@/components/PageMeta";
 import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
-import { DashboardSkeleton } from "@/components/skeletons/DashboardSkeleton";
+import DashboardSkeleton from "@/components/skeletons/DashboardSkeleton";
 import { useDashboardData } from "./_components/dashboard/useDashboardData";
 import { useActivityAnalysis } from "./_components/dashboard/useActivityAnalysis";
 import { KpiCards } from "./_components/dashboard/KpiCards";
