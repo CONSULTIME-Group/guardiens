@@ -45,7 +45,7 @@ test.describe.parallel("Signup flow — vague 43 (CGU unifiée)", () => {
     // On coche, on remplit, on soumet : la validation CGU passe.
     await page.getByRole("checkbox").first().check();
     await page.getByLabel(/Email/i).first().fill(`ok+${Date.now()}@guardiens.test`);
-    await page.getByLabel(/Mot de passe/i).fill("MotDePasseFort2026!");
+    await page.locator("#password").fill("MotDePasseFort2026!");
     // Le bouton de soumission est actionnable.
     await expect(page.getByRole("button", { name: /Créer mon compte/i })).toBeEnabled();
   });
@@ -53,7 +53,7 @@ test.describe.parallel("Signup flow — vague 43 (CGU unifiée)", () => {
   test("1.2 Meter password évolue selon la force saisie", async ({ page }) => {
     await goToStep2(page);
 
-    const passwordInput = page.getByLabel(/Mot de passe/i);
+    const passwordInput = page.locator("#password");
     await passwordInput.fill("bonjour");
     await expect(page.getByText(/Trop court/i)).toBeVisible();
 
@@ -69,7 +69,7 @@ test.describe.parallel("Signup flow — vague 43 (CGU unifiée)", () => {
 
     await page.getByRole("button", { name: /Suggérer un mot de passe fort/i }).click();
 
-    const passwordInput = page.getByLabel(/Mot de passe/i);
+    const passwordInput = page.locator("#password");
     const value = await passwordInput.inputValue();
     expect(value.length).toBeGreaterThanOrEqual(12);
     await expect(passwordInput).toHaveAttribute("type", "text");
@@ -78,7 +78,7 @@ test.describe.parallel("Signup flow — vague 43 (CGU unifiée)", () => {
 
   test("1.4 Blacklist password affiche l'avertissement inline", async ({ page }) => {
     await goToStep2(page);
-    await page.getByLabel(/Mot de passe/i).fill("guardiens");
+    await page.locator("#password").fill("guardiens");
     await expect(
       page.getByText(/apparaît dans les listes des plus utilisés/i)
     ).toBeVisible();
@@ -93,7 +93,7 @@ test.describe.parallel("Signup flow — vague 43 (CGU unifiée)", () => {
     await goToStep2(page);
     await page.getByRole("checkbox").first().check();
     await page.getByLabel(/Email/i).first().fill(`e2e+${Date.now()}@guardiens.test`);
-    await page.getByLabel(/Mot de passe/i).fill("MotDePasseFort2026!");
+    await page.locator("#password").fill("MotDePasseFort2026!");
     await page.getByRole("button", { name: /Créer mon compte/i }).click();
 
     const alert = page.getByRole("alert").first();
@@ -110,7 +110,7 @@ test.describe.parallel("Signup flow — vague 43 (CGU unifiée)", () => {
     await goToStep2(page);
     await page.getByRole("checkbox").first().check();
     await page.getByLabel(/Email/i).first().fill("existing@guardiens.test");
-    await page.getByLabel(/Mot de passe/i).fill("MotDePasseFort2026!");
+    await page.locator("#password").fill("MotDePasseFort2026!");
     await page.getByRole("button", { name: /Créer mon compte/i }).click();
 
     await expect(
