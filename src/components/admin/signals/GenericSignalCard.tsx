@@ -48,12 +48,7 @@ export const GenericSignalCard = ({ signal }: { signal: AdminSignalBase }) => {
   return (
     <div className="rounded-lg border p-3 space-y-2">
       <div className="flex items-start gap-3">
-        <Badge
-          variant="outline"
-          className={cn("text-[10px] uppercase tracking-wide shrink-0", SEVERITY_STYLE[signal.severity])}
-        >
-          {signal.severity === "critical" ? "Critique" : "À traiter"}
-        </Badge>
+        <SignalPriorityBadge severity={signal.severity} />
         <div className="flex-1 min-w-0">
           <p className="text-sm font-medium text-foreground">
             {signalTypeLabel(signal.signal_type)}

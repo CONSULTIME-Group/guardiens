@@ -7659,6 +7659,7 @@ export type Database = {
         }[]
       }
       admin_get_user_email: { Args: { p_user_id: string }; Returns: string }
+      admin_liquidity_snapshot: { Args: never; Returns: Json }
       admin_list_conversations: {
         Args: {
           p_context?: string

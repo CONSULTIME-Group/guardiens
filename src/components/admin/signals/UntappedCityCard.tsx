@@ -4,7 +4,7 @@ import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+import { SignalPriorityBadge } from "./PriorityBadge";
 import { supabase } from "@/integrations/supabase/client";
 
 export interface UntappedCitySignal {
@@ -62,9 +62,7 @@ export const UntappedCityCard = ({ signal }: Props) => {
           <div className="flex-1 min-w-0 space-y-2">
             <div className="flex flex-wrap items-center gap-2">
               <h3 className="text-sm font-semibold text-foreground">Opportunité de recrutement, {city}</h3>
-              <Badge variant="outline" className="text-[10px] uppercase tracking-wide bg-warning/10 text-warning-foreground border-warning/30">
-                À traiter
-              </Badge>
+              <SignalPriorityBadge severity={signal.severity} />
             </div>
             <div className="text-sm text-foreground">
               {city} génère {impressions} impressions Google mais compte seulement {sitters} gardien{sitters > 1 ? "s" : ""}. Cibler la ville en recrutement.

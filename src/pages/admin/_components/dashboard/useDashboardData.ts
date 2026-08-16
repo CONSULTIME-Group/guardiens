@@ -49,7 +49,6 @@ export function useDashboardData(): DashboardData {
         { count: activeSubscriptions },
         { data: recentStatusChanges },
         { data: recentDeletions },
-        { count: intlMembers },
       ] = await Promise.all([
         supabase.from("profiles").select("id", { count: "exact", head: true }),
         supabase.from("profiles").select("id", { count: "exact", head: true }).eq("role", "owner"),
@@ -67,7 +66,6 @@ export function useDashboardData(): DashboardData {
         supabase.from("subscriptions").select("id", { count: "exact", head: true }).eq("status", "active"),
         supabase.rpc("admin_get_recent_sit_status_changes" as any, { p_limit: 8 }),
         supabase.rpc("admin_get_recent_account_deletions" as any, { p_limit: 5 }),
-        supabase.from("profiles").select("id", { count: "exact", head: true }).not("country", "is", null).neq("country", "FR"),
       ]);
 
       const totalReviews = reviewsData?.length || 0;
@@ -88,7 +86,6 @@ export function useDashboardData(): DashboardData {
         totalReviews,
         avgRating: Math.round(avgRating * 10) / 10,
         monthRevenue,
-        intlMembers: intlMembers || 0,
       });
 
       // Inscriptions hebdomadaires (12 dernières semaines)
