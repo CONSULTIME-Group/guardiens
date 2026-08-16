@@ -15,6 +15,8 @@ interface SitSidebarProps {
   cityName: string;
   ownerBio: string;
   hasLocalGuide: boolean;
+  /** La page ville /house-sitting/<slug> existe réellement (sinon lien vers un 404). */
+  hasCityPage: boolean;
   citySlug: string | null;
   showSittersLink: boolean;
   sittersLink: string | null;
@@ -29,6 +31,7 @@ const SitSidebar = ({
   cityName,
   ownerBio,
   hasLocalGuide,
+  hasCityPage,
   citySlug,
   showSittersLink,
   sittersLink,
@@ -104,7 +107,7 @@ const SitSidebar = ({
         </Link>
       )}
 
-      {citySlug && cityName && (
+      {hasCityPage && citySlug && cityName && (
         <Link
           to={`/house-sitting/${citySlug}`}
           className="block rounded-2xl border border-border bg-card p-5 hover:border-primary/50 transition-colors group"

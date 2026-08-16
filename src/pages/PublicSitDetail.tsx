@@ -27,6 +27,7 @@ import { DEFAULT_OG_IMAGE } from "@/data/siteRoutes";
 
 import ApplicationModal from "@/components/sits/ApplicationModal";
 import { useSubscriptionAccess } from "@/hooks/useSubscriptionAccess";
+import { useCityPageExists } from "@/hooks/useCityPageExists";
 import PublicHeader from "@/components/layout/PublicHeader";
 import PublicFooter from "@/components/layout/PublicFooter";
 import PublicSitView from "@/components/sits/PublicSitView";
@@ -61,7 +62,17 @@ const PublicSitDetail = () => {
  const [hasApplied, setHasApplied] = useState(false);
  const [isAcceptedSitter, setIsAcceptedSitter] = useState(false);
 
- const [viewerType, setViewerType] = useState<ViewerType>("anonymous");
+  const [viewerType, setViewerType] = useState<ViewerType>("anonymous");
+
+  // Maillage interne : la page ville /house-sitting/<slug> n'existe que pour
+  // les villes statiques ou publiées en base. Ne jamais l'émettre sinon (404).
+  const sitCityName = ((sit as any)?.city as string | undefined)?.trim() || owner?.city?.trim() || "";
+  // Même normalisation que le citySlug du breadcrumb JSON-LD plus bas.
+  const cityPageSlug = sitCityName
+    .toLowerCase()
+    .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+  const hasCityPage = useCityPageExists(cityPageSlug || null);
  const sitViewFired = useRef(false);
 
   useEffect(() => {
@@ -533,16 +544,17 @@ const PublicSitDetail = () => {
  .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
  .replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
  const origin = canonicalUrl.replace(/\/annonces\/.*$/, "");
+ // Le 2e niveau de breadcrumb pointe vers une page silo /house-sitting/<ville>
+ // qui n'existe que pour les villes FR réellement servies (villes statiques ou
+ // seo_city_pages publiées). On l'omet sinon pour éviter une URL en 404.
+ const showCityBreadcrumb = Boolean(hasCityPage && citySlug && (!ownerCountry || ownerCountry === "FR"));
  const breadcrumbLd = {
  "@context": "https://schema.org",
  "@type": "BreadcrumbList",
  itemListElement: [
  { "@type": "ListItem", position: 1, name: "Accueil", item: `${origin}/` },
-       // Le 2e niveau de breadcrumb pointe vers une page silo /house-sitting/<ville>
-       // qui n'existe que pour les villes FR (silos SEO Lyon/Annecy/Grenoble + autres CityPages).
-       // On l'omet pour les annonces internationales pour éviter une URL en 404.
-       ...(citySlug && (!ownerCountry || ownerCountry === "FR") ? [{ "@type": "ListItem", position: 2, name: cityForTitle, item: `${origin}/house-sitting/${citySlug}` }] : []),
-       { "@type": "ListItem", position: (citySlug && (!ownerCountry || ownerCountry === "FR")) ? 3 : 2, name: sit.title || "Annonce de garde", item: canonicalUrl },
+       ...(showCityBreadcrumb ? [{ "@type": "ListItem", position: 2, name: cityForTitle, item: `${origin}/house-sitting/${citySlug}` }] : []),
+       { "@type": "ListItem", position: showCityBreadcrumb ? 3 : 2, name: sit.title || "Annonce de garde", item: canonicalUrl },
  ],
  };
 
