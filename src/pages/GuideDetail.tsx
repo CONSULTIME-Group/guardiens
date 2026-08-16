@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import { slugify } from "@/lib/normalize";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { useCityPageExists } from "@/hooks/useCityPageExists";
 import PageMeta from "@/components/PageMeta";
 import { MapPin, TreePine, Stethoscope, Coffee, Store, Footprints, Droplets, Trees, Star, ArrowRight, ArrowLeft, Search } from "lucide-react";
 import PageBreadcrumb from "@/components/seo/PageBreadcrumb";
@@ -89,6 +90,10 @@ const GuideDetail = () => {
     },
     enabled: !!slug,
   });
+
+  // La page ville /house-sitting/<slug> n'existe pas pour chaque guide :
+  // ne lier que si elle est réellement servie, sinon le lien mène à un 404.
+  const hasCityPage = useCityPageExists(guide?.slug ?? null);
 
   const { data: places = [], isSuccess: placesLoaded } = useQuery({
     queryKey: ["guide-places", guide?.id],
@@ -233,12 +238,14 @@ const GuideDetail = () => {
           </div>
           <div className="mt-3 flex flex-wrap items-center gap-2 md:gap-4">
             <Badge variant="secondary">{t("guide_detail.places_count", { count: places.length })}</Badge>
-            <Link
-              to={`/house-sitting/${guide.slug}`}
-              className="text-sm text-primary hover:underline flex items-center gap-1"
-            >
-              {t("guide_detail.see_sits", { city: guide.city })} <ArrowRight className="h-3.5 w-3.5" />
-            </Link>
+            {hasCityPage && (
+              <Link
+                to={`/house-sitting/${guide.slug}`}
+                className="text-sm text-primary hover:underline flex items-center gap-1"
+              >
+                {t("guide_detail.see_sits", { city: guide.city })} <ArrowRight className="h-3.5 w-3.5" />
+              </Link>
+            )}
             {guide.department && (
               <Link
                 to={`/departement/${slugify(guide.department)}`}
@@ -365,18 +372,20 @@ const GuideDetail = () => {
             </div>
           )}
 
-          {/* CTA */}
-          <div className="mt-14 text-center border-t border-border pt-10">
-            <p className="text-muted-foreground mb-4">
-              {t("guide_detail.cta_question", { city: guide.city })}
-            </p>
-            <Link
-              to={`/house-sitting/${guide.slug}`}
-              className="inline-flex items-center justify-center rounded-lg bg-primary px-6 py-3 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors"
-            >
-              {t("guide_detail.see_sits", { city: guide.city })}
-            </Link>
-          </div>
+          {/* CTA : masqué si la page ville n'existe pas (évite un lien vers un 404) */}
+          {hasCityPage && (
+            <div className="mt-14 text-center border-t border-border pt-10">
+              <p className="text-muted-foreground mb-4">
+                {t("guide_detail.cta_question", { city: guide.city })}
+              </p>
+              <Link
+                to={`/house-sitting/${guide.slug}`}
+                className="inline-flex items-center justify-center rounded-lg bg-primary px-6 py-3 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors"
+              >
+                {t("guide_detail.see_sits", { city: guide.city })}
+              </Link>
+            </div>
+          )}
         </div>
 
         {/* Schema.org */}

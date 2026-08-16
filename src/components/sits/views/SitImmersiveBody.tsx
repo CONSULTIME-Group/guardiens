@@ -21,6 +21,7 @@ import TabAttentes from "./tabs/TabAttentes";
 import SitSidebar from "./tabs/SitSidebar";
 import { speciesLabel } from "./tabs/sitMeta";
 import { sanitizeBioForPublic } from "@/lib/sanitizeBio";
+import { useCityPageExists } from "@/hooks/useCityPageExists";
 
 const GUIDE_SLUGS = new Set(CITIES.map((c) => c.slug));
 
@@ -119,6 +120,10 @@ const SitImmersiveBody = ({
     },
   });
   const hasLocalGuide = Boolean(citySlug && (GUIDE_SLUGS.has(citySlug) || dbGuide));
+
+  // Page ville /house-sitting/<slug> : ne lier que si elle est réellement
+  // servie (ville statique ou seo_city_pages publiée), sinon 404 crawlable.
+  const hasCityPage = useCityPageExists(citySlug);
 
   const ownerPostalCode: string | undefined = owner?.postal_code
     ? String(owner.postal_code)
@@ -280,6 +285,7 @@ const SitImmersiveBody = ({
             cityName={cityName}
             ownerBio={ownerBio}
             hasLocalGuide={hasLocalGuide}
+            hasCityPage={hasCityPage}
             citySlug={citySlug}
             showSittersLink={showSittersLink}
             sittersLink={sittersLink}
