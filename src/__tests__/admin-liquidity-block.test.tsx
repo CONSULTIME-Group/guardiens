@@ -80,7 +80,8 @@ describe("LiquidityBlock", () => {
       await screen.findByText(/effectif trop faible pour une médiane/),
     ).toBeInTheDocument();
     expect(screen.getByText(/Effectif trop faible pour un taux \(4 tranchées\)/)).toBeInTheDocument();
-    expect(screen.queryByText(/%/)).not.toBeInTheDocument();
+    // Aucun taux affiché nulle part (l'en-tête mentionne « 60 % » hors cellules).
+    expect(screen.queryByText(/^\d+ %$/)).not.toBeInTheDocument();
   });
 
   it("affiche une erreur explicite si le RPC échoue", async () => {
