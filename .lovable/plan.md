@@ -1,103 +1,117 @@
-# Messagerie admin consultable, et traitement des candidatures propriétaire
+# Conversion propriétaire en première session
 
-## Correction de deux prémisses, vérifiée en base aujourd'hui
+## Faits vérifiés avant plan (code + base, 16/08)
 
-Avant de trancher, deux points du brief ne correspondent pas à l'état réel du projet.
+- Auto-confirm email actif : `email_confirmed_at` à 0-1 min après signup pour 11 des 12 derniers propriétaires. La session n'est PAS interrompue par la confirmation email. Le problème est donc purement ce qu'on demande au propriétaire pendant la session.
+- 20 derniers propriétaires relus en base : 4 publiés (completion 85-95), 1 brouillon abandonné (65), 2 avec logement + animaux mais zéro annonce (70, 50), 4 coquilles vides (0-10), le reste profils partiels sans logement.
+- Base globale : 7 brouillons contre 8 annonces publiées. Presque un brouillon mort par annonce en ligne.
+- Crons de relance existants, tous à J+1 ou plus : `send_sit_draft_reminder_daily` (8h, drafts > 24h), `nudge-stale-draft` (7h), `relance-cp-manquant` (lun 9h30). Hors fenêtre de conversion mesurée.
 
-1. `sits.max_applications` **est déjà utilisé**. Valeur par défaut 5 en base, 29 annonces portent une valeur, 4 annonces ont `accepting_applications = false`. La logique vit dans `src/lib/applicationCap.ts` (`countOpenApplications`, `isCapReached`, paliers 5, 10, 20), la fermeture automatique dans `SitterSitView.tsx`, la réouverture dans `ReopenApplicationsCard.tsx`, et la relance propriétaire dans `ApplicationCapSection.tsx`. Le plafond existe donc déjà, exactement sur le modèle des 5 réponses de l'entraide.
-2. Le **classement par affinité existe déjà** dans `ApplicationsList.tsx` : `sortMode` vaut `affinity` par défaut, avec bascule note ou date. Les boutons Accepter et Décliner sont déjà présents sur chaque carte de la liste, sans ouvrir le profil, mais passent tous deux par une boîte de dialogue de confirmation.
+## 1. Cartographie de l'existant
 
-Le vrai manque côté propriétaire n'est donc pas le tri ni le plafond, c'est ce qui se passe **au moment où le propriétaire dépublie** avec des candidatures encore ouvertes, et la visibilité du reste à traiter. Le plan ci-dessous est recentré là-dessus.
+```text
+/inscription (Register.tsx, 870 l.)
+  étape 1 : rôle | étape 2 : email + mot de passe + CGU, ou Google
+  aucun champ identité (prénom, ville) collecté
+  post-signup : session immédiate, navigate("/dashboard")  [Register.tsx:325]
+        │
+        ▼
+OnboardingModal, 7 slides, strictement 1er login  [AppLayout.tsx:10,91]
+        │
+        ▼
+/dashboard (OwnerDashboard.tsx)
+  si completion < 60 et onboarding_minimal_completed :
+    OnboardingWelcome plein écran, checklist 5 étapes dans l'ordre :
+    avatar → logement → animaux → identité → PUBLIER (dernier)
+    [OnboardingWelcome.tsx:100-142, condition OwnerDashboard.tsx:158-166]
+    texte affiché : « À 60 %, vous pourrez publier votre première annonce »
+  sinon : cockpit, Star section variante "publish", CTA → /sits/create
+        │
+        ▼
+/sits/create (CreateSit.tsx, 2771 l.)
+  préflight : si logement OU animaux OU photo manquant
+    → écran setup bloquant (CreateSitSetupStep) avec saisie inline
+      InlineHousingBlock (écrit properties), PetsEditor (pets), InlinePhotoUpload
+    → bouton Continuer désactivé tant que les 3 blocs ne sont pas remplis,
+      animaux EXIGÉS [setupState.ts:52-64]
+  étape 0 L'essentiel : lieu (domicile), titre, dates
+  étape 1 La garde : lieu optionnel, description 2 champs (30 car. min chacun)
+  étape 2 Préférences : photo couverture, préférences, publication
+  règles : sitPublishRules.ts (animaux advisory depuis le 12/08, photo requise,
+  pas de seuil de complétion)
+```
 
-Chiffres actuels : 77 conversations, 220 messages humains, 34 non lus répartis sur 27 conversations, 46 candidatures dont 9 encore ouvertes.
+Logement, animaux et galerie vivent sur `/owner-profile` (tables `properties` et `pets`, partagées entre toutes les annonces). Le setup step les édite déjà inline, sans quitter le tunnel.
 
----
+Sorties du tunnel : OnboardingWelcome dismissable (localStorage persistant), OnboardingModal fermable, setup step SANS sortie quand ouvert par le préflight (`canGoBack: false`), formulaire avec autosauvegarde brouillon.
 
-## Volet 1, écran de conversations admin
+## 2. Points de fuite (appuyés sur code + données)
 
-### Ce qu'on construit
+- **Fuite 1, inscription → vide (4/20 à 0 %)** : aucun champ profil à l'inscription, puis 7 slides de modal avant tout accès. Les 3 comptes à 0 % ont `onboarding_minimal_completed = false` : ils décrochent au modal ou juste après.
+- **Fuite 2, checklist inversée (7/20 profils partiels sans logement)** : OnboardingWelcome présente « Publiez votre première annonce » en 5e et dernière position, après avatar et identité qui ne servent pas à publier. Pire, la phrase « À 60 %, vous pourrez publier » est factuellement fausse : `useAccessLevel.ts:56-66` donne `canPublish: true` aux propriétaires quel que soit le score. Elle dit à un propriétaire à 40 % qu'il ne peut pas publier alors qu'il le peut.
+- **Fuite 3, rupture profil/annonce (2/20)** : logement + animaux remplis, zéro annonce. Ils ont fait le profil et ne sont jamais allés sur /sits/create.
+- **Fuite 4, brouillon abandonné (7 en base)** : le draft est créé puis quitté, relance seulement à J+1.
+- **Fuite 5, blocage dur latent** : un propriétaire sans animaux (maison, jardin, légitime depuis le 12/08) ne peut PAS passer l'écran setup : `canContinue` exige `hasPets`. Contradiction directe avec sitPublishRules, sans issue ni retour possible.
 
-`/admin/messages` gagne un second onglet, Conversations, à côté de l'onglet Statistiques actuel (les 6 KPI, la répartition par type, le graphe 14 jours et le Top 20 restent tels quels).
+Le seuil 85-95 % chez les publiés est une corrélation (publier exige logement + photo + description, ce qui gonfle le score), pas un gate.
 
-Liste paginée et filtrable de toutes les conversations :
+## 3. Parcours cible proposé
 
-- colonnes : participants (propriétaire et gardien, avatar et prénom), contexte (candidature, contact gardien, coup de main, privé), annonce ou mission liée, nombre de messages, dernier message (extrait et date), non lus, statut de réponse
-- filtres : période, contexte, recherche par nom de membre, et surtout **deux filtres de service** : « sans réponse » (un seul participant a écrit) et « non lus depuis plus de N jours »
-- tri par dernier message, par ancienneté du non-lu, par volume
-- clic sur une ligne : panneau latéral avec le fil complet, qui a écrit, quand, lu ou pas, messages système distingués, messages masqués par la modération signalés comme tels
-- liens croisés vers `/admin/users?id=` et vers l'annonce
+Principe : pour un propriétaire, la création d'annonce EST la fin de l'inscription. Le tunnel inline existe déjà, le problème est que personne n'y arrive.
 
-Le classement Top 20 gagne un lien « voir ses conversations » qui pré-filtre l'onglet Conversations sur ce membre, ce qui règle le cas du membre 58e invisible.
+```text
+/inscription (inchangé : rôle, email, mot de passe)
+   │  session immédiate
+   ▼
+/sits/create?source=signup  (direct, pas de dashboard, modal différé)
+   │  écran setup enrichi :
+   │    0. prénom + code postal si absents (écrits sur profiles)
+   │    1. logement (existant, inline)
+   │    2. animaux, devenus OPTIONNELS (« si vous en avez »)
+   │    3. une photo (existant)
+   ▼
+formulaire 3 étapes → publication
+Sortie honnête permanente : « Je préfère faire ça plus tard » → /dashboard
+```
 
-### Tables et composants
+Sur la rupture logement/animaux : ne PAS déplacer les données. `properties` et `pets` sont partagées entre annonces, l'édition inline dans le tunnel (déjà existante) est la bonne réponse, étendue à prénom/ville. `/owner-profile` reste l'écran d'enrichissement ultérieur. Doctrine sitPublishRules conservée : ne bloquer que sur l'actionnable (titre, dates, description, photo).
 
-- tables : `conversations`, `messages`, `profiles`, `sits`, `small_missions`
-- nouveau : `src/pages/admin/AdminMessages.tsx` passe en deux onglets, plus `src/components/admin/messages/ConversationsTable.tsx` et `ConversationThreadPanel.tsx`
-- réutilisation directe de `ListingDrilldownDialog.tsx`, qui fait déjà exactement ça mais annonce par annonce
+## 4. Découpage en lots
 
-### Contrainte technique décisive
+**Lot 0, correctifs de cohérence (gain immédiat, risque faible)**
+- Corriger la phrase « À 60 %… » dans OnboardingWelcome (fausse) et réordonner la checklist : publier en premier.
+- `setupState.ts` : animaux passent en recommandé, non bloquant (alignement 12/08). `CreateSitSetupStep.tsx` : bloc animaux affiché comme optionnel, Continuer actif sans animaux.
+- Fichiers : `OnboardingWelcome.tsx`, `src/lib/setupState.ts`, `CreateSitSetupStep.tsx`, tests `setupState` + Playwright `signup-flow`.
+- À tester : parcours sans animaux possible de bout en bout, checklist réordonnée.
 
-Les policies de `messages` et `conversations` n'autorisent que les **participants**. Aucune policy admin. Un admin qui interroge ces tables depuis le client ne voit rien. Tout passe donc obligatoirement par des fonctions SECURITY DEFINER, comme `admin_get_listing_conversations` et `admin_get_conversation_messages` déjà en place. On ajoute deux fonctions du même modèle, avec contrôle de rôle admin à l'intérieur :
+**Lot 1, tunnel post-signup (structurant, risque moyen)**
+- `Register.tsx` : `postAuthTarget` propriétaire → `/sits/create?source=signup` (sauf redirect explicite), email et Google (l. 325, 422).
+- `OnboardingModal` : différé au premier retour dashboard pour un owner frais, ne pas interrompre le tunnel.
+- `CreateSitSetupStep` : bloc identité (prénom + code postal) si absent, écriture `profiles`. Sortie « plus tard » explicite vers /dashboard même en préflight.
+- À tester : specs `signup-flow.spec.ts` (redirect changé), `sits-create-alma-bubble`, `sit-draft-autosave`, parcours complet mobile 390 px.
 
-- `admin_list_conversations(p_since, p_context, p_user_id, p_only_unanswered, p_limit, p_offset)`
-- `admin_conversation_search(p_query)` pour la recherche par membre
+**Lot 2, instrumentation (risque nul)**
+- Événement `sit_first_publish` avec `minutes_since_signup` et `same_session`. Conserver les événements existants (`sits_create_preflight_blocked`, `setup_shown`, `setup_completed`, `step_started/completed`).
+- Requête de cohorte SQL documentée dans le code.
 
-`admin_get_conversation_messages(uuid)` est réutilisée telle quelle pour le fil.
+**Lot 3, relance recalibrée (optionnel, après mesure)**
+- `send-sit-draft-reminder` : ajouter une relance H+2 pour les brouillons créés en session d'inscription, en plus du J+1. Aucun autre cron touché.
 
-### Ampleur et risques
+## 5. Mesure
 
-Ampleur : **moyen**, environ deux fonctions SQL et trois composants.
+- Indicateur principal : taux de publication en première session = propriétaires avec `published_at` ≤ 24 h après `created_at` / propriétaires inscrits. Baseline actuelle : 25 % (4/16).
+- Secondaires : taux d'entrée dans /sits/create en première session, taux de complétion du setup, durée médiane signup → publication (baseline : 24 min à 5 h 48).
+- Fenêtre de lecture : cumul 30 jours glissants. À 3 inscriptions propriétaires par semaine, aucune lecture hebdomadaire ni A/B n'est exploitable, on lira une tendance sur 4 à 6 semaines.
 
-Risques :
+## 6. Ce que je déconseille, franchement
 
-- aucune modification des policies existantes, donc aucun risque de fuite côté membre, à condition que les nouvelles fonctions vérifient le rôle admin en première ligne et soient révoquées de `public`
-- lecture seule, aucun trigger de notification touché, aucun `read_at` modifié par l'admin (consulter un fil ne doit jamais marquer comme lu côté membre)
-- le dédoublonnage de conversations de début août est neutre ici, la liste lit l'état courant
-- point de vigilance produit et RGPD : consulter le contenu privé des membres est une capacité sensible, à tracer dans `admin_action_logs` à chaque ouverture de fil
+- **Le blocage dur** (« impossible de terminer l'inscription sans brouillon ») : il produira des brouillons coquilles vides qui pollueront les relances, le back-office et l'indicateur lui-même, et il fait fuir les « je m'inscris pour plus tard » qui seraient revenus. Le mur souple (tunnel par défaut, sortie visible mais pas mise en avant) obtient l'essentiel du résultat sans dark pattern.
+- **Ajouter prénom/ville au formulaire d'inscription** : chaque champ à l'inscription coûte des inscrits. Ces champs ont une raison d'être visible dans le tunnel (l'annonce), pas sur le formulaire de compte.
+- **Dupliquer logement/animaux dans l'annonce** : casse le partage entre annonces et EditSit.
+- **Sur-instrumenter avant le Lot 1** : avec ce volume, les événements existants suffisent à lire l'effet, le Lot 2 n'ajoute que le marqueur de cohorte indispensable.
 
----
+## Détails techniques
 
-## Volet 2, candidatures côté propriétaire
-
-Trois chantiers, indépendants, à trancher séparément.
-
-### 2.1 Filet de sécurité à la dépublication (le symptôme décrit)
-
-Aujourd'hui rien n'empêche de dépublier avec 6 candidatures ouvertes, et les candidats restent sans réponse.
-
-- au clic sur Dépublier, si des candidatures sont encore ouvertes, boîte de dialogue qui les nomme et propose deux issues : les décliner en un geste avec un message type, ou dépublier en les laissant ouvertes
-- si le propriétaire dépublie sans traiter, la fermeture automatique des candidatures orphelines déjà en place prend le relais, avec le gabarit à trois cas déjà écrit
-
-Composants : `OwnerSitView.tsx`, `Sits.tsx`, plus un composant de dialogue dédié. Ampleur : **petit**.
-Risque : le déclin en masse déclenche autant d'emails, à faire passer par la même file que les déclins unitaires pour respecter les plafonds d'envoi.
-
-### 2.2 Réponse en un clic, réellement en un clic
-
-Les boutons existent mais imposent une confirmation modale à chaque candidature.
-
-- Décliner : action immédiate avec message type par défaut et bandeau d'annulation pendant quelques secondes, la modale ne s'ouvre que si le propriétaire veut personnaliser
-- Accepter : la confirmation reste, c'est un engagement contractuel qui déclenche l'accord de garde
-
-Composant : `ApplicationsList.tsx`. Ampleur : **petit à moyen**.
-Risque : le déclin envoie un email au gardien, l'annulation doit donc différer l'envoi, sinon un déclin annulé part quand même.
-
-### 2.3 Visibilité du reste à traiter
-
-- compteur permanent « X candidatures à traiter » sur la carte d'annonce du tableau de bord propriétaire, pas seulement dans la vue détaillée
-- rappel au propriétaire au bout de quelques jours quand des candidatures restent en `pending`, la fonction de détection existe déjà côté supervision
-
-Composants : tableau de bord propriétaire, `ApplicationsSection.tsx`, `ApplicationCapSection.tsx`. Ampleur : **petit**.
-
-### Ce que je ne recommande pas
-
-Durcir le plafond `max_applications` en dessous de 5, ou le rendre bloquant plus tôt. Avec 9 candidatures ouvertes sur toute la plateforme, le volume n'est pas le problème, la relance et la clôture le sont. Un plafond plus bas priverait surtout les propriétaires de choix.
-
----
-
-## Ordre proposé
-
-1. Volet 2.1, filet de dépublication, c'est le symptôme vécu et le plus court
-2. Volet 1, onglet Conversations admin
-3. Volets 2.2 et 2.3 selon ce que l'usage montre après le 2.1
-
-Dites-moi ce que vous gardez et dans quel ordre.
+- Aucune migration SQL nécessaire pour les lots 0 à 2 (toutes les colonnes existent : `first_name`, `postal_code`, `properties`, `pets`, `sits.status`, `published_at`).
+- Contraintes éditoriales appliquées : vouvoiement, aucun tiret cadratin, aucun mot proscrit, pas d'icônes décoratives dans les nouveaux textes.
+- Garde-fous existants à faire passer : tests Vitest (`setupState`, `sitPublishRules`, guards), Playwright `signup-flow.spec.ts` et `sit-draft-autosave`.
