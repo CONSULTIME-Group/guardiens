@@ -4,7 +4,6 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { supabase } from "@/integrations/supabase/client";
-import PageMeta from "@/components/PageMeta";
 import { useAdmin } from "@/hooks/useAdmin";
 import { Navigate } from "react-router-dom";
 
