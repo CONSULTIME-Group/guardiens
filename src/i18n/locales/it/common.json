@@ -153,7 +153,7 @@
       "need_footer": "Un servizio in cambio di un servizio. Questa è la sfida.",
       "offer_title": "«Posso dedicare un po' del mio tempo»",
       "offer_text": "Sa potare i rosai. Adora i cani. Ha due ore sabato mattina. Proponga, e viva ciò che non avrebbe mai vissuto senza quell'incontro.",
-      "offer_footer": "È così che si ricuce il tessuto locale.",
+      "offer_footer": "È così che si ricuce il tessuto.",
       "seen_this_week": "Alcuni scambi visti su Guardiens questa settimana",
       "examples": {
         "water_plants": "Innaffiare le piante",
@@ -183,7 +183,7 @@
       "p3_title": "Profili documentati, recensioni incrociate",
       "p3_text": "Ogni profilo mostra le recensioni pubblicate dai proprietari precedenti e la cronologia delle custodie effettuate. L'incontro di persona prima di ogni custodia resta il cuore della fiducia.",
       "p4_title": "Dalla Sua via all'altro capo dell'Italia",
-      "p4_text": "Iper-locale per un aiuto rapido, più ampio per cambiare aria: Lei decide fin dove spingersi. Ogni custodia diventa una porta che si apre."
+      "p4_text": "Vicino a casa per un aiuto rapido, in tutta la Francia per cambiare aria: Lei decide fin dove spingersi. Ogni custodia diventa una porta che si apre."
     },
     "testimonials": {
       "title": "Hanno osato. Ecco cosa è rimasto loro.",
@@ -221,7 +221,7 @@
     "cities": {
       "eyebrow": "Guide & città",
       "title": "House-sitting vicino a Lei.",
-      "lede": "Guide concrete per preparare la Sua custodia e hub locali per le città più attive, Lyon, Annecy, Grenoble, e in tutta la Francia.",
+      "lede": "Guide concrete per preparare la Sua custodia e hub per le città più attive, Lyon, Annecy, Grenoble, e in tutta la Francia.",
       "guides_tag": "Guide & consigli",
       "guides_title": "Preparare la Sua custodia",
       "all_articles": "Tutti gli articoli",
@@ -275,7 +275,7 @@
         "cta": "Pubblicare il mio annuncio Francia"
       },
       "card2": {
-        "title": "Va all'estero, trovi un custode locale.",
+        "title": "Va all'estero, trovi un custode di fiducia.",
         "cta": "Vedere gli annunci internazionali"
       },
       "card3": {
@@ -310,7 +310,7 @@
     },
     "pros": {
       "title": "Veterinari, toelettatori, educatori, verificati Guardiens",
-      "subtitle": "Un elenco locale di professionisti per animali. I documenti SIRET sono analizzati automaticamente e le pratiche che non superano questo primo controllo sono riviste dal team. Il distintivo indica un SIRET convalidato.",
+      "subtitle": "Un elenco di professionisti per animali. I documenti SIRET sono analizzati automaticamente e le pratiche che non superano questo primo controllo sono riviste dal team. Il distintivo indica un SIRET convalidato.",
       "card1": {
         "title": "Veterinari",
         "cta": "Trovare un veterinario vicino"
@@ -457,7 +457,7 @@
         },
         "c2": {
           "label": "House-sitting ad Annecy",
-          "desc": "Lago, montagna, seconde case in Alta Savoia. Sitter locali che conoscono il gelo, gli accessi e i veterinari."
+          "desc": "Lago, montagna, seconde case in Alta Savoia. Sitter che conoscono il gelo, gli accessi e i veterinari."
         },
         "c3": {
           "label": "House-sitting a Grenoble",
@@ -1154,7 +1154,7 @@
     "soon_title": "Presto disponibile. La rete di custodi d'emergenza si attiverà non appena avremo abbastanza custodi idonei ed esperti.",
     "soon_subtitle": "La nostra piattaforma è giovane. Ci prendiamo il tempo per designare sitter d'emergenza con criteri rigorosi.",
     "hero_title": "I sitter d'emergenza",
-    "hero_lead": "La Sua rete di sicurezza locale. Un imprevisto, una cancellazione dell'ultimo minuto, una partenza precipitosa? Le persone idonee della zona possono ricevere un avviso prioritario.",
+    "hero_lead": "La Sua rete di sicurezza. Un imprevisto, una cancellazione dell'ultimo minuto, una partenza precipitosa? Le persone idonee della zona possono ricevere un avviso prioritario.",
     "hero_tagline": "È la forza della prossimità: persone già sul posto, non dall'altra parte del paese.",
     "how_it_works": "Come funziona?",
     "step1_title": "Un proprietario ha un bisogno urgente",
@@ -1171,7 +1171,7 @@
     "story2_name": "Pierre, Annecy",
     "story2_text": "Pastore australiano di 5 anni, magnifico ma reattivo con gli sconosciuti. Pierre doveva partire cinque giorni per lavoro. Ha attivato l'allerta. Un sitter formato per cani di carattere ha risposto la sera stessa.",
     "story3_name": "Camille, Grenoble",
-    "story3_text": "Lutto improvviso a Parigi. Camille doveva partire quattro giorni, il suo gatto di 14 anni non sopporta più i trasferimenti. L'allerta è partita la mattina, un sitter locale ha risposto prima di mezzogiorno.",
+    "story3_text": "Lutto improvviso a Parigi. Camille doveva partire quattro giorni, il suo gatto di 14 anni non sopporta più i trasferimenti. L'allerta è partita la mattina, un sitter ha risposto prima di mezzogiorno.",
     "story4_name": "Sophie, Vieux-Lyon",
     "story4_text": "Cane diabetico, due iniezioni al giorno a orari fissi. Nessuno nella sua cerchia sapeva farlo. Sophie doveva assentarsi tre giorni. Un sitter d'emergenza con esperienza veterinaria ha risposto in giornata.",
     "story5_name": "Thomas, Chambéry",
@@ -1226,7 +1226,7 @@
     "engagement_p2": "Le cancellazioni sono rivalutate ogni 6 mesi: solo quelle degli ultimi 6 mesi contano per l'idoneità.",
     "faq_title": "Domande frequenti",
     "cities_title": "Sitter d'emergenza per città",
-    "cities_lead": "La rete d'emergenza si basa su custodi locali in tutta la Francia. Ecco le città dove la rete si costruisce per prima.",
+    "cities_lead": "La rete d'emergenza si basa su custodi in tutta la Francia. Ecco le città dove la rete si costruisce per prima.",
     "see_pricing": "Vedi tariffe",
     "further_kicker": "Per andare oltre",
     "further1_title": "Piccole missioni di aiuto reciproco",

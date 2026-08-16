@@ -153,7 +153,7 @@
       "need_footer": "Un servicio a cambio de un servicio. Esa es la apuesta.",
       "offer_title": "«Puedo dedicar un poco de mi tiempo»",
       "offer_text": "Usted sabe podar rosales. Le encantan los perros. Tiene dos horas el sábado por la mañana. Proponga, y viva lo que nunca habría vivido sin ese encuentro.",
-      "offer_footer": "Así es como se reconstruye el tejido local.",
+      "offer_footer": "Así es como se reconstruye el tejido.",
       "seen_this_week": "Algunos intercambios vistos en Guardiens esta semana",
       "examples": {
         "water_plants": "Regar las plantas",
@@ -183,7 +183,7 @@
       "p3_title": "Perfiles documentados, reseñas cruzadas",
       "p3_text": "Cada perfil muestra las reseñas publicadas por propietarios anteriores y el historial de cuidados realizados. El encuentro presencial previo a cada cuidado sigue siendo el corazón de la confianza.",
       "p4_title": "Desde su calle hasta el otro extremo del país",
-      "p4_text": "Hiperlocal para una ayuda puntual, ampliado para cambiar de aire: usted decide hasta dónde quiere llegar. Cada cuidado se convierte en una puerta que se abre."
+      "p4_text": "Cerca de casa para una ayuda puntual, en toda Francia para cambiar de aire: usted decide hasta dónde quiere llegar. Cada cuidado se convierte en una puerta que se abre."
     },
     "testimonials": {
       "title": "Ellos se atrevieron. Esto es lo que les queda.",
@@ -221,7 +221,7 @@
     "cities": {
       "eyebrow": "Guías y ciudades",
       "title": "house-sitting cerca de su hogar.",
-      "lede": "Guías concretas para preparar su cuidado y centros locales para las ciudades más activas como Lyon, Annecy, Grenoble y toda Francia.",
+      "lede": "Guías concretas para preparar su cuidado y centros para las ciudades más activas como Lyon, Annecy, Grenoble y toda Francia.",
       "guides_tag": "Guías y consejos",
       "guides_title": "Preparar su cuidado",
       "all_articles": "Todos los artículos",
@@ -275,7 +275,7 @@
         "cta": "Publicar mi anuncio Francia"
       },
       "card2": {
-        "title": "Viaja al extranjero, encuentre un cuidador local.",
+        "title": "Viaja al extranjero, encuentre un cuidador de confianza.",
         "cta": "Ver anuncios internacionales"
       },
       "card3": {
@@ -310,7 +310,7 @@
     },
     "pros": {
       "title": "Veterinarios, peluqueros, educadores, verificados Guardiens",
-      "subtitle": "Un directorio local de profesionales para animales. Los justificantes SIRET se analizan automáticamente y los expedientes que no superan este primer control son revisados por el equipo. La insignia indica un SIRET validado.",
+      "subtitle": "Un directorio de profesionales para animales. Los justificantes SIRET se analizan automáticamente y los expedientes que no superan este primer control son revisados por el equipo. La insignia indica un SIRET validado.",
       "card1": {
         "title": "Veterinarios",
         "cta": "Encontrar un veterinario cerca"
@@ -457,7 +457,7 @@
         },
         "c2": {
           "label": "House-sitting en Annecy",
-          "desc": "Lago, montaña, segundas residencias en Alta Saboya. Cuidadores locales que conocen el hielo, los accesos y los veterinarios."
+          "desc": "Lago, montaña, segundas residencias en Alta Saboya. Cuidadores que conocen el hielo, los accesos y los veterinarios."
         },
         "c3": {
           "label": "House-sitting en Grenoble",
@@ -1154,7 +1154,7 @@
     "soon_title": "Próximamente. La red de cuidadores de urgencia se activará en cuanto tengamos suficientes cuidadores elegibles y con experiencia.",
     "soon_subtitle": "Nuestra plataforma es joven. Nos tomamos el tiempo para designar cuidadores de urgencia con criterios estrictos.",
     "hero_title": "Los cuidadores de urgencia",
-    "hero_lead": "Su red de seguridad local. ¿Un imprevisto, una cancelación de última hora, una salida precipitada? Las personas elegibles de la zona pueden recibir una alerta prioritaria.",
+    "hero_lead": "Su red de seguridad. ¿Un imprevisto, una cancelación de última hora, una salida precipitada? Las personas elegibles de la zona pueden recibir una alerta prioritaria.",
     "hero_tagline": "Esa es la fuerza de la proximidad: personas que ya están en el sitio, no al otro lado del país.",
     "how_it_works": "¿Cómo funciona?",
     "step1_title": "Un propietario tiene una necesidad urgente",
@@ -1171,7 +1171,7 @@
     "story2_name": "Pierre, Annecy",
     "story2_text": "Pastor australiano de 5 años, reactivo con desconocidos. Pierre debía irse cinco días por trabajo. Sin opción de residencia. Activó la alerta. Un cuidador formado en perros de carácter respondió esa misma noche. Pierre partió tranquilo.",
     "story3_name": "Camille, Grenoble",
-    "story3_text": "Fallecimiento repentino de un familiar en París. Camille debía partir cuatro días, su gato de 14 años no soporta los traslados. La alerta salió por la mañana, un cuidador local respondió antes del mediodía.",
+    "story3_text": "Fallecimiento repentino de un familiar en París. Camille debía partir cuatro días, su gato de 14 años no soporta los traslados. La alerta salió por la mañana, un cuidador respondió antes del mediodía.",
     "story4_name": "Sophie, Vieux-Lyon",
     "story4_text": "Perro diabético, dos inyecciones diarias a horas fijas. Nadie en su entorno sabía hacerlo. Sophie debía ausentarse tres días. Activó la alerta especificando la competencia de cuidado. Un cuidador con experiencia veterinaria respondió ese día.",
     "story5_name": "Thomas, Chambéry",
@@ -1226,7 +1226,7 @@
     "engagement_p2": "Las cancelaciones se reevalúan cada 6 meses: solo las de los últimos 6 meses cuentan para la elegibilidad.",
     "faq_title": "Preguntas frecuentes",
     "cities_title": "Cuidadores de urgencia por ciudad",
-    "cities_lead": "La red de urgencia se apoya en cuidadores locales por toda Francia. Estas son las ciudades donde la red se construye primero.",
+    "cities_lead": "La red de urgencia se apoya en cuidadores por toda Francia. Estas son las ciudades donde la red se construye primero.",
     "see_pricing": "Ver tarifas",
     "further_kicker": "Para ir más lejos",
     "further1_title": "Pequeñas misiones de ayuda mutua",

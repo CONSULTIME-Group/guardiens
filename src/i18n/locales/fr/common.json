@@ -153,7 +153,7 @@
       "need_footer": "Un service contre un service. C'est le pari.",
       "offer_title": "« Je peux donner un peu de mon temps »",
       "offer_text": "Vous savez tailler les rosiers. Vous adorez les chiens. Vous avez deux heures samedi matin. Proposez, et vivez ce que vous n'auriez jamais vécu sans cette rencontre.",
-      "offer_footer": "C'est comme ça qu'un tissu local se retisse.",
+      "offer_footer": "C'est comme ça qu'un tissu se retisse.",
       "seen_this_week": "Quelques échanges vus sur Guardiens cette semaine",
       "examples": {
         "water_plants": "Arroser les plantes",
@@ -183,7 +183,7 @@
       "p3_title": "Profils documentés, avis croisés",
       "p3_text": "Chaque profil affiche les avis publiés par les propriétaires précédents et l'historique des gardes réalisées. La rencontre physique préalable à toute garde reste au cœur de la confiance.",
       "p4_title": "De votre rue à l'autre bout de la France",
-      "p4_text": "Hyper-local pour un dépannage, élargi pour changer d'air : vous décidez jusqu'où vous voulez aller. Chaque garde devient une porte qui s'ouvre."
+      "p4_text": "Près de chez vous pour un dépannage, à l'autre bout de la France pour changer d'air : vous décidez jusqu'où vous voulez aller. Chaque garde devient une porte qui s'ouvre."
     },
     "testimonials": {
       "title": "Ils ont osé. Voici ce qu'il leur reste.",
@@ -221,7 +221,7 @@
     "cities": {
       "eyebrow": "Guides & villes",
       "title": "House-sitting près de chez vous.",
-      "lede": "Des guides concrets pour préparer votre garde, et des hubs locaux pour les villes les plus actives, Lyon, Annecy, Grenoble, et partout en France.",
+      "lede": "Des guides concrets pour préparer votre garde, et des hubs pour les villes les plus actives, Lyon, Annecy, Grenoble, et partout en France.",
       "guides_tag": "Guides & conseils",
       "guides_title": "Préparer votre garde",
       "all_articles": "Tous les articles",
@@ -275,7 +275,7 @@
         "cta": "Publier mon annonce France"
       },
       "card2": {
-        "title": "Vous partez à l'étranger, trouvez un gardien local.",
+        "title": "Vous partez à l'étranger, trouvez un gardien de confiance.",
         "cta": "Voir les annonces internationales"
       }
     },
@@ -306,7 +306,7 @@
     },
     "pros": {
       "title": "Vétérinaires, toiletteurs, éducateurs, vérifiés Guardiens",
-      "subtitle": "Un annuaire local de professionnels animaliers. Les justificatifs SIRET sont analysés automatiquement, et les dossiers qui ne passent pas ce premier contrôle sont revus par l'équipe. Le badge signale un SIRET validé.",
+      "subtitle": "Un annuaire de professionnels animaliers. Les justificatifs SIRET sont analysés automatiquement, et les dossiers qui ne passent pas ce premier contrôle sont revus par l'équipe. Le badge signale un SIRET validé.",
       "card1": {
         "title": "Vétérinaires",
         "cta": "Trouver un véto près de chez moi"
@@ -453,7 +453,7 @@
         },
         "c2": {
           "label": "House-sitting à Annecy",
-          "desc": "Lac, montagne, résidences secondaires en Haute-Savoie. Des gardiens locaux qui connaissent le gel, les accès et les vétos."
+          "desc": "Lac, montagne, résidences secondaires en Haute-Savoie. Des gardiens qui connaissent le gel, les accès et les vétos."
         },
         "c3": {
           "label": "House-sitting à Grenoble",
@@ -1149,7 +1149,7 @@
     "soon_title": "Bientôt disponible, le réseau de gardiens d'urgence sera activé dès que nous aurons suffisamment de gardiens éligibles et expérimentés.",
     "soon_subtitle": "Notre plateforme est jeune. Nous prenons le temps de désigner des gardiens d'urgence sur des critères stricts pour garantir la fiabilité du service.",
     "hero_title": "Les gardiens d'urgence",
-    "hero_lead": "Votre filet de sécurité local. Un imprévu, une annulation de dernière minute, un départ précipité ? Des gens du coin éligibles peuvent être alertés en priorité.",
+    "hero_lead": "Votre filet de sécurité. Un imprévu, une annulation de dernière minute, un départ précipité ? Des gens du coin éligibles peuvent être alertés en priorité.",
     "hero_tagline": "C'est la force de la proximité : des personnes déjà sur place, pas à l'autre bout du pays.",
     "how_it_works": "Comment ça marche ?",
     "step1_title": "Un proprio a un besoin urgent",
@@ -1222,7 +1222,7 @@
     "engagement_p2": "Les annulations sont réévaluées tous les 6 mois : seules celles des 6 derniers mois comptent pour l'éligibilité.",
     "faq_title": "Questions fréquentes",
     "cities_title": "Gardiens d'urgence par ville",
-    "cities_lead": "Le réseau d'urgence s'appuie sur des gardiens locaux partout en France. Voici les villes où le réseau se construit en priorité.",
+    "cities_lead": "Le réseau d'urgence s'appuie sur des gardiens partout en France. Voici les villes où le réseau se construit en priorité.",
     "see_pricing": "Voir les tarifs",
     "further_kicker": "Pour aller plus loin",
     "further1_title": "Petites missions d'entraide",
