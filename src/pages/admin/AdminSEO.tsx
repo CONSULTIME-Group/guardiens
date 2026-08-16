@@ -25,6 +25,8 @@ import NoImpressionActionable from "@/components/admin/seo/NoImpressionActionabl
 import UrlInspectionCard from "@/components/admin/seo/UrlInspectionCard";
 import CoreWebVitalsCard from "@/components/admin/seo/CoreWebVitalsCard";
 import GA4DiagnosticCard from "@/components/admin/seo/GA4DiagnosticCard";
+import { AcquisitionPilotCard } from "@/pages/admin/_components/dashboard/AcquisitionPilotCard";
+import AiAcquisitionCard from "@/pages/admin/_components/dashboard/AiAcquisitionCard";
 import { useSeoData, type GSCRow } from "@/hooks/useSeoData";
 import type { BingPeriodDays } from "@/hooks/useBingData";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
@@ -419,6 +421,13 @@ const AdminSEO = () => {
           Performance CTAs articles
         </h2>
         <ArticleCtaPerformance />
+      </section>
+
+      {/* SECTION, Pilotage acquisition (déplacé de la vue d'ensemble) */}
+      <section className="space-y-4">
+        <h2 className="text-lg font-semibold text-foreground border-b pb-2">Pilotage acquisition</h2>
+        <AcquisitionPilotCard />
+        <AiAcquisitionCard />
       </section>
 
       {/* Quick links */}
