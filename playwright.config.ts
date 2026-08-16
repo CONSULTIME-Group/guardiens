@@ -28,6 +28,10 @@ try {
     use: {
       headless: true,
       viewport: { width: 1280, height: 900 },
+      // Locale figée : l'app suit la langue du navigateur (détection i18n
+      // querystring → localStorage → navigator) et les specs assertent du
+      // français. Sans cela, un Chromium en-US les fait toutes échouer.
+      locale: "fr-FR",
     },
     projects: [
       {
