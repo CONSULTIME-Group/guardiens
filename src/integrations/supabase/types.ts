@@ -983,7 +983,7 @@ export type Database = {
           },
         ]
       }
-      article_translations_archive_de_it: {
+      article_translations_archive: {
         Row: {
           archived_at: string
           article_id: string
