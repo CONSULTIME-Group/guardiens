@@ -3,26 +3,18 @@ import { initReactI18next } from "react-i18next";
 import LanguageDetector from "i18next-browser-languagedetector";
 import { LANG_STORAGE_KEY, migrateLegacyLangStorage } from "@/lib/langStorageKey";
 
-// Seul le français est embarqué dans le bundle d'entrée : c'est la langue de
-// repli et la langue de la très grande majorité des visites. Le dictionnaire
-// anglais est chargé à la demande par loadLanguage(), en chunk séparé, pour
-// ne pas faire télécharger et analyser un dictionnaire inutile avant le
-// premier rendu.
+// Guardiens est monolingue français depuis le 17/08/2026 : allemand, italien,
+// espagnol puis anglais ont été retirés, chacun mesuré sans audience dans
+// Search Console. i18next reste en place avec le seul dictionnaire français :
+// tous les appels t() fonctionnent à l'identique. Ce retrait concerne une
+// langue, pas l'internationalisation elle-même.
 //
-// Langues retirées le 17/08/2026 : allemand, italien puis espagnol. Leurs
-// variantes `?lang=de|it|es` connues de Google renvoyaient `noindex` +
-// canonique vers le français, combinaison déconseillée. Elles retombent
-// désormais sur un rendu français indexable (voir LangUrlSync et
-// resolveInitialLang).
+// Les anciennes variantes `?lang=de|it|es|en` connues de Google retombent sur
+// un rendu français indexable (voir LangUrlSync et resolveInitialLang).
 import frCommon from "./locales/fr/common.json";
 
-export const SUPPORTED_LANGS = ["fr", "en"] as const;
+export const SUPPORTED_LANGS = ["fr"] as const;
 export type SupportedLang = (typeof SUPPORTED_LANGS)[number];
-
-export const LANG_LABELS: Record<SupportedLang, { native: string; flag: string }> = {
-  fr: { native: "Français", flag: "🇫🇷" },
-  en: { native: "English", flag: "🇬🇧" },
-};
 
 // Une seule mémoire de langue : les clés héritées d'anciennes versions du
 // détecteur sont reprises puis effacées avant toute détection.
@@ -39,16 +31,15 @@ void i18n
     resources: {
       fr: { common: frCommon },
     },
-    // Les dictionnaires arrivent après l'init, via addResourceBundle : sans
-    // cette option, i18next considérerait les langues absentes des resources
-    // comme non chargées et n'irait jamais les relire.
+    // Conservée pour le jour où un dictionnaire arriverait après l'init :
+    // sans cette option, i18next considérerait une langue absente des
+    // resources comme non chargée et n'irait jamais la relire.
     partialBundledLanguages: true,
     load: "languageOnly",
     detection: {
-      // Un lien explicite (`?lang=xx`) gagne toujours. Sans paramètre, le
-      // choix mémorisé prend le relais, puis la langue du navigateur. Sans
-      // cette persistance, la première navigation interne sans querystring
-      // retombait en français : c'était le mécanisme exact du bug.
+      // Un lien explicite (`?lang=fr`) gagne toujours. Sans paramètre, le
+      // choix mémorisé prend le relais, puis la langue du navigateur. Avec
+      // un seul dictionnaire, tout cela converge vers le français.
       // Une seule clé de stockage, définie dans src/lib/langStorageKey.ts.
       order: ["querystring", "localStorage", "navigator"],
       caches: ["localStorage"],
@@ -60,30 +51,12 @@ void i18n
   });
 
 /**
- * Charge à la demande le dictionnaire d'une langue autre que le français.
- *
- * Le chemin d'import est écrit en dur dans chaque branche : Vite a besoin de
- * littéraux statiques pour produire un chunk par langue. Un échec réseau est
- * absorbé sans bruit, la page reste alors en français plutôt que de casser.
+ * Monolingue français : il n'existe plus aucun dictionnaire à charger à la
+ * demande. Conservée pour les appelants historiques (LangUrlSync, main.tsx),
+ * la fonction est volontairement sans effet.
  */
-export async function loadLanguage(lng: string): Promise<void> {
-  if (lng === "fr") return;
-  if (!(SUPPORTED_LANGS as readonly string[]).includes(lng)) return;
-  if (i18n.hasResourceBundle(lng, "common")) return;
-
-  try {
-    let mod: { default: Record<string, unknown> };
-    switch (lng) {
-      case "en":
-        mod = await import("./locales/en/common.json");
-        break;
-      default:
-        return;
-    }
-    i18n.addResourceBundle(lng, "common", mod.default, true, true);
-  } catch {
-    // Chargement impossible (réseau, CDN) : repli silencieux sur le français.
-  }
+export async function loadLanguage(_lng: string): Promise<void> {
+  return;
 }
 
 // Sync <html lang> on every language change.

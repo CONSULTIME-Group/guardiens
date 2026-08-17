@@ -3,34 +3,12 @@ import fs from "node:fs";
 import path from "node:path";
 
 /**
- * Trois garde-fous i18n, exécutés en intégration continue avec le reste de la
- * suite Vitest :
- *
- * 1. parité des clés entre le français et l'anglais,
- * 2. absence de recopie du français dans l'anglais sur les textes longs,
- * 3. absence de chaîne visible en dur dans les fichiers déjà internationalisés
- *    des parcours de priorité 1 et 2.
+ * Garde-fou i18n, exécuté en intégration continue avec le reste de la suite
+ * Vitest. Depuis le 17/08/2026, Guardiens est monolingue français : les
+ * verrous de parité entre dictionnaires ont été retirés avec les langues
+ * étrangères. Reste le verrou d'usage : pas de chaîne visible en dur dans
+ * les fichiers déjà internationalisés.
  */
-
-const LOCALES = path.resolve(process.cwd(), "src/i18n/locales");
-const TARGETS = ["en"] as const;
-
-const read = (lng: string) =>
-  JSON.parse(fs.readFileSync(path.join(LOCALES, `${lng}/common.json`), "utf8"));
-
-const flatten = (obj: Record<string, unknown>, prefix = "", acc: Record<string, string> = {}) => {
-  for (const [key, value] of Object.entries(obj)) {
-    const full = prefix ? `${prefix}.${key}` : key;
-    if (value && typeof value === "object" && !Array.isArray(value)) {
-      flatten(value as Record<string, unknown>, full, acc);
-    } else if (typeof value === "string") {
-      acc[full] = value;
-    }
-  }
-  return acc;
-};
-
-const fr = flatten(read("fr"));
 
 /**
  * Fichiers déjà passés par t() sur les parcours publics et d'authentification.
@@ -49,30 +27,7 @@ const FORBIDDEN_LITERALS = [
   "gardien trouvé", "gardiens trouvés", "Recherche en cours", "Élargir à ",
 ];
 
-describe("garde-fous i18n", () => {
-  it("toute clé française existe dans les deux autres langues", () => {
-    const missing: string[] = [];
-    for (const lng of TARGETS) {
-      const dict = flatten(read(lng));
-      for (const key of Object.keys(fr)) {
-        if (!(key in dict)) missing.push(`${lng}: ${key}`);
-      }
-    }
-    expect(missing, `clés manquantes : ${missing.slice(0, 20).join(", ")}`).toEqual([]);
-  });
-
-  it("aucune valeur anglaise de plus de trois mots n'est identique au français", () => {
-    const en = flatten(read("en"));
-    const copied = Object.keys(fr).filter((key) => {
-      const source = fr[key];
-      if (!source || source.split(/\s+/).length <= 3) return false;
-      // Les valeurs purement techniques (URL, gabarits) ne sont pas traduisibles.
-      if (/^https?:|^\{\{/.test(source)) return false;
-      return en[key] === source;
-    });
-    expect(copied, `traductions anglaises oubliées : ${copied.slice(0, 20).join(", ")}`).toEqual([]);
-  });
-
+describe("garde-fou i18n", () => {
   it("les fichiers internationalisés ne réintroduisent pas de chaîne en dur", () => {
     const offenders: string[] = [];
     for (const file of I18N_LOCKED_FILES) {

@@ -1,4 +1,3 @@
-import UntranslatedNotice from "@/components/i18n/UntranslatedNotice";
 import { useEffect, useState } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import NotFound from "@/pages/NotFound";
@@ -12,7 +11,7 @@ import { ArrowLeft, ArrowRight, Calendar, MapPin, User, Compass, Building2 } fro
 import PageMeta from "@/components/PageMeta";
 import { logSeoSnapshot } from "@/lib/seoDebugLog";
 import { format } from "date-fns";
-import { fr, enUS, es, it as itLocale, de as deLocale } from "date-fns/locale";
+import { fr } from "date-fns/locale";
 import ArticleRenderer, { resolveImagePath } from "@/components/articles/ArticleRenderer";
 import ArticleAuthorBio from "@/components/articles/ArticleAuthorBio";
 import PageBreadcrumb from "@/components/seo/PageBreadcrumb";
@@ -134,21 +133,13 @@ function ArticleSeoLogger({ article }: { article: ArticleFull }) {
 export default function ArticleDetail() {
  const { slug } = useParams<{ slug: string }>();
  const navigate = useNavigate();
- const { t, i18n } = useTranslation();
+ const { t } = useTranslation();
  const { user, isAuthenticated } = useAuth();
  const [article, setArticle] = useState<ArticleFull | null>(null);
  const [loading, setLoading] = useState(true);
  const [relatedArticles, setRelatedArticles] = useState<RelatedArticle[]>([]);
  const [cityGuideSlug, setCityGuideSlug] = useState<string | null>(null);
  const [cityPageSlug, setCityPageSlug] = useState<string | null>(null);
- // true si lang=fr OU si une traduction existe pour la langue courante.
- // Sert à noindex les variantes ?lang=xx pointant vers du contenu FR (thin content SEO).
- const [hasTranslationForLang, setHasTranslationForLang] = useState<boolean>(true);
- // article_translations.noindex de la langue courante (true = variante désindexée).
- const [translationNoindex, setTranslationNoindex] = useState<boolean>(false);
- // Langues dont la traduction est indexable (noindex = false) : seules celles-là
- // sont déclarées en hreflang alternate.
- const [indexableLangs, setIndexableLangs] = useState<string[]>([]);
 
   useEffect(() => {
   if (!slug) return;
@@ -178,52 +169,7 @@ export default function ArticleDetail() {
 .eq("slug", slug)
 .eq("published", true)
 .maybeSingle();
- let art = data as ArticleFull | null;
- // Overlay traduction si langue ≠ fr
- const currentLang = (i18n.language || "fr").split("-")[0].toLowerCase();
- if (art) {
-   // Toutes les traductions de l'article : sert à l'overlay ET aux hreflang
-   // (seules les traductions noindex = false sont déclarées en alternate).
-   const { data: trAll, error: trErr } = await supabase
-     .from("article_translations")
-     .select("lang, noindex, title, excerpt, content, meta_title, meta_description, hero_image_alt")
-     .eq("article_id", art.id);
-   if (trErr) console.warn("[i18n] translation fetch error", trErr);
-   const rows = (trAll as Array<Record<string, any>> | null) || [];
-   if (!cancelled) {
-     setIndexableLangs(rows.filter((r) => r.noindex === false).map((r) => r.lang));
-   }
-   if (currentLang === "en") {
-     const tr = rows.find((r) => r.lang === currentLang);
-     if (tr) {
-       art = {
-         ...art,
-         title: tr.title || art.title,
-         excerpt: tr.excerpt || art.excerpt,
-         content: tr.content || art.content,
-         meta_title: tr.meta_title ?? art.meta_title,
-         meta_description: tr.meta_description ?? art.meta_description,
-         hero_image_alt: tr.hero_image_alt ?? art.hero_image_alt,
-       };
-       if (!cancelled) {
-         setHasTranslationForLang(true);
-         // noindex par défaut true côté base : absence de valeur = désindexé.
-         setTranslationNoindex(tr.noindex !== false);
-       }
-     } else {
-       console.info(`[i18n] no ${currentLang} translation for ${art.slug}`);
-       // Pas de traduction : la variante ?lang=xx sera noindexée (thin content).
-       if (!cancelled) {
-         setHasTranslationForLang(false);
-         setTranslationNoindex(true);
-       }
-     }
-   } else if (!cancelled) {
-     // Version française : suit uniquement articles.noindex.
-     setHasTranslationForLang(true);
-     setTranslationNoindex(false);
-   }
- }
+ const art = data as ArticleFull | null;
  setArticle(art);
  setLoading(false);
 
@@ -300,7 +246,7 @@ export default function ArticleDetail() {
  };
   fetchAll();
   return () => { cancelled = true; };
-  }, [slug, i18n.language]);
+  }, [slug]);
 
  // CTA tracking, listen for clicks on data-article-cta links inside the rendered article
  useEffect(() => {
@@ -407,9 +353,8 @@ export default function ArticleDetail() {
     type="article"
     publishedAt={article.published_at || undefined}
     author={article.author_name}
-    noindex={article.noindex === true || !hasTranslationForLang || translationNoindex}
+    noindex={article.noindex === true}
     canonical={article.canonical_url || undefined}
-    hreflangLangs={indexableLangs}
     />
     <ArticleSeoLogger article={article} />
 
@@ -473,7 +418,8 @@ export default function ArticleDetail() {
 
  <article className="max-w-3xl mx-auto px-4 py-8 animate-fade-in">
 
- {!hasTranslationForLang && <UntranslatedNotice className="mb-6" />}
+
+
 
 
  <header className="mb-8">
@@ -497,7 +443,7 @@ export default function ArticleDetail() {
  <div className="flex items-center gap-1.5 text-sm text-muted-foreground mb-4">
  <Calendar className="h-3.5 w-3.5" />
  {(() => {
-   const dfLocale = ({ fr, en: enUS, es, it: itLocale, de: deLocale } as any)[i18n.language] || fr;
+   const dfLocale = fr;
    const isUpdated = article.updated_at && article.created_at && new Date(article.updated_at).getTime() - new Date(article.created_at).getTime() > 86400000;
    const d = isUpdated ? article.updated_at : (article.published_at || article.created_at);
    const formatted = format(new Date(d), "d MMMM yyyy", { locale: dfLocale });
@@ -513,7 +459,7 @@ export default function ArticleDetail() {
  {article.published_at && (
  <span className="flex items-center gap-1">
  <Calendar className="h-3.5 w-3.5" />
- {format(new Date(article.published_at), "d MMMM yyyy", { locale: (({ fr, en: enUS, es, it: itLocale, de: deLocale } as any)[i18n.language] || fr) })}
+ {format(new Date(article.published_at), "d MMMM yyyy", { locale: fr })}
  </span>
  )}
  </div>

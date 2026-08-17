@@ -46,13 +46,7 @@ function loadStaticRoutes() {
     // robots.txt et <meta robots>). Source de vérité : siteRoutes.ts.
     const indexMatch = block.match(/index:\s*(true|false)/);
     const indexable = indexMatch ? indexMatch[1] === "true" : true;
-    // Traductions réelles de la page (hors fr) : mêmes valeurs que la prop
-    // `translatedLangs` de PageMeta, dont ce fichier est la source unique.
-    const translatedMatch = block.match(/translatedLangs:\s*\[([^\]]*)\]/);
-    const translatedLangs = translatedMatch
-      ? Array.from(translatedMatch[1].matchAll(/["']([^"']+)["']/g)).map((mm) => mm[1])
-      : [];
-    routes.push({ loc: path_, priority: priorityMatch[2], changefreq, indexable, translatedLangs });
+    routes.push({ loc: path_, priority: priorityMatch[2], changefreq, indexable });
   }
   if (routes.length === 0) throw new Error("Aucune route extraite de staticRoutes");
   return { siteUrl, routes };
@@ -104,57 +98,6 @@ function urlEntry(loc, lastmod, changefreq, priority) {
     <lastmod>${lastmod}</lastmod>
     <changefreq>${changefreq}</changefreq>
     <priority>${priority}</priority>
-  </url>`;
-}
-
-// Alternates linguistiques : émises uniquement pour les pages dont
-// `translatedLangs` est renseigné dans siteRoutes.ts (traduction réelle et
-// indexable, même source de vérité que PageMeta). Une page sans traduction
-// déclarée n'émet aucune alternate : ses variantes ?lang= sont noindex,
-// les déclarer ici serait un signal contradictoire.
-function urlEntryWithLangAlternates(loc, lastmod, changefreq, priority, translatedLangs) {
-  const base = escapeXml(SITE_URL + loc);
-  const langs = ["fr", ...translatedLangs.filter((l) => l !== "fr")];
-  const alt = langs.map((lng) => {
-    const href = lng === "fr" ? base : `${base}${loc.includes("?") ? "&" : "?"}lang=${lng}`;
-    return `    <xhtml:link rel="alternate" hreflang="${lng}" href="${escapeXml(href)}"/>`;
-  }).join("\n");
-  const xDefault = `    <xhtml:link rel="alternate" hreflang="x-default" href="${base}"/>`;
-  return `  <url>
-    <loc>${base}</loc>
-    <lastmod>${lastmod}</lastmod>
-    <changefreq>${changefreq}</changefreq>
-    <priority>${priority}</priority>
-${alt}
-${xDefault}
-  </url>`;
-}
-
-// Variante pour articles : alternates linguistiques selon les traductions
-// effectivement présentes en base (article_translations). FR = canonique.
-function articleUrlEntry(loc, lastmod, changefreq, priority, availableLangs) {
-  const base = escapeXml(SITE_URL + loc);
-  const langs = ["fr", ...availableLangs.filter((l) => l !== "fr")];
-  if (langs.length <= 1) {
-    return `  <url>
-    <loc>${base}</loc>
-    <lastmod>${lastmod}</lastmod>
-    <changefreq>${changefreq}</changefreq>
-    <priority>${priority}</priority>
-  </url>`;
-  }
-  const alt = langs.map((lng) => {
-    const href = lng === "fr" ? base : `${base}?lang=${lng}`;
-    return `    <xhtml:link rel="alternate" hreflang="${lng}" href="${escapeXml(href)}"/>`;
-  }).join("\n");
-  const xDefault = `    <xhtml:link rel="alternate" hreflang="x-default" href="${base}"/>`;
-  return `  <url>
-    <loc>${base}</loc>
-    <lastmod>${lastmod}</lastmod>
-    <changefreq>${changefreq}</changefreq>
-    <priority>${priority}</priority>
-${alt}
-${xDefault}
   </url>`;
 }
 
@@ -446,54 +389,15 @@ async function main() {
   }
 
 
-  // Map slug → langs disponibles (article_translations join articles)
-  // Filtre d'indexation : une traduction n'est déclarée que si
-  //   article_translations.noindex = false
-  //   ET l'article FR parent est indexable (published = true, noindex faux/null).
-  const articleLangs = new Map();
-  try {
-    const { data: trRows } = await supabase
-      .from("article_translations")
-      .select("lang, noindex, articles!inner(slug, published, noindex)");
-    let kept = 0;
-    for (const r of trRows || []) {
-      const slug = r.articles?.slug;
-      if (!slug) continue;
-      if (r.noindex !== false) continue;
-      if (r.articles?.published !== true) continue;
-      if (r.articles?.noindex === true) continue;
-      if (!articleLangs.has(slug)) articleLangs.set(slug, new Set());
-      articleLangs.get(slug).add(r.lang);
-      kept++;
-    }
-    console.log(
-      `  ↳ article_translations: ${kept} alternates indexables sur ${trRows?.length || 0} (${articleLangs.size} articles)`,
-    );
-  } catch (e) {
-    console.warn("  ⚠️  Failed to fetch article_translations:", e.message);
-  }
-
   const entries = [];
 
   for (const page of staticPages) {
-    // Alternates seulement si la page déclare des traductions réelles dans
-    // siteRoutes.ts (aujourd'hui : uniquement la home, en en/es).
-    entries.push(
-      page.translatedLangs.length > 0
-        ? urlEntryWithLangAlternates(page.loc, today, page.changefreq, page.priority, page.translatedLangs)
-        : urlEntry(page.loc, today, page.changefreq, page.priority),
-    );
+    entries.push(urlEntry(page.loc, today, page.changefreq, page.priority));
   }
-  // Pages ville statiques : CityPage ne déclare aucune traduction réelle,
-  // donc aucune alternate (cohérent avec le noindex des variantes ?lang=).
   for (const slug of cityLandingPages) {
     entries.push(urlEntry(`/house-sitting/${slug}`, today, "weekly", "0.9"));
   }
-  for (const e of articles) {
-    const slug = e.loc.replace(/^\/actualites\//, "");
-    const langs = Array.from(articleLangs.get(slug) || []);
-    entries.push(articleUrlEntry(e.loc, e.lastmod, e.changefreq, e.priority, langs));
-  }
+  for (const e of articles) entries.push(urlEntry(e.loc, e.lastmod, e.changefreq, e.priority));
   for (const e of seoCity) entries.push(urlEntry(e.loc, e.lastmod, e.changefreq, e.priority));
   for (const e of guides) entries.push(urlEntry(e.loc, e.lastmod, e.changefreq, e.priority));
   for (const e of depts) entries.push(urlEntry(e.loc, e.lastmod, e.changefreq, e.priority));
@@ -521,7 +425,7 @@ async function main() {
   if (dupeCount > 0) console.log(`  ⚠️  ${dupeCount} doublon(s) <loc> filtré(s)`);
 
   const xml = `<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 ${dedupedEntries.join("\n")}
 </urlset>`;
 

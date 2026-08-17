@@ -22,14 +22,13 @@ import path from "node:path";
  */
 
 const LOCALES_DIR = path.resolve(process.cwd(), "src/i18n/locales");
-const LANGS = ["fr", "en"] as const;
+const LANGS = ["fr"] as const;
 type Lang = (typeof LANGS)[number];
 
 const SCOPED_PREFIX = /^(landing|login_page|emergency_page)\./;
 
 const FORBIDDEN: Record<Lang, RegExp[]> = {
   fr: [/\blocal(e|s)?\b/i, /\blocaux\b/i, /hyper-local/i],
-  en: [/\blocals?\b/i, /hyper-local/i],
 };
 
 /** Clés exemptées, avec la raison. Toute nouvelle entrée doit être arbitrée. */

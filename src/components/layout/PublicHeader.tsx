@@ -3,7 +3,6 @@ import { useNavigate, Link, useLocation } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { Menu, X } from "lucide-react";
-import LanguageSwitcher from "./LanguageSwitcher";
 import { useAuth } from "@/contexts/AuthContext";
 import { useInAppShell } from "./AppShellContext";
 import UserMenu from "./UserMenu";
@@ -192,12 +191,11 @@ export default function PublicHeader({ authedVariant = false }: { authedVariant?
               </Button>
             </>
           )}
-          <LanguageSwitcher />
         </nav>
 
         {/* Mobile : barre strictement allégée. Sous le breakpoint sm, seuls
             le logo et le burger (plus l'avatar d'un connecté) restent dans
-            l'en tête. Langue, connexion et création de compte vivent dans le
+            l'en tête. Connexion et création de compte vivent dans le
             panneau du menu, sinon le cluster déborde du viewport. */}
         <div className="flex sm:hidden shrink-0 items-center gap-1">
           {!authChecked ? (
@@ -282,18 +280,11 @@ export default function PublicHeader({ authedVariant = false }: { authedVariant?
               </Button>
             </div>
           )}
-          {/* Sélecteur de langue en pied de panneau. Pour un connecté, il est
-              déjà rendu dans la barre cloches ci dessous, on ne double pas. */}
-          {!showBells && (
-            <div className="pt-3 mt-2 border-t border-border flex justify-start">
-              <LanguageSwitcher compact />
-            </div>
-          )}
         </nav>
       )}
 
 
-      {/* Messagerie, notifications et langue sur mobile : montés en
+      {/* Messagerie et notifications sur mobile : montées en
           permanence (une seule instance dans tout le composant) pour
           alimenter la pastille du burger, visibles uniquement menu ouvert. */}
       {isCompact && showBells && (
@@ -301,9 +292,6 @@ export default function PublicHeader({ authedVariant = false }: { authedVariant?
           className={`sm:hidden items-center gap-1 border-t border-border bg-background px-[5%] py-3 ${open ? "flex" : "hidden"}`}
         >
           {bells}
-          <div className="ml-auto">
-            <LanguageSwitcher compact />
-          </div>
         </div>
       )}
     </header>
