@@ -263,7 +263,7 @@ const Observatoire = () => {
    },
    {
     "@type": "Question",
-    name: "Les profils sont-ils vérifiés ?",
+    name: "Comment fonctionne la vérification d'identité ?",
     acceptedAnswer: {
      "@type": "Answer",
      text: "La vérification d'identité est ouverte à tous les membres, sans être obligatoire. La pièce envoyée est analysée automatiquement, et seuls les dossiers qui ne passent pas ce contrôle sont relus par l'équipe. Les profils validés affichent l'écusson « Identité vérifiée » ; les avis croisés et les indicateurs de fiabilité complètent le dispositif.",

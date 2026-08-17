@@ -14,8 +14,8 @@ import { describe, it, expect } from "vitest";
  * donc valider la bonne signature d'invocation ici suffit à garantir
  * que l'email sera créé.
  *
- * Refontes prises en compte (vérifiées à la main le 17/08/2026, les 6
- * invocations existent toujours dans SmallMissionDetail.tsx) :
+ * Refontes prises en compte (confirmées par lecture du code le 17/08/2026,
+ * les 6 invocations existent toujours dans SmallMissionDetail.tsx) :
  * - 20/07/2026 : la cascade de déclinaison est calculée côté serveur,
  *   le client envoie `target_ids: declinedIds` (result.declined_responder_ids)
  *   au lieu de `pendingOthers.map(...)`.
