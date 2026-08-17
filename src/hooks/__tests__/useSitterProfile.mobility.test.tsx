@@ -65,6 +65,12 @@ vi.mock("@/integrations/supabase/client", () => {
         return profileTable();
       },
       rpc: async () => ({ data: 60, error: null }),
+      // Effet passif de useSitterProfile (email vérifié) : sans ce mock,
+      // supabase.auth est undefined et la promesse rejette APRÈS la fin du
+      // test (4 « Unhandled Rejection » faisaient échouer le run complet).
+      auth: {
+        getUser: async () => ({ data: { user: null }, error: null }),
+      },
     },
   };
 });
