@@ -202,6 +202,30 @@ describe("Revendication « gardiens vérifiés »", () => {
   });
 });
 
+describe("Énumération de promesses « Identité vérifiée »", () => {
+  it("le nom de l'écusson n'apparaît dans aucune énumération de promesses hors contexte d'écusson", () => {
+    const hits: string[] = [];
+    for (const { file, raw } of FILE_CONTENTS) {
+      if (EXCLUDE_CLAIM.has(file)) continue;
+      raw.split("\n").forEach((line, index) => {
+        if (isPromiseEnumeration(line)) {
+          hits.push(`${file}:${index + 1}:${line.trim()}`);
+        }
+      });
+    }
+    if (hits.length > 0) {
+      throw new Error(
+        `${hits.length} énumération(s) de promesses avec « Identité vérifiée ».\n` +
+          "Le nom de l'écusson ne peut pas servir de promesse générale : la vérification " +
+          "est un choix du membre, pas une garantie sur tous les profils. Écrire " +
+          "« Identité vérifiable » ou nommer l'écusson entre guillemets.\n\n" +
+          hits.slice(0, 20).join("\n")
+      );
+    }
+    expect(hits.length).toBe(0);
+  });
+});
+
 describe("Positionnement national", () => {
   it("ne mentionne ni AURA, ni Auvergne-Rhône-Alpes, ni « votre région »", () => {
     const hits = [
@@ -266,4 +290,42 @@ describe("Motifs du garde-fou", () => {
       isDetected("Tous nos gardiens sont vérifiés. Écusson « Identité vérifiée ».")
     ).toBe(true);
   });
+
+  it.each(ENUM_MUST_DETECT)("détecte l'énumération de promesses : %s", (line) => {
+    expect(isPromiseEnumeration(line)).toBe(true);
+  });
+
+  it.each(ENUM_MUST_NOT_DETECT)("laisse passer l'usage légitime : %s", (line) => {
+    expect(isPromiseEnumeration(line)).toBe(false);
+  });
+
+  /**
+   * Besoins consignés, non résolus (17/08/2026). Ces deux formes sont des
+   * promesses générales, mais aucun motif fiable ne les distingue des usages
+   * légitimes textuellement identiques : la correction reste manuelle.
+   */
+  it.skip("pastille autonome « Identité vérifiée » dans un bandeau marketing (cas CityHero)", () => {
+    expect(isPromiseEnumeration('{ icon: BadgeCheck, label: "Identité vérifiée" },')).toBe(true);
+  });
+
+  it.skip("forme minuscule nue dans une énumération (cas HomeJsonLd)", () => {
+    expect(isPromiseEnumeration("Mise en relation par affinité, identité vérifiée, avis croisés.")).toBe(true);
+  });
 });
+
+/**
+ * Cas du bloc 3 (énumérations de promesses). La première chaîne est la ligne
+ * de réassurance du hero d'accueil telle qu'elle existait avant le 17/08/2026.
+ */
+const ENUM_MUST_DETECT: string[] = [
+  "Identité vérifiée, avis croisés, affinité calculée. Vous gardez la main.",
+  "Avis croisés, Identité vérifiée, affinité calculée.",
+];
+
+const ENUM_MUST_NOT_DETECT: string[] = [
+  '"cond4": "Identité vérifiée",',
+  'label: "Identité vérifiée", ok: checks.identityVerified',
+  "Un système de badges de reconnaissance distingue les profils (Super Sitter, Identité vérifiée, Spécialiste NAC).",
+  "Score de confiance calculé sur l'identité vérifiée, les avis croisés et l'ancienneté.",
+  "Écusson « Identité vérifiée », avis croisés détaillés.",
+];
