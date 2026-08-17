@@ -86,7 +86,12 @@ describe("repli après retrait de de/it", () => {
         expect(fs.readdirSync(full), `dossier ${dir} non vide`).toEqual([]);
       }
     }
-    expect(fs.readdirSync(LOCALES_DIR).sort()).toEqual(["en", "es", "fr"]);
+    // Seuls des dossiers avec contenu comptent (un watcher peut laisser un
+    // dossier vide inerte derrière lui).
+    const nonEmpty = fs
+      .readdirSync(LOCALES_DIR)
+      .filter((d) => fs.readdirSync(path.join(LOCALES_DIR, d)).length > 0);
+    expect(nonEmpty.sort()).toEqual(["en", "es", "fr"]);
   });
 
   for (const removed of ["de", "it"]) {
