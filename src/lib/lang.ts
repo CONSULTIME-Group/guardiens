@@ -63,12 +63,12 @@ export function withLang(path: string, lang: string | null | undefined): string 
  * Langue cible avant le premier rendu : lien explicite, puis choix mémorisé,
  * puis détection navigateur, puis français.
  *
- * Cas particulier des langues retirées du produit (de, it le 17/08/2026) : un
- * paramètre `?lang=` explicite mais non supporté impose le français
- * immédiatement, sans tenir compte du choix mémorisé ni du navigateur. C'est
- * ce qui garantit qu'une ancienne URL `?lang=de` connue de Google rend la
- * page française indexable avec sa canonique auto-référente, au lieu d'une
- * variante noindex.
+ * Cas particulier des langues retirées du produit (de, it, es le
+ * 17/08/2026) : un paramètre `?lang=` explicite mais non supporté impose le
+ * français immédiatement, sans tenir compte du choix mémorisé ni du
+ * navigateur. C'est ce qui garantit qu'une ancienne URL `?lang=de` ou
+ * `?lang=es` connue de Google rend la page française indexable avec sa
+ * canonique auto-référente, au lieu d'une variante noindex.
  */
 export function resolveInitialLang(): string {
   if (typeof window === "undefined") return "fr";

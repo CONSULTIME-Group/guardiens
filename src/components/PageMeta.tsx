@@ -13,7 +13,6 @@ const SITE_NAME = "Guardiens";
 const OG_LOCALES: Record<SupportedLang, string> = {
   fr: "fr_FR",
   en: "en_GB",
-  es: "es_ES",
 };
 
 // Adds ?lang=xx to a URL while preserving any existing query params.

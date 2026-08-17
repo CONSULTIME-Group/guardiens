@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Batch translate published articles (FR -> EN/ES/IT/DE) via Lovable AI Gateway.
+ * Batch translate published articles (FR -> EN) via Lovable AI Gateway.
  * Stores results in public.article_translations.
  *
  * Usage:
@@ -26,10 +26,10 @@ const getArg = (k, d) => {
 const FORCE = args.includes("--force");
 const ONLY_LANG = getArg("--lang", null);
 const LIMIT = parseInt(getArg("--limit", "9999"), 10);
-const LANGS = ONLY_LANG ? [ONLY_LANG] : ["en", "es"];
+const LANGS = ONLY_LANG ? [ONLY_LANG] : ["en"];
 const MODEL = getArg("--model", "google/gemini-2.5-flash");
 
-const LANG_NAMES = { en: "English", es: "Spanish (Spain)" };
+const LANG_NAMES = { en: "English" };
 
 const supabase = createClient(SUPABASE_URL, SERVICE_KEY, { auth: { persistSession: false } });
 
@@ -49,7 +49,7 @@ Rules:
 - Preserve all Markdown formatting (headings, lists, links, images, code blocks) EXACTLY.
 - Keep all URLs, slugs, image paths, brand names ("Guardiens"), and proper nouns unchanged.
 - Natural, fluent, idiomatic ${LANG_NAMES[lang]} — not literal.
-- Use formal "you" (vous in French equivalent: e.g. Sie in DE, usted in ES, lei in IT, you in EN).
+- Use natural, polite "you" (vouvoiement equivalent).
 - NEVER use the em dash character "—" (U+2014). Replace it with commas, colons, parentheses, periods, or "–" for number ranges.
 - NEVER use the word "neighbor/neighbour/neighborhood" or its translations ("vicino", "Nachbar", "vecino"). Use "local", "trusted person", "community member", "guardian" instead.
 - Return STRICT JSON only, same keys as input. No commentary, no markdown fences.`;

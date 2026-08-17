@@ -4,24 +4,24 @@ import LanguageDetector from "i18next-browser-languagedetector";
 import { LANG_STORAGE_KEY, migrateLegacyLangStorage } from "@/lib/langStorageKey";
 
 // Seul le français est embarqué dans le bundle d'entrée : c'est la langue de
-// repli et la langue de la très grande majorité des visites. Les deux autres
-// dictionnaires sont chargés à la demande par loadLanguage(), en chunks
-// séparés, pour ne pas faire télécharger et analyser des dictionnaires
-// inutiles avant le premier rendu.
+// repli et la langue de la très grande majorité des visites. Le dictionnaire
+// anglais est chargé à la demande par loadLanguage(), en chunk séparé, pour
+// ne pas faire télécharger et analyser un dictionnaire inutile avant le
+// premier rendu.
 //
-// Langues retirées le 17/08/2026 : allemand et italien. Leurs variantes
-// `?lang=de|it` connues de Google renvoyaient `noindex` + canonique vers le
-// français, combinaison déconseillée. Elles retombent désormais sur un
-// rendu français indexable (voir LangUrlSync et resolveInitialLang).
+// Langues retirées le 17/08/2026 : allemand, italien puis espagnol. Leurs
+// variantes `?lang=de|it|es` connues de Google renvoyaient `noindex` +
+// canonique vers le français, combinaison déconseillée. Elles retombent
+// désormais sur un rendu français indexable (voir LangUrlSync et
+// resolveInitialLang).
 import frCommon from "./locales/fr/common.json";
 
-export const SUPPORTED_LANGS = ["fr", "en", "es"] as const;
+export const SUPPORTED_LANGS = ["fr", "en"] as const;
 export type SupportedLang = (typeof SUPPORTED_LANGS)[number];
 
 export const LANG_LABELS: Record<SupportedLang, { native: string; flag: string }> = {
   fr: { native: "Français", flag: "🇫🇷" },
   en: { native: "English", flag: "🇬🇧" },
-  es: { native: "Español", flag: "🇪🇸" },
 };
 
 // Une seule mémoire de langue : les clés héritées d'anciennes versions du
@@ -76,9 +76,6 @@ export async function loadLanguage(lng: string): Promise<void> {
     switch (lng) {
       case "en":
         mod = await import("./locales/en/common.json");
-        break;
-      case "es":
-        mod = await import("./locales/es/common.json");
         break;
       default:
         return;

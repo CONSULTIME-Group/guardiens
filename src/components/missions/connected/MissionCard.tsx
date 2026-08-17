@@ -7,7 +7,7 @@ import spotBricolage from "@/assets/missions/spot-bricolage.png";
 import spotBienetre from "@/assets/missions/spot-bienetre.png";
 import { avatarImageUrl } from "@/lib/storageImage";
 
-const LOCALE_MAP: Record<string, string> = { fr: "fr-FR", en: "en-US", es: "es-ES", it: "it-IT", de: "de-DE" };
+const LOCALE_MAP: Record<string, string> = { fr: "fr-FR", en: "en-US" };
 
 // Gradient teinté par catégorie pour le fallback sans photo (uniquement tokens sémantiques).
 const CATEGORY_GRADIENT: Record<string, string> = {

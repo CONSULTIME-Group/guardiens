@@ -16,7 +16,7 @@ import PageMeta from "@/components/PageMeta";
  */
 
 const ROUTES: Array<{ path: string; translated?: readonly string[] }> = [
-  { path: "/", translated: ["en", "es"] },
+  { path: "/", translated: ["en"] },
   { path: "/annonces" },
   { path: "/petites-missions" },
   { path: "/tarifs", translated: ["en"] },

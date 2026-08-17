@@ -138,7 +138,7 @@ export const staticRoutes: SiteRoute[] = [
  ogImage: DEFAULT_OG_IMAGE,
  // Seule page statique réellement traduite : l'allemand et l'italien ont
  // été retirés le 17/08/2026. Consommé par Landing.tsx et le sitemap.
- translatedLangs: ["en", "es"],
+ translatedLangs: ["en"],
  },
  {
  path: "/tarifs",

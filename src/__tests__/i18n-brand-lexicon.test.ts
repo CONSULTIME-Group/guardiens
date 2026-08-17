@@ -3,7 +3,7 @@ import fs from "node:fs";
 import path from "node:path";
 
 /**
- * Garde-fou du lexique de marque dans les trois dictionnaires :
+ * Garde-fou du lexique de marque dans les deux dictionnaires :
  *
  * 1. l'idée de « voisin » est proscrite dans toutes les langues,
  * 2. la gratuité présentée comme promesse perpétuelle est proscrite,
@@ -11,7 +11,7 @@ import path from "node:path";
  */
 
 const LOCALES = path.resolve(process.cwd(), "src/i18n/locales");
-const LANGS = ["fr", "en", "es"] as const;
+const LANGS = ["fr", "en"] as const;
 
 const read = (lng: string) =>
   JSON.parse(fs.readFileSync(path.join(LOCALES, `${lng}/common.json`), "utf8"));

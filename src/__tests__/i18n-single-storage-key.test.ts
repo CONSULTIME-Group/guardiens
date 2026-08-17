@@ -72,7 +72,7 @@ describe("aucun rendu mixte possible", () => {
     flatten(JSON.parse(fs.readFileSync(path.join(localesDir, "fr/common.json"), "utf8"))),
   );
 
-  for (const lng of ["en", "es"]) {
+  for (const lng of ["en"]) {
     it(`le dictionnaire ${lng} couvre toutes les clés françaises`, () => {
       const keys = new Set(
         flatten(JSON.parse(fs.readFileSync(path.join(localesDir, `${lng}/common.json`), "utf8"))),

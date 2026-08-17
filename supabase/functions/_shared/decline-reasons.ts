@@ -19,7 +19,7 @@ export const DECLINE_REASONS: DeclineReason[] = [
   'different_profile',
 ]
 
-type Locale = 'fr' | 'en' | 'es' | 'de' | 'it'
+type Locale = 'fr' | 'en' | 'de' | 'it'
 
 const COPY: Record<Locale, Record<DeclineReason, string[]>> = {
   fr: {
@@ -64,28 +64,6 @@ const COPY: Record<Locale, Record<DeclineReason, string[]>> = {
       'The owner is looking for a profile that works differently for this specific stay. It comes from current needs, not from your track record.',
       'For this stay, the owner is going towards another type of profile. It is a question of fit with the animal and daily routine.',
       'This specific stay calls for particular conditions on the household side. Other listings will match what you can offer.',
-    ],
-  },
-  es: {
-    other_chosen: [
-      'El propietario ha elegido otra candidatura para esta estancia. Su candidatura queda liberada y sigue disponible para otros anuncios.',
-      'La plaza está ocupada, otra persona se encargará de esta estancia. Ya nada le retiene, puede presentarse a otros anuncios.',
-      'Esta estancia ya tiene su cuidador. Su candidatura termina aquí, y otros anuncios le esperan.',
-    ],
-    dates_changed: [
-      'Las fechas de esta estancia han cambiado y el anuncio ya no corresponde a lo previsto. Su candidatura queda liberada.',
-      'El calendario del propietario se ha movido desde la publicación. La estancia no se hará en estas condiciones, vuelve a estar disponible.',
-      'Cambio de fechas por parte del propietario, esta estancia ya no se mantiene tal como se anunció. Su candidatura termina aquí.',
-    ],
-    not_right_time: [
-      'Finalmente no es el buen momento para el propietario, que prefiere aplazar. Su candidatura queda liberada.',
-      'El propietario pone esta estancia en pausa, el momento no es adecuado. Sigue libre para otros anuncios.',
-      'La estancia no se realizará esta vez, la situación del propietario ha cambiado. Su candidatura termina aquí.',
-    ],
-    different_profile: [
-      'El propietario busca un perfil con otro funcionamiento para esta estancia concreta. Responde a sus necesidades del momento, no a su trayectoria.',
-      'Para esta estancia, el propietario se orienta hacia otro tipo de perfil. Es una cuestión de encaje con su animal y su día a día.',
-      'Esta estancia concreta requiere condiciones particulares del lado del hogar. Otros anuncios se ajustarán a lo que puede ofrecer.',
     ],
   },
   de: {
@@ -148,12 +126,6 @@ const SUBJECTS: Record<Locale, Record<DeclineReason, string>> = {
     not_right_time: 'This stay is postponed by the owner',
     different_profile: 'This stay will not happen with you',
   },
-  es: {
-    other_chosen: 'El propietario ha elegido otra candidatura',
-    dates_changed: 'Las fechas de esta estancia han cambiado',
-    not_right_time: 'El propietario aplaza esta estancia',
-    different_profile: 'Esta estancia no se hará con usted',
-  },
   de: {
     other_chosen: 'Es wurde eine andere Bewerbung gewählt',
     dates_changed: 'Die Daten dieser Betreuung haben sich geändert',
@@ -172,13 +144,12 @@ const SUBJECTS: Record<Locale, Record<DeclineReason, string>> = {
 const REASSURANCE: Record<Locale, string> = {
   fr: "Cela ne dit rien de votre profil : chaque garde a ses contraintes de dates, de lieu et d'animaux.",
   en: 'This says nothing about your profile: every stay has its own constraints of dates, place and animals.',
-  es: 'Esto no dice nada de su perfil: cada estancia tiene sus limitaciones de fechas, lugar y animales.',
   de: 'Das sagt nichts über Ihr Profil aus: Jede Betreuung hat eigene Vorgaben zu Daten, Ort und Tieren.',
   it: 'Questo non dice nulla del suo profilo: ogni custodia ha i suoi vincoli di date, luogo e animali.',
 }
 
 const resolve = (reason?: string | null, locale: string = 'fr') => {
-  const loc = (['fr', 'en', 'es', 'de', 'it'].includes(locale) ? locale : 'fr') as Locale
+  const loc = (['fr', 'en', 'de', 'it'].includes(locale) ? locale : 'fr') as Locale
   const key = (DECLINE_REASONS as string[]).includes(reason ?? '')
     ? (reason as DeclineReason)
     : ('other_chosen' as DeclineReason)
@@ -203,7 +174,7 @@ export const declineBody = (
   variant?: number | null,
   locale: string = 'fr',
 ): string | null => {
-  const loc = (['fr', 'en', 'es', 'de', 'it'].includes(locale) ? locale : 'fr') as Locale
+  const loc = (['fr', 'en', 'de', 'it'].includes(locale) ? locale : 'fr') as Locale
   const key = (DECLINE_REASONS as string[]).includes(reason ?? '')
     ? (reason as DeclineReason)
     : null

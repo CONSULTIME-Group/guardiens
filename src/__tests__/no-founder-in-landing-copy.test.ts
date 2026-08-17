@@ -11,13 +11,12 @@ import { describe, it, expect } from "vitest";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 
-const LOCALES = ["fr", "en", "es"] as const;
+const LOCALES = ["fr", "en"] as const;
 const LANDING_TSX = resolve(__dirname, "../pages/Landing.tsx");
 
 const forbiddenLabels: Record<(typeof LOCALES)[number], RegExp> = {
   fr: /Programme Fondateur/i,
   en: /Founder Programme/i,
-  es: /Programa Fundador/i,
 };
 
 describe("no-founder-in-landing-copy", () => {

@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 /**
- * Translates src/i18n/locales/fr/common.json into en/es via Lovable AI.
+ * Translates src/i18n/locales/fr/common.json into en via Lovable AI.
  * Preserves keys and ICU placeholders ({{var}}). Uses formal "you" (vouvoiement).
- * (it/de retirés du produit le 17/08/2026.)
+ * (it/de/es retirés du produit le 17/08/2026.)
  */
 import fs from "node:fs";
 import path from "node:path";
@@ -13,7 +13,6 @@ if (!API_KEY) { console.error("LOVABLE_API_KEY missing"); process.exit(1); }
 const SRC = "src/i18n/locales/fr/common.json";
 const TARGETS = [
   { code: "en", name: "English" },
-  { code: "es", name: "Spanish (formal usted)" },
 ];
 
 const fr = JSON.parse(fs.readFileSync(SRC, "utf8"));
@@ -22,12 +21,12 @@ const GLOSSARY = `
 Glossary (keep these mappings):
 - "Guardiens" → keep as brand name, never translate
 - "House-sitting" → keep "house-sitting" (do not translate, recognized worldwide)
-- "Gardien / gardienne" → caretaker / pet & home sitter (EN), cuidador (ES)
-- "Coup de main / petites missions" → small favours (EN), pequeños favores (ES)
-- "Propriétaire" → owner (EN), propietario (ES)
+- "Gardien / gardienne" → caretaker / pet & home sitter (EN)
+- "Coup de main / petites missions" → small favours (EN)
+- "Propriétaire" → owner (EN)
 - "Bêta" → Beta (everywhere)
 - City and department names (Lyon, Rhône, Haute-Savoie...) → keep verbatim
-- Use formal address (vouvoiement / usted)
+- Use formal address (vouvoiement)
 - Keep ICU placeholders like {{lang}} intact
 - Preserve JSON structure exactly (same keys, same nesting)
 `;
