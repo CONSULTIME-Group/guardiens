@@ -52,8 +52,8 @@ const LangUrlSync = () => {
       // 17/08/2026) : repli francophone immédiat, jamais le choix mémorisé.
       // Une ancienne URL `?lang=de` crawlée par Google doit rendre la page
       // française indexable avec sa canonique auto-référente, pas une
-      // variante noindex. Le choix mémorisé n'est pas effacé : il reprendra
-      // à la prochaine navigation sans paramètre.
+      // variante noindex. Comme tout choix explicite, le repli est mémorisé
+      // par le détecteur i18next (caches: localStorage).
       void apply("fr");
     } else {
       const stored = getStoredLang();

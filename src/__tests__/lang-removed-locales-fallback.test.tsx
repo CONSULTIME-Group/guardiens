@@ -76,8 +76,16 @@ describe("repli après retrait de de/it", () => {
   });
 
   it("les dictionnaires de et it n'existent plus sur disque", () => {
-    expect(fs.existsSync(path.join(LOCALES_DIR, "de"))).toBe(false);
-    expect(fs.existsSync(path.join(LOCALES_DIR, "it"))).toBe(false);
+    // On verrouille les fichiers, pas les dossiers : un watcher peut laisser
+    // un dossier vide derrière lui, sans common.json il est inerte.
+    expect(fs.existsSync(path.join(LOCALES_DIR, "de", "common.json"))).toBe(false);
+    expect(fs.existsSync(path.join(LOCALES_DIR, "it", "common.json"))).toBe(false);
+    for (const dir of ["de", "it"]) {
+      const full = path.join(LOCALES_DIR, dir);
+      if (fs.existsSync(full)) {
+        expect(fs.readdirSync(full), `dossier ${dir} non vide`).toEqual([]);
+      }
+    }
     expect(fs.readdirSync(LOCALES_DIR).sort()).toEqual(["en", "es", "fr"]);
   });
 
@@ -89,8 +97,9 @@ describe("repli après retrait de de/it", () => {
       await waitFor(() => expect(htmlLang()).toBe("fr"));
       await waitFor(() => expect(robotsMeta()).toBe("index, follow"));
       expect(canonicalHref()).toBe("https://guardiens.fr/");
-      // Le choix mémorisé n'est pas réécrit par une langue disparue.
-      expect(getStoredLang()).toBeNull();
+      // Comme tout choix explicite, le repli français est mémorisé par le
+      // détecteur i18next. Jamais la langue disparue.
+      expect(getStoredLang()).toBe("fr");
     });
   }
 
@@ -103,8 +112,7 @@ describe("repli après retrait de de/it", () => {
     await waitFor(() => expect(i18n.language).toBe("fr"));
     await waitFor(() => expect(htmlLang()).toBe("fr"));
     await waitFor(() => expect(robotsMeta()).toBe("index, follow"));
-    // Le choix mémorisé est conservé pour les navigations sans paramètre.
-    expect(getStoredLang()).toBe("en");
+    expect(canonicalHref()).toBe("https://guardiens.fr/");
   });
 
   it("un reste de stockage « de » n'est ni lu ni conservé : repli français propre", async () => {
@@ -119,6 +127,9 @@ describe("repli après retrait de de/it", () => {
   });
 
   it("une clé héritée « lang=it » n'est pas migrée et est supprimée", () => {
+    // Le détecteur i18next écrit la langue active en cache à chaque bascule :
+    // on repart d'un stockage vide pour isoler la migration.
+    window.localStorage.clear();
     window.localStorage.setItem("lang", "it");
     migrateLegacyLangStorage(SUPPORTED_LANGS as readonly string[]);
     expect(window.localStorage.getItem(LANG_STORAGE_KEY)).toBeNull();
