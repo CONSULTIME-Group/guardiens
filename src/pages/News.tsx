@@ -13,7 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Calendar, MapPin, ArrowRight, ChevronLeft, ChevronRight, Search, AlertCircle, RotateCcw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { format } from "date-fns";
-import { fr, enUS, es, it as itLocale, de as deLocale } from "date-fns/locale";
+import { fr } from "date-fns/locale";
 
 interface Article {
   id: string;
@@ -77,12 +77,6 @@ function isNew(publishedAt: string | null): boolean {
 export default function News() {
   const { t, i18n } = useTranslation();
   const tCat = (key: string) => t(`news.categories.${key}`, { defaultValue: key });
-  const dateLocale = (({ fr, en: enUS, es, it: itLocale, de: deLocale } as any)[i18n.language?.split("-")[0]] || fr);
-  const isForeignLang = (i18n.language || "fr").split("-")[0].toLowerCase() !== "fr";
-  // Articles réellement traduits dans la langue active : sert au marquage
-  // « FR » et au filtre, pour qu'un visiteur ne clique plus à l'aveugle.
-  const [translatedIds, setTranslatedIds] = useState<Set<string>>(new Set());
-  const [onlyTranslated, setOnlyTranslated] = useState(false);
   const [articles, setArticles] = useState<Article[]>([]);
   const [vieLocaleArticles, setVieLocaleArticles] = useState<Article[]>([]);
   const [categoryCounts, setCategoryCounts] = useState<Record<string, number>>({});
@@ -119,30 +113,6 @@ export default function News() {
 
   useEffect(() => {
     let cancelled = false;
-    const lang = (i18n.language || "fr").split("-")[0].toLowerCase();
-    setTranslatedIds(new Set());
-    const overlayTranslations = async (list: Article[], lg: string): Promise<Article[]> => {
-      if (lg !== "en" || list.length === 0) return list;
-      const { data: trs } = await supabase
-        .from("article_translations")
-        .select("article_id, title, excerpt")
-        .eq("lang", lg)
-        .in("article_id", list.map((a) => a.id));
-      const map = new Map<string, { title?: string; excerpt?: string }>();
-      (trs || []).forEach((tr: any) => map.set(tr.article_id, { title: tr.title, excerpt: tr.excerpt }));
-      if (!cancelled) {
-        setTranslatedIds((prev) => {
-          const next = new Set(prev);
-          map.forEach((_v, id) => next.add(id));
-          return next;
-        });
-      }
-      return list.map((a) => {
-        const tr = map.get(a.id);
-        if (!tr) return a;
-        return { ...a, title: tr.title || a.title, excerpt: tr.excerpt || a.excerpt };
-      });
-    };
     const fetchArticles = async () => {
       setLoading(true);
       setError(null);
@@ -176,9 +146,8 @@ export default function News() {
         setTotalCount(0);
       } else {
         const list = (data as Article[]) || [];
-        const overlaid = await overlayTranslations(list, lang);
         if (cancelled) return;
-        setArticles(overlaid);
+        setArticles(list);
         setTotalCount(count || 0);
       }
       setLoading(false);
@@ -196,8 +165,7 @@ export default function News() {
         .order("published_at", { ascending: false })
         .limit(3);
       const list = (data as Article[]) || [];
-      const overlaid = await overlayTranslations(list, lang);
-      if (!cancelled) setVieLocaleArticles(overlaid);
+      if (!cancelled) setVieLocaleArticles(list);
     };
 
     fetchArticles();
@@ -207,7 +175,7 @@ export default function News() {
     return () => {
       cancelled = true;
     };
-  }, [activeCategory, currentPage, urlSearch, i18n.language]);
+  }, [activeCategory, currentPage, urlSearch]);
 
   // Fetch category counts once (only categories that have at least one article are shown)
   useEffect(() => {
@@ -252,11 +220,11 @@ export default function News() {
 
   const featuredIds = useMemo(() => new Set(vieLocaleArticles.map((a) => a.id)), [vieLocaleArticles]);
   const visibleArticles = useMemo(() => {
-    const base =
-      activeCategory === "all" && !urlSearch.trim() ? articles.filter((a) => !featuredIds.has(a.id)) : articles;
-    if (!isForeignLang || !onlyTranslated) return base;
-    return base.filter((a) => translatedIds.has(a.id));
-  }, [articles, featuredIds, activeCategory, urlSearch, isForeignLang, onlyTranslated, translatedIds]);
+    if (activeCategory === "all" && !urlSearch.trim()) {
+      return articles.filter((a) => !featuredIds.has(a.id));
+    }
+    return articles;
+  }, [articles, featuredIds, activeCategory, urlSearch]);
 
   // Preferred display order (categories not listed here go to the end alphabetically by label)
   const CATEGORY_ORDER = [
@@ -344,16 +312,6 @@ export default function News() {
               aria-label={t("news.search_aria")}
             />
           </div>
-          {isForeignLang && (
-            <Button
-              variant={onlyTranslated ? "default" : "outline"}
-              onClick={() => setOnlyTranslated((v) => !v)}
-              className="shrink-0 min-h-[44px]"
-              aria-pressed={onlyTranslated}
-            >
-              {t("news.only_translated")}
-            </Button>
-          )}
           {hasActiveFilters && (
             <Button variant="outline" onClick={resetFilters} className="shrink-0 gap-2">
               <RotateCcw className="h-4 w-4" aria-hidden="true" />
@@ -523,11 +481,6 @@ export default function News() {
                           {isNew(article.published_at) && (
                             <Badge className="bg-primary text-primary-foreground">{t("news.new_badge")}</Badge>
                           )}
-                          {isForeignLang && !translatedIds.has(article.id) && (
-                            <Badge variant="outline" title={t("news.fr_only_title")}>
-                              {t("news.fr_only_badge")}
-                            </Badge>
-                          )}
                           {article.city && (
                             <span className="flex items-center gap-1 text-xs text-muted-foreground">
                               <MapPin className="h-3 w-3" aria-hidden="true" />
@@ -546,7 +499,7 @@ export default function News() {
                               className="flex items-center gap-1 text-xs text-muted-foreground"
                             >
                               <Calendar className="h-3 w-3" aria-hidden="true" />
-                              {format(new Date(article.published_at), "d MMM yyyy", { locale: dateLocale })}
+                              {format(new Date(article.published_at), "d MMM yyyy", { locale: fr })}
                             </time>
                           )}
                           <span className="flex items-center gap-1 text-xs font-medium text-primary opacity-0 group-hover:opacity-100 transition-opacity">

@@ -6,7 +6,7 @@ import path from "node:path";
  * Garde-fou upload photo (passe du 14/08/2026) :
  *
  * 1. Une seule formulation d'échec, portée par la clé i18n upload.photo_failed,
- *    déclinée dans les deux langues, partagée par tous les parcours d'upload.
+ *    partagée par tous les parcours d'upload.
  * 2. Chaque parcours mesure son échec définitif via un événement dédié, sur
  *    le modèle avatar_compression_failed (métadonnées ext + size_kb).
  * 3. compressGalleryFile et compressMessagePhotoFile ont un repli dégradé
@@ -16,7 +16,7 @@ import path from "node:path";
  */
 
 const LOCALES = path.resolve(process.cwd(), "src/i18n/locales");
-const LANGS = ["fr", "en"] as const;
+const LANGS = ["fr"] as const;
 
 const readKey = (lng: string): string | undefined => {
   const dict = JSON.parse(fs.readFileSync(path.join(LOCALES, `${lng}/common.json`), "utf8"));
@@ -24,7 +24,7 @@ const readKey = (lng: string): string | undefined => {
 };
 
 describe("upload photo : formulation unique", () => {
-  it("la clé upload.photo_failed existe dans les deux langues", () => {
+  it("la clé upload.photo_failed existe dans le dictionnaire français", () => {
     for (const lng of LANGS) {
       const value = readKey(lng);
       expect(value, lng).toBeTruthy();

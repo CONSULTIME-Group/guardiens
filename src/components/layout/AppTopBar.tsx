@@ -1,7 +1,6 @@
 import { lazy, Suspense, useLayoutEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { BackButton } from "./BackButton";
-import LanguageSwitcher from "./LanguageSwitcher";
 import UserMenu from "./UserMenu";
 
 const NotificationBell = lazy(() => import("./NotificationBell"));
@@ -77,7 +76,6 @@ export const AppTopBar = ({ standalone = false }: { standalone?: boolean }) => {
         </Link>
       </div>
       <div className="flex items-center gap-2 shrink-0">
-        <LanguageSwitcher compact />
         {mobileHeader && (
           <>
             <Suspense fallback={<div className="w-11 h-11" aria-hidden />}>

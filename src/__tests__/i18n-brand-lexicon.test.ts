@@ -3,15 +3,16 @@ import fs from "node:fs";
 import path from "node:path";
 
 /**
- * Garde-fou du lexique de marque dans les deux dictionnaires :
+ * Garde-fou du lexique de marque dans le dictionnaire (français uniquement
+ * depuis le 17/08/2026, les motifs étrangers restent en verrou anti-retour) :
  *
- * 1. l'idée de « voisin » est proscrite dans toutes les langues,
+ * 1. l'idée de « voisin » est proscrite,
  * 2. la gratuité présentée comme promesse perpétuelle est proscrite,
- * 3. une notion de marque a une seule formulation par langue.
+ * 3. une notion de marque a une seule formulation.
  */
 
 const LOCALES = path.resolve(process.cwd(), "src/i18n/locales");
-const LANGS = ["fr", "en"] as const;
+const LANGS = ["fr"] as const;
 
 const read = (lng: string) =>
   JSON.parse(fs.readFileSync(path.join(LOCALES, `${lng}/common.json`), "utf8"));
@@ -90,11 +91,8 @@ describe("lexique de marque", () => {
     expect(offenders, `formulations divergentes : ${offenders.join(", ")}`).toEqual([]);
   });
 
-  it("le titre et la description de la home existent dans les cinq langues", () => {
-    for (const lng of LANGS) {
-      expect(dicts[lng]["landing.meta_title"], lng).toBeTruthy();
-      expect(dicts[lng]["landing.meta_description"], lng).toBeTruthy();
-    }
-    expect(dicts.en["landing.meta_title"]).not.toBe(dicts.fr["landing.meta_title"]);
+  it("le titre et la description de la home existent", () => {
+    expect(dicts.fr["landing.meta_title"]).toBeTruthy();
+    expect(dicts.fr["landing.meta_description"]).toBeTruthy();
   });
 });

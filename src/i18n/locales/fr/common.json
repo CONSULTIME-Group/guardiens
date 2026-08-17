@@ -1,9 +1,4 @@
 {
-  "language": {
-    "label": "Langue",
-    "switcher_aria": "Changer de langue",
-    "current": "Langue actuelle : {{lang}}"
-  },
   "nav": {
     "listings": "Annonces en cours",
     "small_missions": "Entraide",

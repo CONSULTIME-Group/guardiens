@@ -7,17 +7,17 @@ import { getStoredLang, isSupportedLang, setStoredLang } from "@/lib/lang";
 /**
  * Recale la langue à chaque navigation, sans jamais réécrire l'URL.
  *
- * A chaque changement de route :
- *   - `?lang=xx` supporté : on bascule i18next dessus et on mémorise le choix
- *     immédiatement, car une personne arrivée par un lien externe ne verra
- *     jamais le sélecteur ;
+ * Guardiens est monolingue français depuis le 17/08/2026. A chaque
+ * changement de route :
+ *   - `?lang=fr` explicite : on recale i18next dessus et on mémorise ;
+ *   - `?lang=xx` non supporté (anciennes variantes en, de, it, es encore
+ *     connues de Google) : repli français immédiat ;
  *   - pas de paramètre : la langue mémorisée est conservée, la navigation du
- *     routeur ne repasse plus en français.
+ *     routeur ne repasse jamais sur une autre langue.
  *
  * Aucune décoration d'URL : ajouter `?lang` sur les liens internes créerait
  * une seconde URL crawlable pour chaque page (articles, guides, villes), donc
- * de la duplication à grande échelle. Le paramètre reste réservé aux liens qui
- * sortent du contexte JavaScript.
+ * de la duplication à grande échelle.
  */
 export const readLangFromSearch = (search: string): string => {
   const raw = new URLSearchParams(search).get("lang");
@@ -48,9 +48,9 @@ const LangUrlSync = () => {
       setStoredLang(raw);
       void apply(raw);
     } else if (raw) {
-      // Paramètre explicite mais langue retirée du produit (de, it, es le
-      // 17/08/2026) : repli francophone immédiat, jamais le choix mémorisé.
-      // Une ancienne URL `?lang=de` crawlée par Google doit rendre la page
+      // Paramètre explicite mais langue retirée du produit (de, it, es, en
+      // le 17/08/2026) : repli francophone immédiat, jamais le choix mémorisé.
+      // Une ancienne URL `?lang=en` crawlée par Google doit rendre la page
       // française indexable avec sa canonique auto-référente, pas une
       // variante noindex. Comme tout choix explicite, le repli est mémorisé
       // par le détecteur i18next (caches: localStorage).
