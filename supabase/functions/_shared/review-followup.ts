@@ -82,6 +82,11 @@ export function serveReviewFollowup(config: ReviewFollowupConfig) {
               : []),
           ];
 
+          // Même règle que send-avis-j1 : le drapeau n'est posé que si tous
+          // les envois attendus ont été acceptés (2xx). Sinon la garde est
+          // rejouée au run suivant et chaque échec est tracé.
+          let allAccepted = true;
+
           for (const party of parties) {
             // Aucune relance si cette partie a déjà déposé son avis.
             const { data: existingReview } = await supabase
@@ -102,42 +107,88 @@ export function serveReviewFollowup(config: ReviewFollowupConfig) {
 
             if (!party.profile?.email) continue;
 
-            const res = await fetch(`${supabaseUrl}/functions/v1/send-transactional-email`, {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-                Authorization: `Bearer ${supabaseKey}`,
-              },
-              body: JSON.stringify({
-                templateName: "review-reminder",
-                recipientEmail: party.profile.email,
-                idempotencyKey: `review-${config.stage}-${party.id}-${sit.id}`,
-                templateData: {
-                  firstName: party.profile.first_name || "",
-                  sitTitle: sit.title || "",
-                  revieweeName: otherName,
-                  sitId: sit.id,
-                  isOwner: party.isOwner,
-                  stage: config.stage,
+            const idempotencyKey = `review-${config.stage}-${party.id}-${sit.id}`;
+
+            let res: Response;
+            try {
+              res = await fetch(`${supabaseUrl}/functions/v1/send-transactional-email`, {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                  Authorization: `Bearer ${supabaseKey}`,
                 },
-                logMetadata: { sit_id: sit.id, source: config.edgeName },
-              }),
-            });
+                body: JSON.stringify({
+                  templateName: "review-reminder",
+                  recipientEmail: party.profile.email,
+                  idempotencyKey,
+                  templateData: {
+                    firstName: party.profile.first_name || "",
+                    sitTitle: sit.title || "",
+                    revieweeName: otherName,
+                    sitId: sit.id,
+                    isOwner: party.isOwner,
+                    stage: config.stage,
+                  },
+                  logMetadata: { sit_id: sit.id, source: config.edgeName },
+                }),
+              });
+            } catch (fetchErr) {
+              const msg = fetchErr instanceof Error ? fetchErr.message : String(fetchErr);
+              console.error(`[${config.edgeName}] fetch threw`, sit.id, msg);
+              errors.push(`${sit.id}: fetch_error`);
+              allAccepted = false;
+              await recordReviewSendFailure(supabase, {
+                edgeName: config.edgeName,
+                stage: config.stage,
+                sitId: sit.id,
+                sitTitle: sit.title,
+                party: party.isOwner ? "owner" : "sitter",
+                recipientEmail: party.profile.email,
+                idempotencyKey,
+                responseBody: msg,
+              });
+              continue;
+            }
             if (!res.ok) {
               const body = await res.text().catch(() => "");
               console.error(`[${config.edgeName}] send failed`, res.status, body);
               errors.push(`${sit.id}: send_failed_${res.status}`);
+              allAccepted = false;
+              await recordReviewSendFailure(supabase, {
+                edgeName: config.edgeName,
+                stage: config.stage,
+                sitId: sit.id,
+                sitTitle: sit.title,
+                party: party.isOwner ? "owner" : "sitter",
+                recipientEmail: party.profile.email,
+                idempotencyKey,
+                httpStatus: res.status,
+                responseBody: body,
+              });
               continue;
             }
             count++;
           }
 
-          // Le drapeau passe à true même si personne n'a été relancé.
-          await supabase.from("sits").update({ [config.flagColumn]: true }).eq("id", sit.id);
+          // Le drapeau passe à true si personne n'avait à être relancé ou si
+          // tous les envois ont été acceptés. Un échec le laisse à false :
+          // rejeu automatique au prochain run.
+          if (allAccepted) {
+            await supabase.from("sits").update({ [config.flagColumn]: true }).eq("id", sit.id);
+          }
         } catch (e) {
           const msg = e instanceof Error ? e.message : String(e);
           console.error(`[${config.edgeName}] sit failed`, sit.id, msg);
           errors.push(`${sit.id}: ${msg}`);
+          await recordReviewSendFailure(supabase, {
+            edgeName: config.edgeName,
+            stage: config.stage,
+            sitId: sit.id,
+            sitTitle: sit.title,
+            party: "unknown",
+            idempotencyKey: `review-${config.stage}-${sit.id}`,
+            responseBody: msg,
+          });
         }
       }
 
