@@ -36,7 +36,7 @@ export default function HomeJsonLd() {
                 height: 512,
               },
               description:
-                "Réseau d'entraide entre particuliers : house-sitting, garde d'animaux à domicile, de maison et de jardin, et petites missions entre gens du coin. Mise en relation par affinité, identité vérifiée, avis croisés. France entière et Français à l'étranger.",
+                "Réseau d'entraide entre particuliers : house-sitting, garde d'animaux à domicile, de maison et de jardin, et petites missions entre gens du coin. Mise en relation par affinité, identité vérifiable, avis croisés. France entière et Français à l'étranger.",
               areaServed: { "@type": "Country", name: "France" },
               knowsAbout: [
                 "House-sitting",
