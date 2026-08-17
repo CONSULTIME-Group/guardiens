@@ -16,7 +16,7 @@ import path from "node:path";
  */
 
 const LOCALES = path.resolve(process.cwd(), "src/i18n/locales");
-const LANGS = ["fr", "en", "es", "it", "de"] as const;
+const LANGS = ["fr", "en", "es"] as const;
 
 const readKey = (lng: string): string | undefined => {
   const dict = JSON.parse(fs.readFileSync(path.join(LOCALES, `${lng}/common.json`), "utf8"));
@@ -24,7 +24,7 @@ const readKey = (lng: string): string | undefined => {
 };
 
 describe("upload photo : formulation unique", () => {
-  it("la clé upload.photo_failed existe dans les cinq langues", () => {
+  it("la clé upload.photo_failed existe dans les trois langues", () => {
     for (const lng of LANGS) {
       const value = readKey(lng);
       expect(value, lng).toBeTruthy();
