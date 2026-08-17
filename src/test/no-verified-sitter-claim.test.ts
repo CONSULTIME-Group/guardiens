@@ -125,7 +125,18 @@ const PROMISE_ENUM_PATTERNS: RegExp[] = [
 
 const BADGE_CONTEXT_LINE = /écussons?|badges?/i;
 
+/** Une promesse vit dans une chaîne rendue, jamais dans un commentaire. */
+function isCommentLine(trimmed: string): boolean {
+  return (
+    trimmed.startsWith("//") ||
+    trimmed.startsWith("/*") ||
+    trimmed.startsWith("*") ||
+    trimmed.startsWith("{/*")
+  );
+}
+
 export function isPromiseEnumeration(line: string): boolean {
+  if (isCommentLine(line.trim())) return false;
   if (BADGE_CONTEXT_LINE.test(line)) return false;
   const stripped = removeAllowedBadgeNames(line);
   return PROMISE_ENUM_PATTERNS.some((pattern) => pattern.test(stripped));
