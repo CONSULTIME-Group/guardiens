@@ -6,7 +6,8 @@ vi.mock("@/lib/analytics", () => ({ trackEvent: vi.fn() }));
 // Le composant utilise useTranslation directement : sans mock, l'assertion sur
 // la clé du compteur dépend de l'état d'initialisation d'i18next (flaky).
 // Le mock fige t = identité, l'assertion sur la clé devient déterministe.
-vi.mock("react-i18next", () => ({
+vi.mock("react-i18next", async (importOriginal) => ({
+  ...(await importOriginal<object>()),
   useTranslation: () => ({ t: (k: string) => k, i18n: { language: "fr" } }),
 }));
 vi.mock("@/hooks/useImpressionOnce", () => ({ useImpressionOnce: () => false }));
