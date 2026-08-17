@@ -1165,6 +1165,11 @@ Deno.serve(async (req) => {
   if (templateName === 'contact-reply') {
     resendPayload.reply_to = 'contact.guardiens@gmail.com'
   }
+  // Le gabarit d'avis invite explicitement à répondre (mot du fondateur) :
+  // la promesse doit aboutir dans une boîte réellement relevée.
+  if (templateName === 'review-reminder') {
+    resendPayload.reply_to = REPLY_TO_ADDRESS
+  }
 
   try {
     const resendRes = await resendFetch('https://api.resend.com/emails', {
