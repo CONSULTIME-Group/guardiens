@@ -5,29 +5,31 @@ import i18n from "@/i18n";
 
 /**
  * Complétude du dictionnaire français pour l'écran annonces : chaque clé
- * public_listings.* utilisée par SearchPage doit résoudre une vraie chaîne
- * (jamais la clé elle-même, jamais une chaîne vide). Avant le 17/08/2026 ce
- * test vérifiait l'absence de rendu mixte entre langues ; il n'existe plus
- * qu'une seule langue, le risque résiduel est le trou de dictionnaire.
+ * public_listings.* utilisée par PublicListings doit résoudre une vraie
+ * chaîne (jamais la clé elle-même, jamais une chaîne vide). Avant le
+ * 17/08/2026 ce test vérifiait l'absence de rendu mixte entre langues ; il
+ * n'existe plus qu'une seule langue, le risque résiduel est le trou de
+ * dictionnaire. La liste reflète les clés réellement appelées par
+ * `src/pages/PublicListings.tsx`, y compris les clés pluralisées
+ * (résolues en _one/_other par i18next via `count`).
  */
 const screenKeys = [
-  "public_listings.title",
-  "public_listings.subtitle",
-  "public_listings.search_placeholder",
+  "public_listings.meta_title",
+  "public_listings.meta_description",
+  "public_listings.eyebrow",
+  "public_listings.eyebrow_stats",
+  "public_listings.cities_count",
+  "public_listings.all_france",
+  "public_listings.h1",
+  "public_listings.subtitle_short",
+  "public_listings.see_also_missions",
   "public_listings.local_guides",
-  "public_listings.results_count",
-  "public_listings.results_empty",
-  "public_listings.filters_open",
-  "public_listings.reset_filters",
-  "public_listings.sort_label",
-  "public_listings.sort_relevance",
-  "public_listings.sort_date",
-  "public_listings.sort_duration",
-  "public_listings.sort_animals",
-  "public_listings.view_list",
-  "public_listings.view_map",
-  "public_listings.load_error",
-  "public_listings.retry",
+  "public_listings.pricing",
+  "public_listings.intl_count",
+  "public_listings.become_sitter_eyebrow",
+  "public_listings.become_sitter_title",
+  "public_listings.become_sitter_body",
+  "public_listings.become_sitter_cta",
 ] as const;
 
 const Screen = () => {
@@ -36,7 +38,7 @@ const Screen = () => {
     <div>
       {screenKeys.map((k) => (
         <span key={k} data-testid={k}>
-          {t(k)}
+          {t(k, { count: 2, cities: "Lyon" })}
         </span>
       ))}
     </div>

@@ -7,8 +7,6 @@ import { installGlobalErrorLogger } from "./lib/errorLogger";
 import { initConsent } from "./lib/cookieConsent";
 import { installStorageFallback } from "./lib/storageFallback";
 import { installOAuthDebugHelper } from "./lib/oauthLogger";
-import { loadLanguage } from "./i18n";
-import { resolveInitialLang } from "@/lib/lang";
 
 installStorageFallback();
 installOAuthDebugHelper();
@@ -37,39 +35,16 @@ if (!container) {
   throw new Error("Élément #root introuvable dans le DOM");
 }
 
-/**
- * Langue cible avant le premier rendu : la règle vit dans
- * `src/lib/lang.ts` (resolveInitialLang), partagée avec les tests. La logique
- * de détection d'i18next n'est pas modifiée, on se contente de savoir quel
- * dictionnaire précharger.
- */
-const renderApp = () => {
-  createRoot(container).render(
-    <App />
-  );
-};
-
-const bootstrap = async () => {
-  const target = resolveInitialLang();
-  if (target !== "fr") {
-    try {
-      // Le rendu n'attend jamais plus de 1,5 s : un CDN lent dégrade en
-      // français plutôt que de retarder l'affichage.
-      await Promise.race([
-        loadLanguage(target),
-        new Promise((resolve) => window.setTimeout(resolve, 1500)),
-      ]);
-    } catch {
-      // Repli silencieux : le rendu a lieu quoi qu'il arrive.
-    }
-  }
-  renderApp();
-};
-
-void bootstrap();
+// Guardiens est monolingue français : le seul dictionnaire (fr) est importé
+// statiquement par i18next à l'init, il n'y a plus rien à précharger avant le
+// premier rendu. Le repli des anciennes URL `?lang=xx` est géré par
+// LangUrlSync et `src/lib/lang.ts`.
+createRoot(container).render(
+  <App />
+);
 
 // Fallback prerenderReady : PageMeta est la source de vérité et flippe le flag
-// à la fin de son useEffect (après upsert du canonical par langue). Ce fallback
+// à la fin de son useEffect (après upsert du canonical). Ce fallback
 // couvre uniquement les routes sans PageMeta (ex : /annonces/* qui a son propre
 // chemin OG server-side). Délai généreux pour laisser React + fetch + PageMeta
 // s'exécuter avant que Prerender ne capture.
