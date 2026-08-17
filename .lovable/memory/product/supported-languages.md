@@ -14,6 +14,6 @@ L'allemand (de), l'italien (it) puis l'espagnol (es) ont été retirés du produ
 - `SUPPORTED_LANGS = ["fr", "en"]` dans `src/i18n/index.ts`. Ne jamais réintroduire de/it/es sans lot SEO dédié.
 - Un paramètre `?lang=` explicite mais non supporté force le repli français (jamais le choix mémorisé ni le navigateur) : `resolveInitialLang` dans `src/lib/lang.ts`, `LangUrlSync.tsx`. Verrou : `src/__tests__/lang-removed-locales-fallback.test.tsx`.
 - Une URL `?lang=de|it|es` doit rendre : `html lang="fr"`, `index, follow`, canonique auto-référente sans paramètre.
-- Les 212 lignes `article_translations` de/it/es sont archivées dans `public.article_translations_archive` (table renommée, suppression réversible). Seules les 102 traductions anglaises restent actives.
+- Les traductions de/it/es sont définitivement supprimées (table d'archive détruite le 17/08/2026, décision assumée, aucune restauration possible). Seules les 102 traductions anglaises subsistent dans `article_translations`.
 - Alternates hreflang du sitemap : dérivés de `translatedLangs` dans `src/data/siteRoutes.ts` (même source de vérité que PageMeta). Seule la home déclare une traduction statique (en). Les pages sans traduction réelle n'émettent aucun alternate.
 - Résidu inerte assumé : `supabase/functions/_shared/decline-reasons.ts` garde des branches de/it (emails transactionnels, repli fr, le front ne peut plus émettre ces codes). Les codes ISO pays du géocodeur (`es` = Espagne, etc.) sont hors scope langue.
