@@ -1,6 +1,12 @@
 import { describe, it, expect } from "vitest";
 import { readFileSync, existsSync } from "node:fs";
 import { resolve } from "node:path";
+// Import STATIQUE : l'ancien `await import(...)` dans le `it` chargeait
+// tout le graphe de composants React des badges dans un test timé (5 s)
+// et mourrait en timeout sous la charge du run complet (constaté le
+// 17/08/2026). Au niveau module, le coût tombe dans la phase de collecte,
+// hors testTimeout. Sémantique du test inchangée.
+import { BADGE_DEFINITIONS } from "@/components/badges/badge-definitions";
 
 /**
  * Garantit que public/llms.txt liste toutes les routes statiques publiques
@@ -72,8 +78,7 @@ describe("llms.txt coverage", () => {
     ).toEqual([]);
   });
 
-  it("annonce le bon nombre de badges, aligné sur BADGE_DEFINITIONS", async () => {
-    const { BADGE_DEFINITIONS } = await import("@/components/badges/badge-definitions");
+  it("annonce le bon nombre de badges, aligné sur BADGE_DEFINITIONS", () => {
     const count = Object.keys(BADGE_DEFINITIONS).length;
     expect(
       llmsTxt.includes(`${count} badges de reconnaissance`),

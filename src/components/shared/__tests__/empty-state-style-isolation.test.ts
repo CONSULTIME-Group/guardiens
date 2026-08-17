@@ -82,13 +82,23 @@ const FORBIDDEN_PATTERNS: { pattern: RegExp; message: string }[] = [
 describe("EmptyState style isolation", () => {
   const files = walk(SRC);
 
+  /**
+   * Contenus lus UNE fois ici (phase de collecte, hors testTimeout).
+   * Avant, chaque `it` de pattern relisait tout `src/` (~1500 fichiers
+   * par pattern, ×4 patterns + 2 lectures d'index.css) : sous la charge
+   * I/O du run complet, un test dépassait le délai de 5 s et mourrait
+   * sur « Test timed out in 5000ms » (constaté le 17/08/2026).
+   */
+  const CONTENTS = new Map(files.map((f) => [f, readFileSync(f, "utf8")] as const));
+
+
   for (const { pattern, message } of FORBIDDEN_PATTERNS) {
     it(`no forbidden pattern: ${pattern}`, () => {
       const violations: string[] = [];
       for (const file of files) {
         const rel = relative(ROOT, file).replace(/\\/g, "/");
         if (ALLOWED.has(rel)) continue;
-        const content = readFileSync(file, "utf8");
+        const content = CONTENTS.get(file)!;
         if (pattern.test(content)) {
           // Récupère la 1re ligne fautive pour le message d'erreur.
           const line = content
@@ -105,7 +115,7 @@ describe("EmptyState style isolation", () => {
   }
 
   it(".illustration-blend exists exactly once in index.css (base rule)", () => {
-    const css = readFileSync(join(SRC, "index.css"), "utf8");
+    const css = CONTENTS.get(join(SRC, "index.css"))!;
     // Compte UNIQUEMENT la règle de base : début de ligne + indentation +
     // .illustration-blend non précédée d'un autre sélecteur (ex: .dark).
     const matches = css.match(/^\s*\.illustration-blend\s*\{/gm) ?? [];
@@ -113,7 +123,7 @@ describe("EmptyState style isolation", () => {
   });
 
   it(".illustration-wrapper exists in index.css (defensive bg-transparent)", () => {
-    const css = readFileSync(join(SRC, "index.css"), "utf8");
+    const css = CONTENTS.get(join(SRC, "index.css"))!;
     expect(css).toMatch(/\.illustration-wrapper\s*\{/);
     expect(css).toMatch(/\.illustration-wrapper[\s\S]{0,200}background:\s*transparent/);
   });
