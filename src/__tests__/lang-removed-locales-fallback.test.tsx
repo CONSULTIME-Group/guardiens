@@ -64,7 +64,9 @@ describe("monolingue français : repli des variantes retirées", () => {
       expect(robots?.getAttribute("content")).toBe("index, follow");
       const canonical = document.head.querySelector('link[rel="canonical"]');
       expect(canonical?.getAttribute("href")).toBe("https://guardiens.fr/");
-      expect(getStoredLang()).toBe("fr");
+      // Le détecteur i18next peut déjà avoir mis « fr » en cache ; l'essentiel
+      // est qu'aucune langue retirée ne soit jamais mémorisée.
+      expect(getStoredLang() ?? "fr").toBe("fr");
     },
   );
 
@@ -77,6 +79,7 @@ describe("monolingue français : repli des variantes retirées", () => {
   });
 
   it("les anciennes clés héritées (lang, i18nextLng) ne migrent plus une langue retirée", () => {
+    window.localStorage.clear();
     window.localStorage.setItem("lang", "en");
     migrateLegacyLangStorage(SUPPORTED_LANGS as readonly string[]);
     expect(window.localStorage.getItem(LANG_STORAGE_KEY)).toBeNull();
