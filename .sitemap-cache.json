@@ -13,12 +13,12 @@
       "fetchedAt": "2026-08-16T21:02:32.592Z"
     },
     "seo_city_pages": {
-      "head": "2026-08-16T20:59:33.708301+00:00",
-      "fetchedAt": "2026-08-16T21:02:32.599Z"
+      "head": "2026-08-17T04:05:00.353048+00:00",
+      "fetchedAt": "2026-08-17T06:42:12.724Z"
     },
     "seo_department_pages": {
-      "head": "2026-08-16T20:59:33.708301+00:00",
-      "fetchedAt": "2026-08-16T21:02:32.618Z"
+      "head": "2026-08-17T04:07:00.20394+00:00",
+      "fetchedAt": "2026-08-17T06:42:12.660Z"
     },
     "pro_profiles": {
       "head": "2026-08-13T03:10:20.218582+00:00",
@@ -29,8 +29,8 @@
       "fetchedAt": "2026-08-16T21:02:32.645Z"
     },
     "public_profiles": {
-      "head": "2026-08-16T19:46:06.278765+00:00|961",
-      "fetchedAt": "2026-08-16T21:02:32.742Z"
+      "head": "2026-08-17T03:13:05.092195+00:00|964",
+      "fetchedAt": "2026-08-17T06:42:12.782Z"
     }
   },
   "entries": {
@@ -1813,7 +1813,7 @@
       },
       {
         "loc": "/house-sitting/annecy",
-        "lastmod": "2026-08-10",
+        "lastmod": "2026-08-17",
         "changefreq": "weekly",
         "priority": "0.8"
       },
@@ -1843,6 +1843,18 @@
       }
     ],
     "seo_department_pages": [
+      {
+        "loc": "/departement/haute-savoie",
+        "lastmod": "2026-08-17",
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/departement/nievre",
+        "lastmod": "2026-08-17",
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
       {
         "loc": "/departement/ain",
         "lastmod": "2026-08-16",
@@ -1875,12 +1887,6 @@
       },
       {
         "loc": "/departement/drome",
-        "lastmod": "2026-08-16",
-        "changefreq": "weekly",
-        "priority": "0.8"
-      },
-      {
-        "loc": "/departement/haute-savoie",
         "lastmod": "2026-08-16",
         "changefreq": "weekly",
         "priority": "0.8"
@@ -1935,12 +1941,6 @@
       },
       {
         "loc": "/departement/jura",
-        "lastmod": "2026-08-16",
-        "changefreq": "weekly",
-        "priority": "0.8"
-      },
-      {
-        "loc": "/departement/nievre",
         "lastmod": "2026-08-16",
         "changefreq": "weekly",
         "priority": "0.8"
@@ -2575,12 +2575,6 @@
         "priority": "0.5"
       },
       {
-        "loc": "/gardiens/eba9e472-9fe3-4239-b5ac-aecbe9309cd5",
-        "lastmod": "2026-08-12",
-        "changefreq": "monthly",
-        "priority": "0.5"
-      },
-      {
         "loc": "/gardiens/8a2f7ad8-8a78-49ba-b840-895ccb1196b0",
         "lastmod": "2026-08-16",
         "changefreq": "monthly",
@@ -2631,6 +2625,12 @@
       {
         "loc": "/gardiens/fb3f799b-ea38-482a-be14-6baca80ac48d",
         "lastmod": "2026-08-14",
+        "changefreq": "monthly",
+        "priority": "0.5"
+      },
+      {
+        "loc": "/gardiens/eba9e472-9fe3-4239-b5ac-aecbe9309cd5",
+        "lastmod": "2026-08-17",
         "changefreq": "monthly",
         "priority": "0.5"
       },
