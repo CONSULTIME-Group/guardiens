@@ -26,10 +26,10 @@ const getArg = (k, d) => {
 const FORCE = args.includes("--force");
 const ONLY_LANG = getArg("--lang", null);
 const LIMIT = parseInt(getArg("--limit", "9999"), 10);
-const LANGS = ONLY_LANG ? [ONLY_LANG] : ["en", "es", "it", "de"];
+const LANGS = ONLY_LANG ? [ONLY_LANG] : ["en", "es"];
 const MODEL = getArg("--model", "google/gemini-2.5-flash");
 
-const LANG_NAMES = { en: "English", es: "Spanish (Spain)", it: "Italian", de: "German" };
+const LANG_NAMES = { en: "English", es: "Spanish (Spain)" };
 
 const supabase = createClient(SUPABASE_URL, SERVICE_KEY, { auth: { persistSession: false } });
 

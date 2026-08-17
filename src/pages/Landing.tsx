@@ -151,9 +151,10 @@ const Landing = () => {
         description={t("landing.meta_description")}
  path="/"
  image={HOME_OG_IMAGE}
- /* La home est traduite dans les cinq langues : ses variantes sont
-    indexables et déclarées en alternates. */
- translatedLangs={["en", "es", "it", "de"]}
+ /* La home est traduite en anglais et en espagnol : ses variantes sont
+    indexables et déclarées en alternates. Source unique : siteRoutes.ts,
+    également lue par le générateur de sitemap. */
+ translatedLangs={staticRoutes.find((r) => r.path === "/")?.translatedLangs ?? []}
  />
       <HomeJsonLd />
 

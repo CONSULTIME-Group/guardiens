@@ -193,7 +193,7 @@ export default function ArticleDetail() {
    if (!cancelled) {
      setIndexableLangs(rows.filter((r) => r.noindex === false).map((r) => r.lang));
    }
-   if (["en", "es", "it", "de"].includes(currentLang)) {
+   if (["en", "es"].includes(currentLang)) {
      const tr = rows.find((r) => r.lang === currentLang);
      if (tr) {
        art = {

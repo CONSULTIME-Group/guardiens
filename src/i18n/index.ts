@@ -4,21 +4,24 @@ import LanguageDetector from "i18next-browser-languagedetector";
 import { LANG_STORAGE_KEY, migrateLegacyLangStorage } from "@/lib/langStorageKey";
 
 // Seul le français est embarqué dans le bundle d'entrée : c'est la langue de
-// repli et la langue de la très grande majorité des visites. Les quatre autres
+// repli et la langue de la très grande majorité des visites. Les deux autres
 // dictionnaires sont chargés à la demande par loadLanguage(), en chunks
-// séparés, pour ne pas faire télécharger et analyser 4 dictionnaires inutiles
-// avant le premier rendu.
+// séparés, pour ne pas faire télécharger et analyser des dictionnaires
+// inutiles avant le premier rendu.
+//
+// Langues retirées le 17/08/2026 : allemand et italien. Leurs variantes
+// `?lang=de|it` connues de Google renvoyaient `noindex` + canonique vers le
+// français, combinaison déconseillée. Elles retombent désormais sur un
+// rendu français indexable (voir LangUrlSync et resolveInitialLang).
 import frCommon from "./locales/fr/common.json";
 
-export const SUPPORTED_LANGS = ["fr", "en", "es", "it", "de"] as const;
+export const SUPPORTED_LANGS = ["fr", "en", "es"] as const;
 export type SupportedLang = (typeof SUPPORTED_LANGS)[number];
 
 export const LANG_LABELS: Record<SupportedLang, { native: string; flag: string }> = {
   fr: { native: "Français", flag: "🇫🇷" },
   en: { native: "English", flag: "🇬🇧" },
   es: { native: "Español", flag: "🇪🇸" },
-  it: { native: "Italiano", flag: "🇮🇹" },
-  de: { native: "Deutsch", flag: "🇩🇪" },
 };
 
 // Une seule mémoire de langue : les clés héritées d'anciennes versions du
@@ -76,12 +79,6 @@ export async function loadLanguage(lng: string): Promise<void> {
         break;
       case "es":
         mod = await import("./locales/es/common.json");
-        break;
-      case "it":
-        mod = await import("./locales/it/common.json");
-        break;
-      case "de":
-        mod = await import("./locales/de/common.json");
         break;
       default:
         return;

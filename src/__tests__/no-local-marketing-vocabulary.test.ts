@@ -6,7 +6,7 @@ import path from "node:path";
  * Garde anti-régression, règle posée le 16/08/2026 :
  * le vocabulaire marketing « local » (et ses équivalents traduits) ne doit
  * plus apparaître dans les chaînes de la landing, de la page de connexion
- * et de la page urgence, dans les cinq langues. Le positionnement est
+ * et de la page urgence, dans les trois langues. Le positionnement est
  * national, le réseau s'organise par affinité autant que par proximité.
  *
  * Exceptions explicites :
@@ -22,7 +22,7 @@ import path from "node:path";
  */
 
 const LOCALES_DIR = path.resolve(process.cwd(), "src/i18n/locales");
-const LANGS = ["fr", "en", "es", "it", "de"] as const;
+const LANGS = ["fr", "en", "es"] as const;
 type Lang = (typeof LANGS)[number];
 
 const SCOPED_PREFIX = /^(landing|login_page|emergency_page)\./;
@@ -31,8 +31,6 @@ const FORBIDDEN: Record<Lang, RegExp[]> = {
   fr: [/\blocal(e|s)?\b/i, /\blocaux\b/i, /hyper-local/i],
   en: [/\blocals?\b/i, /hyper-local/i],
   es: [/\blocal(es)?\b/i, /hiperlocal/i],
-  it: [/\blocal(e|i)?\b/i, /iper-local/i],
-  de: [/\blokal(e|en|er|em|es)?\b/i, /hyper-lokal/i, /einheimisc/i],
 };
 
 /** Clés exemptées, avec la raison. Toute nouvelle entrée doit être arbitrée. */

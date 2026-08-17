@@ -31,6 +31,16 @@ export interface SiteRoute {
  * lisent ce flag. Toute exception côté composant doit être justifiée.
  */
  index?: boolean;
+ /**
+ * Langues pour lesquelles CETTE page possède une traduction réelle et
+ * indexable (hors fr, toujours inclus). Source unique consommée par le
+ * composant de la page (prop `translatedLangs` de PageMeta) ET par
+ * `generate-sitemap.mjs` (alternates hreflang) : une variante n'est
+ * déclarée nulle part ailleurs que ce qu'elle existe vraiment.
+ * Absent ou vide : aucune alternate, les variantes `?lang=` restent
+ * noindex côté PageMeta.
+ */
+ translatedLangs?: readonly string[];
 }
 
 /**
@@ -126,6 +136,9 @@ export const staticRoutes: SiteRoute[] = [
  sitemapPriority: "1.0",
  changeFreq: "daily",
  ogImage: DEFAULT_OG_IMAGE,
+ // Seule page statique réellement traduite : l'allemand et l'italien ont
+ // été retirés le 17/08/2026. Consommé par Landing.tsx et le sitemap.
+ translatedLangs: ["en", "es"],
  },
  {
  path: "/tarifs",
