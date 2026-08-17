@@ -34,7 +34,7 @@ const clearCanonicals = () => {
 describe("index.html : script de canonique de bootstrap", () => {
   it("est présent dans index.html", () => {
     expect(bootstrapScript).toBeDefined();
-    expect(html).toContain('data-bootstrap-canonical="true"');
+    expect(html).toContain('setAttribute("data-bootstrap-canonical", "true")');
   });
 
   it("s'exécute après le script de preview .lovable.app", () => {
