@@ -17,6 +17,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:guard": "node scripts/test-guard/diff-guard.mjs",
+    "test:data": "vitest run src/__tests__/article-internal-links.test.ts src/__tests__/article-pricing-content.test.ts",
     "test:e2e:badges": "playwright test tests/badges-long-labels.spec.ts",
     "test:e2e:badges:update": "playwright test tests/badges-long-labels.spec.ts --update-snapshots",
     "test:e2e:sit-visual": "playwright test tests/visual/sit-detail.spec.ts",
