@@ -15,6 +15,10 @@ import { readFileSync } from "node:fs";
  * Bloc 2 : positionnement national. « AURA », « Auvergne-Rhône-Alpes » et
  * « votre région » sont proscrits du contenu visible.
  *
+ * Bloc 3 : le nom de l'écusson « Identité vérifiée » ne doit pas figurer dans
+ * une énumération de promesses produit (hero, bandeau de réassurance), où il
+ * se lirait comme une garantie générale sur tous les profils.
+ *
  * Aucune astuce d'écriture n'est utilisée ici : les littéraux interdits sont
  * écrits en clair, et les fichiers légitimes sont exclus nommément ci-dessous.
  */
@@ -84,6 +88,47 @@ export function removeAllowedBadgeNames(source: string): string {
     .split('"Identité vérifiée"').join("")
     .split("« ID vérifiée »").join("")
     .split('"ID vérifiée"').join("");
+}
+
+/**
+ * Bloc 3 : énumérations de promesses.
+ *
+ * « Identité vérifiée » est le nom d'un écusson attribué à un profil qui l'a
+ * réellement obtenu. Dans une énumération de promesses produit (hero, bandeau
+ * de réassurance), ce nom se lit comme une garantie générale sur tous les
+ * profils : c'est faux, la vérification est un choix du membre.
+ *
+ * Le motif est volontairement étroit, trois conditions cumulatives :
+ * - casse exacte du nom propre « Identité vérifiée » : les formes descriptives
+ *   en minuscules (« l'identité vérifiée » du Trust Score, listes de
+ *   conditions d'éligibilité) ne sont pas visées ;
+ * - virgule adjacente à l'intérieur de la chaîne : les libellés autonomes
+ *   (`label: "Identité vérifiée"`) sont déjà retirés par
+ *   removeAllowedBadgeNames, et une virgule JSON après le guillemet fermant ne
+ *   crée pas l'adjacence ;
+ * - la ligne ne mentionne ni « écusson » ni « badge » : une énumération de
+ *   noms d'écussons en prose (Observatoire) reste légitime.
+ *
+ * Trous connus et assumés (tests ignorés en bas de fichier) :
+ * - une pastille autonome `label: "Identité vérifiée"` dans un bandeau
+ *   marketing est textuellement identique aux libellés légitimes (checklist
+ *   d'éligibilité, statut de compte) : aucun motif fiable ne les distingue ;
+ * - la forme minuscule nue (« par affinité, identité vérifiée, avis croisés »,
+ *   corrigée dans HomeJsonLd le 17/08/2026) : un motif insensible à la casse
+ *   frapperait aussi les listes de conditions (« 0 annulation, identité
+ *   vérifiée. ») et les descriptions du Trust Score.
+ */
+const PROMISE_ENUM_PATTERNS: RegExp[] = [
+  /Identité vérifiée\s*,/,
+  /,\s*Identité vérifiée/,
+];
+
+const BADGE_CONTEXT_LINE = /écussons?|badges?/i;
+
+export function isPromiseEnumeration(line: string): boolean {
+  if (BADGE_CONTEXT_LINE.test(line)) return false;
+  const stripped = removeAllowedBadgeNames(line);
+  return PROMISE_ENUM_PATTERNS.some((pattern) => pattern.test(stripped));
 }
 
 /**
