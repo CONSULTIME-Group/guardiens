@@ -36,6 +36,13 @@ const ALLOWED = new Set([
   "src/components/onboarding/OnboardingModal.tsx",
   "src/components/auth/AuthIllustrationPanel.tsx",
   "src/pages/Sits.tsx",
+  // Usages volontaires hors EmptyState, validés le 17/08/2026 :
+  // MissionCard.tsx : mix-blend-multiply teinte le dégradé des photos de mission.
+  "src/components/missions/MissionCard.tsx",
+  // SearchOwner.tsx / SearchSitter.tsx : sm:[mask-image:none] DÉSACTIVE sur
+  // desktop le fondu de scroll des pilules (le masque vit dans index.css).
+  "src/pages/SearchOwner.tsx",
+  "src/pages/SearchSitter.tsx",
 ]);
 
 function walk(dir: string, acc: string[] = []): string[] {
