@@ -46,7 +46,13 @@ function loadStaticRoutes() {
     // robots.txt et <meta robots>). Source de vérité : siteRoutes.ts.
     const indexMatch = block.match(/index:\s*(true|false)/);
     const indexable = indexMatch ? indexMatch[1] === "true" : true;
-    routes.push({ loc: path_, priority: priorityMatch[2], changefreq, indexable });
+    // Traductions réelles de la page (hors fr) : mêmes valeurs que la prop
+    // `translatedLangs` de PageMeta, dont ce fichier est la source unique.
+    const translatedMatch = block.match(/translatedLangs:\s*\[([^\]]*)\]/);
+    const translatedLangs = translatedMatch
+      ? Array.from(translatedMatch[1].matchAll(/["']([^"']+)["']/g)).map((mm) => mm[1])
+      : [];
+    routes.push({ loc: path_, priority: priorityMatch[2], changefreq, indexable, translatedLangs });
   }
   if (routes.length === 0) throw new Error("Aucune route extraite de staticRoutes");
   return { siteUrl, routes };
@@ -101,12 +107,15 @@ function urlEntry(loc, lastmod, changefreq, priority) {
   </url>`;
 }
 
-// Routes UI traduites en EN/ES/IT/DE via i18next (header, footer, landing, pricing, faq).
-// Signale les alternates linguistiques à Google via xhtml:link.
-const I18N_LANGS = ["fr", "en", "es", "it", "de"];
-function urlEntryWithLangAlternates(loc, lastmod, changefreq, priority) {
+// Alternates linguistiques : émises uniquement pour les pages dont
+// `translatedLangs` est renseigné dans siteRoutes.ts (traduction réelle et
+// indexable, même source de vérité que PageMeta). Une page sans traduction
+// déclarée n'émet aucune alternate : ses variantes ?lang= sont noindex,
+// les déclarer ici serait un signal contradictoire.
+function urlEntryWithLangAlternates(loc, lastmod, changefreq, priority, translatedLangs) {
   const base = escapeXml(SITE_URL + loc);
-  const alt = I18N_LANGS.map((lng) => {
+  const langs = ["fr", ...translatedLangs.filter((l) => l !== "fr")];
+  const alt = langs.map((lng) => {
     const href = lng === "fr" ? base : `${base}${loc.includes("?") ? "&" : "?"}lang=${lng}`;
     return `    <xhtml:link rel="alternate" hreflang="${lng}" href="${escapeXml(href)}"/>`;
   }).join("\n");
@@ -467,10 +476,18 @@ async function main() {
   const entries = [];
 
   for (const page of staticPages) {
-    entries.push(urlEntryWithLangAlternates(page.loc, today, page.changefreq, page.priority));
+    // Alternates seulement si la page déclare des traductions réelles dans
+    // siteRoutes.ts (aujourd'hui : uniquement la home, en en/es).
+    entries.push(
+      page.translatedLangs.length > 0
+        ? urlEntryWithLangAlternates(page.loc, today, page.changefreq, page.priority, page.translatedLangs)
+        : urlEntry(page.loc, today, page.changefreq, page.priority),
+    );
   }
+  // Pages ville statiques : CityPage ne déclare aucune traduction réelle,
+  // donc aucune alternate (cohérent avec le noindex des variantes ?lang=).
   for (const slug of cityLandingPages) {
-    entries.push(urlEntryWithLangAlternates(`/house-sitting/${slug}`, today, "weekly", "0.9"));
+    entries.push(urlEntry(`/house-sitting/${slug}`, today, "weekly", "0.9"));
   }
   for (const e of articles) {
     const slug = e.loc.replace(/^\/actualites\//, "");
