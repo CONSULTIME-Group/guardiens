@@ -58,6 +58,16 @@ const ALLOWED_FILES = new Set<string>([
   "supabase/functions/refresh-articles-post-pivot/index.ts",
   "supabase/functions/draft-sit-from-prompt/index.ts",
 
+  // Même circularité assumée (décision du 17/08/2026) : ces 5 edge functions de
+  // rédaction assistée portent chacune la regex PROSCRIBED qui sert à détecter
+  // et interdire la promesse d'essai dans le contenu généré. La chaîne y est un
+  // motif d'interdiction, jamais une copy servie à l'utilisateur.
+  "supabase/functions/draft-application-letter/index.ts",
+  "supabase/functions/draft-conversation-opener/index.ts",
+  "supabase/functions/draft-review/index.ts",
+  "supabase/functions/explain-affinity-score/index.ts",
+  "supabase/functions/generate-house-guide/index.ts",
+
   // Migrations DB = historique figé, jamais ré-exécuté contre du contenu vivant.
   // (les migrations contiennent du seed FAQ obsolète, non servi.)
 ]);

@@ -7,6 +7,17 @@ import MissionsTabsCard from "../MissionsTabsCard";
 import MonAnnonceCard from "../MonAnnonceCard";
 import type { SitRow, SitterInfo, Pet, SmallMission } from "../types";
 
+// Depuis le 16/07/2026, HelpDuringSitDialog (enfant de OngoingSitHero)
+// appelle useAuth : le harness doit fournir le contexte, faute de quoi le
+// rendu plante avant le snapshot. Mock minimal sans aucun appel réseau.
+vi.mock("@/contexts/AuthContext", () => ({
+  useAuth: () => ({
+    user: { id: "owner-1", email: "owner@example.com" },
+    activeRole: "owner",
+    isAuthenticated: true,
+  }),
+}));
+
 /**
  * Tests visuels (snapshots DOM) — 4 composants clés du dashboard propriétaire.
  * Couverture min : 1 état par composant × 2 viewports (mobile 390px / desktop 1280px).

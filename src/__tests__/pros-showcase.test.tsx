@@ -3,6 +3,13 @@ import { render, screen } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 
 vi.mock("@/lib/analytics", () => ({ trackEvent: vi.fn() }));
+// Le composant utilise useTranslation directement : sans mock, l'assertion sur
+// la clé du compteur dépend de l'état d'initialisation d'i18next (flaky).
+// Le mock fige t = identité, l'assertion sur la clé devient déterministe.
+vi.mock("react-i18next", async (importOriginal) => ({
+  ...(await importOriginal<object>()),
+  useTranslation: () => ({ t: (k: string) => k, i18n: { language: "fr" } }),
+}));
 vi.mock("@/hooks/useImpressionOnce", () => ({ useImpressionOnce: () => false }));
 
 const mockCounts = vi.fn();
@@ -37,8 +44,15 @@ describe("ProsShowcase", () => {
   });
 
   it("affiche 3 cards + compteur quand pros_total ≥ 1", () => {
+    // Décision du 14/07/2026 (commit d3da22ad3) : l'écran ne montre que les
+    // catégories ayant au moins 1 fiche publiée. Le mock doit donc fournir
+    // pros_by_category peuplé (clés DB au singulier) pour les trois cartes.
     mockCounts.mockReturnValue({
-      data: { pros_total: 12, pros_verified: 3 },
+      data: {
+        pros_total: 12,
+        pros_verified: 3,
+        pros_by_category: { veterinaire: 5, toiletteur: 4, transporteur: 3 },
+      },
       isLoading: false,
     });
     renderShowcase();

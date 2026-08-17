@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeAll } from "vitest";
 import { createClient } from "@supabase/supabase-js";
+import { isPricingActive } from "@/lib/pricing";
 
 /**
  * Garantit que l'article pilier `/actualites/nouveaux-tarifs-2026`
@@ -36,7 +37,13 @@ const REQUIRED_PATTERNS: Array<{ label: string; regex: RegExp }> = [
   { label: "offert", regex: /\boffert(?:e|s|es)?\b/i },
 ];
 
-describe("Article /actualites/nouveaux-tarifs-2026 — cohérence tarifaire", () => {
+// Décision produit du 17/08/2026 : la dépublication de l'article
+// « nouveaux-tarifs-2026 » est volontaire, Guardiens est gratuit jusqu'à
+// nouvel ordre. Tant que isPricingActive() est faux, cette suite est ignorée
+// proprement (skip, pas de requête réseau). Elle se réactivera d'elle-même le
+// jour où le pricing repassera à vrai : l'article devra alors être republié
+// et resynchronisé avec les tarifs en vigueur.
+describe.skipIf(!isPricingActive())("Article /actualites/nouveaux-tarifs-2026 — cohérence tarifaire", () => {
   let combined = "";
   let fields: { title: string; meta_title: string; meta_description: string; content: string };
 

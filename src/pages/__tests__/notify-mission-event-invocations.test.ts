@@ -6,13 +6,21 @@ import { describe, it, expect } from "vitest";
  * Guard test : garantit que SmallMissionDetail.tsx invoque bien
  * `notify-mission-event` avec le bon `event_type`, un `actor_id`
  * dérivé du user courant et des `target_ids` cohérents pour chacun
- * des 7 chemins produit (proposal / accepted / declined unitaire /
- * declined cascade / cancelled / completed / response_withdrawn).
+ * des 6 chemins produit (accepted / declined unitaire / declined
+ * cascade / cancelled / completed / response_withdrawn).
  *
  * Le fan-out email est délégué à l'edge function (registry + templates
  * `mission-*` couverts par registry-completeness_test côté serveur),
  * donc valider la bonne signature d'invocation ici suffit à garantir
  * que l'email sera créé.
+ *
+ * Refontes prises en compte (confirmées par lecture du code le 17/08/2026,
+ * les 6 invocations existent toujours dans SmallMissionDetail.tsx) :
+ * - 20/07/2026 : la cascade de déclinaison est calculée côté serveur,
+ *   le client envoie `target_ids: declinedIds` (result.declined_responder_ids)
+ *   au lieu de `pendingOthers.map(...)`.
+ * - 10/08/2026 : `mission_id: missionUuid!` (mission?.id chargé depuis
+ *   l'id d'URL) remplace `mission_id: id`.
  */
 
 const source = readFileSync(
@@ -38,7 +46,8 @@ describe("SmallMissionDetail → notify-mission-event", () => {
   });
 
   const expected: Array<{ event: string; targetShape: RegExp }> = [
-    { event: "mission_declined", targetShape: /target_ids:\s*pendingOthers\.map\(r\s*=>\s*r\.responder_id\)/ },
+    // Cascade : liste calculée côté serveur depuis la refonte du 20/07/2026.
+    { event: "mission_declined", targetShape: /target_ids:\s*declinedIds/ },
     { event: "mission_accepted", targetShape: /target_ids:\s*\[resp\.responder_id\]/ },
     { event: "mission_declined", targetShape: /target_ids:\s*\[resp\.responder_id\]/ },
     { event: "mission_cancelled", targetShape: /target_ids:\s*pending\.map\(r\s*=>\s*r\.responder_id\)/ },
@@ -55,8 +64,9 @@ describe("SmallMissionDetail → notify-mission-event", () => {
       expect(match, `bloc introuvable pour ${event}`).toBeTruthy();
       // actor_id doit venir du user courant (jamais un id littéral / hardcodé)
       expect(match!.block).toMatch(/actor_id:\s*user!?\.id/);
-      // mission_id est toujours l'id de l'URL
-      expect(match!.block).toMatch(/mission_id:\s*id/);
+      // mission_id est missionUuid, c'est-à-dire mission?.id chargé depuis
+      // l'id de l'URL (refonte du 10/08/2026).
+      expect(match!.block).toMatch(/mission_id:\s*missionUuid!/);
     },
   );
 

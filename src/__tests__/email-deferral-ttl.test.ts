@@ -128,9 +128,13 @@ describe("Etape 2, categorie alerte et derogations", () => {
 
   it("plafond alerte : 1 par 24h", () => {
     expect(CAP_ALERT_PER_DAY).toBe(1);
+    // Doctrine du 07/08/2026 : « nearby-sit-alert » compte sur ses compteurs
+    // propres (NEARBY_SIT_ALERT_TEMPLATES, CAP_NEARBY_SIT_*) et ne passe plus
+    // par le plafond générique de la catégorie 'alert'. Ce plafond s'exerce
+    // donc via un autre gabarit de la catégorie, ici « alert-digest ».
     const d = decideDeferral({
       now: NOON2,
-      templateName: "nearby-sit-alert",
+      templateName: "alert-digest",
       category: "alert",
       hourSentAt: [],
       daySentAt: [],

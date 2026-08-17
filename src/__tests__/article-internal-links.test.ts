@@ -14,7 +14,14 @@ const SUPABASE_KEY =
   process.env.VITE_SUPABASE_PUBLISHABLE_KEY ||
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVyaGNjeXFldmR5ZXZweWN0c2pqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ0MjMzMzQsImV4cCI6MjA4OTk5OTMzNH0.ltBQtcouoqd5tuv_wQXb92x5Q5YYa9mkEQvZUx0wLTY";
 
-const ACTUALITES_LINK_RE = /\/actualites\/([a-z0-9][a-z0-9-]*[a-z0-9])(?=[\s)"'<#?]|$)/gi;
+// Faux positif corrigé le 17/08/2026 : avec le flag `i`, la regex avalait les
+// liens EXTERNES dont le chemin contient « /Actualites/ » (ex. source ministère
+// de l'Intérieur https://www.interieur.gouv.fr/Interstats/Actualites/Insecurite-...
+// citée par 4 articles) et les comptait comme des liens internes cassés.
+// Deux protections : pas de flag `i` (les slugs internes sont en minuscules) et
+// lookbehind excluant un caractère de domaine (lettre, chiffre, point, tiret)
+// immédiatement avant le chemin, ce qui écarte toute URL absolue.
+const ACTUALITES_LINK_RE = /(?<![a-z0-9.-])\/actualites\/([a-z0-9][a-z0-9-]*[a-z0-9])(?=[\s)"'<#?]|$)/g;
 
 describe("Articles — liens internes /actualites/<slug>", () => {
   it("tous les slugs cités existent et sont publiés", async () => {

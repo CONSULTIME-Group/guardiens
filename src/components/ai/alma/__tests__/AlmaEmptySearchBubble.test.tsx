@@ -26,16 +26,19 @@ describe("AlmaEmptySearchBubble", () => {
     freqMock.mockReturnValue({ frequency: "balanced", loading: false, setFrequency: vi.fn() });
   });
 
+  // Libellés alignés sur le changement de copy du 11/07/2026 (commit
+  // 8c9321236) : « Créer une alerte » et « Retirer ... » ont remplacé
+  // « Activer une alerte » et « Relâcher ... ». Vouvoiement conservé.
   it("renders 3 actions when a restrictive filter is active", () => {
     render(<AlmaEmptySearchBubble {...defaultProps} />);
     expect(screen.getByRole("button", { name: /élargir à la région/i })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /activer une alerte/i })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /relâcher le filtre vérifié/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /créer une alerte/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /retirer le filtre vérifié/i })).toBeInTheDocument();
   });
 
   it("utilise le vouvoiement (règle éditoriale absolue)", () => {
     render(<AlmaEmptySearchBubble {...defaultProps} />);
-    expect(screen.getByText(/voulez-vous que je propose/i)).toBeInTheDocument();
+    expect(screen.getByText(/je vous propose/i)).toBeInTheDocument();
   });
 
   it("returns null when frequency is silent", () => {
@@ -59,7 +62,7 @@ describe("AlmaEmptySearchBubble", () => {
 
   it("fires analytics on relax_filter click with restrictive_filter", () => {
     render(<AlmaEmptySearchBubble {...defaultProps} />);
-    fireEvent.click(screen.getByRole("button", { name: /relâcher/i }));
+    fireEvent.click(screen.getByRole("button", { name: /retirer/i }));
     expect(defaultProps.onRelaxFilter).toHaveBeenCalledWith("verifiedOnly");
     expect(trackEvent).toHaveBeenCalledWith(
       "alma_empty_search_action_clicked",
