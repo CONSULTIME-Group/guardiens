@@ -61,10 +61,26 @@ Conséquences :
   rejeu tant qu'il n'y a pas d'écart) ;
 - les tests qui lisent la base de production (`article-internal-links`,
   `article-pricing-content`) sont dans `excludedFiles` : une donnée qui
-  bouge en base ne fait jamais échouer un build. Ils restent à lancer à
-  la main dans un environnement connecté ;
-- les scans statiques sensibles à la charge I/O du run complet
-  (`llms-txt-coverage`, `no-unconsumed-supabase-call`, `no-trial-wording`,
-  `no-verified-sitter-claim`, `empty-state-style-isolation`) sont aussi
-  dans `excludedFiles` : verts en isolation de façon reproductible, ils
-  ne doivent pas bloquer une publication sur un faux négatif de charge.
+  bouge en base ne fait jamais échouer un build. Ils se relancent à la
+  main dans un environnement connecté via `npm run test:data` (à jouer
+  après toute modification du contenu des articles en production).
+
+## Scans statiques : cause racine corrigée le 17/08/2026
+
+Les 5 gardes à scan statique (`llms-txt-coverage`,
+`no-unconsumed-supabase-call`, `no-trial-wording`, `no-verified-sitter-claim`,
+`empty-state-style-isolation`) mourraient parfois en run complet sur
+`Test timed out in 5000ms` : leurs `it()` relançaient l'inventaire disque
+(walk / `rg --files`) et la lecture de ~1500 fichiers à chaque test, et
+sous la charge I/O du parallélisme un scan dépassait le délai de 5 s.
+Le verdict n'a jamais été faux : le test était simplement trop lent.
+
+Correction (17/08/2026) : l'inventaire et les contenus sont lus UNE fois
+au chargement du module, pendant la phase de collecte Vitest, qui n'est
+pas soumise au `testTimeout`. Les `it()` n'opèrent plus que sur des
+chaînes en mémoire (millisecondes). Les 5 fichiers ont été réintégrés au
+périmètre de la garde le même jour et la suite complète a été vérifiée
+verte trois fois de suite.
+
+Le rejeu en isolation de la garde reste en place comme filet de sécurité
+pour de vrais futurs flaky tests.

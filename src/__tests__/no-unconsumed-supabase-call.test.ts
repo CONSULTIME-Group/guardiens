@@ -51,14 +51,23 @@ export function findUnconsumedVoidCalls(source: string): number[] {
   return offenders;
 }
 
+/**
+ * Inventaire (collect) et contenus lus UNE fois au chargement du module,
+ * donc pendant la phase de collecte Vitest, hors testTimeout. Avant ce
+ * cache, ce `it` scannait `src/` et `supabase/functions/` puis relisait
+ * chaque fichier : sous la charge I/O du run complet, il dépassait le
+ * délai de 5 s (« Test timed out in 5000ms », constaté le 17/08/2026).
+ * Le verdict n'a jamais varié, seule sa durée.
+ */
+const SCANNED: { file: string; src: string }[] = ROOTS.flatMap((r) => collect(r))
+  .filter((file) => !file.endsWith("no-unconsumed-supabase-call.test.ts"))
+  .map((file) => ({ file, src: fs.readFileSync(file, "utf8") }));
+
 describe("garde-fou : aucune promesse Supabase non consommée", () => {
   it("aucun `void supabase.` sans .then/.catch dans les sources", () => {
-    const files = ROOTS.flatMap((r) => collect(r));
     const problems: string[] = [];
 
-    for (const file of files) {
-      if (file.endsWith("no-unconsumed-supabase-call.test.ts")) continue;
-      const src = fs.readFileSync(file, "utf8");
+    for (const { file, src } of SCANNED) {
       for (const lineNo of findUnconsumedVoidCalls(src)) {
         problems.push(`${file}:${lineNo}`);
       }

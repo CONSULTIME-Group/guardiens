@@ -113,11 +113,24 @@ function scannedFiles(): string[] {
   return [...new Set(output.split("\n").filter(Boolean))];
 }
 
+/**
+ * Inventaire (`rg --files`) et contenus lus UNE fois au chargement du
+ * module, donc pendant la phase de collecte Vitest, hors testTimeout.
+ * Avant ce cache, chaque `it` relançait l'inventaire + la lecture de
+ * ~1500 fichiers ; sous la charge I/O du run complet, un scan dépassait
+ * le délai de 5 s et mourrait sur « Test timed out in 5000ms » (constaté
+ * le 17/08/2026, runs complets). Le verdict du scan n'a jamais varié,
+ * seule sa durée : c'est la cause racine des timeouts, pas le pattern.
+ */
+const FILE_CONTENTS: { file: string; raw: string }[] = scannedFiles().map((file) => ({
+  file,
+  raw: readFileSync(file, "utf8"),
+}));
+
 function scan(patterns: RegExp[], excludes: Set<string>, allowBadgeNames = false): string[] {
   const hits: string[] = [];
-  for (const file of scannedFiles()) {
+  for (const { file, raw } of FILE_CONTENTS) {
     if (excludes.has(file)) continue;
-    const raw = readFileSync(file, "utf8");
     const source = allowBadgeNames ? removeAllowedBadgeNames(raw) : raw;
     source.split("\n").forEach((line, index) => {
       if (patterns.some((pattern) => pattern.test(line))) {

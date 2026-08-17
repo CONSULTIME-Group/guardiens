@@ -109,22 +109,31 @@ function walk(dir: string, acc: string[] = []): string[] {
 
 const toPosix = (p: string) => p.split(sep).join("/");
 
+/**
+ * Inventaire (walk) et contenus lus UNE fois au chargement du module,
+ * donc pendant la phase de collecte Vitest, hors testTimeout. Avant ce
+ * cache, ce `it` relançait le walk complet + la lecture de ~1500 fichiers :
+ * sous la charge I/O du run complet, il dépassait le délai de 5 s et
+ * mourrait sur « Test timed out in 5000ms » (constaté le 17/08/2026).
+ * Le verdict n'a jamais varié, seule sa durée : cause racine = I/O
+ * répétées dans un test timé, pas le pattern.
+ */
+const FILES_WITH_CONTENT: { rel: string; content: string }[] = [];
+for (const file of SCAN_DIRS.flatMap((d) => walk(join(ROOT, d)))) {
+  const rel = toPosix(relative(ROOT, file));
+  if (ALLOWED_FILES.has(rel)) continue;
+  try {
+    FILES_WITH_CONTENT.push({ rel, content: readFileSync(file, "utf-8") });
+  } catch {
+    // Fichier illisible : ignoré, comme avant.
+  }
+}
+
 describe("Garde-fou : aucune promesse d'essai 7 jours dans le code", () => {
   it("Aucun fichier visible utilisateur ne contient une mention interdite", () => {
-    const files = SCAN_DIRS.flatMap((d) => walk(join(ROOT, d)));
     const violations: { file: string; pattern: string; line: number; snippet: string }[] = [];
 
-    for (const file of files) {
-      const rel = toPosix(relative(ROOT, file));
-      if (ALLOWED_FILES.has(rel)) continue;
-
-      let content: string;
-      try {
-        content = readFileSync(file, "utf-8");
-      } catch {
-        continue;
-      }
-
+    for (const { rel, content } of FILES_WITH_CONTENT) {
       const lines = content.split("\n");
       for (let i = 0; i < lines.length; i++) {
         const line = lines[i];
