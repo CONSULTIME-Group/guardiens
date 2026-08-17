@@ -36,6 +36,34 @@
         } catch (e) {}
       })();
     </script>
+    <script>
+      // Canonique de bootstrap : posée dès le parse HTML, avant le boot React,
+      // pour qu'un agent qui n'exécute pas l'application (Prerender.io en
+      // échec, quota dépassé, crawler sans rendu) reçoive quand même une
+      // canonique auto-référente. PageMeta la remplace au montage : son
+      // upsert supprime toutes les balises link[rel="canonical"] existantes
+      // avant d'écrire la sienne, donc jamais de doublon.
+      // La normalisation ci-dessous reproduit à l'identique normalizePathname
+      // de src/lib/seo.ts. Toute évolution de l'une doit être reportée dans
+      // l'autre (verrou : src/test/bootstrap-canonical.test.tsx).
+      // Placé après le script de preview .lovable.app : sur ces domaines une
+      // canonique existe déjà et ce script ne fait rien.
+      (function () {
+        try {
+          if (document.querySelector('link[rel="canonical"]')) return;
+          var basePath = (window.location.pathname || "/").split(/[?#]/)[0] || "/";
+          var normalized = ("/" + basePath).replace(/\/+/g, "/");
+          if (normalized !== "/") {
+            normalized = normalized.replace(/\/+$/g, "");
+          }
+          var c = document.createElement("link");
+          c.rel = "canonical";
+          c.href = "https://guardiens.fr" + normalized;
+          c.setAttribute("data-bootstrap-canonical", "true");
+          document.head.appendChild(c);
+        } catch (e) {}
+      })();
+    </script>
     <!-- build: 2026-05-19T07:30 force-redeploy (purge HMR cache: DashboardErrorBoundary) -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <title>Garde d'animaux à domicile, maison et jardin | House-sitting | Guardiens</title>

@@ -19,8 +19,10 @@ const staticPages = [
   { loc: "/auteurs/elisa", priority: "0.5", changefreq: "monthly" },
 ];
 
+// « aura » retiré : le slug n'existe ni dans src/data/cities.ts ni dans
+// seo_city_pages, la route /house-sitting/aura rend la page introuvable.
 const cityPages = [
-  "annecy", "lyon", "grenoble", "caluire-et-cuire", "chambery", "aura",
+  "annecy", "lyon", "grenoble", "caluire-et-cuire", "chambery",
 ];
 
 const legalPages = [
@@ -124,18 +126,16 @@ Deno.serve(async () => {
 
   const today = new Date().toISOString().split("T")[0];
 
-  let xml = `<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
-`;
+  const entries: string[] = [];
 
   // Static pages
   for (const page of staticPages) {
-    xml += urlEntry(page.loc, today, page.changefreq, page.priority);
+    entries.push(urlEntry(page.loc, today, page.changefreq, page.priority));
   }
 
   // City landing pages
   for (const slug of cityPages) {
-    xml += urlEntry(`/house-sitting/${slug}`, today, "weekly", "0.9");
+    entries.push(urlEntry(`/house-sitting/${slug}`, today, "weekly", "0.9"));
   }
 
   const excludedSlugs = new Set([
@@ -156,34 +156,34 @@ Deno.serve(async () => {
       if (excludedSlugs.has(a.slug)) continue;
       const priority = PRIORITY_MAP[a.category] || "0.7";
       const changefreq = CHANGEFREQ_MAP[a.category] || "monthly";
-      xml += urlEntry(
+      entries.push(urlEntry(
         `/actualites/${a.slug}`,
         (a.updated_at || a.published_at || today).split("T")[0],
         changefreq,
         priority,
         a.cover_image_url
-      );
+      ));
     }
   }
 
   // SEO city pages from DB
   if (seoCityPages) {
     for (const cp of seoCityPages) {
-      xml += urlEntry(`/house-sitting/${cp.slug}`, (cp.updated_at || today).split("T")[0], "weekly", "0.8");
+      entries.push(urlEntry(`/house-sitting/${cp.slug}`, (cp.updated_at || today).split("T")[0], "weekly", "0.8"));
     }
   }
 
   // City guides
   if (cityGuides) {
     for (const cg of cityGuides) {
-      xml += urlEntry(`/guides/${cg.slug}`, (cg.updated_at || today).split("T")[0], "weekly", "0.7");
+      entries.push(urlEntry(`/guides/${cg.slug}`, (cg.updated_at || today).split("T")[0], "weekly", "0.7"));
     }
   }
 
   // Department pages
   if (departmentPages) {
     for (const dp of departmentPages) {
-      xml += urlEntry(`/departement/${dp.slug}`, (dp.updated_at || today).split("T")[0], "weekly", "0.8");
+      entries.push(urlEntry(`/departement/${dp.slug}`, (dp.updated_at || today).split("T")[0], "weekly", "0.8"));
     }
   }
 
@@ -197,7 +197,7 @@ Deno.serve(async () => {
   if (breedProfiles) {
     for (const bp of breedProfiles) {
       const slug = `${bp.species.toLowerCase()}-${slugifyBreed(bp.breed)}`;
-      xml += urlEntry(`/races/${slug}`, (bp.generated_at || today).split("T")[0], "monthly", "0.6");
+      entries.push(urlEntry(`/races/${slug}`, (bp.generated_at || today).split("T")[0], "monthly", "0.6"));
     }
   }
 
@@ -205,10 +205,24 @@ Deno.serve(async () => {
 
   // Legal pages
   for (const page of legalPages) {
-    xml += urlEntry(page.loc, today, page.changefreq, page.priority);
+    entries.push(urlEntry(page.loc, today, page.changefreq, page.priority));
   }
 
-  xml += `</urlset>`;
+  // Déduplication finale par <loc>, première occurrence gagnante : les villes
+  // hardcodées ci-dessus existent aussi dans seo_city_pages et seraient sinon
+  // émises deux fois. Même règle que scripts/generate-sitemap.mjs.
+  const seen = new Set<string>();
+  const dedupedEntries: string[] = [];
+  for (const entry of entries) {
+    const loc = entry.match(/<loc>([^<]+)<\/loc>/)?.[1];
+    if (loc && seen.has(loc)) continue;
+    if (loc) seen.add(loc);
+    dedupedEntries.push(entry);
+  }
+
+  const xml = `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
+${dedupedEntries.join("")}</urlset>`;
 
   return new Response(xml, {
     headers: {
