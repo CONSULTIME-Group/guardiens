@@ -10,7 +10,7 @@
     "generate-robots:check": "node scripts/generate-robots.mjs --check",
     "sync-index-html": "node scripts/sync-index-html.mjs",
     "sync-index-html:check": "node scripts/sync-index-html.mjs --check",
-    "build": "node scripts/sync-index-html.mjs && node scripts/generate-robots.mjs && node scripts/generate-sitemap.mjs && vite build",
+    "build": "node scripts/sync-index-html.mjs && node scripts/generate-robots.mjs && node scripts/generate-sitemap.mjs && vite build && npm run test:guard",
     "build:dev": "vite build --mode development",
     "lint": "eslint .",
     "preview": "vite preview",
