@@ -4,8 +4,8 @@
  * Cron horaire : consomme le flag `articles.seo_dirty_at` posé par le trigger
  * `articles_recache_prerender`. Pour chaque article publié marqué sale (50 max
  * par exécution, les plus anciens d'abord), appelle l'API Prerender.io recache
- * sur l'URL canonique FR puis sur chaque variante de langue indexable
- * (article_translations.noindex = false).
+ * sur l'URL canonique FR. Guardiens est monolingue français depuis le
+ * 17/08/2026 : il n'existe plus aucune variante de langue à recacher.
  *
  * Le flag n'est effacé que si TOUS les recaches de l'article ont réussi.
  * Chaque tentative est journalisée dans public.prerender_recache_log.
@@ -88,22 +88,6 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Variantes de langue indexables pour ce lot
-    const ids = articles.map((a) => a.id);
-    const { data: trData } = await sb
-      .from("article_translations")
-      .select("article_id, lang")
-      .in("article_id", ids)
-      .eq("noindex", false);
-
-    const langsByArticle = new Map<string, string[]>();
-    for (const t of (trData ?? []) as Array<{ article_id: string; lang: string }>) {
-      if (t.lang === "fr") continue;
-      const arr = langsByArticle.get(t.article_id) ?? [];
-      arr.push(t.lang);
-      langsByArticle.set(t.article_id, arr);
-    }
-
     const logRows: Array<Record<string, unknown>> = [];
     const clearedIds: string[] = [];
     let urlsOk = 0;
@@ -113,7 +97,9 @@ Deno.serve(async (req) => {
       const base = a.canonical_url && a.canonical_url.startsWith("http")
         ? a.canonical_url
         : `${SITE}/actualites/${a.slug}`;
-      const urls = [base, ...(langsByArticle.get(a.id) ?? []).map((l) => `${base}?lang=${l}`)];
+      // Monolingue français : seule l'URL canonique est recachée, jamais de
+      // variante `?lang=`.
+      const urls = [base];
 
       let allOk = true;
       for (const url of urls) {

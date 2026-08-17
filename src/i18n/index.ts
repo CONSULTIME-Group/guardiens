@@ -52,8 +52,8 @@ void i18n
 
 /**
  * Monolingue français : il n'existe plus aucun dictionnaire à charger à la
- * demande. Conservée pour les appelants historiques (LangUrlSync, main.tsx),
- * la fonction est volontairement sans effet.
+ * demande. Conservée pour son unique appelant (LangUrlSync), la fonction est
+ * volontairement sans effet.
  */
 export async function loadLanguage(_lng: string): Promise<void> {
   return;
