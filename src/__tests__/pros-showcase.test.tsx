@@ -37,8 +37,15 @@ describe("ProsShowcase", () => {
   });
 
   it("affiche 3 cards + compteur quand pros_total ≥ 1", () => {
+    // Décision du 14/07/2026 (commit d3da22ad3) : l'écran ne montre que les
+    // catégories ayant au moins 1 fiche publiée. Le mock doit donc fournir
+    // pros_by_category peuplé (clés DB au singulier) pour les trois cartes.
     mockCounts.mockReturnValue({
-      data: { pros_total: 12, pros_verified: 3 },
+      data: {
+        pros_total: 12,
+        pros_verified: 3,
+        pros_by_category: { veterinaire: 5, toiletteur: 4, transporteur: 3 },
+      },
       isLoading: false,
     });
     renderShowcase();

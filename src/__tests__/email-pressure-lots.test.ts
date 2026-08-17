@@ -7,6 +7,7 @@ import {
   CAP_NON_TX_PER_WEEK,
   CAP_NEARBY_SIT_PER_DAY,
   CAP_NEARBY_SIT_PER_WEEK,
+  CAP_DIGEST_PER_WEEK,
   NEARBY_SIT_MAX_DEFER_HOURS,
   TEMPLATE_TTL_HOURS,
   resolveDeferral,
@@ -151,9 +152,14 @@ describe("Lot 6 — plafond par categorie", () => {
     expect(d).toMatchObject({ action: "defer", reason: "frequency_cap_category_day" });
   });
 
-  it("digest : 3 par 7 jours maximum, cumul toutes categories non transactionnelles", () => {
-    expect(CAP_NON_TX_PER_WEEK).toBe(3);
-    const week = [iso(-5 * 86400_000), iso(-3 * 86400_000), iso(-2 * 86400_000)];
+  // Doctrine du 07/08/2026 : la catégorie 'digest' a ses compteurs propres
+  // (digestDaySentAt / digestWeekSentAt) et ne cumule plus avec le quota
+  // partagé des catégories non transactionnelles. Le plafond hebdomadaire
+  // digest est CAP_DIGEST_PER_WEEK (10), pas CAP_NON_TX_PER_WEEK.
+  it("digest : 10 par 7 jours maximum, compteurs propres à la catégorie", () => {
+    expect(CAP_DIGEST_PER_WEEK).toBe(10);
+    // 10 envois sur les 6 derniers jours, le plus ancien en tête.
+    const week = Array.from({ length: 10 }, (_, i) => iso(-(i + 1) * 57600_000)).reverse();
     const d = decideDeferral({
       now: NOON,
       templateName: "sitter-daily-digest",
@@ -161,7 +167,9 @@ describe("Lot 6 — plafond par categorie", () => {
       hourSentAt: [],
       daySentAt: [],
       nonTxDaySentAt: [],
-      nonTxWeekSentAt: week,
+      nonTxWeekSentAt: [],
+      digestDaySentAt: [],
+      digestWeekSentAt: week,
     });
     expect(d).toMatchObject({ action: "defer", reason: "frequency_cap_category_week" });
   });
