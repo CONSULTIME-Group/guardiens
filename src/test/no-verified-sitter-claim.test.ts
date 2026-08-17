@@ -298,6 +298,7 @@ const ENUM_MUST_NOT_DETECT: string[] = [
   "Un système de badges de reconnaissance distingue les profils (Super Sitter, Identité vérifiée, Spécialiste NAC).",
   "Score de confiance calculé sur l'identité vérifiée, les avis croisés et l'ancienneté.",
   "Écusson « Identité vérifiée », avis croisés détaillés.",
+  "* (Fondateur, À jamais la 1ère, Identité vérifiée, etc.) au-dessus de la grille",
 ];
 
 describe("Motifs du garde-fou", () => {
