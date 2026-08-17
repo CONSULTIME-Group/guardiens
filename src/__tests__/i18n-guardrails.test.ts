@@ -6,14 +6,14 @@ import path from "node:path";
  * Trois garde-fous i18n, exécutés en intégration continue avec le reste de la
  * suite Vitest :
  *
- * 1. parité des clés entre le français et les quatre autres langues,
+ * 1. parité des clés entre le français et les deux autres langues,
  * 2. absence de recopie du français dans l'anglais sur les textes longs,
  * 3. absence de chaîne visible en dur dans les fichiers déjà internationalisés
  *    des parcours de priorité 1 et 2.
  */
 
 const LOCALES = path.resolve(process.cwd(), "src/i18n/locales");
-const TARGETS = ["en", "es", "it", "de"] as const;
+const TARGETS = ["en", "es"] as const;
 
 const read = (lng: string) =>
   JSON.parse(fs.readFileSync(path.join(LOCALES, `${lng}/common.json`), "utf8"));
@@ -50,7 +50,7 @@ const FORBIDDEN_LITERALS = [
 ];
 
 describe("garde-fous i18n", () => {
-  it("toute clé française existe dans les quatre autres langues", () => {
+  it("toute clé française existe dans les deux autres langues", () => {
     const missing: string[] = [];
     for (const lng of TARGETS) {
       const dict = flatten(read(lng));

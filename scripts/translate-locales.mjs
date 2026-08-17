@@ -1,7 +1,8 @@
 #!/usr/bin/env node
 /**
- * Translates src/i18n/locales/fr/common.json into en/es/it/de via Lovable AI.
+ * Translates src/i18n/locales/fr/common.json into en/es via Lovable AI.
  * Preserves keys and ICU placeholders ({{var}}). Uses formal "you" (vouvoiement).
+ * (it/de retirés du produit le 17/08/2026.)
  */
 import fs from "node:fs";
 import path from "node:path";
@@ -13,8 +14,6 @@ const SRC = "src/i18n/locales/fr/common.json";
 const TARGETS = [
   { code: "en", name: "English" },
   { code: "es", name: "Spanish (formal usted)" },
-  { code: "it", name: "Italian (formal Lei)" },
-  { code: "de", name: "German (formal Sie)" },
 ];
 
 const fr = JSON.parse(fs.readFileSync(SRC, "utf8"));
@@ -23,12 +22,12 @@ const GLOSSARY = `
 Glossary (keep these mappings):
 - "Guardiens" → keep as brand name, never translate
 - "House-sitting" → keep "house-sitting" (do not translate, recognized worldwide)
-- "Gardien / gardienne" → caretaker / pet & home sitter (EN), cuidador (ES), custode (IT), Betreuer (DE)
-- "Coup de main / petites missions" → small favours (EN), pequeños favores (ES), piccoli aiuti (IT), kleine Hilfen (DE)
-- "Propriétaire" → owner (EN), propietario (ES), proprietario (IT), Eigentümer (DE)
+- "Gardien / gardienne" → caretaker / pet & home sitter (EN), cuidador (ES)
+- "Coup de main / petites missions" → small favours (EN), pequeños favores (ES)
+- "Propriétaire" → owner (EN), propietario (ES)
 - "Bêta" → Beta (everywhere)
 - City and department names (Lyon, Rhône, Haute-Savoie...) → keep verbatim
-- Use formal address (vouvoiement / usted / Lei / Sie)
+- Use formal address (vouvoiement / usted)
 - Keep ICU placeholders like {{lang}} intact
 - Preserve JSON structure exactly (same keys, same nesting)
 `;
