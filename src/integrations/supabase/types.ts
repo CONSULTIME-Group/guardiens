@@ -983,57 +983,6 @@ export type Database = {
           },
         ]
       }
-      article_translations_archive: {
-        Row: {
-          archived_at: string
-          article_id: string
-          content: string
-          created_at: string
-          excerpt: string
-          hero_image_alt: string | null
-          id: string
-          lang: string
-          meta_description: string | null
-          meta_title: string | null
-          noindex: boolean
-          slug: string
-          title: string
-          updated_at: string
-        }
-        Insert: {
-          archived_at?: string
-          article_id: string
-          content: string
-          created_at: string
-          excerpt: string
-          hero_image_alt?: string | null
-          id: string
-          lang: string
-          meta_description?: string | null
-          meta_title?: string | null
-          noindex: boolean
-          slug: string
-          title: string
-          updated_at: string
-        }
-        Update: {
-          archived_at?: string
-          article_id?: string
-          content?: string
-          created_at?: string
-          excerpt?: string
-          hero_image_alt?: string | null
-          id?: string
-          lang?: string
-          meta_description?: string | null
-          meta_title?: string | null
-          noindex?: boolean
-          slug?: string
-          title?: string
-          updated_at?: string
-        }
-        Relationships: []
-      }
       articles: {
         Row: {
           admin_notes: string | null
