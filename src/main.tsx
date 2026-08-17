@@ -7,8 +7,8 @@ import { installGlobalErrorLogger } from "./lib/errorLogger";
 import { initConsent } from "./lib/cookieConsent";
 import { installStorageFallback } from "./lib/storageFallback";
 import { installOAuthDebugHelper } from "./lib/oauthLogger";
-import { loadLanguage, SUPPORTED_LANGS } from "./i18n";
-import { getStoredLang } from "@/lib/lang";
+import { loadLanguage } from "./i18n";
+import { resolveInitialLang } from "@/lib/lang";
 
 installStorageFallback();
 installOAuthDebugHelper();
@@ -38,36 +38,11 @@ if (!container) {
 }
 
 /**
- * Langue cible avant le premier rendu : lien explicite, puis choix mémorisé,
- * puis détection navigateur, puis français. La logique de détection d'i18next
- * n'est pas modifiée, on se contente de savoir quel dictionnaire précharger.
+ * Langue cible avant le premier rendu : la règle vit dans
+ * `src/lib/lang.ts` (resolveInitialLang), partagée avec les tests. La logique
+ * de détection d'i18next n'est pas modifiée, on se contente de savoir quel
+ * dictionnaire précharger.
  */
-const resolveInitialLang = (): string => {
-  try {
-    const fromUrl = new URLSearchParams(window.location.search).get("lang")?.toLowerCase();
-    if (fromUrl && (SUPPORTED_LANGS as readonly string[]).includes(fromUrl)) return fromUrl;
-  } catch {
-    // URL illisible : on continue sur le choix mémorisé.
-  }
-
-  const stored = getStoredLang();
-  if (stored) return stored;
-
-  try {
-    if (typeof navigator !== "undefined") {
-      const candidate = navigator.language || (navigator.languages && navigator.languages[0]);
-      if (candidate) {
-        const code = candidate.split("-")[0].toLowerCase().slice(0, 2);
-        if ((SUPPORTED_LANGS as readonly string[]).includes(code)) return code;
-      }
-    }
-  } catch {
-    // Détection navigateur indisponible : repli sur le français.
-  }
-
-  return "fr";
-};
-
 const renderApp = () => {
   createRoot(container).render(
     <App />

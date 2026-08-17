@@ -14,8 +14,6 @@ const OG_LOCALES: Record<SupportedLang, string> = {
   fr: "fr_FR",
   en: "en_GB",
   es: "es_ES",
-  it: "it_IT",
-  de: "de_DE",
 };
 
 // Adds ?lang=xx to a URL while preserving any existing query params.

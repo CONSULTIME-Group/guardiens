@@ -60,6 +60,46 @@ export function withLang(path: string, lang: string | null | undefined): string 
 }
 
 /**
+ * Langue cible avant le premier rendu : lien explicite, puis choix mémorisé,
+ * puis détection navigateur, puis français.
+ *
+ * Cas particulier des langues retirées du produit (de, it le 17/08/2026) : un
+ * paramètre `?lang=` explicite mais non supporté impose le français
+ * immédiatement, sans tenir compte du choix mémorisé ni du navigateur. C'est
+ * ce qui garantit qu'une ancienne URL `?lang=de` connue de Google rend la
+ * page française indexable avec sa canonique auto-référente, au lieu d'une
+ * variante noindex.
+ */
+export function resolveInitialLang(): string {
+  if (typeof window === "undefined") return "fr";
+  try {
+    const raw = new URLSearchParams(window.location.search).get("lang")?.toLowerCase();
+    if (raw) {
+      return isSupportedLang(raw) ? raw : "fr";
+    }
+  } catch {
+    // URL illisible : on continue sur le choix mémorisé.
+  }
+
+  const stored = getStoredLang();
+  if (stored) return stored;
+
+  try {
+    if (typeof navigator !== "undefined") {
+      const candidate = navigator.language || (navigator.languages && navigator.languages[0]);
+      if (candidate) {
+        const code = candidate.split("-")[0].toLowerCase().slice(0, 2);
+        if (isSupportedLang(code)) return code;
+      }
+    }
+  } catch {
+    // Détection navigateur indisponible : repli sur le français.
+  }
+
+  return "fr";
+}
+
+/**
  * Locale BCP 47 sûre pour Intl.
  *
  * Certains environnements (navigateurs headless, systèmes POSIX) exposent des

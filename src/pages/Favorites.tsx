@@ -57,8 +57,6 @@ const Favorites = () => {
   const locale =
     i18n.language?.startsWith("en") ? "en-GB"
     : i18n.language?.startsWith("es") ? "es-ES"
-    : i18n.language?.startsWith("it") ? "it-IT"
-    : i18n.language?.startsWith("de") ? "de-DE"
     : "fr-FR";
 
   const { data: sitters, isLoading: isLoadingSitters } = useQuery({
