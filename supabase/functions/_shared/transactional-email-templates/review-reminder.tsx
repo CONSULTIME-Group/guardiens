@@ -79,6 +79,36 @@ const ReviewReminderEmail = ({ firstName, sitTitle, revieweeName, sitId, isOwner
 
           <Hr style={hr} />
 
+          {stage === undefined || stage === 'j1' ? (
+            <>
+              <Text style={text}>
+                {isOwner
+                  ? "Vous venez de confier votre maison et vos animaux le temps d'un séjour."
+                  : "Vous venez de prendre soin d'une maison et de ses animaux pendant plusieurs jours."}
+                {' '}Guardiens est encore jeune, et l'utiliser aujourd'hui est une forme de pari.
+                Merci de l'avoir fait.
+              </Text>
+              <Text style={text}>
+                Si quelque chose vous a plu, vous a gêné ou vous a manqué pendant cette garde,
+                répondez simplement à cet email. Ce qui marche se voit dans nos chiffres. Ce qui
+                coince, personne ne nous le dira à votre place : les critiques nous sont plus
+                utiles que les compliments, et trois lignes suffisent. Je lis tout.
+              </Text>
+              <Text style={signatureName}>Jérémie</Text>
+              <Text style={signatureRole}>Cofondateur de Guardiens, avec Elisa</Text>
+            </>
+          ) : (
+            <>
+              <Text style={text}>
+                Un dernier mot : si quelque chose vous a plu ou vous a gêné pendant cette garde,
+                répondez simplement à cet email, je lis tout.
+              </Text>
+              <Text style={signatureInline}>Jérémie, cofondateur de Guardiens, avec Elisa</Text>
+            </>
+          )}
+
+          <Hr style={hr} />
+
           <Section style={googleBox}>
             <Text style={googleTitle}>Vous avez apprécié votre expérience Guardiens ?</Text>
             <Text style={googleText}>
@@ -143,6 +173,9 @@ const button = {
   display: 'inline-block',
 }
 const note = { fontSize: '12px', color: 'hsl(37, 7%, 55%)', lineHeight: '1.5', margin: '0 0 16px', fontStyle: 'italic' as const, textAlign: 'center' as const }
+const signatureName = { fontSize: '15px', fontWeight: '600' as const, color: 'hsl(40, 12%, 25%)', margin: '24px 0 2px' }
+const signatureRole = { fontSize: '13px', color: 'hsl(37, 7%, 55%)', margin: '0 0 16px' }
+const signatureInline = { fontSize: '13px', color: 'hsl(37, 7%, 55%)', margin: '0 0 16px' }
 const hr = { borderColor: 'hsl(37, 22%, 89%)', margin: '20px 0' }
 const legalNote = { fontSize: '10px', color: 'hsl(37, 7%, 60%)', lineHeight: '1.5', margin: '0 0 12px' }
 const footer = { fontSize: '12px', color: 'hsl(37, 7%, 60%)', margin: '10px 0 0' }

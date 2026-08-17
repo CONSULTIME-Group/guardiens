@@ -1,6 +1,7 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.4";
 import { startCronRun } from "../_shared/cron-run-log.ts";
 import { requireCronCaller } from "../_shared/require-cron-caller.ts";
+import { recordReviewSendFailure } from "../_shared/review-send-failure.ts";
 
 
 const corsHeaders = {
@@ -25,7 +26,9 @@ Deno.serve(async (req) => {
     // Fenetre de rattrapage elargie a 4 jours (au lieu de 2), et statut
     // 'in_progress' accepte : si la transition de nuit echoue, la garde
     // reste 'in_progress' et doit quand meme declencher la demande d'avis.
-    // Le flag review_j1_sent reste la garantie anti doublon.
+    // Le flag review_j1_sent reste la garantie anti doublon. Depuis le
+    // 17/08/2026, ce flag n'est pose que si tous les envois attendus ont ete
+    // acceptes : la fenetre de 4 jours sert alors de rejeu automatique.
     const h24ago = new Date(now.getTime() - 24 * 60 * 60 * 1000).toISOString().split("T")[0];
     const d4ago = new Date(now.getTime() - 4 * 24 * 60 * 60 * 1000).toISOString().split("T")[0];
 
@@ -66,57 +69,111 @@ Deno.serve(async (req) => {
           await supabase.from("sits").update({ status: "completed" }).eq("id", sit.id);
         }
 
-        // Email owner via transactional email system
-        if (ownerProfile?.email) {
-          const _steRes = await fetch(`${Deno.env.get('SUPABASE_URL')}/functions/v1/send-transactional-email`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')}` },
-            body: JSON.stringify({
-              templateName: "review-reminder",
-              recipientEmail: ownerProfile.email,
-              idempotencyKey: `review-j1-owner-${sit.id}`,
-              templateData: {
-                firstName: ownerProfile.first_name || "",
-                sitTitle: sit.title || "",
-                revieweeName: sitterProfile?.first_name || "",
-                sitId: sit.id,
-                isOwner: true,
-              },
-            }),
-          });
-          const _steTxt1 = _steRes.ok ? '' : await _steRes.text().catch(() => '');
-          if (!_steRes.ok) console.error('send-transactional-email failed', _steRes.status, _steTxt1);
-          count++;
-        }
-
-        // Email sitter via transactional email system
-        if (sitterProfile?.email) {
-          const _steRes2 = await fetch(`${Deno.env.get('SUPABASE_URL')}/functions/v1/send-transactional-email`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')}` },
-            body: JSON.stringify({
-              templateName: "review-reminder",
-              recipientEmail: sitterProfile.email,
-              idempotencyKey: `review-j1-sitter-${sit.id}`,
-              templateData: {
-                firstName: sitterProfile.first_name || "",
-                sitTitle: sit.title || "",
-                revieweeName: ownerProfile?.first_name || "",
-                sitId: sit.id,
+        const parties = [
+          {
+            role: "owner" as const,
+            profile: ownerProfile,
+            isOwner: true,
+            idempotencyKey: `review-j1-owner-${sit.id}`,
+            revieweeName: sitterProfile?.first_name || "",
+          },
+          ...(sitterId && sitterProfile
+            ? [{
+                role: "sitter" as const,
+                profile: sitterProfile,
                 isOwner: false,
-              },
-            }),
+                idempotencyKey: `review-j1-sitter-${sit.id}`,
+                revieweeName: ownerProfile?.first_name || "",
+              }]
+            : []),
+        ];
+
+        // Le drapeau ne passe a true que si chaque envoi attendu a ete
+        // accepte (2xx : envoye, differe ou ecarte pour motif metier, tous
+        // traces dans email_send_log). Toute reponse non-2xx ou erreur reseau
+        // laisse le drapeau a false : la garde sera rejouee au prochain run,
+        // et l'echec remonte dans email_send_log + signaux admin.
+        let allAccepted = true;
+
+        for (const party of parties) {
+          if (!party.profile?.email) continue;
+
+          let res: Response;
+          try {
+            res = await fetch(`${supabaseUrl}/functions/v1/send-transactional-email`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json", Authorization: `Bearer ${supabaseKey}` },
+              body: JSON.stringify({
+                templateName: "review-reminder",
+                recipientEmail: party.profile.email,
+                idempotencyKey: party.idempotencyKey,
+                templateData: {
+                  firstName: party.profile.first_name || "",
+                  sitTitle: sit.title || "",
+                  revieweeName: party.revieweeName,
+                  sitId: sit.id,
+                  isOwner: party.isOwner,
+                  stage: "j1",
+                },
+                logMetadata: { sit_id: sit.id, source: "send-avis-j1" },
+              }),
+            });
+          } catch (fetchErr) {
+            const msg = fetchErr instanceof Error ? fetchErr.message : String(fetchErr);
+            console.error("[avis-j1] fetch threw", sit.id, party.role, msg);
+            errors.push(`${sit.id}: ${party.role} fetch_error`);
+            allAccepted = false;
+            await recordReviewSendFailure(supabase, {
+              edgeName: "send-avis-j1",
+              stage: "j1",
+              sitId: sit.id,
+              sitTitle: sit.title,
+              party: party.role,
+              recipientEmail: party.profile.email,
+              idempotencyKey: party.idempotencyKey,
+              responseBody: msg,
+            });
+            continue;
+          }
+
+          if (res.ok) {
+            count++;
+            continue;
+          }
+
+          const bodyText = await res.text().catch(() => "");
+          console.error("[avis-j1] send failed", sit.id, party.role, res.status, bodyText);
+          errors.push(`${sit.id}: ${party.role} http_${res.status}`);
+          allAccepted = false;
+          await recordReviewSendFailure(supabase, {
+            edgeName: "send-avis-j1",
+            stage: "j1",
+            sitId: sit.id,
+            sitTitle: sit.title,
+            party: party.role,
+            recipientEmail: party.profile.email,
+            idempotencyKey: party.idempotencyKey,
+            httpStatus: res.status,
+            responseBody: bodyText,
           });
-          const _steTxt2 = _steRes2.ok ? '' : await _steRes2.text().catch(() => '');
-          if (!_steRes2.ok) console.error('send-transactional-email failed', _steRes2.status, _steTxt2);
-          count++;
         }
 
-        await supabase.from("sits").update({ review_j1_sent: true }).eq("id", sit.id);
+        if (allAccepted) {
+          await supabase.from("sits").update({ review_j1_sent: true }).eq("id", sit.id);
+        }
       } catch (e) {
         const msg = e instanceof Error ? e.message : String(e);
         console.error("[avis-j1] sit failed", sit.id, msg);
         errors.push(`${sit.id}: ${msg}`);
+        await recordReviewSendFailure(supabase, {
+          edgeName: "send-avis-j1",
+          stage: "j1",
+          sitId: sit.id,
+          sitTitle: sit.title,
+          party: "unknown",
+          idempotencyKey: `review-j1-${sit.id}`,
+          responseBody: msg,
+        });
       }
     }
 

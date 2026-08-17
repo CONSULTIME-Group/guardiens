@@ -5,6 +5,7 @@ import { TEMPLATES } from '../_shared/transactional-email-templates/registry.ts'
 import { getEmailCategory, type EmailCategory } from '../_shared/email-categories.ts'
 import { bypassesSuppression } from '../_shared/email-suppression.ts'
 import { evaluateSitAlert, isSitStatusGuardedTemplate } from '../_shared/sit-alert-guard.ts'
+import { REPLY_TO_ADDRESS } from '../_shared/sender-address.ts'
 
 const SITE_URL = 'https://guardiens.fr'
 
@@ -1164,6 +1165,11 @@ Deno.serve(async (req) => {
 
   if (templateName === 'contact-reply') {
     resendPayload.reply_to = 'contact.guardiens@gmail.com'
+  }
+  // Le gabarit d'avis invite explicitement à répondre (mot du fondateur) :
+  // la promesse doit aboutir dans une boîte réellement relevée.
+  if (templateName === 'review-reminder') {
+    resendPayload.reply_to = REPLY_TO_ADDRESS
   }
 
   try {
