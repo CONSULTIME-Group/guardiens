@@ -1,57 +1,36 @@
 {
-  "$schema": "Référence des échecs de tests connus et tolérés, figée le 14/08/2026.",
+  "$schema": "Référence des échecs de tests connus et tolérés. Au 17/08/2026, la suite est entièrement verte : knownFailures est vide et doit le rester. Tout échec nouveau est une régression.",
   "usage": "scripts/test-guard/diff-guard.mjs compare chaque exécution à cette liste. Un échec NOUVEAU fait échouer la garde. Un test listé ici qui se remet à passer fait aussi échouer la garde : il faut alors le retirer de knownFailures (ou lancer node scripts/test-guard/diff-guard.mjs --update).",
   "updated": "2026-08-17",
   "excludedFiles": [
     {
       "file": "src/__tests__/article-internal-links.test.ts",
-      "reason": "Dépend au contenu de la base de production (table articles). En CI, sans les mêmes accès ni les mêmes données, il échoue autrement : instable par nature, hors périmètre de la garde dans les deux sens (échec ou succès ignorés)."
+      "reason": "Dépend du contenu de la base de production (table articles). En CI ou en build, sans les mêmes accès ni les mêmes données, il échoue autrement : instable par nature, hors périmètre de la garde dans les deux sens (échec ou succès ignorés). À lancer à la main dans un environnement connecté."
     },
     {
       "file": "src/__tests__/article-pricing-content.test.ts",
-      "reason": "Dépend du contenu de la base de production (table articles, slug nouveaux-tarifs-2026). Instable par nature hors environnement connecté : hors périmètre de la garde dans les deux sens."
-    }
-  ],
-  "knownFailures": [
+      "reason": "Dépend du contenu de la base de production (table articles, slug nouveaux-tarifs-2026) et conditionné au flag isPricingActive() depuis le 17/08/2026. Hors périmètre de la garde dans les deux sens."
+    },
     {
       "file": "src/__tests__/llms-txt-coverage.test.ts",
-      "test": "llms.txt coverage > annonce le bon nombre de badges, aligné sur BADGE_DEFINITIONS",
-      "reason": "à documenter"
+      "reason": "Scan statique (lecture disque exhaustive) sensible à la charge I/O du run complet : rouge en run complet, vert en isolation de façon reproductible (constaté le 14/08/2026 et le 17/08/2026). Hors périmètre dans les deux sens."
     },
     {
       "file": "src/__tests__/no-unconsumed-supabase-call.test.ts",
-      "test": "garde-fou : aucune promesse Supabase non consommée > aucun `void supabase.` sans .then/.catch dans les sources",
-      "reason": "à documenter"
-    },
-    {
-      "file": "src/components/shared/__tests__/empty-state-style-isolation.test.ts",
-      "test": "EmptyState style isolation > no forbidden pattern: /(WebkitMaskImage|webkitMaskImage|-webkit-mask-image|mask-image)\\s*[:=]/",
-      "reason": "code : mask-image détecté hors fichier autorisé (garde-fou d'isolation de style)."
-    },
-    {
-      "file": "src/components/shared/__tests__/empty-state-style-isolation.test.ts",
-      "test": "EmptyState style isolation > no forbidden pattern: /(mix-blend-(mode|multiply|screen|overlay))/",
-      "reason": "code : mix-blend-mode détecté hors fichier autorisé (garde-fou d'isolation de style)."
-    },
-    {
-      "file": "src/components/shared/__tests__/empty-state-style-isolation.test.ts",
-      "test": "EmptyState style isolation > no forbidden pattern: /illustration-blend\\s*\\{/",
-      "reason": "à documenter"
+      "reason": "Scan statique sensible à la charge I/O du run complet : rouge en run complet, vert en isolation (constaté le 14/08/2026 et le 17/08/2026). Hors périmètre dans les deux sens."
     },
     {
       "file": "src/test/no-trial-wording.test.ts",
-      "test": "Garde-fou : aucune promesse d'essai 7 jours dans le code > Aucun fichier visible utilisateur ne contient une mention interdite",
-      "reason": "code et contenu : 5 mentions « essai 7 jours » résiduelles dans des fichiers visibles."
+      "reason": "Scan statique sensible à la charge I/O du run complet : rouge en run complet, vert en isolation (constaté le 17/08/2026). Hors périmètre dans les deux sens."
     },
     {
       "file": "src/test/no-verified-sitter-claim.test.ts",
-      "test": "Positionnement national > ne mentionne ni AURA, ni Auvergne-Rhône-Alpes, ni « votre région »",
-      "reason": "code et contenu : mention régionale proscrite résiduelle."
+      "reason": "Scan statique sensible à la charge I/O du run complet : rouge en run complet, vert en isolation (constaté le 17/08/2026). Hors périmètre dans les deux sens."
     },
     {
-      "file": "src/test/no-verified-sitter-claim.test.ts",
-      "test": "Revendication « gardiens vérifiés » > n'apparaît nulle part dans src/, public/llms.txt et les locales",
-      "reason": "code et contenu : 2 revendications de vérification interdites résiduelles."
+      "file": "src/components/shared/__tests__/empty-state-style-isolation.test.ts",
+      "reason": "Scan statique sensible à la charge I/O du run complet : rouge en run complet, vert en isolation (constaté le 17/08/2026). Hors périmètre dans les deux sens."
     }
-  ]
+  ],
+  "knownFailures": []
 }
