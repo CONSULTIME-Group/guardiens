@@ -3,6 +3,12 @@ import { render, screen } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 
 vi.mock("@/lib/analytics", () => ({ trackEvent: vi.fn() }));
+// Le composant utilise useTranslation directement : sans mock, l'assertion sur
+// la clé du compteur dépend de l'état d'initialisation d'i18next (flaky).
+// Le mock fige t = identité, l'assertion sur la clé devient déterministe.
+vi.mock("react-i18next", () => ({
+  useTranslation: () => ({ t: (k: string) => k, i18n: { language: "fr" } }),
+}));
 vi.mock("@/hooks/useImpressionOnce", () => ({ useImpressionOnce: () => false }));
 
 const mockCounts = vi.fn();
