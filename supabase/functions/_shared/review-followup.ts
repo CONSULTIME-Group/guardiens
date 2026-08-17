@@ -4,6 +4,7 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.4";
 import { startCronRun } from "./cron-run-log.ts";
 import { requireCronCaller } from "./require-cron-caller.ts";
+import { recordReviewSendFailure } from "./review-send-failure.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -32,7 +33,10 @@ export function serveReviewFollowup(config: ReviewFollowupConfig) {
     try {
       const now = Date.now();
       const day = 24 * 60 * 60 * 1000;
-      const from = new Date(now - (config.dayOffset + 1) * day).toISOString().split("T")[0];
+      // Fenêtre élargie à 3 jours de rattrapage (au lieu d'une) : un envoi qui
+      // échoue laisse le drapeau à false et la garde est rejouée au run
+      // suivant sans sortir de la fenêtre.
+      const from = new Date(now - (config.dayOffset + 3) * day).toISOString().split("T")[0];
       const to = new Date(now - config.dayOffset * day).toISOString().split("T")[0];
 
       const { data: sits } = await supabase
