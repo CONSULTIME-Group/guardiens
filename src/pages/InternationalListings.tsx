@@ -73,7 +73,7 @@ export default function InternationalListings() {
   const [sits, setSits] = useState<IntlSitWithCoords[] | null>(null);
 
   const locale =
-    ({ fr: "fr-FR", en: "en-GB", es: "es-ES", it: "it-IT", de: "de-DE" } as Record<string, string>)[i18n.language] ||
+    ({ fr: "fr-FR", en: "en-GB" } as Record<string, string>)[i18n.language] ||
     "fr-FR";
 
   function formatPeriod(s?: string | null, e?: string | null) {
