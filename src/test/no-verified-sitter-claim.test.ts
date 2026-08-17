@@ -312,20 +312,3 @@ describe("Motifs du garde-fou", () => {
     expect(isPromiseEnumeration("Mise en relation par affinité, identité vérifiée, avis croisés.")).toBe(true);
   });
 });
-
-/**
- * Cas du bloc 3 (énumérations de promesses). La première chaîne est la ligne
- * de réassurance du hero d'accueil telle qu'elle existait avant le 17/08/2026.
- */
-const ENUM_MUST_DETECT: string[] = [
-  "Identité vérifiée, avis croisés, affinité calculée. Vous gardez la main.",
-  "Avis croisés, Identité vérifiée, affinité calculée.",
-];
-
-const ENUM_MUST_NOT_DETECT: string[] = [
-  '"cond4": "Identité vérifiée",',
-  'label: "Identité vérifiée", ok: checks.identityVerified',
-  "Un système de badges de reconnaissance distingue les profils (Super Sitter, Identité vérifiée, Spécialiste NAC).",
-  "Score de confiance calculé sur l'identité vérifiée, les avis croisés et l'ancienneté.",
-  "Écusson « Identité vérifiée », avis croisés détaillés.",
-];
