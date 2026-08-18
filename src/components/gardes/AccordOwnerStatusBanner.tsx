@@ -32,7 +32,7 @@ interface AccordStatusRow {
   sitter_declined: boolean;
 }
 
-export function AccordOwnerStatusBanner({ sitId, sitStatus, onSignAccord }: AccordOwnerStatusBannerProps) {
+export function AccordOwnerStatusBanner({ sitId, sitStatus, onSignAccord, refreshKey }: AccordOwnerStatusBannerProps) {
   const [status, setStatus] = useState<AccordStatusRow | null>(null);
 
   useEffect(() => {
@@ -56,7 +56,7 @@ export function AccordOwnerStatusBanner({ sitId, sitStatus, onSignAccord }: Acco
         });
       });
     return () => { cancelled = true; };
-  }, [sitId, sitStatus]);
+  }, [sitId, sitStatus, refreshKey]);
 
   if (!status) return null;
 
