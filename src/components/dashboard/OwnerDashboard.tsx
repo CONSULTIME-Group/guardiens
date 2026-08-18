@@ -25,6 +25,7 @@ import SitterEntraideSection from "./sitter/SitterEntraideSection";
 import { useFirstNearbyMission } from "@/hooks/useFirstNearbyMission";
 import NearbySittersSection from "./owner/NearbySittersSection";
 import PetAdviceSection from "./shared/PetAdviceSection";
+import OwnerStageReadings from "./owner/OwnerStageReadings";
 import EntraideCtaCard from "./shared/EntraideCtaCard";
 
 import MobileStickyCTA from "./owner/MobileStickyCTA";
@@ -371,6 +372,11 @@ const OwnerDashboard = () => {
                   profileIncomplete: (accessProfileCompletion ?? 100) < 100,
                 }}
               />
+            </div>
+
+            {/* 6bis. LECTURES DU MOMENT : 2 à 3 articles calés sur l'étape du parcours */}
+            <div className="px-4 sm:px-5 md:px-8">
+              <OwnerStageReadings variant={priorityAction.variant} />
             </div>
 
 
