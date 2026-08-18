@@ -70,13 +70,13 @@ const ContextualResources = memo(({ annoncesCount, gardesCount, loading }: Conte
     resItems = [
       { title: "Accueillir son gardien", description: "Remise des clés, visite, jour du départ.", href: "/actualites/accueillir-gardien-bonnes-pratiques", slug: "accueillir-gardien-bonnes-pratiques" },
       { title: "Préparer sa maison avant une garde", description: "Ce qu'on oublie dans le guide de la maison.", href: "/actualites/preparer-maison-avant-garde", slug: "preparer-maison-avant-garde" },
-      { title: "Que faire si quelque chose se passe mal", description: "Animal malade, panne, gardien défaillant.", href: "/actualites/que-faire-probleme-pendant-garde", slug: "que-faire-probleme-pendant-garde" },
+      { title: "Que faire si quelque chose se passe mal", description: "Animal malade, panne, gardien défaillant.", href: "/actualites/confier-sa-maison-absence-risques", slug: "confier-sa-maison-absence-risques" },
     ];
   } else {
     resTitle = "Optimiser vos prochaines gardes";
     resItems = [
       { title: "Choisir son gardien : les bons critères", description: "Affinez votre sélection à chaque garde.", href: "/actualites/choisir-gardien-bons-criteres", slug: "choisir-gardien-bons-criteres" },
-      { title: "Que faire si quelque chose se passe mal", description: "Animal malade, panne, gardien défaillant.", href: "/actualites/que-faire-probleme-pendant-garde", slug: "que-faire-probleme-pendant-garde" },
+      { title: "Que faire si quelque chose se passe mal", description: "Animal malade, panne, gardien défaillant.", href: "/actualites/confier-sa-maison-absence-risques", slug: "confier-sa-maison-absence-risques" },
       { title: "Accueillir son gardien", description: "Ce qui fait qu'un gardien prend soin de tout.", href: "/actualites/accueillir-gardien-bonnes-pratiques", slug: "accueillir-gardien-bonnes-pratiques" },
     ];
   }
