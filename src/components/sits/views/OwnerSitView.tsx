@@ -512,7 +512,7 @@ const OwnerSitView = ({
       toast({
         variant: "destructive",
         title: "Ouverture impossible",
-        description: "Le commodat n'a pas pu être préparé. Réessayez dans un instant.",
+        description: "L'accord de garde n'a pas pu être préparé. Réessayez dans un instant.",
       });
     } finally {
       setAccordLoading(false);

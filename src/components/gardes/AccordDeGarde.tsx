@@ -146,7 +146,7 @@ export default function AccordDeGarde({ garde, role = "proprio", onClose }: Acco
   p_ip_address: ipAddress,
   });
   if (error) throw error;
-  toast("Commodat signé, merci !");
+  toast("Accord signé, merci !");
   setAlreadySigned({ accepted_at: new Date().toISOString() });
   onClose?.();
   } else {
@@ -161,7 +161,7 @@ export default function AccordDeGarde({ garde, role = "proprio", onClose }: Acco
   p_ip_address: null,
   });
   if (error) throw error;
-  toast("Commodat signé, vous recevrez le PDF par email.");
+  toast("Accord signé, vous recevrez le PDF par email.");
   onClose?.();
   }
   } catch (err: any) {
@@ -201,7 +201,7 @@ export default function AccordDeGarde({ garde, role = "proprio", onClose }: Acco
   return (
   <div className="max-w-2xl mx-auto bg-card border rounded-xl shadow-sm p-6 text-center space-y-3">
   <CheckCircle2 className="h-10 w-10 text-primary mx-auto" />
-  <p className="font-semibold text-lg">Vous avez signé ce commodat</p>
+  <p className="font-semibold text-lg">Vous avez signé cet accord de garde</p>
   <p className="text-sm text-muted-foreground">
   Signé le{" "}
   {alreadySigned.accepted_at
@@ -222,7 +222,7 @@ export default function AccordDeGarde({ garde, role = "proprio", onClose }: Acco
 
   const buttonLabel =
   role === "gardien"
-  ? "C'est bon pour moi, je signe ce commodat"
+  ? "C'est bon pour moi, je signe cet accord"
   : "C'est bon pour moi, je signe →";
 
  return (
@@ -230,7 +230,7 @@ export default function AccordDeGarde({ garde, role = "proprio", onClose }: Acco
  {/* EN-TÊTE */}
  <div className="shrink-0 px-6 py-4 border-b flex items-start gap-4">
  <div className="min-w-0">
-  <p className="font-semibold text-lg">Notre commodat</p>
+  <p className="font-semibold text-lg">Notre accord de garde</p>
   <p className="text-sm text-muted-foreground">
   Garde du {garde.dateDebut} au {garde.dateFin} · {garde.adresse}
   </p>
@@ -359,17 +359,17 @@ export default function AccordDeGarde({ garde, role = "proprio", onClose }: Acco
  )}
  </div>
 
-  {/* Nature juridique de la garde */}
+  {/* Nature de la garde */}
   <div>
   <p className="font-semibold text-sm mb-2">Ce que ce document est vraiment</p>
   <p className="text-sm">
-  Cette garde est un commodat : {p} prête son logement à {g} gratuitement, pour des dates précises, et {g} s'engage à le restituer à la date prévue. C'est le nom du prêt à usage à titre gratuit dans le code civil (articles 1875 et suivants), autrement dit exactement ce que vous faites déjà : un coup de main gratuit, avec une date de retour.
+  Cette garde est réalisée dans un esprit d'échange et de confiance mutuelle : {p} prête son logement à {g} gratuitement, pour des dates précises, et {g} s'engage à le restituer à la date prévue.
   </p>
   <p className="text-sm mt-3">
-  Guardiens génère ce commodat à chaque garde confirmée parce que des dates écrites et signées par les deux parties changent tout si quelque chose se passait mal : elles prouvent que {g} occupe le logement avec l'accord de {p}, et jusqu'à quand. Si un litige survenait sur la restitution du logement, par exemple si un gardien refusait de partir à la date prévue, ce document faciliterait la preuve des droits de chacun (l'occupation sans droit ni titre est interdite par l'article 226-4 du code pénal et la loi du 27 juillet 2023). À lui seul, il ne crée pas cette protection : il la rend plus simple à établir.
+  Guardiens génère cet accord à chaque garde confirmée parce que des dates écrites et signées par les deux parties changent tout si quelque chose se passait mal : elles prouvent que {g} occupe le logement avec l'accord de {p}, et jusqu'à quand. Si un litige survenait sur la restitution du logement, par exemple si un gardien refusait de partir à la date prévue, ce document faciliterait la preuve des droits de chacun (l'occupation sans droit ni titre est interdite par l'article 226-4 du code pénal et la loi du 27 juillet 2023). À lui seul, il ne crée pas cette protection : il la rend plus simple à établir.
   </p>
   <p className="text-sm mt-3">
-  Ce commodat n'est ni un contrat de travail, ni un bail d'habitation : {g} ne reçoit aucune rémunération et ne devient jamais locataire. C'est précisément ce qui distingue une garde entre membres d'une location ou d'une prestation payante.
+  Juridiquement, cet accord prend la forme d'un commodat (code civil, articles 1875 et suivants) : un prêt à usage à titre gratuit, avec obligation de restitution à la date convenue. Ce n'est ni un contrat de travail, ni un bail d'habitation : {g} ne reçoit aucune rémunération et ne devient jamais locataire.
   </p>
   </div>
 
@@ -386,7 +386,7 @@ export default function AccordDeGarde({ garde, role = "proprio", onClose }: Acco
  Si {g} se blessait dans le logement, chaque partie reste couverte par sa propre assurance. On recommande à {g} de vérifier sa couverture accidents personnelle avant la garde, ça prend cinq minutes.
  </p>
   <p className="italic text-xs text-muted-foreground mt-2">
-  Ce commodat ne remplace pas vos assurances respectives.
+  Cet accord ne remplace pas vos assurances respectives.
   </p>
  </div>
 
@@ -407,22 +407,22 @@ export default function AccordDeGarde({ garde, role = "proprio", onClose }: Acco
 
  <hr className="border-border my-2" />
   <p className="text-center text-xs text-muted-foreground">
-  Commodat généré par Guardiens, en attente de signature des deux parties.
+  Accord de garde généré par Guardiens, en attente de signature des deux parties.
   </p>
   <a
-  href="/faq#qu-est-ce-que-notre-commodat"
+  href="/faq#qu-est-ce-que-notre-accord-de-garde"
   target="_blank"
   rel="noopener noreferrer"
   className="text-xs text-primary text-center block mt-1"
   >
-  En savoir plus sur le commodat →
+  En savoir plus sur l'accord de garde →
   </a>
  </div>
 
  {/* PIED */}
  <div className="shrink-0 border-t px-6 py-4">
   <p className="text-center text-sm text-muted-foreground mb-3">
-  J'ai lu ce commodat et je confirme que son contenu correspond à ce que nous avons prévu ensemble.
+  J'ai lu cet accord et je confirme que son contenu correspond à ce que nous avons prévu ensemble.
   </p>
   <button
   disabled={!hasScrolled || isLoading}
@@ -441,7 +441,7 @@ export default function AccordDeGarde({ garde, role = "proprio", onClose }: Acco
   </button>
   {alreadyDeclined ? (
   <p className="mt-3 text-center text-xs text-muted-foreground">
-  Vous avez choisi de ne pas signer ce commodat{alreadyDeclined.declined_at ? ` le ${format(new Date(alreadyDeclined.declined_at), "d MMMM yyyy", { locale: fr })}` : ""}. Ce choix est visible de l'autre partie. Vous pouvez changer d'avis en le signant ci-dessus.
+  Vous avez choisi de ne pas signer cet accord{alreadyDeclined.declined_at ? ` le ${format(new Date(alreadyDeclined.declined_at), "d MMMM yyyy", { locale: fr })}` : ""}. Ce choix est visible de l'autre partie. Vous pouvez changer d'avis en le signant ci-dessus.
   </p>
   ) : !declineConfirm ? (
   <button
@@ -452,7 +452,7 @@ export default function AccordDeGarde({ garde, role = "proprio", onClose }: Acco
   </button>
   ) : (
   <div className="mt-3 rounded-lg border border-border bg-muted/40 p-3 space-y-2">
-  <p className="text-sm text-center font-medium">Vous choisissez de ne pas signer ce commodat ?</p>
+  <p className="text-sm text-center font-medium">Vous choisissez de ne pas signer cet accord ?</p>
   <p className="text-xs text-muted-foreground text-center">
   Votre choix sera visible de l'autre partie. Vous pourrez changer d'avis à tout moment en revenant ici.
   </p>
