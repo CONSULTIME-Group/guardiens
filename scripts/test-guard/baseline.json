@@ -10,6 +10,10 @@
     {
       "file": "src/__tests__/article-pricing-content.test.ts",
       "reason": "Dépend du contenu de la base de production (table articles, slug nouveaux-tarifs-2026) et conditionné au flag isPricingActive() depuis le 17/08/2026. Hors périmètre de la garde dans les deux sens. À lancer à la main via npm run test:data dans un environnement connecté."
+    },
+    {
+      "file": "src/__tests__/owner-stage-articles.test.ts",
+      "reason": "Dépend du contenu de la base de production (table articles, slugs du mapping OWNER_STAGE_ARTICLES). Un renommage d'article en base doit faire échouer ce test sans bloquer le build : instable par nature, hors périmètre de la garde dans les deux sens. À lancer à la main via npm run test:data dans un environnement connecté."
     }
   ],
   "knownFailures": []
