@@ -40,7 +40,8 @@ export function AccordOwnerStatusBanner({ sitId, sitStatus, onSignAccord }: Acco
       .rpc("get_garde_accord_status", { p_garde_id: sitId })
       .then(({ data }) => {
         if (cancelled) return;
-        const row = Array.isArray(data) ? data[0] : null;
+        const rows = (Array.isArray(data) ? data : []) as unknown as AccordStatusRow[];
+        const row = rows[0];
         if (!row) {
           setStatus({ owner_signed: false, sitter_signed: false, owner_declined: false, sitter_declined: false });
           return;
