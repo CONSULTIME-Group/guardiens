@@ -127,3 +127,5 @@ export function AccordOwnerStatusBanner({ sitId, sitStatus, onSignAccord }: Acco
     </div>
   );
 }
+
+export default AccordOwnerStatusBanner;

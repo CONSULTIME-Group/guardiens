@@ -484,16 +484,22 @@ const SitterSitView = ({
                 className="font-heading text-foreground"
                 style={{ fontSize: "16px", fontWeight: 600, lineHeight: 1.3 }}
               >
-                Notre commodat
+                Notre accord de garde
               </h3>
               <p
                 className="text-muted-foreground mt-[8px]"
                 style={{ fontSize: "13px", lineHeight: 1.5 }}
               >
+                Un accord de garde est disponible pour cette réservation. Ce document résume les dates, ce que chacun s'engage à faire, et les contacts utiles pour cette garde.
+              </p>
+              <p
+                className="text-muted-foreground mt-[8px]"
+                style={{ fontSize: "13px", lineHeight: 1.5 }}
+              >
                 {!ownerAccordSigned && !ownerAccordDeclined &&
-                  "En attente de signature du propriétaire. Dès qu'il aura signé le commodat, vous pourrez le lire et le signer à votre tour."}
+                  "En attente de signature du propriétaire. Dès qu'il aura signé l'accord, vous pourrez le lire et le signer à votre tour."}
                 {!ownerAccordSigned && ownerAccordDeclined &&
-                  "Le propriétaire a choisi de ne pas signer le commodat de cette garde. La garde reste confirmée ; si vous en ressentez le besoin, échangez ensemble dans la messagerie."}
+                  "Le propriétaire a choisi de ne pas signer l'accord de cette garde. La garde reste confirmée ; si vous en ressentez le besoin, échangez ensemble dans la messagerie."}
                 {ownerAccordSigned && sitterAccordSigned &&
                   `Vous l'avez signé${
                     sitterAccordSigned.accepted_at
@@ -513,7 +519,7 @@ const SitterSitView = ({
                     onClick={() => setAccordOpen(true)}
                     className="rounded-full bg-card border-border"
                   >
-                    {sitterAccordSigned ? "Voir le commodat" : "Voir et signer le commodat"}
+                    {sitterAccordSigned ? "Voir l'accord" : "Voir et signer l'accord"}
                   </Button>
                 </div>
               )}
