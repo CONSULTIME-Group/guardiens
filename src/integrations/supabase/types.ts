@@ -5477,6 +5477,8 @@ export type Database = {
           created_at: string
           daily_routine: string | null
           departement_code: string | null
+          draft_hold_reason: string | null
+          draft_hold_reason_at: string | null
           end_date: string | null
           environments: string[]
           flexibility_notes: string | null
@@ -5527,6 +5529,8 @@ export type Database = {
           created_at?: string
           daily_routine?: string | null
           departement_code?: string | null
+          draft_hold_reason?: string | null
+          draft_hold_reason_at?: string | null
           end_date?: string | null
           environments?: string[]
           flexibility_notes?: string | null
@@ -5577,6 +5581,8 @@ export type Database = {
           created_at?: string
           daily_routine?: string | null
           departement_code?: string | null
+          draft_hold_reason?: string | null
+          draft_hold_reason_at?: string | null
           end_date?: string | null
           environments?: string[]
           flexibility_notes?: string | null
@@ -8542,6 +8548,10 @@ export type Database = {
           p_token: string
         }
         Returns: boolean
+      }
+      signal_sit_publish_error: {
+        Args: { _code: string; _message: string; _sit_id: string }
+        Returns: undefined
       }
       slugify: { Args: { input: string }; Returns: string }
       slugify_city: { Args: { input: string }; Returns: string }

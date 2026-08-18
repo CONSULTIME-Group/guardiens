@@ -66,8 +66,11 @@ import {
   MIN_SUB_DESCRIPTION,
   type PublishBlocker,
 } from "@/lib/sitPublishRules";
-import { describeSitWriteError } from "@/lib/sitDbErrors";
+import { describeSitWriteError, sitWriteErrorNeedsSignal } from "@/lib/sitDbErrors";
 import { isIdentityComplete, resolveSetupState } from "@/lib/setupState";
+import PublishExitDialog from "@/components/sits/owner/PublishExitDialog";
+import { shouldOfferPublishExitChoice, type DraftHoldReason } from "@/lib/draftHoldReasons";
+import { reportError } from "@/lib/errorLogger";
 
 
 interface PropertySummary {
@@ -315,6 +318,10 @@ const CreateSit = () => {
   const lastStepRef = useRef<number>(0);
   const visitedStepsRef = useRef<Set<number>>(new Set());
   const funnelStartedAtRef = useRef<number>(Date.now());
+  // Écran de choix à la sortie : annonce prête, jamais publiée, sortie demandée.
+  const [sitPublishedAt, setSitPublishedAt] = useState<string | null>(null);
+  const [exitChoiceOpen, setExitChoiceOpen] = useState(false);
+  const pendingExitRef = useRef<(() => void) | null>(null);
 
   // Analytics : les events d'étape sont émis plus bas, une fois le formulaire
   // réellement affiché, sinon l'étape 0 absorbe le temps de mise en route.
@@ -801,6 +808,9 @@ const CreateSit = () => {
           const cleanEnd = rawEnd && rawEnd >= today && (!cleanStart || rawEnd >= cleanStart) ? rawEnd : "";
           const datesWerePast = (!!rawStart && !cleanStart) || (!!rawEnd && !cleanEnd);
           setDraftId(d.id);
+          // Une annonce publiée puis dépubliée est un choix assumé : l'écran
+          // de choix à la sortie ne la concerne pas.
+          setSitPublishedAt((d as any).published_at ?? null);
           setTitle(d.title || "");
           setStartDate(cleanStart);
           setEndDate(cleanEnd);
@@ -977,6 +987,8 @@ const CreateSit = () => {
         source: "create_sit_page",
         metadata: { sit_id: id },
       });
+      // Annonce publiable jamais publiée : quitter exige un choix explicite.
+      if (offerExitChoiceIfReady(() => navigate("/dashboard"), "save_and_exit")) return;
       toast({ title: "Brouillon enregistré", description: "Vous pourrez le reprendre depuis votre dashboard." });
       navigate("/dashboard");
     }
@@ -1117,6 +1129,62 @@ const CreateSit = () => {
   const canPublish = getBlockingBlockers(publishBlockers).length === 0;
   const titleTooLong = title.trim().length > MAX_TITLE_LENGTH;
   const hasPhoto = !publishBlockers.some((b) => b.id === "photo");
+
+  // Écran de choix à la sortie (règle : src/lib/draftHoldReasons.ts). Une
+  // annonce non publiable sort sans cet écran : la checklist des éléments
+  // manquants porte ce cas, jamais ce choix.
+  const offerExitChoiceIfReady = (proceed: () => void, exit: "save_and_exit" | "back_link"): boolean => {
+    if (!shouldOfferPublishExitChoice({
+      canPublish,
+      publishedAt: sitPublishedAt,
+      justPublished: publishedRef.current,
+    })) return false;
+    void trackEvent("sit_exit_choice_shown", {
+      source: "create_sit_page",
+      metadata: { sit_id: draftId, exit },
+    });
+    pendingExitRef.current = proceed;
+    setExitChoiceOpen(true);
+    return true;
+  };
+
+  const persistDraftHoldReason = async (reason: DraftHoldReason) => {
+    let id = draftId;
+    if (!id) id = await saveDraft({ silent: true });
+    if (!id || !user) return;
+    const { error } = await supabase
+      .from("sits")
+      .update({ draft_hold_reason: reason, draft_hold_reason_at: new Date().toISOString() })
+      .eq("id", id)
+      .eq("user_id", user.id);
+    if (error) reportError(error, { source: "sit_draft_hold_reason", sit_id: id });
+  };
+
+  const handleExitPublishNow = async () => {
+    setExitChoiceOpen(false);
+    pendingExitRef.current = null;
+    void trackEvent("sit_exit_choice_publish", {
+      source: "create_sit_page",
+      metadata: { sit_id: draftId },
+    });
+    await handlePublish();
+  };
+
+  const handleExitKeepDraft = (reason: DraftHoldReason | null) => {
+    setExitChoiceOpen(false);
+    void trackEvent("sit_exit_choice_keep_draft", {
+      source: "create_sit_page",
+      metadata: { sit_id: draftId, reason: reason ?? "skipped" },
+    });
+    if (reason) void persistDraftHoldReason(reason);
+    toast({
+      title: "Annonce gardée en brouillon",
+      description: "Elle reste dans vos annonces, vous pouvez la publier à tout moment.",
+    });
+    const proceed = pendingExitRef.current;
+    pendingExitRef.current = null;
+    proceed?.();
+  };
 
   // Une photo ajoutée depuis le parcours rejoint immédiatement la galerie
   // locale, sans rechargement, pour que les bloqueurs se lèvent tout de suite.
@@ -1458,6 +1526,15 @@ const CreateSit = () => {
       // console, l'utilisateur reçoit une phrase compréhensible.
       console.error("[CreateSit] publish failed", err);
       failPublish(["write_error"]);
+      // Une erreur non prévue laisse un signal admin visible : sans cela, un
+      // propriétaire peut se heurter à un mur sans que personne ne le sache.
+      if (draftId && sitWriteErrorNeedsSignal(err)) {
+        void supabase.rpc("signal_sit_publish_error", {
+          _sit_id: draftId,
+          _code: String(err?.code || "inconnu"),
+          _message: String(err?.message || err),
+        });
+      }
       const description = describeSitWriteError(err, "publish");
 
       toast({
@@ -1755,9 +1832,16 @@ const CreateSit = () => {
           to="/sits"
           className="hidden md:inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground mb-4"
           onClick={(e) => {
-            if (!unsavedRemote) return;
-            const ok = window.confirm("Des modifications ne sont pas encore enregistrées. Quitter cette page maintenant ?");
-            if (!ok) e.preventDefault();
+            if (unsavedRemote) {
+              const ok = window.confirm("Des modifications ne sont pas encore enregistrées. Quitter cette page maintenant ?");
+              if (!ok) {
+                e.preventDefault();
+                return;
+              }
+            }
+            if (offerExitChoiceIfReady(() => navigate("/sits"), "back_link")) {
+              e.preventDefault();
+            }
           }}
         >
           <ArrowLeft className="h-4 w-4" /> Retour à mes annonces
@@ -2797,6 +2881,19 @@ const CreateSit = () => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <PublishExitDialog
+        open={exitChoiceOpen}
+        onOpenChange={(open) => {
+          setExitChoiceOpen(open);
+          // Fermer sans choisir (croix, clic à l'extérieur) annule la sortie :
+          // le propriétaire reste sur son formulaire.
+          if (!open) pendingExitRef.current = null;
+        }}
+        publishing={publishing}
+        onPublishNow={handleExitPublishNow}
+        onKeepDraft={handleExitKeepDraft}
+      />
 
       <AnnouncementPreviewDialog
         blockers={publishBlockers}
