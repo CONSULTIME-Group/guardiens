@@ -57,6 +57,7 @@ import SitDateHistory from "@/components/sits/SitDateHistory";
 import ApplicationsList from "@/components/sits/ApplicationsList";
 import PostConfirmationChecklist from "@/components/sits/PostConfirmationChecklist";
 import AccordOwnerStatusBanner from "@/components/gardes/AccordOwnerStatusBanner";
+import AccordDeGarde from "@/components/gardes/AccordDeGarde";
 import CancelSitModal from "@/components/sits/CancelSitModal";
 import OwnerSitManagement from "@/components/sits/shared/OwnerSitManagement";
 import SitPhotoManager from "@/components/sits/owner/SitPhotoManager";
@@ -452,6 +453,72 @@ const OwnerSitView = ({
     context: "owner",
   });
 
+  // Commodat : ouverture du document côté propriétaire (signature ou relecture)
+  const [accordOpen, setAccordOpen] = useState(false);
+  const [accordData, setAccordData] = useState<any>(null);
+  const [accordLoading, setAccordLoading] = useState(false);
+  const [accordRefreshKey, setAccordRefreshKey] = useState(0);
+
+  const handleSignAccord = async () => {
+    if (accordLoading) return;
+    setAccordLoading(true);
+    try {
+      const { data: acceptedApp } = await supabase
+        .from("applications")
+        .select("sitter_id")
+        .eq("sit_id", sit.id)
+        .eq("status", "accepted")
+        .maybeSingle();
+      let gardienPrenom = "Votre gardien";
+      if (acceptedApp?.sitter_id) {
+        const { data: sp } = await supabase
+          .from("public_profiles")
+          .select("first_name")
+          .eq("id", acceptedApp.sitter_id)
+          .maybeSingle();
+        if (sp?.first_name) gardienPrenom = sp.first_name;
+      }
+      setAccordData({
+        gardeId: sit.id,
+        dateDebut: formatDate(sit.start_date),
+        dateFin: formatDate(sit.end_date),
+        adresse: (sit as any).city || owner?.city || "",
+        proprio: {
+          prenom: owner?.first_name ?? "Le propriétaire",
+          telephone: (ownerProfile as any)?.phone ?? "",
+        },
+        gardien: { prenom: gardienPrenom },
+        animaux: (pets ?? []).map((pet: any) => ({
+          prenom: pet?.name ?? "Animal",
+          espece: pet?.species ?? "",
+          race: pet?.breed ?? undefined,
+        })),
+        reglesVie: {
+          animauxPartout: null,
+          invites: null,
+          tabac: null,
+          autresPrecisions: null,
+        },
+        voisinConfiance: null,
+        urgences: null,
+        montantVetMax: 300,
+        montantLogementMax: null,
+        estLongueDuree: false,
+        contributionCharges: null,
+      });
+      setAccordOpen(true);
+    } catch (e) {
+      logger.error("handleSignAccord failed", { sitId: sit.id, error: String(e) });
+      toast({
+        variant: "destructive",
+        title: "Ouverture impossible",
+        description: "Le commodat n'a pas pu être préparé. Réessayez dans un instant.",
+      });
+    } finally {
+      setAccordLoading(false);
+    }
+  };
+
   const handlePublish = async () => {
     if (!isDraft || publishing) return;
     setPublishing(true);
@@ -734,7 +801,24 @@ const OwnerSitView = ({
       {/* Post-confirmation checklist */}
       {(sit.status === "confirmed" || sit.status === "in_progress") && (
         <div className="mb-8">
-          <AccordOwnerStatusBanner sitId={sit.id} sitStatus={sit.status} />
+          <AccordOwnerStatusBanner
+            sitId={sit.id}
+            sitStatus={sit.status}
+            onSignAccord={handleSignAccord}
+            refreshKey={accordRefreshKey}
+          />
+          {accordOpen && accordData && (
+            <div className="mb-6">
+              <AccordDeGarde
+                garde={accordData}
+                role="proprio"
+                onClose={() => {
+                  setAccordOpen(false);
+                  setAccordRefreshKey((k) => k + 1);
+                }}
+              />
+            </div>
+          )}
           <PostConfirmationChecklist
             sitId={sit.id}
             sitOwnerId={sit.user_id}

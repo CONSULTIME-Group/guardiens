@@ -105,58 +105,41 @@ const SitterSitView = ({
   const showIdentityInvite = identityRecommended && accessLevel !== 0 && accessLevel !== 1 && canApplyGuards;
   const [cancelOpen, setCancelOpen] = useState(false);
   const [ownerAccordSigned, setOwnerAccordSigned] = useState(false);
+  const [ownerAccordDeclined, setOwnerAccordDeclined] = useState(false);
   const [sitterAccordSigned, setSitterAccordSigned] = useState<{ accepted_at: string } | null>(
     null,
   );
+  const [sitterAccordDeclined, setSitterAccordDeclined] = useState(false);
   const [accordOpen, setAccordOpen] = useState(false);
   const [accordData, setAccordData] = useState<any>(null);
+  const [accordLoaded, setAccordLoaded] = useState(false);
 
-  // Check accord de garde status
+  // Statut du commodat (signatures et refus des deux parties), via fonction
+  // sécurisée : la RLS de garde_accords masque la ligne de l'autre partie.
+  const loadAccordStatus = async () => {
+    const { data, error } = await supabase.rpc("get_garde_accord_status" as any, {
+      p_garde_id: sit.id,
+    });
+    if (error || !data) return;
+    const d = data as any;
+    const proprio = d?.proprio ?? null;
+    const gardien = d?.gardien ?? null;
+    setOwnerAccordSigned(!!proprio?.accepted);
+    setOwnerAccordDeclined(!!proprio?.declined && !proprio?.accepted);
+    setSitterAccordSigned(
+      gardien?.accepted && gardien?.accepted_at ? { accepted_at: gardien.accepted_at } : null,
+    );
+    setSitterAccordDeclined(!!gardien?.declined && !gardien?.accepted);
+    if (d?.document) setAccordData(d.document);
+    setAccordLoaded(true);
+  };
+
   useEffect(() => {
-    if (!owner || !property) return;
     const showAccord = ["confirmed", "in_progress", "completed"].includes(sit.status);
-    if (!showAccord) return;
-
-    const checkAccord = async () => {
-      // Check if owner signed
-      const { data: ownerAcc } = await supabase
-        .from("garde_accords")
-        .select("id")
-        .eq("garde_id", sit.id)
-        .eq("role", "proprio")
-        .eq("accepted", true)
-        .maybeSingle();
-
-      if (!ownerAcc) return;
-      setOwnerAccordSigned(true);
-
-      // Check if sitter already signed
-      const { data: sitterAcc } = await supabase
-        .from("garde_accords")
-        .select("accepted_at")
-        .eq("garde_id", sit.id)
-        .eq("user_id", currentUserId)
-        .eq("role", "gardien")
-        .eq("accepted", true)
-        .maybeSingle();
-
-      if (sitterAcc) setSitterAccordSigned(sitterAcc);
-
-      // Build accord data from owner's signed document
-      const { data: ownerDoc } = await supabase
-        .from("garde_accords")
-        .select("document_content")
-        .eq("garde_id", sit.id)
-        .eq("role", "proprio")
-        .eq("accepted", true)
-        .maybeSingle();
-
-      if (ownerDoc?.document_content) {
-        setAccordData(ownerDoc.document_content);
-      }
-    };
-    checkAccord();
-  }, [sit.id, sit.status, currentUserId, owner, property]);
+    if (!showAccord || !currentUserId) return;
+    void loadAccordStatus();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sit.id, sit.status, currentUserId]);
 
   // Dérivés partagés (avgRating + formatDate + badges de matching).
   const { avgRating, formatDate, matchingBadges: badges } = useSitDerived({
@@ -474,14 +457,18 @@ const SitterSitView = ({
         />
       </section>
 
-      {/* Accord de garde — registre carnet (vague 21) */}
-      {ownerAccordSigned && ["confirmed", "in_progress", "completed"].includes(sit.status) && (
+      {/* Commodat — registre carnet (vague 21). Visible dès la confirmation,
+          même si le propriétaire n'a pas encore signé : jamais de silence total. */}
+      {accordLoaded && ["confirmed", "in_progress", "completed"].includes(sit.status) && (
         <div className="mt-8">
           {accordOpen && accordData ? (
             <AccordDeGarde
               garde={{ ...accordData, gardeId: sit.id }}
               role="gardien"
-              onClose={() => setAccordOpen(false)}
+              onClose={() => {
+                setAccordOpen(false);
+                void loadAccordStatus();
+              }}
             />
           ) : (
             <article
@@ -497,30 +484,39 @@ const SitterSitView = ({
                 className="font-heading text-foreground"
                 style={{ fontSize: "16px", fontWeight: 600, lineHeight: 1.3 }}
               >
-                Notre accord de garde
+                Notre commodat
               </h3>
               <p
                 className="text-muted-foreground mt-[8px]"
                 style={{ fontSize: "13px", lineHeight: 1.5 }}
               >
-                {sitterAccordSigned
-                  ? `Vous l'avez signé${
-                      sitterAccordSigned.accepted_at
-                        ? " le " +
-                          format(new Date(sitterAccordSigned.accepted_at), "d MMMM yyyy", { locale: fr })
-                        : ""
-                    }. Vous pouvez le relire à tout moment.`
-                  : "Le propriétaire a validé cet accord. Lisez-le et confirmez votre acceptation pour finaliser la garde."}
+                {!ownerAccordSigned && !ownerAccordDeclined &&
+                  "En attente de signature du propriétaire. Dès qu'il aura signé le commodat, vous pourrez le lire et le signer à votre tour."}
+                {!ownerAccordSigned && ownerAccordDeclined &&
+                  "Le propriétaire a choisi de ne pas signer le commodat de cette garde. La garde reste confirmée ; si vous en ressentez le besoin, échangez ensemble dans la messagerie."}
+                {ownerAccordSigned && sitterAccordSigned &&
+                  `Vous l'avez signé${
+                    sitterAccordSigned.accepted_at
+                      ? " le " +
+                        format(new Date(sitterAccordSigned.accepted_at), "d MMMM yyyy", { locale: fr })
+                      : ""
+                  }. Vous pouvez le relire à tout moment.`}
+                {ownerAccordSigned && !sitterAccordSigned && sitterAccordDeclined &&
+                  "Le propriétaire l'a signé. Vous avez choisi de ne pas le signer pour le moment : il reste disponible si vous changez d'avis."}
+                {ownerAccordSigned && !sitterAccordSigned && !sitterAccordDeclined &&
+                  "Le propriétaire l'a signé. Lisez-le et signez-le à votre tour pour finaliser la garde."}
               </p>
-              <div className="mt-[14px]">
-                <Button
-                  variant="outline"
-                  onClick={() => setAccordOpen(true)}
-                  className="rounded-full bg-card border-border"
-                >
-                  {sitterAccordSigned ? "Voir l'accord" : "Voir et signer l'accord"}
-                </Button>
-              </div>
+              {ownerAccordSigned && accordData && (
+                <div className="mt-[14px]">
+                  <Button
+                    variant="outline"
+                    onClick={() => setAccordOpen(true)}
+                    className="rounded-full bg-card border-border"
+                  >
+                    {sitterAccordSigned ? "Voir le commodat" : "Voir et signer le commodat"}
+                  </Button>
+                </div>
+              )}
             </article>
           )}
         </div>
