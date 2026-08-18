@@ -47,7 +47,7 @@ import {
   getSitPublishBlockers,
   needsCreateFormToPublish,
 } from "@/lib/sitPublishRules";
-import { describeSitWriteError } from "@/lib/sitDbErrors";
+import { describeSitWriteError, sitWriteErrorNeedsSignal } from "@/lib/sitDbErrors";
 
 
 /* ── Status configs (tokens sémantiques uniquement, compat dark mode) ── */
@@ -595,6 +595,14 @@ const Sits = () => {
       // Le détail technique reste en console : l'utilisateur reçoit ce qui
       // bloque, jamais une invitation à réessayer.
       console.error("[Sits] republish failed", err);
+      // Erreur non prévue : signal admin visible, sinon le mur reste muet.
+      if (sitWriteErrorNeedsSignal(err)) {
+        void supabase.rpc("signal_sit_publish_error", {
+          _sit_id: sitId,
+          _code: String(err?.code || "inconnu"),
+          _message: String(err?.message || err),
+        });
+      }
       toast({
         variant: "destructive",
         title: "Republication impossible",

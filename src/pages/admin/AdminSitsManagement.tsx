@@ -6,6 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { draftHoldReasonLabel } from "@/lib/draftHoldReasons";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
@@ -382,7 +383,15 @@ const AdminSitsManagement = () => {
                   key={sit.id}
                   className={`transition-colors hover:bg-muted/50 ${isOverdue ? "bg-warning-soft/50" : ""}`}
                 >
-                  <TableCell className="font-medium max-w-[160px] truncate">{sit.title || "Sans titre"}</TableCell>
+                  <TableCell className="font-medium max-w-[160px]">
+                    <span className="block truncate">{sit.title || "Sans titre"}</span>
+                    {sit.status === "draft" && sit.draft_hold_reason && (
+                      <span className="block text-xs font-normal text-muted-foreground truncate">
+                        Brouillon gardé : {draftHoldReasonLabel(sit.draft_hold_reason)}
+                        {sit.draft_hold_reason_at ? ` le ${format(new Date(sit.draft_hold_reason_at), "d MMM", { locale: fr })}` : ""}
+                      </span>
+                    )}
+                  </TableCell>
                   <TableCell className="text-sm">
                     <div className="flex items-center gap-2">
                       {sit.owner?.avatar_url && <img src={avatarImageUrl(sit.owner.avatar_url, 20)} className="w-5 h-5 rounded-full object-cover" />}
