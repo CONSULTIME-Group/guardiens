@@ -457,7 +457,7 @@ const SitterSitView = ({
         />
       </section>
 
-      {/* Commodat — registre carnet (vague 21). Visible dès la confirmation,
+      {/* Commodat : registre carnet (vague 21). Visible dès la confirmation,
           même si le propriétaire n'a pas encore signé : jamais de silence total. */}
       {accordLoaded && ["confirmed", "in_progress", "completed"].includes(sit.status) && (
         <div className="mt-8">
