@@ -76,6 +76,7 @@ export type EventType =
   | "accord_dialog_opened"          // Modale AccordDeGarde ouverte (sit_id, role)
   | "accord_signed_owner"           // Owner signe l'accord (sit_id, garde_id)
   | "accord_signed_gardien"         // Gardien signe l'accord (sit_id, garde_id)
+  | "accord_declined"               // Refus explicite de signer le commodat (sit_id, role)
   | "accord_dialog_closed_unsigned" // Modale fermée sans signer (sit_id, role, scroll_completed)
   | "sit_owner_state_viewed"        // État vu côté owner (sit_id, state)
   // Module Questions & conseils -----------------------------------------------

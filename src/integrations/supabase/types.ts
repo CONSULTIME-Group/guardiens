@@ -2566,8 +2566,10 @@ export type Database = {
           accepted: boolean
           accepted_at: string | null
           created_at: string
+          declined: boolean
+          declined_at: string | null
           document_content: Json | null
-          document_hash: string
+          document_hash: string | null
           garde_id: string
           id: string
           ip_address: string | null
@@ -2578,8 +2580,10 @@ export type Database = {
           accepted?: boolean
           accepted_at?: string | null
           created_at?: string
+          declined?: boolean
+          declined_at?: string | null
           document_content?: Json | null
-          document_hash: string
+          document_hash?: string | null
           garde_id: string
           id?: string
           ip_address?: string | null
@@ -2590,8 +2594,10 @@ export type Database = {
           accepted?: boolean
           accepted_at?: string | null
           created_at?: string
+          declined?: boolean
+          declined_at?: string | null
           document_content?: Json | null
-          document_hash?: string
+          document_hash?: string | null
           garde_id?: string
           id?: string
           ip_address?: string | null
@@ -7837,6 +7843,7 @@ export type Database = {
         Args: { p_category: string; p_reason: string; p_review_id: string }
         Returns: string
       }
+      decline_garde_accord: { Args: { p_garde_id: string }; Returns: undefined }
       delete_email: {
         Args: { message_id: number; queue_name: string }
         Returns: boolean
@@ -8115,6 +8122,7 @@ export type Database = {
           user_id: string
         }[]
       }
+      get_garde_accord_status: { Args: { p_garde_id: string }; Returns: Json }
       get_garde_environments: {
         Args: { p_garde_id: string }
         Returns: string[]

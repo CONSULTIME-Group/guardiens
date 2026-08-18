@@ -67,25 +67,30 @@ export default function AccordDeGarde({ garde, role = "proprio", onClose }: Acco
  const scrollRef = useRef<HTMLDivElement>(null);
  const [hasScrolled, setHasScrolled] = useState(false);
  const [isLoading, setIsLoading] = useState(false);
- const [alreadySigned, setAlreadySigned] = useState<{ accepted_at: string } | null>(null);
- const { user } = useAuth();
+  const [alreadySigned, setAlreadySigned] = useState<{ accepted_at: string } | null>(null);
+  const [alreadyDeclined, setAlreadyDeclined] = useState<{ declined_at: string | null } | null>(null);
+  const [declineConfirm, setDeclineConfirm] = useState(false);
+  const [declining, setDeclining] = useState(false);
+  const { user } = useAuth();
 
- // Check if gardien already signed
- useEffect(() => {
- if (role !== "gardien" || !user) return;
- const check = async () => {
- const { data } = await supabase
-.from("garde_accords")
-.select("accepted_at")
-.eq("garde_id", garde.gardeId)
-.eq("user_id", user.id)
-.eq("role", "gardien")
-.eq("accepted", true)
-.maybeSingle();
- if (data) setAlreadySigned(data);
- };
- check();
- }, [role, user, garde.gardeId]);
+  // Vérifie si l'utilisateur a déjà signé ou explicitement refusé ce commodat
+  useEffect(() => {
+  if (!user) return;
+  const check = async () => {
+  const { data } = await supabase
+ .from("garde_accords")
+ .select("accepted, accepted_at, declined, declined_at")
+ .eq("garde_id", garde.gardeId)
+ .eq("user_id", user.id)
+ .maybeSingle();
+  if (data?.accepted && data?.accepted_at) {
+  setAlreadySigned({ accepted_at: data.accepted_at });
+  } else if (data?.declined) {
+  setAlreadyDeclined({ declined_at: data.declined_at ?? null });
+  }
+  };
+  check();
+  }, [user, garde.gardeId]);
 
  // Analytics : ouverture de la modale (émis une fois par montage).
  useEffect(() => {
@@ -129,84 +134,106 @@ export default function AccordDeGarde({ garde, role = "proprio", onClose }: Acco
  // IP fetch failed, proceed without
  }
 
- trackEvent("accord_signed_gardien", {
- metadata: { sit_id: garde.gardeId, garde_id: garde.gardeId },
- });
- const { error } = await supabase.from("garde_accords").insert({
- garde_id: garde.gardeId,
- user_id: user.id,
- role: "gardien",
- accepted: true,
- accepted_at: new Date().toISOString(),
- document_hash: hash,
- document_content: garde as any,
- ip_address: ipAddress,
- });
- if (error) throw error;
- toast("Accord confirmé, merci !");
- setAlreadySigned({ accepted_at: new Date().toISOString() });
- onClose?.();
- } else {
- // Proprio flow (existing RPC)
- trackEvent("accord_signed_owner", {
- metadata: { sit_id: garde.gardeId, garde_id: garde.gardeId },
- });
- const { error } = await supabase.rpc("accept_garde_accord", {
- p_garde_id: garde.gardeId,
- p_document_hash: hash,
- p_document_content: garde as any,
- p_ip_address: null,
- });
- if (error) throw error;
- toast("Accord confirmé, vous recevrez le PDF par email.");
- onClose?.();
- }
- } catch (err: any) {
- console.error("[AccordDeGarde] accept failed", err);
- toast.error(err?.message || "Une erreur est survenue, réessayez dans un instant.");
- } finally {
- setIsLoading(false);
- }
- };
+  trackEvent("accord_signed_gardien", {
+  metadata: { sit_id: garde.gardeId, garde_id: garde.gardeId },
+  });
+  // Passage par la fonction sécurisée : elle pose le rôle et efface un
+  // éventuel refus antérieur (changement d'avis possible).
+  const { error } = await supabase.rpc("accept_garde_accord", {
+  p_garde_id: garde.gardeId,
+  p_document_hash: hash,
+  p_document_content: garde as any,
+  p_ip_address: ipAddress,
+  });
+  if (error) throw error;
+  toast("Commodat signé, merci !");
+  setAlreadySigned({ accepted_at: new Date().toISOString() });
+  onClose?.();
+  } else {
+  // Proprio flow (fonction sécurisée)
+  trackEvent("accord_signed_owner", {
+  metadata: { sit_id: garde.gardeId, garde_id: garde.gardeId },
+  });
+  const { error } = await supabase.rpc("accept_garde_accord", {
+  p_garde_id: garde.gardeId,
+  p_document_hash: hash,
+  p_document_content: garde as any,
+  p_ip_address: null,
+  });
+  if (error) throw error;
+  toast("Commodat signé, vous recevrez le PDF par email.");
+  onClose?.();
+  }
+  } catch (err: any) {
+  console.error("[AccordDeGarde] accept failed", err);
+  toast.error(err?.message || "Une erreur est survenue, réessayez dans un instant.");
+  } finally {
+  setIsLoading(false);
+  }
+  };
 
- // If gardien already signed, show confirmation
- if (role === "gardien" && alreadySigned) {
- return (
- <div className="max-w-2xl mx-auto bg-card border rounded-xl shadow-sm p-6 text-center space-y-3">
- <CheckCircle2 className="h-10 w-10 text-primary mx-auto" />
- <p className="font-semibold text-lg">Vous avez accepté cet accord</p>
- <p className="text-sm text-muted-foreground">
- Signé le{" "}
- {alreadySigned.accepted_at
- ? format(new Date(alreadySigned.accepted_at), "d MMMM yyyy 'à' HH:mm", { locale: fr })
- : ","}
- </p>
- {onClose && (
- <button
- onClick={onClose}
- className="text-sm text-muted-foreground hover:text-foreground transition-colors mt-2"
- >
- Fermer
- </button>
- )}
- </div>
- );
- }
+  // Refus explicite et tracé : enregistré en base, visible de l'autre partie.
+  const handleDecline = async () => {
+  if (!user) return;
+  setDeclining(true);
+  trackEvent("accord_declined", {
+  metadata: { sit_id: garde.gardeId, garde_id: garde.gardeId, role },
+  });
+  try {
+  const { error } = await supabase.rpc("decline_garde_accord" as any, {
+  p_garde_id: garde.gardeId,
+  });
+  if (error) throw error;
+  setAlreadyDeclined({ declined_at: new Date().toISOString() });
+  setDeclineConfirm(false);
+  toast("Votre choix est enregistré. Vous pourrez changer d'avis à tout moment.");
+  onClose?.();
+  } catch (err: any) {
+  console.error("[AccordDeGarde] decline failed", err);
+  toast.error(err?.message || "Une erreur est survenue, réessayez dans un instant.");
+  } finally {
+  setDeclining(false);
+  }
+  };
 
- const buttonLabel =
- role === "gardien"
- ? "C'est bon pour moi, j'ai lu et j'accepte"
- : "C'est bon pour moi →";
+  // Si déjà signé, écran de confirmation (propriétaire et gardien)
+  if (alreadySigned) {
+  return (
+  <div className="max-w-2xl mx-auto bg-card border rounded-xl shadow-sm p-6 text-center space-y-3">
+  <CheckCircle2 className="h-10 w-10 text-primary mx-auto" />
+  <p className="font-semibold text-lg">Vous avez signé ce commodat</p>
+  <p className="text-sm text-muted-foreground">
+  Signé le{" "}
+  {alreadySigned.accepted_at
+  ? format(new Date(alreadySigned.accepted_at), "d MMMM yyyy 'à' HH:mm", { locale: fr })
+  : ""}
+  </p>
+  {onClose && (
+  <button
+  onClick={onClose}
+  className="text-sm text-muted-foreground hover:text-foreground transition-colors mt-2"
+  >
+  Fermer
+  </button>
+  )}
+  </div>
+  );
+  }
+
+  const buttonLabel =
+  role === "gardien"
+  ? "C'est bon pour moi, je signe ce commodat"
+  : "C'est bon pour moi, je signe →";
 
  return (
  <div className="max-w-2xl mx-auto bg-card border rounded-xl shadow-sm flex flex-col max-h-[90vh] overflow-hidden">
  {/* EN-TÊTE */}
  <div className="shrink-0 px-6 py-4 border-b flex items-start gap-4">
  <div className="min-w-0">
- <p className="font-semibold text-lg">Notre accord de garde</p>
- <p className="text-sm text-muted-foreground">
- Garde du {garde.dateDebut} au {garde.dateFin} · {garde.adresse}
- </p>
+  <p className="font-semibold text-lg">Notre commodat</p>
+  <p className="text-sm text-muted-foreground">
+  Garde du {garde.dateDebut} au {garde.dateFin} · {garde.adresse}
+  </p>
  </div>
  {onClose && (
  <button
@@ -332,13 +359,19 @@ export default function AccordDeGarde({ garde, role = "proprio", onClose }: Acco
  )}
  </div>
 
- {/* Nature de la garde */}
- <div>
- <p className="font-semibold text-sm mb-2">Ce que cette garde est vraiment</p>
- <p className="text-sm">
- Cette garde est réalisée dans un esprit d'échange et de confiance mutuelle. {g} ne reçoit aucune rémunération. Ce n'est ni un contrat de travail, ni un bail d'habitation.
- </p>
- </div>
+  {/* Nature juridique de la garde */}
+  <div>
+  <p className="font-semibold text-sm mb-2">Ce que ce document est vraiment</p>
+  <p className="text-sm">
+  Cette garde est un commodat : {p} prête son logement à {g} gratuitement, pour des dates précises, et {g} s'engage à le restituer à la date prévue. C'est le nom du prêt à usage à titre gratuit dans le code civil (articles 1875 et suivants), autrement dit exactement ce que vous faites déjà : un coup de main gratuit, avec une date de retour.
+  </p>
+  <p className="text-sm mt-3">
+  Guardiens génère ce commodat à chaque garde confirmée parce que des dates écrites et signées par les deux parties changent tout si quelque chose se passait mal : elles prouvent que {g} occupe le logement avec l'accord de {p}, et jusqu'à quand. Si un litige survenait sur la restitution du logement, par exemple si un gardien refusait de partir à la date prévue, ce document faciliterait la preuve des droits de chacun (l'occupation sans droit ni titre est interdite par l'article 226-4 du code pénal et la loi du 27 juillet 2023). À lui seul, il ne crée pas cette protection : il la rend plus simple à établir.
+  </p>
+  <p className="text-sm mt-3">
+  Ce commodat n'est ni un contrat de travail, ni un bail d'habitation : {g} ne reçoit aucune rémunération et ne devient jamais locataire. C'est précisément ce qui distingue une garde entre membres d'une location ou d'une prestation payante.
+  </p>
+  </div>
 
  {/* Assurance */}
  <div>
@@ -352,9 +385,9 @@ export default function AccordDeGarde({ garde, role = "proprio", onClose }: Acco
  <p className="text-sm mt-3">
  Si {g} se blessait dans le logement, chaque partie reste couverte par sa propre assurance. On recommande à {g} de vérifier sa couverture accidents personnelle avant la garde, ça prend cinq minutes.
  </p>
- <p className="italic text-xs text-muted-foreground mt-2">
- Cet accord ne remplace pas vos assurances respectives.
- </p>
+  <p className="italic text-xs text-muted-foreground mt-2">
+  Ce commodat ne remplace pas vos assurances respectives.
+  </p>
  </div>
 
  {/* Contacts */}
@@ -373,46 +406,74 @@ export default function AccordDeGarde({ garde, role = "proprio", onClose }: Acco
  </div>
 
  <hr className="border-border my-2" />
- <p className="text-center text-xs text-muted-foreground">
- Accord généré par Guardiens, en attente de confirmation des deux parties.
- </p>
- <a
- href="/faq#avant-la-garde"
- target="_blank"
- rel="noopener noreferrer"
- className="text-xs text-primary text-center block mt-1"
- >
- En savoir plus sur l'accord de garde →
- </a>
+  <p className="text-center text-xs text-muted-foreground">
+  Commodat généré par Guardiens, en attente de signature des deux parties.
+  </p>
+  <a
+  href="/faq#qu-est-ce-que-notre-commodat"
+  target="_blank"
+  rel="noopener noreferrer"
+  className="text-xs text-primary text-center block mt-1"
+  >
+  En savoir plus sur le commodat →
+  </a>
  </div>
 
  {/* PIED */}
  <div className="shrink-0 border-t px-6 py-4">
- <p className="text-center text-sm text-muted-foreground mb-3">
- J'ai lu cet accord et je confirme que son contenu correspond à ce que nous avons prévu.
- </p>
- <button
- disabled={!hasScrolled || isLoading}
- onClick={hasScrolled && !isLoading ? handleAccept : undefined}
- className={`w-full py-2 rounded-md text-sm font-medium ${
- hasScrolled
- ? "bg-primary text-primary-foreground cursor-pointer"
- : "bg-muted text-muted-foreground opacity-50 cursor-not-allowed"
- }`}
- >
- {isLoading ? (
- <span className="inline-block w-4 h-4 border-2 border-primary-foreground border-t-transparent rounded-full animate-spin" />
- ) : (
- buttonLabel
- )}
- </button>
- <button
- onClick={onClose ?? undefined}
- className="w-full mt-2 text-sm text-muted-foreground hover:text-foreground transition-colors py-1"
- >
- Passer cette étape
- </button>
- </div>
+  <p className="text-center text-sm text-muted-foreground mb-3">
+  J'ai lu ce commodat et je confirme que son contenu correspond à ce que nous avons prévu ensemble.
+  </p>
+  <button
+  disabled={!hasScrolled || isLoading}
+  onClick={hasScrolled && !isLoading ? handleAccept : undefined}
+  className={`w-full py-2 rounded-md text-sm font-medium ${
+  hasScrolled
+  ? "bg-primary text-primary-foreground cursor-pointer"
+  : "bg-muted text-muted-foreground opacity-50 cursor-not-allowed"
+  }`}
+  >
+  {isLoading ? (
+  <span className="inline-block w-4 h-4 border-2 border-primary-foreground border-t-transparent rounded-full animate-spin" />
+  ) : (
+  buttonLabel
+  )}
+  </button>
+  {alreadyDeclined ? (
+  <p className="mt-3 text-center text-xs text-muted-foreground">
+  Vous avez choisi de ne pas signer ce commodat{alreadyDeclined.declined_at ? ` le ${format(new Date(alreadyDeclined.declined_at), "d MMMM yyyy", { locale: fr })}` : ""}. Ce choix est visible de l'autre partie. Vous pouvez changer d'avis en le signant ci-dessus.
+  </p>
+  ) : !declineConfirm ? (
+  <button
+  onClick={() => setDeclineConfirm(true)}
+  className="w-full mt-2 text-sm text-muted-foreground hover:text-foreground transition-colors py-1"
+  >
+  Passer cette étape
+  </button>
+  ) : (
+  <div className="mt-3 rounded-lg border border-border bg-muted/40 p-3 space-y-2">
+  <p className="text-sm text-center font-medium">Vous choisissez de ne pas signer ce commodat ?</p>
+  <p className="text-xs text-muted-foreground text-center">
+  Votre choix sera visible de l'autre partie. Vous pourrez changer d'avis à tout moment en revenant ici.
+  </p>
+  <div className="flex flex-col sm:flex-row gap-2">
+  <button
+  onClick={() => setDeclineConfirm(false)}
+  className="flex-1 py-2 rounded-md border border-border bg-card text-sm hover:bg-muted transition-colors"
+  >
+  Revenir à la lecture
+  </button>
+  <button
+  onClick={handleDecline}
+  disabled={declining}
+  className="flex-1 py-2 rounded-md bg-muted text-sm font-medium hover:bg-muted/70 transition-colors disabled:opacity-50"
+  >
+  {declining ? "Enregistrement..." : "Oui, je ne le signe pas"}
+  </button>
+  </div>
+  </div>
+  )}
+  </div>
  </div>
  );
 }
