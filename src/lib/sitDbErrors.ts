@@ -49,3 +49,24 @@ export const describeSitWriteError = (
     ? "La base a refusé la republication : vérifiez le titre, les dates, la description et la photo de cette annonce, puis republiez."
     : "La publication n'a pas abouti. Vérifiez votre connexion, puis vos informations de titre, de dates, de description et de photo.";
 };
+
+/**
+ * Vrai quand l'erreur n'entre dans aucun cas connu et traduit. Ces erreurs
+ * doivent produire un signal admin (RPC signal_sit_publish_error) : sinon un
+ * propriétaire se heurte à un mur sans que personne ne le sache jamais.
+ *
+ * Cas particulier : le refus « animal exigé » (P0001) contredit la décision
+ * produit du 12/08/2026 et son déclencheur a été retiré le 18/08/2026. S'il
+ * réapparaît, c'est une régression de la base à voir immédiatement.
+ */
+export const sitWriteErrorNeedsSignal = (err: SitDbErrorLike | null | undefined): boolean => {
+  const code = String(err?.code || "");
+  const msg = String(err?.message || "").toLowerCase();
+  if (code === "P0001") {
+    if (has(msg, "animal")) return true;
+    if (has(msg, "environnement") || has(msg, "min_gardien_sits") || has(msg, "expérience") || has(msg, "experience")) return false;
+    return true;
+  }
+  if (["23505", "42501", "PGRST301", "23514", "23502"].includes(code)) return false;
+  return true;
+};
