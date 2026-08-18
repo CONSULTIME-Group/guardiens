@@ -21,6 +21,8 @@ interface AccordOwnerStatusBannerProps {
   sitId: string;
   sitStatus: string;
   onSignAccord?: () => void;
+  /** Incrémenté par le parent après signature ou refus pour forcer le rechargement. */
+  refreshKey?: number;
 }
 
 interface AccordStatusRow {
