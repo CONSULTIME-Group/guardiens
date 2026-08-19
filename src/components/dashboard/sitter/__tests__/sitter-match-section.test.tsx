@@ -165,3 +165,32 @@ describe("SitterMatchSection — rangée compacte et sortie recherche", () => {
     expect(screen.getByText(/Votre prochaine rencontre se prépare/)).toBeInTheDocument();
   });
 });
+
+describe("SitterMatchSection — sous-titre honnête sur le palier géographique", () => {
+  it("nomme le département au palier départemental", () => {
+    renderSection({ topSits: [scored("a", 80)], scopeUsed: "dept" });
+    expect(screen.getByText("Dans votre département, en ce moment.")).toBeInTheDocument();
+  });
+
+  it("nomme les 100 km au premier élargissement", () => {
+    renderSection({ topSits: [scored("a", 80)], scopeUsed: "km100" });
+    expect(screen.getByText("À moins de 100 km de chez vous.")).toBeInTheDocument();
+  });
+
+  it("nomme les 200 km au deuxième élargissement", () => {
+    renderSection({ topSits: [scored("a", 80)], scopeUsed: "km200" });
+    expect(screen.getByText("À moins de 200 km de chez vous.")).toBeInTheDocument();
+  });
+
+  it("nomme la France entière au palier national", () => {
+    renderSection({ topSits: [scored("a", 80)], scopeUsed: "country" });
+    expect(screen.getByText("Partout en France, les plus proches de votre profil.")).toBeInTheDocument();
+  });
+});
+
+describe("SitterMatchSection — skeleton de chargement", () => {
+  it("montre le fond d'attente aquarelle dès le skeleton, jamais de rectangle blanc", () => {
+    const { container } = renderSection({ isLoading: true });
+    expect(container.querySelector(".photo-placeholder-green")).not.toBeNull();
+  });
+});

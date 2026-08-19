@@ -8,6 +8,7 @@ import AffinityRing from "@/components/matching/AffinityRing";
 import { trackEvent } from "@/lib/analytics";
 import { useImpressionOnce } from "@/hooks/useImpressionOnce";
 import { petSpeciesLabel } from "@/lib/petLabels";
+import { scopeSubtitle } from "@/lib/matchScope";
 
 /**
  * Vague 2 sur 4, la carte rencontre.
@@ -112,7 +113,9 @@ const StarSkeleton = () => (
     className="overflow-hidden border border-border bg-card animate-pulse"
     style={{ borderRadius: "20px" }}
   >
-    <div className="w-full bg-muted" style={{ height: "150px" }} />
+    {/* Même fond d'attente aquarelle que la carte chargée : jamais de
+        rectangle blanc pendant la cascade de requêtes. */}
+    <div className="w-full photo-placeholder-green" style={{ height: "150px" }} />
     <div className="flex items-start" style={{ padding: "22px", gap: "22px" }}>
       <div className="rounded-full bg-muted shrink-0" style={{ width: 70, height: 70 }} />
       <div className="flex-1 space-y-[14px]">
@@ -218,9 +221,14 @@ const StarCard = ({ sit, onCtaClick }: { sit: AffinitySitCard; onCtaClick?: () =
             src={cover}
             alt={sit.title ?? "Annonce"}
             className="w-full h-full object-cover"
-            loading="lazy"
+            loading="eager"
+            decoding="async"
             width={900}
             height={300}
+            onError={(e) => {
+              // Image cassée : on la masque, le fond aquarelle prend le relais.
+              e.currentTarget.style.display = "none";
+            }}
           />
         )}
         {place && (
@@ -512,7 +520,7 @@ const SitterMatchSection = ({ topSits, fallbackSits, discoverySit, scopeUsed, is
       <SectionHeader
         eyebrow="Une rencontre faite pour vous"
         title="Vous êtes faits pour vous entendre."
-        subtitle="Calculé sur vos animaux, votre présence et votre rythme de vie."
+        subtitle={scopeSubtitle(scopeUsed)}
       />
 
       {showEmpty ? (

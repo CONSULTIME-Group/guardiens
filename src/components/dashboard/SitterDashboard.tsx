@@ -360,6 +360,17 @@ const SitterDashboard = () => {
                 <CommunityPulseBanner userId={user?.id} />
               </div>
 
+              {/* 3c. VOIX : Alma parle ici, sous la zone des annonces et le
+                  pouls du réseau, jamais avant. Une seule voix par écran. */}
+              <div className="">
+                <AlmaRailWhisper
+                  profileCompletion={profileCompletion ?? 0}
+                  isAvailable={!!isAvailable}
+                  variant="newSitter"
+                  openingCardVisible={!allChecklistDone}
+                />
+              </div>
+
               {/* 4. ENTRAIDE bidimensionnelle (vague 20) */}
               <div className="">
                 <SitterEntraideSection
@@ -377,8 +388,8 @@ const SitterDashboard = () => {
 
 
             {/* ═══ RAIL collant (droite) — espacement 34px, mt-[52px] mobile.
-                lg:pt-6 aligne la ligne de base du rail sur celle du cockpit. ═══ */}
-            <aside className="mt-[52px] lg:mt-0 lg:pt-6 space-y-[34px] lg:col-span-4 lg:sticky lg:top-20 lg:self-start lg:max-h-[calc(100vh-6rem)] lg:overflow-y-auto">
+                même haut de colonne que le cockpit, aucun décalage vertical. ═══ */}
+            <aside className="mt-[52px] lg:mt-0 space-y-[34px] lg:col-span-4 lg:sticky lg:top-20 lg:self-start lg:max-h-[calc(100vh-6rem)] lg:overflow-y-auto">
               <div className="">
                 {!(level === 4 || level === "3B")
                   ? <AccessGateBanner level={level} profileCompletion={accessProfileCompletion} context="guard" />
@@ -394,14 +405,6 @@ const SitterDashboard = () => {
                   />
                 </div>
               )}
-              <div className="mb-6">
-                <AlmaRailWhisper
-                  profileCompletion={profileCompletion ?? 0}
-                  isAvailable={!!isAvailable}
-                  variant="newSitter"
-                  openingCardVisible={!allChecklistDone}
-                />
-              </div>
             </aside>
           </div>
 
@@ -465,6 +468,16 @@ const SitterDashboard = () => {
                 <CommunityPulseBanner userId={user?.id} />
               </div>
 
+              {/* VOIX : Alma parle ici, sous la zone des annonces et le
+                  pouls du réseau, jamais avant. Une seule voix par écran. */}
+              <div className="">
+                <AlmaRailWhisper
+                  profileCompletion={profileCompletion ?? 0}
+                  isAvailable={!!isAvailable}
+                  checklistVisible={!allChecklistDone}
+                />
+              </div>
+
               {/* VAGUE 3 — tuiles histoire (remplace SitterActivityPanel côté confirmé) */}
               <div className="">
                 <SitterStoryTiles
@@ -495,9 +508,9 @@ const SitterDashboard = () => {
 
             {/* ═══ RAIL collant (droite) — vague 4 ═══
                 Ordre narratif : affinité → prochaine garde (ou access/free) →
-                réputation → Alma en murmure. Espacement 34px. lg:pt-6 aligne
-                la ligne de base du rail sur celle du cockpit (ligne 1). */}
-            <aside className="mt-[52px] lg:mt-0 lg:pt-6 space-y-[34px] lg:col-span-4 lg:sticky lg:top-20 lg:self-start lg:max-h-[calc(100vh-6rem)] lg:overflow-y-auto">
+                réputation. Espacement 34px, même haut de colonne que le
+                cockpit, aucun décalage vertical. Alma est dans le flux. */}
+            <aside className="mt-[52px] lg:mt-0 space-y-[34px] lg:col-span-4 lg:sticky lg:top-20 lg:self-start lg:max-h-[calc(100vh-6rem)] lg:overflow-y-auto">
               <SitterAffinityBanner />
 
               <div className="">
@@ -533,13 +546,6 @@ const SitterDashboard = () => {
                   <VerifiedSitterRailCard />
                 </div>
               )}
-              <div className="mb-6">
-                <AlmaRailWhisper
-                  profileCompletion={profileCompletion ?? 0}
-                  isAvailable={!!isAvailable}
-                  checklistVisible={!allChecklistDone}
-                />
-              </div>
             </aside>
           </div>
         )}
