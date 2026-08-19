@@ -2144,7 +2144,7 @@ const CreateSit = () => {
                   title={title}
                   description={specificExpectations}
                   context={{
-                    animaux: pets?.map(p => `${p.species}${p.breed ? ` (${p.breed})` : ""}`).join(", "),
+                    animaux: pets?.map(p => [petSpeciesLabelLower(p.species), p.breed ? `(${p.breed})` : null].filter(Boolean).join(" ")).filter(Boolean).join(", "),
                     logement: property?.type,
                     ville: sitCity || ownerCity || undefined,
                     dates: startDate && endDate ? `${startDate} à ${endDate}` : undefined,
