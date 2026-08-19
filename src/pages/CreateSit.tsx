@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useCallback, type MouseEvent as ReactMouseEvent } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import { petSpeciesLabelLower } from "@/lib/petLabels";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
