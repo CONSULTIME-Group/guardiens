@@ -26,6 +26,8 @@ const sit = (over: Partial<AffinitySitCard>): AffinitySitCard => ({
   owner_first_name: "Jennifer",
   pet_species: ["dog"],
   affinity: null,
+  distance_km: null,
+  environments: [],
   ...over,
 });
 
@@ -43,7 +45,7 @@ const renderSection = (props: Partial<Parameters<typeof SitterMatchSection>[0]>)
       <SitterMatchSection
         topSits={[]}
         fallbackSits={[]}
-        scopeUsed="dept"
+        rankingSource="distance"
         isLoading={false}
         {...props}
       />
@@ -93,7 +95,7 @@ describe("SitterMatchSection — libellés et photo de la vedette", () => {
 });
 
 describe("SitterMatchSection — rangée compacte et sortie recherche", () => {
-  it("complète la rangée depuis le pool de repli quand le top affinité est pauvre", () => {
+  it("affiche exactement deux gardes compactes sous la vedette", () => {
     renderSection({
       topSits: [scored("a", 80)],
       fallbackSits: [
@@ -105,7 +107,7 @@ describe("SitterMatchSection — rangée compacte et sortie recherche", () => {
     });
     expect(screen.getByText("Garde B")).toBeInTheDocument();
     expect(screen.getByText("Garde C")).toBeInTheDocument();
-    expect(screen.getByText("Garde D")).toBeInTheDocument();
+    expect(screen.queryByText("Garde D")).not.toBeInTheDocument();
   });
 
   it("ne duplique jamais la vedette dans la rangée", () => {
@@ -126,7 +128,7 @@ describe("SitterMatchSection — rangée compacte et sortie recherche", () => {
     expect(rowC?.textContent).not.toMatch(/%/);
   });
 
-  it("plafonne la rangée à 3 gardes", () => {
+  it("plafonne l'ensemble à 3 gardes", () => {
     renderSection({
       topSits: [scored("a", 80)],
       fallbackSits: [
@@ -137,6 +139,7 @@ describe("SitterMatchSection — rangée compacte et sortie recherche", () => {
         sit({ id: "e", title: "Garde E" }),
       ],
     });
+    expect(screen.queryByText("Garde D")).not.toBeInTheDocument();
     expect(screen.queryByText("Garde E")).not.toBeInTheDocument();
   });
 
@@ -166,26 +169,29 @@ describe("SitterMatchSection — rangée compacte et sortie recherche", () => {
   });
 });
 
-describe("SitterMatchSection — sous-titre honnête sur le palier géographique", () => {
-  it("nomme le département au palier départemental", () => {
-    renderSection({ topSits: [scored("a", 80)], scopeUsed: "dept" });
-    expect(screen.getByText("Dans votre département, en ce moment.")).toBeInTheDocument();
+describe("SitterMatchSection — sous-titre honnête sur le classement", () => {
+  it("nomme la zone d'alerte", () => {
+    renderSection({ topSits: [scored("a", 80)], rankingSource: "alert" });
+    expect(screen.getByText("Dans votre zone d'alerte.")).toBeInTheDocument();
   });
 
-  it("nomme les 100 km au premier élargissement", () => {
-    renderSection({ topSits: [scored("a", 80)], scopeUsed: "km100" });
-    expect(screen.getByText("À moins de 100 km de chez vous.")).toBeInTheDocument();
+  it("nomme la proximité géographique", () => {
+    renderSection({ topSits: [scored("a", 80)], rankingSource: "distance" });
+    expect(screen.getByText("Autour de chez vous.")).toBeInTheDocument();
   });
 
-  it("nomme les 200 km au deuxième élargissement", () => {
-    renderSection({ topSits: [scored("a", 80)], scopeUsed: "km200" });
-    expect(screen.getByText("À moins de 200 km de chez vous.")).toBeInTheDocument();
-  });
-
-  it("nomme la France entière au palier national", () => {
-    renderSection({ topSits: [scored("a", 80)], scopeUsed: "country" });
+  it("nomme la France entière sans coordonnées", () => {
+    renderSection({ topSits: [scored("a", 80)], rankingSource: "affinity" });
     expect(screen.getByText("Partout en France, les plus proches de votre profil.")).toBeInTheDocument();
   });
+
+  it.each(["alert", "distance", "affinity"] as const)(
+    "conserve le lien catalogue pour le classement %s",
+    (rankingSource) => {
+      renderSection({ topSits: [scored("a", 80), scored("b", 70), scored("c", 60)], rankingSource, totalPublished: 11 });
+      expect(screen.getByRole("link", { name: "Voir les 11 gardes disponibles" })).toHaveAttribute("href", "/search");
+    },
+  );
 });
 
 describe("SitterMatchSection — skeleton de chargement", () => {

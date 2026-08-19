@@ -333,7 +333,7 @@ export function useSitterTopAffinitySits(): Result {
     hasMinimumPool: topSits.length >= 1,
     hasPostalCode: data?.hasPostalCode ?? false,
     profileIncomplete: data?.profileIncomplete ?? false,
-    rankingSource: data?.rankingSource ?? "affinity",
+    rankingSource: (data?.rankingSource ?? "affinity") as ListingRankingSource,
     totalPublished: data?.totalPublished ?? 0,
     isLoading: q.isLoading,
   };
