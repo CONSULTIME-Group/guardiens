@@ -5,7 +5,7 @@ import { ChevronRight, Home } from "lucide-react";
  * Mapping des segments d'URL vers des labels lisibles.
  */
 const SEGMENT_LABELS: Record<string, string> = {
-  dashboard: "Tableau de bord",
+  dashboard: "Accueil",
   "mon-abonnement": "Mon abonnement",
   annonces: "Annonces",
   sits: "Mes annonces",

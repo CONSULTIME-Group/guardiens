@@ -1,20 +1,22 @@
 import { NavLink, Link, useLocation, useNavigate } from "react-router-dom";
 import {
-  Home, Search, Calendar, MessageSquare, MessageCircle, User, LogOut, Settings,
-  PawPrint, Newspaper, Shield, Compass, Handshake, Menu, Star,
-  MoreHorizontal, Crown, Plus, Heart, LifeBuoy, Briefcase, UserCircle2, Sparkles,
-  CreditCard,
+  Home, Search, Calendar, MessageSquare, User,
+  PawPrint, Handshake, MoreHorizontal, Crown, Plus, Globe,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
-import { useAdmin } from "@/hooks/useAdmin";
 import { cn } from "@/lib/utils";
-import { lazy, Suspense, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { lazy, Suspense, useLayoutEffect, useRef, useState } from "react";
 import { useNavBadgeCounts } from "@/hooks/useNavBadgeCounts";
-import { useInAppShell } from "./AppShellContext";
 import { useChromeVisibility } from "./ChromeVisibility";
 import UserMenu from "./UserMenu";
 import { isFabHidden } from "@/lib/bottomNavFab";
+import {
+  buildNavGroups,
+  flattenNavGroups,
+  entryBadge,
+  sheetBadge,
+  type NavBadgeValues,
+} from "@/lib/navModel";
 
 // Lazy : NotificationBell tire date-fns. On évite vendor-date dans l'entry.
 const NotificationBell = lazy(() => import("./NotificationBell"));
@@ -26,14 +28,14 @@ import { useSubscriptionAccess } from "@/hooks/useSubscriptionAccess";
 import PremiumGateDialog from "@/components/premium/PremiumGateDialog";
 import ActivateRoleDialog from "@/components/premium/ActivateRoleDialog";
 
-// ── Sidebar group label ──
+// ── Libellé de groupe de la barre latérale ──
 const GroupLabel = ({ label }: { label: string }) => (
-  <p className="px-4 pt-5 pb-1.5 text-[10px] font-semibold tracking-widest uppercase text-muted-foreground select-none">
+  <p className="px-4 pt-2 pb-1 first:pt-1 text-[10px] font-semibold tracking-widest uppercase text-muted-foreground select-none">
     {label}
   </p>
 );
 
-// ── Sidebar nav item ──
+// ── Entrée de navigation de la barre latérale ──
 const SidebarItem = ({
   to, icon: Icon, label, badge, beta,
 }: {
@@ -43,7 +45,7 @@ const SidebarItem = ({
     to={to}
     className={({ isActive }) =>
       cn(
-        "flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-colors relative",
+        "flex items-center gap-3 px-4 py-2 rounded-lg text-sm font-medium transition-colors relative",
         isActive
           ? "bg-primary/8 text-primary before:absolute before:left-0 before:top-1/2 before:-translate-y-1/2 before:w-[3px] before:h-5 before:rounded-r before:bg-primary"
           : "text-muted-foreground hover:bg-accent hover:text-foreground"
@@ -67,7 +69,6 @@ const SidebarItem = ({
 
 export const Sidebar = ({ showHeaderBells = true }: { showHeaderBells?: boolean }) => {
   const { user, activeRole, setActiveRole } = useAuth();
-  const { isAdmin } = useAdmin();
   const navigate = useNavigate();
   const { hasAccess } = useSubscriptionAccess();
   const { unreadCount, ownerInboxCount, sitterActionCount, missionBadgeCount } =
@@ -79,16 +80,34 @@ export const Sidebar = ({ showHeaderBells = true }: { showHeaderBells?: boolean 
   const [roleDialogTarget, setRoleDialogTarget] = useState<"gardien" | "proprio">("proprio");
 
   const effectiveRole = user?.role === "both" ? activeRole : user?.role;
-  // Badge sidebar/bottom-nav /sits : owner = candidatures reçues à traiter,
-  // sitter = candidatures propres en attente d'action (pending côté gardien).
+  // Pastille annonces/candidatures : propriétaire = candidatures reçues à
+  // traiter, gardien = candidatures propres en attente.
   const sitsBadge = effectiveRole === "owner" ? ownerInboxCount : sitterActionCount;
+  const navBadges: NavBadgeValues = {
+    sits: sitsBadge,
+    messages: unreadCount,
+    entraide: missionBadgeCount,
+  };
+  const isSitterLocked = effectiveRole === "sitter" && !hasAccess;
+  const groups = buildNavGroups(effectiveRole === "owner" ? "owner" : "sitter", isSitterLocked);
 
-
+  // En-tête compact au défilement : quand le menu descend, la bascule de
+  // rôle et le bouton d'action primaire se replient ; le logo et l'avatar
+  // restent. Le repli est purement visuel et reste fonctionnel sans
+  // animation (prefers-reduced-motion).
+  const navRef = useRef<HTMLElement | null>(null);
+  const [navScrolled, setNavScrolled] = useState(false);
+  const handleNavScroll = () => {
+    const el = navRef.current;
+    if (!el) return;
+    const next = el.scrollTop > 8;
+    setNavScrolled((prev) => (prev === next ? prev : next));
+  };
 
   return (
     <aside className="hidden md:flex flex-col w-64 border-r border-border bg-card h-screen sticky top-0">
-      {/* Logo + bell */}
-      <div className="p-6 pb-4 flex items-center justify-between">
+      {/* Logo + cloches */}
+      <div className="px-6 pt-4 pb-3 flex items-center justify-between">
         <Link
           to="/"
           aria-label="Guardiens, accueil"
@@ -109,7 +128,7 @@ export const Sidebar = ({ showHeaderBells = true }: { showHeaderBells?: boolean 
       </div>
 
       {/* Avatar et menu compte */}
-      <div className="px-6 pb-3 flex items-center gap-2">
+      <div className="px-6 pb-2 flex items-center gap-2">
         <UserMenu />
         <span className="text-sm text-muted-foreground truncate">
           {user?.firstName || "Mon compte"}
@@ -120,159 +139,144 @@ export const Sidebar = ({ showHeaderBells = true }: { showHeaderBells?: boolean 
       <PremiumGateDialog open={gateOpen} onClose={() => setGateOpen(false)} featureName={gateFeature} />
       <ActivateRoleDialog open={roleDialogOpen} onClose={() => setRoleDialogOpen(false)} targetRole={roleDialogTarget} />
 
-      {/* Role toggle */}
-      <div className="px-3 pb-2">
-        <div className="flex items-center bg-accent rounded-lg p-1 gap-1">
-          <button
-            onClick={() => {
-              if (user?.role === "both" || user?.role === "owner") {
-                setActiveRole("owner");
-              } else {
-                setRoleDialogTarget("proprio");
-                setRoleDialogOpen(true);
-              }
-            }}
-            className={cn(
-              "flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-md text-xs font-medium transition-colors",
-              (user?.role === "both" || user?.role === "owner") && activeRole === "owner"
-                ? "bg-primary text-primary-foreground shadow-sm"
-                : user?.role === "sitter"
-                ? "text-muted-foreground/60 hover:text-muted-foreground"
-                : "text-muted-foreground hover:text-foreground"
-            )}
+      {/* Bloc repliable au défilement : bascule de rôle + action primaire */}
+      <div
+        aria-hidden={navScrolled}
+        className={cn(
+          "overflow-hidden transition-[max-height,opacity] duration-300 ease-in-out motion-reduce:transition-none",
+          navScrolled ? "max-h-0 opacity-0 pointer-events-none" : "max-h-[220px] opacity-100"
+        )}
+      >
+        {/* Bascule de rôle */}
+        <div className="px-3 pb-2">
+          <div className="flex items-center bg-accent rounded-lg p-1 gap-1">
+            <button
+              tabIndex={navScrolled ? -1 : undefined}
+              onClick={() => {
+                if (user?.role === "both" || user?.role === "owner") {
+                  setActiveRole("owner");
+                } else {
+                  setRoleDialogTarget("proprio");
+                  setRoleDialogOpen(true);
+                }
+              }}
+              className={cn(
+                "flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-md text-xs font-medium transition-colors",
+                (user?.role === "both" || user?.role === "owner") && activeRole === "owner"
+                  ? "bg-primary text-primary-foreground shadow-sm"
+                  : user?.role === "sitter"
+                  ? "text-muted-foreground/60 hover:text-muted-foreground"
+                  : "text-muted-foreground hover:text-foreground"
+              )}
+            >
+              <PawPrint className="h-3.5 w-3.5" />
+              Propriétaire
+              {user?.role === "sitter" && <Plus className="h-[11px] w-[11px]" />}
+            </button>
+            <button
+              tabIndex={navScrolled ? -1 : undefined}
+              onClick={() => {
+                if (user?.role === "both" || user?.role === "sitter") {
+                  setActiveRole("sitter");
+                } else {
+                  setRoleDialogTarget("gardien");
+                  setRoleDialogOpen(true);
+                }
+              }}
+              className={cn(
+                "flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-md text-xs font-medium transition-colors",
+                (user?.role === "both" || user?.role === "sitter") && activeRole === "sitter"
+                  ? "bg-primary text-primary-foreground shadow-sm"
+                  : user?.role === "owner"
+                  ? "text-muted-foreground/60 hover:text-muted-foreground"
+                  : "text-muted-foreground hover:text-foreground"
+              )}
+            >
+              <User className="h-3.5 w-3.5" />
+              Gardien
+              {user?.role === "owner" && <Plus className="h-[11px] w-[11px]" />}
+            </button>
+          </div>
+        </div>
+
+        {/* Action primaire */}
+        <div className="px-3 pb-2">
+          <Button
+            tabIndex={navScrolled ? -1 : undefined}
+            className="w-full gap-2"
+            onClick={() =>
+              navigate(
+                effectiveRole === "owner"
+                  ? "/sits/create"
+                  : "/petites-missions/creer?type=offre"
+              )
+            }
           >
-            <PawPrint className="h-3.5 w-3.5" />
-            Propriétaire
-            {user?.role === "sitter" && <Plus className="h-[11px] w-[11px]" />}
-          </button>
-          <button
-            onClick={() => {
-              if (user?.role === "both" || user?.role === "sitter") {
-                setActiveRole("sitter");
-              } else {
-                setRoleDialogTarget("gardien");
-                setRoleDialogOpen(true);
-              }
-            }}
-            className={cn(
-              "flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-md text-xs font-medium transition-colors",
-              (user?.role === "both" || user?.role === "sitter") && activeRole === "sitter"
-                ? "bg-primary text-primary-foreground shadow-sm"
-                : user?.role === "owner"
-                ? "text-muted-foreground/60 hover:text-muted-foreground"
-                : "text-muted-foreground hover:text-foreground"
-            )}
-          >
-            <User className="h-3.5 w-3.5" />
-            Gardien
-            {user?.role === "owner" && <Plus className="h-[11px] w-[11px]" />}
-          </button>
+            <Plus className="h-4 w-4" />
+            {effectiveRole === "owner" ? "Publier une annonce" : "Proposer un coup de main"}
+          </Button>
         </div>
       </div>
 
-      {/* Primary action */}
-      <div className="px-3 pb-3">
-        <Button
-          className="w-full gap-2"
-          onClick={() =>
-            navigate(
-              effectiveRole === "owner"
-                ? "/sits/create"
-                : "/petites-missions/creer?type=offre"
-            )
-          }
-        >
-          <Plus className="h-4 w-4" />
-          {effectiveRole === "owner" ? "Publier une annonce" : "Proposer un coup de main"}
-        </Button>
-      </div>
-
-      {/* Nav groups */}
-      <nav className="flex-1 px-3 overflow-y-auto" aria-label="Navigation principale">
-        {(() => {
-          const isSitterLocked = effectiveRole === "sitter" && !hasAccess;
-          const premiumItems = [
-            { to: "/search", label: effectiveRole === "owner" ? "Recherche gardiens" : "Recherche", featureName: "la recherche d'annonces" },
-            { to: "/messages", label: "Messagerie", featureName: "la messagerie" },
-          ];
-
-          const handlePremiumClick = (featureName: string) => {
-            setGateFeature(featureName);
-            setGateOpen(true);
-          };
-
-          return (
-            <>
-              <GroupLabel label="Mon activité" />
-              <SidebarItem to="/dashboard" icon={Home} label="Dashboard" />
-              <SidebarItem to={effectiveRole === "owner" ? "/sits" : "/mes-candidatures"} icon={Calendar} label={effectiveRole === "owner" ? "Mes annonces" : "Mes candidatures"} badge={sitsBadge} />
-              <SidebarItem to="/messages" icon={MessageCircle} label="Messages" badge={unreadCount} />
-              <SidebarItem to="/mes-avis" icon={Star} label="Mes avis" />
-
-              <GroupLabel label="Découvrir" />
-
-              <SidebarItem to="/races" icon={PawPrint} label="Fiches races" />
-              <SidebarItem to="/favoris" icon={Heart} label="Mes favoris" />
-
-              {isSitterLocked ? (
+      {/* Groupes de navigation, source unique : navModel.ts */}
+      <nav
+        ref={navRef}
+        onScroll={handleNavScroll}
+        className="flex-1 px-3 overflow-y-auto"
+        aria-label="Navigation principale"
+      >
+        {groups.map((group) => (
+          <div key={group.id}>
+            <GroupLabel label={group.label} />
+            {group.entries.map((entry) =>
+              entry.premiumLock ? (
                 <button
+                  key={entry.to}
                   type="button"
-                  onClick={() => handlePremiumClick("la recherche d'annonces")}
-                  className="flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-colors text-muted-foreground hover:bg-accent hover:text-foreground w-full text-left"
+                  onClick={() => {
+                    setGateFeature(entry.premiumLock as string);
+                    setGateOpen(true);
+                  }}
+                  className="flex items-center gap-3 px-4 py-2 rounded-lg text-sm font-medium transition-colors text-muted-foreground hover:bg-accent hover:text-foreground w-full text-left"
                 >
-                  <Search className="h-[18px] w-[18px]" strokeWidth={1.8} />
-                  Recherche
+                  <entry.icon className="h-[18px] w-[18px]" strokeWidth={1.8} />
+                  <span className="flex-1 truncate">{entry.label}</span>
                   <Crown className="h-[11px] w-[11px] text-warning ml-1" />
                 </button>
               ) : (
-                <SidebarItem to="/search" icon={Search} label={effectiveRole === "owner" ? "Recherche gardiens" : "Recherche"} />
-              )}
-
-              <SidebarItem to="/pros" icon={Briefcase} label="Pros animaliers" beta />
-              <SidebarItem to="/petites-missions" icon={Handshake} label="Entraide" badge={missionBadgeCount} />
-
-              <GroupLabel label="Ressources" />
-              <SidebarItem to="/conseils" icon={Sparkles} label="Conseils d'Alma" />
-              <SidebarItem to="/actualites" icon={Newspaper} label="Le journal" />
-              <SidebarItem to="/guides" icon={Compass} label="Guides locaux" />
-            </>
-          );
-        })()}
+                <SidebarItem
+                  key={entry.to}
+                  to={entry.to}
+                  icon={entry.icon}
+                  label={entry.label}
+                  badge={entryBadge(entry, navBadges)}
+                  beta={entry.beta}
+                />
+              )
+            )}
+          </div>
+        ))}
       </nav>
 
-      {/* Bottom section */}
-      <div className="p-3 border-t border-border space-y-0.5">
-        {effectiveRole === "sitter" && (
-          <SidebarItem to="/mon-abonnement" icon={CreditCard} label="Mon abonnement" />
-        )}
-        {isAdmin && (
-          <SidebarItem to="/admin" icon={Shield} label="Espace admin" />
-        )}
-        <SidebarItem to="/settings" icon={Settings} label="Paramètres" />
-        <SidebarItem to="/contact" icon={LifeBuoy} label="Aide & contact" />
-
-        {/* Feedback button */}
-        <div className="border-t border-border/50 mt-auto pt-3">
-          <Button
-            variant="outline"
-            onClick={() => setFeedbackOpen(true)}
-            className="w-full justify-start gap-2 text-sm text-foreground/60 border-dashed hover:text-foreground hover:border-foreground/30"
-          >
-            <MessageSquare className="h-[15px] w-[15px]" />
-            Donner mon avis
-          </Button>
-        </div>
-
+      {/* Bas de colonne : uniquement le bouton de retour d'expérience */}
+      <div className="p-2 border-t border-border">
+        <Button
+          variant="outline"
+          onClick={() => setFeedbackOpen(true)}
+          className="w-full justify-start gap-2 text-sm text-foreground/60 border-dashed hover:text-foreground hover:border-foreground/30"
+        >
+          <MessageSquare className="h-[15px] w-[15px]" />
+          Donner mon avis
+        </Button>
       </div>
     </aside>
   );
 };
 
-// ── Mobile bottom nav ──
+// ── Barre de navigation basse mobile ──
 export const BottomNav = () => {
   const location = useLocation();
-  const { user, activeRole, setActiveRole, logout } = useAuth();
-  const { isAdmin } = useAdmin();
+  const { user, activeRole, setActiveRole } = useAuth();
   const { hasAccess } = useSubscriptionAccess();
   const { unreadCount, ownerInboxCount, sitterActionCount, missionBadgeCount } =
     useNavBadgeCounts(user?.id);
@@ -285,10 +289,13 @@ export const BottomNav = () => {
 
   const effectiveRole = user?.role === "both" ? activeRole : user?.role;
   const sitsBadge = effectiveRole === "owner" ? ownerInboxCount : sitterActionCount;
-
+  const navBadges: NavBadgeValues = {
+    sits: sitsBadge,
+    messages: unreadCount,
+    entraide: missionBadgeCount,
+  };
 
   const navigate = useNavigate();
-  const inAppShell = useInAppShell();
 
   // La barre basse est rendue sans condition, sur toutes les routes. Aucune
   // lecture de défilement, aucun observateur, aucune boucle d'animation : la
@@ -296,12 +303,10 @@ export const BottomNav = () => {
   // navigateur peut suspendre. Le recouvrement des boutons du hero est réglé
   // par la géométrie du hero, pas par du code au runtime.
 
-
   // Un écran plein cadre (fil de messagerie mobile) peut demander le retrait
   // complet de la barre basse et de son bouton flottant, pour ne jamais
   // recouvrir une zone de saisie.
   const { bottomNavHidden } = useChromeVisibility();
-
 
   // Hauteur réelle de la pilule exposée en variable CSS, pour que les barres
   // d'action collantes des pages s'empilent au dessus sans valeur en dur.
@@ -333,32 +338,30 @@ export const BottomNav = () => {
     };
   }, [bottomNavHidden]);
 
-
-  // Signature Dock 2026 — 4 tabs role-aware + FAB contextuel + Plus sheet
+  // Dock : 4 onglets role-aware + FAB contextuel + feuille Plus
   const isOwnerView = effectiveRole === "owner";
   const path = location.pathname;
 
-  // PASS 3 — FAB contextuel : label & destination s'adaptent à la section ET au rôle.
-  // Propriétaire : action = publier une garde / demander un coup de main.
-  // Gardien : action = proposer son aide (mission type=offre).
+  // FAB contextuel : libellé et destination s'adaptent à la section et au rôle.
+  // Propriétaire : publier une garde ou demander un coup de main.
+  // Gardien : proposer son aide (mission type=offre).
   let fab: { to: string; label: string };
   if (path.startsWith("/petites-missions")) {
     fab = isOwnerView
       ? { to: "/petites-missions/creer?type=besoin", label: "Demander" }
       : { to: "/petites-missions/creer?type=offre", label: "Proposer" };
   } else if (path.startsWith("/sits") || path.startsWith("/recherche-gardiens")) {
-    // Sur les pages "annonces de garde", seul un propriétaire peut publier.
-    // Pour un gardien, on bascule sur l'action principale de son rôle (proposer entraide).
+    // Sur les pages annonces de garde, seul un propriétaire peut publier.
+    // Pour un gardien, on bascule sur l'action principale de son rôle.
     fab = isOwnerView
       ? { to: "/sits/create", label: "Publier" }
       : { to: "/petites-missions/creer?type=offre", label: "Proposer" };
   } else {
-    // Dashboard, recherche, favoris, profil, settings : action principale du rôle actif.
+    // Accueil, recherche, profil, réglages : action principale du rôle actif.
     fab = isOwnerView
       ? { to: "/sits/create", label: "Publier" }
       : { to: "/petites-missions/creer?type=offre", label: "Proposer" };
   }
-
 
   // 2 onglets à gauche du FAB
   const leftTabs = [
@@ -368,23 +371,28 @@ export const BottomNav = () => {
       : { to: "/search", icon: Search, label: "Recherche", badge: 0 },
   ];
 
-  // 1 onglet à droite du FAB (Plus sheet est le 4e slot)
+  // 1 onglet à droite du FAB (la feuille Plus est le 4e slot)
   const rightTabs = [
     { to: "/petites-missions", icon: Handshake, label: "Entraide", badge: missionBadgeCount },
   ];
 
   const fabHidden = isFabHidden(path);
 
-  const moreBadge = sitterActionCount + (isOwnerView ? 0 : sitsBadge);
+  // Pastille du bouton Plus : somme exacte des pastilles visibles dans la
+  // feuille (voir navModel.sheetBadge), sans doublon.
+  const isSitterLocked = effectiveRole === "sitter" && !hasAccess;
+  const sheetEntries = flattenNavGroups(
+    buildNavGroups(isOwnerView ? "owner" : "sitter", isSitterLocked)
+  );
+  const moreBadge = sheetBadge(navBadges);
 
   const renderTab = (item: { to: string; icon: typeof Home; label: string; badge?: number }) => {
     const isActive = path === item.to || path.startsWith(item.to + "/");
-    const isSitterLocked = effectiveRole === "sitter" && !hasAccess;
     const isGated = isSitterLocked && item.to === "/search";
 
     const inner = (
       <>
-        {/* PASS 1 — Active indicator : barre fine en haut du slot actif */}
+        {/* Indicateur d'onglet actif : barre fine en haut du slot */}
         <span
           className={cn(
             "absolute top-0 left-1/2 -translate-x-1/2 h-[3px] w-7 rounded-b-full bg-primary transition-all duration-300",
@@ -434,9 +442,13 @@ export const BottomNav = () => {
   // La barre est en md:hidden, le desktop n'est donc pas concerné.
   if (bottomNavHidden) return null;
 
-
-
-
+  const sheetItemCls = (active: boolean) =>
+    cn(
+      "flex items-center gap-3 px-4 py-3 min-h-[44px] rounded-lg text-sm font-medium transition-colors relative",
+      active
+        ? "bg-primary/8 text-primary"
+        : "text-muted-foreground hover:bg-accent hover:text-foreground"
+    );
 
   return (
     <>
@@ -453,9 +465,6 @@ export const BottomNav = () => {
           data-nav-pill
           className="pointer-events-auto mx-auto max-w-md bg-card border border-border/60 shadow-[0_20px_50px_-12px_hsl(var(--primary)/0.18)] rounded-3xl h-16 flex items-center justify-between px-1.5 relative"
         >
-
-
-
           {leftTabs.map(renderTab)}
 
           {/* FAB central, masqué quand la page porte déjà une action primaire */}
@@ -482,7 +491,7 @@ export const BottomNav = () => {
 
           {rightTabs.map(renderTab)}
 
-          {/* Plus sheet */}
+          {/* Feuille Plus : même contenu que la barre latérale, source navModel */}
           <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
             <SheetTrigger asChild>
               <button className="flex flex-col items-center justify-center flex-1 h-full min-h-[44px] gap-1 text-muted-foreground hover:text-foreground transition-colors min-w-0 relative pt-1.5 active:scale-95 duration-150">
@@ -498,10 +507,9 @@ export const BottomNav = () => {
               </button>
             </SheetTrigger>
 
-
             <SheetContent side="bottom" className="rounded-t-2xl max-h-[80vh] overflow-y-auto">
               <SheetTitle className="sr-only">Menu</SheetTitle>
-              <SheetDescription className="sr-only">Accès rapide aux profils, raccourcis et paramètres.</SheetDescription>
+              <SheetDescription className="sr-only">Accueil du site, bascule de rôle et navigation principale.</SheetDescription>
 
               {/* Retour à l'accueil du site */}
               <Link
@@ -510,11 +518,11 @@ export const BottomNav = () => {
                 aria-label="Accueil du site"
                 className="flex items-center gap-3 px-4 py-3 mb-3 min-h-[44px] rounded-lg text-sm font-medium text-foreground hover:bg-accent transition-colors"
               >
-                <Home className="h-5 w-5" strokeWidth={1.8} aria-hidden="true" />
+                <Globe className="h-5 w-5" strokeWidth={1.8} aria-hidden="true" />
                 Accueil du site
               </Link>
 
-              {/* Role switcher */}
+              {/* Bascule de rôle */}
               <div className="mb-4">
                 <p className="text-xs text-muted-foreground mb-2 font-medium">Profil actif</p>
                 <div className="flex items-center bg-accent rounded-lg p-1 gap-1">
@@ -565,50 +573,60 @@ export const BottomNav = () => {
                 </div>
               </div>
 
+              {/* Les 10 entrées de la barre latérale, même ordre, mêmes libellés */}
               <div className="space-y-1">
-                {[
-                  { to: "/profile", icon: UserCircle2, label: "Mon profil", badge: 0 },
-                  { to: "/search", icon: Search, label: effectiveRole === "owner" ? "Recherche gardiens" : "Recherche", badge: 0 },
-                  { to: effectiveRole === "owner" ? "/sits" : "/mes-candidatures", icon: Calendar, label: effectiveRole === "owner" ? "Mes annonces" : "Mes candidatures", badge: sitsBadge },
-                  { to: "/messages", icon: MessageCircle, label: "Messages", badge: unreadCount },
-                  { to: "/favoris", icon: Heart, label: "Mes favoris", badge: 0 },
-                  { to: "/petites-missions", icon: Handshake, label: "Entraide", badge: missionBadgeCount },
-                  { to: "/annonces", icon: Newspaper, label: "Annonces", badge: 0 },
-                  { to: "/pros", icon: Briefcase, label: "Pros animaliers", badge: 0 },
-                  { to: "/conseils", icon: Sparkles, label: "Conseils d'Alma", badge: 0 },
-                  { to: "/races", icon: PawPrint, label: "Fiches races", badge: 0 },
-                  { to: "/actualites", icon: Newspaper, label: "Le journal", badge: 0 },
-                  { to: "/guides", icon: Compass, label: "Guides locaux", badge: 0 },
-                  { to: "/tarifs", icon: CreditCard, label: "Tarifs", badge: 0 },
-                  ...(effectiveRole === "sitter" ? [{ to: "/mon-abonnement", icon: CreditCard, label: "Mon abonnement", badge: 0 }] : []),
-                  { to: "/settings", icon: Settings, label: "Paramètres", badge: 0 },
-                  { to: "/contact", icon: LifeBuoy, label: "Aide & contact", badge: 0 },
-                  ...(isAdmin ? [{ to: "/admin", icon: Shield, label: "Espace admin", badge: 0 }] : []),
-                ].map((item) => (
-                  <NavLink
-                    key={item.to}
-                    to={item.to}
-                    onClick={() => setSheetOpen(false)}
-                    className={({ isActive }) =>
-                      cn(
-                        "flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors relative",
-                        isActive
-                          ? "bg-primary/8 text-primary"
-                          : "text-muted-foreground hover:bg-accent hover:text-foreground"
-                      )
-                    }
-                  >
-                    <item.icon className="h-5 w-5" strokeWidth={1.8} />
-                    {item.label}
-                    {item.badge > 0 && (
-                      <span className="absolute right-3 bg-destructive text-destructive-foreground text-[10px] rounded-full min-w-[18px] h-[18px] flex items-center justify-center px-1 font-semibold">
-                        {item.badge > 99 ? "99+" : item.badge}
-                      </span>
-                    )}
-                  </NavLink>
-                ))}
+                {sheetEntries.map((entry) => {
+                  const badge = entryBadge(entry, navBadges);
+                  const inner = (
+                    <>
+                      <entry.icon className="h-5 w-5" strokeWidth={1.8} aria-hidden="true" />
+                      <span className="flex-1 truncate text-left">{entry.label}</span>
+                      {entry.beta && (
+                        <span className="text-[9px] uppercase tracking-wider font-bold bg-warning/15 text-warning-foreground px-1.5 py-0.5 rounded">
+                          Bêta
+                        </span>
+                      )}
+                      {entry.premiumLock && (
+                        <Crown className="h-[11px] w-[11px] text-warning ml-1" aria-hidden="true" />
+                      )}
+                      {badge > 0 && (
+                        <span className="bg-destructive text-destructive-foreground text-[10px] rounded-full min-w-[18px] h-[18px] flex items-center justify-center px-1 font-semibold tabular-nums">
+                          {badge > 99 ? "99+" : badge}
+                        </span>
+                      )}
+                    </>
+                  );
+                  // Verrou premium : même règle que la barre latérale,
+                  // la feuille n'ouvre plus la recherche librement.
+                  if (entry.premiumLock) {
+                    return (
+                      <button
+                        key={entry.to}
+                        type="button"
+                        onClick={() => {
+                          setSheetOpen(false);
+                          setGateFeature(entry.premiumLock as string);
+                          setGateOpen(true);
+                        }}
+                        className={cn(sheetItemCls(false), "w-full")}
+                      >
+                        {inner}
+                      </button>
+                    );
+                  }
+                  return (
+                    <NavLink
+                      key={entry.to}
+                      to={entry.to}
+                      onClick={() => setSheetOpen(false)}
+                      className={({ isActive }) => sheetItemCls(isActive)}
+                    >
+                      {inner}
+                    </NavLink>
+                  );
+                })}
 
-                {/* Feedback button in mobile menu */}
+                {/* Retour d'expérience */}
                 <div className="border-t border-border/50 pt-3 mt-3">
                   <Button
                     variant="outline"
@@ -619,14 +637,6 @@ export const BottomNav = () => {
                     Donner mon avis
                   </Button>
                 </div>
-
-                <button
-                  onClick={() => { setSheetOpen(false); logout(); }}
-                  className="flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium text-destructive hover:bg-destructive/10 transition-colors w-full"
-                >
-                  <LogOut className="h-5 w-5" />
-                  Déconnexion
-                </button>
               </div>
             </SheetContent>
           </Sheet>

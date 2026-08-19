@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
-import { UserCircle2, Eye, Settings, LogOut, BriefcaseBusiness, Heart } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
+import { useAdmin } from "@/hooks/useAdmin";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,
@@ -10,6 +10,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
+import { buildUserMenuEntries } from "@/lib/userMenuModel";
 
 interface UserMenuProps {
   /** Variante compacte pour la top bar mobile. */
@@ -18,11 +19,14 @@ interface UserMenuProps {
 }
 
 /**
- * Avatar de l'utilisateur connecté, point d'entrée vers son profil.
- * Les destinations suivent le rôle actif, sans rechargement.
+ * Avatar de l'utilisateur connecté, point d'entrée vers tout ce qui le
+ * concerne : identité, réglages, abonnement, aide. Ce menu ne porte jamais
+ * de pastille de notification (voir userMenuModel.ts). Il est monté tel
+ * quel sur desktop (barre latérale) et sur mobile (barre du haut).
  */
 const UserMenu = ({ compact = false, className }: UserMenuProps) => {
   const { user, activeRole, logout } = useAuth();
+  const { isAdmin } = useAdmin();
   const navigate = useNavigate();
 
   if (!user) return null;
@@ -32,10 +36,12 @@ const UserMenu = ({ compact = false, className }: UserMenuProps) => {
   const initial = (user.firstName?.charAt(0) || "?").toUpperCase();
   const displayName = user.firstName || "Mon compte";
 
-  const profileTo = isOwnerView ? "/owner-profile" : "/profile";
-  const publicTo = isOwnerView
-    ? `/gardiens/${user.id}?tab=proprio`
-    : `/gardiens/${user.id}`;
+  const entries = buildUserMenuEntries({
+    profileTo: isOwnerView ? "/owner-profile" : "/profile",
+    publicTo: isOwnerView ? `/gardiens/${user.id}?tab=proprio` : `/gardiens/${user.id}`,
+    isSitterView: effectiveRole === "sitter",
+    isAdmin,
+  });
 
   return (
     <DropdownMenu>
@@ -60,32 +66,26 @@ const UserMenu = ({ compact = false, className }: UserMenuProps) => {
       <DropdownMenuContent align="end" className="w-56">
         <div className="px-2 py-1.5 text-xs text-muted-foreground truncate">{displayName}</div>
         <DropdownMenuSeparator />
-        <DropdownMenuItem onSelect={() => navigate(profileTo)} className="gap-2 min-h-11">
-          <UserCircle2 className="h-4 w-4" aria-hidden="true" />
-          Mon profil
-        </DropdownMenuItem>
-        <DropdownMenuItem onSelect={() => navigate(publicTo)} className="gap-2 min-h-11">
-          <Eye className="h-4 w-4" aria-hidden="true" />
-          Mon profil public
-        </DropdownMenuItem>
-        <DropdownMenuItem onSelect={() => navigate("/favoris")} className="gap-2 min-h-11">
-          <Heart className="h-4 w-4" aria-hidden="true" />
-          Mes favoris
-        </DropdownMenuItem>
-        <DropdownMenuItem onSelect={() => navigate("/settings?section=security&focus=pro")} className="gap-2 min-h-11">
-          <BriefcaseBusiness className="h-4 w-4" aria-hidden="true" />
-          Je suis un professionnel
-        </DropdownMenuItem>
-        <DropdownMenuItem onSelect={() => navigate("/settings")} className="gap-2 min-h-11">
-          <Settings className="h-4 w-4" aria-hidden="true" />
-          Paramètres
-        </DropdownMenuItem>
-
-        <DropdownMenuSeparator />
-        <DropdownMenuItem onSelect={() => logout()} className="gap-2 min-h-11 text-destructive focus:text-destructive">
-          <LogOut className="h-4 w-4" aria-hidden="true" />
-          Déconnexion
-        </DropdownMenuItem>
+        {entries.map((entry, index) =>
+          entry === "separator" ? (
+            <DropdownMenuSeparator key={`sep-${index}`} />
+          ) : (
+            <DropdownMenuItem
+              key={entry.key}
+              onSelect={() => {
+                if (entry.action === "logout") {
+                  void Promise.resolve(logout()).catch(() => {});
+                } else if (entry.to) {
+                  navigate(entry.to);
+                }
+              }}
+              className={cn("gap-2 min-h-11", entry.danger && "text-destructive focus:text-destructive")}
+            >
+              <entry.icon className="h-4 w-4" aria-hidden="true" />
+              {entry.label}
+            </DropdownMenuItem>
+          ),
+        )}
       </DropdownMenuContent>
     </DropdownMenu>
   );
