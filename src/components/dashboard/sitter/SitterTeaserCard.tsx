@@ -12,6 +12,7 @@ import { SectionHeader } from "./SitterMatchSection";
 import AffinityBadge from "@/components/matching/AffinityBadge";
 import { trackEvent } from "@/lib/analytics";
 import { useImpressionOnce } from "@/hooks/useImpressionOnce";
+import { petSpeciesLabel } from "@/lib/petLabels";
 
 interface SitterTeaserCardProps {
   topSits: AffinitySitCard[];
@@ -52,7 +53,8 @@ const scopeSubtitle = (scope: PoolScope): string => {
 
 const speciesLabel = (species: string[]): string | null => {
   if (!species || species.length === 0) return null;
-  if (species.length === 1) return species[0];
+  // Mapping partagé, jamais la valeur brute de l'enum.
+  if (species.length === 1) return petSpeciesLabel(species[0]);
   return `${species.length} animaux`;
 };
 

@@ -40,6 +40,7 @@ const fakeSit = (i: number, score: number): AffinitySitCard => ({
   start_date: "2026-07-10",
   end_date: "2026-07-15",
   cover_photo_url: null,
+  pet_photo_url: null,
   owner_first_name: "Alice",
   pet_species: ["dog"],
   affinity: { score, matched: ["Langue commune"], total: 5, displayed: true },

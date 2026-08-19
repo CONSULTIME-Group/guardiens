@@ -15,6 +15,7 @@ import { getOptimizedImageUrl } from "@/lib/imageOptim";
 import AffinityRing from "@/components/affinity/AffinityRing";
 import { useEffect, useRef } from "react";
 import { trackEvent } from "@/lib/analytics";
+import { petSpeciesLabel } from "@/lib/petLabels";
 import type { AffinitySitCard } from "@/hooks/useSitterTopAffinitySits";
 
 interface Props {
@@ -38,17 +39,9 @@ function fmt(d: string | null): string {
   }
 }
 
-const SPECIES_LABEL: Record<string, string> = {
-  dog: "Chien",
-  cat: "Chat",
-  horse: "Cheval",
-  bird: "Oiseau",
-  rodent: "Rongeur",
-  fish: "Poisson",
-  reptile: "Reptile",
-  farm_animal: "Ferme",
-  nac: "NAC",
-};
+// Libellés d'espèces : mapping partagé (petLabels). Jamais la valeur brute
+// de l'enum en repli : une espèce inconnue est simplement omise.
+const speciesLabelOrNull = (s: string): string | null => petSpeciesLabel(s);
 
 const SitterFirstNBA = ({ sits, mode = "affinity", scopeLabel }: Props) => {
   const { isAuthenticated } = useAuth();
@@ -109,7 +102,8 @@ const SitterFirstNBA = ({ sits, mode = "affinity", scopeLabel }: Props) => {
         {sits.map((sit, i) => {
           const speciesLabels = (sit.pet_species || [])
             .slice(0, 3)
-            .map((s) => SPECIES_LABEL[s] || s);
+            .map(speciesLabelOrNull)
+            .filter(Boolean) as string[];
           return (
             <Link
               key={sit.id}

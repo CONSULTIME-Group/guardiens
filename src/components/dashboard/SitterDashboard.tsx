@@ -60,8 +60,10 @@ const SitterDashboard = () => {
   const { hasAccess: hasSubscription } = useSubscriptionAccess();
   // Premier contact Alma : bloque les whispers proactifs tant qu'il n'est pas vu.
   const { shouldShow: showAlmaFirstMeeting, markSeen: markAlmaFirstMeetingSeen } = useAlmaFirstMeeting();
-  // Pass 5 — compagnon culturel : fait d'ambiance selon rôle et ville.
-  useAlmaCulturalFact({ surface: "dashboard", context: { role: "sitter" }, enabled: !showAlmaFirstMeeting });
+  // Compagnon culturel désactivé sur cet écran : Alma parle une seule fois
+  // par écran, via la carte rail (AlmaRailWhisper). La bulle flottante ne
+  // doit pas ouvrir d'infobulle proactive en parallèle.
+  useAlmaCulturalFact({ surface: "dashboard", context: { role: "sitter" }, enabled: false });
 
 
 
@@ -88,7 +90,9 @@ const SitterDashboard = () => {
   // ?sitterView=new force la branche nouveau gardien. Sinon comportement normal.
   const sitterViewParam = searchParams.get("sitterView");
   const isNewSitter = sitterViewParam === "new" ? true : sitterViewParam === "confirmed" ? false : rawIsNewSitter;
-  // Alma étape 1 — usage_nudge P2, ciblé sur l'état du gardien.
+  // Murmures proactifs désactivés sur cet écran : une seule voix Alma par
+  // écran, portée par AlmaRailWhisper dans le rail. La logique de ciblage
+  // est conservée pour réactivation éventuelle sur une autre surface.
   useAlmaUsageNudge({
     surface: "sitter_dashboard",
     role: "sitter",
@@ -97,7 +101,7 @@ const SitterDashboard = () => {
       : (profileCompletion ?? 100) < 60
         ? "profile_incomplete"
         : "any",
-    enabled: !showAlmaFirstMeeting,
+    enabled: false,
   });
   const {
     topSits,
@@ -349,6 +353,13 @@ const SitterDashboard = () => {
                 isLoading={nbaLoading}
               />
 
+              {/* 3b. CONTEXTE : le pouls descend sous la zone des annonces,
+                  jamais en haut du rail (charte : accueil, émotion, action,
+                  contexte, voix). */}
+              <div className="">
+                <CommunityPulseBanner userId={user?.id} />
+              </div>
+
               {/* 4. ENTRAIDE bidimensionnelle (vague 20) */}
               <div className="">
                 <SitterEntraideSection
@@ -365,11 +376,9 @@ const SitterDashboard = () => {
             </div>
 
 
-            {/* ═══ RAIL collant (droite) — espacement 34px, mt-[52px] mobile ═══ */}
-            <aside className="mt-[52px] lg:mt-0 space-y-[34px] lg:col-span-4 lg:sticky lg:top-20 lg:self-start lg:max-h-[calc(100vh-6rem)] lg:overflow-y-auto">
-              <div className="">
-                <CommunityPulseBanner userId={user?.id} />
-              </div>
+            {/* ═══ RAIL collant (droite) — espacement 34px, mt-[52px] mobile.
+                lg:pt-6 aligne la ligne de base du rail sur celle du cockpit. ═══ */}
+            <aside className="mt-[52px] lg:mt-0 lg:pt-6 space-y-[34px] lg:col-span-4 lg:sticky lg:top-20 lg:self-start lg:max-h-[calc(100vh-6rem)] lg:overflow-y-auto">
               <div className="">
                 {!(level === 4 || level === "3B")
                   ? <AccessGateBanner level={level} profileCompletion={accessProfileCompletion} context="guard" />
@@ -445,7 +454,15 @@ const SitterDashboard = () => {
                   discoverySit={discoverySit}
                   scopeUsed={scopeUsed}
                   isLoading={nbaLoading}
+                  totalPublished={totalPublished}
                 />
+              </div>
+
+              {/* CONTEXTE — le pouls de la communauté descend sous la zone
+                  des annonces (charte : accueil, émotion, action, contexte,
+                  voix). Jamais en haut du rail, avant l'action. */}
+              <div className="">
+                <CommunityPulseBanner userId={user?.id} />
               </div>
 
               {/* VAGUE 3 — tuiles histoire (remplace SitterActivityPanel côté confirmé) */}
@@ -477,12 +494,10 @@ const SitterDashboard = () => {
 
 
             {/* ═══ RAIL collant (droite) — vague 4 ═══
-                Ordre narratif : pouls → prochaine garde (ou access/free) →
-                réputation → Alma en murmure. Espacement 34px. */}
-            <aside className="mt-[52px] lg:mt-0 space-y-[34px] lg:col-span-4 lg:sticky lg:top-20 lg:self-start lg:max-h-[calc(100vh-6rem)] lg:overflow-y-auto">
-              <div className="">
-                <CommunityPulseBanner userId={user?.id} />
-              </div>
+                Ordre narratif : affinité → prochaine garde (ou access/free) →
+                réputation → Alma en murmure. Espacement 34px. lg:pt-6 aligne
+                la ligne de base du rail sur celle du cockpit (ligne 1). */}
+            <aside className="mt-[52px] lg:mt-0 lg:pt-6 space-y-[34px] lg:col-span-4 lg:sticky lg:top-20 lg:self-start lg:max-h-[calc(100vh-6rem)] lg:overflow-y-auto">
               <SitterAffinityBanner />
 
               <div className="">
