@@ -24,7 +24,11 @@ import MissionPhotoUpload from "@/components/missions/MissionPhotoUpload";
 import { geocodeCity } from "@/lib/geocode";
 import { trackFirstAction, trackEvent } from "@/lib/analytics";
 import { recordMissionCreatedAttribution } from "@/lib/campaignAttribution";
-import { templatesFor, MISSION_TEMPLATES, type MissionTemplate } from "@/data/missionTemplates";
+import {
+  sitLikeSignals,
+  rehomingSignals,
+  writeSitPrefill,
+} from "@/lib/missionContentGuards";
 import { AlertCircle, ChevronLeft, CalendarIcon } from "lucide-react";
 import { sanitizeUserTitle } from "@/lib/sanitizeTitle";
 import { stripEmojis } from "@/lib/stripEmojis";
@@ -112,7 +116,8 @@ const CreateSmallMission = () => {
   const [petSize, setPetSize] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [photos, setPhotos] = useState<string[]>([]);
-  const [appliedTemplateId, setAppliedTemplateId] = useState<string | null>(null);
+  // Le titre et la description partent toujours vides : aucune intention
+  // pré-remplie, le membre écrit sa propre demande ou offre.
 
   // Hauteur réelle de la barre d'action fixe, exposée en variable CSS pour que
   // le conteneur défilant réserve exactement l'espace des couches fixes
@@ -140,35 +145,9 @@ const CreateSmallMission = () => {
     };
   });
 
-  const applyTemplate = (tpl: MissionTemplate) => {
-    setMissionType(tpl.type);
-    setCategory(tpl.category);
-    setTitle(tpl.title);
-    setDescription(tpl.description);
-    setExchangeOffer(tpl.exchange);
-    setExchangeError("");
-    setDuration(tpl.duration);
-    setAppliedTemplateId(tpl.id);
-  };
-
-  const clearTemplate = () => {
-    setAppliedTemplateId(null);
-    setTitle(""); setDescription(""); setExchangeOffer(""); setDuration("");
-  };
-
-  const visibleTemplates = templatesFor(missionType);
-
   useEffect(() => {
     const tParam = searchParams.get("type");
     if (tParam === "besoin" || tParam === "offre") setMissionType(tParam);
-  }, []);
-
-  useEffect(() => {
-    const templateId = searchParams.get("template");
-    if (!templateId) return;
-    if (title.trim() || description.trim()) return;
-    const tpl = MISSION_TEMPLATES.find((x) => x.id === templateId);
-    if (tpl) applyTemplate(tpl);
   }, []);
 
   // Attrition composer : 5 events (opened / step1_completed / field_abandoned / submitted / abandoned)
@@ -214,17 +193,18 @@ const CreateSmallMission = () => {
     setExchangeTouched(true);
     if (step1Valid) {
       setStep(2);
-      try { trackEvent("mission_composer_step1_completed", { metadata: { has_template: !!appliedTemplateId } }); } catch {}
+      try { trackEvent("mission_composer_step1_completed"); } catch {}
     }
   };
 
-  /** True si titre + description sont mot pour mot ceux d'un template. */
-  const isUnchangedTemplate = useMemo(() => {
-    if (!appliedTemplateId) return false;
-    const tpl = MISSION_TEMPLATES.find((x) => x.id === appliedTemplateId);
-    if (!tpl) return false;
-    return title.trim() === tpl.title.trim() && description.trim() === tpl.description.trim();
-  }, [appliedTemplateId, title, description]);
+  /**
+   * Garde-fous éditoriaux, recalculés à chaque frappe :
+   * une mission qui ressemble à une garde d'animaux est invitée vers
+   * /sits/create (canal dédié), une cession ou adoption d'animaux est
+   * signalée à la modération. Jamais bloquant.
+   */
+  const sitLike = useMemo(() => sitLikeSignals(title, description), [title, description]);
+  const rehoming = useMemo(() => rehomingSignals(title, description), [title, description]);
 
   // Volume d'audience : combien de personnes seront prévenues à la publication.
   const [audienceCount, setAudienceCount] = useState<number | null>(null);
@@ -288,11 +268,6 @@ const CreateSmallMission = () => {
       setStep(1);
       setTitleTouched(true);
       setDescTouched(true);
-      return;
-    }
-    // Garde-fou "modèle non personnalisé" (pattern brouillon Alma).
-    if (isUnchangedTemplate) {
-      setConfirmUnchangedOpen(true);
       return;
     }
     await performSubmit();
