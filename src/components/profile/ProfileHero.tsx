@@ -269,10 +269,10 @@ const ProfileHero = ({
         <button
           type="button"
           onClick={onOpenHeroPicker}
-          className="absolute top-3 right-3 z-20 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-background/90 backdrop-blur border border-border text-xs font-medium shadow-sm hover:bg-background transition-colors"
+          className="absolute top-3 right-3 z-20 inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full bg-background/95 backdrop-blur-md border border-foreground/25 text-[13px] font-semibold text-foreground shadow-[0_2px_10px_hsl(var(--foreground)/0.18)] hover:bg-background hover:shadow-[0_4px_16px_hsl(var(--foreground)/0.25)] transition-all"
           title="Choisir une autre illustration de carnet"
         >
-          <ImageIcon className="w-3.5 h-3.5" />
+          <ImageIcon className="w-4 h-4" />
           Changer l'image
         </button>
       )}
