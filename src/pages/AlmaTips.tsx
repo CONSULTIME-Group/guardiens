@@ -373,9 +373,13 @@ export default function AlmaTips() {
               <p className="text-muted-foreground mt-1 max-w-2xl">
                 Je suis Alma, votre assistante Guardiens. Je vous aide à mieux connaître les animaux
                 que vous gardez : le caractère de chaque race, ses besoins, ses habitudes. Je vous
-                donne aussi des conseils concrets pour préparer une maison avant une garde et vivre
-                le quotidien avec vos compagnons, au fil des saisons. Parcourez mes conseils
-                ci-dessous : ils sont là pour vous aider à accueillir chaque animal en toute confiance.
+                aide aussi côté logement : préparer une maison avant une garde, repérer les lieux de
+                garde et les sentiers à explorer autour de vous. Parcourez mes conseils ci-dessous,
+                et servez-vous des{" "}
+                <Link to="/races" className="text-primary underline underline-offset-2 hover:text-primary/80">fiches races</Link>
+                {" "}et des{" "}
+                <Link to="/guides" className="text-primary underline underline-offset-2 hover:text-primary/80">guides de villes</Link>
+                {" "}: ils sont là pour vous aider à accueillir chaque animal en toute confiance.
               </p>
             </div>
           </header>

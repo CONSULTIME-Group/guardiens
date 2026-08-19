@@ -27,6 +27,8 @@ export interface ProfileCompletionInput {
   lifestyle?: string[] | null;
   geographic_radius?: number | null;
   has_sitter_gallery?: boolean;
+  /** Nombre réel de photos de galerie gardien. Prime sur has_sitter_gallery. */
+  sitter_gallery_count?: number;
   interests?: string[] | null;
   languages?: string[] | null;
   life_pace?: string | null;
