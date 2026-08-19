@@ -23,7 +23,7 @@ const fullSitter = {
   competences: ["chats"],
   lifestyle: ["actif"],
   geographic_radius: 20,
-  has_sitter_gallery: true,
+  sitter_gallery_count: 3,
   identity_verified: true,
   interests: ["a", "b", "c"],
   languages: ["fr"],
@@ -92,6 +92,21 @@ describe("profileCompletion, barème SQL", () => {
     expect(byKey.identity).toBe(5);
     expect(byKey.affinity).toBe(10);
     expect(items.reduce((s, i) => s + i.points, 0)).toBe(100);
+  });
+
+  it("Galerie gardien : 1 ou 2 photos donnent 2 points, 3 photos ou plus donnent 5", () => {
+    const one = computeSitterCompletion({ ...emptySitter, sitter_gallery_count: 1 });
+    expect(one.score).toBe(2);
+    expect(one.items.find(i => i.key === "gallery")?.ok).toBe(false);
+    const two = computeSitterCompletion({ ...emptySitter, sitter_gallery_count: 2 });
+    expect(two.score).toBe(2);
+    const three = computeSitterCompletion({ ...emptySitter, sitter_gallery_count: 3 });
+    expect(three.score).toBe(5);
+    expect(three.items.find(i => i.key === "gallery")?.ok).toBe(true);
+  });
+
+  it("has_sitter_gallery seul vaut une photo (repli de compatibilité)", () => {
+    expect(computeSitterCompletion({ ...emptySitter, has_sitter_gallery: true }).score).toBe(2);
   });
 
   it("Affinité partielle donne 3/6 points sous le seuil", () => {

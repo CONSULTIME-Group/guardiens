@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { UserCircle2, Eye, Settings, LogOut, BriefcaseBusiness } from "lucide-react";
+import { UserCircle2, Eye, Settings, LogOut, BriefcaseBusiness, Heart } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -67,6 +67,10 @@ const UserMenu = ({ compact = false, className }: UserMenuProps) => {
         <DropdownMenuItem onSelect={() => navigate(publicTo)} className="gap-2 min-h-11">
           <Eye className="h-4 w-4" aria-hidden="true" />
           Mon profil public
+        </DropdownMenuItem>
+        <DropdownMenuItem onSelect={() => navigate("/favoris")} className="gap-2 min-h-11">
+          <Heart className="h-4 w-4" aria-hidden="true" />
+          Mes favoris
         </DropdownMenuItem>
         <DropdownMenuItem onSelect={() => navigate("/settings?section=security&focus=pro")} className="gap-2 min-h-11">
           <BriefcaseBusiness className="h-4 w-4" aria-hidden="true" />

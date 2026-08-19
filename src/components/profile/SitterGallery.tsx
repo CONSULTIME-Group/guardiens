@@ -251,6 +251,14 @@ const SitterGallery = () => {
         </Dialog>
       </div>
 
+      {photos.length > 0 && photos.length < 4 && (
+        <p className="mb-4 rounded-lg border border-border bg-muted/40 px-4 py-3 text-sm text-muted-foreground">
+          {photos.length === 1
+            ? "Bon début. Les propriétaires choisissent plus souvent les gardiens qui montrent plusieurs instants : ajoutez deux ou trois photos (animaux gardés, quotidien, balades)."
+            : `Votre galerie compte ${photos.length} photos. Quatre photos ou plus donnent une vraie confiance : ajoutez encore ${4 - photos.length} instant${photos.length === 3 ? "" : "s"}.`}
+        </p>
+      )}
+
       {photos.length === 0 ? (
         <div className="text-center py-12 text-muted-foreground">
           <Camera className="h-10 w-10 mx-auto mb-3 opacity-30" />

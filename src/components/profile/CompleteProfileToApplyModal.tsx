@@ -156,8 +156,8 @@ export const APPLY_GATE_EXTRA_FIELDS: FieldMeta[] = [
   {
     key: "gallery",
     points: 5,
-    title: "Une photo de vos gardes",
-    why: "Une seule photo suffit pour rendre votre expérience concrète.",
+    title: "Vos photos de garde",
+    why: "Une première photo rend votre expérience concrète, trois ou plus la rendent décisive.",
     effort: 5,
   },
 ];
