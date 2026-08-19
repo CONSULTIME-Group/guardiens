@@ -7,11 +7,14 @@
 // digests.
 //
 // La logique de ciblage (rayon/département/région, heure d'envoi, fréquence)
-// et le pré-filtrage des annonces (24h glissantes, pays=FR) sont conservés
-// à l'identique.
+// est conservée. Le pré-filtrage des annonces porte sur la mise en ligne
+// (published_at, 24h glissantes, pays=FR), plus sur la création : constat du
+// 19/08/2026, une annonce publiée après plus de 24h de brouillon n'entrait
+// jamais dans la fenêtre.
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { claimSitNotification, raiseClaimErrorSignal, releaseSitNotification, reportClaimOutcome } from "../_shared/sitNotificationClaim.ts";
-import { parisDateKey, parisHourSlot, parisWindowVerdict } from "../_shared/paris-hour.ts";
+import { ALERT_DIGEST_TARGET_PARIS_HOURS, parisDateKey, parisHourSlot, parisWindowVerdictForHours } from "../_shared/paris-hour.ts";
+import { publicationWindowOrClause } from "../_shared/sit-publication-window.ts";
 import { geocodeKeyCandidates } from "../_shared/geocode-lookup.ts";
 import { recordDeliveryFailure } from "../_shared/delivery-failure.ts";
 
@@ -135,10 +138,13 @@ Deno.serve(async (req) => {
 
     const now = new Date();
 
-    // Règle heure de Paris : ce digest ne travaille qu'au passage de 8h Paris,
-    // jamais en plage calme. Le forçage et le dry run restent possibles.
+    // Règle heure de Paris : ce digest travaille aux créneaux réels de
+    // passage (8h, 12h et 18h, heure de Paris), jamais en plage calme. Le
+    // forçage et le dry run restent possibles. Le filtre heure_envoi suit
+    // l'heure du passage courant (parisHourSlot) : la cohérence entre le
+    // créneau servi et les préférences filtrées est structurelle.
     if (!forceMode && !dryRun && !userId) {
-      const verdict = parisWindowVerdict(now, 8);
+      const verdict = parisWindowVerdictForHours(now, ALERT_DIGEST_TARGET_PARIS_HOURS);
       if (!verdict.run) {
         console.log(JSON.stringify({ event: "digest_skipped_paris_window", source: "send-alert-digest", ...verdict }));
         return new Response(
@@ -280,15 +286,17 @@ Deno.serve(async (req) => {
         const { data: rawSits } = await supabase
           .from("sits")
           .select(`
-            id, title, specific_expectations, owner_message, start_date, end_date, is_urgent, cover_photo_url,
+            id, title, specific_expectations, owner_message, start_date, end_date, is_urgent, published_at, cover_photo_url,
             city, country, departement_code, accepting_applications,
             profiles:user_id (first_name, city, postal_code, departement_code, country),
             properties:property_id (cover_photo_url, photos, pets (species, name))
           `)
           .eq("status", "published")
           .or("country.is.null,country.eq.FR")
-          .gte("created_at", sinceISO)
-          .order("created_at", { ascending: false })
+          // La fenêtre porte sur la mise en ligne, pas la création. Repli
+          // sur created_at uniquement pour l'historique sans published_at.
+          .or(publicationWindowOrClause(sinceISO))
+          .order("published_at", { ascending: false, nullsFirst: false })
           .limit(200);
 
         for (const sit of rawSits ?? []) {

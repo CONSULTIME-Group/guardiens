@@ -37,6 +37,16 @@ export const PUBLISH_LOOKBACK_MINUTES = 30;
 /** Plafond de destinataires par execution. Au dela, on ecarte et on signale. */
 export const MAX_RECIPIENTS_PER_RUN = 150;
 
+/**
+ * Taille maximale d'un lot `.in()`. Au dela d'environ 200 identifiants,
+ * l'URL PostgREST devient trop longue et la requete echoue : un lot de
+ * 500 UUID produit une URL d'environ 19 ko, refusee. Constat du 19/08/2026 :
+ * le premier lot de 500 echouait en silence, et les 500 premiers gardiens
+ * eligeibles n'etaient jamais charges. Tout lot en echec doit etre remonte,
+ * jamais avale.
+ */
+const IN_BATCH_SIZE = 200;
+
 export function haversineKm(lat1: number, lon1: number, lat2: number, lon2: number): number {
   const R = 6371;
   const toRad = (d: number) => (d * Math.PI) / 180;
@@ -135,13 +145,17 @@ async function raiseSignal(
   metadata: Record<string, unknown>,
 ): Promise<void> {
   const entityId = await uuidFromString(key);
-  const { data: existing } = await supabase
+  const { data: existing, error: lookupErr } = await supabase
     .from("admin_signals")
     .select("id")
     .eq("signal_type", signalType)
     .eq("entity_id", entityId)
     .is("resolved_at", null)
     .limit(1);
+  if (lookupErr) {
+    console.error("admin signal lookup failed", signalType, lookupErr);
+    return;
+  }
   if (existing && existing.length > 0) return;
   const { error } = await supabase.from("admin_signals").insert({
     signal_type: signalType,
@@ -201,11 +215,15 @@ Deno.serve(async (req) => {
       const guard = evaluateSitAlert("nearby-sit-alert", sit.status);
       if (guard.block) continue;
 
-      const { data: owner } = await supabase
+      const { data: owner, error: ownerErr } = await supabase
         .from("profiles")
         .select("id, first_name, city, latitude, longitude, postal_code")
         .eq("id", sit.user_id)
         .maybeSingle();
+      if (ownerErr) {
+        errors.push(`owner ${sit.id}: ${ownerErr.message}`);
+        continue;
+      }
       if (!owner) continue;
 
       const sitLocation: SitLocation = {
@@ -219,11 +237,12 @@ Deno.serve(async (req) => {
       // Animaux et photo, pour un email qui dit quelque chose.
       let coverPhotoUrl: string | null = (sit.cover_photo_url || "").trim() || null;
       if (!coverPhotoUrl && sit.property_id) {
-        const { data: prop } = await supabase
+        const { data: prop, error: propErr } = await supabase
           .from("properties")
           .select("cover_photo_url, photos")
           .eq("id", sit.property_id)
           .maybeSingle();
+        if (propErr) console.error("property cover lookup failed", sit.property_id, propErr);
         const photos = (prop as any)?.photos as string[] | null;
         coverPhotoUrl =
           ((prop as any)?.cover_photo_url || "").trim() ||
@@ -236,22 +255,25 @@ Deno.serve(async (req) => {
       if (candidateIds.length === 0) continue;
 
       const sitterById = new Map<string, any>();
-      const CH = 500;
-      for (let i = 0; i < candidateIds.length; i += CH) {
-        const { data: rows } = await supabase
+      for (let i = 0; i < candidateIds.length; i += IN_BATCH_SIZE) {
+        const { data: rows, error: batchErr } = await supabase
           .from("profiles")
           .select("id, first_name, email, city, latitude, longitude, postal_code, account_status, role")
-          .in("id", candidateIds.slice(i, i + CH));
+          .in("id", candidateIds.slice(i, i + IN_BATCH_SIZE));
+        // Un lot en echec ne passe plus inapercu : sans ces profils, le
+        // ciblage se tait et des gardiens ne sont jamais prevenus.
+        if (batchErr) throw new Error(`profiles batch ${i / IN_BATCH_SIZE}: ${batchErr.message}`);
         for (const r of (rows ?? []) as any[]) sitterById.set(r.id, r);
       }
 
       // Desabonnements et adresses supprimees, ecartes avant tout envoi.
       const optedOut = new Set<string>();
-      for (let i = 0; i < candidateIds.length; i += CH) {
-        const { data: eprefs } = await supabase
+      for (let i = 0; i < candidateIds.length; i += IN_BATCH_SIZE) {
+        const { data: eprefs, error: eprefsErr } = await supabase
           .from("email_preferences")
           .select("user_id, alert_emails, sit_alert_frequency")
-          .in("user_id", candidateIds.slice(i, i + CH));
+          .in("user_id", candidateIds.slice(i, i + IN_BATCH_SIZE));
+        if (eprefsErr) throw new Error(`email_preferences batch ${i / IN_BATCH_SIZE}: ${eprefsErr.message}`);
         // Cette diffusion est l'alerte immediate. Elle ne concerne donc que
         // les personnes ayant choisi « a chaque nouvelle annonce ». Les
         // reglages 'weekly' et 'none' sont servis, ou pas, ailleurs.
@@ -262,11 +284,12 @@ Deno.serve(async (req) => {
       }
       const emails = [...sitterById.values()].map((s) => String(s.email || "").toLowerCase()).filter(Boolean);
       const suppressed = new Set<string>();
-      for (let i = 0; i < emails.length; i += CH) {
-        const { data: sups } = await supabase
+      for (let i = 0; i < emails.length; i += IN_BATCH_SIZE) {
+        const { data: sups, error: supsErr } = await supabase
           .from("suppressed_emails")
           .select("email")
-          .in("email", emails.slice(i, i + CH));
+          .in("email", emails.slice(i, i + IN_BATCH_SIZE));
+        if (supsErr) throw new Error(`suppressed_emails batch ${i / IN_BATCH_SIZE}: ${supsErr.message}`);
         for (const s of (sups ?? []) as any[]) if (s.email) suppressed.add(String(s.email).toLowerCase());
       }
 
@@ -332,13 +355,17 @@ Deno.serve(async (req) => {
             errors.push(`claim ${idempotencyKey}: ${claimErr.message}`);
             continue;
           }
-          const { data: reclaimed } = await supabase
+          const { data: reclaimed, error: reclaimErr } = await supabase
             .from("sit_notification_log")
             .update({ status: "claimed", released_at: null, release_reason: null })
             .eq("idempotency_key", idempotencyKey)
             .eq("status", "released")
             .select("idempotency_key")
             .maybeSingle();
+          if (reclaimErr) {
+            errors.push(`reclaim ${idempotencyKey}: ${reclaimErr.message}`);
+            continue;
+          }
           if (!reclaimed) {
             metrics.already_notified++;
             continue;
@@ -369,10 +396,11 @@ Deno.serve(async (req) => {
           errors.push(`send ${idempotencyKey}: ${sendErr.message}`);
           // Relachement non destructif : la ligne reste, l'annonce reste
           // envoyable au passage suivant.
-          await supabase
+          const { error: releaseErr } = await supabase
             .from("sit_notification_log")
             .update({ status: "released", released_at: new Date().toISOString(), release_reason: "send_failed" })
             .eq("idempotency_key", idempotencyKey);
+          if (releaseErr) console.error("release failed", idempotencyKey, releaseErr);
           
         } else {
           metrics.emails_sent++;
