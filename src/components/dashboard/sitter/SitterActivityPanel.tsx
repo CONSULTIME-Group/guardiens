@@ -31,7 +31,7 @@ const SitterActivityPanel = ({
 
   const tiles = [
     {
-      to: "#sitter-availability-toggle",
+      to: "/profile",
       label: "Disponibilité",
       value: isAvailable ? "Active" : "Inactive",
       sub: null,

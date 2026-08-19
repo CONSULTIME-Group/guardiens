@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback, type MouseEvent as ReactMouseEvent } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -1533,7 +1533,7 @@ const CreateSit = () => {
           _sit_id: draftId,
           _code: String(err?.code || "inconnu"),
           _message: String(err?.message || err),
-        });
+        }).then(() => {}, () => {});
       }
       const description = describeSitWriteError(err, "publish");
 
@@ -1819,6 +1819,21 @@ const CreateSit = () => {
           ? "Brouillon enregistré sur cet appareil"
           : draftId ? "Brouillon en cours" : null;
 
+  // Retour desktop vers /sits : confirmation si saisie non enregistrée, puis
+  // choix de sortie si l'annonce est prête à publier.
+  const handleBackToSits = (e: ReactMouseEvent<HTMLAnchorElement>) => {
+    if (unsavedRemote) {
+      const ok = window.confirm("Des modifications ne sont pas encore enregistrées. Quitter cette page maintenant ?");
+      if (!ok) {
+        e.preventDefault();
+        return;
+      }
+    }
+    if (offerExitChoiceIfReady(() => navigate("/sits"), "back_link")) {
+      e.preventDefault();
+    }
+  };
+
   return (
     <>
       <div className="animate-fade-in pb-[calc(15rem+env(safe-area-inset-bottom))] md:pb-40">
@@ -1831,18 +1846,7 @@ const CreateSit = () => {
         <Link
           to="/sits"
           className="hidden md:inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground mb-4"
-          onClick={(e) => {
-            if (unsavedRemote) {
-              const ok = window.confirm("Des modifications ne sont pas encore enregistrées. Quitter cette page maintenant ?");
-              if (!ok) {
-                e.preventDefault();
-                return;
-              }
-            }
-            if (offerExitChoiceIfReady(() => navigate("/sits"), "back_link")) {
-              e.preventDefault();
-            }
-          }}
+          onClick={handleBackToSits}
         >
           <ArrowLeft className="h-4 w-4" /> Retour à mes annonces
         </Link>
