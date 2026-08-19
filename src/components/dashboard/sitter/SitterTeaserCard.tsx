@@ -13,6 +13,7 @@ import AffinityBadge from "@/components/matching/AffinityBadge";
 import { trackEvent } from "@/lib/analytics";
 import { useImpressionOnce } from "@/hooks/useImpressionOnce";
 import { petSpeciesLabel } from "@/lib/petLabels";
+import { scopeSubtitle } from "@/lib/matchScope";
 
 interface SitterTeaserCardProps {
   topSits: AffinitySitCard[];
@@ -20,9 +21,6 @@ interface SitterTeaserCardProps {
   scopeUsed: PoolScope;
   isLoading: boolean;
 }
-
-// Vague 15 : passe par un token CSS pour s'assombrir en dark.
-const PLACEHOLDER_BG = "var(--photo-placeholder-green)";
 
 const DATE_FMT = new Intl.DateTimeFormat("fr-FR", {
   day: "numeric",
@@ -42,13 +40,6 @@ const formatDateRange = (start: string | null, end: string | null): string | nul
   } catch {
     return null;
   }
-};
-
-const scopeSubtitle = (scope: PoolScope): string => {
-  if (scope === "dept") return "Dans votre département, en ce moment.";
-  if (scope === "region") return "Près de chez vous, en ce moment.";
-  if (scope === "country") return "En France, en ce moment.";
-  return "Près de chez vous, en ce moment.";
 };
 
 const speciesLabel = (species: string[]): string | null => {
@@ -143,22 +134,26 @@ const TeaserCard = ({ sit, onCtaClick }: { sit: AffinitySitCard; onCtaClick?: ()
         boxShadow: "0 1px 2px rgba(29,27,22,0.04), 0 8px 24px rgba(29,27,22,0.05)",
       }}
     >
-      {/* Bandeau photo 150px, PAS de ring dans cette branche */}
+      {/* Bandeau photo 150px, PAS de ring dans cette branche. Fond d'attente
+          aquarelle TOUJOURS présent sous l'image : jamais de rectangle blanc
+          pendant le chargement. */}
       <div
-        className="relative w-full"
-        style={{
-          height: "150px",
-          background: cover ? undefined : PLACEHOLDER_BG,
-        }}
+        className="relative w-full photo-placeholder-green"
+        style={{ height: "150px" }}
       >
         {cover && (
           <img
             src={cover}
             alt={sit.title ?? "Annonce"}
             className="w-full h-full object-cover"
-            loading="lazy"
+            loading="eager"
+            decoding="async"
             width={900}
             height={300}
+            onError={(e) => {
+              // Image cassée : on la masque, le fond aquarelle prend le relais.
+              e.currentTarget.style.display = "none";
+            }}
           />
         )}
         {place && (
