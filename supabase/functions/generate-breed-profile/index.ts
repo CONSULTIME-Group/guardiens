@@ -9,6 +9,170 @@ const corsHeaders = {
 
 const LOVABLE_API_URL = "https://ai.gateway.lovable.dev/v1/chat/completions";
 
+/**
+ * Wikimedia exige un User-Agent descriptif (politique robots). Sans lui,
+ * et depuis des IP de sortie mutualisées, ses serveurs répondent 403/429
+ * avec un corps TEXTE (« You are making too many requests… »), jamais du
+ * JSON. Constaté en production le 19/08/2026 : 6 fiches générées sans
+ * image, en silence.
+ */
+const WIKI_HEADERS = {
+  "User-Agent": "Guardiens/1.0 (https://guardiens.fr; contact@guardiens.fr)",
+  "Api-User-Agent": "Guardiens/1.0 (contact@guardiens.fr)",
+};
+
+/**
+ * Trace explicite du pipeline image. Chaque génération journalise cet
+ * objet et le renvoie dans la réponse : l'admin voit à l'écran si la
+ * fiche a une image, et les journaux disent exactement quelle étape a
+ * échoué le cas échéant. Fini le silence.
+ */
+interface ImageTrace {
+  candidate: string | null;
+  wiki_status: number | null;
+  fetch_status: number | null;
+  upload_ok: boolean;
+  stored_url: string | null;
+  detail: string;
+}
+
+const newTrace = (): ImageTrace => ({
+  candidate: null,
+  wiki_status: null,
+  fetch_status: null,
+  upload_ok: false,
+  stored_url: null,
+  detail: "",
+});
+
+/** Étape 1 du pipeline image : trouver un candidat Wikimedia. */
+const findWikiImage = async (
+  breed: string,
+  trace: ImageTrace,
+): Promise<{ url: string; credit: string } | null> => {
+  const cap = (s: string) =>
+    s.split(/\s+/).map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join(" ");
+  const queries = [cap(breed), breed, breed.replace(/é/g, "e").replace(/è/g, "e")];
+  for (const q of queries) {
+    try {
+      // Miniature 1200px (déjà redimensionnée par Wikimedia) en priorité,
+      // l'originale en repli : moins de poids à stocker.
+      const wikiUrl = `https://fr.wikipedia.org/w/api.php?action=query&format=json&prop=pageimages&piprop=original|thumbnail&titles=${encodeURIComponent(q)}&redirects=1&pithumbsize=1200`;
+      const wr = await fetch(wikiUrl, { headers: WIKI_HEADERS });
+      trace.wiki_status = wr.status;
+      if (!wr.ok) {
+        // Réponse non JSON (429/403) : on trace code + extrait, on ne
+        // parse pas à l'aveugle.
+        const body = (await wr.text()).slice(0, 120);
+        console.error(`[image] wiki search HTTP ${wr.status} for "${q}": ${body}`);
+        continue;
+      }
+      const wj: any = await wr.json();
+      const pages = wj?.query?.pages || {};
+      for (const p of Object.values<any>(pages)) {
+        const src = p?.thumbnail?.source ?? p?.original?.source;
+        if (src && /\.(jpg|jpeg|png|webp)/i.test(src)) {
+          trace.candidate = src;
+          return { url: src, credit: `Wikipédia, ${p.title}` };
+        }
+      }
+      console.log(`[image] wiki search "${q}": page trouvée mais sans image exploitable`);
+    } catch (e) {
+      console.error(`[image] wiki search failed for "${q}"`, e);
+    }
+  }
+  if (!trace.detail) {
+    trace.detail = trace.wiki_status && trace.wiki_status !== 200
+      ? `recherche Wikimedia refusée (HTTP ${trace.wiki_status})`
+      : "aucun candidat image Wikimedia";
+  }
+  return null;
+};
+
+/** Étapes 2 et 3 : télécharger le candidat et le déposer dans notre stockage. */
+const storeImage = async (
+  supabase: ReturnType<typeof createClient>,
+  imageUrl: string,
+  species: string,
+  normalizedBreed: string,
+  trace: ImageTrace,
+): Promise<string | null> => {
+  if (imageUrl.includes("/storage/v1/object/public/property-photos/")) {
+    // Déjà dans notre stockage (appel manuel) : rien à rapatrier.
+    trace.upload_ok = true;
+    trace.stored_url = imageUrl;
+    trace.detail = "déjà dans notre stockage";
+    return imageUrl;
+  }
+  try {
+    const imgRes = await fetch(imageUrl, { headers: WIKI_HEADERS });
+    trace.fetch_status = imgRes.status;
+    if (!imgRes.ok) {
+      trace.detail = `téléchargement refusé (HTTP ${imgRes.status})`;
+      console.error("[image] download failed", imgRes.status, imageUrl);
+      return null;
+    }
+    const contentType = (imgRes.headers.get("content-type") || "image/jpeg").split(";")[0];
+    const ext = contentType.includes("png") ? "png" : contentType.includes("webp") ? "webp" : "jpg";
+    const slug = normalizedBreed
+      .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+      .replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+    if (!slug) {
+      trace.detail = "slug de fichier vide";
+      console.error("[image] empty slug for breed", normalizedBreed);
+      return null;
+    }
+    const path = `breeds/${species}-${slug}.${ext}`;
+    const buf = await imgRes.arrayBuffer();
+    const { error: upErr } = await supabase.storage
+      .from("property-photos")
+      .upload(path, buf, { contentType, upsert: true });
+    if (upErr) {
+      trace.detail = `dépôt stockage refusé : ${upErr.message}`;
+      console.error("[image] storage upload failed", path, upErr);
+      return null;
+    }
+    trace.upload_ok = true;
+    trace.stored_url = supabase.storage.from("property-photos").getPublicUrl(path).data.publicUrl;
+    trace.detail = "image rapatriée dans property-photos";
+    return trace.stored_url;
+  } catch (e) {
+    trace.detail = `exception : ${String(e)}`;
+    console.error("[image] migration failed", e);
+    return null;
+  }
+};
+
+/**
+ * Pipeline image complet et tracé : candidat (fourni ou Wikimedia) puis
+ * rapatriement. Retourne l'URL stockée ou null, et remplit la trace.
+ */
+const resolveAndStoreImage = async (
+  supabase: ReturnType<typeof createClient>,
+  args: { species: string; breed: string; image_url?: string | null },
+): Promise<{ stored: string | null; credit: string | null; trace: ImageTrace }> => {
+  const trace = newTrace();
+  let credit: string | null = null;
+  let candidateUrl = args.image_url ?? null;
+  if (candidateUrl) {
+    trace.candidate = candidateUrl;
+  } else {
+    const found = await findWikiImage(args.breed, trace);
+    if (found) {
+      candidateUrl = found.url;
+      credit = found.credit;
+    }
+  }
+  const stored = candidateUrl
+    ? await storeImage(supabase, candidateUrl, args.species, args.breed, trace)
+    : null;
+  if (!stored && !trace.detail) {
+    trace.detail = candidateUrl ? "rapatriement impossible" : "aucune image candidate";
+  }
+  console.log("[image]", JSON.stringify({ species: args.species, breed: args.breed, ...trace }));
+  return { stored, credit, trace };
+};
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -18,7 +182,7 @@ Deno.serve(async (req) => {
     const authFail = await requireAdminOrServiceRole(req, corsHeaders);
     if (authFail) return authFail;
 
-    const { species, breed, force, image_url, image_credit, image_alt } = await req.json();
+    const { species, breed, force, image_url, image_credit, image_alt, image_only } = await req.json();
     if (!species || !breed) {
       return new Response(JSON.stringify({ error: "species and breed required" }), {
         status: 400,
@@ -41,10 +205,51 @@ Deno.serve(async (req) => {
       .eq("breed", normalizedBreed)
       .maybeSingle();
 
-    if (cached && !force) {
-      return new Response(JSON.stringify(cached), {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
+    // Mode rapatriement d'image SEUL : aucune regénération de texte. Sert
+    // à réparer une fiche existante sans image (ou à changer son image)
+    // sans toucher au contenu éditorial.
+    if (image_only) {
+      if (!cached) {
+        return new Response(
+          JSON.stringify({ error: `fiche introuvable : ${normalizedSpecies}/${normalizedBreed}` }),
+          { status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+        );
+      }
+      const { stored, credit, trace } = await resolveAndStoreImage(supabase, {
+        species: normalizedSpecies,
+        breed: normalizedBreed,
+        image_url: image_url ?? null,
       });
+      if (stored) {
+        const update: Record<string, unknown> = { image_url: stored };
+        update.image_credit = image_credit ?? credit ?? cached.image_credit;
+        update.image_alt = image_alt ?? `Photo, ${breed}`;
+        await supabase
+          .from("breed_profiles")
+          .update(update)
+          .eq("species", normalizedSpecies)
+          .eq("breed", normalizedBreed);
+      }
+      return new Response(
+        JSON.stringify({
+          ...cached,
+          image_url: stored ?? cached.image_url,
+          image_status: stored ? "stored" : "none",
+          image_detail: trace.detail,
+        }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
+    }
+
+    if (cached && !force) {
+      return new Response(
+        JSON.stringify({
+          ...cached,
+          image_status: cached.image_url ? "stored" : "none",
+          image_detail: cached.image_url ? "image déjà en place" : "aucune image (fiche en cache)",
+        }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
     }
 
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
@@ -85,7 +290,7 @@ Répondez UNIQUEMENT en JSON valide avec cette structure exacte (chaque champ do
   "stranger_behavior": "Comportement avec les inconnus en 3-5 phrases : réaction face à un gardien non-maître, méfiance naturelle ou non, temps d'adaptation typique, ce qu'il faut éviter les premiers jours.",
   "compatibility": "Compatibilité avec d'autres animaux en 3-5 phrases : autres chiens (même sexe / sexe opposé), chats, petits animaux (rongeurs, lapins), enfants en bas âge.",
   "sitter_tips": "Conseils pratiques pour le gardien en 5-7 phrases : routine à respecter, signaux d'apaisement à reconnaître, erreurs classiques à éviter (laisse trop courte, surstimulation…), comment instaurer la confiance dès la première heure, quoi demander au propriétaire avant la garde.",
-  "difficulty_level": "Niveau de difficulté pour un gardien débutant : Facile, Modéré ou Exigeant, suivi de 2-3 phrases de justification concrète.",
+  "difficulty_level": "Niveau de difficulté pour un gardien débutant. FORMAT STRICT : un seul mot parmi Facile, Modéré ou Exigeant, suivi OBLIGATOIREMENT d'un point (jamais de virgule, jamais de deux-points), puis 2-3 phrases de justification concrète. Exemple attendu : « Exigeant. La garde de cette race demande… ».",
   "ideal_for": "1 paragraphe de 3-5 phrases décrivant le profil de gardien idéal : niveau d'expérience attendu, mode de vie compatible, contraintes à anticiper."
 }`;
 
@@ -197,6 +402,12 @@ RÈGLES MARKDOWN : utilisez **gras** pour les points clés, listes à puces, sou
     }
     profile.rich_content = richContent;
 
+    // Niveau de garde : le séparateur après le niveau est TOUJOURS un point.
+    // Filet de sécurité code (la consigne du prompt peut être ignorée par le
+    // modèle) : « Exigeant, … » devient « Exigeant. … ». La pastille de la
+    // page /races dépend de ce premier mot isolé.
+    const difficultyLevel = String(profile.difficulty_level || "")
+      .replace(/^(\s*(?:facile|modéré|modere|exigeant))\s*,/i, "$1.");
 
     const record: Record<string, unknown> = {
       species: normalizedSpecies,
@@ -209,75 +420,25 @@ RÈGLES MARKDOWN : utilisez **gras** pour les points clés, listes à puces, sou
       stranger_behavior: profile.stranger_behavior || "",
       compatibility: profile.compatibility || "",
       sitter_tips: profile.sitter_tips || "",
-      difficulty_level: profile.difficulty_level || "",
+      difficulty_level: difficultyLevel,
       ideal_for: profile.ideal_for || "",
       rich_content: profile.rich_content || "",
     };
-    // Auto-fetch Wikipedia FR image if not provided
-    let finalImage = image_url, finalCredit = image_credit, finalAlt = image_alt;
-    if (!finalImage) {
-      const cap = (s: string) => s.split(/\s+/).map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(" ");
-      const queries = [cap(breed), breed, breed.replace(/é/g, "e").replace(/è/g, "e")];
-      for (const q of queries) {
-        try {
-          // miniature 1200px (déjà redimensionnée par Wikimedia) en priorité,
-          // l'originale en repli : moins de poids à stocker.
-          const wikiUrl = `https://fr.wikipedia.org/w/api.php?action=query&format=json&prop=pageimages&piprop=original|thumbnail&titles=${encodeURIComponent(q)}&redirects=1&pithumbsize=1200`;
-          const wr = await fetch(wikiUrl);
-          const wj: any = await wr.json();
-          const pages = wj?.query?.pages || {};
-          for (const p of Object.values<any>(pages)) {
-            const src = p?.thumbnail?.source ?? p?.original?.source;
-            if (src && /\.(jpg|jpeg|png|webp)$/i.test(src)) {
-              finalImage = src;
-              finalCredit = `Wikipédia, ${p.title}`;
-              finalAlt = `Photo, ${breed}`;
-              break;
-            }
-          }
-          if (finalImage) break;
-        } catch (e) { console.error("wiki fail", q, e); }
-      }
-    }
 
     // Rapatriement systématique dans notre stockage : toute fiche générée
     // stocke le fichier dans property-photos/breeds/ (format déjà en place),
     // jamais de lien chaud externe. Si le rapatriement échoue, la fiche est
     // créée SANS image : la carte de repli publique prend le relais, mieux
-    // vaut ça qu'une URL fragile.
-    let storedImage: string | null = null;
-    if (finalImage && finalImage.includes("/storage/v1/object/public/property-photos/")) {
-      // Déjà dans notre stockage (appel manuel) : rien à rapatrier.
-      storedImage = finalImage;
-    } else if (finalImage) {
-      try {
-        const imgRes = await fetch(finalImage, {
-          headers: { "User-Agent": "Guardiens/1.0 (https://guardiens.fr)" },
-        });
-        if (imgRes.ok) {
-          const contentType = (imgRes.headers.get("content-type") || "image/jpeg").split(";")[0];
-          const ext = contentType.includes("png") ? "png" : contentType.includes("webp") ? "webp" : "jpg";
-          const slug = normalizedBreed
-            .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
-            .replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
-          if (!slug) throw new Error(`empty slug for breed: ${normalizedBreed}`);
-          const path = `breeds/${normalizedSpecies}-${slug}.${ext}`;
-          const buf = await imgRes.arrayBuffer();
-          const { error: upErr } = await supabase.storage
-            .from("property-photos")
-            .upload(path, buf, { contentType, upsert: true });
-          if (upErr) {
-            console.error("storage upload failed", path, upErr);
-          } else {
-            storedImage = supabase.storage.from("property-photos").getPublicUrl(path).data.publicUrl;
-          }
-        } else {
-          console.error("image fetch failed", imgRes.status, finalImage);
-        }
-      } catch (e) { console.error("image migration failed", e); }
-    }
-    if (storedImage) {
-      record.image_url = storedImage;
+    // vaut ça qu'une URL fragile. La trace est journalisée et renvoyée.
+    const { stored, credit, trace } = await resolveAndStoreImage(supabase, {
+      species: normalizedSpecies,
+      breed: normalizedBreed,
+      image_url: image_url ?? null,
+    });
+    if (stored) {
+      record.image_url = stored;
+      const finalCredit = image_credit ?? credit;
+      const finalAlt = image_alt ?? `Photo, ${breed}`;
       if (finalCredit) record.image_credit = finalCredit;
       if (finalAlt) record.image_alt = finalAlt;
     }
@@ -288,9 +449,16 @@ RÈGLES MARKDOWN : utilisez **gras** pour les points clés, listes à puces, sou
       .select()
       .single();
 
-    return new Response(JSON.stringify(inserted || record), {
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+    return new Response(
+      JSON.stringify({
+        ...(inserted || record),
+        image_status: record.image_url ? "stored" : "none",
+        image_detail: trace.detail,
+      }),
+      {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      },
+    );
   } catch (error) {
     console.error("Breed profile error:", error);
     return new Response(JSON.stringify({ error: String(error) }), {
