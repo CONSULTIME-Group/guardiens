@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { formatDistanceToNow } from "date-fns";
 import { fr } from "date-fns/locale";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -86,7 +86,6 @@ interface Props {
 }
 
 const MobileEntraideFeed = ({ missions, questions, loading, onPublish }: Props) => {
-  const navigate = useNavigate();
   const [active, setActive] = useState<FeedType[]>(() => readChips());
   const viewFiredRef = useRef(false);
 

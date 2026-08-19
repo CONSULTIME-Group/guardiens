@@ -26,13 +26,12 @@ const QuestionCreate = () => {
   const navigate = useNavigate();
   const [params] = useSearchParams();
   const prefillCat = params.get("cat") as CommunityCategory | null;
-  const prefillTitle = params.get("title") || "";
   const [category, setCategory] = useState<CommunityCategory>(
     prefillCat && (["animaux", "jardin", "maison", "garde", "autre"] as const).includes(prefillCat as any)
       ? prefillCat
       : "animaux",
   );
-  const [title, setTitle] = useState(prefillTitle);
+  const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
   const [city, setCity] = useState("");
   const [submitting, setSubmitting] = useState(false);
