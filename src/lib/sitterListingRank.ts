@@ -30,8 +30,14 @@ interface RankListingsInput<T extends RankableListing> {
   limit?: number;
 }
 
+const normalizeEnvironment = (value: string) =>
+  value.trim().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+
 const environmentMatches = (listing: RankableListing, preferred: ReadonlySet<string>) =>
-  listing.environments.reduce((count, environment) => count + (preferred.has(environment) ? 1 : 0), 0);
+  listing.environments.reduce(
+    (count, environment) => count + (preferred.has(normalizeEnvironment(environment)) ? 1 : 0),
+    0,
+  );
 
 const distanceFrom = (listing: RankableListing, origin: ListingRankPoint | null): number | null =>
   listing.coords && origin ? haversineDistance(origin, listing.coords) : null;
@@ -67,7 +73,7 @@ export function rankSitterListings<T extends RankableListing>({
 }: RankListingsInput<T>): { listings: Array<T & { distanceKm: number | null }>; source: ListingRankingSource } {
   const source: ListingRankingSource = alert ? "alert" : sitterCoords ? "distance" : "affinity";
   const origin = alert?.center ?? sitterCoords;
-  const preferred = new Set(preferredEnvironments);
+  const preferred = new Set(preferredEnvironments.map(normalizeEnvironment));
 
   const ranked = listings
     .map((listing, index) => ({

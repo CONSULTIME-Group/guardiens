@@ -496,9 +496,7 @@ const DiscoveryRow = ({ sit }: { sit: AffinitySitCard }) => {
 
 const SitterMatchSection = ({ topSits, fallbackSits, discoverySit, rankingSource, isLoading, totalPublished = 0 }: Props) => {
   const sectionRef = useRef<HTMLElement | null>(null);
-  const usableScored = topSits.filter((s) => s.affinity);
-  const hasScored = usableScored.length > 0;
-  const primary = hasScored ? usableScored[0] : (fallbackSits[0] ?? null);
+  const primary = topSits[0] ?? fallbackSits[0] ?? null;
   const impressionKey = primary ? `sitter_star:${primary.id}` : null;
   const scoreForTrack = primary?.affinity?.score ?? null;
 
