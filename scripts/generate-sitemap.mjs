@@ -14,6 +14,7 @@ import { fileURLToPath } from "url";
 import { sitRichnessRejectionReason } from "../src/lib/sitIndexability.js";
 import { isDemoPro } from "../src/lib/proIndexability.js";
 import { isSitterProfileIndexable } from "../src/lib/sitterProfileIndexability.js";
+import { mergedBreedTarget } from "../src/lib/breedFicheMerges.js";
 import { fetchOrCache as sharedFetchOrCache } from "./lib/sitemapCache.mjs";
 
 
@@ -239,12 +240,16 @@ async function main() {
           s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "")
             .replace(/œ/g, "oe").replace(/æ/g, "ae")
             .replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
-        return rows.map(bp => ({
-          loc: `/races/${bp.species.toLowerCase()}-${slugifyBreed(bp.breed)}`,
-          lastmod: (bp.generated_at || today).split("T")[0],
-          changefreq: "monthly",
-          priority: "0.6",
-        }));
+        // Fiches fusionnées (doublons : jack russel, gris du gabon) exclues,
+        // leur URL redirige vers la fiche conservée (BreedPage).
+        return rows
+          .filter(bp => !mergedBreedTarget(bp.species, bp.breed))
+          .map(bp => ({
+            loc: `/races/${bp.species.toLowerCase()}-${slugifyBreed(bp.breed)}`,
+            lastmod: (bp.generated_at || today).split("T")[0],
+            changefreq: "monthly",
+            priority: "0.6",
+          }));
       }
     ),
     // Fiches gardien `/gardiens/:id` : listées si et seulement si elles passent

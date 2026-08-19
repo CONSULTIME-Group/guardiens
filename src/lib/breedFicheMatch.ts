@@ -30,6 +30,7 @@
  * saisies utilisateur qu'on normalise avant comparaison.
  */
 import { normalizeStrict } from "./normalize";
+import { mergedBreedTarget } from "./breedFicheMerges";
 
 export interface BreedFicheCandidate {
   species: string;
@@ -91,6 +92,13 @@ const BREED_ALIASES: Record<string, Record<string, string>> = {
     golden: "golden retriever",
     "american-stafford-terrier": "american staffordshire terrier",
     roumain: "berger roumain",
+    // Coquille réelle : la race s'écrit Jack Russell (deux l). La fiche
+    // absorbée « jack russel » redirige vers la fiche canonique.
+    "jack-russel": "jack russell",
+  },
+  bird: {
+    // « Gris du Gabon » seul : le nom courant du perroquet gris du gabon.
+    "gri-du-gabon": "perroquet gris du gabon",
   },
 };
 
@@ -153,18 +161,30 @@ export const resolveBreedFiche = <T extends BreedFicheCandidate>(
   const key = breedFicheKey(declaredBreed);
   if (key.length < 2) return null;
 
+  // Fiches fusionnées (doublons éditoriaux) : une correspondance sur la
+  // fiche absorbée (« jack russel ») renvoie la fiche conservée
+  // (« jack russell ») quand elle existe dans les candidats.
+  const withMerge = (candidate: T | null): T | null => {
+    if (!candidate) return null;
+    const target = mergedBreedTarget(candidate.species, candidate.breed);
+    if (!target) return candidate;
+    const targetKey = breedFicheKey(target);
+    const hit = scoped.find((x) => x.key === targetKey);
+    return hit ? hit.candidate : candidate;
+  };
+
   // 1. Exact puis alias sur la saisie complète (« croisé bichon » est une
   //    fiche exacte, elle prime sur la règle du croisement).
   const direct = exactOrAlias(key);
-  if (direct) return direct;
+  if (direct) return withMerge(direct);
 
   // 2. « croisé X » / « x X » retombent sur la fiche de la race citée.
   const stripped = key.replace(CROISE_PREFIX, "");
   if (stripped !== key && stripped.length >= 2) {
     const fromStripped = exactOrAlias(stripped) ?? prefixMatch(stripped);
-    if (fromStripped) return fromStripped;
+    if (fromStripped) return withMerge(fromStripped);
   }
 
   // 3. Préfixe conservateur à frontière de mot.
-  return prefixMatch(key);
+  return withMerge(prefixMatch(key));
 };

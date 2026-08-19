@@ -194,9 +194,14 @@ Deno.serve(async () => {
     s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "")
       .replace(/œ/g, "oe").replace(/æ/g, "ae")
       .replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+  // Fiches fusionnées (doublons) : liste recopiée depuis
+  // src/lib/breedFicheMerges.js, Deno ne peut pas importer src/. Leur URL
+  // redirige vers la fiche conservée (BreedPage), elles ne s'indexent pas.
+  const MERGED_BREED_SLUGS = new Set(["bird-gris-du-gabon", "dog-jack-russel"]);
   if (breedProfiles) {
     for (const bp of breedProfiles) {
       const slug = `${bp.species.toLowerCase()}-${slugifyBreed(bp.breed)}`;
+      if (MERGED_BREED_SLUGS.has(slug)) continue;
       entries.push(urlEntry(`/races/${slug}`, (bp.generated_at || today).split("T")[0], "monthly", "0.6"));
     }
   }

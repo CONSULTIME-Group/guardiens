@@ -802,8 +802,15 @@
       "bird": "Oiseaux",
       "rodent": "Rongeurs",
       "farm_animal": "Animaux de ferme",
-      "horse": "Équidés"
-    }
+      "horse": "Équidés",
+      "nac": "NAC"
+    },
+    "search_label": "Rechercher une fiche de race",
+    "search_placeholder": "Rechercher une race (ex. labrador, maine coon)",
+    "filter_all": "Toutes",
+    "no_results": "Aucune fiche ne correspond à votre recherche.",
+    "guides_note": "Une fiche de race dit qui vous confiez, un guide de ville dit où le promener.",
+    "guides_cta": "Explorer les guides de villes"
   },
   "public_listings": {
     "meta_title": "Annonces de garde d'animaux à domicile en France | Guardiens",

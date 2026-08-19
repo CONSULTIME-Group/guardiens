@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, Navigate, useParams } from "react-router-dom";
 import NotFound from "@/pages/NotFound";
 import ReactMarkdown from "react-markdown";
 import { supabase } from "@/integrations/supabase/client";
@@ -32,14 +32,17 @@ interface BreedProfile {
 
 // Libellés d'espèces : module unique src/lib/petLabels.ts (enum pet_species).
 import { petSpeciesLabelLower } from "@/lib/petLabels";
+import { mergedBreedTarget } from "@/lib/breedFicheMerges";
+import { LEVEL_BADGE_CLASS, extractDifficultyLevel } from "@/lib/breedsListingModel";
 
-const SPECIES_PREFIXES = ["dog", "cat", "bird", "rodent", "farm_animal", "horse"];
+const SPECIES_PREFIXES = ["dog", "cat", "bird", "rodent", "farm_animal", "horse", "nac"];
 
 const BreedPage = () => {
   const { slug = "" } = useParams();
   const [breed, setBreed] = useState<BreedProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
+  const [redirectTo, setRedirectTo] = useState<string | null>(null);
 
   useEffect(() => {
     const prefix = SPECIES_PREFIXES.find((p) => slug.startsWith(`${p}-`));
@@ -58,8 +61,18 @@ const BreedPage = () => {
         const match = (data as BreedProfile[] | null)?.find(
           (b) => slugify(b.breed) === breedSlug,
         );
-        if (!match) setNotFound(true);
-        else setBreed(match);
+        if (!match) {
+          setNotFound(true);
+        } else {
+          // Doublon fusionné (« jack russel », « gris du gabon ») : l'URL
+          // historique redirige vers la fiche conservée, jamais de 404.
+          const target = mergedBreedTarget(match.species, match.breed);
+          if (target) {
+            setRedirectTo(`/races/${match.species.toLowerCase()}-${slugify(target)}`);
+          } else {
+            setBreed(match);
+          }
+        }
         setLoading(false);
       });
   }, [slug]);
@@ -74,6 +87,9 @@ const BreedPage = () => {
     },
   });
 
+  // Fiche absorbée par une autre (doublon) : redirection propre vers la
+  // fiche conservée. Le maillage et le sitemap ne pointent que vers la cible.
+  if (redirectTo) return <Navigate to={redirectTo} replace />;
   // Slug de race inconnu : vraie page 404 en noindex, jamais de redirection
   // vers l'index (une redirection masquerait l'erreur aux moteurs).
   if (notFound) return <NotFound />;
@@ -162,6 +178,9 @@ const BreedPage = () => {
   const ogImage = breed.image_url || buildOgImageUrl({ title: breedCap, subtitle: "Fiche de race, conseils gardien", kind: "race" });
 
   const sections: Array<{ title: string; body: string | null }> = [
+    // difficulty_level est un paragraphe : pastille courte dans l'en-tête,
+    // paragraphe complet ici, à sa place.
+    { title: "Niveau de garde", body: breed.difficulty_level },
     { title: "Tempérament", body: breed.temperament },
     { title: "Besoins d'exercice", body: breed.exercise_needs },
     { title: "Toilettage", body: breed.grooming },
@@ -201,9 +220,11 @@ const BreedPage = () => {
           <h1 className="font-serif text-2xl md:text-4xl font-bold text-foreground mb-3">
             Garder un {breedCap} à domicile
           </h1>
-          {breed.difficulty_level && (
-            <span className="inline-block px-3 py-1 rounded-full bg-muted text-sm text-foreground">
-              Niveau : {breed.difficulty_level}
+          {extractDifficultyLevel(breed.difficulty_level) && (
+            <span
+              className={`inline-block px-3 py-1 rounded-full text-sm font-semibold ${LEVEL_BADGE_CLASS[extractDifficultyLevel(breed.difficulty_level)!]}`}
+            >
+              Niveau : {extractDifficultyLevel(breed.difficulty_level)}
             </span>
           )}
           <div className="mt-4">
