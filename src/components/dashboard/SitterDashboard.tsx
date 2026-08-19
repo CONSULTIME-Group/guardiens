@@ -353,6 +353,13 @@ const SitterDashboard = () => {
                 isLoading={nbaLoading}
               />
 
+              {/* 3b. CONTEXTE : le pouls descend sous la zone des annonces,
+                  jamais en haut du rail (charte : accueil, émotion, action,
+                  contexte, voix). */}
+              <div className="">
+                <CommunityPulseBanner userId={user?.id} />
+              </div>
+
               {/* 4. ENTRAIDE bidimensionnelle (vague 20) */}
               <div className="">
                 <SitterEntraideSection
@@ -369,11 +376,9 @@ const SitterDashboard = () => {
             </div>
 
 
-            {/* ═══ RAIL collant (droite) — espacement 34px, mt-[52px] mobile ═══ */}
-            <aside className="mt-[52px] lg:mt-0 space-y-[34px] lg:col-span-4 lg:sticky lg:top-20 lg:self-start lg:max-h-[calc(100vh-6rem)] lg:overflow-y-auto">
-              <div className="">
-                <CommunityPulseBanner userId={user?.id} />
-              </div>
+            {/* ═══ RAIL collant (droite) — espacement 34px, mt-[52px] mobile.
+                lg:pt-6 aligne la ligne de base du rail sur celle du cockpit. ═══ */}
+            <aside className="mt-[52px] lg:mt-0 lg:pt-6 space-y-[34px] lg:col-span-4 lg:sticky lg:top-20 lg:self-start lg:max-h-[calc(100vh-6rem)] lg:overflow-y-auto">
               <div className="">
                 {!(level === 4 || level === "3B")
                   ? <AccessGateBanner level={level} profileCompletion={accessProfileCompletion} context="guard" />
