@@ -34,8 +34,8 @@ import PublicSitView from "@/components/sits/PublicSitView";
 import {
   ENV_LABELS as envLabels,
   TYPE_LABELS as typeLabels,
-  SPECIES_LABEL as speciesLabel,
 } from "@/components/sits/shared/sitConstants";
+import { petSpeciesLabelLower } from "@/lib/petLabels";
 
 type ViewerType = "anonymous" | "gardien" | "proprio" | "owner_of_sit" | "admin";
 
@@ -404,12 +404,12 @@ const PublicSitDetail = () => {
  if (pets.length === 0) return "leurs animaux";
  if (pets.length === 1) {
  const p = pets[0];
- return `${capitalize(p.name)} (${speciesLabel[p.species] || p.species})`;
+ return `${capitalize(p.name)} (${petSpeciesLabelLower(p.species) ?? "animal"})`;
  }
  // Groupe par espèce
  const byKind: Record<string, number> = {};
  pets.forEach((p: any) => {
- const k = speciesLabel[p.species] || p.species;
+ const k = petSpeciesLabelLower(p.species) ?? "animal";
  byKind[k] = (byKind[k] || 0) + 1;
  });
  return Object.entries(byKind)
@@ -434,7 +434,7 @@ const PublicSitDetail = () => {
 
 
  const petsSummary = pets.length > 0
- ? pets.map((p: any) => `${p.name} (${speciesLabel[p.species] || p.species})`).join(", ")
+ ? pets.map((p: any) => `${p.name} (${petSpeciesLabelLower(p.species) ?? "animal"})`).join(", ")
  : "animaux à confier";
 
  // og:title, titre de l'annonce + ville (si dispo) + suffixe Guardiens
@@ -703,9 +703,8 @@ const PublicSitDetail = () => {
         naturalDateLabel={naturalDateLabel}
         urgencyLabel={urgencyLabel}
         petsPitchSummary={petsPitchSummary}
-        typeLabel={property ? (typeLabels[property.type] || property.type) : null}
-        envLabel={property?.environment ? (envLabels[property.environment] || property.environment) : null}
-        speciesLabel={speciesLabel}
+        typeLabel={property ? (typeLabels[property.type] ?? null) : null}
+        envLabel={property?.environment ? (envLabels[property.environment] ?? null) : null}
         onShare={handleShare}
         isAuthenticated={!!user}
         hasAccess={hasAccess}

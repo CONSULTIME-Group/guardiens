@@ -13,11 +13,9 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import {
-  ACTIVITY_LABELS as ACTIVITY_LEVEL_LABEL,
-  WALK_LABELS as WALK_DURATION_LABEL,
-  ALONE_LABELS as ALONE_DURATION_LABEL,
-} from "@/components/sits/shared/sitConstants";
+// Libellés FR des enums animaux : module unique src/lib/petLabels.ts.
+// Valeur inconnue → null → le bloc est masqué, jamais de valeur brute à l'écran.
+import { petActivityLabel, petWalkLabel, petAloneLabel } from "@/lib/petLabels";
 
 interface TabAnimauxProps {
   safePets: any[];
@@ -124,11 +122,9 @@ const TabAnimaux = ({ safePets, ownerName }: TabAnimauxProps) => {
           typeof pet.special_needs === "string" && pet.special_needs.trim().length > 0;
         const hasCharacter =
           typeof pet.character === "string" && pet.character.trim().length > 0;
-        const activityLabel = pet.activity_level
-          ? ACTIVITY_LEVEL_LABEL[pet.activity_level]
-          : null;
-        const walkLabel = pet.walk_duration ? WALK_DURATION_LABEL[pet.walk_duration] : null;
-        const aloneLabel = pet.alone_duration ? ALONE_DURATION_LABEL[pet.alone_duration] : null;
+        const activityLabel = petActivityLabel(pet.activity_level);
+        const walkLabel = petWalkLabel(pet.walk_duration);
+        const aloneLabel = petAloneLabel(pet.alone_duration);
 
         return (
           <section

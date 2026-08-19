@@ -30,14 +30,8 @@ interface BreedProfile {
   rich_content: string | null;
 }
 
-const SPECIES_LABEL: Record<string, string> = {
-  dog: "chien",
-  cat: "chat",
-  bird: "oiseau",
-  rodent: "rongeur",
-  farm_animal: "animal de ferme",
-  horse: "équidé",
-};
+// Libellés d'espèces : module unique src/lib/petLabels.ts (enum pet_species).
+import { petSpeciesLabelLower } from "@/lib/petLabels";
 
 const SPECIES_PREFIXES = ["dog", "cat", "bird", "rodent", "farm_animal", "horse"];
 
@@ -95,7 +89,8 @@ const BreedPage = () => {
     );
   }
 
-  const speciesLabel = SPECIES_LABEL[breed.species] || breed.species;
+  // Valeur inconnue : terme générique français, jamais la valeur brute DB.
+  const speciesLabel = petSpeciesLabelLower(breed.species) ?? "animal";
   const breedCap = breed.breed.charAt(0).toUpperCase() + breed.breed.slice(1);
   const title = `Garde de ${breedCap} à domicile : conseils gardien | Guardiens`;
   const description =
