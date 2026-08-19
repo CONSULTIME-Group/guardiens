@@ -18,7 +18,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { computeAffinityScore, type AffinityResult } from "@/lib/affinityScore";
 import { getDeptCode } from "@/lib/departments";
-import { getRegionCode, getDeptsInRegion } from "@/lib/regions";
+import { pickProgressiveScope, orderByAffinity } from "@/lib/matchScope";
 import { pickDiscoverySit } from "@/lib/pickDiscoverySit";
 
 export interface AffinitySitCard {
@@ -37,7 +37,7 @@ export interface AffinitySitCard {
   affinity: AffinityResult | null;
 }
 
-export type PoolScope = "dept" | "region" | "country" | "none";
+export type { PoolScope } from "@/lib/matchScope";
 
 interface Result {
   topSits: AffinitySitCard[];
@@ -99,7 +99,7 @@ export function useSitterTopAffinitySits(): Result {
           .maybeSingle(),
         supabase
           .from("profiles")
-          .select("postal_code")
+          .select("postal_code, latitude, longitude")
           .eq("id", userId!)
           .maybeSingle(),
       ]);
@@ -107,7 +107,12 @@ export function useSitterTopAffinitySits(): Result {
       const postalCode = (profile?.postal_code as string | null) ?? null;
       const hasPostalCode = !!postalCode;
       const deptCode = getDeptCode(postalCode);
-      const regionCode = getRegionCode(deptCode);
+      // Coordonnées du gardien (absentes pour 258 profils au 19/08/2026 :
+      // les paliers de distance sont alors impossibles, repli national).
+      const sitterCoords =
+        typeof profile?.latitude === "number" && typeof profile?.longitude === "number"
+          ? { lat: profile.latitude, lng: profile.longitude }
+          : null;
       const filled = countAffinityFields(sitter);
       const profileIncomplete = filled < 3;
 
@@ -358,7 +363,7 @@ export function useSitterTopAffinitySits(): Result {
         topSits: topThree,
         // Pool élargi à 6 : la carte rencontre pioche dedans pour compléter
         // la rangée compacte quand le top affinité est pauvre.
-        fallbackSits: fallback.slice(0, 6),
+        fallbackSits: orderedFallback.slice(0, 6),
         discoverySit,
         totalPublished: totalPublished ?? 0,
         hasPostalCode,
