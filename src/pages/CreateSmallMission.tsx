@@ -340,6 +340,30 @@ const CreateSmallMission = () => {
       try { await trackEvent("mission_created_incomplete_profile", { metadata: { profile_completion: profileCompletion, mission_id: inserted?.id ?? null } }); } catch {}
     }
     if (inserted?.id) { try { await recordMissionCreatedAttribution(inserted.id); } catch {} }
+    // Signaux admin éditoriaux : non bloquants, idempotents côté base.
+    if (inserted?.id && (sitLike || rehoming)) {
+      const mid = inserted.id;
+      const metaBase = { title: cleanTitle, city: city.trim() };
+      const rpc = (supabase.rpc as any).bind(supabase);
+      if (sitLike) {
+        rpc("report_mission_content_signal", {
+          _mission_id: mid,
+          _signal_type: "sit_like_mission",
+          _metadata: { ...metaBase, reason: sitLike.matched.join(" + ") },
+        }).then(({ error }: any) => { if (error) console.warn("signal sit_like_mission", error); });
+      }
+      if (rehoming) {
+        rpc("report_mission_content_signal", {
+          _mission_id: mid,
+          _signal_type: "animal_rehoming_listing",
+          _metadata: { ...metaBase, reason: rehoming.matched.join(" + ") },
+        }).then(({ error }: any) => { if (error) console.warn("signal animal_rehoming_listing", error); });
+        toast({
+          title: "Mission transmise pour relecture",
+          description: "La cession ou l'adoption d'animaux n'est pas proposée sur Guardiens. Notre équipe va relire votre publication.",
+        });
+      }
+    }
     await queryClient.invalidateQueries({ queryKey: ["small-missions-all"] });
     submittedRef.current = true;
     try { trackEvent("mission_composer_submitted", { metadata: { mission_id: inserted?.id, category, mission_type: missionType } }); } catch {}
@@ -429,39 +453,48 @@ const CreateSmallMission = () => {
                   </div>
                 </div>
 
-                {/* Templates */}
-                <div className="rounded-xl border border-primary/20 bg-primary/5 p-4 space-y-3">
-                  <div className="flex items-center justify-between gap-2">
-                    <div>
-                      <p className="text-sm font-semibold">
-                        {missionType === "offre" ? tp("templates_title_offer") : tp("templates_title_need")}
-                      </p>
-                      <p className="text-xs text-muted-foreground">{tp("templates_subtitle")}</p>
-                    </div>
-                    {appliedTemplateId && (
-                      <button type="button" onClick={clearTemplate} className="text-xs text-primary hover:underline whitespace-nowrap">
-                        {tp("templates_reset")}
-                      </button>
-                    )}
-                  </div>
-                  <div className="flex flex-wrap gap-2">
-                    {visibleTemplates.map((tpl) => (
-                      <button
-                        key={tpl.id}
+                {/* Garde-fous éditoriaux, non bloquants */}
+                {sitLike && (
+                  <div className="rounded-xl border border-primary/30 bg-primary/5 p-4 space-y-2" role="note">
+                    <p className="text-sm font-semibold text-foreground">
+                      Ça ressemble à une garde d'animaux
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      Les gardes ont un espace dédié, plus visible et mieux suivi, avec dates et consignes structurées. Votre texte est repris tel quel.
+                    </p>
+                    <div className="flex flex-wrap items-center gap-2">
+                      <Button
                         type="button"
-                        onClick={() => applyTemplate(tpl)}
-                        className={cn(
-                          "rounded-full border px-3 py-1.5 text-xs transition-colors",
-                          appliedTemplateId === tpl.id
-                            ? "bg-primary text-primary-foreground border-primary"
-                            : "bg-background text-foreground border-border hover:border-primary/40"
-                        )}
+                        size="sm"
+                        variant="outline"
+                        onClick={() => {
+                          writeSitPrefill({ title, description });
+                          try { void trackEvent("mission_to_sit_redirect", { metadata: { signals: sitLike.matched } }); } catch {}
+                          navigate("/sits/create");
+                        }}
                       >
-                        {tpl.label}
-                      </button>
-                    ))}
+                        Créer une annonce de garde
+                      </Button>
+                      <span className="text-[11px] text-muted-foreground">Ou continuez votre mission, rien ne bloque.</span>
+                    </div>
                   </div>
-                </div>
+                )}
+                {rehoming && (
+                  <div className="rounded-xl border border-warning/40 bg-warning/10 p-4 space-y-1" role="note">
+                    <p className="text-sm font-semibold text-foreground">
+                      La cession ou l'adoption d'animaux n'a pas sa place dans l'entraide
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      Guardiens ne publie pas d'annonces de vente, don ou adoption d'animaux. Si vous publiez, votre mission sera transmise à notre équipe pour relecture.
+                    </p>
+                  </div>
+                )}
+                <p className="text-xs text-muted-foreground">
+                  Une simple question à poser ?{" "}
+                  <Link to="/questions/nouvelle" className="text-primary hover:underline font-medium">
+                    Posez-la à la communauté
+                  </Link>
+                </p>
 
                 {/* Catégorie */}
                 <div className="space-y-2">
@@ -809,34 +842,6 @@ const CreateSmallMission = () => {
       )}
 
 
-      <Dialog open={confirmUnchangedOpen} onOpenChange={setConfirmUnchangedOpen}>
-        <DialogContent className="max-w-md">
-          <DialogHeader>
-            <DialogTitle>Un mot à vous fait la différence</DialogTitle>
-            <DialogDescription>
-              Les gens du coin répondent plus aux messages personnels. Prenez un instant pour ajouter un détail qui vous ressemble : lieu précis, contexte, ton.
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter className="gap-2">
-            <Button
-              onClick={() => setConfirmUnchangedOpen(false)}
-              autoFocus
-            >
-              Personnaliser
-            </Button>
-            <Button
-              variant="outline"
-              onClick={async () => {
-                setConfirmUnchangedOpen(false);
-                try { trackEvent("mission_composer_published_unchanged_template", { metadata: { template_id: appliedTemplateId } }); } catch {}
-                await performSubmit();
-              }}
-            >
-              Publier quand même
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
     </>
   );
 };

@@ -118,7 +118,10 @@ const SitterDashboard = () => {
   // Signal helpers proches, partagé entre les deux dashboards.
   // DOIT rester avant tout early return pour respecter la règle des hooks.
   const { data: nearbyHelpersData } = useNearbyHelpers(user?.id);
-  const nearbyHelpersCount = nearbyHelpersData?.helpers?.length ?? 0;
+  // Compteur unique réconcilié : même source que le bandeau « pouls de la
+  // communauté » (rayon 30 km), jamais la taille d'une liste plafonnée.
+  const { data: helpersProximity } = useHelpersProximityCount(user?.id);
+  const nearbyHelpersCount = helpersProximity?.localCount ?? nearbyHelpersData?.helpers?.length ?? 0;
 
   // Prochain pas déterministe. Sert uniquement à savoir si l'invitation à
   // vérifier l'identité est bien le pas suivant, ou si une action plus
