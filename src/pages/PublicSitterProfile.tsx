@@ -41,6 +41,12 @@ import { useViewerSitterForAffinity } from "@/hooks/useViewerSitterForAffinity";
 import AlmaFitGardien from "@/components/ai/alma/AlmaFitGardien";
 import { sanitizeBioForPublic } from "@/lib/sanitizeBio";
 import { isSitterProfileIndexable } from "@/lib/sitterProfileIndexability";
+import {
+  buildProfileLightboxItems,
+  isRealAvatarUrl,
+  thumbnailLightboxIndex,
+  wrapIndex,
+} from "@/lib/profileLightbox";
 
 import { AlmaReciprocityWhisper } from "@/components/ai/alma/wiring/AlmaReciprocityWhisper";
 import { AlmaOwnerActiveSitterWhisper } from "@/components/ai/alma/wiring/AlmaOwnerActiveSitterWhisper";
@@ -142,6 +148,13 @@ export default function PublicSitterProfile() {
   const [emergencyActive, setEmergencyActive] = useState(false);
   const [hasActiveSubscription, setHasActiveSubscription] = useState(false);
   const [lightboxIdx, setLightboxIdx] = useState<number | null>(null);
+  const lightboxRef = useRef<HTMLDivElement>(null);
+  // Jeu d'images de la visionneuse : l'avatar en tête (s'il existe), puis la
+  // galerie. Chez un visiteur déconnecté la galerie n'est jamais chargée
+  // (membres uniquement), donc le jeu se limite à l'avatar public.
+  const hasAvatar = isRealAvatarUrl(profile?.avatar_url);
+  const visibleGallery = gallery.slice(0, 9);
+  const lightboxItems = buildProfileLightboxItems(profile?.avatar_url, visibleGallery);
   const [heroPickerOpen, setHeroPickerOpen] = useState(false);
   const [badgesBySitId, setBadgesBySitId] = useState<Record<string, string[]>>({});
   const [sitOwnerBySitId, setSitOwnerBySitId] = useState<Record<string, string>>({});
@@ -342,7 +355,7 @@ export default function PublicSitterProfile() {
         <button
           key={g.id}
           type="button"
-          onClick={() => setLightboxIdx(i)}
+          onClick={() => setLightboxIdx(thumbnailLightboxIndex(i, hasAvatar))}
           className={`overflow-hidden rounded-xl group relative ${
             i === 0
               ? "col-span-2 aspect-[2/1] md:col-span-2 md:row-span-2 md:aspect-auto"
@@ -792,19 +805,58 @@ export default function PublicSitterProfile() {
     loadEntraideData();
   }, [activeTab, id]);
 
-  // Lightbox keyboard navigation (Escape to close, arrows to navigate)
+  // Navigation clavier de la visionneuse : Échap ferme, les flèches circulent
+  // (boucle aux extrémités) et Tab reste piégé dans la modale.
   useEffect(() => {
     if (lightboxIdx === null) return;
-    const gallerySlice = gallery.slice(0, 9);
-    const max = gallerySlice.length > 0 ? gallerySlice.length : (profile?.avatar_url ? 1 : 0);
+    const total = lightboxItems.length;
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') setLightboxIdx(null);
-      else if (e.key === 'ArrowLeft' && lightboxIdx > 0) setLightboxIdx(lightboxIdx - 1);
-      else if (e.key === 'ArrowRight' && lightboxIdx < max - 1) setLightboxIdx(lightboxIdx + 1);
+      if (e.key === 'Escape') {
+        setLightboxIdx(null);
+        return;
+      }
+      if (e.key === 'ArrowLeft') {
+        setLightboxIdx(wrapIndex(lightboxIdx - 1, total));
+        return;
+      }
+      if (e.key === 'ArrowRight') {
+        setLightboxIdx(wrapIndex(lightboxIdx + 1, total));
+        return;
+      }
+      if (e.key === 'Tab') {
+        const container = lightboxRef.current;
+        if (!container) return;
+        const focusables = Array.from(
+          container.querySelectorAll<HTMLElement>('button:not([disabled])'),
+        );
+        if (focusables.length === 0) {
+          e.preventDefault();
+          return;
+        }
+        const first = focusables[0];
+        const last = focusables[focusables.length - 1];
+        const active = document.activeElement;
+        if (e.shiftKey && (active === first || !container.contains(active))) {
+          e.preventDefault();
+          last.focus();
+        } else if (!e.shiftKey && (active === last || !container.contains(active))) {
+          e.preventDefault();
+          first.focus();
+        }
+      }
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [lightboxIdx, gallery]);
+  }, [lightboxIdx, lightboxItems.length]);
+
+  // À l'ouverture, le focus rejoint le bouton Fermer (amorce du piège à focus).
+  const lightboxOpen = lightboxIdx !== null;
+  useEffect(() => {
+    if (!lightboxOpen) return;
+    lightboxRef.current
+      ?.querySelector<HTMLElement>('button[aria-label="Fermer la galerie"]')
+      ?.focus();
+  }, [lightboxOpen]);
 
   const loadMoreOwnerSits = async () => {
     if (!id || ownerSitsLoadingMore) return;
@@ -971,12 +1023,6 @@ export default function PublicSitterProfile() {
   // Compteurs contextuels au hero selon la facette active (JSON-LD/SEO restent sur le total).
   const heroAvg = activeTab === 'proprio' ? ownerAvg : sitterRoleAvg;
   const heroCount = activeTab === 'proprio' ? ownerReviews.length : sitterRoleCount;
-  const visibleGallery = gallery.slice(0, 9);
-  // Contenu réel de la lightbox : la galerie si elle existe, sinon on retombe
-  // sur l'avatar seul pour que l'utilisateur puisse toujours l'agrandir.
-  const lightboxItems = visibleGallery.length > 0
-    ? visibleGallery
-    : (profile?.avatar_url ? [{ photo_url: storageImageUrl(profile.avatar_url, { width: 1024, height: 1024, resize: "contain" }), caption: null }] : []);
 
   // showCTA supprimé (vague 38) : le sticky mobile suit heroCta.kind.
 
@@ -1254,10 +1300,10 @@ export default function PublicSitterProfile() {
             heroAnchor={anchor}
             isOwnProfile={isOwn}
             onOpenHeroPicker={() => setHeroPickerOpen(true)}
-            onOpenAvatarLightbox={() =>
-              lightboxItems.length > 0 && setLightboxIdx(0)
-            }
-            hasAvatarLightbox={lightboxItems.length > 0}
+            // Sans photo de profil, l'avatar n'est pas cliquable du tout :
+            // mieux vaut rien qu'une visionneuse ouverte sur autre chose.
+            onOpenAvatarLightbox={() => hasAvatar && setLightboxIdx(0)}
+            hasAvatarLightbox={hasAvatar}
             proStatus={(profile as any)?.pro_status ?? null}
             proSpecialty={(profile as any)?.pro_specialty ?? null}
             proBusinessName={(profile as any)?.pro_business_name ?? null}
@@ -2388,51 +2434,71 @@ export default function PublicSitterProfile() {
 
 
       {/* ── Lightbox ── */}
-      {lightboxIdx !== null && (
+      {lightboxIdx !== null && lightboxIdx < lightboxItems.length && (
         <div
+          ref={lightboxRef}
           role="dialog"
           aria-modal="true"
           aria-label={`Photo ${lightboxIdx + 1} sur ${lightboxItems.length}`}
           className="fixed inset-0 z-[60] bg-black/90 flex items-center justify-center"
           onClick={() => setLightboxIdx(null)}
         >
+          {/* Fermeture : pastille sombre semi-opaque, lisible sur toute photo. */}
           <button
             type="button"
             aria-label="Fermer la galerie"
-            className="absolute top-4 right-4 text-white/80 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white rounded-full p-1"
-            onClick={() => setLightboxIdx(null)}
+            className="absolute top-4 right-4 sm:top-6 sm:right-6 z-10 inline-flex items-center justify-center rounded-full bg-black/60 text-white ring-1 ring-white/40 backdrop-blur-sm p-2 hover:bg-black/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
+            onClick={(e) => { e.stopPropagation(); setLightboxIdx(null); }}
           >
-            <X className="w-6 h-6" aria-hidden="true" />
+            <X className="w-5 h-5" aria-hidden="true" />
           </button>
-          {lightboxIdx > 0 && (
-            <button
-              type="button"
-              aria-label="Photo précédente"
-              className="absolute left-4 text-white/80 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white rounded-full p-1"
-              onClick={(e) => { e.stopPropagation(); setLightboxIdx(lightboxIdx - 1); }}
-            >
-              <ChevronLeft className="w-8 h-8" aria-hidden="true" />
-            </button>
-          )}
-          {lightboxIdx < lightboxItems.length - 1 && (
-            <button
-              type="button"
-              aria-label="Photo suivante"
-              className="absolute right-4 text-white/80 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white rounded-full p-1"
-              onClick={(e) => { e.stopPropagation(); setLightboxIdx(lightboxIdx + 1); }}
-            >
-              <ChevronRight className="w-8 h-8" aria-hidden="true" />
-            </button>
+          {lightboxItems.length > 1 && (
+            <>
+              <button
+                type="button"
+                aria-label="Photo précédente"
+                className="absolute left-4 z-10 inline-flex items-center justify-center rounded-full bg-black/60 text-white ring-1 ring-white/40 backdrop-blur-sm p-2 hover:bg-black/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
+                onClick={(e) => { e.stopPropagation(); setLightboxIdx(wrapIndex(lightboxIdx - 1, lightboxItems.length)); }}
+              >
+                <ChevronLeft className="w-7 h-7" aria-hidden="true" />
+              </button>
+              <button
+                type="button"
+                aria-label="Photo suivante"
+                className="absolute right-4 z-10 inline-flex items-center justify-center rounded-full bg-black/60 text-white ring-1 ring-white/40 backdrop-blur-sm p-2 hover:bg-black/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
+                onClick={(e) => { e.stopPropagation(); setLightboxIdx(wrapIndex(lightboxIdx + 1, lightboxItems.length)); }}
+              >
+                <ChevronRight className="w-7 h-7" aria-hidden="true" />
+              </button>
+            </>
           )}
           <div className="flex flex-col items-center gap-2" onClick={(e) => e.stopPropagation()}>
             <img
-              src={storageImageUrl(lightboxItems[lightboxIdx]?.photo_url, { width: 1600, height: 1600, resize: "contain" })}
-              alt={lightboxItems[lightboxIdx]?.caption || `Photo ${lightboxIdx + 1} du profil de ${profile?.first_name || "ce gardien"}`}
+              src={storageImageUrl(
+                lightboxItems[lightboxIdx]?.photo_url,
+                // Plafond d'ingestion du bucket source : 1024 pour les avatars,
+                // 1600 pour la galerie. Au-delà, l'endpoint n'a rien à servir.
+                lightboxItems[lightboxIdx]?.kind === "avatar"
+                  ? { width: 1024, height: 1024, resize: "contain" }
+                  : { width: 1600, height: 1600, resize: "contain" },
+              )}
+              alt={
+                lightboxItems[lightboxIdx]?.kind === "avatar"
+                  ? `Photo de profil de ${profile?.first_name || "ce gardien"}`
+                  : lightboxItems[lightboxIdx]?.caption || `Photo ${lightboxIdx + 1} du profil de ${profile?.first_name || "ce gardien"}`
+              }
               className="max-h-[85vh] max-w-[90vw] object-contain rounded-lg"
             />
             {lightboxItems[lightboxIdx]?.source === "guardiens" && (
               <span className="text-xs tracking-wide text-white/70">Photo prise pendant une garde</span>
             )}
+          </div>
+          {/* Compteur de position, discret mais toujours présent. */}
+          <div
+            aria-hidden="true"
+            className="absolute bottom-4 left-1/2 -translate-x-1/2 rounded-full bg-black/60 px-3 py-1 text-sm text-white/90 ring-1 ring-white/20 backdrop-blur-sm"
+          >
+            {lightboxIdx + 1} / {lightboxItems.length}
           </div>
         </div>
       )}
