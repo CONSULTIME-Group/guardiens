@@ -116,16 +116,21 @@ export function useSitterTopAffinitySits(): Result {
       const filled = countAffinityFields(sitter);
       const profileIncomplete = filled < 3;
 
-      // 2. Volume total (pour l'empty state honnête)
+      // 2. Volume réellement visible par CE gardien (lien de sortie vers la
+      //    recherche + empty state honnête). Mêmes règles que le pool
+      //    candidat : publiées, ouvertes aux candidatures, non terminées,
+      //    hors annonces du gardien lui-même. Jamais le total brut.
+      const todayIso = new Date().toISOString().slice(0, 10);
       const { count: totalPublished } = await supabase
         .from("sits")
         .select("id", { count: "exact", head: true })
         .eq("status", "published")
-        .eq("accepting_applications", true);
+        .eq("accepting_applications", true)
+        .gte("end_date", todayIso)
+        .neq("user_id", userId!);
 
       // 3. Pool candidat, joint au code postal du propriétaire pour permettre
       //    le filtrage département/région côté client.
-      const todayIso = new Date().toISOString().slice(0, 10);
       const sitsRes: any = await supabase
         .from("sits")
         .select(
