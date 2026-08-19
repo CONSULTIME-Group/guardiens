@@ -160,7 +160,7 @@ export function useSitterPriorityAction(input: Input): SitterPriorityAction {
         title: "Activez votre disponibilité pour être contacté directement par les propriétaires.",
         description: "Vous restez maître de vos acceptations, c'est juste un signal de présence.",
         ctaLabel: "Activer la disponibilité",
-        ctaTo: "#sitter-availability-toggle",
+        ctaTo: "/profile",
         urgency: "medium",
       };
     }

@@ -22,11 +22,9 @@ const PreviewCockpits = () => (
     {CASES.map((c, i) => (
       <div key={`sitter-${i}`} data-testid="cockpit-case" data-role="sitter">
         <SitterCockpit
-          userId="00000000-0000-0000-0000-000000000000"
           firstName={c.firstName}
           greeting={c.greeting}
           isAvailable={i % 2 === 0}
-          onToggleAvailability={() => {}}
         />
       </div>
     ))}

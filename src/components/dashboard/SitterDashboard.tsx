@@ -75,7 +75,7 @@ const SitterDashboard = () => {
     hasEmergencyProfile, hasAcceptedRecent, nextGuard, nextGuardError,
     nearbyListings, nearbyListingsRadius, nearbyError, articles, nearbyMissions, nearbyMissionsError,
     myMissions, myMissionsError,
-    toggleAvailability,
+    
     reputation, groupedBadges, reload,
   } = useSitterDashboardData(user?.id);
 
@@ -321,12 +321,10 @@ const SitterDashboard = () => {
               {/* 1. ACCUEIL, salutation Bienvenue */}
               <div className="min-w-0">
                 <SitterCockpit
-                  userId={user?.id}
                   firstName={user?.firstName}
                   avatarUrl={avatarUrl}
                   isFounder={user?.isFounder}
                   isAvailable={isAvailable}
-                  onToggleAvailability={toggleAvailability}
                   greeting="Bienvenue"
                 />
               </div>
@@ -405,12 +403,10 @@ const SitterDashboard = () => {
               {/* COCKPIT */}
               <div className="min-w-0">
                 <SitterCockpit
-                  userId={user?.id}
                   firstName={user?.firstName}
                   avatarUrl={avatarUrl}
                   isFounder={user?.isFounder}
                   isAvailable={isAvailable}
-                  onToggleAvailability={toggleAvailability}
                   nextGuard={nextGuard}
                   profileCompletion={profileCompletion}
                   postalCode={postalCode}

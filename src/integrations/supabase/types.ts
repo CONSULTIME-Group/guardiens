@@ -8052,6 +8052,7 @@ export type Database = {
           canonical_user_id: string
         }[]
       }
+      gallery_photo_count: { Args: { p_user_id: string }; Returns: number }
       generate_sit_slug: {
         Args: { p_city: string; p_id: string; p_title: string }
         Returns: string
