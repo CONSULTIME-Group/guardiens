@@ -220,12 +220,14 @@ RÈGLES MARKDOWN : utilisez **gras** pour les points clés, listes à puces, sou
       const queries = [cap(breed), breed, breed.replace(/é/g, "e").replace(/è/g, "e")];
       for (const q of queries) {
         try {
-          const wikiUrl = `https://fr.wikipedia.org/w/api.php?action=query&format=json&prop=pageimages&piprop=original&titles=${encodeURIComponent(q)}&redirects=1&pithumbsize=1200`;
+          // miniature 1200px (déjà redimensionnée par Wikimedia) en priorité,
+          // l'originale en repli : moins de poids à stocker.
+          const wikiUrl = `https://fr.wikipedia.org/w/api.php?action=query&format=json&prop=pageimages&piprop=original|thumbnail&titles=${encodeURIComponent(q)}&redirects=1&pithumbsize=1200`;
           const wr = await fetch(wikiUrl);
           const wj: any = await wr.json();
           const pages = wj?.query?.pages || {};
           for (const p of Object.values<any>(pages)) {
-            const src = p?.original?.source;
+            const src = p?.thumbnail?.source ?? p?.original?.source;
             if (src && /\.(jpg|jpeg|png|webp)$/i.test(src)) {
               finalImage = src;
               finalCredit = `Wikipédia, ${p.title}`;
@@ -237,9 +239,48 @@ RÈGLES MARKDOWN : utilisez **gras** pour les points clés, listes à puces, sou
         } catch (e) { console.error("wiki fail", q, e); }
       }
     }
-    if (finalImage) record.image_url = finalImage;
-    if (finalCredit) record.image_credit = finalCredit;
-    if (finalAlt) record.image_alt = finalAlt;
+
+    // Rapatriement systématique dans notre stockage : toute fiche générée
+    // stocke le fichier dans property-photos/breeds/ (format déjà en place),
+    // jamais de lien chaud externe. Si le rapatriement échoue, la fiche est
+    // créée SANS image : la carte de repli publique prend le relais, mieux
+    // vaut ça qu'une URL fragile.
+    let storedImage: string | null = null;
+    if (finalImage && finalImage.includes("/storage/v1/object/public/property-photos/")) {
+      // Déjà dans notre stockage (appel manuel) : rien à rapatrier.
+      storedImage = finalImage;
+    } else if (finalImage) {
+      try {
+        const imgRes = await fetch(finalImage, {
+          headers: { "User-Agent": "Guardiens/1.0 (https://guardiens.fr)" },
+        });
+        if (imgRes.ok) {
+          const contentType = (imgRes.headers.get("content-type") || "image/jpeg").split(";")[0];
+          const ext = contentType.includes("png") ? "png" : contentType.includes("webp") ? "webp" : "jpg";
+          const slug = normalizedBreed
+            .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+            .replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+          if (!slug) throw new Error(`empty slug for breed: ${normalizedBreed}`);
+          const path = `breeds/${normalizedSpecies}-${slug}.${ext}`;
+          const buf = await imgRes.arrayBuffer();
+          const { error: upErr } = await supabase.storage
+            .from("property-photos")
+            .upload(path, buf, { contentType, upsert: true });
+          if (upErr) {
+            console.error("storage upload failed", path, upErr);
+          } else {
+            storedImage = supabase.storage.from("property-photos").getPublicUrl(path).data.publicUrl;
+          }
+        } else {
+          console.error("image fetch failed", imgRes.status, finalImage);
+        }
+      } catch (e) { console.error("image migration failed", e); }
+    }
+    if (storedImage) {
+      record.image_url = storedImage;
+      if (finalCredit) record.image_credit = finalCredit;
+      if (finalAlt) record.image_alt = finalAlt;
+    }
 
     const { data: inserted } = await supabase
       .from("breed_profiles")
