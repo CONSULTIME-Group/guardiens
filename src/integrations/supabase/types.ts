@@ -8540,6 +8540,10 @@ export type Database = {
         Args: { _context: string; _excerpt: string; _kinds: string[] }
         Returns: undefined
       }
+      report_mission_content_signal: {
+        Args: { _metadata?: Json; _mission_id: string; _signal_type: string }
+        Returns: undefined
+      }
       resolve_review_dispute: {
         Args: {
           p_admin_note?: string

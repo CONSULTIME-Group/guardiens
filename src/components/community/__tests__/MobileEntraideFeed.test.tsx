@@ -52,9 +52,7 @@ const renderFeed = () =>
       <MobileEntraideFeed
         missions={missions}
         questions={questions}
-        onAsk={vi.fn()}
-        onNeed={vi.fn()}
-        onOffer={vi.fn()}
+        onPublish={vi.fn()}
       />
     </MemoryRouter>,
   );
@@ -99,6 +97,13 @@ describe("MobileEntraideFeed", () => {
     );
     // L'offre m2 ne doit plus apparaître
     expect(screen.queryByText("Je peux garder votre chat")).not.toBeInTheDocument();
+  });
+
+  it("affiche les compteurs réels par nature sur les chips", () => {
+    renderFeed();
+    expect(screen.getByRole("button", { name: /Questions 1/ })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /Demandes 1/ })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /Offres 1/ })).toBeInTheDocument();
   });
 
   it("respecte le vouvoiement", () => {

@@ -29,6 +29,12 @@ interface Props {
   onClear: () => void;
   /** Vrai quand le CP saisi est valide mais que Nominatim n'a rien renvoyé. */
   originError?: boolean;
+  /**
+   * Limitation explicite au rayon. Inactive par défaut : la position trie par
+   * proximité sans masquer aucune mission.
+   */
+  filterEnabled?: boolean;
+  onFilterEnabledChange?: (v: boolean) => void;
 }
 
 const GEO_ERROR_MESSAGES: Record<GeolocationErrorReason, string> = {
@@ -56,6 +62,8 @@ const ProximityFilter = ({
   onUseMyLocation,
   onClear,
   originError = false,
+  filterEnabled = false,
+  onFilterEnabledChange,
 }: Props) => {
   const [locating, setLocating] = useState(false);
   const [geoError, setGeoError] = useState<GeolocationErrorReason | null>(null);
@@ -149,6 +157,18 @@ const ProximityFilter = ({
           ))}
         </SelectContent>
       </Select>
+
+      {active && onFilterEnabledChange && (
+        <label className="flex items-center gap-2 text-xs text-muted-foreground cursor-pointer select-none">
+          <input
+            type="checkbox"
+            checked={filterEnabled}
+            onChange={(e) => onFilterEnabledChange(e.target.checked)}
+            className="h-3.5 w-3.5 rounded border-border accent-[var(--primary)]"
+          />
+          Limiter à ce rayon
+        </label>
+      )}
 
       <Button
         type="button"

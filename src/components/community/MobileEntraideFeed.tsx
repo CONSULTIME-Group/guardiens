@@ -7,9 +7,10 @@ import { sanitizeUserTitle } from "@/lib/sanitizeTitle";
 import { trackEvent } from "@/lib/analytics";
 
 /**
- * MobileEntraideFeed — Chantier 5 Pass 3.
- * Feed unifié mobile : agrège Questions, Besoins et Offres triés par date DESC.
- * Multi-select chips Q / D / O persisté en sessionStorage.
+ * MobileEntraideFeed — fil unique de l'entraide sur mobile.
+ * Agrège Questions, Demandes et Offres triées par date DESC.
+ * Multi-select chips Q / D / O persisté en sessionStorage, compteurs réels.
+ * Un seul appel à l'action : « Publier ».
  *
  * Analytics :
  *  - entraide_feed_default_view : émis une seule fois par session mobile
@@ -18,10 +19,10 @@ import { trackEvent } from "@/lib/analytics";
 
 type FeedType = "question" | "besoin" | "offre";
 
-const CHIPS: { key: FeedType; label: string; short: string; badge: string }[] = [
-  { key: "question", label: "Questions", short: "Questions", badge: "bg-primary/10 text-primary" },
-  { key: "besoin", label: "Demandes d'aide", short: "Demandes", badge: "bg-secondary/15 text-secondary-foreground" },
-  { key: "offre", label: "Offres d'aide", short: "Offres", badge: "bg-accent/25 text-accent-foreground" },
+const CHIPS: { key: FeedType; label: string; short: string }[] = [
+  { key: "question", label: "Questions", short: "Questions" },
+  { key: "besoin", label: "Demandes d'aide", short: "Demandes" },
+  { key: "offre", label: "Offres d'aide", short: "Offres" },
 ];
 
 const STORAGE_KEY = "entraide-feed-chips-v1";
@@ -80,12 +81,11 @@ interface Props {
   missions: FeedMission[];
   questions: FeedQuestion[];
   loading?: boolean;
-  onAsk: () => void;
-  onNeed: () => void;
-  onOffer: () => void;
+  /** Action unique de publication (demande, offre ou question). */
+  onPublish: () => void;
 }
 
-const MobileEntraideFeed = ({ missions, questions, loading, onAsk, onNeed, onOffer }: Props) => {
+const MobileEntraideFeed = ({ missions, questions, loading, onPublish }: Props) => {
   const navigate = useNavigate();
   const [active, setActive] = useState<FeedType[]>(() => readChips());
   const viewFiredRef = useRef(false);
@@ -120,6 +120,14 @@ const MobileEntraideFeed = ({ missions, questions, loading, onAsk, onNeed, onOff
     });
   };
 
+  const counts = useMemo(() => {
+    const c: Record<FeedType, number> = { question: questions.length, besoin: 0, offre: 0 };
+    for (const m of missions) {
+      c[(m.mission_type ?? "besoin") as "besoin" | "offre"] += 1;
+    }
+    return c;
+  }, [missions, questions]);
+
   const items = useMemo(() => {
     const list: Array<
       | { kind: "question"; date: string; data: FeedQuestion }
@@ -135,21 +143,12 @@ const MobileEntraideFeed = ({ missions, questions, loading, onAsk, onNeed, onOff
     return list.sort((a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : 0));
   }, [active, missions, questions]);
 
-  const emptyCta =
-    active.length === 1
-      ? active[0] === "question"
-        ? { label: "Poser une question", action: onAsk }
-        : active[0] === "besoin"
-          ? { label: "Publier une demande", action: onNeed }
-          : { label: "Proposer mon aide", action: onOffer }
-      : { label: "Publier une demande", action: onNeed };
-
   return (
     <div className="md:hidden">
       <div className="mb-3">
         <h2 className="font-heading text-lg font-semibold text-foreground">Fil de l'entraide</h2>
         <p className="text-xs text-muted-foreground mt-1">
-          Tout ce qui bouge près de chez vous, du plus récent au plus ancien.
+          Questions, demandes et offres de coup de main, du plus récent au plus ancien.
         </p>
       </div>
 
@@ -166,13 +165,20 @@ const MobileEntraideFeed = ({ missions, questions, loading, onAsk, onNeed, onOff
               type="button"
               onClick={() => toggleChip(c.key)}
               aria-pressed={on}
-              className={`px-3 py-1.5 rounded-full text-xs font-semibold border transition-colors ${
+              className={`px-3 py-1.5 rounded-full text-xs font-semibold border transition-colors inline-flex items-center gap-1.5 ${
                 on
                   ? "bg-primary text-primary-foreground border-primary"
                   : "bg-card text-muted-foreground border-border hover:bg-accent"
               }`}
             >
-              {c.short}
+              <span>{c.short}</span>
+              <span
+                className={`text-[10px] tabular-nums px-1.5 py-px rounded-full ${
+                  on ? "bg-primary-foreground/20" : "bg-muted text-muted-foreground"
+                }`}
+              >
+                {counts[c.key]}
+              </span>
             </button>
           );
         })}
@@ -226,7 +232,7 @@ const MobileEntraideFeed = ({ missions, questions, loading, onAsk, onNeed, onOff
             }
             const m = it.data;
             const isOffer = it.kind === "offre";
-            const badgeLabel = isOffer ? "Offre" : "Besoin";
+            const badgeLabel = isOffer ? "Offre" : "Demande";
             const badgeCls = isOffer
               ? "bg-accent/25 text-accent-foreground"
               : "bg-secondary/15 text-secondary-foreground";
@@ -281,10 +287,10 @@ const MobileEntraideFeed = ({ missions, questions, loading, onAsk, onNeed, onOff
           <div className="mt-4">
             <button
               type="button"
-              onClick={emptyCta.action}
+              onClick={onPublish}
               className="inline-flex items-center justify-center rounded-md bg-primary text-primary-foreground px-4 py-2 text-sm font-semibold hover:bg-primary/90 transition-colors"
             >
-              {emptyCta.label}
+              Publier
             </button>
           </div>
         </div>
