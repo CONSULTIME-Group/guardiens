@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useCallback, type MouseEvent as ReactMouseEvent } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import { petSpeciesLabelLower } from "@/lib/petLabels";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
@@ -2144,7 +2145,7 @@ const CreateSit = () => {
                   title={title}
                   description={specificExpectations}
                   context={{
-                    animaux: pets?.map(p => `${p.species}${p.breed ? ` (${p.breed})` : ""}`).join(", "),
+                    animaux: pets?.map(p => [petSpeciesLabelLower(p.species), p.breed ? `(${p.breed})` : null].filter(Boolean).join(" ")).filter(Boolean).join(", "),
                     logement: property?.type,
                     ville: sitCity || ownerCity || undefined,
                     dates: startDate && endDate ? `${startDate} à ${endDate}` : undefined,

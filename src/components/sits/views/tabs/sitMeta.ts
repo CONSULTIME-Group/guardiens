@@ -6,19 +6,13 @@
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 
-// Libellés FR des espèces, remplace les emojis (règle no-emoji dans le contenu).
-export const SPECIES_LABEL: Record<string, string> = {
-  dog: "Chien",
-  cat: "Chat",
-  farm_animal: "Animal de ferme",
-  rabbit: "Lapin",
-  bird: "Oiseau",
-  fish: "Poisson",
-  rodent: "Rongeur",
-  horse: "Cheval",
-  nac: "NAC",
-  reptile: "Reptile",
-};
+// Libellés FR des espèces : module unique src/lib/petLabels.ts (aligné sur
+// l'enum Postgres pet_species). Ré-export pour compatibilité, ne pas recréer
+// de mapping local. Le repli « Animal » reste un terme générique français,
+// jamais la valeur brute de la base.
+import { PET_SPECIES_LABELS } from "@/lib/petLabels";
+
+export const SPECIES_LABEL = PET_SPECIES_LABELS;
 export const speciesLabel = (s?: string | null) => (s && SPECIES_LABEL[s]) || "Animal";
 
 export const ENV_META: Record<string, { label: string }> = {

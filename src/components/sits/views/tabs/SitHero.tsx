@@ -10,6 +10,7 @@
  */
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { createPortal } from "react-dom";
+import { petSpeciesLabelLower } from "@/lib/petLabels";
 import { ChevronLeft, ChevronRight, X, Grid3x3 } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
@@ -78,7 +79,8 @@ const SitHero = ({
       const url = pet.url.trim();
       if (!url || seen.has(url)) continue;
       seen.add(url);
-      const speciesLbl = pet.species ? ` (${pet.species})` : "";
+      const sp = petSpeciesLabelLower(pet.species);
+      const speciesLbl = sp ? ` (${sp})` : "";
       const caption = pet.name ? `${pet.name}${speciesLbl}` : `Animal de la garde${speciesLbl}`;
       all.push({ url, caption, kind: "animal" });
     }

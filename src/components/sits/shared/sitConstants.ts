@@ -32,37 +32,15 @@ export const SPECIES_EMOJI: Record<string, string> = {
   nac: "🐾",
 };
 
-export const SPECIES_LABEL: Record<string, string> = {
-  dog: "chien",
-  cat: "chat",
-  horse: "cheval",
-  bird: "oiseau",
-  rodent: "rongeur",
-  fish: "poisson",
-  reptile: "reptile",
-  farm_animal: "animal de ferme",
-  nac: "NAC",
-};
-
-export const WALK_LABELS: Record<string, string> = {
-  none: "Aucune balade",
-  "30min": "30 min/jour",
-  "1h": "1h/jour",
-  "2h_plus": "2h+/jour",
-};
-
-export const ALONE_LABELS: Record<string, string> = {
-  never: "Jamais seul",
-  "2h": "2h max seul",
-  "6h": "6h max seul",
-  all_day: "Peut rester seul toute la journée",
-};
-
-export const ACTIVITY_LABELS: Record<string, string> = {
-  calm: "Calme",
-  moderate: "Modéré",
-  sportive: "Sportif",
-};
+// Les libellés français des enums animaux vivent dans src/lib/petLabels.ts
+// (module unique, aligné sur les enums Postgres). Ré-exportés ici pour
+// compatibilité avec les imports existants : ne pas recréer de mapping local.
+export {
+  PET_SPECIES_LABELS_LOWER as SPECIES_LABEL,
+  PET_WALK_LABELS as WALK_LABELS,
+  PET_ALONE_LABELS as ALONE_LABELS,
+  PET_ACTIVITY_LABELS as ACTIVITY_LABELS,
+} from "@/lib/petLabels";
 
 export interface SitStatusConfig {
   label: string;

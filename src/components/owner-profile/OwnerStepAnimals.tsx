@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { avatarImageUrl, storageImageUrl } from "@/lib/storageImage";
+import { petSpeciesLabel } from "@/lib/petLabels";
 import { logger } from "@/lib/logger";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -225,7 +226,7 @@ const OwnerStepAnimals = ({ pets, onAddPet, onUpdatePet, onRemovePet }: Props) =
     setSaving(false);
   };
 
-  const speciesLabel = (val: string) => SPECIES.find(s => s.value === val)?.label || val;
+  // Libellé d'espèce : module unique petLabels, valeur inconnue masquée (jamais brute).
 
   return (
     <div className="space-y-6">
@@ -239,7 +240,7 @@ const OwnerStepAnimals = ({ pets, onAddPet, onUpdatePet, onRemovePet }: Props) =
             {pet.photo_url && <img src={avatarImageUrl(pet.photo_url, 48)} alt={pet.name} className="w-12 h-12 rounded-lg object-cover cursor-pointer hover:ring-2 ring-primary transition-all" onClick={(e) => { e.stopPropagation(); setLightboxUrl(pet.photo_url!); }} />}
             <div className="flex-1">
               <span className="font-semibold">{pet.name}</span>
-              <span className="text-sm text-muted-foreground ml-2">{speciesLabel(pet.species)}{pet.breed ? `, ${pet.breed}` : ""}</span>
+              <span className="text-sm text-muted-foreground ml-2">{petSpeciesLabel(pet.species)}{pet.breed ? `, ${pet.breed}` : ""}</span>
             </div>
             {expandedId === pet.id ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
           </button>

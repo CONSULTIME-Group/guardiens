@@ -18,6 +18,7 @@ import { useViewerSitterForAffinity } from "@/hooks/useViewerSitterForAffinity";
 import { sanitizeBioForPublic } from "@/lib/sanitizeBio";
 import { avatarImageUrl, storageImageUrl } from "@/lib/storageImage";
 import BreedEditorialLink from "@/components/breeds/BreedEditorialLink";
+import { petSpeciesLabel, petActivityLabel, petWalkLabel, petAloneLabel } from "@/lib/petLabels";
 
 interface SitLike {
   slug?: string | null;
@@ -120,7 +121,6 @@ interface Props {
   petsPitchSummary: string;
   typeLabel: string | null;
   envLabel: string | null;
-  speciesLabel: Record<string, string>;
   onShare: () => void;
   /** Contexte viewer pour adapter le CTA. */
   isAuthenticated?: boolean;
@@ -146,7 +146,6 @@ const PublicSitView = ({
   urgencyLabel,
   typeLabel,
   envLabel,
-  speciesLabel,
   onShare,
   isAuthenticated = false,
   hasAccess = false,
@@ -161,7 +160,7 @@ const PublicSitView = ({
   const photos: string[] = (property?.photos || []).filter(Boolean);
   const petPhotos = pets
     .filter((p) => !!p.photo_url)
-    .map((p) => ({ url: p.photo_url as string, name: p.name, species: speciesLabel[p.species] || p.species }));
+    .map((p) => ({ url: p.photo_url as string, name: p.name, species: petSpeciesLabel(p.species) ?? "Animal" }));
   const cityLabel = sit.city || owner?.city || "France";
   const redirect = `/annonces/${sit.slug || sit.id}`;
   const title = sit.title ? sanitizeUserTitle(sit.title) : t("sit_detail.fallback_title", { city: cityLabel });
@@ -382,37 +381,53 @@ const PublicSitView = ({
                     {pets.length === 1 ? t("sit_detail.pets_h2_one") : t("sit_detail.pets_h2_other")}
                   </h2>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    {pets.map((pet) => (
-                      <button
-                        type="button"
+                    {pets.map((pet) => {
+                      // Libellés FR uniquement : une valeur d'enum inconnue est
+                      // masquée, jamais affichée brute (module src/lib/petLabels).
+                      const cardLine = [
+                        petSpeciesLabel(pet.species),
+                        pet.breed || null,
+                        typeof pet.age === "number" && pet.age > 0 ? t("sit_detail.years", { count: pet.age }) : null,
+                      ].filter(Boolean).join(" · ");
+                      return (
+                      <div
                         key={pet.id}
-                        onClick={() => setOpenPet(pet)}
-                        className="flex items-center gap-4 bg-card border border-border rounded-2xl px-5 py-4 text-left hover:border-primary/40 hover:shadow-sm transition-all focus:outline-none focus:ring-2 focus:ring-primary/30"
-                        aria-label={t("sit_detail.pet_sheet_aria", { name: pet.name })}
+                        className="bg-card border border-border rounded-2xl px-5 py-4 hover:border-primary/40 hover:shadow-sm transition-all"
                       >
-                        {pet.photo_url ? (
-                          <img
-                            src={avatarImageUrl(pet.photo_url, 112)}
-                            alt={pet.name}
-                            loading="lazy"
-                            className="w-14 h-14 rounded-full object-cover shrink-0"
-                          />
-                        ) : (
-                          <span className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center font-heading text-lg font-bold text-primary shrink-0">
-                            {pet.name.charAt(0).toUpperCase()}
-                          </span>
+                        <button
+                          type="button"
+                          onClick={() => setOpenPet(pet)}
+                          className="flex items-center gap-4 w-full text-left rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/30"
+                          aria-label={t("sit_detail.pet_sheet_aria", { name: pet.name })}
+                        >
+                          {pet.photo_url ? (
+                            <img
+                              src={avatarImageUrl(pet.photo_url, 112)}
+                              alt={pet.name}
+                              loading="lazy"
+                              className="w-14 h-14 rounded-full object-cover shrink-0"
+                            />
+                          ) : (
+                            <span className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center font-heading text-lg font-bold text-primary shrink-0">
+                              {pet.name.charAt(0).toUpperCase()}
+                            </span>
+                          )}
+                          <div className="min-w-0 flex-1">
+                            <p className="font-semibold text-base truncate">{pet.name}</p>
+                            {cardLine && (
+                              <p className="text-sm text-muted-foreground truncate">{cardLine}</p>
+                            )}
+                          </div>
+                          <span className="text-xs text-primary font-medium shrink-0">{t("sit_detail.view")}</span>
+                        </button>
+                        {/* Lien fiche race visible sans ouvrir la modale : une
+                            ligne discrète, rendue uniquement si la fiche existe. */}
+                        {pet.breed && (
+                          <BreedEditorialLink species={pet.species} breed={pet.breed} className="mt-2 ml-[72px]" />
                         )}
-                        <div className="min-w-0 flex-1">
-                          <p className="font-semibold text-base truncate">{pet.name}</p>
-                          <p className="text-sm text-muted-foreground truncate">
-                            {speciesLabel[pet.species] || pet.species}
-                            {pet.breed ? ` · ${pet.breed}` : ""}
-                            {typeof pet.age === "number" && pet.age > 0 ? ` · ${t("sit_detail.years", { count: pet.age })}` : ""}
-                          </p>
-                        </div>
-                        <span className="text-xs text-primary font-medium shrink-0">{t("sit_detail.view")}</span>
-                      </button>
-                    ))}
+                      </div>
+                      );
+                    })}
                   </div>
 
                   {/* Modale fiche animal */}
@@ -434,9 +449,11 @@ const PublicSitView = ({
                           )}
                           <div className="space-y-3 text-sm">
                             <p className="text-muted-foreground">
-                              {speciesLabel[openPet.species] || openPet.species}
-                              {openPet.breed ? ` · ${openPet.breed}` : ""}
-                              {typeof openPet.age === "number" && openPet.age > 0 ? ` · ${t("sit_detail.years", { count: openPet.age })}` : ""}
+                              {[
+                                petSpeciesLabel(openPet.species),
+                                openPet.breed || null,
+                                typeof openPet.age === "number" && openPet.age > 0 ? t("sit_detail.years", { count: openPet.age }) : null,
+                              ].filter(Boolean).join(" · ")}
                             </p>
                             {openPet.breed && (
                               <BreedEditorialLink species={openPet.species} breed={openPet.breed} />
@@ -447,22 +464,22 @@ const PublicSitView = ({
                                 <p className="text-foreground/85 whitespace-pre-line">{openPet.character}</p>
                               </div>
                             )}
-                            {openPet.activity_level && (
+                            {petActivityLabel(openPet.activity_level) && (
                               <div>
                                 <p className="font-semibold text-foreground mb-1">{t("sit_detail.pet_activity")}</p>
-                                <p className="text-foreground/85">{openPet.activity_level}</p>
+                                <p className="text-foreground/85">{petActivityLabel(openPet.activity_level)}</p>
                               </div>
                             )}
-                            {openPet.walk_duration && (
+                            {petWalkLabel(openPet.walk_duration) && (
                               <div>
                                 <p className="font-semibold text-foreground mb-1">{t("sit_detail.pet_walks")}</p>
-                                <p className="text-foreground/85">{openPet.walk_duration}</p>
+                                <p className="text-foreground/85">{petWalkLabel(openPet.walk_duration)}</p>
                               </div>
                             )}
-                            {openPet.alone_duration && (
+                            {petAloneLabel(openPet.alone_duration) && (
                               <div>
                                 <p className="font-semibold text-foreground mb-1">{t("sit_detail.pet_alone")}</p>
-                                <p className="text-foreground/85">{openPet.alone_duration}</p>
+                                <p className="text-foreground/85">{petAloneLabel(openPet.alone_duration)}</p>
                               </div>
                             )}
                             {openPet.food && (

@@ -60,6 +60,7 @@ import AlmaWhisperCard from "@/components/profile/AlmaWhisperCard";
 import CommunityPulseCard from "@/components/profile/CommunityPulseCard";
 import { useCommunityPulse } from "@/hooks/useCommunityPulse";
 import { avatarImageUrl, storageImageUrl } from "@/lib/storageImage";
+import { petSpeciesLabel } from "@/lib/petLabels";
 
 const capitalize = (name: string) =>
   name ? name.charAt(0).toUpperCase() + name.slice(1).toLowerCase() : "";
@@ -1869,7 +1870,7 @@ export default function PublicSitterProfile() {
                           <div className="min-w-0">
                             <p className="font-heading font-semibold text-foreground text-sm truncate">{pet.name}</p>
                             <p className="text-xs text-foreground/60 font-body truncate">
-                              {[pet.species, pet.breed, ageLabel].filter(Boolean).join(' · ')}
+                              {[petSpeciesLabel(pet.species), pet.breed, ageLabel].filter(Boolean).join(' · ')}
                             </p>
                             {pet.character && (
                               <p className="text-xs text-foreground/50 font-body mt-0.5 truncate italic">{pet.character}</p>

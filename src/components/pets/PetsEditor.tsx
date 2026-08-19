@@ -19,11 +19,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import PetForm, { type PetFormValues } from "./PetForm";
 
-const SPECIES_LABEL: Record<string, string> = {
-  dog: "Chien", cat: "Chat", horse: "Cheval", bird: "Oiseau",
-  rodent: "Rongeur", fish: "Poisson", reptile: "Reptile",
-  farm_animal: "Animal de ferme", nac: "NAC",
-};
+// Libellés d'espèces : module unique src/lib/petLabels.ts. Valeur inconnue :
+// on masque plutôt que d'afficher la valeur brute de la base.
+import { petSpeciesLabel } from "@/lib/petLabels";
 
 interface Pet {
   id: string;
@@ -135,7 +133,9 @@ const PetsEditor = ({ propertyId, onChange }: Props) => {
           <div className="flex-1 min-w-0">
             <p className="text-sm font-medium truncate">
               {pet.name}
-              <span className="text-muted-foreground font-normal"> · {SPECIES_LABEL[pet.species] ?? pet.species}</span>
+              {petSpeciesLabel(pet.species) && (
+                <span className="text-muted-foreground font-normal"> · {petSpeciesLabel(pet.species)}</span>
+              )}
               {pet.breed ? <span className="text-muted-foreground font-normal">, {pet.breed}</span> : null}
             </p>
             {(pet.age || pet.character) && (
