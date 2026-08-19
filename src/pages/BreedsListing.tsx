@@ -214,28 +214,7 @@ const BreedsListing = () => {
                     to={`/races/${breedSlug(b)}`}
                     className="group block rounded-xl border border-border bg-card overflow-hidden hover:border-primary/60 transition"
                   >
-                    {b.image_url ? (
-                      <div className="aspect-[4/3] bg-muted overflow-hidden">
-                        <img
-                          src={b.image_url}
-                          alt={b.image_alt || b.breed}
-                          loading="lazy"
-                          decoding="async"
-                          className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-300"
-                        />
-                      </div>
-                    ) : (
-                      // Sans photo : carte typographique assumée, papier carnet
-                      // et initiale en Playfair terracotta. Jamais de carré gris.
-                      <div className="aspect-[4/3] bg-[hsl(var(--hero-paper))] flex items-center justify-center border-b border-border/60">
-                        <span
-                          aria-hidden="true"
-                          className="font-serif text-6xl font-semibold text-secondary/50 select-none"
-                        >
-                          {b.breed.trim().charAt(0).toUpperCase()}
-                        </span>
-                      </div>
-                    )}
+                    <BreedCardImage entry={b} />
                     <div className="p-3 flex items-start justify-between gap-2">
                       <span className="capitalize text-foreground font-medium leading-snug group-hover:text-primary transition-colors">
                         {b.breed}
