@@ -340,10 +340,14 @@ export default function PublicSitterProfile() {
           key={g.id}
           type="button"
           onClick={() => setLightboxIdx(i)}
-          className="overflow-hidden rounded-xl aspect-square group relative"
+          className={`overflow-hidden rounded-xl group relative ${
+            i === 0
+              ? "col-span-2 aspect-[2/1] md:col-span-2 md:row-span-2 md:aspect-auto"
+              : "aspect-square"
+          }`}
         >
           <img
-            src={storageImageUrl(g.photo_url, { width: 386, height: 386 })}
+            src={storageImageUrl(g.photo_url, i === 0 ? { width: 800, height: 800 } : { width: 386, height: 386 })}
             alt={g.caption || `Photo ${i + 1}`}
             className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-300"
             loading="lazy"
@@ -1592,8 +1596,10 @@ export default function PublicSitterProfile() {
               })()}
             </section>
 
-            {/* 5. Galerie — uniquement si contenu réel */}
-            {gallery.length > 0 && (
+            {/* 5. Galerie — uniquement si contenu réel. Sur son propre profil,
+                une galerie vide affiche un encart d'incitation : 96 % des
+                gardiens n'ont aucune photo, et c'est ce qui décide du choix. */}
+            {gallery.length > 0 ? (
               <section aria-label="Galerie" className="scroll-mt-20">
                 <div className="mb-5">
                   <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-secondary">
@@ -1608,7 +1614,28 @@ export default function PublicSitterProfile() {
                 </div>
                 <GallerySimple visibleGallery={visibleGallery} setLightboxIdx={setLightboxIdx} />
               </section>
-            )}
+            ) : isOwn ? (
+              <section aria-label="Galerie" className="scroll-mt-20">
+                <div className="rounded-2xl border border-dashed border-border bg-card p-5 sm:p-6">
+                  <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-secondary">
+                    Galerie
+                  </p>
+                  <h2 className="font-heading text-[22px] sm:text-[26px] font-semibold text-foreground mt-1 leading-tight">
+                    Montrez-vous, c'est ce qui rassure.
+                  </h2>
+                  <p className="text-sm text-muted-foreground mt-2 max-w-xl leading-relaxed">
+                    Un gardien avec des photos est choisi, un gardien sans photo ne l'est presque jamais.
+                    Ajoutez plusieurs instants : vous avec des animaux, votre quotidien, vos expériences de garde.
+                  </p>
+                  <Link
+                    to="/profile"
+                    className="inline-flex items-center mt-4 text-sm font-medium text-primary underline underline-offset-4 hover:text-primary/80 transition-colors"
+                  >
+                    Ajouter des photos à mon profil
+                  </Link>
+                </div>
+              </section>
+            ) : null}
             {/* Rail INLINE (mobile) : les mêmes cartes que le rail sticky
                 desktop, empilées en fin de flux. Masqué en desktop où le rail
                 sticky à droite prend le relais. */}

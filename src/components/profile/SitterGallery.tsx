@@ -180,7 +180,7 @@ const SitterGallery = () => {
       <div className="flex items-center justify-between">
         <div>
           <h2 className="font-heading text-xl font-bold">Ma galerie</h2>
-          <p className="text-sm text-muted-foreground">{photos.length}/50 photos · Montrez les animaux que vous avez gardés</p>
+          <p className="text-sm text-muted-foreground">{photos.length}/50 photos · Vous avec des animaux, votre quotidien, vos expériences de garde : c'est ce que les propriétaires regardent en premier.</p>
         </div>
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
           <DialogTrigger asChild>
@@ -253,7 +253,7 @@ const SitterGallery = () => {
       {photos.length === 0 ? (
         <div className="text-center py-12 text-muted-foreground">
           <Camera className="h-10 w-10 mx-auto mb-3 opacity-30" />
-          <p className="text-sm">Ajoutez des photos d'animaux que vous avez gardés pour enrichir votre profil.</p>
+          <p className="text-sm">Un gardien avec des photos est choisi, un gardien sans photo ne l'est presque jamais. Ajoutez plusieurs instants : vous avec des animaux, votre quotidien, vos expériences de garde.</p>
         </div>
       ) : (
         <div className="grid grid-cols-2 md:grid-cols-3 gap-3">

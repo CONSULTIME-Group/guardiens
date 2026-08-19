@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Info, RefreshCw, Activity, Heart, Utensils, Shield, Users, PawPrint, Star, Gauge } from "lucide-react";
+import BreedEditorialLink from "./BreedEditorialLink";
 
 interface BreedProfile {
   temperament: string;
@@ -126,6 +127,12 @@ const BreedProfileCard = ({ species, breed, ownerNote, ownerFirstName, onNoteCha
             </div>
           ) : null
         ))}
+      </div>
+
+      {/* Lien vers la fiche éditoriale indexée /races/:slug, seulement si
+          elle existe réellement (résolution stricte, jamais de soft 404). */}
+      <div className="pt-1">
+        <BreedEditorialLink species={species} breed={breedLabel} />
       </div>
     </div>
   );
