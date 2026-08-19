@@ -29,7 +29,7 @@ describe("validateGenerationInput", () => {
   });
   it("accepte et trimme une saisie valide", () => {
     const r = validateGenerationInput("dog", "  Cane corso ");
-    expect(r).toEqual({ ok: true, species: "dog", breed: "Cane corso" });
+    expect(r).toEqual({ ok: true, reason: null, species: "dog", breed: "Cane corso" });
   });
 });
 
