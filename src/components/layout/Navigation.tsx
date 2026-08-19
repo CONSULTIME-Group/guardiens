@@ -30,7 +30,7 @@ import ActivateRoleDialog from "@/components/premium/ActivateRoleDialog";
 
 // ── Libellé de groupe de la barre latérale ──
 const GroupLabel = ({ label }: { label: string }) => (
-  <p className="px-4 pt-3 pb-1 first:pt-1 text-[10px] font-semibold tracking-widest uppercase text-muted-foreground select-none">
+  <p className="px-4 pt-2 pb-1 first:pt-1 text-[10px] font-semibold tracking-widest uppercase text-muted-foreground select-none">
     {label}
   </p>
 );
