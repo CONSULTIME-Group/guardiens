@@ -114,7 +114,7 @@ const AdminBreeds = () => {
   const handleGenerate = async () => {
     const v = validation;
     if (!v.ok) {
-      toast.error(v.reason);
+      toast.error(v.reason ?? "Saisie incomplète.");
       return;
     }
     if (generating) return;

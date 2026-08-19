@@ -23,9 +23,17 @@ import {
 // 1. Validation du formulaire
 // ---------------------------------------------------------------------------
 
-export type GenerationInputResult =
-  | { ok: true; species: string; breed: string }
-  | { ok: false; reason: string };
+/**
+ * Forme plate volontaire (pas d'union discriminée) : le projet compile sans
+ * strictNullChecks et le narrowing par discriminant n'y est pas fiable.
+ */
+export interface GenerationInputResult {
+  ok: boolean;
+  /** Message d'erreur si ok = false, null sinon. */
+  reason: string | null;
+  species: string;
+  breed: string;
+}
 
 /** La race saisie est trimmée, l'espèce doit être non vide. */
 export const validateGenerationInput = (
@@ -34,12 +42,18 @@ export const validateGenerationInput = (
 ): GenerationInputResult => {
   const trimmedBreed = (breed ?? "").trim();
   const trimmedSpecies = (species ?? "").trim();
-  if (!trimmedSpecies) return { ok: false, reason: "Choisissez une espèce." };
-  if (!trimmedBreed) return { ok: false, reason: "Saisissez un nom de race." };
+  const fail = (reason: string): GenerationInputResult => ({
+    ok: false,
+    reason,
+    species: trimmedSpecies,
+    breed: trimmedBreed,
+  });
+  if (!trimmedSpecies) return fail("Choisissez une espèce.");
+  if (!trimmedBreed) return fail("Saisissez un nom de race.");
   if (normalizeBreedName(trimmedBreed).length < 2) {
-    return { ok: false, reason: "Le nom de race est trop court." };
+    return fail("Le nom de race est trop court.");
   }
-  return { ok: true, species: trimmedSpecies, breed: trimmedBreed };
+  return { ok: true, reason: null, species: trimmedSpecies, breed: trimmedBreed };
 };
 
 // ---------------------------------------------------------------------------
