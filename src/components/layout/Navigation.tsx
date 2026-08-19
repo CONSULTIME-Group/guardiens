@@ -208,9 +208,11 @@ export const Sidebar = ({ showHeaderBells = true }: { showHeaderBells?: boolean 
               <SidebarItem to={effectiveRole === "owner" ? "/sits" : "/mes-candidatures"} icon={Calendar} label={effectiveRole === "owner" ? "Mes annonces" : "Mes candidatures"} badge={sitsBadge} />
               <SidebarItem to="/messages" icon={MessageCircle} label="Messages" badge={unreadCount} />
               <SidebarItem to="/mes-avis" icon={Star} label="Mes avis" />
-              <SidebarItem to="/favoris" icon={Heart} label="Mes favoris" />
 
               <GroupLabel label="Découvrir" />
+
+              <SidebarItem to="/races" icon={PawPrint} label="Fiches races" />
+              <SidebarItem to="/favoris" icon={Heart} label="Mes favoris" />
 
               {isSitterLocked ? (
                 <button
@@ -574,6 +576,7 @@ export const BottomNav = () => {
                   { to: "/annonces", icon: Newspaper, label: "Annonces", badge: 0 },
                   { to: "/pros", icon: Briefcase, label: "Pros animaliers", badge: 0 },
                   { to: "/conseils", icon: Sparkles, label: "Conseils d'Alma", badge: 0 },
+                  { to: "/races", icon: PawPrint, label: "Fiches races", badge: 0 },
                   { to: "/actualites", icon: Newspaper, label: "Le journal", badge: 0 },
                   { to: "/guides", icon: Compass, label: "Guides locaux", badge: 0 },
                   { to: "/tarifs", icon: CreditCard, label: "Tarifs", badge: 0 },

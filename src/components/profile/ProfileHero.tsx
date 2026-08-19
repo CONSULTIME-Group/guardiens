@@ -321,12 +321,12 @@ const ProfileHero = ({
             >
               {avatarUrl && !avatarUrl.includes("placeholder.svg") ? (
                 <img
-                  src={avatarImageUrl(avatarUrl, 144)}
+                  src={avatarImageUrl(avatarUrl, 352)}
                   alt={firstName}
-                  className="w-20 h-20 sm:w-28 sm:h-28 md:w-36 md:h-36 rounded-full object-cover object-center border-4 border-background shadow-md ring-2 ring-primary ring-offset-2"
+                  className="w-28 h-28 sm:w-36 sm:h-36 md:w-44 md:h-44 rounded-full object-cover object-center border-4 border-background shadow-md ring-2 ring-primary ring-offset-2"
                 />
               ) : (
-                <div className="w-20 h-20 sm:w-28 sm:h-28 md:w-36 md:h-36 rounded-full bg-muted flex items-center justify-center font-heading font-bold text-foreground text-3xl sm:text-4xl md:text-5xl border-4 border-background shadow-md ring-2 ring-primary ring-offset-2">
+                <div className="w-28 h-28 sm:w-36 sm:h-36 md:w-44 md:h-44 rounded-full bg-muted flex items-center justify-center font-heading font-bold text-foreground text-4xl sm:text-5xl md:text-6xl border-4 border-background shadow-md ring-2 ring-primary ring-offset-2">
                   {firstName?.charAt(0) || "?"}
                 </div>
               )}

@@ -17,6 +17,7 @@ import AffinityTeaser from "@/components/matching/AffinityTeaser";
 import { useViewerSitterForAffinity } from "@/hooks/useViewerSitterForAffinity";
 import { sanitizeBioForPublic } from "@/lib/sanitizeBio";
 import { avatarImageUrl, storageImageUrl } from "@/lib/storageImage";
+import BreedEditorialLink from "@/components/breeds/BreedEditorialLink";
 
 interface SitLike {
   slug?: string | null;
@@ -437,6 +438,9 @@ const PublicSitView = ({
                               {openPet.breed ? ` · ${openPet.breed}` : ""}
                               {typeof openPet.age === "number" && openPet.age > 0 ? ` · ${t("sit_detail.years", { count: openPet.age })}` : ""}
                             </p>
+                            {openPet.breed && (
+                              <BreedEditorialLink species={openPet.species} breed={openPet.breed} />
+                            )}
                             {openPet.character && (
                               <div>
                                 <p className="font-semibold text-foreground mb-1">{t("sit_detail.pet_character")}</p>
