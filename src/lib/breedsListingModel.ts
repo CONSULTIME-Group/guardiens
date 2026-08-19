@@ -41,6 +41,16 @@ const LEVEL_BY_NORMALIZED: Record<string, DifficultyBadge> = {
 };
 
 /**
+ * Pastille de niveau, partagée entre /races et la fiche détaillée : tokens
+ * sémantiques uniquement, texte foncé sur fond doux (contraste AA).
+ */
+export const LEVEL_BADGE_CLASS: Record<DifficultyBadge, string> = {
+  Facile: "bg-success-soft text-success",
+  "Modéré": "bg-warning-soft text-warning-foreground",
+  Exigeant: "bg-destructive/10 text-destructive-text",
+};
+
+/**
  * difficulty_level est un paragraphe (« Exigeant. La garde d'un Gris du
  * Gabon est exigeante en raison de… », « Modéré, car … »). On n'en extrait
  * que le premier mot, et on ne l'affiche que s'il correspond exactement à

@@ -5,27 +5,16 @@ import PageMeta from "@/components/PageMeta";
 import { supabase } from "@/integrations/supabase/client";
 import { slugify } from "@/lib/normalize";
 import {
+  LEVEL_BADGE_CLASS,
   SPECIES_ORDER,
   extractDifficultyLevel,
   groupBreedsBySpecies,
   searchBreeds,
   visibleBreeds,
   type BreedListingEntry,
-  type DifficultyBadge,
 } from "@/lib/breedsListingModel";
 
 const CANONICAL = "https://guardiens.fr/races";
-
-/**
- * Pastille de niveau de garde : tokens sémantiques uniquement, contrastes AA
- * (texte foncé sur fond doux). Facile = vert succès, Modéré = ambre warning,
- * Exigeant = rouge texte AA (variante prévue pour fond clair).
- */
-const LEVEL_BADGE_CLASS: Record<DifficultyBadge, string> = {
-  Facile: "bg-success-soft text-success",
-  "Modéré": "bg-warning-soft text-warning-foreground",
-  Exigeant: "bg-destructive/10 text-destructive-text",
-};
 
 const breedSlug = (b: Pick<BreedListingEntry, "species" | "breed">) =>
   `${b.species.toLowerCase()}-${slugify(b.breed)}`;
