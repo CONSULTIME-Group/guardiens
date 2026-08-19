@@ -22,8 +22,9 @@ const breedSlug = (b: Pick<BreedListingEntry, "species" | "breed">) =>
 /** Carte de repli façon carnet aquarelle : papier, lavis vert pin et
  *  terracotta, double filet de planche, initiale Playfair et nom d'espèce.
  *  Elle est rendue EN PERMANENCE sous l'image : pendant le chargement, en
- *  cas d'échec ou d'absence d'image, la carte reste belle. Jamais de trou. */
-const TypographicFallback = ({
+ *  cas d'échec ou d'absence d'image, la carte reste belle. Jamais de trou.
+ *  (Exportée pour les tests.) */
+export const TypographicFallback = ({
   breed,
   speciesLabel,
 }: {
