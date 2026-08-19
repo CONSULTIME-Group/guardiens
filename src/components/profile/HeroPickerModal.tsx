@@ -24,6 +24,7 @@ import { useToast } from "@/hooks/use-toast";
 import {
   HERO_BANK,
   getCategoryByBankIndex,
+  heroDisplayNumber,
   type HeroCategoryName,
 } from "@/lib/heroBank";
 import { getMobileByIndex } from "@/lib/heroBankMobile";
@@ -105,7 +106,7 @@ export function HeroPickerModal({
         description:
           newIndex === null
             ? "Votre image de profil suit à nouveau l'attribution automatique."
-            : `L'image n°${String(newIndex + 1).padStart(3, "0")} est désormais affichée sur votre profil.`,
+            : `L'image n°${heroDisplayNumber(newIndex)} est désormais affichée sur votre profil.`,
       });
 
       onSaved(newIndex);
@@ -208,7 +209,7 @@ export function HeroPickerModal({
                       : "border-border hover:border-foreground/30"
                   }`}
                   style={{ aspectRatio: "1536 / 544" }}
-                  title={`Illustration n°${String(it.idx + 1).padStart(3, "0")}, ${CATEGORY_LABELS[it.category]}`}
+                  title={`Illustration n°${heroDisplayNumber(it.idx)}, ${CATEGORY_LABELS[it.category]}`}
                 >
                   <img
                     src={it.src}
@@ -232,7 +233,7 @@ export function HeroPickerModal({
                       transformOrigin: "left center",
                     }}
                   >
-                    n° {String(it.idx + 1).padStart(3, "0")}
+                    n° {heroDisplayNumber(it.idx)}
                   </span>
 
                   {/* Indicateur de sélection */}
@@ -279,7 +280,7 @@ export function HeroPickerModal({
                     '"Caveat", "Kalam", "Bradley Hand", "Segoe Print", "Comic Sans MS", cursive',
                 }}
               >
-                n° {String(previewItem.idx + 1).padStart(3, "0")},{" "}
+                n° {heroDisplayNumber(previewItem.idx)},{" "}
                 {CATEGORY_LABELS[previewItem.category]}
               </span>
 

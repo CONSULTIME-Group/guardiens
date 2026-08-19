@@ -437,6 +437,17 @@ export function getCategoryByBankIndex(idx: number): HeroCategoryName {
   return "animals";
 }
 
+/**
+ * Numéro d'identité affiché d'une illustration ("001" … "100").
+ *
+ * Source unique de vérité pour tous les libellés "n° NNN" (vignette, aperçu,
+ * toast de confirmation). L'identité est portée par l'index de banque de
+ * l'illustration elle-même, jamais par sa position dans une liste filtrée.
+ */
+export function heroDisplayNumber(bankIndex: number): string {
+  return String(bankIndex + 1).padStart(3, "0");
+}
+
 // ============================================================================
 // VALIDATION DE LA BANQUE
 // ----------------------------------------------------------------------------
