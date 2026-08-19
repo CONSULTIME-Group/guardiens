@@ -178,6 +178,9 @@ const BreedPage = () => {
   const ogImage = breed.image_url || buildOgImageUrl({ title: breedCap, subtitle: "Fiche de race, conseils gardien", kind: "race" });
 
   const sections: Array<{ title: string; body: string | null }> = [
+    // difficulty_level est un paragraphe : pastille courte dans l'en-tête,
+    // paragraphe complet ici, à sa place.
+    { title: "Niveau de garde", body: breed.difficulty_level },
     { title: "Tempérament", body: breed.temperament },
     { title: "Besoins d'exercice", body: breed.exercise_needs },
     { title: "Toilettage", body: breed.grooming },
@@ -217,9 +220,11 @@ const BreedPage = () => {
           <h1 className="font-serif text-2xl md:text-4xl font-bold text-foreground mb-3">
             Garder un {breedCap} à domicile
           </h1>
-          {breed.difficulty_level && (
-            <span className="inline-block px-3 py-1 rounded-full bg-muted text-sm text-foreground">
-              Niveau : {breed.difficulty_level}
+          {extractDifficultyLevel(breed.difficulty_level) && (
+            <span
+              className={`inline-block px-3 py-1 rounded-full text-sm font-semibold ${LEVEL_BADGE_CLASS[extractDifficultyLevel(breed.difficulty_level)!]}`}
+            >
+              Niveau : {extractDifficultyLevel(breed.difficulty_level)}
             </span>
           )}
           <div className="mt-4">
