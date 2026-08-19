@@ -88,7 +88,8 @@ describe("SitterMatchSection — libellés et photo de la vedette", () => {
       topSits: [scored("a", 80, { pet_photo_url: "https://img.test/nougat.jpg" })],
     });
     const img = screen.getByRole("img", { name: /Annonce a/ });
-    expect(img.parentElement?.style.background).toContain("--photo-placeholder-green");
+    // jsdom ne sérialise pas var() en shorthand : on lit l'attribut brut.
+    expect(img.parentElement?.getAttribute("style")).toContain("--photo-placeholder-green");
   });
 });
 
