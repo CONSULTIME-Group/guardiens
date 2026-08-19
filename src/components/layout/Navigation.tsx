@@ -107,7 +107,7 @@ export const Sidebar = ({ showHeaderBells = true }: { showHeaderBells?: boolean 
   return (
     <aside className="hidden md:flex flex-col w-64 border-r border-border bg-card h-screen sticky top-0">
       {/* Logo + cloches */}
-      <div className="px-6 pt-5 pb-3 flex items-center justify-between">
+      <div className="px-6 pt-4 pb-3 flex items-center justify-between">
         <Link
           to="/"
           aria-label="Guardiens, accueil"
@@ -259,7 +259,7 @@ export const Sidebar = ({ showHeaderBells = true }: { showHeaderBells?: boolean 
       </nav>
 
       {/* Bas de colonne : uniquement le bouton de retour d'expérience */}
-      <div className="p-3 border-t border-border">
+      <div className="p-2 border-t border-border">
         <Button
           variant="outline"
           onClick={() => setFeedbackOpen(true)}
