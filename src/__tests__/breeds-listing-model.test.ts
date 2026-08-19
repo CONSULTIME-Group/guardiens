@@ -38,6 +38,25 @@ describe("extractDifficultyLevel", () => {
     expect(extractDifficultyLevel("modere")).toBe("Modéré");
     expect(extractDifficultyLevel("FACILE.")).toBe("Facile");
   });
+  it("accepte les deux chaînes réelles générées avec une virgule (cane corso, poule pondeuse)", () => {
+    // Chaînes réellement écrites en base le 19/08/2026 : virgule au lieu
+    // du point attendu après le niveau. La pastille doit quand même
+    // extraire le premier mot.
+    expect(
+      extractDifficultyLevel(
+        "Exigeant, car le Cane Corso est un chien puissant qui demande une éducation ferme et cohérente, ainsi qu'une excellente socialisation dès son plus jeune âge. Sa force physique et son tempérament protecteur nécessitent un gardien expérimenté, capable de gérer des situations potentiellement complexes et de maintenir une autorité douce mais inébranlable. Il ne convient pas aux personnes n'ayant aucune expérience avec les chiens de grande taille ou les races ayant un fort caractère.",
+      ),
+    ).toBe("Exigeant");
+    expect(
+      extractDifficultyLevel(
+        "Modéré, la garde d'une poule pondeuse est modérée pour un gardien débutant. Bien que l'animal soit autonome pour de nombreux aspects, la surveillance de sa santé, la gestion de son environnement extérieur sécurisé et la propreté du poulailler demandent une attention et une régularité qui peuvent surprendre un novice. La gestion des œufs et la compréhension de leur comportement social nécessitent également un apprentissage.",
+      ),
+    ).toBe("Modéré");
+  });
+  it("accepte deux-points et espace comme séparateurs", () => {
+    expect(extractDifficultyLevel("Exigeant : la garde demande de l'expérience.")).toBe("Exigeant");
+    expect(extractDifficultyLevel("Facile pour un gardien débutant")).toBe("Facile");
+  });
   it("n'affiche rien plutôt qu'une valeur fausse", () => {
     expect(extractDifficultyLevel("Plutôt facile à garder")).toBeNull();
     expect(extractDifficultyLevel("Difficile")).toBeNull();

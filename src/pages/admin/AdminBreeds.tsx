@@ -23,10 +23,11 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
-import { Loader2, Zap, ExternalLink, RefreshCw, Wand2, ListChecks } from "lucide-react";
+import { Loader2, Zap, ExternalLink, RefreshCw, Wand2, ListChecks, ImageDown } from "lucide-react";
 import { TOP_DOG_BREEDS, TOP_CAT_BREEDS } from "@/data/topBreeds";
 import { slugify } from "@/lib/normalize";
 import { PET_SPECIES_LABELS } from "@/lib/petLabels";
+import { withTimeout, TimeoutError } from "@/lib/withTimeout";
 import {
   validateGenerationInput,
   findDuplicateFiche,
@@ -34,10 +35,27 @@ import {
   type DeclaredPetRow,
 } from "@/lib/adminBreedGeneration";
 
-interface BreedRow { species: string; breed: string; generated_at: string }
+interface BreedRow { species: string; breed: string; generated_at: string; image_url: string | null }
 
 /** Toutes les valeurs de l'enum pet_species, pas seulement chien/chat. */
 const SPECIES_OPTIONS = Object.entries(PET_SPECIES_LABELS);
+
+/**
+ * Garde anti-blocage : l'appel de génération est long (deux passes IA,
+ * recherche et rapatriement d'image) et sa promesse peut ne jamais se
+ * résoudre si la connexion se fige. Sans délai maximal, l'état « en cours »
+ * restait allumé pour toujours et la page était bloquée jusqu'au
+ * rechargement (constaté en production le 19/08/2026). Avec withTimeout,
+ * l'état retombe toujours ; la génération continue côté serveur.
+ */
+const GENERATION_TIMEOUT_MS = 150_000;
+const REPATRIATE_TIMEOUT_MS = 60_000;
+
+interface LastResult {
+  breed: string;
+  hasImage: boolean;
+  imageDetail: string | null;
+}
 
 const AdminBreeds = () => {
   const [rows, setRows] = useState<BreedRow[]>([]);
@@ -51,7 +69,11 @@ const AdminBreeds = () => {
   const [formSpecies, setFormSpecies] = useState<string>("dog");
   const [formBreed, setFormBreed] = useState("");
   const [generating, setGenerating] = useState(false);
+  const [lastResult, setLastResult] = useState<LastResult | null>(null);
   const formRef = useRef<HTMLDivElement>(null);
+
+  // Rapatriement d'image seul (fiches existantes sans image)
+  const [repatriating, setRepatriating] = useState<string | null>(null);
 
   // Ciblage : races déclarées sans fiche
   const [petsRows, setPetsRows] = useState<DeclaredPetRow[]>([]);
@@ -74,23 +96,72 @@ const AdminBreeds = () => {
     if (regenerating) return;
     setRegenerating(key);
     try {
-      const { error } = await supabase.functions.invoke("generate-breed-profile", {
-        body: { species, breed, force: true },
-      });
+      const { data, error } = await withTimeout(
+        supabase.functions.invoke("generate-breed-profile", {
+          body: { species, breed, force: true },
+        }),
+        GENERATION_TIMEOUT_MS,
+        "régénération de la fiche",
+      );
       if (error) throw error;
-      toast.success(`Fiche régénérée : ${breed}`);
+      if (data?.image_status === "stored") {
+        toast.success(`Fiche régénérée, image rapatriée : ${breed}`);
+      } else {
+        toast.warning(`Fiche régénérée SANS image : ${breed}${data?.image_detail ? ` (${data.image_detail})` : ""}`);
+      }
       await refresh();
     } catch (err: any) {
-      toast.error(`Erreur : ${err.message}`);
+      if (err instanceof TimeoutError) {
+        toast.warning("La régénération dépasse le délai d'attente mais continue côté serveur. Rechargez la liste dans un instant.");
+        await refresh();
+      } else {
+        toast.error(`Erreur : ${err.message}`);
+      }
     } finally {
       setRegenerating(null);
+    }
+  };
+
+  const handleRepatriate = async (species: string, breed: string) => {
+    const key = `${species}-${breed}`;
+    if (repatriating) return;
+    setRepatriating(key);
+    try {
+      const { data, error } = await withTimeout(
+        supabase.functions.invoke("generate-breed-profile", {
+          body: { species, breed, image_only: true },
+        }),
+        REPATRIATE_TIMEOUT_MS,
+        "rapatriement de l'image",
+      );
+      if (error) throw error;
+      if (data?.image_status === "stored") {
+        toast.success(`Image rapatriée dans notre stockage : ${breed}`);
+      } else {
+        toast.warning(`Toujours pas d'image pour ${breed} : ${data?.image_detail ?? "raison inconnue"}`);
+      }
+      await logAdminAction({
+        action: "content_ai_image_repatriate",
+        target_type: "breed",
+        target_id: null,
+        metadata: { title: breed, species, image_status: data?.image_status ?? "none" },
+      });
+      await refresh();
+    } catch (err: any) {
+      if (err instanceof TimeoutError) {
+        toast.warning("Le rapatriement dépasse le délai d'attente mais continue côté serveur.");
+      } else {
+        toast.error(`Erreur : ${err.message}`);
+      }
+    } finally {
+      setRepatriating(null);
     }
   };
 
   const refresh = async () => {
     setLoading(true);
     const [{ data: breeds }, { data: pets }, { data: liveSits }] = await Promise.all([
-      supabase.from("breed_profiles").select("species, breed, generated_at").order("species").order("breed"),
+      supabase.from("breed_profiles").select("species, breed, generated_at, image_url").order("species").order("breed"),
       supabase.from("pets").select("species, breed, property_id"),
       supabase.from("sits").select("property_id").eq("status", "published"),
     ]);
@@ -119,33 +190,59 @@ const AdminBreeds = () => {
     }
     if (generating) return;
     setGenerating(true);
+    setLastResult(null);
     // Doublon détecté : on régénère la fiche EXISTANTE (nom canonique),
     // jamais de création silencieuse d'une variante.
     const targetBreed = duplicate ? duplicate.breed : v.breed;
     const force = !!duplicate;
     try {
-      const { error } = await supabase.functions.invoke("generate-breed-profile", {
-        body: { species: v.species, breed: targetBreed, force },
-      });
-      if (error) throw error;
-      toast.success(
-        force ? `Fiche régénérée : ${targetBreed}` : `Fiche générée : ${targetBreed}`,
+      const { data, error } = await withTimeout(
+        supabase.functions.invoke("generate-breed-profile", {
+          body: { species: v.species, breed: targetBreed, force },
+        }),
+        GENERATION_TIMEOUT_MS,
+        "génération de la fiche",
       );
+      if (error) throw error;
+      // Bilan visible à l'écran, y compris (surtout) quand l'image manque.
+      const hasImage = data?.image_status === "stored";
+      const imageDetail = data?.image_detail ?? null;
+      setLastResult({ breed: targetBreed, hasImage, imageDetail });
+      if (hasImage) {
+        toast.success(`${force ? "Fiche régénérée" : "Fiche générée"}, image rapatriée : ${targetBreed}`);
+      } else {
+        toast.warning(
+          `Fiche ${force ? "régénérée" : "générée"} SANS image : ${targetBreed}${imageDetail ? ` (${imageDetail})` : ""}`,
+        );
+      }
       await logAdminAction({
         action: force ? "content_ai_regenerate" : "content_ai_generate",
         target_type: "breed",
         target_id: null,
-        metadata: { title: targetBreed, species: v.species },
+        metadata: { title: targetBreed, species: v.species, image_status: data?.image_status ?? "none" },
       });
       setFormBreed("");
       await refresh();
     } catch (err: any) {
-      toast.error(`Erreur : ${err.message}`);
+      if (err instanceof TimeoutError) {
+        // La fonction continue côté serveur : l'état retombe, la liste se
+        // rafraîchit, la fiche apparaîtra dès qu'elle est écrite.
+        toast.warning("La génération dépasse le délai d'attente mais continue côté serveur. Rechargez la liste dans un instant.");
+        await refresh();
+      } else {
+        toast.error(`Erreur : ${err.message}`);
+      }
     } finally {
       setGenerating(false);
     }
   };
 
+  /**
+   * Pré-remplissage depuis la liste de ciblage : ne touche JAMAIS à l'état
+   * « en cours » (generating/repatriating). Seule une génération réellement
+   * lancée allume cet état, et il retombe toujours (try/finally + délai
+   * maximal withTimeout).
+   */
   const prefillForm = (species: string, breed: string) => {
     setFormSpecies(species);
     setFormBreed(breed);
@@ -175,9 +272,13 @@ const AdminBreeds = () => {
     let ok = 0, failed = 0;
     for (let i = 0; i < todo.length; i++) {
       try {
-        const { error } = await supabase.functions.invoke("generate-breed-profile", {
-          body: { species, breed: todo[i] },
-        });
+        const { error } = await withTimeout(
+          supabase.functions.invoke("generate-breed-profile", {
+            body: { species, breed: todo[i] },
+          }),
+          GENERATION_TIMEOUT_MS,
+          "génération par lot",
+        );
         if (error) failed++; else ok++;
       } catch { failed++; }
       setProgress({ done: i + 1, total: todo.length, ok, failed });
@@ -189,12 +290,16 @@ const AdminBreeds = () => {
   };
 
   const byKind = (s: string) => rows.filter((r) => r.species === s);
+  const withoutImage = rows.filter((r) => !r.image_url).length;
 
   return (
     <div className="space-y-6">
       <div>
         <h1 className="font-heading text-2xl sm:text-3xl font-bold tracking-tight text-foreground">Fiches de race</h1>
-        <p className="text-muted-foreground text-sm">{rows.length} fiches générées</p>
+        <p className="text-muted-foreground text-sm">
+          {rows.length} fiches générées
+          {withoutImage > 0 ? ` · ${withoutImage} sans image` : ""}
+        </p>
       </div>
 
       <Card ref={formRef}>
@@ -251,6 +356,20 @@ const AdminBreeds = () => {
               L'image est rapatriée dans notre stockage pendant la génération.
             </p>
           </div>
+
+          {lastResult && (
+            <p
+              className={`text-sm rounded-lg border px-3 py-2 ${
+                lastResult.hasImage
+                  ? "border-success bg-success-soft text-success"
+                  : "border-warning bg-warning-soft text-warning-foreground"
+              }`}
+            >
+              {lastResult.hasImage
+                ? `« ${lastResult.breed} » : fiche en ligne, image rapatriée dans notre stockage.`
+                : `« ${lastResult.breed} » : fiche en ligne SANS image (${lastResult.imageDetail ?? "raison inconnue"}). La carte de repli aquarelle s'affiche en attendant ; relancez le rapatriement depuis la liste des fiches ci-dessous.`}
+            </p>
+          )}
         </CardContent>
       </Card>
 
@@ -335,6 +454,21 @@ const AdminBreeds = () => {
                       <li key={key} className="flex items-center justify-between gap-2">
                         <span className="truncate">{r.breed}</span>
                         <div className="flex items-center gap-1 shrink-0">
+                          {!r.image_url && (
+                            <button
+                              type="button"
+                              onClick={() => handleRepatriate(r.species, r.breed)}
+                              disabled={!!repatriating}
+                              className="text-warning hover:text-primary disabled:opacity-50 p-1"
+                              title="Sans image : rapatrier depuis Wikimedia (sans toucher au texte)"
+                            >
+                              {repatriating === key ? (
+                                <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                              ) : (
+                                <ImageDown className="w-3.5 h-3.5" />
+                              )}
+                            </button>
+                          )}
                           <button
                             type="button"
                             onClick={() => setPendingRegenerate(r)}

@@ -86,7 +86,10 @@ const BREED_ALIASES: Record<string, Record<string, string>> = {
     yorshire: "yorkshire terrier",
     rotweiler: "rottweiler",
     staf: "staffordshire bull terrier",
-    amstaff: "staffordshire bull terrier",
+    // « Amstaff » : abréviation courante de l'AMERICAN staffordshire
+    // terrier, dont la fiche existe. À ne pas confondre avec « staf »
+    // (une f) qui désigne le staffordshire bull terrier.
+    amstaff: "american staffordshire terrier",
     westie: "west highland white terrier",
     border: "border collie",
     golden: "golden retriever",

@@ -88,6 +88,8 @@ describe("resolveBreedFiche : alias explicites (saisies réelles)", () => {
     ["dog", "golden", "golden retriever"],
     ["dog", "American stafford terrier", "american staffordshire terrier"],
     ["dog", "Staff", "american staffordshire terrier"],
+    ["dog", "Amstaff", "american staffordshire terrier"],
+    ["dog", "amstaff", "american staffordshire terrier"],
     ["dog", "Roumain", "berger roumain"],
     ["dog", "roumain ", "berger roumain"],
   ])("%s « %s » → fiche « %s »", (species, declared, expected) => {
