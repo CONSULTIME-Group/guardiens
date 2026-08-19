@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { messagesUnreadExclusive } from "@/lib/navModel";
 
 export interface NavBadgeCounts {
   unreadCount: number;
@@ -48,11 +49,12 @@ export function useNavBadgeCounts(userId: string | undefined): NavBadgeCounts {
           .in("conversation_id", convIds)
           .neq("sender_id", userId)
           .is("read_at", null);
-        result.unreadCount = count || 0;
+        const totalUnread = count || 0;
 
         const missionConvIds = (convs ?? [])
           .filter((c: any) => c.small_mission_id)
           .map((c: any) => c.id);
+        let missionUnread = 0;
         if (missionConvIds.length > 0) {
           const { count: mCount } = await supabase
             .from("messages")
@@ -60,8 +62,14 @@ export function useNavBadgeCounts(userId: string | undefined): NavBadgeCounts {
             .in("conversation_id", missionConvIds)
             .neq("sender_id", userId)
             .is("read_at", null);
-          result.missionBadgeCount = mCount || 0;
+          missionUnread = mCount || 0;
         }
+        // Choix de comptage : un même message non lu ne doit jamais alimenter
+        // deux pastilles. La pastille Entraide compte les non lus des
+        // conversations de petites missions ; la pastille Messages compte
+        // tout le reste (total moins les missions). Voir navModel.ts.
+        result.missionBadgeCount = missionUnread;
+        result.unreadCount = messagesUnreadExclusive(totalUnread, missionUnread);
       }
 
       const { data: userSits } = await supabase
