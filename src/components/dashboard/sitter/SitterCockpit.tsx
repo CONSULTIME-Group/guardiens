@@ -1,6 +1,5 @@
 import { Link } from "react-router-dom";
 import { CockpitGreeting } from "@/components/dashboard/CockpitGreeting";
-import { Eye, Pencil } from "lucide-react";
 import cockpitMorning from "@/assets/illustrations/sitter-cockpit-morning.webp";
 import cockpitWaiting from "@/assets/illustrations/sitter-match-empty.webp";
 import { avatarImageUrl } from "@/lib/storageImage";
@@ -11,8 +10,9 @@ import { avatarImageUrl } from "@/lib/storageImage";
  *
  * Accueil calme : aucun bouton d'action fort, aucun CTA prioritaire.
  * La star de l'écran sera la carte rencontre (vague 2). Ici on pose
- * une couverture de carnet, une salutation adressée, un ancrage temporel
- * discret et les contrôles utilitaires (édition profil, disponibilité).
+ * une couverture de carnet, une salutation adressée et un ancrage temporel
+ * discret. L'édition du profil, le profil public et la disponibilité vivent
+ * dans /profile et le menu profil (redondances retirées, lot navigation).
  */
 
 const capitalize = (name: string) =>
@@ -36,12 +36,10 @@ const momentAncrage = (now: Date = new Date()): string => {
 };
 
 interface SitterCockpitProps {
-  userId?: string;
   firstName?: string;
   avatarUrl?: string | null;
   isFounder?: boolean;
   isAvailable: boolean;
-  onToggleAvailability: () => void;
   /** Salutation configurable, "Bonjour" par défaut. La branche nouveau gardien
    * passe "Bienvenue" pour marquer l'arrivée. */
   greeting?: string;
@@ -56,11 +54,9 @@ interface SitterCockpitProps {
 }
 
 const SitterCockpit = ({
-  userId,
   firstName,
   avatarUrl,
   isAvailable,
-  onToggleAvailability,
   greeting = "Bonjour",
 }: SitterCockpitProps) => {
 
@@ -145,66 +141,6 @@ const SitterCockpit = ({
             >
               {ancrage}
             </p>
-          </div>
-
-          {/* Rangée d'actions, sous le texte en mobile, à droite au dessus de 768 px */}
-          <div className="flex items-center gap-[8px] sm:shrink-0 flex-wrap">
-            <Link
-              to="/profile"
-              aria-label="Modifier mon profil"
-              className="inline-flex items-center justify-center gap-1.5 rounded-full border border-border bg-card hover:bg-muted/40 text-foreground font-semibold px-[14px] transition-colors"
-              style={{ minHeight: "44px", fontSize: "12px" }}
-            >
-              <Pencil className="w-3.5 h-3.5" aria-hidden="true" />
-              Modifier
-            </Link>
-            {userId && (
-              <Link
-                to={`/gardiens/${userId}`}
-                aria-label="Voir votre profil public"
-                className="inline-flex items-center justify-center gap-1.5 rounded-full border border-border bg-card hover:bg-muted/40 text-foreground font-semibold px-[14px] transition-colors"
-                style={{ minHeight: "44px", fontSize: "12px" }}
-              >
-                <Eye className="w-3.5 h-3.5" aria-hidden="true" />
-                Profil public
-              </Link>
-            )}
-            <button
-              id="sitter-availability-toggle"
-              role="switch"
-              aria-checked={isAvailable}
-              aria-label={
-                isAvailable
-                  ? "Vous êtes disponible, désactiver"
-                  : "Vous êtes indisponible, activer"
-              }
-              onClick={onToggleAvailability}
-              className={`group inline-flex items-center justify-center gap-2 rounded-full border font-semibold px-[14px] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 ${
-                isAvailable
-                  ? "bg-primary text-primary-foreground border-primary hover:bg-primary/90"
-                  : "bg-muted text-foreground border-border hover:bg-muted/80"
-              }`}
-              style={{
-                minHeight: "44px",
-                fontSize: "12px",
-                boxShadow: isAvailable ? "0 6px 14px rgba(44,109,80,0.24)" : undefined,
-              }}
-            >
-              <span
-                className={`relative flex h-2 w-2 ${isAvailable ? "" : "opacity-40"}`}
-                aria-hidden="true"
-              >
-                {isAvailable && (
-                  <span className="absolute inline-flex h-full w-full rounded-full bg-primary-foreground opacity-60 animate-ping motion-reduce:hidden" />
-                )}
-                <span
-                  className={`relative inline-flex h-2 w-2 rounded-full ${
-                    isAvailable ? "bg-primary-foreground" : "bg-muted-foreground"
-                  }`}
-                />
-              </span>
-              {isAvailable ? "Disponible" : "Indisponible"}
-            </button>
           </div>
         </div>
         <div className="notebook-card-edge" aria-hidden="true" />

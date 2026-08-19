@@ -181,6 +181,7 @@ const SitterGallery = () => {
         <div>
           <h2 className="font-heading text-xl font-bold">Ma galerie</h2>
           <p className="text-sm text-muted-foreground">{photos.length}/50 photos · Vous avec des animaux, votre quotidien, vos expériences de garde : c'est ce que les propriétaires regardent en premier.</p>
+          <p className="text-sm text-muted-foreground mt-1">Vos photos ne sont visibles que par les membres connectés de Guardiens. Elles n'apparaissent pas dans les moteurs de recherche.</p>
         </div>
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
           <DialogTrigger asChild>

@@ -135,6 +135,8 @@ export default function PublicSitterProfile() {
   const [reviews, setReviews] = useState<any[]>([]);
   const [reviewCount, setReviewCount] = useState(0);
   const [gallery, setGallery] = useState<any[]>([]);
+  // Nombre de photos affiché aux visiteurs déconnectés (jamais les images).
+  const [galleryCount, setGalleryCount] = useState(0);
   const [avgRating, setAvgRating] = useState(0);
   const [emergencyActive, setEmergencyActive] = useState(false);
   const [hasActiveSubscription, setHasActiveSubscription] = useState(false);
@@ -461,11 +463,16 @@ export default function PublicSitterProfile() {
             .eq("moderation_status", "valide")
             .neq("review_type", "annulation")
             .order("created_at", { ascending: false }),
-          supabase
-            .from("sitter_gallery")
-            .select("id, photo_url, caption, created_at, source")
-            .eq("user_id", id)
-            .order("created_at", { ascending: false }),
+          // Galerie réservée aux membres connectés (décision produit, août
+          // 2026) : un visiteur anonyme ne reçoit jamais les URLs des photos.
+          // La policy RLS anon a été supprimée, côté serveur comme côté client.
+          auth?.hasSession
+            ? supabase
+                .from("sitter_gallery")
+                .select("id, photo_url, caption, created_at, source")
+                .eq("user_id", id)
+                .order("created_at", { ascending: false })
+            : Promise.resolve({ data: null as any[] | null }),
           (supabase as any).from("public_emergency_sitter_profiles").select("is_active").eq("user_id", id).maybeSingle(),
           // Chip Abonné : fonction booléenne (vague 39) pour ne jamais exposer subscriptions à anon.
           (supabase as any).rpc("has_active_subscription", { p_user_id: id }),
@@ -507,6 +514,12 @@ export default function PublicSitterProfile() {
       if (fetchedPublicProfile) setProfile(fetchedPublicProfile);
       if (fetchedSitterProfile) setSitterProfile(fetchedSitterProfile);
       if (galleryRes.data) setGallery(galleryRes.data);
+      // Visiteur anonyme : seul le NOMBRE de photos est exposé (fonction
+      // security definer), pour l'encart « photos réservées aux membres ».
+      if (!auth?.hasSession) {
+        const { data: cnt } = await (supabase as any).rpc("gallery_photo_count", { p_user_id: id });
+        setGalleryCount(typeof cnt === "number" ? cnt : 0);
+      }
       if (fetchedEmergencyProfile) setEmergencyActive(fetchedEmergencyProfile.is_active);
       setHasActiveSubscription(Boolean((subRes as any)?.data));
       setOwnerProfile(fetchedOwnerProfile);
@@ -626,7 +639,7 @@ export default function PublicSitterProfile() {
       }
     };
     load();
-  }, [id, loadNonce]);
+  }, [id, loadNonce, auth?.hasSession]);
 
   // Complément d'affinité réservé aux propriétaires connectés. Le user_id
   // déclenche ce chargement lorsque le profil public est prêt, sans rejouer le
@@ -1596,10 +1609,42 @@ export default function PublicSitterProfile() {
               })()}
             </section>
 
-            {/* 5. Galerie — uniquement si contenu réel. Sur son propre profil,
-                une galerie vide affiche un encart d'incitation : 96 % des
-                gardiens n'ont aucune photo, et c'est ce qui décide du choix. */}
-            {gallery.length > 0 ? (
+            {/* 5. Galerie. Réservée aux membres connectés (décision produit) :
+                un visiteur déconnecté voit un encart sobre avec le nombre réel
+                de photos et un lien vers l'inscription, jamais les images.
+                Sur son propre profil sans photo, un encart invite à en ajouter. */}
+            {!hasSession ? (
+              galleryCount > 0 && (
+                <section aria-label="Galerie" className="scroll-mt-20">
+                  <div className="rounded-2xl border border-border bg-card p-5 sm:p-6">
+                    <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-secondary">
+                      Galerie
+                    </p>
+                    <h2 className="font-heading text-[22px] sm:text-[26px] font-semibold text-foreground mt-1 leading-tight">
+                      {galleryCount} photo{galleryCount > 1 ? "s" : ""} partagée{galleryCount > 1 ? "s" : ""} par {firstName}.
+                    </h2>
+                    <p className="text-sm text-muted-foreground mt-2 max-w-xl leading-relaxed">
+                      Ces photos ne sont visibles que par les membres connectés de Guardiens.
+                      C'est une protection pour {firstName} : elles n'apparaissent pas dans les moteurs de recherche.
+                    </p>
+                    <div className="flex flex-wrap items-center gap-x-5 gap-y-2 mt-4">
+                      <Link
+                        to={`/inscription?redirect=/gardiens/${id}`}
+                        className="inline-flex items-center text-sm font-medium text-primary underline underline-offset-4 hover:text-primary/80 transition-colors"
+                      >
+                        Créer un compte pour les voir
+                      </Link>
+                      <Link
+                        to={`/login?redirect=/gardiens/${id}`}
+                        className="inline-flex items-center text-sm text-muted-foreground underline underline-offset-4 hover:text-foreground transition-colors"
+                      >
+                        Déjà membre ? Connectez-vous
+                      </Link>
+                    </div>
+                  </div>
+                </section>
+              )
+            ) : gallery.length > 0 ? (
               <section aria-label="Galerie" className="scroll-mt-20">
                 <div className="mb-5">
                   <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-secondary">
@@ -1626,6 +1671,10 @@ export default function PublicSitterProfile() {
                   <p className="text-sm text-muted-foreground mt-2 max-w-xl leading-relaxed">
                     Un gardien avec des photos est choisi, un gardien sans photo ne l'est presque jamais.
                     Ajoutez plusieurs instants : vous avec des animaux, votre quotidien, vos expériences de garde.
+                  </p>
+                  <p className="text-sm text-muted-foreground mt-2 max-w-xl leading-relaxed">
+                    Vos photos ne sont visibles que par les membres connectés de Guardiens.
+                    Elles n'apparaissent pas dans les moteurs de recherche.
                   </p>
                   <Link
                     to="/profile"

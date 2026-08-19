@@ -344,8 +344,11 @@ export default function AlmaTips() {
                 Les conseils d'Alma
               </h1>
               <p className="text-muted-foreground mt-1 max-w-2xl">
-                Je vous partage ici mes repères favoris pour bien accueillir un animal,
-                choisir vos gestes du quotidien et vivre l'entraide entre gens du coin en confiance.
+                Je suis Alma, votre assistante Guardiens. Je vous aide à mieux connaître les animaux
+                que vous gardez : le caractère de chaque race, ses besoins, ses habitudes. Je vous
+                donne aussi des conseils concrets pour préparer une maison avant une garde et vivre
+                le quotidien avec vos compagnons, au fil des saisons. Parcourez mes conseils
+                ci-dessous : ils sont là pour vous aider à accueillir chaque animal en toute confiance.
               </p>
             </div>
           </header>
