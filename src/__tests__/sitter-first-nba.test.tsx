@@ -44,6 +44,8 @@ const fakeSit = (i: number, score: number): AffinitySitCard => ({
   owner_first_name: "Alice",
   pet_species: ["dog"],
   affinity: { score, matched: ["Langue commune"], total: 5, displayed: true },
+  distance_km: null,
+  environments: [],
 });
 
 describe("SitterFirstNBA", () => {

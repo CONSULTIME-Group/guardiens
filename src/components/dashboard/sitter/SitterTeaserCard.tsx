@@ -7,18 +7,18 @@ import { Link } from "react-router-dom";
 import { useRef } from "react";
 import matchEmptyIllustration from "@/assets/illustrations/sitter-match-empty.webp";
 import { getOptimizedImageUrl } from "@/lib/imageOptim";
-import type { AffinitySitCard, PoolScope } from "@/hooks/useSitterTopAffinitySits";
+import type { AffinitySitCard, ListingRankingSource } from "@/hooks/useSitterTopAffinitySits";
 import { SectionHeader, catalogExitLabel } from "./SitterMatchSection";
 import AffinityBadge from "@/components/matching/AffinityBadge";
 import { trackEvent } from "@/lib/analytics";
 import { useImpressionOnce } from "@/hooks/useImpressionOnce";
 import { petSpeciesLabel } from "@/lib/petLabels";
-import { scopeSubtitle } from "@/lib/matchScope";
+import { listingRankingSubtitle } from "@/lib/sitterListingRank";
 
 interface SitterTeaserCardProps {
   topSits: AffinitySitCard[];
   fallbackSits: AffinitySitCard[];
-  scopeUsed: PoolScope;
+  rankingSource: ListingRankingSource;
   isLoading: boolean;
   /** Nombre réel d'annonces visibles par ce gardien, pour le lien de sortie
    * vers la recherche. Jamais codé en dur. */
@@ -242,8 +242,9 @@ const TeaserCard = ({ sit, onCtaClick }: { sit: AffinitySitCard; onCtaClick?: ()
 const SitterTeaserCard = ({
   topSits,
   fallbackSits,
-  scopeUsed,
+  rankingSource,
   isLoading,
+  totalPublished = 0,
 }: SitterTeaserCardProps) => {
   const sectionRef = useRef<HTMLElement | null>(null);
   const featured = topSits[0] ?? fallbackSits[0] ?? null;
@@ -252,14 +253,14 @@ const SitterTeaserCard = ({
   useImpressionOnce(sectionRef, impressionKey, () => {
     void trackEvent("dashboard_star_seen", {
       source: "sitter_dashboard",
-      metadata: { surface: "sitter_dashboard", variant: "teaser", scope: scopeUsed, sit_id: featured?.id ?? null },
+      metadata: { surface: "sitter_dashboard", variant: "teaser", ranking_source: rankingSource, sit_id: featured?.id ?? null },
     });
   });
 
   const onCtaClick = () =>
     void trackEvent("dashboard_star_cta_clicked", {
       source: "sitter_dashboard",
-      metadata: { surface: "sitter_dashboard", variant: "teaser", scope: scopeUsed, sit_id: featured?.id ?? null },
+      metadata: { surface: "sitter_dashboard", variant: "teaser", ranking_source: rankingSource, sit_id: featured?.id ?? null },
     });
 
   return (
@@ -272,9 +273,18 @@ const SitterTeaserCard = ({
       <SectionHeader
         eyebrow="Ce qui vous attend"
         title="Une maison cherche déjà son gardien."
-        subtitle={scopeSubtitle(scopeUsed)}
+        subtitle={listingRankingSubtitle(rankingSource)}
       />
-      {isLoading ? <Skeleton /> : featured ? <TeaserCard sit={featured} onCtaClick={onCtaClick} /> : <EmptyTeaser />}
+      {isLoading ? <Skeleton /> : featured ? (
+        <>
+          <TeaserCard sit={featured} onCtaClick={onCtaClick} />
+          <div className="mt-[18px]">
+            <Link to="/search" className="text-primary hover:underline underline-offset-4 text-[13px] font-bold">
+              {catalogExitLabel(totalPublished)}
+            </Link>
+          </div>
+        </>
+      ) : <EmptyTeaser />}
     </section>
   );
 };

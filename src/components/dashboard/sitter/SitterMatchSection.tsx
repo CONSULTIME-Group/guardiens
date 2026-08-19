@@ -3,12 +3,13 @@ import matchEmptyIllustration from "@/assets/illustrations/sitter-match-empty.we
 import { Link } from "react-router-dom";
 import { useRef } from "react";
 import { getOptimizedImageUrl } from "@/lib/imageOptim";
-import type { AffinitySitCard, PoolScope } from "@/hooks/useSitterTopAffinitySits";
+import type { AffinitySitCard, ListingRankingSource } from "@/hooks/useSitterTopAffinitySits";
 import AffinityRing from "@/components/matching/AffinityRing";
 import { trackEvent } from "@/lib/analytics";
 import { useImpressionOnce } from "@/hooks/useImpressionOnce";
 import { petSpeciesLabel } from "@/lib/petLabels";
-import { scopeSubtitle } from "@/lib/matchScope";
+import { listingRankingSubtitle } from "@/lib/sitterListingRank";
+import { ENV_LABEL_MAP } from "@/components/shared/EnvironmentPills";
 
 /**
  * Vague 2 sur 4, la carte rencontre.
@@ -23,7 +24,7 @@ interface Props {
   topSits: AffinitySitCard[];
   fallbackSits: AffinitySitCard[];
   discoverySit?: AffinitySitCard | null;
-  scopeUsed: PoolScope;
+  rankingSource: ListingRankingSource;
   isLoading: boolean;
   /** Nombre réel d'annonces publiées visibles par ce gardien, pour le lien
    * de sortie vers la recherche. Jamais codé en dur. */
@@ -68,10 +69,16 @@ const speciesLabel = (species: string[]): string | null => {
  */
 export const catalogExitLabel = (totalPublished: number): string =>
   totalPublished > 1
-    ? `Voir les ${totalPublished} gardes disponibles partout en France`
+    ? `Voir les ${totalPublished} gardes disponibles`
     : totalPublished === 1
-      ? "Voir la garde disponible partout en France"
+      ? "Voir la garde disponible"
       : "Voir toutes les annonces";
+
+const environmentLabels = (environments: string[]): string[] =>
+  environments
+    .map((environment) => ENV_LABEL_MAP[environment])
+    .filter((label): label is string => !!label)
+    .slice(0, 2);
 
 /* -------------------------------------------------------------------------- */
 /*  En-tête signature : trait + eyebrow + titre + sous-titre                  */
@@ -211,6 +218,7 @@ const StarCard = ({ sit, onCtaClick }: { sit: AffinitySitCard; onCtaClick?: () =
   const dates = formatDateRange(sit.start_date, sit.end_date);
   const species = speciesLabel(sit.pet_species);
   const meta = [species, dates].filter(Boolean).join(" · ");
+  const labels = environmentLabels(sit.environments);
   const matched = sit.affinity?.matched ?? [];
   const chips = matched.slice(0, 2);
   const total = sit.affinity?.total ?? 0;
@@ -309,6 +317,16 @@ const StarCard = ({ sit, onCtaClick }: { sit: AffinitySitCard; onCtaClick?: () =
             </div>
           )}
 
+          {labels.length > 0 && (
+            <div className="flex flex-wrap gap-[6px] mt-[12px]">
+              {labels.map((label) => (
+                <span key={label} className="rounded-full border border-border bg-muted/40 px-2.5 py-1 text-xs text-muted-foreground">
+                  {label}
+                </span>
+              ))}
+            </div>
+          )}
+
           <div className="mt-[22px]">
             <Link
               to={`/sits/${sit.id}`}
@@ -354,7 +372,9 @@ const CompactRow = ({
 }) => {
   const dates = formatDateRange(sit.start_date, sit.end_date);
   const species = speciesLabel(sit.pet_species);
-  const meta = [sit.city, species, dates].filter(Boolean).join(" · ");
+  const distance = sit.distance_km == null ? null : `${Math.round(sit.distance_km)} km`;
+  const meta = [sit.city, dates, distance].filter(Boolean).join(" · ");
+  const labels = environmentLabels(sit.environments);
 
   return (
     <Link
@@ -392,6 +412,15 @@ const CompactRow = ({
           >
             {meta}
           </p>
+        )}
+        {labels.length > 0 && (
+          <div className="flex flex-wrap gap-1.5 mt-2">
+            {labels.map((label) => (
+              <span key={label} className="rounded-full border border-border bg-muted/40 px-2 py-0.5 text-xs text-muted-foreground">
+                {label}
+              </span>
+            ))}
+          </div>
         )}
       </div>
       <span
@@ -465,7 +494,7 @@ const DiscoveryRow = ({ sit }: { sit: AffinitySitCard }) => {
 /*  Section principale                                                        */
 /* -------------------------------------------------------------------------- */
 
-const SitterMatchSection = ({ topSits, fallbackSits, discoverySit, scopeUsed, isLoading, totalPublished = 0 }: Props) => {
+const SitterMatchSection = ({ topSits, fallbackSits, discoverySit, rankingSource, isLoading, totalPublished = 0 }: Props) => {
   const sectionRef = useRef<HTMLElement | null>(null);
   const usableScored = topSits.filter((s) => s.affinity);
   const hasScored = usableScored.length > 0;
@@ -476,14 +505,14 @@ const SitterMatchSection = ({ topSits, fallbackSits, discoverySit, scopeUsed, is
   useImpressionOnce(sectionRef, impressionKey, () => {
     void trackEvent("dashboard_star_seen", {
       source: "sitter_dashboard",
-      metadata: { surface: "sitter_dashboard", variant: "match", scope: scopeUsed, score: scoreForTrack },
+      metadata: { surface: "sitter_dashboard", variant: "match", ranking_source: rankingSource, score: scoreForTrack },
     });
   });
 
   const onCtaClick = () =>
     void trackEvent("dashboard_star_cta_clicked", {
       source: "sitter_dashboard",
-      metadata: { surface: "sitter_dashboard", variant: "match", scope: scopeUsed, score: scoreForTrack, sit_id: primary?.id ?? null },
+      metadata: { surface: "sitter_dashboard", variant: "match", ranking_source: rankingSource, score: scoreForTrack, sit_id: primary?.id ?? null },
     });
 
   if (isLoading) {
@@ -504,15 +533,9 @@ const SitterMatchSection = ({ topSits, fallbackSits, discoverySit, scopeUsed, is
     );
   }
 
-  // Rangée compacte : reste du top affinité, complété par le pool de repli
-  // (jamais de doublon avec la vedette ni entre eux). Maximum 3 rangées,
-  // discrètes, elles ne concurrencent pas la vedette.
-  const restScored = hasScored ? usableScored.slice(1) : [];
-  const shownIds = new Set(
-    [primary?.id, ...restScored.map((s) => s.id)].filter(Boolean),
-  );
-  const restFill = fallbackSits.filter((s) => !shownIds.has(s.id));
-  const rest = [...restScored, ...restFill].slice(0, 3);
+  // Deux rangées compactes sous la vedette, jamais plus de trois annonces au total.
+  const shownIds = new Set([primary?.id].filter(Boolean));
+  const rest = [...topSits, ...fallbackSits].filter((sit) => !shownIds.has(sit.id)).filter((sit, index, rows) => rows.findIndex((row) => row.id === sit.id) === index).slice(0, 2);
 
   const showEmpty = !primary && rest.length === 0;
 
@@ -528,7 +551,7 @@ const SitterMatchSection = ({ topSits, fallbackSits, discoverySit, scopeUsed, is
       <SectionHeader
         eyebrow="Une rencontre faite pour vous"
         title="Vous êtes faits pour vous entendre."
-        subtitle={scopeSubtitle(scopeUsed)}
+        subtitle={listingRankingSubtitle(rankingSource)}
       />
 
       {showEmpty ? (

@@ -110,7 +110,7 @@ const SitterDashboard = () => {
     hasMinimumPool,
     hasPostalCode,
     profileIncomplete,
-    scopeUsed,
+    rankingSource,
     totalPublished,
     isLoading: nbaLoading,
   } = useSitterTopAffinitySits();
@@ -349,7 +349,8 @@ const SitterDashboard = () => {
               <SitterTeaserCard
                 topSits={topSits}
                 fallbackSits={fallbackSits}
-                scopeUsed={scopeUsed}
+                rankingSource={rankingSource}
+                totalPublished={totalPublished}
                 isLoading={nbaLoading}
               />
 
@@ -455,7 +456,7 @@ const SitterDashboard = () => {
                   topSits={topSits}
                   fallbackSits={fallbackSits}
                   discoverySit={discoverySit}
-                  scopeUsed={scopeUsed}
+                  rankingSource={rankingSource}
                   isLoading={nbaLoading}
                   totalPublished={totalPublished}
                 />
