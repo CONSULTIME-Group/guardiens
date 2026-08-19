@@ -1,25 +1,18 @@
 /**
- * Charge les 3 meilleures annonces pour un gardien selon le score d'affinité,
- * avec garde-fous "cul-de-sac" (audit 2026-07) :
- *
- *  - le pool candidat suit un élargissement progressif (département, puis
- *    100 km, puis 200 km, puis France entière, arrêt au premier palier non
- *    vide) : on ne "recommande" plus des annonces à l'autre bout du pays,
- *    sans laisser 86 % des gardiens sur une section vide (audit 19/08/2026).
- *  - si le score d'affinité ne retient AUCUNE annonce affichable, on
- *    expose un `fallbackSits` (annonces ouvertes de la zone, triées par
- *    date) pour éviter l'écran vide.
- *  - on expose `profileIncomplete` pour permettre à l'UI d'afficher un
- *    empty state honnête (profil vs distance) plutôt qu'un message
- *    trompeur "aucune annonce dans un rayon de X km".
+ * Charge les 3 annonces les plus pertinentes pour un gardien. La préférence
+ * déclarée dans alert_preferences prime, puis la distance depuis le profil,
+ * puis l'affinité nationale quand aucune coordonnée n'est disponible.
  */
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { computeAffinityScore, type AffinityResult } from "@/lib/affinityScore";
 import { getDeptCode } from "@/lib/departments";
-import { pickProgressiveScope, orderByAffinity, type PoolScope } from "@/lib/matchScope";
-import { pickDiscoverySit } from "@/lib/pickDiscoverySit";
+import {
+  rankSitterListings,
+  type ListingAlertPreference,
+  type ListingRankingSource,
+} from "@/lib/sitterListingRank";
 
 export interface AffinitySitCard {
   id: string;
@@ -35,9 +28,11 @@ export interface AffinitySitCard {
   owner_first_name: string | null;
   pet_species: string[];
   affinity: AffinityResult | null;
+  distance_km: number | null;
+  environments: string[];
 }
 
-export type { PoolScope } from "@/lib/matchScope";
+export type { ListingRankingSource } from "@/lib/sitterListingRank";
 
 interface Result {
   topSits: AffinitySitCard[];
@@ -52,7 +47,7 @@ interface Result {
   hasMinimumPool: boolean;
   hasPostalCode: boolean;
   profileIncomplete: boolean;
-  scopeUsed: PoolScope;
+  rankingSource: ListingRankingSource;
   totalPublished: number;
   isLoading: boolean;
 }
@@ -93,7 +88,7 @@ export function useSitterTopAffinitySits(): Result {
         supabase
           .from("sitter_profiles")
           .select(
-            "animal_types, life_pace, languages, interests, work_during_sit, sensitivities, special_animal_skills, sitter_type, experience_years, travels_with_children, travels_with_own_animals",
+            "animal_types, life_pace, languages, interests, work_during_sit, sensitivities, special_animal_skills, sitter_type, experience_years, travels_with_children, travels_with_own_animals, preferred_environments",
           )
           .eq("user_id", userId!)
           .maybeSingle(),
@@ -106,15 +101,54 @@ export function useSitterTopAffinitySits(): Result {
 
       const postalCode = (profile?.postal_code as string | null) ?? null;
       const hasPostalCode = !!postalCode;
-      const deptCode = getDeptCode(postalCode);
-      // Coordonnées du gardien (absentes pour 258 profils au 19/08/2026 :
-      // les paliers de distance sont alors impossibles, repli national).
       const sitterCoords =
         typeof profile?.latitude === "number" && typeof profile?.longitude === "number"
           ? { lat: profile.latitude, lng: profile.longitude }
           : null;
       const filled = countAffinityFields(sitter);
       const profileIncomplete = filled < 3;
+
+      // La dernière alerte active pour les gardes est la préférence déclarée
+      // qui fait foi sur le tableau de bord, comme dans les emails.
+      const { data: alertRow } = await supabase
+        .from("alert_preferences")
+        .select("zone_type, city, radius_km, departement, region_code")
+        .eq("user_id", userId!)
+        .eq("active", true)
+        .contains("alert_types", ["gardes"])
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      let alertCenter = sitterCoords;
+      const alertCity = (alertRow as any)?.city as string | null | undefined;
+      if (alertCity) {
+        const normalized = alertCity
+          .trim()
+          .toLowerCase()
+          .normalize("NFD")
+          .replace(/[\u0300-\u036f]/g, "")
+          .replace(/[^a-z0-9 -]/g, "")
+          .replace(/\s+/g, " ");
+        const candidates = [`city:${normalized}|france`, `${normalized}|france`, normalized, alertCity.trim().toLowerCase()];
+        const { data: geo } = await supabase
+          .from("geocode_cache")
+          .select("lat, lng")
+          .in("normalized_name", candidates)
+          .limit(1)
+          .maybeSingle();
+        if (typeof geo?.lat === "number" && typeof geo?.lng === "number") {
+          alertCenter = { lat: geo.lat, lng: geo.lng };
+        }
+      }
+      const alert: ListingAlertPreference | null = alertRow
+        ? {
+            zoneType: (alertRow as any).zone_type,
+            radiusKm: (alertRow as any).radius_km ?? null,
+            department: getDeptCode((alertRow as any).departement ?? null),
+            center: alertCenter,
+          }
+        : null;
 
       // 2. Volume réellement visible par CE gardien (lien de sortie vers la
       //    recherche + empty state honnête). Mêmes règles que le pool
@@ -129,12 +163,12 @@ export function useSitterTopAffinitySits(): Result {
         .gte("end_date", todayIso)
         .neq("user_id", userId!);
 
-      // 3. Pool candidat, joint au code postal du propriétaire pour permettre
-      //    le filtrage département/région côté client.
+      // 3. Pool national candidat. Le classement complète toujours jusqu'à
+      //    trois annonces si le catalogue en contient au moins trois.
       const sitsRes: any = await supabase
         .from("sits")
         .select(
-          "id, title, city, start_date, end_date, cover_photo_url, user_id, property_id, accepts_sitter_pets, accepts_sitter_children",
+          "id, title, city, start_date, end_date, cover_photo_url, user_id, property_id, accepts_sitter_pets, accepts_sitter_children, departement_code, environments",
         )
         .eq("status", "published")
         .eq("accepting_applications", true)
@@ -156,28 +190,7 @@ export function useSitterTopAffinitySits(): Result {
         sitsAll.forEach((s: any) => { s.owner = s.user_id ? ownerMap.get(s.user_id) ?? null : null; });
       }
 
-      // 4. Élargissement progressif : département → 100 km → 200 km → France
-      //    entière, arrêt au premier palier non vide. La distance utilise les
-      //    coordonnées approximatives du propriétaire (public_profiles),
-      //    jamais le géocodage du nom de ville (homonymes). Un gardien sans
-      //    coordonnées ne peut calculer aucune distance : il conserve le
-      //    palier département (code postal) puis tombe directement au palier
-      //    national, jamais sur un écran vide.
-      const { scoped, scope: scopeUsed } = pickProgressiveScope({
-        sits: sitsAll,
-        sitterDept: deptCode,
-        sitterCoords,
-        getDept: (s: any) => getDeptCode(s?.owner?.postal_code ?? null),
-        getCoords: (s: any) => {
-          const lat = s?.owner?.latitude_approx;
-          const lng = s?.owner?.longitude_approx;
-          return typeof lat === "number" && typeof lng === "number"
-            ? { lat, lng }
-            : null;
-        },
-      });
-
-      if (scoped.length === 0) {
+      if (sitsAll.length === 0) {
         return {
           topSits: [] as AffinitySitCard[],
           fallbackSits: [] as AffinitySitCard[],
@@ -185,17 +198,17 @@ export function useSitterTopAffinitySits(): Result {
           totalPublished: totalPublished ?? 0,
           hasPostalCode,
           profileIncomplete,
-          scopeUsed,
+          rankingSource: alert ? "alert" : sitterCoords ? "distance" : "affinity",
         };
       }
 
       // 5. Charger les animaux des propriétés du pool réduit (utile aux
       //    filtres animaux, à l'affichage des espèces et au score).
-      const propertyIds = Array.from(
-        new Set(scoped.map((s) => s.property_id).filter(Boolean)),
+       const propertyIds = Array.from(
+         new Set(sitsAll.map((s) => s.property_id).filter(Boolean)),
       ) as string[];
       const ownerIds = Array.from(
-        new Set(scoped.map((s) => s.user_id).filter(Boolean)),
+         new Set(sitsAll.map((s) => s.user_id).filter(Boolean)),
       ) as string[];
 
       const [petsRes, ownerProfilesRes]: any[] = await Promise.all([
@@ -230,7 +243,7 @@ export function useSitterTopAffinitySits(): Result {
 
       const scored: AffinitySitCard[] = [];
       const fallback: AffinitySitCard[] = [];
-      for (const sit of scoped) {
+      for (const sit of sitsAll) {
         const pets = petsByProperty.get(sit.property_id) ?? [];
         const ownerFirstName: string | null = sit?.owner?.first_name ?? null;
         const card: AffinitySitCard = {
@@ -247,6 +260,8 @@ export function useSitterTopAffinitySits(): Result {
           owner_first_name: ownerFirstName,
           pet_species: pets.map((p) => p.species ?? "").filter(Boolean),
           affinity: null,
+          distance_km: null,
+          environments: Array.isArray(sit.environments) ? sit.environments : [],
         };
         fallback.push(card);
 
@@ -270,112 +285,40 @@ export function useSitterTopAffinitySits(): Result {
         scored.push({ ...card, affinity });
       }
 
-      scored.sort((a, b) => (b.affinity?.score ?? 0) - (a.affinity?.score ?? 0));
-
-      // Palier national : le pool de repli épouse le tri par affinité (les
-      // annonces non scorées restent visibles, en fin de liste). Les paliers
-      // de proximité conservent l'ordre chronologique.
-      const orderedFallback =
-        scopeUsed === "country"
-          ? orderByAffinity(
-              fallback,
-              new Map(scored.map((s) => [s.id, s.affinity?.score ?? 0])),
-            )
-          : fallback;
-
-      // Sélection "découverte" (Vague 9) : première annonce hors top 3
-      // qui apporte de l'altérité au gardien. Critères réels :
-      //   (a) au moins une espèce que le gardien n'a pas déclarée dans
-      //       son expérience `animal_types`, OU
-      //   (b) une ville différente de toutes celles du top.
-      // Pas de score affiché ensuite : c'est la proposition inverse du
-      // ring. Si aucun candidat ne remplit ces critères, on retourne
-      // null plutôt qu'un remplissage artificiel.
-      const topThree = scored.slice(0, 3);
-      const topIds = new Set(topThree.map((c) => c.id));
-      const topCities = new Set(
-        topThree
-          .map((c) => (c.city ?? "").trim().toLowerCase())
-          .filter(Boolean),
-      );
-      const sitterSpecies = Array.isArray(sitter?.animal_types)
-        ? (sitter!.animal_types as string[])
-        : [];
-      let discoverySit: AffinitySitCard | null = pickDiscoverySit(fallback, {
-        topIds,
-        topCities,
-        sitterSpecies,
-      });
-
-      // Vague 14, #7 : découverte élargie. Si le pool local ne fournit aucun
-      // candidat "altérité" (typiquement une seule annonce locale), on va
-      // chercher une seule annonce affichable ailleurs en France, hors du top.
-      if (!discoverySit && topIds.size < 3) {
-        const excludeIds = Array.from(topIds);
-        let elsewhereQuery = supabase
-          .from("sits")
-          .select("id, title, city, start_date, end_date, cover_photo_url, user_id, property_id")
-          .eq("status", "published")
-          .eq("accepting_applications", true)
-          .gte("end_date", todayIso)
-          .neq("user_id", userId!)
-          .order("created_at", { ascending: false })
-          .limit(1);
-        if (excludeIds.length > 0) {
-          elsewhereQuery = elsewhereQuery.not("id", "in", `(${excludeIds.join(",")})`);
-        }
-        const { data: elsewhereRows } = await elsewhereQuery;
-        const elsewhere = (elsewhereRows ?? [])[0];
-        if (elsewhere) {
-          // Hydrate owner first name best effort (non bloquant).
-          let ownerFirstName: string | null = null;
-          if (elsewhere.user_id) {
-            const { data: ownerRow } = await supabase
-              .from("public_profiles")
-              .select("first_name")
-              .eq("id", elsewhere.user_id)
-              .maybeSingle();
-            ownerFirstName = (ownerRow as any)?.first_name ?? null;
-          }
-          let petSpecies: string[] = [];
-          let petPhoto: string | null = null;
-          if (elsewhere.property_id) {
-            const { data: petRows } = await supabase
-              .from("pets")
-              .select("species, photo_url")
-              .eq("property_id", elsewhere.property_id);
-            petSpecies = (petRows ?? [])
-              .map((p: any) => p.species)
-              .filter(Boolean);
-            petPhoto =
-              (petRows ?? []).find((p: any) => p.photo_url)?.photo_url ?? null;
-          }
-          discoverySit = {
-            id: elsewhere.id,
-            title: elsewhere.title,
-            city: elsewhere.city,
-            start_date: elsewhere.start_date,
-            end_date: elsewhere.end_date,
-            cover_photo_url: elsewhere.cover_photo_url,
-            pet_photo_url: petPhoto,
-            owner_first_name: ownerFirstName,
-            pet_species: petSpecies,
-            affinity: null,
+      const affinityById = new Map(scored.map((card) => [card.id, card.affinity]));
+      const ranked = rankSitterListings({
+        listings: fallback.map((card) => {
+          const raw = sitsAll.find((sit) => sit.id === card.id);
+          const lat = raw?.owner?.latitude_approx;
+          const lng = raw?.owner?.longitude_approx;
+          const affinity = affinityById.get(card.id) ?? null;
+          return {
+            ...card,
+            affinity,
+            affinityScore: affinity?.score ?? null,
+            department: getDeptCode(raw?.departement_code ?? raw?.owner?.postal_code ?? null),
+            coords: typeof lat === "number" && typeof lng === "number" ? { lat, lng } : null,
           };
-        }
-      }
-
+        }),
+        alert,
+        sitterCoords,
+        preferredEnvironments: Array.isArray((sitter as any)?.preferred_environments)
+          ? (sitter as any).preferred_environments
+          : [],
+      });
+      const topThree = ranked.listings.map(({ distanceKm, affinityScore: _affinityScore, department: _department, coords: _coords, ...card }) => ({
+        ...card,
+        distance_km: distanceKm,
+      }));
 
       return {
         topSits: topThree,
-        // Pool élargi à 6 : la carte rencontre pioche dedans pour compléter
-        // la rangée compacte quand le top affinité est pauvre.
-        fallbackSits: orderedFallback.slice(0, 6),
-        discoverySit,
+        fallbackSits: topThree,
+        discoverySit: null,
         totalPublished: totalPublished ?? 0,
         hasPostalCode,
         profileIncomplete,
-        scopeUsed,
+        rankingSource: ranked.source,
       };
     },
   });
@@ -390,7 +333,7 @@ export function useSitterTopAffinitySits(): Result {
     hasMinimumPool: topSits.length >= 1,
     hasPostalCode: data?.hasPostalCode ?? false,
     profileIncomplete: data?.profileIncomplete ?? false,
-    scopeUsed: data?.scopeUsed ?? "none",
+    rankingSource: data?.rankingSource ?? "affinity",
     totalPublished: data?.totalPublished ?? 0,
     isLoading: q.isLoading,
   };
