@@ -81,8 +81,12 @@ describe("petLabels — exhaustivité des mappings (enums Postgres)", () => {
       ...Object.entries(PET_SPECIES_LABELS),
       ...Object.entries(PET_SPECIES_LABELS_LOWER),
     ];
+    // « reptile » est le libellé français correct, identique à la clé d'enum.
+    const LEGIT_IDENTICAL = new Set(["reptile"]);
     for (const [key, label] of all) {
-      expect(label, `le libellé de « ${key} » recopie la valeur brute`).not.toBe(key);
+      if (!LEGIT_IDENTICAL.has(key)) {
+        expect(label, `le libellé de « ${key} » recopie la valeur brute`).not.toBe(key);
+      }
       expect(label.length).toBeGreaterThan(0);
     }
   });
