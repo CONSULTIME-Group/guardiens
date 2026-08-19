@@ -175,7 +175,7 @@ const BreedsListing = () => {
           <p className="text-muted-foreground py-8">{t("breeds_listing.no_results")}</p>
         )}
 
-        {sections.map(({ species, list }) => (
+        {sections.map(({ species, breeds: list }) => (
           <section key={species} className="mb-8 md:mb-12">
             <h2 className="font-serif text-2xl font-semibold text-foreground mb-4">
               {t(`breeds_listing.species.${species}`, { defaultValue: species })}{" "}
