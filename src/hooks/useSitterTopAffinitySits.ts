@@ -28,6 +28,10 @@ export interface AffinitySitCard {
   start_date: string | null;
   end_date: string | null;
   cover_photo_url: string | null;
+  /** Photo d'un animal de l'annonce, prioritaire sur la couverture pour la
+   * carte rencontre : quand une seule annonce occupe l'écran, la photo de
+   * l'animal gardé est plus pertinente qu'une photo de lieu générique. */
+  pet_photo_url: string | null;
   owner_first_name: string | null;
   pet_species: string[];
   affinity: AffinityResult | null;
@@ -197,7 +201,7 @@ export function useSitterTopAffinitySits(): Result {
         propertyIds.length > 0
           ? supabase
               .from("pets")
-              .select("property_id, species, special_needs")
+              .select("property_id, species, special_needs, photo_url")
               .in("property_id", propertyIds)
           : Promise.resolve({ data: [] }),
         ownerIds.length > 0
@@ -212,11 +216,11 @@ export function useSitterTopAffinitySits(): Result {
 
       const petsByProperty = new Map<
         string,
-        { species: string | null; special_needs: string | null }[]
+        { species: string | null; special_needs: string | null; photo_url: string | null }[]
       >();
       for (const p of (petsRes.data ?? []) as any[]) {
         const arr = petsByProperty.get(p.property_id) ?? [];
-        arr.push({ species: p.species, special_needs: p.special_needs });
+        arr.push({ species: p.species, special_needs: p.special_needs, photo_url: p.photo_url ?? null });
         petsByProperty.set(p.property_id, arr);
       }
       const ownerPrefsById = new Map<string, any>(
@@ -235,6 +239,10 @@ export function useSitterTopAffinitySits(): Result {
           start_date: sit.start_date,
           end_date: sit.end_date,
           cover_photo_url: sit.cover_photo_url,
+          // Priorité à une photo d'animal sur la carte rencontre (exception
+          // assumée à coverPriority : ici la photo illustre la garde, pas le
+          // lieu). Repli sur la couverture du lieu si aucun animal n'en a.
+          pet_photo_url: pets.find((p) => p.photo_url)?.photo_url ?? null,
           owner_first_name: ownerFirstName,
           pet_species: pets.map((p) => p.species ?? "").filter(Boolean),
           affinity: null,
@@ -318,14 +326,17 @@ export function useSitterTopAffinitySits(): Result {
             ownerFirstName = (ownerRow as any)?.first_name ?? null;
           }
           let petSpecies: string[] = [];
+          let petPhoto: string | null = null;
           if (elsewhere.property_id) {
             const { data: petRows } = await supabase
               .from("pets")
-              .select("species")
+              .select("species, photo_url")
               .eq("property_id", elsewhere.property_id);
             petSpecies = (petRows ?? [])
               .map((p: any) => p.species)
               .filter(Boolean);
+            petPhoto =
+              (petRows ?? []).find((p: any) => p.photo_url)?.photo_url ?? null;
           }
           discoverySit = {
             id: elsewhere.id,
@@ -334,6 +345,7 @@ export function useSitterTopAffinitySits(): Result {
             start_date: elsewhere.start_date,
             end_date: elsewhere.end_date,
             cover_photo_url: elsewhere.cover_photo_url,
+            pet_photo_url: petPhoto,
             owner_first_name: ownerFirstName,
             pet_species: petSpecies,
             affinity: null,
@@ -344,7 +356,9 @@ export function useSitterTopAffinitySits(): Result {
 
       return {
         topSits: topThree,
-        fallbackSits: fallback.slice(0, 3),
+        // Pool élargi à 6 : la carte rencontre pioche dedans pour compléter
+        // la rangée compacte quand le top affinité est pauvre.
+        fallbackSits: fallback.slice(0, 6),
         discoverySit,
         totalPublished: totalPublished ?? 0,
         hasPostalCode,

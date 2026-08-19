@@ -7,6 +7,7 @@ import type { AffinitySitCard, PoolScope } from "@/hooks/useSitterTopAffinitySit
 import AffinityRing from "@/components/matching/AffinityRing";
 import { trackEvent } from "@/lib/analytics";
 import { useImpressionOnce } from "@/hooks/useImpressionOnce";
+import { petSpeciesLabel } from "@/lib/petLabels";
 
 /**
  * Vague 2 sur 4, la carte rencontre.
@@ -23,6 +24,9 @@ interface Props {
   discoverySit?: AffinitySitCard | null;
   scopeUsed: PoolScope;
   isLoading: boolean;
+  /** Nombre réel d'annonces publiées visibles par ce gardien, pour le lien
+   * de sortie vers la recherche. Jamais codé en dur. */
+  totalPublished?: number;
 }
 
 // Vague 15 : passe par un token CSS pour s'assombrir en dark.
@@ -48,16 +52,10 @@ const formatDateRange = (start: string | null, end: string | null): string | nul
   }
 };
 
-const scopeSubtitle = (scope: PoolScope): string => {
-  if (scope === "dept") return "Dans votre département.";
-  if (scope === "region") return "Près de chez vous.";
-  if (scope === "country") return "Ailleurs en France.";
-  return "";
-};
-
 const speciesLabel = (species: string[]): string | null => {
   if (!species || species.length === 0) return null;
-  if (species.length === 1) return species[0];
+  // Mapping partagé, jamais la valeur brute de l'enum ("dog" -> "Chien").
+  if (species.length === 1) return petSpeciesLabel(species[0]);
   return `${species.length} animaux`;
 };
 
@@ -200,19 +198,22 @@ const StarCard = ({ sit, onCtaClick }: { sit: AffinitySitCard; onCtaClick?: () =
   const matched = sit.affinity?.matched ?? [];
   const chips = matched.slice(0, 2);
   const total = sit.affinity?.total ?? 0;
-  const cover = sit.cover_photo_url
-    ? getOptimizedImageUrl(sit.cover_photo_url, 900, 78)
+  // Photo d'animal d'abord (la garde), couverture du lieu en repli.
+  const photoUrl = sit.pet_photo_url ?? sit.cover_photo_url;
+  const cover = photoUrl
+    ? getOptimizedImageUrl(photoUrl, 900, 78)
     : null;
 
   return (
     <article className="group notebook-card relative">
       <div className="notebook-card-paper absolute inset-0" aria-hidden="true" />
-      {/* Bandeau photo, hauteur exacte 150px */}
+      {/* Bandeau photo, hauteur exacte 150px. Fond d'attente aquarelle TOUJOURS
+          présent sous l'image : jamais de rectangle blanc pendant le chargement. */}
       <div
         className="relative w-full"
         style={{
           height: "150px",
-          background: cover ? undefined : PLACEHOLDER_BG,
+          background: PLACEHOLDER_BG,
         }}
       >
         {cover && (
@@ -446,7 +447,7 @@ const DiscoveryRow = ({ sit }: { sit: AffinitySitCard }) => {
 /*  Section principale                                                        */
 /* -------------------------------------------------------------------------- */
 
-const SitterMatchSection = ({ topSits, fallbackSits, discoverySit, scopeUsed, isLoading }: Props) => {
+const SitterMatchSection = ({ topSits, fallbackSits, discoverySit, scopeUsed, isLoading, totalPublished = 0 }: Props) => {
   const sectionRef = useRef<HTMLElement | null>(null);
   const usableScored = topSits.filter((s) => s.affinity);
   const hasScored = usableScored.length > 0;
@@ -485,11 +486,24 @@ const SitterMatchSection = ({ topSits, fallbackSits, discoverySit, scopeUsed, is
     );
   }
 
-  const usableFallback = fallbackSits;
-  const rest = hasScored ? usableScored.slice(1, 3) : usableFallback.slice(0, 3);
-  const rowsShowScore = hasScored;
+  // Rangée compacte : reste du top affinité, complété par le pool de repli
+  // (jamais de doublon avec la vedette ni entre eux). Maximum 3 rangées,
+  // discrètes, elles ne concurrencent pas la vedette.
+  const restScored = hasScored ? usableScored.slice(1) : [];
+  const shownIds = new Set(
+    [primary?.id, ...restScored.map((s) => s.id)].filter(Boolean),
+  );
+  const restFill = fallbackSits.filter((s) => !shownIds.has(s.id));
+  const rest = [...restScored, ...restFill].slice(0, 3);
 
   const showEmpty = !primary && rest.length === 0;
+
+  const searchLinkLabel =
+    totalPublished > 1
+      ? `Voir les ${totalPublished} gardes disponibles`
+      : totalPublished === 1
+        ? "Voir la garde disponible"
+        : "Voir toutes les annonces";
 
   return (
     <section
@@ -510,46 +524,39 @@ const SitterMatchSection = ({ topSits, fallbackSits, discoverySit, scopeUsed, is
         <>
           {primary && <StarCard sit={primary} onCtaClick={onCtaClick} />}
 
-          {(rest.length > 0 || discoverySit) && (
-            <div style={{ marginTop: "52px" }}>
-              <SectionHeader
-                eyebrow="Près de chez vous"
-                title="D'autres maisons cherchent leur gardien."
-                subtitle={scopeSubtitle(scopeUsed) || undefined}
-              />
-              {rest.length > 0 && (
-                <div className="space-y-[14px]">
-                  {rest.map((s) => (
-                    <CompactRow key={s.id} sit={s} showScore={rowsShowScore} />
-                  ))}
-                </div>
-              )}
-              {discoverySit && (
-                <div style={{ marginTop: rest.length > 0 ? "22px" : "0" }}>
-                  <p
-                    className="font-heading text-muted-foreground mb-[8px]"
-                    style={{
-                      fontSize: "13.5px",
-                      fontStyle: "italic",
-                      lineHeight: 1.4,
-                    }}
-                  >
-                    Et pour ce que vous n'avez pas encore vécu :
-                  </p>
-                  <DiscoveryRow sit={discoverySit} />
-                </div>
-              )}
-              <div className="mt-[22px]">
-                <Link
-                  to="/recherche"
-                  className="text-primary"
-                  style={{ fontSize: "13px", fontWeight: 700 }}
-                >
-                  Toutes les annonces autour de vous
-                </Link>
-              </div>
+          {rest.length > 0 && (
+            <div className="space-y-[10px] mt-[14px]">
+              {rest.map((s) => (
+                <CompactRow key={s.id} sit={s} showScore={!!s.affinity} />
+              ))}
             </div>
           )}
+
+          {discoverySit && (
+            <div style={{ marginTop: "22px" }}>
+              <p
+                className="font-heading text-muted-foreground mb-[8px]"
+                style={{
+                  fontSize: "13.5px",
+                  fontStyle: "italic",
+                  lineHeight: 1.4,
+                }}
+              >
+                Et pour ce que vous n'avez pas encore vécu :
+              </p>
+              <DiscoveryRow sit={discoverySit} />
+            </div>
+          )}
+
+          <div className="mt-[18px]">
+            <Link
+              to="/search"
+              className="text-primary hover:underline underline-offset-4"
+              style={{ fontSize: "13px", fontWeight: 700 }}
+            >
+              {searchLinkLabel}
+            </Link>
+          </div>
         </>
       )}
     </section>
