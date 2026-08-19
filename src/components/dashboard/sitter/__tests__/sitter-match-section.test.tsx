@@ -128,6 +128,22 @@ describe("SitterMatchSection — rangée compacte et sortie recherche", () => {
     expect(rowC?.textContent).not.toMatch(/%/);
   });
 
+  it("affiche ville, dates, distance, score et environnement sur une rangée compacte", () => {
+    renderSection({
+      topSits: [
+        scored("a", 80),
+        scored("b", 62, { city: "Belley", distance_km: 66.3, environments: ["campagne"] }),
+      ],
+      totalPublished: 11,
+    });
+    const row = screen.getByText("Annonce b").closest("a");
+    expect(row?.textContent).toContain("Belley");
+    expect(row?.textContent).toContain("27 août au 30 septembre");
+    expect(row?.textContent).toContain("66 km");
+    expect(row?.textContent).toContain("62 %");
+    expect(row?.textContent).toContain("Campagne");
+  });
+
   it("plafonne l'ensemble à 3 gardes", () => {
     renderSection({
       topSits: [scored("a", 80)],
@@ -192,6 +208,16 @@ describe("SitterMatchSection — sous-titre honnête sur le classement", () => {
       expect(screen.getByRole("link", { name: "Voir les 11 gardes disponibles" })).toHaveAttribute("href", "/search");
     },
   );
+
+  it("rend le lien visible à l'écran sous trois gardes", () => {
+    renderSection({
+      topSits: [scored("a", 80), scored("b", 70), scored("c", 60)],
+      totalPublished: 11,
+    });
+    const link = screen.getByRole("link", { name: "Voir les 11 gardes disponibles" });
+    expect(link).toBeVisible();
+    expect(link.getAttribute("href")).toBe("/search");
+  });
 });
 
 describe("SitterMatchSection — skeleton de chargement", () => {
