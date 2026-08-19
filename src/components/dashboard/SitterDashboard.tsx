@@ -60,8 +60,10 @@ const SitterDashboard = () => {
   const { hasAccess: hasSubscription } = useSubscriptionAccess();
   // Premier contact Alma : bloque les whispers proactifs tant qu'il n'est pas vu.
   const { shouldShow: showAlmaFirstMeeting, markSeen: markAlmaFirstMeetingSeen } = useAlmaFirstMeeting();
-  // Pass 5 — compagnon culturel : fait d'ambiance selon rôle et ville.
-  useAlmaCulturalFact({ surface: "dashboard", context: { role: "sitter" }, enabled: !showAlmaFirstMeeting });
+  // Compagnon culturel désactivé sur cet écran : Alma parle une seule fois
+  // par écran, via la carte rail (AlmaRailWhisper). La bulle flottante ne
+  // doit pas ouvrir d'infobulle proactive en parallèle.
+  useAlmaCulturalFact({ surface: "dashboard", context: { role: "sitter" }, enabled: false });
 
 
 
@@ -88,7 +90,9 @@ const SitterDashboard = () => {
   // ?sitterView=new force la branche nouveau gardien. Sinon comportement normal.
   const sitterViewParam = searchParams.get("sitterView");
   const isNewSitter = sitterViewParam === "new" ? true : sitterViewParam === "confirmed" ? false : rawIsNewSitter;
-  // Alma étape 1 — usage_nudge P2, ciblé sur l'état du gardien.
+  // Murmures proactifs désactivés sur cet écran : une seule voix Alma par
+  // écran, portée par AlmaRailWhisper dans le rail. La logique de ciblage
+  // est conservée pour réactivation éventuelle sur une autre surface.
   useAlmaUsageNudge({
     surface: "sitter_dashboard",
     role: "sitter",
@@ -97,7 +101,7 @@ const SitterDashboard = () => {
       : (profileCompletion ?? 100) < 60
         ? "profile_incomplete"
         : "any",
-    enabled: !showAlmaFirstMeeting,
+    enabled: false,
   });
   const {
     topSits,
