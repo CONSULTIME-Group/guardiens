@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { avatarImageUrl, storageImageUrl } from "@/lib/storageImage";
+import { petSpeciesLabel } from "@/lib/petLabels";
 import { logger } from "@/lib/logger";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -225,7 +226,8 @@ const OwnerStepAnimals = ({ pets, onAddPet, onUpdatePet, onRemovePet }: Props) =
     setSaving(false);
   };
 
-  const speciesLabel = (val: string) => SPECIES.find(s => s.value === val)?.label || val;
+  // Libellé d'espèce : module unique petLabels, valeur inconnue masquée (jamais brute).
+  const speciesLabel = (val: string) => petSpeciesLabel(val) ?? "";
 
   return (
     <div className="space-y-6">

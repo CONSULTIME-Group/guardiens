@@ -120,19 +120,27 @@ describe("garde statique — aucun rendu direct d'enum animal dans le JSX", () =
     for (const file of TSX_FILES) {
       const content = readFileSync(file, "utf8");
       const lines = content.split("\n");
+      // StepExperience stocke des libellés français choisis dans une liste
+      // (SPECIES_OPTIONS : « Chien », « Chat »...), pas des clés d'enum.
+      if (file.endsWith("components/profile/StepExperience.tsx")) return;
+      const lines = content.split("\n");
       lines.forEach((line, i) => {
         if (!directRender.test(line)) return;
         // Autorisé : passage par un accesseur petLabels.
         if (/pet(?:Activity|Walk|Alone|Species)Label/.test(line)) return;
         // Autorisé : accès indexé à un mapping (couvert par le test d'exhaustivité)
-        // ou à la map emoji de la page de démo (repli emoji, jamais la valeur brute).
-        if (/\b[A-Za-z_]*(?:LABELS|LABEL|EMOJI)\[[^\]]+\]/.test(line)) return;
+        // ou à une map emoji (repli emoji, jamais la valeur brute).
+        if (/\b[A-Za-z_]*(?:LABELS|LABEL|EMOJI|Emoji)\[[^\]]+\]/.test(line)) return;
         // Autorisé : construction d'objet de données (species: p.species), pas un rendu.
         if (/\bspecies:\s*(?:pet|p|openPet|animal)\.species\b/.test(line)) return;
         // Autorisé : comparaison technique (p.species === "dog").
         if (/\.species\s*={2,3}/.test(line)) return;
         // Autorisé : props techniques (species={pet.species}).
-        if (/^\s*(?:species|value|key)=/.test(line.trim())) return;
+        if (/(?:^|\s)(?:species|value|key)=\{(?:pet|p|openPet|animal)\.species\}/.test(line)) return;
+        // Autorisé : comptage indexé (speciesCount[p.species] = ...).
+        if (/\[[^\]]*\.species\]\s*=[^=]/.test(line)) return;
+        // Autorisé : clé technique de template (`${pet.species}-fallback`).
+        if (/\$\{[^}]*\.species\}-[a-z]/.test(line)) return;
         offenders.push(`${file.replace(`${SRC_ROOT}/`, "")}:${i + 1} ${line.trim()}`);
       });
     }
