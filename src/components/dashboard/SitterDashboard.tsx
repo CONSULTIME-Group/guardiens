@@ -35,7 +35,6 @@ import SitterAffinityBanner from "@/components/matching/SitterAffinityBanner";
 import { isPricingActive } from "@/lib/pricing";
 import { shouldShowVerifiedCard } from "@/lib/shouldShowVerifiedCard";
 import SitterOpeningCard from "./sitter/SitterOpeningCard";
-import SitterTeaserCard from "./sitter/SitterTeaserCard";
 import SitterNextStepRailCard from "./sitter/SitterNextStepRailCard";
 import { useSitterPriorityAction } from "@/hooks/useSitterPriorityAction";
 import SitterEntraideSection from "./sitter/SitterEntraideSection";
@@ -110,7 +109,7 @@ const SitterDashboard = () => {
     hasMinimumPool,
     hasPostalCode,
     profileIncomplete,
-    scopeUsed,
+    rankingSource,
     totalPublished,
     isLoading: nbaLoading,
   } = useSitterTopAffinitySits();
@@ -345,11 +344,14 @@ const SitterDashboard = () => {
                 </div>
               )}
 
-              {/* 3. ÉMOTION EN APERÇU : SitterTeaserCard (jamais de ring ici) */}
-              <SitterTeaserCard
+              {/* 3. ÉMOTION : les trois gardes les plus pertinentes, comme
+                  dans la branche gardien confirmé. */}
+              <SitterMatchSection
                 topSits={topSits}
                 fallbackSits={fallbackSits}
-                scopeUsed={scopeUsed}
+                discoverySit={discoverySit}
+                rankingSource={rankingSource}
+                totalPublished={totalPublished}
                 isLoading={nbaLoading}
               />
 
@@ -455,7 +457,7 @@ const SitterDashboard = () => {
                   topSits={topSits}
                   fallbackSits={fallbackSits}
                   discoverySit={discoverySit}
-                  scopeUsed={scopeUsed}
+                  rankingSource={rankingSource}
                   isLoading={nbaLoading}
                   totalPublished={totalPublished}
                 />
