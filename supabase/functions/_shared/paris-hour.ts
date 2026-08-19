@@ -58,3 +58,26 @@ export function parisWindowVerdict(now: Date, targetParisHour: number): ParisWin
   if (parisHour !== targetParisHour) return { run: false, parisHour, reason: "outside_target_hour" };
   return { run: true, parisHour };
 }
+
+/** Créneaux Paris servis par send-alert-digest : 8h, 12h et 18h. */
+export const ALERT_DIGEST_TARGET_PARIS_HOURS = [8, 12, 18] as const;
+
+/**
+ * Variante multi-créneaux de parisWindowVerdict : le passage courant est le
+ * bon si l'heure de Paris fait partie des créneaux visés, hors plage calme.
+ * L'heure cible vient du créneau réel d'exécution, jamais d'une constante.
+ * Constat du 19/08/2026 : send-alert-digest visait 8 en dur, les crons de
+ * 12h et 18h sortaient en outside_target_hour et leurs destinataires n'ont
+ * jamais rien reçu.
+ */
+export function parisWindowVerdictForHours(
+  now: Date,
+  targetParisHours: readonly number[],
+): ParisWindowVerdict {
+  const parisHour = parisHourNumber(now);
+  if (isParisQuietHour(now)) return { run: false, parisHour, reason: "quiet_hours" };
+  if (!targetParisHours.includes(parisHour)) {
+    return { run: false, parisHour, reason: "outside_target_hour" };
+  }
+  return { run: true, parisHour };
+}

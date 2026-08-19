@@ -17,6 +17,7 @@
 import { createClient } from 'npm:@supabase/supabase-js@2.45.0'
 import { claimSitNotification, raiseClaimErrorSignal, releaseSitNotification, reportClaimOutcome } from '../_shared/sitNotificationClaim.ts'
 import { parisWindowVerdict } from '../_shared/paris-hour.ts'
+import { publicationWindowOrClause } from '../_shared/sit-publication-window.ts'
 import { recordDeliveryFailure } from '../_shared/delivery-failure.ts'
 
 const TARGET_PARIS_HOUR = 9
@@ -90,8 +91,10 @@ Deno.serve(async (req) => {
     const [{ data: sits, error: sitsErr }, { data: missions, error: missionsErr }] = await Promise.all([
       supabase
         .from('sits')
-        .select('id, slug, title, city, start_date, end_date, user_id, status, created_at, cover_photo_url, property_id, departement_code, accepting_applications, country, profiles:user_id (latitude, longitude, postal_code, departement_code, country)')
-        .gte('created_at', since)
+        .select('id, slug, title, city, start_date, end_date, user_id, status, created_at, published_at, cover_photo_url, property_id, departement_code, accepting_applications, country, profiles:user_id (latitude, longitude, postal_code, departement_code, country)')
+        // Fenêtre sur la mise en ligne, pas la création : une annonce
+        // publiée après un long brouillon doit entrer dans le digest.
+        .or(publicationWindowOrClause(since))
         .eq('status', 'published')
         .or('country.is.null,country.eq.FR'),
       supabase
