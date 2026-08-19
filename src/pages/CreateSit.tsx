@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback, type MouseEvent as ReactMouseEvent } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -1821,7 +1821,7 @@ const CreateSit = () => {
 
   // Retour desktop vers /sits : confirmation si saisie non enregistrée, puis
   // choix de sortie si l'annonce est prête à publier.
-  const handleBackToSits = (e: MouseEvent<HTMLAnchorElement>) => {
+  const handleBackToSits = (e: ReactMouseEvent<HTMLAnchorElement>) => {
     if (unsavedRemote) {
       const ok = window.confirm("Des modifications ne sont pas encore enregistrées. Quitter cette page maintenant ?");
       if (!ok) {
