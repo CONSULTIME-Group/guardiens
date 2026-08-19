@@ -601,7 +601,7 @@ const Sits = () => {
           _sit_id: sitId,
           _code: String(err?.code || "inconnu"),
           _message: String(err?.message || err),
-        });
+        }).then(() => {}, () => {});
       }
       toast({
         variant: "destructive",

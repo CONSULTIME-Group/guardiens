@@ -22,6 +22,8 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Search, ExternalLink, ArrowRight } from "lucide-react";
 import { slugify } from "@/lib/normalize";
+import { resolveBreedFiche } from "@/lib/breedFicheMatch";
+import { buildBreedEditorialHref } from "@/components/breeds/BreedEditorialLink";
 
 type FactType =
   | "pet_care_tip"
@@ -115,6 +117,7 @@ function extractBreed(cf: Tip["context_filter"]): { breed: string; species: stri
 export default function AlmaTips() {
   const [tips, setTips] = useState<Tip[]>([]);
   const [breedArticles, setBreedArticles] = useState<Map<string, string>>(new Map());
+  const [breedFiches, setBreedFiches] = useState<Map<string, string>>(new Map());
   const [loading, setLoading] = useState(true);
   const [category, setCategory] = useState<Category>("all");
   const [query, setQuery] = useState("");
@@ -133,10 +136,32 @@ export default function AlmaTips() {
 
       // Précharge les slugs d'articles guide_race pour les tips "breed_did_you_know".
       const breeds = new Set<string>();
+      const breedRefs = new Map<string, { breed: string; species: string }>();
       for (const t of rows) {
         if (t.fact_type === "breed_did_you_know") {
           const b = extractBreed(t.context_filter);
-          if (b) breeds.add(b.breed);
+          if (b) {
+            breeds.add(b.breed);
+            breedRefs.set(`${b.species}|${b.breed}`, b);
+          }
+        }
+      }
+      // Fiches éditoriales /races : quand l'une existe pour la race du
+      // conseil, « Pour aller plus loin » pointe vers elle plutôt que vers
+      // l'article. Même rapprochement conservateur que BreedEditorialLink.
+      if (breedRefs.size > 0) {
+        const speciesList = Array.from(new Set([...breedRefs.values()].map((b) => b.species)));
+        const { data: fiches } = await supabase
+          .from("breed_profiles")
+          .select("species, breed")
+          .in("species", speciesList);
+        if (!cancelled && fiches) {
+          const map = new Map<string, string>();
+          for (const [key, b] of breedRefs) {
+            const match = resolveBreedFiche(b.species, b.breed, fiches as { species: string; breed: string }[]);
+            if (match) map.set(key, buildBreedEditorialHref(b.species, match.breed));
+          }
+          setBreedFiches(map);
         }
       }
       if (breeds.size > 0) {
@@ -228,7 +253,9 @@ export default function AlmaTips() {
 
   const renderTip = (t: Tip) => {
     const breed = t.fact_type === "breed_did_you_know" ? extractBreed(t.context_filter) : null;
+    const ficheHref = breed ? breedFiches.get(`${breed.species}|${breed.breed}`) : undefined;
     const raceSlug = breed ? breedArticles.get(breed.breed) : undefined;
+    const furtherHref = ficheHref ?? (raceSlug ? `/actualites/${raceSlug}` : undefined);
     const accent = accentFor(t.fact_type);
     return (
       <Card key={t.id} className={`h-full border-l-4 ${accent.border}`}>
@@ -264,9 +291,9 @@ export default function AlmaTips() {
                 Source : {extractDomain(t.source_url)}
               </a>
             )}
-            {raceSlug && (
+            {furtherHref && (
               <Link
-                to={`/actualites/${raceSlug}`}
+                to={furtherHref}
                 className="inline-flex items-center gap-1 text-xs text-primary hover:underline"
               >
                 Pour aller plus loin

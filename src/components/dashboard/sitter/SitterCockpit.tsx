@@ -141,6 +141,19 @@ const SitterCockpit = ({
             >
               {ancrage}
             </p>
+
+            {/* 4. Mention de disponibilité, volontairement non cliquable :
+                l'état reste visible ici, le pilotage vit dans /profile. */}
+            <p
+              className="font-sans text-muted-foreground mt-[4px] flex items-center gap-[6px]"
+              style={{ fontSize: "12px", lineHeight: 1.3 }}
+            >
+              <span
+                aria-hidden="true"
+                className={`inline-block h-[6px] w-[6px] rounded-full ${isAvailable ? "bg-success" : "bg-muted-foreground/40"}`}
+              />
+              {isAvailable ? "Disponible" : "Indisponible"}
+            </p>
           </div>
         </div>
         <div className="notebook-card-edge" aria-hidden="true" />

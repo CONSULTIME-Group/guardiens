@@ -21,6 +21,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { slugify } from "@/lib/normalize";
+import { resolveBreedFiche } from "@/lib/breedFicheMatch";
 import { getOptimizedImageUrl } from "@/lib/imageOptim";
 import { SectionHeader } from "../sitter/SitterMatchSection";
 import { capitalize, capitalizeWords } from "../owner/helpers";
@@ -259,10 +260,8 @@ const PetAdviceSection = ({
     for (const pet of pets) {
       const speciesLabel = SPECIES_LABEL[pet.species] ?? "compagnon";
       const match = pet.breed
-        ? (breeds ?? []).find(
-            (b) => b.species === pet.species && slugify(b.breed) === slugify(pet.breed!),
-          )
-        : undefined;
+        ? resolveBreedFiche(pet.species, pet.breed, breeds ?? [])
+        : null;
       if (match) {
         const to = `/races/${match.species}-${slugify(match.breed)}`;
         if (seen.has(to)) continue;

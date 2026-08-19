@@ -1,17 +1,18 @@
 /**
  * BreedEditorialLink — lien contextuel vers la fiche éditoriale /races/:slug.
  *
- * La fiche éditoriale n'existe que si `breed_profiles` contient la race.
- * La résolution reprend exactement la construction de slug de BreedPage et
- * PetAdviceSection : `/races/{espèce}-{slugify(race)}` avec le `slugify()`
- * strict de `src/lib/normalize.ts`. Un slug divergent produirait un soft 404
- * (cf. générateur de sitemap) : si aucune fiche ne correspond, le composant
- * ne rend rien. Jamais de lien vers une page inexistante.
+ * La fiche n'existe que si `breed_profiles` contient la race. Le
+ * rapprochement entre le nom déclaré (saisie libre) et le nom officiel de la
+ * fiche est confié à `resolveBreedFiche` : normalisation, puis préfixe
+ * conservateur à frontière de mot, toujours dans la même espèce, et aucun
+ * lien en cas d'ambiguïté. Le href est construit sur le nom officiel de la
+ * fiche, aligné avec la résolution de BreedPage : jamais de soft 404.
  */
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { slugify } from "@/lib/normalize";
+import { resolveBreedFiche, type BreedFicheCandidate } from "@/lib/breedFicheMatch";
 import { cn } from "@/lib/utils";
 
 /** Construction unique du href, partagée avec BreedPage et PetAdviceSection. */
@@ -19,19 +20,22 @@ export const buildBreedEditorialHref = (species: string, breed: string): string 
   `/races/${species}-${slugify(breed)}`;
 
 /** Cache module : une seule requête par espèce pour toute la session. */
-const slugsBySpecies = new Map<string, Promise<Set<string>>>();
+const candidatesBySpecies = new Map<string, Promise<BreedFicheCandidate[]>>();
 
-const loadSpeciesSlugs = (species: string): Promise<Set<string>> => {
-  let pending = slugsBySpecies.get(species);
+const loadSpeciesCandidates = (species: string): Promise<BreedFicheCandidate[]> => {
+  let pending = candidatesBySpecies.get(species);
   if (!pending) {
     pending = (async () => {
       const { data } = await supabase
         .from("breed_profiles")
         .select("breed")
         .eq("species", species);
-      return new Set((data ?? []).map((row) => slugify((row as { breed: string }).breed)));
+      return (data ?? []).map((row) => ({
+        species,
+        breed: (row as { breed: string }).breed,
+      }));
     })();
-    slugsBySpecies.set(species, pending);
+    candidatesBySpecies.set(species, pending);
   }
   return pending;
 };
@@ -43,28 +47,29 @@ interface BreedEditorialLinkProps {
 }
 
 const BreedEditorialLink = ({ species, breed, className }: BreedEditorialLinkProps) => {
-  const [exists, setExists] = useState(false);
-  const breedSlug = slugify(breed || "");
+  const [ficheBreed, setFicheBreed] = useState<string | null>(null);
 
   useEffect(() => {
     let active = true;
-    setExists(false);
-    if (!species || breedSlug.length < 2) return;
-    loadSpeciesSlugs(species)
-      .then((slugs) => {
-        if (active) setExists(slugs.has(breedSlug));
+    setFicheBreed(null);
+    if (!species || !breed || breed.trim().length < 2) return;
+    loadSpeciesCandidates(species)
+      .then((candidates) => {
+        if (!active) return;
+        const match = resolveBreedFiche(species, breed, candidates);
+        setFicheBreed(match ? match.breed : null);
       })
       .catch(() => {});
     return () => {
       active = false;
     };
-  }, [species, breedSlug]);
+  }, [species, breed]);
 
-  if (!exists) return null;
+  if (!ficheBreed) return null;
 
   return (
     <Link
-      to={buildBreedEditorialHref(species, breed)}
+      to={buildBreedEditorialHref(species, ficheBreed)}
       className={cn(
         "inline-flex items-center text-xs font-medium text-primary underline underline-offset-2 hover:text-primary/80 transition-colors",
         className,
