@@ -52,6 +52,16 @@ interface Result {
   isLoading: boolean;
 }
 
+interface MatchingQueryResult {
+  topSits: AffinitySitCard[];
+  fallbackSits: AffinitySitCard[];
+  discoverySit: AffinitySitCard | null;
+  totalPublished: number;
+  hasPostalCode: boolean;
+  profileIncomplete: boolean;
+  rankingSource: ListingRankingSource;
+}
+
 /**
  * Un profil est considéré "assez complet pour scorer" dès que le gardien
  * a renseigné au moins 3 des 7 champs d'affinité. Sous ce seuil, le score
@@ -77,7 +87,7 @@ export function useSitterTopAffinitySits(): Result {
   const { user } = useAuth();
   const userId = user?.id;
 
-  const q = useQuery({
+  const q = useQuery<MatchingQueryResult>({
     queryKey: ["sitter-top-affinity-sits", userId],
     enabled: !!userId,
     staleTime: 10 * 60 * 1000,
