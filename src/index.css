@@ -823,6 +823,13 @@
   body[data-alma-dock-expanded="true"] [data-alma-safe-area] {
     padding-bottom: 18rem;
   }
+
+  /* Fond d'attente aquarelle des bandeaux photo : appliqué SOUS l'image,
+     jamais conditionnellement, pour éviter le rectangle blanc au chargement.
+     Classe (et non style inline) pour rester testable et thémé via token. */
+  .photo-placeholder-green {
+    background: var(--photo-placeholder-green);
+  }
 }
 
 @layer utilities {

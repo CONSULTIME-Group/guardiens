@@ -210,11 +210,8 @@ const StarCard = ({ sit, onCtaClick }: { sit: AffinitySitCard; onCtaClick?: () =
       {/* Bandeau photo, hauteur exacte 150px. Fond d'attente aquarelle TOUJOURS
           présent sous l'image : jamais de rectangle blanc pendant le chargement. */}
       <div
-        className="relative w-full"
-        style={{
-          height: "150px",
-          background: PLACEHOLDER_BG,
-        }}
+        className="relative w-full photo-placeholder-green"
+        style={{ height: "150px" }}
       >
         {cover && (
           <img
