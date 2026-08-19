@@ -208,12 +208,12 @@ export const Sidebar = ({ showHeaderBells = true }: { showHeaderBells?: boolean 
               navigate(
                 effectiveRole === "owner"
                   ? "/sits/create"
-                  : "/petites-missions/creer?type=offre"
+                  : "/petites-missions/creer"
               )
             }
           >
             <Plus className="h-4 w-4" />
-            {effectiveRole === "owner" ? "Publier une annonce" : "Proposer un coup de main"}
+            {effectiveRole === "owner" ? "Publier une annonce" : "Publier"}
           </Button>
         </div>
       </div>
@@ -348,19 +348,19 @@ export const BottomNav = () => {
   let fab: { to: string; label: string };
   if (path.startsWith("/petites-missions")) {
     fab = isOwnerView
-      ? { to: "/petites-missions/creer?type=besoin", label: "Demander" }
-      : { to: "/petites-missions/creer?type=offre", label: "Proposer" };
+      ? { to: "/petites-missions/creer", label: "Publier" }
+      : { to: "/petites-missions/creer", label: "Publier" };
   } else if (path.startsWith("/sits") || path.startsWith("/recherche-gardiens")) {
     // Sur les pages annonces de garde, seul un propriétaire peut publier.
     // Pour un gardien, on bascule sur l'action principale de son rôle.
     fab = isOwnerView
       ? { to: "/sits/create", label: "Publier" }
-      : { to: "/petites-missions/creer?type=offre", label: "Proposer" };
+      : { to: "/petites-missions/creer", label: "Publier" };
   } else {
     // Accueil, recherche, profil, réglages : action principale du rôle actif.
     fab = isOwnerView
       ? { to: "/sits/create", label: "Publier" }
-      : { to: "/petites-missions/creer?type=offre", label: "Proposer" };
+      : { to: "/petites-missions/creer", label: "Publier" };
   }
 
   // 2 onglets à gauche du FAB

@@ -50,6 +50,7 @@ import DashboardLoadError from "./DashboardLoadError";
 
 import { useNearbyOwnerSitters } from "@/hooks/useNearbyOwnerSitters";
 import { useNearbyHelpers } from "@/hooks/useNearbyHelpers";
+import { useHelpersProximityCount } from "@/hooks/useHelpersProximityCount";
 import { useIsNewOwner, isEarlyOwner, hasNoActiveSit } from "@/hooks/useIsNewUser";
 import { useAlmaCulturalFact } from "@/hooks/useAlmaCulturalFact";
 import { useAlmaUsageNudge } from "@/hooks/useAlmaUsageNudge";
@@ -75,7 +76,10 @@ const OwnerDashboard = () => {
   /* ── Signaux locaux : gardiens et « helpers » proches ── */
   const { data: nearbyOwnerSittersData } = useNearbyOwnerSitters(user?.id);
   const { data: nearbyHelpersData } = useNearbyHelpers(user?.id);
-  const nearbyHelpersCount = nearbyHelpersData?.helpers?.length ?? 0;
+  // Compteur unique réconcilié : même source que le bandeau « pouls de la
+  // communauté » (rayon 30 km), jamais la taille d'une liste plafonnée.
+  const { data: helpersProximity } = useHelpersProximityCount(user?.id);
+  const nearbyHelpersCount = helpersProximity?.localCount ?? nearbyHelpersData?.helpers?.length ?? 0;
   const { mission: firstNearbyMission } = useFirstNearbyMission(user?.id);
   const myActiveMission = useMemo(
     () => myMissions.find((m: any) => m.status !== "completed" && m.status !== "cancelled") ?? null,

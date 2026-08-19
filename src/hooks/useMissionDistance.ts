@@ -59,6 +59,12 @@ export function useMissionDistance(missions: MissionLike[]) {
   const [resolving, setResolving] = useState(false);
   const [computing, setComputing] = useState(false);
   const [prefilled, setPrefilled] = useState(false);
+  /**
+   * Limitation au rayon : inactive par défaut. La position sert au tri par
+   * proximité, jamais à masquer des missions. Le membre active la limitation
+   * explicitement, pour ne jamais ouvrir l'entraide sur une page vide.
+   */
+  const [filterEnabled, setFilterEnabled] = useState(false);
 
   const setPostal = useCallback((v: string) => {
     const clean = v.trim();
@@ -218,6 +224,8 @@ export function useMissionDistance(missions: MissionLike[]) {
       setPostal,
       radius,
       setRadius,
+      filterEnabled,
+      setFilterEnabled,
       origin,
       active,
       resolving,
@@ -228,6 +236,6 @@ export function useMissionDistance(missions: MissionLike[]) {
       useMyLocation,
       isValidPostal: isValidFrPostal(postal),
     }),
-    [postal, setPostal, radius, setRadius, origin, active, resolving, computing, originError, getDistance, hasDistance, useMyLocation],
+    [postal, setPostal, radius, setRadius, filterEnabled, origin, active, resolving, computing, originError, getDistance, hasDistance, useMyLocation],
   );
 }

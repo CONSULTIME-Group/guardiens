@@ -13,13 +13,18 @@ const formatRelative = (iso: string) => {
   return `il y a ${d} j`;
 };
 
-const QuestionCard = ({ q }: { q: CommunityQuestionRow }) => {
+const QuestionCard = ({ q, showNatureBadge = false }: { q: CommunityQuestionRow; showNatureBadge?: boolean }) => {
   return (
     <Link
       to={`/questions/${q.id}`}
       className="block p-4 rounded-xl border border-border bg-card hover:bg-accent/50 transition-colors"
     >
       <div className="flex items-center gap-2 mb-2">
+        {showNatureBadge && (
+          <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-primary text-primary-foreground uppercase tracking-wide">
+            Question
+          </span>
+        )}
         <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-primary/10 text-primary">
           {CATEGORY_LABEL[q.category]}
         </span>

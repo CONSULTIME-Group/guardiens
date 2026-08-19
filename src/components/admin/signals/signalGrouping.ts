@@ -40,6 +40,8 @@ export const SIGNAL_TYPE_LABELS: Record<string, string> = {
   repeated_cancellations: "Annulations répétées",
   repeated_republish: "Republications répétées",
   identity_needs_review: "Vérification d'identité à contrôler",
+  sit_like_mission: "Mission qui ressemble à une garde",
+  animal_rehoming_listing: "Cession ou adoption d'animal",
 };
 
 export const signalTypeLabel = (type: string): string =>

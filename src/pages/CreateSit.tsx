@@ -56,6 +56,7 @@ import { pickSmartCover } from "@/lib/pickSmartCover";
 import { sortForCover, withoutAnimalPhotos } from "@/lib/coverPriority";
 import { normalizeCityTyping, normalizeCityName } from "@/lib/normalizeCity";
 import { readFormDraft, writeFormDraft, clearFormDraft, getFormDraftSavedAt } from "@/lib/formDraft";
+import { readSitPrefill } from "@/lib/missionContentGuards";
 import { makePlainTextPasteHandler } from "@/lib/pastePlainText";
 import { DEFAULT_MAX_APPLICATIONS } from "@/lib/applicationCap";
 import {
@@ -567,6 +568,22 @@ const CreateSit = () => {
   // locale doit donc être récupérée puis migrée, mais uniquement si elle
   // n'appartient à aucun autre brouillon.
   const legacyLocalDraftKey = user ? `sit-create:${user.id}:current` : null;
+
+  // Bascule depuis l'entraide : une mission qui ressemblait à une garde
+  // reprend son texte ici. Un brouillon existant fait foi, on n'écrase rien.
+  useEffect(() => {
+    if (!user) return;
+    if (draftIdParam || fromSitId) return;
+    const prefill = readSitPrefill();
+    if (!prefill) return;
+    if (localDraftKey) {
+      const existing = readFormDraft<SitLocalDraft>(localDraftKey);
+      if (existing && localDraftHasContent(existing)) return;
+    }
+    if (prefill.title.trim()) setTitle(prefill.title.slice(0, 120));
+    if (prefill.description.trim()) applyExpectations(prefill.description);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user]);
   const applyLocalDraft = useCallback((d: SitLocalDraft) => {
     setTitle(d.title ?? "");
     setStartDate(d.startDate ?? "");

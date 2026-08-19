@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo, useRef } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -24,13 +24,16 @@ import MissionPhotoUpload from "@/components/missions/MissionPhotoUpload";
 import { geocodeCity } from "@/lib/geocode";
 import { trackFirstAction, trackEvent } from "@/lib/analytics";
 import { recordMissionCreatedAttribution } from "@/lib/campaignAttribution";
-import { templatesFor, MISSION_TEMPLATES, type MissionTemplate } from "@/data/missionTemplates";
+import {
+  sitLikeSignals,
+  rehomingSignals,
+  writeSitPrefill,
+} from "@/lib/missionContentGuards";
 import { AlertCircle, ChevronLeft, CalendarIcon } from "lucide-react";
 import { sanitizeUserTitle } from "@/lib/sanitizeTitle";
 import { stripEmojis } from "@/lib/stripEmojis";
 
 import IdentityRecommendedHint from "@/components/missions/IdentityRecommendedHint";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 
 /** Longueurs minimales pour éviter les annonces vides ou illisibles. */
 const MIN_TITLE_LEN = 15;
@@ -73,7 +76,6 @@ const CreateSmallMission = () => {
   // L'ID vérification devient un soft-nudge (badge auteur uniquement) sur SitDetail.
   const canApplyMissions = true;
   
-  const [confirmUnchangedOpen, setConfirmUnchangedOpen] = useState(false);
 
   const CATEGORIES = useMemo(() => [
     { value: "animals", label: tp("cat_animals") },
@@ -112,7 +114,8 @@ const CreateSmallMission = () => {
   const [petSize, setPetSize] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [photos, setPhotos] = useState<string[]>([]);
-  const [appliedTemplateId, setAppliedTemplateId] = useState<string | null>(null);
+  // Le titre et la description partent toujours vides : aucune intention
+  // pré-remplie, le membre écrit sa propre demande ou offre.
 
   // Hauteur réelle de la barre d'action fixe, exposée en variable CSS pour que
   // le conteneur défilant réserve exactement l'espace des couches fixes
@@ -140,35 +143,9 @@ const CreateSmallMission = () => {
     };
   });
 
-  const applyTemplate = (tpl: MissionTemplate) => {
-    setMissionType(tpl.type);
-    setCategory(tpl.category);
-    setTitle(tpl.title);
-    setDescription(tpl.description);
-    setExchangeOffer(tpl.exchange);
-    setExchangeError("");
-    setDuration(tpl.duration);
-    setAppliedTemplateId(tpl.id);
-  };
-
-  const clearTemplate = () => {
-    setAppliedTemplateId(null);
-    setTitle(""); setDescription(""); setExchangeOffer(""); setDuration("");
-  };
-
-  const visibleTemplates = templatesFor(missionType);
-
   useEffect(() => {
     const tParam = searchParams.get("type");
     if (tParam === "besoin" || tParam === "offre") setMissionType(tParam);
-  }, []);
-
-  useEffect(() => {
-    const templateId = searchParams.get("template");
-    if (!templateId) return;
-    if (title.trim() || description.trim()) return;
-    const tpl = MISSION_TEMPLATES.find((x) => x.id === templateId);
-    if (tpl) applyTemplate(tpl);
   }, []);
 
   // Attrition composer : 5 events (opened / step1_completed / field_abandoned / submitted / abandoned)
@@ -214,17 +191,18 @@ const CreateSmallMission = () => {
     setExchangeTouched(true);
     if (step1Valid) {
       setStep(2);
-      try { trackEvent("mission_composer_step1_completed", { metadata: { has_template: !!appliedTemplateId } }); } catch {}
+      try { trackEvent("mission_composer_step1_completed"); } catch {}
     }
   };
 
-  /** True si titre + description sont mot pour mot ceux d'un template. */
-  const isUnchangedTemplate = useMemo(() => {
-    if (!appliedTemplateId) return false;
-    const tpl = MISSION_TEMPLATES.find((x) => x.id === appliedTemplateId);
-    if (!tpl) return false;
-    return title.trim() === tpl.title.trim() && description.trim() === tpl.description.trim();
-  }, [appliedTemplateId, title, description]);
+  /**
+   * Garde-fous éditoriaux, recalculés à chaque frappe :
+   * une mission qui ressemble à une garde d'animaux est invitée vers
+   * /sits/create (canal dédié), une cession ou adoption d'animaux est
+   * signalée à la modération. Jamais bloquant.
+   */
+  const sitLike = useMemo(() => sitLikeSignals(title, description), [title, description]);
+  const rehoming = useMemo(() => rehomingSignals(title, description), [title, description]);
 
   // Volume d'audience : combien de personnes seront prévenues à la publication.
   const [audienceCount, setAudienceCount] = useState<number | null>(null);
@@ -288,11 +266,6 @@ const CreateSmallMission = () => {
       setStep(1);
       setTitleTouched(true);
       setDescTouched(true);
-      return;
-    }
-    // Garde-fou "modèle non personnalisé" (pattern brouillon Alma).
-    if (isUnchangedTemplate) {
-      setConfirmUnchangedOpen(true);
       return;
     }
     await performSubmit();
@@ -367,6 +340,30 @@ const CreateSmallMission = () => {
       try { await trackEvent("mission_created_incomplete_profile", { metadata: { profile_completion: profileCompletion, mission_id: inserted?.id ?? null } }); } catch {}
     }
     if (inserted?.id) { try { await recordMissionCreatedAttribution(inserted.id); } catch {} }
+    // Signaux admin éditoriaux : non bloquants, idempotents côté base.
+    if (inserted?.id && (sitLike || rehoming)) {
+      const mid = inserted.id;
+      const metaBase = { title: cleanTitle, city: city.trim() };
+      const rpc = (supabase.rpc as any).bind(supabase);
+      if (sitLike) {
+        rpc("report_mission_content_signal", {
+          _mission_id: mid,
+          _signal_type: "sit_like_mission",
+          _metadata: { ...metaBase, reason: sitLike.matched.join(" + ") },
+        }).then(({ error }: any) => { if (error) console.warn("signal sit_like_mission", error); });
+      }
+      if (rehoming) {
+        rpc("report_mission_content_signal", {
+          _mission_id: mid,
+          _signal_type: "animal_rehoming_listing",
+          _metadata: { ...metaBase, reason: rehoming.matched.join(" + ") },
+        }).then(({ error }: any) => { if (error) console.warn("signal animal_rehoming_listing", error); });
+        toast({
+          title: "Mission transmise pour relecture",
+          description: "La cession ou l'adoption d'animaux n'est pas proposée sur Guardiens. Notre équipe va relire votre publication.",
+        });
+      }
+    }
     await queryClient.invalidateQueries({ queryKey: ["small-missions-all"] });
     submittedRef.current = true;
     try { trackEvent("mission_composer_submitted", { metadata: { mission_id: inserted?.id, category, mission_type: missionType } }); } catch {}
@@ -456,39 +453,48 @@ const CreateSmallMission = () => {
                   </div>
                 </div>
 
-                {/* Templates */}
-                <div className="rounded-xl border border-primary/20 bg-primary/5 p-4 space-y-3">
-                  <div className="flex items-center justify-between gap-2">
-                    <div>
-                      <p className="text-sm font-semibold">
-                        {missionType === "offre" ? tp("templates_title_offer") : tp("templates_title_need")}
-                      </p>
-                      <p className="text-xs text-muted-foreground">{tp("templates_subtitle")}</p>
-                    </div>
-                    {appliedTemplateId && (
-                      <button type="button" onClick={clearTemplate} className="text-xs text-primary hover:underline whitespace-nowrap">
-                        {tp("templates_reset")}
-                      </button>
-                    )}
-                  </div>
-                  <div className="flex flex-wrap gap-2">
-                    {visibleTemplates.map((tpl) => (
-                      <button
-                        key={tpl.id}
+                {/* Garde-fous éditoriaux, non bloquants */}
+                {sitLike && (
+                  <div className="rounded-xl border border-primary/30 bg-primary/5 p-4 space-y-2" role="note">
+                    <p className="text-sm font-semibold text-foreground">
+                      Ça ressemble à une garde d'animaux
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      Les gardes ont un espace dédié, plus visible et mieux suivi, avec dates et consignes structurées. Votre texte est repris tel quel.
+                    </p>
+                    <div className="flex flex-wrap items-center gap-2">
+                      <Button
                         type="button"
-                        onClick={() => applyTemplate(tpl)}
-                        className={cn(
-                          "rounded-full border px-3 py-1.5 text-xs transition-colors",
-                          appliedTemplateId === tpl.id
-                            ? "bg-primary text-primary-foreground border-primary"
-                            : "bg-background text-foreground border-border hover:border-primary/40"
-                        )}
+                        size="sm"
+                        variant="outline"
+                        onClick={() => {
+                          writeSitPrefill({ title, description });
+                          try { void trackEvent("mission_to_sit_redirect", { metadata: { signals: sitLike.matched } }); } catch {}
+                          navigate("/sits/create");
+                        }}
                       >
-                        {tpl.label}
-                      </button>
-                    ))}
+                        Créer une annonce de garde
+                      </Button>
+                      <span className="text-[11px] text-muted-foreground">Ou continuez votre mission, rien ne bloque.</span>
+                    </div>
                   </div>
-                </div>
+                )}
+                {rehoming && (
+                  <div className="rounded-xl border border-warning/40 bg-warning/10 p-4 space-y-1" role="note">
+                    <p className="text-sm font-semibold text-foreground">
+                      La cession ou l'adoption d'animaux n'a pas sa place dans l'entraide
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      Guardiens ne publie pas d'annonces de vente, don ou adoption d'animaux. Si vous publiez, votre mission sera transmise à notre équipe pour relecture.
+                    </p>
+                  </div>
+                )}
+                <p className="text-xs text-muted-foreground">
+                  Une simple question à poser ?{" "}
+                  <Link to="/questions/nouvelle" className="text-primary hover:underline font-medium">
+                    Posez-la à la communauté
+                  </Link>
+                </p>
 
                 {/* Catégorie */}
                 <div className="space-y-2">
@@ -836,34 +842,6 @@ const CreateSmallMission = () => {
       )}
 
 
-      <Dialog open={confirmUnchangedOpen} onOpenChange={setConfirmUnchangedOpen}>
-        <DialogContent className="max-w-md">
-          <DialogHeader>
-            <DialogTitle>Un mot à vous fait la différence</DialogTitle>
-            <DialogDescription>
-              Les gens du coin répondent plus aux messages personnels. Prenez un instant pour ajouter un détail qui vous ressemble : lieu précis, contexte, ton.
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter className="gap-2">
-            <Button
-              onClick={() => setConfirmUnchangedOpen(false)}
-              autoFocus
-            >
-              Personnaliser
-            </Button>
-            <Button
-              variant="outline"
-              onClick={async () => {
-                setConfirmUnchangedOpen(false);
-                try { trackEvent("mission_composer_published_unchanged_template", { metadata: { template_id: appliedTemplateId } }); } catch {}
-                await performSubmit();
-              }}
-            >
-              Publier quand même
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
     </>
   );
 };
