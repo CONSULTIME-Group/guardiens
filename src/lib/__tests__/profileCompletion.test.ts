@@ -23,7 +23,7 @@ const fullSitter = {
   competences: ["chats"],
   lifestyle: ["actif"],
   geographic_radius: 20,
-  has_sitter_gallery: true,
+  sitter_gallery_count: 3,
   identity_verified: true,
   interests: ["a", "b", "c"],
   languages: ["fr"],
