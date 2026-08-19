@@ -91,6 +91,10 @@ const BREED_ALIASES: Record<string, Record<string, string>> = {
     border: "border collie",
     golden: "golden retriever",
     "american-stafford-terrier": "american staffordshire terrier",
+    // « Staff » (deux f) : abréviation courante de l'american staffordshire
+    // terrier. À ne pas confondre avec « staf » (une f) qui désigne le
+    // staffordshire bull terrier.
+    staff: "american staffordshire terrier",
     roumain: "berger roumain",
     // Coquille réelle : la race s'écrit Jack Russell (deux l). La fiche
     // absorbée « jack russel » redirige vers la fiche canonique.
