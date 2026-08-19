@@ -19,6 +19,39 @@ const CANONICAL = "https://guardiens.fr/races";
 const breedSlug = (b: Pick<BreedListingEntry, "species" | "breed">) =>
   `${b.species.toLowerCase()}-${slugify(b.breed)}`;
 
+/** Carte typographique (papier carnet + initiale Playfair terracotta),
+ *  utilisée quand il n'y a pas d'image ou qu'elle ne charge pas : la grille
+ *  ne doit jamais paraître trouée ni cassée. */
+const TypographicFallback = ({ breed }: { breed: string }) => (
+  <div className="aspect-[4/3] bg-[hsl(var(--hero-paper))] flex items-center justify-center border-b border-border/60">
+    <span
+      aria-hidden="true"
+      className="font-serif text-6xl font-semibold text-secondary/50 select-none"
+    >
+      {breed.trim().charAt(0).toUpperCase()}
+    </span>
+  </div>
+);
+
+/** Image externe (Wikimedia) : en cas d'échec de chargement, on bascule
+ *  sur la carte typographique plutôt que d'afficher une icône brisée. */
+const BreedCardImage = ({ entry }: { entry: BreedListingEntry }) => {
+  const [failed, setFailed] = useState(false);
+  if (!entry.image_url || failed) return <TypographicFallback breed={entry.breed} />;
+  return (
+    <div className="aspect-[4/3] bg-muted overflow-hidden">
+      <img
+        src={entry.image_url}
+        alt={entry.image_alt || entry.breed}
+        loading="lazy"
+        decoding="async"
+        onError={() => setFailed(true)}
+        className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-300"
+      />
+    </div>
+  );
+};
+
 const BreedsListing = () => {
   const { t } = useTranslation();
   const [breeds, setBreeds] = useState<BreedListingEntry[]>([]);
