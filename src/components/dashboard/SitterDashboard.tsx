@@ -454,7 +454,15 @@ const SitterDashboard = () => {
                   discoverySit={discoverySit}
                   scopeUsed={scopeUsed}
                   isLoading={nbaLoading}
+                  totalPublished={totalPublished}
                 />
+              </div>
+
+              {/* CONTEXTE — le pouls de la communauté descend sous la zone
+                  des annonces (charte : accueil, émotion, action, contexte,
+                  voix). Jamais en haut du rail, avant l'action. */}
+              <div className="">
+                <CommunityPulseBanner userId={user?.id} />
               </div>
 
               {/* VAGUE 3 — tuiles histoire (remplace SitterActivityPanel côté confirmé) */}
@@ -486,12 +494,10 @@ const SitterDashboard = () => {
 
 
             {/* ═══ RAIL collant (droite) — vague 4 ═══
-                Ordre narratif : pouls → prochaine garde (ou access/free) →
-                réputation → Alma en murmure. Espacement 34px. */}
-            <aside className="mt-[52px] lg:mt-0 space-y-[34px] lg:col-span-4 lg:sticky lg:top-20 lg:self-start lg:max-h-[calc(100vh-6rem)] lg:overflow-y-auto">
-              <div className="">
-                <CommunityPulseBanner userId={user?.id} />
-              </div>
+                Ordre narratif : affinité → prochaine garde (ou access/free) →
+                réputation → Alma en murmure. Espacement 34px. lg:pt-6 aligne
+                la ligne de base du rail sur celle du cockpit (ligne 1). */}
+            <aside className="mt-[52px] lg:mt-0 lg:pt-6 space-y-[34px] lg:col-span-4 lg:sticky lg:top-20 lg:self-start lg:max-h-[calc(100vh-6rem)] lg:overflow-y-auto">
               <SitterAffinityBanner />
 
               <div className="">
