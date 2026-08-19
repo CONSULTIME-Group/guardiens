@@ -119,10 +119,9 @@ describe("garde statique — aucun rendu direct d'enum animal dans le JSX", () =
     const directRender = /\{[^{}]*\b(?:pet|p|openPet|animal)\.(?:activity_level|walk_duration|alone_duration|species)\b[^{}]*\}/;
     for (const file of TSX_FILES) {
       const content = readFileSync(file, "utf8");
-      const lines = content.split("\n");
       // StepExperience stocke des libellés français choisis dans une liste
       // (SPECIES_OPTIONS : « Chien », « Chat »...), pas des clés d'enum.
-      if (file.endsWith("components/profile/StepExperience.tsx")) return;
+      if (file.endsWith("components/profile/StepExperience.tsx")) continue;
       const lines = content.split("\n");
       lines.forEach((line, i) => {
         if (!directRender.test(line)) return;
