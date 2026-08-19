@@ -8,7 +8,7 @@ import { useRef } from "react";
 import matchEmptyIllustration from "@/assets/illustrations/sitter-match-empty.webp";
 import { getOptimizedImageUrl } from "@/lib/imageOptim";
 import type { AffinitySitCard, PoolScope } from "@/hooks/useSitterTopAffinitySits";
-import { SectionHeader } from "./SitterMatchSection";
+import { SectionHeader, catalogExitLabel } from "./SitterMatchSection";
 import AffinityBadge from "@/components/matching/AffinityBadge";
 import { trackEvent } from "@/lib/analytics";
 import { useImpressionOnce } from "@/hooks/useImpressionOnce";
@@ -20,6 +20,9 @@ interface SitterTeaserCardProps {
   fallbackSits: AffinitySitCard[];
   scopeUsed: PoolScope;
   isLoading: boolean;
+  /** Nombre réel d'annonces visibles par ce gardien, pour le lien de sortie
+   * vers la recherche. Jamais codé en dur. */
+  totalPublished?: number;
 }
 
 const DATE_FMT = new Intl.DateTimeFormat("fr-FR", {

@@ -60,6 +60,19 @@ const speciesLabel = (species: string[]): string | null => {
   return `${species.length} animaux`;
 };
 
+/**
+ * Lien de sortie vers le catalogue national, partagé par les deux branches
+ * du dashboard gardien (rencontre + aperçu). Toujours présent dès qu'une
+ * annonce est visible à l'écran : c'est le chemin de l'accueil vers la
+ * recherche, il ne doit jamais manquer. Compte réel, jamais codé en dur.
+ */
+export const catalogExitLabel = (totalPublished: number): string =>
+  totalPublished > 1
+    ? `Voir les ${totalPublished} gardes disponibles partout en France`
+    : totalPublished === 1
+      ? "Voir la garde disponible partout en France"
+      : "Voir toutes les annonces";
+
 /* -------------------------------------------------------------------------- */
 /*  En-tête signature : trait + eyebrow + titre + sous-titre                  */
 /* -------------------------------------------------------------------------- */
@@ -503,12 +516,7 @@ const SitterMatchSection = ({ topSits, fallbackSits, discoverySit, scopeUsed, is
 
   const showEmpty = !primary && rest.length === 0;
 
-  const searchLinkLabel =
-    totalPublished > 1
-      ? `Voir les ${totalPublished} gardes disponibles`
-      : totalPublished === 1
-        ? "Voir la garde disponible"
-        : "Voir toutes les annonces";
+  const searchLinkLabel = catalogExitLabel(totalPublished);
 
   return (
     <section
