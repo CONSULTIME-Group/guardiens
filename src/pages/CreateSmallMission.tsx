@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo, useRef } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -34,7 +34,6 @@ import { sanitizeUserTitle } from "@/lib/sanitizeTitle";
 import { stripEmojis } from "@/lib/stripEmojis";
 
 import IdentityRecommendedHint from "@/components/missions/IdentityRecommendedHint";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 
 /** Longueurs minimales pour éviter les annonces vides ou illisibles. */
 const MIN_TITLE_LEN = 15;
@@ -77,7 +76,6 @@ const CreateSmallMission = () => {
   // L'ID vérification devient un soft-nudge (badge auteur uniquement) sur SitDetail.
   const canApplyMissions = true;
   
-  const [confirmUnchangedOpen, setConfirmUnchangedOpen] = useState(false);
 
   const CATEGORIES = useMemo(() => [
     { value: "animals", label: tp("cat_animals") },

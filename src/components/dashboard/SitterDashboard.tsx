@@ -9,6 +9,7 @@ import { useSubscriptionAccess } from "@/hooks/useSubscriptionAccess";
 import { useAccessLevel } from "@/hooks/useAccessLevel";
 import { useSitterDashboardData } from "@/hooks/useSitterDashboardData";
 import { useNearbyHelpers } from "@/hooks/useNearbyHelpers";
+import { useHelpersProximityCount } from "@/hooks/useHelpersProximityCount";
 import DashboardLoadError from "./DashboardLoadError";
 
 import RoleActivationBanner from "./RoleActivationBanner";

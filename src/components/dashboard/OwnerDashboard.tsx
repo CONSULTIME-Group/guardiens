@@ -50,6 +50,7 @@ import DashboardLoadError from "./DashboardLoadError";
 
 import { useNearbyOwnerSitters } from "@/hooks/useNearbyOwnerSitters";
 import { useNearbyHelpers } from "@/hooks/useNearbyHelpers";
+import { useHelpersProximityCount } from "@/hooks/useHelpersProximityCount";
 import { useIsNewOwner, isEarlyOwner, hasNoActiveSit } from "@/hooks/useIsNewUser";
 import { useAlmaCulturalFact } from "@/hooks/useAlmaCulturalFact";
 import { useAlmaUsageNudge } from "@/hooks/useAlmaUsageNudge";
