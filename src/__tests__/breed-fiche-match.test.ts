@@ -28,6 +28,7 @@ const fiches = [
   { species: "dog", breed: "croisé bichon" },
   { species: "horse", breed: "âne du cotentin" },
   { species: "rodent", breed: "rat" },
+  { species: "bird", breed: "perroquet gris du gabon" },
 ];
 
 describe("normalizeBreedName", () => {
@@ -146,7 +147,23 @@ describe("resolveBreedFiche : garde-fou, jamais de faux rapprochement", () => {
     expect(resolveBreedFiche("dog", "malinois", fiches)?.breed).toBe("malinois");
   });
   it("départage les quasi-homonymes par l'exact", () => {
-    expect(resolveBreedFiche("dog", "jack russel", fiches)?.breed).toBe("jack russel");
+    expect(resolveBreedFiche("dog", "jack russell terrier", fiches)?.breed).toBe("jack russell");
+  });
+  it("une fiche absorbée renvoie la fiche conservée (fusion éditoriale)", () => {
+    // « jack russel » existe en base mais est fusionné dans « jack russell ».
+    expect(resolveBreedFiche("dog", "jack russel", fiches)?.breed).toBe("jack russell");
+    // Alias même quand la fiche absorbée n'est pas dans les candidats.
+    expect(
+      resolveBreedFiche(
+        "dog",
+        "jack russel",
+        fiches.filter((f) => f.breed !== "jack russel"),
+      )?.breed,
+    ).toBe("jack russell");
+    // « gris du gabon » → « perroquet gris du gabon » (alias explicite).
+    expect(resolveBreedFiche("bird", "Gris du Gabon", fiches)?.breed).toBe(
+      "perroquet gris du gabon",
+    );
   });
   it("retourne null sans candidat", () => {
     expect(resolveBreedFiche("dog", "yorshire", [])).toBeNull();
