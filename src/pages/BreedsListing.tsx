@@ -245,7 +245,10 @@ const BreedsListing = () => {
                     to={`/races/${breedSlug(b)}`}
                     className="group block rounded-xl border border-border bg-card overflow-hidden hover:border-primary/60 transition"
                   >
-                    <BreedCardImage entry={b} />
+                    <BreedCardImage
+                      entry={b}
+                      speciesLabel={t(`breeds_listing.species.${species}`, { defaultValue: species })}
+                    />
                     <div className="p-3 flex items-start justify-between gap-2">
                       <span className="capitalize text-foreground font-medium leading-snug group-hover:text-primary transition-colors">
                         {b.breed}
