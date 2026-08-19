@@ -92,6 +92,13 @@ const BREED_ALIASES: Record<string, Record<string, string>> = {
     golden: "golden retriever",
     "american-stafford-terrier": "american staffordshire terrier",
     roumain: "berger roumain",
+    // Coquille réelle : la race s'écrit Jack Russell (deux l). La fiche
+    // absorbée « jack russel » redirige vers la fiche canonique.
+    "jack-russel": "jack russell",
+  },
+  bird: {
+    // « Gris du Gabon » seul : le nom courant du perroquet gris du gabon.
+    "gri-du-gabon": "perroquet gris du gabon",
   },
 };
 
