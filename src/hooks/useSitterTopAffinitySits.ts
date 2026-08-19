@@ -2,10 +2,10 @@
  * Charge les 3 meilleures annonces pour un gardien selon le score d'affinité,
  * avec garde-fous "cul-de-sac" (audit 2026-07) :
  *
- *  - le pool candidat est restreint à une zone géographique COHÉRENTE
- *    autour du gardien (département puis région, puis France entière en
- *    dernier recours) ; on ne "recommande" plus des annonces à l'autre
- *    bout du pays.
+ *  - le pool candidat suit un élargissement progressif (département, puis
+ *    100 km, puis 200 km, puis France entière, arrêt au premier palier non
+ *    vide) : on ne "recommande" plus des annonces à l'autre bout du pays,
+ *    sans laisser 86 % des gardiens sur une section vide (audit 19/08/2026).
  *  - si le score d'affinité ne retient AUCUNE annonce affichable, on
  *    expose un `fallbackSits` (annonces ouvertes de la zone, triées par
  *    date) pour éviter l'écran vide.
@@ -18,7 +18,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { computeAffinityScore, type AffinityResult } from "@/lib/affinityScore";
 import { getDeptCode } from "@/lib/departments";
-import { pickProgressiveScope, orderByAffinity } from "@/lib/matchScope";
+import { pickProgressiveScope, orderByAffinity, type PoolScope } from "@/lib/matchScope";
 import { pickDiscoverySit } from "@/lib/pickDiscoverySit";
 
 export interface AffinitySitCard {
@@ -144,42 +144,33 @@ export function useSitterTopAffinitySits(): Result {
       if (sitOwnerIds.length > 0) {
         const { data: ownerProfs } = await supabase
           .from("public_profiles")
-          .select("id, first_name, postal_code")
+          .select("id, first_name, postal_code, latitude_approx, longitude_approx")
           .in("id", sitOwnerIds);
         const ownerMap = new Map<string, any>();
-        (ownerProfs ?? []).forEach((p: any) => ownerMap.set(p.id, { first_name: p.first_name, postal_code: p.postal_code }));
+        (ownerProfs ?? []).forEach((p: any) => ownerMap.set(p.id, p));
         sitsAll.forEach((s: any) => { s.owner = s.user_id ? ownerMap.get(s.user_id) ?? null : null; });
       }
 
-      // 4. Réduction géographique progressive : département → région → pays.
-      let scopeUsed: PoolScope = "none";
-      let scoped: any[] = [];
-      if (deptCode) {
-        const sameDept = sitsAll.filter(
-          (s) => getDeptCode(s?.owner?.postal_code ?? null) === deptCode,
-        );
-        if (sameDept.length > 0) {
-          scoped = sameDept;
-          scopeUsed = "dept";
-        }
-      }
-      if (scoped.length === 0 && regionCode) {
-        const regionDepts = new Set(getDeptsInRegion(regionCode));
-        const sameRegion = sitsAll.filter((s) => {
-          const d = getDeptCode(s?.owner?.postal_code ?? null);
-          return d ? regionDepts.has(d) : false;
-        });
-        if (sameRegion.length > 0) {
-          scoped = sameRegion;
-          scopeUsed = "region";
-        }
-      }
-      if (scoped.length === 0 && sitsAll.length > 0) {
-        // Dernier recours : on ouvre au pays entier pour ne pas laisser le
-        // dashboard vide, mais l'UI signalera la mention "hors de votre zone".
-        scoped = sitsAll;
-        scopeUsed = "country";
-      }
+      // 4. Élargissement progressif : département → 100 km → 200 km → France
+      //    entière, arrêt au premier palier non vide. La distance utilise les
+      //    coordonnées approximatives du propriétaire (public_profiles),
+      //    jamais le géocodage du nom de ville (homonymes). Un gardien sans
+      //    coordonnées ne peut calculer aucune distance : il conserve le
+      //    palier département (code postal) puis tombe directement au palier
+      //    national, jamais sur un écran vide.
+      const { scoped, scope: scopeUsed } = pickProgressiveScope({
+        sits: sitsAll,
+        sitterDept: deptCode,
+        sitterCoords,
+        getDept: (s: any) => getDeptCode(s?.owner?.postal_code ?? null),
+        getCoords: (s: any) => {
+          const lat = s?.owner?.latitude_approx;
+          const lng = s?.owner?.longitude_approx;
+          return typeof lat === "number" && typeof lng === "number"
+            ? { lat, lng }
+            : null;
+        },
+      });
 
       if (scoped.length === 0) {
         return {
@@ -275,6 +266,17 @@ export function useSitterTopAffinitySits(): Result {
       }
 
       scored.sort((a, b) => (b.affinity?.score ?? 0) - (a.affinity?.score ?? 0));
+
+      // Palier national : le pool de repli épouse le tri par affinité (les
+      // annonces non scorées restent visibles, en fin de liste). Les paliers
+      // de proximité conservent l'ordre chronologique.
+      const orderedFallback =
+        scopeUsed === "country"
+          ? orderByAffinity(
+              fallback,
+              new Map(scored.map((s) => [s.id, s.affinity?.score ?? 0])),
+            )
+          : fallback;
 
       // Sélection "découverte" (Vague 9) : première annonce hors top 3
       // qui apporte de l'altérité au gardien. Critères réels :
