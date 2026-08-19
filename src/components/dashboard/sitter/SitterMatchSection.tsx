@@ -29,8 +29,8 @@ interface Props {
   totalPublished?: number;
 }
 
-// Vague 15 : passe par un token CSS pour s'assombrir en dark.
-const PLACEHOLDER_BG = "var(--photo-placeholder-green)";
+// Le fond d'attente passe par la classe .photo-placeholder-green (token CSS
+// qui s'assombrit en dark), jamais par un style inline.
 
 const DATE_FMT = new Intl.DateTimeFormat("fr-FR", {
   day: "numeric",
