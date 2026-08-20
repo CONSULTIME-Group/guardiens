@@ -11,6 +11,7 @@ import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/compone
 import { Plus, Pencil, Trash2, ChevronDown, ChevronUp, Camera, X } from "lucide-react";
 import HintBubble from "../profile/HintBubble";
 import BreedProfileCard from "../breeds/BreedProfileCard";
+import BreedEditorialLink from "../breeds/BreedEditorialLink";
 import { makePlainTextPasteHandler } from "@/lib/pastePlainText";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -233,23 +234,39 @@ const OwnerStepAnimals = ({ pets, onAddPet, onUpdatePet, onRemovePet }: Props) =
       <h2 className="font-heading text-2xl font-bold">Les animaux</h2>
       <HintBubble>Chaque animal a sa fiche. Plus vous êtes précis, plus le gardien sera préparé, et rassuré.</HintBubble>
 
-      {pets.map(pet => (
+      {pets.map(pet => {
+        const isOpen = expandedId === pet.id;
+        const detailId = `pet-detail-${pet.id}`;
+        const speciesLabel = petSpeciesLabel(pet.species);
+        const summary = `${pet.name}, ${speciesLabel}${pet.breed ? `, ${pet.breed}` : ""}`;
+        return (
         <div key={pet.id} className="bg-muted/30 rounded-lg border border-border overflow-hidden">
-          <button type="button" onClick={() => setExpandedId(expandedId === pet.id ? null : pet.id!)}
-            className="w-full flex items-center gap-3 p-4 text-left">
-            {pet.photo_url && <img src={avatarImageUrl(pet.photo_url, 48)} alt={pet.name} className="w-12 h-12 rounded-lg object-cover cursor-pointer hover:ring-2 ring-primary transition-all" onClick={(e) => { e.stopPropagation(); setLightboxUrl(pet.photo_url!); }} />}
-            <div className="flex-1">
-              <span className="font-semibold">{pet.name}</span>
-              <span className="text-sm text-muted-foreground ml-2">{petSpeciesLabel(pet.species)}{pet.breed ? `, ${pet.breed}` : ""}</span>
+          {/* Ligne repliée : nom, espèce, race, plus les actions de base
+              (fiche race, modifier). Le dépliage ne sert qu'au détail :
+              conseil de race complet, note personnelle, suppression. */}
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-2 p-4">
+            <button type="button" onClick={() => setExpandedId(isOpen ? null : pet.id!)}
+              aria-expanded={isOpen}
+              aria-controls={detailId}
+              aria-label={`${summary}. ${isOpen ? "Masquer le détail" : "Afficher le détail"}`}
+              className="flex-1 min-w-[180px] flex items-center gap-3 text-left rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+              {pet.photo_url && <img src={avatarImageUrl(pet.photo_url, 48)} alt="" className="w-12 h-12 rounded-lg object-cover cursor-pointer hover:ring-2 ring-primary transition-all" onClick={(e) => { e.stopPropagation(); setLightboxUrl(pet.photo_url!); }} />}
+              <div className="flex-1 min-w-0" aria-hidden="true">
+                <span className="font-semibold">{pet.name}</span>
+                <span className="text-sm text-muted-foreground ml-2">{speciesLabel}{pet.breed ? `, ${pet.breed}` : ""}</span>
+              </div>
+              {isOpen ? <ChevronUp className="w-4 h-4 shrink-0" /> : <ChevronDown className="w-4 h-4 shrink-0" />}
+            </button>
+            <div className="flex items-center gap-3 shrink-0">
+              {pet.breed && <BreedEditorialLink species={pet.species} breed={pet.breed} label="Fiche race" />}
+              <Button type="button" variant="outline" size="sm" onClick={() => startEdit(pet)}>
+                <Pencil className="w-3 h-3 mr-1" /> Modifier
+              </Button>
             </div>
-            {expandedId === pet.id ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-          </button>
-          {expandedId === pet.id && (
-            <div className="px-4 pb-4 space-y-3">
+          </div>
+          {isOpen && (
+            <div id={detailId} className="px-4 pb-4 space-y-3">
               <div className="flex gap-2">
-                <Button type="button" variant="outline" size="sm" onClick={() => startEdit(pet)}>
-                  <Pencil className="w-3 h-3 mr-1" /> Modifier
-                </Button>
                 <Button type="button" variant="outline" size="sm" onClick={() => pet.id && onRemovePet(pet.id)}
                   className="text-destructive hover:text-destructive">
                   <Trash2 className="w-3 h-3 mr-1" /> Supprimer
@@ -267,7 +284,8 @@ const OwnerStepAnimals = ({ pets, onAddPet, onUpdatePet, onRemovePet }: Props) =
             </div>
           )}
         </div>
-      ))}
+        );
+      })}
 
       {editingPet ? (
         <div ref={editFormRef} className="bg-card rounded-lg border border-primary/30 p-5 space-y-4">

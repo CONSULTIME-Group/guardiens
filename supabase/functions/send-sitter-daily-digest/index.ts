@@ -1,7 +1,9 @@
 // send-sitter-daily-digest
 // -------------------------------------------------------------
 // Envoie chaque soir un digest quotidien aux gardiens ayant au moins une
-// entrée `queued` dans `sitter_digest_queue`. Pour chaque gardien :
+// entrée `queued` dans `sitter_digest_queue`. L'identité vérifiée n'est plus
+// un filtre d'éligibilité : c'est une clé de tri (vérifiés en tête de file).
+// Pour chaque gardien :
 //  - top 3 par (affinity_score DESC NULLS LAST, distance ASC NULLS LAST)
 //  - anti-doublon : pas de digest dans les 24h (via email_send_log)
 //  - vérification suppression, opt-in email_preferences.new_sit_digest
@@ -149,7 +151,21 @@ Deno.serve(async (req) => {
     // Cache sits déjà chargées pour éviter multi requêtes
     const sitCache = new Map<string, SitRow>()
 
-    for (const [sitterId, rows] of bySitter.entries()) {
+    // 2a-bis. Ordre d'envoi : les gardiens dont l'identité est vérifiée
+    // passent en tête de file, les autres suivent (la vérification trie,
+    // elle n'exclut plus).
+    const { data: verifiedRows } = await supabase
+      .from('profiles')
+      .select('id, identity_verified')
+      .in('id', [...bySitter.keys()])
+    const verifiedSitters = new Set(
+      (verifiedRows ?? []).filter((r: any) => r.identity_verified).map((r: any) => r.id as string)
+    )
+    const orderedSitters = [...bySitter.entries()].sort(
+      (a, b) => Number(verifiedSitters.has(b[0])) - Number(verifiedSitters.has(a[0]))
+    )
+
+    for (const [sitterId, rows] of orderedSitters) {
       try {
         // 2a. Charge les infos gardien (profile + email_preferences)
         const { data: profile } = await supabase
@@ -160,7 +176,6 @@ Deno.serve(async (req) => {
 
         if (!profile
             || profile.account_status !== 'active'
-            || !profile.identity_verified
             || (profile.profile_completion ?? 0) < 60
         ) {
           await markSkipped(supabase, rows.map(r => r.id), 'sitter_not_eligible', body.dry_run)
