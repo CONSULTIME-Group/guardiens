@@ -414,7 +414,7 @@ Deno.serve(async (req) => {
           subject: buildSubject(items.length, !!body.catchup),
           sits: items.map(i => i.sitId),
           sit_titles: items.map(i => i.sitTitle),
-          skipped: overflow.map(o => o.sit_id),
+          skipped: overflow.map(o => o.row.sit_id),
         } as any)
 
         if (body.dry_run) {
@@ -502,7 +502,7 @@ Deno.serve(async (req) => {
             await supabase
               .from('sitter_digest_queue')
               .update({ skip_reason: `deferred_retry:http_${_steRes.status}` })
-              .in('id', top3.map(q => q.id))
+              .in('id', top3.map(s => s.row.id))
           }
           errors.push({ sitter_id: sitterId, reason: `send_failed: ${String(sendErr)}` })
           continue
@@ -510,8 +510,8 @@ Deno.serve(async (req) => {
 
         // 2h. Mise à jour queue : top → sent, overflow → skipped
         const sentIds = top3
-          .filter(q => items.find(i => i.sitId === q.sit_id))
-          .map(q => q.id)
+          .filter(s => items.find(i => i.sitId === s.sit.id))
+          .map(s => s.row.id)
 
         if (sentIds.length > 0) {
           await supabase
@@ -524,7 +524,7 @@ Deno.serve(async (req) => {
           await supabase
             .from('sitter_digest_queue')
             .update({ status: 'skipped', skip_reason: 'digest_cap_3' })
-            .in('id', overflow.map(o => o.id))
+            .in('id', overflow.map(o => o.row.id))
         }
 
         sittersSent++
