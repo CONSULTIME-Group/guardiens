@@ -5854,6 +5854,7 @@ export type Database = {
           travels_with_own_animals: boolean | null
           updated_at: string
           user_id: string
+          vehicle_type: string | null
           work_during_sit: string | null
         }
         Insert: {
@@ -5905,6 +5906,7 @@ export type Database = {
           travels_with_own_animals?: boolean | null
           updated_at?: string
           user_id: string
+          vehicle_type?: string | null
           work_during_sit?: string | null
         }
         Update: {
@@ -5956,6 +5958,7 @@ export type Database = {
           travels_with_own_animals?: boolean | null
           updated_at?: string
           user_id?: string
+          vehicle_type?: string | null
           work_during_sit?: string | null
         }
         Relationships: [
@@ -7157,8 +7160,8 @@ export type Database = {
           has_vehicle: boolean | null
           is_available: boolean | null
           lifestyle: string[] | null
-          min_duration: number | null
           min_notice: string | null
+          min_stay_duration: string | null
           motivation: string | null
           own_animals: string[] | null
           preferred_environments: string[] | null
@@ -7168,6 +7171,7 @@ export type Database = {
           travels_with_children: boolean | null
           travels_with_own_animals: boolean | null
           user_id: string | null
+          vehicle_type: string | null
         }
         Relationships: [
           {

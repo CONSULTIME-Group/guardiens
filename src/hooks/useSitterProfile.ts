@@ -6,38 +6,15 @@ import { logger } from "@/lib/logger";
 import { validateAvatarFile } from "@/lib/validateAvatarFile";
 import { compressAvatarFile } from "@/lib/compressImage";
 
-// Exported so the page can recompute missing fields against the LIVE preview state
-// (mergedData = data + localData) instead of the stale server snapshot.
-export function computeSitterMissingFields(d: SitterProfileData): { step: number; label: string }[] {
-  const missing: { step: number; label: string }[] = [];
-  if (!d.avatar_url) missing.push({ step: 1, label: "Photo de profil" });
-  if (!d.first_name) missing.push({ step: 1, label: "Prénom" });
-  if (!d.last_name) missing.push({ step: 1, label: "Nom" });
-  if (!d.city) missing.push({ step: 1, label: "Ville" });
-  if (!d.bio) missing.push({ step: 1, label: "Bio" });
-  if (!d.motivation) missing.push({ step: 1, label: "Motivation" });
-  if (!d.sitter_type) missing.push({ step: 2, label: "Type de gardien" });
-  if (!d.availability_during) missing.push({ step: 2, label: "Disponibilité" });
-  if (d.lifestyle.length === 0) missing.push({ step: 2, label: "Mode de vie" });
-  if (d.animal_types.length === 0) missing.push({ step: 3, label: "Types d'animaux" });
-  if (!d.experience_years) missing.push({ step: 3, label: "Années d'expérience" });
-  if (!d.references_text) missing.push({ step: 3, label: "Références" });
-  if (!d.has_license && !d.has_vehicle) missing.push({ step: 4, label: "Permis ou véhicule" });
-  if (d.languages.length === 0) missing.push({ step: 5, label: "Langues" });
-  if (d.meeting_preference.length === 0) missing.push({ step: 5, label: "Préférence de rencontre" });
-  if (!d.handover_preference) missing.push({ step: 5, label: "Préférence de passation" });
-  return missing;
-}
-
 export interface SitterProfileData {
   // Step 1 - Identity (from profiles table)
   first_name: string;
   last_name: string;
   city: string;
   postal_code: string;
-  // Pays (aligne avec profiles.country) : la règle « code postal requis »
-  // ne s'applique qu'en France, ailleurs `city` suffit (parité serveur RPC).
-  country: string;
+  // Pays (aligne avec profiles.country) : NULL ou code réel, jamais "".
+  // La règle « code postal requis » ne s'applique qu'en France (parité serveur RPC).
+  country: string | null;
   latitude?: number | null;
   longitude?: number | null;
   bio: string;
@@ -57,6 +34,7 @@ export interface SitterProfileData {
   // Step 4
   has_license: boolean;
   has_vehicle: boolean;
+  vehicle_type: string;
   geographic_radius: number;
   min_duration: number;
   max_duration: number;
@@ -107,7 +85,7 @@ const defaultData: SitterProfileData = {
   motivation: "",
   sitter_type: "", accompanied_by: "", smoker: false, availability_during: "", lifestyle: [],
   animal_types: [], experience_years: "", references_text: "",
-  has_license: false, has_vehicle: false, geographic_radius: 15, min_duration: 3, max_duration: 21, availability_dates: [], is_available: false,
+  has_license: false, has_vehicle: false, vehicle_type: "", geographic_radius: 15, min_duration: 3, max_duration: 21, availability_dates: [], is_available: false,
   min_stay_duration: "flexible", preferred_frequency: "flexible", min_notice: "asap", preferred_periods: [], preferred_environments: [],
   strict_rules_ok: false, prefer_visitors: false, farm_animals_ok: false, preferences_notes: "",
   meeting_preference: [], handover_preference: "", languages: [], bonus_skills: [], interests: [],
@@ -177,6 +155,7 @@ export function useSitterProfile() {
       references_text: s?.references_text || "",
       has_license: s?.has_license || false,
       has_vehicle: s?.has_vehicle || false,
+      vehicle_type: (s as any)?.vehicle_type || "",
       geographic_radius: s?.geographic_radius || 15,
       min_duration: s?.min_duration || 3,
       max_duration: s?.max_duration || 21,
@@ -323,11 +302,6 @@ export function useSitterProfile() {
     return () => { cancelled = true; };
   }, [user]);
 
-
-  const computeMissingFields = useCallback((d: SitterProfileData): { step: number; label: string }[] => {
-    return computeSitterMissingFields(d);
-  }, []);
-
   const saveStep = useCallback(async (stepData: Partial<SitterProfileData>): Promise<boolean> => {
     if (!user) return false;
     setSaving(true);
@@ -341,6 +315,8 @@ export function useSitterProfile() {
       const profileFields = ["first_name", "last_name", "city", "postal_code", "country", "latitude", "longitude", "bio", "avatar_url", "skill_categories", "available_for_help"] as const;
       const profileUpdate: any = {};
       profileFields.forEach(f => { if (f in stepData) profileUpdate[f] = (stepData as any)[f]; });
+      // Un pays vide ne s'écrit jamais : NULL ou code réel (parité du score client/serveur).
+      if ("country" in profileUpdate) profileUpdate.country = (profileUpdate.country || "").trim() || null;
 
       // profile_completion is recomputed server-side via RPC after writes (canonical barème)
 
@@ -353,7 +329,7 @@ export function useSitterProfile() {
       const sitterFields = [
         "motivation", "sitter_type", "accompanied_by", "smoker", "availability_during",
         "lifestyle", "animal_types", "experience_years", "references_text",
-        "has_license", "has_vehicle", "geographic_radius", "min_duration", "max_duration",
+        "has_license", "has_vehicle", "vehicle_type", "geographic_radius", "min_duration", "max_duration",
         "availability_dates", "is_available", "strict_rules_ok", "prefer_visitors", "farm_animals_ok",
         "preferences_notes", "meeting_preference", "handover_preference",
         "languages", "bonus_skills", "interests", "competences",
@@ -503,7 +479,6 @@ export function useSitterProfile() {
     data, pastAnimals, loading, saving, sitterProfileId, lastSyncedAt,
     saveStep, addPastAnimal, removePastAnimal, uploadAvatar,
     completion,
-    missingFields: computeMissingFields(data),
     loadError,
     reload: () => fetchData(),
     emailVerified,

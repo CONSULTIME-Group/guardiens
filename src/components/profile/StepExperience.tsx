@@ -11,6 +11,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import ChipSelect from "./ChipSelect";
+import RadioChipGroup from "./RadioChipGroup";
 import HintBubble from "./HintBubble";
 import type { SitterProfileData, PastAnimal } from "@/hooks/useSitterProfile";
 import { safeUUID } from "@/lib/uuid";
@@ -184,10 +185,10 @@ const StepExperience = ({ data, pastAnimals, onChange, onAddAnimal, onRemoveAnim
 
       <div className="space-y-2">
         <Label id="lbl-guard-exp">Gardes avec animaux réalisées</Label>
-        <ChipSelect
+        <RadioChipGroup
           options={GUARD_EXPERIENCE}
-          selected={(data as any).guard_experience ? [(data as any).guard_experience] : []}
-          onChange={v => onChange({ guard_experience: v[v.length - 1] || "" } as any)}
+          value={(data as any).guard_experience || ""}
+          onChange={v => onChange({ guard_experience: v } as any)}
           ariaLabelledBy="lbl-guard-exp"
         />
       </div>

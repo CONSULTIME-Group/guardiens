@@ -40,6 +40,14 @@ import AffinityTeaser from "@/components/matching/AffinityTeaser";
 import { useViewerSitterForAffinity } from "@/hooks/useViewerSitterForAffinity";
 import AlmaFitGardien from "@/components/ai/alma/AlmaFitGardien";
 import { sanitizeBioForPublic } from "@/lib/sanitizeBio";
+import { publishableMotivation } from "@/lib/motivation";
+import {
+  mobilityPublicLabel,
+  VEHICLE_OPTIONS,
+  MIN_STAY_DURATION_OPTIONS,
+  FREQUENCY_OPTIONS,
+  NOTICE_OPTIONS,
+} from "@/lib/mobilityOptions";
 import { isSitterProfileIndexable } from "@/lib/sitterProfileIndexability";
 import {
   buildProfileLightboxItems,
@@ -81,17 +89,6 @@ const SITTER_TYPE_LABELS: Record<string, string> = {
   solo: "Solo", couple: "Couple", family: "Famille", retired: "Retraité(e)",
 };
 
-const MIN_DURATION_LABELS: Record<string, string> = {
-  "1-3 jours": "1 à 3 jours minimum",
-  "short": "1 à 3 jours minimum",
-  "1 semaine": "1 semaine minimum",
-  "week": "1 semaine minimum",
-  "2 semaines": "2 semaines minimum",
-  "two_weeks": "2 semaines minimum",
-  "1 mois": "1 mois minimum",
-  "month": "1 mois minimum",
-  "flexible": "Durée flexible",
-};
 
 const ENV_LABELS: Record<string, string> = {
   city: "Ville", countryside: "Campagne", mountain: "Montagne",
@@ -258,7 +255,7 @@ export default function PublicSitterProfile() {
   const PracticalGrid = (props: {
     animalTypes: string[]; sitterProfile: any; hasVehicle: boolean; radius: number | null; city: string | null;
     competences: string[]; lifestyle: string[]; preferredEnvironments: string[];
-    typeLine: string; durationLabel: string; frequencyLabel: string; noticeLabel: string;
+    typeLine: string; durationLabel: string; frequencyLabel: string; noticeLabel: string; vehicleLabel: string;
   }) => (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
       {props.animalTypes.length > 0 && (
@@ -298,8 +295,8 @@ export default function PublicSitterProfile() {
       <div>
         <h3 className="text-sm font-semibold text-foreground font-body mb-2.5">Zone d'intervention</h3>
         <p className="text-sm text-foreground/70 font-body">
-          {props.hasVehicle
-            ? `Avec véhicule${props.radius ? `, peut intervenir jusqu'à ${props.radius} km${props.city ? ` autour de ${props.city}` : ''}` : ''}`
+          {props.vehicleLabel
+            ? `${props.vehicleLabel}${props.radius ? `, peut intervenir jusqu'à ${props.radius} km${props.city ? ` autour de ${props.city}` : ''}` : ''}`
             : props.radius
               ? `Jusqu'à ${props.radius} km${props.city ? ` autour de ${props.city}` : ''}`
               : 'Zone d\'intervention non précisée'}
@@ -462,7 +459,7 @@ export default function PublicSitterProfile() {
 
       // Vue publique réduite : 19 colonnes d'affichage, sans donnée d'affinité.
       const PUBLIC_SITTER_COLS =
-        "user_id, motivation, sitter_type, accompanied_by, lifestyle, animal_types, has_vehicle, geographic_radius, min_duration, is_available, competences, preferred_frequency, min_notice, preferred_environments, farm_animals_ok, own_animals, reply_median_minutes, travels_with_children, travels_with_own_animals";
+        "user_id, motivation, sitter_type, accompanied_by, lifestyle, animal_types, has_vehicle, vehicle_type, geographic_radius, min_stay_duration, is_available, competences, preferred_frequency, min_notice, preferred_environments, farm_animals_ok, own_animals, reply_median_minutes, travels_with_children, travels_with_own_animals";
       const [profileRes, baseProfileRes, sitterRes, badgesRes, reviewsRes, galleryRes, emergencyRes, subRes, ownerRes, missionsRes, extExpRes] =
         await Promise.all([
           supabase.from("public_profiles").select(PUBLIC_PROFILE_COLS).eq("id", id).maybeSingle(),
@@ -951,7 +948,8 @@ export default function PublicSitterProfile() {
   const city = profile?.city || "";
   // RGPD : masquage présentationnel des coordonnées (jamais de modification en base).
   const bio = sanitizeBioForPublic(profile?.bio);
-  const motivation = sanitizeBioForPublic(sitterProfile?.motivation);
+  // Une motivation sous le seuil (50 car.) reste un brouillon : jamais publiée.
+  const motivation = sanitizeBioForPublic(publishableMotivation(sitterProfile?.motivation));
   const animalTypes: string[] = sitterProfile?.animal_types || [];
   const hasVehicle = sitterProfile?.has_vehicle || false;
   const rawRadius = sitterProfile?.geographic_radius;
@@ -971,28 +969,15 @@ export default function PublicSitterProfile() {
   const sitterType = sitterProfile?.sitter_type || "";
   const accompaniedBy = sitterProfile?.accompanied_by || "";
   const lifestyle: string[] = sitterProfile?.lifestyle || [];
-  const minDuration: string = sitterProfile?.min_duration || "";
+  const minStayDuration: string = sitterProfile?.min_stay_duration || "";
+  const vehicleType: string = sitterProfile?.vehicle_type || "";
   const preferredEnvironments: string[] = sitterProfile?.preferred_environments || [];
   const competences: string[] = sitterProfile?.competences || [];
   const preferredFrequency: string = sitterProfile?.preferred_frequency || "";
   const minNotice: string = sitterProfile?.min_notice || "";
 
-  const FREQUENCY_LABELS: Record<string, string> = {
-    occasionnel: "Occasionnel",
-    occasional: "Occasionnel",
-    regulier: "Régulier",
-    regular: "Régulier",
-  };
-  const NOTICE_LABELS: Record<string, string> = {
-    "1_semaine": "Préavis : 1 semaine",
-    "1_week": "Préavis : 1 semaine",
-    "2_semaines": "Préavis : 2 semaines",
-    "2_weeks": "Préavis : 2 semaines",
-    "1_mois": "Préavis : 1 mois",
-    "1_month": "Préavis : 1 mois",
-  };
-  const frequencyLabel = FREQUENCY_LABELS[preferredFrequency] || "";
-  const noticeLabel = NOTICE_LABELS[minNotice] || "";
+  const frequencyLabel = mobilityPublicLabel(FREQUENCY_OPTIONS, preferredFrequency);
+  const noticeLabel = mobilityPublicLabel(NOTICE_OPTIONS, minNotice);
 
   const totalBadgeCount = badges.reduce((s: any, b: any) => s + b.count, 0);
 
@@ -1073,9 +1058,8 @@ export default function PublicSitterProfile() {
   const typeLineItems = [typeLabel, accompLabel].filter(Boolean);
   const typeLine = typeLineItems.length > 0 ? typeLineItems.join(" · ") : "";
 
-  const durationLabel = minDuration
-    ? (MIN_DURATION_LABELS[minDuration] || "Durée flexible")
-    : "";
+  const durationLabel = mobilityPublicLabel(MIN_STAY_DURATION_OPTIONS, minStayDuration);
+  const vehicleLabel = mobilityPublicLabel(VEHICLE_OPTIONS, vehicleType);
 
   // Stats line
   const statsItems: string[] = [];
@@ -1541,6 +1525,7 @@ export default function PublicSitterProfile() {
                   durationLabel={durationLabel}
                   frequencyLabel={frequencyLabel}
                   noticeLabel={noticeLabel}
+                  vehicleLabel={vehicleLabel}
                 />
                 <PublicExperiences experiences={externalExperiences} />
               </div>
