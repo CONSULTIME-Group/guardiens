@@ -540,10 +540,16 @@ export default function PublicSitterProfile() {
         try {
           const { data: propsData } = await supabase
             .from("properties")
-            .select("pets:pets(species, special_needs)")
+            .select("car_required, pets:pets(species, special_needs)")
             .eq("user_id", id);
           const flat = (propsData || []).flatMap((p: any) => p.pets || []);
           setTargetPets(flat);
+          // Voiture requise : critère d'affinité (direction gardien → propriétaire).
+          if ((propsData || []).some((p: any) => p.car_required === true)) {
+            setTargetOwnerAffinity((current: any) =>
+              current?.user_id === id ? { ...current, car_required: true } : current,
+            );
+          }
         } catch {
           setTargetPets([]);
         }
@@ -652,23 +658,19 @@ export default function PublicSitterProfile() {
     load();
   }, [id, loadNonce, auth?.hasSession]);
 
-  // Complément d'affinité réservé aux propriétaires connectés. Le user_id
+  // Complément d'affinité réservé aux membres connectés (la vue publique
+  // `public_sitter_profiles` ne porte pas les colonnes d'affinité). Le user_id
   // déclenche ce chargement lorsque le profil public est prêt, sans rejouer le
   // grand effet. La fusion fonctionnelle conserve toute la projection publique.
   useEffect(() => {
-    if (
-      !id ||
-      !auth?.user ||
-      auth?.activeRole !== "owner" ||
-      sitterProfile?.user_id !== id
-    ) return;
+    if (!id || !auth?.user || sitterProfile?.user_id !== id) return;
 
     let cancelled = false;
 
     const loadAffinityProfile = async () => {
       const { data: affinityRow } = await (supabase as any)
         .from("sitter_profiles_affinity")
-        .select("user_id, experience_years, life_pace, languages, interests, work_during_sit, sensitivities")
+        .select("user_id, experience_years, life_pace, lifestyle, availability_during, has_vehicle, has_license, languages, interests, work_during_sit, sensitivities, special_animal_skills")
         .eq("user_id", id)
         .maybeSingle();
 
@@ -683,7 +685,7 @@ export default function PublicSitterProfile() {
     return () => {
       cancelled = true;
     };
-  }, [id, auth?.user, auth?.activeRole, sitterProfile?.user_id]);
+  }, [id, auth?.user, sitterProfile?.user_id]);
 
   useEffect(() => {
     if (activeTab !== 'proprio') return;
