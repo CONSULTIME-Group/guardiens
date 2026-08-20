@@ -671,7 +671,9 @@ export default function PublicSitterProfile() {
     const loadAffinityProfile = async () => {
       const { data: affinityRow } = await (supabase as any)
         .from("sitter_profiles_affinity")
-        .select("user_id, experience_years, life_pace, lifestyle, availability_during, has_vehicle, has_license, languages, interests, work_during_sit, sensitivities, special_animal_skills")
+        // Projection complète des 16 champs d'AffinitySitterInput : parité
+        // des entrées verrouillée par affinity-input-parity.test.ts.
+        .select("user_id, experience_years, life_pace, lifestyle, availability_during, has_vehicle, has_license, languages, interests, work_during_sit, sensitivities, special_animal_skills, animal_types, sitter_type, travels_with_children, travels_with_own_animals, farm_animals_ok")
         .eq("user_id", id)
         .maybeSingle();
 

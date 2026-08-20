@@ -749,6 +749,17 @@ export function computeAffinityResultFull(
   // CLASSEMENT utilise le score pondéré par la confiance (poids réellement
   // évalué / poids maximal possible pour ce couple). Personne n'est
   // éliminé : tout le monde reste dans la liste, on trie mieux.
+  //
+  // DÉFAUT DORMANT, noté pour mémoire (mesure du 20/08/2026) : tant que le
+  // vivier du Top 3 filtrait sur identity_verified, un seul profil
+  // totalement vide y était éligible, donc le défaut était invisible. Le
+  // retrait de ce filtre le matin même a fait entrer 112 profils vides dans
+  // le classement : avec l'ancien evalPresence (« 100% sur place » rendait
+  // 2/2 à tout le monde), ils auraient tous obtenu 100 % affiché chez un
+  // propriétaire à exigence « 100% sur place » et occupé le haut du
+  // classement. Les deux changements (retrait du filtre identité et score
+  // de tri pondéré par la confiance) devaient partir ensemble. Ne jamais
+  // réintroduire l'un sans l'autre.
   const maxWeight = maxPossibleWeight(owner);
   const confidence = maxWeight > 0 ? Math.min(1, maxPoints / maxWeight) : 0;
   const sortScore = Math.round(score * confidence);
