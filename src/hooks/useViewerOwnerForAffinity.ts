@@ -17,11 +17,13 @@ const cache = new Map<string, Promise<Loaded>>();
 async function fetchOwnerWithPets(userId: string): Promise<Loaded> {
   const [ownerRes, propsRes] = await Promise.all([
     supabase.from("owner_profiles").select("*").eq("user_id", userId).maybeSingle(),
-    supabase.from("properties").select("pets(species, special_needs, breed)").eq("user_id", userId),
+    supabase.from("properties").select("car_required, pets(species, special_needs, breed)").eq("user_id", userId),
   ]);
   if (!ownerRes.data) return null;
   const pets = (propsRes.data ?? []).flatMap((p: any) => p.pets ?? []);
-  return { ...(ownerRes.data as any), pets } as AffinityOwnerInput;
+  // Voiture requise si au moins une propriété le demande.
+  const car_required = (propsRes.data ?? []).some((p: any) => p.car_required === true);
+  return { ...(ownerRes.data as any), pets, car_required } as AffinityOwnerInput;
 }
 
 export function useViewerOwnerForAffinity(): {
