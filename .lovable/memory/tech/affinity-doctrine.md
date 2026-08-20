@@ -35,7 +35,9 @@ Défaut dormant, noté le 20/08/2026 : le retrait du filtre `identity_verified` 
 
 ## Parité des entrées
 
-Tout site qui alimente le moteur doit fournir les 16 champs d'`AffinitySitterInput`, par projection SQL complète ou par littéral complet. Un champ omis produit un score différent selon l'écran pour le même couple (cas réel du 20/08/2026 : ApplicationsList jetait six champs). Verrouillé par `src/lib/__tests__/affinity-input-parity.test.ts` : chaque source est contrôlée et tout nouvel appel direct au moteur non répertorié fait échouer la suite.
+Tout site qui alimente le moteur doit fournir les 16 champs d'`AffinitySitterInput` ET les 10 champs d'`AffinityOwnerInput`, par projection SQL complète ou par littéral complet. Un champ omis produit un score différent selon l'écran pour le même couple (cas réels : ApplicationsList jetait six champs gardien le 20/08/2026 ; 11 surfaces sur 16 perdaient au moins un champ propriétaire le 21/08/2026). Verrouillé par `src/lib/__tests__/affinity-input-parity.test.ts` : chaque source est contrôlée et tout nouvel appel direct au moteur (ou à son alias `computeAffinityScore`) non répertorié fait échouer la suite.
+
+Attention aux champs hors table : `accepts_sitter_pets` et `accepts_sitter_children` vivent sur `sits`, `car_required` sur `properties`, `pets` est une jointure. Un `select("*")` sur `owner_profiles` ne les fournit PAS : ils doivent être injectés explicitement. Contexte sans annonce (profil public, onboarding J+1, classement transverse) : `null` explicite avec commentaire, neutre dans le moteur, jamais pénalisant. Le hook `useViewerOwnerForAffinity` est la source unique pour toute surface où un propriétaire consulte un gardien hors annonce : interdiction de reconstruire une entrée propriétaire par une requête propre.
 
 ## Moteur unique
 
