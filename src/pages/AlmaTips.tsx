@@ -21,7 +21,11 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Search, ExternalLink, ArrowRight } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
 import { slugify } from "@/lib/normalize";
+import imgSaison from "@/assets/conseils-saison.jpg";
+import imgDaily from "@/assets/conseils-du-jour.jpg";
+import imgBibliotheque from "@/assets/conseils-bibliotheque.jpg";
 import { resolveBreedFiche } from "@/lib/breedFicheMatch";
 import { buildBreedEditorialHref } from "@/components/breeds/BreedEditorialLink";
 
@@ -105,6 +109,36 @@ function extractDomain(url: string): string {
   }
 }
 
+/** Un lien « Source » ne vaut que s'il pointe vers la page précise qui
+ *  justifie l'affirmation. Une racine de site est affichée en texte simple,
+ *  sans lien : une page d'accueil n'est pas une source. */
+function isHomepageUrl(url: string): boolean {
+  try {
+    const path = new URL(url).pathname.replace(/\/+$/, "");
+    return path === "" || /^\/(fr|en|accueil|home|index\.html?)$/i.test(path);
+  } catch {
+    return false;
+  }
+}
+
+const SourceLink = ({ url }: { url: string }) => {
+  const domain = extractDomain(url);
+  if (isHomepageUrl(url)) {
+    return <p className="text-xs text-muted-foreground">Source : {domain}</p>;
+  }
+  return (
+    <a
+      href={url}
+      target="_blank"
+      rel="nofollow noopener"
+      className="inline-flex items-center gap-1 text-xs text-primary hover:underline"
+    >
+      <ExternalLink className="h-3 w-3" aria-hidden="true" />
+      Source : {domain}
+    </a>
+  );
+};
+
 function extractBreed(cf: Tip["context_filter"]): { breed: string; species: string } | null {
   if (!cf || typeof cf !== "object") return null;
   const anyCf = cf as Record<string, unknown>;
@@ -115,6 +149,7 @@ function extractBreed(cf: Tip["context_filter"]): { breed: string; species: stri
 }
 
 export default function AlmaTips() {
+  const { user } = useAuth();
   const [tips, setTips] = useState<Tip[]>([]);
   const [breedArticles, setBreedArticles] = useState<Map<string, string>>(new Map());
   const [breedFiches, setBreedFiches] = useState<Map<string, string>>(new Map());
@@ -280,17 +315,7 @@ export default function AlmaTips() {
             </p>
           )}
           <div className="flex flex-col gap-1.5 pt-1">
-            {t.source_url && (
-              <a
-                href={t.source_url}
-                target="_blank"
-                rel="noopener"
-                className="inline-flex items-center gap-1 text-xs text-primary hover:underline"
-              >
-                <ExternalLink className="h-3 w-3" />
-                Source : {extractDomain(t.source_url)}
-              </a>
-            )}
+            {t.source_url && <SourceLink url={t.source_url} />}
             {furtherHref && (
               <Link
                 to={furtherHref}
@@ -391,10 +416,20 @@ export default function AlmaTips() {
 
           {/* Conseils de saison */}
           {seasonal.length > 0 && (
-            <section className="mb-10">
+            <section id="saison" className="mb-10 scroll-mt-24">
               <h2 className="font-heading text-xl md:text-2xl font-semibold mb-4">
                 Conseils de saison
               </h2>
+              <div className="mb-5 overflow-hidden rounded-xl border border-border">
+                <img
+                  src={imgSaison}
+                  alt="Aquarelle : un jardin arrosé en été, un chien à l'ombre et un chat sur le muret"
+                  className="w-full aspect-[16/6] object-cover"
+                  loading="lazy"
+                  width={1200}
+                  height={675}
+                />
+              </div>
               <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 {seasonal.map(renderTip)}
               </div>
@@ -407,7 +442,16 @@ export default function AlmaTips() {
               <h2 className="font-heading text-xl md:text-2xl font-semibold mb-4">
                 Le conseil du jour
               </h2>
-              <div className="rounded-xl bg-muted/40 border border-border p-5 md:p-7">
+              <div className="rounded-xl bg-muted/40 border border-border overflow-hidden">
+                <img
+                  src={imgDaily}
+                  alt="Gouache : un carnet ouvert avec une empreinte de patte, deux tasses sur la table"
+                  className="w-full aspect-[16/6] object-cover"
+                  loading="lazy"
+                  width={1200}
+                  height={675}
+                />
+                <div className="p-5 md:p-7">
                 <div className="flex items-start gap-4 mb-5">
                   <div className="shrink-0">
                     <AlmaAvatar size={40} breathe />
@@ -421,16 +465,11 @@ export default function AlmaTips() {
                     {dailyPick.content}
                   </p>
                   {dailyPick.source_url && (
-                    <a
-                      href={dailyPick.source_url}
-                      target="_blank"
-                      rel="noopener"
-                      className="inline-flex items-center gap-1 text-xs text-primary hover:underline mt-3"
-                    >
-                      <ExternalLink className="h-3 w-3" />
-                      Source : {extractDomain(dailyPick.source_url)}
-                    </a>
+                    <div className="mt-3">
+                      <SourceLink url={dailyPick.source_url} />
+                    </div>
                   )}
+                </div>
                 </div>
               </div>
             </section>
@@ -468,6 +507,16 @@ export default function AlmaTips() {
 
           {/* Liste complète */}
           <section>
+            <div className="mb-6 overflow-hidden rounded-xl border border-border">
+              <img
+                src={imgBibliotheque}
+                alt="Gouache : un chien, un chat, un lapin et une poule réunis dans un jardin devant une maison"
+                className="w-full aspect-[16/5] object-cover"
+                loading="lazy"
+                width={1200}
+                height={675}
+              />
+            </div>
             {loading ? (
               <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 {Array.from({ length: 6 }).map((_, i) => (
@@ -508,31 +557,52 @@ export default function AlmaTips() {
             </Link>
           </div>
 
-          {/* CTA proprio */}
-          <aside className="mt-10 p-6 md:p-8 rounded-xl border border-border bg-card">
-            <h2 className="font-heading text-xl md:text-2xl font-semibold mb-2">
-              Confier votre animal ou votre maison en toute confiance
-            </h2>
-            <p className="text-muted-foreground mb-4 max-w-2xl">
-              Guardiens reste gratuit tant que nous ne sommes pas satisfaits du service
-              que nous vous offrons. Rejoignez les propriétaires qui trouvent leur gardien
-              parmi les gens du coin.
-            </p>
-            <div className="flex flex-wrap gap-3">
-              <Button asChild>
-                <Link to="/inscription?role=owner">Créer mon espace propriétaire</Link>
-              </Button>
-              <Button variant="outline" asChild>
-                <Link to="/annonces">Voir les gardiens disponibles</Link>
-              </Button>
-            </div>
-            <p className="mt-4 text-sm text-muted-foreground">
-              Vous voulez garder des animaux ?{" "}
-              <Link to="/devenir-home-sitter" className="text-primary hover:underline font-medium">
-                Devenez gardien
-              </Link>
-            </p>
-          </aside>
+          {/* CTA de fin : adapté à l'état de connexion. Un membre déjà
+              inscrit reçoit une action utile, pas une inscription. */}
+          {user ? (
+            <aside className="mt-10 p-6 md:p-8 rounded-xl border border-border bg-card">
+              <h2 className="font-heading text-xl md:text-2xl font-semibold mb-2">
+                Envie de mettre ces conseils en pratique ?
+              </h2>
+              <p className="text-muted-foreground mb-4 max-w-2xl">
+                Décrivez votre maison et vos compagnons : les gardiens près de chez vous
+                pourront candidater, déjà briefés par ces repères.
+              </p>
+              <div className="flex flex-wrap gap-3">
+                <Button asChild>
+                  <Link to="/sits/create">Publier une annonce</Link>
+                </Button>
+                <Button variant="outline" asChild>
+                  <Link to="/dashboard">Retour à mon tableau de bord</Link>
+                </Button>
+              </div>
+            </aside>
+          ) : (
+            <aside className="mt-10 p-6 md:p-8 rounded-xl border border-border bg-card">
+              <h2 className="font-heading text-xl md:text-2xl font-semibold mb-2">
+                Confier votre animal ou votre maison en toute confiance
+              </h2>
+              <p className="text-muted-foreground mb-4 max-w-2xl">
+                Guardiens reste gratuit tant que nous ne sommes pas satisfaits du service
+                que nous vous offrons. Rejoignez les propriétaires qui trouvent leur gardien
+                parmi les gens du coin.
+              </p>
+              <div className="flex flex-wrap gap-3">
+                <Button asChild>
+                  <Link to="/inscription?role=owner">Créer mon espace propriétaire</Link>
+                </Button>
+                <Button variant="outline" asChild>
+                  <Link to="/annonces">Voir les gardiens disponibles</Link>
+                </Button>
+              </div>
+              <p className="mt-4 text-sm text-muted-foreground">
+                Vous voulez garder des animaux ?{" "}
+                <Link to="/devenir-home-sitter" className="text-primary hover:underline font-medium">
+                  Devenez gardien
+                </Link>
+              </p>
+            </aside>
+          )}
         </div>
 
       </div>

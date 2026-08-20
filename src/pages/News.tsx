@@ -29,6 +29,38 @@ interface Article {
   published_at: string | null;
 }
 
+/** Repli typographique quand un article n'a pas d'image de couverture :
+ *  papier crème, lavis vert pin et terracotta, initiale du titre.
+ *  Même règle que sur /races : jamais de trou dans la grille. */
+const ArticleCoverFallback = ({
+  title,
+  compact = false,
+  className = "",
+}: {
+  title: string;
+  compact?: boolean;
+  className?: string;
+}) => (
+  <div
+    aria-hidden="true"
+    className={`flex flex-col items-center justify-center ${className}`}
+    style={{
+      backgroundColor: "hsl(var(--hero-paper))",
+      backgroundImage:
+        "radial-gradient(ellipse 65% 55% at 26% 20%, hsl(var(--primary) / 0.10), transparent 70%)," +
+        "radial-gradient(ellipse 60% 50% at 76% 80%, hsl(var(--secondary) / 0.14), transparent 70%)",
+    }}
+  >
+    <span
+      className={`font-serif font-semibold text-secondary/70 select-none leading-none ${
+        compact ? "text-2xl" : "text-5xl"
+      }`}
+    >
+      {title.trim().charAt(0).toUpperCase()}
+    </span>
+  </div>
+);
+
 const CATEGORY_KEYS = [
   "guide_central","guide_race","guide_lieu","guide_ville","conseil_gardien","conseil_proprio",
   "conseil","temoignage","actualite","ville","thematique","guide_local","saisonnier","guide_pratique","vie_locale",
@@ -395,8 +427,10 @@ export default function News() {
             <div className="grid sm:grid-cols-3 gap-4 mb-4">
               {vieLocaleArticles.map((a) => (
                 <Link key={a.id} to={`/actualites/${a.slug}`} className="group flex gap-3 bg-background rounded-lg p-3 hover:shadow-md transition-shadow">
-                  {a.cover_image_url && (
+                  {a.cover_image_url ? (
                     <img src={getOptimizedImageUrl(a.cover_image_url, 200, 75)} alt={a.title} className="w-20 h-20 rounded-lg object-cover flex-shrink-0" loading="lazy" width={80} height={80} />
+                  ) : (
+                    <ArticleCoverFallback title={a.title} compact className="w-20 h-20 rounded-lg flex-shrink-0" />
                   )}
                   <div className="min-w-0">
                     <h3 className="font-heading text-sm font-semibold line-clamp-2 group-hover:text-primary transition-colors">{a.title}</h3>
@@ -461,7 +495,7 @@ export default function News() {
                 <Link key={article.id} to={`/actualites/${article.slug}`} className="group">
                   <article>
                     <Card className="overflow-hidden h-full transition-shadow hover:shadow-lg border-border">
-                      {article.cover_image_url && (
+                      {article.cover_image_url ? (
                         <div className="aspect-[16/9] overflow-hidden bg-muted">
                           <img
                             src={getOptimizedImageUrl(article.cover_image_url, 480, 75)}
@@ -472,6 +506,8 @@ export default function News() {
                             height={270}
                           />
                         </div>
+                      ) : (
+                        <ArticleCoverFallback title={article.title} className="aspect-[16/9]" />
                       )}
                       <CardContent className="p-5 space-y-3">
                         <div className="flex items-center gap-2 flex-wrap">
