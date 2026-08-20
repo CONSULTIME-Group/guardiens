@@ -1,5 +1,8 @@
 import * as React from 'npm:react@18.3.1'
-import { renderAsync } from 'npm:@react-email/components@0.0.22'
+// render synchrone, jamais renderAsync : la version en flux découpe la
+// sortie en morceaux et corrompt tout caractère accentué à cheval sur deux
+// morceaux (reproductible, observé le 20/08/2026 sur « Proposée »).
+import { render } from 'npm:@react-email/components@0.0.22'
 import { createClient } from 'npm:@supabase/supabase-js@2'
 import { TEMPLATES } from '../_shared/transactional-email-templates/registry.ts'
 import { getEmailCategory, type EmailCategory } from '../_shared/email-categories.ts'

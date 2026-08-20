@@ -48,15 +48,23 @@ interface Props {
   profileCompletion?: number | null
   /** Manque principal chiffré, ex. « 8 des 11 annonces en ligne… ». */
   completionHint?: string
+  /**
+   * Section du profil qui pose la question du manque principal (même source
+   * que completionHint). Le bouton y mène directement.
+   */
+  completionHref?: string
 }
 
 const buildCtaUrl = (sitId: string) =>
   `${SITE_URL}/annonces/${sitId}?utm_source=email&utm_campaign=sitter_daily_digest&utm_medium=daily`
 
-const buildProfileUrl = () =>
-  `${SITE_URL}/sitter-profile?utm_source=email&utm_campaign=sitter_daily_digest&utm_medium=daily`
+const buildProfileUrl = (href?: string) => {
+  const path = href && href.startsWith('/') ? href : '/sitter-profile'
+  const sep = path.includes('?') ? '&' : '?'
+  return `${SITE_URL}${path}${sep}utm_source=email&utm_campaign=sitter_daily_digest&utm_medium=daily`
+}
 
-const SitterDailyDigestEmail = ({ sitterFirstName, items = [], isCatchup, canApply = true, profileCompletion, completionHint }: Props) => (
+const SitterDailyDigestEmail = ({ sitterFirstName, items = [], isCatchup, canApply = true, profileCompletion, completionHint, completionHref }: Props) => (
   <Html lang="fr" dir="ltr">
     <BrandedHead />
     <Preview>
@@ -139,7 +147,7 @@ const SitterDailyDigestEmail = ({ sitterFirstName, items = [], isCatchup, canApp
             ) : null}
 
             {canApply === false ? (
-              <Button style={button} href={buildProfileUrl()}>
+              <Button style={button} href={buildProfileUrl(completionHref)}>
                 Complétez votre profil pour candidater
               </Button>
             ) : (

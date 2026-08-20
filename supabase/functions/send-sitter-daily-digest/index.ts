@@ -473,10 +473,13 @@ Deno.serve(async (req) => {
         const profileCompletion = profile.profile_completion ?? 0
         const canApply = profileCompletion >= 60
         let completionHint: string | undefined
+        let completionHref: string | undefined
         if (!canApply) {
           const { data: missing } = await supabase.rpc('sitter_missing_opportunities', { _sitter_id: sitterId })
           const hint = pickMissingOpportunities(missing as MissingOpportunitiesStats | null, 1)[0]
           completionHint = hint?.sentence
+          // Lien direct vers la section du profil qui pose la question.
+          completionHref = hint?.href
         }
 
         // 2h. Envoi digest
@@ -500,6 +503,7 @@ Deno.serve(async (req) => {
               canApply,
               profileCompletion,
               completionHint,
+              completionHref,
             },
           }),
         });

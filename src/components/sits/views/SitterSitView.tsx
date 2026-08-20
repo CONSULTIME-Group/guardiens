@@ -94,13 +94,26 @@ const SitterSitView = ({
    * sur sa candidature. Le seuil lui-même reste porté par useAccessLevel.
    */
   const [completionOpen, setCompletionOpen] = useState(false);
-  const missingCount = useApplyGateMissingCount(accessLevel === 1);
-  const missingHint =
-    missingCount === null
-      ? "Quelques informations de profil suffisent pour postuler"
-      : missingCount <= 1
-        ? "Il vous manque une information de profil pour postuler"
-        : `Il vous manque ${missingCount} informations de profil pour postuler`;
+  const missing = useApplyGateMissingCount(accessLevel === 1);
+  /**
+   * Mention sous le bouton, point d'arrivée du digest : le gardien doit lire
+   * son pourcentage actuel et ce qu'il lui manque, nommément. Le bouton
+   * ouvre la modale qui complète ces champs précis, un par un.
+   */
+  const missingHint = (() => {
+    if (missing === null) return "Quelques informations de profil suffisent pour postuler";
+    const pct = `Profil rempli à ${profileCompletion} %`;
+    if (missing.count === 0) return `${pct}, encore quelques informations pour postuler.`;
+    const shown = missing.titles
+      .slice(0, 2)
+      .map((title) => title.charAt(0).toLowerCase() + title.slice(1));
+    const rest = missing.count - shown.length;
+    const list =
+      rest > 0
+        ? `${shown.join(", ")} et ${rest} autre${rest > 1 ? "s" : ""}`
+        : shown.join(" et ");
+    return `${pct} : il vous manque ${list}.`;
+  })();
   /** Encart identité affiché sur la page. Si vrai, la modale n'en remet pas un. */
   const showIdentityInvite = identityRecommended && accessLevel !== 0 && accessLevel !== 1 && canApplyGuards;
   const [cancelOpen, setCancelOpen] = useState(false);
