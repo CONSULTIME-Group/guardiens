@@ -17,6 +17,8 @@ import { useAuth } from "@/contexts/AuthContext";
 import PageMeta from "@/components/PageMeta";
 import PostalCodeCityFields from "@/components/profile/PostalCodeCityFields";
 import { Slider } from "@/components/ui/slider";
+import { declarableRadius, effectiveSearchRadius } from "@/lib/searchRadius";
+import { snapToAllowedRadius } from "@/lib/alertRadius";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
@@ -108,7 +110,8 @@ const MonSecteur = () => {
       if (cancelled) return;
       setCity(profile?.city ?? "");
       setPostalCode(profile?.postal_code ?? "");
-      setRadius(sitter?.geographic_radius ?? 30);
+      // 30 est le marqueur de silence : on affiche le rayon réellement appliqué.
+      setRadius(effectiveSearchRadius(sitter?.geographic_radius));
       setLoading(false);
     })();
     return () => {
@@ -202,7 +205,7 @@ const MonSecteur = () => {
 
       const { error: sitterError } = await supabase
         .from("sitter_profiles")
-        .upsert({ user_id: user.id, geographic_radius: radius }, { onConflict: "user_id" });
+        .upsert({ user_id: user.id, geographic_radius: declarableRadius(radius) /* 30 = silence, jamais réécrit */ }, { onConflict: "user_id" });
       if (sitterError) throw sitterError;
 
       savedRef.current = true;
@@ -231,7 +234,7 @@ const MonSecteur = () => {
       p_zone_type: "rayon",
       p_city: city.trim(),
       p_postal_code: postalCode,
-      p_radius_km: radius,
+      p_radius_km: snapToAllowedRadius(radius),
       p_departement: null,
       p_region_code: null,
       p_alert_types: ["gardes", "missions"],

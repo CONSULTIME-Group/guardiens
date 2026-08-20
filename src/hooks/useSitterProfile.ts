@@ -37,7 +37,8 @@ export interface SitterProfileData {
   has_license: boolean | null;
   has_vehicle: boolean | null;
   vehicle_type: string;
-  geographic_radius: number;
+  /** 30 est le marqueur de silence (ancien défaut de colonne), pas une déclaration. */
+  geographic_radius: number | null;
   min_duration: number;
   max_duration: number;
   availability_dates: any[];
@@ -90,7 +91,7 @@ const defaultData: SitterProfileData = {
   motivation: "",
   sitter_type: "", accompanied_by: "", smoker: null, availability_during: "", lifestyle: [],
   animal_types: [], experience_years: "", references_text: "",
-  has_license: null, has_vehicle: null, vehicle_type: "", geographic_radius: 15, min_duration: 3, max_duration: 21, availability_dates: [], is_available: false,
+  has_license: null, has_vehicle: null, vehicle_type: "", geographic_radius: null, /* jamais pré-écrit : la question attend une vraie réponse */ min_duration: 3, max_duration: 21, availability_dates: [], is_available: false,
   min_stay_duration: "flexible", preferred_frequency: "flexible", min_notice: "asap", preferred_periods: [], preferred_environments: [],
   strict_rules_ok: null, prefer_visitors: null, farm_animals_ok: null, preferences_notes: "",
   meeting_preference: [], handover_preference: "", languages: [], bonus_skills: [], interests: [],
@@ -163,7 +164,7 @@ export function useSitterProfile() {
       has_license: s?.has_license ?? null,
       has_vehicle: s?.has_vehicle ?? null,
       vehicle_type: (s as any)?.vehicle_type || "",
-      geographic_radius: s?.geographic_radius || 15,
+      geographic_radius: s?.geographic_radius ?? null,
       min_duration: s?.min_duration || 3,
       max_duration: s?.max_duration || 21,
       availability_dates: (s?.availability_dates as any[]) || [],

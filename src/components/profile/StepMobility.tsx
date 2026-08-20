@@ -1,5 +1,4 @@
 import { Label } from "@/components/ui/label";
-import { Slider } from "@/components/ui/slider";
 import HintBubble from "./HintBubble";
 import ChipSelect from "./ChipSelect";
 import RadioChipGroup from "./RadioChipGroup";
@@ -11,6 +10,7 @@ import {
   NOTICE_OPTIONS,
 } from "@/lib/mobilityOptions";
 import type { SitterProfileData } from "@/hooks/useSitterProfile";
+import { isRadiusDeclared, RADIUS_CHOICE_OPTIONS } from "@/lib/searchRadius";
 
 const PERIOD_OPTIONS = ["Toute l'année", "Été", "Hiver", "Vacances scolaires", "Week-ends"];
 const ENVIRONMENT_OPTIONS = ["Ville", "Campagne", "Montagne", "Lac", "Vignes", "Forêt"];
@@ -21,6 +21,13 @@ interface Props {
 }
 
 const StepMobility = ({ data, onChange }: Props) => {
+  // 30 n'est jamais proposé : c'est le marqueur de silence (ancien défaut de
+  // colonne). Une déclaration hors liste (ancienne saisie) reste visible.
+  const radiusChoices = new Set<number>(RADIUS_CHOICE_OPTIONS);
+  if (isRadiusDeclared(data.geographic_radius)) radiusChoices.add(data.geographic_radius);
+  const radiusOptions = [...radiusChoices]
+    .sort((a, b) => a - b)
+    .map(km => ({ value: String(km), label: `${km} km` }));
   return (
     <div className="space-y-6">
       {/* Vehicle type (choix unique, persisté en colonne vehicle_type) */}
@@ -48,17 +55,14 @@ const StepMobility = ({ data, onChange }: Props) => {
       </div>
 
       <div className="space-y-3">
-        <div className="flex items-center justify-between">
-          <Label>Rayon géographique</Label>
-          <span className="text-sm font-semibold text-primary">{data.geographic_radius} km</span>
-        </div>
-        <Slider
-          value={[data.geographic_radius]}
-          onValueChange={v => onChange({ geographic_radius: v[0] })}
-          min={10} max={100} step={5}
-          className="py-2"
+        <Label id="lbl-radius">Jusqu'à quelle distance acceptez-vous de vous déplacer pour une garde ?</Label>
+        <RadioChipGroup
+          ariaLabelledBy="lbl-radius"
+          options={radiusOptions}
+          value={isRadiusDeclared(data.geographic_radius) ? String(data.geographic_radius) : ""}
+          onChange={v => onChange({ geographic_radius: v === "" ? null : Number(v) })}
         />
-        <HintBubble>Plus votre rayon est large, plus vous verrez d'annonces. Mais la proximité est un atout, les propriétaires préfèrent les gardiens proches.</HintBubble>
+        <HintBubble>Sans réponse, nous retenons 100 km autour de chez vous. Choisissez la distance qui vous convient vraiment : elle détermine les annonces que vous recevez.</HintBubble>
       </div>
 
       {/* Durée minimum souhaitée (choix unique) */}

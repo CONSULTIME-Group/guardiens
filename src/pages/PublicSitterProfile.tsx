@@ -75,6 +75,7 @@ import CommunityPulseCard from "@/components/profile/CommunityPulseCard";
 import { useCommunityPulse } from "@/hooks/useCommunityPulse";
 import { avatarImageUrl, storageImageUrl } from "@/lib/storageImage";
 import { petSpeciesLabel } from "@/lib/petLabels";
+import { isRadiusDeclared } from "@/lib/searchRadius";
 
 const capitalize = (name: string) =>
   name ? name.charAt(0).toUpperCase() + name.slice(1).toLowerCase() : "";
@@ -958,7 +959,7 @@ export default function PublicSitterProfile() {
   // Cohérence : la valeur DB est désormais maintenue par un trigger sur la table
   // reviews (recalc_completed_sits_count). Plus besoin de Math.max côté client.
   const completedSits = profile?.completed_sits_count ?? 0;
-  const radius = rawRadius && rawRadius > 0 ? rawRadius : null;
+  const radius = isRadiusDeclared(rawRadius) ? rawRadius : null; // 30 = silence, jamais affiché
   const isOwn = auth?.user?.id === id;
   // Variante connectée gatée sur la présence réelle du profil, pour ne jamais
   // remplacer le teaser visiteur par des actions inopérantes.

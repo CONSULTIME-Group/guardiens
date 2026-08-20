@@ -19,7 +19,13 @@
  * les annonces publiées, recalculés à chaque appel).
  */
 
+import {
+  EFFECTIVE_DEFAULT_RADIUS_KM,
+  LEGACY_UNANSWERED_RADIUS_KM,
+} from "../search-radius.ts";
+
 export type MissingOpportunityKey =
+  | "radius"
   | "vehicle"
   | "species"
   | "work"
@@ -50,6 +56,7 @@ export interface MissingOpportunity {
 
 /** Ordre fixe de départage à compteur égal. */
 const PRIORITY: readonly MissingOpportunityKey[] = [
+  "radius",
   "vehicle",
   "species",
   "work",
@@ -71,6 +78,12 @@ interface KeyWording {
 }
 
 const WORDING: Record<MissingOpportunityKey, KeyWording> = {
+  radius: {
+    what: `entre ${LEGACY_UNANSWERED_RADIUS_KM} et ${EFFECTIVE_DEFAULT_RADIUS_KM} km de chez vous`,
+    verbPlural: "se trouvent",
+    verbSingular: "se trouve",
+    section: "mobility",
+  },
   vehicle: {
     what: "un gardien véhiculé",
     verbPlural: "demandent",
@@ -132,8 +145,8 @@ export const missingOpportunitySentence = (
 /**
  * Choisit les manques à afficher : uniquement les questions sans réponse qui
  * concernent au moins une annonce en ligne, triées par nombre d'annonces
- * concernées (départage : ordre fixe véhicule > espèces > présence > type >
- * rythme > langues), au maximum `max` (deux par défaut).
+ * concernées (départage : ordre fixe rayon > véhicule > espèces > présence >
+ * type > rythme > langues), au maximum `max` (deux par défaut).
  */
 export const pickMissingOpportunities = (
   stats: MissingOpportunitiesStats | null | undefined,

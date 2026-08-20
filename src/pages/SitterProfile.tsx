@@ -26,6 +26,7 @@ import FillSavoirFaireBanner from "@/components/profile/FillSavoirFaireBanner";
 import ProfileProgressStrip from "@/components/profile/ProfileProgressStrip";
 import TrustProfile from "@/components/profile/TrustProfile";
 import SitterAffinityBanner from "@/components/matching/SitterAffinityBanner";
+import { isRadiusDeclared } from "@/lib/searchRadius";
 
 const SECTIONS_BASE: Array<{ id: string; num: number; optional?: boolean }> = [
   { id: "identity", num: 1 },
@@ -223,8 +224,8 @@ const SitterProfile = () => {
 
     // Snapshot AVANT save : la section Mobilité était-elle déjà complète ?
     // (si oui, on ne re-toaste pas inutilement à chaque clic)
-    const radiusBefore = data.geographic_radius ?? 0;
-    const mobilityWasComplete = radiusBefore > 0;
+    // 30 est le marqueur de silence (ancien défaut de colonne) : pas une réponse.
+    const mobilityWasComplete = isRadiusDeclared(data.geographic_radius);
 
     const success = await saveStep(localData);
     if (!success) return;
@@ -247,7 +248,7 @@ const SitterProfile = () => {
     // déclenché uniquement si la section devient complète suite à ce save.
     if (activeSection === "mobility") {
       const merged = { ...data, ...localData } as SitterProfileData;
-      const mobilityNowComplete = (merged.geographic_radius ?? 0) > 0;
+      const mobilityNowComplete = isRadiusDeclared(merged.geographic_radius);
       if (mobilityNowComplete && !mobilityWasComplete) {
         toast({
           title: tp("mobility_toast_title"),
@@ -304,7 +305,7 @@ const SitterProfile = () => {
     { section: "sitter", kind: "essential", label: tp("criteria.lifestyle"), points: 10,
       ok: (mergedData.lifestyle?.length ?? 0) > 0, hint: tp("hints.tab_sitter") },
     { section: "mobility", kind: "essential", label: tp("criteria.radius"), points: 15,
-      ok: (mergedData.geographic_radius ?? 0) > 0, hint: tp("hints.tab_mobility") },
+      ok: isRadiusDeclared(mergedData.geographic_radius), hint: tp("hints.tab_mobility") },
     { section: "identity", kind: "bonus", label: tp("criteria.bio_50"), points: 10,
       ok: (mergedData.bio?.length ?? 0) >= 50, hint: tp("hints.chars_50", { count: mergedData.bio?.length ?? 0 }) },
     { section: "sitter", kind: "bonus", label: tp("criteria.affinity"), points: 10,
