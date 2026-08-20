@@ -4,7 +4,6 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Switch } from "@/components/ui/switch";
 import { Plus, X, Camera, ImageIcon } from "lucide-react";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { supabase } from "@/integrations/supabase/client";
@@ -12,6 +11,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import ChipSelect from "./ChipSelect";
 import RadioChipGroup from "./RadioChipGroup";
+import YesNoChips from "./YesNoChips";
 import HintBubble from "./HintBubble";
 import type { SitterProfileData, PastAnimal } from "@/hooks/useSitterProfile";
 import { safeUUID } from "@/lib/uuid";
@@ -129,9 +129,13 @@ const StepExperience = ({ data, pastAnimals, onChange, onAddAnimal, onRemoveAnim
             <p className="text-xs text-muted-foreground mb-2">
               Certaines races demandent plus d'expérience (Malinois, Husky, Border Collie...)
             </p>
-            <div className="flex items-center justify-between py-2">
-              <Label htmlFor="demanding-breeds-switch" className="flex-1 pr-4 text-sm">J'accepte les races exigeantes</Label>
-              <Switch id="demanding-breeds-switch" checked={(data as any).demanding_breeds_ok || false} onCheckedChange={v => onChange({ demanding_breeds_ok: v } as any)} />
+            <div className="space-y-2 py-2">
+              <Label id="lbl-demanding-breeds" className="text-sm">J'accepte les races exigeantes</Label>
+              <YesNoChips
+                ariaLabelledBy="lbl-demanding-breeds"
+                value={data.demanding_breeds_ok}
+                onChange={v => onChange({ demanding_breeds_ok: v })}
+              />
             </div>
           </div>
         </>
@@ -139,9 +143,13 @@ const StepExperience = ({ data, pastAnimals, onChange, onAddAnimal, onRemoveAnim
 
       {/* Cat-specific */}
       {hasCats && (
-        <div className="flex items-center justify-between py-2">
-          <Label htmlFor="indoor-cats-switch" className="flex-1 pr-4 text-sm">J'accepte les chats d'intérieur uniquement</Label>
-          <Switch id="indoor-cats-switch" checked={(data as any).indoor_cats_only || false} onCheckedChange={v => onChange({ indoor_cats_only: v } as any)} />
+        <div className="space-y-2 py-2">
+          <Label id="lbl-indoor-cats" className="text-sm">J'accepte les chats d'intérieur uniquement</Label>
+          <YesNoChips
+            ariaLabelledBy="lbl-indoor-cats"
+            value={data.indoor_cats_only}
+            onChange={v => onChange({ indoor_cats_only: v })}
+          />
         </div>
       )}
 
@@ -161,24 +169,24 @@ const StepExperience = ({ data, pastAnimals, onChange, onAddAnimal, onRemoveAnim
         <p className="text-xs text-muted-foreground">
           Aide les propriétaires à voir si leur annonce vous convient.
         </p>
-        <div className="flex items-center justify-between py-1">
-          <Label htmlFor="travels-with-animals-switch" className="flex-1 pr-4 text-sm font-normal">
+        <div className="space-y-2 py-1">
+          <Label id="lbl-travels-animals" className="text-sm font-normal">
             Je voyage avec mes animaux pour mes gardes
           </Label>
-          <Switch
-            id="travels-with-animals-switch"
-            checked={!!(data as any).travels_with_own_animals}
-            onCheckedChange={v => onChange({ travels_with_own_animals: v } as any)}
+          <YesNoChips
+            ariaLabelledBy="lbl-travels-animals"
+            value={data.travels_with_own_animals}
+            onChange={v => onChange({ travels_with_own_animals: v })}
           />
         </div>
-        <div className="flex items-center justify-between py-1">
-          <Label htmlFor="travels-with-children-switch" className="flex-1 pr-4 text-sm font-normal">
+        <div className="space-y-2 py-1">
+          <Label id="lbl-travels-children" className="text-sm font-normal">
             Je voyage parfois avec mes enfants pour mes gardes
           </Label>
-          <Switch
-            id="travels-with-children-switch"
-            checked={!!(data as any).travels_with_children}
-            onCheckedChange={v => onChange({ travels_with_children: v } as any)}
+          <YesNoChips
+            ariaLabelledBy="lbl-travels-children"
+            value={data.travels_with_children}
+            onChange={v => onChange({ travels_with_children: v })}
           />
         </div>
       </div>

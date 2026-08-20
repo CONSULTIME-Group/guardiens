@@ -23,6 +23,7 @@ import CommunityPulseBanner from "./shared/CommunityPulseBanner";
 import DashSection from "./owner/DashSection";
 import SitterDashboardSkeleton from "./sitter/SitterDashboardSkeleton";
 import SitterMatchSection from "./sitter/SitterMatchSection";
+import SitterMissingOpportunities from "./sitter/SitterMissingOpportunities";
 import SitterStoryTiles from "./sitter/SitterStoryTiles";
 import AlmaRailWhisper from "./sitter/AlmaRailWhisper";
 import SitterOpeningCard from "./sitter/SitterOpeningCard";
@@ -375,6 +376,10 @@ const SitterDashboard = () => {
                 isLoading={nbaLoading}
               />
 
+              {/* Occasions manquées : deux manques max, chiffrés sur les
+                  annonces en ligne. Disparaît quand tout est répondu. */}
+              <SitterMissingOpportunities />
+
               {/* 4. ENTRAIDE bidimensionnelle (vague 20) */}
               <div className="">
                 <SitterEntraideSection
@@ -484,6 +489,10 @@ const SitterDashboard = () => {
                   totalPublished={totalPublished}
                 />
               </div>
+
+              {/* Occasions manquées : deux manques max, chiffrés sur les
+                  annonces en ligne. Disparaît quand tout est répondu. */}
+              <SitterMissingOpportunities />
 
               {/* ENTRAIDE : remontée juste après la rencontre (refonte rail,
                   août 2026). Les deux volets sont côte à côte sur desktop. */}

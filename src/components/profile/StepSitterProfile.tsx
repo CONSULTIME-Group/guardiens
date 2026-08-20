@@ -4,6 +4,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Switch } from "@/components/ui/switch";
 import ChipSelect from "./ChipSelect";
 import HintBubble from "./HintBubble";
+import YesNoChips from "./YesNoChips";
 import type { SitterProfileData } from "@/hooks/useSitterProfile";
 import { SITTER_TYPE_OPTIONS } from "@/lib/profileMatchingOptions";
 
@@ -48,9 +49,9 @@ const StepSitterProfile = ({ data, onChange }: Props) => {
         </div>
       )}
 
-      <div className="flex items-center justify-between py-2">
-        <Label htmlFor="sitter-smoker">Fumeur</Label>
-        <Switch id="sitter-smoker" checked={data.smoker} onCheckedChange={v => onChange({ smoker: v })} />
+      <div className="space-y-2">
+        <Label id="lbl-smoker">Fumeur</Label>
+        <YesNoChips ariaLabelledBy="lbl-smoker" value={data.smoker} onChange={v => onChange({ smoker: v })} />
       </div>
 
       <div className="space-y-2">

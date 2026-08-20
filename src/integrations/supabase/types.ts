@@ -116,6 +116,48 @@ export type Database = {
         }
         Relationships: []
       }
+      _backup_sitter_booleans_20260820: {
+        Row: {
+          demanding_breeds_ok: boolean | null
+          farm_animals_ok: boolean | null
+          has_license: boolean | null
+          has_vehicle: boolean | null
+          indoor_cats_only: boolean | null
+          prefer_visitors: boolean | null
+          smoker: boolean | null
+          strict_rules_ok: boolean | null
+          travels_with_children: boolean | null
+          travels_with_own_animals: boolean | null
+          user_id: string | null
+        }
+        Insert: {
+          demanding_breeds_ok?: boolean | null
+          farm_animals_ok?: boolean | null
+          has_license?: boolean | null
+          has_vehicle?: boolean | null
+          indoor_cats_only?: boolean | null
+          prefer_visitors?: boolean | null
+          smoker?: boolean | null
+          strict_rules_ok?: boolean | null
+          travels_with_children?: boolean | null
+          travels_with_own_animals?: boolean | null
+          user_id?: string | null
+        }
+        Update: {
+          demanding_breeds_ok?: boolean | null
+          farm_animals_ok?: boolean | null
+          has_license?: boolean | null
+          has_vehicle?: boolean | null
+          indoor_cats_only?: boolean | null
+          prefer_visitors?: boolean | null
+          smoker?: boolean | null
+          strict_rules_ok?: boolean | null
+          travels_with_children?: boolean | null
+          travels_with_own_animals?: boolean | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       account_deletion_requests: {
         Row: {
           cancelled_at: string | null
@@ -5813,7 +5855,7 @@ export type Database = {
           bonus_skills: string[] | null
           competences: string[] | null
           created_at: string
-          demanding_breeds_ok: boolean
+          demanding_breeds_ok: boolean | null
           dog_sizes_accepted: string[]
           experience_years: string | null
           farm_animals_ok: boolean | null
@@ -5824,7 +5866,7 @@ export type Database = {
           has_vehicle: boolean | null
           household_composition: string[] | null
           id: string
-          indoor_cats_only: boolean
+          indoor_cats_only: boolean | null
           interests: string[] | null
           is_available: boolean
           languages: string[] | null
@@ -5865,7 +5907,7 @@ export type Database = {
           bonus_skills?: string[] | null
           competences?: string[] | null
           created_at?: string
-          demanding_breeds_ok?: boolean
+          demanding_breeds_ok?: boolean | null
           dog_sizes_accepted?: string[]
           experience_years?: string | null
           farm_animals_ok?: boolean | null
@@ -5876,7 +5918,7 @@ export type Database = {
           has_vehicle?: boolean | null
           household_composition?: string[] | null
           id?: string
-          indoor_cats_only?: boolean
+          indoor_cats_only?: boolean | null
           interests?: string[] | null
           is_available?: boolean
           languages?: string[] | null
@@ -5917,7 +5959,7 @@ export type Database = {
           bonus_skills?: string[] | null
           competences?: string[] | null
           created_at?: string
-          demanding_breeds_ok?: boolean
+          demanding_breeds_ok?: boolean | null
           dog_sizes_accepted?: string[]
           experience_years?: string | null
           farm_animals_ok?: boolean | null
@@ -5928,7 +5970,7 @@ export type Database = {
           has_vehicle?: boolean | null
           household_composition?: string[] | null
           id?: string
-          indoor_cats_only?: boolean
+          indoor_cats_only?: boolean | null
           interests?: string[] | null
           is_available?: boolean
           languages?: string[] | null
@@ -8570,6 +8612,7 @@ export type Database = {
         Args: { _code: string; _message: string; _sit_id: string }
         Returns: undefined
       }
+      sitter_missing_opportunities: { Args: never; Returns: Json }
       slugify: { Args: { input: string }; Returns: string }
       slugify_city: { Args: { input: string }; Returns: string }
       strip_emojis: { Args: { t: string }; Returns: string }

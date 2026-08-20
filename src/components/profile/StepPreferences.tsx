@@ -1,8 +1,8 @@
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import ChipSelect from "./ChipSelect";
+import YesNoChips from "./YesNoChips";
 import type { SitterProfileData } from "@/hooks/useSitterProfile";
 import { trackEvent } from "@/lib/analytics";
 import {
@@ -92,19 +92,19 @@ const StepPreferences = ({ data, onChange }: Props) => (
     <MatchingExplainer role="sitter" variant="inline" />
 
 
-    <div className="flex items-center justify-between py-2">
-      <Label className="flex-1 pr-4">J'accepte les maisons où les visites et invités ne sont pas autorisés</Label>
-      <Switch checked={data.strict_rules_ok} onCheckedChange={v => onChange({ strict_rules_ok: v })} />
+    <div className="space-y-2">
+      <Label id="lbl-strict-rules">J'accepte les maisons où les visites et invités ne sont pas autorisés</Label>
+      <YesNoChips ariaLabelledBy="lbl-strict-rules" value={data.strict_rules_ok} onChange={v => onChange({ strict_rules_ok: v })} />
     </div>
 
-    <div className="flex items-center justify-between py-2">
-      <Label className="flex-1 pr-4">Je préfère les propriétaires qui autorisent les visites</Label>
-      <Switch checked={data.prefer_visitors} onCheckedChange={v => onChange({ prefer_visitors: v })} />
+    <div className="space-y-2">
+      <Label id="lbl-prefer-visitors">Je préfère les propriétaires qui autorisent les visites</Label>
+      <YesNoChips ariaLabelledBy="lbl-prefer-visitors" value={data.prefer_visitors} onChange={v => onChange({ prefer_visitors: v })} />
     </div>
 
-    <div className="flex items-center justify-between py-2">
-      <Label className="flex-1 pr-4">J'accepte les gardes avec beaucoup d'animaux ou animaux de ferme</Label>
-      <Switch checked={data.farm_animals_ok} onCheckedChange={v => onChange({ farm_animals_ok: v })} />
+    <div className="space-y-2">
+      <Label id="lbl-farm-animals">J'accepte les gardes avec beaucoup d'animaux ou animaux de ferme</Label>
+      <YesNoChips ariaLabelledBy="lbl-farm-animals" value={data.farm_animals_ok} onChange={v => onChange({ farm_animals_ok: v })} />
     </div>
 
     <div className="space-y-2">
