@@ -94,6 +94,25 @@ describe("sitterNextStep", () => {
     expect(step?.progressPct).toBe(60);
   });
 
+  it(">= 90 % : la touche manquante est nommée précisément", () => {
+    const step = sitterNextStep({
+      ...base,
+      profileCompletion: 97,
+      missing: [{ label: "Galerie de 3 photos ou plus", hint: "1 photo pour l'instant." }],
+    });
+    expect(step?.title).toBe("Une dernière touche à votre profil.");
+    expect(step?.phrase).toBe("Reste à faire : galerie de 3 photos ou plus (1 photo pour l'instant).");
+    expect(step?.progressPct).toBe(97);
+    expectNoDash(step);
+  });
+
+  it(">= 90 % sans détail disponible : repli honnête, une touche et pas quelques minutes", () => {
+    const step = sitterNextStep({ ...base, profileCompletion: 95 });
+    expect(step?.title).toBe("Une dernière touche à votre profil.");
+    expect(step?.phrase).toBe("Il ne reste qu'une touche pour compléter votre profil.");
+    expectNoDash(step);
+  });
+
   it("aucun tiret cadratin dans les contenus", () => {
     [
       sitterNextStep({ ...base, hasAvatar: false }),
@@ -116,5 +135,22 @@ describe("ownerNextStep", () => {
 
   it("aucune carte à 100 %", () => {
     expect(ownerNextStep({ profileCompletion: 100 })).toBeNull();
+  });
+
+  it(">= 90 % : plusieurs touches manquantes sont listées", () => {
+    const step = ownerNextStep({
+      profileCompletion: 90,
+      missing: [{ label: "Vérification d'identité" }, { label: "Une photo de galerie" }],
+    });
+    expect(step?.title).toBe("Une dernière touche à votre profil.");
+    expect(step?.phrase).toBe("Reste à faire : vérification d'identité, une photo de galerie.");
+    expect(step?.ctaTo).toBe("/owner-profile");
+    expectNoDash(step);
+  });
+
+  it("sous 90 %, l'invitation générique est conservée", () => {
+    expect(ownerNextStep({ profileCompletion: 60 })?.title).toBe(
+      "Votre profil se complète en quelques minutes.",
+    );
   });
 });

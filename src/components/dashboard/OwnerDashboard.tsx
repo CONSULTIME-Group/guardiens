@@ -26,7 +26,9 @@ import NearbySittersSection from "./owner/NearbySittersSection";
 import PetAdviceSection from "./shared/PetAdviceSection";
 import NextStepRailCard from "./shared/NextStepRailCard";
 import RailReadingsCard from "./shared/RailReadingsCard";
+import DashboardRail from "./shared/DashboardRail";
 import { useRailReadings } from "@/hooks/useRailReadings";
+import { useProfileCompletionMissing } from "@/hooks/useProfileCompletionMissing";
 import { ownerNextStep } from "@/lib/dashboardNextStep";
 
 import MobileStickyCTA from "./owner/MobileStickyCTA";
@@ -230,6 +232,10 @@ const OwnerDashboard = () => {
     stageVariant: priorityAction.variant,
   });
 
+  // Touches manquantes du barème : au-dessus de 90 %, le rail nomme
+  // précisément ce qui reste à faire (correctif phrase 97 %, août 2026).
+  const completionMissing = useProfileCompletionMissing("owner", user?.id);
+
   /* ── Analytics une fois par session ── */
   useEffect(() => {
     if (loading || !user?.id || !isNewOwner) return;
@@ -268,7 +274,10 @@ const OwnerDashboard = () => {
   const hasReadApps = recentApps.some(a => a.status !== "pending");
 
   // Bloc (b) du rail : compléter son profil, tant qu'il reste du chemin.
-  const ownerNextStepRail = ownerNextStep({ profileCompletion: accessProfileCompletion ?? 0 });
+  const ownerNextStepRail = ownerNextStep({
+    profileCompletion: accessProfileCompletion ?? 0,
+    missing: completionMissing,
+  });
 
   return (
     <div className="space-y-0 overflow-hidden lg:overflow-visible pb-[calc(10rem+env(safe-area-inset-bottom))] md:pb-32">
@@ -388,8 +397,9 @@ const OwnerDashboard = () => {
             )}
           </div>
 
-          {/* ═══ RAIL collant (droite) : a. Pouls  b. Prochain pas  c. Alma  d. À lire  + accès ═══ */}
-          <aside className="mt-[52px] lg:mt-0 space-y-[34px] lg:col-span-4 lg:sticky lg:top-20 lg:self-start lg:max-h-[calc(100vh-6rem)] lg:overflow-y-auto">
+          {/* ═══ RAIL droite : a. Pouls  b. Prochain pas  c. Alma  d. À lire  + accès.
+              Collant seulement si son contenu tient dans la fenêtre. ═══ */}
+          <DashboardRail>
             {/* a. Pouls — seul bloc sombre de la page */}
             <div className="">
               <CommunityPulseBanner userId={user?.id} />
@@ -443,7 +453,7 @@ const OwnerDashboard = () => {
             {!isNewOwner && (
               <OwnerAffinityBanner context="dashboard_owner_rail" />
             )}
-          </aside>
+          </DashboardRail>
         </div>
       </div>
 
