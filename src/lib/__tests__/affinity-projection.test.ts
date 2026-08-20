@@ -19,9 +19,12 @@ import { resolve } from "node:path";
 
 const read = (p: string) => readFileSync(resolve(process.cwd(), p), "utf8");
 
-/** Colonnes gardien réellement lues par la formule. */
+/** Colonnes gardien réellement lues par la formule (moteur unique partagé). */
 function consumedSitterColumns(): string[] {
-  const src = read("src/lib/affinityScore.ts");
+  // Depuis le lot affinité (août 2026), la formule vit dans le moteur
+  // unique partagé client/edge : `supabase/functions/_shared/affinity/score.ts`.
+  // `src/lib/affinityScore.ts` n'est plus qu'une réexportation.
+  const src = read("supabase/functions/_shared/affinity/score.ts");
   const cols = new Set<string>();
   for (const m of src.matchAll(/\bsitter\.([a-z_]+)\b/g)) cols.add(m[1]);
   return [...cols].sort();

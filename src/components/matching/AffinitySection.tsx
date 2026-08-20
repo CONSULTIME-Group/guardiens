@@ -42,7 +42,9 @@ const AffinitySection = ({
     { context, targetId, enabled: !!sitterProfile && !!ownerProfile },
   );
 
-  if (!full || !displayed) {
+  // Doctrine : on trie, on n'élimine jamais. Le badge est rendu dès qu'un
+  // résultat existe ; le CTA ne sert que si aucun calcul n'est possible.
+  if (!full) {
     if (showCtaForSitter && sitterProfile) {
       return (
         <div className="mt-3">

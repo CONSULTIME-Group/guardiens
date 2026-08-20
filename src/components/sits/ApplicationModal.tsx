@@ -419,7 +419,7 @@ const ApplicationModal = ({
           <DialogDescription>Le propriétaire verra votre profil ci-dessous en plus de votre message.</DialogDescription>
         </DialogHeader>
 
-        {affinity?.displayed && (
+        {affinity && (
           <div className="flex items-center gap-2 flex-wrap mt-1">
             <AffinityBadge
               result={affinity}

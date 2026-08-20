@@ -6,7 +6,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
-import { computeAffinityScore, type AffinityResult } from "@/lib/affinityScore";
+import { computeAffinityResultFull, type AffinityResult } from "@/lib/affinityScore";
 import { getDeptCode } from "@/lib/departments";
 import {
   rankSitterListings,
@@ -225,7 +225,7 @@ export function useSitterTopAffinitySits(): Result {
         propertyIds.length > 0
           ? supabase
               .from("pets")
-              .select("property_id, species, special_needs, photo_url")
+              .select("property_id, species, special_needs, photo_url, breed")
               .in("property_id", propertyIds)
           : Promise.resolve({ data: [] }),
         ownerIds.length > 0
@@ -240,11 +240,11 @@ export function useSitterTopAffinitySits(): Result {
 
       const petsByProperty = new Map<
         string,
-        { species: string | null; special_needs: string | null; photo_url: string | null }[]
+        { species: string | null; special_needs: string | null; photo_url: string | null; breed: string | null }[]
       >();
       for (const p of (petsRes.data ?? []) as any[]) {
         const arr = petsByProperty.get(p.property_id) ?? [];
-        arr.push({ species: p.species, special_needs: p.special_needs, photo_url: p.photo_url ?? null });
+        arr.push({ species: p.species, special_needs: p.special_needs, photo_url: p.photo_url ?? null, breed: p.breed ?? null });
         petsByProperty.set(p.property_id, arr);
       }
       const ownerPrefsById = new Map<string, any>(
@@ -277,7 +277,10 @@ export function useSitterTopAffinitySits(): Result {
 
         if (!sitter) continue;
         const ownerPrefs = ownerPrefsById.get(sit.user_id) ?? {};
-        const affinity = computeAffinityScore(
+        // Doctrine : on trie par pertinence, on n'élimine jamais. Le score
+        // est toujours calculé et joint à la carte ; l'affichage du chiffre
+        // est décidé par AffinityBadge / AffinityRing via `scoreReliable`.
+        const affinity = computeAffinityResultFull(
           {
             preferred_sitter_types: ownerPrefs.preferred_sitter_types,
             home_ambiance: ownerPrefs.home_ambiance,
@@ -291,7 +294,6 @@ export function useSitterTopAffinitySits(): Result {
           },
           sitter as any,
         );
-        if (!affinity) continue;
         scored.push({ ...card, affinity });
       }
 

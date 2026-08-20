@@ -109,16 +109,13 @@ const About = () => {
             À chaque candidature, un score d'affinité est calculé automatiquement entre le propriétaire et le gardien. Il repose sur <strong className="text-foreground">sept critères pondérés</strong> selon leur poids dans une garde réussie.
           </p>
           <ul className="list-disc pl-6 space-y-2">
-            <li><strong className="text-foreground">Animaux (22 %)</strong> : les espèces déclarées par le propriétaire recoupent l'expérience du gardien.</li>
-            <li><strong className="text-foreground">Présence pendant la garde (22 %)</strong> : le rythme du gardien correspond à ce que la maison attend (télétravail, sorties, présence continue).</li>
-            <li><strong className="text-foreground">Rythme de vie (11 %)</strong> : calme, actif, sportif, tranquille.</li>
-            <li><strong className="text-foreground">Langues (11 %)</strong> : au moins une langue en commun.</li>
-            <li><strong className="text-foreground">Intérêts (11 %)</strong> : jardin, cuisine, lecture, nature, animaux.</li>
-            <li><strong className="text-foreground">Profil idéal (11 %)</strong> : le gardien correspond au type de personne recherché par le foyer.</li>
-            <li><strong className="text-foreground">Ambiance du foyer (11 %)</strong> : le rythme et les centres d'intérêt du gardien collent à l'ambiance déclarée.</li>
+            <li><strong className="text-foreground">Animaux (poids 3 à 12 selon l'espèce)</strong> : les espèces déclarées par le propriétaire recoupent l'expérience du gardien, avec un poids croissant selon l'engagement demandé (chien, chat, cheval, animal de ferme).</li>
+            <li><strong className="text-foreground">Besoins particuliers des animaux (poids 1)</strong> : médicaments, senior ou handicap ne pèsent que si le gardien déclare la compétence associée.</li>
+            <li><strong className="text-foreground">Présence pendant la garde (poids 2)</strong> : le rythme du gardien correspond à ce que la maison attend (télétravail, sorties, présence continue).</li>
+            <li><strong className="text-foreground">Rythme de vie, langues, intérêts, profil idéal, ambiance (poids 1 chacun)</strong> : les critères d'entente au quotidien.</li>
           </ul>
           <p>
-            Des garde-fous coupent le score si les sensibilités du gardien sont incompatibles avec une espèce, si aucune espèce ne matche, ou si le gardien voyage avec des enfants ou des animaux non acceptés. Le score n'est affiché qu'au-delà d'un seuil minimum ({thresholds.minScorePercent} % actuellement) et {criteriaPhrase}.
+            On trie par pertinence, on n'élimine jamais : le score est calculé pour chaque gardien, et le chiffre s'affiche dès qu'il est fiable ({criteriaPhrase}). Seules les alertes et recommandations proactives respectent ce que le gardien a explicitement refusé (allergie, espèce refusée, enfants ou animaux non acceptés par la maison). Un seuil de mise en avant ({thresholds.minScorePercent} % actuellement) décide des recommandations d'Alma, sans jamais masquer personne.
           </p>
           <p className="text-sm text-foreground/60 italic">
             La règle est publique : elle n'est ni un classement caché, ni un tri commercial. Vous voyez le détail, vous décidez.

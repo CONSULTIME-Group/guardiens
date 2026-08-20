@@ -9,6 +9,22 @@ import { MemoryRouter } from "react-router-dom";
 import SitterFirstNBA from "@/components/dashboard/SitterFirstNBA";
 import NoNearbySitsEmptyState from "@/components/dashboard/NoNearbySitsEmptyState";
 import type { AffinitySitCard } from "@/hooks/useSitterTopAffinitySits";
+import type { AffinityResult } from "@/lib/affinityScore";
+
+const makeAffinity = (over: Partial<AffinityResult>): AffinityResult => ({
+  score: 0,
+  total: 0,
+  matched: [],
+  explanation: [],
+  notes: [],
+  displayed: true,
+  hiddenReason: null,
+  scoreReliable: true,
+  hasDeclaredIncompatibility: false,
+  distributable: true,
+  ...over,
+});
+
 
 vi.mock("@/contexts/AuthContext", () => ({
   useAuth: () => ({ user: { id: "u1" } }),
@@ -43,7 +59,7 @@ const fakeSit = (i: number, score: number): AffinitySitCard => ({
   pet_photo_url: null,
   owner_first_name: "Alice",
   pet_species: ["dog"],
-  affinity: { score, matched: ["Langue commune"], total: 5, displayed: true },
+  affinity: makeAffinity({ score, matched: ["Langue commune"], total: 5 }),
   distance_km: null,
   environments: [],
 });

@@ -228,7 +228,14 @@ const ApplicationCard = ({
   if (rating && !Number.isNaN(rating)) meta.push(`${rating} sur 5 en moyenne`);
 
   const chips = (affinity?.matched ?? []).slice(0, 2);
-  const showRing = !!affinity && !!affinityInput && typeof affinity.score === "number" && affinity.displayed !== false;
+  // L'anneau n'affiche un chiffre que s'il est fiable ; un profil avec refus
+  // déclaré ne reçoit pas d'anneau de mise en avant (il reste listé).
+  const showRing =
+    !!affinity &&
+    !!affinityInput &&
+    typeof affinity.score === "number" &&
+    affinity.scoreReliable &&
+    !affinity.hasDeclaredIncompatibility;
 
   return (
     <article
@@ -320,8 +327,12 @@ const ApplicationsStar = ({
 }) => {
   const { owner } = useViewerOwnerForAffinity();
 
-  // Choix du candidat mis en avant : meilleur score affinité si calculable,
-  // sinon le plus récent (les recentApps arrivent déjà triés desc côté hook).
+  // Choix du candidat mis en avant (règles produit, lot affinité août 2026) :
+  //  1. meilleur score d'affinité, Y COMPRIS si ce meilleur score est bas ;
+  //  2. une incompatibilité déclarée (allergie, refus animaux/enfants) n'est
+  //     jamais mise en avant, SAUF si c'est la seule candidature ;
+  //  3. la section n'est JAMAIS vide dès qu'il existe une candidature :
+  //     repli sur la plus récente (recentApps triées desc côté hook).
   let featured: AppRow = pendingApps[0];
   let featuredAffinity: AffinityResult | null = null;
   let featuredInput: AffinitySitterInput | null = null;
@@ -333,7 +344,8 @@ const ApplicationsStar = ({
       const input = sid ? sitterAffinityProfiles?.[sid] : undefined;
       if (!input) continue;
       const r = computeAffinityResultFull(owner, input);
-      if (r && r.displayed !== false && typeof r.score === "number" && r.score > bestScore) {
+      if (r.hasDeclaredIncompatibility && pendingApps.length > 1) continue;
+      if (typeof r.score === "number" && r.score > bestScore) {
         bestScore = r.score;
         featured = app;
         featuredAffinity = r;

@@ -17,7 +17,7 @@ const cache = new Map<string, Promise<Loaded>>();
 async function fetchOwnerWithPets(userId: string): Promise<Loaded> {
   const [ownerRes, propsRes] = await Promise.all([
     supabase.from("owner_profiles").select("*").eq("user_id", userId).maybeSingle(),
-    supabase.from("properties").select("pets(species, special_needs)").eq("user_id", userId),
+    supabase.from("properties").select("pets(species, special_needs, breed)").eq("user_id", userId),
   ]);
   if (!ownerRes.data) return null;
   const pets = (propsRes.data ?? []).flatMap((p: any) => p.pets ?? []);

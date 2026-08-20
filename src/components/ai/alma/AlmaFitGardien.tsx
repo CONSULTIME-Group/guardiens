@@ -94,7 +94,9 @@ export function AlmaFitGardien({ sitter, sitterProfile }: Props) {
   const affinity = useMemo(() => {
     if (!owner || !sitterProfile) return null;
     const res = computeAffinityResultFull(owner, sitterProfile);
-    if (!res || res.displayed === false) return null;
+    // Seuil de MISE EN AVANT : Alma ne recommande que les chiffres fiables
+    // sans incompatibilité déclarée. Aucune exclusion d'affichage ici.
+    if (!res || !res.scoreReliable || res.hasDeclaredIncompatibility) return null;
     return res;
   }, [owner, sitterProfile]);
 

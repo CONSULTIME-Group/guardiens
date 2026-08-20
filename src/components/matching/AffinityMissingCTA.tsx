@@ -15,7 +15,7 @@ import { useImpressionOnce } from "@/hooks/useImpressionOnce";
 interface SitterProfileLike {
   animal_types?: string[] | null;
   work_during_sit?: string | null;
-  sitter_type?: string | null;
+  sitter_type?: string | string[] | null;
 }
 
 interface OwnerProfileLike {

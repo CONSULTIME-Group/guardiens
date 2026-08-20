@@ -8,7 +8,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
-import { computeAffinityScore, type AffinityResult } from "@/lib/affinityScore";
+import { computeAffinityResultFull, type AffinityResult } from "@/lib/affinityScore";
 import { haversineDistance } from "@/utils/geo";
 
 export interface AffinitySitterCard {
@@ -43,7 +43,7 @@ export function useOwnerTopAffinitySitters(): Result {
       const [{ data: me }, { data: ownerPrefs }, { data: pets }] = await Promise.all([
         supabase.from("profiles").select("latitude, longitude, city").eq("id", userId!).maybeSingle(),
         supabase.from("owner_profiles").select("preferred_sitter_types, home_ambiance, languages, interests, life_pace, presence_expected").eq("user_id", userId!).maybeSingle(),
-        supabase.from("pets").select("species, special_needs, property_id, properties!inner(user_id)").eq("properties.user_id", userId!),
+        supabase.from("pets").select("species, special_needs, breed, property_id, properties!inner(user_id)").eq("properties.user_id", userId!),
       ]);
 
       const meLat = (me?.latitude as number | null) ?? null;
@@ -67,7 +67,7 @@ export function useOwnerTopAffinitySitters(): Result {
       const ids = pool.map((p) => p.id);
       const { data: sitterRows } = await supabase
         .from("sitter_profiles_affinity")
-        .select("user_id, experience_years, life_pace, languages, interests, work_during_sit, sensitivities, animal_types, sitter_type, travels_with_children, travels_with_own_animals")
+        .select("user_id, experience_years, life_pace, languages, interests, work_during_sit, sensitivities, animal_types, sitter_type, travels_with_children, travels_with_own_animals, special_animal_skills, farm_animals_ok")
         .in("user_id", ids);
 
       const sitterByUser = new Map<string, any>((sitterRows ?? []).map((s: any) => [s.user_id, s]));
@@ -106,15 +106,17 @@ export function useOwnerTopAffinitySitters(): Result {
         interests: (ownerPrefs as any)?.interests ?? null,
         life_pace: (ownerPrefs as any)?.life_pace ?? null,
         presence_expected: ownerPrefs?.presence_expected ?? null,
-        pets: (pets ?? []).map((p: any) => ({ species: p.species, special_needs: p.special_needs })),
+        pets: (pets ?? []).map((p: any) => ({ species: p.species, special_needs: p.special_needs, breed: p.breed ?? null })),
       };
 
       const scored: AffinitySitterCard[] = [];
       for (const p of scoped) {
         const sitter = sitterByUser.get(p.id);
         if (!sitter) continue;
-        const affinity = computeAffinityScore(ownerInput as any, sitter as any);
-        if (!affinity) continue;
+        // Doctrine : on trie par pertinence, on n'élimine jamais. Tous les
+        // gardiens du pool entrent dans le classement ; le chiffre affiché
+        // dépend de `affinity.scoreReliable`, pas d'une exclusion ici.
+        const affinity = computeAffinityResultFull(ownerInput as any, sitter as any);
         scored.push({
           id: p.id,
           first_name: p.first_name ?? null,

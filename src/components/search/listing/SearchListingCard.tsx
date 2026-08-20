@@ -333,7 +333,7 @@ const SearchListingCard = ({
                 Vérifié
               </span>
             )}
-            {affinity && affinityDisplayed && (
+            {affinity && (
               <AffinityBadge
                 result={affinity}
                 size="sm"

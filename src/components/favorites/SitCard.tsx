@@ -73,7 +73,7 @@ const SitCard = ({ sit, fallbackLabel, locale }: SitCardProps) => {
               Ouverte
             </Badge>
           )}
-          {full?.displayed && (
+          {full && (
             <AffinityBadge
               result={full}
               size="sm"
