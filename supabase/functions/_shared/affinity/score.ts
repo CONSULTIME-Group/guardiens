@@ -18,8 +18,9 @@
  * Les seuils de MISE EN AVANT (Alma, Star) vivent chez leurs consommateurs
  * sous des constantes nommées AFFINITY_HIGHLIGHT_*.
  *
- * Côté edge, ce module remplace l'ancien moteur SQL `calculate_affinity_score_pg`
- * (supprimé dans la même passe) : un même couple produit le même score dans
+ * Côté edge, ce module remplace l'ancien moteur SQL `calculate_affinity_score_pg`,
+ * DÉPRÉCIÉ mais CONSERVÉ en base (commentaire SQL posé sur la fonction, aucun
+ * DROP de fonction ni de colonne). Un même couple produit le même score dans
  * l'app et dans les emails, garanti par `affinity-single-engine.test.ts`.
  */
 
@@ -29,6 +30,11 @@ import {
   PRESENCE_NO_REQUIREMENT,
   PRESENCE_REMOTE_OK,
   PRESENCE_SHORT_ABSENCES,
+  AVAILABILITY_TO_WORK,
+  LIFESTYLE_ACTIF_TAGS,
+  LIFESTYLE_CALME_TAGS,
+  LIFESTYLE_SPORTIF_TAG,
+  LIFESTYLE_FAMILLE_TAG,
   WORK_FULL_REMOTE,
   WORK_PARTIAL_REMOTE,
   WORK_ON_SITE,
@@ -73,14 +79,20 @@ export interface AffinityOwnerInput {
   home_ambiance?: string[] | null;
   accepts_sitter_pets?: string | null;
   accepts_sitter_children?: string | null;
+  /** `properties.car_required` : voiture indispensable sur place (critère dur). */
+  car_required?: boolean | null;
 }
 
 export interface AffinitySitterInput {
   animal_types?: string[] | null;
   life_pace?: string | null;
+  /** Tags lifestyle (506 profils) : source PRINCIPALE du rythme de vie. */
+  lifestyle?: string[] | null;
   languages?: string[] | null;
   interests?: string[] | null;
   work_during_sit?: string | null;
+  /** Repli de work_during_sit quand celui-ci est vide (155 profils). */
+  availability_during?: string | null;
   sensitivities?: string[] | null;
   /** En base : TEXT singulier ("Solo", "Couple", "Famille"…). Accepte aussi un tableau. */
   sitter_type?: string | string[] | null;
@@ -90,8 +102,18 @@ export interface AffinitySitterInput {
   travels_with_own_animals?: boolean | null;
   /** Compétences spéciales (médicaments, réactifs, seniors…). */
   special_animal_skills?: string[] | null;
-  /** Acceptation explicite chevaux / animaux de ferme. */
+  /**
+   * Acceptation explicite chevaux / animaux de ferme. RÈGLE BOOLÉENS : false
+   * signifie « jamais répondu » (défaut de schéma), jamais « non ». Ce champ
+   * ne peut être qu'un bonus, JAMAIS une porte : la source de vérité pour les
+   * espèces est `animal_types` (84 gardiens déclarent Chevaux, 122 Animaux de
+   * ferme, contre 39 avec farm_animals_ok à true).
+   */
   farm_animals_ok?: boolean | null;
+  /** Véhicule déclaré (true = déclaration ; false = non renseigné, neutre). */
+  has_vehicle?: boolean | null;
+  /** Permis déclaré : compte comme mobilité pour le critère véhicule. */
+  has_license?: boolean | null;
 }
 
 /**
@@ -111,7 +133,6 @@ export interface AffinityResult {
   displayed: boolean;
   hiddenReason:
     | "disqualified"
-    | "no_animal_species_match"
     | "sitter_pets_not_accepted"
     | "sitter_children_not_accepted"
     | "too_few_criteria"
@@ -273,21 +294,32 @@ export function speciesIntersects(ownerSpecies: string[], sitterTypes: string[])
 function evalAnimals(
   owner: AffinityOwnerInput,
   sitter: AffinitySitterInput,
-): { crit: CriterionEval | null; blockedSensitivities: string[]; noCoverage: boolean } {
+): { crit: CriterionEval | null; blockedSensitivities: string[] } {
   const pets = toArray(owner.pets);
   const ownerSpecies = new Set<string>();
   for (const p of pets) {
     const canon = SPECIES_NORMALIZE[normalizeFreeText(p.species)];
     if (canon) ownerSpecies.add(canon);
   }
-  const sitterDeclares = toArray(sitter.animal_types).length > 0;
-  if (ownerSpecies.size === 0 || !sitterDeclares) {
-    return { crit: null, blockedSensitivities: [], noCoverage: false };
+  // House-sitting sans animaux : garde légitime. Le critère sort du
+  // dénominateur, ni bonus ni malus, et le couple reste évaluable.
+  if (ownerSpecies.size === 0) {
+    return { crit: null, blockedSensitivities: [] };
   }
 
+  // Les refus déclarés (sensibilités) sont remontés même si le gardien n'a
+  // pas déclaré ses espèces : un refus reste un refus.
   const { covered, blockedSensitivities } = coveredSpecies(owner, sitter);
 
-  // Pondération par espèce (rareté × contrainte).
+  // Gardien sans espèces déclarées : critère non évalué (hors dénominateur,
+  // jamais pénalisant). Les sensibilités ci-dessus restent prises en compte.
+  const sitterDeclares = toArray(sitter.animal_types).length > 0;
+  if (!sitterDeclares) {
+    return { crit: null, blockedSensitivities };
+  }
+
+  // Pondération par espèce (rareté × contrainte). Source : animal_types,
+  // jamais farm_animals_ok (booléen à false par défaut, voir règle booléens).
   let wMatch = 0;
   let wTotal = 0;
   for (const s of ownerSpecies) {
@@ -304,6 +336,7 @@ function evalAnimals(
   } else if (wMatch > 0) {
     crit.matched.push("Expérience avec une partie de vos animaux");
   } else {
+    // Moins pertinent, pas exclu : le gardien descend dans le tri.
     crit.explanation.push("Ne déclare pas d'expérience avec vos animaux");
   }
 
@@ -314,7 +347,7 @@ function evalAnimals(
     if (w > SPECIES_REMARKABLE_THRESHOLD && phrase) crit.matched.push(phrase);
   }
 
-  return { crit, blockedSensitivities, noCoverage: wMatch === 0 && wTotal > 0 };
+  return { crit, blockedSensitivities };
 }
 
 const WORK_RANK: Record<string, number> = {
@@ -325,9 +358,35 @@ const WORK_RANK: Record<string, number> = {
   [WORK_FULL_REMOTE]: 4,
 };
 
+/**
+ * Critère véhicule (dur, opérationnel) : `properties.car_required` vaut true
+ * sur 42 % des logements (39/92) et décide réellement de la faisabilité
+ * d'une garde en zone isolée. Règle des booléens : true est une déclaration,
+ * false est non renseigné (neutre). Donc : véhicule déclaré + voiture
+ * requise = points ; rien de déclaré = pas de points, aucune pénalité,
+ * aucun masquage, le gardien reste dans la liste, plus bas.
+ * `vehicle_type` est volontairement ignoré : renseigné sur 0 profil sur 1 029.
+ */
+function evalVehicle(owner: AffinityOwnerInput, sitter: AffinitySitterInput): CriterionEval | null {
+  if (owner.car_required !== true) return null;
+  const declared = sitter.has_vehicle === true || sitter.has_license === true;
+  return {
+    weight: 2,
+    points: declared ? 2 : 0,
+    matched: declared ? ["Véhiculé, comme vous le souhaitez"] : [],
+    explanation: declared
+      ? []
+      : ["N'a pas déclaré de véhicule, alors qu'une voiture est nécessaire sur place"],
+  };
+}
+
 function evalPresence(owner: AffinityOwnerInput, sitter: AffinitySitterInput): CriterionEval | null {
   const need = owner.presence_expected;
-  const work = sitter.work_during_sit;
+  // Colonne principale : work_during_sit (480 profils). Repli sur
+  // availability_during (155 profils) quand le premier est vide.
+  const work = sitter.work_during_sit
+    ?? AVAILABILITY_TO_WORK[normalizeFreeText(sitter.availability_during)]
+    ?? null;
   if (!need || !work) return null;
   if (PRESENCE_NO_REQUIREMENT.has(normalizeFreeText(need))) return null;
 
@@ -391,9 +450,27 @@ function evalIdealProfile(owner: AffinityOwnerInput, sitter: AffinitySitterInput
   };
 }
 
+/**
+ * Rythme de vie du gardien. Colonne principale : `lifestyle` (tags, 506
+ * profils) ; repli sur `life_pace` (385 profils). Union réelle : 618.
+ * Tags actifs sans tags calmes ⇒ actif ; l'inverse ⇒ calme ; mixte ou autre
+ * combinaison non vide ⇒ équilibré.
+ */
+export function resolveSitterPace(sitter: AffinitySitterInput): string | null {
+  const tags = toArray(sitter.lifestyle);
+  if (tags.length > 0) {
+    const hasActif = tags.some((t) => (LIFESTYLE_ACTIF_TAGS as readonly string[]).includes(t));
+    const hasCalme = tags.some((t) => (LIFESTYLE_CALME_TAGS as readonly string[]).includes(t));
+    if (hasActif && !hasCalme) return PACE_ACTIF;
+    if (hasCalme && !hasActif) return PACE_CALME;
+    return PACE_EQUILIBRE;
+  }
+  return sitter.life_pace ?? null;
+}
+
 function evalPace(owner: AffinityOwnerInput, sitter: AffinitySitterInput): CriterionEval | null {
   const o = owner.life_pace;
-  const s = sitter.life_pace;
+  const s = resolveSitterPace(sitter);
   if (!o || !s) return null;
   const oi = (PACE_ORDER as readonly string[]).indexOf(o);
   const si = (PACE_ORDER as readonly string[]).indexOf(s);
@@ -440,11 +517,15 @@ function evalAmbiance(owner: AffinityOwnerInput, sitter: AffinitySitterInput): C
     (HOME_AMBIANCE_SCORED_TAGS as readonly string[]).includes(t)
   );
   if (tags.length === 0) return null;
-  if (!sitter.life_pace && toArray(sitter.interests).length === 0) return null;
 
-  const sitterPace = sitter.life_pace;
+  const sitterPace = resolveSitterPace(sitter);
+  const lifestyleTags = new Set(toArray(sitter.lifestyle));
   const sitterInterests = new Set(toArray(sitter.interests));
-  const hasOutdoorSport = (OUTDOOR_SPORT_INTERESTS as readonly string[]).some((i) => sitterInterests.has(i));
+  if (!sitterPace && sitterInterests.size === 0 && lifestyleTags.size === 0) return null;
+
+  const hasOutdoorSport =
+    (OUTDOOR_SPORT_INTERESTS as readonly string[]).some((i) => sitterInterests.has(i)) ||
+    lifestyleTags.has(LIFESTYLE_SPORTIF_TAG);
   const hasRuralInterest = (RURAL_INTERESTS as readonly string[]).some((i) => sitterInterests.has(i));
 
   let points = 0;
@@ -530,10 +611,12 @@ export function computeAffinityResultFull(
   // --- 1. Évaluer tous les critères ---
   const animals = evalAnimals(owner, sitter);
   const presence = evalPresence(owner, sitter);
+  const vehicle = evalVehicle(owner, sitter);
 
   const criteria: CriterionEval[] = [
     animals.crit,
     presence,
+    vehicle,
     evalIdealProfile(owner, sitter),
     evalPace(owner, sitter),
     evalLanguages(owner, sitter),
@@ -588,18 +671,18 @@ export function computeAffinityResultFull(
   const evaluated = criteria.length;
   const score = maxPoints > 0 ? Math.round((points / maxPoints) * 100) : 0;
 
-  const hardEvaluated = animals.crit != null || presence != null;
+  const hardEvaluated = animals.crit != null || presence != null || vehicle != null;
   const scoreReliable = evaluated >= thresholds.minCommonCriteria && hardEvaluated;
 
   // --- 4. Affichage du CHIFFRE (jamais une exclusion de liste) ---
   // Le chiffre ne s'affiche que s'il est fiable, sans incompatibilité
-  // déclarée, sans zéro couverture animale et au-delà du seuil minimum.
-  // Aucun de ces cas ne retire le gardien d'une liste : on trie, on
-  // n'élimine jamais.
+  // déclarée et au-delà du seuil minimum. Une couverture animale à zéro ne
+  // masque plus le chiffre : le score bas trie le gardien plus bas,
+  // l'explication porte l'information. Aucun de ces cas ne retire le gardien
+  // d'une liste : on trie, on n'élimine jamais.
   const displayed =
     scoreReliable &&
     !hasDeclaredIncompatibility &&
-    !animals.noCoverage &&
     score >= thresholds.minScorePercent;
 
   let hiddenReason: AffinityResult["hiddenReason"] = null;
@@ -610,10 +693,6 @@ export function computeAffinityResultFull(
         : petsRefused
           ? "sitter_pets_not_accepted"
           : "sitter_children_not_accepted";
-    } else if (animals.noCoverage) {
-      // Pas un refus : absence d'expérience déclarée. Reste listé,
-      // l'explication porte l'information.
-      hiddenReason = "no_animal_species_match";
     } else if (!scoreReliable) {
       hiddenReason = hardEvaluated ? "too_few_criteria" : "no_hard_criterion";
     } else {

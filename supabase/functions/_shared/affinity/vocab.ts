@@ -114,10 +114,41 @@ export const SPECIES_NORMALIZE: Record<string, string> = {
   nac: "nac",
   horse: "horse", cheval: "horse", chevaux: "horse",
   farm_animal: "farm_animal",
+  // normalizeFreeText supprime le underscore de "farm_animal" : sans cette
+  // clé, l'espèce disparaissait silencieusement du croisement.
+  "farm animal": "farm_animal",
   "animal de ferme": "farm_animal",
   "animaux de ferme": "farm_animal",
   tous: "all", all: "all",
 };
+
+// -------------------- Disponibilité (repli de la présence) --------------------
+
+/**
+ * Repli de `work_during_sit` (480 profils remplis) : `availability_during`
+ * (155 profils, union réelle 492 au 20/08/2026). Clés normalisées via
+ * normalizeFreeText (minuscules, sans accents, signes retirés).
+ */
+export const AVAILABILITY_TO_WORK: Record<string, string> = {
+  "100 en conges": WORK_FULL_REMOTE,
+  "en teletravail": WORK_FULL_REMOTE,
+  flexible: WORK_FLEXIBLE,
+};
+
+// -------------------- Lifestyle (source principale du rythme gardien) --------------------
+
+/**
+ * `sitter_profiles.lifestyle` est un tableau de tags (506 profils remplis)
+ * quand `life_pace` (385 profils) est une échelle à 3 valeurs. Union réelle :
+ * 618 profils. Le moteur lit lifestyle en principal et replie sur life_pace
+ * quand le tableau est vide.
+ */
+export const LIFESTYLE_SPORTIF_TAG = "Sportif / grandes balades";
+export const LIFESTYLE_FAMILLE_TAG = "Famille";
+/** Tags lifestyle qui signalent un rythme actif. */
+export const LIFESTYLE_ACTIF_TAGS = [LIFESTYLE_SPORTIF_TAG, "Joueur"] as const;
+/** Tags lifestyle qui signalent un rythme calme. */
+export const LIFESTYLE_CALME_TAGS = ["Tranquille / casanier"] as const;
 
 /** Ombrelle NAC : un gardien "NAC" couvre toutes ces espèces owner. */
 export const NAC_UMBRELLA = ["rodent", "reptile", "bird", "nac"] as const;
