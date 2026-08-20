@@ -49,6 +49,7 @@ export interface AffinitySitterCard {
 interface Result {
   topSitters: AffinitySitterCard[];
   totalPool: number;
+  scoredCount: number;
   hasGeo: boolean;
   isLoading: boolean;
 }

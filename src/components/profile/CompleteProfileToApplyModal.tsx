@@ -64,6 +64,7 @@ import {
   SITTER_ANIMAL_TYPES_OPTIONS,
 } from "@/lib/profileMatchingOptions";
 import { avatarImageUrl } from "@/lib/storageImage";
+import { declarableRadius, EFFECTIVE_DEFAULT_RADIUS_KM } from "@/lib/searchRadius";
 
 /** Seuil de candidature, aligné sur useAccessLevel (source de vérité). */
 const APPLY_THRESHOLD = 60;
@@ -320,7 +321,7 @@ const CompleteProfileToApplyModal = ({
         ...snap,
         // Valeur de départ lisible pour le curseur, non enregistrée tant que
         // le gardien ne valide pas.
-        geographic_radius: snap.geographic_radius || 15,
+        geographic_radius: snap.geographic_radius || EFFECTIVE_DEFAULT_RADIUS_KM,
       });
       setLoading(false);
     })();
@@ -527,7 +528,7 @@ const CompleteProfileToApplyModal = ({
     }
     if (initialMissing.bio) payload.bio = form.bio.trim();
     if (initialMissing.radius && form.geographic_radius > 0) {
-      payload.geographic_radius = form.geographic_radius;
+      payload.geographic_radius = declarableRadius(form.geographic_radius);
     }
     if (initialMissing.competences) {
       payload.competences = form.competences;

@@ -11,6 +11,7 @@
 import { useMemo, useCallback } from "react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
+import { isRadiusDeclared } from "@/lib/searchRadius";
 
 interface UseSitDerivedArgs {
   reviews: any[];
@@ -66,7 +67,8 @@ export function useSitDerived({
       sitterAnimals.includes(s),
     );
     if (matchAnimal) badges.push("Correspond à votre expérience animaux");
-    if (sitterProfile.geographic_radius && owner?.city && userFirstName) {
+    // 30 est le marqueur de silence : il ne suffit pas à afficher « Proche de chez vous ».
+    if (isRadiusDeclared(sitterProfile.geographic_radius) && owner?.city && userFirstName) {
       badges.push("Proche de chez vous");
     }
     return badges;

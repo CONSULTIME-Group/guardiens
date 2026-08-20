@@ -18,6 +18,18 @@ describe("missingOpportunitySentence", () => {
     );
   });
 
+  it("formule le rayon : « 8 des 11 annonces en ligne se trouvent entre 30 et 100 km de chez vous, vous n'avez pas répondu. »", () => {
+    expect(missingOpportunitySentence("radius", 8, 11)).toBe(
+      "8 des 11 annonces en ligne se trouvent entre 30 et 100 km de chez vous, vous n'avez pas répondu.",
+    );
+  });
+
+  it("accorde le rayon au singulier", () => {
+    expect(missingOpportunitySentence("radius", 1, 11)).toBe(
+      "Une des 11 annonces en ligne se trouve entre 30 et 100 km de chez vous, vous n'avez pas répondu.",
+    );
+  });
+
   it("accorde au singulier quand une seule annonce est concernée", () => {
     expect(missingOpportunitySentence("species", 1, 11)).toBe(
       "Une des 11 annonces en ligne précise les animaux confiés, vous n'avez pas répondu.",
