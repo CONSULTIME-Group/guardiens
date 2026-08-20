@@ -179,7 +179,13 @@ export function useOwnerTopAffinitySitters(): Result {
 
       return {
         topSitters: scored.slice(0, 3),
-        totalPool: scoped.length,
+        // Taille réelle du vivier lu, AVANT le plafond de scoring. C'est le
+        // chiffre annoncé dans le lien "Voir les N gardiens" : il doit
+        // correspondre à ce que le propriétaire trouve derrière /search.
+        totalPool: pool.length,
+        // Nombre réellement scoré (après plafond de calcul). Diagnostic
+        // uniquement, jamais affiché.
+        scoredCount: scoped.length,
         hasGeo,
         poolExcludedByCap,
       };
@@ -190,6 +196,7 @@ export function useOwnerTopAffinitySitters(): Result {
   return {
     topSitters: data?.topSitters ?? [],
     totalPool: data?.totalPool ?? 0,
+    scoredCount: data?.scoredCount ?? 0,
     hasGeo: data?.hasGeo ?? false,
     isLoading: q.isLoading,
   };
