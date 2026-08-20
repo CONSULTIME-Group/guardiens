@@ -8,11 +8,11 @@ import { MemoryRouter } from "react-router-dom";
 import RailReadingsCard from "@/components/dashboard/shared/RailReadingsCard";
 import type { RailReadingItem } from "@/hooks/useRailReadings";
 
-const item = (label: string): RailReadingItem => ({
-  kind: "journal",
-  label,
-  context: "Le journal",
-  href: `/actualites/${label}`,
+const item = (title: string): RailReadingItem => ({
+  key: title,
+  title,
+  context: "Le journal Guardiens",
+  href: `/actualites/${title}`,
 });
 
 describe("RailReadingsCard", () => {
