@@ -12,6 +12,9 @@ export interface SitData {
   flexibility_notes?: string | null;
 
   specific_expectations: string | null;
+  /** Champs texte privés du propriétaire, lus pour le signal « animaux » à la republication. */
+  absence_reason?: string | null;
+  sitter_expectations?: string | null;
   open_to: string[] | null;
   status: string;
   user_id: string;

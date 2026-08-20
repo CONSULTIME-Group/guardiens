@@ -25,11 +25,13 @@ export interface SitAnimalMentionInput {
   title?: string | null;
   absenceReason?: string | null;
   sitterExpectations?: string | null;
+  /** Consignes détaillées de l'annonce, lues en republication depuis /sits. */
+  specificExpectations?: string | null;
 }
 
 /** Vrai si le texte publié mentionne au moins un animal. */
 export const sitTextMentionsAnimals = (input: SitAnimalMentionInput): boolean => {
-  const text = `${input.title ?? ""} ${input.absenceReason ?? ""} ${input.sitterExpectations ?? ""}`;
+  const text = `${input.title ?? ""} ${input.absenceReason ?? ""} ${input.sitterExpectations ?? ""} ${input.specificExpectations ?? ""}`;
   if (!text.trim()) return false;
   return SPECIES_RX.test(text);
 };

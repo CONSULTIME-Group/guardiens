@@ -14,6 +14,8 @@ const makeResult = (over: Partial<AffinityResult>): AffinityResult => ({
   scoreReliable: true,
   hasDeclaredIncompatibility: false,
   distributable: true,
+  confidence: 1,
+  sortScore: 0,
   ...over,
 });
 

@@ -63,6 +63,9 @@ import OwnerSitManagement from "@/components/sits/shared/OwnerSitManagement";
 import SitPhotoManager from "@/components/sits/owner/SitPhotoManager";
 import DraftChecklist from "@/components/sits/owner/DraftChecklist";
 import InviteSittersBlock from "@/components/sits/owner/InviteSittersBlock";
+import AnimalMentionDialog from "@/components/sits/owner/AnimalMentionDialog";
+import { shouldPromptAnimalMention } from "@/lib/sitAnimalMention";
+import { trackEvent } from "@/lib/analytics";
 
 import SitDetailHeader from "./SitDetailHeader";
 import SitFooterReassurance from "./SitFooterReassurance";
@@ -519,7 +522,38 @@ const OwnerSitView = ({
     }
   };
 
-  const handlePublish = async () => {
+  /**
+   * Publication d'un brouillon depuis /sits (republication incluse).
+   * Le signal « texte avec animaux, fiche sans animaux » s'applique ici
+   * aussi (décision du 20/08/2026) : le cas à l'origine du chantier est une
+   * republication. Signal uniquement, la publication n'est jamais bloquée.
+   */
+  const [animalMentionOpen, setAnimalMentionOpen] = useState(false);
+
+  const handlePublish = () => {
+    if (!isDraft || publishing) return;
+    if (
+      shouldPromptAnimalMention(
+        {
+          title: sit.title,
+          absenceReason: sit.absence_reason,
+          sitterExpectations: sit.sitter_expectations,
+          specificExpectations: sit.specific_expectations,
+        },
+        pets?.length ?? 0,
+      )
+    ) {
+      void trackEvent("sit_animal_mention_prompt_shown", {
+        source: "republish_owner_view",
+        metadata: { sit_id: sit.id },
+      });
+      setAnimalMentionOpen(true);
+      return;
+    }
+    void runPublish();
+  };
+
+  const runPublish = async () => {
     if (!isDraft || publishing) return;
     setPublishing(true);
     const { error } = await supabase
@@ -1066,6 +1100,29 @@ const OwnerSitView = ({
         onCancelled={() => {
           setSit({ ...sit, status: "cancelled" });
           setCancelOpen(false);
+        }}
+      />
+
+      {/* Signal animaux à la republication : jamais bloquant, le
+          propriétaire peut ajouter ses animaux ou publier quand même. */}
+      <AnimalMentionDialog
+        open={animalMentionOpen}
+        onOpenChange={setAnimalMentionOpen}
+        onAddPets={() => {
+          setAnimalMentionOpen(false);
+          void trackEvent("sit_animal_mention_add_pets", {
+            source: "republish_owner_view",
+            metadata: { sit_id: sit.id },
+          });
+          navigate("/owner-profile?section=animals");
+        }}
+        onPublishAnyway={() => {
+          setAnimalMentionOpen(false);
+          void trackEvent("sit_animal_mention_publish_anyway", {
+            source: "republish_owner_view",
+            metadata: { sit_id: sit.id },
+          });
+          void runPublish();
         }}
       />
     </>

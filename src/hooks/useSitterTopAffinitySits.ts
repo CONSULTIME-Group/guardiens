@@ -327,7 +327,10 @@ export function useSitterTopAffinitySits(): Result {
           return {
             ...card,
             affinity,
-            affinityScore: affinity?.score ?? null,
+            // Le classement (rankSitterListings) trie sur le score pondéré
+            // par la confiance (défaut 1b, 20/08/2026) ; la carte continue
+            // d'AFFICHER le score brut via affinity.score.
+            affinityScore: affinity?.sortScore ?? null,
             department: getDeptCode(raw?.departement_code ?? raw?.owner?.postal_code ?? null),
             coords: typeof lat === "number" && typeof lng === "number" ? { lat, lng } : null,
             // Photos du lieu de vie : couverture de l'annonce ou photos du

@@ -44,12 +44,15 @@ describe("Viviers gardiens, règle définitive : on trie, on ne filtre jamais", 
     expect(hookSrc).not.toContain(".limit(300)");
   });
 
-  it("la chaîne de départage est score, identité vérifiée, photo, distance", () => {
-    expect(hookSrc).toContain("b.affinity.score - a.affinity.score");
+  it("la chaîne de départage est score de tri, identité vérifiée, photo, distance", () => {
+    // Tri sur le score pondéré par la confiance (défaut 1b, 20/08/2026) :
+    // le score brut ne classe plus rien.
+    expect(hookSrc).toContain("b.affinity.sortScore - a.affinity.sortScore");
+    expect(hookSrc).not.toContain("b.affinity.score - a.affinity.score");
     expect(hookSrc).toContain("a.identity_verified !== b.identity_verified");
     expect(hookSrc).toContain("bPhoto - aPhoto");
     expect(hookSrc).toContain("return da - db;");
-    const scoreIdx = hookSrc.indexOf("b.affinity.score - a.affinity.score");
+    const scoreIdx = hookSrc.indexOf("b.affinity.sortScore - a.affinity.sortScore");
     const idIdx = hookSrc.indexOf("a.identity_verified !== b.identity_verified");
     const photoIdx = hookSrc.indexOf("bPhoto - aPhoto");
     const distIdx = hookSrc.lastIndexOf("return da - db;");
