@@ -23,7 +23,6 @@ import { ENV_LABEL_MAP } from "@/components/shared/EnvironmentPills";
 interface Props {
   topSits: AffinitySitCard[];
   fallbackSits: AffinitySitCard[];
-  discoverySit?: AffinitySitCard | null;
   rankingSource: ListingRankingSource;
   isLoading: boolean;
   /** Nombre réel d'annonces publiées visibles par ce gardien, pour le lien
@@ -379,7 +378,7 @@ const CompactRow = ({
   return (
     <Link
       to={`/sits/${sit.id}`}
-      className="flex items-center bg-card border border-border hover:border-primary/40 transition-colors"
+      className="flex items-center h-full bg-card border border-border hover:border-primary/40 transition-colors"
       style={{
         borderRadius: "16px",
         padding: "14px 22px",
@@ -434,67 +433,10 @@ const CompactRow = ({
 };
 
 /* -------------------------------------------------------------------------- */
-/*  Rangée "découverte" (Vague 9) — altérité, jamais de score                 */
-/* -------------------------------------------------------------------------- */
-
-const DiscoveryRow = ({ sit }: { sit: AffinitySitCard }) => {
-  const dates = formatDateRange(sit.start_date, sit.end_date);
-  const species = speciesLabel(sit.pet_species);
-  const meta = [sit.city, species, dates].filter(Boolean).join(" · ");
-
-  return (
-    <Link
-      to={`/sits/${sit.id}`}
-      className="flex items-center bg-card border border-border hover:border-primary/40 transition-colors"
-      style={{
-        borderRadius: "16px",
-        padding: "14px 22px",
-        gap: "14px",
-      }}
-    >
-      <span
-        className="rounded-full shrink-0"
-        style={{
-          backgroundColor: "hsl(var(--primary) / 0.1)",
-          color: "hsl(var(--primary))",
-          padding: "4px 10px",
-          fontSize: "12px",
-          fontWeight: 600,
-        }}
-      >
-        À découvrir
-      </span>
-      <div className="min-w-0 flex-1">
-        <p
-          className="font-heading text-foreground truncate"
-          style={{ fontSize: "15.5px", fontWeight: 600, lineHeight: 1.3 }}
-        >
-          {sit.title ?? "Une garde à découvrir"}
-        </p>
-        {meta && (
-          <p
-            className="text-muted-foreground truncate mt-[4px]"
-            style={{ fontSize: "12.5px" }}
-          >
-            {meta}
-          </p>
-        )}
-      </div>
-      <span
-        className="text-primary shrink-0"
-        style={{ fontSize: "13px", fontWeight: 700 }}
-      >
-        Voir
-      </span>
-    </Link>
-  );
-};
-
-/* -------------------------------------------------------------------------- */
 /*  Section principale                                                        */
 /* -------------------------------------------------------------------------- */
 
-const SitterMatchSection = ({ topSits, fallbackSits, discoverySit, rankingSource, isLoading, totalPublished = 0 }: Props) => {
+const SitterMatchSection = ({ topSits, fallbackSits, rankingSource, isLoading, totalPublished = 0 }: Props) => {
   const sectionRef = useRef<HTMLElement | null>(null);
   const primary = topSits[0] ?? fallbackSits[0] ?? null;
   const impressionKey = primary ? `sitter_star:${primary.id}` : null;
@@ -559,26 +501,12 @@ const SitterMatchSection = ({ topSits, fallbackSits, discoverySit, rankingSource
           {primary && <StarCard sit={primary} onCtaClick={onCtaClick} />}
 
           {rest.length > 0 && (
-            <div className="space-y-[10px] mt-[14px]">
+            // Deux cartes secondaires côte à côte sur desktop, réempilées
+            // sur écran étroit. Jamais plus de trois annonces au total.
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-[10px] mt-[14px]">
               {rest.map((s) => (
                 <CompactRow key={s.id} sit={s} showScore={!!s.affinity} />
               ))}
-            </div>
-          )}
-
-          {discoverySit && (
-            <div style={{ marginTop: "22px" }}>
-              <p
-                className="font-heading text-muted-foreground mb-[8px]"
-                style={{
-                  fontSize: "13.5px",
-                  fontStyle: "italic",
-                  lineHeight: 1.4,
-                }}
-              >
-                Et pour ce que vous n'avez pas encore vécu :
-              </p>
-              <DiscoveryRow sit={discoverySit} />
             </div>
           )}
 

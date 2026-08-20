@@ -195,17 +195,3 @@ export const resolveBreedFiche = <T extends BreedFicheCandidate>(
   // 3. Préfixe conservateur à frontière de mot.
   return withMerge(prefixMatch(key));
 };
-
-/**
- * slugifyBreedName — « Berger Australien » → « berger-australien ».
- * Source unique du slug de fiche race (utilisée pour construire les
- * URLs /races/{espèce}-{slug}). Même règle partout : minuscules sans
- * accents, tout caractère non alphanumérique devient un tiret simple.
- */
-export const slugifyBreedName = (raw: string): string =>
-  raw
-    .normalize("NFD")
-    .replace(/[̀-ͯ]/g, "")
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/(^-|-$)/g, "");

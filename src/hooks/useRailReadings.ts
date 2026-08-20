@@ -14,11 +14,8 @@
  */
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import {
-  resolveBreedFiche,
-  slugifyBreedName,
-  type BreedFicheCandidate,
-} from "@/lib/breedFicheMatch";
+import { resolveBreedFiche, type BreedFicheCandidate } from "@/lib/breedFicheMatch";
+import { slugify } from "@/lib/normalize";
 import { OWNER_STAGE_ARTICLES } from "@/lib/ownerArticleStages";
 import type { OwnerPriorityAction } from "@/hooks/useOwnerPriorityAction";
 
@@ -99,7 +96,7 @@ export const useRailReadings = ({
                 key: "breed",
                 title: `La fiche ${match.breed}`,
                 context: animal.name ? `Pour ${animal.name}` : "Depuis votre profil",
-                href: `/races/${match.species}-${slugifyBreedName(match.breed)}`,
+                href: `/races/${match.species}-${slugify(match.breed)}`,
               });
               break;
             }
