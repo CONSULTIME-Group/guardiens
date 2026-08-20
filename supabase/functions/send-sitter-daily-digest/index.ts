@@ -307,7 +307,7 @@ Deno.serve(async (req) => {
         // 2f. Score par annonce via le moteur unique partagé, mode
         // distribution : seuls les refus explicitement déclarés par le
         // gardien excluent (distributable=false), jamais un score bas.
-        const scoredRows: Array<{ row: QueueRow; score: number; sit: SitRow }> = []
+        const scoredRows: Array<{ row: QueueRow; score: number; sortScore: number; sit: SitRow }> = []
         for (const q of rows) {
           let sit = sitCache.get(q.sit_id) as SitRow | undefined
           if (!sit) {

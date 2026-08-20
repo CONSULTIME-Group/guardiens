@@ -92,12 +92,12 @@ describe("computeAffinityScore", () => {
   it("3 critères DONT un critère dur (présence) tous matchés = 100 %, affiché", () => {
     const full = computeAffinityResultFull(
       {
-        presence_expected: "100% sur place",
+        presence_expected: "Absences courtes OK",
         languages: ["Français"],
         interests: ["Randonnée", "Vélo"],
       },
       {
-        work_during_sit: "on_site",
+        work_during_sit: "full_remote",
         languages: ["Français"],
         interests: ["Randonnée", "Vélo"],
       },
@@ -179,7 +179,7 @@ describe("computeAffinityScore", () => {
     expect(d.distributable).toBe(false);
   });
 
-  it("présence 100% sur place est compatible avec n'importe quel rythme de travail", () => {
+  it("« 100% sur place » sort du dénominateur : compatible par construction, rien à noter (défaut 1a)", () => {
     const r = computeAffinityResultFull(
       {
         presence_expected: "100% sur place",
@@ -193,9 +193,10 @@ describe("computeAffinityScore", () => {
       },
     );
     expect(r).not.toBeNull();
-    // présence(2) + pace(1) + langue(1) = 4 / 9 ≈ 44%
-    expect(r!.score).toBeGreaterThanOrEqual(40);
-    expect(r!.matched).toContain("Présence compatible");
+    // pace(1) + langue(1) : la présence n'entre plus en compte.
+    expect(r!.total).toBe(2);
+    expect(r!.score).toBe(100);
+    expect(r!.matched).not.toContain("Présence compatible");
   });
 
 
@@ -512,8 +513,12 @@ describe("règles lot affinité 20/08/2026", () => {
     const withoutCar = computeAffinityResultFull(ownerBase, {
       has_vehicle: false, has_license: false, lifestyle: ["Tranquille / casanier"], languages: ["Français"],
     });
-    // Pas de points véhicule, mais le gardien reste listé avec un score honnête.
-    expect(withoutCar.score).toBeLessThan(withCar.score);
+    // Silence neutre (défaut 3, 20/08/2026) : le critère sort du
+    // dénominateur, le score BRUT n'est pas pénalisé. C'est le score de
+    // tri, pondéré par la confiance, qui fait descendre le profil muet,
+    // et l'explication reste affichée (c'est elle qui porte l'info).
+    expect(withoutCar.score).toBe(withCar.score);
+    expect(withoutCar.sortScore).toBeLessThan(withCar.sortScore);
     expect(withoutCar.explanation.some((e) => /véhicule/i.test(e))).toBe(true);
     // Le permis seul compte comme mobilité déclarée.
     const licenseOnly = computeAffinityResultFull(ownerBase, {
