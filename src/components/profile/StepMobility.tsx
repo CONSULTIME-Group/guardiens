@@ -1,9 +1,9 @@
 import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
 import { Slider } from "@/components/ui/slider";
 import HintBubble from "./HintBubble";
 import ChipSelect from "./ChipSelect";
 import RadioChipGroup from "./RadioChipGroup";
+import YesNoChips from "./YesNoChips";
 import {
   VEHICLE_OPTIONS,
   MIN_STAY_DURATION_OPTIONS,
@@ -37,14 +37,14 @@ const StepMobility = ({ data, onChange }: Props) => {
         </p>
       </div>
 
-      <div className="flex items-center justify-between py-2">
-        <Label>Permis de conduire</Label>
-        <Switch checked={data.has_license} onCheckedChange={v => onChange({ has_license: v })} />
+      <div className="space-y-2">
+        <Label id="lbl-has-license">Permis de conduire</Label>
+        <YesNoChips ariaLabelledBy="lbl-has-license" value={data.has_license} onChange={v => onChange({ has_license: v })} />
       </div>
 
-      <div className="flex items-center justify-between py-2">
-        <Label>Véhicule personnel</Label>
-        <Switch checked={data.has_vehicle} onCheckedChange={v => onChange({ has_vehicle: v })} />
+      <div className="space-y-2">
+        <Label id="lbl-has-vehicle">Véhicule personnel</Label>
+        <YesNoChips ariaLabelledBy="lbl-has-vehicle" value={data.has_vehicle} onChange={v => onChange({ has_vehicle: v })} />
       </div>
 
       <div className="space-y-3">

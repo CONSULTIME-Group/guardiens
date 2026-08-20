@@ -1,0 +1,1 @@
+ALTER TABLE public._backup_sitter_booleans_20260820 ENABLE ROW LEVEL SECURITY;

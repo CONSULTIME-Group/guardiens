@@ -24,7 +24,9 @@ export interface SitterProfileData {
   // Step 2
   sitter_type: string;
   accompanied_by: string;
-  smoker: boolean;
+  // Dix questions oui/non en tri-état : null = jamais répondu. Un false ne doit
+  // exister que si la personne a explicitement choisi « Non » (YesNoChips).
+  smoker: boolean | null;
   availability_during: string;
   lifestyle: string[];
   // Step 3
@@ -32,8 +34,8 @@ export interface SitterProfileData {
   experience_years: string;
   references_text: string;
   // Step 4
-  has_license: boolean;
-  has_vehicle: boolean;
+  has_license: boolean | null;
+  has_vehicle: boolean | null;
   vehicle_type: string;
   geographic_radius: number;
   min_duration: number;
@@ -46,9 +48,9 @@ export interface SitterProfileData {
   preferred_periods: string[];
   preferred_environments: string[];
   // Step 5
-  strict_rules_ok: boolean;
-  prefer_visitors: boolean;
-  farm_animals_ok: boolean;
+  strict_rules_ok: boolean | null;
+  prefer_visitors: boolean | null;
+  farm_animals_ok: boolean | null;
   preferences_notes: string;
   meeting_preference: string[];
   handover_preference: string;
@@ -68,8 +70,11 @@ export interface SitterProfileData {
   // Competences
   competences: string[];
   // Accompagnants pendant les gardes
-  travels_with_children: boolean;
-  travels_with_own_animals: boolean;
+  travels_with_children: boolean | null;
+  travels_with_own_animals: boolean | null;
+  // Step 3 - Animaux
+  demanding_breeds_ok: boolean | null;
+  indoor_cats_only: boolean | null;
 }
 
 export interface PastAnimal {
@@ -83,18 +88,20 @@ export interface PastAnimal {
 const defaultData: SitterProfileData = {
   first_name: "", last_name: "", city: "", postal_code: "", country: "FR", bio: "", avatar_url: "",
   motivation: "",
-  sitter_type: "", accompanied_by: "", smoker: false, availability_during: "", lifestyle: [],
+  sitter_type: "", accompanied_by: "", smoker: null, availability_during: "", lifestyle: [],
   animal_types: [], experience_years: "", references_text: "",
-  has_license: false, has_vehicle: false, vehicle_type: "", geographic_radius: 15, min_duration: 3, max_duration: 21, availability_dates: [], is_available: false,
+  has_license: null, has_vehicle: null, vehicle_type: "", geographic_radius: 15, min_duration: 3, max_duration: 21, availability_dates: [], is_available: false,
   min_stay_duration: "flexible", preferred_frequency: "flexible", min_notice: "asap", preferred_periods: [], preferred_environments: [],
-  strict_rules_ok: false, prefer_visitors: false, farm_animals_ok: false, preferences_notes: "",
+  strict_rules_ok: null, prefer_visitors: null, farm_animals_ok: null, preferences_notes: "",
   meeting_preference: [], handover_preference: "", languages: [], bonus_skills: [], interests: [],
   life_pace: "", household_composition: [],
   special_animal_skills: [], work_during_sit: "", sensitivities: [],
   skill_categories: [], available_for_help: false,
   competences: [],
-  travels_with_children: false,
-  travels_with_own_animals: false,
+  travels_with_children: null,
+  travels_with_own_animals: null,
+  demanding_breeds_ok: null,
+  indoor_cats_only: null,
 };
 
 export function useSitterProfile() {
@@ -147,28 +154,28 @@ export function useSitterProfile() {
       motivation: s?.motivation || "",
       sitter_type: s?.sitter_type || "",
       accompanied_by: s?.accompanied_by || "",
-      smoker: s?.smoker || false,
+      smoker: s?.smoker ?? null,
       availability_during: s?.availability_during || "",
       lifestyle: s?.lifestyle || [],
       animal_types: s?.animal_types || [],
       experience_years: s?.experience_years || "",
       references_text: s?.references_text || "",
-      has_license: s?.has_license || false,
-      has_vehicle: s?.has_vehicle || false,
+      has_license: s?.has_license ?? null,
+      has_vehicle: s?.has_vehicle ?? null,
       vehicle_type: (s as any)?.vehicle_type || "",
       geographic_radius: s?.geographic_radius || 15,
       min_duration: s?.min_duration || 3,
       max_duration: s?.max_duration || 21,
       availability_dates: (s?.availability_dates as any[]) || [],
       is_available: s?.is_available || false,
-       strict_rules_ok: s?.strict_rules_ok || false,
+       strict_rules_ok: s?.strict_rules_ok ?? null,
        min_stay_duration: (s as any)?.min_stay_duration || "flexible",
        preferred_frequency: (s as any)?.preferred_frequency || "flexible",
        min_notice: (s as any)?.min_notice || "asap",
        preferred_periods: (s as any)?.preferred_periods || [],
        preferred_environments: (s as any)?.preferred_environments || [],
-      prefer_visitors: s?.prefer_visitors || false,
-      farm_animals_ok: s?.farm_animals_ok || false,
+      prefer_visitors: s?.prefer_visitors ?? null,
+      farm_animals_ok: s?.farm_animals_ok ?? null,
       preferences_notes: s?.preferences_notes || "",
       meeting_preference: s?.meeting_preference || [],
       handover_preference: s?.handover_preference || "",
@@ -183,13 +190,14 @@ export function useSitterProfile() {
       skill_categories: (p as any)?.skill_categories || [],
       available_for_help: (p as any)?.available_for_help || false,
       competences: (s as any)?.competences || [],
-      travels_with_children: (s as any)?.travels_with_children || false,
-      travels_with_own_animals: (s as any)?.travels_with_own_animals || false,
+      travels_with_children: (s as any)?.travels_with_children ?? null,
+      travels_with_own_animals: (s as any)?.travels_with_own_animals ?? null,
+      // Tri-état : null = jamais répondu, jamais un « non » implicite.
+      demanding_breeds_ok: s?.demanding_breeds_ok ?? null,
+      indoor_cats_only: s?.indoor_cats_only ?? null,
       // Step 3 — Animaux (nouveaux champs persistés)
       ...( {
         dog_sizes_accepted: (s as any)?.dog_sizes_accepted || [],
-        demanding_breeds_ok: (s as any)?.demanding_breeds_ok || false,
-        indoor_cats_only: (s as any)?.indoor_cats_only || false,
         own_animals: (s as any)?.own_animals || [],
         guard_experience: (s as any)?.guard_experience || "",
       } as any),
