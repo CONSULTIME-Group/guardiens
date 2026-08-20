@@ -116,6 +116,30 @@ export type Database = {
         }
         Relationships: []
       }
+      _backup_property_photos_20260820: {
+        Row: {
+          backed_up_at: string
+          cover_photo_url: string | null
+          photos: string[] | null
+          property_id: string
+          user_id: string | null
+        }
+        Insert: {
+          backed_up_at?: string
+          cover_photo_url?: string | null
+          photos?: string[] | null
+          property_id: string
+          user_id?: string | null
+        }
+        Update: {
+          backed_up_at?: string
+          cover_photo_url?: string | null
+          photos?: string[] | null
+          property_id?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       _backup_sitter_booleans_20260820: {
         Row: {
           demanding_breeds_ok: boolean | null
@@ -8051,6 +8075,7 @@ export type Database = {
           local_sitters_count: number
         }[]
       }
+      effective_search_radius: { Args: { declared: number }; Returns: number }
       email_cap_bypass_counts: {
         Args: { p_days?: number }
         Returns: {

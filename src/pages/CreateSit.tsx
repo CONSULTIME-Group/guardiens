@@ -71,6 +71,8 @@ import {
 import { describeSitWriteError, sitWriteErrorNeedsSignal } from "@/lib/sitDbErrors";
 import { isIdentityComplete, resolveSetupState } from "@/lib/setupState";
 import PublishExitDialog from "@/components/sits/owner/PublishExitDialog";
+import AnimalMentionDialog from "@/components/sits/owner/AnimalMentionDialog";
+import { shouldPromptAnimalMention } from "@/lib/sitAnimalMention";
 import { shouldOfferPublishExitChoice, type DraftHoldReason } from "@/lib/draftHoldReasons";
 import { reportError } from "@/lib/errorLogger";
 
@@ -324,6 +326,8 @@ const CreateSit = () => {
   const [sitPublishedAt, setSitPublishedAt] = useState<string | null>(null);
   const [exitChoiceOpen, setExitChoiceOpen] = useState(false);
   const pendingExitRef = useRef<(() => void) | null>(null);
+  const [animalMentionOpen, setAnimalMentionOpen] = useState(false);
+  const animalMentionConfirmedRef = useRef(false);
 
   // Analytics : les events d'étape sont émis plus bas, une fois le formulaire
   // réellement affiché, sinon l'étape 0 absorbe le temps de mise en route.
@@ -1204,6 +1208,27 @@ const CreateSit = () => {
     proceed?.();
   };
 
+  // Le signal animaux n'empêche rien : un clic ajoute les animaux, l'autre
+  // publie exactement comme prévu (la confirmation est mémorisée).
+  const handleAnimalMentionAddPets = () => {
+    setAnimalMentionOpen(false);
+    void trackEvent("sit_animal_mention_add_pets", {
+      source: "create_sit_page",
+      metadata: { sit_id: draftId },
+    });
+    navigate("/owner-profile?section=animals");
+  };
+
+  const handleAnimalMentionPublishAnyway = () => {
+    animalMentionConfirmedRef.current = true;
+    setAnimalMentionOpen(false);
+    void trackEvent("sit_animal_mention_publish_anyway", {
+      source: "create_sit_page",
+      metadata: { sit_id: draftId },
+    });
+    void handlePublish();
+  };
+
   // Une photo ajoutée depuis le parcours rejoint immédiatement la galerie
   // locale, sans rechargement, pour que les bloqueurs se lèvent tout de suite.
   const registerUploadedPhoto = (url: string) => {
@@ -1386,6 +1411,20 @@ const CreateSit = () => {
         description: blocking.map((b) => b.label).join(" · "),
       });
       goToBlocker(blocking[0]);
+      return;
+    }
+    // Signal « texte avec animaux, fiche sans animaux », jamais bloquant
+    // (règle : src/lib/sitAnimalMention.ts). Une garde sans animaux reste
+    // légitime, « Publier quand même » poursuit sans rien changer.
+    if (
+      !animalMentionConfirmedRef.current &&
+      shouldPromptAnimalMention({ title, absenceReason, sitterExpectations }, pets.length)
+    ) {
+      void trackEvent("sit_animal_mention_prompt_shown", {
+        source: "create_sit_page",
+        metadata: { sit_id: draftId },
+      });
+      setAnimalMentionOpen(true);
       return;
     }
     setPublishing(true);
@@ -2915,6 +2954,13 @@ const CreateSit = () => {
         publishing={publishing}
         onPublishNow={handleExitPublishNow}
         onKeepDraft={handleExitKeepDraft}
+      />
+
+      <AnimalMentionDialog
+        open={animalMentionOpen}
+        onOpenChange={setAnimalMentionOpen}
+        onAddPets={handleAnimalMentionAddPets}
+        onPublishAnyway={handleAnimalMentionPublishAnyway}
       />
 
       <AnnouncementPreviewDialog

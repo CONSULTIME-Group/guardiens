@@ -106,6 +106,9 @@ export type EventType =
   | "sit_publish_succeeded"            // Annonce publiée (sit_id, duration_ms)
   | "sit_first_publish"                // Toute première annonce du compte (minutes_since_signup, first_session)
   | "sit_publish_blocked"              // Publication refusée (blockers, step)
+  | "sit_animal_mention_prompt_shown"  // Signal animaux affiché : texte avec animaux, fiche sans animaux (sit_id)
+  | "sit_animal_mention_add_pets"      // Signal animaux : choix d'ajouter les animaux (sit_id)
+  | "sit_animal_mention_publish_anyway" // Signal animaux : publication maintenue sans animal (sit_id)
   // Hygiène ré-audit : events émis en prod, désormais typés -------------------
   | "signup_terms_checked"             // CGU cochées (metadata.step: 1 | 2)
   | "dashboard_error"                  // Erreur boundary dashboard (metadata.error_type, component?)
