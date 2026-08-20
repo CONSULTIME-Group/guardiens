@@ -533,6 +533,65 @@ describe("règles lot affinité 20/08/2026", () => {
     expect(notRequired.total).toBe(1);
   });
 
+  it("défaut 1 : un gardien totalement silencieux n'obtient plus 100 %", () => {
+    // Cas mesuré le 20/08/2026 : 362 gardiens sans AUCUNE déclaration
+    // obtenaient 100 % chez un propriétaire « 100% sur place », car la
+    // présence, compatible par construction, leur donnait 2/2.
+    const r = computeAffinityResultFull(
+      { presence_expected: "100% sur place", life_pace: "calme", languages: ["Français"] },
+      {},
+    );
+    expect(r.total).toBe(0);
+    expect(r.score).toBe(0);
+    expect(r.confidence).toBe(0);
+    expect(r.sortScore).toBe(0);
+  });
+
+  it("défaut 1b : le tri utilise le score pondéré par la confiance, pas le score brut", () => {
+    const owner = {
+      pets: [{ species: "dog" }],
+      life_pace: "calme",
+      languages: ["Français"],
+      interests: ["Randonnée"],
+    };
+    // Gardien presque vide : une seule langue commune, score brut 100.
+    const silencieux = computeAffinityResultFull(owner, { languages: ["Français"] });
+    // Gardien documenté : animaux + langue matchés, un intérêt commun,
+    // rythme opposé déclaré, score brut 70.
+    const documente = computeAffinityResultFull(owner, {
+      animal_types: ["Chiens"],
+      languages: ["Français"],
+      interests: ["Randonnée"],
+      life_pace: "actif",
+    });
+    expect(silencieux.score).toBe(100);
+    expect(documente.score).toBe(70);
+    // Le chiffre affiché reste le score brut ; le CLASSEMENT inverse l'ordre.
+    expect(documente.sortScore).toBeGreaterThan(silencieux.sortScore);
+  });
+
+  it("défaut 2 : beaucoup de tags d'ambiance ne gonflent plus le poids du critère", () => {
+    // Mesuré : un propriétaire à 7 tags faisait peser l'ambiance 7 contre 2
+    // pour les animaux. Le critère pèse désormais 1, moyenne des tags.
+    const unTag = computeAffinityResultFull(
+      { home_ambiance: ["Calme et posé"], languages: ["Français"] },
+      { life_pace: "calme", languages: ["Français"] },
+    );
+    const cinqTags = computeAffinityResultFull(
+      {
+        home_ambiance: ["Calme et posé", "Cocon casanier", "Sportif outdoor", "Campagne", "Famille animée"],
+        languages: ["Français"],
+      },
+      { life_pace: "calme", languages: ["Français"] },
+    );
+    // Même nombre de critères évalués : le dénominateur ne gonfle pas.
+    expect(cinqTags.total).toBe(unTag.total);
+    // Les points sont la moyenne par tag : (1+1+0+0+0,5)/5 = 0,5 sur 1.
+    expect(unTag.score).toBe(100);
+    expect(cinqTags.score).toBe(75);
+  });
+
+
   it("présence : repli sur availability_during quand work_during_sit est vide", () => {
     const r = computeAffinityResultFull(
       { presence_expected: "Télétravail OK" },
