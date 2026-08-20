@@ -28,6 +28,7 @@ import { parisWindowVerdict } from '../_shared/paris-hour.ts'
 import { recordDeliveryFailure } from '../_shared/delivery-failure.ts'
 import { startCronRun } from '../_shared/cron-run-log.ts'
 import { computeAffinityResultFull } from '../_shared/affinity/score.ts'
+import { pickMissingOpportunities, type MissingOpportunitiesStats } from '../_shared/missing-opportunities/index.ts'
 
 // Heure de Paris visée pour ce passage, garde saison-proof (voir paris-hour.ts).
 const TARGET_PARIS_HOUR = 8
@@ -221,9 +222,12 @@ Deno.serve(async (req) => {
           .eq('id', sitterId)
           .maybeSingle()
 
+        // Éligibilité : compte actif uniquement. La complétude de profil NE
+        // conditionne PAS la distribution (décision du 20/08/2026) : un
+        // profil incomplet ne peut pas candidater, mais il reçoit les
+        // annonces, avec un appel à compléter son profil dans l'email.
         if (!profile
             || profile.account_status !== 'active'
-            || (profile.profile_completion ?? 0) < 60
         ) {
           await markSkipped(supabase, rows.map(r => r.id), 'sitter_not_eligible', body.dry_run)
           sittersSkipped++
@@ -457,7 +461,21 @@ Deno.serve(async (req) => {
           claimGranted++
         }
 
-        // 2g. Envoi digest
+        // 2g bis. CTA selon complétude : sous 60 %, le gardien ne peut pas
+        // candidater (useAccessLevel niveau 1). Mêmes annonces, même ordre,
+        // seul l'appel à l'action change, avec le pourcentage actuel et le
+        // manque principal chiffré (MÊME fonction de calcul que le bloc
+        // dashboard gardien, une seule source).
+        const profileCompletion = profile.profile_completion ?? 0
+        const canApply = profileCompletion >= 60
+        let completionHint: string | undefined
+        if (!canApply) {
+          const { data: missing } = await supabase.rpc('sitter_missing_opportunities', { _sitter_id: sitterId })
+          const hint = pickMissingOpportunities(missing as MissingOpportunitiesStats | null, 1)[0]
+          completionHint = hint?.sentence
+        }
+
+        // 2h. Envoi digest
         const idemBase = body.catchup
           ? `sitter-digest-catchup-2026-08-05-${sitterId}`
           : body.manual
@@ -475,6 +493,9 @@ Deno.serve(async (req) => {
               sitterFirstName: profile.first_name ?? undefined,
               items,
               isCatchup: !!body.catchup,
+              canApply,
+              profileCompletion,
+              completionHint,
             },
           }),
         });

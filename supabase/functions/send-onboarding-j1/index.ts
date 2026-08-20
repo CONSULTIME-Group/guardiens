@@ -1,9 +1,22 @@
 import { createClient } from 'npm:@supabase/supabase-js@2'
+import { computeAffinityResultFull } from '../_shared/affinity/score.ts'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
+
+function haversineKm(lat1: number, lon1: number, lat2: number, lon2: number): number {
+  const R = 6371
+  const dLat = (lat2 - lat1) * Math.PI / 180
+  const dLon = (lon2 - lon1) * Math.PI / 180
+  const a = Math.sin(dLat / 2) ** 2
+    + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon / 2) ** 2
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
+}
+
+// Colonnes lues pour le moteur unique : même projection que le digest.
+const SITTER_AFFINITY_COLUMNS = 'user_id, experience_years, life_pace, lifestyle, availability_during, languages, interests, work_during_sit, meeting_preference, handover_preference, sensitivities, animal_types, sitter_type, special_animal_skills, travels_with_children, travels_with_own_animals, has_vehicle, has_license, farm_animals_ok'
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -28,7 +41,7 @@ Deno.serve(async (req) => {
   // Find users with profile_completion < 60 who signed up in the window
   const { data: eligibleProfiles, error: queryError } = await supabase
     .from('profiles')
-    .select('id, email, first_name, profile_completion, role, city')
+    .select('id, email, first_name, profile_completion, role, city, latitude, longitude')
     .lt('profile_completion', 60)
     .gte('created_at', new Date(Date.now() - maxHours * 3600_000).toISOString())
     .lte('created_at', new Date(Date.now() - minHours * 3600_000).toISOString())
