@@ -82,6 +82,69 @@ export const HOME_AMBIANCE_SCORED_TAGS = [
   AMBIANCE_FAMILLE,
 ] as const;
 
+/**
+ * RÈGLE DES DEUX CÔTÉS (voir score.ts) : ces tags n'existent que côté
+ * propriétaire, ils sont DESCRIPTIFS. Affichés sur la fiche pour que les
+ * gardiens se projettent, JAMAIS scorés, jamais présentés comme un critère
+ * de matching. Registre consommé par le test d'exhaustivité
+ * (`src/lib/__tests__/affinity-exhaustiveness.test.ts`).
+ */
+export const HOME_AMBIANCE_DISPLAY_ONLY = [
+  "Urbain",
+  "Montagne",
+  "Bord de mer",
+  "Maison de vacances",
+  "Invités fréquents",
+] as const;
+
+/**
+ * Alias orthographiques persistés en base (mesurés le 20/08/2026 : Familial,
+ * Calme, Cosy, 1 déclaration chacun). Clés normalisées via normalizeFreeText.
+ * Même mécanisme que les alias de races.
+ */
+export const HOME_AMBIANCE_ALIASES: Record<string, string> = {
+  familial: AMBIANCE_FAMILLE,
+  calme: AMBIANCE_CALME_POSE,
+  cosy: AMBIANCE_COCON,
+};
+
+/** Ramène un tag d'ambiance persisté à sa forme canonique (alias résolus). */
+export function canonicalAmbianceTag(tag: string): string {
+  return HOME_AMBIANCE_ALIASES[normalizeFreeText(tag)] ?? tag;
+}
+
+// -------------------- Profil idéal (owner) --------------------
+
+/** Satisfait via `experience_years` déclaré, hors « Débutant ». */
+export const PREF_SITTER_EXP_EXPERIENCED = "Gardien·ne expérimenté·e";
+/** Satisfait UNIQUEMENT via `experience_years` = « Débutant » explicite. */
+export const PREF_SITTER_EXP_BEGINNER = "Débutant·e motivé·e";
+/** Satisfait via `work_during_sit` full_remote / partial_remote. */
+export const PREF_SITTER_WORK_REMOTE = "Télétravailleur·euse";
+
+/**
+ * Valeur normalisée de « Débutant » dans `sitter_profiles.experience_years`.
+ * Valeurs en base au 20/08/2026 : Débutant (37), 1-3 ans (52), 3-5 ans (26),
+ * 5+ ans (48), vide (868).
+ */
+export const EXPERIENCE_BEGINNER = "debutant";
+
+/**
+ * RÈGLE DES DEUX CÔTÉS : ces préférences n'ont aucun équivalent côté gardien
+ * (`sitter_type` ne connaît que Solo, Couple, Famille, Retraité). Elles sont
+ * DESCRIPTIVES : visibles sur la fiche publique du propriétaire, jamais
+ * scorées, et on ne crée PAS de champ gardien pour les rendre bilatérales
+ * (45 déclarations en base au 20/08/2026, conservées).
+ */
+export const PREF_SITTER_DESCRIPTIVE = ["Étudiant·e", "Indépendant·e"] as const;
+
+/**
+ * « Sans préférence » (55 propriétaires) et le résidu technique
+ * « no_preference » (1) : le propriétaire n'exprime rien, le critère profil
+ * idéal sort du dénominateur ET de maxPossibleWeight. Clés normalisées.
+ */
+export const PREF_SITTER_NO_PREFERENCE = new Set(["sans preference", "no preference"]);
+
 // -------------------- Intérêts (sitter) --------------------
 
 /** Intérêts "sportif outdoor" utilisés par le matching d'ambiance. */

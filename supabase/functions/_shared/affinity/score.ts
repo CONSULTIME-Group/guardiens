@@ -24,6 +24,16 @@
  * l'app et dans les emails. La parité des ENTRÉES (16 champs gardien, 10
  * champs propriétaire, sur chaque surface) est verrouillée par
  * `src/lib/__tests__/affinity-input-parity.test.ts`.
+ *
+ * RÈGLE DES DEUX CÔTÉS (décision de Jérémie, 20/08/2026) : un critère n'est
+ * SCORABLE que s'il existe des DEUX côtés. Ce qui n'existe que d'un côté
+ * (préférences « Étudiant·e » / « Indépendant·e », tags d'environnement) est
+ * DESCRIPTIF : affiché tel quel, jamais présenté comme un critère de
+ * matching, et on n'ajoute PAS un champ au formulaire gardien pour le rendre
+ * bilatéral. La classification de chaque valeur (scorable par un chemin
+ * identifié, ou explicitement descriptive) est verrouillée par
+ * `src/lib/__tests__/affinity-exhaustiveness.test.ts` : aucune valeur
+ * persistée ne doit tomber en silence.
  */
 
 import {
@@ -69,6 +79,13 @@ import {
   CATEGORIZED_DOG_BREEDS,
   SPECIAL_NEED_SIGNALS,
   normalizeFreeText,
+  canonicalAmbianceTag,
+  PREF_SITTER_EXP_EXPERIENCED,
+  PREF_SITTER_EXP_BEGINNER,
+  PREF_SITTER_WORK_REMOTE,
+  PREF_SITTER_DESCRIPTIVE,
+  PREF_SITTER_NO_PREFERENCE,
+  EXPERIENCE_BEGINNER,
 } from "./vocab.ts";
 
 export interface AffinityOwnerInput {
@@ -98,7 +115,11 @@ export interface AffinitySitterInput {
   sensitivities?: string[] | null;
   /** En base : TEXT singulier ("Solo", "Couple", "Famille"…). Accepte aussi un tableau. */
   sitter_type?: string | string[] | null;
-  /** Conservé pour compat des appelants ; non scoré. */
+  /**
+   * Niveau d'expérience déclaré (« Débutant », « 1-3 ans », « 3-5 ans »,
+   * « 5+ ans »). Scoré par le critère profil idéal (chemins « expérimenté »
+   * et « débutant motivé », règle des deux côtés, 20/08/2026).
+   */
   experience_years?: string | null;
   travels_with_children?: boolean | null;
   travels_with_own_animals?: boolean | null;
@@ -457,25 +478,74 @@ function evalPresence(owner: AffinityOwnerInput, sitter: AffinitySitterInput): C
   };
 }
 
+/**
+ * Critère profil idéal. RÈGLE DES DEUX CÔTÉS : seules les préférences qui
+ * ont un équivalent déclarable côté gardien sont scorables. Quatre chemins :
+ *  - correspondance souple avec `sitter_type` (Couple, Famille, Retraité·e…) ;
+ *  - « Gardien·ne expérimenté·e » via `experience_years` déclaré, hors
+ *    « Débutant » (toute autre valeur déclarée qualifie) ;
+ *  - « Débutant·e motivé·e » via `experience_years` = « Débutant » EXPLICITE :
+ *    le silence n'est pas débutant, on ne récompense pas le vide ;
+ *  - « Télétravailleur·euse » via `work_during_sit` (même repli sur
+ *    `availability_during` que le critère présence).
+ * « Sans préférence » / « no_preference » : le propriétaire n'exprime rien,
+ * le critère sort du dénominateur. « Étudiant·e » et « Indépendant·e » sont
+ * descriptives (affichées sur la fiche, jamais scorées).
+ * Le critère n'entre au dénominateur que si au moins une préférence
+ * scorable dispose de son champ gardien renseigné.
+ */
 function evalIdealProfile(owner: AffinityOwnerInput, sitter: AffinitySitterInput): CriterionEval | null {
-  const preferred = toArray(owner.preferred_sitter_types);
+  const norm = (s: string) => normalizeFreeText(s);
+  const descriptive = new Set(PREF_SITTER_DESCRIPTIVE.map(norm));
+  const scorable = toArray(owner.preferred_sitter_types).filter(
+    (t) => !PREF_SITTER_NO_PREFERENCE.has(norm(t)) && !descriptive.has(norm(t)),
+  );
+  if (scorable.length === 0) return null;
+
   const actual = typeof sitter.sitter_type === "string"
     ? toArray([sitter.sitter_type])
     : toArray(sitter.sitter_type);
-  if (preferred.length === 0 || actual.length === 0) return null;
-  // Correspondance souple : « Retraité·e » matche « Retraité·e voyageur·euse ».
-  const norm = (s: string) => normalizeFreeText(s);
-  const inter = preferred.filter((t) =>
-    actual.some((a) => {
-      const na = norm(a);
-      const nt = norm(t);
-      return na === nt || na.includes(nt) || nt.includes(na);
-    }),
-  );
+  const experience = norm(sitter.experience_years);
+  const work = sitter.work_during_sit
+    ?? AVAILABILITY_TO_WORK[norm(sitter.availability_during)]
+    ?? null;
+
+  const npExperienced = norm(PREF_SITTER_EXP_EXPERIENCED);
+  const npBeginner = norm(PREF_SITTER_EXP_BEGINNER);
+  const npRemote = norm(PREF_SITTER_WORK_REMOTE);
+
+  let anyMaterial = false;
+  let satisfied = false;
+  for (const pref of scorable) {
+    const np = norm(pref);
+    if (np === npExperienced) {
+      if (!experience) continue;
+      anyMaterial = true;
+      if (experience !== EXPERIENCE_BEGINNER) satisfied = true;
+    } else if (np === npBeginner) {
+      if (!experience) continue;
+      anyMaterial = true;
+      if (experience === EXPERIENCE_BEGINNER) satisfied = true;
+    } else if (np === npRemote) {
+      if (!work) continue;
+      anyMaterial = true;
+      if (work === WORK_FULL_REMOTE || work === WORK_PARTIAL_REMOTE) satisfied = true;
+    } else {
+      // Correspondance souple : « Retraité·e » matche « Retraité·e voyageur·euse ».
+      if (actual.length === 0) continue;
+      anyMaterial = true;
+      const hit = actual.some((a) => {
+        const na = norm(a);
+        return na === np || na.includes(np) || np.includes(na);
+      });
+      if (hit) satisfied = true;
+    }
+  }
+  if (!anyMaterial) return null;
   return {
     weight: 1,
-    points: inter.length > 0 ? 1 : 0,
-    matched: inter.length > 0 ? ["Correspond à votre profil idéal"] : [],
+    points: satisfied ? 1 : 0,
+    matched: satisfied ? ["Correspond à votre profil idéal"] : [],
     explanation: [],
   };
 }
@@ -543,9 +613,15 @@ function evalInterests(owner: AffinityOwnerInput, sitter: AffinitySitterInput): 
 }
 
 function evalAmbiance(owner: AffinityOwnerInput, sitter: AffinitySitterInput): CriterionEval | null {
-  const tags = toArray(owner.home_ambiance).filter((t) =>
-    (HOME_AMBIANCE_SCORED_TAGS as readonly string[]).includes(t)
-  );
+  // Alias orthographiques résolus (Familial, Calme, Cosy) et doublons
+  // dédupliqués : « Calme » + « Calme et posé » ne comptent qu'une fois.
+  // Les tags d'environnement (HOME_AMBIANCE_DISPLAY_ONLY) sont descriptifs,
+  // règle des deux côtés : filtrés ici, jamais scorés.
+  const tags = Array.from(new Set(
+    toArray(owner.home_ambiance)
+      .map(canonicalAmbianceTag)
+      .filter((t) => (HOME_AMBIANCE_SCORED_TAGS as readonly string[]).includes(t)),
+  ));
   if (tags.length === 0) return null;
 
   const sitterPace = resolveSitterPace(sitter);
@@ -643,11 +719,18 @@ function maxPossibleWeight(owner: AffinityOwnerInput): number {
   if (need === PRESENCE_REMOTE_OK || need === PRESENCE_SHORT_ABSENCES) w += 2;
   // Véhicule : 2 si la voiture est requise sur place.
   if (owner.car_required === true) w += 2;
-  if (toArray(owner.preferred_sitter_types).length > 0) w += 1;
+  // Profil idéal : 1 uniquement s'il reste une préférence SCORABLE après
+  // retrait de « Sans préférence » et des valeurs descriptives (miroir
+  // strict de la condition propriétaire d'evalIdealProfile).
+  const descriptivePrefs = new Set(PREF_SITTER_DESCRIPTIVE.map((d) => normalizeFreeText(d)));
+  const scorablePrefs = toArray(owner.preferred_sitter_types).filter(
+    (t) => !PREF_SITTER_NO_PREFERENCE.has(normalizeFreeText(t)) && !descriptivePrefs.has(normalizeFreeText(t)),
+  );
+  if (scorablePrefs.length > 0) w += 1;
   if (owner.life_pace && (PACE_ORDER as readonly string[]).includes(owner.life_pace)) w += 1;
   if (toArray(owner.languages).length > 0) w += 1;
   if (toArray(owner.interests).length > 0) w += 1;
-  if (toArray(owner.home_ambiance).some((t) => (HOME_AMBIANCE_SCORED_TAGS as readonly string[]).includes(t))) w += 1;
+  if (toArray(owner.home_ambiance).map(canonicalAmbianceTag).some((t) => (HOME_AMBIANCE_SCORED_TAGS as readonly string[]).includes(t))) w += 1;
   // Besoins spéciaux : 1 si le texte des besoins matche un signal connu.
   const needsText = toArray(owner.pets).map((p) => p.special_needs).filter(Boolean).join(" ; ");
   if (needsText) {

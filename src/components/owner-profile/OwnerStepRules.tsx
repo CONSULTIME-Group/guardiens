@@ -8,10 +8,11 @@ import RadioChipGroup from "../profile/RadioChipGroup";
 import HintBubble from "../profile/HintBubble";
 import AiSuggestButton from "../profile/AiSuggestButton";
 import type { OwnerProfileData } from "@/hooks/useOwnerProfile";
-import { IDEAL_SITTER_PROFILE_OPTIONS, HOME_AMBIANCE_OPTIONS, PRESENCE_EXPECTED_OPTIONS } from "@/lib/profileMatchingOptions";
+import { IDEAL_SITTER_SCORED_OPTIONS, IDEAL_SITTER_DESCRIPTIVE_OPTIONS, HOME_AMBIANCE_SCORED_OPTIONS, HOME_AMBIANCE_ENVIRONMENT_OPTIONS, PRESENCE_EXPECTED_OPTIONS } from "@/lib/profileMatchingOptions";
 import MatchingExplainer from "@/components/matching/MatchingExplainer";
 
-const SITTER_TYPES = IDEAL_SITTER_PROFILE_OPTIONS;
+const SITTER_TYPES = IDEAL_SITTER_SCORED_OPTIONS;
+const SITTER_SITUATIONS = IDEAL_SITTER_DESCRIPTIVE_OPTIONS;
 
 const PRESENCE = PRESENCE_EXPECTED_OPTIONS;
 const VISITS = ["Oui librement", "Oui ponctuellement", "Non"];
@@ -31,7 +32,9 @@ const OwnerStepRules = ({ data, onChange }: Props) => {
   const meetingId = `${uid}-meeting`;
   const newsId = `${uid}-news`;
   const sitterTypesId = `${uid}-sitter-types`;
+  const sitterSituationId = `${uid}-sitter-situation`;
   const ambianceId = `${uid}-ambiance`;
+  const environmentId = `${uid}-environment`;
   const presenceId = `${uid}-presence`;
   const experienceRequiredId = `${uid}-experience-required`;
   const expectationsId = `${uid}-expectations`;
@@ -74,9 +77,21 @@ const OwnerStepRules = ({ data, onChange }: Props) => {
       </div>
 
       <div className="space-y-2">
+        <Label id={sitterSituationId}>Situation recherchée</Label>
+        <p className="text-xs text-muted-foreground">Affiché sur votre fiche pour que les gardiens se reconnaissent, sans effet sur le score d'affinité.</p>
+        <ChipSelect ariaLabelledBy={sitterSituationId} options={SITTER_SITUATIONS} selected={data.preferred_sitter_types} onChange={v => onChange({ preferred_sitter_types: v })} />
+      </div>
+
+      <div className="space-y-2">
         <Label id={ambianceId}>Ambiance du foyer</Label>
         <p className="text-xs text-muted-foreground">Contribue à votre score d'affinité avec les gardiens.</p>
-        <ChipSelect ariaLabelledBy={ambianceId} options={HOME_AMBIANCE_OPTIONS} selected={data.home_ambiance} onChange={v => onChange({ home_ambiance: v })} />
+        <ChipSelect ariaLabelledBy={ambianceId} options={HOME_AMBIANCE_SCORED_OPTIONS} selected={data.home_ambiance} onChange={v => onChange({ home_ambiance: v })} />
+      </div>
+
+      <div className="space-y-2">
+        <Label id={environmentId}>Environnement</Label>
+        <p className="text-xs text-muted-foreground">Pour que les gardiens se projettent : affiché sur votre fiche, sans effet sur le score d'affinité.</p>
+        <ChipSelect ariaLabelledBy={environmentId} options={HOME_AMBIANCE_ENVIRONMENT_OPTIONS} selected={data.home_ambiance} onChange={v => onChange({ home_ambiance: v })} />
       </div>
 
       <div className="space-y-2">

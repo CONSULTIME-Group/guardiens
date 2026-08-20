@@ -33,11 +33,13 @@ import {
   SITTER_TYPE_OPTIONS,
   WORK_DURING_SIT_OPTIONS,
   PRESENCE_EXPECTED_OPTIONS,
-  IDEAL_SITTER_PROFILE_OPTIONS,
+  IDEAL_SITTER_SCORED_OPTIONS,
+  IDEAL_SITTER_DESCRIPTIVE_OPTIONS,
   LIFE_PACE_OPTIONS,
   INTEREST_OPTIONS,
   LANGUAGE_OPTIONS,
-  HOME_AMBIANCE_OPTIONS,
+  HOME_AMBIANCE_SCORED_OPTIONS,
+  HOME_AMBIANCE_ENVIRONMENT_OPTIONS,
 } from "@/lib/profileMatchingOptions";
 
 type Role = "owner" | "sitter" | "both";
@@ -424,7 +426,7 @@ const OnboardingAffinity = () => {
                 <div className="space-y-2">
                   <Label id="lbl-preferred-sitter">Le gardien idéal pour vous</Label>
                   <ChipSelect
-                    options={IDEAL_SITTER_PROFILE_OPTIONS}
+                    options={IDEAL_SITTER_SCORED_OPTIONS}
                     selected={preferredSitterTypes}
                     onChange={setPreferredSitterTypes}
                     ariaLabelledBy="lbl-preferred-sitter"
@@ -432,12 +434,38 @@ const OnboardingAffinity = () => {
                 </div>
 
                 <div className="space-y-2">
+                  <Label id="lbl-preferred-sitter-situation">Situation recherchée</Label>
+                  <p className="text-xs text-muted-foreground">
+                    Affiché sur votre fiche pour que les gardiens se reconnaissent, sans effet sur le score d'affinité.
+                  </p>
+                  <ChipSelect
+                    options={IDEAL_SITTER_DESCRIPTIVE_OPTIONS}
+                    selected={preferredSitterTypes}
+                    onChange={setPreferredSitterTypes}
+                    ariaLabelledBy="lbl-preferred-sitter-situation"
+                  />
+                </div>
+
+                <div className="space-y-2">
                   <Label id="lbl-ambiance">Comment décririez-vous l'ambiance chez vous ?</Label>
                   <ChipSelect
-                    options={HOME_AMBIANCE_OPTIONS}
+                    options={HOME_AMBIANCE_SCORED_OPTIONS}
                     selected={homeAmbiance}
                     onChange={setHomeAmbiance}
                     ariaLabelledBy="lbl-ambiance"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label id="lbl-environment">Votre environnement</Label>
+                  <p className="text-xs text-muted-foreground">
+                    Pour que les gardiens se projettent : affiché sur votre fiche, sans effet sur le score d'affinité.
+                  </p>
+                  <ChipSelect
+                    options={HOME_AMBIANCE_ENVIRONMENT_OPTIONS}
+                    selected={homeAmbiance}
+                    onChange={setHomeAmbiance}
+                    ariaLabelledBy="lbl-environment"
                   />
                 </div>
               </section>
