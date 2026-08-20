@@ -1,13 +1,16 @@
 /**
- * Owner Pass 3 — 3 gardiens qui vous correspondent (score d'affinité).
+ * Owner Pass 3 : 3 gardiens qui vous correspondent (score d'affinité).
  *
  * Charge le profil owner, le vivier de gardiens actifs, calcule le score
  * d'affinité via le MOTEUR UNIQUE partagé (`computeAffinityResultFull`, le
  * même calcul que la distribution des emails) et retourne les 3 meilleurs.
  *
- * DOCTRINE : ON TRIE PAR PERTINENCE, ON N'ÉLIMINE JAMAIS.
- * - L'identité vérifiée et la complétude DÉPARTAGENT le classement, elles
- *   ne filtrent pas le vivier (constante TOP3_TRUST_POLICY ci-dessous).
+ * DOCTRINE DÉFINITIVE (décision de Jérémie, 20/08/2026) : tri, on filtre
+ * jamais. Aucun filtre de pool n'est admis, quel que soit son motif :
+ * identité vérifiée, complétude, ancienneté, note, abonnement se TRIENT,
+ * rien de tout cela ne FILTRE. Pas de constante d'arbitrage, pas de bascule.
+ * - L'identité vérifiée départage le classement à score égal et s'affiche
+ *   en badge sur la carte ; un gardien non vérifié reste dans la liste.
  * - Une garde sans animaux est une garde légitime : le critère espèces
  *   sort alors du dénominateur, il ne vide jamais la liste.
  * - Un gardien sans ligne sitter_profiles est scoré (tous critères non
@@ -20,22 +23,18 @@ import { computeAffinityResultFull, type AffinityResult } from "@/lib/affinitySc
 import { haversineDistance } from "@/utils/geo";
 
 /**
- * TOP3_TRUST_POLICY, politique de confiance du Top 3 propriétaire.
- *
- * "sort" (doctrine cible) : identité vérifiée et complétude trient le
- *   classement, jamais de filtre. L'écusson « Identité vérifiée » affiché
- *   sur la carte est un fait sur ce profil, pas une promesse générale.
- * "filter" (comportement historique, 56 gardiens visibles sur 991) :
- *   conservé uniquement comme retour arrière documenté. Jérémie tranche
- *   avant toute bascule définitive.
- */
-export const TOP3_TRUST_POLICY: "sort" | "filter" = "sort";
-
-/**
  * Plafond de scoring : au-delà, les gardiens les plus éloignés ne sont pas
- * scorés (coût de calcul). Le nombre écarté est tracé, jamais silencieux.
+ * scorés (coût de calcul). Tri par distance AVANT plafonnement, nombre
+ * écarté tracé, jamais silencieux.
  */
 export const POOL_SCORING_CAP = 600;
+
+/**
+ * Plafond de lecture du vivier (borne technique de requête). Si le vivier
+ * grandit jusqu'à l'atteindre, la troncature est journalisée, jamais
+ * silencieuse.
+ */
+export const POOL_READ_CAP = 2000;
 
 export interface AffinitySitterCard {
   id: string;
@@ -59,37 +58,24 @@ export function useOwnerTopAffinitySitters(): Result {
   const userId = user?.id;
 
   const q = useQuery({
-    queryKey: ["owner-top-affinity-sitters", userId, TOP3_TRUST_POLICY],
-    enabled: !!userId,
-    staleTime: 10 * 60 * 1000,
-    gcTime: 15 * 60 * 1000,
-    queryFn: async () => {
-      // 1. Owner : coordonnées + prefs matching + pets + voiture requise
-      const [{ data: me }, { data: ownerPrefs }, { data: pets }, { data: myProperties }] = await Promise.all([
-        supabase.from("profiles").select("latitude, longitude, city").eq("id", userId!).maybeSingle(),
-        supabase.from("owner_profiles").select("preferred_sitter_types, home_ambiance, languages, interests, life_pace, presence_expected").eq("user_id", userId!).maybeSingle(),
-        supabase.from("pets").select("species, special_needs, breed, property_id, properties!inner(user_id)").eq("properties.user_id", userId!),
-        supabase.from("properties").select("car_required").eq("user_id", userId!),
-      ]);
-
-      const meLat = (me?.latitude as number | null) ?? null;
-      const meLng = (me?.longitude as number | null) ?? null;
-      const hasGeo = meLat !== null && meLng !== null;
-
-      // 2. Vivier de gardiens actifs. Aucun filtre de confiance en mode
-      // "sort" : la vérification et la complétude trient, elles n'excluent
-      // pas. Le plafond de lecture est une borne technique, tracée plus bas.
-      let poolQuery = supabase
+    queryKey: ["owner-top-affinity-sitters", userId],
+...
+      // 2. Vivier de gardiens actifs, COMPLET : aucun filtre de confiance
+      // (identité vérifiée, complétude). La vue public_profiles ne contient
+      // déjà que des comptes actifs avec prénom, c'est la seule hygiène
+      // admise. Le plafond de lecture est une borne technique, tracée.
+      const { data: pool } = await supabase
         .from("public_profiles")
         .select("id, first_name, avatar_url, city, latitude_approx, longitude_approx, identity_verified, profile_completion, role")
         .in("role", ["sitter", "both"])
-        .neq("id", userId!);
-      if (TOP3_TRUST_POLICY === "filter") {
-        // Retour arrière documenté : ancien barrage (56 gardiens visibles
-        // sur 991). Ne s'active que par décision explicite de Jérémie.
-        poolQuery = poolQuery.eq("identity_verified", true).gte("profile_completion", 60);
+        .neq("id", userId!)
+        .limit(POOL_READ_CAP);
+
+      if (pool && pool.length === POOL_READ_CAP) {
+        console.warn(
+          `[top3] plafond de lecture ${POOL_READ_CAP} atteint : le vivier est tronqué avant tri, augmenter POOL_READ_CAP.`,
+        );
       }
-      const { data: pool } = await poolQuery.limit(2000);
 
       if (!pool || pool.length === 0) {
         return { topSitters: [] as AffinitySitterCard[], totalPool: 0, hasGeo, poolExcludedByCap: 0 };
