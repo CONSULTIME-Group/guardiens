@@ -258,6 +258,9 @@ function pickPhrase(c: CriterionEval): string | null {
  */
 export function speciesIntersects(ownerSpecies: string[], sitterTypes: string[]): number {
   const owners = Array.from(normalizeSpeciesList(ownerSpecies));
+  // « Tous » / « all » (toute casse) couvre toutes les espèces.
+  const rawTypes = sitterTypes.map((t) => normalizeFreeText(t));
+  if (rawTypes.some((t) => t === "tous" || t === "all")) return owners.length;
   const coverage = expandSitterCoverage(normalizeSpeciesList(sitterTypes));
   if (coverage.has("all")) return owners.length;
   return owners.reduce((acc, s) => acc + (coverage.has(s) ? 1 : 0), 0);
@@ -337,11 +340,11 @@ function evalPresence(owner: AffinityOwnerInput, sitter: AffinitySitterInput): C
 
   switch (need) {
     case PRESENCE_100:
-      // Exigence maximale : seul le télétravail complet y répond pleinement.
-      if (work === WORK_FULL_REMOTE) { points = 2; matched = "Présent sur place en continu"; }
-      else if (work === WORK_PARTIAL_REMOTE || work === WORK_FLEXIBLE) { points = 1; explanation = "Pas présent en continu (télétravail partiel)"; }
-      else if (work === WORK_OUT_DAYTIME) { points = 0.5; explanation = "Absent dans la journée"; }
-      else { points = 0; explanation = "Absent dans la journée"; }
+      // « 100% sur place » = le propriétaire est lui-même présent en
+      // continu : le rythme de travail du gardien est sans objet, la
+      // présence est compatible par construction.
+      points = 2;
+      matched = "Présence compatible";
       break;
     case PRESENCE_REMOTE_OK:
       if (rank >= WORK_RANK[WORK_PARTIAL_REMOTE]) { points = 2; matched = "Peut télétravailler chez vous"; }
@@ -371,7 +374,15 @@ function evalIdealProfile(owner: AffinityOwnerInput, sitter: AffinitySitterInput
     ? toArray([sitter.sitter_type])
     : toArray(sitter.sitter_type);
   if (preferred.length === 0 || actual.length === 0) return null;
-  const inter = preferred.filter((t) => actual.includes(t));
+  // Correspondance souple : « Retraité·e » matche « Retraité·e voyageur·euse ».
+  const norm = (s: string) => normalizeFreeText(s);
+  const inter = preferred.filter((t) =>
+    actual.some((a) => {
+      const na = norm(a);
+      const nt = norm(t);
+      return na === nt || na.includes(nt) || nt.includes(na);
+    }),
+  );
   return {
     weight: 1,
     points: inter.length > 0 ? 1 : 0,
@@ -580,17 +591,20 @@ export function computeAffinityResultFull(
   const hardEvaluated = animals.crit != null || presence != null;
   const scoreReliable = evaluated >= thresholds.minCommonCriteria && hardEvaluated;
 
-  // --- 4. Affichage (contexte, jamais une liste) ---
+  // --- 4. Affichage du CHIFFRE (jamais une exclusion de liste) ---
+  // Le chiffre ne s'affiche que s'il est fiable, sans incompatibilité
+  // déclarée, sans zéro couverture animale et au-delà du seuil minimum.
+  // Aucun de ces cas ne retire le gardien d'une liste : on trie, on
+  // n'élimine jamais.
   const displayed =
     scoreReliable &&
     !hasDeclaredIncompatibility &&
+    !animals.noCoverage &&
     score >= thresholds.minScorePercent;
 
   let hiddenReason: AffinityResult["hiddenReason"] = null;
   if (!displayed) {
-    if (!scoreReliable) {
-      hiddenReason = hardEvaluated ? "too_few_criteria" : "no_hard_criterion";
-    } else if (hasDeclaredIncompatibility) {
+    if (hasDeclaredIncompatibility) {
       hiddenReason = blockedSensitivities.length > 0
         ? "disqualified"
         : petsRefused
@@ -600,6 +614,8 @@ export function computeAffinityResultFull(
       // Pas un refus : absence d'expérience déclarée. Reste listé,
       // l'explication porte l'information.
       hiddenReason = "no_animal_species_match";
+    } else if (!scoreReliable) {
+      hiddenReason = hardEvaluated ? "too_few_criteria" : "no_hard_criterion";
     } else {
       hiddenReason = "below_threshold";
     }
