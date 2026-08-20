@@ -83,4 +83,33 @@ describe("rankSitterListings", () => {
     // 4 km (palier <= 30) devant 60 km (palier <= 100), malgre 95 % d'affinite.
     expect(result.listings.map((item) => item.id)).toEqual(["tout-pres", "loin-tres-affine"]);
   });
+
+  it("a affinite egale, le logement qui montre des photos remonte", () => {
+    const result = rankSitterListings({
+      listings: [
+        { ...listing("sans-photo", 45.8, 70) },
+        { ...listing("avec-photo", 45.95, 70), hasPlacePhoto: true },
+      ],
+      alert: null,
+      sitterCoords: { lat: 45.76, lng: 4.84 },
+      preferredEnvironments: [],
+    });
+    // Affinite egale : la photo du lieu de vie departage, meme si l'autre
+    // annonce est plus proche.
+    expect(result.listings[0].id).toBe("avec-photo");
+  });
+
+  it("une annonce sans photo du logement reste dans la liste, jamais filtree", () => {
+    const result = rankSitterListings({
+      listings: [
+        { ...listing("sans-photo", null, 70) },
+        { ...listing("avec-photo", null, 70), hasPlacePhoto: true },
+      ],
+      alert: null,
+      sitterCoords: null,
+      preferredEnvironments: [],
+    });
+    expect(result.listings.map((item) => item.id)).toContain("sans-photo");
+    expect(result.listings).toHaveLength(2);
+  });
 });

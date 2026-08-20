@@ -24,6 +24,7 @@ import { getImageDimensions } from "@/lib/imageDimensions";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { pickPlaceCover, sortForCover } from "@/lib/coverPriority";
+import { appendPropertyPhoto } from "@/lib/uploadOwnerPhoto";
 
 interface GalleryPhoto {
   id: string;
@@ -245,7 +246,9 @@ const SitPhotoManager = ({
           const compressed = await compressImageFile(file, 5, 1200);
           const dims = await getImageDimensions(compressed);
           const ext = (compressed.type.split("/")[1] || "jpg").replace("jpeg", "jpg");
-          const path = `${ownerId}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
+          // Sous-dossier owner-gallery/ : les uploads historiques en vrac à
+          // la racine du dossier membre rendaient le bucket illisible.
+          const path = `${ownerId}/owner-gallery/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
           const { error: upErr } = await supabase.storage
             .from("property-photos")
             .upload(path, compressed);
@@ -266,6 +269,10 @@ const SitPhotoManager = ({
             .select("id, photo_url, category")
             .single();
           if (insErr) throw insErr;
+          // Branche aussi properties.photos / cover_photo_url : sans cette
+          // écriture les colonnes du logement restaient vides et l'annonce
+          // ne bénéficiait pas du départage photo dans le classement.
+          await appendPropertyPhoto(ownerId, photo_url);
           inserted.push(row as GalleryPhoto);
         } catch {
           // continue with the rest
@@ -298,7 +305,9 @@ const SitPhotoManager = ({
           </h2>
           <p className="text-sm text-muted-foreground mt-1">
             La photo de couverture apparaît dans les résultats de recherche et lors d'un partage.
-            Cliquez sur une photo pour la définir comme couverture.
+            Cliquez sur une photo pour la définir comme couverture. Les photos de votre lieu de vie
+            rassurent les gardiens autant que celles de vos animaux : une annonce qui en montre
+            remonte dans leur classement.
           </p>
         </div>
         <div className="flex items-center gap-2">

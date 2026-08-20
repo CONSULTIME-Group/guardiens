@@ -20,6 +20,12 @@ export interface RankableListing {
   coords: ListingRankPoint | null;
   affinityScore: number | null;
   environments: string[];
+  /**
+   * Vrai si l'annonce montre le lieu de vie (couverture de l'annonce ou
+   * photos du logement). Signal de réassurance : il départage à affinité
+   * égale, il ne filtre jamais (symétrie de la règle 2 du bloc normatif).
+   */
+  hasPlacePhoto?: boolean;
 }
 
 interface RankListingsInput<T extends RankableListing> {
@@ -110,6 +116,12 @@ export function rankSitterListings<T extends RankableListing>({
       // palier affiché (correctif du cas 81 % vedette devant un 88 %).
       const affinityOrder = (b.listing.affinityScore ?? -1) - (a.listing.affinityScore ?? -1);
       if (affinityOrder !== 0) return affinityOrder;
+
+      // À affinité égale : une annonce qui montre le lieu de vie remonte,
+      // une annonce sans photo descend. Tri, jamais de filtre (décision du
+      // 20/08/2026, symétrie côté propriétaire de l'identité vérifiée).
+      const photoOrder = Number(b.listing.hasPlacePhoto === true) - Number(a.listing.hasPlacePhoto === true);
+      if (photoOrder !== 0) return photoOrder;
 
       const distanceOrder = compareNullableAscending(a.distanceKm, b.distanceKm);
       if (distanceOrder !== 0) return distanceOrder;

@@ -2457,7 +2457,7 @@ const CreateSit = () => {
                     <ImageIcon className="h-5 w-5 text-primary" /> Photo de couverture
                   </h2>
                   <p className="text-sm text-muted-foreground mt-1 mb-3">
-                    Ajoutez une photo ici, elle deviendra la couverture de votre annonce et rejoindra la galerie de votre profil.
+                    Ajoutez une photo ici, elle deviendra la couverture de votre annonce et rejoindra la galerie de votre profil. Les photos de votre lieu de vie rassurent les gardiens autant que celles de vos animaux : une annonce qui en montre remonte dans leur classement.
                   </p>
                   {user && (
                     <InlinePhotoUpload
