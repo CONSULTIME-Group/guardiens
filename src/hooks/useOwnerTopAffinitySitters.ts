@@ -9,8 +9,8 @@
  * jamais. Aucun filtre de pool n'est admis, quel que soit son motif :
  * identité vérifiée, complétude, ancienneté, note, abonnement se TRIENT,
  * rien de tout cela ne FILTRE. Pas de constante d'arbitrage, pas de bascule.
- * - L'identité vérifiée départage le classement à score égal et s'affiche
- *   en badge sur la carte ; un gardien non vérifié reste dans la liste.
+ * - L'écusson d'identité départage le classement à score égal et s'affiche
+ *   en badge sur la carte ; un gardien sans écusson reste dans la liste.
  * - Une garde sans animaux est une garde légitime : le critère espèces
  *   sort alors du dénominateur, il ne vide jamais la liste.
  * - Un gardien sans ligne sitter_profiles est scoré (tous critères non

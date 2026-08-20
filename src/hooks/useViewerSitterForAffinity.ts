@@ -18,8 +18,10 @@ const cache = new Map<string, Promise<Loaded>>();
 async function fetchSitter(userId: string): Promise<Loaded> {
   const { data } = await supabase
     .from("sitter_profiles")
+    // Projection complète des 16 champs d'AffinitySitterInput : la parité des
+    // entrées est verrouillée par affinity-input-parity.test.ts.
     .select(
-      "animal_types, life_pace, languages, interests, work_during_sit, sensitivities, special_animal_skills, sitter_type, experience_years, travels_with_children, travels_with_own_animals",
+      "experience_years, life_pace, lifestyle, availability_during, has_vehicle, has_license, languages, interests, work_during_sit, sensitivities, animal_types, sitter_type, travels_with_children, travels_with_own_animals, special_animal_skills, farm_animals_ok",
     )
     .eq("user_id", userId)
     .maybeSingle();

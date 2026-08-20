@@ -175,18 +175,28 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, prope
             .map(([badge_key, count]) => ({ badge_key, count }))
             .sort((a, b) => b.count - a.count)
         : [];
+      // Parité des entrées (verrouillée par affinity-input-parity.test.ts) :
+      // l'objet transmis au moteur DOIT porter les 16 champs de
+      // AffinitySitterInput. Un champ omis ici produit un score différent de
+      // celui du Top 3 ou de la recherche pour le même couple.
       const affinityInput: AffinitySitterInput | null = sp
         ? {
             animal_types: sp.animal_types,
             life_pace: sp.life_pace,
+            lifestyle: sp.lifestyle,
             languages: sp.languages,
             interests: sp.interests,
             work_during_sit: sp.work_during_sit,
+            availability_during: sp.availability_during,
             sensitivities: sp.sensitivities,
             sitter_type: sp.sitter_type,
             experience_years: sp.experience_years,
             travels_with_children: sp.travels_with_children,
             travels_with_own_animals: sp.travels_with_own_animals,
+            special_animal_skills: sp.special_animal_skills,
+            farm_animals_ok: sp.farm_animals_ok,
+            has_vehicle: sp.has_vehicle,
+            has_license: sp.has_license,
           }
         : null;
       return {
