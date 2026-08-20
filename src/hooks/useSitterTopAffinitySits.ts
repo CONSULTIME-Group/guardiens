@@ -240,13 +240,21 @@ export function useSitterTopAffinitySits(): Result {
         propertyIds.length > 0
           ? supabase
               .from("properties")
-              .select("id, car_required")
+              .select("id, car_required, cover_photo_url, photos")
               .in("id", propertyIds)
           : Promise.resolve({ data: [] }),
       ]);
 
       const carRequiredByProperty = new Map<string, boolean>(
         ((propertiesRes.data ?? []) as any[]).map((p) => [p.id, p.car_required === true]),
+      );
+      // Le logement montre des photos si la colonne photos ou la couverture
+      // du logement est renseignée (signal de départage, jamais un filtre).
+      const placePhotosByProperty = new Map<string, boolean>(
+        ((propertiesRes.data ?? []) as any[]).map((p) => [
+          p.id,
+          !!p.cover_photo_url || (Array.isArray(p.photos) && p.photos.length > 0),
+        ]),
       );
 
       const petsByProperty = new Map<
@@ -322,6 +330,10 @@ export function useSitterTopAffinitySits(): Result {
             affinityScore: affinity?.score ?? null,
             department: getDeptCode(raw?.departement_code ?? raw?.owner?.postal_code ?? null),
             coords: typeof lat === "number" && typeof lng === "number" ? { lat, lng } : null,
+            // Photos du lieu de vie : couverture de l'annonce ou photos du
+            // logement. Départage à affinité égale, jamais un filtre.
+            hasPlacePhoto:
+              !!card.cover_photo_url || placePhotosByProperty.get(sit.property_id) === true,
           };
         }),
         alert,

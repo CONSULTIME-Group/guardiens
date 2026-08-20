@@ -298,7 +298,9 @@ const SitPhotoManager = ({
           </h2>
           <p className="text-sm text-muted-foreground mt-1">
             La photo de couverture apparaît dans les résultats de recherche et lors d'un partage.
-            Cliquez sur une photo pour la définir comme couverture.
+            Cliquez sur une photo pour la définir comme couverture. Les photos de votre lieu de vie
+            rassurent les gardiens autant que celles de vos animaux : une annonce qui en montre
+            remonte dans leur classement.
           </p>
         </div>
         <div className="flex items-center gap-2">
