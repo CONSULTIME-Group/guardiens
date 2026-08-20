@@ -12,6 +12,22 @@ import { render, screen } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import SitterMatchSection from "../SitterMatchSection";
 import type { AffinitySitCard } from "@/hooks/useSitterTopAffinitySits";
+import type { AffinityResult } from "@/lib/affinityScore";
+
+const makeAffinity = (over: Partial<AffinityResult>): AffinityResult => ({
+  score: 0,
+  total: 0,
+  matched: [],
+  explanation: [],
+  notes: [],
+  displayed: true,
+  hiddenReason: null,
+  scoreReliable: true,
+  hasDeclaredIncompatibility: false,
+  distributable: true,
+  ...over,
+});
+
 
 vi.mock("@/lib/analytics", () => ({ trackEvent: vi.fn() }));
 
@@ -35,7 +51,7 @@ const scored = (id: string, score: number, over: Partial<AffinitySitCard> = {}):
   sit({
     id,
     title: `Annonce ${id}`,
-    affinity: { score, matched: ["Langue commune"], total: 5, displayed: true },
+    affinity: makeAffinity({ score, matched: ["Langue commune"], total: 5 }),
     ...over,
   });
 

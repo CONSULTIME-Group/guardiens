@@ -58,7 +58,10 @@ const OwnerToSitterAffinity = ({
 
   if (loading) return null;
 
-  if (!full || !displayed) {
+  // Doctrine : on trie, on n'élimine jamais. Dès qu'un résultat existe, le
+  // badge est rendu (le chiffre dépend de `scoreReliable`). Le CTA ne sert
+  // plus que lorsqu'aucun calcul n'est possible (profil visiteur absent).
+  if (!full) {
     if (showCta && owner) {
       return (
         <div className={className}>

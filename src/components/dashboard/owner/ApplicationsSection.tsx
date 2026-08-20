@@ -58,7 +58,10 @@ const FeaturedAffinityBlock = ({
     targetId: sitterId,
     enabled: !loading && !!owner && !!sitterProfile,
   });
-  if (loading || !full || !displayed || typeof full.score !== "number") return null;
+  // Bloc de mise en avant : ne se monte que si le chiffre est fiable et
+  // sans incompatibilité déclarée. La candidature elle-même reste listée
+  // quoi qu'il arrive (on trie, on n'élimine jamais).
+  if (loading || !full || !full.scoreReliable || full.hasDeclaredIncompatibility) return null;
   const matched = Array.isArray(full.matched) ? full.matched.slice(0, 3) : [];
   return (
     <div className="mt-3 flex items-center gap-3 rounded-xl border border-border/60 bg-muted/30 p-2.5">

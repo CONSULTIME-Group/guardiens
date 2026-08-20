@@ -7,7 +7,12 @@
  * `useAffinityWithShadow`. Ne s'affiche QUE si :
  *   - views_week >= 15
  *   - applicationsCount >= 2
- *   - affinity.score >= 60 (et non masqué)
+ *   - affinity.score >= AFFINITY_HIGHLIGHT_SCORE_PERCENT (60)
+ *
+ * Le seuil d'affinité est un seuil de MISE EN AVANT (highlight), pas
+ * d'affichage : il décide qu'Alma recommande proactivement ce couple, sans
+ * jamais masquer le score ailleurs. Une incompatibilité déclarée ou un
+ * score non fiable ne déclenche jamais le whisper.
  *
  * Aucune valeur inventée : si l'une des trois métriques est absente ou en
  * deçà du seuil, aucun whisper.
@@ -18,6 +23,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useAlma } from "@/contexts/AlmaContext";
 import { useAffinityWithShadow } from "@/hooks/useAffinityWithShadow";
 import { buildPopularSitWhisper } from "@/lib/alma/whisper-triggers";
+import { AFFINITY_HIGHLIGHT_SCORE_PERCENT } from "@/lib/affinityScore";
 
 interface Props {
   sitId: string;
@@ -30,7 +36,6 @@ interface Props {
 
 const MIN_VIEWS_WEEK = 15;
 const MIN_APPLICATIONS = 2;
-const MIN_AFFINITY = 60;
 
 export function AlmaPopularSitWhisper({
   sitId,
@@ -79,8 +84,8 @@ export function AlmaPopularSitWhisper({
     if (viewsWeek === null) return;
     if (viewsWeek < MIN_VIEWS_WEEK) return;
     if (applicationsCount < MIN_APPLICATIONS) return;
-    if (!affinity || !affinity.displayed) return;
-    if (affinity.score < MIN_AFFINITY) return;
+    if (!affinity || !affinity.scoreReliable || affinity.hasDeclaredIncompatibility) return;
+    if (affinity.score < AFFINITY_HIGHLIGHT_SCORE_PERCENT) return;
     if (!canEmit("sitter_popular_sit_context")) return;
 
     fired.current = true;

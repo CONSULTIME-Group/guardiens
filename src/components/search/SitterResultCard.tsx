@@ -116,7 +116,9 @@ const SitterResultCard = ({
   const quote = firstSentenceUnder(sanitizeBioForCard(profile?.bio), 120);
 
   // Affinité affichable : owner connecté + score non masqué.
-  const showAffinityRing = !isAnon && !!affinity && affinity.displayed !== false;
+  // On trie, on n'élimine jamais : l'anneau est rendu dès qu'un score
+  // existe ; le chiffre affiché dépend de `affinity.scoreReliable`.
+  const showAffinityRing = !isAnon && !!affinity;
   // Fallback owner sans score affichable : petite mention discrète.
   const showAffinityFallback = !isAnon && hasOwnerProfile && !showAffinityRing;
 

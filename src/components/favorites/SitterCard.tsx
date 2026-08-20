@@ -63,7 +63,7 @@ const SitterCard = ({ sitter, fallbackLabel, viewerOwnerContext }: SitterCardPro
         )}
       </div>
 
-      {affinity && affinityDisplayed && (
+      {affinity && (
         <AffinityBadge
           result={affinity}
           size="sm"

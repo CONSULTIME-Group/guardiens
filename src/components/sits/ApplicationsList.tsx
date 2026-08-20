@@ -569,8 +569,11 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, prope
     };
     rawActive.forEach((app: any) => {
       if (!app.sitterAffinityInput) return;
+      // Doctrine : on trie par pertinence, on n'élimine jamais. Le score
+      // entre toujours dans le tri ; seul l'affichage du chiffre dépend de
+      // `scoreReliable` côté badge.
       const res = computeAffinityResultFull(ownerWithSit, app.sitterAffinityInput);
-      if (res?.displayed) map.set(app.id, res.score);
+      map.set(app.id, res.score);
     });
     return map;
   }, [rawActive, viewerOwner, sitContext.accepts_sitter_pets, sitContext.accepts_sitter_children]);

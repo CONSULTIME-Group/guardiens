@@ -9,8 +9,12 @@
  *  - texte muted rappelant le nombre réel de critères et l'affordance,
  *  - chips pin doux des raisons réelles (result.matched).
  *
- * RÈGLE ABSOLUE : si le score n'est pas fiable (full absent ou displayed=false),
- * la section ne se monte pas du tout (return null). Aucun fallback CTA ici.
+ * RÈGLE ABSOLUE (lot affinité août 2026) : la section ne se monte que si le
+ * chiffre est fiable (`full.scoreReliable === true`) ET sans incompatibilité
+ * déclarée. Doctrine : on trie par pertinence, on n'élimine jamais, mais une
+ * section narrative « faite pour vous entendre » n'a de sens que sur un score
+ * solide. Le badge d'affinité reste visible ailleurs (cartes, listes) même
+ * quand cette section ne se monte pas. Aucun fallback CTA ici.
  */
 import { useAffinityWithShadow } from "@/hooks/useAffinityWithShadow";
 import AffinityRing from "@/components/matching/AffinityRing";
@@ -41,7 +45,7 @@ const SitterAffinitySection = ({
     { context: "sit_detail", targetId, enabled: !!sitterProfile && !!ownerProfile },
   );
 
-  if (!full || !displayed) return null;
+  if (!full || !full.scoreReliable || full.hasDeclaredIncompatibility) return null;
 
   const reasons = full.matched ?? [];
   const criteriaCount = full.total ?? reasons.length;
