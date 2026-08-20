@@ -45,6 +45,15 @@ type: feature
 
 Bootstrap au démarrage via `useAffinityThresholdsBootstrap` monté dans `App.tsx`.
 
+## Règle des deux côtés (20/08/2026)
+
+Un critère n'est scorable que s'il existe des DEUX côtés. Ce qui n'existe que d'un côté est DESCRIPTIF : affiché comme tel, jamais présenté comme un critère de matching, et on n'ajoute pas de champ gardien pour le rendre bilatéral.
+
+- `preferred_sitter_types` : « Sans préférence » / `no_preference` = sortie explicite du critère (dénominateur ET maxPossibleWeight). Chemins câblés : « Gardien·ne expérimenté·e » via `experience_years` ≠ « Débutant », « Débutant·e motivé·e » via `experience_years` = « Débutant » explicite, « Télétravailleur·euse » via `work_during_sit` (full/partial, repli availability_during). « Étudiant·e » / « Indépendant·e » : descriptives (`PREF_SITTER_DESCRIPTIVE`).
+- `home_ambiance` : tags scorés (`HOME_AMBIANCE_SCORED_TAGS`) vs environnement descriptif (`HOME_AMBIANCE_DISPLAY_ONLY`). Alias persistés : Familial → Famille animée, Calme → Calme et posé, Cosy → Cocon casanier (`HOME_AMBIANCE_ALIASES`, dédupliqués).
+- Formulaires (`OwnerStepRules`, `OnboardingAffinity`) : deux groupes séparés, « Ambiance » scorée vs « Environnement » descriptif, « Profil idéal » vs « Situation recherchée ».
+- Verrou : `src/lib/__tests__/affinity-exhaustiveness.test.ts` échoue si une valeur en base n'est ni scorable ni déclarée descriptive (listes DB_* à maintenir).
+
 ## Vocabulaire centralisé
 
 Les chaînes magiques du scoring (rythmes, présence, travail, ambiance, espèces, sensibilités, intérêts) sont centralisées dans `src/lib/affinityVocab.ts`. `src/lib/__tests__/affinityVocab.test.ts` vérifie que chaque valeur attendue par le scoring est bien présente dans les options des formulaires d'onboarding et d'édition de profil. Si un libellé de formulaire dérive, le test casse au lieu que le score se dégrade en silence.
