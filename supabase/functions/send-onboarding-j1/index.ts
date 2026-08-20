@@ -134,6 +134,10 @@ Deno.serve(async (req) => {
           life_pace: (ownerPrefs as any)?.life_pace ?? null,
           presence_expected: (ownerPrefs as any)?.presence_expected ?? null,
           car_required: (ownerProps ?? []).some((p: any) => p.car_required === true),
+          // Pas d'annonce cible à J+1 : les politiques accompagnants ne sont
+          // pas évaluables. null explicite, neutre dans le moteur.
+          accepts_sitter_pets: null,
+          accepts_sitter_children: null,
           pets: ownerPets.map((p: any) => ({
             species: p.species,
             special_needs: p.special_needs,

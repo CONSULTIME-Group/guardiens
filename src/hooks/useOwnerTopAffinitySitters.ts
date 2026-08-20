@@ -143,6 +143,11 @@ export function useOwnerTopAffinitySitters(): Result {
         life_pace: (ownerPrefs as any)?.life_pace ?? null,
         presence_expected: ownerPrefs?.presence_expected ?? null,
         car_required: (myProperties ?? []).some((p: any) => p.car_required === true),
+        // Classement transverse sans annonce cible : les politiques
+        // accompagnants ne sont pas évaluables. null explicite, neutre dans
+        // le moteur, jamais pénalisant.
+        accepts_sitter_pets: null,
+        accepts_sitter_children: null,
         pets: (pets ?? []).map((p: any) => ({ species: p.species, special_needs: p.special_needs, breed: p.breed ?? null })),
       };
 
