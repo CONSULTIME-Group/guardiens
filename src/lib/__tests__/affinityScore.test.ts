@@ -622,5 +622,125 @@ describe("règles lot affinité 20/08/2026", () => {
   });
 });
 
+describe("règle des deux côtés (20/08/2026)", () => {
+  it("« Sans préférence » seul : le critère profil idéal sort du dénominateur et de la confiance", () => {
+    const sitter = { life_pace: "calme" };
+    const sans = computeAffinityResultFull(
+      { life_pace: "calme", preferred_sitter_types: ["Sans préférence"] },
+      sitter,
+    );
+    const vide = computeAffinityResultFull({ life_pace: "calme" }, sitter);
+    expect(sans.total).toBe(vide.total);
+    expect(sans.score).toBe(vide.score);
+    expect(sans.confidence).toBe(vide.confidence);
+    // Résidu technique historique : même traitement.
+    const legacy = computeAffinityResultFull(
+      { life_pace: "calme", preferred_sitter_types: ["no_preference"] },
+      sitter,
+    );
+    expect(legacy.total).toBe(vide.total);
+  });
+
+  it("« Gardien·ne expérimenté·e » : satisfait par experience_years déclaré hors Débutant", () => {
+    const owner = { preferred_sitter_types: ["Gardien·ne expérimenté·e"] };
+    const ok = computeAffinityResultFull(owner, { experience_years: "3-5 ans" });
+    expect(ok.total).toBe(1);
+    expect(ok.score).toBe(100);
+    expect(ok.matched).toContain("Correspond à votre profil idéal");
+    // « Débutant » déclaré : évalué, pas satisfait.
+    const debutant = computeAffinityResultFull(owner, { experience_years: "Débutant" });
+    expect(debutant.total).toBe(1);
+    expect(debutant.score).toBe(0);
+    expect(debutant.matched).not.toContain("Correspond à votre profil idéal");
+    // Rien de déclaré : critère hors dénominateur, jamais pénalisant.
+    const silence = computeAffinityResultFull(owner, {});
+    expect(silence.total).toBe(0);
+  });
+
+  it("« Débutant·e motivé·e » : seul « Débutant » explicite matche, le silence reste neutre", () => {
+    const owner = { preferred_sitter_types: ["Débutant·e motivé·e"] };
+    const ok = computeAffinityResultFull(owner, { experience_years: "Débutant" });
+    expect(ok.total).toBe(1);
+    expect(ok.matched).toContain("Correspond à votre profil idéal");
+    const senior = computeAffinityResultFull(owner, { experience_years: "5+ ans" });
+    expect(senior.total).toBe(1);
+    expect(senior.score).toBe(0);
+    // Le vide n'est pas débutant : critère non évalué.
+    const silence = computeAffinityResultFull(owner, {});
+    expect(silence.total).toBe(0);
+  });
+
+  it("« Télétravailleur·euse » : full/partial remote matchent, repli availability_during", () => {
+    const owner = { preferred_sitter_types: ["Télétravailleur·euse"] };
+    const full = computeAffinityResultFull(owner, { work_during_sit: "full_remote" });
+    expect(full.matched).toContain("Correspond à votre profil idéal");
+    const partial = computeAffinityResultFull(owner, { work_during_sit: "partial_remote" });
+    expect(partial.matched).toContain("Correspond à votre profil idéal");
+    const onSite = computeAffinityResultFull(owner, { work_during_sit: "on_site" });
+    expect(onSite.total).toBe(1);
+    expect(onSite.score).toBe(0);
+    // Repli availability_during, même résolution que le critère présence.
+    const fallback = computeAffinityResultFull(owner, { availability_during: "En télétravail" });
+    expect(fallback.matched).toContain("Correspond à votre profil idéal");
+  });
+
+  it("« Étudiant·e » et « Indépendant·e » : descriptives, hors dénominateur et confiance", () => {
+    const sitter = { life_pace: "calme" };
+    const desc = computeAffinityResultFull(
+      { life_pace: "calme", preferred_sitter_types: ["Étudiant·e", "Indépendant·e"] },
+      sitter,
+    );
+    const vide = computeAffinityResultFull({ life_pace: "calme" }, sitter);
+    expect(desc.total).toBe(vide.total);
+    expect(desc.confidence).toBe(vide.confidence);
+  });
+
+  it("préférences mixtes : scorable évalué même si une descriptive est cochée", () => {
+    const r = computeAffinityResultFull(
+      { preferred_sitter_types: ["Étudiant·e", "Couple"] },
+      { sitter_type: "Couple" },
+    );
+    expect(r.total).toBe(1);
+    expect(r.matched).toContain("Correspond à votre profil idéal");
+  });
+
+  it("alias d'ambiance : « Cosy » est scoré comme « Cocon casanier »", () => {
+    const alias = computeAffinityResultFull(
+      { home_ambiance: ["Cosy"] },
+      { life_pace: "calme" },
+    );
+    const canon = computeAffinityResultFull(
+      { home_ambiance: ["Cocon casanier"] },
+      { life_pace: "calme" },
+    );
+    expect(alias.matched).toContain("Compatible avec l'ambiance de votre foyer");
+    expect(alias.score).toBe(canon.score);
+    expect(alias.confidence).toBe(canon.confidence);
+  });
+
+  it("tags d'environnement : descriptifs, hors dénominateur et confiance", () => {
+    const sitter = { life_pace: "calme" };
+    const env = computeAffinityResultFull(
+      { life_pace: "calme", home_ambiance: ["Urbain", "Montagne", "Bord de mer"] },
+      sitter,
+    );
+    const vide = computeAffinityResultFull({ life_pace: "calme" }, sitter);
+    expect(env.total).toBe(vide.total);
+    expect(env.confidence).toBe(vide.confidence);
+  });
+
+  it("alias + canonique dédupliqués : « Calme » et « Calme et posé » comptent une seule fois", () => {
+    const doublon = computeAffinityResultFull(
+      { home_ambiance: ["Calme", "Calme et posé"] },
+      { life_pace: "calme" },
+    );
+    const seul = computeAffinityResultFull(
+      { home_ambiance: ["Calme et posé"] },
+      { life_pace: "calme" },
+    );
+    expect(doublon.score).toBe(seul.score);
+  });
+});
+
 
 

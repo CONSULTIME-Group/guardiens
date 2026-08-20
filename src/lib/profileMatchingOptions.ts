@@ -152,35 +152,74 @@ export const SENSITIVITIES_OPTIONS = [
  * Liste enrichie pour mieux nourrir le matching (présence, expérience, situation de vie).
  * Stockée dans `owner_profiles.preferred_sitter_types`.
  */
-export const IDEAL_SITTER_PROFILE_OPTIONS = [
+/**
+ * RÈGLE DES DEUX CÔTÉS (20/08/2026) : les valeurs scorables ont un
+ * équivalent déclarable côté gardien (sitter_type, experience_years,
+ * work_during_sit). « Sans préférence » est une sortie explicite du
+ * critère. Les valeurs sans équivalent gardien sont DESCRIPTIVES :
+ * affichées sur la fiche, jamais présentées comme un critère de matching.
+ * Miroir des registres PREF_SITTER_* dans affinityVocab, verrouillé par
+ * `affinity-exhaustiveness.test.ts`.
+ */
+export const IDEAL_SITTER_SCORED_OPTIONS = [
   "Sans préférence",
   "Couple",
   "Famille",
   "Retraité·e",
   "Actif·ve solo",
   "Télétravailleur·euse",
-  "Étudiant·e",
-  "Indépendant·e",
   "Gardien·ne expérimenté·e",
   "Débutant·e motivé·e",
 ];
 
+/** Descriptif uniquement : aucun champ gardien correspondant, aucun score. */
+export const IDEAL_SITTER_DESCRIPTIVE_OPTIONS = [
+  "Étudiant·e",
+  "Indépendant·e",
+];
+
+export const IDEAL_SITTER_PROFILE_OPTIONS = [
+  ...IDEAL_SITTER_SCORED_OPTIONS,
+  ...IDEAL_SITTER_DESCRIPTIVE_OPTIONS,
+];
+
 /**
  * Tags d'ambiance du foyer côté propriétaire (multi).
- * Aide le gardien à se projeter et alimente le futur score d'affinité.
  * Stockés dans `owner_profiles.home_ambiance`.
+ *
+ * RÈGLE DES DEUX CÔTÉS (20/08/2026) : deux groupes explicitement séparés
+ * dans les formulaires. Le premier alimente le score d'affinité, le second
+ * est DESCRIPTIF (affiché pour que les gardiens se projettent, sans effet
+ * sur le calcul). Miroir de HOME_AMBIANCE_SCORED_TAGS et
+ * HOME_AMBIANCE_DISPLAY_ONLY dans affinityVocab : le test
+ * `affinity-exhaustiveness.test.ts` casse si les listes divergent.
  */
-export const HOME_AMBIANCE_OPTIONS = [
+
+/** Groupe 1, « Ambiance du foyer » : scoré par le moteur d'affinité. */
+export const HOME_AMBIANCE_SCORED_OPTIONS = [
   "Calme et posé",
-  "Famille animée",
-  "Campagne",
-  "Bord de mer",
-  "Montagne",
-  "Urbain",
-  "Invités fréquents",
-  "Sportif outdoor",
   "Cocon casanier",
+  "Sportif outdoor",
+  "Campagne",
+  "Famille animée",
+];
+
+/**
+ * Groupe 2, « Environnement » : descriptif uniquement. Ne JAMAIS présenter
+ * ces tags comme un critère de matching.
+ */
+export const HOME_AMBIANCE_ENVIRONMENT_OPTIONS = [
+  "Urbain",
+  "Montagne",
+  "Bord de mer",
   "Maison de vacances",
+  "Invités fréquents",
+];
+
+/** Union des deux groupes (affichage fiche publique, tests de cohérence). */
+export const HOME_AMBIANCE_OPTIONS = [
+  ...HOME_AMBIANCE_SCORED_OPTIONS,
+  ...HOME_AMBIANCE_ENVIRONMENT_OPTIONS,
 ];
 
 
