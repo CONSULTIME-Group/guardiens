@@ -70,7 +70,7 @@ const OwnerProfilePage = () => {
     [t]
   );
   const {
-    data, pets, loading, saving, completion, missingFields, lastSyncedAt,
+    data, pets, loading, saving, completion, lastSyncedAt,
     saveStep, addPet, updatePet, removePet, uploadPhoto,
     loadError, reload, emailVerified, hasFirstActivity,
   } = useOwnerProfile();

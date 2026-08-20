@@ -11,7 +11,7 @@ import { normalizeCityTyping, normalizeCityName } from "@/lib/normalizeCity";
 interface Props {
   city: string;
   postalCode: string;
-  onChange: (partial: { city?: string; postal_code?: string; country?: string }) => void;
+  onChange: (partial: { city?: string; postal_code?: string; country?: string | null }) => void;
   cityLabel?: string;
   postalLabel?: string;
   cityId?: string;
@@ -21,7 +21,7 @@ interface Props {
   required?: boolean;
   disabled?: boolean;
   /** Optional: enable "I live abroad" toggle. Pass the current country (defaults to "FR"). */
-  country?: string;
+  country?: string | null;
   showAbroadToggle?: boolean;
 }
 
@@ -51,16 +51,17 @@ const PostalCodeCityFields = ({
   const { handlePostalCodeChange, selectCity, cities, loading, error } =
     usePostalCodeCity(onChange);
 
-  // Si on n'a pas reçu de country mais qu'il y a déjà un postal → FR par défaut.
-  const initialCountry = country ?? "FR";
+  // FR par défaut, y compris pour les anciennes lignes où country valait "" (inconnu).
+  const initialCountry = country || "FR";
   const [abroad, setAbroad] = useState<boolean>(initialCountry !== "FR");
 
   const toggleAbroad = () => {
     const next = !abroad;
     setAbroad(next);
     if (next) {
-      // Passe à l'étranger : on vide le code postal FR
-      onChange({ postal_code: "", country: country && country !== "FR" ? country : "" });
+      // Passe à l'étranger : on vide le code postal FR.
+      // Le pays n'est jamais "" : soit un code réel déjà choisi, soit NULL (inconnu).
+      onChange({ postal_code: "", country: country && country !== "FR" ? country : null });
     } else {
       onChange({ country: "FR" });
     }

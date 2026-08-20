@@ -10,6 +10,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { Key, Home, AlertTriangle, ClipboardList, Heart, Check, Circle, CheckCircle, Loader2, Sparkles } from "lucide-react";
 import { AlmaHouseGuideAssist, type HouseGuideDrafts } from "@/components/ai/alma/AlmaHouseGuideAssist";
 import { trackEvent } from "@/lib/analytics";
+import { isPlausiblePhone, PHONE_MAX_LENGTH, PHONE_ERROR_MESSAGE } from "@/lib/phone";
 
 interface GuideData {
   exact_address: string;
@@ -119,10 +120,13 @@ const OwnerHouseGuideForm = () => {
     emergency: "emergency_contact_name",
   };
 
+  const emergencyPhone = guide.emergency_contact_phone?.trim() ?? "";
+  const emergencyPhoneInvalid = !!emergencyPhone && !isPlausiblePhone(emergencyPhone);
   const isPublishable = !!(
     guide.exact_address?.trim() &&
     guide.access_codes?.trim() &&
-    guide.emergency_contact_phone?.trim()
+    emergencyPhone &&
+    isPlausiblePhone(emergencyPhone)
   );
 
   useEffect(() => {
@@ -262,6 +266,7 @@ const OwnerHouseGuideForm = () => {
 
   const handleFinalize = async () => {
     if (!user) return;
+    if (!isPublishable) return;
     setFinalizeLoading(true);
     try {
       // Flush pending save first
@@ -469,6 +474,9 @@ const OwnerHouseGuideForm = () => {
                 {!guide.emergency_contact_phone?.trim() && (
                   <p className="text-xs text-muted-foreground">· Contact d'urgence, section Contacts d'urgence</p>
                 )}
+                {emergencyPhoneInvalid && (
+                  <p className="text-xs text-destructive">· {PHONE_ERROR_MESSAGE}</p>
+                )}
               </div>
             )}
             <Button
@@ -495,7 +503,7 @@ interface FieldProps {
   onChange: (field: keyof GuideData, value: string) => void;
 }
 
-const Field = ({ label, field, guide, onChange, type = "input", rows = 2, placeholder = "" }: FieldProps & { label: string; field: keyof GuideData; type?: "input" | "textarea"; rows?: number; placeholder?: string }) => (
+const Field = ({ label, field, guide, onChange, type = "input", rows = 2, placeholder = "", inputType, invalid }: FieldProps & { label: string; field: keyof GuideData; type?: "input" | "textarea"; rows?: number; placeholder?: string; inputType?: string; invalid?: boolean }) => (
   <div className="space-y-1">
     <Label className="text-sm font-medium text-foreground">{label}</Label>
     {type === "textarea" ? (
@@ -507,15 +515,29 @@ const Field = ({ label, field, guide, onChange, type = "input", rows = 2, placeh
         className="bg-background border border-border rounded-md px-3 py-2 text-sm w-full"
       />
     ) : (
-      <Input
-        value={guide[field] as string}
-        onChange={e => onChange(field, e.target.value)}
-        placeholder={placeholder}
-        className="bg-background border border-border rounded-md px-3 py-2 text-sm w-full"
-      />
+      <>
+        <Input
+          type={inputType || "text"}
+          value={guide[field] as string}
+          onChange={e => onChange(field, e.target.value)}
+          placeholder={placeholder}
+          maxLength={inputType === "tel" ? PHONE_MAX_LENGTH : undefined}
+          aria-invalid={invalid || undefined}
+          className="bg-background border border-border rounded-md px-3 py-2 text-sm w-full"
+        />
+        {invalid && (
+          <p className="text-xs text-destructive">{PHONE_ERROR_MESSAGE}</p>
+        )}
+      </>
     )}
   </div>
 );
+
+/** True quand un champ téléphone est rempli mais ne ressemble pas à un numéro. */
+const phoneInvalid = (guide: GuideData, field: keyof GuideData): boolean => {
+  const v = (guide[field] as string | undefined)?.trim() ?? "";
+  return !!v && !isPlausiblePhone(v);
+};
 
 const AccessFields = ({ guide, onChange }: FieldProps) => (
   <>
@@ -547,24 +569,24 @@ const EmergencyFields = ({ guide, onChange }: FieldProps) => (
     <Label className="text-sm font-medium text-foreground">Vétérinaire habituel</Label>
     <div className="grid grid-cols-2 gap-3">
       <Field label="Nom" field="vet_name" guide={guide} onChange={onChange} placeholder="Dr. Dupont" />
-      <Field label="Téléphone" field="vet_phone" guide={guide} onChange={onChange} placeholder="01 23 45 67 89" />
+      <Field label="Téléphone" field="vet_phone" guide={guide} onChange={onChange} placeholder="01 23 45 67 89" inputType="tel" invalid={phoneInvalid(guide, "vet_phone")} />
     </div>
     <Field label="Adresse de la clinique" field="vet_address" guide={guide} onChange={onChange} placeholder="Adresse de la clinique" />
 
     <Label className="text-sm font-medium text-foreground mt-2">Personne de confiance</Label>
     <div className="grid grid-cols-2 gap-3">
       <Field label="Nom" field="neighbor_name" guide={guide} onChange={onChange} placeholder="Marie" />
-      <Field label="Téléphone" field="neighbor_phone" guide={guide} onChange={onChange} placeholder="Il/elle a un double des clés" />
+      <Field label="Téléphone" field="neighbor_phone" guide={guide} onChange={onChange} placeholder="06 12 34 56 78" inputType="tel" invalid={phoneInvalid(guide, "neighbor_phone")} />
     </div>
 
     <Label className="text-sm font-medium text-foreground mt-2">Contact d'urgence proprio</Label>
     <div className="grid grid-cols-2 gap-3">
       <Field label="Nom" field="emergency_contact_name" guide={guide} onChange={onChange} placeholder="Un proche joignable si vous n'êtes pas disponible" />
-      <Field label="Téléphone" field="emergency_contact_phone" guide={guide} onChange={onChange} placeholder="06 12 34 56 78" />
+      <Field label="Téléphone" field="emergency_contact_phone" guide={guide} onChange={onChange} placeholder="06 12 34 56 78" inputType="tel" invalid={phoneInvalid(guide, "emergency_contact_phone")} />
     </div>
 
-    <Field label="Plombier de confiance" field="plumber_phone" guide={guide} onChange={onChange} placeholder="Numéro à appeler en cas de fuite" />
-    <Field label="Électricien de confiance" field="electrician_phone" guide={guide} onChange={onChange} placeholder="Numéro à appeler en cas de panne" />
+    <Field label="Plombier de confiance" field="plumber_phone" guide={guide} onChange={onChange} placeholder="Numéro à appeler en cas de fuite" inputType="tel" invalid={phoneInvalid(guide, "plumber_phone")} />
+    <Field label="Électricien de confiance" field="electrician_phone" guide={guide} onChange={onChange} placeholder="Numéro à appeler en cas de panne" inputType="tel" invalid={phoneInvalid(guide, "electrician_phone")} />
   </>
 );
 

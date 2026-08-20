@@ -3,42 +3,14 @@ import { Switch } from "@/components/ui/switch";
 import { Slider } from "@/components/ui/slider";
 import HintBubble from "./HintBubble";
 import ChipSelect from "./ChipSelect";
+import RadioChipGroup from "./RadioChipGroup";
+import {
+  VEHICLE_OPTIONS,
+  MIN_STAY_DURATION_OPTIONS,
+  FREQUENCY_OPTIONS,
+  NOTICE_OPTIONS,
+} from "@/lib/mobilityOptions";
 import type { SitterProfileData } from "@/hooks/useSitterProfile";
-
-const VEHICLE_OPTIONS = ["Oui, voiture", "Oui, moto", "Non, transports en commun", "Non, vélo uniquement"];
-
-const DURATION_OPTIONS = ["1-3 jours", "1 semaine", "2 semaines", "1 mois", "Flexible"];
-const DURATION_VALUES: Record<string, string> = {
-  "1-3 jours": "1_3_days",
-  "1 semaine": "1_week",
-  "2 semaines": "2_weeks",
-  "1 mois": "1_month",
-  "Flexible": "flexible",
-};
-const DURATION_REVERSE: Record<string, string> = Object.fromEntries(
-  Object.entries(DURATION_VALUES).map(([k, v]) => [v, k])
-);
-
-const FREQUENCY_OPTIONS = ["Occasionnel", "Régulier", "Flexible"];
-const FREQUENCY_VALUES: Record<string, string> = {
-  "Occasionnel": "occasional",
-  "Régulier": "regular",
-  "Flexible": "flexible",
-};
-const FREQUENCY_REVERSE: Record<string, string> = Object.fromEntries(
-  Object.entries(FREQUENCY_VALUES).map(([k, v]) => [v, k])
-);
-
-const NOTICE_OPTIONS = ["Dès que possible", "1 semaine", "2 semaines", "1 mois"];
-const NOTICE_VALUES: Record<string, string> = {
-  "Dès que possible": "asap",
-  "1 semaine": "1_week",
-  "2 semaines": "2_weeks",
-  "1 mois": "1_month",
-};
-const NOTICE_REVERSE: Record<string, string> = Object.fromEntries(
-  Object.entries(NOTICE_VALUES).map(([k, v]) => [v, k])
-);
 
 const PERIOD_OPTIONS = ["Toute l'année", "Été", "Hiver", "Vacances scolaires", "Week-ends"];
 const ENVIRONMENT_OPTIONS = ["Ville", "Campagne", "Montagne", "Lac", "Vignes", "Forêt"];
@@ -51,13 +23,14 @@ interface Props {
 const StepMobility = ({ data, onChange }: Props) => {
   return (
     <div className="space-y-6">
-      {/* Vehicle type */}
+      {/* Vehicle type (choix unique, persisté en colonne vehicle_type) */}
       <div className="space-y-2">
-        <Label>Vous avez un véhicule ?</Label>
-        <ChipSelect
+        <Label id="lbl-vehicle-type">Vous avez un véhicule ?</Label>
+        <RadioChipGroup
+          ariaLabelledBy="lbl-vehicle-type"
           options={VEHICLE_OPTIONS}
-          selected={(data as any).vehicle_type ? [(data as any).vehicle_type] : []}
-          onChange={v => onChange({ vehicle_type: v[v.length - 1] || "" } as any)}
+          value={data.vehicle_type || ""}
+          onChange={v => onChange({ vehicle_type: v })}
         />
         <p className="text-xs text-muted-foreground">
           Indispensable pour les gardes en zone rurale ou avec animaux nécessitant des sorties véto.
@@ -88,49 +61,43 @@ const StepMobility = ({ data, onChange }: Props) => {
         <HintBubble>Plus votre rayon est large, plus vous verrez d'annonces. Mais la proximité est un atout, les propriétaires préfèrent les gardiens proches.</HintBubble>
       </div>
 
-      {/* Durée minimum souhaitée */}
+      {/* Durée minimum souhaitée (choix unique) */}
       <div className="space-y-2">
-        <Label>Durée minimum souhaitée</Label>
-        <ChipSelect
-          options={DURATION_OPTIONS}
-          selected={DURATION_REVERSE[data.min_stay_duration] ? [DURATION_REVERSE[data.min_stay_duration]] : ["Flexible"]}
-          onChange={v => {
-            const last = v[v.length - 1] || "Flexible";
-            onChange({ min_stay_duration: DURATION_VALUES[last] || "flexible" });
-          }}
+        <Label id="lbl-min-stay">Durée minimum souhaitée</Label>
+        <RadioChipGroup
+          ariaLabelledBy="lbl-min-stay"
+          options={MIN_STAY_DURATION_OPTIONS}
+          value={data.min_stay_duration || ""}
+          onChange={v => onChange({ min_stay_duration: v })}
         />
         <p className="text-xs text-muted-foreground">
           Nous vous montrons les annonces qui correspondent à cette durée minimum.
         </p>
       </div>
 
-      {/* Fréquence souhaitée */}
+      {/* Fréquence souhaitée (choix unique) */}
       <div className="space-y-2">
-        <Label>Fréquence souhaitée</Label>
-        <ChipSelect
+        <Label id="lbl-frequency">Fréquence souhaitée</Label>
+        <RadioChipGroup
+          ariaLabelledBy="lbl-frequency"
           options={FREQUENCY_OPTIONS}
-          selected={FREQUENCY_REVERSE[data.preferred_frequency] ? [FREQUENCY_REVERSE[data.preferred_frequency]] : ["Flexible"]}
-          onChange={v => {
-            const last = v[v.length - 1] || "Flexible";
-            onChange({ preferred_frequency: FREQUENCY_VALUES[last] || "flexible" });
-          }}
+          value={data.preferred_frequency || ""}
+          onChange={v => onChange({ preferred_frequency: v })}
         />
       </div>
 
-      {/* Préavis minimum */}
+      {/* Préavis minimum (choix unique) */}
       <div className="space-y-2">
-        <Label>Préavis minimum</Label>
-        <ChipSelect
+        <Label id="lbl-notice">Préavis minimum</Label>
+        <RadioChipGroup
+          ariaLabelledBy="lbl-notice"
           options={NOTICE_OPTIONS}
-          selected={NOTICE_REVERSE[data.min_notice] ? [NOTICE_REVERSE[data.min_notice]] : ["Dès que possible"]}
-          onChange={v => {
-            const last = v[v.length - 1] || "Dès que possible";
-            onChange({ min_notice: NOTICE_VALUES[last] || "asap" });
-          }}
+          value={data.min_notice || ""}
+          onChange={v => onChange({ min_notice: v })}
         />
       </div>
 
-      {/* Période de l'année */}
+      {/* Période de l'année (multi, 3 max) */}
       <div className="space-y-2">
         <Label>Période de l'année</Label>
         <ChipSelect
@@ -142,7 +109,7 @@ const StepMobility = ({ data, onChange }: Props) => {
         />
       </div>
 
-      {/* Environnements préférés */}
+      {/* Environnements préférés (multi, 3 max) */}
       <div className="space-y-2">
         <Label>Environnements préférés</Label>
         <ChipSelect

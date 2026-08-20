@@ -4,6 +4,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import ChipSelect from "../profile/ChipSelect";
+import RadioChipGroup from "../profile/RadioChipGroup";
 import HintBubble from "../profile/HintBubble";
 import AiSuggestButton from "../profile/AiSuggestButton";
 import type { OwnerProfileData } from "@/hooks/useOwnerProfile";
@@ -61,7 +62,7 @@ const OwnerStepRules = ({ data, onChange }: Props) => {
         <p className="text-xs text-muted-foreground mb-3">
           À quelle fréquence souhaitez-vous recevoir des nouvelles (photos, messages) de votre gardien ?
         </p>
-        <ChipSelect ariaLabelledBy={newsId} options={NEWS_OPTIONS} selected={data.news_frequency ? [data.news_frequency] : []} onChange={v => onChange({ news_frequency: v[v.length - 1] || "" })} />
+        <RadioChipGroup ariaLabelledBy={newsId} options={NEWS_OPTIONS} value={data.news_frequency || ""} onChange={v => onChange({ news_frequency: v })} />
       </div>
 
       <h3 className="font-heading text-lg font-semibold">Attentes envers le gardien</h3>

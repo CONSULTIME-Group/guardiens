@@ -8,35 +8,13 @@ import { compressAvatarFile } from "@/lib/compressImage";
 import { clearViewerOwnerCache } from "@/hooks/useViewerOwnerForAffinity";
 import { ENV_KEYS } from "@/components/shared/EnvironmentPills";
 
-// Exported so the page can recompute missing fields against the LIVE preview state
-// (mergedData = data + localData) instead of the stale server snapshot.
-export function computeOwnerMissingFields(d: OwnerProfileData, petsCount: number): { step: number; label: string }[] {
-  const missing: { step: number; label: string }[] = [];
-  if (!d.avatar_url) missing.push({ step: 1, label: "Photo de profil" });
-  if (!d.first_name) missing.push({ step: 1, label: "Prénom" });
-  if (!d.last_name) missing.push({ step: 1, label: "Nom" });
-  if (!d.city) missing.push({ step: 1, label: "Ville" });
-  if (!d.bio) missing.push({ step: 1, label: "Bio" });
-  // postal_code n'est requis qu'en France (country === "FR" ou non renseigné).
-  // Les propriétaires à l'étranger renseignent uniquement ville + pays.
-  if (!d.property_type) missing.push({ step: 2, label: "Type de logement" });
-  if (!d.environment) missing.push({ step: 2, label: "Environnement" });
-  if (!d.description) missing.push({ step: 2, label: "Description du logement" });
-  if (petsCount === 0) missing.push({ step: 3, label: "Ajouter un animal" });
-  if (!d.presence_expected) missing.push({ step: 4, label: "Présence attendue" });
-  if (!d.visits_allowed) missing.push({ step: 4, label: "Visites autorisées" });
-  if (d.meeting_preference.length === 0) missing.push({ step: 4, label: "Préférence de rencontre" });
-  if (!d.news_frequency) missing.push({ step: 4, label: "Fréquence des nouvelles" });
-  return missing;
-}
-
 export interface OwnerProfileData {
   // Step 1 - Identity (profiles table)
   first_name: string;
   last_name: string;
   city: string;
   postal_code: string;
-  country: string;
+  country: string | null;
   bio: string;
   avatar_url: string;
   // Step 2 - Housing (properties table)
@@ -350,9 +328,6 @@ export function useOwnerProfile() {
   }, [user]);
 
 
-  const computeMissingFields = useCallback((d: OwnerProfileData, petsCount: number): { step: number; label: string }[] => {
-    return computeOwnerMissingFields(d, petsCount);
-  }, []);
 
   const saveStep = useCallback(async (stepData: Partial<OwnerProfileData>): Promise<boolean> => {
     if (!user) return false;
@@ -366,6 +341,8 @@ export function useOwnerProfile() {
       const profileFields = ["first_name", "last_name", "city", "postal_code", "country", "bio", "avatar_url", "skill_categories", "available_for_help"] as const;
       const profileUpdate: any = {};
       profileFields.forEach(f => { if (f in stepData) profileUpdate[f] = (stepData as any)[f]; });
+      // Un pays vide ne s'écrit jamais : NULL ou code réel (parité du score client/serveur).
+      if ("country" in profileUpdate) profileUpdate.country = (profileUpdate.country || "").trim() || null;
       // Owner skill categories alias → canonical profiles.skill_categories
       if ("owner_skill_categories" in stepData) {
         profileUpdate.skill_categories = (stepData as any).owner_skill_categories;
@@ -614,7 +591,6 @@ export function useOwnerProfile() {
     data, pets, loading, saving, propertyId, lastSyncedAt,
     saveStep, addPet, updatePet, removePet, uploadPhoto,
     completion,
-    missingFields: computeMissingFields(data, pets.length),
     loadError,
     reload: () => fetchData(),
     emailVerified,

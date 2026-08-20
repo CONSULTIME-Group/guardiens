@@ -94,6 +94,7 @@ describe("useSitterProfile — Permis & Véhicule (Mobilité)", () => {
     sitterUpdates.length = 0;
     sitterRow.has_license = false;
     sitterRow.has_vehicle = false;
+    delete sitterRow.vehicle_type;
   });
 
   it("envoie has_license et has_vehicle à sitter_profiles lors du save", async () => {
@@ -133,19 +134,20 @@ describe("useSitterProfile — Permis & Véhicule (Mobilité)", () => {
     expect(second.result.current.data.has_vehicle).toBe(true);
   });
 
-  it("la sidebar ne signale plus 'Permis ou véhicule' manquant après coche", async () => {
+  it("persiste le type de véhicule (colonne vehicle_type)", async () => {
     const { result } = renderHook(() => useSitterProfile());
     await waitFor(() => expect(result.current.loading).toBe(false));
 
-    // Avant : champ manquant détecté dans missingFields exposé par le hook
-    expect(result.current.missingFields.some(m => m.label === "Permis ou véhicule")).toBe(true);
+    // Avant : aucun véhicule déclaré
+    expect(result.current.data.vehicle_type).toBe("");
 
-    // Après save de has_license seul → contrainte levée (license OU vehicle suffit)
+    // Après save, la valeur est bien relue depuis la base (whitelist saveStep + refetch)
     await act(async () => {
-      await result.current.saveStep({ has_license: true });
+      await result.current.saveStep({ has_vehicle: true, vehicle_type: "car" });
     });
     await waitFor(() => {
-      expect(result.current.missingFields.some(m => m.label === "Permis ou véhicule")).toBe(false);
+      expect(result.current.data.has_vehicle).toBe(true);
+      expect(result.current.data.vehicle_type).toBe("car");
     });
   });
 });

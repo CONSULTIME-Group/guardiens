@@ -82,7 +82,7 @@ const SitterProfile = () => {
   );
   const [searchParams] = useSearchParams();
   const {
-    data, pastAnimals, loading, saving, completion, missingFields, lastSyncedAt,
+    data, pastAnimals, loading, saving, completion, lastSyncedAt,
     saveStep, addPastAnimal, removePastAnimal, uploadAvatar,
     loadError, reload, emailVerified, hasFirstActivity,
   } = useSitterProfile();
@@ -213,11 +213,10 @@ const SitterProfile = () => {
     setSaved(false);
   }, []);
 
-  const motivationLength = (mergedData.motivation || "").length;
-  // Block save only if user is editing motivation specifically and it's < 50
-  const motivationBeingEdited = "motivation" in localData;
-  const motivationBlocks = motivationBeingEdited && motivationLength > 0 && motivationLength < 50;
-  const canSave = !saving && dirty && !motivationBlocks;
+  // La contrainte de longueur de la motivation vit au niveau du champ (StepIdentity,
+  // indication sous la zone de texte) et à la publication (src/lib/motivation.ts) :
+  // elle ne bloque jamais l'enregistrement des autres champs de la page.
+  const canSave = !saving && dirty;
 
   const handleSave = useCallback(async () => {
     if (Object.keys(localData).length === 0) return;
@@ -524,7 +523,6 @@ const SitterProfile = () => {
                   disabled={!canSave}
                   className="rounded-full px-6 gap-2"
                   size="lg"
-                  aria-describedby={motivationBlocks ? "save-blocked-hint" : undefined}
                 >
                   {saving ? (
                     <><Loader2 className="h-4 w-4 animate-spin" /> {tp("saving")}</>
@@ -536,25 +534,11 @@ const SitterProfile = () => {
             </TooltipTrigger>
             {!canSave && !saving && (
               <TooltipContent side="top">
-                {motivationBlocks
-                  ? tp("tooltip_motivation", { count: motivationLength })
-                  : !dirty
-                    ? tp("tooltip_nothing")
-                    : tp("tooltip_blocked")}
+                {tp("tooltip_nothing")}
               </TooltipContent>
             )}
           </Tooltip>
           </div>
-          {motivationBlocks && !saving && (
-            <p
-              id="save-blocked-hint"
-              role="status"
-              aria-live="polite"
-              className="text-xs text-warning-foreground bg-warning/15 border border-warning/30 rounded-md px-3 py-2"
-            >
-              {tp("tooltip_motivation", { count: motivationLength })}
-            </p>
-          )}
           </div>
         </div>
       </TooltipProvider>
