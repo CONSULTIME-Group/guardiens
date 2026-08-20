@@ -163,11 +163,15 @@ export function useOwnerTopAffinitySitters(): Result {
         });
       }
 
-      // Tri : affinité d'abord, puis la confiance départage (vérifiés
-      // devant à score égal), puis la distance.
+      // Chaîne de départage (règle 2 du bloc normatif) : affinité d'abord,
+      // puis identité vérifiée, puis photo de profil présente, puis
+      // distance. Les signaux de confiance départagent, ils ne notent pas.
       scored.sort((a, b) => {
         if (b.affinity.score !== a.affinity.score) return b.affinity.score - a.affinity.score;
         if (a.identity_verified !== b.identity_verified) return a.identity_verified ? -1 : 1;
+        const aPhoto = a.avatar_url ? 1 : 0;
+        const bPhoto = b.avatar_url ? 1 : 0;
+        if (aPhoto !== bPhoto) return bPhoto - aPhoto;
         const da = a.distance_km ?? 999;
         const db = b.distance_km ?? 999;
         return da - db;

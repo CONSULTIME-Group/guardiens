@@ -15,7 +15,7 @@ import { useOwnerProfile } from "@/hooks/useOwnerProfile";
 import { trackEvent } from "@/lib/analytics";
 
 export default function OwnerFirstNBAGardiens() {
-  const { topSitters, isLoading } = useOwnerTopAffinitySitters();
+  const { topSitters, totalPool, isLoading } = useOwnerTopAffinitySitters();
   const { data: owner } = useOwnerProfile();
   const seenRef = useRef(false);
 
@@ -38,7 +38,8 @@ export default function OwnerFirstNBAGardiens() {
 
   // Doctrine : la section ne doit JAMAIS être vide dès qu'il existe au
   // moins un candidat, y compris si le meilleur score est bas. Le repli
-  // « parrainage » ne s'affiche que sans aucun gardien dans le vivier.
+  // « parrainage » ne s'affiche que sans aucun gardien dans le vivier, et
+  // la porte de sortie vers la liste complète y reste (règle 1 bis).
   if (topSitters.length === 0) {
     return (
       <section className="rounded-2xl border border-border bg-card p-5 md:p-6">
@@ -48,7 +49,13 @@ export default function OwnerFirstNBAGardiens() {
         <p className="text-sm text-muted-foreground mt-2">
           Nous cherchons des gardiens dans votre secteur, revenez dans quelques jours ou parrainez un proche.
         </p>
-        <div className="mt-4">
+        <div className="mt-4 flex flex-col items-start gap-3">
+          <Link
+            to="/search?role=sitter"
+            className="text-sm text-primary hover:underline underline-offset-2 font-medium"
+          >
+            Voir tous les gardiens
+          </Link>
           <Button asChild variant="outline" className="rounded-xl">
             <Link to="/inscription?role=sitter&refer=owner">Parrainer un proche gardien</Link>
           </Button>
@@ -76,7 +83,18 @@ export default function OwnerFirstNBAGardiens() {
         ))}
       </ul>
 
-      <div className="mt-4 flex justify-center">
+      {/* Porte de sortie obligatoire (règle 1 bis) : un extrait de
+          classement sans lien vers la liste complète est une exclusion.
+          Le nombre est le vivier réel (totalPool), pas un chiffre
+          générique. Libellé sans « de votre secteur » : le compteur est
+          national, la promesse doit rester vraie. */}
+      <div className="mt-4 flex flex-col sm:flex-row items-center justify-center gap-x-6 gap-y-2">
+        <Link
+          to="/search?role=sitter"
+          className="text-sm text-primary hover:underline underline-offset-2 font-medium"
+        >
+          {totalPool > 0 ? `Voir les ${totalPool} gardiens` : "Voir tous les gardiens"}
+        </Link>
         <Link
           to="/sits/create"
           className="text-sm text-primary hover:underline underline-offset-2 font-medium inline-flex items-center gap-1"
