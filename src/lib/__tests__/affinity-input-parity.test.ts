@@ -22,7 +22,10 @@
  * champ retiré d'une source.
  *
  * Verrous côté gardien (16 champs) :
- * 1. Chaque source par projection SQL couvre les 16 champs.
+ * 1. Chaque source par projection SQL couvre les 16 champs. select("*")
+ *    n'est PAS une exemption : il prouve les colonnes de la table, pas que
+ *    l'objet transmis au moteur les porte. Tout re-mapping partiel (entre
+ *    1 et 15 clés gardien) en aval d'un star est interdit.
  * 2. Chaque source par littéral typé construit les 16 clés.
  *
  * Verrous côté propriétaire (10 champs) :
@@ -35,12 +38,18 @@
  *    fournir accepts_sitter_* (colonnes de sits) ni car_required (colonne
  *    de properties).
  * 6. Les animaux du propriétaire sont projetés avec species, special_needs
- *    ET breed partout.
+ *    ET breed partout, y compris le repli anonyme public_pets de SitDetail
+ *    (projection explicite exigée : un star sur une vue amputée ne prouve
+ *    rien, special_needs y manquait avant le 20/08/2026).
+ * 7. Toute surface disposant d'une annonce dans son périmètre lit
+ *    accepts_sitter_pets / accepts_sitter_children depuis cette annonce,
+ *    jamais null (règle produit du 21/08/2026). Un null n'est permis que
+ *    hors contexte annonce et doit porter le commentaire qui le justifie.
  *
  * Verrous transverses :
- * 7. Les relais restent des relais (aucune requête sitter ou propriétaire
+ * 8. Les relais restent des relais (aucune requête sitter ou propriétaire
  *    propre).
- * 8. Tout appel DIRECT au moteur (computeAffinityResultFull ou son alias
+ * 9. Tout appel DIRECT au moteur (computeAffinityResultFull ou son alias
  *    computeAffinityScore) doit être répertorié ici : un nouvel appelant
  *    non déclaré fait échouer la suite.
  */
@@ -98,7 +107,7 @@ function projectedColumns(path: string, tables: string[]): { cols: Set<string>; 
   const cols = new Set<string>();
   let star = false;
   const re = new RegExp(
-    `\\.from\\(\\s*["'\`](?:${tables.join("|")})["'\`]\\s*\\)[\\s\\S]{0,1500}?\\.select\\(\\s*("[^"]*"|'[^']*'|\`[^\`]*\`|[A-Z][A-Z0-9_]+)`,
+    `\\.from\\(\\s*["'\`](?:${tables.join("|")})["'\`](?:\\s+as\\s+\\w+)?\\s*\\)[\\s\\S]{0,1500}?\\.select\\(\\s*("[^"]*"|'[^']*'|\`[^\`]*\`|[A-Z][A-Z0-9_]+)`,
     "g",
   );
   for (const m of src.matchAll(re)) {
@@ -315,7 +324,22 @@ describe("parité des entrées du moteur d'affinité", () => {
     for (const path of SOURCES_PROJECTION) {
       it(`${path} projette les 16 champs`, () => {
         const { cols, star } = projectedSitterColumns(path);
-        if (star) return; // select("*") : complet par construction
+        if (star) {
+          // select("*") prouve les colonnes de la TABLE, pas que l'objet
+          // transmis au moteur les porte (le bug ApplicationsList du
+          // 20/08/2026 sous une autre forme). Exigence assortie : la ligne
+          // doit arriver au moteur sans re-plucking. Tout littéral qui
+          // remappe une partie seulement des champs gardien est interdit.
+          const src = read(path);
+          const remapped = sitterFields.filter((f) =>
+            new RegExp(`^\\s*${f}\\s*:`, "m").test(src),
+          );
+          expect(
+            remapped.length === 0 || remapped.length === sitterFields.length,
+            `${path} : select("*") suivi d'un re-mapping partiel (${remapped.length}/${sitterFields.length} clés : ${remapped.join(", ")}). Transmettre la ligne brute ou construire les ${sitterFields.length} clés.`,
+          ).toBe(true);
+          return;
+        }
         const missing = sitterFields.filter((f) => !cols.has(f));
         expect(
           missing,
@@ -401,6 +425,67 @@ describe("parité des entrées du moteur d'affinité", () => {
     });
   });
 
+  /* ------ politiques accompagnants : lues depuis l'annonce, jamais null ------ */
+
+  /**
+   * Règle produit du 21/08/2026. Toute surface qui dispose d'une annonce
+   * dans son périmètre DOIT lire accepts_sitter_pets et
+   * accepts_sitter_children depuis cette annonce : ce sont les surfaces où
+   * un humain choisit quelqu'un, et le seul motif d'exclusion légitime
+   * (incompatibilité déclarée) doit y être visible. Le troisième élément de
+   * chaque entrée est la preuve statique de lecture depuis l'annonce.
+   */
+  const SIT_CONTEXT_SURFACES: Array<[string, RegExp, string]> = [
+    ["src/components/sits/ApplicationsList.tsx", /from\("sits"\)\s*\.select\(\s*"accepts_sitter_pets, accepts_sitter_children/, "requête sits dédiée"],
+    ["src/components/sits/ApplicationModal.tsx", /from\("sits"\)\s*\.select\(\s*"accepts_sitter_pets, accepts_sitter_children/, "requête sits dédiée"],
+    ["src/hooks/useOwnerDashboardData.ts", /sit:sits\([^)]*accepts_sitter_pets[^)]*accepts_sitter_children/, "embed sit des candidatures"],
+    ["src/components/dashboard/owner/OwnerStarSection.tsx", /accepts_sitter_pets:\s*app\.sit\?\./, "embed sit de chaque candidature"],
+    ["src/components/ai/alma/AlmaFitGardien.tsx", /accepts_sitter_pets:\s*targetSit\.accepts_sitter_pets/, "annonce cible chargée par le composant"],
+    ["src/pages/SitDetail.tsx", /accepts_sitter_pets:\s*\(sitData as any\)\?\./, "RPC get_public_sit"],
+    ["src/components/sits/PublicSitView.tsx", /accepts_sitter_pets:\s*\(sit as any\)\./, "annonce affichée"],
+    ["src/pages/Sits.tsx", /accepts_sitter_pets:\s*sit\.accepts_sitter_pets/, "annonce de la liste"],
+    ["src/components/favorites/SitCard.tsx", /accepts_sitter_pets:\s*sit\.accepts_sitter_pets/, "annonce favorite"],
+    ["src/hooks/useSitterTopAffinitySits.ts", /accepts_sitter_pets:\s*sit\.accepts_sitter_pets/, "annonce du classement gardien"],
+    ["supabase/functions/send-sitter-daily-digest/index.ts", /accepts_sitter_pets:\s*sit\.accepts_sitter_pets/, "annonce du digest"],
+  ];
+
+  describe("politiques accompagnants et contexte annonce", () => {
+    for (const [path, evidence, label] of SIT_CONTEXT_SURFACES) {
+      it(`${path} lit accepts_sitter_* depuis l'annonce (${label})`, () => {
+        const src = read(path);
+        expect(
+          src,
+          `${path} : annonce en contexte mais politiques accompagnants non lues depuis celle-ci`,
+        ).toMatch(evidence);
+        expect(
+          /accepts_sitter_(pets|children)\s*:\s*null\b/.test(src),
+          `${path} dispose d'une annonce : accepts_sitter_* ne doit jamais être mis à null ici`,
+        ).toBe(false);
+      });
+    }
+
+    it("tout null sur accepts_sitter_* porte un commentaire qui le justifie (surface sans annonce)", () => {
+      const offenders: string[] = [];
+      for (const base of ["src", "supabase/functions"]) {
+        for (const full of walk(resolve(ROOT, base))) {
+          const rel = full.slice(ROOT.length + 1).replace(/\\/g, "/");
+          const lines = readFileSync(full, "utf8").split("\n");
+          lines.forEach((line, i) => {
+            if (!/accepts_sitter_(pets|children)\s*:\s*null\b/.test(line)) return;
+            const context = lines.slice(Math.max(0, i - 3), i + 1).join("\n");
+            if (!context.includes("//") && !context.includes("/*")) {
+              offenders.push(`${rel}:${i + 1}`);
+            }
+          });
+        }
+      }
+      expect(
+        offenders,
+        `accepts_sitter_* mis à null sans commentaire justificatif :\n${offenders.join("\n")}`,
+      ).toEqual([]);
+    });
+  });
+
   describe("sources propriétaire par spread (enrichissement hors table)", () => {
     it("ApplicationModal injecte les 4 champs hors table et projette les 6 colonnes + animaux complets", () => {
       const path = "src/components/sits/ApplicationModal.tsx";
@@ -428,8 +513,22 @@ describe("parité des entrées du moteur d'affinité", () => {
       }
       const ownerProj = projectedColumns(path, ["owner_profiles"]);
       expect(ownerProj.star, "owner_profiles doit être sélectionné avec select(\"*\")").toBe(true);
+      // Animaux : la table pets reste en select("*") (toutes colonnes), mais
+      // le repli anonyme public_pets doit PROUVER ses colonnes. Un star sur
+      // une vue amputée ne prouve rien : special_needs y manquait avant le
+      // 20/08/2026, evalSpecialNeeds était muet pour tout visiteur anonyme.
       const petsProj = projectedColumns(path, ["pets"]);
       expect(petsProj.star, "pets doit être sélectionné avec select(\"*\")").toBe(true);
+      const publicPetsProj = projectedColumns(path, ["public_pets"]);
+      expect(
+        publicPetsProj.star,
+        "public_pets ne doit pas être sélectionné en select(\"*\") : projection explicite exigée",
+      ).toBe(false);
+      const missingPublicPetCols = PETS_TRIPLE.filter((c) => !publicPetsProj.cols.has(c));
+      expect(
+        missingPublicPetCols,
+        `projection public_pets incomplète (repli anonyme), manque ${missingPublicPetCols.join(", ")}`,
+      ).toEqual([]);
     });
 
     it("PublicSitterProfile couvre les 10 champs pour AffinitySection", () => {
