@@ -59,7 +59,22 @@ export function useOwnerTopAffinitySitters(): Result {
 
   const q = useQuery({
     queryKey: ["owner-top-affinity-sitters", userId],
-...
+    enabled: !!userId,
+    staleTime: 10 * 60 * 1000,
+    gcTime: 15 * 60 * 1000,
+    queryFn: async () => {
+      // 1. Owner : coordonnées + prefs matching + pets + voiture requise
+      const [{ data: me }, { data: ownerPrefs }, { data: pets }, { data: myProperties }] = await Promise.all([
+        supabase.from("profiles").select("latitude, longitude, city").eq("id", userId!).maybeSingle(),
+        supabase.from("owner_profiles").select("preferred_sitter_types, home_ambiance, languages, interests, life_pace, presence_expected").eq("user_id", userId!).maybeSingle(),
+        supabase.from("pets").select("species, special_needs, breed, property_id, properties!inner(user_id)").eq("properties.user_id", userId!),
+        supabase.from("properties").select("car_required").eq("user_id", userId!),
+      ]);
+
+      const meLat = (me?.latitude as number | null) ?? null;
+      const meLng = (me?.longitude as number | null) ?? null;
+      const hasGeo = meLat !== null && meLng !== null;
+
       // 2. Vivier de gardiens actifs, COMPLET : aucun filtre de confiance
       // (identité vérifiée, complétude). La vue public_profiles ne contient
       // déjà que des comptes actifs avec prénom, c'est la seule hygiène
