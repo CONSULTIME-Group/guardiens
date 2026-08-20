@@ -328,7 +328,9 @@ const ApplicationsStar = ({
   const { owner } = useViewerOwnerForAffinity();
 
   // Choix du candidat mis en avant (règles produit, lot affinité août 2026) :
-  //  1. meilleur score d'affinité, Y COMPRIS si ce meilleur score est bas ;
+  //  1. meilleur score de tri (sortScore = score × confiance, 20/08/2026) :
+  //     un profil vide à 100 % affiché ne passe plus devant un profil
+  //     documenté, Y COMPRIS si ce meilleur score est bas ;
   //  2. une incompatibilité déclarée (allergie, refus animaux/enfants) n'est
   //     jamais mise en avant, SAUF si c'est la seule candidature ;
   //  3. la section n'est JAMAIS vide dès qu'il existe une candidature :
@@ -345,8 +347,8 @@ const ApplicationsStar = ({
       if (!input) continue;
       const r = computeAffinityResultFull(owner, input);
       if (r.hasDeclaredIncompatibility && pendingApps.length > 1) continue;
-      if (typeof r.score === "number" && r.score > bestScore) {
-        bestScore = r.score;
+      if (r.sortScore > bestScore) {
+        bestScore = r.sortScore;
         featured = app;
         featuredAffinity = r;
         featuredInput = input;

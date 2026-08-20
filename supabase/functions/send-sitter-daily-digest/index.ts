@@ -307,7 +307,7 @@ Deno.serve(async (req) => {
         // 2f. Score par annonce via le moteur unique partagé, mode
         // distribution : seuls les refus explicitement déclarés par le
         // gardien excluent (distributable=false), jamais un score bas.
-        const scoredRows: Array<{ row: QueueRow; score: number; sit: SitRow }> = []
+        const scoredRows: Array<{ row: QueueRow; score: number; sortScore: number; sit: SitRow }> = []
         for (const q of rows) {
           let sit = sitCache.get(q.sit_id) as SitRow | undefined
           if (!sit) {
@@ -341,7 +341,9 @@ Deno.serve(async (req) => {
             await markSkipped(supabase, [q.id], 'declared_refusal', body.dry_run)
             continue
           }
-          scoredRows.push({ row: q, score: result.score, sit })
+          // score = brut (affiché dans l'email), sortScore = pondéré par la
+          // confiance (classement, défaut 1b du 20/08/2026).
+          scoredRows.push({ row: q, score: result.score, sortScore: result.sortScore, sit })
         }
 
         if (scoredRows.length === 0) {
@@ -352,9 +354,9 @@ Deno.serve(async (req) => {
           continue
         }
 
-        // 2g. Tri : score moteur unique DESC, distance ASC.
+        // 2g. Tri : score de tri (pondéré par la confiance) DESC, distance ASC.
         scoredRows.sort((a, b) => {
-          if (a.score !== b.score) return b.score - a.score
+          if (a.sortScore !== b.sortScore) return b.sortScore - a.sortScore
           const aDist = a.row.distance_km ?? Number.POSITIVE_INFINITY
           const bDist = b.row.distance_km ?? Number.POSITIVE_INFINITY
           return aDist - bDist

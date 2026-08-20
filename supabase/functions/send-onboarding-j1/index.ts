@@ -158,9 +158,11 @@ Deno.serve(async (req) => {
           return { p, result, distance }
         }).filter((x) => x.result.distributable)
 
-        // Tri : affinité d'abord, identité vérifiée en départage, distance.
+        // Tri : score de tri (pondéré par la confiance, 20/08/2026) d'abord,
+        // identité vérifiée en départage, distance. Le score brut reste
+        // celui affiché dans l'email.
         scored.sort((a, b) =>
-          (b.result.score - a.result.score)
+          (b.result.sortScore - a.result.sortScore)
           || (Number(b.p.identity_verified === true) - Number(a.p.identity_verified === true))
           || ((a.distance ?? Number.POSITIVE_INFINITY) - (b.distance ?? Number.POSITIVE_INFINITY))
         )

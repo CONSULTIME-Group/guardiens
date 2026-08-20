@@ -896,7 +896,10 @@ const SearchOwner = () => {
     const affinityRank = (s: any) => {
       const a = s._affinity;
       if (!a || a.displayed === false) return -1;
-      return a.score ?? 0;
+      // Tri sur le score pondéré par la confiance (défaut 1b, 20/08/2026) :
+      // le score brut reste affiché, le classement ne récompense plus le
+      // profil vide.
+      return a.sortScore ?? 0;
     };
 
     const sorted = [...zoned];

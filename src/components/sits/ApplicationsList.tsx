@@ -558,9 +558,11 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, prope
   const rawActive = applications.filter(a => !["rejected", "cancelled"].includes(a.status));
   const declinedApps = applications.filter(a => ["rejected", "cancelled"].includes(a.status));
 
-  // Précalcul du score d'affinité par candidat, pour le tri.
+  // Précalcul du score d'affinité par candidat : le score brut sert à
+  // l'AFFICHAGE (couleur de la puce), le score de tri (pondéré par la
+  // confiance, défaut 1b du 20/08/2026) sert au CLASSEMENT.
   const affinityByApp = useMemo(() => {
-    const map = new Map<string, number>();
+    const map = new Map<string, { score: number; sortScore: number }>();
     if (!viewerOwner) return map;
     const ownerWithSit: AffinityOwnerInput = {
       ...(viewerOwner as AffinityOwnerInput),
@@ -573,7 +575,7 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, prope
       // entre toujours dans le tri ; seul l'affichage du chiffre dépend de
       // `scoreReliable` côté badge.
       const res = computeAffinityResultFull(ownerWithSit, app.sitterAffinityInput);
-      map.set(app.id, res.score);
+      map.set(app.id, { score: res.score, sortScore: res.sortScore });
     });
     return map;
   }, [rawActive, viewerOwner, sitContext.accepts_sitter_pets, sitContext.accepts_sitter_children]);
@@ -592,8 +594,8 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, prope
       const pb = isPending(b.status) ? 0 : 1;
       if (pa !== pb) return pa - pb;
       if (sortMode === "affinity") {
-        const sa = affinityByApp.get(a.id) ?? -1;
-        const sb = affinityByApp.get(b.id) ?? -1;
+        const sa = affinityByApp.get(a.id)?.sortScore ?? -1;
+        const sb = affinityByApp.get(b.id)?.sortScore ?? -1;
         if (sa !== sb) return sb - sa;
       } else if (sortMode === "rating") {
         const ra = a.avgRating ? parseFloat(a.avgRating) : -1;
@@ -622,7 +624,8 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, prope
     const receivedLabel = app.created_at
       ? `Reçue ${formatDistanceToNow(new Date(app.created_at), { addSuffix: true, locale: fr })}`
       : null;
-    const affinityScore = affinityByApp.get(app.id);
+    // Couleur de la puce : score brut affiché, jamais le score de tri.
+    const affinityScore = affinityByApp.get(app.id)?.score;
     const affinityClass =
       typeof affinityScore === "number"
         ? affinityScore >= 70

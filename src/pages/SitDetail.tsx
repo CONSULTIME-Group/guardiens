@@ -123,7 +123,7 @@ const SitDetail = () => {
       if (user?.id && user.id === (sitData as any).user_id) {
         const { data: privateRow } = await supabase
           .from("sits")
-          .select("cover_photo_url, logement_override, animaux_override, last_unpublished_reason")
+          .select("cover_photo_url, logement_override, animaux_override, last_unpublished_reason, absence_reason, sitter_expectations, specific_expectations")
           .eq("id", (sitData as any).id)
           .maybeSingle();
         if (privateRow) ownerFields = privateRow as Record<string, any>;

@@ -92,12 +92,12 @@ describe("computeAffinityScore", () => {
   it("3 critères DONT un critère dur (présence) tous matchés = 100 %, affiché", () => {
     const full = computeAffinityResultFull(
       {
-        presence_expected: "100% sur place",
+        presence_expected: "Absences courtes OK",
         languages: ["Français"],
         interests: ["Randonnée", "Vélo"],
       },
       {
-        work_during_sit: "on_site",
+        work_during_sit: "full_remote",
         languages: ["Français"],
         interests: ["Randonnée", "Vélo"],
       },
@@ -179,7 +179,7 @@ describe("computeAffinityScore", () => {
     expect(d.distributable).toBe(false);
   });
 
-  it("présence 100% sur place est compatible avec n'importe quel rythme de travail", () => {
+  it("« 100% sur place » sort du dénominateur : compatible par construction, rien à noter (défaut 1a)", () => {
     const r = computeAffinityResultFull(
       {
         presence_expected: "100% sur place",
@@ -193,9 +193,10 @@ describe("computeAffinityScore", () => {
       },
     );
     expect(r).not.toBeNull();
-    // présence(2) + pace(1) + langue(1) = 4 / 9 ≈ 44%
-    expect(r!.score).toBeGreaterThanOrEqual(40);
-    expect(r!.matched).toContain("Présence compatible");
+    // pace(1) + langue(1) : la présence n'entre plus en compte.
+    expect(r!.total).toBe(2);
+    expect(r!.score).toBe(100);
+    expect(r!.matched).not.toContain("Présence compatible");
   });
 
 
@@ -512,8 +513,12 @@ describe("règles lot affinité 20/08/2026", () => {
     const withoutCar = computeAffinityResultFull(ownerBase, {
       has_vehicle: false, has_license: false, lifestyle: ["Tranquille / casanier"], languages: ["Français"],
     });
-    // Pas de points véhicule, mais le gardien reste listé avec un score honnête.
-    expect(withoutCar.score).toBeLessThan(withCar.score);
+    // Silence neutre (défaut 3, 20/08/2026) : le critère sort du
+    // dénominateur, le score BRUT n'est pas pénalisé. C'est le score de
+    // tri, pondéré par la confiance, qui fait descendre le profil muet,
+    // et l'explication reste affichée (c'est elle qui porte l'info).
+    expect(withoutCar.score).toBe(withCar.score);
+    expect(withoutCar.sortScore).toBeLessThan(withCar.sortScore);
     expect(withoutCar.explanation.some((e) => /véhicule/i.test(e))).toBe(true);
     // Le permis seul compte comme mobilité déclarée.
     const licenseOnly = computeAffinityResultFull(ownerBase, {
@@ -527,6 +532,65 @@ describe("règles lot affinité 20/08/2026", () => {
     );
     expect(notRequired.total).toBe(1);
   });
+
+  it("défaut 1 : un gardien totalement silencieux n'obtient plus 100 %", () => {
+    // Cas mesuré le 20/08/2026 : 362 gardiens sans AUCUNE déclaration
+    // obtenaient 100 % chez un propriétaire « 100% sur place », car la
+    // présence, compatible par construction, leur donnait 2/2.
+    const r = computeAffinityResultFull(
+      { presence_expected: "100% sur place", life_pace: "calme", languages: ["Français"] },
+      {},
+    );
+    expect(r.total).toBe(0);
+    expect(r.score).toBe(0);
+    expect(r.confidence).toBe(0);
+    expect(r.sortScore).toBe(0);
+  });
+
+  it("défaut 1b : le tri utilise le score pondéré par la confiance, pas le score brut", () => {
+    const owner = {
+      pets: [{ species: "dog" }],
+      life_pace: "calme",
+      languages: ["Français"],
+      interests: ["Randonnée"],
+    };
+    // Gardien presque vide : une seule langue commune, score brut 100.
+    const silencieux = computeAffinityResultFull(owner, { languages: ["Français"] });
+    // Gardien documenté : animaux + langue matchés, un intérêt commun,
+    // rythme opposé déclaré, score brut 70.
+    const documente = computeAffinityResultFull(owner, {
+      animal_types: ["Chiens"],
+      languages: ["Français"],
+      interests: ["Randonnée"],
+      life_pace: "actif",
+    });
+    expect(silencieux.score).toBe(100);
+    expect(documente.score).toBe(70);
+    // Le chiffre affiché reste le score brut ; le CLASSEMENT inverse l'ordre.
+    expect(documente.sortScore).toBeGreaterThan(silencieux.sortScore);
+  });
+
+  it("défaut 2 : beaucoup de tags d'ambiance ne gonflent plus le poids du critère", () => {
+    // Mesuré : un propriétaire à 7 tags faisait peser l'ambiance 7 contre 2
+    // pour les animaux. Le critère pèse désormais 1, moyenne des tags.
+    const unTag = computeAffinityResultFull(
+      { home_ambiance: ["Calme et posé"], languages: ["Français"] },
+      { life_pace: "calme", languages: ["Français"] },
+    );
+    const cinqTags = computeAffinityResultFull(
+      {
+        home_ambiance: ["Calme et posé", "Cocon casanier", "Sportif outdoor", "Campagne", "Famille animée"],
+        languages: ["Français"],
+      },
+      { life_pace: "calme", languages: ["Français"] },
+    );
+    // Même nombre de critères évalués : le dénominateur ne gonfle pas.
+    expect(cinqTags.total).toBe(unTag.total);
+    // Les points sont la moyenne par tag : (1+1+0+0+0,5)/5 = 0,5 sur 1.
+    expect(unTag.score).toBe(100);
+    expect(cinqTags.score).toBe(75);
+  });
+
 
   it("présence : repli sur availability_during quand work_during_sit est vide", () => {
     const r = computeAffinityResultFull(

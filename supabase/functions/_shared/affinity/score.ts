@@ -145,6 +145,19 @@ export interface AffinityResult {
   hasDeclaredIncompatibility: boolean;
   /** Vrai s'il est responsable de notifier/emailer ce couple. */
   distributable: boolean;
+  /**
+   * Confiance du score : poids réellement évalué / poids maximal possible
+   * pour ce couple (0..1). Un profil qui ne déclare rien a une confiance
+   * faible : ses critères défavorables disparaissent du dénominateur au
+   * lieu de le pénaliser, la confiance corrige cela au CLASSEMENT.
+   */
+  confidence: number;
+  /**
+   * Score de TRI = score affiché × confiance (défaut 1b, décision du
+   * 20/08/2026). C'est LUI qui ordonne toutes les listes (Top 3, recherche,
+   * candidatures, digest). Le score brut reste celui qu'on AFFICHE.
+   */
+  sortScore: number;
 }
 
 export interface AffinityThresholds {
@@ -369,16 +382,30 @@ const WORK_RANK: Record<string, number> = {
  * aucun masquage, le gardien reste dans la liste, plus bas.
  * `vehicle_type` est volontairement ignoré : renseigné sur 0 profil sur 1 029.
  */
-function evalVehicle(owner: AffinityOwnerInput, sitter: AffinitySitterInput): CriterionEval | null {
-  if (owner.car_required !== true) return null;
+function evalVehicle(
+  owner: AffinityOwnerInput,
+  sitter: AffinitySitterInput,
+): { crit: CriterionEval | null; explanation: string[] } {
+  if (owner.car_required !== true) return { crit: null, explanation: [] };
   const declared = sitter.has_vehicle === true || sitter.has_license === true;
+  if (!declared) {
+    // Doctrine « le silence est neutre » (défaut 3, décision du 20/08/2026),
+    // aligné sur evalAnimals : rien de déclaré ⇒ le critère sort du
+    // dénominateur, AUCUNE pénalité. L'explication reste affichée, c'est
+    // elle qui porte l'information, pas le score.
+    return {
+      crit: null,
+      explanation: ["N'a pas déclaré de véhicule, alors qu'une voiture est nécessaire sur place"],
+    };
+  }
   return {
-    weight: 2,
-    points: declared ? 2 : 0,
-    matched: declared ? ["Véhiculé, comme vous le souhaitez"] : [],
-    explanation: declared
-      ? []
-      : ["N'a pas déclaré de véhicule, alors qu'une voiture est nécessaire sur place"],
+    crit: {
+      weight: 2,
+      points: 2,
+      matched: ["Véhiculé, comme vous le souhaitez"],
+      explanation: [],
+    },
+    explanation: [],
   };
 }
 
@@ -391,6 +418,12 @@ function evalPresence(owner: AffinityOwnerInput, sitter: AffinitySitterInput): C
     ?? null;
   if (!need || !work) return null;
   if (PRESENCE_NO_REQUIREMENT.has(normalizeFreeText(need))) return null;
+  // « 100% sur place » = le propriétaire est lui-même présent en continu :
+  // le rythme de travail du gardien est sans objet, la présence est
+  // compatible par construction POUR TOUT LE MONDE. Un critère satisfait
+  // par construction ne discrimine rien : il sort du dénominateur comme un
+  // critère non évaluable, et rien ne s'affiche (défaut 1a, 20/08/2026).
+  if (need === PRESENCE_100) return null;
 
   const rank = WORK_RANK[work];
   if (rank == null) return null;
@@ -400,13 +433,6 @@ function evalPresence(owner: AffinityOwnerInput, sitter: AffinitySitterInput): C
   let explanation: string | null = null;
 
   switch (need) {
-    case PRESENCE_100:
-      // « 100% sur place » = le propriétaire est lui-même présent en
-      // continu : le rythme de travail du gardien est sans objet, la
-      // présence est compatible par construction.
-      points = 2;
-      matched = "Présence compatible";
-      break;
     case PRESENCE_REMOTE_OK:
       if (rank >= WORK_RANK[WORK_PARTIAL_REMOTE]) { points = 2; matched = "Peut télétravailler chez vous"; }
       else if (work === WORK_OUT_DAYTIME) { points = 1; explanation = "Absent dans la journée"; }
@@ -531,12 +557,10 @@ function evalAmbiance(owner: AffinityOwnerInput, sitter: AffinitySitterInput): C
   const hasRuralInterest = (RURAL_INTERESTS as readonly string[]).some((i) => sitterInterests.has(i));
 
   let points = 0;
-  let weight = 0;
   let anyGood = false;
   let anyBad = false;
 
   for (const tag of tags) {
-    weight += 1;
     switch (tag) {
       case AMBIANCE_COCON:
       case AMBIANCE_CALME_POSE:
@@ -562,7 +586,12 @@ function evalAmbiance(owner: AffinityOwnerInput, sitter: AffinitySitterInput): C
   }
 
   const matched = anyGood && !anyBad ? ["Compatible avec l'ambiance de votre foyer"] : [];
-  return { weight, points, matched, explanation: [] };
+  // Poids FIXE 1, comme les autres critères mous (défaut 2, décision du
+  // 20/08/2026) : un propriétaire qui coche beaucoup de tags exprime une
+  // ouverture, pas une exigence plusieurs fois plus forte. Les points sont
+  // la MOYENNE des scores par tag, jamais leur somme : l'ambiance ne peut
+  // plus peser plus lourd que les animaux.
+  return { weight: 1, points: points / tags.length, matched, explanation: [] };
 }
 
 function evalSpecialNeeds(owner: AffinityOwnerInput, sitter: AffinitySitterInput): CriterionEval | null {
@@ -588,6 +617,42 @@ function evalSpecialNeeds(owner: AffinityOwnerInput, sitter: AffinitySitterInput
     matched: points > 0 ? ["Compétent pour les besoins de vos animaux"] : [],
     explanation: points === 0 ? ["Ne déclare pas les compétences attendues par vos animaux"] : [],
   };
+}
+
+/**
+ * Poids maximal atteignable pour CE couple, déterminé par les seules
+ * données du propriétaire : chaque critère compte s'il POURRAIT être évalué
+ * avec un gardien qui aurait tout déclaré. Sert au dénominateur de la
+ * confiance (défaut 1b, décision du 20/08/2026). Miroir strict des
+ * conditions d'entrée de chaque critère, côté propriétaire uniquement.
+ */
+function maxPossibleWeight(owner: AffinityOwnerInput): number {
+  let w = 0;
+  // Animaux : 2 si le propriétaire a au moins une espèce connue.
+  const species = new Set<string>();
+  for (const p of toArray(owner.pets)) {
+    const canon = SPECIES_NORMALIZE[normalizeFreeText(p.species)];
+    if (canon) species.add(canon);
+  }
+  if (species.size > 0) w += 2;
+  // Présence : 2 uniquement si l'exigence est discriminante. « 100% sur
+  // place » est exclu : compatible par construction, il ne note rien.
+  const need = owner.presence_expected;
+  if (need === PRESENCE_REMOTE_OK || need === PRESENCE_SHORT_ABSENCES) w += 2;
+  // Véhicule : 2 si la voiture est requise sur place.
+  if (owner.car_required === true) w += 2;
+  if (toArray(owner.preferred_sitter_types).length > 0) w += 1;
+  if (owner.life_pace && (PACE_ORDER as readonly string[]).includes(owner.life_pace)) w += 1;
+  if (toArray(owner.languages).length > 0) w += 1;
+  if (toArray(owner.interests).length > 0) w += 1;
+  if (toArray(owner.home_ambiance).some((t) => (HOME_AMBIANCE_SCORED_TAGS as readonly string[]).includes(t))) w += 1;
+  // Besoins spéciaux : 1 si le texte des besoins matche un signal connu.
+  const needsText = toArray(owner.pets).map((p) => p.special_needs).filter(Boolean).join(" ; ");
+  if (needsText) {
+    const text = normalizeFreeText(needsText);
+    if (SPECIAL_NEED_SIGNALS.some((sig) => sig.keywords.some((k) => text.includes(k)))) w += 1;
+  }
+  return w;
 }
 
 // ---------------------------------------------------------------------------
@@ -618,7 +683,7 @@ export function computeAffinityResultFull(
   const criteria: CriterionEval[] = [
     animals.crit,
     presence,
-    vehicle,
+    vehicle.crit,
     evalIdealProfile(owner, sitter),
     evalPace(owner, sitter),
     evalLanguages(owner, sitter),
@@ -638,6 +703,9 @@ export function computeAffinityResultFull(
     // Chips emphatiques espèces remarquables (2e phrase du critère animaux).
     for (const extra of c.matched.slice(1)) matched.push(extra);
   }
+  // Frein véhicule hors critère : quand rien n'est déclaré, le critère sort
+  // du dénominateur (silence neutre) mais l'information reste affichée.
+  explanation.push(...vehicle.explanation);
 
   // --- 2. Refus déclarés ---
   const blockedSensitivities = animals.blockedSensitivities;
@@ -673,7 +741,19 @@ export function computeAffinityResultFull(
   const evaluated = criteria.length;
   const score = maxPoints > 0 ? Math.round((points / maxPoints) * 100) : 0;
 
-  const hardEvaluated = animals.crit != null || presence != null || vehicle != null;
+  // --- 3bis. Score de tri (défaut 1b, décision du 20/08/2026) ---
+  // Un dénominateur dynamique récompense mécaniquement le profil vide : ses
+  // critères défavorables disparaissent du calcul au lieu de le pénaliser,
+  // et un 100 % construit sur un seul critère passait devant un 78 %
+  // construit sur sept. Le CHIFFRE AFFICHÉ reste le score brut ; le
+  // CLASSEMENT utilise le score pondéré par la confiance (poids réellement
+  // évalué / poids maximal possible pour ce couple). Personne n'est
+  // éliminé : tout le monde reste dans la liste, on trie mieux.
+  const maxWeight = maxPossibleWeight(owner);
+  const confidence = maxWeight > 0 ? Math.min(1, maxPoints / maxWeight) : 0;
+  const sortScore = Math.round(score * confidence);
+
+  const hardEvaluated = animals.crit != null || presence != null || vehicle.crit != null;
   const scoreReliable = evaluated >= thresholds.minCommonCriteria && hardEvaluated;
 
   // --- 4. Affichage du CHIFFRE (jamais une exclusion de liste) ---
@@ -716,6 +796,8 @@ export function computeAffinityResultFull(
     scoreReliable,
     hasDeclaredIncompatibility,
     distributable,
+    confidence,
+    sortScore,
   };
 }
 
