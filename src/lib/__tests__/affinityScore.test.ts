@@ -151,22 +151,26 @@ describe("computeAffinityScore", () => {
   });
 
 
-  it("disqualifie un sitter qui refuse les chiens si l'owner a un chien", () => {
-    const r = computeAffinityScore(
-      {
-        life_pace: "calme",
-        languages: ["Français"],
-        interests: ["Lecture"],
-        pets: [{ species: "dog" }],
-      },
-      {
-        life_pace: "calme",
-        languages: ["Français"],
-        interests: ["Lecture"],
-        sensitivities: ["Pas de très grands chiens"],
-      },
-    );
-    expect(r).toBeNull();
+  it("refus des grands chiens déclaré : incompatibilité signalée, jamais d'élimination en liste", () => {
+    // Sans race renseignée, la prudence s'applique : le refus est respecté
+    // en distribution, le gardien reste listé en affichage.
+    const owner = {
+      life_pace: "calme",
+      languages: ["Français"],
+      interests: ["Lecture"],
+      pets: [{ species: "dog" }],
+    };
+    const sitter = {
+      life_pace: "calme",
+      languages: ["Français"],
+      interests: ["Lecture"],
+      sensitivities: ["Pas de très grands chiens"],
+    };
+    const r = computeAffinityScore(owner, sitter);
+    expect(r).not.toBeNull();
+    expect(r!.hasDeclaredIncompatibility).toBe(true);
+    expect(r!.hiddenReason).toBe("disqualified");
+    expect(computeAffinityScore(owner, sitter, { mode: "distribution" })).toBeNull();
   });
 
   it("présence 100% sur place est compatible avec n'importe quel rythme de travail", () => {
@@ -246,6 +250,8 @@ describe("computeAffinityScore", () => {
     expect(r).not.toBeNull();
     expect(r!.displayed).toBe(false);
     expect(r!.hiddenReason).toBe("below_threshold");
+    // Doctrine : le score sous le seuil reste calculé (tri), seul le chiffre
+    // est masqué. computeAffinityScore ne retourne plus jamais null en liste.
     expect(computeAffinityScore(
       {
         life_pace: "calme",
@@ -259,7 +265,7 @@ describe("computeAffinityScore", () => {
         interests: ["Vélo"],
         work_during_sit: "out_daytime",
       },
-    )).toBeNull();
+    )).not.toBeNull();
   });
 
   it("pondération : animaux + présence pèsent plus que langues + intérêts", () => {
@@ -299,20 +305,20 @@ describe("computeAffinityScore", () => {
     expect(a!.score).toBeGreaterThan(b!.score);
   });
 
-  it("signale displayed:false avec raison too_few_criteria sous 2 critères communs", () => {
+  it("signale displayed:false avec raison no_hard_criterion quand aucun critère dur n'est évaluable", () => {
     const r = computeAffinityResultFull(
       { life_pace: "calme" },
       { life_pace: "calme" },
     );
     expect(r).not.toBeNull();
     expect(r!.displayed).toBe(false);
-    expect(r!.hiddenReason).toBe("too_few_criteria");
+    expect(r!.hiddenReason).toBe("no_hard_criterion");
   });
 
 
 
 
-  it("garde-fou espèces : owner chat + sitter chien = no_animal_species_match", () => {
+  it("aucune espèce couverte : chiffre masqué (no_animal_species_match), gardien JAMAIS éliminé", () => {
     const r = computeAffinityResultFull(
       { pets: [{ species: "cat" }], life_pace: "calme", languages: ["Français"] },
       { animal_types: ["dog"], life_pace: "calme", languages: ["Français"] },
@@ -320,10 +326,12 @@ describe("computeAffinityScore", () => {
     expect(r).not.toBeNull();
     expect(r!.displayed).toBe(false);
     expect(r!.hiddenReason).toBe("no_animal_species_match");
+    // Doctrine : pas un refus déclaré, donc distribuable (alertes incluses).
+    expect(r!.distributable).toBe(true);
     expect(computeAffinityScore(
       { pets: [{ species: "cat" }], life_pace: "calme", languages: ["Français"] },
       { animal_types: ["dog"], life_pace: "calme", languages: ["Français"] },
-    )).toBeNull();
+    )).not.toBeNull();
   });
 
   it("garde-fou accompagnants : accepts_sitter_pets='no' + travels_with_own_animals=true = disqualification", () => {
@@ -370,11 +378,11 @@ describe("computeAffinityScore", () => {
       },
     );
     expect(r).not.toBeNull();
-    expect(r!.hiddenReason).toBeUndefined();
+    expect(r!.hiddenReason).toBeNull();
     expect(r!.notes?.some((n) => /discuter/i.test(n))).toBe(true);
   });
 
-  it("score 100 % : tous les 7 critères matchent avec MAX_WEIGHT=9", () => {
+  it("score 100 % : tous les critères évalués matchent (dénominateur dynamique)", () => {
     const r = computeAffinityScore(
       {
         pets: [{ species: "cat" }, { species: "cat" }],
