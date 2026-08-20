@@ -333,7 +333,7 @@ export function useSitterTopAffinitySits(): Result {
             // Photos du lieu de vie : couverture de l'annonce ou photos du
             // logement. Départage à affinité égale, jamais un filtre.
             hasPlacePhoto:
-              !!card.cover_photo_url || placePhotosByProperty.get(sit.property_id) === true,
+              !!card.cover_photo_url || placePhotosByProperty.get(raw?.property_id) === true,
           };
         }),
         alert,
