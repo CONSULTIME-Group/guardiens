@@ -1,5 +1,5 @@
 import * as React from 'npm:react@18.3.1'
-import { renderAsync } from 'npm:@react-email/components@0.0.22'
+import { render } from 'npm:@react-email/components@0.0.22'
 import { createClient } from 'npm:@supabase/supabase-js@2'
 import { TEMPLATES } from '../_shared/transactional-email-templates/registry.ts'
 import { SignupEmail } from '../_shared/email-templates/signup.tsx'
@@ -66,7 +66,7 @@ Deno.serve(async (req) => {
       })
     }
     try {
-      const html = await renderAsync(React.createElement(authTpl.component, authTpl.sampleData))
+      const html = render(React.createElement(authTpl.component, authTpl.sampleData))
       return new Response(JSON.stringify({ html }), {
         status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       })
@@ -102,7 +102,7 @@ Deno.serve(async (req) => {
 
   try {
     const previewData = template.previewData || {}
-    const html = await renderAsync(React.createElement(template.component, previewData))
+    const html = render(React.createElement(template.component, previewData))
     const resolvedSubject = typeof template.subject === 'function'
       ? template.subject(previewData)
       : template.subject

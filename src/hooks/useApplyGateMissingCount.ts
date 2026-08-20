@@ -1,7 +1,8 @@
 /**
- * Nombre de critères réellement manquants pour franchir le seuil de candidature.
+ * Critères réellement manquants pour franchir le seuil de candidature.
  * Sert uniquement à formuler la mention sous le bouton « Postuler », pour ne
- * jamais afficher un texte figé.
+ * jamais afficher un texte figé : le gardien doit lire ce qui manque,
+ * nommément, pas un compteur abstrait.
  */
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -11,13 +12,19 @@ import {
   missingFor,
 } from "@/components/profile/CompleteProfileToApplyModal";
 
-export function useApplyGateMissingCount(enabled: boolean): number | null {
+export interface ApplyGateMissing {
+  count: number;
+  /** Titres des champs manquants, dans l'ordre du barème. */
+  titles: string[];
+}
+
+export function useApplyGateMissingCount(enabled: boolean): ApplyGateMissing | null {
   const { user } = useAuth();
-  const [count, setCount] = useState<number | null>(null);
+  const [missingInfo, setMissingInfo] = useState<ApplyGateMissing | null>(null);
 
   useEffect(() => {
     if (!enabled || !user) {
-      setCount(null);
+      setMissingInfo(null);
       return;
     }
     let cancelled = false;
@@ -55,14 +62,15 @@ export function useApplyGateMissingCount(enabled: boolean): number | null {
         // proposée qu'en cas d'élargissement du barème.
         has_gallery: true,
       });
-      setCount(APPLY_GATE_FIELDS.filter((f) => missing[f.key]).length);
+      const fields = APPLY_GATE_FIELDS.filter((f) => missing[f.key]);
+      setMissingInfo({ count: fields.length, titles: fields.map((f) => f.title) });
     })();
     return () => {
       cancelled = true;
     };
   }, [enabled, user]);
 
-  return count;
+  return missingInfo;
 }
 
 export default useApplyGateMissingCount;
