@@ -156,10 +156,10 @@ function objectBlockAfter(src: string, marker: string): string {
   throw new Error(`accolade fermante introuvable après : ${marker}`);
 }
 
-/** Clés en début de ligne d'un bloc (clés de niveau 1 et clés imbriquées multilignes). */
+/** Clés en début de ligne d'un bloc, formes `cle:` et raccourcie `cle,`. */
 function blockKeys(block: string): Set<string> {
   const keys = new Set<string>();
-  for (const k of block.matchAll(/^\s*([a-z_]+)\s*:/gm)) keys.add(k[1]);
+  for (const k of block.matchAll(/^\s*([a-z_]+)\s*[,:]/gm)) keys.add(k[1]);
   return keys;
 }
 
