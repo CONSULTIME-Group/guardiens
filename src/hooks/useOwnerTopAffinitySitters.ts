@@ -119,7 +119,7 @@ export function useOwnerTopAffinitySitters(): Result {
         const da = a.distance_km ?? Number.POSITIVE_INFINITY;
         const db = b.distance_km ?? Number.POSITIVE_INFINITY;
         if (da !== db) return da - db;
-        // Sans coordonnées à départager, les profils vérifiés d'abord.
+        // Sans coordonnées à départager, l'identité vérifiée d'abord.
         return Number(b.identity_verified === true) - Number(a.identity_verified === true);
       });
       const scoped = byDistance.slice(0, POOL_SCORING_CAP);
