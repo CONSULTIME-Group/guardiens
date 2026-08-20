@@ -54,4 +54,33 @@ describe("rankSitterListings", () => {
     });
     expect(result.listings[0].id).toBe("preferred");
   });
+  it("dans un meme palier de distance, la meilleure affinite devient la vedette", () => {
+    const result = rankSitterListings({
+      listings: [
+        listing("moins-affine", 45.85, 81),
+        listing("plus-affine", 45.9, 88),
+        listing("troisieme", 45.99, 60),
+      ],
+      alert: null,
+      sitterCoords: { lat: 45.76, lng: 4.84 },
+      preferredEnvironments: [],
+    });
+    expect(result.source).toBe("distance");
+    // Palier <= 30 km pour les trois : l'affinite decide, pas la distance.
+    expect(result.listings.map((item) => item.id)).toEqual(["plus-affine", "moins-affine", "troisieme"]);
+  });
+
+  it("un palier plus proche prime toujours sur une meilleure affinite", () => {
+    const result = rankSitterListings({
+      listings: [
+        listing("loin-tres-affine", 46.3, 95),
+        listing("tout-pres", 45.8, 30),
+      ],
+      alert: null,
+      sitterCoords: { lat: 45.76, lng: 4.84 },
+      preferredEnvironments: [],
+    });
+    // 4 km (palier <= 30) devant 60 km (palier <= 100), malgre 95 % d'affinite.
+    expect(result.listings.map((item) => item.id)).toEqual(["tout-pres", "loin-tres-affine"]);
+  });
 });
