@@ -233,9 +233,14 @@ const SitDetail = () => {
         if (fullPets && fullPets.length > 0) {
           setPets(fullPets);
         } else {
+          // Repli anonyme : projection EXPLICITE, jamais select("*"). Un star
+          // sur une vue ne prouve rien (special_needs en était absent avant le
+          // 20/08/2026, ce qui rendait evalSpecialNeeds muet pour tout
+          // visiteur anonyme). Verrou : affinity-input-parity.test.ts exige
+          // species, special_needs et breed ici.
           const { data: safePets } = await supabase
             .from("public_pets" as any)
-            .select("*")
+            .select("id, property_id, species, breed, name, age, photo_url, character, activity_level, alone_duration, walk_duration, special_needs")
             .eq("property_id", propertyData.id);
           setPets((safePets as any) || []);
         }

@@ -20,6 +20,9 @@ interface Sit {
   title: string | null;
   start_date: string | null;
   end_date: string | null;
+  // Politiques accompagnants de l'annonce, contexte d'affinité (21/08/2026).
+  accepts_sitter_pets: string | null;
+  accepts_sitter_children: string | null;
 }
 
 interface Props {
