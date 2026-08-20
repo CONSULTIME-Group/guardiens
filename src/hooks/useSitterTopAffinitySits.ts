@@ -97,9 +97,9 @@ export function useSitterTopAffinitySits(): Result {
       const [{ data: sitter }, { data: profile }] = await Promise.all([
         supabase
           .from("sitter_profiles")
+          // 16 champs d'AffinitySitterInput + preferred_environments :
+          // parité des entrées verrouillée par affinity-input-parity.test.ts.
           .select(
-            // 16 champs d'AffinitySitterInput + preferred_environments :
-            // parité des entrées verrouillée par affinity-input-parity.test.ts.
             "animal_types, life_pace, lifestyle, availability_during, has_vehicle, has_license, languages, interests, work_during_sit, sensitivities, special_animal_skills, sitter_type, experience_years, travels_with_children, travels_with_own_animals, farm_animals_ok, preferred_environments",
           )
           .eq("user_id", userId!)
