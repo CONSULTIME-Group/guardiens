@@ -31,7 +31,9 @@ import SitterEntraideSection from "./sitter/SitterEntraideSection";
 import PetAdviceSection from "./shared/PetAdviceSection";
 import NextStepRailCard from "./shared/NextStepRailCard";
 import RailReadingsCard from "./shared/RailReadingsCard";
+import DashboardRail from "./shared/DashboardRail";
 import { useRailReadings } from "@/hooks/useRailReadings";
+import { useProfileCompletionMissing } from "@/hooks/useProfileCompletionMissing";
 import { sitterNextStep } from "@/lib/dashboardNextStep";
 
 import { useIsNewSitter } from "@/hooks/useIsNewUser";
@@ -143,6 +145,10 @@ const SitterDashboard = () => {
   // Appelé inconditionnellement (règle des hooks), avant tout early return.
   const railReadings = useRailReadings({ role: "sitter", userId: user?.id });
 
+  // Touches manquantes du barème : au-dessus de 90 %, le rail nomme
+  // précisément ce qui reste à faire (correctif phrase 97 %, août 2026).
+  const completionMissing = useProfileCompletionMissing("sitter", user?.id);
+
   // Bloc (b) du rail : la garde confirmée à venir prime toujours sur les
   // étapes de profil. Identique pour les deux variantes (nouveau gardien :
   // nextGuard est null par construction).
@@ -155,6 +161,7 @@ const SitterDashboard = () => {
       ? { title: identityRailAction.title, cta: identityRailAction.ctaLabel, href: identityRailAction.ctaTo }
       : null,
     profileCompletion: profileCompletion ?? 0,
+    missing: completionMissing,
   });
 
   if (loading) return <SitterDashboardSkeleton />;
@@ -384,9 +391,10 @@ const SitterDashboard = () => {
             </div>
 
 
-            {/* ═══ RAIL collant (droite) — espacement 34px, mt-[52px] mobile.
-                même haut de colonne que le cockpit, aucun décalage vertical. ═══ */}
-            <aside className="mt-[52px] lg:mt-0 space-y-[34px] lg:col-span-4 lg:sticky lg:top-20 lg:self-start lg:max-h-[calc(100vh-6rem)] lg:overflow-y-auto">
+            {/* ═══ RAIL droite — espacement 34px, mt-[52px] mobile. Collant
+                seulement si son contenu tient dans la fenêtre, sinon il
+                défile avec la page : jamais de défilement interne. ═══ */}
+            <DashboardRail>
               {/* a. Pouls : seul bloc sombre de la page */}
               <div className="">
                 <CommunityPulseBanner userId={user?.id} />
@@ -422,7 +430,7 @@ const SitterDashboard = () => {
                   ? <AccessGateBanner level={level} profileCompletion={accessProfileCompletion} context="guard" />
                   : <FreePeriodBanner />}
               </div>
-            </aside>
+            </DashboardRail>
           </div>
 
         ) : (
@@ -506,8 +514,9 @@ const SitterDashboard = () => {
 
 
 
-            {/* ═══ RAIL collant (droite) : a. Pouls  b. Prochain pas  c. Alma  d. À lire  + accès ═══ */}
-            <aside className="mt-[52px] lg:mt-0 space-y-[34px] lg:col-span-4 lg:sticky lg:top-20 lg:self-start lg:max-h-[calc(100vh-6rem)] lg:overflow-y-auto">
+            {/* ═══ RAIL droite : a. Pouls  b. Prochain pas  c. Alma  d. À lire  + accès.
+                Collant seulement si son contenu tient dans la fenêtre. ═══ */}
+            <DashboardRail>
               {/* a. Pouls : seul bloc sombre de la page */}
               <div className="">
                 <CommunityPulseBanner userId={user?.id} />
@@ -542,7 +551,7 @@ const SitterDashboard = () => {
                   ? <AccessGateBanner level={level} profileCompletion={accessProfileCompletion} context="guard" />
                   : <FreePeriodBanner />}
               </div>
-            </aside>
+            </DashboardRail>
           </div>
         )}
       </div>
