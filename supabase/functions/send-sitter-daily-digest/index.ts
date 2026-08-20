@@ -3,8 +3,14 @@
 // Envoie chaque soir un digest quotidien aux gardiens ayant au moins une
 // entrée `queued` dans `sitter_digest_queue`. L'identité vérifiée n'est plus
 // un filtre d'éligibilité : c'est une clé de tri (vérifiés en tête de file).
+// Depuis le 20/08/2026, le score d'affinité est calculé ICI par le moteur
+// unique partagé (`_shared/affinity/score.ts`, le même que l'affichage), en
+// mode distribution : seuls les refus explicitement déclarés par le gardien
+// excluent une annonce, jamais un score bas. Le tri du top 3 est
+// (score DESC, distance ASC). La colonne SQL `affinity_score` de la file
+// n'est plus lue (NULL depuis la même date).
 // Pour chaque gardien :
-//  - top 3 par (affinity_score DESC NULLS LAST, distance ASC NULLS LAST)
+//  - top 3 par (score moteur unique DESC, distance ASC NULLS LAST)
 //  - anti-doublon : pas de digest dans les 24h (via email_send_log)
 //  - vérification suppression, opt-in email_preferences.new_sit_digest
 //  - envoi via `send-transactional-email` (template 'sitter-daily-digest')
@@ -21,6 +27,7 @@ import { claimSitNotification, raiseClaimErrorSignal, raiseStaleClaimSignal, rel
 import { parisWindowVerdict } from '../_shared/paris-hour.ts'
 import { recordDeliveryFailure } from '../_shared/delivery-failure.ts'
 import { startCronRun } from '../_shared/cron-run-log.ts'
+import { computeAffinityResultFull } from '../_shared/affinity/score.ts'
 
 // Heure de Paris visée pour ce passage, garde saison-proof (voir paris-hour.ts).
 const TARGET_PARIS_HOUR = 8
@@ -49,7 +56,13 @@ interface SitRow {
   status: string
   accepting_applications: boolean
   unpublished_at: string | null
+  accepts_sitter_pets: string | null
+  accepts_sitter_children: string | null
 }
+
+// Colonnes gardien consommées par le moteur unique d'affinité.
+// À maintenir en phase avec `AffinitySitterInput` (_shared/affinity/score.ts).
+const SITTER_AFFINITY_COLUMNS = 'user_id, experience_years, life_pace, lifestyle, availability_during, languages, interests, work_during_sit, meeting_preference, handover_preference, sensitivities, animal_types, sitter_type, special_animal_skills, travels_with_children, travels_with_own_animals, has_vehicle, has_license, farm_animals_ok'
 
 function formatFrDate(iso?: string | null): string | undefined {
   if (!iso) return undefined
