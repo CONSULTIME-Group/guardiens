@@ -3,6 +3,10 @@
 // Envoie chaque soir un digest quotidien aux gardiens ayant au moins une
 // entrée `queued` dans `sitter_digest_queue`. L'identité vérifiée n'est plus
 // un filtre d'éligibilité : c'est une clé de tri (vérifiés en tête de file).
+// La complétude de profil n'est pas un filtre non plus (décision du
+// 20/08/2026) : sous 60 % le gardien ne peut pas candidater, mais il reçoit
+// les annonces avec un appel à compléter son profil (même source de calcul
+// des manques que le bloc dashboard, `_shared/missing-opportunities`).
 // Depuis le 20/08/2026, le score d'affinité est calculé ICI par le moteur
 // unique partagé (`_shared/affinity/score.ts`, le même que l'affichage), en
 // mode distribution : seuls les refus explicitement déclarés par le gardien
