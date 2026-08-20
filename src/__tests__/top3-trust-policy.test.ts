@@ -4,9 +4,13 @@
  * Verrouille la règle définitive sur les trois viviers gardiens côté
  * propriétaire : Top 3 (useOwnerTopAffinitySitters), « près de chez vous »
  * (useNearbyOwnerSitters) et invitation groupée (BulkInviteNearestDialog).
- * La confiance (identité vérifiée, complétude) est une clé de tri et un
- * badge, jamais un filtre. Aucune constante d'arbitrage, aucune bascule :
- * si l'une réapparaît, ce test doit échouer.
+ * La confiance (identité vérifiée, photo, complétude) est une clé de
+ * départage et un badge, jamais un filtre. Aucune constante d'arbitrage,
+ * aucune bascule : si l'une réapparaît, ce test doit échouer.
+ *
+ * Règle 1 bis : un extrait de classement sans porte de sortie vers la liste
+ * complète est une exclusion déguisée. Le lien /search?role=sitter, avec le
+ * nombre réel, est verrouillé ici, y compris dans l'état vide.
  */
 import { describe, it, expect } from "vitest";
 import { readFileSync } from "node:fs";
@@ -40,10 +44,19 @@ describe("Viviers gardiens, règle définitive : on trie, on ne filtre jamais", 
     expect(hookSrc).not.toContain(".limit(300)");
   });
 
-  it("le tri du Top 3 est score décroissant, identité vérifiée en départage, distance croissante", () => {
+  it("la chaîne de départage est score, identité vérifiée, photo, distance", () => {
     expect(hookSrc).toContain("b.affinity.score - a.affinity.score");
     expect(hookSrc).toContain("a.identity_verified !== b.identity_verified");
+    expect(hookSrc).toContain("bPhoto - aPhoto");
     expect(hookSrc).toContain("return da - db;");
+    const scoreIdx = hookSrc.indexOf("b.affinity.score - a.affinity.score");
+    const idIdx = hookSrc.indexOf("a.identity_verified !== b.identity_verified");
+    const photoIdx = hookSrc.indexOf("bPhoto - aPhoto");
+    const distIdx = hookSrc.lastIndexOf("return da - db;");
+    expect(scoreIdx).toBeGreaterThan(-1);
+    expect(idIdx).toBeGreaterThan(scoreIdx);
+    expect(photoIdx).toBeGreaterThan(idIdx);
+    expect(distIdx).toBeGreaterThan(photoIdx);
   });
 
   it("les plafonds du Top 3 sont triés par distance d'abord et tracés, jamais silencieux", () => {
@@ -74,13 +87,40 @@ describe("Viviers gardiens, règle définitive : on trie, on ne filtre jamais", 
     expect(sliceIdx).toBeGreaterThan(sortIdx);
   });
 
-  it("la carte affiche le fait « Identité vérifiée » quand il est vrai", () => {
+  it("la carte affiche le badge « Identité vérifiée » quand il est vrai", () => {
     expect(cardSrc).toContain("sitter.identity_verified");
     expect(cardSrc).toContain("Identité vérifiée");
+  });
+
+  it("l'absence de badge reste neutre : rien de négatif ne la signale", () => {
+    expect(cardSrc).toContain("sitter.identity_verified &&");
+    expect(cardSrc).not.toContain("line-through");
+    expect(cardSrc).not.toContain("grayscale");
+    expect(cardSrc).not.toContain("non vérifié");
   });
 
   it("la section n'est jamais vide dès qu'il existe au moins un candidat", () => {
     expect(cardSrc).not.toContain("topSitters.length < 3");
     expect(cardSrc).toContain("topSitters.length === 0");
+  });
+});
+
+describe("Porte de sortie vers la liste complète (règle 1 bis)", () => {
+  it("le lien vers /search?role=sitter existe dans l'état rempli ET dans l'état vide", () => {
+    const occurrences = cardSrc.split('to="/search?role=sitter"').length - 1;
+    expect(occurrences).toBeGreaterThanOrEqual(2);
+  });
+
+  it("le libellé porte le nombre réel du vivier (totalPool), pas un générique", () => {
+    expect(cardSrc).toContain("totalPool");
+    expect(cardSrc).toContain("Voir les ${totalPool} gardiens");
+    expect(cardSrc).toContain("Voir tous les gardiens");
+  });
+
+  it("dans l'état vide, le lien vers la liste précède la proposition de parrainage", () => {
+    const linkIdx = cardSrc.indexOf('to="/search?role=sitter"');
+    const referIdx = cardSrc.indexOf("Parrainer un proche gardien");
+    expect(linkIdx).toBeGreaterThan(-1);
+    expect(referIdx).toBeGreaterThan(linkIdx);
   });
 });
