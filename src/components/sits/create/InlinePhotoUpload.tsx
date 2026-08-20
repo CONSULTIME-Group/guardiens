@@ -2,6 +2,7 @@ import { useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { compressImageFile } from "@/lib/compressImage";
 import { getImageDimensions } from "@/lib/imageDimensions";
+import { appendPropertyPhoto } from "@/lib/uploadOwnerPhoto";
 import { Button } from "@/components/ui/button";
 import { UploadCloud } from "lucide-react";
 import { toast } from "sonner";
@@ -43,6 +44,11 @@ const InlinePhotoUpload = ({ userId, nextPosition = 0, label = "Ajouter une phot
         height: dims.height || null,
       } as any);
       if (insertErr) throw insertErr;
+      // Branche aussi properties.photos / cover_photo_url (colonnes du
+      // logement), comme le parcours photo guidé : sans cette écriture les
+      // colonnes restent vides et l'annonce ne remonte pas dans le
+      // classement vu par les gardiens.
+      await appendPropertyPhoto(userId, urlData.publicUrl);
       onUploaded(urlData.publicUrl);
       toast.success("Photo ajoutée à votre galerie");
     } catch (e: any) {

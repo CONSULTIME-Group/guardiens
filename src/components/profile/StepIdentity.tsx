@@ -61,7 +61,9 @@ const StepIdentity = ({ data, onChange, onUploadAvatar }: Props) => {
               ? "Modifier votre photo de profil"
               : "Ajouter une photo de profil"}
         </span>
-        <HintBubble>C'est la première chose que les propriétaires regardent.</HintBubble>
+        <HintBubble>
+          Les propriétaires regardent votre photo avant tout le reste : à profil équivalent, elle vous fait passer devant dans leur classement.
+        </HintBubble>
       </div>
 
       {/* Name fields */}
