@@ -7093,6 +7093,7 @@ export type Database = {
           name: string | null
           photo_url: string | null
           property_id: string | null
+          special_needs: string | null
           species: Database["public"]["Enums"]["pet_species"] | null
           walk_duration: Database["public"]["Enums"]["walk_duration"] | null
         }
@@ -7106,6 +7107,7 @@ export type Database = {
           name?: string | null
           photo_url?: string | null
           property_id?: string | null
+          special_needs?: string | null
           species?: Database["public"]["Enums"]["pet_species"] | null
           walk_duration?: Database["public"]["Enums"]["walk_duration"] | null
         }
@@ -7119,6 +7121,7 @@ export type Database = {
           name?: string | null
           photo_url?: string | null
           property_id?: string | null
+          special_needs?: string | null
           species?: Database["public"]["Enums"]["pet_species"] | null
           walk_duration?: Database["public"]["Enums"]["walk_duration"] | null
         }
