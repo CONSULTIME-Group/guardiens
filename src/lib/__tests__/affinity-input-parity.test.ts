@@ -43,12 +43,12 @@ function interfaceFields(): string[] {
 /** Constantes locales `const NAME = "..."` ou `` `...` ``, interpolations résolues. */
 function collectConstStrings(src: string): Map<string, string> {
   const consts = new Map<string, string>();
-  const re = /const\s+([A-Z][A-Z0-9_]+)\s*=\s*(?:"([^"]*)"|`([^`]*)`)/g;
+  const re = /const\s+([A-Z][A-Z0-9_]+)\s*=\s*(?:"([^"]*)"|'([^']*)'|`([^`]*)`)/g;
   // Plusieurs passes : une constante peut en interpoler une autre.
   for (let pass = 0; pass < 4; pass++) {
     let changed = false;
     for (const m of src.matchAll(re)) {
-      const raw = m[2] ?? m[3] ?? "";
+      const raw = m[2] ?? m[3] ?? m[4] ?? "";
       const resolved = raw.replace(/\$\{([A-Z][A-Z0-9_]+)\}/g, (_, name) => {
         if (!consts.has(name)) throw new Error(`interpolation non résoluble : ${name}`);
         return consts.get(name)!;
@@ -83,9 +83,10 @@ function projectedSitterColumns(path: string): { cols: Set<string>; star: boolea
       const v = consts.get(expr);
       if (v == null) throw new Error(`${path} : projection ${expr} non résoluble statiquement`);
       value = v;
-    } else if (expr.startsWith('"') || expr.startsWith("`")) {
-      const raw = expr.replace(/^"|"$/g, "").replace(/^`|`$/g, "");
-      value = raw.replace(/\$\{([A-Z][A-Z0-9_]+)\}/g, (_, name) => {
+    } else if (expr.startsWith('"') || expr.startsWith("`") || expr.startsWith("'")) {
+      const mm = expr.match(/^"([^"]*)"/) ?? expr.match(/^'([^']*)'/) ?? expr.match(/^`([^`]*)`/);
+      if (!mm) throw new Error(`${path} : littéral de select illisible`);
+      value = mm[1].replace(/\$\{([A-Z][A-Z0-9_]+)\}/g, (_, name) => {
         if (!consts.has(name)) throw new Error(`${path} : interpolation ${name} non résoluble`);
         return consts.get(name)!;
       });
