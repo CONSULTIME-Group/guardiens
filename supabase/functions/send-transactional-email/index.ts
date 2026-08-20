@@ -1004,11 +1004,12 @@ Deno.serve(async (req) => {
     }
   }
 
-  // 4. Render React Email template to HTML and plain text
-  let html = await renderAsync(
+  // 4. Render React Email template to HTML and plain text (synchrone,
+  // voir la note d'import : renderAsync corrompt les accents).
+  let html = render(
     React.createElement(template.component, templateData)
   )
-  let plainText = await renderAsync(
+  let plainText = render(
     React.createElement(template.component, templateData),
     { plainText: true }
   )
