@@ -35,7 +35,7 @@ const RailReadingsCard = ({ items }: RailReadingsCardProps) => {
       </p>
 
       <ul className="mt-[12px]" style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
-        {items.map((item) => (
+        {items.slice(0, 3).map((item) => (
           <li key={item.key}>
             <Link
               to={item.href}

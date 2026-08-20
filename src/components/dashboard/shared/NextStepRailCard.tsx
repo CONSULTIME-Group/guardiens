@@ -27,7 +27,7 @@ const NextStepRailCard = ({ step }: NextStepRailCardProps) => (
   >
     <p
       style={{
-        color: "hsl(var(--secondary))",
+        color: "hsl(var(--foreground) / 0.72)",
         fontSize: "11px",
         fontWeight: 700,
         letterSpacing: "0.16em",
