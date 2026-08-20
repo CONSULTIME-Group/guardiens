@@ -69,7 +69,11 @@ const statusOrder: Record<string, number> = {
 const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, propertyId, sitStatus, statusFilter = null }: ApplicationsListProps) => {
   const { user } = useAuth();
   const { owner: viewerOwner } = useViewerOwnerForAffinity();
-  const [sitContext, setSitContext] = useState<{ accepts_sitter_pets: any; accepts_sitter_children: any }>({ accepts_sitter_pets: null, accepts_sitter_children: null });
+  // État initial indéterminé (undefined, pas null) : la valeur réelle est
+  // toujours relue depuis l'annonce. Règle du 21/08/2026, verrouillée par
+  // affinity-input-parity.test.ts (aucun null littéral sur une surface qui
+  // dispose d'une annonce).
+  const [sitContext, setSitContext] = useState<{ accepts_sitter_pets: any; accepts_sitter_children: any }>({ accepts_sitter_pets: undefined, accepts_sitter_children: undefined });
   const [applications, setApplications] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [confirmApp, setConfirmApp] = useState<any>(null);
