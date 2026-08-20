@@ -92,7 +92,7 @@ const SecondaryLink = ({ to, children }: { to: string; children: React.ReactNode
 
 const CardShell = ({ children }: { children: React.ReactNode }) => (
   <article
-    className="bg-card border border-border"
+    className="bg-card border border-border h-full"
     style={{
       borderRadius: "16px",
       padding: "22px",
@@ -123,8 +123,9 @@ const SitterEntraideSection = ({
         subtitle={helpersSignal}
       />
 
-      {/* Deux volets empilés, gap 14px, gabarit jumeau */}
-      <div className="flex flex-col" style={{ gap: "14px" }}>
+      {/* Deux volets côte à côte sur desktop (refonte rail, août 2026),
+          réempilés sur écran étroit, gabarit jumeau */}
+      <div className="grid grid-cols-1 md:grid-cols-2" style={{ gap: "14px" }}>
         {/* ── DONNER ── */}
         {firstNearbyMission ? (
           <CardShell>

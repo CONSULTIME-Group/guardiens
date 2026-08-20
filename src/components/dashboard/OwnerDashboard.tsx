@@ -6,7 +6,6 @@ import OnboardingWelcome from "./OnboardingWelcome";
 import NearbyOwnerSittersCard from "./owner/NearbyOwnerSittersCard";
 import NearbyEmergencySitters from "./NearbyEmergencySitters";
 import DashboardSkeleton from "@/components/skeletons/DashboardSkeleton";
-import { Link } from "react-router-dom";
 import { differenceInDays } from "date-fns";
 
 import RoleActivationBanner from "./RoleActivationBanner";
@@ -25,24 +24,22 @@ import SitterEntraideSection from "./sitter/SitterEntraideSection";
 import { useFirstNearbyMission } from "@/hooks/useFirstNearbyMission";
 import NearbySittersSection from "./owner/NearbySittersSection";
 import PetAdviceSection from "./shared/PetAdviceSection";
-import OwnerStageReadings from "./owner/OwnerStageReadings";
-import EntraideCtaCard from "./shared/EntraideCtaCard";
+import NextStepRailCard from "./shared/NextStepRailCard";
+import RailReadingsCard from "./shared/RailReadingsCard";
+import { useRailReadings } from "@/hooks/useRailReadings";
+import { ownerNextStep } from "@/lib/dashboardNextStep";
 
 import MobileStickyCTA from "./owner/MobileStickyCTA";
 import OwnerFirstNBAGardiens from "./OwnerFirstNBAGardiens";
 
 /* ── Vague 12 : rail ── */
 import CommunityPulseBanner from "./shared/CommunityPulseBanner";
-import HouseStoryRailCard from "./owner/HouseStoryRailCard";
 import AlmaRailWhisper from "./sitter/AlmaRailWhisper";
 import OwnerAffinityBanner from "@/components/matching/OwnerAffinityBanner";
 
 import { useOwnerPriorityAction } from "@/hooks/useOwnerPriorityAction";
 import PriorityActionCard from "./shared/PriorityActionCard";
 import { useOwnerPrimaryAction } from "@/hooks/useOwnerPrimaryAction";
-import AlmaSilentSitBubble from "@/components/ai/alma/AlmaSilentSitBubble";
-import { AlmaOwnerTrafficNoActionWhisper } from "@/components/ai/alma/wiring/AlmaOwnerTrafficNoActionWhisper";
-import { AlmaOwnerViewTrendWhisper } from "@/components/ai/alma/wiring/AlmaOwnerViewTrendWhisper";
 
 import type { Pet } from "./owner/types";
 import { useOwnerDashboardData } from "@/hooks/useOwnerDashboardData";
@@ -52,7 +49,6 @@ import { useNearbyOwnerSitters } from "@/hooks/useNearbyOwnerSitters";
 import { useNearbyHelpers } from "@/hooks/useNearbyHelpers";
 import { useHelpersProximityCount } from "@/hooks/useHelpersProximityCount";
 import { useIsNewOwner, isEarlyOwner, hasNoActiveSit } from "@/hooks/useIsNewUser";
-import { useAlmaCulturalFact } from "@/hooks/useAlmaCulturalFact";
 import { useAlmaUsageNudge } from "@/hooks/useAlmaUsageNudge";
 import { useAlmaFirstMeeting } from "@/hooks/useAlmaFirstMeeting";
 import { AlmaFirstMeeting } from "@/components/ai/alma/AlmaFirstMeeting";
@@ -61,7 +57,6 @@ import { trackEvent } from "@/lib/analytics";
 const OwnerDashboard = () => {
   const { user } = useAuth();
   const { shouldShow: showAlmaFirstMeeting, markSeen: markAlmaFirstMeetingSeen } = useAlmaFirstMeeting();
-  useAlmaCulturalFact({ surface: "dashboard", context: { role: "owner" }, enabled: !showAlmaFirstMeeting });
 
   /* ── Data fetching ── */
   const { data, loading, error, reload } = useOwnerDashboardData(user?.id);
@@ -92,11 +87,6 @@ const OwnerDashboard = () => {
   /* ── Derived values ── */
   const now = new Date();
   const activeSits = useMemo(() => sits.filter(s => ["published", "confirmed"].includes(s.status)), [sits]);
-  const completedSits = useMemo(() => sits.filter(s => s.status === "completed"), [sits]);
-  const avgRating = useMemo(() => {
-    if (reviews.length === 0) return 0;
-    return Math.round((reviews.reduce((s, r) => s + r.overall_rating, 0) / reviews.length) * 10) / 10;
-  }, [reviews]);
   const pendingAppCount = useMemo(() => recentApps.filter(a => a.status === "pending").length, [recentApps]);
 
   const latestDraft = useMemo(() => {
@@ -125,11 +115,13 @@ const OwnerDashboard = () => {
   const primaryAction = primaryActionData ?? null;
   const hasPrimaryAction = !!primaryAction?.action;
 
+  // Une seule voix Alma par écran, portée par AlmaRailWhisper dans le rail.
+  // Le nudge proactif reste désactivé ici (correctif « double voix », 16/08/2026).
   useAlmaUsageNudge({
     surface: "owner_dashboard",
     role: "owner",
     state: isNewOwner ? "new_owner" : noActiveSit ? "no_active_sit" : "any",
-    enabled: !showAlmaFirstMeeting && !hasPrimaryAction,
+    enabled: false,
   });
 
   const isOwnerRole = user?.role === "owner" || user?.role === "both";
@@ -229,6 +221,15 @@ const OwnerDashboard = () => {
     petsCount: pets.length,
   });
 
+  // Bloc « À lire » du rail : fiche race (animaux de la maison), saison,
+  // article d'étape. Appelé inconditionnellement (règle des hooks).
+  const ownerReadings = useRailReadings({
+    role: "owner",
+    userId: user?.id,
+    pets: pets as any,
+    stageVariant: priorityAction.variant,
+  });
+
   /* ── Analytics une fois par session ── */
   useEffect(() => {
     if (loading || !user?.id || !isNewOwner) return;
@@ -266,12 +267,11 @@ const OwnerDashboard = () => {
 
   const hasReadApps = recentApps.some(a => a.status !== "pending");
 
+  // Bloc (b) du rail : compléter son profil, tant qu'il reste du chemin.
+  const ownerNextStepRail = ownerNextStep({ profileCompletion: accessProfileCompletion ?? 0 });
+
   return (
     <div className="space-y-0 overflow-hidden lg:overflow-visible pb-[calc(10rem+env(safe-area-inset-bottom))] md:pb-32">
-      {/* Alma whispers */}
-      <AlmaOwnerTrafficNoActionWhisper sits={sits} />
-      <AlmaOwnerViewTrendWhisper />
-
       {showAlmaFirstMeeting && (
         <div className="px-4 sm:px-5 md:px-8 pt-2">
           <AlmaFirstMeeting role="owner" onDone={markAlmaFirstMeetingSeen} />
@@ -323,9 +323,6 @@ const OwnerDashboard = () => {
               />
             )}
 
-            {/* Alma bulle silencieuse : conservée dans le flux */}
-            <AlmaSilentSitBubble sits={sits as any} />
-
             {/* NBA gardiens si nouveau proprio sans annonce active */}
             {showAlmaProactive && !latestDraft && !ongoingSit && (
               <OwnerFirstNBAGardiens />
@@ -340,15 +337,6 @@ const OwnerDashboard = () => {
 
             {/* 3ter. Plafond de candidatures atteint : deux issues offertes */}
             <ApplicationCapSection sits={sits} onUpdated={reload} />
-
-            {/* 3bis. CTA Entraide — visible sans scroll excessif */}
-            <EntraideCtaCard
-              signal={
-                nearbyHelpersCount && nearbyHelpersCount > 0
-                  ? `${nearbyHelpersCount} personne${nearbyHelpersCount > 1 ? "s" : ""} prête${nearbyHelpersCount > 1 ? "s" : ""} à aider autour de vous.`
-                  : null
-              }
-            />
 
             {/* 4. VOTRE FAMILLE */}
             <OwnerFamilySection pets={pets} getNextSitForPet={getNextSitForPet} />
@@ -378,12 +366,6 @@ const OwnerDashboard = () => {
               />
             </div>
 
-            {/* 6bis. LECTURES DU MOMENT : 2 à 3 articles calés sur l'étape du parcours */}
-            <div className="px-4 sm:px-5 md:px-8">
-              <OwnerStageReadings variant={priorityAction.variant} />
-            </div>
-
-
             {/* Historique candidatures : accordéon discret tout en bas */}
             {hasReadApps && (
               <details className="rounded-2xl bg-card border border-border overflow-hidden">
@@ -406,101 +388,22 @@ const OwnerDashboard = () => {
             )}
           </div>
 
-          {/* ═══ RAIL collant (droite) — vague 12 ═══ */}
+          {/* ═══ RAIL collant (droite) : a. Pouls  b. Prochain pas  c. Alma  d. À lire  + accès ═══ */}
           <aside className="mt-[52px] lg:mt-0 space-y-[34px] lg:col-span-4 lg:sticky lg:top-20 lg:self-start lg:max-h-[calc(100vh-6rem)] lg:overflow-y-auto">
-            {/* 1. Pouls — seul bloc sombre */}
+            {/* a. Pouls — seul bloc sombre de la page */}
             <div className="">
               <CommunityPulseBanner userId={user?.id} />
             </div>
 
-            {/* 1bis. Activation affinité — profils anciens sans presence_expected */}
-            {!isNewOwner && (
-              <OwnerAffinityBanner context="dashboard_owner_rail" />
-            )}
-
-
-            {/* 2. Votre maison */}
-            <div className="">
-              <HouseStoryRailCard
-                userId={user?.id}
-                completedSits={completedSits.length}
-                avgRating={avgRating}
-                reviewsCount={reviews.length}
-                trustedSitterCount={trustedSitterCount}
-                highlightsCount={(highlights ?? []).length}
-                pendingReviewsCount={pendingReviews.length}
-                firstPendingReviewSitId={pendingReviews[0]?.sitId ?? null}
-              />
-            </div>
-
-            {/* 3. Accès (Gate ou Free) */}
-            <div className="">
-              {!(level === 4 || level === "3B")
-                ? <AccessGateBanner level={level} profileCompletion={accessProfileCompletion} context="guard" />
-                : <FreePeriodBanner />}
-            </div>
-
-            {/* 4. Gardiens d'urgence — condition existante */}
-            {showEmergencyHelp && (
+            {/* b. Prochain pas — terracotta doux, titre Playfair, progression */}
+            {ownerNextStepRail && (
               <div className="">
-                <NearbyEmergencySitters />
+                <NextStepRailCard step={ownerNextStepRail} />
               </div>
             )}
 
-            {/* 5. Parrainage — gabarit rail aligné */}
+            {/* c. Alma — une seule voix par écran, portée par le rail */}
             <div className="">
-              <article
-                className="bg-card border border-border"
-                style={{
-                  borderRadius: "20px",
-                  padding: "22px",
-                  boxShadow: "0 1px 2px rgba(29,27,22,0.04), 0 8px 24px rgba(29,27,22,0.05)",
-                }}
-              >
-                <div className="flex items-center gap-2">
-                  <span
-                    aria-hidden="true"
-                    className="inline-block"
-                    style={{ width: "20px", height: "1px", background: "hsl(var(--secondary))" }}
-                  />
-                  <p
-                    style={{
-                      color: "hsl(var(--secondary))",
-                      fontSize: "11px",
-                      fontWeight: 700,
-                      letterSpacing: "0.16em",
-                      textTransform: "uppercase",
-                    }}
-                  >
-                    Parrainage
-                  </p>
-                </div>
-                <h3
-                  className="font-heading text-foreground mt-[8px]"
-                  style={{ fontSize: "17px", fontWeight: 600, lineHeight: 1.3 }}
-                >
-                  Invitez un proche.
-                </h3>
-                <p
-                  className="font-sans text-muted-foreground mt-[8px]"
-                  style={{ fontSize: "13.5px", lineHeight: 1.5 }}
-                >
-                  Son inscription reste sans engagement et vous développez l'entraide autour de chez vous.
-                </p>
-                <div className="mt-[14px]">
-                  <Link
-                    to="/mon-abonnement#parrainage"
-                    className="text-primary hover:underline underline-offset-4"
-                    style={{ fontSize: "13px", fontWeight: 700 }}
-                  >
-                    Partager votre lien
-                  </Link>
-                </div>
-              </article>
-            </div>
-
-            {/* 6. Alma — clôt le rail */}
-            <div className="mb-6">
               <AlmaRailWhisper
                 variant="owner"
                 ownerState={{
@@ -516,6 +419,30 @@ const OwnerDashboard = () => {
                 }}
               />
             </div>
+
+            {/* d. À lire — fiche race, saison, journal (3 liens max) */}
+            {ownerReadings.length > 0 && (
+              <div className="">
+                <RailReadingsCard items={ownerReadings} />
+              </div>
+            )}
+
+            {/* 5. Accès (Gate ou Free) : clôt la grammaire canonique */}
+            <div className="">
+              {!(level === 4 || level === "3B")
+                ? <AccessGateBanner level={level} profileCompletion={accessProfileCompletion} context="guard" />
+                : <FreePeriodBanner />}
+            </div>
+
+            {/* Filets conditionnels, après la grammaire canonique */}
+            {showEmergencyHelp && (
+              <div className="">
+                <NearbyEmergencySitters />
+              </div>
+            )}
+            {!isNewOwner && (
+              <OwnerAffinityBanner context="dashboard_owner_rail" />
+            )}
           </aside>
         </div>
       </div>

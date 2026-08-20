@@ -75,6 +75,24 @@ export function rankSitterListings<T extends RankableListing>({
   const origin = alert?.center ?? sitterCoords;
   const preferred = new Set(preferredEnvironments.map(normalizeEnvironment));
 
+  /**
+   * Palier de proximité (0 = affiché en premier) : zone d'alerte (ou mode
+   * affinité nationale), puis tout près (<= 30 km), proche (<= 100 km),
+   * étendu (<= 200 km), au-delà, sans coordonnées. La géographie de
+   * l'alerte reste la priorité absolue : une annonce hors zone ne passe
+   * jamais devant une annonce dans la zone.
+   */
+  const tierOf = (entry: { distanceKm: number | null; inAlert: boolean }): number => {
+    if (alert && entry.inAlert) return 0;
+    if (source === "affinity") return 0;
+    const km = entry.distanceKm;
+    if (km == null) return 5;
+    if (km <= 30) return 1;
+    if (km <= 100) return 2;
+    if (km <= 200) return 3;
+    return 4;
+  };
+
   const ranked = listings
     .map((listing, index) => ({
       listing,
@@ -84,15 +102,18 @@ export function rankSitterListings<T extends RankableListing>({
       environmentMatches: environmentMatches(listing, preferred),
     }))
     .sort((a, b) => {
-      if (source === "alert" && a.inAlert !== b.inAlert) return a.inAlert ? -1 : 1;
+      const tierOrder = tierOf(a) - tierOf(b);
+      if (tierOrder !== 0) return tierOrder;
 
-      if (source === "distance" || (source === "alert" && !isNationalAlert(alert as ListingAlertPreference))) {
-        const distanceOrder = compareNullableAscending(a.distanceKm, b.distanceKm);
-        if (distanceOrder !== 0) return distanceOrder;
-      }
-
+      // Dans un même palier : la meilleure affinité en premier. La carte
+      // vedette (rang 0) porte donc toujours la meilleure affinité du
+      // palier affiché (correctif du cas 81 % vedette devant un 88 %).
       const affinityOrder = (b.listing.affinityScore ?? -1) - (a.listing.affinityScore ?? -1);
       if (affinityOrder !== 0) return affinityOrder;
+
+      const distanceOrder = compareNullableAscending(a.distanceKm, b.distanceKm);
+      if (distanceOrder !== 0) return distanceOrder;
+
       if (b.environmentMatches !== a.environmentMatches) return b.environmentMatches - a.environmentMatches;
       return a.index - b.index;
     })

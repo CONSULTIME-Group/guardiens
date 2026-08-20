@@ -5,7 +5,6 @@ import { useAlmaFirstMeeting } from "@/hooks/useAlmaFirstMeeting";
 import { AlmaFirstMeeting } from "@/components/ai/alma/AlmaFirstMeeting";
 import { useAuth } from "@/contexts/AuthContext";
 import { useSearchParams, Link, useNavigate } from "react-router-dom";
-import { useSubscriptionAccess } from "@/hooks/useSubscriptionAccess";
 import { useAccessLevel } from "@/hooks/useAccessLevel";
 import { useSitterDashboardData } from "@/hooks/useSitterDashboardData";
 import { useNearbyHelpers } from "@/hooks/useNearbyHelpers";
@@ -23,23 +22,17 @@ import CommunityPulseBanner from "./shared/CommunityPulseBanner";
 // NearbyAnnoncesCard retiré ici (vague 2) : la carte rencontre le remplace.
 import DashSection from "./owner/DashSection";
 import SitterDashboardSkeleton from "./sitter/SitterDashboardSkeleton";
-import SitterFirstNBA from "./SitterFirstNBA";
-import SitterFirstNBASkeleton from "./SitterFirstNBASkeleton";
 import SitterMatchSection from "./sitter/SitterMatchSection";
 import SitterStoryTiles from "./sitter/SitterStoryTiles";
-import NoNearbySitsEmptyState from "./NoNearbySitsEmptyState";
-import NextGuardRailCard from "./sitter/NextGuardRailCard";
-import ReputationRailCard from "./sitter/ReputationRailCard";
-import VerifiedSitterRailCard from "./sitter/VerifiedSitterRailCard";
 import AlmaRailWhisper from "./sitter/AlmaRailWhisper";
-import SitterAffinityBanner from "@/components/matching/SitterAffinityBanner";
-import { isPricingActive } from "@/lib/pricing";
-import { shouldShowVerifiedCard } from "@/lib/shouldShowVerifiedCard";
 import SitterOpeningCard from "./sitter/SitterOpeningCard";
-import SitterNextStepRailCard from "./sitter/SitterNextStepRailCard";
 import { useSitterPriorityAction } from "@/hooks/useSitterPriorityAction";
 import SitterEntraideSection from "./sitter/SitterEntraideSection";
 import PetAdviceSection from "./shared/PetAdviceSection";
+import NextStepRailCard from "./shared/NextStepRailCard";
+import RailReadingsCard from "./shared/RailReadingsCard";
+import { useRailReadings } from "@/hooks/useRailReadings";
+import { sitterNextStep } from "@/lib/dashboardNextStep";
 
 import { useIsNewSitter } from "@/hooks/useIsNewUser";
 import { useSitterTopAffinitySits } from "@/hooks/useSitterTopAffinitySits";
@@ -57,7 +50,6 @@ const SitterDashboard = () => {
   const navigate = useNavigate();
   const { level, profileCompletion: accessProfileCompletion } = useAccessLevel();
   const [searchParams, setSearchParams] = useSearchParams();
-  const { hasAccess: hasSubscription } = useSubscriptionAccess();
   // Premier contact Alma : bloque les whispers proactifs tant qu'il n'est pas vu.
   const { shouldShow: showAlmaFirstMeeting, markSeen: markAlmaFirstMeetingSeen } = useAlmaFirstMeeting();
   // Compagnon culturel désactivé sur cet écran : Alma parle une seule fois
@@ -146,6 +138,24 @@ const SitterDashboard = () => {
           ctaTo: sitterPriorityAction.ctaTo,
         }
       : null;
+
+  // Bloc « À lire » du rail : fiche race liée au membre, saison, journal.
+  // Appelé inconditionnellement (règle des hooks), avant tout early return.
+  const railReadings = useRailReadings({ role: "sitter", userId: user?.id });
+
+  // Bloc (b) du rail : la garde confirmée à venir prime toujours sur les
+  // étapes de profil. Identique pour les deux variantes (nouveau gardien :
+  // nextGuard est null par construction).
+  const nextStepRail = sitterNextStep({
+    nextGuard: (nextGuard as any) ?? null,
+    postalCode: postalCode ?? null,
+    hasAvatar: !!avatarUrl,
+    hasBio: !!(bio && bio.length >= 50),
+    identityAction: identityRailAction
+      ? { title: identityRailAction.title, cta: identityRailAction.ctaLabel, href: identityRailAction.ctaTo }
+      : null,
+    profileCompletion: profileCompletion ?? 0,
+  });
 
   if (loading) return <SitterDashboardSkeleton />;
   if (error) return <DashboardLoadError onRetry={reload} detail={error} />;
@@ -353,29 +363,10 @@ const SitterDashboard = () => {
               <SitterMatchSection
                 topSits={topSits}
                 fallbackSits={fallbackSits}
-                discoverySit={discoverySit}
                 rankingSource={rankingSource}
                 totalPublished={totalPublished}
                 isLoading={nbaLoading}
               />
-
-              {/* 3b. CONTEXTE : le pouls descend sous la zone des annonces,
-                  jamais en haut du rail (charte : accueil, émotion, action,
-                  contexte, voix). */}
-              <div className="">
-                <CommunityPulseBanner userId={user?.id} />
-              </div>
-
-              {/* 3c. VOIX : Alma parle ici, sous la zone des annonces et le
-                  pouls du réseau, jamais avant. Une seule voix par écran. */}
-              <div className="">
-                <AlmaRailWhisper
-                  profileCompletion={profileCompletion ?? 0}
-                  isAvailable={!!isAvailable}
-                  variant="newSitter"
-                  openingCardVisible={!allChecklistDone}
-                />
-              </div>
 
               {/* 4. ENTRAIDE bidimensionnelle (vague 20) */}
               <div className="">
@@ -396,21 +387,41 @@ const SitterDashboard = () => {
             {/* ═══ RAIL collant (droite) — espacement 34px, mt-[52px] mobile.
                 même haut de colonne que le cockpit, aucun décalage vertical. ═══ */}
             <aside className="mt-[52px] lg:mt-0 space-y-[34px] lg:col-span-4 lg:sticky lg:top-20 lg:self-start lg:max-h-[calc(100vh-6rem)] lg:overflow-y-auto">
+              {/* a. Pouls : seul bloc sombre de la page */}
+              <div className="">
+                <CommunityPulseBanner userId={user?.id} />
+              </div>
+
+              {/* b. Prochain pas : terracotta doux, titre Playfair, progression */}
+              {nextStepRail && (
+                <div className="">
+                  <NextStepRailCard step={nextStepRail} />
+                </div>
+              )}
+
+              {/* c. Alma : une seule voix par écran, portée par le rail */}
+              <div className="">
+                <AlmaRailWhisper
+                  profileCompletion={profileCompletion ?? 0}
+                  isAvailable={!!isAvailable}
+                  variant="newSitter"
+                  openingCardVisible={!allChecklistDone}
+                />
+              </div>
+
+              {/* d. À lire : fiche race, saison, journal (3 liens max) */}
+              {railReadings.length > 0 && (
+                <div className="">
+                  <RailReadingsCard items={railReadings} />
+                </div>
+              )}
+
+              {/* 5. Accès (Gate ou Free) : clôt toujours le rail */}
               <div className="">
                 {!(level === 4 || level === "3B")
                   ? <AccessGateBanner level={level} profileCompletion={accessProfileCompletion} context="guard" />
                   : <FreePeriodBanner />}
               </div>
-              {(!allChecklistDone || identityRailAction) && (
-                <div className="">
-                  <SitterNextStepRailCard
-                    hasAvatar={!!avatarUrl}
-                    hasBioMin={!!(bio && bio.length >= 50)}
-                    hasPostalCode={!!postalCode}
-                    action={identityRailAction}
-                  />
-                </div>
-              )}
             </aside>
           </div>
 
@@ -460,27 +471,19 @@ const SitterDashboard = () => {
                 <SitterMatchSection
                   topSits={topSits}
                   fallbackSits={fallbackSits}
-                  discoverySit={discoverySit}
                   rankingSource={rankingSource}
                   isLoading={nbaLoading}
                   totalPublished={totalPublished}
                 />
               </div>
 
-              {/* CONTEXTE — le pouls de la communauté descend sous la zone
-                  des annonces (charte : accueil, émotion, action, contexte,
-                  voix). Jamais en haut du rail, avant l'action. */}
+              {/* ENTRAIDE : remontée juste après la rencontre (refonte rail,
+                  août 2026). Les deux volets sont côte à côte sur desktop. */}
               <div className="">
-                <CommunityPulseBanner userId={user?.id} />
-              </div>
-
-              {/* VOIX : Alma parle ici, sous la zone des annonces et le
-                  pouls du réseau, jamais avant. Une seule voix par écran. */}
-              <div className="">
-                <AlmaRailWhisper
-                  profileCompletion={profileCompletion ?? 0}
-                  isAvailable={!!isAvailable}
-                  checklistVisible={!allChecklistDone}
+                <SitterEntraideSection
+                  firstNearbyMission={firstNearbyMission}
+                  myActiveMission={myActiveMission}
+                  nearbyHelpersCount={nearbyHelpersCount}
                 />
               </div>
 
@@ -495,15 +498,6 @@ const SitterDashboard = () => {
 
               {ChecklistBlock}
 
-              {/* VAGUE 20 — entraide bidimensionnelle */}
-              <div className="">
-                <SitterEntraideSection
-                  firstNearbyMission={firstNearbyMission}
-                  myActiveMission={myActiveMission}
-                  nearbyHelpersCount={nearbyHelpersCount}
-                />
-              </div>
-
               {/* Conseils ancrés sur les compagnons (lot 4, point 3) */}
               <div>
                 <PetAdviceSection />
@@ -512,46 +506,42 @@ const SitterDashboard = () => {
 
 
 
-            {/* ═══ RAIL collant (droite) — vague 4 ═══
-                Ordre narratif : affinité → prochaine garde (ou access/free) →
-                réputation. Espacement 34px, même haut de colonne que le
-                cockpit, aucun décalage vertical. Alma est dans le flux. */}
+            {/* ═══ RAIL collant (droite) : a. Pouls  b. Prochain pas  c. Alma  d. À lire  + accès ═══ */}
             <aside className="mt-[52px] lg:mt-0 space-y-[34px] lg:col-span-4 lg:sticky lg:top-20 lg:self-start lg:max-h-[calc(100vh-6rem)] lg:overflow-y-auto">
-              <SitterAffinityBanner />
-
+              {/* a. Pouls : seul bloc sombre de la page */}
               <div className="">
-                {nextGuard ? (
-                  <NextGuardRailCard nextGuard={nextGuard} />
-                ) : !(level === 4 || level === "3B") ? (
-                  <AccessGateBanner level={level} profileCompletion={accessProfileCompletion} context="guard" />
-                ) : (
-                  <FreePeriodBanner />
-                )}
+                <CommunityPulseBanner userId={user?.id} />
               </div>
+
+              {/* b. Prochain pas : terracotta doux, titre Playfair, progression */}
+              {nextStepRail && (
+                <div className="">
+                  <NextStepRailCard step={nextStepRail} />
+                </div>
+              )}
+
+              {/* c. Alma : une seule voix par écran, portée par le rail */}
               <div className="">
-                <ReputationRailCard
-                  userId={user?.id}
-                  completedSits={completedSits ?? 0}
-                  avgRating={avgRating ?? 0}
-                  reviewsCount={reviewsCount ?? 0}
-                  badgeCount={badgeCount ?? 0}
+                <AlmaRailWhisper
+                  profileCompletion={profileCompletion ?? 0}
+                  isAvailable={!!isAvailable}
+                  checklistVisible={!allChecklistDone}
                 />
               </div>
-              {identityRailAction && (
+
+              {/* d. À lire : fiche race, saison, journal (3 liens max) */}
+              {railReadings.length > 0 && (
                 <div className="">
-                  <SitterNextStepRailCard
-                    hasAvatar={!!avatarUrl}
-                    hasBioMin={!!(bio && bio.length >= 50)}
-                    hasPostalCode={!!postalCode}
-                    action={identityRailAction}
-                  />
+                  <RailReadingsCard items={railReadings} />
                 </div>
               )}
-              {shouldShowVerifiedCard(isPricingActive(), !!hasSubscription) && (
-                <div>
-                  <VerifiedSitterRailCard />
-                </div>
-              )}
+
+              {/* 5. Accès (Gate ou Free) : clôt toujours le rail */}
+              <div className="">
+                {!(level === 4 || level === "3B")
+                  ? <AccessGateBanner level={level} profileCompletion={accessProfileCompletion} context="guard" />
+                  : <FreePeriodBanner />}
+              </div>
             </aside>
           </div>
         )}
