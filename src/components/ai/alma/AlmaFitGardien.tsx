@@ -54,7 +54,7 @@ export function AlmaFitGardien({ sitter, sitterProfile }: Props) {
     (async () => {
       const { data } = await supabase
         .from("sits")
-        .select("id, title, start_date, end_date")
+        .select("id, title, start_date, end_date, accepts_sitter_pets, accepts_sitter_children")
         .eq("user_id", user.id)
         .eq("status", "published")
         .order("start_date", { ascending: true })
@@ -95,13 +95,23 @@ export function AlmaFitGardien({ sitter, sitterProfile }: Props) {
 
   // Affinity
   const affinity = useMemo(() => {
-    if (!owner || !sitterProfile) return null;
-    const res = computeAffinityResultFull(owner, sitterProfile);
+    if (!owner || !sitterProfile || !targetSit) return null;
+    // Contexte annonce réel (21/08/2026) : targetSit est chargé par ce
+    // composant, les politiques accompagnants de l'annonce remplacent le
+    // null du hook partagé (réservé aux surfaces sans annonce).
+    const res = computeAffinityResultFull(
+      {
+        ...owner,
+        accepts_sitter_pets: targetSit.accepts_sitter_pets ?? null,
+        accepts_sitter_children: targetSit.accepts_sitter_children ?? null,
+      },
+      sitterProfile,
+    );
     // Seuil de MISE EN AVANT : Alma ne recommande que les chiffres fiables
     // sans incompatibilité déclarée. Aucune exclusion d'affichage ici.
     if (!res || !res.scoreReliable || res.hasDeclaredIncompatibility) return null;
     return res;
-  }, [owner, sitterProfile]);
+  }, [owner, sitterProfile, targetSit]);
 
   // Tracking impression une seule fois
   useEffect(() => {
