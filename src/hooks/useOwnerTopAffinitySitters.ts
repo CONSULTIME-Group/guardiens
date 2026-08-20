@@ -94,7 +94,7 @@ export function useOwnerTopAffinitySitters(): Result {
       }
 
       if (!pool || pool.length === 0) {
-        return { topSitters: [] as AffinitySitterCard[], totalPool: 0, hasGeo, poolExcludedByCap: 0 };
+        return { topSitters: [] as AffinitySitterCard[], totalPool: 0, scoredCount: 0, hasGeo, poolExcludedByCap: 0 };
       }
 
       const ids = pool.map((p) => p.id);
