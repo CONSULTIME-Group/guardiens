@@ -284,27 +284,28 @@ Deno.serve(async (req) => {
           }
         }
 
-        // 2e. Tri : affinity DESC NULLS LAST, distance ASC NULLS LAST
-        const sorted = [...rows].sort((a, b) => {
-          const aScore = a.affinity_score ?? -1
-          const bScore = b.affinity_score ?? -1
-          if (aScore !== bScore) return bScore - aScore
-          const aDist = a.distance_km ?? Number.POSITIVE_INFINITY
-          const bDist = b.distance_km ?? Number.POSITIVE_INFINITY
-          return aDist - bDist
-        })
+        // 2e. Profil gardien complet pour le moteur unique.
+        const { data: sitterRow } = await supabase
+          .from('sitter_profiles')
+          .select(SITTER_AFFINITY_COLUMNS)
+          .eq('user_id', sitterId)
+          .maybeSingle()
+        if (!sitterRow) {
+          await markSkipped(supabase, rows.map(r => r.id), 'sitter_profile_missing', body.dry_run)
+          sittersSkipped++
+          continue
+        }
 
-        const top3 = sorted.slice(0, 3)
-        const overflow = sorted.slice(3)
-
-        // 2f. Charge chaque sit (vérifie toujours publiée + accepting)
-        const items: any[] = []
-        for (const q of top3) {
+        // 2f. Score par annonce via le moteur unique partagé, mode
+        // distribution : seuls les refus explicitement déclarés par le
+        // gardien excluent (distributable=false), jamais un score bas.
+        const scoredRows: Array<{ row: QueueRow; score: number; sit: SitRow }> = []
+        for (const q of rows) {
           let sit = sitCache.get(q.sit_id) as SitRow | undefined
           if (!sit) {
             const { data } = await supabase
               .from('sits')
-              .select('id, title, city, start_date, end_date, cover_photo_url, user_id, status, accepting_applications, unpublished_at')
+              .select('id, title, city, start_date, end_date, cover_photo_url, user_id, status, accepting_applications, unpublished_at, accepts_sitter_pets, accepts_sitter_children')
               .eq('id', q.sit_id)
               .maybeSingle()
             if (data) {
@@ -320,6 +321,44 @@ Deno.serve(async (req) => {
             await markSkipped(supabase, [q.id], 'sit_not_available', body.dry_run)
             continue
           }
+
+          let ownerInput = ownerInputCache.get(sit.user_id)
+          if (!ownerInput) {
+            ownerInput = await loadOwnerInput(sit)
+            ownerInputCache.set(sit.user_id, ownerInput)
+          }
+
+          const result = computeAffinityResultFull(ownerInput as any, sitterRow as any, { mode: 'distribution' })
+          if (!result.distributable) {
+            await markSkipped(supabase, [q.id], 'declared_refusal', body.dry_run)
+            continue
+          }
+          scoredRows.push({ row: q, score: result.score, sit })
+        }
+
+        if (scoredRows.length === 0) {
+          // Aucune annonce diffusable : toutes les lignes restantes de ce
+          // gardien sont soldées, sinon elles restent en file pour toujours.
+          await markSkipped(supabase, rows.map(r => r.id), 'no_distributable_sit', body.dry_run)
+          sittersSkipped++
+          continue
+        }
+
+        // 2g. Tri : score moteur unique DESC, distance ASC.
+        scoredRows.sort((a, b) => {
+          if (a.score !== b.score) return b.score - a.score
+          const aDist = a.row.distance_km ?? Number.POSITIVE_INFINITY
+          const bDist = b.row.distance_km ?? Number.POSITIVE_INFINITY
+          return aDist - bDist
+        })
+
+        const top3 = scoredRows.slice(0, 3)
+        const overflow = scoredRows.slice(3)
+
+        // 2h. Construit les items du gabarit
+        const items: any[] = []
+        for (const s of top3) {
+          const sit = s.sit
 
           // Owner + animals summary
           const { data: ownerProfile } = await supabase
@@ -337,9 +376,9 @@ Deno.serve(async (req) => {
           const speciesCounts: Record<string, number> = {}
           const petsList = props?.[0]?.pets ?? []
           for (const p of petsList as Array<{ species: string | null }>) {
-            const s = p?.species
-            if (!s) continue
-            speciesCounts[s] = (speciesCounts[s] ?? 0) + 1
+            const sp = p?.species
+            if (!sp) continue
+            speciesCounts[sp] = (speciesCounts[sp] ?? 0) + 1
           }
           const animalsSummary = Object.entries(speciesCounts)
             .map(([k, n]) => `${n} ${labelSpecies(k, n)}`)
@@ -354,9 +393,9 @@ Deno.serve(async (req) => {
             endDate: formatFrDate(sit.end_date),
             animalsSummary: animalsSummary || undefined,
             coverPhotoUrl: sit.cover_photo_url,
-            affinityScore: q.affinity_score,
+            affinityScore: s.score,
             affinityTotal: null,
-            distanceKm: q.distance_km,
+            distanceKm: s.row.distance_km,
           })
         }
 
