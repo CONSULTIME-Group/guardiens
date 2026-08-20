@@ -8612,7 +8612,9 @@ export type Database = {
         Args: { _code: string; _message: string; _sit_id: string }
         Returns: undefined
       }
-      sitter_missing_opportunities: { Args: never; Returns: Json }
+      sitter_missing_opportunities:
+        | { Args: never; Returns: Json }
+        | { Args: { _sitter_id?: string }; Returns: Json }
       slugify: { Args: { input: string }; Returns: string }
       slugify_city: { Args: { input: string }; Returns: string }
       strip_emojis: { Args: { t: string }; Returns: string }

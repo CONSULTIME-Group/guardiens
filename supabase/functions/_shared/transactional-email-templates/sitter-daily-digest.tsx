@@ -38,12 +38,25 @@ interface Props {
    * assume le rappel et ne présente rien comme une nouveauté du jour.
    */
   isCatchup?: boolean
+  /**
+   * false quand le profil est rempli à moins de 60 % : le gardien ne peut
+   * pas candidater (useAccessLevel niveau 1). Mêmes annonces, même ordre,
+   * seul l'appel à l'action change (doctrine du 20/08/2026).
+   */
+  canApply?: boolean
+  /** Pourcentage actuel de complétude, affiché quand canApply est false. */
+  profileCompletion?: number | null
+  /** Manque principal chiffré, ex. « 8 des 11 annonces en ligne… ». */
+  completionHint?: string
 }
 
 const buildCtaUrl = (sitId: string) =>
   `${SITE_URL}/annonces/${sitId}?utm_source=email&utm_campaign=sitter_daily_digest&utm_medium=daily`
 
-const SitterDailyDigestEmail = ({ sitterFirstName, items = [], isCatchup }: Props) => (
+const buildProfileUrl = () =>
+  `${SITE_URL}/sitter-profile?utm_source=email&utm_campaign=sitter_daily_digest&utm_medium=daily`
+
+const SitterDailyDigestEmail = ({ sitterFirstName, items = [], isCatchup, canApply = true, profileCompletion, completionHint }: Props) => (
   <Html lang="fr" dir="ltr">
     <BrandedHead />
     <Preview>
@@ -75,6 +88,13 @@ const SitterDailyDigestEmail = ({ sitterFirstName, items = [], isCatchup }: Prop
             ? "Ces annonces ont été publiées il y a un à trois jours et ne vous avaient pas encore été signalées. Elles sont toujours ouvertes aux candidatures. Le score d'affinité indique la compatibilité selon vos préférences."
             : "Voici les nouvelles annonces publiées ces dernières 24 heures qui matchent votre profil. Le score d'affinité indique la compatibilité selon vos préférences."}
         </Text>
+
+        {canApply === false && (
+          <Text style={text}>
+            Votre profil est rempli à {profileCompletion ?? 0} %.
+            {completionHint ? ` ${completionHint}` : ''} Complétez votre profil pour pouvoir candidater.
+          </Text>
+        )}
 
 
 
@@ -118,9 +138,15 @@ const SitterDailyDigestEmail = ({ sitterFirstName, items = [], isCatchup }: Prop
               </Text>
             ) : null}
 
-            <Button style={button} href={buildCtaUrl(item.sitId)}>
-              Postuler en 1 clic
-            </Button>
+            {canApply === false ? (
+              <Button style={button} href={buildProfileUrl()}>
+                Complétez votre profil pour candidater
+              </Button>
+            ) : (
+              <Button style={button} href={buildCtaUrl(item.sitId)}>
+                Postuler en 1 clic
+              </Button>
+            )}
 
             <Text style={cardLineSmall}>
               <Link href={buildCtaUrl(item.sitId)} style={linkStyle}>

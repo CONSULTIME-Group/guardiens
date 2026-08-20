@@ -36,7 +36,10 @@ export default function OwnerFirstNBAGardiens() {
 
   const city = owner?.city;
 
-  if (topSitters.length < 3) {
+  // Doctrine : la section ne doit JAMAIS être vide dès qu'il existe au
+  // moins un candidat, y compris si le meilleur score est bas. Le repli
+  // « parrainage » ne s'affiche que sans aucun gardien dans le vivier.
+  if (topSitters.length === 0) {
     return (
       <section className="rounded-2xl border border-border bg-card p-5 md:p-6">
         <h2 className="text-lg md:text-xl font-serif font-semibold text-foreground">
@@ -58,7 +61,9 @@ export default function OwnerFirstNBAGardiens() {
     <section className="rounded-2xl border border-border bg-card p-5 md:p-6">
       <header className="mb-4">
         <h2 className="text-lg md:text-xl font-serif font-semibold text-foreground">
-          3 gardiens qui vous correspondent{city ? ` à ${city}` : ""}
+          {topSitters.length === 1
+            ? `1 gardien vous correspond${city ? ` à ${city}` : ""}`
+            : `${topSitters.length} gardiens qui vous correspondent${city ? ` à ${city}` : ""}`}
         </h2>
         <p className="text-sm text-muted-foreground mt-1">
           Score d'affinité calculé automatiquement. Publiez une annonce pour qu'ils puissent candidater.
@@ -115,6 +120,11 @@ function SitterCard({ sitter, position }: { sitter: AffinitySitterCard; position
             <p className="font-semibold text-foreground truncate">
               {sitter.first_name ?? "Gardien"}
             </p>
+            {sitter.identity_verified && (
+              <Badge variant="outline" className="mt-1 text-[11px] font-medium">
+                Identité vérifiée
+              </Badge>
+            )}
             {sitter.city && (
               <p className="text-xs text-muted-foreground flex items-center gap-1 truncate">
                 <MapPin className="h-3 w-3" aria-hidden="true" />
