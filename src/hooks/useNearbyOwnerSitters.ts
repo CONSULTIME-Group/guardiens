@@ -6,13 +6,14 @@ import { haversineDistance } from "@/utils/geo";
  * « Gardiens près de chez vous » pour le dashboard propriétaire.
  *
  * Jumeau symétrique de `useNearbyHelpers` mais ciblant les gardiens (role ∈
- * {sitter, both}, profil minimalement actif). Tri par distance croissante,
- * fallback progressif 30 → 50 → 100 km, puis flag `is_beyond` si aucun
- * gardien dans 100 km — pour pouvoir afficher quand même les plus proches
- * disponibles, comme côté annonces.
+ * {sitter, both}). Vivier COMPLET : aucun filtre de confiance ni de
+ * complétude (décision de Jérémie, 20/08/2026 : tri, jamais de filtre de
+ * pool). Tri par distance croissante, fallback progressif 30 → 50 → 100 km,
+ * puis flag `is_beyond` si aucun gardien dans 100 km, pour pouvoir afficher
+ * quand même les plus proches disponibles, comme côté annonces.
  *
  * On retourne les `custom_skills` (savoir-faire secondaires) pour permettre
- * au composant d'afficher 1–2 chips qualitatifs différenciants.
+ * au composant d'afficher 1 à 2 chips qualitatifs différenciants.
  */
 
 export type NearbyOwnerSitter = {
@@ -31,6 +32,8 @@ export type NearbyOwnerSitter = {
 
 const RADIUS_STEPS = [30, 50, 100];
 const MAX_RESULTS = 6;
+/** Borne technique de lecture du vivier, tracée si atteinte. */
+const POOL_READ_CAP = 2000;
 
 function normalizeCustom(raw: unknown): string[] {
   if (!raw) return [];
@@ -78,14 +81,21 @@ export function useNearbyOwnerSitters(currentUserId: string | undefined) {
       }
       const hasGeo = meLat !== null && meLng !== null;
 
-      // 2. Pool de gardiens actifs (large, on filtre côté client)
+      // 2. Vivier de gardiens actifs, complet : aucun filtre de complétude
+      // ni de confiance (la vue ne retient déjà que les comptes actifs).
+      // Plafond de lecture technique, tracé s'il est atteint.
       const { data: pool } = await supabase
         .from("public_profiles")
-        .select("id, first_name, avatar_url, city, identity_verified, completed_sits_count, skill_categories, custom_skills, latitude_approx, longitude_approx, role, profile_completion")
+        .select("id, first_name, avatar_url, city, identity_verified, completed_sits_count, skill_categories, custom_skills, latitude_approx, longitude_approx, role")
         .in("role", ["sitter", "both"])
         .neq("id", currentUserId!)
-        .gte("profile_completion", 40)
-        .limit(500);
+        .limit(POOL_READ_CAP);
+
+      if (pool && pool.length === POOL_READ_CAP) {
+        console.warn(
+          `[nearby-owner-sitters] plafond de lecture ${POOL_READ_CAP} atteint : vivier tronqué avant tri, augmenter POOL_READ_CAP.`,
+        );
+      }
 
       if (!pool || pool.length === 0) {
         return { sitters: [], radiusUsed: null, hasGeo, totalCount: 0 };
