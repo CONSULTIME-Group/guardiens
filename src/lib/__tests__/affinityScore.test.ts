@@ -61,7 +61,9 @@ describe("computeAffinityScore", () => {
     expect(r!.displayed).toBe(false);
     expect(r!.hiddenReason).toBe("disqualified");
     // Distribution : le refus déclaré est respecté, et seulement ça.
-    expect(computeAffinityScore(owner, sitter, { mode: "distribution" })).toBeNull();
+    const d = computeAffinityScore(owner, sitter, { mode: "distribution" });
+    expect(d).not.toBeNull();
+    expect(d.distributable).toBe(false);
   });
 
   it("dénominateur dynamique : 3 critères SOFT tous matchés → masqué (no_hard_criterion)", () => {
@@ -153,7 +155,9 @@ describe("computeAffinityScore", () => {
 
   it("refus des grands chiens déclaré : incompatibilité signalée, jamais d'élimination en liste", () => {
     // Sans race renseignée, la prudence s'applique : le refus est respecté
-    // en distribution, le gardien reste listé en affichage.
+    // en distribution, le gardien reste listé en affichage. Le refus est
+    // remonté même si le gardien n'a pas déclaré ses espèces (animal_types
+    // vide) : un refus déclaré reste un refus.
     const owner = {
       life_pace: "calme",
       languages: ["Français"],
@@ -170,7 +174,9 @@ describe("computeAffinityScore", () => {
     expect(r).not.toBeNull();
     expect(r!.hasDeclaredIncompatibility).toBe(true);
     expect(r!.hiddenReason).toBe("disqualified");
-    expect(computeAffinityScore(owner, sitter, { mode: "distribution" })).toBeNull();
+    const d = computeAffinityScore(owner, sitter, { mode: "distribution" });
+    expect(d).not.toBeNull();
+    expect(d.distributable).toBe(false);
   });
 
   it("présence 100% sur place est compatible avec n'importe quel rythme de travail", () => {
@@ -318,14 +324,20 @@ describe("computeAffinityScore", () => {
 
 
 
-  it("aucune espèce couverte : chiffre masqué (no_animal_species_match), gardien JAMAIS éliminé", () => {
+  it("aucune espèce couverte : score bas affiché, gardien JAMAIS éliminé ni masqué", () => {
+    // Doctrine : no_animal_species_match n'existe plus comme cause
+    // d'exclusion ni de masquage. Le gardien moins pertinent descend dans
+    // le tri avec un chiffre honnête, l'explication porte l'information.
     const r = computeAffinityResultFull(
       { pets: [{ species: "cat" }], life_pace: "calme", languages: ["Français"] },
       { animal_types: ["dog"], life_pace: "calme", languages: ["Français"] },
     );
     expect(r).not.toBeNull();
-    expect(r!.displayed).toBe(false);
-    expect(r!.hiddenReason).toBe("no_animal_species_match");
+    // animaux 0/2 + rythme 1 + langue 1 = 2/4 = 50 %
+    expect(r!.score).toBe(50);
+    expect(r!.displayed).toBe(true);
+    expect(r!.hiddenReason).toBeNull();
+    expect(r!.explanation).toContain("Ne déclare pas d'expérience avec vos animaux");
     // Doctrine : pas un refus déclaré, donc distribuable (alertes incluses).
     expect(r!.distributable).toBe(true);
     expect(computeAffinityScore(
@@ -441,6 +453,108 @@ describe("computeAffinityScore", () => {
     expect(r).not.toBeNull();
     expect(r!.displayed).toBe(false);
     expect(r!.hiddenReason).toBe("no_hard_criterion");
+  });
+});
+
+describe("règles lot affinité 20/08/2026", () => {
+  it("propriétaire sans animaux : critère animaux hors dénominateur, couple évaluable", () => {
+    // Cas réel : Catherine (4584ccd1-58ef-4625-a414-72d49fca936b), 0 animal
+    // enregistré, 2 critères évaluables. Avant : NULL sur tout le vivier,
+    // Top 3 vide. Une garde sans animaux est une garde légitime.
+    const r = computeAffinityResultFull(
+      { life_pace: "calme", languages: ["Français"], pets: [] },
+      { lifestyle: ["Tranquille / casanier"], languages: ["Français"] },
+    );
+    expect(r).not.toBeNull();
+    expect(r.total).toBe(2);
+    expect(r.score).toBe(100);
+  });
+
+  it("propriétaire sans animaux : le vivier entier reste classable, Top 3 toujours servi", () => {
+    const owner = { life_pace: "calme", languages: ["Français"], pets: [] as { species?: string }[] };
+    const pool = [
+      { lifestyle: ["Tranquille / casanier"], languages: ["Français"] },
+      { lifestyle: ["Sportif / grandes balades"], languages: ["Français"] },
+      { languages: ["Anglais"] },
+      { lifestyle: ["Famille", "Lève-tôt"], languages: ["Français", "Anglais"] },
+    ];
+    const scored = pool
+      .map((s) => computeAffinityResultFull(owner, s))
+      .sort((a, b) => b.score - a.score);
+    expect(scored.length).toBe(pool.length); // personne n'est éliminé
+    expect(scored.slice(0, 3)).toHaveLength(3); // Top 3 jamais vide
+    expect(scored[0].score).toBeGreaterThanOrEqual(scored[2].score);
+  });
+
+  it("booléens à false = non renseigné : neutre, hors dénominateur, jamais pénalisant", () => {
+    // farm_animals_ok false ne ferme PAS la porte aux chevaux si
+    // animal_types les déclare (39 profils à true contre 84 « Chevaux »).
+    const withFalse = computeAffinityResultFull(
+      { pets: [{ species: "horse" }], life_pace: "calme", languages: ["Français"] },
+      { animal_types: ["Chevaux"], farm_animals_ok: false, lifestyle: ["Tranquille / casanier"], languages: ["Français"] },
+    );
+    expect(withFalse.score).toBe(100);
+    expect(withFalse.matched).toContain("A déjà gardé des chevaux");
+    // travels_with_own_animals false ne déclenche aucun refus.
+    const r = computeAffinityResultFull(
+      { accepts_sitter_pets: "no", life_pace: "calme" },
+      { travels_with_own_animals: false, lifestyle: ["Tranquille / casanier"] },
+    );
+    expect(r.hasDeclaredIncompatibility).toBe(false);
+  });
+
+  it("critère véhicule : voiture requise + véhicule déclaré = points, sinon neutre sans masquage", () => {
+    const ownerBase = { car_required: true, life_pace: "calme", languages: ["Français"] };
+    const withCar = computeAffinityResultFull(ownerBase, {
+      has_vehicle: true, lifestyle: ["Tranquille / casanier"], languages: ["Français"],
+    });
+    expect(withCar.matched).toContain("Véhiculé, comme vous le souhaitez");
+    const withoutCar = computeAffinityResultFull(ownerBase, {
+      has_vehicle: false, has_license: false, lifestyle: ["Tranquille / casanier"], languages: ["Français"],
+    });
+    // Pas de points véhicule, mais le gardien reste listé avec un score honnête.
+    expect(withoutCar.score).toBeLessThan(withCar.score);
+    expect(withoutCar.explanation.some((e) => /véhicule/i.test(e))).toBe(true);
+    // Le permis seul compte comme mobilité déclarée.
+    const licenseOnly = computeAffinityResultFull(ownerBase, {
+      has_license: true, lifestyle: ["Tranquille / casanier"], languages: ["Français"],
+    });
+    expect(licenseOnly.matched).toContain("Véhiculé, comme vous le souhaitez");
+    // Voiture non requise : le critère sort du dénominateur.
+    const notRequired = computeAffinityResultFull(
+      { car_required: false, life_pace: "calme" },
+      { has_vehicle: true, lifestyle: ["Tranquille / casanier"] },
+    );
+    expect(notRequired.total).toBe(1);
+  });
+
+  it("présence : repli sur availability_during quand work_during_sit est vide", () => {
+    const r = computeAffinityResultFull(
+      { presence_expected: "Télétravail OK" },
+      { availability_during: "En télétravail" },
+    );
+    expect(r.matched).toContain("Peut télétravailler chez vous");
+  });
+
+  it("rythme : lifestyle prime, life_pace en repli, mixte actif+calme = équilibré", () => {
+    // lifestyle actif + life_pace contradictoire : lifestyle fait foi.
+    const r1 = computeAffinityResultFull(
+      { life_pace: "actif" },
+      { lifestyle: ["Sportif / grandes balades"], life_pace: "calme" },
+    );
+    expect(r1.matched).toContain("Même rythme de vie");
+    // lifestyle vide : repli sur life_pace.
+    const r2 = computeAffinityResultFull(
+      { life_pace: "calme" },
+      { lifestyle: [], life_pace: "calme" },
+    );
+    expect(r2.matched).toContain("Même rythme de vie");
+    // mixte actif + calme : rythme équilibré, match avec un owner équilibré.
+    const r3 = computeAffinityResultFull(
+      { life_pace: "equilibre" },
+      { lifestyle: ["Sportif / grandes balades", "Tranquille / casanier"] },
+    );
+    expect(r3.matched).toContain("Même rythme de vie");
   });
 });
 

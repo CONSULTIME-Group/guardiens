@@ -3,8 +3,14 @@
 // Envoie chaque soir un digest quotidien aux gardiens ayant au moins une
 // entrée `queued` dans `sitter_digest_queue`. L'identité vérifiée n'est plus
 // un filtre d'éligibilité : c'est une clé de tri (vérifiés en tête de file).
+// Depuis le 20/08/2026, le score d'affinité est calculé ICI par le moteur
+// unique partagé (`_shared/affinity/score.ts`, le même que l'affichage), en
+// mode distribution : seuls les refus explicitement déclarés par le gardien
+// excluent une annonce, jamais un score bas. Le tri du top 3 est
+// (score DESC, distance ASC). La colonne SQL `affinity_score` de la file
+// n'est plus lue (NULL depuis la même date).
 // Pour chaque gardien :
-//  - top 3 par (affinity_score DESC NULLS LAST, distance ASC NULLS LAST)
+//  - top 3 par (score moteur unique DESC, distance ASC NULLS LAST)
 //  - anti-doublon : pas de digest dans les 24h (via email_send_log)
 //  - vérification suppression, opt-in email_preferences.new_sit_digest
 //  - envoi via `send-transactional-email` (template 'sitter-daily-digest')
@@ -21,6 +27,7 @@ import { claimSitNotification, raiseClaimErrorSignal, raiseStaleClaimSignal, rel
 import { parisWindowVerdict } from '../_shared/paris-hour.ts'
 import { recordDeliveryFailure } from '../_shared/delivery-failure.ts'
 import { startCronRun } from '../_shared/cron-run-log.ts'
+import { computeAffinityResultFull } from '../_shared/affinity/score.ts'
 
 // Heure de Paris visée pour ce passage, garde saison-proof (voir paris-hour.ts).
 const TARGET_PARIS_HOUR = 8
@@ -49,7 +56,13 @@ interface SitRow {
   status: string
   accepting_applications: boolean
   unpublished_at: string | null
+  accepts_sitter_pets: string | null
+  accepts_sitter_children: string | null
 }
+
+// Colonnes gardien consommées par le moteur unique d'affinité.
+// À maintenir en phase avec `AffinitySitterInput` (_shared/affinity/score.ts).
+const SITTER_AFFINITY_COLUMNS = 'user_id, experience_years, life_pace, lifestyle, availability_during, languages, interests, work_during_sit, meeting_preference, handover_preference, sensitivities, animal_types, sitter_type, special_animal_skills, travels_with_children, travels_with_own_animals, has_vehicle, has_license, farm_animals_ok'
 
 function formatFrDate(iso?: string | null): string | undefined {
   if (!iso) return undefined
@@ -150,6 +163,40 @@ Deno.serve(async (req) => {
 
     // Cache sits déjà chargées pour éviter multi requêtes
     const sitCache = new Map<string, SitRow>()
+    // Cache des inputs propriétaire du moteur unique (par owner_id).
+    const ownerInputCache = new Map<string, Record<string, unknown>>()
+
+    // Construit l'input propriétaire du moteur unique : préférences matching,
+    // drapeaux d'acceptation de l'annonce, véhicule et animaux (avec besoins
+    // spéciaux et races). Les champs absents restent null : le moteur les
+    // traite comme non renseignés (neutres), jamais pénalisants.
+    const loadOwnerInput = async (sit: SitRow): Promise<Record<string, unknown>> => {
+      const [{ data: op }, { data: props }] = await Promise.all([
+        supabase
+          .from('owner_profiles')
+          .select('preferred_sitter_types, home_ambiance, languages, interests, life_pace, presence_expected')
+          .eq('user_id', sit.user_id)
+          .maybeSingle(),
+        supabase
+          .from('properties')
+          .select('id, car_required, pets:pets(species, special_needs, breed)')
+          .eq('user_id', sit.user_id),
+      ])
+      const pets = (props ?? []).flatMap((p: any) => p.pets ?? [])
+      const carRequired = (props ?? []).some((p: any) => p.car_required === true)
+      return {
+        preferred_sitter_types: (op as any)?.preferred_sitter_types ?? null,
+        home_ambiance: (op as any)?.home_ambiance ?? null,
+        languages: (op as any)?.languages ?? null,
+        interests: (op as any)?.interests ?? null,
+        life_pace: (op as any)?.life_pace ?? null,
+        presence_expected: (op as any)?.presence_expected ?? null,
+        accepts_sitter_pets: sit.accepts_sitter_pets ?? null,
+        accepts_sitter_children: sit.accepts_sitter_children ?? null,
+        car_required: carRequired,
+        pets: pets.map((p: any) => ({ species: p.species, special_needs: p.special_needs, breed: p.breed ?? null })),
+      }
+    }
 
     // 2a-bis. Ordre d'envoi : les gardiens dont l'identité est vérifiée
     // passent en tête de file, les autres suivent (la vérification trie,
@@ -237,27 +284,28 @@ Deno.serve(async (req) => {
           }
         }
 
-        // 2e. Tri : affinity DESC NULLS LAST, distance ASC NULLS LAST
-        const sorted = [...rows].sort((a, b) => {
-          const aScore = a.affinity_score ?? -1
-          const bScore = b.affinity_score ?? -1
-          if (aScore !== bScore) return bScore - aScore
-          const aDist = a.distance_km ?? Number.POSITIVE_INFINITY
-          const bDist = b.distance_km ?? Number.POSITIVE_INFINITY
-          return aDist - bDist
-        })
+        // 2e. Profil gardien complet pour le moteur unique.
+        const { data: sitterRow } = await supabase
+          .from('sitter_profiles')
+          .select(SITTER_AFFINITY_COLUMNS)
+          .eq('user_id', sitterId)
+          .maybeSingle()
+        if (!sitterRow) {
+          await markSkipped(supabase, rows.map(r => r.id), 'sitter_profile_missing', body.dry_run)
+          sittersSkipped++
+          continue
+        }
 
-        const top3 = sorted.slice(0, 3)
-        const overflow = sorted.slice(3)
-
-        // 2f. Charge chaque sit (vérifie toujours publiée + accepting)
-        const items: any[] = []
-        for (const q of top3) {
+        // 2f. Score par annonce via le moteur unique partagé, mode
+        // distribution : seuls les refus explicitement déclarés par le
+        // gardien excluent (distributable=false), jamais un score bas.
+        const scoredRows: Array<{ row: QueueRow; score: number; sit: SitRow }> = []
+        for (const q of rows) {
           let sit = sitCache.get(q.sit_id) as SitRow | undefined
           if (!sit) {
             const { data } = await supabase
               .from('sits')
-              .select('id, title, city, start_date, end_date, cover_photo_url, user_id, status, accepting_applications, unpublished_at')
+              .select('id, title, city, start_date, end_date, cover_photo_url, user_id, status, accepting_applications, unpublished_at, accepts_sitter_pets, accepts_sitter_children')
               .eq('id', q.sit_id)
               .maybeSingle()
             if (data) {
@@ -273,6 +321,44 @@ Deno.serve(async (req) => {
             await markSkipped(supabase, [q.id], 'sit_not_available', body.dry_run)
             continue
           }
+
+          let ownerInput = ownerInputCache.get(sit.user_id)
+          if (!ownerInput) {
+            ownerInput = await loadOwnerInput(sit)
+            ownerInputCache.set(sit.user_id, ownerInput)
+          }
+
+          const result = computeAffinityResultFull(ownerInput as any, sitterRow as any, { mode: 'distribution' })
+          if (!result.distributable) {
+            await markSkipped(supabase, [q.id], 'declared_refusal', body.dry_run)
+            continue
+          }
+          scoredRows.push({ row: q, score: result.score, sit })
+        }
+
+        if (scoredRows.length === 0) {
+          // Aucune annonce diffusable : toutes les lignes restantes de ce
+          // gardien sont soldées, sinon elles restent en file pour toujours.
+          await markSkipped(supabase, rows.map(r => r.id), 'no_distributable_sit', body.dry_run)
+          sittersSkipped++
+          continue
+        }
+
+        // 2g. Tri : score moteur unique DESC, distance ASC.
+        scoredRows.sort((a, b) => {
+          if (a.score !== b.score) return b.score - a.score
+          const aDist = a.row.distance_km ?? Number.POSITIVE_INFINITY
+          const bDist = b.row.distance_km ?? Number.POSITIVE_INFINITY
+          return aDist - bDist
+        })
+
+        const top3 = scoredRows.slice(0, 3)
+        const overflow = scoredRows.slice(3)
+
+        // 2h. Construit les items du gabarit
+        const items: any[] = []
+        for (const s of top3) {
+          const sit = s.sit
 
           // Owner + animals summary
           const { data: ownerProfile } = await supabase
@@ -290,9 +376,9 @@ Deno.serve(async (req) => {
           const speciesCounts: Record<string, number> = {}
           const petsList = props?.[0]?.pets ?? []
           for (const p of petsList as Array<{ species: string | null }>) {
-            const s = p?.species
-            if (!s) continue
-            speciesCounts[s] = (speciesCounts[s] ?? 0) + 1
+            const sp = p?.species
+            if (!sp) continue
+            speciesCounts[sp] = (speciesCounts[sp] ?? 0) + 1
           }
           const animalsSummary = Object.entries(speciesCounts)
             .map(([k, n]) => `${n} ${labelSpecies(k, n)}`)
@@ -307,9 +393,9 @@ Deno.serve(async (req) => {
             endDate: formatFrDate(sit.end_date),
             animalsSummary: animalsSummary || undefined,
             coverPhotoUrl: sit.cover_photo_url,
-            affinityScore: q.affinity_score,
+            affinityScore: s.score,
             affinityTotal: null,
-            distanceKm: q.distance_km,
+            distanceKm: s.row.distance_km,
           })
         }
 
@@ -328,7 +414,7 @@ Deno.serve(async (req) => {
           subject: buildSubject(items.length, !!body.catchup),
           sits: items.map(i => i.sitId),
           sit_titles: items.map(i => i.sitTitle),
-          skipped: overflow.map(o => o.sit_id),
+          skipped: overflow.map(o => o.row.sit_id),
         } as any)
 
         if (body.dry_run) {
@@ -416,7 +502,7 @@ Deno.serve(async (req) => {
             await supabase
               .from('sitter_digest_queue')
               .update({ skip_reason: `deferred_retry:http_${_steRes.status}` })
-              .in('id', top3.map(q => q.id))
+              .in('id', top3.map(s => s.row.id))
           }
           errors.push({ sitter_id: sitterId, reason: `send_failed: ${String(sendErr)}` })
           continue
@@ -424,8 +510,8 @@ Deno.serve(async (req) => {
 
         // 2h. Mise à jour queue : top → sent, overflow → skipped
         const sentIds = top3
-          .filter(q => items.find(i => i.sitId === q.sit_id))
-          .map(q => q.id)
+          .filter(s => items.find(i => i.sitId === s.sit.id))
+          .map(s => s.row.id)
 
         if (sentIds.length > 0) {
           await supabase
@@ -438,7 +524,7 @@ Deno.serve(async (req) => {
           await supabase
             .from('sitter_digest_queue')
             .update({ status: 'skipped', skip_reason: 'digest_cap_3' })
-            .in('id', overflow.map(o => o.id))
+            .in('id', overflow.map(o => o.row.id))
         }
 
         sittersSent++

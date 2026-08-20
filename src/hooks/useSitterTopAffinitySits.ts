@@ -98,7 +98,7 @@ export function useSitterTopAffinitySits(): Result {
         supabase
           .from("sitter_profiles")
           .select(
-            "animal_types, life_pace, languages, interests, work_during_sit, sensitivities, special_animal_skills, sitter_type, experience_years, travels_with_children, travels_with_own_animals, preferred_environments",
+            "animal_types, life_pace, lifestyle, availability_during, has_vehicle, has_license, languages, interests, work_during_sit, sensitivities, special_animal_skills, sitter_type, experience_years, travels_with_children, travels_with_own_animals, preferred_environments",
           )
           .eq("user_id", userId!)
           .maybeSingle(),
@@ -221,7 +221,7 @@ export function useSitterTopAffinitySits(): Result {
          new Set(sitsAll.map((s) => s.user_id).filter(Boolean)),
       ) as string[];
 
-      const [petsRes, ownerProfilesRes]: any[] = await Promise.all([
+      const [petsRes, ownerProfilesRes, propertiesRes]: any[] = await Promise.all([
         propertyIds.length > 0
           ? supabase
               .from("pets")
@@ -236,7 +236,18 @@ export function useSitterTopAffinitySits(): Result {
               )
               .in("user_id", ownerIds)
           : Promise.resolve({ data: [] }),
+        // Voiture requise (critère d'affinité) par propriété du pool.
+        propertyIds.length > 0
+          ? supabase
+              .from("properties")
+              .select("id, car_required")
+              .in("id", propertyIds)
+          : Promise.resolve({ data: [] }),
       ]);
+
+      const carRequiredByProperty = new Map<string, boolean>(
+        ((propertiesRes.data ?? []) as any[]).map((p) => [p.id, p.car_required === true]),
+      );
 
       const petsByProperty = new Map<
         string,
@@ -291,6 +302,7 @@ export function useSitterTopAffinitySits(): Result {
             pets,
             accepts_sitter_pets: sit.accepts_sitter_pets ?? null,
             accepts_sitter_children: sit.accepts_sitter_children ?? null,
+            car_required: carRequiredByProperty.get(sit.property_id) ?? null,
           },
           sitter as any,
         );

@@ -689,6 +689,7 @@ const PublicSitView = ({
                     ...(ownerProfile as any),
                     accepts_sitter_pets: (sit as any).accepts_sitter_pets ?? null,
                     accepts_sitter_children: (sit as any).accepts_sitter_children ?? null,
+                    car_required: (property as any)?.car_required ?? null,
                   }}
                   pets={pets as any}
                   context="public_sit_detail"

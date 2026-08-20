@@ -20,7 +20,7 @@ import OwnerToSitterAffinity from "@/components/matching/OwnerToSitterAffinity";
 import { avatarImageUrl } from "@/lib/storageImage";
 
 const AFFINITY_COLUMNS =
-  "user_id, experience_years, life_pace, languages, interests, work_during_sit, sensitivities, animal_types, sitter_type, travels_with_children, travels_with_own_animals";
+  "user_id, experience_years, life_pace, lifestyle, availability_during, has_vehicle, has_license, languages, interests, work_during_sit, sensitivities, animal_types, sitter_type, travels_with_children, travels_with_own_animals, special_animal_skills, farm_animals_ok";
 
 const NearbySittersSection = () => {
   const { user } = useAuth();
