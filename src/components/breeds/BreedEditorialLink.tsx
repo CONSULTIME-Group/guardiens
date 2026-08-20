@@ -44,9 +44,11 @@ interface BreedEditorialLinkProps {
   species: string;
   breed: string;
   className?: string;
+  /** Libellé du lien ; par défaut « Lire la fiche {race} ». */
+  label?: string;
 }
 
-const BreedEditorialLink = ({ species, breed, className }: BreedEditorialLinkProps) => {
+const BreedEditorialLink = ({ species, breed, className, label }: BreedEditorialLinkProps) => {
   const [ficheBreed, setFicheBreed] = useState<string | null>(null);
 
   useEffect(() => {
@@ -75,7 +77,7 @@ const BreedEditorialLink = ({ species, breed, className }: BreedEditorialLinkPro
         className,
       )}
     >
-      Lire la fiche {breed.trim()}
+      {label ?? `Lire la fiche ${breed.trim()}`}
     </Link>
   );
 };

@@ -7,7 +7,7 @@
  * Ordre de résolution pour chaque animal :
  *   1. fiche de sa race (breed_profiles, match species + slug de race),
  *   2. à défaut, la porte d'entrée des fiches de son espèce,
- *   3. à défaut, un guide générique.
+ *   3. à défaut, les conseils d'Alma.
  * Aucune carte vide, aucune race sans rapport avec l'animal.
  *
  * S'y ajoutent un ou deux conseils choisis sur la situation réelle (garde à
@@ -99,7 +99,7 @@ export const pickContextTips = (
   if (ctx.hasUpcomingSit) {
     tips.push({
       key: "upcoming",
-      to: "/guides",
+      to: "/actualites/preparer-maison-avant-garde",
       eyebrow: "Avant la garde",
       title: "Préparer la maison et les habitudes avant l'arrivée du gardien",
     });
@@ -107,7 +107,7 @@ export const pickContextTips = (
   if (ctx.hasDraftSit) {
     tips.push({
       key: "draft",
-      to: "/guides",
+      to: "/actualites/rediger-bonne-annonce-house-sitting",
       eyebrow: "Votre annonce",
       title: "Ce qui fait qu'une annonce reçoit des candidatures",
     });
@@ -115,7 +115,7 @@ export const pickContextTips = (
   if (ctx.profileIncomplete) {
     tips.push({
       key: "profile",
-      to: "/guides",
+      to: "/owner-profile?section=identity",
       eyebrow: "Votre profil",
       title: "Les quelques lignes qui rassurent vraiment",
     });
@@ -125,20 +125,20 @@ export const pickContextTips = (
       month >= 5 && month <= 8
         ? {
             key: "summer",
-            to: "/guides",
+            to: "/conseils#saison",
             eyebrow: "Cette saison",
             title: "Chaleur, départs et animaux, les précautions de l'été",
           }
         : month >= 11 || month <= 2
           ? {
               key: "winter",
-              to: "/guides",
+              to: "/conseils#saison",
               eyebrow: "Cette saison",
               title: "Sorties courtes et pattes fragiles, l'hiver au quotidien",
             }
           : {
               key: "midseason",
-              to: "/guides",
+              to: "/conseils#saison",
               eyebrow: "Cette saison",
               title: "Reprendre le rythme des balades à la mi-saison",
             };
@@ -276,7 +276,7 @@ const PetAdviceSection = ({
         continue;
       }
       const plural = SPECIES_PLURAL[pet.species];
-      const to = plural ? "/races" : "/guides";
+      const to = plural ? "/races" : "/conseils";
       const key = `${pet.species}-fallback`;
       if (seen.has(key)) continue;
       seen.add(key);
