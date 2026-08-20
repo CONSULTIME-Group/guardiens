@@ -238,13 +238,15 @@ function coveredSpecies(
     if (!canon) continue;
 
     // Sensibilités bloquantes applicables à cette espèce / cet animal.
+    const breedUnknown = pet.breed == null || normalizeFreeText(pet.breed) === "";
     const applicable = (SENSITIVITY_BY_SPECIES[canon] ?? []).filter((sens) => {
       if (!sitterSens.has(sens)) return false;
       if (canon === "dog" && sens === SENS_GRANDS_CHIENS) {
-        return breedMatches(pet.breed, LARGE_DOG_BREEDS);
+        // Prudence : race non renseignée ⇒ on respecte le refus déclaré.
+        return breedUnknown || breedMatches(pet.breed, LARGE_DOG_BREEDS);
       }
       if (canon === "dog" && sens === SENS_CHIENS_CATEGORISES) {
-        return breedMatches(pet.breed, CATEGORIZED_DOG_BREEDS);
+        return breedUnknown || breedMatches(pet.breed, CATEGORIZED_DOG_BREEDS);
       }
       return true;
     });
