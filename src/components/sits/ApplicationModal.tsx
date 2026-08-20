@@ -180,12 +180,24 @@ const ApplicationModal = ({
         const ownerAff = (ownerAffRes.data as any) || null;
         const propertyId = (sitRes.data as any)?.property_id || null;
         let pets: any[] = [];
+        let carRequired: boolean | null = null;
         if (propertyId) {
-          const { data: petsData } = await supabase
-            .from("pets")
-            .select("species, special_needs")
-            .eq("property_id", propertyId);
+          // Projection complète : animaux (species, special_needs, breed) et
+          // voiture requise. Parité des entrées verrouillée par
+          // affinity-input-parity.test.ts.
+          const [{ data: petsData }, { data: propertyRow }] = await Promise.all([
+            supabase
+              .from("pets")
+              .select("species, special_needs, breed")
+              .eq("property_id", propertyId),
+            supabase
+              .from("properties")
+              .select("car_required")
+              .eq("id", propertyId)
+              .maybeSingle(),
+          ]);
           pets = petsData || [];
+          carRequired = (propertyRow as any)?.car_required ?? null;
         }
         if (ownerAff && sitterRes.data) {
           const ownerInput: AffinityOwnerInput = {
@@ -193,6 +205,7 @@ const ApplicationModal = ({
             pets,
             accepts_sitter_pets: (sitRes.data as any)?.accepts_sitter_pets ?? null,
             accepts_sitter_children: (sitRes.data as any)?.accepts_sitter_children ?? null,
+            car_required: carRequired,
           };
           const sitterInput: AffinitySitterInput = sitterRes.data as any;
           setAffinity(computeAffinityResultFull(ownerInput, sitterInput));

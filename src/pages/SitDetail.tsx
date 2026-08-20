@@ -183,7 +183,20 @@ const SitDetail = () => {
 
       setOwner(effectiveOwner);
       setProperty(enrichedProperty);
-      setOwnerProfile(ownerProfileData);
+      // Entrée d'affinité complète (parité verrouillée par
+      // affinity-input-parity.test.ts) : les colonnes d'owner_profiles
+      // viennent du select("*"), les politiques accompagnants de l'annonce
+      // (RPC get_public_sit), la voiture requise de la propriété.
+      setOwnerProfile(
+        ownerProfileData
+          ? {
+              ...ownerProfileData,
+              accepts_sitter_pets: (sitData as any)?.accepts_sitter_pets ?? null,
+              accepts_sitter_children: (sitData as any)?.accepts_sitter_children ?? null,
+              car_required: (propertyData as any)?.car_required ?? null,
+            }
+          : null,
+      );
       // Hydratation RLS-safe des reviewers via la vue publique.
       const reviewRows = (reviewsRes.data ?? []) as any[];
       const reviewerIds = Array.from(new Set(

@@ -23,7 +23,17 @@ async function fetchOwnerWithPets(userId: string): Promise<Loaded> {
   const pets = (propsRes.data ?? []).flatMap((p: any) => p.pets ?? []);
   // Voiture requise si au moins une propriété le demande.
   const car_required = (propsRes.data ?? []).some((p: any) => p.car_required === true);
-  return { ...(ownerRes.data as any), pets, car_required } as AffinityOwnerInput;
+  return {
+    ...(ownerRes.data as any),
+    pets,
+    car_required,
+    // Pas de contexte annonce ici (le visiteur consulte un profil ou une
+    // liste de gardiens, pas une de ses annonces) : les politiques
+    // accompagnants ne sont pas évaluables. null explicite, neutre dans le
+    // moteur, jamais pénalisant.
+    accepts_sitter_pets: null,
+    accepts_sitter_children: null,
+  } as AffinityOwnerInput;
 }
 
 export function useViewerOwnerForAffinity(): {

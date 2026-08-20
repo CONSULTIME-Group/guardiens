@@ -535,22 +535,31 @@ export default function PublicSitterProfile() {
       if (fetchedEmergencyProfile) setEmergencyActive(fetchedEmergencyProfile.is_active);
       setHasActiveSubscription(Boolean((subRes as any)?.data));
       setOwnerProfile(fetchedOwnerProfile);
-      setTargetOwnerAffinity(fetchedOwnerProfile);
+      // Entrée d'affinité (parité verrouillée par affinity-input-parity.test.ts).
+      // Pas de contexte annonce sur un profil public : les politiques
+      // accompagnants ne sont pas évaluables. null explicite, neutre dans le
+      // moteur, jamais pénalisant.
+      setTargetOwnerAffinity(
+        fetchedOwnerProfile
+          ? { ...fetchedOwnerProfile, accepts_sitter_pets: null, accepts_sitter_children: null }
+          : null,
+      );
       // Charge les animaux du propriétaire cible (via ses properties) pour permettre le calcul d'affinité côté gardien visitant l'onglet propriétaire.
       if (fetchedOwnerProfile && id) {
         try {
           const { data: propsData } = await supabase
             .from("properties")
-            .select("car_required, pets:pets(species, special_needs)")
+            .select("car_required, pets:pets(species, special_needs, breed)")
             .eq("user_id", id);
           const flat = (propsData || []).flatMap((p: any) => p.pets || []);
           setTargetPets(flat);
           // Voiture requise : critère d'affinité (direction gardien → propriétaire).
-          if ((propsData || []).some((p: any) => p.car_required === true)) {
-            setTargetOwnerAffinity((current: any) =>
-              current?.user_id === id ? { ...current, car_required: true } : current,
-            );
-          }
+          // Toujours écrite (true ou false), jamais laissée absente.
+          setTargetOwnerAffinity((current: any) =>
+            current?.user_id === id
+              ? { ...current, car_required: (propsData || []).some((p: any) => p.car_required === true) }
+              : current,
+          );
         } catch {
           setTargetPets([]);
         }

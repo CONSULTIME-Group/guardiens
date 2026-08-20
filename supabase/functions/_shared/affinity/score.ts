@@ -21,7 +21,9 @@
  * Côté edge, ce module remplace l'ancien moteur SQL `calculate_affinity_score_pg`,
  * DÉPRÉCIÉ mais CONSERVÉ en base (commentaire SQL posé sur la fonction, aucun
  * DROP de fonction ni de colonne). Un même couple produit le même score dans
- * l'app et dans les emails, garanti par `affinity-single-engine.test.ts`.
+ * l'app et dans les emails. La parité des ENTRÉES (16 champs gardien, 10
+ * champs propriétaire, sur chaque surface) est verrouillée par
+ * `src/lib/__tests__/affinity-input-parity.test.ts`.
  */
 
 import {
