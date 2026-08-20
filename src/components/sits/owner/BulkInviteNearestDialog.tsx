@@ -2,9 +2,12 @@
  * Dialogue d'envoi groupé : invite en un clic les N gardiens disponibles
  * les plus proches du propriétaire.
  *
- * - Filtre : role=sitter, sitter_profiles.is_available=true, hors propriétaire,
- *   hors gardiens déjà invités sur cette annonce.
- * - Distance : géocodage des villes candidates + filtre Haversine, tri croissant.
+ * - Vivier : role=sitter, sitter_profiles.is_available=true, hors
+ *   propriétaire, hors gardiens déjà invités sur cette annonce. Aucun filtre
+ *   de confiance ni plafond de lecture : tout le vivier disponible est trié
+ *   (décision du 20/08/2026 : tri, jamais de filtre de pool).
+ * - Distance : coordonnées approchées de la vue publique, géocodage de la
+ *   ville en repli, tri croissant AVANT le plafond d'affichage (tracé).
  * - Quota : respect de la limite 20 invitations / 24 h (cap = 20 - déjà envoyé).
  * - Vouvoiement strict.
  */
@@ -32,7 +35,8 @@ interface Candidate {
   first_name: string | null;
   avatar_url: string | null;
   city: string | null;
-  distance_km: number;
+  /** Null si aucune position connue : trié en fin de liste, jamais écarté. */
+  distance_km: number | null;
 }
 
 interface Props {
@@ -119,20 +123,26 @@ const BulkInviteNearestDialog = ({
         return;
       }
 
+      // Vivier complet des gardiens disponibles, sans plafond de lecture :
+      // le tri par distance précède le plafond d'affichage, jamais
+      // l'inverse (aucun plafond silencieux).
       const { data } = await supabase
         .from("public_profiles")
-        .select("id, first_name, avatar_url, city")
+        .select("id, first_name, avatar_url, city, latitude_approx, longitude_approx")
         .in("id", availableIds)
-        .neq("id", ownerId)
-        .not("city", "is", null)
-        .limit(300);
+        .neq("id", ownerId);
 
-      const rows = ((data as any[]) || []).filter(
-        (r) => !excluded.has(r.id) && (r.city || "").trim().length > 0,
-      );
+      const rows = ((data as any[]) || []).filter((r) => !excluded.has(r.id));
 
+      // Géocodage de la ville en repli, uniquement pour les profils sans
+      // coordonnées approchées.
       const uniqueCities = Array.from(
-        new Set(rows.map((r) => (r.city || "").trim())),
+        new Set(
+          rows
+            .filter((r) => r.latitude_approx == null || r.longitude_approx == null)
+            .map((r) => (r.city || "").trim())
+            .filter((c) => c.length > 0),
+        ),
       );
       await Promise.all(
         uniqueCities.map(async (c) => {
@@ -142,30 +152,45 @@ const BulkInviteNearestDialog = ({
         }),
       );
 
-      const enriched: Candidate[] = rows
-        .map((r) => {
-          const g = cache.current.get((r.city || "").trim());
-          if (!g) return null;
-          const d = haversineDistance(
+      const enriched: Candidate[] = rows.map((r) => {
+        let d: number | null = null;
+        if (r.latitude_approx != null && r.longitude_approx != null) {
+          d = haversineDistance(
             ownerCoords.lat,
             ownerCoords.lng,
-            g.lat,
-            g.lng,
+            r.latitude_approx,
+            r.longitude_approx,
           );
-          return {
-            id: r.id,
-            first_name: r.first_name,
-            avatar_url: r.avatar_url,
-            city: r.city,
-            distance_km: Math.round(d),
-          } as Candidate;
-        })
-        .filter((c): c is Candidate => !!c)
-        .sort((a, b) => a.distance_km - b.distance_km)
-        .slice(0, cap);
+        } else {
+          const g = cache.current.get((r.city || "").trim());
+          if (g) {
+            d = haversineDistance(ownerCoords.lat, ownerCoords.lng, g.lat, g.lng);
+          }
+        }
+        return {
+          id: r.id,
+          first_name: r.first_name,
+          avatar_url: r.avatar_url,
+          city: r.city,
+          distance_km: d === null ? null : Math.round(d),
+        };
+      });
+      enriched.sort((a, b) => {
+        const da = a.distance_km ?? Number.POSITIVE_INFINITY;
+        const db = b.distance_km ?? Number.POSITIVE_INFINITY;
+        return da - db;
+      });
+
+      const shown = enriched.slice(0, cap);
+      const excludedByCap = enriched.length - shown.length;
+      if (cap > 0 && excludedByCap > 0) {
+        console.info(
+          `[bulk-invite] plafond d'affichage ${cap} : ${excludedByCap} gardiens disponibles plus éloignés non proposés.`,
+        );
+      }
 
       if (!cancel) {
-        setCandidates(enriched);
+        setCandidates(shown);
         setLoading(false);
       }
     })();
@@ -221,7 +246,13 @@ const BulkInviteNearestDialog = ({
     if (cap === 0) return "Quota atteint (20 invitations / 24 h).";
     if (loading) return "Recherche des gardiens disponibles les plus proches…";
     if (candidates.length === 0) return "Aucun gardien disponible trouvé à proximité.";
-    const max = candidates[candidates.length - 1]?.distance_km ?? 0;
+    const max = candidates.reduce(
+      (m, c) => (c.distance_km !== null && c.distance_km > m ? c.distance_km : m),
+      0,
+    );
+    if (max === 0) {
+      return `${candidates.length} gardien${candidates.length > 1 ? "s" : ""} disponible${candidates.length > 1 ? "s" : ""}.`;
+    }
     return `${candidates.length} gardien${candidates.length > 1 ? "s" : ""} disponible${candidates.length > 1 ? "s" : ""} dans un rayon de ${max} km.`;
   }, [loading, candidates, cap]);
 
@@ -260,7 +291,9 @@ const BulkInviteNearestDialog = ({
                   </Avatar>
                   <span className="font-medium truncate flex-1">{c.first_name || "Gardien"}</span>
                   <span className="text-xs text-muted-foreground truncate">{c.city}</span>
-                  <span className="text-xs font-medium text-primary tabular-nums shrink-0">{c.distance_km} km</span>
+                  {c.distance_km !== null && (
+                    <span className="text-xs font-medium text-primary tabular-nums shrink-0">{c.distance_km} km</span>
+                  )}
                 </div>
               ))}
             </div>

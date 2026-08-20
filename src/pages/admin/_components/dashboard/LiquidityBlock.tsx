@@ -114,7 +114,7 @@ export const LiquidityBlock = () => {
           {data?.generated_at
             ? ` · relevé le ${new Date(data.generated_at).toLocaleString("fr-FR")}`
             : ""}
-          . Gardiens éligibles : identité vérifiée, profil complété à 60 % ou plus.
+          . Gardiens éligibles : vivier actif complet, sans filtre d'identité ni de complétude.
         </p>
       </CardHeader>
       <CardContent>
