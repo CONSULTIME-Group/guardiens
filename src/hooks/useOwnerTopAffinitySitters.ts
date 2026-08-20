@@ -39,11 +39,12 @@ export function useOwnerTopAffinitySitters(): Result {
     staleTime: 10 * 60 * 1000,
     gcTime: 15 * 60 * 1000,
     queryFn: async () => {
-      // 1. Owner : coordonnées + prefs matching + pets
-      const [{ data: me }, { data: ownerPrefs }, { data: pets }] = await Promise.all([
+      // 1. Owner : coordonnées + prefs matching + pets + voiture requise
+      const [{ data: me }, { data: ownerPrefs }, { data: pets }, { data: myProperties }] = await Promise.all([
         supabase.from("profiles").select("latitude, longitude, city").eq("id", userId!).maybeSingle(),
         supabase.from("owner_profiles").select("preferred_sitter_types, home_ambiance, languages, interests, life_pace, presence_expected").eq("user_id", userId!).maybeSingle(),
         supabase.from("pets").select("species, special_needs, breed, property_id, properties!inner(user_id)").eq("properties.user_id", userId!),
+        supabase.from("properties").select("car_required").eq("user_id", userId!),
       ]);
 
       const meLat = (me?.latitude as number | null) ?? null;
@@ -67,7 +68,7 @@ export function useOwnerTopAffinitySitters(): Result {
       const ids = pool.map((p) => p.id);
       const { data: sitterRows } = await supabase
         .from("sitter_profiles_affinity")
-        .select("user_id, experience_years, life_pace, languages, interests, work_during_sit, sensitivities, animal_types, sitter_type, travels_with_children, travels_with_own_animals, special_animal_skills, farm_animals_ok")
+        .select("user_id, experience_years, life_pace, lifestyle, availability_during, has_vehicle, has_license, languages, interests, work_during_sit, sensitivities, animal_types, sitter_type, travels_with_children, travels_with_own_animals, special_animal_skills, farm_animals_ok")
         .in("user_id", ids);
 
       const sitterByUser = new Map<string, any>((sitterRows ?? []).map((s: any) => [s.user_id, s]));
@@ -106,6 +107,7 @@ export function useOwnerTopAffinitySitters(): Result {
         interests: (ownerPrefs as any)?.interests ?? null,
         life_pace: (ownerPrefs as any)?.life_pace ?? null,
         presence_expected: ownerPrefs?.presence_expected ?? null,
+        car_required: (myProperties ?? []).some((p: any) => p.car_required === true),
         pets: (pets ?? []).map((p: any) => ({ species: p.species, special_needs: p.special_needs, breed: p.breed ?? null })),
       };
 
