@@ -172,7 +172,10 @@ export function useOwnerDashboardData(userId: string | undefined) {
         const appsPromise = sitIds.length > 0
           ? supabase
               .from("applications")
-              .select("*, sit:sits(title, start_date, end_date)")
+              // L'embed sit porte les politiques accompagnants : OwnerStarSection
+              // les injecte dans le calcul d'affinité de chaque candidature
+              // (contexte annonce obligatoire, 21/08/2026).
+              .select("*, sit:sits(title, start_date, end_date, accepts_sitter_pets, accepts_sitter_children)")
               .in("sit_id", sitIds)
               .order("created_at", { ascending: false })
               .limit(20)

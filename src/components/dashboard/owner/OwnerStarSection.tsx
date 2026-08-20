@@ -345,7 +345,19 @@ const ApplicationsStar = ({
       const sid = app.sitter?.id;
       const input = sid ? sitterAffinityProfiles?.[sid] : undefined;
       if (!input) continue;
-      const r = computeAffinityResultFull(owner, input);
+      // Contexte annonce obligatoire (21/08/2026) : chaque candidature porte
+      // son sit_id, les politiques accompagnants sont lues depuis l'annonce
+      // concernée (embed sit de useOwnerDashboardData), jamais laissées à
+      // null sur cette surface. Un null résiduel signifie colonne non
+      // renseignée, neutre dans le moteur.
+      const r = computeAffinityResultFull(
+        {
+          ...owner,
+          accepts_sitter_pets: app.sit?.accepts_sitter_pets ?? null,
+          accepts_sitter_children: app.sit?.accepts_sitter_children ?? null,
+        },
+        input,
+      );
       if (r.hasDeclaredIncompatibility && pendingApps.length > 1) continue;
       if (r.sortScore > bestScore) {
         bestScore = r.sortScore;
