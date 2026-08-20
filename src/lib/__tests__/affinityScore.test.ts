@@ -2,12 +2,17 @@ import { describe, it, expect } from "vitest";
 import { computeAffinityScore, computeAffinityResultFull } from "../affinityScore";
 
 describe("computeAffinityScore", () => {
-  it("renvoie null si moins de 3 critères communs", () => {
+  it("n'élimine jamais : 1 critère commun → score calculé, chiffre masqué (non fiable)", () => {
+    // Doctrine lot affinité août 2026 : ON TRIE, ON N'ÉLIMINE JAMAIS.
+    // computeAffinityScore retourne toujours un résultat ; seul le chiffre
+    // affiché dépend de la fiabilité.
     const r = computeAffinityScore(
       { life_pace: "calme" },
       { life_pace: "calme" },
     );
-    expect(r).toBeNull();
+    expect(r).not.toBeNull();
+    expect(r!.displayed).toBe(false);
+    expect(r!.scoreReliable).toBe(false);
   });
 
   it("calcule un score élevé quand tout matche", () => {
@@ -35,23 +40,28 @@ describe("computeAffinityScore", () => {
     expect(r!.total).toBeGreaterThanOrEqual(5);
   });
 
-  it("disqualifie un sitter allergique au chat si l'owner a un chat", () => {
-    const r = computeAffinityScore(
-      {
-        life_pace: "calme",
-        languages: ["Français"],
-        interests: ["Lecture"],
-        pets: [{ species: "cat" }],
-      },
-      {
-        life_pace: "calme",
-        languages: ["Français"],
-        interests: ["Lecture"],
-        animal_types: ["cat"],
-        sensitivities: ["Allergie aux chats"],
-      },
-    );
-    expect(r).toBeNull();
+  it("allergie au chat déclarée : pas d'élimination en liste, exclusion en distribution", () => {
+    const owner = {
+      life_pace: "calme",
+      languages: ["Français"],
+      interests: ["Lecture"],
+      pets: [{ species: "cat" }],
+    };
+    const sitter = {
+      life_pace: "calme",
+      languages: ["Français"],
+      interests: ["Lecture"],
+      animal_types: ["cat"],
+      sensitivities: ["Allergie aux chats"],
+    };
+    // Liste : le gardien reste, chiffre masqué, incompatibilité signalée.
+    const r = computeAffinityScore(owner, sitter);
+    expect(r).not.toBeNull();
+    expect(r!.hasDeclaredIncompatibility).toBe(true);
+    expect(r!.displayed).toBe(false);
+    expect(r!.hiddenReason).toBe("disqualified");
+    // Distribution : le refus déclaré est respecté, et seulement ça.
+    expect(computeAffinityScore(owner, sitter, { mode: "distribution" })).toBeNull();
   });
 
   it("dénominateur dynamique : 3 critères SOFT tous matchés → masqué (no_hard_criterion)", () => {
