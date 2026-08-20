@@ -163,6 +163,40 @@ Deno.serve(async (req) => {
 
     // Cache sits déjà chargées pour éviter multi requêtes
     const sitCache = new Map<string, SitRow>()
+    // Cache des inputs propriétaire du moteur unique (par owner_id).
+    const ownerInputCache = new Map<string, Record<string, unknown>>()
+
+    // Construit l'input propriétaire du moteur unique : préférences matching,
+    // drapeaux d'acceptation de l'annonce, véhicule et animaux (avec besoins
+    // spéciaux et races). Les champs absents restent null : le moteur les
+    // traite comme non renseignés (neutres), jamais pénalisants.
+    const loadOwnerInput = async (sit: SitRow): Promise<Record<string, unknown>> => {
+      const [{ data: op }, { data: props }] = await Promise.all([
+        supabase
+          .from('owner_profiles')
+          .select('preferred_sitter_types, home_ambiance, languages, interests, life_pace, presence_expected')
+          .eq('user_id', sit.user_id)
+          .maybeSingle(),
+        supabase
+          .from('properties')
+          .select('id, car_required, pets:pets(species, special_needs, breed)')
+          .eq('user_id', sit.user_id),
+      ])
+      const pets = (props ?? []).flatMap((p: any) => p.pets ?? [])
+      const carRequired = (props ?? []).some((p: any) => p.car_required === true)
+      return {
+        preferred_sitter_types: (op as any)?.preferred_sitter_types ?? null,
+        home_ambiance: (op as any)?.home_ambiance ?? null,
+        languages: (op as any)?.languages ?? null,
+        interests: (op as any)?.interests ?? null,
+        life_pace: (op as any)?.life_pace ?? null,
+        presence_expected: (op as any)?.presence_expected ?? null,
+        accepts_sitter_pets: sit.accepts_sitter_pets ?? null,
+        accepts_sitter_children: sit.accepts_sitter_children ?? null,
+        car_required: carRequired,
+        pets: pets.map((p: any) => ({ species: p.species, special_needs: p.special_needs, breed: p.breed ?? null })),
+      }
+    }
 
     // 2a-bis. Ordre d'envoi : les gardiens dont l'identité est vérifiée
     // passent en tête de file, les autres suivent (la vérification trie,
