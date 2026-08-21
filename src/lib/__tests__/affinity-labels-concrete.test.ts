@@ -88,7 +88,7 @@ describe("règle des libellés : chaque phrase nomme la donnée du couple", () =
       { home_ambiance: ["Calme et posé"] },
       { life_pace: "calme" },
     );
-    expect(r.matched).toContain("Aime le calme, comme vous");
+    expect(r.matched).toContain("Calme, comme vous");
   });
 
   it("profil idéal : le type de gardien est nommé", () => {
@@ -151,8 +151,8 @@ describe("distance, 9e critère (décision du 21/08/2026)", () => {
     const nul = computeAffinityResultFull({ ...owner, distance_km: null }, sitter);
     expect(sans.score).toBe(nul.score);
     expect(sans.total).toBe(nul.total);
-    // Distance connue proche : le score monte.
-    const proche = computeAffinityResultFull({ ...owner, distance_km: 5 }, sitter);
-    expect(proche.score).toBeGreaterThan(sans.score);
+    // Distance connue mais lointaine : le critère est évalué, le score baisse.
+    const loin = computeAffinityResultFull({ ...owner, distance_km: 150 }, sitter);
+    expect(loin.score).toBeLessThan(sans.score);
   });
 });

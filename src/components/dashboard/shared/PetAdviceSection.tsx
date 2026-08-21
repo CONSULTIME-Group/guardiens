@@ -22,6 +22,7 @@ import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { slugify } from "@/lib/normalize";
 import { resolveBreedFiche } from "@/lib/breedFicheMatch";
+import { TypographicFallback } from "@/components/breeds/BreedCardImage";
 import { getOptimizedImageUrl } from "@/lib/imageOptim";
 import { SectionHeader } from "../sitter/SitterMatchSection";
 import { capitalize, capitalizeWords } from "../owner/helpers";
@@ -80,6 +81,8 @@ type Tile = {
   eyebrow: string;
   title: string;
   image: string | null;
+  /** Nom de la fiche de race, pour le repli typographique sans photo. */
+  fallbackTitle?: string | null;
 };
 
 /** Liste les prénoms des compagnons, sans jamais dépasser trois mentions. */
@@ -153,8 +156,8 @@ const AdviceCard = ({ tile }: { tile: Tile }) => (
       to={tile.to}
       className="group flex h-full flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-sm transition-colors hover:border-primary/30"
     >
-      {tile.image !== null && (
-        <div aria-hidden="true" className="w-full overflow-hidden bg-muted" style={{ height: "90px" }}>
+      {(tile.image !== null || tile.fallbackTitle) && (
+        <div aria-hidden="true" className="relative w-full overflow-hidden bg-muted" style={{ height: "90px" }}>
           {tile.image ? (
             <img
               src={getOptimizedImageUrl(tile.image, 320, 78)}
@@ -162,6 +165,9 @@ const AdviceCard = ({ tile }: { tile: Tile }) => (
               loading="lazy"
               className="h-full w-full object-cover transition-transform duration-500 ease-out group-hover:scale-105"
             />
+          ) : tile.fallbackTitle ? (
+            /* Fiche sans photo : repli typographique carnet, jamais de trou. */
+            <TypographicFallback breed={tile.fallbackTitle} speciesLabel="" compact />
           ) : (
             <div
               className="h-full w-full"
@@ -272,6 +278,7 @@ const PetAdviceSection = ({
           eyebrow: `Pour ${capitalize(pet.name)}`,
           title: `${capitalizeWords(match.breed)}, ce qu'il faut savoir pour bien s'en occuper`,
           image: match.image_url,
+          fallbackTitle: capitalizeWords(match.breed),
         });
         continue;
       }

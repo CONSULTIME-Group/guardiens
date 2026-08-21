@@ -33,6 +33,11 @@ async function fetchOwnerWithPets(userId: string): Promise<Loaded> {
     // moteur, jamais pénalisant.
     accepts_sitter_pets: null,
     accepts_sitter_children: null,
+    // Distance par couple : inconnue ici (le hook ne connaît pas le gardien
+    // consulté). null explicite, critère hors dénominateur, jamais
+    // pénalisant. Le consommateur qui connaît les deux coordonnées la
+    // surcharge à l'appel du moteur.
+    distance_km: null,
   } as AffinityOwnerInput;
 }
 

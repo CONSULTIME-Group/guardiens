@@ -33,6 +33,7 @@ interface BreedProfile {
 // Libellés d'espèces : module unique src/lib/petLabels.ts (enum pet_species).
 import { petSpeciesLabelLower } from "@/lib/petLabels";
 import { mergedBreedTarget } from "@/lib/breedFicheMerges";
+import { TypographicFallback } from "@/components/breeds/BreedCardImage";
 import { LEVEL_BADGE_CLASS, extractDifficultyLevel } from "@/lib/breedsListingModel";
 
 const SPECIES_PREFIXES = ["dog", "cat", "bird", "rodent", "farm_animal", "horse", "nac"];
@@ -232,7 +233,7 @@ const BreedPage = () => {
           </div>
         </header>
 
-        {breed.image_url && (
+        {breed.image_url ? (
           <figure className="mb-10 rounded-xl overflow-hidden border border-border bg-muted">
             <img
               src={breed.image_url}
@@ -246,6 +247,12 @@ const BreedPage = () => {
               </figcaption>
             )}
           </figure>
+        ) : (
+          /* Fiche sans photo (28/84) : repli typographique façon carnet,
+             le double filet et l'initiale tiennent la page, jamais de trou. */
+          <div className="relative mb-10 aspect-[21/9] overflow-hidden rounded-xl border border-border">
+            <TypographicFallback breed={breedCap} speciesLabel={speciesLabel} />
+          </div>
         )}
 
         {breed.rich_content && breed.rich_content.trim().length > 200 ? (

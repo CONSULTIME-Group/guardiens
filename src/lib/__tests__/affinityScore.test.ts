@@ -215,7 +215,7 @@ describe("computeAffinityScore", () => {
       },
     );
     expect(r).not.toBeNull();
-    expect(r!.matched.some((m) => /ambiance/i.test(m))).toBe(true);
+    expect(r!.matched).toContain("Sport, comme vous");
   });
 
   it("ne plante pas si special_needs est fourni (bonus retiré)", () => {
@@ -338,7 +338,7 @@ describe("computeAffinityScore", () => {
     expect(r!.score).toBe(50);
     expect(r!.displayed).toBe(true);
     expect(r!.hiddenReason).toBeNull();
-    expect(r!.explanation).toContain("Ne déclare pas d'expérience avec vos animaux");
+    expect(r!.explanation).toContain("Ne déclare pas d'expérience avec les chats");
     // Doctrine : pas un refus déclaré, donc distribuable (alertes incluses).
     expect(r!.distributable).toBe(true);
     expect(computeAffinityScore(
@@ -435,7 +435,7 @@ describe("computeAffinityScore", () => {
     expect(r).not.toBeNull();
     expect(r!.hiddenReason).not.toBe("no_animal_species_match");
     expect(r!.displayed).toBe(true);
-    expect(r!.matched.some((m) => /animaux|expérience/i.test(m))).toBe(true);
+    expect(r!.matched.some((m) => m.startsWith("A déjà gardé"))).toBe(true);
   });
 
   it("no_hard_criterion : uniquement soft (langues + intérêts + ambiance) → masqué", () => {
@@ -713,7 +713,7 @@ describe("règle des deux côtés (20/08/2026)", () => {
       { home_ambiance: ["Cocon casanier"] },
       { life_pace: "calme" },
     );
-    expect(alias.matched).toContain("Aime le cocooning, comme vous");
+    expect(alias.matched).toContain("Cocooning, comme vous");
     expect(alias.score).toBe(canon.score);
     expect(alias.confidence).toBe(canon.confidence);
   });
@@ -739,6 +739,61 @@ describe("règle des deux côtés (20/08/2026)", () => {
       { life_pace: "calme" },
     );
     expect(doublon.score).toBe(seul.score);
+  });
+});
+
+describe("demi-portion et une chip par critère (décision du 21/08/2026)", () => {
+  it("distance au-delà de 60 km : frein, jamais une chip positive", () => {
+    const loin = computeAffinityResultFull({ distance_km: 150 }, {});
+    expect(loin.matched).toHaveLength(0);
+    expect(loin.explanation).toContain("À 150 km de chez vous, le trajet est long");
+    // Palier 0,5 : pile la demi-portion, mais la règle distance prime.
+    const moyen = computeAffinityResultFull({ distance_km: 90 }, {});
+    expect(moyen.matched).toHaveLength(0);
+    expect(moyen.explanation).toContain("À 90 km de chez vous, le trajet est long");
+    const proche = computeAffinityResultFull({ distance_km: 45 }, {});
+    expect(proche.matched).toContain("À 45 km de chez vous");
+  });
+
+  it("couverture animale sous la moitié du poids : la phrase rejoint les freins", () => {
+    // chien (poids 1) + cheval (poids 3) : ne couvrir que le chien = 0,25.
+    const r = computeAffinityResultFull(
+      { pets: [{ species: "dog" }, { species: "horse" }] },
+      { animal_types: ["Chiens"] },
+    );
+    expect(r.matched.some((m) => m.startsWith("A déjà gardé"))).toBe(false);
+    expect(r.explanation.some((m) => m.includes("pas vos"))).toBe(true);
+  });
+
+  it("couverture animale à exactement la moitié : la chip reste positive", () => {
+    // chien (1) + chat (1), seul le chat est couvert : 0,5, seuil inclus.
+    const r = computeAffinityResultFull(
+      { pets: [{ species: "dog" }, { species: "cat" }] },
+      { animal_types: ["Chats"] },
+    );
+    expect(r.matched.some((m) => m.includes("pas vos chiens"))).toBe(true);
+  });
+
+  it("ambiance : plusieurs tags qui matchent fondent en UNE seule chip", () => {
+    const r = computeAffinityResultFull(
+      { home_ambiance: ["Campagne", "Calme et posé", "Cocon casanier"] },
+      { life_pace: "calme", interests: ["Jardinage"] },
+    );
+    const chips = r.matched.filter((m) => m.endsWith("comme vous"));
+    expect(chips).toEqual(["Campagne, calme et cocooning, comme vous"]);
+  });
+
+  it("intérêts : un seul intérêt commun (0,5/1) reste positif, zéro ne produit rien", () => {
+    const un = computeAffinityResultFull(
+      { interests: ["Lecture"] },
+      { interests: ["Lecture"] },
+    );
+    expect(un.matched).toContain("Lecture en commun");
+    const zero = computeAffinityResultFull(
+      { interests: ["Lecture"] },
+      { interests: ["Cuisine"] },
+    );
+    expect(zero.matched).toHaveLength(0);
   });
 });
 

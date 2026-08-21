@@ -131,7 +131,7 @@ const SitterEntraideSection = ({
           <CardShell>
             <VoletLabel>Donner</VoletLabel>
             <div className="flex items-center flex-wrap" style={{ gap: "14px" }}>
-              <div className="min-w-0 flex-1">
+              <div className="min-w-0 flex-1 basis-48">
                 <h3
                   className="font-heading text-foreground"
                   style={{ fontSize: "16px", fontWeight: 600, lineHeight: 1.3 }}
@@ -163,12 +163,17 @@ const SitterEntraideSection = ({
         ) : (
           <CardShell>
             <VoletLabel>Donner</VoletLabel>
-            <p
-              className="font-heading italic text-muted-foreground"
-              style={{ fontSize: "13.5px", lineHeight: 1.5 }}
-            >
-              Personne n'a besoin d'aide pour l'instant.
-            </p>
+            <div className="flex items-center flex-wrap" style={{ gap: "14px" }}>
+              <p
+                className="font-heading italic text-muted-foreground min-w-0 flex-1 basis-48"
+                style={{ fontSize: "13.5px", lineHeight: 1.5 }}
+              >
+                Personne n'a besoin d'aide pour l'instant.
+              </p>
+              <SecondaryLink to="/petites-missions">
+                Parcourir les missions
+              </SecondaryLink>
+            </div>
           </CardShell>
         )}
 
@@ -177,7 +182,7 @@ const SitterEntraideSection = ({
           <CardShell>
             <VoletLabel>Demander</VoletLabel>
             <div className="flex items-center flex-wrap" style={{ gap: "14px" }}>
-              <div className="min-w-0 flex-1">
+              <div className="min-w-0 flex-1 basis-48">
                 <h3
                   className="font-heading text-foreground"
                   style={{ fontSize: "16px", fontWeight: 600, lineHeight: 1.3 }}
@@ -208,7 +213,7 @@ const SitterEntraideSection = ({
             <VoletLabel>Demander</VoletLabel>
             <div className="flex items-center flex-wrap" style={{ gap: "14px" }}>
               <p
-                className="text-foreground min-w-0 flex-1"
+                className="text-foreground min-w-0 flex-1 basis-48"
                 style={{ fontSize: "13.5px", lineHeight: 1.5 }}
               >
                 Arrosage, courrier, présence : publiez une petite mission, les gens du coin sont prévenus aussitôt.

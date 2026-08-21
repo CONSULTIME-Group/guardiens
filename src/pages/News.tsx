@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import { getOptimizedImageUrl } from "@/lib/imageOptim";
 import { useSearchParams, Link } from "react-router-dom";
 import PageMeta from "@/components/PageMeta";
+import ArticleCoverFallback from "@/components/news/ArticleCoverFallback";
 import PageBreadcrumb from "@/components/seo/PageBreadcrumb";
 import inventoryCover from "@/assets/inventaire-guardiens-france.jpg";
 import { supabase } from "@/integrations/supabase/client";
@@ -29,37 +30,6 @@ interface Article {
   published_at: string | null;
 }
 
-/** Repli typographique quand un article n'a pas d'image de couverture :
- *  papier crème, lavis vert pin et terracotta, initiale du titre.
- *  Même règle que sur /races : jamais de trou dans la grille. */
-const ArticleCoverFallback = ({
-  title,
-  compact = false,
-  className = "",
-}: {
-  title: string;
-  compact?: boolean;
-  className?: string;
-}) => (
-  <div
-    aria-hidden="true"
-    className={`flex flex-col items-center justify-center ${className}`}
-    style={{
-      backgroundColor: "hsl(var(--hero-paper))",
-      backgroundImage:
-        "radial-gradient(ellipse 65% 55% at 26% 20%, hsl(var(--primary) / 0.10), transparent 70%)," +
-        "radial-gradient(ellipse 60% 50% at 76% 80%, hsl(var(--secondary) / 0.14), transparent 70%)",
-    }}
-  >
-    <span
-      className={`font-serif font-semibold text-secondary/70 select-none leading-none ${
-        compact ? "text-2xl" : "text-5xl"
-      }`}
-    >
-      {title.trim().charAt(0).toUpperCase()}
-    </span>
-  </div>
-);
 
 const CATEGORY_KEYS = [
   "guide_central","guide_race","guide_lieu","guide_ville","conseil_gardien","conseil_proprio",

@@ -8,9 +8,12 @@ import type { BreedListingEntry } from "@/lib/breedsListingModel";
 export const TypographicFallback = ({
   breed,
   speciesLabel,
+  compact = false,
 }: {
   breed: string;
   speciesLabel: string;
+  /** Format réduit (vignettes basses, ex. 90 px) : initiale seule. */
+  compact?: boolean;
 }) => (
   <div
     aria-hidden="true"
@@ -23,13 +26,15 @@ export const TypographicFallback = ({
         "radial-gradient(ellipse 60% 50% at 76% 80%, hsl(var(--secondary) / 0.14), transparent 70%)",
     }}
   >
-    <span className="pointer-events-none absolute inset-2 rounded-lg border border-secondary/25" />
-    <span className="font-serif text-6xl font-semibold text-secondary/70 select-none leading-none">
+    <span className={`pointer-events-none absolute rounded-lg border border-secondary/25 ${compact ? "inset-1" : "inset-2"}`} />
+    <span className={`font-serif font-semibold text-secondary/70 select-none leading-none ${compact ? "text-3xl" : "text-6xl"}`}>
       {breed.trim().charAt(0).toUpperCase()}
     </span>
-    <span className="text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
-      {speciesLabel}
-    </span>
+    {!compact && (
+      <span className="text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
+        {speciesLabel}
+      </span>
+    )}
   </div>
 );
 

@@ -146,8 +146,10 @@ describe("resolveBreedFiche : garde-fou, jamais de faux rapprochement", () => {
     // Le lapin (NAC) ne renvoie pas vers la fiche rat (rongeur).
     expect(resolveBreedFiche("nac", "Lapin", fiches)).toBeNull();
   });
-  it("préfère l'exact au préfixe", () => {
-    expect(resolveBreedFiche("dog", "malinois", fiches)?.breed).toBe("malinois");
+  it("une fiche absorbée prime sur l'exact (« malinois », fusion du 21/08/2026)", () => {
+    // « malinois » existe en base mais est fusionné dans « berger belge
+    // malinois » : la fusion éditoriale passe avant le rapprochement exact.
+    expect(resolveBreedFiche("dog", "malinois", fiches)?.breed).toBe("berger belge malinois");
   });
   it("départage les quasi-homonymes par l'exact", () => {
     expect(resolveBreedFiche("dog", "jack russell terrier", fiches)?.breed).toBe("jack russell");

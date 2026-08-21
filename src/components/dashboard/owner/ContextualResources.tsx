@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { Skeleton } from "@/components/ui/skeleton";
 import { supabase } from "@/integrations/supabase/client";
 import { getOptimizedImageUrl } from "@/lib/imageOptim";
+import ArticleCoverFallback from "@/components/news/ArticleCoverFallback";
 
 interface ResItem {
   title: string;
@@ -132,7 +133,10 @@ const ContextualResources = memo(({ annoncesCount, gardesCount, loading }: Conte
                     />
                   ) : cover === undefined ? (
                     <Skeleton className="h-full w-full rounded-none" />
-                  ) : null}
+                  ) : (
+                    /* Article sans couverture : repli typographique, jamais de trou. */
+                    <ArticleCoverFallback title={r.title} compact className="h-full w-full" />
+                  )}
                 </div>
                 <div className="flex-1 min-w-0 p-3">
                   <p className="text-sm font-semibold text-foreground leading-snug line-clamp-1">

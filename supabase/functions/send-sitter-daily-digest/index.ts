@@ -200,6 +200,9 @@ Deno.serve(async (req) => {
         accepts_sitter_children: sit.accepts_sitter_children ?? null,
         car_required: carRequired,
         pets: pets.map((p: any) => ({ species: p.species, special_needs: p.special_needs, breed: p.breed ?? null })),
+        // Distance par couple : surchargée à l'appel du moteur avec le
+        // distance_km de la ligne de file (calculée à l'enfilement).
+        distance_km: null,
       }
     }
 
@@ -336,7 +339,7 @@ Deno.serve(async (req) => {
             ownerInputCache.set(sit.user_id, ownerInput)
           }
 
-          const result = computeAffinityResultFull(ownerInput as any, sitterRow as any, { mode: 'distribution' })
+          const result = computeAffinityResultFull({ ...ownerInput, distance_km: q.distance_km ?? null } as any, sitterRow as any, { mode: 'distribution' })
           if (!result.distributable) {
             await markSkipped(supabase, [q.id], 'declared_refusal', body.dry_run)
             continue
