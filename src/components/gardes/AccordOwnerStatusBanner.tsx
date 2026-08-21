@@ -42,17 +42,20 @@ export function AccordOwnerStatusBanner({ sitId, sitStatus, onSignAccord, refres
       .rpc("get_garde_accord_status", { p_garde_id: sitId })
       .then(({ data }) => {
         if (cancelled) return;
-        const rows = (Array.isArray(data) ? data : []) as unknown as AccordStatusRow[];
-        const row = rows[0];
-        if (!row) {
-          setStatus({ owner_signed: false, sitter_signed: false, owner_declined: false, sitter_declined: false });
-          return;
-        }
+        // Le RPC renvoie un objet jsonb unique : { proprio, gardien, document }.
+        // Même convention que la vue gardien : un refus suivi d'une signature
+        // compte comme signé (accepted prime sur declined).
+        const d = (data ?? null) as {
+          proprio?: { accepted?: boolean; declined?: boolean } | null;
+          gardien?: { accepted?: boolean; declined?: boolean } | null;
+        } | null;
+        const proprio = d?.proprio ?? null;
+        const gardien = d?.gardien ?? null;
         setStatus({
-          owner_signed: !!row.owner_signed,
-          sitter_signed: !!row.sitter_signed,
-          owner_declined: !!row.owner_declined,
-          sitter_declined: !!row.sitter_declined,
+          owner_signed: !!proprio?.accepted,
+          sitter_signed: !!gardien?.accepted,
+          owner_declined: !!proprio?.declined && !proprio?.accepted,
+          sitter_declined: !!gardien?.declined && !gardien?.accepted,
         });
       });
     return () => { cancelled = true; };

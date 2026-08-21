@@ -18,7 +18,9 @@ export const useShellMode = (): ShellMode => {
   const { hasSession, authChecked, loading, user, authTimeout } = useAuth();
 
   if (user && hasSession) return "app";
-  if (authTimeout) return "pending";
+  // Un délai d'authentification ne doit jamais masquer une page publique :
+  // on retombe sur la coquille visiteur plutôt que sur l'écran d'erreur.
+  if (authTimeout) return "public";
   if (!hasSession && !authChecked) return "public";
   if (authChecked && !hasSession) return "public";
   // Session annoncée mais profil absent une fois le chargement terminé :
