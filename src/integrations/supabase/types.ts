@@ -1781,6 +1781,13 @@ export type Database = {
             foreignKeyName: "conversations_small_mission_id_fkey"
             columns: ["small_mission_id"]
             isOneToOne: false
+            referencedRelation: "public_small_missions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "conversations_small_mission_id_fkey"
+            columns: ["small_mission_id"]
+            isOneToOne: false
             referencedRelation: "small_missions"
             referencedColumns: ["id"]
           },
@@ -3443,6 +3450,13 @@ export type Database = {
             foreignKeyName: "mission_feedbacks_mission_id_fkey"
             columns: ["mission_id"]
             isOneToOne: false
+            referencedRelation: "public_small_missions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mission_feedbacks_mission_id_fkey"
+            columns: ["mission_id"]
+            isOneToOne: false
             referencedRelation: "small_missions"
             referencedColumns: ["id"]
           },
@@ -3520,6 +3534,13 @@ export type Database = {
             columns: ["helper_id"]
             isOneToOne: false
             referencedRelation: "public_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mission_notification_queue_mission_id_fkey"
+            columns: ["mission_id"]
+            isOneToOne: false
+            referencedRelation: "public_small_missions"
             referencedColumns: ["id"]
           },
           {
@@ -5114,6 +5135,13 @@ export type Database = {
             foreignKeyName: "reviews_mission_id_fkey"
             columns: ["mission_id"]
             isOneToOne: false
+            referencedRelation: "public_small_missions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reviews_mission_id_fkey"
+            columns: ["mission_id"]
+            isOneToOne: false
             referencedRelation: "small_missions"
             referencedColumns: ["id"]
           },
@@ -6230,6 +6258,13 @@ export type Database = {
             foreignKeyName: "small_mission_responses_mission_id_fkey"
             columns: ["mission_id"]
             isOneToOne: false
+            referencedRelation: "public_small_missions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "small_mission_responses_mission_id_fkey"
+            columns: ["mission_id"]
+            isOneToOne: false
             referencedRelation: "small_missions"
             referencedColumns: ["id"]
           },
@@ -7261,6 +7296,101 @@ export type Database = {
             foreignKeyName: "sitter_profiles_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: true
+            referencedRelation: "public_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      public_small_missions: {
+        Row: {
+          category: Database["public"]["Enums"]["small_mission_category"] | null
+          city: string | null
+          created_at: string | null
+          date_needed: string | null
+          description: string | null
+          duration_estimate: string | null
+          end_date: string | null
+          exchange_offer: string | null
+          id: string | null
+          latitude: number | null
+          longitude: number | null
+          mission_type: Database["public"]["Enums"]["mission_type_enum"] | null
+          pet_size: string | null
+          pet_species: string | null
+          photos: string[] | null
+          postal_code: string | null
+          slug: string | null
+          status: Database["public"]["Enums"]["small_mission_status"] | null
+          title: string | null
+          user_id: string | null
+        }
+        Insert: {
+          category?:
+            | Database["public"]["Enums"]["small_mission_category"]
+            | null
+          city?: string | null
+          created_at?: string | null
+          date_needed?: string | null
+          description?: string | null
+          duration_estimate?: string | null
+          end_date?: string | null
+          exchange_offer?: string | null
+          id?: string | null
+          latitude?: number | null
+          longitude?: number | null
+          mission_type?: Database["public"]["Enums"]["mission_type_enum"] | null
+          pet_size?: string | null
+          pet_species?: string | null
+          photos?: string[] | null
+          postal_code?: string | null
+          slug?: string | null
+          status?: Database["public"]["Enums"]["small_mission_status"] | null
+          title?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          category?:
+            | Database["public"]["Enums"]["small_mission_category"]
+            | null
+          city?: string | null
+          created_at?: string | null
+          date_needed?: string | null
+          description?: string | null
+          duration_estimate?: string | null
+          end_date?: string | null
+          exchange_offer?: string | null
+          id?: string | null
+          latitude?: number | null
+          longitude?: number | null
+          mission_type?: Database["public"]["Enums"]["mission_type_enum"] | null
+          pet_size?: string | null
+          pet_species?: string | null
+          photos?: string[] | null
+          postal_code?: string | null
+          slug?: string | null
+          status?: Database["public"]["Enums"]["small_mission_status"] | null
+          title?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "small_missions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profile_reputation"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "small_missions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "small_missions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
             referencedRelation: "public_profiles"
             referencedColumns: ["id"]
           },

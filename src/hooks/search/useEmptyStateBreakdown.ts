@@ -58,13 +58,13 @@ export function useEmptyStateBreakdown({
 
         const [otherTabRes, sitsAllRes, missionsAllRes, breakdownRes] = await Promise.all([
           tab === "sits"
-            ? supabase.from("small_missions").select("id", { count: "exact", head: true }).eq("status", "open")
+            ? (supabase as any).from("public_small_missions").select("id", { count: "exact", head: true })
             : supabase.from("sits").select("id", { count: "exact", head: true }).eq("status", "published"),
           supabase.from("sits").select("id", { count: "exact", head: true }).eq("status", "published"),
-          supabase.from("small_missions").select("id", { count: "exact", head: true }).eq("status", "open"),
+          (supabase as any).from("public_small_missions").select("id", { count: "exact", head: true }),
           tab === "sits"
             ? supabase.from("sits").select("user_id").eq("status", "published").limit(500)
-            : supabase.from("small_missions").select("postal_code").eq("status", "open").limit(500),
+            : (supabase as any).from("public_small_missions").select("postal_code").limit(500),
 
         ]);
         if (cancelled) return;

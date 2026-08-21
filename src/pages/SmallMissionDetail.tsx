@@ -236,7 +236,8 @@ const SmallMissionDetail = () => {
 
     // Le paramètre d'URL peut être soit un UUID (legacy), soit un slug lisible.
     const isUuidParam = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
-    const query = supabase.from("small_missions").select("*");
+    // Visiteurs anonymes : vue publique (colonnes d'affichage uniquement).
+    const query = (supabase as any).from(user ? "small_missions" : "public_small_missions").select("*");
     const { data: m } = await (isUuidParam ? query.eq("id", id) : query.eq("slug", id)).maybeSingle();
     if (!m) { setLoading(false); return; }
 
@@ -252,7 +253,7 @@ const SmallMissionDetail = () => {
     // côté client (haversine) pour éviter de proposer Vergons (04) à quelqu'un du 93.
     const [authorRes, relatedRes, respsRes, givenFbRes, recFbRes] = await Promise.all([
       supabase.rpc("get_mission_author_public", { _mission_id: m.id }),
-      supabase.from("small_missions")
+      (supabase as any).from("public_small_missions")
         .select("id, slug, title, description, category, city, postal_code, created_at, duration_estimate, photos, mission_type, latitude, longitude")
         .eq("status", "open")
         .neq("id", m.id)

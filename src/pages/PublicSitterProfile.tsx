@@ -495,7 +495,7 @@ export default function PublicSitterProfile() {
             .maybeSingle(),
 
           supabase
-            .from("small_missions")
+            .from(auth?.user ? "small_missions" : ("public_small_missions" as any))
             .select("id", { count: "exact", head: true })
             .eq("user_id", id),
           supabase
