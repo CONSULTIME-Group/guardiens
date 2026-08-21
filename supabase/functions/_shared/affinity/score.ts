@@ -75,8 +75,8 @@ import {
   SPECIES_NORMALIZE,
   NAC_UMBRELLA,
   SPECIES_MATCH_WEIGHT,
-  SPECIES_REMARKABLE_THRESHOLD,
-  SPECIES_MATCH_PHRASE,
+  SPECIES_LABEL_PLURAL,
+
   SENSITIVITY_BY_SPECIES,
   SENSITIVITY_EXPLANATION,
   SENS_ALLERGIE_CHAT,
@@ -785,6 +785,25 @@ function evalSpecialNeeds(owner: AffinityOwnerInput, sitter: AffinitySitterInput
 }
 
 /**
+ * 9e critère, distance réelle du couple (décision de Jérémie, 21/08/2026).
+ * « Près de chez vous » est la promesse du produit : 12 km et 90 km ne sont
+ * pas le même service. Poids 1, jamais plus. Jamais 0 point : un gardien
+ * qui apparaît à 120 km a déclaré un rayon qui le couvre, il ne triche pas.
+ * null (hors dénominateur) si la distance n'est pas connue.
+ */
+function evalDistance(owner: AffinityOwnerInput): CriterionEval | null {
+  const km = owner.distance_km;
+  if (km == null || !Number.isFinite(km) || km < 0) return null;
+  const points = km <= 30 ? 1 : km <= 60 ? 0.75 : km <= 100 ? 0.5 : 0.25;
+  return {
+    weight: 1,
+    points,
+    matched: [`À ${Math.round(km)} km de chez vous`],
+    explanation: [],
+  };
+}
+
+/**
  * Poids maximal atteignable pour CE couple, déterminé par les seules
  * données du propriétaire : chaque critère compte s'il POURRAIT être évalué
  * avec un gardien qui aurait tout déclaré. Sert au dénominateur de la
@@ -824,6 +843,9 @@ function maxPossibleWeight(owner: AffinityOwnerInput): number {
     const text = normalizeFreeText(needsText);
     if (SPECIAL_NEED_SIGNALS.some((sig) => sig.keywords.some((k) => text.includes(k)))) w += 1;
   }
+  // Distance : 1 si la distance du couple est connue (miroir d'evalDistance).
+  const km = owner.distance_km;
+  if (km != null && Number.isFinite(km) && km >= 0) w += 1;
   return w;
 }
 
@@ -862,6 +884,7 @@ export function computeAffinityResultFull(
     evalInterests(owner, sitter),
     evalAmbiance(owner, sitter),
     evalSpecialNeeds(owner, sitter),
+    evalDistance(owner),
   ].filter((c): c is CriterionEval => c != null);
 
   const matched: string[] = [];
