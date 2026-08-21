@@ -1064,15 +1064,13 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
 
 
    const searchMissions = async (searchCoords: { lat: number; lng: number } | null) => {
-   const query = supabase
-     .from("small_missions")
+   const query = (supabase as any)
+     .from("public_small_missions")
      .select("*")
-     .eq("status", "open")
      .order("created_at", { ascending: false });
-   const countQuery = supabase
-     .from("small_missions")
-     .select("*", { count: "exact", head: true })
-     .eq("status", "open");
+   const countQuery = (supabase as any)
+     .from("public_small_missions")
+     .select("*", { count: "exact", head: true });
 
    const [{ data, error: missionsError }, { count: missionsFranceCount, error: missionsCountError }] = await Promise.all([
      query,
@@ -1092,7 +1090,7 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
   items = items.filter((m: any) => (m.mission_type ?? "besoin") !== "offre");
   // Hydrate owner via public_profiles (anon n'a pas accès à la table profiles
   // utilisée par le FK embed PostgREST).
-  const ownerIds = Array.from(new Set(items.map((m: any) => m.user_id).filter(Boolean)));
+  const ownerIds = Array.from(new Set<string>(items.map((m: any) => m.user_id).filter(Boolean)));
   if (ownerIds.length > 0) {
     const { data: owners, error: ownersError } = await supabase
       .from("public_profiles")
@@ -1168,17 +1166,16 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
 
  // 2) Auteurs ayant publié une « offre » de coup de main encore ouverte
  //    -> considérés disponibles de fait, même sans opt-in available_for_help
- const { data: offreMissions, error: offreError } = await supabase
-   .from("small_missions")
+ const { data: offreMissions, error: offreError } = await (supabase as any)
+   .from("public_small_missions")
     .select("id, user_id, title, category, city, postal_code, created_at")
-   .eq("mission_type", "offre")
-   .eq("status", "open");
+   .eq("mission_type", "offre");
  if (offreError) {
    console.error("[SearchSitter] Erreur chargement offres:", offreError);
    setSearchError("Impossible de charger les offres de coup de main.");
    return;
  }
- const offreAuthorIds = Array.from(new Set((offreMissions || []).map((m: any) => m.user_id))).filter(Boolean);
+ const offreAuthorIds = Array.from(new Set<string>((offreMissions || []).map((m: any) => m.user_id))).filter(Boolean);
  const offreCatsByUser = new Map<string, Set<string>>();
   const offresByUser = new Map<string, any[]>();
  (offreMissions || []).forEach((m: any) => {

@@ -42,8 +42,8 @@ const MissionsCityPage = () => {
 
   useEffect(() => {
     const load = async () => {
-      const { data } = await supabase
-        .from("small_missions")
+      const { data } = await (supabase as any)
+        .from("public_small_missions")
         .select("id, slug, title, category, city, latitude, longitude, created_at, photos")
         .eq("status", "open")
         .order("created_at", { ascending: false })

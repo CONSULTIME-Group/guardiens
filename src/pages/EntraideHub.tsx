@@ -125,7 +125,7 @@ type FeedItem =
 const EntraideHub = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, loading: authLoading } = useAuth();
   const [params, setParams] = useSearchParams();
 
   // Compatibilité ascendante des liens existants :
@@ -194,10 +194,13 @@ const EntraideHub = () => {
   const autoSwitchedStatusRef = useRef(false);
   const allStatusFallbackTrackedRef = useRef(false);
   useEffect(() => {
+    // Attendre la résolution de la session : les visiteurs anonymes lisent la vue
+    // publique (colonnes d'affichage uniquement), les membres la table complète.
+    if (authLoading) return;
     const load = async () => {
       setMLoading(true);
       const { data } = await supabase
-        .from("small_missions")
+        .from(isAuthenticated ? "small_missions" : ("public_small_missions" as any))
         .select(
           "id, slug, title, description, category, city, postal_code, created_at, date_needed, end_date, duration_estimate, status, mission_type, user_id, photos",
         )
@@ -236,7 +239,7 @@ const EntraideHub = () => {
     };
     void load();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [authLoading, isAuthenticated]);
 
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   useEffect(() => {
