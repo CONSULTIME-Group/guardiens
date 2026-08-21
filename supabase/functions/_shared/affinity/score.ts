@@ -711,33 +711,40 @@ function evalAmbiance(owner: AffinityOwnerInput, sitter: AffinitySitterInput): C
   let points = 0;
   let anyGood = false;
   let anyBad = false;
+  // RÈGLE DES LIBELLÉS : la phrase nomme le tag d'ambiance qui matche,
+  // jamais « Compatible avec l'ambiance de votre foyer ».
+  const tagPhrases: string[] = [];
 
   for (const tag of tags) {
     switch (tag) {
       case AMBIANCE_COCON:
+        if (sitterPace === PACE_CALME) { points += 1; anyGood = true; tagPhrases.push("Aime le cocooning, comme vous"); }
+        else if (sitterPace === PACE_ACTIF) anyBad = true;
+        else points += 0.5;
+        break;
       case AMBIANCE_CALME_POSE:
-        if (sitterPace === PACE_CALME) { points += 1; anyGood = true; }
+        if (sitterPace === PACE_CALME) { points += 1; anyGood = true; tagPhrases.push("Aime le calme, comme vous"); }
         else if (sitterPace === PACE_ACTIF) anyBad = true;
         else points += 0.5;
         break;
       case AMBIANCE_SPORTIF:
-        if (sitterPace === PACE_ACTIF || hasOutdoorSport) { points += 1; anyGood = true; }
+        if (sitterPace === PACE_ACTIF || hasOutdoorSport) { points += 1; anyGood = true; tagPhrases.push("Sportif, comme vous"); }
         else if (sitterPace === PACE_CALME) anyBad = true;
         else points += 0.5;
         break;
       case AMBIANCE_CAMPAGNE:
-        if (sitterPace === PACE_ACTIF || hasRuralInterest) { points += 1; anyGood = true; }
+        if (sitterPace === PACE_ACTIF || hasRuralInterest) { points += 1; anyGood = true; tagPhrases.push("Aime la campagne, comme vous"); }
         else if (sitterPace === PACE_CALME) anyBad = true;
         else points += 0.5;
         break;
       case AMBIANCE_FAMILLE:
-        if (sitterPace === PACE_EQUILIBRE || sitterPace === PACE_ACTIF) { points += 1; anyGood = true; }
+        if (sitterPace === PACE_EQUILIBRE || sitterPace === PACE_ACTIF) { points += 1; anyGood = true; tagPhrases.push("Aime les foyers animés, comme vous"); }
         else points += 0.5;
         break;
     }
   }
 
-  const matched = anyGood && !anyBad ? ["Compatible avec l'ambiance de votre foyer"] : [];
+  const matched = anyGood && !anyBad ? tagPhrases : [];
   // Poids FIXE 1, comme les autres critères mous (défaut 2, décision du
   // 20/08/2026) : un propriétaire qui coche beaucoup de tags exprime une
   // ouverture, pas une exigence plusieurs fois plus forte. Les points sont
@@ -760,14 +767,20 @@ function evalSpecialNeeds(owner: AffinityOwnerInput, sitter: AffinitySitterInput
   }
   if (needed.length === 0) return null;
 
-  const coveredCount = needed.filter((n) => skillSet.has(n.skill)).length;
-  const ratio = coveredCount / needed.length;
+  const covered = needed.filter((n) => skillSet.has(n.skill));
+  const ratio = covered.length / needed.length;
   const points = ratio === 1 ? 1 : ratio > 0 ? 0.5 : 0;
+  // RÈGLE DES LIBELLÉS : la phrase nomme la compétence couverte.
+  const lowerFirst = (s: string) => (s.length === 0 ? s : s[0].toLowerCase() + s.slice(1));
   return {
     weight: 1,
     points,
-    matched: points > 0 ? ["Compétent pour les besoins de vos animaux"] : [],
-    explanation: points === 0 ? ["Ne déclare pas les compétences attendues par vos animaux"] : [],
+    matched: points > 0
+      ? [`Compétent pour : ${joinFr(covered.map((n) => lowerFirst(n.skill)))}`]
+      : [],
+    explanation: points === 0
+      ? [`Ne déclare pas la compétence attendue : ${joinFr(needed.map((n) => lowerFirst(n.skill)))}`]
+      : [],
   };
 }
 
