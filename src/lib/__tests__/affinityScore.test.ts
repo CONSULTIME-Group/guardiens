@@ -196,7 +196,7 @@ describe("computeAffinityScore", () => {
     // pace(1) + langue(1) : la présence n'entre plus en compte.
     expect(r!.total).toBe(2);
     expect(r!.score).toBe(100);
-    expect(r!.matched).not.toContain("Présence compatible");
+    expect(r!.matched.some((m) => /présent|Absent/i.test(m))).toBe(false);
   });
 
 
@@ -597,7 +597,7 @@ describe("règles lot affinité 20/08/2026", () => {
       { presence_expected: "Télétravail OK" },
       { availability_during: "En télétravail" },
     );
-    expect(r.matched).toContain("Peut télétravailler chez vous");
+    expect(r.matched).toContain("Télétravaille, donc présent en journée");
   });
 
   it("rythme : lifestyle prime, life_pace en repli, mixte actif+calme = équilibré", () => {
@@ -606,19 +606,19 @@ describe("règles lot affinité 20/08/2026", () => {
       { life_pace: "actif" },
       { lifestyle: ["Sportif / grandes balades"], life_pace: "calme" },
     );
-    expect(r1.matched).toContain("Même rythme de vie");
+    expect(r1.matched).toContain("Rythme actif, comme vous");
     // lifestyle vide : repli sur life_pace.
     const r2 = computeAffinityResultFull(
       { life_pace: "calme" },
       { lifestyle: [], life_pace: "calme" },
     );
-    expect(r2.matched).toContain("Même rythme de vie");
+    expect(r2.matched).toContain("Rythme calme, comme vous");
     // mixte actif + calme : rythme équilibré, match avec un owner équilibré.
     const r3 = computeAffinityResultFull(
       { life_pace: "equilibre" },
       { lifestyle: ["Sportif / grandes balades", "Tranquille / casanier"] },
     );
-    expect(r3.matched).toContain("Même rythme de vie");
+    expect(r3.matched).toContain("Rythme équilibré, comme vous");
   });
 });
 
