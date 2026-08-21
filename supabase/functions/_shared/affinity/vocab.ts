@@ -262,10 +262,9 @@ export const SPECIES_LABEL_PLURAL: Record<string, string> = {
  * DÉPRÉCIÉ (21/08/2026) : le moteur ne l'utilise plus, la phrase principale
  * du critère animaux nomme désormais les espèces couvertes. Conservé pour
  * référence, ne pas réintroduire dans score.ts.
+ *
+ * Phrases de mise en avant par espèce remarquable (voix produit, côté owner).
  */
-export const SPECIES_MATCH_PHRASE_DEPRECATED = true;
-
-/** Phrases de mise en avant par espèce remarquable (voix produit, côté owner). */
 export const SPECIES_MATCH_PHRASE: Record<string, string> = {
   bird: "À l'aise avec les oiseaux",
   rodent: "À l'aise avec les rongeurs",
