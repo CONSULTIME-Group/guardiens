@@ -18,6 +18,7 @@ import PageBreadcrumb from "@/components/seo/PageBreadcrumb";
 import { parseFaqFromMarkdown, buildFaqSchema } from "@/lib/parseFaq";
 import { parseHowToFromMarkdown, buildHowToSchema } from "@/lib/parseHowTo";
 import { getOptimizedImageUrl } from "@/lib/imageOptim";
+import ArticleCoverFallback from "@/components/news/ArticleCoverFallback";
 import { resolveAuthors } from "@/data/authors";
 import { trackEvent } from "@/lib/analytics";
 import { SITTER_PRICE_NUMERIC, SITTER_PRICE_CURRENCY, SITTER_PRICE_START_ISO } from "@/lib/pricing";
@@ -469,7 +470,7 @@ export default function ArticleDetail() {
       à fond transparent / coups de pinceau) sont rendues sans cadre ni crop,
       pour donner l'impression que l'illustration est peinte directement sur la
       page. Les couvertures JPG/WebP (photos) gardent le rendu encadré. */}
-  {article.cover_image_url && (() => {
+  {article.cover_image_url ? (() => {
     const isTransparentArtwork = /\.png(\?|$)/i.test(article.cover_image_url);
     return isTransparentArtwork ? (
       <div className="mb-8 -mx-2 sm:-mx-4">
@@ -496,7 +497,10 @@ export default function ArticleDetail() {
         />
       </div>
     );
-  })()}
+  })() : (
+    /* Article sans couverture (7/120) : repli typographique, jamais de trou. */
+    <ArticleCoverFallback title={article.title} className="aspect-[16/9] rounded-xl mb-8" />
+  )}
 
  <ArticleRenderer content={article.content} userRole={isAuthenticated ? user?.role : undefined} slug={article.slug} />
 

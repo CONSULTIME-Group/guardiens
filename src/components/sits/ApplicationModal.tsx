@@ -206,6 +206,10 @@ const ApplicationModal = ({
             accepts_sitter_pets: (sitRes.data as any)?.accepts_sitter_pets ?? null,
             accepts_sitter_children: (sitRes.data as any)?.accepts_sitter_children ?? null,
             car_required: carRequired,
+            // Distance du couple : la modale ne projette ni les coordonnées
+            // de l'annonce ni celles du gardien. null explicite, critère
+            // hors dénominateur, jamais pénalisant.
+            distance_km: null,
           };
           const sitterInput: AffinitySitterInput = sitterRes.data as any;
           setAffinity(computeAffinityResultFull(ownerInput, sitterInput));

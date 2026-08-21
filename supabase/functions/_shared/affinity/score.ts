@@ -43,6 +43,18 @@
  * pourrait s'appliquer à n'importe quel couple. Verrouillé par
  * `src/lib/__tests__/affinity-labels-concrete.test.ts`, qui injecte des
  * valeurs sentinelles et exige de les retrouver dans les phrases.
+ *
+ * RÈGLE DE LA DEMI-PORTION (décision de Jérémie, 21/08/2026) : une chip
+ * positive n'apparaît que si le critère rapporte au moins la moitié de
+ * son poids. En dessous, la phrase passe dans les freins, elle reste
+ * affichée mais dite pour ce qu'elle est. Pour la distance, règle plus
+ * stricte : au-delà de 60 km, toujours un frein, même au palier 0,5.
+ *
+ * UNE CHIP PAR CRITÈRE (décision de Jérémie, 21/08/2026) : chaque critère
+ * produit au maximum une phrase positive. Ambiance, intérêts et espèces
+ * agrègent leurs correspondances en une seule phrase (« Campagne, calme
+ * et cocooning, comme vous »). Un critère qui pèse 1 sur 11 n'occupe pas
+ * la moitié de l'infobulle.
  */
 
 import {
@@ -337,10 +349,6 @@ interface CriterionEval {
   explanation: string[];
 }
 
-/** Une phrase par critère au plus (matched prioritaire, sinon premier frein). */
-function pickPhrase(c: CriterionEval): string | null {
-  return c.matched[0] ?? c.explanation[0] ?? null;
-}
 
 /**
  * Utilitaire historique (SearchOwner, tests) : nombre d'espèces de l'owner
@@ -686,6 +694,19 @@ function evalInterests(owner: AffinityOwnerInput, sitter: AffinitySitterInput): 
   };
 }
 
+/**
+ * Libellés courts des tags d'ambiance pour la chip agrégée. UNE CHIP PAR
+ * CRITÈRE (défaut d'affichage 2, décision du 21/08/2026) : plusieurs tags
+ * qui matchent fondent en une seule phrase, jamais une chip par tag.
+ */
+const AMBIANCE_CHIP_LABEL: Record<string, string> = {
+  [AMBIANCE_COCON]: "cocooning",
+  [AMBIANCE_CALME_POSE]: "calme",
+  [AMBIANCE_SPORTIF]: "sport",
+  [AMBIANCE_CAMPAGNE]: "campagne",
+  [AMBIANCE_FAMILLE]: "foyer animé",
+};
+
 function evalAmbiance(owner: AffinityOwnerInput, sitter: AffinitySitterInput): CriterionEval | null {
   // Alias orthographiques résolus (Familial, Calme, Cosy) et doublons
   // dédupliqués : « Calme » + « Calme et posé » ne comptent qu'une fois.
@@ -711,40 +732,43 @@ function evalAmbiance(owner: AffinityOwnerInput, sitter: AffinitySitterInput): C
   let points = 0;
   let anyGood = false;
   let anyBad = false;
-  // RÈGLE DES LIBELLÉS : la phrase nomme le tag d'ambiance qui matche,
+  // RÈGLE DES LIBELLÉS : la phrase nomme les tags d'ambiance qui matchent,
   // jamais « Compatible avec l'ambiance de votre foyer ».
-  const tagPhrases: string[] = [];
+  const chipLabels: string[] = [];
 
   for (const tag of tags) {
     switch (tag) {
       case AMBIANCE_COCON:
-        if (sitterPace === PACE_CALME) { points += 1; anyGood = true; tagPhrases.push("Aime le cocooning, comme vous"); }
+        if (sitterPace === PACE_CALME) { points += 1; anyGood = true; chipLabels.push(AMBIANCE_CHIP_LABEL[tag]); }
         else if (sitterPace === PACE_ACTIF) anyBad = true;
         else points += 0.5;
         break;
       case AMBIANCE_CALME_POSE:
-        if (sitterPace === PACE_CALME) { points += 1; anyGood = true; tagPhrases.push("Aime le calme, comme vous"); }
+        if (sitterPace === PACE_CALME) { points += 1; anyGood = true; chipLabels.push(AMBIANCE_CHIP_LABEL[tag]); }
         else if (sitterPace === PACE_ACTIF) anyBad = true;
         else points += 0.5;
         break;
       case AMBIANCE_SPORTIF:
-        if (sitterPace === PACE_ACTIF || hasOutdoorSport) { points += 1; anyGood = true; tagPhrases.push("Sportif, comme vous"); }
+        if (sitterPace === PACE_ACTIF || hasOutdoorSport) { points += 1; anyGood = true; chipLabels.push(AMBIANCE_CHIP_LABEL[tag]); }
         else if (sitterPace === PACE_CALME) anyBad = true;
         else points += 0.5;
         break;
       case AMBIANCE_CAMPAGNE:
-        if (sitterPace === PACE_ACTIF || hasRuralInterest) { points += 1; anyGood = true; tagPhrases.push("Aime la campagne, comme vous"); }
+        if (sitterPace === PACE_ACTIF || hasRuralInterest) { points += 1; anyGood = true; chipLabels.push(AMBIANCE_CHIP_LABEL[tag]); }
         else if (sitterPace === PACE_CALME) anyBad = true;
         else points += 0.5;
         break;
       case AMBIANCE_FAMILLE:
-        if (sitterPace === PACE_EQUILIBRE || sitterPace === PACE_ACTIF) { points += 1; anyGood = true; tagPhrases.push("Aime les foyers animés, comme vous"); }
+        if (sitterPace === PACE_EQUILIBRE || sitterPace === PACE_ACTIF) { points += 1; anyGood = true; chipLabels.push(AMBIANCE_CHIP_LABEL[tag]); }
         else points += 0.5;
         break;
     }
   }
 
-  const matched = anyGood && !anyBad ? tagPhrases : [];
+  const matched =
+    anyGood && !anyBad && chipLabels.length > 0
+      ? [`${capitalizeFirst(joinFr(chipLabels))}, comme vous`]
+      : [];
   // Poids FIXE 1, comme les autres critères mous (défaut 2, décision du
   // 20/08/2026) : un propriétaire qui coche beaucoup de tags exprime une
   // ouverture, pas une exigence plusieurs fois plus forte. Les points sont
@@ -795,12 +819,14 @@ function evalDistance(owner: AffinityOwnerInput): CriterionEval | null {
   const km = owner.distance_km;
   if (km == null || !Number.isFinite(km) || km < 0) return null;
   const points = km <= 30 ? 1 : km <= 60 ? 0.75 : km <= 100 ? 0.5 : 0.25;
-  return {
-    weight: 1,
-    points,
-    matched: [`À ${Math.round(km)} km de chez vous`],
-    explanation: [],
-  };
+  const label = `À ${Math.round(km)} km de chez vous`;
+  // RÈGLE DISTANCE (décision du 21/08/2026) : au-delà de 60 km, la distance
+  // n'est JAMAIS un point fort, même au palier 0,5 qui atteint la
+  // demi-portion. La phrase devient un frein, formulé comme tel.
+  if (km > 60) {
+    return { weight: 1, points, matched: [], explanation: [`${label}, le trajet est long`] };
+  }
+  return { weight: 1, points, matched: [label], explanation: [] };
 }
 
 /**
@@ -890,13 +916,18 @@ export function computeAffinityResultFull(
   const matched: string[] = [];
   const explanation: string[] = [];
   for (const c of criteria) {
-    const phrase = pickPhrase(c);
+    // RÈGLE DE LA DEMI-PORTION (décision du 21/08/2026) : la chip positive
+    // exige au moins la moitié du poids du critère. En dessous, la même
+    // phrase rejoint les freins : affichée, mais dite pour ce qu'elle est.
+    // UNE CHIP PAR CRITÈRE : l'agrégation a lieu dans chaque critère
+    // (ambiance, espèces, intérêts), seule la première phrase est retenue.
+    const positive = c.points * 2 >= c.weight;
+    const phrase = c.matched[0];
     if (phrase) {
-      if (c.matched.includes(phrase)) matched.push(phrase);
+      if (positive) matched.push(phrase);
       else explanation.push(phrase);
     }
-    // Chips emphatiques espèces remarquables (2e phrase du critère animaux).
-    for (const extra of c.matched.slice(1)) matched.push(extra);
+    explanation.push(...c.explanation);
   }
   // Frein véhicule hors critère : quand rien n'est déclaré, le critère sort
   // du dénominateur (silence neutre) mais l'information reste affichée.

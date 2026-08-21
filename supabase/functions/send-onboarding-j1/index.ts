@@ -143,22 +143,27 @@ Deno.serve(async (req) => {
             special_needs: p.special_needs,
             breed: p.breed ?? null,
           })),
+          // Distance par couple : surchargée à chaque appel du moteur dans
+          // la boucle de scoring (calculée par paire, jamais stockée).
+          distance_km: null,
         }
 
         const meLat = (profile as any).latitude as number | null
         const meLng = (profile as any).longitude as number | null
 
         const scored = poolRows.map((p: any) => {
-          // Un gardien sans ligne sitter_profiles est scoré avec une entrée
-          // vide (critères non évaluables, neutres), jamais écarté.
-          const result = computeAffinityResultFull(
-            ownerInput as any,
-            (sitterByUser.get(p.id) ?? {}) as any,
-            { mode: 'distribution' },
-          )
+          // Distance du couple (9e critère) : calculée AVANT le score et
+          // transmise au moteur ; null si une coordonnée manque (neutre).
           const distance = (meLat != null && meLng != null && p.latitude != null && p.longitude != null)
             ? Math.round(haversineKm(meLat, meLng, p.latitude, p.longitude) * 10) / 10
             : null
+          // Un gardien sans ligne sitter_profiles est scoré avec une entrée
+          // vide (critères non évaluables, neutres), jamais écarté.
+          const result = computeAffinityResultFull(
+            { ...ownerInput, distance_km: distance } as any,
+            (sitterByUser.get(p.id) ?? {}) as any,
+            { mode: 'distribution' },
+          )
           return { p, result, distance }
         }).filter((x) => x.result.distributable)
 

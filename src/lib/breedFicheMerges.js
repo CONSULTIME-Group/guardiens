@@ -21,7 +21,10 @@ export const BREED_FICHE_MERGES = {
   bird: { "gris-du-gabon": "perroquet gris du gabon" },
   // « jack russel » (coquille, fiche sans contenu riche) absorbé par
   // « jack russell » (fiche complète). L'URL /races/dog-jack-russel redirige.
-  dog: { "jack-russel": "jack russell" },
+  // « malinois » (fiche sans image) absorbé par « berger belge malinois »
+  // (fiche complète, 23 310 caractères, image présente). L'URL
+  // /races/dog-malinois redirige (décision du 21/08/2026).
+  dog: { "jack-russel": "jack russell", malinois: "berger belge malinois" },
 };
 
 /** slugify() minimal, aligné sur src/lib/normalize.ts. Recopié ici car ce

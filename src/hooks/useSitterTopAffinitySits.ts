@@ -8,6 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { computeAffinityResultFull, type AffinityResult } from "@/lib/affinityScore";
 import { getDeptCode } from "@/lib/departments";
+import { haversineDistance } from "@/utils/geo";
 import {
   rankSitterListings,
   type ListingAlertPreference,
@@ -298,6 +299,14 @@ export function useSitterTopAffinitySits(): Result {
 
         if (!sitter) continue;
         const ownerPrefs = ownerPrefsById.get(sit.user_id) ?? {};
+        // Distance du couple (9e critère) : coordonnées approchées des deux
+        // côtés ; null si l'un manque (critère hors dénominateur, neutre).
+        const ownerLat = sit?.owner?.latitude_approx;
+        const ownerLng = sit?.owner?.longitude_approx;
+        const coupleDistanceKm =
+          sitterCoords && typeof ownerLat === "number" && typeof ownerLng === "number"
+            ? haversineDistance(sitterCoords, { lat: ownerLat, lng: ownerLng })
+            : null;
         // Doctrine : on trie par pertinence, on n'élimine jamais. Le score
         // est toujours calculé et joint à la carte ; l'affichage du chiffre
         // est décidé par AffinityBadge / AffinityRing via `scoreReliable`.
@@ -313,6 +322,7 @@ export function useSitterTopAffinitySits(): Result {
             accepts_sitter_pets: sit.accepts_sitter_pets ?? null,
             accepts_sitter_children: sit.accepts_sitter_children ?? null,
             car_required: carRequiredByProperty.get(sit.property_id) ?? null,
+            distance_km: coupleDistanceKm,
           },
           sitter as any,
         );

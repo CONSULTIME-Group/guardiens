@@ -89,3 +89,11 @@ Un gardien déclarant « NAC » couvre les espèces owner `rodent`, `reptile`, `
 ## Tests
 
 `src/lib/__tests__/affinityScore.test.ts` couvre : dénominateur dynamique, disqualification sensibilité, disqualification espèces, disqualification accompagnants, seuils, pondération critères durs > nice-to-have, règle du critère dur obligatoire, expansion NAC.
+
+## Règles d'affichage (décision du 21/08/2026)
+
+- **Libellés concrets** : chaque phrase nomme la donnée du couple (verrou `affinity-labels-concrete.test.ts`, valeurs sentinelles).
+- **Demi-portion** : une chip positive n'apparaît que si le critère rapporte au moins la moitié de son poids ; en dessous, la phrase passe dans les freins. Distance : au-delà de 60 km TOUJOURS un frein (« À 150 km de chez vous, le trajet est long »), même au palier 0,5.
+- **Une chip par critère** : ambiance, intérêts et espèces agrègent leurs tags en une seule phrase (« Campagne, calme et cocooning, comme vous »).
+- **Distance, 9e critère, poids 1** : ≤ 30 km = 1 pt, ≤ 60 = 0,75, ≤ 100 = 0,5, au-delà = 0,25. `distance_km` sur `AffinityOwnerInput` (11 champs), calculée par couple, jamais stockée ; null = hors dénominateur. Câblée sur toutes les surfaces (parité verrouillée).
+- **Fusion malinois** : « malinois » absorbé par « berger belge malinois » (breedFicheMerges, sitemap, redirection /races/dog-malinois).

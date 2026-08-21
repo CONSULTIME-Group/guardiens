@@ -149,6 +149,9 @@ export function useOwnerTopAffinitySitters(): Result {
         accepts_sitter_pets: null,
         accepts_sitter_children: null,
         pets: (pets ?? []).map((p: any) => ({ species: p.species, special_needs: p.special_needs, breed: p.breed ?? null })),
+        // Distance par couple : surchargée à chaque appel dans la boucle de
+        // scoring (calculée par paire, jamais stockée).
+        distance_km: null,
       };
 
       const scored: AffinitySitterCard[] = [];
@@ -157,7 +160,7 @@ export function useOwnerTopAffinitySitters(): Result {
         // Doctrine : on trie par pertinence, on n'élimine jamais. Tous les
         // gardiens du vivier entrent dans le classement ; le chiffre affiché
         // dépend de `affinity.scoreReliable`, pas d'une exclusion ici.
-        const affinity = computeAffinityResultFull(ownerInput as any, sitter as any);
+        const affinity = computeAffinityResultFull({ ...ownerInput, distance_km: p.distance_km } as any, sitter as any);
         scored.push({
           id: p.id,
           first_name: p.first_name ?? null,

@@ -370,7 +370,7 @@ describe("parité des entrées du moteur d'affinité", () => {
 
   describe("sources propriétaire par littéral complet", () => {
     for (const [path, marker, petsMode] of OWNER_LITERAL_SOURCES) {
-      it(`${path} construit les 10 champs, animaux complets`, () => {
+      it(`${path} construit les 11 champs, animaux complets`, () => {
         const src = read(path);
         const keys = blockKeys(objectBlockAfter(src, marker));
         const missing = ownerFields.filter((f) => !keys.has(f));
@@ -393,7 +393,7 @@ describe("parité des entrées du moteur d'affinité", () => {
   });
 
   describe("hook partagé du propriétaire visiteur", () => {
-    it(`${VIEWER_OWNER_HOOK} injecte les 4 champs hors table`, () => {
+    it(`${VIEWER_OWNER_HOOK} injecte les 5 champs hors table`, () => {
       const src = read(VIEWER_OWNER_HOOK);
       const keys = blockKeys(objectBlockAfter(src, "return {"));
       const missing = OWNER_OFF_TABLE_FIELDS.filter((f) => !keys.has(f));
@@ -491,7 +491,7 @@ describe("parité des entrées du moteur d'affinité", () => {
   });
 
   describe("sources propriétaire par spread (enrichissement hors table)", () => {
-    it("ApplicationModal injecte les 4 champs hors table et projette les 6 colonnes + animaux complets", () => {
+    it("ApplicationModal injecte les 5 champs hors table et projette les 6 colonnes + animaux complets", () => {
       const path = "src/components/sits/ApplicationModal.tsx";
       const src = read(path);
       const keys = blockKeys(objectBlockAfter(src, "const ownerInput: AffinityOwnerInput = {"));
