@@ -400,21 +400,23 @@ function evalAnimals(
   const coverageRatio = wTotal > 0 ? wMatch / wTotal : 0;
   const points = 2 * coverageRatio;
 
+  // RÈGLE DES LIBELLÉS : la phrase nomme les espèces, jamais de générique.
+  const coveredOwner = new Set([...ownerSpecies].filter((s) => covered.has(s)));
+  const missingOwner = new Set([...ownerSpecies].filter((s) => !covered.has(s)));
   const crit: CriterionEval = { weight: 2, points, matched: [], explanation: [] };
   if (wMatch >= wTotal && wTotal > 0) {
-    crit.matched.push("Expérience avec vos animaux");
+    // « A déjà gardé des chiens et des chats ».
+    crit.matched.push(`A déjà gardé ${joinFr(speciesLabels(coveredOwner).map((l) => `des ${l}`))}`);
   } else if (wMatch > 0) {
-    crit.matched.push("Expérience avec une partie de vos animaux");
+    // « A déjà gardé vos chats, pas vos chiens ».
+    crit.matched.push(
+      `A déjà gardé ${joinFr(speciesLabels(coveredOwner).map((l) => `vos ${l}`))}, pas ${joinFr(speciesLabels(missingOwner).map((l) => `vos ${l}`))}`,
+    );
   } else {
     // Moins pertinent, pas exclu : le gardien descend dans le tri.
-    crit.explanation.push("Ne déclare pas d'expérience avec vos animaux");
-  }
-
-  // Espèces remarquables couvertes (rares / contraignantes) : chips emphatiques.
-  for (const s of covered) {
-    const w = SPECIES_MATCH_WEIGHT[s] ?? 1;
-    const phrase = SPECIES_MATCH_PHRASE[s];
-    if (w > SPECIES_REMARKABLE_THRESHOLD && phrase) crit.matched.push(phrase);
+    crit.explanation.push(
+      `Ne déclare pas d'expérience avec ${joinFr(speciesLabels(ownerSpecies).map((l) => `les ${l}`))}`,
+    );
   }
 
   return { crit, blockedSensitivities };
