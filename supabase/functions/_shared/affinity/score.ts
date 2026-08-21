@@ -561,38 +561,53 @@ function evalIdealProfile(owner: AffinityOwnerInput, sitter: AffinitySitterInput
   const npBeginner = norm(PREF_SITTER_EXP_BEGINNER);
   const npRemote = norm(PREF_SITTER_WORK_REMOTE);
 
+  // RÈGLE DES LIBELLÉS : la phrase nomme le type de gardien qui matche,
+  // jamais « Correspond à votre profil idéal ».
   let anyMaterial = false;
   let satisfied = false;
+  let matchedPhrase: string | null = null;
   for (const pref of scorable) {
     const np = norm(pref);
     if (np === npExperienced) {
       if (!experience) continue;
       anyMaterial = true;
-      if (experience !== EXPERIENCE_BEGINNER) satisfied = true;
+      if (experience !== EXPERIENCE_BEGINNER) {
+        satisfied = true;
+        matchedPhrase = matchedPhrase ?? "Gardien expérimenté, comme vous le demandez";
+      }
     } else if (np === npBeginner) {
       if (!experience) continue;
       anyMaterial = true;
-      if (experience === EXPERIENCE_BEGINNER) satisfied = true;
+      if (experience === EXPERIENCE_BEGINNER) {
+        satisfied = true;
+        matchedPhrase = matchedPhrase ?? "Débutant motivé, comme vous le demandez";
+      }
     } else if (np === npRemote) {
       if (!work) continue;
       anyMaterial = true;
-      if (work === WORK_FULL_REMOTE || work === WORK_PARTIAL_REMOTE) satisfied = true;
+      if (work === WORK_FULL_REMOTE || work === WORK_PARTIAL_REMOTE) {
+        satisfied = true;
+        matchedPhrase = matchedPhrase ?? "Télétravailleur, comme vous le souhaitez";
+      }
     } else {
       // Correspondance souple : « Retraité·e » matche « Retraité·e voyageur·euse ».
       if (actual.length === 0) continue;
       anyMaterial = true;
-      const hit = actual.some((a) => {
+      const hit = actual.find((a) => {
         const na = norm(a);
         return na === np || na.includes(np) || np.includes(na);
       });
-      if (hit) satisfied = true;
+      if (hit) {
+        satisfied = true;
+        matchedPhrase = matchedPhrase ?? `${hit}, comme vous le souhaitez`;
+      }
     }
   }
   if (!anyMaterial) return null;
   return {
     weight: 1,
     points: satisfied ? 1 : 0,
-    matched: satisfied ? ["Correspond à votre profil idéal"] : [],
+    matched: satisfied && matchedPhrase ? [matchedPhrase] : [],
     explanation: [],
   };
 }
