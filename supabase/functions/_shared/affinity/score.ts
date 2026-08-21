@@ -639,10 +639,17 @@ function evalPace(owner: AffinityOwnerInput, sitter: AffinitySitterInput): Crite
   if (oi < 0 || si < 0) return null;
   const same = oi === si;
   const adjacent = Math.abs(oi - si) === 1;
+  // RÈGLE DES LIBELLÉS : « Rythme calme, comme vous », jamais « Même rythme
+  // de vie ».
+  const PACE_LABEL: Record<string, string> = {
+    [PACE_CALME]: "calme",
+    [PACE_EQUILIBRE]: "équilibré",
+    [PACE_ACTIF]: "actif",
+  };
   return {
     weight: 1,
     points: same ? 1 : adjacent ? 0.5 : 0,
-    matched: same ? ["Même rythme de vie"] : [],
+    matched: same ? [`Rythme ${PACE_LABEL[o] ?? o}, comme vous`] : [],
     explanation: [],
   };
 }
@@ -655,7 +662,10 @@ function evalLanguages(owner: AffinityOwnerInput, sitter: AffinitySitterInput): 
   return {
     weight: 1,
     points: inter.length > 0 ? 1 : 0,
-    matched: inter.length > 0 ? ["Langue commune"] : [],
+    // « Parle français, comme vous », jamais « Langue commune ».
+    matched: inter.length > 0
+      ? [`Parle ${joinFr(inter.map((l) => l.toLowerCase()))}, comme vous`]
+      : [],
     explanation: [],
   };
 }
@@ -666,10 +676,12 @@ function evalInterests(owner: AffinityOwnerInput, sitter: AffinitySitterInput): 
   if (o.length === 0 || s.length === 0) return null;
   const inter = o.filter((i) => s.includes(i));
   const points = inter.length >= 2 ? 1 : inter.length === 1 ? 0.5 : 0;
+  // « Randonnée et cuisine en commun », jamais « 2 intérêts communs ».
+  const named = inter.map((x, i) => (i === 0 ? capitalizeFirst(x) : x.toLowerCase()));
   return {
     weight: 1,
     points,
-    matched: points > 0 ? [`${inter.length} intérêt${inter.length > 1 ? "s" : ""} commun${inter.length > 1 ? "s" : ""}`] : [],
+    matched: points > 0 ? [`${joinFr(named)} en commun`] : [],
     explanation: [],
   };
 }
