@@ -252,6 +252,22 @@ function toArray<T>(v: T[] | null | undefined): T[] {
   return Array.isArray(v) ? v.filter((x) => x != null && x !== "") : [];
 }
 
+/** « a et b » / « a, b et c » (règle des libellés : listes lisibles). */
+function joinFr(items: string[]): string {
+  if (items.length <= 1) return items[0] ?? "";
+  return `${items.slice(0, -1).join(", ")} et ${items[items.length - 1]}`;
+}
+
+/** Libellés FR pluriels des espèces, dans l'ordre donné. */
+function speciesLabels(species: Iterable<string>): string[] {
+  return Array.from(species).map((s) => SPECIES_LABEL_PLURAL[s] ?? s);
+}
+
+/** Première lettre en capitale, le reste inchangé. */
+function capitalizeFirst(s: string): string {
+  return s.length === 0 ? s : s[0].toUpperCase() + s.slice(1);
+}
+
 function normalizeSpeciesList(list: (string | null | undefined)[] | null | undefined): Set<string> {
   const out = new Set<string>();
   for (const raw of toArray(list)) {
