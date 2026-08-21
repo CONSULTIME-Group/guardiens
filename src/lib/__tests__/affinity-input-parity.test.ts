@@ -242,10 +242,13 @@ const OWNER_SPREAD_SOURCES = [
 
 /**
  * Colonnes d'AffinityOwnerInput portées par owner_profiles (ou sa vue
- * publique). Les 4 autres champs sont hors table : pets (jointure),
+ * publique). Les 5 autres champs sont hors table : pets (jointure),
  * accepts_sitter_pets / accepts_sitter_children (colonnes de sits),
- * car_required (colonne de properties). Un select("*") sur owner_profiles
- * ne les fournit donc PAS : ils doivent être injectés explicitement.
+ * car_required (colonne de properties), distance_km (calculée par couple,
+ * jamais stockée). Un select("*") sur owner_profiles ne les fournit donc
+ * PAS : ils doivent être injectés explicitement. Une surface qui connaît
+ * la distance du couple DOIT la passer ; une surface sans coordonnées
+ * écrit null explicitement avec un commentaire.
  */
 const OWNER_TABLE_COLUMNS = [
   "preferred_sitter_types",
@@ -260,6 +263,7 @@ const OWNER_OFF_TABLE_FIELDS = [
   "accepts_sitter_pets",
   "accepts_sitter_children",
   "car_required",
+  "distance_km",
 ];
 
 /**
@@ -309,8 +313,8 @@ describe("parité des entrées du moteur d'affinité", () => {
     expect(sitterFields.length).toBe(16);
   });
 
-  it("l'interface AffinityOwnerInput porte les 10 champs attendus", () => {
-    expect(ownerFields.length).toBe(10);
+  it("l'interface AffinityOwnerInput porte les 11 champs attendus", () => {
+    expect(ownerFields.length).toBe(11);
   });
 
   it("le découpage table / hors table couvre exactement AffinityOwnerInput", () => {
