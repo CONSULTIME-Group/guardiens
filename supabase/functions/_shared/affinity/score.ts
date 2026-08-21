@@ -34,6 +34,15 @@
  * identifié, ou explicitement descriptive) est verrouillée par
  * `src/lib/__tests__/affinity-exhaustiveness.test.ts` : aucune valeur
  * persistée ne doit tomber en silence.
+ *
+ * RÈGLE DES LIBELLÉS (décision de Jérémie, 21/08/2026) : chaque phrase
+ * produite par le moteur NOMME LA CHOSE CONCRÈTE issue des données du
+ * couple. « Expérience avec vos animaux » est interdit, on écrit « A déjà
+ * gardé des chiens et des chats ». « Même rythme de vie » est interdit, on
+ * écrit « Rythme calme, comme vous ». Jamais de libellé générique qui
+ * pourrait s'appliquer à n'importe quel couple. Verrouillé par
+ * `src/lib/__tests__/affinity-labels-concrete.test.ts`, qui injecte des
+ * valeurs sentinelles et exige de les retrouver dans les phrases.
  */
 
 import {
@@ -100,6 +109,13 @@ export interface AffinityOwnerInput {
   accepts_sitter_children?: string | null;
   /** `properties.car_required` : voiture indispensable sur place (critère dur). */
   car_required?: boolean | null;
+  /**
+   * Distance réelle du couple en km (9e critère, poids 1, décision du
+   * 21/08/2026). Le moteur est pur et ne connaît pas les coordonnées :
+   * chaque surface qui a déjà calculé la distance DOIT la passer ici.
+   * null ou absent = critère hors dénominateur (jamais pénalisant).
+   */
+  distance_km?: number | null;
 }
 
 export interface AffinitySitterInput {
