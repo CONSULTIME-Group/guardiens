@@ -196,7 +196,7 @@ describe("computeAffinityScore", () => {
     // pace(1) + langue(1) : la présence n'entre plus en compte.
     expect(r!.total).toBe(2);
     expect(r!.score).toBe(100);
-    expect(r!.matched).not.toContain("Présence compatible");
+    expect(r!.matched.some((m) => /présent|Absent/i.test(m))).toBe(false);
   });
 
 
@@ -597,7 +597,7 @@ describe("règles lot affinité 20/08/2026", () => {
       { presence_expected: "Télétravail OK" },
       { availability_during: "En télétravail" },
     );
-    expect(r.matched).toContain("Peut télétravailler chez vous");
+    expect(r.matched).toContain("Télétravaille, donc présent en journée");
   });
 
   it("rythme : lifestyle prime, life_pace en repli, mixte actif+calme = équilibré", () => {
@@ -606,19 +606,19 @@ describe("règles lot affinité 20/08/2026", () => {
       { life_pace: "actif" },
       { lifestyle: ["Sportif / grandes balades"], life_pace: "calme" },
     );
-    expect(r1.matched).toContain("Même rythme de vie");
+    expect(r1.matched).toContain("Rythme actif, comme vous");
     // lifestyle vide : repli sur life_pace.
     const r2 = computeAffinityResultFull(
       { life_pace: "calme" },
       { lifestyle: [], life_pace: "calme" },
     );
-    expect(r2.matched).toContain("Même rythme de vie");
+    expect(r2.matched).toContain("Rythme calme, comme vous");
     // mixte actif + calme : rythme équilibré, match avec un owner équilibré.
     const r3 = computeAffinityResultFull(
       { life_pace: "equilibre" },
       { lifestyle: ["Sportif / grandes balades", "Tranquille / casanier"] },
     );
-    expect(r3.matched).toContain("Même rythme de vie");
+    expect(r3.matched).toContain("Rythme équilibré, comme vous");
   });
 });
 
@@ -646,12 +646,12 @@ describe("règle des deux côtés (20/08/2026)", () => {
     const ok = computeAffinityResultFull(owner, { experience_years: "3-5 ans" });
     expect(ok.total).toBe(1);
     expect(ok.score).toBe(100);
-    expect(ok.matched).toContain("Correspond à votre profil idéal");
+    expect(ok.matched).toContain("Gardien expérimenté, comme vous le demandez");
     // « Débutant » déclaré : évalué, pas satisfait.
     const debutant = computeAffinityResultFull(owner, { experience_years: "Débutant" });
     expect(debutant.total).toBe(1);
     expect(debutant.score).toBe(0);
-    expect(debutant.matched).not.toContain("Correspond à votre profil idéal");
+    expect(debutant.matched).not.toContain("Gardien expérimenté, comme vous le demandez");
     // Rien de déclaré : critère hors dénominateur, jamais pénalisant.
     const silence = computeAffinityResultFull(owner, {});
     expect(silence.total).toBe(0);
@@ -661,7 +661,7 @@ describe("règle des deux côtés (20/08/2026)", () => {
     const owner = { preferred_sitter_types: ["Débutant·e motivé·e"] };
     const ok = computeAffinityResultFull(owner, { experience_years: "Débutant" });
     expect(ok.total).toBe(1);
-    expect(ok.matched).toContain("Correspond à votre profil idéal");
+    expect(ok.matched).toContain("Débutant motivé, comme vous le demandez");
     const senior = computeAffinityResultFull(owner, { experience_years: "5+ ans" });
     expect(senior.total).toBe(1);
     expect(senior.score).toBe(0);
@@ -673,15 +673,15 @@ describe("règle des deux côtés (20/08/2026)", () => {
   it("« Télétravailleur·euse » : full/partial remote matchent, repli availability_during", () => {
     const owner = { preferred_sitter_types: ["Télétravailleur·euse"] };
     const full = computeAffinityResultFull(owner, { work_during_sit: "full_remote" });
-    expect(full.matched).toContain("Correspond à votre profil idéal");
+    expect(full.matched).toContain("Télétravailleur, comme vous le souhaitez");
     const partial = computeAffinityResultFull(owner, { work_during_sit: "partial_remote" });
-    expect(partial.matched).toContain("Correspond à votre profil idéal");
+    expect(partial.matched).toContain("Télétravailleur, comme vous le souhaitez");
     const onSite = computeAffinityResultFull(owner, { work_during_sit: "on_site" });
     expect(onSite.total).toBe(1);
     expect(onSite.score).toBe(0);
     // Repli availability_during, même résolution que le critère présence.
     const fallback = computeAffinityResultFull(owner, { availability_during: "En télétravail" });
-    expect(fallback.matched).toContain("Correspond à votre profil idéal");
+    expect(fallback.matched).toContain("Télétravailleur, comme vous le souhaitez");
   });
 
   it("« Étudiant·e » et « Indépendant·e » : descriptives, hors dénominateur et confiance", () => {
@@ -701,7 +701,7 @@ describe("règle des deux côtés (20/08/2026)", () => {
       { sitter_type: "Couple" },
     );
     expect(r.total).toBe(1);
-    expect(r.matched).toContain("Correspond à votre profil idéal");
+    expect(r.matched).toContain("Couple, comme vous le souhaitez");
   });
 
   it("alias d'ambiance : « Cosy » est scoré comme « Cocon casanier »", () => {
@@ -713,7 +713,7 @@ describe("règle des deux côtés (20/08/2026)", () => {
       { home_ambiance: ["Cocon casanier"] },
       { life_pace: "calme" },
     );
-    expect(alias.matched).toContain("Compatible avec l'ambiance de votre foyer");
+    expect(alias.matched).toContain("Aime le cocooning, comme vous");
     expect(alias.score).toBe(canon.score);
     expect(alias.confidence).toBe(canon.confidence);
   });

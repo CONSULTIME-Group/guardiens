@@ -34,6 +34,15 @@
  * identifié, ou explicitement descriptive) est verrouillée par
  * `src/lib/__tests__/affinity-exhaustiveness.test.ts` : aucune valeur
  * persistée ne doit tomber en silence.
+ *
+ * RÈGLE DES LIBELLÉS (décision de Jérémie, 21/08/2026) : chaque phrase
+ * produite par le moteur NOMME LA CHOSE CONCRÈTE issue des données du
+ * couple. « Expérience avec vos animaux » est interdit, on écrit « A déjà
+ * gardé des chiens et des chats ». « Même rythme de vie » est interdit, on
+ * écrit « Rythme calme, comme vous ». Jamais de libellé générique qui
+ * pourrait s'appliquer à n'importe quel couple. Verrouillé par
+ * `src/lib/__tests__/affinity-labels-concrete.test.ts`, qui injecte des
+ * valeurs sentinelles et exige de les retrouver dans les phrases.
  */
 
 import {
@@ -66,8 +75,8 @@ import {
   SPECIES_NORMALIZE,
   NAC_UMBRELLA,
   SPECIES_MATCH_WEIGHT,
-  SPECIES_REMARKABLE_THRESHOLD,
-  SPECIES_MATCH_PHRASE,
+  SPECIES_LABEL_PLURAL,
+
   SENSITIVITY_BY_SPECIES,
   SENSITIVITY_EXPLANATION,
   SENS_ALLERGIE_CHAT,
@@ -100,6 +109,13 @@ export interface AffinityOwnerInput {
   accepts_sitter_children?: string | null;
   /** `properties.car_required` : voiture indispensable sur place (critère dur). */
   car_required?: boolean | null;
+  /**
+   * Distance réelle du couple en km (9e critère, poids 1, décision du
+   * 21/08/2026). Le moteur est pur et ne connaît pas les coordonnées :
+   * chaque surface qui a déjà calculé la distance DOIT la passer ici.
+   * null ou absent = critère hors dénominateur (jamais pénalisant).
+   */
+  distance_km?: number | null;
 }
 
 export interface AffinitySitterInput {
@@ -236,6 +252,22 @@ function toArray<T>(v: T[] | null | undefined): T[] {
   return Array.isArray(v) ? v.filter((x) => x != null && x !== "") : [];
 }
 
+/** « a et b » / « a, b et c » (règle des libellés : listes lisibles). */
+function joinFr(items: string[]): string {
+  if (items.length <= 1) return items[0] ?? "";
+  return `${items.slice(0, -1).join(", ")} et ${items[items.length - 1]}`;
+}
+
+/** Libellés FR pluriels des espèces, dans l'ordre donné. */
+function speciesLabels(species: Iterable<string>): string[] {
+  return Array.from(species).map((s) => SPECIES_LABEL_PLURAL[s] ?? s);
+}
+
+/** Première lettre en capitale, le reste inchangé. */
+function capitalizeFirst(s: string): string {
+  return s.length === 0 ? s : s[0].toUpperCase() + s.slice(1);
+}
+
 function normalizeSpeciesList(list: (string | null | undefined)[] | null | undefined): Set<string> {
   const out = new Set<string>();
   for (const raw of toArray(list)) {
@@ -368,21 +400,23 @@ function evalAnimals(
   const coverageRatio = wTotal > 0 ? wMatch / wTotal : 0;
   const points = 2 * coverageRatio;
 
+  // RÈGLE DES LIBELLÉS : la phrase nomme les espèces, jamais de générique.
+  const coveredOwner = new Set([...ownerSpecies].filter((s) => covered.has(s)));
+  const missingOwner = new Set([...ownerSpecies].filter((s) => !covered.has(s)));
   const crit: CriterionEval = { weight: 2, points, matched: [], explanation: [] };
   if (wMatch >= wTotal && wTotal > 0) {
-    crit.matched.push("Expérience avec vos animaux");
+    // « A déjà gardé des chiens et des chats ».
+    crit.matched.push(`A déjà gardé ${joinFr(speciesLabels(coveredOwner).map((l) => `des ${l}`))}`);
   } else if (wMatch > 0) {
-    crit.matched.push("Expérience avec une partie de vos animaux");
+    // « A déjà gardé vos chats, pas vos chiens ».
+    crit.matched.push(
+      `A déjà gardé ${joinFr(speciesLabels(coveredOwner).map((l) => `vos ${l}`))}, pas ${joinFr(speciesLabels(missingOwner).map((l) => `vos ${l}`))}`,
+    );
   } else {
     // Moins pertinent, pas exclu : le gardien descend dans le tri.
-    crit.explanation.push("Ne déclare pas d'expérience avec vos animaux");
-  }
-
-  // Espèces remarquables couvertes (rares / contraignantes) : chips emphatiques.
-  for (const s of covered) {
-    const w = SPECIES_MATCH_WEIGHT[s] ?? 1;
-    const phrase = SPECIES_MATCH_PHRASE[s];
-    if (w > SPECIES_REMARKABLE_THRESHOLD && phrase) crit.matched.push(phrase);
+    crit.explanation.push(
+      `Ne déclare pas d'expérience avec ${joinFr(speciesLabels(ownerSpecies).map((l) => `les ${l}`))}`,
+    );
   }
 
   return { crit, blockedSensitivities };
@@ -451,21 +485,34 @@ function evalPresence(owner: AffinityOwnerInput, sitter: AffinitySitterInput): C
   const rank = WORK_RANK[work];
   if (rank == null) return null;
 
+  // RÈGLE DES LIBELLÉS : le fait, pas l'adjectif. La phrase dépend de la
+  // façon de travailler déclarée par le gardien, jamais d'une formule
+  // générique du type « présence compatible ».
+  const presenceFact: Record<string, string> = {
+    [WORK_FULL_REMOTE]: "Télétravaille, donc présent en journée",
+    [WORK_PARTIAL_REMOTE]: "Télétravaille une partie de la semaine",
+    [WORK_FLEXIBLE]: "En congés ou horaires flexibles pendant la garde",
+  };
+  const absenceFact: Record<string, string> = {
+    [WORK_OUT_DAYTIME]: "Absent en journée, présent matin et soir",
+    [WORK_ON_SITE]: "Absent en journée, présent matin et soir",
+  };
+
   let points = 0;
   let matched: string | null = null;
   let explanation: string | null = null;
 
   switch (need) {
     case PRESENCE_REMOTE_OK:
-      if (rank >= WORK_RANK[WORK_PARTIAL_REMOTE]) { points = 2; matched = "Peut télétravailler chez vous"; }
-      else if (work === WORK_OUT_DAYTIME) { points = 1; explanation = "Absent dans la journée"; }
-      else { points = 0; explanation = "Absent dans la journée"; }
+      if (rank >= WORK_RANK[WORK_PARTIAL_REMOTE]) { points = 2; matched = presenceFact[work]; }
+      else if (work === WORK_OUT_DAYTIME) { points = 1; explanation = absenceFact[work]; }
+      else { points = 0; explanation = absenceFact[work] ?? "Absent en journée"; }
       break;
     case PRESENCE_SHORT_ABSENCES:
-      if (work === WORK_FULL_REMOTE) { points = 2; matched = "Présence compatible avec vos absences"; }
-      else if (work === WORK_PARTIAL_REMOTE || work === WORK_FLEXIBLE) { points = 1.5; matched = "Présence compatible avec vos absences"; }
-      else if (work === WORK_OUT_DAYTIME) { points = 1; explanation = "Absent dans la journée"; }
-      else { points = 0.5; explanation = "Absent dans la journée"; }
+      if (work === WORK_FULL_REMOTE) { points = 2; matched = presenceFact[work]; }
+      else if (work === WORK_PARTIAL_REMOTE || work === WORK_FLEXIBLE) { points = 1.5; matched = presenceFact[work]; }
+      else if (work === WORK_OUT_DAYTIME) { points = 1; explanation = absenceFact[work]; }
+      else { points = 0.5; explanation = absenceFact[work] ?? "Absent en journée"; }
       break;
     default:
       return null;
@@ -514,38 +561,53 @@ function evalIdealProfile(owner: AffinityOwnerInput, sitter: AffinitySitterInput
   const npBeginner = norm(PREF_SITTER_EXP_BEGINNER);
   const npRemote = norm(PREF_SITTER_WORK_REMOTE);
 
+  // RÈGLE DES LIBELLÉS : la phrase nomme le type de gardien qui matche,
+  // jamais « Correspond à votre profil idéal ».
   let anyMaterial = false;
   let satisfied = false;
+  let matchedPhrase: string | null = null;
   for (const pref of scorable) {
     const np = norm(pref);
     if (np === npExperienced) {
       if (!experience) continue;
       anyMaterial = true;
-      if (experience !== EXPERIENCE_BEGINNER) satisfied = true;
+      if (experience !== EXPERIENCE_BEGINNER) {
+        satisfied = true;
+        matchedPhrase = matchedPhrase ?? "Gardien expérimenté, comme vous le demandez";
+      }
     } else if (np === npBeginner) {
       if (!experience) continue;
       anyMaterial = true;
-      if (experience === EXPERIENCE_BEGINNER) satisfied = true;
+      if (experience === EXPERIENCE_BEGINNER) {
+        satisfied = true;
+        matchedPhrase = matchedPhrase ?? "Débutant motivé, comme vous le demandez";
+      }
     } else if (np === npRemote) {
       if (!work) continue;
       anyMaterial = true;
-      if (work === WORK_FULL_REMOTE || work === WORK_PARTIAL_REMOTE) satisfied = true;
+      if (work === WORK_FULL_REMOTE || work === WORK_PARTIAL_REMOTE) {
+        satisfied = true;
+        matchedPhrase = matchedPhrase ?? "Télétravailleur, comme vous le souhaitez";
+      }
     } else {
       // Correspondance souple : « Retraité·e » matche « Retraité·e voyageur·euse ».
       if (actual.length === 0) continue;
       anyMaterial = true;
-      const hit = actual.some((a) => {
+      const hit = actual.find((a) => {
         const na = norm(a);
         return na === np || na.includes(np) || np.includes(na);
       });
-      if (hit) satisfied = true;
+      if (hit) {
+        satisfied = true;
+        matchedPhrase = matchedPhrase ?? `${hit}, comme vous le souhaitez`;
+      }
     }
   }
   if (!anyMaterial) return null;
   return {
     weight: 1,
     points: satisfied ? 1 : 0,
-    matched: satisfied ? ["Correspond à votre profil idéal"] : [],
+    matched: satisfied && matchedPhrase ? [matchedPhrase] : [],
     explanation: [],
   };
 }
@@ -577,10 +639,17 @@ function evalPace(owner: AffinityOwnerInput, sitter: AffinitySitterInput): Crite
   if (oi < 0 || si < 0) return null;
   const same = oi === si;
   const adjacent = Math.abs(oi - si) === 1;
+  // RÈGLE DES LIBELLÉS : « Rythme calme, comme vous », jamais « Même rythme
+  // de vie ».
+  const PACE_LABEL: Record<string, string> = {
+    [PACE_CALME]: "calme",
+    [PACE_EQUILIBRE]: "équilibré",
+    [PACE_ACTIF]: "actif",
+  };
   return {
     weight: 1,
     points: same ? 1 : adjacent ? 0.5 : 0,
-    matched: same ? ["Même rythme de vie"] : [],
+    matched: same ? [`Rythme ${PACE_LABEL[o] ?? o}, comme vous`] : [],
     explanation: [],
   };
 }
@@ -593,7 +662,10 @@ function evalLanguages(owner: AffinityOwnerInput, sitter: AffinitySitterInput): 
   return {
     weight: 1,
     points: inter.length > 0 ? 1 : 0,
-    matched: inter.length > 0 ? ["Langue commune"] : [],
+    // « Parle français, comme vous », jamais « Langue commune ».
+    matched: inter.length > 0
+      ? [`Parle ${joinFr(inter.map((l) => l.toLowerCase()))}, comme vous`]
+      : [],
     explanation: [],
   };
 }
@@ -604,10 +676,12 @@ function evalInterests(owner: AffinityOwnerInput, sitter: AffinitySitterInput): 
   if (o.length === 0 || s.length === 0) return null;
   const inter = o.filter((i) => s.includes(i));
   const points = inter.length >= 2 ? 1 : inter.length === 1 ? 0.5 : 0;
+  // « Randonnée et cuisine en commun », jamais « 2 intérêts communs ».
+  const named = inter.map((x, i) => (i === 0 ? capitalizeFirst(x) : x.toLowerCase()));
   return {
     weight: 1,
     points,
-    matched: points > 0 ? [`${inter.length} intérêt${inter.length > 1 ? "s" : ""} commun${inter.length > 1 ? "s" : ""}`] : [],
+    matched: points > 0 ? [`${joinFr(named)} en commun`] : [],
     explanation: [],
   };
 }
@@ -637,33 +711,40 @@ function evalAmbiance(owner: AffinityOwnerInput, sitter: AffinitySitterInput): C
   let points = 0;
   let anyGood = false;
   let anyBad = false;
+  // RÈGLE DES LIBELLÉS : la phrase nomme le tag d'ambiance qui matche,
+  // jamais « Compatible avec l'ambiance de votre foyer ».
+  const tagPhrases: string[] = [];
 
   for (const tag of tags) {
     switch (tag) {
       case AMBIANCE_COCON:
+        if (sitterPace === PACE_CALME) { points += 1; anyGood = true; tagPhrases.push("Aime le cocooning, comme vous"); }
+        else if (sitterPace === PACE_ACTIF) anyBad = true;
+        else points += 0.5;
+        break;
       case AMBIANCE_CALME_POSE:
-        if (sitterPace === PACE_CALME) { points += 1; anyGood = true; }
+        if (sitterPace === PACE_CALME) { points += 1; anyGood = true; tagPhrases.push("Aime le calme, comme vous"); }
         else if (sitterPace === PACE_ACTIF) anyBad = true;
         else points += 0.5;
         break;
       case AMBIANCE_SPORTIF:
-        if (sitterPace === PACE_ACTIF || hasOutdoorSport) { points += 1; anyGood = true; }
+        if (sitterPace === PACE_ACTIF || hasOutdoorSport) { points += 1; anyGood = true; tagPhrases.push("Sportif, comme vous"); }
         else if (sitterPace === PACE_CALME) anyBad = true;
         else points += 0.5;
         break;
       case AMBIANCE_CAMPAGNE:
-        if (sitterPace === PACE_ACTIF || hasRuralInterest) { points += 1; anyGood = true; }
+        if (sitterPace === PACE_ACTIF || hasRuralInterest) { points += 1; anyGood = true; tagPhrases.push("Aime la campagne, comme vous"); }
         else if (sitterPace === PACE_CALME) anyBad = true;
         else points += 0.5;
         break;
       case AMBIANCE_FAMILLE:
-        if (sitterPace === PACE_EQUILIBRE || sitterPace === PACE_ACTIF) { points += 1; anyGood = true; }
+        if (sitterPace === PACE_EQUILIBRE || sitterPace === PACE_ACTIF) { points += 1; anyGood = true; tagPhrases.push("Aime les foyers animés, comme vous"); }
         else points += 0.5;
         break;
     }
   }
 
-  const matched = anyGood && !anyBad ? ["Compatible avec l'ambiance de votre foyer"] : [];
+  const matched = anyGood && !anyBad ? tagPhrases : [];
   // Poids FIXE 1, comme les autres critères mous (défaut 2, décision du
   // 20/08/2026) : un propriétaire qui coche beaucoup de tags exprime une
   // ouverture, pas une exigence plusieurs fois plus forte. Les points sont
@@ -686,14 +767,39 @@ function evalSpecialNeeds(owner: AffinityOwnerInput, sitter: AffinitySitterInput
   }
   if (needed.length === 0) return null;
 
-  const coveredCount = needed.filter((n) => skillSet.has(n.skill)).length;
-  const ratio = coveredCount / needed.length;
+  const covered = needed.filter((n) => skillSet.has(n.skill));
+  const ratio = covered.length / needed.length;
   const points = ratio === 1 ? 1 : ratio > 0 ? 0.5 : 0;
+  // RÈGLE DES LIBELLÉS : la phrase nomme la compétence couverte.
+  const lowerFirst = (s: string) => (s.length === 0 ? s : s[0].toLowerCase() + s.slice(1));
   return {
     weight: 1,
     points,
-    matched: points > 0 ? ["Compétent pour les besoins de vos animaux"] : [],
-    explanation: points === 0 ? ["Ne déclare pas les compétences attendues par vos animaux"] : [],
+    matched: points > 0
+      ? [`Compétent pour : ${joinFr(covered.map((n) => lowerFirst(n.skill)))}`]
+      : [],
+    explanation: points === 0
+      ? [`Ne déclare pas la compétence attendue : ${joinFr(needed.map((n) => lowerFirst(n.skill)))}`]
+      : [],
+  };
+}
+
+/**
+ * 9e critère, distance réelle du couple (décision de Jérémie, 21/08/2026).
+ * « Près de chez vous » est la promesse du produit : 12 km et 90 km ne sont
+ * pas le même service. Poids 1, jamais plus. Jamais 0 point : un gardien
+ * qui apparaît à 120 km a déclaré un rayon qui le couvre, il ne triche pas.
+ * null (hors dénominateur) si la distance n'est pas connue.
+ */
+function evalDistance(owner: AffinityOwnerInput): CriterionEval | null {
+  const km = owner.distance_km;
+  if (km == null || !Number.isFinite(km) || km < 0) return null;
+  const points = km <= 30 ? 1 : km <= 60 ? 0.75 : km <= 100 ? 0.5 : 0.25;
+  return {
+    weight: 1,
+    points,
+    matched: [`À ${Math.round(km)} km de chez vous`],
+    explanation: [],
   };
 }
 
@@ -737,6 +843,9 @@ function maxPossibleWeight(owner: AffinityOwnerInput): number {
     const text = normalizeFreeText(needsText);
     if (SPECIAL_NEED_SIGNALS.some((sig) => sig.keywords.some((k) => text.includes(k)))) w += 1;
   }
+  // Distance : 1 si la distance du couple est connue (miroir d'evalDistance).
+  const km = owner.distance_km;
+  if (km != null && Number.isFinite(km) && km >= 0) w += 1;
   return w;
 }
 
@@ -775,6 +884,7 @@ export function computeAffinityResultFull(
     evalInterests(owner, sitter),
     evalAmbiance(owner, sitter),
     evalSpecialNeeds(owner, sitter),
+    evalDistance(owner),
   ].filter((c): c is CriterionEval => c != null);
 
   const matched: string[] = [];

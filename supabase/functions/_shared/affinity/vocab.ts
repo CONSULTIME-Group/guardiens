@@ -241,7 +241,30 @@ export const SPECIES_MATCH_WEIGHT: Record<string, number> = {
 /** Une espèce est « remarquable » (chip emphatique) si son poids dépasse le socle. */
 export const SPECIES_REMARKABLE_THRESHOLD = 1.5;
 
-/** Phrases de mise en avant par espèce remarquable (voix produit, côté owner). */
+/**
+ * Libellés FR pluriels des espèces canoniques. RÈGLE DES LIBELLÉS
+ * (21/08/2026) : chaque phrase du moteur nomme la chose concrète, ces
+ * libellés servent à construire « A déjà gardé des chiens et des chats ».
+ */
+export const SPECIES_LABEL_PLURAL: Record<string, string> = {
+  dog: "chiens",
+  cat: "chats",
+  bird: "oiseaux",
+  rodent: "rongeurs",
+  fish: "poissons",
+  reptile: "reptiles",
+  nac: "NAC",
+  horse: "chevaux",
+  farm_animal: "animaux de ferme",
+};
+
+/**
+ * DÉPRÉCIÉ (21/08/2026) : le moteur ne l'utilise plus, la phrase principale
+ * du critère animaux nomme désormais les espèces couvertes. Conservé pour
+ * référence, ne pas réintroduire dans score.ts.
+ *
+ * Phrases de mise en avant par espèce remarquable (voix produit, côté owner).
+ */
 export const SPECIES_MATCH_PHRASE: Record<string, string> = {
   bird: "À l'aise avec les oiseaux",
   rodent: "À l'aise avec les rongeurs",
