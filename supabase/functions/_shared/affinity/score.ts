@@ -485,21 +485,34 @@ function evalPresence(owner: AffinityOwnerInput, sitter: AffinitySitterInput): C
   const rank = WORK_RANK[work];
   if (rank == null) return null;
 
+  // RÈGLE DES LIBELLÉS : le fait, pas l'adjectif. La phrase dépend de la
+  // façon de travailler déclarée par le gardien, jamais d'une formule
+  // générique du type « présence compatible ».
+  const presenceFact: Record<string, string> = {
+    [WORK_FULL_REMOTE]: "Télétravaille, donc présent en journée",
+    [WORK_PARTIAL_REMOTE]: "Télétravaille une partie de la semaine",
+    [WORK_FLEXIBLE]: "En congés ou horaires flexibles pendant la garde",
+  };
+  const absenceFact: Record<string, string> = {
+    [WORK_OUT_DAYTIME]: "Absent en journée, présent matin et soir",
+    [WORK_ON_SITE]: "Absent en journée, présent matin et soir",
+  };
+
   let points = 0;
   let matched: string | null = null;
   let explanation: string | null = null;
 
   switch (need) {
     case PRESENCE_REMOTE_OK:
-      if (rank >= WORK_RANK[WORK_PARTIAL_REMOTE]) { points = 2; matched = "Peut télétravailler chez vous"; }
-      else if (work === WORK_OUT_DAYTIME) { points = 1; explanation = "Absent dans la journée"; }
-      else { points = 0; explanation = "Absent dans la journée"; }
+      if (rank >= WORK_RANK[WORK_PARTIAL_REMOTE]) { points = 2; matched = presenceFact[work]; }
+      else if (work === WORK_OUT_DAYTIME) { points = 1; explanation = absenceFact[work]; }
+      else { points = 0; explanation = absenceFact[work] ?? "Absent en journée"; }
       break;
     case PRESENCE_SHORT_ABSENCES:
-      if (work === WORK_FULL_REMOTE) { points = 2; matched = "Présence compatible avec vos absences"; }
-      else if (work === WORK_PARTIAL_REMOTE || work === WORK_FLEXIBLE) { points = 1.5; matched = "Présence compatible avec vos absences"; }
-      else if (work === WORK_OUT_DAYTIME) { points = 1; explanation = "Absent dans la journée"; }
-      else { points = 0.5; explanation = "Absent dans la journée"; }
+      if (work === WORK_FULL_REMOTE) { points = 2; matched = presenceFact[work]; }
+      else if (work === WORK_PARTIAL_REMOTE || work === WORK_FLEXIBLE) { points = 1.5; matched = presenceFact[work]; }
+      else if (work === WORK_OUT_DAYTIME) { points = 1; explanation = absenceFact[work]; }
+      else { points = 0.5; explanation = absenceFact[work] ?? "Absent en journée"; }
       break;
     default:
       return null;
