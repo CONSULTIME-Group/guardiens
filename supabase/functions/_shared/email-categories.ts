@@ -33,6 +33,9 @@ const TRANSACTIONAL: ReadonlyArray<string> = [
   // lieu : consequence directe des echanges reels entre deux membres
   // identifies, meme nature que 'owner-pending-application-nudge'.
   'owner-sit-unconfirmed',
+  // Les deux parties se sont deja ecrit (souvent un numero echange) mais la
+  // candidature n'est pas confirmee : consequence directe de leur discussion.
+  'discussion-stalled-nudge',
   'cancellation-by-owner',
   'cancellation-by-sitter',
   'cancellation-review-published',

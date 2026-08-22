@@ -35,6 +35,26 @@ interface PendingApp {
   sit_status: string | null;
 }
 
+/**
+ * Discussion engagée (les deux parties ont écrit, souvent un numéro échangé)
+ * mais candidature toujours ouverte et silence depuis 48h. C'est le trou du
+ * nudge pending, qui exclut toute candidature où le propriétaire a répondu.
+ */
+interface StalledDiscussion {
+  application_id: string;
+  sit_id: string;
+  sit_title: string;
+  sitter_id: string;
+  sitter_first_name: string | null;
+  owner_id: string;
+  owner_first_name: string | null;
+  owner_email: string;
+  msg_count: number;
+  hours_since_last_message: number;
+  sit_start_date: string | null;
+  sit_status: string | null;
+}
+
 async function sendReminderEmail(params: {
   serviceClient: ReturnType<typeof createClient>;
   app: PendingApp;
@@ -146,6 +166,107 @@ async function sendReminderEmail(params: {
 
   // Un HTTP 200 ne signifie pas envoye : le sender repond 200 avec deferred:true
   // quand il diffère, et 200 avec skipped:true quand il deduplique.
+  const payload = (await resp.json().catch(() => null)) as Record<string, unknown> | null;
+  if (payload?.deferred) {
+    return { ok: false, outcome: "deferred", error: String(payload?.reason ?? "deferred") };
+  }
+  if (payload?.skipped) {
+    return { ok: false, outcome: "skipped", error: String(payload?.reason ?? "skipped") };
+  }
+  return { ok: true, outcome: "sent" };
+}
+
+/**
+ * Relance "discussion engagée mais candidature non confirmée".
+ * Un seul email par candidature (message_id stable), dédupliqué via
+ * email_send_log, suppression vérifiée, catégorie transactionnelle.
+ */
+async function sendStalledDiscussionEmail(params: {
+  serviceClient: ReturnType<typeof createClient>;
+  disc: StalledDiscussion;
+  messageId: string;
+}): Promise<{ ok: boolean; outcome: "sent" | "deferred" | "skipped" | "failed"; error?: string }> {
+  const { serviceClient, disc, messageId } = params;
+  const email = disc.owner_email.trim().toLowerCase();
+
+  const { data: existing } = await serviceClient
+    .from("email_send_log")
+    .select("id")
+    .eq("message_id", messageId)
+    .limit(1)
+    .maybeSingle();
+  if (existing) return { ok: false, outcome: "skipped", error: "already_sent" };
+
+  const { data: sup } = await serviceClient
+    .from("suppressed_emails")
+    .select("email")
+    .eq("email", email)
+    .maybeSingle();
+  if (sup) return { ok: false, outcome: "skipped", error: "suppressed" };
+
+  const daysSince = Math.max(2, Math.floor(disc.hours_since_last_message / 24));
+  const ctaUrl = `https://guardiens.fr/dashboard/candidatures/${disc.application_id}`;
+
+  let declineUrl: string | undefined;
+  let thinkingUrl: string | undefined;
+  try {
+    const [{ data: dTok }, { data: tTok }] = await Promise.all([
+      serviceClient.rpc("issue_application_action_token", {
+        p_application_id: disc.application_id,
+        p_action: "decline",
+      }),
+      serviceClient.rpc("issue_application_action_token", {
+        p_application_id: disc.application_id,
+        p_action: "thinking",
+      }),
+    ]);
+    if (dTok) declineUrl = `https://guardiens.fr/candidature/reponse?t=${dTok}`;
+    if (tTok) thinkingUrl = `https://guardiens.fr/candidature/reponse?t=${tTok}`;
+  } catch (e) {
+    console.error("[nudge-owner-pending-application] stalled token issue failed", e);
+  }
+
+  const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
+  const SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+  const resp = await fetch(`${SUPABASE_URL}/functions/v1/send-transactional-email`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${SERVICE_KEY}`,
+      apikey: SERVICE_KEY,
+    },
+    body: JSON.stringify({
+      templateName: "discussion-stalled-nudge",
+      recipientEmail: email,
+      idempotencyKey: messageId,
+      templateData: {
+        ownerFirstName: disc.owner_first_name || "",
+        sitterFirstName: disc.sitter_first_name || "",
+        sitTitle: disc.sit_title,
+        daysSince,
+        msgCount: disc.msg_count,
+        ctaUrl,
+        declineUrl,
+        thinkingUrl,
+      },
+      logMetadata: {
+        application_id: disc.application_id,
+        sit_id: disc.sit_id,
+        sitter_id: disc.sitter_id,
+        owner_id: disc.owner_id,
+        msg_count: disc.msg_count,
+        hours_since_last_message: disc.hours_since_last_message,
+        source: "stalled_discussion",
+      },
+    }),
+  });
+
+  if (!resp.ok) {
+    const body = await resp.text();
+    console.error("[nudge-owner-pending-application] stalled send failed", resp.status, body);
+    return { ok: false, outcome: "failed", error: `send_failed_${resp.status}` };
+  }
+
   const payload = (await resp.json().catch(() => null)) as Record<string, unknown> | null;
   if (payload?.deferred) {
     return { ok: false, outcome: "deferred", error: String(payload?.reason ?? "deferred") };
@@ -337,6 +458,68 @@ Deno.serve(async (req) => {
       else errors.push({ application_id: app.application_id, error: result.error ?? "send_failed" });
     }
 
+    // ── Balayage 2 : discussions engagées mais candidature non confirmée ──
+    // Le nudge pending ignore toute candidature où le propriétaire a écrit :
+    // ce second balayage couvre exactement ce trou (numéro échangé puis rien).
+    const { data: stalledData, error: stalledErr } = await serviceClient.rpc(
+      "detect_stalled_discussions",
+    );
+    if (stalledErr) {
+      errors.push({ application_id: "stalled_sweep", error: stalledErr.message });
+    }
+    const stalled: StalledDiscussion[] = (stalledData as StalledDiscussion[]) ?? [];
+
+    let stalledSignalsInserted = 0;
+    let stalledEmailsSent = 0;
+    let stalledEmailsSkipped = 0;
+    let stalledEmailsDeferred = 0;
+
+    for (const disc of stalled) {
+      const severity = disc.hours_since_last_message >= 192 ? "critical" : "warning";
+
+      const { error: insErr } = await serviceClient.from("admin_signals").insert({
+        signal_type: "stalled_discussion",
+        severity,
+        entity_type: "application",
+        entity_id: disc.application_id,
+        metadata: {
+          sit_id: disc.sit_id,
+          sit_title: disc.sit_title,
+          sitter_id: disc.sitter_id,
+          sitter_first_name: disc.sitter_first_name,
+          owner_id: disc.owner_id,
+          owner_first_name: disc.owner_first_name,
+          owner_email: disc.owner_email,
+          msg_count: disc.msg_count,
+          hours_since_last_message: disc.hours_since_last_message,
+        },
+      });
+
+      if (insErr) {
+        if (!(insErr.code === "23505" || insErr.message?.includes("idx_admin_signals_idempotent"))) {
+          errors.push({ application_id: disc.application_id, error: insErr.message });
+          continue;
+        }
+      } else {
+        stalledSignalsInserted += 1;
+      }
+
+      // Email de relance (un seul par candidature, dédupliqué par message_id)
+      if (!RESEND_API_KEY) {
+        stalledEmailsSkipped += 1;
+        continue;
+      }
+      const result = await sendStalledDiscussionEmail({
+        serviceClient,
+        disc,
+        messageId: `stalled-discussion-${disc.application_id}`,
+      });
+      if (result.outcome === "sent") stalledEmailsSent += 1;
+      else if (result.outcome === "deferred") stalledEmailsDeferred += 1;
+      else if (result.outcome === "skipped") stalledEmailsSkipped += 1;
+      else errors.push({ application_id: disc.application_id, error: result.error ?? "send_failed" });
+    }
+
     if (run) {
       await run.finish(errors.length > 0 ? "partial" : "success", {
         detected: pending.length,
@@ -345,6 +528,11 @@ Deno.serve(async (req) => {
         emails_sent: emailsSent,
         emails_deferred: emailsDeferred,
         emails_skipped: emailsSkipped,
+        stalled_detected: stalled.length,
+        stalled_signals_inserted: stalledSignalsInserted,
+        stalled_emails_sent: stalledEmailsSent,
+        stalled_emails_deferred: stalledEmailsDeferred,
+        stalled_emails_skipped: stalledEmailsSkipped,
         errors_count: errors.length,
       });
     }
@@ -357,6 +545,11 @@ Deno.serve(async (req) => {
         emails_sent: emailsSent,
         emails_deferred: emailsDeferred,
         emails_skipped: emailsSkipped,
+        stalled_detected: stalled.length,
+        stalled_signals_inserted: stalledSignalsInserted,
+        stalled_emails_sent: stalledEmailsSent,
+        stalled_emails_deferred: stalledEmailsDeferred,
+        stalled_emails_skipped: stalledEmailsSkipped,
         errors,
         generated_at: new Date().toISOString(),
       }),

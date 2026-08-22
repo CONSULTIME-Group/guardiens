@@ -97,6 +97,7 @@ import { template as accountDeleted } from './account-deleted.tsx'
 import { template as unsubscribeLink } from './unsubscribe-link.tsx'
 import { template as ownerPendingApplicationNudge } from './owner-pending-application-nudge.tsx'
 import { template as ownerSitUnconfirmed } from './owner-sit-unconfirmed.tsx'
+import { template as discussionStalledNudge } from './discussion-stalled-nudge.tsx'
 import { template as founderPersonalNotice } from './founder-personal-notice.tsx'
 
 
@@ -192,6 +193,7 @@ export const TEMPLATES: Record<string, TemplateEntry> = {
   'account-deleted': accountDeleted,
   'owner-pending-application-nudge': ownerPendingApplicationNudge,
   'owner-sit-unconfirmed': ownerSitUnconfirmed,
+  'discussion-stalled-nudge': discussionStalledNudge,
 }
 
 
