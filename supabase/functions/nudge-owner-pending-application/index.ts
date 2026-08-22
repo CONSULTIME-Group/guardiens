@@ -35,6 +35,26 @@ interface PendingApp {
   sit_status: string | null;
 }
 
+/**
+ * Discussion engagée (les deux parties ont écrit, souvent un numéro échangé)
+ * mais candidature toujours ouverte et silence depuis 48h. C'est le trou du
+ * nudge pending, qui exclut toute candidature où le propriétaire a répondu.
+ */
+interface StalledDiscussion {
+  application_id: string;
+  sit_id: string;
+  sit_title: string;
+  sitter_id: string;
+  sitter_first_name: string | null;
+  owner_id: string;
+  owner_first_name: string | null;
+  owner_email: string;
+  msg_count: number;
+  hours_since_last_message: number;
+  sit_start_date: string | null;
+  sit_status: string | null;
+}
+
 async function sendReminderEmail(params: {
   serviceClient: ReturnType<typeof createClient>;
   app: PendingApp;
