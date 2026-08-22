@@ -17,14 +17,15 @@ interface Props {
   sitId?: string
   isOwner?: boolean
   stage?: 'j1' | 'j5' | 'j10' | 'j20'
+  deepLinkUrl?: string
 }
 
-const ReviewReminderEmail = ({ firstName, sitTitle, revieweeName, sitId, isOwner, stage }: Props) => {
+const ReviewReminderEmail = ({ firstName, sitTitle, revieweeName, sitId, isOwner, stage, deepLinkUrl }: Props) => {
   const greeting = firstName ? `Bonjour ${firstName},` : 'Bonjour,'
   const who = revieweeName
     ? (isOwner ? `le gardien ${revieweeName}` : `le propriétaire ${revieweeName}`)
     : (isOwner ? 'votre gardien' : 'votre propriétaire')
-  const reviewUrl = sitId ? `${SITE_URL}/review/${sitId}` : `${SITE_URL}/sits`
+  const reviewUrl = deepLinkUrl || (sitId ? `${SITE_URL}/review/${sitId}` : `${SITE_URL}/sits`)
 
   return (
     <Html lang="fr" dir="ltr">

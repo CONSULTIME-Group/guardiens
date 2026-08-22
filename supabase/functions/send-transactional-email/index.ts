@@ -91,6 +91,16 @@ const DEEP_LINK_TEMPLATES = new Set<string>([
   'unread-messages-reminder',
   'owner-pending-application-nudge',
   'first-application-received',
+  'review-reminder',
+  'review-received',
+])
+
+// Gabarits dont la cible est le formulaire de dépôt d'avis, pas un fil de
+// conversation. Le lien profond dépose la personne directement sur le
+// formulaire, session ouverte, sans passer par la page de connexion.
+const REVIEW_DEEP_LINK_TEMPLATES = new Set<string>([
+  'review-reminder',
+  'review-received',
 ])
 
 // Generate a cryptographically random 32-byte hex token
@@ -978,11 +988,14 @@ Deno.serve(async (req) => {
         (typeof templateData?.conversationId === 'string' && templateData.conversationId) ||
         (typeof logMetadata?.conversation_id === 'string' && logMetadata.conversation_id) ||
         null
+      const sitId = typeof templateData?.sitId === 'string' && templateData.sitId
+        ? templateData.sitId
+        : null
       const targetPath = conversationId
         ? `/messages/${conversationId}`
-        : (typeof templateData?.sitId === 'string' && templateData.sitId
-          ? `/sits/${templateData.sitId}#candidatures`
-          : '/messages')
+        : (REVIEW_DEEP_LINK_TEMPLATES.has(templateName) && sitId
+          ? `/review/${sitId}`
+          : (sitId ? `/sits/${sitId}#candidatures` : '/messages'))
       const isUuid = (v: string) =>
         /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(v)
       const { data: deepToken, error: deepErr } = await supabase.rpc('create_email_deep_link', {

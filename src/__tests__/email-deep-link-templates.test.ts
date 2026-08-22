@@ -17,6 +17,10 @@ const DEEP_LINK_TEMPLATES = [
   "first-application-received.tsx",
 ];
 
+// Gabarits d'avis : le bouton doit déposer la personne directement sur le
+// formulaire de dépôt, session ouverte, sans page de connexion intermédiaire.
+const REVIEW_DEEP_LINK_TEMPLATES = ["review-reminder.tsx", "review-received.tsx"];
+
 describe("lien profond authentifie dans les emails de conversation", () => {
   it("chaque gabarit concerne accepte deepLinkUrl et l'utilise en priorite", () => {
     for (const f of DEEP_LINK_TEMPLATES) {
@@ -42,6 +46,26 @@ describe("lien profond authentifie dans les emails de conversation", () => {
     expect(sender).toContain("create_email_deep_link");
     expect(sender).toContain("/acces?t=");
     for (const f of DEEP_LINK_TEMPLATES) {
+      expect(sender, f).toContain(`'${f.replace(".tsx", "")}'`);
+    }
+  });
+
+  it("les gabarits d'avis acceptent deepLinkUrl et l'utilisent en priorite", () => {
+    for (const f of REVIEW_DEEP_LINK_TEMPLATES) {
+      const src = read(f);
+      expect(src, f).toContain("deepLinkUrl?: string");
+      expect(src, f).toMatch(/deepLinkUrl\s*\|\|/);
+      expect(src, f).toContain("Laisser mon avis");
+    }
+  });
+
+  it("le sender cible le formulaire d'avis pour les gabarits d'avis", () => {
+    const sender = readFileSync(
+      resolve(__dirname, "../../supabase/functions/send-transactional-email/index.ts"),
+      "utf8",
+    );
+    expect(sender).toContain("/review/");
+    for (const f of REVIEW_DEEP_LINK_TEMPLATES) {
       expect(sender, f).toContain(`'${f.replace(".tsx", "")}'`);
     }
   });

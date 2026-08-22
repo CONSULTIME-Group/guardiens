@@ -15,12 +15,13 @@ interface Props {
   reviewerName?: string
   sitTitle?: string
   sitId?: string
+  deepLinkUrl?: string
 }
 
-const ReviewReceivedEmail = ({ firstName, reviewerName, sitTitle, sitId }: Props) => {
+const ReviewReceivedEmail = ({ firstName, reviewerName, sitTitle, sitId, deepLinkUrl }: Props) => {
   const greeting = firstName ? `Bonjour ${firstName},` : 'Bonjour,'
   const reviewer = reviewerName || 'votre partenaire de garde'
-  const reviewUrl = sitId ? `${SITE_URL}/review/${sitId}` : `${SITE_URL}/sits`
+  const reviewUrl = deepLinkUrl || (sitId ? `${SITE_URL}/review/${sitId}` : `${SITE_URL}/sits`)
 
   return (
     <Html lang="fr" dir="ltr">
