@@ -176,6 +176,107 @@ async function sendReminderEmail(params: {
   return { ok: true, outcome: "sent" };
 }
 
+/**
+ * Relance "discussion engagée mais candidature non confirmée".
+ * Un seul email par candidature (message_id stable), dédupliqué via
+ * email_send_log, suppression vérifiée, catégorie transactionnelle.
+ */
+async function sendStalledDiscussionEmail(params: {
+  serviceClient: ReturnType<typeof createClient>;
+  disc: StalledDiscussion;
+  messageId: string;
+}): Promise<{ ok: boolean; outcome: "sent" | "deferred" | "skipped" | "failed"; error?: string }> {
+  const { serviceClient, disc, messageId } = params;
+  const email = disc.owner_email.trim().toLowerCase();
+
+  const { data: existing } = await serviceClient
+    .from("email_send_log")
+    .select("id")
+    .eq("message_id", messageId)
+    .limit(1)
+    .maybeSingle();
+  if (existing) return { ok: false, outcome: "skipped", error: "already_sent" };
+
+  const { data: sup } = await serviceClient
+    .from("suppressed_emails")
+    .select("email")
+    .eq("email", email)
+    .maybeSingle();
+  if (sup) return { ok: false, outcome: "skipped", error: "suppressed" };
+
+  const daysSince = Math.max(2, Math.floor(disc.hours_since_last_message / 24));
+  const ctaUrl = `https://guardiens.fr/dashboard/candidatures/${disc.application_id}`;
+
+  let declineUrl: string | undefined;
+  let thinkingUrl: string | undefined;
+  try {
+    const [{ data: dTok }, { data: tTok }] = await Promise.all([
+      serviceClient.rpc("issue_application_action_token", {
+        p_application_id: disc.application_id,
+        p_action: "decline",
+      }),
+      serviceClient.rpc("issue_application_action_token", {
+        p_application_id: disc.application_id,
+        p_action: "thinking",
+      }),
+    ]);
+    if (dTok) declineUrl = `https://guardiens.fr/candidature/reponse?t=${dTok}`;
+    if (tTok) thinkingUrl = `https://guardiens.fr/candidature/reponse?t=${tTok}`;
+  } catch (e) {
+    console.error("[nudge-owner-pending-application] stalled token issue failed", e);
+  }
+
+  const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
+  const SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+  const resp = await fetch(`${SUPABASE_URL}/functions/v1/send-transactional-email`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${SERVICE_KEY}`,
+      apikey: SERVICE_KEY,
+    },
+    body: JSON.stringify({
+      templateName: "discussion-stalled-nudge",
+      recipientEmail: email,
+      idempotencyKey: messageId,
+      templateData: {
+        ownerFirstName: disc.owner_first_name || "",
+        sitterFirstName: disc.sitter_first_name || "",
+        sitTitle: disc.sit_title,
+        daysSince,
+        msgCount: disc.msg_count,
+        ctaUrl,
+        declineUrl,
+        thinkingUrl,
+      },
+      logMetadata: {
+        application_id: disc.application_id,
+        sit_id: disc.sit_id,
+        sitter_id: disc.sitter_id,
+        owner_id: disc.owner_id,
+        msg_count: disc.msg_count,
+        hours_since_last_message: disc.hours_since_last_message,
+        source: "stalled_discussion",
+      },
+    }),
+  });
+
+  if (!resp.ok) {
+    const body = await resp.text();
+    console.error("[nudge-owner-pending-application] stalled send failed", resp.status, body);
+    return { ok: false, outcome: "failed", error: `send_failed_${resp.status}` };
+  }
+
+  const payload = (await resp.json().catch(() => null)) as Record<string, unknown> | null;
+  if (payload?.deferred) {
+    return { ok: false, outcome: "deferred", error: String(payload?.reason ?? "deferred") };
+  }
+  if (payload?.skipped) {
+    return { ok: false, outcome: "skipped", error: String(payload?.reason ?? "skipped") };
+  }
+  return { ok: true, outcome: "sent" };
+}
+
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
