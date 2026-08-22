@@ -8186,6 +8186,23 @@ export type Database = {
           profile_id: string
         }[]
       }
+      detect_stalled_discussions: {
+        Args: never
+        Returns: {
+          application_id: string
+          hours_since_last_message: number
+          msg_count: number
+          owner_email: string
+          owner_first_name: string
+          owner_id: string
+          sit_id: string
+          sit_start_date: string
+          sit_status: string
+          sit_title: string
+          sitter_first_name: string
+          sitter_id: string
+        }[]
+      }
       detect_suspicious_accounts: {
         Args: never
         Returns: {
