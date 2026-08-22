@@ -17,6 +17,10 @@ const DEEP_LINK_TEMPLATES = [
   "first-application-received.tsx",
 ];
 
+// Gabarits d'avis : le bouton doit déposer la personne directement sur le
+// formulaire de dépôt, session ouverte, sans page de connexion intermédiaire.
+const REVIEW_DEEP_LINK_TEMPLATES = ["review-reminder.tsx", "review-received.tsx"];
+
 describe("lien profond authentifie dans les emails de conversation", () => {
   it("chaque gabarit concerne accepte deepLinkUrl et l'utilise en priorite", () => {
     for (const f of DEEP_LINK_TEMPLATES) {
