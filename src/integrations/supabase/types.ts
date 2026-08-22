@@ -7408,12 +7408,18 @@ export type Database = {
       sitter_profiles_affinity: {
         Row: {
           animal_types: string[] | null
+          availability_during: string | null
           experience_years: string | null
+          farm_animals_ok: boolean | null
+          has_license: boolean | null
+          has_vehicle: boolean | null
           interests: string[] | null
           languages: string[] | null
           life_pace: string | null
+          lifestyle: string[] | null
           sensitivities: string[] | null
           sitter_type: string | null
+          special_animal_skills: string[] | null
           travels_with_children: boolean | null
           travels_with_own_animals: boolean | null
           user_id: string | null
@@ -7421,12 +7427,18 @@ export type Database = {
         }
         Insert: {
           animal_types?: string[] | null
+          availability_during?: string | null
           experience_years?: string | null
+          farm_animals_ok?: boolean | null
+          has_license?: boolean | null
+          has_vehicle?: boolean | null
           interests?: string[] | null
           languages?: string[] | null
           life_pace?: string | null
+          lifestyle?: string[] | null
           sensitivities?: string[] | null
           sitter_type?: string | null
+          special_animal_skills?: string[] | null
           travels_with_children?: boolean | null
           travels_with_own_animals?: boolean | null
           user_id?: string | null
@@ -7434,12 +7446,18 @@ export type Database = {
         }
         Update: {
           animal_types?: string[] | null
+          availability_during?: string | null
           experience_years?: string | null
+          farm_animals_ok?: boolean | null
+          has_license?: boolean | null
+          has_vehicle?: boolean | null
           interests?: string[] | null
           languages?: string[] | null
           life_pace?: string | null
+          lifestyle?: string[] | null
           sensitivities?: string[] | null
           sitter_type?: string | null
+          special_animal_skills?: string[] | null
           travels_with_children?: boolean | null
           travels_with_own_animals?: boolean | null
           user_id?: string | null
