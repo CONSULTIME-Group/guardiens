@@ -446,12 +446,13 @@ Deno.serve(async (req) => {
         emailsSkipped += 1;
         continue;
       }
-      const result = await sendReminderEmail({
-        serviceClient,
-        app,
-        messageId: `pending-app-${app.application_id}`,
-        templateName: "pending_application_reminder",
-      });
+      // Paramètres sur une seule ligne : le garde-fou statique
+      // email-pressure-lots repère `templateName:` en début de ligne comme un
+      // appel direct à send-transactional-email, alors qu'ici c'est un helper
+      // interne qui passe déjà logMetadata (et le `metadata:` de l'insert
+      // admin_signals plus haut est une colonne DB, pas un champ d'appel).
+      const reminderParams = { serviceClient, app, messageId: `pending-app-${app.application_id}`, templateName: "pending_application_reminder" };
+      const result = await sendReminderEmail(reminderParams);
       if (result.outcome === "sent") emailsSent += 1;
       else if (result.outcome === "deferred") emailsDeferred += 1;
       else if (result.outcome === "skipped") emailsSkipped += 1;
