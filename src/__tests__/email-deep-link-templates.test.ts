@@ -49,4 +49,24 @@ describe("lien profond authentifie dans les emails de conversation", () => {
       expect(sender, f).toContain(`'${f.replace(".tsx", "")}'`);
     }
   });
+
+  it("les gabarits d'avis acceptent deepLinkUrl et l'utilisent en priorite", () => {
+    for (const f of REVIEW_DEEP_LINK_TEMPLATES) {
+      const src = read(f);
+      expect(src, f).toContain("deepLinkUrl?: string");
+      expect(src, f).toMatch(/deepLinkUrl\s*\|\|/);
+      expect(src, f).toContain("Laisser mon avis");
+    }
+  });
+
+  it("le sender cible le formulaire d'avis pour les gabarits d'avis", () => {
+    const sender = readFileSync(
+      resolve(__dirname, "../../supabase/functions/send-transactional-email/index.ts"),
+      "utf8",
+    );
+    expect(sender).toContain("/review/");
+    for (const f of REVIEW_DEEP_LINK_TEMPLATES) {
+      expect(sender, f).toContain(`'${f.replace(".tsx", "")}'`);
+    }
+  });
 });
