@@ -38,6 +38,10 @@ const TRANSACTIONAL: ReadonlyArray<string> = [
   'cancellation-review-published',
   'cancellation-response-published',
   'help-during-sit',
+  // Accord de garde (commodat) : consequence directe de la signature de
+  // l'autre partie sur une garde confirmee, meme nature que 'sit-confirmed'.
+  'accord-ready-for-sitter',
+  'accord-signed-by-sitter',
   // Mutual aid, interactions directes liées à une action d'un membre identifié
   'mission-response',
   'mission-response-received',
