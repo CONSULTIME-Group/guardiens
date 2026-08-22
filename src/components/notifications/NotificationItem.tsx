@@ -42,6 +42,8 @@ const typeTone: Record<string, "success" | "info" | "warning" | "destructive" | 
   mission_completed: "success",
   mission_cancelled: "muted",
   subscription_offered: "success",
+  accord_ready_for_sitter: "info",
+  accord_signed_both: "success",
   listing_hidden: "warning",
   listing_deleted: "destructive",
   admin_contact: "info",

@@ -15,6 +15,8 @@ import { template as applicationDeclined } from './application-declined.tsx'
 import { template as applicationClosedListingWithdrawn } from './application-closed-listing-withdrawn.tsx'
 import { template as applicationUnderReview } from './application-under-review.tsx'
 import { template as applicationAccepted } from './application-accepted.tsx'
+import { template as accordReadyForSitter } from './accord-ready-for-sitter.tsx'
+import { template as accordSignedBySitter } from './accord-signed-by-sitter.tsx'
 import { template as newMessage } from './new-message.tsx'
 import { template as subscriptionExpires30d } from './subscription-expires-30d.tsx'
 import { template as subscriptionExpires7d } from './subscription-expires-7d.tsx'
@@ -111,6 +113,8 @@ export const TEMPLATES: Record<string, TemplateEntry> = {
   'application-closed-listing-withdrawn': applicationClosedListingWithdrawn,
   'application-under-review': applicationUnderReview,
   'application-accepted': applicationAccepted,
+  'accord-ready-for-sitter': accordReadyForSitter,
+  'accord-signed-by-sitter': accordSignedBySitter,
   'new-message': newMessage,
   'subscription-expires-30d': subscriptionExpires30d,
   'subscription-expires-7d': subscriptionExpires7d,
