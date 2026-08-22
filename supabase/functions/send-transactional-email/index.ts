@@ -91,6 +91,16 @@ const DEEP_LINK_TEMPLATES = new Set<string>([
   'unread-messages-reminder',
   'owner-pending-application-nudge',
   'first-application-received',
+  'review-reminder',
+  'review-received',
+])
+
+// Gabarits dont la cible est le formulaire de dépôt d'avis, pas un fil de
+// conversation. Le lien profond dépose la personne directement sur le
+// formulaire, session ouverte, sans passer par la page de connexion.
+const REVIEW_DEEP_LINK_TEMPLATES = new Set<string>([
+  'review-reminder',
+  'review-received',
 ])
 
 // Generate a cryptographically random 32-byte hex token
