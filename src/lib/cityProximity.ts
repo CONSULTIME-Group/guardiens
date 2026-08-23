@@ -27,9 +27,10 @@ export function haversineKm(
 }
 
 /**
- * Miroir de la regex SQL de recalc_seo_city_nearby_counts : nom de commune en
- * mot entier, insensible à la casse et aux accents ("Saint-Paul" ne match pas
- * "Saint-Paul-lès-Dax").
+ * Miroir exact de la regex SQL de recalc_seo_city_nearby_counts : nom de
+ * commune en mot entier, insensible à la casse et aux accents. Les
+ * ponctuations internes (trait d'union, espace) sont des frontières de mot
+ * mais doivent être identiques des deux côtés, comme dans le SQL.
  */
 export function cityNameMatches(
   profileCity: string | null | undefined,

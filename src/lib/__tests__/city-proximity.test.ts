@@ -38,11 +38,16 @@ describe("haversineKm", () => {
 describe("cityNameMatches", () => {
   it("match en mot entier, insensible casse et accents", () => {
     expect(cityNameMatches("saint-denis", "Saint-Denis")).toBe(true);
-    expect(cityNameMatches("Saint Etienne", "Saint-Étienne")).toBe(true);
+    expect(cityNameMatches("saint-étienne", "Saint-Etienne")).toBe(true);
   });
 
-  it("ne match pas un nom composé plus long", () => {
-    expect(cityNameMatches("Saint-Paul-lès-Dax", "Saint-Paul")).toBe(false);
+  it("respecte les frontières de mot (miroir SQL exact)", () => {
+    // "ien" n'est pas une frontière : pas de match.
+    expect(cityNameMatches("Saint-Paulien", "Saint-Paul")).toBe(false);
+    // Le trait d'union EST une frontière : le SQL matche, on matche aussi.
+    expect(cityNameMatches("Saint-Paul-lès-Dax", "Saint-Paul")).toBe(true);
+    // Ponctuation interne différente (espace vs trait d'union) : pas de match.
+    expect(cityNameMatches("Saint Etienne", "Saint-Étienne")).toBe(false);
   });
 
   it("tolère une ville de profil vide", () => {
