@@ -80,7 +80,7 @@ Deno.serve(async (req) => {
 
     const { data: pages, error: pErr } = await supabase
       .from("seo_city_pages")
-      .select("id, slug, city, department")
+      .select("id, slug, city, department, geocode_attempts")
       .is("latitude", null)
       .lt("geocode_attempts", 3)
       .not("slug", "like", "test-%")
@@ -99,7 +99,7 @@ Deno.serve(async (req) => {
       // Incrément AVANT l'appel réseau : un échec ne doit pas créer de boucle.
       await supabase
         .from("seo_city_pages")
-        .update({ geocode_attempts: (page as { geocode_attempts?: number }).geocode_attempts ?? 0 + 1 })
+        .update({ geocode_attempts: (page.geocode_attempts ?? 0) + 1 })
         .eq("id", page.id);
 
       const deptCode = deptCodeByName.get(page.department);
