@@ -155,7 +155,7 @@ export function AlmaFitGardien({ sitter, sitterProfile }: Props) {
       >
         <p>
           Voici pourquoi {prenom} correspond à votre annonce {titre} : {matchedText}. {reviewNote}
-          Score d'affinité {affinity.score}%.
+          Score d'affinité {affinity.sortScore}%.
         </p>
         {reciprocity > 0 && (
           <p className="mt-2 text-primary/90">
