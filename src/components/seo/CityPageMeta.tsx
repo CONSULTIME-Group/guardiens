@@ -5,6 +5,12 @@ import type { CityData } from "@/data/cities";
 interface Props {
   city: CityData;
   noindex?: boolean;
+  /**
+   * Titre SEO rédigé en base (seo_city_pages.meta_title), utilisé tel quel
+   * quand il est non vide. Le gabarit générique reste le repli quand le
+   * champ est vide. PageMeta réutilise le même titre pour og:title.
+   */
+  metaTitle?: string | null;
 }
 
 const META_TITLE_OVERRIDES: Record<string, string> = {
@@ -13,8 +19,9 @@ const META_TITLE_OVERRIDES: Record<string, string> = {
   chambery: "Home sitting Chambéry, Gardien de confiance en Savoie | Guardiens",
 };
 
-const CityPageMeta = ({ city, noindex = false }: Props) => {
+const CityPageMeta = ({ city, noindex = false, metaTitle }: Props) => {
   const title =
+    (metaTitle && metaTitle.trim()) ||
     META_TITLE_OVERRIDES[city.slug] ||
     `House-sitting à ${city.name}, garde d'animaux, de maison et de jardin, gardiens près de chez vous | Guardiens`;
 

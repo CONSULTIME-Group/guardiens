@@ -6,10 +6,18 @@ import { Button } from "@/components/ui/button";
 import { ArrowRight, ShieldCheck } from "lucide-react";
 import TrustHaloAvatar from "@/components/sitters/TrustHaloAvatar";
 import { avatarImageUrl } from "@/lib/storageImage";
+import { postalMatchesDepartment } from "@/lib/postalDepartment";
 
 interface Props {
   city: string;
   citySlug?: string;
+  /**
+   * Code département de la page (ex : "93", "974", "2A"). Filtre les
+   * gardiens par code postal selon la règle de recalc_seo_city_page_counts
+   * : postal absent conservé, 20xxx rattaché à 2A et 2B, DOM sur 3
+   * caractères. Sans code résolu, aucun filtre (repli identique au SQL).
+   */
+  departmentCode?: string | null;
 }
 
 interface SitterRow {
@@ -17,6 +25,7 @@ interface SitterRow {
   first_name: string | null;
   avatar_url: string | null;
   city: string | null;
+  postal_code: string | null;
   identity_verified: boolean | null;
 }
 
@@ -24,18 +33,18 @@ interface SitterRow {
  * Affiche 3-6 gardiens du coin sur une page ville SEO.
  * RGPD : prénom + ville + avatar uniquement. Données déjà publiques sur /gardiens/:id.
  */
-const CitySittersGrid = ({ city, citySlug }: Props) => {
+const CitySittersGrid = ({ city, citySlug, departmentCode }: Props) => {
   const { data: sitters, isLoading } = useQuery({
-    queryKey: ["city-sitters-grid", city],
+    queryKey: ["city-sitters-grid", city, departmentCode ?? ""],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("public_profiles")
-        .select("id, first_name, avatar_url, city, role, identity_verified")
+        .select("id, first_name, avatar_url, city, postal_code, role, identity_verified")
         .in("role", ["sitter", "both"])
         .ilike("city", `%${city}%`)
         .not("first_name", "is", null)
         .not("avatar_url", "is", null)
-        .limit(6);
+        .limit(24);
       if (error) return [] as SitterRow[];
       return (data || []) as SitterRow[];
     },
@@ -45,7 +54,11 @@ const CitySittersGrid = ({ city, citySlug }: Props) => {
 
   if (isLoading) return null;
 
-  const list = sitters ?? [];
+  // Filtre départemental sur le code postal : élimine les homonymes hors
+  // département (Saint-Denis du 93 vs Saint-Denis de La Réunion).
+  const list = (sitters ?? [])
+    .filter((s) => postalMatchesDepartment(s.postal_code, departmentCode))
+    .slice(0, 6);
 
   return (
     <section className="max-w-5xl mx-auto px-4 py-12 border-t border-border">
