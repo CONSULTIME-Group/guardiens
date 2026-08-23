@@ -140,6 +140,57 @@ const CityPage = () => {
     },
   });
 
+  // Compteurs de la ligne SEO pour les pages statiques (la version DB les
+  // lit déjà dans dbPage). Sert à la mention de proximité et au tracking.
+  const { data: seoCounts } = useQuery<{
+    sitter_count: number | null;
+    nearby_sitter_count: number | null;
+  } | null>({
+    queryKey: ["city-seo-counts", slug],
+    enabled: !!cityData && !!slug,
+    staleTime: 5 * 60 * 1000,
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("seo_city_pages" as any)
+        .select("sitter_count, nearby_sitter_count")
+        .eq("slug", slug)
+        .eq("published", true)
+        .maybeSingle();
+      return (data as any) ?? null;
+    },
+  });
+
+  // Instrumentation : mesure si les pages complétées par la proximité
+  // convertissent mieux. residents = habitants de la commune, proximite =
+  // gardiens qui interviennent sans y habiter. Tir unique par slug.
+  const cityTrackedRef = useRef<string | null>(null);
+  useEffect(() => {
+    if (!slug || cityTrackedRef.current === slug) return;
+    if (cityData) {
+      if (seoCounts === undefined) return; // requête encore en cours
+      cityTrackedRef.current = slug;
+      void trackEvent("city_page_viewed", {
+        source: `/house-sitting/${slug}`,
+        metadata: {
+          slug,
+          residents: seoCounts?.sitter_count ?? 0,
+          proximite: seoCounts?.nearby_sitter_count ?? 0,
+        },
+      });
+      return;
+    }
+    if (dbLoading || !dbPage) return;
+    cityTrackedRef.current = slug;
+    void trackEvent("city_page_viewed", {
+      source: `/house-sitting/${slug}`,
+      metadata: {
+        slug,
+        residents: dbPage.sitter_count ?? 0,
+        proximite: dbPage.nearby_sitter_count ?? 0,
+      },
+    });
+  }, [slug, cityData, seoCounts, dbLoading, dbPage]);
+
  // ── STATIC CITY DATA PATH ──
  if (cityData) {
  const content = getCityContent(cityData.slug);
