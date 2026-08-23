@@ -572,11 +572,12 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, prope
   const rawActive = applications.filter(a => !["rejected", "cancelled"].includes(a.status));
   const declinedApps = applications.filter(a => ["rejected", "cancelled"].includes(a.status));
 
-  // Précalcul du score d'affinité par candidat : classement ET affichage
-  // utilisent le score pondéré par la confiance (sortScore, alignement
-  // chiffre/tri du 23/08/2026) ; le brut reste calculé par le moteur.
+  // Précalcul du score d'affinité par candidat : tri, puce colorée ET
+  // chiffre affiché utilisent le score BRUT (décision du 23/08/2026,
+  // surface CANDIDATURES : 53 candidatures au total, 2,5 par annonce, le
+  // chiffre sert à oser dire oui, pas à départager un classement).
   const affinityByApp = useMemo(() => {
-    const map = new Map<string, { score: number; sortScore: number }>();
+    const map = new Map<string, number>();
     if (!viewerOwner) return map;
     const ownerWithSit: AffinityOwnerInput = {
       ...(viewerOwner as AffinityOwnerInput),
@@ -589,7 +590,7 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, prope
       // entre toujours dans le tri ; seul l'affichage du chiffre dépend de
       // `scoreReliable` côté badge.
       const res = computeAffinityResultFull(ownerWithSit, app.sitterAffinityInput);
-      map.set(app.id, { score: res.score, sortScore: res.sortScore });
+      map.set(app.id, res.score);
     });
     return map;
   }, [rawActive, viewerOwner, sitContext.accepts_sitter_pets, sitContext.accepts_sitter_children]);
@@ -608,8 +609,8 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, prope
       const pb = isPending(b.status) ? 0 : 1;
       if (pa !== pb) return pa - pb;
       if (sortMode === "affinity") {
-        const sa = affinityByApp.get(a.id)?.sortScore ?? -1;
-        const sb = affinityByApp.get(b.id)?.sortScore ?? -1;
+        const sa = affinityByApp.get(a.id) ?? -1;
+        const sb = affinityByApp.get(b.id) ?? -1;
         if (sa !== sb) return sb - sa;
       } else if (sortMode === "rating") {
         const ra = a.avgRating ? parseFloat(a.avgRating) : -1;
@@ -638,9 +639,9 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, prope
     const receivedLabel = app.created_at
       ? `Reçue ${formatDistanceToNow(new Date(app.created_at), { addSuffix: true, locale: fr })}`
       : null;
-    // Couleur de la puce : le chiffre montré est le sortScore (le nombre
-    // exact rendu par OwnerToSitterAffinity juste en dessous).
-    const affinityScore = affinityByApp.get(app.id)?.sortScore;
+    // Couleur de la puce : score BRUT, le même nombre que celui rendu par
+    // OwnerToSitterAffinity juste en dessous (displayKey="score").
+    const affinityScore = affinityByApp.get(app.id);
     const affinityClass =
       typeof affinityScore === "number"
         ? affinityScore >= 70
@@ -742,6 +743,7 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, prope
                   size="sm"
                   showCta={false}
                   scope="list"
+                  displayKey="score"
                 />
               </div>
             )}

@@ -2,16 +2,26 @@ import { describe, it, expect } from "vitest";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { computeAffinityResultFull } from "../affinityScore";
+import {
+  AFFINITY_DISPLAY_REGISTRY,
+  type AffinityDisplayKey,
+} from "../affinityDisplayRegistry";
 
 /**
- * ALIGNEMENT CHIFFRE AFFICHÉ / CHIFFRE DE TRI (décision du 23/08/2026).
+ * ALIGNEMENT CHIFFRE AFFICHÉ / CHIFFRE DE TRI (décisions des 20 et 23/08/2026).
  *
- * Côté PROPRIÉTAIRE, les listes sont triées par sortScore (score x
- * confiance) : le pourcentage AFFICHÉ doit être ce même sortScore, sinon le
- * deuxième de la liste peut porter un meilleur chiffre que le premier.
- * Côté GARDIEN (sa propre affinité avec une annonce), le chiffre reste le
- * score brut : le pondéré pénaliserait en permanence un profil peu
- * renseigné, ce que la règle 11 interdit.
+ * Un seul chiffre par surface, le même pour trier et pour afficher :
+ *  - surfaces de CLASSEMENT (recherche, Top 3) : tri et affichage sur le
+ *    sortScore (score x confiance) ;
+ *  - surfaces CANDIDATURES (ApplicationsList, OwnerStarSection) : tri et
+ *    affichage sur le score BRUT. 53 candidatures au total, 2,5 par
+ *    annonce : le chiffre ne sert pas à trier, il sert à oser dire oui ;
+ *  - côté GARDIEN : le brut, inchangé (règle 11, le silence ne se punit pas).
+ *
+ * Ce test est GÉNÉRIQUE : il pilote le registre
+ * `src/lib/affinityDisplayRegistry.ts`. Toute nouvelle surface affichant un
+ * pourcentage d'affinité DOIT y être déclarée ; elle est alors couverte par
+ * les assertions ci-dessous sans modifier ce fichier.
  */
 
 // Un propriétaire complet : tous les critères sont évaluables, donc la
@@ -30,75 +40,129 @@ const OWNER_FULL = {
   distance_km: 12,
 };
 
-// Gardien très déclarant, match moyen : score brut honnête, confiance haute.
-const SITTER_FULL = {
-  life_pace: "calme",
-  languages: ["Français", "Anglais"],
-  interests: ["Lecture"],
-  work_during_sit: "full_remote",
-  sitter_type: "Retraité·e voyageur·euse",
-  animal_types: ["cat", "dog"],
-  has_vehicle: true,
-  experience_years: "5 ans et plus",
-  special_animal_skills: ["Soins"],
-  travels_with_children: false,
-  travels_with_own_animals: false,
-};
+// Génération déterministe de profils gardiens variés (mix déclarants,
+// partiels, vides) pour éprouver la monotonie sur des couples réalistes.
+function makeSitters(n: number): Array<Record<string, unknown>> {
+  const paces = ["calme", "actif", "equilibre", undefined];
+  const langs = [["Français"], ["Français", "Anglais"], ["Français", "Espagnol"], undefined];
+  const interests = [["Lecture"], ["Jardinage", "Randonnée"], ["Cuisine"], undefined];
+  const works = ["full_remote", "partial_remote", "on_site", "out_daytime", "flexible", undefined];
+  const types = ["Retraité·e voyageur·euse", "Étudiant·e", "Famille nombreuse", undefined];
+  const animals = [["cat", "dog"], ["dog"], ["cat"], ["horse"], ["Tous"], undefined];
+  const out: Array<Record<string, unknown>> = [];
+  for (let i = 0; i < n; i++) {
+    out.push({
+      life_pace: paces[i % paces.length],
+      languages: langs[Math.floor(i / 2) % langs.length],
+      interests: interests[Math.floor(i / 3) % interests.length],
+      work_during_sit: works[Math.floor(i / 5) % works.length],
+      sitter_type: types[Math.floor(i / 7) % types.length],
+      animal_types: animals[Math.floor(i / 11) % animals.length],
+      has_vehicle: i % 3 === 0 ? true : i % 3 === 1 ? false : null,
+      has_license: i % 2 === 0,
+      experience_years: i % 4 === 0 ? "5 ans et plus" : undefined,
+      special_animal_skills: i % 5 === 0 ? ["Soins"] : undefined,
+      travels_with_children: i % 6 === 0 ? true : i % 6 === 1 ? false : null,
+      travels_with_own_animals: i % 7 === 0 ? true : i % 7 === 1 ? false : null,
+    });
+  }
+  return out;
+}
 
-// Gardien quasi vide : un seul critère évaluable, match parfait dessus.
-// Score brut 100, confiance très basse, sortScore bas.
-const SITTER_EMPTY = {
-  life_pace: "calme",
-};
-
-describe("alignement chiffre affiché / chiffre de tri (côté propriétaire)", () => {
-  it("le fixture prouve que brut et pondéré peuvent diverger (sinon le test ne protège rien)", () => {
-    const full = computeAffinityResultFull(OWNER_FULL, SITTER_FULL);
-    const empty = computeAffinityResultFull(OWNER_FULL, SITTER_EMPTY);
-    // Le profil vide a un BRUT plus élevé mais un PONDÉRÉ plus faible.
+describe("divergence brut / pondéré (la raison d'être de l'alignement)", () => {
+  it("un profil quasi vide a un brut plus élevé mais un pondéré plus faible", () => {
+    const full = computeAffinityResultFull(OWNER_FULL, {
+      life_pace: "calme",
+      languages: ["Français", "Anglais"],
+      interests: ["Lecture"],
+      work_during_sit: "full_remote",
+      sitter_type: "Retraité·e voyageur·euse",
+      animal_types: ["cat", "dog"],
+      has_vehicle: true,
+      experience_years: "5 ans et plus",
+      special_animal_skills: ["Soins"],
+      travels_with_children: false,
+      travels_with_own_animals: false,
+    });
+    const empty = computeAffinityResultFull(OWNER_FULL, { life_pace: "calme" });
     expect(empty.score).toBeGreaterThan(full.score);
     expect(empty.sortScore).toBeLessThan(full.sortScore);
   });
+});
 
-  it("liste triée par sortScore : les chiffres AFFICHÉS (sortScore) sont décroissants", () => {
-    const sitters = [SITTER_FULL, SITTER_EMPTY, { life_pace: "sportif" }, {}];
-    const ranked = sitters
-      .map((s) => computeAffinityResultFull(OWNER_FULL, s))
-      .sort((a, b) => b.sortScore - a.sortScore);
-    const displayed = ranked.map((r) => r.sortScore);
-    for (let i = 1; i < displayed.length; i++) {
+describe("registre des surfaces d'affinité (pilote générique)", () => {
+  const read = (p: string) => readFileSync(join(process.cwd(), p), "utf8");
+
+  it("chaque surface déclarée affiche la clé qu'elle déclare (scan statique)", () => {
+    for (const s of AFFINITY_DISPLAY_REGISTRY) {
+      const content = read(s.file);
       expect(
-        displayed[i] <= displayed[i - 1],
-        `inversion d'affichage à la position ${i} : ${displayed.join(", ")}`,
-      ).toBe(true);
+        content,
+        `${s.surface} (${s.file}) doit contenir la preuve "${s.proof}"`,
+      ).toContain(s.proof);
+      if (s.forbidden) {
+        expect(
+          content,
+          `${s.surface} (${s.file}) ne doit pas contenir "${s.forbidden}"`,
+        ).not.toContain(s.forbidden);
+      }
     }
-    // Contre-épreuve : avec le BRUT comme chiffre affiché, la même liste
-    // triée par sortScore montre une inversion. C'est le défaut corrigé.
-    const raw = ranked.map((r) => r.score);
-    const hasInversion = raw.some((v, i) => i > 0 && v > raw[i - 1]);
-    expect(hasInversion).toBe(true);
+  });
+
+  it("surfaces CANDIDATURES : la clé déclarée est le score brut, verrouillé", () => {
+    const candidatures = AFFINITY_DISPLAY_REGISTRY.filter(
+      (s) => s.category === "candidatures",
+    );
+    expect(candidatures.length).toBeGreaterThanOrEqual(2);
+    for (const s of candidatures) {
+      expect(
+        s.displayKey,
+        `${s.surface} affiche le score BRUT : à 2,5 candidatures par annonce, ` +
+          "le chiffre sert à oser dire oui, pas à trier (décision du 23/08/2026).",
+      ).toBe("score");
+    }
+  });
+
+  it("surfaces de CLASSEMENT : la clé déclarée est le sortScore (clé de tri)", () => {
+    const classement = AFFINITY_DISPLAY_REGISTRY.filter(
+      (s) => s.category === "classement",
+    );
+    expect(classement.length).toBeGreaterThanOrEqual(1);
+    for (const s of classement) {
+      expect(
+        s.displayKey,
+        `${s.surface} trie sur le sortScore, elle doit l'afficher`,
+      ).toBe("sortScore");
+    }
+  });
+
+  it("pour toute collection ordonnée, la suite des chiffres affichés est non croissante", () => {
+    const sitters = makeSitters(60);
+    const governed = AFFINITY_DISPLAY_REGISTRY.filter(
+      (s) => s.category === "classement" || s.category === "candidatures",
+    );
+    for (const s of governed) {
+      const sortKey: AffinityDisplayKey =
+        s.category === "candidatures" ? "score" : "sortScore";
+      const ranked = sitters
+        .map((x) => computeAffinityResultFull(OWNER_FULL, x))
+        .sort((a, b) => b[sortKey] - a[sortKey]);
+      const displayed = ranked.map((r) => r[s.displayKey]);
+      for (let i = 1; i < displayed.length; i++) {
+        expect(
+          displayed[i] <= displayed[i - 1],
+          `${s.surface} : inversion d'affichage à la position ${i} ` +
+            `(${displayed.join(", ")})`,
+        ).toBe(true);
+      }
+    }
   });
 });
 
-describe("verrouillage des surfaces (scan statique)", () => {
+describe("côté GARDIEN : rien ne change (décision gardien non tranchée)", () => {
   const read = (p: string) => readFileSync(join(process.cwd(), p), "utf8");
 
-  it("surfaces PROPRIÉTAIRE : le chiffre montré est le sortScore", () => {
-    const ownerSurfaces: Array<[string, string]> = [
-      ["src/components/matching/OwnerToSitterAffinity.tsx", "displayScore={full.sortScore}"],
-      ["src/components/dashboard/owner/OwnerStarSection.tsx", "affinity!.sortScore"],
-      ["src/components/search/SitterResultCard.tsx", "affinity!.sortScore"],
-      ["src/components/favorites/SitterCard.tsx", "displayScore={affinity.sortScore}"],
-      ["src/components/ai/alma/AlmaFitGardien.tsx", "affinity.sortScore"],
-    ];
-    for (const [file, needle] of ownerSurfaces) {
-      expect(read(file), `${file} doit afficher le sortScore`).toContain(needle);
-    }
-    // ApplicationsList : la couleur de la puce suit le chiffre montré.
-    expect(read("src/components/sits/ApplicationsList.tsx")).toContain("?.sortScore");
-  });
-
-  it("surfaces GARDIEN : le chiffre montré reste le score brut (décision en attente)", () => {
+  it("les surfaces gardien continuent d'afficher le score brut", () => {
     const sitterSurfaces = [
       "src/components/sits/views/SitterAffinitySection.tsx",
       "src/components/dashboard/sitter/SitterMatchSection.tsx",

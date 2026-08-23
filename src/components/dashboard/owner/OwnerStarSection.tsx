@@ -245,10 +245,10 @@ const ApplicationCard = ({
       <div className="notebook-card-paper absolute inset-0" aria-hidden="true" />
       <div className="relative flex items-start gap-[22px] pr-[14px] sm:pr-[22px]">
         {showRing ? (
-          // Chiffre affiché = score de tri pondéré (alignement chiffre/tri,
-          // décision du 23/08/2026) : l'ordre de la liste et les
-          // pourcentages lus par le propriétaire ne se contredisent jamais.
-          <AffinityRing score={affinity!.sortScore} result={affinity} />
+          // Chiffre affiché = score BRUT (décision du 23/08/2026, surface
+          // CANDIDATURES) : à 2,5 candidatures par annonce le chiffre ne
+          // sert pas à trier, il sert à oser dire oui.
+          <AffinityRing score={affinity!.score} result={affinity} />
         ) : (
           <div className="w-16 h-16 rounded-full overflow-hidden bg-primary/10 shrink-0 flex items-center justify-center">
             {sitter?.avatar_url ? (
@@ -330,10 +330,12 @@ const ApplicationsStar = ({
 }) => {
   const { owner } = useViewerOwnerForAffinity();
 
-  // Choix du candidat mis en avant (règles produit, lot affinité août 2026) :
-  //  1. meilleur score de tri (sortScore = score × confiance, 20/08/2026) :
-  //     un profil vide à 100 % affiché ne passe plus devant un profil
-  //     documenté, Y COMPRIS si ce meilleur score est bas ;
+  // Choix du candidat mis en avant (décision du 23/08/2026, surface
+  // CANDIDATURES) :
+  //  1. meilleur score BRUT : le volume réel (53 candidatures, 2,5 par
+  //     annonce) ne justifie pas un classement pondéré. Baisser le niveau
+  //     affiché ferait peser un risque sur les seules conversions que la
+  //     plateforme produit, sans bénéfice de tri ;
   //  2. une incompatibilité déclarée (allergie, refus animaux/enfants) n'est
   //     jamais mise en avant, SAUF si c'est la seule candidature ;
   //  3. la section n'est JAMAIS vide dès qu'il existe une candidature :
@@ -362,8 +364,8 @@ const ApplicationsStar = ({
         input,
       );
       if (r.hasDeclaredIncompatibility && pendingApps.length > 1) continue;
-      if (r.sortScore > bestScore) {
-        bestScore = r.sortScore;
+      if (r.score > bestScore) {
+        bestScore = r.score;
         featured = app;
         featuredAffinity = r;
         featuredInput = input;
