@@ -38,7 +38,7 @@ import {
   OWNER_PUBLIC_DESCRIPTIVE_COLUMNS,
 } from "@/lib/affinityVocab";
 
-const ROOT = path.resolve(__dirname, "../..");
+const ROOT = path.resolve(__dirname, "../../..");
 const scoreTs = fs.readFileSync(
   path.join(ROOT, "supabase/functions/_shared/affinity/score.ts"),
   "utf8",
@@ -166,14 +166,20 @@ describe("Symétrie fiches publiques / moteur d'affinité", () => {
       path.join(ROOT, "src/pages/PublicSitterProfile.tsx"),
       "utf8",
     );
-    const m = page.match(/PUBLIC_SITTER_COLS\s*=\s*"([^"]+)"/);
-    expect(m, "PUBLIC_SITTER_COLS introuvable").toBeTruthy();
-    const cols = m![1].split(",").map((s) => s.trim());
-    for (const c of cols) {
-      expect(
-        SITTER_VIEW,
-        `PUBLIC_SITTER_COLS demande ${c}, absent de la vue : 400 assuré.`,
-      ).toContain(c);
+    // Toutes les occurrences : la page déclare la liste des colonnes à
+    // plusieurs endroits (fetch principal, rafraîchissements).
+    const matches = [
+      ...page.matchAll(/PUBLIC_SITTER_COLS\s*=\s*\n?\s*"([^"]+)"/g),
+    ];
+    expect(matches.length, "PUBLIC_SITTER_COLS introuvable").toBeGreaterThan(0);
+    for (const m of matches) {
+      const cols = m[1].split(",").map((s) => s.trim());
+      for (const c of cols) {
+        expect(
+          SITTER_VIEW,
+          `PUBLIC_SITTER_COLS demande ${c}, absent de la vue : 400 assuré.`,
+        ).toContain(c);
+      }
     }
   });
 });

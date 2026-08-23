@@ -495,9 +495,10 @@ export default function PublicSitterProfile() {
       const BASE_PROFILE_COLS =
         "id, first_name, avatar_url, bio, city, postal_code, created_at, identity_verified, is_founder, profile_completion, completed_sits_count, cancellation_count, hero_image_index";
 
-      // Vue publique réduite : 19 colonnes d'affichage, sans donnée d'affinité.
+      // Vue publique : alignée sur les entrées scorées du moteur (symétrie
+      // du 23/08/2026), sauf sensitivities (donnée de santé, jamais exposée).
       const PUBLIC_SITTER_COLS =
-        "user_id, motivation, sitter_type, accompanied_by, lifestyle, animal_types, has_vehicle, vehicle_type, geographic_radius, min_stay_duration, is_available, competences, preferred_frequency, min_notice, preferred_environments, farm_animals_ok, own_animals, reply_median_minutes, travels_with_children, travels_with_own_animals";
+        "user_id, motivation, sitter_type, accompanied_by, lifestyle, animal_types, has_vehicle, has_license, geographic_radius, min_stay_duration, is_available, competences, special_animal_skills, preferred_frequency, min_notice, preferred_environments, farm_animals_ok, own_animals, reply_median_minutes, travels_with_children, travels_with_own_animals, work_during_sit, availability_during, experience_years, languages, interests, life_pace";
       const [profileRes, baseProfileRes, sitterRes, badgesRes, reviewsRes, galleryRes, emergencyRes, subRes, ownerRes, missionsRes, extExpRes] =
         await Promise.all([
           supabase.from("public_profiles").select(PUBLIC_PROFILE_COLS).eq("id", id).maybeSingle(),

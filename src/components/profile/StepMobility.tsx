@@ -29,8 +29,9 @@ const StepMobility = ({ data, onChange }: Props) => {
     .map(km => ({ value: String(km), label: `${km} km` }));
   return (
     <div className="space-y-6">
-      {/* vehicle_type retiré le 23/08/2026 : champ mort (3/1037, jamais scoré).
-          La mobilité se déclare via Permis de conduire + Véhicule personnel. */}
+      {/* Le choix du type de véhicule a été retiré le 23/08/2026 (champ mort :
+          3 profils sur 1 037, jamais scoré). La mobilité se déclare via
+          Permis de conduire + Véhicule personnel, qui sont scorés. */}
       <div className="space-y-2">
         <Label id="lbl-has-license">Permis de conduire</Label>
         <YesNoChips ariaLabelledBy="lbl-has-license" value={data.has_license} onChange={v => onChange({ has_license: v })} />
