@@ -39,6 +39,7 @@ vi.mock("@/hooks/useAffinityOnboardingStatus", () => ({
     needsOnboarding: true,
     needsSitter: false,
     needsOwner: true,
+    needsPostal: false,
     profileCreatedAt: new Date().toISOString(),
     refresh: vi.fn(),
   }),
