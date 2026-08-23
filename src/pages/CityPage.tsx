@@ -194,6 +194,11 @@ const CityPage = () => {
  // ── STATIC CITY DATA PATH ──
  if (cityData) {
  const content = getCityContent(cityData.slug);
+ const staticNearbyMention = buildNearbyMention(
+   cityData.name,
+   seoCounts?.sitter_count ?? 0,
+   seoCounts?.nearby_sitter_count ?? 0
+ );
 
  const faqItems = cityData.slug === "lyon"
  ? [
