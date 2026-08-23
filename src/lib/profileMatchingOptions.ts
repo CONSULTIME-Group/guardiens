@@ -222,4 +222,40 @@ export const HOME_AMBIANCE_OPTIONS = [
   ...HOME_AMBIANCE_ENVIRONMENT_OPTIONS,
 ];
 
+/**
+ * Tags d'ambiance mutuellement exclusifs (décision du 23/08/2026, règle 16
+ * de la doctrine d'affinité). Fondé sur la sémantique du moteur :
+ * « Calme et posé » et « Cocon casanier » sont scorés sur un rythme calme,
+ * « Sportif outdoor » sur un rythme actif, les cocher ensemble produisait
+ * des chips contradictoires pour un même gardien. « Campagne » (accessible
+ * via le jardinage) et « Famille animée » (rythme équilibré accepté) ne
+ * contredisent ni le calme ni le sport.
+ * La correction vit au FORMULAIRE : le moteur continue de scorer
+ * fidèlement ce qui est déclaré.
+ */
+export const HOME_AMBIANCE_CONFLICTS: Record<string, readonly string[]> = {
+  "Sportif outdoor": ["Calme et posé", "Cocon casanier"],
+  "Calme et posé": ["Sportif outdoor"],
+  "Cocon casanier": ["Sportif outdoor"],
+};
+
+/**
+ * Résout les contradictions d'ambiance. Règle déterministe unique, commune
+ * au formulaire et à la migration de nettoyage des profils existants :
+ * le DERNIER tag déclaré (ordre du tableau, donc choix le plus récent)
+ * l'emporte, les tags qui le contredisent sont retirés. Sans contradiction,
+ * le tableau est rendu inchangé.
+ */
+export function resolveAmbianceConflicts(tags: string[]): { value: string[]; removed: string[] } {
+  let winner: string | null = null;
+  for (const tag of tags) {
+    if (HOME_AMBIANCE_CONFLICTS[tag]) winner = tag;
+  }
+  if (!winner) return { value: tags, removed: [] };
+  const losers = new Set(HOME_AMBIANCE_CONFLICTS[winner]);
+  const removed = tags.filter((t) => losers.has(t));
+  if (removed.length === 0) return { value: tags, removed: [] };
+  return { value: tags.filter((t) => !losers.has(t)), removed };
+}
+
 
