@@ -103,3 +103,11 @@ Un gardien déclarant « NAC » couvre les espèces owner `rodent`, `reptile`, `
 - `HOME_AMBIANCE_CONFLICTS` + `resolveAmbianceConflicts` dans `profileMatchingOptions.ts` : « Sportif outdoor » exclusif avec « Calme et posé » et « Cocon casanier ». Dernier choix gagne, toast explicite. Câblé dans `OwnerStepRules` et `OnboardingAffinity` (les deux groupes, scoré et descriptif).
 - Le moteur (`evalAmbiance`) ne change pas : correction au formulaire, pas au calcul.
 - Nettoyage base : 10 profils contradictoires, règle « dernier tag déclaré gagne », sauvegarde `_backup_home_ambiance_20260823` (10 lignes, old/new). Piège rencontré : un `array_agg` sans `FILTER (WHERE NOT is_removed)` réécrit les tags retirés ; vérifier le résultat ligne à ligne après toute migration de données.
+
+## « Campagne » : lieu, pas tempo (décision du 23/08/2026)
+
+evalAmbiance ne lève plus anyBad pour « Campagne » face à un gardien calme : un gardien calme n'est pas incompatible avec une maison à la campagne. Chemin positif inchangé (gardien actif ou intérêt rural = match).
+
+Invariant verrouillé par `src/lib/__tests__/ambiance-engine-conflicts.test.ts` : l'ensemble des tags qui lèvent anyBad dans evalAmbiance (Cocon casanier, Calme et posé, Sportif outdoor) est strictement égal aux clés de HOME_AMBIANCE_CONFLICTS du formulaire. Une seule définition de ce qui se contredit, des deux côtés.
+
+Mesure au 23/08/2026 : 46 propriétaires « Campagne + tag calme », 94 gardiens calmes sans intérêt rural, 4 324 couples récupèrent une chip d'ambiance. 0 combinaison résiduelle bloquée par « Sportif outdoor » (migration du 23/08 effective).
