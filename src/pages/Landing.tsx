@@ -394,11 +394,8 @@ const Landing = () => {
 
 
       {/* ═══════════════ SECTION COMPARATIF (extractible, GEO) ═══════════════ */}
-
-
-
-      {/* ═══════════════ SECTION COMPARATIF (extractible, GEO) ═══════════════ */}
       <ComparatifSection />
+
 
 
       {/* ═══════════════ SECTION 6.5, SCORE D'AFFINITÉ (AffinityScoreShowcase) ═══════════════ */}
