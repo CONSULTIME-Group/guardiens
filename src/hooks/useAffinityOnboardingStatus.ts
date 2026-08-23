@@ -87,12 +87,13 @@ export function useAffinityOnboardingStatus(): AffinityOnboardingStatus {
     loading: !!user,
     needsSitter: false,
     needsOwner: false,
+    needsPostal: false,
     profileCreatedAt: null as string | null,
   });
 
   const refresh = async () => {
     if (!user) {
-      setState({ loading: false, needsSitter: false, needsOwner: false, profileCreatedAt: null });
+      setState({ loading: false, needsSitter: false, needsOwner: false, needsPostal: false, profileCreatedAt: null });
       return;
     }
     const s = await loadStatus(user.id, role);
@@ -102,20 +103,20 @@ export function useAffinityOnboardingStatus(): AffinityOnboardingStatus {
   useEffect(() => {
     let cancelled = false;
     if (!user) {
-      setState({ loading: false, needsSitter: false, needsOwner: false, profileCreatedAt: null });
+      setState({ loading: false, needsSitter: false, needsOwner: false, needsPostal: false, profileCreatedAt: null });
       return;
     }
     setState((prev) => ({ ...prev, loading: true }));
     loadStatus(user.id, role)
       .then((s) => { if (!cancelled) setState({ loading: false, ...s }); })
-      .catch(() => { if (!cancelled) setState({ loading: false, needsSitter: false, needsOwner: false, profileCreatedAt: null }); });
+      .catch(() => { if (!cancelled) setState({ loading: false, needsSitter: false, needsOwner: false, needsPostal: false, profileCreatedAt: null }); });
     return () => { cancelled = true; };
   }, [user, role]);
 
   return {
     ...state,
     role,
-    needsOnboarding: state.needsSitter || state.needsOwner,
+    needsOnboarding: state.needsSitter || state.needsOwner || state.needsPostal,
     refresh,
   };
 }
