@@ -150,7 +150,7 @@ const AffinityBadge = ({
     variant === "semantic"
       ? `${label} (${shown}% d'affinité), voir le détail`
       : result.scoreReliable
-        ? `Affinité ${shown}% (${result.total} critères sur 8 comparés), voir le détail`
+        ? `Affinité ${shown}% (${result.total} critère${result.total > 1 ? "s" : ""} comparé${result.total > 1 ? "s" : ""}), voir le détail`
         : `Affinité en cours d'estimation (${result.total} critères comparés), voir le détail`;
 
   // Fiabilité cosmétique : « partiel » si le chiffre n'est pas affichable,
