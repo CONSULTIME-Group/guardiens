@@ -39,7 +39,7 @@ const SITTER_FULL = {
   sitter_type: "Retraité·e voyageur·euse",
   animal_types: ["cat", "dog"],
   has_vehicle: true,
-  experience_years: 5,
+  experience_years: "5 ans et plus",
   special_animal_skills: ["Soins"],
   travels_with_children: false,
   travels_with_own_animals: false,
