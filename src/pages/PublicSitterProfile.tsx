@@ -298,8 +298,8 @@ export default function PublicSitterProfile() {
       <div>
         <h3 className="text-sm font-semibold text-foreground font-body mb-2.5">Zone d'intervention</h3>
         <p className="text-sm text-foreground/70 font-body">
-          {props.vehicleLabel
-            ? `${props.vehicleLabel}${props.radius ? `, peut intervenir jusqu'à ${props.radius} km${props.city ? ` autour de ${props.city}` : ''}` : ''}`
+          {props.mobilityLabel
+            ? `${props.mobilityLabel}${props.radius ? `, jusqu'à ${props.radius} km${props.city ? ` autour de ${props.city}` : ''}` : ''}`
             : props.radius
               ? `Jusqu'à ${props.radius} km${props.city ? ` autour de ${props.city}` : ''}`
               : 'Zone d\'intervention non précisée'}
@@ -315,13 +315,26 @@ export default function PublicSitterProfile() {
           </div>
         </div>
       )}
-      {props.lifestyle.length > 0 && (
+      {props.specialSkills.length > 0 && (
+        <div>
+          <h3 className="text-sm font-semibold text-foreground font-body mb-2.5">Soins spécifiques</h3>
+          <div className="flex flex-wrap gap-1.5">
+            {props.specialSkills.map(c => (
+              <span key={c} className="border border-border bg-card rounded-full text-xs px-2.5 py-1 text-foreground/80 font-body">{c}</span>
+            ))}
+          </div>
+        </div>
+      )}
+      {(props.lifestyle.length > 0 || props.lifePace) && (
         <div>
           <h3 className="text-sm font-semibold text-foreground font-body mb-2.5">Style de vie</h3>
           <div className="flex flex-wrap gap-1.5">
             {props.lifestyle.map(l => (
               <span key={l} className="border border-border bg-card rounded-full text-xs px-2.5 py-1 text-foreground font-body">{l}</span>
             ))}
+            {props.lifestyle.length === 0 && props.lifePace && (
+              <span className="border border-border bg-card rounded-full text-xs px-2.5 py-1 text-foreground font-body">{props.lifePace}</span>
+            )}
           </div>
         </div>
       )}
@@ -335,11 +348,33 @@ export default function PublicSitterProfile() {
           </div>
         </div>
       )}
-      {(props.typeLine || props.durationLabel || props.frequencyLabel || props.noticeLabel) && (
+      {props.languages.length > 0 && (
+        <div>
+          <h3 className="text-sm font-semibold text-foreground font-body mb-2.5">Langues parlées</h3>
+          <div className="flex flex-wrap gap-1.5">
+            {props.languages.map(l => (
+              <span key={l} className="border border-border bg-card rounded-full text-xs px-2.5 py-1 text-foreground font-body">{l}</span>
+            ))}
+          </div>
+        </div>
+      )}
+      {props.interests.length > 0 && (
+        <div>
+          <h3 className="text-sm font-semibold text-foreground font-body mb-2.5">Centres d'intérêt</h3>
+          <div className="flex flex-wrap gap-1.5">
+            {props.interests.map(i => (
+              <span key={i} className="border border-border bg-card rounded-full text-xs px-2.5 py-1 text-foreground font-body">{i}</span>
+            ))}
+          </div>
+        </div>
+      )}
+      {(props.typeLine || props.presenceLabel || props.experienceLabel || props.durationLabel || props.frequencyLabel || props.noticeLabel) && (
         <div>
           <h3 className="text-sm font-semibold text-foreground font-body mb-2.5">Profil &amp; disponibilité</h3>
           <div className="text-sm text-foreground/70 font-body space-y-0.5">
             {props.typeLine && <p>{props.typeLine}</p>}
+            {props.presenceLabel && <p>{props.presenceLabel}</p>}
+            {props.experienceLabel && <p>Expérience : {props.experienceLabel}</p>}
             {props.durationLabel && <p>{props.durationLabel}</p>}
             {props.frequencyLabel && <p>{props.frequencyLabel}</p>}
             {props.noticeLabel && <p>{props.noticeLabel}</p>}
