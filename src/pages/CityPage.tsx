@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import ReactMarkdown from "react-markdown";
 import { useParams, Link } from "react-router-dom";
 import NotFound from "@/pages/NotFound";
@@ -41,6 +41,8 @@ import PageBreadcrumb from "@/components/seo/PageBreadcrumb";
 import CityHero, { CITY_HERO_IMAGES } from "@/components/city/CityHero";
 import CitySittersGrid from "@/components/city/CitySittersGrid";
 import { useAlmaCulturalFact } from "@/hooks/useAlmaCulturalFact";
+import { buildNearbyMention } from "@/lib/cityProximity";
+import { trackEvent } from "@/lib/analytics";
 
 const CityPage = () => {
  const { slug } = useParams<{ slug: string }>();
@@ -138,9 +140,65 @@ const CityPage = () => {
     },
   });
 
+  // Compteurs de la ligne SEO pour les pages statiques (la version DB les
+  // lit déjà dans dbPage). Sert à la mention de proximité et au tracking.
+  const { data: seoCounts } = useQuery<{
+    sitter_count: number | null;
+    nearby_sitter_count: number | null;
+  } | null>({
+    queryKey: ["city-seo-counts", slug],
+    enabled: !!cityData && !!slug,
+    staleTime: 5 * 60 * 1000,
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("seo_city_pages" as any)
+        .select("sitter_count, nearby_sitter_count")
+        .eq("slug", slug)
+        .eq("published", true)
+        .maybeSingle();
+      return (data as any) ?? null;
+    },
+  });
+
+  // Instrumentation : mesure si les pages complétées par la proximité
+  // convertissent mieux. residents = habitants de la commune, proximite =
+  // gardiens qui interviennent sans y habiter. Tir unique par slug.
+  const cityTrackedRef = useRef<string | null>(null);
+  useEffect(() => {
+    if (!slug || cityTrackedRef.current === slug) return;
+    if (cityData) {
+      if (seoCounts === undefined) return; // requête encore en cours
+      cityTrackedRef.current = slug;
+      void trackEvent("city_page_viewed", {
+        source: `/house-sitting/${slug}`,
+        metadata: {
+          slug,
+          residents: seoCounts?.sitter_count ?? 0,
+          proximite: seoCounts?.nearby_sitter_count ?? 0,
+        },
+      });
+      return;
+    }
+    if (dbLoading || !dbPage) return;
+    cityTrackedRef.current = slug;
+    void trackEvent("city_page_viewed", {
+      source: `/house-sitting/${slug}`,
+      metadata: {
+        slug,
+        residents: dbPage.sitter_count ?? 0,
+        proximite: dbPage.nearby_sitter_count ?? 0,
+      },
+    });
+  }, [slug, cityData, seoCounts, dbLoading, dbPage]);
+
  // ── STATIC CITY DATA PATH ──
  if (cityData) {
  const content = getCityContent(cityData.slug);
+ const staticNearbyMention = buildNearbyMention(
+   cityData.name,
+   seoCounts?.sitter_count ?? 0,
+   seoCounts?.nearby_sitter_count ?? 0
+ );
 
  const faqItems = cityData.slug === "lyon"
  ? [
@@ -212,9 +270,14 @@ const CityPage = () => {
  <p className="text-lg text-muted-foreground max-w-3xl leading-relaxed mb-6">
  {stats.guardiansCount > 0
  ? `${stats.guardiansCount} gardien${stats.guardiansCount > 1 ? "s" : ""} inscrit${stats.guardiansCount > 1 ? "s" : ""} en ${cityData.department}`
- : `Gardiens inscrits en ${cityData.department}`}
- {" · Gratuit pour les propriétaires"}
- </p>
+  : `Gardiens inscrits en ${cityData.department}`}
+  {" · Gratuit pour les propriétaires"}
+  </p>
+  {staticNearbyMention && (
+  <p className="text-muted-foreground max-w-3xl leading-relaxed mb-6 -mt-3">
+  {staticNearbyMention}
+  </p>
+  )}
 
  <div className="flex flex-wrap gap-3 mb-8">
  <Badge variant="secondary" className="text-sm px-4 py-2 gap-2">
@@ -357,6 +420,8 @@ const CityPage = () => {
           city={cityData.name}
           citySlug={cityData.slug}
           departmentCode={cityData.departmentCode}
+          cityLat={cityData.coordinates.lat}
+          cityLng={cityData.coordinates.lng}
         />
 
  {/* Network */}
@@ -484,7 +549,14 @@ const CityPage = () => {
  }
 
   // Render DB-based page (simplified legacy)
-  const dbNoindex = dbPage.noindex === true;
+   const dbNoindex = dbPage.noindex === true;
+   // Mention de proximité sous le compteur. nearby_sitter_count ne sert
+   // qu'à l'affichage et au tracking, jamais au noindex.
+   const dbNearbyMention = buildNearbyMention(
+     dbPage.city,
+     dbPage.sitter_count ?? 0,
+     dbPage.nearby_sitter_count ?? 0
+   );
   const dbFaqItems = [
     {
       q: `Comment trouver un gardien de maison à ${dbPage.city} ?`,
@@ -625,6 +697,9 @@ const CityPage = () => {
               Inscription sans carte bancaire
             </Badge>
           </div>
+          {dbNearbyMention && (
+            <p className="text-muted-foreground mb-8 -mt-4">{dbNearbyMention}</p>
+          )}
  <div className="flex flex-col sm:flex-row gap-3">
  <Link to="/inscription">
  <Button size="lg" className="gap-2">
@@ -655,6 +730,8 @@ const CityPage = () => {
           city={dbPage.city}
           citySlug={dbPage.slug}
           departmentCode={dbDepartmentCode}
+          cityLat={dbPage.latitude ?? null}
+          cityLng={dbPage.longitude ?? null}
         />
 
         <NearbyCityLinks department={dbPage.department} currentSlug={dbPage.slug} />

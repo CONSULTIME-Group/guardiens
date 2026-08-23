@@ -8,6 +8,7 @@ import { getDeviceContext } from "@/lib/deviceContext";
 
 export type EventType =
   | "page_view"
+  | "city_page_viewed"                        // Vue page ville SEO (slug, residents, proximite)
   | "signup_started"
   | "signup_role_selected"
   | "signup_form_submitted"
