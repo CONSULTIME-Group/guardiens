@@ -7282,11 +7282,17 @@ export type Database = {
         Row: {
           accompanied_by: string | null
           animal_types: string[] | null
+          availability_during: string | null
           competences: string[] | null
+          experience_years: string | null
           farm_animals_ok: boolean | null
           geographic_radius: number | null
+          has_license: boolean | null
           has_vehicle: boolean | null
+          interests: string[] | null
           is_available: boolean | null
+          languages: string[] | null
+          life_pace: string | null
           lifestyle: string[] | null
           min_notice: string | null
           min_stay_duration: string | null
@@ -7296,10 +7302,11 @@ export type Database = {
           preferred_frequency: string | null
           reply_median_minutes: number | null
           sitter_type: string | null
+          special_animal_skills: string[] | null
           travels_with_children: boolean | null
           travels_with_own_animals: boolean | null
           user_id: string | null
-          vehicle_type: string | null
+          work_during_sit: string | null
         }
         Relationships: [
           {

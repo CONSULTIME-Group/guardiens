@@ -111,3 +111,6 @@ evalAmbiance ne lève plus anyBad pour « Campagne » face à un gardien calme :
 Invariant verrouillé par `src/lib/__tests__/ambiance-engine-conflicts.test.ts` : l'ensemble des tags qui lèvent anyBad dans evalAmbiance (Cocon casanier, Calme et posé, Sportif outdoor) est strictement égal aux clés de HOME_AMBIANCE_CONFLICTS du formulaire. Une seule définition de ce qui se contredit, des deux côtés.
 
 Mesure au 23/08/2026 : 46 propriétaires « Campagne + tag calme », 94 gardiens calmes sans intérêt rural, 4 324 couples récupèrent une chip d'ambiance. 0 combinaison résiduelle bloquée par « Sportif outdoor » (migration du 23/08 effective).
+
+## Symétrie fiches publiques / moteur (23/08/2026)
+La fiche publique expose TOUT ce que le moteur score, des deux côtés. Vue `public_sitter_profiles` élargie : work_during_sit, availability_during, experience_years, languages, interests, life_pace, has_license, special_animal_skills. `vehicle_type` retiré de la vue, du formulaire (StepMobility) et de la fiche : champ mort (3/1037, jamais scoré), colonne DB conservée (règle 17). `sensitivities` jamais exposé (donnée de santé, frein moteur suffit). Registres dans vocab.ts : ENGINE_NOT_PUBLIC_FIELDS, SITTER/OWNER_PUBLIC_DESCRIPTIVE_COLUMNS. Verrou build : src/lib/__tests__/public-views-affinity-symmetry.test.ts (bidirectionnel, basé sur types.ts régénéré).

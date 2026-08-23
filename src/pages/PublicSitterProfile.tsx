@@ -43,11 +43,11 @@ import { sanitizeBioForPublic } from "@/lib/sanitizeBio";
 import { publishableMotivation } from "@/lib/motivation";
 import {
   mobilityPublicLabel,
-  VEHICLE_OPTIONS,
   MIN_STAY_DURATION_OPTIONS,
   FREQUENCY_OPTIONS,
   NOTICE_OPTIONS,
 } from "@/lib/mobilityOptions";
+import { WORK_DURING_SIT_OPTIONS } from "@/lib/profileMatchingOptions";
 import { isSitterProfileIndexable } from "@/lib/sitterProfileIndexability";
 import {
   buildProfileLightboxItems,
@@ -254,9 +254,11 @@ export default function PublicSitterProfile() {
   );
 
   const PracticalGrid = (props: {
-    animalTypes: string[]; sitterProfile: any; hasVehicle: boolean; radius: number | null; city: string | null;
-    competences: string[]; lifestyle: string[]; preferredEnvironments: string[];
-    typeLine: string; durationLabel: string; frequencyLabel: string; noticeLabel: string; vehicleLabel: string;
+    animalTypes: string[]; sitterProfile: any; radius: number | null; city: string | null;
+    competences: string[]; specialSkills: string[]; lifestyle: string[]; lifePace: string;
+    preferredEnvironments: string[]; languages: string[]; interests: string[];
+    typeLine: string; durationLabel: string; frequencyLabel: string; noticeLabel: string;
+    mobilityLabel: string; presenceLabel: string; experienceLabel: string;
   }) => (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
       {props.animalTypes.length > 0 && (
@@ -296,8 +298,8 @@ export default function PublicSitterProfile() {
       <div>
         <h3 className="text-sm font-semibold text-foreground font-body mb-2.5">Zone d'intervention</h3>
         <p className="text-sm text-foreground/70 font-body">
-          {props.vehicleLabel
-            ? `${props.vehicleLabel}${props.radius ? `, peut intervenir jusqu'à ${props.radius} km${props.city ? ` autour de ${props.city}` : ''}` : ''}`
+          {props.mobilityLabel
+            ? `${props.mobilityLabel}${props.radius ? `, jusqu'à ${props.radius} km${props.city ? ` autour de ${props.city}` : ''}` : ''}`
             : props.radius
               ? `Jusqu'à ${props.radius} km${props.city ? ` autour de ${props.city}` : ''}`
               : 'Zone d\'intervention non précisée'}
@@ -313,13 +315,26 @@ export default function PublicSitterProfile() {
           </div>
         </div>
       )}
-      {props.lifestyle.length > 0 && (
+      {props.specialSkills.length > 0 && (
+        <div>
+          <h3 className="text-sm font-semibold text-foreground font-body mb-2.5">Soins spécifiques</h3>
+          <div className="flex flex-wrap gap-1.5">
+            {props.specialSkills.map(c => (
+              <span key={c} className="border border-border bg-card rounded-full text-xs px-2.5 py-1 text-foreground/80 font-body">{c}</span>
+            ))}
+          </div>
+        </div>
+      )}
+      {(props.lifestyle.length > 0 || props.lifePace) && (
         <div>
           <h3 className="text-sm font-semibold text-foreground font-body mb-2.5">Style de vie</h3>
           <div className="flex flex-wrap gap-1.5">
             {props.lifestyle.map(l => (
               <span key={l} className="border border-border bg-card rounded-full text-xs px-2.5 py-1 text-foreground font-body">{l}</span>
             ))}
+            {props.lifestyle.length === 0 && props.lifePace && (
+              <span className="border border-border bg-card rounded-full text-xs px-2.5 py-1 text-foreground font-body">{props.lifePace}</span>
+            )}
           </div>
         </div>
       )}
@@ -333,11 +348,33 @@ export default function PublicSitterProfile() {
           </div>
         </div>
       )}
-      {(props.typeLine || props.durationLabel || props.frequencyLabel || props.noticeLabel) && (
+      {props.languages.length > 0 && (
+        <div>
+          <h3 className="text-sm font-semibold text-foreground font-body mb-2.5">Langues parlées</h3>
+          <div className="flex flex-wrap gap-1.5">
+            {props.languages.map(l => (
+              <span key={l} className="border border-border bg-card rounded-full text-xs px-2.5 py-1 text-foreground font-body">{l}</span>
+            ))}
+          </div>
+        </div>
+      )}
+      {props.interests.length > 0 && (
+        <div>
+          <h3 className="text-sm font-semibold text-foreground font-body mb-2.5">Centres d'intérêt</h3>
+          <div className="flex flex-wrap gap-1.5">
+            {props.interests.map(i => (
+              <span key={i} className="border border-border bg-card rounded-full text-xs px-2.5 py-1 text-foreground font-body">{i}</span>
+            ))}
+          </div>
+        </div>
+      )}
+      {(props.typeLine || props.presenceLabel || props.experienceLabel || props.durationLabel || props.frequencyLabel || props.noticeLabel) && (
         <div>
           <h3 className="text-sm font-semibold text-foreground font-body mb-2.5">Profil &amp; disponibilité</h3>
           <div className="text-sm text-foreground/70 font-body space-y-0.5">
             {props.typeLine && <p>{props.typeLine}</p>}
+            {props.presenceLabel && <p>{props.presenceLabel}</p>}
+            {props.experienceLabel && <p>Expérience : {props.experienceLabel}</p>}
             {props.durationLabel && <p>{props.durationLabel}</p>}
             {props.frequencyLabel && <p>{props.frequencyLabel}</p>}
             {props.noticeLabel && <p>{props.noticeLabel}</p>}
@@ -458,9 +495,10 @@ export default function PublicSitterProfile() {
       const BASE_PROFILE_COLS =
         "id, first_name, avatar_url, bio, city, postal_code, created_at, identity_verified, is_founder, profile_completion, completed_sits_count, cancellation_count, hero_image_index";
 
-      // Vue publique réduite : 19 colonnes d'affichage, sans donnée d'affinité.
+      // Vue publique : alignée sur les entrées scorées du moteur (symétrie
+      // du 23/08/2026), sauf sensitivities (donnée de santé, jamais exposée).
       const PUBLIC_SITTER_COLS =
-        "user_id, motivation, sitter_type, accompanied_by, lifestyle, animal_types, has_vehicle, vehicle_type, geographic_radius, min_stay_duration, is_available, competences, preferred_frequency, min_notice, preferred_environments, farm_animals_ok, own_animals, reply_median_minutes, travels_with_children, travels_with_own_animals";
+        "user_id, motivation, sitter_type, accompanied_by, lifestyle, animal_types, has_vehicle, has_license, geographic_radius, min_stay_duration, is_available, competences, special_animal_skills, preferred_frequency, min_notice, preferred_environments, farm_animals_ok, own_animals, reply_median_minutes, travels_with_children, travels_with_own_animals, work_during_sit, availability_during, experience_years, languages, interests, life_pace";
       const [profileRes, baseProfileRes, sitterRes, badgesRes, reviewsRes, galleryRes, emergencyRes, subRes, ownerRes, missionsRes, extExpRes] =
         await Promise.all([
           supabase.from("public_profiles").select(PUBLIC_PROFILE_COLS).eq("id", id).maybeSingle(),
@@ -984,11 +1022,24 @@ export default function PublicSitterProfile() {
   const accompaniedBy = sitterProfile?.accompanied_by || "";
   const lifestyle: string[] = sitterProfile?.lifestyle || [];
   const minStayDuration: string = sitterProfile?.min_stay_duration || "";
-  const vehicleType: string = sitterProfile?.vehicle_type || "";
   const preferredEnvironments: string[] = sitterProfile?.preferred_environments || [];
   const competences: string[] = sitterProfile?.competences || [];
   const preferredFrequency: string = sitterProfile?.preferred_frequency || "";
   const minNotice: string = sitterProfile?.min_notice || "";
+  // Signaux scorés par le moteur, exposés sur la fiche (symétrie du 23/08/2026).
+  const specialSkills: string[] = (sitterProfile?.special_animal_skills || []).filter(Boolean);
+  const sitterLanguages: string[] = (sitterProfile?.languages || []).filter(Boolean);
+  const sitterInterests: string[] = (sitterProfile?.interests || []).filter(Boolean);
+  // life_pace est le repli de lifestyle dans le moteur : affiché seulement si
+  // lifestyle est vide, pour ne pas doubler l'information.
+  const lifePace: string = lifestyle.length === 0 ? (sitterProfile?.life_pace || "") : "";
+  const experienceLabel: string = sitterProfile?.experience_years || "";
+  // Présence pendant la garde : critère le plus lourd du moteur (poids 2),
+  // affiché avec le libellé exact du formulaire. Repli : availability_during.
+  const presenceLabel: string =
+    WORK_DURING_SIT_OPTIONS.find(o => o.value === sitterProfile?.work_during_sit)?.label
+    || sitterProfile?.availability_during
+    || "";
 
   const frequencyLabel = mobilityPublicLabel(FREQUENCY_OPTIONS, preferredFrequency);
   const noticeLabel = mobilityPublicLabel(NOTICE_OPTIONS, minNotice);
@@ -1073,7 +1124,12 @@ export default function PublicSitterProfile() {
   const typeLine = typeLineItems.length > 0 ? typeLineItems.join(" · ") : "";
 
   const durationLabel = mobilityPublicLabel(MIN_STAY_DURATION_OPTIONS, minStayDuration);
-  const vehicleLabel = mobilityPublicLabel(VEHICLE_OPTIONS, vehicleType);
+  // Mobilité : tri-état (doctrine règle 5), la nullité ne s'affiche pas.
+  const mobilityLabel = hasVehicle
+    ? "Se déplace avec son véhicule"
+    : sitterProfile?.has_license
+      ? "A le permis de conduire"
+      : "";
 
   // Stats line
   const statsItems: string[] = [];
@@ -1529,17 +1585,22 @@ export default function PublicSitterProfile() {
                 <PracticalGrid
                   animalTypes={animalTypes}
                   sitterProfile={sitterProfile}
-                  hasVehicle={hasVehicle}
                   radius={radius}
                   city={city}
                   competences={competences}
+                  specialSkills={specialSkills}
                   lifestyle={lifestyle}
+                  lifePace={lifePace}
                   preferredEnvironments={preferredEnvironments}
+                  languages={sitterLanguages}
+                  interests={sitterInterests}
                   typeLine={typeLine}
                   durationLabel={durationLabel}
                   frequencyLabel={frequencyLabel}
                   noticeLabel={noticeLabel}
-                  vehicleLabel={vehicleLabel}
+                  mobilityLabel={mobilityLabel}
+                  presenceLabel={presenceLabel}
+                  experienceLabel={experienceLabel}
                 />
                 <PublicExperiences experiences={externalExperiences} />
               </div>
