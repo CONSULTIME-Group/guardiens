@@ -45,6 +45,17 @@ const OwnerStepRules = ({ data, onChange }: Props) => {
   const smokerId = `${uid}-smoker`;
   const rulesNotesId = `${uid}-rules-notes`;
 
+  // Exclusivité des tags d'ambiance (23/08/2026) : le dernier choix
+  // l'emporte, les tags opposés sont retirés et signalés. Appliqué aux
+  // deux groupes car ils écrivent dans le même tableau home_ambiance.
+  const handleAmbianceChange = (v: string[]) => {
+    const r = resolveAmbianceConflicts(v);
+    if (r.removed.length > 0) {
+      toast.info(`« ${r.removed.join(" », « ")} » retiré${r.removed.length > 1 ? "s" : ""} : ambiance opposée à votre dernier choix.`);
+    }
+    onChange({ home_ambiance: r.value });
+  };
+
   return (
     <div className="space-y-6">
       <h2 className="font-heading text-2xl font-bold">Attentes & règles</h2>
