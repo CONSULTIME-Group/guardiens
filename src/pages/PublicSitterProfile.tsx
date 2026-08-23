@@ -1584,17 +1584,22 @@ export default function PublicSitterProfile() {
                 <PracticalGrid
                   animalTypes={animalTypes}
                   sitterProfile={sitterProfile}
-                  hasVehicle={hasVehicle}
                   radius={radius}
                   city={city}
                   competences={competences}
+                  specialSkills={specialSkills}
                   lifestyle={lifestyle}
+                  lifePace={lifePace}
                   preferredEnvironments={preferredEnvironments}
+                  languages={sitterLanguages}
+                  interests={sitterInterests}
                   typeLine={typeLine}
                   durationLabel={durationLabel}
                   frequencyLabel={frequencyLabel}
                   noticeLabel={noticeLabel}
-                  vehicleLabel={vehicleLabel}
+                  mobilityLabel={mobilityLabel}
+                  presenceLabel={presenceLabel}
+                  experienceLabel={experienceLabel}
                 />
                 <PublicExperiences experiences={externalExperiences} />
               </div>
