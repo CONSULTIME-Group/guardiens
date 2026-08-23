@@ -609,8 +609,8 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, prope
       const pb = isPending(b.status) ? 0 : 1;
       if (pa !== pb) return pa - pb;
       if (sortMode === "affinity") {
-        const sa = affinityByApp.get(a.id)?.sortScore ?? -1;
-        const sb = affinityByApp.get(b.id)?.sortScore ?? -1;
+        const sa = affinityByApp.get(a.id) ?? -1;
+        const sb = affinityByApp.get(b.id) ?? -1;
         if (sa !== sb) return sb - sa;
       } else if (sortMode === "rating") {
         const ra = a.avgRating ? parseFloat(a.avgRating) : -1;
@@ -639,9 +639,9 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, prope
     const receivedLabel = app.created_at
       ? `Reçue ${formatDistanceToNow(new Date(app.created_at), { addSuffix: true, locale: fr })}`
       : null;
-    // Couleur de la puce : le chiffre montré est le sortScore (le nombre
-    // exact rendu par OwnerToSitterAffinity juste en dessous).
-    const affinityScore = affinityByApp.get(app.id)?.sortScore;
+    // Couleur de la puce : score BRUT, le même nombre que celui rendu par
+    // OwnerToSitterAffinity juste en dessous (displayKey="score").
+    const affinityScore = affinityByApp.get(app.id);
     const affinityClass =
       typeof affinityScore === "number"
         ? affinityScore >= 70
