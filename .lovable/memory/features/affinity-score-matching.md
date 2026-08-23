@@ -97,3 +97,9 @@ Un gardien déclarant « NAC » couvre les espèces owner `rodent`, `reptile`, `
 - **Une chip par critère** : ambiance, intérêts et espèces agrègent leurs tags en une seule phrase (« Campagne, calme et cocooning, comme vous »).
 - **Distance, 9e critère, poids 1** : ≤ 30 km = 1 pt, ≤ 60 = 0,75, ≤ 100 = 0,5, au-delà = 0,25. `distance_km` sur `AffinityOwnerInput` (11 champs), calculée par couple, jamais stockée ; null = hors dénominateur. Câblée sur toutes les surfaces (parité verrouillée).
 - **Fusion malinois** : « malinois » absorbé par « berger belge malinois » (breedFicheMerges, sitemap, redirection /races/dog-malinois).
+
+## Exclusivité des tags d'ambiance (23/08/2026)
+
+- `HOME_AMBIANCE_CONFLICTS` + `resolveAmbianceConflicts` dans `profileMatchingOptions.ts` : « Sportif outdoor » exclusif avec « Calme et posé » et « Cocon casanier ». Dernier choix gagne, toast explicite. Câblé dans `OwnerStepRules` et `OnboardingAffinity` (les deux groupes, scoré et descriptif).
+- Le moteur (`evalAmbiance`) ne change pas : correction au formulaire, pas au calcul.
+- Nettoyage base : 10 profils contradictoires, règle « dernier tag déclaré gagne », sauvegarde `_backup_home_ambiance_20260823` (10 lignes, old/new). Piège rencontré : un `array_agg` sans `FILTER (WHERE NOT is_removed)` réécrit les tags retirés ; vérifier le résultat ligne à ligne après toute migration de données.
