@@ -138,6 +138,7 @@ const OnboardingAffinity = () => {
         role: user.role ?? null,
         needs_sitter: status.needsSitter,
         needs_owner: status.needsOwner,
+        needs_postal: status.needsPostal,
       },
     });
     void trackEvent("affinity_onboarding_started", {
@@ -147,9 +148,10 @@ const OnboardingAffinity = () => {
         profile_created_at: status.profileCreatedAt,
         needs_sitter: status.needsSitter,
         needs_owner: status.needsOwner,
+        needs_postal: status.needsPostal,
       },
     });
-  }, [flagLoading, flagEnabled, status.loading, status.needsSitter, status.needsOwner, status.needsOnboarding, status.profileCreatedAt, user]);
+  }, [flagLoading, flagEnabled, status.loading, status.needsSitter, status.needsOwner, status.needsPostal, status.needsOnboarding, status.profileCreatedAt, user]);
 
   // Abandon : émis AU PLUS UNE FOIS par session/monté du composant, si
   // l'utilisateur n'a pas complété. `reason` distingue le mode de sortie
@@ -174,6 +176,7 @@ const OnboardingAffinity = () => {
         role: chosenRole,
         needs_sitter: status.needsSitter,
         needs_owner: status.needsOwner,
+        needs_postal: status.needsPostal,
         user_id_hint: user?.id ?? null,
       },
     });
@@ -187,6 +190,9 @@ const OnboardingAffinity = () => {
         last_step_index: lastStepRef.current.index,
         last_step_name: lastStepRef.current.name,
         duration_seconds: duration,
+        needs_sitter: status.needsSitter,
+        needs_owner: status.needsOwner,
+        needs_postal: status.needsPostal,
         user_id_hint: user?.id ?? null,
       },
     });
@@ -226,6 +232,7 @@ const OnboardingAffinity = () => {
   // sinon un profil dont l'affinité est déjà complète serait bloqué sans
   // aucun champ à remplir (blocage muet interdit).
   const showSharedBlock = showSitterBlock || showOwnerBlock || needsPostal;
+  const showAffinityFields = showSitterBlock || showOwnerBlock;
 
   const missingFields = useMemo(() => {
     const missing: string[] = [];
@@ -385,9 +392,15 @@ const OnboardingAffinity = () => {
         <Card>
           <CardHeader className="space-y-2">
             <CardTitle className="font-heading text-2xl">Une dernière étape avant de commencer</CardTitle>
-            <p className="text-sm text-muted-foreground">
-              Ces informations nous servent uniquement à calculer votre score d'affinité et à vous proposer les meilleures correspondances. Aucune saisie libre, moins d'une minute.
-            </p>
+            {showAffinityFields ? (
+              <p className="text-sm text-muted-foreground">
+                Ces informations nous servent uniquement à calculer votre score d'affinité et à vous proposer les meilleures correspondances. Aucune saisie libre, moins d'une minute.
+              </p>
+            ) : (
+              <p className="text-sm text-muted-foreground">
+                Il nous manque une seule information pour vous proposer des gardiens et des annonces près de chez vous. Dix secondes.
+              </p>
+            )}
           </CardHeader>
           <CardContent className="space-y-8">
             {askRole && !chosenRole && (
