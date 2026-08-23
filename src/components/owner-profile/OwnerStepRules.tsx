@@ -1,4 +1,5 @@
 import { useId } from "react";
+import { toast } from "sonner";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
@@ -8,7 +9,7 @@ import RadioChipGroup from "../profile/RadioChipGroup";
 import HintBubble from "../profile/HintBubble";
 import AiSuggestButton from "../profile/AiSuggestButton";
 import type { OwnerProfileData } from "@/hooks/useOwnerProfile";
-import { IDEAL_SITTER_SCORED_OPTIONS, IDEAL_SITTER_DESCRIPTIVE_OPTIONS, HOME_AMBIANCE_SCORED_OPTIONS, HOME_AMBIANCE_ENVIRONMENT_OPTIONS, PRESENCE_EXPECTED_OPTIONS } from "@/lib/profileMatchingOptions";
+import { IDEAL_SITTER_SCORED_OPTIONS, IDEAL_SITTER_DESCRIPTIVE_OPTIONS, HOME_AMBIANCE_SCORED_OPTIONS, HOME_AMBIANCE_ENVIRONMENT_OPTIONS, PRESENCE_EXPECTED_OPTIONS, resolveAmbianceConflicts } from "@/lib/profileMatchingOptions";
 import MatchingExplainer from "@/components/matching/MatchingExplainer";
 
 const SITTER_TYPES = IDEAL_SITTER_SCORED_OPTIONS;
