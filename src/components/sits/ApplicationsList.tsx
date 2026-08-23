@@ -572,11 +572,12 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, prope
   const rawActive = applications.filter(a => !["rejected", "cancelled"].includes(a.status));
   const declinedApps = applications.filter(a => ["rejected", "cancelled"].includes(a.status));
 
-  // Précalcul du score d'affinité par candidat : classement ET affichage
-  // utilisent le score pondéré par la confiance (sortScore, alignement
-  // chiffre/tri du 23/08/2026) ; le brut reste calculé par le moteur.
+  // Précalcul du score d'affinité par candidat : tri, puce colorée ET
+  // chiffre affiché utilisent le score BRUT (décision du 23/08/2026,
+  // surface CANDIDATURES : 53 candidatures au total, 2,5 par annonce, le
+  // chiffre sert à oser dire oui, pas à départager un classement).
   const affinityByApp = useMemo(() => {
-    const map = new Map<string, { score: number; sortScore: number }>();
+    const map = new Map<string, number>();
     if (!viewerOwner) return map;
     const ownerWithSit: AffinityOwnerInput = {
       ...(viewerOwner as AffinityOwnerInput),
@@ -589,7 +590,7 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, prope
       // entre toujours dans le tri ; seul l'affichage du chiffre dépend de
       // `scoreReliable` côté badge.
       const res = computeAffinityResultFull(ownerWithSit, app.sitterAffinityInput);
-      map.set(app.id, { score: res.score, sortScore: res.sortScore });
+      map.set(app.id, res.score);
     });
     return map;
   }, [rawActive, viewerOwner, sitContext.accepts_sitter_pets, sitContext.accepts_sitter_children]);

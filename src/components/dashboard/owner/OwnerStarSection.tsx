@@ -364,8 +364,8 @@ const ApplicationsStar = ({
         input,
       );
       if (r.hasDeclaredIncompatibility && pendingApps.length > 1) continue;
-      if (r.sortScore > bestScore) {
-        bestScore = r.sortScore;
+      if (r.score > bestScore) {
+        bestScore = r.score;
         featured = app;
         featuredAffinity = r;
         featuredInput = input;
