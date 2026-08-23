@@ -40,6 +40,7 @@ import {
   LANGUAGE_OPTIONS,
   HOME_AMBIANCE_SCORED_OPTIONS,
   HOME_AMBIANCE_ENVIRONMENT_OPTIONS,
+  resolveAmbianceConflicts,
 } from "@/lib/profileMatchingOptions";
 
 type Role = "owner" | "sitter" | "both";
@@ -69,6 +70,17 @@ const OnboardingAffinity = () => {
   const [presenceExpected, setPresenceExpected] = useState<string>("");
   const [preferredSitterTypes, setPreferredSitterTypes] = useState<string[]>([]);
   const [homeAmbiance, setHomeAmbiance] = useState<string[]>([]);
+
+  // Exclusivité des tags d'ambiance (23/08/2026) : le dernier choix
+  // l'emporte, les tags opposés sont retirés et signalés. Appliqué aux
+  // deux groupes car ils écrivent dans le même tableau home_ambiance.
+  const handleAmbianceChange = (v: string[]) => {
+    const r = resolveAmbianceConflicts(v);
+    if (r.removed.length > 0) {
+      toast.info(`« ${r.removed.join(" », « ")} » retiré${r.removed.length > 1 ? "s" : ""} : ambiance opposée à votre dernier choix.`);
+    }
+    setHomeAmbiance(r.value);
+  };
   // Champs partagés (persistés sur sitter_profiles ET owner_profiles selon les rôles actifs).
   const [lifePace, setLifePace] = useState<string>("");
   const [interests, setInterests] = useState<string[]>([]);
@@ -448,10 +460,13 @@ const OnboardingAffinity = () => {
 
                 <div className="space-y-2">
                   <Label id="lbl-ambiance">Comment décririez-vous l'ambiance chez vous ?</Label>
+                  <p className="text-xs text-muted-foreground">
+                    « Sportif outdoor » est exclusif avec « Calme et posé » et « Cocon casanier ».
+                  </p>
                   <ChipSelect
                     options={HOME_AMBIANCE_SCORED_OPTIONS}
                     selected={homeAmbiance}
-                    onChange={setHomeAmbiance}
+                    onChange={handleAmbianceChange}
                     ariaLabelledBy="lbl-ambiance"
                   />
                 </div>
@@ -464,7 +479,7 @@ const OnboardingAffinity = () => {
                   <ChipSelect
                     options={HOME_AMBIANCE_ENVIRONMENT_OPTIONS}
                     selected={homeAmbiance}
-                    onChange={setHomeAmbiance}
+                    onChange={handleAmbianceChange}
                     ariaLabelledBy="lbl-environment"
                   />
                 </div>

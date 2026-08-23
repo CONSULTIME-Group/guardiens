@@ -1,4 +1,5 @@
 import { useId } from "react";
+import { toast } from "sonner";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
@@ -8,7 +9,7 @@ import RadioChipGroup from "../profile/RadioChipGroup";
 import HintBubble from "../profile/HintBubble";
 import AiSuggestButton from "../profile/AiSuggestButton";
 import type { OwnerProfileData } from "@/hooks/useOwnerProfile";
-import { IDEAL_SITTER_SCORED_OPTIONS, IDEAL_SITTER_DESCRIPTIVE_OPTIONS, HOME_AMBIANCE_SCORED_OPTIONS, HOME_AMBIANCE_ENVIRONMENT_OPTIONS, PRESENCE_EXPECTED_OPTIONS } from "@/lib/profileMatchingOptions";
+import { IDEAL_SITTER_SCORED_OPTIONS, IDEAL_SITTER_DESCRIPTIVE_OPTIONS, HOME_AMBIANCE_SCORED_OPTIONS, HOME_AMBIANCE_ENVIRONMENT_OPTIONS, PRESENCE_EXPECTED_OPTIONS, resolveAmbianceConflicts } from "@/lib/profileMatchingOptions";
 import MatchingExplainer from "@/components/matching/MatchingExplainer";
 
 const SITTER_TYPES = IDEAL_SITTER_SCORED_OPTIONS;
@@ -43,6 +44,17 @@ const OwnerStepRules = ({ data, onChange }: Props) => {
   const spacesId = `${uid}-spaces`;
   const smokerId = `${uid}-smoker`;
   const rulesNotesId = `${uid}-rules-notes`;
+
+  // Exclusivité des tags d'ambiance (23/08/2026) : le dernier choix
+  // l'emporte, les tags opposés sont retirés et signalés. Appliqué aux
+  // deux groupes car ils écrivent dans le même tableau home_ambiance.
+  const handleAmbianceChange = (v: string[]) => {
+    const r = resolveAmbianceConflicts(v);
+    if (r.removed.length > 0) {
+      toast.info(`« ${r.removed.join(" », « ")} » retiré${r.removed.length > 1 ? "s" : ""} : ambiance opposée à votre dernier choix.`);
+    }
+    onChange({ home_ambiance: r.value });
+  };
 
   return (
     <div className="space-y-6">
@@ -84,14 +96,14 @@ const OwnerStepRules = ({ data, onChange }: Props) => {
 
       <div className="space-y-2">
         <Label id={ambianceId}>Ambiance du foyer</Label>
-        <p className="text-xs text-muted-foreground">Contribue à votre score d'affinité avec les gardiens.</p>
-        <ChipSelect ariaLabelledBy={ambianceId} options={HOME_AMBIANCE_SCORED_OPTIONS} selected={data.home_ambiance} onChange={v => onChange({ home_ambiance: v })} />
+        <p className="text-xs text-muted-foreground">Contribue à votre score d'affinité avec les gardiens. « Sportif outdoor » est exclusif avec « Calme et posé » et « Cocon casanier ».</p>
+        <ChipSelect ariaLabelledBy={ambianceId} options={HOME_AMBIANCE_SCORED_OPTIONS} selected={data.home_ambiance} onChange={handleAmbianceChange} />
       </div>
 
       <div className="space-y-2">
         <Label id={environmentId}>Environnement</Label>
         <p className="text-xs text-muted-foreground">Pour que les gardiens se projettent : affiché sur votre fiche, sans effet sur le score d'affinité.</p>
-        <ChipSelect ariaLabelledBy={environmentId} options={HOME_AMBIANCE_ENVIRONMENT_OPTIONS} selected={data.home_ambiance} onChange={v => onChange({ home_ambiance: v })} />
+        <ChipSelect ariaLabelledBy={environmentId} options={HOME_AMBIANCE_ENVIRONMENT_OPTIONS} selected={data.home_ambiance} onChange={handleAmbianceChange} />
       </div>
 
       <div className="space-y-2">
