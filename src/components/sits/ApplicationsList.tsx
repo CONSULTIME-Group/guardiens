@@ -743,6 +743,7 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, prope
                   size="sm"
                   showCta={false}
                   scope="list"
+                  displayKey="score"
                 />
               </div>
             )}
