@@ -1,0 +1,1 @@
+ALTER TABLE public._backup_home_ambiance_20260823 ENABLE ROW LEVEL SECURITY;
