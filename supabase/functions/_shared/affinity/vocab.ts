@@ -145,6 +145,19 @@ export const PREF_SITTER_DESCRIPTIVE = ["Étudiant·e", "Indépendant·e"] as co
  */
 export const PREF_SITTER_NO_PREFERENCE = new Set(["sans preference", "no preference"]);
 
+// -------------------- Langues --------------------
+
+/**
+ * Français, clé normalisée via normalizeFreeText. Décision de Jérémie
+ * (23/08/2026) : le français ne rapporte plus de points au critère langues.
+ * Mesuré : 393/395 gardiens et 101/101 propriétaires le déclarent, le
+ * critère ne discriminiait rien et produisait une chip creuse
+ * (« Parle français, comme vous », interdite par la règle des libellés).
+ * Seule une langue SECONDAIRE partagée est valorisée. Question à rouvrir
+ * quand le produit sera international.
+ */
+export const LANGUAGE_FRENCH_NORMALIZED = "francais";
+
 // -------------------- Intérêts (sitter) --------------------
 
 /** Intérêts "sportif outdoor" utilisés par le matching d'ambiance. */
