@@ -116,6 +116,30 @@ export type Database = {
         }
         Relationships: []
       }
+      _backup_home_ambiance_20260823: {
+        Row: {
+          backed_up_at: string | null
+          new_home_ambiance: string[] | null
+          old_home_ambiance: string[] | null
+          tags_retires: number | null
+          user_id: string | null
+        }
+        Insert: {
+          backed_up_at?: string | null
+          new_home_ambiance?: string[] | null
+          old_home_ambiance?: string[] | null
+          tags_retires?: number | null
+          user_id?: string | null
+        }
+        Update: {
+          backed_up_at?: string | null
+          new_home_ambiance?: string[] | null
+          old_home_ambiance?: string[] | null
+          tags_retires?: number | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       _backup_property_photos_20260820: {
         Row: {
           backed_up_at: string
