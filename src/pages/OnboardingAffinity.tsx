@@ -460,10 +460,13 @@ const OnboardingAffinity = () => {
 
                 <div className="space-y-2">
                   <Label id="lbl-ambiance">Comment décririez-vous l'ambiance chez vous ?</Label>
+                  <p className="text-xs text-muted-foreground">
+                    « Sportif outdoor » est exclusif avec « Calme et posé » et « Cocon casanier ».
+                  </p>
                   <ChipSelect
                     options={HOME_AMBIANCE_SCORED_OPTIONS}
                     selected={homeAmbiance}
-                    onChange={setHomeAmbiance}
+                    onChange={handleAmbianceChange}
                     ariaLabelledBy="lbl-ambiance"
                   />
                 </div>
@@ -476,7 +479,7 @@ const OnboardingAffinity = () => {
                   <ChipSelect
                     options={HOME_AMBIANCE_ENVIRONMENT_OPTIONS}
                     selected={homeAmbiance}
-                    onChange={setHomeAmbiance}
+                    onChange={handleAmbianceChange}
                     ariaLabelledBy="lbl-environment"
                   />
                 </div>
