@@ -97,8 +97,8 @@ async function sendReminderEmail(params: {
     daysUntilStart = Math.round((start - todayUtc) / 86400000);
   }
   const isUrgent = daysUntilStart !== null && daysUntilStart <= 7;
-  // Cible réelle : l'annonce, ancre candidatures. /dashboard/candidatures/*
-  // n'existe pas dans le routeur (404 mesuré en production le 23/08/2026).
+  // Cible réelle : l'annonce, ancre candidatures. L'ancienne cible sous
+  // /dashboard n'existe pas dans le routeur (404 mesuré le 23/08/2026).
   const ctaUrl = `https://guardiens.fr/sits/${app.sit_id}#candidatures`;
 
   // Reponses en un clic depuis l'email (jetons a usage unique, 30 jours).
@@ -208,8 +208,8 @@ async function sendStalledDiscussionEmail(params: {
   if (sup) return { ok: false, outcome: "skipped", error: "suppressed" };
 
   const daysSince = Math.max(2, Math.floor(disc.hours_since_last_message / 24));
-  // Cible réelle : l'annonce, ancre candidatures. /dashboard/candidatures/*
-  // n'existe pas dans le routeur (404 mesuré en production le 23/08/2026).
+  // Cible réelle : l'annonce, ancre candidatures. L'ancienne cible sous
+  // /dashboard n'existe pas dans le routeur (404 mesuré le 23/08/2026).
   const ctaUrl = `https://guardiens.fr/sits/${disc.sit_id}#candidatures`;
 
   let declineUrl: string | undefined;
