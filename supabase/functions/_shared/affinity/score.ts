@@ -100,6 +100,7 @@ import {
   CATEGORIZED_DOG_BREEDS,
   SPECIAL_NEED_SIGNALS,
   normalizeFreeText,
+  LANGUAGE_FRENCH_NORMALIZED,
   canonicalAmbianceTag,
   PREF_SITTER_EXP_EXPERIENCED,
   PREF_SITTER_EXP_BEGINNER,
@@ -430,21 +431,34 @@ function evalAnimals(
   return { crit, blockedSensitivities };
 }
 
-const WORK_RANK: Record<string, number> = {
-  [WORK_ON_SITE]: 0,
-  [WORK_OUT_DAYTIME]: 1,
-  [WORK_PARTIAL_REMOTE]: 2,
-  [WORK_FLEXIBLE]: 3,
-  [WORK_FULL_REMOTE]: 4,
+/**
+ * Classement par DISPONIBILITÉ RÉELLE, lue dans le libellé français de
+ * `WORK_DURING_SIT_OPTIONS`, jamais dans le nom de variable. Piège corrigé
+ * le 23/08/2026 : « on_site » se lit en anglais comme « travaille sur site »
+ * (absent), alors que son libellé est « Sur place, congés ou retraite », le
+ * profil le PLUS présent de la plateforme (191 gardiens, 2e groupe le plus
+ * nombreux). L'inversion lui donnait 0/2 là où un gardien absent en journée
+ * obtenait 1/2. Verrou : src/lib/__tests__/presence-work-rank.test.ts, qui
+ * compare ce rang à la disponibilité décrite par chaque libellé.
+ */
+export const WORK_RANK: Record<string, number> = {
+  [WORK_OUT_DAYTIME]: 1, // « Absences en journée (travail extérieur) »
+  [WORK_PARTIAL_REMOTE]: 2, // « Télétravail partiel, quelques sorties »
+  [WORK_FLEXIBLE]: 3, // « Variable selon la garde »
+  [WORK_FULL_REMOTE]: 4, // « Télétravail 100 %, présent toute la journée »
+  [WORK_ON_SITE]: 4, // « Sur place, congés ou retraite » : présence maximale
 };
 
 /**
  * Critère véhicule (dur, opérationnel) : `properties.car_required` vaut true
  * sur 42 % des logements (39/92) et décide réellement de la faisabilité
  * d'une garde en zone isolée. Règle des booléens : true est une déclaration,
- * false est non renseigné (neutre). Donc : véhicule déclaré + voiture
- * requise = points ; rien de déclaré = pas de points, aucune pénalité,
- * aucun masquage, le gardien reste dans la liste, plus bas.
+ * false est non renseigné (neutre).
+ * Barème (décision de Jérémie, 23/08/2026) : véhicule déclaré = 2/2 avec la
+ * chip ; permis SEUL sans véhicule = 1/2 avec une phrase honnête en frein
+ * (17 gardiens mesurés, la chip « Véhiculé » était factuellement fausse pour
+ * eux puisque la voiture est nécessaire SUR PLACE) ; rien de déclaré = critère
+ * hors dénominateur (silence neutre), l'explication porte l'information.
  * `vehicle_type` est volontairement ignoré : renseigné sur 0 profil sur 1 029.
  */
 function evalVehicle(
@@ -452,25 +466,38 @@ function evalVehicle(
   sitter: AffinitySitterInput,
 ): { crit: CriterionEval | null; explanation: string[] } {
   if (owner.car_required !== true) return { crit: null, explanation: [] };
-  const declared = sitter.has_vehicle === true || sitter.has_license === true;
-  if (!declared) {
-    // Doctrine « le silence est neutre » (défaut 3, décision du 20/08/2026),
-    // aligné sur evalAnimals : rien de déclaré ⇒ le critère sort du
-    // dénominateur, AUCUNE pénalité. L'explication reste affichée, c'est
-    // elle qui porte l'information, pas le score.
+  if (sitter.has_vehicle === true) {
     return {
-      crit: null,
-      explanation: ["N'a pas déclaré de véhicule, alors qu'une voiture est nécessaire sur place"],
+      crit: {
+        weight: 2,
+        points: 2,
+        matched: ["Véhiculé, comme vous le souhaitez"],
+        explanation: [],
+      },
+      explanation: [],
     };
   }
-  return {
-    crit: {
-      weight: 2,
-      points: 2,
-      matched: ["Véhiculé, comme vous le souhaitez"],
+  if (sitter.has_license === true) {
+    // Demi-portion honnête : la phrase part dans les freins, JAMAIS en chip
+    // positive. Dire « Véhiculé » à un propriétaire dont la garde exige une
+    // voiture serait un mensonge produit.
+    return {
+      crit: {
+        weight: 2,
+        points: 1,
+        matched: [],
+        explanation: ["A le permis, sans véhicule déclaré"],
+      },
       explanation: [],
-    },
-    explanation: [],
+    };
+  }
+  // Doctrine « le silence est neutre » (défaut 3, décision du 20/08/2026),
+  // aligné sur evalAnimals : rien de déclaré ⇒ le critère sort du
+  // dénominateur, AUCUNE pénalité. L'explication reste affichée, c'est
+  // elle qui porte l'information, pas le score.
+  return {
+    crit: null,
+    explanation: ["N'a pas déclaré de véhicule, alors qu'une voiture est nécessaire sur place"],
   };
 }
 
@@ -498,12 +525,15 @@ function evalPresence(owner: AffinityOwnerInput, sitter: AffinitySitterInput): C
   // générique du type « présence compatible ».
   const presenceFact: Record<string, string> = {
     [WORK_FULL_REMOTE]: "Télétravaille, donc présent en journée",
+    [WORK_ON_SITE]: "Sur place toute la journée, en congés ou à la retraite",
     [WORK_PARTIAL_REMOTE]: "Télétravaille une partie de la semaine",
     [WORK_FLEXIBLE]: "En congés ou horaires flexibles pendant la garde",
   };
+  // « on_site » n'est PAS une absence : son libellé est « Sur place, congés
+  // ou retraite ». Ne jamais le remettre ici (inversion corrigée le
+  // 23/08/2026, verrou presence-work-rank.test.ts).
   const absenceFact: Record<string, string> = {
     [WORK_OUT_DAYTIME]: "Absent en journée, présent matin et soir",
-    [WORK_ON_SITE]: "Absent en journée, présent matin et soir",
   };
 
   let points = 0;
@@ -517,7 +547,9 @@ function evalPresence(owner: AffinityOwnerInput, sitter: AffinitySitterInput): C
       else { points = 0; explanation = absenceFact[work] ?? "Absent en journée"; }
       break;
     case PRESENCE_SHORT_ABSENCES:
-      if (work === WORK_FULL_REMOTE) { points = 2; matched = presenceFact[work]; }
+      // on_site (« Sur place, congés ou retraite ») est au niveau de
+      // full_remote : présence maximale, 2/2 dans les deux branches.
+      if (work === WORK_FULL_REMOTE || work === WORK_ON_SITE) { points = 2; matched = presenceFact[work]; }
       else if (work === WORK_PARTIAL_REMOTE || work === WORK_FLEXIBLE) { points = 1.5; matched = presenceFact[work]; }
       else if (work === WORK_OUT_DAYTIME) { points = 1; explanation = absenceFact[work]; }
       else { points = 0.5; explanation = absenceFact[work] ?? "Absent en journée"; }
@@ -662,18 +694,28 @@ function evalPace(owner: AffinityOwnerInput, sitter: AffinitySitterInput): Crite
   };
 }
 
+/**
+ * Critère langues. Décision de Jérémie (23/08/2026) : le français ne
+ * rapporte plus de points (déclaré par 99,5 % des gardiens et 100 % des
+ * propriétaires, il ne discriminiait rien et gonflait tous les scores).
+ * Seule une langue SECONDAIRE partagée est valorisée. Si l'intersection
+ * hors français est vide, le critère sort du dénominateur (null, neutre,
+ * jamais pénalisant) : deux francophones ne sont pas incompatibles, ils
+ * sont simplement non discriminés sur ce critère.
+ */
 function evalLanguages(owner: AffinityOwnerInput, sitter: AffinitySitterInput): CriterionEval | null {
   const o = toArray(owner.languages);
   const s = toArray(sitter.languages);
   if (o.length === 0 || s.length === 0) return null;
-  const inter = o.filter((l) => s.includes(l));
+  const inter = o.filter(
+    (l) => s.includes(l) && normalizeFreeText(l) !== LANGUAGE_FRENCH_NORMALIZED,
+  );
+  if (inter.length === 0) return null;
+  // « Parle espagnol, comme vous », jamais « Langue commune ».
   return {
     weight: 1,
-    points: inter.length > 0 ? 1 : 0,
-    // « Parle français, comme vous », jamais « Langue commune ».
-    matched: inter.length > 0
-      ? [`Parle ${joinFr(inter.map((l) => l.toLowerCase()))}, comme vous`]
-      : [],
+    points: 1,
+    matched: [`Parle ${joinFr(inter.map((l) => l.toLowerCase()))}, comme vous`],
     explanation: [],
   };
 }
@@ -865,7 +907,10 @@ function maxPossibleWeight(owner: AffinityOwnerInput): number {
   );
   if (scorablePrefs.length > 0) w += 1;
   if (owner.life_pace && (PACE_ORDER as readonly string[]).includes(owner.life_pace)) w += 1;
-  if (toArray(owner.languages).length > 0) w += 1;
+  // Langues : 1 uniquement si le propriétaire déclare une langue SECONDAIRE
+  // (miroir d'evalLanguages, décision du 23/08/2026 : le français seul ne
+  // peut jamais produire un critère évaluable, il ne gonfle pas la confiance).
+  if (toArray(owner.languages).some((l) => normalizeFreeText(l) !== LANGUAGE_FRENCH_NORMALIZED)) w += 1;
   if (toArray(owner.interests).length > 0) w += 1;
   if (toArray(owner.home_ambiance).map(canonicalAmbianceTag).some((t) => (HOME_AMBIANCE_SCORED_TAGS as readonly string[]).includes(t))) w += 1;
   // Besoins spéciaux : 1 si le texte des besoins matche un signal connu.
