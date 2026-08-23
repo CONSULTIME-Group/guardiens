@@ -289,14 +289,20 @@ const OnboardingAffinity = () => {
     try {
       // 1. Persist role if it changed, plus le code postal et le code
       // département dérivé (colonne vide sur 295 profils au 23/08/2026).
-      const profileUpdate: Record<string, string | null> = {};
-      if (user.role !== chosenRole) profileUpdate.role = chosenRole;
-      if (needsPostal) {
-        profileUpdate.postal_code = postalClean;
-        profileUpdate.departement_code = departmentCodeFromPostal(postalClean);
-      }
-      if (Object.keys(profileUpdate).length > 0) {
-        await supabase.from("profiles").update(profileUpdate).eq("id", user.id);
+      const roleChanged = user.role !== chosenRole;
+      if (roleChanged || needsPostal) {
+        await supabase
+          .from("profiles")
+          .update({
+            ...(roleChanged ? { role: chosenRole } : {}),
+            ...(needsPostal
+              ? {
+                  postal_code: postalClean,
+                  departement_code: departmentCodeFromPostal(postalClean),
+                }
+              : {}),
+          })
+          .eq("id", user.id);
       }
       // 2. Persist sitter fields
       if (showSitterBlock) {
