@@ -96,14 +96,14 @@ const OwnerStepRules = ({ data, onChange }: Props) => {
 
       <div className="space-y-2">
         <Label id={ambianceId}>Ambiance du foyer</Label>
-        <p className="text-xs text-muted-foreground">Contribue à votre score d'affinité avec les gardiens.</p>
-        <ChipSelect ariaLabelledBy={ambianceId} options={HOME_AMBIANCE_SCORED_OPTIONS} selected={data.home_ambiance} onChange={v => onChange({ home_ambiance: v })} />
+        <p className="text-xs text-muted-foreground">Contribue à votre score d'affinité avec les gardiens. « Sportif outdoor » est exclusif avec « Calme et posé » et « Cocon casanier ».</p>
+        <ChipSelect ariaLabelledBy={ambianceId} options={HOME_AMBIANCE_SCORED_OPTIONS} selected={data.home_ambiance} onChange={handleAmbianceChange} />
       </div>
 
       <div className="space-y-2">
         <Label id={environmentId}>Environnement</Label>
         <p className="text-xs text-muted-foreground">Pour que les gardiens se projettent : affiché sur votre fiche, sans effet sur le score d'affinité.</p>
-        <ChipSelect ariaLabelledBy={environmentId} options={HOME_AMBIANCE_ENVIRONMENT_OPTIONS} selected={data.home_ambiance} onChange={v => onChange({ home_ambiance: v })} />
+        <ChipSelect ariaLabelledBy={environmentId} options={HOME_AMBIANCE_ENVIRONMENT_OPTIONS} selected={data.home_ambiance} onChange={handleAmbianceChange} />
       </div>
 
       <div className="space-y-2">
