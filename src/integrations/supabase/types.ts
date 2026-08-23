@@ -5258,12 +5258,17 @@ export type Database = {
           created_at: string
           department: string
           excerpt: string | null
+          geocode_attempts: number
+          geocoded_at: string | null
           h1_title: string
           hero_image_alt: string | null
           id: string
           intro_text: string
+          latitude: number | null
+          longitude: number | null
           meta_description: string
           meta_title: string
+          nearby_sitter_count: number
           noindex: boolean | null
           published: boolean
           seo_dirty_at: string | null
@@ -5280,12 +5285,17 @@ export type Database = {
           created_at?: string
           department: string
           excerpt?: string | null
+          geocode_attempts?: number
+          geocoded_at?: string | null
           h1_title?: string
           hero_image_alt?: string | null
           id?: string
           intro_text?: string
+          latitude?: number | null
+          longitude?: number | null
           meta_description?: string
           meta_title?: string
+          nearby_sitter_count?: number
           noindex?: boolean | null
           published?: boolean
           seo_dirty_at?: string | null
@@ -5302,12 +5312,17 @@ export type Database = {
           created_at?: string
           department?: string
           excerpt?: string | null
+          geocode_attempts?: number
+          geocoded_at?: string | null
           h1_title?: string
           hero_image_alt?: string | null
           id?: string
           intro_text?: string
+          latitude?: number | null
+          longitude?: number | null
           meta_description?: string
           meta_title?: string
+          nearby_sitter_count?: number
           noindex?: boolean | null
           published?: boolean
           seo_dirty_at?: string | null
