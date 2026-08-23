@@ -120,19 +120,21 @@ const CityPage = () => {
     enabled: !!(cityData?.name || dbPage?.city),
   });
 
-  // Comptage live des gardiens pour la branche DB (sitter_count en base = 0).
-  const { data: dbSitterCount = 0 } = useQuery<number>({
-    queryKey: ["city-db-sitter-count", dbPage?.city],
-    enabled: !cityData && !!dbPage?.city,
-    staleTime: 5 * 60 * 1000,
+  // Code département de la page DB, résolu via la table departements
+  // (nom -> code). Sert au filtre postal de CitySittersGrid, règle identique
+  // à la fonction SQL recalc_seo_city_page_counts (23/08/2026).
+  const { data: dbDepartmentCode = null } = useQuery<string | null>({
+    queryKey: ["city-db-department-code", dbPage?.department],
+    enabled: !cityData && !!dbPage?.department,
+    staleTime: 60 * 60 * 1000,
     queryFn: async () => {
-      const { count, error } = await supabase
-        .from("public_profiles")
-        .select("id", { count: "exact", head: true })
-        .in("role", ["sitter", "both"])
-        .ilike("city", `%${dbPage!.city}%`);
-      if (error) return 0;
-      return count ?? 0;
+      const { data, error } = await supabase
+        .from("departements")
+        .select("code")
+        .eq("nom", dbPage!.department)
+        .maybeSingle();
+      if (error) return null;
+      return (data?.code as string) ?? null;
     },
   });
 
@@ -351,7 +353,11 @@ const CityPage = () => {
  )}
 
         {/* Gardiens du coin */}
-        <CitySittersGrid city={cityData.name} citySlug={cityData.slug} />
+        <CitySittersGrid
+          city={cityData.name}
+          citySlug={cityData.slug}
+          departmentCode={cityData.departmentCode}
+        />
 
  {/* Network */}
  <LocalNetworkGrid current={cityData} allCities={CITIES} />
@@ -555,6 +561,7 @@ const CityPage = () => {
     <>
       <CityPageMeta
         noindex={dbNoindex}
+        metaTitle={dbPage.meta_title}
         city={{
           slug: dbPage.slug,
           name: dbPage.city,
@@ -605,12 +612,12 @@ const CityPage = () => {
             {dbPage.intro_text}
           </p>
           <div className="flex flex-wrap gap-4 mb-8">
-            {dbSitterCount > 0 && (
+            {(dbPage.sitter_count ?? 0) > 0 && (
               <Badge variant="secondary" className="text-base px-4 py-2 gap-2">
                 <Users className="h-4 w-4" />
-                {dbSitterCount} gardien
-                {dbSitterCount > 1 ? "s" : ""} inscrit
-                {dbSitterCount > 1 ? "s" : ""}
+                {dbPage.sitter_count} gardien
+                {dbPage.sitter_count > 1 ? "s" : ""} inscrit
+                {dbPage.sitter_count > 1 ? "s" : ""}
               </Badge>
             )}
             <Badge variant="outline" className="text-base px-4 py-2 gap-2">
@@ -644,7 +651,11 @@ const CityPage = () => {
        )}
 
         {/* Gardiens du coin */}
-        <CitySittersGrid city={dbPage.city} citySlug={dbPage.slug} />
+        <CitySittersGrid
+          city={dbPage.city}
+          citySlug={dbPage.slug}
+          departmentCode={dbDepartmentCode}
+        />
 
         <NearbyCityLinks department={dbPage.department} currentSlug={dbPage.slug} />
 
