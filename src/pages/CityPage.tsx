@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import ReactMarkdown from "react-markdown";
 import { useParams, Link } from "react-router-dom";
 import NotFound from "@/pages/NotFound";
@@ -41,6 +41,8 @@ import PageBreadcrumb from "@/components/seo/PageBreadcrumb";
 import CityHero, { CITY_HERO_IMAGES } from "@/components/city/CityHero";
 import CitySittersGrid from "@/components/city/CitySittersGrid";
 import { useAlmaCulturalFact } from "@/hooks/useAlmaCulturalFact";
+import { buildNearbyMention } from "@/lib/cityProximity";
+import { trackEvent } from "@/lib/analytics";
 
 const CityPage = () => {
  const { slug } = useParams<{ slug: string }>();
