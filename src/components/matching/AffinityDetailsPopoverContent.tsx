@@ -43,7 +43,7 @@ const AffinityDetailsPopoverContent = ({ result, displayScore }: Props) => {
     <>
       <p className="text-xs font-semibold mb-1.5 text-foreground">
         {result.scoreReliable
-          ? `${result.score}% de compatibilité${reliability === "partial" ? " (score partiel)" : ""}`
+          ? `${shown}% de compatibilité${reliability === "partial" ? " (score partiel)" : ""}`
           : "Compatibilité en cours d'estimation"}
       </p>
       {result.matched.length > 0 ? (

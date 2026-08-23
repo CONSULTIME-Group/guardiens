@@ -175,7 +175,7 @@ const AffinityBadge = ({
               "inline-flex items-center gap-1 rounded-full border font-semibold leading-none cursor-pointer",
               "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1",
               sizing,
-              tone(result),
+              tone(result, shown),
               className,
             )}
             aria-label={ariaLabel}
