@@ -274,6 +274,10 @@ const Landing = () => {
             <p className="font-body text-sm text-white/85 mt-[14px] md:mt-[22px] animate-hero-fade-up animation-delay-1000">
               {t("landing.hero.reassurance")}
             </p>
+            <p className="font-body text-sm text-white/85 mt-2 animate-hero-fade-up animation-delay-1050">
+              {t("landing.hero.guides_promise")}
+            </p>
+
 
 
             {(kpiMaisons >= 10 || kpiAnimaux >= 10 || kpiInscrits > 0 || kpiMissions >= 10) && (
@@ -314,8 +318,12 @@ const Landing = () => {
         </div>
       </section>
 
-      {/* ═══════════════ APERÇU LIVE ANNONCES (sous Hero) ═══════════════ */}
+      {/* ═══════════════ SECTION 2, CONFIANCE & PÉRIMÈTRE (positionnée tôt : réponse à la peur n°1) ═══════════════ */}
+      <ConfianceSection />
+
+      {/* ═══════════════ APERÇU LIVE ANNONCES ═══════════════ */}
       <LiveListingsStrip />
+
 
 
 
