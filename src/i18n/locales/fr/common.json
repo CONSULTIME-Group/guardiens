@@ -275,10 +275,10 @@
       }
     },
     "affinity": {
-      "title": "Le match qui compte, 7 critères, pas juste la proximité",
+      "title": "Le match qui compte, pas juste la proximité",
       "subtitle": "Un score calculé automatiquement entre chaque propriétaire et chaque gardien, pondéré, transparent, visible.",
       "bullet1": "Calcul automatique dès qu'un gardien postule à votre annonce",
-      "bullet2": "Sept critères pondérés : animaux, présence pendant la garde, rythme de vie, langues, intérêts, profil idéal, ambiance du foyer",
+      "bullet2": "Plusieurs critères pondérés, propres à chaque couple : animaux, présence pendant la garde, véhicule, rythme de vie, langues, intérêts, profil idéal, ambiance du foyer, besoins spéciaux, distance",
       "bullet3": "Vous voyez le détail, vous décidez",
       "cta": "Comprendre le score d'affinité",
       "demo_label": "Exemple illustratif",
@@ -287,6 +287,8 @@
         "n_animals": "Chien et chat déclarés, expérience confirmée",
         "c_presence": "Présence pendant la garde",
         "n_presence": "Télétravail compatible avec vos attentes",
+        "c_vehicle": "Véhicule",
+        "n_vehicle": "Véhiculé, comme vous le souhaitez",
         "c_pace": "Rythme de vie",
         "n_pace": "Rythme actif, cohérent avec le foyer",
         "c_languages": "Langues",
@@ -296,7 +298,11 @@
         "c_ideal": "Profil idéal",
         "n_ideal": "Correspond au type de gardien recherché",
         "c_mood": "Ambiance du foyer",
-        "n_mood": "Ambiance calme, gardien plus sportif"
+        "n_mood": "Ambiance calme, gardien plus sportif",
+        "c_needs": "Besoins spéciaux",
+        "n_needs": "Médicaments quotidiens déjà pratiqués",
+        "c_distance": "Distance",
+        "n_distance": "À 68 km, au-delà de votre zone préférée"
       }
     },
     "pros": {
@@ -367,7 +373,7 @@
       "body_1": "Guardiens est un réseau d'entraide entre particuliers, organisé par affinité autant que par proximité. On y garde des maisons, on s'y rend des services, on y rencontre des gens. À un kilomètre comme à mille.",
       "body_2": "La garde de maison et la garde d'animaux à domicile en sont l'usage principal. Un gardien s'installe chez vous pendant votre absence et veille sur ce que vous laissez : votre maison, votre jardin, vos animaux.",
       "body_3": "À côté des gardes, les membres se rendent des coups de main : arrosage, courses, compagnie. L'échange se décide entre vous.",
-      "body_4": "La mise en relation s'appuie sur un score d'affinité calculé sur sept critères, où le mode de vie compte autant que la distance. Les membres documentent leur profil et peuvent faire vérifier leur identité. Les avis sont croisés, et un statut de gardien d'urgence répond aux imprévus.",
+      "body_4": "La mise en relation s'appuie sur un score d'affinité calculé sur plusieurs critères pondérés, propres à chaque couple, où le mode de vie compte autant que la distance. Les membres documentent leur profil et peuvent faire vérifier leur identité. Les avis sont croisés, et un statut de gardien d'urgence répond aux imprévus.",
       "body_5": "Guardiens publie aussi des guides de race et des guides locaux ville par ville. S'y ajoutent un annuaire de professionnels animaliers dont le SIRET est contrôlé, et un journal de conseils pratiques.",
       "body_6": "Le réseau couvre la France entière, et met en relation les Français de l'étranger avec des gardiens sur place. Vous avez accès à tout, sans engagement."
     },
