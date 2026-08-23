@@ -270,9 +270,14 @@ const CityPage = () => {
  <p className="text-lg text-muted-foreground max-w-3xl leading-relaxed mb-6">
  {stats.guardiansCount > 0
  ? `${stats.guardiansCount} gardien${stats.guardiansCount > 1 ? "s" : ""} inscrit${stats.guardiansCount > 1 ? "s" : ""} en ${cityData.department}`
- : `Gardiens inscrits en ${cityData.department}`}
- {" · Gratuit pour les propriétaires"}
- </p>
+  : `Gardiens inscrits en ${cityData.department}`}
+  {" · Gratuit pour les propriétaires"}
+  </p>
+  {staticNearbyMention && (
+  <p className="text-muted-foreground max-w-3xl leading-relaxed mb-6 -mt-3">
+  {staticNearbyMention}
+  </p>
+  )}
 
  <div className="flex flex-wrap gap-3 mb-8">
  <Badge variant="secondary" className="text-sm px-4 py-2 gap-2">
@@ -415,6 +420,8 @@ const CityPage = () => {
           city={cityData.name}
           citySlug={cityData.slug}
           departmentCode={cityData.departmentCode}
+          cityLat={cityData.coordinates.lat}
+          cityLng={cityData.coordinates.lng}
         />
 
  {/* Network */}
@@ -542,7 +549,14 @@ const CityPage = () => {
  }
 
   // Render DB-based page (simplified legacy)
-  const dbNoindex = dbPage.noindex === true;
+   const dbNoindex = dbPage.noindex === true;
+   // Mention de proximité sous le compteur. nearby_sitter_count ne sert
+   // qu'à l'affichage et au tracking, jamais au noindex.
+   const dbNearbyMention = buildNearbyMention(
+     dbPage.city,
+     dbPage.sitter_count ?? 0,
+     dbPage.nearby_sitter_count ?? 0
+   );
   const dbFaqItems = [
     {
       q: `Comment trouver un gardien de maison à ${dbPage.city} ?`,
@@ -683,6 +697,9 @@ const CityPage = () => {
               Inscription sans carte bancaire
             </Badge>
           </div>
+          {dbNearbyMention && (
+            <p className="text-muted-foreground mb-8 -mt-4">{dbNearbyMention}</p>
+          )}
  <div className="flex flex-col sm:flex-row gap-3">
  <Link to="/inscription">
  <Button size="lg" className="gap-2">
@@ -713,6 +730,8 @@ const CityPage = () => {
           city={dbPage.city}
           citySlug={dbPage.slug}
           departmentCode={dbDepartmentCode}
+          cityLat={dbPage.latitude ?? null}
+          cityLng={dbPage.longitude ?? null}
         />
 
         <NearbyCityLinks department={dbPage.department} currentSlug={dbPage.slug} />
