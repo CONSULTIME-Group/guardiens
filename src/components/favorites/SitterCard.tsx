@@ -70,6 +70,7 @@ const SitterCard = ({ sitter, fallbackLabel, viewerOwnerContext }: SitterCardPro
           className="shrink-0"
           trackingContext="favorites"
           trackingId={sitter.id}
+          displayScore={affinity.sortScore}
         />
       )}
       <FavoriteButton targetType="sitter" targetId={sitter.id} size="md" className="shrink-0" />

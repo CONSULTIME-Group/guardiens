@@ -53,28 +53,41 @@ interface AffinityBadgeProps {
    * disponible pour l'affichage).
    */
   variant?: "numeric" | "semantic";
+  /**
+   * Chiffre à afficher à la place du score brut. Côté PROPRIÉTAIRE, passer
+   * `result.sortScore` (alignement chiffre/tri, décision du 23/08/2026) :
+   * la liste est triée sur le pondéré, le pourcentage montré doit être le
+   * même nombre. Côté gardien, ne rien passer : le brut reste affiché.
+   */
+  displayScore?: number;
 }
 
-function tone(result: AffinityResult): string {
+function shownScore(result: AffinityResult, displayScore?: number): number {
+  return typeof displayScore === "number" && Number.isFinite(displayScore)
+    ? Math.round(displayScore)
+    : result.score;
+}
+
+function tone(result: AffinityResult, shown: number): string {
   // Incompatibilité déclarée : ton neutre, le popover explique. Jamais de
   // signal « succès » sur un refus déclaré.
   if (result.hasDeclaredIncompatibility) {
     return "bg-muted text-muted-foreground border-border";
   }
-  if (result.score >= AFFINITY_HIGHLIGHT_STRONG_SCORE_PERCENT) {
+  if (shown >= AFFINITY_HIGHLIGHT_STRONG_SCORE_PERCENT) {
     return "bg-success/15 text-success border-success/30";
   }
-  if (result.score >= AFFINITY_HIGHLIGHT_SCORE_PERCENT) {
+  if (shown >= AFFINITY_HIGHLIGHT_SCORE_PERCENT) {
     return "bg-primary/10 text-primary border-primary/25";
   }
   // Sous le seuil highlight : ton neutre, pas de warning orange qui suggère un problème.
   return "bg-muted text-muted-foreground border-border";
 }
 
-function semanticLabel(result: AffinityResult): string | null {
+function semanticLabel(result: AffinityResult, shown: number): string | null {
   if (!result.scoreReliable || result.hasDeclaredIncompatibility) return null;
-  if (result.score >= AFFINITY_HIGHLIGHT_STRONG_SCORE_PERCENT) return "Très compatible";
-  if (result.score >= AFFINITY_HIGHLIGHT_SCORE_PERCENT) return "Compatible";
+  if (shown >= AFFINITY_HIGHLIGHT_STRONG_SCORE_PERCENT) return "Très compatible";
+  if (shown >= AFFINITY_HIGHLIGHT_SCORE_PERCENT) return "Compatible";
   return null;
 }
 
@@ -85,6 +98,7 @@ const AffinityBadge = ({
   trackingContext,
   trackingId,
   variant = "numeric",
+  displayScore,
 }: AffinityBadgeProps) => {
   const wrapRef = useRef<HTMLButtonElement>(null);
 
@@ -110,9 +124,13 @@ const AffinityBadge = ({
 
   if (!result) return null;
 
+  // Le chiffre montré : `displayScore` si la surface le fournit (côté
+  // propriétaire, le sortScore pondéré par la confiance), sinon le brut.
+  const shown = shownScore(result, displayScore);
+
   // Variante « semantic » = pure mise en avant : absente sous le seuil
   // highlight, si le score n'est pas fiable, ou si un refus est déclaré.
-  const label = variant === "semantic" ? semanticLabel(result) : null;
+  const label = variant === "semantic" ? semanticLabel(result, shown) : null;
   if (variant === "semantic" && !label) return null;
 
   const sizing = size === "sm" ? "text-[11px] px-2 py-0.5" : "text-xs px-2.5 py-1";
@@ -125,14 +143,14 @@ const AffinityBadge = ({
   // Le chiffre ne s'affiche que s'il est fiable ; sinon le chip reste présent
   // et invite à ouvrir le détail (on trie, on n'élimine jamais).
   const numericText = result.scoreReliable
-    ? `${result.score}% d'affinité`
+    ? `${shown}% d'affinité`
     : "Affinité en cours";
   const displayText = variant === "semantic" ? label : numericText;
   const ariaLabel =
     variant === "semantic"
-      ? `${label} (${result.score}% d'affinité), voir le détail`
+      ? `${label} (${shown}% d'affinité), voir le détail`
       : result.scoreReliable
-        ? `Affinité ${result.score}% (${result.total} critères sur 8 comparés), voir le détail`
+        ? `Affinité ${shown}% (${result.total} critères sur 8 comparés), voir le détail`
         : `Affinité en cours d'estimation (${result.total} critères comparés), voir le détail`;
 
   // Fiabilité cosmétique : « partiel » si le chiffre n'est pas affichable,
@@ -157,7 +175,7 @@ const AffinityBadge = ({
               "inline-flex items-center gap-1 rounded-full border font-semibold leading-none cursor-pointer",
               "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1",
               sizing,
-              tone(result),
+              tone(result, shown),
               className,
             )}
             aria-label={ariaLabel}
@@ -188,7 +206,7 @@ const AffinityBadge = ({
         className="w-[300px] p-3 z-50"
         onOpenAutoFocus={(e) => e.preventDefault()}
       >
-        <AffinityDetailsPopoverContent result={result} />
+        <AffinityDetailsPopoverContent result={result} displayScore={shown} />
       </PopoverContent>
     </Popover>
   );

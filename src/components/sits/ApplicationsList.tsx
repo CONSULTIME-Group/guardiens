@@ -572,9 +572,9 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, prope
   const rawActive = applications.filter(a => !["rejected", "cancelled"].includes(a.status));
   const declinedApps = applications.filter(a => ["rejected", "cancelled"].includes(a.status));
 
-  // Précalcul du score d'affinité par candidat : le score brut sert à
-  // l'AFFICHAGE (couleur de la puce), le score de tri (pondéré par la
-  // confiance, défaut 1b du 20/08/2026) sert au CLASSEMENT.
+  // Précalcul du score d'affinité par candidat : classement ET affichage
+  // utilisent le score pondéré par la confiance (sortScore, alignement
+  // chiffre/tri du 23/08/2026) ; le brut reste calculé par le moteur.
   const affinityByApp = useMemo(() => {
     const map = new Map<string, { score: number; sortScore: number }>();
     if (!viewerOwner) return map;
@@ -638,8 +638,9 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, prope
     const receivedLabel = app.created_at
       ? `Reçue ${formatDistanceToNow(new Date(app.created_at), { addSuffix: true, locale: fr })}`
       : null;
-    // Couleur de la puce : score brut affiché, jamais le score de tri.
-    const affinityScore = affinityByApp.get(app.id)?.score;
+    // Couleur de la puce : le chiffre montré est le sortScore (le nombre
+    // exact rendu par OwnerToSitterAffinity juste en dessous).
+    const affinityScore = affinityByApp.get(app.id)?.sortScore;
     const affinityClass =
       typeof affinityScore === "number"
         ? affinityScore >= 70

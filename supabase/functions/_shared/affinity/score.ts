@@ -205,9 +205,11 @@ export interface AffinityResult {
    */
   confidence: number;
   /**
-   * Score de TRI = score affiché × confiance (défaut 1b, décision du
+   * Score de TRI = score brut × confiance (défaut 1b, décision du
    * 20/08/2026). C'est LUI qui ordonne toutes les listes (Top 3, recherche,
-   * candidatures, digest). Le score brut reste celui qu'on AFFICHE.
+   * candidatures, digest). Depuis le 23/08/2026 c'est aussi le chiffre
+   * AFFICHÉ côté propriétaire (alignement chiffre/tri) ; côté gardien, le
+   * chiffre affiché reste le score brut (règle 11 : pas de chiffre punitif).
    */
   sortScore: number;
 }
@@ -348,6 +350,30 @@ interface CriterionEval {
   matched: string[];
   /** Phrases de frein, humaines. */
   explanation: string[];
+}
+
+/** Clés stables des 10 critères, utilisées par le diagnostic de dispersion. */
+export type AffinityCriterionKey =
+  | "animals"
+  | "presence"
+  | "vehicle"
+  | "ideal_profile"
+  | "pace"
+  | "languages"
+  | "interests"
+  | "ambiance"
+  | "special_needs"
+  | "distance";
+
+interface KeyedCriterion extends CriterionEval {
+  key: AffinityCriterionKey;
+}
+
+/** Extrait diagnostic d'un critère (poids déclaré, points obtenus). */
+export interface AffinityCriterionBreakdown {
+  key: AffinityCriterionKey;
+  weight: number;
+  points: number;
 }
 
 
@@ -883,7 +909,7 @@ function evalDistance(owner: AffinityOwnerInput): CriterionEval | null {
  * confiance (défaut 1b, décision du 20/08/2026). Miroir strict des
  * conditions d'entrée de chaque critère, côté propriétaire uniquement.
  */
-function maxPossibleWeight(owner: AffinityOwnerInput): number {
+export function maxPossibleWeight(owner: AffinityOwnerInput): number {
   let w = 0;
   // Animaux : 2 si le propriétaire a au moins une espèce connue.
   const species = new Set<string>();
@@ -930,6 +956,60 @@ function maxPossibleWeight(owner: AffinityOwnerInput): number {
 // ---------------------------------------------------------------------------
 
 /**
+ * Évaluation unique des 10 critères, factorisée entre le score complet et le
+ * diagnostic de dispersion. Toute modification de la liste des critères se
+ * fait ICI, jamais en dupliquant.
+ */
+function evaluateCriteria(
+  owner: AffinityOwnerInput,
+  sitter: AffinitySitterInput,
+): {
+  criteria: KeyedCriterion[];
+  blockedSensitivities: string[];
+  vehicleExplanation: string[];
+} {
+  const animals = evalAnimals(owner, sitter);
+  const presence = evalPresence(owner, sitter);
+  const vehicle = evalVehicle(owner, sitter);
+  const raw: Array<{ key: AffinityCriterionKey; crit: CriterionEval | null }> = [
+    { key: "animals", crit: animals.crit },
+    { key: "presence", crit: presence },
+    { key: "vehicle", crit: vehicle.crit },
+    { key: "ideal_profile", crit: evalIdealProfile(owner, sitter) },
+    { key: "pace", crit: evalPace(owner, sitter) },
+    { key: "languages", crit: evalLanguages(owner, sitter) },
+    { key: "interests", crit: evalInterests(owner, sitter) },
+    { key: "ambiance", crit: evalAmbiance(owner, sitter) },
+    { key: "special_needs", crit: evalSpecialNeeds(owner, sitter) },
+    { key: "distance", crit: evalDistance(owner) },
+  ];
+  const criteria = raw
+    .filter((r): r is { key: AffinityCriterionKey; crit: CriterionEval } => r.crit != null)
+    .map((r) => ({ ...r.crit, key: r.key }));
+  return {
+    criteria,
+    blockedSensitivities: animals.blockedSensitivities,
+    vehicleExplanation: vehicle.explanation,
+  };
+}
+
+/**
+ * Diagnostic (mesures, jamais l'affichage) : les critères réellement évalués
+ * pour ce couple, avec poids déclaré et points obtenus. Un critère absent de
+ * la liste est non évaluable sur ce couple (hors dénominateur).
+ */
+export function computeAffinityCriteriaBreakdown(
+  owner: AffinityOwnerInput,
+  sitter: AffinitySitterInput,
+): AffinityCriterionBreakdown[] {
+  return evaluateCriteria(owner, sitter).criteria.map(({ key, weight, points }) => ({
+    key,
+    weight,
+    points,
+  }));
+}
+
+/**
  * Score d'affinité complet. Retourne TOUJOURS un résultat (jamais null) :
  * l'élimination n'existe pas ; `scoreReliable` et `displayed` informent
  * l'affichage du chiffre et du contexte, pas la présence dans une liste.
@@ -946,22 +1026,7 @@ export function computeAffinityResultFull(
   const mode = options?.mode ?? "list";
 
   // --- 1. Évaluer tous les critères ---
-  const animals = evalAnimals(owner, sitter);
-  const presence = evalPresence(owner, sitter);
-  const vehicle = evalVehicle(owner, sitter);
-
-  const criteria: CriterionEval[] = [
-    animals.crit,
-    presence,
-    vehicle.crit,
-    evalIdealProfile(owner, sitter),
-    evalPace(owner, sitter),
-    evalLanguages(owner, sitter),
-    evalInterests(owner, sitter),
-    evalAmbiance(owner, sitter),
-    evalSpecialNeeds(owner, sitter),
-    evalDistance(owner),
-  ].filter((c): c is CriterionEval => c != null);
+  const { criteria, blockedSensitivities, vehicleExplanation } = evaluateCriteria(owner, sitter);
 
   const matched: string[] = [];
   const explanation: string[] = [];
@@ -981,10 +1046,9 @@ export function computeAffinityResultFull(
   }
   // Frein véhicule hors critère : quand rien n'est déclaré, le critère sort
   // du dénominateur (silence neutre) mais l'information reste affichée.
-  explanation.push(...vehicle.explanation);
+  explanation.push(...vehicleExplanation);
 
   // --- 2. Refus déclarés ---
-  const blockedSensitivities = animals.blockedSensitivities;
   for (const sens of blockedSensitivities) {
     const phrase = SENSITIVITY_EXPLANATION[sens];
     if (phrase) explanation.push(phrase);
@@ -1021,10 +1085,18 @@ export function computeAffinityResultFull(
   // Un dénominateur dynamique récompense mécaniquement le profil vide : ses
   // critères défavorables disparaissent du calcul au lieu de le pénaliser,
   // et un 100 % construit sur un seul critère passait devant un 78 %
-  // construit sur sept. Le CHIFFRE AFFICHÉ reste le score brut ; le
-  // CLASSEMENT utilise le score pondéré par la confiance (poids réellement
-  // évalué / poids maximal possible pour ce couple). Personne n'est
-  // éliminé : tout le monde reste dans la liste, on trie mieux.
+  // construit sur sept. Le CLASSEMENT utilise le score pondéré par la
+  // confiance (poids réellement évalué / poids maximal possible pour ce
+  // couple). Personne n'est éliminé : tout le monde reste dans la liste,
+  // on trie mieux.
+  //
+  // ALIGNEMENT CHIFFRE/TRI (décision du 23/08/2026) : côté PROPRIÉTAIRE, le
+  // chiffre affiché EST le sortScore, pour que l'ordre de la liste et les
+  // pourcentages lus ne se contredisent jamais. Côté GARDIEN (sa propre
+  // affinité avec une annonce), le chiffre affiché reste le score brut :
+  // le pondéré pénaliserait en permanence un profil peu renseigné, ce que
+  // la règle 11 interdit (le silence se signale par invitation, jamais par
+  // un chiffre punitif). Le brut reste calculé et disponible partout.
   //
   // DÉFAUT DORMANT, noté pour mémoire (mesure du 20/08/2026) : tant que le
   // vivier du Top 3 filtrait sur identity_verified, un seul profil
@@ -1040,7 +1112,7 @@ export function computeAffinityResultFull(
   const confidence = maxWeight > 0 ? Math.min(1, maxPoints / maxWeight) : 0;
   const sortScore = Math.round(score * confidence);
 
-  const hardEvaluated = animals.crit != null || presence != null || vehicle.crit != null;
+  const hardEvaluated = criteria.some((c) => c.key === "animals" || c.key === "presence" || c.key === "vehicle");
   const scoreReliable = evaluated >= thresholds.minCommonCriteria && hardEvaluated;
 
   // --- 4. Affichage du CHIFFRE (jamais une exclusion de liste) ---

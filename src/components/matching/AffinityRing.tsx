@@ -142,7 +142,7 @@ const AffinityRing = ({ score, result, size = 70 }: Props) => {
         className="w-[300px] p-3 z-50"
         onOpenAutoFocus={(e) => e.preventDefault()}
       >
-        <AffinityDetailsPopoverContent result={result} />
+        <AffinityDetailsPopoverContent result={result} displayScore={clamped} />
       </PopoverContent>
     </Popover>
   );
