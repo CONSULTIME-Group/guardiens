@@ -8753,6 +8753,13 @@ export type Database = {
         Args: { _user_id: string }
         Returns: undefined
       }
+      recalc_seo_city_nearby_counts: {
+        Args: never
+        Returns: {
+          pages_changed: number
+          pages_sans_coord: number
+        }[]
+      }
       recalc_seo_city_page_counts: {
         Args: never
         Returns: {
