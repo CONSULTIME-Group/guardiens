@@ -61,8 +61,13 @@ function viewColumns(view: string): string[] {
   const i = typesTs.indexOf(`${view}: {`);
   if (i < 0) throw new Error(`Vue ${view} introuvable dans types.ts`);
   const r = typesTs.indexOf("Row: {", i);
-  const end = typesTs.indexOf("Relationships:", r);
-  if (r < 0 || end < 0) throw new Error(`Row de ${view} introuvable`);
+  if (r < 0) throw new Error(`Row de ${view} introuvable`);
+  // La section Row se termine au premier bloc suivant (Insert, Update,
+  // Relationships ou la fermeture de la vue), selon la forme générée.
+  const stops = ["Insert:", "Update:", "Relationships:"]
+    .map((s) => typesTs.indexOf(s, r))
+    .filter((x) => x > r);
+  const end = Math.min(...stops);
   const body = typesTs.slice(r + "Row: {".length, end);
   return [...body.matchAll(/^\s*(\w+):/gm)].map((x) => x[1]);
 }
