@@ -34,6 +34,14 @@ interface Props {
    * Utile sur les cartes de liste pour ne jamais laisser un trou visuel.
    */
   fallbackLabel?: string;
+  /**
+   * Clé du chiffre montré. "sortScore" (défaut) : surfaces de classement et
+   * profil public, le chiffre affiché suit la clé de tri (décision du
+   * 23/08/2026). "score" (brut) : réservé aux surfaces CANDIDATURES, où à
+   * 2,5 candidatures par annonce le chiffre sert à oser dire oui, pas à
+   * départager un classement.
+   */
+  displayKey?: "score" | "sortScore";
   className?: string;
 }
 
@@ -47,6 +55,7 @@ const OwnerToSitterAffinity = ({
   caption,
   variant = "numeric",
   fallbackLabel,
+  displayKey = "sortScore",
   className,
 }: Props) => {
   const { owner, loading } = useViewerOwnerForAffinity();
