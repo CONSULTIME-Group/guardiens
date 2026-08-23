@@ -21,7 +21,13 @@ export interface AffinityOnboardingStatus {
   role: "owner" | "sitter" | "both" | null;
   needsSitter: boolean;
   needsOwner: boolean;
-  /** Doit-on afficher l'étape ? true si au moins un des deux jeux est incomplet. */
+  /**
+   * Code postal absent sur `profiles` : requis pour TOUS les rôles
+   * (23/08/2026). Sans lui le profil est géographiquement introuvable :
+   * 286 gardiens sur 1 001 mesurés dans ce cas.
+   */
+  needsPostal: boolean;
+  /** Doit-on afficher l'étape ? true si au moins un jeu est incomplet. */
   needsOnboarding: boolean;
   /** Date d'inscription du compte (ISO), pour scoper le garde aux nouveaux. */
   profileCreatedAt: string | null;
@@ -43,14 +49,14 @@ async function loadStatus(userId: string, role: string | null) {
       .maybeSingle(),
     supabase
       .from("profiles")
-      .select("created_at")
+      .select("created_at, postal_code")
       .eq("id", userId)
       .maybeSingle(),
   ]);
 
   const sitter = sitterRes.data as { animal_types?: string[] | null; work_during_sit?: string | null; sitter_type?: string | null } | null;
   const owner = ownerRes.data as { presence_expected?: string | null; preferred_sitter_types?: string[] | null } | null;
-  const profile = profileRes.data as { created_at?: string | null } | null;
+  const profile = profileRes.data as { created_at?: string | null; postal_code?: string | null } | null;
 
   const sitterComplete =
     !!sitter &&
@@ -69,6 +75,7 @@ async function loadStatus(userId: string, role: string | null) {
   return {
     needsSitter: isSitter && !sitterComplete,
     needsOwner: isOwner && !ownerComplete,
+    needsPostal: !(profile?.postal_code ?? "").trim(),
     profileCreatedAt: profile?.created_at ?? null,
   };
 }
