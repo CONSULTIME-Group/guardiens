@@ -90,6 +90,7 @@ const DEEP_LINK_TEMPLATES = new Set<string>([
   'new-application',
   'unread-messages-reminder',
   'owner-pending-application-nudge',
+  'discussion-stalled-nudge',
   'first-application-received',
   'review-reminder',
   'review-received',

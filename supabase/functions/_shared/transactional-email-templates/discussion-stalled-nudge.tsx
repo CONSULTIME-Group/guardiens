@@ -15,6 +15,8 @@ interface Props {
   daysSince?: number
   msgCount?: number
   ctaUrl?: string
+  /** Lien profond authentifié, prioritaire sur ctaUrl quand il existe. */
+  deepLinkUrl?: string
   declineUrl?: string
   thinkingUrl?: string
 }
@@ -26,6 +28,7 @@ const DiscussionStalledNudgeEmail = ({
   daysSince,
   msgCount,
   ctaUrl,
+  deepLinkUrl,
   declineUrl,
   thinkingUrl,
 }: Props) => {
@@ -65,7 +68,7 @@ const DiscussionStalledNudgeEmail = ({
           </Text>
 
           <QuickActions
-            primaryHref={ctaUrl || 'https://guardiens.fr/dashboard/candidatures'}
+            primaryHref={deepLinkUrl || ctaUrl || 'https://guardiens.fr/dashboard'}
             primaryLabel={`Confirmer la candidature de ${sitter}`}
             declineUrl={declineUrl}
             thinkingUrl={thinkingUrl}
@@ -101,7 +104,7 @@ export const template = {
     sitTitle: 'Garde de deux chats à Annecy',
     daysSince: 3,
     msgCount: 6,
-    ctaUrl: 'https://guardiens.fr/dashboard/candidatures',
+    ctaUrl: 'https://guardiens.fr/dashboard',
     declineUrl: 'https://guardiens.fr/candidature/reponse?t=exemple-decline',
     thinkingUrl: 'https://guardiens.fr/candidature/reponse?t=exemple-attente',
   },

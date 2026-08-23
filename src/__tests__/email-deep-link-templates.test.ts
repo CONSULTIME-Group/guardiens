@@ -69,4 +69,28 @@ describe("lien profond authentifie dans les emails de conversation", () => {
       expect(sender, f).toContain(`'${f.replace(".tsx", "")}'`);
     }
   });
+
+  // Régression mesurée en production le 23/08/2026 : le bouton principal de
+  // la relance « discussion enlisée » menait à /dashboard/candidatures/:id,
+  // une route inexistante (404). Le gabarit doit accepter le lien profond et
+  // le sender doit l'injecter.
+  it("la relance discussion enlisée accepte le lien profond et le sender l'injecte", () => {
+    const src = read("discussion-stalled-nudge.tsx");
+    expect(src).toContain("deepLinkUrl?: string");
+    expect(src).toMatch(/deepLinkUrl\s*\|\|/);
+    const sender = readFileSync(
+      resolve(__dirname, "../../supabase/functions/send-transactional-email/index.ts"),
+      "utf8",
+    );
+    expect(sender).toContain("'discussion-stalled-nudge'");
+  });
+
+  it("aucune relance candidature ne pointe vers la route inexistante /dashboard/candidatures", () => {
+    const nudge = readFileSync(
+      resolve(__dirname, "../../supabase/functions/nudge-owner-pending-application/index.ts"),
+      "utf8",
+    );
+    expect(nudge).not.toContain("/dashboard/candidatures/");
+    expect(nudge).toContain("#candidatures");
+  });
 });
