@@ -18,10 +18,19 @@ import { useAuth } from "@/contexts/AuthContext";
 
 interface Props {
   result: AffinityResult;
+  /**
+   * Chiffre montré dans l'en-tête. Côté propriétaire : `result.sortScore`
+   * (alignement chiffre/tri). Défaut : score brut (côté gardien).
+   */
+  displayScore?: number;
 }
 
-const AffinityDetailsPopoverContent = ({ result }: Props) => {
+const AffinityDetailsPopoverContent = ({ result, displayScore }: Props) => {
   const { activeRole } = useAuth();
+  const shown =
+    typeof displayScore === "number" && Number.isFinite(displayScore)
+      ? Math.round(displayScore)
+      : result.score;
   const reliability: "complete" | "partial" | "neutral" =
     !result.scoreReliable || result.total <= 3
       ? "partial"
