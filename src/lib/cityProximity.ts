@@ -39,8 +39,7 @@ export function cityNameMatches(
     s
       .toLowerCase()
       .normalize("NFD")
-      .replace(/[̀-ͯ]/g, "");
-  // (plage U+0300 à U+036f, accents combinants)
+      .replace(/[\u0300-\u036f]/g, "");
   const name = norm(pageCity).trim();
   if (!name) return false;
   const escaped = name.replace(/[.^$*+?()[\]{}|\\]/g, "\\$&");
