@@ -586,9 +586,11 @@ describe("règles lot affinité 20/08/2026", () => {
     );
     // Même nombre de critères évalués : le dénominateur ne gonfle pas.
     expect(cinqTags.total).toBe(unTag.total);
-    // Les points sont la moyenne par tag : (1+1+0+0+0,5)/5 = 0,5 sur 1.
+    // Les points sont la moyenne par tag : (1+1+0+0,5+0,5)/5 = 0,6 sur 1.
+    // « Campagne » ne pénalise plus un gardien calme (lieu, pas tempo,
+    // décision du 23/08/2026) : il marque 0,5 neutre au lieu de 0.
     expect(unTag.score).toBe(100);
-    expect(cinqTags.score).toBe(75);
+    expect(cinqTags.score).toBe(80);
   });
 
 
