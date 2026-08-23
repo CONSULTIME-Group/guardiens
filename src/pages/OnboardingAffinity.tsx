@@ -138,6 +138,7 @@ const OnboardingAffinity = () => {
         role: user.role ?? null,
         needs_sitter: status.needsSitter,
         needs_owner: status.needsOwner,
+        needs_postal: status.needsPostal,
       },
     });
     void trackEvent("affinity_onboarding_started", {
@@ -147,9 +148,10 @@ const OnboardingAffinity = () => {
         profile_created_at: status.profileCreatedAt,
         needs_sitter: status.needsSitter,
         needs_owner: status.needsOwner,
+        needs_postal: status.needsPostal,
       },
     });
-  }, [flagLoading, flagEnabled, status.loading, status.needsSitter, status.needsOwner, status.needsOnboarding, status.profileCreatedAt, user]);
+  }, [flagLoading, flagEnabled, status.loading, status.needsSitter, status.needsOwner, status.needsPostal, status.needsOnboarding, status.profileCreatedAt, user]);
 
   // Abandon : émis AU PLUS UNE FOIS par session/monté du composant, si
   // l'utilisateur n'a pas complété. `reason` distingue le mode de sortie
@@ -174,6 +176,7 @@ const OnboardingAffinity = () => {
         role: chosenRole,
         needs_sitter: status.needsSitter,
         needs_owner: status.needsOwner,
+        needs_postal: status.needsPostal,
         user_id_hint: user?.id ?? null,
       },
     });
@@ -187,6 +190,9 @@ const OnboardingAffinity = () => {
         last_step_index: lastStepRef.current.index,
         last_step_name: lastStepRef.current.name,
         duration_seconds: duration,
+        needs_sitter: status.needsSitter,
+        needs_owner: status.needsOwner,
+        needs_postal: status.needsPostal,
         user_id_hint: user?.id ?? null,
       },
     });
@@ -226,6 +232,7 @@ const OnboardingAffinity = () => {
   // sinon un profil dont l'affinité est déjà complète serait bloqué sans
   // aucun champ à remplir (blocage muet interdit).
   const showSharedBlock = showSitterBlock || showOwnerBlock || needsPostal;
+  const showAffinityFields = showSitterBlock || showOwnerBlock;
 
   const missingFields = useMemo(() => {
     const missing: string[] = [];
@@ -385,9 +392,15 @@ const OnboardingAffinity = () => {
         <Card>
           <CardHeader className="space-y-2">
             <CardTitle className="font-heading text-2xl">Une dernière étape avant de commencer</CardTitle>
-            <p className="text-sm text-muted-foreground">
-              Ces informations nous servent uniquement à calculer votre score d'affinité et à vous proposer les meilleures correspondances. Aucune saisie libre, moins d'une minute.
-            </p>
+            {showAffinityFields ? (
+              <p className="text-sm text-muted-foreground">
+                Ces informations nous servent uniquement à calculer votre score d'affinité et à vous proposer les meilleures correspondances. Aucune saisie libre, moins d'une minute.
+              </p>
+            ) : (
+              <p className="text-sm text-muted-foreground">
+                Il nous manque une seule information pour vous proposer des gardiens et des annonces près de chez vous. Dix secondes.
+              </p>
+            )}
           </CardHeader>
           <CardContent className="space-y-8">
             {askRole && !chosenRole && (
@@ -521,7 +534,7 @@ const OnboardingAffinity = () => {
             {showSharedBlock && (
               <section className="space-y-5" aria-labelledby="shared-heading">
                 <h2 id="shared-heading" className="font-heading text-lg font-semibold">
-                  Pour affiner votre affinité
+                  {showAffinityFields ? "Pour affiner votre affinité" : "Où êtes-vous ?"}
                 </h2>
 
                 {needsPostal && (
@@ -550,51 +563,55 @@ const OnboardingAffinity = () => {
                   </div>
                 )}
 
-                <div className="space-y-2">
-                  <Label id="lbl-life-pace">Quel est votre rythme de vie ?</Label>
-                  <div role="radiogroup" aria-labelledby="lbl-life-pace" className="flex flex-wrap gap-2">
-                    {LIFE_PACE_OPTIONS.map((o) => {
-                      const active = lifePace === o.value;
-                      return (
-                        <button
-                          type="button"
-                          key={o.value}
-                          role="radio"
-                          aria-checked={active}
-                          onClick={() => setLifePace(o.value)}
-                          className={`inline-flex items-center justify-center min-h-[44px] px-4 py-2 rounded-full border text-sm transition-colors ${
-                            active
-                              ? "bg-primary text-primary-foreground border-primary"
-                              : "bg-background text-foreground border-border hover:bg-accent"
-                          }`}
-                          title={o.description}
-                        >
-                          {o.label}
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
+                {showAffinityFields && (
+                  <>
+                    <div className="space-y-2">
+                      <Label id="lbl-life-pace">Quel est votre rythme de vie ?</Label>
+                      <div role="radiogroup" aria-labelledby="lbl-life-pace" className="flex flex-wrap gap-2">
+                        {LIFE_PACE_OPTIONS.map((o) => {
+                          const active = lifePace === o.value;
+                          return (
+                            <button
+                              type="button"
+                              key={o.value}
+                              role="radio"
+                              aria-checked={active}
+                              onClick={() => setLifePace(o.value)}
+                              className={`inline-flex items-center justify-center min-h-[44px] px-4 py-2 rounded-full border text-sm transition-colors ${
+                                active
+                                  ? "bg-primary text-primary-foreground border-primary"
+                                  : "bg-background text-foreground border-border hover:bg-accent"
+                              }`}
+                              title={o.description}
+                            >
+                              {o.label}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
 
-                <div className="space-y-2">
-                  <Label id="lbl-interests">Vos centres d'intérêt (3 minimum recommandés)</Label>
-                  <ChipSelect
-                    options={INTEREST_OPTIONS}
-                    selected={interests}
-                    onChange={setInterests}
-                    ariaLabelledBy="lbl-interests"
-                  />
-                </div>
+                    <div className="space-y-2">
+                      <Label id="lbl-interests">Vos centres d'intérêt (3 minimum recommandés)</Label>
+                      <ChipSelect
+                        options={INTEREST_OPTIONS}
+                        selected={interests}
+                        onChange={setInterests}
+                        ariaLabelledBy="lbl-interests"
+                      />
+                    </div>
 
-                <div className="space-y-2">
-                  <Label id="lbl-languages">Les langues que vous parlez</Label>
-                  <ChipSelect
-                    options={LANGUAGE_OPTIONS}
-                    selected={languages}
-                    onChange={setLanguages}
-                    ariaLabelledBy="lbl-languages"
-                  />
-                </div>
+                    <div className="space-y-2">
+                      <Label id="lbl-languages">Les langues que vous parlez</Label>
+                      <ChipSelect
+                        options={LANGUAGE_OPTIONS}
+                        selected={languages}
+                        onChange={setLanguages}
+                        ariaLabelledBy="lbl-languages"
+                      />
+                    </div>
+                  </>
+                )}
               </section>
             )}
 
