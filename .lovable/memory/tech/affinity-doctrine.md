@@ -22,13 +22,14 @@ Tout plafond (lecture, scoring, affichage) : trier d'abord, plafonner ensuite, e
 3. Photo de profil présente avant absente.
 4. Distance croissante (coord approx, ville en repli, NULL en fin de liste).
 
-## Score de tri : on affiche le brut, on classe sur le pondéré
+## Chiffre affiché = chiffre de tri (décision affinée le 23/08/2026)
 
 Formule : `sortScore = round(score × confiance)`.
 
-- `score` : le score brut affiché (0 à 100), normalisé sur le dénominateur dynamique des critères réellement évalués.
+- `score` : le score brut (0 à 100), normalisé sur le dénominateur dynamique des critères réellement évalués.
 - `confiance = maxPoints / maxPossibleWeight(owner)`, bornée à 1. Numérateur : somme des poids des critères réellement évalués (ceux entrés dans le dénominateur dynamique). Dénominateur : somme des poids des critères évaluables pour CE couple d'après les seules déclarations du propriétaire : espèces 2 si au moins une espèce connue, présence 2 uniquement si l'exigence est discriminante (« 100% sur place » est exclu, compatible par construction), véhicule 2 si voiture requise, critères mous 1 chacun s'ils sont renseignés, besoins spéciaux 1 si un signal est détecté.
-- Règle d'affichage : on AFFICHE le brut, on CLASSE sur le pondéré, partout (Top 3, recherche, candidatures, digest). Plus aucun tri sur le score brut.
+- Sur toute surface, l'ordre affiché correspond au chiffre affiché. CLASSEMENT (recherche, Top 3) : trier ET afficher `sortScore`. CANDIDATURES (ApplicationsList, OwnerStarSection) : trier ET afficher le `score` BRUT (53 candidatures, 2,5 par annonce : le chiffre sert à oser dire oui, pas à trier ; baisser le niveau affiché pèserait sur les seules conversions de la plateforme). PROFIL PUBLIC / PROXIMITÉ / FAVORIS : `sortScore` (cohérence avec la recherche). GARDIEN : brut partout, inchangé (règle 11).
+- Source unique : `src/lib/affinityDisplayRegistry.ts` (surface, catégorie, clé déclarée, preuve de code). Toute nouvelle surface affichant un pourcentage d'affinité DOIT y être déclarée. Verrou : `src/lib/__tests__/affinity-displayed-order.test.ts` (scan statique + monotonie générique « ordre = chiffre » + verrou brut candidatures). `OwnerToSitterAffinity` expose la prop `displayKey` (« sortScore » par défaut, « score » pour les surfaces candidatures).
 - Un critère satisfait par construction pour tout le monde n'est pas un critère : il sort du dénominateur (cas de la présence « 100% sur place »).
 
 Défaut dormant, noté le 20/08/2026 : le retrait du filtre `identity_verified` et l'arrivée du `sortScore` devaient partir ensemble. Tant que le vivier filtrait sur l'identité vérifiée, un seul profil totalement vide y était éligible et le défaut était invisible. Le retrait du filtre a fait entrer 112 profils vides dans le classement : avec l'ancien `evalPresence` (« 100% sur place » rendait 2/2 à tout le monde), ils seraient tous sortis à 100 % affiché chez les propriétaires à exigence « 100% sur place » et auraient occupé le haut du classement. Ne jamais réintroduire l'un sans l'autre.
