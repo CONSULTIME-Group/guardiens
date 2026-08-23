@@ -534,7 +534,7 @@ const OnboardingAffinity = () => {
             {showSharedBlock && (
               <section className="space-y-5" aria-labelledby="shared-heading">
                 <h2 id="shared-heading" className="font-heading text-lg font-semibold">
-                  Pour affiner votre affinité
+                  {showAffinityFields ? "Pour affiner votre affinité" : "Où êtes-vous ?"}
                 </h2>
 
                 {needsPostal && (
@@ -563,51 +563,55 @@ const OnboardingAffinity = () => {
                   </div>
                 )}
 
-                <div className="space-y-2">
-                  <Label id="lbl-life-pace">Quel est votre rythme de vie ?</Label>
-                  <div role="radiogroup" aria-labelledby="lbl-life-pace" className="flex flex-wrap gap-2">
-                    {LIFE_PACE_OPTIONS.map((o) => {
-                      const active = lifePace === o.value;
-                      return (
-                        <button
-                          type="button"
-                          key={o.value}
-                          role="radio"
-                          aria-checked={active}
-                          onClick={() => setLifePace(o.value)}
-                          className={`inline-flex items-center justify-center min-h-[44px] px-4 py-2 rounded-full border text-sm transition-colors ${
-                            active
-                              ? "bg-primary text-primary-foreground border-primary"
-                              : "bg-background text-foreground border-border hover:bg-accent"
-                          }`}
-                          title={o.description}
-                        >
-                          {o.label}
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
+                {showAffinityFields && (
+                  <>
+                    <div className="space-y-2">
+                      <Label id="lbl-life-pace">Quel est votre rythme de vie ?</Label>
+                      <div role="radiogroup" aria-labelledby="lbl-life-pace" className="flex flex-wrap gap-2">
+                        {LIFE_PACE_OPTIONS.map((o) => {
+                          const active = lifePace === o.value;
+                          return (
+                            <button
+                              type="button"
+                              key={o.value}
+                              role="radio"
+                              aria-checked={active}
+                              onClick={() => setLifePace(o.value)}
+                              className={`inline-flex items-center justify-center min-h-[44px] px-4 py-2 rounded-full border text-sm transition-colors ${
+                                active
+                                  ? "bg-primary text-primary-foreground border-primary"
+                                  : "bg-background text-foreground border-border hover:bg-accent"
+                              }`}
+                              title={o.description}
+                            >
+                              {o.label}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
 
-                <div className="space-y-2">
-                  <Label id="lbl-interests">Vos centres d'intérêt (3 minimum recommandés)</Label>
-                  <ChipSelect
-                    options={INTEREST_OPTIONS}
-                    selected={interests}
-                    onChange={setInterests}
-                    ariaLabelledBy="lbl-interests"
-                  />
-                </div>
+                    <div className="space-y-2">
+                      <Label id="lbl-interests">Vos centres d'intérêt (3 minimum recommandés)</Label>
+                      <ChipSelect
+                        options={INTEREST_OPTIONS}
+                        selected={interests}
+                        onChange={setInterests}
+                        ariaLabelledBy="lbl-interests"
+                      />
+                    </div>
 
-                <div className="space-y-2">
-                  <Label id="lbl-languages">Les langues que vous parlez</Label>
-                  <ChipSelect
-                    options={LANGUAGE_OPTIONS}
-                    selected={languages}
-                    onChange={setLanguages}
-                    ariaLabelledBy="lbl-languages"
-                  />
-                </div>
+                    <div className="space-y-2">
+                      <Label id="lbl-languages">Les langues que vous parlez</Label>
+                      <ChipSelect
+                        options={LANGUAGE_OPTIONS}
+                        selected={languages}
+                        onChange={setLanguages}
+                        ariaLabelledBy="lbl-languages"
+                      />
+                    </div>
+                  </>
+                )}
               </section>
             )}
 
