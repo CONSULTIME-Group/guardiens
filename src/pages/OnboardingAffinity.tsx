@@ -25,8 +25,10 @@ import { sanitizeRedirect } from "@/lib/safeRedirect";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { departmentCodeFromPostal } from "@/lib/postalDepartment";
 import ChipSelect from "@/components/profile/ChipSelect";
 import {
   SITTER_ANIMAL_TYPES_OPTIONS,
@@ -85,6 +87,15 @@ const OnboardingAffinity = () => {
   const [lifePace, setLifePace] = useState<string>("");
   const [interests, setInterests] = useState<string[]>([]);
   const [languages, setLanguages] = useState<string[]>(["Français"]);
+  // Code postal : requis pour tous les rôles tant qu'il manque sur profiles
+  // (23/08/2026, fuite d'inscriptions géographiquement introuvables).
+  const [postalCode, setPostalCode] = useState<string>("");
+
+  const needsPostal = status.needsPostal;
+  const postalClean = postalCode.trim();
+  // Cinq chiffres : les codes DOM/TOM (971xx, 974xx, 988xx...) sont couverts.
+  const postalValid = /^\d{5}$/.test(postalClean);
+  const postalFormatError = needsPostal && postalClean !== "" && !postalValid;
 
   const shownTrackedRef = useRef(false);
   const completedRef = useRef(false);
@@ -211,6 +222,10 @@ const OnboardingAffinity = () => {
     () => status.needsOwner && (chosenRole === "owner" || chosenRole === "both"),
     [status.needsOwner, chosenRole],
   );
+  // La section partagée s'affiche aussi quand seul le code postal manque :
+  // sinon un profil dont l'affinité est déjà complète serait bloqué sans
+  // aucun champ à remplir (blocage muet interdit).
+  const showSharedBlock = showSitterBlock || showOwnerBlock || needsPostal;
 
   const missingFields = useMemo(() => {
     const missing: string[] = [];
@@ -228,12 +243,13 @@ const OnboardingAffinity = () => {
       if (!lifePace) missing.push("votre rythme de vie");
       if (languages.length === 0) missing.push("au moins une langue parlée");
     }
+    if (needsPostal && !postalValid) missing.push("votre code postal");
     return missing;
-  }, [askRole, chosenRole, showSitterBlock, showOwnerBlock, animalTypes, workDuringSit, sitterType, presenceExpected, preferredSitterTypes, lifePace, languages]);
+  }, [askRole, chosenRole, showSitterBlock, showOwnerBlock, animalTypes, workDuringSit, sitterType, presenceExpected, preferredSitterTypes, lifePace, languages, needsPostal, postalValid]);
 
   const canSubmit = useMemo(
-    () => (showSitterBlock || showOwnerBlock) && missingFields.length === 0,
-    [showSitterBlock, showOwnerBlock, missingFields],
+    () => showSharedBlock && missingFields.length === 0,
+    [showSharedBlock, missingFields],
   );
 
   // Tient à jour l'étape courante pour metadata.step des événements d'abandon.
@@ -242,9 +258,12 @@ const OnboardingAffinity = () => {
     if (askRole && !chosenRole) step = "role_pick";
     else if (showSitterBlock && (animalTypes.length === 0 || !workDuringSit || !sitterType)) step = "sitter_form";
     else if (showOwnerBlock && (!presenceExpected || preferredSitterTypes.length === 0)) step = "owner_form";
-    else if (showSitterBlock || showOwnerBlock) step = "form_ready";
+    // Étape dédiée : mesure si les gens décrochent précisément sur le code
+    // postal une fois les blocs d'affinité remplis.
+    else if (needsPostal && !postalValid) step = "postal_form";
+    else if (showSharedBlock) step = "form_ready";
     currentStepRef.current = step;
-  }, [askRole, chosenRole, showSitterBlock, showOwnerBlock, animalTypes, workDuringSit, sitterType, presenceExpected, preferredSitterTypes]);
+  }, [askRole, chosenRole, showSitterBlock, showOwnerBlock, showSharedBlock, animalTypes, workDuringSit, sitterType, presenceExpected, preferredSitterTypes, needsPostal, postalValid]);
 
   const handleRolePick = (r: Role) => {
     setChosenRole(r);
@@ -268,9 +287,16 @@ const OnboardingAffinity = () => {
     if (!user || !chosenRole) return;
     setSaving(true);
     try {
-      // 1. Persist role if it changed
-      if (user.role !== chosenRole) {
-        await supabase.from("profiles").update({ role: chosenRole }).eq("id", user.id);
+      // 1. Persist role if it changed, plus le code postal et le code
+      // département dérivé (colonne vide sur 295 profils au 23/08/2026).
+      const profileUpdate: Record<string, string | null> = {};
+      if (user.role !== chosenRole) profileUpdate.role = chosenRole;
+      if (needsPostal) {
+        profileUpdate.postal_code = postalClean;
+        profileUpdate.departement_code = departmentCodeFromPostal(postalClean);
+      }
+      if (Object.keys(profileUpdate).length > 0) {
+        await supabase.from("profiles").update(profileUpdate).eq("id", user.id);
       }
       // 2. Persist sitter fields
       if (showSitterBlock) {
