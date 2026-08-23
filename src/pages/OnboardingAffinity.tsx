@@ -518,11 +518,37 @@ const OnboardingAffinity = () => {
               </section>
             )}
 
-            {(showSitterBlock || showOwnerBlock) && (
+            {showSharedBlock && (
               <section className="space-y-5" aria-labelledby="shared-heading">
                 <h2 id="shared-heading" className="font-heading text-lg font-semibold">
                   Pour affiner votre affinité
                 </h2>
+
+                {needsPostal && (
+                  <div className="space-y-2">
+                    <Label htmlFor="postal-code">Votre code postal</Label>
+                    <p className="text-xs text-muted-foreground">
+                      Il sert à vous proposer des gardiens et des annonces réellement près de chez vous.
+                    </p>
+                    <Input
+                      id="postal-code"
+                      value={postalCode}
+                      onChange={(e) => setPostalCode(e.target.value)}
+                      placeholder="Ex. 69001 ou 97410"
+                      inputMode="numeric"
+                      autoComplete="postal-code"
+                      maxLength={5}
+                      className="rounded-lg h-12"
+                      aria-invalid={postalFormatError || undefined}
+                      aria-describedby={postalFormatError ? "postal-code-error" : undefined}
+                    />
+                    {postalFormatError && (
+                      <p id="postal-code-error" role="alert" className="text-xs text-destructive">
+                        Format attendu : 5 chiffres, par exemple 69001, ou 97410 pour la Réunion.
+                      </p>
+                    )}
+                  </div>
+                )}
 
                 <div className="space-y-2">
                   <Label id="lbl-life-pace">Quel est votre rythme de vie ?</Label>
