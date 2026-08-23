@@ -392,8 +392,9 @@ const Landing = () => {
         <InventoryStrip />
       </RevealSection>
 
-      {/* ═══════════════ SECTION 6, CONFIANCE & PÉRIMÈTRE ═══════════════ */}
-      <ConfianceSection />
+
+      {/* ═══════════════ SECTION COMPARATIF (extractible, GEO) ═══════════════ */}
+
 
 
       {/* ═══════════════ SECTION COMPARATIF (extractible, GEO) ═══════════════ */}
