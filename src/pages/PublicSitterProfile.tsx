@@ -43,11 +43,11 @@ import { sanitizeBioForPublic } from "@/lib/sanitizeBio";
 import { publishableMotivation } from "@/lib/motivation";
 import {
   mobilityPublicLabel,
-  VEHICLE_OPTIONS,
   MIN_STAY_DURATION_OPTIONS,
   FREQUENCY_OPTIONS,
   NOTICE_OPTIONS,
 } from "@/lib/mobilityOptions";
+import { WORK_DURING_SIT_OPTIONS } from "@/lib/profileMatchingOptions";
 import { isSitterProfileIndexable } from "@/lib/sitterProfileIndexability";
 import {
   buildProfileLightboxItems,

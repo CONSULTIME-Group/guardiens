@@ -3,6 +3,10 @@
  * Une seule liste de valeurs, un seul dictionnaire de libellés, partagés par
  * le formulaire (StepMobility), la fiche publique (PublicSitterProfile) et la
  * vue public_sitter_profiles (qui expose la valeur brute).
+ *
+ * VEHICLE_OPTIONS retiré le 23/08/2026 : `vehicle_type` est un champ mort
+ * (3 profils sur 1 037, jamais scoré, doctrine règle 6). Le critère véhicule
+ * du moteur lit les tri-états `has_vehicle` / `has_license`.
  */
 
 export interface MobilityOption {
@@ -13,13 +17,6 @@ export interface MobilityOption {
   /** Libellé affiché sur la fiche publique. */
   publicLabel: string;
 }
-
-export const VEHICLE_OPTIONS: MobilityOption[] = [
-  { value: "car", label: "Oui, voiture", publicLabel: "Se déplace en voiture" },
-  { value: "motorcycle", label: "Oui, moto", publicLabel: "Se déplace en moto" },
-  { value: "transit", label: "Non, transports en commun", publicLabel: "Se déplace en transports en commun" },
-  { value: "bike", label: "Non, vélo uniquement", publicLabel: "Se déplace à vélo" },
-];
 
 export const MIN_STAY_DURATION_OPTIONS: MobilityOption[] = [
   { value: "1_3_days", label: "1-3 jours", publicLabel: "1 à 3 jours minimum" },

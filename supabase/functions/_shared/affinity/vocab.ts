@@ -434,3 +434,54 @@ export const SPECIAL_NEED_SIGNALS: { skill: string; keywords: string[] }[] = [
     keywords: ["post-op", "post op", "operation", "opere", "convalescence", "suture"],
   },
 ];
+
+// -------------------- Exposition publique des fiches --------------------
+
+/**
+ * Décision de Jérémie (23/08/2026) : la fiche publique expose TOUT ce que le
+ * moteur score, pour que chaque partie puisse vérifier sur quoi elle est
+ * jugée. Asymétrie mesurée avant correction : le propriétaire exposait six de
+ * ses entrées scorées, le gardien aucun de ses champs les plus lourds
+ * (`work_during_sit`, poids 2, était invisible).
+ * Verrou : `src/lib/__tests__/public-views-affinity-symmetry.test.ts`.
+ */
+
+/**
+ * Champs lus par le moteur, JAMAIS exposés publiquement, avec justification.
+ * Toute nouvelle exclusion doit être ajoutée ici, jamais en silence.
+ */
+export const ENGINE_NOT_PUBLIC_FIELDS = {
+  sitter: {
+    sensitivities:
+      "Donnée de santé (allergies). Le propriétaire l'apprend par le frein " +
+      "du moteur au moment de la candidature, jamais par la fiche publique.",
+  },
+} as const;
+
+/**
+ * Colonnes DESCRIPTIVES des vues publiques : visibles, jamais scorées.
+ * `accompanied_by` et `own_animals` détaillent les booléens scorés
+ * `travels_with_children` / `travels_with_own_animals` (répartition décidée
+ * le 23/08/2026 : booléen scoré, texte descriptif exposé).
+ */
+export const SITTER_PUBLIC_DESCRIPTIVE_COLUMNS = [
+  "motivation",
+  "accompanied_by",
+  "own_animals",
+  "geographic_radius",
+  "min_stay_duration",
+  "is_available",
+  "competences",
+  "preferred_frequency",
+  "min_notice",
+  "preferred_environments",
+  "reply_median_minutes",
+] as const;
+
+export const OWNER_PUBLIC_DESCRIPTIVE_COLUMNS = [
+  "welcome_notes",
+  "environments",
+  "competences",
+  "competences_disponible",
+  "created_at",
+] as const;
