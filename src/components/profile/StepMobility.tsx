@@ -4,7 +4,6 @@ import ChipSelect from "./ChipSelect";
 import RadioChipGroup from "./RadioChipGroup";
 import YesNoChips from "./YesNoChips";
 import {
-  VEHICLE_OPTIONS,
   MIN_STAY_DURATION_OPTIONS,
   FREQUENCY_OPTIONS,
   NOTICE_OPTIONS,
@@ -30,20 +29,8 @@ const StepMobility = ({ data, onChange }: Props) => {
     .map(km => ({ value: String(km), label: `${km} km` }));
   return (
     <div className="space-y-6">
-      {/* Vehicle type (choix unique, persisté en colonne vehicle_type) */}
-      <div className="space-y-2">
-        <Label id="lbl-vehicle-type">Vous avez un véhicule ?</Label>
-        <RadioChipGroup
-          ariaLabelledBy="lbl-vehicle-type"
-          options={VEHICLE_OPTIONS}
-          value={data.vehicle_type || ""}
-          onChange={v => onChange({ vehicle_type: v })}
-        />
-        <p className="text-xs text-muted-foreground">
-          Indispensable pour les gardes en zone rurale ou avec animaux nécessitant des sorties véto.
-        </p>
-      </div>
-
+      {/* vehicle_type retiré le 23/08/2026 : champ mort (3/1037, jamais scoré).
+          La mobilité se déclare via Permis de conduire + Véhicule personnel. */}
       <div className="space-y-2">
         <Label id="lbl-has-license">Permis de conduire</Label>
         <YesNoChips ariaLabelledBy="lbl-has-license" value={data.has_license} onChange={v => onChange({ has_license: v })} />

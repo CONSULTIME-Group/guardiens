@@ -254,9 +254,11 @@ export default function PublicSitterProfile() {
   );
 
   const PracticalGrid = (props: {
-    animalTypes: string[]; sitterProfile: any; hasVehicle: boolean; radius: number | null; city: string | null;
-    competences: string[]; lifestyle: string[]; preferredEnvironments: string[];
-    typeLine: string; durationLabel: string; frequencyLabel: string; noticeLabel: string; vehicleLabel: string;
+    animalTypes: string[]; sitterProfile: any; radius: number | null; city: string | null;
+    competences: string[]; specialSkills: string[]; lifestyle: string[]; lifePace: string;
+    preferredEnvironments: string[]; languages: string[]; interests: string[];
+    typeLine: string; durationLabel: string; frequencyLabel: string; noticeLabel: string;
+    mobilityLabel: string; presenceLabel: string; experienceLabel: string;
   }) => (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
       {props.animalTypes.length > 0 && (
@@ -984,11 +986,24 @@ export default function PublicSitterProfile() {
   const accompaniedBy = sitterProfile?.accompanied_by || "";
   const lifestyle: string[] = sitterProfile?.lifestyle || [];
   const minStayDuration: string = sitterProfile?.min_stay_duration || "";
-  const vehicleType: string = sitterProfile?.vehicle_type || "";
   const preferredEnvironments: string[] = sitterProfile?.preferred_environments || [];
   const competences: string[] = sitterProfile?.competences || [];
   const preferredFrequency: string = sitterProfile?.preferred_frequency || "";
   const minNotice: string = sitterProfile?.min_notice || "";
+  // Signaux scorés par le moteur, exposés sur la fiche (symétrie du 23/08/2026).
+  const specialSkills: string[] = (sitterProfile?.special_animal_skills || []).filter(Boolean);
+  const sitterLanguages: string[] = (sitterProfile?.languages || []).filter(Boolean);
+  const sitterInterests: string[] = (sitterProfile?.interests || []).filter(Boolean);
+  // life_pace est le repli de lifestyle dans le moteur : affiché seulement si
+  // lifestyle est vide, pour ne pas doubler l'information.
+  const lifePace: string = lifestyle.length === 0 ? (sitterProfile?.life_pace || "") : "";
+  const experienceLabel: string = sitterProfile?.experience_years || "";
+  // Présence pendant la garde : critère le plus lourd du moteur (poids 2),
+  // affiché avec le libellé exact du formulaire. Repli : availability_during.
+  const presenceLabel: string =
+    WORK_DURING_SIT_OPTIONS.find(o => o.value === sitterProfile?.work_during_sit)?.label
+    || sitterProfile?.availability_during
+    || "";
 
   const frequencyLabel = mobilityPublicLabel(FREQUENCY_OPTIONS, preferredFrequency);
   const noticeLabel = mobilityPublicLabel(NOTICE_OPTIONS, minNotice);
@@ -1073,7 +1088,12 @@ export default function PublicSitterProfile() {
   const typeLine = typeLineItems.length > 0 ? typeLineItems.join(" · ") : "";
 
   const durationLabel = mobilityPublicLabel(MIN_STAY_DURATION_OPTIONS, minStayDuration);
-  const vehicleLabel = mobilityPublicLabel(VEHICLE_OPTIONS, vehicleType);
+  // Mobilité : tri-état (doctrine règle 5), la nullité ne s'affiche pas.
+  const mobilityLabel = hasVehicle
+    ? "Se déplace avec son véhicule"
+    : sitterProfile?.has_license
+      ? "A le permis de conduire"
+      : "";
 
   // Stats line
   const statsItems: string[] = [];
