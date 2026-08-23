@@ -63,7 +63,8 @@ function viewColumns(view: string): string[] {
   const r = typesTs.indexOf("Row: {", i);
   const end = typesTs.indexOf("Relationships:", r);
   if (r < 0 || end < 0) throw new Error(`Row de ${view} introuvable`);
-  return [...typesTs.slice(r, end).matchAll(/^\s*(\w+):/gm)].map((x) => x[1]);
+  const body = typesTs.slice(r + "Row: {".length, end);
+  return [...body.matchAll(/^\s*(\w+):/gm)].map((x) => x[1]);
 }
 
 const SITTER_FIELDS = interfaceFields("AffinitySitterInput");
