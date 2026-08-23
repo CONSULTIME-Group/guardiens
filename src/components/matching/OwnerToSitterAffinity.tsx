@@ -95,6 +95,7 @@ const OwnerToSitterAffinity = ({
         variant={variant}
         trackingContext={context}
         trackingId={targetId}
+        displayScore={full.sortScore}
       />
       {caption && (
         <span className="text-xs text-muted-foreground">{caption}</span>

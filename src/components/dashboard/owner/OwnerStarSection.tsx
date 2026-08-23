@@ -245,7 +245,10 @@ const ApplicationCard = ({
       <div className="notebook-card-paper absolute inset-0" aria-hidden="true" />
       <div className="relative flex items-start gap-[22px] pr-[14px] sm:pr-[22px]">
         {showRing ? (
-          <AffinityRing score={affinity!.score} result={affinity} />
+          // Chiffre affiché = score de tri pondéré (alignement chiffre/tri,
+          // décision du 23/08/2026) : l'ordre de la liste et les
+          // pourcentages lus par le propriétaire ne se contredisent jamais.
+          <AffinityRing score={affinity!.sortScore} result={affinity} />
         ) : (
           <div className="w-16 h-16 rounded-full overflow-hidden bg-primary/10 shrink-0 flex items-center justify-center">
             {sitter?.avatar_url ? (

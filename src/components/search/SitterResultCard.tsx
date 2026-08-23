@@ -283,7 +283,7 @@ const SitterResultCard = ({
         <div className="mt-auto pt-4 flex items-center justify-between gap-3">
           <div className="min-w-0 flex-1">
             {showAffinityRing ? (
-              <AffinityRing score={affinity!.score} result={affinity} size={54} />
+              <AffinityRing score={affinity!.sortScore} result={affinity} size={54} />
             ) : showAffinityFallback ? (
               <span
                 className="inline-flex items-center rounded-full border border-border bg-muted/60 px-2.5 py-1 text-[11px] font-medium text-muted-foreground"
