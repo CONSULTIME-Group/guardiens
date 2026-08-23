@@ -106,7 +106,7 @@ const About = () => {
 
           <h2 id="affinite" className="font-heading text-xl md:text-2xl font-bold text-foreground pt-4 scroll-mt-24">Le score d'affinité</h2>
           <p>
-            À chaque candidature, un score d'affinité est calculé automatiquement entre le propriétaire et le gardien. Il repose sur <strong className="text-foreground">sept critères pondérés</strong> selon leur poids dans une garde réussie.
+            À chaque candidature, un score d'affinité est calculé automatiquement entre le propriétaire et le gardien. Il repose sur <strong className="text-foreground">plusieurs critères pondérés, propres à chaque couple</strong>, selon leur poids dans une garde réussie.
           </p>
           <ul className="list-disc pl-6 space-y-2">
             <li><strong className="text-foreground">Animaux (poids 3 à 12 selon l'espèce)</strong> : les espèces déclarées par le propriétaire recoupent l'expérience du gardien, avec un poids croissant selon l'engagement demandé (chien, chat, cheval, animal de ferme).</li>

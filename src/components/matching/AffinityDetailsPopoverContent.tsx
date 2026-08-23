@@ -76,7 +76,7 @@ const AffinityDetailsPopoverContent = ({ result, displayScore }: Props) => {
         </ul>
       )}
       <p className="text-[11px] text-muted-foreground/80">
-        {result.total} critère{result.total > 1 ? "s" : ""} comparé{result.total > 1 ? "s" : ""} sur 8 possibles.
+        {result.total} critère{result.total > 1 ? "s" : ""} comparé{result.total > 1 ? "s" : ""} pour ce couple.
       </p>
       {reliability === "partial" && (
         <>
