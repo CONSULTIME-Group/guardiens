@@ -21,7 +21,7 @@
  * Côté edge, ce module remplace l'ancien moteur SQL `calculate_affinity_score_pg`,
  * DÉPRÉCIÉ mais CONSERVÉ en base (commentaire SQL posé sur la fonction, aucun
  * DROP de fonction ni de colonne). Un même couple produit le même score dans
- * l'app et dans les emails. La parité des ENTRÉES (16 champs gardien, 10
+ * l'app et dans les emails. La parité des ENTRÉES (16 champs gardien, 11
  * champs propriétaire, sur chaque surface) est verrouillée par
  * `src/lib/__tests__/affinity-input-parity.test.ts`.
  *
@@ -754,8 +754,13 @@ function evalAmbiance(owner: AffinityOwnerInput, sitter: AffinitySitterInput): C
         else points += 0.5;
         break;
       case AMBIANCE_CAMPAGNE:
+        // « Campagne » décrit le LIEU, pas le TEMPO (défaut remonté par
+        // Jérémie, 23/08/2026) : un gardien calme n'est pas incompatible
+        // avec une maison à la campagne. Pas de branche anyBad ici, aligné
+        // sur « Famille animée » : l'ensemble des tags qui lèvent anyBad
+        // dans ce switch doit rester strictement égal aux clés de
+        // HOME_AMBIANCE_CONFLICTS (verrou : ambiance-engine-conflicts.test.ts).
         if (sitterPace === PACE_ACTIF || hasRuralInterest) { points += 1; anyGood = true; chipLabels.push(AMBIANCE_CHIP_LABEL[tag]); }
-        else if (sitterPace === PACE_CALME) anyBad = true;
         else points += 0.5;
         break;
       case AMBIANCE_FAMILLE:
