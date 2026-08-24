@@ -462,6 +462,13 @@ export type Database = {
             referencedRelation: "public_profiles"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "admin_signals_admin_id_fkey"
+            columns: ["admin_id"]
+            isOneToOne: false
+            referencedRelation: "seo_couverture_manquante"
+            referencedColumns: ["profil_id"]
+          },
         ]
       }
       admin_subscription_logs: {
@@ -521,6 +528,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "admin_subscription_logs_performed_by_fkey"
+            columns: ["performed_by"]
+            isOneToOne: false
+            referencedRelation: "seo_couverture_manquante"
+            referencedColumns: ["profil_id"]
+          },
+          {
             foreignKeyName: "admin_subscription_logs_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
@@ -540,6 +554,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "public_profiles"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "admin_subscription_logs_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "seo_couverture_manquante"
+            referencedColumns: ["profil_id"]
           },
         ]
       }
@@ -637,6 +658,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "public_profiles"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "alert_preferences_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "seo_couverture_manquante"
+            referencedColumns: ["profil_id"]
           },
         ]
       }
@@ -752,6 +780,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "public_profiles"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "alma_whisper_history_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "seo_couverture_manquante"
+            referencedColumns: ["profil_id"]
           },
         ]
       }
@@ -962,6 +997,13 @@ export type Database = {
             referencedRelation: "public_profiles"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "applications_sitter_id_fkey"
+            columns: ["sitter_id"]
+            isOneToOne: false
+            referencedRelation: "seo_couverture_manquante"
+            referencedColumns: ["profil_id"]
+          },
         ]
       }
       article_refresh_logs: {
@@ -1043,6 +1085,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "public_profiles"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "article_refresh_logs_admin_id_fkey"
+            columns: ["admin_id"]
+            isOneToOne: false
+            referencedRelation: "seo_couverture_manquante"
+            referencedColumns: ["profil_id"]
           },
           {
             foreignKeyName: "article_refresh_logs_article_id_fkey"
@@ -1191,6 +1240,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "badge_attributions_giver_id_fkey"
+            columns: ["giver_id"]
+            isOneToOne: false
+            referencedRelation: "seo_couverture_manquante"
+            referencedColumns: ["profil_id"]
+          },
+          {
             foreignKeyName: "badge_attributions_sit_id_fkey"
             columns: ["sit_id"]
             isOneToOne: false
@@ -1224,6 +1280,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "public_profiles"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "badge_attributions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "seo_couverture_manquante"
+            referencedColumns: ["profil_id"]
           },
         ]
       }
@@ -1803,6 +1866,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "conversations_owner_id_fkey"
+            columns: ["owner_id"]
+            isOneToOne: false
+            referencedRelation: "seo_couverture_manquante"
+            referencedColumns: ["profil_id"]
+          },
+          {
             foreignKeyName: "conversations_sit_id_fkey"
             columns: ["sit_id"]
             isOneToOne: false
@@ -1836,6 +1906,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "public_profiles"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "conversations_sitter_id_fkey"
+            columns: ["sitter_id"]
+            isOneToOne: false
+            referencedRelation: "seo_couverture_manquante"
+            referencedColumns: ["profil_id"]
           },
           {
             foreignKeyName: "conversations_small_mission_id_fkey"
@@ -2466,6 +2543,13 @@ export type Database = {
             referencedRelation: "public_profiles"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "emergency_sitter_profiles_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "seo_couverture_manquante"
+            referencedColumns: ["profil_id"]
+          },
         ]
       }
       error_logs: {
@@ -2604,6 +2688,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "public_profiles"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "external_experiences_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "seo_couverture_manquante"
+            referencedColumns: ["profil_id"]
           },
         ]
       }
@@ -2772,6 +2863,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "public_profiles"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "garde_accords_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "seo_couverture_manquante"
+            referencedColumns: ["profil_id"]
           },
         ]
       }
@@ -3006,6 +3104,13 @@ export type Database = {
             referencedRelation: "public_profiles"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "house_guides_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "seo_couverture_manquante"
+            referencedColumns: ["profil_id"]
+          },
         ]
       }
       identity_verification_logs: {
@@ -3054,6 +3159,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "public_profiles"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "identity_verification_logs_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "seo_couverture_manquante"
+            referencedColumns: ["profil_id"]
           },
         ]
       }
@@ -3356,6 +3468,13 @@ export type Database = {
             referencedRelation: "public_profiles"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "mass_emails_sent_by_fkey"
+            columns: ["sent_by"]
+            isOneToOne: false
+            referencedRelation: "seo_couverture_manquante"
+            referencedColumns: ["profil_id"]
+          },
         ]
       }
       messages: {
@@ -3426,6 +3545,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "public_profiles"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "messages_sender_id_fkey"
+            columns: ["sender_id"]
+            isOneToOne: false
+            referencedRelation: "seo_couverture_manquante"
+            referencedColumns: ["profil_id"]
           },
         ]
       }
@@ -3507,6 +3633,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "mission_feedbacks_giver_id_fkey"
+            columns: ["giver_id"]
+            isOneToOne: false
+            referencedRelation: "seo_couverture_manquante"
+            referencedColumns: ["profil_id"]
+          },
+          {
             foreignKeyName: "mission_feedbacks_mission_id_fkey"
             columns: ["mission_id"]
             isOneToOne: false
@@ -3540,6 +3673,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "public_profiles"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mission_feedbacks_receiver_id_fkey"
+            columns: ["receiver_id"]
+            isOneToOne: false
+            referencedRelation: "seo_couverture_manquante"
+            referencedColumns: ["profil_id"]
           },
         ]
       }
@@ -3595,6 +3735,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "public_profiles"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mission_notification_queue_helper_id_fkey"
+            columns: ["helper_id"]
+            isOneToOne: false
+            referencedRelation: "seo_couverture_manquante"
+            referencedColumns: ["profil_id"]
           },
           {
             foreignKeyName: "mission_notification_queue_mission_id_fkey"
@@ -3865,6 +4012,13 @@ export type Database = {
             referencedRelation: "public_profiles"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "owner_gallery_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "seo_couverture_manquante"
+            referencedColumns: ["profil_id"]
+          },
         ]
       }
       owner_highlights: {
@@ -3921,6 +4075,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "owner_highlights_owner_id_fkey"
+            columns: ["owner_id"]
+            isOneToOne: false
+            referencedRelation: "seo_couverture_manquante"
+            referencedColumns: ["profil_id"]
+          },
+          {
             foreignKeyName: "owner_highlights_sit_id_fkey"
             columns: ["sit_id"]
             isOneToOne: false
@@ -3954,6 +4115,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "public_profiles"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "owner_highlights_sitter_id_fkey"
+            columns: ["sitter_id"]
+            isOneToOne: false
+            referencedRelation: "seo_couverture_manquante"
+            referencedColumns: ["profil_id"]
           },
         ]
       }
@@ -4072,6 +4240,13 @@ export type Database = {
             isOneToOne: true
             referencedRelation: "public_profiles"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "owner_profiles_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "seo_couverture_manquante"
+            referencedColumns: ["profil_id"]
           },
         ]
       }
@@ -4410,6 +4585,13 @@ export type Database = {
             referencedRelation: "public_profiles"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "pro_profiles_siret_verified_by_fkey"
+            columns: ["siret_verified_by"]
+            isOneToOne: false
+            referencedRelation: "seo_couverture_manquante"
+            referencedColumns: ["profil_id"]
+          },
         ]
       }
       pro_reviews: {
@@ -4574,6 +4756,13 @@ export type Database = {
             isOneToOne: true
             referencedRelation: "public_profiles"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "profile_moderation_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: true
+            referencedRelation: "seo_couverture_manquante"
+            referencedColumns: ["profil_id"]
           },
         ]
       }
@@ -4786,6 +4975,13 @@ export type Database = {
             referencedRelation: "public_profiles"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "profiles_referred_by_fkey"
+            columns: ["referred_by"]
+            isOneToOne: false
+            referencedRelation: "seo_couverture_manquante"
+            referencedColumns: ["profil_id"]
+          },
         ]
       }
       properties: {
@@ -4864,6 +5060,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "public_profiles"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "properties_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "seo_couverture_manquante"
+            referencedColumns: ["profil_id"]
           },
         ]
       }
@@ -4957,6 +5160,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "referrals_referred_id_fkey"
+            columns: ["referred_id"]
+            isOneToOne: true
+            referencedRelation: "seo_couverture_manquante"
+            referencedColumns: ["profil_id"]
+          },
+          {
             foreignKeyName: "referrals_referrer_id_fkey"
             columns: ["referrer_id"]
             isOneToOne: false
@@ -4976,6 +5186,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "public_profiles"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "referrals_referrer_id_fkey"
+            columns: ["referrer_id"]
+            isOneToOne: false
+            referencedRelation: "seo_couverture_manquante"
+            referencedColumns: ["profil_id"]
           },
         ]
       }
@@ -5230,6 +5447,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "reviews_reviewee_id_fkey"
+            columns: ["reviewee_id"]
+            isOneToOne: false
+            referencedRelation: "seo_couverture_manquante"
+            referencedColumns: ["profil_id"]
+          },
+          {
             foreignKeyName: "reviews_reviewer_id_fkey"
             columns: ["reviewer_id"]
             isOneToOne: false
@@ -5249,6 +5473,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "public_profiles"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reviews_reviewer_id_fkey"
+            columns: ["reviewer_id"]
+            isOneToOne: false
+            referencedRelation: "seo_couverture_manquante"
+            referencedColumns: ["profil_id"]
           },
           {
             foreignKeyName: "reviews_sit_id_fkey"
@@ -5830,6 +6061,13 @@ export type Database = {
             referencedRelation: "public_profiles"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "sits_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "seo_couverture_manquante"
+            referencedColumns: ["profil_id"]
+          },
         ]
       }
       sitter_digest_queue: {
@@ -5901,6 +6139,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "public_profiles"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sitter_digest_queue_sitter_id_fkey"
+            columns: ["sitter_id"]
+            isOneToOne: false
+            referencedRelation: "seo_couverture_manquante"
+            referencedColumns: ["profil_id"]
           },
         ]
       }
@@ -5979,6 +6224,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "public_profiles"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sitter_gallery_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "seo_couverture_manquante"
+            referencedColumns: ["profil_id"]
           },
         ]
       }
@@ -6161,6 +6413,13 @@ export type Database = {
             referencedRelation: "public_profiles"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "sitter_profiles_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "seo_couverture_manquante"
+            referencedColumns: ["profil_id"]
+          },
         ]
       }
       skills_library: {
@@ -6235,6 +6494,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "skills_library_first_submitted_by_fkey"
+            columns: ["first_submitted_by"]
+            isOneToOne: false
+            referencedRelation: "seo_couverture_manquante"
+            referencedColumns: ["profil_id"]
+          },
+          {
             foreignKeyName: "skills_library_merged_into_fkey"
             columns: ["merged_into"]
             isOneToOne: false
@@ -6287,6 +6553,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "public_profiles"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "small_mission_response_thanks_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "seo_couverture_manquante"
+            referencedColumns: ["profil_id"]
           },
         ]
       }
@@ -6372,6 +6645,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "public_profiles"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "small_mission_responses_responder_id_fkey"
+            columns: ["responder_id"]
+            isOneToOne: false
+            referencedRelation: "seo_couverture_manquante"
+            referencedColumns: ["profil_id"]
           },
         ]
       }
@@ -6487,6 +6767,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "public_profiles"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "small_missions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "seo_couverture_manquante"
+            referencedColumns: ["profil_id"]
           },
         ]
       }
@@ -6792,6 +7079,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "reviews_reviewee_id_fkey"
+            columns: ["reviewee_id"]
+            isOneToOne: false
+            referencedRelation: "seo_couverture_manquante"
+            referencedColumns: ["profil_id"]
+          },
+          {
             foreignKeyName: "reviews_reviewer_id_fkey"
             columns: ["reviewer_id"]
             isOneToOne: false
@@ -6811,6 +7105,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "public_profiles"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reviews_reviewer_id_fkey"
+            columns: ["reviewer_id"]
+            isOneToOne: false
+            referencedRelation: "seo_couverture_manquante"
+            referencedColumns: ["profil_id"]
           },
           {
             foreignKeyName: "reviews_sit_id_fkey"
@@ -6916,6 +7217,13 @@ export type Database = {
             referencedRelation: "public_profiles"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "small_mission_responses_responder_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "seo_couverture_manquante"
+            referencedColumns: ["profil_id"]
+          },
         ]
       }
       mass_email_click_rates: {
@@ -6984,6 +7292,13 @@ export type Database = {
             referencedRelation: "public_profiles"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "mission_feedbacks_receiver_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "seo_couverture_manquante"
+            referencedColumns: ["profil_id"]
+          },
         ]
       }
       profile_reputation: {
@@ -7046,6 +7361,13 @@ export type Database = {
             referencedRelation: "public_profiles"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "sits_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "seo_couverture_manquante"
+            referencedColumns: ["profil_id"]
+          },
         ]
       }
       public_emergency_sitter_profiles: {
@@ -7082,6 +7404,13 @@ export type Database = {
             isOneToOne: true
             referencedRelation: "public_profiles"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "emergency_sitter_profiles_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "seo_couverture_manquante"
+            referencedColumns: ["profil_id"]
           },
         ]
       }
@@ -7131,6 +7460,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "public_profiles"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mission_feedbacks_receiver_id_fkey"
+            columns: ["receiver_id"]
+            isOneToOne: false
+            referencedRelation: "seo_couverture_manquante"
+            referencedColumns: ["profil_id"]
           },
         ]
       }
@@ -7198,6 +7534,13 @@ export type Database = {
             isOneToOne: true
             referencedRelation: "public_profiles"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "owner_profiles_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "seo_couverture_manquante"
+            referencedColumns: ["profil_id"]
           },
         ]
       }
@@ -7390,6 +7733,13 @@ export type Database = {
             referencedRelation: "public_profiles"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "sitter_profiles_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "seo_couverture_manquante"
+            referencedColumns: ["profil_id"]
+          },
         ]
       }
       public_small_missions: {
@@ -7485,6 +7835,13 @@ export type Database = {
             referencedRelation: "public_profiles"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "small_missions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "seo_couverture_manquante"
+            referencedColumns: ["profil_id"]
+          },
         ]
       }
       public_stats: {
@@ -7493,6 +7850,19 @@ export type Database = {
           maisons_gardees: number | null
           missions_entraide: number | null
           total_inscrits: number | null
+        }
+        Relationships: []
+      }
+      seo_couverture_manquante: {
+        Row: {
+          code_departement: string | null
+          code_postal: string | null
+          commune: string | null
+          created_at: string | null
+          departement: string | null
+          motif: string | null
+          profil_id: string | null
+          role: Database["public"]["Enums"]["user_role"] | null
         }
         Relationships: []
       }
@@ -7575,6 +7945,13 @@ export type Database = {
             isOneToOne: true
             referencedRelation: "public_profiles"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sitter_profiles_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "seo_couverture_manquante"
+            referencedColumns: ["profil_id"]
           },
         ]
       }
