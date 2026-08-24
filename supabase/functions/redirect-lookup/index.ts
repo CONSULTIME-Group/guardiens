@@ -97,7 +97,7 @@ Deno.serve(async (req) => {
   // Best-effort : incrémente le compteur via service_role (non bloquant)
   if (SERVICE) {
     const admin = createClient(SUPABASE_URL, SERVICE);
-    admin.rpc("increment_redirect_hit", { p_slug_from: slug }).then(() => {});
+    admin.rpc("increment_redirect_hit", { p_slug_from: slug, p_scope: scope }).then(() => {});
   }
 
   return new Response(
