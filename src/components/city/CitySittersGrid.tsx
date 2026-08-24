@@ -101,7 +101,9 @@ const CitySittersGrid = ({ city, citySlug, aggregateCities, departmentCode, city
   // Candidats de proximité : profils publics géocodés dans la boîte
   // englobante, enrichis du rayon déclaré (public_sitter_profiles).
   const { data: nearbyCandidates = [] } = useQuery({
-    queryKey: ["city-nearby-sitters", city, cityLat, cityLng, departmentCode ?? ""],
+    // residentCities dans la clé : l'exclusion des résidents du complément
+    // dépend de la liste agrégée, le cache ne doit pas la traverser.
+    queryKey: ["city-nearby-sitters", city, cityLat, cityLng, departmentCode ?? "", residentCities.join("|")],
     enabled: !!city && hasCoords,
     staleTime: 5 * 60 * 1000,
     queryFn: async () => {
