@@ -8413,6 +8413,10 @@ export type Database = {
         }
         Returns: Json
       }
+      get_content_stats: {
+        Args: { p_city_slug?: string; p_department_slug?: string }
+        Returns: Json
+      }
       get_dormant_recovery_context: {
         Args: { _user_id: string }
         Returns: Json

@@ -4,6 +4,7 @@ import DOMPurify from "dompurify";
 import { Search, TreePine, Users, CheckCircle2, Lightbulb, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { getOptimizedImageUrl } from "@/lib/imageOptim";
+import { interpolatePlaceholders, type PlaceholderValue } from "@/lib/contentPlaceholders";
 
 // ── Supabase Storage base URL ──────────────────────────────
 const SB = "https://erhccyqevdyevpyctsjj.supabase.co/storage/v1/object/public/property-photos/articles-inline";
@@ -155,6 +156,12 @@ interface ArticleRendererProps {
   userRole?: "owner" | "sitter" | "both";
   /** Slug de l'article, utilisé pour instrumenter les CTAs (data-article-slug). */
   slug?: string;
+  /**
+   * Valeurs des variables dynamiques (placeholders {{...}}), issues de
+   * useContentStats. Sans la prop, le rendu est identique à ceci près que
+   * d'éventuelles accolades résiduelles sont retirées plutôt qu'affichées.
+   */
+  placeholderValues?: Record<string, PlaceholderValue>;
 }
 
 /**
@@ -220,8 +227,11 @@ function wrapTables(html: string): string {
 }
 
 
-export default function ArticleRenderer({ content, userRole, slug }: ArticleRendererProps) {
-  const withoutH1 = stripLeadingH1(content);
+export default function ArticleRenderer({ content, userRole, slug, placeholderValues }: ArticleRendererProps) {
+  // Substitution des variables dynamiques AVANT toute autre transformation,
+  // donc avant marked.parse.
+  const interpolated = interpolatePlaceholders(content, placeholderValues ?? {});
+  const withoutH1 = stripLeadingH1(interpolated);
   const preprocessed = transformFaqBlocks(transformFactBoxes(withoutH1));
   let html = marked.parse(preprocessed, { async: false }) as string;
 

@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import ReactMarkdown from "react-markdown";
 import { useParams, Link } from "react-router-dom";
 import NotFound from "@/pages/NotFound";
@@ -43,6 +43,8 @@ import CitySittersGrid from "@/components/city/CitySittersGrid";
 import { useAlmaCulturalFact } from "@/hooks/useAlmaCulturalFact";
 import { buildNearbyMention } from "@/lib/cityProximity";
 import { trackEvent } from "@/lib/analytics";
+import { useContentStats } from "@/hooks/useContentStats";
+import { interpolatePlaceholders } from "@/lib/contentPlaceholders";
 
 const CityPage = () => {
  const { slug } = useParams<{ slug: string }>();
@@ -67,9 +69,45 @@ const CityPage = () => {
  enabled: !!slug && !cityData,
  });
 
- useEffect(() => {
- if (cityData || (!dbLoading && dbPage !== undefined)) window.prerenderReady = true;
- }, [cityData, dbLoading, dbPage]);
+  // Variables dynamiques de contenu (placeholders {{...}}), scope ville.
+  const { values: contentStats, isLoading: contentStatsLoading } = useContentStats({
+    citySlug: slug ?? null,
+  });
+
+  // Contenu éditorial de la ville statique, placeholders substitués.
+  const cityContent = useMemo(() => {
+    if (!cityData) return null;
+    const raw = getCityContent(cityData.slug);
+    if (!raw) return null;
+    return {
+      ...raw,
+      subtitle: interpolatePlaceholders(raw.subtitle, contentStats ?? {}),
+      articleSections: raw.articleSections.map((s) => ({
+        ...s,
+        content: interpolatePlaceholders(s.content, contentStats ?? {}),
+      })),
+    };
+  }, [cityData, contentStats]);
+
+  // Corps éditorial de la page alimentée par la base, placeholders substitués.
+  const dbInterpolated = useMemo(() => {
+    if (!dbPage) return { content: null as string | null, intro: null as string | null };
+    return {
+      content: dbPage.content
+        ? interpolatePlaceholders(dbPage.content, contentStats ?? {})
+        : null,
+      intro: dbPage.intro_text
+        ? interpolatePlaceholders(dbPage.intro_text, contentStats ?? {})
+        : null,
+    };
+  }, [dbPage, contentStats]);
+
+  // Prerender : ne figer la page pour les robots qu'une fois les variables de
+  // contenu résolues, sinon le chiffre manquerait dans le contenu indexé.
+  useEffect(() => {
+  if (contentStatsLoading) return;
+  if (cityData || (!dbLoading && dbPage !== undefined)) window.prerenderReady = true;
+  }, [cityData, dbLoading, dbPage, contentStatsLoading]);
 
  const stats = useCityStats(
  cityData?.departmentCode || "",

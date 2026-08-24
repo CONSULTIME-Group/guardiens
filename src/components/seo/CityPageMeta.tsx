@@ -11,6 +11,11 @@ interface Props {
    * champ est vide. PageMeta réutilise le même titre pour og:title.
    */
   metaTitle?: string | null;
+  /**
+   * Propagé à PageMeta : tant que faux, window.prerenderReady reste à false.
+   * Utilisé pour attendre la résolution des variables de contenu.
+   */
+  ready?: boolean;
 }
 
 const META_TITLE_OVERRIDES: Record<string, string> = {
@@ -19,7 +24,7 @@ const META_TITLE_OVERRIDES: Record<string, string> = {
   chambery: "Home sitting Chambéry, Gardien de confiance en Savoie | Guardiens",
 };
 
-const CityPageMeta = ({ city, noindex = false, metaTitle }: Props) => {
+const CityPageMeta = ({ city, noindex = false, metaTitle, ready }: Props) => {
   const title =
     (metaTitle && metaTitle.trim()) ||
     META_TITLE_OVERRIDES[city.slug] ||
@@ -31,6 +36,7 @@ const CityPageMeta = ({ city, noindex = false, metaTitle }: Props) => {
       description={city.metaDescription}
       path={`/house-sitting/${city.slug}`}
       noindex={noindex}
+      ready={ready}
       image={buildOgImageUrl({
         title: city.name,
         subtitle: "Garde d'animaux, de maison et de jardin entre particuliers",
