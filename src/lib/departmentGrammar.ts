@@ -190,7 +190,7 @@ export const rewriteDepartmentMention = (
   if (!forms || !name) return text;
   const loc = forms.in;
   const re = new RegExp(
-    `(?<![${BOUNDARY_CHARS}])${MENTION_PREFIX}?(${escapeRegExp(name.trim())})(?![${BOUNDARY_CHARS}])`,
+    `(?<![${BOUNDARY_CHARS}])(?:${MENTION_PREFIX})?(${escapeRegExp(name.trim())})(?![${BOUNDARY_CHARS}])`,
     "g"
   );
   return text.replace(re, (match, prefix: string | undefined) => {
