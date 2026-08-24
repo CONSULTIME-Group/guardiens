@@ -170,17 +170,17 @@
       "cta": "Découvrir les petites missions"
     },
     "trust": {
-      "eyebrow": "Confiance & périmètre",
-      "title": "Choisir en confiance, à un kilomètre comme à mille.",
-      "lede": "Quatre repères pour partir tranquille : rencontre avant chaque garde, profils documentés, avis croisés, et un périmètre que vous fixez vous-même.",
-      "p1_title": "Entre membres, sans transaction",
-      "p1_text": "Entre membres, tout se passe sans transaction : un service contre un service.",
-      "p2_title": "Rencontre avant chaque garde",
-      "p2_text": "Un café, une visite du logement, un tour des consignes. La confiance ne se devine pas : elle se construit, en se regardant.",
-      "p3_title": "Profils documentés, avis croisés",
-      "p3_text": "Chaque profil affiche les avis publiés par les propriétaires précédents et l'historique des gardes réalisées. La rencontre physique préalable à toute garde reste au cœur de la confiance.",
-      "p4_title": "De votre rue à l'autre bout de la France",
-      "p4_text": "Près de chez vous pour un dépannage, à l'autre bout de la France pour changer d'air : vous décidez jusqu'où vous voulez aller. Chaque garde devient une porte qui s'ouvre."
+      "eyebrow": "Ce qui compte vraiment",
+      "title": "Ce qu'aucune pension ne vous donne.",
+      "lede": "Quatre choses qu'une pension, un pet-sitter ou un proche ne vous offrent pas.",
+      "p1_title": "Un matching qui vous ressemble",
+      "p1_text": "Le score d'affinité compare votre rythme de vie, vos habitudes et vos animaux à ceux du gardien. Pas une recherche par mots-clés, une correspondance calculée pour vous.",
+      "p2_title": "Un gardien qui arrive préparé",
+      "p2_text": "Guide de la race de votre animal, guide de votre ville. Votre gardien sait déjà ce qui compte avant même d'arriver.",
+      "p3_title": "Des pros vérifiés en renfort",
+      "p3_text": "Vétérinaires, toiletteurs, éducateurs. L'annuaire Guardiens ne référence que des professionnels au SIRET contrôlé, prêts si besoin.",
+      "p4_title": "Une communauté qui va plus loin",
+      "p4_text": "Arroser un jardin, prêter une compétence, rendre un service. L'entraide continue bien après la garde."
     },
     "testimonials": {
       "title": "Ils ont osé. Voici ce qu'il leur reste.",
