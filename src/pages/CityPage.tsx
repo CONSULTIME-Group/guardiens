@@ -133,8 +133,16 @@ const CityPage = () => {
   // contenu résolues, sinon le chiffre manquerait dans le contenu indexé.
   useEffect(() => {
   if (contentStatsLoading) return;
-  if (cityData || (!dbLoading && dbPage !== undefined)) window.prerenderReady = true;
-  }, [cityData, dbLoading, dbPage, contentStatsLoading]);
+  if (cityData || (!dbLoading && dbPage)) {
+    window.prerenderReady = true;
+    return;
+  }
+  // Slug inconnu : attendre la resolution de la redirection eventuelle,
+  // figee par le PageMeta 301. Sans redirection, vraie 404 a figer.
+  if (!dbLoading && dbPage === null && cityRedirect === null) {
+    window.prerenderReady = true;
+  }
+  }, [cityData, dbLoading, dbPage, contentStatsLoading, cityRedirect]);
 
  const stats = useCityStats(
  cityData?.departmentCode || "",
@@ -608,8 +616,46 @@ const CityPage = () => {
  );
  }
 
- // Slug de ville inconnu : vraie page 404 en noindex, pas de redirection.
+ // Slug de ville inconnu : redirection de consolidation si le slug est
+ // connu de la table redirects (scope city), sinon vraie page 404 noindex.
  if (!dbPage) {
+ // Resolution de la redirection en cours : meme squelette que le
+ // chargement, jamais un flash de 404.
+ if (cityRedirect === undefined) {
+ return (
+ <div className="min-h-screen bg-background">
+ <div className="max-w-5xl mx-auto px-4 py-16">
+ <Skeleton className="h-10 w-3/4 mb-4" />
+ <Skeleton className="h-24 w-full mb-8" />
+ <div className="grid grid-cols-3 gap-4">
+ <Skeleton className="h-32" />
+ <Skeleton className="h-32" />
+ <Skeleton className="h-32" />
+ </div>
+ </div>
+ </div>
+ );
+ }
+ if (cityRedirect) {
+ // Redirection client pour les personnes, 301 declare aux crawlers via
+ // Prerender (meme modele que la route guide au singulier).
+ const target = `/house-sitting/${cityRedirect}`;
+ const isPrerender =
+   typeof navigator !== "undefined" && /Prerender/i.test(navigator.userAgent);
+ return (
+ <>
+ <PageMeta
+   title="Page ville déplacée"
+   description="Cette page a été regroupée avec la page ville correspondante."
+   path={target}
+   canonical={`https://guardiens.fr${target}`}
+   statusCode={301}
+   prerenderHeader={`Location: https://guardiens.fr${target}`}
+ />
+ {!isPrerender && <Navigate to={target} replace />}
+ </>
+ );
+ }
  return <NotFound />;
  }
 
