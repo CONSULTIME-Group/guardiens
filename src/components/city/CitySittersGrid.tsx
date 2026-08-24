@@ -7,6 +7,7 @@ import { ArrowRight, ShieldCheck } from "lucide-react";
 import TrustHaloAvatar from "@/components/sitters/TrustHaloAvatar";
 import { avatarImageUrl } from "@/lib/storageImage";
 import { postalMatchesDepartment } from "@/lib/postalDepartment";
+import { publicFirstName } from "@/lib/displayName";
 import { pickNearbySitters, buildCityIlikeOrFilter } from "@/lib/cityProximity";
 
 interface Props {
@@ -249,7 +250,8 @@ const CitySittersGrid = ({ city, citySlug, aggregateCities, departmentCode, city
                 </p>
               )}
             </Link>
-          ))}
+            );
+          })}
         </div>
       )}
 
