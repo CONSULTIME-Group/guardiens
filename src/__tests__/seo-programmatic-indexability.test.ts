@@ -29,7 +29,9 @@ describe("pages programmatiques : cohérence du garde-fou noindex", () => {
     // de cache était filtrée, elle pourrait ne pas bouger et le cache
     // servirait des entrées périmées.
     const src = read("scripts/generate-sitemap.mjs");
-    const heads = src.match(/maxUpdatedAt\("seo_(city|department)_pages"[^)]*\)/g) ?? [];
+    // maxUpdatedAtWithCount est la variante à clé composite (date + nombre
+    // de lignes) introduite pour invalider aussi sur dépublication.
+    const heads = src.match(/maxUpdatedAt(?:WithCount)?\("seo_(city|department)_pages"[^)]*\)/g) ?? [];
     expect(heads.length).toBe(2);
     for (const h of heads) {
       expect(h).not.toContain("noindex");
