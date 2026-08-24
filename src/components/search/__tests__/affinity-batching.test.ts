@@ -1,35 +1,34 @@
 /**
  * Test 6 — Découpage par lots de l'appel d'affinité (SearchOwner).
  *
- * Le bloc de découpage est extrait du source et évalué tel quel : avec 820
- * identifiants, l'appel `.in()` doit être découpé en lots d'au plus 200, et
+ * Avec 820 identifiants, l'appel `.in()` doit être découpé en lots d'au plus
+ * 50, et
  * l'union des lots doit être complète, sans doublon ni perte.
  */
 import { describe, it, expect } from "vitest";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
+import { chunkArray } from "@/lib/chunkArray";
 
 const src = readFileSync(resolve(process.cwd(), "src/components/search/SearchOwner.tsx"), "utf8");
 
 function buildBatches(ids: string[]): string[][] {
-  const m = src.match(/const AFFINITY_BATCH = (\d+);[\s\S]*?for \(let i = 0[\s\S]*?\n\s*\}/);
-  if (!m) throw new Error("bloc de découpage par lots introuvable dans SearchOwner.tsx");
-  const code = m[0].replace(/:\s*string\[\]\[\]/g, "");
-  // eslint-disable-next-line no-new-func
-  return new Function("sitterUserIds", `${code}\nreturn batches;`)(ids);
+  return chunkArray(ids, 50);
 }
 
 const ids = Array.from({ length: 820 }, (_, i) => `u-${i}`);
 
 describe("découpage par lots de l'appel d'affinité", () => {
-  it("le lot est plafonné à 200 identifiants", () => {
-    expect(src).toMatch(/const AFFINITY_BATCH = 200;/);
+  it("le lot est plafonné à 50 identifiants", () => {
+    expect(src).toMatch(/chunkArray\(sitterUserIds, 50\)/);
     const batches = buildBatches(ids);
-    expect(Math.max(...batches.map((b) => b.length))).toBeLessThanOrEqual(200);
+    expect(Math.max(...batches.map((b) => b.length))).toBeLessThanOrEqual(50);
   });
 
-  it("820 identifiants produisent 5 lots", () => {
-    expect(buildBatches(ids).map((b) => b.length)).toEqual([200, 200, 200, 200, 20]);
+  it("820 identifiants produisent 17 lots", () => {
+    expect(buildBatches(ids).map((b) => b.length)).toEqual([
+      50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 20,
+    ]);
   });
 
   it("l'union des lots est complète, sans doublon ni perte", () => {
