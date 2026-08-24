@@ -4,7 +4,6 @@ import remarkGfm from "remark-gfm";
 
 interface MarkdownBodyProps {
   children: string;
-  className?: string;
   components?: ComponentProps<typeof ReactMarkdown>["components"];
 }
 
@@ -14,11 +13,10 @@ interface MarkdownBodyProps {
  * encapsulés dans un conteneur défilant horizontalement pour rester lisibles
  * sur mobile sans faire déborder la page.
  */
-export function MarkdownBody({ children, className, components }: MarkdownBodyProps) {
+export function MarkdownBody({ children, components }: MarkdownBodyProps) {
   return (
     <ReactMarkdown
-      remarkPlugins={[remarkGfm]}
-      className={className}
+      remarkPlugins={[remarkGfm as any]}
       components={{
         table: ({ children }) => (
           <div className="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0">
