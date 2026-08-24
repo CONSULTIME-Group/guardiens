@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef } from "react";
-import ReactMarkdown from "react-markdown";
+import { MarkdownBody } from "@/components/MarkdownBody";
 import { useParams, Link, Navigate } from "react-router-dom";
 import NotFound from "@/pages/NotFound";
 import { useQuery } from "@tanstack/react-query";

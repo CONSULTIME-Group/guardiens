@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, Navigate, useParams } from "react-router-dom";
 import NotFound from "@/pages/NotFound";
-import ReactMarkdown from "react-markdown";
+import { MarkdownBody } from "@/components/MarkdownBody";
 import { supabase } from "@/integrations/supabase/client";
 import { slugify } from "@/lib/normalize";
 import { CITIES } from "@/data/cities";
