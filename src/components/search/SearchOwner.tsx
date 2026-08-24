@@ -47,6 +47,7 @@ import { computeAffinityResultFull, speciesIntersects, type AffinityOwnerInput, 
 
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { avatarImageUrl } from "@/lib/storageImage";
+import { chunkArray } from "@/lib/chunkArray";
 
 
 
@@ -630,13 +631,9 @@ const SearchOwner = () => {
     // Elle apporte notamment work_during_sit et sensitivities, indispensables
     // au critère de présence (poids 2) et à la disqualification.
     if (viewerOwner && sitterUserIds.length > 0) {
-      // Découpage par lots de 200 identifiants au maximum : au delà, la chaîne
+      // Découpage par lots de 50 identifiants au maximum : au delà, la chaîne
       // de requête GET dépasse la limite de longueur d'URL et l'appel échoue.
-      const AFFINITY_BATCH = 200;
-      const batches: string[][] = [];
-      for (let i = 0; i < sitterUserIds.length; i += AFFINITY_BATCH) {
-        batches.push(sitterUserIds.slice(i, i + AFFINITY_BATCH));
-      }
+      const batches = chunkArray(sitterUserIds, 50);
       const affinityResults = await Promise.all(
         batches.map((ids) =>
           supabase
@@ -744,17 +741,23 @@ const SearchOwner = () => {
 
     const reviewsAgg = new Map<string, { sum: number; count: number }>();
     if (allUserIds.length > 0) {
-      const { data: reviewRows, error: reviewsError } = await supabase
-        .from("reviews")
-        .select("reviewee_id, overall_rating")
-        .in("reviewee_id", allUserIds)
-        .eq("published", true);
+      const reviewResults = await Promise.all(
+        chunkArray(allUserIds, 100).map((batch) =>
+          supabase
+            .from("reviews")
+            .select("reviewee_id, overall_rating")
+            .in("reviewee_id", batch)
+            .eq("published", true),
+        ),
+      );
+      const reviewsError = reviewResults.find((result) => result.error)?.error;
       if (reviewsError) {
         console.error("[SearchOwner] Erreur chargement avis:", reviewsError);
         setSearchError("Impossible de charger les avis des gardiens.");
         setLoading(false);
         return;
       }
+      const reviewRows = reviewResults.flatMap((result) => result.data ?? []);
       (reviewRows || []).forEach((r: any) => {
         const cur = reviewsAgg.get(r.reviewee_id) || { sum: 0, count: 0 };
         cur.sum += r.overall_rating || 0;
