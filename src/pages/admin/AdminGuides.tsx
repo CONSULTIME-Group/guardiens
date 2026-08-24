@@ -295,7 +295,7 @@ const AdminGuides = () => {
                 }}
               />
               <a
-                href={`/guide/${guide.slug}`}
+                href={`/guides/${guide.slug}`}
                 target="_blank"
                 rel="noopener"
                 className="text-muted-foreground hover:text-foreground"

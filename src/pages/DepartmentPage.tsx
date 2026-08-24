@@ -226,7 +226,7 @@ const DepartmentPage = () => {
           </h2>
  <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
  {guides.map((guide: any) => (
- <Link key={guide.id} to={`/guide/${guide.slug}`}>
+ <Link key={guide.id} to={`/guides/${guide.slug}`}>
  <Card className="hover:shadow-md transition-shadow h-full">
  <CardContent className="p-5 flex items-center gap-3">
  <Compass className="h-5 w-5 text-primary shrink-0" />
