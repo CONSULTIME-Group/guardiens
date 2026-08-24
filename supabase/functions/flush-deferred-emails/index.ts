@@ -17,6 +17,32 @@ const MAX_BATCH = 50;
 const MAX_ATTEMPTS = 6;
 const TTL_HOURS = 36; // hard expire after 36h to avoid stale notifications
 
+// Synchronise la ligne miroir de email_send_log avec le statut terminal de la
+// file. La ligne miroir est ecrite a l'enfilement (statut 'deferred') puis
+// figee : sans cette synchro, le journal affirme a jamais que l'email n'est
+// pas parti alors que la file, elle, a tranche. Jointure par la cle
+// d'idempotence stockee dans metadata (le message_id differe entre le miroir
+// et l'envoi reel). Seules les lignes encore 'deferred' sont touchees : une
+// ligne deja requalifiee (sent, suppressed...) n'est jamais reecrite.
+//
+// deno-lint-ignore no-explicit-any
+async function syncSendLogMirror(
+  supabase: any,
+  idempotencyKey: string | null | undefined,
+  mirrorStatus: "sent" | "superseded" | "abandoned",
+  reason?: string | null,
+): Promise<void> {
+  if (!idempotencyKey) return;
+  const payload: Record<string, unknown> = { status: mirrorStatus };
+  if (reason) payload.error_message = reason.slice(0, 2000);
+  const { error } = await supabase
+    .from("email_send_log")
+    .update(payload)
+    .eq("status", "deferred")
+    .filter("metadata->>idempotency_key", "eq", idempotencyKey);
+  if (error) console.error("syncSendLogMirror failed", { idempotencyKey, mirrorStatus, error });
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
 
@@ -59,11 +85,15 @@ Deno.serve(async (req) => {
 
   // 1. Expire stale entries
   const ttlCutoff = new Date(Date.now() - TTL_HOURS * 3600_000).toISOString();
-  await supabase
+  const { data: expiredRows } = await supabase
     .from("email_deferred_queue")
     .update({ status: "expired", last_error: "TTL exceeded" })
     .eq("status", "pending")
-    .lt("first_enqueued_at", ttlCutoff);
+    .lt("first_enqueued_at", ttlCutoff)
+    .select("idempotency_key");
+  for (const r of expiredRows ?? []) {
+    await syncSendLogMirror(supabase, r.idempotency_key, "abandoned", "TTL expirée : durée de vie de 36h dépassée");
+  }
 
   // 2. Pull due rows, plus anciennement enfilees d'abord (anti famine)
   const { data: due, error: fetchErr } = await supabase
@@ -140,14 +170,17 @@ Deno.serve(async (req) => {
           .update({ status: "abandoned", last_error: reason ?? "abandoned by sender" })
           .eq("id", row.id)
           .eq("status", "processing");
+        await syncSendLogMirror(supabase, row.idempotency_key, "abandoned", `Abandonné : ${reason ?? "abandoned by sender"}`);
         abandoned++;
       } else if (reason === 'already_queued' || reason === 'duplicate_idempotency_key') {
         // Defaut 4 : une ligne doublonnee ne doit pas repasser chaque minute.
         // Aucun email n'est parti : on ne compte pas cette ligne comme envoyee.
+        const supersededReason = `${reason}: un autre envoi couvre cette cle`;
         await supabase
           .from("email_deferred_queue")
-          .update({ status: "superseded", last_error: `${reason}: un autre envoi couvre cette cle` })
+          .update({ status: "superseded", last_error: supersededReason })
           .eq("id", row.id);
+        await syncSendLogMirror(supabase, row.idempotency_key, "superseded", `Remplacé par un envoi plus récent : ${supersededReason}`);
         closed++;
 
       } else if (reason === 'unsubscribed_category' || reason === 'email_suppressed') {
@@ -156,19 +189,24 @@ Deno.serve(async (req) => {
           .from("email_deferred_queue")
           .update({ status: "abandoned", last_error: reason })
           .eq("id", row.id);
+        await syncSendLogMirror(supabase, row.idempotency_key, "abandoned", `Abandonné : ${reason}`);
         closed++;
       } else if (result?.deferred) {
         // Le sender a re-programme la ligne source elle-meme (attempts et
         // first_enqueued_at conserves), et l'a remise en 'pending'.
         // Defaut 3 : MAX_ATTEMPTS s'applique aussi sur le chemin de re-report.
+        // Le miroir reste 'deferred' tant que la ligne est vivante : il ne
+        // bascule que sur statut terminal.
         if (newAttempts >= MAX_ATTEMPTS) {
+          const failReason = `MAX_ATTEMPTS atteint sur chaine de re-report (${newAttempts}), dernier motif: ${reason ?? 'inconnu'}`;
           await supabase
             .from("email_deferred_queue")
             .update({
               status: "failed",
-              last_error: `MAX_ATTEMPTS atteint sur chaine de re-report (${newAttempts}), dernier motif: ${reason ?? 'inconnu'}`,
+              last_error: failReason,
             })
             .eq("id", row.id);
+          await syncSendLogMirror(supabase, row.idempotency_key, "abandoned", `Échec : ${failReason}`);
           failed++;
         } else {
           console.log("flush redeferred", { id: row.id, reason });
@@ -184,6 +222,7 @@ Deno.serve(async (req) => {
       } else if (result?.sent || result?.skipped || result?.success) {
 
         await supabase.from("email_deferred_queue").update({ status: "sent" }).eq("id", row.id);
+        await syncSendLogMirror(supabase, row.idempotency_key, "sent");
         sent++;
       } else {
         // Reponse de forme inattendue : meme traitement que l'erreur reseau,
@@ -194,6 +233,7 @@ Deno.serve(async (req) => {
             .from("email_deferred_queue")
             .update({ status: "failed", last_error: unexpected })
             .eq("id", row.id);
+          await syncSendLogMirror(supabase, row.idempotency_key, "abandoned", `Échec : ${unexpected}`.slice(0, 2000));
         } else {
           const backoffMin = [5, 15, 30, 60, 120][Math.min(newAttempts - 1, 4)];
           await supabase
@@ -214,6 +254,7 @@ Deno.serve(async (req) => {
       console.error("flush invoke error", { id: row.id, err: msg });
       if (newAttempts >= MAX_ATTEMPTS) {
         await supabase.from("email_deferred_queue").update({ status: "failed", last_error: msg }).eq("id", row.id);
+        await syncSendLogMirror(supabase, row.idempotency_key, "abandoned", `Échec : ${msg}`.slice(0, 2000));
       } else {
         // Backoff: push scheduled_for forward (5min, 15, 30, 60, 120).
         // Sur ce chemin le sender n'a rien incremente : on le fait ici.
