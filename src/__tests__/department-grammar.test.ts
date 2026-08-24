@@ -184,6 +184,26 @@ describe("departmentGrammar", () => {
       ).toBe("Garde dans la Drôme, vétérinaires dans la Drôme");
     });
 
+    it("couvre les cas limites : génitif intact, nom composé protégé, déterminant non doublé", () => {
+      const cases: Array<[string, string, string]> = [
+        // département, entrée, sortie attendue
+        ["Haute-Savoie", "Garde chien et chat dans Haute-Savoie : gardiens", "Garde chien et chat en Haute-Savoie : gardiens"],
+        ["Rhône", "Garde d'animaux Rhône : gardiens de confiance", "Garde d'animaux dans le Rhône : gardiens de confiance"],
+        ["Rhône", "Faites garder votre chat dans Rhône par un gardien", "Faites garder votre chat dans le Rhône par un gardien"],
+        ["Ain", "Garde chien et chat dans Ain : gardiens", "Garde chien et chat dans l'Ain : gardiens"],
+        ["Polynésie française", "les communes de Polynésie française", "les communes de Polynésie française"],
+        ["Polynésie française", "House-sitting à Tahiti et en Polynésie française", "House-sitting à Tahiti et en Polynésie française"],
+        ["Loire", "Depuis la Haute-Loire jusqu'à Saint-Étienne", "Depuis la Haute-Loire jusqu'à Saint-Étienne"],
+        ["Loire", "Guardiens couvre Saint-Étienne, Loire-Atlantique exclue", "Guardiens couvre Saint-Étienne, Loire-Atlantique exclue"],
+        ["Rhône", "Les Bouches-du-Rhône et le Rhône", "Les Bouches-du-Rhône et le Rhône"],
+        ["Savoie", "Le lac d'Annecy en Haute-Savoie et la Savoie", "Le lac d'Annecy en Haute-Savoie et la Savoie"],
+        ["Rhône", "Garde d'animaux Rhone : gardiens", "Garde d'animaux Rhone : gardiens"],
+      ];
+      for (const [dept, input, expected] of cases) {
+        expect(rewriteDepartmentMention(input, dept)).toBe(expected);
+      }
+    });
+
     it("ne touche à rien si le nom est inconnu ou le texte vide", () => {
       const text = "Garde d'animaux dans le Finistère";
       expect(rewriteDepartmentMention(text, "Atlantide")).toBe(text);
