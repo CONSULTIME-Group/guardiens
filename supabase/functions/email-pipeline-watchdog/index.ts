@@ -170,6 +170,30 @@ Deno.serve(async (req) => {
       });
     }
 
+    // --- Cohérence du miroir email_send_log avec la file de travail ---
+    // email_send_log est un journal : sa ligne 'deferred' est figée à
+    // l'enfilement. Une ligne 'deferred' de plus de 24h SANS ligne vivante
+    // (pending/processing) dans email_deferred_queue est une dérive : la file
+    // a tranché, le miroir n'a pas suivi. C'est l'invariant qui manquait lors
+    // de l'incident des 2 162 lignes fantômes (août 2026).
+    try {
+      const { data: driftRaw, error: driftErr } = await service.rpc("email_mirror_drift_count");
+      if (driftErr) {
+        console.error("email_mirror_drift_count failed", driftErr);
+      } else {
+        const drift = Number(driftRaw ?? 0);
+        if (drift > 0) {
+          anomalies.push({
+            code: "email_deferred_mirror_drift",
+            title: "Miroir email_send_log désynchronisé de la file",
+            detail: `${drift} ligne(s) email_send_log en statut 'deferred' depuis plus de 24h sans ligne vivante dans email_deferred_queue. Le journal affirme un envoi en attente que la file ne porte plus. Ne jamais conclure à un incident d'envoi à partir du seul email_send_log : joindre sur metadata.idempotency_key et chercher une ligne 'sent' avec resend_id.`,
+          });
+        }
+      }
+    } catch (driftEx) {
+      console.error("mirror drift check failed", driftEx);
+    }
+
     if (anomalies.length === 0) {
       return new Response(JSON.stringify({ ok: true, anomalies: 0 }), {
         status: 200,

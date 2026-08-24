@@ -14,6 +14,42 @@ export type Database = {
   }
   public: {
     Tables: {
+      _backup_email_send_log_mirror_20260824: {
+        Row: {
+          created_at: string | null
+          error_message: string | null
+          id: string | null
+          message_id: string | null
+          metadata: Json | null
+          recipient_email: string | null
+          resend_id: string | null
+          status: string | null
+          template_name: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          error_message?: string | null
+          id?: string | null
+          message_id?: string | null
+          metadata?: Json | null
+          recipient_email?: string | null
+          resend_id?: string | null
+          status?: string | null
+          template_name?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          error_message?: string | null
+          id?: string | null
+          message_id?: string | null
+          metadata?: Json | null
+          recipient_email?: string | null
+          resend_id?: string | null
+          status?: string | null
+          template_name?: string | null
+        }
+        Relationships: []
+      }
       _backup_fusion_conv_20260802: {
         Row: {
           archived_by: string[] | null
@@ -8315,6 +8351,7 @@ export type Database = {
           template_name: string
         }[]
       }
+      email_mirror_drift_count: { Args: never; Returns: number }
       email_queue_dispatch: { Args: never; Returns: undefined }
       email_tracking_start: { Args: never; Returns: string }
       enqueue_email: {

@@ -1,0 +1,88 @@
+# Memory: index.md
+Updated: 2026-08-24
+
+# Project Memory
+
+## Core
+- **Tone**: Vouvoiement is mandatory everywhere. No tutoiement. Fact-based, empathic tone. Never mention competitors.
+- **Theme**: Light mode is default and strictly enforced on strategic pages (landing, dashboards, profiles). Use semantic tokens.
+- **Business**: Mutual aid (small missions) is free forever. Owner space is free. Sitter space requires standard sub (6,99 €/mo, 12 € one-shot, or 5,59 €/mo prorata 2026 with -20%). Free for all sitters until July 14, 2026.
+- **Domain**: "Long Stay" is permanently deleted. No overnight stays in mutual aid. Exchanges without direct financial transactions.
+- **Legal**: Jérémie Martinot, SIRET 894 864 040 00015. RGPD compliant. Strict cookies (no banner needed).
+- **UI Constraints**: Navigation espace connecté verrouillée (sidebar 10 entrées/3 groupes, menu avatar = compte, sheet Plus alignée). Composition figée le 16/08/2026, ne pas réordonner sans demande explicite. Bascule de rôle toujours protégée.
+- **No Lucide/Emoji in content**: Pas d'icônes Lucide décoratives ni d'emojis dans le contenu (cartes, listes, copy, chats). Illustrations/dessins/gouaches sur-mesure encouragés. Icônes UI fonctionnelles OK (actions, nav, statuts).
+- **Mot PROSCRIT**: « voisin / voisine / voisins / voisinage » INTERDIT dans tout texte visible utilisateur (UI, copy, SEO, OG, alt, slogans, badges labels). Remplacer par « gardien », « gens du coin », « membre du coin », « personne de confiance », « proche ». Identifiants techniques en DB/badges/props (super_voisin, voisinConfiance…) NON touchés.
+- **PROSCRIT régional**: « Auvergne-Rhône-Alpes » / « AURA » / « Région AURA » INTERDITS dans tout texte visible (UI, copy, SEO, OG, alt, JSON-LD, placeholders). La proximité est mondiale, pas régionale. Remplacer par « près de chez vous », « France entière », ou omettre. Hubs villes Lyon/Annecy/Grenoble OK car silos SEO réels. Slugs SEO existants conservés.
+- **Tiret cadratin PROSCRIT**: caractère « — » (U+2014) INTERDIT dans tout contenu visible (UI, copy, SEO, articles, emails, alt, OG, toasts). Remplacer par virgule, deux-points, parenthèses, point, ou demi-cadratin « – » pour les plages. Placeholders de données absentes en admin : utiliser « – » ou « · » au lieu de « — ».
+
+## Memories
+- [Entities](mem://domain/entities) — Functional domains and deleted "Long Stay" concept
+- [Moderation](mem://features/community-moderation) — Bidirectional blocking and admin moderation queue
+- [Legal Compliance](mem://security/legal-compliance) — Legal info, strict cookies, no competitor mentions
+- [Local Guides](mem://features/local-guides-ux) — City guides independent of sits
+- [Value Proposition](mem://marketing/value-proposition) — Free for owners forever, mutual aid free, 3 pillars
+- [Search Engine](mem://features/search-engine-ux-with-map-layout) — 50/50 map/grid, 15km default, sitter experience filter
+- [Theme Management](mem://style/theme-management) — Restricted dark mode, default light
+- [UI Protection](mem://constraints/ui-protection) — Composition verrouillée sidebar/avatar/sheet (16/08/2026), règle avatar=MOI vs sidebar=ACTIONS, pastilles disjointes, mesures 715px
+- [Pricing Views](mem://features/subscription-pricing-and-views) — Pre-launch dates, Stripe hardcoded IDs
+- [Dual Role](mem://features/dual-role-activation) — Free owner space, 6,99 €/mo sitter space
+- [Reputation](mem://features/reputation-engine-and-status) — Status calculation, Super Sitter rules, mission reviews excluded
+- [Sit Lifecycle](mem://features/sit-lifecycle-automation) — 6 statuses, auto-transitions, archiving, 4 reminders
+- [Notifications](mem://features/notification-center) — Realtime alerts, nearby sitter triggers
+- [Messaging](mem://features/messagerie-logic-extension) — Direct URL chat opening, mutual aid context
+- [Messagerie Topbar Bell](mem://features/messagerie-topbar-bell) — MessageBell popover topbar (à côté NotificationBell), sortie du sidebar, slot bottom nav remplacé par /sits
+- [Reviews](mem://features/review-system-comprehensive) — 3 types of reviews, tabs, SEO forceMount
+- [Referrals](mem://features/referral-system-logic) — 1 month free, URL param, vouvoiement
+- [Conversations](mem://features/conversation-logic/private-vs-mission) — Private vs mission chat isolation
+- [Mutual Aid Search](mem://features/mutual-aid-ux-v2) — 1-100km radius, keyword search, 'house' category
+- [House Guide](mem://features/house-guide-v2) — 5 sections, sitter access strictly during sit dates
+- [Mutual Aid Exchange](mem://features/mutual-aid-exchange-system) — Structured proposals, isolated reviews
+- [Sitter Tools](mem://features/sitter-assignment-tools) — Post-confirmation dashboard and guide access
+- [Routing](mem://tech/routing/conventions) — Unified /gardiens/:id route
+- [Confirmation](mem://features/confirmation-journey) — Mutual agreement, owner SHA-256, sitter IP clickwrap
+- [SEO Silos](mem://tech/seo/geo-silo-architecture-and-design) — Lyon/Annecy/Grenoble hubs, 3 colors, internal linking
+- [Founder Program](mem://marketing/founder-program-lifecycle) — Golden wax seal badge for early users
+- [Badges](mem://features/badge-system-comprehensive) — 31 badges, compact grayscale inactive states
+- [Alerts](mem://features/alert-preferences-ui) — Up to 3 zones, specific send times
+- [Onboarding Tour](mem://features/onboarding/tour-modal) — 7 slides, strictly first login
+- [Unified Profile](mem://ui/public-profile/unified-view-logic) — 3 tabs, dynamic SEO title
+- [Activation Flow](mem://features/onboarding/activation-flow-v2) — Hybrid onboarding, action wall, deleted /onboarding
+- [Action Wall](mem://tech/onboarding/readiness-logic) — Requires 4/5 fields (name, loc, avatar, DOB>=18, animal exp)
+- [Completion Score](mem://tech/profile/completion-scoring-system) — 0-100 score, 60% threshold for Level 1
+- [Mutual Aid Constraints](mem://features/mutual-aid-mission-constraints) — Durations, Needs/Offers, no overnight
+- [Pricing Clarity](mem://features/pricing-clarity-mutual-aid) — Mutual aid is free forever banner
+- [Editorial Tone](mem://style/editorial-tone-mapping) — Vouvoiement absolute rule everywhere
+- [Account Deletion](mem://security/account-deletion-and-data-retention) — 30-day grace, verified external experiences kept
+- [Favorites](mem://features/favorites-system) — Sitters and sits, 2 tabs
+- [Trust Score](mem://features/trust-score-system) — 0-100 score based on ID, rating, reviews, sits, seniority
+- [Design Tokens](mem://style/design-system-tokens) — Semantic tokens, no hardcoded colors
+- [Footer Token](mem://style/footer-token) — `bg-footer`/`text-footer-foreground` figés identiques light/dark, immunisés contre l'inversion
+- [Status Tokens](mem://style/semantic-status-tokens) — success/info/warning tokens, badge-success réservé pricing
+- [Pricing Article](mem://marketing/pricing/detailed-article) — SEO article with Schema.org pricing
+- [SEO Editorial](mem://marketing/seo-editorial-quality) — No competitors, « gratuit » au lieu de « 0 € » partout (Landing, Pricing, CityPage, FAQ), pas de « à vie / pour toujours », YMYL tone
+- [SEO Policy](mem://security/seo-indexing-policy) — Sitemap quality filters, 12 blocked routes, noindex rules
+- [Registration Roles](mem://auth/registration-role-preselection) — Pre-select role, strict password rules
+- [Breadcrumbs](mem://ui/navigation/breadcrumb-logic) — Standard nomenclature, JSON-LD
+- [Content Pillars](mem://tech/seo/content-pillar-strategy) — Hub & Spoke architecture
+- [Image Optimization](mem://tech/performance/image-optimization) — WebP 82%, lazy loading, Hero preload
+- [Fonts](mem://tech/performance/font-optimization) — Local Outfit/Playfair, font-display: swap
+- [Copy Vocabulary](mem://style/copy-vocabulary) — « voisin/voisinage » mot PROSCRIT partout, remplacements autorisés
+- [No Icons In Content](mem://constraints/no-icons-in-content) — Strict ban on emoji and Lucide icons in editorial content
+- [No AURA](mem://constraints/no-aura-no-region-restriction) — « AURA » / « Auvergne-Rhône-Alpes » PROSCRITS dans tout texte visible. Promesse mondiale, pas régionale.
+- [JSON-LD Validation](mem://tech/seo/jsonld-validation) — Script + test Vitest qui bloque le build si vocabulaire proscrit dans Schema.org
+- [Intentional UX Tradeoffs](mem://product/intentional-ux-tradeoffs) — Promesse "près de chez vous" + filtre département = volontaire. Onglet Propriétaire dans StatusBar gardien = volontaire (dual-role + incitation).
+- [Scope Positioning](mem://marketing/scope-positioning) — « gens du coin » garde le cap, mais TOUJOURS mentionner couverture France entière (composant ReachReassuranceBanner)
+- [No Trial Policy](mem://features/no-trial-policy) — Aucune période d'essai 7j. Rassurance via gratuité jusqu'au 14/07/2026 + sans engagement + one-shot 10€.
+- [Landing Locked](mem://product/landing-structure-locked) — Triptyque hero verrouillé (garde/coup de main/rencontre), home unique dual-role, 10 sections séquencées, Section Rencontre volontairement éditoriale.
+- [Founders KPI Baseline](mem://marketing/founders-kpi-baseline) — KPIs hero = offsets 37 maisons + 234 animaux (historique fondateurs 2021-2026), légitimes, à documenter.
+- [SEO Scanner False Positives](mem://tech/seo/scanner-false-positives) — Findings http:robots & http:sitemap pointant vers guardiens.lovable.app = faux positifs. Domaine canonique = guardiens.fr.
+- [Main flex min-w-0](mem://constraints/main-flex-min-w-0) — Tout `<main flex-1>` DOIT contenir `min-w-0` (overflow mobile). Test Vitest bloquant.
+- [No Em Dash](mem://style/no-em-dash) — Tiret cadratin « — » PROSCRIT partout dans le contenu visible. Remplacer par virgule, deux-points, parenthèses, point, ou demi-cadratin pour les plages.
+- [Screen Audit Methodology 2026](mem://methodology/screen-audit-2026) — OBLIGATOIRE pour tout audit d'écran : mobile (360) + desktop (1440) séparés, screenshots requis, 6 axes (Perf/A11y/UX/States/SEO/Conformité), P0/P1/P2. Scan statique seul = insuffisant.
+- [International Support](mem://product/international-support) — Politique pays ISO 250, défaut FR, Select obligatoire, colonne admin, ouverture auto bloc CreateSit hors FR.
+- [Dashboards Refonte i18n & States](mem://dashboards/refonte-i18n-states.md) — Décision FR-only sur composants refonte (vagues 10-17), pattern états global (DashboardSkeleton + DashboardLoadError), sections indépendantes silencieuses (null), logique pure testée (ownerStarVariant, pickDiscoverySit, almaRailPhrase).
+- [Admin KPI Definitions](mem://features/admin-kpi-definitions) — Rôles stricts + polyvalents comptés une fois, gardes en cours = confirmées, états crons ok/degraded/critical, regroupement signaux >3
+- [Cron Monitoring Truth](mem://features/cron-monitoring-truth) — Fenêtres admin_cron_health dérivées de cron.job, jamais ajustées pour éteindre une alerte. Planifications réelles vérifiées le 16/08/2026.
+- [Programmatic Indexability](mem://tech/seo/programmatic-indexability-rule) — noindex dynamique villes/départements (sitter_count = 0 bidirectionnel, contenu ville < 1000 car.), crons 04:05/04:07, sitemap filtré, têtes de cache non filtrées
+- [Galerie membres only](mem://features/gallery-visibility-members-only) — Galerie gardien réservée aux connectés (RLS + UI + encart anon avec RPC count), avatar public, owner_gallery publique (annonces SEO)
+- [File vs journal emails](mem://features/email-deferred-queue-vs-log) — email_deferred_queue = file de travail (seule vérité), email_send_log = journal figé à l'enfilement. Jamais d'incident conclu sur email_send_log seul. Jointure par metadata.idempotency_key, pas message_id
