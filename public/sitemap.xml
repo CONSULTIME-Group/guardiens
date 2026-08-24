@@ -175,6 +175,18 @@
     <priority>0.6</priority>
   </url>
   <url>
+    <loc>https://guardiens.fr/actualites/abandon-animaux-france-chiffres-causes</loc>
+    <lastmod>2026-08-24</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://guardiens.fr/actualites/garde-kaz-house-sitting-la-reunion</loc>
+    <lastmod>2026-08-24</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
     <loc>https://guardiens.fr/actualites/c-est-quoi-le-house-sitting</loc>
     <lastmod>2026-08-03</lastmod>
     <changefreq>monthly</changefreq>
@@ -187,14 +199,14 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/actualites/abandon-animaux-france-chiffres-causes</loc>
-    <lastmod>2026-08-18</lastmod>
+    <loc>https://guardiens.fr/actualites/confier-sa-maison-absence-risques</loc>
+    <lastmod>2026-08-24</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/actualites/confier-sa-maison-absence-risques</loc>
-    <lastmod>2026-08-18</lastmod>
+    <loc>https://guardiens.fr/actualites/garde-maison-animaux-nouvelle-caledonie</loc>
+    <lastmod>2026-08-24</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
@@ -263,12 +275,6 @@
     <lastmod>2026-08-03</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://guardiens.fr/actualites/garde-chat-presquile-lyon</loc>
-    <lastmod>2026-08-04</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
   </url>
   <url>
     <loc>https://guardiens.fr/actualites/maine-coon-guide-race</loc>
@@ -361,8 +367,8 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/actualites/expat-proprietaire-faire-garder-maison-etranger</loc>
-    <lastmod>2026-08-03</lastmod>
+    <loc>https://guardiens.fr/actualites/commodat-garde-guardiens</loc>
+    <lastmod>2026-08-24</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
@@ -373,16 +379,16 @@
     <priority>0.6</priority>
   </url>
   <url>
+    <loc>https://guardiens.fr/actualites/expat-proprietaire-faire-garder-maison-etranger</loc>
+    <lastmod>2026-08-24</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
     <loc>https://guardiens.fr/actualites/veterinaire-urgence-grenoble-isere</loc>
     <lastmod>2026-08-03</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://guardiens.fr/actualites/commodat-garde-guardiens</loc>
-    <lastmod>2026-08-18</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
   </url>
   <url>
     <loc>https://guardiens.fr/actualites/preparer-maison-avant-garde</loc>
@@ -411,12 +417,6 @@
   <url>
     <loc>https://guardiens.fr/actualites/checklist-partir-vacances-animaux</loc>
     <lastmod>2026-08-03</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://guardiens.fr/actualites/garde-kaz-house-sitting-la-reunion</loc>
-    <lastmod>2026-08-24</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
@@ -487,12 +487,6 @@
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/actualites/garde-maison-animaux-nouvelle-caledonie</loc>
-    <lastmod>2026-08-24</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
     <loc>https://guardiens.fr/actualites/devenir-gardien-maison-etranger</loc>
     <lastmod>2026-08-03</lastmod>
     <changefreq>monthly</changefreq>
@@ -512,7 +506,7 @@
   </url>
   <url>
     <loc>https://guardiens.fr/actualites/francais-etranger-garde-maison-france</loc>
-    <lastmod>2026-08-04</lastmod>
+    <lastmod>2026-08-24</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
@@ -565,16 +559,16 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/actualites/garde-maison-animaux-tahiti</loc>
-    <lastmod>2026-08-24</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
     <loc>https://guardiens.fr/actualites/bengal-guide-race</loc>
     <lastmod>2026-08-03</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://guardiens.fr/actualites/garde-maison-animaux-tahiti</loc>
+    <lastmod>2026-08-24</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
   </url>
   <url>
     <loc>https://guardiens.fr/actualites/arroser-plantes-vacances-grenoble</loc>
@@ -593,6 +587,12 @@
     <lastmod>2026-08-03</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://guardiens.fr/actualites/garde-chat-presquile-lyon</loc>
+    <lastmod>2026-08-24</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
   </url>
   <url>
     <loc>https://guardiens.fr/actualites/rediger-bonne-annonce-house-sitting</loc>
@@ -853,14 +853,14 @@
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/house-sitting/noumea</loc>
-    <lastmod>2026-08-24</lastmod>
+    <loc>https://guardiens.fr/house-sitting/brest</loc>
+    <lastmod>2026-08-23</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/house-sitting/brest</loc>
-    <lastmod>2026-08-23</lastmod>
+    <loc>https://guardiens.fr/house-sitting/noumea</loc>
+    <lastmod>2026-08-24</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
@@ -2204,12 +2204,6 @@
   </url>
   <url>
     <loc>https://guardiens.fr/departement/nouvelle-caledonie</loc>
-    <lastmod>2026-08-24</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://guardiens.fr/departement/polynesie-francaise</loc>
     <lastmod>2026-08-24</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
