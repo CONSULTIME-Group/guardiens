@@ -151,20 +151,20 @@ const main = { backgroundColor: '#ffffff', fontFamily: "'Outfit', Arial, sans-se
 const container = { padding: '24px 28px', maxWidth: '560px', margin: '0 auto' }
 const starsSection = { textAlign: 'center' as const, margin: '0 0 8px' }
 const starsText = { fontSize: '28px', margin: '0', lineHeight: '1' }
-const h1 = { fontSize: '22px', fontWeight: 'bold' as const, color: 'hsl(153, 42%, 30%)', margin: '0 0 20px', textAlign: 'center' as const }
-const text = { fontSize: '14px', color: 'hsl(37, 7%, 43%)', lineHeight: '1.6', margin: '0 0 16px' }
+const h1 = { fontSize: '22px', fontWeight: 'bold' as const, color: '#2C6D50', margin: '0 0 20px', textAlign: 'center' as const }
+const text = { fontSize: '14px', color: '#756F66', lineHeight: '1.6', margin: '0 0 16px' }
 const benefitsBox = {
-  backgroundColor: 'hsl(153, 42%, 96%)',
+  backgroundColor: '#F1F9F5',
   borderRadius: '12px',
   padding: '16px 20px',
   margin: '20px 0',
-  border: '1px solid hsl(153, 42%, 88%)',
+  border: '1px solid #D4EDE2',
 }
-const benefitTitle = { fontSize: '14px', fontWeight: '600' as const, color: 'hsl(153, 42%, 30%)', margin: '0 0 10px' }
-const benefitItem = { fontSize: '13px', color: 'hsl(40, 12%, 25%)', lineHeight: '1.5', margin: '0 0 6px' }
+const benefitTitle = { fontSize: '14px', fontWeight: '600' as const, color: '#2C6D50', margin: '0 0 10px' }
+const benefitItem = { fontSize: '13px', color: '#474238', lineHeight: '1.5', margin: '0 0 6px' }
 const ctaSection = { textAlign: 'center' as const, margin: '24px 0' }
 const button = {
-  backgroundColor: 'hsl(153, 42%, 30%)',
+  backgroundColor: '#2C6D50',
   color: '#ffffff',
   padding: '14px 32px',
   borderRadius: '8px',
@@ -173,31 +173,31 @@ const button = {
   textDecoration: 'none',
   display: 'inline-block',
 }
-const note = { fontSize: '12px', color: 'hsl(37, 7%, 55%)', lineHeight: '1.5', margin: '0 0 16px', fontStyle: 'italic' as const, textAlign: 'center' as const }
-const signatureName = { fontSize: '15px', fontWeight: '600' as const, color: 'hsl(40, 12%, 25%)', margin: '24px 0 2px' }
-const signatureRole = { fontSize: '13px', color: 'hsl(37, 7%, 55%)', margin: '0 0 16px' }
-const signatureInline = { fontSize: '13px', color: 'hsl(37, 7%, 55%)', margin: '0 0 16px' }
-const hr = { borderColor: 'hsl(37, 22%, 89%)', margin: '20px 0' }
-const legalNote = { fontSize: '10px', color: 'hsl(37, 7%, 60%)', lineHeight: '1.5', margin: '0 0 12px' }
-const footer = { fontSize: '12px', color: 'hsl(37, 7%, 60%)', margin: '10px 0 0' }
+const note = { fontSize: '12px', color: '#948E84', lineHeight: '1.5', margin: '0 0 16px', fontStyle: 'italic' as const, textAlign: 'center' as const }
+const signatureName = { fontSize: '15px', fontWeight: '600' as const, color: '#474238', margin: '24px 0 2px' }
+const signatureRole = { fontSize: '13px', color: '#948E84', margin: '0 0 16px' }
+const signatureInline = { fontSize: '13px', color: '#948E84', margin: '0 0 16px' }
+const hr = { borderColor: '#E9E4DD', margin: '20px 0' }
+const legalNote = { fontSize: '10px', color: '#A09B92', lineHeight: '1.5', margin: '0 0 12px' }
+const footer = { fontSize: '12px', color: '#A09B92', margin: '10px 0 0' }
 const googleBox = {
-  backgroundColor: 'hsl(37, 22%, 96%)',
+  backgroundColor: '#F7F5F3',
   borderRadius: '12px',
   padding: '16px 20px',
   margin: '8px 0 20px',
-  border: '1px solid hsl(37, 22%, 89%)',
+  border: '1px solid #E9E4DD',
   textAlign: 'center' as const,
 }
-const googleTitle = { fontSize: '14px', fontWeight: '600' as const, color: 'hsl(40, 12%, 25%)', margin: '0 0 8px' }
-const googleText = { fontSize: '13px', color: 'hsl(37, 7%, 43%)', lineHeight: '1.5', margin: '0 0 8px' }
+const googleTitle = { fontSize: '14px', fontWeight: '600' as const, color: '#474238', margin: '0 0 8px' }
+const googleText = { fontSize: '13px', color: '#756F66', lineHeight: '1.5', margin: '0 0 8px' }
 const buttonSecondary = {
   backgroundColor: '#ffffff',
-  color: 'hsl(153, 42%, 30%)',
+  color: '#2C6D50',
   padding: '12px 28px',
   borderRadius: '8px',
   fontSize: '14px',
   fontWeight: '600' as const,
   textDecoration: 'none',
   display: 'inline-block',
-  border: '1px solid hsl(153, 42%, 30%)',
+  border: '1px solid #2C6D50',
 }

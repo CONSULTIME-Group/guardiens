@@ -89,9 +89,9 @@ const DiscussionStalledNudgeEmail = ({
 
 const main = { backgroundColor: '#f7f5f0', fontFamily: "'Outfit', Arial, sans-serif" }
 const container = { padding: '32px 28px', maxWidth: '560px', margin: '0 auto', backgroundColor: '#ffffff', borderRadius: '14px' }
-const h1 = { fontSize: '22px', fontWeight: 'bold' as const, color: 'hsl(153, 42%, 25%)', margin: '0 0 18px', fontFamily: "'Playfair Display', Georgia, serif" }
-const text = { fontSize: '15px', color: 'hsl(37, 7%, 25%)', lineHeight: '1.65', margin: '0 0 16px' }
-const hr = { borderColor: 'hsl(37, 22%, 89%)', margin: '24px 0 16px' }
+const h1 = { fontSize: '22px', fontWeight: 'bold' as const, color: '#255B42', margin: '0 0 18px', fontFamily: "'Playfair Display', Georgia, serif" }
+const text = { fontSize: '15px', color: '#44413B', lineHeight: '1.65', margin: '0 0 16px' }
+const hr = { borderColor: '#E9E4DD', margin: '24px 0 16px' }
 
 export const template = {
   component: DiscussionStalledNudgeEmail,

@@ -97,13 +97,13 @@ export const template = {
 
 const main = { backgroundColor: '#ffffff', fontFamily: "'Outfit', Arial, sans-serif" }
 const container = { padding: '24px 28px', maxWidth: '560px', margin: '0 auto' }
-const h1 = { fontSize: '24px', fontWeight: 'bold' as const, color: 'hsl(153, 42%, 30%)', margin: '0 0 20px' }
-const text = { fontSize: '14px', color: 'hsl(37, 7%, 43%)', lineHeight: '1.6', margin: '0 0 16px' }
-const card = { backgroundColor: 'hsl(37, 35%, 96%)', borderRadius: '8px', padding: '14px 16px', margin: '12px 0 20px' }
-const cardLine = { fontSize: '13px', color: 'hsl(37, 7%, 30%)', lineHeight: '1.6', margin: '0 0 6px' }
-const hr = { borderColor: 'hsl(37, 22%, 89%)', margin: '20px 0' }
+const h1 = { fontSize: '24px', fontWeight: 'bold' as const, color: '#2C6D50', margin: '0 0 20px' }
+const text = { fontSize: '14px', color: '#756F66', lineHeight: '1.6', margin: '0 0 16px' }
+const card = { backgroundColor: '#F8F6F1', borderRadius: '8px', padding: '14px 16px', margin: '12px 0 20px' }
+const cardLine = { fontSize: '13px', color: '#524E47', lineHeight: '1.6', margin: '0 0 6px' }
+const hr = { borderColor: '#E9E4DD', margin: '20px 0' }
 const button = {
-  backgroundColor: 'hsl(153, 42%, 30%)',
+  backgroundColor: '#2C6D50',
   color: '#ffffff',
   padding: '12px 28px',
   borderRadius: '8px',
@@ -112,5 +112,5 @@ const button = {
   textDecoration: 'none',
   display: 'inline-block',
 }
-const legal = { fontSize: '10px', color: 'hsl(37, 7%, 60%)', lineHeight: '1.5', margin: '0 0 12px' }
-const footer = { fontSize: '12px', color: 'hsl(37, 7%, 60%)', margin: '10px 0 0' }
+const legal = { fontSize: '10px', color: '#A09B92', lineHeight: '1.5', margin: '0 0 12px' }
+const footer = { fontSize: '12px', color: '#A09B92', margin: '10px 0 0' }

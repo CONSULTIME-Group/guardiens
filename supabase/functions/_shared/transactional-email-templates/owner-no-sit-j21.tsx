@@ -86,15 +86,15 @@ export const template = {
 
 const main = { backgroundColor: '#ffffff', fontFamily: "'Outfit', Arial, sans-serif" }
 const container = { padding: '24px 28px', maxWidth: '560px', margin: '0 auto' }
-const h1 = { fontSize: '22px', fontWeight: 'bold' as const, color: 'hsl(153, 42%, 30%)', margin: '0 0 20px' }
-const text = { fontSize: '14px', color: 'hsl(37, 7%, 43%)', lineHeight: '1.6', margin: '0 0 16px' }
-const textSmall = { fontSize: '13px', color: 'hsl(37, 7%, 43%)', lineHeight: '1.6', margin: '16px 0 8px' }
-const sig = { fontSize: '14px', color: 'hsl(37, 7%, 30%)', fontStyle: 'italic' as const, margin: '20px 0 0' }
-const hr = { borderColor: 'hsl(37, 22%, 89%)', margin: '20px 0' }
+const h1 = { fontSize: '22px', fontWeight: 'bold' as const, color: '#2C6D50', margin: '0 0 20px' }
+const text = { fontSize: '14px', color: '#756F66', lineHeight: '1.6', margin: '0 0 16px' }
+const textSmall = { fontSize: '13px', color: '#756F66', lineHeight: '1.6', margin: '16px 0 8px' }
+const sig = { fontSize: '14px', color: '#524E47', fontStyle: 'italic' as const, margin: '20px 0 0' }
+const hr = { borderColor: '#E9E4DD', margin: '20px 0' }
 const ctaSection = { textAlign: 'center' as const, margin: '24px 0' }
 const button = {
-  backgroundColor: 'hsl(153, 42%, 30%)', color: '#ffffff', padding: '12px 28px',
+  backgroundColor: '#2C6D50', color: '#ffffff', padding: '12px 28px',
   borderRadius: '8px', fontSize: '15px', fontWeight: '600' as const,
   textDecoration: 'none', display: 'inline-block',
 }
-const inlineLink = { color: 'hsl(153, 42%, 30%)', textDecoration: 'underline' }
+const inlineLink = { color: '#2C6D50', textDecoration: 'underline' }

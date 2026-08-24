@@ -206,15 +206,15 @@ export const template = {
 
 const main = { backgroundColor: '#ffffff', fontFamily: "'Outfit', Arial, sans-serif" }
 const container = { padding: '24px 28px', maxWidth: '560px', margin: '0 auto' }
-const h1 = { fontSize: '22px', fontWeight: 'bold' as const, color: 'hsl(153, 42%, 30%)', margin: '0 0 12px' }
-const lead = { fontSize: '15px', color: 'hsl(37, 12%, 25%)', lineHeight: '1.6', margin: '0 0 18px' }
+const h1 = { fontSize: '22px', fontWeight: 'bold' as const, color: '#2C6D50', margin: '0 0 12px' }
+const lead = { fontSize: '15px', color: '#474238', lineHeight: '1.6', margin: '0 0 18px' }
 const sectionTitle = {
-  fontSize: '13px', fontWeight: '700' as const, color: 'hsl(153, 42%, 30%)',
+  fontSize: '13px', fontWeight: '700' as const, color: '#2C6D50',
   textTransform: 'uppercase' as const, letterSpacing: '1px', margin: '18px 0 8px',
 }
 const card = {
-  backgroundColor: 'hsl(37, 22%, 96%)',
-  border: '1px solid hsl(37, 22%, 89%)',
+  backgroundColor: '#F7F5F3',
+  border: '1px solid #E9E4DD',
   borderRadius: '12px',
   padding: '16px 18px',
   margin: '10px 0 16px',
@@ -240,11 +240,11 @@ const urgentBadge = {
   borderRadius: '999px',
   margin: '0 0 8px',
 }
-const cardTitle = { fontSize: '16px', fontWeight: '600' as const, color: 'hsl(153, 42%, 25%)', margin: '0 0 6px' }
-const cardMeta = { fontSize: '13px', color: 'hsl(37, 7%, 35%)', margin: '4px 0' }
-const excerpt = { fontSize: '13px', color: 'hsl(37, 7%, 45%)', margin: '6px 0 10px', lineHeight: '1.55' }
+const cardTitle = { fontSize: '16px', fontWeight: '600' as const, color: '#255B42', margin: '0 0 6px' }
+const cardMeta = { fontSize: '13px', color: '#5F5B53', margin: '4px 0' }
+const excerpt = { fontSize: '13px', color: '#7B756B', margin: '6px 0 10px', lineHeight: '1.55' }
 const button = {
-  backgroundColor: 'hsl(153, 42%, 30%)',
+  backgroundColor: '#2C6D50',
   color: '#ffffff',
   padding: '10px 22px',
   borderRadius: '8px',

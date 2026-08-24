@@ -175,17 +175,17 @@ export const template = {
 
 const main = { backgroundColor: '#ffffff', fontFamily: "'Outfit', Arial, sans-serif" }
 const container = { padding: '24px 28px', maxWidth: '560px', margin: '0 auto' }
-const h1 = { fontSize: '22px', fontWeight: 'bold' as const, color: 'hsl(153, 42%, 30%)', margin: '0 0 20px' }
-const h2 = { fontSize: '16px', fontWeight: '600' as const, color: 'hsl(37, 15%, 25%)', margin: '24px 0 12px' }
-const text = { fontSize: '14px', color: 'hsl(37, 7%, 43%)', lineHeight: '1.6', margin: '0 0 16px' }
-const textStrong = { ...text, color: 'hsl(37, 15%, 25%)', fontWeight: '600' as const }
-const textMuted = { fontSize: '13px', color: 'hsl(37, 7%, 55%)', lineHeight: '1.6', margin: '12px 0 0', textAlign: 'center' as const }
-const textSmall = { fontSize: '12px', color: 'hsl(37, 7%, 50%)', lineHeight: '1.5', margin: '0 0 12px' }
-const link = { color: 'hsl(153, 42%, 30%)', textDecoration: 'underline' }
-const hr = { borderColor: 'hsl(37, 22%, 89%)', margin: '20px 0' }
+const h1 = { fontSize: '22px', fontWeight: 'bold' as const, color: '#2C6D50', margin: '0 0 20px' }
+const h2 = { fontSize: '16px', fontWeight: '600' as const, color: '#494236', margin: '24px 0 12px' }
+const text = { fontSize: '14px', color: '#756F66', lineHeight: '1.6', margin: '0 0 16px' }
+const textStrong = { ...text, color: '#494236', fontWeight: '600' as const }
+const textMuted = { fontSize: '13px', color: '#948E84', lineHeight: '1.6', margin: '12px 0 0', textAlign: 'center' as const }
+const textSmall = { fontSize: '12px', color: '#888277', lineHeight: '1.5', margin: '0 0 12px' }
+const link = { color: '#2C6D50', textDecoration: 'underline' }
+const hr = { borderColor: '#E9E4DD', margin: '20px 0' }
 const ctaSection = { textAlign: 'center' as const, margin: '28px 0 8px' }
 const button = {
-  backgroundColor: 'hsl(153, 42%, 30%)',
+  backgroundColor: '#2C6D50',
   color: '#ffffff',
   padding: '14px 28px',
   borderRadius: '8px',
@@ -196,7 +196,7 @@ const button = {
 }
 const cardsSection = { margin: '8px 0 20px' }
 const cardRow = {
-  borderTop: '1px solid hsl(37, 22%, 92%)',
+  borderTop: '1px solid #EFECE6',
   padding: '10px 0',
 }
 const cardAvatarCol = { width: '60px', verticalAlign: 'middle' as const }
@@ -204,9 +204,9 @@ const cardBodyCol = { verticalAlign: 'middle' as const }
 const avatarImg = { borderRadius: '50%', display: 'block' }
 const avatarFallback = {
   width: '48px', height: '48px', borderRadius: '50%',
-  backgroundColor: 'hsl(153, 42%, 92%)', color: 'hsl(153, 42%, 30%)',
+  backgroundColor: '#E2F3EB', color: '#2C6D50',
   textAlign: 'center' as const, lineHeight: '48px', fontWeight: '600' as const,
 }
-const cardName = { fontSize: '14px', fontWeight: '600' as const, color: 'hsl(37, 15%, 20%)', margin: 0 }
-const cardMeta = { fontSize: '12px', color: 'hsl(37, 7%, 50%)', margin: '2px 0 0' }
-const cardScore = { fontSize: '12px', color: 'hsl(153, 42%, 30%)', margin: '2px 0 0', fontWeight: '600' as const }
+const cardName = { fontSize: '14px', fontWeight: '600' as const, color: '#3B352B', margin: 0 }
+const cardMeta = { fontSize: '12px', color: '#888277', margin: '2px 0 0' }
+const cardScore = { fontSize: '12px', color: '#2C6D50', margin: '2px 0 0', fontWeight: '600' as const }

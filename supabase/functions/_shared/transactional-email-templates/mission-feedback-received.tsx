@@ -66,7 +66,7 @@ export const template = {
 
 const main = { backgroundColor: '#ffffff', fontFamily: "'Outfit', Arial, sans-serif" }
 const container = { padding: '24px 28px', maxWidth: '560px', margin: '0 auto' }
-const h1 = { fontSize: '24px', fontWeight: 'bold' as const, color: 'hsl(153, 42%, 30%)', margin: '0 0 20px' }
-const text = { fontSize: '14px', color: 'hsl(37, 7%, 43%)', lineHeight: '1.6', margin: '0 0 16px' }
-const quote = { fontSize: '15px', color: 'hsl(37, 7%, 25%)', lineHeight: '1.6', margin: '0 0 16px', padding: '12px 16px', borderLeft: '3px solid hsl(153, 42%, 30%)', backgroundColor: 'hsl(153, 42%, 96%)', fontStyle: 'italic' as const }
-const button = { backgroundColor: 'hsl(153, 42%, 30%)', color: '#ffffff', padding: '12px 28px', borderRadius: '8px', fontSize: '15px', fontWeight: '600' as const, textDecoration: 'none', display: 'inline-block' }
+const h1 = { fontSize: '24px', fontWeight: 'bold' as const, color: '#2C6D50', margin: '0 0 20px' }
+const text = { fontSize: '14px', color: '#756F66', lineHeight: '1.6', margin: '0 0 16px' }
+const quote = { fontSize: '15px', color: '#44413B', lineHeight: '1.6', margin: '0 0 16px', padding: '12px 16px', borderLeft: '3px solid #2C6D50', backgroundColor: '#F1F9F5', fontStyle: 'italic' as const }
+const button = { backgroundColor: '#2C6D50', color: '#ffffff', padding: '12px 28px', borderRadius: '8px', fontSize: '15px', fontWeight: '600' as const, textDecoration: 'none', display: 'inline-block' }

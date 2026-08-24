@@ -204,14 +204,14 @@ export const template = {
 
 const main = { backgroundColor: '#ffffff', fontFamily: "'Outfit', Arial, sans-serif" }
 const container = { padding: '24px 28px', maxWidth: '600px', margin: '0 auto' }
-const h1 = { fontSize: '22px', fontWeight: 'bold' as const, color: 'hsl(153, 42%, 30%)', margin: '0 0 20px' }
-const h2 = { fontSize: '17px', fontWeight: '600' as const, color: 'hsl(153, 42%, 30%)', margin: '28px 0 12px' }
-const text = { fontSize: '14px', color: 'hsl(37, 7%, 38%)', lineHeight: '1.65', margin: '0 0 16px' }
-const listTitle = { fontSize: '14px', fontWeight: '600' as const, color: 'hsl(37, 7%, 25%)', margin: '18px 0 8px' }
-const hr = { borderColor: 'hsl(37, 22%, 89%)', margin: '28px 0' }
+const h1 = { fontSize: '22px', fontWeight: 'bold' as const, color: '#2C6D50', margin: '0 0 20px' }
+const h2 = { fontSize: '17px', fontWeight: '600' as const, color: '#2C6D50', margin: '28px 0 12px' }
+const text = { fontSize: '14px', color: '#68625A', lineHeight: '1.65', margin: '0 0 16px' }
+const listTitle = { fontSize: '14px', fontWeight: '600' as const, color: '#44413B', margin: '18px 0 8px' }
+const hr = { borderColor: '#E9E4DD', margin: '28px 0' }
 const ctaSection = { textAlign: 'center' as const, margin: '28px 0 8px' }
 const button = {
-  backgroundColor: 'hsl(153, 42%, 30%)',
+  backgroundColor: '#2C6D50',
   color: '#ffffff',
   padding: '14px 32px',
   borderRadius: '8px',
@@ -221,31 +221,31 @@ const button = {
   display: 'inline-block',
 }
 const highlightBox = {
-  backgroundColor: 'hsl(37, 35%, 96%)',
-  border: '1px solid hsl(37, 22%, 85%)',
+  backgroundColor: '#F8F6F1',
+  border: '1px solid #E1DBD0',
   borderRadius: '10px',
   padding: '16px 18px',
   margin: '20px 0 24px',
 }
-const highlightTitle = { fontSize: '14px', fontWeight: '600' as const, color: 'hsl(25, 75%, 40%)', margin: '0 0 10px' }
-const highlightItem = { fontSize: '13px', color: 'hsl(37, 7%, 38%)', lineHeight: '1.6', margin: '0 0 8px' }
+const highlightTitle = { fontSize: '14px', fontWeight: '600' as const, color: '#B35919', margin: '0 0 10px' }
+const highlightItem = { fontSize: '13px', color: '#68625A', lineHeight: '1.6', margin: '0 0 8px' }
 const successBox = {
-  backgroundColor: 'hsl(153, 30%, 96%)',
-  border: '1px solid hsl(153, 30%, 80%)',
+  backgroundColor: '#F2F8F5',
+  border: '1px solid #BDDBCE',
   borderRadius: '10px',
   padding: '16px 18px',
   margin: '20px 0 24px',
 }
-const successTitle = { fontSize: '14px', fontWeight: '700' as const, color: 'hsl(153, 42%, 25%)', margin: '0 0 8px', letterSpacing: '0.02em' }
-const successText = { fontSize: '13px', color: 'hsl(37, 7%, 38%)', lineHeight: '1.65', margin: '0' }
+const successTitle = { fontSize: '14px', fontWeight: '700' as const, color: '#255B42', margin: '0 0 8px', letterSpacing: '0.02em' }
+const successText = { fontSize: '13px', color: '#68625A', lineHeight: '1.65', margin: '0' }
 const articleBox = {
-  backgroundColor: 'hsl(153, 30%, 96%)',
-  border: '1px solid hsl(153, 30%, 85%)',
+  backgroundColor: '#F2F8F5',
+  border: '1px solid #CDE4DA',
   borderRadius: '10px',
   padding: '14px 18px',
   margin: '8px 0 20px',
 }
-const articleLabel = { fontSize: '11px', fontWeight: '700' as const, letterSpacing: '0.08em', color: 'hsl(153, 42%, 30%)', margin: '0 0 6px' }
-const articleLink = { fontSize: '15px', fontWeight: '600' as const, color: 'hsl(153, 42%, 25%)', textDecoration: 'underline' }
-const legal = { fontSize: '10px', color: 'hsl(37, 7%, 60%)', lineHeight: '1.5', margin: '24px 0 12px' }
-const footer = { fontSize: '12px', color: 'hsl(37, 7%, 50%)', margin: '10px 0 0' }
+const articleLabel = { fontSize: '11px', fontWeight: '700' as const, letterSpacing: '0.08em', color: '#2C6D50', margin: '0 0 6px' }
+const articleLink = { fontSize: '15px', fontWeight: '600' as const, color: '#255B42', textDecoration: 'underline' }
+const legal = { fontSize: '10px', color: '#A09B92', lineHeight: '1.5', margin: '24px 0 12px' }
+const footer = { fontSize: '12px', color: '#888277', margin: '10px 0 0' }

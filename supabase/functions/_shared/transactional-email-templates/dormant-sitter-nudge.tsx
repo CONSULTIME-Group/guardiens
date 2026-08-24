@@ -61,13 +61,13 @@ const DormantSitterNudgeEmail = ({ firstName, days }: Props) => (
 
 const main = { backgroundColor: '#f7f5f0', fontFamily: "'Outfit', Arial, sans-serif" }
 const container = { padding: '32px 28px', maxWidth: '560px', margin: '0 auto', backgroundColor: '#ffffff', borderRadius: '14px' }
-const hero = { backgroundColor: 'hsl(153, 42%, 96%)', padding: '22px 20px', borderRadius: '12px', margin: '0 0 24px', borderLeft: '4px solid hsl(153, 42%, 30%)' }
-const heroKicker = { fontSize: '11px', letterSpacing: '1.5px', textTransform: 'uppercase' as const, color: 'hsl(153, 42%, 30%)', fontWeight: 600, margin: '0 0 6px' }
-const h1 = { fontSize: '24px', lineHeight: '1.25', fontWeight: 'bold' as const, color: 'hsl(153, 42%, 20%)', margin: 0, fontFamily: "'Playfair Display', Georgia, serif" }
-const text = { fontSize: '15px', color: 'hsl(37, 7%, 25%)', lineHeight: '1.65', margin: '0 0 16px' }
+const hero = { backgroundColor: '#F1F9F5', padding: '22px 20px', borderRadius: '12px', margin: '0 0 24px', borderLeft: '4px solid #2C6D50' }
+const heroKicker = { fontSize: '11px', letterSpacing: '1.5px', textTransform: 'uppercase' as const, color: '#2C6D50', fontWeight: 600, margin: '0 0 6px' }
+const h1 = { fontSize: '24px', lineHeight: '1.25', fontWeight: 'bold' as const, color: '#1E4835', margin: 0, fontFamily: "'Playfair Display', Georgia, serif" }
+const text = { fontSize: '15px', color: '#44413B', lineHeight: '1.65', margin: '0 0 16px' }
 const ctaSection = { textAlign: 'center' as const, margin: '32px 0 12px' }
 const button = {
-  backgroundColor: 'hsl(153, 42%, 30%)',
+  backgroundColor: '#2C6D50',
   color: '#ffffff',
   padding: '14px 32px',
   borderRadius: '10px',
@@ -76,7 +76,7 @@ const button = {
   textDecoration: 'none',
   display: 'inline-block',
 }
-const hr = { borderColor: 'hsl(37, 22%, 89%)', margin: '24px 0 16px' }
+const hr = { borderColor: '#E9E4DD', margin: '24px 0 16px' }
 
 export const template = {
   component: DormantSitterNudgeEmail,

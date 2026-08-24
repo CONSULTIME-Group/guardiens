@@ -239,31 +239,31 @@ export const template = {
 
 const main = { backgroundColor: '#ffffff', fontFamily: "'Outfit', Arial, sans-serif" }
 const container = { padding: '24px 28px', maxWidth: '560px', margin: '0 auto' }
-const h1 = { fontSize: '22px', fontWeight: 'bold' as const, color: 'hsl(153, 42%, 30%)', margin: '0 0 18px' }
-const text = { fontSize: '14px', color: 'hsl(37, 7%, 33%)', lineHeight: '1.6', margin: '0 0 14px' }
+const h1 = { fontSize: '22px', fontWeight: 'bold' as const, color: '#2C6D50', margin: '0 0 18px' }
+const text = { fontSize: '14px', color: '#5A564E', lineHeight: '1.6', margin: '0 0 14px' }
 const card = {
-  backgroundColor: 'hsl(37, 22%, 96%)',
-  border: '1px solid hsl(37, 22%, 89%)',
+  backgroundColor: '#F7F5F3',
+  border: '1px solid #E9E4DD',
   borderRadius: '10px',
   padding: '16px 18px',
   margin: '14px 0',
 }
 const coverImg = { borderRadius: '8px', marginBottom: '10px', objectFit: 'cover' as const }
-const cardTitle = { fontSize: '16px', fontWeight: '600' as const, color: 'hsl(153, 42%, 25%)', margin: '0 0 8px' }
-const cardLine = { fontSize: '13px', color: 'hsl(37, 7%, 35%)', margin: '4px 0' }
-const cardLineSmall = { fontSize: '12px', color: 'hsl(37, 7%, 45%)', margin: '8px 0 0' }
+const cardTitle = { fontSize: '16px', fontWeight: '600' as const, color: '#255B42', margin: '0 0 8px' }
+const cardLine = { fontSize: '13px', color: '#5F5B53', margin: '4px 0' }
+const cardLineSmall = { fontSize: '12px', color: '#7B756B', margin: '8px 0 0' }
 const cardBadge = {
   fontSize: '12px',
-  color: 'hsl(153, 42%, 30%)',
+  color: '#2C6D50',
   fontWeight: '600' as const,
-  backgroundColor: 'hsl(153, 42%, 94%)',
+  backgroundColor: '#E9F6F0',
   padding: '4px 10px',
   borderRadius: '999px',
   display: 'inline-block',
   margin: '8px 0 12px',
 }
 const button = {
-  backgroundColor: 'hsl(153, 42%, 30%)',
+  backgroundColor: '#2C6D50',
   color: '#ffffff',
   padding: '11px 22px',
   borderRadius: '8px',
@@ -273,7 +273,7 @@ const button = {
   display: 'inline-block',
   marginTop: '4px',
 }
-const linkStyle = { color: 'hsl(153, 42%, 30%)', textDecoration: 'underline' }
-const smallText = { fontSize: '12px', color: 'hsl(37, 7%, 50%)', lineHeight: '1.5', margin: '6px 0' }
-const baseline = { fontSize: '12px', color: 'hsl(153, 42%, 30%)', fontWeight: '600' as const, margin: '14px 0 8px' }
-const hr = { borderColor: 'hsl(37, 22%, 89%)', margin: '22px 0 16px' }
+const linkStyle = { color: '#2C6D50', textDecoration: 'underline' }
+const smallText = { fontSize: '12px', color: '#888277', lineHeight: '1.5', margin: '6px 0' }
+const baseline = { fontSize: '12px', color: '#2C6D50', fontWeight: '600' as const, margin: '14px 0 8px' }
+const hr = { borderColor: '#E9E4DD', margin: '22px 0 16px' }

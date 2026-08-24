@@ -52,12 +52,12 @@ const UnsubscribeLinkEmail = ({ unsubscribeUrl }: Props) => (
 
 const main = { backgroundColor: '#f7f5f0', fontFamily: "'Outfit', Arial, sans-serif" }
 const container = { padding: '32px 28px', maxWidth: '560px', margin: '0 auto', backgroundColor: '#ffffff', borderRadius: '14px' }
-const h1 = { fontSize: '22px', fontWeight: 'bold' as const, color: 'hsl(153, 42%, 25%)', margin: '0 0 18px', fontFamily: "'Playfair Display', Georgia, serif" }
-const text = { fontSize: '15px', color: 'hsl(37, 7%, 25%)', lineHeight: '1.65', margin: '0 0 16px' }
-const hint = { fontSize: '13px', color: 'hsl(37, 7%, 50%)', lineHeight: '1.6', margin: '8px 0 0' }
+const h1 = { fontSize: '22px', fontWeight: 'bold' as const, color: '#255B42', margin: '0 0 18px', fontFamily: "'Playfair Display', Georgia, serif" }
+const text = { fontSize: '15px', color: '#44413B', lineHeight: '1.65', margin: '0 0 16px' }
+const hint = { fontSize: '13px', color: '#888277', lineHeight: '1.6', margin: '8px 0 0' }
 const ctaSection = { textAlign: 'center' as const, margin: '28px 0 12px' }
 const button = {
-  backgroundColor: 'hsl(153, 42%, 30%)',
+  backgroundColor: '#2C6D50',
   color: '#ffffff',
   padding: '14px 32px',
   borderRadius: '10px',
@@ -66,7 +66,7 @@ const button = {
   textDecoration: 'none',
   display: 'inline-block',
 }
-const hr = { borderColor: 'hsl(37, 22%, 89%)', margin: '24px 0 16px' }
+const hr = { borderColor: '#E9E4DD', margin: '24px 0 16px' }
 
 export const template = {
   component: UnsubscribeLinkEmail,

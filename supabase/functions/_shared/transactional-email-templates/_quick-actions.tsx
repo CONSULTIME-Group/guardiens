@@ -48,7 +48,7 @@ export const QuickActions = ({ primaryHref, primaryLabel, declineUrl, thinkingUr
 
 const wrap = { margin: '24px 0 8px' }
 const primaryBtn = {
-  backgroundColor: 'hsl(153, 42%, 30%)',
+  backgroundColor: '#2C6D50',
   color: '#ffffff',
   padding: '14px 32px',
   borderRadius: '10px',
@@ -59,8 +59,8 @@ const primaryBtn = {
 }
 const secondaryBtn = {
   backgroundColor: '#ffffff',
-  color: 'hsl(153, 42%, 30%)',
-  border: '1px solid hsl(153, 42%, 60%)',
+  color: '#2C6D50',
+  border: '1px solid #6EC49D',
   padding: '10px 18px',
   borderRadius: '10px',
   fontSize: '14px',
@@ -69,5 +69,5 @@ const secondaryBtn = {
   display: 'inline-block',
   margin: '0 6px 8px',
 }
-const hint = { fontSize: '13px', color: 'hsl(37, 7%, 43%)', textAlign: 'center' as const, margin: '10px 0 8px' }
-const note = { fontSize: '11px', color: 'hsl(37, 7%, 55%)', textAlign: 'center' as const, margin: '4px 0 0' }
+const hint = { fontSize: '13px', color: '#756F66', textAlign: 'center' as const, margin: '10px 0 8px' }
+const note = { fontSize: '11px', color: '#948E84', textAlign: 'center' as const, margin: '4px 0 0' }

@@ -81,14 +81,14 @@ const SitInvitationEmail = ({
 
 const main = { backgroundColor: '#ffffff', fontFamily: "'Outfit', Arial, sans-serif" }
 const container = { padding: '24px 28px', maxWidth: '560px', margin: '0 auto' }
-const h1 = { fontSize: '22px', fontWeight: 'bold' as const, color: 'hsl(153, 42%, 30%)', margin: '0 0 20px' }
-const text = { fontSize: '14px', color: 'hsl(37, 7%, 30%)', lineHeight: '1.6', margin: '0 0 16px' }
-const card = { backgroundColor: 'hsl(40, 33%, 96%)', padding: '16px', borderRadius: '10px', margin: '16px 0' }
-const cardTitle = { color: 'hsl(153, 42%, 30%)', fontSize: '13px', fontWeight: 600, marginBottom: '8px' }
-const cardLine = { color: 'hsl(37, 7%, 30%)', fontSize: '14px', lineHeight: '22px', whiteSpace: 'pre-wrap' as const }
+const h1 = { fontSize: '22px', fontWeight: 'bold' as const, color: '#2C6D50', margin: '0 0 20px' }
+const text = { fontSize: '14px', color: '#524E47', lineHeight: '1.6', margin: '0 0 16px' }
+const card = { backgroundColor: '#F8F6F1', padding: '16px', borderRadius: '10px', margin: '16px 0' }
+const cardTitle = { color: '#2C6D50', fontSize: '13px', fontWeight: 600, marginBottom: '8px' }
+const cardLine = { color: '#524E47', fontSize: '14px', lineHeight: '22px', whiteSpace: 'pre-wrap' as const }
 const ctaSection = { textAlign: 'center' as const, margin: '28px 0' }
 const button = {
-  backgroundColor: 'hsl(153, 42%, 30%)',
+  backgroundColor: '#2C6D50',
   color: '#ffffff',
   padding: '12px 28px',
   borderRadius: '8px',
@@ -97,8 +97,8 @@ const button = {
   textDecoration: 'none',
   display: 'inline-block',
 }
-const muted = { color: 'hsl(37, 7%, 50%)', fontSize: '13px', lineHeight: '20px', marginTop: '20px' }
-const hr = { borderColor: 'hsl(37, 22%, 89%)', margin: '20px 0' }
+const muted = { color: '#888277', fontSize: '13px', lineHeight: '20px', marginTop: '20px' }
+const hr = { borderColor: '#E9E4DD', margin: '20px 0' }
 
 export const template: TemplateEntry = {
   component: SitInvitationEmail,

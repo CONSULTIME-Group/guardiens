@@ -32,12 +32,12 @@ const nameCell = {
   fontFamily: "'Playfair Display', Georgia, serif",
   fontSize: '17px',
   fontWeight: 600 as const,
-  color: 'hsl(153, 42%, 25%)',
+  color: '#255B42',
   lineHeight: '1.2',
 }
 const baseline = {
   fontSize: '12px',
-  color: 'hsl(37, 7%, 45%)',
+  color: '#7B756B',
   lineHeight: '1.4',
   margin: '2px 0 0',
   textAlign: 'center' as const,
@@ -84,7 +84,7 @@ export const AlmaSignature = () => (
 
 const introStyle = {
   fontSize: '14px',
-  color: 'hsl(37, 7%, 33%)',
+  color: '#5A564E',
   lineHeight: '1.6',
   margin: '0 0 14px',
   fontStyle: 'italic' as const,
