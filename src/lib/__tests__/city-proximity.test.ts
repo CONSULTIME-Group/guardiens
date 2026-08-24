@@ -2,6 +2,7 @@ import { describe, it, expect } from "vitest";
 import {
   haversineKm,
   cityNameMatches,
+  buildCityIlikeOrFilter,
   pickNearbySitters,
   buildNearbyMention,
   type NearbySitterCandidate,
@@ -55,6 +56,26 @@ describe("cityNameMatches", () => {
   });
 });
 
+describe("buildCityIlikeOrFilter", () => {
+  it("produit une clause ilike par commune, joker astérisque", () => {
+    expect(buildCityIlikeOrFilter(["Papeete", "Mahina"])).toBe(
+      'city.ilike."*Papeete*",city.ilike."*Mahina*"',
+    );
+  });
+
+  it("laisse passer l'apostrophe et les espaces (Faa'a, Hitiaa O Te Ra)", () => {
+    expect(buildCityIlikeOrFilter(["Faa'a"])).toBe('city.ilike."*Faa\'a*"');
+    expect(buildCityIlikeOrFilter(["Hitiaa O Te Ra"])).toBe(
+      'city.ilike."*Hitiaa O Te Ra*"',
+    );
+  });
+
+  it("ignore les entrées blanches et renvoie null si rien d'exploitable", () => {
+    expect(buildCityIlikeOrFilter([])).toBeNull();
+    expect(buildCityIlikeOrFilter([" ", ""])).toBeNull();
+  });
+});
+
 describe("pickNearbySitters", () => {
   const lyon = { city: "Lyon", cityLat: 45.764, cityLng: 4.8357, departmentCode: "69" };
 
@@ -77,6 +98,28 @@ describe("pickNearbySitters", () => {
       { ...lyon, limit: 6 },
     );
     expect(list).toEqual([]);
+  });
+
+  it("page agrégée : exclut les habitants de chaque commune de la liste", () => {
+    const tahiti = {
+      city: "Tahiti",
+      cityLat: -17.65,
+      cityLng: -149.43,
+      departmentCode: "987",
+      aggregateCities: ["Papeete", "Faa'a"],
+    };
+    const list = pickNearbySitters(
+      [
+        // Habite Papeete (987) : résident de la page agrégée, exclu.
+        cand("resident", -17.54, -149.57, 100, "Papeete", "98714"),
+        // Habite Faa'a (987) : résident aussi, exclu malgré l'apostrophe.
+        cand("resident2", -17.55, -149.6, 100, "Faa'a", "98702"),
+        // Habite une commune hors liste : reste en proximité.
+        cand("secteur", -17.66, -149.45, 50, "Moorea", "98728"),
+      ],
+      { ...tahiti, limit: 6 },
+    );
+    expect(list.map((s) => s.id)).toEqual(["secteur"]);
   });
 
   it("n'exclut pas un homonyme hors département", () => {

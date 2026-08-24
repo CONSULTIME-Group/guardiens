@@ -49,6 +49,25 @@ export function cityNameMatches(
   );
 }
 
+/**
+ * Construit le filtre `or` PostgREST ramenant les profils dont la ville
+ * contient l'une quelconque des communes données (pages agrégées, ex :
+ * Tahiti couvre Papeete, Faa'a, etc.). Chaque motif est mis entre
+ * guillemets doubles : virgules et parenthèses éventuelles restent
+ * littérales, et l'apostrophe d'un nom comme Faa'a traverse sans
+ * échappement particulier car ce n'est pas un caractère réservé de la
+ * syntaxe des filtres. L'astérisque est le joker ilike de PostgREST,
+ * traduit en pourcent côté SQL même entre guillemets. Renvoie null si la
+ * liste est vide ou blanche.
+ */
+export function buildCityIlikeOrFilter(communes: string[]): string | null {
+  const parts = communes
+    .map((c) => c.trim())
+    .filter(Boolean)
+    .map((c) => `city.ilike."*${c.replace(/"/g, '\\"')}*"`);
+  return parts.length ? parts.join(",") : null;
+}
+
 export interface NearbySitterCandidate {
   id: string;
   city: string | null;
@@ -60,6 +79,13 @@ export interface NearbySitterCandidate {
 
 export interface PickNearbyOptions {
   city: string;
+  /**
+   * Communes agrégées par la page (page île ou métropole). Chaque commune
+   * est traitée comme résidente au même titre que `city` : un gardien qui
+   * y habite est exclu du complément de proximité, il est déjà compté
+   * dans les résidents.
+   */
+  aggregateCities?: string[] | null;
   departmentCode?: string | null;
   cityLat: number;
   cityLng: number;
@@ -78,15 +104,17 @@ export function pickNearbySitters<T extends NearbySitterCandidate>(
   opts: PickNearbyOptions,
 ): Array<T & { distance_km: number }> {
   if (opts.limit <= 0) return [];
+  // Noms résidents : la commune de la page, plus chaque commune agrégée.
+  const residentNames = [opts.city, ...(opts.aggregateCities ?? [])];
   const out: Array<T & { distance_km: number }> = [];
   for (const c of candidates) {
     if (opts.excludeIds?.has(c.id)) continue;
     if (c.latitude_approx == null || c.longitude_approx == null) continue;
     if (c.geographic_radius == null || c.geographic_radius <= 0) continue;
-    // Habitant de la commune : déjà compté dans sitter_count, jamais en
-    // proximité (évite le double comptage et la confusion d'affichage).
+    // Habitant d'une commune couverte : déjà compté dans sitter_count,
+    // jamais en proximité (évite double comptage et confusion d'affichage).
     if (
-      cityNameMatches(c.city, opts.city) &&
+      residentNames.some((name) => cityNameMatches(c.city, name)) &&
       postalMatchesDepartment(c.postal_code, opts.departmentCode)
     ) {
       continue;
