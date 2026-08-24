@@ -781,7 +781,7 @@ const CityPage = () => {
  <section className="max-w-5xl mx-auto px-4 py-6">
  <div className="flex flex-wrap gap-4">
  {cityGuide && (
- <Link to={`/guide/${cityGuide.slug}`}>
+ <Link to={`/guides/${cityGuide.slug}`}>
  <Card className="hover:shadow-md transition-shadow">
  <CardContent className="p-4 flex items-center gap-3">
  <Compass className="h-5 w-5 text-primary" />

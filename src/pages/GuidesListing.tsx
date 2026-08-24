@@ -159,7 +159,7 @@ const GuidesListing = () => {
                       {deptGuides.map((guide) => {
                         const count = getPlaceCount(guide.id);
                         return (
-                          <Link key={guide.id} to={`/guide/${guide.slug}`}>
+                          <Link key={guide.id} to={`/guides/${guide.slug}`}>
                             <Card className="h-full hover:shadow-md transition-shadow border-border">
                               <CardContent className="p-5">
                                 <div className="flex items-start gap-3 mb-3">
