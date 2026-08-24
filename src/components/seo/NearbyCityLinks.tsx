@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { departmentIn } from "@/lib/departmentGrammar";
 
 interface Props {
   /** Nom du département de la ville courante. */
@@ -37,7 +38,7 @@ const NearbyCityLinks = ({ department, currentSlug }: Props) => {
   return (
     <section className="max-w-5xl mx-auto px-4 py-10 border-t border-border">
       <h2 className="font-serif text-2xl font-bold text-foreground mb-5">
-        Autres villes couvertes en {department}
+        Autres villes couvertes {departmentIn(department)}
       </h2>
       <ul className="grid grid-cols-2 md:grid-cols-4 gap-2">
         {cities.map((c) => (
