@@ -388,7 +388,7 @@
         "pet_home": "L'animal reste chez lui",
         "house_lived": "La maison est habitée",
         "cost": "Coût pour le propriétaire",
-        "human": "Lien humain"
+        "human": "Préparation du gardien"
       },
       "rows": {
         "guardiens": {
@@ -396,28 +396,28 @@
           "pet_home": "Oui",
           "house_lived": "Oui, en permanence",
           "cost": "Entre membres, sans transaction",
-          "human": "Rencontre préalable et avis croisés"
+          "human": "Guide de race, guide de ville, matching par affinité"
         },
         "pension": {
           "label": "Pension",
           "pet_home": "Non, l'animal est déplacé",
           "house_lived": "Sans objet",
           "cost": "Payant, tarif journalier",
-          "human": "Équipe professionnelle sur site"
+          "human": "Aucune préparation individuelle, personnel tournant"
         },
         "petsitter": {
           "label": "Pet-sitter à domicile",
           "pet_home": "Oui",
           "house_lived": "Non, visites ponctuelles",
           "cost": "Payant, à la visite",
-          "human": "Relation professionnelle"
+          "human": "Visites courtes, pas de guide dédié"
         },
         "relative": {
           "label": "Garde par un proche",
           "pet_home": "Variable",
           "house_lived": "Variable",
           "cost": "Sans frais en général",
-          "human": "Relation familiale ou amicale"
+          "human": "Connaît déjà vos habitudes, mais rien de formalisé"
         }
       }
     },
