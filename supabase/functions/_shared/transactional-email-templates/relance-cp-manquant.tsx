@@ -18,6 +18,8 @@ interface RelanceCpProps {
   open_sits_count?: number
   /** Zone décrite au rang 2 : département, région, ou "en France". */
   open_sits_zone?: string
+  /** Lien profond authentifié, prioritaire sur cta_url quand il est présent. */
+  deepLinkUrl?: string
 }
 
 const RelanceCpManquantEmail = ({
@@ -26,9 +28,10 @@ const RelanceCpManquantEmail = ({
   rang,
   open_sits_count,
   open_sits_zone,
+  deepLinkUrl,
 }: RelanceCpProps) => {
   const name = prenom || ''
-  const link = cta_url || 'https://guardiens.fr/mon-secteur'
+  const link = deepLinkUrl || cta_url || 'https://guardiens.fr/mon-secteur'
   const step = rang && rang >= 1 && rang <= 4 ? rang : 1
   const zone = open_sits_zone || 'en France'
 
@@ -92,8 +95,11 @@ const RelanceCpManquantEmail = ({
 
           <Section style={ctaSection}>
             <Button style={button} href={link}>
-              {step >= 3 ? 'Renseigner mon secteur' : 'Indiquer mon secteur'}
+              Indiquer mon secteur
             </Button>
+            <Text style={reassurance}>
+              Trente secondes, et vous voyez les gardes autour de vous.
+            </Text>
           </Section>
 
           <Hr style={hr} />
