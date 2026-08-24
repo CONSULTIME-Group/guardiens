@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, Navigate, useParams } from "react-router-dom";
 import NotFound from "@/pages/NotFound";
-import ReactMarkdown from "react-markdown";
+import { MarkdownBody } from "@/components/MarkdownBody";
 import { supabase } from "@/integrations/supabase/client";
 import { slugify } from "@/lib/normalize";
 import { CITIES } from "@/data/cities";
@@ -257,7 +257,7 @@ const BreedPage = () => {
 
         {breed.rich_content && breed.rich_content.trim().length > 200 ? (
           <article className="prose prose-lg prose-neutral max-w-none prose-headings:font-serif prose-headings:text-foreground prose-h2:text-2xl prose-h2:mt-10 prose-h2:mb-4 prose-h3:text-lg prose-h3:mt-6 prose-h3:mb-2 prose-p:text-foreground/85 prose-p:leading-relaxed prose-li:text-foreground/85 prose-strong:text-foreground prose-a:text-primary prose-a:no-underline hover:prose-a:underline">
-            <ReactMarkdown>{breed.rich_content}</ReactMarkdown>
+            <MarkdownBody>{breed.rich_content}</MarkdownBody>
           </article>
         ) : (
           <article className="prose prose-neutral max-w-none">
