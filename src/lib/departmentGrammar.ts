@@ -153,15 +153,33 @@ export const departmentOf = (name: string | null | undefined): string => {
 
 const escapeRegExp = (s: string): string => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
+// Lettre ou tiret : la borne interdit toute reconnaissance partielle du nom
+// (« Haute-Loire » sur la page Loire, « Bouches-du-Rhône », « Haute-Savoie »).
+const BOUNDARY_CHARS = "A-Za-zÀ-ÖØ-öø-ÿ-";
+
+// Préfixes reconnus immédiatement devant le nom, du plus long au plus court.
+// Les formes à apostrophe (droite ou typographique) ne prennent pas d'espace.
+const MENTION_PREFIX =
+  "(dans\\s+les?|dans\\s+l['’]|dans|en|aux|au|à|des|du|de|d['’]|les|le|la|l['’])\\s*";
+
+// Génitifs et déterminants simples : le passage est déjà correct, on n'y
+// touche pas. Le réécrire produirait une faute (« les communes de en ... »).
+const KEEP_PREFIXES = new Set(["de", "du", "des", "d'", "le", "la", "les", "l'"]);
+
 /**
  * Répare une chaîne stockée (titre H1, meta title, meta description) dont la
  * mention du département est fautive : préposition inadaptée (« dans Ain »,
  * « en Rhône », « dans le Savoie ») ou nom nu (« Garde d'animaux Rhône : »).
  *
- * Chaque occurrence du nom, qu'elle soit déjà correcte, fautive ou nue, est
- * remplacée par la forme locative de la table. Aucune règle grammaticale
- * n'est devinée : seule la table décide de la forme produite. Nom inconnu ou
- * texte vide : la chaîne est retournée telle quelle.
+ * Une seule expression régulière, un callback qui décide :
+ * - préfixe génitif ou déterminant simple (de, du, des, d', le, la, les, l') :
+ *   passage laissé totalement inchangé,
+ * - préfixe absent ou préposition locative (dans, en, au, aux, à et formes
+ *   composées) : préfixe et nom remplacés par la forme locative de la table.
+ *
+ * Aucune règle grammaticale n'est devinée : seule la table décide de la forme
+ * produite. Nom inconnu, nom sans accent (« Rhone » pour « Rhône ») ou texte
+ * vide : la chaîne est retournée telle quelle.
  */
 export const rewriteDepartmentMention = (
   text: string | null | undefined,
@@ -170,19 +188,14 @@ export const rewriteDepartmentMention = (
   if (!text) return text ?? "";
   const forms = lookup(name);
   if (!forms || !name) return text;
-  const trimmed = name.trim();
   const loc = forms.in;
-  const esc = escapeRegExp(trimmed);
-  const TOKEN = "\u0001";
-
-  // 1. Protège les occurrences déjà correctes.
-  let out = text.split(loc).join(TOKEN);
-  // 2. Préposition fautive suivie du nom (« dans Ain », « en Rhône », « dans le Savoie »).
-  const prepRe = new RegExp(`\\b(?:dans\\s+les?|dans\\s+l['’]|dans|en|au|aux|à)\\s+${esc}\\b`, "g");
-  out = out.replace(prepRe, TOKEN);
-  // 3. Nom nu restant (ex. « Garde d'animaux Rhône : »).
-  const bareRe = new RegExp(`\\b${esc}\\b`, "g");
-  out = out.replace(bareRe, TOKEN);
-
-  return out.split(TOKEN).join(loc);
+  const re = new RegExp(
+    `(?<![${BOUNDARY_CHARS}])${MENTION_PREFIX}?(${escapeRegExp(name.trim())})(?![${BOUNDARY_CHARS}])`,
+    "g"
+  );
+  return text.replace(re, (match, prefix: string | undefined) => {
+    if (!prefix) return loc;
+    const key = prefix.toLowerCase().replace(/’/g, "'").replace(/\s+/g, " ").trim();
+    return KEEP_PREFIXES.has(key) ? match : loc;
+  });
 };
