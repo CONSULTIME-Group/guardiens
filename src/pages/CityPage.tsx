@@ -492,6 +492,7 @@ const CityPage = () => {
         <CitySittersGrid
           city={cityData.name}
           citySlug={cityData.slug}
+          aggregateCities={null}
           departmentCode={cityData.departmentCode}
           cityLat={cityData.coordinates.lat}
           cityLng={cityData.coordinates.lng}
@@ -841,6 +842,7 @@ const CityPage = () => {
         <CitySittersGrid
           city={dbPage.city}
           citySlug={dbPage.slug}
+          aggregateCities={dbPage.aggregate_cities ?? null}
           departmentCode={dbDepartmentCode}
           cityLat={dbPage.latitude ?? null}
           cityLng={dbPage.longitude ?? null}

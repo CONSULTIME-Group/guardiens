@@ -153,6 +153,7 @@ const CitySittersGrid = ({ city, citySlug, aggregateCities, departmentCode, city
   const nearby = hasCoords
     ? pickNearbySitters(nearbyCandidates, {
         city,
+        aggregateCities: residentCities.length ? residentCities : null,
         departmentCode,
         cityLat: cityLat as number,
         cityLng: cityLng as number,
