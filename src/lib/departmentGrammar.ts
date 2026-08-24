@@ -173,7 +173,7 @@ export const rewriteDepartmentMention = (
   const trimmed = name.trim();
   const loc = forms.in;
   const esc = escapeRegExp(trimmed);
-  const TOKEN = "";
+  const TOKEN = "\u0001";
 
   // 1. Protège les occurrences déjà correctes.
   let out = text.split(loc).join(TOKEN);
