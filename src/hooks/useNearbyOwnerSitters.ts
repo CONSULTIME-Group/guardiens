@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { haversineDistance } from "@/utils/geo";
+import { chunkArray } from "@/lib/chunkArray";
 
 /**
  * « Gardiens près de chez vous » pour le dashboard propriétaire.
@@ -103,17 +104,30 @@ export function useNearbyOwnerSitters(currentUserId: string | undefined) {
 
       // 3. Notes moyennes + compétences sitter (batch)
       const ids = pool.map((p) => p.id);
-      const [{ data: reviewsData }, { data: sitterRows }] = await Promise.all([
-        supabase
-          .from("reviews")
-          .select("reviewee_id, overall_rating")
-          .in("reviewee_id", ids)
-          .eq("published", true),
-        supabase
-          .from("public_sitter_profiles")
-          .select("user_id, competences")
-          .in("user_id", ids),
+      const idBatches = chunkArray(ids, 100);
+      const [reviewResults, sitterResults] = await Promise.all([
+        Promise.all(
+          idBatches.map((batch) =>
+            supabase
+              .from("reviews")
+              .select("reviewee_id, overall_rating")
+              .in("reviewee_id", batch)
+              .eq("published", true),
+          ),
+        ),
+        Promise.all(
+          idBatches.map((batch) =>
+            supabase
+              .from("public_sitter_profiles")
+              .select("user_id, competences")
+              .in("user_id", batch),
+          ),
+        ),
       ]);
+      const batchError = [...reviewResults, ...sitterResults].find((result) => result.error)?.error;
+      if (batchError) throw batchError;
+      const reviewsData = reviewResults.flatMap((result) => result.data ?? []);
+      const sitterRows = sitterResults.flatMap((result) => result.data ?? []);
       const ratingMap = new Map<string, number[]>();
       (reviewsData || []).forEach((r: { reviewee_id: string; overall_rating: number }) => {
         if (!ratingMap.has(r.reviewee_id)) ratingMap.set(r.reviewee_id, []);

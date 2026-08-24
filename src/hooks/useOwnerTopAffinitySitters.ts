@@ -21,6 +21,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { computeAffinityResultFull, type AffinityResult } from "@/lib/affinityScore";
 import { haversineDistance } from "@/utils/geo";
+import { chunkArray } from "@/lib/chunkArray";
 
 /**
  * Plafond de scoring : au-delà, les gardiens les plus éloignés ne sont pas
@@ -98,10 +99,17 @@ export function useOwnerTopAffinitySitters(): Result {
       }
 
       const ids = pool.map((p) => p.id);
-      const { data: sitterRows } = await supabase
-        .from("sitter_profiles_affinity")
-        .select("user_id, experience_years, life_pace, lifestyle, availability_during, has_vehicle, has_license, languages, interests, work_during_sit, sensitivities, animal_types, sitter_type, travels_with_children, travels_with_own_animals, special_animal_skills, farm_animals_ok")
-        .in("user_id", ids);
+      const affinityResults = await Promise.all(
+        chunkArray(ids, 50).map((batch) =>
+          supabase
+            .from("sitter_profiles_affinity")
+            .select("user_id, experience_years, life_pace, lifestyle, availability_during, has_vehicle, has_license, languages, interests, work_during_sit, sensitivities, animal_types, sitter_type, travels_with_children, travels_with_own_animals, special_animal_skills, farm_animals_ok")
+            .in("user_id", batch),
+        ),
+      );
+      const affinityError = affinityResults.find((result) => result.error)?.error;
+      if (affinityError) throw affinityError;
+      const sitterRows = affinityResults.flatMap((result) => result.data ?? []);
 
       const sitterByUser = new Map<string, any>((sitterRows ?? []).map((s: any) => [s.user_id, s]));
 
