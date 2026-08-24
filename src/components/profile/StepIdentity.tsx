@@ -71,6 +71,9 @@ const StepIdentity = ({ data, onChange, onUploadAvatar }: Props) => {
         <div className="space-y-2">
           <Label htmlFor="first_name">Prénom</Label>
           <Input id="first_name" value={data.first_name} onChange={e => onChange({ first_name: e.target.value })} className="rounded-lg h-12" maxLength={100} />
+          <p className="text-xs text-muted-foreground">
+            Seul votre prénom est affiché publiquement. Inutile d'y ajouter votre nom de famille, le champ suivant est prévu pour cela.
+          </p>
         </div>
         <div className="space-y-2">
           <Label htmlFor="last_name">Nom</Label>

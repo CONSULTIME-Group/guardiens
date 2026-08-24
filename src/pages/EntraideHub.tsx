@@ -28,6 +28,7 @@ import { useMissionDistance } from "@/hooks/useMissionDistance";
 import { trackEvent } from "@/lib/analytics";
 import MobileEntraideFeed from "@/components/community/MobileEntraideFeed";
 import { MISSION_CATEGORIES, MISSION_CATEGORY_LABEL } from "@/lib/missionCategories";
+import { publicFirstName } from "@/lib/displayName";
 
 /**
  * EntraideHub — fil unique de l'entraide.
@@ -387,7 +388,7 @@ const EntraideHub = () => {
     const dept = code ? DEPT_NAMES[code] : null;
     const period = formatMissionPeriod(m.date_needed, m.end_date);
     const isMine = currentUserId && m.user_id === currentUserId;
-    const authorName = m.profiles?.first_name || "Membre";
+    const authorName = publicFirstName(m.profiles?.first_name) || "Membre";
     const initial = authorName.charAt(0).toUpperCase();
     const natureLabel = (m.mission_type ?? "besoin") === "offre" ? "Offre" : "Demande";
     const natureCls =

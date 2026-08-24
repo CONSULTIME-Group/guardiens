@@ -5,6 +5,7 @@ import { fr } from "date-fns/locale";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { sanitizeUserTitle } from "@/lib/sanitizeTitle";
 import { trackEvent } from "@/lib/analytics";
+import { publicFirstName } from "@/lib/displayName";
 
 /**
  * MobileEntraideFeed — fil unique de l'entraide sur mobile.
@@ -215,10 +216,10 @@ const MobileEntraideFeed = ({ missions, questions, loading, onPublish }: Props) 
                       <Avatar className="h-5 w-5 shrink-0">
                         <AvatarImage src={q.author_avatar || undefined} alt="" loading="lazy" />
                         <AvatarFallback className="text-[9px]">
-                          {(q.author_name || "M").charAt(0).toUpperCase()}
+                          {(publicFirstName(q.author_name) || "M").charAt(0).toUpperCase()}
                         </AvatarFallback>
                       </Avatar>
-                      <span className="truncate max-w-[10rem]">{q.author_name || "Membre"}</span>
+                      <span className="truncate max-w-[10rem]">{publicFirstName(q.author_name) || "Membre"}</span>
                       {typeof q.answers_count === "number" && (
                         <span className="ml-auto">
                           {q.answers_count} réponse{q.answers_count > 1 ? "s" : ""}
@@ -235,7 +236,7 @@ const MobileEntraideFeed = ({ missions, questions, loading, onPublish }: Props) 
             const badgeCls = isOffer
               ? "bg-accent/25 text-accent-foreground"
               : "bg-secondary/15 text-secondary-foreground";
-            const authorName = m.profiles?.first_name || "Membre";
+            const authorName = publicFirstName(m.profiles?.first_name) || "Membre";
             return (
               <li key={`m-${m.id}`}>
                 <Link

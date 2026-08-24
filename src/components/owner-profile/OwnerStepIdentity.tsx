@@ -111,6 +111,9 @@ const OwnerStepIdentity = ({ data, onChange, onUploadPhoto }: Props) => {
         <div className="space-y-2">
           <Label htmlFor="o_first">Prénom</Label>
           <Input id="o_first" value={data.first_name} onChange={e => onChange({ first_name: e.target.value })} className="rounded-lg h-12" maxLength={100} />
+          <p className="text-xs text-muted-foreground">
+            Seul votre prénom est affiché publiquement. Inutile d'y ajouter votre nom de famille, le champ suivant est prévu pour cela.
+          </p>
         </div>
         <div className="space-y-2">
           <Label htmlFor="o_last">Nom</Label>

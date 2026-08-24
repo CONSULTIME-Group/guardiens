@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { avatarImageUrl } from "@/lib/storageImage";
+import { publicFirstName } from "@/lib/displayName";
 
 type Review = {
   id: string;
@@ -89,7 +90,7 @@ export default function ProReviews({
       list.forEach((r) => {
         const p = map.get(r.user_id) as any;
         if (p) {
-          r.author_name = p.first_name ?? null;
+          r.author_name = publicFirstName(p.first_name) || null;
           r.author_avatar = p.avatar_url ?? null;
         }
       });

@@ -7,6 +7,8 @@
  * vers une fiche publique.
  */
 
+import { publicFirstName } from "@/lib/displayName";
+
 export const DELETED_MEMBER_NAME = "Membre supprimé";
 
 export interface MemberLike {
@@ -31,6 +33,20 @@ export function getMemberDisplayName(
   if (!member) return fallback;
   if (isDeletedMember(member)) return DELETED_MEMBER_NAME;
   return member.first_name?.trim() || fallback;
+}
+
+/**
+ * Prénom affichable sur une surface publique, jamais vide.
+ * Ne garde que le premier mot du champ prénom, certains membres y
+ * saisissent leur nom complet. Un membre supprimé garde son nom neutre.
+ */
+export function getMemberPublicFirstName(
+  member: MemberLike | null | undefined,
+  fallback = "Membre",
+): string {
+  if (!member) return fallback;
+  if (isDeletedMember(member)) return DELETED_MEMBER_NAME;
+  return publicFirstName(member.first_name) || fallback;
 }
 
 /** Photo affichable, nulle pour un membre supprimé. */

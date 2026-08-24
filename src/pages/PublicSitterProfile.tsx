@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
-import { getMemberAvatarUrl, getMemberDisplayName, getMemberInitial } from "@/lib/memberUtils";
+import { getMemberAvatarUrl, getMemberDisplayName, getMemberPublicFirstName, getMemberInitial } from "@/lib/memberUtils";
+import { publicFirstName } from "@/lib/displayName";
 
 import ProBadge from "@/components/badges/ProBadge";
 import { useParams, Link, useSearchParams, useNavigate } from "react-router-dom";
@@ -206,7 +207,7 @@ export default function PublicSitterProfile() {
   }) => (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
       {(showAll ? reviews : reviews.slice(0, 4)).map((r: any) => {
-        const authorName = capitalize(getMemberDisplayName(r.reviewer, "Membre"));
+        const authorName = capitalize(getMemberPublicFirstName(r.reviewer, "Membre"));
         const avatarUrl = getMemberAvatarUrl(r.reviewer);
         const reviewBadges = badgesBySitId && r.sit_id ? (badgesBySitId[r.sit_id] || []) : [];
         return (
@@ -996,7 +997,9 @@ export default function PublicSitterProfile() {
   }
 
 
-  const firstName = capitalize(profile?.first_name || "");
+  // Certains membres saisissent leur nom complet dans le champ prénom,
+  // seul le premier mot est affiché publiquement.
+  const firstName = capitalize(publicFirstName(profile?.first_name));
   const city = profile?.city || "";
   // RGPD : masquage présentationnel des coordonnées (jamais de modification en base).
   const bio = sanitizeBioForPublic(profile?.bio);
@@ -2199,13 +2202,13 @@ export default function PublicSitterProfile() {
                         <article key={review.id} className="bg-card border border-border rounded-xl p-4 space-y-2">
                           <div className="flex items-center gap-2.5 flex-wrap">
                             {getMemberAvatarUrl(review.reviewer) ? (
-                              <img src={avatarImageUrl(getMemberAvatarUrl(review.reviewer), 64)} alt={getMemberDisplayName(review.reviewer, 'Gardien')} className="w-8 h-8 rounded-full object-cover shrink-0" />
+                              <img src={avatarImageUrl(getMemberAvatarUrl(review.reviewer), 64)} alt={getMemberPublicFirstName(review.reviewer, 'Gardien')} className="w-8 h-8 rounded-full object-cover shrink-0" />
                             ) : (
                               <div className="w-8 h-8 rounded-full bg-muted shrink-0 flex items-center justify-center text-xs font-bold text-foreground/40">
                                 {getMemberInitial(review.reviewer)}
                               </div>
                             )}
-                            <span className="text-sm font-medium text-foreground font-body">{getMemberDisplayName(review.reviewer, 'Gardien')}</span>
+                            <span className="text-sm font-medium text-foreground font-body">{getMemberPublicFirstName(review.reviewer, 'Gardien')}</span>
 
                             {stars > 0 && (
                               <span className="text-xs text-primary font-body tracking-wider" aria-label={`${stars} étoiles sur 5`}>

@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { usePublicStats } from "@/hooks/usePublicStats";
 import { useInView } from "@/hooks/useInView";
 import { avatarImageUrl } from "@/lib/storageImage";
+import { publicFirstName } from "@/lib/displayName";
 
 interface Member {
   id: string;
@@ -77,19 +78,23 @@ const RealMembersStrip = () => {
 
       {members.length > 0 && (
         <ul className="flex -space-x-3" aria-label={t("landing.real_members.members_preview_aria")}>
-          {members.map((m) => (
+          {members.map((m) => {
+            // Certains membres saisissent leur nom complet dans le champ
+            // prénom, seul le premier mot est affiché publiquement.
+            const displayName = publicFirstName(m.first_name);
+            return (
             <li key={m.id}>
               <Link
                 to={`/gardiens/${m.id}`}
-                title={m.city ? `${m.first_name} · ${m.city}` : m.first_name}
+                title={m.city ? `${displayName} · ${m.city}` : displayName}
                 className="block h-11 w-11 rounded-full overflow-hidden border-2 border-background ring-1 ring-border bg-muted hover:ring-primary/60 transition-all hover:z-10 hover:scale-110"
               >
                 <img
                   src={avatarImageUrl(m.avatar_url, 44)}
                   alt={
                     m.city
-                      ? t("landing.real_members.member_alt_with_city", { name: m.first_name, city: m.city })
-                      : t("landing.real_members.member_alt_default", { name: m.first_name })
+                      ? t("landing.real_members.member_alt_with_city", { name: displayName, city: m.city })
+                      : t("landing.real_members.member_alt_default", { name: displayName })
                   }
                   className="h-full w-full object-cover"
                   loading="lazy"
@@ -98,7 +103,8 @@ const RealMembersStrip = () => {
                 />
               </Link>
             </li>
-          ))}
+            );
+          })}
         </ul>
       )}
       <p className="font-body text-sm text-foreground/70 text-center max-w-xl">
