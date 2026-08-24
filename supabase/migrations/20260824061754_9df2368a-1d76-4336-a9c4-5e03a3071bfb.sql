@@ -1,0 +1,1 @@
+REVOKE EXECUTE ON FUNCTION public.email_mirror_drift_count() FROM PUBLIC, anon, authenticated;
