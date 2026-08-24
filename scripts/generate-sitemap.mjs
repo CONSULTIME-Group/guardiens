@@ -184,7 +184,11 @@ async function main() {
   const [articles, seoCity, guides, depts, breeds, profiles, sits, profiles_pros] = await Promise.all([
     fetchOrCache(
       "articles", cache,
-      () => maxUpdatedAt("articles", "updated_at", q => q.eq("published", true)),
+      // Sonde composite (date + nombre) : sur une requête filtrée, la sortie
+      // d'une ligne (dépublication, bascule de statut) ne change pas la date
+      // max des lignes restantes. Sans le compteur, le cache resservait des
+      // URL dépubliées (mesuré le 24/08/2026 sur les pages villes).
+      () => maxUpdatedAtWithCount("articles", "updated_at", q => q.eq("published", true)),
       async () => (await supabase.from("articles").select("slug, category, updated_at, published_at").eq("published", true).or("noindex.is.null,noindex.eq.false")).data,
       rows => rows.filter(a => !excludedSlugs.has(a.slug)).map(a => ({
         loc: `/actualites/${a.slug}`,
@@ -199,7 +203,9 @@ async function main() {
       // bascule noindex met à jour updated_at puis sort la ligne de
       // l'ensemble indexable. Une tête filtrée pourrait ne pas bouger et
       // servirait un sitemap périmé (cf. scripts/lib/sitemapCache.mjs).
-      () => maxUpdatedAt("seo_city_pages", "updated_at", q => q.eq("published", true)),
+      // Le compteur de lignes publiées fait partie de la clé : une
+      // dépublication laisse la date max intacte (cas papeete, 24/08/2026).
+      () => maxUpdatedAtWithCount("seo_city_pages", "updated_at", q => q.eq("published", true)),
       async () => (await supabase.from("seo_city_pages").select("slug, updated_at").eq("published", true).or("noindex.is.null,noindex.eq.false")).data,
       rows => rows.map(cp => ({
         loc: `/house-sitting/${cp.slug}`,
@@ -210,7 +216,7 @@ async function main() {
     ),
     fetchOrCache(
       "city_guides", cache,
-      () => maxUpdatedAt("city_guides", "updated_at", q => q.eq("published", true)),
+      () => maxUpdatedAtWithCount("city_guides", "updated_at", q => q.eq("published", true)),
       async () => (await supabase.from("city_guides").select("slug, updated_at").eq("published", true)).data,
       rows => rows.map(cg => ({
         loc: `/guides/${cg.slug}`,
@@ -221,7 +227,7 @@ async function main() {
     ),
     fetchOrCache(
       "seo_department_pages", cache,
-      () => maxUpdatedAt("seo_department_pages", "updated_at", q => q.eq("published", true)),
+      () => maxUpdatedAtWithCount("seo_department_pages", "updated_at", q => q.eq("published", true)),
       async () => (await supabase.from("seo_department_pages").select("slug, updated_at").eq("published", true).or("noindex.is.null,noindex.eq.false")).data,
       rows => rows.map(dp => ({
         loc: `/departement/${dp.slug}`,
@@ -307,7 +313,7 @@ async function main() {
     // titre ≥10 caractères, cumul de contenu rédigé ≥200 caractères.
     fetchOrCache(
       "public_sits", cache,
-      () => maxUpdatedAt("sits", "updated_at", q => q.eq("status", "published").eq("accepting_applications", true)),
+      () => maxUpdatedAtWithCount("sits", "updated_at", q => q.eq("status", "published").eq("accepting_applications", true)),
       async () => (await supabase.from("sits").select("id, slug, title, updated_at, created_at, owner_message, daily_routine, specific_expectations").eq("status", "published").eq("accepting_applications", true).limit(2000)).data,
       rows => {
         const rejected = { titre_trop_court: 0, contenu_insuffisant: 0 };
@@ -335,7 +341,7 @@ async function main() {
     // Fiches pros animaliers approuvées : /pros/:slug
     fetchOrCache(
       "pro_profiles", cache,
-      () => maxUpdatedAt("pro_profiles", "updated_at", q => q.eq("status", "approved").eq("is_paused", false)),
+      () => maxUpdatedAtWithCount("pro_profiles", "updated_at", q => q.eq("status", "approved").eq("is_paused", false)),
       async () => (await supabase.from("pro_profiles").select("slug, raison_sociale, category, city, updated_at").eq("status", "approved").eq("is_paused", false)).data,
       // Les fiches de démonstration de l'annuaire (slug `demo-`) ne sont
       // jamais soumises au crawl : règle partagée avec ProDetail.tsx via
