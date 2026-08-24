@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -14,6 +14,7 @@ import { useTranslation } from "react-i18next";
 import { slugify } from "@/lib/normalize";
 import { compressArticleCoverFile } from "@/lib/compressImage";
 import { trackEvent } from "@/lib/analytics";
+import { findUnknownPlaceholders, KNOWN_PLACEHOLDERS } from "@/lib/contentPlaceholders";
 
 const ArticleEditor = () => {
   const navigate = useNavigate();
@@ -63,6 +64,12 @@ const ArticleEditor = () => {
       });
     }
   }, [id, isNew]);
+
+  // Garde-fou placeholders : clés inconnues détectées à la saisie.
+  const unknownPlaceholderKeys = useMemo(
+    () => findUnknownPlaceholders(form.content),
+    [form.content]
+  );
 
   const updateField = (field: string, value: any) => {
     setForm(prev => {
@@ -303,6 +310,41 @@ const ArticleEditor = () => {
             rows={16}
             className="font-mono text-sm"
           />
+          {unknownPlaceholderKeys.length > 0 && (
+            <div className="mt-2 rounded-lg border border-warning-border bg-warning-soft p-3 text-sm">
+              <p className="font-medium text-foreground mb-1">
+                Variables de contenu inconnues
+              </p>
+              <p className="text-muted-foreground mb-1">
+                Ces clés ne correspondent à aucune variable connue. Elles seront retirées du texte
+                publié, ce qui peut amputer une phrase de son chiffre :
+              </p>
+              <ul className="list-disc pl-5 text-foreground">
+                {unknownPlaceholderKeys.map((k) => (
+                  <li key={k}>
+                    <code className="text-xs bg-muted px-1 py-0.5 rounded">{`{{${k}}}`}</code>
+                  </li>
+                ))}
+              </ul>
+              <p className="text-xs text-muted-foreground mt-2">
+                La liste des clés valides est dans docs/variables-contenu.md.
+              </p>
+            </div>
+          )}
+          <details className="mt-2">
+            <summary className="text-xs text-muted-foreground cursor-pointer">
+              Variables dynamiques disponibles ({KNOWN_PLACEHOLDERS.length})
+            </summary>
+            <ul className="mt-2 grid sm:grid-cols-2 gap-x-4 gap-y-1 text-xs text-muted-foreground">
+              {KNOWN_PLACEHOLDERS.map((p) => (
+                <li key={p.key}>
+                  <code className="bg-muted px-1 py-0.5 rounded text-foreground">{`{{${p.key}}}`}</code>
+                  {" : "}{p.label}
+                  {p.scope !== "global" ? ` (portée ${p.scope})` : ""}
+                </li>
+              ))}
+            </ul>
+          </details>
         </div>
 
         {(form.category === "guide_race") && (
