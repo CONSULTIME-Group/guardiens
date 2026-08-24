@@ -11,7 +11,7 @@ describe("MarkdownBody", () => {
     render(<MarkdownBody>{markdown}</MarkdownBody>);
 
     expect(screen.getByRole("table")).toBeInTheDocument();
-    expect(screen.getAllByRole("row")).toHaveLength(3);
+    expect(screen.getAllByRole("row")).toHaveLength(2);
     expect(screen.getByRole("columnheader", { name: /Ville/ })).toBeInTheDocument();
     expect(screen.getByRole("cell", { name: /Tahiti/ })).toBeInTheDocument();
   });
