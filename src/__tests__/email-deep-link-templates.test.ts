@@ -93,4 +93,20 @@ describe("lien profond authentifie dans les emails de conversation", () => {
     expect(nudge).not.toContain("/dashboard/candidatures/");
     expect(nudge).toContain("#candidatures");
   });
+
+  // Relance secteur : le bouton doit déposer la personne sur /mon-secteur,
+  // session ouverte, et une ligne de réassurance doit suivre le bouton.
+  it("la relance secteur accepte le lien profond et affiche sa ligne de réassurance", () => {
+    const src = read("relance-cp-manquant.tsx");
+    expect(src).toContain("deepLinkUrl?: string");
+    expect(src).toMatch(/deepLinkUrl\s*\|\|/);
+    expect(src).toContain("Indiquer mon secteur");
+    expect(src).toContain("Trente secondes, et vous voyez les gardes autour de vous.");
+    const sender = readFileSync(
+      resolve(__dirname, "../../supabase/functions/send-transactional-email/index.ts"),
+      "utf8",
+    );
+    expect(sender).toContain("'relance-cp-manquant'");
+    expect(sender).toContain("'/mon-secteur'");
+  });
 });
