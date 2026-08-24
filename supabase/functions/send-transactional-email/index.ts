@@ -1000,11 +1000,12 @@ Deno.serve(async (req) => {
       const sitId = typeof templateData?.sitId === 'string' && templateData.sitId
         ? templateData.sitId
         : null
-      const targetPath = conversationId
-        ? `/messages/${conversationId}`
-        : (REVIEW_DEEP_LINK_TEMPLATES.has(templateName) && sitId
-          ? `/review/${sitId}`
-          : (sitId ? `/sits/${sitId}#candidatures` : '/messages'))
+      const targetPath = DEEP_LINK_TARGET_OVERRIDES[templateName]
+        ?? (conversationId
+          ? `/messages/${conversationId}`
+          : (REVIEW_DEEP_LINK_TEMPLATES.has(templateName) && sitId
+            ? `/review/${sitId}`
+            : (sitId ? `/sits/${sitId}#candidatures` : '/messages')))
       const isUuid = (v: string) =>
         /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(v)
       const { data: deepToken, error: deepErr } = await supabase.rpc('create_email_deep_link', {
