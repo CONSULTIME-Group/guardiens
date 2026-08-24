@@ -5,6 +5,7 @@ import { fr } from "date-fns/locale";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { sanitizeUserTitle } from "@/lib/sanitizeTitle";
 import { trackEvent } from "@/lib/analytics";
+import { publicFirstName } from "@/lib/displayName";
 
 /**
  * MobileEntraideFeed — fil unique de l'entraide sur mobile.

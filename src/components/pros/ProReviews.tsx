@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { avatarImageUrl } from "@/lib/storageImage";
+import { publicFirstName } from "@/lib/displayName";
 
 type Review = {
   id: string;

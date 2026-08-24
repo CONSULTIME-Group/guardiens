@@ -1,6 +1,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import type { CommunityCategory } from "@/lib/communityCategories";
+import { publicFirstName } from "@/lib/displayName";
 
 export interface QuestionDetailRow {
   id: string;

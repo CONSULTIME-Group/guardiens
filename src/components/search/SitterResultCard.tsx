@@ -31,6 +31,7 @@ import AffinityRing from "@/components/matching/AffinityRing";
 import type { AffinityResult } from "@/lib/affinityScore";
 import { useAuth } from "@/contexts/AuthContext";
 import { sanitizeBioForCard } from "@/lib/sanitizeBio";
+import { publicFirstName } from "@/lib/displayName";
 
 interface SitterResultCardProps {
   sitter: any;

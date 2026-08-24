@@ -28,6 +28,7 @@ import { useMissionDistance } from "@/hooks/useMissionDistance";
 import { trackEvent } from "@/lib/analytics";
 import MobileEntraideFeed from "@/components/community/MobileEntraideFeed";
 import { MISSION_CATEGORIES, MISSION_CATEGORY_LABEL } from "@/lib/missionCategories";
+import { publicFirstName } from "@/lib/displayName";
 
 /**
  * EntraideHub — fil unique de l'entraide.
