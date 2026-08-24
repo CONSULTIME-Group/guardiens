@@ -16,6 +16,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useContentStats } from "@/hooks/useContentStats";
 import { interpolatePlaceholders } from "@/lib/contentPlaceholders";
 import { departmentIn, departmentInCapitalized, departmentOf, rewriteDepartmentMention } from "@/lib/departmentGrammar";
+import { countLabel } from "@/lib/pluralizeFr";
 
 const DepartmentPage = () => {
  const { slug } = useParams<{ slug: string }>();
@@ -115,7 +116,7 @@ const DepartmentPage = () => {
     : `Pet sitting & House sitting ${deptIn}, garde d'animaux, de maison et de jardin sans frais pour les propriétaires | Guardiens`;
   const metaDescription = page.meta_description
     ? rewriteDepartmentMention(page.meta_description, page.department)
-    : `Trouvez un pet sitter ou house sitter ${deptIn}. Garde d'animaux, de maison et de jardin entre particuliers, sans frais pour les propriétaires. ${cityPages.length} villes couvertes sur Guardiens.`;
+    : `Trouvez un pet sitter ou house sitter ${deptIn}. Garde d'animaux, de maison et de jardin entre particuliers, sans frais pour les propriétaires. ${countLabel(cityPages.length, "ville couverte")} sur Guardiens.`;
 
  return (
  <>
@@ -124,7 +125,7 @@ const DepartmentPage = () => {
   description={metaDescription}
  path={`/departement/${page.slug}`}
   noindex={page.noindex === true}
-  image={buildOgImageUrl({ title: page.department, subtitle: `${cityPages.length} villes couvertes`, kind: "departement" })}
+  image={buildOgImageUrl({ title: page.department, subtitle: countLabel(cityPages.length, "ville couverte"), kind: "departement" })}
   ready={!contentStatsLoading}
   />
 
@@ -154,14 +155,14 @@ const DepartmentPage = () => {
 
  {/* Stats */}
  <div className="flex flex-wrap gap-4 mb-8">
- <Badge variant="secondary" className="text-base px-4 py-2 gap-2">
- <Building2 className="h-4 w-4" />
- {cityPages.length} ville{cityPages.length > 1 ? "s" : ""} couvertes
- </Badge>
- <Badge variant="secondary" className="text-base px-4 py-2 gap-2">
- <Compass className="h-4 w-4" />
- {guides.length} guide{guides.length > 1 ? "s" : ""} locaux
- </Badge>
+  <Badge variant="secondary" className="text-base px-4 py-2 gap-2">
+  <Building2 className="h-4 w-4" />
+  {countLabel(cityPages.length, "ville couverte")}
+  </Badge>
+  <Badge variant="secondary" className="text-base px-4 py-2 gap-2">
+  <Compass className="h-4 w-4" />
+  {countLabel(guides.length, "guide local")}
+  </Badge>
  <Badge variant="outline" className="text-base px-4 py-2 gap-2">
  <Heart className="h-4 w-4" />
  Inscription sans carte bancaire
@@ -401,7 +402,7 @@ const DepartmentPage = () => {
  "@context": "https://schema.org",
  "@type": "Service",
   name: `Pet sitting & House sitting ${deptIn}`,
-  description: `Service de garde d'animaux, de maison et de jardin, house sitting sans frais pour les propriétaires ${deptIn}. ${cityPages.length} villes couvertes.`,
+  description: `Service de garde d'animaux, de maison et de jardin, house sitting sans frais pour les propriétaires ${deptIn}. ${countLabel(cityPages.length, "ville couverte")}.`,
  provider: {
  "@type": "Organization",
  name: "Guardiens",
@@ -440,7 +441,7 @@ const DepartmentPage = () => {
   name: `Comment trouver un pet sitter ${deptIn} ?`,
   acceptedAnswer: {
   "@type": "Answer",
-  text: `Inscrivez-vous sans frais sur Guardiens et parcourez les ${cityPages.length} villes ${deptOf} pour trouver un gardien près de chez vous.`,
+  text: `Inscrivez-vous sans frais sur Guardiens et parcourez ${countLabel(cityPages.length, "ville")} ${deptOf} pour trouver un gardien près de chez vous.`,
  },
  },
  {
