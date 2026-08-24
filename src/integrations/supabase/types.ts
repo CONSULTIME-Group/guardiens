@@ -5287,6 +5287,7 @@ export type Database = {
       seo_city_pages: {
         Row: {
           active_sits_count: number
+          aggregate_cities: string[] | null
           allow_nearby_indexing: boolean
           canonical_url: string | null
           city: string
@@ -5315,6 +5316,7 @@ export type Database = {
         }
         Insert: {
           active_sits_count?: number
+          aggregate_cities?: string[] | null
           allow_nearby_indexing?: boolean
           canonical_url?: string | null
           city: string
@@ -5343,6 +5345,7 @@ export type Database = {
         }
         Update: {
           active_sits_count?: number
+          aggregate_cities?: string[] | null
           allow_nearby_indexing?: boolean
           canonical_url?: string | null
           city?: string
