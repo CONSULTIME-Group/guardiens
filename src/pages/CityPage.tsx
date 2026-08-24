@@ -30,6 +30,7 @@ import { CITIES } from "@/data/cities";
 import { useCityStats } from "@/hooks/useCityStats";
 import { getCityContent } from "@/data/cityContent";
 import CityPageMeta from "@/components/seo/CityPageMeta";
+import PageMeta from "@/components/PageMeta";
 import CitySchemaOrg from "@/components/seo/CitySchemaOrg";
 import LocalExpertise from "@/components/seo/LocalExpertise";
 import LocalSpotsGrid from "@/components/seo/LocalSpotsGrid";

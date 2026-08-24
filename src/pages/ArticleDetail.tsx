@@ -161,6 +161,7 @@ export default function ArticleDetail() {
       const { data: red } = await supabase
         .from("redirects")
         .select("slug_to")
+        .eq("scope", "article")
         .eq("slug_from", current)
         .maybeSingle();
       if (!red?.slug_to || visited.has(red.slug_to)) break;
