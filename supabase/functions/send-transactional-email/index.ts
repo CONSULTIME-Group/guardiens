@@ -94,7 +94,15 @@ const DEEP_LINK_TEMPLATES = new Set<string>([
   'first-application-received',
   'review-reminder',
   'review-received',
+  'relance-cp-manquant',
 ])
+
+// Cibles forcees pour les gabarits dont la destination n'est ni un fil de
+// conversation ni une annonce. La relance secteur depose la personne sur la
+// page qui ne demande que le code postal et le rayon, session deja ouverte.
+const DEEP_LINK_TARGET_OVERRIDES: Record<string, string> = {
+  'relance-cp-manquant': '/mon-secteur',
+}
 
 // Gabarits dont la cible est le formulaire de dépôt d'avis, pas un fil de
 // conversation. Le lien profond dépose la personne directement sur le

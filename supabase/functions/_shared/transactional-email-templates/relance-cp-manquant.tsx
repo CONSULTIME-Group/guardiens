@@ -133,6 +133,7 @@ const h1 = { fontSize: '22px', fontWeight: 'bold' as const, color: 'hsl(153, 42%
 const text = { fontSize: '14px', color: 'hsl(37, 7%, 43%)', lineHeight: '1.6', margin: '0 0 16px' }
 const hr = { borderColor: 'hsl(37, 22%, 89%)', margin: '20px 0' }
 const ctaSection = { textAlign: 'center' as const, margin: '28px 0' }
+const reassurance = { fontSize: '12px', color: 'hsl(37, 7%, 55%)', lineHeight: '1.5', margin: '10px 0 0' }
 const button = {
   backgroundColor: 'hsl(153, 42%, 30%)',
   color: '#ffffff',
