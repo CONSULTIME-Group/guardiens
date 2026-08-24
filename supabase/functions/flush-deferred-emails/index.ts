@@ -29,7 +29,7 @@ const TTL_HOURS = 36; // hard expire after 36h to avoid stale notifications
 async function syncSendLogMirror(
   supabase: any,
   idempotencyKey: string | null | undefined,
-  mirrorStatus: "sent" | "superseded" | "abandoned",
+  mirrorStatus: "sent" | "cancelled" | "abandoned",
   reason?: string | null,
 ): Promise<void> {
   if (!idempotencyKey) return;
@@ -180,7 +180,9 @@ Deno.serve(async (req) => {
           .from("email_deferred_queue")
           .update({ status: "superseded", last_error: supersededReason })
           .eq("id", row.id);
-        await syncSendLogMirror(supabase, row.idempotency_key, "superseded", `Remplacé par un envoi plus récent : ${supersededReason}`);
+        // email_send_log_status_check n'admet pas 'superseded' : le miroir
+        // utilise 'cancelled', la file garde 'superseded'.
+        await syncSendLogMirror(supabase, row.idempotency_key, "cancelled", `Remplacé par un envoi plus récent : ${supersededReason}`);
         closed++;
 
       } else if (reason === 'unsubscribed_category' || reason === 'email_suppressed') {
