@@ -4874,6 +4874,7 @@ export type Database = {
           last_hit_at: string | null
           notes: string | null
           redirect_type: number
+          scope: string
           slug_from: string
           slug_to: string
           updated_at: string
@@ -4884,6 +4885,7 @@ export type Database = {
           last_hit_at?: string | null
           notes?: string | null
           redirect_type?: number
+          scope?: string
           slug_from: string
           slug_to: string
           updated_at?: string
@@ -4894,6 +4896,7 @@ export type Database = {
           last_hit_at?: string | null
           notes?: string | null
           redirect_type?: number
+          scope?: string
           slug_from?: string
           slug_to?: string
           updated_at?: string
@@ -8686,10 +8689,9 @@ export type Database = {
         Returns: number
       }
       increment_pro_view: { Args: { _slug: string }; Returns: undefined }
-      increment_redirect_hit: {
-        Args: { p_slug_from: string }
-        Returns: undefined
-      }
+      increment_redirect_hit:
+        | { Args: { p_slug_from: string }; Returns: undefined }
+        | { Args: { p_scope: string; p_slug_from: string }; Returns: undefined }
       increment_small_mission_view: {
         Args: { _mission_id: string }
         Returns: undefined
