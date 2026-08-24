@@ -13,6 +13,14 @@ interface Props {
   city: string;
   citySlug?: string;
   /**
+   * Communes agrégées par la page (seo_city_pages.aggregate_cities), cas
+   * des pages île ou métropole. Quand la liste est fournie et non vide,
+   * les résidents sont cherchés sur chaque commune de la liste et non sur
+   * le libellé de la page : personne ne déclare « Tahiti » comme ville,
+   * les profils déclarent Papeete, Faa'a, etc.
+   */
+  aggregateCities?: string[] | null;
+  /**
    * Code département de la page (ex : "93", "974", "2A"). Filtre les
    * gardiens par code postal selon la règle de recalc_seo_city_page_counts
    * : postal absent conservé, 20xxx rattaché à 2A et 2B, DOM sur 3
@@ -60,15 +68,23 @@ const LNG_DELTA = 3.5;
  * cartes portent le marqueur « Intervient dans le secteur » : un gardien de
  * proximité n'est jamais présenté comme habitant la commune.
  */
-const CitySittersGrid = ({ city, citySlug, departmentCode, cityLat, cityLng }: Props) => {
+const CitySittersGrid = ({ city, citySlug, aggregateCities, departmentCode, cityLat, cityLng }: Props) => {
+  // Communes réellement recherchées : la liste agrégée si elle est fournie
+  // et non vide, sinon le seul libellé de la page.
+  const residentCities = (aggregateCities ?? []).map((c) => c.trim()).filter(Boolean);
+  const orFilter = residentCities.length ? buildCityIlikeOrFilter(residentCities) : null;
+
   const { data: sitters, isLoading } = useQuery({
-    queryKey: ["city-sitters-grid", city, departmentCode ?? ""],
+    queryKey: ["city-sitters-grid", city, departmentCode ?? "", residentCities.join("|")],
     queryFn: async () => {
-      const { data, error } = await supabase
+      let query = supabase
         .from("public_profiles")
         .select("id, first_name, avatar_url, city, postal_code, role, identity_verified")
-        .in("role", ["sitter", "both"])
-        .ilike("city", `%${city}%`)
+        .in("role", ["sitter", "both"]);
+      // Page agrégée : n'importe quelle commune de la liste. Page simple :
+      // la chaîne ville de la page, comme historiquement.
+      query = orFilter ? query.or(orFilter) : query.ilike("city", `%${city}%`);
+      const { data, error } = await query
         .not("first_name", "is", null)
         .not("avatar_url", "is", null)
         .limit(24);
