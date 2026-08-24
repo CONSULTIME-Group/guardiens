@@ -214,38 +214,38 @@ const FAQ = () => {
  {entry.question}
  </AccordionTrigger>
  <AccordionContent className="leading-relaxed pb-5">
- <ReactMarkdown
- components={{
- p: ({ children }) => (
- <p className="mb-3 text-sm text-muted-foreground leading-relaxed last:mb-0">
- {children}
- </p>
- ),
- strong: ({ children }) => (
- <strong className="font-semibold text-foreground">{children}</strong>
- ),
- a: ({ href, children }) => {
- const isExternal = href?.startsWith("http");
- return (
- <a
- href={href}
- className="text-primary underline hover:text-primary/80 transition-colors"
- {...(isExternal ? { target: "_blank", rel: "noopener noreferrer" } : {})}
- >
- {children}
- </a>
- );
- },
- ul: ({ children }) => (
- <ul className="list-disc pl-4 mb-3 space-y-1 text-sm text-muted-foreground">{children}</ul>
- ),
- li: ({ children }) => (
- <li className="leading-relaxed">{children}</li>
- ),
- }}
- >
- {entry.answer}
- </ReactMarkdown>
+            <MarkdownBody
+              components={{
+                p: ({ children }) => (
+                  <p className="mb-3 text-sm text-muted-foreground leading-relaxed last:mb-0">
+                    {children}
+                  </p>
+                ),
+                strong: ({ children }) => (
+                  <strong className="font-semibold text-foreground">{children}</strong>
+                ),
+                a: ({ href, children }) => {
+                  const isExternal = href?.startsWith("http");
+                  return (
+                    <a
+                      href={href}
+                      className="text-primary underline hover:text-primary/80 transition-colors"
+                      {...(isExternal ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+                    >
+                      {children}
+                    </a>
+                  );
+                },
+                ul: ({ children }) => (
+                  <ul className="list-disc pl-4 mb-3 space-y-1 text-sm text-muted-foreground">{children}</ul>
+                ),
+                li: ({ children }) => (
+                  <li className="leading-relaxed">{children}</li>
+                ),
+              }}
+            >
+              {entry.answer}
+            </MarkdownBody>
  </AccordionContent>
  </AccordionItem>
  ))}
