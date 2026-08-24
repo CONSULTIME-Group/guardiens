@@ -171,16 +171,16 @@
     },
     "trust": {
       "eyebrow": "Ce qui compte vraiment",
-      "title": "Ce qu'aucune pension ne vous donne.",
-      "lede": "Quatre choses qu'une pension, un pet-sitter ou un proche ne vous offrent pas.",
+      "title": "Vos besoins, son savoir-faire. Vous choisissez.",
+      "lede": "Votre rythme, vos habitudes, les besoins de vos animaux, face à son expérience. On vous montre où ça correspond. Vous rencontrez, et vous décidez.",
       "p1_title": "Un matching qui vous ressemble",
-      "p1_text": "Le score d'affinité compare votre rythme de vie, vos habitudes et vos animaux à ceux du gardien. Pas une recherche par mots-clés, une correspondance calculée pour vous.",
+      "p1_text": "Le score d'affinité compare votre rythme de vie, vos habitudes et vos animaux à ceux du gardien, critère par critère. Vous voyez le détail du calcul, vous gardez la main.",
       "p2_title": "Un gardien qui arrive préparé",
-      "p2_text": "Guide de la race de votre animal, guide de votre ville. Votre gardien sait déjà ce qui compte avant même d'arriver.",
-      "p3_title": "Des pros vérifiés en renfort",
-      "p3_text": "Vétérinaires, toiletteurs, éducateurs. L'annuaire Guardiens ne référence que des professionnels au SIRET contrôlé, prêts si besoin.",
+      "p2_text": "Le guide de la race de votre animal et le guide de votre ville, transmis avant la garde. Votre gardien sait déjà ce qui compte avant même d'arriver.",
+      "p3_title": "Des conseils à chaque étape",
+      "p3_text": "Les conseils d'Alma, les guides pratiques, le journal. De la première annonce au retour de vacances, vous avez de quoi préparer chaque étape.",
       "p4_title": "Une communauté qui va plus loin",
-      "p4_text": "Arroser un jardin, prêter une compétence, rendre un service. L'entraide continue bien après la garde."
+      "p4_text": "Arroser un jardin, prêter une compétence, rendre un service. L'entraide entre membres existe en dehors des gardes, toute l'année."
     },
     "testimonials": {
       "title": "Ils ont osé. Voici ce qu'il leur reste.",
