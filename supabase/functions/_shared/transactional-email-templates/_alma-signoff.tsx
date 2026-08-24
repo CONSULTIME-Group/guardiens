@@ -13,14 +13,14 @@ import { Section, Text } from 'npm:@react-email/components@0.0.22'
 const wrap = { margin: '18px 0 12px' }
 const reliure = {
   fontSize: '13px',
-  color: 'hsl(37, 7%, 33%)',
+  color: '#5A564E',
   lineHeight: '1.6',
   margin: '0 0 6px',
   fontStyle: 'italic' as const,
 }
 const pricing = {
   fontSize: '12px',
-  color: 'hsl(153, 42%, 30%)',
+  color: '#2C6D50',
   fontWeight: 600 as const,
   margin: '0 0 8px',
 }

@@ -59,8 +59,8 @@ export const template = {
 
 const main = { backgroundColor: '#ffffff', fontFamily: "'Outfit', Arial, sans-serif" }
 const container = { padding: '24px 28px', maxWidth: '560px', margin: '0 auto' }
-const h1 = { fontSize: '22px', fontWeight: 'bold' as const, color: 'hsl(153, 42%, 30%)', margin: '0 0 18px' }
-const text = { fontSize: '15px', color: 'hsl(37, 7%, 30%)', lineHeight: '1.65', margin: '0 0 16px' }
+const h1 = { fontSize: '22px', fontWeight: 'bold' as const, color: '#2C6D50', margin: '0 0 18px' }
+const text = { fontSize: '15px', color: '#524E47', lineHeight: '1.65', margin: '0 0 16px' }
 const ctaSection = { textAlign: 'center' as const, margin: '26px 0 8px' }
-const button = { backgroundColor: 'hsl(153, 42%, 30%)', color: '#ffffff', padding: '13px 28px', borderRadius: '10px', fontSize: '15px', fontWeight: '600' as const, textDecoration: 'none', display: 'inline-block' }
-const hr = { borderColor: 'hsl(37, 22%, 89%)', margin: '24px 0 16px' }
+const button = { backgroundColor: '#2C6D50', color: '#ffffff', padding: '13px 28px', borderRadius: '10px', fontSize: '15px', fontWeight: '600' as const, textDecoration: 'none', display: 'inline-block' }
+const hr = { borderColor: '#E9E4DD', margin: '24px 0 16px' }

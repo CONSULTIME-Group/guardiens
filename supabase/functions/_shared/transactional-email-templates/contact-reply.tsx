@@ -56,13 +56,13 @@ export const template = {
 
 const main = { backgroundColor: '#ffffff', fontFamily: "'Outfit', Arial, sans-serif" }
 const container = { padding: '24px 28px', maxWidth: '560px', margin: '0 auto' }
-const h1 = { fontSize: '22px', fontWeight: 'bold' as const, color: 'hsl(153, 42%, 30%)', margin: '0 0 20px' }
-const text = { fontSize: '14px', color: 'hsl(37, 7%, 43%)', lineHeight: '1.6', margin: '0 0 16px' }
+const h1 = { fontSize: '22px', fontWeight: 'bold' as const, color: '#2C6D50', margin: '0 0 20px' }
+const text = { fontSize: '14px', color: '#756F66', lineHeight: '1.6', margin: '0 0 16px' }
 const blockquote = {
-  fontSize: '13px', color: 'hsl(37, 7%, 55%)', lineHeight: '1.5',
-  borderLeft: '3px solid hsl(37, 22%, 89%)', padding: '8px 16px', margin: '16px 0',
+  fontSize: '13px', color: '#948E84', lineHeight: '1.5',
+  borderLeft: '3px solid #E9E4DD', padding: '8px 16px', margin: '16px 0',
 }
-const hr = { borderColor: 'hsl(37, 22%, 89%)', margin: '20px 0' }
-const legal = { fontSize: '10px', color: 'hsl(37, 7%, 60%)', lineHeight: '1.5', margin: '0 0 12px' }
-const footer = { fontSize: '12px', color: 'hsl(37, 7%, 60%)', margin: '10px 0 0' }
-const link = { color: 'hsl(153, 42%, 30%)', textDecoration: 'none' }
+const hr = { borderColor: '#E9E4DD', margin: '20px 0' }
+const legal = { fontSize: '10px', color: '#A09B92', lineHeight: '1.5', margin: '0 0 12px' }
+const footer = { fontSize: '12px', color: '#A09B92', margin: '10px 0 0' }
+const link = { color: '#2C6D50', textDecoration: 'none' }

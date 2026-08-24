@@ -77,13 +77,13 @@ export const template = {
 
 const main = { backgroundColor: '#ffffff', fontFamily: "'Outfit', Arial, sans-serif" }
 const container = { padding: '24px 28px', maxWidth: '560px', margin: '0 auto' }
-const h1 = { fontSize: '22px', fontWeight: 'bold' as const, color: 'hsl(153, 42%, 30%)', margin: '0 0 20px' }
-const text = { fontSize: '14px', color: 'hsl(37, 7%, 43%)', lineHeight: '1.6', margin: '0 0 16px' }
-const subtext = { fontSize: '13px', color: 'hsl(37, 7%, 55%)', lineHeight: '1.5', margin: '12px 0 0', fontStyle: 'italic' as const }
-const hr = { borderColor: 'hsl(37, 22%, 89%)', margin: '24px 0' }
+const h1 = { fontSize: '22px', fontWeight: 'bold' as const, color: '#2C6D50', margin: '0 0 20px' }
+const text = { fontSize: '14px', color: '#756F66', lineHeight: '1.6', margin: '0 0 16px' }
+const subtext = { fontSize: '13px', color: '#948E84', lineHeight: '1.5', margin: '12px 0 0', fontStyle: 'italic' as const }
+const hr = { borderColor: '#E9E4DD', margin: '24px 0' }
 const ctaSection = { textAlign: 'center' as const, margin: '28px 0 8px' }
 const button = {
-  backgroundColor: 'hsl(153, 42%, 30%)',
+  backgroundColor: '#2C6D50',
   color: '#ffffff',
   padding: '14px 32px',
   borderRadius: '8px',
@@ -93,11 +93,11 @@ const button = {
   display: 'inline-block',
 }
 const highlightBox = {
-  backgroundColor: 'hsl(37, 35%, 96%)',
-  border: '1px solid hsl(37, 22%, 85%)',
+  backgroundColor: '#F8F6F1',
+  border: '1px solid #E1DBD0',
   borderRadius: '10px',
   padding: '16px 18px',
   margin: '20px 0',
 }
-const highlightTitle = { fontSize: '14px', fontWeight: '600' as const, color: 'hsl(153, 42%, 30%)', margin: '0 0 6px' }
-const highlightText = { fontSize: '13px', color: 'hsl(37, 7%, 38%)', lineHeight: '1.55', margin: '0' }
+const highlightTitle = { fontSize: '14px', fontWeight: '600' as const, color: '#2C6D50', margin: '0 0 6px' }
+const highlightText = { fontSize: '13px', color: '#68625A', lineHeight: '1.55', margin: '0' }

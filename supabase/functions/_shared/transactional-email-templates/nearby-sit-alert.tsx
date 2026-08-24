@@ -122,11 +122,11 @@ export const template = {
 
 const main = { backgroundColor: '#ffffff', fontFamily: "'Outfit', Arial, sans-serif" }
 const container = { padding: '24px 28px', maxWidth: '560px', margin: '0 auto' }
-const h1 = { fontSize: '24px', fontWeight: 'bold' as const, color: 'hsl(153, 42%, 30%)', margin: '0 0 20px' }
-const text = { fontSize: '14px', color: 'hsl(37, 7%, 43%)', lineHeight: '1.6', margin: '0 0 16px' }
+const h1 = { fontSize: '24px', fontWeight: 'bold' as const, color: '#2C6D50', margin: '0 0 20px' }
+const text = { fontSize: '14px', color: '#756F66', lineHeight: '1.6', margin: '0 0 16px' }
 const card = {
-  backgroundColor: 'hsl(37, 22%, 96%)',
-  border: '1px solid hsl(37, 22%, 89%)',
+  backgroundColor: '#F7F5F3',
+  border: '1px solid #E9E4DD',
   borderRadius: '10px',
   padding: '16px 18px',
   margin: '12px 0 20px',
@@ -140,6 +140,6 @@ const coverImg = {
   objectFit: 'cover' as const,
   display: 'block',
 }
-const cardTitle = { fontSize: '16px', fontWeight: '600' as const, color: 'hsl(153, 42%, 25%)', margin: '0 0 8px' }
-const cardLine = { fontSize: '13px', color: 'hsl(37, 7%, 35%)', margin: '4px 0' }
-const button = { backgroundColor: 'hsl(153, 42%, 30%)', color: '#ffffff', padding: '12px 28px', borderRadius: '8px', fontSize: '15px', fontWeight: '600' as const, textDecoration: 'none', display: 'inline-block' }
+const cardTitle = { fontSize: '16px', fontWeight: '600' as const, color: '#255B42', margin: '0 0 8px' }
+const cardLine = { fontSize: '13px', color: '#5F5B53', margin: '4px 0' }
+const button = { backgroundColor: '#2C6D50', color: '#ffffff', padding: '12px 28px', borderRadius: '8px', fontSize: '15px', fontWeight: '600' as const, textDecoration: 'none', display: 'inline-block' }
