@@ -26,6 +26,10 @@ Deno.serve(async (req) => {
 
   const url = new URL(req.url);
   const slug = (url.searchParams.get("slug") || "").trim().toLowerCase();
+  // Scope de la redirection : article par defaut, city pour les pages villes
+  // (colonne scope de la table redirects, unicite sur le couple scope, slug).
+  const scopeParam = (url.searchParams.get("scope") || "article").trim().toLowerCase();
+  const scope = scopeParam === "city" ? "city" : "article";
 
   if (!slug || !SLUG_RE.test(slug)) {
     return new Response(
@@ -51,6 +55,7 @@ Deno.serve(async (req) => {
     const { data, error } = await supabase
       .from("redirects")
       .select("slug_to, redirect_type")
+      .eq("scope", scope)
       .eq("slug_from", current)
       .maybeSingle();
 
