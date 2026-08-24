@@ -71,7 +71,7 @@ export const useQuestionDetail = (questionId: string | undefined) => {
       setAnswers(
         rows.map((r) => ({
           ...r,
-          author_name: byId.get(r.author_id)?.first_name ?? null,
+          author_name: publicFirstName(byId.get(r.author_id)?.first_name) || null,
           author_avatar: byId.get(r.author_id)?.avatar_url ?? null,
         })),
       );

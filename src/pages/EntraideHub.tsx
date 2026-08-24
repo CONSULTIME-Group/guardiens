@@ -387,7 +387,7 @@ const EntraideHub = () => {
     const dept = code ? DEPT_NAMES[code] : null;
     const period = formatMissionPeriod(m.date_needed, m.end_date);
     const isMine = currentUserId && m.user_id === currentUserId;
-    const authorName = m.profiles?.first_name || "Membre";
+    const authorName = publicFirstName(m.profiles?.first_name) || "Membre";
     const initial = authorName.charAt(0).toUpperCase();
     const natureLabel = (m.mission_type ?? "besoin") === "offre" ? "Offre" : "Demande";
     const natureCls =

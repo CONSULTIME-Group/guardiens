@@ -89,7 +89,7 @@ export default function ProReviews({
       list.forEach((r) => {
         const p = map.get(r.user_id) as any;
         if (p) {
-          r.author_name = p.first_name ?? null;
+          r.author_name = publicFirstName(p.first_name) || null;
           r.author_avatar = p.avatar_url ?? null;
         }
       });

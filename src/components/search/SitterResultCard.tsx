@@ -81,7 +81,9 @@ const SitterResultCard = ({
   const { user } = useAuth();
   const isAnon = !user;
   const profile = sitter.profile;
-  const firstName: string = profile?.first_name || "Gardien";
+  // Certains membres saisissent leur nom complet dans le champ prénom,
+  // seul le premier mot est affiché publiquement.
+  const firstName: string = publicFirstName(profile?.first_name) || "Gardien";
   const sitterAnimalTypes: string[] = sitter.animal_types || [];
   const initials = firstName.charAt(0).toUpperCase();
   const hasPhotos = photos.length > 0;

@@ -9,6 +9,7 @@ import { Share2, CheckCircle2, Star } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import PageBreadcrumb from "@/components/seo/PageBreadcrumb";
 import VerifiedBadge from "@/components/profile/VerifiedBadge";
+import { publicFirstName } from "@/lib/displayName";
 import { sanitizeUserTitle } from "@/lib/sanitizeTitle";
 import ApproximateLocationMap from "@/components/shared/ApproximateLocationMap";
 import SitHero from "@/components/sits/views/tabs/SitHero";
@@ -251,18 +252,18 @@ const PublicSitView = ({
                         {owner.avatar_url ? (
                           <img
                             src={avatarImageUrl(owner.avatar_url, 128)}
-                            alt={owner.first_name || t("sit_detail.host")}
+                            alt={publicFirstName(owner.first_name) || t("sit_detail.host")}
                             className="w-16 h-16 rounded-full object-cover border-2 border-background shadow-sm"
                           />
                         ) : (
                           <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center font-heading text-xl font-bold text-foreground">
-                            {owner.first_name?.charAt(0) || "?"}
+                            {publicFirstName(owner.first_name).charAt(0) || "?"}
                           </div>
                         )}
                       </div>
                       <div className="min-w-0">
                         <p className="text-lg font-semibold text-foreground flex items-center gap-2 flex-wrap">
-                          {t("sit_detail.proposed_by", { name: owner.first_name || t("sit_detail.a_member") })}
+                          {t("sit_detail.proposed_by", { name: publicFirstName(owner.first_name) || t("sit_detail.a_member") })}
                           {owner.identity_verified && <VerifiedBadge />}
                         </p>
                         <p className="text-sm text-muted-foreground">
@@ -287,7 +288,7 @@ const PublicSitView = ({
                         {sit.owner_message && (
                           <div className="mt-5 border-l-2 border-primary/40 pl-4 py-1 italic text-base leading-relaxed text-foreground/85 whitespace-pre-line">
                             <p className="not-italic text-[10px] font-bold tracking-[0.18em] uppercase text-muted-foreground mb-1.5">
-                              {owner.first_name ? t("sit_detail.word_from", { name: owner.first_name }) : t("sit_detail.word_from_host")}
+                              {publicFirstName(owner.first_name) ? t("sit_detail.word_from", { name: publicFirstName(owner.first_name) }) : t("sit_detail.word_from_host")}
                             </p>
                             {sit.owner_message}
                           </div>
@@ -528,7 +529,7 @@ const PublicSitView = ({
 
               {/* Le cadre & la vie sur place (depuis owner_profiles) */}
               {ownerProfile && (
-                <CadreSection ownerProfile={ownerProfile} ownerName={owner?.first_name || t("sit_detail.host")} />
+                <CadreSection ownerProfile={ownerProfile} ownerName={publicFirstName(owner?.first_name) || t("sit_detail.host")} />
               )}
 
               {/* Le gardien idéal */}
@@ -738,7 +739,7 @@ const PublicSitView = ({
                 <div className="flex items-start gap-3">
                   <CheckCircle2 className="h-4 w-4 text-primary shrink-0 mt-0.5" />
                   <p className="text-sm text-foreground/85 leading-relaxed">
-                    {t("sit_detail.house_guide_body", { name: owner?.first_name || t("sit_detail.host") })}
+                    {t("sit_detail.house_guide_body", { name: publicFirstName(owner?.first_name) || t("sit_detail.host") })}
                   </p>
                 </div>
               </div>
