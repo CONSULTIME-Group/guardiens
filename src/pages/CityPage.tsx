@@ -38,6 +38,7 @@ import NearbyCityLinks from "@/components/seo/NearbyCityLinks";
 import CityArticleBody from "@/components/city/CityArticleBody";
 import StickyCTA from "@/components/seo/StickyCTA";
 import PageBreadcrumb from "@/components/seo/PageBreadcrumb";
+import { departmentIn } from "@/lib/departmentGrammar";
 import CityHero, { CITY_HERO_IMAGES } from "@/components/city/CityHero";
 import CitySittersGrid from "@/components/city/CitySittersGrid";
 import { useAlmaCulturalFact } from "@/hooks/useAlmaCulturalFact";
@@ -254,7 +255,7 @@ const CityPage = () => {
  { q: `Y a-t-il des frais pour les propriétaires à ${cityData.name} ?`, a: "Non. L'espace propriétaire est sans frais et sans commission. L'espace gardien est lui aussi ouvert sans frais aujourd'hui, sans engagement et sans carte bancaire." },
  { q: `Que se passe-t-il en cas d'urgence pendant la garde à ${cityData.name} ?`, a: `Guardiens dispose d'un réseau de Gardiens d'Urgence dans chaque zone. En cas d'imprévu, animal malade, problème technique, le gardien en poste peut déclencher une alerte.` },
  { q: `Combien coûte une pension pour animaux à ${cityData.name} ?`, a: `Les pensions autour de ${cityData.name} facturent en moyenne 25 à 45 euros par nuit et par animal. Ordres de grandeur constatés en 2026, variables selon la ville, la saison et la taille de l'animal. Sur Guardiens, c'est sans frais pour le propriétaire : le gardien s'installe chez vous et s'occupe de vos animaux dans leur environnement habituel.` },
- { q: `Comment devenir gardien à ${cityData.name} ?`, a: `Inscrivez-vous, complétez votre profil et faites vérifier votre identité. Vous pourrez ensuite postuler aux gardes disponibles en ${cityData.department}. L'accès gardien est ouvert sans frais aujourd'hui, sans engagement.` },
+ { q: `Comment devenir gardien à ${cityData.name} ?`, a: `Inscrivez-vous, complétez votre profil et faites vérifier votre identité. Vous pourrez ensuite postuler aux gardes disponibles ${departmentIn(cityData.department)}. L'accès gardien est ouvert sans frais aujourd'hui, sans engagement.` },
  ];
 
  return (
@@ -274,8 +275,8 @@ const CityPage = () => {
  subtitle={
  content?.subtitle ||
  (stats.guardiansCount > 0
- ? `${stats.guardiansCount} gardien${stats.guardiansCount > 1 ? "s" : ""} inscrit${stats.guardiansCount > 1 ? "s" : ""} en ${cityData.department} · Gratuit pour les propriétaires`
- : `Gardiens inscrits en ${cityData.department} · Gratuit pour les propriétaires`)
+  ? `${stats.guardiansCount} gardien${stats.guardiansCount > 1 ? "s" : ""} inscrit${stats.guardiansCount > 1 ? "s" : ""} ${departmentIn(cityData.department)} · Gratuit pour les propriétaires`
+  : `Gardiens inscrits ${departmentIn(cityData.department)} · Gratuit pour les propriétaires`)
  }
  heroAlt={cityData.heroImageAlt || `House-sitting à ${cityData.name}`}
  department={cityData.department}
@@ -307,8 +308,8 @@ const CityPage = () => {
  )}
  <p className="text-lg text-muted-foreground max-w-3xl leading-relaxed mb-6">
  {stats.guardiansCount > 0
- ? `${stats.guardiansCount} gardien${stats.guardiansCount > 1 ? "s" : ""} inscrit${stats.guardiansCount > 1 ? "s" : ""} en ${cityData.department}`
-  : `Gardiens inscrits en ${cityData.department}`}
+  ? `${stats.guardiansCount} gardien${stats.guardiansCount > 1 ? "s" : ""} inscrit${stats.guardiansCount > 1 ? "s" : ""} ${departmentIn(cityData.department)}`
+   : `Gardiens inscrits ${departmentIn(cityData.department)}`}
   {" · Gratuit pour les propriétaires"}
   </p>
   {staticNearbyMention && (
@@ -523,7 +524,7 @@ const CityPage = () => {
  to={`/departement/${cityData.department.toLowerCase().replace(/\s+/g, "-").replace(/'/g, "")}`}
  className="text-primary hover:underline"
  >
- House-sitting en {cityData.department} →
+ House-sitting {departmentIn(cityData.department)} →
  </Link>
  <Link to="/guides" className="text-primary hover:underline">Tous les guides locaux →</Link>
  <Link to="/tarifs" className="text-primary hover:underline">Voir les tarifs →</Link>
@@ -614,7 +615,7 @@ const CityPage = () => {
     },
     {
       q: `Comment devenir gardien à ${dbPage.city} ?`,
-      a: `Inscrivez-vous, complétez votre profil et faites vérifier votre identité. Vous pourrez ensuite postuler aux gardes disponibles en ${dbPage.department}. L'accès gardien est ouvert sans frais aujourd'hui, sans engagement.`,
+      a: `Inscrivez-vous, complétez votre profil et faites vérifier votre identité. Vous pourrez ensuite postuler aux gardes disponibles ${departmentIn(dbPage.department)}. L'accès gardien est ouvert sans frais aujourd'hui, sans engagement.`,
     },
   ];
 
@@ -804,7 +805,7 @@ const CityPage = () => {
  <Building2 className="h-5 w-5 text-primary" />
  <div>
  <p className="font-semibold text-sm text-foreground">
- House-sitting dans le {departmentPage.department}
+ House-sitting {departmentIn(departmentPage.department)}
  </p>
  <p className="text-xs text-muted-foreground">
  Toutes les villes du département

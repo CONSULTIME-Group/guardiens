@@ -15,6 +15,7 @@ import NeighborDepartments from "@/components/seo/NeighborDepartments";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useContentStats } from "@/hooks/useContentStats";
 import { interpolatePlaceholders } from "@/lib/contentPlaceholders";
+import { departmentIn, departmentInCapitalized, departmentOf, rewriteDepartmentMention } from "@/lib/departmentGrammar";
 
 const DepartmentPage = () => {
  const { slug } = useParams<{ slug: string }>();
@@ -98,16 +99,29 @@ const DepartmentPage = () => {
  );
  }
 
- // Slug de département inconnu : vraie page 404 en noindex.
- if (!page) {
- return <NotFound />;
- }
+  // Slug de département inconnu : vraie page 404 en noindex.
+  if (!page) {
+  return <NotFound />;
+  }
+
+  // Formes grammaticales du nom de département (table exhaustive, src/lib/departmentGrammar.ts).
+  const deptIn = departmentIn(page.department);
+  const deptInCap = departmentInCapitalized(page.department);
+  const deptOf = departmentOf(page.department);
+  // Les titres stockés contiennent parfois une préposition fautive (« dans Ain ») : réparation au rendu.
+  const h1Title = rewriteDepartmentMention(page.h1_title, page.department);
+  const metaTitle = page.meta_title
+    ? rewriteDepartmentMention(page.meta_title, page.department)
+    : `Pet sitting & House sitting ${deptIn}, garde d'animaux, de maison et de jardin sans frais pour les propriétaires | Guardiens`;
+  const metaDescription = page.meta_description
+    ? rewriteDepartmentMention(page.meta_description, page.department)
+    : `Trouvez un pet sitter ou house sitter ${deptIn}. Garde d'animaux, de maison et de jardin entre particuliers, sans frais pour les propriétaires. ${cityPages.length} villes couvertes sur Guardiens.`;
 
  return (
  <>
  <PageMeta
- title={page.meta_title || `Pet sitting & House sitting ${page.department}, garde d'animaux, de maison et de jardin sans frais pour les propriétaires | Guardiens`}
- description={page.meta_description || `Trouvez un pet sitter ou house sitter dans le ${page.department}. Garde d'animaux, de maison et de jardin entre particuliers, sans frais pour les propriétaires. ${cityPages.length} villes couvertes sur Guardiens.`}
+  title={metaTitle}
+  description={metaDescription}
  path={`/departement/${page.slug}`}
   noindex={page.noindex === true}
   image={buildOgImageUrl({ title: page.department, subtitle: `${cityPages.length} villes couvertes`, kind: "departement" })}
@@ -123,7 +137,7 @@ const DepartmentPage = () => {
  {/* Hero */}
  <section className="max-w-5xl mx-auto px-4 py-8 md:py-12">
  <h1 className="font-serif text-3xl md:text-5xl font-bold text-foreground mb-6">
- {page.h1_title}
+  {h1Title}
  </h1>
   <p className="text-lg text-muted-foreground max-w-3xl leading-relaxed mb-4">
   {introText}
@@ -134,7 +148,7 @@ const DepartmentPage = () => {
   </p>
   )}
   <div className="mb-6">
-  <ShareLink url={`https://guardiens.fr/departement/${page.slug}`} title={page.h1_title} text={introText ?? ""} source="department_page" />
+  <ShareLink url={`https://guardiens.fr/departement/${page.slug}`} title={h1Title} text={introText ?? ""} source="department_page" />
   </div>
 
 
@@ -158,13 +172,13 @@ const DepartmentPage = () => {
  <div className="flex flex-col sm:flex-row gap-3">
  <Link to="/inscription">
  <Button size="lg" className="gap-2">
- Trouver un gardien dans le {page.department}
+ Trouver un gardien {deptIn}
  <ArrowRight className="h-4 w-4" />
  </Button>
  </Link>
  <Link to="/inscription">
  <Button size="lg" variant="outline" className="gap-2">
- Devenir gardien dans le {page.department}
+ Devenir gardien {deptIn}
  <ArrowRight className="h-4 w-4" />
  </Button>
  </Link>
@@ -175,7 +189,7 @@ const DepartmentPage = () => {
  {cityPages.length > 0 && (
  <section className="max-w-5xl mx-auto px-4 py-6 md:py-12 border-t border-border">
  <h2 className="font-serif text-2xl font-bold text-foreground mb-6">
- Villes du {page.department} sur Guardiens
+ Villes {deptOf} sur Guardiens
  </h2>
  <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
  {cityPages.map((city: any) => (
@@ -208,7 +222,7 @@ const DepartmentPage = () => {
  {guides.length > 0 && (
  <section className="max-w-5xl mx-auto px-4 py-6 md:py-12 border-t border-border">
  <h2 className="font-serif text-2xl font-bold text-foreground mb-6">
- Guides locaux, {page.department}
+ Guides locaux, {deptOf}
  </h2>
  <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
  {guides.map((guide: any) => (
@@ -231,23 +245,23 @@ const DepartmentPage = () => {
   {/* Combien coûte */}
   <section className="max-w-5xl mx-auto px-4 py-6 md:py-12 border-t border-border">
     <h2 className="font-serif text-2xl font-bold text-foreground mb-4">
-      Combien coûte une garde d'animaux dans le {page.department} ?
+      Combien coûte une garde d'animaux {deptIn} ?
     </h2>
     <p className="text-base text-foreground/90 leading-relaxed mb-3">
       Guardiens reste sans frais tant que nous ne sommes pas satisfaits du service que nous vous offrons. Aucune commission côté propriétaire, aucun frais de mise en relation, une rencontre systématique avant chaque garde.
     </p>
     <p className="text-base text-foreground/80 leading-relaxed">
-      Une pension pour animaux dans le {page.department} se facture généralement entre 25 et 50 € par nuit et par animal, soit 350 à 700 € pour deux semaines avec un chien. Confier son animal à un gardien à domicile, c'est éviter le stress de la mise en pension, garder votre logement occupé pendant votre absence, et bénéficier d'une relation directe entre particuliers, sans intermédiaire commercial. Les profils dont l'identité a été validée affichent l'écusson « Identité vérifiée ». Consultez aussi les avis publics de la communauté et organisez une rencontre en amont.
+      Une pension pour animaux {deptIn} se facture généralement entre 25 et 50 € par nuit et par animal, soit 350 à 700 € pour deux semaines avec un chien. Confier son animal à un gardien à domicile, c'est éviter le stress de la mise en pension, garder votre logement occupé pendant votre absence, et bénéficier d'une relation directe entre particuliers, sans intermédiaire commercial. Les profils dont l'identité a été validée affichent l'écusson « Identité vérifiée ». Consultez aussi les avis publics de la communauté et organisez une rencontre en amont.
     </p>
   </section>
 
   {/* Comment trouver un gardien fiable */}
   <section className="max-w-5xl mx-auto px-4 py-6 md:py-12 border-t border-border">
     <h2 className="font-serif text-2xl font-bold text-foreground mb-4">
-      Comment trouver un gardien fiable dans le {page.department} ?
+      Comment trouver un gardien fiable {deptIn} ?
     </h2>
     <p className="text-base text-foreground/90 leading-relaxed mb-4">
-      Pour trouver un gardien fiable dans le {page.department}, publiez votre annonce sur Guardiens, recevez des candidatures de gardiens de votre secteur, consultez leurs profils et avis, puis organisez une rencontre avant de confirmer la garde. Le processus tient en trois étapes.
+      Pour trouver un gardien fiable {deptIn}, publiez votre annonce sur Guardiens, recevez des candidatures de gardiens de votre secteur, consultez leurs profils et avis, puis organisez une rencontre avant de confirmer la garde. Le processus tient en trois étapes.
     </p>
     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
       <Card>
@@ -274,10 +288,10 @@ const DepartmentPage = () => {
   {/* Vétérinaires */}
   <section className="max-w-5xl mx-auto px-4 py-6 md:py-12 border-t border-border">
     <h2 className="font-serif text-2xl font-bold text-foreground mb-4">
-      Vétérinaires et cliniques d'urgence dans le {page.department}
+      Vétérinaires et cliniques d'urgence {deptIn}
     </h2>
     <p className="text-base text-foreground/90 leading-relaxed mb-3">
-      Chaque garde Guardiens s'accompagne d'un guide de maison où le propriétaire renseigne le vétérinaire habituel, la clinique d'urgence la plus proche et la conduite à tenir en cas d'incident. Dans le {page.department}, les cliniques vétérinaires de garde couvrent la plupart des villes moyennes, avec des permanences 24h/24 dans les chefs-lieux.
+      Chaque garde Guardiens s'accompagne d'un guide de maison où le propriétaire renseigne le vétérinaire habituel, la clinique d'urgence la plus proche et la conduite à tenir en cas d'incident. {deptInCap}, les cliniques vétérinaires de garde couvrent la plupart des villes moyennes, avec des permanences 24h/24 dans les chefs-lieux.
     </p>
     <p className="text-base text-foreground/80 leading-relaxed">
       Consultez <Link to="/observatoire-garde-animaux" className="underline text-primary">l'observatoire Guardiens de la garde d'animaux</Link> pour les chiffres nationaux (densité de vétérinaires, cliniques d'urgence, tarifs moyens). En cas d'imprévu majeur pendant une garde, le réseau <Link to="/gardien-urgence" className="underline text-primary">gardien d'urgence</Link> peut relayer votre gardien titulaire.
@@ -311,7 +325,7 @@ const DepartmentPage = () => {
   {/* Why Guardiens */}
   <section className="max-w-5xl mx-auto px-4 py-6 md:py-12 border-t border-border">
  <h2 className="font-serif text-2xl font-bold text-foreground mb-8">
- Pourquoi Guardiens dans le {page.department} ?
+ Pourquoi Guardiens {deptIn} ?
  </h2>
  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
  <Card>
@@ -349,7 +363,7 @@ const DepartmentPage = () => {
  {/* Final CTA */}
  <section className="max-w-5xl mx-auto px-4 py-8 md:py-16 text-center">
  <h2 className="font-serif text-2xl md:text-3xl font-bold text-foreground mb-4">
- Rejoignez Guardiens dans le {page.department}
+ Rejoignez Guardiens {deptIn}
  </h2>
  <p className="text-muted-foreground mb-8 max-w-xl mx-auto">
  Propriétaire ou gardien, rejoignez un réseau de confiance basé sur la proximité.
@@ -386,8 +400,8 @@ const DepartmentPage = () => {
  __html: JSON.stringify({
  "@context": "https://schema.org",
  "@type": "Service",
- name: `Pet sitting & House sitting dans le ${page.department}`,
- description: `Service de garde d'animaux, de maison et de jardin, house sitting sans frais pour les propriétaires dans le ${page.department}. ${cityPages.length} villes couvertes.`,
+  name: `Pet sitting & House sitting ${deptIn}`,
+  description: `Service de garde d'animaux, de maison et de jardin, house sitting sans frais pour les propriétaires ${deptIn}. ${cityPages.length} villes couvertes.`,
  provider: {
  "@type": "Organization",
  name: "Guardiens",
@@ -423,15 +437,15 @@ const DepartmentPage = () => {
  mainEntity: [
  {
  "@type": "Question",
- name: `Comment trouver un pet sitter dans le ${page.department} ?`,
- acceptedAnswer: {
- "@type": "Answer",
- text: `Inscrivez-vous sans frais sur Guardiens et parcourez les ${cityPages.length} villes du ${page.department} pour trouver un gardien près de chez vous.`,
+  name: `Comment trouver un pet sitter ${deptIn} ?`,
+  acceptedAnswer: {
+  "@type": "Answer",
+  text: `Inscrivez-vous sans frais sur Guardiens et parcourez les ${cityPages.length} villes ${deptOf} pour trouver un gardien près de chez vous.`,
  },
  },
  {
  "@type": "Question",
- name: `Le house sitting dans le ${page.department} est-il sans frais ?`,
+ name: `Le house sitting ${deptIn} est-il sans frais ?`,
  acceptedAnswer: {
  "@type": "Answer",
  text: "Oui, Guardiens est sans frais pour les propriétaires. Le house sitting repose sur l'échange : le gardien loge sans frais en échange de la garde de vos animaux.",

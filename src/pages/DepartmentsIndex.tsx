@@ -6,6 +6,7 @@ import PageMeta from "@/components/PageMeta";
 import PageBreadcrumb from "@/components/seo/PageBreadcrumb";
 import { Skeleton } from "@/components/ui/skeleton";
 import { deptCodeFromName } from "@/lib/deptLookup";
+import { departmentIn } from "@/lib/departmentGrammar";
 
 const SITE = "https://guardiens.fr";
 
@@ -64,7 +65,7 @@ const DepartmentsIndex = () => {
       itemListElement: depts.map((d, i) => ({
         "@type": "ListItem",
         position: i + 1,
-        name: `Garde d'animaux, de maison et de jardin en ${d.department}`,
+        name: `Garde d'animaux, de maison et de jardin ${departmentIn(d.department)}`,
         url: `${SITE}/departement/${d.slug}`,
       })),
     },
