@@ -218,12 +218,12 @@ const DepartmentPage = () => {
  </section>
  )}
 
- {/* Guides in this department */}
- {guides.length > 0 && (
- <section className="max-w-5xl mx-auto px-4 py-6 md:py-12 border-t border-border">
- <h2 className="font-serif text-2xl font-bold text-foreground mb-6">
- Guides locaux, {deptOf}
- </h2>
+      {/* Guides in this department */}
+      {guides.length > 0 && (
+        <section className="max-w-5xl mx-auto px-4 py-6 md:py-12 border-t border-border">
+          <h2 className="font-serif text-2xl font-bold text-foreground mb-6">
+            Guides locaux {deptOf}
+          </h2>
  <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
  {guides.map((guide: any) => (
  <Link key={guide.id} to={`/guide/${guide.slug}`}>
