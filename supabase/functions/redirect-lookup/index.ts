@@ -26,10 +26,11 @@ Deno.serve(async (req) => {
 
   const url = new URL(req.url);
   const slug = (url.searchParams.get("slug") || "").trim().toLowerCase();
-  // Scope de la redirection : article par defaut, city pour les pages villes
-  // (colonne scope de la table redirects, unicite sur le couple scope, slug).
+  // Scope de la redirection : article par defaut, city pour les pages
+  // villes, department pour les pages departements (colonne scope de la
+  // table redirects, unicite sur le couple scope, slug).
   const scopeParam = (url.searchParams.get("scope") || "article").trim().toLowerCase();
-  const scope = scopeParam === "city" ? "city" : "article";
+  const scope = scopeParam === "city" || scopeParam === "department" ? scopeParam : "article";
 
   if (!slug || !SLUG_RE.test(slug)) {
     return new Response(

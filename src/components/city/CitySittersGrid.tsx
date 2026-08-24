@@ -86,7 +86,11 @@ const CitySittersGrid = ({ city, citySlug, aggregateCities, departmentCode, city
       query = orFilter ? query.or(orFilter) : query.ilike("city", `%${city}%`);
       const { data, error } = await query
         .not("first_name", "is", null)
-        .not("avatar_url", "is", null)
+        // Les profils sans photo restent éligibles : le compteur de la
+        // page les inclut et la carte affiche alors l'initiale du prénom.
+        // Le tri serveur fait passer les photos d'abord, la qualité
+        // visuelle est préservée là où le réseau est dense.
+        .order("avatar_url", { nullsFirst: false })
         .limit(24);
       if (error) return [] as SitterRow[];
       return (data || []) as SitterRow[];
@@ -114,13 +118,14 @@ const CitySittersGrid = ({ city, citySlug, aggregateCities, departmentCode, city
         )
         .in("role", ["sitter", "both"])
         .not("first_name", "is", null)
-        .not("avatar_url", "is", null)
         .not("latitude_approx", "is", null)
         .not("longitude_approx", "is", null)
         .gte("latitude_approx", (cityLat as number) - LAT_DELTA)
         .lte("latitude_approx", (cityLat as number) + LAT_DELTA)
         .gte("longitude_approx", (cityLng as number) - LNG_DELTA)
         .lte("longitude_approx", (cityLng as number) + LNG_DELTA)
+        // Même règle que les résidents : photo d'abord, sans exclusion.
+        .order("avatar_url", { nullsFirst: false })
         .limit(400);
       if (error || !profs?.length) return [] as NearbyRow[];
 
@@ -147,11 +152,17 @@ const CitySittersGrid = ({ city, citySlug, aggregateCities, departmentCode, city
 
   // Filtre départemental sur le code postal : élimine les homonymes hors
   // département (Saint-Denis du 93 vs Saint-Denis de La Réunion).
+  // Photo d'abord, tri stable : la découpe à GRID_SIZE ne doit pas
+  // écarter un profil avec photo au profit d'un profil sans photo.
   const residents = (sitters ?? [])
     .filter((s) => postalMatchesDepartment(s.postal_code, departmentCode))
+    .sort((a, b) => Number(Boolean(b.avatar_url)) - Number(Boolean(a.avatar_url)))
     .slice(0, GRID_SIZE);
 
   const residentIds = new Set(residents.map((r) => r.id));
+  // Même règle photo d'abord à l'affichage. La sélection par distance de
+  // pickNearbySitters est inchangée, le tri stable conserve l'ordre de
+  // distance à l'intérieur de chaque groupe.
   const nearby = hasCoords
     ? pickNearbySitters(nearbyCandidates, {
         city,
@@ -161,7 +172,7 @@ const CitySittersGrid = ({ city, citySlug, aggregateCities, departmentCode, city
         cityLng: cityLng as number,
         excludeIds: residentIds,
         limit: GRID_SIZE - residents.length,
-      })
+      }).sort((a, b) => Number(Boolean(b.avatar_url)) - Number(Boolean(a.avatar_url)))
     : [];
 
   const cards: Array<{ row: SitterRow; nearby: boolean }> = [

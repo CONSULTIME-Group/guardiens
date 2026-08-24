@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, Navigate } from "react-router-dom";
 import NotFound from "@/pages/NotFound";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -25,16 +25,45 @@ const DepartmentPage = () => {
  queryKey: ["department-page", slug],
  queryFn: async () => {
  const { data, error } = await supabase
-.from("seo_department_pages" as any)
-.select("*")
-.eq("slug", slug)
-.eq("published", true)
-.maybeSingle();
+ .from("seo_department_pages" as any)
+ .select("*")
+ .eq("slug", slug)
+ .eq("published", true)
+ .maybeSingle();
  if (error) throw error;
  return data as any;
  },
  enabled: !!slug,
  });
+
+  // Redirections de consolidation (scope department) : un slug absent de
+  // seo_department_pages peut avoir été regroupé vers une autre page. La
+  // cible peut être un chemin complet (barre oblique initiale), par
+  // exemple une page ville. Même logique de chaîne que la redirection
+  // ville (5 sauts max).
+  const { data: departmentRedirect } = useQuery({
+    queryKey: ["department-redirect", slug],
+    enabled: !!slug && !isLoading && !page,
+    staleTime: 5 * 60 * 1000,
+    queryFn: async () => {
+      let current = slug!;
+      const visited = new Set<string>([current]);
+      for (let i = 0; i < 5; i++) {
+        const { data } = await supabase
+          .from("redirects")
+          .select("slug_to")
+          .eq("scope", "department")
+          .eq("slug_from", current)
+          .maybeSingle();
+        if (!data?.slug_to || visited.has(data.slug_to)) break;
+        current = data.slug_to;
+        visited.add(current);
+        // Chemin complet : cible terminale, jamais un maillon de chaîne.
+        if (current.startsWith("/")) break;
+      }
+      return current !== slug ? current : null;
+    },
+  });
 
  // Fetch city pages in this department
  const { data: cityPages = [] } = useQuery({
@@ -100,8 +129,51 @@ const DepartmentPage = () => {
  );
  }
 
-  // Slug de département inconnu : vraie page 404 en noindex.
+  // Slug de département inconnu : redirection de consolidation si le slug
+  // est connu de la table redirects (scope department), sinon vraie page
+  // 404 noindex.
   if (!page) {
+  // Résolution de la redirection en cours : même squelette que le
+  // chargement, jamais un flash de 404.
+  if (departmentRedirect === undefined) {
+  return (
+  <div className="min-h-screen bg-background">
+  <div className="max-w-5xl mx-auto px-4 py-16">
+  <Skeleton className="h-10 w-3/4 mb-4" />
+  <Skeleton className="h-24 w-full mb-8" />
+  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+  <Skeleton className="h-32" />
+  <Skeleton className="h-32" />
+  <Skeleton className="h-32" />
+  </div>
+  </div>
+  </div>
+  );
+  }
+  if (departmentRedirect) {
+  // Cible : chemin complet si barre oblique initiale (par exemple une
+  // page ville), sinon autre page département. Redirection client pour
+  // les personnes, 301 déclaré aux crawlers via Prerender (même modèle
+  // que la redirection ville).
+  const target = departmentRedirect.startsWith("/")
+    ? departmentRedirect
+    : `/departement/${departmentRedirect}`;
+  const isPrerender =
+    typeof navigator !== "undefined" && /Prerender/i.test(navigator.userAgent);
+  return (
+  <>
+  <PageMeta
+    title="Page département déplacée"
+    description="Cette page a été regroupée avec la page correspondante."
+    path={target}
+    canonical={`https://guardiens.fr${target}`}
+    statusCode={301}
+    prerenderHeader={`Location: https://guardiens.fr${target}`}
+  />
+  {!isPrerender && <Navigate to={target} replace />}
+  </>
+  );
+  }
   return <NotFound />;
   }
 
