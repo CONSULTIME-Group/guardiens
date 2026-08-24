@@ -21,6 +21,7 @@ import { getOptimizedImageUrl } from "@/lib/imageOptim";
 import ArticleCoverFallback from "@/components/news/ArticleCoverFallback";
 import { resolveAuthors } from "@/data/authors";
 import { trackEvent } from "@/lib/analytics";
+import { useContentStats } from "@/hooks/useContentStats";
 import { SITTER_PRICE_NUMERIC, SITTER_PRICE_CURRENCY, SITTER_PRICE_START_ISO } from "@/lib/pricing";
 import { withOrganizationGraph } from "@/lib/seo/organizationNode";
 
@@ -139,8 +140,14 @@ export default function ArticleDetail() {
  const [article, setArticle] = useState<ArticleFull | null>(null);
  const [loading, setLoading] = useState(true);
  const [relatedArticles, setRelatedArticles] = useState<RelatedArticle[]>([]);
- const [cityGuideSlug, setCityGuideSlug] = useState<string | null>(null);
- const [cityPageSlug, setCityPageSlug] = useState<string | null>(null);
+  const [cityGuideSlug, setCityGuideSlug] = useState<string | null>(null);
+  const [cityPageSlug, setCityPageSlug] = useState<string | null>(null);
+
+  // Variables dynamiques de contenu (placeholders {{...}}). Le scope ville
+  // n'est demandé que si l'article est rattaché à une page ville publiée.
+  const { values: contentStats, isLoading: contentStatsLoading } = useContentStats({
+    citySlug: cityPageSlug,
+  });
 
   useEffect(() => {
   if (!slug) return;
@@ -356,6 +363,7 @@ export default function ArticleDetail() {
     author={article.author_name}
     noindex={article.noindex === true}
     canonical={article.canonical_url || undefined}
+    ready={!contentStatsLoading}
     />
     <ArticleSeoLogger article={article} />
 
@@ -502,7 +510,7 @@ export default function ArticleDetail() {
     <ArticleCoverFallback title={article.title} className="aspect-[16/9] rounded-xl mb-8" />
   )}
 
- <ArticleRenderer content={article.content} userRole={isAuthenticated ? user?.role : undefined} slug={article.slug} />
+ <ArticleRenderer content={article.content} userRole={isAuthenticated ? user?.role : undefined} slug={article.slug} placeholderValues={contentStats} />
 
  {/* Bloc « À propos de l'auteur », affiché si l'auteur est identifié (Jérémie / Elisa) */}
  <ArticleAuthorBio authorName={article.author_name} />

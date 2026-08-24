@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import { useParams, Link } from "react-router-dom";
 import NotFound from "@/pages/NotFound";
 import { useQuery } from "@tanstack/react-query";
@@ -12,6 +13,8 @@ import { MapPin, Users, ClipboardList, ShieldCheck, Heart, ArrowRight, Compass, 
 import PageBreadcrumb from "@/components/seo/PageBreadcrumb";
 import NeighborDepartments from "@/components/seo/NeighborDepartments";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useContentStats } from "@/hooks/useContentStats";
+import { interpolatePlaceholders } from "@/lib/contentPlaceholders";
 
 const DepartmentPage = () => {
  const { slug } = useParams<{ slug: string }>();
@@ -45,10 +48,25 @@ const DepartmentPage = () => {
  if (error) throw error;
  return (data || []) as any[];
  },
- enabled: !!page?.department,
- });
+  enabled: !!page?.department,
+  });
 
- // Fetch guides in this department
+  // Variables dynamiques de contenu (placeholders {{...}}), scope département.
+  const { values: contentStats, isLoading: contentStatsLoading } = useContentStats({
+    departmentSlug: slug ?? null,
+  });
+
+  // Textes éditoriaux, placeholders substitués une fois les valeurs chargées.
+  const introText = useMemo(
+    () => (page?.intro_text ? interpolatePlaceholders(page.intro_text, contentStats ?? {}) : page?.intro_text),
+    [page, contentStats]
+  );
+  const highlightsText = useMemo(
+    () => (page?.highlights ? interpolatePlaceholders(page.highlights, contentStats ?? {}) : page?.highlights),
+    [page, contentStats]
+  );
+
+  // Fetch guides in this department
  const { data: guides = [] } = useQuery({
  queryKey: ["department-guides", page?.department],
  queryFn: async () => {
@@ -91,9 +109,10 @@ const DepartmentPage = () => {
  title={page.meta_title || `Pet sitting & House sitting ${page.department}, garde d'animaux, de maison et de jardin sans frais pour les propriétaires | Guardiens`}
  description={page.meta_description || `Trouvez un pet sitter ou house sitter dans le ${page.department}. Garde d'animaux, de maison et de jardin entre particuliers, sans frais pour les propriétaires. ${cityPages.length} villes couvertes sur Guardiens.`}
  path={`/departement/${page.slug}`}
- noindex={page.noindex === true}
- image={buildOgImageUrl({ title: page.department, subtitle: `${cityPages.length} villes couvertes`, kind: "departement" })}
- />
+  noindex={page.noindex === true}
+  image={buildOgImageUrl({ title: page.department, subtitle: `${cityPages.length} villes couvertes`, kind: "departement" })}
+  ready={!contentStatsLoading}
+  />
 
  <div className="min-h-screen bg-background">
  <PageBreadcrumb items={[
@@ -106,17 +125,17 @@ const DepartmentPage = () => {
  <h1 className="font-serif text-3xl md:text-5xl font-bold text-foreground mb-6">
  {page.h1_title}
  </h1>
- <p className="text-lg text-muted-foreground max-w-3xl leading-relaxed mb-4">
- {page.intro_text}
- </p>
- {page.highlights && (
- <p className="text-base text-foreground/80 max-w-3xl leading-relaxed mb-8">
- {page.highlights}
- </p>
- )}
- <div className="mb-6">
- <ShareLink url={`https://guardiens.fr/departement/${page.slug}`} title={page.h1_title} text={page.intro_text} source="department_page" />
- </div>
+  <p className="text-lg text-muted-foreground max-w-3xl leading-relaxed mb-4">
+  {introText}
+  </p>
+  {highlightsText && (
+  <p className="text-base text-foreground/80 max-w-3xl leading-relaxed mb-8">
+  {highlightsText}
+  </p>
+  )}
+  <div className="mb-6">
+  <ShareLink url={`https://guardiens.fr/departement/${page.slug}`} title={page.h1_title} text={introText ?? ""} source="department_page" />
+  </div>
 
 
  {/* Stats */}
