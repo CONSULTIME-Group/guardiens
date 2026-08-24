@@ -7,7 +7,7 @@ import { ArrowRight, ShieldCheck } from "lucide-react";
 import TrustHaloAvatar from "@/components/sitters/TrustHaloAvatar";
 import { avatarImageUrl } from "@/lib/storageImage";
 import { postalMatchesDepartment } from "@/lib/postalDepartment";
-import { pickNearbySitters } from "@/lib/cityProximity";
+import { pickNearbySitters, buildCityIlikeOrFilter } from "@/lib/cityProximity";
 
 interface Props {
   city: string;

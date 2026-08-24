@@ -104,15 +104,17 @@ export function pickNearbySitters<T extends NearbySitterCandidate>(
   opts: PickNearbyOptions,
 ): Array<T & { distance_km: number }> {
   if (opts.limit <= 0) return [];
+  // Noms résidents : la commune de la page, plus chaque commune agrégée.
+  const residentNames = [opts.city, ...(opts.aggregateCities ?? [])];
   const out: Array<T & { distance_km: number }> = [];
   for (const c of candidates) {
     if (opts.excludeIds?.has(c.id)) continue;
     if (c.latitude_approx == null || c.longitude_approx == null) continue;
     if (c.geographic_radius == null || c.geographic_radius <= 0) continue;
-    // Habitant de la commune : déjà compté dans sitter_count, jamais en
-    // proximité (évite le double comptage et la confusion d'affichage).
+    // Habitant d'une commune couverte : déjà compté dans sitter_count,
+    // jamais en proximité (évite double comptage et confusion d'affichage).
     if (
-      cityNameMatches(c.city, opts.city) &&
+      residentNames.some((name) => cityNameMatches(c.city, name)) &&
       postalMatchesDepartment(c.postal_code, opts.departmentCode)
     ) {
       continue;
