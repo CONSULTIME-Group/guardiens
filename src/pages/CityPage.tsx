@@ -71,6 +71,31 @@ const CityPage = () => {
  enabled: !!slug && !cityData,
  });
 
+  // Redirections de consolidation (scope city) : un slug absent de
+  // seo_city_pages peut avoir ete regroupe vers une autre page ville.
+  // Meme logique de chaine que la redirection article (5 sauts max).
+  const { data: cityRedirect } = useQuery({
+    queryKey: ["city-redirect", slug],
+    enabled: !!slug && !cityData && !dbLoading && !dbPage,
+    staleTime: 5 * 60 * 1000,
+    queryFn: async () => {
+      let current = slug!;
+      const visited = new Set<string>([current]);
+      for (let i = 0; i < 5; i++) {
+        const { data } = await supabase
+          .from("redirects")
+          .select("slug_to")
+          .eq("scope", "city")
+          .eq("slug_from", current)
+          .maybeSingle();
+        if (!data?.slug_to || visited.has(data.slug_to)) break;
+        current = data.slug_to;
+        visited.add(current);
+      }
+      return current !== slug ? current : null;
+    },
+  });
+
   // Variables dynamiques de contenu (placeholders {{...}}), scope ville.
   const { values: contentStats, isLoading: contentStatsLoading } = useContentStats({
     citySlug: slug ?? null,
