@@ -204,7 +204,11 @@ const CitySittersGrid = ({ city, citySlug, aggregateCities, departmentCode, city
 
       {hasAny && (
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-4 mb-8">
-          {cards.map(({ row: s, nearby: isNearby }) => (
+          {cards.map(({ row: s, nearby: isNearby }) => {
+            // RGPD : certains membres saisissent leur nom complet dans le
+            // champ prénom, seul le premier mot est affiché publiquement.
+            const displayName = publicFirstName(s.first_name);
+            return (
             <Link
               key={s.id}
               to={`/gardiens/${s.id}`}
@@ -221,20 +225,20 @@ const CitySittersGrid = ({ city, citySlug, aggregateCities, departmentCode, city
                     src={avatarImageUrl(s.avatar_url, 64)}
                     alt={
                       isNearby
-                        ? `${s.first_name}, gardien qui intervient à ${city}`
-                        : `${s.first_name} gardien à ${city}`
+                        ? `${displayName}, gardien qui intervient à ${city}`
+                        : `${displayName} gardien à ${city}`
                     }
                     className="w-full h-full object-cover"
                     loading="lazy"
                   />
                 ) : (
                   <div className="w-full h-full bg-muted flex items-center justify-center font-semibold text-muted-foreground">
-                    {s.first_name?.[0]}
+                    {displayName[0]}
                   </div>
                 )}
               </TrustHaloAvatar>
               <p className="mt-2 text-sm font-medium text-foreground group-hover:text-primary truncate w-full">
-                {s.first_name}
+                {displayName}
               </p>
               <p className="text-xs text-muted-foreground truncate w-full">
                 {s.city}
