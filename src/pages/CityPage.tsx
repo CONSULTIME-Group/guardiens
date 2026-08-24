@@ -231,7 +231,7 @@ const CityPage = () => {
 
  // ── STATIC CITY DATA PATH ──
  if (cityData) {
- const content = getCityContent(cityData.slug);
+ const content = cityContent;
  const staticNearbyMention = buildNearbyMention(
    cityData.name,
    seoCounts?.sitter_count ?? 0,
@@ -259,8 +259,8 @@ const CityPage = () => {
 
  return (
  <>
- <CityPageMeta city={cityData} />
- <CitySchemaOrg city={cityData} stats={stats} />
+  <CityPageMeta city={cityData} ready={!contentStatsLoading} />
+  <CitySchemaOrg city={cityData} stats={stats} />
 
  {(() => {
  const cityKey = cityData.slug;
@@ -672,6 +672,7 @@ const CityPage = () => {
       <CityPageMeta
         noindex={dbNoindex}
         metaTitle={dbPage.meta_title}
+        ready={!contentStatsLoading}
         city={{
           slug: dbPage.slug,
           name: dbPage.city,
@@ -719,7 +720,7 @@ const CityPage = () => {
             {dbPage.h1_title}
           </h1>
           <p className="text-lg text-muted-foreground max-w-3xl leading-relaxed mb-8">
-            {dbPage.intro_text}
+            {dbInterpolated.intro}
           </p>
           <div className="flex flex-wrap gap-4 mb-8">
             {(dbPage.sitter_count ?? 0) > 0 && (
@@ -755,13 +756,13 @@ const CityPage = () => {
        </section>
 
        {/* Rich editorial body from AI */}
-       {dbPage.content && (
-         <section className="max-w-3xl mx-auto px-4 py-10">
-           <article className="prose prose-lg prose-neutral max-w-none prose-headings:font-serif prose-headings:text-foreground prose-h2:text-3xl prose-h2:mt-12 prose-h2:mb-5 prose-h3:text-xl prose-h3:mt-8 prose-h3:mb-3 prose-h3:text-foreground prose-p:text-foreground/80 prose-p:leading-relaxed prose-li:text-foreground/80 prose-strong:text-foreground prose-a:text-primary prose-a:no-underline hover:prose-a:underline">
-             <ReactMarkdown>{dbPage.content}</ReactMarkdown>
-           </article>
-         </section>
-       )}
+        {dbInterpolated.content && (
+          <section className="max-w-3xl mx-auto px-4 py-10">
+            <article className="prose prose-lg prose-neutral max-w-none prose-headings:font-serif prose-headings:text-foreground prose-h2:text-3xl prose-h2:mt-12 prose-h2:mb-5 prose-h3:text-xl prose-h3:mt-8 prose-h3:mb-3 prose-h3:text-foreground prose-p:text-foreground/80 prose-p:leading-relaxed prose-li:text-foreground/80 prose-strong:text-foreground prose-a:text-primary prose-a:no-underline hover:prose-a:underline">
+              <ReactMarkdown>{dbInterpolated.content}</ReactMarkdown>
+            </article>
+          </section>
+        )}
 
         {/* Gardiens du coin */}
         <CitySittersGrid
