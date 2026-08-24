@@ -97,6 +97,98 @@ describe("interpolatePlaceholders", () => {
   });
 });
 
+describe("interpolatePlaceholders, filet de sécurité sur les formes malformées", () => {
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  const malformedCases = [
+    "{{Profils_Gardien}}",
+    "{{STATS.PROFILS_GARDIEN}}",
+    "{{stats.profils-gardien}}",
+    "{{villes couvertes}}",
+    "{{ville.gardiens.total}}",
+    "{{}}",
+  ];
+
+  it.each(malformedCases)("retire et signale la forme malformée %s", (bad) => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    const out = interpolatePlaceholders(`Avant ${bad} après.`, {
+      profils_gardien: 812,
+      villes_couvertes: 50,
+    });
+    expect(out).toBe("Avant  après.");
+    expect(out).not.toContain("{{");
+    expect(out).not.toContain("}}");
+    expect(warn).toHaveBeenCalledOnce();
+    expect(warn.mock.calls[0][0]).toContain("malformé");
+    expect(warn.mock.calls[0][0]).toContain(bad);
+  });
+
+  it("ne résout jamais une faute de casse vers la clé canonique", () => {
+    vi.spyOn(console, "warn").mockImplementation(() => {});
+    const out = interpolatePlaceholders("{{Profils_Gardien}} gardiens inscrits", {
+      profils_gardien: 812,
+    });
+    expect(out).toBe(" gardiens inscrits");
+    expect(out).not.toContain(fr(812));
+  });
+
+  it("rattrape les formes imbriquées en plusieurs passes", () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    const out = interpolatePlaceholders("X {{ a {{ b }} c }} Y", {});
+    expect(out).not.toContain("{{");
+    expect(out).not.toContain("}}");
+    expect(warn).toHaveBeenCalledTimes(2);
+  });
+
+  it("ne laisse aucune accolade visible avec toutes les formes malformées combinées", () => {
+    vi.spyOn(console, "warn").mockImplementation(() => {});
+    const out = interpolatePlaceholders(malformedCases.join(" puis "), {});
+    expect(out).not.toContain("{{");
+    expect(out).not.toContain("}}");
+    expect(out).not.toContain("undefined");
+    expect(out).not.toContain("NaN");
+  });
+
+  it("préserve un bloc de code fenced contenant des doubles accolades (JSX)", () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    const content = 'Texte.\n\n```jsx\n<div style={{ color: "red" }} />\n```\n\nFin.';
+    expect(interpolatePlaceholders(content, {})).toBe(content);
+    expect(warn).not.toHaveBeenCalled();
+  });
+
+  it("préserve un template avec séparateur point dans un bloc fenced", () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    const content = "Syntaxe :\n\n```\n{{ user.name }}\n```";
+    expect(interpolatePlaceholders(content, {})).toBe(content);
+    expect(warn).not.toHaveBeenCalled();
+  });
+
+  it("préserve un bloc de code JSON contenant des accolades", () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    const content = 'Exemple :\n\n```json\n{"filtre": {"ville": "Lyon", "tags": {}}}\n```\n\nFin.';
+    expect(interpolatePlaceholders(content, {})).toBe(content);
+    expect(warn).not.toHaveBeenCalled();
+  });
+
+  it("préserve le code inline contenant des accolades malformées", () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    const content = "Utilisez `style={{ color: 'red' }}` dans le composant.";
+    expect(interpolatePlaceholders(content, {})).toBe(content);
+    expect(warn).not.toHaveBeenCalled();
+  });
+
+  it("retire le malformé hors code tout en préservant le bloc de code du même contenu", () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    const content = '{{Profils_Gardien}}\n\n```jsx\n<div style={{ color: "red" }} />\n```';
+    const out = interpolatePlaceholders(content, { profils_gardien: 812 });
+    expect(out).toBe('\n\n```jsx\n<div style={{ color: "red" }} />\n```');
+    expect(warn).toHaveBeenCalledOnce();
+    expect(warn.mock.calls[0][0]).toContain("Profils_Gardien");
+  });
+});
+
 describe("findUnknownPlaceholders", () => {
   it("liste les clés inconnues, dédupliquées", () => {
     expect(
@@ -112,6 +204,32 @@ describe("findUnknownPlaceholders", () => {
 
   it("renvoie une liste vide sans placeholder", () => {
     expect(findUnknownPlaceholders("Texte sans variable.")).toEqual([]);
+  });
+
+  it("signale les formes malformées (casse, tiret, espace interne)", () => {
+    expect(
+      findUnknownPlaceholders("{{Profils_Gardien}} et {{stats.profils-gardien}} et {{villes couvertes}}")
+    ).toEqual(["Profils_Gardien", "stats.profils-gardien", "villes couvertes"]);
+  });
+
+  it("signale la double préfixation", () => {
+    expect(findUnknownPlaceholders("{{ville.gardiens.total}}")).toEqual(["ville.gardiens.total"]);
+  });
+
+  it("signale un placeholder vide", () => {
+    expect(findUnknownPlaceholders("Texte {{}} vide")).toEqual(["(vide)"]);
+  });
+
+  it("ne signale rien dans un bloc de code fenced", () => {
+    expect(
+      findUnknownPlaceholders("```jsx\n<div style={{ color: 'red' }} />\n```")
+    ).toEqual([]);
+  });
+
+  it("signale hors code mais pas dans le code, dans le même contenu", () => {
+    expect(
+      findUnknownPlaceholders("{{Profils_Gardien}} puis `style={{ color: 'red' }}`")
+    ).toEqual(["Profils_Gardien"]);
   });
 });
 

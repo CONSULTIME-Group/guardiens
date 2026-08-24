@@ -82,6 +82,30 @@ texte et un avertissement est émis en console. L'éditeur d'article affiche
 la liste des clés inconnues avant publication : la corriger avant de
 publier, un texte amputé d'un chiffre peut devenir incorrect.
 
+## Formes malformées : filet de sécurité
+
+Seules les clés bien formées (minuscules, chiffres et underscores, préfixe
+`stats.`, `ville.` ou `departement.` optionnel) sont candidates à la
+substitution. Toute autre paire d'accolades doubles est un placeholder
+malformé : `{{Profils_Gardien}}`, `{{stats.profils-gardien}}`,
+`{{villes couvertes}}`, `{{ville.gardiens.total}}`, `{{}}`. Il est retiré du
+texte au rendu et journalisé en console, et l'éditeur d'article le signale
+comme une clé inconnue. Une faute de casse n'est jamais corrigée en silence :
+`{{Profils_Gardien}}` est retiré, pas résolu vers `profils_gardien`. Le
+rédacteur corrige sa clé, le moteur ne devine pas.
+
+## Blocs de code
+
+Le balayage des formes malformées ne s'applique jamais à l'intérieur des
+zones de code markdown (blocs fenced ``` et code inline `), afin de ne pas
+altérer un extrait légitime comme `style={{ color: 'red' }}` en JSX. Ces
+zones ne sont pas non plus signalées par l'éditeur. En revanche, la
+substitution des clés bien formées s'applique partout, y compris dans un
+bloc de code (comportement d'origine conservé) : un exemple de syntaxe du
+type `{{ville_gardiens}}` placé dans un bloc de code sera remplacé par le
+chiffre réel. Pour documenter la syntaxe dans un article, mieux vaut donc
+éviter les accolades doubles littérales, même en code.
+
 ## Prerender
 
 Sur les pages concernées, `window.prerenderReady` n'est déclenché qu'une

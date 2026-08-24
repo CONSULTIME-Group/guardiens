@@ -8,8 +8,22 @@
  * compteurs affichés sur la page, jamais recalculés).
  *
  * Règle absolue : aucune accolade ne doit jamais rester visible, ni pour un
- * humain ni pour un robot. Une clé inconnue ou une valeur absente est retirée
- * du texte avec un console.warn.
+ * humain ni pour un robot. Deux passes garantissent cette règle :
+ *
+ * 1. La passe stricte substitue les clés bien formées ({{cle}}, {{ cle }},
+ *    préfixe stats., ville. ou departement. optionnel). Une clé inconnue ou
+ *    une valeur absente est retirée avec un console.warn.
+ * 2. Le filet de sécurité retire tout ce qui reste entre doubles accolades
+ *    (majuscules, tirets, espaces internes, double séparateur, {{}}) avec un
+ *    console.warn indiquant le placeholder malformé et son contenu brut.
+ *
+ * Une faute de casse n'est jamais résolue en silence : {{Profils_Gardien}}
+ * est retiré et signalé, pas substitué. Le rédacteur corrige sa clé.
+ *
+ * Exception documentée : les zones de code markdown (blocs fenced et code
+ * inline) sont exclues du filet de sécurité et de la détection admin, pour
+ * ne pas altérer un extrait légitime du type style={{ color: 'red' }}.
+ * La passe stricte, elle, s'applique partout (comportement d'origine).
  *
  * Fonctions pures, sans dépendance React.
  */
@@ -52,6 +66,17 @@ const KNOWN_KEYS = new Set<string>(KNOWN_PLACEHOLDERS.map((p) => p.key));
 // stats., ville. ou departement.
 const PLACEHOLDER_REGEX = /\{\{\s*((?:(?:stats|ville|departement)\.)?[a-z][a-z0-9_]*)\s*\}\}/g;
 
+// Filet de sécurité : toute paire d'accolades doubles, même malformée.
+// Appliquée en dernière étape de interpolatePlaceholders, uniquement hors
+// zones de code. Sert aussi de détection côté éditeur admin.
+const RESIDUAL_PLACEHOLDER_REGEX = /\{\{[^{}]*\}\}/g;
+const RESIDUAL_PLACEHOLDER_TEST = /\{\{[^{}]*\}\}/;
+
+// Zones de code markdown : blocs fenced ``` ... ``` et code inline `...`.
+// Elles sont exclues du balayage résiduel et de la détection admin, pour ne
+// pas altérer des extraits légitimes (JSX style={{ ... }}, templates).
+const CODE_ZONE_REGEX = /(```[\s\S]*?```|`[^`\n]*`)/g;
+
 const numberFormatter = new Intl.NumberFormat("fr-FR");
 
 /**
@@ -72,6 +97,36 @@ const warnDropped = (raw: string, reason: string) => {
   console.warn(`[contentPlaceholders] Placeholder retiré : {{${raw}}} (${reason})`);
 };
 
+const warnMalformed = (raw: string) => {
+  console.warn(
+    `[contentPlaceholders] Placeholder malformé retiré : ${raw} (format attendu : {{cle}} en minuscules, chiffres et underscores, préfixe stats., ville. ou departement. optionnel)`
+  );
+};
+
+/**
+ * Filet de sécurité : retire tout ce qui ressemble à un placeholder mais n'a
+ * pas été résolu par la passe stricte (majuscules, tirets, espaces internes,
+ * préfixes en cascade, {{}}). La boucle rattrape les formes imbriquées du
+ * type {{ a {{ b }} c }}. Les zones de code ne sont jamais touchées.
+ */
+const sweepResidualPlaceholders = (content: string): string => {
+  if (content.indexOf("{{") === -1) return content;
+  return content
+    .split(CODE_ZONE_REGEX)
+    .map((segment, index) => {
+      if (index % 2 === 1) return segment; // zone de code, intouchée
+      let out = segment;
+      for (let i = 0; i < 10 && RESIDUAL_PLACEHOLDER_TEST.test(out); i++) {
+        out = out.replace(RESIDUAL_PLACEHOLDER_REGEX, (match) => {
+          warnMalformed(match);
+          return "";
+        });
+      }
+      return out;
+    })
+    .join("");
+};
+
 /**
  * Remplace les placeholders par leurs valeurs formatées (nombres au format
  * français avec séparateur de milliers). Tout placeholder non résolu est
@@ -83,7 +138,7 @@ export const interpolatePlaceholders = (
   values: Record<string, PlaceholderValue>
 ): string => {
   if (!content || content.indexOf("{{") === -1) return content;
-  return content.replace(PLACEHOLDER_REGEX, (_match, raw: string) => {
+  const substituted = content.replace(PLACEHOLDER_REGEX, (_match, raw: string) => {
     const key = resolveKey(raw);
     if (!key) {
       warnDropped(raw, "clé inconnue");
@@ -103,19 +158,27 @@ export const interpolatePlaceholders = (
     }
     return value;
   });
+  return sweepResidualPlaceholders(substituted);
 };
 
 /**
  * Liste les clés présentes dans un contenu mais absentes de
- * KNOWN_PLACEHOLDERS (dédupliquées, forme brute sans les accolades).
- * Utilisé par l'éditeur admin pour avertir le rédacteur avant publication.
+ * KNOWN_PLACEHOLDERS (dédupliquées, forme brute sans les accolades). La
+ * détection est permissive : les formes malformées (majuscules, tirets,
+ * espaces, double séparateur, {{}}) sont remontées elles aussi, pour que le
+ * rédacteur les corrige avant publication. Les zones de code ne sont pas
+ * signalées. Un placeholder vide est remonté sous le libellé « (vide) ».
  */
 export const findUnknownPlaceholders = (content: string): string[] => {
   if (!content || content.indexOf("{{") === -1) return [];
   const unknown = new Set<string>();
-  for (const match of content.matchAll(PLACEHOLDER_REGEX)) {
-    const raw = match[1];
-    if (!resolveKey(raw)) unknown.add(raw);
+  const segments = content.split(CODE_ZONE_REGEX);
+  for (let i = 0; i < segments.length; i++) {
+    if (i % 2 === 1) continue; // zone de code : jamais signalée
+    for (const match of segments[i].matchAll(RESIDUAL_PLACEHOLDER_REGEX)) {
+      const raw = match[0].slice(2, -2).trim();
+      if (!resolveKey(raw)) unknown.add(raw === "" ? "(vide)" : raw);
+    }
   }
   return Array.from(unknown);
 };
