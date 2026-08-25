@@ -173,17 +173,20 @@ const OwnerFamilySection = ({ pets, propertyIds, onPetsChanged, getNextSitForPet
         <div className="grid grid-cols-1 min-[430px]:grid-cols-2 md:grid-cols-3 gap-[14px] auto-rows-fr">
           {pets.map((pet) => {
             const nextSit = getNextSitForPet(pet);
-            return (
-              <button
-                type="button"
+              <div
                 key={pet.id}
-                onClick={() => openEditor(pet.property_id)}
-                aria-label={`Modifier ${pet.name}`}
-                className="bg-card border border-border flex items-center gap-[14px] h-full px-[14px] py-[14px] sm:px-[22px] w-full text-left hover:bg-muted/40 transition-colors cursor-pointer"
+                className="bg-card border border-border flex flex-col h-full px-[14px] py-[14px] sm:px-[22px] w-full"
                 style={{
                   borderRadius: "16px",
                 }}
               >
+              <button
+                type="button"
+                onClick={() => openEditor(pet.property_id)}
+                aria-label={`Modifier ${pet.name}`}
+                className="flex items-center gap-[14px] w-full text-left cursor-pointer bg-transparent"
+              >
+
                 <div
                   className="rounded-full overflow-hidden shrink-0 flex items-center justify-center"
                   style={{
