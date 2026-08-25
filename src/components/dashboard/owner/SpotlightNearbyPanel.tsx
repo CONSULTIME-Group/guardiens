@@ -76,6 +76,7 @@ const SpotlightNearbyPanel = () => {
     return (
       <div className="min-w-0">
         <SectionHeader
+          as="h3"
           eyebrow="Les gens du coin"
           title="Votre secteur se remplit encore."
           subtitle="Aucun gardien n'est inscrit tout près de chez vous pour le moment. Élargissez la recherche, ou invitez une personne de confiance à rejoindre Guardiens."
@@ -100,6 +101,7 @@ const SpotlightNearbyPanel = () => {
   return (
     <div className="min-w-0">
       <SectionHeader
+        as="h3"
         eyebrow="Les gens du coin"
         title="Ils sont prêts à garder près de chez vous."
         subtitle={subtitle}
