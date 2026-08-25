@@ -117,6 +117,8 @@ const h1 = { fontSize: '22px', fontWeight: 'bold' as const, color: '#2C6D50', ma
 const text = { fontSize: '14px', color: '#756F66', lineHeight: '1.6', margin: '0 0 14px' }
 const card = { backgroundColor: '#F8F6F1', borderRadius: '8px', padding: '14px 16px', margin: '12px 0 20px' }
 const cardLine = { fontSize: '13px', color: '#524E47', lineHeight: '1.6', margin: 0 }
+const inlineLink = { color: '#2C6D50', textDecoration: 'underline', fontWeight: '600' as const }
+
 const button = {
   backgroundColor: '#2C6D50',
   color: '#ffffff',
