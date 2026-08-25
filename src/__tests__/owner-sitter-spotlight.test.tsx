@@ -236,3 +236,68 @@ describe("OwnerSitterSpotlight, structure statique", () => {
     expect(renders).toBe(1);
   });
 });
+
+// ─── 5. États de bord (26/08/2026) ───────────────────────────────────────
+describe("OwnerSitterSpotlight, états de bord", () => {
+  it("vivier proche chargé et vide : l'onglet reste cliquable et son panneau raconte la situation", () => {
+    mocks.nearby.mockReturnValue({
+      data: { sitters: [], radiusUsed: null, hasGeo: true, totalCount: 0 },
+      isLoading: false,
+    });
+    renderSpotlight();
+
+    const tabProches = screen.getByRole("tab", { name: /Près de chez vous/ });
+    expect(tabProches).toBeTruthy();
+    fireEvent.click(tabProches);
+    expect(tabProches.getAttribute("aria-selected")).toBe("true");
+
+    const panelProches = document.getElementById("owner-spotlight-panel-proches") as HTMLElement;
+    expect(panelProches.getAttribute("hidden")).toBeNull();
+    // Pas un panneau blanc : un état vide avec porte de sortie.
+    expect(panelProches.textContent).toContain("Votre secteur se remplit encore.");
+    expect(within(panelProches).getByText("Voir tous les gardiens")).toBeTruthy();
+    expect(within(panelProches).getByText("Parrainer un proche gardien")).toBeTruthy();
+  });
+
+  it("les deux viviers en chargement : aucun en-tête orphelin, rien n'est rendu", () => {
+    mocks.topAffinity.mockReturnValue({
+      topSitters: [],
+      totalPool: 0,
+      scoredCount: 0,
+      hasGeo: false,
+      isLoading: true,
+    });
+    mocks.nearby.mockReturnValue({ data: undefined, isLoading: true });
+    const { container } = renderSpotlight();
+
+    expect(container.innerHTML).toBe("");
+    expect(screen.queryByRole("tablist")).toBeNull();
+    expect(screen.queryByText("Les gardiens")).toBeNull();
+  });
+});
+
+// ─── 6. Typographie de marque ────────────────────────────────────────────
+const forYouSrc = readFileSync(
+  resolve(__dirname, "../components/dashboard/owner/SpotlightForYouPanel.tsx"),
+  "utf8",
+);
+const nearbySrc = readFileSync(
+  resolve(__dirname, "../components/dashboard/owner/SpotlightNearbyPanel.tsx"),
+  "utf8",
+);
+
+describe("OwnerSitterSpotlight, typographie de marque", () => {
+  it("aucun font-serif dans les trois fichiers du spotlight", () => {
+    // font-serif n'existe pas dans tailwind.config.ts : il retomberait sur
+    // Georgia, pas sur Playfair. Seul font-heading est légitime.
+    expect(spotlightSrc).not.toContain("font-serif");
+    expect(forYouSrc).not.toContain("font-serif");
+    expect(nearbySrc).not.toContain("font-serif");
+  });
+
+  it("le panneau proximité utilise l'en-tête signature SectionHeader", () => {
+    expect(nearbySrc).toContain("SectionHeader");
+    expect(nearbySrc).toContain('eyebrow="Les gens du coin"');
+    expect(nearbySrc).toContain('title="Ils sont prêts à garder près de chez vous."');
+  });
+});
