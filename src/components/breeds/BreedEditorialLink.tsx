@@ -15,9 +15,13 @@ import { slugify } from "@/lib/normalize";
 import { resolveBreedFiche, type BreedFicheCandidate } from "@/lib/breedFicheMatch";
 import { cn } from "@/lib/utils";
 
-/** Construction unique du href, partagée avec BreedPage et PetAdviceSection. */
-export const buildBreedEditorialHref = (species: string, breed: string): string =>
-  `/races/${species}-${slugify(breed)}`;
+/** Construction unique du href, partagée avec BreedPage, PetAdviceSection et
+ *  les fonctions edge (rappel J-7). Source de vérité dans
+ *  `supabase/functions/_shared/breeds/breedEditorialHref.ts`. */
+import { buildBreedEditorialHref } from "../../../supabase/functions/_shared/breeds/breedEditorialHref";
+export { buildBreedEditorialHref };
+
+
 
 /** Cache module : une seule requête par espèce pour toute la session. */
 const candidatesBySpecies = new Map<string, Promise<BreedFicheCandidate[]>>();
