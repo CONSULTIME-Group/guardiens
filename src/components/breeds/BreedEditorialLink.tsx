@@ -84,6 +84,8 @@ const BreedEditorialLink = ({
   return (
     <Link
       to={buildBreedEditorialHref(species, ficheBreed)}
+      aria-label={ariaLabel}
+      onClick={onClick}
       className={cn(
         "inline-flex items-center text-xs font-medium text-primary underline underline-offset-2 hover:text-primary/80 transition-colors",
         className,
