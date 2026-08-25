@@ -71,7 +71,7 @@ const SitReminderJ7 = ({
           </Section>
           {showPrep && (
             <Section style={card}>
-              <Text style={cardLine}>Pour arriver préparé :</Text>
+              <Text style={cardLine}>Pour préparer votre arrivée :</Text>
               {breedUrl && breedGuideName && (
                 <Text style={cardLine}>
                   <Link style={inlineLink} href={breedUrl}>La fiche {breedGuideName}</Link>
