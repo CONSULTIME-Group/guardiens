@@ -34,6 +34,29 @@ describe("pickContextTips", () => {
     );
     expect(tips.map((t) => t.key)).toEqual(["upcoming", "draft"]);
   });
+  it("adapte les conseils au rôle gardien sans route propriétaire", () => {
+    const tips = pickContextTips(
+      {
+        hasUpcomingSit: true,
+        profileIncomplete: true,
+        upcomingBreedHref: "/races/dog-berger-australien",
+        upcomingBreedName: "berger australien",
+      },
+      7,
+      "sitter",
+    );
+    expect(tips.map((tip) => tip.to)).toEqual([
+      "/races/dog-berger-australien",
+      "/profile?section=sitter",
+    ]);
+    expect(tips.every((tip) => !tip.to.includes("owner"))).toBe(true);
+    expect(tips[0].title).not.toContain("arrivée du gardien");
+  });
+
+  it("ne crée aucun lien de race gardien sans fiche vérifiée", () => {
+    const tips = pickContextTips({ hasUpcomingSit: true }, 7, "sitter");
+    expect(tips.some((tip) => tip.key === "upcoming")).toBe(false);
+  });
   it("complète par la saison quand la situation est calme", () => {
     expect(pickContextTips({}, 7).map((t) => t.key)).toEqual(["summer"]);
     expect(pickContextTips({}, 1).map((t) => t.key)).toEqual(["winter"]);

@@ -15,7 +15,7 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { resolveBreedFiche, type BreedFicheCandidate } from "@/lib/breedFicheMatch";
-import { slugify } from "@/lib/normalize";
+import { buildBreedEditorialHref } from "@/components/breeds/BreedEditorialLink";
 import { OWNER_STAGE_ARTICLES } from "@/lib/ownerArticleStages";
 import type { OwnerPriorityAction } from "@/hooks/useOwnerPriorityAction";
 
@@ -40,13 +40,54 @@ interface UseRailReadingsInput {
   pets?: OwnerPetLite[];
   /** Étape du parcours propriétaire (variant de useOwnerPriorityAction). */
   stageVariant?: OwnerPriorityAction["variant"];
+  /** Prochaine garde confirmée, déjà chargée par le dashboard gardien. */
+  upcomingGuard?: {
+    city?: string | null;
+    pets?: Array<{ id?: string; name?: string | null; species?: string | null; breed?: string | null }>;
+  } | null;
 }
+
+interface PublishedCityGuide {
+  slug: string;
+  city: string;
+}
+
+export const buildUpcomingEditorialItems = (
+  guard: UseRailReadingsInput["upcomingGuard"],
+  candidates: BreedFicheCandidate[],
+  cityGuide: PublishedCityGuide | null,
+): RailReadingItem[] => {
+  if (!guard) return [];
+  const out: RailReadingItem[] = [];
+  for (const pet of guard.pets ?? []) {
+    if (!pet.species || !pet.breed) continue;
+    const match = resolveBreedFiche(pet.species, pet.breed, candidates);
+    if (!match) continue;
+    out.push({
+      key: "breed",
+      title: `La fiche ${match.breed}`,
+      context: pet.name ? `Pour votre garde avec ${pet.name}` : "Pour votre prochaine garde",
+      href: buildBreedEditorialHref(match.species, match.breed),
+    });
+    break;
+  }
+  if (cityGuide) {
+    out.push({
+      key: "city-guide",
+      title: `${cityGuide.city}, le guide local`,
+      context: "Pour préparer votre arrivée",
+      href: `/guides/${cityGuide.slug}`,
+    });
+  }
+  return out;
+};
 
 export const useRailReadings = ({
   role,
   userId,
   pets = [],
   stageVariant,
+  upcomingGuard,
 }: UseRailReadingsInput): RailReadingItem[] => {
   const [items, setItems] = useState<RailReadingItem[]>([]);
   const petsKey = pets.map((p) => `${p.species}:${p.breed ?? ""}:${p.name}`).join("|");
@@ -57,14 +98,14 @@ export const useRailReadings = ({
     const load = async () => {
       const out: RailReadingItem[] = [];
 
-      // 1. Fiche de race d'un animal réellement lié au membre.
+      // 1. La prochaine garde prime sur l'historique du gardien.
       try {
         let animals: Array<{ name?: string | null; species: string; breed: string }> = [];
         if (role === "owner") {
           animals = pets
             .filter((p) => p.breed && p.species)
             .map((p) => ({ name: p.name, species: p.species, breed: p.breed as string }));
-        } else if (userId) {
+        } else if (!upcomingGuard && userId) {
           const { data: sp } = await supabase
             .from("sitter_profiles")
             .select("id")
@@ -82,7 +123,30 @@ export const useRailReadings = ({
           }
         }
 
-        if (animals.length > 0) {
+        if (role === "sitter" && upcomingGuard) {
+          const upcomingAnimals = (upcomingGuard.pets ?? []).filter(
+            (pet): pet is { id?: string; name?: string | null; species: string; breed: string } =>
+              Boolean(pet.species && pet.breed),
+          );
+          const species = Array.from(new Set(upcomingAnimals.map((pet) => pet.species)));
+          const [breedResult, guideResult, cityPageResult] = await Promise.all([
+            species.length > 0
+              ? supabase.from("breed_profiles").select("breed, species").in("species", species)
+              : Promise.resolve({ data: [] }),
+            upcomingGuard.city
+              ? supabase.from("city_guides").select("slug, city").ilike("city", upcomingGuard.city).eq("published", true).maybeSingle()
+              : Promise.resolve({ data: null }),
+            upcomingGuard.city
+              ? supabase.from("seo_city_pages").select("slug").ilike("city", upcomingGuard.city).eq("published", true).or("noindex.is.null,noindex.eq.false").maybeSingle()
+              : Promise.resolve({ data: null }),
+          ]);
+          const publishedGuide = cityPageResult.data ? guideResult.data as PublishedCityGuide | null : null;
+          out.push(...buildUpcomingEditorialItems(
+            upcomingGuard,
+            (breedResult.data ?? []) as BreedFicheCandidate[],
+            publishedGuide,
+          ));
+        } else if (animals.length > 0) {
           const species = Array.from(new Set(animals.map((a) => a.species)));
           const { data: candidates } = await supabase
             .from("breed_profiles")
@@ -90,13 +154,13 @@ export const useRailReadings = ({
             .in("species", species);
           const list = (candidates ?? []) as BreedFicheCandidate[];
           for (const animal of animals) {
-            const match = resolveBreedFiche(animal.breed, animal.species, list);
+            const match = resolveBreedFiche(animal.species, animal.breed, list);
             if (match) {
               out.push({
                 key: "breed",
                 title: `La fiche ${match.breed}`,
                 context: animal.name ? `Pour ${animal.name}` : "Depuis votre profil",
-                href: `/races/${match.species}-${slugify(match.breed)}`,
+                href: buildBreedEditorialHref(match.species, match.breed),
               });
               break;
             }
@@ -161,7 +225,7 @@ export const useRailReadings = ({
     };
     // petsKey suffit à représenter pets (stabilité des dépendances).
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [role, userId, petsKey, stageVariant]);
+  }, [role, userId, petsKey, stageVariant, upcomingGuard]);
 
   return items;
 };

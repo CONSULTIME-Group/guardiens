@@ -22,6 +22,7 @@ import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { slugify } from "@/lib/normalize";
 import { resolveBreedFiche } from "@/lib/breedFicheMatch";
+import { buildBreedEditorialHref } from "@/components/breeds/BreedEditorialLink";
 import { TypographicFallback } from "@/components/breeds/BreedCardImage";
 import { getOptimizedImageUrl } from "@/lib/imageOptim";
 import { SectionHeader } from "../sitter/SitterMatchSection";
@@ -41,6 +42,9 @@ export interface PetAdviceContext {
   hasDraftSit?: boolean;
   /** Le profil n'est pas encore complet. */
   profileIncomplete?: boolean;
+  /** Fiche vérifiée de la race concernée par la prochaine garde. */
+  upcomingBreedHref?: string;
+  upcomingBreedName?: string;
 }
 
 interface PetAdviceSectionProps {
@@ -54,6 +58,7 @@ interface PetAdviceSectionProps {
    * passent en une colonne.
    */
   variant?: "flow" | "rail";
+  role?: "owner" | "sitter";
 }
 
 const SPECIES_LABEL: Record<string, string> = {
@@ -103,9 +108,19 @@ export const petNamesPhrase = (pets: AdvicePet[]): string => {
 export const pickContextTips = (
   ctx: PetAdviceContext,
   month: number,
+  role: "owner" | "sitter" = "owner",
 ): { key: string; to: string; eyebrow: string; title: string }[] => {
   const tips: { key: string; to: string; eyebrow: string; title: string }[] = [];
-  if (ctx.hasUpcomingSit) {
+  if (ctx.hasUpcomingSit && role === "sitter" && ctx.upcomingBreedHref) {
+    tips.push({
+      key: "upcoming",
+      to: ctx.upcomingBreedHref,
+      eyebrow: "Votre prochaine garde",
+      title: ctx.upcomingBreedName
+        ? `Repérez les besoins du ${ctx.upcomingBreedName} avant votre arrivée`
+        : "Préparez votre arrivée auprès de l'animal qui vous attend",
+    });
+  } else if (ctx.hasUpcomingSit && role === "owner") {
     tips.push({
       key: "upcoming",
       to: "/actualites/preparer-maison-avant-garde",
@@ -124,9 +139,11 @@ export const pickContextTips = (
   if (ctx.profileIncomplete) {
     tips.push({
       key: "profile",
-      to: "/owner-profile?section=identity",
+      to: role === "sitter" ? "/profile?section=sitter" : "/owner-profile?section=identity",
       eyebrow: "Votre profil",
-      title: "Les quelques lignes qui rassurent vraiment",
+      title: role === "sitter"
+        ? "Complétez les informations qui présentent votre expérience"
+        : "Les quelques lignes qui rassurent vraiment",
     });
   }
   if (tips.length < 2) {
@@ -206,6 +223,7 @@ const PetAdviceSection = ({
   context = {},
   addPetTo = "/owner-profile",
   variant = "flow",
+  role = "owner",
 }: PetAdviceSectionProps) => {
   const isRail = variant === "rail";
   // En rail, le heading ne porte pas la voix Alma (déjà portée par
@@ -219,6 +237,10 @@ const PetAdviceSection = ({
   // lit alors directement, la personne peut aussi être propriétaire.
   useEffect(() => {
     if (petsProp) return;
+    if (role === "sitter") {
+      setFetchedPets([]);
+      return;
+    }
     let cancelled = false;
     (async () => {
       const { data: auth } = await supabase.auth.getUser();
@@ -245,7 +267,7 @@ const PetAdviceSection = ({
     return () => {
       cancelled = true;
     };
-  }, [petsProp]);
+  }, [petsProp, role]);
 
   const pets = petsProp ?? fetchedPets ?? [];
   const hasPets = pets.length > 0;
@@ -281,7 +303,7 @@ const PetAdviceSection = ({
         ? resolveBreedFiche(pet.species, pet.breed, breeds ?? [])
         : null;
       if (match) {
-        const to = `/races/${match.species}-${slugify(match.breed)}`;
+          const to = buildBreedEditorialHref(match.species, match.breed);
         if (seen.has(to)) continue;
         seen.add(to);
         out.push({
@@ -314,14 +336,29 @@ const PetAdviceSection = ({
 
   const contextTiles = useMemo<Tile[]>(
     () =>
-      pickContextTips(context, new Date().getMonth() + 1).map((t) => ({
+      pickContextTips(context, new Date().getMonth() + 1, role).map((t) => ({
         ...t,
         image: null,
       })),
-    [context.hasUpcomingSit, context.hasDraftSit, context.profileIncomplete],
+    [context.hasUpcomingSit, context.hasDraftSit, context.profileIncomplete, context.upcomingBreedHref, context.upcomingBreedName, role],
   );
 
   if (!hasPets) {
+    if (role === "sitter") {
+      if (contextTiles.length === 0) return null;
+      return (
+        <section aria-label="Conseils pour votre prochaine garde" className="min-w-0">
+          <SectionHeader
+            eyebrow={headingEyebrow}
+            title="Préparez votre prochaine garde."
+            subtitle="Des repères utiles avant votre arrivée."
+          />
+          <ul role="list" className="grid grid-cols-1" style={{ gap: "14px" }}>
+            {contextTiles.map((tile) => <AdviceCard key={`${tile.key}-${tile.to}`} tile={tile} />)}
+          </ul>
+        </section>
+      );
+    }
     return (
       <section aria-label="Conseils pour vos compagnons" className="min-w-0">
         <SectionHeader
