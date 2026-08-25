@@ -426,7 +426,7 @@ const SitterDashboard = () => {
                 </div>
               )}
 
-              {/* e. Conseils compagnons — tuiles pratiques, PAS une voix Alma :
+              {/* e. Conseils compagnons, tuiles pratiques, PAS une voix Alma :
                   le heading visible ne mentionne pas Alma (déjà portée par
                   AlmaRailWhisper ci-dessus), le contenu reste inchangé. */}
               <div className="">
@@ -556,7 +556,7 @@ const SitterDashboard = () => {
                 </div>
               )}
 
-              {/* e. Conseils compagnons — tuiles pratiques, PAS une voix Alma :
+              {/* e. Conseils compagnons, tuiles pratiques, PAS une voix Alma :
                   le heading visible ne mentionne pas Alma (déjà portée par
                   AlmaRailWhisper ci-dessus), le contenu reste inchangé. */}
               <div className="">
