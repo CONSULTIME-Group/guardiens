@@ -324,11 +324,14 @@ const AdminSitsManagement = () => {
           <SelectContent>
             <SelectItem value="operational">Opérationnelles (par défaut)</SelectItem>
             <SelectItem value="confirmed">Confirmées uniquement</SelectItem>
+            <SelectItem value="in_progress">En cours</SelectItem>
             <SelectItem value="completed">Terminées</SelectItem>
             <SelectItem value="cancelled">Annulées</SelectItem>
             <SelectItem value="no_draft">+ Annonces publiées</SelectItem>
             <SelectItem value="published">Publiées (pré-confirmation)</SelectItem>
             <SelectItem value="draft">Brouillons</SelectItem>
+            <SelectItem value="archived">Archivées</SelectItem>
+            <SelectItem value="expired">Expirées</SelectItem>
             <SelectItem value="all">Tous statuts</SelectItem>
           </SelectContent>
         </Select>
