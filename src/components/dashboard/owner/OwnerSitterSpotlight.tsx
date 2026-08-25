@@ -21,6 +21,7 @@
 import { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNearbyOwnerSitters } from "@/hooks/useNearbyOwnerSitters";
+import { useOwnerTopAffinitySitters } from "@/hooks/useOwnerTopAffinitySitters";
 import SpotlightForYouPanel from "./SpotlightForYouPanel";
 import SpotlightNearbyPanel from "./SpotlightNearbyPanel";
 
@@ -41,6 +42,9 @@ export default function OwnerSitterSpotlight() {
   // « Près de chez vous », React Query déduplique. Aucun appel réseau
   // supplémentaire, le badge est disponible dès le premier rendu utile.
   const { data: nearbyData, isLoading: nearbyIsLoading } = useNearbyOwnerSitters(user?.id);
+  // Même hook, même queryKey que le panneau « Pour vous » : React Query
+  // déduplique, aucun appel réseau supplémentaire.
+  const { isLoading: affinityIsLoading } = useOwnerTopAffinitySitters();
   const nearbyTotal = nearbyData?.totalCount ?? 0;
   const showNearbyBadge = activeTab !== "proches" && !nearbyIsLoading && nearbyTotal > 0;
 
@@ -51,10 +55,16 @@ export default function OwnerSitterSpotlight() {
     setActiveTab((t) => (t === "pour-vous" ? "proches" : "pour-vous"));
   };
 
+  // En-tête orphelin (25/08/2026) : tant que les DEUX viviers chargent, les
+  // deux panneaux renverraient null et laisseraient un titre plus deux
+  // onglets posés sur du vide. On ne rend rien du tout, l'option la plus
+  // propre visuellement : la section apparaît d'un bloc, déjà remplie.
+  if (nearbyIsLoading && affinityIsLoading) return null;
+
   return (
     <section aria-label="Les gardiens" className="min-w-0">
       <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-3 mb-4">
-        <h2 className="text-lg md:text-xl font-serif font-semibold text-foreground">
+        <h2 className="text-lg md:text-xl font-heading font-semibold text-foreground">
           Les gardiens
         </h2>
         <div

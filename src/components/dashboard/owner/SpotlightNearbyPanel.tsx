@@ -9,8 +9,10 @@
  *
  * Seul l'habillage change : l'eyebrow « Les gens du coin » devient le h3 du
  * panneau, le h2 « Les gardiens » et le sélecteur d'onglet sont portés par
- * OwnerSitterSpotlight. Si aucun gardien proche : rien ne s'affiche
- * (return null), uniquement quand cet onglet est actif.
+ * OwnerSitterSpotlight. L'en-tête reprend le composant SectionHeader de la
+ * marque (trait, eyebrow, titre serif, sous-titre). Si aucun gardien proche
+ * n'est trouvé, le panneau affiche un état vide court, jamais du blanc :
+ * l'onglet reste visible et cliquable dans tous les cas.
  */
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
@@ -20,6 +22,8 @@ import { supabase } from "@/integrations/supabase/client";
 import type { AffinitySitterInput } from "@/lib/affinityScore";
 import OwnerToSitterAffinity from "@/components/matching/OwnerToSitterAffinity";
 import { avatarImageUrl } from "@/lib/storageImage";
+import { SectionHeader } from "@/components/dashboard/sitter/SitterMatchSection";
+import { Button } from "@/components/ui/button";
 
 const AFFINITY_COLUMNS =
   "user_id, experience_years, life_pace, lifestyle, availability_during, has_vehicle, has_license, languages, interests, work_during_sit, sensitivities, animal_types, sitter_type, travels_with_children, travels_with_own_animals, special_animal_skills, farm_animals_ok";
@@ -56,7 +60,7 @@ const SpotlightNearbyPanel = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sitters.map((s) => s.id).join(",")]);
 
-  if (isLoading || sitters.length === 0) return null;
+  if (isLoading) return null;
 
   // Différence de tri posée explicitement (25/08/2026) : ce panneau est un
   // annuaire de proximité, pas un classement par affinité. La chip
@@ -66,14 +70,40 @@ const SpotlightNearbyPanel = () => {
     ? `Trois profils de gardiens dans un rayon de ${radiusUsed} km. Ici, le tri se fait par distance, pas par affinité.`
     : "Trois profils de gardiens parmi les plus proches disponibles. Ici, le tri se fait par distance, pas par affinité.";
 
+  // Vivier proche chargé et vide : l'onglet reste cliquable, le panneau
+  // raconte la situation et ouvre une porte de sortie (règle 1 bis).
+  if (sitters.length === 0) {
+    return (
+      <div className="min-w-0">
+        <SectionHeader
+          eyebrow="Les gens du coin"
+          title="Votre secteur se remplit encore."
+          subtitle="Aucun gardien n'est inscrit tout près de chez vous pour le moment. Élargissez la recherche, ou invitez une personne de confiance à rejoindre Guardiens."
+        />
+        <div className="rounded-2xl border border-dashed border-border bg-card p-5 md:p-6">
+          <div className="flex flex-col items-start gap-3">
+            <Link
+              to="/search?role=sitter"
+              className="text-sm text-primary hover:underline underline-offset-2 font-medium"
+            >
+              Voir tous les gardiens
+            </Link>
+            <Button asChild variant="outline" className="rounded-xl">
+              <Link to="/inscription?role=sitter&refer=owner">Parrainer un proche gardien</Link>
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-w-0">
-      <header className="mb-4">
-        <h3 className="text-lg md:text-xl font-serif font-semibold text-foreground">
-          Les gens du coin
-        </h3>
-        <p className="text-sm text-muted-foreground mt-1">{subtitle}</p>
-      </header>
+      <SectionHeader
+        eyebrow="Les gens du coin"
+        title="Ils sont prêts à garder près de chez vous."
+        subtitle={subtitle}
+      />
 
       <ul role="list" className="flex flex-col" style={{ gap: "14px" }}>
         {sitters.map((s) => {
