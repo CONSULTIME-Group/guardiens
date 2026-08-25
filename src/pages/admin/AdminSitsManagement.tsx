@@ -19,7 +19,7 @@ import { AlertTriangle, Search, Eye, XCircle, Star, StickyNote, RotateCcw, User,
 import { useNavigate } from "react-router-dom";
 import { getCountryName } from "@/lib/countries";
 import { avatarImageUrl } from "@/lib/storageImage";
-import { adminSitsFilterStatuses } from "@/lib/sitStatus";
+import { adminSitsFilterStatuses, resolveSitStatusBadge } from "@/lib/sitStatus";
 
 import {
   AlertDialog,
@@ -324,11 +324,14 @@ const AdminSitsManagement = () => {
           <SelectContent>
             <SelectItem value="operational">Opérationnelles (par défaut)</SelectItem>
             <SelectItem value="confirmed">Confirmées uniquement</SelectItem>
+            <SelectItem value="in_progress">En cours</SelectItem>
             <SelectItem value="completed">Terminées</SelectItem>
             <SelectItem value="cancelled">Annulées</SelectItem>
             <SelectItem value="no_draft">+ Annonces publiées</SelectItem>
             <SelectItem value="published">Publiées (pré-confirmation)</SelectItem>
             <SelectItem value="draft">Brouillons</SelectItem>
+            <SelectItem value="archived">Archivées</SelectItem>
+            <SelectItem value="expired">Expirées</SelectItem>
             <SelectItem value="all">Tous statuts</SelectItem>
           </SelectContent>
         </Select>
@@ -359,16 +362,17 @@ const AdminSitsManagement = () => {
               <TableHead>Dernière activité</TableHead>
               <TableHead className="text-right">Vues</TableHead>
               <TableHead className="text-right">Msg</TableHead>
-              <TableHead>Statut</TableHead>
+              <TableHead>Déroulé dans le temps</TableHead>
+              <TableHead>État du dossier</TableHead>
               <TableHead>Avis</TableHead>
               <TableHead className="text-right">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {loading ? (
-              <TableRow><TableCell colSpan={11} className="text-center py-8 text-muted-foreground">Chargement…</TableCell></TableRow>
+              <TableRow><TableCell colSpan={12} className="text-center py-8 text-muted-foreground">Chargement…</TableCell></TableRow>
             ) : filtered.length === 0 ? (
-              <TableRow><TableCell colSpan={11} className="text-center py-8 text-muted-foreground">Aucune garde</TableCell></TableRow>
+              <TableRow><TableCell colSpan={12} className="text-center py-8 text-muted-foreground">Aucune garde</TableCell></TableRow>
             ) : filtered.map((sit) => {
               const timing = getTimingStatus(sit);
               const sitter = sitters[sit.id];
@@ -421,6 +425,12 @@ const AdminSitsManagement = () => {
                   <TableCell className="text-right text-sm font-medium tabular-nums">{statsBySit[sit.id]?.views ?? ","}</TableCell>
                   <TableCell className="text-right text-sm font-medium tabular-nums">{statsBySit[sit.id]?.messages ?? ","}</TableCell>
                   <TableCell><Badge variant={timing.variant}>{timing.label}</Badge></TableCell>
+                  <TableCell>
+                    {(() => {
+                      const dossier = resolveSitStatusBadge(sit.status);
+                      return <Badge variant={dossier.variant}>{dossier.label}</Badge>;
+                    })()}
+                  </TableCell>
                   <TableCell className="text-xs">
                     <div>P: {rev.owner ? "✅" : "❌"}</div>
                     <div>G: {rev.sitter ? "✅" : "❌"}</div>
