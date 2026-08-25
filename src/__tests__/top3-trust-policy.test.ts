@@ -32,6 +32,10 @@ const cardSrc = readFileSync(
   resolve(__dirname, "../components/dashboard/OwnerFirstNBAGardiens.tsx"),
   "utf8",
 );
+const chipsSrc = readFileSync(
+  resolve(__dirname, "../components/dashboard/shared/discriminatingChips.ts"),
+  "utf8",
+);
 
 describe("Viviers gardiens, règle définitive : on trie, on ne filtre jamais", () => {
   it("aucune constante d'arbitrage ni bascule ne subsiste", () => {
@@ -114,12 +118,15 @@ describe("Viviers gardiens, règle définitive : on trie, on ne filtre jamais", 
     expect(cardSrc).not.toContain("{sitter.affinity.score} % d'affinité");
   });
 
-  it("les 2 chips affichées sont choisies par poids de critère, pas par ordre fixe", () => {
+  it("les 2 chips affichées privilégient les critères qui distinguent le trio", () => {
     // `matched` est un string[] dans l'ordre fixe d'évaluation (animaux,
     // présence...) : les deux mêmes phrases revenaient sur toutes les
-    // cartes. La carte consomme `matchedDetailed` et trie par poids.
-    expect(cardSrc).toContain("sitter.affinity.matchedDetailed");
-    expect(cardSrc).toContain("b.weight - a.weight");
+    // cartes. La sélection vit dans pickDiscriminatingChips : les critères
+    // qui départagent le trio priment, repli poids puis points sinon.
+    expect(cardSrc).toContain("pickDiscriminatingChips(topSitters)");
+    expect(chipsSrc).toContain("matchedDetailed");
+    expect(chipsSrc).toContain("b.weight - a.weight");
+    expect(chipsSrc).toContain("b.points - a.points");
     expect(cardSrc).not.toContain("sitter.affinity.matched.slice(0, 2)");
   });
 });
