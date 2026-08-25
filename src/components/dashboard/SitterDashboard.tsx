@@ -512,8 +512,6 @@ const SitterDashboard = () => {
 
               {ChecklistBlock}
 
-              {ChecklistBlock}
-
             </div>
 
 
