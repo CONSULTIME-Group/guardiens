@@ -362,7 +362,8 @@ const AdminSitsManagement = () => {
               <TableHead>Dernière activité</TableHead>
               <TableHead className="text-right">Vues</TableHead>
               <TableHead className="text-right">Msg</TableHead>
-              <TableHead>Statut</TableHead>
+              <TableHead>Déroulé dans le temps</TableHead>
+              <TableHead>État du dossier</TableHead>
               <TableHead>Avis</TableHead>
               <TableHead className="text-right">Actions</TableHead>
             </TableRow>
