@@ -18,6 +18,7 @@ import { avatarImageUrl } from "@/lib/storageImage";
 import { Link } from "react-router-dom";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import PetsEditor from "@/components/pets/PetsEditor";
+import BreedEditorialLink from "@/components/breeds/BreedEditorialLink";
 import { SectionHeader } from "../sitter/SitterMatchSection";
 import { SPECIES_LABEL, capitalize, capitalizeWords } from "./helpers";
 import type { Pet, SitRow } from "./types";
