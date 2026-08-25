@@ -109,7 +109,15 @@ export default function OwnerFirstNBAGardiens() {
 
 function SitterCard({ sitter, position }: { sitter: AffinitySitterCard; position: number }) {
   const initial = (sitter.first_name || "?").slice(0, 1).toUpperCase();
-  const topCriteria = sitter.affinity.matched.slice(0, 2);
+  // Les 2 chips les plus significatives pour CE gardien : poids du critère
+  // décroissant, puis points obtenus (un match complet prime sur un match
+  // partiel). L'ordre fixe d'évaluation (animaux, présence...) affichait
+  // les deux mêmes phrases sur presque toutes les cartes. Tri stable : à
+  // poids et points égaux, l'ordre canonique des critères est conservé.
+  const topCriteria = [...sitter.affinity.matchedDetailed]
+    .sort((a, b) => b.weight - a.weight || b.points - a.points)
+    .slice(0, 2)
+    .map((c) => c.phrase);
 
   const onClick = () => {
     void trackEvent("owner_first_nba_gardien_card_clicked", {
@@ -155,7 +163,9 @@ function SitterCard({ sitter, position }: { sitter: AffinitySitterCard; position
           </div>
         </div>
         <Badge variant="secondary" className="mb-2">
-          {sitter.affinity.score} % d'affinité
+          {/* Alignement chiffre/tri (23/08/2026) : côté propriétaire, le
+              chiffre affiché EST le sortScore qui ordonne la liste. */}
+          {sitter.affinity.sortScore} % d'affinité
         </Badge>
         {topCriteria.length > 0 && (
           <ul className="text-xs text-muted-foreground space-y-0.5 mt-1">
