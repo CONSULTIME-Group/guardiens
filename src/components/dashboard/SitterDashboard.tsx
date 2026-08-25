@@ -389,11 +389,8 @@ const SitterDashboard = () => {
                 />
               </div>
 
-              {/* 5. CONSEILS ANCRÉS SUR LES COMPAGNONS (lot 4, point 3) */}
-              <div>
-                <PetAdviceSection />
-              </div>
             </div>
+
 
 
             {/* ═══ RAIL droite — espacement 34px, mt-[52px] mobile. Collant
