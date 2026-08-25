@@ -512,10 +512,8 @@ const SitterDashboard = () => {
 
               {ChecklistBlock}
 
-              {/* Conseils ancrés sur les compagnons (lot 4, point 3) */}
-              <div>
-                <PetAdviceSection />
-              </div>
+              {ChecklistBlock}
+
             </div>
 
 
