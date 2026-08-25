@@ -72,7 +72,7 @@ const AdminListings = () => {
   const [restoreModal, setRestoreModal] = useState<string | null>(null);
 
   // KPIs (indépendants des filtres, calculés au montage)
-  const [kpis, setKpis] = useState<{ total: number; published: number; draft: number; cancelled: number; archived: number; newLast7d: number } | null>(null);
+  const [kpis, setKpis] = useState<{ total: number; published: number; draft: number; inProgress: number; cancelled: number; archived: number; newLast7d: number } | null>(null);
 
   // Pagination client-side
   const PAGE_SIZE = 25;
@@ -172,10 +172,11 @@ const AdminListings = () => {
   useEffect(() => {
     (async () => {
       const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
-      const [totalRes, pubRes, draftRes, cancRes, archRes, newRes] = await Promise.all([
+      const [totalRes, pubRes, draftRes, progRes, cancRes, archRes, newRes] = await Promise.all([
         supabase.from("sits").select("id", { count: "exact", head: true }),
         supabase.from("sits").select("id", { count: "exact", head: true }).eq("status", "published" as any),
         supabase.from("sits").select("id", { count: "exact", head: true }).eq("status", "draft" as any),
+        supabase.from("sits").select("id", { count: "exact", head: true }).eq("status", "in_progress" as any),
         supabase.from("sits").select("id", { count: "exact", head: true }).eq("status", "cancelled" as any),
         supabase.from("sits").select("id", { count: "exact", head: true }).eq("status", "archived" as any),
         supabase.from("sits").select("id", { count: "exact", head: true }).gte("created_at", sevenDaysAgo),
@@ -184,6 +185,7 @@ const AdminListings = () => {
         total: totalRes.count ?? 0,
         published: pubRes.count ?? 0,
         draft: draftRes.count ?? 0,
+        inProgress: progRes.count ?? 0,
         cancelled: cancRes.count ?? 0,
         archived: archRes.count ?? 0,
         newLast7d: newRes.count ?? 0,
@@ -473,6 +475,7 @@ const AdminListings = () => {
           { label: "Total annonces", value: kpis?.total },
           { label: "En ligne", value: kpis?.published },
           { label: "Brouillons", value: kpis?.draft },
+          { label: "Gardes en cours", value: kpis?.inProgress },
           { label: "Masquées / annulées", value: kpis?.cancelled },
           { label: "Archivées", value: kpis?.archived },
           { label: "Nouvelles 7 jours", value: kpis?.newLast7d },
