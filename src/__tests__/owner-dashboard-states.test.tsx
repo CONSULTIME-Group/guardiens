@@ -41,7 +41,7 @@ function state(sits: SitLite[], pets: unknown[], role: "owner" | "sitter" | "bot
     showSitDraftFromPrompt: showAlmaProactive, // toujours accessible si Alma proactive
     showDraftResumeCard: hasDraft,
     showPriorityActionCard: !hasDraft && !showAlmaProactive,
-    showOwnerFirstNBAGardiens: showAlmaProactive,
+    showSitterSpotlight: showAlmaProactive,
     showDesktopHeroCta: !showAlmaProactive,
     sitDraftSecondary: showAlmaProactive && hasDraft,
   };
@@ -56,7 +56,7 @@ describe("OwnerDashboard states — précepte 2026 « 1 NBA dominante »", () =>
     expect(s.showSitDraftFromPrompt).toBe(true);
     expect(s.showDraftResumeCard).toBe(false);
     expect(s.showPriorityActionCard).toBe(false);
-    expect(s.showOwnerFirstNBAGardiens).toBe(true);
+    expect(s.showSitterSpotlight).toBe(true);
     expect(s.showDesktopHeroCta).toBe(false);
   });
 
@@ -68,7 +68,7 @@ describe("OwnerDashboard states — précepte 2026 « 1 NBA dominante »", () =>
     expect(s.sitDraftSecondary).toBe(true);
     expect(s.showDraftResumeCard).toBe(true);
     expect(s.showPriorityActionCard).toBe(false);
-    expect(s.showOwnerFirstNBAGardiens).toBe(true);
+    expect(s.showSitterSpotlight).toBe(true);
     expect(s.showDesktopHeroCta).toBe(false);
   });
 
@@ -81,11 +81,11 @@ describe("OwnerDashboard states — précepte 2026 « 1 NBA dominante »", () =>
     expect(s.showSitDraftFromPrompt).toBe(true);
     expect(s.sitDraftSecondary).toBe(true);
     expect(s.showPriorityActionCard).toBe(false);
-    expect(s.showOwnerFirstNBAGardiens).toBe(true);
+    expect(s.showSitterSpotlight).toBe(true);
     expect(s.showDesktopHeroCta).toBe(false);
   });
 
-  it("returning owner (au moins 1 annonce publiée) : PriorityActionCard visible, CTA hero visible, OwnerFirstNBAGardiens masqué", () => {
+  it("returning owner (au moins 1 annonce publiée) : PriorityActionCard visible, CTA hero visible, OwnerSitterSpotlight masqué", () => {
     const s = state([{ status: "published" }], []);
     expect(s.isNewOwner).toBe(false);
     expect(s.earlyOwner).toBe(false);
@@ -93,7 +93,7 @@ describe("OwnerDashboard states — précepte 2026 « 1 NBA dominante »", () =>
     expect(s.showSitDraftFromPrompt).toBe(false);
     expect(s.showDraftResumeCard).toBe(false);
     expect(s.showPriorityActionCard).toBe(true);
-    expect(s.showOwnerFirstNBAGardiens).toBe(false);
+    expect(s.showSitterSpotlight).toBe(false);
     expect(s.showDesktopHeroCta).toBe(true);
   });
 
@@ -106,7 +106,7 @@ describe("OwnerDashboard states — précepte 2026 « 1 NBA dominante »", () =>
     expect(s.nbaVariant).toBe("no_active_sit");
     expect(s.showSitDraftFromPrompt).toBe(true);
     expect(s.showPriorityActionCard).toBe(false);
-    expect(s.showOwnerFirstNBAGardiens).toBe(true);
+    expect(s.showSitterSpotlight).toBe(true);
     expect(s.showDesktopHeroCta).toBe(false);
   });
 
@@ -118,7 +118,7 @@ describe("OwnerDashboard states — précepte 2026 « 1 NBA dominante »", () =>
   });
 
   // Cas Jérémie martinot@gmail.com : role=both, 2 pets, 1 draft + 2 archived, 0 published.
-  // Doit voir DraftResumeCard EN TÊTE + SitDraftFromPrompt secondaire + OwnerFirstNBAGardiens.
+  // Doit voir DraftResumeCard EN TÊTE + SitDraftFromPrompt secondaire + OwnerSitterSpotlight.
   it("owner (role=both) avec pets + draft + archived : DraftResumeCard + concierge IA secondaire", () => {
     const s = state(
       [{ status: "draft" }, { status: "archived" }, { status: "archived" }],
@@ -135,7 +135,7 @@ describe("OwnerDashboard states — précepte 2026 « 1 NBA dominante »", () =>
     expect(s.showSitDraftFromPrompt).toBe(true);
     expect(s.sitDraftSecondary).toBe(true);
     expect(s.showPriorityActionCard).toBe(false);
-    expect(s.showOwnerFirstNBAGardiens).toBe(true);
+    expect(s.showSitterSpotlight).toBe(true);
     expect(s.showDesktopHeroCta).toBe(false);
   });
 
