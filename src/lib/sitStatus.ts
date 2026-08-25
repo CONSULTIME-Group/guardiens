@@ -56,8 +56,21 @@ export const SIT_STATUS_SHORT_LABELS: Record<SitStatus, string> = {
   expired: "Expirées",
 };
 
+/**
+ * Source de vérité effective. Si l'enum de la base est vide ou illisible au
+ * runtime, on retombe sur la liste de repli et on signale l'anomalie, plutôt
+ * que de renvoyer un tableau vide qui masquerait toutes les gardes.
+ */
+export const canonicalSitStatuses = (): SitStatus[] => {
+  if (SIT_STATUSES.length > 0) return [...SIT_STATUSES];
+  console.error(
+    "sitStatus : l'enum sit_status est vide au runtime, repli sur la liste de secours.",
+  );
+  return [...SIT_STATUS_FALLBACK] as SitStatus[];
+};
+
 export const isSitStatus = (value: unknown): value is SitStatus =>
-  typeof value === "string" && (SIT_STATUSES as readonly string[]).includes(value);
+  typeof value === "string" && (canonicalSitStatuses() as readonly string[]).includes(value);
 
 /**
  * Un statut non reconnu n'emprunte jamais l'identité d'un autre statut :
@@ -74,9 +87,11 @@ export const resolveSitStatusBadge = (status: unknown): SitStatusBadge => {
  * Le filtre "all" couvre l'intégralité de l'enum, sans exception.
  */
 export const adminSitsFilterStatuses = (filterStatus: string): SitStatus[] => {
+  const all = canonicalSitStatuses();
   if (filterStatus === "operational") return ["confirmed", "in_progress", "completed", "cancelled"];
-  if (filterStatus === "no_draft") return SIT_STATUSES.filter((s) => s !== "draft");
-  if (filterStatus === "all") return [...SIT_STATUSES];
+  if (filterStatus === "no_draft") return all.filter((s) => s !== "draft");
+  if (filterStatus === "all") return all;
   if (isSitStatus(filterStatus)) return [filterStatus];
-  return [...SIT_STATUSES];
+  return all;
 };
+
