@@ -30,6 +30,8 @@ import ListingProximityCard from "@/components/admin/ListingProximityCard";
 import ListingCoverPickerDialog from "@/components/admin/ListingCoverPickerDialog";
 import { getCountryName } from "@/lib/countries";
 import { avatarImageUrl } from "@/lib/storageImage";
+import { resolveSitStatusBadge, type SitStatusBadgeVariant } from "@/lib/sitStatus";
+
 
 type BadgeVariant = SitStatusBadgeVariant;
 

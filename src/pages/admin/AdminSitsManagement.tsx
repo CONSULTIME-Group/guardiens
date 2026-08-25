@@ -60,11 +60,12 @@ const AdminSitsManagement = () => {
 
     const getStatuses = () => {
       // "operational" = vraies gardes post-acceptation. Le reste appartient à l'onglet Annonces.
-      if (filterStatus === "operational") return ["confirmed", "completed", "cancelled"];
-      if (filterStatus === "no_draft") return ["confirmed", "completed", "cancelled", "published"];
-      if (filterStatus === "all") return ["draft", "confirmed", "completed", "cancelled", "published"];
+      if (filterStatus === "operational") return ["confirmed", "in_progress", "completed", "cancelled"];
+      if (filterStatus === "no_draft") return SIT_STATUSES.filter((s) => s !== "draft");
+      if (filterStatus === "all") return [...SIT_STATUSES];
       return [filterStatus];
     };
+
     const statuses = getStatuses();
 
     const { data } = await supabase.from("sits").select("*, owner:profiles!sits_user_id_fkey(first_name, last_name, avatar_url, city)").in("status", statuses as any).order("created_at", { ascending: false });
