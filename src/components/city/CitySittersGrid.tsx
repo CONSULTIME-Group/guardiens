@@ -187,7 +187,7 @@ const CitySittersGrid = ({ city, citySlug, aggregateCities, departmentCode, city
   return (
     <section className="max-w-5xl mx-auto px-4 py-12 border-t border-border">
       <div className="mb-8">
-        <h2 className="font-serif text-2xl md:text-3xl font-bold text-foreground mb-2">
+        <h2 className="font-heading text-2xl md:text-3xl font-bold text-foreground mb-2">
           {hasResidents
             ? `Gardiens inscrits à ${city}`
             : nearby.length > 0

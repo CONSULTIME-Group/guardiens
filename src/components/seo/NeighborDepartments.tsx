@@ -35,7 +35,7 @@ const NeighborDepartments = ({ department }: Props) => {
 
   return (
     <section className="max-w-5xl mx-auto px-4 py-10 border-t border-border">
-      <h2 className="font-serif text-2xl font-bold text-foreground mb-3">
+      <h2 className="font-heading text-2xl font-bold text-foreground mb-3">
         Les départements limitrophes
       </h2>
       <p className="text-sm text-muted-foreground mb-5">

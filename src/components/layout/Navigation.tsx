@@ -481,7 +481,7 @@ export const BottomNav = () => {
               </div>
               <span
                 key={fab.label}
-                className="mt-1.5 text-primary font-serif italic text-[12px] font-semibold tracking-tight leading-none animate-in fade-in slide-in-from-bottom-1 duration-300"
+                className="mt-1.5 text-primary font-heading italic text-[12px] font-semibold tracking-tight leading-none animate-in fade-in slide-in-from-bottom-1 duration-300"
               >
                 {fab.label}
               </span>

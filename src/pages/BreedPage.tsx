@@ -218,7 +218,7 @@ const BreedPage = () => {
           <p className="hidden md:block text-sm uppercase tracking-wide text-primary font-semibold mb-2">
             Guide de garde · {speciesLabel}
           </p>
-          <h1 className="font-serif text-2xl md:text-4xl font-bold text-foreground mb-3">
+          <h1 className="font-heading text-2xl md:text-4xl font-bold text-foreground mb-3">
             Garder un {breedCap} à domicile
           </h1>
           {extractDifficultyLevel(breed.difficulty_level) && (
@@ -256,14 +256,14 @@ const BreedPage = () => {
         )}
 
         {breed.rich_content && breed.rich_content.trim().length > 200 ? (
-          <article className="prose prose-lg prose-neutral max-w-none prose-headings:font-serif prose-headings:text-foreground prose-h2:text-2xl prose-h2:mt-10 prose-h2:mb-4 prose-h3:text-lg prose-h3:mt-6 prose-h3:mb-2 prose-p:text-foreground/85 prose-p:leading-relaxed prose-li:text-foreground/85 prose-strong:text-foreground prose-a:text-primary prose-a:no-underline hover:prose-a:underline">
+          <article className="prose prose-lg prose-neutral max-w-none prose-headings:font-heading prose-headings:text-foreground prose-h2:text-2xl prose-h2:mt-10 prose-h2:mb-4 prose-h3:text-lg prose-h3:mt-6 prose-h3:mb-2 prose-p:text-foreground/85 prose-p:leading-relaxed prose-li:text-foreground/85 prose-strong:text-foreground prose-a:text-primary prose-a:no-underline hover:prose-a:underline">
             <MarkdownBody>{breed.rich_content}</MarkdownBody>
           </article>
         ) : (
           <article className="prose prose-neutral max-w-none">
             {sections.map((s) => (
               <section key={s.title} className="mb-6">
-                <h2 className="font-serif text-xl font-semibold text-foreground mb-2">
+                <h2 className="font-heading text-xl font-semibold text-foreground mb-2">
                   {s.title}
                 </h2>
                 <p className="text-foreground/90 whitespace-pre-line">{s.body}</p>
@@ -273,7 +273,7 @@ const BreedPage = () => {
         )}
 
         <section className="mt-12 pt-8 border-t border-border">
-          <h2 className="font-serif text-2xl font-semibold text-foreground mb-4">
+          <h2 className="font-heading text-2xl font-semibold text-foreground mb-4">
             Trouver un gardien pour votre {breedCap}
           </h2>
           <p className="text-muted-foreground mb-4">

@@ -152,7 +152,7 @@ const TabGarde = ({
                             className="w-6 h-6 rounded-full object-cover"
                           />
                         ) : (
-                          <span className="w-6 h-6 rounded-full bg-background flex items-center justify-center text-[11px] text-muted-foreground/70 font-serif">
+                          <span className="w-6 h-6 rounded-full bg-background flex items-center justify-center text-[11px] text-muted-foreground/70 font-heading">
                             {initial}
                           </span>
                         )}

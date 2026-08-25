@@ -150,7 +150,7 @@ export default function ArticleInventaire() {
 
         <article className="max-w-3xl mx-auto px-4 py-8 animate-fade-in">
           <header className="mb-8">
-            <h1 className="font-serif text-3xl md:text-4xl font-bold text-foreground leading-tight mb-3">
+            <h1 className="font-heading text-3xl md:text-4xl font-bold text-foreground leading-tight mb-3">
               {TITLE}
             </h1>
             <p className="text-base md:text-lg text-muted-foreground leading-relaxed">
@@ -172,7 +172,7 @@ export default function ArticleInventaire() {
 
           {/* Section 1 : compteurs live */}
           <section className="mb-12">
-            <h2 className="font-serif text-2xl font-semibold text-foreground mb-5">
+            <h2 className="font-heading text-2xl font-semibold text-foreground mb-5">
               Ce que couvre Guardiens, en chiffres
             </h2>
             <p className="text-foreground leading-relaxed mb-5">
@@ -192,7 +192,7 @@ export default function ArticleInventaire() {
 
           {/* Section 2 : villes */}
           <section className="mb-12">
-            <h2 className="font-serif text-2xl font-semibold text-foreground mb-4">
+            <h2 className="font-heading text-2xl font-semibold text-foreground mb-4">
               Les villes que nous couvrons
             </h2>
             <p className="text-foreground leading-relaxed mb-4">
@@ -210,7 +210,7 @@ export default function ArticleInventaire() {
 
           {/* Section 3 : races */}
           <section className="mb-12">
-            <h2 className="font-serif text-2xl font-semibold text-foreground mb-4">
+            <h2 className="font-heading text-2xl font-semibold text-foreground mb-4">
               Les races et espèces documentées
             </h2>
             <p className="text-foreground leading-relaxed mb-5">
@@ -236,7 +236,7 @@ export default function ArticleInventaire() {
 
           {/* Section 4 : lieux */}
           <section className="mb-12">
-            <h2 className="font-serif text-2xl font-semibold text-foreground mb-4">
+            <h2 className="font-heading text-2xl font-semibold text-foreground mb-4">
               Les lieux dog-friendly recensés
             </h2>
             <p className="text-foreground leading-relaxed mb-5">
@@ -257,7 +257,7 @@ export default function ArticleInventaire() {
 
           {/* Section 5 : pros */}
           <section className="mb-12">
-            <h2 className="font-serif text-2xl font-semibold text-foreground mb-4">
+            <h2 className="font-heading text-2xl font-semibold text-foreground mb-4">
               Les professionnels référencés
             </h2>
             <p className="text-foreground leading-relaxed mb-5">
@@ -283,7 +283,7 @@ export default function ArticleInventaire() {
 
           {/* Section 6 : ce que dit le terrain */}
           <section className="mb-12">
-            <h2 className="font-serif text-2xl font-semibold text-foreground mb-4">
+            <h2 className="font-heading text-2xl font-semibold text-foreground mb-4">
               Ce que dit le terrain
             </h2>
             <div className="space-y-4 text-foreground leading-relaxed">
@@ -301,7 +301,7 @@ export default function ArticleInventaire() {
 
           {/* Section 7 : formulaire */}
           <section id="demande" className="mb-12 scroll-mt-20">
-            <h2 className="font-serif text-2xl font-semibold text-foreground mb-4">
+            <h2 className="font-heading text-2xl font-semibold text-foreground mb-4">
               Une analyse manque ? Demandez-la
             </h2>
             <p className="text-foreground leading-relaxed mb-6">

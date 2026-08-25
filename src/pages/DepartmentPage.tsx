@@ -209,7 +209,7 @@ const DepartmentPage = () => {
 
  {/* Hero */}
  <section className="max-w-5xl mx-auto px-4 py-8 md:py-12">
- <h1 className="font-serif text-3xl md:text-5xl font-bold text-foreground mb-6">
+ <h1 className="font-heading text-3xl md:text-5xl font-bold text-foreground mb-6">
   {h1Title}
  </h1>
   <p className="text-lg text-muted-foreground max-w-3xl leading-relaxed mb-4">
@@ -261,7 +261,7 @@ const DepartmentPage = () => {
  {/* Cities in this department */}
  {cityPages.length > 0 && (
  <section className="max-w-5xl mx-auto px-4 py-6 md:py-12 border-t border-border">
- <h2 className="font-serif text-2xl font-bold text-foreground mb-6">
+ <h2 className="font-heading text-2xl font-bold text-foreground mb-6">
  Villes {deptOf} sur Guardiens
  </h2>
  <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -294,7 +294,7 @@ const DepartmentPage = () => {
       {/* Guides in this department */}
       {guides.length > 0 && (
         <section className="max-w-5xl mx-auto px-4 py-6 md:py-12 border-t border-border">
-          <h2 className="font-serif text-2xl font-bold text-foreground mb-6">
+          <h2 className="font-heading text-2xl font-bold text-foreground mb-6">
             Guides locaux {deptOf}
           </h2>
  <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -317,7 +317,7 @@ const DepartmentPage = () => {
 
   {/* Combien coûte */}
   <section className="max-w-5xl mx-auto px-4 py-6 md:py-12 border-t border-border">
-    <h2 className="font-serif text-2xl font-bold text-foreground mb-4">
+    <h2 className="font-heading text-2xl font-bold text-foreground mb-4">
       Combien coûte une garde d'animaux {deptIn} ?
     </h2>
     <p className="text-base text-foreground/90 leading-relaxed mb-3">
@@ -330,7 +330,7 @@ const DepartmentPage = () => {
 
   {/* Comment trouver un gardien fiable */}
   <section className="max-w-5xl mx-auto px-4 py-6 md:py-12 border-t border-border">
-    <h2 className="font-serif text-2xl font-bold text-foreground mb-4">
+    <h2 className="font-heading text-2xl font-bold text-foreground mb-4">
       Comment trouver un gardien fiable {deptIn} ?
     </h2>
     <p className="text-base text-foreground/90 leading-relaxed mb-4">
@@ -360,7 +360,7 @@ const DepartmentPage = () => {
 
   {/* Vétérinaires */}
   <section className="max-w-5xl mx-auto px-4 py-6 md:py-12 border-t border-border">
-    <h2 className="font-serif text-2xl font-bold text-foreground mb-4">
+    <h2 className="font-heading text-2xl font-bold text-foreground mb-4">
       Vétérinaires et cliniques d'urgence {deptIn}
     </h2>
     <p className="text-base text-foreground/90 leading-relaxed mb-3">
@@ -373,7 +373,7 @@ const DepartmentPage = () => {
 
   {/* Fiches races */}
   <section className="max-w-5xl mx-auto px-4 py-6 md:py-12 border-t border-border">
-    <h2 className="font-serif text-2xl font-bold text-foreground mb-4">
+    <h2 className="font-heading text-2xl font-bold text-foreground mb-4">
       Fiches races populaires
     </h2>
     <p className="text-base text-foreground/80 leading-relaxed mb-4">
@@ -397,7 +397,7 @@ const DepartmentPage = () => {
 
   {/* Why Guardiens */}
   <section className="max-w-5xl mx-auto px-4 py-6 md:py-12 border-t border-border">
- <h2 className="font-serif text-2xl font-bold text-foreground mb-8">
+ <h2 className="font-heading text-2xl font-bold text-foreground mb-8">
  Pourquoi Guardiens {deptIn} ?
  </h2>
  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
@@ -435,7 +435,7 @@ const DepartmentPage = () => {
 
  {/* Final CTA */}
  <section className="max-w-5xl mx-auto px-4 py-8 md:py-16 text-center">
- <h2 className="font-serif text-2xl md:text-3xl font-bold text-foreground mb-4">
+ <h2 className="font-heading text-2xl md:text-3xl font-bold text-foreground mb-4">
  Rejoignez Guardiens {deptIn}
  </h2>
  <p className="text-muted-foreground mb-8 max-w-xl mx-auto">

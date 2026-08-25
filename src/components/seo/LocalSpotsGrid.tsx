@@ -17,7 +17,7 @@ const spotIcons: Record<LocalSpot["type"], React.ElementType> = {
 const LocalSpotsGrid = ({ city }: Props) => {
   return (
     <section className="max-w-5xl mx-auto px-4 py-12 border-t border-border">
-      <h2 className="font-serif text-2xl font-bold text-foreground mb-6">
+      <h2 className="font-heading text-2xl font-bold text-foreground mb-6">
         Les spots de nos gardiens à {city.name}
       </h2>
       <div className="grid md:grid-cols-3 gap-4">

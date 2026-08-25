@@ -22,7 +22,7 @@ const ArticleCoverFallback = ({
     }}
   >
     <span
-      className={`font-serif font-semibold text-secondary/70 select-none leading-none ${
+      className={`font-heading font-semibold text-secondary/70 select-none leading-none ${
         compact ? "text-2xl" : "text-5xl"
       }`}
     >
