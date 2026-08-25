@@ -274,6 +274,43 @@ describe("OwnerSitterSpotlight, états de bord", () => {
     expect(screen.queryByRole("tablist")).toBeNull();
     expect(screen.queryByText("Les gardiens")).toBeNull();
   });
+
+  it("vivier d'affinité prêt mais proximité en chargement : aucun rendu partiel", () => {
+    mocks.topAffinity.mockReturnValue({
+      topSitters: [affinitySitter],
+      totalPool: 12,
+      scoredCount: 12,
+      hasGeo: true,
+      isLoading: false,
+    });
+    mocks.nearby.mockReturnValue({ data: undefined, isLoading: true });
+    const { container } = renderSpotlight();
+
+    expect(container.innerHTML).toBe("");
+    expect(screen.queryByRole("tablist")).toBeNull();
+    expect(screen.queryByText("Les gardiens")).toBeNull();
+    expect(screen.queryByText("Marc")).toBeNull();
+  });
+
+  it("vivier de proximité prêt mais affinité en chargement : aucun rendu partiel", () => {
+    mocks.topAffinity.mockReturnValue({
+      topSitters: [],
+      totalPool: 0,
+      scoredCount: 0,
+      hasGeo: false,
+      isLoading: true,
+    });
+    mocks.nearby.mockReturnValue({
+      data: { sitters: [nearbySitter], radiusUsed: 30, hasGeo: true, totalCount: NEARBY_TOTAL },
+      isLoading: false,
+    });
+    const { container } = renderSpotlight();
+
+    expect(container.innerHTML).toBe("");
+    expect(screen.queryByRole("tablist")).toBeNull();
+    expect(screen.queryByText("Les gardiens")).toBeNull();
+    expect(screen.queryByText("Claire")).toBeNull();
+  });
 });
 
 // ─── 6. Typographie de marque ────────────────────────────────────────────
