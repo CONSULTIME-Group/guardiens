@@ -133,7 +133,7 @@ export function useSitterDashboardData(userId: string | undefined) {
         badgesRes, articlesRes, unreadRes, allBadgesRes, emProfileRes, reputationRes,
       ] = await Promise.all([
         supabase.from("applications")
-          .select("*, sit:sits(id, title, start_date, end_date, status, user_id, property_id, properties:property_id(photos))")
+          .select("*, sit:sits(id, title, city, start_date, end_date, status, user_id, property_id, properties:property_id(photos))")
           .eq("sitter_id", userId).order("created_at", { ascending: false }),
         supabase.from("sitter_profiles")
           .select("is_available, experience_years, animal_types, competences, interests")
@@ -436,7 +436,7 @@ export function useSitterDashboardData(userId: string | undefined) {
         const g = futureGuards[0];
         const [ownerRes, petsRes] = await Promise.all([
           supabase.from("public_profiles").select("first_name").eq("id", g.sit.user_id).single(),
-          supabase.from("pets").select("species").eq("property_id", g.sit.property_id),
+          supabase.from("pets").select("id, name, species, breed").eq("property_id", g.sit.property_id),
         ]);
         if (ownerRes.error || petsRes.error) {
           nextGuardError = "Détails de la prochaine garde indisponibles.";

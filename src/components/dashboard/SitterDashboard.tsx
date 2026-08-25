@@ -144,7 +144,7 @@ const SitterDashboard = () => {
 
   // Bloc « À lire » du rail : fiche race liée au membre, saison, journal.
   // Appelé inconditionnellement (règle des hooks), avant tout early return.
-  const railReadings = useRailReadings({ role: "sitter", userId: user?.id });
+  const railReadings = useRailReadings({ role: "sitter", userId: user?.id, upcomingGuard: nextGuard });
 
   // Touches manquantes du barème : au-dessus de 90 %, le rail nomme
   // précisément ce qui reste à faire (correctif phrase 97 %, août 2026).
@@ -168,10 +168,16 @@ const SitterDashboard = () => {
   /* Contexte des conseils compagnons, tiré des données déjà chargées, sans
      requête supplémentaire. hasDraftSit n'existe pas côté gardien (brouillon
      d'annonce, notion propre au propriétaire) : il reste absent. */
+  const upcomingBreedReading = railReadings.find((item) => item.key === "breed");
   const petAdviceContext = {
     hasUpcomingSit: !!nextGuard,
     profileIncomplete: (profileCompletion ?? 100) < 100,
+    upcomingBreedHref: upcomingBreedReading?.href,
+    upcomingBreedName: upcomingBreedReading?.title.replace(/^La fiche\s+/, ""),
   };
+  const upcomingGuardPets = nextGuard
+    ? ((nextGuard.pets ?? []) as Array<{ id: string; name: string; species: string; breed: string | null }>)
+    : undefined;
 
 
   if (loading) return <SitterDashboardSkeleton />;
@@ -439,7 +445,7 @@ const SitterDashboard = () => {
                   le heading visible ne mentionne pas Alma (déjà portée par
                   AlmaRailWhisper ci-dessus), le contenu reste inchangé. */}
               <div className="">
-                <PetAdviceSection variant="rail" context={petAdviceContext} />
+                <PetAdviceSection role="sitter" variant="rail" context={petAdviceContext} pets={upcomingGuardPets} addPetTo="/profile?section=sitter" />
               </div>
 
 
@@ -569,7 +575,7 @@ const SitterDashboard = () => {
                   le heading visible ne mentionne pas Alma (déjà portée par
                   AlmaRailWhisper ci-dessus), le contenu reste inchangé. */}
               <div className="">
-                <PetAdviceSection variant="rail" context={petAdviceContext} />
+                <PetAdviceSection role="sitter" variant="rail" context={petAdviceContext} pets={upcomingGuardPets} addPetTo="/profile?section=sitter" />
               </div>
 
 
