@@ -65,14 +65,37 @@ Deno.serve(async (req) => {
 
     const { data: sits } = await supabase
       .from("sits")
-      .select("id, title, start_date, user_id")
+      .select("id, title, start_date, user_id, city, properties:property_id (pets (species, breed))")
       .eq("status", "confirmed")
       .eq("reminder_j7_sent", false)
       .gte("start_date", windowStart)
       .lte("start_date", windowEnd);
 
+    // Deux requetes pour tout le run, pas une par garde.
+    const cities = Array.from(
+      new Set((sits || []).map((s: any) => s.city).filter((c: unknown): c is string => Boolean(c))),
+    );
+    let breedCandidates: BreedFicheCandidate[] = [];
+    const guideByCity = new Map<string, { slug: string; city: string }>();
+    if ((sits || []).length > 0) {
+      const { data: breeds } = await supabase.from("breed_profiles").select("species, breed");
+      breedCandidates = (breeds || []) as BreedFicheCandidate[];
+      if (cities.length > 0) {
+        const { data: guides } = await supabase
+          .from("city_guides")
+          .select("slug, city")
+          .eq("published", true)
+          .in("city", cities);
+        for (const g of guides || []) {
+          guideByCity.set((g.city as string).toLowerCase(), { slug: g.slug as string, city: g.city as string });
+        }
+      }
+    }
+
     let sent = 0;
     const errors: string[] = [];
+
+
 
     for (const sit of sits || []) {
       try {
