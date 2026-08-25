@@ -118,7 +118,7 @@ export const DraftStatsPanel = () => {
                   {STATUSES.filter((s) => s !== "draft").map((s) => (
                     <div key={s} className="flex justify-between">
                       <span className="text-muted-foreground">{SIT_STATUS_SHORT_LABELS[s]}</span>
-                      <span className={`font-medium ${STATUS_COLORS[s]}`}>{p.counts[s]}</span>
+                      <span className={`font-medium ${STATUS_COLORS[s] ?? "text-foreground"}`}>{p.counts[s]}</span>
                     </div>
                   ))}
                 </div>
