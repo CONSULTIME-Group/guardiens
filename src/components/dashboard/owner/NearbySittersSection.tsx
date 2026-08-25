@@ -56,9 +56,13 @@ const NearbySittersSection = () => {
 
   if (isLoading || sitters.length === 0) return null;
 
+  // Différence de tri posée explicitement (25/08/2026) : cette section est
+  // un annuaire de proximité, pas un classement par affinité. La chip
+  // d'affinité réciproque reste affichée, en style discret, jamais en gros
+  // badge de pourcentage comme sur la sélection du dessus.
   const subtitle = radiusUsed
-    ? `Trois profils de gardiens dans un rayon de ${radiusUsed} km.`
-    : "Trois profils de gardiens parmi les plus proches disponibles.";
+    ? `Trois profils de gardiens dans un rayon de ${radiusUsed} km. Ici, le tri se fait par distance, pas par affinité.`
+    : "Trois profils de gardiens parmi les plus proches disponibles. Ici, le tri se fait par distance, pas par affinité.";
 
   return (
     <section aria-label="Les gens du coin" className="min-w-0">
