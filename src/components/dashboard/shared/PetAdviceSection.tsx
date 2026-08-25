@@ -48,6 +48,12 @@ interface PetAdviceSectionProps {
   context?: PetAdviceContext;
   /** Sans animaux déclarés, où l'on invite la personne à en présenter un. */
   addPetTo?: string;
+  /**
+   * "rail" : colonne étroite du rail droit. Une seule voix Alma par écran
+   * (doctrine 16/08/2026) : le heading ne mentionne plus Alma, les tuiles
+   * passent en une colonne.
+   */
+  variant?: "flow" | "rail";
 }
 
 const SPECIES_LABEL: Record<string, string> = {
@@ -199,7 +205,13 @@ const PetAdviceSection = ({
   pets: petsProp,
   context = {},
   addPetTo = "/owner-profile",
+  variant = "flow",
 }: PetAdviceSectionProps) => {
+  const isRail = variant === "rail";
+  // En rail, le heading ne porte pas la voix Alma (déjà portée par
+  // AlmaRailWhisper sur le même écran) : les tuiles restent identiques.
+  const headingEyebrow = isRail ? "Conseils pratiques" : "Les conseils d'Alma";
+  const allTipsLabel = isRail ? "Tous les conseils" : "Tous les conseils d'Alma";
   const [fetchedPets, setFetchedPets] = useState<AdvicePet[] | null>(null);
   const [breeds, setBreeds] = useState<BreedRow[] | null>(null);
 
@@ -313,7 +325,7 @@ const PetAdviceSection = ({
     return (
       <section aria-label="Conseils pour vos compagnons" className="min-w-0">
         <SectionHeader
-          eyebrow="Les conseils d'Alma"
+          eyebrow={headingEyebrow}
           title="Dites-nous qui partage votre maison."
           subtitle="Dès qu'un compagnon est présenté, les conseils de sa race et de son espèce s'affichent ici."
         />
@@ -348,12 +360,20 @@ const PetAdviceSection = ({
   return (
     <section aria-label="Conseils pour vos compagnons" className="min-w-0">
       <SectionHeader
-        eyebrow="Les conseils d'Alma"
+        eyebrow={headingEyebrow}
         title={`Ce qu'il faut savoir pour ${petNamesPhrase(pets)}.`}
         subtitle="Des repères tirés de leur race et de votre situation du moment."
       />
 
-      <ul role="list" className="grid grid-cols-1 min-[430px]:grid-cols-2 md:grid-cols-3" style={{ gap: "14px" }}>
+      <ul
+        role="list"
+        className={
+          isRail
+            ? "grid grid-cols-1"
+            : "grid grid-cols-1 min-[430px]:grid-cols-2 md:grid-cols-3"
+        }
+        style={{ gap: "14px" }}
+      >
         {all.map((t) => (
           <AdviceCard key={`${t.key}-${t.to}`} tile={t} />
         ))}
@@ -361,7 +381,7 @@ const PetAdviceSection = ({
 
       <p className="font-sans text-[13px] text-muted-foreground" style={{ marginTop: "18px" }}>
         <Link to="/conseils" className="font-semibold text-primary underline-offset-4 hover:underline">
-          Tous les conseils d'Alma
+          {allTipsLabel}
         </Link>
       </p>
     </section>

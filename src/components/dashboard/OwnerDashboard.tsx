@@ -367,19 +367,6 @@ const OwnerDashboard = () => {
               />
             </div>
 
-            {/* 6. CONSEILS ANCRÉS SUR LES COMPAGNONS (lot 4, point 3) */}
-            <div className="px-4 sm:px-5 md:px-8">
-              <PetAdviceSection
-                pets={pets as any}
-                addPetTo="/owner-profile"
-                context={{
-                  hasUpcomingSit: sits.some((s: any) => s.status === "confirmed"),
-                  hasDraftSit: Boolean(latestDraft),
-                  profileIncomplete: (accessProfileCompletion ?? 100) < 100,
-                }}
-              />
-            </div>
-
             {/* Historique candidatures : accordéon discret tout en bas */}
             {hasReadApps && (
               <details className="rounded-2xl bg-card border border-border overflow-hidden">
@@ -441,6 +428,22 @@ const OwnerDashboard = () => {
                 <RailReadingsCard items={ownerReadings} />
               </div>
             )}
+
+            {/* e. Conseils compagnons — tuiles pratiques, PAS une voix Alma :
+                le heading visible ne mentionne pas Alma (déjà portée par
+                AlmaRailWhisper ci-dessus), le contenu reste inchangé. */}
+            <div className="">
+              <PetAdviceSection
+                variant="rail"
+                pets={pets as any}
+                addPetTo="/owner-profile"
+                context={{
+                  hasUpcomingSit: sits.some((s: any) => s.status === "confirmed"),
+                  hasDraftSit: Boolean(latestDraft),
+                  profileIncomplete: (accessProfileCompletion ?? 100) < 100,
+                }}
+              />
+            </div>
 
             {/* 5. Accès (Gate ou Free) : clôt la grammaire canonique */}
             <div className="">

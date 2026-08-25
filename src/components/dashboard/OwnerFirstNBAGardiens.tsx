@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { MapPin, Plus } from "lucide-react";
 import { useOwnerTopAffinitySitters, type AffinitySitterCard } from "@/hooks/useOwnerTopAffinitySitters";
 import { useOwnerProfile } from "@/hooks/useOwnerProfile";
+import { pickDiscriminatingChips } from "@/components/dashboard/shared/discriminatingChips";
 import { trackEvent } from "@/lib/analytics";
 
 export default function OwnerFirstNBAGardiens() {
@@ -35,6 +36,11 @@ export default function OwnerFirstNBAGardiens() {
   if (isLoading) return null;
 
   const city = owner?.city;
+
+  // Chips choisies sur le trio complet : un critère matché à l'identique
+  // par les trois candidats ne départage rien, il recule derrière tout
+  // critère qui les distingue réellement (25/08/2026).
+  const chipsBySitter = pickDiscriminatingChips(topSitters);
 
   // Doctrine : la section ne doit JAMAIS être vide dès qu'il existe au
   // moins un candidat, y compris si le meilleur score est bas. Le repli
@@ -79,7 +85,12 @@ export default function OwnerFirstNBAGardiens() {
 
       <ul className="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-4">
         {topSitters.map((s, index) => (
-          <SitterCard key={s.id} sitter={s} position={index} />
+          <SitterCard
+            key={s.id}
+            sitter={s}
+            position={index}
+            chips={chipsBySitter.get(s.id) ?? []}
+          />
         ))}
       </ul>
 
@@ -107,17 +118,8 @@ export default function OwnerFirstNBAGardiens() {
   );
 }
 
-function SitterCard({ sitter, position }: { sitter: AffinitySitterCard; position: number }) {
+function SitterCard({ sitter, position, chips }: { sitter: AffinitySitterCard; position: number; chips: string[] }) {
   const initial = (sitter.first_name || "?").slice(0, 1).toUpperCase();
-  // Les 2 chips les plus significatives pour CE gardien : poids du critère
-  // décroissant, puis points obtenus (un match complet prime sur un match
-  // partiel). L'ordre fixe d'évaluation (animaux, présence...) affichait
-  // les deux mêmes phrases sur presque toutes les cartes. Tri stable : à
-  // poids et points égaux, l'ordre canonique des critères est conservé.
-  const topCriteria = [...sitter.affinity.matchedDetailed]
-    .sort((a, b) => b.weight - a.weight || b.points - a.points)
-    .slice(0, 2)
-    .map((c) => c.phrase);
 
   const onClick = () => {
     void trackEvent("owner_first_nba_gardien_card_clicked", {
@@ -167,9 +169,9 @@ function SitterCard({ sitter, position }: { sitter: AffinitySitterCard; position
               chiffre affiché EST le sortScore qui ordonne la liste. */}
           {sitter.affinity.sortScore} % d'affinité
         </Badge>
-        {topCriteria.length > 0 && (
+        {chips.length > 0 && (
           <ul className="text-xs text-muted-foreground space-y-0.5 mt-1">
-            {topCriteria.map((c) => (
+            {chips.map((c) => (
               <li key={c} className="truncate">· {c}</li>
             ))}
           </ul>
