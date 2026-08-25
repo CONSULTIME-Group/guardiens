@@ -348,7 +348,12 @@ const OwnerDashboard = () => {
             <ApplicationCapSection sits={sits} onUpdated={reload} />
 
             {/* 4. VOTRE FAMILLE */}
-            <OwnerFamilySection pets={pets} getNextSitForPet={getNextSitForPet} />
+            <OwnerFamilySection
+              pets={pets}
+              propertyIds={data.propertyIds}
+              onPetsChanged={reload}
+              getNextSitForPet={getNextSitForPet}
+            />
 
             {/* 4bis. LES GENS DU COIN (vague 16) */}
             <NearbySittersSection />
