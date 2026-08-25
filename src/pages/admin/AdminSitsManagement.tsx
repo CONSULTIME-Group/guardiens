@@ -60,15 +60,8 @@ const AdminSitsManagement = () => {
     setLoading(true);
     const results: any[] = [];
 
-    const getStatuses = () => {
-      // "operational" = vraies gardes post-acceptation. Le reste appartient à l'onglet Annonces.
-      if (filterStatus === "operational") return ["confirmed", "in_progress", "completed", "cancelled"];
-      if (filterStatus === "no_draft") return SIT_STATUSES.filter((s) => s !== "draft");
-      if (filterStatus === "all") return [...SIT_STATUSES];
-      return [filterStatus];
-    };
+    const statuses = adminSitsFilterStatuses(filterStatus);
 
-    const statuses = getStatuses();
 
     const { data } = await supabase.from("sits").select("*, owner:profiles!sits_user_id_fkey(first_name, last_name, avatar_url, city)").in("status", statuses as any).order("created_at", { ascending: false });
     (data || []).forEach(d => results.push({ ...d, _type: "sit" }));
