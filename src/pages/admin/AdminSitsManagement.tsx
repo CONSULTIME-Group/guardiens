@@ -19,6 +19,8 @@ import { AlertTriangle, Search, Eye, XCircle, Star, StickyNote, RotateCcw, User,
 import { useNavigate } from "react-router-dom";
 import { getCountryName } from "@/lib/countries";
 import { avatarImageUrl } from "@/lib/storageImage";
+import { adminSitsFilterStatuses } from "@/lib/sitStatus";
+
 import {
   AlertDialog,
   AlertDialogAction,
@@ -58,14 +60,8 @@ const AdminSitsManagement = () => {
     setLoading(true);
     const results: any[] = [];
 
-    const getStatuses = () => {
-      // "operational" = vraies gardes post-acceptation. Le reste appartient à l'onglet Annonces.
-      if (filterStatus === "operational") return ["confirmed", "completed", "cancelled"];
-      if (filterStatus === "no_draft") return ["confirmed", "completed", "cancelled", "published"];
-      if (filterStatus === "all") return ["draft", "confirmed", "completed", "cancelled", "published"];
-      return [filterStatus];
-    };
-    const statuses = getStatuses();
+    const statuses = adminSitsFilterStatuses(filterStatus);
+
 
     const { data } = await supabase.from("sits").select("*, owner:profiles!sits_user_id_fkey(first_name, last_name, avatar_url, city)").in("status", statuses as any).order("created_at", { ascending: false });
     (data || []).forEach(d => results.push({ ...d, _type: "sit" }));
