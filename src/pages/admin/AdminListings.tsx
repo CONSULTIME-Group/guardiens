@@ -31,15 +31,7 @@ import ListingCoverPickerDialog from "@/components/admin/ListingCoverPickerDialo
 import { getCountryName } from "@/lib/countries";
 import { avatarImageUrl } from "@/lib/storageImage";
 
-type BadgeVariant = "default" | "secondary" | "outline" | "destructive";
-const statusLabels: Record<string, { label: string; variant: BadgeVariant }> = {
-  draft: { label: "Brouillon", variant: "outline" },
-  published: { label: "En ligne", variant: "default" },
-  confirmed: { label: "Confirmée", variant: "secondary" },
-  completed: { label: "Terminée", variant: "secondary" },
-  cancelled: { label: "Annulée (auteur)", variant: "outline" },
-  archived: { label: "Archivée", variant: "secondary" },
-};
+type BadgeVariant = SitStatusBadgeVariant;
 
 const resolveStatusBadge = (listing: any): { label: string; variant: BadgeVariant } => {
   if (listing.status === "cancelled") {
@@ -47,8 +39,9 @@ const resolveStatusBadge = (listing: any): { label: string; variant: BadgeVarian
       ? { label: "Masquée (admin)", variant: "destructive" }
       : { label: "Annulée (auteur)", variant: "outline" };
   }
-  return statusLabels[listing.status] || statusLabels.draft;
+  return resolveSitStatusBadge(listing.status);
 };
+
 
 type Stats = {
   views: number;
