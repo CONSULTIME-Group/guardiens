@@ -146,6 +146,11 @@ Deno.serve(async (req) => {
         }
 
         if (sitterProfile?.email) {
+          const prep = resolvePrep(
+            ((sit as any).properties?.pets ?? []) as Array<{ species?: string | null; breed?: string | null }>,
+            breedCandidates,
+            guideByCity.get(String((sit as any).city || "").toLowerCase()) ?? null,
+          );
           await invokeSend({
             templateName: "sit-reminder-j7",
             recipientEmail: sitterProfile.email,
@@ -157,9 +162,11 @@ Deno.serve(async (req) => {
               sitTitle: sit.title,
               startDateFr,
               sitId: sit.id,
+              ...prep,
             },
           });
         }
+
 
         // Le flag est pose apres les envois uniquement.
         await supabase.from("sits").update({ reminder_j7_sent: true }).eq("id", sit.id);
