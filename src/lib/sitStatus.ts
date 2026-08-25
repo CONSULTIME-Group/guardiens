@@ -50,3 +50,15 @@ export const resolveSitStatusBadge = (status: unknown): SitStatusBadge => {
   const raw = typeof status === "string" && status.trim() ? status : "non renseigné";
   return { label: `Statut inconnu : ${raw}`, variant: "destructive" };
 };
+
+/**
+ * Statuts couverts par chaque filtre de l'écran admin des gardes.
+ * Le filtre "all" couvre l'intégralité de l'enum, sans exception.
+ */
+export const adminSitsFilterStatuses = (filterStatus: string): SitStatus[] => {
+  if (filterStatus === "operational") return ["confirmed", "in_progress", "completed", "cancelled"];
+  if (filterStatus === "no_draft") return SIT_STATUSES.filter((s) => s !== "draft");
+  if (filterStatus === "all") return [...SIT_STATUSES];
+  if (isSitStatus(filterStatus)) return [filterStatus];
+  return [...SIT_STATUSES];
+};
