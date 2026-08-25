@@ -425,6 +425,12 @@ const AdminSitsManagement = () => {
                   <TableCell className="text-right text-sm font-medium tabular-nums">{statsBySit[sit.id]?.views ?? ","}</TableCell>
                   <TableCell className="text-right text-sm font-medium tabular-nums">{statsBySit[sit.id]?.messages ?? ","}</TableCell>
                   <TableCell><Badge variant={timing.variant}>{timing.label}</Badge></TableCell>
+                  <TableCell>
+                    {(() => {
+                      const dossier = resolveSitStatusBadge(sit.status);
+                      return <Badge variant={dossier.variant}>{dossier.label}</Badge>;
+                    })()}
+                  </TableCell>
                   <TableCell className="text-xs">
                     <div>P: {rev.owner ? "✅" : "❌"}</div>
                     <div>G: {rev.sitter ? "✅" : "❌"}</div>
