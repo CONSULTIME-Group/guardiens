@@ -1,0 +1,238 @@
+/**
+ * Verrous d'OwnerSitterSpotlight (fusion des sections gardiens, 25/08/2026).
+ *
+ * Doctrine verrouillée ici :
+ *  1. L'onglet par défaut est « Pour vous » (affinité), toujours.
+ *  2. Le badge de comptage du vivier proche n'apparaît que sur l'onglet
+ *     inactif, jamais pendant le chargement, jamais à zéro.
+ *  3. Les deux panneaux sont montés dès le premier rendu (attribut hidden,
+ *     jamais de rendu conditionnel) : changer d'onglet est instantané et ne
+ *     déclenche AUCUN nouvel appel réseau.
+ *  4. OwnerDashboard.tsx ne référence plus les deux anciens composants.
+ *
+ * Les assertions jouent sur le rendu réel (hooks mockés, panneaux réels) et
+ * sur la structure statique du composant (readFileSync), sans affaiblir les
+ * verrous existants de top3-trust-policy.test.ts.
+ */
+import { describe, it, expect, vi, beforeEach } from "vitest";
+import { render, screen, fireEvent, waitFor, within } from "@testing-library/react";
+import { MemoryRouter } from "react-router-dom";
+import { readFileSync } from "node:fs";
+import { resolve } from "node:path";
+
+// ─── Mocks contrôlables (vi.hoisted : accessibles dans les factories) ─────
+const mocks = vi.hoisted(() => ({
+  topAffinity: vi.fn(),
+  nearby: vi.fn(),
+  supabaseFrom: vi.fn(),
+  trackEvent: vi.fn(),
+}));
+
+vi.mock("@/contexts/AuthContext", () => ({
+  useAuth: () => ({ user: { id: "owner-1" } }),
+}));
+vi.mock("@/hooks/useOwnerTopAffinitySitters", () => ({
+  useOwnerTopAffinitySitters: mocks.topAffinity,
+}));
+vi.mock("@/hooks/useNearbyOwnerSitters", () => ({
+  useNearbyOwnerSitters: mocks.nearby,
+}));
+vi.mock("@/hooks/useOwnerProfile", () => ({
+  useOwnerProfile: () => ({ data: { city: "Lyon" } }),
+}));
+vi.mock("@/lib/analytics", () => ({
+  trackEvent: mocks.trackEvent,
+}));
+vi.mock("@/integrations/supabase/client", () => ({
+  supabase: { from: mocks.supabaseFrom },
+}));
+// La chip d'affinité réciproque n'est pas l'objet du test, et ses hooks
+// internes exigeraient un setup supplémentaire sans gain de couverture.
+vi.mock("@/components/matching/OwnerToSitterAffinity", () => ({
+  default: () => null,
+}));
+
+import OwnerSitterSpotlight from "@/components/dashboard/owner/OwnerSitterSpotlight";
+
+// ─── Fixtures ─────────────────────────────────────────────────────────────
+const affinitySitter = {
+  id: "sitter-affinity-1",
+  first_name: "Marc",
+  city: "Lyon",
+  avatar_url: null,
+  distance_km: 5,
+  identity_verified: true,
+  affinity: { score: 80, sortScore: 72, matched: [], matchedDetailed: [] },
+};
+
+const nearbySitter = {
+  id: "sitter-nearby-1",
+  first_name: "Claire",
+  city: "Lyon",
+  avatar_url: null,
+  distance_km: 2.4,
+  identity_verified: true,
+  completed_sits_count: 3,
+  skill_categories: [],
+  custom_skills: ["Transport"],
+  is_beyond: false,
+  avg_rating: 4.5,
+};
+
+const NEARBY_TOTAL = 42;
+
+const setupLoaded = () => {
+  mocks.topAffinity.mockReturnValue({
+    topSitters: [affinitySitter],
+    totalPool: 12,
+    scoredCount: 12,
+    hasGeo: true,
+    isLoading: false,
+  });
+  mocks.nearby.mockReturnValue({
+    data: {
+      sitters: [nearbySitter],
+      radiusUsed: 30,
+      hasGeo: true,
+      totalCount: NEARBY_TOTAL,
+    },
+    isLoading: false,
+  });
+};
+
+beforeEach(() => {
+  vi.clearAllMocks();
+  mocks.supabaseFrom.mockReturnValue({
+    select: () => ({ in: () => Promise.resolve({ data: [] }) }),
+  });
+  mocks.trackEvent.mockResolvedValue(undefined);
+  setupLoaded();
+});
+
+const renderSpotlight = () =>
+  render(
+    <MemoryRouter>
+      <OwnerSitterSpotlight />
+    </MemoryRouter>,
+  );
+
+// ─── 1. Onglet par défaut ────────────────────────────────────────────────
+describe("OwnerSitterSpotlight, onglet par défaut", () => {
+  it("« Pour vous » est sélectionné au chargement, « Près de chez vous » ne l'est pas", () => {
+    renderSpotlight();
+    const tabPourVous = screen.getByRole("tab", { name: "Pour vous" });
+    const tabProches = screen.getByRole("tab", { name: /Près de chez vous/ });
+    expect(tabPourVous.getAttribute("aria-selected")).toBe("true");
+    expect(tabProches.getAttribute("aria-selected")).toBe("false");
+  });
+
+  it("le panneau affinité est visible, le panneau proximité est monté mais masqué", () => {
+    renderSpotlight();
+    const panelPourVous = document.getElementById("owner-spotlight-panel-pour-vous");
+    const panelProches = document.getElementById("owner-spotlight-panel-proches");
+    expect(panelPourVous?.getAttribute("hidden")).toBeNull();
+    expect(panelProches?.getAttribute("hidden")).not.toBeNull();
+    // Preuve du montage parallèle : le contenu du panneau masqué existe déjà
+    // dans le DOM (aucun lazy-fetch ne sera nécessaire au changement d'onglet).
+    expect(within(panelProches as HTMLElement).getByText("Claire")).toBeTruthy();
+    expect(within(panelPourVous as HTMLElement).getByText("Marc")).toBeTruthy();
+  });
+});
+
+// ─── 2. Badge de comptage ────────────────────────────────────────────────
+describe("OwnerSitterSpotlight, badge du vivier proche", () => {
+  it("le badge affiche le total réel sur l'onglet inactif, puis disparaît quand on l'ouvre", () => {
+    renderSpotlight();
+    const tabProches = screen.getByRole("tab", { name: /Près de chez vous/ });
+    // Onglet inactif au chargement : badge visible avec le nombre réel.
+    expect(within(tabProches).getByText(String(NEARBY_TOTAL))).toBeTruthy();
+
+    fireEvent.click(tabProches);
+    // Onglet désormais actif : le badge n'a plus de raison d'être.
+    expect(within(tabProches).queryByText(String(NEARBY_TOTAL))).toBeNull();
+    expect(tabProches.getAttribute("aria-selected")).toBe("true");
+    expect(screen.getByRole("tab", { name: "Pour vous" }).getAttribute("aria-selected")).toBe("false");
+  });
+
+  it("aucun badge pendant le chargement du vivier proche", () => {
+    mocks.nearby.mockReturnValue({ data: undefined, isLoading: true });
+    renderSpotlight();
+    const tabProches = screen.getByRole("tab", { name: /Près de chez vous/ });
+    expect(within(tabProches).queryByText(String(NEARBY_TOTAL))).toBeNull();
+    // Ni skeleton ni badge à zéro : le libellé reste seul.
+    expect(tabProches.textContent).toBe("Près de chez vous");
+  });
+
+  it("aucun badge quand le vivier proche est vide", () => {
+    mocks.nearby.mockReturnValue({
+      data: { sitters: [], radiusUsed: null, hasGeo: true, totalCount: 0 },
+      isLoading: false,
+    });
+    renderSpotlight();
+    const tabProches = screen.getByRole("tab", { name: /Près de chez vous/ });
+    expect(tabProches.textContent).toBe("Près de chez vous");
+  });
+});
+
+// ─── 3. Aucun refetch au changement d'onglet ─────────────────────────────
+describe("OwnerSitterSpotlight, montage parallèle des deux viviers", () => {
+  it("les deux hooks sont appelés dès le premier rendu, avant tout clic", () => {
+    renderSpotlight();
+    expect(mocks.topAffinity).toHaveBeenCalled();
+    expect(mocks.nearby).toHaveBeenCalled();
+  });
+
+  it("changer d'onglet ne déclenche aucun nouvel appel réseau", async () => {
+    renderSpotlight();
+    // Effet du panneau proximité flushé (fetch sitter_profiles_affinity).
+    await waitFor(() => expect(mocks.supabaseFrom).toHaveBeenCalled());
+    const callsBefore = mocks.supabaseFrom.mock.calls.length;
+
+    fireEvent.click(screen.getByRole("tab", { name: /Près de chez vous/ }));
+    const panelProches = document.getElementById("owner-spotlight-panel-proches");
+    expect(panelProches?.getAttribute("hidden")).toBeNull();
+    expect(mocks.supabaseFrom.mock.calls.length).toBe(callsBefore);
+
+    fireEvent.click(screen.getByRole("tab", { name: "Pour vous" }));
+    expect(mocks.supabaseFrom.mock.calls.length).toBe(callsBefore);
+  });
+});
+
+// ─── 4. Structure statique verrouillée ───────────────────────────────────
+const spotlightSrc = readFileSync(
+  resolve(__dirname, "../components/dashboard/owner/OwnerSitterSpotlight.tsx"),
+  "utf8",
+);
+const dashboardSrc = readFileSync(
+  resolve(__dirname, "../components/dashboard/OwnerDashboard.tsx"),
+  "utf8",
+);
+
+describe("OwnerSitterSpotlight, structure statique", () => {
+  it("l'onglet par défaut est « Pour vous » dans le code", () => {
+    expect(spotlightSrc).toContain('useState<TabId>("pour-vous")');
+  });
+
+  it("les panneaux sont masqués par attribut hidden, jamais démontés", () => {
+    expect(spotlightSrc).toContain('hidden={activeTab !== "pour-vous"}');
+    expect(spotlightSrc).toContain('hidden={activeTab !== "proches"}');
+    // Aucun rendu conditionnel des panneaux.
+    expect(spotlightSrc).not.toMatch(/activeTab === "pour-vous"\s*&&\s*<SpotlightForYouPanel/);
+    expect(spotlightSrc).not.toMatch(/activeTab === "proches"\s*&&\s*<SpotlightNearbyPanel/);
+  });
+
+  it("le badge est conditionné à l'onglet inactif et à la fin du chargement", () => {
+    expect(spotlightSrc).toContain('activeTab !== "proches"');
+    expect(spotlightSrc).toContain("!nearbyIsLoading");
+    expect(spotlightSrc).toContain("nearbyTotal > 0");
+  });
+
+  it("OwnerDashboard ne référence plus les deux anciens composants", () => {
+    expect(dashboardSrc).not.toContain("OwnerFirstNBAGardiens");
+    expect(dashboardSrc).not.toContain("NearbySittersSection");
+    expect(dashboardSrc).toContain("OwnerSitterSpotlight");
+    // Une seule occurrence de rendu : la section fusionnée est unique.
+    const renders = dashboardSrc.split("<OwnerSitterSpotlight").length - 1;
+    expect(renders).toBe(1);
+  });
+});

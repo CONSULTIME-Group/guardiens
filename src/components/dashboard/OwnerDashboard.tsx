@@ -22,7 +22,6 @@ import ApplicationCapSection from "./owner/ApplicationCapSection";
 import OwnerFamilySection from "./owner/OwnerFamilySection";
 import SitterEntraideSection from "./sitter/SitterEntraideSection";
 import { useFirstNearbyMission } from "@/hooks/useFirstNearbyMission";
-import NearbySittersSection from "./owner/NearbySittersSection";
 import PetAdviceSection from "./shared/PetAdviceSection";
 import NextStepRailCard from "./shared/NextStepRailCard";
 import RailReadingsCard from "./shared/RailReadingsCard";
@@ -32,7 +31,7 @@ import { useProfileCompletionMissing } from "@/hooks/useProfileCompletionMissing
 import { ownerNextStep } from "@/lib/dashboardNextStep";
 
 import MobileStickyCTA from "./owner/MobileStickyCTA";
-import OwnerFirstNBAGardiens from "./OwnerFirstNBAGardiens";
+import OwnerSitterSpotlight from "./owner/OwnerSitterSpotlight";
 
 /* ── Vague 12 : rail ── */
 import CommunityPulseBanner from "./shared/CommunityPulseBanner";
@@ -330,11 +329,6 @@ const OwnerDashboard = () => {
                 ctaTo={priorityAction.ctaTo}
                 urgency={priorityAction.urgency}
               />
-            )}
-
-            {/* NBA gardiens si nouveau proprio sans annonce active */}
-            {showAlmaProactive && !latestDraft && !ongoingSit && (
-              <OwnerFirstNBAGardiens />
             )}
 
             {/* 3. VOTRE ANNONCE (n'affiche rien si aucune annonce active) */}
