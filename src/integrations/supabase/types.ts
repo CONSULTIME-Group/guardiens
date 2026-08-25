@@ -14,6 +14,69 @@ export type Database = {
   }
   public: {
     Tables: {
+      _backup_breed_content_20260825: {
+        Row: {
+          alimentation: string | null
+          breed: string | null
+          compatibility: string | null
+          difficulty_level: string | null
+          exercise_needs: string | null
+          generated_at: string | null
+          grooming: string | null
+          health_notes: string | null
+          id: string | null
+          ideal_for: string | null
+          image_alt: string | null
+          image_credit: string | null
+          image_url: string | null
+          rich_content: string | null
+          sitter_tips: string | null
+          species: string | null
+          stranger_behavior: string | null
+          temperament: string | null
+        }
+        Insert: {
+          alimentation?: string | null
+          breed?: string | null
+          compatibility?: string | null
+          difficulty_level?: string | null
+          exercise_needs?: string | null
+          generated_at?: string | null
+          grooming?: string | null
+          health_notes?: string | null
+          id?: string | null
+          ideal_for?: string | null
+          image_alt?: string | null
+          image_credit?: string | null
+          image_url?: string | null
+          rich_content?: string | null
+          sitter_tips?: string | null
+          species?: string | null
+          stranger_behavior?: string | null
+          temperament?: string | null
+        }
+        Update: {
+          alimentation?: string | null
+          breed?: string | null
+          compatibility?: string | null
+          difficulty_level?: string | null
+          exercise_needs?: string | null
+          generated_at?: string | null
+          grooming?: string | null
+          health_notes?: string | null
+          id?: string | null
+          ideal_for?: string | null
+          image_alt?: string | null
+          image_credit?: string | null
+          image_url?: string | null
+          rich_content?: string | null
+          sitter_tips?: string | null
+          species?: string | null
+          stranger_behavior?: string | null
+          temperament?: string | null
+        }
+        Relationships: []
+      }
       _backup_email_send_log_mirror_20260824: {
         Row: {
           created_at: string | null
