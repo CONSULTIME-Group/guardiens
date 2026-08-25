@@ -154,13 +154,12 @@ describe("OwnerSitterSpotlight, badge du vivier proche", () => {
     expect(screen.getByRole("tab", { name: "Pour vous" }).getAttribute("aria-selected")).toBe("false");
   });
 
-  it("aucun badge pendant le chargement du vivier proche", () => {
+  it("aucun badge pendant le chargement du vivier proche, et aucun en-tête orphelin", () => {
     mocks.nearby.mockReturnValue({ data: undefined, isLoading: true });
-    renderSpotlight();
-    const tabProches = screen.getByRole("tab", { name: /Près de chez vous/ });
-    expect(within(tabProches).queryByText(String(NEARBY_TOTAL))).toBeNull();
-    // Ni skeleton ni badge à zéro : le libellé reste seul.
-    expect(tabProches.textContent).toBe("Près de chez vous");
+    const { container } = renderSpotlight();
+    expect(container.innerHTML).toBe("");
+    expect(screen.queryByRole("tablist")).toBeNull();
+    expect(screen.queryByText("Les gardiens")).toBeNull();
   });
 
   it("aucun badge quand le vivier proche est vide", () => {
@@ -274,6 +273,43 @@ describe("OwnerSitterSpotlight, états de bord", () => {
     expect(screen.queryByRole("tablist")).toBeNull();
     expect(screen.queryByText("Les gardiens")).toBeNull();
   });
+
+  it("vivier d'affinité prêt mais proximité en chargement : aucun rendu partiel", () => {
+    mocks.topAffinity.mockReturnValue({
+      topSitters: [affinitySitter],
+      totalPool: 12,
+      scoredCount: 12,
+      hasGeo: true,
+      isLoading: false,
+    });
+    mocks.nearby.mockReturnValue({ data: undefined, isLoading: true });
+    const { container } = renderSpotlight();
+
+    expect(container.innerHTML).toBe("");
+    expect(screen.queryByRole("tablist")).toBeNull();
+    expect(screen.queryByText("Les gardiens")).toBeNull();
+    expect(screen.queryByText("Marc")).toBeNull();
+  });
+
+  it("vivier de proximité prêt mais affinité en chargement : aucun rendu partiel", () => {
+    mocks.topAffinity.mockReturnValue({
+      topSitters: [],
+      totalPool: 0,
+      scoredCount: 0,
+      hasGeo: false,
+      isLoading: true,
+    });
+    mocks.nearby.mockReturnValue({
+      data: { sitters: [nearbySitter], radiusUsed: 30, hasGeo: true, totalCount: NEARBY_TOTAL },
+      isLoading: false,
+    });
+    const { container } = renderSpotlight();
+
+    expect(container.innerHTML).toBe("");
+    expect(screen.queryByRole("tablist")).toBeNull();
+    expect(screen.queryByText("Les gardiens")).toBeNull();
+    expect(screen.queryByText("Claire")).toBeNull();
+  });
 });
 
 // ─── 6. Typographie de marque ────────────────────────────────────────────
@@ -283,6 +319,10 @@ const forYouSrc = readFileSync(
 );
 const nearbySrc = readFileSync(
   resolve(__dirname, "../components/dashboard/owner/SpotlightNearbyPanel.tsx"),
+  "utf8",
+);
+const sectionHeaderSrc = readFileSync(
+  resolve(__dirname, "../components/dashboard/sitter/SitterMatchSection.tsx"),
   "utf8",
 );
 
@@ -299,5 +339,35 @@ describe("OwnerSitterSpotlight, typographie de marque", () => {
     expect(nearbySrc).toContain("SectionHeader");
     expect(nearbySrc).toContain('eyebrow="Les gens du coin"');
     expect(nearbySrc).toContain('title="Ils sont prêts à garder près de chez vous."');
+  });
+});
+
+// ─── 7. Hiérarchie de titres ─────────────────────────────────────────────
+describe("OwnerSitterSpotlight, hiérarchie de titres", () => {
+  it("SectionHeader conserve h2 par défaut pour les appels existants", () => {
+    expect(sectionHeaderSrc).toContain('as?: "h2" | "h3"');
+    expect(sectionHeaderSrc).toContain('as: Heading = "h2"');
+  });
+
+  it("les deux panneaux du spotlight demandent explicitement un titre de niveau 3", () => {
+    expect(forYouSrc).toContain('as="h3"');
+    expect(nearbySrc).toContain('as="h3"');
+  });
+
+  it("au rendu, le titre de section reste h2 et les titres de panneaux sont des h3", () => {
+    renderSpotlight();
+    // Les deux panneaux sont montés, l'un est masqué par `hidden` : on les
+    // inclut pour vérifier la hiérarchie complète sans avoir à changer d'onglet.
+    const headings = screen.getAllByRole("heading", { hidden: true });
+    const h2 = headings.filter((h) => h.tagName === "H2").map((h) => h.textContent);
+    const h3 = headings.filter((h) => h.tagName === "H3").map((h) => h.textContent);
+    expect(h2).toContain("Les gardiens");
+    expect(h3.some((t) => t?.includes("gardien"))).toBe(true);
+    expect(
+      h3.some((t) =>
+        t?.includes("près de chez vous") ||
+        t?.includes("se remplit encore"),
+      ),
+    ).toBe(true);
   });
 });

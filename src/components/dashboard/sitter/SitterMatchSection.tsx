@@ -87,10 +87,12 @@ export const SectionHeader = ({
   eyebrow,
   title,
   subtitle,
+  as: Heading = "h2",
 }: {
   eyebrow: string;
   title: string;
   subtitle?: string;
+  as?: "h2" | "h3";
 }) => (
   <header className="mb-[22px]">
     <div className="flex items-center gap-[8px]">
@@ -106,12 +108,12 @@ export const SectionHeader = ({
         {eyebrow}
       </p>
     </div>
-    <h2
+    <Heading
       className="font-heading text-foreground mt-[8px]"
       style={{ fontSize: "20px", fontWeight: 600, lineHeight: 1.25 }}
     >
       {title}
-    </h2>
+    </Heading>
     {subtitle && (
       <p
         className="font-sans text-muted-foreground mt-[8px]"

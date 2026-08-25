@@ -58,6 +58,7 @@ export default function SpotlightForYouPanel() {
     return (
       <div className="rounded-2xl border border-border bg-card p-5 md:p-6">
         <SectionHeader
+          as="h3"
           eyebrow="Pour vous"
           title="Des gardiens vous attendent près de chez vous"
           subtitle="Nous cherchons des gardiens dans votre secteur, revenez dans quelques jours ou parrainez un proche."
@@ -80,6 +81,7 @@ export default function SpotlightForYouPanel() {
   return (
     <div className="rounded-2xl border border-border bg-card p-5 md:p-6">
       <SectionHeader
+        as="h3"
         eyebrow="Pour vous"
         title={
           topSitters.length === 1
