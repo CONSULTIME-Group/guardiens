@@ -28,8 +28,11 @@ const bulkSrc = readFileSync(
   resolve(__dirname, "../components/sits/owner/BulkInviteNearestDialog.tsx"),
   "utf8",
 );
+// 25/08/2026 : la carte « Pour vous » vit désormais dans le panneau de
+// l'onglet affinité d'OwnerSitterSpotlight (fusion des deux sections
+// gardiens). Assertions inchangées, seul le chemin bouge.
 const cardSrc = readFileSync(
-  resolve(__dirname, "../components/dashboard/OwnerFirstNBAGardiens.tsx"),
+  resolve(__dirname, "../components/dashboard/owner/SpotlightForYouPanel.tsx"),
   "utf8",
 );
 const chipsSrc = readFileSync(
