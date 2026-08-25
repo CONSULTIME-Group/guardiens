@@ -1,5 +1,6 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { requireAdminOrServiceRole } from "../_shared/require-admin.ts";
+import { isPlausibleBreedInput, invalidBreedMessage } from "../_shared/breeds/breedInputFilter.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -190,6 +191,16 @@ Deno.serve(async (req) => {
       });
     }
 
+    // Garde-fou anti non-race, appliqué ici et pas seulement a l'ecran :
+    // aucun appel ne peut creer une fiche publique sur un croisement, une
+    // robe ou un terme generique. Meme definition que le resolveur.
+    if (!image_only && !isPlausibleBreedInput(breed)) {
+      return new Response(
+        JSON.stringify({ error: invalidBreedMessage(String(breed)), code: "invalid_breed_name" }),
+        { status: 422, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
+    }
+
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseKey);
@@ -264,7 +275,11 @@ Deno.serve(async (req) => {
     };
     const speciesLabel = speciesLabels[normalizedSpecies] || species;
 
-    const isGeneric = ["bâtard", "croisé", "croisee", "batard", "mixte", "sans race", "inconnu", "gouttière", "gouttiere", "europeen", "européen"]
+    // « européen » et « gouttière » ne sont PAS des chats sans race :
+    // l'Européen est une race reconnue par le LOOF, avec un standard. Les
+    // inclure ici produisait une fiche affirmant le contraire (corrigé le
+    // 25/08/2026). Seuls les termes réellement generiques restent.
+    const isGeneric = ["bâtard", "croisé", "croisee", "batard", "mixte", "sans race", "inconnu"]
       .some(term => normalizedBreed.includes(term));
 
     const breedPrompt = isGeneric

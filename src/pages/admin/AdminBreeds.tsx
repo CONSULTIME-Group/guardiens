@@ -25,13 +25,15 @@ import {
 import { toast } from "sonner";
 import { Loader2, Zap, ExternalLink, RefreshCw, Wand2, ListChecks, ImageDown } from "lucide-react";
 import { TOP_DOG_BREEDS, TOP_CAT_BREEDS } from "@/data/topBreeds";
-import { slugify } from "@/lib/normalize";
+import { buildBreedEditorialHref } from "@/components/breeds/BreedEditorialLink";
 import { PET_SPECIES_LABELS } from "@/lib/petLabels";
 import { withTimeout, TimeoutError } from "@/lib/withTimeout";
 import {
   validateGenerationInput,
   findDuplicateFiche,
   computeMissingBreeds,
+  isPlausibleBreedInput,
+  invalidBreedMessage,
   type DeclaredPetRow,
 } from "@/lib/adminBreedGeneration";
 
@@ -56,6 +58,20 @@ interface LastResult {
   hasImage: boolean;
   imageDetail: string | null;
 }
+
+/**
+ * Refus explicite renvoye par la fonction edge (422 anti non-race, par
+ * exemple). Sans cette lecture, l'ecran n'affiche qu'un « Edge Function
+ * returned a non-2xx status code » qui n'apprend rien a l'admin.
+ */
+const readFunctionError = async (err: any): Promise<string | null> => {
+  try {
+    const body = await err?.context?.json?.();
+    return typeof body?.error === "string" ? body.error : null;
+  } catch {
+    return null;
+  }
+};
 
 const AdminBreeds = () => {
   const [rows, setRows] = useState<BreedRow[]>([]);
@@ -181,11 +197,20 @@ const AdminBreeds = () => {
   const duplicate = validation.ok
     ? findDuplicateFiche(validation.species, validation.breed, rows)
     : null;
+  /** Refus anti non-race, meme regle que la fonction edge (garde-fou serveur). */
+  const breedRefusal =
+    validation.ok && !duplicate && !isPlausibleBreedInput(validation.breed)
+      ? invalidBreedMessage(validation.breed)
+      : null;
 
   const handleGenerate = async () => {
     const v = validation;
     if (!v.ok) {
       toast.error(v.reason ?? "Saisie incomplète.");
+      return;
+    }
+    if (breedRefusal) {
+      toast.error(breedRefusal);
       return;
     }
     if (generating) return;
@@ -230,7 +255,8 @@ const AdminBreeds = () => {
         toast.warning("La génération dépasse le délai d'attente mais continue côté serveur. Rechargez la liste dans un instant.");
         await refresh();
       } else {
-        toast.error(`Erreur : ${err.message}`);
+        const serverDetail = await readFunctionError(err);
+        toast.error(serverDetail ?? `Erreur : ${err.message}`);
       }
     } finally {
       setGenerating(false);
@@ -335,6 +361,12 @@ const AdminBreeds = () => {
             </div>
           </div>
 
+          {breedRefusal && (
+            <p className="text-sm rounded-lg border border-destructive bg-destructive/10 text-destructive px-3 py-2">
+              {breedRefusal}
+            </p>
+          )}
+
           {duplicate && (
             <p className="text-sm rounded-lg border border-warning bg-warning-soft text-warning-foreground px-3 py-2">
               Une fiche existe déjà pour ce couple espèce + race : « {duplicate.breed} »
@@ -344,7 +376,7 @@ const AdminBreeds = () => {
           )}
 
           <div className="flex items-center gap-3">
-            <Button onClick={handleGenerate} disabled={generating}>
+            <Button onClick={handleGenerate} disabled={generating || !!breedRefusal}>
               {generating ? (
                 <Loader2 className="w-4 h-4 mr-2 animate-spin" />
               ) : (
@@ -482,7 +514,7 @@ const AdminBreeds = () => {
                               <RefreshCw className="w-3.5 h-3.5" />
                             )}
                           </button>
-                          <Link to={`/races/${slugify(r.breed)}`} className="text-primary inline-flex items-center gap-1 text-xs">
+                          <Link to={buildBreedEditorialHref(r.species, r.breed)} className="text-primary inline-flex items-center gap-1 text-xs">
                             Voir <ExternalLink className="w-3 h-3" />
                           </Link>
                         </div>

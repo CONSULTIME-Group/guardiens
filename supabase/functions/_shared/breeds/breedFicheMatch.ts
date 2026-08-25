@@ -118,7 +118,7 @@ const isWordPrefix = (short: string, long: string): boolean =>
 const MIN_PREFIX_KEY_LENGTH = 5;
 
 /** « croisé … » / « x … » : la fiche visée est celle de la race citée. */
-const CROISE_PREFIX = /^(croise|x)-/;
+export const CROISE_PREFIX = /^(croise|x)-/;
 
 /** Retourne le candidat uniquement si tous mènent à la même fiche. */
 const uniqueMatch = <T extends BreedFicheCandidate>(

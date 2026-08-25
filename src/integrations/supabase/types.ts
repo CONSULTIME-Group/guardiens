@@ -14,6 +14,69 @@ export type Database = {
   }
   public: {
     Tables: {
+      _backup_breed_content_20260825: {
+        Row: {
+          alimentation: string | null
+          breed: string | null
+          compatibility: string | null
+          difficulty_level: string | null
+          exercise_needs: string | null
+          generated_at: string | null
+          grooming: string | null
+          health_notes: string | null
+          id: string | null
+          ideal_for: string | null
+          image_alt: string | null
+          image_credit: string | null
+          image_url: string | null
+          rich_content: string | null
+          sitter_tips: string | null
+          species: string | null
+          stranger_behavior: string | null
+          temperament: string | null
+        }
+        Insert: {
+          alimentation?: string | null
+          breed?: string | null
+          compatibility?: string | null
+          difficulty_level?: string | null
+          exercise_needs?: string | null
+          generated_at?: string | null
+          grooming?: string | null
+          health_notes?: string | null
+          id?: string | null
+          ideal_for?: string | null
+          image_alt?: string | null
+          image_credit?: string | null
+          image_url?: string | null
+          rich_content?: string | null
+          sitter_tips?: string | null
+          species?: string | null
+          stranger_behavior?: string | null
+          temperament?: string | null
+        }
+        Update: {
+          alimentation?: string | null
+          breed?: string | null
+          compatibility?: string | null
+          difficulty_level?: string | null
+          exercise_needs?: string | null
+          generated_at?: string | null
+          grooming?: string | null
+          health_notes?: string | null
+          id?: string | null
+          ideal_for?: string | null
+          image_alt?: string | null
+          image_credit?: string | null
+          image_url?: string | null
+          rich_content?: string | null
+          sitter_tips?: string | null
+          species?: string | null
+          stranger_behavior?: string | null
+          temperament?: string | null
+        }
+        Relationships: []
+      }
       _backup_email_send_log_mirror_20260824: {
         Row: {
           created_at: string | null
@@ -1354,6 +1417,75 @@ export type Database = {
         }
         Update: {
           alimentation?: string
+          breed?: string
+          compatibility?: string
+          difficulty_level?: string
+          exercise_needs?: string
+          generated_at?: string
+          grooming?: string
+          health_notes?: string
+          id?: string
+          ideal_for?: string
+          image_alt?: string | null
+          image_credit?: string | null
+          image_url?: string | null
+          rich_content?: string | null
+          sitter_tips?: string
+          species?: string
+          stranger_behavior?: string
+          temperament?: string
+        }
+        Relationships: []
+      }
+      breed_profiles_archive: {
+        Row: {
+          alimentation: string
+          archive_reason: string | null
+          archived_at: string
+          breed: string
+          compatibility: string
+          difficulty_level: string
+          exercise_needs: string
+          generated_at: string
+          grooming: string
+          health_notes: string
+          id: string
+          ideal_for: string
+          image_alt: string | null
+          image_credit: string | null
+          image_url: string | null
+          rich_content: string | null
+          sitter_tips: string
+          species: string
+          stranger_behavior: string
+          temperament: string
+        }
+        Insert: {
+          alimentation?: string
+          archive_reason?: string | null
+          archived_at?: string
+          breed: string
+          compatibility?: string
+          difficulty_level?: string
+          exercise_needs?: string
+          generated_at?: string
+          grooming?: string
+          health_notes?: string
+          id?: string
+          ideal_for?: string
+          image_alt?: string | null
+          image_credit?: string | null
+          image_url?: string | null
+          rich_content?: string | null
+          sitter_tips?: string
+          species: string
+          stranger_behavior?: string
+          temperament?: string
+        }
+        Update: {
+          alimentation?: string
+          archive_reason?: string | null
+          archived_at?: string
           breed?: string
           compatibility?: string
           difficulty_level?: string
