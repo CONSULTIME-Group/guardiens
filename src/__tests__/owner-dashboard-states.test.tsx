@@ -41,7 +41,10 @@ function state(sits: SitLite[], pets: unknown[], role: "owner" | "sitter" | "bot
     showSitDraftFromPrompt: showAlmaProactive, // toujours accessible si Alma proactive
     showDraftResumeCard: hasDraft,
     showPriorityActionCard: !hasDraft && !showAlmaProactive,
-    showSitterSpotlight: showAlmaProactive,
+    // 25/08/2026 : la section gardiens fusionnée (OwnerSitterSpotlight)
+    // est montée inconditionnellement, son onglet « Pour vous » couvre le
+    // cas nouveau proprio. Plus de condition d'affichage.
+    showSitterSpotlight: true,
     showDesktopHeroCta: !showAlmaProactive,
     sitDraftSecondary: showAlmaProactive && hasDraft,
   };
@@ -85,7 +88,7 @@ describe("OwnerDashboard states — précepte 2026 « 1 NBA dominante »", () =>
     expect(s.showDesktopHeroCta).toBe(false);
   });
 
-  it("returning owner (au moins 1 annonce publiée) : PriorityActionCard visible, CTA hero visible, OwnerSitterSpotlight masqué", () => {
+  it("returning owner (au moins 1 annonce publiée) : PriorityActionCard visible, CTA hero visible, OwnerSitterSpotlight toujours visible", () => {
     const s = state([{ status: "published" }], []);
     expect(s.isNewOwner).toBe(false);
     expect(s.earlyOwner).toBe(false);
@@ -93,7 +96,7 @@ describe("OwnerDashboard states — précepte 2026 « 1 NBA dominante »", () =>
     expect(s.showSitDraftFromPrompt).toBe(false);
     expect(s.showDraftResumeCard).toBe(false);
     expect(s.showPriorityActionCard).toBe(true);
-    expect(s.showSitterSpotlight).toBe(false);
+    expect(s.showSitterSpotlight).toBe(true);
     expect(s.showDesktopHeroCta).toBe(true);
   });
 
