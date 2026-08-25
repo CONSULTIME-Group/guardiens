@@ -55,11 +55,12 @@ export default function OwnerSitterSpotlight() {
     setActiveTab((t) => (t === "pour-vous" ? "proches" : "pour-vous"));
   };
 
-  // En-tête orphelin (25/08/2026) : tant que les DEUX viviers chargent, les
-  // deux panneaux renverraient null et laisseraient un titre plus deux
-  // onglets posés sur du vide. On ne rend rien du tout, l'option la plus
-  // propre visuellement : la section apparaît d'un bloc, déjà remplie.
-  if (nearbyIsLoading && affinityIsLoading) return null;
+  // En-tête orphelin (25/08/2026) : la section ne doit apparaître que lorsque
+  // les deux viviers sont prêts, afin que le titre et les onglets ne se
+  // retrouvent jamais seuls au-dessus d'un panneau encore vide. Dès qu'un
+  // des deux hooks est encore en chargement, on ne rend rien : la section
+  // apparaît ensuite d'un bloc, déjà remplie.
+  if (nearbyIsLoading || affinityIsLoading) return null;
 
   return (
     <section aria-label="Les gardiens" className="min-w-0">
