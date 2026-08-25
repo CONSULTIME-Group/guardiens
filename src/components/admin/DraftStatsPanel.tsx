@@ -61,7 +61,8 @@ export const DraftStatsPanel = () => {
             console.error("admin_get_sits_status_counts:", error);
           } else {
             (data as Array<{ status: string; cnt: number }> | null)?.forEach((row) => {
-              if (row.status in counts) counts[row.status as keyof StatusCounts] = Number(row.cnt) || 0;
+              if (isSitStatus(row.status)) counts[row.status] = Number(row.cnt) || 0;
+              else console.error("admin_get_sits_status_counts, statut inconnu :", row.status);
             });
           }
           return { label: p.label, since: p.since, counts };
@@ -116,7 +117,7 @@ export const DraftStatsPanel = () => {
                 <div className="grid grid-cols-2 gap-x-3 gap-y-1 pt-1 text-xs">
                   {STATUSES.filter((s) => s !== "draft").map((s) => (
                     <div key={s} className="flex justify-between">
-                      <span className="text-muted-foreground">{STATUS_LABELS[s]}</span>
+                      <span className="text-muted-foreground">{SIT_STATUS_SHORT_LABELS[s]}</span>
                       <span className={`font-medium ${STATUS_COLORS[s]}`}>{p.counts[s]}</span>
                     </div>
                   ))}
