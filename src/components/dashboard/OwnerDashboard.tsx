@@ -31,6 +31,7 @@ import { useProfileCompletionMissing } from "@/hooks/useProfileCompletionMissing
 import { ownerNextStep } from "@/lib/dashboardNextStep";
 
 import MobileStickyCTA from "./owner/MobileStickyCTA";
+import OwnerSitterSpotlight from "./owner/OwnerSitterSpotlight";
 
 /* ── Vague 12 : rail ── */
 import CommunityPulseBanner from "./shared/CommunityPulseBanner";
