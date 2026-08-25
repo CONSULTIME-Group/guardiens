@@ -99,4 +99,12 @@ describe("Votre famille, lien vers la fiche de race", () => {
     const link = await screen.findByRole("link", { name: /race de Rex/i });
     expect(link.closest("button")).toBeNull();
   });
+
+  it("la tuile garde un retour visuel au survol sur la zone cliquable", async () => {
+    renderSection([pet()]);
+    await waitFor(() => expect(screen.getByText("Rex")).toBeInTheDocument());
+    const tile = screen.getByRole("button", { name: "Modifier Rex" }).closest("div.bg-card");
+    expect(tile).toHaveClass("hover:bg-muted/40");
+    expect(tile).toHaveClass("transition-colors");
+  });
 });

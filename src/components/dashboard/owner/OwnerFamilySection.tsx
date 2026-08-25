@@ -177,7 +177,7 @@ const OwnerFamilySection = ({ pets, propertyIds, onPetsChanged, getNextSitForPet
             return (
               <div
                 key={pet.id}
-                className="bg-card border border-border flex flex-col h-full px-[14px] py-[14px] sm:px-[22px] w-full"
+                className="bg-card border border-border flex flex-col h-full px-[14px] py-[14px] sm:px-[22px] w-full hover:bg-muted/40 transition-colors"
                 style={{
                   borderRadius: "16px",
                 }}
