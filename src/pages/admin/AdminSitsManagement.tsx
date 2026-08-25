@@ -19,7 +19,7 @@ import { AlertTriangle, Search, Eye, XCircle, Star, StickyNote, RotateCcw, User,
 import { useNavigate } from "react-router-dom";
 import { getCountryName } from "@/lib/countries";
 import { avatarImageUrl } from "@/lib/storageImage";
-import { adminSitsFilterStatuses } from "@/lib/sitStatus";
+import { adminSitsFilterStatuses, resolveSitStatusBadge } from "@/lib/sitStatus";
 
 import {
   AlertDialog,
