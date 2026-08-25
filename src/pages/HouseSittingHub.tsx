@@ -91,7 +91,7 @@ const HouseSittingHub = () => {
         <PageBreadcrumb items={[{ label: "House-sitting" }]} />
 
         <section className="max-w-5xl mx-auto px-4 py-10 md:py-14">
-          <h1 className="font-serif text-3xl md:text-5xl font-bold text-foreground mb-5">
+          <h1 className="font-heading text-3xl md:text-5xl font-bold text-foreground mb-5">
             House-sitting en France, ville par ville
           </h1>
           <p className="text-lg text-muted-foreground max-w-3xl leading-relaxed">
@@ -125,7 +125,7 @@ const HouseSittingHub = () => {
             <div className="space-y-8">
               {grouped.map(([dept, cities]) => (
                 <div key={dept} className="border-t border-border pt-6">
-                  <h2 className="font-serif text-xl font-bold text-foreground mb-3">{dept}</h2>
+                  <h2 className="font-heading text-xl font-bold text-foreground mb-3">{dept}</h2>
                   <ul className="grid grid-cols-2 md:grid-cols-4 gap-2">
                     {cities.map((c) => (
                       <li key={c.slug}>

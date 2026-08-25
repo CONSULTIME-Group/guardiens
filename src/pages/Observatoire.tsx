@@ -142,7 +142,7 @@ const BreakdownList = ({
   if (!rows?.length) return null;
   return (
     <div>
-      <h3 className="font-serif text-lg font-semibold text-foreground mb-4">{title}</h3>
+      <h3 className="font-heading text-lg font-semibold text-foreground mb-4">{title}</h3>
       <ul className="space-y-3">
         {rows.map((row) => (
           <li key={row.cle}>
@@ -289,7 +289,7 @@ const Observatoire = () => {
  <PageBreadcrumb items={[{ label: "Observatoire" }]} />
 
  <header className="max-w-4xl mx-auto px-4 pt-8 pb-10">
- <h1 className="font-serif text-3xl md:text-4xl font-bold text-foreground leading-tight mb-4">
+ <h1 className="font-heading text-3xl md:text-4xl font-bold text-foreground leading-tight mb-4">
  Observatoire de la garde d'animaux à domicile en France
  </h1>
  <p className="text-base md:text-lg text-muted-foreground leading-relaxed max-w-3xl">
@@ -308,7 +308,7 @@ const Observatoire = () => {
  </header>
 
  <section id="datapoints" className="max-w-5xl mx-auto px-4 pb-12 scroll-mt-24">
- <h2 className="font-serif text-2xl font-semibold text-foreground mb-6">
+ <h2 className="font-heading text-2xl font-semibold text-foreground mb-6">
  Volumes et activité
  </h2>
  <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -331,7 +331,7 @@ const Observatoire = () => {
  </section>
 
  <section className="max-w-5xl mx-auto px-4 py-12 border-t border-border">
-  <h2 className="font-serif text-2xl font-semibold text-foreground mb-2">
+  <h2 className="font-heading text-2xl font-semibold text-foreground mb-2">
     Notre inventaire vivant
   </h2>
   <p className="text-muted-foreground mb-6">
@@ -346,7 +346,7 @@ const Observatoire = () => {
  </section>
 
  <section className="max-w-5xl mx-auto px-4 py-12 border-t border-border">
-   <h2 className="font-serif text-2xl font-semibold text-foreground mb-2">
+   <h2 className="font-heading text-2xl font-semibold text-foreground mb-2">
      Que disent les profils de nos membres ?
    </h2>
    <p className="text-muted-foreground mb-6 max-w-3xl leading-relaxed">
@@ -386,7 +386,7 @@ const Observatoire = () => {
 
 
  <section className="max-w-4xl mx-auto px-4 py-12 border-t border-border">
- <h2 className="font-serif text-2xl font-semibold text-foreground mb-6">
+ <h2 className="font-heading text-2xl font-semibold text-foreground mb-6">
  Le modèle économique en clair
  </h2>
  <div className="space-y-4 text-foreground leading-relaxed">
@@ -401,7 +401,7 @@ const Observatoire = () => {
  </section>
 
  <section className="max-w-4xl mx-auto px-4 py-12 border-t border-border">
- <h2 className="font-serif text-2xl font-semibold text-foreground mb-6">
+ <h2 className="font-heading text-2xl font-semibold text-foreground mb-6">
  Dispositif de confiance
  </h2>
  <div className="space-y-4 text-foreground leading-relaxed">
@@ -421,7 +421,7 @@ const Observatoire = () => {
  </section>
 
  <section className="max-w-4xl mx-auto px-4 py-12 border-t border-border">
- <h2 className="font-serif text-2xl font-semibold text-foreground mb-6">
+ <h2 className="font-heading text-2xl font-semibold text-foreground mb-6">
  Couverture géographique
  </h2>
  <p className="text-foreground leading-relaxed mb-4">
@@ -459,7 +459,7 @@ const Observatoire = () => {
  </section>
 
  <section className="max-w-4xl mx-auto px-4 py-12 border-t border-border">
- <h2 className="font-serif text-2xl font-semibold text-foreground mb-6">
+ <h2 className="font-heading text-2xl font-semibold text-foreground mb-6">
  Méthodologie et sources
  </h2>
  <div className="space-y-3 text-sm text-muted-foreground leading-relaxed">
@@ -480,7 +480,7 @@ const Observatoire = () => {
  </section>
 
  <section className="max-w-4xl mx-auto px-4 py-16 text-center border-t border-border">
- <h2 className="font-serif text-2xl md:text-3xl font-bold text-foreground mb-4">
+ <h2 className="font-heading text-2xl md:text-3xl font-bold text-foreground mb-4">
  Vous voulez tester ?
  </h2>
  <p className="text-muted-foreground mb-6">

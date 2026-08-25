@@ -109,7 +109,7 @@ const BreedsListing = () => {
 
       <div className="min-w-0 max-w-5xl mx-auto px-4 py-8 md:py-12">
         <header className="mb-6 md:mb-8">
-          <h1 className="font-serif text-2xl md:text-4xl font-bold text-foreground mb-3">
+          <h1 className="font-heading text-2xl md:text-4xl font-bold text-foreground mb-3">
             {t("breeds_listing.h1")}
           </h1>
           <p className="text-muted-foreground text-lg max-w-2xl">
@@ -167,7 +167,7 @@ const BreedsListing = () => {
 
         {sections.map(({ species, breeds: list }) => (
           <section key={species} className="mb-8 md:mb-12">
-            <h2 className="font-serif text-2xl font-semibold text-foreground mb-4">
+            <h2 className="font-heading text-2xl font-semibold text-foreground mb-4">
               {t(`breeds_listing.species.${species}`, { defaultValue: species })}{" "}
               <span className="text-base font-normal text-muted-foreground">
                 ({list.length})

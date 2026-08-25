@@ -14,7 +14,7 @@ const LocalNetworkGrid = ({ current, allCities }: Props) => {
 
   return (
     <section className="max-w-5xl mx-auto px-4 py-12 border-t border-border">
-      <h2 className="font-serif text-2xl font-bold text-foreground mb-6">
+      <h2 className="font-heading text-2xl font-bold text-foreground mb-6">
         Guardiens est aussi présent près de {current.name}
       </h2>
       <div className="grid grid-cols-2 md:grid-cols-5 gap-3">

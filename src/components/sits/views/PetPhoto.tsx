@@ -36,7 +36,7 @@ export function PetPhoto({ src, name, className }: PetPhotoProps) {
         <div
           aria-label={name ? `Pas de photo pour ${name}` : "Pas de photo"}
           className={cn(
-            "bg-muted border border-border flex items-center justify-center text-muted-foreground/70 text-2xl font-serif",
+            "bg-muted border border-border flex items-center justify-center text-muted-foreground/70 text-2xl font-heading",
             className,
           )}
         >

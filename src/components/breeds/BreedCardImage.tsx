@@ -27,7 +27,7 @@ export const TypographicFallback = ({
     }}
   >
     <span className={`pointer-events-none absolute rounded-lg border border-secondary/25 ${compact ? "inset-1" : "inset-2"}`} />
-    <span className={`font-serif font-semibold text-secondary/70 select-none leading-none ${compact ? "text-3xl" : "text-6xl"}`}>
+    <span className={`font-heading font-semibold text-secondary/70 select-none leading-none ${compact ? "text-3xl" : "text-6xl"}`}>
       {breed.trim().charAt(0).toUpperCase()}
     </span>
     {!compact && (

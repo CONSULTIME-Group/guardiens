@@ -84,7 +84,7 @@ const DepartmentsIndex = () => {
         <PageBreadcrumb items={[{ label: "Départements" }]} />
 
         <section className="max-w-5xl mx-auto px-4 py-10 md:py-14">
-          <h1 className="font-serif text-3xl md:text-5xl font-bold text-foreground mb-5">
+          <h1 className="font-heading text-3xl md:text-5xl font-bold text-foreground mb-5">
             La garde d'animaux département par département
           </h1>
           <p className="text-lg text-muted-foreground max-w-3xl leading-relaxed">
@@ -116,7 +116,7 @@ const DepartmentsIndex = () => {
             <div className="space-y-8">
               {grouped.map(([letter, list]) => (
                 <div key={letter} className="border-t border-border pt-6">
-                  <h2 className="font-serif text-xl font-bold text-foreground mb-3">{letter}</h2>
+                  <h2 className="font-heading text-xl font-bold text-foreground mb-3">{letter}</h2>
                   <ul className="grid grid-cols-2 md:grid-cols-3 gap-2">
                     {list.map((d) => {
                       const code = deptCodeFromName(d.department);

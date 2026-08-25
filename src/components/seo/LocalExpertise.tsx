@@ -46,7 +46,7 @@ const LocalExpertise = ({ city }: Props) => {
     <section className="max-w-5xl mx-auto px-4 py-12 border-t border-border">
       <div className="flex items-center gap-3 mb-6">
         <Icon className="h-6 w-6 text-primary" />
-        <h2 className="font-serif text-2xl font-bold text-foreground">
+        <h2 className="font-heading text-2xl font-bold text-foreground">
           Ce que savent nos gardiens à {city.name}
         </h2>
       </div>

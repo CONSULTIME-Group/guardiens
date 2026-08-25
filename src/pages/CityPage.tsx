@@ -332,7 +332,7 @@ const CityPage = () => {
  {/* Text hero, only when no image hero */}
  {!CITY_HERO_IMAGES[cityData.slug] && (
  <section className="max-w-5xl mx-auto px-4 py-16">
- <h1 className="font-serif text-3xl md:text-5xl font-bold text-foreground mb-6">
+ <h1 className="font-heading text-3xl md:text-5xl font-bold text-foreground mb-6">
  {cityData.h1}
  </h1>
  {content && (
@@ -411,7 +411,7 @@ const CityPage = () => {
 
  {/* Reassurance */}
  <section className="max-w-5xl mx-auto px-4 py-6 md:py-12 border-t border-border">
- <h2 className="font-serif text-2xl font-bold text-foreground mb-6">
+ <h2 className="font-heading text-2xl font-bold text-foreground mb-6">
  Pourquoi choisir Guardiens à {cityData.name} ?
  </h2>
  <div className="grid md:grid-cols-3 gap-6">
@@ -448,7 +448,7 @@ const CityPage = () => {
  {/* Nearby towns from cityContent */}
  {content && content.nearbyTowns.length > 0 && (
  <section className="max-w-5xl mx-auto px-4 py-6 md:py-12 border-t border-border">
- <h2 className="font-serif text-2xl font-bold text-foreground mb-4">
+ <h2 className="font-heading text-2xl font-bold text-foreground mb-4">
  Aussi disponible autour de {cityData.name}
  </h2>
  <p className="text-sm text-muted-foreground mb-4">
@@ -505,7 +505,7 @@ const CityPage = () => {
 
  {/* FAQ */}
  <section className="max-w-5xl mx-auto px-4 py-6 md:py-12 border-t border-border">
- <h2 className="font-serif text-2xl font-bold text-foreground mb-6">
+ <h2 className="font-heading text-2xl font-bold text-foreground mb-6">
  Questions fréquentes sur le house-sitting à {cityData.name}
  </h2>
  <Accordion type="single" collapsible className="w-full">
@@ -523,7 +523,7 @@ const CityPage = () => {
  {/* Related articles */}
  {relatedArticles.length > 0 && (
  <section className="max-w-5xl mx-auto px-4 py-6 md:py-12 border-t border-border">
- <h2 className="font-serif text-2xl font-bold text-foreground mb-6">
+ <h2 className="font-heading text-2xl font-bold text-foreground mb-6">
  Articles sur {cityData.name}
  </h2>
  <div className="grid gap-2 md:gap-4 md:grid-cols-3">
@@ -571,7 +571,7 @@ const CityPage = () => {
 
  {/* Final CTA */}
  <section className="max-w-5xl mx-auto px-4 py-8 md:py-16 text-center border-t border-border">
- <h2 className="font-serif text-2xl md:text-3xl font-bold text-foreground mb-4">
+ <h2 className="font-heading text-2xl md:text-3xl font-bold text-foreground mb-4">
  Prêt à partir l'esprit libre ?
  </h2>
  <p className="text-muted-foreground mb-8 max-w-xl mx-auto">
@@ -790,7 +790,7 @@ const CityPage = () => {
               className="w-full h-56 md:h-80 object-cover rounded-2xl mb-8 shadow-sm"
             />
           )}
-          <h1 className="font-serif text-3xl md:text-5xl font-bold text-foreground mb-6">
+          <h1 className="font-heading text-3xl md:text-5xl font-bold text-foreground mb-6">
             {dbPage.h1_title}
           </h1>
           <p className="text-lg text-muted-foreground max-w-3xl leading-relaxed mb-8">
@@ -832,7 +832,7 @@ const CityPage = () => {
        {/* Rich editorial body from AI */}
         {dbInterpolated.content && (
           <section className="max-w-3xl mx-auto px-4 py-10">
-            <article className="prose prose-lg prose-neutral max-w-none prose-headings:font-serif prose-headings:text-foreground prose-h2:text-3xl prose-h2:mt-12 prose-h2:mb-5 prose-h3:text-xl prose-h3:mt-8 prose-h3:mb-3 prose-h3:text-foreground prose-p:text-foreground/80 prose-p:leading-relaxed prose-li:text-foreground/80 prose-strong:text-foreground prose-a:text-primary prose-a:no-underline hover:prose-a:underline">
+            <article className="prose prose-lg prose-neutral max-w-none prose-headings:font-heading prose-headings:text-foreground prose-h2:text-3xl prose-h2:mt-12 prose-h2:mb-5 prose-h3:text-xl prose-h3:mt-8 prose-h3:mb-3 prose-h3:text-foreground prose-p:text-foreground/80 prose-p:leading-relaxed prose-li:text-foreground/80 prose-strong:text-foreground prose-a:text-primary prose-a:no-underline hover:prose-a:underline">
               <MarkdownBody>{dbInterpolated.content}</MarkdownBody>
             </article>
           </section>
@@ -897,7 +897,7 @@ const CityPage = () => {
         {/* FAQ (uniquement sur pages indexables) */}
         {!dbNoindex && (
           <section className="max-w-5xl mx-auto px-4 py-6 md:py-12 border-t border-border">
-            <h2 className="font-serif text-2xl font-bold text-foreground mb-6">
+            <h2 className="font-heading text-2xl font-bold text-foreground mb-6">
               Questions fréquentes sur le house-sitting à {dbPage.city}
             </h2>
             <Accordion type="single" collapsible className="w-full">
@@ -913,7 +913,7 @@ const CityPage = () => {
 
   {/* Final CTA */}
   <section className="max-w-5xl mx-auto px-4 py-16 text-center">
- <h2 className="font-serif text-2xl md:text-3xl font-bold text-foreground mb-4">
+ <h2 className="font-heading text-2xl md:text-3xl font-bold text-foreground mb-4">
  Rejoignez la communauté Guardiens à {dbPage.city}
  </h2>
  <p className="text-muted-foreground mb-8 max-w-xl mx-auto">

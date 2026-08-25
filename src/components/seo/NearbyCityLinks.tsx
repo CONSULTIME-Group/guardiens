@@ -37,7 +37,7 @@ const NearbyCityLinks = ({ department, currentSlug }: Props) => {
 
   return (
     <section className="max-w-5xl mx-auto px-4 py-10 border-t border-border">
-      <h2 className="font-serif text-2xl font-bold text-foreground mb-5">
+      <h2 className="font-heading text-2xl font-bold text-foreground mb-5">
         Autres villes couvertes {departmentIn(department)}
       </h2>
       <ul className="grid grid-cols-2 md:grid-cols-4 gap-2">
