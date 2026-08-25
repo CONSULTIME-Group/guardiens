@@ -551,6 +551,15 @@ const SitterDashboard = () => {
                 </div>
               )}
 
+              {/* e. Conseils compagnons — tuiles pratiques, PAS une voix Alma :
+                  le heading visible ne mentionne pas Alma (déjà portée par
+                  AlmaRailWhisper ci-dessus), le contenu reste inchangé. */}
+              <div className="">
+                <PetAdviceSection variant="rail" context={petAdviceContext} />
+              </div>
+
+
+
               {/* 5. Accès (Gate ou Free) : clôt toujours le rail */}
               <div className="">
                 {!(level === 4 || level === "3B")
