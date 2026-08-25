@@ -356,15 +356,17 @@ describe("OwnerSitterSpotlight, hiérarchie de titres", () => {
 
   it("au rendu, le titre de section reste h2 et les titres de panneaux sont des h3", () => {
     renderSpotlight();
-    const headings = screen.getAllByRole("heading");
+    // Les deux panneaux sont montés, l'un est masqué par `hidden` : on les
+    // inclut pour vérifier la hiérarchie complète sans avoir à changer d'onglet.
+    const headings = screen.getAllByRole("heading", { hidden: true });
     const h2 = headings.filter((h) => h.tagName === "H2").map((h) => h.textContent);
     const h3 = headings.filter((h) => h.tagName === "H3").map((h) => h.textContent);
     expect(h2).toContain("Les gardiens");
-    expect(h3.some((t) => t?.includes("Pour vous") || t?.includes("gardien"))).toBe(true);
+    expect(h3.some((t) => t?.includes("gardien"))).toBe(true);
     expect(
       h3.some((t) =>
-        t?.includes("Les gens du coin") ||
-        t?.includes("près de chez vous"),
+        t?.includes("près de chez vous") ||
+        t?.includes("se remplit encore"),
       ),
     ).toBe(true);
   });
