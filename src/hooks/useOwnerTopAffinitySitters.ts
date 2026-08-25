@@ -185,8 +185,9 @@ export function useOwnerTopAffinitySitters(): Result {
       // distance. Les signaux de confiance départagent, ils ne notent pas.
       // Le tri utilise le SCORE DE TRI (sortScore = score × confiance,
       // décision du 20/08/2026) : un 100 % construit sur un seul critère ne
-      // passe plus devant un 78 % construit sur sept. Le score brut reste
-      // celui affiché sur la carte.
+      // passe plus devant un 78 % construit sur sept. Côté propriétaire, le
+      // chiffre affiché sur la carte EST ce sortScore (alignement
+      // chiffre/tri, décision du 23/08/2026).
       scored.sort((a, b) => {
         if (b.affinity.sortScore !== a.affinity.sortScore) return b.affinity.sortScore - a.affinity.sortScore;
         if (a.identity_verified !== b.identity_verified) return a.identity_verified ? -1 : 1;
