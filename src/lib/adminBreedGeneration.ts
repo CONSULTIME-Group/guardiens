@@ -18,6 +18,7 @@ import {
   resolveBreedFiche,
   type BreedFicheCandidate,
 } from "./breedFicheMatch";
+import { isPlausibleBreedInput } from "../../supabase/functions/_shared/breeds/breedInputFilter.ts";
 
 // ---------------------------------------------------------------------------
 // 1. Validation du formulaire
