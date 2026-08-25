@@ -238,7 +238,11 @@ async function main() {
     ),
     fetchOrCache(
       "breed_profiles", cache,
-      () => maxUpdatedAt("breed_profiles", "generated_at"),
+      // Sonde composite (date + nombre) : une suppression ou un renommage de
+      // fiche ne change pas la date max des lignes restantes. Sans le compteur,
+      // le cache resservait des URLs de races supprimées (même mécanique que
+      // les pages villes le 24/08/2026).
+      () => maxUpdatedAtWithCount("breed_profiles", "generated_at"),
       async () => (await supabase.from("breed_profiles").select("breed, species, generated_at")).data,
       rows => {
         // Slug aligné avec src/lib/normalize.ts → slugify() (sinon soft-404 sur accents)

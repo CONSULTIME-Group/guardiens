@@ -56,7 +56,6 @@ describe("termes génériques et robes", () => {
   );
 
   it.each([
-    "écaille de tortue",
     "tricolore",
     "bringé",
     "black smoke",
@@ -68,6 +67,13 @@ describe("termes génériques et robes", () => {
 
   it.each(["Cane corso", "Beldi", "Berger créole", "Norvégien", "Européen"])(
     "accepte la vraie race « %s »",
+    (declared) => {
+      expect(isPlausibleBreedInput(declared)).toBe(true);
+    },
+  );
+
+  it.each(["écaille de tortue", "poule pondeuse"])(
+    "accepte la fiche légitime « %s »",
     (declared) => {
       expect(isPlausibleBreedInput(declared)).toBe(true);
     },

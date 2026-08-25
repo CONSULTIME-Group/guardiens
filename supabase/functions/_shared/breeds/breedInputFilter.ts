@@ -48,11 +48,13 @@ const GENERIC_SPECIES_KEYS: ReadonlySet<string> = new Set([
 ]);
 
 /**
- * Robes et motifs : ce sont des couleurs de pelage, pas des races. Employés
- * seuls ils ne donnent jamais lieu à une fiche.
+ * Robes et motifs employés seuls. La règle produit n'est pas « race au sens
+ * taxinomique », mais « la chaîne saisie permet-elle de donner un conseil utile
+ * au gardien ? ». "Écaille de tortue" et "poule pondeuse" restent des fiches
+ * légitimes, donc elles ne figurent pas ici. Seuls les termes qui ne mènent à
+ * aucun conseil exploitable sont rejetés.
  */
 const COAT_PATTERN_KEYS: ReadonlySet<string> = new Set([
-  "ecaille-de-tortue",
   "tricolore",
   "bicolore",
   "bringe",
