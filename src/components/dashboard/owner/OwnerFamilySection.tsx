@@ -251,6 +251,21 @@ const OwnerFamilySection = ({ pets, propertyIds, onPetsChanged, getNextSitForPet
                   ) : null}
                 </div>
               </button>
+                {pet.breed ? (
+                  <div className="mt-[8px] pl-[56px]">
+                    {/* Raccourci contextuel vers la fiche de race. Le lien ne
+                        se rend que si la fiche existe vraiment (résolution
+                        partagée avec PetAdviceSection), jamais de lien mort.
+                        Hors du bouton : le clic n'ouvre pas l'éditeur. */}
+                    <BreedEditorialLink
+                      species={pet.species}
+                      breed={pet.breed}
+                      label={`Le guide du ${capitalizeWords(pet.breed)}`}
+                      ariaLabel={`Le guide du ${capitalizeWords(pet.breed)}, la race de ${capitalize(pet.name)}`}
+                    />
+                  </div>
+                ) : null}
+              </div>
             );
           })}
 
