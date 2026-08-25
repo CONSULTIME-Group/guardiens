@@ -12,6 +12,7 @@ import { Plus, Pencil, Trash2, ChevronDown, ChevronUp, Camera, X } from "lucide-
 import HintBubble from "../profile/HintBubble";
 import BreedProfileCard from "../breeds/BreedProfileCard";
 import BreedEditorialLink from "../breeds/BreedEditorialLink";
+import BreedAutocompleteInput from "../breeds/BreedAutocompleteInput";
 import { makePlainTextPasteHandler } from "@/lib/pastePlainText";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -348,7 +349,14 @@ const OwnerStepAnimals = ({ pets, onAddPet, onUpdatePet, onRemovePet }: Props) =
             </div>
             <div className="space-y-2">
               <Label>Race</Label>
-              <Input value={editingPet.breed} onChange={e => setEditingPet({ ...editingPet, breed: e.target.value })} onPaste={makePlainTextPasteHandler(v => setEditingPet({ ...editingPet, breed: v }))} className="rounded-lg h-10" maxLength={100} />
+              <BreedAutocompleteInput
+                species={editingPet.species}
+                value={editingPet.breed}
+                onChange={v => setEditingPet({ ...editingPet, breed: v })}
+                onPaste={makePlainTextPasteHandler(v => setEditingPet({ ...editingPet, breed: v }))}
+                className="rounded-lg h-10"
+                maxLength={100}
+              />
             </div>
           </div>
 

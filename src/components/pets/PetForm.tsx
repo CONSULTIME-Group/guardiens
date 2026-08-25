@@ -20,6 +20,7 @@ import { useTranslation } from "react-i18next";
 import { readFormDraft, writeFormDraft, clearFormDraft, getFormDraftSavedAt } from "@/lib/formDraft";
 import { makePlainTextPasteHandler } from "@/lib/pastePlainText";
 import DraftStatus, { type DraftState } from "@/components/shared/DraftStatus";
+import BreedAutocompleteInput from "@/components/breeds/BreedAutocompleteInput";
 
 export type PetFormValues = {
   name: string;
@@ -254,7 +255,15 @@ const PetForm = ({ initialValues, onSubmit, onCancel, submitLabel = "Enregistrer
         </div>
         <div className="space-y-1.5">
           <Label htmlFor="pet-breed">Race</Label>
-          <Input id="pet-breed" {...register("breed")} onPaste={makePlainTextPasteHandler(v => setValue("breed", v, { shouldDirty: true }), { maxLength: 50 })} maxLength={50} placeholder="Optionnel" />
+          <BreedAutocompleteInput
+            id="pet-breed"
+            species={species}
+            value={watch("breed") ?? ""}
+            onChange={(v) => setValue("breed", v, { shouldDirty: true })}
+            onPaste={makePlainTextPasteHandler(v => setValue("breed", v, { shouldDirty: true }), { maxLength: 50 })}
+            maxLength={50}
+            placeholder="Optionnel"
+          />
         </div>
         <div className="space-y-1.5">
           <Label htmlFor="pet-age">Âge (années)</Label>
