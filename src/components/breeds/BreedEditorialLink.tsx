@@ -46,9 +46,21 @@ interface BreedEditorialLinkProps {
   className?: string;
   /** Libellé du lien ; par défaut « Lire la fiche {race} ». */
   label?: string;
+  /** Libellé accessible, quand le texte visible est trop court hors contexte. */
+  ariaLabel?: string;
+  /** Clic supplémentaire, par exemple pour arrêter la propagation. */
+  onClick?: (e: React.MouseEvent<HTMLAnchorElement>) => void;
 }
 
-const BreedEditorialLink = ({ species, breed, className, label }: BreedEditorialLinkProps) => {
+const BreedEditorialLink = ({
+  species,
+  breed,
+  className,
+  label,
+  ariaLabel,
+  onClick,
+}: BreedEditorialLinkProps) => {
+
   const [ficheBreed, setFicheBreed] = useState<string | null>(null);
 
   useEffect(() => {
