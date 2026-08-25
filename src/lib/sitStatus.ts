@@ -4,11 +4,29 @@ import type { Database } from "@/integrations/supabase/types";
 export type SitStatus = Database["public"]["Enums"]["sit_status"];
 
 /**
+ * Liste de repli explicite. Elle ne sert QUE si l'enum de la base devient
+ * illisible au runtime : sans elle, un filtre renverrait un tableau vide et
+ * l'écran admin n'afficherait plus aucune garde.
+ */
+export const SIT_STATUS_FALLBACK = [
+  "draft",
+  "published",
+  "confirmed",
+  "in_progress",
+  "completed",
+  "cancelled",
+  "archived",
+  "expired",
+] as const;
+
+/**
  * Liste canonique des statuts de garde, lue directement depuis l'enum de la base.
  * Ne jamais recopier cette liste à la main : tout statut ajouté en base doit
  * apparaître ici automatiquement.
  */
-export const SIT_STATUSES: readonly SitStatus[] = Constants.public.Enums.sit_status;
+export const SIT_STATUSES: readonly SitStatus[] =
+  (Constants?.public?.Enums?.sit_status as readonly SitStatus[] | undefined) ?? [];
+
 
 export type SitStatusBadgeVariant = "default" | "secondary" | "outline" | "destructive";
 
