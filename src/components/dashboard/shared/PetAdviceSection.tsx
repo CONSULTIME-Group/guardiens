@@ -48,6 +48,12 @@ interface PetAdviceSectionProps {
   context?: PetAdviceContext;
   /** Sans animaux déclarés, où l'on invite la personne à en présenter un. */
   addPetTo?: string;
+  /**
+   * "rail" : colonne étroite du rail droit. Une seule voix Alma par écran
+   * (doctrine 16/08/2026) : le heading ne mentionne plus Alma, les tuiles
+   * passent en une colonne.
+   */
+  variant?: "flow" | "rail";
 }
 
 const SPECIES_LABEL: Record<string, string> = {
@@ -199,7 +205,13 @@ const PetAdviceSection = ({
   pets: petsProp,
   context = {},
   addPetTo = "/owner-profile",
+  variant = "flow",
 }: PetAdviceSectionProps) => {
+  const isRail = variant === "rail";
+  // En rail, le heading ne porte pas la voix Alma (déjà portée par
+  // AlmaRailWhisper sur le même écran) : les tuiles restent identiques.
+  const headingEyebrow = isRail ? "Conseils pratiques" : "Les conseils d'Alma";
+  const allTipsLabel = isRail ? "Tous les conseils" : "Tous les conseils d'Alma";
   const [fetchedPets, setFetchedPets] = useState<AdvicePet[] | null>(null);
   const [breeds, setBreeds] = useState<BreedRow[] | null>(null);
 
