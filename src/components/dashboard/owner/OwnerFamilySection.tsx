@@ -173,6 +173,7 @@ const OwnerFamilySection = ({ pets, propertyIds, onPetsChanged, getNextSitForPet
         <div className="grid grid-cols-1 min-[430px]:grid-cols-2 md:grid-cols-3 gap-[14px] auto-rows-fr">
           {pets.map((pet) => {
             const nextSit = getNextSitForPet(pet);
+            return (
               <div
                 key={pet.id}
                 className="bg-card border border-border flex flex-col h-full px-[14px] py-[14px] sm:px-[22px] w-full"
