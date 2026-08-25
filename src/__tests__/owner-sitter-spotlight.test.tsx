@@ -322,6 +322,10 @@ const nearbySrc = readFileSync(
   resolve(__dirname, "../components/dashboard/owner/SpotlightNearbyPanel.tsx"),
   "utf8",
 );
+const sectionHeaderSrc = readFileSync(
+  resolve(__dirname, "../components/dashboard/sitter/SitterMatchSection.tsx"),
+  "utf8",
+);
 
 describe("OwnerSitterSpotlight, typographie de marque", () => {
   it("aucun font-serif dans les trois fichiers du spotlight", () => {
@@ -336,5 +340,33 @@ describe("OwnerSitterSpotlight, typographie de marque", () => {
     expect(nearbySrc).toContain("SectionHeader");
     expect(nearbySrc).toContain('eyebrow="Les gens du coin"');
     expect(nearbySrc).toContain('title="Ils sont prêts à garder près de chez vous."');
+  });
+});
+
+// ─── 7. Hiérarchie de titres ─────────────────────────────────────────────
+describe("OwnerSitterSpotlight, hiérarchie de titres", () => {
+  it("SectionHeader conserve h2 par défaut pour les appels existants", () => {
+    expect(sectionHeaderSrc).toContain('as?: "h2" | "h3"');
+    expect(sectionHeaderSrc).toContain('as: Heading = "h2"');
+  });
+
+  it("les deux panneaux du spotlight demandent explicitement un titre de niveau 3", () => {
+    expect(forYouSrc).toContain('as="h3"');
+    expect(nearbySrc).toContain('as="h3"');
+  });
+
+  it("au rendu, le titre de section reste h2 et les titres de panneaux sont des h3", () => {
+    renderSpotlight();
+    const headings = screen.getAllByRole("heading");
+    const h2 = headings.filter((h) => h.tagName === "H2").map((h) => h.textContent);
+    const h3 = headings.filter((h) => h.tagName === "H3").map((h) => h.textContent);
+    expect(h2).toContain("Les gardiens");
+    expect(h3.some((t) => t?.includes("Pour vous") || t?.includes("gardien"))).toBe(true);
+    expect(
+      h3.some((t) =>
+        t?.includes("Les gens du coin") ||
+        t?.includes("près de chez vous"),
+      ),
+    ).toBe(true);
   });
 });
