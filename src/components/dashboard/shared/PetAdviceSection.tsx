@@ -325,7 +325,7 @@ const PetAdviceSection = ({
     return (
       <section aria-label="Conseils pour vos compagnons" className="min-w-0">
         <SectionHeader
-          eyebrow="Les conseils d'Alma"
+          eyebrow={headingEyebrow}
           title="Dites-nous qui partage votre maison."
           subtitle="Dès qu'un compagnon est présenté, les conseils de sa race et de son espèce s'affichent ici."
         />
@@ -360,12 +360,20 @@ const PetAdviceSection = ({
   return (
     <section aria-label="Conseils pour vos compagnons" className="min-w-0">
       <SectionHeader
-        eyebrow="Les conseils d'Alma"
+        eyebrow={headingEyebrow}
         title={`Ce qu'il faut savoir pour ${petNamesPhrase(pets)}.`}
         subtitle="Des repères tirés de leur race et de votre situation du moment."
       />
 
-      <ul role="list" className="grid grid-cols-1 min-[430px]:grid-cols-2 md:grid-cols-3" style={{ gap: "14px" }}>
+      <ul
+        role="list"
+        className={
+          isRail
+            ? "grid grid-cols-1"
+            : "grid grid-cols-1 min-[430px]:grid-cols-2 md:grid-cols-3"
+        }
+        style={{ gap: "14px" }}
+      >
         {all.map((t) => (
           <AdviceCard key={`${t.key}-${t.to}`} tile={t} />
         ))}
@@ -373,7 +381,7 @@ const PetAdviceSection = ({
 
       <p className="font-sans text-[13px] text-muted-foreground" style={{ marginTop: "18px" }}>
         <Link to="/conseils" className="font-semibold text-primary underline-offset-4 hover:underline">
-          Tous les conseils d'Alma
+          {allTipsLabel}
         </Link>
       </p>
     </section>
