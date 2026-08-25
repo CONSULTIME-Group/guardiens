@@ -154,13 +154,12 @@ describe("OwnerSitterSpotlight, badge du vivier proche", () => {
     expect(screen.getByRole("tab", { name: "Pour vous" }).getAttribute("aria-selected")).toBe("false");
   });
 
-  it("aucun badge pendant le chargement du vivier proche", () => {
+  it("aucun badge pendant le chargement du vivier proche, et aucun en-tête orphelin", () => {
     mocks.nearby.mockReturnValue({ data: undefined, isLoading: true });
-    renderSpotlight();
-    const tabProches = screen.getByRole("tab", { name: /Près de chez vous/ });
-    expect(within(tabProches).queryByText(String(NEARBY_TOTAL))).toBeNull();
-    // Ni skeleton ni badge à zéro : le libellé reste seul.
-    expect(tabProches.textContent).toBe("Près de chez vous");
+    const { container } = renderSpotlight();
+    expect(container.innerHTML).toBe("");
+    expect(screen.queryByRole("tablist")).toBeNull();
+    expect(screen.queryByText("Les gardiens")).toBeNull();
   });
 
   it("aucun badge quand le vivier proche est vide", () => {
