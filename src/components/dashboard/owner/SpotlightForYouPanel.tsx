@@ -21,6 +21,7 @@ import { useOwnerTopAffinitySitters, type AffinitySitterCard } from "@/hooks/use
 import { useOwnerProfile } from "@/hooks/useOwnerProfile";
 import { pickDiscriminatingChips } from "@/components/dashboard/shared/discriminatingChips";
 import { trackEvent } from "@/lib/analytics";
+import { SectionHeader } from "@/components/dashboard/sitter/SitterMatchSection";
 
 export default function SpotlightForYouPanel() {
   const { topSitters, totalPool, isLoading } = useOwnerTopAffinitySitters();
@@ -56,12 +57,11 @@ export default function SpotlightForYouPanel() {
   if (topSitters.length === 0) {
     return (
       <div className="rounded-2xl border border-border bg-card p-5 md:p-6">
-        <h3 className="text-lg md:text-xl font-serif font-semibold text-foreground">
-          Des gardiens vous attendent près de chez vous
-        </h3>
-        <p className="text-sm text-muted-foreground mt-2">
-          Nous cherchons des gardiens dans votre secteur, revenez dans quelques jours ou parrainez un proche.
-        </p>
+        <SectionHeader
+          eyebrow="Pour vous"
+          title="Des gardiens vous attendent près de chez vous"
+          subtitle="Nous cherchons des gardiens dans votre secteur, revenez dans quelques jours ou parrainez un proche."
+        />
         <div className="mt-4 flex flex-col items-start gap-3">
           <Link
             to="/search?role=sitter"
@@ -79,16 +79,15 @@ export default function SpotlightForYouPanel() {
 
   return (
     <div className="rounded-2xl border border-border bg-card p-5 md:p-6">
-      <header className="mb-4">
-        <h3 className="text-lg md:text-xl font-serif font-semibold text-foreground">
-          {topSitters.length === 1
+      <SectionHeader
+        eyebrow="Pour vous"
+        title={
+          topSitters.length === 1
             ? `1 gardien vous correspond${city ? ` à ${city}` : ""}`
-            : `${topSitters.length} gardiens qui vous correspondent${city ? ` à ${city}` : ""}`}
-        </h3>
-        <p className="text-sm text-muted-foreground mt-1">
-          Score d'affinité calculé automatiquement. Publiez une annonce pour qu'ils puissent candidater.
-        </p>
-      </header>
+            : `${topSitters.length} gardiens qui vous correspondent${city ? ` à ${city}` : ""}`
+        }
+        subtitle="Score d'affinité calculé automatiquement. Publiez une annonce pour qu'ils puissent candidater."
+      />
 
       <ul className="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-4">
         {topSitters.map((s, index) => (
