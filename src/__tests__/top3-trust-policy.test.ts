@@ -106,6 +106,22 @@ describe("Viviers gardiens, règle définitive : on trie, on ne filtre jamais", 
     expect(cardSrc).not.toContain("topSitters.length < 3");
     expect(cardSrc).toContain("topSitters.length === 0");
   });
+
+  it("le chiffre affiché est le score de tri (sortScore), aligné sur l'ordre de la liste", () => {
+    // Alignement chiffre/tri (23/08/2026) : la carte affiche le même chiffre
+    // que celui qui ordonne la liste, jamais le score brut.
+    expect(cardSrc).toContain("sitter.affinity.sortScore");
+    expect(cardSrc).not.toContain("{sitter.affinity.score} % d'affinité");
+  });
+
+  it("les 2 chips affichées sont choisies par poids de critère, pas par ordre fixe", () => {
+    // `matched` est un string[] dans l'ordre fixe d'évaluation (animaux,
+    // présence...) : les deux mêmes phrases revenaient sur toutes les
+    // cartes. La carte consomme `matchedDetailed` et trie par poids.
+    expect(cardSrc).toContain("sitter.affinity.matchedDetailed");
+    expect(cardSrc).toContain("b.weight - a.weight");
+    expect(cardSrc).not.toContain("sitter.affinity.matched.slice(0, 2)");
+  });
 });
 
 describe("Porte de sortie vers la liste complète (règle 1 bis)", () => {

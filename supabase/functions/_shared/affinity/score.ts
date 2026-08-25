@@ -172,11 +172,26 @@ export interface AffinitySitterInput {
  * `hiddenReason` est LEGACY : il explique pourquoi le CHIFFRE ou le CONTEXTE
  * ne s'affiche pas, jamais pourquoi un profil serait retiré d'une liste.
  */
+/**
+ * Phrase positive enrichie de son critère d'origine (poids, points).
+ * Permet aux surfaces de classement de choisir les chips les plus
+ * significatives (tri par poids) au lieu des premières dans l'ordre fixe
+ * d'évaluation. `matched` reste la liste de phrases, inchangée.
+ */
+export interface MatchedCriterion {
+  key: AffinityCriterionKey;
+  weight: number;
+  points: number;
+  phrase: string;
+}
+
 export interface AffinityResult {
   score: number;
   total: number;
   /** Raisons positives (chips vertes), en voix produit. */
   matched: string[];
+  /** Les mêmes phrases que `matched`, avec le poids de leur critère. */
+  matchedDetailed: MatchedCriterion[];
   /** Freins factuels, traduits pour un humain. Jamais d'identifiant technique. */
   explanation: string[];
   /** Notes « à discuter » (ex : animaux accompagnants à convenir). */
@@ -1029,6 +1044,7 @@ export function computeAffinityResultFull(
   const { criteria, blockedSensitivities, vehicleExplanation } = evaluateCriteria(owner, sitter);
 
   const matched: string[] = [];
+  const matchedDetailed: MatchedCriterion[] = [];
   const explanation: string[] = [];
   for (const c of criteria) {
     // RÈGLE DE LA DEMI-PORTION (décision du 21/08/2026) : la chip positive
@@ -1039,8 +1055,12 @@ export function computeAffinityResultFull(
     const positive = c.points * 2 >= c.weight;
     const phrase = c.matched[0];
     if (phrase) {
-      if (positive) matched.push(phrase);
-      else explanation.push(phrase);
+      if (positive) {
+        matched.push(phrase);
+        matchedDetailed.push({ key: c.key, weight: c.weight, points: c.points, phrase });
+      } else {
+        explanation.push(phrase);
+      }
     }
     explanation.push(...c.explanation);
   }
@@ -1148,6 +1168,7 @@ export function computeAffinityResultFull(
     score,
     total: evaluated,
     matched,
+    matchedDetailed,
     explanation,
     notes,
     displayed,

@@ -30,6 +30,8 @@ export interface OwnerDashboardData {
   sitterProfiles: Record<string, SitterInfo>;
   sitterAffinityProfiles: Record<string, AffinitySitterInput>;
   trustedSitterCount: number;
+  /** Logements du propriétaire (les animaux y sont rattachés). */
+  propertyIds: string[];
   propertyType: string | null;
   propertyEnvironment: string | null;
   propertyCoverPhoto: string | null;
@@ -57,6 +59,7 @@ const INITIAL: OwnerDashboardData = {
   sitterProfiles: {},
   sitterAffinityProfiles: {},
   trustedSitterCount: 0,
+  propertyIds: [],
   propertyType: null,
   propertyEnvironment: null,
   propertyCoverPhoto: null,
@@ -346,6 +349,7 @@ export function useOwnerDashboardData(userId: string | undefined) {
           sitterProfiles,
           sitterAffinityProfiles,
           trustedSitterCount,
+          propertyIds: propIds,
           propertyType,
           propertyEnvironment,
           propertyCoverPhoto,
