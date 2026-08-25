@@ -74,7 +74,7 @@ export const buildUpcomingEditorialItems = (
   if (cityGuide) {
     out.push({
       key: "city-guide",
-      title: `Le guide de ${cityGuide.city}`,
+      title: `${cityGuide.city}, le guide local`,
       context: "Pour préparer votre arrivée",
       href: `/guides/${cityGuide.slug}`,
     });

@@ -175,9 +175,6 @@ const SitterDashboard = () => {
     upcomingBreedHref: upcomingBreedReading?.href,
     upcomingBreedName: upcomingBreedReading?.title.replace(/^La fiche\s+/, ""),
   };
-  const upcomingGuardPets = nextGuard
-    ? ((nextGuard.pets ?? []) as Array<{ id: string; name: string; species: string; breed: string | null }>)
-    : undefined;
 
 
   if (loading) return <SitterDashboardSkeleton />;
@@ -445,7 +442,7 @@ const SitterDashboard = () => {
                   le heading visible ne mentionne pas Alma (déjà portée par
                   AlmaRailWhisper ci-dessus), le contenu reste inchangé. */}
               <div className="">
-                <PetAdviceSection role="sitter" variant="rail" context={petAdviceContext} pets={upcomingGuardPets} addPetTo="/profile?section=sitter" />
+                <PetAdviceSection role="sitter" variant="rail" context={petAdviceContext} addPetTo="/profile?section=sitter" />
               </div>
 
 
@@ -575,7 +572,7 @@ const SitterDashboard = () => {
                   le heading visible ne mentionne pas Alma (déjà portée par
                   AlmaRailWhisper ci-dessus), le contenu reste inchangé. */}
               <div className="">
-                <PetAdviceSection role="sitter" variant="rail" context={petAdviceContext} pets={upcomingGuardPets} addPetTo="/profile?section=sitter" />
+                <PetAdviceSection role="sitter" variant="rail" context={petAdviceContext} addPetTo="/profile?section=sitter" />
               </div>
 
 

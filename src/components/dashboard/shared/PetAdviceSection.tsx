@@ -117,7 +117,7 @@ export const pickContextTips = (
       to: ctx.upcomingBreedHref,
       eyebrow: "Votre prochaine garde",
       title: ctx.upcomingBreedName
-        ? `Préparez votre arrivée auprès de cette race, ${ctx.upcomingBreedName}`
+        ? `Repérez les besoins du ${ctx.upcomingBreedName} avant votre arrivée`
         : "Préparez votre arrivée auprès de l'animal qui vous attend",
     });
   } else if (ctx.hasUpcomingSit && role === "owner") {
@@ -237,6 +237,10 @@ const PetAdviceSection = ({
   // lit alors directement, la personne peut aussi être propriétaire.
   useEffect(() => {
     if (petsProp) return;
+    if (role === "sitter") {
+      setFetchedPets([]);
+      return;
+    }
     let cancelled = false;
     (async () => {
       const { data: auth } = await supabase.auth.getUser();
@@ -263,7 +267,7 @@ const PetAdviceSection = ({
     return () => {
       cancelled = true;
     };
-  }, [petsProp]);
+  }, [petsProp, role]);
 
   const pets = petsProp ?? fetchedPets ?? [];
   const hasPets = pets.length > 0;

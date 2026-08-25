@@ -20,7 +20,7 @@ describe("conseils éditoriaux de la prochaine garde", () => {
       },
       {
         key: "city-guide",
-        title: "Le guide de Annecy",
+        title: "Annecy, le guide local",
         context: "Pour préparer votre arrivée",
         href: "/guides/annecy",
       },
