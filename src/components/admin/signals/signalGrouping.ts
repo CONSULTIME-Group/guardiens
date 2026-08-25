@@ -42,10 +42,15 @@ export const SIGNAL_TYPE_LABELS: Record<string, string> = {
   identity_needs_review: "Vérification d'identité à contrôler",
   sit_like_mission: "Mission qui ressemble à une garde",
   animal_rehoming_listing: "Cession ou adoption d'animal",
+  sit_published_zero_reach: "Annonce publiée sans aucun gardien touché",
 };
 
+/**
+ * Libellé lisible d'un signal. Un type inconnu n'emprunte jamais le libellé
+ * d'un autre type : il est annoncé explicitement, type brut inclus.
+ */
 export const signalTypeLabel = (type: string): string =>
-  SIGNAL_TYPE_LABELS[type] ?? type;
+  SIGNAL_TYPE_LABELS[type] ?? `Signal inconnu : ${type}`;
 
 /**
  * Fonction de relance associée à un type de signal, quand il en existe une.
