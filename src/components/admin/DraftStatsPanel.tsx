@@ -2,14 +2,9 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { canonicalSitStatuses, SIT_STATUS_SHORT_LABELS, isSitStatus, type SitStatus } from "@/lib/sitStatus";
 
-type StatusCounts = {
-  draft: number;
-  published: number;
-  confirmed: number;
-  completed: number;
-  cancelled: number;
-};
+type StatusCounts = Record<SitStatus, number>;
 
 type PeriodStats = {
   label: string;
@@ -17,22 +12,18 @@ type PeriodStats = {
   counts: StatusCounts;
 };
 
-const STATUSES: (keyof StatusCounts)[] = ["draft", "published", "confirmed", "completed", "cancelled"];
+/** Tous les statuts de l'enum, sans exception : un total partiel est un total faux. */
+const STATUSES: SitStatus[] = canonicalSitStatuses();
 
-const STATUS_COLORS: Record<keyof StatusCounts, string> = {
+const STATUS_COLORS: Partial<Record<SitStatus, string>> = {
   draft: "text-warning",
   published: "text-success",
   confirmed: "text-info",
+  in_progress: "text-info",
   completed: "text-muted-foreground",
   cancelled: "text-destructive",
-};
-
-const STATUS_LABELS: Record<keyof StatusCounts, string> = {
-  draft: "Brouillons",
-  published: "Publiées",
-  confirmed: "Confirmées",
-  completed: "Terminées",
-  cancelled: "Annulées",
+  archived: "text-muted-foreground",
+  expired: "text-muted-foreground",
 };
 
 const buildPeriods = (): { label: string; since: Date | null }[] => {
@@ -48,7 +39,9 @@ const buildPeriods = (): { label: string; since: Date | null }[] => {
   ];
 };
 
-const emptyCounts = (): StatusCounts => ({ draft: 0, published: 0, confirmed: 0, completed: 0, cancelled: 0 });
+const emptyCounts = (): StatusCounts =>
+  STATUSES.reduce((acc, s) => { acc[s] = 0; return acc; }, {} as StatusCounts);
+
 
 export const DraftStatsPanel = () => {
   const [stats, setStats] = useState<PeriodStats[] | null>(null);
