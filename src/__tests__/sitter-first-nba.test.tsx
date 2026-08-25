@@ -15,6 +15,7 @@ const makeAffinity = (over: Partial<AffinityResult>): AffinityResult => ({
   score: 0,
   total: 0,
   matched: [],
+  matchedDetailed: [],
   explanation: [],
   notes: [],
   displayed: true,

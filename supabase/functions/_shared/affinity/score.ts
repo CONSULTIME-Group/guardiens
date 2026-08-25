@@ -1044,6 +1044,7 @@ export function computeAffinityResultFull(
   const { criteria, blockedSensitivities, vehicleExplanation } = evaluateCriteria(owner, sitter);
 
   const matched: string[] = [];
+  const matchedDetailed: MatchedCriterion[] = [];
   const explanation: string[] = [];
   for (const c of criteria) {
     // RÈGLE DE LA DEMI-PORTION (décision du 21/08/2026) : la chip positive
@@ -1054,8 +1055,12 @@ export function computeAffinityResultFull(
     const positive = c.points * 2 >= c.weight;
     const phrase = c.matched[0];
     if (phrase) {
-      if (positive) matched.push(phrase);
-      else explanation.push(phrase);
+      if (positive) {
+        matched.push(phrase);
+        matchedDetailed.push({ key: c.key, weight: c.weight, points: c.points, phrase });
+      } else {
+        explanation.push(phrase);
+      }
     }
     explanation.push(...c.explanation);
   }
@@ -1163,6 +1168,7 @@ export function computeAffinityResultFull(
     score,
     total: evaluated,
     matched,
+    matchedDetailed,
     explanation,
     notes,
     displayed,
