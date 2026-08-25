@@ -18,6 +18,7 @@ import { avatarImageUrl } from "@/lib/storageImage";
 import { Link } from "react-router-dom";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import PetsEditor from "@/components/pets/PetsEditor";
+import BreedEditorialLink from "@/components/breeds/BreedEditorialLink";
 import { SectionHeader } from "../sitter/SitterMatchSection";
 import { SPECIES_LABEL, capitalize, capitalizeWords } from "./helpers";
 import type { Pet, SitRow } from "./types";
@@ -174,16 +175,20 @@ const OwnerFamilySection = ({ pets, propertyIds, onPetsChanged, getNextSitForPet
           {pets.map((pet) => {
             const nextSit = getNextSitForPet(pet);
             return (
-              <button
-                type="button"
+              <div
                 key={pet.id}
-                onClick={() => openEditor(pet.property_id)}
-                aria-label={`Modifier ${pet.name}`}
-                className="bg-card border border-border flex items-center gap-[14px] h-full px-[14px] py-[14px] sm:px-[22px] w-full text-left hover:bg-muted/40 transition-colors cursor-pointer"
+                className="bg-card border border-border flex flex-col h-full px-[14px] py-[14px] sm:px-[22px] w-full"
                 style={{
                   borderRadius: "16px",
                 }}
               >
+              <button
+                type="button"
+                onClick={() => openEditor(pet.property_id)}
+                aria-label={`Modifier ${pet.name}`}
+                className="flex items-center gap-[14px] w-full text-left cursor-pointer bg-transparent"
+              >
+
                 <div
                   className="rounded-full overflow-hidden shrink-0 flex items-center justify-center"
                   style={{
@@ -247,6 +252,21 @@ const OwnerFamilySection = ({ pets, propertyIds, onPetsChanged, getNextSitForPet
                   ) : null}
                 </div>
               </button>
+                {pet.breed ? (
+                  <div className="mt-[8px] pl-[56px]">
+                    {/* Raccourci contextuel vers la fiche de race. Le lien ne
+                        se rend que si la fiche existe vraiment (résolution
+                        partagée avec PetAdviceSection), jamais de lien mort.
+                        Hors du bouton : le clic n'ouvre pas l'éditeur. */}
+                    <BreedEditorialLink
+                      species={pet.species}
+                      breed={pet.breed}
+                      label={`Le guide du ${capitalizeWords(pet.breed)}`}
+                      ariaLabel={`Le guide du ${capitalizeWords(pet.breed)}, la race de ${capitalize(pet.name)}`}
+                    />
+                  </div>
+                ) : null}
+              </div>
             );
           })}
 
