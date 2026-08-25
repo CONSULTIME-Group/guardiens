@@ -355,8 +355,11 @@ const OwnerDashboard = () => {
               getNextSitForPet={getNextSitForPet}
             />
 
-            {/* 4bis. LES GENS DU COIN (vague 16) */}
-            <NearbySittersSection />
+            {/* 4bis. LES GARDIENS (fusion 25/08/2026) : section unique à
+                onglets, « Pour vous » (affinité, défaut) et « Près de chez
+                vous » (proximité). Les deux viviers sont montés en
+                parallèle, le changement d'onglet ne relance aucun réseau. */}
+            <OwnerSitterSpotlight />
 
             {/* 5. ENTRAIDE bidimensionnelle (vague 20) — même composant que le dashboard gardien */}
             <div className="px-4 sm:px-5 md:px-8">
