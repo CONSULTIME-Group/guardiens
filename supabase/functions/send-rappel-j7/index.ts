@@ -1,5 +1,7 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.4";
 import { startCronRun } from "../_shared/cron-run-log.ts";
+import { resolveBreedFiche, type BreedFicheCandidate } from "../_shared/breeds/breedFicheMatch.ts";
+import { buildBreedEditorialHref } from "../_shared/breeds/breedEditorialHref.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -11,6 +13,41 @@ function dateOffset(days: number): string {
   d.setDate(d.getDate() + days);
   return d.toISOString().split("T")[0];
 }
+
+/**
+ * Preparation de la garde, gardien uniquement. Meme regle que le rail du
+ * dashboard gardien : la fiche de race n'est liee que si resolveBreedFiche
+ * retourne une correspondance, le guide de ville que si city_guides.published
+ * vaut vrai. Jamais de lien mort.
+ */
+type Prep = {
+  breedGuidePath?: string;
+  breedGuideName?: string;
+  cityGuidePath?: string;
+  cityGuideName?: string;
+};
+
+function resolvePrep(
+  pets: Array<{ species?: string | null; breed?: string | null }>,
+  candidates: BreedFicheCandidate[],
+  cityGuide: { slug: string; city: string } | null,
+): Prep {
+  const prep: Prep = {};
+  for (const pet of pets) {
+    if (!pet.species || !pet.breed) continue;
+    const match = resolveBreedFiche(pet.species, pet.breed, candidates);
+    if (!match) continue;
+    prep.breedGuidePath = buildBreedEditorialHref(match.species, match.breed);
+    prep.breedGuideName = match.breed;
+    break;
+  }
+  if (cityGuide) {
+    prep.cityGuidePath = `/guides/${cityGuide.slug}`;
+    prep.cityGuideName = cityGuide.city;
+  }
+  return prep;
+}
+
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
