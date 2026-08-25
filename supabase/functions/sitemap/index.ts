@@ -197,7 +197,7 @@ Deno.serve(async () => {
   // Fiches fusionnées (doublons) : liste recopiée depuis
   // src/lib/breedFicheMerges.js, Deno ne peut pas importer src/. Leur URL
   // redirige vers la fiche conservée (BreedPage), elles ne s'indexent pas.
-  const MERGED_BREED_SLUGS = new Set(["bird-gris-du-gabon", "dog-jack-russel", "dog-malinois"]);
+  const MERGED_BREED_SLUGS = new Set(["bird-gris-du-gabon", "dog-jack-russel", "dog-malinois", "cat-chat-des-forets-norvegiennes"]);
   if (breedProfiles) {
     for (const bp of breedProfiles) {
       const slug = `${bp.species.toLowerCase()}-${slugifyBreed(bp.breed)}`;

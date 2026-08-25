@@ -19,6 +19,11 @@ export const BREED_FICHE_MERGES = {
   // « gris du gabon » (fiche vide) absorbé par « perroquet gris du gabon »
   // (20 669 caractères de contenu riche).
   bird: { "gris-du-gabon": "perroquet gris du gabon" },
+  // « chat des forêts norvégiennes » absorbé par « norvégien », nom LOOF de
+  // la race. Les deux fiches décrivaient le même animal (origine nordique,
+  // 5 à 9 kg pour les mâles) et aucun animal ne déclarait l'une ou l'autre.
+  // Le nom juste prime sur la longueur du contenu (décision du 25/08/2026).
+  cat: { "chat-des-forets-norvegiennes": "norvégien" },
   // « jack russel » (coquille, fiche sans contenu riche) absorbé par
   // « jack russell » (fiche complète). L'URL /races/dog-jack-russel redirige.
   // « malinois » (fiche sans image) absorbé par « berger belge malinois »
