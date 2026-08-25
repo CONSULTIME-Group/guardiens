@@ -77,38 +77,14 @@ export const findDuplicateFiche = <T extends BreedFicheCandidate>(
 // ---------------------------------------------------------------------------
 
 /**
- * Filtre de bon sens : la saisie ressemble-t-elle à un nom de race ?
- * Rejette les chiffres (« 16 kgs »), la ponctuation d'énumération ou
- * d'exclamation (« Le plus beau! », « une caniche, un shitsu »), les
- * superlatifs (« la plus belle »), les saisies trop courtes et quelques
- * termes génériques qui ne sont pas des races. Un faux positif restant
- * n'est pas grave : l'admin décide au clic.
+ * Filtre de bon sens, ré-exporté depuis `_shared` : une seule
+ * implémentation, partagée avec la fonction edge `generate-breed-profile`
+ * qui applique le même refus à la génération elle même.
  */
-export const isPlausibleBreedInput = (raw: string | null | undefined): boolean => {
-  const trimmed = (raw ?? "").trim();
-  if (trimmed.length < 3) return false;
-  if (/[0-9!?,;]/.test(trimmed)) return false;
-  const normalized = normalizeBreedName(trimmed);
-  if (normalized.length < 3) return false;
-  if (/^(le|la|les) plus /.test(normalized)) return false;
-  if (/\b et \b/.test(normalized)) return false;
-  return !NON_BREED_TERMS.has(normalized);
-};
-
-/** Saisies réelles qui ne désignent aucune race (clés normalisées). */
-const NON_BREED_TERMS: ReadonlySet<string> = new Set([
-  "inconnu",
-  "inconnue",
-  "sans race",
-  "aucune",
-  "autre",
-  "croise",
-  "croisee",
-  "batard",
-  "mixte",
-  "croise dog",
-  "x berger",
-]);
+export {
+  isPlausibleBreedInput,
+  invalidBreedMessage,
+} from "../../supabase/functions/_shared/breeds/breedInputFilter.ts";
 
 export interface DeclaredPetRow {
   species: string;
