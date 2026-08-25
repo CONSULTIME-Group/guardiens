@@ -99,4 +99,4 @@ export const isPlausibleBreedInput = (raw: string | null | undefined): boolean =
 
 /** Message de refus, identique à l'écran et côté serveur. */
 export const invalidBreedMessage = (raw: string): string =>
-  `Nom de race non valide : ${raw.trim()}. Les croisements, les robes et les termes generiques ne donnent pas lieu a une fiche.`;
+  `Nom de race non valide : ${raw.trim()}. Les croisements, les robes et les termes génériques ne donnent pas lieu à une fiche.`;
