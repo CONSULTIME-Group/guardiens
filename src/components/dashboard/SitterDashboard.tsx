@@ -165,6 +165,15 @@ const SitterDashboard = () => {
     missing: completionMissing,
   });
 
+  /* Contexte des conseils compagnons, tiré des données déjà chargées, sans
+     requête supplémentaire. hasDraftSit n'existe pas côté gardien (brouillon
+     d'annonce, notion propre au propriétaire) : il reste absent. */
+  const petAdviceContext = {
+    hasUpcomingSit: !!nextGuard,
+    profileIncomplete: (profileCompletion ?? 100) < 100,
+  };
+
+
   if (loading) return <SitterDashboardSkeleton />;
   if (error) return <DashboardLoadError onRetry={reload} detail={error} />;
 
