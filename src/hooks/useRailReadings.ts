@@ -129,23 +129,24 @@ export const useRailReadings = ({
               Boolean(pet.species && pet.breed),
           );
           const species = Array.from(new Set(upcomingAnimals.map((pet) => pet.species)));
-          const [breedResult, guideResult, cityPageResult] = await Promise.all([
+          const [breedResult, guideResult] = await Promise.all([
             species.length > 0
               ? supabase.from("breed_profiles").select("breed, species").in("species", species)
               : Promise.resolve({ data: [] }),
+            // Publication du guide local : city_guides.published fait foi, et
+            // rien d'autre. Cette table n'a pas de colonne noindex, et les
+            // pages /house-sitting (seo_city_pages) sont une autre intention,
+            // elles ne conditionnent pas /guides.
             upcomingGuard.city
               ? supabase.from("city_guides").select("slug, city").ilike("city", upcomingGuard.city).eq("published", true).maybeSingle()
               : Promise.resolve({ data: null }),
-            upcomingGuard.city
-              ? supabase.from("seo_city_pages").select("slug").ilike("city", upcomingGuard.city).eq("published", true).or("noindex.is.null,noindex.eq.false").maybeSingle()
-              : Promise.resolve({ data: null }),
           ]);
-          const publishedGuide = cityPageResult.data ? guideResult.data as PublishedCityGuide | null : null;
           out.push(...buildUpcomingEditorialItems(
             upcomingGuard,
             (breedResult.data ?? []) as BreedFicheCandidate[],
-            publishedGuide,
+            (guideResult.data ?? null) as PublishedCityGuide | null,
           ));
+
         } else if (animals.length > 0) {
           const species = Array.from(new Set(animals.map((a) => a.species)));
           const { data: candidates } = await supabase
