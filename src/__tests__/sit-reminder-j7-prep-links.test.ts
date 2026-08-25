@@ -113,6 +113,11 @@ describe("gabarit sit-reminder-j7", () => {
     expect(TEMPLATE).toContain("<Link style={inlineLink}");
   });
 
+  it("le bloc de préparation emploie une formulation neutre", () => {
+    expect(TEMPLATE).toContain("Pour préparer votre arrivée :");
+    expect(TEMPLATE).not.toContain("Pour arriver préparé :");
+  });
+
   it("aucune incitation promotionnelle, base légale 6.1.b préservée", () => {
     expect(TEMPLATE).toContain('basis="6.1.b"');
     expect(TEMPLATE).not.toMatch(/nos autres guides|Découvrez/i);
