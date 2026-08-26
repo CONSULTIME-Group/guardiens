@@ -192,6 +192,38 @@ export async function raiseDigestBacklogSignal(
   });
 }
 
+/**
+ * Adresse structurellement rejetée par le fournisseur (422). Les lignes sont
+ * sorties de la file, la personne doit être contactée pour corriger son
+ * adresse, sinon elle disparaît en silence.
+ */
+export async function raiseInvalidRecipientSignal(
+  supabase: any,
+  args: {
+    source: string;
+    sitterId: string;
+    recipientEmail: string;
+    rowCount: number;
+    providerMessage: string;
+  },
+): Promise<void> {
+  await raiseSignal(supabase, {
+    signalType: "email_recipient_address_invalid",
+    key: `email_recipient_address_invalid_${args.sitterId}`,
+    severity: "critical",
+    metadata: {
+      source: args.source,
+      sitter_id: args.sitterId,
+      recipient_email: args.recipientEmail,
+      row_count: args.rowCount,
+      provider_message: args.providerMessage.slice(0, 500),
+      title: "Adresse email refusée par le fournisseur",
+      detail: `${args.recipientEmail} est rejetée à chaque envoi (${args.rowCount} lignes sorties de la file). Contacter la personne pour corriger son adresse.`,
+    },
+  });
+}
+
+
 async function raiseSignal(
   supabase: any,
   args: {

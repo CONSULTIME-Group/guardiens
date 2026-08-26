@@ -28,12 +28,14 @@
 // - sitter_id : limite l'exécution à un gardien précis (test ciblé).
 
 import { createClient } from 'npm:@supabase/supabase-js@2.45.0'
-import { claimSitNotification, raiseClaimErrorSignal, raiseDigestBacklogSignal, raiseStaleClaimSignal, releaseSitNotification, reportClaimOutcome } from '../_shared/sitNotificationClaim.ts'
+import { claimSitNotification, raiseClaimErrorSignal, raiseDigestBacklogSignal, raiseInvalidRecipientSignal, raiseStaleClaimSignal, releaseSitNotification, reportClaimOutcome } from '../_shared/sitNotificationClaim.ts'
 import { parisWindowVerdictForHours, SITTER_DAILY_DIGEST_TARGET_PARIS_HOURS } from '../_shared/paris-hour.ts'
 import { recordDeliveryFailure } from '../_shared/delivery-failure.ts'
 import { startCronRun } from '../_shared/cron-run-log.ts'
+import { acquireWorkerLock, releaseWorkerLock } from '../_shared/worker-lock.ts'
 import { computeAffinityResultFull } from '../_shared/affinity/score.ts'
 import { pickMissingOpportunities, type MissingOpportunitiesStats } from '../_shared/missing-opportunities/index.ts'
+
 
 // La plateforme coupe actuellement ce traitement vers 150 secondes. Le
 // passage cesse de démarrer de nouveaux gardiens à 110 secondes, puis termine
@@ -47,6 +49,12 @@ const MAX_SITTERS_PER_RUN = 500
 const EMAIL_SEND_INTERVAL_MS = 2_000
 const MAX_EMAIL_SEND_ATTEMPTS = 2
 const MAX_CONSECUTIVE_RATE_LIMITS = 2
+// Verrou de bail : un seul passage draine la file à la fois. Le bail porte sa
+// propre péremption (budget d'exécution plus une marge), donc un passage tué
+// par la plateforme libère le verrou de lui même, sans intervention humaine.
+const DIGEST_LOCK_KEY = 'send-sitter-daily-digest'
+const DIGEST_LOCK_TTL_SECONDS = 180
+
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -123,6 +131,22 @@ Deno.serve(async (req) => {
   const nominalRun = (!body.manual && !body.dry_run && !body.catchup && !body.sitter_id)
     ? await startCronRun('send-sitter-daily-digest')
     : null
+
+  // Verrou single-flight. Le mode manuel (bouton admin) et le mode dry_run
+  // passent outre : le premier est une action délibérée, le second n'écrit
+  // rien. Tout passage automatique qui n'obtient pas le bail laisse la main
+  // sans erreur, motif explicite dans la réponse et dans cron_run_log.
+  const needsLock = !body.manual && !body.dry_run
+  let lockHeld = false
+  if (needsLock) {
+    lockHeld = await acquireWorkerLock(supabase as any, DIGEST_LOCK_KEY, DIGEST_LOCK_TTL_SECONDS)
+    if (!lockHeld) {
+      console.log(JSON.stringify({ event: 'digest_skipped_lock_held', source: 'send-sitter-daily-digest' }))
+      await nominalRun?.finish('success', { reason: 'lock_held', sitters_processed: 0 })
+      return json({ ok: true, skipped: true, reason: 'lock_held' })
+    }
+  }
+
 
   // Passage de rattrapage : unique, tracé, non rejouable. Le gabarit assume
   // le rappel, le contrôle des 24h et la réservation de créneau sont sautés
@@ -609,7 +633,40 @@ Deno.serve(async (req) => {
         if (!_steRes.ok) console.error('send-transactional-email failed', _steRes.status, _steTxt1);
         const sendErr = _steRes.ok ? null : new Error(`send-transactional-email ${_steRes.status}: ${_steTxt1}`);
 
+        // Rejet définitif de l'adresse par le fournisseur (422, adresse
+        // structurellement invalide). Une ligne qui ne pourra jamais partir
+        // n'a rien à faire en file, exactement comme `auth_email_missing`.
+        // Un échec temporaire (quota, indisponibilité) garde le chemin
+        // `deferred_retry` juste en dessous.
+        if (sendErr && isPermanentRecipientRejection(_steTxt1)) {
+          await recordDeliveryFailure(supabase, {
+            templateName: 'sitter-daily-digest',
+            recipientEmail: email,
+            recipientId: sitterId,
+            entityType: 'user',
+            entityId: sitterId,
+            source: 'send-sitter-daily-digest',
+            errorMessage: `invalid_recipient_email: ${_steTxt1.slice(0, 500)}`,
+            extra: { http_status: _steRes.status, response_body: _steTxt1.slice(0, 1000), idempotency_key: idemBase },
+          })
+          await markSkipped(supabase, rows.map(r => r.id), 'invalid_recipient_email', body.dry_run)
+          if (!body.dry_run) {
+            await raiseInvalidRecipientSignal(supabase, {
+              source: 'sitter-daily-digest',
+              sitterId,
+              recipientEmail: email,
+              rowCount: rows.length,
+              providerMessage: _steTxt1,
+            })
+          }
+          if (!body.manual) await releaseSitNotification(supabase, sitterId, 'invalid_recipient_email')
+          sittersSkipped++
+          errors.push({ sitter_id: sitterId, reason: 'invalid_recipient_email' })
+          continue
+        }
+
         if (sendErr) {
+
           // Trace persistante : code HTTP et corps de réponse, jamais un
           // simple console.error.
           await recordDeliveryFailure(supabase, {
@@ -733,8 +790,13 @@ Deno.serve(async (req) => {
     console.error('send-sitter-daily-digest fatal', err)
     await nominalRun?.fail(err)
     return json({ error: String(err) }, 500)
+  } finally {
+    // Le bail est rendu dès la fin du passage. S'il n'est pas rendu (passage
+    // tué), sa péremption le libère toute seule.
+    if (lockHeld) await releaseWorkerLock(supabase as any, DIGEST_LOCK_KEY)
   }
 })
+
 
 function buildSubject(count: number, isCatchup: boolean): string {
   if (count === 0) return 'Votre digest Guardiens'
@@ -800,4 +862,18 @@ function isRateLimitError(error: unknown): boolean {
 function describeThrownValue(error: unknown): string {
   if (error instanceof Error) return `${error.name}: ${error.message}`
   return String(error)
+}
+
+/**
+ * Rejet définitif de l'adresse par le fournisseur. `send-transactional-email`
+ * enveloppe tout en 500, le verdict se lit donc dans le corps de réponse
+ * (`providerStatus: 422`, message « Invalid to field »), jamais dans le code
+ * HTTP de l'enveloppe. Un quota dépassé ou une indisponibilité restent des
+ * échecs temporaires et ne passent pas par ici.
+ */
+function isPermanentRecipientRejection(responseBody: string): boolean {
+  if (!responseBody) return false
+  const hasProvider422 = /"?providerStatus"?\s*[:=]\s*422/.test(responseBody)
+  const invalidField = /invalid\s+`?to`?\s+field|invalid_recipient|invalid recipient/i.test(responseBody)
+  return hasProvider422 || invalidField
 }
