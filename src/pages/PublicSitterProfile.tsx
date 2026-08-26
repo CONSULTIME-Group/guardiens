@@ -400,7 +400,7 @@ export default function PublicSitterProfile() {
         >
           <img
             src={storageImageUrl(g.photo_url, i === 0 ? { width: 800, height: 800 } : { width: 386, height: 386 })}
-            alt={g.caption || `Photo ${i + 1}`}
+            alt={galleryPhotoAlt(g, firstName)}
             className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-300"
             loading="lazy"
           />
