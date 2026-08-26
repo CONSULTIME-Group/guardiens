@@ -28,12 +28,14 @@
 // - sitter_id : limite l'exécution à un gardien précis (test ciblé).
 
 import { createClient } from 'npm:@supabase/supabase-js@2.45.0'
-import { claimSitNotification, raiseClaimErrorSignal, raiseDigestBacklogSignal, raiseStaleClaimSignal, releaseSitNotification, reportClaimOutcome } from '../_shared/sitNotificationClaim.ts'
+import { claimSitNotification, raiseClaimErrorSignal, raiseDigestBacklogSignal, raiseInvalidRecipientSignal, raiseStaleClaimSignal, releaseSitNotification, reportClaimOutcome } from '../_shared/sitNotificationClaim.ts'
 import { parisWindowVerdictForHours, SITTER_DAILY_DIGEST_TARGET_PARIS_HOURS } from '../_shared/paris-hour.ts'
 import { recordDeliveryFailure } from '../_shared/delivery-failure.ts'
 import { startCronRun } from '../_shared/cron-run-log.ts'
+import { acquireWorkerLock, releaseWorkerLock } from '../_shared/worker-lock.ts'
 import { computeAffinityResultFull } from '../_shared/affinity/score.ts'
 import { pickMissingOpportunities, type MissingOpportunitiesStats } from '../_shared/missing-opportunities/index.ts'
+
 
 // La plateforme coupe actuellement ce traitement vers 150 secondes. Le
 // passage cesse de démarrer de nouveaux gardiens à 110 secondes, puis termine
