@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
@@ -7,7 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
-import { Plus, Trash2, Camera, X, CheckCircle2, Star } from "lucide-react";
+import { Plus, Trash2, Camera, X, CheckCircle2, Star, UploadCloud, Loader2, AlertTriangle } from "lucide-react";
 import { toast } from "sonner";
 import { logger } from "@/lib/logger";
 import { compressGalleryFile } from "@/lib/compressImage";
@@ -15,6 +15,8 @@ import { storageImageUrl } from "@/lib/storageImage";
 import { galleryPhotoAlt } from "@/lib/galleryPhotoAlt";
 import { trackEvent } from "@/lib/analytics";
 import { useTranslation } from "react-i18next";
+import { uploadGalleryBatch, GALLERY_MAX_PHOTOS, type GalleryUploadResult } from "@/lib/galleryBatchUpload";
+import { inferPhotoDate } from "@/lib/galleryPhotoDate";
 
 const NO_SIT_VALUE = "__none__";
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -39,6 +41,15 @@ interface GalleryPhoto {
   sit_id: string | null;
 }
 
+interface PendingTile {
+  index: number;
+  fileName: string;
+  previewUrl: string;
+  state: "queued" | "uploading" | "done" | "error" | "skipped";
+  message?: string;
+  photo?: GalleryPhoto;
+}
+
 const SitterGallery = () => {
   const { user } = useAuth();
   const { t } = useTranslation();
@@ -48,15 +59,9 @@ const SitterGallery = () => {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [lightboxPhoto, setLightboxPhoto] = useState<GalleryPhoto | null>(null);
-
-  // Form state
-  const [file, setFile] = useState<File | null>(null);
-  const [caption, setCaption] = useState("");
-  const [animalType, setAnimalType] = useState("");
-  const [animalBreed, setAnimalBreed] = useState("");
-  const [city, setCity] = useState("");
-  const [photoDate, setPhotoDate] = useState("");
-  const [selectedSitId, setSelectedSitId] = useState("");
+  const [tiles, setTiles] = useState<PendingTile[]>([]);
+  const [dragOver, setDragOver] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (!user) return;
@@ -76,81 +81,98 @@ const SitterGallery = () => {
     load();
   }, [user]);
 
-  const resetForm = () => {
-    setFile(null);
-    setCaption("");
-    setAnimalType("");
-    setAnimalBreed("");
-    setCity("");
-    setPhotoDate("");
-    setSelectedSitId("");
+  const handleFiles = useCallback(async (selected: File[]) => {
+    if (!user || selected.length === 0 || uploading) return;
+    const images = selected.filter(f => f.type.startsWith("image/") || /\.(jpe?g|png|webp|heic|heif)$/i.test(f.name));
+    if (images.length === 0) return;
+
+    setUploading(true);
+    setTiles(images.map((f, i) => ({
+      index: i,
+      fileName: f.name,
+      previewUrl: URL.createObjectURL(f),
+      state: "queued",
+    })));
+
+    const existingCount = photos.length;
+
+    const results = await uploadGalleryBatch<GalleryPhoto>(user.id, images, existingCount, {
+      compress: (f) => compressGalleryFile(f),
+      upload: async (path, f) => {
+        const { error } = await supabase.storage.from("sitter-gallery").upload(path, f, { upsert: false });
+        if (error) throw error;
+      },
+      publicUrl: (path) => supabase.storage.from("sitter-gallery").getPublicUrl(path).data.publicUrl,
+      inferDate: (f) => inferPhotoDate(f),
+      insertRow: async ({ photo_url, photo_date }) => {
+        const { data, error } = await supabase.from("sitter_gallery").insert({
+          user_id: user.id,
+          photo_url,
+          caption: "",
+          animal_type: null,
+          animal_breed: null,
+          city: null,
+          photo_date,
+          source: "external" as const,
+          sit_id: null,
+        }).select().single();
+        if (error) throw error;
+        return data as unknown as GalleryPhoto;
+      },
+      onProgress: (index, state) => {
+        setTiles(prev => prev.map(tl => (tl.index === index ? { ...tl, state: state === "done" ? "done" : state } : tl)));
+      },
+    });
+
+    applyResults(results, images);
+    setUploading(false);
+    if (inputRef.current) inputRef.current.value = "";
+  }, [user, uploading, photos.length]);
+
+  const applyResults = (results: GalleryUploadResult<GalleryPhoto>[], images: File[]) => {
+    const added: GalleryPhoto[] = [];
+    setTiles(prev => prev.map(tl => {
+      const r = results.find(x => x.index === tl.index);
+      if (!r) return tl;
+      if (r.status === "success") {
+        added.push(r.row);
+        return { ...tl, state: "done", photo: r.row };
+      }
+      if (r.status === "skipped_limit") {
+        return { ...tl, state: "skipped", message: "Plafond de 50 photos atteint" };
+      }
+      return { ...tl, state: "error", message: r.message };
+    }));
+
+    if (added.length > 0) setPhotos(prev => [...added.slice().reverse(), ...prev]);
+
+    const failed = results.filter(r => r.status === "error") as Extract<GalleryUploadResult<GalleryPhoto>, { status: "error" }>[];
+    const skipped = results.filter(r => r.status === "skipped_limit");
+
+    if (added.length > 0) {
+      toast.success(added.length === 1 ? "Photo ajoutée à votre galerie" : `${added.length} photos ajoutées à votre galerie`);
+    }
+    if (skipped.length > 0) {
+      toast.warning(`Plafond de ${GALLERY_MAX_PHOTOS} photos atteint : ${skipped.length} fichier${skipped.length > 1 ? "s" : ""} non ajouté${skipped.length > 1 ? "s" : ""}.`);
+    }
+    for (const f of failed) {
+      const src = images[f.index];
+      logger.error("SitterGallery upload failed", { error: f.message, file: f.fileName });
+      void trackEvent("sitter_gallery_upload_failed", {
+        metadata: {
+          ext: f.fileName.split(".").pop()?.toLowerCase() || "unknown",
+          size_kb: src ? Math.round(src.size / 1024) : 0,
+        },
+      });
+      toast.error(`${f.fileName} : ${t("upload.photo_failed")}`);
+    }
   };
 
-  const handleUpload = async () => {
-    if (!user || !file) return;
-    if (photos.length >= 50) {
-      toast.error("Vous avez atteint la limite de 50 photos.");
-      return;
-    }
-    setUploading(true);
-    try {
-      // Plafond d'ingestion galerie : 1600 px côté long, cible 300 ko.
-      // Repli dégradé 1024 px inclus dans compressGalleryFile ; jamais de brut.
-      const toUpload = await compressGalleryFile(file);
-      const ext = toUpload.name.split(".").pop();
-      const path = `${user.id}/${Date.now()}.${ext}`;
-      const { error: uploadErr } = await supabase.storage.from("sitter-gallery").upload(path, toUpload, { upsert: false });
-      if (uploadErr) throw uploadErr;
-
-      const { data: { publicUrl } } = supabase.storage.from("sitter-gallery").getPublicUrl(path);
-
-      const validSitId = selectedSitId && selectedSitId !== NO_SIT_VALUE && UUID_RE.test(selectedSitId)
-        ? selectedSitId
-        : null;
-      const source = validSitId ? "guardiens" : "external";
-      // Accepte "YYYY-MM-DD" tel quel ; convertit "YYYY-MM" (input type=month) en "YYYY-MM-01" ; sinon null
-      let validPhotoDate: string | null = null;
-      if (photoDate) {
-        if (/^\d{4}-\d{2}-\d{2}$/.test(photoDate)) {
-          validPhotoDate = photoDate;
-        } else if (/^\d{4}-\d{2}$/.test(photoDate)) {
-          validPhotoDate = `${photoDate}-01`;
-        }
-      }
-
-      const payload = {
-        user_id: user.id,
-        photo_url: publicUrl,
-        caption: (caption ?? "").trim(),
-        animal_type: animalType || null,
-        animal_breed: animalBreed || null,
-        city: city || null,
-        photo_date: validPhotoDate,
-        source: source as "guardiens" | "external",
-        sit_id: validSitId,
-      };
-
-      const { data, error } = await supabase.from("sitter_gallery").insert(payload).select().single();
-
-      if (error) {
-        logger.error("Failed to insert sitter_gallery photo", { error: String(error), payload });
-        throw error;
-      }
-      setPhotos(prev => [data as any, ...prev]);
-      resetForm();
-      setDialogOpen(false);
-      toast.success("Photo ajoutée à votre galerie !");
-    } catch (err: any) {
-      // Le rejet de loadImage est un ProgressEvent sans propriété message :
-      // on affiche toujours la formulation unique, jamais err.message.
-      logger.error("SitterGallery upload failed", { error: String(err) });
-      void trackEvent("sitter_gallery_upload_failed", {
-        metadata: { ext: file.name.split(".").pop()?.toLowerCase() || "unknown", size_kb: Math.round(file.size / 1024) },
-      });
-      toast.error(t("upload.photo_failed"));
-    } finally {
-      setUploading(false);
-    }
+  const patchPhoto = async (id: string, patch: Partial<GalleryPhoto>) => {
+    setPhotos(prev => prev.map(p => (p.id === id ? { ...p, ...patch } : p)));
+    setTiles(prev => prev.map(tl => (tl.photo?.id === id ? { ...tl, photo: { ...tl.photo, ...patch } as GalleryPhoto } : tl)));
+    const { error } = await supabase.from("sitter_gallery").update(patch as any).eq("id", id);
+    if (error) toast.error("Détail non enregistré, réessayez dans un instant.");
   };
 
   const handleDelete = async (photo: GalleryPhoto) => {
@@ -160,6 +182,7 @@ const SitterGallery = () => {
     }
     await supabase.from("sitter_gallery").delete().eq("id", photo.id);
     setPhotos(prev => prev.filter(p => p.id !== photo.id));
+    setTiles(prev => prev.filter(tl => tl.photo?.id !== photo.id));
     toast.success("Photo supprimée.");
   };
 
@@ -174,7 +197,17 @@ const SitterGallery = () => {
     window.dispatchEvent(new Event("profile:avatar-changed"));
   };
 
+  const closeDialog = (open: boolean) => {
+    setDialogOpen(open);
+    if (!open) {
+      tiles.forEach(tl => URL.revokeObjectURL(tl.previewUrl));
+      setTiles([]);
+    }
+  };
+
   if (loading) return <div className="text-muted-foreground text-sm py-8 text-center">Chargement...</div>;
+
+  const remaining = Math.max(0, GALLERY_MAX_PHOTOS - photos.length);
 
   return (
     <div className="space-y-6">
@@ -184,70 +217,165 @@ const SitterGallery = () => {
           <p className="text-sm text-muted-foreground">{photos.length}/50 photos · Vous avec des animaux, votre quotidien, vos expériences de garde : c'est ce que les propriétaires regardent en premier.</p>
           <p className="text-sm text-muted-foreground mt-1">Vos photos ne sont visibles que par les membres connectés de Guardiens. Elles n'apparaissent pas dans les moteurs de recherche.</p>
         </div>
-        <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+        <Dialog open={dialogOpen} onOpenChange={closeDialog}>
           <DialogTrigger asChild>
-            <Button size="sm" className="gap-1.5" disabled={photos.length >= 50}>
-              <Plus className="h-4 w-4" /> Ajouter une photo
+            <Button size="sm" className="gap-1.5" disabled={photos.length >= GALLERY_MAX_PHOTOS}>
+              <Plus className="h-4 w-4" /> Ajouter des photos
             </Button>
           </DialogTrigger>
-          <DialogContent className="max-w-lg">
+          <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
             <DialogHeader>
-              <DialogTitle>Ajouter une photo</DialogTitle>
+              <DialogTitle>Ajouter des photos</DialogTitle>
+              <DialogDescription>
+                Déposez plusieurs photos d'un coup. Elles partent immédiatement, vous pourrez les décrire ensuite si vous le souhaitez.
+              </DialogDescription>
             </DialogHeader>
+
             <div className="space-y-4">
-              <div>
-                <Label>Photo *</Label>
-                <Input type="file" accept="image/*" onChange={e => setFile(e.target.files?.[0] || null)} />
-                <p className="text-xs text-muted-foreground mt-1">Max 5 Mo</p>
-              </div>
-              <div>
-                <Label>Légende (facultatif)</Label>
-                <Textarea value={caption} onChange={e => setCaption(e.target.value)} placeholder="Ex : Luna, golden retriever, 2 semaines à Annecy, janvier 2025" rows={2} />
-                <p className="text-xs text-muted-foreground mt-1">Une légende aide le propriétaire à se projeter, vous pouvez l'ajouter plus tard.</p>
+              <div
+                role="button"
+                tabIndex={0}
+                aria-label="Déposer des photos ou parcourir vos fichiers"
+                onClick={() => inputRef.current?.click()}
+                onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") inputRef.current?.click(); }}
+                onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
+                onDragLeave={() => setDragOver(false)}
+                onDrop={(e) => {
+                  e.preventDefault();
+                  setDragOver(false);
+                  void handleFiles(Array.from(e.dataTransfer.files || []));
+                }}
+                className={`flex flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed px-6 py-8 text-center transition-colors ${dragOver ? "border-primary bg-primary/5" : "border-border bg-muted/30"}`}
+              >
+                <UploadCloud className="h-6 w-6 text-muted-foreground" aria-hidden="true" />
+                <p className="text-sm font-medium">Glissez vos photos ici, ou cliquez pour les choisir</p>
+                <p className="text-xs text-muted-foreground">
+                  Sélection multiple possible (touche Maj). JPG ou PNG, redimensionnées automatiquement. {remaining} emplacement{remaining > 1 ? "s" : ""} restant{remaining > 1 ? "s" : ""}.
+                </p>
+                <Input
+                  ref={inputRef}
+                  type="file"
+                  accept="image/*"
+                  multiple
+                  className="sr-only"
+                  onChange={(e) => void handleFiles(Array.from(e.target.files || []))}
+                />
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <Label>Type d'animal</Label>
-                  <Select value={animalType} onValueChange={setAnimalType}>
-                    <SelectTrigger><SelectValue placeholder="Choisir" /></SelectTrigger>
-                    <SelectContent>
-                      {animalTypeOptions.map(o => <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>)}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div>
-                  <Label>Race (optionnel)</Label>
-                  <Input value={animalBreed} onChange={e => setAnimalBreed(e.target.value)} placeholder="Golden Retriever" />
-                </div>
-              </div>
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <Label>Ville (optionnel)</Label>
-                  <Input value={city} onChange={e => setCity(e.target.value)} placeholder="Annecy" />
-                </div>
-                <div>
-                  <Label>Date (optionnel)</Label>
-                  <Input type="month" value={photoDate} onChange={e => setPhotoDate(e.target.value)} />
-                </div>
-              </div>
-              {completedSits.length > 0 && (
-                <div>
-                  <Label>Lier à une garde Guardiens</Label>
-                  <Select
-                    value={selectedSitId || NO_SIT_VALUE}
-                    onValueChange={(v) => setSelectedSitId(v === NO_SIT_VALUE ? "" : v)}
-                  >
-                    <SelectTrigger><SelectValue placeholder="Aucune (expérience passée)" /></SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value={NO_SIT_VALUE}>Aucune (expérience passée)</SelectItem>
-                      {completedSits.map(s => <SelectItem key={s.id} value={s.id}>{s.title}</SelectItem>)}
-                    </SelectContent>
-                  </Select>
+              {tiles.length > 0 && (
+                <div className="space-y-3">
+                  {tiles.map(tile => (
+                    <div key={tile.index} className="flex gap-3 rounded-lg border border-border p-3">
+                      <div className="relative h-24 w-24 shrink-0 overflow-hidden rounded-md bg-muted">
+                        <img src={tile.previewUrl} alt="" className="h-full w-full object-cover" />
+                        {(tile.state === "queued" || tile.state === "uploading") && (
+                          <div className="absolute inset-0 flex items-center justify-center bg-background/70">
+                            <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+                          </div>
+                        )}
+                      </div>
+                      <div className="min-w-0 flex-1 space-y-2">
+                        <p className="truncate text-xs text-muted-foreground">{tile.fileName}</p>
+                        {tile.state === "error" && (
+                          <p className="flex items-center gap-1.5 text-xs text-destructive">
+                            <AlertTriangle className="h-3.5 w-3.5" aria-hidden="true" />
+                            Envoi impossible pour {tile.fileName}. Réessayez dans un instant.
+                          </p>
+                        )}
+                        {tile.state === "skipped" && (
+                          <p className="text-xs text-muted-foreground">{tile.message}</p>
+                        )}
+                        {tile.state === "done" && tile.photo && (
+                          <div className="space-y-2">
+                            <div>
+                              <Label className="text-xs">Légende (facultatif)</Label>
+                              <Textarea
+                                rows={2}
+                                defaultValue={tile.photo.caption || ""}
+                                placeholder="Ex : Luna, golden retriever, 2 semaines à Annecy"
+                                onBlur={(e) => {
+                                  const v = e.target.value.trim();
+                                  if (v !== (tile.photo?.caption || "")) void patchPhoto(tile.photo!.id, { caption: v });
+                                }}
+                              />
+                            </div>
+                            <div className="grid grid-cols-2 gap-2">
+                              <div>
+                                <Label className="text-xs">Type d'animal</Label>
+                                <Select
+                                  value={tile.photo.animal_type || ""}
+                                  onValueChange={(v) => void patchPhoto(tile.photo!.id, { animal_type: v || null })}
+                                >
+                                  <SelectTrigger><SelectValue placeholder="Choisir" /></SelectTrigger>
+                                  <SelectContent>
+                                    {animalTypeOptions.map(o => <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>)}
+                                  </SelectContent>
+                                </Select>
+                              </div>
+                              <div>
+                                <Label className="text-xs">Race</Label>
+                                <Input
+                                  defaultValue={tile.photo.animal_breed || ""}
+                                  placeholder="Golden Retriever"
+                                  onBlur={(e) => {
+                                    const v = e.target.value.trim();
+                                    if (v !== (tile.photo?.animal_breed || "")) void patchPhoto(tile.photo!.id, { animal_breed: v || null });
+                                  }}
+                                />
+                              </div>
+                            </div>
+                            <div className="grid grid-cols-2 gap-2">
+                              <div>
+                                <Label className="text-xs">Ville</Label>
+                                <Input
+                                  defaultValue={tile.photo.city || ""}
+                                  placeholder="Annecy"
+                                  onBlur={(e) => {
+                                    const v = e.target.value.trim();
+                                    if (v !== (tile.photo?.city || "")) void patchPhoto(tile.photo!.id, { city: v || null });
+                                  }}
+                                />
+                              </div>
+                              <div>
+                                <Label className="text-xs">Date</Label>
+                                <Input
+                                  type="month"
+                                  value={(tile.photo.photo_date || "").slice(0, 7)}
+                                  onChange={(e) => {
+                                    const v = e.target.value;
+                                    void patchPhoto(tile.photo!.id, { photo_date: /^\d{4}-\d{2}$/.test(v) ? `${v}-01` : null });
+                                  }}
+                                />
+                              </div>
+                            </div>
+                            {completedSits.length > 0 && (
+                              <div>
+                                <Label className="text-xs">Lier à une garde Guardiens</Label>
+                                <Select
+                                  value={tile.photo.sit_id || NO_SIT_VALUE}
+                                  onValueChange={(v) => {
+                                    const sitId = v === NO_SIT_VALUE ? null : v;
+                                    void patchPhoto(tile.photo!.id, { sit_id: sitId, source: sitId ? "guardiens" : "external" });
+                                  }}
+                                >
+                                  <SelectTrigger><SelectValue placeholder="Aucune (expérience passée)" /></SelectTrigger>
+                                  <SelectContent>
+                                    <SelectItem value={NO_SIT_VALUE}>Aucune (expérience passée)</SelectItem>
+                                    {completedSits.map(s => <SelectItem key={s.id} value={s.id}>{s.title}</SelectItem>)}
+                                  </SelectContent>
+                                </Select>
+                              </div>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  ))}
                 </div>
               )}
-              <Button onClick={handleUpload} disabled={!file || uploading} className="w-full">
-                <Camera className="h-4 w-4 mr-2" /> {uploading ? "Upload en cours..." : "Ajouter à ma galerie"}
+
+              <Button variant="outline" className="w-full" onClick={() => closeDialog(false)} disabled={uploading}>
+                {uploading ? "Envoi en cours..." : "Terminer"}
               </Button>
             </div>
           </DialogContent>
