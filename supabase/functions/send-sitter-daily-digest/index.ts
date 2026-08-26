@@ -132,6 +132,22 @@ Deno.serve(async (req) => {
     ? await startCronRun('send-sitter-daily-digest')
     : null
 
+  // Verrou single-flight. Le mode manuel (bouton admin) et le mode dry_run
+  // passent outre : le premier est une action délibérée, le second n'écrit
+  // rien. Tout passage automatique qui n'obtient pas le bail laisse la main
+  // sans erreur, motif explicite dans la réponse et dans cron_run_log.
+  const needsLock = !body.manual && !body.dry_run
+  let lockHeld = false
+  if (needsLock) {
+    lockHeld = await acquireWorkerLock(supabase as any, DIGEST_LOCK_KEY, DIGEST_LOCK_TTL_SECONDS)
+    if (!lockHeld) {
+      console.log(JSON.stringify({ event: 'digest_skipped_lock_held', source: 'send-sitter-daily-digest' }))
+      await nominalRun?.finish('success', { reason: 'lock_held', sitters_processed: 0 })
+      return json({ ok: true, skipped: true, reason: 'lock_held' })
+    }
+  }
+
+
   // Passage de rattrapage : unique, tracé, non rejouable. Le gabarit assume
   // le rappel, le contrôle des 24h et la réservation de créneau sont sautés
   // pour ce seul passage. Un second appel réel est refusé.
