@@ -180,7 +180,7 @@ Deno.serve(async (req) => {
           first_name: p.first_name,
           city: p.city,
           avatar_url: p.avatar_url,
-          affinity_score: result.score,
+          affinity_score: result.displayed ? result.score : null,
           distance_km: distance,
         }))
       } catch (e) {

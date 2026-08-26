@@ -875,5 +875,5 @@ function isPermanentRecipientRejection(responseBody: string): boolean {
   if (!responseBody) return false
   const hasProvider422 = /"?providerStatus"?\s*[:=]\s*422/.test(responseBody)
   const invalidField = /invalid\s+`?to`?\s+field|invalid_recipient|invalid recipient/i.test(responseBody)
-  return hasProvider422 && invalidField ? true : (hasProvider422 || invalidField) && invalidField
+  return hasProvider422 || invalidField
 }
