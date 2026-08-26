@@ -565,6 +565,7 @@ Deno.serve(async (req) => {
             retryAfterMs = parseRetryAfterMs(_steTxt1)
           } catch (fetchErr) {
             if (!isRateLimitError(fetchErr)) {
+              consecutiveRateLimits = 0
               sendException = fetchErr
               break
             }
