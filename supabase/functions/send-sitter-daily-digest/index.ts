@@ -790,8 +790,13 @@ Deno.serve(async (req) => {
     console.error('send-sitter-daily-digest fatal', err)
     await nominalRun?.fail(err)
     return json({ error: String(err) }, 500)
+  } finally {
+    // Le bail est rendu dès la fin du passage. S'il n'est pas rendu (passage
+    // tué), sa péremption le libère toute seule.
+    if (lockHeld) await releaseWorkerLock(supabase as any, DIGEST_LOCK_KEY)
   }
 })
+
 
 function buildSubject(count: number, isCatchup: boolean): string {
   if (count === 0) return 'Votre digest Guardiens'
