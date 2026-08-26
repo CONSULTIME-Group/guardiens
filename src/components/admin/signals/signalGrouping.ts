@@ -44,6 +44,8 @@ export const SIGNAL_TYPE_LABELS: Record<string, string> = {
   sit_like_mission: "Mission qui ressemble à une garde",
   animal_rehoming_listing: "Cession ou adoption d'animal",
   sit_published_zero_reach: "Annonce publiée sans aucun gardien touché",
+  email_recipient_address_invalid: "Adresse email refusée par le fournisseur",
+
 };
 
 /**
