@@ -14,6 +14,12 @@ describe("libellés des signaux admin", () => {
     );
   });
 
+  it("connaît le reliquat matinal du digest", () => {
+    expect(SIGNAL_TYPE_LABELS.digest_queue_morning_backlog).toBe(
+      "File des digests encore chargée après le dernier passage",
+    );
+  });
+
   it("annonce explicitement un type inconnu, sans repli sur un autre libellé", () => {
     const label = signalTypeLabel("type_totalement_inconnu");
     expect(label).toBe("Signal inconnu : type_totalement_inconnu");

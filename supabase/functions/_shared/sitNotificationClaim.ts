@@ -170,6 +170,28 @@ export async function raiseStaleClaimSignal(
   });
 }
 
+/** Rend visible le reliquat du digest dès le dernier passage du matin. */
+export async function raiseDigestBacklogSignal(
+  supabase: any,
+  queueRemaining: number,
+  queuedToday: number,
+): Promise<void> {
+  if (queueRemaining <= 0 || queuedToday <= 0) return;
+  const day = new Date().toISOString().slice(0, 10);
+  await raiseSignal(supabase, {
+    signalType: "digest_queue_morning_backlog",
+    key: `digest_queue_morning_backlog_${day}`,
+    severity: "critical",
+    metadata: {
+      source: "sitter-daily-digest",
+      queue_remaining: queueRemaining,
+      queued_today: queuedToday,
+      title: "File des digests encore chargée après le dernier passage",
+      detail: `${queueRemaining} lignes restent en attente, dont ${queuedToday} ajoutées aujourd'hui.`,
+    },
+  });
+}
+
 async function raiseSignal(
   supabase: any,
   args: {
