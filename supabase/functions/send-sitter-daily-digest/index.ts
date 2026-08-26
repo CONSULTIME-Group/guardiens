@@ -40,6 +40,11 @@ import { pickMissingOpportunities, type MissingOpportunitiesStats } from '../_sh
 // le gardien en cours et garde une marge pour les métriques et les signaux.
 const RUN_BUDGET_MS = 110_000
 const MAX_SITTERS_PER_RUN = 500
+// Resend autorise 10 requêtes par seconde par équipe, tous flux confondus.
+// Ce digest se limite à 2 requêtes par seconde pour laisser 80 % de la
+// capacité aux emails transactionnels déclenchés en parallèle.
+const EMAIL_SEND_INTERVAL_MS = 500
+const MAX_EMAIL_SEND_ATTEMPTS = 2
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -176,6 +181,7 @@ Deno.serve(async (req) => {
     let budgetReached = false
     let claimSkipped = 0
     let claimGranted = 0
+    let lastEmailAttemptAtMs = 0
     const staleSolded: string[] = []
     let staleReason = ''
     const claimSkippedBy: Record<string, number> = {}
@@ -226,7 +232,7 @@ Deno.serve(async (req) => {
     // budget contraint, la plus ancienne ligne est donc toujours prioritaire.
     const orderedSitters = [...bySitter.entries()]
 
-    for (const [sitterId, rows] of orderedSitters) {
+    digestLoop: for (const [sitterId, rows] of orderedSitters) {
       if (Date.now() - startedAtMs >= RUN_BUDGET_MS || sittersStarted >= MAX_SITTERS_PER_RUN) {
         budgetReached = true
         break
@@ -508,25 +514,53 @@ Deno.serve(async (req) => {
             ? `sitter-digest-${sitterId}-${Date.now()}`
             : `sitter-digest-${sitterId}-${today}`
 
-        const _steRes = await fetch(`${Deno.env.get('SUPABASE_URL')}/functions/v1/send-transactional-email`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')}` },
-          body: JSON.stringify({
-            templateName: 'sitter-daily-digest',
-            recipientEmail: email,
-            idempotencyKey: idemBase,
-            templateData: {
-              sitterFirstName: profile.first_name ?? undefined,
-              items,
-              isCatchup: !!body.catchup,
-              canApply,
-              profileCompletion,
-              completionHint,
-              completionHref,
-            },
-          }),
-        });
-        const _steTxt1 = _steRes.ok ? '' : await _steRes.text().catch(() => '');
+        const sendBody = JSON.stringify({
+          templateName: 'sitter-daily-digest',
+          recipientEmail: email,
+          idempotencyKey: idemBase,
+          templateData: {
+            sitterFirstName: profile.first_name ?? undefined,
+            items,
+            isCatchup: !!body.catchup,
+            canApply,
+            profileCompletion,
+            completionHint,
+            completionHref,
+          },
+        })
+
+        let _steRes: Response | null = null
+        let _steTxt1 = ''
+        let retryAfterMs = 0
+        let stopAfterCurrentFailure = false
+
+        for (let attempt = 1; attempt <= MAX_EMAIL_SEND_ATTEMPTS; attempt++) {
+          const cadenceWaitMs = Math.max(0, EMAIL_SEND_INTERVAL_MS - (Date.now() - lastEmailAttemptAtMs))
+          const waitMs = Math.max(cadenceWaitMs, retryAfterMs)
+          if (waitMs > 0) {
+            if (Date.now() - startedAtMs + waitMs >= RUN_BUDGET_MS) {
+              budgetReached = true
+              stopAfterCurrentFailure = _steRes?.status === 429
+              break
+            }
+            await delay(waitMs)
+          }
+
+          lastEmailAttemptAtMs = Date.now()
+          _steRes = await fetch(`${Deno.env.get('SUPABASE_URL')}/functions/v1/send-transactional-email`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')}` },
+            body: sendBody,
+          })
+          _steTxt1 = _steRes.ok ? '' : await _steRes.text().catch(() => '')
+          if (_steRes.status !== 429 || attempt === MAX_EMAIL_SEND_ATTEMPTS) break
+          retryAfterMs = parseRetryAfterMs(_steTxt1)
+        }
+
+        if (!_steRes) {
+          if (!body.manual) await releaseSitNotification(supabase, sitterId, 'run_budget_reached')
+          break digestLoop
+        }
         if (!_steRes.ok) console.error('send-transactional-email failed', _steRes.status, _steTxt1);
         const sendErr = _steRes.ok ? null : new Error(`send-transactional-email ${_steRes.status}: ${_steTxt1}`);
 
@@ -553,6 +587,7 @@ Deno.serve(async (req) => {
               .in('id', top3.map(s => s.row.id))
           }
           errors.push({ sitter_id: sitterId, reason: `send_failed: ${String(sendErr)}` })
+          if (stopAfterCurrentFailure) break digestLoop
           continue
         }
 
@@ -703,4 +738,13 @@ function json(body: unknown, status = 200) {
     status,
     headers: { ...corsHeaders, 'Content-Type': 'application/json' },
   })
+}
+
+function delay(ms: number): Promise<void> {
+  return new Promise(resolve => setTimeout(resolve, ms))
+}
+
+function parseRetryAfterMs(responseBody: string): number {
+  const match = responseBody.match(/Retry after\s+(\d+)ms/i)
+  return match ? Number(match[1]) : 8_000
 }
