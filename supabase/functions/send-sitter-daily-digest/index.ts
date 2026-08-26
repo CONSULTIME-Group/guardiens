@@ -321,7 +321,7 @@ Deno.serve(async (req) => {
         // 2f. Score par annonce via le moteur unique partagé, mode
         // distribution : seuls les refus explicitement déclarés par le
         // gardien excluent (distributable=false), jamais un score bas.
-        const scoredRows: Array<{ row: QueueRow; score: number; sortScore: number; sit: SitRow }> = []
+        const scoredRows: Array<{ row: QueueRow; score: number; sortScore: number; displayed: boolean; sit: SitRow }> = []
         for (const q of rows) {
           let sit = sitCache.get(q.sit_id) as SitRow | undefined
           if (!sit) {
@@ -357,7 +357,10 @@ Deno.serve(async (req) => {
           }
           // score = brut (affiché dans l'email), sortScore = pondéré par la
           // confiance (classement, défaut 1b du 20/08/2026).
-          scoredRows.push({ row: q, score: result.score, sortScore: result.sortScore, sit })
+          // displayed : verdict du moteur lui même (fiabilité, incompatibilité
+          // déclarée, seuil d'affichage). Un chiffre non fiable ne doit jamais
+          // partir dans l'email, le silence se signale par invitation.
+          scoredRows.push({ row: q, score: result.score, sortScore: result.sortScore, displayed: result.displayed, sit })
         }
 
         if (scoredRows.length === 0) {
@@ -417,7 +420,7 @@ Deno.serve(async (req) => {
             endDate: formatFrDate(sit.end_date),
             animalsSummary: animalsSummary || undefined,
             coverPhotoUrl: sit.cover_photo_url,
-            affinityScore: s.score,
+            affinityScore: s.displayed ? s.score : null,
             affinityTotal: null,
             distanceKm: s.row.distance_km,
           })
