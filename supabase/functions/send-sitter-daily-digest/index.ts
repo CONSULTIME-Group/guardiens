@@ -40,11 +40,13 @@ import { pickMissingOpportunities, type MissingOpportunitiesStats } from '../_sh
 // le gardien en cours et garde une marge pour les métriques et les signaux.
 const RUN_BUDGET_MS = 110_000
 const MAX_SITTERS_PER_RUN = 500
-// Resend autorise 10 requêtes par seconde par équipe, tous flux confondus.
-// Ce digest se limite à 2 requêtes par seconde pour laisser 80 % de la
-// capacité aux emails transactionnels déclenchés en parallèle.
-const EMAIL_SEND_INTERVAL_MS = 500
+// Le passage de production du 26/08/2026 a soutenu au maximum 31 envois par
+// minute avant saturation du quota d'invocations sortantes. Une tentative
+// toutes les 2 secondes borne donc ce digest à 30 tentatives par minute.
+// Cette constante est le seul réglage de cadence à ajuster après mesure.
+const EMAIL_SEND_INTERVAL_MS = 2_000
 const MAX_EMAIL_SEND_ATTEMPTS = 2
+const MAX_CONSECUTIVE_RATE_LIMITS = 2
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -182,6 +184,7 @@ Deno.serve(async (req) => {
     let claimSkipped = 0
     let claimGranted = 0
     let lastEmailAttemptAtMs = 0
+    let consecutiveRateLimits = 0
     const staleSolded: string[] = []
     let staleReason = ''
     const claimSkippedBy: Record<string, number> = {}
@@ -532,7 +535,8 @@ Deno.serve(async (req) => {
         let _steRes: Response | null = null
         let _steTxt1 = ''
         let retryAfterMs = 0
-        let stopAfterCurrentFailure = false
+        let sendException: unknown = null
+        let quotaExhausted = false
 
         for (let attempt = 1; attempt <= MAX_EMAIL_SEND_ATTEMPTS; attempt++) {
           const cadenceWaitMs = Math.max(0, EMAIL_SEND_INTERVAL_MS - (Date.now() - lastEmailAttemptAtMs))
@@ -540,26 +544,67 @@ Deno.serve(async (req) => {
           if (waitMs > 0) {
             if (Date.now() - startedAtMs + waitMs >= RUN_BUDGET_MS) {
               budgetReached = true
-              stopAfterCurrentFailure = _steRes?.status === 429
               break
             }
             await delay(waitMs)
           }
 
           lastEmailAttemptAtMs = Date.now()
-          _steRes = await fetch(`${Deno.env.get('SUPABASE_URL')}/functions/v1/send-transactional-email`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')}` },
-            body: sendBody,
-          })
-          _steTxt1 = _steRes.ok ? '' : await _steRes.text().catch(() => '')
-          if (_steRes.status !== 429 || attempt === MAX_EMAIL_SEND_ATTEMPTS) break
-          retryAfterMs = parseRetryAfterMs(_steTxt1)
+          try {
+            _steRes = await fetch(`${Deno.env.get('SUPABASE_URL')}/functions/v1/send-transactional-email`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')}` },
+              body: sendBody,
+            })
+            _steTxt1 = _steRes.ok ? '' : await _steRes.text().catch(() => '')
+            if (_steRes.status !== 429) {
+              consecutiveRateLimits = 0
+              break
+            }
+            consecutiveRateLimits++
+            retryAfterMs = parseRetryAfterMs(_steTxt1)
+          } catch (fetchErr) {
+            if (!isRateLimitError(fetchErr)) {
+              consecutiveRateLimits = 0
+              sendException = fetchErr
+              break
+            }
+            consecutiveRateLimits++
+            _steTxt1 = describeThrownValue(fetchErr)
+            retryAfterMs = parseRetryAfterMs(_steTxt1)
+          }
+
+          if (consecutiveRateLimits >= MAX_CONSECUTIVE_RATE_LIMITS) {
+            budgetReached = true
+            quotaExhausted = true
+            break
+          }
+          if (attempt === MAX_EMAIL_SEND_ATTEMPTS) break
         }
 
-        if (!_steRes) {
-          if (!body.manual) await releaseSitNotification(supabase, sitterId, 'run_budget_reached')
+        if (quotaExhausted) {
+          if (!body.manual) await releaseSitNotification(supabase, sitterId, 'outbound_rate_limit')
           break digestLoop
+        }
+        if (!_steRes) {
+          if (budgetReached) {
+            if (!body.manual) await releaseSitNotification(supabase, sitterId, 'run_budget_reached')
+            break digestLoop
+          }
+          const failure = sendException ?? new Error('send-transactional-email fetch failed')
+          await recordDeliveryFailure(supabase, {
+            templateName: 'sitter-daily-digest',
+            recipientEmail: email,
+            recipientId: sitterId,
+            entityType: 'user',
+            entityId: sitterId,
+            source: 'send-sitter-daily-digest',
+            errorMessage: failure,
+            extra: { idempotency_key: idemBase },
+          })
+          if (!body.manual) await releaseSitNotification(supabase, sitterId, 'send_failed')
+          errors.push({ sitter_id: sitterId, reason: `send_failed: ${String(failure)}` })
+          continue
         }
         if (!_steRes.ok) console.error('send-transactional-email failed', _steRes.status, _steTxt1);
         const sendErr = _steRes.ok ? null : new Error(`send-transactional-email ${_steRes.status}: ${_steTxt1}`);
@@ -587,7 +632,6 @@ Deno.serve(async (req) => {
               .in('id', top3.map(s => s.row.id))
           }
           errors.push({ sitter_id: sitterId, reason: `send_failed: ${String(sendErr)}` })
-          if (stopAfterCurrentFailure) break digestLoop
           continue
         }
 
@@ -747,4 +791,13 @@ function delay(ms: number): Promise<void> {
 function parseRetryAfterMs(responseBody: string): number {
   const match = responseBody.match(/Retry after\s+(\d+)ms/i)
   return match ? Number(match[1]) : 8_000
+}
+
+function isRateLimitError(error: unknown): boolean {
+  return /(?:RateLimitError|rate limit exceeded)/i.test(describeThrownValue(error))
+}
+
+function describeThrownValue(error: unknown): string {
+  if (error instanceof Error) return `${error.name}: ${error.message}`
+  return String(error)
 }

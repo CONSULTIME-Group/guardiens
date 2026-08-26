@@ -41,20 +41,32 @@ describe("send-sitter-daily-digest, orchestration bornée", () => {
   });
 
   it("régule les envois et refuse toute attente hors budget", () => {
-    expect(SRC).toMatch(/const EMAIL_SEND_INTERVAL_MS = 500/);
+    expect(SRC).toMatch(/const EMAIL_SEND_INTERVAL_MS = 2_000/);
     expect(SRC).toMatch(/const MAX_EMAIL_SEND_ATTEMPTS = 2/);
+    expect(SRC).toMatch(/const MAX_CONSECUTIVE_RATE_LIMITS = 2/);
     expect(SRC).toContain("Math.max(cadenceWaitMs, retryAfterMs)");
     expect(SRC).toContain("Date.now() - startedAtMs + waitMs >= RUN_BUDGET_MS");
     expect(SRC).toContain("budgetReached = true");
     expect(SRC).toContain("await delay(waitMs)");
   });
 
-  it("reprend uniquement un 429 avec le même corps et la même clé d'idempotence", () => {
-    expect(SRC).toContain("_steRes.status !== 429 || attempt === MAX_EMAIL_SEND_ATTEMPTS");
+  it("reprend un 429 HTTP ou une exception de quota avec la même clé d'idempotence", () => {
+    expect(SRC).toContain("if (_steRes.status !== 429)");
+    expect(SRC).toContain("if (!isRateLimitError(fetchErr))");
+    expect(SRC).toContain("_steTxt1 = describeThrownValue(fetchErr)");
     expect(SRC).toContain("retryAfterMs = parseRetryAfterMs(_steTxt1)");
     expect(SRC).toContain("body: sendBody");
     expect(SRC.match(/const sendBody = JSON\.stringify/g)).toHaveLength(1);
     expect(SRC.match(/idempotencyKey: idemBase/g)).toHaveLength(1);
     expect(SRC).not.toMatch(/idempotencyKey:\s*`[^`]*attempt/i);
+  });
+
+  it("arrête proprement le passage quand le quota sortant reste épuisé", () => {
+    expect(SRC).toContain("consecutiveRateLimits >= MAX_CONSECUTIVE_RATE_LIMITS");
+    expect(SRC).toContain("quotaExhausted = true");
+    expect(SRC).toContain("releaseSitNotification(supabase, sitterId, 'outbound_rate_limit')");
+    expect(SRC).toContain("break digestLoop");
+    expect(SRC).toContain("nominalRun?.finish(runPartial ? 'partial' : 'success'");
+    expect(SRC).toContain("queue_remaining: queueRemaining ?? 0");
   });
 });
