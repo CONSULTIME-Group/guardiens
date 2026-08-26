@@ -633,7 +633,40 @@ Deno.serve(async (req) => {
         if (!_steRes.ok) console.error('send-transactional-email failed', _steRes.status, _steTxt1);
         const sendErr = _steRes.ok ? null : new Error(`send-transactional-email ${_steRes.status}: ${_steTxt1}`);
 
+        // Rejet définitif de l'adresse par le fournisseur (422, adresse
+        // structurellement invalide). Une ligne qui ne pourra jamais partir
+        // n'a rien à faire en file, exactement comme `auth_email_missing`.
+        // Un échec temporaire (quota, indisponibilité) garde le chemin
+        // `deferred_retry` juste en dessous.
+        if (sendErr && isPermanentRecipientRejection(_steTxt1)) {
+          await recordDeliveryFailure(supabase, {
+            templateName: 'sitter-daily-digest',
+            recipientEmail: email,
+            recipientId: sitterId,
+            entityType: 'user',
+            entityId: sitterId,
+            source: 'send-sitter-daily-digest',
+            errorMessage: `invalid_recipient_email: ${_steTxt1.slice(0, 500)}`,
+            extra: { http_status: _steRes.status, response_body: _steTxt1.slice(0, 1000), idempotency_key: idemBase },
+          })
+          await markSkipped(supabase, rows.map(r => r.id), 'invalid_recipient_email', body.dry_run)
+          if (!body.dry_run) {
+            await raiseInvalidRecipientSignal(supabase, {
+              source: 'sitter-daily-digest',
+              sitterId,
+              recipientEmail: email,
+              rowCount: rows.length,
+              providerMessage: _steTxt1,
+            })
+          }
+          if (!body.manual) await releaseSitNotification(supabase, sitterId, 'invalid_recipient_email')
+          sittersSkipped++
+          errors.push({ sitter_id: sitterId, reason: 'invalid_recipient_email' })
+          continue
+        }
+
         if (sendErr) {
+
           // Trace persistante : code HTTP et corps de réponse, jamais un
           // simple console.error.
           await recordDeliveryFailure(supabase, {
