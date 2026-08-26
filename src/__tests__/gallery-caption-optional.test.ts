@@ -16,7 +16,7 @@ describe("légende facultative dans la modale d'ajout de photo", () => {
     for (const d of btn) expect(d).not.toContain("caption");
   });
 
-  it("aucune vérification manuelle de la légende avant envoi", () => {
+  it("aucun contrôle bloquant sur la légende avant envoi", () => {
     expect(SOURCE).not.toMatch(/if\s*\(\s*!\s*caption/);
     expect(SOURCE).not.toMatch(/!file\s*\|\|\s*!caption/);
   });
