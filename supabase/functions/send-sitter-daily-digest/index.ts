@@ -2,7 +2,7 @@
 // -------------------------------------------------------------
 // Envoie chaque soir un digest quotidien aux gardiens ayant au moins une
 // entrée `queued` dans `sitter_digest_queue`. L'identité vérifiée n'est plus
-// un filtre d'éligibilité : c'est une clé de tri (vérifiés en tête de file).
+// un filtre d'éligibilité. La file est consommée dans l'ordre FIFO.
 // La complétude de profil n'est pas un filtre non plus (décision du
 // 20/08/2026) : sous 60 % le gardien ne peut pas candidater, mais il reçoit
 // les annonces avec un appel à compléter son profil (même source de calcul
@@ -593,7 +593,7 @@ Deno.serve(async (req) => {
     const todayUtc = new Date(now)
     todayUtc.setUTCHours(0, 0, 0, 0)
     let queuedToday = 0
-    if ((queueRemaining ?? 0) > 0 && now.getUTCHours() >= 8 && !body.dry_run) {
+    if ((queueRemaining ?? 0) > 0 && now.getUTCHours() >= 8 && nominalRun) {
       const { count, error: todayErr } = await supabase
         .from('sitter_digest_queue')
         .select('id', { count: 'exact', head: true })
