@@ -63,6 +63,14 @@ export function parisWindowVerdict(now: Date, targetParisHour: number): ParisWin
 export const ALERT_DIGEST_TARGET_PARIS_HOURS = [8, 12, 18] as const;
 
 /**
+ * Fenêtre du digest quotidien gardien. Le premier passage utile reste 8h à
+ * Paris. Les passages de 9h et 10h reprennent seulement la file encore en
+ * attente, ce qui couvre les crons 07:05 et 08:05 UTC en été, et le dernier
+ * passage 08:05 UTC en hiver.
+ */
+export const SITTER_DAILY_DIGEST_TARGET_PARIS_HOURS = [8, 9, 10] as const;
+
+/**
  * Variante multi-créneaux de parisWindowVerdict : le passage courant est le
  * bon si l'heure de Paris fait partie des créneaux visés, hors plage calme.
  * L'heure cible vient du créneau réel d'exécution, jamais d'une constante.

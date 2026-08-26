@@ -2,7 +2,7 @@
 // -------------------------------------------------------------
 // Envoie chaque soir un digest quotidien aux gardiens ayant au moins une
 // entrée `queued` dans `sitter_digest_queue`. L'identité vérifiée n'est plus
-// un filtre d'éligibilité : c'est une clé de tri (vérifiés en tête de file).
+// un filtre d'éligibilité. La file est consommée dans l'ordre FIFO.
 // La complétude de profil n'est pas un filtre non plus (décision du
 // 20/08/2026) : sous 60 % le gardien ne peut pas candidater, mais il reçoit
 // les annonces avec un appel à compléter son profil (même source de calcul
@@ -14,6 +14,7 @@
 // (score DESC, distance ASC). La colonne SQL `affinity_score` de la file
 // n'est plus lue (NULL depuis la même date).
 // Pour chaque gardien :
+//  - gardiens traités dans l'ordre FIFO de leur plus ancienne ligne
 //  - top 3 par (score moteur unique DESC, distance ASC NULLS LAST)
 //  - anti-doublon : pas de digest dans les 24h (via email_send_log)
 //  - vérification suppression, opt-in email_preferences.new_sit_digest
@@ -27,15 +28,18 @@
 // - sitter_id : limite l'exécution à un gardien précis (test ciblé).
 
 import { createClient } from 'npm:@supabase/supabase-js@2.45.0'
-import { claimSitNotification, raiseClaimErrorSignal, raiseStaleClaimSignal, releaseSitNotification, reportClaimOutcome } from '../_shared/sitNotificationClaim.ts'
-import { parisWindowVerdict } from '../_shared/paris-hour.ts'
+import { claimSitNotification, raiseClaimErrorSignal, raiseDigestBacklogSignal, raiseStaleClaimSignal, releaseSitNotification, reportClaimOutcome } from '../_shared/sitNotificationClaim.ts'
+import { parisWindowVerdictForHours, SITTER_DAILY_DIGEST_TARGET_PARIS_HOURS } from '../_shared/paris-hour.ts'
 import { recordDeliveryFailure } from '../_shared/delivery-failure.ts'
 import { startCronRun } from '../_shared/cron-run-log.ts'
 import { computeAffinityResultFull } from '../_shared/affinity/score.ts'
 import { pickMissingOpportunities, type MissingOpportunitiesStats } from '../_shared/missing-opportunities/index.ts'
 
-// Heure de Paris visée pour ce passage, garde saison-proof (voir paris-hour.ts).
-const TARGET_PARIS_HOUR = 8
+// La plateforme coupe actuellement ce traitement vers 150 secondes. Le
+// passage cesse de démarrer de nouveaux gardiens à 110 secondes, puis termine
+// le gardien en cours et garde une marge pour les métriques et les signaux.
+const RUN_BUDGET_MS = 110_000
+const MAX_SITTERS_PER_RUN = 500
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -48,6 +52,7 @@ interface QueueRow {
   sit_id: string
   affinity_score: number | null
   distance_km: number | null
+  queued_at: string
 }
 
 interface SitRow {
@@ -94,10 +99,13 @@ Deno.serve(async (req) => {
     { auth: { persistSession: false } },
   )
 
-  // Règle heure de Paris : hors passage visé ou en plage calme, on sort sans
-  // rien faire, le passage suivant de la fenêtre reprend la main.
+  const startedAtMs = Date.now()
+  const now = new Date()
+
+  // Le premier passage utile reste 8h à Paris. Les passages suivants de la
+  // fenêtre matinale reprennent le reliquat, sans contourner l'idempotence.
   if (!body.manual && !body.dry_run && !body.catchup && !body.sitter_id) {
-    const verdict = parisWindowVerdict(new Date(), TARGET_PARIS_HOUR)
+    const verdict = parisWindowVerdictForHours(now, SITTER_DAILY_DIGEST_TARGET_PARIS_HOURS)
     if (!verdict.run) {
       console.log(JSON.stringify({ event: 'digest_skipped_paris_window', source: 'send-sitter-daily-digest', ...verdict }))
       return json({ ok: true, skipped: true, reason: verdict.reason, paris_hour: verdict.parisHour })
@@ -141,10 +149,16 @@ Deno.serve(async (req) => {
     }
 
     const { data: queued, error: qErr } = await queueQuery
+      .order('queued_at', { ascending: true })
     if (qErr) throw qErr
 
     if (!queued || queued.length === 0) {
-      return json({ ok: true, sitters_processed: 0, reason: 'empty_queue' })
+      await nominalRun?.finish('success', {
+        sitters_processed: 0,
+        queue_remaining: 0,
+        reason: 'empty_queue',
+      })
+      return json({ ok: true, sitters_processed: 0, queue_remaining: 0, reason: 'empty_queue' })
     }
 
     // 2. Regroupe par sitter_id
@@ -158,6 +172,8 @@ Deno.serve(async (req) => {
     const today = new Date().toISOString().slice(0, 10)
     let sittersSent = 0
     let sittersSkipped = 0
+    let sittersStarted = 0
+    let budgetReached = false
     let claimSkipped = 0
     let claimGranted = 0
     const staleSolded: string[] = []
@@ -206,21 +222,16 @@ Deno.serve(async (req) => {
       }
     }
 
-    // 2a-bis. Ordre d'envoi : les gardiens dont l'identité est vérifiée
-    // passent en tête de file, les autres suivent (la vérification trie,
-    // elle n'exclut plus).
-    const { data: verifiedRows } = await supabase
-      .from('profiles')
-      .select('id, identity_verified')
-      .in('id', [...bySitter.keys()])
-    const verifiedSitters = new Set(
-      (verifiedRows ?? []).filter((r: any) => r.identity_verified).map((r: any) => r.id as string)
-    )
-    const orderedSitters = [...bySitter.entries()].sort(
-      (a, b) => Number(verifiedSitters.has(b[0])) - Number(verifiedSitters.has(a[0]))
-    )
+    // La requête est triée par queued_at et Map conserve cet ordre. Sous
+    // budget contraint, la plus ancienne ligne est donc toujours prioritaire.
+    const orderedSitters = [...bySitter.entries()]
 
     for (const [sitterId, rows] of orderedSitters) {
+      if (Date.now() - startedAtMs >= RUN_BUDGET_MS || sittersStarted >= MAX_SITTERS_PER_RUN) {
+        budgetReached = true
+        break
+      }
+      sittersStarted++
       try {
         // 2a. Charge les infos gardien (profile + email_preferences)
         const { data: profile } = await supabase
@@ -573,6 +584,26 @@ Deno.serve(async (req) => {
       await raiseStaleClaimSignal(supabase, 'sitter-daily-digest', staleReason, staleSolded)
     }
 
+    const { count: queueRemaining, error: remainingErr } = await supabase
+      .from('sitter_digest_queue')
+      .select('id', { count: 'exact', head: true })
+      .eq('status', 'queued')
+    if (remainingErr) throw remainingErr
+
+    const todayUtc = new Date(now)
+    todayUtc.setUTCHours(0, 0, 0, 0)
+    let queuedToday = 0
+    if ((queueRemaining ?? 0) > 0 && now.getUTCHours() >= 8 && nominalRun) {
+      const { count, error: todayErr } = await supabase
+        .from('sitter_digest_queue')
+        .select('id', { count: 'exact', head: true })
+        .eq('status', 'queued')
+        .gte('queued_at', todayUtc.toISOString())
+      if (todayErr) throw todayErr
+      queuedToday = count ?? 0
+      await raiseDigestBacklogSignal(supabase, queueRemaining ?? 0, queuedToday)
+    }
+
     if (body.catchup && !body.dry_run) {
       await supabase
         .from('cron_run_log')
@@ -584,10 +615,16 @@ Deno.serve(async (req) => {
         .eq('edge_name', CATCHUP_TAG)
     }
 
-    await nominalRun?.finish(errors.length > 0 ? 'partial' : 'success', {
-      sitters_processed: bySitter.size,
+    const runPartial = errors.length > 0 || budgetReached || (queueRemaining ?? 0) > 0
+    await nominalRun?.finish(runPartial ? 'partial' : 'success', {
+      sitters_processed: sittersStarted,
+      sitters_available: bySitter.size,
       sitters_sent: sittersSent,
       sitters_skipped: sittersSkipped,
+      budget_reached: budgetReached,
+      run_budget_ms: RUN_BUDGET_MS,
+      queue_remaining: queueRemaining ?? 0,
+      queued_today_remaining: queuedToday,
       claim_granted: claimGranted,
       claim_skipped: claimSkipped,
       claim_skipped_by: claimSkippedBy,
@@ -597,9 +634,13 @@ Deno.serve(async (req) => {
     return json({
       ok: true,
       catchup: !!body.catchup,
-      sitters_processed: bySitter.size,
+      sitters_processed: sittersStarted,
+      sitters_available: bySitter.size,
       sitters_sent: sittersSent,
       sitters_skipped: sittersSkipped,
+      partial: runPartial,
+      budget_reached: budgetReached,
+      queue_remaining: queueRemaining ?? 0,
       claim_skipped: claimSkipped,
       claim_skipped_by: claimSkippedBy,
       errors,
