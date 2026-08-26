@@ -22,6 +22,7 @@ import { fr } from "date-fns/locale";
 
 import { Skeleton } from "@/components/ui/skeleton";
 import { buildAbsoluteUrl } from "@/lib/seo";
+import { galleryPhotoAlt } from "@/lib/galleryPhotoAlt";
 import {
   MapPin, X,
   ChevronLeft, ChevronRight,

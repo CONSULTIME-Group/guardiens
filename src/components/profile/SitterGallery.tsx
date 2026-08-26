@@ -12,6 +12,7 @@ import { toast } from "sonner";
 import { logger } from "@/lib/logger";
 import { compressGalleryFile } from "@/lib/compressImage";
 import { storageImageUrl } from "@/lib/storageImage";
+import { galleryPhotoAlt } from "@/lib/galleryPhotoAlt";
 import { trackEvent } from "@/lib/analytics";
 import { useTranslation } from "react-i18next";
 
