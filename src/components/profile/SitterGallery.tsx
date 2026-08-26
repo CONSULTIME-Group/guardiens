@@ -12,6 +12,7 @@ import { toast } from "sonner";
 import { logger } from "@/lib/logger";
 import { compressGalleryFile } from "@/lib/compressImage";
 import { storageImageUrl } from "@/lib/storageImage";
+import { galleryPhotoAlt } from "@/lib/galleryPhotoAlt";
 import { trackEvent } from "@/lib/analytics";
 import { useTranslation } from "react-i18next";
 
@@ -200,9 +201,11 @@ const SitterGallery = () => {
                 <p className="text-xs text-muted-foreground mt-1">Max 5 Mo</p>
               </div>
               <div>
-                <Label>Légende *</Label>
+                <Label>Légende (facultatif)</Label>
                 <Textarea value={caption} onChange={e => setCaption(e.target.value)} placeholder="Ex : Luna, golden retriever, 2 semaines à Annecy, janvier 2025" rows={2} />
+                <p className="text-xs text-muted-foreground mt-1">Une légende aide le propriétaire à se projeter, vous pouvez l'ajouter plus tard.</p>
               </div>
+
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <Label>Type d'animal</Label>
@@ -243,7 +246,7 @@ const SitterGallery = () => {
                   </Select>
                 </div>
               )}
-              <Button onClick={handleUpload} disabled={!file || !caption || uploading} className="w-full">
+              <Button onClick={handleUpload} disabled={!file || uploading} className="w-full">
                 <Camera className="h-4 w-4 mr-2" /> {uploading ? "Upload en cours..." : "Ajouter à ma galerie"}
               </Button>
             </div>
@@ -268,7 +271,7 @@ const SitterGallery = () => {
         <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
           {photos.map(photo => (
             <div key={photo.id} className="group relative aspect-square rounded-xl overflow-hidden cursor-pointer" onClick={() => setLightboxPhoto(photo)}>
-              <img src={storageImageUrl(photo.photo_url, { width: 306, height: 306 })} alt={photo.caption} className="w-full h-full object-cover transition-transform group-hover:scale-105" />
+              <img src={storageImageUrl(photo.photo_url, { width: 306, height: 306 })} alt={galleryPhotoAlt(photo)} className="w-full h-full object-cover transition-transform group-hover:scale-105" />
               {/* Badge */}
               <span className={`absolute top-2 left-2 px-2 py-0.5 rounded-full text-xs font-medium ${photo.source === "guardiens" ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"}`}>
                 {photo.source === "guardiens" ? "Guardiens" : "Expérience passée"}
@@ -311,7 +314,7 @@ const SitterGallery = () => {
             <DialogTitle className="sr-only">{lightboxPhoto.caption || "Photo"}</DialogTitle>
             <DialogDescription className="sr-only">Aperçu agrandi de la photo de la galerie.</DialogDescription>
             <div className="relative">
-              <img src={storageImageUrl(lightboxPhoto.photo_url, { width: 1600, height: 1600, resize: "contain" })} alt={lightboxPhoto.caption} className="w-full max-h-[70vh] object-contain bg-black" />
+              <img src={storageImageUrl(lightboxPhoto.photo_url, { width: 1600, height: 1600, resize: "contain" })} alt={galleryPhotoAlt(lightboxPhoto)} className="w-full max-h-[70vh] object-contain bg-black" />
               <button onClick={() => setLightboxPhoto(null)} className="absolute top-3 right-3 p-2 rounded-full bg-black/60 text-white hover:bg-black/80">
                 <X className="h-4 w-4" />
               </button>
