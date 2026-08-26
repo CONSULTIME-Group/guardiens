@@ -22,10 +22,11 @@ describe("légende facultative dans la modale d'ajout de photo", () => {
   });
 
   it("la soumission écrit une chaîne vide quand la légende est absente", () => {
-    // la valeur envoyée reste (caption ?? "").trim(), donc "" et non null
-    expect(SOURCE).toContain('caption: (caption ?? "").trim()');
+    // le dépôt multiple insère caption: "" puis la légende s'édite en ligne
+    expect(SOURCE).toContain('caption: ""');
     expect(("" as string).trim()).toBe("");
   });
+
 });
 
 describe("galleryPhotoAlt", () => {
