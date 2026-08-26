@@ -863,3 +863,17 @@ function describeThrownValue(error: unknown): string {
   if (error instanceof Error) return `${error.name}: ${error.message}`
   return String(error)
 }
+
+/**
+ * Rejet définitif de l'adresse par le fournisseur. `send-transactional-email`
+ * enveloppe tout en 500, le verdict se lit donc dans le corps de réponse
+ * (`providerStatus: 422`, message « Invalid to field »), jamais dans le code
+ * HTTP de l'enveloppe. Un quota dépassé ou une indisponibilité restent des
+ * échecs temporaires et ne passent pas par ici.
+ */
+function isPermanentRecipientRejection(responseBody: string): boolean {
+  if (!responseBody) return false
+  const hasProvider422 = /"?providerStatus"?\s*[:=]\s*422/.test(responseBody)
+  const invalidField = /invalid\s+`?to`?\s+field|invalid_recipient|invalid recipient/i.test(responseBody)
+  return hasProvider422 && invalidField ? true : (hasProvider422 || invalidField) && invalidField
+}
