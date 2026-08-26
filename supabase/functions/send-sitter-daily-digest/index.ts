@@ -49,6 +49,12 @@ const MAX_SITTERS_PER_RUN = 500
 const EMAIL_SEND_INTERVAL_MS = 2_000
 const MAX_EMAIL_SEND_ATTEMPTS = 2
 const MAX_CONSECUTIVE_RATE_LIMITS = 2
+// Verrou de bail : un seul passage draine la file à la fois. Le bail porte sa
+// propre péremption (budget d'exécution plus une marge), donc un passage tué
+// par la plateforme libère le verrou de lui même, sans intervention humaine.
+const DIGEST_LOCK_KEY = 'send-sitter-daily-digest'
+const DIGEST_LOCK_TTL_SECONDS = 180
+
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
