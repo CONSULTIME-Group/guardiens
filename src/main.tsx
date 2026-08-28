@@ -7,7 +7,9 @@ import { installGlobalErrorLogger } from "./lib/errorLogger";
 import { initConsent } from "./lib/cookieConsent";
 import { installStorageFallback } from "./lib/storageFallback";
 import { installOAuthDebugHelper } from "./lib/oauthLogger";
+import { installDomTranslationGuard } from "./lib/domTranslationGuard";
 
+installDomTranslationGuard();
 installStorageFallback();
 installOAuthDebugHelper();
 
