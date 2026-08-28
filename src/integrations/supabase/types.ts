@@ -1252,6 +1252,30 @@ export type Database = {
         }
         Relationships: []
       }
+      articles_content_backup: {
+        Row: {
+          backed_up_at: string
+          content: string | null
+          id: string | null
+          reason: string | null
+          slug: string | null
+        }
+        Insert: {
+          backed_up_at?: string
+          content?: string | null
+          id?: string | null
+          reason?: string | null
+          slug?: string | null
+        }
+        Update: {
+          backed_up_at?: string
+          content?: string | null
+          id?: string | null
+          reason?: string | null
+          slug?: string | null
+        }
+        Relationships: []
+      }
       badge_attributions: {
         Row: {
           badge_id: string
