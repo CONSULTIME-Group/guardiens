@@ -130,12 +130,16 @@ const SitterGallery = () => {
   }, [user, uploading, photos.length]);
 
   const applyResults = (results: GalleryUploadResult<GalleryPhoto>[], images: File[]) => {
-    const added: GalleryPhoto[] = [];
+    // Collecte déterministe hors updater : un updater différé au render
+    // laisserait added vide au moment du setPhotos et masquerait les uploads réussis.
+    const added = results
+      .filter((r): r is Extract<GalleryUploadResult<GalleryPhoto>, { status: "success" }> => r.status === "success")
+      .sort((a, b) => b.index - a.index)
+      .map(r => r.row);
     setTiles(prev => prev.map(tl => {
       const r = results.find(x => x.index === tl.index);
       if (!r) return tl;
       if (r.status === "success") {
-        added.push(r.row);
         return { ...tl, state: "done", photo: r.row };
       }
       if (r.status === "skipped_limit") {
@@ -144,7 +148,7 @@ const SitterGallery = () => {
       return { ...tl, state: "error", message: r.message };
     }));
 
-    if (added.length > 0) setPhotos(prev => [...added.slice().reverse(), ...prev]);
+    if (added.length > 0) setPhotos(prev => [...added, ...prev]);
 
     const failed = results.filter(r => r.status === "error") as Extract<GalleryUploadResult<GalleryPhoto>, { status: "error" }>[];
     const skipped = results.filter(r => r.status === "skipped_limit");
