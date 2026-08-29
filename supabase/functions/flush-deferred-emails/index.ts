@@ -193,7 +193,22 @@ Deno.serve(async (req) => {
           .eq("id", row.id);
         await syncSendLogMirror(supabase, row.idempotency_key, "abandoned", `Abandonné : ${reason}`);
         closed++;
+      } else if (result?.cancelled || result?.status === 'cancelled' || reason === 'ttl_exceeded') {
+        // Le sender a TRANCHÉ : au delà de la TTL de report, la ligne est
+        // annulée (decideOverTtl retourne 'cancel'). C'est une décision
+        // définitive, pas un incident : la retenter chaque cycle produisait
+        // une chaîne de reports qui n'aboutit jamais (alerte
+        // email_deferred_retry_chain du 29/08/2026), jusqu'à MAX_ATTEMPTS.
+        const cancelReason = `annulé par le sender : ${reason ?? 'ttl_exceeded'}`;
+        console.log("flush cancelled by sender", { id: row.id, reason });
+        await supabase
+          .from("email_deferred_queue")
+          .update({ status: "abandoned", last_error: cancelReason })
+          .eq("id", row.id);
+        await syncSendLogMirror(supabase, row.idempotency_key, "cancelled", `Annulé : ${cancelReason}`);
+        closed++;
       } else if (result?.deferred) {
+
         // Le sender a re-programme la ligne source elle-meme (attempts et
         // first_enqueued_at conserves), et l'a remise en 'pending'.
         // Defaut 3 : MAX_ATTEMPTS s'applique aussi sur le chemin de re-report.
