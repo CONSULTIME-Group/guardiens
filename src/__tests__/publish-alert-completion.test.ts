@@ -45,6 +45,20 @@ describe("alerte immediate, phrase de completion", () => {
     expect(SRC).toContain("galleryCountByUser.set(g.user_id");
   });
 
+  it("pagine explicitement la lecture sitter_gallery pour echapper au plafond PostgREST", () => {
+    const block = SRC.slice(SRC.indexOf('from("sitter_gallery")'));
+    expect(block).toContain(".range(from, from + GALLERY_PAGE_SIZE - 1)");
+    expect(block).toContain("(grows ?? []).length < GALLERY_PAGE_SIZE");
+    expect(SRC).toContain("const GALLERY_PAGE_SIZE = 1000");
+  });
+
+  it("evalue les alertes faites main avant les migrees, ordre deterministe", () => {
+    const zonesBlock = SRC.slice(SRC.indexOf("const zones ="), SRC.indexOf("for (const sit of"));
+    expect(zonesBlock).toContain(".sort(");
+    expect(zonesBlock).toContain("a.source == null ? 0 : 1");
+    expect(zonesBlock).toContain("localeCompare");
+  });
+
   it("groupe aussi la lecture sitter_profiles", () => {
     expect(SRC).toContain('.from("sitter_profiles")');
     expect(SRC).toContain('.in("user_id", belowIds.slice(i, i + IN_BATCH_SIZE))');

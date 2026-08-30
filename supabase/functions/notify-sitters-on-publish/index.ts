@@ -64,6 +64,9 @@ export const MIGRATED_ALERT_SOURCE = "migration_email_preferences_2026_07_31";
  * jamais avale.
  */
 const IN_BATCH_SIZE = 200;
+// Taille de page de la lecture sitter_gallery, paginee explicitement pour
+// echapper au plafond de lignes PostgREST (N lignes par gardien).
+const GALLERY_PAGE_SIZE = 1000;
 
 export function haversineKm(lat1: number, lon1: number, lat2: number, lon2: number): number {
   const R = 6371;
