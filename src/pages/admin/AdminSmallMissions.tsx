@@ -467,14 +467,15 @@ const AdminSmallMissions = () => {
           </TableHeader>
           <TableBody>
             {loading ? (
-              <TableRow><TableCell colSpan={10} className="text-center py-8 text-muted-foreground">Chargement…</TableCell></TableRow>
+              <TableRow><TableCell colSpan={11} className="text-center py-8 text-muted-foreground">Chargement…</TableCell></TableRow>
             ) : filtered.length === 0 ? (
-              <TableRow><TableCell colSpan={10} className="text-center py-8 text-muted-foreground">Aucune mission</TableCell></TableRow>
+              <TableRow><TableCell colSpan={11} className="text-center py-8 text-muted-foreground">Aucune mission</TableCell></TableRow>
             ) : paginated.map((m) => {
               const status = resolveStatusBadge(m);
               const isSuspect = moneyPattern.test(m.description || "") || moneyPattern.test(m.exchange_offer || "");
               const views = m.view_count ?? 0;
               const resp = responseCounts[m.id] || 0;
+              const notified = notifiedCounts[m.id] || 0;
               const ratio = views > 0 ? `${((resp / views) * 100).toFixed(0)}%` : "–";
               return (
                 <TableRow key={m.id} className={isSuspect ? "bg-warning-soft/50" : ""}>
@@ -492,6 +493,7 @@ const AdminSmallMissions = () => {
                   <TableCell className="text-sm text-muted-foreground">{m.city}</TableCell>
                   <TableCell className="text-sm text-muted-foreground">{format(new Date(m.created_at), "d MMM yyyy", { locale: fr })}</TableCell>
                   <TableCell><Badge variant={status.variant}>{status.label}</Badge></TableCell>
+                  <TableCell className={`text-sm font-medium tabular-nums ${notified === 0 ? "text-warning" : ""}`}>{notified}</TableCell>
                   <TableCell className="text-sm font-medium tabular-nums">{resp}</TableCell>
                   <TableCell className="text-sm font-medium tabular-nums">{views}</TableCell>
                   <TableCell className="text-sm text-muted-foreground tabular-nums">{ratio}</TableCell>
