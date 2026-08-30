@@ -26,6 +26,12 @@ import { createClient, SupabaseClient } from "https://esm.sh/@supabase/supabase-
 import { startCronRun } from "../_shared/cron-run-log.ts";
 import { requireCronCaller } from "../_shared/require-cron-caller.ts";
 import { evaluateSitAlert, PUBLISHED_STATUS } from "../_shared/sit-alert-guard.ts";
+import {
+  APPLY_COMPLETION_THRESHOLD,
+  completionMessageFor,
+  remainingCompletionSteps,
+} from "../_shared/completion-steps/index.ts";
+
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
