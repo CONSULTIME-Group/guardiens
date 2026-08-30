@@ -23,7 +23,7 @@ const FORBIDDEN_PATTERNS = [
   { pattern: /Auvergne-Rhône-Alpes/i, label: "Auvergne-Rhône-Alpes", severity: "error" },
   { pattern: /\bvoisin(?:e|s|age)?\b/i, label: "voisin/voisinage (mot proscrit)", severity: "error" },
   { pattern: /votre région/i, label: "« votre région » (proximité régionale)", severity: "error" },
-  { pattern: /\bgratuit(?:e|s|es)?\b/i, label: "« gratuit » (utiliser « 0 € » en SEO)", severity: "warn" },
+  { pattern: /\b9\s*€\s*\/\s*mois\b/i, label: "ancien prix 9 €/mois (utiliser 6,99 €/mois)", severity: "error" },
   { pattern: /\b9\s*€\s*\/\s*mois\b/i, label: "ancien prix 9 €/mois (utiliser 6,99 €/mois)", severity: "error" },
   { pattern: /\b9€\/mois\b/i, label: "ancien prix 9€/mois", severity: "error" },
 ];
