@@ -395,9 +395,10 @@ const EntraideHub = () => {
     const natureCls =
       (m.mission_type ?? "besoin") === "offre"
         ? "bg-accent/25 text-accent-foreground"
-        // Demande : terra sur terra-soft. Le couple secondary/15 + secondary-foreground
-        // donnait du crème sur du crème (1,14:1), sous le minimum AA de 4,5:1.
-        : "bg-terra-soft text-terra border border-terra-border";
+        // Demande : encre sur terra-soft, bordure terra. Mesuré 15,8:1 en clair et
+        // 11:1 en sombre. Le couple secondary/15 + secondary-foreground donnait
+        // du crème sur du crème, 1,14:1, sous le minimum AA de 4,5:1.
+        : "bg-terra-soft text-foreground border border-terra-border";
     const statusBadge =
       m.status === "in_progress"
         ? { label: "En cours", aria: "Statut : en cours" }
@@ -515,7 +516,7 @@ const EntraideHub = () => {
             {m.exchange_offer && (
               // Coeur du modèle : un service contre un service, jamais d'argent.
               <p className="mt-2 text-sm text-foreground/90 line-clamp-1">
-                <span className="text-[10px] font-semibold uppercase tracking-wide text-terra mr-1.5">
+                <span className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground mr-1.5">
                   En échange
                 </span>
                 {m.exchange_offer}

@@ -246,10 +246,10 @@ const MobileEntraideFeed = ({ missions, questions, loading, onPublish, proximity
             const m = it.data;
             const isOffer = it.kind === "offre";
             const badgeLabel = isOffer ? "Offre" : "Demande";
-            // Même couple lisible que le fil desktop : terra sur terra-soft.
+            // Même couple lisible que le fil desktop : encre sur terra-soft.
             const badgeCls = isOffer
               ? "bg-accent/25 text-accent-foreground"
-              : "bg-terra-soft text-terra border border-terra-border";
+              : "bg-terra-soft text-foreground border border-terra-border";
             const authorName = publicFirstName(m.profiles?.first_name) || "Membre";
             const statusBadge =
               m.status === "in_progress"
@@ -306,7 +306,7 @@ const MobileEntraideFeed = ({ missions, questions, loading, onPublish, proximity
                     )}
                     {m.exchange_offer && (
                       <p className="mt-1.5 text-sm text-foreground/90 line-clamp-1">
-                        <span className="text-[10px] font-semibold uppercase tracking-wide text-terra mr-1.5">
+                        <span className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground mr-1.5">
                           En échange
                         </span>
                         {m.exchange_offer}

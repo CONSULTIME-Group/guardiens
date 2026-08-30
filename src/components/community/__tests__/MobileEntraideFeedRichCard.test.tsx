@@ -60,7 +60,7 @@ describe("carte mobile de l'entraide", () => {
       (s) => s.textContent === "Demande",
     );
     expect(badge?.className).toContain("bg-terra-soft");
-    expect(badge?.className).toContain("text-terra");
+    expect(badge?.className).toContain("text-foreground");
     expect(container.innerHTML).not.toContain("bg-secondary/15 text-secondary-foreground");
   });
 
