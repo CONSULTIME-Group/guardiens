@@ -448,6 +448,18 @@ const EntraideHub = () => {
         <Link
           to={`/petites-missions/${m.slug || m.id}`}
           aria-label={cardAria}
+          onClick={() => {
+            void trackEvent("mission_card_clicked", {
+              metadata: {
+                mission_id: m.id,
+                position,
+                category: m.category,
+                mission_type: m.mission_type ?? "besoin",
+                surface: "feed_desktop",
+                distance_km: d != null ? Math.round(d) : null,
+              },
+            });
+          }}
           className="flex gap-4 p-4 rounded-xl bg-card border border-border hover:border-primary/40 hover:shadow-sm transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
         >
           <MissionCardCover
