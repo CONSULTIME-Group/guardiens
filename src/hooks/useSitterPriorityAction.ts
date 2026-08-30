@@ -9,7 +9,7 @@ import { MIN_COMPLETION_TO_APPLY } from "@/hooks/useAccessLevel";
  *
  * Règle (priorité décroissante) :
  *  1. NextGuard programmée    → préparer la garde imminente
- *  2. Profil < 40%            → débloquer la visibilité
+ *  2. Profil < 40%            → débloquer les candidatures
  *  3. Code postal manquant    → débloquer l'affichage géo
  *  4. Annonce à proximité     → postuler / découvrir
  *  5. Mode dispo OFF          → activer la visibilité
@@ -39,11 +39,13 @@ interface Input {
   interestsCount?: number;
   /** true si la pièce d'identité est validée ou en cours d'examen. */
   identityDone?: boolean;
+  /** Nombre de gardes déjà réalisées. Sert à ne pas proposer l'entraide à un gardien confirmé. */
+  completedSitsCount?: number;
 }
 
 export function useSitterPriorityAction(input: Input): SitterPriorityAction {
   return useMemo(() => {
-    const { nextGuard, profileCompletion, postalCode, nearbyListings, isAvailable, competencesCount = 0, interestsCount = 0, identityDone = true } = input;
+    const { nextGuard, profileCompletion, postalCode, nearbyListings, isAvailable, competencesCount = 0, interestsCount = 0, identityDone = true, completedSitsCount = 0 } = input;
 
     // 1. Prochaine garde imminente — toujours prioritaire
     if (nextGuard) {
@@ -60,13 +62,13 @@ export function useSitterPriorityAction(input: Input): SitterPriorityAction {
       };
     }
 
-    // 2. Profil incomplet — bloque la découvrabilité
+    // 2. Profil incomplet — bloque les candidatures
     if (profileCompletion < MIN_COMPLETION_TO_APPLY) {
       return {
         variant: "profile",
-        eyebrow: "Visibilité bloquée",
-        title: `Complétez votre profil à ${profileCompletion}% pour apparaître dans les recherches.`,
-        description: "Photo, bio et expérience animale sont les 3 éléments les plus regardés par les propriétaires.",
+        eyebrow: "Candidatures bloquées",
+        title: `Votre profil est à ${profileCompletion}%. Il faut ${MIN_COMPLETION_TO_APPLY}% pour postuler à une annonce.`,
+        description: "Une photo et quelques lignes sur vous suffisent le plus souvent à passer le seuil. Ce sont aussi les deux éléments que les propriétaires regardent en premier.",
         ctaLabel: "Compléter mon profil",
         ctaTo: "/profile",
         urgency: "high",
@@ -166,17 +168,21 @@ export function useSitterPriorityAction(input: Input): SitterPriorityAction {
       };
     }
 
-    // 6. Pas d'annonce proche : entraide first
-    return {
-      variant: "entraide",
-      eyebrow: "À faire maintenant",
-      title: "Rendez un coup de main près de chez vous",
-      description:
-        "C'est ouvert à tous, sans abonnement, et c'est le meilleur moyen de vous faire connaître avant vos premières gardes.",
-      ctaLabel: "Voir les coups de main",
-      ctaTo: "/petites-missions",
-      urgency: "medium",
-    };
+    // 6. Pas d'annonce proche : entraide first, mais uniquement pour les
+    // gardiens qui n'ont pas encore réalisé de garde. Après une première
+    // garde, on préfère l'état d'accueil "Tout est prêt".
+    if (completedSitsCount === 0) {
+      return {
+        variant: "entraide",
+        eyebrow: "À faire maintenant",
+        title: "Rendez un coup de main près de chez vous",
+        description:
+          "C'est ouvert à tous, sans abonnement, et c'est le meilleur moyen de vous faire connaître avant vos premières gardes.",
+        ctaLabel: "Voir les coups de main",
+        ctaTo: "/petites-missions",
+        urgency: "medium",
+      };
+    }
 
     // 7. Fallback — tout est prêt
     return {
@@ -189,5 +195,5 @@ export function useSitterPriorityAction(input: Input): SitterPriorityAction {
       ctaTo: "/petites-missions",
       urgency: "low",
     };
-  }, [input.nextGuard, input.profileCompletion, input.postalCode, input.nearbyListings, input.isAvailable, input.competencesCount, input.interestsCount, input.identityDone]);
+  }, [input.nextGuard, input.profileCompletion, input.postalCode, input.nearbyListings, input.isAvailable, input.competencesCount, input.interestsCount, input.identityDone, input.completedSitsCount]);
 }

@@ -130,6 +130,7 @@ const SitterDashboard = () => {
     competencesCount: competencesCount ?? 0,
     interestsCount: interestsCount ?? 0,
     identityDone: identityStatus === "verified" || identityStatus === "pending" || !!identityVerified,
+    completedSitsCount: completedSits ?? 0,
   });
   const identityRailAction =
     sitterPriorityAction.variant === "identity"
