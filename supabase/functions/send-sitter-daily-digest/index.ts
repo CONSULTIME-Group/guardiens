@@ -574,7 +574,8 @@ Deno.serve(async (req) => {
             isCatchup: !!body.catchup,
             canApply,
             profileCompletion,
-            completionHint,
+            completionSentence,
+            completionSteps,
             completionHref,
           },
         })
