@@ -215,7 +215,7 @@ export function missingFor(state: ProfileState): Record<FieldKey, boolean> {
     avatar: !state.avatar_url,
     bio: (state.bio || "").trim().length < 50,
     competences: (state.competences || []).length === 0,
-    radius: !(state.geographic_radius > 0),
+    // Le rayon d'intervention ne fait plus partie du barème de complétion.
     lifestyle: (state.lifestyle || []).length === 0,
     affinity: affinitySignals(state) < 3,
     gallery: !state.has_gallery,
