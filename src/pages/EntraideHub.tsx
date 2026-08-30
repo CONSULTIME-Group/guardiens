@@ -31,10 +31,10 @@ import { MISSION_CATEGORIES, MISSION_CATEGORY_LABEL } from "@/lib/missionCategor
 import { publicFirstName } from "@/lib/displayName";
 
 /**
- * EntraideHub — fil unique de l'entraide.
+ * EntraideHub, fil unique de l'entraide.
  *
  * Un seul flux chronologique mêlant Questions, Demandes et Offres, étiqueté
- * par nature. Quatre catégories alignées sur l'enum `small_mission_category`
+ * par nature. Huit catégories alignées sur l'enum `small_mission_category`
  * (source unique : `src/lib/missionCategories.ts`). La position du membre
  * sert au tri par proximité, jamais au filtrage par défaut : la limitation
  * au rayon est un choix explicite, pour ne jamais ouvrir sur du vide.
@@ -286,6 +286,20 @@ const EntraideHub = () => {
         return true;
       }),
     [missions, mStatus, mineOnly, currentUserId],
+  );
+
+  /**
+   * Fil mobile : le sélecteur de statut n'existe que sur desktop. On ne lui
+   * applique donc jamais le filtre de statut, sinon les publications En cours
+   * et Terminées disparaîtraient sans moyen de les réafficher.
+   */
+  const mobileMissions = useMemo(
+    () =>
+      missions.filter((m) => {
+        if (mineOnly && currentUserId && m.user_id !== currentUserId) return false;
+        return true;
+      }),
+    [missions, mineOnly, currentUserId],
   );
 
   /** Questions après « mes publications », avant nature/catégorie. */
@@ -591,7 +605,7 @@ const EntraideHub = () => {
 
           {/* Fil unifié mobile. */}
           <MobileEntraideFeed
-            missions={baseMissions}
+            missions={mobileMissions}
             questions={baseQuestions as any}
             loading={mLoading || qLoading}
             onPublish={goPublish}
