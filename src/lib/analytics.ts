@@ -180,7 +180,7 @@ export type EventType =
   | "sits_create_alma_intent_clicked"           // Clic "Décrire en une phrase" sur /sits/create
   | "sits_create_alma_dismissed"                // Dismiss définitif de la bulle Alma sur /sits/create
   // EntraideHub Pass 1 (UX + fixes workflow) --------------------------------
-  | "mission_created_incomplete_profile"        // Mission publiée avec profil < 60 % (profile_completion)
+  | "mission_created_incomplete_profile"        // Mission publiée avec profil < 40 % (profile_completion)
   | "entraide_empty_state_template_clicked"     // Exemple cliquable empty state (tab, template_key)
   | "entraide_all_status_default_used"          // Fallback filtre status=all car <20 missions (missions_count)
   | "mission_expired_badge_seen"                // Badge "date dépassée" impression (mission_id, days_overdue)
