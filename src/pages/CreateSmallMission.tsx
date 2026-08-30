@@ -336,7 +336,7 @@ const CreateSmallMission = () => {
       return;
     }
     try { await trackFirstAction("mission_created", { category, mission_type: missionType }); } catch {}
-    if (typeof profileCompletion === "number" && profileCompletion < 60) {
+    if (typeof profileCompletion === "number" && profileCompletion < MIN_COMPLETION_TO_APPLY) {
       try { await trackEvent("mission_created_incomplete_profile", { metadata: { profile_completion: profileCompletion, mission_id: inserted?.id ?? null } }); } catch {}
     }
     if (inserted?.id) { try { await recordMissionCreatedAttribution(inserted.id); } catch {} }

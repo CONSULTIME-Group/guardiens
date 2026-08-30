@@ -1,4 +1,5 @@
 import { useMemo } from "react";
+import { MIN_COMPLETION_TO_APPLY } from "@/hooks/useAccessLevel";
 
 /**
  * Calcule l'action prioritaire unique à afficher en haut du dashboard gardien.
@@ -8,7 +9,7 @@ import { useMemo } from "react";
  *
  * Règle (priorité décroissante) :
  *  1. NextGuard programmée    → préparer la garde imminente
- *  2. Profil < 60%            → débloquer la visibilité
+ *  2. Profil < 40%            → débloquer la visibilité
  *  3. Code postal manquant    → débloquer l'affichage géo
  *  4. Annonce à proximité     → postuler / découvrir
  *  5. Mode dispo OFF          → activer la visibilité
@@ -60,7 +61,7 @@ export function useSitterPriorityAction(input: Input): SitterPriorityAction {
     }
 
     // 2. Profil incomplet — bloque la découvrabilité
-    if (profileCompletion < 60) {
+    if (profileCompletion < MIN_COMPLETION_TO_APPLY) {
       return {
         variant: "profile",
         eyebrow: "Visibilité bloquée",
