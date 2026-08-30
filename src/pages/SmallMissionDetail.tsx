@@ -1900,18 +1900,25 @@ const SmallMissionDetail = () => {
       {/* Mobile sticky CTA */}
       {!isAuthor && mission.status === "open" && canApplyMissions && !hasResponded && (
         <div className="lg:hidden fixed bottom-[var(--bottom-nav-h,0px)] md:bottom-0 left-0 right-0 z-40 bg-background/95 backdrop-blur border-t border-border px-4 py-3 pb-[calc(env(safe-area-inset-bottom)+0.75rem)] shadow-[0_-8px_24px_-12px_hsl(var(--foreground)/0.15)]">
-          <Button
-            size="lg"
-            className="w-full rounded-full font-bold text-base shadow-lg shadow-primary/20"
-            onClick={() => {
-              const el = document.getElementById("composer");
-              el?.scrollIntoView({ behavior: "smooth", block: "center" });
-              setTimeout(() => document.getElementById("composer-textarea")?.focus(), 400);
-            }}
-          >
-            {(mission as any).mission_type === "offre" ? "Solliciter cette aide" : "Répondre publiquement"}
-          </Button>
+          {responsesCapReached ? (
+            <p className="text-xs text-center text-muted-foreground leading-relaxed">
+              Publication temporairement fermée aux nouvelles réponses. {responsesCapMessage}
+            </p>
+          ) : (
+            <Button
+              size="lg"
+              className="w-full rounded-full font-bold text-base shadow-lg shadow-primary/20"
+              onClick={() => {
+                const el = document.getElementById("composer");
+                el?.scrollIntoView({ behavior: "smooth", block: "center" });
+                setTimeout(() => document.getElementById("composer-textarea")?.focus(), 400);
+              }}
+            >
+              {(mission as any).mission_type === "offre" ? "Solliciter cette aide" : "Répondre publiquement"}
+            </Button>
+          )}
         </div>
+
       )}
     </AppLayout>
   );
