@@ -29,7 +29,7 @@ const TTL_HOURS = 36; // hard expire after 36h to avoid stale notifications
 async function syncSendLogMirror(
   supabase: any,
   idempotencyKey: string | null | undefined,
-  mirrorStatus: "sent" | "cancelled" | "abandoned",
+  mirrorStatus: "cancelled" | "abandoned",
   reason?: string | null,
 ): Promise<void> {
   if (!idempotencyKey) return;
@@ -42,6 +42,40 @@ async function syncSendLogMirror(
     .filter("metadata->>idempotency_key", "eq", idempotencyKey);
   if (error) console.error("syncSendLogMirror failed", { idempotencyKey, mirrorStatus, error });
 }
+
+// Cloture d'une ligne de report effectivement partie.
+//
+// Regle : une ligne de report n'est JAMAIS requalifiee en 'sent'. L'envoi reel
+// ecrit sa propre ligne, avec resend_id. Requalifier le miroir creait un
+// doublon compte comme envoi, ce qui ecrasait mecaniquement les taux de
+// livraison et d'ouverture. La ligne reste donc 'deferred' et porte
+// metadata.flushed_at, qui la sort de la detection de derive du miroir.
+// deno-lint-ignore no-explicit-any
+async function markMirrorFlushed(
+  supabase: any,
+  idempotencyKey: string | null | undefined,
+): Promise<void> {
+  if (!idempotencyKey) return;
+  const { data, error } = await supabase
+    .from("email_send_log")
+    .select("id, metadata")
+    .eq("status", "deferred")
+    .filter("metadata->>idempotency_key", "eq", idempotencyKey)
+    .limit(20);
+  if (error) {
+    console.error("markMirrorFlushed select failed", { idempotencyKey, error });
+    return;
+  }
+  const flushedAt = new Date().toISOString();
+  for (const row of (data ?? []) as Array<{ id: string; metadata: Record<string, unknown> | null }>) {
+    const { error: updErr } = await supabase
+      .from("email_send_log")
+      .update({ metadata: { ...(row.metadata ?? {}), flushed_at: flushedAt } })
+      .eq("id", row.id);
+    if (updErr) console.error("markMirrorFlushed update failed", { id: row.id, error: updErr });
+  }
+}
+
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
