@@ -424,8 +424,8 @@ const CompleteProfileToApplyModal = ({
       changed(form.interests, snapshot.interests) ||
       changed(form.languages, snapshot.languages) ||
       changed(form.life_pace, snapshot.life_pace) ||
-      changed(form.animal_types, snapshot.animal_types) ||
-      (snapshot.geographic_radius === 0 && form.geographic_radius > 0)
+      changed(form.animal_types, snapshot.animal_types)
+
     );
   }, [snapshot, form]);
 
