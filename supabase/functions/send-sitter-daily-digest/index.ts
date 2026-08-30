@@ -34,7 +34,7 @@ import { recordDeliveryFailure } from '../_shared/delivery-failure.ts'
 import { startCronRun } from '../_shared/cron-run-log.ts'
 import { acquireWorkerLock, releaseWorkerLock } from '../_shared/worker-lock.ts'
 import { computeAffinityResultFull } from '../_shared/affinity/score.ts'
-import { pickMissingOpportunities, type MissingOpportunitiesStats } from '../_shared/missing-opportunities/index.ts'
+import { completionMessageFor, remainingCompletionSteps } from '../_shared/completion-steps/index.ts'
 
 
 // La plateforme coupe actuellement ce traitement vers 150 secondes. Le
@@ -87,7 +87,7 @@ interface SitRow {
 
 // Colonnes gardien consommées par le moteur unique d'affinité.
 // À maintenir en phase avec `AffinitySitterInput` (_shared/affinity/score.ts).
-const SITTER_AFFINITY_COLUMNS = 'user_id, experience_years, life_pace, lifestyle, availability_during, languages, interests, work_during_sit, meeting_preference, handover_preference, sensitivities, animal_types, sitter_type, special_animal_skills, travels_with_children, travels_with_own_animals, has_vehicle, has_license, farm_animals_ok'
+const SITTER_AFFINITY_COLUMNS = 'user_id, experience_years, life_pace, lifestyle, availability_during, languages, interests, work_during_sit, meeting_preference, handover_preference, sensitivities, animal_types, sitter_type, special_animal_skills, travels_with_children, travels_with_own_animals, has_vehicle, has_license, farm_animals_ok, competences'
 
 function formatFrDate(iso?: string | null): string | undefined {
   if (!iso) return undefined
@@ -269,7 +269,7 @@ Deno.serve(async (req) => {
         // 2a. Charge les infos gardien (profile + email_preferences)
         const { data: profile } = await supabase
           .from('profiles')
-          .select('id, first_name, account_status, identity_verified, profile_completion, last_seen_at, role')
+          .select('id, first_name, account_status, identity_verified, profile_completion, last_seen_at, role, avatar_url, bio, postal_code, city, country')
           .eq('id', sitterId)
           .maybeSingle()
 
@@ -404,12 +404,14 @@ Deno.serve(async (req) => {
           continue
         }
 
-        // 2g. Tri : score de tri (pondéré par la confiance) DESC, distance ASC.
+        // 2g. Tri : proximité d'abord (décision du 30/08/2026). Le moteur
+        // d'affinité n'évalue aucun critère sur 85 % des couples réels, il ne
+        // peut donc pas ordonner une diffusion. Il reste l'affichage.
         scoredRows.sort((a, b) => {
-          if (a.sortScore !== b.sortScore) return b.sortScore - a.sortScore
           const aDist = a.row.distance_km ?? Number.POSITIVE_INFINITY
           const bDist = b.row.distance_km ?? Number.POSITIVE_INFINITY
-          return aDist - bDist
+          if (aDist !== bDist) return aDist - bDist
+          return b.sortScore - a.sortScore
         })
 
         const top3 = scoredRows.slice(0, 3)
@@ -519,19 +521,40 @@ Deno.serve(async (req) => {
 
         // 2g bis. CTA selon complétude : sous 60 %, le gardien ne peut pas
         // candidater (useAccessLevel niveau 1). Mêmes annonces, même ordre,
-        // seul l'appel à l'action change, avec le pourcentage actuel et le
-        // manque principal chiffré (MÊME fonction de calcul que le bloc
-        // dashboard gardien, une seule source).
+        // seul l'appel à l'action change. Depuis le 30/08/2026, le message
+        // nomme un seul geste, mais dit la vérité sur le nombre d'étapes
+        // restantes, calculé sur le barème réel de _calculate_sitter_score.
         const profileCompletion = profile.profile_completion ?? 0
         const canApply = profileCompletion >= 60
-        let completionHint: string | undefined
+        let completionSentence: string | undefined
         let completionHref: string | undefined
+        let completionSteps = 0
         if (!canApply) {
-          const { data: missing } = await supabase.rpc('sitter_missing_opportunities', { _sitter_id: sitterId })
-          const hint = pickMissingOpportunities(missing as MissingOpportunitiesStats | null, 1)[0]
-          completionHint = hint?.sentence
-          // Lien direct vers la section du profil qui pose la question.
-          completionHref = hint?.href
+          const { count: galleryCount } = await supabase
+            .from('sitter_gallery')
+            .select('id', { count: 'exact', head: true })
+            .eq('sitter_id', sitterId)
+          const steps = remainingCompletionSteps({
+            first_name: profile.first_name,
+            postal_code: (profile as any).postal_code,
+            city: (profile as any).city,
+            country: (profile as any).country,
+            avatar_url: (profile as any).avatar_url,
+            bio: (profile as any).bio,
+            identity_verified: profile.identity_verified,
+            competences: (sitterRow as any).competences,
+            lifestyle: (sitterRow as any).lifestyle,
+            interests: (sitterRow as any).interests,
+            languages: (sitterRow as any).languages,
+            life_pace: (sitterRow as any).life_pace,
+            animal_types: (sitterRow as any).animal_types,
+            gallery_count: galleryCount ?? 0,
+          })
+          const message = completionMessageFor(profileCompletion, steps)
+          completionSentence = message?.sentence
+          // Lien direct vers la section du profil qui porte le geste nommé.
+          completionHref = message?.href
+          completionSteps = message?.stepCount ?? 0
         }
 
         // 2h. Envoi digest
@@ -551,7 +574,8 @@ Deno.serve(async (req) => {
             isCatchup: !!body.catchup,
             canApply,
             profileCompletion,
-            completionHint,
+            completionSentence,
+            completionSteps,
             completionHref,
           },
         })
