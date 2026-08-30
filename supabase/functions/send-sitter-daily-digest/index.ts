@@ -443,7 +443,7 @@ Deno.serve(async (req) => {
         if (scoredRows.length === 0) {
           // Aucune annonce diffusable : toutes les lignes restantes de ce
           // gardien sont soldées, sinon elles restent en file pour toujours.
-          await markSkipped(supabase, rows.map(r => r.id), 'no_distributable_sit', body.dry_run)
+          await markSkipped(supabase, pendingRows.map(r => r.id), 'no_distributable_sit', body.dry_run)
           sittersSkipped++
           continue
         }
@@ -508,7 +508,7 @@ Deno.serve(async (req) => {
         if (items.length === 0) {
           // Aucune annonce diffusable : toutes les lignes restantes de ce
           // gardien sont soldées, sinon elles restent en file pour toujours.
-          await markSkipped(supabase, rows.map(r => r.id), 'no_available_sit', body.dry_run)
+          await markSkipped(supabase, pendingRows.map(r => r.id), 'no_available_sit', body.dry_run)
           sittersSkipped++
           continue
         }
@@ -546,7 +546,7 @@ Deno.serve(async (req) => {
             // repasser la ligne au lendemain, mais au delà de 48 heures la
             // ligne ne partira jamais, on la solde explicitement.
             const staleCutoff = Date.now() - 48 * 60 * 60 * 1000
-            const staleRows = rows.filter(r => {
+            const staleRows = pendingRows.filter(r => {
               const t = (r as any).queued_at ? new Date((r as any).queued_at).getTime() : Date.now()
               return t < staleCutoff
             })
@@ -729,7 +729,7 @@ Deno.serve(async (req) => {
             errorMessage: `invalid_recipient_email: ${_steTxt1.slice(0, 500)}`,
             extra: { http_status: _steRes.status, response_body: _steTxt1.slice(0, 1000), idempotency_key: idemBase },
           })
-          await markSkipped(supabase, rows.map(r => r.id), 'invalid_recipient_email', body.dry_run)
+          await markSkipped(supabase, pendingRows.map(r => r.id), 'invalid_recipient_email', body.dry_run)
           if (!body.dry_run) {
             await raiseInvalidRecipientSignal(supabase, {
               source: 'sitter-daily-digest',
