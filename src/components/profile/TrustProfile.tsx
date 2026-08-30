@@ -4,6 +4,7 @@ import { CheckCircle2, Circle, ShieldCheck, ChevronDown } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { MIN_COMPLETION_TO_APPLY } from "@/hooks/useAccessLevel";
 
 interface Props {
   emailVerified: boolean;
@@ -21,7 +22,7 @@ const TrustProfile = ({ emailVerified, identityVerified, hasAvatar, profileCompl
     { label: "Email vérifié", done: emailVerified },
     { label: "Identité vérifiée", done: identityVerified, action: !identityVerified ? identityCtaHref("trust_profile") : undefined },
     { label: "Photo de profil ajoutée", done: hasAvatar },
-    { label: "Profil complété à 60%+", done: profileCompletion >= 60 },
+    { label: `Profil complété à ${MIN_COMPLETION_TO_APPLY}%+`, done: profileCompletion >= MIN_COMPLETION_TO_APPLY },
     { label: role === "owner" ? "Première annonce publiée" : "Première garde réalisée", done: hasFirstActivity },
   ];
 
