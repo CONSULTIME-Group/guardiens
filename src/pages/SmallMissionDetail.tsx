@@ -349,6 +349,29 @@ const SmallMissionDetail = () => {
     } catch { /* silencieux */ }
   }, [missionUuid]);
 
+  // Événement de vue, parité avec sit_view. Le compteur en base dit combien,
+  // l'événement dit d'où et pour qui. Une fois par fiche et par montage.
+  const viewTrackedRef = useRef<string | null>(null);
+  useEffect(() => {
+    if (!missionUuid || !mission) return;
+    if (viewTrackedRef.current === missionUuid) return;
+    viewTrackedRef.current = missionUuid;
+    const source = captureMissionSource(missionUuid);
+    void trackEvent("mission_view", {
+      source: "/petites-missions/:id",
+      metadata: {
+        mission_id: missionUuid,
+        category: (mission as any).category ?? null,
+        mission_type: (mission as any).mission_type ?? "besoin",
+        has_photo: Array.isArray((mission as any).photos) && (mission as any).photos.length > 0,
+        has_exchange_offer: Boolean(((mission as any).exchange_offer || "").trim()),
+        viewer_type: user ? "member" : "anonymous",
+        arrival_source: source,
+      },
+    });
+  }, [missionUuid, mission, user]);
+
+
   // Realtime : l'auteur voit immédiatement les nouvelles propositions et changements de statut
   useEffect(() => {
     if (!missionUuid) return;
