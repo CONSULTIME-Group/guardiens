@@ -39,7 +39,7 @@ describe("alerte immediate, phrase de completion", () => {
 
   it("groupe la lecture galerie sur user_id, sans count par personne", () => {
     const block = SRC.slice(SRC.indexOf('from("sitter_gallery")'));
-    expect(block).toContain('.in("user_id", belowIds.slice(i, i + IN_BATCH_SIZE))');
+    expect(block).toContain('.in("user_id", batchIds)');
     expect(SRC).not.toContain("count: 'exact', head: true");
     expect(SRC).not.toContain('count: "exact", head: true');
     expect(SRC).toContain("galleryCountByUser.set(g.user_id");
