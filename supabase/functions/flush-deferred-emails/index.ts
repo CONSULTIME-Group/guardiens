@@ -273,7 +273,7 @@ Deno.serve(async (req) => {
       } else if (result?.sent || result?.skipped || result?.success) {
 
         await supabase.from("email_deferred_queue").update({ status: "sent" }).eq("id", row.id);
-        await syncSendLogMirror(supabase, row.idempotency_key, "sent");
+        await markMirrorFlushed(supabase, row.idempotency_key);
         sent++;
       } else {
         // Reponse de forme inattendue : meme traitement que l'erreur reseau,
