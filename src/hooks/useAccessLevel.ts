@@ -60,7 +60,7 @@ export const useAccessLevel = (): AccessInfo => {
 
   // Palier 1 : profil trop incomplet pour postuler. Garde-fou côté gardien
   // uniquement, sans rapport avec les prérequis de publication d'un propriétaire.
-  if (completion < 60) {
+  if (completion < MIN_COMPLETION_TO_APPLY) {
     return {
       level: 1,
       profileCompletion: completion,
