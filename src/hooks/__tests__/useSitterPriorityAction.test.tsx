@@ -71,14 +71,14 @@ describe("useSitterPriorityAction — règle de priorité", () => {
 
   it("propose l'entraide aux gardiens sans garde réalisée", () => {
     const { result } = renderHook(() =>
-      useSitterPriorityAction({ ...baseInput, competencesCount: 1, completedSitsCount: 0 }),
+      useSitterPriorityAction({ ...baseInput, competencesCount: 1, interestsCount: 1, completedSitsCount: 0 }),
     );
     expect(result.current.variant).toBe("entraide");
   });
 
   it("passe à l'état d'accueil 'explore' si le gardien a déjà réalisé une garde", () => {
     const { result } = renderHook(() =>
-      useSitterPriorityAction({ ...baseInput, competencesCount: 1, completedSitsCount: 1 }),
+      useSitterPriorityAction({ ...baseInput, competencesCount: 1, interestsCount: 1, completedSitsCount: 1 }),
     );
     expect(result.current.variant).toBe("explore");
     expect(result.current.eyebrow).toBe("Tout est prêt");
