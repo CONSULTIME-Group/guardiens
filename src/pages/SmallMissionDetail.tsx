@@ -821,6 +821,11 @@ const SmallMissionDetail = () => {
   const statusMeta = STATUS_LABELS[mission.status] || STATUS_LABELS.open;
   const acceptedResponses = responses.filter(r => r.status === "accepted");
   const pendingResponses = responses.filter(r => r.status === "pending");
+  // Plafond serveur de 5 propositions en attente. Il doit se voir sur TOUS les
+  // appels à l'action, sinon la personne rédige puis reçoit une erreur serveur.
+  const responsesCapReached = pendingResponses.length >= 5;
+  const responsesCapMessage =
+    "5 personnes ont déjà proposé leur aide. Une place se libérera si l'auteur en décline une.";
   // Une OFFRE (disponibilité) n'a pas d'échéance : pas de bannière "date dépassée".
   const isOfferMission = (mission as any).mission_type === "offre";
   const isDatePassed = !isOfferMission && mission.date_needed && new Date(mission.date_needed) < new Date();
