@@ -372,12 +372,16 @@ const PublicMissionView = ({
                     </p>
                   </div>
                 )}
-                <div>
-                  <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-1">
-                    {t("mission_detail.cost")}
-                  </p>
-                  <p className="text-base font-semibold text-foreground">{t("mission_detail.cost_value")}</p>
-                </div>
+                {/* Pas de rubrique coût : l'entraide n'a pas de prix, on met
+                    en valeur ce qui est proposé en retour. */}
+                {mission.exchange_offer && (
+                  <div>
+                    <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-1">
+                      {t("mission_detail.exchange_h3")}
+                    </p>
+                    <p className="text-base font-semibold text-foreground">{mission.exchange_offer}</p>
+                  </div>
+                )}
               </div>
 
               <Link to={`/inscription?redirect=${encodeURIComponent(redirect)}`} className="block">
