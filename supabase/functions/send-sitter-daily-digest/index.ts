@@ -530,32 +530,44 @@ Deno.serve(async (req) => {
         let completionHref: string | undefined
         let completionSteps = 0
         if (!canApply) {
-          const { count: galleryCount } = await supabase
+          // sitter_gallery porte user_id, pas sitter_id. C'est aussi la colonne
+          // que compte _calculate_sitter_score. En cas d'erreur, on n'envoie
+          // aucune phrase de completion : une phrase fausse coute plus cher
+          // qu'une phrase absente.
+          const { count: galleryCount, error: galleryError } = await supabase
             .from('sitter_gallery')
             .select('id', { count: 'exact', head: true })
-            .eq('sitter_id', sitterId)
-          const steps = remainingCompletionSteps({
-            first_name: profile.first_name,
-            postal_code: (profile as any).postal_code,
-            city: (profile as any).city,
-            country: (profile as any).country,
-            avatar_url: (profile as any).avatar_url,
-            bio: (profile as any).bio,
-            identity_verified: profile.identity_verified,
-            competences: (sitterRow as any).competences,
-            lifestyle: (sitterRow as any).lifestyle,
-            interests: (sitterRow as any).interests,
-            languages: (sitterRow as any).languages,
-            life_pace: (sitterRow as any).life_pace,
-            animal_types: (sitterRow as any).animal_types,
-            gallery_count: galleryCount ?? 0,
-          })
-          const message = completionMessageFor(profileCompletion, steps)
-          completionSentence = message?.sentence
-          // Lien direct vers la section du profil qui porte le geste nommé.
-          completionHref = message?.href
-          completionSteps = message?.stepCount ?? 0
+            .eq('user_id', sitterId)
+          if (galleryError) {
+            console.error('[digest] lecture sitter_gallery impossible', {
+              sitter_id: sitterId,
+              error: galleryError.message,
+            })
+          } else {
+            const steps = remainingCompletionSteps({
+              first_name: profile.first_name,
+              postal_code: (profile as any).postal_code,
+              city: (profile as any).city,
+              country: (profile as any).country,
+              avatar_url: (profile as any).avatar_url,
+              bio: (profile as any).bio,
+              identity_verified: profile.identity_verified,
+              competences: (sitterRow as any).competences,
+              lifestyle: (sitterRow as any).lifestyle,
+              interests: (sitterRow as any).interests,
+              languages: (sitterRow as any).languages,
+              life_pace: (sitterRow as any).life_pace,
+              animal_types: (sitterRow as any).animal_types,
+              gallery_count: galleryCount ?? 0,
+            })
+            const message = completionMessageFor(profileCompletion, steps)
+            completionSentence = message?.sentence
+            // Lien direct vers la section du profil qui porte le geste nomme.
+            completionHref = message?.href
+            completionSteps = message?.stepCount ?? 0
+          }
         }
+
 
         // 2h. Envoi digest
         const idemBase = body.catchup
