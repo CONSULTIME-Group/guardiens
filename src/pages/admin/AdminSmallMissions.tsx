@@ -91,21 +91,48 @@ const AdminSmallMissions = () => {
   const [contactMission, setContactMission] = useState<any | null>(null);
   const [contactReason, setContactReason] = useState("");
   const [contactSending, setContactSending] = useState(false);
-  const [kpis, setKpis] = useState({ total: 0, open: 0, totalViews: 0, totalResponses: 0 });
+  const [kpis, setKpis] = useState({
+    total: 0,
+    open: 0,
+    totalViews: 0,
+    totalResponses: 0,
+    totalNotified: 0,
+    zeroReach: 0,
+  });
+  // Destinataires réellement prévenus, par publication. C'est ce qui explique
+  // les zéro réponse : sans notifiés, il n'y a rien à convertir.
+  const [notifiedCounts, setNotifiedCounts] = useState<Record<string, number>>({});
 
   // Global KPIs (independent of pagination/filters)
   useEffect(() => {
     (async () => {
-      const [{ count: total }, { count: open }, viewsRes, respRes] = await Promise.all([
+      const [{ count: total }, { count: open }, viewsRes, respRes, notifRes] = await Promise.all([
         supabase.from("small_missions").select("*", { count: "exact", head: true }),
         supabase.from("small_missions").select("*", { count: "exact", head: true }).eq("status", "open" as any),
         supabase.from("small_missions").select("view_count"),
         supabase.from("small_mission_responses").select("*", { count: "exact", head: true }),
+        supabase.from("mission_notification_queue").select("mission_id").eq("status", "sent").limit(20000),
       ]);
       const totalViews = (viewsRes.data || []).reduce((s: number, r: any) => s + (r.view_count || 0), 0);
-      setKpis(k => ({ ...k, total: total || 0, open: open || 0, totalViews, totalResponses: respRes.count || 0 }));
+      const counts: Record<string, number> = {};
+      (notifRes.data || []).forEach((r: any) => {
+        counts[r.mission_id] = (counts[r.mission_id] || 0) + 1;
+      });
+      setNotifiedCounts(counts);
+      const totalNotified = (notifRes.data || []).length;
+      const zeroReach = Math.max(0, (total || 0) - Object.keys(counts).length);
+      setKpis(k => ({
+        ...k,
+        total: total || 0,
+        open: open || 0,
+        totalViews,
+        totalResponses: respRes.count || 0,
+        totalNotified,
+        zeroReach,
+      }));
     })();
   }, []);
+
 
   const fetchMissions = useCallback(async () => {
     setLoading(true);
@@ -289,12 +316,13 @@ const AdminSmallMissions = () => {
 
   const exportCsv = () => {
     const rows = [
-      ["Titre", "Posteur", "Catégorie", "Ville", "Date", "Statut", "Réponses", VIEWS_LABEL],
+      ["Titre", "Posteur", "Catégorie", "Ville", "Date", "Statut", "Notifiés", "Réponses", VIEWS_LABEL],
       ...filtered.map(m => [
         m.title, `${m.poster?.first_name || ""} ${m.poster?.last_name || ""}`.trim(),
         categoryLabels[m.category] || missionCategoryLabel(m.category), m.city || "",
         format(new Date(m.created_at), "yyyy-MM-dd"),
         resolveStatusBadge(m).label,
+        String(notifiedCounts[m.id] || 0),
         String(responseCounts[m.id] || 0), String(m.view_count ?? 0),
       ]),
     ];
@@ -308,6 +336,10 @@ const AdminSmallMissions = () => {
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
   const ratioGlobal = kpis.totalViews > 0 ? ((kpis.totalResponses / kpis.totalViews) * 100).toFixed(1) : "0";
+  // Indicateur maître : ce que produit une notification envoyée.
+  const notifToResponse = kpis.totalNotified > 0
+    ? ((kpis.totalResponses / kpis.totalNotified) * 100).toFixed(1)
+    : "0";
 
   return (
     <div className="space-y-6">
@@ -319,7 +351,16 @@ const AdminSmallMissions = () => {
       </div>
 
       {/* KPIs */}
-      <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+      <div className="grid grid-cols-2 md:grid-cols-4 xl:grid-cols-7 gap-3">
+        <Card className="border-primary/40"><CardContent className="p-4">
+          <p className="text-xs text-muted-foreground" title="Réponses ÷ notifications envoyées">Conversion notif. → réponse</p>
+          <p className="text-2xl font-bold tabular-nums">{notifToResponse}%</p>
+          <p className="text-[11px] text-muted-foreground mt-0.5">{kpis.totalNotified} notifiés</p>
+        </CardContent></Card>
+        <Card className={kpis.zeroReach > 0 ? "border-warning-border bg-warning-soft" : undefined}><CardContent className="p-4">
+          <p className="text-xs text-muted-foreground">Publications sans destinataire</p>
+          <p className="text-2xl font-bold tabular-nums">{kpis.zeroReach}</p>
+        </CardContent></Card>
         <Card><CardContent className="p-4">
           <p className="text-xs text-muted-foreground">Total</p>
           <p className="text-2xl font-bold tabular-nums">{kpis.total}</p>
@@ -341,6 +382,7 @@ const AdminSmallMissions = () => {
           <p className="text-2xl font-bold tabular-nums">{ratioGlobal}%</p>
         </CardContent></Card>
       </div>
+
 
       {suspectMissions.length > 0 && (
         <Card className="border-warning-border bg-warning-soft">
@@ -409,6 +451,7 @@ const AdminSmallMissions = () => {
                 </button>
               </TableHead>
               <TableHead>Statut</TableHead>
+              <TableHead title="Personnes réellement prévenues pour cette publication">Notifiés</TableHead>
               <TableHead>
                 <button onClick={() => toggleSort("response_count")} className="inline-flex items-center gap-1 hover:text-foreground">
                   Réponses <ArrowUpDown className="h-3 w-3" />
@@ -425,14 +468,15 @@ const AdminSmallMissions = () => {
           </TableHeader>
           <TableBody>
             {loading ? (
-              <TableRow><TableCell colSpan={10} className="text-center py-8 text-muted-foreground">Chargement…</TableCell></TableRow>
+              <TableRow><TableCell colSpan={11} className="text-center py-8 text-muted-foreground">Chargement…</TableCell></TableRow>
             ) : filtered.length === 0 ? (
-              <TableRow><TableCell colSpan={10} className="text-center py-8 text-muted-foreground">Aucune mission</TableCell></TableRow>
+              <TableRow><TableCell colSpan={11} className="text-center py-8 text-muted-foreground">Aucune mission</TableCell></TableRow>
             ) : paginated.map((m) => {
               const status = resolveStatusBadge(m);
               const isSuspect = moneyPattern.test(m.description || "") || moneyPattern.test(m.exchange_offer || "");
               const views = m.view_count ?? 0;
               const resp = responseCounts[m.id] || 0;
+              const notified = notifiedCounts[m.id] || 0;
               const ratio = views > 0 ? `${((resp / views) * 100).toFixed(0)}%` : "–";
               return (
                 <TableRow key={m.id} className={isSuspect ? "bg-warning-soft/50" : ""}>
@@ -450,6 +494,7 @@ const AdminSmallMissions = () => {
                   <TableCell className="text-sm text-muted-foreground">{m.city}</TableCell>
                   <TableCell className="text-sm text-muted-foreground">{format(new Date(m.created_at), "d MMM yyyy", { locale: fr })}</TableCell>
                   <TableCell><Badge variant={status.variant}>{status.label}</Badge></TableCell>
+                  <TableCell className={`text-sm font-medium tabular-nums ${notified === 0 ? "text-warning" : ""}`}>{notified}</TableCell>
                   <TableCell className="text-sm font-medium tabular-nums">{resp}</TableCell>
                   <TableCell className="text-sm font-medium tabular-nums">{views}</TableCell>
                   <TableCell className="text-sm text-muted-foreground tabular-nums">{ratio}</TableCell>

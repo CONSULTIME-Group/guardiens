@@ -2,6 +2,7 @@ import { MISSION_CATEGORIES } from "@/lib/missionCategories";
 import { useTranslation } from "react-i18next";
 import { useState, useEffect, useCallback, useRef } from "react";
 import { trackEvent } from "@/lib/analytics";
+import { captureMissionSource, readMissionSource } from "@/lib/missionResponseSource";
 import { logger } from "@/lib/logger";
 import { useParams, Link, useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -20,6 +21,11 @@ import { Textarea } from "@/components/ui/textarea";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription,
 } from "@/components/ui/dialog";
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import ReportButton from "@/components/reports/ReportButton";
 import PageMeta from "@/components/PageMeta";
 import PageBreadcrumb from "@/components/seo/PageBreadcrumb";
@@ -349,6 +355,29 @@ const SmallMissionDetail = () => {
     } catch { /* silencieux */ }
   }, [missionUuid]);
 
+  // Événement de vue, parité avec sit_view. Le compteur en base dit combien,
+  // l'événement dit d'où et pour qui. Une fois par fiche et par montage.
+  const viewTrackedRef = useRef<string | null>(null);
+  useEffect(() => {
+    if (!missionUuid || !mission) return;
+    if (viewTrackedRef.current === missionUuid) return;
+    viewTrackedRef.current = missionUuid;
+    const source = captureMissionSource(missionUuid);
+    void trackEvent("mission_view", {
+      source: "/petites-missions/:id",
+      metadata: {
+        mission_id: missionUuid,
+        category: (mission as any).category ?? null,
+        mission_type: (mission as any).mission_type ?? "besoin",
+        has_photo: Array.isArray((mission as any).photos) && (mission as any).photos.length > 0,
+        has_exchange_offer: Boolean(((mission as any).exchange_offer || "").trim()),
+        viewer_type: user ? "member" : "anonymous",
+        arrival_source: source,
+      },
+    });
+  }, [missionUuid, mission, user]);
+
+
   // Realtime : l'auteur voit immédiatement les nouvelles propositions et changements de statut
   useEffect(() => {
     if (!missionUuid) return;
@@ -438,6 +467,15 @@ const SmallMissionDetail = () => {
         }
         setHasResponded(true);
         setMessage("");
+        const originFeed = readMissionSource(missionUuid!);
+        void trackEvent("mission_response_source", {
+          metadata: {
+            mission_id: missionUuid,
+            source: originFeed.source,
+            utm_campaign: originFeed.utm_campaign,
+            path: "composer",
+          },
+        });
         toast({ title: "Réponse publiée !", description: "La personne qui demande va être prévenue." });
 
         // Note : le fan-out (notif in-app + email) est déclenché côté serveur
@@ -665,23 +703,75 @@ const SmallMissionDetail = () => {
     setOneClickInterestBusy(true);
     try {
       trackEvent("mission_offer_one_click_interest", { metadata: { mission_id: missionUuid } });
-      // 1. Récupère/crée conversation (RPC atomique)
+
+      // 1. Statut frais : ne jamais écrire sur une publication clôturée.
+      const { data: fresh } = await supabase
+        .from("small_missions")
+        .select("status, user_id")
+        .eq("id", mission.id)
+        .single();
+      if (!fresh) {
+        toast({ variant: "destructive", title: "Erreur", description: "Publication introuvable." });
+        return;
+      }
+      if (fresh.status !== "open") {
+        toast({ variant: "destructive", title: "Publication clôturée", description: "Cette publication n'accepte plus de réponses." });
+        return;
+      }
+      if (fresh.user_id === user.id) return;
+
+      // 2. Réponse en base. On lit l'erreur : sans cela, la personne était
+      // redirigée vers la messagerie en croyant avoir répondu.
+      const templateMsg = `Bonjour ${author?.first_name || ""}, votre proposition « ${mission.title} » m'intéresse. Je vous contacte en privé pour en discuter.`.trim();
+      const { error: insertError } = await supabase
+        .from("small_mission_responses")
+        .insert({ mission_id: missionUuid!, responder_id: user.id, message: templateMsg });
+
+      if (insertError) {
+        const hint = (insertError as any)?.hint || "";
+        const raw = String(insertError.message || "");
+        if (insertError.code === "23505") {
+          toast({ variant: "destructive", title: "Déjà envoyé", description: "Vous avez déjà proposé votre aide pour cette publication." });
+          setHasResponded(true);
+        } else if (hint === "account_not_active" || raw.includes("account_not_active")) {
+          toast({ variant: "destructive", title: "Compte non actif", description: "Contactez le support pour rétablir l'accès à l'entraide." });
+        } else if (hint === "mission_response_cap_reached" || raw.includes("mission_response_cap_reached")) {
+          toast({
+            variant: "destructive",
+            title: "Publication temporairement fermée",
+            description: "5 personnes ont déjà proposé leur aide. Une place se libérera si l'auteur en décline une.",
+          });
+        } else {
+          logger.error("[handleOneClickInterest] insert", { err: raw });
+          toast({ variant: "destructive", title: "Erreur", description: "Impossible d'enregistrer votre réponse." });
+        }
+        return;
+      }
+
+      setHasResponded(true);
+      const origin = readMissionSource(missionUuid!);
+      void trackEvent("mission_response_source", {
+        metadata: {
+          mission_id: missionUuid,
+          source: origin.source,
+          utm_campaign: origin.utm_campaign,
+          path: "one_click",
+        },
+      });
+
+      // 3. Conversation, ouverte seulement après une réponse réussie.
       const { conversationId, error: convError } = await startConversation({
         otherUserId: mission.user_id,
         context: "mission_help",
         smallMissionId: id,
       });
       if (!conversationId) {
-        toast({ variant: "destructive", title: "Erreur", description: convError || "Impossible d'ouvrir la conversation." });
+        toast({
+          title: "Réponse envoyée",
+          description: convError || "Votre réponse est enregistrée. La messagerie n'a pas pu s'ouvrir, réessayez depuis vos messages.",
+        });
         return;
       }
-      // 2. Insert réponse (silencieux si doublon)
-      const templateMsg = `Bonjour ${author?.first_name || ""}, votre proposition « ${mission.title} » m'intéresse. Je vous contacte en privé pour en discuter.`.trim();
-      await supabase
-        .from("small_mission_responses")
-        .insert({ mission_id: missionUuid!, responder_id: user.id, message: templateMsg })
-        .then(() => {});
-      // 3. Redirige messagerie
       navigate(`/messages?c=${conversationId}`);
     } catch (err: any) {
       logger.error("[handleOneClickInterest]", { err: String(err) });
@@ -690,6 +780,7 @@ const SmallMissionDetail = () => {
       setOneClickInterestBusy(false);
     }
   };
+
 
   if (loading) {
     return (
@@ -735,6 +826,11 @@ const SmallMissionDetail = () => {
   const statusMeta = STATUS_LABELS[mission.status] || STATUS_LABELS.open;
   const acceptedResponses = responses.filter(r => r.status === "accepted");
   const pendingResponses = responses.filter(r => r.status === "pending");
+  // Plafond serveur de 5 propositions en attente. Il doit se voir sur TOUS les
+  // appels à l'action, sinon la personne rédige puis reçoit une erreur serveur.
+  const responsesCapReached = pendingResponses.length >= 5;
+  const responsesCapMessage =
+    "5 personnes ont déjà proposé leur aide. Une place se libérera si l'auteur en décline une.";
   // Une OFFRE (disponibilité) n'a pas d'échéance : pas de bannière "date dépassée".
   const isOfferMission = (mission as any).mission_type === "offre";
   const isDatePassed = !isOfferMission && mission.date_needed && new Date(mission.date_needed) < new Date();
@@ -861,41 +957,57 @@ const SmallMissionDetail = () => {
               {author?.first_name || "L'auteur"} a reçu votre mot. Vous serez prévenu(e) dès qu'il y a une réponse.
             </p>
             <p className="text-xs text-muted-foreground">Envoyée {timeAgoFr(myResponse.created_at)}.</p>
-            <Button
-              variant="outline"
-              size="sm"
-              className="w-full rounded-full"
-              onClick={async () => {
-                if (!confirm("Retirer votre réponse ?")) return;
-                const { error } = await supabase
-                  .from("small_mission_responses")
-                  .update({ status: "withdrawn" as any })
-                  .eq("id", myResponse.id);
-                if (error) {
-                  toast({ variant: "destructive", title: "Erreur", description: error.message });
-                  return;
-                }
-                // On garde hasResponded=true : la ligne reste en BDD (status=withdrawn), pas de re-réponse possible sans admin.
-                setResponses(prev => prev.map(r =>
-                  r.id === myResponse.id ? { ...r, status: "withdrawn" } : r,
-                ));
-                trackEvent("mission_response_withdrawn", {
-                  metadata: { mission_id: missionUuid!, response_id: myResponse.id },
-                });
-                // Fan-out serveur (notif + email auteur)
-                supabase.functions.invoke("notify-mission-event", {
-                  body: {
-                    event_type: "mission_response_withdrawn",
-                    mission_id: missionUuid!,
-                    actor_id: user!.id,
-                    target_ids: [mission.user_id],
-                  },
-                }).catch(() => {});
-                toast({ title: "Réponse retirée" });
-              }}
-            >
-              Retirer ma réponse
-            </Button>
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button variant="outline" size="sm" className="w-full rounded-full">
+                  Retirer ma réponse
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Retirer votre réponse ?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    Ce retrait est définitif : vous ne pourrez plus proposer votre aide sur cette
+                    publication. {author?.first_name || "L'auteur"} en sera informé(e).
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Annuler</AlertDialogCancel>
+                  <AlertDialogAction
+                    className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                    onClick={async () => {
+                      const { error } = await supabase
+                        .from("small_mission_responses")
+                        .update({ status: "withdrawn" as any })
+                        .eq("id", myResponse.id);
+                      if (error) {
+                        toast({ variant: "destructive", title: "Erreur", description: error.message });
+                        return;
+                      }
+                      // On garde hasResponded=true : la ligne reste en BDD (status=withdrawn), pas de re-réponse possible sans admin.
+                      setResponses(prev => prev.map(r =>
+                        r.id === myResponse.id ? { ...r, status: "withdrawn" } : r,
+                      ));
+                      trackEvent("mission_response_withdrawn", {
+                        metadata: { mission_id: missionUuid!, response_id: myResponse.id },
+                      });
+                      // Fan-out serveur (notif + email auteur)
+                      supabase.functions.invoke("notify-mission-event", {
+                        body: {
+                          event_type: "mission_response_withdrawn",
+                          mission_id: missionUuid!,
+                          actor_id: user!.id,
+                          target_ids: [mission.user_id],
+                        },
+                      }).catch(() => {});
+                      toast({ title: "Réponse retirée" });
+                    }}
+                  >
+                    Retirer définitivement
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
           </div>
         );
       }
@@ -956,28 +1068,42 @@ const SmallMissionDetail = () => {
               <span className="font-semibold text-foreground"> retient pour aider</span>, votre nom apparaîtra alors publiquement.
             </p>
           </div>
-          <Button
-            className="w-full rounded-full font-bold text-base"
-            size="lg"
-            onClick={() => {
-              setResponseModalOpen(true);
-              trackEvent("mission_response_modal_opened", {
-                metadata: { mission_id: mission.id, mission_type: isOffer ? "offre" : "besoin" },
-              });
-            }}
-          >
-            {ctaLabel}
-          </Button>
-          {isOffer && (
-            <Button
-              variant="outline"
-              className="w-full rounded-full font-semibold text-sm gap-2"
-              disabled={oneClickInterestBusy}
-              onClick={handleOneClickInterest}
-            >
-              <MessageSquare className="h-4 w-4" />
-              {oneClickInterestBusy ? "Ouverture…" : "Je suis intéressé(e), contactez-moi"}
-            </Button>
+          {responsesCapReached ? (
+            <div className="rounded-2xl border border-warning/40 bg-warning-soft/40 p-4 text-sm text-foreground/85">
+              <p className="font-medium">Publication temporairement fermée aux nouvelles réponses.</p>
+              <p className="mt-1 text-muted-foreground">{responsesCapMessage}</p>
+            </div>
+          ) : (
+            <>
+              <Button
+                className="w-full rounded-full font-bold text-base"
+                size="lg"
+                onClick={() => {
+                  setResponseModalOpen(true);
+                  trackEvent("mission_response_modal_opened", {
+                    metadata: { mission_id: mission.id, mission_type: isOffer ? "offre" : "besoin" },
+                  });
+                }}
+              >
+                {ctaLabel}
+              </Button>
+              {isOffer && (
+                <div className="space-y-1">
+                  <Button
+                    variant="ghost"
+                    className="w-full rounded-full font-semibold text-sm gap-2"
+                    disabled={oneClickInterestBusy}
+                    onClick={handleOneClickInterest}
+                  >
+                    <MessageSquare className="h-4 w-4" />
+                    {oneClickInterestBusy ? "Envoi en cours…" : "Écrire directement"}
+                  </Button>
+                  <p className="text-[11px] text-muted-foreground text-center leading-relaxed">
+                    Même proposition, avec un message type et l'ouverture immédiate de la conversation.
+                  </p>
+                </div>
+              )}
+            </>
           )}
           <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-[11px] text-muted-foreground">
             <span className="inline-flex items-center gap-1"><CheckCircle2 className="h-3 w-3" /> Un service contre un service</span>
@@ -986,6 +1112,7 @@ const SmallMissionDetail = () => {
         </div>
       );
     }
+
 
     // Mission fermée / autres cas, état neutre
     return (
@@ -1794,18 +1921,25 @@ const SmallMissionDetail = () => {
       {/* Mobile sticky CTA */}
       {!isAuthor && mission.status === "open" && canApplyMissions && !hasResponded && (
         <div className="lg:hidden fixed bottom-[var(--bottom-nav-h,0px)] md:bottom-0 left-0 right-0 z-40 bg-background/95 backdrop-blur border-t border-border px-4 py-3 pb-[calc(env(safe-area-inset-bottom)+0.75rem)] shadow-[0_-8px_24px_-12px_hsl(var(--foreground)/0.15)]">
-          <Button
-            size="lg"
-            className="w-full rounded-full font-bold text-base shadow-lg shadow-primary/20"
-            onClick={() => {
-              const el = document.getElementById("composer");
-              el?.scrollIntoView({ behavior: "smooth", block: "center" });
-              setTimeout(() => document.getElementById("composer-textarea")?.focus(), 400);
-            }}
-          >
-            {(mission as any).mission_type === "offre" ? "Solliciter cette aide" : "Répondre publiquement"}
-          </Button>
+          {responsesCapReached ? (
+            <p className="text-xs text-center text-muted-foreground leading-relaxed">
+              Publication temporairement fermée aux nouvelles réponses. {responsesCapMessage}
+            </p>
+          ) : (
+            <Button
+              size="lg"
+              className="w-full rounded-full font-bold text-base shadow-lg shadow-primary/20"
+              onClick={() => {
+                const el = document.getElementById("composer");
+                el?.scrollIntoView({ behavior: "smooth", block: "center" });
+                setTimeout(() => document.getElementById("composer-textarea")?.focus(), 400);
+              }}
+            >
+              {(mission as any).mission_type === "offre" ? "Solliciter cette aide" : "Répondre publiquement"}
+            </Button>
+          )}
         </div>
+
       )}
     </AppLayout>
   );

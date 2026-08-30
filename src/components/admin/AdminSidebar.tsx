@@ -72,6 +72,9 @@ const adminNavGroups: NavGroup[] = [
       { to: "/admin/listings", icon: Megaphone, label: "Annonces", badgeKey: "sitsToStaff" },
       { to: "/admin/sits-management", icon: CalendarCheck, label: "Gardes" },
       { to: "/admin/small-missions", icon: Handshake, label: "Petites missions", badgeKey: "reportsMission" },
+      // Pilotage produit de l'entraide, jusqu'ici accessible seulement depuis
+      // un onglet de la page Emails, donc introuvable.
+      { to: "/admin/emails?tab=mutual-aid", icon: Handshake, label: "Vue d'ensemble Entraide" },
     ],
   },
   {

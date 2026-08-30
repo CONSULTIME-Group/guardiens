@@ -151,7 +151,9 @@ const MutualAidDashboardTab = () => {
       supabase.from("small_missions").select("id", { count: "exact", head: true }).gte("created_at", start),
       supabase.from("small_mission_responses").select("id", { count: "exact", head: true }).gte("created_at", start),
       supabase.from("mission_feedbacks").select("id", { count: "exact", head: true }).gte("created_at", start),
-      supabase.from("small_mission_response_thanks").select("id", { count: "exact", head: true }).gte("created_at", start),
+      // Cette table n'a pas de colonne `id` : la clé est `response_id`.
+      // Le `select("id")` renvoyait un 400 et faisait échouer tout l'écran.
+      supabase.from("small_mission_response_thanks").select("response_id", { count: "exact", head: true }).gte("created_at", start),
       supabase
         .from("email_send_log")
         .select("template_name,status,message_id,delivered_at,open_count,click_count,created_at")

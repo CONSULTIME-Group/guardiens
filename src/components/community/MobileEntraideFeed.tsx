@@ -205,7 +205,7 @@ const MobileEntraideFeed = ({ missions, questions, loading, onPublish, proximity
         </div>
       ) : items.length > 0 ? (
         <ul className="space-y-3">
-          {items.map((it) => {
+          {items.map((it, index) => {
             if (it.kind === "question") {
               const q = it.data;
               return (
@@ -262,6 +262,18 @@ const MobileEntraideFeed = ({ missions, questions, loading, onPublish, proximity
               <li key={`m-${m.id}`}>
                 <Link
                   to={`/petites-missions/${m.slug || m.id}`}
+                  onClick={() => {
+                    void trackEvent("mission_card_clicked", {
+                      metadata: {
+                        mission_id: m.id,
+                        position: index + 1,
+                        category: m.category,
+                        mission_type: m.mission_type ?? "besoin",
+                        surface: "feed_mobile",
+                        distance_km: dist != null ? Math.round(dist) : null,
+                      },
+                    });
+                  }}
                   className="flex gap-3 p-3 rounded-xl bg-card border border-border hover:border-primary/40 hover:shadow-sm transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
                   aria-label={`Voir la publication : ${sanitizeUserTitle(m.title) || m.title}`}
                 >

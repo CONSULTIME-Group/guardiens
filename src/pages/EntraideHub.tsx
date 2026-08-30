@@ -398,7 +398,7 @@ const EntraideHub = () => {
     proximity.setFilterEnabled(false);
   };
 
-  const renderMissionCard = (m: MissionRow) => {
+  const renderMissionCard = (m: MissionRow, position: number) => {
     const code = getDeptCode(m.postal_code);
     const dept = code ? DEPT_NAMES[code] : null;
     const period = formatMissionPeriod(m.date_needed, m.end_date);
@@ -448,6 +448,18 @@ const EntraideHub = () => {
         <Link
           to={`/petites-missions/${m.slug || m.id}`}
           aria-label={cardAria}
+          onClick={() => {
+            void trackEvent("mission_card_clicked", {
+              metadata: {
+                mission_id: m.id,
+                position,
+                category: m.category,
+                mission_type: m.mission_type ?? "besoin",
+                surface: "feed_desktop",
+                distance_km: d != null ? Math.round(d) : null,
+              },
+            });
+          }}
           className="flex gap-4 p-4 rounded-xl bg-card border border-border hover:border-primary/40 hover:shadow-sm transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
         >
           <MissionCardCover
@@ -770,13 +782,13 @@ const EntraideHub = () => {
             ) : visibleFeed.length > 0 ? (
               <>
                 <ul className="space-y-3">
-                  {visibleFeed.map((item) =>
+                  {visibleFeed.map((item, index) =>
                     item.kind === "question" ? (
                       <li key={`q-${(item.q as any).id}`}>
                         <QuestionCard q={item.q} showNatureBadge />
                       </li>
                     ) : (
-                      renderMissionCard(item.m)
+                      renderMissionCard(item.m, index + 1)
                     ),
                   )}
                 </ul>
