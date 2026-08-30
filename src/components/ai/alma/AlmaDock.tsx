@@ -25,6 +25,7 @@ import { useAlma } from "@/contexts/AlmaContext";
 import { useAlmaFrequency, type AlmaFrequency } from "@/hooks/useAlmaFrequency";
 import { useAlmaHidden } from "@/hooks/useAlmaHidden";
 import { useAlmaEvolution, type AlmaStage } from "@/hooks/useAlmaEvolution";
+import { MIN_COMPLETION_TO_APPLY } from "@/hooks/useAccessLevel";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { trackEvent } from "@/lib/analytics";

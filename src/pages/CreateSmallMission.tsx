@@ -18,7 +18,7 @@ import { detectContactDetails, contactDetailsMessage } from "@/lib/contactDetail
 import { useToast } from "@/hooks/use-toast";
 import { useQueryClient } from "@tanstack/react-query";
 import PageMeta from "@/components/PageMeta";
-import { useAccessLevel } from "@/hooks/useAccessLevel";
+import { useAccessLevel, MIN_COMPLETION_TO_APPLY } from "@/hooks/useAccessLevel";
 import AccessGateBanner from "@/components/access/AccessGateBanner";
 import MissionPhotoUpload from "@/components/missions/MissionPhotoUpload";
 import { geocodeCity } from "@/lib/geocode";
