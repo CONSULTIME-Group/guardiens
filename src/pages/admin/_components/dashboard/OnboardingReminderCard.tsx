@@ -33,7 +33,7 @@ export const OnboardingReminderCard = () => (
           <AlertDialogHeader>
             <AlertDialogTitle>Confirmer l'envoi</AlertDialogTitle>
             <AlertDialogDescription>
-              Cela enverra un email de rappel aux membres inscrits dans les dernières 48h dont le profil est complété à moins de 60%. Les doublons sont automatiquement exclus.
+              Cela enverra un email de rappel aux membres inscrits dans les dernières 48h dont le profil est complété à moins de {MIN_COMPLETION_TO_APPLY}%. Les doublons sont automatiquement exclus.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
