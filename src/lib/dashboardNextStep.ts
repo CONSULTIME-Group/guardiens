@@ -149,7 +149,7 @@ export const sitterNextStep = (input: SitterNextStepInput): RailNextStep | null 
       title: "Ajoutez une photo de profil",
       phrase: "Quelques détails suffisent pour rassurer les propriétaires.",
       ctaLabel: "Compléter mon profil",
-      ctaTo: "/sitter-profile?tab=profil",
+      ctaTo: "/profile?tab=profil",
       progressPct: pct,
     };
   }
@@ -159,7 +159,7 @@ export const sitterNextStep = (input: SitterNextStepInput): RailNextStep | null 
       title: "Écrivez votre bio",
       phrase: "Quelques détails suffisent pour rassurer les propriétaires.",
       ctaLabel: "Compléter mon profil",
-      ctaTo: "/sitter-profile?tab=profil",
+      ctaTo: "/profile?tab=profil",
       progressPct: pct,
     };
   }
@@ -169,7 +169,7 @@ export const sitterNextStep = (input: SitterNextStepInput): RailNextStep | null 
       title: "Confirmez votre code postal",
       phrase: "C'est ce qui déclenche les alertes près de chez vous.",
       ctaLabel: "Compléter mon profil",
-      ctaTo: "/sitter-profile?tab=alertes",
+      ctaTo: "/profile?tab=alertes",
       progressPct: pct,
     };
   }
@@ -190,7 +190,7 @@ export const sitterNextStep = (input: SitterNextStepInput): RailNextStep | null 
         title: "Une dernière touche à votre profil.",
         phrase: remainingTouchesPhrase(missing),
         ctaLabel: "Compléter mon profil",
-        ctaTo: "/sitter-profile?tab=profil",
+        ctaTo: "/profile?tab=profil",
         progressPct: pct,
       };
     }
@@ -199,7 +199,7 @@ export const sitterNextStep = (input: SitterNextStepInput): RailNextStep | null 
       title: "Votre profil se complète en quelques minutes.",
       phrase: "Chaque détail aide une maison à vous choisir.",
       ctaLabel: "Compléter mon profil",
-      ctaTo: "/sitter-profile?tab=profil",
+      ctaTo: "/profile?tab=profil",
       progressPct: pct,
     };
   }

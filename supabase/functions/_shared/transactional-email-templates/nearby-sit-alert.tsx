@@ -35,7 +35,7 @@ interface Props {
 }
 
 const buildProfileUrl = (href?: string) => {
-  const path = href && href.startsWith('/') ? href : '/sitter-profile'
+  const path = href && href.startsWith('/') ? href : '/profile'
   return `${SITE_URL}${path}`
 }
 

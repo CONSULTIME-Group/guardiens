@@ -65,7 +65,7 @@ const STEPS: StepDef[] = [
     points: 20,
     single: "une photo de vous",
     opener: "commençons par la photo, c'est celle qui compte le plus pour les propriétaires",
-    href: "/sitter-profile?section=identity",
+    href: "/profile?section=identite",
     ok: (d) => !!d.avatar_url,
   },
   {
@@ -73,7 +73,7 @@ const STEPS: StepDef[] = [
     points: 15,
     single: "quelques lignes de présentation, au moins 50 caractères",
     opener: "commençons par votre présentation, quelques lignes suffisent",
-    href: "/sitter-profile?section=identity",
+    href: "/profile?section=identite",
     ok: (d) => (d.bio?.trim().length ?? 0) >= 50,
   },
   {
@@ -81,7 +81,7 @@ const STEPS: StepDef[] = [
     points: 15,
     single: "votre prénom et votre code postal",
     opener: "commençons par votre prénom et votre code postal",
-    href: "/sitter-profile?section=identity",
+    href: "/profile?section=identite",
     ok: (d) =>
       !!d.first_name && ((d.country || "FR") === "FR" ? !!d.postal_code : !!d.city),
   },
@@ -90,7 +90,7 @@ const STEPS: StepDef[] = [
     points: 15,
     single: "vos compétences",
     opener: "commençons par vos compétences",
-    href: "/sitter-profile?section=experience",
+    href: "/profile?section=competences",
     ok: (d) => (d.competences?.length ?? 0) > 0,
   },
   {
@@ -98,7 +98,7 @@ const STEPS: StepDef[] = [
     points: 10,
     single: "votre style de vie",
     opener: "commençons par votre style de vie",
-    href: "/sitter-profile?section=sitter",
+    href: "/profile?section=profil",
     ok: (d) => (d.lifestyle?.length ?? 0) > 0,
   },
   {
@@ -106,7 +106,7 @@ const STEPS: StepDef[] = [
     points: 10,
     single: "trois photos dans votre galerie",
     opener: "commençons par votre galerie, trois photos suffisent",
-    href: "/sitter-profile?section=gallery",
+    href: "/profile?section=galerie",
     ok: (d) => (d.gallery_count ?? 0) >= 3,
     partial: (d) => ((d.gallery_count ?? 0) >= 1 ? 4 : 0),
   },
@@ -115,7 +115,7 @@ const STEPS: StepDef[] = [
     points: 10,
     single: "votre profil d'affinité, au moins trois réponses",
     opener: "commençons par votre profil d'affinité",
-    href: "/sitter-profile?section=sitter",
+    href: "/profile?section=profil",
     ok: (d) => affinityCount(d) >= 3,
     partial: (d) => affinityPoints(affinityCount(d)),
   },
@@ -124,7 +124,7 @@ const STEPS: StepDef[] = [
     points: 5,
     single: "l'envoi de vos documents d'identité",
     opener: "commençons par vos documents d'identité",
-    href: "/sitter-profile?section=identity",
+    href: "/profile?section=identite",
     ok: (d) => !!d.identity_verified,
   },
 ];

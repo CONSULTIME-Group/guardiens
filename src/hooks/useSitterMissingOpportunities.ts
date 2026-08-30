@@ -3,8 +3,12 @@
  * manquées » via la RPC `sitter_missing_opportunities` (compteurs recalculés
  * à chaque appel sur les annonces publiées).
  *
- * Silencieux en cas d'erreur ou pour un non-gardien : le bloc ne s'affiche
- * simplement pas (null).
+ * La base porte deux surcharges de cette fonction (sans paramètre, et avec
+ * `_sitter_id uuid DEFAULT NULL`). Un appel sans argument est ambigu et
+ * échoue en 42725. On vise donc explicitement la surcharge paramétrée.
+ *
+ * Le bloc reste silencieux à l'écran en cas d'erreur (null), mais l'erreur
+ * est toujours tracée en console : un échec de base ne doit plus disparaître.
  */
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -24,20 +28,32 @@ export const useSitterMissingOpportunities = (
 
     const load = async () => {
       try {
-        const { data, error } = await supabase.rpc("sitter_missing_opportunities" as never);
+        const { data, error } = await supabase.rpc(
+          "sitter_missing_opportunities" as never,
+          { _sitter_id: userId } as never,
+        );
         if (cancelled) return;
-        if (error || !data || typeof data !== "object") {
+        if (error) {
+          console.error("[missing-opportunities] échec de la RPC", error);
+          setStats(null);
+          return;
+        }
+        if (!data || typeof data !== "object") {
           setStats(null);
           return;
         }
         const parsed = data as unknown as MissingOpportunitiesStats;
         if (typeof parsed.total_sits !== "number" || !Array.isArray(parsed.items)) {
+          console.error("[missing-opportunities] réponse inattendue", parsed);
           setStats(null);
           return;
         }
         setStats(parsed);
-      } catch {
-        if (!cancelled) setStats(null);
+      } catch (e) {
+        if (!cancelled) {
+          console.error("[missing-opportunities] exception", e);
+          setStats(null);
+        }
       }
     };
 

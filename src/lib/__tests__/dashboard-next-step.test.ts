@@ -72,7 +72,7 @@ describe("sitterNextStep", () => {
     expect(sitterNextStep({ ...base, hasAvatar: false })?.title).toBe("Ajoutez une photo de profil");
     expect(sitterNextStep({ ...base, hasBio: false })?.title).toBe("Écrivez votre bio");
     expect(sitterNextStep({ ...base, postalCode: null })?.title).toBe("Confirmez votre code postal");
-    expect(sitterNextStep({ ...base, postalCode: null })?.ctaTo).toBe("/sitter-profile?tab=alertes");
+    expect(sitterNextStep({ ...base, postalCode: null })?.ctaTo).toBe("/profile?tab=alertes");
   });
 
   it("la vérification d'identité est le filet avant la complétion", () => {

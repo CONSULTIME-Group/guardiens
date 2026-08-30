@@ -82,13 +82,13 @@ const WORDING: Record<MissingOpportunityKey, KeyWording> = {
     what: `entre ${LEGACY_UNANSWERED_RADIUS_KM} et ${EFFECTIVE_DEFAULT_RADIUS_KM} km de chez vous`,
     verbPlural: "se trouvent",
     verbSingular: "se trouve",
-    section: "mobility",
+    section: "mobilite",
   },
   vehicle: {
     what: "un gardien véhiculé",
     verbPlural: "demandent",
     verbSingular: "demande",
-    section: "mobility",
+    section: "mobilite",
   },
   species: {
     what: "les animaux confiés",
@@ -100,25 +100,25 @@ const WORDING: Record<MissingOpportunityKey, KeyWording> = {
     what: "une attente de présence pendant la garde",
     verbPlural: "précisent",
     verbSingular: "précise",
-    section: "sitter",
+    section: "profil",
   },
   sitter_type: {
     what: "le type de gardien recherché",
     verbPlural: "indiquent",
     verbSingular: "indique",
-    section: "sitter",
+    section: "profil",
   },
   pace: {
     what: "un rythme de vie",
     verbPlural: "décrivent",
     verbSingular: "décrit",
-    section: "sitter",
+    section: "profil",
   },
   languages: {
     what: "des langues parlées",
     verbPlural: "mentionnent",
     verbSingular: "mentionne",
-    section: "sitter",
+    section: "profil",
   },
 };
 
@@ -164,7 +164,7 @@ export const pickMissingOpportunities = (
     .map((i) => ({
       key: i.key,
       sentence: missingOpportunitySentence(i.key, i.concerned, stats.total_sits),
-      href: `/sitter-profile?section=${WORDING[i.key].section}`,
+      href: `/profile?section=${WORDING[i.key].section}`,
       ctaLabel: "Répondre",
     }));
 };
