@@ -156,7 +156,7 @@ Deno.serve(async (req) => {
 
   return new Response(JSON.stringify({
     ok: true, dry_run: dryRun,
-    snapshot: { snapshotDate, window_days: t.window_days, sent, delivered, opened, clicked, bounced, complained, bounce_rate, open_rate, click_rate, complaint_rate },
+    snapshot: { snapshotDate, window_days: t.window_days, sent, delivered, opened, clicked, bounced, complained, bounce_rate, open_rate, click_rate, complaint_rate, defer_markers_excluded: deferMarkers },
     breaches, alert_sent: alertSent,
   }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
 })
