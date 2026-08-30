@@ -216,7 +216,7 @@ Deno.serve(async (req) => {
     // Zones d'alerte actives portant sur les gardes, chargees une fois.
     const { data: prefs, error: prefsErr } = await supabase
       .from("alert_preferences")
-      .select("user_id, zone_type, radius_km, departement, alert_types, active")
+      .select("user_id, zone_type, radius_km, departement, alert_types, active, source")
       .eq("active", true);
     if (prefsErr) throw prefsErr;
     const zones = (prefs ?? []).filter((p: any) =>
