@@ -138,11 +138,13 @@ function validateBlock(block, source) {
   const typeMatch = raw.match(/["']@type["']\s*:\s*["']([^"']+)["']/);
   const schemaType = typeMatch ? typeMatch[1] : "Unknown";
 
-  for (const rule of FORBIDDEN_PATTERNS) {
+  const rules = MUTUAL_AID_FILES.test(block.file)
+    ? [...FORBIDDEN_PATTERNS, ...MUTUAL_AID_FORBIDDEN]
+    : FORBIDDEN_PATTERNS;
+
+  for (const rule of rules) {
     const match = raw.match(rule.pattern);
     if (match) {
-      // Filtre faux-positifs : "gratuit" peut apparaître dans une URL slug
-      if (rule.label.startsWith("« gratuit »") && /\/[\w-]*gratuit/.test(raw)) continue;
       issues.push({
         severity: rule.severity,
         label: rule.label,
