@@ -57,7 +57,7 @@ interface Props {
   completionSteps?: number
   /**
    * Section du profil qui pose la question du manque principal (même source
-   * que completionHint). Le bouton y mène directement.
+   * que completionSentence). Le bouton y mène directement.
    */
   completionHref?: string
 }
@@ -71,7 +71,7 @@ const buildProfileUrl = (href?: string) => {
   return `${SITE_URL}${path}${sep}utm_source=email&utm_campaign=sitter_daily_digest&utm_medium=daily`
 }
 
-const SitterDailyDigestEmail = ({ sitterFirstName, items = [], isCatchup, canApply = true, profileCompletion, completionHint, completionHref }: Props) => (
+const SitterDailyDigestEmail = ({ sitterFirstName, items = [], isCatchup, canApply = true, profileCompletion, completionSentence, completionSteps, completionHref }: Props) => (
   <Html lang="fr" dir="ltr">
     <BrandedHead />
     <Preview>
