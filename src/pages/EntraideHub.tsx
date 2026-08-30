@@ -789,6 +789,7 @@ const EntraideHub = () => {
                 howSteps={[
                   "Vous publiez une question, une demande ou une offre de coup de main.",
                   "Les membres intéressés vous répondent en message privé ou en commentaire.",
+                  "Vous convenez d'un échange, jamais d'argent : un café, des œufs du jardin, un service en retour.",
                   "Vous convenez ensemble du jour et du cadre, sans engagement.",
                 ]}
               />
