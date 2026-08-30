@@ -1,4 +1,4 @@
-import { MIN_COMPLETION_TO_APPLY } from "@/hooks/useAccessLevel";
+
 
 /**
  * Moteur d'actions séquentielles + score d'activation, espace propriétaire.
@@ -206,7 +206,8 @@ export function computeOwnerActivationScore(
     {
       key: "profile",
       label: "Complétez votre profil",
-      done: profileCompletion >= MIN_COMPLETION_TO_APPLY,
+      // Seuil du parcours d'activation propriétaire, sans rapport avec le seuil de candidature des gardiens.
+      done: profileCompletion >= 60,
       ctaTo: "/owner-profile",
     },
     {

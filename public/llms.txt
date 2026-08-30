@@ -18,7 +18,7 @@ Guardiens reste gratuit tant que nous ne sommes pas satisfaits du service que no
 - [Devenir home-sitter](/devenir-home-sitter): Guide pour devenir gardien à domicile sur Guardiens.
 - [Guides de villes](/guides): Guides locaux indépendants des annonces de garde.
 - [House-sitting par ville](/house-sitting): Pages ville dédiées au house-sitting et à la garde d'animaux, de maison et de jardin, 100 villes couvertes.
-- [House-sitting par département](/departement): Pages département, chacune recense villes couvertes, gardiens inscrits et guides locaux, 96 départements couverts.
+- [House-sitting par département](/departement): Pages département, chacune recense villes couvertes, gardiens inscrits et guides locaux, 98 départements couverts.
 - [Annonces de garde](/annonces): Toutes les annonces de garde à domicile, partout en France.
 - [Pros animaliers](/pros): Annuaire de vétérinaires, éducateurs, toiletteurs, ostéopathes, transporteurs vérifiés.
 - [Races d'animaux](/races): Guides de garde par race (chiens, chats, NAC, équidés), conseils gardien.
