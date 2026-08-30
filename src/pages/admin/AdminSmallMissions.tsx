@@ -1,3 +1,4 @@
+import { MISSION_CATEGORY_LABEL, missionCategoryLabel } from "@/lib/missionCategories";
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Badge } from "@/components/ui/badge";
@@ -44,12 +45,8 @@ function resolveStatusBadge(m: { status: string; hidden_by?: string | null }) {
   return statusLabels[m.status] || { label: m.status, variant: "outline" as const };
 }
 
-const categoryLabels: Record<string, string> = {
-  animals: "Animaux",
-  garden: "Jardin",
-  house: "Maison",
-  skills: "Compétences",
-};
+/** Libellés catégories : miroir de la source unique, jamais de valeur brute anglaise. */
+const categoryLabels: Record<string, string> = MISSION_CATEGORY_LABEL as Record<string, string>;
 
 const PAGE_SIZE = 25;
 const RESPONSE_CHUNK = 200;
@@ -295,7 +292,7 @@ const AdminSmallMissions = () => {
       ["Titre", "Posteur", "Catégorie", "Ville", "Date", "Statut", "Réponses", VIEWS_LABEL],
       ...filtered.map(m => [
         m.title, `${m.poster?.first_name || ""} ${m.poster?.last_name || ""}`.trim(),
-        categoryLabels[m.category] || m.category, m.city || "",
+        categoryLabels[m.category] || missionCategoryLabel(m.category), m.city || "",
         format(new Date(m.created_at), "yyyy-MM-dd"),
         resolveStatusBadge(m).label,
         String(responseCounts[m.id] || 0), String(m.view_count ?? 0),
@@ -450,7 +447,7 @@ const AdminSmallMissions = () => {
                       <span>{m.poster?.first_name} {m.poster?.last_name}</span>
                     </div>
                   </TableCell>
-                  <TableCell><Badge variant="outline" className="text-xs">{categoryLabels[m.category] || m.category}</Badge></TableCell>
+                  <TableCell><Badge variant="outline" className="text-xs">{categoryLabels[m.category] || missionCategoryLabel(m.category)}</Badge></TableCell>
                   <TableCell className="text-sm text-muted-foreground">{m.city}</TableCell>
                   <TableCell className="text-sm text-muted-foreground">{format(new Date(m.created_at), "d MMM yyyy", { locale: fr })}</TableCell>
                   <TableCell><Badge variant={status.variant}>{status.label}</Badge></TableCell>

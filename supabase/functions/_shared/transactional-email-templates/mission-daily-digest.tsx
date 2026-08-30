@@ -39,8 +39,10 @@ const CTA = (missionId: string) =>
   `${SITE_URL}/petites-missions/${missionId}?utm_source=email&utm_campaign=mission_daily_digest&utm_medium=daily`
 
 const CATEGORY_LABEL: Record<string, string> = {
-  animals: 'Animaux', garden: 'Jardin', house: 'Maison', errand: 'Courses',
-  tech: 'Technique', company: 'Compagnie', other: 'Autre',
+  animals: 'Animaux', garden: 'Jardin', house: 'Maison et bricolage',
+  errand: 'Courses et livraisons', transport: 'Transport et accompagnement',
+  company: 'Présence et compagnie', skills: 'Savoir-faire et démarches',
+  other: 'Autre',
 }
 
 const MissionDailyDigestEmail = ({ helperFirstName, items = [] }: Props) => (
