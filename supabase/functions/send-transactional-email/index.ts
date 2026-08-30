@@ -328,15 +328,23 @@ Deno.serve(async (req) => {
 
 
   // 1b. Idempotency check — prevent duplicate sends for the same key
+  // Une ligne 'deferred' est une intention d'envoi vivante : la compter evite
+  // qu'un second appel double l'email. Exception : le drainage de la file
+  // (sourceQueueId) porte la meme cle et doit pouvoir passer, sinon rien ne
+  // partirait jamais.
   if (idempotencyKey && idempotencyKey !== messageId) {
+    const statusFilter = sourceQueueId
+      ? 'status.eq.sent,status.eq.pending'
+      : 'status.eq.sent,status.eq.pending,status.eq.deferred'
     const { data: existingSend } = await supabase
       .from('email_send_log')
       .select('id')
       .eq('template_name', templateName)
       .eq('recipient_email', effectiveRecipient)
-      .or('status.eq.sent,status.eq.pending')
+      .or(statusFilter)
       .filter('metadata->>idempotency_key', 'eq', idempotencyKey)
       .limit(1)
+
 
     if (existingSend && existingSend.length > 0) {
       console.warn('[ALERT] Duplicate idempotency hit (duplicate_send)', { idempotencyKey, templateName, effectiveRecipient })

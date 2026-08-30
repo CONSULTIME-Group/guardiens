@@ -219,7 +219,7 @@ async function sendNudge(
     .select('id')
     .eq('template_name', templateName)
     .eq('recipient_email', email)
-    .in('status', ['sent', 'pending'])
+    .in('status', ['sent', 'pending', 'deferred'])
     .contains('metadata', { mission_id: m.id })
     .limit(1)
   if (prev && prev.length > 0) {
@@ -312,7 +312,7 @@ async function sendResponseWaitingNudge(
     .select('id')
     .eq('template_name', templateName)
     .eq('recipient_email', email)
-    .in('status', ['sent', 'pending'])
+    .in('status', ['sent', 'pending', 'deferred'])
     .contains('metadata', { response_id: responseId })
     .limit(1)
   if (prev && prev.length > 0) {

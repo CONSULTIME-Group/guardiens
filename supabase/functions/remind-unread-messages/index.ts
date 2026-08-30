@@ -118,7 +118,7 @@ Deno.serve(async (req) => {
         .from("email_send_log")
         .select("id, created_at")
         .eq("template_name", "new-message")
-        .in("status", ["sent", "pending"])
+        .in("status", ["sent", "pending", "deferred"])
         .filter("metadata->>idempotency_key", "eq", `msg_${triggerMsg.id}`)
         .gte("created_at", cutoff24)
         .limit(1);

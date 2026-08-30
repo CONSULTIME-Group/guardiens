@@ -95,7 +95,7 @@ Deno.serve(async (req) => {
     .from('email_send_log')
     .select('id, created_at')
     .eq('template_name', 'new-message')
-    .eq('status', 'sent')
+    .in('status', ['sent', 'deferred'])
     .filter('metadata->>conversation_id', 'eq', payload.conversation_id)
     .filter('metadata->>recipient_id', 'eq', recipientId)
     .gte('created_at', thirtyMinAgo)
