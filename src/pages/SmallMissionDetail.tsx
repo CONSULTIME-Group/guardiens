@@ -438,6 +438,15 @@ const SmallMissionDetail = () => {
         }
         setHasResponded(true);
         setMessage("");
+        const originFeed = readMissionSource(missionUuid!);
+        void trackEvent("mission_response_source", {
+          metadata: {
+            mission_id: missionUuid,
+            source: originFeed.source,
+            utm_campaign: originFeed.utm_campaign,
+            path: "composer",
+          },
+        });
         toast({ title: "Réponse publiée !", description: "La personne qui demande va être prévenue." });
 
         // Note : le fan-out (notif in-app + email) est déclenché côté serveur
