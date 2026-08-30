@@ -398,7 +398,7 @@ const EntraideHub = () => {
     proximity.setFilterEnabled(false);
   };
 
-  const renderMissionCard = (m: MissionRow) => {
+  const renderMissionCard = (m: MissionRow, position: number) => {
     const code = getDeptCode(m.postal_code);
     const dept = code ? DEPT_NAMES[code] : null;
     const period = formatMissionPeriod(m.date_needed, m.end_date);
