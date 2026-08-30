@@ -335,6 +335,10 @@ const AdminSmallMissions = () => {
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
   const ratioGlobal = kpis.totalViews > 0 ? ((kpis.totalResponses / kpis.totalViews) * 100).toFixed(1) : "0";
+  // Indicateur maître : ce que produit une notification envoyée.
+  const notifToResponse = kpis.totalNotified > 0
+    ? ((kpis.totalResponses / kpis.totalNotified) * 100).toFixed(1)
+    : "0";
 
   return (
     <div className="space-y-6">
