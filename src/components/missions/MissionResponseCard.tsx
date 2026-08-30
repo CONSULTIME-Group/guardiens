@@ -197,15 +197,15 @@ const MissionResponseCard = ({
                           className="space-y-2"
                         >
                           <div className="flex items-start gap-2">
-                            <RadioGroupItem value="keep" id={`mode-keep-${r.id}`} className="mt-0.5" />
-                            <Label htmlFor={`mode-keep-${r.id}`} className="text-sm font-normal leading-snug cursor-pointer">
-                              Garder les autres réponses ouvertes (au cas où)
+                            <RadioGroupItem value="decline_others" id={`mode-decline-${r.id}`} className="mt-0.5" />
+                            <Label htmlFor={`mode-decline-${r.id}`} className="text-sm font-normal leading-snug cursor-pointer">
+                              Prévenir les autres que la place est prise (recommandé)
                             </Label>
                           </div>
                           <div className="flex items-start gap-2">
-                            <RadioGroupItem value="decline_others" id={`mode-decline-${r.id}`} className="mt-0.5" />
-                            <Label htmlFor={`mode-decline-${r.id}`} className="text-sm font-normal leading-snug cursor-pointer">
-                              Écarter les autres réponses (elles seront prévenues)
+                            <RadioGroupItem value="keep" id={`mode-keep-${r.id}`} className="mt-0.5" />
+                            <Label htmlFor={`mode-keep-${r.id}`} className="text-sm font-normal leading-snug cursor-pointer">
+                              Laisser les autres réponses en attente
                             </Label>
                           </div>
                         </RadioGroup>
