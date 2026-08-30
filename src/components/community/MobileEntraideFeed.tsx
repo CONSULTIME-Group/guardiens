@@ -6,6 +6,8 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { sanitizeUserTitle } from "@/lib/sanitizeTitle";
 import { trackEvent } from "@/lib/analytics";
 import { publicFirstName } from "@/lib/displayName";
+import MissionCardCover from "@/components/missions/MissionCardCover";
+import { MISSION_CATEGORY_LABEL } from "@/lib/missionCategories";
 
 /**
  * MobileEntraideFeed — fil unique de l'entraide sur mobile.
@@ -58,11 +60,15 @@ const formatRelative = (iso: string) => {
 
 export interface FeedMission {
   id: string;
+  slug?: string | null;
   title: string;
   description: string | null;
+  exchange_offer?: string | null;
   category: string;
   city: string | null;
   created_at: string;
+  status?: string | null;
+  photos?: string[] | null;
   mission_type: "besoin" | "offre" | null;
   profiles?: { first_name: string | null; avatar_url: string | null } | null;
 }
@@ -84,9 +90,12 @@ interface Props {
   loading?: boolean;
   /** Action unique de publication (demande, offre ou question). */
   onPublish: () => void;
+  /** Tri par proximité : actif seulement si la position est connue. */
+  proximityActive?: boolean;
+  getDistance?: (id: string) => number | null;
 }
 
-const MobileEntraideFeed = ({ missions, questions, loading, onPublish }: Props) => {
+const MobileEntraideFeed = ({ missions, questions, loading, onPublish, proximityActive, getDistance }: Props) => {
   const [active, setActive] = useState<FeedType[]>(() => readChips());
   const viewFiredRef = useRef(false);
 
@@ -140,18 +149,22 @@ const MobileEntraideFeed = ({ missions, questions, loading, onPublish }: Props) 
       const t = (m.mission_type ?? "besoin") as "besoin" | "offre";
       if (active.includes(t)) list.push({ kind: t, date: m.created_at, data: m });
     }
-    return list.sort((a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : 0));
-  }, [active, missions, questions]);
+    // Tri par proximité quand la position est connue, sinon chronologique.
+    // La bannière ne promet jamais un tri sans effet.
+    return list.sort((a, b) => {
+      if (proximityActive && getDistance) {
+        const da = getDistance(a.data.id);
+        const db = getDistance(b.data.id);
+        if (da != null && db != null && da !== db) return da - db;
+        if (da != null) return -1;
+        if (db != null) return 1;
+      }
+      return a.date < b.date ? 1 : a.date > b.date ? -1 : 0;
+    });
+  }, [active, missions, questions, proximityActive, getDistance]);
 
   return (
     <div className="md:hidden">
-      <div className="mb-3">
-        <h2 className="font-heading text-lg font-semibold text-foreground">Fil de l'entraide</h2>
-        <p className="text-xs text-muted-foreground mt-1">
-          Questions, demandes et offres de coup de main, du plus récent au plus ancien.
-        </p>
-      </div>
-
       <div
         role="group"
         aria-label="Filtrer le fil de l'entraide"
@@ -233,45 +246,88 @@ const MobileEntraideFeed = ({ missions, questions, loading, onPublish }: Props) 
             const m = it.data;
             const isOffer = it.kind === "offre";
             const badgeLabel = isOffer ? "Offre" : "Demande";
+            // Même couple lisible que le fil desktop : terra sur terra-soft.
             const badgeCls = isOffer
               ? "bg-accent/25 text-accent-foreground"
-              : "bg-secondary/15 text-secondary-foreground";
+              : "bg-terra-soft text-terra border border-terra-border";
             const authorName = publicFirstName(m.profiles?.first_name) || "Membre";
+            const statusBadge =
+              m.status === "in_progress"
+                ? { label: "En cours", aria: "Statut : en cours" }
+                : m.status === "completed"
+                  ? { label: "Terminée", aria: "Statut : terminée" }
+                  : null;
+            const dist = proximityActive && getDistance ? getDistance(m.id) : null;
             return (
               <li key={`m-${m.id}`}>
                 <Link
-                  to={`/petites-missions/${m.id}`}
-                  className="block p-4 rounded-xl bg-card border border-border hover:border-primary/40 hover:shadow-sm transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+                  to={`/petites-missions/${m.slug || m.id}`}
+                  className="flex gap-3 p-3 rounded-xl bg-card border border-border hover:border-primary/40 hover:shadow-sm transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
                   aria-label={`Voir la publication : ${sanitizeUserTitle(m.title) || m.title}`}
                 >
-                  <div className="flex items-center gap-2 mb-2">
-                    <span
-                      className={`text-[10px] font-semibold px-2 py-0.5 rounded-full uppercase tracking-wide ${badgeCls}`}
-                    >
-                      {badgeLabel}
-                    </span>
-                    <span className="ml-auto text-[11px] text-muted-foreground">{formatRelative(m.created_at)}</span>
-                  </div>
-                  <p className="font-heading text-base font-semibold text-foreground line-clamp-2">
-                    {sanitizeUserTitle(m.title) || m.title}
-                  </p>
-                  {m.description && (
-                    <p className="text-sm text-muted-foreground mt-1 line-clamp-2">{m.description}</p>
-                  )}
-                  <div className="mt-3 flex items-center gap-2 text-xs text-muted-foreground">
-                    <Avatar className="h-5 w-5 shrink-0">
-                      <AvatarImage src={m.profiles?.avatar_url || undefined} alt="" loading="lazy" />
-                      <AvatarFallback className="text-[9px]">
-                        {authorName.charAt(0).toUpperCase()}
-                      </AvatarFallback>
-                    </Avatar>
-                    <span className="truncate max-w-[10rem]">{authorName}</span>
-                    {m.city && (
-                      <>
-                        <span aria-hidden="true">·</span>
-                        <span className="truncate">{m.city}</span>
-                      </>
+                  <MissionCardCover
+                    photo={m.photos && m.photos[0] ? m.photos[0] : null}
+                    category={m.category}
+                    title={m.title}
+                    className="w-24 shrink-0 aspect-[4/3] rounded-lg"
+                  />
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-1.5 flex-wrap mb-1.5">
+                      <span
+                        className={`text-[10px] font-semibold px-2 py-0.5 rounded-full uppercase tracking-wide ${badgeCls}`}
+                      >
+                        {badgeLabel}
+                      </span>
+                      <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-primary/10 text-primary uppercase tracking-wide">
+                        {MISSION_CATEGORY_LABEL[m.category as keyof typeof MISSION_CATEGORY_LABEL] || "Autre"}
+                      </span>
+                      {statusBadge && (
+                        <span
+                          className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-muted text-muted-foreground uppercase tracking-wide"
+                          aria-label={statusBadge.aria}
+                        >
+                          {statusBadge.label}
+                        </span>
+                      )}
+                      {dist != null && (
+                        <span
+                          className="ml-auto text-[10px] font-semibold px-2 py-0.5 rounded-full bg-primary/10 text-primary tabular-nums"
+                          aria-label={dist < 1 ? "Distance : moins d'un kilomètre" : `Distance : environ ${Math.round(dist)} kilomètres`}
+                        >
+                          {dist < 1 ? "moins d'1 km" : `à ${Math.round(dist)} km`}
+                        </span>
+                      )}
+                    </div>
+                    <p className="font-heading text-base font-semibold text-foreground line-clamp-2">
+                      {sanitizeUserTitle(m.title) || m.title}
+                    </p>
+                    {m.description && (
+                      <p className="text-sm text-muted-foreground mt-1 line-clamp-2">{m.description}</p>
                     )}
+                    {m.exchange_offer && (
+                      <p className="mt-1.5 text-sm text-foreground/90 line-clamp-1">
+                        <span className="text-[10px] font-semibold uppercase tracking-wide text-terra mr-1.5">
+                          En échange
+                        </span>
+                        {m.exchange_offer}
+                      </p>
+                    )}
+                    <div className="mt-2 flex items-center gap-2 text-xs text-muted-foreground">
+                      <Avatar className="h-5 w-5 shrink-0">
+                        <AvatarImage src={m.profiles?.avatar_url || undefined} alt="" loading="lazy" />
+                        <AvatarFallback className="text-[9px]">
+                          {authorName.charAt(0).toUpperCase()}
+                        </AvatarFallback>
+                      </Avatar>
+                      <span className="truncate max-w-[8rem]">{authorName}</span>
+                      {m.city && (
+                        <>
+                          <span aria-hidden="true">·</span>
+                          <span className="truncate">{m.city}</span>
+                        </>
+                      )}
+                      <span className="ml-auto shrink-0">{formatRelative(m.created_at)}</span>
+                    </div>
                   </div>
                 </Link>
               </li>
