@@ -123,6 +123,14 @@ const SitterEntraideSection = ({
         subtitle={helpersSignal}
       />
 
+      {/* Rappel de la règle fondatrice : un service contre un service, jamais d'argent */}
+      <p
+        className="text-muted-foreground"
+        style={{ fontSize: "13px", lineHeight: 1.5, marginBottom: "14px" }}
+      >
+        Un service contre un service, jamais d'argent : un café, des œufs du jardin, un coup de main en retour.
+      </p>
+
       {/* Deux volets côte à côte sur desktop (refonte rail, août 2026),
           réempilés sur écran étroit, gabarit jumeau */}
       <div className="grid grid-cols-1 md:grid-cols-2" style={{ gap: "14px" }}>
