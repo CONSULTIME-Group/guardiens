@@ -1,4 +1,4 @@
-import { MISSION_CATEGORIES, MISSION_CATEGORY_LABEL } from "@/lib/missionCategories";
+import { MISSION_CATEGORIES, MISSION_CATEGORY_LABEL, type MissionCategory } from "@/lib/missionCategories";
 
 /** Libellés catégories : miroir strict de la source unique. */
 export const CATEGORY_META: Record<string, { label: string }> = Object.fromEntries(
