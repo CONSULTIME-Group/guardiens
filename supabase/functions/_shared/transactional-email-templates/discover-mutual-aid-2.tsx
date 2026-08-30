@@ -46,7 +46,7 @@ const DiscoverMutualAidOfferEmail = ({ firstName }: Props) => (
         </Section>
 
         <Text style={text} className="em-text">
-          C'est gratuit, sans transaction financière. L'entraide repose sur la confiance
+          Un service contre un service, ni tarif ni facture. L'entraide repose sur la confiance
           et le plaisir de rendre service. Vous pourriez être surpris par ce que ça change.
         </Text>
 

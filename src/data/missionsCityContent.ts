@@ -29,7 +29,7 @@ export const MISSIONS_LYON: MissionsCityContent = {
   radiusKm: 25,
   metaTitle: "Petites missions d'entraide à domicile à Lyon | Guardiens",
   metaDescription:
-    "Petites missions d'entraide à domicile à Lyon : garde animaux, jardin, courses. Sans contrepartie financière, entre gens du coin. Publiez ou aidez.",
+    "Petites missions d'entraide à domicile à Lyon : garde animaux, jardin, courses. Un service contre un service, entre gens du coin. Publiez ou aidez.",
   h1: "Petites missions d'entraide à domicile à Lyon",
   intro:
     "À Lyon, les petites missions d'entraide rassemblent des gens du coin qui rendent service à domicile sans contrepartie financière. Une promenade de chien à la Croix-Rousse, un arrosage de plantes à Villeurbanne, un coup de main pour réceptionner un colis à Vaise : autant d'échanges concrets qui se nouent entre habitants des 9 arrondissements lyonnais et des communes proches comme Caluire-et-Cuire, Tassin-la-Demi-Lune, Bron, Vénissieux ou Écully.",
@@ -47,7 +47,7 @@ export const MISSIONS_LYON: MissionsCityContent = {
     {
       heading: "Comment publier ou répondre à une mission près de chez vous",
       body:
-        "Si vous habitez à Lyon ou dans un rayon de 25 kilomètres autour de Bellecour, vous pouvez à la fois publier une mission et proposer votre aide. Pour publier, vous décrivez en quelques lignes ce dont vous avez besoin, vous précisez votre quartier ou votre commune, et vous indiquez ce que vous proposez en échange, un produit, un service futur, un simple moment partagé. Les gens du coin voient votre demande et vous contactent par messagerie privée. Si vous voulez aider, vous parcourez les missions ouvertes affichées plus bas sur cette page : elles sont triées par proximité avec Lyon. Les missions d'entraide sont accessibles à toutes les personnes inscrites, sans abonnement, sans commission.",
+        "Si vous habitez à Lyon ou dans un rayon de 25 kilomètres autour de Bellecour, vous pouvez à la fois publier une mission et proposer votre aide. Pour publier, vous décrivez en quelques lignes ce dont vous avez besoin, vous précisez votre quartier ou votre commune, et vous indiquez ce que vous proposez en échange, un produit, un service futur, un simple moment partagé. Les gens du coin voient votre demande et vous contactent par messagerie privée. Si vous voulez aider, vous parcourez les missions ouvertes affichées plus bas sur cette page : elles sont triées par proximité avec Lyon. Les missions d'entraide sont accessibles à toutes les personnes inscrites : un service contre un service, jamais d'argent.",
     },
     {
       heading: "Une logique d'échange, pas de prestation",
@@ -66,7 +66,7 @@ export const MISSIONS_LYON: MissionsCityContent = {
     },
     {
       q: "Faut-il un abonnement pour publier une mission à Lyon ?",
-      a: "Non. Les petites missions d'entraide sont accessibles à tous les membres inscrits sur Guardiens, sans abonnement et sans frais. L'espace gardien, pour les longues gardes à domicile, est également gratuit aujourd'hui, sans engagement.",
+      a: "Non. Les petites missions d'entraide sont accessibles à tous les membres inscrits sur Guardiens : un service contre un service, ni tarif ni facture. L'espace gardien, pour les longues gardes à domicile, est également gratuit aujourd'hui, sans engagement.",
     },
     {
       q: "Quelle différence avec une garde de maison à Lyon ?",

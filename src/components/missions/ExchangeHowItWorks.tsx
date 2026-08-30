@@ -65,7 +65,7 @@ const ExchangeHowItWorks = ({
           {
             icon: MessageCircle,
             title: "2. Convenez d'un petit échange",
-            text: "Sans argent, sans abonnement. Un café, des œufs, un service en retour : c'est vous qui décidez.",
+            text: "Ni tarif ni facture. Un café, des œufs, un service en retour : c'est vous qui décidez.",
           },
           {
             icon: Sparkles,
@@ -95,7 +95,7 @@ const ExchangeHowItWorks = ({
           {title}
         </h3>
         <p className="text-sm text-foreground/70 mt-1">
-          Un coup de main, c'est un échange. Sans argent, sans abonnement.
+          Un coup de main, c'est un échange. Un service contre un service, ni tarif ni facture.
         </p>
       </header>
 

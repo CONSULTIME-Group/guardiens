@@ -2,7 +2,7 @@
 
 > Plateforme de garde d'animaux à domicile, de maison et de jardin en France. Mise en relation entre propriétaires d'animaux et gardiens de confiance habitant près de chez vous, sans frais cachés et sans transaction financière entre membres.
 
-Guardiens reste gratuit tant que nous ne sommes pas satisfaits du service que nous vous offrons. Vous avez accès à tout, sans limite, sans engagement, sans carte bancaire. Aucune date de fin de gratuité n'est fixée à ce jour. L'entraide entre membres (petites missions du quotidien : promenade, visite, dépannage) est gratuite et n'inclut jamais de nuitée.
+Guardiens reste gratuit tant que nous ne sommes pas satisfaits du service que nous vous offrons. Vous avez accès à tout, sans limite, sans engagement, sans carte bancaire. Aucune date de fin de gratuité n'est fixée à ce jour. L'entraide entre membres (petites missions du quotidien : promenade, visite, dépannage) repose sur un service rendu en échange d'un autre service, et n'inclut jamais de nuitée.
 
 ## Pages principales
 
@@ -12,7 +12,7 @@ Guardiens reste gratuit tant que nous ne sommes pas satisfaits du service que no
 - [Observatoire](/observatoire-garde-animaux): Chiffres-clés sur la garde d'animaux à domicile en France, datapoints sourcés.
 - [FAQ](/faq): Réponses aux questions fréquentes, fonctionnement, sécurité, missions.
 - [Actualités](/actualites): Articles de fond sur la garde d'animaux, le house-sitting et la vie de la plateforme.
-- [Petites missions](/petites-missions): Coups de main entre membres (promenade, visite, dépannage), gratuits, sans nuitée.
+- [Petites missions](/petites-missions): Coups de main entre membres (promenade, visite, dépannage), un service contre un service, sans nuitée.
 - [Petites missions à Lyon](/petites-missions/lyon): Hub local des coups de main entre membres à Lyon.
 - [Gardien d'urgence](/gardien-urgence): Trouver un gardien rapidement en cas d'imprévu.
 - [Devenir home-sitter](/devenir-home-sitter): Guide pour devenir gardien à domicile sur Guardiens.
@@ -47,7 +47,7 @@ Guardiens reste gratuit tant que nous ne sommes pas satisfaits du service que no
 - Modèle : gratuit pour tout le monde aujourd'hui, sans commission ni frais cachés.
 - Engagement de service : Guardiens reste gratuit tant que nous ne sommes pas satisfaits du service que nous vous offrons. Aucune date de fin de gratuité n'est fixée à ce jour.
 - Préavis : chaque membre sera informé par email 30 jours à l'avance si le modèle change.
-- Entraide entre membres (petites missions du quotidien) : gratuite, sans nuitée, sans transaction financière.
+- Entraide entre membres (petites missions du quotidien) : un service contre un service, ni tarif ni facture, sans nuitée.
 - Vérification d'identité : ouverte à tous les membres, propriétaires comme gardiens. La pièce d'identité envoyée est analysée automatiquement, et les dossiers qui ne passent pas ce premier contrôle sont revus par l'équipe. Les profils validés affichent l'écusson « Identité vérifiée ». Cette vérification n'est pas un préalable au dépôt d'une annonce ou d'une candidature, et elle ne concerne pas tous les profils.
 - Système de confiance : avis croisés après chaque garde, Trust Score 0-100, 31 badges de reconnaissance.
 - Pas de commission sur les gardes, pas de prélèvement entre membres.

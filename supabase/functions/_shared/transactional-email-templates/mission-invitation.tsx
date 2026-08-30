@@ -58,7 +58,7 @@ const MissionInvitationEmail = ({
         </Section>
 
         <Text style={muted}>
-          L'entraide est gratuite, sans transaction financière. Si cette mission ne vous
+          L'entraide, c'est un service contre un service, jamais d'argent. Si cette mission ne vous
           correspond pas, vous pouvez simplement ignorer ce message.
         </Text>
 

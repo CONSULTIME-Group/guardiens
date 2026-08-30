@@ -32,7 +32,7 @@ const DiscoverMutualAidEmail = ({ firstName }: Props) => (
         </Text>
 
         <Text style={text} className="em-text">
-          L'entraide entre membres du coin, c'est gratuit, simple, et c'est souvent ce qui crée
+          L'entraide entre membres du coin, c'est un service contre un service, simple, et c'est souvent ce qui crée
           les plus belles rencontres. Une question, un service, une envie de nouveauté :
           il suffit de demander.
         </Text>
