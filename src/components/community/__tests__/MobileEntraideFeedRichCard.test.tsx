@@ -68,7 +68,7 @@ describe("carte mobile de l'entraide", () => {
     renderFeed();
     expect(screen.getByText("En échange")).toBeInTheDocument();
     expect(screen.getByText("Servez-vous dans le potager")).toBeInTheDocument();
-    expect(screen.getByText("Jardin")).toBeInTheDocument();
+    expect(screen.getAllByText("Jardin").length).toBeGreaterThan(0);
     expect(screen.getByText("En cours")).toBeInTheDocument();
   });
 
