@@ -158,7 +158,6 @@ Deno.serve(async (req) => {
 
     // === Nudge 4 : invitation à clôturer (date prévue passée depuis 3 à 10 jours) ===
     if (!body.kind || body.kind === 'close_reminder') {
-      const today = new Date(now)
       const iso = (d: Date) => d.toISOString().slice(0, 10)
       const older = iso(new Date(now - 10 * 86400_000))
       const recent = iso(new Date(now - 3 * 86400_000))
