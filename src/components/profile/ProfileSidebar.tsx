@@ -63,7 +63,7 @@ const ProfileSidebar = ({
     ? firstName.charAt(0).toUpperCase() + firstName.slice(1).toLowerCase()
     : "Votre profil";
 
-  const isVisible = completion >= 60;
+  const isVisible = completion >= MIN_COMPLETION_TO_APPLY;
 
   return (
     <TooltipProvider delayDuration={200}>
@@ -119,7 +119,7 @@ const ProfileSidebar = ({
           <p className="text-[11px] text-muted-foreground">
             {isVisible
               ? `Visible par les ${role === "sitter" ? "propriétaires" : "gardiens"}`
-              : `Complétez jusqu'à 60% pour rendre votre profil visible`}
+              : `Complétez jusqu'à ${MIN_COMPLETION_TO_APPLY}% pour rendre votre profil visible`}
           </p>
         </div>
 
@@ -212,7 +212,7 @@ const ProfileSidebar = ({
           ) : (
             <span className="inline-flex items-center gap-1 text-xs text-warning-foreground bg-warning-soft border border-warning-border rounded-full px-2 py-0.5">
               <AlertTriangle className="h-3 w-3" aria-hidden="true" />
-              Profil non visible, complétez à 60%
+              Profil non visible, complétez à {MIN_COMPLETION_TO_APPLY}%
             </span>
           )}
         </div>
