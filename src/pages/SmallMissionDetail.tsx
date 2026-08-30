@@ -2,6 +2,7 @@ import { MISSION_CATEGORIES } from "@/lib/missionCategories";
 import { useTranslation } from "react-i18next";
 import { useState, useEffect, useCallback, useRef } from "react";
 import { trackEvent } from "@/lib/analytics";
+import { captureMissionSource, readMissionSource } from "@/lib/missionResponseSource";
 import { logger } from "@/lib/logger";
 import { useParams, Link, useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
