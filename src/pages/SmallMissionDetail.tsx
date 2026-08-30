@@ -952,41 +952,57 @@ const SmallMissionDetail = () => {
               {author?.first_name || "L'auteur"} a reçu votre mot. Vous serez prévenu(e) dès qu'il y a une réponse.
             </p>
             <p className="text-xs text-muted-foreground">Envoyée {timeAgoFr(myResponse.created_at)}.</p>
-            <Button
-              variant="outline"
-              size="sm"
-              className="w-full rounded-full"
-              onClick={async () => {
-                if (!confirm("Retirer votre réponse ?")) return;
-                const { error } = await supabase
-                  .from("small_mission_responses")
-                  .update({ status: "withdrawn" as any })
-                  .eq("id", myResponse.id);
-                if (error) {
-                  toast({ variant: "destructive", title: "Erreur", description: error.message });
-                  return;
-                }
-                // On garde hasResponded=true : la ligne reste en BDD (status=withdrawn), pas de re-réponse possible sans admin.
-                setResponses(prev => prev.map(r =>
-                  r.id === myResponse.id ? { ...r, status: "withdrawn" } : r,
-                ));
-                trackEvent("mission_response_withdrawn", {
-                  metadata: { mission_id: missionUuid!, response_id: myResponse.id },
-                });
-                // Fan-out serveur (notif + email auteur)
-                supabase.functions.invoke("notify-mission-event", {
-                  body: {
-                    event_type: "mission_response_withdrawn",
-                    mission_id: missionUuid!,
-                    actor_id: user!.id,
-                    target_ids: [mission.user_id],
-                  },
-                }).catch(() => {});
-                toast({ title: "Réponse retirée" });
-              }}
-            >
-              Retirer ma réponse
-            </Button>
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button variant="outline" size="sm" className="w-full rounded-full">
+                  Retirer ma réponse
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Retirer votre réponse ?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    Ce retrait est définitif : vous ne pourrez plus proposer votre aide sur cette
+                    publication. {author?.first_name || "L'auteur"} en sera informé(e).
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Annuler</AlertDialogCancel>
+                  <AlertDialogAction
+                    className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                    onClick={async () => {
+                      const { error } = await supabase
+                        .from("small_mission_responses")
+                        .update({ status: "withdrawn" as any })
+                        .eq("id", myResponse.id);
+                      if (error) {
+                        toast({ variant: "destructive", title: "Erreur", description: error.message });
+                        return;
+                      }
+                      // On garde hasResponded=true : la ligne reste en BDD (status=withdrawn), pas de re-réponse possible sans admin.
+                      setResponses(prev => prev.map(r =>
+                        r.id === myResponse.id ? { ...r, status: "withdrawn" } : r,
+                      ));
+                      trackEvent("mission_response_withdrawn", {
+                        metadata: { mission_id: missionUuid!, response_id: myResponse.id },
+                      });
+                      // Fan-out serveur (notif + email auteur)
+                      supabase.functions.invoke("notify-mission-event", {
+                        body: {
+                          event_type: "mission_response_withdrawn",
+                          mission_id: missionUuid!,
+                          actor_id: user!.id,
+                          target_ids: [mission.user_id],
+                        },
+                      }).catch(() => {});
+                      toast({ title: "Réponse retirée" });
+                    }}
+                  >
+                    Retirer définitivement
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
           </div>
         );
       }
