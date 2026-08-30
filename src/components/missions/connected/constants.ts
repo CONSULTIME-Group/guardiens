@@ -69,17 +69,16 @@ export const EXAMPLES = [
   { cat: "skills", title: "Dog-training : les bases (rappel, marche en laisse)", exchange: "Un bon café et une balade ensemble" },
 ];
 
-export type CategoryFilter = "all" | "animals" | "garden" | "house" | "skills" | "mine";
+export type CategoryFilter = string;
 export type ModeFilter = "need" | "offer";
 
+/** Filtres : les huit catégories de la source unique, encadrées de Tout et Mes missions. */
 export const FILTER_PILLS: { key: CategoryFilter; label: string }[] = [
   { key: "all", label: "Tout" },
-  { key: "garden", label: "Jardin" },
-  { key: "animals", label: "Animaux" },
-  { key: "skills", label: "Compétences" },
-  { key: "house", label: "Maison" },
+  ...MISSION_CATEGORIES.map((c) => ({ key: c.key as string, label: c.label })),
   { key: "mine", label: "Mes missions" },
 ];
+
 
 export const ENTRAIDE_HEADER_URL =
   "https://erhccyqevdyevpyctsjj.supabase.co/storage/v1/object/public/property-photos/misc/entraide-header.webp";
