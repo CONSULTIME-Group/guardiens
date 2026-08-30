@@ -432,6 +432,7 @@ Deno.serve(async (req) => {
                 .from("sitter_gallery")
                 .select("user_id")
                 .in("user_id", batchIds)
+                .order("id", { ascending: true })
                 .range(from, from + GALLERY_PAGE_SIZE - 1);
               if (gErr) {
                 console.error("[publish-alert] lecture sitter_gallery impossible", gErr.message);

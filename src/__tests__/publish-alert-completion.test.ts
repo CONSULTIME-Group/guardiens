@@ -47,6 +47,7 @@ describe("alerte immediate, phrase de completion", () => {
 
   it("pagine explicitement la lecture sitter_gallery pour echapper au plafond PostgREST", () => {
     const block = SRC.slice(SRC.indexOf('from("sitter_gallery")'));
+    expect(block).toContain(".order(\"id\", { ascending: true })");
     expect(block).toContain(".range(from, from + GALLERY_PAGE_SIZE - 1)");
     expect(block).toContain("(grows ?? []).length < GALLERY_PAGE_SIZE");
     expect(SRC).toContain("const GALLERY_PAGE_SIZE = 1000");
