@@ -542,7 +542,26 @@ Deno.serve(async (req) => {
       );
     }
 
+    // Garde fou de volume (30/08/2026) : aucune limite dure, la diffusion
+    // manuelle est une action admin deliberee. Au dela de 150 destinataires,
+    // elle est simplement tracee en signal admin.
+    if (targets.length > LARGE_BROADCAST_THRESHOLD) {
+      const { error: signalErr } = await serviceClient.from("admin_signals").insert({
+        signal_type: "listing_proximity_large_broadcast",
+        severity: "warning",
+        entity_type: "sit",
+        entity_id: sitId,
+        metadata: {
+          sit_id: sitId,
+          targeted: targets.length,
+          radius_km: radiusKm,
+        },
+      });
+      if (signalErr) console.error("large broadcast signal failed", signalErr.message);
+    }
+
     // Row campagne pour la traçabilité admin (SignalsSection).
+
     const { data: campaign, error: campErr } = await serviceClient
       .from("mass_emails")
       .insert({
