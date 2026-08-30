@@ -2,9 +2,16 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useSubscriptionAccess } from "@/hooks/useSubscriptionAccess";
 
 /**
+ * Seuil minimal de complétion de profil pour qu'un gardien puisse postuler
+ * aux annonces. Source unique côté front : toute référence au seuil doit
+ * importer cette constante.
+ */
+export const MIN_COMPLETION_TO_APPLY = 40;
+
+/**
  * Access levels:
  * 0 — Not logged in
- * 1 — Connecté, profil incomplet (moins de 60 pour cent) : ne peut pas postuler
+ * 1 — Connecté, profil incomplet (moins de 40 pour cent) : ne peut pas postuler
  * 2 — Connecté, identité non vérifiée (NON-BLOQUANT, recommandation seulement)
  * 3A — Gardien, identité vérifiée, sans abonnement
  * 3B — Propriétaire, identité vérifiée (gratuit)
