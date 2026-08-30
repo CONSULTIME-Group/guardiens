@@ -26,6 +26,10 @@ import { createClient, SupabaseClient } from "https://esm.sh/@supabase/supabase-
 import { clampRadiusKm, MAX_RADIUS_KM, PROXIMITY_DEDUP_DAYS } from "../_shared/proximity-radius.ts";
 import { PUBLISHED_STATUS } from "../_shared/sit-alert-guard.ts";
 
+/** Au dela de ce nombre de destinataires, la diffusion manuelle est signalee. */
+export const LARGE_BROADCAST_THRESHOLD = 150;
+
+
 /**
  * Adresses à ne pas resservir :
  * - celles déjà servies pour CETTE annonce, toutes campagnes confondues,
