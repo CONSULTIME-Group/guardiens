@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import { StatutGardienBadge } from "@/components/profile/StatutGardienBadge";
 import { useAuth } from "@/contexts/AuthContext";
 import type { ReputationData } from "@/hooks/useSitterDashboardData";
+import { MIN_COMPLETION_TO_APPLY } from "@/hooks/useAccessLevel";
 
 interface SitterStatusBarProps {
   profileCompletion: number;

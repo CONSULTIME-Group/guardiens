@@ -89,7 +89,7 @@ const SitterSitView = ({
 
   const [applyOpen, setApplyOpen] = useState(false);
   /**
-   * Complétion « en place » : un gardien sous 60 pour cent ne quitte plus
+   * Complétion « en place » : un gardien sous 40 pour cent ne quitte plus
    * l'annonce, il complète le strict nécessaire dans une modale puis enchaîne
    * sur sa candidature. Le seuil lui-même reste porté par useAccessLevel.
    */
