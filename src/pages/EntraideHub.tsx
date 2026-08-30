@@ -58,6 +58,7 @@ interface MissionRow {
   slug?: string | null;
   title: string;
   description: string | null;
+  exchange_offer?: string | null;
   category: string;
   city: string | null;
   postal_code: string | null;
@@ -203,7 +204,7 @@ const EntraideHub = () => {
       const { data } = await supabase
         .from(isAuthenticated ? "small_missions" : ("public_small_missions" as any))
         .select(
-          "id, slug, title, description, category, city, postal_code, created_at, date_needed, end_date, duration_estimate, status, mission_type, user_id, photos",
+          "id, slug, title, description, exchange_offer, category, city, postal_code, created_at, date_needed, end_date, duration_estimate, status, mission_type, user_id, photos",
         )
         .in("status", ["open", "in_progress", "completed"] as any)
         .order("created_at", { ascending: false })
@@ -394,7 +395,10 @@ const EntraideHub = () => {
     const natureCls =
       (m.mission_type ?? "besoin") === "offre"
         ? "bg-accent/25 text-accent-foreground"
-        : "bg-secondary/15 text-secondary-foreground";
+        // Demande : encre sur terra-soft, bordure terra. Mesuré 15,8:1 en clair et
+        // 11:1 en sombre. Le couple secondary/15 + secondary-foreground donnait
+        // du crème sur du crème, 1,14:1, sous le minimum AA de 4,5:1.
+        : "bg-terra-soft text-foreground border border-terra-border";
     const statusBadge =
       m.status === "in_progress"
         ? { label: "En cours", aria: "Statut : en cours" }
@@ -509,6 +513,15 @@ const EntraideHub = () => {
                 {m.description}
               </p>
             )}
+            {m.exchange_offer && (
+              // Coeur du modèle : un service contre un service, jamais d'argent.
+              <p className="mt-2 text-sm text-foreground/90 line-clamp-1">
+                <span className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground mr-1.5">
+                  En échange
+                </span>
+                {m.exchange_offer}
+              </p>
+            )}
             <div className="flex items-center gap-2 mt-3 text-xs text-muted-foreground flex-wrap">
               <Avatar className="h-5 w-5 shrink-0">
                 <AvatarImage src={m.profiles?.avatar_url || undefined} alt="" loading="lazy" />
@@ -547,10 +560,6 @@ const EntraideHub = () => {
         <PageBreadcrumb items={[{ label: t("nav.small_missions", "Entraide") }]} />
 
         <section className="max-w-3xl mx-auto px-4 sm:px-6 pt-4 pb-28 sm:pt-6 sm:pb-8 min-w-0">
-          <EntraideGeolocBanner
-            hasCoords={proximity.active}
-            onUseMyLocation={proximity.useMyLocation}
-          />
           <div className="mb-5">
             <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-3">
               <div className="min-w-0 flex-1">
@@ -563,7 +572,7 @@ const EntraideHub = () => {
                   </span>
                 </div>
                 <p className="text-sm text-muted-foreground mt-1.5 md:max-w-xl">
-                  Questions à la communauté, demandes et offres de coup de main entre gens du coin.
+                  Questions, demandes et offres de coup de main entre gens du coin, du plus récent au plus ancien. Un service contre un service, ni tarif ni facture.
                 </p>
               </div>
               <Button onClick={goPublish} size="sm" className="hidden md:inline-flex shrink-0 h-9">
@@ -572,12 +581,22 @@ const EntraideHub = () => {
             </div>
           </div>
 
+          {/* Position : proposée aux membres seulement, et jamais avant le titre. */}
+          {isAuthenticated && (
+            <EntraideGeolocBanner
+              hasCoords={proximity.active}
+              onUseMyLocation={proximity.useMyLocation}
+            />
+          )}
+
           {/* Fil unifié mobile. */}
           <MobileEntraideFeed
-            missions={missions}
-            questions={questions as any}
+            missions={baseMissions}
+            questions={baseQuestions as any}
             loading={mLoading || qLoading}
             onPublish={goPublish}
+            proximityActive={proximity.active}
+            getDistance={proximity.getDistance}
           />
 
           {/* Desktop : fil unique. */}

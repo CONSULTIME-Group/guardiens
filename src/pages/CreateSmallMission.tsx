@@ -100,6 +100,7 @@ const CreateSmallMission = () => {
   // Aucune catégorie présélectionnée : la personne choisit, le formulaire suit.
   const [category, setCategory] = useState("");
   const [categoryTouched, setCategoryTouched] = useState(false);
+  const [photoTouched, setPhotoTouched] = useState(false);
   const [title, setTitle] = useState("");
   const [titleTouched, setTitleTouched] = useState(false);
   const [description, setDescription] = useState("");
@@ -185,8 +186,16 @@ const CreateSmallMission = () => {
   };
 
   /* Step 1 validation */
+  /**
+   * Photo requise pour toutes les offres, et pour les catégories qui ont un
+   * objet à montrer. Facultative là où il n'y a souvent rien à photographier.
+   */
+  const photoRequired =
+    missionType === "offre" || ["animals", "garden", "house"].includes(category);
+
   const step1Valid =
     !!category &&
+    (!photoRequired || photos.length > 0) &&
     title.trim().length >= MIN_TITLE_LEN &&
     description.trim().length >= MIN_DESC_LEN &&
     exchangeOffer.trim().length >= 2 &&
@@ -194,6 +203,7 @@ const CreateSmallMission = () => {
 
   const handleNextStep = () => {
     setCategoryTouched(true);
+    setPhotoTouched(true);
     setTitleTouched(true);
     setDescTouched(true);
     setExchangeTouched(true);
@@ -258,6 +268,7 @@ const CreateSmallMission = () => {
     if (submitting) return;
     const missing: string[] = [];
     if (!category) missing.push("Catégorie");
+    if (photoRequired && photos.length === 0) missing.push("Photo");
     if (!title.trim()) missing.push("Titre");
     if (!description.trim()) missing.push("Description");
     if (!exchangeOffer.trim()) missing.push("Contrepartie");
@@ -265,7 +276,7 @@ const CreateSmallMission = () => {
     if (!postalCode.trim()) missing.push("Code postal");
     if (!duration) missing.push("Durée estimée");
     if (missing.length > 0) {
-      const stepOneMissing = missing.some((m) => ["Catégorie", "Titre", "Description", "Contrepartie"].includes(m));
+      const stepOneMissing = missing.some((m) => ["Catégorie", "Photo", "Titre", "Description", "Contrepartie"].includes(m));
       toast({
         title: missing.length > 1 ? "Champs manquants" : "Champ manquant",
         description: `À compléter : ${missing.join(", ")}.`,
@@ -274,6 +285,7 @@ const CreateSmallMission = () => {
       setStep(stepOneMissing ? 1 : 2);
       if (stepOneMissing) {
         setCategoryTouched(true);
+        setPhotoTouched(true);
         setTitleTouched(true);
         setDescTouched(true);
         setExchangeTouched(true);
@@ -601,6 +613,24 @@ const CreateSmallMission = () => {
                   )}
                 </div>
 
+                {/* Photo, juste après le titre : c'est elle qui fait comprendre en un coup d'oeil. */}
+                <div className="space-y-2">
+                  <Label className="text-sm font-medium">
+                    {photoRequired ? "Photo" : "Photo (facultative)"}
+                  </Label>
+                  <p className="text-xs text-muted-foreground">
+                    {photoRequired
+                      ? "Une photo montre de quoi il s'agit, et les publications qui en ont une reçoivent bien plus de réponses."
+                      : "Ajoutez une photo si vous avez quelque chose à montrer, sinon passez."}
+                  </p>
+                  <MissionPhotoUpload userId={user!.id} photos={photos} onChange={setPhotos} />
+                  {photoTouched && photoRequired && photos.length === 0 && (
+                    <p className="text-xs text-destructive flex items-center gap-1">
+                      <AlertCircle className="h-3 w-3 shrink-0" /> Ajoutez une photo pour cette publication.
+                    </p>
+                  )}
+                </div>
+
                 {/* Description */}
                 <div className="space-y-2">
                   <Label className="text-sm font-medium">
@@ -865,13 +895,6 @@ const CreateSmallMission = () => {
                     À compléter : {[!city.trim() ? "Ville" : null, !postalCode.trim() ? "Code postal" : null].filter(Boolean).join(", ")}.
                   </p>
                 )}
-
-
-                {/* Photos */}
-                <div className="space-y-2">
-                  <Label className="text-sm font-medium">{tp("photos_label")}</Label>
-                  <MissionPhotoUpload userId={user!.id} photos={photos} onChange={setPhotos} />
-                </div>
               </>
             )}
           </form>
