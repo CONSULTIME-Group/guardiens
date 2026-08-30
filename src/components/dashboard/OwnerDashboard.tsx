@@ -156,7 +156,7 @@ const OwnerDashboard = () => {
   useEffect(() => {
     if (loading || !user || !data.profile) return;
     const dismissed = localStorage.getItem("onboarding_owner_dismissed");
-    if (!dismissed && user.profileCompletion < 60 && data.profile.onboarding_minimal_completed) {
+    if (!dismissed && user.profileCompletion < MIN_COMPLETION_TO_APPLY && data.profile.onboarding_minimal_completed) {
       setShowOnboarding(true);
     } else {
       setShowOnboarding(false);

@@ -45,7 +45,7 @@ const SitterStatusBar = ({
         <div className="h-1.5 bg-primary rounded-full transition-all duration-500" style={{ width: `${profileCompletion}%` }} />
       </div>
       <p className="text-lg font-heading font-bold text-foreground mb-1">{profileCompletion}% complété</p>
-      {profileCompletion >= 60 && (
+      {profileCompletion >= MIN_COMPLETION_TO_APPLY && (
         <span className="text-xs font-sans bg-primary/10 text-primary rounded-md px-2 py-0.5 inline-block mb-3">Visible par les proprios</span>
       )}
       {profileCompletion < 100 && (

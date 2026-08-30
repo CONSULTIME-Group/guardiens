@@ -835,7 +835,7 @@ const OnboardingModal = ({ open, onClose, onMinimalComplete }: OnboardingModalPr
                 Votre profil est prêt.
               </h2>
               <p className="text-base text-foreground/80 leading-relaxed">
-                {liveCompletion >= 60
+                {liveCompletion >= MIN_COMPLETION_TO_APPLY
                   ? "Bravo ! Votre profil est déjà bien rempli. La communauté peut vous découvrir."
                   : "Vous pouvez encore améliorer votre profil depuis vos paramètres. En attendant, explorez !"}
               </p>

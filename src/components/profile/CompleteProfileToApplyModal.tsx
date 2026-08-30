@@ -622,7 +622,7 @@ const CompleteProfileToApplyModal = ({
             </DialogDescription>
           </DialogHeader>
 
-          {/* Barre de progression, repère du seuil à 60 pour cent */}
+          {/* Barre de progression, repère du seuil à 40 pour cent */}
           <div className="mt-4">
             <div className="relative h-2.5 rounded-full bg-muted overflow-hidden">
               <div
