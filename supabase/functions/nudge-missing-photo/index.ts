@@ -150,7 +150,7 @@ Deno.serve(async (req) => {
       .select("recipient_email")
       .eq("template_name", TEMPLATE_NAME)
       .in("recipient_email", emails)
-      .in("status", ["sent", "pending"]);
+      .in("status", ["sent", "pending", "deferred"]);
     const sentSet = new Set(
       (alreadySent || []).map((s: any) => (s.recipient_email as string).trim().toLowerCase()),
     );

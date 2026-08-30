@@ -71,7 +71,7 @@ Deno.serve(async (req) => {
       .select("recipient_email")
       .eq("template_name", "relance-profil-incomplet")
       .in("recipient_email", emails)
-      .in("status", ["sent", "pending"]);
+      .in("status", ["sent", "pending", "deferred"]);
     const sentSet = new Set((alreadySent || []).map(s => s.recipient_email));
 
     const targets = candidates.filter(p =>

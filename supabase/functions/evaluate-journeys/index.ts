@@ -214,7 +214,7 @@ async function runEvaluation(
     const { data: recent, error: recentErr } = await supabase
       .from('email_send_log')
       .select('recipient_email')
-      .eq('status', 'sent')
+      .in('status', ['sent', 'deferred'])
       .gte('created_at', freqSince)
       .filter('metadata->>source', 'like', 'journey:%')
       .limit(10000)

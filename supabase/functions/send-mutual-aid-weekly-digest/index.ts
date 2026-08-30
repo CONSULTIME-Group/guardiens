@@ -169,7 +169,7 @@ Deno.serve(async (req) => {
           .select('id')
           .eq('template_name', TEMPLATE)
           .eq('recipient_email', email)
-          .in('status', ['sent', 'pending'])
+          .in('status', ['sent', 'pending', 'deferred'])
           .gte('created_at', dedupWindowIso)
           .limit(1)
         if (prev && prev.length > 0) { skipped++; continue }

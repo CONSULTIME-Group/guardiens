@@ -339,7 +339,7 @@ Deno.serve(async (req) => {
             .select('id')
             .eq('template_name', 'nearby-daily-digest')
             .eq('recipient_email', email)
-            .in('status', ['sent', 'pending'])
+            .in('status', ['sent', 'pending', 'deferred'])
             .gte('created_at', cutoff)
             .limit(1)
           if (recent && recent.length > 0) { usersSkipped++; continue }
