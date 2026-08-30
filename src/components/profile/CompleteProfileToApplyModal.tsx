@@ -1,7 +1,7 @@
 /**
  * CompleteProfileToApplyModal
  * ----------------------------------------------------------------------------
- * Complétion de profil « en place » pour un gardien sous le seuil de 60 pour
+ * Complétion de profil « en place » pour un gardien sous le seuil de 40 pour
  * cent, ouverte depuis la page d'une annonce. Objectif : ne jamais faire
  * quitter l'annonce, puis enchaîner directement sur la candidature.
  *
@@ -18,7 +18,7 @@
  *   - La sauvegarde emprunte le chemin canonique `useSitterProfile.saveStep`
  *     (écriture, RPC calculate_profile_completion, refreshProfile), sinon
  *     `useAccessLevel` resterait bloqué au niveau 1.
- *   - Le garde-fou des 60 pour cent n'est pas supprimé, il devient franchissable
+ *   - Le garde-fou des 40 pour cent n'est pas supprimé, il devient franchissable
  *     sur place.
  */
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
