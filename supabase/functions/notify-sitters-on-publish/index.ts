@@ -305,7 +305,13 @@ Deno.serve(async (req) => {
         for (const s of (sups ?? []) as any[]) if (s.email) suppressed.add(String(s.email).toLowerCase());
       }
 
-      type Target = { user_id: string; email: string; first_name: string; distance_km: number | null };
+      type Target = {
+        user_id: string;
+        email: string;
+        first_name: string;
+        distance_km: number | null;
+        manual: boolean;
+      };
       const targets: Target[] = [];
       const seen = new Set<string>();
       for (const zone of zones as any[]) {
@@ -330,24 +336,35 @@ Deno.serve(async (req) => {
           email: String(sitter.email).trim(),
           first_name: sitter.first_name || "",
           distance_km: verdict.distanceKm,
+          // Alerte faite main : `source IS NULL`. Un rayon pose par la
+          // migration automatique n'est pas un choix, il ne donne donc
+          // aucune priorite hors plafond.
+          manual: zone.source === null || zone.source === undefined,
         });
       }
 
       targets.sort((a, b) => (a.distance_km ?? 99999) - (b.distance_km ?? 99999));
+      // Priorite hors plafond aux seules alertes configurees a la main,
+      // meme regle que le declencheur notify_sitters_on_new_sit.
+      const manualTargets = targets.filter((t) => t.manual);
+      const rankedTargets = targets.filter((t) => !t.manual);
       let selected = targets;
-      if (targets.length > MAX_RECIPIENTS_PER_RUN) {
-        selected = targets.slice(0, MAX_RECIPIENTS_PER_RUN);
+      if (rankedTargets.length > MAX_RECIPIENTS_PER_RUN) {
+        const kept = new Set(rankedTargets.slice(0, MAX_RECIPIENTS_PER_RUN).map((t) => t.user_id));
+        selected = targets.filter((t) => t.manual || kept.has(t.user_id));
         const dropped = targets.length - selected.length;
         metrics.dropped_over_cap += dropped;
         await raiseSignal(supabase, "publish_alert_volume_capped", `publish_alert_volume_capped_${sit.id}`, {
           sit_id: sit.id,
           targeted: targets.length,
           sent: selected.length,
+          manual: manualTargets.length,
           dropped,
           title: "Alerte de publication ecretee au plafond de volume",
-          detail: `${dropped} gardiens ecartes sur cette annonce, plafond de ${MAX_RECIPIENTS_PER_RUN} destinataires par execution.`,
+          detail: `${dropped} gardiens ecartes sur cette annonce, plafond de ${MAX_RECIPIENTS_PER_RUN} destinataires par annonce, alertes faites main hors plafond.`,
         });
       }
+
       metrics.recipients_targeted += selected.length;
 
       for (const t of selected) {
