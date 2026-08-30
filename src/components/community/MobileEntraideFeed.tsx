@@ -205,7 +205,7 @@ const MobileEntraideFeed = ({ missions, questions, loading, onPublish, proximity
         </div>
       ) : items.length > 0 ? (
         <ul className="space-y-3">
-          {items.map((it) => {
+          {items.map((it, index) => {
             if (it.kind === "question") {
               const q = it.data;
               return (
