@@ -350,7 +350,16 @@ const AdminSmallMissions = () => {
       </div>
 
       {/* KPIs */}
-      <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+      <div className="grid grid-cols-2 md:grid-cols-4 xl:grid-cols-7 gap-3">
+        <Card className="border-primary/40"><CardContent className="p-4">
+          <p className="text-xs text-muted-foreground" title="Réponses ÷ notifications envoyées">Conversion notif. → réponse</p>
+          <p className="text-2xl font-bold tabular-nums">{notifToResponse}%</p>
+          <p className="text-[11px] text-muted-foreground mt-0.5">{kpis.totalNotified} notifiés</p>
+        </CardContent></Card>
+        <Card className={kpis.zeroReach > 0 ? "border-warning-border bg-warning-soft" : undefined}><CardContent className="p-4">
+          <p className="text-xs text-muted-foreground">Publications sans destinataire</p>
+          <p className="text-2xl font-bold tabular-nums">{kpis.zeroReach}</p>
+        </CardContent></Card>
         <Card><CardContent className="p-4">
           <p className="text-xs text-muted-foreground">Total</p>
           <p className="text-2xl font-bold tabular-nums">{kpis.total}</p>
@@ -372,6 +381,7 @@ const AdminSmallMissions = () => {
           <p className="text-2xl font-bold tabular-nums">{ratioGlobal}%</p>
         </CardContent></Card>
       </div>
+
 
       {suspectMissions.length > 0 && (
         <Card className="border-warning-border bg-warning-soft">
