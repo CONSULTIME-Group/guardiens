@@ -65,9 +65,10 @@ import {
 } from "@/lib/profileMatchingOptions";
 import { avatarImageUrl } from "@/lib/storageImage";
 import { declarableRadius, EFFECTIVE_DEFAULT_RADIUS_KM } from "@/lib/searchRadius";
+import { MIN_COMPLETION_TO_APPLY } from "@/hooks/useAccessLevel";
 
 /** Seuil de candidature, aligné sur useAccessLevel (source de vérité). */
-const APPLY_THRESHOLD = 60;
+const APPLY_THRESHOLD = MIN_COMPLETION_TO_APPLY;
 
 /** Même liste que StepSitterProfile, gardée synchrone à la main. */
 const LIFESTYLE_OPTIONS = [
