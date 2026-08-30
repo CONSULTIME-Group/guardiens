@@ -101,6 +101,11 @@ const CreateSmallMission = () => {
   const [category, setCategory] = useState("");
   const [categoryTouched, setCategoryTouched] = useState(false);
   const [photoTouched, setPhotoTouched] = useState(false);
+  const [photoUploading, setPhotoUploading] = useState(false);
+  const [photoFailed, setPhotoFailed] = useState(false);
+  // Échappatoire après un échec d'envoi : la photo reste une exigence forte,
+  // jamais un cul-de-sac qui rendrait une offre impubliable.
+  const [photoWaived, setPhotoWaived] = useState(false);
   const [title, setTitle] = useState("");
   const [titleTouched, setTitleTouched] = useState(false);
   const [description, setDescription] = useState("");
@@ -190,11 +195,13 @@ const CreateSmallMission = () => {
    * Photo requise pour toutes les offres, et pour les catégories qui ont un
    * objet à montrer. Facultative là où il n'y a souvent rien à photographier.
    */
-  const photoRequired =
+  const photoRequiredByRule =
     missionType === "offre" || ["animals", "garden", "house"].includes(category);
+  const photoRequired = photoRequiredByRule && !photoWaived;
 
   const step1Valid =
     !!category &&
+    !photoUploading &&
     (!photoRequired || photos.length > 0) &&
     title.trim().length >= MIN_TITLE_LEN &&
     description.trim().length >= MIN_DESC_LEN &&
@@ -210,6 +217,31 @@ const CreateSmallMission = () => {
     if (step1Valid) {
       setStep(2);
       try { trackEvent("mission_composer_step1_completed"); } catch {}
+      return;
+    }
+    if (photoUploading) {
+      toast({ title: tp("photo_uploading") });
+      return;
+    }
+    // Le bouton est dans une barre fixe : sans message ni défilement, il
+    // paraîtrait ne rien faire alors que l'erreur est hors du champ de vision.
+    const fields: { id: string; label: string; invalid: boolean }[] = [
+      { id: "mission-field-category", label: "Catégorie", invalid: !category },
+      { id: "mission-field-photo", label: "Photo", invalid: photoRequired && photos.length === 0 },
+      { id: "mission-field-title", label: "Titre", invalid: title.trim().length < MIN_TITLE_LEN },
+      { id: "mission-field-description", label: "Description", invalid: description.trim().length < MIN_DESC_LEN },
+      { id: "mission-field-exchange", label: "Contrepartie", invalid: exchangeOffer.trim().length < 2 || !!exchangeError },
+    ];
+    const missing = fields.filter((f) => f.invalid);
+    if (missing.length === 0) return;
+    toast({
+      title: missing.length > 1 ? "Champs manquants" : "Champ manquant",
+      description: `À compléter : ${missing.map((f) => f.label).join(", ")}.`,
+      variant: "destructive",
+    });
+    if (typeof document !== "undefined") {
+      const el = document.getElementById(missing[0].id);
+      el?.scrollIntoView({ behavior: "smooth", block: "center" });
     }
   };
 
@@ -302,15 +334,6 @@ const CreateSmallMission = () => {
       setStep(1);
       setTitleTouched(true);
       setDescTouched(true);
-      return;
-    }
-    if (durationIssue && !durationAck) {
-      setDurationAck(true);
-      toast({
-        title: "Durée à vérifier",
-        description: `${durationIssue.message} Choisissez la durée proposée, ou publiez à nouveau pour garder la vôtre.`,
-      });
-      setStep(2);
       return;
     }
     await performSubmit();
@@ -575,7 +598,7 @@ const CreateSmallMission = () => {
                 </p>
 
                 {/* Catégorie */}
-                <div className="space-y-2">
+                <div id="mission-field-category" className="space-y-2">
                   <Label className="text-sm font-medium">{tp("category_label")}</Label>
                   <Select value={category} onValueChange={setCategory}>
                     <SelectTrigger className={cn("h-12 text-base", categoryTouched && !category && "border-destructive")}>
@@ -595,7 +618,7 @@ const CreateSmallMission = () => {
                 </div>
 
                 {/* Titre */}
-                <div className="space-y-2">
+                <div id="mission-field-title" className="space-y-2">
                   <Label className="text-sm font-medium">{tp("title_label")}</Label>
                   <Input
                     value={title}
@@ -614,20 +637,41 @@ const CreateSmallMission = () => {
                 </div>
 
                 {/* Photo, juste après le titre : c'est elle qui fait comprendre en un coup d'oeil. */}
-                <div className="space-y-2">
+                <div id="mission-field-photo" className="space-y-2">
                   <Label className="text-sm font-medium">
-                    {photoRequired ? "Photo" : "Photo (facultative)"}
+                    {photoRequired ? tp("photo_label") : tp("photo_label_optional")}
                   </Label>
                   <p className="text-xs text-muted-foreground">
-                    {photoRequired
-                      ? "Une photo montre de quoi il s'agit, et les publications qui en ont une reçoivent bien plus de réponses."
-                      : "Ajoutez une photo si vous avez quelque chose à montrer, sinon passez."}
+                    {photoRequired ? tp("photo_help_required") : tp("photo_help_optional")}
                   </p>
-                  <MissionPhotoUpload userId={user!.id} photos={photos} onChange={setPhotos} />
-                  {photoTouched && photoRequired && photos.length === 0 && (
+                  <MissionPhotoUpload
+                    userId={user!.id}
+                    photos={photos}
+                    onChange={setPhotos}
+                    onUploadingChange={setPhotoUploading}
+                    onUploadError={() => setPhotoFailed(true)}
+                  />
+                  {photoUploading && (
+                    <p className="text-xs text-muted-foreground">{tp("photo_uploading")}</p>
+                  )}
+                  {!photoUploading && photoTouched && photoRequired && photos.length === 0 && (
                     <p className="text-xs text-destructive flex items-center gap-1">
-                      <AlertCircle className="h-3 w-3 shrink-0" /> Ajoutez une photo pour cette publication.
+                      <AlertCircle className="h-3 w-3 shrink-0" /> {tp("photo_error_required")}
                     </p>
+                  )}
+                  {!photoUploading && photoFailed && photoRequiredByRule && photos.length === 0 && (
+                    <div className="rounded-md border border-border bg-muted/40 px-3 py-2 space-y-2">
+                      <p className="text-xs text-muted-foreground">{tp("photo_failed_hint")}</p>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setPhotoWaived(true)}
+                        disabled={photoWaived}
+                      >
+                        {photoWaived ? tp("photo_waived") : tp("photo_skip")}
+                      </Button>
+                    </div>
                   )}
                 </div>
 
@@ -660,7 +704,7 @@ const CreateSmallMission = () => {
                 </div>
 
                 {/* Échange proposé */}
-                <div className="space-y-2">
+                <div id="mission-field-exchange" className="space-y-2">
                   <Label className="text-sm font-medium">
                     {missionType === "offre" ? tp("exchange_label_offer") : tp("exchange_label_need")}
                   </Label>
@@ -915,9 +959,10 @@ const CreateSmallMission = () => {
               <Button
                 type="button"
                 onClick={handleNextStep}
+                disabled={photoUploading}
                 className="w-full h-12 text-base font-semibold"
               >
-                Continuer
+                {photoUploading ? tp("photo_uploading") : "Continuer"}
               </Button>
             ) : (
               <Button
