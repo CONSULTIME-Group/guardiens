@@ -351,11 +351,55 @@ Deno.serve(async (req) => {
           continue
         }
 
+        // 2e bis. Anti doublon inter canaux (30/08/2026). Le cron
+        // notify-sitters-on-publish envoie une alerte immediate 15 minutes
+        // apres la publication, avec la cle `publish-alert-<sit>-<gardien>`.
+        // Une annonce deja servie par ce canal ne repart pas dans le digest.
+        // Seul `status = 'claimed'` compte : une ligne `released` signifie que
+        // l'envoi immediat a echoue, le digest reste le filet.
+        // Une seule requete groupee par gardien, jamais une par annonce.
+        const alertedSitIds = new Set<string>()
+        {
+          const keyToSit = new Map<string, string>()
+          for (const r of rows) keyToSit.set(`publish-alert-${r.sit_id}-${sitterId}`, r.sit_id)
+          const { data: alerted, error: alertedError } = await supabase
+            .from('sit_notification_log')
+            .select('idempotency_key, status')
+            .in('idempotency_key', [...keyToSit.keys()])
+            .eq('status', 'claimed')
+          if (alertedError) {
+            // En cas d'erreur on ne filtre rien : un doublon coute moins cher
+            // qu'une annonce jamais diffusee.
+            console.error('[digest] lecture sit_notification_log impossible', {
+              sitter_id: sitterId,
+              error: alertedError.message,
+            })
+          } else {
+            for (const a of (alerted ?? []) as Array<{ idempotency_key: string }>) {
+              const sitId = keyToSit.get(a.idempotency_key)
+              if (sitId) alertedSitIds.add(sitId)
+            }
+          }
+        }
+
+        const duplicateRows = rows.filter(r => alertedSitIds.has(r.sit_id))
+        if (duplicateRows.length > 0) {
+          await markSkipped(supabase, duplicateRows.map(r => r.id), 'already_alerted_immediate', body.dry_run)
+        }
+        const pendingRows = rows.filter(r => !alertedSitIds.has(r.sit_id))
+        if (pendingRows.length === 0) {
+          // Toutes les annonces ont deja ete servies en immediat : aucun email
+          // n'est du a ce gardien, ses lignes sont soldees. Resultat attendu.
+          sittersSkipped++
+          continue
+        }
+
         // 2f. Score par annonce via le moteur unique partagé, mode
         // distribution : seuls les refus explicitement déclarés par le
         // gardien excluent (distributable=false), jamais un score bas.
         const scoredRows: Array<{ row: QueueRow; score: number; sortScore: number; displayed: boolean; sit: SitRow }> = []
-        for (const q of rows) {
+        for (const q of pendingRows) {
+
           let sit = sitCache.get(q.sit_id) as SitRow | undefined
           if (!sit) {
             const { data } = await supabase
