@@ -57,16 +57,17 @@ export default function MatchedHelpersInviteBlock({
   const skillKey = useMemo(() => MISSION_TO_SKILL[missionCategory], [missionCategory]);
 
   useEffect(() => {
-    if (!skillKey) { setLoading(false); return; }
     let cancelled = false;
     (async () => {
-      const { data } = await supabase
+      // Une catégorie sans compétence correspondante ne fait pas disparaître
+      // le bloc : on retombe sur une sélection par proximité seule.
+      let query = supabase
         .from("public_profiles")
         .select("id, first_name, avatar_url, city, latitude_approx, longitude_approx, skill_categories, available_for_help")
         .eq("available_for_help", true)
-        .contains("skill_categories", [skillKey])
-        .neq("id", ownerId)
-        .limit(30);
+        .neq("id", ownerId);
+      if (skillKey) query = query.contains("skill_categories", [skillKey]);
+      const { data } = await query.limit(30);
 
       if (cancelled || !data) return;
 
@@ -135,7 +136,9 @@ export default function MatchedHelpersInviteBlock({
         Invitez directement des aidants qui correspondent
       </h3>
       <p className="text-sm text-muted-foreground mt-1">
-        Ces membres ont déclaré la compétence qui colle à votre demande, et se sont rendus disponibles.
+        {skillKey
+          ? "Ces membres ont déclaré la compétence qui colle à votre demande, et se sont rendus disponibles."
+          : "Ces membres se sont rendus disponibles pour aider près de chez vous."}
       </p>
       <ul className="mt-4 divide-y divide-border">
         {helpers.map((h) => {

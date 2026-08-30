@@ -1,3 +1,4 @@
+import { MISSION_CATEGORIES } from "@/lib/missionCategories";
 import { useTranslation } from "react-i18next";
 import { useState, useEffect, useCallback, useRef } from "react";
 import { trackEvent } from "@/lib/analytics";
@@ -49,12 +50,18 @@ import { avatarImageUrl } from "@/lib/storageImage";
 /** Rayon max (km) pour considérer une mission « près de chez vous ». */
 const NEAR_RADIUS_KM = 100;
 
-const CATEGORY_META: Record<string, { label: string; icon: typeof Dog; colorClass: string }> = {
-  animals: { label: "Animaux", icon: Dog, colorClass: "text-primary" },
-  garden: { label: "Jardin", icon: Flower2, colorClass: "text-primary" },
-  house: { label: "Maison", icon: Handshake, colorClass: "text-primary" },
-  skills: { label: "Compétences", icon: Handshake, colorClass: "text-primary" },
+/** Libellés tirés de la source unique, icône fonctionnelle par catégorie. */
+const CATEGORY_ICON: Record<string, typeof Dog> = {
+  animals: Dog,
+  garden: Flower2,
 };
+const CATEGORY_META: Record<string, { label: string; icon: typeof Dog; colorClass: string }> =
+  Object.fromEntries(
+    MISSION_CATEGORIES.map((c) => [
+      c.key,
+      { label: c.label, icon: CATEGORY_ICON[c.key] || Handshake, colorClass: "text-primary" },
+    ]),
+  );
 
 const DURATION_LABELS: Record<string, string> = {
   "1-2h": "1-2 heures",

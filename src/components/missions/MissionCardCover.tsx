@@ -1,28 +1,27 @@
 import { useState } from "react";
 import { storageImageUrl } from "@/lib/storageImage";
+import { missionCategoryLabel } from "@/lib/missionCategories";
 
 /**
  * Cover unifiée pour les cartes de coup de main.
  * - Si `photo` → image plein cadre 4:3 avec zoom au hover.
- * - Sinon → gradient teinté par catégorie + label court centré (Animaux / Jardin / Maison / Savoir-faire).
+ * - Sinon → gradient teinté par catégorie + libellé centré, tiré de la
+ *   source unique `missionCategories.ts` (un seul libellé par catégorie).
  *
  * Utilisée dans les sections "Près de chez vous" et partout où l'on liste des missions
  * sans avoir besoin d'un composant carte complet type SearchListingCard.
  */
-
-const CATEGORY_LABEL: Record<string, string> = {
-  animals: "Animaux",
-  garden: "Jardin",
-  house: "Maison",
-  skills: "Savoir-faire",
-};
 
 /** Gradients doux, sur des tokens sémantiques uniquement. */
 const CATEGORY_GRADIENT: Record<string, string> = {
   animals: "from-primary/15 via-muted to-primary/5",
   garden: "from-success/15 via-muted to-success/5",
   house: "from-info/15 via-muted to-info/5",
+  errand: "from-warning/15 via-muted to-warning/5",
+  transport: "from-info/20 via-muted to-primary/5",
+  company: "from-primary/10 via-muted to-success/10",
   skills: "from-warning/15 via-muted to-warning/5",
+  other: "from-muted-foreground/10 via-muted to-muted",
 };
 
 interface MissionCardCoverProps {
@@ -35,8 +34,9 @@ interface MissionCardCoverProps {
 const MissionCardCover = ({ photo, category, title, className }: MissionCardCoverProps) => {
   const [imgError, setImgError] = useState(false);
   const cat = (category || "animals") as string;
-  const label = CATEGORY_LABEL[cat] || CATEGORY_LABEL.animals;
-  const gradient = CATEGORY_GRADIENT[cat] || CATEGORY_GRADIENT.animals;
+  const label = missionCategoryLabel(cat);
+  const gradient = CATEGORY_GRADIENT[cat] || CATEGORY_GRADIENT.other;
+
 
   const showImage = !!photo && !imgError;
 
@@ -96,7 +96,48 @@ const CategoryIllustration = ({ cat }: { cat: string }) => {
       </svg>
     );
   }
+  if (cat === "errand") {
+    // Cabas de courses
+    return (
+      <svg viewBox="0 0 100 100" className={common} aria-hidden="true" preserveAspectRatio="xMidYMid slice">
+        <path d="M28 42 H72 L67 82 H33 Z" fill="currentColor" />
+        <path d="M40 42 V32 a10 10 0 0 1 20 0 V42" fill="none" stroke="currentColor" strokeWidth="5" />
+      </svg>
+    );
+  }
+  if (cat === "transport") {
+    // Voiture stylisée
+    return (
+      <svg viewBox="0 0 100 100" className={common} aria-hidden="true" preserveAspectRatio="xMidYMid slice">
+        <path d="M20 62 L27 45 H73 L80 62 V72 H20 Z" fill="currentColor" />
+        <circle cx="33" cy="74" r="7" fill="currentColor" opacity="0.6" />
+        <circle cx="67" cy="74" r="7" fill="currentColor" opacity="0.6" />
+      </svg>
+    );
+  }
+  if (cat === "company") {
+    // Deux présences côte à côte
+    return (
+      <svg viewBox="0 0 100 100" className={common} aria-hidden="true" preserveAspectRatio="xMidYMid slice">
+        <circle cx="38" cy="40" r="10" fill="currentColor" />
+        <circle cx="64" cy="44" r="8" fill="currentColor" opacity="0.6" />
+        <path d="M22 80 a16 16 0 0 1 32 0 Z" fill="currentColor" />
+        <path d="M52 80 a13 13 0 0 1 26 0 Z" fill="currentColor" opacity="0.6" />
+      </svg>
+    );
+  }
+  if (cat === "other") {
+    // Trois points, catégorie ouverte
+    return (
+      <svg viewBox="0 0 100 100" className={common} aria-hidden="true" preserveAspectRatio="xMidYMid slice">
+        <circle cx="34" cy="55" r="6" fill="currentColor" />
+        <circle cx="50" cy="55" r="6" fill="currentColor" />
+        <circle cx="66" cy="55" r="6" fill="currentColor" />
+      </svg>
+    );
+  }
   // animals (défaut) : silhouette de patte
+
   return (
     <svg viewBox="0 0 100 100" className={common} aria-hidden="true" preserveAspectRatio="xMidYMid slice">
       <ellipse cx="50" cy="65" rx="18" ry="14" fill="currentColor" />

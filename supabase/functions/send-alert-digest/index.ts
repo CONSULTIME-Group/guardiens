@@ -39,9 +39,11 @@ const SPECIES: Record<string, { s: string; p: string }> = {
 
 const MISSION_CATEGORY: Record<string, string> = {
   walk: "Promenade", visit: "Visite à domicile", feeding: "Repas / gamelle",
-  transport: "Transport", vet: "Visite vétérinaire", house: "Coup de main maison",
-  animals: "Animaux", garden: "Jardin", errand: "Courses", tech: "Technique",
-  company: "Compagnie", other: "Coup de main",
+  vet: "Visite vétérinaire", tech: "Technique",
+  animals: "Animaux", garden: "Jardin", house: "Maison et bricolage",
+  errand: "Courses et livraisons", transport: "Transport et accompagnement",
+  company: "Présence et compagnie", skills: "Savoir-faire et démarches",
+  other: "Autre",
 };
 
 function capitalize(s: string | null | undefined): string {

@@ -9637,7 +9637,15 @@ export type Database = {
         | "cancelled"
         | "archived"
         | "expired"
-      small_mission_category: "animals" | "garden" | "house" | "skills"
+      small_mission_category:
+        | "animals"
+        | "garden"
+        | "house"
+        | "skills"
+        | "errand"
+        | "transport"
+        | "company"
+        | "other"
       small_mission_response_status:
         | "pending"
         | "accepted"
@@ -9902,7 +9910,16 @@ export const Constants = {
         "archived",
         "expired",
       ],
-      small_mission_category: ["animals", "garden", "house", "skills"],
+      small_mission_category: [
+        "animals",
+        "garden",
+        "house",
+        "skills",
+        "errand",
+        "transport",
+        "company",
+        "other",
+      ],
       small_mission_response_status: [
         "pending",
         "accepted",

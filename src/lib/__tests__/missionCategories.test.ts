@@ -8,7 +8,16 @@ import { z } from "zod";
  * Si l'enum évolue en base, ce test casse et force la mise à jour de la
  * source unique `missionCategories.ts`.
  */
-const smallMissionCategoryEnum = z.enum(["animals", "garden", "house", "skills"]);
+const smallMissionCategoryEnum = z.enum([
+  "animals",
+  "garden",
+  "house",
+  "skills",
+  "errand",
+  "transport",
+  "company",
+  "other",
+]);
 
 describe("missionCategories : alignement avec l'enum small_mission_category", () => {
   const enumValues = smallMissionCategoryEnum.options;
@@ -29,5 +38,12 @@ describe("missionCategories : alignement avec l'enum small_mission_category", ()
       expect(c.label.trim().length).toBeGreaterThan(0);
       expect(MISSION_CATEGORY_LABEL[c.key]).toBe(c.label);
     }
+  });
+});
+
+describe("libellé unique par catégorie", () => {
+  it("aucun libellé dupliqué entre catégories", () => {
+    const labels = MISSION_CATEGORIES.map((c) => c.label);
+    expect(new Set(labels).size).toBe(labels.length);
   });
 });

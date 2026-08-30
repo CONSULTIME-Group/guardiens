@@ -36,6 +36,13 @@ import { sanitizeUserTitle } from "@/lib/sanitizeTitle";
 import { stripEmojis } from "@/lib/stripEmojis";
 
 import IdentityRecommendedHint from "@/components/missions/IdentityRecommendedHint";
+import { MISSION_CATEGORIES } from "@/lib/missionCategories";
+import {
+  categoryDescHelp,
+  categoryExchangeSuggestions,
+  categoryTitleExample,
+} from "@/lib/missionCategoryCopy";
+import { durationMismatch, DURATION_LABEL } from "@/lib/missionDurationCoherence";
 
 /** Longueurs minimales pour éviter les annonces vides ou illisibles. */
 const MIN_TITLE_LEN = 15;
@@ -77,12 +84,8 @@ const CreateSmallMission = () => {
   const canApplyMissions = true;
   
 
-  const CATEGORIES = useMemo(() => [
-    { value: "animals", label: tp("cat_animals") },
-    { value: "garden", label: tp("cat_garden") },
-    { value: "house", label: tp("cat_house") },
-    { value: "skills", label: tp("cat_skills") },
-  ], [t]);
+  // Les huit catégories viennent de la source unique : un seul libellé partout.
+  const CATEGORIES = MISSION_CATEGORIES;
 
   const DURATIONS = useMemo(() => [
     { value: "1-2h", label: tp("dur_1_2h") },
@@ -94,7 +97,9 @@ const CreateSmallMission = () => {
   const typeParam = searchParams.get("type");
   const [step, setStep] = useState(1);
   const [missionType, setMissionType] = useState<"besoin" | "offre">(typeParam === "offre" ? "offre" : "besoin");
-  const [category, setCategory] = useState("animals");
+  // Aucune catégorie présélectionnée : la personne choisit, le formulaire suit.
+  const [category, setCategory] = useState("");
+  const [categoryTouched, setCategoryTouched] = useState(false);
   const [title, setTitle] = useState("");
   const [titleTouched, setTitleTouched] = useState(false);
   const [description, setDescription] = useState("");
@@ -110,6 +115,7 @@ const CreateSmallMission = () => {
   const [calendarOpen, setCalendarOpen] = useState(false);
   const [endCalendarOpen, setEndCalendarOpen] = useState(false);
   const [duration, setDuration] = useState("");
+  const [durationAck, setDurationAck] = useState(false);
   const [petSpecies, setPetSpecies] = useState("");
   const [petSize, setPetSize] = useState("");
   const [submitting, setSubmitting] = useState(false);
@@ -180,12 +186,14 @@ const CreateSmallMission = () => {
 
   /* Step 1 validation */
   const step1Valid =
+    !!category &&
     title.trim().length >= MIN_TITLE_LEN &&
     description.trim().length >= MIN_DESC_LEN &&
     exchangeOffer.trim().length >= 2 &&
     !exchangeError;
 
   const handleNextStep = () => {
+    setCategoryTouched(true);
     setTitleTouched(true);
     setDescTouched(true);
     setExchangeTouched(true);
@@ -207,6 +215,16 @@ const CreateSmallMission = () => {
     () => moneyWordingSignals(title, description, exchangeOffer),
     [title, description, exchangeOffer],
   );
+
+  /**
+   * Cohérence période / durée déclarée. Explicite, jamais bloquant : on
+   * propose la durée cohérente, la personne décide.
+   */
+  const durationIssue = useMemo(
+    () => durationMismatch(duration, dateNeeded, endDate),
+    [duration, dateNeeded, endDate],
+  );
+  useEffect(() => { setDurationAck(false); }, [duration, dateNeeded, endDate]);
 
   // Volume d'audience : combien de personnes seront prévenues à la publication.
   const [audienceCount, setAudienceCount] = useState<number | null>(null);
@@ -239,6 +257,7 @@ const CreateSmallMission = () => {
     if (hasMoneyMention(exchangeOffer)) return;
     if (submitting) return;
     const missing: string[] = [];
+    if (!category) missing.push("Catégorie");
     if (!title.trim()) missing.push("Titre");
     if (!description.trim()) missing.push("Description");
     if (!exchangeOffer.trim()) missing.push("Contrepartie");
@@ -246,7 +265,7 @@ const CreateSmallMission = () => {
     if (!postalCode.trim()) missing.push("Code postal");
     if (!duration) missing.push("Durée estimée");
     if (missing.length > 0) {
-      const stepOneMissing = missing.some((m) => ["Titre", "Description", "Contrepartie"].includes(m));
+      const stepOneMissing = missing.some((m) => ["Catégorie", "Titre", "Description", "Contrepartie"].includes(m));
       toast({
         title: missing.length > 1 ? "Champs manquants" : "Champ manquant",
         description: `À compléter : ${missing.join(", ")}.`,
@@ -254,6 +273,7 @@ const CreateSmallMission = () => {
       });
       setStep(stepOneMissing ? 1 : 2);
       if (stepOneMissing) {
+        setCategoryTouched(true);
         setTitleTouched(true);
         setDescTouched(true);
         setExchangeTouched(true);
@@ -270,6 +290,15 @@ const CreateSmallMission = () => {
       setStep(1);
       setTitleTouched(true);
       setDescTouched(true);
+      return;
+    }
+    if (durationIssue && !durationAck) {
+      setDurationAck(true);
+      toast({
+        title: "Durée à vérifier",
+        description: `${durationIssue.message} Choisissez la durée proposée, ou publiez à nouveau pour garder la vôtre.`,
+      });
+      setStep(2);
       return;
     }
     await performSubmit();
@@ -537,13 +566,20 @@ const CreateSmallMission = () => {
                 <div className="space-y-2">
                   <Label className="text-sm font-medium">{tp("category_label")}</Label>
                   <Select value={category} onValueChange={setCategory}>
-                    <SelectTrigger className="h-12 text-base"><SelectValue /></SelectTrigger>
+                    <SelectTrigger className={cn("h-12 text-base", categoryTouched && !category && "border-destructive")}>
+                      <SelectValue placeholder="Choisissez une catégorie" />
+                    </SelectTrigger>
                     <SelectContent>
                       {CATEGORIES.map((c) => (
-                        <SelectItem key={c.value} value={c.value}>{c.label}</SelectItem>
+                        <SelectItem key={c.key} value={c.key}>{c.label}</SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
+                  {categoryTouched && !category && (
+                    <p className="text-xs text-destructive flex items-center gap-1">
+                      <AlertCircle className="h-3 w-3 shrink-0" /> Choisissez une catégorie.
+                    </p>
+                  )}
                 </div>
 
                 {/* Titre */}
@@ -553,7 +589,7 @@ const CreateSmallMission = () => {
                     value={title}
                     onChange={(e) => setTitle(e.target.value)}
                     onBlur={handleTitleBlur}
-                    placeholder={missionType === "offre" ? tp("title_ph_offer") : tp("title_ph_need")}
+                    placeholder={categoryTitleExample(category, missionType)}
                     maxLength={120}
                     className="h-12 text-base"
                   />
@@ -574,11 +610,7 @@ const CreateSmallMission = () => {
                     value={description}
                     onChange={(e) => setDescription(e.target.value)}
                     onBlur={handleDescBlur}
-                    placeholder={
-                      missionType === "offre"
-                        ? tp("desc_ph_offer")
-                        : "Précisez l'animal (espèce, taille, âge), les dates approximatives et ce que vous attendez concrètement (promenade, gamelle, jeu…). Plus c'est clair, plus vite vous aurez des propositions."
-                    }
+                    placeholder={categoryDescHelp(category, missionType)}
                     rows={5}
                     className="text-base resize-none"
                   />
@@ -606,18 +638,7 @@ const CreateSmallMission = () => {
                     Un coup de main = un échange. Pas d'euros. Restez simple et sincère.
                   </p>
                   <div className="flex flex-wrap gap-1.5">
-                    {(missionType === "offre"
-                      ? [
-                          "Un coup de main en retour quand vous voulez",
-                          "Un moment partagé autour d'un café",
-                          "Rien, ça me fait plaisir",
-                        ]
-                      : [
-                          "Un café et des biscuits maison",
-                          "Des œufs de la semaine",
-                          "Un coup de main en retour quand vous voulez",
-                        ]
-                    ).map((ex) => (
+                    {categoryExchangeSuggestions(category, missionType).map((ex) => (
                       <button
                         key={ex}
                         type="button"
@@ -781,6 +802,7 @@ const CreateSmallMission = () => {
                         <SelectContent>
                           <SelectItem value="chien">Chien</SelectItem>
                           <SelectItem value="chat">Chat</SelectItem>
+                          <SelectItem value="cheval">Cheval</SelectItem>
                           <SelectItem value="rongeur">Rongeur</SelectItem>
                           <SelectItem value="oiseau">Oiseau</SelectItem>
                           <SelectItem value="poisson">Poisson</SelectItem>
@@ -820,6 +842,19 @@ const CreateSmallMission = () => {
                     <p className="text-xs text-destructive flex items-center gap-1">
                       <AlertCircle className="h-3 w-3 shrink-0" /> Indiquez une durée estimée.
                     </p>
+                  )}
+                  {durationIssue && (
+                    <div className="rounded-xl border border-warning/40 bg-warning/10 p-3 space-y-2" role="note">
+                      <p className="text-xs text-muted-foreground">{durationIssue.message}</p>
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="outline"
+                        onClick={() => setDuration(durationIssue.suggested)}
+                      >
+                        Utiliser « {DURATION_LABEL[durationIssue.suggested]} »
+                      </Button>
+                    </div>
                   )}
                 </div>
 

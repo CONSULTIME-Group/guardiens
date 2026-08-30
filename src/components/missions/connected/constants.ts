@@ -1,15 +1,26 @@
-export const CATEGORY_META: Record<string, { label: string }> = {
-  animals: { label: "Animaux" },
-  garden: { label: "Jardin" },
-  house: { label: "Maison" },
-  skills: { label: "Compétences" },
-};
+import { MISSION_CATEGORIES, MISSION_CATEGORY_LABEL } from "@/lib/missionCategories";
 
-export const MISSION_TO_SKILL: Record<string, string> = {
+/** Libellés catégories : miroir strict de la source unique. */
+export const CATEGORY_META: Record<string, { label: string }> = Object.fromEntries(
+  MISSION_CATEGORIES.map((c) => [c.key, { label: c.label }]),
+);
+
+/**
+ * Correspondance catégorie de mission vers compétence déclarée par le membre.
+ * Les compétences réelles sont : animaux, jardin, competences, coups_de_main.
+ * Une catégorie sans compétence équivalente vaut `null` : le bloc
+ * d'invitation retombe alors sur une sélection par proximité seule, il ne
+ * disparaît jamais silencieusement.
+ */
+export const MISSION_TO_SKILL: Record<string, string | null> = {
   animals: "animaux",
   garden: "jardin",
-  skills: "competences",
   house: "coups_de_main",
+  skills: "competences",
+  errand: "coups_de_main",
+  transport: "coups_de_main",
+  company: null,
+  other: null,
 };
 
 export const SKILL_TO_MISSION: Record<string, string> = {
@@ -19,12 +30,14 @@ export const SKILL_TO_MISSION: Record<string, string> = {
   coups_de_main: "house",
 };
 
+/** Pastilles de compétences : clés alignées sur les compétences réelles. */
 export const SKILL_PILL_META: Record<string, { label: string }> = {
-  jardin: { label: "Jardin" },
-  animaux: { label: "Animaux" },
-  competences: { label: "Compétences" },
-  house: { label: "Maison" },
+  jardin: { label: MISSION_CATEGORY_LABEL.garden },
+  animaux: { label: MISSION_CATEGORY_LABEL.animals },
+  competences: { label: MISSION_CATEGORY_LABEL.skills },
+  coups_de_main: { label: MISSION_CATEGORY_LABEL.house },
 };
+
 
 export const DURATION_LABELS: Record<string, string> = {
   "1-2h": "1-2 heures",
@@ -56,17 +69,16 @@ export const EXAMPLES = [
   { cat: "skills", title: "Dog-training : les bases (rappel, marche en laisse)", exchange: "Un bon café et une balade ensemble" },
 ];
 
-export type CategoryFilter = "all" | "animals" | "garden" | "house" | "skills" | "mine";
+export type CategoryFilter = string;
 export type ModeFilter = "need" | "offer";
 
+/** Filtres : les huit catégories de la source unique, encadrées de Tout et Mes missions. */
 export const FILTER_PILLS: { key: CategoryFilter; label: string }[] = [
   { key: "all", label: "Tout" },
-  { key: "garden", label: "Jardin" },
-  { key: "animals", label: "Animaux" },
-  { key: "skills", label: "Compétences" },
-  { key: "house", label: "Maison" },
+  ...MISSION_CATEGORIES.map((c) => ({ key: c.key as string, label: c.label })),
   { key: "mine", label: "Mes missions" },
 ];
+
 
 export const ENTRAIDE_HEADER_URL =
   "https://erhccyqevdyevpyctsjj.supabase.co/storage/v1/object/public/property-photos/misc/entraide-header.webp";
