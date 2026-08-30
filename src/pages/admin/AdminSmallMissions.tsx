@@ -316,12 +316,13 @@ const AdminSmallMissions = () => {
 
   const exportCsv = () => {
     const rows = [
-      ["Titre", "Posteur", "Catégorie", "Ville", "Date", "Statut", "Réponses", VIEWS_LABEL],
+      ["Titre", "Posteur", "Catégorie", "Ville", "Date", "Statut", "Notifiés", "Réponses", VIEWS_LABEL],
       ...filtered.map(m => [
         m.title, `${m.poster?.first_name || ""} ${m.poster?.last_name || ""}`.trim(),
         categoryLabels[m.category] || missionCategoryLabel(m.category), m.city || "",
         format(new Date(m.created_at), "yyyy-MM-dd"),
         resolveStatusBadge(m).label,
+        String(notifiedCounts[m.id] || 0),
         String(responseCounts[m.id] || 0), String(m.view_count ?? 0),
       ]),
     ];
