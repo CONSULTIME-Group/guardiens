@@ -91,21 +91,48 @@ const AdminSmallMissions = () => {
   const [contactMission, setContactMission] = useState<any | null>(null);
   const [contactReason, setContactReason] = useState("");
   const [contactSending, setContactSending] = useState(false);
-  const [kpis, setKpis] = useState({ total: 0, open: 0, totalViews: 0, totalResponses: 0 });
+  const [kpis, setKpis] = useState({
+    total: 0,
+    open: 0,
+    totalViews: 0,
+    totalResponses: 0,
+    totalNotified: 0,
+    zeroReach: 0,
+  });
+  // Destinataires réellement prévenus, par publication. C'est ce qui explique
+  // les zéro réponse : sans notifiés, il n'y a rien à convertir.
+  const [notifiedCounts, setNotifiedCounts] = useState<Record<string, number>>({});
 
   // Global KPIs (independent of pagination/filters)
   useEffect(() => {
     (async () => {
-      const [{ count: total }, { count: open }, viewsRes, respRes] = await Promise.all([
+      const [{ count: total }, { count: open }, viewsRes, respRes, notifRes] = await Promise.all([
         supabase.from("small_missions").select("*", { count: "exact", head: true }),
         supabase.from("small_missions").select("*", { count: "exact", head: true }).eq("status", "open" as any),
         supabase.from("small_missions").select("view_count"),
         supabase.from("small_mission_responses").select("*", { count: "exact", head: true }),
+        supabase.from("mission_notification_queue").select("mission_id").eq("status", "sent").limit(20000),
       ]);
       const totalViews = (viewsRes.data || []).reduce((s: number, r: any) => s + (r.view_count || 0), 0);
-      setKpis(k => ({ ...k, total: total || 0, open: open || 0, totalViews, totalResponses: respRes.count || 0 }));
+      const counts: Record<string, number> = {};
+      (notifRes.data || []).forEach((r: any) => {
+        counts[r.mission_id] = (counts[r.mission_id] || 0) + 1;
+      });
+      setNotifiedCounts(counts);
+      const totalNotified = (notifRes.data || []).length;
+      const zeroReach = Math.max(0, (total || 0) - Object.keys(counts).length);
+      setKpis(k => ({
+        ...k,
+        total: total || 0,
+        open: open || 0,
+        totalViews,
+        totalResponses: respRes.count || 0,
+        totalNotified,
+        zeroReach,
+      }));
     })();
   }, []);
+
 
   const fetchMissions = useCallback(async () => {
     setLoading(true);
