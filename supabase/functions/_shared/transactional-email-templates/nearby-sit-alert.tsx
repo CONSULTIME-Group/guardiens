@@ -1,6 +1,6 @@
 import * as React from 'npm:react@18.3.1'
 import {
-  Body, Container, Head, Heading, Html, Preview, Text, Button, Section, Img,
+  Body, Container, Head, Heading, Html, Preview, Text, Button, Section, Img, Link,
 } from 'npm:@react-email/components@0.0.22'
 import { BrandedHead } from './_branded-head.tsx'
 import { BrandHeader } from './_brand-header.tsx'
@@ -20,6 +20,23 @@ interface Props {
   sitId?: string
   animalsSummary?: string
   coverPhotoUrl?: string | null
+  /**
+   * Faux quand le gardien est sous le seuil de candidature. Meme contrat que
+   * `sitter-daily-digest` : l'appel a l'action doit dire la verite, un
+   * gardien qui ne peut pas candidater ne voit pas un bouton de candidature.
+   */
+  canApply?: boolean
+  /** Phrase de completion calculee sur le bareme reel, cote fonction. */
+  completionSentence?: string
+  /** Nombre d'etapes restantes, pilote le libelle du bouton. */
+  completionSteps?: number
+  /** Ancre du profil qui porte le geste nomme dans la phrase. */
+  completionHref?: string
+}
+
+const buildProfileUrl = (href?: string) => {
+  const path = href && href.startsWith('/') ? href : '/sitter-profile'
+  return `${SITE_URL}${path}`
 }
 
 const NearbySitAlertEmail = ({
@@ -33,6 +50,10 @@ const NearbySitAlertEmail = ({
   sitId,
   animalsSummary,
   coverPhotoUrl,
+  canApply = true,
+  completionSentence,
+  completionSteps,
+  completionHref,
 }: Props) => {
   const ctaHref = sitId ? `${SITE_URL}/sits/${sitId}` : `${SITE_URL}/sits`
   return (
@@ -83,11 +104,29 @@ const NearbySitAlertEmail = ({
             peut vraiment faire la différence pour cette famille.
           </Text>
 
+          {canApply === false && completionSentence ? (
+            <Text style={text}>{completionSentence}</Text>
+          ) : null}
+
           <Section style={{ textAlign: 'center', margin: '20px 0' }}>
-            <Button style={button} href={ctaHref}>
-              Voir l'annonce
-            </Button>
+            {canApply === false ? (
+              <Button style={button} href={buildProfileUrl(completionHref)}>
+                {(completionSteps ?? 0) > 1 ? 'Compléter mon profil' : 'Complétez votre profil pour candidater'}
+              </Button>
+            ) : (
+              <Button style={button} href={ctaHref}>
+                Voir l'annonce
+              </Button>
+            )}
           </Section>
+
+          {canApply === false ? (
+            <Text style={{ ...text, textAlign: 'center' as const }}>
+              <Link href={ctaHref} style={linkStyle}>
+                Voir l'annonce complète
+              </Link>
+            </Text>
+          ) : null}
 
           <LegalFooter
             purpose="la bonne marche de votre alerte"
@@ -142,4 +181,5 @@ const coverImg = {
 }
 const cardTitle = { fontSize: '16px', fontWeight: '600' as const, color: '#255B42', margin: '0 0 8px' }
 const cardLine = { fontSize: '13px', color: '#5F5B53', margin: '4px 0' }
+const linkStyle = { color: '#2C6D50', textDecoration: 'underline' }
 const button = { backgroundColor: '#2C6D50', color: '#ffffff', padding: '12px 28px', borderRadius: '8px', fontSize: '15px', fontWeight: '600' as const, textDecoration: 'none', display: 'inline-block' }
