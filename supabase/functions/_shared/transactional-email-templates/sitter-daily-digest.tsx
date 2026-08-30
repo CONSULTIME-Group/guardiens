@@ -46,8 +46,15 @@ interface Props {
   canApply?: boolean
   /** Pourcentage actuel de complétude, affiché quand canApply est false. */
   profileCompletion?: number | null
-  /** Manque principal chiffré, ex. « 8 des 11 annonces en ligne… ». */
-  completionHint?: string
+  /**
+   * Phrase de complétion, deux variantes (décision du 30/08/2026). Une seule
+   * étape restante : on promet le déblocage, il est vrai. Plusieurs étapes :
+   * on dit le nombre réel et on nomme un seul geste, sans jamais promettre
+   * que ce geste débloque la candidature.
+   */
+  completionSentence?: string
+  /** Nombre réel d'étapes restantes avant de pouvoir candidater. */
+  completionSteps?: number
   /**
    * Section du profil qui pose la question du manque principal (même source
    * que completionHint). Le bouton y mène directement.
@@ -97,12 +104,9 @@ const SitterDailyDigestEmail = ({ sitterFirstName, items = [], isCatchup, canApp
             : "Voici les nouvelles annonces publiées ces dernières 24 heures qui matchent votre profil. Le score d'affinité indique la compatibilité selon vos préférences."}
         </Text>
 
-        {canApply === false && (
-          <Text style={text}>
-            Votre profil est rempli à {profileCompletion ?? 0} %.
-            {completionHint ? ` ${completionHint}` : ''} Complétez votre profil pour pouvoir candidater.
-          </Text>
-        )}
+        {canApply === false && completionSentence ? (
+          <Text style={text}>{completionSentence}</Text>
+        ) : null}
 
 
 
@@ -148,7 +152,7 @@ const SitterDailyDigestEmail = ({ sitterFirstName, items = [], isCatchup, canApp
 
             {canApply === false ? (
               <Button style={button} href={buildProfileUrl(completionHref)}>
-                Complétez votre profil pour candidater
+                {(completionSteps ?? 0) > 1 ? 'Compléter mon profil' : 'Complétez votre profil pour candidater'}
               </Button>
             ) : (
               <Button style={button} href={buildCtaUrl(item.sitId)}>
