@@ -305,6 +305,27 @@ export type Database = {
         }
         Relationships: []
       }
+      _score_rebalance_20260830: {
+        Row: {
+          apres: number | null
+          avant: number | null
+          id: string | null
+          role: Database["public"]["Enums"]["user_role"] | null
+        }
+        Insert: {
+          apres?: number | null
+          avant?: number | null
+          id?: string | null
+          role?: Database["public"]["Enums"]["user_role"] | null
+        }
+        Update: {
+          apres?: number | null
+          avant?: number | null
+          id?: string | null
+          role?: Database["public"]["Enums"]["user_role"] | null
+        }
+        Relationships: []
+      }
       account_deletion_requests: {
         Row: {
           cancelled_at: string | null
@@ -8177,6 +8198,10 @@ export type Database = {
     Functions: {
       _calculate_owner_score: { Args: { p_user_id: string }; Returns: number }
       _calculate_sitter_score: { Args: { p_user_id: string }; Returns: number }
+      _calculate_sitter_score_pre_20260830: {
+        Args: { p_user_id: string }
+        Returns: number
+      }
       _normalize_species_pg: { Args: { v: string }; Returns: string }
       accept_application: { Args: { p_application_id: string }; Returns: Json }
       accept_garde_accord: {
