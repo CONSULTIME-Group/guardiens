@@ -7954,8 +7954,8 @@ export type Database = {
           end_date?: string | null
           exchange_offer?: string | null
           id?: string | null
-          latitude?: number | null
-          longitude?: number | null
+          latitude?: never
+          longitude?: never
           mission_type?: Database["public"]["Enums"]["mission_type_enum"] | null
           pet_size?: string | null
           pet_species?: string | null
@@ -7978,8 +7978,8 @@ export type Database = {
           end_date?: string | null
           exchange_offer?: string | null
           id?: string | null
-          latitude?: number | null
-          longitude?: number | null
+          latitude?: never
+          longitude?: never
           mission_type?: Database["public"]["Enums"]["mission_type_enum"] | null
           pet_size?: string | null
           pet_species?: string | null
@@ -9320,6 +9320,7 @@ export type Database = {
         }
         Returns: number
       }
+      mutual_aid_money_mention: { Args: { p_texte: string }; Returns: boolean }
       normalize_analytics_source: { Args: { raw: string }; Returns: string }
       normalize_city_name: { Args: { txt: string }; Returns: string }
       notify_owner_of_new_application: {
