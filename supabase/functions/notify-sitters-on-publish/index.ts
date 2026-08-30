@@ -64,6 +64,9 @@ export const MIGRATED_ALERT_SOURCE = "migration_email_preferences_2026_07_31";
  * jamais avale.
  */
 const IN_BATCH_SIZE = 200;
+// Taille de page de la lecture sitter_gallery, paginee explicitement pour
+// echapper au plafond de lignes PostgREST (N lignes par gardien).
+const GALLERY_PAGE_SIZE = 1000;
 
 export function haversineKm(lat1: number, lon1: number, lat2: number, lon2: number): number {
   const R = 6371;
@@ -225,9 +228,19 @@ Deno.serve(async (req) => {
       .select("user_id, zone_type, radius_km, departement, alert_types, active, source")
       .eq("active", true);
     if (prefsErr) throw prefsErr;
-    const zones = (prefs ?? []).filter((p: any) =>
-      Array.isArray(p.alert_types) ? p.alert_types.includes("gardes") : true,
-    );
+    // Ordre deterministe, alertes faites main (source NULL) evaluees avant
+    // les migrees a gardien egal : la deduplication `seen` retient la
+    // premiere zone rencontree, un gardien ayant configure une alerte a la
+    // main est toujours traite comme tel, quel que soit l'ordre de la base.
+    const zones = (prefs ?? [])
+      .filter((p: any) =>
+        Array.isArray(p.alert_types) ? p.alert_types.includes("gardes") : true,
+      )
+      .sort(
+        (a: any, b: any) =>
+          String(a.user_id).localeCompare(String(b.user_id)) ||
+          (a.source == null ? 0 : 1) - (b.source == null ? 0 : 1),
+      );
 
     for (const sit of (sits ?? []) as any[]) {
       const guard = evaluateSitAlert("nearby-sit-alert", sit.status);
@@ -409,18 +422,29 @@ Deno.serve(async (req) => {
         const galleryCountByUser = new Map<string, number>();
         if (readOk) {
           for (let i = 0; i < belowIds.length; i += IN_BATCH_SIZE) {
-            const { data: grows, error: gErr } = await supabase
-              .from("sitter_gallery")
-              .select("user_id")
-              .in("user_id", belowIds.slice(i, i + IN_BATCH_SIZE));
-            if (gErr) {
-              console.error("[publish-alert] lecture sitter_gallery impossible", gErr.message);
-              readOk = false;
-              break;
+            // Pagination explicite : cette lecture renvoie N lignes par
+            // gardien, le plafond de lignes PostgREST peut tronquer le lot
+            // en silence et poser gallery_count = 0 aux derniers.
+            const batchIds = belowIds.slice(i, i + IN_BATCH_SIZE);
+            let from = 0;
+            for (;;) {
+              const { data: grows, error: gErr } = await supabase
+                .from("sitter_gallery")
+                .select("user_id")
+                .in("user_id", batchIds)
+                .range(from, from + GALLERY_PAGE_SIZE - 1);
+              if (gErr) {
+                console.error("[publish-alert] lecture sitter_gallery impossible", gErr.message);
+                readOk = false;
+                break;
+              }
+              for (const g of (grows ?? []) as any[]) {
+                galleryCountByUser.set(g.user_id, (galleryCountByUser.get(g.user_id) ?? 0) + 1);
+              }
+              if ((grows ?? []).length < GALLERY_PAGE_SIZE) break;
+              from += GALLERY_PAGE_SIZE;
             }
-            for (const g of (grows ?? []) as any[]) {
-              galleryCountByUser.set(g.user_id, (galleryCountByUser.get(g.user_id) ?? 0) + 1);
-            }
+            if (!readOk) break;
           }
         }
         if (readOk) {
