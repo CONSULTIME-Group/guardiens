@@ -34,8 +34,20 @@ const corsHeaders = {
 
 /** Fenetre de rattrapage, en minutes, sur published_at. */
 export const PUBLISH_LOOKBACK_MINUTES = 30;
-/** Plafond de destinataires par execution. Au dela, on ecarte et on signale. */
-export const MAX_RECIPIENTS_PER_RUN = 150;
+/**
+ * Plafond de destinataires par ANNONCE, pas par execution : `targets` est
+ * reconstruit dans la boucle sur les annonces. Dix annonces publiees dans la
+ * meme fenetre peuvent donc produire jusqu'a dix fois ce plafond.
+ * Valeur alignee sur `c_rank_cap` du declencheur notify_sitters_on_new_sit,
+ * pour une seule regle de plafond entre les deux canaux (30/08/2026).
+ * Les alertes configurees a la main (`alert_preferences.source IS NULL`)
+ * passent hors plafond, les alertes issues de la migration automatique du
+ * 31/07 repassent dans le classement normal par distance.
+ */
+export const MAX_RECIPIENTS_PER_RUN = 100;
+/** Source posee par la migration automatique du 31/07/2026, jamais choisie. */
+export const MIGRATED_ALERT_SOURCE = "migration_email_preferences_2026_07_31";
+
 
 /**
  * Taille maximale d'un lot `.in()`. Au dela d'environ 200 identifiants,
@@ -204,7 +216,7 @@ Deno.serve(async (req) => {
     // Zones d'alerte actives portant sur les gardes, chargees une fois.
     const { data: prefs, error: prefsErr } = await supabase
       .from("alert_preferences")
-      .select("user_id, zone_type, radius_km, departement, alert_types, active")
+      .select("user_id, zone_type, radius_km, departement, alert_types, active, source")
       .eq("active", true);
     if (prefsErr) throw prefsErr;
     const zones = (prefs ?? []).filter((p: any) =>
@@ -293,7 +305,13 @@ Deno.serve(async (req) => {
         for (const s of (sups ?? []) as any[]) if (s.email) suppressed.add(String(s.email).toLowerCase());
       }
 
-      type Target = { user_id: string; email: string; first_name: string; distance_km: number | null };
+      type Target = {
+        user_id: string;
+        email: string;
+        first_name: string;
+        distance_km: number | null;
+        manual: boolean;
+      };
       const targets: Target[] = [];
       const seen = new Set<string>();
       for (const zone of zones as any[]) {
@@ -318,24 +336,35 @@ Deno.serve(async (req) => {
           email: String(sitter.email).trim(),
           first_name: sitter.first_name || "",
           distance_km: verdict.distanceKm,
+          // Alerte faite main : `source IS NULL`. Un rayon pose par la
+          // migration automatique n'est pas un choix, il ne donne donc
+          // aucune priorite hors plafond.
+          manual: zone.source === null || zone.source === undefined,
         });
       }
 
       targets.sort((a, b) => (a.distance_km ?? 99999) - (b.distance_km ?? 99999));
+      // Priorite hors plafond aux seules alertes configurees a la main,
+      // meme regle que le declencheur notify_sitters_on_new_sit.
+      const manualTargets = targets.filter((t) => t.manual);
+      const rankedTargets = targets.filter((t) => !t.manual);
       let selected = targets;
-      if (targets.length > MAX_RECIPIENTS_PER_RUN) {
-        selected = targets.slice(0, MAX_RECIPIENTS_PER_RUN);
+      if (rankedTargets.length > MAX_RECIPIENTS_PER_RUN) {
+        const kept = new Set(rankedTargets.slice(0, MAX_RECIPIENTS_PER_RUN).map((t) => t.user_id));
+        selected = targets.filter((t) => t.manual || kept.has(t.user_id));
         const dropped = targets.length - selected.length;
         metrics.dropped_over_cap += dropped;
         await raiseSignal(supabase, "publish_alert_volume_capped", `publish_alert_volume_capped_${sit.id}`, {
           sit_id: sit.id,
           targeted: targets.length,
           sent: selected.length,
+          manual: manualTargets.length,
           dropped,
           title: "Alerte de publication ecretee au plafond de volume",
-          detail: `${dropped} gardiens ecartes sur cette annonce, plafond de ${MAX_RECIPIENTS_PER_RUN} destinataires par execution.`,
+          detail: `${dropped} gardiens ecartes sur cette annonce, plafond de ${MAX_RECIPIENTS_PER_RUN} destinataires par annonce, alertes faites main hors plafond.`,
         });
       }
+
       metrics.recipients_targeted += selected.length;
 
       for (const t of selected) {

@@ -26,6 +26,10 @@ import { createClient, SupabaseClient } from "https://esm.sh/@supabase/supabase-
 import { clampRadiusKm, MAX_RADIUS_KM, PROXIMITY_DEDUP_DAYS } from "../_shared/proximity-radius.ts";
 import { PUBLISHED_STATUS } from "../_shared/sit-alert-guard.ts";
 
+/** Au dela de ce nombre de destinataires, la diffusion manuelle est signalee. */
+export const LARGE_BROADCAST_THRESHOLD = 150;
+
+
 /**
  * Adresses à ne pas resservir :
  * - celles déjà servies pour CETTE annonce, toutes campagnes confondues,
@@ -542,7 +546,26 @@ Deno.serve(async (req) => {
       );
     }
 
+    // Garde fou de volume (30/08/2026) : aucune limite dure, la diffusion
+    // manuelle est une action admin deliberee. Au dela de 150 destinataires,
+    // elle est simplement tracee en signal admin.
+    if (targets.length > LARGE_BROADCAST_THRESHOLD) {
+      const { error: signalErr } = await serviceClient.from("admin_signals").insert({
+        signal_type: "listing_proximity_large_broadcast",
+        severity: "warning",
+        entity_type: "sit",
+        entity_id: sitId,
+        metadata: {
+          sit_id: sitId,
+          targeted: targets.length,
+          radius_km: radiusKm,
+        },
+      });
+      if (signalErr) console.error("large broadcast signal failed", signalErr.message);
+    }
+
     // Row campagne pour la traçabilité admin (SignalsSection).
+
     const { data: campaign, error: campErr } = await serviceClient
       .from("mass_emails")
       .insert({
