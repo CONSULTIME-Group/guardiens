@@ -12,7 +12,7 @@ import type { Tables } from "@/integrations/supabase/types";
 
 export type MissionCategory = Tables<"small_missions">["category"];
 
-export const MISSION_CATEGORIES: { key: MissionCategory; label: string }[] = [
+export const MISSION_CATEGORIES = [
   { key: "animals", label: "Animaux" },
   { key: "garden", label: "Jardin" },
   { key: "house", label: "Maison et bricolage" },
