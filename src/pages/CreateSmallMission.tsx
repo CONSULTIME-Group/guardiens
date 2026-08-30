@@ -18,7 +18,7 @@ import { detectContactDetails, contactDetailsMessage } from "@/lib/contactDetail
 import { useToast } from "@/hooks/use-toast";
 import { useQueryClient } from "@tanstack/react-query";
 import PageMeta from "@/components/PageMeta";
-import { useAccessLevel } from "@/hooks/useAccessLevel";
+import { useAccessLevel, MIN_COMPLETION_TO_APPLY } from "@/hooks/useAccessLevel";
 import AccessGateBanner from "@/components/access/AccessGateBanner";
 import MissionPhotoUpload from "@/components/missions/MissionPhotoUpload";
 import { geocodeCity } from "@/lib/geocode";
@@ -72,7 +72,7 @@ const CreateSmallMission = () => {
   const { t } = useTranslation();
   const tp = (k: string, opts?: any) => t(`create_mission_page.${k}`, opts) as string;
   const { level: accessLevel, profileCompletion, identityRecommended, loading: accessLoading } = useAccessLevel();
-  // Chantier 1 EntraideHub Pass 1 : plus de gate 60 %, tout profil connecté peut publier.
+  // Chantier 1 EntraideHub Pass 1 : plus de gate 40 %, tout profil connecté peut publier.
   // L'ID vérification devient un soft-nudge (badge auteur uniquement) sur SitDetail.
   const canApplyMissions = true;
   
@@ -336,7 +336,7 @@ const CreateSmallMission = () => {
       return;
     }
     try { await trackFirstAction("mission_created", { category, mission_type: missionType }); } catch {}
-    if (typeof profileCompletion === "number" && profileCompletion < 60) {
+    if (typeof profileCompletion === "number" && profileCompletion < MIN_COMPLETION_TO_APPLY) {
       try { await trackEvent("mission_created_incomplete_profile", { metadata: { profile_completion: profileCompletion, mission_id: inserted?.id ?? null } }); } catch {}
     }
     if (inserted?.id) { try { await recordMissionCreatedAttribution(inserted.id); } catch {} }

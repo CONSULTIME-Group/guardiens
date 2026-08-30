@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Mail } from "lucide-react";
 import { toast } from "sonner";
+import { MIN_COMPLETION_TO_APPLY } from "@/hooks/useAccessLevel";
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
@@ -19,7 +20,7 @@ export const OnboardingReminderCard = () => (
     </CardHeader>
     <CardContent>
       <p className="text-sm text-muted-foreground mb-4">
-        Envoyer manuellement l'email J+1 aux inscrits des dernières 48h avec un profil complété à moins de 60%.
+        Envoyer manuellement l'email J+1 aux inscrits des dernières 48h avec un profil complété à moins de {MIN_COMPLETION_TO_APPLY}%.
       </p>
       <AlertDialog>
         <AlertDialogTrigger asChild>
@@ -32,7 +33,7 @@ export const OnboardingReminderCard = () => (
           <AlertDialogHeader>
             <AlertDialogTitle>Confirmer l'envoi</AlertDialogTitle>
             <AlertDialogDescription>
-              Cela enverra un email de rappel aux membres inscrits dans les dernières 48h dont le profil est complété à moins de 60%. Les doublons sont automatiquement exclus.
+              Cela enverra un email de rappel aux membres inscrits dans les dernières 48h dont le profil est complété à moins de {MIN_COMPLETION_TO_APPLY}%. Les doublons sont automatiquement exclus.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

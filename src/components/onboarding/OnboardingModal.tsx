@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
+import { MIN_COMPLETION_TO_APPLY } from "@/hooks/useAccessLevel";
 import { Camera, CheckCircle, User, Circle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -835,7 +836,7 @@ const OnboardingModal = ({ open, onClose, onMinimalComplete }: OnboardingModalPr
                 Votre profil est prêt.
               </h2>
               <p className="text-base text-foreground/80 leading-relaxed">
-                {liveCompletion >= 60
+                {liveCompletion >= MIN_COMPLETION_TO_APPLY
                   ? "Bravo ! Votre profil est déjà bien rempli. La communauté peut vous découvrir."
                   : "Vous pouvez encore améliorer votre profil depuis vos paramètres. En attendant, explorez !"}
               </p>

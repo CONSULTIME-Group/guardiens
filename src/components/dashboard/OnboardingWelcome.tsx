@@ -181,7 +181,7 @@ const OnboardingWelcome = ({ role, checks, onDismiss }: OnboardingWelcomeProps) 
         <p className="text-xs text-muted-foreground text-right">
           {role === "owner"
             ? "Un profil complet rassure les gardiens et attire des candidatures plus pertinentes."
-            : "À 60 %, vous pourrez postuler aux annonces."}
+            : "À 40 %, vous pourrez postuler aux annonces."}
         </p>
       </div>
 

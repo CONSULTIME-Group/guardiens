@@ -7,7 +7,7 @@
  *
  * Stades :
  *  - "nouvelle" : par défaut, juste inscrit (profil sous le seuil).
- *  - "eveillee" : profil complété au-dessus du seuil (par défaut 60 %).
+ *  - "eveillee" : profil complété au-dessus du seuil (par défaut 40 %).
  *  - "complice" : profil complété ET au moins une action réelle
  *                 (annonce publiée, candidature, mission d'entraide).
  *  - "fidele"   : historique tangible, garde réalisée OU >= 3 missions d'entraide
@@ -16,12 +16,13 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { MIN_COMPLETION_TO_APPLY } from "@/hooks/useAccessLevel";
 
 export type AlmaStage = "nouvelle" | "eveillee" | "complice" | "fidele";
 
 /** Seuils centralisés, ajustables par produit sans toucher la logique. */
 export const ALMA_THRESHOLDS = {
-  profileCompletionMin: 60,
+  profileCompletionMin: MIN_COMPLETION_TO_APPLY,
   missionsForFidele: 3,
   badgesForFidele: 1,
   completedSitsForFidele: 1,

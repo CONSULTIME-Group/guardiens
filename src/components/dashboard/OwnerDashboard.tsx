@@ -11,7 +11,7 @@ import { differenceInDays } from "date-fns";
 import RoleActivationBanner from "./RoleActivationBanner";
 import AccessGateBanner from "@/components/access/AccessGateBanner";
 import { FreePeriodBanner } from "@/components/marketing/FreePeriodBanner";
-import { useAccessLevel } from "@/hooks/useAccessLevel";
+import { useAccessLevel, MIN_COMPLETION_TO_APPLY } from "@/hooks/useAccessLevel";
 
 /* ── Vague 11 : composants du flux principal ── */
 import ApplicationsSection from "./owner/ApplicationsSection";
@@ -156,7 +156,7 @@ const OwnerDashboard = () => {
   useEffect(() => {
     if (loading || !user || !data.profile) return;
     const dismissed = localStorage.getItem("onboarding_owner_dismissed");
-    if (!dismissed && user.profileCompletion < 60 && data.profile.onboarding_minimal_completed) {
+    if (!dismissed && user.profileCompletion < MIN_COMPLETION_TO_APPLY && data.profile.onboarding_minimal_completed) {
       setShowOnboarding(true);
     } else {
       setShowOnboarding(false);

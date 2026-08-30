@@ -34,7 +34,7 @@ describe("useSitterPriorityAction — règle de priorité", () => {
     expect(result.current.variant).not.toBe("skills");
   });
 
-  it("garde la priorité au profil incomplet (< 60%) avant la carte compétences", () => {
+  it("garde la priorité au profil incomplet (< 40%) avant la carte compétences", () => {
     const { result } = renderHook(() =>
       useSitterPriorityAction({
         ...baseInput,
