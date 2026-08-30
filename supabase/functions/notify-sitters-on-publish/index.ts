@@ -270,7 +270,7 @@ Deno.serve(async (req) => {
       for (let i = 0; i < candidateIds.length; i += IN_BATCH_SIZE) {
         const { data: rows, error: batchErr } = await supabase
           .from("profiles")
-          .select("id, first_name, email, city, latitude, longitude, postal_code, account_status, role")
+          .select("id, first_name, email, city, country, latitude, longitude, postal_code, account_status, role, profile_completion, identity_verified, avatar_url, bio")
           .in("id", candidateIds.slice(i, i + IN_BATCH_SIZE));
         // Un lot en echec ne passe plus inapercu : sans ces profils, le
         // ciblage se tait et des gardiens ne sont jamais prevenus.
@@ -367,6 +367,87 @@ Deno.serve(async (req) => {
 
       metrics.recipients_targeted += selected.length;
 
+      // Incitation a completer le profil (30/08/2026). Depuis le
+      // dedoublonnage, une annonce servie en immediat ne repart plus dans le
+      // digest : c'est donc cette alerte qui porte desormais la phrase de
+      // completion. Meme module que le digest, jamais un bareme duplique.
+      // Le calcul detaille n'est fait que pour les destinataires sous le
+      // seuil, en requetes groupees, jamais une par personne.
+      const completionByUser = new Map<
+        string,
+        { sentence?: string; steps: number; href?: string }
+      >();
+      const belowIds = selected
+        .filter((t) => (sitterById.get(t.user_id)?.profile_completion ?? 0) < APPLY_COMPLETION_THRESHOLD)
+        .map((t) => t.user_id);
+      if (belowIds.length > 0) {
+        // Regle du digest : en cas d'erreur de lecture, aucune phrase plutot
+        // qu'une phrase fausse.
+        let readOk = true;
+        const sitterRowById = new Map<string, any>();
+        for (let i = 0; i < belowIds.length; i += IN_BATCH_SIZE) {
+          const { data: srows, error: sErr } = await supabase
+            .from("sitter_profiles")
+            .select("user_id, competences, lifestyle, interests, languages, life_pace, animal_types")
+            .in("user_id", belowIds.slice(i, i + IN_BATCH_SIZE));
+          if (sErr) {
+            console.error("[publish-alert] lecture sitter_profiles impossible", sErr.message);
+            readOk = false;
+            break;
+          }
+          for (const r of (srows ?? []) as any[]) sitterRowById.set(r.user_id, r);
+        }
+        // Comptage galerie groupe : une seule lecture par lot, agregation en
+        // memoire. sitter_gallery porte user_id, la colonne que compte
+        // _calculate_sitter_score.
+        const galleryCountByUser = new Map<string, number>();
+        if (readOk) {
+          for (let i = 0; i < belowIds.length; i += IN_BATCH_SIZE) {
+            const { data: grows, error: gErr } = await supabase
+              .from("sitter_gallery")
+              .select("user_id")
+              .in("user_id", belowIds.slice(i, i + IN_BATCH_SIZE));
+            if (gErr) {
+              console.error("[publish-alert] lecture sitter_gallery impossible", gErr.message);
+              readOk = false;
+              break;
+            }
+            for (const g of (grows ?? []) as any[]) {
+              galleryCountByUser.set(g.user_id, (galleryCountByUser.get(g.user_id) ?? 0) + 1);
+            }
+          }
+        }
+        if (readOk) {
+          for (const uid of belowIds) {
+            const prof = sitterById.get(uid);
+            if (!prof) continue;
+            const sitterRow = sitterRowById.get(uid) ?? {};
+            const steps = remainingCompletionSteps({
+              first_name: prof.first_name,
+              postal_code: prof.postal_code,
+              city: prof.city,
+              country: prof.country,
+              avatar_url: prof.avatar_url,
+              bio: prof.bio,
+              identity_verified: prof.identity_verified,
+              competences: sitterRow.competences,
+              lifestyle: sitterRow.lifestyle,
+              interests: sitterRow.interests,
+              languages: sitterRow.languages,
+              life_pace: sitterRow.life_pace,
+              animal_types: sitterRow.animal_types,
+              gallery_count: galleryCountByUser.get(uid) ?? 0,
+            });
+            const message = completionMessageFor(prof.profile_completion ?? 0, steps);
+            completionByUser.set(uid, {
+              sentence: message?.sentence,
+              steps: message?.stepCount ?? 0,
+              href: message?.href,
+            });
+          }
+        }
+      }
+
       for (const t of selected) {
         const idempotencyKey = `publish-alert-${sit.id}-${t.user_id}`;
         // Idempotence stricte : la cle primaire de sit_notification_log
@@ -417,6 +498,10 @@ Deno.serve(async (req) => {
               endDate: formatDateFr(sit.end_date) || undefined,
               sitId: sit.id,
               coverPhotoUrl: coverPhotoUrl || null,
+              canApply: (sitterById.get(t.user_id)?.profile_completion ?? 0) >= APPLY_COMPLETION_THRESHOLD,
+              completionSentence: completionByUser.get(t.user_id)?.sentence,
+              completionSteps: completionByUser.get(t.user_id)?.steps ?? 0,
+              completionHref: completionByUser.get(t.user_id)?.href,
             },
           },
         });
