@@ -96,7 +96,48 @@ const CategoryIllustration = ({ cat }: { cat: string }) => {
       </svg>
     );
   }
+  if (cat === "errand") {
+    // Cabas de courses
+    return (
+      <svg viewBox="0 0 100 100" className={common} aria-hidden="true" preserveAspectRatio="xMidYMid slice">
+        <path d="M28 42 H72 L67 82 H33 Z" fill="currentColor" />
+        <path d="M40 42 V32 a10 10 0 0 1 20 0 V42" fill="none" stroke="currentColor" strokeWidth="5" />
+      </svg>
+    );
+  }
+  if (cat === "transport") {
+    // Voiture stylisée
+    return (
+      <svg viewBox="0 0 100 100" className={common} aria-hidden="true" preserveAspectRatio="xMidYMid slice">
+        <path d="M20 62 L27 45 H73 L80 62 V72 H20 Z" fill="currentColor" />
+        <circle cx="33" cy="74" r="7" fill="currentColor" opacity="0.6" />
+        <circle cx="67" cy="74" r="7" fill="currentColor" opacity="0.6" />
+      </svg>
+    );
+  }
+  if (cat === "company") {
+    // Deux présences côte à côte
+    return (
+      <svg viewBox="0 0 100 100" className={common} aria-hidden="true" preserveAspectRatio="xMidYMid slice">
+        <circle cx="38" cy="40" r="10" fill="currentColor" />
+        <circle cx="64" cy="44" r="8" fill="currentColor" opacity="0.6" />
+        <path d="M22 80 a16 16 0 0 1 32 0 Z" fill="currentColor" />
+        <path d="M52 80 a13 13 0 0 1 26 0 Z" fill="currentColor" opacity="0.6" />
+      </svg>
+    );
+  }
+  if (cat === "other") {
+    // Trois points, catégorie ouverte
+    return (
+      <svg viewBox="0 0 100 100" className={common} aria-hidden="true" preserveAspectRatio="xMidYMid slice">
+        <circle cx="34" cy="55" r="6" fill="currentColor" />
+        <circle cx="50" cy="55" r="6" fill="currentColor" />
+        <circle cx="66" cy="55" r="6" fill="currentColor" />
+      </svg>
+    );
+  }
   // animals (défaut) : silhouette de patte
+
   return (
     <svg viewBox="0 0 100 100" className={common} aria-hidden="true" preserveAspectRatio="xMidYMid slice">
       <ellipse cx="50" cy="65" rx="18" ry="14" fill="currentColor" />
