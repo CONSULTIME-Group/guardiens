@@ -185,7 +185,12 @@ export type EventType =
   | "entraide_all_status_default_used"          // Fallback filtre status=all car <20 missions (missions_count)
   | "mission_expired_badge_seen"                // Badge "date dépassée" impression (mission_id, days_overdue)
   | "mission_expired_reschedule_clicked"        // Clic "Reporter" sur mission expirée (mission_id)
+  // Mesure entraide (parité avec sit_view) ----------------------------------
+  | "mission_view"                              // Vue d'une fiche entraide (mission_id, category, mission_type, has_photo, has_exchange_offer, viewer_type)
+  | "mission_card_clicked"                      // Clic sur une carte du fil (mission_id, position, category, surface, distance_km?)
+  | "mission_response_source"                   // Réponse envoyée (mission_id, source: feed|digest_email|invitation|direct, utm_campaign?)
   // EntraideHub Pass 1, vagues 2-3 (modale réponse + workflow) ---------------
+
   | "mission_response_modal_opened"             // Ouverture modale de réponse depuis sidebar (mission_id, mission_type)
   | "mission_response_template_used"            // Template rapide sélectionné dans la modale (mission_id, template_key)
   | "mission_response_submitted_from_modal"     // Envoi depuis la modale (mission_id, has_template)
