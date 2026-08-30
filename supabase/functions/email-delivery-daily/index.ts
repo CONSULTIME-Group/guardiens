@@ -42,7 +42,7 @@ Deno.serve(async (req) => {
 
   const { data: rows, error } = await supabase
     .from('email_send_log')
-    .select('template_name, status, delivered_at, first_opened_at, first_clicked_at, bounced_at, complained_at, message_id')
+    .select('template_name, status, delivered_at, first_opened_at, first_clicked_at, bounced_at, complained_at, message_id, resend_id, metadata')
     .gte('created_at', since)
     .limit(100000)
 
@@ -55,9 +55,15 @@ Deno.serve(async (req) => {
   // Dedup by message_id keeping "sent" rows
   const seen = new Set<string>()
   let sent = 0, delivered = 0, opened = 0, clicked = 0, bounced = 0, complained = 0
+  let deferMarkers = 0
   const perTpl = new Map<string, { sent: number; delivered: number; opened: number; clicked: number; bounced: number; complained: number }>()
 
   for (const r of rows || []) {
+    // Une ligne de report (metadata.defer_reason, sans resend_id) est une
+    // intention, pas un envoi. La compter ecrasait mecaniquement les taux de
+    // livraison et d'ouverture. Elle est exclue de toute statistique.
+    const isDeferMarker = !!(r as any).metadata?.defer_reason && !(r as any).resend_id
+    if (isDeferMarker) { deferMarkers++; continue }
     const key = (r as any).message_id || crypto.randomUUID()
     if (seen.has(key)) continue
     seen.add(key)
@@ -71,6 +77,7 @@ Deno.serve(async (req) => {
     if ((r as any).bounced_at) { bounced++; p.bounced++ }
     if ((r as any).complained_at) { complained++; p.complained++ }
   }
+
 
   const denom = delivered || sent || 1
   const bounce_rate = (bounced / (sent || 1)) * 100
