@@ -16,6 +16,7 @@ const baseInput = {
   postalCode: "69001",
   nearbyListings: [],
   isAvailable: true,
+  completedSitsCount: 0,
 };
 
 describe("useSitterPriorityAction — règle de priorité", () => {
@@ -45,6 +46,18 @@ describe("useSitterPriorityAction — règle de priorité", () => {
     expect(result.current.variant).toBe("profile");
   });
 
+  it("annonce clairement que les candidatures sont bloquées quand le profil est incomplet", () => {
+    const { result } = renderHook(() =>
+      useSitterPriorityAction({
+        ...baseInput,
+        profileCompletion: 30,
+      }),
+    );
+    expect(result.current.variant).toBe("profile");
+    expect(result.current.eyebrow).toBe("Candidatures bloquées");
+    expect(result.current.title).toContain("pour postuler à une annonce");
+  });
+
   it("garde la priorité au code postal manquant avant la carte compétences", () => {
     const { result } = renderHook(() =>
       useSitterPriorityAction({
@@ -54,5 +67,20 @@ describe("useSitterPriorityAction — règle de priorité", () => {
       }),
     );
     expect(result.current.variant).toBe("postal");
+  });
+
+  it("propose l'entraide aux gardiens sans garde réalisée", () => {
+    const { result } = renderHook(() =>
+      useSitterPriorityAction({ ...baseInput, completedSitsCount: 0 }),
+    );
+    expect(result.current.variant).toBe("entraide");
+  });
+
+  it("passe à l'état d'accueil 'explore' si le gardien a déjà réalisé une garde", () => {
+    const { result } = renderHook(() =>
+      useSitterPriorityAction({ ...baseInput, completedSitsCount: 1 }),
+    );
+    expect(result.current.variant).toBe("explore");
+    expect(result.current.eyebrow).toBe("Tout est prêt");
   });
 });
