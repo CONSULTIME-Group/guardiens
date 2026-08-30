@@ -80,7 +80,6 @@ const LIFESTYLE_OPTIONS = [
 ];
 
 export type FieldKey =
-  | "radius"
   | "location"
   | "competences"
   | "avatar"
@@ -88,6 +87,7 @@ export type FieldKey =
   | "lifestyle"
   | "affinity"
   | "gallery";
+
 
 interface FieldMeta {
   key: FieldKey;
