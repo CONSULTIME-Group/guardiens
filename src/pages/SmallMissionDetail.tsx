@@ -1016,16 +1016,17 @@ const SmallMissionDetail = () => {
         publishedAt={mission.created_at}
       />
       <Head>
+        {/* Balisage non marchand : ni Service, ni Offer, ni prix, ni provider.
+            Un coup de main s'échange contre un service, jamais contre de l'argent. */}
         <script type="application/ld+json">{JSON.stringify({
           "@context": "https://schema.org",
-          "@type": "Service",
+          "@type": "WebPage",
           name: displayTitle,
           description: mission.description?.slice(0, 300),
-          areaServed: cityLabel,
-          serviceType: catMeta.label,
-          provider: { "@type": "Organization", name: "Guardiens", url: "https://guardiens.fr" },
-          offers: { "@type": "Offer", price: "0", priceCurrency: "EUR", availability: mission.status === "open" ? "https://schema.org/InStock" : "https://schema.org/OutOfStock" },
-          datePosted: mission.created_at,
+          inLanguage: "fr-FR",
+          about: { "@type": "Thing", name: catMeta.label },
+          contentLocation: { "@type": "Place", name: cityLabel },
+          datePublished: mission.created_at,
         })}</script>
       </Head>
 

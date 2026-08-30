@@ -5,6 +5,8 @@ import {
   writeSitPrefill,
   readSitPrefill,
   SIT_PREFILL_KEY,
+  hasMoneyMention,
+  moneyWordingSignals,
 } from "../missionContentGuards";
 
 describe("sitLikeSignals", () => {
@@ -66,5 +68,44 @@ describe("pré-remplissage de bascule vers /sits/create", () => {
     const first = readSitPrefill();
     expect(first?.title).toBe("Garde de mon chat");
     expect(readSitPrefill()).toBeNull();
+  });
+});
+
+describe("MONEY_RX, mentions monétaires bloquantes", () => {
+  it.each([
+    "Je paie 20 €",
+    "20 euros de l'heure",
+    "Contre 15 balles",
+    "Paiement par PayPal",
+    "Je peux régler en Lydia",
+    "Virement possible",
+    "Paiement CESU",
+    "Réglé en espèces",
+    "en liquide",
+    "un chèque à l'ordre de",
+    "Prix : 30 CHF",
+  ])("bloque %s", (text) => {
+    expect(hasMoneyMention("Coup de main urgent", text, "")).toBe(true);
+  });
+
+  it.each([
+    "Deux espèces animales à surveiller",
+    "Boules, mon chien, adore les balades",
+    "Arroser mes plantes pendant une semaine",
+  ])("laisse passer %s", (text) => {
+    expect(hasMoneyMention("Arrosage de plantes", text, "Un café et des tomates")).toBe(false);
+  });
+
+  it("teste bien les trois champs concaténés", () => {
+    expect(hasMoneyMention("Aide déménagement", "Deux heures", "30 €")).toBe(true);
+  });
+});
+
+describe("moneyWordingSignals, vocabulaire ambigu non bloquant", () => {
+  it("signale un dédommagement", () => {
+    expect(moneyWordingSignals("Aide jardinage", "Petit dédommagement possible", "")).not.toBeNull();
+  });
+  it("ne signale rien sur un texte neutre", () => {
+    expect(moneyWordingSignals("Aide jardinage", "Tailler la haie", "Des légumes")).toBeNull();
   });
 });

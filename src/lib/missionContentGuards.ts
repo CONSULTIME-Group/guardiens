@@ -68,6 +68,55 @@ export function rehomingSignals(
   return { matched: ["marqueur de cession ou adoption", "espèce animale"] };
 }
 
+/**
+ * Mention monétaire indiscutable. Lexique strictement aligné sur le trigger
+ * base qui refuse la publication avec hint = 'money_in_mutual_aid'.
+ *
+ * Faux positifs volontairement évités : sur Guardiens « espèces » seul
+ * désigne des espèces animales et « boules » désigne un chien. Seules les
+ * locutions « en espèces » et « en liquide » sont retenues.
+ */
+export const MONEY_RX =
+  /[€£$]|\b(?:eur|chf)\b|\d+\s*(?:euros?|balles|roros)\b|\bpaypal\b|\blydia\b|\bpaylib\b|\bvirement\b|\bcesu\b|\ben\s+especes\b|\ben\s+esp[èe]ces\b|\ben\s+liquide\b|\b(?:par|un)\s+ch[èe]que\b|\bde\s+l'heure\b/i;
+
+/**
+ * Vocabulaire d'argent ambigu, jamais bloquant : il déclenche un rappel doux
+ * que l'entraide fonctionne sans argent. Le serveur ouvre de son côté un
+ * signal admin money_wording_mission.
+ */
+const MONEY_WORDING_RX =
+  /\b(remuneration|rémunération|salaire|honoraires?|tarif|cash|remboursement|frais\s+de|dedommagement|dédommagement|defraiement|défraiement|indemnite|indemnité|prix|facture)\b/i;
+
+/**
+ * Détecte une mention monétaire bloquante dans les trois champs libres
+ * (titre, description, contrepartie), comme le fait detectContactDetails.
+ */
+export function hasMoneyMention(
+  title: string | null | undefined,
+  description?: string | null,
+  exchangeOffer?: string | null,
+): boolean {
+  const text = normalize(`${title ?? ""} ${description ?? ""} ${exchangeOffer ?? ""}`);
+  if (!text.trim()) return false;
+  return MONEY_RX.test(text);
+}
+
+/**
+ * Détecte le vocabulaire d'argent ambigu sur les trois champs libres.
+ * Non bloquant, sur le modèle de sitLikeSignals.
+ */
+export function moneyWordingSignals(
+  title: string | null | undefined,
+  description?: string | null,
+  exchangeOffer?: string | null,
+): ContentGuardSignals | null {
+  const text = normalize(`${title ?? ""} ${description ?? ""} ${exchangeOffer ?? ""}`);
+  if (!text.trim()) return null;
+  const match = text.match(MONEY_WORDING_RX);
+  if (!match) return null;
+  return { matched: [`vocabulaire d'argent : ${match[0]}`] };
+}
+
 /** Clé sessionStorage pour la reprise du texte vers /sits/create. */
 export const SIT_PREFILL_KEY = "guardiens.sitPrefill";
 

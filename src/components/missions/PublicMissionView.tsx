@@ -136,21 +136,18 @@ const PublicMissionView = ({
         image={ogImage}
       />
       <Head>
+        {/* Balisage non marchand : une annonce d'entraide n'est ni un service
+            commercial ni une offre, elle ne porte donc ni Offer, ni prix, ni
+            provider Organization. */}
         <script type="application/ld+json">{JSON.stringify({
           "@context": "https://schema.org",
-          "@type": "Service",
+          "@type": "WebPage",
           name: displayTitle,
           description: mission.description?.slice(0, 300) || metaDescription,
-          areaServed: cityLabel,
-          serviceType: catMeta.label,
-          provider: { "@type": "Organization", name: "Guardiens", url: "https://guardiens.fr" },
-          offers: {
-            "@type": "Offer",
-            price: "0",
-            priceCurrency: "EUR",
-            availability: mission.status === "open" ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
-          },
-          datePosted: mission.created_at,
+          inLanguage: "fr-FR",
+          about: { "@type": "Thing", name: catMeta.label },
+          contentLocation: { "@type": "Place", name: cityLabel },
+          datePublished: mission.created_at,
         })}</script>
       </Head>
 
@@ -372,12 +369,16 @@ const PublicMissionView = ({
                     </p>
                   </div>
                 )}
-                <div>
-                  <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-1">
-                    {t("mission_detail.cost")}
-                  </p>
-                  <p className="text-base font-semibold text-foreground">{t("mission_detail.cost_value")}</p>
-                </div>
+                {/* Pas de rubrique coût : l'entraide n'a pas de prix, on met
+                    en valeur ce qui est proposé en retour. */}
+                {mission.exchange_offer && (
+                  <div>
+                    <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-1">
+                      {t("mission_detail.exchange_h3")}
+                    </p>
+                    <p className="text-base font-semibold text-foreground">{mission.exchange_offer}</p>
+                  </div>
+                )}
               </div>
 
               <Link to={`/inscription?redirect=${encodeURIComponent(redirect)}`} className="block">

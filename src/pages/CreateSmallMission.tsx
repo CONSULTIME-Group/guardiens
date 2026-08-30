@@ -27,6 +27,8 @@ import { recordMissionCreatedAttribution } from "@/lib/campaignAttribution";
 import {
   sitLikeSignals,
   rehomingSignals,
+  moneyWordingSignals,
+  hasMoneyMention,
   writeSitPrefill,
 } from "@/lib/missionContentGuards";
 import { AlertCircle, ChevronLeft, CalendarIcon } from "lucide-react";
@@ -38,8 +40,6 @@ import IdentityRecommendedHint from "@/components/missions/IdentityRecommendedHi
 /** Longueurs minimales pour éviter les annonces vides ou illisibles. */
 const MIN_TITLE_LEN = 15;
 const MIN_DESC_LEN = 60;
-
-const EURO_REGEX = /\d+\s*[€]|[€]\s*\d+|\d+\s*euro/i;
 
 /* ── Stepper progress bar ── */
 const StepperBar = ({ current, total }: { current: number; total: number }) => (
@@ -175,7 +175,7 @@ const CreateSmallMission = () => {
 
   const handleExchangeChange = (val: string) => {
     setExchangeOffer(val);
-    setExchangeError(EURO_REGEX.test(val) ? tp("exchange_error_euros") : "");
+    setExchangeError(hasMoneyMention(val) ? tp("exchange_error_euros") : "");
   };
 
   /* Step 1 validation */
@@ -203,6 +203,10 @@ const CreateSmallMission = () => {
    */
   const sitLike = useMemo(() => sitLikeSignals(title, description), [title, description]);
   const rehoming = useMemo(() => rehomingSignals(title, description), [title, description]);
+  const moneyWording = useMemo(
+    () => moneyWordingSignals(title, description, exchangeOffer),
+    [title, description, exchangeOffer],
+  );
 
   // Volume d'audience : combien de personnes seront prévenues à la publication.
   const [audienceCount, setAudienceCount] = useState<number | null>(null);
@@ -232,7 +236,7 @@ const CreateSmallMission = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user) return;
-    if (EURO_REGEX.test(exchangeOffer)) return;
+    if (hasMoneyMention(exchangeOffer)) return;
     if (submitting) return;
     const missing: string[] = [];
     if (!title.trim()) missing.push("Titre");
@@ -273,6 +277,20 @@ const CreateSmallMission = () => {
 
   const performSubmit = async () => {
     if (!user) return;
+
+    // L'entraide s'échange service contre service : aucune mention d'argent,
+    // sur aucun des trois champs libres. Miroir du trigger base.
+    if (hasMoneyMention(title, description, exchangeOffer)) {
+      toast({
+        title: "Ici, on s'échange des services",
+        description:
+          "Votre annonce mentionne de l'argent. Sur l'entraide, on propose un service en retour, jamais un paiement. Reformulez votre contrepartie.",
+        variant: "destructive",
+      });
+      setStep(1);
+      setExchangeTouched(true);
+      return;
+    }
 
     // Une annonce d'entraide est une page publique indexable : les coordonnées
     // personnelles y sont bloquantes, contrairement à la messagerie privée.
@@ -328,6 +346,15 @@ const CreateSmallMission = () => {
     if (error) {
       const hint = (error as any)?.hint || "";
       const msg = String(error.message || "");
+      if (hint === "money_in_mutual_aid" || msg.includes("money_in_mutual_aid")) {
+        toast({
+          title: "Ici, on s'échange des services",
+          description: error.message,
+          variant: "destructive",
+        });
+        setStep(1);
+        return;
+      }
       if (hint === "account_not_active" || msg.includes("account_not_active")) {
         toast({ title: "Compte non actif", description: "Contactez le support pour rétablir l'accès à l'entraide.", variant: "destructive" });
         return;
@@ -477,6 +504,16 @@ const CreateSmallMission = () => {
                       </Button>
                       <span className="text-[11px] text-muted-foreground">Ou continuez votre mission, rien ne bloque.</span>
                     </div>
+                  </div>
+                )}
+                {moneyWording && (
+                  <div className="rounded-xl border border-warning/40 bg-warning/10 p-4 space-y-1" role="note">
+                    <p className="text-sm font-semibold text-foreground">
+                      Ici, on s'échange des services
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      L'entraide fonctionne sans argent : ni paiement, ni tarif, ni remboursement. Proposez plutôt un service en retour. Rien ne bloque, c'est une simple relecture.
+                    </p>
                   </div>
                 )}
                 {rehoming && (
