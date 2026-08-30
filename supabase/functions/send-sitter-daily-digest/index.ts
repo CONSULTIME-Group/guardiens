@@ -34,7 +34,7 @@ import { recordDeliveryFailure } from '../_shared/delivery-failure.ts'
 import { startCronRun } from '../_shared/cron-run-log.ts'
 import { acquireWorkerLock, releaseWorkerLock } from '../_shared/worker-lock.ts'
 import { computeAffinityResultFull } from '../_shared/affinity/score.ts'
-import { pickMissingOpportunities, type MissingOpportunitiesStats } from '../_shared/missing-opportunities/index.ts'
+import { completionMessageFor, remainingCompletionSteps } from '../_shared/completion-steps/index.ts'
 
 
 // La plateforme coupe actuellement ce traitement vers 150 secondes. Le
@@ -87,7 +87,7 @@ interface SitRow {
 
 // Colonnes gardien consommées par le moteur unique d'affinité.
 // À maintenir en phase avec `AffinitySitterInput` (_shared/affinity/score.ts).
-const SITTER_AFFINITY_COLUMNS = 'user_id, experience_years, life_pace, lifestyle, availability_during, languages, interests, work_during_sit, meeting_preference, handover_preference, sensitivities, animal_types, sitter_type, special_animal_skills, travels_with_children, travels_with_own_animals, has_vehicle, has_license, farm_animals_ok'
+const SITTER_AFFINITY_COLUMNS = 'user_id, experience_years, life_pace, lifestyle, availability_during, languages, interests, work_during_sit, meeting_preference, handover_preference, sensitivities, animal_types, sitter_type, special_animal_skills, travels_with_children, travels_with_own_animals, has_vehicle, has_license, farm_animals_ok, competences'
 
 function formatFrDate(iso?: string | null): string | undefined {
   if (!iso) return undefined
@@ -269,7 +269,7 @@ Deno.serve(async (req) => {
         // 2a. Charge les infos gardien (profile + email_preferences)
         const { data: profile } = await supabase
           .from('profiles')
-          .select('id, first_name, account_status, identity_verified, profile_completion, last_seen_at, role')
+          .select('id, first_name, account_status, identity_verified, profile_completion, last_seen_at, role, avatar_url, bio, postal_code, city, country')
           .eq('id', sitterId)
           .maybeSingle()
 
