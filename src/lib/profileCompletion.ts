@@ -79,26 +79,27 @@ export function computeSitterCompletion(d: ProfileCompletionInput): CompletionRe
   const affinityCount = affinityChecks.filter(Boolean).length;
   const affinityOk = affinityCount >= 3;
 
-  // Galerie : le barème distingue « au moins une photo » (2 pts) de
-  // « galerie fournie » (3 photos ou plus, 5 pts). Parité SQL.
+  // Galerie : le barème distingue « au moins une photo » (4 pts) de
+  // « galerie fournie » (3 photos ou plus, 10 pts). Parité SQL.
   const galleryCount = d.sitter_gallery_count ?? (d.has_sitter_gallery ? 1 : 0);
-  const galleryPoints = galleryCount >= 3 ? 5 : galleryCount >= 1 ? 2 : 0;
+  const galleryPoints = galleryCount >= 3 ? 10 : galleryCount >= 1 ? 4 : 0;
   const galleryOk = galleryCount >= 3;
 
+  // Le rayon d'intervention ne rapporte plus de points depuis le barème du
+  // 30/08/2026. Le champ reste utilisé par la recherche et l'entraide.
   const items: CompletionItem[] = [
     { key: "location", label: "Nom et localisation", points: 15, ok: locationOk(d) },
-    { key: "avatar", label: "Photo de profil", points: 15, ok: !!d.avatar_url },
-    { key: "bio", label: "Bio d'au moins 50 caractères", points: 10, ok: (d.bio?.length ?? 0) >= 50 },
+    { key: "avatar", label: "Photo de profil", points: 20, ok: !!d.avatar_url },
+    { key: "bio", label: "Bio d'au moins 50 caractères", points: 15, ok: (d.bio?.length ?? 0) >= 50 },
     { key: "competences", label: "Compétences", points: 15, ok: (d.competences?.length ?? 0) > 0 },
     { key: "lifestyle", label: "Style de vie", points: 10, ok: (d.lifestyle?.length ?? 0) > 0 },
-    { key: "radius", label: "Rayon de mobilité", points: 15, ok: (d.geographic_radius ?? 0) > 0 },
-    { key: "gallery", label: "Galerie de 3 photos ou plus", points: 5, ok: galleryOk, hint: galleryCount > 0 && !galleryOk ? `${galleryCount} photo${galleryCount > 1 ? "s" : ""} pour l'instant.` : undefined },
+    { key: "gallery", label: "Galerie de 3 photos ou plus", points: 10, ok: galleryOk, hint: galleryCount > 0 && !galleryOk ? `${galleryCount} photo${galleryCount > 1 ? "s" : ""} pour l'instant.` : undefined },
     { key: "identity", label: "Vérification d'identité", points: 5, ok: !!d.identity_verified, hint: "Traitée par notre équipe après envoi de vos documents." },
     { key: "affinity", label: "Profil d'affinité (au moins 3 signaux)", points: 10, ok: affinityOk, hint: `Complété à ${affinityCount}/4.` },
   ];
   const baseScore = items.reduce((s, i) => s + (i.ok ? i.points : 0), 0);
   // Parité SQL : affinity partiel donne 3/6 points même sous le seuil,
-  // galerie partielle donne 2 points dès la première photo.
+  // galerie partielle donne 4 points dès la première photo.
   const partialAffinity = affinityOk ? 0 : affinityPoints(affinityCount);
   const score = Math.min(
     100,
@@ -106,6 +107,7 @@ export function computeSitterCompletion(d: ProfileCompletionInput): CompletionRe
       - (affinityOk ? 10 : 0) + (affinityOk ? 10 : partialAffinity)
       + (galleryOk ? 0 : galleryPoints),
   );
+
   return { score, items, missing: items.filter(i => !i.ok) };
 }
 

@@ -64,16 +64,16 @@ describe("profileCompletion, barème SQL", () => {
     expect(computeOwnerCompletion(fullOwner).score).toBe(100);
   });
 
-  it("Barème Gardien : essentiels 15+15+10+15+10+15 = 80, bonus 5+5+10 = 20", () => {
+  it("Barème Gardien : localisation 15, photo 20, bio 15, compétences 15, lifestyle 10, galerie 10, identité 5, affinité 10", () => {
     const items = computeSitterCompletion(fullSitter).items;
     const byKey = Object.fromEntries(items.map(i => [i.key, i.points]));
     expect(byKey.location).toBe(15);
-    expect(byKey.avatar).toBe(15);
-    expect(byKey.bio).toBe(10);
+    expect(byKey.avatar).toBe(20);
+    expect(byKey.bio).toBe(15);
     expect(byKey.competences).toBe(15);
     expect(byKey.lifestyle).toBe(10);
-    expect(byKey.radius).toBe(15);
-    expect(byKey.gallery).toBe(5);
+    expect(byKey.radius).toBeUndefined();
+    expect(byKey.gallery).toBe(10);
     expect(byKey.identity).toBe(5);
     expect(byKey.affinity).toBe(10);
     expect(items.reduce((s, i) => s + i.points, 0)).toBe(100);
@@ -94,19 +94,19 @@ describe("profileCompletion, barème SQL", () => {
     expect(items.reduce((s, i) => s + i.points, 0)).toBe(100);
   });
 
-  it("Galerie gardien : 1 ou 2 photos donnent 2 points, 3 photos ou plus donnent 5", () => {
+  it("Galerie gardien : 1 ou 2 photos donnent 4 points, 3 photos ou plus donnent 10", () => {
     const one = computeSitterCompletion({ ...emptySitter, sitter_gallery_count: 1 });
-    expect(one.score).toBe(2);
+    expect(one.score).toBe(4);
     expect(one.items.find(i => i.key === "gallery")?.ok).toBe(false);
     const two = computeSitterCompletion({ ...emptySitter, sitter_gallery_count: 2 });
-    expect(two.score).toBe(2);
+    expect(two.score).toBe(4);
     const three = computeSitterCompletion({ ...emptySitter, sitter_gallery_count: 3 });
-    expect(three.score).toBe(5);
+    expect(three.score).toBe(10);
     expect(three.items.find(i => i.key === "gallery")?.ok).toBe(true);
   });
 
   it("has_sitter_gallery seul vaut une photo (repli de compatibilité)", () => {
-    expect(computeSitterCompletion({ ...emptySitter, has_sitter_gallery: true }).score).toBe(2);
+    expect(computeSitterCompletion({ ...emptySitter, has_sitter_gallery: true }).score).toBe(4);
   });
 
   it("Affinité partielle donne 3/6 points sous le seuil", () => {
@@ -133,6 +133,6 @@ describe("profileCompletion, barème SQL", () => {
     expect(keys).not.toContain("location");
     expect(keys).not.toContain("avatar");
     expect(keys).toContain("bio");
-    expect(keys).toContain("radius");
+    expect(keys).not.toContain("radius");
   });
 });

@@ -36,7 +36,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Slider } from "@/components/ui/slider";
 import {
   Select,
   SelectContent,
@@ -64,7 +63,7 @@ import {
   SITTER_ANIMAL_TYPES_OPTIONS,
 } from "@/lib/profileMatchingOptions";
 import { avatarImageUrl } from "@/lib/storageImage";
-import { declarableRadius, EFFECTIVE_DEFAULT_RADIUS_KM } from "@/lib/searchRadius";
+import { EFFECTIVE_DEFAULT_RADIUS_KM } from "@/lib/searchRadius";
 import { MIN_COMPLETION_TO_APPLY } from "@/hooks/useAccessLevel";
 
 /** Seuil de candidature, aligné sur useAccessLevel (source de vérité). */
@@ -80,7 +79,6 @@ const LIFESTYLE_OPTIONS = [
 ];
 
 export type FieldKey =
-  | "radius"
   | "location"
   | "competences"
   | "avatar"
@@ -88,6 +86,7 @@ export type FieldKey =
   | "lifestyle"
   | "affinity"
   | "gallery";
+
 
 interface FieldMeta {
   key: FieldKey;
@@ -102,13 +101,6 @@ interface FieldMeta {
 
 /** Noyau proposé par défaut : les gestes les plus rentables. */
 export const APPLY_GATE_FIELDS: FieldMeta[] = [
-  {
-    key: "radius",
-    points: 15,
-    title: "Votre rayon de déplacement",
-    why: "Les propriétaires voient tout de suite si vous pouvez venir jusqu'à chez eux.",
-    effort: 1,
-  },
   {
     key: "location",
     points: 15,
@@ -125,14 +117,14 @@ export const APPLY_GATE_FIELDS: FieldMeta[] = [
   },
   {
     key: "avatar",
-    points: 15,
+    points: 20,
     title: "Votre photo de profil",
     why: "C'est la première chose regardée sur une candidature.",
     effort: 2,
   },
   {
     key: "bio",
-    points: 10,
+    points: 15,
     title: "Quelques lignes sur vous",
     why: "Cinquante caractères suffisent pour donner envie de vous lire.",
     effort: 5,
@@ -157,12 +149,13 @@ export const APPLY_GATE_EXTRA_FIELDS: FieldMeta[] = [
   },
   {
     key: "gallery",
-    points: 5,
+    points: 10,
     title: "Vos photos de garde",
     why: "Une première photo rend votre expérience concrète, trois ou plus la rendent décisive.",
     effort: 5,
   },
 ];
+
 
 const ALL_FIELDS = [...APPLY_GATE_FIELDS, ...APPLY_GATE_EXTRA_FIELDS];
 
@@ -221,7 +214,7 @@ export function missingFor(state: ProfileState): Record<FieldKey, boolean> {
     avatar: !state.avatar_url,
     bio: (state.bio || "").trim().length < 50,
     competences: (state.competences || []).length === 0,
-    radius: !(state.geographic_radius > 0),
+    // Le rayon d'intervention ne fait plus partie du barème de complétion.
     lifestyle: (state.lifestyle || []).length === 0,
     affinity: affinitySignals(state) < 3,
     gallery: !state.has_gallery,
@@ -430,8 +423,8 @@ const CompleteProfileToApplyModal = ({
       changed(form.interests, snapshot.interests) ||
       changed(form.languages, snapshot.languages) ||
       changed(form.life_pace, snapshot.life_pace) ||
-      changed(form.animal_types, snapshot.animal_types) ||
-      (snapshot.geographic_radius === 0 && form.geographic_radius > 0)
+      changed(form.animal_types, snapshot.animal_types)
+
     );
   }, [snapshot, form]);
 
@@ -528,9 +521,6 @@ const CompleteProfileToApplyModal = ({
       payload.country = form.country;
     }
     if (initialMissing.bio) payload.bio = form.bio.trim();
-    if (initialMissing.radius && form.geographic_radius > 0) {
-      payload.geographic_radius = declarableRadius(form.geographic_radius);
-    }
     if (initialMissing.competences) {
       payload.competences = form.competences;
       payload.skill_categories = deriveCategoriesFromCompetences(form.competences);
@@ -690,24 +680,8 @@ const CompleteProfileToApplyModal = ({
                     </span>
                   </div>
 
-                  {f.key === "radius" && (
-                    <div className="space-y-2">
-                      <div className="flex items-center justify-between">
-                        <Label>Rayon géographique</Label>
-                        <span className="text-sm font-semibold text-primary">
-                          {form.geographic_radius} km
-                        </span>
-                      </div>
-                      <Slider
-                        value={[form.geographic_radius]}
-                        onValueChange={(v) => patch({ geographic_radius: v[0] })}
-                        min={10}
-                        max={100}
-                        step={5}
-                        className="py-2"
-                      />
-                    </div>
-                  )}
+
+
 
                   {f.key === "location" && (
                     <div className="space-y-4">
