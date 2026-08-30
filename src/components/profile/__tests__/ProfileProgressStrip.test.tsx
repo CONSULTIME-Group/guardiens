@@ -19,11 +19,11 @@ describe("ProfileProgressStrip", () => {
       nextIncomplete: next,
       totalRemaining: 2,
       missingScoreItems: [
-        { key: "gallery", label: "Une photo de galerie", points: 5 },
-        { key: "radius", label: "Rayon de mobilité", points: 15 },
+        { key: "gallery", label: "Galerie de 3 photos ou plus", points: 10 },
+        { key: "bio", label: "Bio d'au moins 50 caractères", points: 15 },
       ],
     });
-    expect(screen.getByText("Une photo de galerie")).toBeInTheDocument();
+    expect(screen.getByText("Galerie de 3 photos ou plus")).toBeInTheDocument();
     expect(screen.getByText("+15")).toBeInTheDocument();
   });
 
