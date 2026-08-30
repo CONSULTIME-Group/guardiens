@@ -51,7 +51,7 @@ const SitterActivityPanel = ({
       value: profileCompletion === 0 ? "À compléter" : `${profileCompletion}%`,
       sub: profileCompletion === 0 ? "Un profil complet rassure les propriétaires" : null,
       Icon: UserCircle2,
-      emphasis: profileCompletion === 0 ? "text-accent font-heading" : profileCompletion < 60 ? "text-warning" : "text-foreground",
+      emphasis: profileCompletion === 0 ? "text-accent font-heading" : profileCompletion < MIN_COMPLETION_TO_APPLY ? "text-warning" : "text-foreground",
     },
     {
       to: nextGuard ? `/sits/${nextGuard.id}` : "/search",

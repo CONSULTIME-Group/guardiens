@@ -93,7 +93,7 @@ const SitterDashboard = () => {
     role: "sitter",
     state: isNewSitter
       ? "new_sitter"
-      : (profileCompletion ?? 100) < 60
+      : (profileCompletion ?? 100) < 40
         ? "profile_incomplete"
         : "any",
     enabled: false,
