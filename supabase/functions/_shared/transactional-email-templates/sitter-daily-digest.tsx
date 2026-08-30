@@ -66,7 +66,7 @@ const buildCtaUrl = (sitId: string) =>
   `${SITE_URL}/annonces/${sitId}?utm_source=email&utm_campaign=sitter_daily_digest&utm_medium=daily`
 
 const buildProfileUrl = (href?: string) => {
-  const path = href && href.startsWith('/') ? href : '/sitter-profile'
+  const path = href && href.startsWith('/') ? href : '/profile'
   const sep = path.includes('?') ? '&' : '?'
   return `${SITE_URL}${path}${sep}utm_source=email&utm_campaign=sitter_daily_digest&utm_medium=daily`
 }

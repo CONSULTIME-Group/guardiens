@@ -102,7 +102,7 @@ describe("pickMissingOpportunities", () => {
         { key: "species", concerned: 9, answered: false },
       ]),
     );
-    expect(result.find((r) => r.key === "vehicle")?.href).toBe("/sitter-profile?section=mobility");
-    expect(result.find((r) => r.key === "species")?.href).toBe("/sitter-profile?section=experience");
+    expect(result.find((r) => r.key === "vehicle")?.href).toBe("/profile?section=mobilite");
+    expect(result.find((r) => r.key === "species")?.href).toBe("/profile?section=experience");
   });
 });
