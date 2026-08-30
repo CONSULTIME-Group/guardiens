@@ -450,6 +450,7 @@ const AdminSmallMissions = () => {
                 </button>
               </TableHead>
               <TableHead>Statut</TableHead>
+              <TableHead title="Personnes réellement prévenues pour cette publication">Notifiés</TableHead>
               <TableHead>
                 <button onClick={() => toggleSort("response_count")} className="inline-flex items-center gap-1 hover:text-foreground">
                   Réponses <ArrowUpDown className="h-3 w-3" />
