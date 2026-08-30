@@ -5,7 +5,7 @@ import { useAlmaFirstMeeting } from "@/hooks/useAlmaFirstMeeting";
 import { AlmaFirstMeeting } from "@/components/ai/alma/AlmaFirstMeeting";
 import { useAuth } from "@/contexts/AuthContext";
 import { useSearchParams, Link, useNavigate } from "react-router-dom";
-import { useAccessLevel } from "@/hooks/useAccessLevel";
+import { useAccessLevel, MIN_COMPLETION_TO_APPLY } from "@/hooks/useAccessLevel";
 import { useSitterDashboardData } from "@/hooks/useSitterDashboardData";
 import { useNearbyHelpers } from "@/hooks/useNearbyHelpers";
 import { useHelpersProximityCount } from "@/hooks/useHelpersProximityCount";
@@ -93,7 +93,7 @@ const SitterDashboard = () => {
     role: "sitter",
     state: isNewSitter
       ? "new_sitter"
-      : (profileCompletion ?? 100) < 40
+      : (profileCompletion ?? 100) < MIN_COMPLETION_TO_APPLY
         ? "profile_incomplete"
         : "any",
     enabled: false,
