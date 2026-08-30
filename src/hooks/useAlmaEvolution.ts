@@ -16,13 +16,14 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
-import { MIN_COMPLETION_TO_APPLY } from "@/hooks/useAccessLevel";
+
 
 export type AlmaStage = "nouvelle" | "eveillee" | "complice" | "fidele";
 
 /** Seuils centralisés, ajustables par produit sans toucher la logique. */
 export const ALMA_THRESHOLDS = {
-  profileCompletionMin: MIN_COMPLETION_TO_APPLY,
+  // Seuil produit du stade Alma, sans rapport avec le seuil de candidature des gardiens.
+  profileCompletionMin: 60,
   missionsForFidele: 3,
   badgesForFidele: 1,
   completedSitsForFidele: 1,

@@ -3,7 +3,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { MIN_COMPLETION_TO_APPLY } from "@/hooks/useAccessLevel";
+
 import { Slider } from "@/components/ui/slider";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
@@ -194,8 +194,9 @@ export const MassEmailFiltersPanel = ({ segment, setSegment, filters, setFilters
                     onValueChange={([v]) => update({ profile_completion_max: v < 100 ? v : undefined })}
                     min={0} max={100} step={5}
                   />
+                  {/* Exemple de ciblage admin, sans rapport avec le seuil de candidature. */}
                   <p className="text-[11px] text-muted-foreground">
-                    Cibler les profils peu remplis (ex : ≤ {MIN_COMPLETION_TO_APPLY}% pour relancer ceux qui ont commencé sans finir)
+                    Cibler les profils peu remplis (ex : ≤ 60% pour relancer ceux qui ont commencé sans finir)
                   </p>
                 </div>
 
