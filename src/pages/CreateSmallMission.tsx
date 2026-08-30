@@ -72,7 +72,7 @@ const CreateSmallMission = () => {
   const { t } = useTranslation();
   const tp = (k: string, opts?: any) => t(`create_mission_page.${k}`, opts) as string;
   const { level: accessLevel, profileCompletion, identityRecommended, loading: accessLoading } = useAccessLevel();
-  // Chantier 1 EntraideHub Pass 1 : plus de gate 60 %, tout profil connecté peut publier.
+  // Chantier 1 EntraideHub Pass 1 : plus de gate 40 %, tout profil connecté peut publier.
   // L'ID vérification devient un soft-nudge (badge auteur uniquement) sur SitDetail.
   const canApplyMissions = true;
   
