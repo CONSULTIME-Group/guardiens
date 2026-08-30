@@ -34,8 +34,20 @@ const corsHeaders = {
 
 /** Fenetre de rattrapage, en minutes, sur published_at. */
 export const PUBLISH_LOOKBACK_MINUTES = 30;
-/** Plafond de destinataires par execution. Au dela, on ecarte et on signale. */
-export const MAX_RECIPIENTS_PER_RUN = 150;
+/**
+ * Plafond de destinataires par ANNONCE, pas par execution : `targets` est
+ * reconstruit dans la boucle sur les annonces. Dix annonces publiees dans la
+ * meme fenetre peuvent donc produire jusqu'a dix fois ce plafond.
+ * Valeur alignee sur `c_rank_cap` du declencheur notify_sitters_on_new_sit,
+ * pour une seule regle de plafond entre les deux canaux (30/08/2026).
+ * Les alertes configurees a la main (`alert_preferences.source IS NULL`)
+ * passent hors plafond, les alertes issues de la migration automatique du
+ * 31/07 repassent dans le classement normal par distance.
+ */
+export const MAX_RECIPIENTS_PER_RUN = 100;
+/** Source posee par la migration automatique du 31/07/2026, jamais choisie. */
+export const MIGRATED_ALERT_SOURCE = "migration_email_preferences_2026_07_31";
+
 
 /**
  * Taille maximale d'un lot `.in()`. Au dela d'environ 200 identifiants,
