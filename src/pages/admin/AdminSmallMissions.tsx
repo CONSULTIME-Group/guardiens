@@ -1,4 +1,4 @@
-import { MISSION_CATEGORY_LABEL, missionCategoryLabel } from "@/lib/missionCategories";
+import { MISSION_CATEGORIES, MISSION_CATEGORY_LABEL, missionCategoryLabel } from "@/lib/missionCategories";
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Badge } from "@/components/ui/badge";
@@ -370,10 +370,9 @@ const AdminSmallMissions = () => {
           <SelectTrigger className="w-[150px]"><SelectValue /></SelectTrigger>
           <SelectContent>
             <SelectItem value="all">Toutes catégories</SelectItem>
-            <SelectItem value="animals">Animaux</SelectItem>
-            <SelectItem value="garden">Jardin</SelectItem>
-            <SelectItem value="house">Maison</SelectItem>
-            <SelectItem value="skills">Compétences</SelectItem>
+            {MISSION_CATEGORIES.map((c) => (
+              <SelectItem key={c.key} value={c.key}>{c.label}</SelectItem>
+            ))}
           </SelectContent>
         </Select>
         <Select value={filterPeriod} onValueChange={setFilterPeriod}>
