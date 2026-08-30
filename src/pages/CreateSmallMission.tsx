@@ -115,6 +115,7 @@ const CreateSmallMission = () => {
   const [calendarOpen, setCalendarOpen] = useState(false);
   const [endCalendarOpen, setEndCalendarOpen] = useState(false);
   const [duration, setDuration] = useState("");
+  const [durationAck, setDurationAck] = useState(false);
   const [petSpecies, setPetSpecies] = useState("");
   const [petSize, setPetSize] = useState("");
   const [submitting, setSubmitting] = useState(false);
@@ -215,6 +216,16 @@ const CreateSmallMission = () => {
     [title, description, exchangeOffer],
   );
 
+  /**
+   * Cohérence période / durée déclarée. Explicite, jamais bloquant : on
+   * propose la durée cohérente, la personne décide.
+   */
+  const durationIssue = useMemo(
+    () => durationMismatch(duration, dateNeeded, endDate),
+    [duration, dateNeeded, endDate],
+  );
+  useEffect(() => { setDurationAck(false); }, [duration, dateNeeded, endDate]);
+
   // Volume d'audience : combien de personnes seront prévenues à la publication.
   const [audienceCount, setAudienceCount] = useState<number | null>(null);
   useEffect(() => {
@@ -279,6 +290,15 @@ const CreateSmallMission = () => {
       setStep(1);
       setTitleTouched(true);
       setDescTouched(true);
+      return;
+    }
+    if (durationIssue && !durationAck) {
+      setDurationAck(true);
+      toast({
+        title: "Durée à vérifier",
+        description: `${durationIssue.message} Choisissez la durée proposée, ou publiez à nouveau pour garder la vôtre.`,
+      });
+      setStep(2);
       return;
     }
     await performSubmit();
@@ -822,6 +842,19 @@ const CreateSmallMission = () => {
                     <p className="text-xs text-destructive flex items-center gap-1">
                       <AlertCircle className="h-3 w-3 shrink-0" /> Indiquez une durée estimée.
                     </p>
+                  )}
+                  {durationIssue && (
+                    <div className="rounded-xl border border-warning/40 bg-warning/10 p-3 space-y-2" role="note">
+                      <p className="text-xs text-muted-foreground">{durationIssue.message}</p>
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="outline"
+                        onClick={() => setDuration(durationIssue.suggested)}
+                      >
+                        Utiliser « {DURATION_LABEL[durationIssue.suggested]} »
+                      </Button>
+                    </div>
                   )}
                 </div>
 
