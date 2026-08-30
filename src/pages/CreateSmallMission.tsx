@@ -121,7 +121,6 @@ const CreateSmallMission = () => {
   const [calendarOpen, setCalendarOpen] = useState(false);
   const [endCalendarOpen, setEndCalendarOpen] = useState(false);
   const [duration, setDuration] = useState("");
-  const [durationAck, setDurationAck] = useState(false);
   const [petSpecies, setPetSpecies] = useState("");
   const [petSize, setPetSize] = useState("");
   const [submitting, setSubmitting] = useState(false);
@@ -266,7 +265,6 @@ const CreateSmallMission = () => {
     () => durationMismatch(duration, dateNeeded, endDate),
     [duration, dateNeeded, endDate],
   );
-  useEffect(() => { setDurationAck(false); }, [duration, dateNeeded, endDate]);
 
   // Volume d'audience : combien de personnes seront prévenues à la publication.
   const [audienceCount, setAudienceCount] = useState<number | null>(null);
