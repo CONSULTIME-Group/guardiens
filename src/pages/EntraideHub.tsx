@@ -782,13 +782,13 @@ const EntraideHub = () => {
             ) : visibleFeed.length > 0 ? (
               <>
                 <ul className="space-y-3">
-                  {visibleFeed.map((item) =>
+                  {visibleFeed.map((item, index) =>
                     item.kind === "question" ? (
                       <li key={`q-${(item.q as any).id}`}>
                         <QuestionCard q={item.q} showNatureBadge />
                       </li>
                     ) : (
-                      renderMissionCard(item.m)
+                      renderMissionCard(item.m, index + 1)
                     ),
                   )}
                 </ul>
