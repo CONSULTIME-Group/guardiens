@@ -36,7 +36,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Slider } from "@/components/ui/slider";
 import {
   Select,
   SelectContent,
@@ -64,7 +63,7 @@ import {
   SITTER_ANIMAL_TYPES_OPTIONS,
 } from "@/lib/profileMatchingOptions";
 import { avatarImageUrl } from "@/lib/storageImage";
-import { declarableRadius, EFFECTIVE_DEFAULT_RADIUS_KM } from "@/lib/searchRadius";
+import { EFFECTIVE_DEFAULT_RADIUS_KM } from "@/lib/searchRadius";
 import { MIN_COMPLETION_TO_APPLY } from "@/hooks/useAccessLevel";
 
 /** Seuil de candidature, aligné sur useAccessLevel (source de vérité). */
