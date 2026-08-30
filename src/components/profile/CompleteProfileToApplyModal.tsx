@@ -522,9 +522,6 @@ const CompleteProfileToApplyModal = ({
       payload.country = form.country;
     }
     if (initialMissing.bio) payload.bio = form.bio.trim();
-    if (initialMissing.radius && form.geographic_radius > 0) {
-      payload.geographic_radius = declarableRadius(form.geographic_radius);
-    }
     if (initialMissing.competences) {
       payload.competences = form.competences;
       payload.skill_categories = deriveCategoriesFromCompetences(form.competences);
