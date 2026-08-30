@@ -65,8 +65,6 @@ describe("message de complétion, une étape ou plusieurs", () => {
     postal_code: "69003",
     country: "FR",
     bio: "x".repeat(60),
-    competences: ["chien"],
-    lifestyle: ["calme"],
     interests: ["a", "b", "c"],
     languages: ["fr"],
     life_pace: "calme",
@@ -102,7 +100,13 @@ describe("message de complétion, une étape ou plusieurs", () => {
   });
 
   it("ne propose aucune étape au dessus du seuil", () => {
-    expect(remainingCompletionSteps({ ...base, avatar_url: "https://x/y.jpg" })).toEqual([]);
+    expect(
+      remainingCompletionSteps({
+        ...base,
+        avatar_url: "https://x/y.jpg",
+        competences: ["chien"],
+      }),
+    ).toEqual([]);
     expect(completionMessageFor(80, [])).toBeNull();
   });
 });
