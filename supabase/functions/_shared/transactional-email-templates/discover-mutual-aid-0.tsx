@@ -48,7 +48,7 @@ const DiscoverMutualAidIntroEmail = ({ firstName }: Props) => (
 
         <Text style={text} className="em-text">
           Pas d'obligation, pas d'engagement. Quand l'envie vient, la vôtre ou celle d'un
-          proche, l'entraide est là, gratuite et simple à utiliser.
+          proche, l'entraide est là : un service contre un service, simple à utiliser.
         </Text>
 
         <Section style={ctaSection} className="em-cta">

@@ -49,7 +49,7 @@ const MissionResponseCard = ({
   const [count, setCount] = useState<number>(r.helpful_count ?? 0);
   const [thanked, setThanked] = useState(false);
   const [busy, setBusy] = useState(false);
-  const [acceptMode, setAcceptMode] = useState<"keep" | "decline_others">("keep");
+  const [acceptMode, setAcceptMode] = useState<"keep" | "decline_others">("decline_others");
 
   const isOwnResponse = currentUserId && r.responder_id === currentUserId;
   const canThank =

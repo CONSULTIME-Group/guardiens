@@ -53,7 +53,7 @@ export const MISSION_TEMPLATES: MissionTemplate[] = [
     title: "Accompagner mon chien chez le vétérinaire",
     description:
       "J'ai un rendez-vous chez le vétérinaire et je n'ai pas de voiture / je ne peux pas m'absenter du travail. Je cherche quelqu'un de patient et doux avec les animaux pour l'emmener et le ramener.",
-    exchange: "Je rembourse les frais et offre un repas pour vous remercier",
+    exchange: "Un repas fait maison pour vous remercier, ou un coup de main en retour",
   },
   {
     id: "need-poultry",
@@ -245,7 +245,7 @@ export const MISSION_TEMPLATES: MissionTemplate[] = [
     category: "skills",
     duration: "1-2h",
     label: "Prof de yoga contre bricolage",
-    title: "Prof de yoga bénévole en échange de bricolage",
+    title: "Prof de yoga en échange de bricolage",
     description:
       "Prof de yoga, je peux donner un cours particulier chez vous ou en extérieur. En échange, j'aimerais un coup de main sur des petits travaux (étagère, meuble à monter, luminaire à installer).",
     exchange: "Une séance de yoga contre un coup de main bricolage",

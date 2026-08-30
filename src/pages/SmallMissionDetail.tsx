@@ -446,7 +446,7 @@ const SmallMissionDetail = () => {
     }
   };
 
-  const handleAcceptResponse = async (responseId: string, mode: "keep" | "decline_others" = "keep") => {
+  const handleAcceptResponse = async (responseId: string, mode: "keep" | "decline_others" = "decline_others") => {
     if (processingResponseId) return;
     const resp = responses.find(r => r.id === responseId);
     if (!resp) return;
@@ -973,7 +973,7 @@ const SmallMissionDetail = () => {
             </Button>
           )}
           <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-[11px] text-muted-foreground">
-            <span className="inline-flex items-center gap-1"><CheckCircle2 className="h-3 w-3" /> Gratuit, entre membres</span>
+            <span className="inline-flex items-center gap-1"><CheckCircle2 className="h-3 w-3" /> Un service contre un service</span>
             <span className="inline-flex items-center gap-1"><CheckCircle2 className="h-3 w-3" /> Sans engagement</span>
           </div>
         </div>
@@ -1007,7 +1007,7 @@ const SmallMissionDetail = () => {
           const parts = [
             `${catMeta.label} à ${cityLabel}`,
             mission.exchange_offer ? `En échange : ${mission.exchange_offer}` : null,
-            "Coup de main entre particuliers, gratuit et sans engagement.",
+            "Coup de main entre particuliers : un service contre un service, sans engagement.",
           ].filter(Boolean);
           return parts.join(". ").slice(0, 155);
         })()}
