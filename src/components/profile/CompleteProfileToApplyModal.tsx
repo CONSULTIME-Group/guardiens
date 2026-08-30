@@ -103,13 +103,6 @@ interface FieldMeta {
 /** Noyau proposé par défaut : les gestes les plus rentables. */
 export const APPLY_GATE_FIELDS: FieldMeta[] = [
   {
-    key: "radius",
-    points: 15,
-    title: "Votre rayon de déplacement",
-    why: "Les propriétaires voient tout de suite si vous pouvez venir jusqu'à chez eux.",
-    effort: 1,
-  },
-  {
     key: "location",
     points: 15,
     title: "Votre prénom et votre commune",
@@ -125,14 +118,14 @@ export const APPLY_GATE_FIELDS: FieldMeta[] = [
   },
   {
     key: "avatar",
-    points: 15,
+    points: 20,
     title: "Votre photo de profil",
     why: "C'est la première chose regardée sur une candidature.",
     effort: 2,
   },
   {
     key: "bio",
-    points: 10,
+    points: 15,
     title: "Quelques lignes sur vous",
     why: "Cinquante caractères suffisent pour donner envie de vous lire.",
     effort: 5,
@@ -157,12 +150,13 @@ export const APPLY_GATE_EXTRA_FIELDS: FieldMeta[] = [
   },
   {
     key: "gallery",
-    points: 5,
+    points: 10,
     title: "Vos photos de garde",
     why: "Une première photo rend votre expérience concrète, trois ou plus la rendent décisive.",
     effort: 5,
   },
 ];
+
 
 const ALL_FIELDS = [...APPLY_GATE_FIELDS, ...APPLY_GATE_EXTRA_FIELDS];
 
