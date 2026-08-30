@@ -261,7 +261,7 @@ const SmallMissionDetail = () => {
     const [authorRes, relatedRes, respsRes, givenFbRes, recFbRes] = await Promise.all([
       supabase.rpc("get_mission_author_public", { _mission_id: m.id }),
       (supabase as any).from("public_small_missions")
-        .select("id, slug, title, description, category, city, postal_code, created_at, duration_estimate, photos, mission_type, latitude, longitude")
+        .select("id, slug, title, description, category, city, postal_code, created_at, duration_estimate, photos, mission_type, exchange_offer, latitude, longitude")
         .eq("status", "open")
         .neq("id", m.id)
         .or(`category.eq.${m.category},city.eq.${m.city}`)

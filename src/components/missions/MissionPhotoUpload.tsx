@@ -15,9 +15,13 @@ interface MissionPhotoUploadProps {
   userId: string;
   photos: string[];
   onChange: (photos: string[]) => void;
+  /** Envoi en cours, exposé au formulaire pour ne pas afficher une erreur pendant le chargement. */
+  onUploadingChange?: (uploading: boolean) => void;
+  /** Au moins un envoi a échoué : le formulaire propose alors une échappatoire. */
+  onUploadError?: () => void;
 }
 
-const MissionPhotoUpload = ({ userId, photos, onChange }: MissionPhotoUploadProps) => {
+const MissionPhotoUpload = ({ userId, photos, onChange, onUploadingChange, onUploadError }: MissionPhotoUploadProps) => {
   const { toast } = useToast();
   const { t } = useTranslation();
   const inputRef = useRef<HTMLInputElement>(null);
@@ -33,6 +37,7 @@ const MissionPhotoUpload = ({ userId, photos, onChange }: MissionPhotoUploadProp
     }
 
     setUploading(true);
+    onUploadingChange?.(true);
     setProgress(0);
     const toProcess = Math.min(files.length, remaining);
     const newUrls: string[] = [];
@@ -59,11 +64,13 @@ const MissionPhotoUpload = ({ userId, photos, onChange }: MissionPhotoUploadProp
           metadata: { ext: file.name.split(".").pop()?.toLowerCase() || "unknown", size_kb: Math.round(file.size / 1024) },
         });
         toast({ title: t("upload.photo_failed"), variant: "destructive" });
+        onUploadError?.();
       }
     }
 
     if (newUrls.length) onChange([...photos, ...newUrls]);
     setUploading(false);
+    onUploadingChange?.(false);
     setProgress(0);
     if (inputRef.current) inputRef.current.value = "";
   };

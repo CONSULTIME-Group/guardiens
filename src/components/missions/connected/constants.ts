@@ -1,4 +1,4 @@
-import { MISSION_CATEGORIES, MISSION_CATEGORY_LABEL } from "@/lib/missionCategories";
+import { MISSION_CATEGORIES, MISSION_CATEGORY_LABEL, type MissionCategory } from "@/lib/missionCategories";
 
 /** Libellés catégories : miroir strict de la source unique. */
 export const CATEGORY_META: Record<string, { label: string }> = Object.fromEntries(
@@ -69,15 +69,10 @@ export const EXAMPLES = [
   { cat: "skills", title: "Dog-training : les bases (rappel, marche en laisse)", exchange: "Un bon café et une balade ensemble" },
 ];
 
-export type CategoryFilter = string;
+/** Union fermée dérivée de la source unique, plus « Tout » et « Mes missions ». */
+export type CategoryFilter = MissionCategory | "all" | "mine";
 export type ModeFilter = "need" | "offer";
 
-/** Filtres : les huit catégories de la source unique, encadrées de Tout et Mes missions. */
-export const FILTER_PILLS: { key: CategoryFilter; label: string }[] = [
-  { key: "all", label: "Tout" },
-  ...MISSION_CATEGORIES.map((c) => ({ key: c.key as string, label: c.label })),
-  { key: "mine", label: "Mes missions" },
-];
 
 
 export const ENTRAIDE_HEADER_URL =
