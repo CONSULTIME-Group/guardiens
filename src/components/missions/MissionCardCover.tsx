@@ -1,28 +1,27 @@
 import { useState } from "react";
 import { storageImageUrl } from "@/lib/storageImage";
+import { missionCategoryLabel } from "@/lib/missionCategories";
 
 /**
  * Cover unifiée pour les cartes de coup de main.
  * - Si `photo` → image plein cadre 4:3 avec zoom au hover.
- * - Sinon → gradient teinté par catégorie + label court centré (Animaux / Jardin / Maison / Savoir-faire).
+ * - Sinon → gradient teinté par catégorie + libellé centré, tiré de la
+ *   source unique `missionCategories.ts` (un seul libellé par catégorie).
  *
  * Utilisée dans les sections "Près de chez vous" et partout où l'on liste des missions
  * sans avoir besoin d'un composant carte complet type SearchListingCard.
  */
-
-const CATEGORY_LABEL: Record<string, string> = {
-  animals: "Animaux",
-  garden: "Jardin",
-  house: "Maison",
-  skills: "Savoir-faire",
-};
 
 /** Gradients doux, sur des tokens sémantiques uniquement. */
 const CATEGORY_GRADIENT: Record<string, string> = {
   animals: "from-primary/15 via-muted to-primary/5",
   garden: "from-success/15 via-muted to-success/5",
   house: "from-info/15 via-muted to-info/5",
+  errand: "from-warning/15 via-muted to-warning/5",
+  transport: "from-info/20 via-muted to-primary/5",
+  company: "from-primary/10 via-muted to-success/10",
   skills: "from-warning/15 via-muted to-warning/5",
+  other: "from-muted-foreground/10 via-muted to-muted",
 };
 
 interface MissionCardCoverProps {
@@ -35,8 +34,9 @@ interface MissionCardCoverProps {
 const MissionCardCover = ({ photo, category, title, className }: MissionCardCoverProps) => {
   const [imgError, setImgError] = useState(false);
   const cat = (category || "animals") as string;
-  const label = CATEGORY_LABEL[cat] || CATEGORY_LABEL.animals;
-  const gradient = CATEGORY_GRADIENT[cat] || CATEGORY_GRADIENT.animals;
+  const label = missionCategoryLabel(cat);
+  const gradient = CATEGORY_GRADIENT[cat] || CATEGORY_GRADIENT.other;
+
 
   const showImage = !!photo && !imgError;
 
