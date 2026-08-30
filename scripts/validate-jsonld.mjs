@@ -24,8 +24,17 @@ const FORBIDDEN_PATTERNS = [
   { pattern: /\bvoisin(?:e|s|age)?\b/i, label: "voisin/voisinage (mot proscrit)", severity: "error" },
   { pattern: /votre région/i, label: "« votre région » (proximité régionale)", severity: "error" },
   { pattern: /\b9\s*€\s*\/\s*mois\b/i, label: "ancien prix 9 €/mois (utiliser 6,99 €/mois)", severity: "error" },
-  { pattern: /\b9\s*€\s*\/\s*mois\b/i, label: "ancien prix 9 €/mois (utiliser 6,99 €/mois)", severity: "error" },
   { pattern: /\b9€\/mois\b/i, label: "ancien prix 9€/mois", severity: "error" },
+];
+
+// Pages de l'espace Entraide : aucun vocabulaire marchand n'y est admis.
+// Un prix de zéro reste un prix, et « Offer » installe le cadre commercial.
+const MUTUAL_AID_FILES = /(missions?|petites-missions)/i;
+const MUTUAL_AID_FORBIDDEN = [
+  { pattern: /priceCurrency/i, label: "priceCurrency interdit sur l'entraide", severity: "error" },
+  { pattern: /["']@type["']\s*:\s*["']Offer["']/, label: "« @type: Offer » interdit sur l'entraide", severity: "error" },
+  { pattern: /\bEUR\b/, label: "code monnaie EUR interdit sur l'entraide", severity: "error" },
+  { pattern: /PriceSpecification/i, label: "PriceSpecification interdit sur l'entraide", severity: "error" },
 ];
 
 // Champs JSON-LD à inspecter prioritairement (texte libre)
