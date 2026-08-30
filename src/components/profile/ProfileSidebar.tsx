@@ -9,6 +9,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { MIN_COMPLETION_TO_APPLY } from "@/hooks/useAccessLevel";
 
 export interface SidebarSection {
   id: string;
