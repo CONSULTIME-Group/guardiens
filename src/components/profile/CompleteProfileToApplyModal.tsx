@@ -684,24 +684,8 @@ const CompleteProfileToApplyModal = ({
                     </span>
                   </div>
 
-                  {f.key === "radius" && (
-                    <div className="space-y-2">
-                      <div className="flex items-center justify-between">
-                        <Label>Rayon géographique</Label>
-                        <span className="text-sm font-semibold text-primary">
-                          {form.geographic_radius} km
-                        </span>
-                      </div>
-                      <Slider
-                        value={[form.geographic_radius]}
-                        onValueChange={(v) => patch({ geographic_radius: v[0] })}
-                        min={10}
-                        max={100}
-                        step={5}
-                        className="py-2"
-                      />
-                    </div>
-                  )}
+
+
 
                   {f.key === "location" && (
                     <div className="space-y-4">
