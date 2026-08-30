@@ -110,3 +110,32 @@ describe("message de complétion, une étape ou plusieurs", () => {
     expect(completionMessageFor(80, [])).toBeNull();
   });
 });
+
+describe("digest gardien, lecture de la galerie", () => {
+  const SRC = readFileSync("supabase/functions/send-sitter-daily-digest/index.ts", "utf8");
+
+  it("compte la galerie sur user_id, la colonne reelle de sitter_gallery", () => {
+    const block = SRC.slice(SRC.indexOf("from('sitter_gallery')"));
+    expect(block).toContain(".eq('user_id', sitterId)");
+    expect(SRC).not.toContain(".eq('sitter_id', sitterId)");
+  });
+
+  it("examine l'erreur et n'envoie aucune phrase de completion en cas d'echec", () => {
+    expect(SRC).toContain("const { count: galleryCount, error: galleryError }");
+    expect(SRC).toContain("if (galleryError) {");
+  });
+});
+
+describe("filtre espece, reversible par drapeau", () => {
+  const files = readdirSync(MIGRATIONS_DIR).filter((f) => f.endsWith(".sql")).sort();
+  const flagged = files.filter((f) =>
+    readFileSync(`${MIGRATIONS_DIR}/${f}`, "utf8").includes("species_filter_blocking"),
+  );
+
+  it("le filtre espece est derriere un drapeau desactive par defaut", () => {
+    expect(flagged.length).toBeGreaterThan(0);
+    const sql = readFileSync(`${MIGRATIONS_DIR}/${flagged[flagged.length - 1]}`, "utf8");
+    expect(sql).toContain("v_species_blocking = false");
+    expect(sql).toContain("'species_filter_blocking', false");
+  });
+});
