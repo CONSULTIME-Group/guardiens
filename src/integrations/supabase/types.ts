@@ -9339,6 +9339,26 @@ export type Database = {
         Returns: number
       }
       mutual_aid_money_mention: { Args: { p_texte: string }; Returns: boolean }
+      mutual_aid_radius_km: {
+        Args: { p_default?: number; p_max?: number; p_user: string }
+        Returns: number
+      }
+      mutual_aid_weekly_digest_plan: {
+        Args: {
+          p_max_missions?: number
+          p_max_radius_km?: number
+          p_new_since_days?: number
+        }
+        Returns: {
+          city: string
+          email: string
+          first_name: string
+          missions: Json
+          nb_nouvelles: number
+          radius_km: number
+          user_id: string
+        }[]
+      }
       normalize_analytics_source: { Args: { raw: string }; Returns: string }
       normalize_city_name: { Args: { txt: string }; Returns: string }
       notify_owner_of_new_application: {
