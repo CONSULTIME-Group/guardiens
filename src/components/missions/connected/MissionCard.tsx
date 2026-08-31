@@ -18,8 +18,7 @@ const CATEGORY_GRADIENT: Record<string, string> = {
 };
 
 // Illustration gouache par catégorie (réutilise les assets existants src/assets/missions/).
-// Les 4 catégories réelles du schéma small_mission_category ont toutes une gouache adaptée,
-// donc l'avatar flouté n'est plus utilisé qu'en filet ultime pour d'éventuelles catégories futures.
+// Les 4 catégories réelles du schéma small_mission_category ont toutes une gouache adaptée.
 const CATEGORY_ILLUSTRATION: Record<string, string> = {
   animals: spotChien,
   garden: spotJardin,
@@ -130,7 +129,7 @@ const MissionCard = ({ mission: m, currentUserId, isAuthenticated, canApplyMissi
         isCompleted ? "opacity-70" : "",
       ].join(" ")}
     >
-      {/* Cover : photo mission → gouache catégorie → avatar flouté → gradient + glyph */}
+      {/* Cover : photo mission, puis gouache catégorie, puis gradient et glyph */}
       <div className="relative h-52 overflow-hidden shrink-0">
         {cover ? (
           <img
@@ -151,18 +150,6 @@ const MissionCard = ({ mission: m, currentUserId, isAuthenticated, canApplyMissi
               className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
             />
           </div>
-        ) : avatarUrl ? (
-          <>
-            <img
-              src={avatarImageUrl(avatarUrl, 96)}
-              alt=""
-              aria-hidden="true"
-              loading="lazy"
-              decoding="async"
-              className="absolute inset-0 w-full h-full object-cover scale-125 blur-2xl transition-transform duration-700 group-hover:scale-[1.35]"
-            />
-            <div className={`absolute inset-0 bg-gradient-to-br ${CATEGORY_GRADIENT[catKey]} opacity-40 mix-blend-multiply`} />
-          </>
         ) : (
           <div className={`w-full h-full bg-gradient-to-br ${CATEGORY_GRADIENT[catKey]} flex items-center justify-center transition-transform duration-700 group-hover:scale-105`}>
             <CategoryGlyph category={catKey} />

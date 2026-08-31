@@ -22,8 +22,14 @@ export const DEPT_NAMES: Record<string, string> = {
   "971":"Guadeloupe","972":"Martinique","973":"Guyane","974":"La Réunion","976":"Mayotte",
 };
 
+/**
+ * Code département déduit d'un code postal FRANÇAIS uniquement.
+ * Un code postal étranger (Hannut en Belgique, 1350) n'a pas de département :
+ * on renvoie null plutôt qu'un département français faux.
+ */
 export const getDeptCode = (cp: string | null): string | null => {
-  if (!cp || cp.length < 2) return null;
+  if (!cp || !/^\d{5}$/.test(cp.trim())) return null;
+  cp = cp.trim();
   if (cp.startsWith("97") && cp.length >= 3) return cp.substring(0, 3);
   if (cp.startsWith("20")) {
     const num = parseInt(cp, 10);
