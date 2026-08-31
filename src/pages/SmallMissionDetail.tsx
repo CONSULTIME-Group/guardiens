@@ -1006,21 +1006,21 @@ const SmallMissionDetail = () => {
                 {ctaLabel}
               </Button>
               {isOffer && (
-                <div className="space-y-1">
-                  <Button
-                    variant="ghost"
-                    className="w-full rounded-full font-semibold text-sm gap-2"
-                    disabled={oneClickInterestBusy}
-                    onClick={handleOneClickInterest}
-                  >
-                    <MessageSquare className="h-4 w-4" />
-                    {oneClickInterestBusy ? "Envoi en cours…" : "Écrire directement"}
-                  </Button>
-                  <p className="text-[11px] text-muted-foreground text-center leading-relaxed">
-                    Même proposition, avec un message type et l'ouverture immédiate de la conversation.
-                  </p>
-                </div>
+                <Button
+                  variant="ghost"
+                  className="w-full rounded-full font-semibold text-sm gap-2"
+                  onClick={() => {
+                    setResponseModalOpen(true);
+                    trackEvent("mission_response_modal_opened", {
+                      metadata: { mission_id: mission.id, mission_type: "offre" },
+                    });
+                  }}
+                >
+                  <MessageSquare className="h-4 w-4" />
+                  Répondre à cette offre
+                </Button>
               )}
+
             </>
           )}
           <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-[11px] text-muted-foreground">
