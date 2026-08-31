@@ -13,10 +13,13 @@ const utm = (section: string) => `utm_source=email&utm_campaign=mutual_aid_weekl
 
 interface MissionItem {
   id: string
+  slug?: string | null
   title?: string
   city?: string
   missionType?: 'besoin' | 'offre' | null
+  category?: string | null
   distanceKm?: number | null
+  isNew?: boolean | null
   photoUrl?: string | null
 }
 interface QuestionItem {
@@ -34,52 +37,68 @@ interface TopMemberItem {
 interface Props {
   firstName?: string
   city?: string | null
+  radiusKm?: number | null
+  newCount?: number
   missions?: MissionItem[]
   questions?: QuestionItem[]
   topMembers?: TopMemberItem[]
 }
 
-const Email = ({ firstName, city, missions = [], questions = [], topMembers = [] }: Props) => {
-  const zoneLabel = city ? `à ${city}` : 'en France'
+const zoneOf = (city?: string | null) => (city ? `${city}` : 'chez vous')
+
+const headline = (newCount: number, city?: string | null) =>
+  newCount > 0
+    ? `${newCount} nouveau${newCount > 1 ? 'x' : ''} coup${newCount > 1 ? 's' : ''} de main autour de ${zoneOf(city)}`
+    : `L'entraide ouverte autour de ${zoneOf(city)}`
+
+const Email = ({ firstName, city, radiusKm, newCount = 0, missions = [], questions = [], topMembers = [] }: Props) => {
   const publishUrl = `${SITE_URL}/petites-missions/creer?${utm('cta_publish')}`
   const askUrl = `${SITE_URL}/questions/nouvelle?${utm('cta_ask')}`
+  const title = headline(newCount, city)
   return (
     <Html lang="fr" dir="ltr">
       <BrandedHead />
-      <Preview>Le fil de l'entraide de cette semaine {zoneLabel}</Preview>
+      <Preview>{title}</Preview>
       <Body style={main}>
         <Container style={container}>
           <BrandHeader />
           <AlmaSignature />
           <AlmaIntro firstName={firstName} />
-          <Heading style={h1}>Le fil de l'entraide de cette semaine {zoneLabel}</Heading>
+          <Heading style={h1}>{title}</Heading>
+          <Text style={intro}>
+            Voici ce qui est ouvert à moins de {typeof radiusKm === 'number' ? Math.round(radiusKm) : 30} km de {zoneOf(city)}.
+            Ici, on échange un service contre un service, jamais d'argent.
+          </Text>
 
           {missions.length > 0 && (
             <Section style={section}>
-              <Heading as="h2" style={h2}>Nouvelles missions près de chez vous</Heading>
-              {missions.map((m) => (
-                <div key={m.id} style={missionRow}>
-                  {m.photoUrl ? (
-                    <Img
-                      src={m.photoUrl}
-                      alt=""
-                      width="80"
-                      height="80"
-                      style={missionThumb}
-                    />
-                  ) : null}
-                  <Text style={itemLine}>
-                    <Link href={`${SITE_URL}/petites-missions/${m.id}?${utm('mission')}`} style={link}>
-                      {m.title || 'Mission sans titre'}
-                    </Link>
-                    <span style={meta}>
-                      {m.missionType === 'offre' ? ' · Offre' : ' · Besoin'}
-                      {m.city ? ` · ${m.city}` : ''}
-                      {typeof m.distanceKm === 'number' ? ` · ${Math.round(m.distanceKm)} km` : ''}
-                    </span>
-                  </Text>
-                </div>
-              ))}
+              {missions.map((m) => {
+                const isOffer = m.missionType === 'offre'
+                return (
+                  <div key={m.id} style={missionRow}>
+                    {m.photoUrl ? (
+                      <Img src={m.photoUrl} alt="" width="80" height="80" style={missionThumb} />
+                    ) : null}
+                    <Text style={itemLine}>
+                      {m.isNew ? <span style={badgeNew}>Nouveau</span> : null}
+                      <span style={isOffer ? badgeOffer : badgeNeed}>
+                        {isOffer ? 'Propose son aide' : 'Cherche un coup de main'}
+                      </span>
+                      <br />
+                      <Link
+                        href={`${SITE_URL}/petites-missions/${m.slug || m.id}?${utm('mission')}`}
+                        style={link}
+                      >
+                        {m.title || 'Annonce sans titre'}
+                      </Link>
+                      <span style={meta}>
+                        {m.city ? ` · ${m.city}` : ''}
+                        {typeof m.distanceKm === 'number' ? ` · à ${Math.round(m.distanceKm)} km de vous` : ''}
+                      </span>
+                    </Text>
+                  </div>
+                )
+              })}
             </Section>
           )}
 
@@ -118,7 +137,7 @@ const Email = ({ firstName, city, missions = [], questions = [], topMembers = []
           )}
 
           <Section style={{ textAlign: 'center', margin: '24px 0' }}>
-            <Button href={publishUrl} style={btnPrimary}>Publier votre besoin ou votre offre</Button>
+            <Button href={publishUrl} style={btnPrimary}>Publier votre demande ou votre offre</Button>
           </Section>
           <Text style={pCenter}>
             Ou <Link href={askUrl} style={link}>posez votre question</Link> à la communauté.
@@ -136,15 +155,22 @@ const Email = ({ firstName, city, missions = [], questions = [], topMembers = []
 export const template = {
   component: Email,
   subject: (data: Record<string, any>) => {
-    const zone = data?.city ? `à ${data.city}` : 'en France'
-    return `Le fil de l'entraide cette semaine ${zone}`
+    const city = data?.city
+    const n = Number(data?.newCount ?? 0)
+    if (n > 0) {
+      return `${n} coup${n > 1 ? 's' : ''} de main cherche${n > 1 ? 'nt' : ''} quelqu'un près de ${city || 'chez vous'}`
+    }
+    return `L'entraide ouverte autour de ${city || 'chez vous'}`
   },
   displayName: "Digest hebdo entraide",
   previewData: {
     firstName: 'Marie',
     city: 'Lyon',
+    radiusKm: 30,
+    newCount: 2,
     missions: [
-      { id: 'm1', title: 'Sortir mon chien mercredi', city: 'Lyon', missionType: 'besoin', distanceKm: 2 },
+      { id: 'm1', slug: 'sortir-mon-chien-mercredi', title: 'Sortir mon chien mercredi', city: 'Lyon', missionType: 'besoin', distanceKm: 2, isNew: true },
+      { id: 'm2', slug: 'je-peux-garder-vos-plantes', title: 'Je peux arroser vos plantes', city: 'Bron', missionType: 'offre', distanceKm: 7, isNew: false },
     ],
     questions: [
       { id: 'q1', title: 'Comment habituer un chat à la laisse ?', answersCount: 4 },
@@ -157,13 +183,17 @@ export const template = {
 
 const main = { backgroundColor: '#ffffff', fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif" }
 const container = { padding: '20px 25px', maxWidth: '600px', margin: '0 auto' }
-const h1 = { color: '#1a1a1a', fontSize: '22px', fontWeight: 700, margin: '20px 0 16px 0' }
+const h1 = { color: '#1a1a1a', fontSize: '22px', fontWeight: 700, margin: '20px 0 8px 0' }
 const h2 = { color: '#1a1a1a', fontSize: '16px', fontWeight: 700, margin: '0 0 8px 0' }
+const intro = { color: '#555', fontSize: '14px', lineHeight: '22px', margin: '0 0 12px 0' }
 const section = { margin: '18px 0', padding: '14px 16px', backgroundColor: '#fafafa', borderRadius: '10px' }
 const itemLine = { color: '#333', fontSize: '14px', lineHeight: '22px', margin: '4px 0' }
-const missionRow = { display: 'flex' as const, alignItems: 'flex-start' as const, gap: '10px', margin: '6px 0' }
+const missionRow = { display: 'flex' as const, alignItems: 'flex-start' as const, gap: '10px', margin: '10px 0' }
 const missionThumb = { borderRadius: '8px', objectFit: 'cover' as const, flexShrink: 0 }
 const meta = { color: '#666', fontSize: '13px' }
+const badgeNew = { backgroundColor: '#1a7f4b', color: '#ffffff', fontSize: '11px', fontWeight: 700, padding: '2px 8px', borderRadius: '999px', marginRight: '6px' }
+const badgeNeed = { backgroundColor: '#eef2ff', color: '#33417a', fontSize: '11px', fontWeight: 700, padding: '2px 8px', borderRadius: '999px' }
+const badgeOffer = { backgroundColor: '#fff3e0', color: '#8a5300', fontSize: '11px', fontWeight: 700, padding: '2px 8px', borderRadius: '999px' }
 const link = { color: '#2b6cb0', textDecoration: 'underline', fontWeight: 600 }
 const pCenter = { textAlign: 'center' as const, color: '#666', fontSize: '13px', margin: '6px 0 0 0' }
 const btnPrimary = { backgroundColor: '#1a1a1a', color: '#fff', padding: '12px 24px', borderRadius: '8px', textDecoration: 'none', fontWeight: 600, fontSize: '14px' }

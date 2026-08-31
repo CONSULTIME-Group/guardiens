@@ -1,12 +1,10 @@
 // send-mutual-aid-weekly-digest
 // -----------------------------------------------------------------------------
-// Envoie chaque mardi 8h UTC un digest hebdomadaire "le fil de l'entraide" aux
-// membres opt-in `email_preferences.new_mission_digest = true`.
-// Contenu :
-//   - 5 nouvelles missions les plus proches (haversine sur postal_code)
-//   - 3 questions les plus commentées de la semaine
-//   - 3 profils avec le plus de badges reçus cette semaine (mission_feedbacks)
-// Anti-spam : dédup 6j sur email_send_log, respect suppressed_emails.
+// Digest hebdomadaire "le fil de l'entraide", chaque mardi 8h UTC.
+// Le plan d'envoi est calcule entierement en SQL par
+// public.mutual_aid_weekly_digest_plan : rayon d'entraide du membre,
+// opt-in par defaut, disponibilite pour aider, suppressions, et garde-fou
+// "aucune annonce dans le rayon". Cote fonction, on se contente d'envoyer.
 // Body : { dry_run?: boolean, recipient_id?: string, manual?: boolean }
 import { createClient } from 'npm:@supabase/supabase-js@2.45.0'
 import { requireCronCaller } from '../_shared/require-cron-caller.ts'
@@ -21,34 +19,55 @@ const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!
 const SERVICE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
 
 const TEMPLATE = 'mutual-aid-weekly-digest'
+const BATCH_SIZE = 20
 
-interface Recipient {
-  id: string
-  first_name: string | null
+interface PlanRow {
+  user_id: string
   email: string | null
+  first_name: string | null
   city: string | null
-  postal_code: string | null
-  latitude: number | null
-  longitude: number | null
+  radius_km: number | null
+  nb_nouvelles: number | null
+  missions: unknown
 }
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders })
 
-  const guard = await requireCronCaller(req, corsHeaders, "send-mutual-aid-weekly-digest")
+  const guard = await requireCronCaller(req, corsHeaders, 'send-mutual-aid-weekly-digest')
   if (guard) return guard
 
-  const run = await startCronRun("send-mutual-aid-weekly-digest")
+  const run = await startCronRun('send-mutual-aid-weekly-digest')
   let body: { dry_run?: boolean; recipient_id?: string; manual?: boolean } = {}
   try { if (req.body) body = await req.json() } catch { /* noop */ }
 
   const admin = createClient(SUPABASE_URL, SERVICE_KEY, { auth: { persistSession: false } })
   const now = Date.now()
   const weekAgoIso = new Date(now - 7 * 86400_000).toISOString()
+  const dedupWindowIso = new Date(now - 6 * 86400_000).toISOString()
 
   try {
-    // === Contenu global (mutualisé pour tous les destinataires) ===
-    // Section 3 : top 3 profils avec le plus de badges reçus cette semaine
+    // === 1. Plan d'envoi, une seule requete ===
+    const { data: planData, error: planErr } = await admin.rpc(
+      'mutual_aid_weekly_digest_plan',
+      { p_max_radius_km: 30, p_new_since_days: 7, p_max_missions: 5 },
+    )
+    if (planErr) throw planErr
+
+    let planRows = (planData ?? []) as unknown as PlanRow[]
+    if (body.recipient_id) {
+      planRows = planRows.filter((r) => r.user_id === body.recipient_id)
+    }
+    planRows = planRows.filter((r) => !!r.email)
+
+    const planned = planRows.length
+    if (planned === 0) {
+      await run.finish('success', { planned: 0, sent: 0, skipped: 0, failed: 0, dry_run: !!body.dry_run })
+      return json({ ok: true, planned: 0, sent: 0, skipped: 0, failed: 0, reason: 'no_plan' })
+    }
+
+    // === 2. Contenu decoratif, charge une seule fois. Il ne declenche jamais
+    // un envoi a lui seul : seul le plan decide qui recoit le mail. ===
     const { data: recentFeedbacks } = await admin
       .from('mission_feedbacks')
       .select('receiver_id, badge_key, created_at')
@@ -80,7 +99,6 @@ Deno.serve(async (req) => {
       }))
     }
 
-    // Section 2 : top 3 questions les plus commentées de la semaine
     const { data: recentQuestions } = await admin
       .from('community_questions')
       .select('id, title, city, answers_count, created_at')
@@ -95,74 +113,17 @@ Deno.serve(async (req) => {
       answersCount: q.answers_count ?? 0,
     }))
 
-    // Section 1 (partiel) : missions récentes (24-96h) , filtrées par distance côté recipient
-    const missionsCutoff = new Date(now - 7 * 86400_000).toISOString()
-    const { data: freshMissions } = await admin
-      .from('small_missions')
-      .select('id, title, city, mission_type, latitude, longitude, postal_code, created_at, photos')
-      .eq('status', 'open')
-      .gte('created_at', missionsCutoff)
-      .order('created_at', { ascending: false })
-      .limit(200)
-
-    // === Destinataires ===
-    let recipientsQuery = admin
-      .from('email_preferences')
-      .select('user_id')
-      .eq('new_mission_digest', true)
-      .eq('product_emails', true)
-      .limit(5000)
-    if (body.recipient_id) recipientsQuery = recipientsQuery.eq('user_id', body.recipient_id)
-    const { data: prefsRows, error: prefsErr } = await recipientsQuery
-    if (prefsErr) throw prefsErr
-
-    const recipientIds = (prefsRows ?? []).map((r) => r.user_id).filter(Boolean)
-    if (recipientIds.length === 0) {
-      await run.finish('success', { sent: 0, reason: 'no_optin' })
-      return json({ ok: true, sent: 0, reason: 'no_optin' })
-    }
-
-    // Charge profils par lots de 200
-    const recipients: Recipient[] = []
-    for (let i = 0; i < recipientIds.length; i += 200) {
-      const batch = recipientIds.slice(i, i + 200)
-      const { data } = await admin
-        .from('profiles')
-        .select('id, first_name, email, city, postal_code, latitude, longitude, account_status')
-        .in('id', batch)
-        .eq('account_status', 'active')
-      for (const p of data ?? []) {
-        recipients.push({
-          id: p.id, first_name: p.first_name, email: p.email,
-          city: p.city, postal_code: p.postal_code,
-          latitude: p.latitude, longitude: p.longitude,
-        })
-      }
-    }
-
-    const dedupWindowIso = new Date(now - 6 * 86400_000).toISOString()
-    let sent = 0, skipped = 0
+    // === 3. Envoi par lots de 20 en parallele ===
+    let sent = 0
+    let skipped = 0
+    let failed = 0
     const errors: Array<{ user_id: string; reason: string }> = []
-    const plan: Array<{ user_id: string; missions: number }> = []
+    const dayKey = new Date().toISOString().slice(0, 10)
 
-    for (const r of recipients) {
-      // Email
-      let email = r.email?.trim() || null
-      if (!email) {
-        const { data: authData } = await admin.auth.admin.getUserById(r.id)
-        email = authData?.user?.email ?? null
-      }
-      if (!email) { errors.push({ user_id: r.id, reason: 'email_missing' }); continue }
+    async function processOne(row: PlanRow): Promise<'sent' | 'skipped' | 'failed'> {
+      const email = (row.email ?? '').trim()
+      if (!email) return 'skipped'
 
-      // Suppression
-      const { data: sup } = await admin
-        .from('suppressed_emails')
-        .select('email')
-        .ilike('email', email)
-        .maybeSingle()
-      if (sup) { skipped++; continue }
-
-      // Dédup hebdo (sauf manual)
       if (!body.manual) {
         const { data: prev } = await admin
           .from('email_send_log')
@@ -172,80 +133,88 @@ Deno.serve(async (req) => {
           .in('status', ['sent', 'pending', 'deferred'])
           .gte('created_at', dedupWindowIso)
           .limit(1)
-        if (prev && prev.length > 0) { skipped++; continue }
+        if (prev && prev.length > 0) return 'skipped'
       }
 
-      // Sélection missions par distance (fallback: 5 plus récentes nationales)
-      let missionsForRecipient = freshMissions ?? []
-      if (r.latitude != null && r.longitude != null) {
-        const withDistance = missionsForRecipient
-          .filter((m) => m.latitude != null && m.longitude != null)
-          .map((m) => ({
-            m,
-            d: haversineKm(r.latitude!, r.longitude!, m.latitude!, m.longitude!),
-          }))
-          .sort((a, b) => a.d - b.d)
-          .slice(0, 5)
-        missionsForRecipient = withDistance.map((x) => ({ ...x.m, __distance: x.d } as any))
-      } else {
-        missionsForRecipient = missionsForRecipient.slice(0, 5)
-      }
-
-      const missionsPayload = (missionsForRecipient as any[]).map((m) => ({
-        id: m.id,
-        title: m.title,
-        city: m.city,
-        missionType: m.mission_type,
-        distanceKm: typeof m.__distance === 'number' ? m.__distance : null,
-        photoUrl: Array.isArray(m.photos) && m.photos.length > 0 && typeof m.photos[0] === 'string' ? m.photos[0] : null,
-      }))
-
-      // Skip si aucun contenu à montrer (0 mission + 0 question + 0 top members)
-      if (missionsPayload.length === 0 && questions.length === 0 && topMembers.length === 0) {
-        skipped++
-        continue
-      }
-
-      plan.push({ user_id: r.id, missions: missionsPayload.length })
-
-      if (body.dry_run) continue
+      if (body.dry_run) return 'skipped'
 
       const idem = body.manual
-        ? `${TEMPLATE}-${r.id}-${Date.now()}`
-        : `${TEMPLATE}-${r.id}-${new Date().toISOString().slice(0, 10)}`
+        ? `${TEMPLATE}-${row.user_id}-${Date.now()}`
+        : `${TEMPLATE}-${row.user_id}-${dayKey}`
 
-      const _steRes = await fetch(`${Deno.env.get('SUPABASE_URL')}/functions/v1/send-transactional-email`, {
+      const res = await fetch(`${SUPABASE_URL}/functions/v1/send-transactional-email`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')}` },
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${SERVICE_KEY}` },
         body: JSON.stringify({
           templateName: TEMPLATE,
           recipientEmail: email,
           idempotencyKey: idem,
           templateData: {
-            firstName: r.first_name ?? undefined,
-            city: r.city ?? null,
-            missions: missionsPayload,
+            firstName: row.first_name ?? undefined,
+            city: row.city ?? null,
+            radiusKm: row.radius_km ?? null,
+            newCount: Number(row.nb_nouvelles ?? 0),
+            missions: Array.isArray(row.missions) ? row.missions : [],
             questions,
             topMembers,
           },
           logMetadata: { digest: 'mutual_aid_weekly' },
         }),
-      });
-      const _steTxt1 = _steRes.ok ? '' : await _steRes.text().catch(() => '');
-      if (!_steRes.ok) console.error('send-transactional-email failed', _steRes.status, _steTxt1);
-      const sendErr = _steRes.ok ? null : new Error(`send-transactional-email ${_steRes.status}: ${_steTxt1}`);
-      if (sendErr) { errors.push({ user_id: r.id, reason: String(sendErr) }); continue }
-      sent++
+      })
+      if (!res.ok) {
+        const txt = await res.text().catch(() => '')
+        console.error('send-transactional-email failed', res.status, txt)
+        errors.push({ user_id: row.user_id, reason: `send-transactional-email ${res.status}: ${txt}` })
+        return 'failed'
+      }
+      return 'sent'
     }
 
-    await run.finish(errors.length > 0 ? 'partial' : 'success', {
-      sent, skipped, total_recipients: recipients.length,
-      error_count: errors.length, dry_run: !!body.dry_run,
+    for (let i = 0; i < planRows.length; i += BATCH_SIZE) {
+      const batch = planRows.slice(i, i + BATCH_SIZE)
+      const outcomes = await Promise.all(batch.map(async (row) => {
+        try {
+          return await processOne(row)
+        } catch (e) {
+          console.error('[send-mutual-aid-weekly-digest] recipient failed', row.user_id, e)
+          errors.push({ user_id: row.user_id, reason: String(e) })
+          return 'failed' as const
+        }
+      }))
+      for (const outcome of outcomes) {
+        if (outcome === 'sent') sent++
+        else if (outcome === 'skipped') skipped++
+        else failed++
+      }
+    }
+
+    // Surveillance : un ecart d'envoi de plus de 20 pour cent remonte en
+    // 'partial', pour que les alertes existantes voient le digest mourir.
+    const missionCounts = planRows.map((r) => (Array.isArray(r.missions) ? r.missions.length : 0))
+    const avgMissions = planned > 0
+      ? missionCounts.reduce((a, b) => a + b, 0) / planned
+      : 0
+    const status = !body.dry_run && sent < planned * 0.8 ? 'partial' : 'success'
+
+    await run.finish(status, {
+      planned,
+      sent,
+      skipped,
+      failed,
+      avg_missions: Number(avgMissions.toFixed(2)),
+      dry_run: !!body.dry_run,
+      shortfall_ratio: planned > 0 ? Number((1 - sent / planned).toFixed(2)) : 0,
     })
+
     return json({
-      ok: true, sent, skipped, total_recipients: recipients.length,
-      errors, dry_run: !!body.dry_run,
-      plan: body.dry_run ? plan.slice(0, 20) : undefined,
+      ok: true,
+      planned,
+      sent,
+      skipped,
+      failed,
+      avg_missions: Number(avgMissions.toFixed(2)),
+      dry_run: !!body.dry_run,
+      errors: errors.slice(0, 20),
     })
   } catch (err) {
     console.error('[send-mutual-aid-weekly-digest] fatal', err)
@@ -253,16 +222,6 @@ Deno.serve(async (req) => {
     return json({ error: String(err) }, 500)
   }
 })
-
-function haversineKm(lat1: number, lon1: number, lat2: number, lon2: number): number {
-  const R = 6371
-  const dLat = ((lat2 - lat1) * Math.PI) / 180
-  const dLon = ((lon2 - lon1) * Math.PI) / 180
-  const a = Math.sin(dLat / 2) ** 2 +
-    Math.cos((lat1 * Math.PI) / 180) * Math.cos((lat2 * Math.PI) / 180) *
-    Math.sin(dLon / 2) ** 2
-  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
-}
 
 function json(payload: unknown, status = 200) {
   return new Response(JSON.stringify(payload), {
