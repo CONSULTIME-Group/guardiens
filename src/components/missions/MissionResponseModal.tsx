@@ -13,7 +13,7 @@ interface Props {
   missionType: "besoin" | "offre";
   authorFirstName?: string | null;
   submitting: boolean;
-  onSubmit: (message: string, templateKey: string | null) => Promise<void>;
+  onSubmit: (message: string) => Promise<void>;
 }
 
 /**
@@ -55,7 +55,7 @@ const MissionResponseModal = ({
       });
       return;
     }
-    await onSubmit(message, null);
+    await onSubmit(message);
     setMessage("");
   };
 

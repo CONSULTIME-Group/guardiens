@@ -1824,10 +1824,10 @@ const SmallMissionDetail = () => {
         missionType={((mission as any).mission_type === "offre" ? "offre" : "besoin") as "besoin" | "offre"}
         authorFirstName={author?.first_name}
         submitting={submitting}
-        onSubmit={async (msg, templateKey) => {
+        onSubmit={async (msg) => {
           await handleRespond(msg);
           trackEvent("mission_response_submitted_from_modal", {
-            metadata: { mission_id: mission.id, has_template: !!templateKey },
+            metadata: { mission_id: mission.id },
           });
           setResponseModalOpen(false);
         }}
