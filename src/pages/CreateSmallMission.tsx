@@ -799,6 +799,7 @@ const CreateSmallMission = () => {
                       if (partial.postal_code !== undefined) setPostalCode(partial.postal_code);
                     }}
                     required
+                    showRequiredMark={false}
                     inputClassName="h-12 text-base"
                   />
                 </div>
@@ -911,11 +912,19 @@ const CreateSmallMission = () => {
                 {category === "animals" && (
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 rounded-2xl border border-border p-4 bg-muted/30">
                     <div className="sm:col-span-2">
-                      <p className="text-sm font-semibold mb-0.5">L'animal concerné</p>
-                      <p className="text-xs text-muted-foreground">Aide les gens à savoir s'ils peuvent proposer leur aide.</p>
+                      <p className="text-sm font-semibold mb-0.5">
+                        {missionType === "offre" ? "Les animaux que vous savez garder" : "L'animal concerné"}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        {missionType === "offre"
+                          ? "Précisez avec quels animaux vous êtes à l'aise."
+                          : "Aide les gens à savoir s'ils peuvent proposer leur aide."}
+                      </p>
                     </div>
                     <div className="space-y-1.5">
-                      <Label className="text-xs font-medium">Espèce</Label>
+                      <Label className="text-xs font-medium">
+                        {missionType === "offre" ? "Espèces" : "Espèce"}
+                      </Label>
                       <Select value={petSpecies} onValueChange={setPetSpecies}>
                         <SelectTrigger className="h-11"><SelectValue placeholder="Chien, chat…" /></SelectTrigger>
                         <SelectContent>
