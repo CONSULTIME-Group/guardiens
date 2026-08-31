@@ -23,6 +23,8 @@ interface Props {
   /** Optional: enable "I live abroad" toggle. Pass the current country (defaults to "FR"). */
   country?: string | null;
   showAbroadToggle?: boolean;
+  /** Show the red asterisk next to required labels. Defaults to true for backward compatibility. */
+  showRequiredMark?: boolean;
 }
 
 /**
@@ -47,7 +49,9 @@ const PostalCodeCityFields = ({
   disabled = false,
   country,
   showAbroadToggle = true,
+  showRequiredMark = true,
 }: Props) => {
+  const requiredMark = showRequiredMark && required ? " *" : "";
   const { handlePostalCodeChange, selectCity, cities, loading, error } =
     usePostalCodeCity(onChange);
 
@@ -74,7 +78,7 @@ const PostalCodeCityFields = ({
           <div className="space-y-2">
             <Label htmlFor={cityId}>
               {cityLabel}
-              {required && " *"}
+              {requiredMark}
             </Label>
             <Input
               id={cityId}
@@ -89,7 +93,7 @@ const PostalCodeCityFields = ({
           </div>
           <div className="space-y-2">
             <Label htmlFor={`${postalId}_country`}>
-              Pays{required && " *"}
+              Pays{requiredMark}
             </Label>
             <Select
               value={country && country !== "FR" ? country : ""}
@@ -126,7 +130,7 @@ const PostalCodeCityFields = ({
         <div className="space-y-2">
           <Label htmlFor={cityId}>
             {cityLabel}
-            {required && " *"}
+            {requiredMark}
           </Label>
           {cities.length >= 1 && !disabled ? (
             <Select value={city} onValueChange={(v) => selectCity(v)} disabled={disabled}>
@@ -156,7 +160,7 @@ const PostalCodeCityFields = ({
         <div className="space-y-2">
           <Label htmlFor={postalId}>
             {postalLabel}
-            {required && " *"}
+            {requiredMark}
           </Label>
           <div className="relative">
             <Input
