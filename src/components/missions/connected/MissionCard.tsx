@@ -151,18 +151,6 @@ const MissionCard = ({ mission: m, currentUserId, isAuthenticated, canApplyMissi
               className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
             />
           </div>
-        ) : avatarUrl ? (
-          <>
-            <img
-              src={avatarImageUrl(avatarUrl, 96)}
-              alt=""
-              aria-hidden="true"
-              loading="lazy"
-              decoding="async"
-              className="absolute inset-0 w-full h-full object-cover scale-125 blur-2xl transition-transform duration-700 group-hover:scale-[1.35]"
-            />
-            <div className={`absolute inset-0 bg-gradient-to-br ${CATEGORY_GRADIENT[catKey]} opacity-40 mix-blend-multiply`} />
-          </>
         ) : (
           <div className={`w-full h-full bg-gradient-to-br ${CATEGORY_GRADIENT[catKey]} flex items-center justify-center transition-transform duration-700 group-hover:scale-105`}>
             <CategoryGlyph category={catKey} />
