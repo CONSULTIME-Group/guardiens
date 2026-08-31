@@ -57,18 +57,6 @@ export function formatDuration(raw: string): string {
   return DURATION_LABELS[raw] || raw;
 }
 
-export const EXAMPLES = [
-  { cat: "animals", title: "Promener Filou 3 fois cette semaine", exchange: "Plateau de fromages maison et une bonne bouteille" },
-  { cat: "animals", title: "Nourrir mes 4 chats samedi et dimanche matin", exchange: "Un dîner à mon retour, je cuisine bien !" },
-  { cat: "animals", title: "Accompagner mon chien chez le véto mercredi", exchange: "Confitures maison (abricot et figue)" },
-  { cat: "animals", title: "Garder mes 3 poules le week-end du 15 juin", exchange: "Les œufs sont pour vous !" },
-  { cat: "garden", title: "Arroser le potager pendant 5 jours", exchange: "Servez-vous dans les tomates et les courgettes !" },
-  { cat: "garden", title: "Coup de main pour tailler la haie samedi", exchange: "BBQ à midi, je m'occupe de tout" },
-  { cat: "garden", title: "Tondre la pelouse une fois par semaine en juillet", exchange: "Profitez du jardin, de la piscine, et du hamac" },
-  { cat: "skills", title: "Véto à la retraite, questions sur votre chien", exchange: "Le plaisir de voir des animaux heureux" },
-  { cat: "skills", title: "Dog-training : les bases (rappel, marche en laisse)", exchange: "Un bon café et une balade ensemble" },
-];
-
 /** Union fermée dérivée de la source unique, plus « Tout » et « Mes missions ». */
 export type CategoryFilter = MissionCategory | "all" | "mine";
 export type ModeFilter = "need" | "offer";

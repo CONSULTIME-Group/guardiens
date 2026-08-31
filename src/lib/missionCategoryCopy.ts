@@ -5,8 +5,9 @@
  * partie parce que tous les textes d'aide parlaient d'un animal. Chaque
  * catégorie parle désormais de la chose concernée.
  *
- * Règle du réseau : un service contre un service, jamais d'argent. Les
- * suggestions de contrepartie restent des gestes, jamais des sommes.
+ * Règle du réseau : un service contre un service, jamais d'argent. Aucune
+ * aide n'est une phrase prête à coller : on nomme des familles de
+ * contrepartie, la personne écrit avec ses mots.
  */
 import type { MissionCategory } from "@/lib/missionCategories";
 
@@ -19,15 +20,9 @@ interface CategoryCopy {
   descNeed: string;
   /** Texte d'aide de la description, pour une offre. */
   descOffer: string;
-  /** Suggestions de contrepartie, pour un besoin. */
-  exchangeNeed: string[];
+  /** Familles de contrepartie, pour un besoin. Jamais une phrase recopiable. */
+  exchangeHint: string;
 }
-
-const COMMON_OFFER_EXCHANGES = [
-  "Un coup de main en retour quand vous voulez",
-  "Un moment partagé autour d'un café",
-  "Rien, ça me fait plaisir",
-];
 
 const COPY: Record<string, CategoryCopy> = {
   animals: {
@@ -37,11 +32,8 @@ const COPY: Record<string, CategoryCopy> = {
       "Précisez l'animal (espèce, taille, âge), les dates approximatives et ce que vous attendez concrètement (promenade, gamelle, jeu). Plus c'est clair, plus vite vous aurez des propositions.",
     descOffer:
       "Dites avec quels animaux vous êtes à l'aise, vos disponibilités et ce que vous proposez concrètement (promenade, gamelle, visite).",
-    exchangeNeed: [
-      "Un café et des biscuits maison",
-      "Des œufs de la semaine",
-      "Un coup de main en retour quand vous voulez",
-    ],
+    exchangeHint:
+      "Ce que vous pouvez offrir : quelque chose de chez vous, un moment partagé, ou un coup de main en retour. Dites-le avec vos mots.",
   },
   garden: {
     titleNeed: "Ex : Arroser le potager pendant une semaine",
@@ -50,11 +42,8 @@ const COPY: Record<string, CategoryCopy> = {
       "Décrivez le jardin (surface, ce qui pousse), les gestes attendus (arrosage, tonte, taille) et la fréquence souhaitée.",
     descOffer:
       "Dites ce que vous savez faire au jardin, avec quel matériel, et sur quels créneaux vous êtes disponible.",
-    exchangeNeed: [
-      "Servez-vous dans les tomates et les courgettes",
-      "Un café et des biscuits maison",
-      "Un coup de main en retour quand vous voulez",
-    ],
+    exchangeHint:
+      "Ce que vous pouvez offrir : une part de la récolte, un moment partagé, ou un coup de main en retour. Dites-le avec vos mots.",
   },
   house: {
     titleNeed: "Ex : Fixer deux étagères dans le salon",
@@ -63,11 +52,8 @@ const COPY: Record<string, CategoryCopy> = {
       "Décrivez la pièce, ce qui est à faire, le matériel déjà sur place et le temps que cela demande selon vous.",
     descOffer:
       "Dites quels travaux simples vous savez faire, votre outillage, et vos créneaux habituels.",
-    exchangeNeed: [
-      "Un repas partagé après le chantier",
-      "Un café et des biscuits maison",
-      "Un coup de main en retour quand vous voulez",
-    ],
+    exchangeHint:
+      "Ce que vous pouvez offrir : un repas partagé, un savoir-faire, ou un coup de main en retour. Dites-le avec vos mots.",
   },
   errand: {
     titleNeed: "Ex : Récupérer un colis en point relais jeudi",
@@ -76,11 +62,8 @@ const COPY: Record<string, CategoryCopy> = {
       "Précisez ce qu'il faut aller chercher, où, à quel moment, et comment vous récupérez ensuite les affaires.",
     descOffer:
       "Dites votre secteur, vos jours de courses, et ce que vous acceptez de transporter.",
-    exchangeNeed: [
-      "Un café à la remise du colis",
-      "Des confitures maison",
-      "Un coup de main en retour quand vous voulez",
-    ],
+    exchangeHint:
+      "Ce que vous pouvez offrir : quelque chose de chez vous, un moment partagé, ou un coup de main en retour. Dites-le avec vos mots.",
   },
   transport: {
     titleNeed: "Ex : M'accompagner à un rendez-vous médical mardi",
@@ -89,11 +72,8 @@ const COPY: Record<string, CategoryCopy> = {
       "Indiquez le trajet, l'horaire, la durée d'attente prévue et si un accompagnement sur place est utile. Aucun paiement n'est demandé ni proposé.",
     descOffer:
       "Dites votre secteur, vos créneaux, et si vous pouvez attendre sur place. Aucun paiement n'est demandé ni proposé.",
-    exchangeNeed: [
-      "Un café après le rendez-vous",
-      "Un gâteau maison",
-      "Un coup de main en retour quand vous voulez",
-    ],
+    exchangeHint:
+      "Ce que vous pouvez offrir : un moment partagé, quelque chose de chez vous, ou un coup de main en retour. Dites-le avec vos mots.",
   },
   company: {
     titleNeed: "Ex : Un peu de compagnie pour ma mère le mercredi",
@@ -102,11 +82,8 @@ const COPY: Record<string, CategoryCopy> = {
       "Dites qui a besoin de présence, à quel rythme, ce qui fait plaisir (discuter, une promenade, un jeu) et ce qu'il faut savoir.",
     descOffer:
       "Dites ce que vous aimez partager (discussion, promenade, lecture) et vos disponibilités.",
-    exchangeNeed: [
-      "Un thé et une conversation",
-      "Un gâteau maison",
-      "Un coup de main en retour quand vous voulez",
-    ],
+    exchangeHint:
+      "Ce que vous pouvez offrir : un moment partagé, quelque chose de chez vous, ou un coup de main en retour. Dites-le avec vos mots.",
   },
   skills: {
     titleNeed: "Ex : Aide pour remplir un dossier en ligne",
@@ -115,11 +92,8 @@ const COPY: Record<string, CategoryCopy> = {
       "Décrivez le savoir-faire recherché ou la démarche à faire, le niveau d'aide attendu et le temps que cela peut prendre.",
     descOffer:
       "Décrivez votre savoir-faire, ce que vous pouvez transmettre, et sur quels créneaux.",
-    exchangeNeed: [
-      "Un savoir-faire en retour, dites-moi le vôtre",
-      "Un café et des biscuits maison",
-      "Un coup de main en retour quand vous voulez",
-    ],
+    exchangeHint:
+      "Ce que vous pouvez offrir : un savoir-faire en retour, un moment partagé, ou un coup de main quand vous voulez. Dites-le avec vos mots.",
   },
   other: {
     titleNeed: "Ex : Un coup de main pour un déménagement samedi",
@@ -128,11 +102,8 @@ const COPY: Record<string, CategoryCopy> = {
       "Décrivez précisément ce dont vous avez besoin, quand, et ce que la personne devra faire concrètement.",
     descOffer:
       "Décrivez ce que vous proposez, quand, et pour qui cela peut être utile.",
-    exchangeNeed: [
-      "Un café et des biscuits maison",
-      "Un repas partagé",
-      "Un coup de main en retour quand vous voulez",
-    ],
+    exchangeHint:
+      "Ce que vous pouvez offrir : quelque chose de chez vous, un moment partagé, ou un coup de main en retour. Dites-le avec vos mots.",
   },
 };
 
@@ -154,13 +125,16 @@ export function categoryDescHelp(
   return missionType === "offre" ? c.descOffer : c.descNeed;
 }
 
-export function categoryExchangeSuggestions(
+/** Une seule phrase de repère, en lecture seule, jamais insérable dans le champ. */
+export function categoryExchangeHint(
   category: string | null | undefined,
   missionType: "besoin" | "offre",
-): string[] {
-  if (missionType === "offre") return COMMON_OFFER_EXCHANGES;
+): string {
+  if (missionType === "offre") {
+    return "Ce que vous aimeriez en retour, ou rien du tout si ça vous fait plaisir. Dites-le avec vos mots.";
+  }
   const c = (category && COPY[category]) || FALLBACK;
-  return c.exchangeNeed;
+  return c.exchangeHint;
 }
 
 export type { MissionCategory };

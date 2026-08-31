@@ -40,8 +40,9 @@ import IdentityRecommendedHint from "@/components/missions/IdentityRecommendedHi
 import { MISSION_CATEGORIES } from "@/lib/missionCategories";
 import {
   categoryDescHelp,
-  categoryExchangeSuggestions,
+  categoryExchangeHint,
   categoryTitleExample,
+
 } from "@/lib/missionCategoryCopy";
 import { durationMismatch, DURATION_LABEL } from "@/lib/missionDurationCoherence";
 
@@ -421,6 +422,17 @@ const CreateSmallMission = () => {
         toast({ title: "Compte non actif", description: "Contactez le support pour rétablir l'accès à l'entraide.", variant: "destructive" });
         return;
       }
+      if (hint === "duplicate_small_mission" || msg.includes("duplicate_small_mission")) {
+        toast({
+          title: "Vous avez déjà cette annonce en ligne",
+          description: error.message,
+          variant: "destructive",
+        });
+        setStep(1);
+        setTitleTouched(true);
+        return;
+      }
+
       toast({ title: tp("toast_error_title"), description: error.message, variant: "destructive" });
       return;
     }
@@ -710,21 +722,10 @@ const CreateSmallMission = () => {
                   <Label className="text-sm font-medium">
                     {missionType === "offre" ? tp("exchange_label_offer") : tp("exchange_label_need")}
                   </Label>
-                  <p className="text-xs text-muted-foreground -mt-1">
-                    Un coup de main = un échange. Pas d'euros. Restez simple et sincère.
+                  <p className="text-xs text-muted-foreground -mt-1 leading-relaxed">
+                    Un coup de main, c'est un échange, jamais d'argent. {categoryExchangeHint(category, missionType)}
                   </p>
-                  <div className="flex flex-wrap gap-1.5">
-                    {categoryExchangeSuggestions(category, missionType).map((ex) => (
-                      <button
-                        key={ex}
-                        type="button"
-                        onClick={() => handleExchangeChange(ex)}
-                        className="rounded-full border border-border bg-background text-foreground/80 hover:border-primary/40 hover:text-foreground px-3 py-1 text-[11px] transition-colors"
-                      >
-                        {ex}
-                      </button>
-                    ))}
-                  </div>
+
                   <Input
                     value={exchangeOffer}
                     onChange={(e) => handleExchangeChange(e.target.value)}

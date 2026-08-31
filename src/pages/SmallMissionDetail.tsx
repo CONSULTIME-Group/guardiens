@@ -44,7 +44,6 @@ import PublicMissionView from "@/components/missions/PublicMissionView";
 import RelatedMissionCard from "@/components/missions/RelatedMissionCard";
 import MissionResponseCard from "@/components/missions/MissionResponseCard";
 import MissionResponseModal from "@/components/missions/MissionResponseModal";
-import { startConversation } from "@/lib/conversation";
 import ApproximateLocationMap from "@/components/shared/ApproximateLocationMap";
 import { isAuthorOf } from "@/lib/ownership";
 import { sanitizeUserTitle } from "@/lib/sanitizeTitle";
@@ -232,7 +231,6 @@ const SmallMissionDetail = () => {
   const [processingResponseId, setProcessingResponseId] = useState<string | null>(null);
   const [completing, setCompleting] = useState(false);
   const [responseModalOpen, setResponseModalOpen] = useState(false);
-  const [oneClickInterestBusy, setOneClickInterestBusy] = useState(false);
 
   // Per-person feedback tracking: receiverId → submitted
   const [feedbackSent, setFeedbackSent] = useState<Record<string, boolean>>({});
@@ -697,89 +695,7 @@ const SmallMissionDetail = () => {
     setSearchParams({}, { replace: true });
   };
 
-  const handleOneClickInterest = async () => {
-    if (!user || !id || !mission || oneClickInterestBusy) return;
-    if (mission.user_id === user.id) return;
-    setOneClickInterestBusy(true);
-    try {
-      trackEvent("mission_offer_one_click_interest", { metadata: { mission_id: missionUuid } });
 
-      // 1. Statut frais : ne jamais écrire sur une publication clôturée.
-      const { data: fresh } = await supabase
-        .from("small_missions")
-        .select("status, user_id")
-        .eq("id", mission.id)
-        .single();
-      if (!fresh) {
-        toast({ variant: "destructive", title: "Erreur", description: "Publication introuvable." });
-        return;
-      }
-      if (fresh.status !== "open") {
-        toast({ variant: "destructive", title: "Publication clôturée", description: "Cette publication n'accepte plus de réponses." });
-        return;
-      }
-      if (fresh.user_id === user.id) return;
-
-      // 2. Réponse en base. On lit l'erreur : sans cela, la personne était
-      // redirigée vers la messagerie en croyant avoir répondu.
-      const templateMsg = `Bonjour ${author?.first_name || ""}, votre proposition « ${mission.title} » m'intéresse. Je vous contacte en privé pour en discuter.`.trim();
-      const { error: insertError } = await supabase
-        .from("small_mission_responses")
-        .insert({ mission_id: missionUuid!, responder_id: user.id, message: templateMsg });
-
-      if (insertError) {
-        const hint = (insertError as any)?.hint || "";
-        const raw = String(insertError.message || "");
-        if (insertError.code === "23505") {
-          toast({ variant: "destructive", title: "Déjà envoyé", description: "Vous avez déjà proposé votre aide pour cette publication." });
-          setHasResponded(true);
-        } else if (hint === "account_not_active" || raw.includes("account_not_active")) {
-          toast({ variant: "destructive", title: "Compte non actif", description: "Contactez le support pour rétablir l'accès à l'entraide." });
-        } else if (hint === "mission_response_cap_reached" || raw.includes("mission_response_cap_reached")) {
-          toast({
-            variant: "destructive",
-            title: "Publication temporairement fermée",
-            description: "5 personnes ont déjà proposé leur aide. Une place se libérera si l'auteur en décline une.",
-          });
-        } else {
-          logger.error("[handleOneClickInterest] insert", { err: raw });
-          toast({ variant: "destructive", title: "Erreur", description: "Impossible d'enregistrer votre réponse." });
-        }
-        return;
-      }
-
-      setHasResponded(true);
-      const origin = readMissionSource(missionUuid!);
-      void trackEvent("mission_response_source", {
-        metadata: {
-          mission_id: missionUuid,
-          source: origin.source,
-          utm_campaign: origin.utm_campaign,
-          path: "one_click",
-        },
-      });
-
-      // 3. Conversation, ouverte seulement après une réponse réussie.
-      const { conversationId, error: convError } = await startConversation({
-        otherUserId: mission.user_id,
-        context: "mission_help",
-        smallMissionId: id,
-      });
-      if (!conversationId) {
-        toast({
-          title: "Réponse envoyée",
-          description: convError || "Votre réponse est enregistrée. La messagerie n'a pas pu s'ouvrir, réessayez depuis vos messages.",
-        });
-        return;
-      }
-      navigate(`/messages?c=${conversationId}`);
-    } catch (err: any) {
-      logger.error("[handleOneClickInterest]", { err: String(err) });
-      toast({ variant: "destructive", title: "Erreur", description: err?.message || "Impossible d'envoyer votre intérêt." });
-    } finally {
-      setOneClickInterestBusy(false);
-    }
-  };
 
 
   if (loading) {
@@ -1088,21 +1004,21 @@ const SmallMissionDetail = () => {
                 {ctaLabel}
               </Button>
               {isOffer && (
-                <div className="space-y-1">
-                  <Button
-                    variant="ghost"
-                    className="w-full rounded-full font-semibold text-sm gap-2"
-                    disabled={oneClickInterestBusy}
-                    onClick={handleOneClickInterest}
-                  >
-                    <MessageSquare className="h-4 w-4" />
-                    {oneClickInterestBusy ? "Envoi en cours…" : "Écrire directement"}
-                  </Button>
-                  <p className="text-[11px] text-muted-foreground text-center leading-relaxed">
-                    Même proposition, avec un message type et l'ouverture immédiate de la conversation.
-                  </p>
-                </div>
+                <Button
+                  variant="ghost"
+                  className="w-full rounded-full font-semibold text-sm gap-2"
+                  onClick={() => {
+                    setResponseModalOpen(true);
+                    trackEvent("mission_response_modal_opened", {
+                      metadata: { mission_id: mission.id, mission_type: "offre" },
+                    });
+                  }}
+                >
+                  <MessageSquare className="h-4 w-4" />
+                  Répondre à cette offre
+                </Button>
               )}
+
             </>
           )}
           <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-[11px] text-muted-foreground">
@@ -1908,10 +1824,10 @@ const SmallMissionDetail = () => {
         missionType={((mission as any).mission_type === "offre" ? "offre" : "besoin") as "besoin" | "offre"}
         authorFirstName={author?.first_name}
         submitting={submitting}
-        onSubmit={async (msg, templateKey) => {
+        onSubmit={async (msg) => {
           await handleRespond(msg);
           trackEvent("mission_response_submitted_from_modal", {
-            metadata: { mission_id: mission.id, has_template: !!templateKey },
+            metadata: { mission_id: mission.id },
           });
           setResponseModalOpen(false);
         }}
