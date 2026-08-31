@@ -117,6 +117,8 @@ const PRODUCT: ReadonlyArray<string> = [
   'helper-to-guard',
   'mission-nudge-no-response',
   'mission-nudge-feedback',
+  'mission-nudge-close',
+  'mission-nudge-feedback-helper',
   // Avis / parrainage
   'review-reminder',
   'referral-boost-monthly',
