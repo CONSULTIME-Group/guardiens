@@ -35,6 +35,7 @@ import { AlertCircle, ChevronLeft, CalendarIcon } from "lucide-react";
 import { isPhotoRequiredByRule } from "@/lib/missionPhotoRule";
 import { sanitizeUserTitle } from "@/lib/sanitizeTitle";
 import { stripEmojis } from "@/lib/stripEmojis";
+import { avatarImageUrl } from "@/lib/storageImage";
 
 import IdentityRecommendedHint from "@/components/missions/IdentityRecommendedHint";
 import { MISSION_CATEGORIES } from "@/lib/missionCategories";
@@ -744,7 +745,7 @@ const CreateSmallMission = () => {
                   {missionType === "offre" && user?.avatarUrl && (
                     <div className="flex items-center gap-3 rounded-xl border border-border bg-muted/30 p-3">
                       <img
-                        src={user.avatarUrl}
+                        src={avatarImageUrl(user.avatarUrl, 48)}
                         alt="Votre photo de profil"
                         className="h-12 w-12 rounded-full object-cover"
                       />
