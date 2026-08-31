@@ -9,7 +9,7 @@ import AnswerComposer from "@/components/community/AnswerComposer";
 import { useQuestionDetail } from "@/hooks/useQuestionDetail";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
-import { CATEGORY_LABEL } from "@/lib/communityCategories";
+import { questionCategoryLabel } from "@/lib/communityCategories";
 import { trackEvent } from "@/lib/analytics";
 import { toast } from "sonner";
 
@@ -114,7 +114,7 @@ const QuestionDetail = () => {
         <section className="max-w-3xl mx-auto px-4 sm:px-6 py-8">
           <div className="flex items-center gap-2 mb-3">
             <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-primary/10 text-primary">
-              {CATEGORY_LABEL[question.category]}
+              {questionCategoryLabel(question.category)}
             </span>
             {question.status === "resolved" && (
               <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700">

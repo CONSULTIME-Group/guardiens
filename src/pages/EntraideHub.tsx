@@ -28,6 +28,7 @@ import { useMissionDistance } from "@/hooks/useMissionDistance";
 import { trackEvent } from "@/lib/analytics";
 import MobileEntraideFeed from "@/components/community/MobileEntraideFeed";
 import { MISSION_CATEGORIES, MISSION_CATEGORY_LABEL } from "@/lib/missionCategories";
+import { questionCategoryToMissionCategory } from "@/lib/communityCategories";
 import { publicFirstName } from "@/lib/displayName";
 
 /**
@@ -46,12 +47,6 @@ type MissionStatus = "all" | "open" | "in_progress" | "completed";
 
 const PAGE_SIZE = 20;
 
-/** Les catégories de questions rejoignent les 4 catégories de missions. */
-const QUESTION_CAT_TO_MISSION: Record<string, string> = {
-  animaux: "animals",
-  jardin: "garden",
-  maison: "house",
-};
 
 interface MissionRow {
   id: string;
@@ -312,7 +307,7 @@ const EntraideHub = () => {
       (m) => category === "all" || m.category === category,
     );
     const countQuestions = baseQuestions.filter(
-      (q) => category === "all" || QUESTION_CAT_TO_MISSION[q.category as string] === category,
+      (q) => category === "all" || questionCategoryToMissionCategory(q.category) === category,
     );
     const demandes = countMissions.filter((m) => (m.mission_type ?? "besoin") !== "offre").length;
     const offres = countMissions.filter((m) => (m.mission_type ?? "besoin") === "offre").length;
@@ -336,7 +331,7 @@ const EntraideHub = () => {
     for (const c of MISSION_CATEGORIES) {
       const mCount = natMissions.filter((m) => m.category === c.key).length;
       const qCount = natQuestions.filter(
-        (q) => QUESTION_CAT_TO_MISSION[q.category as string] === c.key,
+        (q) => questionCategoryToMissionCategory(q.category) === c.key,
       ).length;
       counts[c.key] = mCount + qCount;
     }
@@ -347,7 +342,7 @@ const EntraideHub = () => {
     const items: FeedItem[] = [];
     if (nature === "all" || nature === "question") {
       for (const q of baseQuestions) {
-        if (category !== "all" && QUESTION_CAT_TO_MISSION[q.category as string] !== category) continue;
+        if (category !== "all" && questionCategoryToMissionCategory(q.category) !== category) continue;
         items.push({ kind: "question", date: q.created_at, q });
       }
     }

@@ -8,6 +8,7 @@ import { trackEvent } from "@/lib/analytics";
 import { publicFirstName } from "@/lib/displayName";
 import MissionCardCover from "@/components/missions/MissionCardCover";
 import { MISSION_CATEGORY_LABEL } from "@/lib/missionCategories";
+import { questionCategoryLabel } from "@/lib/communityCategories";
 
 /**
  * MobileEntraideFeed — fil unique de l'entraide sur mobile.
@@ -215,7 +216,10 @@ const MobileEntraideFeed = ({ missions, questions, loading, onPublish, proximity
                     className="block p-4 rounded-xl bg-card border border-border hover:border-primary/40 hover:shadow-sm transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
                     aria-label={`Voir la question : ${q.title}`}
                   >
-                    <div className="flex items-center gap-2 mb-2">
+                    <div className="flex items-center gap-1.5 flex-wrap mb-2">
+                      <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-primary/10 text-primary uppercase tracking-wide">
+                        {questionCategoryLabel(q.category)}
+                      </span>
                       <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-primary/10 text-primary uppercase tracking-wide">
                         Question
                       </span>

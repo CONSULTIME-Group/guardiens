@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { CATEGORY_LABEL } from "@/lib/communityCategories";
+import { questionCategoryLabel } from "@/lib/communityCategories";
 import type { CommunityQuestionRow } from "@/hooks/useCommunityQuestions";
 
 const formatRelative = (iso: string) => {
@@ -26,7 +26,7 @@ const QuestionCard = ({ q, showNatureBadge = false }: { q: CommunityQuestionRow;
           </span>
         )}
         <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-primary/10 text-primary">
-          {CATEGORY_LABEL[q.category]}
+          {questionCategoryLabel(q.category)}
         </span>
         {q.status === "resolved" && (
           <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700">
