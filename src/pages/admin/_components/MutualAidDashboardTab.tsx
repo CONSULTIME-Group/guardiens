@@ -9,6 +9,7 @@ import { toast } from "sonner";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { trackEvent } from "@/lib/analytics";
+import { missionCategoryLabel } from "@/lib/missionCategories";
 
 /**
  * Chantier 8 Pass 3 — Dashboard admin dédié à l'entraide.
@@ -268,7 +269,7 @@ const MutualAidDashboardTab = () => {
         <CardContent className="pt-6 space-y-4">
           <div className="flex items-center justify-between gap-3 flex-wrap">
             <div>
-              <h2 className="font-heading text-lg font-semibold">Vue d'ensemble Entraide</h2>
+              <h2 className="font-heading text-lg font-semibold">Pilotage entraide</h2>
               <p className="text-sm text-muted-foreground">Cycle de vie des missions, engagement des emails et missions dormantes.</p>
             </div>
             <div className="flex items-center gap-2">
@@ -395,7 +396,7 @@ const MutualAidDashboardTab = () => {
                   <TableRow key={m.id}>
                     <TableCell className="font-medium max-w-[24rem]"><span className="line-clamp-1">{m.title}</span></TableCell>
                     <TableCell>{m.city || "–"}</TableCell>
-                    <TableCell>{m.category}</TableCell>
+                    <TableCell>{missionCategoryLabel(m.category)}</TableCell>
                     <TableCell>{format(new Date(m.created_at), "d MMM yyyy", { locale: fr })}</TableCell>
                     <TableCell className="text-right">
                       <Button
@@ -448,7 +449,7 @@ const MutualAidDashboardTab = () => {
                   <TableRow key={m.id}>
                     <TableCell className="font-medium max-w-[24rem]"><span className="line-clamp-1">{m.title}</span></TableCell>
                     <TableCell>{m.city || "–"}</TableCell>
-                    <TableCell>{m.category}</TableCell>
+                    <TableCell>{missionCategoryLabel(m.category)}</TableCell>
                     <TableCell>{format(new Date(m.closed_at), "d MMM yyyy", { locale: fr })}</TableCell>
                     <TableCell><code className="text-[11px] px-1.5 py-0.5 rounded bg-muted">{m.close_reason}</code></TableCell>
                   </TableRow>

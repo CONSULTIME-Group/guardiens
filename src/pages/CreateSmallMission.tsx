@@ -32,6 +32,7 @@ import {
   writeSitPrefill,
 } from "@/lib/missionContentGuards";
 import { AlertCircle, ChevronLeft, CalendarIcon } from "lucide-react";
+import { isPhotoRequiredByRule } from "@/lib/missionPhotoRule";
 import { sanitizeUserTitle } from "@/lib/sanitizeTitle";
 import { stripEmojis } from "@/lib/stripEmojis";
 
@@ -194,8 +195,7 @@ const CreateSmallMission = () => {
    * Photo requise pour toutes les offres, et pour les catégories qui ont un
    * objet à montrer. Facultative là où il n'y a souvent rien à photographier.
    */
-  const photoRequiredByRule =
-    missionType === "offre" || ["animals", "garden", "house"].includes(category);
+  const photoRequiredByRule = isPhotoRequiredByRule(missionType, category);
   const photoRequired = photoRequiredByRule && !photoWaived;
 
   const step1Valid =
@@ -500,8 +500,12 @@ const CreateSmallMission = () => {
             {step === 1 && (
               <>
                 <div className="rounded-xl p-4 border border-primary/20 bg-primary/5 space-y-1">
+                  {/* Le titre suit le mode choisi : une personne qui propose son
+                      aide ne doit pas lire un titre qui parle de demander. */}
                   <h2 className="font-heading font-bold text-foreground text-base">
-                    {tp("encouragement_title")}
+                    {missionType === "offre"
+                      ? tp("encouragement_title_offer")
+                      : tp("encouragement_title_need")}
                   </h2>
                   <p className="text-sm text-muted-foreground">
                     {missionType === "offre" ? tp("encouragement_offer") : tp("encouragement_need")}

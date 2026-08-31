@@ -1432,12 +1432,13 @@
     "week": "Semaine"
   },
   "create_mission_page": {
-    "meta_title_offer": "J'ai du temps à offrir | Guardiens",
+    "meta_title_offer": "Je propose un coup de main | Guardiens",
     "meta_title_need": "J'ose demander un coup de main | Guardiens",
     "meta_description": "Publiez une demande ou une offre d'entraide. Coups de main entre gens du coin, sans argent qui circule.",
     "back": "Retour",
-    "encouragement_title": "Vous hésitez ? C'est normal. Personne ne vous jugera.",
-    "encouragement_offer": "Décrivez ce que vous savez faire, même modestement. Quelqu'un du coin a peut-être besoin exactement de ça.",
+    "encouragement_title_need": "J'ose demander un coup de main",
+    "encouragement_title_offer": "Je propose un coup de main",
+    "encouragement_offer": "Décrivez ce que vous savez faire, même modestement, et le temps que vous pouvez donner. Quelqu'un du coin a peut-être besoin exactement de ça.",
     "encouragement_need": "Décrivez votre besoin, même petit. Vous ne dérangez personne, vous offrez une occasion de rendre service.",
     "note_label": "À noter :",
     "note_text": "les petites missions sont des coups de main ponctuels, sans nuitée chez la personne.",

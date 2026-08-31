@@ -217,8 +217,16 @@ const AdminSmallMissions = () => {
 
   const paginated = useMemo(() => filtered.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE), [filtered, page]);
 
+  // Une publication annulée, masquée ou terminée n'est plus visible de
+  // personne : elle ne doit plus allumer l'alerte, sinon le bandeau reste
+  // allumé en permanence et on cesse de le regarder.
   const suspectMissions = useMemo(
-    () => filtered.filter(m => moneyPattern.test(m.description || "") || moneyPattern.test(m.exchange_offer || "")),
+    () =>
+      filtered.filter(
+        (m) =>
+          (m.status === "open" || m.status === "in_progress") &&
+          (moneyPattern.test(m.description || "") || moneyPattern.test(m.exchange_offer || "")),
+      ),
     [filtered],
   );
 
@@ -344,7 +352,7 @@ const AdminSmallMissions = () => {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between flex-wrap gap-3">
-        <h1 className="font-heading text-2xl sm:text-3xl font-bold tracking-tight">Petites missions</h1>
+        <h1 className="font-heading text-2xl sm:text-3xl font-bold tracking-tight">Entraide</h1>
         <Button variant="outline" size="sm" onClick={exportCsv}>
           <Download className="h-4 w-4 mr-2" /> Exporter CSV
         </Button>
@@ -535,6 +543,12 @@ const AdminSmallMissions = () => {
           </TableBody>
         </Table>
       </div>
+
+      {/* Clé de lecture de la colonne Notifiés, sinon le zéro se lit comme un bug. */}
+      <p className="text-xs text-muted-foreground">
+        Lecture de la colonne Notifiés : un zéro signifie que la publication est antérieure à la mise
+        en service de la file de notification, le 9 juillet 2026. Ce n'est pas un échec de diffusion.
+      </p>
 
       {/* Pagination */}
       <div className="flex items-center justify-between gap-3">
