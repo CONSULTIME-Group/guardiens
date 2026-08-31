@@ -317,7 +317,7 @@ const ConversationHeader = ({
                 {conv.sit?.city && `, ${capitalize(conv.sit.city)}`}
               </p>
             )}
-            {/* Présence inline sous le nom — RGPD : show_last_seen géré côté appelant */}
+            {/* Présence inline sous le nom, RGPD : show_last_seen géré côté appelant */}
             {conv.other_user?.last_seen_at && conv.other_user?.show_last_seen !== false && (
               <PresenceBadge
                 lastSeenAt={conv.other_user.last_seen_at}

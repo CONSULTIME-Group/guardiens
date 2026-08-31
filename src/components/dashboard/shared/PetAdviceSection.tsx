@@ -1,5 +1,5 @@
 /**
- * PetAdviceSection (lot 4, point 3 corrigé) — Les conseils pour Rex et Resa.
+ * PetAdviceSection (lot 4, point 3 corrigé), Les conseils pour Rex et Resa.
  *
  * Remplace l'ancienne grille d'articles génériques du bas de dashboard par un
  * bloc ancré sur les compagnons réellement déclarés par la personne.

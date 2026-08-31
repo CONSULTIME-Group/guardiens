@@ -305,7 +305,7 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, prope
       }
 
       // Notification gardien : dédup PAR GARDE via le champ link qui inclut le sit_id.
-      // Les emails restent hors du bloc conditionnel — leur idempotencyKey suffit à
+      // Les emails restent hors du bloc conditionnel, leur idempotencyKey suffit à
       // dédupliquer côté serveur, même si la notification a déjà été insérée avant.
       const notifLink = `/mes-gardes?sit=${sitId}`;
       const { data: existingNotif } = await supabase
@@ -350,7 +350,7 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, prope
         });
       }
 
-      // Emails toujours envoyés — idempotencyKey stable (app.id / sit.id) dédup côté serveur.
+      // Emails toujours envoyés, idempotencyKey stable (app.id / sit.id) dédup côté serveur.
       sendTransactionalEmail({
         templateName: "application-accepted",
         recipientUserId: sitterId,

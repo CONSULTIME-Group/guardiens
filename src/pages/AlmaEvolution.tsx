@@ -1,5 +1,5 @@
 /**
- * Page /alma — « Alma grandit avec vous ».
+ * Page /alma, « Alma grandit avec vous ».
  * Montre les 4 stades d'évolution dans l'ordre, met en avant le stade
  * actuel et propose le prochain jalon avec le lien vers l'action.
  */

@@ -1,5 +1,5 @@
 /**
- * Alma Pass 1 — Chantier 3 : bulle motivation sitter.
+ * Alma Pass 1, Chantier 3 : bulle motivation sitter.
  * Apparaît quand motivation < 50 caractères et propose 3 brouillons via l'edge
  * function existante `generate-bio-drafts` (le prompt system persona reste côté serveur).
  * Tutoiement (audience sitter).

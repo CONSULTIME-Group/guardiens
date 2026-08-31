@@ -1,5 +1,5 @@
 /**
- * Rail droit — teaser d'affinité pour visiteur NON connecté.
+ * Rail droit, teaser d'affinité pour visiteur NON connecté.
  * Ring flouté (dégradé primary → founder/or), copie invitant à s'inscrire,
  * lien /inscription avec redirect encodé. Pour visiteurs connectés, on n'utilise
  * PAS ce composant : on rend directement OwnerToSitterAffinity / AffinitySection.

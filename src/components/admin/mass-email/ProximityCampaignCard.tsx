@@ -1,5 +1,5 @@
 /**
- * ProximityCampaignCard — envoi ciblé d'une annonce d'entraide de proximité.
+ * ProximityCampaignCard, envoi ciblé d'une annonce d'entraide de proximité.
  *
  * Flux : saisie mission_id + rayon, "Prévisualiser" (compte + liste), puis clic
  * explicite "Envoyer" pour déclencher l'edge function send-mass-email-proximity.

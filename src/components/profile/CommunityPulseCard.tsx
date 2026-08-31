@@ -1,5 +1,5 @@
 /**
- * Rail droit — « Le pouls de la communauté ».
+ * Rail droit, « Le pouls de la communauté ».
  * Seul bloc sombre du profil (dégradé pin profond vers pin). Max 2 chiffres,
  * uniquement données réelles. Si aucun chiffre → composant retourne null.
  * Si aucune donnée locale mais chiffres globaux dispos, titre élargi.

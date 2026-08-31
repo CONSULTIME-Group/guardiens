@@ -181,11 +181,11 @@ const GA4DiagnosticCard = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           <div className="rounded-md border bg-muted/30 px-3 py-2">
             <p className="text-xs text-muted-foreground">Measurement ID</p>
-            <code className="text-sm font-mono">{data?.measurement_id || "–"}</code>
+            <code className="text-sm font-mono">{data?.measurement_id || "·"}</code>
           </div>
           <div className="rounded-md border bg-muted/30 px-3 py-2">
             <p className="text-xs text-muted-foreground">Property ID</p>
-            <code className="text-sm font-mono">{data?.property_id || "–"}</code>
+            <code className="text-sm font-mono">{data?.property_id || "·"}</code>
           </div>
         </div>
 
@@ -215,7 +215,7 @@ const GA4DiagnosticCard = () => {
                 warn={!data?.realtime_error && (data?.realtime_active_users ?? 0) === 0}
               />
               <span className="font-medium tabular-nums">
-                {data?.realtime_error ? "Erreur" : (data?.realtime_active_users ?? "–")}
+                {data?.realtime_error ? "Erreur" : (data?.realtime_active_users ?? "·")}
               </span>
             </span>
           </div>

@@ -11,7 +11,7 @@ interface Props {
 }
 
 /**
- * Banner géoloc EntraideHub — s'affiche 1 fois, dismiss persistant (localStorage).
+ * Banner géoloc EntraideHub, s'affiche 1 fois, dismiss persistant (localStorage).
  * Ne s'affiche pas si l'utilisateur a déjà des coordonnées.
  */
 const EntraideGeolocBanner = ({ hasCoords, onUseMyLocation }: Props) => {

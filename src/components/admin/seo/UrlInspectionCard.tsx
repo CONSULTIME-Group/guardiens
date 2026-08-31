@@ -93,7 +93,7 @@ export default function UrlInspectionCard() {
         {idx && (
           <div className="space-y-2 text-sm">
             <div className="flex flex-wrap gap-2">
-              <Badge variant={verdictColor(idx.verdict) as any}>Verdict: {idx.verdict ?? "–"}</Badge>
+              <Badge variant={verdictColor(idx.verdict) as any}>Verdict: {idx.verdict ?? "·"}</Badge>
               {idx.coverageState && <Badge variant="outline">{idx.coverageState}</Badge>}
               {idx.robotsTxtState && <Badge variant="outline">robots: {idx.robotsTxtState}</Badge>}
               {idx.indexingState && <Badge variant="outline">{idx.indexingState}</Badge>}

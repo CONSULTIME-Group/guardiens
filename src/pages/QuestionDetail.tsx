@@ -41,7 +41,7 @@ const QuestionDetail = () => {
       <div className="min-h-screen bg-background flex items-center justify-center px-4">
         <div className="text-center">
           <p className="font-heading text-lg mb-4">Question introuvable.</p>
-          <Link to="/questions"><Button variant="outline">Voir toutes les questions</Button></Link>
+          <Link to="/petites-missions?tab=questions"><Button variant="outline">Voir toutes les questions</Button></Link>
         </div>
       </div>
     );
@@ -106,7 +106,7 @@ const QuestionDetail = () => {
       <div className="min-h-screen bg-background">
         <PageBreadcrumb
           items={[
-            { label: "Questions & conseils", href: "/questions" },
+            { label: "Questions & conseils", href: "/petites-missions?tab=questions" },
             { label: question.title.slice(0, 40) + (question.title.length > 40 ? "…" : "") },
           ]}
         />

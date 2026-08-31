@@ -1,5 +1,5 @@
 /**
- * SitterOpeningCard — vague 8, la STAR de la branche nouveau gardien.
+ * SitterOpeningCard, vague 8, la STAR de la branche nouveau gardien.
  *
  * Grand nudge d'ouverture, seul bouton primaire de l'écran. Remplace
  * ChecklistBlock et le bandeau "Code postal manquant" dans cette branche.

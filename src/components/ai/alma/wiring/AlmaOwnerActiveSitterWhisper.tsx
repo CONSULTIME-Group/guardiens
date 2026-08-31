@@ -1,5 +1,5 @@
 /**
- * Alma — Trigger owner_active_sitter_context (P1).
+ * Alma, Trigger owner_active_sitter_context (P1).
  *
  * Monté sur PublicSitterProfile côté owner authentifié. Charge les vraies
  * stats de gardes du gardien via RPC `get_sitter_stay_stats` (source unique :

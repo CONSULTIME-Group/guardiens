@@ -396,7 +396,7 @@ export default function MyProProfile() {
               </div>
             </div>
 
-            {/* KPI activité — visibles dès la publication */}
+            {/* KPI activité, visibles dès la publication */}
             {profile.status === "approved" && (
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
                 <div className="bg-card rounded-xl border border-border p-4">
@@ -408,7 +408,7 @@ export default function MyProProfile() {
                 <div className="bg-card rounded-xl border border-border p-4">
                   <p className="text-[10px] uppercase tracking-widest text-muted-foreground font-semibold">Note moyenne</p>
                   <p className="text-2xl font-display font-bold mt-1 tabular-nums text-foreground">
-                    {profile.rating_avg ? Number(profile.rating_avg).toFixed(1) : "–"}
+                    {profile.rating_avg ? Number(profile.rating_avg).toFixed(1) : "·"}
                   </p>
                 </div>
                 <div className="bg-card rounded-xl border border-border p-4 col-span-2 sm:col-span-1">
@@ -432,7 +432,7 @@ export default function MyProProfile() {
 
             </div>
 
-            {/* Cross-promo gardien — éditorial sage */}
+            {/* Cross-promo gardien, éditorial sage */}
             <div className="rounded-xl bg-primary text-primary-foreground p-6 sm:p-8 flex flex-col md:flex-row items-start md:items-center gap-6">
               <div className="flex-1 space-y-3 min-w-0">
                 <h3 className="font-heading text-xl">Vous êtes aussi gardien d'animaux ?</h3>
@@ -469,7 +469,7 @@ export default function MyProProfile() {
                   <CardContent className="p-5">
                     <p className="text-xs uppercase tracking-wider text-muted-foreground">Note moyenne</p>
                     <p className="text-3xl font-display font-bold mt-1 tabular-nums">
-                      {profile.rating_avg ? Number(profile.rating_avg).toFixed(1) : "–"}
+                      {profile.rating_avg ? Number(profile.rating_avg).toFixed(1) : "·"}
                     </p>
                     <p className="text-xs text-muted-foreground mt-1">
                       {profile.rating_count ?? 0} avis publié{(profile.rating_count ?? 0) > 1 ? "s" : ""}

@@ -1,5 +1,5 @@
 /**
- * Alma Pass 1 — Chantier 7
+ * Alma Pass 1, Chantier 7
  * Bulle brouillon d'avis dans LeaveReview.
  * Se déclenche quand : au moins 1 sub-rating rempli + commentaire < 50 chars.
  * Appelle `draft-review` (edge fn) qui utilise 1 anecdote factuelle du fil

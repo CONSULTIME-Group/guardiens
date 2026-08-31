@@ -50,7 +50,7 @@ export default function BingKpiRow({ period = 28 }: Props) {
       <MetricCard
         title="Position moy. Bing"
         icon={<Globe className="h-4 w-4 text-primary" />}
-        value={s.current.position > 0 ? s.current.position.toFixed(1) : "–"}
+        value={s.current.position > 0 ? s.current.position.toFixed(1) : "·"}
         subtitle="Plus bas = mieux · Bing"
         change={s.previous.position > 0 ? pctChange(s.current.position, s.previous.position) : undefined}
         invertChange

@@ -1,5 +1,5 @@
 /**
- * <RepublishAlmaDialog /> — Alma propose 2 modes pour republier une annonce archivée.
+ * <RepublishAlmaDialog />, Alma propose 2 modes pour republier une annonce archivée.
  *
  * Mode "copy"  : redirige vers /sits/create?from={sitId}&mode=copy → pré-remplit tel quel.
  * Mode "adapt" : redirige vers /sits/create?from={sitId}&mode=adapt&prompt={text} → Alma

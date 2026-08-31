@@ -1,5 +1,5 @@
 /**
- * RailReadingsCard — bloc « À lire » du rail droit (refonte rail,
+ * RailReadingsCard, bloc « À lire » du rail droit (refonte rail,
  * août 2026). Trois liens maximum, titre court et une ligne de contexte.
  * Retourne null si aucune source n'est disponible : jamais de remplissage.
  */

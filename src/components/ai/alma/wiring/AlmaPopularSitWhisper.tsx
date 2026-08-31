@@ -1,5 +1,5 @@
 /**
- * Alma — Trigger sitter_popular_sit_context (P1).
+ * Alma, Trigger sitter_popular_sit_context (P1).
  *
  * Monté sur SitterSitView (fiche annonce côté gardien authentifié). Charge
  * les vraies vues sur 7 jours via RPC `get_sit_view_count_week` (seulement

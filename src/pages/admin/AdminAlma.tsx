@@ -63,7 +63,7 @@ const RANGE_LABEL: Record<Range, string> = {
 
 const fmtPct = (v: number) => `${(v * 100).toFixed(1)} %`;
 const fmtDate = (iso: string | null) =>
-  iso ? format(new Date(iso), "d MMM yyyy HH:mm", { locale: fr }) : "–";
+  iso ? format(new Date(iso), "d MMM yyyy HH:mm", { locale: fr }) : "·";
 
 /** Pilote l'adoption et l'impact d'Alma (bulles + whispers). */
 export default function AdminAlma() {

@@ -29,7 +29,7 @@ const SearchPage = () => {
   // Anonymous visitors and sitter role: show sitter search (browse listings).
   const showSitterView = !user || activeRole === "sitter";
 
-  // Pass 5 — compagnon culturel : fait ambiance sur la recherche.
+  // Pass 5, compagnon culturel : fait ambiance sur la recherche.
   useAlmaCulturalFact({ surface: "search", context: { role: activeRole } });
 
 

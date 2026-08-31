@@ -108,7 +108,7 @@ const AdminLongTailArticles = () => {
         <CardContent className="space-y-3">
           <div className="rounded-lg border border-destructive bg-destructive/10 p-4 space-y-2">
             <h2 className="text-sm font-semibold text-destructive">
-              Module verrouillé — décision produit du 11/07/2026
+              Module verrouillé, décision produit du 11/07/2026
             </h2>
             <p className="text-sm text-destructive/90">
               Le pattern ville × race contredit la stratégie SEO validée (fiches races = scope national, pages villes = hubs de proximité uniquement). La génération de 150 combinaisons avec 7 villes hors hubs (Paris, Marseille, Toulouse, Bordeaux, Nantes, Lille, Strasbourg) créerait des pages à faible E-E-A-T et risque de pénalité Helpful Content Update. Le module reste visible pour audit mais n'exécute plus rien tant que la logique n'est pas re-arbitrée.

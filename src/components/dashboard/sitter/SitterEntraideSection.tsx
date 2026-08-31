@@ -1,5 +1,5 @@
 /**
- * SitterEntraideSection (vague 20) — L'entraide, bidimensionnelle.
+ * SitterEntraideSection (vague 20), L'entraide, bidimensionnelle.
  *
  * Composant partagé entre dashboards gardien ET propriétaire. Chacun peut
  * DONNER un coup de main (première mission proche) et EN DEMANDER (sa

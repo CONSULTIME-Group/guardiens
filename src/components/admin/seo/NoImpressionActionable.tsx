@@ -96,7 +96,7 @@ export default function NoImpressionActionable({ publishedArticles, topPages }: 
                 /actualites/{a.slug}
               </a>
               <span className="text-xs text-muted-foreground shrink-0">
-                {a.published_at ? new Date(a.published_at).toLocaleDateString("fr-FR") : "–"}
+                {a.published_at ? new Date(a.published_at).toLocaleDateString("fr-FR") : "·"}
               </span>
               <Button
                 size="sm"

@@ -1,5 +1,5 @@
 /**
- * Alma Pass 2 — Chantier 1
+ * Alma Pass 2, Chantier 1
  * Bulle dédiée au guide maison génératif : propose à l'owner de générer 4 trames
  * (WiFi, voisinage, vétérinaire, urgences). Au clic, appelle `generate-house-guide`
  * et remonte les 4 trames au parent via `onDrafts`, qui les pré-remplit dans les

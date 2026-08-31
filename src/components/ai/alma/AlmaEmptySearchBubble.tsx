@@ -1,5 +1,5 @@
 /**
- * <AlmaEmptySearchBubble /> — Alma Pass 2 Tour 3.
+ * <AlmaEmptySearchBubble />, Alma Pass 2 Tour 3.
  *
  * Bulle d'aide affichée en tête de l'empty state de SearchSitter quand
  * l'utilisateur a au moins un filtre actif OU un rayon restrictif (<100 km).

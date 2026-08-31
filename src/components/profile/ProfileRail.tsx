@@ -1,5 +1,5 @@
 /**
- * ProfileRail — colonne droite sticky desktop du profil public gardien (vague 37).
+ * ProfileRail, colonne droite sticky desktop du profil public gardien (vague 37).
  *
  * Ne rend RIEN si aucun enfant. Sur mobile, la colonne est masquée : le rail se
  * déplie dans le flux via une variante non-sticky (`inline` prop). Le rail

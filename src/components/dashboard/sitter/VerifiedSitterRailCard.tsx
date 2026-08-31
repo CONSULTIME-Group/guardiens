@@ -1,5 +1,5 @@
 /**
- * VerifiedSitterRailCard — carte rail « gardien vérifié » (vague 18).
+ * VerifiedSitterRailCard, carte rail « gardien vérifié » (vague 18).
  *
  * Registre : chaleureux, jamais paywall plaqué. Le doré founder porte la
  * confiance (écusson, vérification), distinct du gold du ring d'affinité.

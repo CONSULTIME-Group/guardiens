@@ -12,11 +12,11 @@ type Variant = "sitters" | "listings";
 const TITLES: Record<Variant, (count?: number) => string> = {
   sitters: (c) =>
     `Trouver un gardien d'animaux à domicile en France${
-      typeof c === "number" && c > 0 ? ` — ${c} gardien${c > 1 ? "s" : ""}` : ""
+      typeof c === "number" && c > 0 ? `, ${c} gardien${c > 1 ? "s" : ""}` : ""
     }`,
   listings: (c) =>
     `Annonces de garde d'animaux à domicile en France${
-      typeof c === "number" && c > 0 ? ` — ${c} annonce${c > 1 ? "s" : ""}` : ""
+      typeof c === "number" && c > 0 ? `, ${c} annonce${c > 1 ? "s" : ""}` : ""
     }`,
 };
 

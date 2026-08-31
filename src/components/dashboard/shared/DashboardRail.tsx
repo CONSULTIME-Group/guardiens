@@ -1,5 +1,5 @@
 /**
- * DashboardRail — rail droit des deux dashboards (refonte rail, août 2026).
+ * DashboardRail, rail droit des deux dashboards (refonte rail, août 2026).
  *
  * Règle d'or : JAMAIS de défilement interne au rail. Si le contenu tient
  * dans la hauteur de la fenêtre, le rail reste collant ; sinon il défile

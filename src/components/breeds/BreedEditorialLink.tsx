@@ -1,5 +1,5 @@
 /**
- * BreedEditorialLink — lien contextuel vers la fiche éditoriale /races/:slug.
+ * BreedEditorialLink, lien contextuel vers la fiche éditoriale /races/:slug.
  *
  * La fiche n'existe que si `breed_profiles` contient la race. Le
  * rapprochement entre le nom déclaré (saisie libre) et le nom officiel de la

@@ -1,5 +1,5 @@
 /**
- * /conseils — Hub public "Les conseils d'Alma".
+ * /conseils, Hub public "Les conseils d'Alma".
  *
  * Alimenté par la vue `public.alma_public_tips` (filtre strict côté SQL des
  * types de contenu diffusables). Les autres types (usage_nudge, social_stat,

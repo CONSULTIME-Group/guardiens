@@ -1,5 +1,5 @@
 /**
- * SitterMissingOpportunities — bloc « occasions manquées » du dashboard
+ * SitterMissingOpportunities, bloc « occasions manquées » du dashboard
  * gardien. Nomme au maximum deux questions sans réponse, formulées en
  * annonces réelles recalculées à l'affichage (« 8 des 11 annonces en ligne
  * demandent un gardien véhiculé, vous n'avez pas répondu. »).

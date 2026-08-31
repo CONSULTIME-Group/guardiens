@@ -78,7 +78,7 @@ const BreedPage = () => {
       });
   }, [slug]);
 
-  // Pass 5 — compagnon culturel : fait race matché sur species + breed slug.
+  // Pass 5, compagnon culturel : fait race matché sur species + breed slug.
   useAlmaCulturalFact({
     surface: "race_page",
     enabled: !!breed,

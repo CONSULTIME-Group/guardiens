@@ -107,7 +107,7 @@ const AdminReports = () => {
 
   const currentReport = reports.find(r => r.id === actionModal.reportId);
   const currentTargetLabel = currentReport
-    ? `${targetTypeLabels[currentReport.target_type] || currentReport.target_type} — ${currentReport.target_id}`
+    ? `${targetTypeLabels[currentReport.target_type] || currentReport.target_type}, ${currentReport.target_id}`
     : "";
 
   const executeAction = async () => {

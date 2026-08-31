@@ -1,5 +1,5 @@
 /**
- * OwnerStarSection (vague 10) — LA star contextuelle du dashboard propriétaire.
+ * OwnerStarSection (vague 10), LA star contextuelle du dashboard propriétaire.
  *
  * Une seule carte vedette à la fois, choisie par priorité :
  *   a) garde en cours       -> "Suivre la garde"

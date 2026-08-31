@@ -1,5 +1,5 @@
 /**
- * NextStepRailCard — bloc « prochain pas » du rail droit (refonte rail,
+ * NextStepRailCard, bloc « prochain pas » du rail droit (refonte rail,
  * août 2026). Charte : fond terracotta doux, titre Playfair, barre de
  * progression quand le contenu porte un score de complétion, une phrase
  * douce, un bouton secondaire. Jamais de rouge, jamais de reproche.

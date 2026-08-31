@@ -7,7 +7,7 @@ import { useAlmaFrequency } from "@/hooks/useAlmaFrequency";
 import { trackEvent } from "@/lib/analytics";
 
 /**
- * EmailDigestCard — carte unique "Vos rendez-vous email" pour le dashboard
+ * EmailDigestCard, carte unique "Vos rendez-vous email" pour le dashboard
  * gardien. Fusionne l'ancien NextDigestCard (digest garde quotidien) et
  * NextMissionDigestCard (digest entraide hebdo). Un seul fetch, entraide en
  * tête.

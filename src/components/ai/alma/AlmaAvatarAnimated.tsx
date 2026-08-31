@@ -1,5 +1,5 @@
 /**
- * <AlmaAvatarAnimated /> — Alma, bichon frisé qui évolue physiquement.
+ * <AlmaAvatarAnimated />, Alma, bichon frisé qui évolue physiquement.
  *
  * Contrairement à la version précédente (une seule silhouette dont les
  * accessoires changeaient), chaque stade rend désormais une SILHOUETTE
@@ -43,7 +43,7 @@ export const ALMA_STAGE_ASSETS: Record<AlmaStage, string | null> = {
 };
 
 /**
- * Facteur de croissance d'Alma par stade — utilisé par les surfaces qui
+ * Facteur de croissance d'Alma par stade, utilisé par les surfaces qui
  * veulent visualiser la trajectoire (page /alma). Le SVG a déjà une
  * silhouette qui grandit intrinsèquement ; ce facteur augmente en plus
  * la taille rendue pour appuyer l'effet.
@@ -110,7 +110,7 @@ const GOLD = "#E4A62A";
 const GOLD_DARK = "#B9821A";
 
 /* ------------------------------------------------------------------ */
-/* Feuille de style — mêmes classes que la version précédente pour     */
+/* Feuille de style, mêmes classes que la version précédente pour     */
 /* préserver les animations attachées aux groupes.                     */
 /* ------------------------------------------------------------------ */
 const STYLE = `
@@ -234,7 +234,7 @@ function ellipseCurls(
 }
 
 /* ------------------------------------------------------------------ */
-/* Bloc visage réutilisable — yeux, truffe, bouche, langue.            */
+/* Bloc visage réutilisable, yeux, truffe, bouche, langue.            */
 /* ------------------------------------------------------------------ */
 type FaceProps = {
   cx: number;
@@ -314,7 +314,7 @@ function AlmaFace(f: FaceProps) {
 }
 
 /* ------------------------------------------------------------------ */
-/* Oreilles tombantes, frisées, contour crème — dimension paramétrable */
+/* Oreilles tombantes, frisées, contour crème, dimension paramétrable */
 /* ------------------------------------------------------------------ */
 function DroopyEar({
   side,

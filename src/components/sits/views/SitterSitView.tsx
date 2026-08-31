@@ -390,7 +390,7 @@ const SitterSitView = ({
         );
       })()}
 
-      {/* Rencontre — grammaire du ring partagé (vague 21), après l'action */}
+      {/* Rencontre, grammaire du ring partagé (vague 21), après l'action */}
       <SitterAffinitySection
         sitterProfile={sitterProfile}
         ownerProfile={ownerProfile}
@@ -399,7 +399,7 @@ const SitterSitView = ({
         targetId={sit.id}
       />
 
-      {/* Whispers Alma — surfacés uniquement si données réelles */}
+      {/* Whispers Alma, surfacés uniquement si données réelles */}
       {activeRole === "sitter" && sit.status === "published" && !!currentUserId && (
         <>
           <AlmaPopularSitWhisper
@@ -438,7 +438,7 @@ const SitterSitView = ({
         ownerProfile={ownerProfile}
       />
 
-      {/* Avis sur l'hôte — trio d'en-tête signature (vague 21) */}
+      {/* Avis sur l'hôte, trio d'en-tête signature (vague 21) */}
       <section className="mt-10">
         <header className="mb-[22px]">
           <div className="flex items-center gap-[8px]">
@@ -541,7 +541,7 @@ const SitterSitView = ({
         </div>
       )}
 
-      {/* Annulation adoucie (vague 21) — carte pointillée, seul rouge sur la page */}
+      {/* Annulation adoucie (vague 21), carte pointillée, seul rouge sur la page */}
       {(() => {
         const today = new Date();
         today.setHours(0, 0, 0, 0);

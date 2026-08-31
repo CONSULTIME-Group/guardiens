@@ -51,7 +51,7 @@ function MetricLine({ name, code, bucket }: { name: string; code: keyof typeof T
     return (
       <div className="flex items-center justify-between text-xs py-1 border-b border-border/40">
         <span className="font-medium">{name}</span>
-        <span className="text-muted-foreground">–</span>
+        <span className="text-muted-foreground">·</span>
       </div>
     );
   }

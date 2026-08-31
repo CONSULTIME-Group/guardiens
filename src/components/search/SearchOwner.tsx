@@ -1028,7 +1028,7 @@ const SearchOwner = () => {
       jsonLd={seoJsonLd}
     />
     <div className="animate-fade-in">
-      {/* Hero signature vague 42 — eyebrow terra + H1 Playfair + lede contextuel */}
+      {/* Hero signature vague 42, eyebrow terra + H1 Playfair + lede contextuel */}
       <div className="px-6 pt-6 pb-3 md:pt-10 md:pb-4 space-y-3">
         <p className="inline-flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.16em] text-terra">
           <span aria-hidden className="inline-block h-[1.5px] w-5 bg-terra" />

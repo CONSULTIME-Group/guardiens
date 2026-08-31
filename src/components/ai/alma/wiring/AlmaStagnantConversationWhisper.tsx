@@ -1,5 +1,5 @@
 /**
- * Alma Pass 4 — Trigger 10 (P0 conversation stagnante).
+ * Alma Pass 4, Trigger 10 (P0 conversation stagnante).
  *
  * Composant invisible monté dans Messages. Détecte une conversation active
  * remplissant les 3 conditions :

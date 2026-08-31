@@ -1,5 +1,5 @@
 /**
- * SitterTeaserCard — vague 8, émotion en aperçu pour la branche nouveau
+ * SitterTeaserCard, vague 8, émotion en aperçu pour la branche nouveau
  * gardien. Remplace SitterFirstNBA et NoNearbySitsEmptyState dans cette
  * branche uniquement. CTA secondaire, jamais primaire.
  */

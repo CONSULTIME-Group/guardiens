@@ -1,5 +1,5 @@
 /**
- * <WelcomeBackDigest /> — Alma résume l'activité depuis la dernière visite.
+ * <WelcomeBackDigest />, Alma résume l'activité depuis la dernière visite.
  *
  * 8 variantes déterministes selon (audience owner|sitter) × (signaux) :
  *   - owner_first_visit / sitter_first_visit  : première visite, message d'accueil neutre

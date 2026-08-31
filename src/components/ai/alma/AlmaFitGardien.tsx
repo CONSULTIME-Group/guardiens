@@ -1,5 +1,5 @@
 /**
- * Alma Pass 2 — Chantier 2
+ * Alma Pass 2, Chantier 2
  * Bulle "fit gardien" affichée en tête de PublicSitterProfile pour un owner
  * connecté qui possède au moins une annonce publiée. Explique en langage naturel
  * pourquoi ce gardien correspond à son annonce, avec bonus reciprocity si le

@@ -2,7 +2,7 @@ import { useRef, useState } from "react";
 import { avatarImageUrl } from "@/lib/storageImage";
 
 /**
- * OwnerFamilySection (vague 11) — VOTRE FAMILLE.
+ * OwnerFamilySection (vague 11), VOTRE FAMILLE.
  *
  * Tuiles à hauteur égale, dernière tuile pointillée pour ajouter un compagnon.
  * Aucun EmptyCard système : si aucune famille, une seule tuile pointillée.

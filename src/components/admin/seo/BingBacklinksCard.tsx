@@ -39,7 +39,7 @@ export default function BingBacklinksCard() {
                 rel="noreferrer noopener"
                 className="truncate font-mono hover:underline text-foreground"
               >
-                {(r.Url ?? "–").replace(/^https?:\/\//, "")}
+                {(r.Url ?? "·").replace(/^https?:\/\//, "")}
               </a>
               <span className="font-mono shrink-0 text-muted-foreground">
                 {(r.Count ?? 0).toLocaleString()} liens

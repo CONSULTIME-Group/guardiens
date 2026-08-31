@@ -434,7 +434,7 @@ const AdminListings = () => {
     }
   };
 
-  // Totaux d'en-tête — cohérents avec les annonces affichées (filtered)
+  // Totaux d'en-tête, cohérents avec les annonces affichées (filtered)
   const totalViews = filtered.reduce((a, l) => a + (stats[l.id]?.views || 0), 0);
   const totalUniques = filtered.reduce((a, l) => a + (stats[l.id]?.uniqueViews || 0), 0);
   const totalMsg = filtered.reduce((a, l) => a + (stats[l.id]?.messages || 0), 0);
@@ -484,7 +484,7 @@ const AdminListings = () => {
             <CardContent className="p-4">
               <p className="text-xs text-muted-foreground">{k.label}</p>
               <p className="text-2xl font-bold text-foreground mt-1">
-                {k.value === undefined ? "–" : k.value.toLocaleString("fr-FR")}
+                {k.value === undefined ? "·" : k.value.toLocaleString("fr-FR")}
               </p>
             </CardContent>
           </Card>

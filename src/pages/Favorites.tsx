@@ -43,7 +43,7 @@ const Favorites = () => {
   const { user, activeRole } = useAuth();
   const { data: favorites, isLoading: isLoadingFavorites } = useFavorites();
 
-  // Alma étape 1 — compagnon culturel + usage_nudge sur la page favoris.
+  // Alma étape 1, compagnon culturel + usage_nudge sur la page favoris.
   useAlmaCulturalFact({ surface: "favorites", context: { role: activeRole } });
   useAlmaUsageNudge({
     surface: "favorites",

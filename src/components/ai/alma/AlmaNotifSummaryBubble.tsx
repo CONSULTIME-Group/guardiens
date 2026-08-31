@@ -1,5 +1,5 @@
 /**
- * <AlmaNotifSummaryBubble /> — Alma Pass 2 Tour 3.
+ * <AlmaNotifSummaryBubble />, Alma Pass 2 Tour 3.
  *
  * Résume les notifications quand le feed est chargé : catégorise
  * candidatures/messages/social et propose un filtre "3 urgentes".

@@ -11,7 +11,7 @@ import { MISSION_CATEGORY_LABEL } from "@/lib/missionCategories";
 import { questionCategoryLabel } from "@/lib/communityCategories";
 
 /**
- * MobileEntraideFeed — fil unique de l'entraide sur mobile.
+ * MobileEntraideFeed, fil unique de l'entraide sur mobile.
  * Agrège Questions, Demandes et Offres triées par date DESC.
  * Multi-select chips Q / D / O persisté en sessionStorage, compteurs réels.
  * Un seul appel à l'action : « Publier ».
@@ -220,7 +220,7 @@ const MobileEntraideFeed = ({ missions, questions, loading, onPublish, proximity
                       <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-primary/10 text-primary uppercase tracking-wide">
                         {questionCategoryLabel(q.category)}
                       </span>
-                      <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-primary/10 text-primary uppercase tracking-wide">
+                      <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-primary text-primary-foreground uppercase tracking-wide">
                         Question
                       </span>
                       <span className="ml-auto text-[11px] text-muted-foreground">{formatRelative(q.created_at)}</span>

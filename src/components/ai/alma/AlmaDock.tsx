@@ -1,5 +1,5 @@
 /**
- * <AlmaDock /> — présence persistante d'Alma en bas à droite.
+ * <AlmaDock />, présence persistante d'Alma en bas à droite.
  *
  * Remplace le rendu flottant indépendant des whispers (ancien AlmaWhisperOutlet).
  * Le dock est monté une seule fois dans AppLayout (surfaces authentifiées).
