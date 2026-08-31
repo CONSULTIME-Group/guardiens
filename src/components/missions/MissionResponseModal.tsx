@@ -76,43 +76,25 @@ const MissionResponseModal = ({
         </DialogHeader>
 
         <div className="space-y-4">
-          <div>
-            <p className="text-xs font-medium text-muted-foreground mb-2 flex items-center gap-1.5">
-              <Sparkles className="h-3.5 w-3.5" /> Modèles rapides
-            </p>
-            <div className="flex flex-wrap gap-2">
-              {templates.map((t) => {
-                const active = pickedTemplate === t.key;
-                return (
-                  <button
-                    key={t.key}
-                    type="button"
-                    onClick={() => pickTemplate(t)}
-                    className={`text-xs px-3 py-1.5 rounded-full border transition-colors ${
-                      active
-                        ? "bg-primary text-primary-foreground border-primary"
-                        : "bg-muted/50 text-foreground border-border hover:bg-muted"
-                    }`}
-                  >
-                    {t.label}
-                  </button>
-                );
-              })}
-            </div>
+          <div className="rounded-lg border border-border bg-muted/40 p-3">
+            <p className="text-xs font-medium text-foreground mb-1.5">Ce qui donne envie de répondre</p>
+            <ul className="space-y-1 text-xs text-muted-foreground list-disc pl-4">
+              {WRITING_TIPS.map((tip) => (
+                <li key={tip}>{tip}</li>
+              ))}
+            </ul>
           </div>
 
           <div>
             <Textarea
               value={message}
-              onChange={(e) => {
-                setMessage(e.target.value.slice(0, MAX_LEN));
-                if (pickedTemplate) setPickedTemplate(null);
-              }}
+              onChange={(e) => setMessage(e.target.value.slice(0, MAX_LEN))}
               placeholder="Écrivez votre réponse…"
               rows={5}
               className={`resize-none ${tooShort ? "ring-1 ring-destructive/40" : ""}`}
               aria-invalid={tooShort}
             />
+
             <div className="flex items-center justify-between mt-1.5">
               <span className={`text-[11px] ${tooShort ? "text-destructive" : "text-muted-foreground"}`}>
                 {tooShort
