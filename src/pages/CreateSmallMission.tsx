@@ -984,7 +984,6 @@ const CreateSmallMission = () => {
         </div>
       )}
 
-
     </>
   );
 };

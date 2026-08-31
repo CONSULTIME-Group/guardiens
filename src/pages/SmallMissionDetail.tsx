@@ -375,7 +375,6 @@ const SmallMissionDetail = () => {
     });
   }, [missionUuid, mission, user]);
 
-
   // Realtime : l'auteur voit immédiatement les nouvelles propositions et changements de statut
   useEffect(() => {
     if (!missionUuid) return;
@@ -695,9 +694,6 @@ const SmallMissionDetail = () => {
     setSearchParams({}, { replace: true });
   };
 
-
-
-
   if (loading) {
     return (
       <>
@@ -1014,7 +1010,6 @@ const SmallMissionDetail = () => {
       );
     }
 
-
     // Mission fermée / autres cas, état neutre
     return (
       <div className="bg-card p-5 rounded-2xl shadow-sm border border-border space-y-3">
@@ -1138,8 +1133,6 @@ const SmallMissionDetail = () => {
             isAuthor={isAuthor}
           />
         )}
-
-
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 md:gap-8 lg:gap-10 items-start">
           {/* ── COLONNE PRINCIPALE ── */}
@@ -1618,7 +1611,6 @@ const SmallMissionDetail = () => {
                 </section>
                 )
               )}
-
 
               {/* États composer : déjà répondu / non éligible */}
               {!isAuthor && hasResponded && (
