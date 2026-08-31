@@ -8667,7 +8667,12 @@ export type Database = {
         Returns: number
       }
       count_mission_notification_audience: {
-        Args: { p_lat: number; p_lng: number; p_radius_km?: number }
+        Args: {
+          p_category?: string
+          p_lat: number
+          p_lng: number
+          p_radius_km?: number
+        }
         Returns: number
       }
       create_alert_from_search: {
@@ -9311,6 +9316,19 @@ export type Database = {
         Returns: number
       }
       mark_user_seen: { Args: never; Returns: undefined }
+      mission_audience: {
+        Args: {
+          p_category: string
+          p_exclude?: string
+          p_lat: number
+          p_lng: number
+        }
+        Returns: {
+          distance_km: number
+          helper_id: string
+        }[]
+      }
+      mission_category_to_skill: { Args: { p_cat: string }; Returns: string }
       move_to_dlq: {
         Args: {
           dlq_name: string
