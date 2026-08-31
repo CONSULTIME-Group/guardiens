@@ -342,7 +342,7 @@ const EntraideHub = () => {
     const items: FeedItem[] = [];
     if (nature === "all" || nature === "question") {
       for (const q of baseQuestions) {
-        if (category !== "all" && QUESTION_CAT_TO_MISSION[q.category as string] !== category) continue;
+        if (category !== "all" && questionCategoryToMissionCategory(q.category) !== category) continue;
         items.push({ kind: "question", date: q.created_at, q });
       }
     }
