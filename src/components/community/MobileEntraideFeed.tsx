@@ -8,6 +8,7 @@ import { trackEvent } from "@/lib/analytics";
 import { publicFirstName } from "@/lib/displayName";
 import MissionCardCover from "@/components/missions/MissionCardCover";
 import { MISSION_CATEGORY_LABEL } from "@/lib/missionCategories";
+import { questionCategoryLabel } from "@/lib/communityCategories";
 
 /**
  * MobileEntraideFeed — fil unique de l'entraide sur mobile.
