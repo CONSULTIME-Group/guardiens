@@ -162,7 +162,6 @@ const MissionsCityPage = lazy(() => import("./pages/MissionsCityPage"));
 const CreateSmallMission = lazy(() => import("./pages/CreateSmallMission"));
 const MentionsLegales = lazy(() => import("./pages/MentionsLegales"));
 const AdminSmallMissions = lazy(() => import("./pages/admin/AdminSmallMissions"));
-const Questions = lazy(() => import("./pages/Questions"));
 const EntraideHub = lazy(() => import("./pages/EntraideHub"));
 const QuestionDetail = lazy(() => import("./pages/QuestionDetail"));
 const QuestionCreate = lazy(() => import("./pages/QuestionCreate"));
