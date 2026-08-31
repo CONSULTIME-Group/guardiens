@@ -32,6 +32,7 @@ import {
   writeSitPrefill,
 } from "@/lib/missionContentGuards";
 import { AlertCircle, ChevronLeft, CalendarIcon } from "lucide-react";
+import { isPhotoRequiredByRule } from "@/lib/missionPhotoRule";
 import { sanitizeUserTitle } from "@/lib/sanitizeTitle";
 import { stripEmojis } from "@/lib/stripEmojis";
 
