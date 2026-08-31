@@ -51,6 +51,8 @@ const MIN_TITLE_LEN = 15;
 const MIN_DESC_LEN = 60;
 
 /* ── Stepper progress bar ── */
+const STEP_LABELS = ["Votre annonce", "Le détail", "Où et quand"];
+
 const StepperBar = ({ current, total }: { current: number; total: number }) => (
   <div className="sticky top-12 md:top-0 z-30 bg-background/95 backdrop-blur border-b border-border px-4 py-3">
     <div className="max-w-2xl mx-auto">
@@ -59,7 +61,7 @@ const StepperBar = ({ current, total }: { current: number; total: number }) => (
           Étape {current} / {total}
         </span>
         <span className="text-xs text-muted-foreground">
-          {current === 1 ? "Votre annonce" : "Lieu et date"}
+          {STEP_LABELS[current - 1]}
         </span>
       </div>
       <div className="h-1.5 bg-muted rounded-full overflow-hidden">
@@ -71,6 +73,7 @@ const StepperBar = ({ current, total }: { current: number; total: number }) => (
     </div>
   </div>
 );
+
 
 const CreateSmallMission = () => {
   const { user } = useAuth();
@@ -156,6 +159,16 @@ const CreateSmallMission = () => {
     };
   });
 
+  // Le titre reçoit le focus à l'ouverture, sauf sur mobile où le clavier
+  // masquerait aussitôt la question posée.
+  const titleRef = useRef<HTMLInputElement | null>(null);
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const isDesktop = window.matchMedia?.("(min-width: 768px)")?.matches;
+    if (isDesktop) titleRef.current?.focus();
+  }, []);
+
+
   useEffect(() => {
     const tParam = searchParams.get("type");
     if (tParam === "besoin" || tParam === "offre") setMissionType(tParam);
@@ -191,59 +204,88 @@ const CreateSmallMission = () => {
     setExchangeError(hasMoneyMention(val) ? tp("exchange_error_euros") : "");
   };
 
-  /* Step 1 validation */
   /**
-   * Photo requise pour toutes les offres, et pour les catégories qui ont un
-   * objet à montrer. Facultative là où il n'y a souvent rien à photographier.
+   * Photo jamais exigée sur une offre (la photo de profil illustre déjà),
+   * attendue seulement sur une demande dont l'objet se montre.
    */
   const photoRequiredByRule = isPhotoRequiredByRule(missionType, category);
   const photoRequired = photoRequiredByRule && !photoWaived;
 
-  const step1Valid =
-    !!category &&
-    !photoUploading &&
-    (!photoRequired || photos.length > 0) &&
-    title.trim().length >= MIN_TITLE_LEN &&
+  /** Étape 1 : une seule question, le titre. */
+  const step1Valid = title.trim().length >= MIN_TITLE_LEN;
+
+  /** Étape 2 : le détail, description, contrepartie, puis catégorie. */
+  const step2Valid =
     description.trim().length >= MIN_DESC_LEN &&
     exchangeOffer.trim().length >= 2 &&
-    !exchangeError;
+    !exchangeError &&
+    !!category;
 
-  const handleNextStep = () => {
-    setCategoryTouched(true);
-    setPhotoTouched(true);
-    setTitleTouched(true);
-    setDescTouched(true);
-    setExchangeTouched(true);
-    if (step1Valid) {
-      setStep(2);
-      try { trackEvent("mission_composer_step1_completed"); } catch {}
-      return;
-    }
-    if (photoUploading) {
-      toast({ title: tp("photo_uploading") });
-      return;
-    }
-    // Le bouton est dans une barre fixe : sans message ni défilement, il
-    // paraîtrait ne rien faire alors que l'erreur est hors du champ de vision.
-    const fields: { id: string; label: string; invalid: boolean }[] = [
-      { id: "mission-field-category", label: "Catégorie", invalid: !category },
-      { id: "mission-field-photo", label: "Photo", invalid: photoRequired && photos.length === 0 },
-      { id: "mission-field-title", label: "Titre", invalid: title.trim().length < MIN_TITLE_LEN },
-      { id: "mission-field-description", label: "Description", invalid: description.trim().length < MIN_DESC_LEN },
-      { id: "mission-field-exchange", label: "Contrepartie", invalid: exchangeOffer.trim().length < 2 || !!exchangeError },
-    ];
-    const missing = fields.filter((f) => f.invalid);
+  /**
+   * Champs obligatoires, avec l'étape qui les porte. Source unique du toast,
+   * du défilement et du renvoi vers la bonne des trois étapes.
+   */
+  const requiredFields = (): { id: string; label: string; step: number; invalid: boolean }[] => [
+    { id: "mission-field-title", label: "Titre", step: 1, invalid: title.trim().length < MIN_TITLE_LEN },
+    { id: "mission-field-description", label: "Description", step: 2, invalid: description.trim().length < MIN_DESC_LEN },
+    { id: "mission-field-exchange", label: "Contrepartie", step: 2, invalid: exchangeOffer.trim().length < 2 || !!exchangeError },
+    { id: "mission-field-category", label: "Catégorie", step: 2, invalid: !category },
+    { id: "mission-field-photo", label: "Photo", step: 3, invalid: photoRequired && photos.length === 0 },
+    { id: "mission-field-place", label: "Ville", step: 3, invalid: !city.trim() },
+    { id: "mission-field-place", label: "Code postal", step: 3, invalid: !postalCode.trim() },
+    { id: "mission-field-duration", label: "Durée estimée", step: 3, invalid: !duration },
+  ];
+
+  const touchStep = (s: number) => {
+    if (s === 1) setTitleTouched(true);
+    if (s === 2) { setDescTouched(true); setExchangeTouched(true); setCategoryTouched(true); }
+    if (s === 3) { setPhotoTouched(true); setPlaceTouched(true); }
+  };
+
+  /**
+   * Signale les champs manquants : même toast nommant les champs, même
+   * défilement vers le premier champ en défaut, et renvoi vers son étape.
+   */
+  const reportMissing = (missing: { id: string; label: string; step: number }[]) => {
     if (missing.length === 0) return;
     toast({
       title: missing.length > 1 ? "Champs manquants" : "Champ manquant",
       description: `À compléter : ${missing.map((f) => f.label).join(", ")}.`,
       variant: "destructive",
     });
+    const first = missing[0];
+    touchStep(first.step);
+    setStep(first.step);
     if (typeof document !== "undefined") {
-      const el = document.getElementById(missing[0].id);
-      el?.scrollIntoView({ behavior: "smooth", block: "center" });
+      window.setTimeout(() => {
+        document.getElementById(first.id)?.scrollIntoView({ behavior: "smooth", block: "center" });
+      }, 50);
     }
   };
+
+  const handleNextStep = () => {
+    touchStep(step);
+    if (step === 1) {
+      if (step1Valid) {
+        setStep(2);
+        try { trackEvent("mission_composer_step1_completed"); } catch {}
+        return;
+      }
+      reportMissing(requiredFields().filter((f) => f.step === 1 && f.invalid));
+      return;
+    }
+    if (photoUploading) {
+      toast({ title: tp("photo_uploading") });
+      return;
+    }
+    if (step2Valid) {
+      setStep(3);
+      try { trackEvent("mission_composer_step2_completed"); } catch {}
+      return;
+    }
+    reportMissing(requiredFields().filter((f) => f.step === 2 && f.invalid));
+  };
+
 
   /**
    * Garde-fous éditoriaux, recalculés à chaque frappe :
@@ -270,7 +312,7 @@ const CreateSmallMission = () => {
   // Volume d'audience : combien de personnes seront prévenues à la publication.
   const [audienceCount, setAudienceCount] = useState<number | null>(null);
   useEffect(() => {
-    if (step !== 2 || !city.trim()) {
+    if (step !== 3 || !city.trim()) {
       setAudienceCount(null);
       return;
     }
@@ -300,44 +342,12 @@ const CreateSmallMission = () => {
     if (!user) return;
     if (hasMoneyMention(exchangeOffer)) return;
     if (submitting) return;
-    const missing: string[] = [];
-    if (!category) missing.push("Catégorie");
-    if (photoRequired && photos.length === 0) missing.push("Photo");
-    if (!title.trim()) missing.push("Titre");
-    if (!description.trim()) missing.push("Description");
-    if (!exchangeOffer.trim()) missing.push("Contrepartie");
-    if (!city.trim()) missing.push("Ville");
-    if (!postalCode.trim()) missing.push("Code postal");
-    if (!duration) missing.push("Durée estimée");
+    const missing = requiredFields().filter((f) => f.invalid);
     if (missing.length > 0) {
-      const stepOneMissing = missing.some((m) => ["Catégorie", "Photo", "Titre", "Description", "Contrepartie"].includes(m));
-      toast({
-        title: missing.length > 1 ? "Champs manquants" : "Champ manquant",
-        description: `À compléter : ${missing.join(", ")}.`,
-        variant: "destructive",
-      });
-      setStep(stepOneMissing ? 1 : 2);
-      if (stepOneMissing) {
-        setCategoryTouched(true);
-        setPhotoTouched(true);
-        setTitleTouched(true);
-        setDescTouched(true);
-        setExchangeTouched(true);
-      }
-      setPlaceTouched(true);
+      reportMissing(missing);
       return;
     }
-    if (title.trim().length < MIN_TITLE_LEN || description.trim().length < MIN_DESC_LEN) {
-      toast({
-        title: "Annonce trop courte",
-        description: `Titre ≥ ${MIN_TITLE_LEN} caractères, description ≥ ${MIN_DESC_LEN} caractères.`,
-        variant: "destructive",
-      });
-      setStep(1);
-      setTitleTouched(true);
-      setDescTouched(true);
-      return;
-    }
+
     await performSubmit();
   };
 
@@ -353,7 +363,7 @@ const CreateSmallMission = () => {
           "Votre annonce mentionne de l'argent. Sur l'entraide, on propose un service en retour, jamais un paiement. Reformulez votre contrepartie.",
         variant: "destructive",
       });
-      setStep(1);
+      setStep(2);
       setExchangeTouched(true);
       return;
     }
@@ -376,7 +386,7 @@ const CreateSmallMission = () => {
       } catch {
         // Signal non bloquant : l'essentiel est le refus de publication.
       }
-      setStep(1);
+      setStep(2);
       setDescTouched(true);
       return;
     }
@@ -418,7 +428,7 @@ const CreateSmallMission = () => {
           description: error.message,
           variant: "destructive",
         });
-        setStep(1);
+        setStep(2);
         return;
       }
       if (hint === "account_not_active" || msg.includes("account_not_active")) {
@@ -484,7 +494,7 @@ const CreateSmallMission = () => {
       />
 
       {(accessLoading || canApplyMissions) && (
-        <StepperBar current={step} total={2} />
+        <StepperBar current={step} total={3} />
       )}
 
       <div
@@ -497,12 +507,14 @@ const CreateSmallMission = () => {
         }}
       >
         <button
-          onClick={() => step === 1 ? navigate("/petites-missions") : setStep(1)}
-          className="flex items-center gap-1 text-sm text-foreground/60 hover:text-foreground transition-colors -ml-1"
+          type="button"
+          onClick={() => (step === 1 ? navigate("/petites-missions") : setStep(step - 1))}
+          className="flex items-center gap-1 min-h-[44px] text-sm text-foreground/60 hover:text-foreground transition-colors -ml-1"
         >
           <ChevronLeft className="h-4 w-4" />
           {step === 1 ? tp("back") : "Étape précédente"}
         </button>
+
 
         {!accessLoading && !canApplyMissions && (
           <AccessGateBanner level={accessLevel} profileCompletion={profileCompletion} context="mission" />
@@ -511,7 +523,7 @@ const CreateSmallMission = () => {
         {(accessLoading || canApplyMissions) && (
           <form onSubmit={handleSubmit} className="space-y-5">
 
-            {/* ── ÉTAPE 1 : Votre annonce ── */}
+            {/* ── ÉTAPE 1 : une seule question ── */}
             {step === 1 && (
               <>
                 <div className="rounded-xl p-4 border border-primary/20 bg-primary/5 space-y-1">
@@ -524,9 +536,6 @@ const CreateSmallMission = () => {
                   </h2>
                   <p className="text-sm text-muted-foreground">
                     {missionType === "offre" ? tp("encouragement_offer") : tp("encouragement_need")}
-                  </p>
-                  <p className="inline-block text-xs font-medium bg-badge-success text-badge-success-foreground px-3 py-1 rounded-full mt-1">
-                    {tp("free_badge")}
                   </p>
                 </div>
 
@@ -560,6 +569,36 @@ const CreateSmallMission = () => {
                     </button>
                   </div>
                 </div>
+
+                {/* La seule question de l'étape 1 */}
+                <div id="mission-field-title" className="space-y-2">
+                  <Label htmlFor="mission-title-input" className="text-base font-medium">
+                    {missionType === "offre" ? tp("title_question_offer") : tp("title_question_need")}
+                  </Label>
+                  <Input
+                    id="mission-title-input"
+                    ref={titleRef}
+                    value={title}
+                    onChange={(e) => setTitle(e.target.value)}
+                    onBlur={handleTitleBlur}
+                    placeholder={categoryTitleExample(category, missionType)}
+                    maxLength={120}
+                    className="h-12 text-base"
+                  />
+                  {titleTouched && title.trim().length < MIN_TITLE_LEN && (
+                    <p className="text-xs text-destructive flex items-center gap-1">
+                      <AlertCircle className="h-3 w-3 shrink-0" />
+                      Titre trop court ({title.trim().length}/{MIN_TITLE_LEN} caractères). Ex&nbsp;: « Garder mon chien pendant le week-end ».
+                    </p>
+                  )}
+                </div>
+              </>
+            )}
+
+            {/* ── ÉTAPE 2 : le détail ── */}
+            {step === 2 && (
+              <>
+                <h2 className="font-heading font-semibold text-lg">Le détail</h2>
 
                 {/* Garde-fous éditoriaux, non bloquants */}
                 {sitLike && (
@@ -607,14 +646,70 @@ const CreateSmallMission = () => {
                     </p>
                   </div>
                 )}
-                <p className="text-xs text-muted-foreground">
-                  Une simple question à poser ?{" "}
-                  <Link to="/questions/nouvelle" className="text-primary hover:underline font-medium">
-                    Posez-la à la communauté
-                  </Link>
-                </p>
 
-                {/* Catégorie */}
+                {/* Description */}
+                <div id="mission-field-description" className="space-y-2">
+                  <Label htmlFor="mission-description-input" className="text-sm font-medium">
+                    {missionType === "offre" ? tp("desc_label_offer") : tp("desc_label_need")}
+                  </Label>
+                  <Textarea
+                    id="mission-description-input"
+                    value={description}
+                    onChange={(e) => setDescription(e.target.value)}
+                    onBlur={handleDescBlur}
+                    placeholder={categoryDescHelp(category, missionType)}
+                    rows={5}
+                    className="text-base resize-none"
+                  />
+                  {/* Le compteur n'apparaît qu'à la première frappe : un « 0/60 »
+                      à vide ressemble à une sanction avant même d'écrire. */}
+                  <div className="flex items-center justify-between text-xs">
+                    {descTouched && description.trim().length < MIN_DESC_LEN ? (
+                      <p className="text-destructive flex items-center gap-1">
+                        <AlertCircle className="h-3 w-3 shrink-0" />
+                        Description trop courte, décrivez le contexte pour rassurer.
+                      </p>
+                    ) : (
+                      <span className="text-muted-foreground">Minimum {MIN_DESC_LEN} caractères.</span>
+                    )}
+                    {description.length > 0 && (
+                      <span className={cn("tabular-nums", descTouched && description.trim().length < MIN_DESC_LEN ? "text-destructive" : "text-muted-foreground")}>
+                        {description.trim().length}/{MIN_DESC_LEN}
+                      </span>
+                    )}
+                  </div>
+                </div>
+
+                {/* Échange proposé */}
+                <div id="mission-field-exchange" className="space-y-2">
+                  <Label htmlFor="mission-exchange-input" className="text-sm font-medium">
+                    {missionType === "offre" ? tp("exchange_label_offer") : tp("exchange_label_need")}
+                  </Label>
+                  <p className="text-xs text-muted-foreground -mt-1 leading-relaxed">
+                    Un coup de main, c'est un échange, jamais d'argent. {categoryExchangeHint(category, missionType)}
+                  </p>
+
+                  <Input
+                    id="mission-exchange-input"
+                    value={exchangeOffer}
+                    onChange={(e) => handleExchangeChange(e.target.value)}
+                    onBlur={() => setExchangeTouched(true)}
+                    placeholder={missionType === "offre" ? tp("exchange_ph_offer") : tp("exchange_ph_need")}
+                    className="h-12 text-base"
+                  />
+                  {exchangeError && (
+                    <p className="text-sm text-destructive bg-destructive/10 rounded-md px-3 py-2">
+                      {exchangeError}
+                    </p>
+                  )}
+                  {exchangeTouched && !exchangeError && exchangeOffer.trim().length < 2 && (
+                    <p className="text-xs text-destructive flex items-center gap-1">
+                      <AlertCircle className="h-3 w-3 shrink-0" /> Précisez votre contrepartie.
+                    </p>
+                  )}
+                </div>
+
+                {/* Catégorie, après la description : on écrit d'abord, on classe ensuite. */}
                 <div id="mission-field-category" className="space-y-2">
                   <Label className="text-sm font-medium">{tp("category_label")}</Label>
                   <Select value={category} onValueChange={setCategory}>
@@ -633,33 +728,35 @@ const CreateSmallMission = () => {
                     </p>
                   )}
                 </div>
+              </>
+            )}
 
-                {/* Titre */}
-                <div id="mission-field-title" className="space-y-2">
-                  <Label className="text-sm font-medium">{tp("title_label")}</Label>
-                  <Input
-                    value={title}
-                    onChange={(e) => setTitle(e.target.value)}
-                    onBlur={handleTitleBlur}
-                    placeholder={categoryTitleExample(category, missionType)}
-                    maxLength={120}
-                    className="h-12 text-base"
-                  />
-                  {titleTouched && title.trim().length < MIN_TITLE_LEN && (
-                    <p className="text-xs text-destructive flex items-center gap-1">
-                      <AlertCircle className="h-3 w-3 shrink-0" />
-                      Titre trop court ({title.trim().length}/{MIN_TITLE_LEN} caractères). Ex&nbsp;: « Garder mon chien pendant le week-end ».
-                    </p>
-                  )}
-                </div>
+            {/* ── ÉTAPE 3 : où et quand ── */}
+            {step === 3 && (
+              <>
+                <h2 className="font-heading font-semibold text-lg">Où et quand ?</h2>
 
-                {/* Photo, juste après le titre : c'est elle qui fait comprendre en un coup d'oeil. */}
+                {/* Photo, ou photo de profil sur une offre */}
                 <div id="mission-field-photo" className="space-y-2">
                   <Label className="text-sm font-medium">
                     {photoRequired ? tp("photo_label") : tp("photo_label_optional")}
                   </Label>
+                  {missionType === "offre" && user?.avatarUrl && (
+                    <div className="flex items-center gap-3 rounded-xl border border-border bg-muted/30 p-3">
+                      <img
+                        src={user.avatarUrl}
+                        alt="Votre photo de profil"
+                        className="h-12 w-12 rounded-full object-cover"
+                      />
+                      <p className="text-xs text-muted-foreground">{tp("photo_profile_note")}</p>
+                    </div>
+                  )}
                   <p className="text-xs text-muted-foreground">
-                    {photoRequired ? tp("photo_help_required") : tp("photo_help_optional")}
+                    {missionType === "offre" && !user?.avatarUrl
+                      ? tp("photo_profile_missing")
+                      : photoRequired
+                        ? tp("photo_help_required")
+                        : tp("photo_help_optional")}
                   </p>
                   <MissionPhotoUpload
                     userId={user!.id}
@@ -692,79 +789,20 @@ const CreateSmallMission = () => {
                   )}
                 </div>
 
-                {/* Description */}
-                <div className="space-y-2">
-                  <Label className="text-sm font-medium">
-                    {missionType === "offre" ? tp("desc_label_offer") : tp("desc_label_need")}
-                  </Label>
-                  <Textarea
-                    value={description}
-                    onChange={(e) => setDescription(e.target.value)}
-                    onBlur={handleDescBlur}
-                    placeholder={categoryDescHelp(category, missionType)}
-                    rows={5}
-                    className="text-base resize-none"
+                <div id="mission-field-place" className="space-y-2">
+                  <PostalCodeCityFields
+                    city={city}
+                    postalCode={postalCode}
+                    onChange={(partial) => {
+                      if (partial.city !== undefined) setCity(partial.city);
+                      if (partial.postal_code !== undefined) setPostalCode(partial.postal_code);
+                    }}
+                    required
+                    inputClassName="h-12 text-base"
                   />
-                  <div className="flex items-center justify-between text-xs">
-                    {descTouched && description.trim().length < MIN_DESC_LEN ? (
-                      <p className="text-destructive flex items-center gap-1">
-                        <AlertCircle className="h-3 w-3 shrink-0" />
-                        Description trop courte, décrivez le contexte pour rassurer.
-                      </p>
-                    ) : (
-                      <span className="text-muted-foreground">Minimum {MIN_DESC_LEN} caractères.</span>
-                    )}
-                    <span className={cn("tabular-nums", descTouched && description.trim().length < MIN_DESC_LEN ? "text-destructive" : "text-muted-foreground")}>
-                      {description.trim().length}/{MIN_DESC_LEN}
-                    </span>
-                  </div>
                 </div>
 
-                {/* Échange proposé */}
-                <div id="mission-field-exchange" className="space-y-2">
-                  <Label className="text-sm font-medium">
-                    {missionType === "offre" ? tp("exchange_label_offer") : tp("exchange_label_need")}
-                  </Label>
-                  <p className="text-xs text-muted-foreground -mt-1 leading-relaxed">
-                    Un coup de main, c'est un échange, jamais d'argent. {categoryExchangeHint(category, missionType)}
-                  </p>
 
-                  <Input
-                    value={exchangeOffer}
-                    onChange={(e) => handleExchangeChange(e.target.value)}
-                    onBlur={() => setExchangeTouched(true)}
-                    placeholder={missionType === "offre" ? tp("exchange_ph_offer") : tp("exchange_ph_need")}
-                    className="h-12 text-base"
-                  />
-                  {exchangeError && (
-                    <p className="text-sm text-destructive bg-destructive/10 rounded-md px-3 py-2">
-                      {exchangeError}
-                    </p>
-                  )}
-                  {exchangeTouched && !exchangeError && exchangeOffer.trim().length < 2 && (
-                    <p className="text-xs text-destructive flex items-center gap-1">
-                      <AlertCircle className="h-3 w-3 shrink-0" /> Précisez votre contrepartie.
-                    </p>
-                  )}
-                </div>
-              </>
-            )}
-
-            {/* ── ÉTAPE 2 : Lieu et date ── */}
-            {step === 2 && (
-              <>
-                <h2 className="font-heading font-semibold text-lg">Où et quand ?</h2>
-
-                <PostalCodeCityFields
-                  city={city}
-                  postalCode={postalCode}
-                  onChange={(partial) => {
-                    if (partial.city !== undefined) setCity(partial.city);
-                    if (partial.postal_code !== undefined) setPostalCode(partial.postal_code);
-                  }}
-                  required
-                  inputClassName="h-12 text-base"
-                />
 
                 {/* Date, Drawer full-screen mobile */}
                 <div className="space-y-2">
@@ -905,8 +943,8 @@ const CreateSmallMission = () => {
                   </div>
                 )}
 
-                {/* Durée */}
-                <div className="space-y-2">
+                <div id="mission-field-duration" className="space-y-2">
+
                   <Label className="text-sm font-medium">{tp("duration_label")}</Label>
                   <Select value={duration} onValueChange={setDuration}>
                     <SelectTrigger className={cn("h-12 text-base", placeTouched && !duration && "border-destructive")}>
@@ -955,8 +993,8 @@ const CreateSmallMission = () => {
       {(accessLoading || canApplyMissions) && (
         <div ref={actionBarRef} className="fixed bottom-[var(--bottom-nav-h,0px)] inset-x-0 bg-card/95 backdrop-blur border-t border-border px-4 py-3 z-40 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
           <div className="max-w-2xl mx-auto space-y-2">
-            {step === 2 && identityRecommended && <IdentityRecommendedHint compact />}
-            {step === 2 && audienceCount !== null && (
+            {step === 3 && identityRecommended && <IdentityRecommendedHint compact />}
+            {step === 3 && audienceCount !== null && (
               <div className="text-center space-y-1">
                 <p className="text-xs text-muted-foreground">
                   {audienceCount === 0
@@ -970,16 +1008,27 @@ const CreateSmallMission = () => {
                 </p>
               </div>
             )}
-            {step === 1 ? (
-              <Button
-                type="button"
-                onClick={handleNextStep}
-                disabled={photoUploading}
-                className="w-full h-12 text-base font-semibold"
-              >
-                {photoUploading ? tp("photo_uploading") : "Continuer"}
-              </Button>
+            {step < 3 ? (
+              <>
+                <Button
+                  type="button"
+                  onClick={handleNextStep}
+                  disabled={photoUploading}
+                  className="w-full h-12 text-base font-semibold"
+                >
+                  {photoUploading ? tp("photo_uploading") : "Continuer"}
+                </Button>
+                {step === 1 && (
+                  <p className="text-xs text-muted-foreground text-center">
+                    Une simple question à poser ?{" "}
+                    <Link to="/questions/nouvelle" className="hover:underline font-medium">
+                      Posez-la à la communauté
+                    </Link>
+                  </p>
+                )}
+              </>
             ) : (
+
               <Button
                 type="submit"
                 form=""

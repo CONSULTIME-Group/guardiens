@@ -11,11 +11,12 @@ describe("photo à la publication d'une entraide", () => {
     }
   });
 
-  it("offre : photo attendue quelle que soit la catégorie", () => {
+  it("offre : jamais de photo exigée, la photo de profil illustre l'offre", () => {
     for (const c of MISSION_CATEGORIES) {
-      expect(isPhotoRequiredByRule("offre", c.key)).toBe(true);
+      expect(isPhotoRequiredByRule("offre", c.key)).toBe(false);
     }
   });
+
 
   it("catégorie absente : photo facultative pour une demande", () => {
     expect(isPhotoRequiredByRule("besoin", "")).toBe(false);
