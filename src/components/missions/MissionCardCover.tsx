@@ -1,6 +1,7 @@
 import { useState } from "react";
-import { storageImageUrl } from "@/lib/storageImage";
+import { storageImageUrl, avatarImageUrl } from "@/lib/storageImage";
 import { missionCategoryLabel } from "@/lib/missionCategories";
+import { cn } from "@/lib/utils";
 
 /**
  * Cover unifiée pour les cartes de coup de main.
