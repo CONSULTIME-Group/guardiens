@@ -67,13 +67,14 @@ const ProposeHelperExchangeDialog = ({
         convId = conv.id;
       }
 
-      // Send structured message
+      // Le message envoyé est celui du membre, sans enveloppe rédigée par
+      // l'interface : des libellés ajoutés rendaient tous les messages
+      // identiques mot pour mot d'un membre à l'autre.
       const messageContent = [
-        `Proposition d'échange`,
-        `\nCe dont j'ai besoin : ${needDescription.trim()}`,
-        `\nCe que je propose en échange : ${exchangeOffer.trim()}`,
-        exchangeDate ? `\nDate proposée : ${exchangeDate}` : "",
-      ].filter(Boolean).join("");
+        needDescription.trim(),
+        exchangeOffer.trim(),
+        exchangeDate ? `Le ${exchangeDate} me conviendrait.` : "",
+      ].filter(Boolean).join("\n");
 
       const { error: msgError } = await supabase.from("messages").insert({
         conversation_id: convId,
@@ -122,7 +123,7 @@ const ProposeHelperExchangeDialog = ({
         <DialogHeader>
           <DialogTitle>Proposer un échange à {helper.first_name}</DialogTitle>
           <DialogDescription>
-            {helper.first_name} a indiqué être disponible, n'hésitez pas, c'est exactement pour ça que cette personne est là.
+            {helper.first_name} a indiqué être disponible, n'hésitez pas. Ces deux champs partent tels que vous les écrivez, dans un message privé.
           </DialogDescription>
         </DialogHeader>
 
@@ -142,7 +143,7 @@ const ProposeHelperExchangeDialog = ({
         <div className="space-y-4">
           {/* What I need */}
           <div className="space-y-1.5">
-            <Label htmlFor="helper-need">Ce dont j'ai besoin *</Label>
+            <Label htmlFor="helper-need">Ce dont vous avez besoin, avec vos mots *</Label>
             <Textarea
               id="helper-need"
               value={needDescription}
@@ -155,7 +156,7 @@ const ProposeHelperExchangeDialog = ({
 
           {/* What I offer */}
           <div className="space-y-1.5">
-            <Label htmlFor="helper-offer">Ce que je propose en échange *</Label>
+            <Label htmlFor="helper-offer">Ce que vous proposez en retour, avec vos mots *</Label>
             <Textarea
               id="helper-offer"
               value={exchangeOffer}
@@ -168,7 +169,7 @@ const ProposeHelperExchangeDialog = ({
 
           {/* Date */}
           <div className="space-y-1.5">
-            <Label htmlFor="helper-date">Date proposée (optionnel)</Label>
+            <Label htmlFor="helper-date">Date qui vous conviendrait (facultatif)</Label>
             <Input
               id="helper-date"
               type="date"
