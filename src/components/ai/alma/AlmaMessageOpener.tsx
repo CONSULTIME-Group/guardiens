@@ -27,6 +27,7 @@ export function AlmaMessageOpener({
 }: AlmaMessageOpenerProps) {
   const [dismissed, setDismissed] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [unavailable, setUnavailable] = useState(false);
   const prenom = otherFirstName || (audience === "owner" ? "cette personne" : "la personne");
 
   useEffect(() => {
@@ -37,7 +38,9 @@ export function AlmaMessageOpener({
 
   if (dismissed) return null;
 
-  const message = audience === "owner"
+  const message = unavailable
+    ? "Je n'arrive pas à vous aider à rédiger là tout de suite. Écrivez-lui avec vos mots, c'est ce qui marche le mieux."
+    : audience === "owner"
     ? `Vous voulez que je vous prépare un premier message à partir de votre annonce et du profil de ${prenom} ? Vous relisez avant d'envoyer.`
     : `Voulez-vous que je vous prépare un premier message à partir de cette annonce et de votre bio ? Vous gardez le contrôle.`;
 
@@ -55,6 +58,12 @@ export function AlmaMessageOpener({
       });
       if (error) throw error;
       if ((data as any)?.error) throw new Error((data as any).error);
+      // Plus aucun brouillon de repli : quand Alma ne peut pas aider, on le dit
+      // et le champ reste vide, plutôt que d'envoyer le même texte à tout le monde.
+      if ((data as any)?.available === false) {
+        setUnavailable(true);
+        return;
+      }
       const draft = (data as any)?.draft as string;
       if (!draft) throw new Error("Aucun brouillon reçu");
       onDraftReady(draft);
@@ -96,6 +105,7 @@ export function AlmaMessageOpener({
             {message}
           </p>
           <div className="flex items-center gap-4 mt-2">
+            {!unavailable && (
             <button
               type="button"
               onClick={handleGenerate}
@@ -104,12 +114,13 @@ export function AlmaMessageOpener({
             >
               {loading ? "Préparation…" : "Utiliser cette réponse"}
             </button>
+            )}
             <button
               type="button"
               onClick={() => setDismissed(true)}
               className="text-[12px] text-muted-foreground hover:text-foreground transition-colors"
             >
-              Non merci
+              {unavailable ? "Fermer" : "Non merci"}
             </button>
           </div>
         </div>
