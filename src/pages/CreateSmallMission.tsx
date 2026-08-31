@@ -282,7 +282,10 @@ const CreateSmallMission = () => {
         const { data } = await supabase.rpc("count_mission_notification_audience" as any, {
           p_lat: coords.lat,
           p_lng: coords.lng,
+          // p_radius_km est conservé pour la signature mais ignoré en base :
+          // le rayon retenu est celui déclaré par chaque membre.
           p_radius_km: 30,
+          p_category: category,
         });
         if (!cancelled) setAudienceCount(typeof data === "number" ? data : null);
       } catch {
@@ -290,7 +293,7 @@ const CreateSmallMission = () => {
       }
     }, 600);
     return () => { cancelled = true; window.clearTimeout(timer); };
-  }, [step, city]);
+  }, [step, city, category]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -954,8 +957,20 @@ const CreateSmallMission = () => {
           <div className="max-w-2xl mx-auto space-y-2">
             {step === 2 && identityRecommended && <IdentityRecommendedHint compact />}
             {step === 2 && audienceCount !== null && audienceCount > 0 && (
+              <div className="text-center space-y-1">
+                <p className="text-xs text-muted-foreground">
+                  {audienceCount === 1
+                    ? "1 personne de votre secteur, disponible pour ce type de coup de main, sera prévenue."
+                    : `${audienceCount} personnes de votre secteur, disponibles pour ce type de coup de main, seront prévenues.`}
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  Les personnes prévenues sont celles qui ont indiqué le rayon et le type d'aide qui leur conviennent.
+                </p>
+              </div>
+            )}
+            {step === 2 && audienceCount === 0 && (
               <p className="text-xs text-muted-foreground text-center">
-                Votre demande sera proposée à {audienceCount} personne{audienceCount > 1 ? "s" : ""} autour de {city.trim()}.
+                Personne n'est encore disponible dans votre secteur pour cette catégorie. Publiez quand même, votre annonce reste visible et les nouveaux membres la verront.
               </p>
             )}
             {step === 1 ? (
