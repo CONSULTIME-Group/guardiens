@@ -1,14 +1,14 @@
 // Alma Pass 1 — Chantier 8.1 (patch P0 : colonnes inexistantes → contexte null → refus IA)
 // Génère un premier message (brise-glace) pour un thread vide avec contexte sit ou mission.
 // Entrée : { thread_context: { sit_id?, mission_id?, other_user_id } }
-// Sortie : { draft: string, warnings: string[], fallback?: boolean }
+// Sortie : { draft: string, warnings: string[] } ou { available: false, reason, message }
 // Rate limit : 5/h. Vouvoiement absolu, quelle que soit l'audience.
 //
 // Correctifs :
 //   - `sits.owner_id` et `small_missions.owner_id` n'existent pas (c'est
 //     `user_id`) → l'ancien code lisait null silencieusement, passait le
 //     wrapper au LLM et générait un refus. Corrigé + service_role.
-//   - Détection refus + fallback statique par public/audience.
+//   - Détection refus : aucune réponse de repli rédigée, on annonce l'indisponibilité.
 
 import { callLovableAI, extractToolArgs, STYLE_GUARDRAILS, CORS_HEADERS } from "../_shared/ai-gateway.ts";
 import { isLlmRefusal, logRefusalFallback } from "../_shared/refusal-guard.ts";
@@ -24,27 +24,17 @@ function json(body: unknown, status = 200) {
   });
 }
 
-function buildFallback(params: {
-  audience: "owner" | "sitter";
-  otherFirstName?: string | null;
-  meFirstName?: string | null;
-  sitTitle?: string | null;
-  sitCity?: string | null;
-  missionTitle?: string | null;
-}): string {
-  const salut = `Bonjour${params.otherFirstName ? ` ${params.otherFirstName}` : ""},`;
-  const refObj = params.sitTitle
-    ? `votre annonce${params.sitCity ? ` à ${params.sitCity}` : ""}`
-    : params.missionTitle
-      ? "votre demande d'entraide"
-      : "votre profil";
-  const lead = params.audience === "owner"
-    ? `Je découvre ${refObj} et je pense que vous pourriez rejoindre notre cercle de confiance pour cette période.`
-    : `Je découvre ${refObj} et je serais heureux d'en discuter avec vous.`;
-  const q = params.audience === "owner"
-    ? "Souhaitez-vous que je vous en dise plus sur notre foyer et nos animaux ?"
-    : "Seriez-vous disponible pour un premier échange, par message ou en visio ?";
-  return [salut, "", lead, "", q, "", "Belle journée,"].join("\n");
+/**
+ * Aucun texte de repli n'est renvoyé : un brouillon figé produisait le même
+ * message chez tous les membres tombés sur ce chemin. En cas d'indisponibilité
+ * on le dit, et la personne écrit avec ses mots.
+ */
+function unavailable(reason: string) {
+  return json({
+    available: false,
+    reason,
+    message: "Je n'arrive pas à vous aider à rédiger là tout de suite. Écrivez-lui avec vos mots, c'est ce qui marche le mieux.",
+  });
 }
 
 Deno.serve(async (req) => {
@@ -162,15 +152,6 @@ Deno.serve(async (req) => {
 
     const meFirstName = (meRes.data as any)?.first_name ?? null;
     const otherFirstName = (otherRes.data as any)?.first_name ?? null;
-    const fallbackCtx = {
-      audience,
-      otherFirstName,
-      meFirstName,
-      sitTitle: (sitCtx as any)?.title ?? null,
-      sitCity: (sitCtx as any)?.city ?? null,
-      missionTitle: (missionCtx as any)?.title ?? null,
-    };
-
     const register = "vouvoiement";
     const system = `Vous êtes Alma, narratrice IA de Guardiens.fr. Vous rédigez UN PREMIER MESSAGE court (60 à 120 mots) pour engager la conversation avec ${otherFirstName ?? "l'autre membre"}. Utilisez le vouvoiement, quelle que soit l'audience (jamais de tutoiement, même pour un sitter).
 
@@ -226,8 +207,7 @@ Contraintes :
 
     if (!r.ok) {
       if (r.status === 402 || r.status === 429) return json({ error: r.error, code: r.code }, r.status);
-      const draft = buildFallback(fallbackCtx);
-      return json({ draft, warnings: ["Assistant IA momentanément indisponible, brouillon générique proposé."], fallback: true });
+      return unavailable("ai_unavailable");
     }
 
     const parsed = extractToolArgs(r.data);
@@ -239,6 +219,8 @@ Contraintes :
       draft = draft.replace(PROSCRIBED, "gardien");
     }
 
+    if (!draft.trim()) return unavailable("empty_draft");
+
     if (isLlmRefusal(draft)) {
       console.warn("draft-conversation-opener: LLM refusal detected, using fallback", { userId, raw: draft.slice(0, 120) });
       await logRefusalFallback(adminClient, {
@@ -247,8 +229,7 @@ Contraintes :
         reason: "llm_refusal",
         extra: { audience, has_sit: !!ctx.sit_id, has_mission: !!ctx.mission_id, raw_preview: draft.slice(0, 200) },
       });
-      const fb = buildFallback(fallbackCtx);
-      return json({ draft: fb, warnings: ["Brouillon générique proposé, personnalisez-le avant envoi."], fallback: true });
+      return unavailable("llm_refusal");
     }
 
     return json({ draft, warnings });
