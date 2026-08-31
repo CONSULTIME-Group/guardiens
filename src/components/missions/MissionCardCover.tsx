@@ -29,9 +29,15 @@ interface MissionCardCoverProps {
   category?: string | null;
   title: string;
   className?: string;
+  /**
+   * Libellé de catégorie incrusté dans la vignette de repli. À passer à false
+   * quand la carte affiche déjà une pastille de catégorie : sinon la même
+   * catégorie apparaît deux fois sur la même carte.
+   */
+  showLabel?: boolean;
 }
 
-const MissionCardCover = ({ photo, category, title, className }: MissionCardCoverProps) => {
+const MissionCardCover = ({ photo, category, title, className, showLabel = true }: MissionCardCoverProps) => {
   const [imgError, setImgError] = useState(false);
   const cat = (category || "animals") as string;
   const label = missionCategoryLabel(cat);
@@ -60,9 +66,11 @@ const MissionCardCover = ({ photo, category, title, className }: MissionCardCove
           className={`relative w-full h-full bg-gradient-to-br ${gradient} group-hover:scale-105 transition-transform duration-700 flex items-center justify-center overflow-hidden`}
         >
           <CategoryIllustration cat={cat} />
-          <span className="relative text-[10px] font-bold uppercase tracking-widest text-foreground/50">
-            {label}
-          </span>
+          {showLabel && (
+            <span className="relative text-[10px] font-bold uppercase tracking-widest text-foreground/50">
+              {label}
+            </span>
+          )}
         </div>
       )}
     </div>

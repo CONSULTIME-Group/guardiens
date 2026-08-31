@@ -170,11 +170,11 @@ const MissionCard = ({ mission: m, currentUserId, isAuthenticated, canApplyMissi
         )}
         {/* Badges type + catégorie empilés en haut à gauche */}
         <div className="absolute top-4 left-4 flex flex-col gap-2">
-          <span className={`px-3 py-1 text-[11px] font-semibold tracking-wider uppercase rounded-full ${typeChipClass}`}>
-            {typeLabel}
-          </span>
           <span className={`px-3 py-1 text-[10px] font-bold tracking-widest uppercase rounded-full w-fit ${catChipClass}`}>
             {categoryLabel}
+          </span>
+          <span className={`px-3 py-1 text-[11px] font-semibold tracking-wider uppercase rounded-full w-fit ${typeChipClass}`}>
+            {typeLabel}
           </span>
         </div>
         {/* État terminé : sceau discret en haut à droite */}
